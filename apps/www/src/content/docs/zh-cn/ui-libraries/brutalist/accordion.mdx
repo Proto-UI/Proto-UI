@@ -1,13 +1,14 @@
 ---
 title: 'Brutalist Accordion'
-description: '由五个部件组成的可折叠手风琴组件，支持单选/多选展开、键盘导航与按需内容卸载。'
+description: '采用高对比度粗边框与硬偏移阴影的五部件手风琴组件，支持单选/多选展开、受控状态与完整键盘导航。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Accordion 用于在一组可折叠面板之间展开或收起内容，支持单展开与多展开模式，并搭配高对比度黑色粗边框与硬阴影视觉风格。
+Brutalist Accordion 用于在一组可折叠面板之间展开或收起内容，基于 Base Accordion 语义并搭配 5px 圆角、2px 粗边框与随主题自适应的 4px 硬偏移阴影。
 
 ## 预览
 
@@ -15,67 +16,177 @@ Brutalist Accordion 用于在一组可折叠面板之间展开或收起内容，
   demoId="demo-brutalist-accordion"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-accordion" manager="npm" />
 
-- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-accordion`
-- **包导出**：从 `@proto.ui/prototypes-brutalist/accordion` 导入 `accordionRoot`、`accordionItem`、`accordionHeading`、`accordionTrigger`、`accordionContent`
+把 `wc` 替换为 `react`、`vue` 或 `vue2` 即可生成对应框架的本地组件封装，也可以直接从 `@proto.ui/prototypes-brutalist/accordion` 导入五个部件原型。
 
 ## 用法
 
-### 部件组成
+```tsx
+import {
+  BrutalistAccordionRoot,
+  BrutalistAccordionItem,
+  BrutalistAccordionHeading,
+  BrutalistAccordionTrigger,
+  BrutalistAccordionContent,
+} from '@/components/proto-ui/react';
 
-按 `Root -> Item -> Heading -> Trigger` 嵌套结构组织，并将 `Content` 与 `Heading` 并列放置在 `Item` 内：
+export function BrutalistAccordionUsage() {
+  return (
+    <BrutalistAccordionRoot defaultOpenItems={['item-1']}>
+      <BrutalistAccordionItem value="item-1">
+        <BrutalistAccordionHeading level={3}>
+          <BrutalistAccordionTrigger>Is it accessible?</BrutalistAccordionTrigger>
+        </BrutalistAccordionHeading>
+        <BrutalistAccordionContent>
+          Yes. It adheres to the WAI-ARIA design pattern.
+        </BrutalistAccordionContent>
+      </BrutalistAccordionItem>
+    </BrutalistAccordionRoot>
+  );
+}
+```
 
-- **Root**：统一管理当前展开的项列表、模式（单选/多选）、禁用状态与键盘导航方向。嵌套的 `Root` 彼此独立。
-- **Item**：代表单个折叠条目，需提供唯一且非空的 `value`。
-- **Heading**：为折叠标题提供语义标题层级（`level` 1–6，默认为 `3`）。内部仅放置对应的 `Trigger`，常驻次级操作按钮放在旁边。
-- **Trigger**：点击或按键切换所属条目的展开状态，不声明独立属性。
-- **Content**：承载展开后的面板内容。关闭时默认卸载内容节点（设置 `keepMounted` 可保留隐藏节点）。
+### 部件结构
 
-### 受控与非受控模式
+```text
+AccordionRoot
+└── AccordionItem
+    ├── AccordionHeading
+    │   └── AccordionTrigger
+    └── AccordionContent
+```
 
-- **非受控**：通过 `defaultOpenItems` 指定初始展开项。
-- **受控**：传入 `openItems` 进入受控模式，并监听 `openChange` 事件（负载为 `{ openItems, value, open, reason }`）同步更新外部状态。`reason` 取值为 `'pointer'`、`'keyboard'` 或 `'programmatic'`。
-- **边界行为**：`mode="single"` 下仅保留首个唯一有效键；设置 `allowEmpty={false}` 可阻止关闭最后一个展开项；尚未挂载的条目键会保持待命并在对应 `Item` 挂载后自动生效。
+- **Root**：统一管理当前展开的项集合、单选/多选模式与键盘导航方向。嵌套的 `Root` 彼此独立。
+- **Item**：代表单个折叠条目，提供 `rounded-base` 圆角、2px 边框与主题自适应 4px 硬阴影，需传入唯一非空 `value`。
+- **Heading**：提供语义标题层级（`level` 1–6，默认 `3`），内部仅放控制该项的 `Trigger`。
+- **Trigger**：采用 `font-heading font-bold` 主色标题栏，提供内嵌高可见焦点环、按压内框反馈与展开状态底部分隔线。
+- **Content**：使用 `bg-secondary-background` 与 `font-sans font-medium` 承载正文；关闭时默认卸载内容节点（设置 `keepMounted` 可保留隐藏节点）。
 
 ### 键盘与无障碍
 
-- 所有启用的标题与展开内容内的可聚焦元素保持自然 `Tab` 顺序。
-- 聚焦标题后按 `Enter` 或 `Space` 切换展开状态。
-- 纵向模式下按 `ArrowUp` / `ArrowDown`（横向模式下按 `ArrowLeft` / `ArrowRight`，RTL 自动反转）在启用标题之间移动焦点，`Home` / `End` 跳至首末标题；移动焦点不会改变展开状态。
-- `Trigger` 自动维护 `aria-expanded`、`aria-disabled` 与 `aria-controls`；`Content` 由对应 `Trigger` 命名，设置 `region` 可在需要时将其声明为区域地标（多面板同时展开时建议按需开启）。
+- 所有启用的标题与展开面板内的可聚焦元素保持自然 `Tab` 顺序；聚焦标题后按 `Enter` 或 `Space` 切换展开状态。
+- 纵向模式下使用 `ArrowUp` / `ArrowDown`（横向模式下使用 `ArrowLeft` / `ArrowRight`，RTL 自动反转）与 `Home` / `End` 在启用标题间移动焦点，不改变展开状态。
+- `Trigger` 自动维护 `aria-expanded`、`aria-disabled` 与 `aria-controls`；当 `allowEmpty={false}` 阻止收起最后一项时，标题保持可聚焦并通过 `aria-disabled` 提示不可关闭。
+
+## 示例
+
+### 基础用法
+
+单选展开模式，默认展开第一项。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-accordion-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多项展开
+
+传入 `mode="multiple"`，允许多个条目同时保持展开。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-accordion-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用条目
+
+在单个 `AccordionItem` 上设置 `disabled`，禁用该条目交互并跳过方向键聚焦。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-accordion-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 ### Root
 
 <ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
   rows={[
-    { name: 'mode', type: "'single' | 'multiple'", default: 'single' },
-    { name: 'openItems', type: 'string[]', default: 'undefined' },
-    { name: 'defaultOpenItems', type: 'string[]', default: '[]' },
-    { name: 'allowEmpty', type: 'boolean', default: 'true' },
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'orientation', type: "'vertical' | 'horizontal'", default: 'vertical' },
-    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
-    { name: 'loop', type: 'boolean', default: 'true' },
+    {
+      name: 'mode',
+      type: "'single' | 'multiple'",
+      default: "'single'",
+      description: '单选或多选展开模式',
+    },
+    {
+      name: 'openItems',
+      type: 'string[]',
+      default: '—',
+      description: '受控模式的已展开项 value 列表',
+    },
+    {
+      name: 'defaultOpenItems',
+      type: 'string[]',
+      default: '[]',
+      description: '非受控模式的初始展开项列表',
+    },
+    {
+      name: 'allowEmpty',
+      type: 'boolean',
+      default: 'true',
+      description: '设为 false 时阻止关闭最后一个展开项',
+    },
+    { name: 'disabled', type: 'boolean', default: 'false', description: '禁用整组交互' },
+    {
+      name: 'orientation',
+      type: "'vertical' | 'horizontal'",
+      default: "'vertical'",
+      description: '布局方向与标题方向键导航轴向',
+    },
+    {
+      name: 'direction',
+      type: "'ltr' | 'rtl'",
+      default: "'ltr'",
+      description: '阅读方向与横向方向键反转方向',
+    },
+    { name: 'loop', type: 'boolean', default: 'true', description: '到达首尾标题时是否循环聚焦' },
   ]}
 />
 
-### 其他部件属性
+### Item / Heading / Content
 
-- **Item**：`value: string`（必填、唯一且非空），`disabled?: boolean`（默认 `false`）
-- **Heading**：`level?: 1 | 2 | 3 | 4 | 5 | 6`（默认 `3`）
-- **Trigger**：无独立属性
-- **Content**：`keepMounted?: boolean`（默认 `false`），`region?: boolean`（默认 `false`）
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'Item.value',
+      type: 'string',
+      default: '必填',
+      description: '条目在当前 Root 内的唯一非空标识',
+    },
+    { name: 'Item.disabled', type: 'boolean', default: 'false', description: '禁用单个条目交互' },
+    {
+      name: 'Heading.level',
+      type: '1 | 2 | 3 | 4 | 5 | 6',
+      default: '3',
+      description: '语义标题层级（aria-level）',
+    },
+    {
+      name: 'Content.keepMounted',
+      type: 'boolean',
+      default: 'false',
+      description: '收起时保留隐藏节点',
+    },
+    {
+      name: 'Content.region',
+      type: 'boolean',
+      default: 'false',
+      description: '显式声明为 region 地标区域',
+    },
+  ]}
+/>
 
-### 方法与事件
+### 方法与事件（Root）
 
 - **方法**：`getOpenItems()` 返回当前展开键数组的副本；`requestOpen(value, open, reason?)` 以编程方式请求展开或收起；`openCount` 为当前展开键数量。
 - **事件**：`openChange` 在状态变更请求时触发，返回 `{ openItems, value, open, reason }`。
@@ -90,5 +201,6 @@ Brutalist Accordion 用于在一组可折叠面板之间展开或收起内容，
     'P-BRUTALIST-ACCORDION-HEADING.yaml',
     'P-BRUTALIST-ACCORDION-TRIGGER.yaml',
     'P-BRUTALIST-ACCORDION-CONTENT.yaml',
+    'P-BASE-ACCORDION.yaml',
   ]}
 />

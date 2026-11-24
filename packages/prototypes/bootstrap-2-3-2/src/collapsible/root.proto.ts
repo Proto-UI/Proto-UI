@@ -8,12 +8,13 @@ const collapsibleRoot = definePrototype<
   Bootstrap232CollapsibleRootExposes
 >({
   name: 'bootstrap-2-3-2-collapsible-root',
+  modules: asCollapsibleRoot.modules,
   setup(def) {
     const inherited = asCollapsibleRoot();
     // P-BOOTSTRAP-2-3-2-COLLAPSIBLE-VISUAL-SAFETY: no fixed width/height or clipped long label.
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full text-foreground text-[14px] leading-[20px] block mb-[2px] rounded-[4px] border border-[#e5e5e5]'
+        'min-w-0 max-w-full bg-background text-foreground text-[14px] leading-[20px] block mb-[2px] rounded-[4px] border border-[#e5e5e5] dark:border-border'
       )
     );
     return inherited.render;

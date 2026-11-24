@@ -1,12 +1,14 @@
 ---
 title: 'Collapsible'
-description: '由 Root、Trigger 与 Content 组成的 Brutalist 折叠展开组件，支持受控模式与按需卸载。'
+description: '由 Root、Trigger 与 Content 组成的 Brutalist 折叠展开组件，支持 2px 粗边框、硬阴影按压反馈、受控模式与按需卸载。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Collapsible 用于控制单个内容区块的展开与收起，提供高对比度边框与硬阴影视觉，并完整继承 [Base Collapsible](/zh-cn/ui-libraries/base/collapsible/) 的交互与状态机制。
+Brutalist Collapsible 用于控制单个内容区块的展开与收起，采用 `rounded-base` 圆角、2px 粗边框与按压即落位的硬阴影设计，并完整继承 [Base Collapsible](/zh-cn/ui-libraries/base/collapsible/) 的交互语义。
 
 ## 预览
 
@@ -14,15 +16,15 @@ Brutalist Collapsible 用于控制单个内容区块的展开与收起，提供�
   demoId="demo-brutalist-collapsible"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前通过工作区源码与 CLI 目标提供：
 
-- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-collapsible`
-- **包导出**：
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-collapsible" manager="npm" />
+
+将 `wc` 替换为 `react`、`vue` 或 `vue2` 即可生成对应框架封装，也可以直接从 `@proto.ui/prototypes-brutalist/collapsible` 导入部件：
 
 ```ts
 import {
@@ -34,17 +36,68 @@ import {
 
 ## 用法
 
-### 部件组成
+```tsx
+import {
+  BrutalistCollapsibleRoot,
+  BrutalistCollapsibleTrigger,
+  BrutalistCollapsibleContent,
+} from '@/components/ui/collapsible';
 
-每个 `Root` 内放置一个 `Trigger` 和一个 `Content`，嵌套或相邻的 `Collapsible` 彼此独立：
+export function Example() {
+  return (
+    <BrutalistCollapsibleRoot>
+      <BrutalistCollapsibleTrigger>Product details</BrutalistCollapsibleTrigger>
+      <BrutalistCollapsibleContent>
+        This panel expands and collapses to reveal additional content.
+      </BrutalistCollapsibleContent>
+    </BrutalistCollapsibleRoot>
+  );
+}
+```
 
-- **Root**：管理展开状态，支持受控 `open` 与非受控 `defaultOpen`，以及整体禁用 `disabled`（禁用后阻止切换，但不会强制收起已展开的内容）。
-- **Trigger**：按钮触发器，支持自然 `Tab` 顺序与 `Enter` / `Space` 切换，自动同步展开与禁用状态。
-- **Content**：承载折叠内容；关闭时默认卸载内容节点（设置 `keepMounted` 可保留隐藏节点）。支持长文本折行与容器收缩，布局外围建议为焦点环与硬阴影预留空间。
+### 部件结构与视觉规范
 
-### 受控模式
+```text
+CollapsibleRoot
+├── CollapsibleTrigger
+└── CollapsibleContent
+```
 
-传入 `open` 进入受控模式，监听 `openChange` 事件（负载为 `{ open, reason }`）后更新外部状态；若外部未接受该变更，面板保持原状态。
+- **抬起控件反馈**：默认与 `neutral` 变体的 `Trigger` 带有 4px 硬阴影，仅在按压（pressed）时沿阴影方向位移 `+4px, +4px` 并收起外影，悬停保持静止，符合 [Brutalist 设计契约](../../design-contract/)。
+- **暗色主题适配**：边框与硬阴影通过主题变量在明暗模式下自适应重绘。
+- **受控与卸载策略**：传入 `open` 并响应 `openChange`（载荷 `{ open, reason }`）进入受控模式；`Content` 默认关闭即卸载，设置 `keepMounted={true}` 可保留隐藏节点。
+
+## 示例
+
+### 仓库列表（Default）
+
+使用 `variant="noShadow"` 触发器搭配等宽字体列表项，展示常驻首项与可展开的星标仓库列表。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-collapsible-repositories"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 基础卡片（Basic）
+
+在带硬阴影的 Brutalist 卡片容器内展开产品说明与操作按钮。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-collapsible-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 设置面板（Settings Panel）
+
+使用受控状态与 `variant="neutral"` 触发器切换更多圆角参数项。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-collapsible-settings"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -53,19 +106,43 @@ import {
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
   ]}
 />
 
-传入 `open: boolean` 进入受控模式。
+### Trigger
 
-### 其他部件属性
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'neutral' | 'noShadow'", default: "'default'" },
+  ]}
+/>
 
-- **Trigger**：`disabled?: boolean`（默认 `false`）
-- **Content**：`keepMounted?: boolean`（默认 `false`）
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'keepMounted', type: 'boolean', default: 'false' }]}
+/>
 
 ### 方法与事件
 
-- **Root 方法**：`openCollapsible()`、`close()`、`toggle()`；**Trigger 方法**：`focusSelf()`
-- **事件**：`openChange`（负载 `{ open, reason }`）
+- **Root 方法**：`openCollapsible(reason?)`、`close(reason?)`、`toggle(reason?)`
+- **Trigger 方法**：`focusSelf(options?)`
+- **事件**：`openChange`（载荷 `{ open, reason }`）
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-COLLAPSIBLE.yaml',
+    'P-BRUTALIST-COLLAPSIBLE-TRIGGER.yaml',
+    'P-BRUTALIST-COLLAPSIBLE-CONTENT.yaml',
+    'P-BASE-COLLAPSIBLE.yaml',
+  ]}
+/>

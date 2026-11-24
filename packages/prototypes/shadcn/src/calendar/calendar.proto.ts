@@ -25,9 +25,7 @@ import {
   type CalendarDayProps,
   type CalendarDayExposes,
   type CalendarHeadingExposes,
-  type CalendarPreviousProps,
   type CalendarPreviousExposes,
-  type CalendarNextProps,
   type CalendarNextExposes,
 } from '@proto.ui/prototypes-base/calendar';
 import {
@@ -36,15 +34,18 @@ import {
   setupShadcnStyleSelection,
   type ShadcnStyleProps,
 } from '../style-scope';
-import { setupCollectionActionVisual } from '../toolbar/action-visual';
 import {
   CALENDAR_ROOT_PROFILE,
   CALENDAR_WEEKDAY_WIDTH,
   CALENDAR_CELL_RADIUS,
   CALENDAR_CAPTION_SIZE,
   setupCalendarDayVisual,
+  setupCalendarNavVisual,
+  type ShadcnCalendarButtonVariant,
+  type ShadcnCalendarNavProps,
 } from './visual';
 export type * from '@proto.ui/prototypes-base/calendar';
+export type { ShadcnCalendarButtonVariant };
 export type ShadcnCalendarRootProps = CalendarRootProps & ShadcnStyleProps;
 export type ShadcnCalendarCaptionProps = CalendarCaptionProps & ShadcnStyleProps;
 export type ShadcnCalendarGridProps = CalendarGridProps;
@@ -53,8 +54,8 @@ export type ShadcnCalendarWeekdayProps = CalendarWeekdayProps & ShadcnStyleProps
 export type ShadcnCalendarRowProps = CalendarRowProps;
 export type ShadcnCalendarDayProps = CalendarDayProps & ShadcnStyleProps;
 export type ShadcnCalendarHeadingProps = ShadcnStyleProps;
-export type ShadcnCalendarPreviousProps = CalendarPreviousProps & ShadcnStyleProps;
-export type ShadcnCalendarNextProps = CalendarNextProps & ShadcnStyleProps;
+export type ShadcnCalendarPreviousProps = ShadcnCalendarNavProps;
+export type ShadcnCalendarNextProps = ShadcnCalendarNavProps;
 
 export const calendarRoot = definePrototype<ShadcnCalendarRootProps, CalendarRootExposes>({
   name: 'shadcn-calendar-root',
@@ -210,7 +211,7 @@ export const calendarPrevious = definePrototype<
     const behavior = asCalendarPrevious();
     const state = behavior.getAsHookHandle?.('as-button')?.stateHandles;
     if (!state) throw new Error('[shadcn-calendar] Navigation state unavailable.');
-    setupCollectionActionVisual(def, state, 'ghost', true);
+    setupCalendarNavVisual(def, state);
     return behavior.render;
   },
 });
@@ -223,7 +224,7 @@ export const calendarNext = definePrototype<ShadcnCalendarNextProps, CalendarNex
     const behavior = asCalendarNext();
     const state = behavior.getAsHookHandle?.('as-button')?.stateHandles;
     if (!state) throw new Error('[shadcn-calendar] Navigation state unavailable.');
-    setupCollectionActionVisual(def, state, 'ghost', true);
+    setupCalendarNavVisual(def, state);
     return behavior.render;
   },
 });

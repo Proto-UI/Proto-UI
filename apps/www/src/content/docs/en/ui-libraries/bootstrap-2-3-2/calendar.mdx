@@ -1,23 +1,15 @@
 ---
 title: 'Calendar'
-description: 'A Gregorian date picker supporting single, multiple, and range selection in Bootstrap 2.3.2 styling.'
+description: 'A Gregorian calendar supporting single, multiple, and range date selection in classic Bootstrap 2.3.2 framed panel, gradient button, and table styling.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Calendar provides `single` (default), `multiple`, and `range` date selection. As Bootstrap 2.3.2 did not include a built-in calendar, this family extension applies its button, form, and table styling.
+Bootstrap 2.3.2 Calendar provides `single` (default), `multiple`, and `range` date selection. As Bootstrap 2.3.2 did not ship a native calendar, this family extension applies its classic 4px framed surfaces, raised button gradients, and condensed table typography.
 
 ## Preview
-
-### Single, multiple, and range selection
-
-<PrototypePreviewer
-  demoId="demo-bootstrap-2-3-2-calendar-selection"
-  initialRuntime="wc"
-  runtimes={['wc', 'react', 'vue', 'vue2']}
-/>
-
-### Month and year selector composition
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-calendar"
@@ -27,37 +19,191 @@ Calendar provides `single` (default), `multiple`, and `range` date selection. As
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source (`@proto.ui/prototypes-bootstrap-2-3-2/calendar`); not yet included in the 0.2.0 stable CLI registry.
 
 ## Usage
 
-### Composition and date format
+```tsx
+import {
+  CalendarRoot,
+  CalendarCaption,
+  CalendarPrevious,
+  CalendarHeading,
+  CalendarNext,
+  CalendarGrid,
+  CalendarWeekdays,
+  CalendarWeekday,
+  CalendarRow,
+  CalendarDay,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/calendar';
 
-Compose `Root`, `Caption`, `Heading`, `Previous`, `Next`, `Grid`, `Weekdays`, `Weekday`, `Row`, and `Day`:
+export function BootstrapCalendarExample() {
+  return (
+    <CalendarRoot mode="single" defaultMonth="2026-10" defaultValue="2026-10-12" today="2026-10-08">
+      <CalendarCaption>
+        <CalendarPrevious a11yLabel="Previous month" />
+        <CalendarHeading />
+        <CalendarNext a11yLabel="Next month" />
+      </CalendarCaption>
+      <CalendarGrid>
+        <CalendarWeekdays>
+          {Array.from({ length: 7 }, (_, offset) => (
+            <CalendarWeekday key={offset} offset={offset} />
+          ))}
+        </CalendarWeekdays>
+        {Array.from({ length: 6 }, (_, row) => (
+          <CalendarRow key={row} index={row}>
+            {Array.from({ length: 7 }, (_, col) => (
+              <CalendarDay key={col} offset={row * 7 + col} />
+            ))}
+          </CalendarRow>
+        ))}
+      </CalendarGrid>
+    </CalendarRoot>
+  );
+}
+```
 
-- **Date strings**: Dates use `YYYY-MM-DD` and visible months use `YYYY-MM`. Selection and `month` can be controlled independently.
-- **Week layout**: Displays the minimum 4, 5, or 6 weeks needed for the active month by default; set `fixedWeeks={true}` to always show 6 rows. You can render 6 indexed `Row` slots (`index` `0`–`5`) and 42 `Day` slots (`offset` `0`–`41`) as capacity; unused rows and days automatically expose `hidden` and leave the focus order.
-- **Locale and direction**: Configure `weekStartsOn` (`0` = Sunday), `locale`, and `direction="rtl"` for weekday order, localized cell labels, and mirrored Left/Right navigation. Provide `a11yLabel` on icon-only navigation buttons.
-- **Today**: Pass `today` as a `YYYY-MM-DD` string from your app (Calendar never reads the system clock). Initial visible month priority is `month` → `defaultMonth` → active selection → `today` → `1970-01`.
+### Anatomy, clock ownership, and caption pickers
 
-### Range and multiple selection
+- Compose `Calendar` from ten parts: `Root`, `Caption`, `Heading`, `Previous`, `Next`, `Grid`, `Weekdays`, `Weekday`, `Row`, and `Day`.
+- Dates use `YYYY-MM-DD` and visible months use `YYYY-MM`, controllable independently. The grid renders 4–6 complete weeks by default; pass `fixedWeeks={true}` to reserve 6 rows.
+- Calendar never reads the system clock directly: pass a `YYYY-MM-DD` `today` string from your host to highlight today (`aria-current="date"`).
+- `direction="rtl"` mirrors Left/Right arrow keys automatically. Connect family `Select` controls using `bindCalendarCaption(source, { month, year })` (and call `dispose()` on teardown).
 
-- **Multiple (`multiple`)**: Activating a day toggles it in a deduplicated, chronologically sorted array. Constrain counts with `minSelected` (default `0`) and `maxSelected`; adding can build up from empty toward `minSelected`, while removals must stay at or above `minSelected`.
-- **Range (`range`)**: The first click sets `{ from }`, the second completes an inclusive `{ from, to }` (reordering reversed picks), and a subsequent click starts a new range. Pass `{}` to clear. `minNights` (default `0`, allowing single-day ranges) and `maxNights` limit the day span between endpoints.
-- **Availability**: Use `min`, `max`, and `Root` `unavailable` for whole-date rules (ranges crossing an unavailable date are rejected while keeping the anchor). Local `Day` `disabled` disables only that cell. `readOnly` allows browsing without editing selection.
-- **Range states**: Each `Day` exposes `selected`, `rangeStart`, `rangeEnd`, `rangeMiddle`, and `rangePending`.
+### Selection modes
 
-### Composing month and year selectors
+| Mode       | Controlled / initial props                       | Change event                 |
+| ---------- | ------------------------------------------------ | ---------------------------- |
+| `single`   | `value` / `defaultValue` (`YYYY-MM-DD`)          | `onValueChange({ value })`   |
+| `multiple` | `values` / `defaultValues` (`readonly string[]`) | `onValuesChange({ values })` |
+| `range`    | `range` / `defaultRange` (`{ from?, to? }`)      | `onRangeChange({ range })`   |
 
-Use `bindCalendarCaption(source, { month, year })` to connect two family `Select` controls to Calendar's public `month`, `disabled`, and `requestMonth` APIs, and call `dispose()` on teardown. Name icon/caption triggers using `Select`'s `accessibleLabel` prop.
+## Examples
+
+### Basic
+
+A classic framed single-date calendar with `.btn-primary` selected paint.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-calendar-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Range
+
+Set `mode="range"` for joined 4px endpoint corners and classic Bootstrap info-blue span highlighting.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-calendar-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Multiple and range selection
+
+Combine `min`, `max`, `unavailable`, `minNights`, `maxNights`, and `maxSelected` to constrain selections.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-calendar-selection"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Presets
+
+Pair controlled `value`, `month`, and `fixedWeeks` with family `Button` actions.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-calendar-presets"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Booked dates
+
+Use `unavailable` along with `min` and `max` to disable booked date ranges.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-calendar-booked-dates"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Set `direction="rtl"`, `locale="ar-SA"`, and `weekStartsOn={6}` for RTL rendering and mirrored keyboard navigation.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-calendar-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Mode       | Controlled / initial props                  | Change event                 |
-| ---------- | ------------------------------------------- | ---------------------------- |
-| `single`   | `value` / `defaultValue` (`YYYY-MM-DD`)     | `onValueChange({ value })`   |
-| `multiple` | `values` / `defaultValues` (`string[]`)     | `onValuesChange({ values })` |
-| `range`    | `range` / `defaultRange` (`{ from?, to? }`) | `onRangeChange({ range })`   |
+### Root
 
-- **Common `Root` props**: `mode`, `month` / `defaultMonth`, `today`, `min`, `max`, `unavailable`, `minSelected`, `maxSelected`, `minNights`, `maxNights`, `fixedWeeks`, `weekStartsOn`, `locale`, `direction`, `disabled`, `readOnly`.
-- **State & methods**: `Root` exposes `mode`, `weekCount`, `selectedCount`, `rangeComplete`, plus `requestMonth(month)`, `requestValue(date)`, `requestValues(dates)`, `requestRange(range)`, `getValues()`, and `getRange()`. In controlled mode, `request*` emits a proposal and visual state updates once the parent supplies the new prop.
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: "'single'" },
+    { name: 'value', type: 'string', default: 'undefined' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'values', type: 'readonly string[]', default: 'undefined' },
+    { name: 'defaultValues', type: 'readonly string[]', default: '[]' },
+    { name: 'range', type: 'CalendarRange', default: 'undefined' },
+    { name: 'defaultRange', type: 'CalendarRange', default: '{}' },
+    { name: 'minSelected', type: 'number', default: '0' },
+    { name: 'maxSelected', type: 'number', default: 'undefined' },
+    { name: 'minNights', type: 'number', default: '0' },
+    { name: 'maxNights', type: 'number', default: 'undefined' },
+    { name: 'month', type: 'string', default: 'undefined' },
+    { name: 'defaultMonth', type: 'string', default: 'undefined' },
+    { name: 'min', type: 'string', default: "''" },
+    { name: 'max', type: 'string', default: "''" },
+    { name: 'unavailable', type: 'readonly string[]', default: '[]' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'weekStartsOn', type: 'number', default: '0' },
+    { name: 'fixedWeeks', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "'Calendar'" },
+    { name: 'today', type: 'string', default: "''" },
+    { name: 'locale', type: 'string', default: "'en-US'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+  ]}
+/>
+
+### Sub-part props
+
+<ApiPropsTable
+  headers={{ name: 'Part / Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Day.date', type: 'string', default: "''" },
+    { name: 'Day.offset', type: 'number', default: '0' },
+    { name: 'Day.disabled', type: 'boolean', default: 'false' },
+    { name: 'Row.index', type: 'number', default: 'undefined' },
+    { name: 'Weekday.offset', type: 'number', default: '0' },
+    { name: 'Caption.a11yLabel', type: 'string', default: "'Calendar navigation'" },
+    {
+      name: 'Previous / Next.a11yLabel',
+      type: 'string',
+      default: "'Previous month' / 'Next month'",
+    },
+    { name: 'Previous / Next.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Events, methods, and exposed states
+
+- **Events (Root)**: `onValueChange({ value })`, `onValuesChange({ values })`, `onRangeChange({ range })`, `onMonthChange({ month })`.
+- **Methods (Root)**: `requestValue(date)`, `requestValues(dates)`, `requestRange(range)`, `requestMonth(month)`, `getValues()`, `getRange()`.
+- **Exposed states**: Root exposes `value`, `mode`, `selectedCount`, `rangeComplete`, `month`, `weekCount`, `disabled`, `direction`; Day exposes `date`, `selected`, `rangeStart`, `rangeEnd`, `rangeMiddle`, `rangePending`, `today`, `outside`, `disabled`, `hidden`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-CALENDAR.yaml', 'P-BASE-CALENDAR.yaml']}
+/>

@@ -1,12 +1,13 @@
 ---
 title: 'Carousel'
-description: 'A scrollable carousel with pointer drag, native scroll snapping, responsive slide counts, and keyboard controls.'
+description: 'A scrollable Brutalist carousel with pointer drag, native scroll snapping, responsive slide counts, and keyboard controls.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Carousel pairs an equal-size slide track with a continuously scrollable viewport and Previous/Next controls. It supports mouse and touch dragging, wheel and trackpad scrolling, and keyboard navigation, snapping to the nearest reachable slide boundary once motion stops.
+Brutalist Carousel pairs an equal-size slide track with a continuously scrollable viewport and high-contrast raised Previous/Next controls. It supports mouse and touch dragging, wheel and trackpad scrolling, and keyboard navigation, snapping cleanly to the nearest reachable slide boundary.
 
 ## Preview
 
@@ -22,17 +23,67 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
-### Responsive viewport and layout
+```tsx
+import {
+  BrutalistCarouselRoot,
+  BrutalistCarouselViewport,
+  BrutalistCarouselSlide,
+  BrutalistCarouselPrevious,
+  BrutalistCarouselNext,
+} from '../proto-ui/components/react';
 
-- Configure `slidesPerView` (default `1`) for the maximum visible equal-size slides and `minSlideSize` (default `0`) for their minimum extent in logical pixels. Narrower viewports automatically reduce visible capacity, and the final snap aligns cleanly to the end of the strip without trailing gaps.
-- `Root` exposes `visibleSlides` and `maxIndex`; `Viewport` exposes `dragging`, `scrolling`, and normalized `scrollPosition`; each `Slide` exposes `current` and offscreen `hidden` without collapsing layout size.
-- When using `orientation="vertical"`, give the viewport an explicit bounded height. Horizontal `direction="rtl"` mirrors physical dragging and arrow keys while keeping logical item order.
-- Enable `loop={true}` to wrap index requests between the first and last reachable snap positions.
+export function Example() {
+  return (
+    <BrutalistCarouselRoot className="mx-auto w-full max-w-xs">
+      <BrutalistCarouselViewport>
+        <BrutalistCarouselSlide>1</BrutalistCarouselSlide>
+        <BrutalistCarouselSlide>2</BrutalistCarouselSlide>
+        <BrutalistCarouselSlide>3</BrutalistCarouselSlide>
+      </BrutalistCarouselViewport>
+      <BrutalistCarouselPrevious aria-label="Previous slide">←</BrutalistCarouselPrevious>
+      <BrutalistCarouselNext aria-label="Next slide">→</BrutalistCarouselNext>
+    </BrutalistCarouselRoot>
+  );
+}
+```
 
-### Controlled and uncontrolled index
+- **Responsive viewport and layout**: Configure `slidesPerView` (default `1`) and `minSlideSize` (default `0`) to adapt visible slide counts automatically as the container resizes.
+- **Brutalist geometry and motion**: Viewport uses 5px `rounded-base` clipping while raised Previous/Next buttons pair 2px black borders with 4px zero-blur hard shadows that collapse into place on press.
+- **Orientation and controlled state**: Provide an explicit height on `Viewport` for `orientation="vertical"`; pass `index` with `indexChange` for controlled navigation.
 
-- **Uncontrolled**: Set `defaultIndex` to initialize the starting slide.
-- **Controlled**: Pass `index` and listen to `indexChange` to commit new snap positions. Live drag previews never overwrite the committed index prematurely.
+## Examples
+
+### Sizes
+
+<PrototypePreviewer
+  demoId="demo-brutalist-carousel-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Orientation
+
+<PrototypePreviewer
+  demoId="demo-brutalist-carousel-orientation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Loop
+
+<PrototypePreviewer
+  demoId="demo-brutalist-carousel-loop"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### API
+
+<PrototypePreviewer
+  demoId="demo-brutalist-carousel-api"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -42,9 +93,9 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
     { name: 'index', type: 'number', default: '—' },
+    { name: 'defaultIndex', type: 'number', default: '0' },
     { name: 'slidesPerView', type: 'number', default: '1' },
     { name: 'minSlideSize', type: 'number', default: '0' },
-    { name: 'defaultIndex', type: 'number', default: '0' },
     { name: 'loop', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
@@ -53,7 +104,23 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
   ]}
 />
 
-### Other parts
+### Other parts & exposed states
 
-- **Viewport**: No props
-- **Slide**: `index?: number` (defaults to document order when omitted; explicit indexes should match item order)
+<ApiPropsTable
+  headers={{ name: 'Part / Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Slide.index', type: 'number', default: 'Document order' },
+    { name: 'Previous / Next.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+- **Root**: exposes states `index`, `slideCount`, `visibleSlides`, `maxIndex`, method `requestIndex(next)`, and event `indexChange`.
+- **Viewport**: exposes `focusVisible`, `dragging`, `scrolling`, and `scrollPosition`.
+- **Slide**: exposes `current`, `hidden`, `basis`, and `minSize`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-CAROUSEL.yaml', 'P-BASE-CAROUSEL.yaml']}
+/>

@@ -1,0 +1,232 @@
+---
+title: 'Table'
+description: 'A content-layer Liquid Glass table designed for clear readability beneath floating glass controls.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Table provides a crisp, restrained **content-layer** presentation over [Base Table](/en/ui-libraries/base/table/). Following Apple's Liquid Glass material hierarchy, tables and data rows stay non-glass and opaque so tabular data remains highly legible while floating Liquid Glass controls—such as toolbars, buttons, and action menus—elevate cleanly above it without stacking glass on glass.
+
+For sorting, filtering, pagination, and row selection, use [Data Table](/en/ui-libraries/liquid-glass/data-table/).
+
+## Preview
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-table"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the parts from `@proto.ui/prototypes-liquid-glass/table`:
+
+```ts
+import {
+  liquidGlassTableRoot,
+  liquidGlassTableCaption,
+  liquidGlassTableRow,
+  liquidGlassTableHeaderCell,
+  liquidGlassTableCell,
+} from '@proto.ui/prototypes-liquid-glass/table';
+```
+
+## Usage
+
+```html
+<div class="w-full overflow-x-auto">
+  <liquid-glass-table-root>
+    <liquid-glass-table-caption>A list of your recent invoices.</liquid-glass-table-caption>
+    <liquid-glass-table-row section="header" last-in-section>
+      <liquid-glass-table-header-cell
+        header-key="invoice"
+        header-kind="column"
+        style="width: 100px"
+      >
+        Invoice
+      </liquid-glass-table-header-cell>
+      <liquid-glass-table-header-cell header-key="status" header-kind="column"
+        >Status</liquid-glass-table-header-cell
+      >
+      <liquid-glass-table-header-cell header-key="method" header-kind="column"
+        >Method</liquid-glass-table-header-cell
+      >
+      <liquid-glass-table-header-cell
+        header-key="amount"
+        header-kind="column"
+        style="text-align: end"
+      >
+        Amount
+      </liquid-glass-table-header-cell>
+    </liquid-glass-table-row>
+    <liquid-glass-table-row section="body" last-in-section>
+      <liquid-glass-table-header-cell header-key="inv001" header-kind="row"
+        >INV001</liquid-glass-table-header-cell
+      >
+      <liquid-glass-table-cell>Paid</liquid-glass-table-cell>
+      <liquid-glass-table-cell>Credit Card</liquid-glass-table-cell>
+      <liquid-glass-table-cell style="text-align: end">$250.00</liquid-glass-table-cell>
+    </liquid-glass-table-row>
+  </liquid-glass-table-root>
+</div>
+```
+
+### Content Layer & Material Hierarchy
+
+```text
+Root (content layer, no glass material)
+├── Caption (caption-bottom + mt-4)
+├── Row (section="header")
+│   └── HeaderCell (align-middle + text-start)
+├── Row (section="body")
+│   ├── HeaderCell (headerKind="row")
+│   └── Cell (headers=[...])
+└── Row (section="footer")
+    ├── HeaderCell (headerKind="row")
+    └── Cell (headers=[...])
+```
+
+- **No glass-on-glass**: Table parts intentionally omit translucent blur and optical material carriers so dense data stays sharp underneath floating Liquid Glass overlays.
+- **Alignment & accessibility fallbacks**: Cells use `align-middle` so inline action triggers align cleanly; reduced-motion disables row hover transitions, and forced-colors mode promotes row dividers to `border-foreground`.
+- **Logical direction**: `Caption` and `HeaderCell` align via `text-start` for automatic RTL mirroring.
+
+## Examples
+
+### Footer
+
+Use `section="footer"` for summary rows and `lastInSection` to withdraw the trailing bottom rule:
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-table-footer"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Actions
+
+Pair a crisp content-layer table with floating Liquid Glass `DropdownMenu` controls for row-level actions:
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-table-actions"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Wrap the table in a `dir="rtl"` container to mirror logical start/end alignment across caption, headers, and numeric cells:
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-table-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root & Caption
+
+`Root` and `Caption` declare no props. `Root` exposes `getStructure()` for inspecting the row/column hierarchy and header relationships.
+
+### Row
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'section',
+      type: "'header' | 'body' | 'footer'",
+      default: "'body'",
+      description: 'Visual section membership: subtle body hover highlight or muted summary footer',
+    },
+    {
+      name: 'lastInSection',
+      type: 'boolean',
+      default: 'false',
+      description: 'Suppresses the bottom divider on final body or footer rows',
+    },
+  ]}
+/>
+
+### HeaderCell
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'headerKey',
+      type: 'string',
+      default: "''",
+      description: 'Unique header identifier referenced by Cell.headers',
+    },
+    {
+      name: 'headerKind',
+      type: "'column' | 'row'",
+      default: 'undefined',
+      description: 'Declares columnheader or rowheader semantics',
+    },
+    {
+      name: 'headers',
+      type: 'readonly string[]',
+      default: '[]',
+      description: 'Ordered parent header keys for multi-level header hierarchies',
+    },
+    {
+      name: 'rowSpan',
+      type: 'number',
+      default: '1',
+      description: 'Positive integer accessible row span',
+    },
+    {
+      name: 'columnSpan',
+      type: 'number',
+      default: '1',
+      description: 'Positive integer accessible column span',
+    },
+  ]}
+/>
+
+### Cell
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'headers',
+      type: 'readonly string[]',
+      default: '[]',
+      description: 'Ordered list of headerKey references',
+    },
+    {
+      name: 'rowSpan',
+      type: 'number',
+      default: '1',
+      description: 'Positive integer accessible row span',
+    },
+    {
+      name: 'columnSpan',
+      type: 'number',
+      default: '1',
+      description: 'Positive integer accessible column span',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-TABLE.yaml',
+    'P-LIQUID-GLASS-TABLE-CAPTION.yaml',
+    'P-LIQUID-GLASS-TABLE-ROW.yaml',
+    'P-LIQUID-GLASS-TABLE-HEADER-CELL.yaml',
+    'P-LIQUID-GLASS-TABLE-CELL.yaml',
+    'P-BASE-TABLE.yaml',
+  ]}
+/>

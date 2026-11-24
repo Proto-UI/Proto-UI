@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Virtual List decouples a complete logical key sequence from physical DOM nodes, creating item views only for the visible window plus overscan so large, variable-height lists stay fast. The examples on this page use the **Shadcn Rhea** style preset.
+Virtual List decouples a complete logical key sequence from physical DOM nodes, creating item views only for the visible window and overscan buffer so large, variable-height lists stay responsive. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -19,24 +19,100 @@ Virtual List decouples a complete logical key sequence from physical DOM nodes, 
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes from `@proto.ui/prototypes-shadcn/virtual-list` and connect a Web scroll container through `@proto.ui/prototypes-base/virtual-list/web`.
 
 ## Usage
 
-Virtual List consists of `Root`, `Viewport`, and `Content`:
+Virtual List is composed of `Root`, `Viewport`, and `Content`: `Root` tracks the ordered `itemKeys` sequence and provides the family style scope, `Viewport` handles scrolling and keyboard focus, and `Content` hosts the materialized row elements.
 
-- The core model tracks `itemKeys`, `overscanItems`, `maxMaterializedItems`, revisions, and generation-bound commits.
-- On the Web, `attachWebVirtualList` from `virtual-list/web` connects to the scroll viewport to measure variable item heights, maintain spacers, reuse keyed DOM rows, scroll to specific keys, and dispose listeners.
+```ts
+import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import {
+  virtualListRoot,
+  virtualListViewport,
+  virtualListContent,
+} from '@proto.ui/prototypes-shadcn/virtual-list';
+import { attachWebVirtualList } from '@proto.ui/prototypes-base/virtual-list/web';
 
-### Materializer lifecycle
+AdaptToWebComponent(virtualListRoot);
+AdaptToWebComponent(virtualListViewport);
+AdaptToWebComponent(virtualListContent);
 
-- Each logical list allows one active materializer at a time. `attachWebVirtualList` acquires this lease automatically before creating nodes or listeners; dispose the existing materializer before attaching a replacement.
-- Custom non-Web hosts can integrate through `acquireMaterializer(onRetired)` on the model (Web callers using `attachWebVirtualList` do not need to call it separately).
-- Unmounting or disposing `Root` retires the active materializer, clears rendered rows and observers, and ignores late callbacks from the retired host. If initial setup fails, the lease is released automatically so mounting can be retried.
+const list = document.querySelector('shadcn-virtual-list-root')!;
+const viewport = document.querySelector('shadcn-virtual-list-viewport')!;
+const content = document.querySelector('shadcn-virtual-list-content')!;
+
+setElementProps(list, {
+  styleProfile: 'rhea',
+  itemKeys: Array.from({ length: 1000 }, (_, i) => `event-${i + 1}`),
+  overscanItems: 3,
+  maxMaterializedItems: 60,
+});
+
+const host = attachWebVirtualList({
+  viewport,
+  content,
+  collection: list.getExposes().getCollection(),
+  estimateSize: 64,
+  renderItem(key) {
+    const row = document.createElement('div');
+    row.className = 'border-b border-border/60 px-4 py-3 text-sm';
+    row.textContent = key;
+    return row;
+  },
+});
+
+// Programmatically scroll to a key and dispose on teardown
+host.ensureVisible('event-250', 'center');
+// host.dispose();
+```
+
+### Anatomy & Accessibility
+
+- `Root` sets `role="region"` with `a11yLabel` and adapts its radius, border, and surface ring to the active `styleProfile`.
+- `Viewport` inherits `Scroll Area` scrolling and focus handling, displaying a clipped inset focus ring on keyboard focus.
+- `Content` sets `role="list"`; each mounted row receives `role="listitem"`, `aria-posinset`, and `aria-setsize` automatically.
+
+### Advanced: Custom Materializers
+
+- Each logical list allows one active materializer at a time; `attachWebVirtualList` manages the lease automatically and cleans up rendered rows and its `ResizeObserver` when `Root` unmounts or disposes.
+- Call `dispose()` on an active materializer before attaching a replacement. Non-Web hosts can integrate directly through `collection.acquireMaterializer(onRetired)`.
+
+## Examples
+
+### Scroll to Item
+
+Call `ensureVisible(key, align)` with `'start'`, `'center'`, `'end'`, or `'nearest'` to scroll any logical key into view.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-virtual-list-jump"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Dynamic Filtering & Empty State
+
+Updating `itemKeys` on `Root` recomputes the visible window and reconciles mounted rows automatically, making filtering and empty states straightforward.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-virtual-list-filter"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Overscan & Bounded Materialization
+
+Tune `overscanItems` and `maxMaterializedItems` to keep the number of mounted DOM rows strictly bounded even across thousands of logical items.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-virtual-list-window"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root` (`Viewport` and `Content` add no props):
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -44,7 +120,92 @@ The following props belong to `Root` (`Viewport` and `Content` add no props):
     { name: 'itemKeys', type: 'readonly string[]', default: '[]' },
     { name: 'overscanItems', type: 'number', default: '2' },
     { name: 'maxMaterializedItems', type: 'number', default: '100' },
-    { name: 'a11yLabel', type: 'string', default: 'Virtual list' },
+    { name: 'a11yLabel', type: 'string', default: "'Virtual list'" },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'rhea' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'new-york-v4'",
+      default: "'inherit'",
+    },
+  ]}
+/>
+
+### Viewport & Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'rhea' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'new-york-v4'",
+      default: "'inherit'",
+    },
+  ]}
+/>
+
+### Root Exposes
+
+<ApiPropsTable
+  headers={{ name: 'Member', type: 'Type', default: 'Description' }}
+  rows={[
+    {
+      name: 'logicalCount',
+      type: 'ExposeState<number>',
+      default: 'Total number of logical item keys',
+    },
+    {
+      name: 'getCollection',
+      type: '() => WindowedCollection',
+      default: 'Returns the collection model for host attachment',
+    },
+    {
+      name: 'getWindow',
+      type: '() => WindowSnapshot',
+      default: 'Returns the current revision, committed range, and materialized keys',
+    },
+  ]}
+/>
+
+### attachWebVirtualList
+
+<ApiPropsTable
+  headers={{ name: 'Option / Method', type: 'Type', default: 'Default / Description' }}
+  rows={[
+    { name: 'viewport', type: 'HTMLElement', default: 'Scrollable viewport element (required)' },
+    {
+      name: 'content',
+      type: 'HTMLElement',
+      default: 'List element hosting spacers and rows (required)',
+    },
+    {
+      name: 'collection',
+      type: 'WindowedCollection',
+      default: 'Collection from Root getCollection() (required)',
+    },
+    {
+      name: 'renderItem',
+      type: '(key: string) => HTMLElement',
+      default: 'Creates a row element for a key; mounted keys are reused (required)',
+    },
+    {
+      name: 'estimateSize',
+      type: 'number',
+      default: '36 (estimated height in px before measurement)',
+    },
+    {
+      name: 'refresh()',
+      type: '() => void',
+      default: 'Re-evaluates viewport geometry and materialization',
+    },
+    {
+      name: 'ensureVisible(key, align?)',
+      type: "(key: string, align?: 'nearest' | 'start' | 'center' | 'end') => boolean",
+      default: 'Scrolls the target key into view and returns whether it materialized',
+    },
+    {
+      name: 'dispose()',
+      type: '() => void',
+      default: 'Disconnects listeners/observers, clears rows, and releases the lease',
+    },
   ]}
 />
 

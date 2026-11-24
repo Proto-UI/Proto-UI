@@ -1,12 +1,13 @@
 ---
 title: 'Resizable'
-description: '支持多面板比例调整、嵌套布局与折叠停点的 Brutalist 风格可调分栏组件。'
+description: '遵循 Brutalist 5px 圆角、2px 黑框与 4px 零模糊阴影规范的多面板可调分栏组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Resizable 将容器划分为两个或多个按百分比分配空间的面板，并通过带索引的分隔柄连续调整相邻面板的比例，同时支持嵌套不同方向的独立分栏。
+Brutalist 风格的可调整分栏组件：外层面板组采用 `5px` 圆角（`rounded-base`）、`2px` 黑色边框、零模糊 `4px 4px` 硬影与 `DM Sans` 字体，内嵌分组通过 `variant="nested"` 保持无重复边框。
 
 ## 预览
 
@@ -18,36 +19,104 @@ Resizable 将容器划分为两个或多个按百分比分配空间的面板，�
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-brutalist/resizable` 导入组件原型并使用对应宿主 Adapter 适配。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-brutalist/resizable` 导入原型并使用目标宿主 Adapter 适配：
+
+```ts
+import {
+  resizableRoot,
+  resizablePanel,
+  resizableHandle,
+} from '@proto.ui/prototypes-brutalist/resizable';
+```
 
 ## 用法
 
-### 组件结构与索引
+```tsx
+import {
+  BrutalistResizableRoot,
+  BrutalistResizablePanel,
+  BrutalistResizableHandle,
+} from '../proto-ui/components/react';
 
-- `Root`：统一管理各面板的百分比尺寸、约束、方向与受控/非受控状态。
-- `Panel`：按 `index`（`0..N-1`）标识各个面板，并将无量纲尺寸导出到 `--pui-size`，由静态 `flex-basis` CSS 规则驱动布局。
-- `Handle`：按 `index`（`0..N-2`）标识分隔柄，每个分隔柄指向其前一个面板并调整相邻两面板的比例（默认无障碍名称为 `Resize panels`）。
+export function Example() {
+  return (
+    <BrutalistResizableRoot defaultSizes={[50, 50]} className="h-56 w-full max-w-md">
+      <BrutalistResizablePanel index={0}>One</BrutalistResizablePanel>
+      <BrutalistResizableHandle index={0} withHandle />
+      <BrutalistResizablePanel index={1}>Two</BrutalistResizablePanel>
+    </BrutalistResizableRoot>
+  );
+}
+```
 
-### 多面板尺寸与约束
+### 组合结构
 
-- 通过 `Root` 的 `sizes` / `defaultSizes` 传入完整百分比数组（自动归一化使总和为 `100`）；原有双面板的 `value` / `defaultValue` 属性继续可用，显式传入 `sizes` 时以数组为准。
-- `constraints` 可为每个面板单独配置 `min`（默认 `0`）、`max`（默认 `100`）、`collapsible`（默认 `false`）和 `collapsedSize`（默认 `0`）。非法或不可行布局会忽略变更并保持上一个有效状态。
-- 拖动分隔柄或按键调整时，只改变相邻两个面板的分配并保持其余面板尺寸不变。折叠作为离散停点生效，并受相邻面板上限约束。
-- 嵌套 `Root` 各自独立管理尺寸比例、约束与水平/垂直方向。拖动计算按面板实际边框尺寸归一化，不把固定分隔柄宽度计入分母。
+```text
+BrutalistResizableRoot (variant="default" | "nested")
+├── BrutalistResizablePanel (index: 0)
+├── BrutalistResizableHandle (index: 0, withHandle?)
+└── BrutalistResizablePanel (index: 1)
+```
 
-### 键盘交互与受控模式
+- 顶层 `Root` 默认附带 `rounded-base`、2px 黑框与 4px 硬阴影；在面板内部嵌套另一个 `Root` 时传入 `variant="nested"`，避免双重边框与阴影堆叠。
+- 布局包含 `N` 个 `Panel`（`index: 0..N-1`）与 `N - 1` 个 `Handle`（`index: 0..N-2`），通过 `--pui-size` 驱动静态 `flex-basis`。
+- `Handle` 默认绘制 2px 黑色分隔线并提供方向性拖拽光标；设置 `withHandle` 可显示主色带黑框的 Brutalist 抓握徽章。
+- 支持指针拖动、方向键、`Shift` 加速、`Home` / `End` 与 `Enter` 折叠；传入 `sizes` 进入受控模式并通过 `sizesChange` / `sizesCommit` 响应变更。
 
-- 指针拖动、方向键、`Home` / `End`、`Shift` 加速步进和折叠均走同一套受约束请求路径。
-- 读取 `sizes` 或调用 `requestResize(index, nextSize, commit)` / `requestSizes(nextSizes, commit)` 进行程序化调整。`sizesChange` 与 `sizesCommit` 事件载荷为 `{ sizes }`；取消手势不会触发 `sizesCommit`。
-- 传入 `sizes` 进入受控模式：父级采纳提议值则更新，保持原值则拒绝，面板尺寸与 ARIA 属性始终与当前已提交值一致。
+## 示例
+
+### 垂直分栏
+
+将 `orientation` 设为 `"vertical"` 构建上下可调分栏。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-resizable-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 可见分隔柄
+
+对比带主色黑框抓握徽章的 `withHandle` 与极简 2px 黑色分隔线。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-resizable-handle"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 从右到左（RTL）
+
+设置 `direction="rtl"` 镜像排列顺序与键盘方向增减方向。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-resizable-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多面板与折叠
+
+三栏布局结合 `constraints` 与可折叠侧边栏，聚焦首个分隔柄并按 `Enter` 可快速收起或展开。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-resizable-collapsible"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`（传入 `sizes` 或 `value` 进入受控模式）：
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'variant', type: "'default' | 'nested'", default: "'default'" },
+    { name: 'sizes', type: 'readonly number[]', default: '—' },
+    { name: 'defaultSizes', type: 'readonly number[]', default: '—' },
+    { name: 'constraints', type: 'readonly ResizablePanelConstraint[]', default: '[]' },
+    { name: 'value', type: 'number', default: '—' },
     { name: 'defaultValue', type: 'number', default: '50' },
     { name: 'min', type: 'number', default: '10' },
     { name: 'max', type: 'number', default: '90' },
@@ -55,12 +124,28 @@ Resizable 将容器划分为两个或多个按百分比分配空间的面板，�
     { name: 'collapsible', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
-    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
   ]}
 />
 
-其余子部件：
+### Panel 与 Handle
 
-- **Panel**：`index` 默认 `0`。
-- **Handle**：按 `index`（`0..N-2`）对应前一个面板，无障碍名称默认为 `Resize panels`。
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Panel.index', type: 'number', default: '0' },
+    { name: 'Handle.index', type: 'number', default: '0' },
+    { name: 'Handle.withHandle', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+- **暴露状态**：Root 暴露 `value`、`sizes`；Panel 暴露 `size`；Handle 暴露 `value`、`focusVisible`、`disabled`。
+- **事件与方法**：Root 触发 `sizesChange` / `sizesCommit` / `valueChange` / `valueCommit`，并提供 `requestResize(index, next, commit?)`、`requestSizes(next, commit?)`、`requestValue(next, commit?)` 与 `cancelResize()`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-RESIZABLE.yaml', 'P-BASE-RESIZABLE.yaml']}
+/>

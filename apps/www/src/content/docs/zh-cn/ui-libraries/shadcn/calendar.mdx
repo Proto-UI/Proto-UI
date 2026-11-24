@@ -1,13 +1,13 @@
 ---
 title: 'Calendar'
-description: '支持单选、多选与日期范围选择的公历日历组件，内置本地化星期标签与年月切换组合。'
+description: '支持单选、多选与日期范围选择的公历日历组件，内置本地化星期标签、快捷预设与年月切换组合。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-公历日期选择组件，支持单选（`single`）、多选（`multiple`）与日期范围（`range`）三种模式，提供本地化星期标签、键盘跨月导航及受控年月切换。本页示例采用 **Shadcn Rhea** 风格。
+支持单选（`single`）、多选（`multiple`）与日期范围（`range`）的公历日历组件，提供本地化星期标题、RTL 键盘导航与可组合年月选择器。本页示例采用 **Shadcn Rhea** 风格预设。
 
 ## 预览
 
@@ -17,7 +17,101 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-### 多选与范围选择
+## 安装
+
+当前组件随源码工作区提供，尚未纳入 0.2.0 稳定版 CLI 注册表；可在工作区中直接从 `@proto.ui/prototypes-shadcn/calendar` 引入。
+
+## 用法
+
+```tsx
+import {
+  CalendarRoot,
+  CalendarCaption,
+  CalendarPrevious,
+  CalendarHeading,
+  CalendarNext,
+  CalendarGrid,
+  CalendarWeekdays,
+  CalendarWeekday,
+  CalendarRow,
+  CalendarDay,
+} from '@proto.ui/prototypes-shadcn/calendar';
+
+export function ExampleCalendar() {
+  return (
+    <CalendarRoot
+      styleProfile="rhea"
+      mode="single"
+      defaultMonth="2026-10"
+      defaultValue="2026-10-12"
+      today="2026-10-08"
+      className="rounded-lg border border-border"
+    >
+      <CalendarCaption>
+        <CalendarPrevious a11yLabel="Previous month" />
+        <CalendarHeading />
+        <CalendarNext a11yLabel="Next month" />
+      </CalendarCaption>
+      <CalendarGrid>
+        <CalendarWeekdays>
+          {Array.from({ length: 7 }, (_, offset) => (
+            <CalendarWeekday key={offset} offset={offset} />
+          ))}
+        </CalendarWeekdays>
+        {Array.from({ length: 6 }, (_, row) => (
+          <CalendarRow key={row} index={row}>
+            {Array.from({ length: 7 }, (_, col) => (
+              <CalendarDay key={col} offset={row * 7 + col} />
+            ))}
+          </CalendarRow>
+        ))}
+      </CalendarGrid>
+    </CalendarRoot>
+  );
+}
+```
+
+### 部件结构与键盘导航
+
+- `Calendar` 由十个部件组成：`Root`、`Caption`、`Heading`、`Previous`、`Next`、`Grid`、`Weekdays`、`Weekday`、`Row` 与 `Day`。
+- 默认按当月最少需要的 4–6 周渲染；设置 `fixedWeeks={true}` 可固定显示六周，多余行与单元格自动隐藏并移出焦点路径。
+- 方向键支持跨月连续移动，`Home` / `End` 跳至当周起止，`PageUp` / `PageDown` 翻月（配合 `Shift` 翻年）；`direction="rtl"` 自动镜像左右方向键。
+- 组件不直接读取系统时钟或时区：为避免 SSR 水合偏移，请由宿主在客户端通过 `today` 传入 `YYYY-MM-DD` 字符串标记今天（自动映射 `aria-current="date"`）。
+- 如需弹出式日期输入，可配合 `Date Picker` 组件使用；如需月份/年份下拉跳转，可通过 `bindCalendarCaption(source, { month, year })` 与同族 `Select` 组合（退出时调用 `dispose()`）。
+
+### 选择模式
+
+| 模式       | 受控值 / 初始值                                 | 变更事件                     |
+| ---------- | ----------------------------------------------- | ---------------------------- |
+| `single`   | `value` / `defaultValue`：`YYYY-MM-DD`          | `onValueChange({ value })`   |
+| `multiple` | `values` / `defaultValues`：`readonly string[]` | `onValuesChange({ values })` |
+| `range`    | `range` / `defaultRange`：`{ from?, to? }`      | `onRangeChange({ range })`   |
+
+## 示例
+
+### 基础日历
+
+使用默认月份标题栏的单选日历。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-calendar-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 日期范围
+
+设置 `mode="range"` 开启连续日期范围选择，自动衔接首尾端点与中间区间样式。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-calendar-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多选与范围约束
+
+结合 `min`、`max`、`unavailable`、`minNights`、`maxNights` 与 `maxSelected` 限制可选日期与跨度。
 
 <PrototypePreviewer
   demoId="demo-shadcn-calendar-selection"
@@ -25,60 +119,56 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 用法
+### 快捷预设
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+配合受控 `value`、`month`、`fixedWeeks` 与同族 `Button` 实现快捷日期跳转。
 
-### 部件结构
+<PrototypePreviewer
+  demoId="demo-shadcn-calendar-presets"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-`Calendar` 由十个部件组成：`Root`、`Caption`、`Heading`、`Previous`、`Next`、`Grid`、`Weekdays`、`Weekday`、`Row` 与 `Day`。
+### 已预订与不可用日期
 
-- 在 `Weekdays` 中放置 `offset` 为 `0`–`6` 的七个 `Weekday`，再使用最多六个带 `index`（`0`–`5`）的 `Row` 与 `offset` `0`–`41` 的 `Day` 组成日历网格。
-- 默认只显示覆盖当月所需的 4、5 或 6 周；设置 `fixedWeeks={true}` 可固定显示六周。多余的行和日期格会自动隐藏并移出焦点路径，可通过 `Root` 的 `weekCount` 读取当前周数。
-- 星期标签与日期排列随 `weekStartsOn`（`0` 为周日）与 `locale` 同步；日期格自动使用完整的本地化日期作为无障碍名称。
-- `Previous` 与 `Next` 支持 `a11yLabel`，为纯图标导航按钮提供无障碍名称。`direction="rtl"` 会自动镜像左右方向键。
+通过 `unavailable` 与 `min` / `max` 标记不可预订区间。
 
-### 选择模式
+<PrototypePreviewer
+  demoId="demo-shadcn-calendar-booked-dates"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-| 模式       | 受控值 / 初始值                               | 变更事件                     |
-| ---------- | --------------------------------------------- | ---------------------------- |
-| `single`   | `value` / `defaultValue`：`YYYY-MM-DD` 字符串 | `onValueChange({ value })`   |
-| `multiple` | `values` / `defaultValues`：日期数组          | `onValuesChange({ values })` |
-| `range`    | `range` / `defaultRange`：`{ from?, to? }`    | `onRangeChange({ range })`   |
+### 从右到左（RTL）
 
-- **多选模式**：每次点击或按键激活日期都会切换选中状态，数组会自动去重并按日期升序排列。通过 `minSelected`（默认 `0`）与 `maxSelected` 限制可选数量；调用 `requestValues(dates)` 整组替换时会同时校验上下限。
-- **范围模式**：首次选择确定起点 `{ from }`，第二次选择完成包含两端的 `{ from, to }`（反向选择会自动按先后排序），再次选择则开启新范围；传入 `{}` 可清空范围。`minNights`（默认 `0`，允许同日起止）与 `maxNights` 用于限制起止日期之间的天数间隔。
-- **范围样式状态**：`Day` 在 `selected` 之外还会暴露 `rangeStart`、`rangeEnd`、`rangeMiddle` 与 `rangePending`，方便区分端点、中段和待完成起点。多选与范围模式下，`Grid` 会自动设置 `aria-multiselectable`。
+设置 `direction="rtl"`、`locale="ar-SA"` 与 `weekStartsOn={6}` 启用阿拉伯语 RTL 布局与镜像键盘导航。
 
-### 可用日期与当前日期（`today`）
-
-- `min`、`max` 与 `Root` 的 `unavailable` 会作用于所有选中日期；范围选择跨过不可用日期时会被拒绝并保留原有起点。单个日期格的 `disabled` 仅禁用该单元格；`Root` 的 `readOnly` 禁止修改选择但允许继续翻月浏览。
-- 组件不直接读取系统时钟或时区：如需高亮“今天”（并设置 `aria-current="date"`），请由宿主传入 `YYYY-MM-DD` 格式的 `today` 字符串。
-- 初始显示月份优先级为：`month` → `defaultMonth` → 当前模式下的已选日期 → `today` → `1970-01`。
-
-### 受控月份与年月选择器
-
-- `value` / `values` / `range`（选中状态）与 `month`（当前展示月份，格式 `YYYY-MM`）可分别独立受控。
-- `Root` 暴露 `requestValue(date)`、`requestValues(dates)`、`requestRange(range)`、`requestMonth(month)`、`getValues()`、`getRange()`，以及 `mode`、`selectedCount`、`rangeComplete` 等只读状态。
-- 如需在 `Caption` 中提供月份和年份下拉选择，可通过 `bindCalendarCaption(source, { month, year })` 将组件库自带的 `Select` 绑定到 `Calendar` 的 `month` 状态与 `requestMonth` 方法（退出时调用 `dispose()` 清理）。`Select` 的触发器通过 `accessibleLabel` 保持稳定的无障碍名称。
-- Shadcn Rhea 风格采用 `h-8 w-8`（32px）日期与导航按钮和 `p-3` 内边距，聚焦环独立于选中状态显示。
+<PrototypePreviewer
+  demoId="demo-shadcn-calendar-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-传入 `value`、`values`、`range` 或 `month` 即可分别控制对应状态。省略 `today` 时不显示“今天”标记。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
-    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: 'single' },
+    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: "'single'" },
     { name: 'value', type: 'string', default: 'undefined' },
+    { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'values', type: 'readonly string[]', default: 'undefined' },
     { name: 'defaultValues', type: 'readonly string[]', default: '[]' },
     { name: 'range', type: 'CalendarRange', default: 'undefined' },
     { name: 'defaultRange', type: 'CalendarRange', default: '{}' },
-    { name: 'minSelected / minNights', type: 'number', default: '0' },
-    { name: 'maxSelected / maxNights', type: 'number', default: 'undefined' },
-    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'minSelected', type: 'number', default: '0' },
+    { name: 'maxSelected', type: 'number', default: 'undefined' },
+    { name: 'minNights', type: 'number', default: '0' },
+    { name: 'maxNights', type: 'number', default: 'undefined' },
+    { name: 'month', type: 'string', default: 'undefined' },
+    { name: 'defaultMonth', type: 'string', default: 'undefined' },
     { name: 'min', type: 'string', default: "''" },
     { name: 'max', type: 'string', default: "''" },
     { name: 'unavailable', type: 'readonly string[]', default: '[]' },
@@ -86,13 +176,44 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'weekStartsOn', type: 'number', default: '0' },
     { name: 'fixedWeeks', type: 'boolean', default: 'false' },
-    { name: 'a11yLabel', type: 'string', default: 'Calendar' },
+    { name: 'a11yLabel', type: 'string', default: "'Calendar'" },
     { name: 'today', type: 'string', default: "''" },
-    { name: 'locale', type: 'string', default: 'en-US' },
+    { name: 'locale', type: 'string', default: "'en-US'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+    {
+      name: 'styleProfile',
+      type: "'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'nova'",
+    },
   ]}
 />
 
-以上属性属于 `Root`。
+### 子部件属性
+
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Day.date', type: 'string', default: "''" },
+    { name: 'Day.offset', type: 'number', default: '0' },
+    { name: 'Day.disabled', type: 'boolean', default: 'false' },
+    { name: 'Row.index', type: 'number', default: 'undefined' },
+    { name: 'Weekday.offset', type: 'number', default: '0' },
+    { name: 'Caption.a11yLabel', type: 'string', default: "'Calendar navigation'" },
+    {
+      name: 'Previous / Next.a11yLabel',
+      type: 'string',
+      default: "'Previous month' / 'Next month'",
+    },
+    { name: 'Previous / Next.buttonVariant', type: "'ghost' | 'outline'", default: "'ghost'" },
+    { name: 'Previous / Next.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### 事件、方法与暴露状态
+
+- **事件（Root）**：`onValueChange({ value })`、`onValuesChange({ values })`、`onRangeChange({ range })`、`onMonthChange({ month })`。
+- **方法（Root）**：`requestValue(date)`、`requestValues(dates)`、`requestRange(range)`、`requestMonth(month)`、`getValues()`、`getRange()`。
+- **暴露状态**：Root 暴露 `value`、`mode`、`selectedCount`、`rangeComplete`、`month`、`weekCount`、`disabled`、`direction`；Day 暴露 `date`、`selected`、`rangeStart`、`rangeEnd`、`rangeMiddle`、`rangePending`、`today`、`outside`、`disabled`、`hidden`。
 
 ## 参考
 

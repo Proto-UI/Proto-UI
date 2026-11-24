@@ -4,8 +4,10 @@ description: '按可见窗口按需渲染可变高度列表项的 Liquid Glass �
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Virtual List 将稳定的逻辑项标识序列与物理渲染节点分离，仅为当前可见窗口及其缓冲区（overscan）创建内容节点，适用于大数据集与可变高度列表项。
+Liquid Glass Virtual List 将稳定的逻辑项标识序列与物理 DOM 节点分离，仅为当前可见窗口及其缓冲区创建内容节点。按照 Liquid Glass 层级原则，可滚动列表本身保持不透明的分组内容表面（`rounded-2xl` 同心圆角裁切），而半透明玻璃材质仅用于悬浮于内容之上的功能操作栏。
 
 ## 预览
 
@@ -17,14 +19,164 @@ Liquid Glass Virtual List 将稳定的逻辑项标识序列与物理渲染节点
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-liquid-glass/virtual-list` 导入原型，并结合 `@proto.ui/prototypes-base/virtual-list/web` 完成 Web 滚动视口绑定。
 
 ## 用法
 
-- **逻辑模型与 Web 物化分离**：核心列表模型与宿主无关，负责按项 overscan、最大物化数量上限、修订号与基于 generation 的提交；Web 端通过显式 `virtual-list/web` 入口测量可变项尺寸、管理占位 spacer 与 DOM 节点复用、支持按键滚动定位，并在卸载时自动清理监听。
-- **按需创建内容**：应用仅需为有界可见区间内的键渲染实际内容，复用已有键对应的视图以保持滚动流畅。
+Virtual List 由 `Root`、`Viewport` 与 `Content` 组成：`Root` 维护有序逻辑键集合并提供 `rounded-2xl` 不透明分组容器，`Viewport` 承担纵向滚动与内嵌焦点环，`Content` 承载按需挂载的行节点。
+
+```ts
+import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import {
+  virtualListRoot,
+  virtualListViewport,
+  virtualListContent,
+} from '@proto.ui/prototypes-liquid-glass/virtual-list';
+import { attachWebVirtualList } from '@proto.ui/prototypes-base/virtual-list/web';
+
+AdaptToWebComponent(virtualListRoot);
+AdaptToWebComponent(virtualListViewport);
+AdaptToWebComponent(virtualListContent);
+
+const list = document.querySelector('liquid-glass-virtual-list-root')!;
+const viewport = document.querySelector('liquid-glass-virtual-list-viewport')!;
+const content = document.querySelector('liquid-glass-virtual-list-content')!;
+
+setElementProps(list, {
+  itemKeys: Array.from({ length: 1000 }, (_, i) => `event-${i + 1}`),
+  overscanItems: 3,
+  maxMaterializedItems: 60,
+});
+
+const host = attachWebVirtualList({
+  viewport,
+  content,
+  collection: list.getExposes().getCollection(),
+  estimateSize: 64,
+  renderItem(key) {
+    const row = document.createElement('div');
+    row.className = 'border-b border-border/50 px-4 py-3 text-sm';
+    row.textContent = key;
+    return row;
+  },
+});
+
+// 定位到指定条目，卸载时清理监听与节点
+host.ensureVisible('event-250', 'center');
+// host.dispose();
+```
+
+### 层级、动效与无障碍
+
+- **内容层与控制层分离**：列表容器本身不叠加玻璃材质，避免在滚动内容上叠放玻璃或产生玻璃叠玻璃；搭配悬浮跳转/筛选按钮时，由上层 `Liquid Glass Button` 承担 `regular` / `prominent` 材质表现。
+- **无障碍偏好回退**：启用减少透明度或高对比度模式时，容器自动强化边界并移除柔和阴影；启用减少动态效果时自动停用过渡动画。
+- **语义角色**：`Root` 声明 `role="region"` 与 `a11yLabel`，`Viewport` 继承 `Scroll Area` 内嵌焦点环，`Content` 声明 `role="list"` 并为挂载行写入 `role="listitem"`、`aria-posinset` 与 `aria-setsize`。
+
+### 进阶：自定义渲染宿主
+
+- 每个逻辑列表实例同一时刻仅允许挂载一个活跃渲染宿主；`attachWebVirtualList` 会自动管理生命周期并在 `Root` 卸载或销毁时清理节点与观察器。
+- 替换宿主前需先调用旧宿主的 `dispose()`；非 Web 宿主可通过 `collection.acquireMaterializer(onRetired)` 接入。
+
+## 示例
+
+### 悬浮玻璃操作栏与滚动定位
+
+上方 `regular` 与 `prominent` Liquid Glass 按钮构成悬浮控制层，点击后通过 `ensureVisible(key, align)` 定位下方不透明内容列表中的任意条目。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-virtual-list-jump"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 动态筛选与空状态
+
+通过悬浮筛选控制栏更新 `Root` 的 `itemKeys`，自动重算可见窗口并支持空状态展示。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-virtual-list-filter"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 缓冲区间与有界渲染
+
+切换 `overscanItems` 缓冲项数，验证 2,000 条逻辑条目下始终保持有界的 DOM 渲染规模。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-virtual-list-window"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-- **核心模型能力**：稳定逻辑键序列、按项 overscan 缓冲、最大物化节点上限、修订追踪。
-- **Web 宿主入口（`virtual-list/web`）**：可变项高度/宽度测量、占位管理、按键视图复用、滚动到指定键以及监听清理。
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'itemKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'overscanItems', type: 'number', default: '2' },
+    { name: 'maxMaterializedItems', type: 'number', default: '100' },
+    { name: 'a11yLabel', type: 'string', default: "'Virtual list'" },
+  ]}
+/>
+
+### Viewport 与 Content
+
+`Viewport` 与 `Content` 无额外组件属性，且保持中性不透明内容层（不申请玻璃材质）。
+
+### Root 暴露接口
+
+<ApiPropsTable
+  headers={{ name: '成员', type: '类型', default: '说明' }}
+  rows={[
+    { name: 'logicalCount', type: 'ExposeState<number>', default: '当前逻辑条目总数' },
+    {
+      name: 'getCollection',
+      type: '() => WindowedCollection',
+      default: '返回供渲染宿主接入的集合模型',
+    },
+    {
+      name: 'getWindow',
+      type: '() => WindowSnapshot',
+      default: '返回当前修订、窗口区间与已挂载键快照',
+    },
+  ]}
+/>
+
+### attachWebVirtualList
+
+<ApiPropsTable
+  headers={{ name: '参数 / 返回方法', type: '类型', default: '默认值 / 说明' }}
+  rows={[
+    { name: 'viewport', type: 'HTMLElement', default: '滚动视口元素（必填）' },
+    { name: 'content', type: 'HTMLElement', default: '承载占位器与行节点的列表元素（必填）' },
+    {
+      name: 'collection',
+      type: 'WindowedCollection',
+      default: '来自 Root getCollection()（必填）',
+    },
+    {
+      name: 'renderItem',
+      type: '(key: string) => HTMLElement',
+      default: '按 key 创建行节点，已挂载 key 会自动复用（必填）',
+    },
+    { name: 'estimateSize', type: 'number', default: '36（未测量行的预估像素高度）' },
+    { name: 'refresh()', type: '() => void', default: '手动触发一次视口测量与窗口刷新' },
+    {
+      name: 'ensureVisible(key, align?)',
+      type: "(key: string, align?: 'nearest' | 'start' | 'center' | 'end') => boolean",
+      default: '滚动定位至指定 key 并返回是否已挂载',
+    },
+    { name: 'dispose()', type: '() => void', default: '移除监听与观察器、清理已挂载行并释放租约' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-VIRTUAL-LIST.yaml', 'P-BASE-VIRTUAL-LIST.yaml']}
+/>

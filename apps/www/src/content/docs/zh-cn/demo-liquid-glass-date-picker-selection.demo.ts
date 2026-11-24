@@ -1,3 +1,3 @@
-import { createCalendarSelectionDemo } from './calendar-selection-demo.shared';
+import { createDatePickerSelectionDemo } from '../demo_components/date-picker/date-picker-demo.shared';
 
-export default createCalendarSelectionDemo('liquid-glass', true);
+export default createDatePickerSelectionDemo('liquid-glass');

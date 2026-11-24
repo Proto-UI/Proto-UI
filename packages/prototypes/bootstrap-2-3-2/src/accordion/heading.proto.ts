@@ -6,6 +6,7 @@ import {
 } from '@proto.ui/prototypes-base/accordion';
 export default definePrototype<AccordionHeadingProps, AccordionHeadingExposes>({
   name: 'bootstrap-2-3-2-accordion-heading',
+  modules: asAccordionHeading.modules,
   setup(def) {
     const inherited = asAccordionHeading();
     def.feedback.style.use(tw('block m-0 min-w-0 border-b-0'));

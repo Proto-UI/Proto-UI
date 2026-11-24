@@ -7,11 +7,18 @@ import {
 
 export default definePrototype<ScrollAreaScrollbarProps, ScrollAreaScrollbarExposes>({
   name: 'liquid-glass-scroll-area-scrollbar',
+  modules: asScrollAreaScrollbar.modules,
   setup(def) {
     const inherited = asScrollAreaScrollbar();
     const state = inherited.stateHandles;
     if (!state) throw new Error('[liquid-glass-scroll-area-scrollbar] Missing Base orientation.');
-    def.feedback.style.use(tw('absolute flex touch-none select-none border-2 border-transparent'));
+    def.feedback.style.use(
+      tw('absolute flex touch-none select-none border-2 border-transparent transition-opacity')
+    );
+    def.rule({
+      when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
     def.rule({
       when: (w) => w.state(state.orientation).eq('vertical'),
       intent: (i) =>

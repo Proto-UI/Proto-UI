@@ -1,6 +1,6 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import { asScrollAreaScrollbar } from '@proto.ui/prototypes-base/scroll-area';
-import { setupShadcnStyleSelection } from '../style-scope';
+import { SHADCN_STYLE_IDS, setupShadcnStyleSelection } from '../style-scope';
 import type { ShadcnScrollAreaScrollbarExposes, ShadcnScrollAreaScrollbarProps } from './types';
 
 const SCROLLBAR_SURFACE_TOKENS = 'absolute flex touch-none p-px select-none transition-colors';
@@ -19,9 +19,13 @@ const scrollAreaScrollbar = definePrototype<
         '[shadcn-scroll-area-scrollbar] asScrollAreaScrollbar must project Scrollbar state handles.'
       );
     }
-    setupShadcnStyleSelection(def, 'new-york-v4');
+    setupShadcnStyleSelection(def, 'new-york-v4', { supportedStyles: SHADCN_STYLE_IDS });
 
     def.feedback.style.use(tw(SCROLLBAR_SURFACE_TOKENS));
+    def.rule({
+      when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
     def.rule({
       when: (when) => when.state(state.orientation).eq('vertical'),
       intent: (intent) =>

@@ -1,6 +1,6 @@
 ---
 title: Shadcn Accordion
-description: A vertically stacked set of collapsible sections with single or multiple expansion, full keyboard navigation, and controlled content lifecycle.
+description: A vertically or horizontally stacked set of collapsible sections with single or multiple expansion, keyboard navigation, controlled state, and Shadcn style presets.
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -8,7 +8,7 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-A vertically stacked set of collapsible content panels with single or multiple expansion, controlled state support, and keyboard navigation aligned with the [WAI-ARIA Accordion Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/). The examples on this page use the **Shadcn Rhea** style preset.
+A vertically or horizontally stacked set of collapsible content panels with single or multiple expansion, controlled state support, and keyboard navigation aligned with the [WAI-ARIA Accordion Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/). The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -16,7 +16,6 @@ A vertically stacked set of collapsible content panels with single or multiple e
   demoId="demo-shadcn-accordion"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
@@ -31,46 +30,121 @@ You can also import `accordionRoot`, `accordionItem`, `accordionHeading`, `accor
 
 ## Usage
 
+```tsx
+import {
+  ShadcnAccordionRoot,
+  ShadcnAccordionItem,
+  ShadcnAccordionHeading,
+  ShadcnAccordionTrigger,
+  ShadcnAccordionContent,
+} from '@/components/proto-ui/react';
+
+export function AccordionUsage() {
+  return (
+    <ShadcnAccordionRoot defaultOpenItems={['item-1']}>
+      <ShadcnAccordionItem value="item-1">
+        <ShadcnAccordionHeading level={3}>
+          <ShadcnAccordionTrigger>Is it accessible?</ShadcnAccordionTrigger>
+        </ShadcnAccordionHeading>
+        <ShadcnAccordionContent>
+          Yes. It adheres to the WAI-ARIA Accordion design pattern.
+        </ShadcnAccordionContent>
+      </ShadcnAccordionItem>
+    </ShadcnAccordionRoot>
+  );
+}
+```
+
 ### Anatomy
 
-Compose `Root` → `Item` → `Heading` → `Trigger`, with `Content` as a sibling of `Heading`:
+```text
+AccordionRoot
+└── AccordionItem
+    ├── AccordionHeading
+    │   └── AccordionTrigger
+    └── AccordionContent
+```
 
-- **Root**: Manages the set of open item keys and header navigation orientation. Nested `Root` instances keep independent state.
+- **Root**: Manages the set of open item keys, expansion mode, and header navigation orientation. Nested `Root` instances keep independent state.
 - **Item**: Represents one collapsible section and requires a unique, stable, non-empty `value`.
-- **Heading**: Declares the heading level (`1`–`6`, default `3`). Place only the controlling `Trigger` inside `Heading`; place any persistent secondary actions beside it.
-- **Trigger**: Derives open and disabled state from `Item` and `Root`, and automatically links to its `Content`.
-- **Content**: Holds the collapsible panel content. It unmounts content when closed by default; set `keepMounted` to keep the hidden node in place.
-
-### Controlled and uncontrolled state
-
-- **Uncontrolled**: Pass `defaultOpenItems` to set the initial open keys (read once on mount).
-- **Controlled**: Pass `openItems` to manage the open keys externally. When the user interacts, `Root` emits `openChange` with payload `{ openItems, value, open, reason }` (`reason` is `'pointer'`, `'keyboard'`, or `'programmatic'`). Pass the updated `openItems` back to `Root` to commit the change.
-
-Key behaviors:
-
-- Duplicate input keys are deduplicated; `mode="single"` keeps the first unique key.
-- Keys without a mounted `Item` stay dormant until that `Item` mounts; calling `requestOpen` for a missing key is ignored.
-- In uncontrolled mode, removing an open `Item` retires its key. When `allowEmpty={false}`, the last remaining open item cannot be collapsed.
+- **Heading**: Declares the heading level (`1`–`6`, default `3`). Place only the controlling `Trigger` inside `Heading`, and place persistent secondary actions beside it.
+- **Trigger**: Derives expanded, disabled, and collapse-blocked state from `Item` and `Root`, managing `aria-expanded`, `aria-disabled`, and `aria-controls`.
+- **Content**: Holds the collapsible panel body. Unmounts when closed by default; set `keepMounted` to keep the hidden node mounted and `region` to opt into a landmark region.
 
 ### Keyboard and accessibility
 
 - `Tab` / `Shift + Tab`: Follows the natural tab sequence across enabled triggers and focusable elements inside open panels.
 - `Enter` / `Space`: Toggles the focused item.
-- `ArrowUp` / `ArrowDown` (vertical) or `ArrowLeft` / `ArrowRight` (horizontal, reversed in RTL): Moves focus across enabled headers without changing open state. Set `loop={false}` to stop at the first and last headers.
-- `Home` / `End`: Moves focus to the first or last enabled header.
-- Disabled headers are skipped during arrow-key navigation. When `allowEmpty={false}` prevents collapsing the last open header, it stays focusable with `aria-disabled`.
-- `Content` is automatically labelled by its `Trigger`. Set `region={true}` to opt into a landmark region (use selectively when many sections can be open at once).
+- `ArrowUp` / `ArrowDown` (vertical) or `ArrowLeft` / `ArrowRight` (horizontal, reversed in RTL) plus `Home` / `End`: Moves focus across enabled headers without changing open state. Set `loop={false}` to stop at the endpoints.
+- Disabled headers are skipped during arrow-key navigation. When `allowEmpty={false}` prevents collapsing the last open item, its trigger stays focusable with `aria-disabled`.
 
-### Animation and layout
+## Examples
 
-- Pair `keepMounted` with your own CSS or transition logic when animating panel height or opacity.
-- Built-in styles wrap long labels, shrink inside narrow containers, and contain horizontal overflow within the panel.
+### Basic
+
+A basic single-open accordion with the first section expanded by default.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-accordion-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Multiple
+
+Set `mode="multiple"` to allow several items to stay open simultaneously.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-accordion-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Pass `disabled` to an individual `AccordionItem` to disable interaction and skip it during arrow-key navigation.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-accordion-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Borders
+
+Frame the `AccordionRoot` with a rounded outer border and clean item dividers.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-accordion-borders"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Card
+
+Compose `Accordion` inside `Shadcn Card` for account settings or billing FAQs.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-accordion-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Pair `dir="rtl"` with `direction="rtl"` to adapt inline text alignment, indicator placement, and horizontal keyboard navigation for right-to-left languages.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-accordion-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-### Root props
+### Root
 
-Passing `openItems` switches `Root` to controlled mode.
+Passing `openItems` switches `Root` to controlled mode; listen to `openChange` to commit updates.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
@@ -78,15 +152,20 @@ Passing `openItems` switches `Root` to controlled mode.
     {
       name: 'mode',
       type: "'single' | 'multiple'",
-      default: 'single',
+      default: "'single'",
       description: 'Allows one or multiple items open at a time',
     },
-    { name: 'openItems', type: 'string[]', description: 'Controlled list of open item values' },
+    {
+      name: 'openItems',
+      type: 'string[]',
+      default: '—',
+      description: 'Controlled list of open item values',
+    },
     {
       name: 'defaultOpenItems',
       type: 'string[]',
       default: '[]',
-      description: 'Initial open item values for uncontrolled mode',
+      description: 'Initial open item values for uncontrolled mode (read once on mount)',
     },
     {
       name: 'allowEmpty',
@@ -103,14 +182,14 @@ Passing `openItems` switches `Root` to controlled mode.
     {
       name: 'orientation',
       type: "'vertical' | 'horizontal'",
-      default: 'vertical',
-      description: 'Axis for arrow-key header navigation',
+      default: "'vertical'",
+      description: 'Layout direction and axis for arrow-key header navigation',
     },
     {
       name: 'direction',
       type: "'ltr' | 'rtl'",
-      default: 'ltr',
-      description: 'Reading direction for horizontal navigation',
+      default: "'ltr'",
+      description: 'Reading direction and horizontal arrow-key reversal',
     },
     {
       name: 'loop',
@@ -118,26 +197,120 @@ Passing `openItems` switches `Root` to controlled mode.
       default: 'true',
       description: 'Wraps focus from the last header back to the first',
     },
+    {
+      name: 'styleProfile',
+      type: "'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4' | 'inherit'",
+      default: "'inherit'",
+      description:
+        'Selects a Shadcn style preset; falls back to nova when no style scope is present',
+    },
   ]}
 />
 
-### Other parts
+### Item
 
-- **Item**: `value: string` (required, unique non-empty key), `disabled?: boolean` (default `false`).
-- **Heading**: `level?: 1 | 2 | 3 | 4 | 5 | 6` (default `3`).
-- **Trigger**: No props; derives state from `Item` and `Root`.
-- **Content**: `keepMounted?: boolean` (default `false`), `region?: boolean` (default `false`).
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'value',
+      type: 'string',
+      default: 'Required',
+      description: 'Unique non-empty key for this section within its Root',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disables interaction for this item',
+    },
+    {
+      name: 'styleProfile',
+      type: "ShadcnStyleId | 'inherit'",
+      default: "'inherit'",
+      description: 'Overrides the Shadcn style preset for this part',
+    },
+  ]}
+/>
+
+### Heading
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'level',
+      type: '1 | 2 | 3 | 4 | 5 | 6',
+      default: '3',
+      description: 'Semantic heading level (aria-level)',
+    },
+    {
+      name: 'styleProfile',
+      type: "ShadcnStyleId | 'inherit'",
+      default: "'inherit'",
+      description: 'Overrides the Shadcn style preset for this part',
+    },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: "ShadcnStyleId | 'inherit'",
+      default: "'inherit'",
+      description:
+        'Overrides the Shadcn style preset; expanded and disabled state derive from Item and Root',
+    },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'keepMounted',
+      type: 'boolean',
+      default: 'false',
+      description: 'Keeps the hidden panel node mounted when closed',
+    },
+    {
+      name: 'region',
+      type: 'boolean',
+      default: 'false',
+      description: 'Opts into an explicit landmark region role',
+    },
+    {
+      name: 'styleProfile',
+      type: "ShadcnStyleId | 'inherit'",
+      default: "'inherit'",
+      description: 'Overrides the Shadcn style preset for this panel',
+    },
+  ]}
+/>
 
 ### Methods and events (Root)
 
 - `getOpenItems()`: Returns a copy of the currently open item keys.
 - `openCount`: Number of open keys, including dormant keys awaiting mount.
 - `requestOpen(value, open, reason?)`: Programmatically requests an open or close change.
-- `openChange`: Emits `{ openItems, value, open, reason }` when a state change is requested.
+- `openChange`: Emits `{ openItems, value, open, reason }` (`reason` is `'pointer'`, `'keyboard'`, or `'programmatic'`).
 
 ## References
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-ACCORDION.yaml', 'P-BASE-ACCORDION.yaml']}
+  files={[
+    'P-SHADCN-ACCORDION.yaml',
+    'P-SHADCN-ACCORDION-ITEM.yaml',
+    'P-SHADCN-ACCORDION-HEADING.yaml',
+    'P-SHADCN-ACCORDION-TRIGGER.yaml',
+    'P-SHADCN-ACCORDION-CONTENT.yaml',
+    'P-BASE-ACCORDION.yaml',
+  ]}
 />

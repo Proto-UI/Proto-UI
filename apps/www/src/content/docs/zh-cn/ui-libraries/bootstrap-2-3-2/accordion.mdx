@@ -1,11 +1,13 @@
 ---
 title: Bootstrap 2.3.2 Accordion
-description: 采用 Bootstrap 2.3.2 风格的折叠面板组，支持单选与多选展开、自然 Tab 顺序与内容挂载控制。
+description: 采用经典 Bootstrap 2.3.2 视觉样式与 350ms 高度过渡的折叠面板组，支持单选/多选展开、自然 Tab 顺序与内容挂载控制。
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Accordion 是一组可展开/收起的折叠面板，沿用归档 Bootstrap 2.3.2 视觉风格并复用 Base Accordion 交互逻辑。
+Bootstrap 2.3.2 Accordion 沿用经典 Bootstrap 2.3.2 的 `.accordion-group` 外观（4px 圆角、链接式蓝字标题与 350ms 平滑高度展开过渡），并完整复用 Base Accordion 的状态与无障碍语义。
 
 ## 预览
 
@@ -14,14 +16,13 @@ Bootstrap 2.3.2 Accordion 是一组可展开/收起的折叠面板，沿用归�
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
   toolbar={true}
-  codePanel={false}
 />
 
 可通过预览工具栏中本体系的真实 Select 切换 WC、React、Vue 或 Vue 2；页面顶部的 Runtime 偏好也会与之保持同步。
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前通过工作区源码包提供，可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/accordion` 导入五个部件原型：
 
 ```ts
 import {
@@ -35,42 +36,186 @@ import {
 
 ## 用法
 
-### 组合结构
+```tsx
+import {
+  Bootstrap232AccordionRoot,
+  Bootstrap232AccordionItem,
+  Bootstrap232AccordionHeading,
+  Bootstrap232AccordionTrigger,
+  Bootstrap232AccordionContent,
+} from '@/components/proto-ui/react';
 
-按 `Root` → `Item` → `Heading` → `Trigger` 组合，将 `Content` 与 `Heading` 并列放置：
+export function BootstrapAccordionUsage() {
+  return (
+    <Bootstrap232AccordionRoot defaultOpenItems={['item-1']}>
+      <Bootstrap232AccordionItem value="item-1">
+        <Bootstrap232AccordionHeading level={3}>
+          <Bootstrap232AccordionTrigger>Collapsible Group Item #1</Bootstrap232AccordionTrigger>
+        </Bootstrap232AccordionHeading>
+        <Bootstrap232AccordionContent>
+          Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson.
+        </Bootstrap232AccordionContent>
+      </Bootstrap232AccordionItem>
+    </Bootstrap232AccordionRoot>
+  );
+}
+```
 
-- **Root**：统一管理当前展开的项集合，支持嵌套独立分组。
-- **Item**：每个面板项都需要唯一、稳定且非空的 `value`。
-- **Heading**：声明标题语义层级，内部只放用于控制该项的 `Trigger`；如有持续显示的次级操作，放在 `Heading` 旁边。
-- **Trigger**：从所属 `Item` 和 `Root` 读取展开与禁用状态。
-- **Content**：关闭时默认卸载内容节点；设置 `keepMounted` 可在收起时保留隐藏节点。
+### 部件结构
 
-### 受控与非受控
+```text
+AccordionRoot
+└── AccordionItem
+    ├── AccordionHeading
+    │   └── AccordionTrigger
+    └── AccordionContent
+```
 
-- 传入 `defaultOpenItems` 初始化非受控展开项；传入 `openItems` 进入受控模式。
-- 受控模式下，`Root` 发出 `openChange` 事件（载荷为 `{ openItems, value, open, reason }`），界面仅在父组件更新 `openItems` 后改变。
-- `single` 模式下只取第一个有效键；尚未挂载的键会保留待对应 `Item` 出现后生效。
+- **Root**：统一管理当前展开项集合与导航轴向，支持嵌套独立分组。
+- **Item**：对应经典 `.accordion-group` 面板框（4px 圆角、浅色 `#e5e5e5` / 暗色自适应边框与主题底色），需提供唯一非空 `value`。
+- **Heading**：声明标题层级（默认 `3`），内部仅放控制该项的 `Trigger`。
+- **Trigger**：无额外折叠图标的经典链接式标题（默认 `#08c`、悬停 `#005580` 下划线，暗色模式自动切换高对比链接色），并在不可收起或禁用时给出明确光标提示。
+- **Content**：绑定 `asTransition` 提供 350ms `blockSize` 高度过渡动画；关闭时默认卸载内容节点，设置 `keepMounted` 可保留隐藏节点。
 
 ### 键盘与无障碍
 
-- 每个启用的 `Trigger` 和内容区内的可聚焦元素保持自然 Tab 顺序。
-- `Enter` / `Space` 切换当前项；纵向模式下用上下方向键、横向模式下用左右方向键（RTL 自动反转）在启用的标题间移动，`Home` / `End` 跳到首末标题。
-- 方向键只移动焦点，不改变展开状态；当 `allowEmpty={false}` 时，最后一个已展开项的触发器仍可聚焦，但通过 `aria-disabled` 阻止关闭。
-- `Trigger` 自动关联其对应 `Content` 的 `aria-controls` 与命名关系；设置 `Content` 的 `region={true}` 可显式声明地标区域。
+- 启用的 `Trigger` 与内容区可聚焦元素保持自然 `Tab` 顺序；`Enter` / `Space` 切换当前项。
+- 纵向模式下按 `ArrowUp` / `ArrowDown`、横向模式下按 `ArrowLeft` / `ArrowRight`（RTL 自动反转）及 `Home` / `End` 在启用标题间移动焦点，不改变展开状态。
+- 当 `allowEmpty={false}` 阻止收起最后一个已展开项时，该触发器仍可聚焦并通过 `aria-disabled` 提示不可关闭。
+
+## 示例
+
+### 基础用法
+
+单选展开模式，配合 Bootstrap 2.3.2 经典的 350ms 折叠过渡。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-accordion-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多项展开
+
+传入 `mode="multiple"`，允许多个面板同时展开。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-accordion-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用条目
+
+在单个 `AccordionItem` 上设置 `disabled`，以经典 65% 不透明度与禁用光标呈现不可交互状态。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-accordion-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL 从右到左
+
+配合 `dir="rtl"` 与 `direction="rtl"` 实现从右到左排版与键盘导航。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-accordion-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 | 说明与默认值 |
-| --- | --- | --- |
-| `Root` | `mode` | `'single'`（默认）或 `'multiple'` |
-| `Root` | `openItems` / `defaultOpenItems` | `string[]`；传入 `openItems` 即为受控模式 |
-| `Root` | `allowEmpty` | `boolean`，默认 `true`；设为 `false` 时阻止收起最后一个展开项 |
-| `Root` | `disabled` | `boolean`，默认 `false`；禁用整组交互但不改写已有值 |
-| `Root` | `orientation` / `direction` / `loop` | 默认 `'vertical'`、`'ltr'`、`true`，仅影响标题键盘导航 |
-| `Item` | `value` / `disabled` | `value` 必填且唯一；`disabled` 默认 `false` |
-| `Heading` | `level` | `1`–`6` 整数，默认 `3` |
-| `Trigger` | — | 从 `Item` 与 `Root` 派生状态 |
-| `Content` | `keepMounted` / `region` | 默认均为 `false`；分别控制隐藏保留与地标语义 |
+### Root
 
-- **方法与属性**：`Root` 提供 `getOpenItems()`（返回副本）、`openCount` 和 `requestOpen(value, open, reason?)`。
-- **事件**：`openChange`，载荷为 `{ openItems, value, open, reason }`，其中 `reason` 为 `'pointer'`、`'keyboard'` 或 `'programmatic'`。
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'mode',
+      type: "'single' | 'multiple'",
+      default: "'single'",
+      description: '单选或多选展开模式',
+    },
+    { name: 'openItems', type: 'string[]', default: '—', description: '受控的已展开项 value 列表' },
+    {
+      name: 'defaultOpenItems',
+      type: 'string[]',
+      default: '[]',
+      description: '非受控初始展开项列表',
+    },
+    {
+      name: 'allowEmpty',
+      type: 'boolean',
+      default: 'true',
+      description: '设为 false 时阻止关闭最后一个展开项',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: '禁用整组交互但不改写受控值',
+    },
+    {
+      name: 'orientation',
+      type: "'vertical' | 'horizontal'",
+      default: "'vertical'",
+      description: '排列方向与标题方向键导航轴向',
+    },
+    {
+      name: 'direction',
+      type: "'ltr' | 'rtl'",
+      default: "'ltr'",
+      description: '阅读方向及横向导航反转方向',
+    },
+    { name: 'loop', type: 'boolean', default: 'true', description: '到达首尾标题时是否循环聚焦' },
+  ]}
+/>
+
+### Item / Heading / Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    { name: 'Item.value', type: 'string', default: '必填', description: '唯一非空项标识' },
+    { name: 'Item.disabled', type: 'boolean', default: 'false', description: '禁用单个面板项' },
+    {
+      name: 'Heading.level',
+      type: '1 | 2 | 3 | 4 | 5 | 6',
+      default: '3',
+      description: '标题语义层级（aria-level）',
+    },
+    {
+      name: 'Content.keepMounted',
+      type: 'boolean',
+      default: 'false',
+      description: '收起时保留隐藏节点',
+    },
+    {
+      name: 'Content.region',
+      type: 'boolean',
+      default: 'false',
+      description: '显式声明 region 地标角色',
+    },
+  ]}
+/>
+
+### 方法与事件（Root）
+
+- **方法与属性**：`getOpenItems()` 返回当前展开键数组副本；`openCount` 表示展开键数量；`requestOpen(value, open, reason?)` 编程请求展开或收起。
+- **事件**：`openChange`，载荷为 `{ openItems, value, open, reason }`（`reason` 为 `'pointer'`、`'keyboard'` 或 `'programmatic'`）。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-ACCORDION.yaml',
+    'P-BOOTSTRAP-2-3-2-ACCORDION-ITEM.yaml',
+    'P-BOOTSTRAP-2-3-2-ACCORDION-HEADING.yaml',
+    'P-BOOTSTRAP-2-3-2-ACCORDION-TRIGGER.yaml',
+    'P-BOOTSTRAP-2-3-2-ACCORDION-CONTENT.yaml',
+    'P-BASE-ACCORDION.yaml',
+  ]}
+/>

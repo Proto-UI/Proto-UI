@@ -12,17 +12,24 @@ import type {
 } from './types';
 
 // P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-BASE-INHERITANCE: Base is the only semantic owner.
-// Explicit optical intent uses the shared material owner; actual host paint remains separately verified.
-// Do not substitute adaptive/native backdrop blur for an explicit glass request.
+// Explicit optical intent uses the shared material owner; never substitute adaptive CSS blur.
 const collapsibleTrigger = definePrototype<
   LiquidGlassCollapsibleTriggerProps,
   LiquidGlassCollapsibleTriggerExposes
 >({
   name: 'liquid-glass-collapsible-trigger',
+  modules: asCollapsibleTrigger.modules,
   setup(def) {
-    const state = asCollapsibleTrigger().stateHandles;
+    const inherited = asCollapsibleTrigger();
+    const state = inherited.stateHandles;
+    def.props.define({
+      variant: { type: 'enum', options: ['regular', 'prominent'], empty: 'fallback' },
+      material: { type: 'enum', options: ['auto', 'opaque'], empty: 'fallback' },
+    });
+    def.props.setDefaults({ variant: 'regular', material: 'auto' });
     if (!state) throw new Error('[liquid-glass-collapsible-trigger] Missing Base state handles.');
-    const { hovered, pressed, focusVisible, disabled } = state;
+    const { expanded, hovered, pressed, focusVisible, disabled } = state;
+
     // P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-MATERIAL-INTENT: one owned slot,
     // complete opaque style fallback, and no adaptive/native-blur substitution.
     def.feedback.material.declare({
@@ -33,10 +40,35 @@ const collapsibleTrigger = definePrototype<
     });
     for (const isPressed of [false, true]) {
       def.rule({
-        when: (w) => w.all(w.state(pressed).eq(isPressed), w.state(disabled).eq(false)),
+        when: (w) =>
+          w.all(
+            w.state(pressed).eq(isPressed),
+            w.state(disabled).eq(false),
+            w.prop('material').eq('auto'),
+            w.prop('variant').eq('regular')
+          ),
         intent: (i) =>
           i.feedback.material.use({
             intent: 'liquid-glass',
+            deformation: {
+              kind: 'press',
+              phase: isPressed ? 'pressed' : 'rest',
+              contact: 'pointer',
+            },
+          }),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(pressed).eq(isPressed),
+            w.state(disabled).eq(false),
+            w.prop('material').eq('auto'),
+            w.prop('variant').eq('prominent')
+          ),
+        intent: (i) =>
+          i.feedback.material.use({
+            intent: 'liquid-glass',
+            tint: 'style-fill',
             deformation: {
               kind: 'press',
               phase: isPressed ? 'pressed' : 'rest',
@@ -49,9 +81,18 @@ const collapsibleTrigger = definePrototype<
     // P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY: no fixed width/height or clipped long label.
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full text-foreground wrap-anywhere whitespace-break-spaces text-left cursor-pointer select-none inline-flex items-center justify-start rounded-xl border border-border bg-secondary px-5 py-3 text-sm font-medium shadow-sm'
+        'min-w-0 max-w-full text-foreground wrap-anywhere whitespace-break-spaces text-left cursor-pointer select-none inline-flex items-center justify-start gap-2 rounded-xl border border-border bg-secondary px-5 py-3 text-sm font-medium shadow-sm transition-colors'
       )
     );
+    def.rule({
+      when: (w) => w.prop('variant').eq('prominent'),
+      intent: (i) =>
+        i.feedback.style.use(tw('border-primary bg-primary text-primary-foreground shadow-md')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(expanded).eq(true), w.state(disabled).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('font-semibold')),
+    });
     def.rule({
       when: (w) =>
         w.all(
@@ -74,6 +115,7 @@ const collapsibleTrigger = definePrototype<
       when: (w) => w.state(disabled).eq(true),
       intent: (i) => i.feedback.style.use(tw(COMMAND_DISABLED)),
     });
+    return inherited.render;
   },
 });
 

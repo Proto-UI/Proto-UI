@@ -7,15 +7,18 @@ import {
 
 export default definePrototype<ScrollAreaScrollbarProps, ScrollAreaScrollbarExposes>({
   name: 'bootstrap-2-3-2-scroll-area-scrollbar',
+  modules: asScrollAreaScrollbar.modules,
   setup(def) {
     const inherited = asScrollAreaScrollbar();
     const state = inherited.stateHandles;
     if (!state)
       throw new Error('[bootstrap-2-3-2-scroll-area-scrollbar] Base orientation required.');
     // This 12px composed track is a Proto extension, not a native scrollbar skin.
-    // Its gray palette and 4px corners come from the pinned forms/button grammar.
+    // Its gray trough, recessed shadow, and 4px corners follow the pinned forms/button grammar.
     def.feedback.style.use(
-      tw('absolute flex touch-none select-none rounded-[4px] border border-[#ccc] bg-[#eee]')
+      tw(
+        'absolute flex touch-none select-none p-px rounded-[4px] border border-[#ccc] bg-[#eee] shadow-[inset_0_1px_2px_rgb(0_0_0/10%)]'
+      )
     );
     def.rule({
       when: (w) => w.state(state.orientation).eq('vertical'),

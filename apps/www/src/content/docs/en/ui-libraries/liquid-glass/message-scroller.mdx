@@ -1,11 +1,13 @@
 ---
 title: 'Message Scroller'
-description: 'A Liquid Glass message stream container with end-follow scrolling and jump-to-latest recovery.'
+description: 'A Liquid Glass message stream container pairing a neutral concentric transcript layer with a floating Jump capsule.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Message Scroller builds on Scroll Surface end-follow behavior: new messages auto-scroll into view while the reader is at the bottom, pause when the reader scrolls up to read history, and resume on demand via Jump to latest.
+Liquid Glass Message Scroller separates the scrolling content layer from the floating navigation control: `Root` and `Viewport` remain clean, neutral surfaces with concentric corners (`rounded-2xl` outer frame with 4px inset around a `rounded-xl` viewport), while `Jump` floats above the transcript as a concentric capsule with `regular` and `prominent` prominence levels.
 
 ## Preview
 
@@ -17,16 +19,130 @@ Liquid Glass Message Scroller builds on Scroll Surface end-follow behavior: new 
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-liquid-glass/message-scroller` and adapt them for your target runtime.
+
+```ts
+import {
+  messageScrollerRoot,
+  messageScrollerViewport,
+  messageScrollerJump,
+} from '@proto.ui/prototypes-liquid-glass/message-scroller';
+```
 
 ## Usage
 
-- **New-item indicator**: pass `newContentCount` from your application state; the scroller does not infer application-level unread semantics.
-- **Focus and accessibility**: jumping to the latest message scrolls smoothly without stealing focus. Customize the scrollable region's accessible name via Root's `a11yLabel` (default `'Messages'`).
+Place `Root` inside a height-constrained container so messages scroll cleanly beneath the floating capsule control:
+
+```tsx
+<div className="h-80 w-full max-w-lg">
+  <LiquidGlassMessageScrollerRoot a11yLabel="Design conversation">
+    <LiquidGlassMessageScrollerViewport>
+      <div className="flex flex-col gap-3 p-4 pb-16">
+        {messages.map((message) => (
+          <div key={message.id}>{message.text}</div>
+        ))}
+      </div>
+    </LiquidGlassMessageScrollerViewport>
+    <LiquidGlassMessageScrollerJump variant="regular">
+      Jump to latest ↓
+    </LiquidGlassMessageScrollerJump>
+  </LiquidGlassMessageScrollerRoot>
+</div>
+```
+
+### Layering & Contrast Guidelines
+
+- **Keep content surfaces neutral**: `Root` and `Viewport` never apply glass over transcript text, keeping long threads legible and avoiding glass-on-glass stacking.
+- **Prominence hierarchy (`regular` vs `prominent`)**: Use `variant="regular"` while caught up, and promote to `variant="prominent"` when `newContentCount > 0` while scrolled up.
+- **Readable disabled contrast**: Disabling `Jump` withdraws shadow elevation and pointer interaction while keeping paired surface/ink contrast intact instead of applying `opacity-50`.
+- **Focus preservation**: Activating `Jump` scrolls smoothly to the latest message without stealing keyboard focus.
+
+## Examples
+
+### Live Messages & Prominence
+
+Click **Send reply** at the bottom to watch automatic end-following. Scroll up first and send again to increment `newContentCount` and promote the floating capsule from `regular` to `prominent`.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-message-scroller-live"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Prominence & Disabled Contrast
+
+Toggle between `variant="regular"` and `variant="prominent"` or disable `Jump` to verify readable contrast over rich backdrops.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-message-scroller-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop              | Default      | Description                                           |
-| ---- | ----------------- | ------------ | ----------------------------------------------------- |
-| Root | `a11yLabel`       | `'Messages'` | Accessible label for the scrollable region            |
-| Root | `newContentCount` | —            | Application-supplied count of newly appended messages |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'newContentCount', type: 'number', default: '0' },
+    { name: 'a11yLabel', type: 'string', default: "'Messages'" },
+  ]}
+/>
+
+### Viewport
+
+<ApiPropsTable
+  headers={{ name: 'Expose', type: 'Type', default: 'Notes' }}
+  rows={[
+    {
+      name: 'atEnd',
+      type: 'ExposeState<boolean>',
+      default: 'Whether the viewport is currently at the bottom',
+    },
+    {
+      name: 'following',
+      type: 'ExposeState<ScrollEndFollowState>',
+      default: 'Current end-follow state',
+    },
+    {
+      name: 'requestStatus',
+      type: 'ExposeState<ScrollEndFollowRequestStatus>',
+      default: 'Status of the latest end-follow request',
+    },
+    { name: 'jumpToEnd()', type: '() => void', default: 'Programmatically scroll to the end' },
+    {
+      name: 'pauseFollowing()',
+      type: '() => ScrollSurfaceRequestOutcome',
+      default: 'Pause automatic end-following',
+    },
+  ]}
+/>
+
+### Jump
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Expose', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'variant', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'atEnd (expose)',
+      type: 'ExposeState<boolean>',
+      default: 'Mirrored bottom state from Root',
+    },
+    {
+      name: 'newContentCount (expose)',
+      type: 'ExposeState<number>',
+      default: 'Mirrored new-content count from Root',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-MESSAGE-SCROLLER.yaml', 'P-BASE-MESSAGE-SCROLLER.yaml']}
+/>

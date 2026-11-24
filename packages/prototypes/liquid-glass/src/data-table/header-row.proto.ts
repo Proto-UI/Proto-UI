@@ -9,10 +9,13 @@ export const dataTableHeaderRow = definePrototype<
   DataTableHeaderRowExposes
 >({
   name: 'liquid-glass-data-table-header-row',
+  modules: asDataTableHeaderRow.modules,
   setup(def) {
     const behavior = asDataTableHeaderRow();
     def.feedback.style.use(
-      tw('min-w-0 max-w-full text-foreground grid items-stretch border-b border-border')
+      tw(
+        'table-row min-w-0 max-w-full border-b border-border bg-background/60 text-muted-foreground'
+      )
     );
     return behavior.render;
   },

@@ -285,6 +285,62 @@ import w3Demo77 from '../src/content/docs/demo_components/form/demo-shadcn-form-
 import w3Demo78 from '../src/content/docs/demo_components/form/demo-shadcn-form-disabled.demo';
 import w3Demo79 from '../src/content/docs/demo_components/form/demo-shadcn-form-profile.demo';
 
+import w4Demo0 from '../src/content/docs/demo_components/accordion/demo-shadcn-accordion-basic.demo';
+import w4Demo1 from '../src/content/docs/demo_components/accordion/demo-shadcn-accordion-borders.demo';
+import w4Demo2 from '../src/content/docs/demo_components/accordion/demo-shadcn-accordion-card.demo';
+import w4Demo3 from '../src/content/docs/demo_components/accordion/demo-shadcn-accordion-disabled.demo';
+import w4Demo4 from '../src/content/docs/demo_components/accordion/demo-shadcn-accordion-multiple.demo';
+import w4Demo5 from '../src/content/docs/demo_components/accordion/demo-shadcn-accordion-rtl.demo';
+import w4Demo6 from '../src/content/docs/demo_components/collapsible/demo-shadcn-collapsible-basic.demo';
+import w4Demo7 from '../src/content/docs/demo_components/collapsible/demo-shadcn-collapsible-controlled.demo';
+import w4Demo8 from '../src/content/docs/demo_components/collapsible/demo-shadcn-collapsible-file-tree.demo';
+import w4Demo9 from '../src/content/docs/demo_components/collapsible/demo-shadcn-collapsible-rtl.demo';
+import w4Demo10 from '../src/content/docs/demo_components/collapsible/demo-shadcn-collapsible-settings.demo';
+import w4Demo11 from '../src/content/docs/demo_components/tabs/demo-shadcn-tabs-controlled.demo';
+import w4Demo12 from '../src/content/docs/demo_components/tabs/demo-shadcn-tabs-disabled.demo';
+import w4Demo13 from '../src/content/docs/demo_components/tabs/demo-shadcn-tabs-line.demo';
+import w4Demo14 from '../src/content/docs/demo_components/tabs/demo-shadcn-tabs-manual.demo';
+import w4Demo15 from '../src/content/docs/demo_components/tabs/demo-shadcn-tabs-vertical.demo';
+import w4Demo16 from '../src/content/docs/demo_components/calendar/demo-shadcn-calendar-basic.demo';
+import w4Demo17 from '../src/content/docs/demo_components/calendar/demo-shadcn-calendar-booked-dates.demo';
+import w4Demo18 from '../src/content/docs/demo_components/calendar/demo-shadcn-calendar-presets.demo';
+import w4Demo19 from '../src/content/docs/demo_components/calendar/demo-shadcn-calendar-range.demo';
+import w4Demo20 from '../src/content/docs/demo_components/calendar/demo-shadcn-calendar-rtl.demo';
+import w4Demo21 from '../src/content/docs/demo_components/date-picker/demo-shadcn-date-picker-basic.demo';
+import w4Demo22 from '../src/content/docs/demo_components/date-picker/demo-shadcn-date-picker-multiple.demo';
+import w4Demo23 from '../src/content/docs/demo_components/date-picker/demo-shadcn-date-picker-range.demo';
+import w4Demo24 from '../src/content/docs/demo_components/date-picker/demo-shadcn-date-picker-rtl.demo';
+import w4Demo25 from '../src/content/docs/demo_components/table/demo-shadcn-table-actions.demo';
+import w4Demo26 from '../src/content/docs/demo_components/table/demo-shadcn-table-footer.demo';
+import w4Demo27 from '../src/content/docs/demo_components/table/demo-shadcn-table-rtl.demo';
+import w4Demo28 from '../src/content/docs/demo_components/data-table/demo-shadcn-data-table-basic.demo';
+import w4Demo29 from '../src/content/docs/demo_components/data-table/demo-shadcn-data-table-filtering.demo';
+import w4Demo30 from '../src/content/docs/demo_components/data-table/demo-shadcn-data-table-pagination.demo';
+import w4Demo31 from '../src/content/docs/demo_components/data-table/demo-shadcn-data-table-states.demo';
+import w4Demo32 from '../src/content/docs/demo_components/carousel/demo-shadcn-carousel-api.demo';
+import w4Demo33 from '../src/content/docs/demo_components/carousel/demo-shadcn-carousel-loop.demo';
+import w4Demo34 from '../src/content/docs/demo_components/carousel/demo-shadcn-carousel-orientation.demo';
+import w4Demo35 from '../src/content/docs/demo_components/carousel/demo-shadcn-carousel-rtl.demo';
+import w4Demo36 from '../src/content/docs/demo_components/carousel/demo-shadcn-carousel-sizes.demo';
+import w4Demo37 from '../src/content/docs/demo_components/carousel/demo-shadcn-carousel-spacing.demo';
+import w4Demo38 from '../src/content/docs/demo_components/resizable/demo-shadcn-resizable-collapsible.demo';
+import w4Demo39 from '../src/content/docs/demo_components/resizable/demo-shadcn-resizable-handle.demo';
+import w4Demo40 from '../src/content/docs/demo_components/resizable/demo-shadcn-resizable-rtl.demo';
+import w4Demo41 from '../src/content/docs/demo_components/resizable/demo-shadcn-resizable-vertical.demo';
+import w4Demo42 from '../src/content/docs/demo_components/scroll-area/demo-shadcn-scroll-area-both-axes.demo';
+import w4Demo43 from '../src/content/docs/demo_components/scroll-area/demo-shadcn-scroll-area-horizontal.demo';
+import w4Demo44 from '../src/content/docs/demo_components/scroll-area/demo-shadcn-scroll-area-rtl.demo';
+import w4Demo45 from '../src/content/docs/demo_components/scroll-area/demo-shadcn-scroll-area-tags.demo';
+import w4Demo46 from '../src/content/docs/demo_components/tree/demo-shadcn-tree-controlled.demo';
+import w4Demo47 from '../src/content/docs/demo_components/tree/demo-shadcn-tree-embedded.demo';
+import w4Demo48 from '../src/content/docs/demo_components/tree/demo-shadcn-tree-rtl.demo';
+import w4Demo49 from '../src/content/docs/demo_components/tree/demo-shadcn-tree-states.demo';
+import w4Demo50 from '../src/content/docs/demo_components/virtual-list/demo-shadcn-virtual-list-filter.demo';
+import w4Demo51 from '../src/content/docs/demo_components/virtual-list/demo-shadcn-virtual-list-jump.demo';
+import w4Demo52 from '../src/content/docs/demo_components/virtual-list/demo-shadcn-virtual-list-window.demo';
+import w4Demo53 from '../src/content/docs/demo_components/message-scroller/demo-shadcn-message-scroller-disabled.demo';
+import w4Demo54 from '../src/content/docs/demo_components/message-scroller/demo-shadcn-message-scroller-group.demo';
+import w4Demo55 from '../src/content/docs/demo_components/message-scroller/demo-shadcn-message-scroller-live.demo';
 const demos: ReadonlyArray<readonly [string, DemoSpec]> = [
   ['demo-button', demo0],
   ['demo-button-default', demo1],
@@ -541,6 +597,62 @@ const demos: ReadonlyArray<readonly [string, DemoSpec]> = [
   ['demo-shadcn-form-actions', w3Demo77],
   ['demo-shadcn-form-disabled', w3Demo78],
   ['demo-shadcn-form-profile', w3Demo79],
+  ['demo-shadcn-accordion-basic', w4Demo0],
+  ['demo-shadcn-accordion-borders', w4Demo1],
+  ['demo-shadcn-accordion-card', w4Demo2],
+  ['demo-shadcn-accordion-disabled', w4Demo3],
+  ['demo-shadcn-accordion-multiple', w4Demo4],
+  ['demo-shadcn-accordion-rtl', w4Demo5],
+  ['demo-shadcn-collapsible-basic', w4Demo6],
+  ['demo-shadcn-collapsible-controlled', w4Demo7],
+  ['demo-shadcn-collapsible-file-tree', w4Demo8],
+  ['demo-shadcn-collapsible-rtl', w4Demo9],
+  ['demo-shadcn-collapsible-settings', w4Demo10],
+  ['demo-shadcn-tabs-controlled', w4Demo11],
+  ['demo-shadcn-tabs-disabled', w4Demo12],
+  ['demo-shadcn-tabs-line', w4Demo13],
+  ['demo-shadcn-tabs-manual', w4Demo14],
+  ['demo-shadcn-tabs-vertical', w4Demo15],
+  ['demo-shadcn-calendar-basic', w4Demo16],
+  ['demo-shadcn-calendar-booked-dates', w4Demo17],
+  ['demo-shadcn-calendar-presets', w4Demo18],
+  ['demo-shadcn-calendar-range', w4Demo19],
+  ['demo-shadcn-calendar-rtl', w4Demo20],
+  ['demo-shadcn-date-picker-basic', w4Demo21],
+  ['demo-shadcn-date-picker-multiple', w4Demo22],
+  ['demo-shadcn-date-picker-range', w4Demo23],
+  ['demo-shadcn-date-picker-rtl', w4Demo24],
+  ['demo-shadcn-table-actions', w4Demo25],
+  ['demo-shadcn-table-footer', w4Demo26],
+  ['demo-shadcn-table-rtl', w4Demo27],
+  ['demo-shadcn-data-table-basic', w4Demo28],
+  ['demo-shadcn-data-table-filtering', w4Demo29],
+  ['demo-shadcn-data-table-pagination', w4Demo30],
+  ['demo-shadcn-data-table-states', w4Demo31],
+  ['demo-shadcn-carousel-api', w4Demo32],
+  ['demo-shadcn-carousel-loop', w4Demo33],
+  ['demo-shadcn-carousel-orientation', w4Demo34],
+  ['demo-shadcn-carousel-rtl', w4Demo35],
+  ['demo-shadcn-carousel-sizes', w4Demo36],
+  ['demo-shadcn-carousel-spacing', w4Demo37],
+  ['demo-shadcn-resizable-collapsible', w4Demo38],
+  ['demo-shadcn-resizable-handle', w4Demo39],
+  ['demo-shadcn-resizable-rtl', w4Demo40],
+  ['demo-shadcn-resizable-vertical', w4Demo41],
+  ['demo-shadcn-scroll-area-both-axes', w4Demo42],
+  ['demo-shadcn-scroll-area-horizontal', w4Demo43],
+  ['demo-shadcn-scroll-area-rtl', w4Demo44],
+  ['demo-shadcn-scroll-area-tags', w4Demo45],
+  ['demo-shadcn-tree-controlled', w4Demo46],
+  ['demo-shadcn-tree-embedded', w4Demo47],
+  ['demo-shadcn-tree-rtl', w4Demo48],
+  ['demo-shadcn-tree-states', w4Demo49],
+  ['demo-shadcn-virtual-list-filter', w4Demo50],
+  ['demo-shadcn-virtual-list-jump', w4Demo51],
+  ['demo-shadcn-virtual-list-window', w4Demo52],
+  ['demo-shadcn-message-scroller-disabled', w4Demo53],
+  ['demo-shadcn-message-scroller-group', w4Demo54],
+  ['demo-shadcn-message-scroller-live', w4Demo55],
 ];
 
 const profileExamples = [
@@ -695,7 +807,7 @@ describe('ordinary Shadcn documentation demo policy', () => {
   it('covers every actual Shadcn page demo ID in each locale', () => {
     const ordinaryIds = demos.map(([id]) => id);
     const expected = [...ordinaryIds, ...profileExamples.map(({ id }) => id)].sort();
-    expect(expected).toHaveLength(263);
+    expect(expected).toHaveLength(319);
     for (const locale of ['en', 'zh-cn']) {
       const found = new Set<string>();
       const directory = resolve(

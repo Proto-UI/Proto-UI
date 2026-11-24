@@ -1,11 +1,13 @@
 ---
 title: 'Tabs'
-description: 'A Liquid Glass tabs component with segmented glass styling and an underline appearance variant.'
+description: 'A Liquid Glass tabs component with concentric capsule geometry, prominence hierarchy, opaque fallback, and accessible keyboard navigation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Tabs composes `Root`, `List`, `Trigger`, and `Content` over [Base Tabs](/en/ui-libraries/base/tabs/). It defaults to a rounded segmented glass appearance (with automatic opaque fallback) and includes a transparent underline variant (`appearance="underline"`).
+Liquid Glass Tabs builds on [Base Tabs](/en/ui-libraries/base/tabs/) and scopes Liquid Glass translucency strictly to the navigation `TabsList` layer—never stacking glass onto `TabsTrigger` or `TabsContent`—with concentric capsule radii, `regular` / `prominent` hierarchy, and explicit `material="opaque"` fallback.
 
 ## Preview
 
@@ -17,7 +19,7 @@ Liquid Glass Tabs composes `Root`, `List`, `Trigger`, and `Content` over [Base T
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Available directly from workspace source at `@proto.ui/prototypes-liquid-glass/tabs`.
 
 ```ts
 import {
@@ -25,20 +27,151 @@ import {
   tabsList,
   tabsTrigger,
   tabsContent,
+  tabsIndicator,
 } from '@proto.ui/prototypes-liquid-glass/tabs';
 ```
 
 ## Usage
 
-- **Selection and keyboard**: `Root` manages the active tab value. Arrow keys and `Home`/`End` move focus across enabled triggers; in manual activation mode, Enter or Space commits the switch so browsing does not remount panels unexpectedly. Controlled mode waits for the updated `value` prop.
-- **Appearance variants**: use the default segmented style or pass `appearance="underline"` to `List` and `Trigger` for a transparent, text-width underline look.
+```html
+<wc-liquid-glass-tabs-root default-value="overview">
+  <wc-liquid-glass-tabs-list>
+    <wc-liquid-glass-tabs-trigger value="overview">Overview</wc-liquid-glass-tabs-trigger>
+    <wc-liquid-glass-tabs-trigger value="analytics">Analytics</wc-liquid-glass-tabs-trigger>
+  </wc-liquid-glass-tabs-list>
+  <wc-liquid-glass-tabs-content value="overview">Overview content.</wc-liquid-glass-tabs-content>
+  <wc-liquid-glass-tabs-content value="analytics">Analytics content.</wc-liquid-glass-tabs-content>
+</wc-liquid-glass-tabs-root>
+```
+
+### Composition
+
+```text
+TabsRoot
+├── TabsList (Liquid Glass navigation layer)
+│   ├── TabsTrigger (concentric active lens, non-glass)
+│   └── TabsTrigger
+├── TabsContent (neutral content layer, non-glass)
+└── TabsContent
+```
+
+- **Material layering & fallback**: Only `TabsList` declares a `liquid-glass` material candidate when `appearance="default"` and `material="auto"`. Reduced-transparency environments, increased-contrast settings, or `material="opaque"` fall back cleanly to readable opaque fills.
+- **Motion & accessibility**: Selection transitions respect `prefers-reduced-motion: reduce`, focus rings use high-contrast inset outlines with `forced-colors` support, and disabled items preserve contrast without dimming opacity.
+
+## Examples
+
+### Prominence & Opaque Fallback
+
+Use `prominence="prominent"` for tinted primary emphasis, or `material="opaque"` to opt out of backdrop glass explicitly.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tabs-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Vertical
+
+In vertical orientation, the outer track switches to `rounded-2xl` (16px) with `p-1` (4px) and concentric `rounded-xl` (12px) triggers.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tabs-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Underline
+
+Pass `appearance="underline"` on `TabsList` and `TabsTrigger` to omit the glass track for lightweight secondary navigation.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tabs-underline"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Disabled triggers withdraw pointer interaction and elevation via `COMMAND_DISABLED` instead of reducing opacity, keeping opaque fallbacks legible.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tabs-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop | Description |
-| --- | --- | --- |
-| Root | `value`, `defaultValue` | Controlled / uncontrolled active tab value |
-| Root | `activationMode`, `orientation` | Automatic or manual keyboard activation / horizontal or vertical layout |
-| List | `appearance` | Default segmented look, or `'underline'` |
-| Trigger | `value`, `disabled`, `appearance` | Tab key, disabled state, and appearance variant |
-| Content | `value`, `keepMounted` | Associated tab key; keeps hidden node mounted when `true` |
+### Root
+
+Exposes state `value` and event `valueChange({ value: string })`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'undefined' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'activationMode', type: "'automatic' | 'manual'", default: "'automatic'" },
+  ]}
+/>
+
+### List
+
+Exposes focus methods `focusFirst`, `focusLast`, `focusNext`, `focusPrev`, and `focusSelected`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'appearance', type: "'default' | 'underline'", default: "'default'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'prominence', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'loop', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Trigger
+
+Exposes states `selected`, `disabled`, `hovered`, `focused`, `focusVisible`, `pressed`, method `focusSelf`, and event `click`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'appearance', type: "'default' | 'underline'", default: "'default'" },
+  ]}
+/>
+
+### Content
+
+Exposes states `current` and `hidden`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'keepMounted', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Indicator
+
+Semantic-only part exposing derived `value`, `activeValue`, and `orientation` with no material or extra default paint.
+
+<ApiPropsTable headers={{ name: 'Prop', type: 'Type', default: 'Default' }} rows={[]} />
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-TABS.yaml',
+    'P-LIQUID-GLASS-TABS-LIST.yaml',
+    'P-LIQUID-GLASS-TABS-TRIGGER.yaml',
+    'P-LIQUID-GLASS-TABS-CONTENT.yaml',
+    'P-LIQUID-GLASS-TABS-INDICATOR.yaml',
+    'P-BASE-TABS.yaml',
+  ]}
+/>

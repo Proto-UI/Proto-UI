@@ -24,7 +24,7 @@ export type ShadcnResizableRootProps = ResizableRootProps & ShadcnStyleProps;
 export type ShadcnResizablePanelProps = ResizablePanelProps & ShadcnStyleProps;
 export type ShadcnResizableHandleProps = ResizableHandleProps &
   ShadcnStyleProps & {
-    /** Optional inert grip paint, not another drag/focus target. */
+    /** Optional decorative grip surface inside the single handle owner. */
     withHandle?: boolean;
   };
 
@@ -48,8 +48,9 @@ export const resizablePanel = definePrototype<ShadcnResizablePanelProps, Resizab
   setup(def) {
     const inherited = asResizablePanel();
     setupShadcnStyleSelection(def, 'new-york-v4');
-    // Base owns complementary size and its percentage flex basis. The
-    // upstream Panel is deliberately unstyled; never overwrite that basis.
+    // Base owns complementary size and its percentage flex basis; clip panel
+    // overflow so narrow or collapsed panels do not flash scrollbars.
+    def.feedback.style.use(tw('overflow-hidden'));
     return inherited.render;
   },
 });
@@ -88,7 +89,7 @@ export const resizableHandle = definePrototype<ShadcnResizableHandleProps, Resiz
     def.props.watch(['withHandle'], refresh);
     def.feedback.style.use(
       tw(
-        'relative flex shrink-0 items-center justify-center bg-border ring-offset-background outline-none'
+        'relative flex shrink-0 items-center justify-center bg-border ring-offset-background outline-none select-none touch-none transition-colors'
       )
     );
     def.rule({
@@ -100,21 +101,24 @@ export const resizableHandle = definePrototype<ShadcnResizableHandleProps, Resiz
       intent: (i) => i.feedback.style.use(tw('h-px w-full')),
     });
     def.rule({
-      when: (w) => w.state(state.focusVisible).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-1 ring-ring forced-colors-focus-outline')),
+      when: (w) => w.all(w.state(axis).eq('horizontal'), w.state(state.disabled).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('cursor-ew-resize')),
     });
     def.rule({
-      when: (w) => w.all(w.state(state.focusVisible).eq(true), w.state(style).eq('new-york-v4')),
-      intent: (i) => i.feedback.style.use(tw('ring-offset-1')),
+      when: (w) => w.all(w.state(axis).eq('vertical'), w.state(state.disabled).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('cursor-ns-resize')),
+    });
+    def.rule({
+      when: (w) => w.state(state.focusVisible).eq(true),
+      intent: (i) =>
+        i.feedback.style.use(tw('z-10 ring-1 ring-ring ring-offset-1 forced-colors-focus-outline')),
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50')),
+      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
     });
-    // Ordinary decorative containers preserve the one inherited input owner.
-    // Upstream's .25rem pseudo hit-slop is not replaced with a wider layout
-    // separator. Exact expansion around 1px needs a mixed-unit self inset;
-    // the current public hit-inset vocabulary accepts only a px or rem length.
+    // Ordinary decorative grip stays inside the single inherited input owner so
+    // pointer grabs on the visible pill bubble directly to the handle host.
     def.lifecycle.onMounted(() => {
       mounted = true;
     });
@@ -138,10 +142,10 @@ export const resizableHandle = definePrototype<ShadcnResizableHandleProps, Resiz
             {
               style: vertical
                 ? tw(
-                    'pointer-events-none z-10 flex h-3 w-4 items-center justify-center rounded-xs border border-border bg-border'
+                    'z-10 flex shrink-0 h-3 w-4 items-center justify-center rounded-xs border border-border bg-border text-foreground select-none'
                   )
                 : tw(
-                    'pointer-events-none z-10 flex h-4 w-3 items-center justify-center rounded-xs border border-border bg-border'
+                    'z-10 flex shrink-0 h-4 w-3 items-center justify-center rounded-xs border border-border bg-border text-foreground select-none'
                   ),
             },
             r.el(
@@ -174,11 +178,11 @@ export const resizableHandle = definePrototype<ShadcnResizableHandleProps, Resiz
         r.el('div', {
           style: vertical
             ? square
-              ? tw('pointer-events-none z-10 flex shrink-0 h-1 w-6 rounded-none bg-border')
-              : tw('pointer-events-none z-10 flex shrink-0 h-1 w-6 rounded-lg bg-border')
+              ? tw('z-10 flex shrink-0 h-1 w-6 rounded-none bg-border select-none')
+              : tw('z-10 flex shrink-0 h-1 w-6 rounded-lg bg-border select-none')
             : square
-              ? tw('pointer-events-none z-10 flex shrink-0 h-6 w-1 rounded-none bg-border')
-              : tw('pointer-events-none z-10 flex shrink-0 h-6 w-1 rounded-lg bg-border'),
+              ? tw('z-10 flex shrink-0 h-6 w-1 rounded-none bg-border select-none')
+              : tw('z-10 flex shrink-0 h-6 w-1 rounded-lg bg-border select-none'),
         }),
         r.slot(),
       ];

@@ -5,8 +5,9 @@ description: '支持稳定排序、全局与按列筛选、列显隐、分页及
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Data Table 在静态表格结构之上提供稳定排序、全局与按列筛选、列可见性控制、分页及行选择能力。表格行按当前页索引映射实际记录，每条记录需提供唯一的 `id`。
+Brutalist Data Table 在静态表格结构之上提供稳定排序、全局与按列筛选、列显隐、分页及行/整页选择能力，并遵循 5px 圆角（`rounded-base`）、2px 黑色描边、4px 零模糊硬阴影与 DM Sans 字体规范。
 
 ## 预览
 
@@ -22,12 +23,92 @@ Brutalist Data Table 在静态表格结构之上提供稳定排序、全局与�
 
 ## 用法
 
-### 表头与数据行
+```tsx
+import {
+  BrutalistDataTableCaption,
+  BrutalistDataTableCell,
+  BrutalistDataTableHeader,
+  BrutalistDataTableHeaderRow,
+  BrutalistDataTableNext,
+  BrutalistDataTablePrevious,
+  BrutalistDataTableRoot,
+  BrutalistDataTableRow,
+} from '../proto-ui/components/react';
 
-- 排序表头放置在 `DataTableHeaderRow` 内，正文记录槽使用 `DataTableRow`；单元格按 `columnKey` 读取当前行对应字段。
-- 排序、筛选与分页都会更新实际单元格内容，支持受控 `sortKey`、`sortDirection`、`page` 与 `selectedKeys`。
+const rows = [
+  { id: 'm5gr84i9', status: 'Success', email: 'ken99@example.com', amount: 316 },
+  { id: '3u1reuv4', status: 'Success', email: 'abe45@example.com', amount: 242 },
+];
 
-### 筛选、列显隐、整页选择与自定义渲染
+export function Example() {
+  return (
+    <BrutalistDataTableRoot rows={rows} pageSize={4}>
+      <BrutalistDataTableCaption>Recent payments.</BrutalistDataTableCaption>
+      <BrutalistDataTableHeaderRow>
+        <BrutalistDataTableHeader headerKey="status">Status</BrutalistDataTableHeader>
+        <BrutalistDataTableHeader headerKey="email">Email</BrutalistDataTableHeader>
+        <BrutalistDataTableHeader headerKey="amount" className="text-right">
+          Amount
+        </BrutalistDataTableHeader>
+      </BrutalistDataTableHeaderRow>
+      {[0, 1].map((index) => (
+        <BrutalistDataTableRow key={index} index={index}>
+          <BrutalistDataTableCell columnKey="status" headers={['status']} />
+          <BrutalistDataTableCell columnKey="email" headers={['email']} />
+          <BrutalistDataTableCell columnKey="amount" headers={['amount']} className="text-right" />
+        </BrutalistDataTableRow>
+      ))}
+      <div className="table-caption caption-bottom">
+        <div className="flex justify-end gap-2 pt-3">
+          <BrutalistDataTablePrevious>Previous</BrutalistDataTablePrevious>
+          <BrutalistDataTableNext>Next</BrutalistDataTableNext>
+        </div>
+      </div>
+    </BrutalistDataTableRoot>
+  );
+}
+```
+
+### 结构与设计规范
+
+- **表格结构与行槽位**：每条记录需提供唯一 `id`，排序表头放在 `DataTableHeaderRow` 中，正文行槽使用 `DataTableRow`，单元格通过 `columnKey` 绑定字段。
+- **视觉与动效**：表头使用 `font-heading font-bold`，单元格使用 `font-sans font-medium`；翻页按钮采用抬起型控件（4px 硬阴影，按压时沿阴影方向位移 `+4px, +4px` 并收起外影）；选中行使用 `bg-main text-main-foreground` 高对比配色。
+
+## 示例
+
+### 基础表格与排序
+
+<PrototypePreviewer
+  demoId="demo-brutalist-data-table-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 筛选与列显隐
+
+<PrototypePreviewer
+  demoId="demo-brutalist-data-table-filtering"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 分页与行选择
+
+<PrototypePreviewer
+  demoId="demo-brutalist-data-table-pagination"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 只读与禁用状态
+
+<PrototypePreviewer
+  demoId="demo-brutalist-data-table-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 自定义单元格格式化组合
 
 <PrototypePreviewer
   demoId="demo-brutalist-data-table-recipes"
@@ -35,36 +116,68 @@ Brutalist Data Table 在静态表格结构之上提供稳定排序、全局与�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-- **筛选与列显隐**：`columnFilters` 与全局 `filter` 叠加生效（全部非空条件均匹配后再排序和分页）。通过 `columnVisibility` 可隐藏指定列的表头与单元格，同时保留逻辑结构与子组件状态，重新显示时自动恢复。
-- **整页选择**：调用 `requestPageSelection()` 仅勾选或清空当前筛选后的当前页，保留其他页的选择；`pageSelection` 暴露 `'none'`、`'some'` 或 `'all'`。`readOnly` 会禁止行选择与整页选择，同时保留排序和分页。
-- **自定义单元格**：在 `Cell` 上设置 `renderValue={false}` 可保留传入的子元素，并通过 `displayValue` 读取当前记录值来自定义格式化内容。
-
 ## API
 
 ### Root
+
+传入 `sortKey`、`sortDirection`、`page` 或 `selectedKeys` 可分别控制对应状态。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
     { name: 'rows', type: 'readonly DataRecord[]', default: '[]' },
+    { name: 'sortKey', type: 'string', default: '—（受控）' },
     { name: 'defaultSortKey', type: 'string', default: "''" },
-    { name: 'defaultSortDirection', type: "'none' | 'ascending' | 'descending'", default: 'none' },
+    { name: 'sortDirection', type: "'none' | 'ascending' | 'descending'", default: '—（受控）' },
+    {
+      name: 'defaultSortDirection',
+      type: "'none' | 'ascending' | 'descending'",
+      default: "'none'",
+    },
     { name: 'filter', type: 'string', default: "''" },
     { name: 'columnFilters', type: 'Readonly<Record<string, string>>', default: '{}' },
     { name: 'columnVisibility', type: 'Readonly<Record<string, boolean>>', default: '{}' },
+    { name: 'page', type: 'number', default: '—（受控）' },
     { name: 'defaultPage', type: 'number', default: '0' },
     { name: 'pageSize', type: 'number', default: '10' },
+    { name: 'selectedKeys', type: 'readonly string[]', default: '—（受控）' },
     { name: 'defaultSelectedKeys', type: 'readonly string[]', default: '[]' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
   ]}
 />
 
-传入 `sortKey`、`sortDirection`、`page` 或 `selectedKeys` 可分别控制对应状态。
+### 子部件属性
 
-### 其他部件属性
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Row.index', type: 'number', default: '0' },
+    { name: 'Row.header', type: 'boolean', default: 'false' },
+    { name: 'Header.headerKey', type: 'string', default: "''" },
+    { name: 'Header.headerKind', type: "'column' | 'row'", default: "'column'" },
+    { name: 'Header.sortable', type: 'boolean', default: 'true' },
+    { name: 'Cell.columnKey', type: 'string', default: "''" },
+    { name: 'Cell.headers', type: 'readonly string[]', default: '[]' },
+    { name: 'Cell.renderValue', type: 'boolean', default: 'true' },
+    { name: 'Previous / Next', type: 'ButtonProps', default: '抬起型硬阴影按钮' },
+  ]}
+/>
 
-- **Row**：`index?: number`（默认 `0`），`header?: boolean`（默认 `false`）
-- **Header**：`sortable?: boolean`（默认 `true`）
-- **Cell**：`columnKey?: string`（默认 `''`），`renderValue?: boolean`（默认 `true`）
-- **Previous / Next**：支持 Button 属性
+### 事件、方法与暴露状态
+
+- **事件（Root）**：`sortChange`、`pageChange`、`selectionChange`。
+- **方法（Root）**：`getRows()`、`getRecord(id)`、`getSelectedKeys()`、`requestSort(key)`、`requestPage(next)`、`requestSelection(id)`、`requestPageSelection(selected?)`。
+- **暴露状态**：Root 暴露 `filteredCount`、`pageSelection`；Row 暴露 `rowKey`、`selected`、`focused`、`focusVisible`；Header 暴露 `sort`；Cell 暴露 `displayValue`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-DATA-TABLE.yaml',
+    'P-BRUTALIST-DATA-TABLE-HEADER-ROW.yaml',
+    'P-BASE-DATA-TABLE.yaml',
+    'P-BASE-DATA-TABLE-HEADER-ROW.yaml',
+  ]}
+/>

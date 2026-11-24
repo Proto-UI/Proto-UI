@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Virtual List 将完整的逻辑条目序列与物理渲染节点分离，仅在可见窗口及预渲染缓冲区间内创建列表项，适用于超长列表和可变高度内容。本页示例使用 **Shadcn Rhea** 风格。
+Virtual List 将完整的逻辑条目序列与物理 DOM 节点分离，仅在可见视口及预渲染缓冲区间内创建列表项，适用于超长列表和可变高度内容。本页示例使用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -19,24 +19,100 @@ Virtual List 将完整的逻辑条目序列与物理渲染节点分离，仅在�
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-shadcn/virtual-list` 导入组件原型，并结合 `@proto.ui/prototypes-base/virtual-list/web` 接入 Web 滚动视口。
 
 ## 用法
 
-Virtual List 由 `Root`、`Viewport` 和 `Content` 组成：
+Virtual List 由 `Root`、`Viewport` 与 `Content` 三个部件组成：`Root` 负责维护有序逻辑键集合（`itemKeys`）与风格上下文，`Viewport` 承担滚动与键盘聚焦，`Content` 作为列表容器接收按需挂载的行节点。
 
-- 核心逻辑模型管理有序的稳定 `itemKeys`、`overscanItems` 缓冲项数、`maxMaterializedItems` 渲染上限以及基于 generation 的状态提交。
-- 在 Web 端，通过 `virtual-list/web` 导出的 `attachWebVirtualList` 连接真实滚动视口，自动处理可变项高度测量、占位间距、按 key 复用行节点、滚动定位到指定 key 以及监听清理。
+```ts
+import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import {
+  virtualListRoot,
+  virtualListViewport,
+  virtualListContent,
+} from '@proto.ui/prototypes-shadcn/virtual-list';
+import { attachWebVirtualList } from '@proto.ui/prototypes-base/virtual-list/web';
 
-### 渲染宿主生命周期
+AdaptToWebComponent(virtualListRoot);
+AdaptToWebComponent(virtualListViewport);
+AdaptToWebComponent(virtualListContent);
 
-- 每个逻辑列表实例同一时刻仅允许挂载一个活跃的渲染宿主。`attachWebVirtualList` 会在挂载节点与监听前自动获取独占租约；若需替换宿主，请先调用旧宿主的 dispose 方法再挂载新宿主。
-- 自定义非 Web 宿主可通过模型的 `acquireMaterializer(onRetired)` 接口注册租约（使用 `attachWebVirtualList` 时无需重复获取）。
-- 当 `Root` 卸载或销毁时，组件会自动退休当前宿主、清理已渲染节点与观察器并忽略旧宿主的延迟回调；若首次渲染或观察器安装失败，租约会自动释放以便重试。
+const list = document.querySelector('shadcn-virtual-list-root')!;
+const viewport = document.querySelector('shadcn-virtual-list-viewport')!;
+const content = document.querySelector('shadcn-virtual-list-content')!;
+
+setElementProps(list, {
+  styleProfile: 'rhea',
+  itemKeys: Array.from({ length: 1000 }, (_, i) => `event-${i + 1}`),
+  overscanItems: 3,
+  maxMaterializedItems: 60,
+});
+
+const host = attachWebVirtualList({
+  viewport,
+  content,
+  collection: list.getExposes().getCollection(),
+  estimateSize: 64,
+  renderItem(key) {
+    const row = document.createElement('div');
+    row.className = 'border-b border-border/60 px-4 py-3 text-sm';
+    row.textContent = key;
+    return row;
+  },
+});
+
+// 滚动定位到指定条目，卸载时清理监听与节点
+host.ensureVisible('event-250', 'center');
+// host.dispose();
+```
+
+### 结构与无障碍
+
+- `Root` 声明 `role="region"` 并绑定 `a11yLabel`，同时自动适配当前 `styleProfile` 的圆角、边框与外环。
+- `Viewport` 继承 `Scroll Area` 的滚动与焦点管理，聚焦时显示与当前风格一致的内嵌焦点环。
+- `Content` 声明 `role="list"`；Web 宿主挂载的每一行会自动写入 `role="listitem"`、`aria-posinset` 与 `aria-setsize`。
+
+### 进阶：自定义渲染宿主
+
+- 每个逻辑列表实例同一时刻仅允许挂载一个活跃渲染宿主；`attachWebVirtualList` 会自动管理生命周期并在 `Root` 卸载或销毁时清理节点与 `ResizeObserver`。
+- 替换宿主前需先调用旧宿主的 `dispose()`；非 Web 自定义宿主可通过 `collection.acquireMaterializer(onRetired)` 接入同一边界。
+
+## 示例
+
+### 滚动到指定条目
+
+调用 `ensureVisible(key, align)` 可按 `start`、`center`、`end` 或 `nearest` 将任意逻辑键滚动到可见区域内。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-virtual-list-jump"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 动态筛选与空状态
+
+更新 `Root` 的 `itemKeys` 会自动重算可见窗口并清理失效行节点，当列表为空时可平滑展示空状态提示。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-virtual-list-filter"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 缓冲区间与有界渲染
+
+通过调整 `overscanItems` 与 `maxMaterializedItems`，即使面对数千条逻辑数据，实际挂载的 DOM 节点数也始终保持有界。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-virtual-list-window"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`（`Viewport` 与 `Content` 无额外属性）：
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -44,7 +120,72 @@ Virtual List 由 `Root`、`Viewport` 和 `Content` 组成：
     { name: 'itemKeys', type: 'readonly string[]', default: '[]' },
     { name: 'overscanItems', type: 'number', default: '2' },
     { name: 'maxMaterializedItems', type: 'number', default: '100' },
-    { name: 'a11yLabel', type: 'string', default: 'Virtual list' },
+    { name: 'a11yLabel', type: 'string', default: "'Virtual list'" },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'rhea' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'new-york-v4'",
+      default: "'inherit'",
+    },
+  ]}
+/>
+
+### Viewport 与 Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'rhea' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'new-york-v4'",
+      default: "'inherit'",
+    },
+  ]}
+/>
+
+### Root 暴露接口
+
+<ApiPropsTable
+  headers={{ name: '成员', type: '类型', default: '说明' }}
+  rows={[
+    { name: 'logicalCount', type: 'ExposeState<number>', default: '当前逻辑条目总数' },
+    {
+      name: 'getCollection',
+      type: '() => WindowedCollection',
+      default: '返回供渲染宿主接入的集合模型',
+    },
+    {
+      name: 'getWindow',
+      type: '() => WindowSnapshot',
+      default: '返回当前修订、窗口区间与已挂载键快照',
+    },
+  ]}
+/>
+
+### attachWebVirtualList
+
+<ApiPropsTable
+  headers={{ name: '参数 / 返回方法', type: '类型', default: '默认值 / 说明' }}
+  rows={[
+    { name: 'viewport', type: 'HTMLElement', default: '滚动视口元素（必填）' },
+    { name: 'content', type: 'HTMLElement', default: '承载占位器与行节点的列表元素（必填）' },
+    {
+      name: 'collection',
+      type: 'WindowedCollection',
+      default: '来自 Root getCollection()（必填）',
+    },
+    {
+      name: 'renderItem',
+      type: '(key: string) => HTMLElement',
+      default: '按 key 创建行节点，已挂载 key 会自动复用（必填）',
+    },
+    { name: 'estimateSize', type: 'number', default: '36（未测量行的预估像素高度）' },
+    { name: 'refresh()', type: '() => void', default: '手动触发一次视口测量与窗口刷新' },
+    {
+      name: 'ensureVisible(key, align?)',
+      type: "(key: string, align?: 'nearest' | 'start' | 'center' | 'end') => boolean",
+      default: '滚动定位至指定 key 并返回是否已挂载',
+    },
+    { name: 'dispose()', type: '() => void', default: '移除监听与观察器、清理已挂载行并释放租约' },
   ]}
 />
 

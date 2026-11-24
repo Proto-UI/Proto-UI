@@ -1,15 +1,16 @@
 ---
 title: 'Table'
-description: 'A Brutalist-styled structural table with ordered row/column metadata, header associations, and bold framed borders.'
+description: 'A Brutalist-styled structural table with ordered row/column metadata, main-accent headers, and bold framed borders.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Table displays passive structured data while maintaining ordered row/column indexing, header relationships, and cell spans. Its Brutalist presentation frames the table with `border-2 border-black` and a `4px/4px` solid offset shadow, black row dividers, semibold headers, a doubled top border on the footer, and a `bg-main/20` hover highlight on body rows.
+Table displays passive structured data while maintaining [Base Table](/en/ui-libraries/base/table/) row/column indexing, header associations, and span metadata. Its Brutalist presentation frames the table with `border-2 border-black` and a `4px/4px` solid offset shadow, a main-accent header row, crisp black row dividers, a doubled top border on the footer, and an instant `bg-main/20` hover highlight on body rows.
 
 For sorting, row selection, pagination, filtering, or interactive grid navigation, use [Data Table](/en/ui-libraries/brutalist/components/data-table/).
 
@@ -25,29 +26,197 @@ For sorting, row selection, pagination, filtering, or interactive grid navigatio
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the parts from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/table` (workspace CLI target: `brutalist-table`).
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the five parts from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/table`:
+
+```ts
+import {
+  brutalistTableRoot,
+  brutalistTableCaption,
+  brutalistTableRow,
+  brutalistTableHeaderCell,
+  brutalistTableCell,
+} from '@proto.ui/prototypes-brutalist/table';
+```
 
 ## Usage
 
-### Anatomy
+```html
+<div class="w-full overflow-x-auto">
+  <brutalist-table-root>
+    <brutalist-table-caption>A list of your recent invoices.</brutalist-table-caption>
+    <brutalist-table-row section="header" last-in-section>
+      <brutalist-table-header-cell header-key="invoice" header-kind="column" style="width: 100px">
+        Invoice
+      </brutalist-table-header-cell>
+      <brutalist-table-header-cell header-key="status" header-kind="column"
+        >Status</brutalist-table-header-cell
+      >
+      <brutalist-table-header-cell header-key="method" header-kind="column"
+        >Method</brutalist-table-header-cell
+      >
+      <brutalist-table-header-cell header-key="amount" header-kind="column" style="text-align: end">
+        Amount
+      </brutalist-table-header-cell>
+    </brutalist-table-row>
+    <brutalist-table-row section="body" last-in-section>
+      <brutalist-table-header-cell header-key="inv001" header-kind="row"
+        >INV001</brutalist-table-header-cell
+      >
+      <brutalist-table-cell>Paid</brutalist-table-cell>
+      <brutalist-table-cell>Credit Card</brutalist-table-cell>
+      <brutalist-table-cell style="text-align: end">$250.00</brutalist-table-cell>
+    </brutalist-table-row>
+  </brutalist-table-root>
+</div>
+```
 
-Table is composed of five parts: `Root`, `Caption`, `Row`, `HeaderCell`, and `Cell`.
+### Composition
 
-- `Root`: Table container that tracks ordered row/column structure and exposes `getStructure()`. Wrap `Root` in an outer scroll container if you need horizontal scrolling.
-- `Caption`: Accessible table caption.
-- `Row`: Table row accepting two visual-only props—`section` (`'header' | 'body' | 'footer'`, default `'body'`) and `lastInSection` (default `false`)—to style header, body, and footer borders and row hover.
-- `HeaderCell`: Declares column or row headers via `headerKey` and `headerKind`, and supports `headers`, `rowSpan`, and `columnSpan`.
-- `Cell`: Standard data cell supporting `headers` references as well as `rowSpan` and `columnSpan`.
+```text
+Root
+├── Caption
+├── Row (section="header")
+│   └── HeaderCell (headerKind="column")
+├── Row (section="body")
+│   ├── HeaderCell (headerKind="row")
+│   └── Cell (headers=[...])
+└── Row (section="footer")
+    ├── HeaderCell (headerKind="row")
+    └── Cell (headers=[...])
+```
+
+- `Root`: Table container tracking ordered row/column structure and exposing `getStructure()`. Wrap `Root` in an outer scroll container when horizontal scrolling is required.
+- `Row`: Accepts visual-only `section` (`'header' | 'body' | 'footer'`) and `lastInSection` props. Header rows paint `bg-main text-main-foreground`, body rows snap to `bg-main/20` on pointer hover, and footer rows paint a doubled top border with a contrasting summary fill.
+- `HeaderCell`: Uses `font-heading font-semibold` and logical `text-start` alignment.
+
+## Examples
+
+### Footer
+
+Set `section="footer"` to apply the doubled top rule and summary weight:
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-table-footer"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Actions
+
+Compose a Brutalist `DropdownMenu` in each row's trailing cell for Edit, Duplicate, and destructive Delete actions:
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-table-actions"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-`Root` declares no props (and exposes `getStructure()` for inspecting rows, columns, and header relationships):
+### Root & Caption
 
-<ApiPropsTable headers={{ name: 'Prop', type: 'Type', default: 'Default' }} rows={[]} />
+`Root` and `Caption` declare no props. `Root` exposes `getStructure()` for inspecting rows, columns, and header relationships.
 
-Other part props and defaults:
+### Row
 
-- **Caption**: No props.
-- **Row**: `section` defaults to `'body'`; `lastInSection` defaults to `false`.
-- **Cell**: `headers` defaults to `[]`; `rowSpan` and `columnSpan` default to `1`.
-- **HeaderCell**: `headerKey` defaults to `''`; `headerKind` defaults to `'column'`; `headers` defaults to `[]`; `rowSpan` and `columnSpan` default to `1`.
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'section',
+      type: "'header' | 'body' | 'footer'",
+      default: "'body'",
+      description:
+        'Visual section styling: main-accent header, hoverable body, or doubled-rule footer',
+    },
+    {
+      name: 'lastInSection',
+      type: 'boolean',
+      default: 'false',
+      description:
+        'Withdraws the bottom divider on final body or footer rows so the outer frame closes cleanly',
+    },
+  ]}
+/>
+
+### HeaderCell
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'headerKey',
+      type: 'string',
+      default: "''",
+      description: 'Unique header identifier referenced by Cell.headers',
+    },
+    {
+      name: 'headerKind',
+      type: "'column' | 'row'",
+      default: 'undefined',
+      description: 'Declares columnheader or rowheader semantics',
+    },
+    {
+      name: 'headers',
+      type: 'readonly string[]',
+      default: '[]',
+      description: 'Ordered parent header keys for multi-level headers',
+    },
+    {
+      name: 'rowSpan',
+      type: 'number',
+      default: '1',
+      description: 'Positive integer accessible row span',
+    },
+    {
+      name: 'columnSpan',
+      type: 'number',
+      default: '1',
+      description: 'Positive integer accessible column span',
+    },
+  ]}
+/>
+
+### Cell
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'headers',
+      type: 'readonly string[]',
+      default: '[]',
+      description: 'Ordered list of headerKey references',
+    },
+    {
+      name: 'rowSpan',
+      type: 'number',
+      default: '1',
+      description: 'Positive integer accessible row span',
+    },
+    {
+      name: 'columnSpan',
+      type: 'number',
+      default: '1',
+      description: 'Positive integer accessible column span',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-TABLE.yaml',
+    'P-BRUTALIST-TABLE-CAPTION.yaml',
+    'P-BRUTALIST-TABLE-ROW.yaml',
+    'P-BRUTALIST-TABLE-HEADER-CELL.yaml',
+    'P-BRUTALIST-TABLE-CELL.yaml',
+    'P-BASE-TABLE.yaml',
+  ]}
+/>

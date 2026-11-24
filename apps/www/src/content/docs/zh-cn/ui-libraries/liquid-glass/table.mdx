@@ -1,0 +1,232 @@
+---
+title: 'Table'
+description: '遵循内容层清晰度原则的 Liquid Glass 结构化表格组件，与悬浮玻璃操作控件分层协作。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Table 在 [Base Table](/zh-cn/ui-libraries/base/table/) 语义之上提供克制、高对比度的**内容层**表格呈现。按照 Apple Liquid Glass 设计分层原则，数据表格本身保持清晰不透明的阅读表面，不叠加工艺玻璃或模糊材质，从而让悬浮在其上的 Liquid Glass 导航栏、按钮与操作菜单保持层次分明与可读性。
+
+如需排序、过滤、分页与行选择，请使用 [Data Table](/zh-cn/ui-libraries/liquid-glass/data-table/)。
+
+## 预览
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-table"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-liquid-glass/table` 导入各部件：
+
+```ts
+import {
+  liquidGlassTableRoot,
+  liquidGlassTableCaption,
+  liquidGlassTableRow,
+  liquidGlassTableHeaderCell,
+  liquidGlassTableCell,
+} from '@proto.ui/prototypes-liquid-glass/table';
+```
+
+## 用法
+
+```html
+<div class="w-full overflow-x-auto">
+  <liquid-glass-table-root>
+    <liquid-glass-table-caption>A list of your recent invoices.</liquid-glass-table-caption>
+    <liquid-glass-table-row section="header" last-in-section>
+      <liquid-glass-table-header-cell
+        header-key="invoice"
+        header-kind="column"
+        style="width: 100px"
+      >
+        Invoice
+      </liquid-glass-table-header-cell>
+      <liquid-glass-table-header-cell header-key="status" header-kind="column"
+        >Status</liquid-glass-table-header-cell
+      >
+      <liquid-glass-table-header-cell header-key="method" header-kind="column"
+        >Method</liquid-glass-table-header-cell
+      >
+      <liquid-glass-table-header-cell
+        header-key="amount"
+        header-kind="column"
+        style="text-align: end"
+      >
+        Amount
+      </liquid-glass-table-header-cell>
+    </liquid-glass-table-row>
+    <liquid-glass-table-row section="body" last-in-section>
+      <liquid-glass-table-header-cell header-key="inv001" header-kind="row"
+        >INV001</liquid-glass-table-header-cell
+      >
+      <liquid-glass-table-cell>Paid</liquid-glass-table-cell>
+      <liquid-glass-table-cell>Credit Card</liquid-glass-table-cell>
+      <liquid-glass-table-cell style="text-align: end">$250.00</liquid-glass-table-cell>
+    </liquid-glass-table-row>
+  </liquid-glass-table-root>
+</div>
+```
+
+### 内容层与材质分层
+
+```text
+Root (内容层，无玻璃材质)
+├── Caption (caption-bottom + mt-4)
+├── Row (section="header")
+│   └── HeaderCell (align-middle + text-start)
+├── Row (section="body")
+│   ├── HeaderCell (headerKind="row")
+│   └── Cell (headers=[...])
+└── Row (section="footer")
+    ├── HeaderCell (headerKind="row")
+    └── Cell (headers=[...])
+```
+
+- **不叠加玻璃**：表格与行单元格属于数据内容层，不启用 `backdrop-filter` 或光学折射，避免“玻璃叠玻璃”造成阅读干扰。
+- **居中行高与无障碍回退**：表头与数据单元格统一采用 `align-middle` 以便对齐行内操作控件；开启减弱动态效果时关闭过渡动画，开启强制颜色模式时自动强化为高对比度前景色分隔线。
+- **逻辑对齐**：`Caption` 与 `HeaderCell` 使用 `text-start`，天然兼容 RTL 阅读方向。
+
+## 示例
+
+### 表尾
+
+通过 `section="footer"` 为汇总行添加顶部边框与柔和底色，并在末行通过 `lastInSection` 收起底部多余分隔线：
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-table-footer"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 操作菜单
+
+将清晰不透明的内容层表格与悬浮的 Liquid Glass `DropdownMenu` 组合，呈现内容层与控制层的自然分层：
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-table-actions"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+外层容器声明 `dir="rtl"` 时，表格标题、列头与末尾金额列自动镜像对齐：
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-table-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root & Caption
+
+`Root` 与 `Caption` 不声明额外属性；`Root` 暴露 `getStructure()` 读取当前行列与表头结构快照。
+
+### Row
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'section',
+      type: "'header' | 'body' | 'footer'",
+      default: "'body'",
+      description: '指定视觉分区；body 行支持轻柔悬停反馈，footer 显示汇总分隔线与柔和背景',
+    },
+    {
+      name: 'lastInSection',
+      type: 'boolean',
+      default: 'false',
+      description: '隐藏正文或表尾末行的底部分隔线',
+    },
+  ]}
+/>
+
+### HeaderCell
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'headerKey',
+      type: 'string',
+      default: "''",
+      description: '表头键名，供 Cell.headers 引用',
+    },
+    {
+      name: 'headerKind',
+      type: "'column' | 'row'",
+      default: 'undefined',
+      description: '声明列表头（columnheader）或行表头（rowheader）',
+    },
+    {
+      name: 'headers',
+      type: 'readonly string[]',
+      default: '[]',
+      description: '多层表头场景下关联的上级表头键集合',
+    },
+    {
+      name: 'rowSpan',
+      type: 'number',
+      default: '1',
+      description: '无障碍跨行数（正整数）',
+    },
+    {
+      name: 'columnSpan',
+      type: 'number',
+      default: '1',
+      description: '无障碍跨列数（正整数）',
+    },
+  ]}
+/>
+
+### Cell
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'headers',
+      type: 'readonly string[]',
+      default: '[]',
+      description: '按顺序关联的表头 headerKey 列表',
+    },
+    {
+      name: 'rowSpan',
+      type: 'number',
+      default: '1',
+      description: '无障碍跨行数（正整数）',
+    },
+    {
+      name: 'columnSpan',
+      type: 'number',
+      default: '1',
+      description: '无障碍跨列数（正整数）',
+    },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-TABLE.yaml',
+    'P-LIQUID-GLASS-TABLE-CAPTION.yaml',
+    'P-LIQUID-GLASS-TABLE-ROW.yaml',
+    'P-LIQUID-GLASS-TABLE-HEADER-CELL.yaml',
+    'P-LIQUID-GLASS-TABLE-CELL.yaml',
+    'P-BASE-TABLE.yaml',
+  ]}
+/>

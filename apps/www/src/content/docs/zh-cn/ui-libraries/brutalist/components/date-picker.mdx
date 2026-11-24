@@ -5,8 +5,9 @@ description: '结合 Popover 与 Calendar 的 Brutalist 日期选择器，支持
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Date Picker 将 `Popover` 浮层与 `Calendar` 日历组合为完整的日期选择控件，支持单日、多日和日期范围选择，并各自保持独立的受控/非受控边界。
+Brutalist Date Picker 将 `Popover` 浮层与 `Calendar` 日历组合为完整的日期选择控件，遵循 5px 圆角、2px 黑色粗边、抬起式 4px 硬阴影触发器与 3px 硬阴影浮层面板规范，支持单日、多日与范围选择。
 
 ## 预览
 
@@ -18,11 +19,99 @@ Brutalist Date Picker 将 `Popover` 浮层与 `Calendar` 日历组合为完整�
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。`Date Picker` 由 Brutalist `Popover` 与 `Calendar` 部件组合而成。
 
 ## 用法
 
-### 单选、范围与多选模式
+```tsx
+import {
+  BrutalistDatePickerRoot,
+  BrutalistDatePickerTrigger,
+  BrutalistDatePickerValue,
+  BrutalistDatePickerContent,
+  BrutalistDatePickerDay,
+  BrutalistCalendarCaption,
+  BrutalistCalendarPrevious,
+  BrutalistCalendarHeading,
+  BrutalistCalendarNext,
+  BrutalistCalendarGrid,
+  BrutalistCalendarWeekdays,
+  BrutalistCalendarWeekday,
+  BrutalistCalendarRow,
+} from '../proto-ui/components/react';
+
+export function BrutalistDatePickerExample() {
+  return (
+    <BrutalistDatePickerRoot defaultMonth="2026-10">
+      <BrutalistDatePickerTrigger className="w-56">
+        <BrutalistDatePickerValue placeholder="Pick a date" />
+        <span aria-hidden="true">▾</span>
+      </BrutalistDatePickerTrigger>
+      <BrutalistDatePickerContent side="bottom" align="start" sideOffset={6}>
+        <BrutalistCalendarCaption>
+          <BrutalistCalendarPrevious a11yLabel="Previous month">‹</BrutalistCalendarPrevious>
+          <BrutalistCalendarHeading />
+          <BrutalistCalendarNext a11yLabel="Next month">›</BrutalistCalendarNext>
+        </BrutalistCalendarCaption>
+        <BrutalistCalendarGrid>
+          <BrutalistCalendarWeekdays>
+            {[0, 1, 2, 3, 4, 5, 6].map((offset) => (
+              <BrutalistCalendarWeekday key={offset} offset={offset} />
+            ))}
+          </BrutalistCalendarWeekdays>
+          {[0, 1, 2, 3, 4, 5].map((row) => (
+            <BrutalistCalendarRow key={row} index={row}>
+              {[0, 1, 2, 3, 4, 5, 6].map((col) => (
+                <BrutalistDatePickerDay key={col} offset={row * 7 + col} />
+              ))}
+            </BrutalistCalendarRow>
+          ))}
+        </BrutalistCalendarGrid>
+      </BrutalistDatePickerContent>
+    </BrutalistDatePickerRoot>
+  );
+}
+```
+
+- **层级与反馈**：触发器保持 `4px 4px` 黑色硬影并在按压时落入阴影；浮层面板采用 `3px 3px` 前景硬影且保持静止；日期网格单元格为扁平交互项，仅切换高亮配色，不叠加位移。
+- **选择模式与关闭时机**：通过 `mode="single"`（默认）、`mode="range"` 或 `mode="multiple"` 切换模式。单选与完成范围选择后自动请求关闭弹层，多选模式保持展开以便连续切换。
+- **展示文本**：`Value` 自动格式化为单个 ISO 日期、有序逗号列表、未完成范围（`from …`）或完整范围（`from – to`）；空值时显示 `placeholder`。
+
+## 示例
+
+### 基础用法
+
+带标签与日期范围限制的 Brutalist 单日选择器。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-date-picker-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 范围选择
+
+通过 `mode="range"` 选择起止日期，端点以主色高亮、中间日期使用扁平填充带连接。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-date-picker-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多选与禁用状态
+
+支持 `mode="multiple"` 连续选择多个日期，并展示禁用态无阴影反馈。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-date-picker-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 范围与多选对比
+
+同时体验 `mode="range"` 与 `mode="multiple"` 在共享日期约束下的交互差异。
 
 <PrototypePreviewer
   demoId="demo-brutalist-date-picker-selection"
@@ -30,17 +119,46 @@ Brutalist Date Picker 将 `Popover` 浮层与 `Calendar` 日历组合为完整�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-- 通过 `mode="single"`（默认）、`mode="range"`（`range` / `defaultRange`）或 `mode="multiple"`（`values` / `defaultValues`）切换选择模式，所有日期约束与回调均继承自 `Calendar`。
-- **自动关闭时机**：单选模式下选中有效日期后自动请求关闭弹层；范围模式下选中第一个端点时保持打开，完成第二个端点后自动请求关闭；多选模式下保持打开以便连续勾选，完成后按常规 Popover 方式关闭即可。
-- **展示文本**：`Value` 自动格式化显示单个 ISO 日期、逗号分隔的有序多日期、未完成范围（`from …`）或完整范围（`from – to`）；未选中时显示 `placeholder`。
+### RTL 与本地化
+
+通过 `direction="rtl"` 与 `locale="ar-SA"` 切换从右到左排列与本地化日历文案。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-date-picker-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-开关状态由 `Popover` 管理，日期模式、选中值、日期约束与显示月份由 `Calendar` 管理；Date Picker 仅在 `Value` 上提供以下属性：
-
-### Value
+开关状态由 `Popover` 管理，日期模式、选中值、日期约束与显示月份由 `Calendar` 管理；`Value` 部件额外提供 `placeholder`。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
-  rows={[{ name: 'placeholder', type: 'string', default: 'Pick a date' }]}
+  rows={[
+    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: "'single'" },
+    { name: 'open / defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'value / defaultValue', type: 'string (YYYY-MM-DD)', default: "''" },
+    { name: 'values / defaultValues', type: 'readonly string[]', default: '[]' },
+    { name: 'range / defaultRange', type: '{ from?: string; to?: string }', default: '{}' },
+    { name: 'month / defaultMonth', type: 'string (YYYY-MM)', default: '当前月' },
+    { name: 'min / max / unavailable', type: 'string / readonly string[]', default: '—' },
+    { name: 'minSelected / maxSelected', type: 'number', default: '—' },
+    { name: 'minNights / maxNights', type: 'number', default: '—' },
+    { name: 'locale / direction', type: "string / 'ltr' | 'rtl'", default: "'en-US' / 'ltr'" },
+    { name: 'disabled / readOnly', type: 'boolean', default: 'false' },
+    {
+      name: 'side / align / sideOffset',
+      type: 'PopoverContentProps',
+      default: "'bottom' / 'center' / 4",
+    },
+    { name: 'placeholder (Value)', type: 'string', default: "'Pick a date'" },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-DATE-PICKER.yaml', 'P-BASE-DATE-PICKER.yaml']}
 />

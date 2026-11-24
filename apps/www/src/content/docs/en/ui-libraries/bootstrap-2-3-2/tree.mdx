@@ -1,11 +1,13 @@
 ---
 title: 'Tree'
-description: 'A Bootstrap 2.3.2 hierarchical tree view with single selection, node expansion, and keyboard navigation.'
+description: 'A Bootstrap 2.3.2 hierarchical tree view with single selection, node expansion, RTL support, and keyboard navigation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Tree renders nested hierarchies with single selection, expandable branches, and full tree-view keyboard navigation.
+Tree renders nested hierarchies with classic Bootstrap 2.3.2 `.well` / `.nav-list` navigation styling and `.btn-mini` disclosure toggles, supporting single selection, expandable branches, RTL mirroring, and full tree-view keyboard navigation.
 
 ## Preview
 
@@ -17,19 +19,152 @@ Tree renders nested hierarchies with single selection, expandable branches, and 
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes from `@proto.ui/prototypes-bootstrap-2-3-2/tree` and adapt them for your target runtime:
+
+```ts
+import {
+  treeRoot,
+  treeItem,
+  treeGroup,
+  treeToggle,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/tree';
+```
 
 ## Usage
 
-- **Explicit hierarchy**: Give every node a unique `nodeKey` and point child nodes to their parent via `parentKey`. Duplicate keys, missing parents, and cycles ignore invalid configuration and stay inactive.
-- **Keyboard navigation**: Up/Down arrows, `Home`/`End`, and first-letter typing move focus; Right arrow expands a collapsed node or moves to its first child, while Left arrow collapses an expanded node or moves to its parent.
-- **Controlled state**: Both `value` (selected key) and `expandedKeys` support controlled usage via change requests.
+```tsx
+<Bootstrap232TreeRoot defaultValue="button" defaultExpandedKeys={['src', 'components']}>
+  <div className="flex items-center gap-1.5">
+    <Bootstrap232TreeToggle nodeKey="src">▾</Bootstrap232TreeToggle>
+    <Bootstrap232TreeItem nodeKey="src" textValue="src" className="flex-1">
+      src/
+    </Bootstrap232TreeItem>
+  </div>
+  <Bootstrap232TreeGroup nodeKey="src">
+    <Bootstrap232TreeItem nodeKey="button" parentKey="src" textValue="button.tsx">
+      button.tsx
+    </Bootstrap232TreeItem>
+  </Bootstrap232TreeGroup>
+</Bootstrap232TreeRoot>
+```
+
+### Structure & Semantics
+
+- **Explicit hierarchy & grouping**: Give each `Item` a unique `nodeKey` and set `parentKey` to its parent branch. Place children inside a `TreeGroup` with the parent's `nodeKey` so `aria-controls` and `aria-labelledby` stay synchronized.
+- **Historical visual projection**: `Root` uses the inset `.well` container (`#f5f5f5`), `Item` uses `.nav-list` `#08c` links, `#eee` hover/focus fill, and active `#08c` highlight, while `Toggle` renders a tactile `.btn-mini` button.
+- **Keyboard & RTL**: Up/Down, `Home`/`End`, and first-letter typing move focus in visual order; `direction="rtl"` mirrors the 15px group indentation and swaps Left/Right arrow mappings.
+
+## Examples
+
+### Controlled Selection & Expansion
+
+Pass `value` and `expandedKeys` to control selection and expanded branches externally through `valueChange` and `expandedChange`.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tree-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled & Read-Only
+
+Disable individual items or the entire tree with `disabled`, or set `readOnly` on `Root` to preserve navigation and branch toggling while locking selection.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tree-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Right-to-Left (RTL)
+
+Set `direction="rtl"` on `Root` to mirror group indentation (`15px` on the right) and horizontal arrow navigation.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tree-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Prop           | Description                                   |
-| -------------- | --------------------------------------------- |
-| `nodeKey`      | Unique identifier for each node in the tree   |
-| `parentKey`    | Key of the node's parent                      |
-| `value`        | Selected node key (supports controlled mode)  |
-| `expandedKeys` | Expanded node keys (supports controlled mode) |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'undefined (controlled)' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'expandedKeys', type: 'readonly string[]', default: 'undefined (controlled)' },
+    { name: 'defaultExpandedKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: 'Tree' },
+  ]}
+/>
+
+### Item, Group & Toggle
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Item.nodeKey', type: 'string', default: "''" },
+    { name: 'Item.parentKey', type: 'string', default: "''" },
+    { name: 'Item.textValue', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+    { name: 'Group.nodeKey', type: 'string', default: "''" },
+    { name: 'Toggle.nodeKey', type: 'string', default: "''" },
+    { name: 'Toggle.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Events & Methods (Root)
+
+<ApiPropsTable
+  headers={{ name: 'Name', type: 'Signature / Payload', default: 'Description' }}
+  rows={[
+    {
+      name: 'valueChange',
+      type: '{ value: string }',
+      default: 'Emitted when a selection change is requested',
+    },
+    {
+      name: 'expandedChange',
+      type: '{ expandedKeys: string[] }',
+      default: 'Emitted when branch expansion changes are requested',
+    },
+    {
+      name: 'getTree',
+      type: '() => TreeEntry[]',
+      default: 'Returns the current validated tree snapshot',
+    },
+    {
+      name: 'getExpandedKeys',
+      type: '() => string[]',
+      default: 'Returns the list of expanded branch keys',
+    },
+    {
+      name: 'requestValue',
+      type: '(key: string) => boolean',
+      default: 'Programmatically requests selecting a node',
+    },
+    {
+      name: 'requestExpanded',
+      type: '(key: string, open: boolean) => boolean',
+      default: 'Programmatically requests expanding or collapsing a branch',
+    },
+    {
+      name: 'refresh',
+      type: '() => void',
+      default: 'Recomputes and publishes the tree hierarchy snapshot',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-TREE.yaml', 'P-BASE-TREE.yaml']}
+/>

@@ -22,12 +22,16 @@ import {
   type DataTableNextProps,
   type DataTableNextExposes,
 } from '@proto.ui/prototypes-base/data-table';
-import { setupShadcnStyleScope, type ShadcnStyleProps } from '../style-scope';
+import {
+  setupShadcnStyleScope,
+  setupShadcnStyleSelection,
+  type ShadcnStyleProps,
+} from '../style-scope';
 import { setupCollectionActionVisual, setupCollectionHover } from '../toolbar/action-visual';
 import { setupDataTableText, setupDataTableCell } from './visual';
 export type * from '@proto.ui/prototypes-base/data-table';
 export type ShadcnDataTableRootProps = DataTableRootProps & ShadcnStyleProps;
-export type ShadcnDataTableRowProps = DataTableRowProps;
+export type ShadcnDataTableRowProps = DataTableRowProps & ShadcnStyleProps;
 export type ShadcnDataTableCellProps = DataTableCellProps & ShadcnStyleProps;
 export type ShadcnDataTableHeaderProps = DataTableHeaderProps & ShadcnStyleProps;
 export type ShadcnDataTableCaptionProps = DataTableCaptionProps & ShadcnStyleProps;
@@ -52,16 +56,35 @@ export const dataTableRow = definePrototype<ShadcnDataTableRowProps, DataTableRo
   modules: asDataTableRow.modules,
   setup(def) {
     const behavior = asDataTableRow();
+    setupShadcnStyleSelection(def, 'nova');
     const state = behavior.stateHandles;
     if (!state) throw new Error('[shadcn-data-table] Row state unavailable.');
     const hovered = setupCollectionHover(def);
-    def.feedback.style.use(tw('border-b border-border transition-colors'));
+    def.feedback.style.use(tw('transition-colors'));
     def.rule({
       when: (w) => w.state(state.hidden).eq(false),
       intent: (i) => i.feedback.style.use(tw('table-row')),
     });
     def.rule({
-      when: (w) => w.all(w.state(hovered).eq(true), w.state(state.selected).eq(false)),
+      when: (w) => w.state(state.collectionLast).eq(false),
+      intent: (i) => i.feedback.style.use(tw('border-b border-border')),
+    });
+    def.rule({
+      when: (w) => w.state(state.collectionLast).eq(true),
+      intent: (i) => i.feedback.style.use(tw('border-b-0')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(state.hidden).eq(false), w.prop('header').eq(false)),
+      intent: (i) => i.feedback.style.use(tw('cursor-pointer')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(hovered).eq(true),
+          w.state(state.selected).eq(false),
+          w.state(state.hidden).eq(false),
+          w.prop('header').eq(false)
+        ),
       intent: (i) => i.feedback.style.use(tw('bg-muted/50')),
     });
     def.rule({
@@ -97,11 +120,31 @@ export const dataTableHeader = definePrototype<ShadcnDataTableHeaderProps, DataT
   modules: asDataTableHeader.modules,
   setup(def) {
     const behavior = asDataTableHeader();
-    if (!behavior.stateHandles) throw new Error('[shadcn-data-table] Header state unavailable.');
-    setupDataTableCell(def, behavior.stateHandles.hidden, true);
+    const state = behavior.stateHandles;
+    if (!state) throw new Error('[shadcn-data-table] Header state unavailable.');
+    setupDataTableCell(def, state.hidden, true);
+    const hovered = setupCollectionHover(def);
+    def.feedback.style.use(tw('transition-colors select-none'));
     def.rule({
       when: (w) => w.prop('sortable').eq(true),
       intent: (i) => i.feedback.style.use(tw('cursor-pointer')),
+    });
+    def.rule({
+      when: (w) => w.prop('sortable').eq(false),
+      intent: (i) => i.feedback.style.use(tw('cursor-default')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('sortable').eq(true),
+          w.state(hovered).eq(true),
+          w.state(state.hidden).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-muted/50')),
+    });
+    def.rule({
+      when: (w) => w.any(w.state(state.sort).eq('ascending'), w.state(state.sort).eq('descending')),
+      intent: (i) => i.feedback.style.use(tw('font-semibold underline underline-offset-4')),
     });
     // Its public hook exposes sort only; do not fabricate focus/selected facts
     // by probing undeclared states or install a second focus owner for paint.
@@ -136,6 +179,14 @@ export const dataTablePrevious = definePrototype<
     const state = behavior.getAsHookHandle?.('as-button')?.stateHandles;
     if (!state) throw new Error('[shadcn-data-table] Previous state unavailable.');
     setupCollectionActionVisual(def, state, 'outline');
+    def.rule({
+      when: (w) => w.state(state.disabled).eq(false),
+      intent: (i) => i.feedback.style.use(tw('cursor-pointer')),
+    });
+    def.rule({
+      when: (w) => w.state(state.disabled).eq(true),
+      intent: (i) => i.feedback.style.use(tw('cursor-default')),
+    });
     return behavior.render;
   },
 });
@@ -149,9 +200,21 @@ export const dataTableNext = definePrototype<ShadcnDataTableNextProps, DataTable
     const state = behavior.getAsHookHandle?.('as-button')?.stateHandles;
     if (!state) throw new Error('[shadcn-data-table] Next state unavailable.');
     setupCollectionActionVisual(def, state, 'outline');
+    def.rule({
+      when: (w) => w.state(state.disabled).eq(false),
+      intent: (i) => i.feedback.style.use(tw('cursor-pointer')),
+    });
+    def.rule({
+      when: (w) => w.state(state.disabled).eq(true),
+      intent: (i) => i.feedback.style.use(tw('cursor-default')),
+    });
     return behavior.render;
   },
 });
 export { dataTableNext as shadcnDataTableNext };
 
-export { dataTableHeaderRow, shadcnDataTableHeaderRow } from './header-row.proto';
+export {
+  dataTableHeaderRow,
+  shadcnDataTableHeaderRow,
+  type ShadcnDataTableHeaderRowProps,
+} from './header-row.proto';

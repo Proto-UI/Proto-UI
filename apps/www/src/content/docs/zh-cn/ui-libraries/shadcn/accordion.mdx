@@ -1,6 +1,6 @@
 ---
 title: Shadcn Accordion
-description: 由五个独立部件组成的手风琴组件，支持单选/多选展开、完整键盘导航与受控内容生命周期。
+description: 由五个独立部件组成的手风琴组件，支持单选/多选展开、完整键盘导航、受控状态与多套 Shadcn 视觉预设。
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -8,7 +8,7 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-垂直排列的可折叠内容面板，支持单项或多项展开、受控状态管理以及符合 [WAI-ARIA Accordion 模式](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/)的键盘导航。本页示例采用 **Shadcn Rhea** 风格。
+垂直或水平排列的可折叠内容面板，支持单项或多项展开、受控状态管理以及符合 [WAI-ARIA Accordion 模式](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/)的键盘导航。本页示例采用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -16,7 +16,6 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   demoId="demo-shadcn-accordion"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
@@ -31,46 +30,121 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 ## 用法
 
+```tsx
+import {
+  ShadcnAccordionRoot,
+  ShadcnAccordionItem,
+  ShadcnAccordionHeading,
+  ShadcnAccordionTrigger,
+  ShadcnAccordionContent,
+} from '@/components/proto-ui/react';
+
+export function AccordionUsage() {
+  return (
+    <ShadcnAccordionRoot defaultOpenItems={['item-1']}>
+      <ShadcnAccordionItem value="item-1">
+        <ShadcnAccordionHeading level={3}>
+          <ShadcnAccordionTrigger>Is it accessible?</ShadcnAccordionTrigger>
+        </ShadcnAccordionHeading>
+        <ShadcnAccordionContent>
+          Yes. It adheres to the WAI-ARIA Accordion design pattern.
+        </ShadcnAccordionContent>
+      </ShadcnAccordionItem>
+    </ShadcnAccordionRoot>
+  );
+}
+```
+
 ### 部件结构
 
-按 `Root` → `Item` → `Heading` → `Trigger` 组合，并将 `Content` 与 `Heading` 并列放置：
+```text
+AccordionRoot
+└── AccordionItem
+    ├── AccordionHeading
+    │   └── AccordionTrigger
+    └── AccordionContent
+```
 
-- **Root**：统一管理当前展开的项集合与键盘导航方向。嵌套的 `Root` 各自拥有独立状态。
+- **Root**：统一管理当前展开的项集合、展开模式与方向键导航轴向。嵌套的 `Root` 各自拥有独立状态。
 - **Item**：代表单个折叠项，必须提供唯一、稳定、非空的 `value`。
-- **Heading**：声明标题语义与层级（`level` 1–6，默认 `3`），内部只放控制当前项的 `Trigger`；如需常驻的辅助操作按钮，请放在 `Heading` 旁。
-- **Trigger**：从 `Item` 与 `Root` 派生展开与禁用状态，自动关联对应的 `Content`。
-- **Content**：存放展开后显示的内容。关闭时默认卸载内容节点；设置 `keepMounted` 可保留隐藏节点。
-
-### 受控与非受控
-
-- **非受控**：通过 `defaultOpenItems` 设置初始展开项（仅在首次挂载时生效）。
-- **受控**：传入 `openItems` 将展开状态交由外部管理。组件在用户交互时触发 `openChange` 事件（负载为 `{ openItems, value, open, reason }`，其中 `reason` 为 `'pointer'`、`'keyboard'` 或 `'programmatic'`），应用层接收后把新的 `openItems` 传回 `Root` 即可完成更新。
-
-状态变更规则：
-
-- 传入重复的 `value` 会自动去重；`mode="single"` 下取首个唯一键。
-- 尚未挂载对应 `Item` 的键会先保留，待该 `Item` 挂载后自动展开；对不存在的键发起 `requestOpen` 请求会被忽略。
-- 非受控模式下移除已展开的 `Item` 会自动清理该键；`allowEmpty={false}` 阻止关闭最后一个展开项。
+- **Heading**：声明标题语义层级（`level` 1–6，默认 `3`），内部仅放控制当前项的 `Trigger`；如需常驻辅助按钮，请放在 `Heading` 旁。
+- **Trigger**：从 `Item` 与 `Root` 派生展开、禁用和防收起状态，自动维护 `aria-expanded`、`aria-disabled` 与 `aria-controls`。
+- **Content**：存放展开后显示的内容。关闭时默认卸载内容节点；设置 `keepMounted` 可保留隐藏节点，设置 `region` 可按需声明为地标区域。
 
 ### 键盘交互与无障碍
 
-- `Tab` / `Shift + Tab`：按自然文档顺序在各启用的 `Trigger` 与内容区可聚焦元素间移动。
+- `Tab` / `Shift + Tab`：按自然文档顺序在各启用的 `Trigger` 与展开内容区的可聚焦元素间移动。
 - `Enter` / `Space`：切换当前项的展开状态。
-- `ArrowUp` / `ArrowDown`（纵向）或 `ArrowLeft` / `ArrowRight`（横向，RTL 自动反转）：在已启用的标题间移动焦点，不改变展开状态；`loop={false}` 时在首尾停住。
-- `Home` / `End`：跳转到首个或最后一个已启用的标题。
-- 禁用的标题会在方向键导航中被跳过；当 `allowEmpty={false}` 阻止关闭最后一项时，该标题仍可聚焦并通过 `aria-disabled` 提示不可收起。
-- `Content` 默认由对应 `Trigger` 命名；设置 `region={true}` 可显式声明为地标区域（大量同时展开项时建议保持默认 `false`）。
+- `ArrowUp` / `ArrowDown`（纵向）或 `ArrowLeft` / `ArrowRight`（横向，RTL 自动反转）与 `Home` / `End`：在已启用的标题间移动焦点，不改变展开状态；`loop={false}` 时在首尾停住。
+- 禁用的标题会在方向键导航中被跳过；当 `allowEmpty={false}` 阻止关闭最后一个展开项时，该标题仍可聚焦并通过 `aria-disabled` 提示不可收起。
 
-### 动画与布局
+## 示例
 
-- 如需为展开/收起添加过渡动画，可在消费层结合 `keepMounted` 与 `open` 状态自行控制，避免破坏开关状态同步。
-- 样式内置长标题自动换行与容器收缩适配，水平溢出内容会限制在面板内部。
+### 基础用法
+
+单选展开模式，默认展开第一项；点击另一标题时自动收起前一项。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-accordion-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多项展开
+
+将 `mode` 设为 `"multiple"`，允许多个折叠项同时保持展开。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-accordion-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用单个条目
+
+在单个 `AccordionItem` 上设置 `disabled`，禁用该条目交互并使其在方向键导航中被跳过。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-accordion-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 边框样式
+
+为外层 `AccordionRoot` 添加圆角与边框样式，在列表之间保持清晰分隔。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-accordion-borders"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 卡片组合
+
+将 `Accordion` 嵌套在 `Shadcn Card` 中，用于账单说明或常见问题卡片。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-accordion-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL 从右到左
+
+配合 `dir="rtl"` 容器与 `direction="rtl"` 属性，标题排版、图标位置与横向方向键均适配从右到左语言。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-accordion-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-### Root 属性
+### Root
 
-传入 `openItems` 进入受控模式。
+传入 `openItems` 进入受控模式，并通过监听 `openChange` 同步外部状态。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
@@ -78,51 +152,143 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
     {
       name: 'mode',
       type: "'single' | 'multiple'",
-      default: 'single',
+      default: "'single'",
       description: '单选或多选展开模式',
     },
-    { name: 'openItems', type: 'string[]', description: '受控的已展开项 value 列表' },
+    { name: 'openItems', type: 'string[]', default: '—', description: '受控的已展开项 value 列表' },
     {
       name: 'defaultOpenItems',
       type: 'string[]',
       default: '[]',
-      description: '非受控初始展开项列表',
+      description: '非受控模式下的初始展开项列表（仅首次挂载生效）',
     },
     {
       name: 'allowEmpty',
       type: 'boolean',
       default: 'true',
-      description: '设为 false 时阻止关闭最后一个展开项',
+      description: '设为 false 时阻止关闭最后一个已展开项',
     },
     { name: 'disabled', type: 'boolean', default: 'false', description: '禁用整组交互' },
     {
       name: 'orientation',
       type: "'vertical' | 'horizontal'",
-      default: 'vertical',
-      description: '标题方向键导航轴向',
+      default: "'vertical'",
+      description: '排列方向与标题方向键导航轴向',
     },
-    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr', description: '横向导航的阅读方向' },
+    {
+      name: 'direction',
+      type: "'ltr' | 'rtl'",
+      default: "'ltr'",
+      description: '阅读方向及横向导航反转方向',
+    },
     { name: 'loop', type: 'boolean', default: 'true', description: '方向键到达边界时是否循环聚焦' },
+    {
+      name: 'styleProfile',
+      type: "'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4' | 'inherit'",
+      default: "'inherit'",
+      description: '选择 Shadcn 风格预设，未指定作用域时兼容回退为 nova',
+    },
   ]}
 />
 
-### 其他部件属性
+### Item
 
-- **Item**：`value: string`（必填，唯一非空键）、`disabled?: boolean`（默认 `false`）。
-- **Heading**：`level?: 1 | 2 | 3 | 4 | 5 | 6`（默认 `3`）。
-- **Trigger**：无独立属性，状态自动从 `Item` 与 `Root` 派生。
-- **Content**：`keepMounted?: boolean`（默认 `false`，关闭时保留隐藏节点）、`region?: boolean`（默认 `false`，显式添加 landmark 角色）。
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'value',
+      type: 'string',
+      default: '必填',
+      description: '当前折叠项在 Root 内的唯一非空标识',
+    },
+    { name: 'disabled', type: 'boolean', default: 'false', description: '禁用当前折叠项' },
+    {
+      name: 'styleProfile',
+      type: "ShadcnStyleId | 'inherit'",
+      default: "'inherit'",
+      description: '覆盖当前部件的 Shadcn 风格预设',
+    },
+  ]}
+/>
+
+### Heading
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'level',
+      type: '1 | 2 | 3 | 4 | 5 | 6',
+      default: '3',
+      description: '语义标题层级（aria-level）',
+    },
+    {
+      name: 'styleProfile',
+      type: "ShadcnStyleId | 'inherit'",
+      default: "'inherit'",
+      description: '覆盖当前部件的 Shadcn 风格预设',
+    },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: "ShadcnStyleId | 'inherit'",
+      default: "'inherit'",
+      description: '覆盖当前触发器的 Shadcn 风格预设；展开与禁用状态自动从 Item 与 Root 派生',
+    },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'keepMounted',
+      type: 'boolean',
+      default: 'false',
+      description: '收起时保留隐藏节点而不卸载内容',
+    },
+    {
+      name: 'region',
+      type: 'boolean',
+      default: 'false',
+      description: '显式添加 region 地标语义（同时展开项较多时建议保持 false）',
+    },
+    {
+      name: 'styleProfile',
+      type: "ShadcnStyleId | 'inherit'",
+      default: "'inherit'",
+      description: '覆盖当前内容面板的 Shadcn 风格预设',
+    },
+  ]}
+/>
 
 ### 方法与事件（Root）
 
 - `getOpenItems()`：返回当前展开项 `value` 数组的副本。
 - `openCount`：当前已展开项数量（包含尚未挂载对应 `Item` 的保留键）。
 - `requestOpen(value, open, reason?)`：以编程方式请求展开或收起指定项。
-- `openChange`：状态请求事件，负载为 `{ openItems, value, open, reason }`。
+- `openChange`：状态请求事件，负载为 `{ openItems, value, open, reason }`（`reason` 为 `'pointer'`、`'keyboard'` 或 `'programmatic'`）。
 
 ## 参考
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-ACCORDION.yaml', 'P-BASE-ACCORDION.yaml']}
+  files={[
+    'P-SHADCN-ACCORDION.yaml',
+    'P-SHADCN-ACCORDION-ITEM.yaml',
+    'P-SHADCN-ACCORDION-HEADING.yaml',
+    'P-SHADCN-ACCORDION-TRIGGER.yaml',
+    'P-SHADCN-ACCORDION-CONTENT.yaml',
+    'P-BASE-ACCORDION.yaml',
+  ]}
 />

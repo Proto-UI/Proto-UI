@@ -10,7 +10,19 @@ export default definePrototype<ShadcnAccordionRootProps, AccordionRootExposes>({
     const inherited = asAccordionRoot();
     setupShadcnStyleScope(def);
     const style = setupAccordionStyle(def);
-    def.feedback.style.use(tw('flex w-full min-w-0 flex-col text-foreground'));
+    def.feedback.style.use(tw('flex w-full min-w-0 text-foreground'));
+    def.rule({
+      when: (w) => w.prop('orientation').eq('horizontal'),
+      intent: (i) => i.feedback.style.use(tw('flex-row flex-wrap')),
+    });
+    def.rule({
+      when: (w) => w.not(w.prop('orientation').eq('horizontal')),
+      intent: (i) => i.feedback.style.use(tw('flex-col')),
+    });
+    def.rule({
+      when: (w) => w.prop('direction').eq('rtl'),
+      intent: (i) => i.feedback.style.use(tw('direction-rtl')),
+    });
     def.rule({
       when: (w) =>
         w.any(w.state(style).eq('maia'), w.state(style).eq('luma'), w.state(style).eq('rhea')),

@@ -6,6 +6,7 @@ export {
   tableHeaderCell as bootstrap232TableHeaderCell,
 } from './header-cell.proto';
 export { tableCell, tableCell as bootstrap232TableCell } from './cell.proto';
+export type * from './types';
 export type {
   TableRootProps,
   TableRootExposes,

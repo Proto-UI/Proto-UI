@@ -5,8 +5,9 @@ description: 'A Brutalist data table with stable sorting, global and column filt
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Data Table layers stable sorting, global and per-column filtering, column visibility, pagination, and row selection over semantic table structure. Each item in `rows` must have a unique `id`.
+Brutalist Data Table layers stable sorting, global and per-column filtering, column visibility, pagination, and row or page selection onto semantic table structure with 5px `rounded-base` corners, 2px black borders, zero-blur 4px offset shadows, and DM Sans typography.
 
 ## Preview
 
@@ -22,12 +23,92 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
-### Header and body rows
+```tsx
+import {
+  BrutalistDataTableCaption,
+  BrutalistDataTableCell,
+  BrutalistDataTableHeader,
+  BrutalistDataTableHeaderRow,
+  BrutalistDataTableNext,
+  BrutalistDataTablePrevious,
+  BrutalistDataTableRoot,
+  BrutalistDataTableRow,
+} from '../proto-ui/components/react';
 
-- Place sortable headers inside `DataTableHeaderRow` and body record slots in `DataTableRow`. Each `Cell` displays the field matching its `columnKey` for the current record.
-- `sortKey`, `sortDirection`, `page`, and `selectedKeys` can each be controlled independently.
+const rows = [
+  { id: 'm5gr84i9', status: 'Success', email: 'ken99@example.com', amount: 316 },
+  { id: '3u1reuv4', status: 'Success', email: 'abe45@example.com', amount: 242 },
+];
 
-### Filtering, visibility, page selection, and custom cells
+export function Example() {
+  return (
+    <BrutalistDataTableRoot rows={rows} pageSize={4}>
+      <BrutalistDataTableCaption>Recent payments.</BrutalistDataTableCaption>
+      <BrutalistDataTableHeaderRow>
+        <BrutalistDataTableHeader headerKey="status">Status</BrutalistDataTableHeader>
+        <BrutalistDataTableHeader headerKey="email">Email</BrutalistDataTableHeader>
+        <BrutalistDataTableHeader headerKey="amount" className="text-right">
+          Amount
+        </BrutalistDataTableHeader>
+      </BrutalistDataTableHeaderRow>
+      {[0, 1].map((index) => (
+        <BrutalistDataTableRow key={index} index={index}>
+          <BrutalistDataTableCell columnKey="status" headers={['status']} />
+          <BrutalistDataTableCell columnKey="email" headers={['email']} />
+          <BrutalistDataTableCell columnKey="amount" headers={['amount']} className="text-right" />
+        </BrutalistDataTableRow>
+      ))}
+      <div className="table-caption caption-bottom">
+        <div className="flex justify-end gap-2 pt-3">
+          <BrutalistDataTablePrevious>Previous</BrutalistDataTablePrevious>
+          <BrutalistDataTableNext>Next</BrutalistDataTableNext>
+        </div>
+      </div>
+    </BrutalistDataTableRoot>
+  );
+}
+```
+
+### Structure & Visual Grammar
+
+- **Rows and cells**: Every item in `rows` requires a unique `id`. Place sortable column triggers in `DataTableHeaderRow`, map active page slots with `DataTableRow`, and bind fields with `DataTableCell` `columnKey`.
+- **Brutalist contract**: Headers use `font-heading font-bold`, cells use `font-sans font-medium`, selected rows highlight with `bg-main text-main-foreground`, and `Previous`/`Next` use raised 4px hard shadows that settle `+4px, +4px` on press.
+
+## Examples
+
+### Basic Table & Sorting
+
+<PrototypePreviewer
+  demoId="demo-brutalist-data-table-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Filtering & Column Visibility
+
+<PrototypePreviewer
+  demoId="demo-brutalist-data-table-filtering"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Pagination & Row Selection
+
+<PrototypePreviewer
+  demoId="demo-brutalist-data-table-pagination"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Read-Only & Disabled States
+
+<PrototypePreviewer
+  demoId="demo-brutalist-data-table-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Custom Cell Formatting Recipe
 
 <PrototypePreviewer
   demoId="demo-brutalist-data-table-recipes"
@@ -35,36 +116,72 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-- **Filtering and column visibility**: `columnFilters` combines with global `filter` before sorting and pagination. `columnVisibility` hides a column's headers and cells (excluding them from keyboard sorting and assistive tech) while preserving component identity when shown again.
-- **Page selection**: `requestPageSelection()` toggles selection for the current filtered page only while preserving selections on other pages, and exposes `pageSelection` as `'none'`, `'some'`, or `'all'`. `readOnly` blocks selection while keeping sorting and pagination active.
-- **Custom cell formatting**: Set `renderValue={false}` on `Cell` to render your children and read `displayValue` to format the current record's value.
-
 ## API
 
 ### Root
+
+Pass `sortKey`, `sortDirection`, `page`, or `selectedKeys` to control each state independently.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
     { name: 'rows', type: 'readonly DataRecord[]', default: '[]' },
+    { name: 'sortKey', type: 'string', default: '— (controlled)' },
     { name: 'defaultSortKey', type: 'string', default: "''" },
-    { name: 'defaultSortDirection', type: "'none' | 'ascending' | 'descending'", default: 'none' },
+    {
+      name: 'sortDirection',
+      type: "'none' | 'ascending' | 'descending'",
+      default: '— (controlled)',
+    },
+    {
+      name: 'defaultSortDirection',
+      type: "'none' | 'ascending' | 'descending'",
+      default: "'none'",
+    },
     { name: 'filter', type: 'string', default: "''" },
     { name: 'columnFilters', type: 'Readonly<Record<string, string>>', default: '{}' },
     { name: 'columnVisibility', type: 'Readonly<Record<string, boolean>>', default: '{}' },
+    { name: 'page', type: 'number', default: '— (controlled)' },
     { name: 'defaultPage', type: 'number', default: '0' },
     { name: 'pageSize', type: 'number', default: '10' },
+    { name: 'selectedKeys', type: 'readonly string[]', default: '— (controlled)' },
     { name: 'defaultSelectedKeys', type: 'readonly string[]', default: '[]' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
   ]}
 />
 
-Pass `sortKey`, `sortDirection`, `page`, or `selectedKeys` to control each state independently.
+### Part Props
 
-### Other parts
+<ApiPropsTable
+  headers={{ name: 'Part / Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Row.index', type: 'number', default: '0' },
+    { name: 'Row.header', type: 'boolean', default: 'false' },
+    { name: 'Header.headerKey', type: 'string', default: "''" },
+    { name: 'Header.headerKind', type: "'column' | 'row'", default: "'column'" },
+    { name: 'Header.sortable', type: 'boolean', default: 'true' },
+    { name: 'Cell.columnKey', type: 'string', default: "''" },
+    { name: 'Cell.headers', type: 'readonly string[]', default: '[]' },
+    { name: 'Cell.renderValue', type: 'boolean', default: 'true' },
+    { name: 'Previous / Next', type: 'ButtonProps', default: 'raised hard-shadow control' },
+  ]}
+/>
 
-- **Row**: `index?: number` (default `0`), `header?: boolean` (default `false`)
-- **Header**: `sortable?: boolean` (default `true`)
-- **Cell**: `columnKey?: string` (default `''`), `renderValue?: boolean` (default `true`)
-- **Previous / Next**: Accept Button props
+### Events, Methods & Exposed States
+
+- **Events (Root)**: `sortChange`, `pageChange`, `selectionChange`.
+- **Methods (Root)**: `getRows()`, `getRecord(id)`, `getSelectedKeys()`, `requestSort(key)`, `requestPage(next)`, `requestSelection(id)`, `requestPageSelection(selected?)`.
+- **Exposed States**: Root exposes `filteredCount` and `pageSelection`; Row exposes `rowKey`, `selected`, `focused`, and `focusVisible`; Header exposes `sort`; Cell exposes `displayValue`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-DATA-TABLE.yaml',
+    'P-BRUTALIST-DATA-TABLE-HEADER-ROW.yaml',
+    'P-BASE-DATA-TABLE.yaml',
+    'P-BASE-DATA-TABLE-HEADER-ROW.yaml',
+  ]}
+/>

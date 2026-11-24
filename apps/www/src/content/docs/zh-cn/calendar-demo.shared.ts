@@ -15,11 +15,28 @@ export interface CalendarDemoOptions {
   captionLocale?: string | string[];
 }
 
+const CAPTION_TRIGGER_METRICS: Record<
+  CalendarFamily,
+  { height: string; padding: string; monthMinWidth: string; yearMinWidth: string }
+> = {
+  base: { height: '28px', padding: '0 6px', monthMinWidth: '60px', yearMinWidth: '64px' },
+  shadcn: { height: '32px', padding: '0 8px', monthMinWidth: '64px', yearMinWidth: '68px' },
+  brutalist: { height: '32px', padding: '0 8px', monthMinWidth: '68px', yearMinWidth: '72px' },
+  'bootstrap-2-3-2': {
+    height: '30px',
+    padding: '0 8px',
+    monthMinWidth: '64px',
+    yearMinWidth: '68px',
+  },
+  'liquid-glass': {
+    height: '36px',
+    padding: '0 10px',
+    monthMinWidth: '68px',
+    yearMinWidth: '72px',
+  },
+};
+
 function captionMonthLabels(locale: CalendarDemoOptions['captionLocale']): string[] {
-  // The upstream base-nova formatter uses date.toLocaleString(locale?.code,
-  // { month: 'short' }). Undefined deliberately resolves the host Intl locale,
-  // separately from Calendar's explicit weekday/date locale below.
-  // https://ui.shadcn.com/r/styles/base-nova/calendar.json
   const formatter = new Intl.DateTimeFormat(locale, { month: 'short', timeZone: 'UTC' });
   return Array.from({ length: 12 }, (_, month) =>
     formatter.format(new Date(Date.UTC(2000, month, 1)))
@@ -83,14 +100,10 @@ export function setupCalendarCaptionDemo({ host, api }: DemoSetupContext) {
       if (field === 'month') binding?.requestMonth(next);
       else binding?.requestYear(next);
     };
-    // WC replaces its raw record. Retain all owned props and callbacks on every
-    // synchronization; React/Vue consume the same complete controlled record.
     let queued = false;
     const publish = () => {
       if (queued) return;
       queued = true;
-      // Exposed state may notify during a framework commit. Batch this host
-      // owner update after that commit rather than nesting React flushSync.
       queueMicrotask(() => {
         queued = false;
         if (active) api.setProps(ref, { value: selected, disabled, onValueChange });
@@ -152,19 +165,13 @@ export function createCalendarDemo(
   options: CalendarDemoOptions = {}
 ): DemoSpec {
   const months = captionMonthLabels(options.captionLocale);
-  // App-owned options, never a Base date constraint. The official Shadcn Base
-  // example inspected on 2026-10-10 has 101 years (1926–2026), including 2007
-  // visible in the user's year-menu reference. Keep that full range rather
-  // than reducing it to hide actual Select collection performance.
-  // https://ui.shadcn.com/docs/components/base/calendar
-  // The other families retain this app's explicit ±10-year sample range;
-  // that choice is not a claim about their upstream Calendar implementations.
   const year = new Date().getFullYear();
   const firstYear = Math.max(0, year - (family === 'shadcn' ? 100 : 10));
   const lastYear = Math.min(9999, year + (family === 'shadcn' ? 0 : 10));
   const years = Array.from({ length: lastYear - firstYear + 1 }, (_, index) =>
     String(firstYear + index).padStart(4, '0')
   );
+  const metrics = CAPTION_TRIGGER_METRICS[family];
   const proto = (part: string) => `${family}-${part}`;
   const selectItems = (field: 'month' | 'year'): DemoNode[] =>
     (field === 'month' ? months : years).map((label, index) => ({
@@ -204,13 +211,11 @@ export function createCalendarDemo(
           family === 'base'
             ? 'inline-flex items-center justify-between gap-1 rounded px-1 text-sm'
             : 'gap-1 text-sm',
-        // This demo's compact caption is an explicit public surface override,
-        // not a new size API or a mutation of any family's Select recipe.
         surfaceStyle: {
-          height: '28px',
-          'min-height': '28px',
-          padding: '0 4px',
-          'min-width': field === 'month' ? '60px' : '64px',
+          height: metrics.height,
+          'min-height': metrics.height,
+          padding: metrics.padding,
+          'min-width': field === 'month' ? metrics.monthMinWidth : metrics.yearMinWidth,
           width: 'max-content',
         },
         children: [
@@ -247,8 +252,6 @@ export function createCalendarDemo(
         ...(family === 'base'
           ? { className: 'z-50 rounded border bg-white p-1 text-slate-900 shadow-md' }
           : {}),
-        // Modern Shadcn profiles require these public owners: Surface paints,
-        // Viewport scrolls, and ItemText participates in Select alignment.
         children:
           family === 'shadcn'
             ? [
@@ -284,88 +287,79 @@ export function createCalendarDemo(
       },
     ],
   });
+  const calendarNode: DemoNode = {
+    kind: 'proto',
+    prototypeId: proto('calendar-root'),
+    ref: 'calendar',
+    props: {
+      locale: 'en-US',
+      weekStartsOn: 0,
+      fixedWeeks: false,
+      a11yLabel: 'Choose a date',
+    },
+    ...(family === 'base'
+      ? { className: 'inline-grid gap-2 rounded-lg border p-3' }
+      : family === 'shadcn'
+        ? { className: 'rounded-lg border border-border' }
+        : {}),
+    children: [
+      {
+        kind: 'proto',
+        prototypeId: proto('calendar-caption'),
+        props: { a11yLabel: 'Choose month and year' },
+        className: 'flex items-center justify-between',
+        children: [navigation('previous'), select('month'), select('year'), navigation('next')],
+      },
+      { kind: 'proto', prototypeId: proto('calendar-heading'), className: 'sr-only' },
+      {
+        kind: 'proto',
+        prototypeId: proto('calendar-grid'),
+        children: [
+          {
+            kind: 'proto',
+            prototypeId: proto('calendar-weekdays'),
+            ...(family === 'base' ? { className: 'grid grid-cols-7' } : {}),
+            children: Array.from({ length: 7 }, (_, offset) => ({
+              kind: 'proto' as const,
+              prototypeId: proto('calendar-weekday'),
+              props: { offset },
+              ...(family === 'base'
+                ? { className: 'flex size-7 items-center justify-center text-xs' }
+                : {}),
+            })),
+          },
+          ...Array.from({ length: 6 }, (_, row) => ({
+            kind: 'proto' as const,
+            prototypeId: proto('calendar-row'),
+            props: { index: row },
+            ...(family === 'base' ? { className: 'grid grid-cols-7' } : {}),
+            children: Array.from({ length: 7 }, (_, column) => ({
+              kind: 'proto' as const,
+              prototypeId: proto('calendar-day'),
+              props: { offset: row * 7 + column },
+              ...(family === 'base'
+                ? {
+                    className:
+                      'flex size-7 items-center justify-center text-sm data-[selected]:font-bold data-[outside]:opacity-50',
+                  }
+                : {}),
+            })),
+          })),
+        ],
+      },
+    ],
+  };
+
   return {
     type: 'demo',
     setup: setupCalendarCaptionDemo,
     root: {
       kind: 'box',
-      className: 'inline-flex max-w-full flex-col items-start gap-3',
-      children: [
-        {
-          kind: 'proto',
-          prototypeId: proto('calendar-root'),
-          ref: 'calendar',
-          props: {
-            locale: 'en-US',
-            weekStartsOn: 0,
-            fixedWeeks: false,
-            a11yLabel: 'Choose a date',
-          },
-          ...(family === 'base'
-            ? { className: 'inline-grid gap-2 p-3' }
-            : family === 'shadcn'
-              ? { className: 'rounded-lg border border-border' }
-              : {}),
-          children: [
-            {
-              kind: 'proto',
-              prototypeId: proto('calendar-caption'),
-              props: { a11yLabel: 'Choose month and year' },
-              className: 'flex items-center justify-between',
-              children: [
-                navigation('previous'),
-                select('month'),
-                select('year'),
-                navigation('next'),
-              ],
-            },
-            { kind: 'proto', prototypeId: proto('calendar-heading'), className: 'sr-only' },
-            {
-              kind: 'proto',
-              prototypeId: proto('calendar-grid'),
-              children: [
-                {
-                  kind: 'proto',
-                  prototypeId: proto('calendar-weekdays'),
-                  ...(family === 'base' ? { className: 'grid grid-cols-7' } : {}),
-                  children: Array.from({ length: 7 }, (_, offset) => ({
-                    kind: 'proto' as const,
-                    prototypeId: proto('calendar-weekday'),
-                    props: { offset },
-                    ...(family === 'base'
-                      ? { className: 'flex size-7 items-center justify-center text-xs' }
-                      : {}),
-                  })),
-                },
-                ...Array.from({ length: 6 }, (_, row) => ({
-                  kind: 'proto' as const,
-                  prototypeId: proto('calendar-row'),
-                  props: { index: row },
-                  ...(family === 'base' ? { className: 'grid grid-cols-7' } : {}),
-                  children: Array.from({ length: 7 }, (_, column) => ({
-                    kind: 'proto' as const,
-                    prototypeId: proto('calendar-day'),
-                    props: { offset: row * 7 + column },
-                    ...(family === 'base'
-                      ? {
-                          className:
-                            'flex size-7 items-center justify-center text-sm data-[selected]:font-bold data-[outside]:opacity-50',
-                        }
-                      : {}),
-                  })),
-                })),
-              ],
-            },
-          ],
-        },
-        {
-          kind: 'box',
-          className: 'max-w-xs text-xs text-muted-foreground',
-          children: [
-            `月份与年份使用同族 Select，通过 Calendar 公开 API 组合。标题月份按宿主语言环境格式化；星期使用英语。年份选项：${firstYear}–${lastYear}（${family === 'shadcn' ? '与 Shadcn 上游示例相同的 101 年范围' : '此应用自定的前后 10 年范围'}）；今天由本地时钟提供。`,
-          ],
-        },
-      ],
+      className:
+        family === 'liquid-glass'
+          ? 'inline-flex max-w-full items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6'
+          : 'inline-flex max-w-full flex-col items-start gap-3',
+      children: [calendarNode],
     },
   };
 }

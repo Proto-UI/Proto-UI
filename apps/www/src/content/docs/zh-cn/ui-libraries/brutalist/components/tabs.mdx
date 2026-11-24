@@ -1,52 +1,183 @@
 ---
 title: 'Brutalist Tabs'
-description: '支持水平与垂直方向、自动/手动激活及扁平圆角样式的 Brutalist 风格选项卡组件。'
+description: '支持水平与垂直方向、禁用态、受控切换与 5px 圆角扁平样式的 Brutalist 风格选项卡组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Tabs 用于在同一区域内切换多组关联内容面板，提供 5px 圆角扁平标签栏与选项卡样式，并支持自动或手动激活以及面板优先子元素聚焦语义。
+Brutalist Tabs 将关联内容组织在可切换的面板区域内，遵循 5px 圆角（`rounded-base`）、2px 黑色边框与扁平无阴影标签栏的 Brutalist 视觉规范，并继承 [Base Tabs](/zh-cn/ui-libraries/base/tabs/) 的完整键盘导航与无障碍语义。
 
 ## 预览
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-tabs" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-tabs"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
-
-为 `Root` 设置稳定的响应式宽度（如上方示例），可以避免切换不同长度的面板内容时整体宽度抖动或偏移。
 
 ## 安装
 
-已包含在 `@proto.ui/prototypes-brutalist@0.2.0` 中。可通过 CLI 目标 `brutalist-tabs` 添加，或从 `@proto.ui/prototypes-brutalist/tabs` 导入。
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-tabs" manager="npm" />
+
+将 `wc` 替换为 `react`、`vue` 或 `vue2` 可生成对应框架封装，也可直接从 `@proto.ui/prototypes-brutalist/tabs` 导入。
 
 ## 用法
 
-- **组件结构**：由 `Root`、`List`、`Trigger`、`Content` 和 `Indicator` 组成，通过相同的 `value` 将 `Trigger` 与对应的 `Content` 关联。
-- **外观切换**：`List` 与 `Trigger` 支持 `appearance="default"` 和 `appearance="underline"` 两种样式。
-- **激活与挂载**：`Root` 的 `activationMode` 可选 `'automatic'`（焦点移动即激活）或 `'manual'`（按 Enter / Space 确认激活）。关闭的 `Content` 默认卸载内容节点，设置 `keepMounted={true}` 可保留隐藏节点。
-- **受控模式**：向 `Root` 传入 `value` 进入受控模式，否则使用 `defaultValue` 进行非受控初始化。
+```tsx
+import {
+  BrutalistTabsContent,
+  BrutalistTabsList,
+  BrutalistTabsRoot,
+  BrutalistTabsTrigger,
+} from '../proto-ui/components/react';
+```
+
+```tsx
+<BrutalistTabsRoot defaultValue="account">
+  <BrutalistTabsList>
+    <BrutalistTabsTrigger value="account">Account</BrutalistTabsTrigger>
+    <BrutalistTabsTrigger value="password">Password</BrutalistTabsTrigger>
+  </BrutalistTabsList>
+  <BrutalistTabsContent value="account">Make changes to your account here.</BrutalistTabsContent>
+  <BrutalistTabsContent value="password">Change your password here.</BrutalistTabsContent>
+</BrutalistTabsRoot>
+```
+
+### 组件结构
+
+```text
+TabsRoot
+├── TabsList
+│   ├── TabsTrigger
+│   └── TabsTrigger
+├── TabsContent
+└── TabsContent
+```
+
+- **视觉规范**：`TabsList` 与 `TabsTrigger` 采用无阴影扁平表面，选中项切换为主色填充（`bg-main`）与黑框；`TabsContent` 默认不叠加额外边框，便于直接承载卡片或表单内容。
+- **键盘导航**：支持方向键、`Home` / `End` 移动焦点，以及 `activationMode="automatic" | "manual"` 两种激活模式。
+
+## 示例
+
+### 垂直布局
+
+设置 `orientation="vertical"`，将扁平标签条与内容面板横向并排展示。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-tabs-vertical"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 禁用标签
+
+在 `TabsTrigger` 上设置 `disabled` 以跳过点击与方向键聚焦。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-tabs-disabled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 下划线变体
+
+在 `TabsList` 与 `TabsTrigger` 上设置 `appearance="underline"`，切换为粗体无背景的下划线导航样式。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-tabs-underline"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 受控状态
+
+通过 `value` 与 `valueChange` 将标签切换与外部按钮或业务状态同步。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-tabs-controlled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-以下前三个属性（`defaultValue`、`orientation`、`activationMode`）属于 `Root`（传入 `value` 进入受控模式），`appearance` 属于 `List` 与 `Trigger`：
+### Root
+
+暴露状态 `value` 与事件 `valueChange({ value: string })`。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: 'undefined' },
     { name: 'defaultValue', type: 'string', default: "''" },
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
-    { name: 'activationMode', type: "'automatic' | 'manual'", default: 'automatic' },
-    { name: 'appearance', type: "'default' | 'underline'", default: 'default' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'activationMode', type: "'automatic' | 'manual'", default: "'automatic'" },
   ]}
 />
 
-其余子部件属性默认值：
+### List
 
-- **List**：`orientation` 默认 `'horizontal'`，`loop` 默认 `false`，`a11yLabel` 默认 `''`。
-- **Trigger**：`value` 默认 `''`，`disabled` 默认 `false`。
-- **Content**：`value` 默认 `''`，`keepMounted` 默认 `false`。
-- **Indicator**：无属性。
+暴露焦点方法 `focusFirst`、`focusLast`、`focusNext`、`focusPrev`、`focusSelected`。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'appearance', type: "'default' | 'underline'", default: "'default'" },
+    { name: 'loop', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Trigger
+
+暴露状态 `selected`、`disabled`、`hovered`、`focused`、`focusVisible`、`pressed`，方法 `focusSelf` 及事件 `click`。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'appearance', type: "'default' | 'underline'", default: "'default'" },
+  ]}
+/>
+
+### Content
+
+暴露状态 `current` 与 `hidden`。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'keepMounted', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-TABS.yaml',
+    'P-BRUTALIST-TABS-LIST.yaml',
+    'P-BRUTALIST-TABS-TRIGGER.yaml',
+    'P-BRUTALIST-TABS-CONTENT.yaml',
+    'P-BASE-TABS.yaml',
+  ]}
+/>

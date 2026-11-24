@@ -1,0 +1,119 @@
+---
+title: 'Bootstrap 2.3.2 Scroll Area'
+description: 'A scrollable container styled with classic Bootstrap 2.3.2 4px borders, recessed tracks, and beveled gradient thumbs.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Bootstrap 2.3.2 Scroll Area extends Base's host-owned scroll domain with a classic 4px bordered white container, a 12px recessed gray track, and a beveled `#fff` to `#e6e6e6` linear-gradient thumb suited for server logs, release archives, and classic dashboards.
+
+## Preview
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-scroll-area"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Available from the workspace source tree and CLI registry:
+
+<InstallCommandCard
+  command="npx @proto.ui/cli@latest add wc bootstrap-2-3-2-scroll-area"
+  manager="npm"
+/>
+
+Replace `wc` with `react`, `vue`, or `vue2` to generate wrappers for your framework.
+
+## Usage
+
+```ts
+import {
+  BootstrapScrollAreaRoot,
+  BootstrapScrollAreaViewport,
+  BootstrapScrollAreaScrollbar,
+  BootstrapScrollAreaThumb,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/scroll-area';
+```
+
+```html
+<bootstrap-2-3-2-scroll-area-root class="h-48 w-full max-w-80">
+  <bootstrap-2-3-2-scroll-area-viewport>
+    <div class="p-3">Scrollable content here.</div>
+  </bootstrap-2-3-2-scroll-area-viewport>
+  <bootstrap-2-3-2-scroll-area-scrollbar orientation="vertical">
+    <bootstrap-2-3-2-scroll-area-thumb></bootstrap-2-3-2-scroll-area-thumb>
+  </bootstrap-2-3-2-scroll-area-scrollbar>
+</bootstrap-2-3-2-scroll-area-root>
+```
+
+### Composition & Styling
+
+```text
+Root
+├── Viewport
+└── Scrollbar
+    └── Thumb
+```
+
+- `Root` frames content with 4px corners, a `#ccc` border, an inset top shadow, and paired `#fff` / `#333` light surface contrast even inside dark host pages.
+- `Viewport` preserves Base's `auto` projection preference so the host selects native or composed chrome, entering the `Tab` order only when scrollable overflow exists.
+- `Scrollbar` paints a 12px recessed `#eee` trough while `Thumb` uses the classic `#fff` → `#e6e6e6` gradient, `#b3b3b3` border, top inner highlight, and a forced-colors border fallback.
+
+## Examples
+
+### Release Archive
+
+Mount a vertical scrollbar for compact release lists and archive panels.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-scroll-area-tags"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Horizontal Thumbnails
+
+Use `orientation="horizontal"` to scroll classic Bootstrap 2.3.2 thumbnail cards horizontally.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-scroll-area-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Props
+
+The following prop belongs to `Scrollbar` (`Root`, `Viewport`, and `Thumb` add no props):
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'orientation', type: "'vertical' | 'horizontal'", default: "'vertical'" }]}
+/>
+
+### Exposed States
+
+- **Viewport**: `focused`, `focusVisible`, `scrollAxes`, `scrolling`, `scrollProjection`, `scrollXPosition`, `scrollXVisibleRatio`, `canScrollLeft`, `canScrollRight`, `scrollYPosition`, `scrollYVisibleRatio`, `canScrollUp`, `canScrollDown`.
+- **Scrollbar**: `orientation`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-SCROLL-AREA.yaml',
+    'P-BOOTSTRAP-2-3-2-SCROLL-AREA-VIEWPORT.yaml',
+    'P-BOOTSTRAP-2-3-2-SCROLL-AREA-SCROLLBAR.yaml',
+    'P-BOOTSTRAP-2-3-2-SCROLL-AREA-THUMB.yaml',
+    'P-BASE-SCROLL-AREA.yaml',
+  ]}
+/>

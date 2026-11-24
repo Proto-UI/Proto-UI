@@ -1,11 +1,13 @@
 ---
 title: 'Data Table'
-description: '支持稳定排序、全局过滤、分页与行选择的 Bootstrap 2.3.2 数据表格组件。'
+description: '支持稳定排序、全局与按列筛选、列显隐、分页及行选择的 Bootstrap 2.3.2 数据表格组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Data Table 在标准表格结构上提供稳定的记录标识、排序、全局过滤、分页与行选择能力，并采用 Bootstrap 2.3.2 表格视觉风格。
+Data Table 在标准表格结构上提供稳定排序、全局与按列筛选、列显隐、分页以及行/整页选择能力，保留 Bootstrap 2.3.2 经典的 `8px` 单元格内边距、水平分隔线、`.info` 选中色与渐变 `.btn` 翻页控件。
 
 ## 预览
 
@@ -21,14 +23,157 @@ Data Table 在标准表格结构上提供稳定的记录标识、排序、全局
 
 ## 用法
 
-- **数据与槽位**：应用传入的每条记录都需要唯一的 `id`。正文行（`DataTableRow`）按当前页 `index` 顺序呈现，每个单元格按 `columnKey` 渲染对应记录字段；排序时会直接更新单元格数据，保持真实的 DOM 表格顺序。
-- **表头排序**：将可排序表头放在 `DataTableHeaderRow` 内，以保持独立的表头语义并支持多个排序触发器；正文数据行继续使用 `DataTableRow`。
-- **职责边界**：数据请求、行内编辑和列拖拽重排由应用层自行管理。
+```tsx
+import {
+  Bootstrap232DataTableCaption,
+  Bootstrap232DataTableCell,
+  Bootstrap232DataTableHeader,
+  Bootstrap232DataTableHeaderRow,
+  Bootstrap232DataTableNext,
+  Bootstrap232DataTablePrevious,
+  Bootstrap232DataTableRoot,
+  Bootstrap232DataTableRow,
+} from '../proto-ui/components/react';
+
+const rows = [
+  { id: 'm5gr84i9', status: 'Success', email: 'ken99@example.com', amount: 316 },
+  { id: '3u1reuv4', status: 'Success', email: 'abe45@example.com', amount: 242 },
+];
+
+export function Example() {
+  return (
+    <Bootstrap232DataTableRoot rows={rows} pageSize={4}>
+      <Bootstrap232DataTableCaption>Recent payments.</Bootstrap232DataTableCaption>
+      <Bootstrap232DataTableHeaderRow>
+        <Bootstrap232DataTableHeader headerKey="status">Status</Bootstrap232DataTableHeader>
+        <Bootstrap232DataTableHeader headerKey="email">Email</Bootstrap232DataTableHeader>
+        <Bootstrap232DataTableHeader headerKey="amount" className="text-right">
+          Amount
+        </Bootstrap232DataTableHeader>
+      </Bootstrap232DataTableHeaderRow>
+      {[0, 1].map((index) => (
+        <Bootstrap232DataTableRow key={index} index={index}>
+          <Bootstrap232DataTableCell columnKey="status" headers={['status']} />
+          <Bootstrap232DataTableCell columnKey="email" headers={['email']} />
+          <Bootstrap232DataTableCell
+            columnKey="amount"
+            headers={['amount']}
+            className="text-right"
+          />
+        </Bootstrap232DataTableRow>
+      ))}
+      <div className="table-caption caption-bottom">
+        <div className="flex justify-end gap-2 pt-3">
+          <Bootstrap232DataTablePrevious>Previous</Bootstrap232DataTablePrevious>
+          <Bootstrap232DataTableNext>Next</Bootstrap232DataTableNext>
+        </div>
+      </div>
+    </Bootstrap232DataTableRoot>
+  );
+}
+```
+
+### 结构与交互说明
+
+- **数据与槽位**：传入 `rows` 时每条记录需提供唯一 `id`。正文行（`DataTableRow`）按当前页 `index` 呈现，单元格通过 `columnKey` 读取字段；隐藏列与空行槽会自动移除 `table-row` / `table-cell` 显示样式以保持准确折叠。
+- **表头排序与悬停**：将排序表头置于 `DataTableHeaderRow` 中，悬停与当前排序列采用经典浅灰背景高亮，数据行选中时采用 Bootstrap 2.3.2 的 `.info` 配色。
+
+## 示例
+
+### 基础表格与排序
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-data-table-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 筛选与列显隐
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-data-table-filtering"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 分页与行选择
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-data-table-pagination"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 只读与禁用状态
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-data-table-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 / 属性          | 说明                                          |
-| -------------------- | --------------------------------------------- |
-| `DataTableHeaderRow` | 静态表头行容器，用于放置可排序列头            |
-| `DataTableRow`       | 当前页的数据行槽位，通过 `index` 绑定对应记录 |
-| `id` / `columnKey`   | 每条记录的唯一标识与单元格列键名              |
+### Root
+
+传入 `sortKey`、`sortDirection`、`page` 或 `selectedKeys` 可分别进入对应受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'rows', type: 'readonly DataRecord[]', default: '[]' },
+    { name: 'sortKey', type: 'string', default: '—（受控）' },
+    { name: 'defaultSortKey', type: 'string', default: "''" },
+    { name: 'sortDirection', type: "'none' | 'ascending' | 'descending'", default: '—（受控）' },
+    {
+      name: 'defaultSortDirection',
+      type: "'none' | 'ascending' | 'descending'",
+      default: "'none'",
+    },
+    { name: 'filter', type: 'string', default: "''" },
+    { name: 'columnFilters', type: 'Readonly<Record<string, string>>', default: '{}' },
+    { name: 'columnVisibility', type: 'Readonly<Record<string, boolean>>', default: '{}' },
+    { name: 'page', type: 'number', default: '—（受控）' },
+    { name: 'defaultPage', type: 'number', default: '0' },
+    { name: 'pageSize', type: 'number', default: '10' },
+    { name: 'selectedKeys', type: 'readonly string[]', default: '—（受控）' },
+    { name: 'defaultSelectedKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### 子部件属性
+
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Row.index', type: 'number', default: '0' },
+    { name: 'Row.header', type: 'boolean', default: 'false' },
+    { name: 'Header.headerKey', type: 'string', default: "''" },
+    { name: 'Header.headerKind', type: "'column' | 'row'", default: "'column'" },
+    { name: 'Header.sortable', type: 'boolean', default: 'true' },
+    { name: 'Cell.columnKey', type: 'string', default: "''" },
+    { name: 'Cell.headers', type: 'readonly string[]', default: '[]' },
+    { name: 'Cell.renderValue', type: 'boolean', default: 'true' },
+    { name: 'Previous / Next', type: 'ButtonProps', default: '经典 .btn 渐变样式' },
+  ]}
+/>
+
+### 事件、方法与暴露状态
+
+- **事件（Root）**：`sortChange`、`pageChange`、`selectionChange`。
+- **方法（Root）**：`getRows()`、`getRecord(id)`、`getSelectedKeys()`、`requestSort(key)`、`requestPage(next)`、`requestSelection(id)`、`requestPageSelection(selected?)`。
+- **暴露状态**：Root 暴露 `filteredCount`、`pageSelection`；Row 暴露 `rowKey`、`selected`、`focused`、`focusVisible`；Header 暴露 `sort`；Cell 暴露 `displayValue`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-DATA-TABLE.yaml',
+    'P-BOOTSTRAP-2-3-2-DATA-TABLE-HEADER-ROW.yaml',
+    'P-BASE-DATA-TABLE.yaml',
+    'P-BASE-DATA-TABLE-HEADER-ROW.yaml',
+  ]}
+/>

@@ -1,6 +1,7 @@
 export * from './data-table.proto';
 export type {
   ShadcnDataTableRootProps as DataTableRootProps,
+  ShadcnDataTableHeaderRowProps as DataTableHeaderRowProps,
   ShadcnDataTableRowProps as DataTableRowProps,
   ShadcnDataTableCellProps as DataTableCellProps,
   ShadcnDataTableHeaderProps as DataTableHeaderProps,

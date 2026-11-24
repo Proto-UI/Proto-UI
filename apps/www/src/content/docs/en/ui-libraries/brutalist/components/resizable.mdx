@@ -1,12 +1,13 @@
 ---
 title: 'Resizable'
-description: 'A Brutalist-styled resizable split-panel layout supporting multi-panel ratios, nesting, and collapsible stops.'
+description: 'A Brutalist resizable split-panel layout with 5px base corners, 2px black borders, hard 4px shadows, and collapsible stops.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Resizable divides a container into two or more percentage-sized panels separated by indexed drag handles, with full keyboard support, collapsible stops, and independent nested layouts.
+A Brutalist resizable panel group styled with `5px` (`rounded-base`) corners, `2px` black borders, zero-blur `4px 4px` offset shadows, and `DM Sans` typography, with borderless nested composition via `variant="nested"`.
 
 ## Preview
 
@@ -18,36 +19,104 @@ Resizable divides a container into two or more percentage-sized panels separated
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/resizable` and adapt them for your target runtime.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/resizable` and adapt them for your target runtime:
+
+```ts
+import {
+  resizableRoot,
+  resizablePanel,
+  resizableHandle,
+} from '@proto.ui/prototypes-brutalist/resizable';
+```
 
 ## Usage
 
-### Anatomy & Indexing
+```tsx
+import {
+  BrutalistResizableRoot,
+  BrutalistResizablePanel,
+  BrutalistResizableHandle,
+} from '../proto-ui/components/react';
 
-- `Root`: Manages percentage panel sizes, constraints, orientation, and controlled/uncontrolled state.
-- `Panel`: Indexed `0..N-1`; exposes its dimensionless size to `--pui-size` so static `flex-basis` CSS rules drive layout without runtime-generated CSS tokens.
-- `Handle`: Indexed `0..N-2`; references its preceding panel and resizes only its adjacent pair (default accessible name: `Resize panels`).
+export function Example() {
+  return (
+    <BrutalistResizableRoot defaultSizes={[50, 50]} className="h-56 w-full max-w-md">
+      <BrutalistResizablePanel index={0}>One</BrutalistResizablePanel>
+      <BrutalistResizableHandle index={0} withHandle />
+      <BrutalistResizablePanel index={1}>Two</BrutalistResizablePanel>
+    </BrutalistResizableRoot>
+  );
+}
+```
 
-### Multi-Panel Sizing & Constraints
+### Composition
 
-- Pass `sizes` or `defaultSizes` on `Root` for a complete percentage vector (normalized to sum to `100`). The two-panel `value` / `defaultValue` props remain supported, with `sizes` taking precedence when provided.
-- Use `constraints` to configure per-panel `min` (`0`), `max` (`100`), `collapsible` (`false`), and `collapsedSize` (`0`). Infeasible layouts ignore invalid updates and keep the previous valid state.
-- Dragging a handle preserves the combined total of its adjacent pair and leaves every other panel untouched. Collapsing acts as a discrete stop subject to the adjacent panel's `max`.
-- Nested `Root` layouts manage independent ratios, constraints, and orientations (for example, a vertical split inside a three-panel horizontal layout). Pointer drag math normalizes against panel border-box extents, excluding fixed handle widths.
+```text
+BrutalistResizableRoot (variant="default" | "nested")
+├── BrutalistResizablePanel (index: 0)
+├── BrutalistResizableHandle (index: 0, withHandle?)
+└── BrutalistResizablePanel (index: 1)
+```
 
-### Keyboard & Controlled Mode
+- Top-level `Root` renders the `rounded-base` 2px black frame and 4px hard shadow by default; pass `variant="nested"` on inner split groups to keep them borderless and shadowless.
+- Place `N` `Panel` parts (`index: 0..N-1`) and `N - 1` `Handle` parts (`index: 0..N-2`). Each panel exposes `--pui-size` for static `flex-basis` sizing.
+- `Handle` paints a 2px black divider with directional resize cursors; enable `withHandle` to show an accent-filled, black-bordered grip badge.
+- Supports pointer drag, arrow keys, `Shift` 10× steps, `Home` / `End`, and `Enter` collapsing. Pass `sizes` for controlled mode and handle `sizesChange` / `sizesCommit`.
 
-- Pointer drag, arrow keys, `Home`/`End`, `Shift`-accelerated steps, and collapse share one constrained request pipeline.
-- Read `sizes` or invoke `requestResize(index, nextSize, commit)` / `requestSizes(nextSizes, commit)`. Both `sizesChange` and `sizesCommit` emit `{ sizes }`; cancelling a gesture emits no commit.
-- Pass `sizes` for controlled mode: update it with the proposed vector to accept or keep the previous value to decline. Panels and ARIA attributes always reflect the committed sizes.
+## Examples
+
+### Vertical
+
+Set `orientation="vertical"` to resize stacked panes.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-resizable-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Handle
+
+Compare the accent-bordered `withHandle` grip badge with the default 2px black divider.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-resizable-handle"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Use `direction="rtl"` to mirror panel order and horizontal arrow-key behavior.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-resizable-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Multi-panel & Collapsible
+
+Combine `defaultSizes` and `constraints` for a three-pane layout. Focus the first handle and press `Enter` to toggle the collapsible sidebar.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-resizable-collapsible"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root` (pass `sizes` or `value` for controlled mode):
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'variant', type: "'default' | 'nested'", default: "'default'" },
+    { name: 'sizes', type: 'readonly number[]', default: '—' },
+    { name: 'defaultSizes', type: 'readonly number[]', default: '—' },
+    { name: 'constraints', type: 'readonly ResizablePanelConstraint[]', default: '[]' },
+    { name: 'value', type: 'number', default: '—' },
     { name: 'defaultValue', type: 'number', default: '50' },
     { name: 'min', type: 'number', default: '10' },
     { name: 'max', type: 'number', default: '90' },
@@ -55,12 +124,28 @@ The following props belong to `Root` (pass `sizes` or `value` for controlled mod
     { name: 'collapsible', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
-    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
   ]}
 />
 
-Other parts:
+### Panel & Handle
 
-- **Panel**: `index` defaults to `0`.
-- **Handle**: Indexed `0..N-2` for the preceding panel; default accessible name is `Resize panels`.
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Panel.index', type: 'number', default: '0' },
+    { name: 'Handle.index', type: 'number', default: '0' },
+    { name: 'Handle.withHandle', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+- **Exposed states**: Root exposes `value` and `sizes`; Panel exposes `size`; Handle exposes `value`, `focusVisible`, and `disabled`.
+- **Events & methods**: Root emits `sizesChange`, `sizesCommit`, `valueChange`, and `valueCommit`, and exposes `requestResize(index, next, commit?)`, `requestSizes(next, commit?)`, `requestValue(next, commit?)`, and `cancelResize()`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-RESIZABLE.yaml', 'P-BASE-RESIZABLE.yaml']}
+/>

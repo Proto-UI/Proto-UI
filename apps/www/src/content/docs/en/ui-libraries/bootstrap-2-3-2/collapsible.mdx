@@ -1,11 +1,13 @@
 ---
 title: 'Collapsible'
-description: 'A Bootstrap 2.3.2 disclosure component composed of Root, Trigger, and Content.'
+description: 'A Bootstrap 2.3.2 disclosure component composed of Root, Trigger, and Content with authentic pixel metrics and a 350ms height collapse transition.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Collapsible expands and collapses a single content section, pairing Bootstrap 2.3.2 borders and spacing with Base Collapsible disclosure behavior.
+Bootstrap 2.3.2 Collapsible expands and collapses a single content section, pairing authentic Bootstrap 2.3.2 pixel borders, link colors, and a 350ms height collapse transition with [Base Collapsible](/en/ui-libraries/base/collapsible/) disclosure semantics.
 
 ## Preview
 
@@ -14,14 +16,11 @@ Bootstrap 2.3.2 Collapsible expands and collapses a single content section, pair
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
   toolbar={true}
-  codePanel={false}
 />
-
-Use the preview toolbar's real family Select to switch between WC, React, Vue, and Vue 2; the page header preference stays in sync. The demo covers default unmount on close, `keepMounted`, disabled while open, and controlled acceptance via **Accept**.
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source. Import the parts directly from `@proto.ui/prototypes-bootstrap-2-3-2/collapsible`:
 
 ```ts
 import {
@@ -33,19 +32,110 @@ import {
 
 ## Usage
 
-- **Three-part composition**: Place one `Trigger` and one `Content` inside each `Root`. Nested and sibling collapsibles manage state independently.
-- **Root manages the state**: Pass `open` for controlled mode and respond to `openChange` (`{ open, reason }`) to accept changes. Disabling blocks new toggles without closing already open content.
-- **Content lifecycle**: Unmounts content when closed; set `keepMounted` on `Content` to keep it mounted while hidden.
-- **Responsive styling**: Labels and long words wrap naturally, padding scales in `rem` with text size, and surrounding containers should leave room for focus rings.
+```tsx
+import {
+  Bootstrap232CollapsibleRoot,
+  Bootstrap232CollapsibleTrigger,
+  Bootstrap232CollapsibleContent,
+} from '@/components/ui/collapsible';
 
-See [Base Collapsible](/en/ui-libraries/base/collapsible/) for the shared disclosure protocol.
+export function Example() {
+  return (
+    <Bootstrap232CollapsibleRoot>
+      <Bootstrap232CollapsibleTrigger>Order #4189 — Product details</Bootstrap232CollapsibleTrigger>
+      <Bootstrap232CollapsibleContent>
+        Status: Shipped · 100 Market St, San Francisco · 2x Studio Headphones.
+      </Bootstrap232CollapsibleContent>
+    </Bootstrap232CollapsibleRoot>
+  );
+}
+```
+
+### Parts and Classic Metrics
+
+```text
+CollapsibleRoot
+├── CollapsibleTrigger
+└── CollapsibleContent
+```
+
+- **Fixed pixel proportions and link ink**: preserves Bootstrap 2.3.2's `14px`/`20px` type scale, `4px` radius, `15px × 8px` trigger padding, `15px × 9px` inner body padding, and classic `#08c` link ink shifting to `#005580` underlined on hover/press (with readable dark-mode border and ink fallbacks).
+- **350ms height collapse**: `Content` binds `asTransition()` to animate `blockSize` smoothly while keeping inner border and padding on the child wrapper so closed height collapses cleanly to zero.
+- **Controlled and mount lifecycle**: pass `open` and handle `openChange` (`{ open, reason }`) for controlled state; `Content` unmounts when closed unless `keepMounted={true}` is set.
+
+## Examples
+
+### Basic Panel
+
+A classic Bootstrap 2.3.2 disclosure group paired with a primary action button.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-collapsible-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Synchronize an external button with the collapsible trigger while animating the 350ms height collapse.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-collapsible-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Nested Groups
+
+Compose nested and sibling Bootstrap 2.3.2 collapsible panels with independent open state.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-collapsible-file-tree"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / Methods / Events | Description |
-| --- | --- | --- |
-| `Root` | `open` / `defaultOpen` / `disabled` | Controlled or initial open state and disabled flag |
-| `Root` | `openCollapsible()` / `close()` / `toggle()` | Programmatic open, close, and toggle requests |
-| `Root` | `openChange` | Emitted with `{ open, reason }` on state requests |
-| `Trigger` | `disabled` / `focusSelf()` | Disclosure button with natural Tab order and `Enter`/`Space` activation |
-| `Content` | `keepMounted` | Defaults to `false`; keeps hidden content mounted when `true` |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'keepMounted', type: 'boolean', default: 'false' }]}
+/>
+
+### Events and Methods
+
+- **Root events**: `openChange` with payload `{ open, reason }`
+- **Root methods**: `openCollapsible(reason?)`, `close(reason?)`, `toggle(reason?)`
+- **Trigger method**: `focusSelf(options?)`
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-COLLAPSIBLE.yaml',
+    'P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER.yaml',
+    'P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT.yaml',
+    'P-BASE-COLLAPSIBLE.yaml',
+  ]}
+/>

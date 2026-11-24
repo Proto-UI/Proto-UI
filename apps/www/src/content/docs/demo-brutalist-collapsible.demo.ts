@@ -5,6 +5,7 @@ type OpenRequest = { open: boolean; reason: 'pointer' | 'keyboard' | 'programmat
 function disclosure(
   ref: string,
   label: string,
+  body: string,
   props: Record<string, unknown> = {},
   keepMounted = false
 ): DemoNode {
@@ -23,9 +24,7 @@ function disclosure(
         kind: 'proto',
         prototypeId: 'brutalist-collapsible-content',
         props: { keepMounted },
-        children: [
-          'Content has no automatic role or focus entry. Close and reopen this disclosure. Long text stays readable: DisclosuresPreserveTheirOwnStateAcrossRepeatedOpeningAndClosingWithoutClippingLongWords.',
-        ],
+        children: [body],
       },
     ],
   };
@@ -35,28 +34,51 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className: 'grid w-full min-w-0 max-w-lg gap-5 p-2',
+    className: 'grid w-full min-w-0 max-w-lg gap-4 p-2',
     children: [
       disclosure(
         'uncontrolled',
-        'Uncontrolled · default L1 detach · a long disclosure label that wraps safely within the available width'
+        'Order #4189 — Shipping & delivery details',
+        '100 Market St, San Francisco, CA · 2x Studio Headphones · Standard Express (estimated arrival Friday).'
       ),
-      disclosure('retained', 'defaultOpen · keepMounted', { defaultOpen: true }, true),
-      disclosure('disabled', 'Disabled · stays open', { defaultOpen: true, disabled: true }),
-      disclosure('controlled', 'Controlled · request only', { open: false }),
+      disclosure(
+        'retained',
+        'Order summary (2 items)',
+        'Studio Headphones (x2) — $398.00 · Free shipping applied. Panel remains mounted while collapsed.',
+        { defaultOpen: true },
+        true
+      ),
+      disclosure(
+        'disabled',
+        'Warranty coverage (locked)',
+        '2-year hardware protection is included with this order and stays open while locked.',
+        { defaultOpen: true, disabled: true }
+      ),
+      disclosure(
+        'controlled',
+        'Billing & invoice details',
+        'Paid with Visa ending in 4242 · Invoice #INV-2026-4189 is ready to download.',
+        { open: false }
+      ),
       {
         kind: 'box',
-        ref: 'requestStatus',
-        attrs: { 'aria-live': 'polite' },
-        className: 'text-sm break-words',
-        children: ['No pending request. Controlled content stays closed until accepted.'],
-      },
-      {
-        kind: 'proto',
-        prototypeId: 'brutalist-button',
-        ref: 'accept',
-        props: {},
-        children: ['Accept'],
+        className: 'flex flex-wrap items-center justify-between gap-3 pt-1',
+        children: [
+          {
+            kind: 'box',
+            ref: 'requestStatus',
+            attrs: { 'aria-live': 'polite' },
+            className: 'text-sm break-words',
+            children: ['Invoice details are collapsed. Select the trigger, then confirm below.'],
+          },
+          {
+            kind: 'proto',
+            prototypeId: 'brutalist-button',
+            ref: 'accept',
+            props: {},
+            children: ['Accept'],
+          },
+        ],
       },
     ],
   },
@@ -65,7 +87,7 @@ export default {
     let pending: OpenRequest | null = null;
     const propose = (request: OpenRequest) => {
       pending = request;
-      refs.requestStatus.textContent = `Requested ${request.open ? 'open' : 'closed'} (${request.reason}); owner has not accepted it.`;
+      refs.requestStatus.textContent = `Pending request to ${request.open ? 'expand' : 'collapse'} (${request.reason}). Click Accept to apply.`;
     };
     const setControlledProps = () => api.setProps('controlled', { open, onOpenChange: propose });
     const accept = () => {
@@ -73,7 +95,7 @@ export default {
       open = pending.open;
       pending = null;
       setControlledProps();
-      refs.requestStatus.textContent = `Owner accepted: ${open ? 'open' : 'closed'}.`;
+      refs.requestStatus.textContent = `Invoice details are now ${open ? 'expanded' : 'collapsed'}.`;
     };
     setControlledProps();
     api.setProps('accept', { onClick: accept });

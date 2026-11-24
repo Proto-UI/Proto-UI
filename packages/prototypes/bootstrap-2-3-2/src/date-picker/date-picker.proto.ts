@@ -69,7 +69,7 @@ export const datePickerTrigger = definePrototype<DatePickerTriggerProps, DatePic
       );
     def.feedback.style.use(
       tw(
-        'inline-flex shrink-0 items-center justify-center rounded-[4px] border px-[12px] py-[4px] text-[14px] font-normal leading-[20px] select-none cursor-pointer min-w-0 max-w-full whitespace-normal wrap-anywhere text-paint-[#333_0_1px_1px_rgb(255_255_255/75%)] border-[rgb(0_0_0/10%)_rgb(0_0_0/10%)_#b3b3b3_rgb(0_0_0/10%)]'
+        'inline-flex shrink-0 items-center justify-between gap-2 text-left rounded-[4px] border px-[12px] py-[4px] text-[14px] font-normal leading-[20px] select-none cursor-pointer min-w-0 max-w-full whitespace-normal wrap-anywhere text-paint-[#333_0_1px_1px_rgb(255_255_255/75%)] border-[rgb(0_0_0/10%)_rgb(0_0_0/10%)_#b3b3b3_rgb(0_0_0/10%)]'
       )
     );
     def.feedback.style.use(tw(bootstrapButtonRaised));
@@ -144,7 +144,7 @@ export const datePickerContent = definePrototype<DatePickerContentProps, DatePic
     def.props.setDefaults({ sideOffset: 10 });
     def.feedback.style.use(
       tw(
-        'rounded-[6px] border border-[rgb(0_0_0/20%)] bg-background bg-clip-padding text-foreground font-sans text-[14px] leading-[20px] shadow-[0_5px_10px_rgb(0_0_0/20%)] p-[1px] max-w-[min(276px,var(--proto-ui-available-width))] max-h-[var(--proto-ui-available-height)] overflow-y-auto text-left whitespace-normal'
+        'w-auto rounded-[6px] border border-[rgb(0_0_0/20%)] bg-background bg-clip-padding text-foreground font-sans text-[14px] leading-[20px] shadow-[0_5px_10px_rgb(0_0_0/20%)] p-[1px] max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-y-auto text-left whitespace-normal'
       )
     );
     popover.asTransition.configure({ enterDuration: 150, leaveDuration: 150 });

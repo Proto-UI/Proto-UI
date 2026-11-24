@@ -7,7 +7,9 @@ sidebar:
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
@@ -16,37 +18,106 @@ Scroll Area 在保留宿主原生滚动体验的同时，提供 5px 圆角纸面
 ## 预览
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-scroll-area" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-scroll-area"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## 安装
 
-已包含在 `@proto.ui/prototypes-brutalist@0.2.0` 中。可通过 CLI 目标 `brutalist-scroll-area` 添加，或从 `@proto.ui/prototypes-brutalist/scroll-area` 导入。
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-scroll-area" manager="npm" />
+
+将 `wc` 替换为 `react`、`vue` 或 `vue2` 即可生成对应框架代码，或直接从 `@proto.ui/prototypes-brutalist/scroll-area` 导入。
 
 ## 用法
 
+```ts
+import {
+  BrutalistScrollAreaRoot,
+  BrutalistScrollAreaViewport,
+  BrutalistScrollAreaScrollbar,
+  BrutalistScrollAreaThumb,
+} from '@proto.ui/prototypes-brutalist/scroll-area';
+```
+
+```html
+<brutalist-scroll-area-root class="h-48 w-full max-w-80">
+  <brutalist-scroll-area-viewport>
+    <div class="p-4">Your scrollable content here.</div>
+  </brutalist-scroll-area-viewport>
+  <brutalist-scroll-area-scrollbar orientation="vertical">
+    <brutalist-scroll-area-thumb></brutalist-scroll-area-thumb>
+  </brutalist-scroll-area-scrollbar>
+</brutalist-scroll-area-root>
+```
+
 ### 组件结构
 
-Scroll Area 由 `Root`、`Viewport`、`Scrollbar` 和 `Thumb` 四个部分组成：
+```text
+Root
+├── Viewport
+└── Scrollbar
+    └── Thumb
+```
 
-- `Root`：外层滚动容器，需由外围布局提供明确的尺寸约束（示例使用 `12rem` 高度和响应式 `20rem` 最大宽度）。
-- `Viewport`：实际的宿主滚动视口。
-- `Scrollbar`：水平或垂直滚动轨道，通过 `orientation` 指定方向。
-- `Thumb`：根据实时滚动指标连续同步尺寸与位置的滑块；拖动滑块会直接映射为滚动请求，不会创建第二套滚动状态或额外的焦点停靠点。
+- `Root`：外层 5px 圆角 2px 边框容器，不带外阴影；尺寸由外围布局提供。
+- `Viewport`：实际的宿主滚动视口，仅在存在可滚动溢出时进入 `Tab` 焦点序列，聚焦时绘制内嵌焦点环与 forced-colors 轮廓。
+- `Scrollbar`：水平或垂直高对比轨道，通过 `orientation` 指定方向；双轴共存时自动在右下交点绘制匹配的浅紫底色与边框，单轴时自动释放。
+- `Thumb`：根据实时滚动指标连续同步尺寸与位置并支持指针拖动；无溢出时自动隐藏，高对比度模式下保持实体轮廓。
 
-### 双轴交点处理
+## 示例
 
-同时显示水平与垂直两条轨道时，两者会自动为右下交点预留避让区域（由水平滚动条绘制匹配的浅紫底色与边框），无需额外的 Corner 组件；当另一条轨道未渲染或隐藏时，预留空间会自动释放。没有内容溢出时，轨道保持可见而滑块自动隐藏。
+### 正文阅读
+
+仅挂载纵向轨道，用于长段叙事正文、条款或说明面板。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-scroll-area-prose"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 横向画廊
+
+通过 `orientation="horizontal"` 构建横向海报与卡片浏览条。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-scroll-area-horizontal"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-以下属性属于 `Scrollbar`：
+### 属性
+
+以下属性属于 `Scrollbar`（`Root`、`Viewport` 与 `Thumb` 无额外属性）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
-  rows={[{ name: 'orientation', type: "'horizontal' | 'vertical'", default: 'vertical' }]}
+  rows={[{ name: 'orientation', type: "'horizontal' | 'vertical'", default: "'vertical'" }]}
 />
 
-其余子部件：
+### 暴露状态
 
-- **Root**、**Viewport**、**Thumb**：无属性。
+- **Viewport**：`focused`、`focusVisible`、`scrollAxes`、`scrolling`、`scrollProjection`、`scrollXPosition`、`scrollXVisibleRatio`、`canScrollLeft`、`canScrollRight`、`scrollYPosition`、`scrollYVisibleRatio`、`canScrollUp`、`canScrollDown`。
+- **Scrollbar**：`orientation`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-SCROLL-AREA.yaml',
+    'P-BRUTALIST-SCROLL-AREA-VIEWPORT.yaml',
+    'P-BRUTALIST-SCROLL-AREA-SCROLLBAR.yaml',
+    'P-BRUTALIST-SCROLL-AREA-THUMB.yaml',
+    'P-BASE-SCROLL-AREA.yaml',
+  ]}
+/>

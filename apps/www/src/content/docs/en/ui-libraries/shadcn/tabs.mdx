@@ -1,66 +1,22 @@
 ---
 title: 'Tabs'
-description: 'Accessible tabbed panels with keyboard navigation, style presets, and lazy panel mounting.'
+description: 'Accessible tabbed panels with keyboard navigation, line and vertical variants, controlled state, and style presets.'
 ---
 
-import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
-import { codeMap } from '@/content/docs/demo_components/tabs/tabsCode';
-import { tabsProfileSwitchCode } from '@/content/docs/demo_components/tabs/tabs-profile-switch-code';
-import { getCode } from '@/utils/conversionUtils';
 
-Tabs organizes related views into switchable panels with one active panel at a time, supporting horizontal or vertical orientation and automatic or manual keyboard activation. The examples on this page use the **Shadcn Rhea** style preset.
+Tabs organizes related views into switchable panels displaying one active panel at a time, supporting horizontal or vertical orientation, line styling, and automatic or manual keyboard activation. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={getCode('wc', 'demo-shadcn-tabs', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={getCode('react', 'demo-shadcn-tabs', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={getCode('vue', 'demo-shadcn-tabs', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={getCode('vue2', 'demo-shadcn-tabs', codeMap)}
-  />
-</div>
-
-<AdapterPanelScript />
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## Installation
 
@@ -72,222 +28,212 @@ Replace `wc` with `react` or `vue` to generate the facade for your target framew
 
 ## Usage
 
-### Style presets and live switching
+```tsx
+import {
+  ShadcnTabsContent,
+  ShadcnTabsList,
+  ShadcnTabsRoot,
+  ShadcnTabsTrigger,
+} from '../proto-ui/components/react';
+```
 
-Tabs supports eight modern presets (`vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`) along with `new-york-v4`; unknown preset IDs are rejected rather than falling back silently.
+```tsx
+<ShadcnTabsRoot styleProfile="rhea" defaultValue="account">
+  <ShadcnTabsList styleProfile="rhea">
+    <ShadcnTabsTrigger styleProfile="rhea" value="account">
+      Account
+    </ShadcnTabsTrigger>
+    <ShadcnTabsTrigger styleProfile="rhea" value="password">
+      Password
+    </ShadcnTabsTrigger>
+  </ShadcnTabsList>
+  <ShadcnTabsContent styleProfile="rhea" value="account">
+    Make changes to your account here.
+  </ShadcnTabsContent>
+  <ShadcnTabsContent styleProfile="rhea" value="password">
+    Change your password here.
+  </ShadcnTabsContent>
+</ShadcnTabsRoot>
+```
 
-In the interactive example below, select **Password** and then switch between Nova, Rhea, and New York v4. Updating the enclosing style scope preserves the selected tab and child nodes on the same Tabs instance. To switch presets while a tab holds keyboard focus, press **Alt+1**, **Alt+2**, or **Alt+3** inside the demo.
+### Composition
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-profile-switch"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={tabsProfileSwitchCode.wc}
-  />
-</div>
+```text
+TabsRoot
+├── TabsList
+│   ├── TabsTrigger
+│   └── TabsTrigger
+├── TabsContent
+└── TabsContent
+```
 
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-profile-switch"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={tabsProfileSwitchCode.react}
-  />
-</div>
+- **Keyboard & accessibility**: Use `ArrowLeft` / `ArrowRight` in horizontal mode or `ArrowUp` / `ArrowDown` in vertical mode along with `Home` / `End` to move focus across enabled triggers; disabled triggers are skipped automatically.
+- **Panel mounting**: Inactive `TabsContent` unmounts its content by default; pass `keepMounted={true}` to keep hidden panels mounted.
 
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-profile-switch"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={tabsProfileSwitchCode.vue}
-  />
-</div>
+## Examples
 
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-profile-switch"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={tabsProfileSwitchCode.vue2}
-  />
-</div>
+### Line
 
-The three static examples below display the same content for direct visual comparison:
+Pass `variant="line"` on `TabsList` for a transparent track with an active underline indicator.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-line"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Vertical
+
+Pass `orientation="vertical"` on `TabsRoot` for a vertical tab strip beside the content panel.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Add `disabled` to any `TabsTrigger` to prevent activation and skip it during roving keyboard navigation.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Bind `value` on `TabsRoot` and subscribe to the exposed `valueChange` event to coordinate selection with external controls or router state.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Manual Activation & Keep Mounted
+
+Set `activationMode="manual"` so arrow keys move focus without switching panels until `Enter` or `Space` is pressed, combined with `loop` and `keepMounted`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-manual"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Style Presets & Live Switching
+
+Tabs supports eight modern presets (`vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`) plus `new-york-v4`. Updating the surrounding `shadcn-style-scope` changes appearance live while preserving selection and focus (press `Alt+1`, `Alt+2`, or `Alt+3` while focused to switch via keyboard).
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-profile-switch"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 #### Nova
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-nova"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={getCode('wc', 'demo-shadcn-tabs-preset-nova', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-nova"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={getCode('react', 'demo-shadcn-tabs-preset-nova', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-nova"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={getCode('vue', 'demo-shadcn-tabs-preset-nova', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-nova"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={getCode('vue2', 'demo-shadcn-tabs-preset-nova', codeMap)}
-  />
-</div>
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-preset-nova"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 #### Rhea
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-rhea"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={getCode('wc', 'demo-shadcn-tabs-preset-rhea', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-rhea"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={getCode('react', 'demo-shadcn-tabs-preset-rhea', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-rhea"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={getCode('vue', 'demo-shadcn-tabs-preset-rhea', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-rhea"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={getCode('vue2', 'demo-shadcn-tabs-preset-rhea', codeMap)}
-  />
-</div>
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-preset-rhea"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 #### New York v4
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-new-york-v4"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={getCode('wc', 'demo-shadcn-tabs-preset-new-york-v4', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-new-york-v4"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={getCode('react', 'demo-shadcn-tabs-preset-new-york-v4', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-new-york-v4"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={getCode('vue', 'demo-shadcn-tabs-preset-new-york-v4', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-new-york-v4"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={getCode('vue2', 'demo-shadcn-tabs-preset-new-york-v4', codeMap)}
-  />
-</div>
-
-### Panel mounting policy
-
-`TabsContent` unmounts inactive panel content by default (set `keepMounted={true}` to keep hidden panels mounted):
-
-- Only the active panel mounts its content nodes; inactive panels unmount their view while keeping the underlying component instance, state, and exposed handles intact.
-- On Web Components, the custom element host stays mounted and hidden while inactive, then re-renders its inner view inside the same host when reactivated.
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-preset-new-york-v4"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root` (pass `value` for controlled mode):
+### Root
+
+Exposes state `value` and event `valueChange({ value: string })`.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: 'undefined' },
     { name: 'defaultValue', type: 'string', default: "''" },
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
-    { name: 'activationMode', type: "'automatic' | 'manual'", default: 'automatic' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'activationMode', type: "'automatic' | 'manual'", default: "'automatic'" },
+    { name: 'styleProfile', type: "ShadcnStyleId | 'inherit'", default: "'inherit'" },
   ]}
 />
 
-Other part defaults:
+### List
 
-- `List`: `orientation` defaults to `'horizontal'`, `loop` to `false`, and `a11yLabel` to `''`.
-- `Trigger`: `value` defaults to `''` and `disabled` to `false`.
-- `Content`: `value` defaults to `''` and `keepMounted` to `false`.
+Exposes focus methods `focusFirst`, `focusLast`, `focusNext`, `focusPrev`, and `focusSelected`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'variant', type: "'default' | 'line'", default: "'default'" },
+    { name: 'appearance', type: "'default' | 'underline'", default: "'default'" },
+    { name: 'loop', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: "ShadcnStyleId | 'inherit'", default: "'inherit'" },
+  ]}
+/>
+
+### Trigger
+
+Exposes states `selected`, `disabled`, `hovered`, `focused`, `focusVisible`, `pressed`, method `focusSelf`, and event `click`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'appearance', type: "'default' | 'underline'", default: "'default'" },
+    { name: 'styleProfile', type: "ShadcnStyleId | 'inherit'", default: "'inherit'" },
+  ]}
+/>
+
+### Content
+
+Exposes states `current` and `hidden`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'keepMounted', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: "ShadcnStyleId | 'inherit'", default: "'inherit'" },
+  ]}
+/>
+
+### Indicator
+
+Optional semantic indicator part deriving `value`, `activeValue`, and `orientation`; placement and sizing remain consumer-styled.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'styleProfile', type: "ShadcnStyleId | 'inherit'", default: "'inherit'" }]}
+/>
 
 ## References
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-TABS.yaml', 'P-BASE-TABS.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-SHADCN-TABS.yaml',
+    'P-SHADCN-TABS-LIST.yaml',
+    'P-SHADCN-TABS-TRIGGER.yaml',
+    'P-SHADCN-TABS-CONTENT.yaml',
+    'P-SHADCN-TABS-INDICATOR.yaml',
+    'P-BASE-TABS.yaml',
+  ]}
+/>

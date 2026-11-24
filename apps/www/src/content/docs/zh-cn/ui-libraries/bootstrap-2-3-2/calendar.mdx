@@ -1,23 +1,15 @@
 ---
 title: 'Calendar'
-description: '支持单选、多选与范围选择的 Bootstrap 2.3.2 风格公历日期选择组件。'
+description: '支持单选、多选与日期范围选择的 Bootstrap 2.3.2 风格公历日历组件，沿用经典 4px 边框面板、渐变按钮与表格视觉语言。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Calendar 是支持 `single`（默认）、`multiple` 与 `range` 三种模式的公历控件，作为基于 Bootstrap 2.3.2 按钮、表单与表格视觉语言的扩展组件提供。
+Bootstrap 2.3.2 Calendar 是支持 `single`（默认）、`multiple` 与 `range` 三种模式的公历控件，作为基于 Bootstrap 2.3.2 经典渐变按钮、面板边框与表格排版的家族扩展组件提供。
 
 ## 预览
-
-### 单选、多选与范围选择
-
-<PrototypePreviewer
-  demoId="demo-bootstrap-2-3-2-calendar-selection"
-  initialRuntime="wc"
-  runtimes={['wc', 'react', 'vue', 'vue2']}
-/>
-
-### 月份与年份选择器组合
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-calendar"
@@ -27,37 +19,191 @@ Calendar 是支持 `single`（默认）、`multiple` 与 `range` 三种模式的
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前组件随源码工作区提供，尚未纳入 0.2.0 稳定版 CLI 注册表；可在工作区中直接从 `@proto.ui/prototypes-bootstrap-2-3-2/calendar` 引入。
 
 ## 用法
 
-### 组合结构与日期格式
+```tsx
+import {
+  CalendarRoot,
+  CalendarCaption,
+  CalendarPrevious,
+  CalendarHeading,
+  CalendarNext,
+  CalendarGrid,
+  CalendarWeekdays,
+  CalendarWeekday,
+  CalendarRow,
+  CalendarDay,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/calendar';
 
-由 `Root`、`Caption`、`Heading`、`Previous`、`Next`、`Grid`、`Weekdays`、`Weekday`、`Row` 和 `Day` 组成：
+export function BootstrapCalendarExample() {
+  return (
+    <CalendarRoot mode="single" defaultMonth="2026-10" defaultValue="2026-10-12" today="2026-10-08">
+      <CalendarCaption>
+        <CalendarPrevious a11yLabel="Previous month" />
+        <CalendarHeading />
+        <CalendarNext a11yLabel="Next month" />
+      </CalendarCaption>
+      <CalendarGrid>
+        <CalendarWeekdays>
+          {Array.from({ length: 7 }, (_, offset) => (
+            <CalendarWeekday key={offset} offset={offset} />
+          ))}
+        </CalendarWeekdays>
+        {Array.from({ length: 6 }, (_, row) => (
+          <CalendarRow key={row} index={row}>
+            {Array.from({ length: 7 }, (_, col) => (
+              <CalendarDay key={col} offset={row * 7 + col} />
+            ))}
+          </CalendarRow>
+        ))}
+      </CalendarGrid>
+    </CalendarRoot>
+  );
+}
+```
 
-- **日期格式**：日期值采用 `YYYY-MM-DD`，显示月份 `month` 采用 `YYYY-MM`，两者可分别受控。
-- **周数与布局**：默认显示覆盖当月所需的 4–6 周；设置 `fixedWeeks={true}` 可固定显示 6 周。可在模板中固定放置 6 个 `Row`（`index` `0`–`5`）和 42 个 `Day`（`offset` `0`–`41`），多余行列会自动标记 `hidden` 并移出焦点顺序。
-- **本地化与方向**：通过 `weekStartsOn`（`0` 表示周日）、`locale` 与 `direction="rtl"` 调整星期顺序、网格标签与方向键映射。纯图标导航按钮可通过 `a11yLabel` 提供可访问名称。
-- **当前日期**：组件不读取系统时钟，由宿主通过 `today` 传入 `YYYY-MM-DD` 字符串标记“今天”（对应 `aria-current="date"`）。初始显示月份优先级为：`month` → `defaultMonth` → 当前模式选中日期 → `today` → `1970-01`。
+### 组合结构、时钟与年月选择
 
-### 范围与多选规则
+- Calendar 由十个部件组成：`Root`、`Caption`、`Heading`、`Previous`、`Next`、`Grid`、`Weekdays`、`Weekday`、`Row` 与 `Day`。
+- 日期采用 `YYYY-MM-DD`，显示月份采用 `YYYY-MM`，两者可分别独立受控；默认渲染覆盖当月所需的 4–6 周，设置 `fixedWeeks={true}` 可固定显示 6 周。
+- 组件不读取系统时钟：请由宿主传入 `YYYY-MM-DD` 格式的 `today` 字符串标记“今天”（对应 `aria-current="date"`）。
+- `direction="rtl"` 自动镜像左右方向键；可通过 `bindCalendarCaption(source, { month, year })` 将两个同族 `Select` 与 Calendar 的 `month`、`disabled` 及 `requestMonth` 联动（退出时调用 `dispose()`）。
 
-- **多选（`multiple`）**：点击日期切换选中，结果自动去重并按日期升序排列。通过 `minSelected`（默认 `0`）和 `maxSelected` 限制数量；逐日增加时允许从空值逐步达到下限，取消选择时必须保留至少 `minSelected` 项。
-- **范围（`range`）**：首次点击确定起点 `{ from }`，再次点击完成含两端点的 `{ from, to }`（反向选择自动排序）；完成后再点任意日期开启新范围，传入 `{}` 清空。`minNights`（默认 `0`，允许单日范围）与 `maxNights` 约束起止日期间的天数差。
-- **日期限制**：使用 `min`、`max` 和 `Root` 的 `unavailable` 数组设置全局不可选日期（跨越不可用日期的范围会被拒绝并保留起点）；单个 `Day` 的 `disabled` 仅禁用该格。`readOnly` 允许浏览月份但禁止修改选择。
-- **范围状态**：每个 `Day` 除 `selected` 外，还提供 `rangeStart`、`rangeEnd`、`rangeMiddle` 与 `rangePending` 状态，便于区分端点与中段样式。
+### 选择模式
 
-### 组合月份/年份选择器
+| 模式       | 受控 / 初始值属性                                 | 变更事件                     |
+| ---------- | ------------------------------------------------- | ---------------------------- |
+| `single`   | `value` / `defaultValue`（`YYYY-MM-DD`）          | `onValueChange({ value })`   |
+| `multiple` | `values` / `defaultValues`（`readonly string[]`） | `onValuesChange({ values })` |
+| `range`    | `range` / `defaultRange`（`{ from?, to? }`）      | `onRangeChange({ range })`   |
 
-可使用 `bindCalendarCaption(source, { month, year })` 将两个 `Select` 与 `Calendar` 的 `month`、`disabled` 状态及 `requestMonth` 联动，并在卸载时调用 `dispose()` 清理订阅。月份/年份按钮可通过 `Select` 的 `accessibleLabel` 提供稳定名称。
+## 示例
+
+### 基础日历
+
+经典边框面板与 `.btn-primary` 选中态单日日历。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-calendar-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 日期范围
+
+`mode="range"` 自动衔接首尾 4px 圆角端点与浅蓝中段区间。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-calendar-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多选与范围约束
+
+结合 `min`、`max`、`unavailable`、`minNights`、`maxNights` 与 `maxSelected` 限制可选日期与跨度。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-calendar-selection"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 快捷预设
+
+配合受控 `value` / `month`、`fixedWeeks` 与同族 `Button` 快捷跳转日期。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-calendar-presets"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 已预订与不可用日期
+
+使用 `unavailable` 与 `min` / `max` 标记不可预订区间。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-calendar-booked-dates"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 从右到左（RTL）
+
+设置 `direction="rtl"`、`locale="ar-SA"` 与 `weekStartsOn={6}` 启用 RTL 布局与镜像键盘导航。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-calendar-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 模式       | 受控 / 初始值属性                            | 变更事件                     |
-| ---------- | -------------------------------------------- | ---------------------------- |
-| `single`   | `value` / `defaultValue`（`YYYY-MM-DD`）     | `onValueChange({ value })`   |
-| `multiple` | `values` / `defaultValues`（`string[]`）     | `onValuesChange({ values })` |
-| `range`    | `range` / `defaultRange`（`{ from?, to? }`） | `onRangeChange({ range })`   |
+### Root
 
-- **常用 `Root` 属性**：`mode`、`month` / `defaultMonth`、`today`、`min`、`max`、`unavailable`、`minSelected`、`maxSelected`、`minNights`、`maxNights`、`fixedWeeks`、`weekStartsOn`、`locale`、`direction`、`disabled`、`readOnly`。
-- **只读状态与方法**：`Root` 暴露 `mode`、`weekCount`、`selectedCount`、`rangeComplete`，以及 `requestMonth(month)`、`requestValue(date)`、`requestValues(dates)`、`requestRange(range)`、`getValues()`、`getRange()`。受控模式下，`request*` 返回 `true` 仅表示已发出变更请求，界面在父组件更新对应属性后生效。
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: "'single'" },
+    { name: 'value', type: 'string', default: 'undefined' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'values', type: 'readonly string[]', default: 'undefined' },
+    { name: 'defaultValues', type: 'readonly string[]', default: '[]' },
+    { name: 'range', type: 'CalendarRange', default: 'undefined' },
+    { name: 'defaultRange', type: 'CalendarRange', default: '{}' },
+    { name: 'minSelected', type: 'number', default: '0' },
+    { name: 'maxSelected', type: 'number', default: 'undefined' },
+    { name: 'minNights', type: 'number', default: '0' },
+    { name: 'maxNights', type: 'number', default: 'undefined' },
+    { name: 'month', type: 'string', default: 'undefined' },
+    { name: 'defaultMonth', type: 'string', default: 'undefined' },
+    { name: 'min', type: 'string', default: "''" },
+    { name: 'max', type: 'string', default: "''" },
+    { name: 'unavailable', type: 'readonly string[]', default: '[]' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'weekStartsOn', type: 'number', default: '0' },
+    { name: 'fixedWeeks', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "'Calendar'" },
+    { name: 'today', type: 'string', default: "''" },
+    { name: 'locale', type: 'string', default: "'en-US'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+  ]}
+/>
+
+### 子部件属性
+
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Day.date', type: 'string', default: "''" },
+    { name: 'Day.offset', type: 'number', default: '0' },
+    { name: 'Day.disabled', type: 'boolean', default: 'false' },
+    { name: 'Row.index', type: 'number', default: 'undefined' },
+    { name: 'Weekday.offset', type: 'number', default: '0' },
+    { name: 'Caption.a11yLabel', type: 'string', default: "'Calendar navigation'" },
+    {
+      name: 'Previous / Next.a11yLabel',
+      type: 'string',
+      default: "'Previous month' / 'Next month'",
+    },
+    { name: 'Previous / Next.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### 事件、方法与暴露状态
+
+- **事件（Root）**：`onValueChange({ value })`、`onValuesChange({ values })`、`onRangeChange({ range })`、`onMonthChange({ month })`。
+- **方法（Root）**：`requestValue(date)`、`requestValues(dates)`、`requestRange(range)`、`requestMonth(month)`、`getValues()`、`getRange()`。
+- **暴露状态**：Root 暴露 `value`、`mode`、`selectedCount`、`rangeComplete`、`month`、`weekCount`、`disabled`、`direction`；Day 暴露 `date`、`selected`、`rangeStart`、`rangeEnd`、`rangeMiddle`、`rangePending`、`today`、`outside`、`disabled`、`hidden`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-CALENDAR.yaml', 'P-BASE-CALENDAR.yaml']}
+/>

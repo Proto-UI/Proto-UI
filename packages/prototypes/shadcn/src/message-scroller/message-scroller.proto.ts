@@ -16,11 +16,15 @@ import {
   setupShadcnStyleSelection,
   type ShadcnStyleProps,
 } from '../style-scope';
-import { setupMessageJumpPaint } from './visual';
+import { setupMessageJumpPaint, type ShadcnMessageScrollerJumpSize } from './visual';
 export type * from '@proto.ui/prototypes-base/message-scroller';
+export type { ShadcnMessageScrollerJumpSize } from './visual';
 export type ShadcnMessageScrollerRootProps = MessageScrollerRootProps & ShadcnStyleProps;
 export type ShadcnMessageScrollerViewportProps = ShadcnStyleProps;
-export type ShadcnMessageScrollerJumpProps = MessageScrollerJumpProps & ShadcnStyleProps;
+export type ShadcnMessageScrollerJumpProps = MessageScrollerJumpProps &
+  ShadcnStyleProps & {
+    size?: ShadcnMessageScrollerJumpSize;
+  };
 
 // shadcn-ui/ui@3d98900e: bases/base/ui/message-scroller.tsx and the
 // independently retained new-york-v4/ui/message-scroller.tsx. The Base
@@ -50,18 +54,52 @@ export const messageScrollerViewport = definePrototype<
   modules: asMessageScrollerViewport.modules,
   setup(def) {
     const inherited = asMessageScrollerViewport();
-    setupShadcnStyleSelection(def, 'new-york-v4');
+    const style = setupShadcnStyleSelection(def, 'new-york-v4');
     const state = inherited.getAsHookHandle?.('as-scroll-area-viewport')?.stateHandles;
     if (!state)
       throw new Error('[shadcn-message-scroller] Required viewport focus state is unavailable.');
     // The inherited Scroll Surface alone owns while-at-end follow, requests,
     // reader interruption and system/composed negotiation. Paint cannot
     // convert an ordinary system scroller into clipped, non-scrollable content.
-    def.feedback.style.use(tw('h-full w-full min-h-0 min-w-0 overflow-y-auto'));
+    def.feedback.style.use(
+      tw('h-full w-full min-h-0 min-w-0 overflow-y-auto overscroll-contain outline-none')
+    );
     def.rule({
-      when: (w) => w.state(state.focusVisible).eq(true),
+      when: (w) => w.all(w.state(state.focusVisible).eq(true), w.state(style).eq('lyra')),
       intent: (i) =>
-        i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
+        i.feedback.style.use(tw('ring-1 ring-ring/50 ring-inset forced-colors-focus-outline')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(state.focusVisible).eq(true),
+          w.any(w.state(style).eq('mira'), w.state(style).eq('sera'))
+        ),
+      intent: (i) =>
+        i.feedback.style.use(tw('ring-2 ring-ring/30 ring-inset forced-colors-focus-outline')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(state.focusVisible).eq(true),
+          w.any(w.state(style).eq('luma'), w.state(style).eq('rhea'))
+        ),
+      intent: (i) =>
+        i.feedback.style.use(tw('ring-3 ring-ring/30 ring-inset forced-colors-focus-outline')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(state.focusVisible).eq(true),
+          w.any(
+            w.state(style).eq('vega'),
+            w.state(style).eq('nova'),
+            w.state(style).eq('maia'),
+            w.state(style).eq('new-york-v4')
+          )
+        ),
+      intent: (i) =>
+        i.feedback.style.use(tw('ring-2 ring-ring ring-inset forced-colors-focus-outline')),
     });
     return inherited.render;
   },

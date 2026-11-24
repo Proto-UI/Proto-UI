@@ -4,8 +4,10 @@ description: 'A Bootstrap 2.3.2 virtualized list that renders only visible items
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Virtual List decouples a stable logical key sequence from rendered DOM nodes, mounting only items in the visible viewport plus an overscan buffer for smooth scrolling over large datasets.
+Virtual List decouples a stable logical key sequence from mounted DOM rows, rendering only items in the visible viewport and overscan buffer. The Bootstrap 2.3.2 projection pairs classic 4px rounded borders, a subtle inset bevel, and 14px/20px Helvetica typography with bounded virtualization.
 
 ## Preview
 
@@ -17,16 +19,184 @@ Virtual List decouples a stable logical key sequence from rendered DOM nodes, mo
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes from `@proto.ui/prototypes-bootstrap-2-3-2/virtual-list` and connect a Web scroll container through `@proto.ui/prototypes-base/virtual-list/web`.
 
 ## Usage
 
-- **Bounded rendering model**: The host-neutral core tracks stable logical keys, item-count `overscan`, and a maximum materialized item cap so application content is created only for the visible window.
-- **Web integration**: The `virtual-list/web` entry measures variable item heights, manages scroll spacers, reuses keyed nodes, scrolls to any key on demand, and cleans up listeners on teardown.
+Virtual List consists of `Root`, `Viewport`, and `Content`: `Root` tracks the ordered `itemKeys` sequence and outer container border, `Viewport` handles scrolling and inset focus feedback, and `Content` hosts materialized row elements.
+
+```ts
+import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import {
+  virtualListRoot,
+  virtualListViewport,
+  virtualListContent,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/virtual-list';
+import { attachWebVirtualList } from '@proto.ui/prototypes-base/virtual-list/web';
+
+AdaptToWebComponent(virtualListRoot);
+AdaptToWebComponent(virtualListViewport);
+AdaptToWebComponent(virtualListContent);
+
+const list = document.querySelector('bootstrap-2-3-2-virtual-list-root')!;
+const viewport = document.querySelector('bootstrap-2-3-2-virtual-list-viewport')!;
+const content = document.querySelector('bootstrap-2-3-2-virtual-list-content')!;
+
+setElementProps(list, {
+  itemKeys: Array.from({ length: 1000 }, (_, i) => `event-${i + 1}`),
+  overscanItems: 3,
+  maxMaterializedItems: 60,
+});
+
+const host = attachWebVirtualList({
+  viewport,
+  content,
+  collection: list.getExposes().getCollection(),
+  estimateSize: 62,
+  renderItem(key) {
+    const row = document.createElement('div');
+    row.className = 'border-b border-border px-3 py-2 text-[14px] leading-[20px]';
+    row.textContent = key;
+    return row;
+  },
+});
+
+// Scroll to a key on demand and dispose on teardown
+host.ensureVisible('event-250', 'center');
+// host.dispose();
+```
+
+### Anatomy & Accessibility
+
+- `Root` sets `role="region"` with `a11yLabel`, 4px rounded corners, a 1px semantic border, and `overflow-hidden` clipping.
+- `Viewport` enables `overflow-auto` scrolling out of the box and renders a clean 2px inset focus ring on keyboard focus.
+- `Content` sets `role="list"`, and mounted rows automatically receive `role="listitem"`, `aria-posinset`, and `aria-setsize`.
+
+### Advanced: Custom Materializers
+
+- Each logical list allows one active materializer at a time; `attachWebVirtualList` manages the lease automatically and cleans up rows and observers when `Root` unmounts or disposes.
+- Dispose an active materializer before attaching a replacement. Non-Web hosts can integrate through `collection.acquireMaterializer(onRetired)`.
+
+## Examples
+
+### Scroll to Item
+
+Call `ensureVisible(key, align)` to scroll any logical key into view with `'start'`, `'center'`, `'end'`, or `'nearest'` alignment.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-virtual-list-jump"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Dynamic Filtering & Empty State
+
+Updating `itemKeys` on `Root` automatically reconciles the materialized window and supports empty-list feedback.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-virtual-list-filter"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Overscan & Bounded Materialization
+
+Compare `overscanItems` settings and monitor bounded DOM row counts across 2,000 logical entries.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-virtual-list-window"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Capability / Entry | Description |
-| --- | --- |
-| Core model | Tracks stable logical keys, item-count `overscan`, and max materialized count |
-| `virtual-list/web` | Measures variable extents, manages spacers, supports scroll-to-key, and cleans up listeners |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'itemKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'overscanItems', type: 'number', default: '2' },
+    { name: 'maxMaterializedItems', type: 'number', default: '100' },
+    { name: 'a11yLabel', type: 'string', default: "'Virtual list'" },
+  ]}
+/>
+
+### Viewport & Content
+
+`Viewport` and `Content` add no additional component props.
+
+### Root Exposes
+
+<ApiPropsTable
+  headers={{ name: 'Member', type: 'Type', default: 'Description' }}
+  rows={[
+    {
+      name: 'logicalCount',
+      type: 'ExposeState<number>',
+      default: 'Total number of logical item keys',
+    },
+    {
+      name: 'getCollection',
+      type: '() => WindowedCollection',
+      default: 'Returns the collection model for host attachment',
+    },
+    {
+      name: 'getWindow',
+      type: '() => WindowSnapshot',
+      default: 'Returns the current revision, committed range, and materialized keys',
+    },
+  ]}
+/>
+
+### attachWebVirtualList
+
+<ApiPropsTable
+  headers={{ name: 'Option / Method', type: 'Type', default: 'Default / Description' }}
+  rows={[
+    { name: 'viewport', type: 'HTMLElement', default: 'Scrollable viewport element (required)' },
+    {
+      name: 'content',
+      type: 'HTMLElement',
+      default: 'List element hosting spacers and rows (required)',
+    },
+    {
+      name: 'collection',
+      type: 'WindowedCollection',
+      default: 'Collection from Root getCollection() (required)',
+    },
+    {
+      name: 'renderItem',
+      type: '(key: string) => HTMLElement',
+      default: 'Creates a row element for a key; mounted keys are reused (required)',
+    },
+    {
+      name: 'estimateSize',
+      type: 'number',
+      default: '36 (estimated height in px before measurement)',
+    },
+    {
+      name: 'refresh()',
+      type: '() => void',
+      default: 'Re-evaluates viewport geometry and materialization',
+    },
+    {
+      name: 'ensureVisible(key, align?)',
+      type: "(key: string, align?: 'nearest' | 'start' | 'center' | 'end') => boolean",
+      default: 'Scrolls the target key into view and returns whether it materialized',
+    },
+    {
+      name: 'dispose()',
+      type: '() => void',
+      default: 'Disconnects listeners/observers, clears rows, and releases the lease',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-VIRTUAL-LIST.yaml', 'P-BASE-VIRTUAL-LIST.yaml']}
+/>

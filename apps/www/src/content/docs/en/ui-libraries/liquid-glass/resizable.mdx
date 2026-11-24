@@ -1,11 +1,13 @@
 ---
 title: 'Resizable'
-description: 'A Liquid Glass multi-panel resizable layout with percentage sizing, collapsible bounds, and nested orientations.'
+description: 'A Liquid Glass multi-panel resizable layout with neutral content panes, concentric corners, capsule grabbers, and accessible opaque fallbacks.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Resizable splits a container into two or more percentage-sized panels separated by indexed drag handles. Each handle resizes only its adjacent pair through pointer drag, arrow keys, Home/End, Shift acceleration, and optional collapsing.
+A Liquid Glass resizable panel group that keeps content panes neutral without stacking nested chrome: the outer frame uses a concentric `rounded-2xl` translucent surface (with `variant="nested"` for inner groups), handles support `regular` and `prominent` capsule grabbers, and reduced-transparency, forced-colors, or `material="opaque"` settings cleanly fall back to solid contrast-preserving fills.
 
 ## Preview
 
@@ -15,25 +17,139 @@ Liquid Glass Resizable splits a container into two or more percentage-sized pane
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-The preview nests a two-panel vertical group inside a three-panel horizontal layout. Each panel exposes its dimensionless size via `--pui-size` for static `flex-basis` styling.
-
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-liquid-glass/resizable` and adapt them for your target runtime:
+
+```ts
+import {
+  resizableRoot,
+  resizablePanel,
+  resizableHandle,
+} from '@proto.ui/prototypes-liquid-glass/resizable';
+```
 
 ## Usage
 
-- **Panels and handles**: provide `N` `Panel` parts (`index: 0..N-1`) and `N - 1` `Handle` parts (`index: 0..N-2`). Each handle keeps the pair total and all other panels unchanged, with default accessible name `Resize panels`.
-- **Constraints and collapsing**: pass per-panel `constraints` (`min: 0`, `max: 100`, `collapsible: false`, `collapsedSize: 0`). Ratios normalize to `100`, and infeasible layouts retain the previous valid state. Collapsing acts as a discrete stop and respects the neighbor's `max`.
-- **Controlled mode and nesting**: pass `sizes` for controlled mode and handle `sizesChange` / `sizesCommit` with payload `{ sizes }` (cancelled drags emit no commit). The legacy two-panel `value` / `defaultValue` props remain supported when `sizes` is omitted. Nested Roots maintain independent layouts and constraints, and dragging normalizes against panel border-box extent without counting fixed handle widths.
+```tsx
+import {
+  LiquidGlassResizableRoot,
+  LiquidGlassResizablePanel,
+  LiquidGlassResizableHandle,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <div className="w-full max-w-lg rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6">
+      <LiquidGlassResizableRoot defaultSizes={[50, 50]} className="h-56 w-full">
+        <LiquidGlassResizablePanel index={0}>One</LiquidGlassResizablePanel>
+        <LiquidGlassResizableHandle index={0} withHandle />
+        <LiquidGlassResizablePanel index={1}>Two</LiquidGlassResizablePanel>
+      </LiquidGlassResizableRoot>
+    </div>
+  );
+}
+```
+
+### Composition
+
+```text
+LiquidGlassResizableRoot (variant="default" | "nested", material="auto" | "opaque")
+├── LiquidGlassResizablePanel (index: 0)
+├── LiquidGlassResizableHandle (index: 0, withHandle?, prominence?, material?)
+└── LiquidGlassResizablePanel (index: 1)
+```
+
+- **Hierarchy & concentric geometry**: content panels stay neutral while the outer `Root` supplies a `rounded-2xl` shell. Pass `variant="nested"` on inner split groups to prevent stacked frames; enable `withHandle` on `Handle` to display a centered `rounded-full` capsule grabber.
+- **Accessible fallbacks**: `material="auto"` enables translucent layering only when reduced-transparency and forced-colors preferences are inactive; passing `material="opaque"` forces solid fills. Disabled handles preserve opaque legibility without dimming the surface with `opacity`.
+- **Multi-panel, constraints & keyboard**: supports `sizes` / `defaultSizes`, per-panel `constraints`, pointer drag, arrow keys, `Shift` acceleration, `Home` / `End`, and `Enter` collapsing, with `Resize panels` as the default handle label.
+
+## Examples
+
+### Vertical
+
+Use `orientation="vertical"` for vertically stacked resizable panels.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-resizable-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Handle & Prominence
+
+The top group compares `prominence="regular"` and `prominence="prominent"` capsule grabbers; the bottom group shows the default hairline separator.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-resizable-handle"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Pass `direction="rtl"` to mirror panel order and horizontal arrow-key behavior.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-resizable-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Multi-panel & Collapsible
+
+Combine three panels with a collapsible sidebar. Focus the first handle and press `Enter` to toggle collapse.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-resizable-collapsible"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop / Method / Event | Defaults and notes |
-| --- | --- | --- |
-| Root | `sizes`, `defaultSizes` | Controlled / uncontrolled percentage array totaling `100` (takes precedence over `value` / `defaultValue`) |
-| Root | `constraints` | Per-panel `{ min, max, collapsible, collapsedSize }` (defaults `0`, `100`, `false`, `0`) |
-| Root | `requestResize(index, nextSize, commit)`, `requestSizes(nextSizes, commit)` | Programmatically propose panel resize updates |
-| Root | `sizesChange`, `sizesCommit` | Emitted during resize and on commit with `{ sizes }` |
-| Panel | `index` | Panel index (`0..N-1`); exposes dimensionless `size` (`--pui-size`) |
-| Handle | `index` | Separator index (`0..N-2`) referencing its preceding panel |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'variant', type: "'default' | 'nested'", default: "'default'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'sizes', type: 'readonly number[]', default: '—' },
+    { name: 'defaultSizes', type: 'readonly number[]', default: '—' },
+    { name: 'constraints', type: 'readonly ResizablePanelConstraint[]', default: '[]' },
+    { name: 'value', type: 'number', default: '—' },
+    { name: 'defaultValue', type: 'number', default: '50' },
+    { name: 'min', type: 'number', default: '10' },
+    { name: 'max', type: 'number', default: '90' },
+    { name: 'step', type: 'number', default: '1' },
+    { name: 'collapsible', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+  ]}
+/>
+
+### Panel & Handle
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Panel.index', type: 'number', default: '0' },
+    { name: 'Handle.index', type: 'number', default: '0' },
+    { name: 'Handle.withHandle', type: 'boolean', default: 'false' },
+    { name: 'Handle.prominence', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'Handle.material', type: "'auto' | 'opaque'", default: "'auto'" },
+  ]}
+/>
+
+- **Exposed states**: Root exposes `value` and `sizes`; Panel exposes `size`; Handle exposes `value`, `focusVisible`, and `disabled`.
+- **Events & methods**: Root emits `sizesChange`, `sizesCommit`, `valueChange`, and `valueCommit`, and exposes `requestResize(index, next, commit?)`, `requestSizes(next, commit?)`, `requestValue(next, commit?)`, and `cancelResize()`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-RESIZABLE.yaml', 'P-BASE-RESIZABLE.yaml']}
+/>

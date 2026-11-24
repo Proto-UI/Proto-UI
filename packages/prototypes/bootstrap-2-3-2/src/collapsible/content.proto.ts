@@ -12,6 +12,7 @@ const collapsibleContent = definePrototype<
   Bootstrap232CollapsibleContentExposes
 >({
   name: 'bootstrap-2-3-2-collapsible-content',
+  modules: asCollapsibleContent.modules,
   setup(def) {
     const transition = asTransition();
     const inherited = asCollapsibleContent();
@@ -36,7 +37,7 @@ const collapsibleContent = definePrototype<
       renderer.el(
         'div',
         {
-          style: tw('border-t border-[#e5e5e5] px-[15px] py-[9px]'),
+          style: tw('border-t border-[#e5e5e5] dark:border-border px-[15px] py-[9px]'),
         },
         renderer.slot()
       );

@@ -1,11 +1,13 @@
 ---
-title: 'Accordion'
-description: 'A five-part Liquid Glass accordion with single or multiple expansion, natural Tab order, and explicit content lifecycle.'
+title: 'Liquid Glass Accordion'
+description: 'A five-part Liquid Glass accordion separating translucent interactive triggers from opaque readable content, with regular/prominent hierarchy and accessible fallbacks.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Accordion composes five parts—Root, Item, Heading, Trigger, and Content—built on Base Accordion semantics with Liquid Glass styling on the interactive trigger.
+Liquid Glass Accordion composes five parts—Root, Item, Heading, Trigger, and Content—built on Base Accordion semantics. Only the interactive `Trigger` carries Liquid Glass optical material and press deformation, while `Content` stays opaque for legibility and never stacks glass on glass.
 
 ## Preview
 
@@ -14,54 +16,249 @@ Liquid Glass Accordion composes five parts—Root, Item, Heading, Trigger, and C
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
   toolbar={true}
-  codePanel={false}
 />
 
-Use the preview toolbar’s real family Select to switch among WC, React, Vue, and Vue 2. The page header runtime preference remains synchronized.
+Use the preview toolbar's real family Select to switch among WC, React, Vue, and Vue 2. The page header runtime preference remains synchronized.
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `accordionRoot`, `accordionItem`, `accordionHeading`, `accordionTrigger`, and `accordionContent` from `@proto.ui/prototypes-liquid-glass/accordion`.
+Available from workspace source by importing the five prototypes from `@proto.ui/prototypes-liquid-glass/accordion`:
+
+```ts
+import {
+  accordionRoot,
+  accordionItem,
+  accordionHeading,
+  accordionTrigger,
+  accordionContent,
+} from '@proto.ui/prototypes-liquid-glass/accordion';
+```
 
 ## Usage
 
-### Composition and state
+```tsx
+import {
+  LiquidGlassAccordionRoot,
+  LiquidGlassAccordionItem,
+  LiquidGlassAccordionHeading,
+  LiquidGlassAccordionTrigger,
+  LiquidGlassAccordionContent,
+} from '@/components/proto-ui/react';
 
-Compose `Root → Item → Heading → Trigger` with `Content` beside `Heading`. Give every `Item` a unique, stable, non-empty `value`. Root manages the expanded key set and nested Roots stay independent. Keep only the controlling `Trigger` inside `Heading` and place persistent secondary actions alongside it.
+export function LiquidGlassAccordionUsage() {
+  return (
+    <div className="rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6">
+      <LiquidGlassAccordionRoot defaultOpenItems={['item-1']}>
+        <LiquidGlassAccordionItem value="item-1">
+          <LiquidGlassAccordionHeading level={3}>
+            <LiquidGlassAccordionTrigger>How do I reset my password?</LiquidGlassAccordionTrigger>
+          </LiquidGlassAccordionHeading>
+          <LiquidGlassAccordionContent>
+            Click on 'Forgot Password' on the login page to receive a reset link.
+          </LiquidGlassAccordionContent>
+        </LiquidGlassAccordionItem>
+      </LiquidGlassAccordionRoot>
+    </div>
+  );
+}
+```
 
-- Duplicate input keys are deduplicated, and duplicate `Item` registrations are ignored. In `single` mode, the first unique key is used.
-- Unknown keys stay dormant to support progressive mounting; requests targeting missing keys are ignored.
-- In controlled mode, interactions emit `openChange` without mutating state optimistically; pass the updated `openItems` back to Root to accept the change.
+### Anatomy and material layering
+
+```text
+AccordionRoot
+└── AccordionItem (transparent structural frame)
+    ├── AccordionHeading (paint reservation boundary)
+    │   └── AccordionTrigger (optical Liquid Glass interactive surface)
+    └── AccordionContent (opaque readable content surface)
+```
+
+- **Single optical layer**: `Item` stays transparent so it never obscures backdrop sampling or stacks glass on glass; `Content` owns its opaque surface, subtle top divider, and reading padding.
+- **Prominence and accessibility fallbacks**: `Trigger` supports `prominence="regular" | "prominent"` and an explicit `material="opaque"` opt-out. Under `prefers-reduced-transparency: reduce`, `forced-colors: active`, disabled/collapse-blocked states, or hosts without an optical sink, optical candidates withdraw cleanly to readable opaque theme tokens.
+- **Readable disabled state**: Disabled triggers withdraw optical elevation and pointer interaction without dimming the entire host via `opacity-50`.
 
 ### Keyboard and accessibility
 
-- Enabled headers and focusable elements inside your children stay in the natural Tab order. Enter and Space toggle the focused item.
-- Up/Down (vertical) or Left/Right (horizontal, reversed in RTL), plus Home/End, move focus across enabled headers without changing open items.
-- Disabled headers are skipped. When `allowEmpty={false}`, the last remaining open header stays focusable with `aria-disabled` preventing collapse.
-- `Heading` sets the heading level and `Trigger` wires button semantics, expanded state, and item-scoped `aria-controls`. Opt into a landmark on `Content` with `region={true}` when appropriate.
+- Enabled triggers and focusable elements inside open content stay in the natural `Tab` order; `Enter` and `Space` toggle the focused item.
+- `ArrowUp` / `ArrowDown` (vertical) or `ArrowLeft` / `ArrowRight` (horizontal, reversed in RTL) plus `Home` / `End` move focus between enabled headers without changing open items.
+- Disabled headers are skipped; when `allowEmpty={false}`, the last remaining open header stays focusable with `aria-disabled` preventing collapse.
 
-### Content lifecycle and material
+## Examples
 
-- Closed Content unmounts when closed by default (set `keepMounted={true}` to keep a hidden node mounted). Accordion does not relocate focus or add a delayed-close timer.
-- Only `Trigger` declares `liquid-glass` optical intent and press deformation; other parts stay opaque and readable. Hosts without optical support use the declared opaque fallback.
+### Basic
+
+Single-open accordion showcased over a colorful gradient stage to highlight Liquid Glass translucency.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-accordion-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Multiple
+
+Set `mode="multiple"` to expand several sections independently.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-accordion-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Disabled sections withdraw optical elevation while preserving full opaque text contrast.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-accordion-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Prominence and opaque opt-out
+
+Compare `prominence="regular"`, `prominence="prominent"`, and `material="opaque"` triggers.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-accordion-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props | Defaults and notes |
-| --- | --- | --- |
-| Root | `mode` | `'single'`; `'multiple'` allows independent open items |
-| Root | `openItems`, `defaultOpenItems` | String arrays; supplying `openItems` enables controlled mode, `defaultOpenItems` initializes once |
-| Root | `allowEmpty` | `true`; `false` prevents closing the last open item |
-| Root | `disabled` | `false`; suppresses activation without modifying controlled input |
-| Root | `orientation`, `direction`, `loop` | `'vertical'`, `'ltr'`, `true`; governs header arrow navigation |
-| Item | `value`, `disabled` | Required non-empty stable `value`; `disabled` defaults to `false` |
-| Heading | `level` | Integer `1–6`, default `3` |
-| Trigger | — | Derives state from Item and Root |
-| Content | `keepMounted`, `region` | Both `false`; keeps hidden node mounted / opts into landmark role |
+### Root
 
-### Events and methods
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'mode',
+      type: "'single' | 'multiple'",
+      default: "'single'",
+      description: 'Allows one or multiple independent open items',
+    },
+    {
+      name: 'openItems',
+      type: 'string[]',
+      default: '—',
+      description: 'Controlled list of open item keys',
+    },
+    {
+      name: 'defaultOpenItems',
+      type: 'string[]',
+      default: '[]',
+      description: 'Initial open keys in uncontrolled mode',
+    },
+    {
+      name: 'allowEmpty',
+      type: 'boolean',
+      default: 'true',
+      description: 'Prevents closing the last open item when false',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disables interaction without modifying controlled values',
+    },
+    {
+      name: 'orientation',
+      type: "'vertical' | 'horizontal'",
+      default: "'vertical'",
+      description: 'Layout axis and header arrow navigation axis',
+    },
+    {
+      name: 'direction',
+      type: "'ltr' | 'rtl'",
+      default: "'ltr'",
+      description: 'Reading direction and horizontal arrow reversal',
+    },
+    {
+      name: 'loop',
+      type: 'boolean',
+      default: 'true',
+      description: 'Wraps keyboard focus from end to start',
+    },
+  ]}
+/>
 
-- `getOpenItems()`: returns a copy of the current open key array.
-- `openCount`: number of open keys (including dormant keys).
-- `requestOpen(value, open, reason?)`: proposes opening or closing an item (`reason` is `'pointer' | 'keyboard' | 'programmatic'`).
-- `openChange`: payload `{ openItems, value, open, reason }`. Initialization, controlled sync, and no-op requests do not emit.
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'material',
+      type: "'auto' | 'opaque'",
+      default: "'auto'",
+      description:
+        'auto submits optical candidates while honoring reduced transparency; opaque forces an opaque surface',
+    },
+    {
+      name: 'prominence',
+      type: "'regular' | 'prominent'",
+      default: "'regular'",
+      description: 'Selects regular translucent glass or primary-tinted prominent emphasis',
+    },
+  ]}
+/>
+
+### Item / Heading / Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'Item.value',
+      type: 'string',
+      default: 'Required',
+      description: 'Unique stable non-empty key for this item',
+    },
+    {
+      name: 'Item.disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disables interaction for this item',
+    },
+    {
+      name: 'Heading.level',
+      type: '1 | 2 | 3 | 4 | 5 | 6',
+      default: '3',
+      description: 'Semantic heading level (aria-level)',
+    },
+    {
+      name: 'Content.keepMounted',
+      type: 'boolean',
+      default: 'false',
+      description: 'Retains the hidden content node when closed',
+    },
+    {
+      name: 'Content.region',
+      type: 'boolean',
+      default: 'false',
+      description: 'Opts into an explicit landmark region role',
+    },
+  ]}
+/>
+
+### Methods and events (Root)
+
+- `getOpenItems()`: Returns a copy of the current open key array.
+- `openCount`: Number of open keys (including dormant keys).
+- `requestOpen(value, open, reason?)`: Proposes opening or closing an item (`reason` is `'pointer' | 'keyboard' | 'programmatic'`).
+- `openChange`: Payload `{ openItems, value, open, reason }`. Initialization, controlled sync, and no-op requests do not emit.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-ACCORDION.yaml',
+    'P-LIQUID-GLASS-ACCORDION-ITEM.yaml',
+    'P-LIQUID-GLASS-ACCORDION-HEADING.yaml',
+    'P-LIQUID-GLASS-ACCORDION-TRIGGER.yaml',
+    'P-LIQUID-GLASS-ACCORDION-CONTENT.yaml',
+    'P-BASE-ACCORDION.yaml',
+  ]}
+/>

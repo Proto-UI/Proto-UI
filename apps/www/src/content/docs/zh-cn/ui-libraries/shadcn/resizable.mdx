@@ -1,13 +1,13 @@
 ---
 title: 'Resizable'
-description: '支持多面板比例分配、折叠与嵌套布局的可调整分栏组件。'
+description: '支持多面板比例分配、折叠停靠、RTL 布局与嵌套分栏的可调整面板组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Resizable 将容器划分为两个或多个按百分比分配尺寸的面板，支持通过指针拖动或键盘操作连续调整相邻面板比例，也支持嵌套分栏布局。本页示例使用 **Shadcn Rhea** 风格。
+支持键盘操作、约束折叠与嵌套方向的可调整分栏组件。本页示例使用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -19,40 +19,109 @@ Resizable 将容器划分为两个或多个按百分比分配尺寸的面板，�
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-shadcn/resizable` 导入原型并使用目标宿主 Adapter 适配：
+
+```ts
+import {
+  resizableRoot,
+  resizablePanel,
+  resizableHandle,
+} from '@proto.ui/prototypes-shadcn/resizable';
+```
 
 ## 用法
 
-Resizable 由 `Root`、`Panel` 和 `Handle` 组成：
+```tsx
+import {
+  ShadcnResizableRoot,
+  ShadcnResizablePanel,
+  ShadcnResizableHandle,
+} from '../proto-ui/components/react';
 
-- `Root` 统一管理面板尺寸比例、方向与约束。
-- 布局包含 N 个 `Panel`（`index: 0..N-1`）与 N−1 个 `Handle`（`index: 0..N-2`）。每个 `Handle` 仅调整其相邻的两个面板，保持这两个面板的总比例及其他面板尺寸不变。
-- `Panel` 会将无量纲尺寸暴露给静态 CSS 变量 `--pui-size`，用于 `flex-basis` 计算。
+export function Example() {
+  return (
+    <ShadcnResizableRoot
+      orientation="horizontal"
+      defaultSizes={[50, 50]}
+      className="h-56 max-w-md rounded-lg border border-border overflow-hidden"
+    >
+      <ShadcnResizablePanel index={0}>One</ShadcnResizablePanel>
+      <ShadcnResizableHandle index={0} withHandle />
+      <ShadcnResizablePanel index={1}>Two</ShadcnResizablePanel>
+    </ShadcnResizableRoot>
+  );
+}
+```
 
-### 多面板与约束配置
+### 组合结构
 
-- 通过 `sizes`（受控）或 `defaultSizes`（非受控）传入完整的百分比数组；若仅构建双面板，也可以继续使用 `value` / `defaultValue`（同时提供 `sizes` 时以 `sizes` 为准）。
-- `constraints` 可按面板索引配置 `min`（默认 `0`）、`max`（默认 `100`）、`collapsible`（默认 `false`）和 `collapsedSize`（默认 `0`）。所有面板比例会归一化为总计 `100`；遇到不可行布局时，组件会保留上一次有效状态并忽略非法调整。
-- 折叠是离散停靠点；如果相邻面板的 `max` 限制不允许继续扩大，则该面板保持当前展开状态。
+Proto UI 中的 `resizableRoot`、`resizablePanel` 与 `resizableHandle` 分别对应上游 shadcn/ui 的 `ResizablePanelGroup`、`ResizablePanel` 与 `ResizableHandle`：
 
-### 交互与嵌套
+```text
+ResizableRoot
+├── ResizablePanel (index: 0)
+├── ResizableHandle (index: 0)
+└── ResizablePanel (index: 1)
+```
 
-- 指针拖动、方向键、`Shift` 加速、`Home` / `End` 和折叠共用同一套受约束的尺寸请求通道。拖动距离按面板自身实际总长度归一化，不计入分隔柄的固定宽度。
-- 每个 `Handle` 的默认无障碍名称为 `Resize panels`。
-- 嵌套的 `Root` 各自独立管理比例、约束和排列方向，可自由组合水平与垂直分栏。
+- 布局包含 `N` 个 `Panel`（`index: 0..N-1`）与 `N - 1` 个 `Handle`（`index: 0..N-2`）。每个 `Handle` 只调整其相邻的两个面板，保持这两个面板的总比例及其他面板尺寸不变。
+- `Panel` 将无量纲百分比暴露到静态 CSS 变量 `--pui-size`，由 `flex-basis` 规则驱动布局；拖动距离按面板自身实际总长度归一化，不计入分隔柄宽度。
+- `constraints` 可按面板索引配置 `min`（默认 `0`）、`max`（默认 `100`）、`collapsible`（默认 `false`）和 `collapsedSize`（默认 `0`）；传入 `sizes` 进入受控模式并监听 `sizesChange` / `sizesCommit`。
+- 键盘支持方向键、`Shift` 10 倍步进、`Home` / `End` 与 `Enter` 折叠切换；每个 `Handle` 的默认无障碍名称为 `Resize panels`。
 
-### 受控模式与方法
+## 示例
 
-- 传入 `sizes` 后进入受控模式：在 `sizesChange` 和 `sizesCommit` 事件中接收 `{ sizes }` 载荷，并回传新数组以接受变更（取消手势不会触发 `sizesCommit`）。
-- 也可以通过 `requestResize(index, nextSize, commit)` 和 `requestSizes(nextSizes, commit)` 以编程方式请求调整。
+### 垂直分栏
+
+将 `orientation` 设为 `"vertical"` 以垂直调整上下两个面板。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-resizable-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 可见分隔柄
+
+在 `Handle` 上启用 `withHandle` 显示可抓握的装饰柄；未设置时渲染极简 1px 分隔线。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-resizable-handle"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 从右到左（RTL）
+
+在 `Root` 上设置 `direction="rtl"` 以镜像面板排布与左右方向键的增减语义。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-resizable-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多面板与折叠
+
+通过 `defaultSizes` 和 `constraints` 组合三栏工作区；聚焦首个分隔柄并按 `Enter` 可折叠或展开左侧栏。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-resizable-collapsible"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`（`Panel` 的 `index` 默认 `0`）：
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'sizes', type: 'readonly number[]', default: '—' },
+    { name: 'defaultSizes', type: 'readonly number[]', default: '—' },
+    { name: 'constraints', type: 'readonly ResizablePanelConstraint[]', default: '[]' },
+    { name: 'value', type: 'number', default: '—' },
     { name: 'defaultValue', type: 'number', default: '50' },
     { name: 'min', type: 'number', default: '10' },
     { name: 'max', type: 'number', default: '90' },
@@ -60,10 +129,28 @@ Resizable 由 `Root`、`Panel` 和 `Handle` 组成：
     { name: 'collapsible', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
-    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
   ]}
 />
+
+### Panel 与 Handle
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Panel.index', type: 'number', default: '0' },
+    { name: 'Panel.styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+    { name: 'Handle.index', type: 'number', default: '0' },
+    { name: 'Handle.withHandle', type: 'boolean', default: 'false' },
+    { name: 'Handle.styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+  ]}
+/>
+
+- **暴露状态**：Root 暴露 `value` 与 `sizes`；Panel 暴露 `size`；Handle 暴露 `value`、`focusVisible` 与 `disabled`。
+- **事件**：Root 触发 `sizesChange` / `sizesCommit`（载荷 `{ sizes }`）与双面板兼容事件 `valueChange` / `valueCommit`（载荷 `{ value }`）。取消拖拽不会触发 `*Commit`。
+- **方法**：Root 暴露 `requestResize(index, next, commit?)`、`requestSizes(next, commit?)`、`requestValue(next, commit?)` 与 `cancelResize()`。
 
 ## 参考
 

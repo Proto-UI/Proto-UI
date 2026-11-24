@@ -9,10 +9,13 @@ export const dataTableHeaderRow = definePrototype<
   DataTableHeaderRowExposes
 >({
   name: 'brutalist-data-table-header-row',
+  modules: asDataTableHeaderRow.modules,
   setup(def) {
     const behavior = asDataTableHeaderRow();
     def.feedback.style.use(
-      tw('min-w-0 max-w-full text-foreground grid items-stretch border-b border-border')
+      tw(
+        'table-row min-w-0 max-w-full bg-background text-foreground border-b-2 border-black font-heading font-bold'
+      )
     );
     return behavior.render;
   },

@@ -1,11 +1,13 @@
 ---
 title: 'Collapsible'
-description: 'A Liquid Glass disclosure component built from Root, Trigger, and Content over Base Collapsible semantics.'
+description: 'A Liquid Glass disclosure component composed of Root, Trigger, and Content with single-layer glass controls, prominence hierarchy, and opaque reading fallbacks.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Collapsible composes Root, Trigger, and Content on top of [Base Collapsible](/en/ui-libraries/base/collapsible/), with Root managing expansion state and Trigger applying Liquid Glass material styling.
+Liquid Glass Collapsible composes `Root`, `Trigger`, and `Content` on top of [Base Collapsible](/en/ui-libraries/base/collapsible/). Only the interactive `Trigger` declares Liquid Glass optical intent, while `Root` and reading `Content` remain opaque so glass is never stacked on glass.
 
 ## Preview
 
@@ -14,14 +16,11 @@ Liquid Glass Collapsible composes Root, Trigger, and Content on top of [Base Col
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
   toolbar={true}
-  codePanel={false}
 />
-
-Use the preview toolbar's family Select to switch among WC, React, Vue, and Vue 2. The examples show default unmounting, `keepMounted`, disabled-while-open, and controlled confirmation via **Accept**.
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source. Import the parts directly from `@proto.ui/prototypes-liquid-glass/collapsible`:
 
 ```ts
 import {
@@ -33,22 +32,116 @@ import {
 
 ## Usage
 
-- **Composition**: place one `Trigger` and one `Content` inside each `Root`; nested and sibling disclosures maintain independent state.
-- **Controlled and disabled**: in controlled mode, requests emit `openChange` without mutating state until you pass the new `open` prop. `disabled` blocks new toggles while keeping already-open content visible.
-- **Mounting and layout**: Content unmounts when closed by default (set `keepMounted={true}` to keep a hidden node mounted). Layouts shrink cleanly, wrap long labels and words, and avoid fixed content heights; leave room outside the control for the focus ring.
-- **Material**: only `Trigger` declares `liquid-glass` optical intent with press deformation; `Root` and `Content` remain opaque and readable, and hosts without optical support use the declared opaque fallback. See [Apple's Materials guidance](https://developer.apple.com/design/human-interface-guidelines/materials).
+```tsx
+import {
+  LiquidGlassCollapsibleRoot,
+  LiquidGlassCollapsibleTrigger,
+  LiquidGlassCollapsibleContent,
+} from '@/components/ui/collapsible';
+
+export function Example() {
+  return (
+    <LiquidGlassCollapsibleRoot>
+      <LiquidGlassCollapsibleTrigger variant="regular">
+        Order #4189 — Product details
+      </LiquidGlassCollapsibleTrigger>
+      <LiquidGlassCollapsibleContent>
+        Status: Shipped · Content stays opaque for crisp legibility.
+      </LiquidGlassCollapsibleContent>
+    </LiquidGlassCollapsibleRoot>
+  );
+}
+```
+
+### Layering and Optical Guidance
+
+```text
+CollapsibleRoot          (opaque container)
+├── CollapsibleTrigger   (liquid-glass control, regular | prominent, material auto | opaque)
+└── CollapsibleContent   (opaque reading surface — never glass on glass)
+```
+
+- **Single-layer glass**: only `Trigger` declares `liquid-glass` optical intent with press deformation; `Root` and reading `Content` stay opaque to preserve legibility and avoid stacking glass on glass.
+- **Prominence and opaque opt-out**: `Trigger` supports `variant="regular"` and `variant="prominent"` (primary tinted glass), plus `material="opaque"` to opt out of optical intent while retaining the full opaque surface.
+- **Concentric radii and accessible fallbacks**: outer containers pair `rounded-2xl` with `rounded-xl` inner controls; disabled triggers withdraw optical candidates and elevation without dimming whole-host opacity, and hosts without optical support render the declared opaque fallback. See [Apple's Materials guidance](https://developer.apple.com/design/human-interface-guidelines/materials).
+
+## Examples
+
+### Basic Card
+
+Showcase the interactive Liquid Glass trigger and opaque reading panel over a layered gradient backdrop with concentric corner radii.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-collapsible-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Prominence and Opaque Mode
+
+Compare `variant="regular"`, `variant="prominent"`, and `material="opaque"` triggers side by side over a layered backdrop.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-collapsible-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Coordinate an external Liquid Glass button with the collapsible trigger through `open` and `openChange`.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-collapsible-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop | Defaults and notes |
-| --- | --- | --- |
-| Root | `open`, `defaultOpen` | Controlled open state / initial uncontrolled state |
-| Root | `disabled` | `false`; suppresses toggle requests without closing open content |
-| Trigger | `disabled` | `false`; locally disables the button; supports natural Tab order and Enter / Space |
-| Content | `keepMounted` | `false`; keeps the hidden node mounted when closed |
+### Root
 
-### Events and methods
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
 
-- Root exposes: `open` state, `openCollapsible()`, `close()`, `toggle()`, and `openChange` with payload `{ open, reason }`.
-- Trigger exposes: expanded, effective disabled, hover, press, focus states, and `focusSelf()`.
-- Content exposes: derived `open` and `hidden` states.
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'keepMounted', type: 'boolean', default: 'false' }]}
+/>
+
+### Events and Methods
+
+- **Root events**: `openChange` with payload `{ open, reason }`
+- **Root methods**: `openCollapsible(reason?)`, `close(reason?)`, `toggle(reason?)`
+- **Trigger method**: `focusSelf(options?)`
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-COLLAPSIBLE.yaml',
+    'P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER.yaml',
+    'P-LIQUID-GLASS-COLLAPSIBLE-CONTENT.yaml',
+    'P-BASE-COLLAPSIBLE.yaml',
+  ]}
+/>

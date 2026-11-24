@@ -1,12 +1,13 @@
 ---
 title: 'Calendar'
-description: 'A Gregorian calendar supporting single, multiple, and range date selection with localized weekdays and custom caption controls.'
+description: 'A Neo-Brutalist Gregorian calendar supporting single, multiple, and range date selection with bold 2px borders, adaptive hard shadows, and composable caption controls.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Calendar supports single, multiple, and range date selection in a bold Neo-Brutalist panel with 36px day cells, 28px navigation controls, 2px borders, and a hard offset shadow.
+Brutalist Calendar supports `single`, `multiple`, and `range` date selection in a Neo-Brutalist panel with 36px day cells, 28px navigation controls, crisp 2px borders, and an adaptive 4px hard offset shadow.
 
 ## Preview
 
@@ -18,11 +19,91 @@ Brutalist Calendar supports single, multiple, and range date selection in a bold
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source (`@proto.ui/prototypes-brutalist/calendar`); not yet included in the 0.2.0 stable CLI registry.
 
 ## Usage
 
+```tsx
+import {
+  CalendarRoot,
+  CalendarCaption,
+  CalendarPrevious,
+  CalendarHeading,
+  CalendarNext,
+  CalendarGrid,
+  CalendarWeekdays,
+  CalendarWeekday,
+  CalendarRow,
+  CalendarDay,
+} from '@proto.ui/prototypes-brutalist/calendar';
+
+export function BrutalistCalendarExample() {
+  return (
+    <CalendarRoot mode="single" defaultMonth="2026-10" defaultValue="2026-10-12" today="2026-10-08">
+      <CalendarCaption>
+        <CalendarPrevious a11yLabel="Previous month" />
+        <CalendarHeading />
+        <CalendarNext a11yLabel="Next month" />
+      </CalendarCaption>
+      <CalendarGrid>
+        <CalendarWeekdays>
+          {Array.from({ length: 7 }, (_, offset) => (
+            <CalendarWeekday key={offset} offset={offset} />
+          ))}
+        </CalendarWeekdays>
+        {Array.from({ length: 6 }, (_, row) => (
+          <CalendarRow key={row} index={row}>
+            {Array.from({ length: 7 }, (_, col) => (
+              <CalendarDay key={col} offset={row * 7 + col} />
+            ))}
+          </CalendarRow>
+        ))}
+      </CalendarGrid>
+    </CalendarRoot>
+  );
+}
+```
+
+### Anatomy, keyboard navigation, and caption pickers
+
+- Compose `Calendar` from ten parts: `Root`, `Caption`, `Heading`, `Previous`, `Next`, `Grid`, `Weekdays`, `Weekday`, `Row`, and `Day`.
+- By default, the grid shows the 4–6 weeks required for the active month; pass `fixedWeeks={true}` to reserve 6 rows. Unused rows and cells hide automatically off the focus path.
+- Calendar never reads the system clock directly: supply a `YYYY-MM-DD` `today` prop from the host to highlight today (`aria-current="date"`).
+- `direction="rtl"` mirrors Left/Right arrows automatically. Pair family `Select` dropdowns with `bindCalendarCaption(source, { month, year })` (and call `dispose()` on teardown) for month/year pickers.
+
 ### Selection modes
+
+| Mode       | Controlled / initial prop                       | Change event                 |
+| ---------- | ----------------------------------------------- | ---------------------------- |
+| `single`   | `value` / `defaultValue`: `YYYY-MM-DD`          | `onValueChange({ value })`   |
+| `multiple` | `values` / `defaultValues`: `readonly string[]` | `onValuesChange({ values })` |
+| `range`    | `range` / `defaultRange`: `{ from?, to? }`      | `onRangeChange({ range })`   |
+
+## Examples
+
+### Basic
+
+A default single-date calendar with a plain month heading.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-calendar-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Range
+
+Set `mode="range"` for joined range endpoints and continuous span shading.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-calendar-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Multiple and range selection
+
+Combine `min`, `max`, `unavailable`, `minNights`, `maxNights`, and `maxSelected` to constrain selections.
 
 <PrototypePreviewer
   demoId="demo-brutalist-calendar-selection"
@@ -30,28 +111,35 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-| Mode       | Controlled / initial prop                     | Change event                 |
-| ---------- | --------------------------------------------- | ---------------------------- |
-| `single`   | `value` / `defaultValue`: `YYYY-MM-DD` string | `onValueChange({ value })`   |
-| `multiple` | `values` / `defaultValues`: date string array | `onValuesChange({ values })` |
-| `range`    | `range` / `defaultRange`: `{ from?, to? }`    | `onRangeChange({ range })`   |
+### Presets
 
-- **Multiple mode**: Activating a day toggles it in a deduplicated, chronologically sorted array. Constrain counts with `minSelected` and `maxSelected`.
-- **Range mode**: The first activation sets `{ from }` and the second completes an inclusive `{ from, to }` (automatically sorting reversed picks). Activating another day starts a new range, and `{}` clears it. `minNights` (default `0`, allowing single-day ranges) and `maxNights` constrain the interval between endpoints.
-- **Constraints**: Use `min`, `max`, and `unavailable` to restrict selectable dates. Ranges crossing an unavailable date are rejected while keeping the start anchor. `readOnly` blocks selection changes while still allowing month navigation.
-- **Range states**: `Day` exposes `rangeStart`, `rangeEnd`, `rangeMiddle`, and `rangePending` alongside `selected` for styling range endpoints and spans.
+Pair controlled `value`, `month`, and `fixedWeeks` with family `Button` presets.
 
-### Parts and month layout
+<PrototypePreviewer
+  demoId="demo-brutalist-calendar-presets"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-Calendar is composed of `Root`, `Caption`, `Heading`, `Previous`, `Next`, `Grid`, `Weekdays`, `Weekday`, `Row`, and `Day`:
+### Booked dates
 
-- By default, the grid shows the 4–6 weeks required for the active month and `weekStartsOn` (`0` = Sunday); set `fixedWeeks={true}` to always render 6 weeks. You can render 6 indexed `Row` containers (`0`–`5`) with 42 offset `Day` cells (`0`–`41`) and let unused rows and cells hide automatically off the focus path.
-- Calendar does not read the system clock; pass `today` as a `YYYY-MM-DD` string to highlight the current date (`aria-current="date"`). Initial month priority is `month` > `defaultMonth` > active mode's selected date > `today` > `1970-01`.
-- `direction="rtl"` mirrors Left/Right arrow navigation while keeping Up/Down and week boundaries intact.
+Use `unavailable` along with `min` and `max` to block booked date ranges.
 
-### Month and year selectors
+<PrototypePreviewer
+  demoId="demo-brutalist-calendar-booked-dates"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-`Caption` is a semantic grouping container. To add month and year dropdown navigation, pair Calendar's `month`, `disabled`, and `requestMonth` with real family Select controls via `bindCalendarCaption(source, { month, year })`, and call `dispose()` on teardown.
+### RTL
+
+Set `direction="rtl"`, `locale="ar-SA"`, and `weekStartsOn={6}` for RTL layout and mirrored navigation.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-calendar-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -60,41 +148,62 @@ Calendar is composed of `Root`, `Caption`, `Heading`, `Previous`, `Next`, `Grid`
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: 'single' },
+    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: "'single'" },
     { name: 'value', type: 'string', default: 'undefined' },
+    { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'values', type: 'readonly string[]', default: 'undefined' },
     { name: 'defaultValues', type: 'readonly string[]', default: '[]' },
     { name: 'range', type: 'CalendarRange', default: 'undefined' },
     { name: 'defaultRange', type: 'CalendarRange', default: '{}' },
-    { name: 'minSelected / minNights', type: 'number', default: '0' },
-    { name: 'maxSelected / maxNights', type: 'number', default: 'undefined' },
-    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'minSelected', type: 'number', default: '0' },
+    { name: 'maxSelected', type: 'number', default: 'undefined' },
+    { name: 'minNights', type: 'number', default: '0' },
+    { name: 'maxNights', type: 'number', default: 'undefined' },
+    { name: 'month', type: 'string', default: 'undefined' },
     { name: 'defaultMonth', type: 'string', default: 'undefined' },
     { name: 'min', type: 'string', default: "''" },
     { name: 'max', type: 'string', default: "''" },
-    { name: 'unavailable', type: 'string[]', default: '[]' },
+    { name: 'unavailable', type: 'readonly string[]', default: '[]' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'weekStartsOn', type: 'number', default: '0' },
     { name: 'fixedWeeks', type: 'boolean', default: 'false' },
-    { name: 'a11yLabel', type: 'string', default: 'Calendar' },
+    { name: 'a11yLabel', type: 'string', default: "'Calendar'" },
     { name: 'today', type: 'string', default: "''" },
-    { name: 'locale', type: 'string', default: 'en-US' },
-    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'locale', type: 'string', default: "'en-US'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
   ]}
 />
 
-Pass `value`, `values`, `range`, or `month` to control each state independently.
+### Sub-part props
 
-### Other parts
+<ApiPropsTable
+  headers={{ name: 'Part / Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Day.date', type: 'string', default: "''" },
+    { name: 'Day.offset', type: 'number', default: '0' },
+    { name: 'Day.disabled', type: 'boolean', default: 'false' },
+    { name: 'Row.index', type: 'number', default: 'undefined' },
+    { name: 'Weekday.offset', type: 'number', default: '0' },
+    { name: 'Caption.a11yLabel', type: 'string', default: "'Calendar navigation'" },
+    {
+      name: 'Previous / Next.a11yLabel',
+      type: 'string',
+      default: "'Previous month' / 'Next month'",
+    },
+    { name: 'Previous / Next.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
 
-- **Day**: `date?: string` (default `''`), `offset?: number` (default `0`), `disabled?: boolean` (default `false`)
-- **Row**: `index?: number`
-- **Weekday**: `offset?: number` (default `0`)
-- **Caption**: `a11yLabel?: string` (default `'Calendar navigation'`)
-- **Previous / Next**: Accept Button props; `a11yLabel` defaults to `'Previous month'` and `'Next month'`
-- **Grid / Heading / Weekdays**: No props
+### Events, methods, and exposed states
 
-### Methods
+- **Events (Root)**: `onValueChange({ value })`, `onValuesChange({ values })`, `onRangeChange({ range })`, `onMonthChange({ month })`.
+- **Methods (Root)**: `requestValue(date)`, `requestValues(dates)`, `requestRange(range)`, `requestMonth(month)`, `getValues()`, `getRange()`.
+- **Exposed states**: Root exposes `value`, `mode`, `selectedCount`, `rangeComplete`, `month`, `weekCount`, `disabled`, `direction`; Day exposes `date`, `selected`, `rangeStart`, `rangeEnd`, `rangeMiddle`, `rangePending`, `today`, `outside`, `disabled`, `hidden`.
 
-- `requestValue(date)`, `requestValues(dates)`, `requestRange(range)`, `requestMonth(month)`, `getValues()`, `getRange()`
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-CALENDAR.yaml', 'P-BASE-CALENDAR.yaml']}
+/>

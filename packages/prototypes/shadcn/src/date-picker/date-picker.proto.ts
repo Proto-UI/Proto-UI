@@ -32,7 +32,8 @@ export type ShadcnDatePickerTriggerProps = DatePickerTriggerProps & ShadcnStyleP
 export type ShadcnDatePickerContentProps = DatePickerContentProps & ShadcnStyleProps;
 export type ShadcnDatePickerDayProps = DatePickerDayProps & ShadcnStyleProps;
 export type ShadcnDatePickerValueProps = DatePickerValueProps;
-const DATE_PICKER_PRESENTATION = createContextKey<{ open: boolean }>(
+
+const DATE_PICKER_PRESENTATION = createContextKey<{ open: boolean; empty: boolean }>(
   'shadcn-date-picker-presentation'
 );
 
@@ -66,19 +67,24 @@ export const datePickerRoot = definePrototype<ShadcnDatePickerRootProps, DatePic
     const open = behavior.getAsHookHandle?.('as-popover-root')?.getAsHookHandle?.('useOpenState')
       ?.stateHandles?.open;
     if (!calendar || !open) throw new Error('[shadcn-date-picker] Root facts unavailable.');
-    def.context.provide(DATE_PICKER_PRESENTATION, { open: false });
+    def.context.provide(DATE_PICKER_PRESENTATION, { open: false, empty: true });
     def.context.subscribe(DATE_PICKER_PRESENTATION);
-    const syncOpen = (run: RunHandle<ShadcnDatePickerRootProps>) => {
-      const next = open.get();
-      if (run.context.read(DATE_PICKER_PRESENTATION).open !== next) {
-        run.context.update(DATE_PICKER_PRESENTATION, { open: next });
+    const syncPresentation = (run: RunHandle<ShadcnDatePickerRootProps>) => {
+      const nextOpen = open.get();
+      const nextEmpty = calendar.selectedCount.get() === 0;
+      const current = run.context.read(DATE_PICKER_PRESENTATION);
+      if (current.open !== nextOpen || current.empty !== nextEmpty) {
+        run.context.update(DATE_PICKER_PRESENTATION, { open: nextOpen, empty: nextEmpty });
       }
     };
     open.watch((run, event) => {
-      if (event.type === 'next') syncOpen(run);
+      if (event.type === 'next') syncPresentation(run);
     });
-    def.lifecycle.onCreated(syncOpen);
-    def.lifecycle.onMounted(syncOpen);
+    calendar.selectedCount.watch((run, event) => {
+      if (event.type === 'next') syncPresentation(run);
+    });
+    def.lifecycle.onCreated(syncPresentation);
+    def.lifecycle.onMounted(syncPresentation);
     setupShadcnStyleScope(def);
     def.feedback.style.use(tw('inline-grid min-w-0 max-w-full text-foreground'));
     def.rule({
@@ -105,16 +111,16 @@ export const datePickerTrigger = definePrototype<
     const state = behavior.getAsHookHandle?.('as-popover-trigger')?.stateHandles;
     if (!state) throw new Error('[shadcn-date-picker] Trigger state unavailable.');
     const open = def.state.bool('datePickerExpandedPaint', false);
-    const syncOpen = (run: RunHandle<ShadcnDatePickerTriggerProps>) => {
-      open.set(
-        run.context.tryRead(DATE_PICKER_PRESENTATION)?.open ?? false,
-        'date picker observed open'
-      );
+    const empty = def.state.bool('datePickerEmptyPaint', true);
+    const syncPresentation = (run: RunHandle<ShadcnDatePickerTriggerProps>) => {
+      const presentation = run.context.tryRead(DATE_PICKER_PRESENTATION);
+      open.set(presentation?.open ?? false, 'date picker observed open');
+      empty.set(presentation?.empty ?? true, 'date picker observed empty');
     };
-    def.context.trySubscribe(DATE_PICKER_PRESENTATION, syncOpen);
-    def.lifecycle.onCreated(syncOpen);
-    def.lifecycle.onMounted(syncOpen);
-    setupCollectionActionVisual(
+    def.context.trySubscribe(DATE_PICKER_PRESENTATION, syncPresentation);
+    def.lifecycle.onCreated(syncPresentation);
+    def.lifecycle.onMounted(syncPresentation);
+    const style = setupCollectionActionVisual(
       def,
       {
         disabled: state.disabled,
@@ -127,6 +133,19 @@ export const datePickerTrigger = definePrototype<
       false,
       true
     );
+    def.feedback.style.use(tw('justify-between text-start cursor-pointer'));
+    def.rule({
+      when: (w) => w.not(w.state(style).eq('sera')),
+      intent: (i) => i.feedback.style.use(tw('font-normal')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(empty).eq(true), w.state(state.disabled).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('text-muted-foreground')),
+    });
+    def.rule({
+      when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
     return behavior.render;
   },
 });
@@ -146,7 +165,7 @@ export const datePickerContent = definePrototype<
     const style = setupShadcnStyleSelection(def, 'nova');
     def.feedback.style.use(
       tw(
-        'z-50 grid w-auto min-w-0 max-w-full gap-4 bg-popover text-popover-foreground outline-none'
+        'z-50 grid w-auto min-w-0 max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-hidden gap-2 bg-popover text-popover-foreground outline-none'
       )
     );
     for (const profile of SHADCN_STYLE_IDS) {
@@ -171,6 +190,10 @@ export const datePickerContent = definePrototype<
         ),
       intent: (i) => i.feedback.style.use(tw('ring-foreground/10')),
     });
+    def.rule({
+      when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+      intent: (i) => i.feedback.style.use(tw('animate-none transition-none')),
+    });
     return behavior.render;
   },
 });
@@ -184,6 +207,24 @@ export const datePickerDay = definePrototype<ShadcnDatePickerDayProps, DatePicke
     const state = behavior.getAsHookHandle?.('as-calendar-day')?.stateHandles;
     if (!state) throw new Error('[shadcn-date-picker] Day state unavailable.');
     setupCalendarDayVisual(def, state);
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(state.rangePending).eq(true),
+          w.state(state.selected).eq(false),
+          w.state(state.rangeMiddle).eq(false),
+          w.state(state.disabled).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-accent/50 text-accent-foreground')),
+    });
+    def.rule({
+      when: (w) => w.any(w.state(state.rangeStart).eq(true), w.state(state.rangeEnd).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('font-medium')),
+    });
+    def.rule({
+      when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
     return behavior.render;
   },
 });
@@ -194,8 +235,8 @@ export const datePickerValue = definePrototype<ShadcnDatePickerValueProps, DateP
   modules: asDatePickerValue.modules,
   setup(def) {
     const behavior = asDatePickerValue();
-    // Text inherits its actual Trigger's typography, including Mira and Sera.
-    def.feedback.style.use(tw('min-w-0'));
+    // Text inherits its actual Trigger's typography and empty color, including Mira and Sera.
+    def.feedback.style.use(tw('min-w-0 text-start'));
     return behavior.render;
   },
 });

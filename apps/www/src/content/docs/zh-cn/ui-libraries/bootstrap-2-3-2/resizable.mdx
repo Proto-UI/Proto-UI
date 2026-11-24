@@ -1,15 +1,15 @@
 ---
 title: 'Resizable'
-description: '支持多比例面板拖拽、折叠停靠、嵌套布局与键盘调整的 Bootstrap 2.3.2 可调整分栏组件。'
+description: '采用 Bootstrap 2.3.2 经典灰阶渐变、斜切高光与 #52a8ec 焦点光晕的可调整分栏组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Resizable 将两个或多个按百分比分配的面板与可拖拽分隔柄组合起来，支持指针拖动、方向键、`Shift` 加速、`Home` / `End` 与面板折叠，并可自由嵌套不同方向的面板组。
+基于 Base 语义构建的 Bootstrap 2.3.2 扩展分栏组件：分隔柄采用经典 `#fff → #e6e6e6` 垂直渐变、内嵌高光边框、可选凹刻抓握柄与 `#52a8ec` 蓝色焦点光晕，完整支持多面板比例分配、折叠停靠、RTL 与嵌套布局。
 
 ## 预览
-
-示例展示了三个水平面板，以及嵌入其中的两个垂直面板组。
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-resizable"
@@ -19,21 +19,134 @@ Resizable 将两个或多个按百分比分配的面板与可拖拽分隔柄组�
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/resizable` 导入原型并适配到目标宿主：
+
+```ts
+import {
+  resizableRoot,
+  resizablePanel,
+  resizableHandle,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/resizable';
+```
 
 ## 用法
 
-- **多面板编号**：`N` 个 `Panel` 依次使用 `index: 0..N-1`，`N - 1` 个 `Handle` 使用 `index: 0..N-2`（每个 `Handle` 调整其前后相邻的两个面板，保持其余面板比例不变，默认无障碍名称为 `Resize panels`）。
-- **约束与折叠**：通过 `constraints` 按面板索引配置 `min`、`max`、`collapsible` 与 `collapsedSize`（默认 `0`、`100`、`false`、`0`）。总比例自动归一化为 `100`；非法或不可行约束会保持上次有效布局。折叠是离散停靠点，若相邻面板已达 `max` 则阻止继续折叠。
-- **受控与嵌套**：传入 `sizes` 进入受控模式，通过 `sizesChange` 与 `sizesCommit`（载荷为 `{ sizes }`）接收实时与最终比例；取消拖拽不触发 `sizesCommit`。嵌套 `Root` 各自独立管理比例、约束与方向。Web 样式通过 `--pui-size` 映射静态 `flex-basis` 规则，拖拽计算自动扣除固定分隔柄宽度。
+```tsx
+import {
+  Bootstrap232ResizableRoot,
+  Bootstrap232ResizablePanel,
+  Bootstrap232ResizableHandle,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <Bootstrap232ResizableRoot
+      defaultSizes={[50, 50]}
+      className="h-56 w-full max-w-md rounded-[4px] border border-[#ccc] bg-background shadow-[0_1px_3px_rgb(0_0_0/5.5%)] overflow-hidden"
+    >
+      <Bootstrap232ResizablePanel index={0}>One</Bootstrap232ResizablePanel>
+      <Bootstrap232ResizableHandle index={0} withHandle />
+      <Bootstrap232ResizablePanel index={1}>Two</Bootstrap232ResizablePanel>
+    </Bootstrap232ResizableRoot>
+  );
+}
+```
+
+### 组合结构
+
+```text
+Bootstrap232ResizableRoot
+├── Bootstrap232ResizablePanel (index: 0)
+├── Bootstrap232ResizableHandle (index: 0, withHandle?)
+└── Bootstrap232ResizablePanel (index: 1)
+```
+
+- **多面板编号**：`N` 个 `Panel` 使用 `index: 0..N-1`，`N - 1` 个 `Handle` 使用 `index: 0..N-2`。每个分隔柄只调整相邻两个面板，并默认提供无障碍名称 `Resize panels`。
+- **视觉与交互**：分隔柄在水平/垂直布局下自动切换 `ew-resize` / `ns-resize` 光标；键盘聚焦时呈现 Bootstrap 2.3.2 经典的 `#52a8ec` 外发光；禁用时切换为平铺 `#e6e6e6` 与 `opacity-65`。
+- **约束与受控**：通过 `constraints` 按索引配置 `min`、`max`、`collapsible` 与 `collapsedSize`；传入 `sizes` 进入受控模式并响应 `sizesChange` / `sizesCommit`。
+
+## 示例
+
+### 垂直分栏
+
+将 `orientation` 设为 `"vertical"` 以垂直调整上下两个面板。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-resizable-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 可见分隔柄
+
+在 `Handle` 上设置 `withHandle` 显示经典斜切抓握块，或省略以使用 6px 渐变分隔条。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-resizable-handle"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 从右到左（RTL）
+
+设置 `direction="rtl"` 以适配从右到左的布局和方向键语义。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-resizable-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多面板与折叠
+
+组合三个面板并允许首个面板折叠；聚焦第一个分隔柄后按 `Enter` 可切换展开/折叠。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-resizable-collapsible"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 方法 / 事件 | 说明 |
-| --- | --- | --- |
-| `Root` | `sizes` / `defaultSizes` | 完整面板百分比数组（同时兼容旧双面板 `value` / `defaultValue`，传入 `sizes` 时优先） |
-| `Root` | `constraints` | 逐面板约束对象数组：`min`、`max`、`collapsible`、`collapsedSize` |
-| `Root` | `requestResize(index, nextSize, commit)` / `requestSizes(nextSizes, commit)` | 编程式发起单面板或整组尺寸调整 |
-| `Root` | `sizesChange` / `sizesCommit` | 拖拽中与提交时的比例变更事件，载荷为 `{ sizes }` |
-| `Panel` | `index` | `0..N-1` 面板编号，通过 `--pui-size` 应用当前百分比宽度/高度 |
-| `Handle` | `index` | `0..N-2` 分隔柄编号，支持指针与键盘调整相邻面板 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'sizes', type: 'readonly number[]', default: '—' },
+    { name: 'defaultSizes', type: 'readonly number[]', default: '—' },
+    { name: 'constraints', type: 'readonly ResizablePanelConstraint[]', default: '[]' },
+    { name: 'value', type: 'number', default: '—' },
+    { name: 'defaultValue', type: 'number', default: '50' },
+    { name: 'min', type: 'number', default: '10' },
+    { name: 'max', type: 'number', default: '90' },
+    { name: 'step', type: 'number', default: '1' },
+    { name: 'collapsible', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+  ]}
+/>
+
+### Panel 与 Handle
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Panel.index', type: 'number', default: '0' },
+    { name: 'Handle.index', type: 'number', default: '0' },
+    { name: 'Handle.withHandle', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+- **暴露状态**：Root 暴露 `value`、`sizes`；Panel 暴露 `size`；Handle 暴露 `value`、`focusVisible`、`disabled`。
+- **事件与方法**：Root 触发 `sizesChange` / `sizesCommit` / `valueChange` / `valueCommit`，并暴露 `requestResize(index, next, commit?)`、`requestSizes(next, commit?)`、`requestValue(next, commit?)` 与 `cancelResize()`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-RESIZABLE.yaml', 'P-BASE-RESIZABLE.yaml']}
+/>

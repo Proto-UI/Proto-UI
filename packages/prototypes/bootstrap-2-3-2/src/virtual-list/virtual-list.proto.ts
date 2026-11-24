@@ -18,10 +18,13 @@ export type * from '@proto.ui/prototypes-base/virtual-list';
 // logical collection state stay in Base and its existing public host boundary.
 export const virtualListRoot = definePrototype<VirtualListRootProps, VirtualListRootExposes>({
   name: 'bootstrap-2-3-2-virtual-list-root',
+  modules: asVirtualListRoot.modules,
   setup(def) {
     const inherited = asVirtualListRoot();
     def.feedback.style.use(
-      tw('min-w-0 min-h-0 max-w-full text-foreground text-[14px] leading-[20px]')
+      tw(
+        'min-w-0 min-h-0 max-w-full overflow-hidden rounded-[4px] border border-border bg-background text-foreground font-sans text-[14px] leading-[20px] shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)] grid gap-0'
+      )
     );
     return inherited.render;
   },
@@ -33,12 +36,13 @@ export const virtualListViewport = definePrototype<
   VirtualListViewportExposes
 >({
   name: 'bootstrap-2-3-2-virtual-list-viewport',
+  modules: asVirtualListViewport.modules,
   setup(def) {
     const inherited = asVirtualListViewport();
     const viewport = inherited.getAsHookHandle!('as-scroll-area-viewport');
     if (!viewport?.stateHandles)
       throw new Error('[bootstrap-2-3-2-virtual-list-viewport] Base focus facts required.');
-    def.feedback.style.use(tw('min-w-0 min-h-0 max-w-full outline-none'));
+    def.feedback.style.use(tw('min-w-0 min-h-0 max-w-full overflow-auto outline-none'));
     def.rule({
       when: (w) => w.state(viewport.stateHandles!.focusVisible).eq(true),
       intent: (i) =>
@@ -54,6 +58,7 @@ export const virtualListContent = definePrototype<
   VirtualListContentExposes
 >({
   name: 'bootstrap-2-3-2-virtual-list-content',
+  modules: asVirtualListContent.modules,
   setup(def) {
     const inherited = asVirtualListContent();
     def.feedback.style.use(tw('relative min-w-0 min-h-0 text-inherit'));

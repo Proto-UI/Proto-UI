@@ -6,12 +6,14 @@ import {
 } from '@proto.ui/prototypes-base/accordion';
 export default definePrototype<AccordionContentProps, AccordionContentExposes>({
   name: 'brutalist-accordion-content',
+  modules: asAccordionContent.modules,
   setup(def) {
-    asAccordionContent();
+    const inherited = asAccordionContent();
     def.feedback.style.use(
       tw(
         'block min-w-0 bg-secondary-background text-foreground p-4 text-sm font-sans font-medium leading-relaxed break-words overflow-x-auto'
       )
     );
+    return inherited.render;
   },
 });

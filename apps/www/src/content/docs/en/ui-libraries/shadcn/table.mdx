@@ -1,12 +1,13 @@
 ---
 title: 'Table'
-description: 'Structured table primitives with header semantics and Shadcn border styling.'
+description: 'A responsive structured table component with header semantics, logical alignment, and Shadcn styling.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Table presents structured tabular data over the [Base Table](/en/ui-libraries/base/table/) protocol, adding Shadcn collapsed borders, cell padding, header emphasis, and muted footer styling. The examples on this page use the **Shadcn Rhea** style preset.
+Table presents structured tabular data over the [Base Table](/en/ui-libraries/base/table/) protocol, adding Shadcn collapsed borders, cell padding, row hover and selected highlights, and muted footer styling. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -14,30 +15,262 @@ Table presents structured tabular data over the [Base Table](/en/ui-libraries/ba
   demoId="demo-shadcn-table"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the parts from `@proto.ui/prototypes-shadcn/table`:
+
+```ts
+import {
+  tableRoot,
+  tableCaption,
+  tableRow,
+  tableHeaderCell,
+  tableCell,
+} from '@proto.ui/prototypes-shadcn/table';
+```
 
 ## Usage
 
-Table consists of five parts: `Root`, `Caption`, `Row`, `HeaderCell`, and `Cell`:
+```html
+<div class="w-full overflow-x-auto">
+  <shadcn-table-root style-profile="rhea">
+    <shadcn-table-caption>A list of your recent invoices.</shadcn-table-caption>
+    <shadcn-table-row section="header" last-in-section>
+      <shadcn-table-header-cell header-key="invoice" header-kind="column" style="width: 100px">
+        Invoice
+      </shadcn-table-header-cell>
+      <shadcn-table-header-cell header-key="status" header-kind="column"
+        >Status</shadcn-table-header-cell
+      >
+      <shadcn-table-header-cell header-key="method" header-kind="column"
+        >Method</shadcn-table-header-cell
+      >
+      <shadcn-table-header-cell header-key="amount" header-kind="column" style="text-align: end">
+        Amount
+      </shadcn-table-header-cell>
+    </shadcn-table-row>
+    <shadcn-table-row section="body" last-in-section>
+      <shadcn-table-header-cell header-key="inv001" header-kind="row"
+        >INV001</shadcn-table-header-cell
+      >
+      <shadcn-table-cell>Paid</shadcn-table-cell>
+      <shadcn-table-cell>Credit Card</shadcn-table-cell>
+      <shadcn-table-cell style="text-align: end">$250.00</shadcn-table-cell>
+    </shadcn-table-row>
+  </shadcn-table-root>
+</div>
+```
 
-- `Root` creates the table scope and `Caption` describes the table's purpose.
-- `Row` defines an ordered logical row and accepts two styling props to drive borders: `section` (`'header' | 'body' | 'footer'`, default `'body'`) and `lastInSection` (default `false`).
-- `HeaderCell` declares `headerKey` and `headerKind` (`'column' | 'row'`); `Cell` references its headers via an ordered `headers` key list and supports positive integer `rowSpan` and `columnSpan` (defaulting to `1`).
-- Wrap `Table` in an outer scroll container if horizontal scrolling is needed. For sorting, filtering, or row selection, use Data Table.
+### Composition
+
+```text
+Root
+├── Caption
+├── Row (section="header")
+│   └── HeaderCell (headerKind="column")
+├── Row (section="body")
+│   ├── HeaderCell (headerKind="row")
+│   └── Cell (headers=[...])
+└── Row (section="footer")
+    ├── HeaderCell (headerKind="row")
+    └── Cell (headers=[...])
+```
+
+- `Root` creates the table structure scope and exposes `getStructure()`; wrap it in an outer `overflow-x-auto` container for horizontal scrolling.
+- `Row` accepts visual-only `section`, `lastInSection`, and `selected` props to control borders and row highlights without synthesizing row-group roles or selection state.
+- `HeaderCell` uses logical `text-start` alignment so RTL layouts mirror naturally; align trailing numeric columns with `text-align: end`.
+- `rowSpan` and `columnSpan` project accessible span metadata. For sorting, filtering, pagination, or row selection, use [Data Table](/en/ui-libraries/shadcn/data-table/).
+
+## Examples
+
+### Footer
+
+Set `section="footer"` on summary rows to apply a top divider, subtle muted background, and medium weight:
+
+<PrototypePreviewer
+  demoId="demo-shadcn-table-footer"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Actions
+
+Compose a `DropdownMenu` in the trailing cell to expose row-level actions such as Edit, Duplicate, and Delete:
+
+<PrototypePreviewer
+  demoId="demo-shadcn-table-actions"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Data Table
+
+Combine tabular presentation with sorting, filtering, pagination, and row selection using [Data Table](/en/ui-libraries/shadcn/data-table/).
+
+### RTL
+
+Wrap the table in a container with `dir="rtl"` to mirror logical start/end alignment across headers and cells:
+
+<PrototypePreviewer
+  demoId="demo-shadcn-table-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-`Root` (`TableRootProps`) has no props. Part props include:
+### Root
 
-- `Row`: `section` (`'header' | 'body' | 'footer'`, default `'body'`), `lastInSection` (`boolean`, default `false`).
-- `HeaderCell`: `headerKey` (`string`), `headerKind` (`'column' | 'row'`), `rowSpan` (default `1`), `columnSpan` (default `1`).
-- `Cell`: `headers` (ordered header keys), `rowSpan` (default `1`), `columnSpan` (default `1`).
+`Root` exposes `getStructure()` to read the current row/column structure snapshot and validation diagnostics.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: "'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'new-york-v4'",
+      description:
+        'Selects typography scale and cell density, or inherits from an enclosing StyleScope',
+    },
+  ]}
+/>
+
+### Caption
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleId',
+      default: 'Inherited',
+      description: 'Overrides caption text sizing preset',
+    },
+  ]}
+/>
+
+### Row
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'section',
+      type: "'header' | 'body' | 'footer'",
+      default: "'body'",
+      description: 'Visual section membership controlling borders, hover wash, and footer styling',
+    },
+    {
+      name: 'lastInSection',
+      type: 'boolean',
+      default: 'false',
+      description: 'Withdraws the bottom divider on final body or footer rows',
+    },
+    {
+      name: 'selected',
+      type: 'boolean',
+      default: 'false',
+      description:
+        'Visual-only selected highlight (bg-muted); does not set ARIA or add a selection owner',
+    },
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleId',
+      default: 'Inherited',
+      description: 'Overrides style preset for the row and its descendant cells',
+    },
+  ]}
+/>
+
+### HeaderCell
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'headerKey',
+      type: 'string',
+      default: "''",
+      description: 'Unique header identifier referenced by Cell.headers',
+    },
+    {
+      name: 'headerKind',
+      type: "'column' | 'row'",
+      default: 'undefined',
+      description: 'Declares columnheader or rowheader semantics',
+    },
+    {
+      name: 'headers',
+      type: 'readonly string[]',
+      default: '[]',
+      description: 'Ordered parent header keys for multi-level header hierarchies',
+    },
+    {
+      name: 'rowSpan',
+      type: 'number',
+      default: '1',
+      description: 'Positive integer accessible row span',
+    },
+    {
+      name: 'columnSpan',
+      type: 'number',
+      default: '1',
+      description: 'Positive integer accessible column span',
+    },
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleId',
+      default: 'Inherited',
+      description: 'Overrides header cell height, padding, and typography preset',
+    },
+  ]}
+/>
+
+### Cell
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'headers',
+      type: 'readonly string[]',
+      default: '[]',
+      description: 'Ordered list of headerKey references',
+    },
+    {
+      name: 'rowSpan',
+      type: 'number',
+      default: '1',
+      description: 'Positive integer accessible row span',
+    },
+    {
+      name: 'columnSpan',
+      type: 'number',
+      default: '1',
+      description: 'Positive integer accessible column span',
+    },
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleId',
+      default: 'Inherited',
+      description: 'Overrides data cell padding preset',
+    },
+  ]}
+/>
 
 ## References
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-TABLE.yaml', 'P-BASE-TABLE.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-SHADCN-TABLE.yaml',
+    'P-SHADCN-TABLE-CAPTION.yaml',
+    'P-SHADCN-TABLE-ROW.yaml',
+    'P-SHADCN-TABLE-HEADER-CELL.yaml',
+    'P-SHADCN-TABLE-CELL.yaml',
+    'P-BASE-TABLE.yaml',
+  ]}
+/>

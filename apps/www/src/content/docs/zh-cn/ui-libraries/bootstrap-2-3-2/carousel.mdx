@@ -4,8 +4,10 @@ description: '支持连续滚动、拖拽吸附、响应式视口与键盘导航
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Carousel 将等尺寸滑块条、连续滚动视口与前后切换按钮组合在一起，支持鼠标/触摸拖拽、滚轮/触控板滚动与键盘导航，松手或滚动停止后自动吸附到最近的可达项。
+Bootstrap 2.3.2 Carousel 保留经典的 40×40px 圆形深色半透明翻页按钮（`‹` / `›`）与暗底标题条，同时复用 Base Carousel 的连续滚动、拖拽吸附、响应式列数与键盘导航能力。
 
 ## 预览
 
@@ -21,25 +23,103 @@ Carousel 将等尺寸滑块条、连续滚动视口与前后切换按钮组合�
 
 ## 用法
 
-### 响应式视口与吸附
+```tsx
+import {
+  Bootstrap232CarouselRoot,
+  Bootstrap232CarouselViewport,
+  Bootstrap232CarouselSlide,
+  Bootstrap232CarouselPrevious,
+  Bootstrap232CarouselNext,
+} from '../proto-ui/components/react';
 
-- 通过 `Root` 的 `slidesPerView`（默认 `1`）设置最多同时显示的等尺寸项数，`minSlideSize`（默认 `0`，逻辑像素）设置单项最小尺寸。当视口变窄时会自动减少可见项数，最后一个吸附位贴齐末端以避免多余空白。
-- 示例配置为最多显示 2 项、最小宽度 `180`，缩小视口可观察容量自适应变化。
-- 纵向模式（`orientation="vertical"`）需为视口设置明确高度；横向 `direction="rtl"` 会反转拖动和左右键方向，同时保留逻辑顺序。
-- 开启 `loop` 后索引可在首尾之间循环（不会克隆额外节点）。
+export function Example() {
+  return (
+    <Bootstrap232CarouselRoot className="mx-auto w-full max-w-lg">
+      <Bootstrap232CarouselViewport>
+        <Bootstrap232CarouselSlide>Slide 1</Bootstrap232CarouselSlide>
+        <Bootstrap232CarouselSlide>Slide 2</Bootstrap232CarouselSlide>
+      </Bootstrap232CarouselViewport>
+      <Bootstrap232CarouselPrevious aria-label="Previous slide">‹</Bootstrap232CarouselPrevious>
+      <Bootstrap232CarouselNext aria-label="Next slide">›</Bootstrap232CarouselNext>
+    </Bootstrap232CarouselRoot>
+  );
+}
+```
 
-### 受控索引
+- **经典控件约定**：`Previous` / `Next` 采用 `60px` 轻字重单字符排布，请传入 `‹` / `›` 符号并配合 `sr-only` 或 `aria-label` 提供无障碍名称，避免放入长文本导致溢出。
+- **响应式与吸附**：通过 `slidesPerView`（默认 `1`）与 `minSlideSize`（默认 `0`）控制同时显示的等尺寸项数；纵向模式（`orientation="vertical"`）请为视口指定明确高度。
+- **受控索引**：传入 `index` 进入受控模式并通过 `indexChange` 响应变更请求；开启 `loop={true}` 可在首尾之间循环切换。
 
-- 传入 `index` 进入受控模式，通过 `indexChange` 接收新的吸附索引请求。
-- 拖拽过程中已提交的 `index` 保持不变；松手时若父组件同步更新 `index` 则停留在目标位，否则平滑回到当前值。
+## 示例
+
+### 多项展示（Sizes）
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-carousel-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 纵向轮播（Orientation）
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-carousel-orientation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 首尾循环（Loop）
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-carousel-loop"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 索引追踪（API）
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-carousel-api"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 状态 | 说明 |
-| --- | --- | --- |
-| `Root` | `slidesPerView` / `minSlideSize` | 默认 `1` / `0`，控制响应式可见项数与最小尺寸 |
-| `Root` | `index` / `indexChange` | 受控吸附索引与索引变更请求事件 |
-| `Root` | `orientation` / `direction` / `loop` | 滚动方向、书写方向与首尾循环开关 |
-| `Root` | `visibleSlides` / `maxIndex` | 根据实际视口计算的只读状态 |
-| `Viewport` | `dragging` / `scrolling` / `scrollPosition` | 实时交互状态与归一化滚动进度 |
-| `Slide` | `current` / `hidden` | 跟随当前吸附项与实际屏外可见性（不移除布局占位） |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'index', type: 'number', default: '—' },
+    { name: 'defaultIndex', type: 'number', default: '0' },
+    { name: 'slidesPerView', type: 'number', default: '1' },
+    { name: 'minSlideSize', type: 'number', default: '0' },
+    { name: 'loop', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'a11yLabel', type: 'string', default: 'Carousel' },
+  ]}
+/>
+
+### 其他部件属性与暴露状态
+
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Slide.index', type: 'number', default: '按文档顺序分配' },
+    { name: 'Previous / Next.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+- **Root**：暴露 `index`、`slideCount`、`visibleSlides`、`maxIndex`、方法 `requestIndex(next)` 与事件 `indexChange`。
+- **Viewport**：暴露 `focusVisible`、`dragging`、`scrolling`、`scrollPosition`。
+- **Slide**：暴露 `current`、`hidden`、`basis`、`minSize`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-CAROUSEL.yaml', 'P-BASE-CAROUSEL.yaml']}
+/>

@@ -12,7 +12,11 @@ Scroll Area pairs native host scrolling—wheel, touch, keyboard, inertia, and o
 
 ## Preview
 
-<PrototypePreviewer demoId="demo-shadcn-scroll-area" initialRuntime="wc" />
+<PrototypePreviewer
+  demoId="demo-shadcn-scroll-area"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## Installation
 
@@ -24,27 +28,109 @@ Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your targ
 
 ## Usage
 
-Import the family from `@proto.ui/prototypes-shadcn/scroll-area`. It consists of four parts: `Root`, `Viewport`, `Scrollbar`, and `Thumb`:
+```ts
+import {
+  ShadcnScrollAreaRoot,
+  ShadcnScrollAreaViewport,
+  ShadcnScrollAreaScrollbar,
+  ShadcnScrollAreaThumb,
+} from '@proto.ui/prototypes-shadcn/scroll-area';
+```
 
-- `Root` provides the outer clipped frame.
-- `Viewport` wraps the scrollable content, participates in `Tab` focus, and renders the focus-visible ring.
-- `Scrollbar` renders a vertical or horizontal track based on `orientation`.
-- `Thumb` tracks scroll progress and supports pointer dragging; it stays outside the tab order and keeps a visible outline in forced-colors mode.
+```html
+<proto-ui-shadcn-scroll-area-root class="h-72 w-48 rounded-md border bg-background">
+  <proto-ui-shadcn-scroll-area-viewport>
+    <div class="p-4">Your scrollable content here.</div>
+  </proto-ui-shadcn-scroll-area-viewport>
+  <proto-ui-shadcn-scroll-area-scrollbar orientation="vertical">
+    <proto-ui-shadcn-scroll-area-thumb></proto-ui-shadcn-scroll-area-thumb>
+  </proto-ui-shadcn-scroll-area-scrollbar>
+</proto-ui-shadcn-scroll-area-root>
+```
 
-### Scrollbar behavior
+### Composition
 
-- `Viewport` prefers composed custom scrollbars and gracefully falls back to native system scrollbars on hosts that do not support composed chrome.
-- When both vertical and horizontal tracks are rendered on the Web, they automatically reserve the lower-right corner intersection transparently—no separate corner element is needed—and release that space if the opposite track is absent or hidden.
-- When content does not overflow, `Thumb` hides automatically.
+```text
+Root
+├── Viewport
+└── Scrollbar
+    └── Thumb
+```
+
+- `Root` provides the outer clipped frame and establishes a `styleProfile` scope without imposing fixed dimensions.
+- `Viewport` wraps the scrollable content, joins the `Tab` order only when scrollable overflow exists, and renders an inset focus-visible ring with forced-colors support.
+- `Scrollbar` renders a vertical or horizontal track based on `orientation` and hides gracefully when a host selects system scrollbars.
+- `Thumb` tracks scroll progress and supports pointer dragging; it stays outside the tab order, hides when there is no overflow, and keeps a visible outline in forced-colors mode.
+- When both vertical and horizontal tracks are rendered, they automatically reserve their corner intersection transparently and release that space when either track unmounts.
+
+## Examples
+
+### Vertical Tags
+
+Mount a single vertical scrollbar for compact tag lists, sidebars, and release feeds.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-scroll-area-tags"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Horizontal
+
+Use `Scrollbar` with `orientation="horizontal"` for horizontal galleries and card strips.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-scroll-area-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Both Axes
+
+Combine vertical and horizontal `Scrollbar` tracks for wide data matrices and log tables with automatic corner reservation.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-scroll-area-both-axes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Wrap the scroll container in `dir="rtl"` for right-to-left reading flows.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-scroll-area-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following prop belongs to `Scrollbar` (`Root`, `Viewport`, and `Thumb` add no props):
+### Props
+
+All four parts accept `styleProfile` (or inherit it from `Root` / `ShadcnStyleScope`); `orientation` belongs to `Scrollbar`:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
-  rows={[{ name: 'orientation', type: "'vertical' | 'horizontal'", default: 'vertical' }]}
+  rows={[
+    {
+      name: 'orientation (Scrollbar)',
+      type: "'vertical' | 'horizontal'",
+      default: "'vertical'",
+    },
+    {
+      name: 'styleProfile (all parts)',
+      type: "'new-york-v4' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea'",
+      default: "'new-york-v4'",
+    },
+  ]}
 />
+
+### Exposed States
+
+- **Viewport**: `focused`, `focusVisible`, `scrollAxes`, `scrolling`, `scrollProjection`, `scrollXPosition`, `scrollXVisibleRatio`, `canScrollLeft`, `canScrollRight`, `scrollYPosition`, `scrollYVisibleRatio`, `canScrollUp`, `canScrollDown`.
+- **Scrollbar**: `orientation`.
 
 ## References
 
@@ -52,7 +138,9 @@ The following prop belongs to `Scrollbar` (`Root`, `Viewport`, and `Thumb` add n
   directory="spec/prototypes"
   files={[
     'P-SHADCN-SCROLL-AREA.yaml',
+    'P-SHADCN-SCROLL-AREA-VIEWPORT.yaml',
     'P-SHADCN-SCROLL-AREA-SCROLLBAR.yaml',
+    'P-SHADCN-SCROLL-AREA-THUMB.yaml',
     'P-BASE-SCROLL-AREA.yaml',
   ]}
 />

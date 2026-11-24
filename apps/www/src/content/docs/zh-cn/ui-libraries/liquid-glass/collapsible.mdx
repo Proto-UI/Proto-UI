@@ -1,11 +1,13 @@
 ---
 title: 'Collapsible'
-description: '由 Root、Trigger、Content 组成的 Liquid Glass 折叠披露组件，继承 Base Collapsible 语义。'
+description: '由 Root、Trigger、Content 组成的 Liquid Glass 折叠披露组件，遵循单层玻璃控制、显著度分级与可读不透明回退原则。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Collapsible 由 Root、Trigger、Content 三个部件组成，继承 [Base Collapsible](/zh-cn/ui-libraries/base/collapsible/) 的展开语义，并为 Trigger 提供 Liquid Glass 材质外观。展开状态由 Root 统一管理。
+Liquid Glass Collapsible 由 `Root`、`Trigger` 与 `Content` 三个部件组成，继承 [Base Collapsible](/zh-cn/ui-libraries/base/collapsible/) 的展开语义，并仅在可交互的 `Trigger` 上声明 Liquid Glass 材质意图，保持 `Root` 与阅读正文 `Content` 不透明清晰可读。
 
 ## 预览
 
@@ -14,14 +16,11 @@ Liquid Glass Collapsible 由 Root、Trigger、Content 三个部件组成，继�
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
   toolbar={true}
-  codePanel={false}
 />
-
-可通过预览工具栏的本体系 Select 切换 WC、React、Vue 与 Vue 2。示例依次展示默认卸载、保留隐藏节点、禁用时保持展开以及需点击 **Accept** 确认的受控展开。
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，可直接从 `@proto.ui/prototypes-liquid-glass/collapsible` 导入部件：
 
 ```ts
 import {
@@ -33,22 +32,116 @@ import {
 
 ## 用法
 
-- **部件组合**：每个 `Root` 内放置一个 `Trigger` 与一个 `Content`；嵌套或并列的折叠区块各自独立维护状态。
-- **受控与禁用**：受控模式下仅发出 `openChange` 请求，待调用方更新 `open` 后内容才展开或收起。`disabled` 会禁止新操作，但不会关闭已经展开的内容。
-- **内容挂载与布局**：关闭时默认卸载内容节点（设置 `keepMounted={true}` 可保留隐藏节点）。组件内置可收缩宽度、长词换行与自适应高度，建议在容器外预留焦点环空间。
-- **材质表现**：仅 `Trigger` 声明 `liquid-glass` 材质意图并响应按压状态，`Root` 与正文 `Content` 保持不透明可读样式；宿主不支持材质时自动使用声明的不透明回退色。参考 [Apple Materials 指南](https://developer.apple.com/design/human-interface-guidelines/materials)。
+```tsx
+import {
+  LiquidGlassCollapsibleRoot,
+  LiquidGlassCollapsibleTrigger,
+  LiquidGlassCollapsibleContent,
+} from '@/components/ui/collapsible';
+
+export function Example() {
+  return (
+    <LiquidGlassCollapsibleRoot>
+      <LiquidGlassCollapsibleTrigger variant="regular">
+        Order #4189 — Product details
+      </LiquidGlassCollapsibleTrigger>
+      <LiquidGlassCollapsibleContent>
+        Status: Shipped · Content stays opaque for crisp legibility.
+      </LiquidGlassCollapsibleContent>
+    </LiquidGlassCollapsibleRoot>
+  );
+}
+```
+
+### 部件结构与材质分层
+
+```text
+CollapsibleRoot          (opaque container)
+├── CollapsibleTrigger   (liquid-glass control, regular | prominent, material auto | opaque)
+└── CollapsibleContent   (opaque reading surface — never glass on glass)
+```
+
+- **单层玻璃原则**：仅 `Trigger` 声明 `liquid-glass` 光学意图与按压形变；`Root` 与承载长文本的 `Content` 保持不透明，避免玻璃叠加玻璃导致对比度下降。
+- **显著度分级与不透明退出**：`Trigger` 支持 `variant="regular"`（常规中性玻璃）与 `variant="prominent"`（主色强调玻璃），并可通过 `material="opaque"` 显式退出光学材质而保留完整不透明样式。
+- **同心圆角与无障碍回退**：外层卡片采用 `rounded-2xl` 搭配内层 `rounded-xl` 控件形成同心圆角关系；禁用态通过撤回光学候选与阴影保持文字清晰可读，而非降低整体透明度。参考 [Apple Materials 指南](https://developer.apple.com/design/human-interface-guidelines/materials)。
+
+## 示例
+
+### 基础卡片
+
+在色彩渐变背景与同心圆角容器中展示 Liquid Glass 触发器与不透明正文面板的层次对比。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-collapsible-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 显著度与不透明模式
+
+对比 `variant="regular"`、`variant="prominent"` 与 `material="opaque"` 三种视觉层级。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-collapsible-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控状态
+
+在层次背景上通过外部 Liquid Glass 按钮与 `open` / `openChange` 同步展开状态。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-collapsible-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 | 默认值与说明 |
-| --- | --- | --- |
-| Root | `open` / `defaultOpen` | 受控展开状态 / 非受控初始展开状态 |
-| Root | `disabled` | `false`；禁用全部切换请求但不关闭已展开内容 |
-| Trigger | `disabled` | `false`；局部禁用触发按钮，支持自然 Tab 顺序与 Enter / Space 激活 |
-| Content | `keepMounted` | `false`；设为 `true` 时关闭后保留隐藏节点 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'keepMounted', type: 'boolean', default: 'false' }]}
+/>
 
 ### 事件与方法
 
-- Root 暴露：`open` 状态、`openCollapsible()`、`close()`、`toggle()` 以及 `openChange` 事件（载荷 `{ open, reason }`）。
-- Trigger 暴露：展开、禁用、悬停、按压、焦点状态与 `focusSelf()`。
-- Content 暴露：派生的 `open` / `hidden` 状态。
+- **Root 事件**：`openChange`（载荷 `{ open, reason }`）
+- **Root 方法**：`openCollapsible(reason?)`、`close(reason?)`、`toggle(reason?)`
+- **Trigger 方法**：`focusSelf(options?)`
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-COLLAPSIBLE.yaml',
+    'P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER.yaml',
+    'P-LIQUID-GLASS-COLLAPSIBLE-CONTENT.yaml',
+    'P-BASE-COLLAPSIBLE.yaml',
+  ]}
+/>

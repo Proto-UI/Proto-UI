@@ -7,6 +7,9 @@ export {
 export {
   default as accordionTrigger,
   default as liquidGlassAccordionTrigger,
+  type LiquidGlassAccordionMaterial,
+  type LiquidGlassAccordionProminence,
+  type LiquidGlassAccordionTriggerProps,
 } from './trigger.proto';
 export {
   default as accordionContent,

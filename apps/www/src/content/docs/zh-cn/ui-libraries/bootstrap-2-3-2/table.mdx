@@ -1,0 +1,283 @@
+---
+title: 'Table'
+description: '沿用经典 Bootstrap 2.3.2 像素排版、边框与斑马纹风格的响应式结构化表格组件。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Bootstrap 2.3.2 Table 在 [Base Table](/zh-cn/ui-libraries/base/table/) 的结构化语义之上还原归档版本的 14px/20px 排版、8px 默认单元格内边距与顶部横线节奏，并提供经典的边框表格（`bordered`）、紧凑排版（`condensed`）、斑马纹（`striped`）、悬停高亮（`hoverable`）与语义状态行（`tone`）。
+
+如需排序、过滤、分页与行选择，请使用 [Data Table](/zh-cn/ui-libraries/bootstrap-2-3-2/data-table/)。
+
+## 预览
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-table"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-bootstrap-2-3-2/table` 导入各部件：
+
+```ts
+import {
+  tableRoot,
+  tableCaption,
+  tableRow,
+  tableHeaderCell,
+  tableCell,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/table';
+```
+
+## 用法
+
+```html
+<div class="w-full overflow-x-auto">
+  <bootstrap-2-3-2-table-root>
+    <bootstrap-2-3-2-table-caption>A list of your recent invoices.</bootstrap-2-3-2-table-caption>
+    <bootstrap-2-3-2-table-row section="header">
+      <bootstrap-2-3-2-table-header-cell
+        header-key="invoice"
+        header-kind="column"
+        style="width: 100px"
+      >
+        Invoice
+      </bootstrap-2-3-2-table-header-cell>
+      <bootstrap-2-3-2-table-header-cell header-key="status" header-kind="column"
+        >Status</bootstrap-2-3-2-table-header-cell
+      >
+      <bootstrap-2-3-2-table-header-cell header-key="method" header-kind="column"
+        >Method</bootstrap-2-3-2-table-header-cell
+      >
+      <bootstrap-2-3-2-table-header-cell
+        header-key="amount"
+        header-kind="column"
+        style="text-align: end"
+      >
+        Amount
+      </bootstrap-2-3-2-table-header-cell>
+    </bootstrap-2-3-2-table-row>
+    <bootstrap-2-3-2-table-row section="body">
+      <bootstrap-2-3-2-table-header-cell header-key="inv001" header-kind="row"
+        >INV001</bootstrap-2-3-2-table-header-cell
+      >
+      <bootstrap-2-3-2-table-cell>Paid</bootstrap-2-3-2-table-cell>
+      <bootstrap-2-3-2-table-cell>Credit Card</bootstrap-2-3-2-table-cell>
+      <bootstrap-2-3-2-table-cell style="text-align: end">$250.00</bootstrap-2-3-2-table-cell>
+    </bootstrap-2-3-2-table-row>
+  </bootstrap-2-3-2-table-root>
+</div>
+```
+
+### 组件结构
+
+```text
+Root
+├── Caption
+├── Row (section="header")
+│   └── HeaderCell (headerKind="column")
+├── Row (section="body")
+│   ├── HeaderCell (headerKind="row")
+│   └── Cell (headers=[...])
+└── Row (section="footer")
+    ├── HeaderCell (headerKind="row")
+    └── Cell (headers=[...])
+```
+
+- 默认基线严格保留 Bootstrap 2.3.2 `.table` 的首行无上边框规则（仅第一行的列表头省略 `border-t`）与 `8px` 单元格内边距。
+- 分隔线绑定主题变量 `border-border`，在浅色与深色宿主下均与文字前景色保持清晰对比。
+
+## 示例
+
+### 表尾
+
+通过 `section="footer"` 为汇总行添加次级底色与加粗字体：
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-table-footer"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 经典变体与状态行
+
+组合 `bordered`、`condensed`（`4px 5px` 内边距）、`striped`、`hoverable` 以及 `info` / `warning` / `error` 状态行：
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-table-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 操作菜单
+
+在单元格中组合 Bootstrap 2.3.2 `DropdownMenu`，提供行级操作入口：
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-table-actions"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root
+
+`Root` 暴露 `getStructure()` 方法读取当前表格结构快照。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'bordered',
+      type: 'boolean',
+      default: 'false',
+      description: '启用经典 .table-bordered 外框与 4px 圆角',
+    },
+  ]}
+/>
+
+### Caption
+
+`Caption` 不声明额外属性，采用居中辅助文字样式并保留上下留白。
+
+### Row
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'section',
+      type: "'header' | 'body' | 'footer'",
+      default: "'body'",
+      description: '指定视觉分区；footer 应用次级背景与加粗汇总字重',
+    },
+    {
+      name: 'striped',
+      type: 'boolean',
+      default: 'false',
+      description: '在正文行上启用 .table-striped 隔行底色',
+    },
+    {
+      name: 'hoverable',
+      type: 'boolean',
+      default: 'false',
+      description: '启用被动 .table-hover 指针悬停高亮',
+    },
+    {
+      name: 'tone',
+      type: "'default' | 'info' | 'warning' | 'error'",
+      default: "'default'",
+      description: 'Bootstrap 2.3.2 经典状态行配色',
+    },
+  ]}
+/>
+
+### HeaderCell
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'headerKey',
+      type: 'string',
+      default: "''",
+      description: '表头键名，供 Cell.headers 引用',
+    },
+    {
+      name: 'headerKind',
+      type: "'column' | 'row'",
+      default: 'undefined',
+      description: '列表头底部对齐并保留首行无上边框，行表头顶部对齐',
+    },
+    {
+      name: 'headers',
+      type: 'readonly string[]',
+      default: '[]',
+      description: '多层表头引用的上级表头键列表',
+    },
+    {
+      name: 'rowSpan',
+      type: 'number',
+      default: '1',
+      description: '无障碍跨行数（正整数）',
+    },
+    {
+      name: 'columnSpan',
+      type: 'number',
+      default: '1',
+      description: '无障碍跨列数（正整数）',
+    },
+    {
+      name: 'condensed',
+      type: 'boolean',
+      default: 'false',
+      description: '切换为 .table-condensed 紧凑内边距（4px 5px）',
+    },
+    {
+      name: 'bordered',
+      type: 'boolean',
+      default: 'false',
+      description: '为边框表格添加列间竖线',
+    },
+  ]}
+/>
+
+### Cell
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'headers',
+      type: 'readonly string[]',
+      default: '[]',
+      description: '按顺序关联的表头 headerKey 列表',
+    },
+    {
+      name: 'rowSpan',
+      type: 'number',
+      default: '1',
+      description: '无障碍跨行数（正整数）',
+    },
+    {
+      name: 'columnSpan',
+      type: 'number',
+      default: '1',
+      description: '无障碍跨列数（正整数）',
+    },
+    {
+      name: 'condensed',
+      type: 'boolean',
+      default: 'false',
+      description: '切换为 .table-condensed 紧凑内边距（4px 5px）',
+    },
+    {
+      name: 'bordered',
+      type: 'boolean',
+      default: 'false',
+      description: '为边框表格添加列间竖线',
+    },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-TABLE.yaml',
+    'P-BOOTSTRAP-2-3-2-TABLE-CAPTION.yaml',
+    'P-BOOTSTRAP-2-3-2-TABLE-ROW.yaml',
+    'P-BOOTSTRAP-2-3-2-TABLE-HEADER-CELL.yaml',
+    'P-BOOTSTRAP-2-3-2-TABLE-CELL.yaml',
+    'P-BASE-TABLE.yaml',
+  ]}
+/>

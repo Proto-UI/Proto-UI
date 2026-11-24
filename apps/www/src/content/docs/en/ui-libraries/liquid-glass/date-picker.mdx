@@ -4,12 +4,12 @@ description: 'A Liquid Glass date picker combining Popover and Calendar for sing
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Date Picker composes Popover and Calendar into a dropdown date selector supporting single-date, multiple-date, and range modes. `open`, selection values, and the visible `month` can each be controlled independently.
+Liquid Glass Date Picker pairs a concentric pill trigger with a single floating `regular` Liquid Glass calendar popover and circular day cells, supporting single, multiple, and range modes with an explicit `material="opaque"` opt-out.
 
 ## Preview
-
-### Single date
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-date-picker"
@@ -17,7 +17,101 @@ Liquid Glass Date Picker composes Popover and Calendar into a dropdown date sele
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-### Range and multiple selection
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release. `Date Picker` composes Liquid Glass `Popover` and `Calendar` parts directly from the workspace.
+
+## Usage
+
+```tsx
+import {
+  LiquidGlassDatePickerRoot,
+  LiquidGlassDatePickerTrigger,
+  LiquidGlassDatePickerValue,
+  LiquidGlassDatePickerContent,
+  LiquidGlassDatePickerDay,
+  LiquidGlassCalendarCaption,
+  LiquidGlassCalendarPrevious,
+  LiquidGlassCalendarHeading,
+  LiquidGlassCalendarNext,
+  LiquidGlassCalendarGrid,
+  LiquidGlassCalendarWeekdays,
+  LiquidGlassCalendarWeekday,
+  LiquidGlassCalendarRow,
+} from '../proto-ui/components/react';
+
+export function LiquidGlassDatePickerExample() {
+  return (
+    <LiquidGlassDatePickerRoot defaultMonth="2026-10">
+      <LiquidGlassDatePickerTrigger className="w-56" variant="regular">
+        <LiquidGlassDatePickerValue placeholder="Pick a date" />
+        <span aria-hidden="true">▾</span>
+      </LiquidGlassDatePickerTrigger>
+      <LiquidGlassDatePickerContent side="bottom" align="start" sideOffset={6} material="auto">
+        <LiquidGlassCalendarCaption>
+          <LiquidGlassCalendarPrevious a11yLabel="Previous month">‹</LiquidGlassCalendarPrevious>
+          <LiquidGlassCalendarHeading />
+          <LiquidGlassCalendarNext a11yLabel="Next month">›</LiquidGlassCalendarNext>
+        </LiquidGlassCalendarCaption>
+        <LiquidGlassCalendarGrid>
+          <LiquidGlassCalendarWeekdays>
+            {[0, 1, 2, 3, 4, 5, 6].map((offset) => (
+              <LiquidGlassCalendarWeekday key={offset} offset={offset} />
+            ))}
+          </LiquidGlassCalendarWeekdays>
+          {[0, 1, 2, 3, 4, 5].map((row) => (
+            <LiquidGlassCalendarRow key={row} index={row}>
+              {[0, 1, 2, 3, 4, 5, 6].map((col) => (
+                <LiquidGlassDatePickerDay key={col} offset={row * 7 + col} />
+              ))}
+            </LiquidGlassCalendarRow>
+          ))}
+        </LiquidGlassCalendarGrid>
+      </LiquidGlassDatePickerContent>
+    </LiquidGlassDatePickerRoot>
+  );
+}
+```
+
+- **Single-layer material and concentric geometry**: Only the open `DatePickerContent` requests the `regular` Liquid Glass material (never stacking glass-on-glass). `DatePickerTrigger` uses pill geometry with `regular` and `prominent` prominence levels, while day cells sit flat inside the `rounded-2xl` surface as circular targets.
+- **Accessibility fallbacks**: When Reduced Transparency or Increased Contrast is active—or when `material="opaque"` is set—the popup falls back to its crisp `bg-secondary` / `text-secondary-foreground` surface. Disabled controls avoid `opacity-*` dimming to keep fallback contrast readable, and Reduced Motion disables popup entrance/exit animations.
+- **Selection modes and dismissal**: Single selection and completed ranges request closing the popup; multiple mode stays open for consecutive picks. Date constraints inherit from [Calendar](/en/ui-libraries/liquid-glass/calendar/).
+
+## Examples
+
+### Basic
+
+Showcases the pill trigger and floating `regular` Liquid Glass popover over a tinted backdrop.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-date-picker-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Range Picker
+
+Select an inclusive range with `mode="range"`, prominent circular endpoints, and high-contrast `bg-muted` middle cells.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-date-picker-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Prominence, Multiple & Disabled
+
+Pairs a `variant="prominent"` trigger in `mode="multiple"` with a readable `disabled` picker.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-date-picker-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Range & Multiple Comparison
+
+Compare `mode="range"` and `mode="multiple"` side by side under identical availability rules.
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-date-picker-selection"
@@ -25,31 +119,46 @@ Liquid Glass Date Picker composes Popover and Calendar into a dropdown date sele
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Installation
+### RTL & Locale
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Pass `direction="rtl"` and `locale="ar-SA"` to mirror grid order and localize headings and weekdays.
 
-## Usage
-
-- **Modes**: pass `mode="range"` with `range` / `defaultRange`, or `mode="multiple"` with `values` / `defaultValues`. All date bounds, unavailable dates, count limits, and night limits follow [Calendar](/en/ui-libraries/liquid-glass/calendar/).
-- **Auto-close behavior**:
-  - Single selection requests closing the popover once the selection is accepted.
-  - Range selection keeps the popover open after the first endpoint and requests one close once the second endpoint completes the range.
-  - Multiple selection stays open for consecutive toggles; dismiss normally via Escape, outside press, or a close trigger.
-  - Rejected controlled requests keep the popover open, and external value updates alone do not dismiss it.
-- **Value formatting**: `Value` renders a single `YYYY-MM-DD` date, a comma-separated sorted list, `from …` for an incomplete range, `from – to` for a complete range, or `placeholder` when empty. Dismissal and focus return follow Popover.
+<PrototypePreviewer
+  demoId="demo-liquid-glass-date-picker-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Prop                      | Description                                      |
-| ------------------------- | ------------------------------------------------ |
-| `open`, `defaultOpen`     | Controlled / uncontrolled popover visibility     |
-| `mode`                    | `'single'` (default), `'multiple'`, or `'range'` |
-| `value`, `defaultValue`   | Single-date selection                            |
-| `values`, `defaultValues` | Multiple-date array                              |
-| `range`, `defaultRange`   | Range selection `{ from?, to? }`                 |
-| `month`, `defaultMonth`   | Visible calendar month (`YYYY-MM`)               |
-| `placeholder`             | Fallback text shown in `Value` when empty        |
-| `disabled`, `readOnly`    | Disables interaction or blocks selection edits   |
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: "'single'" },
+    { name: 'open / defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'value / defaultValue', type: 'string (YYYY-MM-DD)', default: "''" },
+    { name: 'values / defaultValues', type: 'readonly string[]', default: '[]' },
+    { name: 'range / defaultRange', type: '{ from?: string; to?: string }', default: '{}' },
+    { name: 'month / defaultMonth', type: 'string (YYYY-MM)', default: 'current month' },
+    { name: 'min / max / unavailable', type: 'string / readonly string[]', default: '—' },
+    { name: 'minSelected / maxSelected', type: 'number', default: '—' },
+    { name: 'minNights / maxNights', type: 'number', default: '—' },
+    { name: 'locale / direction', type: "string / 'ltr' | 'rtl'", default: "'en-US' / 'ltr'" },
+    { name: 'disabled / readOnly', type: 'boolean', default: 'false' },
+    { name: 'variant (Trigger)', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'material (Content)', type: "'auto' | 'opaque'", default: "'auto'" },
+    {
+      name: 'side / align / sideOffset',
+      type: 'PopoverContentProps',
+      default: "'bottom' / 'center' / 4",
+    },
+    { name: 'placeholder (Value)', type: 'string', default: "'Pick a date'" },
+  ]}
+/>
 
-See [Calendar](/en/ui-libraries/liquid-glass/calendar/) for the full set of calendar props, callbacks, and grid parts.
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-DATE-PICKER.yaml', 'P-BASE-DATE-PICKER.yaml']}
+/>

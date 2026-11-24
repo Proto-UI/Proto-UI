@@ -1,11 +1,13 @@
 ---
 title: 'Message Scroller'
-description: '支持底部自动跟随新消息与手动回底的 Bootstrap 2.3.2 消息流滚动容器。'
+description: '支持底部自动跟随新消息与经典按钮回底操作的 Bootstrap 2.3.2 消息流滚动容器。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Message Scroller 面向聊天和实时日志流场景：当用户停留在列表底部时自动跟随新消息滚动，向上回看历史时暂停跟随，并提供“Jump to latest”操作显式回到最新内容。
+Message Scroller 面向聊天记录与实时活动日志场景，以经典 Bootstrap 2.3.2 的 4px 圆角边框面板、内阴影和渐变斜角按钮承载消息流：停留在底部时自动跟随新消息，向上回看历史时保持位置，并通过浮动回底按钮随时返回最新条目。
 
 ## 预览
 
@@ -17,17 +19,114 @@ Message Scroller 面向聊天和实时日志流场景：当用户停留在列表
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/message-scroller` 导入原型并使用对应适配器封装。
+
+```ts
+import {
+  messageScrollerRoot,
+  messageScrollerViewport,
+  messageScrollerJump,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/message-scroller';
+```
 
 ## 用法
 
-- **自动跟随与回底**：仅当视口位于末端时自动跟随追加内容；用户主动滚动离开底部后保持当前位置，点击“Jump to latest”即可平滑回底并恢复跟随，且不会抢夺当前键盘焦点。
-- **新消息计数**：未读或新增条目数通过 `newContentCount` 由应用显式传入，组件不自行推断业务未读状态。
-- **无障碍命名**：通过 `Root` 的 `a11yLabel` 为滚动区域命名，默认为 `'Messages'`。
+为外层容器设置固定高度，`Root` 提供 Bootstrap 2.3.2 边框面板，`Viewport` 承担纵向滚动，`Jump` 复用经典按钮视觉并浮动于底部右下角：
+
+```tsx
+<div className="h-72 w-full max-w-lg">
+  <Bootstrap232MessageScrollerRoot a11yLabel="Release room messages">
+    <Bootstrap232MessageScrollerViewport>
+      <div className="flex flex-col pb-12">
+        {messages.map((message) => (
+          <div key={message.id}>{message.text}</div>
+        ))}
+      </div>
+    </Bootstrap232MessageScrollerViewport>
+    <Bootstrap232MessageScrollerJump>Jump to latest ↓</Bootstrap232MessageScrollerJump>
+  </Bootstrap232MessageScrollerRoot>
+</div>
+```
+
+### 行为说明
+
+- **贴底自动跟随**：仅当视口已经位于底部时自动跟随追加条目；读者主动向上滚动后保持原位。
+- **不抢占焦点**：点击回底按钮会滚动到末尾并恢复跟随，同时保留当前键盘焦点。
+- **应用层计数与命名**：通过 `newContentCount` 显式传入新增消息数量，通过 `a11yLabel` 为滚动区域命名（默认为 `'Messages'`）。
+
+## 示例
+
+### 实时日志流
+
+点击 **Append message** 追加新日志；先向上回看历史再追加即可观察阅读位置保持与未读计数变化。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-message-scroller-live"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用态与未读提示
+
+`Jump` 继承 Button 属性，禁用时呈现经典的柔和扁平按钮样式且不响应点击，同时保留正常手动滚动。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-message-scroller-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件   | 属性              | 默认值       | 说明                         |
-| ------ | ----------------- | ------------ | ---------------------------- |
-| `Root` | `a11yLabel`       | `'Messages'` | 滚动区域的可访问名称         |
-| `Root` | `newContentCount` | —            | 由应用提供的新增消息数量提示 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'newContentCount', type: 'number', default: '0' },
+    { name: 'a11yLabel', type: 'string', default: "'Messages'" },
+  ]}
+/>
+
+### Viewport
+
+<ApiPropsTable
+  headers={{ name: '暴露能力', type: '类型', default: '说明' }}
+  rows={[
+    { name: 'atEnd', type: 'ExposeState<boolean>', default: '当前视口是否位于底部' },
+    { name: 'following', type: 'ExposeState<ScrollEndFollowState>', default: '末端自动跟随状态' },
+    {
+      name: 'requestStatus',
+      type: 'ExposeState<ScrollEndFollowRequestStatus>',
+      default: '最近一次滚底请求状态',
+    },
+    { name: 'jumpToEnd()', type: '() => void', default: '显式滚动至末尾' },
+    {
+      name: 'pauseFollowing()',
+      type: '() => ScrollSurfaceRequestOutcome',
+      default: '暂停自动跟随',
+    },
+  ]}
+/>
+
+### Jump
+
+<ApiPropsTable
+  headers={{ name: '属性 / 暴露能力', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'atEnd (expose)', type: 'ExposeState<boolean>', default: '同步自 Root 的底部状态' },
+    {
+      name: 'newContentCount (expose)',
+      type: 'ExposeState<number>',
+      default: '同步自 Root 的新增条数',
+    },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-MESSAGE-SCROLLER.yaml', 'P-BASE-MESSAGE-SCROLLER.yaml']}
+/>

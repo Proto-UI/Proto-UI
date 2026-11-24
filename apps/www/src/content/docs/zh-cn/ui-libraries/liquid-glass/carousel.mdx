@@ -1,11 +1,13 @@
 ---
 title: 'Carousel'
-description: '支持连续拖动、原生滚动吸附、响应式视口与受控索引的 Liquid Glass 轮播组件。'
+description: '支持悬浮液态玻璃导航控件、连续拖动吸附、响应式视口与受控索引的 Liquid Glass 轮播组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Carousel 组合等宽项目条、可连续滚动的视口以及前后翻页控制。支持鼠标/触摸拖动、滚轮、触控板、滚动条与键盘导航，松手或滚动静止后自动吸附到最近的可达项。
+Liquid Glass Carousel 将清晰通透的内容滑块与悬浮其上的圆形液态玻璃翻页控制分层组合：内容区保持实体与高对比度，前后按钮作为浮动导航层使用 Liquid Glass 材质（支持 `regular` / `prominent` 层级与 `material="opaque"` 回退），不在玻璃之上叠放玻璃。
 
 ## 预览
 
@@ -15,27 +17,116 @@ Liquid Glass Carousel 组合等宽项目条、可连续滚动的视口以及前�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-示例设置最多显示两项且单页最小宽度 `180`；缩放容器宽度时会自动调整实际可见数量。
-
 ## 安装
 
 当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
 ## 用法
 
-- **响应式容量**：`slidesPerView` 设置最多显示的等尺寸项数（默认 `1`），`minSlideSize` 设置单项最小逻辑像素尺寸（默认 `0`）。最后一个吸附位自动贴齐末端，避免留下大片空白。
-- **受控索引**：传入 `index` 进入受控模式，`indexChange` 提出目标吸附索引。拖动过程中不会提前改写已提交的 `index`；松手时若调用方未更新 `index`，会平滑回弹至当前值。
-- **方向与循环**：使用 `orientation="vertical"` 时需为视口设置明确高度；水平模式下 `direction="rtl"` 会反转拖动和方向键，但保留逻辑项顺序。`loop` 在首尾索引间循环切换（不通过克隆节点实现无限循环）。
-- 当前版本面向等尺寸项与手动/键盘导航，不包含自动播放或不等宽项。
+```tsx
+import {
+  LiquidGlassCarouselRoot,
+  LiquidGlassCarouselViewport,
+  LiquidGlassCarouselSlide,
+  LiquidGlassCarouselPrevious,
+  LiquidGlassCarouselNext,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <LiquidGlassCarouselRoot className="mx-auto w-full max-w-md">
+      <LiquidGlassCarouselViewport>
+        <LiquidGlassCarouselSlide>1</LiquidGlassCarouselSlide>
+        <LiquidGlassCarouselSlide>2</LiquidGlassCarouselSlide>
+        <LiquidGlassCarouselSlide>3</LiquidGlassCarouselSlide>
+      </LiquidGlassCarouselViewport>
+      <LiquidGlassCarouselPrevious aria-label="Previous slide">‹</LiquidGlassCarouselPrevious>
+      <LiquidGlassCarouselNext aria-label="Next slide">›</LiquidGlassCarouselNext>
+    </LiquidGlassCarouselRoot>
+  );
+}
+```
+
+- **材质与层级**：`Previous` / `Next` 默认采用 `variant="regular"` 圆形液态玻璃控件悬浮在内容边缘，按需可为主要推进操作设置 `variant="prominent"`；当系统启用降低透明度、提高对比度或设置 `material="opaque"` 时自动回退为高可读性不透明表面。
+- **同心圆角与响应式容量**：视口采用 `rounded-xl` 与卡片内边距形成同心圆角关系；通过 `slidesPerView` 与 `minSlideSize` 控制响应式可见项数。
+- **方向与受控模式**：支持 `orientation="vertical"`、`direction="rtl"`、`loop={true}` 及 `index` / `indexChange` 受控索引。
+
+## 示例
+
+### 多项展示（Sizes）
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-carousel-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 纵向轮播（Orientation）
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-carousel-orientation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 首尾循环与层级（Loop & Prominence）
+
+下方示例启用 `loop={true}`，并对比 `variant="regular"`（上一项）与 `variant="prominent"`（下一项）两种悬浮玻璃层级。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-carousel-loop"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 索引追踪（API）
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-carousel-api"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 状态 | 默认值与说明 |
-| --- | --- | --- |
-| Root | `slidesPerView` | `1`；最多同时显示的等尺寸项目数 |
-| Root | `minSlideSize` | `0`；单项最小逻辑宿主像素尺寸 |
-| Root | `index` | 受控当前吸附索引，配合 `indexChange` 事件使用 |
-| Root | `orientation` / `direction` / `loop` | 滚动轴向、文本方向与首尾循环开关 |
-| Root（暴露状态） | `visibleSlides` / `maxIndex` | 根据实际视口计算的可见项数与最大可达索引 |
-| Viewport（暴露状态） | `dragging` / `scrolling` / `scrollPosition` | 拖动状态、滚动状态与归一化滚动进度 |
-| Slide（暴露状态） | `current` / `hidden` | 分别对应当前吸附项与屏外可见性（不移除布局尺寸） |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'index', type: 'number', default: '—' },
+    { name: 'defaultIndex', type: 'number', default: '0' },
+    { name: 'slidesPerView', type: 'number', default: '1' },
+    { name: 'minSlideSize', type: 'number', default: '0' },
+    { name: 'loop', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'a11yLabel', type: 'string', default: 'Carousel' },
+  ]}
+/>
+
+### Slide / Previous / Next
+
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Slide.index', type: 'number', default: '按文档顺序分配' },
+    { name: 'Previous / Next.disabled', type: 'boolean', default: 'false' },
+    { name: 'Previous / Next.variant', type: "'regular' | 'prominent'", default: 'regular' },
+    { name: 'Previous / Next.material', type: "'auto' | 'opaque'", default: 'auto' },
+  ]}
+/>
+
+### 暴露状态、方法与事件
+
+- **Root**：状态 `index`、`slideCount`、`visibleSlides`、`maxIndex`；方法 `requestIndex(next)`；事件 `indexChange`。
+- **Viewport**：状态 `focusVisible`、`dragging`、`scrolling`、`scrollPosition`。
+- **Slide**：状态 `current`、`hidden`、`basis`、`minSize`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-CAROUSEL.yaml', 'P-BASE-CAROUSEL.yaml']}
+/>

@@ -1,13 +1,13 @@
 ---
 title: 'Tree'
-description: '支持层级展开折叠、键盘导航与双向文字方向的树形视图组件。'
+description: '支持层级展开折叠、嵌入式外观、键盘导航与双向文字方向的 Shadcn 风格树形视图组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Tree 用于展示和浏览层级结构数据（如文件目录或大纲列表），支持单项选择、分支展开折叠以及完整的键盘导航。本页示例使用 **Shadcn Rhea** 风格。
+Tree 用于展示和浏览层级结构数据（如文件浏览器或文档大纲），支持单项选择、分支展开折叠以及完整的键盘导航。本页示例使用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -19,35 +19,98 @@ Tree 用于展示和浏览层级结构数据（如文件目录或大纲列表）
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-shadcn/tree` 导入原型并通过目标框架适配器注册使用：
+
+```ts
+import { treeRoot, treeItem, treeGroup, treeToggle } from '@proto.ui/prototypes-shadcn/tree';
+```
 
 ## 用法
 
-Tree 由 `Root`、`Item`、`Group`（`TreeGroup`）和 `Toggle` 组成：
+```tsx
+<ShadcnTreeRoot defaultValue="button" defaultExpandedKeys={['src', 'components']}>
+  <div className="flex items-center gap-1">
+    <ShadcnTreeToggle nodeKey="src" size="icon">
+      ▾
+    </ShadcnTreeToggle>
+    <ShadcnTreeItem nodeKey="src" textValue="src" className="flex-1">
+      src/
+    </ShadcnTreeItem>
+  </div>
+  <ShadcnTreeGroup nodeKey="src">
+    <ShadcnTreeItem nodeKey="button" parentKey="src" textValue="button.tsx">
+      button.tsx
+    </ShadcnTreeItem>
+  </ShadcnTreeGroup>
+</ShadcnTreeRoot>
+```
 
-- 每个 `Item` 使用树内唯一的 `nodeKey`，并通过 `parentKey` 指向父节点；若出现重复 key、缺失父节点或循环引用，非法节点配置会被忽略并保持当前有效结构。
+### 结构与无障碍语义
+
+- 每个 `Item` 需提供树内唯一的 `nodeKey`，并通过 `parentKey` 指向父节点；若出现重复键、缺失父节点或循环引用，非法节点配置会被忽略并保持当前有效结构。
 - 将分支子项放入与父 `Item` 共享相同 `nodeKey` 的 `TreeGroup` 中，组件会自动维护 `aria-controls` / `aria-labelledby` 关联并在节点卸载时清理。
-- 折叠分支时仅隐藏 `TreeGroup` 而保留完整层级；若折叠前焦点位于分支内部，焦点会自动回到可见祖先节点，而不会抢走树外的焦点。
+- 折叠分支时仅隐藏 `TreeGroup` 而保留完整层级；若折叠前焦点位于分支内部，焦点会自动回到可见祖先节点，而不会抢走树外焦点。
+- **键盘导航**：支持 `ArrowUp` / `ArrowDown`、`Home` / `End` 和首字母跳转；LTR 模式下 `ArrowRight` 展开分支或进入首个子节点，`ArrowLeft` 折叠分支或返回父节点；`direction="rtl"` 会自动镜像缩进导轨与左右键方向。
 
-### 嵌入式外观与文字方向
+### 风格预设（`styleProfile`）
 
-- 在侧边栏或现有卡片表面内展示文件导航时，可在 `Root` 和 `Item` 上同时设置 `appearance="embedded"`，启用更柔和的选中底色并支持放大字号时的自动换行。
-- 在 `Root` 上设置 `direction="rtl"` 会自动镜像缩进方向与左右方向键映射（左键展开/进入子项，右键折叠/返回父项）；上下方向键、`Home` / `End` 和首字母跳转继续按逻辑可见顺序工作。
+支持 `vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea` 与 `new-york-v4`（`new-york` 作为兼容别名）。省略或设为 `inherit` 时优先继承最近的 [Style Scope](../style-scope/)，否则回退到 `nova`。
 
-### 受控与只读
+## 示例
 
-- 传入 `value` 或 `expandedKeys` 可分别进入受控模式，组件发出变更请求并在外部更新后提交。动态增删或移动节点会更新层级而不会伪造用户选择事件。
-- 设置 `readOnly` 会阻止修改选中项，同时保留键盘导航与展开/折叠功能。
+### 嵌入式侧边栏外观
+
+在侧边栏或现有卡片表面内使用 `appearance="embedded"` 时，`Root` 会自动将嵌入式外观向下传递给未显式覆盖的 `Item`，启用无外框透明容器与更柔和的选中/悬停层次。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tree-embedded"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控选择与展开
+
+传入 `value` 或 `expandedKeys` 可分别进入受控模式；监听 `valueChange` 与 `expandedChange` 并在外部状态确认后提交更新。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tree-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读状态
+
+支持在 `Root` 或单个 `Item` 上设置 `disabled`；在 `Root` 上设置 `readOnly` 会锁定当前选中项，同时保留分支展开折叠与键盘导航。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tree-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 从右到左（RTL）
+
+设置 `direction="rtl"` 会自动翻转层级缩进与导轨边，并交换左/右方向键的展开与折叠语义。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tree-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`（传入 `value` 或 `expandedKeys` 可分别进入受控模式）：
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: 'undefined（受控）' },
     { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'expandedKeys', type: 'readonly string[]', default: 'undefined（受控）' },
     { name: 'defaultExpandedKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'appearance', type: "'default' | 'embedded'", default: 'default' },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: 'inherit → 最近 scope → nova' },
     { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -55,11 +118,63 @@ Tree 由 `Root`、`Item`、`Group`（`TreeGroup`）和 `Toggle` 组成：
   ]}
 />
 
-其他部件属性：
+### Item
 
-- `Item`：`nodeKey`、`parentKey`、`textValue` 默认 `''`，`disabled` 默认 `false`（支持 `appearance="embedded"`）。
-- `Group`：接受 `nodeKey`。
-- `Toggle`：接受 Button 属性。
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'nodeKey', type: 'string', default: "''" },
+    { name: 'parentKey', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'appearance', type: "'inherit' | 'default' | 'embedded'", default: 'inherit' },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: 'inherit → 最近 scope → nova' },
+  ]}
+/>
+
+### Group 与 Toggle
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Group.nodeKey', type: 'string', default: "''" },
+    { name: 'Toggle.nodeKey', type: 'string', default: "''" },
+    { name: 'Toggle.size', type: "'default' | 'icon'", default: 'default' },
+    { name: 'Toggle.disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'Toggle.styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: 'inherit → 最近 scope → nova',
+    },
+  ]}
+/>
+
+### 事件与方法（Root）
+
+<ApiPropsTable
+  headers={{ name: '名称', type: '签名 / 载荷', default: '说明' }}
+  rows={[
+    { name: 'valueChange', type: '{ value: string }', default: '请求变更选中节点时触发' },
+    {
+      name: 'expandedChange',
+      type: '{ expandedKeys: string[] }',
+      default: '请求展开或折叠分支时触发',
+    },
+    { name: 'getTree', type: '() => TreeEntry[]', default: '返回当前有效节点的层级快照' },
+    { name: 'getExpandedKeys', type: '() => string[]', default: '返回当前已展开分支的键列表' },
+    {
+      name: 'requestValue',
+      type: '(key: string) => boolean',
+      default: '以编程方式请求选中指定节点',
+    },
+    {
+      name: 'requestExpanded',
+      type: '(key: string, open: boolean) => boolean',
+      default: '以编程方式请求展开或折叠分支',
+    },
+    { name: 'refresh', type: '() => void', default: '重新计算并同步树形结构快照' },
+  ]}
+/>
 
 ## 参考
 

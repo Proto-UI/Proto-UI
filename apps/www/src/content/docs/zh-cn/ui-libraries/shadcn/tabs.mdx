@@ -1,66 +1,22 @@
 ---
 title: 'Tabs'
-description: '支持键盘导航、多种外观预设与按需挂载面板的标签页组件。'
+description: '支持键盘导航、多种外观变体、垂直布局与风格预设的标签页组件。'
 ---
 
-import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
-import { codeMap } from '@/content/docs/demo_components/tabs/tabsCode';
-import { tabsProfileSwitchCode } from '@/content/docs/demo_components/tabs/tabs-profile-switch-code';
-import { getCode } from '@/utils/conversionUtils';
 
-Tabs 将关联内容分组到可切换的标签面板中，同一时刻展示一个活动面板，支持水平或垂直排列以及自动/手动键盘激活。本页示例使用 **Shadcn Rhea** 风格。
+Tabs 将关联内容分组到可切换的标签面板中，同一时刻展示一个活动面板，支持水平或垂直布局、线条变体及自动/手动键盘激活。本页示例默认使用 **Shadcn Rhea** 风格。
 
 ## 预览
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={getCode('wc', 'demo-shadcn-tabs', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={getCode('react', 'demo-shadcn-tabs', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={getCode('vue', 'demo-shadcn-tabs', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={getCode('vue2', 'demo-shadcn-tabs', codeMap)}
-  />
-</div>
-
-<AdapterPanelScript />
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## 安装
 
@@ -72,223 +28,212 @@ Tabs 将关联内容分组到可切换的标签面板中，同一时刻展示一
 
 ## 用法
 
+```tsx
+import {
+  ShadcnTabsContent,
+  ShadcnTabsList,
+  ShadcnTabsRoot,
+  ShadcnTabsTrigger,
+} from '../proto-ui/components/react';
+```
+
+```tsx
+<ShadcnTabsRoot styleProfile="rhea" defaultValue="account">
+  <ShadcnTabsList styleProfile="rhea">
+    <ShadcnTabsTrigger styleProfile="rhea" value="account">
+      Account
+    </ShadcnTabsTrigger>
+    <ShadcnTabsTrigger styleProfile="rhea" value="password">
+      Password
+    </ShadcnTabsTrigger>
+  </ShadcnTabsList>
+  <ShadcnTabsContent styleProfile="rhea" value="account">
+    Make changes to your account here.
+  </ShadcnTabsContent>
+  <ShadcnTabsContent styleProfile="rhea" value="password">
+    Change your password here.
+  </ShadcnTabsContent>
+</ShadcnTabsRoot>
+```
+
+### 组件结构
+
+```text
+TabsRoot
+├── TabsList
+│   ├── TabsTrigger
+│   └── TabsTrigger
+├── TabsContent
+└── TabsContent
+```
+
+- **键盘与无障碍**：水平模式支持 `ArrowLeft` / `ArrowRight`，垂直模式支持 `ArrowUp` / `ArrowDown`，配合 `Home` / `End` 在可用标签间移动焦点；禁用项会自动跳过。
+- **按需挂载**：非活动 `TabsContent` 默认卸载内部视图，传入 `keepMounted={true}` 可保留隐藏节点。
+
+## 示例
+
+### Line 变体
+
+在 `TabsList` 上设置 `variant="line"`，可切换为透明背景与底部线条高亮样式。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-line"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 垂直布局
+
+在 `TabsRoot` 上设置 `orientation="vertical"`，将标签栏切换为左侧纵向排列。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用标签
+
+在单个 `TabsTrigger` 上设置 `disabled`，即可禁止点击并在键盘导航中自动跳过。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控状态
+
+向 `TabsRoot` 传入 `value` 并监听暴露事件 `valueChange`，即可与外部按钮或路由状态同步。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 手动激活与保留挂载
+
+设置 `activationMode="manual"` 后，方向键仅移动焦点，按 `Enter` 或 `Space` 确认切换；配合 `loop` 循环聚焦与 `keepMounted` 保留隐藏面板内容。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-manual"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
 ### 风格预设与实时切换
 
-Tabs 支持八种现代预设（`vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea`）以及独立的 `new-york-v4` 预设；传入未识别的预设 ID 会被拒绝。
+Tabs 支持八种现代预设（`vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea`）以及 `new-york-v4`。通过外层 `shadcn-style-scope` 动态切换预设时，选中项与焦点会保持不变（也可按 `Alt+1` / `Alt+2` / `Alt+3` 在聚焦状态下切换）。
 
-在下方示例中，你可以先切换到 **Password** 标签，再点击切换 Nova、Rhea 或 New York v4。更新外层样式作用域时，Tabs 会保留当前选中项和内部节点而不会重建实例。若想在标签保持键盘焦点时切换，请在示例区域内按 **Alt+1**、**Alt+2** 或 **Alt+3**。
-
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-profile-switch"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={tabsProfileSwitchCode.wc}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-profile-switch"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={tabsProfileSwitchCode.react}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-profile-switch"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={tabsProfileSwitchCode.vue}
-  />
-</div>
-
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-profile-switch"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={tabsProfileSwitchCode.vue2}
-  />
-</div>
-
-下方三个静态示例使用相同内容，便于直接对比不同预设的外观差异：
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-profile-switch"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 #### Nova
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-nova"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={getCode('wc', 'demo-shadcn-tabs-preset-nova', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-nova"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={getCode('react', 'demo-shadcn-tabs-preset-nova', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-nova"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={getCode('vue', 'demo-shadcn-tabs-preset-nova', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-nova"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={getCode('vue2', 'demo-shadcn-tabs-preset-nova', codeMap)}
-  />
-</div>
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-preset-nova"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 #### Rhea
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-rhea"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={getCode('wc', 'demo-shadcn-tabs-preset-rhea', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-rhea"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={getCode('react', 'demo-shadcn-tabs-preset-rhea', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-rhea"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={getCode('vue', 'demo-shadcn-tabs-preset-rhea', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-rhea"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={getCode('vue2', 'demo-shadcn-tabs-preset-rhea', codeMap)}
-  />
-</div>
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-preset-rhea"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 #### New York v4
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-new-york-v4"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={getCode('wc', 'demo-shadcn-tabs-preset-new-york-v4', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-new-york-v4"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={getCode('react', 'demo-shadcn-tabs-preset-new-york-v4', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-new-york-v4"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={getCode('vue', 'demo-shadcn-tabs-preset-new-york-v4', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-shadcn-tabs-preset-new-york-v4"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={getCode('vue2', 'demo-shadcn-tabs-preset-new-york-v4', codeMap)}
-  />
-</div>
-
-### 面板挂载策略
-
-`TabsContent` 默认采用按需挂载策略：
-
-- 仅当前激活的面板会渲染内容节点；关闭或切换离开时默认卸载内容节点（设置 `keepMounted={true}` 可保留隐藏节点）。
-- 卸载非活动面板的视图时，其组件实例、内部状态与暴露接口依然保持存活；重新切回该面板时会自动恢复渲染。
-- 在 Web Components 中，外层自定义元素保持挂载并在非激活时隐藏，再次激活时在同一个元素内重新渲染内容。
+<PrototypePreviewer
+  demoId="demo-shadcn-tabs-preset-new-york-v4"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`（传入 `value` 可进入受控模式）：
+### Root
+
+暴露状态 `value` 与事件 `valueChange({ value: string })`。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: 'undefined' },
     { name: 'defaultValue', type: 'string', default: "''" },
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
-    { name: 'activationMode', type: "'automatic' | 'manual'", default: 'automatic' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'activationMode', type: "'automatic' | 'manual'", default: "'automatic'" },
+    { name: 'styleProfile', type: "ShadcnStyleId | 'inherit'", default: "'inherit'" },
   ]}
 />
 
-其他部件的默认属性：
+### List
 
-- `List`：`orientation` 默认 `'horizontal'`，`loop` 默认 `false`，`a11yLabel` 默认 `''`。
-- `Trigger`：`value` 默认 `''`，`disabled` 默认 `false`。
-- `Content`：`value` 默认 `''`，`keepMounted` 默认 `false`。
+暴露焦点方法 `focusFirst`、`focusLast`、`focusNext`、`focusPrev`、`focusSelected`。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'variant', type: "'default' | 'line'", default: "'default'" },
+    { name: 'appearance', type: "'default' | 'underline'", default: "'default'" },
+    { name: 'loop', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: "ShadcnStyleId | 'inherit'", default: "'inherit'" },
+  ]}
+/>
+
+### Trigger
+
+暴露状态 `selected`、`disabled`、`hovered`、`focused`、`focusVisible`、`pressed`，方法 `focusSelf` 及事件 `click`。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'appearance', type: "'default' | 'underline'", default: "'default'" },
+    { name: 'styleProfile', type: "ShadcnStyleId | 'inherit'", default: "'inherit'" },
+  ]}
+/>
+
+### Content
+
+暴露状态 `current` 与 `hidden`。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'keepMounted', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: "ShadcnStyleId | 'inherit'", default: "'inherit'" },
+  ]}
+/>
+
+### Indicator
+
+可选语义指示器部件，派生暴露 `value`、`activeValue`、`orientation` 状态；定位与尺寸由消费方样式控制。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'styleProfile', type: "ShadcnStyleId | 'inherit'", default: "'inherit'" }]}
+/>
 
 ## 参考
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-TABS.yaml', 'P-BASE-TABS.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-SHADCN-TABS.yaml',
+    'P-SHADCN-TABS-LIST.yaml',
+    'P-SHADCN-TABS-TRIGGER.yaml',
+    'P-SHADCN-TABS-CONTENT.yaml',
+    'P-SHADCN-TABS-INDICATOR.yaml',
+    'P-BASE-TABS.yaml',
+  ]}
+/>

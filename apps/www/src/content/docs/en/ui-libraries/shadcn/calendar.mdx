@@ -1,13 +1,13 @@
 ---
 title: 'Calendar'
-description: 'A Gregorian calendar supporting single, multiple, and range date selection with localized weekdays and composable month/year controls.'
+description: 'A Gregorian calendar supporting single, multiple, and range date selection with localized weekdays, presets, and composable month/year controls.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-A Gregorian calendar component supporting `single`, `multiple`, and `range` date selection, localized weekday headers, keyboard cross-month navigation, and composable month/year pickers. The examples on this page use the **Shadcn Rhea** style preset.
+A Gregorian calendar component supporting `single`, `multiple`, and `range` date selection, localized weekday headers, RTL keyboard navigation, and composable month/year pickers. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -17,7 +17,101 @@ A Gregorian calendar component supporting `single`, `multiple`, and `range` date
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## Installation
+
+Currently available from workspace source (`@proto.ui/prototypes-shadcn/calendar`); not yet included in the 0.2.0 stable CLI registry.
+
+## Usage
+
+```tsx
+import {
+  CalendarRoot,
+  CalendarCaption,
+  CalendarPrevious,
+  CalendarHeading,
+  CalendarNext,
+  CalendarGrid,
+  CalendarWeekdays,
+  CalendarWeekday,
+  CalendarRow,
+  CalendarDay,
+} from '@proto.ui/prototypes-shadcn/calendar';
+
+export function ExampleCalendar() {
+  return (
+    <CalendarRoot
+      styleProfile="rhea"
+      mode="single"
+      defaultMonth="2026-10"
+      defaultValue="2026-10-12"
+      today="2026-10-08"
+      className="rounded-lg border border-border"
+    >
+      <CalendarCaption>
+        <CalendarPrevious a11yLabel="Previous month" />
+        <CalendarHeading />
+        <CalendarNext a11yLabel="Next month" />
+      </CalendarCaption>
+      <CalendarGrid>
+        <CalendarWeekdays>
+          {Array.from({ length: 7 }, (_, offset) => (
+            <CalendarWeekday key={offset} offset={offset} />
+          ))}
+        </CalendarWeekdays>
+        {Array.from({ length: 6 }, (_, row) => (
+          <CalendarRow key={row} index={row}>
+            {Array.from({ length: 7 }, (_, col) => (
+              <CalendarDay key={col} offset={row * 7 + col} />
+            ))}
+          </CalendarRow>
+        ))}
+      </CalendarGrid>
+    </CalendarRoot>
+  );
+}
+```
+
+### Anatomy and keyboard navigation
+
+- Compose `Calendar` from ten parts: `Root`, `Caption`, `Heading`, `Previous`, `Next`, `Grid`, `Weekdays`, `Weekday`, `Row`, and `Day`.
+- By default, `Calendar` renders the minimum 4–6 complete weeks for the visible month; pass `fixedWeeks={true}` to always show six rows. Unused rows and cells hide automatically off the focus path.
+- Arrow keys navigate continuously across months, `Home`/`End` jump to week boundaries, and `PageUp`/`PageDown` move by month (`Shift` by year). `direction="rtl"` mirrors Left/Right arrows automatically.
+- `Calendar` never reads the system clock directly: pass a client-resolved `YYYY-MM-DD` `today` string to mark the current date (`aria-current="date"`) without SSR timezone hydration drift.
+- Pair with `Date Picker` to build a popover date input, or connect family `Select` dropdowns to the caption using `bindCalendarCaption(source, { month, year })` (and call `dispose()` on cleanup).
+
+### Selection modes
+
+| Mode       | Controlled / initial value                      | Change event                 |
+| ---------- | ----------------------------------------------- | ---------------------------- |
+| `single`   | `value` / `defaultValue`: `YYYY-MM-DD`          | `onValueChange({ value })`   |
+| `multiple` | `values` / `defaultValues`: `readonly string[]` | `onValuesChange({ values })` |
+| `range`    | `range` / `defaultRange`: `{ from?, to? }`      | `onRangeChange({ range })`   |
+
+## Examples
+
+### Basic
+
+A single-date calendar with the default month heading.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-calendar-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Range
+
+Set `mode="range"` for continuous range selection with joined endpoint corners and middle-span shading.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-calendar-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
 ### Multiple and range selection
+
+Combine `min`, `max`, `unavailable`, `minNights`, `maxNights`, and `maxSelected` to constrain selectable dates and spans.
 
 <PrototypePreviewer
   demoId="demo-shadcn-calendar-selection"
@@ -25,60 +119,56 @@ A Gregorian calendar component supporting `single`, `multiple`, and `range` date
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Usage
+### Presets
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Pair controlled `value`, `month`, and `fixedWeeks` with family `Button` actions for quick date jumps.
 
-### Anatomy
+<PrototypePreviewer
+  demoId="demo-shadcn-calendar-presets"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-Compose `Calendar` from ten parts: `Root`, `Caption`, `Heading`, `Previous`, `Next`, `Grid`, `Weekdays`, `Weekday`, `Row`, and `Day`:
+### Booked dates
 
-- Place seven `Weekday` parts (`offset` `0`–`6`) inside `Weekdays`, and up to six indexed `Row` parts (`index` `0`–`5`) containing `Day` cells (`offset` `0`–`41`).
-- By default, `Calendar` renders the minimum 4, 5, or 6 complete weeks needed for the visible month; set `fixedWeeks={true}` to always render six rows. Unused rows and cells are hidden and excluded from focus. Read the active row count from `Root`'s `weekCount`.
-- Weekday labels and column order follow `weekStartsOn` (`0` = Sunday) and `locale`. Each day cell receives a full localized civil date as its accessible name.
-- Pass `a11yLabel` to `Previous` and `Next` when rendering icon-only navigation buttons. `direction="rtl"` mirrors Left/Right arrow navigation while preserving vertical and week-boundary behavior.
+Use `unavailable` along with `min` and `max` to block booked date ranges.
 
-### Selection modes
+<PrototypePreviewer
+  demoId="demo-shadcn-calendar-booked-dates"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-| Mode       | Controlled / initial value                    | Change event                 |
-| ---------- | --------------------------------------------- | ---------------------------- |
-| `single`   | `value` / `defaultValue`: `YYYY-MM-DD` string | `onValueChange({ value })`   |
-| `multiple` | `values` / `defaultValues`: date array        | `onValuesChange({ values })` |
-| `range`    | `range` / `defaultRange`: `{ from?, to? }`    | `onRangeChange({ range })`   |
+### RTL
 
-- **Multiple mode**: Activating a day toggles it in a deduplicated, ascending-sorted array. Use `minSelected` (default `0`) and `maxSelected` to constrain the count; `requestValues(dates)` validates the entire array against both bounds.
-- **Range mode**: The first selection sets `{ from }`, the second completes an inclusive `{ from, to }` (automatically ordering reversed endpoints), and a subsequent click starts a new range. Pass `{}` to clear. `minNights` (default `0`, allowing single-day ranges) and `maxNights` constrain the number of days between endpoints.
-- **Range states**: `Day` exposes `rangeStart`, `rangeEnd`, `rangeMiddle`, and `rangePending` alongside `selected`. `Grid` automatically sets `aria-multiselectable` in `multiple` and `range` modes.
+Set `direction="rtl"`, `locale="ar-SA"`, and `weekStartsOn={6}` for right-to-left Arabic rendering and mirrored arrow navigation.
 
-### Availability and `today`
-
-- `min`, `max`, and `Root`'s `unavailable` array apply to all selected dates; completing a range across an unavailable date is rejected while keeping the start anchor. Local `Day` `disabled` disables only that cell. `Root`'s `readOnly` blocks selection changes while allowing month browsing.
-- `Calendar` does not read the system clock directly: pass a `YYYY-MM-DD` `today` string from your host to mark the current date with `aria-current="date"`.
-- Initial visible month precedence: `month` → `defaultMonth` → active selection → `today` → `1970-01`.
-
-### Controlled month and caption pickers
-
-- Selection (`value` / `values` / `range`) and the visible `month` (`YYYY-MM`) can be controlled independently.
-- `Root` exposes `requestValue(date)`, `requestValues(dates)`, `requestRange(range)`, `requestMonth(month)`, `getValues()`, `getRange()`, `mode`, `selectedCount`, and `rangeComplete`.
-- To wire month and year dropdowns into `Caption`, compose `Select` with `bindCalendarCaption(source, { month, year })` (and call `dispose()` on cleanup). Pass `accessibleLabel` to the month and year `Select` triggers so their accessible names stay stable as values change.
-- The Shadcn Rhea preset uses 32px (`h-8 w-8`) day and navigation buttons with `p-3` padding and an independent focus ring over `selected`.
+<PrototypePreviewer
+  demoId="demo-shadcn-calendar-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-Passing `value`, `values`, `range`, or `month` controls the corresponding state. Omitting `today` hides the current-date marker.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: 'single' },
+    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: "'single'" },
     { name: 'value', type: 'string', default: 'undefined' },
+    { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'values', type: 'readonly string[]', default: 'undefined' },
     { name: 'defaultValues', type: 'readonly string[]', default: '[]' },
     { name: 'range', type: 'CalendarRange', default: 'undefined' },
     { name: 'defaultRange', type: 'CalendarRange', default: '{}' },
-    { name: 'minSelected / minNights', type: 'number', default: '0' },
-    { name: 'maxSelected / maxNights', type: 'number', default: 'undefined' },
-    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'minSelected', type: 'number', default: '0' },
+    { name: 'maxSelected', type: 'number', default: 'undefined' },
+    { name: 'minNights', type: 'number', default: '0' },
+    { name: 'maxNights', type: 'number', default: 'undefined' },
+    { name: 'month', type: 'string', default: 'undefined' },
+    { name: 'defaultMonth', type: 'string', default: 'undefined' },
     { name: 'min', type: 'string', default: "''" },
     { name: 'max', type: 'string', default: "''" },
     { name: 'unavailable', type: 'readonly string[]', default: '[]' },
@@ -86,13 +176,44 @@ Passing `value`, `values`, `range`, or `month` controls the corresponding state.
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'weekStartsOn', type: 'number', default: '0' },
     { name: 'fixedWeeks', type: 'boolean', default: 'false' },
-    { name: 'a11yLabel', type: 'string', default: 'Calendar' },
+    { name: 'a11yLabel', type: 'string', default: "'Calendar'" },
     { name: 'today', type: 'string', default: "''" },
-    { name: 'locale', type: 'string', default: 'en-US' },
+    { name: 'locale', type: 'string', default: "'en-US'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+    {
+      name: 'styleProfile',
+      type: "'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'nova'",
+    },
   ]}
 />
 
-These props belong to `Root`.
+### Sub-part props
+
+<ApiPropsTable
+  headers={{ name: 'Part / Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Day.date', type: 'string', default: "''" },
+    { name: 'Day.offset', type: 'number', default: '0' },
+    { name: 'Day.disabled', type: 'boolean', default: 'false' },
+    { name: 'Row.index', type: 'number', default: 'undefined' },
+    { name: 'Weekday.offset', type: 'number', default: '0' },
+    { name: 'Caption.a11yLabel', type: 'string', default: "'Calendar navigation'" },
+    {
+      name: 'Previous / Next.a11yLabel',
+      type: 'string',
+      default: "'Previous month' / 'Next month'",
+    },
+    { name: 'Previous / Next.buttonVariant', type: "'ghost' | 'outline'", default: "'ghost'" },
+    { name: 'Previous / Next.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Events, methods, and exposed states
+
+- **Events (Root)**: `onValueChange({ value })`, `onValuesChange({ values })`, `onRangeChange({ range })`, `onMonthChange({ month })`.
+- **Methods (Root)**: `requestValue(date)`, `requestValues(dates)`, `requestRange(range)`, `requestMonth(month)`, `getValues()`, `getRange()`.
+- **Exposed states**: Root exposes `value`, `mode`, `selectedCount`, `rangeComplete`, `month`, `weekCount`, `disabled`, `direction`; Day exposes `date`, `selected`, `rangeStart`, `rangeEnd`, `rangeMiddle`, `rangePending`, `today`, `outside`, `disabled`, `hidden`.
 
 ## References
 

@@ -11,7 +11,13 @@ export function createCalendarSelectionDemo(family: CalendarFamily, picker = fal
     prototypeId: proto(`calendar-${part}`),
     props: { a11yLabel: part === 'previous' ? 'Previous month' : 'Next month' },
     ...(base ? { className: 'inline-flex size-8 items-center justify-center rounded' } : {}),
-    children: [part === 'previous' ? '‹' : '›'],
+    children: [
+      {
+        kind: 'proto',
+        prototypeId: `lucide-chevron-${part === 'previous' ? 'left' : 'right'}-icon`,
+        props: { size: 16 },
+      },
+    ],
   });
   const calendar = (mode: 'range' | 'multiple'): DemoNode[] => [
     {
@@ -63,12 +69,12 @@ export function createCalendarSelectionDemo(family: CalendarFamily, picker = fal
   ];
   const example = (mode: 'range' | 'multiple'): DemoNode => ({
     kind: 'box',
-    className: 'flex flex-col items-start gap-3',
+    className: 'flex flex-col items-start gap-2.5',
     children: [
       {
         kind: 'box',
-        className: 'font-semibold',
-        children: [mode === 'range' ? 'Date range / 日期范围' : 'Multiple dates / 多个日期'],
+        className: 'text-sm font-medium text-foreground',
+        children: [mode === 'range' ? 'Date range' : 'Multiple dates'],
       },
       {
         kind: 'proto',
@@ -91,7 +97,9 @@ export function createCalendarSelectionDemo(family: CalendarFamily, picker = fal
         },
         ...(base
           ? { className: picker ? 'inline-grid' : 'inline-grid gap-2 rounded-lg border p-3' }
-          : {}),
+          : family === 'shadcn' && !picker
+            ? { className: 'rounded-lg border border-border' }
+            : {}),
         children: picker
           ? [
               {
@@ -130,8 +138,8 @@ export function createCalendarSelectionDemo(family: CalendarFamily, picker = fal
         className: 'max-w-72 text-xs text-muted-foreground',
         children: [
           mode === 'range'
-            ? 'Choose a start and end, 1–14 nights. October 18 is unavailable. / 选择起止日期，间隔 1–14 天；10 月 18 日不可用。'
-            : 'Toggle up to four dates. October 18 is unavailable. / 点击增减日期，最多四个；10 月 18 日不可用。',
+            ? '1–14 nights between Oct 1 and Nov 30. Oct 18 is unavailable.'
+            : 'Toggle up to 4 dates. Oct 18 is unavailable.',
         ],
       },
     ],
@@ -140,7 +148,10 @@ export function createCalendarSelectionDemo(family: CalendarFamily, picker = fal
     type: 'demo',
     root: {
       kind: 'box',
-      className: 'flex max-w-full flex-wrap items-start gap-8',
+      className:
+        family === 'liquid-glass' && !picker
+          ? 'flex max-w-full flex-wrap items-start gap-8 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6'
+          : 'flex max-w-full flex-wrap items-start gap-8',
       children: [example('range'), example('multiple')],
     },
   };

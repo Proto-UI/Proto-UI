@@ -1,13 +1,13 @@
 ---
 title: 'Data Table'
-description: '支持排序、全局与按列筛选、列显隐、分页及行选择的数据表格组件。'
+description: '支持稳定排序、全局与按列筛选、列显隐、分页及行选择的 Shadcn 数据表格组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-基于基础表格结构扩展的交互式数据表格，提供稳定排序、全局与按列筛选、列显隐、分页以及行/整页选择能力。本页示例采用 **Shadcn Rhea** 风格。
+基于语义化表格结构构建的交互式数据表格，提供稳定排序、全局与按列筛选、列显隐、分页以及行/整页选择能力。本页示例采用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -17,9 +17,109 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-### 筛选、列显隐、整页选择与自定义格式化
+## 安装
 
-结合 `Input`、`Button` 与表格部件实现按列筛选、列显隐、当前页全选和自定义单元格格式化：
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+## 用法
+
+```tsx
+import {
+  ShadcnDataTableCaption,
+  ShadcnDataTableCell,
+  ShadcnDataTableHeader,
+  ShadcnDataTableHeaderRow,
+  ShadcnDataTableNext,
+  ShadcnDataTablePrevious,
+  ShadcnDataTableRoot,
+  ShadcnDataTableRow,
+} from '../proto-ui/components/react';
+
+const rows = [
+  { id: 'm5gr84i9', status: 'Success', email: 'ken99@example.com', amount: 316 },
+  { id: '3u1reuv4', status: 'Success', email: 'abe45@example.com', amount: 242 },
+];
+
+export function Example() {
+  return (
+    <ShadcnDataTableRoot rows={rows} pageSize={4} className="rounded-md border border-border">
+      <ShadcnDataTableCaption>Recent payments.</ShadcnDataTableCaption>
+      <ShadcnDataTableHeaderRow>
+        <ShadcnDataTableHeader headerKey="status">Status</ShadcnDataTableHeader>
+        <ShadcnDataTableHeader headerKey="email">Email</ShadcnDataTableHeader>
+        <ShadcnDataTableHeader headerKey="amount" className="text-right">
+          Amount
+        </ShadcnDataTableHeader>
+      </ShadcnDataTableHeaderRow>
+      {[0, 1].map((index) => (
+        <ShadcnDataTableRow key={index} index={index}>
+          <ShadcnDataTableCell columnKey="status" headers={['status']} />
+          <ShadcnDataTableCell columnKey="email" headers={['email']} />
+          <ShadcnDataTableCell columnKey="amount" headers={['amount']} className="text-right" />
+        </ShadcnDataTableRow>
+      ))}
+      <div className="table-caption caption-bottom">
+        <div className="flex justify-end gap-2 pt-3">
+          <ShadcnDataTablePrevious>Previous</ShadcnDataTablePrevious>
+          <ShadcnDataTableNext>Next</ShadcnDataTableNext>
+        </div>
+      </div>
+    </ShadcnDataTableRoot>
+  );
+}
+```
+
+### 结构与交互说明
+
+- **数据标识与行槽位**：`rows` 中每条记录必须包含唯一非空 `id`。正文行通过 `DataTableRow` 的 `index` 映射当前页记录槽位，单元格通过 `columnKey` 读取字段，排序与翻页会直接更新真实表格内容。
+- **表头与键盘导航**：可排序列头放在静态 `DataTableHeaderRow` 中；聚焦可排序表头或数据行后，按 `Enter` 或 `Space` 可切换排序方向或行选中状态。
+- **风格预设（`styleProfile`）**：支持 `vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea` 与 `new-york-v4`；省略或设为 `inherit` 时优先继承最近的 `Style Scope`，否则回退到默认预设。
+
+## 示例
+
+### 基础表格与排序
+
+在表头设置 `sortable={false}` 可禁用单列排序，通过 `defaultSortKey` 与 `defaultSortDirection` 配置初始排序。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-data-table-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 筛选与列显隐
+
+全局 `filter` 会与按列 `columnFilters` 叠加生效；`columnVisibility` 可隐藏指定列的表头和单元格，同时保留逻辑结构与子元素状态。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-data-table-filtering"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 分页与行选择
+
+`requestPageSelection()` 仅勾选或清空当前筛选页的数据，同时保留其他页的选中记录；`DataTablePrevious` 与 `DataTableNext` 通过上下文触发翻页。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-data-table-pagination"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 只读与禁用状态
+
+`readOnly={true}` 会阻止行与整页选择，但仍允许排序与翻页；`disabled={true}` 会统一禁用排序、翻页与行选择。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-data-table-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 自定义单元格格式化组合
+
+在 `DataTableCell` 上设置 `renderValue={false}` 可保留传入子元素，并订阅 `displayValue` 动态格式化当前记录内容。
 
 <PrototypePreviewer
   demoId="demo-shadcn-data-table-recipes"
@@ -27,53 +127,81 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 用法
-
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
-
-### 结构与数据模型
-
-- 传入 `rows` 时，每条记录需要具备唯一的 `id`。表格按当前页索引渲染行槽位，单元格通过 `columnKey` 读取对应字段，排序会直接更新真实数据内容。
-- 表头排序单元格请放在静态 `DataTableHeaderRow` 中，正文数据行使用 `DataTableRow`。
-
-### 筛选、列显隐与分页选择
-
-- **筛选**：`columnFilters` 中的每个非空条件会与 `Root` 的全局 `filter` 共同过滤数据，随后再执行排序与分页。
-- **列显隐**：通过 `columnVisibility` 可隐藏指定列的表头与单元格（同时移出排序焦点与辅助技术树）；重新开启后原有节点与自定义内容会恢复显示。
-- **行与整页选择**：调用 `requestPageSelection()` 仅勾选或清空当前筛选页的数据，同时保留其他页的选中状态；可通过 `pageSelection` 读取 `'none'`、`'some'` 或 `'all'`。`readOnly={true}` 会阻止行选择和整页选择，但仍允许排序与翻页。
-- **自定义单元格渲染**：在 `Cell` 上设置 `renderValue={false}` 可保留传入的子元素，并通过订阅 `displayValue` 动态格式化当前记录的展示文本。
-
 ## API
 
-传入 `sortKey`、`sortDirection`、`page` 或 `selectedKeys` 可分别控制对应状态。
+### Root
+
+传入 `sortKey`、`sortDirection`、`page` 或 `selectedKeys` 可分别进入对应受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: 'inherit → scope → nova' },
     { name: 'rows', type: 'readonly DataRecord[]', default: '[]' },
+    { name: 'sortKey', type: 'string', default: '—（受控）' },
     { name: 'defaultSortKey', type: 'string', default: "''" },
-    { name: 'defaultSortDirection', type: "'none' | 'ascending' | 'descending'", default: 'none' },
+    { name: 'sortDirection', type: "'none' | 'ascending' | 'descending'", default: '—（受控）' },
+    {
+      name: 'defaultSortDirection',
+      type: "'none' | 'ascending' | 'descending'",
+      default: "'none'",
+    },
     { name: 'filter', type: 'string', default: "''" },
     { name: 'columnFilters', type: 'Readonly<Record<string, string>>', default: '{}' },
     { name: 'columnVisibility', type: 'Readonly<Record<string, boolean>>', default: '{}' },
+    { name: 'page', type: 'number', default: '—（受控）' },
     { name: 'defaultPage', type: 'number', default: '0' },
     { name: 'pageSize', type: 'number', default: '10' },
+    { name: 'selectedKeys', type: 'readonly string[]', default: '—（受控）' },
     { name: 'defaultSelectedKeys', type: 'readonly string[]', default: '[]' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
   ]}
 />
 
-以上属性属于 `Root`。其他部件属性：
+### 子部件属性
 
-- **Row**：`index` 默认 `0`，`header` 默认 `false`。
-- **Cell**：`columnKey` 默认 `''`，`renderValue` 默认 `true`。
-- **Header**：`sortable` 默认 `true`。
-- **Previous / Next**：接受与 `Button` 相同的属性。
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    {
+      name: 'HeaderRow.styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: 'inherit → scope → nova',
+    },
+    { name: 'Row.index', type: 'number', default: '0' },
+    { name: 'Row.header', type: 'boolean', default: 'false' },
+    { name: 'Row.styleProfile', type: 'ShadcnStyleChoice', default: 'inherit → scope → nova' },
+    { name: 'Header.headerKey', type: 'string', default: "''" },
+    { name: 'Header.headerKind', type: "'column' | 'row'", default: "'column'" },
+    { name: 'Header.sortable', type: 'boolean', default: 'true' },
+    { name: 'Header.styleProfile', type: 'ShadcnStyleChoice', default: 'inherit → scope → nova' },
+    { name: 'Cell.columnKey', type: 'string', default: "''" },
+    { name: 'Cell.headers', type: 'readonly string[]', default: '[]' },
+    { name: 'Cell.renderValue', type: 'boolean', default: 'true' },
+    { name: 'Cell.styleProfile', type: 'ShadcnStyleChoice', default: 'inherit → scope → nova' },
+    {
+      name: 'Previous / Next',
+      type: 'ButtonProps & ShadcnStyleProps',
+      default: 'outline 视觉样式',
+    },
+  ]}
+/>
+
+### 事件、方法与暴露状态
+
+- **事件（Root）**：`sortChange`（`{ sortKey, sortDirection }`）、`pageChange`（`{ page }`）、`selectionChange`（`{ selectedKeys }`）。
+- **方法（Root）**：`getRows()`、`getRecord(id)`、`getSelectedKeys()`、`requestSort(key)`、`requestPage(next)`、`requestSelection(id)`、`requestPageSelection(selected?)`。
+- **暴露状态**：Root 暴露 `filteredCount` 与 `pageSelection`（`'none' | 'some' | 'all'`）；Row 暴露 `rowKey`、`selected`、`focused`、`focusVisible`；Header 暴露 `sort`；Cell 暴露 `displayValue`。
 
 ## 参考
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-DATA-TABLE.yaml', 'P-BASE-DATA-TABLE.yaml']}
+  files={[
+    'P-SHADCN-DATA-TABLE.yaml',
+    'P-SHADCN-DATA-TABLE-HEADER-ROW.yaml',
+    'P-BASE-DATA-TABLE.yaml',
+    'P-BASE-DATA-TABLE-HEADER-ROW.yaml',
+  ]}
 />

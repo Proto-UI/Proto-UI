@@ -9,14 +9,16 @@ const collapsibleContent = definePrototype<
   BrutalistCollapsibleContentExposes
 >({
   name: 'brutalist-collapsible-content',
+  modules: asCollapsibleContent.modules,
   setup(def) {
-    asCollapsibleContent();
+    const inherited = asCollapsibleContent();
     // P-BRUTALIST-COLLAPSIBLE-CONTENT-VISUAL-SAFETY: no fixed width/height or clipped long label.
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full font-sans font-medium text-foreground wrap-anywhere rounded-base border-2 border-black bg-secondary-background p-4 text-sm'
+        'min-w-0 max-w-full font-sans font-medium text-foreground wrap-anywhere rounded-base border-2 border-border dark:border-foreground bg-secondary-background p-4 text-sm'
       )
     );
+    return inherited.render;
   },
 });
 

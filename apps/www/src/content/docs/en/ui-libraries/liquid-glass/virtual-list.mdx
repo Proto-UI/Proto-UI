@@ -1,11 +1,13 @@
 ---
 title: 'Virtual List'
-description: 'A Liquid Glass virtualized list that renders variable-size items only within the visible viewport and overscan window.'
+description: 'A Liquid Glass virtualized list that renders variable-height items only within the visible viewport and overscan window.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Virtual List separates a stable logical key sequence from physical views so your application only instantiates items inside the bounded visible range and overscan buffer.
+Liquid Glass Virtual List separates a stable logical key sequence from mounted DOM rows so your application instantiates only items within the visible window and overscan buffer. Following Liquid Glass layering principles, the scrollable list remains an opaque grouped content surface (`rounded-2xl` with clipped corners), reserving translucent glass strictly for floating companion controls above the content.
 
 ## Preview
 
@@ -17,14 +19,184 @@ Liquid Glass Virtual List separates a stable logical key sequence from physical 
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes from `@proto.ui/prototypes-liquid-glass/virtual-list` and connect a Web scroll viewport through `@proto.ui/prototypes-base/virtual-list/web`.
 
 ## Usage
 
-- **Host-neutral model and Web helper**: item-count overscan, maximum materialized count, revisions, and generation-bound commits live in the host-neutral model. On Web, the explicit `virtual-list/web` entry measures variable item sizes, manages spacers and DOM nodes, preserves keyed views, supports scrolling to a key, and cleans up listeners on teardown.
-- **Bounded rendering**: application content is created only for the active visible window while keeping keyed view instances stable across scrolls.
+Virtual List consists of `Root`, `Viewport`, and `Content`: `Root` tracks the ordered `itemKeys` sequence inside a rounded grouped content surface, `Viewport` handles vertical scrolling and inset focus feedback, and `Content` hosts materialized row elements.
+
+```ts
+import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import {
+  virtualListRoot,
+  virtualListViewport,
+  virtualListContent,
+} from '@proto.ui/prototypes-liquid-glass/virtual-list';
+import { attachWebVirtualList } from '@proto.ui/prototypes-base/virtual-list/web';
+
+AdaptToWebComponent(virtualListRoot);
+AdaptToWebComponent(virtualListViewport);
+AdaptToWebComponent(virtualListContent);
+
+const list = document.querySelector('liquid-glass-virtual-list-root')!;
+const viewport = document.querySelector('liquid-glass-virtual-list-viewport')!;
+const content = document.querySelector('liquid-glass-virtual-list-content')!;
+
+setElementProps(list, {
+  itemKeys: Array.from({ length: 1000 }, (_, i) => `event-${i + 1}`),
+  overscanItems: 3,
+  maxMaterializedItems: 60,
+});
+
+const host = attachWebVirtualList({
+  viewport,
+  content,
+  collection: list.getExposes().getCollection(),
+  estimateSize: 64,
+  renderItem(key) {
+    const row = document.createElement('div');
+    row.className = 'border-b border-border/50 px-4 py-3 text-sm';
+    row.textContent = key;
+    return row;
+  },
+});
+
+// Scroll to a key on demand and dispose on teardown
+host.ensureVisible('event-250', 'center');
+// host.dispose();
+```
+
+### Layering, Motion & Accessibility
+
+- **Content vs. Control Layer**: The scrolling list stays opaque without a glass-coated viewport and never stacks glass on glass; floating navigation or filter pills above it use `regular` and `prominent` Liquid Glass controls.
+- **Accessibility Fallbacks**: Reduced transparency and forced-colors preferences reinforce the container border and drop soft shadows; reduced motion disables focus transitions automatically.
+- **Semantics**: `Root` sets `role="region"` with `a11yLabel`, `Viewport` inherits `Scroll Area` scrolling with an inset focus ring, and `Content` sets `role="list"` while mounted rows receive `role="listitem"`, `aria-posinset`, and `aria-setsize`.
+
+### Advanced: Custom Materializers
+
+- Each logical list allows one active materializer at a time; `attachWebVirtualList` manages the lease automatically and cleans up rows and observers when `Root` unmounts or disposes.
+- Dispose an active materializer before attaching a replacement. Non-Web hosts can integrate through `collection.acquireMaterializer(onRetired)`.
+
+## Examples
+
+### Floating Glass Actions & Scroll to Item
+
+Floating `regular` and `prominent` Liquid Glass buttons sit above the opaque scrolling list and call `ensureVisible(key, align)` on demand.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-virtual-list-jump"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Dynamic Filtering & Empty State
+
+Filter controls update `itemKeys` on `Root`, reconciling the visible window and displaying a clean empty state when no keys match.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-virtual-list-filter"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Overscan & Bounded Materialization
+
+Switch `overscanItems` while scrolling through 2,000 logical items to observe strictly bounded DOM row counts.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-virtual-list-window"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-- **Core model**: stable logical key sequence, item-count overscan, maximum materialized item cap, and revision tracking.
-- **Web host entry (`virtual-list/web`)**: variable-extent measurement, spacer management, keyed view reuse, scroll-to-key navigation, and listener cleanup.
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'itemKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'overscanItems', type: 'number', default: '2' },
+    { name: 'maxMaterializedItems', type: 'number', default: '100' },
+    { name: 'a11yLabel', type: 'string', default: "'Virtual list'" },
+  ]}
+/>
+
+### Viewport & Content
+
+`Viewport` and `Content` add no additional component props and remain neutral opaque content layers without glass material requests.
+
+### Root Exposes
+
+<ApiPropsTable
+  headers={{ name: 'Member', type: 'Type', default: 'Description' }}
+  rows={[
+    {
+      name: 'logicalCount',
+      type: 'ExposeState<number>',
+      default: 'Total number of logical item keys',
+    },
+    {
+      name: 'getCollection',
+      type: '() => WindowedCollection',
+      default: 'Returns the collection model for host attachment',
+    },
+    {
+      name: 'getWindow',
+      type: '() => WindowSnapshot',
+      default: 'Returns the current revision, committed range, and materialized keys',
+    },
+  ]}
+/>
+
+### attachWebVirtualList
+
+<ApiPropsTable
+  headers={{ name: 'Option / Method', type: 'Type', default: 'Default / Description' }}
+  rows={[
+    { name: 'viewport', type: 'HTMLElement', default: 'Scrollable viewport element (required)' },
+    {
+      name: 'content',
+      type: 'HTMLElement',
+      default: 'List element hosting spacers and rows (required)',
+    },
+    {
+      name: 'collection',
+      type: 'WindowedCollection',
+      default: 'Collection from Root getCollection() (required)',
+    },
+    {
+      name: 'renderItem',
+      type: '(key: string) => HTMLElement',
+      default: 'Creates a row element for a key; mounted keys are reused (required)',
+    },
+    {
+      name: 'estimateSize',
+      type: 'number',
+      default: '36 (estimated height in px before measurement)',
+    },
+    {
+      name: 'refresh()',
+      type: '() => void',
+      default: 'Re-evaluates viewport geometry and materialization',
+    },
+    {
+      name: 'ensureVisible(key, align?)',
+      type: "(key: string, align?: 'nearest' | 'start' | 'center' | 'end') => boolean",
+      default: 'Scrolls the target key into view and returns whether it materialized',
+    },
+    {
+      name: 'dispose()',
+      type: '() => void',
+      default: 'Disconnects listeners/observers, clears rows, and releases the lease',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-VIRTUAL-LIST.yaml', 'P-BASE-VIRTUAL-LIST.yaml']}
+/>

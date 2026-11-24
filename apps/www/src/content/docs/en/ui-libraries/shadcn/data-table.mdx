@@ -1,13 +1,13 @@
 ---
 title: 'Data Table'
-description: 'An interactive data table with sorting, global and column filtering, column visibility, pagination, and row selection.'
+description: 'An interactive Shadcn data table with stable sorting, global and column filtering, column visibility, pagination, and row selection.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-An interactive data table built on table structure with stable sorting, global and per-column filtering, column visibility, pagination, and row or page selection. The examples on this page use the **Shadcn Rhea** style preset.
+An interactive data table built over semantic table structure with stable sorting, global and per-column filtering, column visibility, pagination, and row or page selection. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -17,9 +17,109 @@ An interactive data table built on table structure with stable sorting, global a
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-### Filtering, column visibility, page selection, and custom formatting
+## Installation
 
-Combine `Input`, `Button`, and `DataTable` parts to build column filtering, visibility toggles, current-page selection, and custom cell formatting:
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+```tsx
+import {
+  ShadcnDataTableCaption,
+  ShadcnDataTableCell,
+  ShadcnDataTableHeader,
+  ShadcnDataTableHeaderRow,
+  ShadcnDataTableNext,
+  ShadcnDataTablePrevious,
+  ShadcnDataTableRoot,
+  ShadcnDataTableRow,
+} from '../proto-ui/components/react';
+
+const rows = [
+  { id: 'm5gr84i9', status: 'Success', email: 'ken99@example.com', amount: 316 },
+  { id: '3u1reuv4', status: 'Success', email: 'abe45@example.com', amount: 242 },
+];
+
+export function Example() {
+  return (
+    <ShadcnDataTableRoot rows={rows} pageSize={4} className="rounded-md border border-border">
+      <ShadcnDataTableCaption>Recent payments.</ShadcnDataTableCaption>
+      <ShadcnDataTableHeaderRow>
+        <ShadcnDataTableHeader headerKey="status">Status</ShadcnDataTableHeader>
+        <ShadcnDataTableHeader headerKey="email">Email</ShadcnDataTableHeader>
+        <ShadcnDataTableHeader headerKey="amount" className="text-right">
+          Amount
+        </ShadcnDataTableHeader>
+      </ShadcnDataTableHeaderRow>
+      {[0, 1].map((index) => (
+        <ShadcnDataTableRow key={index} index={index}>
+          <ShadcnDataTableCell columnKey="status" headers={['status']} />
+          <ShadcnDataTableCell columnKey="email" headers={['email']} />
+          <ShadcnDataTableCell columnKey="amount" headers={['amount']} className="text-right" />
+        </ShadcnDataTableRow>
+      ))}
+      <div className="table-caption caption-bottom">
+        <div className="flex justify-end gap-2 pt-3">
+          <ShadcnDataTablePrevious>Previous</ShadcnDataTablePrevious>
+          <ShadcnDataTableNext>Next</ShadcnDataTableNext>
+        </div>
+      </div>
+    </ShadcnDataTableRoot>
+  );
+}
+```
+
+### Structure & Accessibility
+
+- **Record identity and row slots**: Every record in `rows` requires a unique non-empty `id`. Body slots (`DataTableRow`) map to the active page by `index`, and each `DataTableCell` renders the matching `columnKey` so sorting and paging update real table content.
+- **Headers and keyboard interaction**: Place sortable column headers inside passive `DataTableHeaderRow` containers. Pressing `Enter` or `Space` on a focused sortable header cycles sorting, and on a focused row toggles selection.
+- **Style presets (`styleProfile`)**: Supports `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`, and `new-york-v4`; omitting it or setting `inherit` follows the nearest `Style Scope` before falling back to the default profile.
+
+## Examples
+
+### Basic Table & Sorting
+
+Set `sortable={false}` on non-sortable columns and configure initial sorting with `defaultSortKey` and `defaultSortDirection`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-data-table-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Filtering & Column Visibility
+
+Combine global `filter` with per-column `columnFilters`, and toggle columns with `columnVisibility` while preserving element identity and table structure.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-data-table-filtering"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Pagination & Row Selection
+
+`requestPageSelection()` toggles only the current filtered page while preserving selections across other pages; `DataTablePrevious` and `DataTableNext` step through pages via table context.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-data-table-pagination"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Read-Only & Disabled States
+
+`readOnly={true}` locks row and page selection while keeping sorting and pagination interactive; `disabled={true}` disables all table interactions.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-data-table-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Custom Cell Formatting Recipe
+
+Set `renderValue={false}` on `DataTableCell` to render your own children and subscribe to `displayValue` for live formatted output.
 
 <PrototypePreviewer
   demoId="demo-shadcn-data-table-recipes"
@@ -27,53 +127,85 @@ Combine `Input`, `Button`, and `DataTable` parts to build column filtering, visi
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Usage
-
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
-
-### Structure and data model
-
-- Provide `rows` with unique record `id` values. Rows act as indexed slots for the current page, and each cell reads its `columnKey` from the active record so sorting updates real table content.
-- Place sortable headers inside `DataTableHeaderRow`, and use `DataTableRow` for body record slots.
-
-### Filtering, visibility, and selection
-
-- **Filtering**: Non-empty entries in `columnFilters` combine with `Root`'s global `filter` before sorting and pagination run.
-- **Column visibility**: `columnVisibility` hides the matching column's headers and cells (excluding them from sorting focus and assistive technology) while preserving their identity when shown again.
-- **Row and page selection**: `requestPageSelection()` toggles selection only for the current filtered page while preserving selections on other pages, and exposes `pageSelection` as `'none'`, `'some'`, or `'all'`. Setting `readOnly={true}` blocks selection changes while still allowing sorting and pagination.
-- **Custom cell formatting**: Set `renderValue={false}` on `Cell` to render your own children and subscribe to `displayValue` for live record updates.
-
 ## API
+
+### Root
 
 Passing `sortKey`, `sortDirection`, `page`, or `selectedKeys` controls the corresponding state independently.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: 'inherit → scope → nova' },
     { name: 'rows', type: 'readonly DataRecord[]', default: '[]' },
+    { name: 'sortKey', type: 'string', default: '— (controlled)' },
     { name: 'defaultSortKey', type: 'string', default: "''" },
-    { name: 'defaultSortDirection', type: "'none' | 'ascending' | 'descending'", default: 'none' },
+    {
+      name: 'sortDirection',
+      type: "'none' | 'ascending' | 'descending'",
+      default: '— (controlled)',
+    },
+    {
+      name: 'defaultSortDirection',
+      type: "'none' | 'ascending' | 'descending'",
+      default: "'none'",
+    },
     { name: 'filter', type: 'string', default: "''" },
     { name: 'columnFilters', type: 'Readonly<Record<string, string>>', default: '{}' },
     { name: 'columnVisibility', type: 'Readonly<Record<string, boolean>>', default: '{}' },
+    { name: 'page', type: 'number', default: '— (controlled)' },
     { name: 'defaultPage', type: 'number', default: '0' },
     { name: 'pageSize', type: 'number', default: '10' },
+    { name: 'selectedKeys', type: 'readonly string[]', default: '— (controlled)' },
     { name: 'defaultSelectedKeys', type: 'readonly string[]', default: '[]' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
   ]}
 />
 
-These props belong to `Root`. Other part defaults:
+### Part Props
 
-- **Row**: `index` defaults to `0`, `header` defaults to `false`.
-- **Cell**: `columnKey` defaults to `''`, `renderValue` defaults to `true`.
-- **Header**: `sortable` defaults to `true`.
-- **Previous / Next**: Accept the same props as `Button`.
+<ApiPropsTable
+  headers={{ name: 'Part / Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    {
+      name: 'HeaderRow.styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: 'inherit → scope → nova',
+    },
+    { name: 'Row.index', type: 'number', default: '0' },
+    { name: 'Row.header', type: 'boolean', default: 'false' },
+    { name: 'Row.styleProfile', type: 'ShadcnStyleChoice', default: 'inherit → scope → nova' },
+    { name: 'Header.headerKey', type: 'string', default: "''" },
+    { name: 'Header.headerKind', type: "'column' | 'row'", default: "'column'" },
+    { name: 'Header.sortable', type: 'boolean', default: 'true' },
+    { name: 'Header.styleProfile', type: 'ShadcnStyleChoice', default: 'inherit → scope → nova' },
+    { name: 'Cell.columnKey', type: 'string', default: "''" },
+    { name: 'Cell.headers', type: 'readonly string[]', default: '[]' },
+    { name: 'Cell.renderValue', type: 'boolean', default: 'true' },
+    { name: 'Cell.styleProfile', type: 'ShadcnStyleChoice', default: 'inherit → scope → nova' },
+    {
+      name: 'Previous / Next',
+      type: 'ButtonProps & ShadcnStyleProps',
+      default: 'outline action paint',
+    },
+  ]}
+/>
+
+### Events, Methods & Exposed States
+
+- **Events (Root)**: `sortChange` (`{ sortKey, sortDirection }`), `pageChange` (`{ page }`), `selectionChange` (`{ selectedKeys }`).
+- **Methods (Root)**: `getRows()`, `getRecord(id)`, `getSelectedKeys()`, `requestSort(key)`, `requestPage(next)`, `requestSelection(id)`, `requestPageSelection(selected?)`.
+- **Exposed States**: Root exposes `filteredCount` and `pageSelection` (`'none' | 'some' | 'all'`); Row exposes `rowKey`, `selected`, `focused`, and `focusVisible`; Header exposes `sort`; Cell exposes `displayValue`.
 
 ## References
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-DATA-TABLE.yaml', 'P-BASE-DATA-TABLE.yaml']}
+  files={[
+    'P-SHADCN-DATA-TABLE.yaml',
+    'P-SHADCN-DATA-TABLE-HEADER-ROW.yaml',
+    'P-BASE-DATA-TABLE.yaml',
+    'P-BASE-DATA-TABLE-HEADER-ROW.yaml',
+  ]}
 />

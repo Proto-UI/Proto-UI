@@ -1,6 +1,6 @@
 ---
 title: 'Collapsible'
-description: '由 Root、Trigger 与 Content 组成的可折叠面板组件，支持受控展开与内容卸载策略。'
+description: '由 Root、Trigger 与 Content 组成的可折叠面板组件，支持受控展开、多种样式变体与内容挂载策略。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -8,17 +8,14 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-用于展开或收起单块内容区域的折叠组件，由 `Root`、`Trigger` 与 `Content` 三个部件组成。本页示例采用 **Shadcn Rhea** 风格。
+用于展开或收起单块内容区域的交互式折叠组件，由 `Root`、`Trigger` 与 `Content` 三个部件组成。本页示例采用 **Shadcn Rhea** 风格预设。
 
 ## 预览
-
-下方依次展示四种常见用法：默认关闭并卸载内容节点、默认展开并在关闭后保留隐藏节点、禁用但保持展开，以及需手动点击 **Accept** 确认的受控模式：
 
 <PrototypePreviewer
   demoId="demo-shadcn-collapsible"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
@@ -41,37 +38,167 @@ import {
 
 ## 用法
 
+```tsx
+import {
+  ShadcnCollapsibleRoot,
+  ShadcnCollapsibleTrigger,
+  ShadcnCollapsibleContent,
+} from '@/components/ui/collapsible';
+
+export function Example() {
+  return (
+    <ShadcnCollapsibleRoot>
+      <ShadcnCollapsibleTrigger>Can I use this in my project?</ShadcnCollapsibleTrigger>
+      <ShadcnCollapsibleContent>
+        Yes. Free to use for personal and commercial projects.
+      </ShadcnCollapsibleContent>
+    </ShadcnCollapsibleRoot>
+  );
+}
+```
+
 ### 部件结构
 
-每个 `Root` 内组合一个 `Trigger` 与一个 `Content`（嵌套或相邻的 `Root` 各自拥有独立状态）：
+```text
+CollapsibleRoot
+├── CollapsibleTrigger
+└── CollapsibleContent
+```
 
-- **Root**：统一管理展开状态，支持 `open`、`defaultOpen` 与 `disabled`，并暴露 `open` 状态、`openCollapsible` / `close` / `toggle` 方法以及 `openChange` 事件（负载为 `{ open, reason }`）。
-- **Trigger**：支持独立的 `disabled` 属性，自动关联展开状态、按钮无障碍语义、自然 `Tab` 顺序、`Enter` / `Space` 激活与 `focusSelf`。
-- **Content**：关闭时默认卸载内容节点；设置 `keepMounted={true}` 可保留隐藏节点。
+每个 `Root` 内组合一个 `Trigger` 与一个 `Content`，嵌套或相邻的 `Root` 各自拥有独立状态：
 
-### 受控与禁用行为
+- **Root**：管理展开状态，支持 `open`、`defaultOpen`、`disabled` 与 `styleProfile`，并暴露 `open` 状态、`openCollapsible()` / `close()` / `toggle()` 方法及 `openChange` 事件（载荷 `{ open, reason }`）。
+- **Trigger**：按钮触发器，支持 `disabled`、`variant`（`default` / `ghost` / `outline` / `plain`）与 `size`（`default` / `sm` / `icon`），内置自然 `Tab` 顺序、`Enter` / `Space` 激活、展开态表面反馈与 `focusSelf()`。
+- **Content**：内容面板，关闭时默认卸载内容节点（设置 `keepMounted={true}` 可保留隐藏节点），支持 `variant="plain"` 用于卡片、设置面板或文件树等自由组合场景。
 
-- 传入 `open` 进入受控模式：用户点击或按键只触发 `openChange` 事件，直到外部将新的 `open` 传回 `Root` 才切换显示状态。
-- 设置 `disabled={true}` 会阻止后续切换操作，但不会强制关闭已经展开的内容。
-- 样式内置容器收缩与长词换行支持，内容高度随实际内容自适应。如果需要多项联动或方向键切换标题，请使用 [Accordion](../accordion/)。底层共享行为说明见 [Base Collapsible](/zh-cn/ui-libraries/base/collapsible/)。
+### 受控状态
+
+传入 `open` 并监听 `openChange` 即可由外部接管展开状态；设置 `disabled={true}` 会阻止后续切换，但不会强制收起已展开的内容。
+
+```tsx
+import { useState } from 'react';
+
+export function ControlledExample() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <ShadcnCollapsibleRoot open={open} onOpenChange={(req) => setOpen(req.open)}>
+      <ShadcnCollapsibleTrigger>Toggle details</ShadcnCollapsibleTrigger>
+      <ShadcnCollapsibleContent>Panel content</ShadcnCollapsibleContent>
+    </ShadcnCollapsibleRoot>
+  );
+}
+```
+
+如果需要多项联动或方向键切换标题，请使用 [Accordion](../accordion/)。底层共享行为说明见 [Base Collapsible](/zh-cn/ui-libraries/base/collapsible/)。
+
+## 示例
+
+### 基础卡片
+
+将 `variant="ghost"` 图标触发器与 `variant="plain"` 内容组合在卡片布局中，默认展示摘要行，展开后显示完整订单详情。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-collapsible-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+通过 `open` 与 `openChange` 将外部按钮与面板内置触发器保持同步。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-collapsible-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 设置面板
+
+使用紧凑的 `outline` 图标按钮展开额外的圆角配置项。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-collapsible-settings"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 文件树
+
+嵌套与并列多个 `Collapsible` 构建独立展开的目录结构。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-collapsible-file-tree"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL 布局
+
+在 `dir="rtl"` 容器中组合折叠订单详情卡片。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-collapsible-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-传入 `open` 进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'styleProfile',
+      type: "'new-york-v4' | 'rhea' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera'",
+      default: "'new-york-v4'",
+    },
   ]}
 />
 
-以上属性属于 `Root`。`Trigger` 的 `disabled` 默认为 `false`；`Content` 的 `keepMounted` 默认为 `false`。
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'ghost' | 'outline' | 'plain'", default: "'default'" },
+    { name: 'size', type: "'default' | 'sm' | 'icon'", default: "'default'" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'keepMounted', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'plain'", default: "'default'" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+  ]}
+/>
+
+### 事件与方法
+
+- **Root 事件**：`openChange`（载荷 `{ open: boolean, reason: 'pointer' | 'keyboard' | 'programmatic' }`）
+- **Root 方法**：`openCollapsible(reason?)`、`close(reason?)`、`toggle(reason?)`
+- **Trigger 方法**：`focusSelf(options?)`
 
 ## 参考
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-COLLAPSIBLE.yaml', 'P-BASE-COLLAPSIBLE.yaml']}
+  files={[
+    'P-SHADCN-COLLAPSIBLE.yaml',
+    'P-SHADCN-COLLAPSIBLE-TRIGGER.yaml',
+    'P-SHADCN-COLLAPSIBLE-CONTENT.yaml',
+    'P-BASE-COLLAPSIBLE.yaml',
+  ]}
 />

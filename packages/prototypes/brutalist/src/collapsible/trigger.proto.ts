@@ -9,24 +9,43 @@ const collapsibleTrigger = definePrototype<
   BrutalistCollapsibleTriggerExposes
 >({
   name: 'brutalist-collapsible-trigger',
+  modules: asCollapsibleTrigger.modules,
   setup(def) {
-    const state = asCollapsibleTrigger().stateHandles;
+    const inherited = asCollapsibleTrigger();
+    const state = inherited.stateHandles;
+    def.props.define({
+      variant: {
+        type: 'enum',
+        options: ['default', 'neutral', 'noShadow'],
+        empty: 'fallback',
+      },
+    });
+    def.props.setDefaults({ variant: 'default' });
     if (!state) throw new Error('[brutalist-collapsible-trigger] Missing Base state handles.');
-    const { hovered, pressed, focusVisible, disabled } = state;
+    const { pressed, focusVisible, disabled } = state;
+
     // P-BRUTALIST-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY: no fixed width/height or clipped long label.
+    // Raised control: 4px hard shadow at rest; +4px,+4px press-only displacement (no hover shift).
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full text-main-foreground wrap-anywhere whitespace-break-spaces text-left cursor-pointer select-none inline-flex items-center justify-start rounded-base border-2 border-black bg-main px-4 py-2 text-sm font-sans font-medium shadow-[4px_4px_0_0_#000] relative hit-envelope-translate-1'
+        'min-w-0 max-w-full text-main-foreground wrap-anywhere whitespace-break-spaces text-left cursor-pointer select-none inline-flex items-center justify-start gap-2 rounded-base border-2 border-border dark:border-foreground bg-main px-4 py-2 text-sm font-sans font-medium shadow-[4px_4px_0_0_#000] dark:shadow-[4px_4px_0_0_var(--pui-foreground)] relative hit-envelope-translate-1'
       )
     );
     def.rule({
-      when: (w) => w.state(hovered).eq(true),
-      intent: (i) => i.feedback.style.use(tw('translate-x-1 translate-y-1 shadow-none')),
+      when: (w) => w.prop('variant').eq('neutral'),
+      intent: (i) => i.feedback.style.use(tw('bg-secondary-background text-foreground')),
     });
     def.rule({
-      when: (w) => w.state(pressed).eq(true),
-      intent: (i) => i.feedback.style.use(tw('translate-x-1 translate-y-1 shadow-none')),
+      when: (w) => w.prop('variant').eq('noShadow'),
+      intent: (i) =>
+        i.feedback.style.use(tw('bg-secondary-background text-foreground shadow-none')),
     });
+    for (const variant of ['default', 'neutral'] as const) {
+      def.rule({
+        when: (w) => w.all(w.state(pressed).eq(true), w.prop('variant').eq(variant)),
+        intent: (i) => i.feedback.style.use(tw('translate-x-1 translate-y-1 shadow-none')),
+      });
+    }
     def.rule({
       when: (w) => w.state(focusVisible).eq(true),
       intent: (i) =>
@@ -40,6 +59,7 @@ const collapsibleTrigger = definePrototype<
       when: (w) => w.state(disabled).eq(true),
       intent: (i) => i.feedback.style.use(tw('opacity-50 pointer-events-none cursor-default')),
     });
+    return inherited.render;
   },
 });
 

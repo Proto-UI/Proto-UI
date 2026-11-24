@@ -1,0 +1,119 @@
+---
+title: 'Bootstrap 2.3.2 Scroll Area'
+description: '沿用经典 Bootstrap 2.3.2 4px 圆角边框、内凹轨道与渐变滑块的滚动容器组件。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Bootstrap 2.3.2 Scroll Area 在 Base 宿主原生滚动语义之上提供经典的 4px 圆角白底边框容器、12px 内凹灰底轨道与垂直渐变滑块，适合运维日志、版本归档与经典后台界面。
+
+## 预览
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-scroll-area"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+当前以工作区源码提供，可通过 CLI 命令生成对应框架代码：
+
+<InstallCommandCard
+  command="npx @proto.ui/cli@latest add wc bootstrap-2-3-2-scroll-area"
+  manager="npm"
+/>
+
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架封装。
+
+## 用法
+
+```ts
+import {
+  BootstrapScrollAreaRoot,
+  BootstrapScrollAreaViewport,
+  BootstrapScrollAreaScrollbar,
+  BootstrapScrollAreaThumb,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/scroll-area';
+```
+
+```html
+<bootstrap-2-3-2-scroll-area-root class="h-48 w-full max-w-80">
+  <bootstrap-2-3-2-scroll-area-viewport>
+    <div class="p-3">Scrollable content here.</div>
+  </bootstrap-2-3-2-scroll-area-viewport>
+  <bootstrap-2-3-2-scroll-area-scrollbar orientation="vertical">
+    <bootstrap-2-3-2-scroll-area-thumb></bootstrap-2-3-2-scroll-area-thumb>
+  </bootstrap-2-3-2-scroll-area-scrollbar>
+</bootstrap-2-3-2-scroll-area-root>
+```
+
+### 组件结构与样式说明
+
+```text
+Root
+├── Viewport
+└── Scrollbar
+    └── Thumb
+```
+
+- `Root` 提供 4px 圆角、`#ccc` 边框、纯白底色与经典内阴影，在深色页面中依然保持配对的浅色表面与 `#333` 文字。
+- `Viewport` 保留 Base 的 `auto` 投射策略（由宿主决定使用系统或组合滚动条），在存在溢出时可按 `Tab` 聚焦并显示焦点环与 forced-colors 轮廓。
+- `Scrollbar` 提供 12px 内凹 `#eee` 轨道；`Thumb` 使用 `#fff → #e6e6e6` 经典渐变、顶部高光与 `#b3b3b3` 边框，并在 forced-colors 模式下保留可见边框。
+
+## 示例
+
+### 纵向归档列表
+
+仅挂载纵向轨道，用于版本归档与条目清单。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-scroll-area-tags"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 横向缩略图条
+
+使用 `orientation="horizontal"` 呈现经典 Bootstrap 2.3.2 缩略图卡片条。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-scroll-area-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### 属性
+
+以下属性属于 `Scrollbar`（`Root`、`Viewport` 与 `Thumb` 无额外属性）：
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'orientation', type: "'vertical' | 'horizontal'", default: "'vertical'" }]}
+/>
+
+### 暴露状态
+
+- **Viewport**：`focused`、`focusVisible`、`scrollAxes`、`scrolling`、`scrollProjection`、`scrollXPosition`、`scrollXVisibleRatio`、`canScrollLeft`、`canScrollRight`、`scrollYPosition`、`scrollYVisibleRatio`、`canScrollUp`、`canScrollDown`。
+- **Scrollbar**：`orientation`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-SCROLL-AREA.yaml',
+    'P-BOOTSTRAP-2-3-2-SCROLL-AREA-VIEWPORT.yaml',
+    'P-BOOTSTRAP-2-3-2-SCROLL-AREA-SCROLLBAR.yaml',
+    'P-BOOTSTRAP-2-3-2-SCROLL-AREA-THUMB.yaml',
+    'P-BASE-SCROLL-AREA.yaml',
+  ]}
+/>

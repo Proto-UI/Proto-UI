@@ -1,13 +1,13 @@
 ---
 title: 'Message Scroller'
-description: 'A scrollable feed container with end-follow behavior and a jump-to-latest control.'
+description: 'A Shadcn-styled chat scroll container with bottom end-follow, history-safe pausing, and a floating jump-to-latest control.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Message Scroller is designed for chat feeds and live logs, automatically following newly appended messages when the reader is at the bottom and letting them jump back to the latest entry on demand. The examples on this page use the **Shadcn Rhea** style preset.
+Message Scroller is built for chat feeds and streamed replies. It automatically follows newly appended items while the reader is at the bottom, holds position when the reader scrolls up into history, and provides a floating jump button to return on demand. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -19,30 +19,161 @@ Message Scroller is designed for chat feeds and live logs, automatically followi
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-shadcn/message-scroller` and adapt them for your target runtime.
+
+```ts
+import {
+  messageScrollerRoot,
+  messageScrollerViewport,
+  messageScrollerJump,
+} from '@proto.ui/prototypes-shadcn/message-scroller';
+```
 
 ## Usage
 
+`Message Scroller` fills its parent, so wrap it in a height-constrained container:
+
+```tsx
+<div className="flex h-80 flex-col overflow-hidden rounded-xl border border-border">
+  <ShadcnMessageScrollerRoot styleProfile="rhea" a11yLabel="Assistant conversation">
+    <ShadcnMessageScrollerViewport styleProfile="rhea">
+      <div className="flex flex-col gap-3 p-4 pb-14">
+        {messages.map((message) => (
+          <div key={message.id}>{message.text}</div>
+        ))}
+      </div>
+    </ShadcnMessageScrollerViewport>
+    <ShadcnMessageScrollerJump styleProfile="rhea">
+      <span aria-hidden="true">↓</span>
+      <span className="sr-only">Jump to latest</span>
+    </ShadcnMessageScrollerJump>
+  </ShadcnMessageScrollerRoot>
+</div>
+```
+
+### Anatomy & Behavior
+
 Message Scroller consists of `Root`, `Viewport`, and `Jump`:
 
-- Newly appended items scroll into view automatically while the reader stays at the end of the list.
-- When the reader scrolls up into history, auto-follow pauses; clicking `Jump` explicitly resumes at the latest item without stealing focus.
-- Pass `newContentCount` from your application state to display new-item indicators rather than inferring unread state automatically.
-- Use `a11yLabel` on `Root` to name the scrollable region (defaults to `Messages`).
+- **Follow only while at the bottom**: Newly appended messages scroll into view automatically when the reader is already at the end. Scrolling up pauses auto-follow immediately and preserves reading position.
+- **Focus-preserving Jump button**: Activating `Jump` scrolls back to the latest entry and re-engages end-follow without stealing keyboard focus from composers or other controls. Use the default `size="icon"` for compact icon buttons or `size="pill"` for text labels and unread counts.
+- **Application-owned unread count**: Pass `newContentCount` from your own application state rather than letting the container guess unread semantics.
+- **Accessible naming**: Set `a11yLabel` on `Root` to label the scrollable region (defaults to `'Messages'`).
+- **Style presets (`styleProfile`)**: All three parts support `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`, and `new-york-v4`, inheriting the nearest [Style Scope](../style-scope/) when omitted or set to `inherit`.
 
 ### Stable-key position and selection restoration
 
 To restore reading position by stable key or preserve text selection across updates, compose the public Base `asMessageScrollerReading` hook after the Shadcn `Viewport`. The hook coordinates anchor capture, exact-key or predecessor restoration, and selection restoration on the same scroll surface, while your application keeps control of content IDs, DOM/Range work, and storage. See [Base Message Scroller](/en/ui-libraries/base/message-scroller/) for details.
 
+## Examples
+
+### Live Feed & Unread Counter
+
+Click **Append reply** while at the bottom to watch automatic end-following. Scroll up first and append again to see position hold steady while `newContentCount` and the pill Jump label update.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-message-scroller-live"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Group Channel & Event Markers
+
+Mix multi-author messages, avatars, and inline system event markers inside one transcript with a `size="pill"` unread jump control.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-message-scroller-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Jump Control State
+
+`Jump` inherits Button interaction semantics. Disabling `Jump` suppresses jump activation while keeping manual scrolling unaffected.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-message-scroller-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
 ## API
 
-The following props belong to `Root` (`Viewport` adds no props; `Jump` accepts Button props):
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
     { name: 'newContentCount', type: 'number', default: '0' },
-    { name: 'a11yLabel', type: 'string', default: 'Messages' },
+    { name: 'a11yLabel', type: 'string', default: "'Messages'" },
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: 'inherit → nearest scope → new-york-v4',
+    },
+  ]}
+/>
+
+### Viewport
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Expose', type: 'Type', default: 'Notes' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: 'inherit → nearest scope → new-york-v4',
+    },
+    {
+      name: 'atEnd (expose)',
+      type: 'ExposeState<boolean>',
+      default: 'Whether the viewport is currently at the bottom',
+    },
+    {
+      name: 'following (expose)',
+      type: 'ExposeState<ScrollEndFollowState>',
+      default: 'Current end-follow state',
+    },
+    {
+      name: 'requestStatus (expose)',
+      type: 'ExposeState<ScrollEndFollowRequestStatus>',
+      default: 'Status of the latest end-follow request',
+    },
+    {
+      name: 'jumpToEnd() (expose)',
+      type: '() => void',
+      default: 'Programmatically scroll to the end',
+    },
+    {
+      name: 'pauseFollowing() (expose)',
+      type: '() => ScrollSurfaceRequestOutcome',
+      default: 'Pause automatic end-following',
+    },
+  ]}
+/>
+
+### Jump
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Expose', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'size', type: "'icon' | 'pill'", default: "'icon'" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: 'inherit → nearest scope → new-york-v4',
+    },
+    {
+      name: 'atEnd (expose)',
+      type: 'ExposeState<boolean>',
+      default: 'Mirrored bottom state from Root',
+    },
+    {
+      name: 'newContentCount (expose)',
+      type: 'ExposeState<number>',
+      default: 'Mirrored new-content count from Root',
+    },
   ]}
 />
 

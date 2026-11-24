@@ -1,6 +1,6 @@
 ---
 title: 'Collapsible'
-description: 'An expandable panel composed of Root, Trigger, and Content with controlled state and mount lifecycle options.'
+description: 'An interactive disclosure component composed of Root, Trigger, and Content with controlled state, style variants, and mount lifecycle options.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -8,17 +8,14 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-A single-panel disclosure component composed of `Root`, `Trigger`, and `Content` with controlled state and explicit mount lifecycle behavior. The examples on this page use the **Shadcn Rhea** style preset.
+An interactive component that expands and collapses a single content panel, composed of `Root`, `Trigger`, and `Content`. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
-
-The demo below covers four common setups: closed by default with unmounted content, open by default with `keepMounted`, disabled while open, and controlled mode requiring **Accept** before opening:
 
 <PrototypePreviewer
   demoId="demo-shadcn-collapsible"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
@@ -41,37 +38,167 @@ import {
 
 ## Usage
 
-### Anatomy
+```tsx
+import {
+  ShadcnCollapsibleRoot,
+  ShadcnCollapsibleTrigger,
+  ShadcnCollapsibleContent,
+} from '@/components/ui/collapsible';
 
-Place one `Trigger` and one `Content` inside each `Root` (nested and sibling `Root` instances keep independent state):
+export function Example() {
+  return (
+    <ShadcnCollapsibleRoot>
+      <ShadcnCollapsibleTrigger>Can I use this in my project?</ShadcnCollapsibleTrigger>
+      <ShadcnCollapsibleContent>
+        Yes. Free to use for personal and commercial projects.
+      </ShadcnCollapsibleContent>
+    </ShadcnCollapsibleRoot>
+  );
+}
+```
 
-- **Root**: Manages open state via `open`, `defaultOpen`, and `disabled`. Exposes `open`, methods `openCollapsible`, `close`, and `toggle`, and `openChange` with payload `{ open, reason }`.
-- **Trigger**: Accepts its own `disabled` prop and automatically handles expanded/disabled states, button accessibility, natural `Tab` order, `Enter`/`Space` activation, and `focusSelf`.
-- **Content**: Unmounts content when closed by default; set `keepMounted={true}` to keep the hidden node mounted.
+### Composition
 
-### Controlled and disabled behavior
+```text
+CollapsibleRoot
+├── CollapsibleTrigger
+└── CollapsibleContent
+```
 
-- Pass `open` to control expansion externally: interaction emits `openChange` without changing the panel until you pass back the updated `open` value.
-- Setting `disabled={true}` prevents toggling without closing content that is already open.
-- Built-in styles handle narrow containers, long-word wrapping, and auto content height. For multi-item groups with arrow-key header navigation, use [Accordion](../accordion/). See [Base Collapsible](/en/ui-libraries/base/collapsible/) for the shared protocol details.
+Place one `Trigger` and one `Content` inside each `Root`. Nested and sibling `Root` instances maintain independent state:
+
+- **Root**: Manages open state via `open`, `defaultOpen`, `disabled`, and `styleProfile`. Exposes `open`, methods `openCollapsible()`, `close()`, and `toggle()`, and `openChange` with payload `{ open, reason }`.
+- **Trigger**: Accessible toggle button supporting `disabled`, `variant` (`default` | `ghost` | `outline` | `plain`), and `size` (`default` | `sm` | `icon`), with natural `Tab` order, `Enter`/`Space` activation, open-state feedback, and `focusSelf()`.
+- **Content**: Unmounts content when closed by default (set `keepMounted={true}` to keep the hidden node mounted) and supports `variant="plain"` for seamless card, settings, and file-tree compositions.
+
+### Controlled State
+
+Pass `open` and handle `openChange` to control expansion externally. Setting `disabled={true}` prevents toggling without closing content that is already open.
+
+```tsx
+import { useState } from 'react';
+
+export function ControlledExample() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <ShadcnCollapsibleRoot open={open} onOpenChange={(req) => setOpen(req.open)}>
+      <ShadcnCollapsibleTrigger>Toggle details</ShadcnCollapsibleTrigger>
+      <ShadcnCollapsibleContent>Panel content</ShadcnCollapsibleContent>
+    </ShadcnCollapsibleRoot>
+  );
+}
+```
+
+For multi-item groups with arrow-key header navigation, use [Accordion](../accordion/). See [Base Collapsible](/en/ui-libraries/base/collapsible/) for the shared protocol details.
+
+## Examples
+
+### Basic
+
+Combine a `variant="ghost"` icon trigger with `variant="plain"` content inside a card to pair an always-visible summary row with expandable order details.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-collapsible-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Synchronize an external button and the built-in trigger through `open` and `openChange`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-collapsible-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Settings Panel
+
+Use a compact `outline` icon trigger to reveal additional corner-radius controls.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-collapsible-settings"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### File Tree
+
+Use nested and sibling collapsibles to build an interactive file explorer where each folder owns independent state.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-collapsible-file-tree"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Compose a collapsible order card inside a `dir="rtl"` right-to-left layout.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-collapsible-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-Passing `open` selects controlled mode.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'styleProfile',
+      type: "'new-york-v4' | 'rhea' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera'",
+      default: "'new-york-v4'",
+    },
   ]}
 />
 
-These props belong to `Root`. `Trigger` defaults `disabled` to `false`; `Content` defaults `keepMounted` to `false`.
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'ghost' | 'outline' | 'plain'", default: "'default'" },
+    { name: 'size', type: "'default' | 'sm' | 'icon'", default: "'default'" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'keepMounted', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'plain'", default: "'default'" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+  ]}
+/>
+
+### Events and Methods
+
+- **Root events**: `openChange` with payload `{ open: boolean, reason: 'pointer' | 'keyboard' | 'programmatic' }`
+- **Root methods**: `openCollapsible(reason?)`, `close(reason?)`, `toggle(reason?)`
+- **Trigger methods**: `focusSelf(options?)`
 
 ## References
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-COLLAPSIBLE.yaml', 'P-BASE-COLLAPSIBLE.yaml']}
+  files={[
+    'P-SHADCN-COLLAPSIBLE.yaml',
+    'P-SHADCN-COLLAPSIBLE-TRIGGER.yaml',
+    'P-SHADCN-COLLAPSIBLE-CONTENT.yaml',
+    'P-BASE-COLLAPSIBLE.yaml',
+  ]}
 />

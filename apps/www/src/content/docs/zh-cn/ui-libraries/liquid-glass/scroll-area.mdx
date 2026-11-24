@@ -1,0 +1,123 @@
+---
+title: 'Liquid Glass Scroll Area'
+description: '遵循内容与浮层分离原则、配以克制半透明指示条与无障碍回退的滚动容器组件。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Scroll Area 作为内容层滚动边界，本身不叠加玻璃材质（避免玻璃套玻璃），而是搭配同心圆角继承、克制的半透明胶囊滑块，以及面向悬浮玻璃导航栏的清晰层次分隔。
+
+## 预览
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-scroll-area"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+Liquid Glass Scroll Area 当前以 Proto UI 工作区源码提供（`@proto.ui/prototypes-liquid-glass/scroll-area`），暂未提供独立的 CLI 安装目标。
+
+## 用法
+
+```ts
+import {
+  LiquidGlassScrollAreaRoot,
+  LiquidGlassScrollAreaViewport,
+  LiquidGlassScrollAreaScrollbar,
+  LiquidGlassScrollAreaThumb,
+} from '@proto.ui/prototypes-liquid-glass/scroll-area';
+```
+
+```html
+<liquid-glass-scroll-area-root
+  class="h-56 w-full rounded-xl border border-border/60 bg-background/90"
+>
+  <liquid-glass-scroll-area-viewport>
+    <div class="p-4">Scrollable content here.</div>
+  </liquid-glass-scroll-area-viewport>
+  <liquid-glass-scroll-area-scrollbar orientation="vertical">
+    <liquid-glass-scroll-area-thumb></liquid-glass-scroll-area-thumb>
+  </liquid-glass-scroll-area-scrollbar>
+</liquid-glass-scroll-area-root>
+```
+
+### 组件结构与材质原则
+
+```text
+Root
+├── Viewport
+└── Scrollbar
+    └── Thumb
+```
+
+- **内容层与玻璃层分离**：`Root` 与 `Viewport` 属于可滚动内容边界，不声明 Liquid Glass 折射材质；玻璃材质保留给悬浮在滚动内容之上的操作栏与导航控件，避免玻璃叠玻璃。
+- **同心圆角**：`Viewport` 使用 `rounded-[inherit]`，自动贴合外层 `rounded-xl` / `rounded-2xl` 容器圆角。
+- **无障碍回退**：`Thumb` 默认以不透明高对比表面兜底，仅在未启用减少透明度（`prefers-reduced-transparency`）与强制颜色模式时呈现柔和半透明胶囊与细腻边缘环；开启增强对比度、减弱动态效果或强制颜色模式时自动切换为高对比静态外观。
+
+## 示例
+
+### 纵向构建列表
+
+在同心圆角卡片中展示单轴纵向滚动与半透明胶囊滑块。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-scroll-area-tags"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 横向媒体画廊
+
+使用 `orientation="horizontal"` 在彩色背景衬托下横向浏览同心圆角卡片。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-scroll-area-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 悬浮玻璃栏与滚动内容组合
+
+将采用 Liquid Glass 材质的 `regular` / `prominent` 操作按钮置于顶栏，下方使用无玻璃材质的 Scroll Area 承载曲目列表，体现内容与控制层的清晰层次。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-scroll-area-floating-bar"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### 属性
+
+以下属性属于 `Scrollbar`（`Root`、`Viewport` 与 `Thumb` 无额外属性）：
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'orientation', type: "'vertical' | 'horizontal'", default: "'vertical'" }]}
+/>
+
+### 暴露状态
+
+- **Viewport**：`focused`、`focusVisible`、`scrollAxes`、`scrolling`、`scrollProjection`、`scrollXPosition`、`scrollXVisibleRatio`、`canScrollLeft`、`canScrollRight`、`scrollYPosition`、`scrollYVisibleRatio`、`canScrollUp`、`canScrollDown`。
+- **Scrollbar**：`orientation`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-SCROLL-AREA.yaml',
+    'P-LIQUID-GLASS-SCROLL-AREA-VIEWPORT.yaml',
+    'P-LIQUID-GLASS-SCROLL-AREA-SCROLLBAR.yaml',
+    'P-LIQUID-GLASS-SCROLL-AREA-THUMB.yaml',
+    'P-BASE-SCROLL-AREA.yaml',
+  ]}
+/>
