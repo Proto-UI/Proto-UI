@@ -1,0 +1,133 @@
+{
+  "source": {
+    "base": "1dd7afa3ea4ff43c1f28306c9b035e87ed11ea62",
+    "changedSourceSha256": "030d878137e79ca41584eb00e3f48f7bcaaf42f03500d2a1336af15761ebd182",
+    "testSha256": "fd3666d2c3dcb66f326f1fb3ef8eadd5d347d25d2c1d2e7e99610c1b3d295155",
+    "originalCliTestSha256": "91ab22ee0641a44c3ed9d9ee6ae826303276886969a541329928146cf6368e1d",
+    "scope": "Uncommitted guarded candidate; original complete files selected, no assertion or case-timeout changes."
+  },
+  "jobs": [
+    {
+      "name": "guarded12",
+      "source": {
+        "base": "1dd7afa3ea4ff43c1f28306c9b035e87ed11ea62",
+        "changedSourceSha256": "030d878137e79ca41584eb00e3f48f7bcaaf42f03500d2a1336af15761ebd182",
+        "testSha256": "fd3666d2c3dcb66f326f1fb3ef8eadd5d347d25d2c1d2e7e99610c1b3d295155",
+        "originalCliTestSha256": "91ab22ee0641a44c3ed9d9ee6ae826303276886969a541329928146cf6368e1d",
+        "scope": "Uncommitted guarded candidate; original complete files selected, no assertion or case-timeout changes."
+      },
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/cli/test/hook-source-props-initialization.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile.json=/var/tmp/proto-ui-native-evidence-456f/cli-native-prefix/guarded12.json"
+      ],
+      "exitCode": 0,
+      "timedOut": false,
+      "outerTimeoutSeconds": 180,
+      "elapsedMs": 5497,
+      "report": {
+        "success": true,
+        "numTotalTests": 12,
+        "numPassedTests": 12,
+        "numFailedTests": 0,
+        "numPendingTests": 0
+      },
+      "failed": []
+    },
+    {
+      "name": "complete-cli79",
+      "source": {
+        "base": "1dd7afa3ea4ff43c1f28306c9b035e87ed11ea62",
+        "changedSourceSha256": "030d878137e79ca41584eb00e3f48f7bcaaf42f03500d2a1336af15761ebd182",
+        "testSha256": "fd3666d2c3dcb66f326f1fb3ef8eadd5d347d25d2c1d2e7e99610c1b3d295155",
+        "originalCliTestSha256": "91ab22ee0641a44c3ed9d9ee6ae826303276886969a541329928146cf6368e1d",
+        "scope": "Uncommitted guarded candidate; original complete files selected, no assertion or case-timeout changes."
+      },
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/cli/test/cli.test.ts",
+        "packages/cli/test/codegen-language-admission.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile.json=/var/tmp/proto-ui-native-evidence-456f/cli-native-prefix/complete-cli79.json"
+      ],
+      "exitCode": 0,
+      "timedOut": false,
+      "outerTimeoutSeconds": 600,
+      "elapsedMs": 109993,
+      "report": {
+        "success": true,
+        "numTotalTests": 79,
+        "numPassedTests": 79,
+        "numFailedTests": 0,
+        "numPendingTests": 0
+      },
+      "failed": []
+    },
+    {
+      "name": "related-source-proof",
+      "source": {
+        "base": "1dd7afa3ea4ff43c1f28306c9b035e87ed11ea62",
+        "changedSourceSha256": "030d878137e79ca41584eb00e3f48f7bcaaf42f03500d2a1336af15761ebd182",
+        "testSha256": "fd3666d2c3dcb66f326f1fb3ef8eadd5d347d25d2c1d2e7e99610c1b3d295155",
+        "originalCliTestSha256": "91ab22ee0641a44c3ed9d9ee6ae826303276886969a541329928146cf6368e1d",
+        "scope": "Uncommitted guarded candidate; original complete files selected, no assertion or case-timeout changes."
+      },
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/cli/test/hook-source-setup-capability.test.ts",
+        "packages/cli/test/hook-source-rule-input-preservation.test.ts",
+        "packages/cli/test/hook-source-write-index.test.ts",
+        "packages/cli/test/hook-source-export-patterns.test.ts",
+        "packages/cli/test/hook-source-lexical-index.test.ts",
+        "packages/cli/test/hook-source-projector-scope.test.ts",
+        "packages/cli/test/hook-source-inline-record-registration.test.ts",
+        "packages/cli/test/hook-source-receiver-mutation.test.ts",
+        "packages/cli/test/hook-source-projection-accessors.test.ts",
+        "packages/cli/test/hook-source-collision-order.test.ts",
+        "packages/cli/test/hook-source-helper-registration-context.test.ts",
+        "packages/cli/test/hook-source-resolution-mode.test.ts",
+        "packages/cli/test/prototype-style-tokens.test.ts",
+        "packages/cli/test/prototype-style-token-tables.test.ts",
+        "packages/cli/test/proto-style-css.test.ts",
+        "packages/cli/test/prototype-style-tokens-local-container-effects.test.ts",
+        "packages/cli/test/lowered-authored-setup-rows.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile.json=/var/tmp/proto-ui-native-evidence-456f/cli-native-prefix/related-source-proof.json"
+      ],
+      "exitCode": 0,
+      "timedOut": false,
+      "outerTimeoutSeconds": 600,
+      "elapsedMs": 45731,
+      "report": {
+        "success": true,
+        "numTotalTests": 602,
+        "numPassedTests": 602,
+        "numFailedTests": 0,
+        "numPendingTests": 0
+      },
+      "failed": []
+    }
+  ]
+}

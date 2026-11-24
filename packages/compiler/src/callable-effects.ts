@@ -25,6 +25,7 @@ import {
   arrayEveryCallbackParameters,
   callableValue,
   dataBoundaryType,
+  joinValueTypes,
   memberValueType,
   objectFields,
   valueAlternatives,
@@ -749,7 +750,7 @@ function analyzeCallableFlow(
     );
   }
 
-  /** A scalar flow view may refine an opaque fact without replacing an aggregate. */
+  /** A scalar declared field view proves the published shape of plain data. */
   function scalarDataView(view: ValueType | undefined, top: boolean): boolean {
     return (
       view !== undefined &&
@@ -760,16 +761,58 @@ function analyzeCallableFlow(
       )
     );
   }
-
+  /** The declared member type of one published field, when the view declares it. */
+  function dataFieldView(
+    view: ValueType | undefined,
+    name: string,
+    array = false
+  ): ValueType | undefined {
+    if (view === undefined) return undefined;
+    const members = valueAlternatives(view).map((type) =>
+      array
+        ? typeof type !== 'string' && type.kind === 'array'
+          ? type.element
+          : undefined
+        : objectFields(type)?.find((field) => field.name === name)?.type
+    );
+    return members.every((type): type is ValueType => type !== undefined)
+      ? joinValueTypes(members)
+      : undefined;
+  }
+  /** A retained data fact is publishable when its declared view stays plain data. */
+  function runtimeDataType(type: ValueType, view: ValueType | undefined, top: boolean): boolean {
+    if (scalarDataView(view, top)) return true;
+    if (typeof type === 'string' || type.kind === 'literal')
+      return dataBoundaryType(type, top) !== undefined;
+    if (type.kind === 'union' || type.kind === 'value-union')
+      return type.members.every((member) => runtimeDataType(member, view, top));
+    if (type.kind === 'array')
+      return runtimeDataType(type.element, dataFieldView(view, '', true), false);
+    if (type.kind === 'object' || type.kind === 'record')
+      return (
+        !('index' in type && type.index !== undefined) &&
+        type.fields.every(
+          (field) =>
+            !('accessor' in field && field.accessor) &&
+            runtimeDataType(field.type, dataFieldView(view, field.name), false)
+        )
+      );
+    return false;
+  }
   /** Publication examines retained values, including fields hidden by a narrower
    * checked view. It never calls getters or treats a type assertion as a copy. */
-  function outwardData(values: Known, top = true, ancestors = new Set<Atom>()): boolean {
+  function outwardData(
+    values: Known,
+    view: ValueType | undefined,
+    top = true,
+    ancestors = new Set<Atom>()
+  ): boolean {
     return values.every((value) => {
       if (value.kind === 'absent') return !top;
       if (value.kind === 'undefined') return top;
       if (value.kind === 'literal') return true;
       if (value.kind === 'unknown')
-        return value.data !== undefined && dataBoundaryType(value.data, top) !== undefined;
+        return value.data !== undefined && runtimeDataType(value.data, view, top);
       if (
         value.kind !== 'record' ||
         value.set ||
@@ -779,8 +822,8 @@ function analyzeCallableFlow(
       )
         return false;
       ancestors.add(value);
-      const valid = [...fields(value).values()].every((field) =>
-        outwardData(field, false, ancestors)
+      const valid = [...fields(value).entries()].every(([name, field]) =>
+        outwardData(field, dataFieldView(view, name), false, ancestors)
       );
       ancestors.delete(value);
       return valid;
@@ -1774,17 +1817,18 @@ function analyzeCallableFlow(
               part.kind === 'unknown' && part.data ? hostValue(part.data) : [part]
             )
           );
-          const nullish = value.operator === '??';
-          const useRightWhenTruthy = value.operator === '&&';
-          const retained = alternatives.filter(
-            (part) => truth([part], nullish) !== useRightWhenTruthy
-          );
-          const canUseRight = alternatives.some(
-            (part) => truth([part], nullish) !== !useRightWhenTruthy
-          );
+          const condition = truth(alternatives, value.operator === '??');
+          const useRight =
+            value.operator === '&&' ? condition : condition === undefined ? undefined : !condition;
+          // Only the short-circuiting left alternatives reach the result.
+          // In particular a nullish left value cannot survive a ?? fallback.
+          const retained = alternatives.filter((item) => {
+            const choice = truth([item], value.operator === '??');
+            return value.operator === '&&' ? choice !== true : choice !== false;
+          });
           return branches([
-            ...(retained.length ? [() => retained] : []),
-            ...(canUseRight ? [() => expression(value.right, scope, execution)] : []),
+            ...(useRight !== true ? [() => retained] : []),
+            ...(useRight !== false ? [() => expression(value.right, scope, execution)] : []),
           ]);
         }
         expression(value.right, scope, execution);
@@ -2163,7 +2207,7 @@ function analyzeCallableFlow(
           !issue &&
           reachable &&
           value.operation === 'expose.emit' &&
-          !outwardData(args[1] ?? UNDEFINED)
+          !outwardData(args[1] ?? UNDEFINED, value.arguments[1]?.type ?? 'void')
         ) {
           issue = {
             code: 'PUI1006',

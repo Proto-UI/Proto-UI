@@ -1,0 +1,40 @@
+{
+  "productSha256": "030d878137e79ca41584eb00e3f48f7bcaaf42f03500d2a1336af15761ebd182",
+  "testSha256": "dfb2ad79b56d3e9edd6ac39a5793c3267a1e45105392a3d0d4f1d695aaf76ba1",
+  "command": [
+    "corepack",
+    "pnpm@10.32.1",
+    "exec",
+    "vitest",
+    "run",
+    "packages/cli/test/hook-source-props-initialization.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=/var/tmp/proto-ui-native-evidence-456f/cli-native-prefix/getter-suffix14.json"
+  ],
+  "exitCode": 1,
+  "elapsedMs": 3672,
+  "report": {
+    "success": false,
+    "numTotalTests": 14,
+    "numPassedTests": 12,
+    "numFailedTests": 2,
+    "numPendingTests": 0
+  },
+  "failed": [
+    {
+      "name": "native Props initialization before authored hook capture withholds capture when shared Props defaults invoke an existing validator",
+      "messages": [
+        "AssertionError: expected [ 'bg-accent', \u2026(1) ] to not include 'data-[selected]:bg-accent'\n    at Proxy.<anonymous> (file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/hook-source-props-initialization.test.ts:120:24\n    at file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)"
+      ]
+    },
+    {
+      "name": "native Props initialization before authored hook capture withholds capture after a getter read following closed Props initialization",
+      "messages": [
+        "AssertionError: expected [ 'bg-accent', \u2026(1) ] to not include 'data-[selected]:bg-accent'\n    at Proxy.<anonymous> (file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/hook-source-props-initialization.test.ts:134:24\n    at file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///var/tmp/proto-ui-cli-fix-456f/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)"
+      ]
+    }
+  ]
+}

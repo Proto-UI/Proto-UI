@@ -1,0 +1,328 @@
+{
+  "schemaVersion": 1,
+  "reviewedAtUtc": "2026-11-24 06:14:56 UTC",
+  "reviewer": "/root/s7_acceptance",
+  "reviewType": "independent technical code and evidence-scope review",
+  "conclusion": "No open findings in the bounded CLI standard Runtime Root CSS resource change.",
+  "findings": [],
+  "githubApproval": false,
+  "reviewerActions": {
+    "implementationEdits": false,
+    "testExecution": false,
+    "deviceCalls": false,
+    "ciDispatches": false,
+    "externalWrites": false,
+    "authoredArtifact": "This technical peer report only."
+  },
+  "sourceBindings": {
+    "originalFailedCliExecution": "3edafee1ea871240015b99aaebd6cf8064db7ba3",
+    "originalComparisonMain": "1dd7afa3ea4ff43c1f28306c9b035e87ed11ea62",
+    "testedProductCommit": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+    "testedProductTree": "d84b02f23621ee9369c45db08bb2d630c332c5cc",
+    "deliveryCommit": "28037549e478bc76f95a7192d7ff643330044a03",
+    "deliveryTree": "b669ddc5e85e136bf2fc554e8e21946d2e960515",
+    "deliveryParents": [
+      "6dd674545c8d388c6f5cc54ec868c88ec0d60cce",
+      "ed64f150d2db1180bf9defc543b6a955b9d4cc18"
+    ],
+    "productPayloadsExactlyPreservedInDelivery": true,
+    "deliveryIdentityEvidence": "current-main-delivery/terminal.json embedded in final-280-validation.actual.json",
+    "scopeAgainstFixedDeliveryMain": [
+      ".prettierignore",
+      "packages/cli/README.md",
+      "packages/cli/src/generated/brutalist-style-tokens.ts",
+      "packages/cli/src/generated/draft-family-style-tokens.ts",
+      "packages/cli/src/generated/shadcn-style-tokens.ts",
+      "packages/cli/src/services/hook-source-summary.ts",
+      "packages/cli/src/services/prototype-style-tokens.ts",
+      "packages/cli/test/hook-source-props-initialization.test.ts"
+    ],
+    "sevenProductPayloadSha256": {
+      "packages/cli/README.md": "608e5b47e582d73f67ed985a6db10184d0539e6b386a7e3cf9ed294f1b6602a0",
+      "packages/cli/src/services/hook-source-summary.ts": "92c933ecf3231086ca4d1ce3a51028963acec28d354e504d404e7c225d07f795",
+      "packages/cli/src/services/prototype-style-tokens.ts": "bdc3f221a1d01d9019bc645cee90673d196dd5cf91f2d9a64c06b894bcec0b56",
+      "packages/cli/test/hook-source-props-initialization.test.ts": "97a518c313a77addb102be435c34c3dba94142ef03f9fdb53b98e70a76b9e6ea",
+      "packages/cli/src/generated/shadcn-style-tokens.ts": "ecca6c18728c49baef1f62032c9943e2b861d4faa2230ba8d188d201640c2cbe",
+      "packages/cli/src/generated/brutalist-style-tokens.ts": "132206860118eb4a5977eb0f112b3846fb6088acba1b9aea4cac932acb0b3e8f",
+      "packages/cli/src/generated/draft-family-style-tokens.ts": "c1526a048cdfc2e09a8504015aecac2ef4c7d403ccd3ade387527b09f2098adf"
+    }
+  },
+  "implementationReview": {
+    "ordinaryQueries": "The ordinary summary factory has no mode option. These previously unproved Props-prefixed captures remain unknown in general queries.",
+    "resourceScenario": "A separate explicitly tagged standard Runtime Root scenario selects a same-source canonical default Prototype and exact setup binding.",
+    "prefixBoundary": "The exact selected owner has one identifier parameter, no initializer/rest, synchronous setup, closed own-data Props arguments, and a complete statement interval through a zero-argument direct producer capture.",
+    "rejectedShapes": [
+      "unknown earlier calls",
+      "getters or callbacks in Props data",
+      "computed keys, spreads and __proto__ data properties",
+      "unknown defaults records",
+      "alias escape, foreign receiver and member writes before the capture",
+      "additional setup parameters",
+      "shared AsHook Def frames",
+      "intervening getter reads",
+      "unselected named or imported entries and borrowed setups"
+    ],
+    "isolation": "Each additional pass has an independent summary/module context, module cache, Scope and graph-version state. Only final Rule token strings merge into the ordinary collector.",
+    "targetOwnership": "The projection inventory returns only Rule variants from its dedicated nonTemplateTokens channel. Shadow unions Root uses even when the same token string already has a Template use. Ordinary Template-only literals do not enter that channel.",
+    "sourceIdentity": "Exact SourceFile object identity is preserved; no claim is made that TypeScript AST objects are deep-frozen.",
+    "changedGeneralCapabilities": false
+  },
+  "resolvedCounterexamples": [
+    {
+      "id": "extra-setup-parameter",
+      "observedRejectedCandidate": {
+        "total": 12,
+        "passed": 11,
+        "failed": 1
+      },
+      "disposition": "Exactly one setup parameter is required; default/rest parameters are rejected.",
+      "executionProvenance": "Actual Device execution reported by parent; not executed by this reviewer."
+    },
+    {
+      "id": "shared-props-validator",
+      "observedRejectedCandidate": {
+        "total": 13,
+        "passed": 12,
+        "failed": 1
+      },
+      "disposition": "Fresh Props authority was removed from ordinary/shared-hook queries and confined to the explicit standard Runtime Root resource scenario.",
+      "executionProvenance": "Actual Device execution reported by parent; not executed by this reviewer."
+    },
+    {
+      "id": "getter-after-props-before-capture",
+      "observedRejectedCandidate": {
+        "total": 14,
+        "passed": 12,
+        "failed": 2
+      },
+      "intervalOnlyCorrection": {
+        "total": 14,
+        "passed": 13,
+        "failed": 1
+      },
+      "disposition": "The complete target interval is checked. The remaining shared-validator failure was then addressed by scenario isolation.",
+      "executionProvenance": "Actual Device execution reported by parent; not executed by this reviewer."
+    },
+    {
+      "id": "root-template-token-role-collision",
+      "observedRejectedCandidate": {
+        "total": 19,
+        "passed": 18,
+        "failed": 1,
+        "pending": 0,
+        "elapsedMs": 5455
+      },
+      "correctedCandidate": {
+        "total": 19,
+        "passed": 19,
+        "failed": 0,
+        "pending": 0,
+        "elapsedMs": 4336
+      },
+      "disposition": "Merge Root uses by target rather than global or per-source string difference; retain the unrelated Template-only italic negative control.",
+      "executionProvenance": "Actual Device execution reported by parent; final formatted controls were subsequently run on ed64."
+    }
+  ],
+  "byteAndScopeAudits": {
+    "candidatePatch": {
+      "file": "standard-runtime-root-style-candidate.patch",
+      "sha256": "385acda7a380945e1f3914cd99a43725907c6251e72b365525bfaa7cbfeee8d1",
+      "result": "Independently reconstructed all four files in memory against exact base blobs; every hunk context, output byte count and SHA matched the candidate artifacts and manifest."
+    },
+    "normalFormatting": {
+      "file": "normal-format.actual.patch",
+      "sha256": "3ab502f3c474b8e9128d894a3d4d60dc4135d1ff035d043dfaecfa0a493b250c",
+      "result": "Independently reconstructed final source hashes. Both product files change whitespace only; the test additionally gains one trailing comma in the two-file-order array. README is byte-identical."
+    },
+    "generatedPayloads": {
+      "file": "generated-presets.actual.patch",
+      "sha256": "b6f79accca26b0a4b3922e9000c196c16655e3dbc7850b37dfdc4722a9d2a045",
+      "result": "Independently fetched exact b17 baseline blobs and reconstructed the three generated files in memory. Every byte count and SHA matched the actual receipt.",
+      "families": [
+        {
+          "name": "shadcn",
+          "before": 939,
+          "after": 961,
+          "added": 22,
+          "removed": 0
+        },
+        {
+          "name": "brutalist",
+          "before": 539,
+          "after": 560,
+          "added": 21,
+          "removed": 0
+        },
+        {
+          "name": "bootstrap-2-3-2",
+          "before": 661,
+          "after": 671,
+          "added": 10,
+          "removed": 0
+        },
+        {
+          "name": "liquid-glass",
+          "before": 439,
+          "after": 451,
+          "added": 12,
+          "removed": 0
+        }
+      ],
+      "totalAddedEntries": 65,
+      "totalRemovedEntries": 0,
+      "themeOrMotionTrackedDelta": false
+    },
+    "formattingProtection": {
+      "result": "Independently reconstructed the narrow ignore append from b17. It adds exactly the six receipt-protected Sprint 5 literal paths, with no wildcard, negation or deleted rule.",
+      "auditedRevision": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+      "baseRevision": "b17c4f88ea4a333da042fd778bf10d657c39f772",
+      "gitBlob": "4525e78ca76bb9ac85cd800cecc72517ea5255b0",
+      "sha256": "2b68d63bce8181943a5edae9ea2d3ce117ef204096e57ee5588ec1bb891cd28b",
+      "sixProtectedModesAndBlobsEqualInIntegrationReceipt": true
+    },
+    "finalEmbeddedReceiptAudit": {
+      "file": "final-280-validation.actual.json",
+      "sha256": "d3e04a46bc4785b3d439b804397abd87f19e8b44565ece51cc87bf846cc6fa36",
+      "result": "Independently reconstructed all five embedded raw JSON content objects as their original pretty JSON plus final LF. All five byte lengths and SHA-256 digests match their declared original receipts.",
+      "logTailReviewed": "The final check-types log tail reports 1335 files, 0 errors, 0 warnings and 47 hints.",
+      "fullLogBytesIndependentlyRead": false
+    }
+  },
+  "validation": {
+    "executionOwner": "/root",
+    "testedProductHead": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+    "ed64CompleteSelections": [
+      {
+        "name": "new Props/projection controls",
+        "files": 1,
+        "passed": 19,
+        "failed": 0,
+        "pending": 0,
+        "elapsedMs": 7901,
+        "exitCode": 0
+      },
+      {
+        "name": "original CLI and language admission",
+        "files": 2,
+        "passed": 79,
+        "failed": 0,
+        "pending": 0,
+        "elapsedMs": 120012,
+        "exitCode": 0
+      },
+      {
+        "name": "related source-proof, token and CSS regressions",
+        "files": 17,
+        "passed": 602,
+        "failed": 0,
+        "pending": 0,
+        "elapsedMs": 30174,
+        "exitCode": 0
+      }
+    ],
+    "ed64UnitReceipt": {
+      "file": "final-ed64-unit.actual.json",
+      "sha256": "9c34991afbaee9fc5895a0981f6a7b71d0dacb39772446f67060114f88a72efd",
+      "totalDistinctCompleteFiles": 20,
+      "totalPassedTests": 700,
+      "headsAndCleanStatusStable": true,
+      "rawFilesIndexed": 9,
+      "rawUnitLogsAndReportsIndependentlyRehashed": false
+    },
+    "presetGenerationForEd64": {
+      "script": "styles:preset:generate",
+      "inputSourceHead": "af14e17f3fa2b7de79e8fb4eca370212f4d89ac7",
+      "outputCommit": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+      "exitCode": 0,
+      "elapsedMs": 412740,
+      "provenance": "Parent actual terminal report; generated bytes independently audited."
+    },
+    "ed64StyleCheck": {
+      "script": "check:styles:preset",
+      "exitCode": 0,
+      "elapsedMs": 285496,
+      "motionControlsPassed": 13,
+      "provenance": "Parent actual terminal report; not relabeled as a run on 280."
+    },
+    "deliveryHead": "28037549e478bc76f95a7192d7ff643330044a03",
+    "deliveryFinf": {
+      "file": "packages/cli/test/finf-components.test.ts",
+      "passed": 191,
+      "failed": 0,
+      "pending": 0,
+      "elapsedMs": 7111,
+      "exitCode": 0,
+      "headsAndCleanStatusStable": true,
+      "originalReceiptSha256": "f57d84ff74b474ee32244ec0a737df842f94a27397ad40862e1acbfb4a989510"
+    },
+    "deliveryOfficialTypes": {
+      "command": "corepack pnpm@10.32.1 check:types",
+      "exitCode": 0,
+      "elapsedMs": 400925,
+      "timedOut": false,
+      "headsAndCleanStatusStable": true,
+      "files": 1335,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 47,
+      "originalReceiptSha256": "622fa37331960a4faa46e48cbd8ec723f48572e824652057500a14d4743dad80",
+      "originalLogSha256": "8a5fd5bad6bb6af22ddb523dd54fbf5cf8232028c50002c40b4a1cb27997f088"
+    },
+    "sourceEquivalence": {
+      "roots": [
+        "packages",
+        "scripts/build",
+        "scripts/styles",
+        "tsconfig.json",
+        "tsconfig.workspace.json",
+        "pnpm-lock.yaml",
+        "package.json"
+      ],
+      "onlyChangedPathFromEd64ToDelivery": "packages/cli/test/finf-components.test.ts",
+      "originalReceiptSha256": "cdc3751afe75214855c60ff5db98740a643a6b1515d474ed9e1f924f52d6a5b6",
+      "claimBoundary": "The seven product payloads and prior CLI test/build/preset inputs are unchanged. The 700 tests and style check retain ed64 execution identities; Finf and official types were newly run on 280."
+    }
+  },
+  "historicalNonSuccessesPreserved": [
+    "The original full CLI run is 78/79 on 3edafee1, despite the evidence directory name containing main1dd.",
+    "Early candidates genuinely failed parameter, shared-validator, getter and target-ownership controls. Earlier partial successes are not transferred to later candidates.",
+    "The first unpushed source commit lacked generated Husky hooks. It is not credited as a passing hook; normally initialized and formatted successor 9bcd and later merges have distinct actual hook receipts.",
+    "The first integrated style check failed with stale Shadcn output before normal regeneration.",
+    "An early standalone workspace type check failed for two missing generated imports.",
+    "The complete check:types on ed64 exited 1 after workspace success because of the upstream Header error. Only the later 280 full chain is a complete type pass.",
+    "Diagnostic merge 80b48039ede5938e9a956ffe0032a8dc35956b5b retains an upstream Input formatting observation and is outside final delivery ancestry."
+  ],
+  "constructionProofRecheckedAtFixedMain": {
+    "ref": "6dd674545c8d388c6f5cc54ec868c88ec0d60cce",
+    "method": "Independent pinned GitHub file fetches; each full Git blob equals the originally reviewed 1dd blob.",
+    "files": {
+      "packages/runtime/src/instance/instance.ts": "027b5fcc76ed78bc6a85e236c60917fe85dba5d3",
+      "packages/runtime/src/kernel/kernel.ts": "e1b8421c35a0b43942b50edee69ac086a539a664",
+      "packages/runtime/src/kernel/handles/def.ts": "52589ca12600cc52a1a48b89432727055f1ed331",
+      "packages/runtime/src/orchestrator/module-orchestrator/runtime-module-orchestrator.ts": "01589c6b21ed0b9181af2902fa2adc83e430be85",
+      "packages/modules/props/src/create.ts": "e1f7278441f45398a9961009f954995506e4a855",
+      "packages/modules/props/src/impl.ts": "ae9b57326e9fe7e385a27a05069456214191f1a7",
+      "packages/modules/props/src/kernel/kernel.ts": "726aa485188c90f843344c69d3bb1045e37061e3",
+      "packages/core/src/prototype.ts": "98f09837478e1cdb668a88f826a31792f42c08b1"
+    }
+  },
+  "publicationTextReviewed": {
+    "technicalRecord": {
+      "file": "2026-11-24-cli-standard-runtime-root-styles.md",
+      "sha256": "2c7bc088c1677f77440eec130527c5a72f7ecb2a9271284bac8c1b9c1a6aba5f"
+    },
+    "prBody": {
+      "file": "cli-standard-runtime-root-styles.pr-body.md",
+      "sha256": "6a943433ce8ff7464fb1a22513b4c899bc8fbd1755632dc121d11aeb3971536f"
+    },
+    "result": "No remaining factual or scope finding in the reviewed final drafts. They preserve the real baseline, rejected candidates, historical gate failures, final source equivalence, and existing typecheck boundary."
+  },
+  "limitations": [
+    "This is a technical peer review, not an eligible independent GitHub APPROVED review or permission to bypass integration rules.",
+    "No tests, generators, hooks or Device commands were executed by this reviewer. Execution outcomes are attributed to the supplied actual owner receipts or explicitly marked parent reports.",
+    "The peer reconstructed candidate, formatter and generated payload bytes and embedded terminal JSON. It did not independently read every original remote stdout/JSON report or inspect the unpublished delivery repository directly.",
+    "prototype-style-tokens.ts retains its pre-existing @ts-nocheck; the official type pass does not strictly check that file's entire implementation.",
+    "The bounded Root CSS resource repair does not complete broader helper/Rule coverage work in #1759 or assert browser, native, installed-consumer, release or seven-Sprint completion.",
+    "Evidence-only publication commits after the reviewed delivery must preserve the seven product payloads and their execution bindings."
+  ]
+}

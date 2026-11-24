@@ -1,6 +1,6 @@
 import { COMMAND_DISABLED } from '../src/interactive-surface';
 import { describe, expect, it, vi } from 'vitest';
-import type { Prototype } from '@proto.ui/core';
+import type { Prototype, TemplateChildren } from '@proto.ui/core';
 import { createRuntimeSession } from '@proto.ui/runtime';
 import {
   ANATOMY_INSTANCE_TOKEN_CAP,
@@ -22,7 +22,11 @@ import {
   FOCUS_PARENT_CAP,
   FOCUS_ROOT_TARGET_CAP,
 } from '@proto.ui/module-focus';
-import { VISUAL_FEEDBACK_SINK_CAP, type VisualFeedbackFrame } from '@proto.ui/module-feedback';
+import {
+  MATERIAL_PAINT_RESERVATION_CAP,
+  VISUAL_FEEDBACK_SINK_CAP,
+  type VisualFeedbackFrame,
+} from '@proto.ui/module-feedback';
 import button from '../src/button';
 import toggle from '../src/toggle';
 import { formRoot, formSubmit, formReset } from '../src/form';
@@ -125,6 +129,7 @@ async function fixture(
     let props = initial;
     let exposes: Record<string, any> = {};
     const frames: VisualFeedbackFrame[] = [];
+    const templates: TemplateChildren[] = [];
     const events: Array<{ key: string; payload: unknown }> = [];
     const release = vi.fn();
     const session = createRuntimeSession(prototype, {
@@ -135,7 +140,10 @@ async function fixture(
         const id = setTimeout(task, duration);
         return { cancel: () => clearTimeout(id) };
       },
-      commit: (_children, signal) => signal?.done(),
+      commit: (children, signal) => {
+        templates.push(children);
+        signal?.done();
+      },
       onRuntimeReady(w) {
         const parentOf = (token: unknown) => parents.get(token) ?? null;
         const protoOf = (token: unknown) => prototypes.get(token) ?? null;
@@ -175,6 +183,9 @@ async function fixture(
           [EXPOSE_EVENT_SINK_CAP, (key: string, payload: unknown) => events.push({ key, payload })],
         ]);
         w.attach('feedback', [
+          // The real Runtime validates the declared reservation in the captured
+          // template. This portable harness records it without claiming host layout.
+          [MATERIAL_PAINT_RESERVATION_CAP, true],
           [
             VISUAL_FEEDBACK_SINK_CAP,
             { commit: (frame: VisualFeedbackFrame) => frames.push(frame), release },
@@ -188,6 +199,7 @@ async function fixture(
       target,
       session,
       frames,
+      templates,
       events,
       release,
       state: () => exposes,
@@ -220,6 +232,7 @@ async function fixture(
   }
   return {
     root,
+    heading,
     control,
     global,
     disable: () =>
@@ -247,6 +260,15 @@ describe('Liquid command interaction recipe over eight implemented Base owners',
       const f = await fixture(command);
       const c = f.control;
       try {
+        if (command.name === 'Accordion') {
+          expect(f.heading?.templates).toMatchObject([
+            {
+              type: { kind: 'paint-reservation', target: expect.any(Object) },
+              children: { type: { kind: 'slot' } },
+            },
+          ]);
+          expect(c.frame().material.slot?.paintReservation).toBe('required');
+        }
         const fill = c.tokens().filter((token) => /^(bg-|text-)/.test(token));
         const geometry = () =>
           c

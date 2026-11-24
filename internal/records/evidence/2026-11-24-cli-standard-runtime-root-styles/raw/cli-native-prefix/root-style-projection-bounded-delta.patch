@@ -1,0 +1,60 @@
+diff --git a/packages/cli/src/services/hook-source-summary.ts b/packages/cli/src/services/hook-source-summary.ts
+--- a/packages/cli/src/services/hook-source-summary.ts
++++ b/packages/cli/src/services/hook-source-summary.ts
+@@ -6209,7 +6209,30 @@
+   if (rootStyleSource) {
+     registerSource(rootStyleSource);
+     rootStyleSetup = selectStandardRuntimeRootSetup(rootStyleSource);
+-    if (!rootStyleSetup) return null;
++    const owner = rootStyleSetup;
++    if (!owner?.body || !ts.isBlock(owner.body)) return null;
++    const first = owner.body.statements[0];
++    if (!first || !ts.isExpressionStatement(first)) return null;
++    const firstCall = unwrap(first.expression);
++    if (!ts.isCallExpression(firstCall)) return null;
++    const module = moduleForSource(rootStyleSource);
++    const hasClosedCapture = owner.body.statements.some((statement) => {
++      if (
++        !ts.isVariableStatement(statement) ||
++        statement.declarationList.declarations.length !== 1
++      )
++        return false;
++      const initializer = statement.declarationList.declarations[0].initializer;
++      if (!initializer) return false;
++      let value = unwrap(initializer);
++      while (ts.isPropertyAccessExpression(value)) value = unwrap(value.expression);
++      return (
++        ts.isCallExpression(value) &&
++        producerForCall(value, rootStyleSource) !== null &&
++        nativePropsInitializationPrefix(firstCall, value, owner, module)
++      );
++    });
++    if (!hasClosedCapture) return null;
+   }
+ 
+   return {
+diff --git a/packages/cli/src/services/prototype-style-tokens.ts b/packages/cli/src/services/prototype-style-tokens.ts
+--- a/packages/cli/src/services/prototype-style-tokens.ts
++++ b/packages/cli/src/services/prototype-style-tokens.ts
+@@ -90,7 +90,8 @@
+     scope.decorationSourceFiles = sourceFiles;
+     scope.decorationHelperUses = decorationHelperUses;
+     await applyImportBindings(file, sourceFile, scope, moduleCache, []);
+-    walk(sourceFile, scope, tokens, collectExposures(sourceFile), {
++    const sourceTokens = new Set<string>();
++    walk(sourceFile, scope, sourceTokens, collectExposures(sourceFile), {
+       occurrences,
+       sourceRoot: root,
+       sourcePath: path.relative(root, file).split(path.sep).join('/'),
+@@ -99,9 +100,10 @@
+       unclassifiedTokens,
+       styleHandleUsage,
+     });
++    for (const token of sourceTokens) tokens.add(token);
+     const projected = await collectStandardRuntimeRootTokens(sourceFile);
+     for (const token of projected) {
+-      if (tokens.has(token)) continue;
++      if (sourceTokens.has(token)) continue;
+       tokens.add(token);
+       // Additional scenario resources have no ordinary source occurrence.
+       // Preserve the existing conservative Root fallback for unclassified CSS.

@@ -1,0 +1,24 @@
+{
+  "jobs": [
+    {
+      "head": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+      "name": "check-types",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "check:types"
+      ],
+      "startedAt": "2026-11-24T05:38:59.461193+00:00",
+      "exitCode": 1,
+      "timedOut": false,
+      "outerTimeoutSeconds": 1200,
+      "elapsedMs": 475852,
+      "headAfter": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+      "statusBefore": "",
+      "statusAfter": "",
+      "nodeOptions": "--max-old-space-size=4096",
+      "cpuAffinity": null
+    }
+  ],
+  "allExitZero": false
+}

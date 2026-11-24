@@ -1,0 +1,12 @@
+{
+  "exitCode": 0,
+  "elapsedMs": 2704,
+  "head": "9bcd3748d0f7df95450bdc2e2dbc0cdefd6b1784",
+  "hashes": {
+    "packages/cli/README.md": "608e5b47e582d73f67ed985a6db10184d0539e6b386a7e3cf9ed294f1b6602a0",
+    "packages/cli/src/services/hook-source-summary.ts": "92c933ecf3231086ca4d1ce3a51028963acec28d354e504d404e7c225d07f795",
+    "packages/cli/src/services/prototype-style-tokens.ts": "bdc3f221a1d01d9019bc645cee90673d196dd5cf91f2d9a64c06b894bcec0b56",
+    "packages/cli/test/hook-source-props-initialization.test.ts": "97a518c313a77addb102be435c34c3dba94142ef03f9fdb53b98e70a76b9e6ea"
+  },
+  "initialCommitHookObservation": "The first unpushed source commit d14842f did not have generated Husky hooks in this worktree. Husky was initialized normally, all four source paths were formatted explicitly, and this successor uses the normal repository pre-commit hook. The initial commit is not claimed as a passing hook run."
+}
