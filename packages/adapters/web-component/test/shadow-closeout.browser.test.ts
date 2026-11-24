@@ -3491,6 +3491,8 @@ describe('Shadow closeout native boundaries', () => {
               : '@scope (body) to (#entry-scope-toggle:checked + #entry-scope-limit) { #native-scope-entry button { visibility: hidden; } }',
         });
         await style.evaluate((node) => {
+          if (!(node instanceof HTMLStyleElement))
+            throw new Error('Expected the native scope fixture style element');
           node.id = 'entry-scope-fixture';
         });
         await style.dispose();
