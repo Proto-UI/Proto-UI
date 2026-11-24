@@ -110,10 +110,12 @@ test('a stale theme fixture fails the check', () => {
   assert.match(result.stderr, /theme-tokens\.json is stale/);
 });
 
-// Liquid declares all eighteen keys, including four radius variants, in its source.
-// Bootstrap declares fifteen keys; the renderer adds four derived radius variants.
-// The explicit contract rejects missing and unknown entries, not just bad colors.
+// Source palettes and the common renderer own this finite key contract, including
+// all seven derived radius variants. Family-only navbar and destructive-foreground
+// keys stay explicit so omissions and unknown entries are both rejected.
 const sharedDraftVariables = [
+  'accent',
+  'accent-foreground',
   'background',
   'border',
   'font-heading',
@@ -125,6 +127,9 @@ const sharedDraftVariables = [
   'primary',
   'primary-foreground',
   'radius',
+  'radius-2xl',
+  'radius-3xl',
+  'radius-4xl',
   'radius-lg',
   'radius-md',
   'radius-sm',
@@ -134,8 +139,19 @@ const sharedDraftVariables = [
   'secondary-foreground',
 ].map((name) => `--pui-${name}`);
 const requiredDraftVariables = {
-  'bootstrap-2-3-2': [...sharedDraftVariables, '--pui-destructive'].sort(),
-  'liquid-glass': [...sharedDraftVariables],
+  'bootstrap-2-3-2': [
+    ...sharedDraftVariables,
+    '--pui-destructive',
+    '--pui-navbar-border',
+    '--pui-navbar-bottom',
+    '--pui-navbar-foreground',
+    '--pui-navbar-top',
+  ].sort(),
+  'liquid-glass': [
+    ...sharedDraftVariables,
+    '--pui-destructive',
+    '--pui-destructive-foreground',
+  ].sort(),
 };
 function assertDraftPaletteKeys(keys, family, label = family) {
   assert.deepEqual([...keys].sort(), requiredDraftVariables[family], `${label} must be complete`);
@@ -171,7 +187,11 @@ test('both draft family palettes come from source with exactly one variable pref
     'shadcn',
   ]);
   assert.equal(themes['bootstrap-2-3-2'].light['--pui-primary'], '#0044cc');
-  assert.deepEqual(themes['bootstrap-2-3-2'].light, themes['bootstrap-2-3-2'].dark);
+  assert.equal(themes['bootstrap-2-3-2'].dark['--pui-primary'], '#0044cc');
+  assert.equal(themes['bootstrap-2-3-2'].light['--pui-background'], '#ffffff');
+  assert.equal(themes['bootstrap-2-3-2'].dark['--pui-background'], '#161616');
+  assert.equal(themes['bootstrap-2-3-2'].light['--pui-navbar-top'], '#006dcc');
+  assert.equal(themes['bootstrap-2-3-2'].dark['--pui-navbar-top'], '#0055aa');
   assert.equal(themes['liquid-glass'].light['--pui-secondary'], '#ffffff');
   assert.equal(themes['liquid-glass'].dark['--pui-secondary'], '#2c2c2e');
   for (const name of ['bootstrap-2-3-2', 'liquid-glass']) {
@@ -185,11 +205,18 @@ test('both draft family palettes come from source with exactly one variable pref
 
 test('Bootstrap gradients keep their flat fallback and explicit unsupported paint input', () => {
   const tokens = JSON.parse(readFileSync(FIXTURE, 'utf8')).tokens;
-  assert.deepEqual(tokens['bg-[linear-gradient(#08c,#04c)]'], {
+  assert.deepEqual(tokens['bg-[#006dcc_linear-gradient(#08c,#04c)_0_0_repeat-x]'], {
     'background-color': '#006dcc',
     'background-image': 'linear-gradient(to bottom, #08c, #04c)',
+    'background-position': '0 0',
+    'background-repeat': 'repeat-x',
   });
-  assert.equal(tokens['bg-[#04c]']['background-image'], 'none');
+  assert.deepEqual(tokens['bg-[#04c_none_0_0_repeat-x]'], {
+    'background-color': '#04c',
+    'background-image': 'none',
+    'background-position': '0 0',
+    'background-repeat': 'repeat-x',
+  });
   assert.equal(tokens['font-normal']['font-weight'], '400');
   assert.equal(tokens['leading-5']['line-height'], '1.25rem');
   assert.equal(tokens['opacity-65'].opacity, '0.65');
