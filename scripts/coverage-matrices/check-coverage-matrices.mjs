@@ -1,6 +1,9 @@
 import { STARTUP_PRERENDER_IMPORT_ALLOWLIST } from './startup-prerender-imports.mjs';
 import { DIAGNOSTIC_IMPORT_ALLOWLIST } from './diagnostic-imports.mjs';
-import { BROWSER_COMPILER_IMPORT_ALLOWLIST } from './browser-compiler-imports.mjs';
+import {
+  BROWSER_COMPILER_IMPORT_ALLOWLIST,
+  BROWSER_COMPILER_INTERACTIVE_SOURCES,
+} from './browser-compiler-imports.mjs';
 import {
   LIBRARY_CARD_IMPORT_ALLOWLIST,
   LIBRARY_CARD_INTERACTIVE_MATERIAL_SOURCES,
@@ -172,6 +175,12 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   ...LIBRARY_CARD_IMPORT_ALLOWLIST,
   ...DIAGNOSTIC_IMPORT_ALLOWLIST,
   ...BROWSER_COMPILER_IMPORT_ALLOWLIST,
+  // The feedback presence projector is reached by the website's presence
+  // projection. Its imports stay inside Core and the motion sampler it owns.
+  'packages/modules/feedback/src/presence/projector.ts': Object.freeze({
+    sourceSha256: '3a5c3749050071ad5308800c2619c36e37ac56462a5ee34c718971655531e87c',
+    specifiers: Object.freeze(['@proto.ui/core', '../motion/sampler', './sink']),
+  }),
   // The authored Form demo consumes only the public Field request type.
   // Its interactive controller remains owned by the existing blocked demo row.
   'apps/www/src/content/docs/form-validation-demo.shared.ts': Object.freeze({
@@ -456,7 +465,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Public InputShell binding only; neither Search source gains UI acceptance.
   'apps/www/src/components/site-search-composition.ts': Object.freeze({
-    sourceSha256: '5787970b7cb00c1e66b0574cc4a7550524e3bf1a638c02a900136974b8f1afec',
+    sourceSha256: '50828c387006e09d4440ae2027c0824750db76f5f896bc46d056f93fc42cdcd3',
     specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
   }),
   'apps/www/src/components/site-text-recipes.ts': Object.freeze({
@@ -750,7 +759,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
   'apps/www/src/components/site-shadcn-controls.ts': Object.freeze({
-    sourceSha256: 'c515576d70dda5728fb3de3dde2792d522776cbaf621aff24ab0d819e0f56f0f',
+    sourceSha256: '6a338d58c8c2bc73e534799170d180ffb48123aaa3248d6ac0d6b16fb0039f6d',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-bootstrap-2-3-2/button',
@@ -12862,6 +12871,7 @@ function parseSourceBindings(lines, afterIndex, relativePath, issues) {
         !isReviewedOpticalHost &&
         !isReviewedCompilerBrowserSource &&
         !Object.hasOwn(LIBRARY_CARD_INTERACTIVE_MATERIAL_SOURCES, sourcePath) &&
+        !Object.hasOwn(BROWSER_COMPILER_INTERACTIVE_SOURCES, sourcePath) &&
         sourcePath !== WEBSITE_STARTUP_EVENT_SOURCE)
     ) {
       issues.push(
@@ -12915,6 +12925,25 @@ function validateWebsiteSourceBindings(
       } catch {
         issues.push(
           `${relativePath}:${binding.line}: exact startup event source, digest and build owner remain unverified`
+        );
+        continue;
+      }
+    }
+    if (Object.hasOwn(BROWSER_COMPILER_INTERACTIVE_SOURCES, sourcePath)) {
+      const expected = BROWSER_COMPILER_INTERACTIVE_SOURCES[sourcePath];
+      try {
+        assertPromotionModulePath(rootDir, absolutePath);
+        if (
+          !fs.lstatSync(absolutePath).isFile() ||
+          sourceScanDigest(absolutePath) !== expected ||
+          binding.digest !== expected ||
+          binding.ownerIds.length !== 1 ||
+          binding.ownerIds[0] !== 'www.demo.raw-adapter-runtimes'
+        )
+          throw new Error('unexpected browser compiler host bytes or owner');
+      } catch {
+        issues.push(
+          `${relativePath}:${binding.line}: exact browser compiler host source, digest and runtime owner remain unverified`
         );
         continue;
       }

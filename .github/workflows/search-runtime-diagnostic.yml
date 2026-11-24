@@ -52,6 +52,7 @@ jobs:
       - name: Verify the existing bounded production owner
         run: node --test apps/www/scripts/run-search-production-evidence.test.mjs
       - name: Profile the original production journeys without changing their assertions
+        id: production_profile
         timeout-minutes: 10
         env:
           PROTO_UI_SEARCH_RUNTIME_PROFILE: '1'
@@ -64,6 +65,13 @@ jobs:
           # ordinary Sprint 1 acceptance must still run without this flag.
           node apps/www/scripts/run-search-production-evidence.mjs \
             2>&1 | tee "$RUNNER_TEMP/homepage-evidence/search-production.log"
+      - name: Retain scripts and route inputs from the same completed build attempt
+        if: always()
+        env:
+          PROTO_UI_SEARCH_DIAGNOSTIC_RUNNER_OUTCOME: ${{ steps.production_profile.outcome }}
+        run: |
+          node apps/www/scripts/run-search-production-evidence.mjs retain-build \
+            "$RUNNER_TEMP/homepage-evidence/search-production/same-build"
       - name: Retain exact-source CPU, publication and failure evidence
         if: always()
         uses: actions/upload-artifact@v4
