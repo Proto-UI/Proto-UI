@@ -1,11 +1,13 @@
 ---
 title: 'Text'
-description: 'A Bootstrap 2.3.2 typography component supporting all eight independent Base Text presentation axes.'
+description: 'Bootstrap 2.3.2 typography component preserving archived heading metrics, the 20/14 body line-height ratio, and all eight Base Text axes.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Text applies Bootstrap 2.3.2 body, heading, and monospace font stacks and ink tokens across all eight [Base Text](/en/ui-libraries/base/text/) typography axes.
+Bootstrap 2.3.2 Text realizes [Base Text](/en/ui-libraries/base/text/) with classic Helvetica Neue / Arial and Monaco / Menlo font stacks while preserving the archived `2xl` heading scale and `20/14` body line-height rhythm across all eight typography axes.
 
 ## Preview
 
@@ -17,27 +19,129 @@ Bootstrap 2.3.2 Text applies Bootstrap 2.3.2 body, heading, and monospace font s
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
-
-```ts
-import { textRoot, Bootstrap232TextRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/text';
-```
+Currently available from workspace source only; not yet included in the 0.2.0 stable release. Import `textRoot` (also exported as `bootstrap232TextRoot` and `Bootstrap232TextRoot`) from `@proto.ui/prototypes-bootstrap-2-3-2/text`, or generate workspace facades with the `bootstrap-2-3-2-text` CLI target.
 
 ## Usage
 
-- **Typography precedence**: An explicit `leading` overrides the default line-height associated with `size`; removing a prop restores its default.
-- **Color inheritance and selection**: Pass `tone="inherit"` inside a colored `Surface` or button to inherit its foreground ink. Text never overrides `user-select`, preserving natural document selection and control-specific selection policies.
-- **HTML semantics**: Text is purely typographic; wrap or pair with native `h1`, `p`, `label`, `a`, or `button` elements for document and interactive semantics.
+```tsx
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import { bootstrap232TextRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/text';
+
+const Text = createReactAdapter(React)(bootstrap232TextRoot, { rootTag: 'span' });
+
+export function PageHeading() {
+  return (
+    <h2>
+      <Text size="2xl" font="heading" weight="bold" leading="relaxed">
+        Overview
+      </Text>
+    </h2>
+  );
+}
+```
+
+### Preserved Bootstrap 2.3.2 metrics and semantics
+
+- **Archived scale & rhythm**: `size="2xl"` maps to `1.53125rem` (`24.5px` at a 16px root); `leading="normal"` uses the classic `20/14` (`1.4286`) ratio; pairing `size="2xl"` with `leading="relaxed"` resolves to `2.5rem` (`40px`). All metrics scale cleanly in `rem`.
+- **Leading precedence & defaults**: Explicit `leading` values override the composite line-height implied by `size`, while `leading="size"` preserves each size's line box. `leading="tighter"` maps to `1.1` and `tracking="tighter"` maps to `-0.05em`. Removing any prop restores its default.
+- **Color inheritance & selection**: Set `tone="inherit"` inside colored surfaces or buttons so text inherits foreground ink and text-shadow cleanly. Text never overrides `user-select`, keeping prose selectable while respecting interactive control selection policies.
+- **Native semantics**: Wrap with native `h1`–`h6`, `p`, `label`, `a`, or `button` elements for document and interactive semantics.
+
+## Examples
+
+### Archived scale and 20/14 line-height rhythm
+
+Demonstrates `4xl`, `3xl`, archived `2xl` (`24.5px` / `40px`), `xl`, `base` (`20/14` normal leading), `sm`, and `xs`.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-text-scale"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Lead copy, quotes, and inline code
+
+Demonstrates lead intro copy, italic blockquotes, monospace code tokens, underlined links, and strikethrough text.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-text-editorial"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Classic surfaces and foreground inheritance
+
+Compares `tone="inherit"`, `default`, and `muted` over Bootstrap 2.3.2 primary gradient (`solid`), info (`accent`), and classic white (`outline`) surfaces.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-text-tones"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Prop | Values | Default |
-| --- | --- | --- |
-| `size` | `xs` \| `sm` \| `base` \| `lg` \| `xl` \| `2xl` \| `3xl` \| `4xl` \| `5xl` | `base` |
-| `tone` | `default` \| `muted` \| `inherit` | `default` |
-| `weight` | `normal` \| `medium` \| `semibold` \| `bold` | `normal` |
-| `font` | `body` \| `heading` \| `mono` | `body` |
-| `leading` | `tight` \| `snug` \| `normal` \| `relaxed` | `normal` |
-| `tracking` | `normal` \| `tight` | `normal` |
-| `emphasis` | `normal` \| `italic` | `normal` |
-| `decoration` | `none` \| `underline` \| `line-through` | `none` |
+The following props belong to `Root` (`Bootstrap232TextRoot`):
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'size',
+      type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'",
+      default: 'base',
+      description: 'Font size scale; 2xl preserves the archived 1.53125rem (24.5px) step',
+    },
+    {
+      name: 'tone',
+      type: "'default' | 'muted' | 'inherit'",
+      default: 'default',
+      description: 'Ink tone; pass inherit inside colored surfaces or buttons',
+    },
+    {
+      name: 'weight',
+      type: "'normal' | 'medium' | 'semibold' | 'bold'",
+      default: 'normal',
+      description: 'Font weight',
+    },
+    {
+      name: 'font',
+      type: "'body' | 'heading' | 'mono'",
+      default: 'body',
+      description: 'Font stack (Helvetica Neue / Arial or Monaco / Menlo monospace)',
+    },
+    {
+      name: 'leading',
+      type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'",
+      default: 'normal',
+      description:
+        'Line height; normal uses 20/14 ratio, 2xl + relaxed is 2.5rem (40px), tighter is 1.1',
+    },
+    {
+      name: 'tracking',
+      type: "'normal' | 'tight' | 'tighter'",
+      default: 'normal',
+      description: 'Letter spacing; tight maps to -0.025em and tighter maps to -0.05em',
+    },
+    {
+      name: 'emphasis',
+      type: "'normal' | 'italic'",
+      default: 'normal',
+      description: 'Normal or italic font style',
+    },
+    {
+      name: 'decoration',
+      type: "'none' | 'underline' | 'line-through'",
+      default: 'none',
+      description: 'Text decoration line',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-TEXT.yaml', 'P-BASE-TEXT.yaml']}
+/>

@@ -7,7 +7,7 @@ import {
 export const BrutalistSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceRootExposes>({
   name: 'brutalist-surface-root',
   setup(def) {
-    asSurfaceRoot();
+    const inherited = asSurfaceRoot();
     // Raised action surfaces share Button timing, not its semantic owner.
     // Fade keeps its separately governed opacity clock and duration input.
     def.rule({
@@ -40,7 +40,11 @@ export const BrutalistSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceRoo
       when: (w) =>
         w.all(
           w.prop('fade').eq(true),
-          w.any(w.prop('transitionState').eq('closed'), w.prop('transitionState').eq('leaving'))
+          w.any(
+            w.prop('transitionState').eq('closed'),
+            w.prop('transitionState').eq('preparing'),
+            w.prop('transitionState').eq('leaving')
+          )
         ),
       intent: (i) => i.feedback.style.use(tw('opacity-0')),
     });
@@ -82,11 +86,11 @@ export const BrutalistSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceRoo
     });
     def.rule({
       when: (w) => w.prop('border').eq('all'),
-      intent: (i) => i.feedback.style.use(tw('border-2 border-black')),
+      intent: (i) => i.feedback.style.use(tw('border-2 border-border')),
     });
     def.rule({
       when: (w) => w.prop('border').eq('bottom'),
-      intent: (i) => i.feedback.style.use(tw('border-b-2 border-black')),
+      intent: (i) => i.feedback.style.use(tw('border-b-2 border-border')),
     });
     def.rule({
       when: (w) => w.prop('border').eq('none'),
@@ -110,7 +114,7 @@ export const BrutalistSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceRoo
     });
     def.rule({
       when: (w) => w.prop('variant').eq('accent'),
-      intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground')),
+      intent: (i) => i.feedback.style.use(tw('bg-canary text-canary-foreground')),
     });
     def.rule({
       when: (w) => w.prop('variant').eq('solid'),
@@ -143,11 +147,7 @@ export const BrutalistSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceRoo
         ),
       intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
     });
-    def.rule({
-      when: (w) => w.all(w.prop('elevation').eq('none'), w.prop('pressed').eq(true)),
-      intent: (i) => i.feedback.style.use(tw('translate-y-px')),
-    });
-    return (renderer) => renderer.r.slot();
+    return inherited.render;
   },
 });
 export default BrutalistSurfaceRoot;

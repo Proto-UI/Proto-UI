@@ -7,8 +7,13 @@ import {
 import { definePrototype, tw } from '@proto.ui/core';
 import { asButton, type ButtonExposes } from '@proto.ui/prototypes-base/button';
 
+export type LiquidGlassButtonVariant = 'regular' | 'prominent' | 'destructive';
+export type LiquidGlassButtonSize = 'sm' | 'default' | 'lg' | 'icon';
+
 export interface ButtonProjectionProps {
-  variant?: 'regular' | 'prominent';
+  variant?: LiquidGlassButtonVariant;
+  size?: LiquidGlassButtonSize;
+  wrap?: boolean;
   disabled?: boolean;
   /** Auto enhances only when all live preference/support inputs are affirmative. */
   material?: 'auto' | 'opaque';
@@ -16,30 +21,74 @@ export interface ButtonProjectionProps {
 
 // Explicit optical intent uses the shared host provider. The same final opaque
 // fill remains available without a source; CSS blur is not a substitute.
-const FILLS = {
+const FILLS: Record<LiquidGlassButtonVariant, string> = {
   regular: 'bg-secondary text-secondary-foreground',
   prominent: 'bg-primary text-primary-foreground',
+  destructive: 'bg-destructive text-destructive-foreground',
+};
+
+const SIZES: Record<LiquidGlassButtonSize, string> = {
+  sm: 'px-3.5 py-1.5 text-xs gap-1.5',
+  default: 'px-5 py-2 text-sm gap-2',
+  lg: 'px-6 py-2.5 text-base gap-2',
+  icon: 'size-9 p-0',
 };
 
 export default definePrototype<ButtonProjectionProps, ButtonExposes>({
   name: 'liquid-glass-button',
   setup(def) {
     def.props.define({
-      variant: { type: 'enum', options: ['regular', 'prominent'], empty: 'fallback' },
+      variant: {
+        type: 'enum',
+        options: ['regular', 'prominent', 'destructive'],
+        empty: 'fallback',
+      },
+      size: { type: 'enum', options: ['sm', 'default', 'lg', 'icon'], empty: 'fallback' },
+      wrap: { type: 'boolean', empty: 'fallback' },
       disabled: { type: 'boolean', empty: 'fallback' },
       material: { type: 'enum', options: ['auto', 'opaque'], empty: 'fallback' },
     });
-    def.props.setDefaults({ variant: 'regular', disabled: false, material: 'auto' });
-    const state = asButton().stateHandles;
+    def.props.setDefaults({
+      variant: 'regular',
+      size: 'default',
+      wrap: false,
+      disabled: false,
+      material: 'auto',
+    });
+    const inherited = asButton();
+    const state = inherited.stateHandles;
     if (!state) throw new Error('[liquid-glass-button] Base Button states are required.');
     const { hovered, pressed, focusVisible, disabled } = state;
 
     def.feedback.style.use(
       tw(
-        'inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm'
+        'inline-flex box-border shrink-0 items-center justify-center rounded-full border border-border font-medium select-none cursor-pointer shadow-sm'
       )
     );
-    (Object.keys(FILLS) as Array<keyof typeof FILLS>).forEach((variant) => {
+    def.rule({
+      when: (w) => w.meta('preference.reducedMotion').eq('no-preference'),
+      intent: (i) => i.feedback.style.use(tw('transition-all duration-150')),
+    });
+    def.rule({
+      when: (w) => w.not(w.meta('preference.reducedMotion').eq('no-preference')),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
+    (Object.keys(SIZES) as LiquidGlassButtonSize[]).forEach((size) => {
+      def.rule({
+        when: (w) => w.prop('size').eq(size),
+        intent: (i) => i.feedback.style.use(tw(SIZES[size])),
+      });
+    });
+    def.rule({
+      when: (w) => w.any(w.prop('wrap').eq(false), w.prop('size').eq('icon')),
+      intent: (i) => i.feedback.style.use(tw('whitespace-nowrap')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('wrap').eq(true), w.not(w.prop('size').eq('icon'))),
+      intent: (i) =>
+        i.feedback.style.use(tw('whitespace-normal min-w-0 max-w-full wrap-anywhere text-center')),
+    });
+    (Object.keys(FILLS) as LiquidGlassButtonVariant[]).forEach((variant) => {
       def.rule({
         when: (w) => w.prop('variant').eq(variant),
         intent: (i) => i.feedback.style.use(tw(FILLS[variant])),
@@ -62,7 +111,7 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
       fallback: { fill: 'style', foreground: 'style' },
     });
     // Prominence selects only style-owned tint; Base remains the sole input owner.
-    for (const variant of ['regular', 'prominent'] as const)
+    for (const variant of ['regular', 'prominent', 'destructive'] as const)
       for (const phase of [false, true]) {
         def.rule({
           when: (w) =>
@@ -76,7 +125,7 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
             i.feedback.material.use({
               intent: 'liquid-glass',
               variant: 'regular',
-              ...(variant === 'prominent' ? { tint: 'style-fill' as const } : {}),
+              ...(variant !== 'regular' ? { tint: 'style-fill' as const } : {}),
               deformation: { kind: 'press', phase: phase ? 'pressed' : 'rest', contact: 'pointer' },
             }),
         });
@@ -93,5 +142,6 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
       when: (w) => w.state(disabled).eq(true),
       intent: (i) => i.feedback.style.use(tw(COMMAND_DISABLED)),
     });
+    return inherited.render;
   },
 });

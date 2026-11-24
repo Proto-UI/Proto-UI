@@ -1,3 +1,3 @@
-import { createControlLabelDemo } from '../../../components/PrototypePreviewer/control-label-demo';
+import { createStyledControlLabelDemo } from '../demo_components/label/label-examples.shared';
 
-export default createControlLabelDemo('brutalist-label-root', 'brutalist');
+export default createStyledControlLabelDemo('brutalist');

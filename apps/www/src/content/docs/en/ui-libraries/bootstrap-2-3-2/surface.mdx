@@ -4,12 +4,12 @@ description: 'A Bootstrap 2.3.2 passive visual surface driven by externally supp
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Surface is a visual-only container implementing [Base Surface](/en/ui-libraries/base/surface/) in Bootstrap 2.3.2 styling. It applies backgrounds, borders, corners, and elevation while leaving semantics, focus, and pointer handling to your interactive controls.
+Surface is a visual-only container implementing [Base Surface](/en/ui-libraries/base/surface/) in classic Bootstrap 2.3.2 styling, supporting 4px corners, raised thumbnails, bevelled button paint, and blue navbar context adaptation while keeping semantics and interaction on the enclosing control.
 
 ## Preview
-
-The demo passes explicit visual states to compare variants, `colorContext="navbar"` on a blue navbar frame, and `actionProfile="button"`.
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-surface"
@@ -19,7 +19,9 @@ The demo passes explicit visual states to compare variants, `colorContext="navba
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Available inside the workspace from `@proto.ui/prototypes-bootstrap-2-3-2/surface` (or the package root); not published to the public CLI registry.
+
+## Usage
 
 ```tsx
 import * as React from 'react';
@@ -30,31 +32,91 @@ const Surface = createReactAdapter(React)(surfaceRoot);
 
 export function Summary() {
   return (
-    <Surface variant="muted" radius="md" border="none">
-      <div style={{ padding: '1rem' }}>Saved locally</div>
+    <Surface variant="outline" elevation="raised">
+      <div className="p-4">Saved locally</div>
     </Surface>
   );
 }
 ```
 
-## Usage
+### Presets and passive boundaries
 
-- **Passive presentation**: `hovered`, `focusVisible`, `pressed`, and `current` are display inputs supplied by an enclosing semantic control. Surface adds no ARIA role, event handler, or Tab stop—compose real `Button` or native `<a>` elements for interaction. Use `tone="inherit"` on nested `Text` children to inherit foreground color.
-- **Bootstrap 2.3.2 presets**:
-  - `actionProfile="button"`: Applies passive button styling while the enclosing control owns interaction.
-  - `colorContext="navbar"`: Switches transparent surfaces (`variant="transparent"`, `actionProfile="none"`) to white ink and a white focus ring for Bootstrap 2.3.2's blue navbar; ignored by other variants and `actionProfile="button"`.
-- **Fade transitions**: Pass `fade={true}` alongside `transitionState` from [Transition](/en/ui-libraries/base/transition/) to map `closed`/`leaving` to opacity `0` and `entering`/`entered` to opacity `1`. Set `--pui-surface-transition-duration` (default `0ms`) to control duration; opacity changes do not unmount or disable content on their own.
+- `hovered`, `focusVisible`, `pressed`, and `current` are visual inputs supplied by an enclosing control. Surface adds no ARIA role, event listener, or Tab stop; pass `tone="inherit"` to nested `Text` children to inherit foreground color.
+- `actionProfile="button"` applies passive `.btn` / `.btn-primary` gradient styling (`solid` selects primary paint; other opaque variants select default `.btn` paint).
+- `colorContext="navbar"` applies only when `variant="transparent"` and `actionProfile="none"`, switching to white text, dark translucent hover/pressed fills, and a white focus ring for blue navbars.
+- Enable `fade` to map `transitionState` from [Transition](/en/ui-libraries/base/transition/) to opacity (`closed` and `leaving` -> `0`; `entering` and `entered` -> `1`) using `--pui-surface-transition-duration` (default `0ms`).
+
+## Examples
+
+### Variants and thumbnail elevation
+
+Compares default borders, raised thumbnail framing (`outline` + `raised`), wells, info accents, primary bevels, and modal scrims.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-surface-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Blue navbar context
+
+Uses `colorContext="navbar"` on a blue navbar to compare resting, hovered, current, pressed, and focused items.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-surface-navbar"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Passive button profile and fade
+
+Showcases `actionProfile="button"` across resting, hovered, focused, and pressed states alongside a Transition-driven fade panel.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-surface-action"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Prop | Values | Default | Description |
-| --- | --- | --- | --- |
-| `variant` | `transparent` \| `outline` \| `secondary` \| `muted` \| `accent` \| `solid` \| `scrim` | `outline` | Background and foreground treatment |
-| `radius` | `default` \| `none` \| `sm` \| `md` \| `lg` \| `xl` \| `full` | `default` | Corner radius token |
-| `border` | `all` \| `bottom` \| `none` | `all` | Border placement |
-| `elevation` | `none` \| `raised` | `none` | Shadow elevation |
-| `transitionState` | `closed` \| `entering` \| `entered` \| `leaving` | `entered` | Phase supplied by an enclosing Transition |
-| `fade` | `boolean` | `false` | Maps `transitionState` to opacity |
-| `hovered` / `focusVisible` / `pressed` / `current` | `boolean` | `false` | Externally supplied visual states |
-| `actionProfile` | `none` \| `button` | `none` | Bootstrap 2.3.2 preset for passive button paint |
-| `colorContext` | `default` \| `navbar` | `default` | Bootstrap 2.3.2 preset for white ink/focus on blue navbars |
+The following props belong to `Root` (removing a prop restores its default):
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'transparent' | 'outline' | 'secondary' | 'muted' | 'accent' | 'solid' | 'scrim'",
+      default: 'outline',
+    },
+    {
+      name: 'radius',
+      type: "'default' | 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'",
+      default: 'default',
+    },
+    { name: 'border', type: "'all' | 'bottom' | 'none'", default: 'all' },
+    { name: 'elevation', type: "'none' | 'raised'", default: 'none' },
+    { name: 'actionProfile', type: "'none' | 'button'", default: 'none' },
+    { name: 'colorContext', type: "'default' | 'navbar'", default: 'default' },
+    {
+      name: 'transitionState',
+      type: "'closed' | 'entering' | 'entered' | 'leaving'",
+      default: 'entered',
+    },
+    { name: 'fade', type: 'boolean', default: 'false' },
+    { name: 'hovered', type: 'boolean', default: 'false' },
+    { name: 'focusVisible', type: 'boolean', default: 'false' },
+    { name: 'pressed', type: 'boolean', default: 'false' },
+    { name: 'current', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+`@proto.ui/prototypes-bootstrap-2-3-2/surface` also exports `Bootstrap232SurfaceRootProps`, `SurfaceRootProps`, `SurfaceRootExposes`, and the passive Web action composition helper `bootstrap232ActionAppearance` (`Bootstrap232ActionAppearanceOptions`).
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-SURFACE.yaml', 'P-BASE-SURFACE.yaml']}
+/>

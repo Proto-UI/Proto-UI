@@ -102,6 +102,61 @@ import tabsProfileSwitchDemo from '../src/content/docs/demo_components/tabs/demo
 import { codeMap as codeMap1 } from '../src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode';
 import { codeMap as codeMap2 } from '../src/content/docs/demo_components/shadcn-hover-card/shadcnHoverCardCode';
 import { codeMap as codeMap3 } from '../src/content/docs/demo_components/tabs/tabsCode';
+import w1ButtonIconDemo from '../src/content/docs/demo_components/button-examples/demo-shadcn-button-icon.demo';
+import w1ButtonLinkDemo from '../src/content/docs/demo_components/button-examples/demo-shadcn-button-link.demo';
+import w1ButtonLoadingDemo from '../src/content/docs/demo_components/button-examples/demo-shadcn-button-loading.demo';
+import w1ButtonRtlDemo from '../src/content/docs/demo_components/button-examples/demo-shadcn-button-rtl.demo';
+import w1ButtonStyleProfilesDemo from '../src/content/docs/demo_components/button-examples/demo-shadcn-button-style-profiles.demo';
+import w1ButtonWithIconDemo from '../src/content/docs/demo_components/button-examples/demo-shadcn-button-with-icon.demo';
+import w1ButtonWrapDemo from '../src/content/docs/demo_components/button-examples/demo-shadcn-button-wrap.demo';
+import w1CardDensityDemo from '../src/content/docs/demo_components/card/demo-shadcn-card-density.demo';
+import w1CardDividersDemo from '../src/content/docs/demo_components/card/demo-shadcn-card-dividers.demo';
+import w1CardImageDemo from '../src/content/docs/demo_components/card/demo-shadcn-card-image.demo';
+import w1CardLoginDemo from '../src/content/docs/demo_components/card/demo-shadcn-card-login.demo';
+import w1CardRtlDemo from '../src/content/docs/demo_components/card/demo-shadcn-card-rtl.demo';
+import w1CardSmallDemo from '../src/content/docs/demo_components/card/demo-shadcn-card-small.demo';
+import w1ImageA11yDemo from '../src/content/docs/demo_components/image/demo-shadcn-image-a11y.demo';
+import w1ImageFitDemo from '../src/content/docs/demo_components/image/demo-shadcn-image-fit.demo';
+import w1ImageLoadingDemo from '../src/content/docs/demo_components/image/demo-shadcn-image-loading.demo';
+import w1ImageRadiusDemo from '../src/content/docs/demo_components/image/demo-shadcn-image-radius.demo';
+import w1LabelBasicDemo from '../src/content/docs/demo_components/label/demo-shadcn-label-basic.demo';
+import w1LabelFieldDemo from '../src/content/docs/demo_components/label/demo-shadcn-label-field.demo';
+import w1LabelModesDemo from '../src/content/docs/demo_components/label/demo-shadcn-label-modes.demo';
+import w1LabelRtlDemo from '../src/content/docs/demo_components/label/demo-shadcn-label-rtl.demo';
+import w1SeparatorListDemo from '../src/content/docs/demo_components/separator/demo-shadcn-separator-list.demo';
+import w1SeparatorMenuDemo from '../src/content/docs/demo_components/separator/demo-shadcn-separator-menu.demo';
+import w1SeparatorRtlDemo from '../src/content/docs/demo_components/separator/demo-shadcn-separator-rtl.demo';
+import w1SeparatorVerticalDemo from '../src/content/docs/demo_components/separator/demo-shadcn-separator-vertical.demo';
+import w1StyleScopeDemo from '../src/content/docs/demo_components/style-scope/demo-shadcn-style-scope.demo';
+import w1StyleScopeCompositeDemo from '../src/content/docs/demo_components/style-scope/demo-shadcn-style-scope-composite.demo';
+import w1StyleScopeNestingDemo from '../src/content/docs/demo_components/style-scope/demo-shadcn-style-scope-nesting.demo';
+import w1StyleScopeStateDemo from '../src/content/docs/demo_components/style-scope/demo-shadcn-style-scope-state-preservation.demo';
+import w1SurfaceActionProfilesDemo from '../src/content/docs/demo_components/surface/demo-shadcn-surface-action-profiles.demo';
+import w1SurfaceFadeDemo from '../src/content/docs/demo_components/surface/demo-shadcn-surface-fade.demo';
+import w1SurfaceGeometryDemo from '../src/content/docs/demo_components/surface/demo-shadcn-surface-geometry.demo';
+import w1SurfaceStatesDemo from '../src/content/docs/demo_components/surface/demo-shadcn-surface-states.demo';
+import w1SurfaceVariantsDemo from '../src/content/docs/demo_components/surface/demo-shadcn-surface-variants.demo';
+import w1TextActionProfilesDemo from '../src/content/docs/demo_components/text/demo-shadcn-text-action-profiles.demo';
+import w1TextEditorialDemo from '../src/content/docs/demo_components/text/demo-shadcn-text-editorial.demo';
+import w1TextRtlDemo from '../src/content/docs/demo_components/text/demo-shadcn-text-rtl.demo';
+import w1TextScaleDemo from '../src/content/docs/demo_components/text/demo-shadcn-text-scale.demo';
+import w1TextTonesDemo from '../src/content/docs/demo_components/text/demo-shadcn-text-tones.demo';
+import w1ToggleControlledDemo from '../src/content/docs/demo_components/toggle/demo-shadcn-toggle-controlled.demo';
+import w1ToggleDisabledDemo from '../src/content/docs/demo_components/toggle/demo-shadcn-toggle-disabled.demo';
+import w1ToggleOutlineDemo from '../src/content/docs/demo_components/toggle/demo-shadcn-toggle-outline.demo';
+import w1ToggleRtlDemo from '../src/content/docs/demo_components/toggle/demo-shadcn-toggle-rtl.demo';
+import w1ToggleSizesDemo from '../src/content/docs/demo_components/toggle/demo-shadcn-toggle-sizes.demo';
+import w1ToggleWithTextDemo from '../src/content/docs/demo_components/toggle/demo-shadcn-toggle-with-text.demo';
+import w1ToggleGroupCustomDemo from '../src/content/docs/demo_components/toggle-group/demo-shadcn-toggle-group-custom.demo';
+import w1ToggleGroupDisabledDemo from '../src/content/docs/demo_components/toggle-group/demo-shadcn-toggle-group-disabled.demo';
+import w1ToggleGroupOutlineDemo from '../src/content/docs/demo_components/toggle-group/demo-shadcn-toggle-group-outline.demo';
+import w1ToggleGroupSizesDemo from '../src/content/docs/demo_components/toggle-group/demo-shadcn-toggle-group-sizes.demo';
+import w1ToggleGroupSpacingDemo from '../src/content/docs/demo_components/toggle-group/demo-shadcn-toggle-group-spacing.demo';
+import w1ToggleGroupVerticalDemo from '../src/content/docs/demo_components/toggle-group/demo-shadcn-toggle-group-vertical.demo';
+import w1ToolbarDisabledDemo from '../src/content/docs/demo_components/toolbar/demo-shadcn-toolbar-disabled.demo';
+import w1ToolbarSizesDemo from '../src/content/docs/demo_components/toolbar/demo-shadcn-toolbar-sizes.demo';
+import w1ToolbarVariantsDemo from '../src/content/docs/demo_components/toolbar/demo-shadcn-toolbar-variants.demo';
+import w1ToolbarVerticalDemo from '../src/content/docs/demo_components/toolbar/demo-shadcn-toolbar-vertical.demo';
 
 const demos: ReadonlyArray<readonly [string, DemoSpec]> = [
   ['demo-button', demo0],
@@ -179,9 +234,74 @@ const demos: ReadonlyArray<readonly [string, DemoSpec]> = [
   ['demo-shadcn-form-validation', formValidationDemo],
   ['demo-shadcn-select-input', selectInputDemo],
   ['demo-shadcn-field-choices', fieldChoicesDemo],
+  ['demo-shadcn-button-icon', w1ButtonIconDemo],
+  ['demo-shadcn-button-link', w1ButtonLinkDemo],
+  ['demo-shadcn-button-loading', w1ButtonLoadingDemo],
+  ['demo-shadcn-button-rtl', w1ButtonRtlDemo],
+  ['demo-shadcn-button-style-profiles', w1ButtonStyleProfilesDemo],
+  ['demo-shadcn-button-with-icon', w1ButtonWithIconDemo],
+  ['demo-shadcn-button-wrap', w1ButtonWrapDemo],
+  ['demo-shadcn-card-density', w1CardDensityDemo],
+  ['demo-shadcn-card-dividers', w1CardDividersDemo],
+  ['demo-shadcn-card-image', w1CardImageDemo],
+  ['demo-shadcn-card-login', w1CardLoginDemo],
+  ['demo-shadcn-card-rtl', w1CardRtlDemo],
+  ['demo-shadcn-card-small', w1CardSmallDemo],
+  ['demo-shadcn-image-a11y', w1ImageA11yDemo],
+  ['demo-shadcn-image-fit', w1ImageFitDemo],
+  ['demo-shadcn-image-loading', w1ImageLoadingDemo],
+  ['demo-shadcn-image-radius', w1ImageRadiusDemo],
+  ['demo-shadcn-label-basic', w1LabelBasicDemo],
+  ['demo-shadcn-label-field', w1LabelFieldDemo],
+  ['demo-shadcn-label-modes', w1LabelModesDemo],
+  ['demo-shadcn-label-rtl', w1LabelRtlDemo],
+  ['demo-shadcn-separator-list', w1SeparatorListDemo],
+  ['demo-shadcn-separator-menu', w1SeparatorMenuDemo],
+  ['demo-shadcn-separator-rtl', w1SeparatorRtlDemo],
+  ['demo-shadcn-separator-vertical', w1SeparatorVerticalDemo],
+  ['demo-shadcn-style-scope', w1StyleScopeDemo],
+  ['demo-shadcn-style-scope-composite', w1StyleScopeCompositeDemo],
+  ['demo-shadcn-style-scope-state-preservation', w1StyleScopeStateDemo],
+  ['demo-shadcn-surface-action-profiles', w1SurfaceActionProfilesDemo],
+  ['demo-shadcn-surface-fade', w1SurfaceFadeDemo],
+  ['demo-shadcn-surface-geometry', w1SurfaceGeometryDemo],
+  ['demo-shadcn-surface-states', w1SurfaceStatesDemo],
+  ['demo-shadcn-surface-variants', w1SurfaceVariantsDemo],
+  ['demo-shadcn-text-action-profiles', w1TextActionProfilesDemo],
+  ['demo-shadcn-text-editorial', w1TextEditorialDemo],
+  ['demo-shadcn-text-rtl', w1TextRtlDemo],
+  ['demo-shadcn-text-scale', w1TextScaleDemo],
+  ['demo-shadcn-text-tones', w1TextTonesDemo],
+  ['demo-shadcn-toggle-controlled', w1ToggleControlledDemo],
+  ['demo-shadcn-toggle-disabled', w1ToggleDisabledDemo],
+  ['demo-shadcn-toggle-outline', w1ToggleOutlineDemo],
+  ['demo-shadcn-toggle-rtl', w1ToggleRtlDemo],
+  ['demo-shadcn-toggle-sizes', w1ToggleSizesDemo],
+  ['demo-shadcn-toggle-with-text', w1ToggleWithTextDemo],
+  ['demo-shadcn-toggle-group-custom', w1ToggleGroupCustomDemo],
+  ['demo-shadcn-toggle-group-disabled', w1ToggleGroupDisabledDemo],
+  ['demo-shadcn-toggle-group-outline', w1ToggleGroupOutlineDemo],
+  ['demo-shadcn-toggle-group-sizes', w1ToggleGroupSizesDemo],
+  ['demo-shadcn-toggle-group-spacing', w1ToggleGroupSpacingDemo],
+  ['demo-shadcn-toggle-group-vertical', w1ToggleGroupVerticalDemo],
+  ['demo-shadcn-toolbar-disabled', w1ToolbarDisabledDemo],
+  ['demo-shadcn-toolbar-sizes', w1ToolbarSizesDemo],
+  ['demo-shadcn-toolbar-variants', w1ToolbarVariantsDemo],
+  ['demo-shadcn-toolbar-vertical', w1ToolbarVerticalDemo],
 ];
 
 const profileExamples = [
+  {
+    id: 'demo-shadcn-style-scope-nesting',
+    page: 'style-scope.mdx',
+    demo: w1StyleScopeNestingDemo,
+    profiles: [
+      ['shadcn-style-scope', 'rhea'],
+      ['shadcn-style-scope', 'rhea'],
+      ['shadcn-style-scope', 'new-york'],
+      ['shadcn-card-root', 'new-york-v4'],
+    ],
+  },
   {
     id: 'demo-shadcn-tabs-profile-switch',
     page: 'tabs.mdx',
@@ -305,7 +425,7 @@ describe('ordinary Shadcn documentation demo policy', () => {
   it('covers every actual Shadcn page demo ID in each locale', () => {
     const ordinaryIds = demos.map(([id]) => id);
     const expected = [...ordinaryIds, ...profileExamples.map(({ id }) => id)].sort();
-    expect(expected).toHaveLength(81);
+    expect(expected).toHaveLength(136);
     for (const locale of ['en', 'zh-cn']) {
       const found = new Set<string>();
       const directory = resolve(

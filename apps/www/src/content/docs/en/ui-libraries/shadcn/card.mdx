@@ -1,6 +1,6 @@
 ---
 title: Card
-description: A Shadcn-styled card surface with header, content, and footer sections.
+description: A Shadcn-styled card container with header, content, and footer sections.
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -12,35 +12,193 @@ A passive, four-part container for grouping related content into `Root`, `Header
 
 ## Preview
 
-<PrototypePreviewer demoId="demo-shadcn-card" initialRuntime="wc" />
+<PrototypePreviewer
+  demoId="demo-shadcn-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## Installation
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-card" manager="npm" />
+<InstallCommandCard
+  manager="npm"
+  commands={{
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-card',
+    npm: 'npx @proto.ui/cli@latest add wc shadcn-card',
+    yarn: 'yarn dlx @proto.ui/cli@latest add wc shadcn-card',
+    bun: 'bunx @proto.ui/cli@latest add wc shadcn-card',
+  }}
+/>
 
-Replace `wc` with `react`, `vue`, or `vue2` to generate the local facade for your framework.
-
-You can also import `ShadcnCardRoot`, `ShadcnCardHeader`, `ShadcnCardContent`, and `ShadcnCardFooter` (or their lowercase aliases) directly from `@proto.ui/prototypes-shadcn/card`.
+Replace `wc` with `react`, `vue`, or `vue2` to generate the local facade for your framework. You can also import `ShadcnCardRoot`, `ShadcnCardHeader`, `ShadcnCardContent`, and `ShadcnCardFooter` (or their lowercase aliases) directly from `@proto.ui/prototypes-shadcn/card`.
 
 <h2 id="card-contract">Usage</h2>
 
-- **Structure and typography**: `Header`, `Content`, and `Footer` each manage their own section spacing. Compose native headings and paragraphs inside them, or pair with [Text](../text/) using `tone="inherit"` for titles/body and `tone="muted"` for secondary descriptions.
-- **Style presets**: Without an explicit selection, `Root` inherits the nearest [Style Scope](../style-scope/) and falls back to New York (`rounded-xl`, border, 24px gap/padding, 8px Header gap). Under **Shadcn Rhea**, it uses a foreground ring, theme-capped radius, 20px gap/padding, and a 6px Header gap.
-- **Passive semantics**: All four parts are purely presentational with no extra ARIA roles, focus stops, or events; links and buttons inside the card keep their own behavior.
+```tsx
+import {
+  ShadcnCardRoot,
+  ShadcnCardHeader,
+  ShadcnCardContent,
+  ShadcnCardFooter,
+} from '@proto.ui/prototypes-shadcn/card';
+```
+
+```tsx
+<ShadcnCardRoot styleProfile="rhea">
+  <ShadcnCardHeader>
+    <h3 className="text-base font-medium">Card Title</h3>
+    <p className="text-sm text-muted-foreground">Card Description</p>
+  </ShadcnCardHeader>
+  <ShadcnCardContent>
+    <p className="text-sm">Card Content</p>
+  </ShadcnCardContent>
+  <ShadcnCardFooter>
+    <p className="text-sm">Card Footer</p>
+  </ShadcnCardFooter>
+</ShadcnCardRoot>
+```
+
+Composition:
+
+```text
+ShadcnCardRoot
+├── ShadcnCardHeader
+├── ShadcnCardContent
+└── ShadcnCardFooter
+```
+
+- **Structure and typography**: `Header`, `Content`, and `Footer` manage horizontal insets and section rhythm. Render native headings and paragraphs inside them, or compose [Text](../text/) with `size="base"`, `weight="medium"`, `tone="inherit"` for titles and `size="sm"`, `tone="muted"` for secondary descriptions.
+- **Style presets**: Without an explicit selection, `Root` inherits the nearest [Style Scope](../style-scope/) and falls back to `new-york-v4` (`rounded-xl`, border, 24px spacing, 8px Header gap). Under **Shadcn Rhea**, it uses a hairline foreground ring, theme-capped 24px radius, 20px default spacing, and compact 16px `sm` density.
+- **Passive semantics**: All four parts are purely presentational with no extra ARIA roles, focus stops, or events; links, inputs, and buttons inside the card keep their own behavior.
+
+## Examples
+
+### Login Form
+
+Compose `Header` actions, paired `Label` / `Input` fields, and full-width `Footer` buttons into a complete sign-in card.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-card-login"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Size
+
+Set `size="sm"` on `Root` under **Shadcn Rhea** to switch every card section to compact 16px spacing and insets.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-card-small"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Dividers
+
+Set `divider={true}` on `Header` and `Footer` to render section dividers with matching inner padding for scrollable agreements or structured panels.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-card-dividers"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Image
+
+Place a cover image before `Header` and add `pt-0` on `Root` so the top edge clips cleanly to the **Shadcn Rhea** rounded frame.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-card-image"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Density Comparison
+
+Compare `size="default"` (20px) and `size="sm"` (16px) side by side with section dividers enabled.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-card-density"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Set `dir="rtl"` on the container and use logical utilities such as `ms-auto` so card headers, forms, and actions adapt to right-to-left scripts.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-card-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
+
+### ShadcnCardRoot
+
+Root card container that also defines the style and density boundary for nested parts.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'size', type: "'default' | 'sm'", default: 'default' },
+    {
+      name: 'styleProfile',
+      type: "'rhea' | 'new-york-v4' | 'new-york' | 'inherit'",
+      default: "'inherit' → nearest scope → 'new-york-v4'",
+    },
+    { name: 'size', type: "'default' | 'sm'", default: "'default'" },
+  ]}
+/>
+
+### ShadcnCardHeader
+
+Header region for titles, descriptions, and header actions.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: "'rhea' | 'new-york-v4' | 'new-york' | 'inherit'",
+      default: "'inherit'",
+    },
     { name: 'divider', type: 'boolean', default: 'false' },
   ]}
 />
 
-- `size` belongs to `Root`.
-- `divider` belongs to `Header` and `Footer`.
-- `Content` has no additional props, and none of the four parts emit events.
+### ShadcnCardContent
+
+Main body region providing horizontal padding aligned with header and footer.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: "'rhea' | 'new-york-v4' | 'new-york' | 'inherit'",
+      default: "'inherit'",
+    },
+  ]}
+/>
+
+### ShadcnCardFooter
+
+Footer region for actions and secondary metadata.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: "'rhea' | 'new-york-v4' | 'new-york' | 'inherit'",
+      default: "'inherit'",
+    },
+    { name: 'divider', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+All four parts are passive presentational slots and emit no custom events or exposed methods.
 
 ## References
 

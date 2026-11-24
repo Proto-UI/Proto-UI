@@ -1,42 +1,170 @@
 ---
 title: Card
-description: '带 2px 黑色外框与 4px 硬黑阴影的 Brutalist 静态内容分组卡片组件。'
+description: '带 2px 黑色外框、5px 圆角与 4px 硬黑阴影的 Brutalist 静态卡片容器组件。'
 sidebar:
   order: 4
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Card 是用于视觉分组内容的静态面板组件，由 5px 圆角、`2px` 黑色外框与 4px 硬黑阴影构成。
+Brutalist Card 是用于视觉分组内容的静态面板组件，采用 5px 圆角（`rounded-base`）、`2px` 黑色外框与 4px 零模糊硬黑阴影，支持默认与紧凑尺寸以及可选的区域分隔线。
 
 ## 预览
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-card" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-card"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+<InstallCommandCard
+  manager="npm"
+  commands={{
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc brutalist-card',
+    npm: 'npx @proto.ui/cli@latest add wc brutalist-card',
+    yarn: 'yarn dlx @proto.ui/cli@latest add wc brutalist-card',
+    bun: 'bunx @proto.ui/cli@latest add wc brutalist-card',
+  }}
+/>
 
-- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-card`
+把 `wc` 替换为 `react`、`vue` 或 `vue2` 即可生成对应框架封装；当前亦可在源码工作区直接从 `@proto.ui/prototypes-brutalist/card` 导入 `BrutalistCardRoot`、`BrutalistCardHeader`、`BrutalistCardContent` 与 `BrutalistCardFooter`。
 
-## 用法
+<h2 id="usage">用法</h2>
 
-Card 提供 `Root`、`Header`、`Content` 和 `Footer` 四个部件：
+```tsx
+import {
+  BrutalistCardRoot,
+  BrutalistCardHeader,
+  BrutalistCardContent,
+  BrutalistCardFooter,
+} from '@proto.ui/prototypes-brutalist/card';
+```
 
-- **Root**：外层容器，提供 5px 圆角、`2px` 黑色外框与 4px 偏移硬阴影，本身为被动布局容器。
-- **Header / Footer**：负责头部与底部区域排布和间距，默认不加分段边框。
-- **Content**：提供主体内容区域的水平间距。
+```tsx
+<BrutalistCardRoot>
+  <BrutalistCardHeader>
+    <div className="flex flex-col gap-1">
+      <h3 className="font-heading text-base font-bold">Card Title</h3>
+      <p className="text-sm text-muted-foreground">Card Description</p>
+    </div>
+  </BrutalistCardHeader>
+  <BrutalistCardContent>
+    <p className="text-sm">Card Content</p>
+  </BrutalistCardContent>
+  <BrutalistCardFooter>
+    <p className="text-xs text-muted-foreground">Card Footer</p>
+  </BrutalistCardFooter>
+</BrutalistCardRoot>
+```
 
-标题与说明直接使用普通文本元素即可；如需在卡片内放置交互操作，请在内部组合 `Button` 或链接组件。
+结构组合方式：
+
+```text
+BrutalistCardRoot
+├── BrutalistCardHeader
+├── BrutalistCardContent
+└── BrutalistCardFooter
+```
+
+- **排版与几何**：`Root` 作为抬起型面板保持 5px 圆角、`2px` 黑色外框与 4px 静止硬黑阴影（不添加按压位移）。标题推荐使用 `font-heading font-bold`（DM Sans 700），正文与辅助信息保留 `font-sans font-medium`。
+- **尺寸与分隔线**：`Root` 支持 `size="sm"`（16px 间距与内边距）；`Header` 与 `Footer` 默认不加分段边框，按需传入 `divider={true}` 启用 `2px` 主题前景色分隔线。
+- **纯展示语义**：四个部件均无交互角色、焦点或事件；交互操作请在卡片内组合 `BrutalistButton`、输入框或原生链接。
+
+## 示例
+
+### 登录表单
+
+结合 `BrutalistLabel`、`BrutalistInput` 与实心/表面变体 `BrutalistButton` 构建登录卡片。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-card-login"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 紧凑尺寸
+
+为 `Root` 设置 `size="sm"`，所有子区域自动切换到紧凑的 16px 垂直间距与水平内边距。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-card-small"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 区域分隔线
+
+为 `Header` 与 `Footer` 设置 `divider={true}`，使用随明暗主题重绘的 `2px` 分隔线区分页眉、滚动内容区与页脚操作栏。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-card-dividers"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 封面图片
+
+在 `Header` 前放入封面图片并为 `Root` 添加 `overflow-hidden pt-0`，使封面与 5px 圆角外框无缝贴合。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-card-image"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-Card 的 `Root`、`Header`、`Content` 与 `Footer` 仅接收传入的子元素，不声明独立属性。
+### BrutalistCardRoot
 
-<ApiPropsTable headers={{ name: '属性', type: '类型', default: '默认值' }} rows={[]} />
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'size', type: "'default' | 'sm'", default: "'default'" }]}
+/>
+
+### BrutalistCardHeader
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'divider', type: 'boolean', default: 'false' }]}
+/>
+
+### BrutalistCardContent
+
+`BrutalistCardContent` 不声明额外属性，并自动跟随 `Root` 的 `size` 密度调整水平内边距。
+
+### BrutalistCardFooter
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'divider', type: 'boolean', default: 'false' }]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-CARD.yaml',
+    'P-BRUTALIST-CARD-HEADER.yaml',
+    'P-BRUTALIST-CARD-CONTENT.yaml',
+    'P-BRUTALIST-CARD-FOOTER.yaml',
+  ]}
+/>

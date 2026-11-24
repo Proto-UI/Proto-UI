@@ -1,12 +1,13 @@
 ---
 title: 'Toolbar'
-description: 'A Brutalist-styled toolbar with roving keyboard focus, accessible naming, and cross-axis separators.'
+description: 'A Brutalist-styled toolbar with roving keyboard focus, variants, sizes, and 2px cross-axis separators.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Toolbar groups related action buttons into a single roving-focus landmark with horizontal or vertical layout and cross-axis separators.
+Brutalist Toolbar groups related action buttons inside a `rounded-base` 2px-bordered container with a crisp 3px foreground offset shadow, single-Tab roving focus, and instant-snap press feedback.
 
 ## Preview
 
@@ -14,43 +15,155 @@ Toolbar groups related action buttons into a single roving-focus landmark with h
   demoId="demo-brutalist-toolbar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/toolbar` and adapt them for your target runtime.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/toolbar` and adapt them for your target framework:
+
+```ts
+import {
+  toolbarRoot,
+  toolbarButton,
+  toolbarSeparator,
+} from '@proto.ui/prototypes-brutalist/toolbar';
+```
 
 ## Usage
 
-### Anatomy
+```tsx
+import {
+  BrutalistToolbarRoot,
+  BrutalistToolbarButton,
+  BrutalistToolbarSeparator,
+} from '../proto-ui/components/react';
 
-Toolbar is composed of `Root`, `Button`, and `Separator`:
+export function EditorToolbar() {
+  return (
+    <BrutalistToolbarRoot a11yLabel="Document actions">
+      <BrutalistToolbarButton value="undo">Undo</BrutalistToolbarButton>
+      <BrutalistToolbarButton value="redo">Redo</BrutalistToolbarButton>
+      <BrutalistToolbarSeparator />
+      <BrutalistToolbarButton value="save" variant="solid">
+        Save
+      </BrutalistToolbarButton>
+    </BrutalistToolbarRoot>
+  );
+}
+```
 
-- `Root`: Manages toolbar-wide `disabled` state, `orientation`, `loop` navigation, and accessible naming (`a11yLabel`).
-- `Button`: Emits an `action` event carrying its `value` when activated while enabled.
-- `Separator`: Automatically aligns along the toolbar's cross axis.
+Toolbar consists of `Root`, `Button`, and `Separator`:
 
-### Keyboard Navigation
+- **Brutalist contract alignment**: `Root` acts as a passive grouping surface with a 3px foreground shadow and `rounded-base` corners; `Button` uses DM Sans medium typography (`14px/20px`), high-contrast accent hover fills, and instant-snap pressed feedback.
+- **Keyboard navigation**: Only one enabled button participates in page `Tab` order at a time, while arrow keys move focus across commands (`loop={true}` by default).
+- **Separators**: `Separator` renders a crisp 2px divider automatically aligned to the toolbar's cross axis.
 
-- Only one enabled button participates in the `Tab` sequence at a time.
-- Arrow keys move focus between enabled buttons inside the toolbar; `loop={true}` (default) wraps from end to start.
+## Examples
+
+### Variants and Sizes
+
+`Button` supports `surface` (default), `solid`, and `destructive` variants together with `default`, `sm`, and `icon` sizes.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-toolbar-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Vertical Orientation
+
+Setting `orientation="vertical"` switches to a stacked rail layout with horizontal 2px dividers and Up/Down arrow navigation.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-toolbar-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and Non-Looping Navigation
+
+Disable the entire bar via `Root.disabled={true}`, or disable end-to-start wrapping with `loop={false}` while skipping individually disabled buttons.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-toolbar-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root`:
+### Root
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
   rows={[
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
-    { name: 'loop', type: 'boolean', default: 'true' },
-    { name: 'a11yLabel', type: 'string', default: "''" },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disables every button inside the toolbar',
+    },
+    {
+      name: 'orientation',
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: 'Toolbar layout axis and arrow-key navigation direction',
+    },
+    {
+      name: 'loop',
+      type: 'boolean',
+      default: 'true',
+      description: 'Wraps arrow-key navigation from the last command back to the first',
+    },
+    {
+      name: 'a11yLabel',
+      type: 'string',
+      default: "''",
+      description: 'Accessible name for the toolbar container',
+    },
   ]}
 />
 
-Other parts:
+### Button
 
-- **Button**: `disabled` defaults to `false`; `value` defaults to `''`.
-- **Separator**: No props.
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'surface' | 'solid' | 'destructive'",
+      default: "'surface'",
+      description: 'Neutral surface, solid accent, or destructive command fill',
+    },
+    {
+      name: 'size',
+      type: "'default' | 'sm' | 'icon'",
+      default: "'default'",
+      description: 'Button height and padding scale',
+    },
+    {
+      name: 'value',
+      type: 'string',
+      default: "''",
+      description: 'Command identifier emitted in the action event detail',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disables this button and skips it during roving navigation',
+    },
+  ]}
+/>
+
+### Separator and Events
+
+- **Separator**: Takes no additional props and renders a 2px cross-axis divider automatically.
+- **Events and exposes**: `Button` emits `action` (`{ value: string }`) on activation. `Root` exposes `disabled`, `focusFirst()`, `focusLast()`, and `setCurrent(id)`; `Button` exposes `disabled`, `focused`, `focusVisible`, and `focusSelf(options)`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-TOOLBAR.yaml', 'P-BASE-TOOLBAR.yaml']}
+/>

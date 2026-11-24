@@ -97,12 +97,7 @@ export function setupSelectPaint<Props extends ShadcnStyleProps, Exposes = Recor
       intent: (i) => i.feedback.style.use(animation),
     });
     def.rule({
-      when: (w) =>
-        w.all(
-          w.state(style).eq('new-york-v4'),
-          w.state(side).eq(value),
-          w.state(position).eq('popper')
-        ),
+      when: (w) => w.all(w.state(side).eq(value), w.state(position).eq('popper')),
       intent: (i) => i.feedback.style.use(translation),
     });
   }

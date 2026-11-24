@@ -4,9 +4,11 @@ description: 'A passive Brutalist visual surface consuming appearance and intera
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Surface realizes [Base Surface](/en/ui-libraries/base/surface/) with Brutalist styling, providing a single content slot that renders backgrounds, borders, radii, elevation, and visual interaction states driven by its caller.
+Surface realizes [Base Surface](/en/ui-libraries/base/surface/) in Brutalist styling with 5px `rounded-base` corners, 2px theme borders, and hard offset shadows while keeping semantic and interaction ownership on the enclosing control.
 
 ## Preview
 
@@ -16,15 +18,13 @@ Surface realizes [Base Surface](/en/ui-libraries/base/surface/) with Brutalist s
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-The focus and press samples in the preview are driven purely through visual props; outer spacing and inner content padding remain consumer-owned.
-
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `surfaceRoot` from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/surface` (workspace CLI target: `brutalist-surface`).
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-surface" manager="npm" />
+
+Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your target framework.
 
 ## Usage
-
-### Basic Example
 
 ```tsx
 import * as React from 'react';
@@ -35,30 +35,54 @@ const Surface = createReactAdapter(React)(surfaceRoot);
 
 export function Summary() {
   return (
-    <Surface variant="muted" radius="md" border="none">
-      <div style={{ padding: '1rem' }}>Saved locally</div>
+    <Surface variant="secondary" elevation="raised">
+      <div className="p-4 font-medium">Saved locally</div>
     </Surface>
   );
 }
 ```
 
-Both the package root and `/surface` subpath export `surfaceRoot`, along with `SurfaceRootProps` and `SurfaceRootExposes`. Base also exports `asSurfaceRoot` and `SurfaceRootAsHookContract` for custom family styling.
+### Passive state inputs and composition
 
-### Passive State Inputs & Composition
+- `hovered`, `focusVisible`, `pressed`, and `current` are caller-supplied visual inputs; Surface installs no event listeners, tab stops, or ARIA roles.
+- `elevation="raised"` adds a 4px hard shadow that collapses with a `+4px, +4px` offset on hover or press, switching to static `transition-none` when reduced motion is preferred.
+- Enable `fade` to map `transitionState` from [Transition](/en/ui-libraries/base/transition/) to opacity (`closed` and `leaving` -> `0`; `entering` and `entered` -> `1`), reading `--pui-surface-transition-duration` (default `0ms`) on Web.
 
-- **Consumer-supplied state**: `hovered`, `focusVisible`, `pressed`, and `current` are purely visual inputs. Surface does not listen for events or set ARIA roles, `aria-current`, or tab stops.
-- **Preserve native semantics**: When wrapping interactive controls or native anchors, keep roles, activation handlers, `href`, `target`, and `download` on the Button or anchor element itself.
-- **Defaults & foreground inheritance**: Removing a prop restores its default. `secondary` applies the Brutalist secondary background independently of `elevation`. When nesting styled Text inside a solid or accent Surface, set `tone="inherit"` on Text to keep matching foreground contrast.
+## Examples
 
-### Pairing with Transition
+### Variants
 
-- Set `fade={true}` to map `transitionState` from an enclosing [Transition](/en/ui-libraries/base/transition/) to opacity (`closed` and `leaving` map to `0`; `entering` and `entered` map to `1`). When `fade={false}`, `transitionState` leaves opacity unchanged.
-- On Web, forward a resolved transition duration (finite, non-negative milliseconds) via `--pui-surface-transition-duration` (defaults to `0ms`).
-- `scrim` renders a standard dimming backdrop. Visual opacity `0` does not disable interaction or unmount content—keep interaction gating, presence, and focus management on the enclosing Dialog or Transition.
+All seven Brutalist surface variants, separating high-contrast canary `accent` from primary `solid` (`main`) fills.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-surface-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Radius, border, and elevation
+
+Compares `rounded-base` (5px) with other corner presets, border placements, and raised shadow collapse.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-surface-geometry"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Text inheritance and Transition fade
+
+Demonstrates foreground contrast inheritance via `Text tone="inherit"` alongside Transition-driven scrim fading.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-surface-composition"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root`:
+The following props belong to `Root` (removing a prop restores its default):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -86,4 +110,13 @@ The following props belong to `Root`:
     { name: 'pressed', type: 'boolean', default: 'false' },
     { name: 'current', type: 'boolean', default: 'false' },
   ]}
+/>
+
+`@proto.ui/prototypes-brutalist/surface` also exports `SurfaceRootProps`, `SurfaceRootExposes`, and the passive Web action composition helper `brutalistActionAppearance` (`BrutalistActionAppearanceOptions`).
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-SURFACE.yaml', 'P-BASE-SURFACE.yaml']}
 />

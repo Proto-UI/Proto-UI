@@ -1734,10 +1734,16 @@ function renderRoundedUtility(utility: string): string[] | null {
   ) {
     return ['border-radius: min(var(--pui-radius-md), 10px);'];
   }
-  if (utility === 'rounded-[min(var(--radius-md),8px)]') {
+  if (
+    utility === 'rounded-[min(var(--radius-md),8px)]' ||
+    utility === 'rounded-[min(var(--pui-radius-md),8px)]'
+  ) {
     return ['border-radius: min(var(--pui-radius-md), 8px);'];
   }
-  if (utility === 'rounded-[min(var(--radius-md),12px)]') {
+  if (
+    utility === 'rounded-[min(var(--radius-md),12px)]' ||
+    utility === 'rounded-[min(var(--pui-radius-md),12px)]'
+  ) {
     return ['border-radius: min(var(--pui-radius-md), 12px);'];
   }
   return null;

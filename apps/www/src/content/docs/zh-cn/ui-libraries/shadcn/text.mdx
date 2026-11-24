@@ -1,6 +1,6 @@
 ---
 title: 'Text'
-description: '提供统一字号、字重、字体族、行高与色彩语义的排版组件。'
+description: '提供统一字号、字重、字体族、行高与色彩语义的 Shadcn 排版组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,7 +8,7 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Text 继承 [Base Text](/zh-cn/ui-libraries/base/text/) 的排版属性体系，以 Shadcn 主题令牌控制字号、行高、字距与文字颜色，不接管文档标题层级或交互语义。本页示例使用 **Shadcn Rhea** 风格。
+Text 继承 [Base Text](/zh-cn/ui-libraries/base/text/) 的八项独立排版属性，使用 Shadcn 主题令牌管理字号、字重、行高、字距与前景色，同时把标题层级与交互语义交由外层原生元素承担。本页示例采用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -20,67 +20,162 @@ Text 继承 [Base Text](/zh-cn/ui-libraries/base/text/) 的排版属性体系，
 
 ## 安装
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-text" manager="npm" />
+先[初始化你的应用](/zh-cn/start-here/quick-start/)，再添加 `shadcn-text` 组件（当前草案能力在工作区源码中提供）：
 
-将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件封装。
+<InstallCommandCard
+  commands={{
+    npm: 'npx @proto.ui/cli@latest add wc shadcn-text',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-text',
+  }}
+  manager="npm"
+/>
+
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的本地组件封装。
 
 ## 用法
 
-从 `@proto.ui/prototypes-shadcn/text`（或包根）导入 `shadcnTextRoot`（也提供 `textRoot` 和 `ShadcnTextRoot` 别名），并在适配时按需配置 Web 宿主元素标签：
+CLI 生成的组件可直接配合原生 `h1`–`h4`、`p`、`blockquote`、`code`、`label` 与 `a` 使用：
 
 ```tsx
-import * as React from 'react';
-import { createReactAdapter } from '@proto.ui/adapter-react';
-import { shadcnTextRoot } from '@proto.ui/prototypes-shadcn/text';
-
-const Text = createReactAdapter(React)(shadcnTextRoot, { rootTag: 'span' });
+import { ShadcnTextRoot } from '../proto-ui/components/react';
 
 export function SectionTitle() {
   return (
     <h1>
-      <Text size="4xl" font="heading" weight="semibold" leading="tight" tracking="tight">
+      <ShadcnTextRoot size="4xl" font="heading" weight="bold" leading="tight" tracking="tight">
         Account settings
-      </Text>
+      </ShadcnTextRoot>
     </h1>
   );
 }
 ```
 
-### 语义边界与颜色继承
+也可以直接从 `@proto.ui/prototypes-shadcn/text` 导入 `shadcnTextRoot`（提供 `textRoot` 与 `ShadcnTextRoot` 别名）并通过 Adapter 指定 `rootTag: 'span'`，或按需启用内置的 `SHADCN_TYPOGRAPHY` 字体主题预设（Geist 搭配系统与 CJK 回退链；字体文件与授权由应用自行托管）：
 
-- `rootTag: 'span'` 属于 Web Adapter 配置项而非组件属性。标题层级、段落、表单标签（`htmlFor` / `for`）和链接（`href`、`target`、`download`）仍由外层原生 `h1`、`p`、`label` 或 `a` 元素负责。
-- 在深色或高对比度表面（如 `Surface` 的 `solid` / `accent` 变体）内部，可设置 `tone="inherit"` 让文字继承外层容器的前景色。
+```ts
+import { shadcnTextRoot, SHADCN_TYPOGRAPHY } from '@proto.ui/prototypes-shadcn/text';
+```
 
-### 行高与字距细节
+### 语义边界与排版细节
 
-- 设置 `leading="size"` 时，使用所选字号内建的行高刻度：`xs` (`1rem`)、`sm` (`1.25rem`)、`base` (`1.5rem`)、`lg` (`1.75rem`)、`xl` (`1.75rem`)、`2xl` (`2rem`)、`3xl` (`2.25rem`)、`4xl` (`2.5rem`)、`5xl` (`1`)。
-- `leading="tighter"` 对应 `1.1`，`tracking="tighter"` 对应 `-0.05em`。
-- 省略属性或移除属性会恢复默认值；若传入非法字号，初始化时回退到 `base`，已有合法值后更新非法值则会保留上一个有效值。
-- 在 Shadcn 操作按钮组合中，`actionProfile="rhea"` 或 `"luma"` 固定采用 `1.25rem` 行高。
+- **外层原生语义**：Text 本身不添加角色、焦点停靠点或点击事件；标题层级、`label`（`htmlFor` / `for`）与链接（`href`、`target`、`download`）应由外层原生元素声明。
+- **字号内建行高与紧凑刻度**：`leading="size"` 保留所选字号的内建行高（`xs` `1rem`、`sm` `1.25rem`、`base` `1.5rem`、`lg` `1.75rem`、`xl` `1.75rem`、`2xl` `2rem`、`3xl` `2.25rem`、`4xl` `2.5rem`、`5xl` `1`）；`leading="tighter"` 对应 `1.1`，`tracking="tighter"` 对应 `-0.05em`。
+- **默认值与回退**：移除属性即可恢复默认值；初始传入非法 `size` 回退到 `base`，已有合法值后更新为非法值则保留上一个有效值。
+- **操作排版预设（`actionProfile`）**：默认为 `'none'`，不会隐式订阅 `shadcn-style-scope`；显式传入 `'rhea'` 或 `'luma'` 等预设时应用对应的操作行高（`rhea` / `luma` / `vega` / `nova` / `maia` / `new-york-v4` 为 `1.25rem`，`lyra` / `sera` 为 `1rem`，`mira` 为 `1.625`，`sera` 额外启用大写与宽字距）。
+
+## 示例
+
+### 字号与字重刻度
+
+展示 `5xl` 至 `xs` 的完整排版刻度，以及 `leading="tighter"`、`leading="size"` 与 `tracking="tighter"` 的组合效果。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-text-scale"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 语义排版组合
+
+展示导语（Lead）、大号强调、引文（`emphasis="italic"`）、行内等宽代码（`font="mono"`）、下划线链接（`decoration="underline"`）、删除线（`decoration="line-through"`）与表单辅助说明的常用组合。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-text-editorial"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 色调与表面前景色继承
+
+在深色、实心（`solid`）或强调色（`accent`）`Surface` 容器中设置 `tone="inherit"`，让文字自动跟随外层前景色，在亮暗主题下均保持清晰对比度。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-text-tones"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 操作排版预设（`actionProfile`）
+
+将 `actionProfile` 与对应风格的 `Surface` 配对，呈现 Rhea、Luma、Lyra、Mira 与 Sera 的紧凑操作文字行高与字距规范。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-text-action-profiles"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL 与中英混排
+
+Text 遵循外层容器的 `dir="rtl"` 逻辑方向，并支持中英文与多语言混排下的系统字体回退。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-text-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`：
+以下属性属于 `Root`（`ShadcnTextRoot`）：
 
 <ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
   rows={[
     {
       name: 'size',
       type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'",
       default: 'base',
+      description: '字号刻度；配合 leading="size" 可保留字号内建行高',
     },
-    { name: 'tone', type: "'default' | 'muted' | 'inherit'", default: 'default' },
-    { name: 'weight', type: "'normal' | 'medium' | 'semibold' | 'bold'", default: 'normal' },
-    { name: 'font', type: "'body' | 'heading' | 'mono'", default: 'body' },
+    {
+      name: 'tone',
+      type: "'default' | 'muted' | 'inherit'",
+      default: 'default',
+      description: '文字颜色语义；在彩色或深色表面内使用 inherit 继承前景色',
+    },
+    {
+      name: 'weight',
+      type: "'normal' | 'medium' | 'semibold' | 'bold'",
+      default: 'normal',
+      description: '字重',
+    },
+    {
+      name: 'font',
+      type: "'body' | 'heading' | 'mono'",
+      default: 'body',
+      description: '字体族（正文、标题或等宽）',
+    },
     {
       name: 'leading',
       type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'",
       default: 'normal',
+      description: '行高；size 保留字号默认行高，tighter 为 1.1',
     },
-    { name: 'tracking', type: "'normal' | 'tight' | 'tighter'", default: 'normal' },
-    { name: 'emphasis', type: "'normal' | 'italic'", default: 'normal' },
-    { name: 'decoration', type: "'none' | 'underline' | 'line-through'", default: 'none' },
+    {
+      name: 'tracking',
+      type: "'normal' | 'tight' | 'tighter'",
+      default: 'normal',
+      description: '字距；tight 为 -0.025em，tighter 为 -0.05em',
+    },
+    {
+      name: 'emphasis',
+      type: "'normal' | 'italic'",
+      default: 'normal',
+      description: '正体或斜体样式',
+    },
+    {
+      name: 'decoration',
+      type: "'none' | 'underline' | 'line-through'",
+      default: 'none',
+      description: '文字装饰线',
+    },
+    {
+      name: 'actionProfile',
+      type: "'none' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4' | 'new-york'",
+      default: 'none',
+      description: '显式操作排版预设（Shadcn 专有），不隐式继承 style-scope',
+    },
   ]}
 />
 

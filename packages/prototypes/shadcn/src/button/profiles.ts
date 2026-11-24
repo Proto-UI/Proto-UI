@@ -89,45 +89,78 @@ export const SHADCN_BUTTON_OUTLINE_HOVER = {
 export const SHADCN_ACTION_SIZES: Record<`${ShadcnModernActionStyle}-${ShadcnButtonSize}`, string> =
   {
     'vega-default': 'h-9 gap-1.5 px-2.5 whitespace-nowrap',
-    'vega-sm': 'h-8 gap-1 rounded-[min(var(--radius-md),10px)] px-2.5 whitespace-nowrap',
+    'vega-xs': 'h-6 gap-1 rounded-[min(var(--pui-radius-md),8px)] px-2 text-xs whitespace-nowrap',
+    'vega-sm': 'h-8 gap-1 rounded-[min(var(--pui-radius-md),10px)] px-2.5 whitespace-nowrap',
     'vega-lg': 'h-10 gap-1.5 px-2.5 whitespace-nowrap',
     'vega-icon': 'size-9 whitespace-nowrap',
+    'vega-icon-xs': 'size-6 rounded-[min(var(--pui-radius-md),8px)] whitespace-nowrap',
+    'vega-icon-sm': 'size-8 rounded-[min(var(--pui-radius-md),10px)] whitespace-nowrap',
+    'vega-icon-lg': 'size-10 whitespace-nowrap',
     'vega-icon-compact': 'size-7 gap-2 rounded-md whitespace-nowrap',
     'nova-default': 'h-8 gap-1.5 px-2.5 whitespace-nowrap',
+    'nova-xs': 'h-6 gap-1 rounded-[min(var(--pui-radius-md),10px)] px-2 text-xs whitespace-nowrap',
     'nova-sm':
-      'h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] whitespace-nowrap',
+      'h-7 gap-1 rounded-[min(var(--pui-radius-md),12px)] px-2.5 text-[0.8rem] whitespace-nowrap',
     'nova-lg': 'h-9 gap-1.5 px-2.5 whitespace-nowrap',
     'nova-icon': 'size-8 whitespace-nowrap',
+    'nova-icon-xs': 'size-6 rounded-[min(var(--pui-radius-md),10px)] whitespace-nowrap',
+    'nova-icon-sm': 'size-7 rounded-[min(var(--pui-radius-md),12px)] whitespace-nowrap',
+    'nova-icon-lg': 'size-9 whitespace-nowrap',
     'nova-icon-compact': 'size-7 gap-2 rounded-md whitespace-nowrap',
     'maia-default': 'h-9 gap-1.5 px-3 whitespace-nowrap',
+    'maia-xs': 'h-6 gap-1 px-2.5 text-xs whitespace-nowrap',
     'maia-sm': 'h-8 gap-1 px-3 whitespace-nowrap',
     'maia-lg': 'h-10 gap-1.5 px-4 whitespace-nowrap',
     'maia-icon': 'size-9 whitespace-nowrap',
+    'maia-icon-xs': 'size-6 whitespace-nowrap',
+    'maia-icon-sm': 'size-8 whitespace-nowrap',
+    'maia-icon-lg': 'size-10 whitespace-nowrap',
     'maia-icon-compact': 'size-7 gap-2 rounded-md whitespace-nowrap',
     'lyra-default': 'h-8 gap-1.5 px-2.5 whitespace-nowrap',
+    'lyra-xs': 'h-6 gap-1 px-2 text-xs whitespace-nowrap',
     'lyra-sm': 'h-7 gap-1 px-2.5 whitespace-nowrap',
     'lyra-lg': 'h-9 gap-1.5 px-2.5 whitespace-nowrap',
     'lyra-icon': 'size-8 whitespace-nowrap',
+    'lyra-icon-xs': 'size-6 whitespace-nowrap',
+    'lyra-icon-sm': 'size-7 whitespace-nowrap',
+    'lyra-icon-lg': 'size-9 whitespace-nowrap',
     'lyra-icon-compact': 'size-7 gap-2 rounded-md whitespace-nowrap',
     'mira-default': 'h-7 gap-1 px-2 whitespace-nowrap',
+    'mira-xs':
+      'h-5 gap-1 rounded-[min(var(--pui-radius-md),8px)] px-1.5 text-[0.625rem] whitespace-nowrap',
     'mira-sm': 'h-6 gap-1 px-2 whitespace-nowrap',
     'mira-lg': 'h-8 gap-1 px-2.5 whitespace-nowrap',
     'mira-icon': 'size-7 whitespace-nowrap',
+    'mira-icon-xs': 'size-5 rounded-[min(var(--pui-radius-md),8px)] whitespace-nowrap',
+    'mira-icon-sm': 'size-6 whitespace-nowrap',
+    'mira-icon-lg': 'size-8 whitespace-nowrap',
     'mira-icon-compact': 'size-7 gap-2 rounded-md whitespace-nowrap',
     'luma-default': 'h-9 gap-1.5 px-3 whitespace-nowrap',
+    'luma-xs': 'h-6 gap-1 px-2.5 text-xs whitespace-nowrap',
     'luma-sm': 'h-8 gap-1 px-3 whitespace-nowrap',
     'luma-lg': 'h-10 gap-1.5 px-4 whitespace-nowrap',
     'luma-icon': 'size-9 whitespace-nowrap',
+    'luma-icon-xs': 'size-6 whitespace-nowrap',
+    'luma-icon-sm': 'size-8 whitespace-nowrap',
+    'luma-icon-lg': 'size-10 whitespace-nowrap',
     'luma-icon-compact': 'size-7 gap-2 rounded-md whitespace-nowrap',
     'sera-default': 'h-10 gap-1.5 px-6 whitespace-nowrap',
+    'sera-xs': 'h-8 gap-1 px-3 text-xs whitespace-nowrap',
     'sera-sm': 'h-9 gap-1 px-4 whitespace-nowrap',
     'sera-lg': 'h-11 gap-1.5 px-8 whitespace-nowrap',
     'sera-icon': 'size-10 whitespace-nowrap',
+    'sera-icon-xs': 'size-8 whitespace-nowrap',
+    'sera-icon-sm': 'size-9 whitespace-nowrap',
+    'sera-icon-lg': 'size-11 whitespace-nowrap',
     'sera-icon-compact': 'size-7 gap-2 rounded-md whitespace-nowrap',
     'rhea-default': 'h-8 gap-1.5 px-3 whitespace-nowrap',
+    'rhea-xs': 'h-6 gap-1 px-2 text-xs whitespace-nowrap',
     'rhea-sm': 'h-7 gap-1 px-3 whitespace-nowrap',
     'rhea-lg': 'h-9 gap-1.5 px-4 whitespace-nowrap',
     'rhea-icon': 'size-8 whitespace-nowrap',
+    'rhea-icon-xs': 'size-6 whitespace-nowrap',
+    'rhea-icon-sm': 'size-7 whitespace-nowrap',
+    'rhea-icon-lg': 'size-9 whitespace-nowrap',
     'rhea-icon-compact': 'size-7 gap-2 rounded-md whitespace-nowrap',
   };
 export const SHADCN_ACTION_WRAP_SIZES = {
@@ -135,35 +168,55 @@ export const SHADCN_ACTION_WRAP_SIZES = {
   // item to shrink for an unbroken label under P-SHADCN-BUTTON-WRAP-PROP.
   'vega-default':
     'min-h-9 h-auto gap-1.5 px-2.5 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
+  'vega-xs':
+    'min-h-6 h-auto gap-1 rounded-[min(var(--pui-radius-md),8px)] px-2 py-0.5 text-xs min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'vega-sm':
-    'min-h-8 h-auto gap-1 rounded-[min(var(--radius-md),10px)] px-2.5 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
-  'vega-lg': 'min-h-10 h-auto gap-1.5 px-2.5 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
+    'min-h-8 h-auto gap-1 rounded-[min(var(--pui-radius-md),10px)] px-2.5 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
+  'vega-lg':
+    'min-h-10 h-auto gap-1.5 px-2.5 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'nova-default':
     'min-h-8 h-auto gap-1.5 px-2.5 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
+  'nova-xs':
+    'min-h-6 h-auto gap-1 rounded-[min(var(--pui-radius-md),10px)] px-2 py-0.5 text-xs min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'nova-sm':
-    'min-h-7 h-auto gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 py-1 text-[0.8rem] min-w-0 max-w-full whitespace-normal wrap-anywhere',
-  'nova-lg': 'min-h-9 h-auto gap-1.5 px-2.5 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
+    'min-h-7 h-auto gap-1 rounded-[min(var(--pui-radius-md),12px)] px-2.5 py-1 text-[0.8rem] min-w-0 max-w-full whitespace-normal wrap-anywhere',
+  'nova-lg':
+    'min-h-9 h-auto gap-1.5 px-2.5 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'maia-default':
     'min-h-9 h-auto gap-1.5 px-3 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
+  'maia-xs':
+    'min-h-6 h-auto gap-1 px-2.5 py-0.5 text-xs min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'maia-sm': 'min-h-8 h-auto gap-1 px-3 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'maia-lg': 'min-h-10 h-auto gap-1.5 px-4 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'lyra-default':
     'min-h-8 h-auto gap-1.5 px-2.5 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
+  'lyra-xs':
+    'min-h-6 h-auto gap-1 px-2 py-0.5 text-xs min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'lyra-sm': 'min-h-7 h-auto gap-1 px-2.5 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
-  'lyra-lg': 'min-h-9 h-auto gap-1.5 px-2.5 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
-  'mira-default': 'min-h-7 h-auto gap-1 px-2 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
+  'lyra-lg':
+    'min-h-9 h-auto gap-1.5 px-2.5 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
+  'mira-default':
+    'min-h-7 h-auto gap-1 px-2 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
+  'mira-xs':
+    'min-h-5 h-auto gap-1 rounded-[min(var(--pui-radius-md),8px)] px-1.5 py-0.5 text-[0.625rem] min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'mira-sm': 'min-h-6 h-auto gap-1 px-2 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'mira-lg': 'min-h-8 h-auto gap-1 px-2.5 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'luma-default':
     'min-h-9 h-auto gap-1.5 px-3 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
+  'luma-xs':
+    'min-h-6 h-auto gap-1 px-2.5 py-0.5 text-xs min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'luma-sm': 'min-h-8 h-auto gap-1 px-3 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'luma-lg': 'min-h-10 h-auto gap-1.5 px-4 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'sera-default':
     'min-h-10 h-auto gap-1.5 px-6 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
+  'sera-xs':
+    'min-h-8 h-auto gap-1 px-3 py-0.5 text-xs min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'sera-sm': 'min-h-9 h-auto gap-1 px-4 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'sera-lg': 'min-h-11 h-auto gap-1.5 px-8 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'rhea-default':
     'min-h-8 h-auto gap-1.5 px-3 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
+  'rhea-xs':
+    'min-h-6 h-auto gap-1 px-2 py-0.5 text-xs min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'rhea-sm': 'min-h-7 h-auto gap-1 px-3 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
   'rhea-lg': 'min-h-9 h-auto gap-1.5 px-4 py-1 min-w-0 max-w-full whitespace-normal wrap-anywhere',
 } as const;

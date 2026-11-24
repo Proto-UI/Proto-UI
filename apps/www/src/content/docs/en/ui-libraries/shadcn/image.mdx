@@ -1,48 +1,145 @@
 ---
 title: 'Image'
-description: 'An image component with explicit accessibility modes, object-fit options, and live loading status events.'
+description: 'An image component with style-profile corner radii, explicit accessibility modes, object-fit options, and live loading status events.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-A neutral image component with explicit informative/decorative accessibility modes, `fit` sizing, and live loading status reporting. The examples on this page use the **Shadcn Rhea** style preset.
+A responsive image component with profile-aware corner framing, explicit informative/decorative accessibility modes, `fit` sizing, and live loading status reporting. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
-
-Use the demo controls below to load, replace, break, and clear an image source while observing `loadingStatus` transitions:
 
 <PrototypePreviewer
   demoId="demo-shadcn-image"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `imageRoot` (aliased as `shadcnImageRoot`) and its types directly from `@proto.ui/prototypes-shadcn/image`.
 
 ## Usage
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+```tsx
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import { imageRoot } from '@proto.ui/prototypes-shadcn/image';
+
+const ShadcnImage = createReactAdapter(React)(imageRoot);
+
+export function CoverPhoto() {
+  return (
+    <ShadcnImage
+      styleProfile="rhea"
+      source="/images/base-image/landscape.svg"
+      a11yMode="informative"
+      alternativeText="Mountain ridge bathed in morning sunlight"
+      fit="cover"
+      radius="default"
+      surfaceStyle={{ width: '100%', height: '220px' }}
+    />
+  );
+}
+```
 
 `Image` consists of a single `Root` part (rendered as a native `<img>` on Web):
 
-- **Source and sizing**: Set `source` to the image URL and `fit` to `'contain'` (default), `'cover'`, or `'fill'`.
-- **Accessibility mode**: Use `a11yMode="informative"` (default) with `alternativeText` for meaningful images, or `a11yMode="decorative"` when surrounding text already conveys the meaning.
-- **Loading status**: Read `loadingStatus` (`'idle'`, `'loading'`, `'loaded'`, `'error'`) and listen to `loadingStatusChange` (with previous and next states) to drive your own placeholder or fallback UI.
+- **Responsive framing and corners**: Ships with `block max-w-full h-auto` by default. `radius="default"` follows the active `styleProfile` (`rounded-xl` for `rhea`, `maia`, and `luma`; `rounded-lg` for `nova`; `rounded-md` for `vega`, `mira`, and `new-york-v4`; `rounded-none` for `lyra` and `sera`), or pass an explicit radius token.
+- **Fit and accessibility**: Choose `'contain'` (default), `'cover'`, or `'fill'` via `fit`. Use `a11yMode="informative"` with descriptive `alternativeText` for meaningful imagery, or `a11yMode="decorative"` when adjacent text carries the meaning.
+- **Loading and fallback**: Observe `loadingStatus` (`'idle' | 'loading' | 'loaded' | 'error'`) and `loadingStatusChange` to drive your own placeholder or retry fallback UI.
+
+## Examples
+
+### Fit Modes
+
+Compare `contain`, `cover`, and `fill` inside equal-height frames.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-image-fit"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Corner Radius
+
+Override the profile corner radius with `radius`, or pair `radius="full"` with a square box for circular crops.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-image-radius"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Accessibility
+
+Informative figures supply descriptive `alternativeText`; decorative accents opt out of redundant screen-reader announcements via `a11yMode="decorative"`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-image-a11y"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Loading & Fallback
+
+Listen to `loadingStatusChange` to present a clean fallback state and retry action when a source fails or is cleared.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-image-loading"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
+
+### Root Props
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'source', type: 'string | undefined', default: 'unset' },
+    { name: 'source', type: 'string | undefined', default: 'undefined' },
     { name: 'a11yMode', type: "'informative' | 'decorative'", default: 'informative' },
     { name: 'alternativeText', type: 'string', default: "''" },
     { name: 'fit', type: "'contain' | 'cover' | 'fill'", default: 'contain' },
+    {
+      name: 'radius',
+      type: "'default' | 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'",
+      default: 'default',
+    },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'rhea' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'new-york-v4' | 'new-york'",
+      default: 'inherit',
+    },
   ]}
 />
 
-`Root` exposes `source`, `fit`, and `loadingStatus` (`'idle'`, `'loading'`, `'loaded'`, `'error'`), and emits `loadingStatusChange` with the previous and next status.
+### Exposes & Events
+
+<ApiPropsTable
+  headers={{ name: 'Name', type: 'Type', default: 'Description' }}
+  rows={[
+    { name: 'source', type: 'ExposeState<string>', default: 'Active image source URI' },
+    {
+      name: 'fit',
+      type: "ExposeState<'contain' | 'cover' | 'fill'>",
+      default: 'Current object-fit mode',
+    },
+    {
+      name: 'loadingStatus',
+      type: "ExposeState<'idle' | 'loading' | 'loaded' | 'error'>",
+      default: 'Current image load lifecycle state',
+    },
+    {
+      name: 'loadingStatusChange',
+      type: 'ExposeEvent<{ status, previousStatus, source }>',
+      default: 'Emitted on status transitions (bind via onLoadingStatusChange in React/Vue)',
+    },
+  ]}
+/>
 
 ## References
 

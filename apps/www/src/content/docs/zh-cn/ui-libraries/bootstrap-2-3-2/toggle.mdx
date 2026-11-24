@@ -1,40 +1,117 @@
 ---
 title: 'Bootstrap 2.3.2 Toggle'
-description: '基于 Base Toggle 的 Bootstrap 2.3.2 设计语言扩展切换按钮。'
+description: '延续 Bootstrap 2.3.2 经典渐变与下凹按压外观的双态切换按钮组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Bootstrap 2.3.2 Toggle 是一项设计语言扩展（design-language extension），不是 Bootstrap 2.3.2 的原版组件。它将归档按钮外观与独立的 Base Toggle 协议结合，提供持久的按下/未按下双态切换，并在深色宿主中保持经典的归档浅色配色。
+Bootstrap 2.3.2 Toggle 将经典 Bootstrap 2.3.2 按钮渐变与下凹阴影外观结合到独立的 Base Toggle 双态协议之上，提供持久的按下/未按下切换状态，并在深色页面中保持一致的经典按钮配色。
 
 ## 预览
-
-示例中 Bold 初始未激活，Italic 初始激活，第三个禁用按钮无法切换。
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-toggle"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={true}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。[查看已实现的子集](../)。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。[查看已实现的组件子集](../)。
 
 ## 用法
 
-- 支持受控 `active` 与非受控 `defaultActive`，统一处理点击、键盘激活、禁用状态与 `aria-pressed` 无障碍信息。
-- 如需一组互斥或多选的切换按钮，请使用 [ToggleGroup](/zh-cn/ui-libraries/bootstrap-2-3-2/toggle-group/)。
+```tsx
+import { BootstrapToggle } from '../proto-ui/components/react';
+```
+
+```tsx
+<BootstrapToggle variant="primary" defaultActive>
+  Bold
+</BootstrapToggle>
+```
+
+- **经典变体与尺寸**：支持 Bootstrap 2.3.2 的七种配色变体（`default`、`primary`、`success`、`info`、`warning`、`danger`、`inverse`）以及四档像素尺寸（`mini`、`small`、`default`、`large`）。
+- **受控与非受控**：支持受控 `active` 与非受控 `defaultActive`，统一处理点击、`Enter` / `Space` 激活、禁用状态与 `aria-pressed` 无障碍语义。
+- **分组切换**：如需一组互斥或多选的切换按钮，请使用 [Toggle Group](/zh-cn/ui-libraries/bootstrap-2-3-2/toggle-group/)。
+
+## 示例
+
+### 变体
+
+展示全部七种经典 Bootstrap 2.3.2 配色变体及其激活下凹样式。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toggle-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  lazy={true}
+/>
+
+### 图标与文本
+
+在经典渐变按钮中组合图标与标签文本。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toggle-with-text"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  lazy={true}
+/>
+
+### 尺寸
+
+使用 `size` 在 `mini`、`small`、`default` 与 `large` 四档经典像素尺寸间切换。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toggle-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  lazy={true}
+/>
+
+### 禁用
+
+禁用状态会展平渐变、收起阴影并阻止交互，同时保留已有的激活态。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toggle-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  lazy={true}
+/>
 
 ## API
 
-| 属性 / 事件                | 说明               |
-| -------------------------- | ------------------ |
-| `active` / `defaultActive` | 受控或初始激活状态 |
-| `disabled`                 | 禁用按钮交互       |
-| `activeChange`             | 激活状态变更事件   |
+以下属性属于 `Root`（传入 `active` 进入受控模式）：
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'active', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultActive', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'variant',
+      type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'",
+      default: "'default'",
+    },
+    { name: 'size', type: "'default' | 'large' | 'small' | 'mini'", default: "'default'" },
+  ]}
+/>
+
+- **事件**：`activeChange`（载荷 `{ active: boolean }`）。
+- **方法**：`focusSelf(options?)`（禁用态忽略）。
+- **暴露状态**：`active`、`disabled`、`hovered`、`focused`、`focusVisible`、`pressed`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-TOGGLE.yaml', 'P-BASE-TOGGLE.yaml']}
+/>

@@ -39,6 +39,7 @@ describe('homepage locale Select composition', () => {
             expected.push(
               `${family}-select-surface`,
               `${family}-select-viewport`,
+              `${family}-select-group`,
               `${family}-select-item-text`
             );
           expect([...prototypeIds].sort()).toEqual(expected.sort());
@@ -77,10 +78,10 @@ describe('homepage locale Select composition', () => {
         expect(() =>
           assertProjectionRecipeClosure(
             demo.root,
-            [...prototypeIds, `${family}-select-group`],
+            [...prototypeIds, `${family}-select-label`],
             'homepage-home-language'
           )
-        ).toThrow(`missing required Prototype(s): ${family}-select-group`);
+        ).toThrow(`missing required Prototype(s): ${family}-select-label`);
       });
     }
   );

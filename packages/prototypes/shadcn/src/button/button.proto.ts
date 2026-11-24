@@ -44,7 +44,17 @@ const button = definePrototype<ShadcnButtonProps, ShadcnButtonExposes>({
       size: {
         type: 'enum',
         empty: 'fallback',
-        options: ['default', 'sm', 'lg', 'icon', 'icon-compact'],
+        options: [
+          'default',
+          'xs',
+          'sm',
+          'lg',
+          'icon',
+          'icon-xs',
+          'icon-sm',
+          'icon-lg',
+          'icon-compact',
+        ],
       },
       disabled: { type: 'boolean', empty: 'fallback' },
       wrap: { type: 'boolean', empty: 'fallback' },
@@ -85,8 +95,24 @@ const button = definePrototype<ShadcnButtonProps, ShadcnButtonExposes>({
         when: (w) => w.all(w.state(style).eq(profile), w.prop('variant').eq('outline')),
         intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_OUTLINE[profile])),
       });
-      for (const size of ['default', 'sm', 'lg', 'icon', 'icon-compact'] as const) {
-        if (size === 'icon' || size === 'icon-compact') {
+      for (const size of [
+        'default',
+        'xs',
+        'sm',
+        'lg',
+        'icon',
+        'icon-xs',
+        'icon-sm',
+        'icon-lg',
+        'icon-compact',
+      ] as const) {
+        if (
+          size === 'icon' ||
+          size === 'icon-xs' ||
+          size === 'icon-sm' ||
+          size === 'icon-lg' ||
+          size === 'icon-compact'
+        ) {
           def.rule({
             when: (w) => w.all(w.state(style).eq(profile), w.prop('size').eq(size)),
             intent: (i) => i.feedback.style.use(tw(SHADCN_ACTION_SIZES[`${profile}-${size}`])),
@@ -132,7 +158,16 @@ const button = definePrototype<ShadcnButtonProps, ShadcnButtonExposes>({
       intent: (i) => i.feedback.style.use(tw('border-destructive/40 ring-destructive/20')),
     });
     def.rule({
-      when: (w) => w.all(w.not(w.state(style).eq('new-york-v4')), w.state(pressed).eq(true)),
+      when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.not(w.state(style).eq('new-york-v4')),
+          w.state(pressed).eq(true),
+          w.not(w.meta('preference.reducedMotion').eq('reduce'))
+        ),
       intent: (i) => i.feedback.style.use(tw('translate-y-px')),
     });
     def.rule({
@@ -304,8 +339,24 @@ const button = definePrototype<ShadcnButtonProps, ShadcnButtonExposes>({
         intent: (i) => i.feedback.style.use(tw(NEW_YORK_VARIANTS[variant])),
       });
     }
-    for (const size of ['default', 'sm', 'lg', 'icon', 'icon-compact'] as const) {
-      if (size === 'icon' || size === 'icon-compact') {
+    for (const size of [
+      'default',
+      'xs',
+      'sm',
+      'lg',
+      'icon',
+      'icon-xs',
+      'icon-sm',
+      'icon-lg',
+      'icon-compact',
+    ] as const) {
+      if (
+        size === 'icon' ||
+        size === 'icon-xs' ||
+        size === 'icon-sm' ||
+        size === 'icon-lg' ||
+        size === 'icon-compact'
+      ) {
         def.rule({
           when: (w) => w.all(w.state(style).eq('new-york-v4'), w.prop('size').eq(size)),
           intent: (i) => i.feedback.style.use(tw(NEW_YORK_SIZES[size])),

@@ -14,12 +14,22 @@ describe('Neo Button and Select source-to-normal-CSS closure', () => {
     const tokens = (await collectProtoStyleTokensFromFiles([
       path.resolve('packages/prototypes/brutalist/src/button/button.proto.ts'),
     ])) as string[];
-    for (const token of ['h-9', 'h-10', 'h-11', 'px-3', 'px-4', 'px-8', 'text-sm']) {
+    for (const token of [
+      'h-6',
+      'h-9',
+      'h-10',
+      'h-11',
+      'px-2.5',
+      'px-3',
+      'px-4',
+      'px-8',
+      'text-xs',
+      'text-sm',
+    ]) {
       expect(tokens).toContain(token);
       expect(BRUTALIST_STYLE_TOKENS).toContain(token);
     }
-    for (const token of ['h-12', 'px-6', 'text-xs', 'text-base'])
-      expect(tokens).not.toContain(token);
+    for (const token of ['h-12', 'px-6', 'text-base']) expect(tokens).not.toContain(token);
     for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
       const css = render(tokens);
       expect(css).not.toContain('Unsupported Proto UI style tokens');

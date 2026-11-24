@@ -25,7 +25,13 @@ export const imageRoot = definePrototype<Bootstrap232ImageRootProps, ImageRootEx
     });
     def.props.setDefaults({ appearance: 'default' });
     const behavior = asImageRoot();
-    def.feedback.style.use(tw('max-w-full h-auto align-middle border-0'));
+    def.feedback.style.use(tw('max-w-full h-auto align-middle'));
+    // Apply border-0 only to non-polaroid appearances so alphabetical CSS
+    // ordering never overrides polaroid's 1px frame border.
+    def.rule({
+      when: (w) => w.not(w.prop('appearance').eq('polaroid')),
+      intent: (i) => i.feedback.style.use(tw('border-0')),
+    });
     // Pinned v2.3.2 less/scaffolding.less .img-* recipes. These are not
     // .thumbnail (a separate Surface composition) and install no interaction.
     def.rule({

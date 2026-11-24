@@ -9,6 +9,7 @@ const {
   SelectItem,
   SelectSurface,
   SelectViewport,
+  SelectGroup,
   SelectItemText,
 } = siteControlTags(family);
 import context from 'virtual:starlight/project-context';
@@ -80,11 +81,13 @@ const labelId = `language-select-label-${Math.random().toString(36).slice(2)}`;
         family !== 'brutalist' ? (
           <SelectSurface>
             <SelectViewport>
-              {localeOptions.map((option) => (
-                <SelectItem data-value={option.value} data-text-value={option.label}>
-                  <SelectItemText>{option.label}</SelectItemText>
-                </SelectItem>
-              ))}
+              <SelectGroup>
+                {localeOptions.map((option) => (
+                  <SelectItem data-value={option.value} data-text-value={option.label}>
+                    <SelectItemText>{option.label}</SelectItemText>
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             </SelectViewport>
           </SelectSurface>
         ) : (

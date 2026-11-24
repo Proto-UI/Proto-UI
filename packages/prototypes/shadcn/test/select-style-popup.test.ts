@@ -98,6 +98,7 @@ it('repaints a live portal through the logical scope without replacing caller op
   await settle();
   expect(tokens(surface)).toContain('min-w-36');
   expect(tokens(surface)).toContain('w-[var(--proto-ui-anchor-width)]');
+  expect(tokens(surface)).toContain('translate-y-1');
   expect(tokens(surface)).not.toContain('min-w-0');
   setElementProps(content, { position: 'item-aligned' });
   await settle();
@@ -105,6 +106,7 @@ it('repaints a live portal through the logical scope without replacing caller op
   expect(tokens(surface)).toContain('w-full');
   expect(tokens(surface)).not.toContain('min-w-36');
   expect(tokens(surface)).not.toContain('w-[var(--proto-ui-anchor-width)]');
+  expect(tokens(surface)).not.toContain('translate-y-1');
 });
 
 it('rejects live Rhea on legacy Content-only rather than silently omitting the translucent Surface', async () => {

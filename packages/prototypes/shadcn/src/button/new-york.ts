@@ -15,13 +15,18 @@ export const NEW_YORK_VARIANTS = {
 } as const;
 export const NEW_YORK_SIZES = {
   default: 'h-9 gap-2 px-4 py-2 whitespace-nowrap',
+  xs: 'h-6 gap-1 px-2 text-xs whitespace-nowrap',
   sm: 'h-8 gap-1.5 px-3 whitespace-nowrap',
   lg: 'h-10 gap-2 px-6 whitespace-nowrap',
   icon: 'size-9 gap-2 whitespace-nowrap',
+  'icon-xs': 'size-6 gap-1 whitespace-nowrap',
+  'icon-sm': 'size-8 gap-1.5 whitespace-nowrap',
+  'icon-lg': 'size-10 gap-2 whitespace-nowrap',
   'icon-compact': 'size-7 gap-2 whitespace-nowrap',
 } as const;
 export const NEW_YORK_WRAP_SIZES = {
   default: 'min-h-9 h-auto gap-2 px-4 py-1 min-w-0 max-w-full whitespace-normal break-words',
+  xs: 'min-h-6 h-auto gap-1 px-2 py-0.5 text-xs min-w-0 max-w-full whitespace-normal break-words',
   sm: 'min-h-8 h-auto gap-1.5 px-3 py-1 min-w-0 max-w-full whitespace-normal break-words',
   lg: 'min-h-10 h-auto gap-2 px-6 py-1 min-w-0 max-w-full whitespace-normal break-words',
 } as const;

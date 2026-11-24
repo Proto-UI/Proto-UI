@@ -36,27 +36,27 @@ criteria:
   - id: P-BRUTALIST-BUTTON-VARIANT-PROP
     text:
       en: >-
-        Public `variant` is the enum `solid | surface | destructive` with default `solid`. `solid` is the accent fill role; `surface` is the paper/panel fill; `destructive` is the warning fill. There is no `outline` variant because every Brutalist control already carries a structural 2px outline.
+        Public `variant` is the enum `solid | surface | destructive | noShadow` with default `solid`. `solid` is the accent fill role with resting hard shadow; `noShadow` is the flat accent fill role without resting shadow; `surface` is the paper/panel fill; `destructive` is the warning fill. There is no `outline` variant because every Brutalist control already carries a structural 2px outline.
 
 
       zh-CN: >-
-        公开 `variant` 为枚举 `solid | surface | destructive`，默认 `solid`。 `solid` 为强调填充，`surface` 为纸面/面板填充，`destructive` 为警告填充。 不提供 `outline`，因为每个 Brutalist 控件本身已带 2px 结构描边。
+        公开 `variant` 为枚举 `solid | surface | destructive | noShadow`，默认 `solid`。`solid` 为带静止硬阴影的强调填充，`noShadow` 为无静止阴影的扁平强调填充，`surface` 为纸面/面板填充，`destructive` 为警告填充。不提供 `outline`，因为每个 Brutalist 控件本身已带 2px 结构描边。
 
 
   - id: P-BRUTALIST-BUTTON-COLOR-PROP
     text:
       en: >-
-        Public `color` is the enum `main | mint | lavender | coral | sky` with default `main`. It applies only when `variant` is `solid` and selects a fixed accent pair from the Brutalist palette.
+        Public `color` is the enum `main | mint | lavender | coral | sky` with default `main`. It applies when `variant` is `solid` or `noShadow` and selects a fixed accent pair from the Brutalist palette.
 
 
       zh-CN: >-
-        公开 `color` 为枚举 `main | mint | lavender | coral | sky`，默认 `main`。 仅在 `variant` 为 `solid` 时生效，并从 Brutalist 调色板选择固定强调色对。
+        公开 `color` 为枚举 `main | mint | lavender | coral | sky`，默认 `main`。在 `variant` 为 `solid` 或 `noShadow` 时生效，并从 Brutalist 调色板选择固定强调色对。
 
 
   - id: P-BRUTALIST-BUTTON-SIZE-PROP
     text:
-      en: Public `size` is the enum `default | sm | lg | icon` with default `default`. Text sizes follow the pinned 3306a802 recipe; default h-10 px-4, sm h-9 px-3, and lg h-11 px-8, all text-sm (14px/20px). Icon remains size-10.
-      zh-CN: 公开 `size` 为枚举 `default | sm | lg | icon`，默认 `default`。文字尺寸对齐固定 3306a802 配方：default 为 h-10 px-4，sm 为 h-9 px-3，lg 为 h-11 px-8，均为 text-sm（14px/20px）；icon 保持 size-10。
+      en: Public `size` is the enum `default | xs | sm | lg | icon | icon-xs | icon-sm | icon-lg` with default `default`. Text sizes keep the pinned default h-10 px-4, sm h-9 px-3, and lg h-11 px-8 at text-sm (14px/20px), plus upstream xs h-6 px-2.5 at text-xs. Icon sizes cover icon (size-10), icon-xs (h-6 w-6), icon-sm (size-9), and icon-lg (h-11 aspect-square).
+      zh-CN: 公开 `size` 为枚举 `default | xs | sm | lg | icon | icon-xs | icon-sm | icon-lg`，默认 `default`。文字尺寸保留固定配方 default（h-10 px-4）、sm（h-9 px-3）、lg（h-11 px-8）均为 text-sm（14px/20px），并补齐上游 xs（h-6 px-2.5、text-xs）；图标尺寸包含 icon（size-10）、icon-xs（h-6 w-6）、icon-sm（size-9）与 icon-lg（h-11 aspect-square）。
   - id: P-BRUTALIST-BUTTON-DEFAULTS
     text:
       en: >-

@@ -12,9 +12,10 @@ export default definePrototype<ShadcnLabelRootProps, LabelRootExposes>({
   setup(def) {
     const inherited = asLabelRoot();
     const style = setupShadcnStyleSelection(def, 'new-york-v4');
-    // .cn-label at shadcn-ui/ui@3d98900e. Peer/disabled-control recipes
-    // require target facts that Base Label does not currently project.
-    def.feedback.style.use(tw('flex items-center gap-2 text-foreground'));
+    // .cn-label layout and ink. Target disabled projection remains owned by Base.
+    def.feedback.style.use(
+      tw('flex w-fit max-w-full items-center gap-2 text-start break-words text-foreground')
+    );
     def.rule({
       when: (w) =>
         w.not(

@@ -1,6 +1,6 @@
 ---
 title: 'Label'
-description: 'Pairs accessible naming and click-to-activate behavior with controls through an explicit reference.'
+description: 'Renders an accessible Shadcn label associated with controls through an explicit reference.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -8,11 +8,11 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Connects accessible naming (`naming`) and pointer activation (`activation`) to a paired control using an explicit reference, without manual DOM IDs or implicit ancestor lookups. The examples on this page use the **Shadcn Rhea** style preset.
+`Label` pairs accessible naming (`naming`) and pointer activation (`activation`) with a target control through an explicit reference, without manual DOM IDs or implicit ancestor lookups. The examples on this page use the **Shadcn Rhea** style preset.
+
+> For form fields, use the [Field](../field/) component, which includes built-in `FieldLabel`, `FieldDescription`, and `FieldError` wiring and validation.
 
 ## Preview
-
-The demo pairs `Label` with `Checkbox`, `Switch`, `Radio Group Item`, `Input`, and `Textarea`, covering naming-only (`activation={false}`), controlled, read-only, and disabled cases:
 
 <PrototypePreviewer
   demoId="demo-shadcn-label"
@@ -22,42 +22,150 @@ The demo pairs `Label` with `Checkbox`, `Switch`, `Radio Group Item`, `Input`, a
 
 ## Installation
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-label" manager="npm" />
+<InstallCommandCard
+  commands={{
+    npm: 'npx @proto.ui/cli@latest add wc shadcn-label',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-label',
+  }}
+  manager="npm"
+/>
 
-Replace `wc` with `react`, `vue`, or `vue2` to generate the local facade for your framework. You can also import directly from `@proto.ui/prototypes-shadcn/label`.
+Replace `wc` with `react`, `vue`, or `vue2` to generate the local facade for your framework. You can also import `labelRoot` directly from `@proto.ui/prototypes-shadcn/label`.
 
 ## Usage
 
-### Independent naming and activation
+Create one stable reference per pair with `createControlLabelRef()` from `@proto.ui/core` and pass it through the adapter association channel (outside JSON props):
+
+```tsx
+import { useMemo } from 'react';
+import { createControlLabelRef } from '@proto.ui/core';
+import {
+  ShadcnCheckboxIndicator,
+  ShadcnCheckboxRoot,
+  ShadcnLabelRoot,
+} from '../proto-ui/components/react';
+
+export function TermsCheckbox() {
+  const termsRef = useMemo(() => createControlLabelRef(), []);
+
+  return (
+    <div className="flex items-center gap-2">
+      <ShadcnCheckboxRoot styleProfile="rhea" instanceAssociations={{ controlLabel: termsRef }}>
+        <ShadcnCheckboxIndicator styleProfile="rhea" />
+      </ShadcnCheckboxRoot>
+      <ShadcnLabelRoot styleProfile="rhea" instanceAssociations={{ controlLabel: termsRef }}>
+        Accept terms and conditions
+      </ShadcnLabelRoot>
+    </div>
+  );
+}
+```
+
+In Web Components, bind the same reference with `setElementAssociations()` from `@proto.ui/adapter-web-component`:
+
+```ts
+import { createControlLabelRef } from '@proto.ui/core';
+import { setElementAssociations } from '@proto.ui/adapter-web-component';
+
+const termsRef = createControlLabelRef();
+setElementAssociations(checkboxEl, { controlLabel: termsRef });
+setElementAssociations(labelEl, { controlLabel: termsRef });
+```
+
+### Naming, activation, and accessibility
 
 - **`naming` (default `true`)**: Associates the rendered label with its paired control so assistive technology announces it automatically. If the target already sets a non-empty `ariaLabel` or `labelledBy`, set `naming={false}` for an activation-only label.
-- **`activation` (default `true`)**: Clicking the paired label invokes the control’s action in the same click turn — toggling `Checkbox`/`Switch`, selecting a `Radio Group Item`, or focusing `Input`/`Textarea` without altering text or selection. Set `activation={false}` for a passive naming-only label.
-- **`selection` (default `'policy'`)**: Suppresses accidental text selection on actionable labels while keeping naming-only labels copyable. Set `selection="text"` if an actionable label should also allow text selection.
-- `Label` adds no extra `Tab` stop, and ignores clicks on nested links/buttons, modified clicks, cancelled pointers, and drag gestures.
+- **`activation` (default `true`)**: Clicking the paired label invokes the control's existing action in the same turn — toggling `Checkbox`/`Switch`, selecting a `Radio Group Item`, or focusing `Input`/`Textarea` without altering text or selection. Set `activation={false}` for a passive naming-only label.
+- **`selection` (default `'policy'`)**: Suppresses accidental text selection on actionable labels while keeping naming-only labels copyable. Set `selection="text"` if an actionable label should remain copyable.
+- **Keyboard and pointer safety**: `Label` adds no extra `Tab` stop, and ignores clicks on nested links/buttons, modified clicks, cancelled pointers, and drag gestures.
+- **Supported targets**: `Checkbox`, `Switch`, `Radio Group Item`, `Input`, `Textarea`, `Button`, `Toggle`, `Toggle Group Item`, standalone `Select Trigger`, and `Number Field Input`.
+- **Style presets (`styleProfile`)**: Supports `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`, and `new-york-v4`; the default `'inherit'` reads the nearest [Style Scope](../style-scope/) and falls back to `new-york-v4`.
 
-### Wiring an explicit association
+## Examples
 
-Create one stable reference per label/control pair with `createControlLabelRef()` from `@proto.ui/core` and pass it through the adapter association channel (outside JSON props):
+### Basic
 
-- **React / Vue / Vue 2**: Pass `instanceAssociations: { controlLabel: ref }` to both the label and its target control.
-- **Web Components**: Call `setElementAssociations(element, { controlLabel: ref })` from `@proto.ui/adapter-web-component` on both elements.
-- **DemoSpec**: Declare `associations: { controlLabel: 'row-key' }` for data-only pairing.
+Pair `Label` with `Checkbox` so clicking the label toggles the control.
 
-Each reference supports one live label and one live target within the same document/shadow root; missing, duplicate, or stale endpoints are ignored. Supported targets are `Checkbox`, `Switch`, `Radio Group Item`, `Input`, `Textarea`, `Button`, `Toggle`, and `Toggle Group Item` (including icon-only buttons).
+<PrototypePreviewer
+  demoId="demo-shadcn-label-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Label in Field
+
+Use [Field](../field/) for structured form fields with automatic `FieldLabel`, `FieldDescription`, and `FieldError` associations alongside standalone `Label` controls.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-label-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Naming, Activation, and Selection
+
+Configure `selection="text"` (actionable and copyable), `activation={false}` (naming only), and `naming={false}` (activation only when the target declares its own `ariaLabel`).
+
+<PrototypePreviewer
+  demoId="demo-shadcn-label-modes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Inside a `dir="rtl"` container, `Label` uses logical start alignment (`text-start`) with `Checkbox` and `Input`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-label-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
+### Root
+
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
   rows={[
-    { name: 'naming', type: 'boolean', default: 'true' },
-    { name: 'activation', type: 'boolean', default: 'true' },
-    { name: 'selection', type: "'policy' | 'auto' | 'text' | 'none'", default: 'policy' },
+    {
+      name: 'naming',
+      type: 'boolean',
+      default: 'true',
+      description: 'Associates this rendered label as the paired target accessible name',
+    },
+    {
+      name: 'activation',
+      type: 'boolean',
+      default: 'true',
+      description: 'Requests the paired target default action when the label is clicked',
+    },
+    {
+      name: 'selection',
+      type: "'policy' | 'auto' | 'text' | 'none'",
+      default: "'policy'",
+      description: 'Text-selection policy; default suppresses selection only while actionable',
+    },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'rhea' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'new-york-v4'",
+      default: "'inherit'",
+      description: 'Typography preset; inherits nearest Style Scope or falls back to new-york-v4',
+    },
   ]}
 />
 
-These props belong to `Root`. `selection="policy"` suppresses accidental text selection only while the label is actionable.
+### Association helpers
+
+- `createControlLabelRef()`: Imported from `@proto.ui/core` to create a stable one-to-one opaque reference.
+- `instanceAssociations`: Adapter prop accepting `{ controlLabel: ref }` in React, Vue, and Vue 2.
+- `setElementAssociations(element, { controlLabel: ref })`: Imported from `@proto.ui/adapter-web-component` for Web Components.
 
 ## References
 
 <SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-LABEL.yaml', 'P-BASE-LABEL.yaml']} />
+
+- [Base UI Label](https://base-ui.com/react/components/label)
+- [shadcn/ui Label](https://ui.shadcn.com/docs/components/base/label)

@@ -100,9 +100,13 @@ export function setupCollectionActionVisual<
   const hovered = state.hovered ?? setupCollectionHover(def, state.disabled);
   def.feedback.style.use(
     tw(
-      'inline-flex shrink-0 items-center justify-center whitespace-nowrap transition-all outline-none select-none text-foreground'
+      'inline-flex shrink-0 items-center justify-center whitespace-nowrap transition-all outline-none select-none cursor-pointer text-foreground'
     )
   );
+  def.rule({
+    when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+    intent: (i) => i.feedback.style.use(tw('transition-none')),
+  });
   if (variant === 'ghost') def.feedback.style.use(tw('bg-transparent'));
   for (const profile of SHADCN_STYLE_IDS) {
     def.rule({
@@ -202,7 +206,8 @@ export function setupCollectionActionVisual<
           w.all(
             w.state(style).eq(profile),
             w.state(state.pressed!).eq(true),
-            w.state(state.disabled).eq(false)
+            w.state(state.disabled).eq(false),
+            w.not(w.meta('preference.reducedMotion').eq('reduce'))
           ),
         intent: (i) => i.feedback.style.use(tw('translate-y-px')),
       });

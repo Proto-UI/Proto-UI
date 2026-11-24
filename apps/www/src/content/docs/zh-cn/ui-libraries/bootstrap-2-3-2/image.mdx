@@ -1,0 +1,133 @@
+---
+title: 'Image'
+description: '提供经典 rounded、polaroid 与 circle 样式以及无障碍语义和加载状态追踪的 Bootstrap 2.3.2 图像组件。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Bootstrap 2.3.2 Image 保留归档版本的 `.img-rounded`、`.img-polaroid` 与 `.img-circle` 视觉修饰，同时通过 Base Image 协议统一管理资源地址、填充模式、无障碍语义与实时加载状态。
+
+## 预览
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-image"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/image` 导入 `imageRoot`（别名 `bootstrap232ImageRoot`）与 `Bootstrap232ImageRootProps`。
+
+## 用法
+
+```tsx
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import { bootstrap232ImageRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/image';
+
+const BootstrapImage = createReactAdapter(React)(bootstrap232ImageRoot);
+
+export function FramedPortrait() {
+  return (
+    <BootstrapImage
+      source="/images/base-image/portrait.svg"
+      a11yMode="informative"
+      alternativeText="经典拍立得边框人像插图"
+      fit="cover"
+      appearance="polaroid"
+      surfaceStyle={{ width: '160px', height: '160px' }}
+    />
+  );
+}
+```
+
+- **外观变体（`appearance`）**：
+  - `default`：响应式无边框图像（`max-w-full h-auto align-middle border-0`）。
+  - `rounded`：经典 `6px` 圆角（`.img-rounded`）。
+  - `polaroid`：`4px` 白色内边距、`1px rgba(0, 0, 0, 0.2)` 外框与柔和投影（`.img-polaroid`）。
+  - `circle`：历史版本 `500px` 圆角（`.img-circle`），建议配合 1:1 正方形尺寸呈现正圆效果。
+- **无障碍与加载状态**：`a11yMode`、`alternativeText`、`fit`、`loadingStatus` 与 `loadingStatusChange` 均继承自 [Base Image](/zh-cn/ui-libraries/base/image/)。
+
+## 示例
+
+### 缩放模式
+
+搭配 `appearance="rounded"` 对比 `contain`、`cover` 与 `fill`。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-image-fit"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 无障碍语义
+
+分别使用 `polaroid` 展示信息性配图、使用 1:1 `circle` 展示装饰性缩略图。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-image-a11y"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 加载与错误回退
+
+结合 Bootstrap 2.3.2 按钮切换资源地址，并在加载失败或清空时显示应用层回退提示与重试按钮。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-image-loading"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root Props
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'source', type: 'string | undefined', default: 'undefined' },
+    { name: 'a11yMode', type: "'informative' | 'decorative'", default: 'informative' },
+    { name: 'alternativeText', type: 'string', default: "''" },
+    { name: 'fit', type: "'contain' | 'cover' | 'fill'", default: 'contain' },
+    {
+      name: 'appearance',
+      type: "'default' | 'rounded' | 'polaroid' | 'circle'",
+      default: 'default',
+    },
+  ]}
+/>
+
+### 暴露状态与事件
+
+<ApiPropsTable
+  headers={{ name: '名称', type: '类型', default: '说明' }}
+  rows={[
+    { name: 'source', type: 'ExposeState<string>', default: '当前生效的图片源 URI' },
+    { name: 'fit', type: "ExposeState<'contain' | 'cover' | 'fill'>", default: '当前缩放填充模式' },
+    {
+      name: 'loadingStatus',
+      type: "ExposeState<'idle' | 'loading' | 'loaded' | 'error'>",
+      default: '当前加载生命周期状态',
+    },
+    {
+      name: 'loadingStatusChange',
+      type: 'ExposeEvent<{ status, previousStatus, source }>',
+      default: '加载状态变化时触发（React/Vue 中可绑定 onLoadingStatusChange）',
+    },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-IMAGE.yaml', 'P-BASE-IMAGE.yaml']}
+/>

@@ -1,11 +1,15 @@
 ---
 title: 'Label'
-description: '通过显式引用关联控件可访问名称与点击激活行为的 Bootstrap 2.3.2 标签组件。'
+description: '保留归档 Bootstrap 2.3.2 排版并通过显式引用关联控件命名与点击激活的标签组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Label 通过显式引用与目标控件配对，可分别控制无障碍命名与点击激活行为，支持 Checkbox、Switch、Radio Group Item、Input、Textarea、Button、Toggle 与 Toggle Group Item。
+Bootstrap 2.3.2 `Label` 保留经典 `14px / 20px` Helvetica Neue 常规字重排版，并通过显式引用与目标控件配对，可独立控制无障碍命名（`naming`）与点击激活（`activation`）行为。
+
+> 表单输入字段请优先使用 [Field](../field/) 组件，内置 `FieldLabel`、`FieldDescription` 与 `FieldError` 自动关联与校验支持。
 
 ## 预览
 
@@ -17,7 +21,7 @@ Bootstrap 2.3.2 Label 通过显式引用与目标控件配对，可分别控制�
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，可直接从工作区包导入：
 
 ```ts
 import { labelRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/label';
@@ -25,28 +29,122 @@ import { labelRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/label';
 
 ## 用法
 
-### 显式配对关联
+通过 `@proto.ui/core` 的 `createControlLabelRef()` 为每对标签与控件创建稳定引用，并通过适配器通道传入：
 
-Label 不依赖 DOM 嵌套或全局 ID 查找，而是通过 `@proto.ui/core` 的 `createControlLabelRef()` 为每一对标签与控件创建稳定引用：
+```tsx
+import { useMemo } from 'react';
+import { createControlLabelRef } from '@proto.ui/core';
+import {
+  BootstrapCheckboxIndicator,
+  BootstrapCheckboxRoot,
+  BootstrapLabelRoot,
+} from '../proto-ui/components/react';
 
-- **React / Vue / Vue 2**：向 Label 和目标控件同时传入 `instanceAssociations: { controlLabel: ref }`。
-- **Web Components**：使用 `@proto.ui/adapter-web-component` 导出的 `setElementAssociations(target, { controlLabel: ref })` 分别绑定到控件和 Label。
+export function TermsCheckbox() {
+  const termsRef = useMemo(() => createControlLabelRef(), []);
 
-每个引用仅绑定一个在线 Label 与一个在线目标控件，且在 Web 中需位于同一 Document 与 Shadow Tree 内；缺失或重复绑定时会忽略非法配置并保持当前状态。
+  return (
+    <div className="flex items-center gap-2">
+      <BootstrapCheckboxRoot instanceAssociations={{ controlLabel: termsRef }}>
+        <BootstrapCheckboxIndicator />
+      </BootstrapCheckboxRoot>
+      <BootstrapLabelRoot instanceAssociations={{ controlLabel: termsRef }}>
+        Accept terms and conditions
+      </BootstrapLabelRoot>
+    </div>
+  );
+}
+```
 
-### 独立控制命名与激活
+Web Components 通过 `@proto.ui/adapter-web-component` 的 `setElementAssociations()` 绑定同一引用：
 
-- **`naming`（默认 `true`）**：目标控件通过无障碍关系引用该 Label 作为名称，无需再额外书写重复的隐藏标签。若目标控件已显式提供非空 `ariaLabel` / `labelledBy`，则会保留其原有命名；此时可将 Label 设为 `naming={false}` 仅用于点击激活。
-- **`activation`（默认 `true`）**：点击已配对的 Label 会触发目标控件的既有行为（例如切换 Checkbox/Switch、选中 Radio Item 或聚焦 Input/Textarea）。如只需被动命名、不希望点击触发控件，显式设置 `activation={false}`。
-- **文本选择与交互保护**：Label 不增加额外 Tab 停靠点，不会转发嵌套链接/按钮、拖拽、取消或带修饰键的点击。`selection="policy"` 可防止短操作标签在点击时误选文字；需要允许复制时设置 `selection="text"`。
+```ts
+import { createControlLabelRef } from '@proto.ui/core';
+import { setElementAssociations } from '@proto.ui/adapter-web-component';
+
+const termsRef = createControlLabelRef();
+setElementAssociations(checkboxEl, { controlLabel: termsRef });
+setElementAssociations(labelEl, { controlLabel: termsRef });
+```
+
+### 命名、激活与布局
+
+- **`naming`（默认 `true`）**：让目标控件自动引用该 `Label` 作为无障碍名称；若目标已声明非空 `ariaLabel` 或 `labelledBy`，建议设为 `naming={false}` 仅用于点击激活。
+- **`activation`（默认 `true`）**：点击已配对的 `Label` 会触发目标控件的默认操作（切换 `Checkbox` / `Switch`、选择 `Radio Group Item` 或聚焦 `Input` / `Textarea`）。如需仅被动命名，请设为 `activation={false}`。
+- **`selection`（默认 `'policy'`）**：可激活标签默认防止误选文字；需要支持选中复制时可设为 `selection="text"`，或使用 `'auto'` / `'none'` 显式覆盖。
+- **对齐与无障碍**：采用 `inline-flex` 布局且不附加硬编码下外边距，既能与行内勾选框垂直居中对齐，也便于在垂直表单容器中按容器间距排布；不增加额外 `Tab` 停靠点，并过滤嵌套交互元素、修饰键点击与拖拽。
+
+## 示例
+
+### 基础用法
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-label-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 在 Field 中使用
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-label-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 命名、激活与文本选择
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-label-modes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 从右到左（RTL）
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-label-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 属性 / 辅助方法 | 默认值 | 说明 |
-| --- | --- | --- |
-| `naming` | `true` | 是否为关联控件提供无障碍名称 |
-| `activation` | `true` | 点击标签时是否触发关联控件的默认操作 |
-| `selection` | `'policy'` | 可选 `'policy'`（防误选）或 `'text'`（允许选中复制） |
-| `createControlLabelRef()` | — | 从 `@proto.ui/core` 导入，创建一对一控件关联引用 |
-| `instanceAssociations` | — | React / Vue / Vue 2 传入 `{ controlLabel: ref }` 的适配器关联属性 |
-| `setElementAssociations()` | — | 从 `@proto.ui/adapter-web-component` 导入，为 Web Components 绑定引用 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'naming',
+      type: 'boolean',
+      default: 'true',
+      description: '是否为关联控件提供无障碍名称',
+    },
+    {
+      name: 'activation',
+      type: 'boolean',
+      default: 'true',
+      description: '点击标签时是否触发关联控件的默认操作',
+    },
+    {
+      name: 'selection',
+      type: "'policy' | 'auto' | 'text' | 'none'",
+      default: "'policy'",
+      description: '文本选择策略；默认仅在可激活状态下抑制误选',
+    },
+  ]}
+/>
+
+### 关联辅助接口
+
+- `createControlLabelRef()`：从 `@proto.ui/core` 导入，创建一对一控件关联引用。
+- `instanceAssociations`：React / Vue / Vue 2 传入 `{ controlLabel: ref }` 的适配器关联属性。
+- `setElementAssociations(element, { controlLabel: ref })`：从 `@proto.ui/adapter-web-component` 导入，为 Web Components 绑定引用。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-LABEL.yaml', 'P-BASE-LABEL.yaml']}
+/>

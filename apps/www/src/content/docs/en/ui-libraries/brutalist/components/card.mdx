@@ -1,42 +1,170 @@
 ---
 title: Card
-description: 'A Brutalist grouping panel with a 2px black frame, hard offset shadow, and clean unbordered sections.'
+description: 'A Brutalist grouping panel with 5px corners, a 2px black frame, and a 4px hard offset shadow.'
 sidebar:
   order: 4
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Card is a static grouping surface styled with 5px rounded corners, a `2px` black frame, and a 4px hard offset shadow.
+Brutalist Card is a passive grouping surface styled with 5px rounded corners (`rounded-base`), a `2px` black border, and a 4px hard offset shadow, supporting default and compact densities plus optional section dividers.
 
 ## Preview
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-card" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-card"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+<InstallCommandCard
+  manager="npm"
+  commands={{
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc brutalist-card',
+    npm: 'npx @proto.ui/cli@latest add wc brutalist-card',
+    yarn: 'yarn dlx @proto.ui/cli@latest add wc brutalist-card',
+    bun: 'bunx @proto.ui/cli@latest add wc brutalist-card',
+  }}
+/>
 
-- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-card`
+Replace `wc` with `react`, `vue`, or `vue2` to generate framework facades, or import `BrutalistCardRoot`, `BrutalistCardHeader`, `BrutalistCardContent`, and `BrutalistCardFooter` directly from `@proto.ui/prototypes-brutalist/card` in workspace source.
 
-## Usage
+<h2 id="usage">Usage</h2>
 
-Card provides four parts: `Root`, `Header`, `Content`, and `Footer`:
+```tsx
+import {
+  BrutalistCardRoot,
+  BrutalistCardHeader,
+  BrutalistCardContent,
+  BrutalistCardFooter,
+} from '@proto.ui/prototypes-brutalist/card';
+```
 
-- **Root**: Passive paper panel with 5px rounded corners, a `2px` black frame, and a 4px hard black shadow.
-- **Header / Footer**: Handle header and footer layout and spacing with no section borders by default.
-- **Content**: Provides horizontal padding for body content.
+```tsx
+<BrutalistCardRoot>
+  <BrutalistCardHeader>
+    <div className="flex flex-col gap-1">
+      <h3 className="font-heading text-base font-bold">Card Title</h3>
+      <p className="text-sm text-muted-foreground">Card Description</p>
+    </div>
+  </BrutalistCardHeader>
+  <BrutalistCardContent>
+    <p className="text-sm">Card Content</p>
+  </BrutalistCardContent>
+  <BrutalistCardFooter>
+    <p className="text-xs text-muted-foreground">Card Footer</p>
+  </BrutalistCardFooter>
+</BrutalistCardRoot>
+```
 
-Render titles and descriptions as ordinary text elements, and place `Button` or link elements inside the card whenever interactive actions are needed.
+Composition:
+
+```text
+BrutalistCardRoot
+├── BrutalistCardHeader
+├── BrutalistCardContent
+└── BrutalistCardFooter
+```
+
+- **Typography and frame**: `Root` projects a static raised panel with 5px corners, a `2px` black frame, and a 4px hard shadow (without press displacement). Style card headings with `font-heading font-bold` (DM Sans 700) while body text inherits `font-sans font-medium`.
+- **Density and dividers**: Set `size="sm"` on `Root` for compact 16px spacing and insets. `Header` and `Footer` render without borders by default; pass `divider={true}` to display `2px` theme-adaptive dividers.
+- **Passive semantics**: All four parts are roleless and non-focusable. Compose `BrutalistButton`, inputs, or native links inside the card for interactive actions.
+
+## Examples
+
+### Login Form
+
+Compose `BrutalistLabel`, `BrutalistInput`, and solid/surface `BrutalistButton` controls inside a card.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-card-login"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Size
+
+Set `size="sm"` on `Root` to switch every section to compact 16px vertical spacing and horizontal insets.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-card-small"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Dividers
+
+Set `divider={true}` on `Header` and `Footer` to separate scrollable body content with `2px` theme-adaptive dividers.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-card-dividers"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Image
+
+Place a cover image before `Header` and add `overflow-hidden pt-0` on `Root` so the image sits flush with the 5px rounded border.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-card-image"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-`Root`, `Header`, `Content`, and `Footer` render your children and declare no props of their own.
+### BrutalistCardRoot
 
-<ApiPropsTable headers={{ name: 'Prop', type: 'Type', default: 'Default' }} rows={[]} />
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'size', type: "'default' | 'sm'", default: "'default'" }]}
+/>
+
+### BrutalistCardHeader
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'divider', type: 'boolean', default: 'false' }]}
+/>
+
+### BrutalistCardContent
+
+`BrutalistCardContent` declares no additional props and inherits horizontal padding from `Root`'s `size` density.
+
+### BrutalistCardFooter
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'divider', type: 'boolean', default: 'false' }]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-CARD.yaml',
+    'P-BRUTALIST-CARD-HEADER.yaml',
+    'P-BRUTALIST-CARD-CONTENT.yaml',
+    'P-BRUTALIST-CARD-FOOTER.yaml',
+  ]}
+/>

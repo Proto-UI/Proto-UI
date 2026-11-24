@@ -1,42 +1,128 @@
 ---
 title: Separator
-description: 'A flat 2px ink rule for visually or semantically dividing content regions in the Brutalist family.'
+description: 'A flat 2px foreground rule for visually or semantically dividing content regions in the Brutalist family.'
 sidebar:
   order: 7
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Separator renders a flat `2px` ink rule with horizontal or vertical orientation and decorative accessibility semantics. Use it between message date groups, Card sections, navigation lists, and form regions.
+Separator renders a flat `2px` foreground rule with no shadow or motion that adapts automatically between light and dark themes, while Base Separator provides orientation and decorative accessibility semantics.
 
 ## Preview
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-separator" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-separator"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## Installation
 
-Included in `@proto.ui/prototypes-brutalist@0.2.0`. Add it via the CLI target `brutalist-separator`, or import directly from `@proto.ui/prototypes-brutalist/separator`.
+<InstallCommandCard
+  manager="npm"
+  commands={{
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc brutalist-separator',
+    npm: 'npx @proto.ui/cli@latest add wc brutalist-separator',
+    yarn: 'yarn dlx @proto.ui/cli@latest add wc brutalist-separator',
+    bun: 'bunx @proto.ui/cli@latest add wc brutalist-separator',
+  }}
+/>
+
+Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your framework, or import directly from `@proto.ui/prototypes-brutalist/separator`.
 
 ## Usage
 
-- Set `orientation` to `'horizontal'` or `'vertical'` to match your layout axis.
-- Keep `decorative={true}` (default) for purely visual dividers, or set `decorative={false}` to expose a semantic separator to assistive technologies.
-- Separator adds no built-in margin; control spacing in the surrounding layout.
+```tsx
+import { BrutalistSeparatorRoot } from '../proto-ui/components/react';
+```
+
+```tsx
+<BrutalistSeparatorRoot />
+```
+
+- Set `orientation` to `'horizontal'` or `'vertical'` to match your layout axis; vertical rules stretch automatically across flex containers (`self-stretch`).
+- Keep `decorative={true}` (default) for purely visual dividers, or set `decorative={false}` to expose `role="separator"` and `aria-orientation` to assistive technologies.
+- Separator is contentless, passive, and adds no built-in margin; control spacing in the surrounding layout.
+
+## Examples
+
+### Vertical
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-separator-vertical"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Menu
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-separator-menu"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### List
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-separator-list"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### RTL
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-separator-rtl"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
 The following props belong to `Root`:
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
   rows={[
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
-    { name: 'decorative', type: 'boolean', default: 'true' },
+    {
+      name: 'orientation',
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: 'Divider orientation',
+    },
+    {
+      name: 'decorative',
+      type: 'boolean',
+      default: 'true',
+      description:
+        'Hides the divider from assistive technologies when true; exposes semantic role="separator" when false',
+    },
   ]}
+/>
+
+Exposes read-only `orientation` and `decorative` states with no focus or interaction channel.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-SEPARATOR.yaml', 'P-BASE-SEPARATOR.yaml']}
 />

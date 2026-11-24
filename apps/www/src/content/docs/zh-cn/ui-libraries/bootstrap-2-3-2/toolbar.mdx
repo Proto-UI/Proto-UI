@@ -1,11 +1,13 @@
 ---
 title: 'Toolbar'
-description: '支持游走焦点、交叉轴分隔线与无障碍命名的 Bootstrap 2.3.2 工具栏组件。'
+description: '支持经典渐变按钮变体、尺寸、交叉轴分隔线与键盘漫游焦点的 Bootstrap 2.3.2 工具栏组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Toolbar 将一组操作按钮与视觉分隔线收纳在一个紧凑的键盘游走容器中，适合编辑器和面板操作栏。
+Bootstrap 2.3.2 Toolbar 保留经典渐变按钮、像素级边框与按压内阴影反馈，将一组命令按钮与分隔线组织在单一 `Tab` 入口的键盘漫游容器中。
 
 ## 预览
 
@@ -13,24 +15,150 @@ Toolbar 将一组操作按钮与视觉分隔线收纳在一个紧凑的键盘游
   demoId="demo-bootstrap-2-3-2-toolbar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/toolbar` 导入原型并适配到目标框架：
+
+```ts
+import {
+  toolbarRoot,
+  toolbarButton,
+  toolbarSeparator,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/toolbar';
+```
 
 ## 用法
 
-由 `Root`、`Button` 和 `Separator` 组成：
+```tsx
+import {
+  BootstrapToolbarRoot,
+  BootstrapToolbarButton,
+  BootstrapToolbarSeparator,
+} from '../proto-ui/components/react';
 
-- **游走焦点**：整条工具栏仅占一个 Tab 入口，使用方向键在已启用的命令按钮之间移动；开启 `loop` 后可在首尾之间循环。
-- **命令激活与分隔线**：点击或按键盘激活启用的 `Button` 时，发出包含其 `value` 的 `action` 事件；`Separator` 会自动沿工具栏的交叉轴方向渲染。
+export function EditorToolbar() {
+  return (
+    <BootstrapToolbarRoot a11yLabel="Document actions">
+      <BootstrapToolbarButton value="undo">Undo</BootstrapToolbarButton>
+      <BootstrapToolbarButton value="redo">Redo</BootstrapToolbarButton>
+      <BootstrapToolbarSeparator />
+      <BootstrapToolbarButton value="save" variant="primary">
+        Save
+      </BootstrapToolbarButton>
+    </BootstrapToolbarRoot>
+  );
+}
+```
+
+Toolbar 由 `Root`、`Button` 和 `Separator` 三个部件组成：
+
+- **经典按钮质感**：`Button` 保留 Bootstrap 2.3.2 的线性渐变、悬停背景位移与按压内阴影，同时在键盘聚焦时使用清晰的单一焦点环避免双重外框。
+- **漫游焦点**：整条工具栏仅保留一个启用命令位于 `Tab` 顺序中，通过方向键在可用命令间移动，`loop={true}`（默认）时支持首尾循环。
+- **交叉轴分隔线**：`Separator` 自动根据工具栏方向切换为 1px 纵向或横向分隔线。
+
+## 示例
+
+### 经典变体与尺寸
+
+支持 Bootstrap 2.3.2 的 `default`、`primary`、`success`、`info`、`warning`、`danger`、`inverse` 按钮变体，以及 `default`、`small`、`mini` 尺寸。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toolbar-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 垂直方向
+
+将 `orientation` 设为 `'vertical'` 后，按钮自动等宽纵向排列，`Separator` 转为水平分隔线，方向键切换为上下键导航。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toolbar-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与非循环导航
+
+通过 `Root.disabled={true}` 统一禁用所有命令，或设置 `loop={false}` 关闭首尾循环导航。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toolbar-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 事件 | 说明 |
-| --- | --- | --- |
-| `Root` | `disabled` / `orientation` / `loop` / `a11yLabel` | 禁用、方向、首尾循环与工具栏可访问名称 |
-| `Button` | `value` / `action` | 命令标识与激活时发出的 `action` 事件 |
-| `Separator` | — | 自动跟随交叉轴方向的分隔线 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: '统一禁用整条工具栏中的所有命令按钮',
+    },
+    {
+      name: 'orientation',
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: '工具栏排列方向与方向键导航轴向',
+    },
+    {
+      name: 'loop',
+      type: 'boolean',
+      default: 'true',
+      description: '方向键导航是否在首尾命令间循环',
+    },
+    { name: 'a11yLabel', type: 'string', default: "''", description: '工具栏的无障碍名称' },
+  ]}
+/>
+
+### Button
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'",
+      default: "'default'",
+      description: '经典 Bootstrap 2.3.2 按钮配色变体',
+    },
+    {
+      name: 'size',
+      type: "'default' | 'small' | 'mini'",
+      default: "'default'",
+      description: 'Bootstrap 2.3.2 像素级按钮尺寸',
+    },
+    {
+      name: 'value',
+      type: 'string',
+      default: "''",
+      description: '激活时随 action 事件回传的命令值',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: '禁用当前按钮并呈现扁平淡化状态',
+    },
+  ]}
+/>
+
+### Separator 与事件
+
+- **Separator**：无额外属性，自动沿工具栏交叉轴方向绘制 1px 分隔线。
+- **事件与暴露**：`Button` 激活时发出 `action`（`{ value: string }`）；`Root` 暴露 `disabled`、`focusFirst()`、`focusLast()` 与 `setCurrent(id)`；`Button` 暴露 `disabled`、`focused`、`focusVisible` 与 `focusSelf(options)`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-TOOLBAR.yaml', 'P-BASE-TOOLBAR.yaml']}
+/>

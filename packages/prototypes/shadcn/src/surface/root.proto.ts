@@ -20,7 +20,7 @@ export interface ShadcnSurfaceRootProps extends SurfaceRootProps {
 export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, SurfaceRootExposes>({
   name: 'shadcn-surface-root',
   setup(def) {
-    asSurfaceRoot();
+    const inherited = asSurfaceRoot();
     def.props.define({
       actionProfile: {
         type: 'enum',
@@ -29,6 +29,24 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
       },
     });
     def.props.setDefaults({ actionProfile: 'none' });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.not(w.prop('actionProfile').eq('none')),
+          w.prop('fade').eq(false),
+          w.meta('preference.reducedMotion').eq('no-preference')
+        ),
+      intent: (i) => i.feedback.style.use(tw('transition-all')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.not(w.prop('actionProfile').eq('none')),
+          w.prop('fade').eq(false),
+          w.not(w.meta('preference.reducedMotion').eq('no-preference'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
     def.rule({
       when: (w) => w.prop('variant').eq('scrim'),
       intent: (i) => i.feedback.style.use(tw('bg-black/80')),
@@ -41,7 +59,11 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
       when: (w) =>
         w.all(
           w.prop('fade').eq(true),
-          w.any(w.prop('transitionState').eq('closed'), w.prop('transitionState').eq('leaving'))
+          w.any(
+            w.prop('transitionState').eq('closed'),
+            w.prop('transitionState').eq('preparing'),
+            w.prop('transitionState').eq('leaving')
+          )
         ),
       intent: (i) => i.feedback.style.use(tw('opacity-0')),
     });
@@ -141,10 +163,29 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
       when: (w) =>
         w.all(
           w.prop('actionProfile').eq('none'),
+          w.prop('variant').eq('secondary'),
+          w.prop('hovered').eq(true)
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-secondary/80')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('actionProfile').eq('none'),
           w.any(w.prop('variant').eq('outline'), w.prop('variant').eq('transparent')),
           w.any(w.prop('hovered').eq(true), w.prop('current').eq(true))
         ),
       intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('actionProfile').eq('none'),
+          w.any(w.prop('variant').eq('outline'), w.prop('variant').eq('transparent')),
+          w.any(w.prop('hovered').eq(true), w.prop('current').eq(true)),
+          w.meta('colorScheme').eq('dark')
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-muted/50')),
     });
     // Explicit source-bound appearance only. No interaction owner is created.
     for (const profile of SHADCN_MODERN_ACTION_STYLES) {
@@ -157,10 +198,29 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
         intent: (i) =>
           i.feedback.style.use(
             tw(
-              'border border-transparent bg-clip-padding transition-all outline-none',
+              'border border-transparent bg-clip-padding outline-none',
               SHADCN_ACTION_RADIUS[profile]
             )
           ),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('actionProfile').eq(profile),
+            w.prop('variant').eq('outline'),
+            w.prop('border').eq('all'),
+            w.prop('focusVisible').eq(false)
+          ),
+        intent: (i) => i.feedback.style.use(tw('border-border')),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('actionProfile').eq(profile),
+            w.prop('border').eq('bottom'),
+            w.prop('focusVisible').eq(false)
+          ),
+        intent: (i) => i.feedback.style.use(tw('border-b border-border')),
       });
       def.rule({
         when: (w) => w.all(w.prop('actionProfile').eq(profile), w.prop('focusVisible').eq(true)),
@@ -189,7 +249,7 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
         when: (w) =>
           w.all(
             w.prop('actionProfile').eq(profile),
-            w.prop('variant').eq('transparent'),
+            w.any(w.prop('variant').eq('transparent'), w.prop('variant').eq('outline')),
             w.prop('hovered').eq(true)
           ),
         intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
@@ -198,7 +258,7 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
         when: (w) =>
           w.all(
             w.prop('actionProfile').eq(profile),
-            w.prop('variant').eq('transparent'),
+            w.any(w.prop('variant').eq('transparent'), w.prop('variant').eq('outline')),
             w.prop('hovered').eq(true),
             w.meta('colorScheme').eq('dark')
           ),
@@ -209,7 +269,26 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
     for (const profile of ['new-york-v4', 'new-york'] as const) {
       def.rule({
         when: (w) => w.prop('actionProfile').eq(profile),
-        intent: (i) => i.feedback.style.use(tw('rounded-md transition-all outline-none')),
+        intent: (i) => i.feedback.style.use(tw('rounded-md outline-none')),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('actionProfile').eq(profile),
+            w.prop('variant').eq('outline'),
+            w.prop('border').eq('all'),
+            w.prop('focusVisible').eq(false)
+          ),
+        intent: (i) => i.feedback.style.use(tw('border border-border')),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('actionProfile').eq(profile),
+            w.prop('border').eq('bottom'),
+            w.prop('focusVisible').eq(false)
+          ),
+        intent: (i) => i.feedback.style.use(tw('border-b border-border')),
       });
       def.rule({
         when: (w) => w.all(w.prop('actionProfile').eq(profile), w.prop('focusVisible').eq(true)),
@@ -238,7 +317,7 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
         when: (w) =>
           w.all(
             w.prop('actionProfile').eq(profile),
-            w.prop('variant').eq('transparent'),
+            w.any(w.prop('variant').eq('transparent'), w.prop('variant').eq('outline')),
             w.prop('hovered').eq(true)
           ),
         intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
@@ -247,14 +326,14 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
         when: (w) =>
           w.all(
             w.prop('actionProfile').eq(profile),
-            w.prop('variant').eq('transparent'),
+            w.any(w.prop('variant').eq('transparent'), w.prop('variant').eq('outline')),
             w.prop('hovered').eq(true),
             w.meta('colorScheme').eq('dark')
           ),
         intent: (i) => i.feedback.style.use(tw('bg-accent/50')),
       });
     }
-    return (renderer) => renderer.r.slot();
+    return inherited.render;
   },
 });
 export default ShadcnSurfaceRoot;

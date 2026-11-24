@@ -10,14 +10,17 @@ export default definePrototype<ToolbarSeparatorProps, ToolbarSeparatorExposes>({
   modules: asToolbarSeparator.modules,
   setup(def) {
     const behavior = asToolbarSeparator();
-    def.feedback.style.use(tw('shrink-0 self-stretch bg-[#e5e5e5]'));
+    const state = behavior.stateHandles;
+    if (!state) throw new Error('[bootstrap-2-3-2-toolbar] Separator state unavailable.');
+
+    def.feedback.style.use(tw('shrink-0 self-stretch bg-border'));
     def.rule({
-      when: (w) => w.state(behavior.getState!('orientation')!).eq('vertical'),
-      intent: (i) => i.feedback.style.use(tw('w-[1px] mx-[5px]')),
+      when: (w) => w.state(state.orientation).eq('vertical'),
+      intent: (i) => i.feedback.style.use(tw('w-[1px] h-auto mx-[5px] my-[2px]')),
     });
     def.rule({
-      when: (w) => w.state(behavior.getState!('orientation')!).eq('horizontal'),
-      intent: (i) => i.feedback.style.use(tw('h-[1px] my-[5px]')),
+      when: (w) => w.state(state.orientation).eq('horizontal'),
+      intent: (i) => i.feedback.style.use(tw('h-[1px] w-full my-[5px] mx-0')),
     });
     return behavior.render;
   },

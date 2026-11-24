@@ -1,42 +1,127 @@
 ---
 title: Separator
-description: '以 2px 墨黑平涂线条划分内容区块的 Brutalist 风格分隔线组件。'
+description: '以 2px 实线前景色线条划分内容区块的 Brutalist 风格分隔线组件。'
 sidebar:
   order: 7
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Separator 渲染一条平涂 `2px` 墨黑分隔线，支持水平与垂直方向及装饰性无障碍语义，适合消息日期分组、Card 分区、导航列表和表单区域。
+Separator 渲染一条平涂 `2px` 实线分隔线，使用随亮暗模式自适应的 `foreground` 语义色，不叠加阴影或动效，由 Base Separator 统一提供方向与无障碍语义。
 
 ## 预览
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-separator" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-separator"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## 安装
 
-已包含在 `@proto.ui/prototypes-brutalist@0.2.0` 中。可通过 CLI 目标 `brutalist-separator` 添加，或从 `@proto.ui/prototypes-brutalist/separator` 导入。
+<InstallCommandCard
+  manager="npm"
+  commands={{
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc brutalist-separator',
+    npm: 'npx @proto.ui/cli@latest add wc brutalist-separator',
+    yarn: 'yarn dlx @proto.ui/cli@latest add wc brutalist-separator',
+    bun: 'bunx @proto.ui/cli@latest add wc brutalist-separator',
+  }}
+/>
+
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2` 生成对应框架组件，也可直接从 `@proto.ui/prototypes-brutalist/separator` 导入。
 
 ## 用法
 
-- 通过 `orientation` 切换水平（`'horizontal'`）或垂直（`'vertical'`）分隔线。
-- 默认 `decorative={true}` 仅作视觉分隔并从无障碍树隐藏；当分隔线需要传达语义分组时，将其设为 `false`。
-- Separator 本身不内置外边距，间距由外围布局控制。
+```tsx
+import { BrutalistSeparatorRoot } from '../proto-ui/components/react';
+```
+
+```tsx
+<BrutalistSeparatorRoot />
+```
+
+- 通过 `orientation` 切换水平（`'horizontal'`）或垂直（`'vertical'`）方向；垂直分隔线会自动沿弹性布局交叉轴拉伸（`self-stretch`）。
+- 默认 `decorative={true}` 仅作视觉分隔并从无障碍树隐藏；当分隔线需要传达语义分组时，设为 `false` 以暴露 `role="separator"` 与 `aria-orientation`。
+- Separator 为无内容、无交互元素，不内置外边距，间距由外围布局控制。
+
+## 示例
+
+### 垂直方向
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-separator-vertical"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 菜单项
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-separator-menu"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 列表与语义分隔
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-separator-list"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### RTL
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-separator-rtl"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
 以下属性属于 `Root`：
 
 <ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
   rows={[
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
-    { name: 'decorative', type: 'boolean', default: 'true' },
+    {
+      name: 'orientation',
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: '分隔线方向',
+    },
+    {
+      name: 'decorative',
+      type: 'boolean',
+      default: 'true',
+      description: '为 true 时对辅助技术隐藏；为 false 时暴露语义 separator 角色与方向',
+    },
   ]}
+/>
+
+暴露只读状态 `orientation` 与 `decorative`，不声明焦点或交互事件。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-SEPARATOR.yaml', 'P-BASE-SEPARATOR.yaml']}
 />

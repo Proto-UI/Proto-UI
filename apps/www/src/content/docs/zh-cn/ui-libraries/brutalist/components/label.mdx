@@ -4,51 +4,167 @@ description: '通过显式实例关联为控件提供无障碍命名与点击激
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
-Brutalist Label 通过显式引用关联为 `Checkbox`、`Switch`、`Radio Group Item`、`Input`、`Textarea`、`Button`、`Toggle` 和 `Toggle Group Item` 提供无障碍命名与点击激活能力，而无需手动维护 DOM ID。
+<BrutalistPageStyle />
+
+Brutalist `Label` 继承 Base Label 协议，采用 [Brutalist 设计契约](../../design-contract/) 中的被动标签排版（DM Sans 500、无外影、无交互动效），通过显式引用为控件提供无障碍命名与点击激活能力。
+
+> 表单输入字段请优先使用 [Field](../../field/) 组件，内置 `FieldLabel`、`FieldDescription` 与 `FieldError` 自动关联与校验支持。
 
 ## 预览
 
-<PrototypePreviewer
-  demoId="demo-brutalist-label"
-  initialRuntime="wc"
-  runtimes={['wc', 'react', 'vue', 'vue2']}
-/>
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-label"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+<InstallCommandCard
+  commands={{
+    npm: 'npx @proto.ui/cli@latest add wc brutalist-label',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc brutalist-label',
+  }}
+  manager="npm"
+/>
 
-- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-label`
-- **包导出**：从 `@proto.ui/prototypes-brutalist/label` 导入
+将 `wc` 替换为 `react`、`vue` 或 `vue2` 即可生成对应框架的本地组件封装，也可以直接从 `@proto.ui/prototypes-brutalist/label` 导入 `labelRoot`。
 
 ## 用法
 
-### 独立控制命名与激活
+从 `@proto.ui/core` 调用 `createControlLabelRef()` 为每对标签与控件创建稳定引用，并通过适配器通道传入：
 
-- **`naming`（默认 `true`）**：目标控件自动关联真实渲染的 `Label` 作为无障碍名称，无需额外放置隐藏文本。
-- **`activation`（默认 `true`）**：配对后，点击标签会在同一次点击时机触发目标控件的对应操作——`Checkbox` / `Switch` 遵循自身的受控与禁用规则，`Radio Item` 向分组请求选中，`Input` / `Textarea` 请求聚焦（只读文本框仍可聚焦，禁用控件保留名称但忽略激活）。如仅需命名而不希望点击激活，请显式设置 `activation={false}`。
-- **`selection`（默认 `'policy'`）**：可激活标签默认避免点击时误选文字；若需要允许用户复制标签文案，可设为 `'text'`。嵌套链接/按钮、修饰键点击与拖拽手势不会误触发激活，未配对的 `Label` 也不会自动吸附附近控件。
+```tsx
+import { useMemo } from 'react';
+import { createControlLabelRef } from '@proto.ui/core';
+import {
+  BrutalistCheckboxIndicator,
+  BrutalistCheckboxRoot,
+  BrutalistLabelRoot,
+} from '../proto-ui/components/react';
 
-### 建立显式关联
+export function TermsCheckbox() {
+  const termsRef = useMemo(() => createControlLabelRef(), []);
 
-从 `@proto.ui/core` 调用 `createControlLabelRef()` 为每对标签与控件创建一个稳定引用（一对一绑定，且需位于同一文档/Shadow 树内）：
+  return (
+    <div className="flex items-center gap-2">
+      <BrutalistCheckboxRoot instanceAssociations={{ controlLabel: termsRef }}>
+        <BrutalistCheckboxIndicator />
+      </BrutalistCheckboxRoot>
+      <BrutalistLabelRoot instanceAssociations={{ controlLabel: termsRef }}>
+        Accept terms and conditions
+      </BrutalistLabelRoot>
+    </div>
+  );
+}
+```
 
-- **React / Vue / Vue 2**：向双方组件传入 `instanceAssociations: { controlLabel: ref }`（由 Adapter 层处理，不进入普通 JSON Props）。
-- **Web Components**：从 `@proto.ui/adapter-web-component` 调用 `setElementAssociations(element, { controlLabel: ref })` 分别绑定目标控件与 `Label`。
+Web Components 通过 `@proto.ui/adapter-web-component` 的 `setElementAssociations()` 绑定同一引用：
 
-如果目标控件已显式设置非空的 `ariaLabel` 或 `labelledBy`，则会保留该命名并提示冲突；此时可将 `Label` 设为 `naming={false}` 仅用于点击激活。
+```ts
+import { createControlLabelRef } from '@proto.ui/core';
+import { setElementAssociations } from '@proto.ui/adapter-web-component';
+
+const termsRef = createControlLabelRef();
+setElementAssociations(checkboxEl, { controlLabel: termsRef });
+setElementAssociations(labelEl, { controlLabel: termsRef });
+```
+
+### 命名、激活与无障碍
+
+- **`naming`（默认 `true`）**：目标控件自动关联真实渲染的 `Label` 作为无障碍名称；如果目标已显式声明非空 `ariaLabel` 或 `labelledBy`，可设置 `naming={false}` 仅用于点击激活。
+- **`activation`（默认 `true`）**：点击标签会在同一次点击时机触发目标控件的默认操作（切换 `Checkbox` / `Switch`、选择 `Radio Group Item` 或聚焦 `Input` / `Textarea`）；如需仅命名，请设为 `activation={false}`。
+- **`selection`（默认 `'policy'`）**：可激活标签默认抑制误选文字；需要允许复制时请设为 `selection="text"`。
+- **交互边界**：`Label` 不增加额外 `Tab` 停靠点，自动忽略嵌套链接/按钮、修饰键点击与拖拽手势，且保持无阴影、无位移的被动标签表现。
+
+## 示例
+
+### 基础用法
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-label-basic"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 在 Field 中使用
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-label-field"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 命名、激活与文本选择
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-label-modes"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 从右到左（RTL）
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-label-rtl"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
 ### Root
 
 <ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
   rows={[
-    { name: 'naming', type: 'boolean', default: 'true' },
-    { name: 'activation', type: 'boolean', default: 'true' },
-    { name: 'selection', type: "'policy' | 'auto' | 'text' | 'none'", default: 'policy' },
+    {
+      name: 'naming',
+      type: 'boolean',
+      default: 'true',
+      description: '是否为关联控件提供无障碍名称',
+    },
+    {
+      name: 'activation',
+      type: 'boolean',
+      default: 'true',
+      description: '点击标签时是否触发目标控件的默认操作',
+    },
+    {
+      name: 'selection',
+      type: "'policy' | 'auto' | 'text' | 'none'",
+      default: "'policy'",
+      description: '文本选择策略；默认仅在可激活状态下抑制误选',
+    },
   ]}
 />
+
+### 关联辅助接口
+
+- `createControlLabelRef()`：从 `@proto.ui/core` 导入，创建一对一不透明引用。
+- `instanceAssociations`：React / Vue / Vue 2 传入 `{ controlLabel: ref }` 的适配器关联属性。
+- `setElementAssociations(element, { controlLabel: ref })`：从 `@proto.ui/adapter-web-component` 导入，用于 Web Components 绑定。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-LABEL.yaml', 'P-BASE-LABEL.yaml']}
+/>
+
+- [neobrutalism.dev Label](https://www.neobrutalism.dev/docs/label)

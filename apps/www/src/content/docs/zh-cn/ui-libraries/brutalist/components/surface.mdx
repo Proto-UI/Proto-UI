@@ -4,9 +4,11 @@ description: '接收外层状态输入并提供统一边框、背景与阴影样
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Surface 是基于 [Base Surface](/zh-cn/ui-libraries/base/surface/) 的 Brutalist 被动视觉容器，提供一个内容插槽并消费视觉外观与状态输入，适合为面板、卡片和交互控件提供统一的表面表现。
+Surface 是基于 [Base Surface](/zh-cn/ui-libraries/base/surface/) 的 Brutalist 被动视觉容器，默认使用 5px 圆角（`rounded-base`）、2px 主题边框与 4px 零模糊硬影，由外层组件驱动视觉状态并保持原有语义与交互所有权。
 
 ## 预览
 
@@ -16,15 +18,13 @@ Surface 是基于 [Base Surface](/zh-cn/ui-libraries/base/surface/) 的 Brutalis
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-预览中的 `hovered`、`focusVisible`、`pressed` 等示例直接由外部属性驱动；外层间距与内边距由使用方自行控制。
-
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-brutalist` 或 `@proto.ui/prototypes-brutalist/surface` 导入 `surfaceRoot`（当前工作区 CLI 目标为 `brutalist-surface`）。
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-surface" manager="npm" />
+
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件封装。
 
 ## 用法
-
-### 基础示例
 
 ```tsx
 import * as React from 'react';
@@ -35,30 +35,54 @@ const Surface = createReactAdapter(React)(surfaceRoot);
 
 export function Summary() {
   return (
-    <Surface variant="muted" radius="md" border="none">
-      <div style={{ padding: '1rem' }}>Saved locally</div>
+    <Surface variant="secondary" elevation="raised">
+      <div className="p-4 font-medium">Saved locally</div>
     </Surface>
   );
 }
 ```
 
-`/surface` 子路径与包根均导出 `surfaceRoot`，配套类型 `SurfaceRootProps` 与 `SurfaceRootExposes` 描述共用契约；如需自定义风格封装，可结合 Base 导出的 `asSurfaceRoot` 与 `SurfaceRootAsHookContract`。
+### 状态输入与组合原则
 
-### 状态输入与语义组合
+- `hovered`、`focusVisible`、`pressed` 和 `current` 均由外层交互控件传入，Surface 本身不监听事件，也不设置 ARIA 角色或焦点停靠点。
+- `elevation="raised"` 提供 4px 硬影并在悬停或按压时沿 `+4px, +4px` 落位；当系统偏好 `prefers-reduced-motion: reduce` 时自动切换为无过渡静态反馈。
+- 开启 `fade` 后，Surface 会将来自 [Transition](/zh-cn/ui-libraries/base/transition/) 的 `transitionState` 映射为透明度（`closed` / `leaving` 为 `0`，`entering` / `entered` 为 `1`），Web 端读取 `--pui-surface-transition-duration`（默认 `0ms`）。
 
-- **纯被动视觉输入**：`hovered`、`focusVisible`、`pressed` 和 `current` 均由外层交互组件或状态管理方传入，Surface 本身不监听事件，也不设置 ARIA role、`aria-current` 或焦点停靠点。
-- **保留原生语义**：当与原生链接或按钮组合时，将 `href`、`target`、`download` 或点击行为保留在原生元素或 Button 组件上，不要在 Surface 上重复叠加交互角色。
-- **颜色与继承**：移除属性后会恢复默认值。`secondary` 使用 Brutalist 次级背景与常规前景色，不受 `elevation` 影响。当内部包含带样式的 Text 子元素并希望沿用 Surface 前景色时，可在 Text 上设置 `tone="inherit"`。
+## 示例
 
-### 配合 Transition 使用
+### 变体
 
-- 将 `fade` 设为 `true` 时，Surface 会根据来自 [Transition](/zh-cn/ui-libraries/base/transition/) 的 `transitionState` 映射透明度：`closed` 与 `leaving` 对应 `0`，`entering` 与 `entered` 对应 `1`；`fade={false}` 时不启用透明度映射。
-- 在 Web 端，可通过 CSS 变量 `--pui-surface-transition-duration`（默认 `0ms`，需传入有限非负毫秒值）传递过渡时长。
-- `scrim` 变体用于常规遮暗背景层。透明度为 `0` 仅影响视觉表现，交互禁用、焦点管理与挂载状态仍由外层 Dialog 或 Transition 负责。
+展示全部 7 种 Brutalist 表面变体，其中 `accent` 使用高对比度的 `canary` 强调色，`solid` 使用 `main` 主色。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-surface-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 圆角、边框与抬升反馈
+
+演示 `rounded-base`（5px）与其他圆角档位、边框范围以及 `elevation="raised"` 的硬影落位。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-surface-geometry"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 文本继承与 Transition 淡入淡出
+
+展示内部 `Text tone="inherit"` 的前景色继承，以及 `fade` 驱动的遮罩层显隐过渡。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-surface-composition"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`：
+以下属性属于 `Root`（移除属性时恢复默认值）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -86,4 +110,13 @@ export function Summary() {
     { name: 'pressed', type: 'boolean', default: 'false' },
     { name: 'current', type: 'boolean', default: 'false' },
   ]}
+/>
+
+`@proto.ui/prototypes-brutalist/surface` 同时导出 `SurfaceRootProps`、`SurfaceRootExposes`，以及被动操作外观组合辅助函数 `brutalistActionAppearance` 与 `BrutalistActionAppearanceOptions`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-SURFACE.yaml', 'P-BASE-SURFACE.yaml']}
 />

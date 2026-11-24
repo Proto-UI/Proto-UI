@@ -1,11 +1,13 @@
 ---
 title: 'Surface'
-description: 'A passive Liquid Glass visual container driven by caller-supplied visual states.'
+description: 'A passive Liquid Glass visual container with concentric corners, opt-in optical material, and caller-supplied states.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Surface builds on [Base Surface](/en/ui-libraries/base/surface/) (via `asSurfaceRoot()`) to provide a single-slot passive container with radii, borders, elevation, optional optical material, and fade support. It handles presentation only; interaction, focus, and semantics remain on the owning control.
+Liquid Glass Surface builds on [Base Surface](/en/ui-libraries/base/surface/) to provide a passive visual container with concentric `12px` (`rounded-xl`) default corners, readable opaque defaults, and explicit opt-in glass material (`material="auto"`) for functional floating shells. Interaction and semantic ownership remain with the enclosing control.
 
 ## Preview
 
@@ -15,11 +17,9 @@ Liquid Glass Surface builds on [Base Surface](/en/ui-libraries/base/surface/) (v
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-The focus and press samples illustrate visual states only. Outer spacing and inner content padding belong to your layout.
-
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `surfaceRoot` from `@proto.ui/prototypes-liquid-glass/surface` (or the package root).
+Available inside the workspace from `@proto.ui/prototypes-liquid-glass/surface` (or the package root); not published to the public CLI registry.
 
 ## Usage
 
@@ -30,44 +30,96 @@ import { surfaceRoot } from '@proto.ui/prototypes-liquid-glass/surface';
 
 const Surface = createReactAdapter(React)(surfaceRoot);
 
-export function Summary() {
+export function FloatingPanel() {
   return (
-    <Surface variant="muted" radius="md" border="none">
-      <div style={{ padding: '1rem' }}>Saved locally</div>
+    <Surface variant="outline" material="auto" elevation="raised">
+      <div className="p-1">
+        <Surface variant="secondary" material="opaque" radius="lg" border="none">
+          <div className="p-3">Opaque content nested with concentric corners</div>
+        </Surface>
+      </div>
     </Surface>
   );
 }
 ```
 
-### Opting into glass material
+### Optical material and layering
 
-Surface renders with ordinary opaque paint by default (`material="opaque"`). For functional or navigation shells, pass `material="auto"` to request `regular` Liquid Glass optics:
+- Surface defaults to ordinary opaque paint (`material="opaque"`). Opt into `material="auto"` only on eligible floating navigation or functional shells—never stack glass on glass.
+- Only `outline`, `secondary`, and `muted` participate in `regular` Liquid Glass material requests; `transparent`, `accent`, `solid`, and `scrim` always remain ordinary paint. Reduced-transparency, increased-contrast, and contrast checks automatically preserve readable opaque fallbacks.
+- Maintain concentric corner radii (`outer = inner + padding`), such as an outer `radius="xl"` (`12px`) shell with `p-1` (`4px`) around an inner `radius="lg"` (`8px`) opaque card.
+- Enable `fade` to map `transitionState` from [Transition](/en/ui-libraries/base/transition/) to opacity (`closed` and `leaving` -> `0`; `entering` and `entered` -> `1`), reading `--pui-surface-transition-duration` (default `0ms`) on Web.
 
-- Only `outline`, `secondary`, and `muted` participate in glass material requests; `transparent`, `accent`, `solid`, and `scrim` always use ordinary paint.
-- When optical support, a valid backdrop source, contrast, or accessibility preferences do not allow glass, Surface keeps its readable opaque styling. Setting `material="opaque"` or removing the prop returns to ordinary paint.
-- When nesting styled Text inside Surface, set `tone="inherit"` on Text to keep the enclosing foreground color.
-- Compose real interactive controls (such as Button or a native `<a>`) rather than attaching roles or click handlers to Surface.
+## Examples
 
-### Coordinating with Transition
+### Opt-in material and concentric nesting
 
-Pass the phase from an external [Transition](/en/ui-libraries/base/transition/) to `transitionState` with `fade={true}` to map `closed` and `leaving` to opacity `0` and `entering` and `entered` to opacity `1`. On Web, forward a finite non-negative millisecond duration via the `--pui-surface-transition-duration` CSS variable (default `0ms`).
+Compares `material="auto"` (`outline`, `secondary`, `muted`) against `material="opaque"` over a colorful backdrop, pairing a floating glass shell with an opaque concentric child card.
 
-`fade` affects opacity only and does not alter interactivity, mounting, or focus. The `scrim` variant renders standard dimming paint without blur or refraction.
+<PrototypePreviewer
+  demoId="demo-liquid-glass-surface-material"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Variants and radius presets
+
+Displays ordinary opaque surface variants, foreground inheritance via `Text tone="inherit"`, and corner radius options.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-surface-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Interactive states and Transition fade
+
+Illustrates specular glass hover highlights, pressed shadow compression, focus rings, and a Transition-driven `scrim` fade.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-surface-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `variant` | `'transparent' \| 'outline' \| 'secondary' \| 'muted' \| 'accent' \| 'solid' \| 'scrim'` | `'outline'` | Visual surface variant |
-| `radius` | `'default' \| 'none' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full'` | `'default'` | Corner radius |
-| `border` | `'all' \| 'bottom' \| 'none'` | `'all'` | Border placement |
-| `elevation` | `'none' \| 'raised'` | `'none'` | Elevation level |
-| `material` | `'auto' \| 'opaque'` | `'opaque'` | Set to `'auto'` to opt eligible variants into glass material |
-| `transitionState` | `'closed' \| 'entering' \| 'entered' \| 'leaving'` | `'entered'` | Phase from an external Transition |
-| `fade` | `boolean` | `false` | Enables opacity mapping for `transitionState` |
-| `hovered` | `boolean` | `false` | External hover visual state |
-| `focusVisible` | `boolean` | `false` | External focus-visible visual state |
-| `pressed` | `boolean` | `false` | External pressed visual state |
-| `current` | `boolean` | `false` | External current-item visual state (visual only; does not set `aria-current`) |
+The following props belong to `Root` (removing a prop restores its default):
 
-Removing any prop restores its default. Surface exposes no states, events, or methods.
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'transparent' | 'outline' | 'secondary' | 'muted' | 'accent' | 'solid' | 'scrim'",
+      default: 'outline',
+    },
+    {
+      name: 'radius',
+      type: "'default' | 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'",
+      default: 'default',
+    },
+    { name: 'border', type: "'all' | 'bottom' | 'none'", default: 'all' },
+    { name: 'elevation', type: "'none' | 'raised'", default: 'none' },
+    { name: 'material', type: "'auto' | 'opaque'", default: 'opaque' },
+    {
+      name: 'transitionState',
+      type: "'closed' | 'entering' | 'entered' | 'leaving'",
+      default: 'entered',
+    },
+    { name: 'fade', type: 'boolean', default: 'false' },
+    { name: 'hovered', type: 'boolean', default: 'false' },
+    { name: 'focusVisible', type: 'boolean', default: 'false' },
+    { name: 'pressed', type: 'boolean', default: 'false' },
+    { name: 'current', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+`@proto.ui/prototypes-liquid-glass/surface` also exports `SurfaceRootProps` and `SurfaceRootExposes`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-SURFACE.yaml', 'P-BASE-SURFACE.yaml']}
+/>

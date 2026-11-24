@@ -1,20 +1,39 @@
 ---
 title: 'Style Scope'
-description: 'Share a Shadcn style preset across descendant components through logical Context.'
+description: 'Propagate and switch a Shadcn style preset across descendant components through logical Context.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Style Scope propagates a Shadcn visual preset (`styleProfile`) through the logical Context tree so descendant components share one appearance without repeating `styleProfile` on every part. Each component keeps its own behavior and state. The examples on this page use the **Shadcn Rhea** style preset.
+Style Scope propagates a Shadcn visual preset (`styleProfile`) through the logical Context tree so descendant components share or switch appearance without repeating `styleProfile` on every part. The default examples on this page use the **Shadcn Rhea** style preset.
+
+## Preview
+
+Select any preset below to update the scoped `Input Shell` and `Button` controls live:
+
+<PrototypePreviewer
+  demoId="demo-shadcn-style-scope"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the generated `proto-ui-style.css` once at your application entry, then import `styleScope` from `@proto.ui/prototypes-shadcn/style-scope` (or the package root):
+
+```ts
+import {
+  styleScope,
+  SHADCN_STYLE_IDS,
+  normalizeShadcnStyle,
+} from '@proto.ui/prototypes-shadcn/style-scope';
+```
 
 ## Usage
 
-Import `styleScope` (or its alias `shadcnStyleScope`) from `@proto.ui/prototypes-shadcn/style-scope` (or the package root) and adapt it with the same Adapter used for its children:
+Adapt `styleScope` (or its alias `shadcnStyleScope`) with the same Adapter used for its children and wrap the subtree that should share a style preset:
 
 ```tsx
 import * as React from 'react';
@@ -29,11 +48,11 @@ const CardContent = adapt(ShadcnCardContent);
 
 export function ProjectCards() {
   return (
-    <StyleScope styleProfile="rhea">
+    <StyleScope styleProfile="rhea" className="contents">
       <Card>
         <CardContent>Inherits Rhea from the outer scope.</CardContent>
       </Card>
-      <StyleScope styleProfile="new-york">
+      <StyleScope styleProfile="new-york" className="contents">
         <Card>
           <CardContent>Inherits New York from the nearer scope.</CardContent>
         </Card>
@@ -46,19 +65,42 @@ export function ProjectCards() {
 }
 ```
 
-Composite `Root` components that publish a style scope (such as `Card`) automatically provide their active preset to their parts and nested Shadcn descendants. Outer layout and spacing remain in your application markup.
+- **Host element and layout neutrality**: `styleScope` emits no host CSS of its own (`display: inline` as a Web Component custom element, wrapper element in framework adapters). Add `class="contents"` (`className="contents"` in React) when placing `StyleScope` inside flex or grid layouts so child flow remains uninterrupted.
+- **Composite scopes**: Composite `Root` components that publish a style scope (such as [Card](../card/) and [Select](../select/)) automatically forward their resolved preset to internal parts and nested Shadcn descendants.
 
-<h2 id="card-contract">Scoped Card example</h2>
+## Examples
 
-The preview below wraps a Card in `styleScope` with `styleProfile="rhea"` to apply the **Shadcn Rhea** style preset across its parts:
+### Nested scopes and override precedence
+
+The three cards below contrast an outer scope, a nested `StyleScope` override (using the `new-york` alias), and an explicit component-level `styleProfile`. Toggle the outer preset or reset the nested scope and Card 3 back to `inherit` to resume inheritance:
 
 <PrototypePreviewer
-  demoId="demo-shadcn-card"
+  demoId="demo-shadcn-style-scope-nesting"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-### Selection and inheritance
+### Live switching without resetting state
+
+Updating `styleProfile` in place only swaps visual rules without remounting component instances. Switch tabs in [Tabs](../tabs/) or edit text inside [Input Shell](../input-shell/), then choose another preset (or press `Alt+1`–`Alt+5` while focused) to verify that active selection, typed input, and keyboard focus remain intact:
+
+<PrototypePreviewer
+  demoId="demo-shadcn-style-scope-state-preservation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Multi-component scoping, alias normalization, and `inherit`
+
+One `StyleScope` coordinates [Card](../card/), [Input Shell](../input-shell/), and [Button](../button/) together. The `new-york` alias normalizes to `new-york-v4`, while `inherit` withdraws the local override and resumes ancestor inheritance (or publishes `{ style: null }` when no ancestor selects a concrete preset, letting each component keep its own compatibility default):
+
+<PrototypePreviewer
+  demoId="demo-shadcn-style-scope-composite"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Selection and inheritance
 
 `styleProfile` is optional and defaults to `inherit`. Resolution follows three steps:
 
@@ -70,30 +112,97 @@ Changing a component or nested scope back to `inherit` withdraws its override an
 
 | Selection | Meaning |
 | --- | --- |
-| `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea` | Recognized modern Shadcn style IDs; check each component's documentation for supported presets. |
+| `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea` | Recognized modern Shadcn style IDs; check each component's supported presets below. |
 | `new-york-v4` | Separate New York compatibility preset. |
 | `new-york` | Alias automatically normalized to `new-york-v4`. |
 | `inherit` or omitted | Inherits from the nearest scope, falling back to the component default. |
 
-### Style isolation and CSS layer order
+### Component preset support
 
-- Changing `styleProfile` updates visual styles only—it preserves the component instance, state handles, edited value, selection, and focus. Update the prop in place rather than remounting with a new `key`.
-- Style Scope is a logical Shadcn Context boundary rather than a CSS reset, Shadow DOM boundary, or global theme store; consumers such as [Input Shell](/en/ui-libraries/shadcn/input-shell/) resolve their style from this channel independently of other families.
-- When using named CSS layers, establish the layer order before loading the first relevant stylesheet: generated theme defaults → reset/base → `proto-ui` → explicit consumer layers.
+Consumers configured with `options.supportedStyles` reject presets they do not implement instead of silently substituting another style:
+
+| Component | Supported `styleProfile` presets | Fallback when scope is `{ style: null }` |
+| --- | --- | --- |
+| [Button](../button/) | All 9 presets (`vega`–`rhea`, `new-york-v4`) | `rhea` |
+| [Tabs](../tabs/) | All 9 presets (`vega`–`rhea`, `new-york-v4`) | `new-york-v4` |
+| [Select](../select/) | All 9 presets (`vega`–`rhea`, `new-york-v4`) | `new-york-v4` |
+| [Dialog](../dialog/) | All 9 presets (`vega`–`rhea`, `new-york-v4`) | `new-york-v4` |
+| [Input Shell](../input-shell/) | All 9 presets (`vega`–`rhea`, `new-york-v4`) | `new-york-v4` |
+| [Card](../card/) | `new-york-v4`, `rhea` | `new-york-v4` |
+
+## Style isolation, lifecycle boundaries, and CSS layer order
+
+- **In-place updates**: Changing `styleProfile` updates visual styles only—it preserves the component instance, state handles, edited value, selection, and keyboard focus. Update the prop in place rather than remounting with a new `key`.
+- **Family isolation**: Style Scope is a logical Shadcn Context boundary rather than a CSS reset, Shadow DOM boundary, or global theme store; Shadcn consumers such as [Input Shell](../input-shell/) resolve presets from this channel without affecting other component families.
+- **Dynamic ancestry and Portal boundaries**: Style Scope reads ancestry during creation, mount, update, and Context subscription callbacks. Live DOM reparenting across scopes, removing a provider without updating descendants, and logical-owner inheritance across native Portals are still evolving; keep consumers inside a stable logical scope and update `styleProfile` in place.
+- **CSS layer order**: When using named CSS layers, establish the layer order before loading the first relevant stylesheet: generated theme defaults → reset/base → `proto-ui` → explicit consumer layers.
 
 ## API
 
-In addition to `styleScope`, `@proto.ui/prototypes-shadcn/style-scope` exports these authoring helpers and types:
+### `styleScope` (`shadcn-style-scope`) props
 
-| Export | Use |
-| --- | --- |
-| `setupShadcnStyleScope(def)` | Called during a composite prototype's setup to publish its active selection and inherit from ancestors. |
-| `setupShadcnStyleSelection(def, compatibilityStyle, options?)` | Called during a consumer's setup to derive visual state for rules; `options.supportedStyles` restricts the presets that consumer supports. |
-| `SHADCN_STYLE_SCOPE` | Singleton Context key carrying `{ style: ShadcnStyleId \| null }` (always import this exact key). |
-| `SHADCN_STYLE_IDS` | Canonical list of recognized style IDs, including `new-york-v4`. |
-| `normalizeShadcnStyle(value)` | Normalizes known IDs and aliases, returns `null` for `undefined`, `null`, or `inherit`, and throws on unknown IDs. |
-| `ShadcnStyleId`, `ShadcnStyleChoice` | Canonical style ID type, and the selectable union including `new-york` and `inherit`. |
-| `ShadcnStyleProps`, `ShadcnStyleContext` | Optional `styleProfile` prop shape and Context value shape. |
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: "'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4' | 'new-york' | 'inherit'",
+      default: "'inherit'",
+      description:
+        'Shadcn visual preset published by this scope; inherits from the nearest ancestor scope when omitted or set to inherit.',
+    },
+  ]}
+/>
+
+### Authoring helpers and types
+
+In addition to `styleScope`, `@proto.ui/prototypes-shadcn/style-scope` exports these helpers and types:
+
+<ApiPropsTable
+  headers={{ name: 'Export', type: 'Type / Signature', description: 'Purpose' }}
+  rows={[
+    {
+      name: 'setupShadcnStyleScope',
+      type: '(def) => void',
+      description:
+        'Called during a composite prototype setup to inherit from ancestors and republish its effective selection.',
+    },
+    {
+      name: 'setupShadcnStyleSelection',
+      type: '(def, compatibilityStyle, options?) => State',
+      description:
+        'Called during a consumer setup to derive visual state for rules; options.supportedStyles restricts supported presets.',
+    },
+    {
+      name: 'SHADCN_STYLE_SCOPE',
+      type: 'ContextKey<ShadcnStyleContext>',
+      description:
+        'Singleton Context key carrying { style: ShadcnStyleId | null } (always import this exact key reference).',
+    },
+    {
+      name: 'SHADCN_STYLE_IDS',
+      type: 'readonly ShadcnStyleId[]',
+      description: 'Canonical list of all nine recognized style IDs, including new-york-v4.',
+    },
+    {
+      name: 'normalizeShadcnStyle',
+      type: '(value: unknown) => ShadcnStyleId | null',
+      description:
+        'Normalizes known IDs and aliases, returns null for undefined, null, or inherit, and throws on unknown IDs.',
+    },
+    {
+      name: 'ShadcnStyleId / ShadcnStyleChoice',
+      type: 'TypeScript types',
+      description:
+        'Canonical style ID type, and the selectable union including the new-york alias and inherit.',
+    },
+    {
+      name: 'ShadcnStyleProps / ShadcnStyleContext',
+      type: 'TypeScript types',
+      description: 'Optional styleProfile prop shape and Context value shape.',
+    },
+  ]}
+/>
 
 ```ts
 import { normalizeShadcnStyle } from '@proto.ui/prototypes-shadcn/style-scope';
@@ -101,8 +210,6 @@ import { normalizeShadcnStyle } from '@proto.ui/prototypes-shadcn/style-scope';
 const legacy = normalizeShadcnStyle('new-york'); // 'new-york-v4'
 const inherited = normalizeShadcnStyle('inherit'); // null
 ```
-
-When `options.supportedStyles` is set on `setupShadcnStyleSelection`, passing a preset not implemented by that component is rejected instead of silently substituted. Portalled overlays inherit the style scope of their logical owner rather than their physical mount container.
 
 ## References
 

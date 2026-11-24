@@ -1,11 +1,13 @@
 ---
 title: 'Toolbar'
-description: '具备游走焦点、可访问名称与交叉轴分隔线的 Liquid Glass 工具栏组件。'
+description: '采用悬浮玻璃容器、同心胶囊几何、主次层级与不透明无障碍回退的 Liquid Glass 工具栏组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Toolbar 将一组命令按钮与视觉分隔线组织为单一 Tab 入口的工具栏，使用方向键在可用命令之间快速移动。
+Liquid Glass Toolbar 将悬浮玻璃材质限定在 `Root` 功能层上，内部以同心胶囊几何承载常规、强调与危险操作按钮，避免玻璃叠玻璃并提供单一 `Tab` 入口与方向键漫游焦点。
 
 ## 预览
 
@@ -13,22 +15,156 @@ Liquid Glass Toolbar 将一组命令按钮与视觉分隔线组织为单一 Tab 
   demoId="demo-liquid-glass-toolbar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-liquid-glass/toolbar` 导入原型并适配到目标框架：
+
+```ts
+import {
+  toolbarRoot,
+  toolbarButton,
+  toolbarSeparator,
+} from '@proto.ui/prototypes-liquid-glass/toolbar';
+```
 
 ## 用法
 
-- **部件组成**：`Root`、`Button`、`Separator`。
-- **键盘导航与命令**：整条工具栏仅保留一个 Tab 停靠点，方向键在启用的命令之间循环移动（受 `orientation` 与 `loop` 控制）。点击或键盘激活可用 `Button` 时，发出携带其 `value` 的 `action` 事件。`Separator` 自动沿交叉轴排布。
+```tsx
+import {
+  LiquidGlassToolbarRoot,
+  LiquidGlassToolbarButton,
+  LiquidGlassToolbarSeparator,
+} from '../proto-ui/components/react';
+
+export function FloatingToolbar() {
+  return (
+    <LiquidGlassToolbarRoot a11yLabel="Document actions">
+      <LiquidGlassToolbarButton value="undo">Undo</LiquidGlassToolbarButton>
+      <LiquidGlassToolbarButton value="redo">Redo</LiquidGlassToolbarButton>
+      <LiquidGlassToolbarSeparator />
+      <LiquidGlassToolbarButton value="publish" variant="prominent">
+        Publish
+      </LiquidGlassToolbarButton>
+    </LiquidGlassToolbarRoot>
+  );
+}
+```
+
+### 材质层级与无障碍
+
+- **禁止玻璃叠玻璃**：只有 `Root` 声明 `liquid-glass` 材质层（通过 `material="opaque"` 可主动关闭光学材质）；子部件 `Button` 与 `Separator` 均不声明嵌套玻璃材质，确保前景可读性与层次清晰。
+- **同心几何与层级**：水平工具栏使用胶囊外轮廓（`rounded-full`）与内层胶囊按钮，垂直工具栏采用 `rounded-2xl` 容器；同一组操作通常只保留一个 `variant="prominent"` 主操作，其余使用无边框 `regular` 悬停高亮胶囊。
+- **系统偏好回退**：开启减少透明度或强制颜色模式时自动切换为高对比度不透明容器与可见焦点轮廓；开启减弱动态效果时移除过渡动画；禁用按钮保留清晰的不透明文字与背景对比度而不使用半透明叠淡。
+
+## 示例
+
+### 主次层级与不透明模式
+
+上方工具栏展示 `regular`、`prominent` 与 `destructive` 按钮层级，下方工具栏通过 `material="opaque"` 强制使用不透明表面。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toolbar-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 垂直悬浮工具栏
+
+将 `orientation` 设为 `'vertical'` 可形成纵向悬浮工具栏，`Separator` 自动沿水平交叉轴排布并使用上下方向键导航。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toolbar-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与非循环导航
+
+禁用态在不透明回退表面上保持可读对比度，同时从键盘漫游焦点序列中移除；设置 `loop={false}` 可禁止方向键首尾循环。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toolbar-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 事件 | 说明 |
-| --- | --- | --- |
-| Root | `disabled` / `orientation` / `loop` / `a11yLabel` | 整条工具栏禁用、排列方向、首尾循环与可访问名称 |
-| Button | `value` / `action` | 命令标识及激活时发出的操作事件 |
-| Separator | — | 沿工具栏交叉轴显示的被动分隔线 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'material',
+      type: "'auto' | 'opaque'",
+      default: "'auto'",
+      description: '自动启用玻璃材质（尊重系统偏好与宿主支持）或显式使用不透明回退',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: '统一禁用整条工具栏的所有命令按钮',
+    },
+    {
+      name: 'orientation',
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: '工具栏排列方向与方向键导航轴向',
+    },
+    {
+      name: 'loop',
+      type: 'boolean',
+      default: 'true',
+      description: '方向键导航是否在首尾命令间循环',
+    },
+    { name: 'a11yLabel', type: 'string', default: "''", description: '工具栏的无障碍名称' },
+  ]}
+/>
+
+### Button
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'regular' | 'prominent' | 'destructive'",
+      default: "'regular'",
+      description: '常规无边框胶囊、主强调染色胶囊或危险操作样式',
+    },
+    {
+      name: 'size',
+      type: "'default' | 'sm' | 'icon'",
+      default: "'default'",
+      description: '命令按钮尺寸',
+    },
+    {
+      name: 'value',
+      type: 'string',
+      default: "''",
+      description: '激活时随 action 事件回传的命令标识',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: '禁用当前命令并保留高对比度不可用样式',
+    },
+  ]}
+/>
+
+### Separator 与事件
+
+- **Separator**：无额外属性，自动沿工具栏交叉轴方向绘制分隔线且不声明嵌套材质。
+- **事件与暴露**：`Button` 激活时发出 `action`（`{ value: string }`）；`Root` 暴露 `disabled`、`focusFirst()`、`focusLast()` 与 `setCurrent(id)`；`Button` 暴露 `disabled`、`focused`、`focusVisible` 与 `focusSelf(options)`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-TOOLBAR.yaml', 'P-BASE-TOOLBAR.yaml']}
+/>

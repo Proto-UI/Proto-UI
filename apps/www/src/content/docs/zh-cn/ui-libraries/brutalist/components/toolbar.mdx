@@ -1,12 +1,13 @@
 ---
 title: 'Toolbar'
-description: '带有可访问名称、交叉轴分隔线与键盘漫游焦点的 Brutalist 风格工具栏组件。'
+description: '遵循 Brutalist 视觉契约、支持变体尺寸、交叉轴分隔线与键盘漫游焦点的工具栏组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Toolbar 将一组相关操作按钮组织为单个键盘漫游焦点区域，支持水平或垂直排列以及交叉轴分隔线。
+Brutalist Toolbar 以 5px 圆角、2px 黑色实线边框与 3px 前景阴影构建分组操作栏，支持单一 `Tab` 入口、方向键漫游焦点与即时落位交互反馈。
 
 ## 预览
 
@@ -14,43 +15,150 @@ Toolbar 将一组相关操作按钮组织为单个键盘漫游焦点区域，支
   demoId="demo-brutalist-toolbar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-brutalist/toolbar` 导入组件原型并使用对应宿主 Adapter 适配。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-brutalist/toolbar` 导入原型并适配到目标框架：
+
+```ts
+import {
+  toolbarRoot,
+  toolbarButton,
+  toolbarSeparator,
+} from '@proto.ui/prototypes-brutalist/toolbar';
+```
 
 ## 用法
 
-### 组件结构
+```tsx
+import {
+  BrutalistToolbarRoot,
+  BrutalistToolbarButton,
+  BrutalistToolbarSeparator,
+} from '../proto-ui/components/react';
 
-Toolbar 由 `Root`、`Button` 和 `Separator` 三个部分组成：
+export function EditorToolbar() {
+  return (
+    <BrutalistToolbarRoot a11yLabel="Document actions">
+      <BrutalistToolbarButton value="undo">Undo</BrutalistToolbarButton>
+      <BrutalistToolbarButton value="redo">Redo</BrutalistToolbarButton>
+      <BrutalistToolbarSeparator />
+      <BrutalistToolbarButton value="save" variant="solid">
+        Save
+      </BrutalistToolbarButton>
+    </BrutalistToolbarRoot>
+  );
+}
+```
 
-- `Root`：统一管理整体禁用状态、主轴方向（`orientation`）、循环导航（`loop`）与工具栏无障碍名称（`a11yLabel`）。
-- `Button`：工具栏内的操作按钮，启用状态下激活时会发出携带 `value` 的 `action` 事件。
-- `Separator`：自动沿工具栏交叉轴方向显示的分隔线。
+Toolbar 由 `Root`、`Button` 和 `Separator` 三个部件组成：
 
-### 键盘导航
+- **设计契约对齐**：`Root` 作为被动分组容器保留 3px 前景阴影与 `rounded-base` 几何；`Button` 使用 DM Sans 中等字重（14px/20px），悬停切换高对比度主题填充并在按压时提供即时落位内影。
+- **键盘导航**：整条工具栏仅占一个 `Tab` 停靠点，方向键在启用的命令按钮间依次移动；默认开启 `loop={true}` 循环导航。
+- **分隔线**：`Separator` 保持 2px 清晰分隔厚度，并自动沿工具栏交叉轴排布。
 
-- 工具栏整体仅保留一个启用命令作为 `Tab` 停靠点，避免长工具栏占用过多 Tab 步数。
-- 使用方向键在工具栏内依次移动焦点；设置 `loop={true}`（默认）可在首尾之间循环。
+## 示例
+
+### 变体与尺寸
+
+`Button` 支持 `surface`（默认）、`solid` 与 `destructive` 三种变体，以及 `default`、`sm`、`icon` 三种尺寸。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-toolbar-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 垂直方向
+
+设置 `orientation="vertical"` 后，工具栏切换为纵向面板布局，`Separator` 自动转为水平 2px 分隔线并使用上下方向键导航。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-toolbar-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与非循环导航
+
+通过 `Root` 的 `disabled={true}` 可整体禁用工具栏；设置 `loop={false}` 可将方向键漫游限制在首个与末个可用命令之间。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-toolbar-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`：
+### Root
 
 <ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
   rows={[
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
-    { name: 'loop', type: 'boolean', default: 'true' },
-    { name: 'a11yLabel', type: 'string', default: "''" },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: '统一禁用整条工具栏的所有命令按钮',
+    },
+    {
+      name: 'orientation',
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: '工具栏排列方向与方向键导航轴向',
+    },
+    {
+      name: 'loop',
+      type: 'boolean',
+      default: 'true',
+      description: '方向键导航是否在首尾命令间循环',
+    },
+    { name: 'a11yLabel', type: 'string', default: "''", description: '工具栏的无障碍名称' },
   ]}
 />
 
-其余子部件：
+### Button
 
-- **Button**：`disabled` 默认 `false`，`value` 默认 `''`。
-- **Separator**：无属性。
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'surface' | 'solid' | 'destructive'",
+      default: "'surface'",
+      description: '中性表面、主强调填充或危险操作样式',
+    },
+    {
+      name: 'size',
+      type: "'default' | 'sm' | 'icon'",
+      default: "'default'",
+      description: '命令按钮尺寸',
+    },
+    {
+      name: 'value',
+      type: 'string',
+      default: "''",
+      description: '激活时随 action 事件发出的命令标识',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: '禁用当前命令并跳过漫游焦点',
+    },
+  ]}
+/>
+
+### Separator 与事件
+
+- **Separator**：无额外属性，自动跟随 `Root` 的交叉轴方向渲染 2px 分隔线。
+- **事件与暴露**：`Button` 激活时发出 `action`（`{ value: string }`）；`Root` 暴露 `disabled`、`focusFirst()`、`focusLast()` 与 `setCurrent(id)`；`Button` 暴露 `disabled`、`focused`、`focusVisible` 与 `focusSelf(options)`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-TOOLBAR.yaml', 'P-BASE-TOOLBAR.yaml']}
+/>

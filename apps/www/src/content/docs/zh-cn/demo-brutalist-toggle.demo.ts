@@ -14,8 +14,8 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'brutalist-toggle',
-        props: { size: 'lg' },
-        children: ['Large'],
+        props: { variant: 'outline' },
+        children: ['Outline'],
       },
       {
         kind: 'proto',

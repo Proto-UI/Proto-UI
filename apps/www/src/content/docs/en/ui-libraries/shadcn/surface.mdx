@@ -1,6 +1,6 @@
 ---
 title: 'Surface'
-description: 'A passive visual surface container with Shadcn variants, borders, elevation, and state styling.'
+description: 'A passive visual surface container with Shadcn variants, borders, elevation, action profiles, and state styling.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,11 +8,9 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Surface is a passive visual container inheriting the [Base Surface](/en/ui-libraries/base/surface/) input contract, applying Shadcn backgrounds, borders, radii, and elevation from props supplied by the enclosing component. The examples on this page use the **Shadcn Rhea** style preset.
+Surface is a passive visual container inheriting the [Base Surface](/en/ui-libraries/base/surface/) input contract, applying Shadcn backgrounds, borders, radii, elevation, and state paint while leaving semantic and interaction ownership to the enclosing control. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
-
-The preview below displays surface variants and visual state samples (the focus and press samples illustrate visual states rather than interactive controls).
 
 <PrototypePreviewer
   demoId="demo-shadcn-surface"
@@ -40,23 +38,69 @@ const Surface = createReactAdapter(React)(surfaceRoot);
 export function Summary() {
   return (
     <Surface variant="muted" radius="md" border="none">
-      <div style={{ padding: '1rem' }}>Saved locally</div>
+      <div className="p-4">Saved locally</div>
     </Surface>
   );
 }
 ```
 
-### Visual states and composition
+### Passive boundaries and composition
 
-- `hovered`, `focusVisible`, `pressed`, and `current` are visual inputs forwarded from an enclosing interactive component; Surface does not listen for pointer, focus, or keyboard events and adds no ARIA role. Use a Button component or native `<a>` element when you need interactive behavior.
-- Outer layout and inner padding belong to your composition. When a nested `Text` should inherit foreground contrast from a `solid` or `accent` Surface, pass `tone="inherit"` to `Text`.
-- With the default `actionProfile="none"`, `pressed` does not translate the surface. Opting into `rhea` or `luma` action appearance enables the 1px press offset.
+- `hovered`, `focusVisible`, `pressed`, and `current` are forwarded from an enclosing interactive component; Surface registers no event listeners, tab stops, or ARIA roles. Compose `Button` or a native `<a>` element whenever you need interactive semantics.
+- Outer layout and inner padding stay with your composition. Pass `tone="inherit"` to nested `Text` children so they inherit foreground contrast from `solid` or `accent` surfaces.
+- Enable `fade` to map `transitionState` from [Base Transition](/en/ui-libraries/base/transition/) to opacity (`closed` and `leaving` map to `0`; `entering` and `entered` map to `1`), reading `--pui-surface-transition-duration` (default `0ms`) on Web.
+
+## Examples
+
+### Variants
+
+All seven surface variants, covering cards, secondary fills, quiet muted containers, accents, solid emphasis, transparent shells, and the 80% black `scrim` backdrop.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-surface-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Radius, border, and elevation
+
+Combine `radius`, `border`, and `elevation` to form pills, dividers, flat panels, or raised callouts.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-surface-geometry"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Visual states and text inheritance
+
+Illustrates caller-supplied `hovered`, `current`, `focusVisible`, `pressed` (with `actionProfile="rhea"` enabling the 1px press offset), and foreground inheritance via `Text tone="inherit"`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-surface-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Action profiles
+
+Opt into explicit `actionProfile` recipes to match Shadcn button radii, borders, and focus rings across modern profiles and `new-york-v4` without replacing the native interactive owner.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-surface-action-profiles"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ### Fading with Transition
 
-- Enable `fade` to map `transitionState` from [Base Transition](/en/ui-libraries/base/transition/) to opacity (`closed` and `leaving` -> `0`, `entering` and `entered` -> `1`).
-- On the Web, fade duration reads the `--pui-surface-transition-duration` CSS variable (default `0ms`), which your composition can populate with a finite non-negative millisecond duration.
-- `scrim` provides a standard dimming backdrop. Opacity `0` affects visuals only; interaction gating, unmounting, and focus management stay with the enclosing Dialog or Transition.
+Drive opacity smoothly via `fade`, `transitionState`, and `--pui-surface-transition-duration` while keeping presence and focus gating on the enclosing controller.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-surface-fade"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -78,8 +122,13 @@ The following props belong to `Root` (removing a prop restores its default):
     { name: 'border', type: "'all' | 'bottom' | 'none'", default: 'all' },
     { name: 'elevation', type: "'none' | 'raised'", default: 'none' },
     {
+      name: 'actionProfile',
+      type: "'none' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4' | 'new-york'",
+      default: 'none',
+    },
+    {
       name: 'transitionState',
-      type: "'closed' | 'preparing' | 'entering' | 'entered' | 'leaving'",
+      type: "'closed' | 'entering' | 'entered' | 'leaving'",
       default: 'entered',
     },
     { name: 'fade', type: 'boolean', default: 'false' },
@@ -90,7 +139,7 @@ The following props belong to `Root` (removing a prop restores its default):
   ]}
 />
 
-`@proto.ui/prototypes-shadcn/surface` also exports `SurfaceRootProps` and `SurfaceRootExposes`.
+`@proto.ui/prototypes-shadcn/surface` also exports `ShadcnSurfaceRootProps`, `SurfaceRootProps`, `SurfaceRootExposes`, and the passive Web composition helper `shadcnActionAppearance` (`ShadcnActionAppearanceOptions`).
 
 ## References
 

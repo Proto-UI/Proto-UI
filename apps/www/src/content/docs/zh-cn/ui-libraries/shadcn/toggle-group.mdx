@@ -1,13 +1,13 @@
 ---
 title: 'Toggle Group'
-description: '支持键盘焦点漫游的单选或多选切换按钮组组件。'
+description: '支持键盘焦点漫游、多种样式预设、尺寸与间距控制的 Shadcn 切换按钮组组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Toggle Group 将多个切换按钮组织为一个支持键盘漫游焦点的选择组，支持单选和多选两种模式。本页示例使用 **Shadcn Rhea** 风格。
+Toggle Group 将一组可切换的双态按钮组织为支持方向键漫游焦点的选择组，支持单选与多选模式。本页示例使用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -15,37 +15,136 @@ Toggle Group 将多个切换按钮组织为一个支持键盘漫游焦点的选�
   demoId="demo-shadcn-toggle-group"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-shadcn/toggle-group` 导入组件原型并通过对应宿主 Adapter 适配。
 
 ## 用法
 
-Toggle Group 由 `Root` 和 `Item` 组成：
+```tsx
+import { ShadcnToggleGroupItem, ShadcnToggleGroupRoot } from '../proto-ui/components/react';
 
-- `value` 和 `defaultValue` 均为字符串数组（`readonly string[]`）。
-- 当 `multiple` 为 `false`（默认）时，组内最多保留一个选中值，再次点击当前已选中的选项可取消选中；设为 `true` 时允许同时选中多个选项。
-- 传入 `value` 进入受控模式，交互会通过 `valueChange` 发出变更请求，由外部更新状态。
-- 禁用态、只读态以及具有重复 `value` 的选项不会提交状态变更。
-- 方向键在组内移动焦点而不自动切换选中状态，按 `Space` 或 `Enter` 切换当前聚焦项。
+export function Example() {
+  return (
+    <ShadcnToggleGroupRoot variant="outline" defaultValue={['a']}>
+      <ShadcnToggleGroupItem value="a">A</ShadcnToggleGroupItem>
+      <ShadcnToggleGroupItem value="b">B</ShadcnToggleGroupItem>
+      <ShadcnToggleGroupItem value="c">C</ShadcnToggleGroupItem>
+    </ShadcnToggleGroupRoot>
+  );
+}
+```
+
+### 组件结构
+
+```text
+ToggleGroupRoot
+├── ToggleGroupItem
+└── ToggleGroupItem
+```
+
+- **值与模式**：`value` 与 `defaultValue` 均为字符串数组（`readonly string[]`）。当 `multiple={false}`（默认）时，组内最多保留一个选中值，再次激活已选中项可清空选择；设为 `multiple={true}` 允许同时选中多项。
+- **受控更新**：传入 `value` 进入受控模式，交互通过 `valueChange`（载荷 `{ value: readonly string[] }`）提交候选值，由外部更新状态。
+- **键盘与无障碍**：方向键根据 `orientation` 在选项间移动焦点而不自动切换选中态，按 `Space` 或 `Enter` 切换当前聚焦项；纯图标按钮应搭配视觉隐藏文本（如 `sr-only`）提供可访问名称。
+- **风格预设**：支持通过 `styleProfile` 或外层 [Style Scope](../style-scope/) 切换 `vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea` 与 `new-york-v4`。
+
+## 示例
+
+### 描边单选（Outline）
+
+使用 `variant="outline"` 渲染描边风格，默认单选模式下再次点击当前项可取消选择。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-group-outline"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 尺寸（Size）
+
+通过 `size` 统一控制整组按钮的尺寸（`sm`、`default`、`lg`），单项也可独立覆写。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-group-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 间距与拼接（Spacing）
+
+使用 `spacing` 控制按钮间距：现代预设默认为 `2`，设为 `0` 时自动折叠内边框并保留外侧圆角，拼接为连续按钮条。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-group-spacing"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 垂直排列（Vertical）
+
+设置 `orientation="vertical"` 将布局与上下方向键漫游切换为垂直方向。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-group-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用（Disabled）
+
+在 `Root` 上设置 `disabled` 禁用整组交互，或在单个 `Item` 上禁用特定选项。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控与自定义组合（Custom）
+
+结合 [Field](../field/)、`value` 与 `valueChange` 构建自定义受控字重选择器。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-group-custom"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`（传入 `value` 可进入受控模式；每个 `Item` 必须提供唯一的 `value`）：
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'readonly string[]', default: '—（受控）' },
     { name: 'defaultValue', type: 'readonly string[]', default: '[]' },
     { name: 'multiple', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'outline'", default: "'default'" },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: "'default'" },
+    { name: 'spacing', type: '0 | 1 | 2', default: '现代预设 2；new-york-v4 为 0' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
     { name: 'loop', type: 'boolean', default: 'true' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit' → scope → 'nova'" },
+    { name: 'valueChange', type: 'Event<{ value: readonly string[] }>', default: '—' },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''（组内唯一）" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'outline'", default: '继承 Root' },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: '继承 Root' },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit' → scope → 'nova'" },
   ]}
 />
 

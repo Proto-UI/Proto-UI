@@ -740,7 +740,13 @@ function createSelectControl<Value extends string>(
             createProjectedProto(selectParts.surface, coordinateAttrs, undefined, {
               children: [
                 createProjectedProto(selectParts.viewport, coordinateAttrs, undefined, {
-                  children: items,
+                  children: selectParts.group
+                    ? [
+                        createProjectedProto(selectParts.group, coordinateAttrs, undefined, {
+                          children: items,
+                        }),
+                      ]
+                    : items,
                 }),
               ],
             }),

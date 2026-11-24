@@ -1,20 +1,39 @@
 ---
 title: 'Style Scope'
-description: '通过逻辑 Context 树为一组 Shadcn 组件统一配置外观预设。'
+description: '通过逻辑 Context 树为一组 Shadcn 组件统一配置并实时切换外观预设。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Style Scope 通过逻辑 Context 树向下传递 Shadcn 视觉预设（`styleProfile`），让你无需在每个子组件上重复声明风格，同时各组件依然保持自身的行为和状态。本页示例使用 **Shadcn Rhea** 风格。
+Style Scope 通过逻辑 Context 树向下传递 Shadcn 视觉预设（`styleProfile`），让你在一组后代组件间统一配置或实时切换外观，而无需在每个子部件上重复传参。本页默认示例采用 **Shadcn Rhea** 风格。
+
+## 预览
+
+点击下方任意预设按钮，即可实时切换同一作用域内的 `Input Shell` 与 `Button` 外观：
+
+<PrototypePreviewer
+  demoId="demo-shadcn-style-scope"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。在应用入口处导入一次生成的 `proto-ui-style.css`，然后从 `@proto.ui/prototypes-shadcn/style-scope`（或包根入口）导入 `styleScope`：
+
+```ts
+import {
+  styleScope,
+  SHADCN_STYLE_IDS,
+  normalizeShadcnStyle,
+} from '@proto.ui/prototypes-shadcn/style-scope';
+```
 
 ## 用法
 
-从 `@proto.ui/prototypes-shadcn/style-scope`（或包根）导入 `styleScope`（别名 `shadcnStyleScope`），并使用与子组件相同的 Adapter 进行适配：
+使用与子组件相同的 Adapter 适配 `styleScope`（别名 `shadcnStyleScope`），并将其包裹在需要统一外观的子树外层：
 
 ```tsx
 import * as React from 'react';
@@ -29,11 +48,11 @@ const CardContent = adapt(ShadcnCardContent);
 
 export function ProjectCards() {
   return (
-    <StyleScope styleProfile="rhea">
+    <StyleScope styleProfile="rhea" className="contents">
       <Card>
         <CardContent>继承外层作用域的 Rhea。</CardContent>
       </Card>
-      <StyleScope styleProfile="new-york">
+      <StyleScope styleProfile="new-york" className="contents">
         <Card>
           <CardContent>继承更近作用域的 New York。</CardContent>
         </Card>
@@ -46,54 +65,141 @@ export function ProjectCards() {
 }
 ```
 
-支持样式作用域的复合组件 `Root`（如 `Card`）也会自动为内部子部件及嵌套后代建立作用域。外层布局和页面间距仍由应用代码控制。
+- **宿主元素与布局透明性**：`styleScope` 本身不输出宿主 CSS（Web Components 自定义元素默认为 `display: inline`，框架适配器默认渲染包裹元素）。在 Flex 或 Grid 容器中使用时，请添加 `class="contents"`（React 中为 `className="contents"`）以保持外层布局流不受影响。
+- **复合组件作用域**：支持样式作用域的复合组件 `Root`（如 [Card](../card/) 与 [Select](../select/)）会自动将解析后的预设向下发布给内部部件及嵌套后代。
 
-<h2 id="card-contract">作用域 Card 示例</h2>
+## 示例
 
-下方示例使用 `styleProfile="rhea"` 的 `styleScope` 包裹 Card，展示通过作用域统一应用 **Shadcn Rhea** 风格的效果：
+### 嵌套作用域与覆盖优先级
+
+下方三张卡片分别展示「继承外层作用域」、「嵌套 `StyleScope` 覆盖（含 `new-york` 别名）」以及「组件自身显式 `styleProfile` 覆盖」。点击上方按钮可切换外层预设，或将嵌套作用域与第三张卡片重置为 `inherit` 以恢复继承：
 
 <PrototypePreviewer
-  demoId="demo-shadcn-card"
+  demoId="demo-shadcn-style-scope-nesting"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-### 预设选择与继承规则
+### 实时切换并保留组件状态
 
-`styleProfile` 为可选属性，默认值为 `inherit`，按以下优先级解析：
+就地更新 `styleProfile` 仅重绘视觉规则，不会重建组件实例。先切换下方 [Tabs](../tabs/) 选中项或在 [Input Shell](../input-shell/) 中编辑文本，再点击预设按钮（或在聚焦状态下按 `Alt+1`–`Alt+5`），当前标签页、输入内容与键盘焦点都会保持不变：
+
+<PrototypePreviewer
+  demoId="demo-shadcn-style-scope-state-preservation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多组件联合作用域、别名归一化与 `inherit`
+
+单个 `StyleScope` 可同时驱动 [Card](../card/)、[Input Shell](../input-shell/) 与 [Button](../button/)。`new-york` 会自动归一化为 `new-york-v4`；将 `styleProfile` 设为 `inherit` 时会撤销本地覆盖并恢复继承外层作用域（若外层也无具体预设，则发布 `{ style: null }`，由各组件回退到各自的兼容默认风格）：
+
+<PrototypePreviewer
+  demoId="demo-shadcn-style-scope-composite"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 预设选择与继承规则
+
+`styleProfile` 为可选属性，默认值为 `inherit`，按以下三级优先级解析：
 
 1. 组件自身显式传入的具体 `styleProfile`。
 2. 最近的祖先样式作用域提供的具体选择。
 3. 组件自身的兼容默认风格。
 
-将组件或嵌套作用域的 `styleProfile` 改回 `inherit` 时，会撤销本地覆盖并恢复继承。若自身与祖先均未指定具体预设，作用域将发布 `{ style: null }`，各组件继续使用各自的默认风格。
+将组件或嵌套作用域的 `styleProfile` 改回 `inherit` 时，会撤销本地覆盖并恢复继承。若自身与祖先均未指定具体预设，作用域发布 `{ style: null }`，各组件继续使用各自的默认风格。
 
 | 预设值 | 说明 |
 | --- | --- |
-| `vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea` | 八个现代 Shadcn 风格 ID，具体支持范围以各组件文档为准。 |
+| `vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea` | 八个现代 Shadcn 风格 ID，具体支持范围以各组件为准。 |
 | `new-york-v4` | 独立的 New York 兼容风格。 |
 | `new-york` | `new-york-v4` 的别名，会自动归一化为 `new-york-v4`。 |
-| `inherit` 或省略 | 不显式覆盖，依次回退到最近作用域和组件默认风格。 |
+| `inherit` 或省略 | 不显式覆盖，依次回退到最近作用域与组件默认风格。 |
 
-### 样式隔离与 CSS Layer 顺序
+### 组件预设支持范围
 
-- 切换 `styleProfile` 仅更新视觉样式，不会重建组件实例，也不会丢失已编辑的值、文本选区或键盘焦点。请直接更新 `styleProfile` 属性，避免通过修改组件 `key` 来切换风格。
-- Style Scope 只传递 Shadcn 家族的逻辑样式上下文，不创建 Shadow DOM 或全局主题存储，也不会影响 [Input Shell](/zh-cn/ui-libraries/shadcn/input-shell/) 等组件以外的其他组件家族。
-- 使用具名 CSS Layer 时，请按以下顺序声明：`生成的主题默认值` → `reset/base` → `proto-ui` → `应用自定义层`，并在首次加载相关样式表之前固定该顺序。
+配置了 `options.supportedStyles` 的组件遇到未实现的预设时会直接抛出错误，而不会静默替换为其他风格。当前主要组件的预设支持如下：
+
+| 组件 | 支持的 `styleProfile` | 无作用域（`{ style: null }`）回退 |
+| --- | --- | --- |
+| [Button](../button/) | 全部 9 种预设（`vega`–`rhea`、`new-york-v4`） | `rhea` |
+| [Tabs](../tabs/) | 全部 9 种预设（`vega`–`rhea`、`new-york-v4`） | `new-york-v4` |
+| [Select](../select/) | 全部 9 种预设（`vega`–`rhea`、`new-york-v4`） | `new-york-v4` |
+| [Dialog](../dialog/) | 全部 9 种预设（`vega`–`rhea`、`new-york-v4`） | `new-york-v4` |
+| [Input Shell](../input-shell/) | 全部 9 种预设（`vega`–`rhea`、`new-york-v4`） | `new-york-v4` |
+| [Card](../card/) | `new-york-v4`、`rhea` | `new-york-v4` |
+
+## 样式隔离、生命周期边界与 CSS Layer 顺序
+
+- **无重建切换**：切换 `styleProfile` 仅更新视觉样式，不会丢失组件实例、已编辑值、文本选区或键盘焦点。请直接更新 `styleProfile` 属性，避免通过修改 `key` 重建子树。
+- **家族隔离**：Style Scope 仅作为 Shadcn 家族的逻辑 Context 边界，而非 CSS Reset、Shadow DOM 边界或全局主题存储；[Input Shell](../input-shell/) 等 Shadcn 组件通过该通道解析预设，不会影响其他组件家族。
+- **动态祖先与 Portal 边界**：作用域在组件创建、挂载、更新和 Context 订阅回调中同步祖先预设。运行时将节点跨作用域重挂、移除祖先提供者而未触发后代更新，以及原生 Portal 弹层沿逻辑归属继承作用域的能力仍在持续演进中；请在同一逻辑子树内稳定挂载并就地更新 `styleProfile`。
+- **CSS Layer 顺序**：使用具名 CSS Layer 时，请在加载首个相关样式表前固定声明顺序：`生成的主题默认值` → `reset/base` → `proto-ui` → `应用自定义层`。
 
 ## API
 
-除 `styleScope` 外，`@proto.ui/prototypes-shadcn/style-scope` 还导出以下工具函数与类型：
+### `styleScope`（`shadcn-style-scope`）属性
 
-| 导出 | 用途 |
-| --- | --- |
-| `setupShadcnStyleScope(def)` | 在复合原型的 `setup` 中调用，发布自身有效选择并从祖先继承。 |
-| `setupShadcnStyleSelection(def, compatibilityStyle, options?)` | 在组件 `setup` 中调用，派生供规则使用的视觉状态；可通过 `options.supportedStyles` 限定该组件支持的预设集合。 |
-| `SHADCN_STYLE_SCOPE` | 承载 `{ style: ShadcnStyleId \| null }` 的单例 Context Key（必须直接导入此 Key）。 |
-| `SHADCN_STYLE_IDS` | 规范风格 ID 列表（包含 `new-york-v4`）。 |
-| `normalizeShadcnStyle(value)` | 归一化已知 ID 与别名；对 `undefined`、`null` 或 `inherit` 返回 `null`，遇到未知 ID 时抛出错误。 |
-| `ShadcnStyleId`、`ShadcnStyleChoice` | 规范风格 ID 类型，以及包含 `new-york` 与 `inherit` 的可选联合类型。 |
-| `ShadcnStyleProps`、`ShadcnStyleContext` | 分别描述可选 `styleProfile` 属性形状与 Context 值类型。 |
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: "'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4' | 'new-york' | 'inherit'",
+      default: "'inherit'",
+      description: '当前作用域发布的 Shadcn 视觉预设；省略或设为 inherit 时继承最近祖先作用域。',
+    },
+  ]}
+/>
+
+### 工具函数与类型导出
+
+除 `styleScope` 外，`@proto.ui/prototypes-shadcn/style-scope` 还导出以下作者侧 API：
+
+<ApiPropsTable
+  headers={{ name: '导出', type: '类型 / 签名', description: '用途' }}
+  rows={[
+    {
+      name: 'setupShadcnStyleScope',
+      type: '(def) => void',
+      description: '在复合原型 setup 中调用，继承祖先选择并向下发布自身有效预设。',
+    },
+    {
+      name: 'setupShadcnStyleSelection',
+      type: '(def, compatibilityStyle, options?) => State',
+      description:
+        '在组件 setup 中调用，派生视觉规则所需状态；可通过 options.supportedStyles 限定支持的预设集合。',
+    },
+    {
+      name: 'SHADCN_STYLE_SCOPE',
+      type: 'ContextKey<ShadcnStyleContext>',
+      description:
+        '承载 { style: ShadcnStyleId | null } 的单例 Context Key（必须直接导入此引用）。',
+    },
+    {
+      name: 'SHADCN_STYLE_IDS',
+      type: 'readonly ShadcnStyleId[]',
+      description: '九个规范风格 ID 列表（包含八个现代预设与 new-york-v4）。',
+    },
+    {
+      name: 'normalizeShadcnStyle',
+      type: '(value: unknown) => ShadcnStyleId | null',
+      description:
+        '归一化已知 ID 与别名；对 undefined、null 或 inherit 返回 null，遇到未知 ID 时抛出错误。',
+    },
+    {
+      name: 'ShadcnStyleId / ShadcnStyleChoice',
+      type: 'TypeScript types',
+      description: '规范风格 ID 类型，以及包含 new-york 别名与 inherit 的可选联合类型。',
+    },
+    {
+      name: 'ShadcnStyleProps / ShadcnStyleContext',
+      type: 'TypeScript types',
+      description: '分别描述可选 styleProfile 属性形状与 Context 值类型。',
+    },
+  ]}
+/>
 
 ```ts
 import { normalizeShadcnStyle } from '@proto.ui/prototypes-shadcn/style-scope';
@@ -101,8 +207,6 @@ import { normalizeShadcnStyle } from '@proto.ui/prototypes-shadcn/style-scope';
 const legacy = normalizeShadcnStyle('new-york'); // 'new-york-v4'
 const inherited = normalizeShadcnStyle('inherit'); // null
 ```
-
-`setupShadcnStyleSelection` 配置了 `options.supportedStyles` 时，若传入了该组件未实现的预设会直接拒绝，而不会静默替换为其他风格。使用 Portal 渲染弹层时，弹层内容会沿逻辑树继承所属作用域，而非物理挂载节点的样式上下文。
 
 ## 参考
 

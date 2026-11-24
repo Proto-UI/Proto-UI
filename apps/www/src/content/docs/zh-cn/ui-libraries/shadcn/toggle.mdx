@@ -1,6 +1,6 @@
 ---
 title: 'Toggle'
-description: '支持多种尺寸与边框变体的双态切换按钮组件。'
+description: '可在开启与关闭状态之间切换的双态按钮组件，支持默认与描边变体及三档尺寸。'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -8,31 +8,119 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Toggle 是一个可在按下（激活）与未按下状态之间切换的双态按钮，适用于富文本工具栏等开关操作场景。本页示例使用 **Shadcn Rhea** 风格。
+可在开启与关闭状态之间切换的双态按钮组件，适用于富文本格式栏、收藏置顶等开关操作。本页示例采用 **Shadcn Rhea** 风格。
 
 ## 预览
-
-下方依次展示了默认图标按钮、已激活的 `outline` 按钮、小号按钮、禁用且已激活按钮、大号文字按钮以及 `outline` 切换按钮（纯图标按钮均配有视觉隐藏的无障碍名称）。
 
 <PrototypePreviewer
   demoId="demo-shadcn-toggle"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
   toolbar={false}
-  codePanel={false}
 />
 
 ## 安装
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-toggle" manager="npm" />
+<InstallCommandCard
+  manager="npm"
+  commands={{
+    npm: 'npx @proto.ui/cli@latest add wc shadcn-toggle',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-toggle',
+    yarn: 'yarn dlx @proto.ui/cli@latest add wc shadcn-toggle',
+    bun: 'bunx @proto.ui/cli@latest add wc shadcn-toggle',
+  }}
+/>
 
-将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件封装。
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的本地组件封装。
 
 ## 用法
 
-- 通过 `variant` 选择 `'default'` 或 `'outline'` 外观，通过 `size` 选择 `'default'`、`'sm'` 或 `'lg'` 尺寸。
-- 在 **Shadcn Rhea** 预设下，`default` / `sm` / `lg` 高度分别为 `2rem`、`1.75rem` 和 `2.25rem`，`outline` 变体使用无阴影边框，激活与悬停均呈现柔和的 muted 表面。切换到 `new-york-v4` 预设时，则采用 `36px` / `32px` / `40px` 高度与 accent 激活态样式。
-- 传入 `active` 进入受控模式，监听 `activeChange` 响应状态变更；使用 `defaultActive` 进入非受控模式。
+```tsx
+import { ShadcnToggle } from '../proto-ui/components/react';
+```
+
+```tsx
+<ShadcnToggle variant="outline">Toggle</ShadcnToggle>
+```
+
+- **变体与尺寸**：通过 `variant` 在 `'default'` 与 `'outline'` 之间切换，通过 `size` 选择 `'sm'`、`'default'` 或 `'lg'`。
+- **风格预设（`styleProfile`）**：支持 `vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea` 与 `new-york-v4`（省略时优先继承最近的 [Style Scope](../style-scope/)）。
+- **受控与非受控**：传入 `active` 并监听 `activeChange` 进入受控模式；使用 `defaultActive` 设置非受控初始状态。
+- **键盘与无障碍**：支持点击、`Enter` 与 `Space` 切换 `aria-pressed` 状态；使用纯图标切换按钮时，请同时提供视觉隐藏的文本标签作为可访问名称。如需协调一组切换按钮，请使用 [Toggle Group](../toggle-group/)。
+
+## 示例
+
+### 描边
+
+使用 `variant="outline"` 渲染带边框的切换按钮。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-outline"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  lazy={true}
+/>
+
+### 图标与文本
+
+在单个切换按钮内组合图标与文本标签。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-with-text"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  lazy={true}
+/>
+
+### 尺寸
+
+通过 `size` 切换 `sm`、`default` 与 `lg` 三档尺寸。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  lazy={true}
+/>
+
+### 禁用
+
+设置 `disabled` 后会阻止点击与键盘激活，并保留当前 `active` 状态。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  lazy={true}
+/>
+
+### 受控模式
+
+传入 `active` 并响应 `activeChange` 事件，由外部状态驱动切换按钮。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  lazy={true}
+/>
+
+### RTL
+
+在 `dir="rtl"` 容器中，图标与文本会沿从右到左的行内方向自然排列。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  lazy={true}
+/>
 
 ## API
 
@@ -44,12 +132,19 @@ Toggle 是一个可在按下（激活）与未按下状态之间切换的双态�
     { name: 'active', type: 'boolean | undefined', default: '非受控' },
     { name: 'defaultActive', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'variant', type: "'default' | 'outline'", default: 'default' },
-    { name: 'size', type: "'default' | 'sm' | 'lg'", default: 'default' },
+    { name: 'variant', type: "'default' | 'outline'", default: "'default'" },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: "'default'" },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'inherit' → 最近 scope → 'new-york-v4'",
+    },
   ]}
 />
 
-`Root` 暴露 `active`、`disabled`、`hovered`、`focused`、`focusVisible` 和 `pressed` 状态，以及 `activeChange` 事件。
+- **事件**：`activeChange`（载荷 `{ active: boolean }`）。
+- **方法**：`focusSelf(options?)`（禁用态忽略）。
+- **暴露状态**：`active`、`disabled`、`hovered`、`focused`、`focusVisible`、`pressed`。
 
 ## 参考
 

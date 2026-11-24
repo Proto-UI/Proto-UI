@@ -1,11 +1,13 @@
 ---
 title: 'Toggle Group'
-description: 'A Liquid Glass group of single- or multi-select toggle buttons with roving keyboard focus.'
+description: 'A floating Liquid Glass toggle group with concentric corner radii, prominence levels, and readable opaque fallbacks.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Toggle Group coordinates related toggle buttons in a roving-focus container supporting single (clearable) or multiple pressed selections.
+Liquid Glass Toggle Group applies optical glass exclusively to the floating `Root` container while rendering borderless inner segments so glass never stacks on glass, maintaining concentric corner radii in both horizontal and vertical layouts.
 
 ## Preview
 
@@ -13,24 +15,116 @@ Liquid Glass Toggle Group coordinates related toggle buttons in a roving-focus c
   demoId="demo-liquid-glass-toggle-group"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-liquid-glass/toggle-group` and adapt them for your target runtime.
 
 ## Usage
 
-- **Parts**: `Root`, `Item`.
-- **Single and multiple modes**: `value` and `defaultValue` are always string arrays. With `multiple={false}`, at most one item stays active and clicking it again clears the selection. Controlled mode emits `valueChange` proposals without mutating caller state.
-- **Keyboard and guards**: arrow keys move roving focus without toggling; disabled, read-only, and duplicate-valued items cannot commit.
+```tsx
+import {
+  LiquidGlassToggleGroupItem,
+  LiquidGlassToggleGroupRoot,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <LiquidGlassToggleGroupRoot defaultValue={['week']} a11yLabel="Calendar range">
+      <LiquidGlassToggleGroupItem value="day">Day</LiquidGlassToggleGroupItem>
+      <LiquidGlassToggleGroupItem value="week">Week</LiquidGlassToggleGroupItem>
+      <LiquidGlassToggleGroupItem value="month">Month</LiquidGlassToggleGroupItem>
+    </LiquidGlassToggleGroupRoot>
+  );
+}
+```
+
+### Material Hierarchy & Accessibility
+
+- **Single glass layer**: Only `Root` declares v2 `liquid-glass` material and specular rim highlights; inner items stay borderless segments so glass is never stacked on glass.
+- **Concentric geometry**: Horizontal groups pair a capsule container with capsule segments (`rounded-full`); vertical groups pair a `rounded-2xl` (16px) frame and `p-1.5` (6px) inset with concentric `rounded-[10px]` items (16px − 6px).
+- **Fallbacks & reduced motion**: Setting `material="opaque"` or enabling reduced transparency or forced colors preserves high-contrast opaque surfaces. Disabled items retain readable contrast without whole-surface opacity reduction, and color transitions disable automatically under reduced motion.
+
+## Examples
+
+### Regular & Prominent
+
+Use `variant="regular"` (default) for standard floating control groups, or `variant="prominent"` for tinted primary emphasis.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle-group-single"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Size
+
+Choose `sm`, `default`, or `lg` to adjust segment density.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle-group-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Vertical
+
+Set `orientation="vertical"` to switch to concentric rounded-rectangle geometry and vertical roving focus.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle-group-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Opaque & Disabled
+
+Compare explicit `material="opaque"` fallback surfaces alongside a disabled toggle group that remains legible.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop / Event | Description |
-| --- | --- | --- |
-| Root | `value`, `defaultValue` | Controlled / uncontrolled array of pressed values |
-| Root | `multiple` | Enables multiple selection; `false` allows at most one active value |
-| Root | `disabled`, `readOnly`, `valueChange` | Interaction state and selection proposal event |
-| Item | `value`, `disabled` | Unique item value and per-item disabled flag |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'readonly string[]', default: '— (controlled)' },
+    { name: 'defaultValue', type: 'readonly string[]', default: '[]' },
+    { name: 'multiple', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: "'default'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'valueChange', type: 'Event<{ value: readonly string[] }>', default: '—' },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "'' (unique in group)" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'regular' | 'prominent'", default: 'inherits Root' },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: 'inherits Root' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-TOGGLE-GROUP.yaml', 'P-BASE-TOGGLE-GROUP.yaml']}
+/>

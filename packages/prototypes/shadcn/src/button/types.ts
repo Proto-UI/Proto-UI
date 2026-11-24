@@ -13,14 +13,23 @@ export type ShadcnButtonVariant =
 export type ShadcnActionStyleProfile = ShadcnStyleId | 'new-york';
 export type ShadcnButtonStyleProfile = ShadcnStyleChoice;
 
-export type ShadcnButtonSize = 'default' | 'sm' | 'lg' | 'icon' | 'icon-compact';
+export type ShadcnButtonSize =
+  | 'default'
+  | 'xs'
+  | 'sm'
+  | 'lg'
+  | 'icon'
+  | 'icon-xs'
+  | 'icon-sm'
+  | 'icon-lg'
+  | 'icon-compact';
 
 export interface ShadcnButtonProps extends ButtonProps, ShadcnStyleProps {
   /** Explicit choice, then nearest scope, then the existing Rhea compatibility recipe. */
   styleProfile?: ShadcnButtonStyleProfile;
   variant?: ShadcnButtonVariant;
   size?: ShadcnButtonSize;
-  /** Allow text labels to wrap within their available inline size; ignored for icon and icon-compact sizes. */
+  /** Allow text labels to wrap within their available inline size; ignored for icon sizes. */
   wrap?: boolean;
 }
 

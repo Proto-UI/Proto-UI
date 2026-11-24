@@ -95,7 +95,12 @@ for (const family of ['shadcn', 'brutalist'] as const)
           (part) => `${family}-select-${part}`
         ),
         ...(family === 'shadcn'
-          ? ['shadcn-select-surface', 'shadcn-select-viewport', 'shadcn-select-item-text']
+          ? [
+              'shadcn-select-surface',
+              'shadcn-select-viewport',
+              'shadcn-select-group',
+              'shadcn-select-item-text',
+            ]
           : []),
       ]);
       let context: DemoSetupContext | undefined;

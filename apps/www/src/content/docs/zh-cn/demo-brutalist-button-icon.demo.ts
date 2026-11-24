@@ -10,7 +10,15 @@ export default {
         kind: 'proto',
         prototypeId: 'brutalist-button',
         props: { size: 'icon' },
-        children: ['!'],
+        children: [
+          {
+            kind: 'proto',
+            prototypeId: 'lucide-arrow-right-icon',
+            className: 'inline-flex size-4 shrink-0 pointer-events-none',
+            props: { size: 16 },
+          },
+          { kind: 'box', tag: 'span', className: 'sr-only', children: ['Continue'] },
+        ],
       },
     ],
   },

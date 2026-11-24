@@ -1,11 +1,13 @@
 ---
-title: 'ToggleGroup'
-description: '支持单选或多选按下状态与游走焦点导航的 Bootstrap 2.3.2 切换按钮组。'
+title: 'Toggle Group'
+description: '沿用经典 Bootstrap 2.3.2 btn-group 拼接几何、渐变填充、尺寸与配色变体的切换按钮组。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-ToggleGroup 将多个切换按钮组合为一组，支持单选或多选按下状态以及方向键游走焦点导航。
+Bootstrap 2.3.2 Toggle Group 忠实保留经典 `btn-group` 与 `btn-group-vertical` 的外侧圆角、`-1px` 接缝折叠、线性渐变与内阴影按压质感，同时提供单选/多选与键盘漫游焦点。
 
 ## 预览
 
@@ -13,26 +15,125 @@ ToggleGroup 将多个切换按钮组合为一组，支持单选或多选按下�
   demoId="demo-bootstrap-2-3-2-toggle-group"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/toggle-group` 导入组件原型并通过对应宿主 Adapter 适配。
 
 ## 用法
 
-由 `Root` 和 `Item` 组成：
+```tsx
+import { BootstrapToggleGroupItem, BootstrapToggleGroupRoot } from '../proto-ui/components/react';
 
-- **单选与多选**：`value` / `defaultValue` 始终为字符串数组。`multiple={false}` 时最多保留一个选中值，再次点击已选中项可清空选择；`multiple={true}` 时允许同时按下多个项。
-- **受控与键盘**：受控模式下通过 `valueChange` 通知父组件更新状态。方向键仅在按钮间移动焦点，不自动改变选中状态；禁用、只读以及重复 `value` 的项不可提交。
+export function Example() {
+  return (
+    <BootstrapToggleGroupRoot defaultValue={['left']} a11yLabel="Text alignment">
+      <BootstrapToggleGroupItem value="left">Left</BootstrapToggleGroupItem>
+      <BootstrapToggleGroupItem value="middle">Middle</BootstrapToggleGroupItem>
+      <BootstrapToggleGroupItem value="right">Right</BootstrapToggleGroupItem>
+    </BootstrapToggleGroupRoot>
+  );
+}
+```
+
+### 组件结构
+
+```text
+ToggleGroupRoot
+├── ToggleGroupItem
+└── ToggleGroupItem
+```
+
+- **经典拼接几何**：首尾项根据尺寸保留 `4px` / `6px` / `3px` 外侧圆角，中间项保持直角并通过 `-1px` 负边距折叠公共边框；激活、悬停或聚焦项自动抬升层级（`z-[2]`）。
+- **单选、多选与键盘**：`value` / `defaultValue` 始终为字符串数组。方向键移动焦点而不切换选中状态，按 `Space` 或 `Enter` 提交切换；传入 `value` 进入受控模式并监听 `valueChange`。
+
+## 示例
+
+### 单选对齐条（Single）
+
+默认单选模式下最多保持一个按下按钮，再次点击当前项可复位。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toggle-group-single"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 尺寸与语义配色（Sizes & Variants）
+
+支持经典的 `mini`、`small`、`default`、`large` 像素尺寸以及 `default`、`primary`、`warning`、`danger`、`success`、`info`、`inverse` 渐变配色。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toggle-group-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 垂直按钮组（Vertical）
+
+设置 `orientation="vertical"` 切换为经典 `btn-group-vertical` 纵向拼接样式与上下方向键漫游。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toggle-group-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用（Disabled）
+
+禁用后切换为扁平填充并降低透明度，同时保留拼接几何占位。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toggle-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件   | 属性 / 事件              | 说明                             |
-| ------ | ------------------------ | -------------------------------- |
-| `Root` | `value` / `defaultValue` | `string[]`，当前按下的按钮值数组 |
-| `Root` | `multiple`               | `boolean`，是否允许多选          |
-| `Root` | `disabled` / `readOnly`  | 禁用或只读状态                   |
-| `Root` | `valueChange`            | 选中值变更请求事件               |
-| `Item` | `value` / `disabled`     | 单个切换按钮的值与禁用开关       |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'readonly string[]', default: '—（受控）' },
+    { name: 'defaultValue', type: 'readonly string[]', default: '[]' },
+    { name: 'multiple', type: 'boolean', default: 'false' },
+    {
+      name: 'variant',
+      type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'",
+      default: "'default'",
+    },
+    { name: 'size', type: "'default' | 'large' | 'small' | 'mini'", default: "'default'" },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'valueChange', type: 'Event<{ value: readonly string[] }>', default: '—' },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''（组内唯一）" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'variant',
+      type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'",
+      default: '继承 Root',
+    },
+    { name: 'size', type: "'default' | 'large' | 'small' | 'mini'", default: '继承 Root' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-TOGGLE-GROUP.yaml', 'P-BASE-TOGGLE-GROUP.yaml']}
+/>

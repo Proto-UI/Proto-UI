@@ -1,6 +1,6 @@
 ---
 title: 'Label'
-description: '通过显式关联为控件提供无障碍命名与点击激活能力的标签组件。'
+description: '通过显式关联为控件提供无障碍命名与点击激活能力的 Shadcn 标签组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -8,11 +8,11 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-通过显式配对为关联控件提供无障碍名称（`naming`）与点击激活/聚焦能力（`activation`），无需手写 DOM `id` 或嵌套隐式查找。本页示例采用 **Shadcn Rhea** 风格。
+`Label` 通过显式引用关联为控件提供无障碍名称（`naming`）与点击激活/聚焦能力（`activation`），无需手写 DOM `id` 或隐式查找相邻节点。本页示例采用 **Shadcn Rhea** 风格。
+
+> 表单输入字段请优先使用 [Field](../field/) 组件，内置 `FieldLabel`、`FieldDescription` 与 `FieldError` 自动关联与校验支持。
 
 ## 预览
-
-下方示例将 `Label` 分别与 `Checkbox`、`Switch`、`Radio Group Item`、`Input` 和 `Textarea` 配对，并包含仅命名（`activation={false}`）、受控、只读与禁用场景：
 
 <PrototypePreviewer
   demoId="demo-shadcn-label"
@@ -22,42 +22,150 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 ## 安装
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-label" manager="npm" />
+<InstallCommandCard
+  commands={{
+    npm: 'npx @proto.ui/cli@latest add wc shadcn-label',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-label',
+  }}
+  manager="npm"
+/>
 
-把 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的本地组件封装。也可以直接从 `@proto.ui/prototypes-shadcn/label` 导入。
+把 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的本地组件封装。也可以直接从 `@proto.ui/prototypes-shadcn/label` 导入 `labelRoot`。
 
 ## 用法
 
-### 命名与激活（可独立开关）
+每对标签与控件通过 `@proto.ui/core` 的 `createControlLabelRef()` 创建唯一引用，并通过适配器通道传入（不放入普通 JSON Props）：
 
-- **`naming`（默认 `true`）**：为目标控件建立无障碍命名关联，无需重复放置视觉隐藏文本。如果目标控件本身已有非空 `ariaLabel` 或 `labelledBy`，建议将该标签设为 `naming={false}`（仅激活模式）以免命名冲突。
-- **`activation`（默认 `true`）**：点击配对标签时同步触发目标控件的对应操作——切换 `Checkbox` / `Switch`、选择 `Radio Group Item`，或聚焦 `Input` / `Textarea`（不修改文本内容或选区）。设为 `false` 可保留命名并关闭点击激活。
-- **`selection`（默认 `'policy'`）**：当标签可激活时自动抑制误选文字；仅命名的标签和长文本说明保持可复制。如需可激活标签也能选中复制文字，请设为 `selection="text"`。
-- `Label` 不增加额外的 `Tab` 顺序，点击标签内嵌的链接/按钮、带修饰键的点击或拖拽手势不会误触控件。
+```tsx
+import { useMemo } from 'react';
+import { createControlLabelRef } from '@proto.ui/core';
+import {
+  ShadcnCheckboxIndicator,
+  ShadcnCheckboxRoot,
+  ShadcnLabelRoot,
+} from '../proto-ui/components/react';
 
-### 创建显式关联
+export function TermsCheckbox() {
+  const termsRef = useMemo(() => createControlLabelRef(), []);
 
-每对标签与控件使用 `@proto.ui/core` 的 `createControlLabelRef()` 创建一个稳定引用，通过框架适配器通道传入（不放入普通 JSON Props）：
+  return (
+    <div className="flex items-center gap-2">
+      <ShadcnCheckboxRoot styleProfile="rhea" instanceAssociations={{ controlLabel: termsRef }}>
+        <ShadcnCheckboxIndicator styleProfile="rhea" />
+      </ShadcnCheckboxRoot>
+      <ShadcnLabelRoot styleProfile="rhea" instanceAssociations={{ controlLabel: termsRef }}>
+        Accept terms and conditions
+      </ShadcnLabelRoot>
+    </div>
+  );
+}
+```
 
-- **React / Vue / Vue 2**：向标签与控件双方传入 `instanceAssociations: { controlLabel: ref }`。
-- **Web Components**：使用 `@proto.ui/adapter-web-component` 的 `setElementAssociations(target, { controlLabel: ref })` 分别绑定目标控件与标签。
-- **DemoSpec**：通过 `associations: { controlLabel: 'row-key' }` 声明纯数据配对键。
+Web Components 通过 `@proto.ui/adapter-web-component` 的 `setElementAssociations()` 绑定同一引用：
 
-每个引用对应唯一的在线标签与目标控件（在 Web 端须位于同一 Document 与根节点下），重复、缺失或过期的配对会自动忽略。支持的关联目标包括 `Checkbox`、`Switch`、`Radio Group Item`、`Input`、`Textarea`、`Button`、`Toggle` 与 `Toggle Group Item`（包括纯图标按钮的独立命名）。
+```ts
+import { createControlLabelRef } from '@proto.ui/core';
+import { setElementAssociations } from '@proto.ui/adapter-web-component';
+
+const termsRef = createControlLabelRef();
+setElementAssociations(checkboxEl, { controlLabel: termsRef });
+setElementAssociations(labelEl, { controlLabel: termsRef });
+```
+
+### 命名、激活与无障碍
+
+- **`naming`（默认 `true`）**：为目标控件建立无障碍命名关联，无需重复放置隐藏文本。如果目标控件本身已有非空 `ariaLabel` 或 `labelledBy`，建议设为 `naming={false}`（仅激活模式）。
+- **`activation`（默认 `true`）**：点击标签会同步请求目标控件的既有操作——切换 `Checkbox` / `Switch`、选择 `Radio Group Item`，或聚焦 `Input` / `Textarea`（不修改文本内容或选区）。设为 `false` 可保留命名并关闭点击激活。
+- **`selection`（默认 `'policy'`）**：可激活标签默认抑制误选文字；仅命名标签与长说明保持自然可选中。需要可激活标签也能复制文字时请设为 `selection="text"`。
+- **键盘与指针边界**：`Label` 不增加额外 `Tab` 停靠点，点击嵌套链接/按钮、带修饰键的点击、拖拽或已取消的指针手势不会误触控件。
+- **支持的关联目标**：`Checkbox`、`Switch`、`Radio Group Item`、`Input`、`Textarea`、`Button`、`Toggle`、`Toggle Group Item`、独立 `Select Trigger` 与 `Number Field Input`。
+- **风格预设（`styleProfile`）**：支持 `vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea` 与 `new-york-v4`；默认 `'inherit'` 会继承最近的 [Style Scope](../style-scope/)，否则回退到 `new-york-v4`。
+
+## 示例
+
+### 基础用法
+
+将 `Label` 与 `Checkbox` 配对，点击标签即可切换勾选状态。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-label-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 在 Field 中使用
+
+在完整表单中，使用 [Field](../field/) 组合 `FieldLabel`、`FieldControl`、`FieldDescription` 与 `FieldError`，并可按需搭配独立的 `Label` 与 `Checkbox`。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-label-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 命名、激活与文本选择
+
+独立配置 `selection="text"`（可点击且可复制）、`activation={false}`（仅命名）与 `naming={false}`（保留目标自身的 `ariaLabel`，仅保留点击聚焦）。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-label-modes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 从右到左（RTL）
+
+在 `dir="rtl"` 容器中，`Label` 使用逻辑文本对齐（`text-start`）并与 `Checkbox`、`Input` 自然排布。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-label-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
+### Root
+
 <ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
   rows={[
-    { name: 'naming', type: 'boolean', default: 'true' },
-    { name: 'activation', type: 'boolean', default: 'true' },
-    { name: 'selection', type: "'policy' | 'auto' | 'text' | 'none'", default: 'policy' },
+    {
+      name: 'naming',
+      type: 'boolean',
+      default: 'true',
+      description: '是否为关联控件提供无障碍名称',
+    },
+    {
+      name: 'activation',
+      type: 'boolean',
+      default: 'true',
+      description: '点击标签时是否请求目标控件的默认操作',
+    },
+    {
+      name: 'selection',
+      type: "'policy' | 'auto' | 'text' | 'none'",
+      default: "'policy'",
+      description: '文本选择策略；默认仅在可激活状态下抑制误选',
+    },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'rhea' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'new-york-v4'",
+      default: "'inherit'",
+      description: '排版预设；默认继承最近的 Style Scope，否则回退到 new-york-v4',
+    },
   ]}
 />
 
-以上属性属于 `Root`。`selection="policy"` 仅在 `Label` 处于可激活状态时抑制误选文字。
+### 关联辅助接口
+
+- `createControlLabelRef()`：从 `@proto.ui/core` 导入，为每对标签与控件创建一对一不透明引用。
+- `instanceAssociations`：React / Vue / Vue 2 传入 `{ controlLabel: ref }` 的适配器关联通道。
+- `setElementAssociations(element, { controlLabel: ref })`：从 `@proto.ui/adapter-web-component` 导入，用于 Web Components 绑定。
 
 ## 参考
 
 <SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-LABEL.yaml', 'P-BASE-LABEL.yaml']} />
+
+- [Base UI Label](https://base-ui.com/react/components/label)
+- [shadcn/ui Label](https://ui.shadcn.com/docs/components/base/label)

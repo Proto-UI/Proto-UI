@@ -1,0 +1,150 @@
+---
+title: 'Image'
+description: 'An optically neutral Liquid Glass content-layer image component with concentric corner radii, accessibility modes, and live loading status events.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Image stays optically neutral in the content layer—never coating photos or illustrations with glass blur—while providing responsive framing and optional concentric corner radii so floating `regular` and `prominent` Liquid Glass controls can refract cleanly above it.
+
+## Preview
+
+The example below pairs a neutral content-layer image with floating `regular` and `prominent` Liquid Glass buttons directly above the photo:
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-image"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `imageRoot` (aliased as `liquidGlassImageRoot`) and `LiquidGlassImageRootProps` directly from `@proto.ui/prototypes-liquid-glass/image`.
+
+## Usage
+
+```tsx
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import { liquidGlassImageRoot } from '@proto.ui/prototypes-liquid-glass/image';
+import { liquidGlassButton } from '@proto.ui/prototypes-liquid-glass/button';
+
+const adapt = createReactAdapter(React);
+const GlassImage = adapt(liquidGlassImageRoot);
+const GlassButton = adapt(liquidGlassButton);
+
+export function MediaCard() {
+  return (
+    <div className="relative overflow-hidden rounded-2xl p-2">
+      <GlassImage
+        source="/images/base-image/landscape.svg"
+        a11yMode="informative"
+        alternativeText="Sunlit mountain ridge overlooking an alpine valley"
+        fit="cover"
+        radius="xl"
+        surfaceStyle={{ width: '100%', height: '240px' }}
+      />
+      <div className="absolute right-4 bottom-4 flex gap-2">
+        <GlassButton variant="regular">Switch</GlassButton>
+        <GlassButton variant="prominent">Featured</GlassButton>
+      </div>
+    </div>
+  );
+}
+```
+
+### Material Hierarchy & Accessibility
+
+Design choices align with Apple's [Materials](https://developer.apple.com/design/human-interface-guidelines/materials) guidance:
+
+- **Optically neutral content layer**: Reserve Liquid Glass strictly for floating functional controls (navigation bars, toolbars, floating actions) above content. Do not coat images with glass or stack glass controls on top of another glass container.
+- **Concentric corner radii**: Use `radius` so nested images match the curvature of their surrounding container (`outer radius = inner radius + padding`), while `block max-w-full h-auto` preserves natural aspect ratios.
+- **Accessibility preferences**: Under Reduce Transparency, Increase Contrast, Reduce Motion, or Forced Colors—or when a floating control explicitly sets `material="opaque"`—overlay controls switch to high-contrast opaque surfaces while the underlying image stays sharp and unaltered.
+- **Semantics and loading**: `a11yMode`, `alternativeText`, `fit`, `loadingStatus`, and `loadingStatusChange` are managed consistently by [Base Image](/en/ui-libraries/base/image/).
+
+## Examples
+
+### Fit Modes & Concentric Corners
+
+Compare `contain`, `cover`, and `fill` inside a rounded gradient stage with concentric inner radii.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-image-fit"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Accessibility
+
+Compare an informative figure carrying descriptive `alternativeText` against a decorative thumbnail using `a11yMode="decorative"`.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-image-a11y"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Loading & Fallback
+
+Switch assets using `prominent`, `regular`, and opaque (`material="opaque"`) controls to observe `loadingStatusChange`-driven fallback and retry UI.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-image-loading"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root Props
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'source', type: 'string | undefined', default: 'undefined' },
+    { name: 'a11yMode', type: "'informative' | 'decorative'", default: 'informative' },
+    { name: 'alternativeText', type: 'string', default: "''" },
+    { name: 'fit', type: "'contain' | 'cover' | 'fill'", default: 'contain' },
+    {
+      name: 'radius',
+      type: "'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full'",
+      default: 'none',
+    },
+  ]}
+/>
+
+### Exposes & Events
+
+<ApiPropsTable
+  headers={{ name: 'Name', type: 'Type', default: 'Description' }}
+  rows={[
+    { name: 'source', type: 'ExposeState<string>', default: 'Active image source URI' },
+    {
+      name: 'fit',
+      type: "ExposeState<'contain' | 'cover' | 'fill'>",
+      default: 'Current object-fit mode',
+    },
+    {
+      name: 'loadingStatus',
+      type: "ExposeState<'idle' | 'loading' | 'loaded' | 'error'>",
+      default: 'Current image load lifecycle state',
+    },
+    {
+      name: 'loadingStatusChange',
+      type: 'ExposeEvent<{ status, previousStatus, source }>',
+      default: 'Emitted on status transitions (bind via onLoadingStatusChange in React/Vue)',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-IMAGE.yaml', 'P-BASE-IMAGE.yaml']}
+/>

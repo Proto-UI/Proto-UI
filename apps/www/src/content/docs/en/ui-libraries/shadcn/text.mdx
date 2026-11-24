@@ -1,6 +1,6 @@
 ---
 title: 'Text'
-description: 'Reusable typography component for consistent sizing, weight, line height, and text tone.'
+description: 'Shadcn typography primitive with consistent scale, weight, font family, leading, tracking, and ink semantics.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,7 +8,7 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Text inherits the [Base Text](/en/ui-libraries/base/text/) typography contract and applies Shadcn font, size, line-height, tracking, and ink tokens while leaving document semantics to surrounding native elements. The examples on this page use the **Shadcn Rhea** style preset.
+Text inherits the eight independent presentation axes of [Base Text](/en/ui-libraries/base/text/) and applies Shadcn typography and ink tokens while leaving document structure and interaction semantics to enclosing native elements. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -20,67 +20,163 @@ Text inherits the [Base Text](/en/ui-libraries/base/text/) typography contract a
 
 ## Installation
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-text" manager="npm" />
+Initialize your app via the [Quick Start guide](/en/start-here/quick-start/), then add `shadcn-text` (draft capabilities are also available directly from workspace source):
 
-Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your target framework.
+<InstallCommandCard
+  commands={{
+    npm: 'npx @proto.ui/cli@latest add wc shadcn-text',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-text',
+  }}
+  manager="npm"
+/>
+
+Replace `wc` with `react`, `vue`, or `vue2` to generate the local facade for your target framework.
 
 ## Usage
 
-Import `shadcnTextRoot` (also exported as `textRoot` and `ShadcnTextRoot`) from `@proto.ui/prototypes-shadcn/text` or the package root, and configure the host element tag through your Adapter:
+Compose the generated `ShadcnTextRoot` component inside native `h1`–`h4`, `p`, `blockquote`, `code`, `label`, or `a` elements:
 
 ```tsx
-import * as React from 'react';
-import { createReactAdapter } from '@proto.ui/adapter-react';
-import { shadcnTextRoot } from '@proto.ui/prototypes-shadcn/text';
-
-const Text = createReactAdapter(React)(shadcnTextRoot, { rootTag: 'span' });
+import { ShadcnTextRoot } from '../proto-ui/components/react';
 
 export function SectionTitle() {
   return (
     <h1>
-      <Text size="4xl" font="heading" weight="semibold" leading="tight" tracking="tight">
+      <ShadcnTextRoot size="4xl" font="heading" weight="bold" leading="tight" tracking="tight">
         Account settings
-      </Text>
+      </ShadcnTextRoot>
     </h1>
   );
 }
 ```
 
-### Semantics and color inheritance
+You can also import `shadcnTextRoot` (aliased as `textRoot` and `ShadcnTextRoot`) from `@proto.ui/prototypes-shadcn/text` with `{ rootTag: 'span' }` on your Web Adapter, and optionally apply the immutable `SHADCN_TYPOGRAPHY` preset (Geist paired with platform and CJK fallbacks; font delivery and licensing stay with the host app):
 
-- `rootTag: 'span'` is a Web Adapter option rather than a component prop. Keep document and interactive semantics—such as `h1`, `p`, `label` (`htmlFor`/`for`), and `a` (`href`, `target`, `download`)—on the enclosing native elements.
-- Use `tone="inherit"` when rendering text inside a `solid` or `accent` `Surface` so it inherits the enclosing container's foreground color.
+```ts
+import { shadcnTextRoot, SHADCN_TYPOGRAPHY } from '@proto.ui/prototypes-shadcn/text';
+```
 
-### Line height and tracking scale
+### Semantics and typography rules
 
-- `leading="size"` uses the built-in line height for each size step: `xs` (`1rem`), `sm` (`1.25rem`), `base` (`1.5rem`), `lg` (`1.75rem`), `xl` (`1.75rem`), `2xl` (`2rem`), `3xl` (`2.25rem`), `4xl` (`2.5rem`), and `5xl` (`1`).
-- `leading="tighter"` maps to `1.1`, and `tracking="tighter"` maps to `-0.05em`.
-- Removing a prop restores its default. An invalid initial `size` falls back to `base`, while an invalid update retains the previous valid value.
-- Inside Shadcn action compositions, `actionProfile="rhea"` and `"luma"` consistently apply `1.25rem` line height.
+- **Native semantic ownership**: Text adds no ARIA role, tab stop, or event handler. Keep heading levels, `label` (`htmlFor`/`for`), and anchor (`href`, `target`, `download`) semantics on the surrounding native elements.
+- **Size-owned line boxes & tight steps**: `leading="size"` retains each size token's built-in line height (`xs` `1rem`, `sm` `1.25rem`, `base` `1.5rem`, `lg` `1.75rem`, `xl` `1.75rem`, `2xl` `2rem`, `3xl` `2.25rem`, `4xl` `2.5rem`, `5xl` `1`). `leading="tighter"` maps to `1.1`, and `tracking="tighter"` maps to `-0.05em`.
+- **Defaults and fallback**: Removing any prop restores its default. An invalid initial `size` falls back to `base`, while an invalid update after a valid value retains the previous valid value.
+- **Action typography (`actionProfile`)**: Defaults to `'none'` and never subscribes implicitly to `shadcn-style-scope`. Passing an explicit preset applies its action line box (`1.25rem` for `rhea`, `luma`, `vega`, `nova`, `maia`, `new-york-v4`; `1rem` for `lyra` and `sera`; `1.625` for `mira`, with uppercase and wide tracking for `sera`).
+
+## Examples
+
+### Type scale and weights
+
+Compare the full `5xl` through `xs` scale together with `leading="tighter"`, `leading="size"`, and `tracking="tighter"`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-text-scale"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Editorial and inline styles
+
+Common compositions for lead copy, large callouts, italic blockquotes, inline monospace code, underlined links, strikethrough text, and form helper captions.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-text-editorial"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Tones and surface inheritance
+
+Use `tone="inherit"` inside `solid` or `accent` `Surface` containers so text inherits the paired foreground ink across both light and dark modes.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-text-tones"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Action typography profiles (`actionProfile`)
+
+Pair `actionProfile` with matching passive action `Surface` recipes for Rhea, Luma, Lyra, Mira, and Sera.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-text-action-profiles"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL and multilingual typography
+
+Text follows enclosing logical direction (`dir="rtl"`) and pairs cleanly with CJK fallback stacks.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-text-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root`:
+The following props belong to `Root` (`ShadcnTextRoot`):
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
   rows={[
     {
       name: 'size',
       type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'",
       default: 'base',
+      description: 'Font size scale; pair with leading="size" to keep built-in line boxes',
     },
-    { name: 'tone', type: "'default' | 'muted' | 'inherit'", default: 'default' },
-    { name: 'weight', type: "'normal' | 'medium' | 'semibold' | 'bold'", default: 'normal' },
-    { name: 'font', type: "'body' | 'heading' | 'mono'", default: 'body' },
+    {
+      name: 'tone',
+      type: "'default' | 'muted' | 'inherit'",
+      default: 'default',
+      description: 'Ink tone; use inherit inside solid or accent surfaces',
+    },
+    {
+      name: 'weight',
+      type: "'normal' | 'medium' | 'semibold' | 'bold'",
+      default: 'normal',
+      description: 'Font weight',
+    },
+    {
+      name: 'font',
+      type: "'body' | 'heading' | 'mono'",
+      default: 'body',
+      description: 'Font family role (body, heading, or monospace)',
+    },
     {
       name: 'leading',
       type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'",
       default: 'normal',
+      description: 'Line height; size keeps the size token line box and tighter maps to 1.1',
     },
-    { name: 'tracking', type: "'normal' | 'tight' | 'tighter'", default: 'normal' },
-    { name: 'emphasis', type: "'normal' | 'italic'", default: 'normal' },
-    { name: 'decoration', type: "'none' | 'underline' | 'line-through'", default: 'none' },
+    {
+      name: 'tracking',
+      type: "'normal' | 'tight' | 'tighter'",
+      default: 'normal',
+      description: 'Letter spacing; tight maps to -0.025em and tighter maps to -0.05em',
+    },
+    {
+      name: 'emphasis',
+      type: "'normal' | 'italic'",
+      default: 'normal',
+      description: 'Normal or italic font style',
+    },
+    {
+      name: 'decoration',
+      type: "'none' | 'underline' | 'line-through'",
+      default: 'none',
+      description: 'Text decoration line',
+    },
+    {
+      name: 'actionProfile',
+      type: "'none' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4' | 'new-york'",
+      default: 'none',
+      description:
+        'Explicit passive action typography recipe (Shadcn-only; never subscribes implicitly to style-scope)',
+    },
   ]}
 />
 

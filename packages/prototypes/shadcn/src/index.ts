@@ -343,6 +343,7 @@ export {
   styleScope as shadcnStyleScope,
   setupShadcnStyleScope,
   setupShadcnStyleSelection,
+  normalizeShadcnStyle,
   SHADCN_STYLE_SCOPE,
   SHADCN_STYLE_IDS,
 } from './style-scope';

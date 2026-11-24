@@ -12,39 +12,111 @@ Separator 以 1px 细线在视觉或语义上划分相邻内容区域，支持�
 
 ## 预览
 
-下方依次展示了水平分隔线、一组垂直分隔线以及带无障碍语义（`decorative={false}`）的水平分隔线。
-
 <PrototypePreviewer
   demoId="demo-shadcn-separator"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
 
 ## 安装
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-separator" manager="npm" />
+<InstallCommandCard
+  manager="npm"
+  commands={{
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-separator',
+    npm: 'npx @proto.ui/cli@latest add wc shadcn-separator',
+    yarn: 'yarn dlx @proto.ui/cli@latest add wc shadcn-separator',
+    bun: 'bunx @proto.ui/cli@latest add wc shadcn-separator',
+  }}
+/>
 
 将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件封装。
 
 ## 用法
 
-- `orientation` 默认为 `'horizontal'`，设为 `'vertical'` 可切换为垂直分隔线。分隔线的长度由外层容器布局决定，间距由组合方式控制。
-- `decorative` 默认为 `true`，此时分隔线仅用于视觉装饰，对辅助技术隐藏；设为 `false` 时会暴露 `separator` 角色及对应的 `aria-orientation`。
-- Separator 为无内容元素，不接受子元素，也不参与键盘焦点或事件交互。
+```tsx
+import { ShadcnSeparatorRoot } from '../proto-ui/components/react';
+```
+
+```tsx
+<ShadcnSeparatorRoot styleProfile="rhea" />
+```
+
+- `orientation` 默认为 `'horizontal'`，设为 `'vertical'` 可切换为垂直分隔线；在现代预设（如 `rhea`、`nova`）中垂直分隔线会自动沿弹性容器交叉轴拉伸（`self-stretch`），`new-york-v4` 则沿用 `h-full`。
+- `decorative` 默认为 `true`，此时分隔线仅用于视觉装饰，对辅助技术隐藏；设为 `false` 时会暴露 `role="separator"` 及对应的 `aria-orientation`。
+- Separator 为无内容元素，不接受子元素，也不参与键盘焦点或事件交互；外边距与间距由外层布局组合控制。
+
+## 示例
+
+### 垂直方向
+
+使用 `orientation="vertical"` 在行内或工具条区域之间添加垂直分隔线。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-separator-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 菜单项
+
+在带有标题与辅助说明的多行选项之间使用垂直分隔线；在窄屏下可通过响应式布局隐藏次要项及其分隔线。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-separator-menu"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 列表与语义分隔
+
+在键值列表条目之间使用水平分隔线。当分隔线表达真实内容分组边界时，传入 `decorative={false}` 向辅助技术暴露 `separator` 语义角色。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-separator-list"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Separator 自动适配 `dir="rtl"` 从右向左排版容器。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-separator-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 以下属性属于 `Root`：
 
 <ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
   rows={[
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
-    { name: 'decorative', type: 'boolean', default: 'true' },
+    {
+      name: 'orientation',
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: '分隔线方向',
+    },
+    {
+      name: 'decorative',
+      type: 'boolean',
+      default: 'true',
+      description: '为 true 时仅作视觉装饰；为 false 时暴露 role="separator" 与 aria-orientation',
+    },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4' | 'new-york'",
+      default: "'inherit'",
+      description: '风格预设；未嵌套在 Style Scope 中时默认回退到 new-york-v4',
+    },
   ]}
 />
+
+暴露只读状态 `orientation` 与 `decorative`，不暴露交互事件或焦点方法。
 
 ## 参考
 

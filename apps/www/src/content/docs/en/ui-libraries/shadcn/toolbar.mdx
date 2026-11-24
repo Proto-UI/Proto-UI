@@ -1,6 +1,6 @@
 ---
 title: 'Toolbar'
-description: 'An accessible toolbar grouping command buttons and separators with roving keyboard focus.'
+description: 'An accessible Shadcn toolbar with command button variants, sizes, cross-axis separators, and roving keyboard focus.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -15,37 +15,194 @@ Toolbar groups related action buttons and dividers into a single accessible cont
   demoId="demo-shadcn-toolbar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-shadcn/toolbar` and adapt them for Web Components, React, Vue 3, or Vue 2:
+
+```ts
+import { toolbarRoot, toolbarButton, toolbarSeparator } from '@proto.ui/prototypes-shadcn/toolbar';
+```
 
 ## Usage
 
-Toolbar consists of `Root`, `Button`, and `Separator`:
+```tsx
+import {
+  ShadcnToolbarRoot,
+  ShadcnToolbarButton,
+  ShadcnToolbarSeparator,
+} from '../proto-ui/components/react';
 
-- `Root` manages `disabled`, `orientation`, `loop`, and the toolbar's accessible name (`a11yLabel`).
-- Only one enabled button participates in the page `Tab` sequence at a time; arrow keys move focus across buttons within the toolbar.
-- Activating an enabled `Button` emits an `action` event carrying its `value`.
-- `Separator` renders along the toolbar's cross axis automatically.
+export function EditorToolbar() {
+  return (
+    <ShadcnToolbarRoot styleProfile="rhea" a11yLabel="Document actions">
+      <ShadcnToolbarButton value="undo">Undo</ShadcnToolbarButton>
+      <ShadcnToolbarButton value="redo">Redo</ShadcnToolbarButton>
+      <ShadcnToolbarSeparator />
+      <ShadcnToolbarButton value="save" variant="default">
+        Save
+      </ShadcnToolbarButton>
+    </ShadcnToolbarRoot>
+  );
+}
+```
+
+Toolbar is composed of `Root`, `Button`, and `Separator`:
+
+- **Roving keyboard focus**: Only one enabled `Button` participates in the page `Tab` sequence at a time. Left/Right arrow keys navigate horizontal toolbars, Up/Down arrow keys navigate vertical toolbars, and `loop={true}` (default) wraps from end to start.
+- **Command activation**: Activating an enabled `Button` emits an `action` event carrying `{ value: string }`.
+- **Cross-axis divider**: `Separator` automatically aligns perpendicular to `Root`'s `orientation`.
+
+### Style Presets (`styleProfile`)
+
+`Root`, `Button`, and `Separator` support all nine Shadcn style presets (`vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`, and `new-york-v4`, with `new-york` as a compatibility alias). When omitted or set to `inherit`, parts inherit from the nearest `StyleScope` or `Root` and otherwise fall back to `rhea`.
+
+## Examples
+
+### Variants
+
+`Button` supports `ghost` (default), `outline`, `secondary`, `default`, and `destructive` variants to distinguish standard commands, primary submissions, and destructive actions inside one toolbar.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toolbar-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Sizes and Icon Buttons
+
+Use `sm`, `default`, `lg`, or square `icon` sizes. For icon-only commands, pair an `aria-hidden="true"` glyph with a visually hidden `sr-only` label so assistive technologies announce the action clearly.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toolbar-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Vertical Orientation
+
+Setting `orientation="vertical"` stacks commands vertically, switches `Separator` to a horizontal rule, and maps roving keyboard navigation to Up/Down arrow keys.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toolbar-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and Non-Looping Navigation
+
+Setting `disabled={true}` on `Root` disables every command in the toolbar. Setting `loop={false}` stops arrow-key navigation at the first and last enabled commands while skipping individually disabled buttons.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toolbar-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root` (`Separator` adds no props):
+### Root
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
   rows={[
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
-    { name: 'loop', type: 'boolean', default: 'true' },
-    { name: 'a11yLabel', type: 'string', default: "''" },
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: 'inherit → nearest scope → rhea',
+      description: 'Selects the Shadcn visual preset and scopes descendant toolbar parts',
+    },
+    {
+      name: 'variant',
+      type: "'default' | 'ghost'",
+      default: "'default'",
+      description: 'Framed toolbar container surface or borderless transparent layout',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disables all toolbar buttons at once',
+    },
+    {
+      name: 'orientation',
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: 'Layout axis and arrow-key navigation axis',
+    },
+    {
+      name: 'loop',
+      type: 'boolean',
+      default: 'true',
+      description: 'Wraps arrow-key focus between the first and last enabled commands',
+    },
+    {
+      name: 'a11yLabel',
+      type: 'string',
+      default: "''",
+      description: 'Accessible name applied to the toolbar landmark',
+    },
   ]}
 />
 
-`Button` defaults `disabled` to `false` and `value` to `''`.
+### Button
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: 'inherit → Root / scope → rhea',
+      description: 'Overrides or inherits the enclosing Shadcn preset',
+    },
+    {
+      name: 'variant',
+      type: "'ghost' | 'outline' | 'secondary' | 'default' | 'destructive'",
+      default: "'ghost'",
+      description: 'Visual style of the toolbar command button',
+    },
+    {
+      name: 'size',
+      type: "'default' | 'sm' | 'lg' | 'icon'",
+      default: "'default'",
+      description: 'Height and padding scale of the button',
+    },
+    {
+      name: 'value',
+      type: 'string',
+      default: "''",
+      description: 'Command identifier emitted in the action event detail',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disables this button and removes it from roving focus',
+    },
+  ]}
+/>
+
+### Separator
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: 'inherit → Root / scope → rhea',
+      description: 'Aligns divider margins with compact or regular presets',
+    },
+  ]}
+/>
+
+### Events and Exposes
+
+- **Button `action` event**: Emitted on enabled activation with payload `{ value: string }`.
+- **Root exposes**: `disabled` state and `focusFirst()`, `focusLast()`, and `setCurrent(id)` methods.
+- **Button exposes**: `disabled`, `focused`, and `focusVisible` states plus `focusSelf(options)`.
 
 ## References
 

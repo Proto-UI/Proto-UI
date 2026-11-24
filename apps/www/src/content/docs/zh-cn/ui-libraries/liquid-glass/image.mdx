@@ -1,0 +1,146 @@
+---
+title: 'Image'
+description: '在内容层保持光学中性并支持同心圆角、无障碍语义与加载状态追踪的 Liquid Glass 图像组件。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Image 位于内容层，刻意保持光学中性（不对照片或插图本身叠加玻璃镀层或模糊），提供响应式排布与可选同心圆角，让悬浮在其上方的常规与强调 Liquid Glass 控件清晰折射底层画面色彩。
+
+## 预览
+
+下方示例展示了光学中性的内容图像与悬浮其上的 `regular`、`prominent` Liquid Glass 按钮组合：
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-image"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-liquid-glass/image` 导入 `imageRoot`（别名 `liquidGlassImageRoot`）与 `LiquidGlassImageRootProps`。
+
+## 用法
+
+```tsx
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import { liquidGlassImageRoot } from '@proto.ui/prototypes-liquid-glass/image';
+import { liquidGlassButton } from '@proto.ui/prototypes-liquid-glass/button';
+
+const adapt = createReactAdapter(React);
+const GlassImage = adapt(liquidGlassImageRoot);
+const GlassButton = adapt(liquidGlassButton);
+
+export function MediaCard() {
+  return (
+    <div className="relative overflow-hidden rounded-2xl p-2">
+      <GlassImage
+        source="/images/base-image/landscape.svg"
+        a11yMode="informative"
+        alternativeText="晴朗山谷中的山脊风景"
+        fit="cover"
+        radius="xl"
+        surfaceStyle={{ width: '100%', height: '240px' }}
+      />
+      <div className="absolute right-4 bottom-4 flex gap-2">
+        <GlassButton variant="regular">切换</GlassButton>
+        <GlassButton variant="prominent">精选</GlassButton>
+      </div>
+    </div>
+  );
+}
+```
+
+### 材质层次与无障碍
+
+设计取舍参考 Apple [Materials](https://developer.apple.com/design/human-interface-guidelines/materials) 指南：
+
+- **内容层保持光学中性**：Liquid Glass 仅用于浮在内容之上的功能交互层（如导航栏、工具栏与悬浮操作按钮），绝不直接施加在图片内容本身，也不要在玻璃容器内再叠放玻璃按钮。
+- **同心圆角几何**：通过 `radius` 为嵌套图片匹配外层圆角容器的曲率（外圆角 = 内圆角 + 内边距），同时保留 `block max-w-full h-auto` 响应式纵横比。
+- **系统偏好与高对比度回退**：开启减少透明度、增强对比度、减弱动态效果或强制颜色模式时（或悬浮控件显式设置 `material="opaque"` 时），上层悬浮控件会自动切换为高对比度不透明样式，底层图像保持清晰不受遮挡。
+- **无障碍与加载生命周期**：`a11yMode`、`alternativeText`、`fit`、`loadingStatus` 与 `loadingStatusChange` 均由 [Base Image](/zh-cn/ui-libraries/base/image/) 统一管理。
+
+## 示例
+
+### 缩放模式与同心圆角
+
+在带柔和渐变背景的圆角容器中对比 `contain`、`cover` 与 `fill`。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-image-fit"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 无障碍语义
+
+对比信息性大图（提供完整 `alternativeText`）与装饰性缩略图（`a11yMode="decorative"`）。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-image-a11y"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 加载与错误回退
+
+通过 `prominent`、`regular` 与不透明 `material="opaque"` 控件切换资源地址，观察基于 `loadingStatusChange` 的回退卡片与重试流程。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-image-loading"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root Props
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'source', type: 'string | undefined', default: 'undefined' },
+    { name: 'a11yMode', type: "'informative' | 'decorative'", default: 'informative' },
+    { name: 'alternativeText', type: 'string', default: "''" },
+    { name: 'fit', type: "'contain' | 'cover' | 'fill'", default: 'contain' },
+    {
+      name: 'radius',
+      type: "'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full'",
+      default: 'none',
+    },
+  ]}
+/>
+
+### 暴露状态与事件
+
+<ApiPropsTable
+  headers={{ name: '名称', type: '类型', default: '说明' }}
+  rows={[
+    { name: 'source', type: 'ExposeState<string>', default: '当前生效的图片源 URI' },
+    { name: 'fit', type: "ExposeState<'contain' | 'cover' | 'fill'>", default: '当前缩放填充模式' },
+    {
+      name: 'loadingStatus',
+      type: "ExposeState<'idle' | 'loading' | 'loaded' | 'error'>",
+      default: '当前加载生命周期状态',
+    },
+    {
+      name: 'loadingStatusChange',
+      type: 'ExposeEvent<{ status, previousStatus, source }>',
+      default: '加载状态变化时触发（React/Vue 中可绑定 onLoadingStatusChange）',
+    },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-IMAGE.yaml', 'P-BASE-IMAGE.yaml']}
+/>

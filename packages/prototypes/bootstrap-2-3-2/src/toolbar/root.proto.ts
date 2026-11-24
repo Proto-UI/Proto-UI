@@ -10,10 +10,17 @@ export default definePrototype<ToolbarRootProps, ToolbarRootExposes>({
   modules: asToolbarRoot.modules,
   setup(def) {
     const behavior = asToolbarRoot();
-    def.feedback.style.use(tw('flex min-w-0 flex-wrap items-center gap-[5px] my-[10px]'));
+    const state = behavior.stateHandles;
+    if (!state) throw new Error('[bootstrap-2-3-2-toolbar] Root state unavailable.');
+
+    def.feedback.style.use(tw('flex w-fit min-w-0 gap-[5px] my-[10px]'));
     def.rule({
-      when: (w) => w.state(behavior.getState!('orientation')!).eq('vertical'),
-      intent: (i) => i.feedback.style.use(tw('flex-col')),
+      when: (w) => w.state(state.orientation).eq('horizontal'),
+      intent: (i) => i.feedback.style.use(tw('flex-row flex-wrap items-center')),
+    });
+    def.rule({
+      when: (w) => w.state(state.orientation).eq('vertical'),
+      intent: (i) => i.feedback.style.use(tw('flex-col items-stretch')),
     });
     return behavior.render;
   },

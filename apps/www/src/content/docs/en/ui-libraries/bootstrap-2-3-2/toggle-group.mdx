@@ -1,11 +1,13 @@
 ---
-title: 'ToggleGroup'
-description: 'A Bootstrap 2.3.2 group of toggle buttons supporting single or multiple selection with roving focus.'
+title: 'Toggle Group'
+description: 'A Bootstrap 2.3.2 joined btn-group of two-state toggle buttons with classic gradients, sizes, variants, and roving focus.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-ToggleGroup coordinates a set of two-state toggle buttons with single or multiple selection and roving keyboard focus.
+Bootstrap 2.3.2 Toggle Group preserves classic `btn-group` and `btn-group-vertical` outer-only corners, `-1px` collapsed seams, linear gradients, and pressed inset shadows with single- or multi-select roving focus.
 
 ## Preview
 
@@ -13,26 +15,125 @@ ToggleGroup coordinates a set of two-state toggle buttons with single or multipl
   demoId="demo-bootstrap-2-3-2-toggle-group"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-bootstrap-2-3-2/toggle-group` and adapt them for your target runtime.
 
 ## Usage
 
-Compose `Root` and `Item`:
+```tsx
+import { BootstrapToggleGroupItem, BootstrapToggleGroupRoot } from '../proto-ui/components/react';
 
-- **Single and multiple selection**: `value` and `defaultValue` are string arrays. When `multiple={false}`, at most one item stays pressed and clicking it again clears the selection; when `multiple={true}`, multiple items can stay pressed simultaneously.
-- **Controlled state and keyboard**: Controlled usage emits `valueChange` without mutating caller state. Arrow keys move focus without toggling selection; disabled, read-only, and duplicate-valued items cannot commit.
+export function Example() {
+  return (
+    <BootstrapToggleGroupRoot defaultValue={['left']} a11yLabel="Text alignment">
+      <BootstrapToggleGroupItem value="left">Left</BootstrapToggleGroupItem>
+      <BootstrapToggleGroupItem value="middle">Middle</BootstrapToggleGroupItem>
+      <BootstrapToggleGroupItem value="right">Right</BootstrapToggleGroupItem>
+    </BootstrapToggleGroupRoot>
+  );
+}
+```
+
+### Composition
+
+```text
+ToggleGroupRoot
+├── ToggleGroupItem
+└── ToggleGroupItem
+```
+
+- **Classic joined geometry**: Outer endpoints carry `4px` / `6px` / `3px` corners matched to the button size while interior seams collapse by `-1px`; hovered, focused, and active items elevate to `z-[2]`.
+- **Selection & keyboard**: `value` and `defaultValue` are always string arrays. Arrow keys move focus without toggling; `Space` or `Enter` toggles the focused button. Pass `value` for controlled mode and handle `valueChange`.
+
+## Examples
+
+### Single Select
+
+In default single-select mode, at most one button stays pressed and clicking it again clears the selection.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toggle-group-single"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Sizes & Variants
+
+Supports classic Bootstrap 2.3.2 `mini`, `small`, `default`, and `large` pixel sizing alongside `default`, `primary`, `warning`, `danger`, `success`, `info`, and `inverse` gradient palettes.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toggle-group-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Vertical
+
+Set `orientation="vertical"` for the classic `btn-group-vertical` stacked layout with vertical arrow navigation.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toggle-group-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Disabled buttons switch to the flat fill while preserving joined group geometry.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toggle-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part   | Props / Events           | Description                                  |
-| ------ | ------------------------ | -------------------------------------------- |
-| `Root` | `value` / `defaultValue` | `string[]` of active item values             |
-| `Root` | `multiple`               | `boolean` enabling multi-selection           |
-| `Root` | `disabled` / `readOnly`  | Group disabled or read-only flags            |
-| `Root` | `valueChange`            | Emitted when selection changes are requested |
-| `Item` | `value` / `disabled`     | Unique item value and per-item disabled flag |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'readonly string[]', default: '— (controlled)' },
+    { name: 'defaultValue', type: 'readonly string[]', default: '[]' },
+    { name: 'multiple', type: 'boolean', default: 'false' },
+    {
+      name: 'variant',
+      type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'",
+      default: "'default'",
+    },
+    { name: 'size', type: "'default' | 'large' | 'small' | 'mini'", default: "'default'" },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'valueChange', type: 'Event<{ value: readonly string[] }>', default: '—' },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "'' (unique in group)" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'variant',
+      type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'",
+      default: 'inherits Root',
+    },
+    { name: 'size', type: "'default' | 'large' | 'small' | 'mini'", default: 'inherits Root' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-TOGGLE-GROUP.yaml', 'P-BASE-TOGGLE-GROUP.yaml']}
+/>

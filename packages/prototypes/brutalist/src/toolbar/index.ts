@@ -3,6 +3,11 @@ export { default as toolbarButton } from './button.proto';
 export { default as toolbarSeparator } from './separator.proto';
 export { default } from './root.proto';
 export type {
+  BrutalistToolbarButtonProps,
+  BrutalistToolbarButtonVariant,
+  BrutalistToolbarButtonSize,
+} from './button.proto';
+export type {
   ToolbarRootProps,
   ToolbarRootExposes,
   ToolbarButtonProps,

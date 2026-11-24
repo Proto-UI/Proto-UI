@@ -6,6 +6,7 @@ import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-comp
 import bootstrapButton from '@proto.ui/prototypes-bootstrap-2-3-2/button';
 import {
   selectContent as bootstrapSelectContent,
+  selectGroup as bootstrapSelectGroup,
   selectSurface as bootstrapSelectSurface,
   selectViewport as bootstrapSelectViewport,
   selectItemText as bootstrapSelectItemText,
@@ -25,6 +26,7 @@ import {
 import shadcnButton from '@proto.ui/prototypes-shadcn/button';
 import {
   selectContent as shadcnSelectContent,
+  selectGroup as shadcnSelectGroup,
   selectSurface as shadcnSelectSurface,
   selectViewport as shadcnSelectViewport,
   selectItemText as shadcnSelectItemText,
@@ -48,6 +50,7 @@ const siteProjections = [
   ['wc-bootstrap-2-3-2-select-item', bootstrapSelectItem],
   ['wc-bootstrap-2-3-2-select-surface', bootstrapSelectSurface],
   ['wc-bootstrap-2-3-2-select-viewport', bootstrapSelectViewport],
+  ['wc-bootstrap-2-3-2-select-group', bootstrapSelectGroup],
   ['wc-bootstrap-2-3-2-select-item-text', bootstrapSelectItemText],
   ['wc-brutalist-button', brutalistButton],
   ['wc-brutalist-select-root', brutalistSelectRoot],
@@ -63,6 +66,7 @@ const siteProjections = [
   ['wc-shadcn-select-item', shadcnSelectItem],
   ['wc-shadcn-select-surface', shadcnSelectSurface],
   ['wc-shadcn-select-viewport', shadcnSelectViewport],
+  ['wc-shadcn-select-group', shadcnSelectGroup],
   ['wc-shadcn-select-item-text', shadcnSelectItemText],
 ] as const;
 

@@ -1,60 +1,24 @@
 ---
 title: 'Liquid Glass Toggle'
-description: '采用 Liquid Glass 玻璃材质与可读回退的双态切换按钮，继承 Base Toggle 语义。'
+description: '采用 Liquid Glass 玻璃材质、三档尺寸与高对比度不透明回退的双态切换按钮。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
-import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Liquid Glass Toggle 继承 [Base Toggle](/zh-cn/ui-libraries/base/toggle/) 的持久选中语义与键盘交互，采用 Liquid Glass 玻璃外观：未激活时呈现中性 `regular` 玻璃（`secondary` 填色与前景色），激活时呈现基于主题主色的染色玻璃（`primary` 与 `primary-foreground`）。
-
-组件内置等宽预留空间的小型 `currentColor` 装饰勾选，在切换状态时保持文字或图标居中、外框几何稳定，即使不依赖颜色或光学材质也能清晰区分激活状态。指针按压形变与持久 `active` 状态彼此独立。
+Liquid Glass Toggle 继承 [Base Toggle](/zh-cn/ui-libraries/base/toggle/) 的持久开关语义，未激活时使用中性 `regular` 玻璃表面，激活时切换为主色染色玻璃，并通过对称预留空间的 `currentColor` 勾选标记在不改变胶囊尺寸的前提下提供非颜色选中提示。
 
 ## 预览
 
-使用页面顶部的运行时选择器可在 Web Components、React、Vue 3 与 Vue 2 之间切换。示例中 Bold 初始未激活，Italic 初始已激活，Unavailable 处于禁用态并保持原选中状态；点击、Space 或 Enter 会发出 `activeChange` 请求。
-
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-toggle"
-    initialRuntime="wc"
-    toolbar={true}
-    runtimes={['wc']}
-    codePanel={false}
-  />
-</div>
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-toggle"
-    initialRuntime="react"
-    toolbar={true}
-    runtimes={['react']}
-    codePanel={false}
-  />
-</div>
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-toggle"
-    initialRuntime="vue"
-    toolbar={true}
-    runtimes={['vue']}
-    codePanel={false}
-  />
-</div>
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-toggle"
-    initialRuntime="vue2"
-    toolbar={true}
-    runtimes={['vue2']}
-    codePanel={false}
-  />
-</div>
-
-<AdapterPanelScript />
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## 安装
 
@@ -62,24 +26,89 @@ Liquid Glass Toggle 继承 [Base Toggle](/zh-cn/ui-libraries/base/toggle/) 的�
 
 ## 用法
 
+```tsx
+import { LiquidGlassToggle } from '../proto-ui/components/react';
+```
+
+```tsx
+<LiquidGlassToggle defaultActive>Italic</LiquidGlassToggle>
+```
+
 ### 材质与无障碍
 
-- 共享 Web 材质提供者仅采样应用显式提供的可见 canvas 背景，不会抓取任意 DOM。
-- 当背景源不可用、存在绘制重叠、处于禁用态、`material="opaque"`，或系统启用减弱透明度、增强对比度、强制颜色模式时，按钮会自动回退到高对比度的不透明主题色对（激活态为 `primary`/`primary-foreground`，未激活态为 `secondary`/`secondary-foreground`），并保留勾选标记以清晰表达选中状态。
-- 开启减弱动态效果时，会关闭弹性按压形变并保留静态材质效果。
-- 多个玻璃控件之间应留出足够间距以容纳扩展的光学绘制（示例中为 `32px`，较宽的控件可按需增大），避免相互重叠。
-- 纯图标按钮仍需提供明确的可访问名称（如 `aria-labelledby`）。设计原则参考 Apple [Materials](https://developer.apple.com/design/human-interface-guidelines/materials) 与 [Meet Liquid Glass](https://developer.apple.com/videos/play/wwdc2025/219/)。
+- **玻璃与不透明模式**：默认 `material="auto"` 在宿主提供有效背景源时启用光学折射；设为 `material="opaque"` 或处于禁用、减弱透明度、增强对比度、强制颜色模式时，自动使用高对比度的不透明色对，不降低整个控件的透明度。
+- **减弱动态效果**：系统开启减弱动态效果时，会关闭弹性按压形变并保留静态材质表现。
+- **避免玻璃叠玻璃**：避免在玻璃容器内再嵌套玻璃切换按钮，相邻玻璃控件之间保持足够间距以容纳光学边缘绘制。
+- **无障碍命名**：纯图标切换按钮需提供明确的可访问名称（如视觉隐藏文本或 `aria-labelledby`）。设计参考 Apple [Materials](https://developer.apple.com/design/human-interface-guidelines/materials) 与 [Meet Liquid Glass](https://developer.apple.com/videos/play/wwdc2025/219/)。
+
+## 示例
+
+### 图标与文本
+
+在胶囊切换按钮内组合图标与文本，切换激活态时内容保持居中、外框几何稳定。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle-with-text"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  lazy={true}
+/>
+
+### 尺寸
+
+通过 `size` 在 `sm`、`default` 与 `lg` 三档胶囊尺寸之间切换。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  lazy={true}
+/>
+
+### 材质模式
+
+对比 `material="auto"` 与显式 `material="opaque"` 在未激活与激活状态下的外观表现。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle-material"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  lazy={true}
+/>
+
+### 禁用
+
+禁用态撤回光学候选并保留高对比度不透明回退与激活态勾选标记，阻止激活交互。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  lazy={true}
+/>
 
 ## API
 
-| 属性 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `active` | `boolean` | — | 受控激活状态；通过 `activeChange` 请求变更，由调用方决定是否更新 |
-| `defaultActive` | `boolean` | `false` | 非受控初始激活状态 |
-| `disabled` | `boolean` | `false` | 禁用交互并清除瞬时按压态，同时保留已有 `active` 状态 |
-| `material` | `'auto' \| 'opaque'` | `'auto'` | 设为 `'opaque'` 时关闭光学增强，始终使用不透明样式 |
+以下属性属于 `Root`（传入 `active` 进入受控模式）：
 
-### 事件与状态
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'active', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultActive', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'size', type: "'sm' | 'default' | 'lg'", default: "'default'" },
+  ]}
+/>
 
-- `activeChange`：载荷为 `{ active: boolean }`。在宿主适配器中通常以 `onActiveChange` 监听该事件。
-- 无障碍与暴露状态：通过 `role="button"` 与 `aria-pressed` 反映持久 `active` 状态；暴露的 `pressed` 表示短暂的指针按压状态。焦点与键盘交互继承自 Base Toggle。
+- **事件**：`activeChange`（载荷 `{ active: boolean }`，在宿主适配器中以 `onActiveChange` 监听）。
+- **方法**：`focusSelf(options?)`（禁用态忽略）。
+- **暴露状态**：`active`、`disabled`、`hovered`、`focused`、`focusVisible`、`pressed`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-TOGGLE.yaml', 'P-BASE-TOGGLE.yaml']}
+/>

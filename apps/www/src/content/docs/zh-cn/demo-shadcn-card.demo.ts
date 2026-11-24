@@ -6,7 +6,7 @@ export default withShadcnRheaDemo({
   root: {
     kind: 'proto',
     prototypeId: 'shadcn-card-root',
-    className: 'max-w-lg',
+    className: 'w-full max-w-sm',
     children: [
       {
         kind: 'proto',
@@ -15,14 +15,14 @@ export default withShadcnRheaDemo({
           {
             kind: 'proto',
             prototypeId: 'shadcn-text-root',
-            props: { weight: 'semibold', tone: 'inherit' },
-            children: ['Project notes'],
+            props: { size: 'base', weight: 'medium', tone: 'inherit' },
+            children: ['Deployment summary'],
           },
           {
             kind: 'proto',
             prototypeId: 'shadcn-text-root',
             props: { size: 'sm', tone: 'muted' },
-            children: ['A passive content group'],
+            children: ['Production release v2.4 is live across all regions.'],
           },
         ],
       },
@@ -33,8 +33,10 @@ export default withShadcnRheaDemo({
           {
             kind: 'proto',
             prototypeId: 'shadcn-text-root',
-            props: { tone: 'inherit' },
-            children: ['The card owns its frame and theme ink. Your content keeps its meaning.'],
+            props: { size: 'sm', tone: 'inherit' },
+            children: [
+              'All 12 edge workers passed health checks with 99.98% uptime over the last 24 hours.',
+            ],
           },
         ],
       },
@@ -45,8 +47,9 @@ export default withShadcnRheaDemo({
           {
             kind: 'box',
             tag: 'a',
+            className: 'text-sm font-medium underline underline-offset-4 hover:opacity-80',
             attrs: { href: '#card-contract' },
-            children: ['Read the contract'],
+            children: ['View usage guide'],
           },
         ],
       },
