@@ -69,3 +69,42 @@ it('leaves a pre that received early keyboard focus untouched', async () => {
   expect(codeScrollTarget(shell)).toBe(pre);
   expect(shell.querySelector('[data-code-scroll-ready]')).toBeNull();
 });
+
+function fileTree(): HTMLElement {
+  const shell = document.createElement('aside');
+  shell.innerHTML = `<div data-code-scroll-root data-code-scroll-label="Files" data-code-tree-scroll tabindex="0" role="region" aria-label="Files">
+    <div data-code-content><nav><a href="#source">src/App.tsx</a></nav></div>
+  </div>`;
+  document.body.append(shell);
+  return shell;
+}
+
+it('hands the file-tree scroll owner to the real viewport without replacing its nodes', async () => {
+  const shell = fileTree();
+  const container = shell.querySelector<HTMLElement>('[data-code-scroll-root]')!;
+  const link = shell.querySelector('a')!;
+  container.scrollLeft = 32;
+  container.scrollTop = 48;
+  await enhanceCodeScrollArea(shell);
+  const viewport = shell.querySelector<Facts>('[data-code-scroll-viewport]')!;
+  await vi.waitFor(() => expect(viewport.getExposes().scrollProjection.get()).toBe('composed'));
+  expect(link.closest('[data-code-tree-scroll]')).toBe(viewport);
+  expect(shell.querySelectorAll('[data-code-tree-scroll]')).toHaveLength(1);
+  expect(container.hasAttribute('tabindex')).toBe(false);
+  expect(container.hasAttribute('role')).toBe(false);
+  expect(viewport.getAttribute('aria-label')).toBe('Files');
+  expect(viewport.querySelector('a')).toBe(link);
+  expect([viewport.scrollLeft, viewport.scrollTop]).toEqual([32, 48]);
+  expect(shell.querySelectorAll('[data-code-scroll-track]')).toHaveLength(2);
+});
+
+it('retains a native file-tree scrollport that received focus before lazy admission', async () => {
+  const shell = fileTree();
+  const container = shell.querySelector<HTMLElement>('[data-code-tree-scroll]')!;
+  container.focus();
+  await enhanceCodeScrollArea(shell);
+  expect(document.activeElement).toBe(container);
+  expect(container.tabIndex).toBe(0);
+  expect(container.getAttribute('role')).toBe('region');
+  expect(shell.querySelector('[data-code-scroll-ready]')).toBeNull();
+});
