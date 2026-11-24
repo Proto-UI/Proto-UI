@@ -5,6 +5,16 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers Content transition presence, focus containment, dismissal requests, controlled ownership, and accessible modal semantics.
 cases:
+  - id: T-BASE-DIALOG-CONTENT-0001-CASE-CONTENT-ENTRY
+    title: Content initial focus remains inside the dialog without entering sequential navigation
+    covers:
+      [
+        P-BASE-DIALOG-CONTENT-CONTENT-ENTRY,
+        P-BASE-DIALOG-CONTENT-ENTRY-POLICY,
+        P-BASE-DIALOG-CONTENT-FOCUS,
+        P-BASE-DIALOG-CONTENT-CONTROLLED,
+      ]
+    expectation: content-initial-target-minus-one-tabindex-descendant-tab-loop-restore-and-current-activation-only-pending-focus
   - id: T-BASE-DIALOG-CONTENT-0001-CASE-ENTRY-POLICY
     title: Optional manual entry preserves explicit focus and next-activation semantics
     covers:
@@ -66,12 +76,45 @@ implementations:
       - Browser AX is not screen-reader evidence. Controlled refusal, first-frame motion, responsive/theme/locale matrices, packed consumers and other native hosts remain separate acceptance debt; source hashes name direct inputs rather than a complete transitive closure.
   - id: dialog-entry-policy-contract
     kind: module-test
-    status: planned
+    status: passing
     path: packages/prototypes/base/test/dialog-focus-entry.test.ts
     required: true
-    consumesCases: [T-BASE-DIALOG-CONTENT-0001-CASE-ENTRY-POLICY]
+    consumesCases:
+      [T-BASE-DIALOG-CONTENT-0001-CASE-ENTRY-POLICY, T-BASE-DIALOG-CONTENT-0001-CASE-CONTENT-ENTRY]
     notes:
-      - Six synthetic WC cases retain real public prototype focus and controlled owner behavior; not native portal timing, pending-request cancellation, Compiler support or Search continuity.
+      - Twenty-one synthetic WC cases retain real public prototype focus and controlled owner behavior. Content-entry cases include explicit host-acquisition rejection, default and zero-duration close, delivered Root identity replacement and synchronous consumer reentry seams; these are not native browser, screen-reader, Compiler or cross-Adapter evidence.
+  - id: dialog-content-entry-react
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/overlay-focus.integration.test.ts
+    required: true
+    consumesCases: [T-BASE-DIALOG-CONTENT-0001-CASE-CONTENT-ENTRY]
+    notes:
+      - Runs the shared public Dialog flow through actual React mounting in a synthetic DOM; this is not native browser or screen-reader evidence.
+  - id: dialog-content-entry-vue
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/overlay-focus.integration.test.ts
+    required: true
+    consumesCases: [T-BASE-DIALOG-CONTENT-0001-CASE-CONTENT-ENTRY]
+    notes:
+      - Runs the shared public Dialog flow through actual Vue mounting in a synthetic DOM; this is not native browser or screen-reader evidence.
+  - id: dialog-content-entry-vue2
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/overlay-focus.integration.test.ts
+    required: true
+    consumesCases: [T-BASE-DIALOG-CONTENT-0001-CASE-CONTENT-ENTRY]
+    notes:
+      - Runs the shared public Dialog flow through actual Vue 2 mounting in a synthetic DOM; this is not native browser or screen-reader evidence.
+  - id: dialog-content-entry-web-component
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/overlay-focus.integration.test.ts
+    required: true
+    consumesCases: [T-BASE-DIALOG-CONTENT-0001-CASE-CONTENT-ENTRY]
+    notes:
+      - Runs the shared public Dialog flow through actual Web Component mounting in a synthetic DOM; this is not native browser or screen-reader evidence.
   - id: s4-closed-paint-browser
     kind: runtime-test
     status: passing
@@ -149,8 +192,15 @@ verifies:
         - P-BASE-DIALOG-CONTENT-FOCUS
         - P-BASE-DIALOG-CONTENT-A11Y-ROLE
         - P-BASE-DIALOG-CONTENT-A11Y-RELATIONS
+        - P-BASE-DIALOG-CONTENT-ENTRY-POLICY
+        - P-BASE-DIALOG-CONTENT-CONTENT-ENTRY
 exercises: { prototypes: [P-BASE-DIALOG-CONTENT] }
+sources:
+  - path: packages/adapters/base/test/fixtures/overlay-focus-conformance.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Mapped Content-surface initial focus, descendant navigation and activation-owned cancellation to bounded public WC contract cases without claiming native execution.
   - version: 0.3.0-alpha.1
     change: refined
     summary: Added planned four-runtime public native Dialog evidence for existing focus, dismissal, accessibility and retained-presence behavior without promoting lifecycle or claiming execution.

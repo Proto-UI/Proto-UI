@@ -64,7 +64,7 @@ Passing `open` selects controlled mode.
 ### Other parts
 
 - **Mask**: `passthrough` defaults to `false`, plus Transition props.
-- **Content**: `focusEntry` defaults to `'auto'`, plus Transition props.
+- **Content**: `focusEntry: 'auto' | 'content' | 'manual'` defaults to `'auto'`, plus Transition props. `'content'` initially focuses the Content surface without adding it to the Tab sequence; Tab still enters the dialog's controls. `'manual'` leaves initial focus placement to the consumer. The policy is read at each activation; changing it while open does not move focus. All three modes retain focus containment and restoration.
 - **Trigger, Title, Description, Close**: no props.
 
 ## References

@@ -27,6 +27,52 @@ async function fixture(mediaClass = '') {
 }
 
 describe('borderless image presentation / maintainer request #796', () => {
+  it.each(['shadcn', 'brutalist'] as const)(
+    'places initial and repeated %s image focus on Content while retaining keyboard Close',
+    async (family) => {
+      const previousFamily = document.documentElement.dataset.siteLibraryFamily;
+      document.documentElement.dataset.siteLibraryFamily = family;
+      try {
+        const { trigger, root, content } = await fixture('whitepaper-diagram');
+        const close = content.querySelector<PreviewControl>('[data-docs-image-close]')!;
+        expect(root.getExposes?.().open.get()).toBe(true);
+        expect(document.activeElement).toBe(content);
+        expect(content.tabIndex).toBe(-1);
+        expect(close.getExposes?.().focused.get()).toBe(false);
+        expect(close.getExposes?.().focusVisible.get()).toBe(false);
+
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+        await settle();
+        expect(document.activeElement).toBe(close);
+        document.dispatchEvent(
+          new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true })
+        );
+        await settle();
+        expect(document.activeElement).toBe(close);
+        close.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        await settle();
+        expect(root.getExposes?.().open.get()).toBe(false);
+        content.getExposes?.().complete();
+        await settle();
+        expect(document.activeElement).toBe(trigger);
+
+        trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await settle();
+        expect(document.activeElement).toBe(content);
+        expect(close.getExposes?.().focused.get()).toBe(false);
+        expect(close.getExposes?.().focusVisible.get()).toBe(false);
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        await settle();
+        expect(root.getExposes?.().open.get()).toBe(false);
+        content.getExposes?.().complete();
+        await settle();
+        expect(document.activeElement).toBe(trigger);
+      } finally {
+        if (previousFamily === undefined) delete document.documentElement.dataset.siteLibraryFamily;
+        else document.documentElement.dataset.siteLibraryFamily = previousFamily;
+      }
+    }
+  );
   it('prevents mask pointer defaults while Content remains the outside-close owner', async () => {
     const { trigger, root } = await fixture();
     const requests: any[] = [];

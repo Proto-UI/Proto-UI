@@ -10,8 +10,12 @@ statement:
 criteria:
   - id: P-BASE-DIALOG-CONTENT-ENTRY-POLICY
     text:
-      en: 'Optional focusEntry auto (default) preserves configured automatic scope entry. Manual suppresses automatic entry only for the next actual Content scope activation, retaining trap, loop, explicit focus and restoration. Changing the prop while active does not refocus or reconfigure the scope; a later activation reads the current policy. Rejected controlled open/close requests do not create an activation. This policy does not select a target, promise native readiness, cancel an already pending request, or establish cross-generation focus continuity.'
-      zh-CN: '可选 focusEntry 默认为 auto，保留原自动 scope entry；manual 仅抑制下一次 Content 实际激活的自动 entry，保留 trap、loop、显式 focus 与恢复。active 中修改 prop 不重聚焦或重配 scope，后续实际激活读取当前策略。受控 owner 拒绝 open/close request 不产生新激活。此策略不选目标、不保证 native ready、不取消已有 pending request，也不建立跨 generation 焦点连续性。'
+      en: 'Optional focusEntry auto (default) preserves configured automatic scope entry. Manual suppresses automatic entry only for the next actual Content scope activation, retaining trap, loop, explicit focus and restoration. Content requests initial focus on the Content surface itself under the content-entry criterion. Changing the prop while active does not refocus or reconfigure the scope; a later activation reads the current policy. Rejected controlled open/close requests do not create an activation. Manual does not select a target, promise native readiness, cancel an already pending request, or establish cross-generation focus continuity.'
+      zh-CN: '可选 focusEntry 默认为 auto，保留原自动 scope entry；manual 仅抑制下一次 Content 实际激活的自动 entry，保留 trap、loop、显式 focus 与恢复。content 按 content-entry 条款请求初始焦点到 Content 表面自身。active 中修改 prop 不重聚焦或重配 scope，后续实际激活读取当前策略。受控 owner 拒绝 open/close request 不产生新激活。manual 不选目标、不保证 native ready、不取消已有 pending request，也不建立跨 generation 焦点连续性。'
+  - id: P-BASE-DIALOG-CONTENT-CONTENT-ENTRY
+    text:
+      en: 'For an accepted actual activation with focusEntry content, Content first activates the same focus scope without automatic child entry, then requests native focus on its own dialog surface with scroll preservation. The surface remains outside sequential Tab navigation; forward and reverse Tab enter and loop through eligible descendants. This target is enabled only for that content-entry activation. Accepted close, owner replacement observed through Context or lifecycle synchronization, and terminal disposal retire its pending focus; a synchronous close, observed replacement or newer activation during entry must prevent the old activation from acquiring or replaying focus. Ancestry changes alone do not invent a Context notification. A rejected controlled open must not enter, and a rejected controlled close must not retire the accepted activation. The existing trap, loop, dismissal, accessible naming and exact previous-owner restoration remain in effect. Host rejection retains only the current activation request through the existing Focus readiness contract; no native focus, readiness or visibility fact is fabricated.'
+      zh-CN: '当实际接受的激活选择 focusEntry content 时，Content 先激活同一 focus scope 并跳过自动 child entry，再以保持滚动的原生请求将焦点送到自身 dialog 表面。该表面不参与顺序 Tab 导航；正反向 Tab 进入并循环合格后代。该 target 仅在本次 content-entry 激活期间启用。接受关闭、通过 Context 或生命周期同步观察到的 owner 替换及终止销毁必须撤销其 pending focus；入场中的同步关闭、已观察替换或更新激活必须阻止旧激活获取或重放焦点。仅 ancestry 改变不额外制造 Context 通知。受控 open 被拒绝时不得入场，受控 close 被拒绝时不得撤销已接受的激活。既有 trap、loop、dismiss、无障碍命名及准确 previous-owner 恢复保持有效。宿主拒绝时仅按既有 Focus readiness 契约保留当前激活请求，不伪造原生焦点、ready 或 visibility 事实。'
   - id: P-BASE-DIALOG-CONTENT-AVAILABLE
     text:
       en: 'Active Dialog Content opts into the logical available-space lease. The direct Base projection centers and bounds the content within that region with scrollable overflow. Styled families own visual insets; Mask remains full-window and edge-attached Sheet policy is not inferred. Unknown host support does not claim safe-area coverage.'
@@ -62,6 +66,7 @@ dependsOn:
       C-ANATOMY-ORDER-0003,
       C-AS-FOCUS-SCOPE-0001,
       C-AS-FOCUS-SCOPE-0002,
+      C-AS-FOCUSABLE-0001,
       C-AS-OVERLAY-0001,
       C-AS-TRANSITION-0001,
       C-BOUNDARY-0001,
@@ -69,6 +74,9 @@ dependsOn:
 verifies:
   { tests: [{ id: T-AVAILABLE-SPACE-0001, since: 0.3.0-alpha.1 }, T-BASE-DIALOG-CONTENT-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Added opt-in Content-surface initial focus outside sequential navigation, with activation-owned cancellation and unchanged auto/manual behavior.
   - version: 0.3.0-alpha.1
     change: refined
     summary: Added optional per-activation entry policy without changing active focus or default automatic entry.

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "67ae70c3369e1bfc03d3fa0d3c279b23d6d058d5",
+  "revision": "723cf85e5a338723b2313665c07705c36a449976",
   "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners, the Button example producer, the extracted InstallCommandCard client and the optional BrowserCompilerPanel template/client owners. Transitive/runtime and served-source proof remain unobserved. Earlier references and their original execution results are retained separately. Sprint 2 integration retains the previous exact reference as website-markup-provenance-8d4d48d.json; only the two added documentation sidebar links change the Astro configuration source hash. The website visual source reference archives the preceding bytes as website-markup-provenance-d8dfeab.json, renews the integrated Astro configuration, CodePanel, its client and PrototypePreviewer, and adds the two direct scroll sources. This does not observe served/transitive closure or run native browser acceptance. The release documentation renewal preserves that visual reference as website-markup-provenance-bd2d1cf.json and reviews the three sampled documentation rewrites, the restored Button/Dialog version and lifecycle boundaries, and the module-anatomy workspace dependency link. The 33 direct source identities and unverified admission remain unchanged; runtime, served/transitive and release acceptance require separate evidence.",
   "sourceAdmission": "unverified",
   "sources": [
@@ -135,7 +135,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-scroll-area-client.ts",
-      "sha256": "bfa460a54734e816879bccecdbbb5f32f184ba4d73e34c8c752da13d3b8f9f1f"
+      "sha256": "ab62bf88b33cbb13cf52d0b1dc6a1d0b201cfbd6591f394565f751999542606e"
     }
   ]
 }

@@ -44,45 +44,49 @@ if (active < 0) throw new Error('[CodeFileBrowser] Initial file must exist.');
     <div
       class="code-file-browser__tree-scroll"
       data-code-tree-scroll
+      data-code-scroll-root
+      data-code-scroll-label={filesLabel}
       tabindex="0"
       role="region"
       aria-label={filesLabel}
     >
-      <nav
-        class="code-file-browser__fallback"
-        aria-label={filesLabel}
-        data-code-file-tabs
-        data-empty-directory-label={emptyLabel}
-      >
-        {
-          nodes.map((node) =>
-            node.fileIndex === undefined ? (
-              <span
-                data-code-directory-path={node.key}
-                style={`padding-inline-start:${0.5 + node.depth * 0.75}rem`}
-              >
-                {node.name}/{' '}
-                {!nodes.some((child) => child.parentKey === node.key) && (
-                  <small>({emptyLabel})</small>
-                )}
-              </span>
-            ) : (
-              <a
-                id={`${id}-file-tab-${node.fileIndex}`}
-                href={`#${id}-file-panel-${node.fileIndex}`}
-                data-code-file-tab
-                data-code-file-index={node.fileIndex}
-                data-code-file-path={node.key}
-                aria-controls={`${id}-file-panel-${node.fileIndex}`}
-                data-code-file-selected={node.fileIndex === active ? 'true' : undefined}
-                style={`padding-inline-start:${0.5 + node.depth * 0.75}rem`}
-              >
-                {node.name}
-              </a>
+      <div data-code-content>
+        <nav
+          class="code-file-browser__fallback"
+          aria-label={filesLabel}
+          data-code-file-tabs
+          data-empty-directory-label={emptyLabel}
+        >
+          {
+            nodes.map((node) =>
+              node.fileIndex === undefined ? (
+                <span
+                  data-code-directory-path={node.key}
+                  style={`padding-inline-start:${0.5 + node.depth * 0.75}rem`}
+                >
+                  {node.name}/{' '}
+                  {!nodes.some((child) => child.parentKey === node.key) && (
+                    <small>({emptyLabel})</small>
+                  )}
+                </span>
+              ) : (
+                <a
+                  id={`${id}-file-tab-${node.fileIndex}`}
+                  href={`#${id}-file-panel-${node.fileIndex}`}
+                  data-code-file-tab
+                  data-code-file-index={node.fileIndex}
+                  data-code-file-path={node.key}
+                  aria-controls={`${id}-file-panel-${node.fileIndex}`}
+                  data-code-file-selected={node.fileIndex === active ? 'true' : undefined}
+                  style={`padding-inline-start:${0.5 + node.depth * 0.75}rem`}
+                >
+                  {node.name}
+                </a>
+              )
             )
-          )
-        }
-      </nav>
+          }
+        </nav>
+      </div>
     </div>
   </aside>
   <div class="code-file-browser__source" data-code-file-source>
@@ -98,7 +102,7 @@ if (active < 0) throw new Error('[CodeFileBrowser] Initial file must exist.');
           collapsible={false}
           title={file.name}
           scrollableTitle
-          scrollLimit={standalone ? 'file' : 'unbounded'}
+          scrollLimit="file"
           copyLabel={`${copyLabel} ${file.name}`}
           code={file.code}
           lang={file.lang}
@@ -108,25 +112,32 @@ if (active < 0) throw new Error('[CodeFileBrowser] Initial file must exist.');
   </div>
 </section>
 <noscript
-  set:html={'<style>@layer base { [data-code-file-browser] [data-code-file-panel][hidden] { display:block!important; } }</style>'}
+  set:html={'<style>@layer base { [data-code-file-browser] [data-code-file-panel][hidden] { display:block!important; } } [data-code-file-browser], [data-code-file-browser] [data-code-file-source] { height:auto!important; } [data-code-file-browser] [data-code-file-source] { --code-file-panel-height:auto; --code-file-panel-max-height:none; } [data-code-file-browser] [data-code-files] { max-height:13rem; }</style>'}
 />
 <script>
-  import { initStandaloneCodeFileBrowsers } from './code-file-browser-client';
-  initStandaloneCodeFileBrowsers(document);
-  document.addEventListener('astro:page-load', () => initStandaloneCodeFileBrowsers(document));
+  import { initCodeFileBrowsers } from './code-file-browser-client';
+  initCodeFileBrowsers(document);
+  document.addEventListener('astro:page-load', () => initCodeFileBrowsers(document));
 </script>
 <style>
   .code-file-browser {
+    --code-file-browser-height: 24rem;
+    --code-file-tree-height: 10rem;
     display: grid;
     grid-template-columns: minmax(10rem, 13rem) minmax(0, 1fr);
+    height: var(--code-file-browser-height);
+    min-height: 0;
     min-width: 0;
     max-width: 100%;
   }
   .code-file-browser__files,
   .code-file-browser__source {
     min-width: 0;
+    min-height: 0;
   }
   .code-file-browser__files {
+    display: flex;
+    flex-direction: column;
     padding: 0;
     border-inline-end: 1px solid var(--color-border);
   }
@@ -139,11 +150,60 @@ if (active < 0) throw new Error('[CodeFileBrowser] Initial file must exist.');
     border-bottom: 1px solid var(--color-border);
     font-size: 0.875rem;
     font-weight: 500;
+    flex: none;
   }
   .code-file-browser__tree-scroll {
+    flex: 1;
+    min-height: 0;
     min-width: 0;
     max-width: 100%;
-    overflow-x: auto;
+    overflow: auto;
+  }
+  .code-file-browser__tree-scroll[data-code-scroll-ready] {
+    overflow: hidden;
+  }
+  .code-file-browser__source {
+    overflow: hidden;
+  }
+  .code-file-browser :global([data-code-file-panel]) {
+    display: flex;
+    flex-direction: column;
+    height: var(--code-file-panel-height, 100%);
+    min-height: 0;
+  }
+  .code-file-browser :global([data-code-file-header]) {
+    flex: none;
+  }
+  .code-file-browser :global([data-code-inner]) {
+    flex: 1;
+    min-height: 0;
+  }
+  .code-file-browser :global([data-code-scroll-root]),
+  .code-file-browser :global([data-code-scroll-anatomy]),
+  .code-file-browser :global([data-code-scroll-ready] [data-code-scroll-viewport]) {
+    height: var(--code-file-panel-height, 100%);
+    min-height: 0;
+    max-height: var(--code-file-panel-max-height, 100%);
+  }
+  /* Before enhancement the original PRE remains the sole source scrollport. */
+  .code-file-browser
+    :global([data-code-scroll-root]:not([data-code-scroll-ready]) > [data-code-content]),
+  .code-file-browser
+    :global([data-code-scroll-root]:not([data-code-scroll-ready]) .proto-previewer__code) {
+    height: var(--code-file-panel-height, 100%);
+    max-height: var(--code-file-panel-max-height, 100%);
+  }
+  /* A failed Tree keeps every linked source visible, just like the no-JS view. */
+  .code-file-browser[data-file-browser-fallback],
+  .code-file-browser[data-file-browser-fallback] .code-file-browser__source {
+    height: auto;
+  }
+  .code-file-browser[data-file-browser-fallback] .code-file-browser__source {
+    --code-file-panel-height: auto;
+    --code-file-panel-max-height: none;
+  }
+  .code-file-browser[data-file-browser-fallback] .code-file-browser__files {
+    max-height: 13rem;
   }
   .code-file-browser__tree-scroll:focus-visible {
     outline: 2px solid var(--color-accent);
@@ -178,10 +238,15 @@ if (active < 0) throw new Error('[CodeFileBrowser] Initial file must exist.');
   @media (max-width: 48rem) {
     .code-file-browser {
       grid-template-columns: minmax(0, 1fr);
+      height: auto;
     }
     .code-file-browser__files {
+      height: var(--code-file-tree-height);
       border-inline-end: 0;
       border-bottom: 1px solid var(--color-border);
+    }
+    .code-file-browser__source {
+      height: var(--code-file-browser-height);
     }
   }
 </style>

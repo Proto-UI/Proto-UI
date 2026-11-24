@@ -44,10 +44,19 @@ async function capture(page: Page, name: string) {
     })),
     panels: Array.from(document.querySelectorAll('[data-docs-image-content]')).map((el) => ({
       tag: el.localName,
+      active: document.activeElement === el,
+      tabIndex: (el as HTMLElement).tabIndex,
+      nativeFocusVisible: el.matches(':focus-visible'),
       state: el.getAttribute('data-transition-state'),
       detached: el.hasAttribute('data-pui-view-detached'),
       display: getComputedStyle(el).display,
       animation: getComputedStyle(el).animationName,
+      outline: {
+        style: getComputedStyle(el).outlineStyle,
+        width: getComputedStyle(el).outlineWidth,
+        color: getComputedStyle(el).outlineColor,
+        offset: getComputedStyle(el).outlineOffset,
+      },
     })),
     activeElement: document.activeElement?.localName,
     sourceFocused: document.activeElement?.hasAttribute('data-docs-image-trigger') ?? false,
@@ -77,6 +86,7 @@ async function observePreviewFocus(page: Page, sourceSelector: string) {
         tag: node.localName,
         source: node.hasAttribute('data-docs-image-trigger'),
         close: node.hasAttribute('data-docs-image-close'),
+        content: node.hasAttribute('data-docs-image-content'),
         prototype: (node as HTMLElement).dataset.docsPreviewPrototype ?? null,
       };
     };
@@ -133,6 +143,19 @@ async function observePreviewFocus(page: Page, sourceSelector: string) {
         trigger: control(trigger, includeStyle),
         modal: {
           contentPresent: Boolean(content),
+          contentActive: content !== null && document.activeElement === content,
+          contentTabIndex: content?.tabIndex ?? null,
+          contentNativeFocusVisible: content?.matches(':focus-visible') ?? null,
+          ...(includeStyle && content
+            ? {
+                contentOutline: {
+                  style: getComputedStyle(content).outlineStyle,
+                  width: getComputedStyle(content).outlineWidth,
+                  color: getComputedStyle(content).outlineColor,
+                  offset: getComputedStyle(content).outlineOffset,
+                },
+              }
+            : {}),
           phase: content?.getAttribute('data-transition-state') ?? null,
           detached: content?.hasAttribute('data-pui-view-detached') ?? null,
           ariaModal: content?.getAttribute('aria-modal') ?? null,
@@ -216,11 +239,40 @@ async function open(page: Page, alt: string) {
     const img = document.querySelector<HTMLImageElement>('.docs-image-full');
     return Boolean(img?.complete && img.naturalWidth);
   });
+  await contentInitialFocus(page);
   return trigger;
 }
 type MediaBox = { x: number; y: number; width: number; height: number };
+async function contentInitialFocus(page: Page) {
+  // Read actual native focus, not a requested target or a synthesized state.
+  // Content intentionally has no public focused/focusVisible expose.
+  const facts = await page.locator('[data-docs-image-content]').evaluate((node) => {
+    const content = node as HTMLElement;
+    const close = content.querySelector('[data-docs-image-close]')!;
+    const style = getComputedStyle(content);
+    return {
+      active: document.activeElement === content,
+      tabIndex: content.tabIndex,
+      nativeFocusVisible: content.matches(':focus-visible'),
+      closeActive: document.activeElement === close,
+      closeClip: getComputedStyle(close).clipPath,
+      outline: {
+        style: style.outlineStyle,
+        width: style.outlineWidth,
+        color: style.outlineColor,
+        offset: style.outlineOffset,
+      },
+    };
+  });
+  expect(facts.active).toBe(true);
+  expect(facts.tabIndex).toBe(-1);
+  expect(facts.closeActive).toBe(false);
+  expect(facts.closeClip).toBe('inset(50%)');
+  return facts;
+}
 async function containedWhitepaper(page: Page) {
   await page.locator('.docs-image-full').evaluate((node) => (node as HTMLImageElement).decode());
+  const initialFocus = await contentInitialFocus(page);
   const facts = await page.evaluate(() => {
     const content = document.querySelector<HTMLElement>('[data-docs-image-content]')!;
     const image = document.querySelector<HTMLImageElement>('.docs-image-full')!;
@@ -313,13 +365,18 @@ async function containedWhitepaper(page: Page) {
   expect(facts.scroll.y).toBe(0);
   expect(facts.scroll.maxX).toBeLessThanOrEqual(1);
   expect(facts.scroll.maxY).toBeLessThanOrEqual(1);
-  return facts;
+  return { ...facts, initialFocus };
 }
-async function keyboardCloseFocus(page: Page) {
-  await page.keyboard.press('Tab');
+async function keyboardCloseFocus(page: Page, entry: 'Tab' | 'Shift+Tab' = 'Tab') {
+  await page.keyboard.press(entry);
   const close = page.locator('[data-docs-image-close]');
   expect(await close.evaluate((node) => node === document.activeElement)).toBe(true);
   expect(await close.getAttribute('data-focus-visible')).not.toBeNull();
+  for (const key of ['Tab', 'Shift+Tab']) {
+    await page.keyboard.press(key);
+    expect(await close.evaluate((node) => node === document.activeElement)).toBe(true);
+    expect(await close.getAttribute('data-focus-visible')).not.toBeNull();
+  }
   const facts = await close.evaluate((node) => {
     const style = getComputedStyle(node);
     const box = node.getBoundingClientRect();
@@ -342,7 +399,7 @@ async function keyboardCloseFocus(page: Page) {
   expect(facts.box.width).toBeGreaterThan(1);
   expect(facts.box.height).toBeGreaterThan(1);
   expect(facts.fitsContent).toBe(true);
-  return facts;
+  return { ...facts, entry, tabLoops: ['Tab', 'Shift+Tab'] };
 }
 type MotionFrame = {
   time: number;
@@ -548,6 +605,7 @@ describe('automatic documentation image preview in real Chromium', () => {
             const panel = page.locator('[data-docs-image-content]');
             expect(await panel.getAttribute('role')).toBe('dialog');
             expect(await panel.getAttribute('aria-modal')).toBe('true');
+            const initialFocus = await contentInitialFocus(page);
             const style = await panel.evaluate((el) => ({
               animation: getComputedStyle(el).animationName,
               duration: getComputedStyle(el).transitionDuration,
@@ -593,7 +651,18 @@ describe('automatic documentation image preview in real Chromium', () => {
             for (let count = 0; count < 5; count++) {
               await page.keyboard.press('Tab');
               expect(await panel.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+              expect(
+                await page
+                  .locator('[data-docs-image-close]')
+                  .evaluate((el) => document.activeElement === el)
+              ).toBe(true);
             }
+            await page.keyboard.press('Shift+Tab');
+            expect(
+              await page
+                .locator('[data-docs-image-close]')
+                .evaluate((el) => document.activeElement === el)
+            ).toBe(true);
             expect(
               await page
                 .locator('[data-docs-image-close]')
@@ -637,9 +706,11 @@ describe('automatic documentation image preview in real Chromium', () => {
                 requestAnimationFrame(sample);
               });
             }
+            const repeatedFocus = [];
             for (let count = 0; count < 2; count++) {
               await trigger.click();
               await entered(page);
+              repeatedFocus.push(await contentInitialFocus(page));
               await page.mouse.click(1, 1);
               await closed(page);
             }
@@ -648,7 +719,7 @@ describe('automatic documentation image preview in real Chromium', () => {
               await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
             ).toBe(true);
             expect(errors).toEqual([]);
-            records.push({ width, colorScheme, family, style, mask });
+            records.push({ width, colorScheme, family, style, mask, initialFocus, repeatedFocus });
           } finally {
             await capture(page, `${width}-${colorScheme}-${family}-last-observed`);
             await context.close();
@@ -1285,16 +1356,20 @@ describe('automatic documentation image preview in real Chromium', () => {
           (window as any).__docsImageFocusProbe.read(true)
         );
         await capture(page, `${name}-repeated-pointer`);
+        expect(repeatedPointer.modal.contentActive).toBe(true);
+        expect(repeatedPointer.modal.contentTabIndex).toBe(-1);
+        expect(repeatedPointer.closeButton?.active).toBe(false);
         expect(repeatedPointer.closeButton?.clipPath).toBe('inset(50%)');
         await page.keyboard.press('Escape');
         await closed(page);
         expect(await trigger.evaluate((node) => document.activeElement === node)).toBe(true);
 
-        // Keyboard activation may reveal Close; it remains a real PUI action.
+        // Keyboard activation also enters Content. Reverse Tab reaches the
+        // same public Close action without introducing Content into tab order.
         await page.keyboard.press('Enter');
         await entered(page);
         const reopened = await containedWhitepaper(page);
-        const reopenedKeyboardFocus = await keyboardCloseFocus(page);
+        const reopenedKeyboardFocus = await keyboardCloseFocus(page, 'Shift+Tab');
         await page.keyboard.press('Enter');
         await closed(page);
         expect(await trigger.evaluate((node) => document.activeElement === node)).toBe(true);
@@ -1713,8 +1788,12 @@ describe('automatic documentation image preview in real Chromium', () => {
         .locator('.docs-image-full')
         .evaluate((node) => (node as HTMLImageElement).decode());
       expect(await page.locator('.docs-image-toolbar, [data-docs-image-zoom]').count()).toBe(0);
+      const whitepaperInitialFocus = await contentInitialFocus(page);
       const whitepaperCloseFocus = await keyboardCloseFocus(page);
-      records.push({ forcedColorsWhitepaperCloseFocus: whitepaperCloseFocus });
+      records.push({
+        forcedColorsWhitepaperInitialFocus: whitepaperInitialFocus,
+        forcedColorsWhitepaperCloseFocus: whitepaperCloseFocus,
+      });
       await capture(page, 'forced-colors-whitepaper-keyboard-close');
       await page.keyboard.press('Enter');
       await closed(page);
@@ -1755,6 +1834,9 @@ describe('automatic documentation image preview in real Chromium', () => {
       );
       await capture(page, 'reduced-motion-repeated-pointer');
       expect(repeatedPointer.reducedMotion).toBe(true);
+      expect(repeatedPointer.modal.contentActive).toBe(true);
+      expect(repeatedPointer.modal.contentTabIndex).toBe(-1);
+      expect(repeatedPointer.closeButton?.active).toBe(false);
       expect(repeatedPointer.closeButton?.clipPath).toBe('inset(50%)');
       records.push({ reducedMotionRepeatedPointer: repeatedPointer });
       await page.mouse.click(1, 1);

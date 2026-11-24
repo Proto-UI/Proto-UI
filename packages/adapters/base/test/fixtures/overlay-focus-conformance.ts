@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   definePrototype,
   type BoundaryHandle,
@@ -6,6 +6,13 @@ import {
   type Prototype,
 } from '@proto.ui/core';
 import { asBoundary, asOverlay } from '@proto.ui/hooks';
+import {
+  dialogClose,
+  dialogContent,
+  dialogRoot,
+  dialogTrigger,
+  type DialogContentProps,
+} from '../../../../prototypes/base/src/dialog';
 
 export type OverlayTree = { proto: Prototype; children?: OverlayTree[] };
 type FocusMount = {
@@ -27,6 +34,75 @@ export function overlayFocusConformance(
   mount: (tree: OverlayTree[]) => Promise<FocusMount>
 ) {
   describe(`${name}: current focus outside`, () => {
+    it('T-BASE-DIALOG-CONTENT-ENTRY-POLICY: enters Content without a new Tab stop and preserves close/restoration across reopen', async () => {
+      const content = definePrototype<DialogContentProps>({
+        name: `dialog-content-entry-${name}`,
+        setup(def) {
+          dialogContent.setup(def);
+          def.props.setDefaults({ focusEntry: 'content', enterDuration: 0, leaveDuration: 0 });
+        },
+      });
+      const mounted = await mount([
+        {
+          proto: dialogRoot,
+          children: [
+            { proto: dialogTrigger },
+            { proto: content, children: [{ proto: dialogClose }] },
+          ],
+        },
+      ]);
+      try {
+        await mounted.flush();
+        const trigger = mounted.host.querySelector<HTMLElement>('[aria-haspopup="dialog"]')!;
+        expect(trigger).not.toBeNull();
+        await mounted.focus(trigger);
+        for (const dismiss of ['Escape', 'Enter']) {
+          await mounted.dispatch(trigger, new MouseEvent('click', { bubbles: true }));
+          await vi.waitFor(async () => {
+            await mounted.flush();
+            const panel = document.body.querySelector<HTMLElement>('[role="dialog"]');
+            expect(panel).not.toBeNull();
+            expect(document.activeElement).toBe(panel);
+            expect(panel?.getAttribute('tabindex')).toBe('-1');
+          });
+          const panel = document.activeElement as HTMLElement;
+          expect(panel.getAttribute('aria-modal')).toBe('true');
+          const close = panel.querySelector<HTMLElement>('[role="button"]')!;
+          expect(close).not.toBeNull();
+          for (const shiftKey of [false, true, false]) {
+            await mounted.dispatch(
+              window,
+              new KeyboardEvent('keydown', {
+                key: 'Tab',
+                shiftKey,
+                bubbles: true,
+                cancelable: true,
+              })
+            );
+            await vi.waitFor(async () => {
+              await mounted.flush();
+              expect(document.activeElement).toBe(close);
+            });
+          }
+          await mounted.dispatch(
+            window,
+            new KeyboardEvent('keydown', { key: dismiss, bubbles: true, cancelable: true })
+          );
+          await mounted.dispatch(
+            window,
+            new KeyboardEvent('keyup', { key: dismiss, bubbles: true })
+          );
+          await vi.waitFor(async () => {
+            await mounted.flush();
+            expect(trigger.getAttribute('aria-expanded')).toBe('false');
+            expect(document.activeElement).toBe(trigger);
+          });
+        }
+      } finally {
+        await mounted.unmount();
+      }
+    });
+
     it('T-BOUNDARY-0002-CASE-FOCUS: retains disjoint trigger, content and owned children; closes without stealing focus', async () => {
       const [trigger, owned, outside] = buttons();
       let overlay!: OverlayHandle;

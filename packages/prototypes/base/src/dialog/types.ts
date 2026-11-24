@@ -95,7 +95,7 @@ export type DialogMaskHandles = {
 export type DialogContentProps = TransitionProps & {
   // P-BASE-DIALOG-CONTENT-ENTRY-POLICY
   // Applies to the next actual scope activation, not an active-view refocus.
-  focusEntry?: 'auto' | 'manual';
+  focusEntry?: 'auto' | 'manual' | 'content';
 };
 
 export type DialogContentExposes = TransitionExposes & {

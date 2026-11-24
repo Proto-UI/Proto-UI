@@ -251,7 +251,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     root.dataset.docsImageDialog = '';
     mask = makePreviewControl(family, 'dialogMask');
     mask.dataset.docsImageMask = '';
-    content = makePreviewControl(family, 'dialogContent');
+    content = makePreviewControl(family, 'dialogContent', { focusEntry: 'content' });
     content.dataset.docsImageContent = '';
     maskSurface = makePreviewControl(family, 'surface', {
       variant: 'scrim',
