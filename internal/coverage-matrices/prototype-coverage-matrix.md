@@ -27,7 +27,7 @@ Total: **63 library-family instances; 27 distinct subjects; 159 P identities; 15
 
 ## Separate candidate source inventory
 
-Candidate commit b388a8947d77117d526b890bc1c74f3d00486fe6; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
+Candidate commit dc2bfc7fc9115e583cc91eb28d4e60d252670514; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
 
 | Library | Historical main families / identities | Candidate families / identities | Release scope |
 | --- | --- | --- | --- |
@@ -390,7 +390,7 @@ These matrices count user-facing jobs, not prototype families. Their exact row I
 
 | Program | Rows | Recorded states | Dedicated ledger |
 | --- | --- | --- | --- |
-| website | 78 | blocked: 40; infrastructure-exempt: 17; native/static: 14; research: 7 | [Website](../website/self-hosting-coverage-matrix.md) |
+| website | 79 | blocked: 41; infrastructure-exempt: 17; native/static: 14; research: 7 | [Website](../website/self-hosting-coverage-matrix.md) |
 | harness | 63 | app-local-proto: 7; blocked: 11; infrastructure-exempt: 8; native/static: 2; ready: 22; research: 13 | [Harness](../agent-harness/dogfood-coverage-matrix.md) |
 
 - Tree (#523)
