@@ -42,6 +42,13 @@ const lanes = [
   ],
   [
     'sprint3-consumer-evidence.yml',
+    'base-select-consumers',
+    65,
+    'SPRINT3_EVIDENCE_DIR',
+    'Identify Chromium and prepare public CJK font fallback',
+  ],
+  [
+    'sprint3-consumer-evidence.yml',
     'release-rehearsal',
     190,
     'REHEARSAL_EVIDENCE_DIR',
@@ -57,7 +64,7 @@ const lanes = [
   return { file, jobId, job, setup, deadline, evidence };
 });
 
-test('all five failed font lanes use the existing verified package owner within a fixed deadline', () => {
+test('all six font lanes use the existing verified package owner within a fixed deadline', () => {
   for (const { file, job, setup, deadline } of lanes) {
     assert.ok(setup.run.includes(bounded), file + ' must use the bounded existing font owner');
     assert.equal(setup['timeout-minutes'], 5);

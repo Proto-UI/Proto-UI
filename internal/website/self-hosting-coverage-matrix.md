@@ -274,7 +274,7 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/components/PrototypePreviewer/ShadowSplitS5.astro` | `www.demo.authored-controllers` | `f4669032b8f41a5e52e1be753f0ce36484560e2d567282bf93bf1b752a8e7306` |
 | `apps/www/src/components/PrototypePreviewer/shadow-split-acceptance.ts` | `www.demo.authored-controllers` | `6ec435217573ac35458cd1ea79b27a9cc95f5137e942cf72b7118a825978cb7a` |
 | `apps/www/src/components/PrototypePreviewer/shadow-split-s2.ts` | `www.demo.authored-controllers` | `6ef1cb15c224e47045993911e1e6b7c14ad0f93f65df5014c86282118a3a83be` |
-| `apps/www/src/components/PrototypePreviewer/shadow-split-s3.ts` | `www.demo.authored-controllers` | `3b7d4778ff754adde59b7cd77862070416e5dcfbcc429a3eef3c99a6eb8df108` |
+| `apps/www/src/components/PrototypePreviewer/shadow-split-s3.ts` | `www.demo.authored-controllers` | `85b7c3c518e6f1ef1e72f20b975d6ac4ce317c1a046a3cc0562602c899dffc46` |
 | `apps/www/src/components/PrototypePreviewer/shadow-split-s4.ts` | `www.demo.authored-controllers` | `4492f622a7d0cd411f60ea7e3906205219cb9b4bc2d1062c0eed5703e1bfd514` |
 | `apps/www/src/components/PrototypePreviewer/shadow-split-s5.ts` | `www.demo.authored-controllers` | `fa92aa85ff8afb7a0f0233155e485dc3363ee886068015ceb979162e2ae66cbf` |
 | `apps/www/src/content/docs/accordion-demo.shared.ts` | `www.demo.authored-controllers` | `e92b1f802f1b53ca66177fc11f36eb2698ab78ee4c51c602dd7e2c0a75c25ec8` |
@@ -297,8 +297,8 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/components/PrototypePreviewer/demo-associations.ts` | `www.demo.prototype-previewer` | `ce19da5e43e2ed99c5d372027d8b3ff796d9601c8020907ad71c4e260ceb9365` |
 | `apps/www/src/components/CodeExample.astro` | `www.docs.code-example-file-tabs`, `www.docs.code-example-host-tabs`, `www.docs.code-surface` | `991f8c3bd93c21eaee831b98876389b77d58331b5dd68cd8bf186857958c4851` |
 | `apps/www/src/components/PrototypePreviewer/BrowserCompilerPanel.astro` | `www.demo.runtime-select`, `www.demo.code-panel`, `www.demo.authored-controllers` | `f92cfa3023ca6f53b5b8f1f292c951fe73cf37fa180f448845cb61b7656cfb5a` |
-| `apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts` | `www.demo.runtime-select`, `www.demo.code-panel`, `www.demo.authored-controllers`, `www.demo.raw-adapter-runtimes` | `c16bd248d5b532017ca0ba2400f78ca04344f136c6d2f85723e744660d84db7a` |
-| `apps/www/src/components/PrototypePreviewer/compiled-preview-sandbox.ts` | `www.demo.raw-adapter-runtimes` | `73527fed2be1f4e9655afef01053ae615f85385c1c0a4f1020dd79a233ead592` |
+| `apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts` | `www.demo.runtime-select`, `www.demo.code-panel`, `www.demo.authored-controllers`, `www.demo.raw-adapter-runtimes` | `13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9` |
+| `apps/www/src/components/PrototypePreviewer/compiled-preview-sandbox.ts` | `www.demo.raw-adapter-runtimes` | `f159da1722e8c7b7e9e3ebf4772c077c841e60275cde2a8e1f482e5379df153e` |
 | `packages/compiler/src/browser/client.ts` | `www.demo.raw-adapter-runtimes` | `f6af8985c52edbfdbd0e1796fc680e0f54e3c889769d099459abe0f23bc58be7` |
 | `packages/compiler/src/browser/worker.ts` | `www.demo.raw-adapter-runtimes` | `d373263fa25d9f77fe22603b89523461d43a007cdc40e21f53b4a55f39036078` |
 | `apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts` | `www.demo.demo-matrix` | `4ed8116369f2fee3872be81dabdaf4c6ad22de3bf74694f5091066637687dcb5` |
@@ -327,7 +327,7 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/components/PageTitle.astro` | `www.shell.page-title` | `6eb3ef6cf85cc84b4aadff283589a910616cccd31fdcf7286c1df9583c102774` |
 | `apps/www/src/components/PrototypeLoader.astro` | `www.demo.prototype-previewer` | `dc066166d19e7ed7c666f244622b73bba397c89bb33afa659ebfc736b1a71c32` |
 | `apps/www/src/components/PrototypePreviewer/AdapterPanelScript.astro` | `www.demo.runtime-select` | `0c8f333bc2eb5ba182eec693c0b902b881d763bfc770e53cc9015015ec0aa848` |
-| `apps/www/src/components/PrototypePreviewer/CodePanel.astro` | `www.demo.code-panel`, `www.docs.code-panel-copy`, `www.docs.code-panel-expand`, `www.docs.code-surface` | `4b69ff8ca48e9d55ef0988207857a862dfc9be207ebb8f4f563c50979ff28462` |
+| `apps/www/src/components/PrototypePreviewer/CodePanel.astro` | `www.demo.code-panel`, `www.docs.code-panel-copy`, `www.docs.code-panel-expand`, `www.docs.code-surface` | `38afd6e5c7fd509682bbb4211fc4c0f637b49d7d6f7134afb04ff6dc1e518403` |
 | `apps/www/src/components/StaticCodeBlock.astro` | `www.docs.code-panel-copy`, `www.docs.code-surface` | `755a863bb83b647e62dd8e12931eb2eb221ea179311b98aaa1b1a032230dec5b` |
 | `apps/www/src/components/PrototypePreviewer/DemoPreviewer.astro` | `www.demo.prototype-previewer` | `f8fcf3d1603b1a6e21e464cc9b70b4dcba2b53cbc6a74f8a41975e770e0e4c72` |
 | `apps/www/src/components/PrototypePreviewer/DialogDemoStyles.astro` | `www.demo.prototype-previewer` | `3f25d1a890299e4246e2757dc096402a07288ee168c8ca9344b8b3c5ef0ef987` |
@@ -352,7 +352,7 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `09e2046f94faf337ab37360e6c6239264fa1190415af578d561e92f3f4f3df65` |
 | `apps/www/src/components/PrototypePreviewer/previewer-removal.ts` | `www.demo.prototype-previewer` | `468d3b8fe0563caffd66bbde02caf933bec6b81bcf088847e88b5df7907a5f19` |
 | `apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `b9d97d3f4d7f20099737379e27ad9c3875f67bcc3d8cd2ce19ee73991bf3b30b` |
-| `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `a75d279fb6a2a82dd1ec4fca6ae2a5003efff5475cf171847938d32f1c60cb40` |
+| `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `e398822d0df0265f3d367d25daa92073fd3fb9464d86d76a1eee8298750d6cd3` |
 | `apps/www/src/components/PrototypePreviewer/projection-materializer.ts` | `www.demo.prototype-previewer` | `da804d7ae21ba4f2000f6e8eabc936d5f1273245c27194d82fac94f30daf6ffd` |
 | `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `9eb11c5eff68f6a382ad895ca1c6f698480de5ca56a6b41095e5626c9955c6c6` |
 | `apps/www/src/components/PrototypePreviewer/runtime-loading-mask.ts` | `www.demo.home-demo-select` | `d688b2ee5af32dc2f2b7461b7f843b4b9e8136dc01f4a1885204c96cb9658f16` |
@@ -368,10 +368,10 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/components/code-example-client.ts` | `www.docs.code-example-file-tabs`, `www.docs.code-example-host-tabs` | `4d78d40daf862af7f343e838d5ab16d08e92b856c8145964dcb2276c1e26e5b9` |
 | `apps/www/src/components/documentation-image-controls.ts` | `www.docs.whitepaper-diagram-viewer` | `ad4fe9ae91198b871eb6a78cd05682e92a105f6d044d3a31547f8080f7c1aa07` |
 | `apps/www/src/components/documentation-image-reading-viewport.proto.ts` | `www.docs.whitepaper-diagram-viewer` | `38c40b79ba99dc444a43376052de3c39798f99db7eb965eb990eadc4d6cc77ec` |
-| `apps/www/src/components/documentation-image-preview.ts` | `www.docs.whitepaper-diagram-viewer` | `20cd7b233e7d585eb905f2cff2f73b5acb3c0191938b983efabd602ba6d60969` |
+| `apps/www/src/components/documentation-image-preview.ts` | `www.docs.whitepaper-diagram-viewer` | `d9394ff6dda5525d0ae1977af1563a16fd793524394d00c594b8f797b46d0619` |
 | `apps/www/src/components/hidden-first-activation.ts` | `www.docs.code-panel-copy`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.note-surface` | `d1de936074817b50b3c1cd15fb5256a29809a0dd2952d8d0cbc774f832e5c80d` |
 | `apps/www/src/components/override/AdapterSelect.astro` | `www.shell.adapter-select` | `d15e4c6708ace3cb09f5bfe78c513eb572820bd76aaad7641967a89f8d25c41c` |
-| `apps/www/src/components/override/Header.astro` | `www.shell.header-separators`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.primary-nav` | `9f14efcd4e059a441b798c3f9ff074f7546c5f3e85f95ec13abeba6e73c120cf` |
+| `apps/www/src/components/override/Header.astro` | `www.shell.header-separators`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.primary-nav` | `7457f2de19b85e74d9d0709b618d1330c0264c3490e004d75326930c3ff982a0` |
 | `apps/www/src/components/override/Hero.astro` | `www.shell.hero-actions`, `www.shell.native-link-presentation` | `acac2f7152cd6aa5ed352418526a76db562c9bdbc1a18bbdb7def035976ad27d` |
 | `apps/www/src/components/override/LanguageSelect.astro` | `www.shell.language-select` | `41e302ab355590a3a252f152a3807ed9510ac41ac5dcf0ff4c4769f13d80b5c9` |
 | `apps/www/src/components/override/PageFrame.astro` | `www.docs.whitepaper-diagram-viewer`, `www.docs.wiki-term`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.page-layout`, `www.shell.sidebar-navigation` | `753f40ce6c26eafd0ea860450c60c277a7bbff6adddc83cb65c753211fad8d57` |
@@ -388,19 +388,19 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/components/site-copy-client.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `b4cdf3ccd25e466ae152c1b31b8e82e8010442f1b828a4b575c290ca67cbcb0d` |
 | `apps/www/src/components/site-copy-command.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `75e31bef21c8e6cd2db3647f201b42403836fe3de530529d994b553c85bd604d` |
 | `apps/www/src/components/site-copy-controller.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `1a39475db2f52b420beec1b26d853d38e05f82d51864e8f50996c769861e59ba` |
-| `apps/www/src/components/site-header-disclosure.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `4fb52b5b1708fb65a2e329205a9ba74bfcb528989e7b203eeef5fbb26ee72017` |
+| `apps/www/src/components/site-header-disclosure.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `0d5ded18075c11f5a478d08c2af4346ff2bfc051de7e4e545172494eb0dce904` |
 | `apps/www/src/components/site-header-surface.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `b1f90dcad071dc4f4bea5b6e47834c2f5464179ee8a8476653907cc11d72716a` |
-| `apps/www/src/components/site-link-recipes.ts` | `www.shell.native-link-presentation` | `f691b11c6cd9b25d3be510eb515b6ec3069350a6877caf2597b77857bfc76b18` |
+| `apps/www/src/components/site-link-recipes.ts` | `www.shell.native-link-presentation` | `34d8b45ee47007e73ce6008ae58c1b9a06691bb26e856b91051c2ebb72458adc` |
 | `apps/www/src/components/site-native-controls.ts` | `www.shell.native-link-presentation`, `www.shell.table-of-contents` | `c2096d99a4c81aecafbd92607e797bef66ece8b93bf01d465f66a7f8fb2320a9` |
 | `apps/www/src/components/site-native-link-facts.ts` | `www.shell.native-link-presentation` | `b1abc0626005f00d0f2298b2fe0d964e733f2df60a1141e158c52331486451cf` |
 | `apps/www/src/components/site-search-commands.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.launcher` | `faa8fc22e5006ee49d3dd6e2085989023aff7d2ab1d6d82d2ae0a5681ca6b572` |
-| `apps/www/src/components/site-search-composition.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.loading-failure` | `5787970b7cb00c1e66b0574cc4a7550524e3bf1a638c02a900136974b8f1afec` |
+| `apps/www/src/components/site-search-composition.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.loading-failure` | `50828c387006e09d4440ae2027c0824750db76f5f896bc46d056f93fc42cdcd3` |
 | `apps/www/src/components/site-search-owner.ts` | `www.search.input-results`, `www.search.loading-failure`, `www.search.pagefind-engine` | `aa4d3cc13174e2e9d62b557d81a8cf192483b669217af733332d22d42842f580` |
 | `apps/www/src/components/site-search-session.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.loading-failure` | `7e3aea951b4d101f80a560ea482df9082f82289dd8b7f47840eb18c78ce55a4f` |
 | `apps/www/src/components/site-search-data.ts` | `www.search.input-results`, `www.search.loading-failure`, `www.search.pagefind-engine` | `bef47a9111cce57e1c19c062be60b5c11178eb8c516ee7cb8a33d684aeb286eb` |
 | `apps/www/src/components/site-pagefind-resource.ts` | `www.search.pagefind-engine` | `1af8170a8e53e5b06f8583d13a8a4b7680e178abeccbffd04237ecb3a885b02a` |
 | `apps/www/src/components/site-select-dismissal.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select`, `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `3d990e18321eb574957172f2a33252cc0dd157e96c7973252a0cb4adbcef33d0` |
-| `apps/www/src/components/site-shadcn-controls.ts` | `www.demo.runtime-select`, `www.docs.code-panel-expand`, `www.docs.install-manager-tabs`, `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-toggle`, `www.shell.theme-toggle` | `c515576d70dda5728fb3de3dde2792d522776cbaf621aff24ab0d819e0f56f0f` |
+| `apps/www/src/components/site-shadcn-controls.ts` | `www.demo.runtime-select`, `www.docs.code-panel-expand`, `www.docs.install-manager-tabs`, `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-toggle`, `www.shell.theme-toggle` | `6a338d58c8c2bc73e534799170d180ffb48123aaa3248d6ac0d6b16fb0039f6d` |
 | `apps/www/src/components/site-sidebar-current-visibility.ts` | `www.shell.sidebar-navigation` | `0c82ae36d1fa9d81efbceaad25c2e153a52333d3da0087abae9f3aac16315b6b` |
 | `apps/www/src/components/site-text-recipes.ts` | `www.content.typography-presentation` | `e035ff8d22dcff7af4e7df6b21ef4938f23884e98a6d362c0167180bf9dcce8d` |
 | `apps/www/src/components/site-typography-client.ts` | `www.content.typography-presentation` | `779a638445611fa5dffe633ef6699902d6a3ca605ead481232522e7c7f270176` |
@@ -416,8 +416,8 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/content/docs/en/whitepaper/6-consistency-boundary.md` | `www.docs.whitepaper-diagram-viewer` | `643c4d4b8d76473fba3dfb70bd276aa8e5c0f870ff2a76ae26b5fea8a998af84` |
 | `apps/www/src/content/docs/en/whitepaper/7-evolving-within-boundaries.md` | `www.docs.whitepaper-diagram-viewer` | `72cb0fbcf72ede21fa055a1a260fce754c6477c9278624dacdf503c0b6eeb64c` |
 | `apps/www/src/content/docs/zh-cn/demo-base-image.demo.ts` | `www.demo.base-image-controls` | `9a8a33af3ada563c51b62c76a7b238d26a3266c13b6203513614abf1f0c8e77c` |
-| `apps/www/src/content/docs/zh-cn/demo-base-input.demo.ts` | `www.demo.authored-controllers` | `1459a7aee6b4d9ce43002e634542695e66e7ed12707ec36c7607b670e3a0bd23` |
-| `apps/www/src/content/docs/zh-cn/demo-base-select.demo.ts` | `www.demo.authored-controllers` | `43f779dabd304a813e070cbe746c45f91918f5f49c2004a3e1ab42aef4b37959` |
+| `apps/www/src/content/docs/zh-cn/demo-base-input.demo.ts` | `www.demo.authored-controllers` | `0a303cb62d1c19189aee4f0c28d30e97b4461f71d491ed466a026a6fe5777721` |
+| `apps/www/src/content/docs/zh-cn/demo-base-select.demo.ts` | `www.demo.authored-controllers` | `321eadf19028d377565dc963c7341144ba19d4828bc45d9981a332dd62659733` |
 | `apps/www/src/content/docs/zh-cn/demo-base-textarea.demo.ts` | `www.demo.authored-controllers` | `5086c8bb63dddf28ba06726eda54ab354479b6f1ff2c703619b9ddbe8c49b7a4` |
 | `apps/www/src/content/docs/zh-cn/demo-base-transition-command.demo.ts` | `www.demo.authored-controllers` | `357374c075b3cfc5066e534528f23ecbfb5ab9458088143eca10349a58334580` |
 | `apps/www/src/content/docs/zh-cn/demo-base-transition-controlled.demo.ts` | `www.demo.authored-controllers` | `2dd09fc318f19b1fa34d46f0bec17cab0375da92b939113e6b1baf7760025b9d` |

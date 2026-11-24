@@ -104,11 +104,11 @@ test('registered carrier opts in manually without changing ordinary or reusable 
   assert.equal(carrier.on.workflow_dispatch.inputs.scope.default, 'repair');
   assert.equal(
     carrier.jobs['focused-browser'].if,
-    "${{ inputs.scope != 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
+    "${{ inputs.scope != 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true && inputs.shader_presentation != true }}"
   );
   assert.equal(
     carrier.jobs.sprint1.if,
-    "${{ inputs.scope == 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
+    "${{ inputs.scope == 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true && inputs.shader_presentation != true }}"
   );
   const call = carrier.jobs['sprint3-acceptance'];
   assert.equal(

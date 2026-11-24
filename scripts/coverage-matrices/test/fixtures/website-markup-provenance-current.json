@@ -127,7 +127,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
-      "sha256": "f734e78b8ec62770c3432c8ffdf002c258b1378ce88ea90fbf7bdb746f7f9112"
+      "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
     }
   ]
 }

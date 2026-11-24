@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "kind": "bounded numeric package-budget transaction",
+  "date": "2026-11-24",
+  "pullRequest": 1779,
+  "branch": "chore/adapter-closure-package-budget-20261124",
+  "scope": "Three existing whole-entry adapter ceilings for this exact merged 0.3 integration source; no feature, measurement or policy change.",
+  "capabilityLifecycle": "No entity lifecycle changes. The Select target-alignment repair, the React Portal origin-document repair and the merged Sprint 5 compiler work keep their existing lifecycle; this transaction accepts measured package cost only.",
+  "source": {
+    "head": "d53664c2a78391f75cf26d9cd7c5b4da3ffa3a36",
+    "tree": "d5540e74a56604b4e57f95023ca8036c494627ef",
+    "workingTreeClean": true,
+    "measuredSourceMatchesHead": true,
+    "scope": [
+      "packages",
+      "scripts/analysis",
+      "package.json",
+      "pnpm-lock.yaml",
+      "pnpm-workspace.yaml",
+      "tsconfig.json",
+      "internal/coverage-matrices/prototype-coverage-matrix.json"
+    ],
+    "fileCount": 7870,
+    "fingerprintSha256": "4dac236825758d009fe1c2fc7eb7b64d1d2d3cd8ce869876b59931ec10fe1db5",
+    "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stableDuringMeasurement": true,
+    "requireClean": true,
+    "expectedSha": "d53664c2a78391f75cf26d9cd7c5b4da3ffa3a36"
+  },
+  "environment": {
+    "node": "v24.22.3",
+    "zlib": "1.3.2.1-motley-285e94b",
+    "esbuild": "0.25.12",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "canonicalMeasurement": {
+    "run": 45329112057,
+    "job": 138225696483,
+    "workflow": "package-budget-evidence.yml",
+    "artifacts": [
+      {
+        "id": 14890264561,
+        "name": "package-budgets-d53664c2a78391f75cf26d9cd7c5b4da3ffa3a36-45329112057-attempt-1",
+        "digest": "sha256:1aa40bec90efe675477c9777af33f01adc8798c79028121fbd56aac84e9a07f0",
+        "sizeInBytes": 303019
+      },
+      {
+        "id": 14890049913,
+        "name": "package-budgets-d53664c2a78391f75cf26d9cd7c5b4da3ffa3a36-45329112057-attempt-1-logs",
+        "digest": "sha256:5a46327fe4f25c381ae0f72e22bcdd325f8e572a6ac09a0638560d4c88862536",
+        "sizeInBytes": 306907
+      }
+    ],
+    "reportSha256": "43fec26647247f5cb33e1cad4dc814c572ded157baef1488044904d85014259e",
+    "result": "6/9 strict passed; 3/9 strict failed; exit 1",
+    "note": "The dispatch measured the exact current main head. It is a targeted measurement workflow with its own concurrency group, so it did not cancel or replace the scheduled regression cycle."
+  },
+  "previousCanonicalMeasurement": {
+    "run": 45314673679,
+    "job": 138198394495,
+    "head": "1dd7afa3ea4ff43c1f28306c9b035e87ed11ea62",
+    "artifact": 14887551324,
+    "artifactDigest": "sha256:bb92046110f80ec0e2d30c3b7fb74556ffa9e068b2fa933ba5c7829a9d7dbaea",
+    "reportSha256": "a0508882933947a42d6700623773a366bb388661b14325fadb35cb0754f75654",
+    "result": "6/9 strict passed; 3/9 strict failed; exit 1"
+  },
+  "entries": [
+    {
+      "name": "adapter-react root",
+      "entry": "packages/adapters/react/src/index.ts",
+      "oldCeiling": 172900,
+      "newCeiling": 173380,
+      "canonicalGzipBytes": 173199,
+      "oldOverrunBytes": 299,
+      "headroomBytes": 181,
+      "headroomPercent": 0.001045,
+      "minifiedBytes": 607603,
+      "minifiedSha256": "f0bd78c204f1807859d43093f531f394cd6ce50f588e665f000b3fc1d6d7ae2f"
+    },
+    {
+      "name": "adapter-vue root",
+      "entry": "packages/adapters/vue/src/index.ts",
+      "oldCeiling": 171700,
+      "newCeiling": 172180,
+      "canonicalGzipBytes": 172000,
+      "oldOverrunBytes": 300,
+      "headroomBytes": 180,
+      "headroomPercent": 0.001047,
+      "minifiedBytes": 602982,
+      "minifiedSha256": "da5409d3b570fa83387ad688f03a487581acd9677db4cd42bf8c5b470f92c016"
+    },
+    {
+      "name": "adapter-web-component root",
+      "entry": "packages/adapters/web-component/src/index.ts",
+      "oldCeiling": 207500,
+      "newCeiling": 208740,
+      "canonicalGzipBytes": 208527,
+      "oldOverrunBytes": 1027,
+      "headroomBytes": 213,
+      "headroomPercent": 0.001021,
+      "minifiedBytes": 712260,
+      "minifiedSha256": "22b0125c7706f1f82efa9d4e57cba6cfd69174db7de0503c53e524179b5214cf"
+    }
+  ],
+  "unchangedCeilingEntries": [
+    { "name": "lucide/icons/x", "ceiling": 3000, "measuredGzipBytes": 1797, "headroomBytes": 1203 },
+    {
+      "name": "lucide root",
+      "ceiling": 700000,
+      "measuredGzipBytes": 635917,
+      "headroomBytes": 64083
+    },
+    { "name": "core root", "ceiling": 12800, "measuredGzipBytes": 12674, "headroomBytes": 126 },
+    { "name": "runtime root", "ceiling": 104300, "measuredGzipBytes": 104207, "headroomBytes": 93 },
+    {
+      "name": "prototypes-base/button",
+      "ceiling": 6000,
+      "measuredGzipBytes": 4197,
+      "headroomBytes": 1803
+    },
+    {
+      "name": "prototypes-shadcn/button",
+      "ceiling": 7900,
+      "measuredGzipBytes": 6741,
+      "headroomBytes": 1159
+    }
+  ],
+  "closureInspection": [
+    {
+      "entry": "adapter-react root",
+      "observed": "packages/modules/positioning 50797 -> 51092 retained bytes; packages/adapters/react 26777 -> 26753 retained bytes",
+      "reading": "The Select target-alignment repair in packages/modules/positioning is retained by every adapter closure."
+    },
+    {
+      "entry": "adapter-vue root",
+      "observed": "packages/modules/positioning 50773 -> 51068 retained bytes",
+      "reading": "The Vue adapter retains the shared positioning module; it has no adapter-local growth in this window."
+    },
+    {
+      "entry": "adapter-web-component root",
+      "observed": "packages/modules/positioning 50751 -> 51035 retained bytes; packages/adapters/web-component 130827 -> 131110 retained bytes",
+      "reading": "The Web Component adapter additionally retains the Sprint 5 compiler work delivered with the Sprint 5 preview bundle merge."
+    }
+  ],
+  "sourceAttribution": [
+    {
+      "change": "Select target alignment keeps the popup row aligned when the root scrollbar geometry changes",
+      "merge": "665c83d7e230416b278b31ffda169af80b43a82b",
+      "pullRequest": 1773,
+      "paths": ["packages/modules/positioning/src/web/target-alignment-host.ts"]
+    },
+    {
+      "change": "React Portal epochs bind to the connected origin document",
+      "merge": "ffacb01996f5a70223b12c43f17a32f9721e9d68",
+      "pullRequest": 1770,
+      "paths": ["packages/adapters/react/src/adapt.ts"]
+    },
+    {
+      "change": "Sprint 5 preview input bundle and the Sprint 5 compiler work it carries",
+      "merge": "1cc4ad159da621d58e2b668d0d2ef0a22be6ed1b",
+      "pullRequest": 1738,
+      "paths": ["packages/adapters/web-component", "packages/compiler/src"]
+    }
+  ],
+  "headroomRationale": "Each new ceiling is the canonical node-24 gzip measurement plus about 0.1 percent headroom, matching the reviewed headroom used by the earlier adapter transactions. No speculative allowance is added.",
+  "preservedGate": "The strict whole-entry measurement policy, the required clean source, the expected-SHA binding and the failing-report behaviour are unchanged. Only three numeric ceilings move.",
+  "independentReview": "The exact numeric diff, this source-bound record and the canonical CI artifacts are reviewed as one bounded transaction before merge. Prior source inspection is not GitHub approval.",
+  "rawEvidence": [
+    "https://github.com/Proto-UI/Proto-UI/actions/runs/45329112057",
+    "https://github.com/Proto-UI/Proto-UI/actions/runs/45314673679"
+  ],
+  "rollback": "Revert the three ceiling lines and this record to restore the previous strict failures; no other file depends on the new numbers.",
+  "remainingOutsideTransaction": "The Finf development advisory mode, the Sprint 4 shader ceiling and every other recorded transaction stay unchanged. Any further growth is a new transaction with its own canonical measurement."
+}
