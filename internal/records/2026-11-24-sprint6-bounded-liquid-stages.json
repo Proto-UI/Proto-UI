@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-24T10:19:35.328863+00:00",
+  "originalPullRequest": "https://github.com/Proto-UI/Proto-UI/pull/1712",
+  "parent": "5ef36bb2223149df8eed4b378f6a994371ffa78a",
+  "integrationObserved": {
+    "pr1712Merged": true,
+    "mergedHead": "041277b4ec781e0ce737edeaf6911c5a15f9e9b8",
+    "mergeCommit": "248f8270dd3458d1fcbc507e618337f98b9fde96",
+    "mergedAt": "2026-11-24T09:56:34Z",
+    "attribution": "Externally executed parallel integration; root observed the live GitHub merge receipt and did not execute that merge."
+  },
+  "purpose": "Repair the actual Liquid Accordion demonstration source budget by giving independent examples independent declared material stages, retaining the full physical coverage and refusal contracts.",
+  "failure": {
+    "run": 45368595551,
+    "artifact": 14908642035,
+    "head": "041277b4ec781e0ce737edeaf6911c5a15f9e9b8",
+    "hosts": 4,
+    "passed": 0,
+    "failed": 4,
+    "actualReason": "source-scope-unavailable",
+    "expectedReason": "source-painted-ancestor",
+    "visibleCanvasCssPixels": [512, 2174],
+    "devicePixelRatio": 1,
+    "visiblePixels": 1113088,
+    "maxSide": 2048,
+    "maxArea": 1048576,
+    "retainedOldBitmap": [512, 1250],
+    "bitmapLimitation": "The old backing size is from the same current DOM receipt, not an independently measured historical baseline."
+  },
+  "change": {
+    "files": {
+      "apps/www/src/content/docs/accordion-demo.shared.ts": "15ef5c53f63cc69c06dfddc457b85385196ae280e99159dfcd683c81c9d3166f",
+      "apps/www/src/content/docs/accordion-demo-layout.test.ts": "36b7c401d0c1dac2893e7ce9ac4e0d6485f587edcf3951149ad37ecb603375c0"
+    },
+    "sourceOwnership": [
+      "Four non-nested existing materialStage declarations for single/multiple/rtl/controlled examples",
+      "One framework tree/setup/ref scope; original nested stays within single opaque Content",
+      "Each stage retains its inner p-2 gutter, original complete flow subtree and an empty separate overlay",
+      "Other families retain their original tree order, props, text, refs and setup"
+    ],
+    "unchanged": [
+      "All material source budgets/admission/coordinates",
+      "Original four native cases and thresholds",
+      "Original ten layout case bodies",
+      "All prototype definitions and reservation templates",
+      "Existing generic stage attachment and automatic-scene opt-out"
+    ]
+  },
+  "validation": {
+    "red": {
+      "files": 1,
+      "passed": 11,
+      "failed": 1,
+      "total": 12,
+      "reason": "Expected four explicit source stages; observed zero."
+    },
+    "green": {
+      "files": 4,
+      "passed": 64,
+      "failed": 0,
+      "pending": 0,
+      "todo": 0,
+      "sourceInputsUnchanged": true
+    },
+    "officialBuildAndTypes": [
+      {
+        "label": "cli-build",
+        "command": ["node", "scripts/build/public-packages.mjs", "--package", "@proto.ui/cli"],
+        "startedAt": "2026-11-24T10:13:56.936468+00:00",
+        "endedAt": "2026-11-24T10:14:01.287571+00:00",
+        "exitCode": 0
+      },
+      {
+        "label": "website-generate",
+        "command": ["node", "apps/www/scripts/generate-website-prototype-tokens.mjs"],
+        "startedAt": "2026-11-24T10:14:01.287856+00:00",
+        "endedAt": "2026-11-24T10:15:40.023928+00:00",
+        "exitCode": 0
+      },
+      {
+        "label": "type-contracts",
+        "command": [
+          "node",
+          "node_modules/typescript/bin/tsc",
+          "-p",
+          "internal/contracts/types/tsconfig.json",
+          "--noEmit"
+        ],
+        "startedAt": "2026-11-24T10:15:40.024494+00:00",
+        "endedAt": "2026-11-24T10:15:52.546078+00:00",
+        "exitCode": 0
+      },
+      {
+        "label": "workspace-types",
+        "command": [
+          "node",
+          "--max-old-space-size=6144",
+          "node_modules/typescript/bin/tsc",
+          "-p",
+          "tsconfig.workspace.json",
+          "--noEmit"
+        ],
+        "startedAt": "2026-11-24T10:15:52.546745+00:00",
+        "endedAt": "2026-11-24T10:16:44.608663+00:00",
+        "exitCode": -9
+      }
+    ],
+    "workspaceTypesBoundary": "CLI build, website generation and public type contracts passed. Whole workspace tsc was terminated by SIGKILL (exit -9), with no TypeScript diagnostics; it is not a passing check. A fresh hosted typecheck is required after current-main reconciliation.",
+    "newNativeGeometry": "Unrun at this record. Approximately1052px/538624pixels follows prior geometry only and is not acceptance evidence."
+  },
+  "independentReview": {
+    "reviewer": "Separate Codex reviewer s6_final_union_review",
+    "findings": [],
+    "scope": "Full two-file diff, generic stage ownership, source and projection attachment, unchanged nested/ref/setup ownership, non-Liquid preservation and clipping/gutter boundary. Actual geometry remains pending native execution.",
+    "githubApproval": false
+  },
+  "rawEvidence": {
+    "archive": "internal/records/evidence/2026-11-24-sprint6-main-reconciliation/liquid-stage-repair.tar.gz",
+    "sha256": "0fe77731a0395c6f84a97a0297604a02748363d878e12a4ff684eca5b9fae2af",
+    "bytes": 1944546,
+    "members": 32
+  },
+  "next": "Reconcile fresh main952722e5, publish a new follow-up PR, run the unchanged four-host reservation journey and final canonical source/public/Liquid evidence. Do not update the closed original branch or claim the old failure fixed by local structure checks."
+}
