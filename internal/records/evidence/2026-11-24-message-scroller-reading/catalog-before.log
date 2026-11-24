@@ -1,0 +1,4 @@
+[prototype-catalog] 1015 declaration files, 1408 static authoring entries, 468 cataloged P entities, 480 known debt files, 3 dynamic factory files.
+
+[prototype-catalog] FAILED (1)
+- packages/prototypes/base/src/message-scroller/reading.proto.ts: uncataloged protocol is not declared as existing debt (packages/prototypes/base/src/message-scroller/reading.proto.ts|asHook:as-message-scroller-reading)
