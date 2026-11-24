@@ -19,6 +19,7 @@
           "checked": false,
           "disabled": false,
           "readOnly": false,
+          "required": false,
           "hovered": false,
           "pressed": false,
           "indeterminate": false,
@@ -91,6 +92,7 @@
           "checked": false,
           "disabled": false,
           "readOnly": false,
+          "required": false,
           "hovered": false,
           "pressed": false,
           "indeterminate": false,
@@ -227,7 +229,8 @@
             "states": {
               "checked": "false",
               "disabled": false,
-              "readOnly": false
+              "readOnly": false,
+              "required": false
             },
             "actions": {
               "activate": {
@@ -414,6 +417,7 @@
           "checked": false,
           "disabled": false,
           "readOnly": false,
+          "required": false,
           "hovered": false,
           "pressed": false,
           "indeterminate": false,
@@ -493,6 +497,7 @@
           "checked": true,
           "disabled": false,
           "readOnly": false,
+          "required": false,
           "hovered": false,
           "pressed": false,
           "indeterminate": false,
@@ -629,7 +634,8 @@
             "states": {
               "checked": "true",
               "disabled": false,
-              "readOnly": false
+              "readOnly": false,
+              "required": false
             },
             "actions": {
               "activate": {
@@ -823,6 +829,7 @@
           "checked": false,
           "disabled": false,
           "readOnly": false,
+          "required": false,
           "hovered": false,
           "pressed": false,
           "indeterminate": false,
@@ -902,6 +909,7 @@
           "checked": false,
           "disabled": false,
           "readOnly": false,
+          "required": false,
           "hovered": false,
           "pressed": false,
           "indeterminate": true,
@@ -1038,7 +1046,8 @@
             "states": {
               "checked": "mixed",
               "disabled": false,
-              "readOnly": false
+              "readOnly": false,
+              "required": false
             },
             "actions": {
               "activate": {

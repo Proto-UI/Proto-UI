@@ -3,8 +3,9 @@
 //! The fixtures were surveyed rather than guessed: across every token
 //! declaration and every theme variable the only colour syntaxes present are
 //! hex, `rgb()`/`rgba()` in both comma and slash form, CSS `lab()`, and
-//! `color-mix(in oklab, <colour> <percent>, transparent)`. Anything else is
-//! reported rather than approximated, and `parses_every_colour_in_the_fixtures`
+//! two-colour `color-mix()` in Oklab or OkLCh, including transparent mixes.
+//! Other spaces, hue strategies, nested mixes and non-literal inputs are
+//! reported rather than approximated, and `parses_every_colour_a_theme_can_produce`
 //! fails if a new form appears.
 //!
 //! Lab input lightness is clamped to CSS Color 4's 0..100 range. For intermediate
@@ -202,6 +203,13 @@ fn parse_rgb(rest: &str, original: &str) -> Result<Rgba, ColorError> {
 }
 
 fn parse_lab(rest: &str, original: &str) -> Result<Rgba, ColorError> {
+    let (linear, alpha) = parse_lab_linear(rest, original)?;
+    let mut color = linear_to_srgb(linear, original)?;
+    color.a = alpha;
+    Ok(color)
+}
+
+fn parse_lab_linear(rest: &str, original: &str) -> Result<([f32; 3], f32), ColorError> {
     let malformed = || ColorError::Malformed(original.to_string());
     // `lab()` takes the same optional `/ alpha` as `rgb()`; the Shadcn dark
     // theme uses it for translucent borders.
@@ -224,11 +232,15 @@ fn parse_lab(rest: &str, original: &str) -> Result<Rgba, ColorError> {
     if !lightness.is_finite() || !a.is_finite() || !b.is_finite() {
         return Err(malformed());
     }
-    let mut color = lab_to_srgb(lightness, a, b, original)?;
-    if let Some(alpha) = alpha {
-        color.a = channel(alpha, 1.0, original)?;
+    let linear = lab_to_linear_srgb(lightness, a, b);
+    if linear.iter().any(|component| !component.is_finite()) {
+        return Err(ColorError::Unsupported(original.to_string()));
     }
-    Ok(color)
+    let alpha = match alpha {
+        Some(alpha) => channel(alpha, 1.0, original)?,
+        None => 1.0,
+    };
+    Ok((linear, alpha))
 }
 
 fn parse_lab_axis(raw: &str, original: &str) -> Result<f32, ColorError> {
@@ -242,41 +254,170 @@ fn parse_lab_axis(raw: &str, original: &str) -> Result<f32, ColorError> {
     Ok(value)
 }
 
-/// `color-mix(in oklab, <colour> <percent>, transparent)`.
-///
-/// Every recorded use mixes against `transparent`. Premultiplied mixing with
-/// a fully transparent colour keeps the first colour's channels and scales its
-/// alpha, so this is alpha attenuation rather than a hue change. A mix against
-/// anything else is reported instead of approximated.
+/// The recorded transparent mixes and Shadcn's two-colour secondary hover.
+/// CSS Color 5 normalizes the percentages; Color 4 defines premultiplied
+/// interpolation, powerless hue carry-forward and the default shorter arc.
+/// This remains a bounded literal parser, not a general CSS evaluator.
 fn parse_color_mix(rest: &str, original: &str) -> Result<Rgba, ColorError> {
     let malformed = || ColorError::Malformed(original.to_string());
-    let mut parts = rest.splitn(3, ',');
-    let space = parts.next().ok_or_else(malformed)?.trim();
-    if !space.eq_ignore_ascii_case("in oklab") {
-        return Err(ColorError::Unsupported(original.to_string()));
+    let unsupported = || ColorError::Unsupported(original.to_string());
+    // Commas inside rgb()/rgba() belong to a colour, not to the mix.
+    let mut parts = Vec::new();
+    let mut depth = 0usize;
+    let mut start = 0usize;
+    for (index, character) in rest.char_indices() {
+        match character {
+            '(' => depth += 1,
+            ')' => depth = depth.checked_sub(1).ok_or_else(malformed)?,
+            ',' if depth == 0 => {
+                parts.push(rest[start..index].trim());
+                start = index + 1;
+            }
+            _ => {}
+        }
     }
-    let first = parts.next().ok_or_else(malformed)?.trim();
-    let second = parts.next().ok_or_else(malformed)?.trim();
-    if !second.eq_ignore_ascii_case("transparent") {
-        return Err(ColorError::Unsupported(original.to_string()));
-    }
-    let (color_text, percent_text) = first.rsplit_once(' ').ok_or_else(malformed)?;
-    let percent = percent_text
-        .trim()
-        .strip_suffix('%')
-        .ok_or_else(malformed)?
-        .parse::<f32>()
-        .map_err(|_| malformed())?;
-    if !percent.is_finite() || !(0.0..=100.0).contains(&percent) {
+    if depth != 0 {
         return Err(malformed());
     }
-    let color = parse_rgba(color_text.trim())?;
-    Ok(Rgba::new(
-        color.r,
-        color.g,
-        color.b,
-        color.a * (percent / 100.0),
-    ))
+    parts.push(rest[start..].trim());
+    if parts.iter().any(|part| part.is_empty()) {
+        return Err(malformed());
+    }
+    if parts.len() != 3 {
+        return Err(unsupported());
+    }
+    let space: Vec<&str> = parts[0].split_whitespace().collect();
+    if space.len() != 2 || !space[0].eq_ignore_ascii_case("in") {
+        return Err(unsupported());
+    }
+    let polar = space[1].eq_ignore_ascii_case("oklch");
+    if !polar && !space[1].eq_ignore_ascii_case("oklab") {
+        return Err(unsupported());
+    }
+    let (first, first_percent) = mix_item(parts[1], original)?;
+    let (second, second_percent) = mix_item(parts[2], original)?;
+    let (p1, p2) = match (first_percent, second_percent) {
+        (Some(a), Some(b)) => (a, b),
+        (Some(a), None) => (a, 1.0 - a),
+        (None, Some(b)) => (1.0 - b, b),
+        (None, None) => (0.5, 0.5),
+    };
+    let total = p1 + p2;
+    // CSS Color 5 uses the midpoint with zero output alpha when both weights
+    // are zero. Otherwise normalize weights before interpolating the colour.
+    let (w1, w2) = if total == 0.0 {
+        (0.5, 0.5)
+    } else {
+        (p1 / total, p2 / total)
+    };
+    let alpha_multiplier = total.min(1.0);
+    let (left, a1) = mix_color(first)?;
+    let (right, a2) = mix_color(second)?;
+
+    // Preserve the existing exact channels for transparent attenuation.
+    // Transparent black has no hue, so this also holds in default OkLCh.
+    if second.eq_ignore_ascii_case("transparent") {
+        let mut color = parse_rgba(first)?;
+        color.a *= w1 * alpha_multiplier;
+        return Ok(color);
+    }
+    if first.eq_ignore_ascii_case("transparent") {
+        let mut color = parse_rgba(second)?;
+        color.a *= w2 * alpha_multiplier;
+        return Ok(color);
+    }
+
+    let alpha = a1 * w1 + a2 * w2;
+    if alpha == 0.0 {
+        return Ok(Rgba::TRANSPARENT);
+    }
+    let left = linear_srgb_to_oklab(left);
+    let right = linear_srgb_to_oklab(right);
+    let component = |left: f32, right: f32| (left * a1 * w1 + right * a2 * w2) / alpha;
+    let lightness = component(left[0], right[0]);
+    let mixed = if polar {
+        // CSS Color 4's OkLCh powerless-hue epsilon. Zero the chroma as well
+        // as carrying the other hue, so conversion noise cannot gain colour.
+        let (c1, h1) = oklab_chroma_hue(left);
+        let (c2, h2) = oklab_chroma_hue(right);
+        let mut h1 = h1.or(h2).unwrap_or(0.0);
+        let mut h2 = h2.unwrap_or(h1);
+        if h2 - h1 > std::f32::consts::PI {
+            h1 += std::f32::consts::TAU;
+        } else if h2 - h1 < -std::f32::consts::PI {
+            h2 += std::f32::consts::TAU;
+        }
+        // Polar hue is interpolated by the weights, never by alpha.
+        let hue = h1 * w1 + h2 * w2;
+        let chroma = component(c1, c2);
+        [lightness, chroma * hue.cos(), chroma * hue.sin()]
+    } else {
+        [
+            lightness,
+            component(left[1], right[1]),
+            component(left[2], right[2]),
+        ]
+    };
+    let mut color = linear_to_srgb(oklab_to_linear_srgb(mixed), original)?;
+    color.a = alpha * alpha_multiplier;
+    Ok(color)
+}
+
+fn mix_item<'a>(text: &'a str, original: &str) -> Result<(&'a str, Option<f32>), ColorError> {
+    let malformed = || ColorError::Malformed(original.to_string());
+    let Some((color, weight)) = text.rsplit_once(char::is_whitespace) else {
+        return Ok((text, None));
+    };
+    let Some(percent) = weight.strip_suffix('%') else {
+        return Ok((text, None));
+    };
+    let percent = percent.parse::<f32>().map_err(|_| malformed())?;
+    if !percent.is_finite() || !(0.0..=100.0).contains(&percent) || color.trim().is_empty() {
+        return Err(malformed());
+    }
+    Ok((color.trim(), Some(percent / 100.0)))
+}
+
+fn mix_color(text: &str) -> Result<([f32; 3], f32), ColorError> {
+    if let Some(rest) = strip_function(text, "lab") {
+        // Input Lab may be outside sRGB. Mapping it before the interpolation
+        // would irreversibly alter the authored mix (CSS Color 4 §13.1).
+        return parse_lab_linear(rest, text);
+    }
+    if strip_function(text, "color-mix").is_some() {
+        return Err(ColorError::Unsupported(text.to_string()));
+    }
+    let color = parse_rgba(text)?;
+    let decode = |component: f32| {
+        if component <= 0.04045 {
+            component / 12.92
+        } else {
+            ((component + 0.055) / 1.055).powf(2.4)
+        }
+    };
+    Ok(([decode(color.r), decode(color.g), decode(color.b)], color.a))
+}
+
+fn oklab_chroma_hue(lab: [f32; 3]) -> (f32, Option<f32>) {
+    let chroma = lab[1].hypot(lab[2]);
+    if chroma <= 0.000_004 {
+        (0.0, None)
+    } else {
+        (
+            chroma,
+            Some(lab[2].atan2(lab[1]).rem_euclid(std::f32::consts::TAU)),
+        )
+    }
+}
+
+fn linear_to_srgb(linear: [f32; 3], original: &str) -> Result<Rgba, ColorError> {
+    if linear.iter().any(|component| !component.is_finite()) {
+        return Err(ColorError::Unsupported(original.to_string()));
+    }
+    if in_srgb_gamut(linear) {
+        return Ok(encode_linear_srgb(linear));
+    }
+    gamut_map_srgb(linear).map_err(|()| ColorError::Unsupported(original.to_string()))
 }
 
 // --- colour science -------------------------------------------------------
@@ -310,7 +451,7 @@ fn multiply(matrix: [[f32; 3]; 3], vector: [f32; 3]) -> [f32; 3] {
     out
 }
 
-fn lab_to_srgb(lightness: f32, a: f32, b: f32, original: &str) -> Result<Rgba, ColorError> {
+fn lab_to_linear_srgb(lightness: f32, a: f32, b: f32) -> [f32; 3] {
     // CSS Color 4 clamps source Lab L before conversion; destination endpoints
     // are determined from converted Oklab lightness during display mapping.
     let lightness = lightness.clamp(0.0, 100.0);
@@ -337,14 +478,7 @@ fn lab_to_srgb(lightness: f32, a: f32, b: f32, original: &str) -> Result<Rgba, C
         y * D50_WHITE[1],
         cube(f2) * D50_WHITE[2],
     ];
-    let linear = multiply(XYZ_D65_TO_LINEAR_SRGB, multiply(D50_TO_D65, xyz_d50));
-    if linear.iter().any(|component| !component.is_finite()) {
-        return Err(ColorError::Unsupported(original.to_string()));
-    }
-    if in_srgb_gamut(linear) {
-        return Ok(encode_linear_srgb(linear));
-    }
-    gamut_map_srgb(linear).map_err(|()| ColorError::Unsupported(original.to_string()))
+    multiply(XYZ_D65_TO_LINEAR_SRGB, multiply(D50_TO_D65, xyz_d50))
 }
 
 /// CSS Color 4 §14.2.1 binary-search gamut mapping with local MINDE.

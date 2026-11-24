@@ -101,14 +101,25 @@ type NotificationDomains = {
   claimsByRoot?: Map<AnatomyInstanceToken, ClaimRecord[]>;
   rootsByInstance: Map<AnatomyInstanceToken, AnatomyInstanceToken | null>;
 };
+type OrderComparisonStep = {
+  left: AnatomyRootTarget;
+  right: AnatomyRootTarget;
+  compare: NonNullable<AnatomyRootTarget['compareDocumentPosition']>;
+  result: number;
+  epoch: number;
+};
 type OrderNotificationReads = {
   comparisons: OrderComparisons;
   domains: Map<AnatomyParentGetter, NotificationDomains>;
+  traces: Map<readonly ClaimRecord[], (OrderComparisonStep | undefined)[]>;
+  comparisonEpoch: number;
 };
 
 function clearOrderNotificationReads(reads?: OrderNotificationReads): void {
   reads?.comparisons.clear();
   reads?.domains.clear();
+  reads?.traces.clear();
+  if (reads) reads.comparisonEpoch++;
 }
 
 const CLAIM_BY_PART_VIEW = new WeakMap<AnatomyPartView, ClaimRecord>();
@@ -941,7 +952,12 @@ export class AnatomyModuleImpl extends ModuleBase {
   }
 
   private static notifyStructuralChange(family: AnatomyFamily): void {
-    const reads: OrderNotificationReads = { comparisons: new Map(), domains: new Map() };
+    const reads: OrderNotificationReads = {
+      comparisons: new Map(),
+      domains: new Map(),
+      traces: new Map(),
+      comparisonEpoch: 0,
+    };
     for (const impl of this.subscribers(this.orderSubscribers, family)) {
       impl.emitOrderChangeIfNeeded(family, reads);
     }
@@ -989,7 +1005,12 @@ export class AnatomyModuleImpl extends ModuleBase {
       // the current recipient's signature.
       clearOrderNotificationReads(reads);
       const off = observer(target, () => {
-        const reads: OrderNotificationReads = { comparisons: new Map(), domains: new Map() };
+        const reads: OrderNotificationReads = {
+          comparisons: new Map(),
+          domains: new Map(),
+          traces: new Map(),
+          comparisonEpoch: 0,
+        };
         for (const impl of listeners) {
           impl.emitOrderChangeIfNeeded(family, reads);
         }
@@ -1067,7 +1088,7 @@ export class AnatomyModuleImpl extends ModuleBase {
     reads?: OrderNotificationReads
   ): OrderSignature {
     if (!domain.rootInstance) return null;
-    const ordered = this.sortClaims(domain.claims, reads?.comparisons);
+    const ordered = this.sortClaims(domain.claims, reads);
     const signature: (string | number)[] = [];
     for (const claim of ordered) signature.push(claim.role, this.getIdentityId(claim.instance));
     return signature;
@@ -1091,30 +1112,72 @@ export class AnatomyModuleImpl extends ModuleBase {
     return next;
   }
 
-  private sortClaims(claims: ClaimRecord[], comparisons?: OrderComparisons): ClaimRecord[] {
+  private sortClaims(claims: ClaimRecord[], reads?: OrderNotificationReads): ClaimRecord[] {
     // Supported hosts provide stable Array.sort: equal or unavailable targets
     // keep registration order without allocating a wrapper for every claim.
-    return claims.slice().sort((left, right) => this.compareClaims(left, right, comparisons));
+    if (!reads) return claims.slice().sort((left, right) => this.compareClaims(left, right));
+    let trace = reads.traces.get(claims);
+    if (!trace) reads.traces.set(claims, (trace = []));
+    let index = 0;
+    const ordered = claims
+      .slice()
+      .sort((left, right) => this.compareClaims(left, right, reads, trace, index++));
+    trace.length = index;
+    return ordered;
   }
 
-  private compareClaims(a: ClaimRecord, b: ClaimRecord, comparisons?: OrderComparisons): number {
+  private compareClaims(
+    a: ClaimRecord,
+    b: ClaimRecord,
+    reads?: OrderNotificationReads,
+    trace?: (OrderComparisonStep | undefined)[],
+    index = 0
+  ): number {
     const aTarget = a.getRootTarget(a.instance);
     const bTarget = b.getRootTarget(b.instance);
     if (!aTarget || !bTarget || aTarget === bTarget) return 0;
     const compare = aTarget.compareDocumentPosition;
     if (typeof compare !== 'function') return 0;
 
-    let entry = comparisons?.get(aTarget);
-    if (entry?.compare !== compare) entry = undefined;
-    const cached = entry?.positions.get(bTarget);
-    if (cached !== undefined) return cached;
+    // Array.sort still performs every comparison and reacquires both targets
+    // and the current method each time. Only the pair-cache lookup is reused
+    // when this comparison follows an already observed path in this delivery.
+    const step = trace?.[index];
+    if (
+      step &&
+      step.epoch === reads?.comparisonEpoch &&
+      step.left === aTarget &&
+      step.right === bTarget &&
+      step.compare === compare
+    )
+      return step.result;
 
-    const pos = compare.call(aTarget, bTarget);
-    const result = pos & ORDER_FOLLOWING ? -1 : pos & ORDER_PRECEDING ? 1 : 0;
-    if (comparisons) {
-      if (!entry) comparisons.set(aTarget, (entry = { compare, positions: new Map() }));
-      entry.positions.set(bTarget, result);
+    const comparisons = reads?.comparisons;
+    let entry = comparisons?.get(aTarget);
+    if (entry?.compare !== compare) {
+      // A different bridge may replace a comparator and later restore it.
+      // Its former trace cannot outlive the pair cache's method invalidation.
+      if (entry && reads) reads.comparisonEpoch++;
+      entry = undefined;
     }
+    let result = entry?.positions.get(bTarget);
+
+    if (result === undefined) {
+      const pos = compare.call(aTarget, bTarget);
+      result = pos & ORDER_FOLLOWING ? -1 : pos & ORDER_PRECEDING ? 1 : 0;
+      if (comparisons) {
+        if (!entry) comparisons.set(aTarget, (entry = { compare, positions: new Map() }));
+        entry.positions.set(bTarget, result);
+      }
+    }
+    if (trace && reads)
+      trace[index] = {
+        left: aTarget,
+        right: bTarget,
+        compare,
+        result,
+        epoch: reads.comparisonEpoch,
+      };
     return result;
   }
 
