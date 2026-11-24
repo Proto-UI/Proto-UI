@@ -1,0 +1,57 @@
+{
+  "base": "1dd7afa3ea4ff43c1f28306c9b035e87ed11ea62",
+  "head": "7902a47f8bd2ba33745840d9248548b2309c9a6a",
+  "tree": "627ece7de9f7499de3d063205c654f71dab4f165",
+  "testBlob": "8838283ed2a4e04af3f6d4469c1c83587b86bfa4",
+  "testSha256": "bc44131a01668c3a75675d91891d032f4e66f4ff87a5bc218f6fd99bdd484b88",
+  "trackedStatus": "",
+  "setup": [
+    {
+      "name": "locked-install",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "install",
+        "--offline",
+        "--frozen-lockfile",
+        "--ignore-scripts"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 5865
+    },
+    {
+      "name": "normal-husky-install",
+      "command": [
+        "node",
+        "node_modules/husky/bin.js"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 115
+    },
+    {
+      "name": "stage",
+      "command": [
+        "git",
+        "add",
+        "--",
+        ".github/workflows/compiler-browser-acceptance.yml"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 65
+    },
+    {
+      "name": "normal-commit",
+      "command": [
+        "git",
+        "commit",
+        "--signoff",
+        "-m",
+        "ci: include complete Scroll Reveal source consumers",
+        "-m",
+        "Select the existing unchanged 28-case generated-host suite in the reusable source-regression lane. Preserve all triggers, job limits, case deadlines and assertions."
+      ],
+      "exitCode": 0,
+      "elapsedMs": 2025
+    }
+  ]
+}
