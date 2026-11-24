@@ -17,6 +17,8 @@ At each boundary record actual state. If the feature deadline is missed, pause f
 
 ## 0.3 commitment boundary
 
+The owner's [2026-11-25 scope decision](release-0.3-list.md#2026-11-25-owner-scope-decision) moves the entire remaining scope of 20 named Compiler/consumer and original IR10 Issues to 0.4. It supersedes their earlier prerequisite or criterion-split assignments, including references from parent tracking Issues. The remaining commitments below apply subject to that explicit exception; the historical source inventory remains intact.
+
 The concrete [delivery list](release-0.3-list.md) and [source-bound ledger](release-0.3-source-ledger.json) retain exported identities and the original Finf criteria. The frozen snapshot stays authoritative history; bounded acquisition corrections live in the additive [source corrections](release-0.3-source-corrections.json) companion, and the single effective view for current criterion identities and denominators is `loadEffectiveLedger` in `scripts/ci/release-source-ledger.mjs`. Source bodies may use LF or CRLF line endings; acquisition must extract checkbox conditions identically under both. Enumeration is not acceptance; current evidence and independently completed child criteria are tracked separately.
 
 The committed Prototype libraries are **Base, Shadcn, Brutalist (the repository identity for neo-brutalism), and Lucide**. Include all their currently supported/exported prototypes and all additional support already promised for these areas in Finf V2. Include their authored combinations and the interaction, focus, keyboard, controlled-state, lifecycle, accessibility and styling repairs needed for real consumption.
@@ -25,7 +27,7 @@ The delivery surface also includes:
 
 - **www:** all supported and Finf V2-promised capabilities applicable to those four families: discoverable documentation, real previews and code, runtime switching, navigation/search, responsive interaction and public install/usage paths. Distinguish site-owned composition from Prototype behavior.
 - **CLI:** existing and Finf V2-promised initialization, add/facade generation, exact-version installation, finite style/token closure, generated artifacts and packed consumer delivery needed for the committed families.
-- **Prerequisites:** core, Runtime, Modules, Adapters, compiler/export/build paths required to deliver the committed surfaces. Their bugs cannot be deferred merely because their package names are not listed above. The existing supported Web-host commitments remain in force.
+- **Prerequisites:** core, Runtime, Modules, Adapters and compiler/export/build paths retained in the effective 0.3 scope. Apply the explicit 2026-11-25 exception before assigning prerequisite work; none of the 20 deferred Issues' remaining criteria becomes a 0.3 blocker through this general rule. Other supported Web-host commitments remain in force, and a package name alone is not a deferral decision.
 
 A family being in 0.3 is a delivery obligation, not an automatic promotion of its draft spec entities. Review and resolve each actual lifecycle/evidence gap under the existing catalog rules.
 
@@ -41,7 +43,7 @@ Maintain one source-bound ledger for the split, linked from Finf V2 #890. Each r
 - development state, integration SHA, acceptance state and evidence URLs;
 - blocker and next executable action, if any.
 
-Use `0.3` for the commitment above and its required prerequisites. Use `0.4` for independent additions outside that boundary, including other-library work and independent experimental targets that are not prerequisites for 0.3. Mixed Issues must be split by criterion: do not move an entire Issue by title when it contains both releases. Retain old unresolved threads and decisions. A deferred criterion is not completed; an actually completed subcriterion is checked even when another release or family remains open.
+Use `0.3` for the effective commitment above and its retained prerequisites. Use `0.4` for the owner's explicitly deferred 20 Issues and for independent additions outside that boundary, including other-library work and independent experimental targets that are not prerequisites for 0.3. Other mixed Issues must be split by criterion; a title alone does not authorize whole-Issue deferral. Preserve unresolved criteria, source history and prior decisions with the dated superseding disposition. A deferred criterion is not completed; an actually completed subcriterion is checked even when another release or family remains open.
 
 ## CI cadence and queue control
 
@@ -68,6 +70,10 @@ The goal is to stop accumulating unknown regressions, not stop useful repair wor
 | Two successive planned cycles are red/unknown, or no valid complete baseline for 24 hours | Enter repair-only mode repository-wide. No new feature PRs enter the integration queue; allow defect fixes, CI recovery, evidence, documentation correction and protected security work. | Two successive valid complete scheduled cycles without new unresolved blocking regressions. |
 | A cycle is still queued after 60 minutes, or a planned slot was missed | Record infrastructure incident and stop adding duplicate broad runs. Diagnose capacity and runner eligibility. Do not classify queue delay as a product regression or fabricate green receipts. | One identified current-source cycle starts and finishes, with backlog recovery recorded. |
 | Known inherited failures | Retain original failed rows and owners; compare failure identities and source conditions, not counts alone. They remain acceptance work, not permanent waivers. | Original criteria repaired and verified, or explicitly dispositioned by the owner with provenance. |
+
+Apply the table's explicit-owner-disposition route to the 20 Issues named in the 2026-11-25 decision and their parent references. Map actual failures and missing observations to retained 0.3 or deferred 0.4 criteria on the exact source, including within mixed jobs; an aggregate suite name must not reintroduce the deferred work as a 0.3 blocker. Unclassified failures and missing retained 0.3 observations remain unresolved.
+
+Keep the full CI inventory, native workflow conclusions and repository-wide recovery counters factual. This scope decision does not turn any old or new red cycle green, mark skipped work as passed or establish release acceptance. A 0.3 acceptance claim still needs two successive scheduled cycles whose complete retained 0.3 check inventory passes on the current release candidate, with the criterion mapping and scoped result reported separately from the full-cycle conclusion. This documentation change does not alter workflow execution, test assertions or release publication controls.
 
 After the 2026-11-27 freeze feature work stays frozen even when regression is green. Green permits the next maintenance/acceptance task, not automatic feature expansion. At release-candidate stage any blocker resets candidate acceptance to the actual new SHA; fixes remain allowed.
 
