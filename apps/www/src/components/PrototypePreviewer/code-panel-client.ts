@@ -1,3 +1,4 @@
+import { codeScrollTarget, enhanceCodeScrollArea } from './code-scroll-area-client';
 import { isSiteButtonActivation } from '../site-shadcn-controls';
 
 export interface RefreshCodePanelOptions {
@@ -22,18 +23,28 @@ export function refreshCodePanel(shell: HTMLElement, options: RefreshCodePanelOp
   const panel = shell.querySelector<HTMLElement>('[data-code-inner]');
   const content = shell.querySelector<HTMLElement>('[data-code-content]');
   if (!panel || !content) return;
+  const scroller = codeScrollTarget(shell);
 
   if (shell.dataset.codeCollapsible === 'false') {
     setExpanded(shell, true);
     return;
   }
-  if (options.reset) setExpanded(shell, false);
+  if (options.reset) {
+    setExpanded(shell, false);
+    // Runtime changes replace the pre, but keep the same viewport anatomy.
+    if (scroller?.matches('[data-code-scroll-viewport]')) {
+      scroller.scrollLeft = 0;
+      scroller.scrollTop = 0;
+    }
+  }
   if (shell.dataset.codeExpanded === 'true') return;
   if (panel.getBoundingClientRect().height < MIN_VISIBLE_PANEL_HEIGHT) return;
 
-  const pre = content.querySelector<HTMLElement>('.proto-previewer__code');
-  const fullHeight = pre?.scrollHeight ?? content.scrollHeight;
-  setExpanded(shell, fullHeight <= content.clientHeight + COLLAPSED_CLIP_EPSILON);
+  const fullHeight = scroller?.scrollHeight ?? content.scrollHeight;
+  const visibleHeight = scroller?.matches('[data-code-scroll-viewport]')
+    ? scroller.clientHeight
+    : content.clientHeight;
+  setExpanded(shell, fullHeight <= visibleHeight + COLLAPSED_CLIP_EPSILON);
 }
 
 const panels = new Map<HTMLElement, () => void>();
@@ -49,6 +60,7 @@ function initCodePanel(shell: HTMLElement): void {
   let second = 0;
   const view = shell.ownerDocument.defaultView!;
   const scheduleRefresh = () => {
+    if (!alive) return;
     view.cancelAnimationFrame(first);
     view.cancelAnimationFrame(second);
     first = view.requestAnimationFrame(() => {
@@ -64,8 +76,7 @@ function initCodePanel(shell: HTMLElement): void {
     setExpanded(shell, expanded);
     // The expansion Button is now hidden. Keep keyboard readers on the source
     // viewport so Arrow/Page keys scroll code and Shift+Tab reaches Copy.
-    if (expanded && ownedFocus)
-      shell.querySelector<HTMLElement>('.proto-previewer__code')?.focus({ preventScroll: true });
+    if (expanded && ownedFocus) codeScrollTarget(shell)?.focus({ preventScroll: true });
   };
   toggle?.addEventListener('click', onToggle);
   const observer =
@@ -91,6 +102,11 @@ function initCodePanel(shell: HTMLElement): void {
   removal.observe(shell.ownerDocument.body, { childList: true, subtree: true });
   shell.ownerDocument.addEventListener('astro:before-swap', dispose);
   panels.set(shell, dispose);
+  if (shell.querySelector('[data-code-scroll-root]')) {
+    void enhanceCodeScrollArea(shell).then(scheduleRefresh, () => {
+      // An unavailable enhancement leaves the original native source usable.
+    });
+  }
   scheduleRefresh();
 }
 

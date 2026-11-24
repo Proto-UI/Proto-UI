@@ -9,7 +9,7 @@ export function setupSwitchRootVisual(
 ) {
   def.feedback.style.use(
     tw(
-      'relative inline-flex h-6 w-11 shrink-0 items-center justify-start border border-foreground px-0.5 bg-[#e6e6e6_linear-gradient(#fff,#e6e6e6)_0_-15px_repeat-x] select-none cursor-pointer rounded-[4px] shadow-[inset_0_2px_4px_rgb(0_0_0/15%),0_1px_2px_rgb(0_0_0/5%)]'
+      'relative inline-flex h-6 w-10 shrink-0 items-center justify-start border border-foreground overflow-hidden bg-[#e6e6e6_linear-gradient(#fff,#e6e6e6)_0_-15px_repeat-x] select-none cursor-pointer rounded-[5px] shadow-[inset_0_2px_4px_rgb(0_0_0/15%),0_1px_2px_rgb(0_0_0/5%)]'
     )
   );
   def.rule({

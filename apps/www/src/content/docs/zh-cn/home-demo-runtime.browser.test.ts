@@ -103,6 +103,33 @@ afterAll(async () => {
 }, 60_000);
 
 describe.sequential('Homepage Runtime demobox browser smoke', () => {
+  it('keeps the compact Bootstrap homepage checkbox operable through its visible label', async () => {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    const page = await context.newPage();
+    try {
+      await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
+      const home = page.locator(HOME_SELECTOR);
+      await chooseRuntime(page, home, 'wc');
+      await chooseProjectionControl(page, home, 'family', 'bootstrap-2-3-2');
+      const choices = home.locator('[data-demo-ref="choice-product"]').locator('xpath=..');
+      const control = choices.getByRole('checkbox', { name: '产品更新', exact: true });
+      const label = choices.getByText('产品更新', { exact: true });
+      const layout = await control.evaluate((node) => ({
+        width: node.getBoundingClientRect().width,
+        height: node.getBoundingClientRect().height,
+        radius: getComputedStyle(node).borderRadius,
+      }));
+      expect(layout).toEqual({ width: 14, height: 14, radius: '2px' });
+      expect(await control.getAttribute('aria-checked')).toBe('true');
+      await label.click();
+      await expect.poll(() => control.getAttribute('aria-checked')).toBe('false');
+      await control.press('Space');
+      await expect.poll(() => control.getAttribute('aria-checked')).toBe('true');
+    } finally {
+      await context.close();
+    }
+  }, 60_000);
+
   it('keeps Bootstrap editor tab labels from selecting without blocking the panel or editor', async () => {
     // C-CONTENT-SELECTION-AFFORDANCE-0001: suppress only the action subject.
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });

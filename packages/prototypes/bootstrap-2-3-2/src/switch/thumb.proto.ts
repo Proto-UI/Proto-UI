@@ -13,26 +13,21 @@ export default definePrototype<SwitchThumbProps, SwitchThumbExposes>({
   setup(def) {
     const state = asSwitchThumb().stateHandles;
     if (!state) throw new Error('[bootstrap-2-3-2-switch-thumb] Base state handles required.');
-    // The Thumb is anchored to the root's padding box rather than to the root
-    // flex order, so an inherited document direction cannot move it out of the
-    // track. Travel is the root's 44px border-box minus 2px borders, minus
-    // 2*2px padding, minus the 20px thumb: 18px. A percentage transform
-    // resolves against the thumb's own border box, so `100% - 2px` is that
-    // 18px.
+    // A full-height rigid face meets the housing edge rather than floating.
+    // The 40px box has 38px inside its two borders. A 20px face leaves the
+    // original 18px travel; the inherited percentage also drives dragging.
     def.feedback.style.use(
       tw(
-        'absolute left-[0.125rem] top-1/2 block size-5 -translate-y-1/2 shrink-0 bg-[#f5f5f5_linear-gradient(#fff,#e6e6e6)_0_0_repeat-x] border border-[#b3b3b3] pointer-events-none rounded-[4px] shadow-[inset_0_1px_0_rgb(255_255_255/20%),0_1px_2px_rgb(0_0_0/5%)] transition-transform duration-150 ease-in-out translate-x-[calc((100%_-_2px)_*_var(--pui-percentage)/100)]'
+        'absolute left-0 top-1/2 block w-5 h-full -translate-y-1/2 shrink-0 bg-[#f5f5f5_linear-gradient(#fff,#e6e6e6)_0_0_repeat-x] border border-[#b3b3b3] pointer-events-none rounded-none shadow-[inset_0_1px_0_rgb(255_255_255/20%),0_1px_2px_rgb(0_0_0/5%)] transition-transform duration-150 ease-in-out translate-x-[calc((100%_-_2px)_*_var(--pui-percentage)/100)]'
       )
     );
     // An explicit RTL direction mirrors the whole thumb: it rests against the
-    // right padding edge and travels towards the left.
+    // right housing edge and travels towards the left.
     def.rule({
       when: (w) => w.state(state.direction).eq('rtl'),
       intent: (i) =>
         i.feedback.style.use(
-          tw(
-            'left-auto right-[0.125rem] translate-x-[calc((2px_-_100%)_*_var(--pui-percentage)/100)]'
-          )
+          tw('left-auto right-0 translate-x-[calc((2px_-_100%)_*_var(--pui-percentage)/100)]')
         ),
     });
     // Direct manipulation follows its owner without a trailing CSS animation.
