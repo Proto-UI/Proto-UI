@@ -22,12 +22,18 @@ export async function enhanceCodeScrollArea(shell: HTMLElement): Promise<void> {
   // Do not disrupt someone who reached the readable first frame before this
   // lazy enhancement arrived. The native surface stays fully usable.
   if (
+    container === doc.activeElement ||
     content.contains(doc.activeElement) ||
     (selection &&
       !selection.isCollapsed &&
       (content.contains(selection.anchorNode) || content.contains(selection.focusNode)))
   )
     return;
+
+  const treeScroll = container.hasAttribute('data-code-tree-scroll');
+  const previousScroll = treeScroll
+    ? { left: container.scrollLeft, top: container.scrollTop }
+    : null;
 
   const create = (part: (typeof parts)[number]) => {
     const id = `shadcn-scroll-area-${part}`;
@@ -37,6 +43,7 @@ export async function enhanceCodeScrollArea(shell: HTMLElement): Promise<void> {
   const root = create('root');
   const viewport = create('viewport');
   viewport.dataset.codeScrollViewport = '';
+  if (treeScroll) viewport.dataset.codeTreeScroll = '';
   viewport.setAttribute('role', 'region');
   viewport.setAttribute('aria-label', container.dataset.codeScrollLabel ?? 'Example source');
   root.dataset.codeScrollAnatomy = '';
@@ -52,6 +59,16 @@ export async function enhanceCodeScrollArea(shell: HTMLElement): Promise<void> {
   viewport.append(content);
   container.append(root);
   container.dataset.codeScrollReady = '';
+  if (previousScroll) {
+    // Tree focus reveal must address the actual viewport after adoption. Keep
+    // the old region only while it is the native fallback scroll owner.
+    container.removeAttribute('data-code-tree-scroll');
+    container.removeAttribute('tabindex');
+    container.removeAttribute('role');
+    container.removeAttribute('aria-label');
+    viewport.scrollLeft = previousScroll.left;
+    viewport.scrollTop = previousScroll.top;
+  }
   codeScrollTarget(shell);
 }
 
