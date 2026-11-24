@@ -15,6 +15,7 @@ import {
   type SourceGraphVersionTracker,
 } from './hook-source-summary.js';
 import { loweredHookStates } from './prototype-style-tokens.js';
+import { closedLocalRuleHelpers, helperArgumentBeforeVisit } from './closed-rule-helpers.js';
 
 /**
  * Mirrors `OFFICIAL_EXPOSED_STATE_NAMES` in `@proto.ui/module-expose-state-web`,
@@ -60,6 +61,8 @@ type DeferredHelperRead = {
 type HelperReplayState = {
   /** Whether an actual call site has replayed the helper. */
   replayed: boolean;
+  /** Same-source calls still need the complete-use-set proof of local replay. */
+  localCallObserved: boolean;
   /** Reads the helper's own scan could not trace and no call site has. */
   pending: DeferredHelperRead[];
   /** The helpers whose replay is running, so a cycle does not recurse. */
@@ -126,7 +129,7 @@ const helperReplayState = (
   }
   let state = helpers.get(key);
   if (!state) {
-    state = { replayed: false, pending: [], active: new Set() };
+    state = { replayed: false, localCallObserved: false, pending: [], active: new Set() };
     helpers.set(key, state);
   }
   return state;
@@ -192,6 +195,100 @@ export type RuleStateScan = {
    */
   exposedLocals: ExposedLocalUsage[];
 };
+
+/** One lexical scanner visit, not proof that a runtime owner was instantiated. */
+export type RuleStateSiteVisit = Readonly<{
+  ordinal: number;
+  invocations: readonly Readonly<{
+    ordinal: number;
+    call: ts.CallExpression;
+    helper: ts.FunctionDeclaration;
+  }>[];
+  usages: readonly HookStateUsage[];
+  unresolved: readonly UnresolvedStateRead[];
+  exposedLocals: readonly ExposedLocalUsage[];
+}>;
+
+/**
+ * All syntactic Rule calls retain their original AST identity. A site with no
+ * visits or an empty visit is still present; neither is a coverage verdict.
+ */
+export type RuleStateSiteInventory = Readonly<{
+  source: ts.SourceFile;
+  sites: readonly Readonly<{
+    call: ts.CallExpression;
+    rawVisits: readonly RuleStateSiteVisit[];
+    visits: readonly RuleStateSiteVisit[];
+  }>[];
+  raw: RuleStateScan;
+  scan: RuleStateScan;
+}>;
+
+const isRuleCallSite = (node: ts.Node): node is ts.CallExpression =>
+  ts.isCallExpression(node) &&
+  ((ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === 'rule') ||
+    (ts.isElementAccessExpression(node.expression) &&
+      !!node.expression.argumentExpression &&
+      ts.isStringLiteralLike(node.expression.argumentExpression) &&
+      node.expression.argumentExpression.text === 'rule'));
+
+/**
+ * Observe independent declaration and production scans over the same AST.
+ * The raw pass does not substitute helper calls for their declarations. It
+ * owns a separate summary and mutable scope/version store. It resolves
+ * dependency files normally and does not clone virtual sources or proofs from
+ * suppliedSummary; that supplied context belongs to the production pass only.
+ * Both passes share this SourceFile, not a claim of identical dependency proof.
+ * Sites belong only to this SourceFile AST. The production scan may also
+ * contain reads replayed from imported helpers, carrying their original file
+ * identity; sites are not a cross-module partition of that aggregate scan.
+ * Existing production scanning remains available through scanRuleStateReads.
+ *
+ * This inventory does not invent prototype entries, discharge unknown call
+ * contexts, or decide that a zero-outcome Rule is covered.
+ */
+export function scanRuleStateReadsWithSites(
+  sourceText: string,
+  fileName = 'source.proto.ts',
+  suppliedSummary?: HookSourceSummaryContext
+): RuleStateSiteInventory {
+  const source = ts.createSourceFile(fileName, sourceText, ts.ScriptTarget.Latest, true);
+  const sites: Array<{
+    call: ts.CallExpression;
+    rawVisits: RuleStateSiteVisit[];
+    visits: RuleStateSiteVisit[];
+  }> = [];
+  const byNode = new Map<ts.CallExpression, (typeof sites)[number]>();
+  const collect = (node: ts.Node): void => {
+    // Match the existing scanner's traversal domain, including computed
+    // members inside type syntax. Inventory is not a runtime-entry claim.
+    if (isRuleCallSite(node)) {
+      const site = { call: node, rawVisits: [], visits: [] };
+      sites.push(site);
+      byNode.set(node, site);
+    }
+    ts.forEachChild(node, collect);
+  };
+  collect(source);
+  const raw = scanRuleStateSource(source, createHookSourceSummaryContext(), false, (call, visit) =>
+    byNode.get(call)!.rawVisits.push(visit)
+  );
+  const scan = scanRuleStateSource(source, suppliedSummary, true, (call, visit) =>
+    byNode.get(call)!.visits.push(visit)
+  );
+  return {
+    source,
+    sites: sites.map((site) =>
+      Object.freeze({
+        call: site.call,
+        rawVisits: Object.freeze(site.rawVisits),
+        visits: Object.freeze(site.visits),
+      })
+    ),
+    raw,
+    scan,
+  };
+}
 
 type LocalStateBinding = {
   kind: 'localState';
@@ -545,27 +642,35 @@ function introducesScope(node: ts.Node): boolean {
 export function scanRuleStateReads(
   sourceText: string,
   fileName = 'source.proto.ts',
+  suppliedSummary?: HookSourceSummaryContext
+): RuleStateScan {
+  const source = ts.createSourceFile(fileName, sourceText, ts.ScriptTarget.Latest, true);
+  return scanRuleStateSource(source, suppliedSummary);
+}
+
+function scanRuleStateSource(
+  source: ts.SourceFile,
   suppliedSummary?: HookSourceSummaryContext,
-  /**
-   * The parsed source of `sourceText`, when the caller already holds it. A
-   * replay reuses the helper's own parse, so the nodes the replay state is
-   * keyed by stay the same nodes the scan visits.
-   */
-  suppliedSource?: ts.SourceFile,
-  /** Internal call-local scope; never reused by another helper invocation. */
+  replayHelpers = true,
+  observeRule?: (call: ts.CallExpression, visit: RuleStateSiteVisit) => void,
   suppliedInvocation?: {
     helper: ts.FunctionLikeDeclaration;
     parameters: ReadonlyMap<string, Binding>;
     provided: ReadonlySet<number>;
   }
 ): RuleStateScan {
-  const source =
-    suppliedSource ?? ts.createSourceFile(fileName, sourceText, ts.ScriptTarget.Latest, true);
+  const fileName = source.fileName;
   const sourceSummary = suppliedSummary ?? createHookSourceSummaryContext();
-  // A caller that already holds the parsed source registered it with the
-  // summary, so re-registering it would only replace the module the summary
-  // resolved the helper's imports through.
-  if (!suppliedSource) sourceSummary.registerSource(source);
+  if (!suppliedInvocation) sourceSummary.registerSource(source);
+  const closedHelpers = replayHelpers
+    ? closedLocalRuleHelpers(source, sourceSummary)
+    : new Set<ts.FunctionDeclaration>();
+  const closedHelperNames = new Set([...closedHelpers].map((helper) => helper.name!.text));
+  const helperScopes = new Map<ts.FunctionDeclaration, Scope>();
+  const invocations: Array<RuleStateSiteVisit['invocations'][number]> = [];
+  let invocationOrdinal = 0;
+  let visitOrdinal = 0;
+  let activeClosedHelperDepth = 0;
 
   const usages: HookStateUsage[] = [];
   const unresolved: UnresolvedStateRead[] = [];
@@ -2727,6 +2832,12 @@ export function scanRuleStateReads(
    */
   const collectEscapedNames = (node: ts.Node, names: Set<string>): void => {
     const value = unwrapWritten(node);
+    // Passing a canonical setup closure to Core does not pass each value read
+    // by its body. writeNamesOf still visits that body separately, including
+    // every actual write, return and opaque call. Ordinary callbacks and a
+    // same-named local factory retain the conservative escape boundary.
+    if (ts.isFunctionLike(value) && sourceSummary.isAuthoredSetup(value, value.getSourceFile()))
+      return;
     if (ts.isIdentifier(value)) {
       names.add(value.text);
       return;
@@ -3395,6 +3506,185 @@ export function scanRuleStateReads(
     return null;
   };
 
+  type LiteralTokenData = string | Map<string, LiteralTokenData>;
+
+  /** Plain own data only: getters, spreads and prototype setters are not values. */
+  const literalTokenData = (expression: ts.Expression): LiteralTokenData | null => {
+    const value = unwrapWritten(expression);
+    if (ts.isStringLiteralLike(value) || ts.isNoSubstitutionTemplateLiteral(value))
+      return value.text;
+    if (!ts.isObjectLiteralExpression(value)) return null;
+    const members = new Map<string, LiteralTokenData>();
+    for (const property of value.properties) {
+      if (!ts.isPropertyAssignment(property)) return null;
+      const key = propertyName(property.name);
+      if (key === null || key === '__proto__') return null;
+      const member = literalTokenData(property.initializer);
+      if (member === null) return null;
+      members.set(key, member);
+    }
+    return members;
+  };
+
+  /**
+   * A private map read hands only a proven string to its consumer. Bare
+   * references, exports, aliases, writes and unknown paths withhold this proof.
+   * The entire source is checked, including deferred writes and later escapes.
+   */
+  const literalTokenMapIsReadOnly = (
+    module: ts.SourceFile,
+    declarationName: ts.Identifier,
+    initial: Map<string, LiteralTokenData>
+  ): boolean => {
+    let safe = true;
+    const visitReference = (node: ts.Node): void => {
+      if (!safe) return;
+      // Dynamic lexical execution can write the owner without a syntax reference.
+      if (
+        ts.isWithStatement(node) ||
+        (ts.isCallExpression(node) &&
+          ts.isIdentifier(unwrapWritten(node.expression)) &&
+          (unwrapWritten(node.expression) as ts.Identifier).text === 'eval')
+      ) {
+        safe = false;
+        return;
+      }
+      if (ts.isIdentifier(node) && node.text === declarationName.text && node !== declarationName) {
+        const parent = node.parent;
+        if (
+          (ts.isPropertyAccessExpression(parent) && parent.name === node) ||
+          (ts.isPropertyAssignment(parent) && parent.name === node) ||
+          (ts.isImportSpecifier(parent) && parent.propertyName === node)
+        )
+          return;
+        for (let owner: ts.Node | undefined = parent; owner; owner = owner.parent) {
+          if (ts.isTypeNode(owner)) return;
+          if (ts.isStatement(owner) || ts.isFunctionLike(owner)) break;
+        }
+
+        let current: ts.Node = node;
+        let data: LiteralTokenData = initial;
+        for (;;) {
+          const next = current.parent;
+          if (
+            next &&
+            (ts.isParenthesizedExpression(next) ||
+              ts.isAsExpression(next) ||
+              ts.isTypeAssertionExpression(next) ||
+              ts.isNonNullExpression(next) ||
+              ts.isSatisfiesExpression(next)) &&
+            next.expression === current
+          ) {
+            current = next;
+            continue;
+          }
+          if (
+            !next ||
+            (!ts.isPropertyAccessExpression(next) && !ts.isElementAccessExpression(next)) ||
+            next.expression !== current
+          )
+            break;
+          const index = ts.isElementAccessExpression(next)
+            ? next.argumentExpression && unwrapWritten(next.argumentExpression)
+            : null;
+          const key = ts.isPropertyAccessExpression(next)
+            ? next.name.text
+            : index && ts.isStringLiteralLike(index)
+              ? index.text
+              : null;
+          if (!(data instanceof Map) || key === null || !data.has(key)) {
+            safe = false;
+            return;
+          }
+          data = data.get(key)!;
+          current = next;
+        }
+        if (typeof data !== 'string') {
+          safe = false;
+          return;
+        }
+        for (let target = current; target.parent; target = target.parent) {
+          const owner = target.parent;
+          if (
+            (ts.isBinaryExpression(owner) &&
+              owner.left === target &&
+              owner.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+              owner.operatorToken.kind <= ts.SyntaxKind.LastAssignment) ||
+            ((ts.isPrefixUnaryExpression(owner) || ts.isPostfixUnaryExpression(owner)) &&
+              owner.operand === target &&
+              (owner.operator === ts.SyntaxKind.PlusPlusToken ||
+                owner.operator === ts.SyntaxKind.MinusMinusToken)) ||
+            (ts.isDeleteExpression(owner) && owner.expression === target) ||
+            ((ts.isForInStatement(owner) || ts.isForOfStatement(owner)) &&
+              owner.initializer === target)
+          ) {
+            safe = false;
+            return;
+          }
+          if (ts.isStatement(owner) || ts.isFunctionLike(owner)) break;
+        }
+        return;
+      }
+      ts.forEachChild(node, visitReference);
+    };
+    visitReference(module);
+    return safe;
+  };
+
+  /** Match the collector's own string member without inventing a state proof. */
+  const literalTokenMember = (expression: ts.Expression, scope: Scope): string | null => {
+    const read = (node: ts.Expression): LiteralTokenData | null => {
+      const value = unwrapWritten(node);
+      if (ts.isPropertyAccessExpression(value) || ts.isElementAccessExpression(value)) {
+        const owner = read(value.expression);
+        const index = ts.isElementAccessExpression(value)
+          ? value.argumentExpression && unwrapWritten(value.argumentExpression)
+          : null;
+        const key = ts.isPropertyAccessExpression(value)
+          ? value.name.text
+          : index && ts.isStringLiteralLike(index)
+            ? index.text
+            : null;
+        return owner instanceof Map && key !== null ? (owner.get(key) ?? null) : null;
+      }
+      if (!ts.isIdentifier(value)) return literalTokenData(value as ts.Expression);
+      const binding = lookup(scope, value.text);
+      // Imported const objects remain mutable through other modules. This
+      // proof admits only a private owner whose complete source is visible.
+      if (
+        binding?.kind !== 'token' ||
+        binding.opaque ||
+        binding.members?.size ||
+        binding.alternates?.length
+      )
+        return null;
+      const declaration = binding.bindingNode ?? binding.initializer.parent;
+      if (
+        !declaration ||
+        !ts.isVariableDeclaration(declaration) ||
+        declaration.initializer !== binding.initializer ||
+        !declaration.initializer ||
+        !ts.isIdentifier(declaration.name) ||
+        !ts.isVariableDeclarationList(declaration.parent) ||
+        (declaration.parent.flags & ts.NodeFlags.Const) === 0
+      )
+        return null;
+      const statement = declaration.parent.parent;
+      if (
+        ts.isVariableStatement(statement) &&
+        statement.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)
+      )
+        return null;
+      const data = literalTokenData(declaration.initializer);
+      if (!(data instanceof Map)) return null;
+      if (!literalTokenMapIsReadOnly(declaration.getSourceFile(), declaration.name, data))
+        return null;
+      return data;
+    };
+    const value = read(expression);
+    return typeof value === 'string' ? value : null;
+  };
+
   /**
    * Argument shapes `resolveExpression` turns into tokens. A `tw(...)` argument
    * the extractor cannot resolve — an arbitrary call, or a name whose value it
@@ -3481,13 +3771,12 @@ export function scanRuleStateReads(
       return false;
     }
     if (ts.isElementAccessExpression(inner)) {
-      // A member is only reachable if its owner is. Element access is the form
-      // `resolveExpression` reads a token map through.
+      // Retain the existing element-access owner proof.
       return resolvableTokenArgument(inner.expression, scope, seen);
     }
-    // Dot access resolves through `semanticMap` only, which holds hook state
-    // handles rather than tokens. An ordinary token object is a `map`, so
-    // `tw(TOKENS.active)` yields nothing while the runtime lowers the real one.
+    // evaluateTokenGraph/tokenMember also reads ordinary dot members. Admit a
+    // finite own string leaf, not an opaque receiver's partial token inventory.
+    if (ts.isPropertyAccessExpression(inner)) return literalTokenMember(inner, scope) !== null;
     return false;
   };
 
@@ -3496,6 +3785,7 @@ export function scanRuleStateReads(
     const inner = unwrap(node) as ts.Expression;
     if (ts.isStringLiteralLike(inner) || ts.isNoSubstitutionTemplateLiteral(inner)) return true;
     if (ts.isTemplateExpression(inner)) return true;
+    if (ts.isPropertyAccessExpression(inner)) return literalTokenMember(inner, scope) !== null;
     if (ts.isIdentifier(inner)) {
       const binding = lookup(scope, inner.text);
       if (binding?.kind === 'token') return singleValuedTokenArgument(binding.initializer, scope);
@@ -3595,6 +3885,7 @@ export function scanRuleStateReads(
    * replay of that call site traces it.
    */
   const callSiteHelper = (node: ts.Node, scope: Scope): ts.FunctionLikeDeclaration | null => {
+    if (!replayHelpers) return null;
     const root = mutationRootOf(node);
     if (!root) return null;
     for (let current: Scope | null = scope; current; current = current.parent) {
@@ -3607,6 +3898,11 @@ export function scanRuleStateReads(
       // Unknown arguments of a real invocation are failures, not deferred
       // declaration reads that a later successful call can clear.
       if (owner === suppliedInvocation?.helper) return null;
+      if (
+        helperReplayState(scope.sourceSummary, owner as ts.FunctionLikeDeclaration)
+          .localCallObserved
+      )
+        return null;
       const binding = lookup(scope, root.text);
       // A parameter the scan already bound is not a call-site value.
       if (binding && binding.kind !== 'opaque') return null;
@@ -4191,6 +4487,21 @@ export function scanRuleStateReads(
     if (binding?.kind === 'tokenImport' && !binding.specifier.startsWith('.')) return null;
     const helper = helperFor(scope.sourceSummary, callee);
     if (!helper || helper.asteriskToken) return null;
+    // Local helpers keep main's complete-use-set and argument-effect proof.
+    // The cross-module path supplements that proof; it must not admit an
+    // escaped, reassigned, or otherwise unproved local helper.
+    if (path.resolve(helper.getSourceFile().fileName) === path.resolve(source.fileName)) {
+      const replay = helperReplayState(scope.sourceSummary, helper);
+      replay.localCallObserved = true;
+      // A local call cannot discharge an exported/escaped declaration through
+      // the imported-helper path. Return its deferred subject failures to the
+      // current scan, preserving main's refusal when local closure is unproved.
+      unresolved.push(
+        ...replay.pending.map(({ expression }) => ({ expression, reason: 'subject' as const }))
+      );
+      replay.pending = [];
+      return null;
+    }
     if (helper.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword))
       return null;
     if (!helperRegistersRules(helper)) return null;
@@ -4199,6 +4510,7 @@ export function scanRuleStateReads(
 
   const withinInvocation = (node: ts.Node): boolean =>
     !suppliedInvocation ||
+    activeClosedHelperDepth > 0 ||
     (node.pos >= suppliedInvocation.helper.pos && node.end <= suppliedInvocation.helper.end);
 
   const replayHelperCall = (
@@ -4215,11 +4527,11 @@ export function scanRuleStateReads(
     const helperSource = helper.getSourceFile();
     replay.active.add(key);
     try {
-      const scan = scanRuleStateReads(
-        helperSource.text,
-        helperSource.fileName,
-        scope.sourceSummary,
+      const scan = scanRuleStateSource(
         helperSource,
+        scope.sourceSummary,
+        replayHelpers,
+        undefined,
         { helper, parameters, provided }
       );
       usages.push(...scan.usages);
@@ -4286,6 +4598,17 @@ export function scanRuleStateReads(
   };
 
   const visitNode = (node: ts.Node, scope: Scope): void => {
+    // Register a proved local helper's lexical scope even when it is outside
+    // the imported helper body currently being replayed. Its actual call
+    // below, rather than this declaration, decides whether it is visited.
+    if (
+      ts.isFunctionDeclaration(node) &&
+      closedHelpers.has(node) &&
+      node !== suppliedInvocation?.helper
+    ) {
+      helperScopes.set(node, scope);
+      return;
+    }
     // Replaying one helper must not execute unrelated function declarations
     // from the same module. Its lexical ancestors and nested callbacks remain.
     if (
@@ -4735,16 +5058,8 @@ export function scanRuleStateReads(
       }
     }
 
-    if (
-      ts.isCallExpression(node) &&
-      ((ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === 'rule') ||
-        (ts.isElementAccessExpression(node.expression) &&
-          node.expression.argumentExpression &&
-          ts.isStringLiteralLike(node.expression.argumentExpression) &&
-          node.expression.argumentExpression.text === 'rule')) &&
-      node.arguments.length >= 1 &&
-      withinInvocation(node)
-    ) {
+    if (isRuleCallSite(node) && node.arguments.length >= 1 && withinInvocation(node)) {
+      const before = observeRule ? [usages.length, unresolved.length, exposedLocals.length] : null;
       const spec = unwrap(node.arguments[0]);
       // The production walk matches a property access only, so `def['rule'](…)`
       // reaches the same runtime API and emits no variant. It is a blind spot
@@ -4755,12 +5070,44 @@ export function scanRuleStateReads(
       // lowered by the runtime and dropped by the extractor, so it is a blind
       // spot rather than something to skip.
       else unresolved.push({ expression: node.getText(source), reason: 'spec' });
+      if (observeRule && before)
+        observeRule(
+          node,
+          Object.freeze({
+            ordinal: ++visitOrdinal,
+            invocations: Object.freeze(invocations.slice()),
+            usages: Object.freeze(usages.slice(before[0])),
+            unresolved: Object.freeze(unresolved.slice(before[1])),
+            exposedLocals: Object.freeze(exposedLocals.slice(before[2])),
+          })
+        );
     }
 
     if (ts.isCallExpression(node)) {
       // The callee and the arguments are evaluated in order, and the call
       // receives the objects its arguments denoted while they were evaluated.
       visit(node.expression, current);
+      const target = unwrap(node.expression);
+      const resolvedHelper =
+        ts.isIdentifier(target) && closedHelperNames.has(target.text)
+          ? sourceSummary.resolveSourceFunction(target, source)
+          : null;
+      const closedHelper =
+        resolvedHelper &&
+        ts.isFunctionDeclaration(resolvedHelper) &&
+        closedHelpers.has(resolvedHelper) &&
+        helperScopes.has(resolvedHelper)
+          ? resolvedHelper
+          : null;
+      const helperParameters: Scope | null = closedHelper
+        ? {
+            parent: helperScopes.get(closedHelper)!,
+            bindings: new Map(),
+            node: closedHelper,
+            sourceSummary,
+            versions: current.versions,
+          }
+        : null;
       const mutation = hookSourceCallMutation(node);
       // The receiver is evaluated before the arguments, so the container it
       // denotes is captured before they are visited: a later argument that
@@ -4773,41 +5120,99 @@ export function scanRuleStateReads(
       // the callee denoted. The proof reads the member from the graph the
       // receiver holds now, so a member a write replaced is not exempt.
       const readsOnly = provenAccessorCallee(node, current, receiver);
-      const helper = withinInvocation(node) ? ruleHelperForCall(node, current) : null;
+      const importedHelper =
+        replayHelpers && withinInvocation(node) ? ruleHelperForCall(node, current) : null;
       const parameterScope: Scope = {
         parent: current,
         bindings: new Map(),
-        node: helper,
+        node: importedHelper,
         sourceSummary,
         versions: current.versions,
       };
       const captured: CapturedArgument[] = [];
       const provided = new Set<number>();
       for (const argument of node.arguments) {
-        const parameter = helper?.parameters[captured.length];
-        const closed = parameter ? closedArgumentValues(argument, current) : null;
-        const isUndefined = closed?.length && closed.every((value) => ts.isVoidExpression(value));
-        if (parameter && !parameter.dotDotDotToken && !isUndefined) {
-          provided.add(captured.length);
-          declareValue(parameter.name, argument, parameterScope, current);
-          for (const [name, binding] of parameterScope.bindings) {
-            if (binding.kind !== 'token') continue;
-            const candidates = [binding.initializer, ...(binding.alternates ?? [])].map((value) =>
-              closedArgumentValues(value, current)
-            );
+        if (closedHelper && helperParameters) {
+          const parameter = closedHelper.parameters[captured.length];
+          const assigned = helperArgumentBeforeVisit(argument, sourceSummary, (part) =>
+            sourceResolveCandidates(part, current).map(({ value }) => value)
+          );
+          // Read each argument before later arguments can rebind its name.
+          // The shared version tracker still observes later writes through
+          // the same borrowed container before the helper body executes.
+          if (!assigned) {
+            // Effects within this argument have not run yet. Capturing a
+            // member through them would incorrectly certify its old State.
+            helperParameters.bindings.set((parameter.name as ts.Identifier).text, {
+              kind: 'opaque',
+              sourceAuthority: true,
+              bindingNode: parameter,
+            });
+          } else {
+            declareValue(parameter.name, assigned, helperParameters, current);
+            const resolved = sourceResolve(assigned, current);
             if (
-              binding.opaque ||
-              binding.members?.size ||
-              candidates.some((value) => value === null)
+              ts.isIdentifier(parameter.name) &&
+              resolved.matched &&
+              resolved.value.kind === 'object' &&
+              sourceValueHasProvenance(resolved.value)
             )
-              parameterScope.bindings.set(name, { kind: 'opaque' });
-            else {
-              const values = candidates.flat() as ts.Expression[];
-              parameterScope.bindings.set(name, {
-                kind: 'token',
-                initializer: values[0],
-                alternates: values.slice(1),
+              helperParameters.bindings.set(parameter.name.text, {
+                kind: 'handleBag',
+                hook: sourceHookLabel(assigned, current) ?? '<source-hook>',
+                sourceValue: resolved.value,
+                sourceAuthority: true,
+                bindingNode: parameter,
               });
+          }
+        }
+        const parameter = importedHelper?.parameters[captured.length];
+        if (parameter && !parameter.dotDotDotToken) {
+          const argumentValue = unwrap(argument);
+          const legacyOwner =
+            ts.isPropertyAccessExpression(argumentValue) &&
+            ts.isIdentifier(argumentValue.expression)
+              ? lookup(current, argumentValue.expression.text)
+              : null;
+          // The established legacy Result binding also proves its passive
+          // stateHandles projection. This does not create source provenance;
+          // the whole-tree provenance assertion still requires authored proof.
+          const legacyBag =
+            legacyOwner?.kind === 'hookResult' &&
+            !legacyOwner.sourceAuthority &&
+            bagHook(argument, current);
+          const assigned =
+            helperArgumentBeforeVisit(argument, sourceSummary, (part) =>
+              sourceResolveCandidates(part, current).map(({ value }) => value)
+            ) ?? (legacyBag ? argument : null);
+          // `void` always supplies undefined, even when evaluating its operand
+          // has effects. The ordinary argument visit below still executes and
+          // tracks those effects before defaults and the helper body are read.
+          const closed = closedArgumentValues(argument, current);
+          const isUndefined = closed?.length && closed.every((value) => ts.isVoidExpression(value));
+          if (!isUndefined) {
+            provided.add(captured.length);
+            if (assigned) declareValue(parameter.name, assigned, parameterScope, current);
+            else shadowBindingPattern(parameterScope, parameter.name);
+            for (const [name, binding] of parameterScope.bindings) {
+              if (binding.kind !== 'token') continue;
+              const candidates = [binding.initializer, ...(binding.alternates ?? [])].map((value) =>
+                closedArgumentValues(value, current)
+              );
+              if (
+                binding.opaque ||
+                binding.members?.size ||
+                candidates.some((value) => value === null)
+              )
+                parameterScope.bindings.set(name, { kind: 'opaque' });
+              else {
+                const values = candidates.flat() as ts.Expression[];
+                parameterScope.bindings.set(name, {
+                  kind: 'token',
+                  initializer: values[0],
+                  alternates: values.slice(1),
+                });
+              }
             }
           }
         }
@@ -4820,8 +5225,38 @@ export function scanRuleStateReads(
         );
         visit(argument, current);
       }
+      for (const bindings of [helperParameters?.bindings, parameterScope.bindings]) {
+        if (!bindings) continue;
+        for (const [name, binding] of bindings) {
+          if (!sourceBinding(binding) || binding.kind === 'handle') continue;
+          const held = sourceBindingValues(binding);
+          const currentValues = [
+            ...new Set(held.flatMap((value) => current.versions.versions(value))),
+          ];
+          if (currentValues.length)
+            bindings.set(name, {
+              ...binding,
+              sourceValue: currentValues[0],
+              sourceAlternatives: currentValues.slice(1),
+            });
+        }
+      }
+      if (closedHelper?.body && helperParameters) {
+        if (observeRule)
+          invocations.push(
+            Object.freeze({ ordinal: ++invocationOrdinal, call: node, helper: closedHelper })
+          );
+        activeClosedHelperDepth++;
+        try {
+          visit(closedHelper.body, helperParameters);
+        } finally {
+          activeClosedHelperDepth--;
+          if (observeRule) invocations.pop();
+        }
+      }
+      if (importedHelper)
+        replayHelperCall(importedHelper, current, parameterScope.bindings, provided);
       applyCallMutation(node, current, captured, receiver, readsOnly);
-      if (helper) replayHelperCall(helper, current, parameterScope.bindings, provided);
       return;
     }
 
@@ -4841,9 +5276,10 @@ export function scanRuleStateReads(
   // A source declaration is a fallback proof, not an additional invocation.
   // Once its body was replayed with actual arguments, retain those call-local
   // results and remove only the declaration's copies, including unknown reads.
-  const covered = declarationReads.filter(
-    ({ helper }) => helperReplayState(sourceSummary, helper).replayed
-  );
+  const covered = declarationReads.filter(({ helper }) => {
+    const replay = helperReplayState(sourceSummary, helper);
+    return replayHelpers && replay.replayed && !replay.localCallObserved;
+  });
   const declarationUsages = new Set(covered.flatMap((read) => read.usages));
   const declarationMisses = new Set(covered.flatMap((read) => read.unresolved));
   const declarationExposed = new Set(covered.flatMap((read) => read.exposedLocals));

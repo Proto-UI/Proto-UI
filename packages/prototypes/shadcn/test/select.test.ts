@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { WebComponentAdapterElement } from '@proto.ui/adapter-web-component';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { styleContains } from '../../test-utils/style';
 import { installRenderingOpportunities } from '../../test-utils/rendering-opportunities';
@@ -25,11 +26,13 @@ function createSelect(options?: {
   root?: Record<string, unknown>;
   trigger?: Record<string, unknown>;
   content?: Record<string, unknown>;
+  contentElement?: WebComponentAdapterElement<typeof selectContent>;
 }) {
   const root = document.createElement('shadcn-select-root') as any;
   const trigger = document.createElement('shadcn-select-trigger') as any;
   const value = document.createElement('shadcn-select-value') as any;
-  const content = document.createElement('shadcn-select-content') as any;
+  const content =
+    options?.contentElement ?? (document.createElement('shadcn-select-content') as any);
   const alpha = document.createElement('shadcn-select-item') as any;
   const beta = document.createElement('shadcn-select-item') as any;
   setElementProps(root, options?.root ?? {});
@@ -93,8 +96,11 @@ describe('prototypes/shadcn: select', () => {
     expect(styleContains(content, 'min-w-[var(--proto-ui-anchor-width)]')).toBe(true);
     expect(styleContains(alpha, 'rounded-sm')).toBe(true);
     expect(styleContains(alpha, 'justify-between')).toBe(false);
-    expect(styleContains(alpha, 'pl-2')).toBe(true);
-    expect(styleContains(alpha, 'pr-8')).toBe(true);
+    // The Item reserves its inline-start and inline-end space with the
+    // logical inline tokens; the expectation follows that token change and
+    // stays exactly as strict as the physical pair it replaces.
+    expect(styleContains(alpha, 'ps-2')).toBe(true);
+    expect(styleContains(alpha, 'pe-8')).toBe(true);
     expect(alpha.querySelector('svg')).toBeNull();
     expect(alpha.lastElementChild?.tagName).toBe('SPAN');
   });
@@ -158,8 +164,25 @@ describe('prototypes/shadcn: select', () => {
   it('accepts official size and position props and retires its closed portal after conceal', async () => {
     vi.useFakeTimers();
     const frame = installRenderingOpportunities();
+    const lifecycle: Array<{ type: string; epoch?: number }> = [];
+    // Keep the authored prototype intact; this fixture owns its diagnostic sink.
+    const TracedContent = AdaptToWebComponent(selectContent, {
+      registerAs: 'shadcn-select-conceal-content',
+      diagnostics: {
+        onLifecycleEvent(event) {
+          if (
+            event.type === 'mount.mounted' ||
+            event.type === 'unmount.begin' ||
+            event.type === 'unmount.done' ||
+            event.type === 'instance.dispose.done'
+          )
+            lifecycle.push(event);
+        },
+      },
+    });
     try {
       const { root, trigger, content, alpha } = createSelect({
+        contentElement: new TracedContent(),
         trigger: { size: 'sm' },
         content: { position: 'item-aligned' },
       });
@@ -170,6 +193,9 @@ describe('prototypes/shadcn: select', () => {
       await settle();
       expect(root.getExposes().open.get()).toBe(true);
       expect(content.parentElement).toBe(document.body);
+      expect(lifecycle).toEqual([{ type: 'mount.mounted', epoch: expect.any(Number) }]);
+      const mounted = lifecycle.slice();
+      const epoch = mounted[0]?.epoch;
       expect(styleContains(content, 'w-[var(--proto-ui-anchor-width)]')).toBe(true);
       expect(content.getExposes().transitionState.get()).toBe('entering');
       expect(styleContains(content, 'animate-in')).toBe(true);
@@ -180,12 +206,23 @@ describe('prototypes/shadcn: select', () => {
       await settle();
       expect(content.getExposes().transitionState.get()).toBe('closed');
       expect(styleContains(content, 'animate-out')).toBe(true);
-      // Semantic closure is immediate; the existing portaled host conceal
-      // barrier retires the physical view after two rendering opportunities.
-      expect(await frame()).toBeGreaterThan(0);
-      expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+      // The marker follows semantic closure immediately; the physical portal
+      // retires only after the existing two rendering opportunities.
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      expect(content.parentElement).toBe(document.body);
+      expect(lifecycle).toEqual(mounted);
       expect(await frame()).toBeGreaterThan(0);
       expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      expect(content.parentElement).toBe(document.body);
+      expect(lifecycle).toEqual(mounted);
+      expect(await frame()).toBeGreaterThan(0);
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      expect(content.parentElement).toBe(root);
+      expect(lifecycle).toEqual([
+        ...mounted,
+        { type: 'unmount.begin', epoch },
+        { type: 'unmount.done', epoch },
+      ]);
       expect(styleContains(content, 'animate-out')).toBe(false);
       await vi.advanceTimersByTimeAsync(100);
       await flush();

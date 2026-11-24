@@ -106,9 +106,8 @@ export const SHADER_PASS_TYPE: ValueType = objectValueType([
   { name: 'input', type: 'string' },
   { name: 'tint', type: { kind: 'array', element: 'number' }, optional: true },
 ]);
-export const SHADER_PRESENTATION_TYPE: ValueType = readonlyRecord({
-  version: { kind: 'literal', value: 1 },
-  source: readonlyRecord({
+export const SHADER_PRESENTATION_SOURCE_TYPE: ValueType = joinValueTypes([
+  readonlyRecord({
     kind: { kind: 'literal', value: 'owned-pixels' },
     width: 'number',
     height: 'number',
@@ -117,6 +116,11 @@ export const SHADER_PRESENTATION_TYPE: ValueType = readonlyRecord({
     alpha: { kind: 'literal', value: 'premultiplied' },
     origin: { kind: 'literal', value: 'top-left' },
   }),
+  readonlyRecord({ kind: { kind: 'literal', value: 'owned-scene' }, slot: 'string' }),
+]);
+export const SHADER_PRESENTATION_TYPE: ValueType = readonlyRecord({
+  version: { kind: 'literal', value: 1 },
+  source: SHADER_PRESENTATION_SOURCE_TYPE,
   passes: { kind: 'array', element: SHADER_PASS_TYPE as import('./data-types').DataType },
   output: 'string',
   fallback: { kind: 'array', element: 'number' },
@@ -189,6 +193,7 @@ export const CORE_VALUE_TYPES: Readonly<Record<string, ValueType>> = {
   PresentationViewBinding: 'presentation-view-binding',
   PresenceOwnerDeclaration: 'presence-owner',
   ShaderPresentationDeclaration: SHADER_PRESENTATION_TYPE,
+  ShaderPresentationSource: SHADER_PRESENTATION_SOURCE_TYPE,
   ShaderPass: SHADER_PASS_TYPE,
   AffineLength: AFFINE_LENGTH_TYPE,
   Translation: TRANSLATION_TYPE,

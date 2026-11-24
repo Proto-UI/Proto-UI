@@ -1,0 +1,103 @@
+{
+  "reviewedCommit": "27b5429b46fdc31ae94d1f6a1bd37fb1c6a8323c",
+  "integratedCommit": "9fff88cf23d4e55375979bc5c68c033e3deaed38",
+  "checkedAtUtc": "2026-11-23T20:38:47.450036+00:00",
+  "comparison": "Git commit objects only; no test reexecution; author working tree not modified",
+  "total": 13,
+  "equal": 13,
+  "different": 0,
+  "files": [
+    {
+      "path": "packages/adapters/base/src/material/shader-scene-host.ts",
+      "reviewedSha256": "ddd4bf1e5b49e7fae03768f0c009fbcff67011ff637ef24cc0158adc8d82945b",
+      "integratedSha256": "ddd4bf1e5b49e7fae03768f0c009fbcff67011ff637ef24cc0158adc8d82945b",
+      "bytes": 15048,
+      "byteEqual": true
+    },
+    {
+      "path": "packages/adapters/base/src/material/shader-webgl2-host.ts",
+      "reviewedSha256": "df6a869ee639e5aa94899c83c00ed8854d1ed0f5a7629a7b21db312868ba6496",
+      "integratedSha256": "df6a869ee639e5aa94899c83c00ed8854d1ed0f5a7629a7b21db312868ba6496",
+      "bytes": 21848,
+      "byteEqual": true
+    },
+    {
+      "path": "packages/adapters/base/src/material/shader-webgl2.ts",
+      "reviewedSha256": "fd2b2b31aa2cb6f19451b9666d176a91e40fb6c418f4527c593da1b6140d1024",
+      "integratedSha256": "fd2b2b31aa2cb6f19451b9666d176a91e40fb6c418f4527c593da1b6140d1024",
+      "bytes": 4691,
+      "byteEqual": true
+    },
+    {
+      "path": "packages/core/src/shader-presentation.ts",
+      "reviewedSha256": "2934afceac6f565cb7468455fa052241efe791e5f45c9fd5c01b54f363d97815",
+      "integratedSha256": "2934afceac6f565cb7468455fa052241efe791e5f45c9fd5c01b54f363d97815",
+      "bytes": 7962,
+      "byteEqual": true
+    },
+    {
+      "path": "packages/compiler/src/native-shader.ts",
+      "reviewedSha256": "c311d0386519b84924746d8c500700069aa16a1ffff1af648e2a4ff4e02ae39c",
+      "integratedSha256": "c311d0386519b84924746d8c500700069aa16a1ffff1af648e2a4ff4e02ae39c",
+      "bytes": 5637,
+      "byteEqual": true
+    },
+    {
+      "path": "packages/compiler/src/native-shader-host.generated.ts",
+      "reviewedSha256": "064bc8a6b7cd9f24370398608fc358d0eadd8e8c5b5d1cbc55e5f947b52d4a4a",
+      "integratedSha256": "064bc8a6b7cd9f24370398608fc358d0eadd8e8c5b5d1cbc55e5f947b52d4a4a",
+      "bytes": 38916,
+      "byteEqual": true
+    },
+    {
+      "path": "packages/compiler/src/native-async.ts",
+      "reviewedSha256": "818979b93274fb6371bdb24964f699508f373025cd1685c3e97b0fe9a32c31b7",
+      "integratedSha256": "818979b93274fb6371bdb24964f699508f373025cd1685c3e97b0fe9a32c31b7",
+      "bytes": 31756,
+      "byteEqual": true
+    },
+    {
+      "path": "packages/compiler/src/react-source.ts",
+      "reviewedSha256": "2a41f2bdbff63568b51015cda3dc7ec09dab8eb4dd5257ab3c2b9bbde56d9f81",
+      "integratedSha256": "2a41f2bdbff63568b51015cda3dc7ec09dab8eb4dd5257ab3c2b9bbde56d9f81",
+      "bytes": 83590,
+      "byteEqual": true
+    },
+    {
+      "path": "packages/compiler/src/vue-source.ts",
+      "reviewedSha256": "6535ddbc7478dcee2e09a1cd1e2b5c72ee3d8e3affc6ca434582002856a19e8a",
+      "integratedSha256": "6535ddbc7478dcee2e09a1cd1e2b5c72ee3d8e3affc6ca434582002856a19e8a",
+      "bytes": 100615,
+      "byteEqual": true
+    },
+    {
+      "path": "packages/compiler/src/vue2-source.ts",
+      "reviewedSha256": "1f1dae5b2cb48f81085502f6c12f9bbfcc18f9ff944da3a454ee122c29880688",
+      "integratedSha256": "1f1dae5b2cb48f81085502f6c12f9bbfcc18f9ff944da3a454ee122c29880688",
+      "bytes": 98058,
+      "byteEqual": true
+    },
+    {
+      "path": "packages/compiler/src/web-component-source.ts",
+      "reviewedSha256": "d8dc8f919c6fe36df174d087738ae833611c69fdc74609c5c3c8ef14ff93a15d",
+      "integratedSha256": "d8dc8f919c6fe36df174d087738ae833611c69fdc74609c5c3c8ef14ff93a15d",
+      "bytes": 94287,
+      "byteEqual": true
+    },
+    {
+      "path": "packages/compiler/src/shader-plan.ts",
+      "reviewedSha256": "625b890c12d1a1fcd2a96a3930ba0f2e0a7d241d442133c1ce60dda55250f0bd",
+      "integratedSha256": "625b890c12d1a1fcd2a96a3930ba0f2e0a7d241d442133c1ce60dda55250f0bd",
+      "bytes": 3009,
+      "byteEqual": true
+    },
+    {
+      "path": "packages/compiler/test/fixtures/shader-scene-owner.proto.ts",
+      "reviewedSha256": "6206b5ee5d1e27a8589fddfa60aaa16e9ef4d623c873c6ba95dec6663b136c20",
+      "integratedSha256": "6206b5ee5d1e27a8589fddfa60aaa16e9ef4d623c873c6ba95dec6663b136c20",
+      "bytes": 951,
+      "byteEqual": true
+    }
+  ],
+  "evidenceBoundary": "The 48-control execution remains bound to 27b5429b; 13 reviewed source files are byte-equivalent at the integration commit. This is not a new 48-control run or a review of unrelated integration files."
+}

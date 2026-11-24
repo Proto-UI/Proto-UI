@@ -28,7 +28,7 @@ const profiles = [
 function graph(
   pixels = [20, 40, 60, 128],
   tint: [number, number, number, number] = [0.5, 0.75, 1, 0.5]
-): ShaderPresentationDeclaration {
+) {
   return {
     version: 1,
     source: {
@@ -46,7 +46,7 @@ function graph(
     ],
     output: 'tint',
     fallback: [0.1, 0.2, 0.3, 1],
-  };
+  } satisfies ShaderPresentationDeclaration;
 }
 describe('finite shader data admission', () => {
   it('copies every mutable byte, uniform and resource declaration before freezing', () => {
@@ -56,6 +56,8 @@ describe('finite shader data admission', () => {
       copied = snapshotShaderPresentation(original);
     pixels[0] = 128;
     tint[0] = 1;
+    if (copied.source.kind !== 'owned-pixels')
+      throw new Error('Expected the copied owned-pixels declaration');
     expect(copied.source.pixels).toEqual([20, 40, 60, 128]);
     expect(copied.passes[1].tint).toEqual([0.5, 0.75, 1, 0.5]);
     expect(

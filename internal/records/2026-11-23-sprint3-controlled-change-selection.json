@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "Retain an independent controlled-change selection clamp oracle",
+  "pullRequest": 1743,
+  "sourceHead": "48ebbaa7139e5caf7730659ae827049a93e97ea3",
+  "authority": "C-TEXT-CONTROL-SELECTION-0001-LIFETIME remains draft, unchanged. Rejected controlled text retains selection clamped to restored owner text.",
+  "finding": "Independent review of main33 found that snapshot.selection == hostSelection only proves agreement; both could wrongly collapse to the end. The retained2..8 forward selection on rejected text must clamp to2..5 forward for owner text. All32 cases and original production guards remain.",
+  "change": "Add one independent host range assertion after the original complete snapshot and owner-value checks. No product source or explicit reset semantics change.",
+  "validation": {
+    "head": "48ebbaa7139e5caf7730659ae827049a93e97ea3",
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "exec",
+      "vitest",
+      "run",
+      "packages/compiler/test/text-reset-native.test.ts",
+      "--maxWorkers=1",
+      "--minWorkers=1"
+    ],
+    "NODE_OPTIONS": "--max-old-space-size=512",
+    "patchSha256": "8067fba94e8ca582f0468b8f8748caf1196ebbeede4610ecbaeb821ebee4a7ab",
+    "sourceSha256": "c836160dabd4f47ccda14d69bc5a2b2439dcb7cc9d8b34e90e3fd3be7551c5b2",
+    "exitCode": 0,
+    "logSha256": "b70b7b33f9f0049fd3a4bc263e513c341def3af346bf000fb45614f2ca5e473d",
+    "capturedAt": "2026-11-23T17:23:19.490732+00:00"
+  },
+  "result": {
+    "files": 1,
+    "tests": 32,
+    "pass": 32,
+    "fail": 0,
+    "skipped": 0
+  },
+  "evidenceBoundary": "Generated framework consumers with synthetic DOM input in Happy DOM, not physical/native acceptance. No new runtime red was reproduced; this restores discriminating coverage.",
+  "recovery": {
+    "previousUnpushedCommit": "dc8de6ea",
+    "previousObservedGreenLogSha256": "a1e631c38635e3002a57dc05804fe838bb0bbe9cfd4b9069e4d021f80c5c8b0d",
+    "previousObservedReviewReportSha256": "008e48b667e4ab1fac70349646b66dbfee56b95b5525cfe4d3d8f0f912122c01",
+    "unrecovered": "Those local objects/raw log/report were lost in the execution-environment reset before publication. Their observed identities remain historical, not current readable archives.",
+    "patchRecovery": "The same one-assertion patch was reconstructed from published48. git diff --abbrev=8 reproduces the original patch SHA7ff2789f691c45db021ba2d1951dfe193a798978be2e1a8efad28ce007c21553 exactly. Fresh full-index patch and actual repeat32/32 log are archived here."
+  },
+  "rawEvidence": {
+    "path": "internal/records/evidence/2026-11-23-sprint3-controlled-change-selection/raw.json.gz",
+    "bytes": 16744,
+    "sha256": "2d4ab1d64dbbb676f0156872b86c8456597e04af6efe78c1a46738b6677dbc8b",
+    "uncompressedSha256": "0601300f0cc7116965f26ccdfea3cbec94a5551c7701c5a5866bd09ecabba72a"
+  }
+}

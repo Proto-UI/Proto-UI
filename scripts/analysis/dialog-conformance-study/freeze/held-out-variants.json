@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "author": "Codex /root; independent of dialog_experiment checker author",
+  "authoredAt": "2026-11-23T19:08:12.460527+00:00",
+  "checkFreezeSha256": "579eb729d4d45384df66aa2cac6e78f3e06d895f9a5ab1f19f415c9b3e438f4a",
+  "visibility": "independently authored after checker freeze; public after handoff; not a model blind/evaluation claim",
+  "variants": [
+    {
+      "id": "heldout-cancel-routes-save",
+      "kind": "injected-broken",
+      "caseId": "D754-ACTION",
+      "patch": {
+        "path": "scripts/analysis/dialog-conformance-study/fixture.ts",
+        "before": "cancel.addEventListener('click', () => actions.push('cancel'));",
+        "after": "cancel.addEventListener('click', () => actions.push('save'));"
+      },
+      "expected": "Cancel closes but invokes save. The independent task expects cancel only, so D754-ACTION must fail. Original Base suites do not observe this application-owned action and may pass; report a task-level coverage gap, not missing Base business semantics.",
+      "authority": "plan.json D754-ACTION fixture task; Close semantic command only covers dismissal.",
+      "owner": "experiment consumer fixture (injected defect)"
+    },
+    {
+      "id": "heldout-missing-live-title",
+      "kind": "injected-broken",
+      "caseId": "D754-RELATIONS",
+      "patch": {
+        "path": "packages/prototypes/base/src/dialog/content.proto.ts",
+        "before": "hasTitle ? createDialogPartId(ctx.rootId, 'title') : ''",
+        "after": "''"
+      },
+      "expected": "A live Title no longer supplies the dialog accessible name; existing accessibleLabel intentionally stays empty while the Title is live. D754-RELATIONS should reject the absent live labelledBy relation. A passing observation is a false negative only after proving the applied mutation is reached.",
+      "authority": "P-BASE-DIALOG-CONTENT-A11Y-RELATIONS and WAI-ARIA Dialog name requirement.",
+      "owner": "Base Dialog Content (injected defect)"
+    },
+    {
+      "id": "heldout-legal-article-wrapper",
+      "kind": "legal-customization",
+      "caseId": null,
+      "patch": {
+        "path": "scripts/analysis/dialog-conformance-study/fixture.ts",
+        "before": "const wrapper = document.createElement('section');",
+        "after": "const wrapper = document.createElement('article');"
+      },
+      "expected": "An ordinary nonfocusable article wrapper keeps the exact child order, accessible relations, actions and focus scope. Both suites should pass. No structural wrapper tag is prescribed by the Dialog contract.",
+      "authority": "P-BASE-DIALOG-CONTENT focus/relations; ordinary host children are admitted.",
+      "owner": "experiment consumer fixture (legal customization)"
+    }
+  ],
+  "independentExpectationReview": {
+    "disposition": "accepted for the stated settled-entry synthetic WC discrimination",
+    "basis": [
+      "Read original plan, actual root/content and fixture sources and frozen observation suite",
+      "Reviewed selected draft Dialog criteria and retained original suite source identities",
+      "Two early-entry baseline failures remain separately reported; completion before observation does not prove entering-time behavior"
+    ],
+    "limits": [
+      "No physical input, browser paint, screen reader, formal hidden model or whole-library result",
+      "Original 28 component checks and five application observations must stay separate",
+      "Compile/preparation failures and ineffective mutants are excluded from detection denominators with reasons"
+    ]
+  }
+}

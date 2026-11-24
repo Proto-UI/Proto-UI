@@ -156,14 +156,14 @@ export const SELECT_SURFACE_STYLE: Record<SelectTranslucentStyle, StyleHandle> =
 
 /** cn-select-item geometry per pinned recipe; state colors stay rule-driven. */
 export const SELECT_ITEM_SURFACE: Record<SelectTranslucentStyle, string> = {
-  vega: 'gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm',
-  nova: 'gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm',
-  maia: 'gap-2.5 rounded-xl py-2 pr-8 pl-3 text-sm',
-  lyra: 'gap-2 rounded-none py-2 pr-8 pl-2 text-xs',
+  vega: 'gap-2 rounded-sm py-1.5 pe-8 ps-2 text-sm',
+  nova: 'gap-1.5 rounded-md py-1 pe-8 ps-1.5 text-sm',
+  maia: 'gap-2.5 rounded-xl py-2 pe-8 ps-3 text-sm',
+  lyra: 'gap-2 rounded-none py-2 pe-8 ps-2 text-xs',
   mira: 'min-h-7 gap-2 rounded-md px-2 py-1 text-xs leading-relaxed',
-  luma: 'gap-2.5 rounded-[var(--pui-radius-2xl)] py-2 pr-8 pl-3 text-sm font-medium',
-  sera: 'gap-2.5 rounded-none py-2 pr-8 pl-3 text-sm',
-  rhea: 'min-h-7 gap-2 rounded-[var(--pui-radius-xl)] py-1.5 pr-8 pl-2 text-sm',
+  luma: 'gap-2.5 rounded-[var(--pui-radius-2xl)] py-2 pe-8 ps-3 text-sm font-medium',
+  sera: 'gap-2.5 rounded-none py-2 pe-8 ps-3 text-sm',
+  rhea: 'min-h-7 gap-2 rounded-[var(--pui-radius-xl)] py-1.5 pe-8 ps-2 text-sm',
 };
 
 /** cn-select-item-indicator span size; mira leaves sizing to the inner svg. */

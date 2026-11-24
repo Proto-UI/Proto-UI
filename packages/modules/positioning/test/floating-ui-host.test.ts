@@ -172,9 +172,11 @@ describe('module-positioning: Floating UI host', () => {
     // Rendered rect includes translate: -1px -1px; layout origin is (100, 100).
     setRect(anchor, rect(99, 99, 50, 20));
     setRect(floating, rect(0, 0, 40, 10));
-    const transformSpy = vi.spyOn(window, 'getComputedStyle').mockImplementation(
-      () => ({ transform: 'none', translate: '-1px -1px' }) as CSSStyleDeclaration
-    );
+    const transformSpy = vi
+      .spyOn(window, 'getComputedStyle')
+      .mockImplementation(
+        () => ({ transform: 'none', translate: '-1px -1px' }) as CSSStyleDeclaration
+      );
 
     const lease = createFloatingUiAnchoredPositionHost().attach({
       anchor,
@@ -206,6 +208,76 @@ describe('module-positioning: Floating UI host', () => {
     expect(floating.dataset.side).toBe('top');
     expect(floating.dataset.align).toBe('end');
     lease.dispose();
+  });
+
+  it('reconsiders intrinsic content after its previous available-space cap', async () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    document.body.append(anchor, floating);
+    setRect(anchor, rect(100, 600, 100, 40));
+    let contentHeight = 20;
+    // This host-unit fixture models max-height: var(--proto-ui-available-height).
+    // The initial short content fits below; later content needs the larger top
+    // side. A previously published cap is an output, not its intrinsic size.
+    const height = () => {
+      const limit = Number.parseFloat(
+        floating.style.getPropertyValue('--proto-ui-available-height')
+      );
+      return Number.isFinite(limit) ? Math.min(contentHeight, limit) : contentHeight;
+    };
+    floating.getBoundingClientRect = () => rect(0, 0, 100, height());
+    Object.defineProperties(floating, {
+      offsetWidth: { configurable: true, value: 100 },
+      offsetHeight: { configurable: true, get: height },
+    });
+    const viewport = Object.getOwnPropertyDescriptor(window, 'visualViewport');
+    const width = Object.getOwnPropertyDescriptor(document.documentElement, 'clientWidth');
+    const heightDescriptor = Object.getOwnPropertyDescriptor(
+      document.documentElement,
+      'clientHeight'
+    );
+    Object.defineProperty(window, 'visualViewport', { configurable: true, value: undefined });
+    Object.defineProperty(document.documentElement, 'clientWidth', {
+      configurable: true,
+      value: 1024,
+    });
+    Object.defineProperty(document.documentElement, 'clientHeight', {
+      configurable: true,
+      value: 768,
+    });
+    const lease = createFloatingUiAnchoredPositionHost().attach({
+      anchor,
+      floating,
+      config: { ...baseConfig, avoidCollisions: true, collisionPadding: 4 },
+    });
+    try {
+      await flush();
+      expect(floating.dataset.side).toBe('bottom');
+      expect(
+        Number.parseFloat(floating.style.getPropertyValue('--proto-ui-available-height'))
+      ).toBeLessThan(240);
+
+      contentHeight = 240;
+      lease.requestUpdate();
+      await flush();
+      expect(floating.dataset.side).toBe('top');
+      expect(height()).toBe(240);
+
+      contentHeight = 20;
+      lease.requestUpdate();
+      await flush();
+      expect(floating.dataset.side).toBe('bottom');
+    } finally {
+      lease.dispose();
+      for (const [target, key, descriptor] of [
+        [window, 'visualViewport', viewport],
+        [document.documentElement, 'clientWidth', width],
+        [document.documentElement, 'clientHeight', heightDescriptor],
+      ] as const) {
+        if (descriptor) Object.defineProperty(target, key, descriptor);
+        else Reflect.deleteProperty(target, key);
+      }
+    }
   });
 });
 

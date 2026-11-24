@@ -1093,8 +1093,14 @@ export function refreshCandidateSource(data, repoRoot, identity) {
 // Refresh only source-derived candidate/consumer projections. Historical main,
 // comparison pins, migration identities, carried conditions and gate results
 // are retained verbatim. A changed consumer ID set needs explicit migration.
-export function refreshSourceInventory(data, repoRoot, identity) {
+export function refreshSourceInventory(data, repoRoot, identity, options = {}) {
   const refreshed = structuredClone(data);
+  // Issue indexes carry historical links until their row is explicitly reconciled.
+  // Refresh selected indexes through this producer, without rewriting unrelated history.
+  const issueRows = new Set(options.refreshConsumerIssues ?? []);
+  for (const id of issueRows)
+    if (!refreshed.consumerRows.some((row) => row.ID === id))
+      throw new Error(`Unknown consumer issue-index row: ${id}`);
   for (const [program, ledger] of Object.entries(CONSUMER_LEDGERS)) {
     const { rows } = consumerLedgerRows(fs.readFileSync(path.join(repoRoot, ledger), 'utf8'));
     const existing = refreshed.consumerRows.filter((row) => row.program === program);
@@ -1105,7 +1111,20 @@ export function refreshSourceInventory(data, repoRoot, identity) {
       )
     )
       throw new Error(`Consumer ID migration requires explicit reconciliation: ${program}`);
-    for (const row of existing) Object.assign(row, rows.get(row.ID));
+    for (const row of existing) {
+      const canonical = rows.get(row.ID);
+      Object.assign(row, canonical);
+      if (issueRows.has(row.ID))
+        row.issues = [
+          ...new Set(
+            [
+              ...Object.values(canonical)
+                .join(' ')
+                .matchAll(/#([1-9]\d*)\b/g),
+            ].map((match) => Number(match[1]))
+          ),
+        ].sort((a, b) => a - b);
+    }
     refreshed.counts.consumerPrograms[program] = {
       rows: existing.length,
       states: count(existing.map((row) => row.State)),
@@ -1994,11 +2013,16 @@ export function render(d) {
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   let data = JSON.parse(fs.readFileSync(path.join(root, dataPath), 'utf8'));
   const refreshIndex = process.argv.indexOf('--refresh-candidate');
+  const issuesIndex = process.argv.indexOf('--refresh-consumer-issues');
+  if (issuesIndex !== -1 && refreshIndex === -1)
+    throw new Error('--refresh-consumer-issues requires --refresh-candidate and --write');
   if (refreshIndex !== -1) {
     const revision = process.argv[refreshIndex + 1];
     if (!process.argv.includes('--write') || !/^[a-f0-9]{40}$/.test(revision ?? ''))
       throw new Error('--refresh-candidate requires a full commit SHA and --write');
-    data = refreshSourceInventory(data, root, { revision });
+    const refreshConsumerIssues =
+      issuesIndex === -1 ? [] : (process.argv[issuesIndex + 1] ?? '').split(',');
+    data = refreshSourceInventory(data, root, { revision }, { refreshConsumerIssues });
   }
   const errors = validate(data);
   const output = render(data);

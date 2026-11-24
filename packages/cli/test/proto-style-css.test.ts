@@ -318,6 +318,40 @@ describe('proto style css renderer', () => {
     }
   });
 
+  it('keeps the logical inline padding and inset utilities beside the physical ones', () => {
+    for (const { render } of STYLE_CSS_LANES) {
+      const logical = render(['ps-2', 'pe-8', 'start-2', 'end-2']);
+      expect(logical).toContain('padding-inline-start: 0.5rem;');
+      expect(logical).toContain('padding-inline-end: 2rem;');
+      expect(logical).toContain('inset-inline-start: 0.5rem;');
+      expect(logical).toContain('inset-inline-end: 0.5rem;');
+      expect(logical).not.toContain('Unsupported Proto UI style tokens');
+      // The rendered document also carries the theme's own base declarations,
+      // so the physical fallback is checked for one spacing value that only
+      // the rendered utilities can own.
+      const distinct = render(['ps-8.25', 'pe-8.25', 'start-8.25', 'end-8.25']);
+      expect(distinct).toContain('padding-inline-start: 2.0625rem;');
+      expect(distinct).toContain('padding-inline-end: 2.0625rem;');
+      expect(distinct).toContain('inset-inline-start: 2.0625rem;');
+      expect(distinct).toContain('inset-inline-end: 2.0625rem;');
+      // The logical utilities never fall back to a physical side.
+      expect(distinct).not.toContain('padding-left: 2.0625rem;');
+      expect(distinct).not.toContain('padding-right: 2.0625rem;');
+      expect(distinct).not.toContain('left: 2.0625rem;');
+      expect(distinct).not.toContain('right: 2.0625rem;');
+      // The physical utilities keep their own declarations and bounds, and
+      // never emit the logical ones for the same spacing value.
+      const physical = render(['pl-8.25', 'pr-8.25', 'left-8.25', 'right-8.25']);
+      expect(physical).toContain('padding-left: 2.0625rem;');
+      expect(physical).toContain('padding-right: 2.0625rem;');
+      expect(physical).toContain('left: 2.0625rem;');
+      expect(physical).toContain('right: 2.0625rem;');
+      expect(physical).not.toContain('padding-inline-start: 2.0625rem;');
+      expect(physical).not.toContain('inset-inline-start: 2.0625rem;');
+      expect(physical).not.toContain('Unsupported Proto UI style tokens');
+    }
+  });
+
   it('keeps directional edge paint after all-edge shorthands in document and Shadow CSS', () => {
     const tokens = [
       'border',

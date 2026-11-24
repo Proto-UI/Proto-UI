@@ -83,7 +83,11 @@ export class BrowserCompilerPanel extends HTMLElement {
         this.sourceText.value = this.files[this.sourceFile.value] ?? '';
       });
       this.sourceText.addEventListener('input', () => {
-        this.files[this.sourceFile.value] = this.sourceText.value;
+        const file = this.sourceFile.value;
+        const source = this.sourceText.value;
+        // Duplicate input notifications do not own a new source revision.
+        if (this.files[file] === source) return;
+        this.files[file] = source;
         this.changed();
       });
       this.element('[data-generated-file]').addEventListener('change', () =>

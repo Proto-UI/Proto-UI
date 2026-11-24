@@ -2,14 +2,13 @@ import {
   installViewVisibilityRule,
   PUI_VIEW_DETACHED_ATTR,
   PUI_VIEW_REVEALING_ATTR,
+  PUI_PORTAL_PREPARING_ATTR,
 } from '@proto.ui/adapter-base';
 
 const HOST_DISPLAY_STYLE_ID = 'proto-ui-wc-host-display';
 const HOST_DISPLAY_CLASS = 'pui-host-root';
 const PUI_STYLE_ATTR = 'data-pui-style';
-export const PUI_PORTAL_PREPARING_ATTR = 'data-pui-portal-preparing';
-
-export { PUI_VIEW_DETACHED_ATTR };
+export { PUI_VIEW_DETACHED_ATTR, PUI_PORTAL_PREPARING_ATTR };
 
 const RULES_BY_DOCUMENT = new WeakMap<Document, boolean>();
 

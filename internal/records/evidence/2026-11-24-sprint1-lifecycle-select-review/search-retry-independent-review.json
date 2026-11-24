@@ -1,0 +1,52 @@
+{
+  "dateUtc": "2026-11-23T19:24:20.069597+00:00",
+  "reviewer": "Independent lifecycle_audit agent; no human approval claimed.",
+  "head": "333f2b19cc7bbe52deab3999f7beef34f6845304",
+  "binding": "Exact working-tree source hashes reviewed after the33-case final test. This is not a clean-commit native execution.",
+  "sourceFiles": [
+    {
+      "file": "apps/www/src/components/site-search-composition.ts",
+      "bytes": 44052,
+      "sha256": "17e5059f7f5cad9f656861c042884e65cef0e77bd4d00deb02debd58463eed12"
+    },
+    {
+      "file": "apps/www/src/components/site-search-composition-paint-cost.test.ts",
+      "bytes": 30758,
+      "sha256": "ca2e46bda6ea9d6b34bbd12d5fbe9f68e2044a6cda3969d8fbd9ca90c3354ad9"
+    }
+  ],
+  "nativeOriginal": {
+    "head": "81c103bd462b73910f7279122fab5f282d172d56",
+    "runId": 45238345986,
+    "artifactId": 14852322395,
+    "families": ["shadcn", "brutalist"],
+    "facts": "HEAD503 Retry visible, query empty and inputFocused true; original1000ms matcher failed with no runtime errors. These observations do not by themselves prove the precise refusal/callback order.",
+    "visualBoundary": "Actual original Shadcn screenshot inspected; Chinese glyphs are missing in the runner image. No complete typography/paint acceptance is claimed."
+  },
+  "rootReducedControl": {
+    "red": {
+      "passed": 28,
+      "failed": 2,
+      "pending": 0,
+      "report": "search-retry-focus-red.json.gz"
+    },
+    "green": {
+      "passed": 30,
+      "failed": 0,
+      "pending": 0,
+      "report": "search-retry-focus-green.json.gz"
+    }
+  },
+  "independentControl": {
+    "report": "search-retry-independent-final.json.gz",
+    "passed": 33,
+    "failed": 0,
+    "pending": 0,
+    "cases": [
+      "Absent presentation suppresses attempts across real paints; presentation triggers one accepted focus, later paints/transitions do not repeat it.",
+      "Synchronous composition disposal during focusSelf cannot read or bind the terminal action.",
+      "Synchronous action replacement plus a new paint cannot let the old continuation certify/read the old action; only the replacement is focused and bound."
+    ]
+  },
+  "disposition": "Bounded source and unit evidence accepted. Guarding current presentation and verifying focused before consuming this opening preserves rejected handoffs without polling. Native final-source production readiness remains pending. No claim that composition cancels a pending native Focus-module request after the public call has been accepted."
+}

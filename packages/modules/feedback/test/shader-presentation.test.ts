@@ -8,7 +8,7 @@ import { FINAL_STYLE_SINK_CAP } from '../src/material/final-style-sink';
 import { SHADER_PRESENTATION_SINK_CAP, type ShaderPresentationFrame } from '../src/shader/sink';
 import type { FeedbackInternalHooks, FeedbackPort } from '../src/types';
 
-function declaration(): ShaderPresentationDeclaration {
+function declaration() {
   return {
     version: 1,
     source: {
@@ -23,7 +23,7 @@ function declaration(): ShaderPresentationDeclaration {
     passes: [{ id: 'copy', kernel: 'copy-rgba8-v1', input: '$source' }],
     output: 'copy',
     fallback: [0, 0, 0, 1],
-  };
+  } satisfies ShaderPresentationDeclaration;
 }
 const materialSlot: MaterialSlot = {
   version: 2,
@@ -110,6 +110,8 @@ describe('portable shader owner without Web globals', () => {
     f.caps.attach([[SHADER_PRESENTATION_SINK_CAP, f.sink]]);
     f.mount();
     const owned = f.frames.at(-1)!.declaration;
+    if (owned.source.kind !== 'owned-pixels')
+      throw new Error('Expected the published owned-pixels declaration');
     expect(owned.source.pixels).toEqual([64, 32, 16, 128]);
     expect(Object.isFrozen(owned.source.pixels)).toBe(true);
     f.facade.style.patch(tw('rounded-full'));
