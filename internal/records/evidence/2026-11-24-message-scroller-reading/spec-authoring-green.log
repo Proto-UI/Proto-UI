@@ -1,0 +1,1 @@
+[spec-authoring] spec/prototypes/P-BASE-MESSAGE-SCROLLER.yaml: P-BASE-MESSAGE-SCROLLER verifies.tests relation to T-BASE-MESSAGE-SCROLLER-READING-0001 starts before the target entity exists.
