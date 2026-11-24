@@ -186,10 +186,24 @@ for (const family of ['shadcn', 'brutalist']) {
             await page.evaluate(() => {
               document.documentElement.style.fontSize = '200%';
             });
+          if (scenario.width < 768) {
+            // A user opens the inert mobile overview before editing its controls.
+            const layoutToggle = page.locator('[data-home-gallery-layout-toggle]');
+            await layoutToggle.waitFor({ state: 'visible' });
+            if ((await layoutToggle.getAttribute('aria-expanded')) === 'false')
+              await layoutToggle.press('Enter');
+            expect(await layoutToggle.getAttribute('aria-expanded')).toBe('true');
+          }
+          expect(
+            await page
+              .locator('[data-home-gallery-stage]')
+              .evaluate((stage) => stage instanceof HTMLElement && !stage.inert)
+          ).toBe(true);
           const content = page.locator('[data-home-demo-host]');
           const retained = await content.locator('[data-home-settings]').elementHandle();
           const note = content.getByRole('textbox', { name: 'Additional note', exact: true });
           await note.fill('Keep this authored value');
+          expect(await note.inputValue()).toBe('Keep this authored value');
           const oldOverflow = await page.evaluate(() => getComputedStyle(document.body).overflow);
           let requested = false;
           await page.route(await runtimeModuleRoute(page), async (route) => {

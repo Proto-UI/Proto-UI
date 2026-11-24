@@ -558,6 +558,19 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
             }
           }
           await page.getByText(`${label} · Ready`, { exact: true }).waitFor({ state: 'visible' });
+          if (scenario.width < 768) {
+            // Inspect the real interactive projection, not its zoomed inert overview.
+            const layoutToggle = page.locator('[data-home-gallery-layout-toggle]');
+            await layoutToggle.waitFor({ state: 'visible' });
+            if ((await layoutToggle.getAttribute('aria-expanded')) === 'false')
+              await layoutToggle.press('Enter');
+            expect(await layoutToggle.getAttribute('aria-expanded')).toBe('true');
+          }
+          expect(
+            await gallery
+              .locator('[data-home-gallery-stage]')
+              .evaluate((stage) => stage instanceof HTMLElement && !stage.inert)
+          ).toBe(true);
           // Isolated test environment only, not a production DOM style patch.
           await page.evaluate((percent) => {
             document.documentElement.style.fontSize = `${percent}%`;

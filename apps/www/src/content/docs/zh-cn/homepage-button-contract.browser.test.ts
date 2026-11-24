@@ -609,6 +609,18 @@ describe.sequential('Base Button selection and family-owned homepage geometry', 
           };
           await observeMotion(16);
           await page.setViewportSize({ width: 390, height: 1000 });
+          // The public mobile overview deliberately zooms an inert gallery.
+          // Open its retained interactive view before measuring public sizes.
+          const layoutToggle = page.locator('[data-home-gallery-layout-toggle]');
+          await layoutToggle.waitFor({ state: 'visible' });
+          if ((await layoutToggle.getAttribute('aria-expanded')) === 'false')
+            await layoutToggle.press('Enter');
+          expect(await layoutToggle.getAttribute('aria-expanded')).toBe('true');
+          expect(
+            await page
+              .locator('[data-home-gallery-stage]')
+              .evaluate((stage) => stage instanceof HTMLElement && !stage.inert)
+          ).toBe(true);
           await page.evaluate(() => {
             document.documentElement.style.fontSize = '200%';
           });
