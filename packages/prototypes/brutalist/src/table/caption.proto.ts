@@ -16,7 +16,7 @@ export const tableCaption = definePrototype<
   setup(def) {
     const inherited = asTableCaption();
     // Family ink instead of muted chrome; the authored text is the caption.
-    def.feedback.style.use(tw('table-caption mt-4 text-foreground'));
+    def.feedback.style.use(tw('table-caption mt-4 text-sm text-foreground'));
     return inherited.render;
   },
 });

@@ -1,3 +1,3 @@
-import { createCalendarSelectionDemo } from './calendar-selection-demo.shared';
+import { createDatePickerSelectionDemo } from '../demo_components/date-picker/date-picker-demo.shared';
 
-export default createCalendarSelectionDemo('bootstrap-2-3-2', true);
+export default createDatePickerSelectionDemo('bootstrap-2-3-2');

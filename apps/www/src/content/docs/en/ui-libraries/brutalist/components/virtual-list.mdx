@@ -1,12 +1,13 @@
 ---
 title: 'Virtual List'
-description: 'A Brutalist-styled virtualized list separating stable logical keys from materialized views with variable-height measurement.'
+description: 'A Brutalist-styled virtualized list with variable-height measurement, 5px base corners, and 2px solid borders.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Virtual List decouples a stable logical key sequence (`itemKeys`) from rendered row nodes so your application creates content only for the visible window and its overscan buffer.
+Virtual List decouples a stable logical key sequence (`itemKeys`) from mounted DOM rows so your application renders content only for the visible viewport and overscan buffer. The Brutalist family applies `rounded-base` (5px) corners, 2px black borders, clipped overflow, and DM Sans typography with no blurred drop shadows.
 
 ## Preview
 
@@ -18,24 +19,99 @@ Virtual List decouples a stable logical key sequence (`itemKeys`) from rendered 
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes from `@proto.ui/prototypes-brutalist/virtual-list` and mount Web rows through the `virtual-list/web` entry.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes from `@proto.ui/prototypes-brutalist/virtual-list` and connect a Web scroll viewport through `@proto.ui/prototypes-base/virtual-list/web`.
 
 ## Usage
 
-### Logical Model & Web Materialization
+Virtual List consists of `Root`, `Viewport`, and `Content`. `Root` owns the ordered `itemKeys` collection and outer frame, `Viewport` handles scrolling and inset focus feedback, and `Content` hosts materialized row elements.
 
-- The host-neutral model manages `itemKeys`, `overscanItems`, `maxMaterializedItems`, revisions, and generation-bound commits.
-- `attachWebVirtualList` from `virtual-list/web` measures variable item heights, manages spacers and keyed DOM row views, scrolls to a target key, and cleans up observers on disposal.
+```ts
+import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import {
+  virtualListRoot,
+  virtualListViewport,
+  virtualListContent,
+} from '@proto.ui/prototypes-brutalist/virtual-list';
+import { attachWebVirtualList } from '@proto.ui/prototypes-base/virtual-list/web';
 
-### Materializer Lifecycle
+AdaptToWebComponent(virtualListRoot);
+AdaptToWebComponent(virtualListViewport);
+AdaptToWebComponent(virtualListContent);
 
-- Each logical collection grants one active materializer lease at a time. `attachWebVirtualList` acquires that lease automatically (other host implementations can call `acquireMaterializer(onRetired)` directly; Web callers do not need an extra outer lease).
-- Attaching a second host while one is active fails without disturbing the current host—dispose the existing host before attaching a replacement.
-- Unmounting or disposing `Root` retires the materializer, invalidates in-flight generations, and cleans up views and observers so late callbacks from an old host cannot affect a replacement. Initial render or observer setup failures also release the lease so you can retry cleanly.
+const list = document.querySelector('brutalist-virtual-list-root')!;
+const viewport = document.querySelector('brutalist-virtual-list-viewport')!;
+const content = document.querySelector('brutalist-virtual-list-content')!;
+
+setElementProps(list, {
+  itemKeys: Array.from({ length: 1000 }, (_, i) => `event-${i + 1}`),
+  overscanItems: 3,
+  maxMaterializedItems: 60,
+});
+
+const host = attachWebVirtualList({
+  viewport,
+  content,
+  collection: list.getExposes().getCollection(),
+  estimateSize: 68,
+  renderItem(key) {
+    const row = document.createElement('div');
+    row.className = 'border-b-2 border-black px-4 py-3 text-sm';
+    row.textContent = key;
+    return row;
+  },
+});
+
+// Scroll to a key on demand and dispose on teardown
+host.ensureVisible('event-250', 'center');
+// host.dispose();
+```
+
+### Anatomy & Accessibility
+
+- `Root` sets `role="region"` with `a11yLabel` and clips overflowing rows inside its 2px black frame without nested double borders.
+- `Viewport` inherits `Scroll Area` scrolling and keyboard focus state, showing a 2px inset focus ring on keyboard focus.
+- `Content` sets `role="list"` and mounted rows automatically receive `role="listitem"`, `aria-posinset`, and `aria-setsize`.
+
+### Advanced: Custom Materializers
+
+- Each logical list allows one active materializer at a time; `attachWebVirtualList` manages the lease automatically and tears down nodes and observers when `Root` unmounts or disposes.
+- Dispose an active materializer before attaching a replacement. Non-Web hosts can integrate through `collection.acquireMaterializer(onRetired)`.
+
+## Examples
+
+### Scroll to Item
+
+Call `ensureVisible(key, align)` to scroll any logical key into view with `'start'`, `'center'`, `'end'`, or `'nearest'` alignment.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-virtual-list-jump"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Dynamic Filtering & Empty State
+
+Updating `itemKeys` on `Root` automatically reconciles the materialized window and supports empty-list transitions.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-virtual-list-filter"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Overscan & Bounded Materialization
+
+Adjust `overscanItems` and inspect live telemetry showing bounded DOM row counts across 2,000 logical entries.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-virtual-list-window"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root`:
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -43,10 +119,84 @@ The following props belong to `Root`:
     { name: 'itemKeys', type: 'readonly string[]', default: '[]' },
     { name: 'overscanItems', type: 'number', default: '2' },
     { name: 'maxMaterializedItems', type: 'number', default: '100' },
-    { name: 'a11yLabel', type: 'string', default: 'Virtual list' },
+    { name: 'a11yLabel', type: 'string', default: "'Virtual list'" },
   ]}
 />
 
-Other parts:
+### Viewport & Content
 
-- **Viewport**, **Content**: No props.
+`Viewport` and `Content` add no additional component props.
+
+### Root Exposes
+
+<ApiPropsTable
+  headers={{ name: 'Member', type: 'Type', default: 'Description' }}
+  rows={[
+    {
+      name: 'logicalCount',
+      type: 'ExposeState<number>',
+      default: 'Total number of logical item keys',
+    },
+    {
+      name: 'getCollection',
+      type: '() => WindowedCollection',
+      default: 'Returns the collection model for host attachment',
+    },
+    {
+      name: 'getWindow',
+      type: '() => WindowSnapshot',
+      default: 'Returns the current revision, committed range, and materialized keys',
+    },
+  ]}
+/>
+
+### attachWebVirtualList
+
+<ApiPropsTable
+  headers={{ name: 'Option / Method', type: 'Type', default: 'Default / Description' }}
+  rows={[
+    { name: 'viewport', type: 'HTMLElement', default: 'Scrollable viewport element (required)' },
+    {
+      name: 'content',
+      type: 'HTMLElement',
+      default: 'List element hosting spacers and rows (required)',
+    },
+    {
+      name: 'collection',
+      type: 'WindowedCollection',
+      default: 'Collection from Root getCollection() (required)',
+    },
+    {
+      name: 'renderItem',
+      type: '(key: string) => HTMLElement',
+      default: 'Creates a row element for a key; mounted keys are reused (required)',
+    },
+    {
+      name: 'estimateSize',
+      type: 'number',
+      default: '36 (estimated height in px before measurement)',
+    },
+    {
+      name: 'refresh()',
+      type: '() => void',
+      default: 'Re-evaluates viewport geometry and materialization',
+    },
+    {
+      name: 'ensureVisible(key, align?)',
+      type: "(key: string, align?: 'nearest' | 'start' | 'center' | 'end') => boolean",
+      default: 'Scrolls the target key into view and returns whether it materialized',
+    },
+    {
+      name: 'dispose()',
+      type: '() => void',
+      default: 'Disconnects listeners/observers, clears rows, and releases the lease',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-VIRTUAL-LIST.yaml', 'P-BASE-VIRTUAL-LIST.yaml']}
+/>

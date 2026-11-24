@@ -1,11 +1,13 @@
 ---
 title: 'Tree'
-description: '支持显式层级、单选、展开折叠与完整键盘导航的 Liquid Glass 树形视图组件。'
+description: '遵循同心圆角与中性内容层原则、支持单选、展开折叠与 RTL 键盘导航的 Liquid Glass 树形视图组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Tree 管理显式声明的层级节点树，支持单选、节点展开/折叠以及完整的方向键与首字母键盘导航。
+Liquid Glass Tree 管理显式声明的层级节点树，提供单选、分支展开折叠以及完整的键盘与 RTL 导航。遵循 Apple Liquid Glass 人机界面指南，树形内容层保持中性可读表面而不叠加玻璃材质（避免在列表行内发生玻璃叠玻璃），同时采用同心圆角（外层 `rounded-2xl` 配合 `p-2` 与内层 `rounded-lg`）与高对比度禁用态。
 
 ## 预览
 
@@ -17,19 +19,134 @@ Liquid Glass Tree 管理显式声明的层级节点树，支持单选、节点�
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-liquid-glass/tree` 导入原型并使用目标框架适配器注册：
+
+```ts
+import { treeRoot, treeItem, treeGroup, treeToggle } from '@proto.ui/prototypes-liquid-glass/tree';
+```
 
 ## 用法
 
-- **显式层级标识**：每个节点通过树内唯一的 `nodeKey` 标识，并用 `parentKey` 指向其父节点；重复标识、缺失父节点或循环引用都会被忽略并保持当前有效状态。
-- **键盘导航**：上下方向键、`Home` / `End` 与首字母输入在可见节点间移动焦点；左右方向键分别用于折叠/定位父节点与展开/进入首个子节点。
-- **受控状态**：`value`（选中节点）与 `expandedKeys`（展开节点集合）均支持受控请求模式。
+```tsx
+<LiquidGlassTreeRoot defaultValue="button" defaultExpandedKeys={['src', 'components']}>
+  <div className="flex items-center gap-1.5">
+    <LiquidGlassTreeToggle nodeKey="src" size="icon">
+      ▾
+    </LiquidGlassTreeToggle>
+    <LiquidGlassTreeItem nodeKey="src" textValue="src" className="flex-1">
+      src/
+    </LiquidGlassTreeItem>
+  </div>
+  <LiquidGlassTreeGroup nodeKey="src">
+    <LiquidGlassTreeItem nodeKey="button" parentKey="src" textValue="button.tsx">
+      button.tsx
+    </LiquidGlassTreeItem>
+  </LiquidGlassTreeGroup>
+</LiquidGlassTreeRoot>
+```
+
+### 层次原则与交互语义
+
+- **中性内容层与同心几何**：Tree 属于内容浏览视图，默认不申报 `liquid-glass` 材质候选，确保位于悬浮导航玻璃层之下的文本与图标始终清晰；外层容器圆角与内边距及子行圆角保持同心对应。
+- **高对比度与无障碍**：聚焦使用内嵌焦点环并保留 `forced-colors` 系统高亮轮廓；禁用态使用语义弱化文字色而非整体降低不透明度，确保在高对比度与不透明回退环境下保持可读性。
+- **键盘导航与 RTL**：支持上下方向键、`Home` / `End` 与首字母跳转；设置 `direction="rtl"` 自动镜像层级导轨与左右方向键映射。
+
+## 示例
+
+### 受控选择与展开
+
+传入 `value` 与 `expandedKeys` 并监听 `valueChange` / `expandedChange` 以在外部同步树视图状态。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tree-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读状态
+
+禁用节点保持清晰文本对比度并阻止激活；`readOnly` 锁定选中项，同时允许展开分支与键盘浏览。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tree-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 从右到左（RTL）
+
+设置 `direction="rtl"` 自动镜像分组导轨边与水平方向键语义。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tree-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 属性           | 说明                            |
-| -------------- | ------------------------------- |
-| `value`        | 受控当前选中节点的 `nodeKey`    |
-| `expandedKeys` | 受控已展开节点的 `nodeKey` 集合 |
-| `nodeKey`      | 节点在当前树中的唯一标识        |
-| `parentKey`    | 指向父节点的 `nodeKey`          |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'undefined（受控）' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'expandedKeys', type: 'readonly string[]', default: 'undefined（受控）' },
+    { name: 'defaultExpandedKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: 'Tree' },
+  ]}
+/>
+
+### Item、Group 与 Toggle
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Item.nodeKey', type: 'string', default: "''" },
+    { name: 'Item.parentKey', type: 'string', default: "''" },
+    { name: 'Item.textValue', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+    { name: 'Group.nodeKey', type: 'string', default: "''" },
+    { name: 'Toggle.nodeKey', type: 'string', default: "''" },
+    { name: 'Toggle.size', type: "'default' | 'icon'", default: 'default' },
+    { name: 'Toggle.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### 事件与方法（Root）
+
+<ApiPropsTable
+  headers={{ name: '名称', type: '签名 / 载荷', default: '说明' }}
+  rows={[
+    { name: 'valueChange', type: '{ value: string }', default: '请求变更选中节点时触发' },
+    {
+      name: 'expandedChange',
+      type: '{ expandedKeys: string[] }',
+      default: '请求展开或折叠分支时触发',
+    },
+    { name: 'getTree', type: '() => TreeEntry[]', default: '返回当前有效节点的层级快照' },
+    { name: 'getExpandedKeys', type: '() => string[]', default: '返回当前已展开分支的键列表' },
+    {
+      name: 'requestValue',
+      type: '(key: string) => boolean',
+      default: '以编程方式请求选中指定节点',
+    },
+    {
+      name: 'requestExpanded',
+      type: '(key: string, open: boolean) => boolean',
+      default: '以编程方式请求展开或折叠分支',
+    },
+    { name: 'refresh', type: '() => void', default: '重新计算并同步树形结构快照' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-TREE.yaml', 'P-BASE-TREE.yaml']}
+/>

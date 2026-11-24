@@ -1,13 +1,13 @@
 ---
 title: 'Resizable'
-description: 'Percentage-sized resizable split panels supporting collapsing and nested layouts.'
+description: 'Accessible resizable panel groups and layouts with collapsible stops, RTL, and keyboard support.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Resizable divides a container into two or more percentage-sized panels with draggable, keyboard-accessible split handles and support for nested split groups. The examples on this page use the **Shadcn Rhea** style preset.
+Accessible percentage-sized resizable panel groups with keyboard controls, collapsible stops, and nested orientations. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -19,40 +19,109 @@ Resizable divides a container into two or more percentage-sized panels with drag
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-shadcn/resizable` and adapt them for your target runtime:
+
+```ts
+import {
+  resizableRoot,
+  resizablePanel,
+  resizableHandle,
+} from '@proto.ui/prototypes-shadcn/resizable';
+```
 
 ## Usage
 
-Resizable consists of `Root`, `Panel`, and `Handle`:
+```tsx
+import {
+  ShadcnResizableRoot,
+  ShadcnResizablePanel,
+  ShadcnResizableHandle,
+} from '../proto-ui/components/react';
 
-- `Root` manages panel proportions, orientation, and constraints.
-- Place N `Panel` elements (`index: 0..N-1`) and N−1 `Handle` elements (`index: 0..N-2`). Each `Handle` resizes only its two adjacent panels while preserving their combined size and every other panel.
-- Each `Panel` exposes its dimensionless size via the `--pui-size` CSS variable for static `flex-basis` layout rules.
+export function Example() {
+  return (
+    <ShadcnResizableRoot
+      orientation="horizontal"
+      defaultSizes={[50, 50]}
+      className="h-56 max-w-md rounded-lg border border-border overflow-hidden"
+    >
+      <ShadcnResizablePanel index={0}>One</ShadcnResizablePanel>
+      <ShadcnResizableHandle index={0} withHandle />
+      <ShadcnResizablePanel index={1}>Two</ShadcnResizablePanel>
+    </ShadcnResizableRoot>
+  );
+}
+```
 
-### Multi-panel layout and constraints
+### Composition
 
-- Use `sizes` (controlled) or `defaultSizes` (uncontrolled) to pass a complete percentage vector. The two-panel `value` / `defaultValue` API remains available; when `sizes` is supplied, it takes precedence.
-- Pass `constraints` to configure per-panel `min` (`0`), `max` (`100`), `collapsible` (`false`), and `collapsedSize` (`0`). Percentages normalize to `100`; infeasible configurations keep the last valid layout and ignore invalid resize requests.
-- Collapsing acts as a discrete stop and respects the adjacent panel's `max` limit.
+Proto UI's `resizableRoot`, `resizablePanel`, and `resizableHandle` correspond to upstream shadcn/ui's `ResizablePanelGroup`, `ResizablePanel`, and `ResizableHandle`:
 
-### Interaction and nesting
+```text
+ResizableRoot
+├── ResizablePanel (index: 0)
+├── ResizableHandle (index: 0)
+└── ResizablePanel (index: 1)
+```
 
-- Pointer dragging, arrow keys, `Shift` acceleration, `Home`/`End`, and collapse share one constrained resize pipeline. Drag deltas are normalized against total panel extents, excluding fixed handle widths.
-- Each `Handle` carries the default accessible name `Resize panels`.
-- Nested `Root` groups manage their own ratios, constraints, and orientation independently so horizontal and vertical splits compose cleanly.
+- Place `N` `Panel` elements (`index: 0..N-1`) and `N - 1` `Handle` elements (`index: 0..N-2`). Each `Handle` resizes only its adjacent pair while preserving their combined size and every other panel.
+- Each `Panel` exposes its dimensionless percentage through `--pui-size` for static `flex-basis` layout rules. Drag deltas normalize against panel extents, excluding fixed handle widths.
+- Pass `constraints` for per-panel `min` (`0`), `max` (`100`), `collapsible` (`false`), and `collapsedSize` (`0`). Pass `sizes` for controlled mode and handle `sizesChange` / `sizesCommit`.
+- Supports arrow keys, `Shift` 10× acceleration, `Home` / `End`, and `Enter` collapse toggles. Each `Handle` defaults its accessible name to `Resize panels`.
 
-### Controlled mode and methods
+## Examples
 
-- Passing `sizes` enables controlled mode: listen to `sizesChange` and `sizesCommit` (payload `{ sizes }`) and pass updated values back to accept changes. Canceled gestures emit no `sizesCommit`.
-- Programmatic resizing is available via `requestResize(index, nextSize, commit)` and `requestSizes(nextSizes, commit)`.
+### Vertical
+
+Use `orientation="vertical"` for vertical resizing.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-resizable-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Handle
+
+Use the `withHandle` prop on `Handle` to display a visible grip handle, or omit it for a minimal 1px separator.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-resizable-handle"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Pass `direction="rtl"` on `Root` to mirror panel order and horizontal arrow-key increments.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-resizable-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Multi-panel & Collapsible
+
+Combine `defaultSizes` and `constraints` for a three-panel workspace. Focus the first handle and press `Enter` to toggle the collapsible sidebar.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-resizable-collapsible"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root` (`Panel` defaults `index` to `0`):
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'sizes', type: 'readonly number[]', default: '—' },
+    { name: 'defaultSizes', type: 'readonly number[]', default: '—' },
+    { name: 'constraints', type: 'readonly ResizablePanelConstraint[]', default: '[]' },
+    { name: 'value', type: 'number', default: '—' },
     { name: 'defaultValue', type: 'number', default: '50' },
     { name: 'min', type: 'number', default: '10' },
     { name: 'max', type: 'number', default: '90' },
@@ -60,10 +129,28 @@ The following props belong to `Root` (`Panel` defaults `index` to `0`):
     { name: 'collapsible', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
-    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
   ]}
 />
+
+### Panel & Handle
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Panel.index', type: 'number', default: '0' },
+    { name: 'Panel.styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+    { name: 'Handle.index', type: 'number', default: '0' },
+    { name: 'Handle.withHandle', type: 'boolean', default: 'false' },
+    { name: 'Handle.styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+  ]}
+/>
+
+- **Exposed states**: Root exposes `value` and `sizes`; Panel exposes `size`; Handle exposes `value`, `focusVisible`, and `disabled`.
+- **Events**: Root emits `sizesChange` / `sizesCommit` (`{ sizes }`) and legacy two-panel `valueChange` / `valueCommit` (`{ value }`). Cancelled drags emit no `*Commit`.
+- **Methods**: Root exposes `requestResize(index, next, commit?)`, `requestSizes(next, commit?)`, `requestValue(next, commit?)`, and `cancelResize()`.
 
 ## References
 

@@ -4,6 +4,7 @@ import {
   type TableRootProps,
   type TableRootExposes,
 } from '@proto.ui/prototypes-base/table';
+import type { BootstrapTableRootExposes, BootstrapTableRootProps } from './types';
 
 // Base Table intentionally has no public asTable* entries. The public authored
 // hook mechanism preserves its exact setup, modules, domain and anonymous slot.
@@ -12,18 +13,25 @@ const asTableRoot = defineAsHook<TableRootProps, TableRootExposes, {}>({
   name: 'as-bootstrap-2-3-2-table-root-base',
 });
 
-export const tableRoot = definePrototype<TableRootProps, TableRootExposes>({
+export const tableRoot = definePrototype<BootstrapTableRootProps, BootstrapTableRootExposes>({
   name: 'bootstrap-2-3-2-table-root',
   modules: asTableRoot.modules,
   setup(def) {
     const behavior = asTableRoot();
-    // Bootstrap v2.3.2 less/tables.less: baseline .table, not the optional
-    // bordered/condensed/striped/hover classes. No Head/Body/RowGroup is added.
+    def.props.define({
+      bordered: { type: 'boolean', empty: 'fallback' },
+    });
+    def.props.setDefaults({ bordered: false });
+    // Bootstrap v2.3.2 less/tables.less: baseline .table plus optional .table-bordered frame.
     def.feedback.style.use(
       tw(
         'table w-full max-w-full mb-[20px] border-collapse border-spacing-0 bg-transparent text-[14px] leading-[20px] text-foreground'
       )
     );
+    def.rule({
+      when: (w) => w.prop('bordered').eq(true),
+      intent: (i) => i.feedback.style.use(tw('border border-border rounded-[4px]')),
+    });
     return behavior.render;
   },
 });

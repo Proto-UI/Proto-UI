@@ -7,6 +7,7 @@ import {
 
 export default definePrototype<ScrollAreaViewportProps, ScrollAreaViewportExposes>({
   name: 'bootstrap-2-3-2-scroll-area-viewport',
+  modules: asScrollAreaViewport.modules,
   setup(def) {
     const inherited = asScrollAreaViewport();
     const state = inherited.stateHandles;

@@ -18,7 +18,9 @@ export const tableHeaderCell = definePrototype<
     // Header emphasis comes from weight, not a muted fill; padding mirrors the
     // data-table sibling's cell geometry.
     def.feedback.style.use(
-      tw('table-cell text-left align-middle whitespace-nowrap px-4 py-3 text-sm font-semibold')
+      tw(
+        'table-cell h-12 text-start align-middle whitespace-nowrap px-4 py-3 text-sm font-heading font-semibold'
+      )
     );
     return inherited.render;
   },

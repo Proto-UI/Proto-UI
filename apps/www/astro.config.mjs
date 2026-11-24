@@ -1718,6 +1718,18 @@ export default defineConfig({
                   translations: { en: 'Radio Group', 'zh-CN': 'Radio Group' },
                   slug: 'ui-libraries/bootstrap-2-3-2/radio-group',
                 },
+                {
+                  label: 'Scroll Area',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Scroll Area', 'zh-CN': 'Scroll Area' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/scroll-area',
+                },
+                {
+                  label: 'Table',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Table', 'zh-CN': 'Table' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/table',
+                },
               ],
             },
             {
@@ -1999,6 +2011,18 @@ export default defineConfig({
                   badge: earlyDraftBadge,
                   translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
                   slug: 'ui-libraries/liquid-glass/textarea',
+                },
+                {
+                  label: 'Scroll Area',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Scroll Area', 'zh-CN': 'Scroll Area' },
+                  slug: 'ui-libraries/liquid-glass/scroll-area',
+                },
+                {
+                  label: 'Table',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Table', 'zh-CN': 'Table' },
+                  slug: 'ui-libraries/liquid-glass/table',
                 },
               ],
             },

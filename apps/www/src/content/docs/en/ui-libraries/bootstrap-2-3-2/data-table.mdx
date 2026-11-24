@@ -1,11 +1,13 @@
 ---
 title: 'Data Table'
-description: 'A Bootstrap 2.3.2 data table with stable sorting, global filtering, pagination, and row selection.'
+description: 'A Bootstrap 2.3.2 data table with stable sorting, global and column filtering, column visibility, pagination, and row selection.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Data Table builds stable record identity, sorting, global filtering, pagination, and row selection on top of semantic table structure with Bootstrap 2.3.2 styling.
+Data Table builds stable sorting, global and per-column filtering, column visibility, pagination, and row or page selection on top of semantic table structure with authentic Bootstrap 2.3.2 `8px` cell spacing, horizontal rules, `.info` selection tint, and classic gradient `.btn` pagination controls.
 
 ## Preview
 
@@ -21,14 +23,161 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
-- **Records and row slots**: Provide a unique `id` on every data row. Body rows (`DataTableRow`) map to the current page by `index`, and cells render their field via `columnKey`, updating real table content on sort.
-- **Sortable headers**: Place sortable header triggers inside `DataTableHeaderRow` so header rows remain distinct from body record slots (`DataTableRow`).
-- **Scope**: Data fetching, inline cell editing, and column reordering are left to application code.
+```tsx
+import {
+  Bootstrap232DataTableCaption,
+  Bootstrap232DataTableCell,
+  Bootstrap232DataTableHeader,
+  Bootstrap232DataTableHeaderRow,
+  Bootstrap232DataTableNext,
+  Bootstrap232DataTablePrevious,
+  Bootstrap232DataTableRoot,
+  Bootstrap232DataTableRow,
+} from '../proto-ui/components/react';
+
+const rows = [
+  { id: 'm5gr84i9', status: 'Success', email: 'ken99@example.com', amount: 316 },
+  { id: '3u1reuv4', status: 'Success', email: 'abe45@example.com', amount: 242 },
+];
+
+export function Example() {
+  return (
+    <Bootstrap232DataTableRoot rows={rows} pageSize={4}>
+      <Bootstrap232DataTableCaption>Recent payments.</Bootstrap232DataTableCaption>
+      <Bootstrap232DataTableHeaderRow>
+        <Bootstrap232DataTableHeader headerKey="status">Status</Bootstrap232DataTableHeader>
+        <Bootstrap232DataTableHeader headerKey="email">Email</Bootstrap232DataTableHeader>
+        <Bootstrap232DataTableHeader headerKey="amount" className="text-right">
+          Amount
+        </Bootstrap232DataTableHeader>
+      </Bootstrap232DataTableHeaderRow>
+      {[0, 1].map((index) => (
+        <Bootstrap232DataTableRow key={index} index={index}>
+          <Bootstrap232DataTableCell columnKey="status" headers={['status']} />
+          <Bootstrap232DataTableCell columnKey="email" headers={['email']} />
+          <Bootstrap232DataTableCell
+            columnKey="amount"
+            headers={['amount']}
+            className="text-right"
+          />
+        </Bootstrap232DataTableRow>
+      ))}
+      <div className="table-caption caption-bottom">
+        <div className="flex justify-end gap-2 pt-3">
+          <Bootstrap232DataTablePrevious>Previous</Bootstrap232DataTablePrevious>
+          <Bootstrap232DataTableNext>Next</Bootstrap232DataTableNext>
+        </div>
+      </div>
+    </Bootstrap232DataTableRoot>
+  );
+}
+```
+
+### Structure & Behavior
+
+- **Records and row slots**: Provide a unique `id` on every data row. Body rows (`DataTableRow`) map to the active page by `index`, and cells read their field via `columnKey`. Hidden columns and empty slots automatically withdraw `table-row` / `table-cell` display so hidden rows collapse cleanly.
+- **Sortable headers and hover feedback**: Place sortable column headers in `DataTableHeaderRow`. Interactive rows use Bootstrap 2.3.2's `#f5f5f5` hover highlight and `.info` selection palette.
+
+## Examples
+
+### Basic Table & Sorting
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-data-table-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Filtering & Column Visibility
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-data-table-filtering"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Pagination & Row Selection
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-data-table-pagination"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Read-Only & Disabled States
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-data-table-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part / Prop          | Description                                           |
-| -------------------- | ----------------------------------------------------- |
-| `DataTableHeaderRow` | Header row container for sortable column triggers     |
-| `DataTableRow`       | Page-indexed body row slot bound to the active record |
-| `id` / `columnKey`   | Unique record identifier and cell column key          |
+### Root
+
+Passing `sortKey`, `sortDirection`, `page`, or `selectedKeys` controls the corresponding state independently.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'rows', type: 'readonly DataRecord[]', default: '[]' },
+    { name: 'sortKey', type: 'string', default: '— (controlled)' },
+    { name: 'defaultSortKey', type: 'string', default: "''" },
+    {
+      name: 'sortDirection',
+      type: "'none' | 'ascending' | 'descending'",
+      default: '— (controlled)',
+    },
+    {
+      name: 'defaultSortDirection',
+      type: "'none' | 'ascending' | 'descending'",
+      default: "'none'",
+    },
+    { name: 'filter', type: 'string', default: "''" },
+    { name: 'columnFilters', type: 'Readonly<Record<string, string>>', default: '{}' },
+    { name: 'columnVisibility', type: 'Readonly<Record<string, boolean>>', default: '{}' },
+    { name: 'page', type: 'number', default: '— (controlled)' },
+    { name: 'defaultPage', type: 'number', default: '0' },
+    { name: 'pageSize', type: 'number', default: '10' },
+    { name: 'selectedKeys', type: 'readonly string[]', default: '— (controlled)' },
+    { name: 'defaultSelectedKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Part Props
+
+<ApiPropsTable
+  headers={{ name: 'Part / Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Row.index', type: 'number', default: '0' },
+    { name: 'Row.header', type: 'boolean', default: 'false' },
+    { name: 'Header.headerKey', type: 'string', default: "''" },
+    { name: 'Header.headerKind', type: "'column' | 'row'", default: "'column'" },
+    { name: 'Header.sortable', type: 'boolean', default: 'true' },
+    { name: 'Cell.columnKey', type: 'string', default: "''" },
+    { name: 'Cell.headers', type: 'readonly string[]', default: '[]' },
+    { name: 'Cell.renderValue', type: 'boolean', default: 'true' },
+    { name: 'Previous / Next', type: 'ButtonProps', default: 'classic .btn gradient style' },
+  ]}
+/>
+
+### Events, Methods & Exposed States
+
+- **Events (Root)**: `sortChange`, `pageChange`, `selectionChange`.
+- **Methods (Root)**: `getRows()`, `getRecord(id)`, `getSelectedKeys()`, `requestSort(key)`, `requestPage(next)`, `requestSelection(id)`, `requestPageSelection(selected?)`.
+- **Exposed States**: Root exposes `filteredCount` and `pageSelection`; Row exposes `rowKey`, `selected`, `focused`, and `focusVisible`; Header exposes `sort`; Cell exposes `displayValue`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-DATA-TABLE.yaml',
+    'P-BOOTSTRAP-2-3-2-DATA-TABLE-HEADER-ROW.yaml',
+    'P-BASE-DATA-TABLE.yaml',
+    'P-BASE-DATA-TABLE-HEADER-ROW.yaml',
+  ]}
+/>

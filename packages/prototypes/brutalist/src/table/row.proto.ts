@@ -38,15 +38,19 @@ export const tableRow = definePrototype<BrutalistTableRowProps, BrutalistTableRo
         ),
       intent: (i) => i.feedback.style.use(tw('border-b-0')),
     });
-    // The footer earns its summary weight through a doubled top rule and
-    // semibold ink rather than a muted fill.
+    // Header rows carry the family's bold main accent strip; footer rows earn
+    // summary emphasis via a doubled top border, contrasting surface and weight.
+    def.rule({
+      when: (w) => w.prop('section').eq('header'),
+      intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground')),
+    });
     def.rule({
       when: (w) => w.prop('section').eq('footer'),
-      intent: (i) => i.feedback.style.use(tw('border-t-2 border-black font-semibold')),
+      intent: (i) =>
+        i.feedback.style.use(tw('border-t-2 border-black bg-secondary-background font-semibold')),
     });
     // Hover is paint observation only: no Trigger, selection, focus or action
-    // owner. The state owner mirrors the Shadcn row; only the paint is family
-    // tokens, a dimmed main accent rather than a muted wash.
+    // owner. Body rows receive a dimmed main accent wash; headers and footers stay calm.
     const hovered = def.state.bool('brutalistTableRowHovered', false);
     const clearHover = () => hovered.set(false, 'reason: passive table row hover ends');
     def.event.on('pointer.enter', () =>
@@ -56,7 +60,7 @@ export const tableRow = definePrototype<BrutalistTableRowProps, BrutalistTableRo
     def.event.on('pointer.cancel', clearHover);
     def.lifecycle.onUnmounted(clearHover);
     def.rule({
-      when: (w) => w.state(hovered).eq(true),
+      when: (w) => w.all(w.state(hovered).eq(true), w.prop('section').eq('body')),
       intent: (i) => i.feedback.style.use(tw('bg-main/20')),
     });
     return inherited.render;

@@ -53,7 +53,7 @@ export function applyBootstrapCalendarDayPaint(
           w.all(w.state(state.hovered).eq(false), w.state(state.pressed).eq(false))
         )
       ),
-    intent: (i) => i.feedback.style.use(tw('bg-muted border-border')),
+    intent: (i) => i.feedback.style.use(tw('bg-muted border-border font-bold')),
   });
   def.rule({
     when: (w) =>
@@ -82,6 +82,23 @@ export function applyBootstrapCalendarDayPaint(
           'text-paint-[#fff_0_-1px_0_rgb(0_0_0/25%)] border-[rgb(0_0_0/10%)_rgb(0_0_0/10%)_rgb(0_0_0/25%)_rgb(0_0_0/10%)]'
         )
       ),
+  });
+  def.rule({
+    when: (w) =>
+      w.all(
+        w.state(state.rangeStart).eq(true),
+        w.state(state.rangeEnd).eq(false),
+        w.state(state.rangePending).eq(false)
+      ),
+    intent: (i) => i.feedback.style.use(tw('rounded-none rounded-l-[4px]')),
+  });
+  def.rule({
+    when: (w) => w.all(w.state(state.rangeEnd).eq(true), w.state(state.rangeStart).eq(false)),
+    intent: (i) => i.feedback.style.use(tw('rounded-none rounded-r-[4px]')),
+  });
+  def.rule({
+    when: (w) => w.state(state.rangePending).eq(true),
+    intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring')),
   });
   def.rule({
     when: (w) =>
@@ -133,11 +150,11 @@ export function applyBootstrapCalendarDayPaint(
   def.rule({
     when: (w) => w.state(state.rangeMiddle).eq(true),
     intent: (i) =>
-      i.feedback.style.use(tw('rounded-none border-transparent bg-secondary text-foreground')),
+      i.feedback.style.use(tw('rounded-none border-transparent bg-accent text-accent-foreground')),
   });
   def.rule({
     when: (w) => w.all(w.state(state.outside).eq(true), w.state(state.selected).eq(false)),
-    intent: (i) => i.feedback.style.use(tw('text-[#999]')),
+    intent: (i) => i.feedback.style.use(tw('text-muted-foreground')),
   });
   def.rule({
     when: (w) => w.state(state.disabled).eq(true),

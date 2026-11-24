@@ -17,7 +17,120 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-### 多选与范围选择
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。`Date Picker` 由 [Popover](../popover/) 与 [Calendar](../calendar/) 组合构成，直接从工作区导入对应部件即可使用。
+
+## 用法
+
+```tsx
+import {
+  ShadcnDatePickerRoot,
+  ShadcnDatePickerTrigger,
+  ShadcnDatePickerValue,
+  ShadcnDatePickerContent,
+  ShadcnDatePickerDay,
+  ShadcnCalendarCaption,
+  ShadcnCalendarPrevious,
+  ShadcnCalendarHeading,
+  ShadcnCalendarNext,
+  ShadcnCalendarGrid,
+  ShadcnCalendarWeekdays,
+  ShadcnCalendarWeekday,
+  ShadcnCalendarRow,
+} from '../proto-ui/components/react';
+
+export function DatePickerExample() {
+  return (
+    <ShadcnDatePickerRoot defaultMonth="2026-10" styleProfile="rhea">
+      <ShadcnDatePickerTrigger className="w-56">
+        <ShadcnDatePickerValue placeholder="Pick a date" />
+        <span aria-hidden="true">▾</span>
+      </ShadcnDatePickerTrigger>
+      <ShadcnDatePickerContent side="bottom" align="start" sideOffset={6}>
+        <ShadcnCalendarCaption>
+          <ShadcnCalendarPrevious a11yLabel="Previous month">‹</ShadcnCalendarPrevious>
+          <ShadcnCalendarHeading />
+          <ShadcnCalendarNext a11yLabel="Next month">›</ShadcnCalendarNext>
+        </ShadcnCalendarCaption>
+        <ShadcnCalendarGrid>
+          <ShadcnCalendarWeekdays>
+            {[0, 1, 2, 3, 4, 5, 6].map((offset) => (
+              <ShadcnCalendarWeekday key={offset} offset={offset} />
+            ))}
+          </ShadcnCalendarWeekdays>
+          {[0, 1, 2, 3, 4, 5].map((row) => (
+            <ShadcnCalendarRow key={row} index={row}>
+              {[0, 1, 2, 3, 4, 5, 6].map((col) => (
+                <ShadcnDatePickerDay key={col} offset={row * 7 + col} />
+              ))}
+            </ShadcnCalendarRow>
+          ))}
+        </ShadcnCalendarGrid>
+      </ShadcnDatePickerContent>
+    </ShadcnDatePickerRoot>
+  );
+}
+```
+
+### 结构组成
+
+```text
+DatePickerRoot
+├── DatePickerTrigger
+│   └── DatePickerValue
+└── DatePickerContent
+    ├── CalendarCaption
+    │   ├── CalendarPrevious
+    │   ├── CalendarHeading
+    │   └── CalendarNext
+    └── CalendarGrid
+        ├── CalendarWeekdays -> CalendarWeekday (0..6)
+        └── CalendarRow (0..5) -> DatePickerDay (0..41)
+```
+
+### 选择模式与关闭时机
+
+- **单选与范围模式**：`mode="single"` 在接受选中日期后请求关闭弹层；`mode="range"` 在选中起点时保持弹层打开，选中第二个端点并形成完整范围后自动请求关闭。受控模式下若本次选择被拒绝或尚未采纳，弹层保持打开。
+- **多选模式**：`mode="multiple"` 每次切换日期后保持弹层打开，方便连续选择，完成后通过点击外部或按 `Escape` 关闭。
+- **显示值（`Value`）**：空值时显示 `placeholder` 并自动套用 muted 占位色；单选显示 `YYYY-MM-DD`，多选显示按日期排序的逗号列表，范围未完成时显示 `from …`，完成后显示 `from – to`。
+- **键盘与无障碍**：弹层焦点恢复与外部关闭由 `Popover` 管理，网格方向键导航、不可用日期跳过与本地化朗读由 [Calendar](../calendar/) 管理。
+
+## 示例
+
+### 基础用法
+
+带标签与起止日期范围限制的单日选择器。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-date-picker-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 范围选择
+
+通过 `mode="range"` 搭配 `defaultRange`、`minNights`、`maxNights` 与 `unavailable` 选择起止日期范围。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-date-picker-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多选与禁用状态
+
+`mode="multiple"` 支持连续勾选多个日期并限制上限（`maxSelected`），右侧展示 `disabled` 禁用态触发器。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-date-picker-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 范围与多选对比
+
+同时对比 `mode="range"` 与 `mode="multiple"` 在同一日期约束下的交互与关闭时机。
 
 <PrototypePreviewer
   demoId="demo-shadcn-date-picker-selection"
@@ -25,34 +138,48 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 用法
+### RTL 与本地化
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+通过 `direction="rtl"` 与 `locale="ar-SA"` 切换从右到左的布局方向与本地化月份/星期文案。
 
-### 选择模式与关闭时机
-
-- **单选与范围模式**：`mode="single"` 在接受选中日期后请求关闭弹层；`mode="range"` 在选中起点时保持弹层打开，选中第二个端点并形成完整范围后自动请求关闭。受控模式下若本次选择被拒绝或尚未采纳，弹层保持打开。
-- **多选模式**：`mode="multiple"` 每次切换日期后保持弹层打开，方便连续选择，完成后通过点击外部或按 `Escape` 关闭。
-- **日期规则继承**：范围与多选模式下的 `range` / `defaultRange`、`values` / `defaultValues`、日期范围限制（`min`、`max`、`unavailable`）及数量/间隔约束均直接复用 [Calendar](../calendar/) 的属性与回调。
-
-### 显示值（`Value`）
-
-`Value` 部件会根据当前模式自动格式化展示内容：
-
-- 单选：单个 `YYYY-MM-DD` 日期；
-- 多选：按日期排序的逗号分隔列表；
-- 范围：未完成时显示 `from …`，完成后显示 `from – to`；
-- 空值：显示 `placeholder`。
-
-弹层焦点恢复与关闭交互由 `Popover` 统一管理。
+<PrototypePreviewer
+  demoId="demo-shadcn-date-picker-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-弹层的 `open` 状态由 `Popover` 管理，选择模式、选中值、日期限制与显示月份由 `Calendar` 管理。`Date Picker` 仅在 `Value` 上额外提供一个属性：
+`Date Picker` 由 `DatePickerRoot`、`DatePickerTrigger`、`DatePickerValue`、`DatePickerContent` 与 `DatePickerDay` 组成，弹层内复用 `Calendar` 的标题、月份导航与星期网格部件。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
-  rows={[{ name: 'placeholder', type: 'string', default: 'Pick a date' }]}
+  rows={[
+    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: "'single'" },
+    { name: 'open / defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'value / defaultValue', type: 'string (YYYY-MM-DD)', default: "''" },
+    { name: 'values / defaultValues', type: 'readonly string[]', default: '[]' },
+    { name: 'range / defaultRange', type: '{ from?: string; to?: string }', default: '{}' },
+    { name: 'month / defaultMonth', type: 'string (YYYY-MM)', default: '当前月' },
+    { name: 'min / max', type: 'string (YYYY-MM-DD)', default: '—' },
+    { name: 'unavailable', type: 'readonly string[]', default: '[]' },
+    { name: 'minSelected / maxSelected', type: 'number', default: '—' },
+    { name: 'minNights / maxNights', type: 'number', default: '—' },
+    { name: 'locale', type: 'string', default: "'en-US'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+    { name: 'disabled / readOnly', type: 'boolean', default: 'false' },
+    {
+      name: 'side / align / sideOffset',
+      type: 'PopoverContentProps',
+      default: "'bottom' / 'center' / 4",
+    },
+    { name: 'placeholder (Value)', type: 'string', default: "'Pick a date'" },
+    {
+      name: 'styleProfile',
+      type: "'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'nova'",
+    },
+  ]}
 />
 
 ## 参考

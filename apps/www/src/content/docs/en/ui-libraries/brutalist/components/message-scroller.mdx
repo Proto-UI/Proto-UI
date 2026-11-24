@@ -1,12 +1,13 @@
 ---
 title: 'Message Scroller'
-description: 'A Brutalist-styled message feed container with automatic end-follow and a jump-to-latest control.'
+description: 'A Brutalist-styled chat scroll container with automatic end-follow and a raised jump-to-latest control.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Message Scroller builds on Scroll Surface's end-follow behavior for chat logs and live feeds. It automatically follows appended items while the reader stays at the end, and lets readers who scroll up jump back to the latest messages on demand.
+Message Scroller pairs Scroll Surface end-follow behavior with Brutalist 2px borders, `rounded-base` framing, and hard 4px offset shadows. New messages auto-scroll while the reader is at the bottom, pause when scrolling up into history, and snap back via the floating Jump control.
 
 ## Preview
 
@@ -20,36 +21,124 @@ Message Scroller builds on Scroll Surface's end-follow behavior for chat logs an
 
 Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/message-scroller` and adapt them for your target runtime.
 
+```ts
+import {
+  messageScrollerRoot,
+  messageScrollerViewport,
+  messageScrollerJump,
+} from '@proto.ui/prototypes-brutalist/message-scroller';
+```
+
 ## Usage
 
-### Anatomy
+Place `Root` inside a height-constrained container. `Root` owns the rounded outer frame and 4px shadow, `Viewport` handles square-cornered vertical scrolling, and `Jump` floats above the bottom-right corner with a crisp `+4px, +4px` press snap:
 
-Message Scroller is composed of `Root`, `Viewport`, and `Jump`:
+```tsx
+<div className="h-96 w-full max-w-md">
+  <BrutalistMessageScrollerRoot a11yLabel="Team chat messages">
+    <BrutalistMessageScrollerViewport>
+      <div className="flex flex-col gap-3 p-4 pb-16">
+        {messages.map((message) => (
+          <div key={message.id}>{message.text}</div>
+        ))}
+      </div>
+    </BrutalistMessageScrollerViewport>
+    <BrutalistMessageScrollerJump>Scroll to end ↓</BrutalistMessageScrollerJump>
+  </BrutalistMessageScrollerRoot>
+</div>
+```
 
-- `Root`: Coordinates end-follow state, the new-content count, and the scroll region's accessible name.
-- `Viewport`: Renders the scrollable message list container.
-- `Jump`: Action control that jumps back to the latest messages when the reader leaves the end (accepts Button props).
+### Anatomy & Behavior
 
-### Behavior Notes
+- **Root**: Styled `rounded-base` panel with 2px black border and 4px offset shadow; coordinates end-follow state, `newContentCount`, and `a11yLabel`.
+- **Viewport**: Square-cornered `overflow-y-auto` scrollable region that preserves reading position while scrolled away from the end.
+- **Jump**: Floating primary raised control that settles into its shadow on press and jumps to the end without stealing keyboard focus.
 
-- **End-follow policy**: New messages auto-scroll into view only while the reader is already at the end. Scrolling up pauses auto-follow until the reader returns or clicks `Jump`.
-- **Application-owned count**: Pass `newContentCount` from your application state to reflect new arrivals; the component does not infer unread business logic.
-- **Focus preservation**: Activating `Jump` scrolls to the end without stealing or requesting focus.
-- **Accessible naming**: Set `a11yLabel` on `Root` to name the scrollable region (defaults to `'Messages'`).
+## Examples
+
+### Add Messages
+
+New messages scroll into view automatically when already at the bottom. Scroll up first and click **Add message** to preserve your reading position and increment the unread counter.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-message-scroller-add-messages"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Group Feed & Markers
+
+Combine role badges and high-contrast banner markers inside one scrollable transcript.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-message-scroller-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root`:
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
     { name: 'newContentCount', type: 'number', default: '0' },
-    { name: 'a11yLabel', type: 'string', default: 'Messages' },
+    { name: 'a11yLabel', type: 'string', default: "'Messages'" },
   ]}
 />
 
-Other parts:
+### Viewport
 
-- **Viewport**: No props.
-- **Jump**: Accepts Button props.
+<ApiPropsTable
+  headers={{ name: 'Expose', type: 'Type', default: 'Notes' }}
+  rows={[
+    {
+      name: 'atEnd',
+      type: 'ExposeState<boolean>',
+      default: 'Whether the viewport is currently at the bottom',
+    },
+    {
+      name: 'following',
+      type: 'ExposeState<ScrollEndFollowState>',
+      default: 'Current end-follow state',
+    },
+    {
+      name: 'requestStatus',
+      type: 'ExposeState<ScrollEndFollowRequestStatus>',
+      default: 'Status of the latest end-follow request',
+    },
+    { name: 'jumpToEnd()', type: '() => void', default: 'Programmatically scroll to the end' },
+    {
+      name: 'pauseFollowing()',
+      type: '() => ScrollSurfaceRequestOutcome',
+      default: 'Pause automatic end-following',
+    },
+  ]}
+/>
+
+### Jump
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Expose', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'atEnd (expose)',
+      type: 'ExposeState<boolean>',
+      default: 'Mirrored bottom state from Root',
+    },
+    {
+      name: 'newContentCount (expose)',
+      type: 'ExposeState<number>',
+      default: 'Mirrored new-content count from Root',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-MESSAGE-SCROLLER.yaml', 'P-BASE-MESSAGE-SCROLLER.yaml']}
+/>

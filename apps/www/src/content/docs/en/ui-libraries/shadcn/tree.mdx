@@ -1,6 +1,6 @@
 ---
 title: 'Tree'
-description: 'A hierarchical tree view with branch expansion, keyboard navigation, and RTL support.'
+description: 'A hierarchical Shadcn-styled tree view with branch expansion, embedded sidebar appearance, keyboard navigation, and RTL support.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -19,35 +19,98 @@ Tree displays nested hierarchies—such as file browsers or document outlines—
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes from `@proto.ui/prototypes-shadcn/tree` and adapt them for your target runtime:
+
+```ts
+import { treeRoot, treeItem, treeGroup, treeToggle } from '@proto.ui/prototypes-shadcn/tree';
+```
 
 ## Usage
 
-Tree consists of `Root`, `Item`, `Group` (`TreeGroup`), and `Toggle`:
+```tsx
+<ShadcnTreeRoot defaultValue="button" defaultExpandedKeys={['src', 'components']}>
+  <div className="flex items-center gap-1">
+    <ShadcnTreeToggle nodeKey="src" size="icon">
+      ▾
+    </ShadcnTreeToggle>
+    <ShadcnTreeItem nodeKey="src" textValue="src" className="flex-1">
+      src/
+    </ShadcnTreeItem>
+  </div>
+  <ShadcnTreeGroup nodeKey="src">
+    <ShadcnTreeItem nodeKey="button" parentKey="src" textValue="button.tsx">
+      button.tsx
+    </ShadcnTreeItem>
+  </ShadcnTreeGroup>
+</ShadcnTreeRoot>
+```
+
+### Structure & Accessibility
 
 - Give each `Item` a unique `nodeKey` and set `parentKey` to its parent branch's key. Invalid configurations such as duplicate keys, missing parents, or cycles are ignored so the active tree stays valid.
 - Place child items inside a `TreeGroup` whose `nodeKey` matches its branch `Item`; Tree automatically links and cleans up `aria-controls` and `aria-labelledby` attributes as nodes mount and unmount.
 - Collapsing a branch hides its `TreeGroup` without removing the underlying hierarchy. If focus was inside the collapsed branch, focus moves to the visible ancestor without stealing focus from outside the tree.
+- **Keyboard navigation**: `ArrowUp` / `ArrowDown`, `Home` / `End`, and first-letter typeahead move focus in visual order. In LTR mode, `ArrowRight` expands a branch or enters its first child and `ArrowLeft` collapses or moves to the parent; `direction="rtl"` mirrors indentation guides and swaps horizontal arrow mappings.
 
-### Embedded appearance and writing direction
+### Style Profiles (`styleProfile`)
 
-- For file navigation inside a sidebar or existing surface, set `appearance="embedded"` on both `Root` and `Item` to enable a subtle selected background and text wrapping at enlarged font sizes.
-- Setting `direction="rtl"` on `Root` mirrors group indentation and swaps Left/Right keyboard mappings (Left expands or enters children; Right collapses or moves to the parent). Up/Down, `Home`/`End`, and first-letter typeahead continue following visual order.
+Supports `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`, and `new-york-v4` (`new-york` alias). When omitted or set to `inherit`, components inherit from the nearest [Style Scope](../style-scope/) or fall back to `nova`.
 
-### Controlled and read-only
+## Examples
 
-- Pass `value` or `expandedKeys` for controlled selection or expansion; inserting, moving, or removing items updates the hierarchy without emitting spurious selection events.
-- `readOnly` blocks selection changes while keeping navigation and branch expansion enabled.
+### Embedded Sidebar Appearance
+
+Set `appearance="embedded"` on `Root` to strip the outer card border and propagate a subtle sidebar row style automatically to descendant `Item`s (any individual `Item` can still override `appearance`).
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tree-embedded"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled Selection & Expansion
+
+Pass `value` and/or `expandedKeys` to control selection and branch expansion externally via `valueChange` and `expandedChange`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tree-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled & Read-Only
+
+Disable the entire tree or individual items with `disabled`, or set `readOnly` on `Root` to lock selection while preserving navigation and branch expansion.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tree-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Right-to-Left (RTL)
+
+Set `direction="rtl"` on `Root` to mirror indentation guides and swap Left/Right arrow navigation.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tree-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root` (pass `value` or `expandedKeys` for controlled mode):
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: 'undefined (controlled)' },
     { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'expandedKeys', type: 'readonly string[]', default: 'undefined (controlled)' },
     { name: 'defaultExpandedKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'appearance', type: "'default' | 'embedded'", default: 'default' },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: 'inherit → nearest scope → nova' },
     { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -55,11 +118,79 @@ The following props belong to `Root` (pass `value` or `expandedKeys` for control
   ]}
 />
 
-Other part props:
+### Item
 
-- `Item`: `nodeKey`, `parentKey`, and `textValue` default to `''`; `disabled` defaults to `false` (also supports `appearance="embedded"`).
-- `Group`: accepts `nodeKey`.
-- `Toggle`: accepts Button props.
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'nodeKey', type: 'string', default: "''" },
+    { name: 'parentKey', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'appearance', type: "'inherit' | 'default' | 'embedded'", default: 'inherit' },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: 'inherit → nearest scope → nova' },
+  ]}
+/>
+
+### Group & Toggle
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Group.nodeKey', type: 'string', default: "''" },
+    { name: 'Toggle.nodeKey', type: 'string', default: "''" },
+    { name: 'Toggle.size', type: "'default' | 'icon'", default: 'default' },
+    { name: 'Toggle.disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'Toggle.styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: 'inherit → nearest scope → nova',
+    },
+  ]}
+/>
+
+### Events & Methods (Root)
+
+<ApiPropsTable
+  headers={{ name: 'Name', type: 'Signature / Payload', default: 'Description' }}
+  rows={[
+    {
+      name: 'valueChange',
+      type: '{ value: string }',
+      default: 'Emitted when a selection change is requested',
+    },
+    {
+      name: 'expandedChange',
+      type: '{ expandedKeys: string[] }',
+      default: 'Emitted when branch expansion changes are requested',
+    },
+    {
+      name: 'getTree',
+      type: '() => TreeEntry[]',
+      default: 'Returns the current validated tree snapshot',
+    },
+    {
+      name: 'getExpandedKeys',
+      type: '() => string[]',
+      default: 'Returns the list of expanded branch keys',
+    },
+    {
+      name: 'requestValue',
+      type: '(key: string) => boolean',
+      default: 'Programmatically requests selecting a node',
+    },
+    {
+      name: 'requestExpanded',
+      type: '(key: string, open: boolean) => boolean',
+      default: 'Programmatically requests expanding or collapsing a branch',
+    },
+    {
+      name: 'refresh',
+      type: '() => void',
+      default: 'Recomputes and publishes the tree hierarchy snapshot',
+    },
+  ]}
+/>
 
 ## References
 

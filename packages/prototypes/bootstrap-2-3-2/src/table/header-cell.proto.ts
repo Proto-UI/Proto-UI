@@ -4,6 +4,7 @@ import {
   type TableHeaderCellProps,
   type TableHeaderCellExposes,
 } from '@proto.ui/prototypes-base/table';
+import type { BootstrapTableHeaderCellExposes, BootstrapTableHeaderCellProps } from './types';
 
 type HeaderCellBehaviorContract = {
   asHooks: {
@@ -19,7 +20,10 @@ const asTableHeaderCell = defineAsHook<
   HeaderCellBehaviorContract
 >({ ...baseTableHeaderCell, name: 'as-bootstrap-2-3-2-table-header-cell-base' });
 
-export const tableHeaderCell = definePrototype<TableHeaderCellProps, TableHeaderCellExposes>({
+export const tableHeaderCell = definePrototype<
+  BootstrapTableHeaderCellProps,
+  BootstrapTableHeaderCellExposes
+>({
   name: 'bootstrap-2-3-2-table-header-cell',
   modules: asTableHeaderCell.modules,
   setup(def) {
@@ -27,9 +31,24 @@ export const tableHeaderCell = definePrototype<TableHeaderCellProps, TableHeader
     const table = behavior.getAsHookHandle?.('asTableStructure:headerCell');
     if (!table)
       throw new Error('[bootstrap-2-3-2-table-header-cell] Base Table Structure handle required.');
-    def.feedback.style.use(
-      tw('table-cell p-[8px] leading-[20px] text-left font-bold border-[#ddd]')
-    );
+    def.props.define({
+      condensed: { type: 'boolean', empty: 'fallback' },
+      bordered: { type: 'boolean', empty: 'fallback' },
+    });
+    def.props.setDefaults({ condensed: false, bordered: false });
+    def.feedback.style.use(tw('table-cell leading-[20px] text-start font-bold border-border'));
+    def.rule({
+      when: (w) => w.prop('condensed').eq(false),
+      intent: (i) => i.feedback.style.use(tw('p-[8px]')),
+    });
+    def.rule({
+      when: (w) => w.prop('condensed').eq(true),
+      intent: (i) => i.feedback.style.use(tw('px-[5px] py-[4px]')),
+    });
+    def.rule({
+      when: (w) => w.prop('bordered').eq(true),
+      intent: (i) => i.feedback.style.use(tw('border-l')),
+    });
     // Base has no thead/tbody owners. Its explicit header kind is the lawful
     // presentation distinction: column headings bottom-align, row headings do not.
     def.rule({

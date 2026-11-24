@@ -1,11 +1,13 @@
 ---
 title: 'Tabs'
-description: 'A Bootstrap 2.3.2 tabbed interface with keyboard navigation, manual activation, and underline styling.'
+description: 'A Bootstrap 2.3.2 tabbed interface preserving classic pixel metrics, vertical .tabs-left layout, dark mode adaptation, and underline styling.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Tabs adapts the archived Bootstrap 2.3.2 tab styling (4px upper corners and rem-scaled padding) over [Base Tabs](/en/ui-libraries/base/tabs/) for accessible keyboard navigation and controlled selection.
+Bootstrap 2.3.2 Tabs reproduces classic Bootstrap 2.3.2 `nav-tabs` pixel metrics (`12px`/`8px` padding, `4px` upper/left corners, `14px`/`20px` type, `#08c`/`#005580` hover links) with dark-mode adaptation over [Base Tabs](/en/ui-libraries/base/tabs/) keyboard and selection semantics.
 
 ## Preview
 
@@ -17,7 +19,7 @@ Bootstrap 2.3.2 Tabs adapts the archived Bootstrap 2.3.2 tab styling (4px upper 
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Available directly from workspace source at `@proto.ui/prototypes-bootstrap-2-3-2/tabs`.
 
 ```ts
 import {
@@ -25,23 +27,143 @@ import {
   tabsList,
   tabsTrigger,
   tabsContent,
+  tabsIndicator,
 } from '@proto.ui/prototypes-bootstrap-2-3-2/tabs';
 ```
 
 ## Usage
 
-Compose `Root`, `List`, `Trigger`, and `Content`:
+```html
+<wc-bootstrap-2-3-2-tabs-root default-value="overview">
+  <wc-bootstrap-2-3-2-tabs-list>
+    <wc-bootstrap-2-3-2-tabs-trigger value="overview">Overview</wc-bootstrap-2-3-2-tabs-trigger>
+    <wc-bootstrap-2-3-2-tabs-trigger value="analytics">Analytics</wc-bootstrap-2-3-2-tabs-trigger>
+  </wc-bootstrap-2-3-2-tabs-list>
+  <wc-bootstrap-2-3-2-tabs-content value="overview"
+    >Overview content.</wc-bootstrap-2-3-2-tabs-content
+  >
+  <wc-bootstrap-2-3-2-tabs-content value="analytics"
+    >Analytics content.</wc-bootstrap-2-3-2-tabs-content
+  >
+</wc-bootstrap-2-3-2-tabs-root>
+```
 
-- **Selection and activation**: `Root` manages the active tab via `value` or `defaultValue`. Arrow keys and `Home` / `End` move across enabled triggers; with manual activation (`activationMode="manual"`), pressing `Enter` or `Space` commits the selection so arrow browsing does not prematurely remount panels.
-- **Underline variant**: Set `appearance="underline"` on `List` and `Trigger` for a transparent, text-width underline style instead of the default Bootstrap 2.3.2 tab chrome.
-- **Content lifecycle**: Inactive panels unmount content by default; set `keepMounted` on `Content` to keep hidden panels mounted.
+### Composition
+
+```text
+TabsRoot
+├── TabsList
+│   ├── TabsTrigger
+│   └── TabsTrigger
+├── TabsContent
+└── TabsContent
+```
+
+- **Selection & keyboard**: `Root` manages controlled `value` or uncontrolled `defaultValue`. Arrow keys and `Home` / `End` move focus across enabled triggers; `activationMode="manual"` commits switches on `Enter` or `Space`.
+- **Dark-mode adaptation**: Light mode retains authentic `#ddd` borders and `#08c` / `#005580` / `#555` text; dark mode adapts cleanly onto theme surface and border tokens.
+
+## Examples
+
+### Vertical (`.tabs-left`)
+
+Pass `orientation="vertical"` on `TabsRoot` for classic Bootstrap 2.3.2 left-side navigation tabs with left-rounded active borders.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tabs-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Underline
+
+Pass `appearance="underline"` on `TabsList` and `TabsTrigger` for a transparent underline strip retaining Bootstrap 2.3.2 typography.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tabs-underline"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Disabled triggers render muted `#999` text in light mode (`muted-foreground` in dark mode) and are skipped by roving focus.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tabs-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props | Description |
-| --- | --- | --- |
-| `Root` | `value` / `defaultValue` | Controlled or initial active tab key |
-| `Root` | `activationMode` / `orientation` | Automatic/manual activation and horizontal/vertical layout |
-| `List` | `appearance` | Pass `'underline'` for the underline preset |
-| `Trigger` | `value` / `disabled` / `appearance` | Tab key, disabled flag, and appearance preset |
-| `Content` | `value` / `keepMounted` | Matching panel key; retains hidden content when `keepMounted` is set |
+### Root
+
+Exposes state `value` and event `valueChange({ value: string })`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'undefined' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'activationMode', type: "'automatic' | 'manual'", default: "'automatic'" },
+  ]}
+/>
+
+### List
+
+Exposes focus methods `focusFirst`, `focusLast`, `focusNext`, `focusPrev`, and `focusSelected`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'appearance', type: "'default' | 'underline'", default: "'default'" },
+    { name: 'loop', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Trigger
+
+Exposes states `selected`, `disabled`, `hovered`, `focused`, `focusVisible`, `pressed`, method `focusSelf`, and event `click`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'appearance', type: "'default' | 'underline'", default: "'default'" },
+  ]}
+/>
+
+### Content
+
+Exposes states `current` and `hidden`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'keepMounted', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Indicator
+
+Semantic-only part exposing derived `value`, `activeValue`, and `orientation` with no extra default paint.
+
+<ApiPropsTable headers={{ name: 'Prop', type: 'Type', default: 'Default' }} rows={[]} />
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-TABS.yaml',
+    'P-BOOTSTRAP-2-3-2-TABS-LIST.yaml',
+    'P-BOOTSTRAP-2-3-2-TABS-TRIGGER.yaml',
+    'P-BOOTSTRAP-2-3-2-TABS-CONTENT.yaml',
+    'P-BOOTSTRAP-2-3-2-TABS-INDICATOR.yaml',
+    'P-BASE-TABS.yaml',
+  ]}
+/>

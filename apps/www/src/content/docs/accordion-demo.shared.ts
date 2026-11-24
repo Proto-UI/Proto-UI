@@ -1,5 +1,7 @@
 import type { DemoNode, DemoSpec, DemoChild } from '@/components/PrototypePreviewer/demo-types';
+
 type Request = { openItems: string[]; value: string; open: boolean; reason: string };
+
 export function createAccordionDemo(family: string): DemoSpec {
   const atom = (
     role: string,
@@ -27,13 +29,16 @@ export function createAccordionDemo(family: string): DemoSpec {
         : {}),
     children,
   });
+
   const item = (
     scope: string,
     value: string,
     label: string,
     props: Record<string, unknown> = {},
     retained = false,
-    children: DemoChild[] = ['Authored content remains selectable. 作者内容保持可选择。']
+    children: DemoChild[] = [
+      'Manage settings and review details for this section without leaving the page.',
+    ]
   ): DemoNode =>
     atom('item', `${scope}-${value}-item`, { value, ...props }, [
       atom('heading', `${scope}-${value}-heading`, { level: 3 }, [
@@ -46,15 +51,18 @@ export function createAccordionDemo(family: string): DemoSpec {
         children
       ),
     ]);
+
   const group = (ref: string, props: Record<string, unknown>, children: DemoNode[]): DemoNode =>
     atom('root', ref, props, children);
+
   const section = (ref: string, children: DemoNode[]): DemoNode[] =>
     family === 'liquid-glass'
       ? [
           {
             kind: 'box',
             ref,
-            className: 'min-w-0 w-full',
+            className:
+              'min-w-0 w-full rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-4',
             // Independent examples own bounded visible sources in the same tree.
             materialStage: { mountRef: `${ref}Flow`, overlayRef: `${ref}Overlay` },
             children: [
@@ -62,7 +70,7 @@ export function createAccordionDemo(family: string): DemoSpec {
                 kind: 'box',
                 ref: `${ref}Flow`,
                 // Keep the inner gutter inside each source's paint footprint.
-                className: 'grid grid-cols-1 min-w-0 gap-6 p-2',
+                className: 'grid grid-cols-1 min-w-0 gap-4 p-2',
                 children,
               },
               { kind: 'box', ref: `${ref}Overlay`, children: [] },
@@ -70,29 +78,47 @@ export function createAccordionDemo(family: string): DemoSpec {
           },
         ]
       : children;
+
   return {
     type: 'demo',
     root: {
       kind: 'box',
-      className: 'grid grid-cols-1 w-full min-w-0 gap-6 p-2',
+      className: 'grid grid-cols-1 w-full max-w-2xl mx-auto min-w-0 gap-6 p-2',
       children: [
         ...section('singleStage', [
           group('single', { defaultOpenItems: ['overview'] }, [
-            item('single', 'overview', 'Overview · 概览', {}, false, [
-              'Open another heading to switch sections. 展开其他标题会切换章节。',
-              group('nested', {}, [
-                item('nested', 'overview', 'Nested overview · 嵌套概览'),
-                item('nested', 'details', 'Nested details · 嵌套详情'),
-              ]),
+            item('single', 'overview', 'What are your shipping options?', {}, false, [
+              {
+                kind: 'box',
+                className: 'grid grid-cols-1 gap-3 min-w-0',
+                children: [
+                  'We offer standard (5–7 days), express (2–3 days), and overnight shipping. Free shipping on international orders.',
+                  group('nested', {}, [
+                    item('nested', 'overview', 'Standard & express delivery', {}, false, [
+                      'Standard delivery arrives in 5–7 business days. Express orders ship the same day.',
+                    ]),
+                    item('nested', 'details', 'International tracking', {}, false, [
+                      'Every international shipment includes end-to-end tracking and customs documentation.',
+                    ]),
+                  ]),
+                ],
+              },
             ]),
-            item('single', 'lifetime', 'Content lifetime · 内容生命周期', {}, false, [
-              'Default L1 detach keeps the logical instance; host children are not promised retention. 默认 L1 不承诺宿主子节点保留。',
+            item('single', 'lifetime', 'What is your return policy?', {}, false, [
+              'Returns are accepted within 30 days. Items must be unused and in original packaging. Refunds are processed within 5–7 business days.',
             ]),
-            item('single', 'disabled', 'Disabled section · 禁用章节', { disabled: true }),
+            item(
+              'single',
+              'disabled',
+              'Enterprise SLA details (Unavailable)',
+              { disabled: true },
+              false,
+              ['Dedicated SLA terms are available on enterprise plans.']
+            ),
             item(
               'single',
               'long',
-              'A deliberately long heading remains readable at narrow widths and larger text sizes · 很长的标题在窄屏和放大字号下仍应完整可读',
+              'How can I contact customer support for international billing, invoices, and custom enterprise accounts?',
               {},
               false,
               [
@@ -100,7 +126,7 @@ export function createAccordionDemo(family: string): DemoSpec {
                   kind: 'box',
                   className: 'min-w-0 wrap-anywhere',
                   children: [
-                    'UnbrokenContentBoundary_0123456789012345678901234567890123456789012345678901234567890123456789',
+                    'Reach us anytime via support@example.com, live chat, or phone. We respond within 24 hours during business days.',
                   ],
                 },
               ]
@@ -108,38 +134,75 @@ export function createAccordionDemo(family: string): DemoSpec {
           ]),
         ]),
         ...section('multipleStage', [
-          { kind: 'box', children: ['Multiple, one stays open · 多开，至少一项保持展开'] },
+          {
+            kind: 'box',
+            className: 'text-sm font-medium text-muted-foreground',
+            children: ['Multiple open (at least one stays open)'],
+          },
           group('multiple', { mode: 'multiple', allowEmpty: false, defaultOpenItems: ['a'] }, [
-            item('multiple', 'a', 'Retained A · 保留 A', {}, true),
-            item('multiple', 'b', 'Retained B · 保留 B', {}, true),
+            item('multiple', 'a', 'Notification settings', {}, true, [
+              'Choose how you receive updates across email alerts and mobile push notifications.',
+            ]),
+            item('multiple', 'b', 'Privacy & security', {}, true, [
+              'Manage two-factor authentication, connected devices, and active sessions.',
+            ]),
           ]),
         ]),
         ...section('rtlStage', [
-          { kind: 'box', children: ['Horizontal RTL header navigation · 横向 RTL 标题导航'] },
-          group('rtl', { orientation: 'horizontal', direction: 'rtl', loop: false }, [
-            item('rtl', 'a', 'RTL A'),
-            item('rtl', 'b', 'RTL B'),
-          ]),
+          {
+            kind: 'box',
+            className: 'text-sm font-medium text-muted-foreground',
+            children: ['Horizontal RTL header navigation'],
+          },
+          {
+            kind: 'box',
+            attrs: { dir: 'rtl' },
+            className: 'min-w-0 w-full',
+            children: [
+              group('rtl', { orientation: 'horizontal', direction: 'rtl', loop: false }, [
+                item('rtl', 'a', 'كيف يمكنني إعادة تعيين كلمة المرور؟', {}, false, [
+                  'انقر على «نسيت كلمة المرور» في صفحة تسجيل الدخول وسنرسل لك رابطًا لإعادة التعيين.',
+                ]),
+                item('rtl', 'b', 'هل يمكنني تغيير خطة الاشتراك؟', {}, false, [
+                  'نعم، يمكنك ترقية خطتك أو تخفيضها في أي وقت من إعدادات الحساب.',
+                ]),
+              ]),
+            ],
+          },
         ]),
         ...section('controlledStage', [
+          {
+            kind: 'box',
+            className: 'text-sm font-medium text-muted-foreground',
+            children: ['Controlled state approval'],
+          },
           group('controlled', { openItems: [] }, [
-            item('controlled', 'a', 'Controlled: request, then accept · 受控：先请求，再接受'),
+            item('controlled', 'a', 'Billing & subscription details', {}, false, [
+              'View your current plan, payment history, and upcoming invoices.',
+            ]),
           ]),
           {
             kind: 'box',
-            ref: 'requestStatus',
-            attrs: { 'aria-live': 'polite' },
-            children: ['No pending request · 暂无请求'],
-          },
-          {
-            kind: 'proto',
-            prototypeId: `${family}-button`,
-            ref: 'accept',
-            className:
-              family === 'shadcn'
-                ? 'min-w-0 max-w-full h-auto whitespace-normal wrap-anywhere'
-                : 'min-w-0 max-w-full h-auto whitespace-normal wrap-anywhere rounded border px-3 py-2',
-            children: ['Accept pending request · 接受请求'],
+            className: 'flex flex-wrap items-center justify-between gap-3 min-w-0',
+            children: [
+              {
+                kind: 'box',
+                ref: 'requestStatus',
+                className: 'text-sm text-muted-foreground min-w-0',
+                attrs: { 'aria-live': 'polite' },
+                children: ['Pending change: none'],
+              },
+              {
+                kind: 'proto',
+                prototypeId: `${family}-button`,
+                ref: 'accept',
+                className:
+                  family === 'base'
+                    ? 'min-w-0 max-w-full h-auto whitespace-normal wrap-anywhere rounded border px-3 py-2'
+                    : 'min-w-0 max-w-full h-auto whitespace-normal wrap-anywhere',
+                children: ['Apply change'],
+              },
+            ],
           },
         ]),
       ],
@@ -149,7 +212,7 @@ export function createAccordionDemo(family: string): DemoSpec {
       let openItems: string[] = [];
       const propose = (request: Request) => {
         pending = request;
-        refs.requestStatus.textContent = `Requested / 请求: ${request.openItems.join(', ') || 'empty / 全关'} (${request.reason})`;
+        refs.requestStatus.textContent = `Pending change: ${request.openItems.join(', ') || 'collapsed'} (${request.reason})`;
       };
       const sync = () => api.setProps('controlled', { openItems, onOpenChange: propose });
       const accept = () => {
@@ -157,7 +220,7 @@ export function createAccordionDemo(family: string): DemoSpec {
         openItems = [...pending.openItems];
         pending = null;
         sync();
-        refs.requestStatus.textContent = `Accepted / 已接受: ${openItems.join(', ') || 'empty / 全关'}`;
+        refs.requestStatus.textContent = `Applied state: ${openItems.join(', ') || 'collapsed'}`;
       };
       sync();
       api.setProps('accept', { onClick: accept });

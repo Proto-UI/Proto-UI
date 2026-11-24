@@ -4,8 +4,10 @@ description: 'A Bootstrap 2.3.2 carousel with continuous scrolling, snap points,
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Carousel pairs an equal-size slide strip with a continuously scrollable viewport and Previous/Next controls. Pointer drag, touch drag, wheel/trackpad scrolling, and keyboard navigation all snap to the nearest reachable slide boundary.
+Bootstrap 2.3.2 Carousel preserves the classic 40×40px circular `#222` translucent navigation controls (`‹` / `›`) and dark caption bar while inheriting Base Carousel's continuous drag/scroll engine, snap alignment, responsive slide sizing, and keyboard navigation.
 
 ## Preview
 
@@ -21,25 +23,103 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
-### Responsive viewport and snapping
+```tsx
+import {
+  Bootstrap232CarouselRoot,
+  Bootstrap232CarouselViewport,
+  Bootstrap232CarouselSlide,
+  Bootstrap232CarouselPrevious,
+  Bootstrap232CarouselNext,
+} from '../proto-ui/components/react';
 
-- Set `slidesPerView` (default `1`) for the maximum equal items shown at once and `minSlideSize` (default `0`, logical pixels) for each slide's minimum extent. Narrower viewports automatically reduce capacity, and the final snap aligns flush with the strip end.
-- The preview above requests 2 slides per view with a `180` minimum size.
-- Set an explicit bounded height on the viewport when using `orientation="vertical"`. Horizontal `direction="rtl"` mirrors dragging and arrow keys while preserving logical slide order.
-- Setting `loop` wraps navigation between the first and last reachable indices without cloning slides.
+export function Example() {
+  return (
+    <Bootstrap232CarouselRoot className="mx-auto w-full max-w-lg">
+      <Bootstrap232CarouselViewport>
+        <Bootstrap232CarouselSlide>Slide 1</Bootstrap232CarouselSlide>
+        <Bootstrap232CarouselSlide>Slide 2</Bootstrap232CarouselSlide>
+      </Bootstrap232CarouselViewport>
+      <Bootstrap232CarouselPrevious aria-label="Previous slide">‹</Bootstrap232CarouselPrevious>
+      <Bootstrap232CarouselNext aria-label="Next slide">›</Bootstrap232CarouselNext>
+    </Bootstrap232CarouselRoot>
+  );
+}
+```
 
-### Controlled index
+- **Classic glyph controls**: `Previous` and `Next` are sized for single `‹` / `›` glyphs (`60px` light typography inside `40×40px` rings); always pair them with `sr-only` text or `aria-label` instead of visible multi-word strings.
+- **Responsive sizing and snapping**: Configure `slidesPerView` (default `1`) and `minSlideSize` (default `0`) to show multiple equal-width slides; set an explicit bounded height on `Viewport` for `orientation="vertical"`.
+- **Controlled index**: Pass `index` and listen to `indexChange` for controlled updates, or set `loop={true}` to wrap between the first and last reachable stops.
 
-- Pass `index` to control the active slide externally and handle `indexChange` proposals.
-- While dragging, the committed `index` remains unchanged; on release it moves to the proposed index if accepted by the parent, or snaps back to the current index.
+## Examples
+
+### Sizes
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-carousel-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Orientation
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-carousel-orientation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Loop
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-carousel-loop"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### API
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-carousel-api"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / States | Description |
-| --- | --- | --- |
-| `Root` | `slidesPerView` / `minSlideSize` | Defaults `1` / `0`; responsive capacity and minimum slide extent |
-| `Root` | `index` / `indexChange` | Controlled snap index and change request event |
-| `Root` | `orientation` / `direction` / `loop` | Axis, text direction, and boundary wrapping |
-| `Root` | `visibleSlides` / `maxIndex` | Read-only states derived from the viewport |
-| `Viewport` | `dragging` / `scrolling` / `scrollPosition` | Live drag/scroll state and normalized scroll position |
-| `Slide` | `current` / `hidden` | Tracks the active snap and offscreen visibility without removing layout extent |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'index', type: 'number', default: '—' },
+    { name: 'defaultIndex', type: 'number', default: '0' },
+    { name: 'slidesPerView', type: 'number', default: '1' },
+    { name: 'minSlideSize', type: 'number', default: '0' },
+    { name: 'loop', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'a11yLabel', type: 'string', default: 'Carousel' },
+  ]}
+/>
+
+### Other parts & exposed states
+
+<ApiPropsTable
+  headers={{ name: 'Part / Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Slide.index', type: 'number', default: 'Document order' },
+    { name: 'Previous / Next.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+- **Root**: exposes `index`, `slideCount`, `visibleSlides`, `maxIndex`, method `requestIndex(next)`, and event `indexChange`.
+- **Viewport**: exposes `focusVisible`, `dragging`, `scrolling`, and `scrollPosition`.
+- **Slide**: exposes `current`, `hidden`, `basis`, and `minSize`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-CAROUSEL.yaml', 'P-BASE-CAROUSEL.yaml']}
+/>

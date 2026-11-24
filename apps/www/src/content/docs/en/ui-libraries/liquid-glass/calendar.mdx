@@ -1,23 +1,15 @@
 ---
 title: 'Calendar'
-description: 'A Gregorian Liquid Glass calendar supporting single, multiple, and range selection with localized weekdays and composable captions.'
+description: 'A Gregorian Liquid Glass calendar supporting single, multiple, and range date selection with concentric radii, reduced-transparency fallbacks, and composable captions.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Calendar provides Gregorian date selection in `single` (default), `multiple`, and `range` modes. Dates use `YYYY-MM-DD` strings and visible months use `YYYY-MM` strings; selection and month can each be controlled independently.
+Liquid Glass Calendar provides Gregorian date selection in `single` (default), `multiple`, and `range` modes. It pairs concentric corner geometry, specular inset edge highlights, and translucent layering with automatic opaque fallbacks under reduced-transparency or forced-colors preferences—without stacking nested glass when hosted inside a `Date Picker` popup.
 
 ## Preview
-
-### Selection modes (single / multiple / range)
-
-<PrototypePreviewer
-  demoId="demo-liquid-glass-calendar-selection"
-  initialRuntime="wc"
-  runtimes={['wc', 'react', 'vue', 'vue2']}
-/>
-
-### Standard calendar with month/year caption selectors
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-calendar"
@@ -27,48 +19,191 @@ Liquid Glass Calendar provides Gregorian date selection in `single` (default), `
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source (`@proto.ui/prototypes-liquid-glass/calendar`); not yet included in the 0.2.0 stable CLI registry.
 
 ## Usage
 
-### Composition and grid capacity
+```tsx
+import {
+  CalendarRoot,
+  CalendarCaption,
+  CalendarPrevious,
+  CalendarHeading,
+  CalendarNext,
+  CalendarGrid,
+  CalendarWeekdays,
+  CalendarWeekday,
+  CalendarRow,
+  CalendarDay,
+} from '@proto.ui/prototypes-liquid-glass/calendar';
 
-Calendar comprises ten parts: `Root`, `Caption`, `Heading`, `Previous`, `Next`, `Grid`, `Weekdays`, `Weekday`, `Row`, and `Day`.
+export function LiquidGlassCalendarExample() {
+  return (
+    <CalendarRoot mode="single" defaultMonth="2026-10" defaultValue="2026-10-12" today="2026-10-08">
+      <CalendarCaption>
+        <CalendarPrevious a11yLabel="Previous month" />
+        <CalendarHeading />
+        <CalendarNext a11yLabel="Next month" />
+      </CalendarCaption>
+      <CalendarGrid>
+        <CalendarWeekdays>
+          {Array.from({ length: 7 }, (_, offset) => (
+            <CalendarWeekday key={offset} offset={offset} />
+          ))}
+        </CalendarWeekdays>
+        {Array.from({ length: 6 }, (_, row) => (
+          <CalendarRow key={row} index={row}>
+            {Array.from({ length: 7 }, (_, col) => (
+              <CalendarDay key={col} offset={row * 7 + col} />
+            ))}
+          </CalendarRow>
+        ))}
+      </CalendarGrid>
+    </CalendarRoot>
+  );
+}
+```
 
-- Place seven `Weekday` parts (`offset` `0–6`) inside `Weekdays`, and up to six indexed `Row` parts (`index` `0–5`) holding `Day` parts (`offset` `0–41`).
-- By default the calendar renders the minimum 4, 5, or 6 complete weeks needed for the active month; set `fixedWeeks={true}` to always show six weeks. Unused capacity rows and days expose `hidden` and stay out of focus and selection.
-- Weekday headings and full localized cell labels follow `weekStartsOn` (`0` = Sunday) and `locale`. `direction="rtl"` mirrors Left/Right navigation, and `a11yLabel` names icon-only Previous/Next buttons.
+### Layering, anatomy, and caption pickers
 
-### Single, multiple, and range behavior
+- Compose `Calendar` from ten parts: `Root`, `Caption`, `Heading`, `Previous`, `Next`, `Grid`, `Weekdays`, `Weekday`, `Row`, and `Day`.
+- To avoid glass-on-glass stacking, Calendar remains an ordinary non-material content surface; when hosted inside `Date Picker`, the popover content owns the single Liquid Glass material layer.
+- Calendar does not read the system clock directly: pass a `YYYY-MM-DD` `today` prop from the host to mark today (`aria-current="date"`).
+- `direction="rtl"` mirrors Left/Right navigation automatically. Bind family `Select` controls with `bindCalendarCaption(source, { month, year })` (and call `dispose()` on teardown) for month and year dropdowns.
 
-- **Multiple (`multiple`)**: activating a day toggles it in a deduplicated, sorted array. `minSelected` defaults to `0`, and omitting `maxSelected` leaves the upper bound open.
-- **Range (`range`)**: the first activation sets `{ from }`, the second completes an inclusive `{ from, to }` (automatically sorting reversed endpoints), and a subsequent activation starts a new range. `{}` clears the range. `minNights` (default `0`, allowing single-day ranges) and `maxNights` bound the civil-day span between endpoints.
-- `min`, `max`, and Root `unavailable` apply to every selected date; ranges spanning an unavailable date are rejected while keeping the starting anchor. Use Root `unavailable` for whole-date rules and Day `disabled` for individual cells.
-- `readOnly` prevents selection changes while still allowing month navigation; `disabled` disables both.
+### Selection modes
 
-### Clock ownership and month/year selectors
+| Mode       | Controlled / initial props                       | Change event                 |
+| ---------- | ------------------------------------------------ | ---------------------------- |
+| `single`   | `value` / `defaultValue` (`YYYY-MM-DD`)          | `onValueChange({ value })`   |
+| `multiple` | `values` / `defaultValues` (`readonly string[]`) | `onValuesChange({ values })` |
+| `range`    | `range` / `defaultRange` (`{ from?, to? }`)      | `onRangeChange({ range })`   |
 
-- Calendar does not read the system clock or timezone; pass `today` as a `YYYY-MM-DD` string to highlight the current date (`aria-current="date"`).
-- Initial month precedence: `month` → `defaultMonth` → active mode's selected date → `today` → `1970-01`.
-- To add month and year dropdowns, bind real family Select controls with `bindCalendarCaption(source, { month, year })` against Calendar's public `month`/`disabled` state and `requestMonth`, call `dispose()` on teardown, and pass stable names via Select's `accessibleLabel`.
+## Examples
+
+### Basic
+
+A single-date calendar with concentric `rounded-2xl` / `rounded-xl` geometry and clear hover/press feedback.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-calendar-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Range
+
+Set `mode="range"` for joined endpoint corners and a continuous tinted range ribbon.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-calendar-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Multiple and range selection
+
+Combine `min`, `max`, `unavailable`, `minNights`, `maxNights`, and `maxSelected` to constrain selections.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-calendar-selection"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Presets
+
+Pair controlled `value`, `month`, and `fixedWeeks` with family Liquid Glass `Button` presets.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-calendar-presets"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Booked dates
+
+Use `unavailable` along with `min` and `max` to block booked dates with clear muted disabled contrast.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-calendar-booked-dates"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Set `direction="rtl"`, `locale="ar-SA"`, and `weekStartsOn={6}` for RTL layout and mirrored navigation.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-calendar-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part / Mode | Props | Defaults and notes |
-| --- | --- | --- |
-| Root | `mode` | `'single' \| 'multiple' \| 'range'`, default `'single'` |
-| Root (`single`) | `value`, `defaultValue` | `YYYY-MM-DD` string; emits `onValueChange({ value })` |
-| Root (`multiple`) | `values`, `defaultValues` | Date array; pairs with `minSelected` (`0`), `maxSelected`, `onValuesChange({ values })` |
-| Root (`range`) | `range`, `defaultRange` | `{ from?, to? }`; pairs with `minNights` (`0`), `maxNights`, `onRangeChange({ range })` |
-| Root | `month`, `defaultMonth` | `YYYY-MM` string; independently controllable |
-| Root | `today`, `min`, `max`, `unavailable` | Current-date marker and eligibility bounds (`unavailable` is a string array) |
-| Root | `weekStartsOn`, `locale`, `direction`, `fixedWeeks` | `weekStartsOn` defaults to `0`; `fixedWeeks` defaults to `false` |
-| Root | `disabled`, `readOnly` | Disables interaction or blocks selection edits |
-| Previous / Next | `a11yLabel`, `disabled` | Accessible label and local disable |
-| Row / Day | `index`, `offset`, `disabled` | Grid capacity indices and per-day disable |
+### Root
 
-### Methods and exposed states
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: "'single'" },
+    { name: 'value', type: 'string', default: 'undefined' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'values', type: 'readonly string[]', default: 'undefined' },
+    { name: 'defaultValues', type: 'readonly string[]', default: '[]' },
+    { name: 'range', type: 'CalendarRange', default: 'undefined' },
+    { name: 'defaultRange', type: 'CalendarRange', default: '{}' },
+    { name: 'minSelected', type: 'number', default: '0' },
+    { name: 'maxSelected', type: 'number', default: 'undefined' },
+    { name: 'minNights', type: 'number', default: '0' },
+    { name: 'maxNights', type: 'number', default: 'undefined' },
+    { name: 'month', type: 'string', default: 'undefined' },
+    { name: 'defaultMonth', type: 'string', default: 'undefined' },
+    { name: 'min', type: 'string', default: "''" },
+    { name: 'max', type: 'string', default: "''" },
+    { name: 'unavailable', type: 'readonly string[]', default: '[]' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'weekStartsOn', type: 'number', default: '0' },
+    { name: 'fixedWeeks', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "'Calendar'" },
+    { name: 'today', type: 'string', default: "''" },
+    { name: 'locale', type: 'string', default: "'en-US'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+  ]}
+/>
 
-- Root methods: `requestMonth(month)`, `requestValue(date)`, `requestValues(dates)`, `requestRange(range)`, `getValues()`, `getRange()`.
-- Root states: `mode`, `weekCount`, `selectedCount`, `rangeComplete`.
-- Day states: `selected`, `rangeStart`, `rangeEnd`, `rangeMiddle`, `rangePending`, `hidden`. Grid sets `aria-multiselectable` in multiple and range modes.
+### Sub-part props
+
+<ApiPropsTable
+  headers={{ name: 'Part / Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Day.date', type: 'string', default: "''" },
+    { name: 'Day.offset', type: 'number', default: '0' },
+    { name: 'Day.disabled', type: 'boolean', default: 'false' },
+    { name: 'Row.index', type: 'number', default: 'undefined' },
+    { name: 'Weekday.offset', type: 'number', default: '0' },
+    { name: 'Caption.a11yLabel', type: 'string', default: "'Calendar navigation'" },
+    {
+      name: 'Previous / Next.a11yLabel',
+      type: 'string',
+      default: "'Previous month' / 'Next month'",
+    },
+    { name: 'Previous / Next.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Events, methods, and exposed states
+
+- **Events (Root)**: `onValueChange({ value })`, `onValuesChange({ values })`, `onRangeChange({ range })`, `onMonthChange({ month })`.
+- **Methods (Root)**: `requestValue(date)`, `requestValues(dates)`, `requestRange(range)`, `requestMonth(month)`, `getValues()`, `getRange()`.
+- **Exposed states**: Root exposes `value`, `mode`, `selectedCount`, `rangeComplete`, `month`, `weekCount`, `disabled`, `direction`; Day exposes `date`, `selected`, `rangeStart`, `rangeEnd`, `rangeMiddle`, `rangePending`, `today`, `outside`, `disabled`, `hidden`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-CALENDAR.yaml', 'P-BASE-CALENDAR.yaml']}
+/>

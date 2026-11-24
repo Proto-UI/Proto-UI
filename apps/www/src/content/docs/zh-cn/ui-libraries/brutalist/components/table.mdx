@@ -1,15 +1,16 @@
 ---
 title: 'Table'
-description: '提供清晰行列结构、表头关联与硬边外框样式的 Brutalist 风格结构化表格组件。'
+description: '提供清晰行列结构、主色表头与硬边外框样式的 Brutalist 风格结构化表格组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Table 用于展示静态结构化数据，完整维护行列索引、表头关系与跨行列属性。Brutalist 风格采用 2px 黑边加 4px 实心偏移阴影外框、黑色行分隔线、加粗表头与双线上边框表尾，并在正文行悬停时提供浅色强调高亮。
+Table 用于展示静态结构化数据，完整维护 [Base Table](/zh-cn/ui-libraries/base/table/) 的行列索引、表头关系与跨度元数据。Brutalist 风格采用 2px 黑色外框与 4px 实心偏移阴影、主色表头行、黑色行分隔线与双线上边框表尾，并在正文行悬停时提供即时浅色高亮。
 
 如需排序、选择、分页、过滤或键盘网格导航等交互能力，请使用 [Data Table](/zh-cn/ui-libraries/brutalist/components/data-table/)。
 
@@ -25,29 +26,195 @@ Table 用于展示静态结构化数据，完整维护行列索引、表头关�
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-brutalist` 或 `@proto.ui/prototypes-brutalist/table` 导入各部件（当前工作区 CLI 目标为 `brutalist-table`）。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-brutalist` 或 `@proto.ui/prototypes-brutalist/table` 导入全部五个部件：
+
+```ts
+import {
+  brutalistTableRoot,
+  brutalistTableCaption,
+  brutalistTableRow,
+  brutalistTableHeaderCell,
+  brutalistTableCell,
+} from '@proto.ui/prototypes-brutalist/table';
+```
 
 ## 用法
 
+```html
+<div class="w-full overflow-x-auto">
+  <brutalist-table-root>
+    <brutalist-table-caption>A list of your recent invoices.</brutalist-table-caption>
+    <brutalist-table-row section="header" last-in-section>
+      <brutalist-table-header-cell header-key="invoice" header-kind="column" style="width: 100px">
+        Invoice
+      </brutalist-table-header-cell>
+      <brutalist-table-header-cell header-key="status" header-kind="column"
+        >Status</brutalist-table-header-cell
+      >
+      <brutalist-table-header-cell header-key="method" header-kind="column"
+        >Method</brutalist-table-header-cell
+      >
+      <brutalist-table-header-cell header-key="amount" header-kind="column" style="text-align: end">
+        Amount
+      </brutalist-table-header-cell>
+    </brutalist-table-row>
+    <brutalist-table-row section="body" last-in-section>
+      <brutalist-table-header-cell header-key="inv001" header-kind="row"
+        >INV001</brutalist-table-header-cell
+      >
+      <brutalist-table-cell>Paid</brutalist-table-cell>
+      <brutalist-table-cell>Credit Card</brutalist-table-cell>
+      <brutalist-table-cell style="text-align: end">$250.00</brutalist-table-cell>
+    </brutalist-table-row>
+  </brutalist-table-root>
+</div>
+```
+
 ### 组件结构
 
-Table 由五个部件组成：`Root`、`Caption`、`Row`、`HeaderCell` 和 `Cell`。
+```text
+Root
+├── Caption
+├── Row (section="header")
+│   └── HeaderCell (headerKind="column")
+├── Row (section="body")
+│   ├── HeaderCell (headerKind="row")
+│   └── Cell (headers=[...])
+└── Row (section="footer")
+    ├── HeaderCell (headerKind="row")
+    └── Cell (headers=[...])
+```
 
-- `Root`：表格容器，管理有序行列索引并通过 `getStructure()` 暴露结构快照。如需横向滚动，可在外层自行包裹滚动容器。
-- `Caption`：表格标题。
-- `Row`：表格行，提供 `section`（`'header' | 'body' | 'footer'`，默认 `'body'`）和 `lastInSection`（默认 `false`）两个纯视觉属性，用于控制表头、正文与表尾的边框和悬停着色。
-- `HeaderCell`：表头单元格，通过 `headerKey` 与 `headerKind` 声明列/行表头，支持 `headers`、`rowSpan` 与 `columnSpan`。
-- `Cell`：普通数据单元格，支持通过 `headers` 关联对应表头以及 `rowSpan` / `columnSpan` 跨度。
+- `Root`：表格容器，管理有序行列索引并通过 `getStructure()` 暴露结构快照；横向滚动容器请在外层自行包裹。
+- `Row`：提供 `section`（`'header' | 'body' | 'footer'`）与 `lastInSection` 两个视觉属性，表头采用主色填充（`bg-main text-main-foreground`），正文行在指针悬停时即时切换 `bg-main/20`，表尾使用双线黑边与对比表面。
+- `HeaderCell`：采用 `font-heading font-semibold` 与逻辑 `text-start` 对齐。
+
+## 示例
+
+### 表尾
+
+使用 `section="footer"` 为汇总行添加 2px 顶部边框与加粗强调：
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-table-footer"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 操作菜单
+
+在行尾组合 Brutalist `DropdownMenu`，提供编辑、复制与危险删除操作：
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-table-actions"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-`Root` 不声明属性（提供 `getStructure()` 方法读取当前行列与表头结构）：
+### Root & Caption
 
-<ApiPropsTable headers={{ name: '属性', type: '类型', default: '默认值' }} rows={[]} />
+`Root` 与 `Caption` 不声明额外属性；`Root` 通过 `getStructure()` 暴露当前行列结构与诊断快照。
 
-其余子部件属性默认值：
+### Row
 
-- **Caption**：无属性。
-- **Row**：`section` 默认 `'body'`，`lastInSection` 默认 `false`。
-- **Cell**：`headers` 默认 `[]`，`rowSpan` 与 `columnSpan` 默认 `1`。
-- **HeaderCell**：`headerKey` 默认 `''`，`headerKind` 默认 `'column'`，`headers` 默认 `[]`，`rowSpan` 与 `columnSpan` 默认 `1`。
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'section',
+      type: "'header' | 'body' | 'footer'",
+      default: "'body'",
+      description: '视觉分区：header 为主色表头，body 支持悬停高亮，footer 为双线汇总行',
+    },
+    {
+      name: 'lastInSection',
+      type: 'boolean',
+      default: 'false',
+      description: '标记正文或表尾末行以隐藏底部分隔线，让外框自然闭合',
+    },
+  ]}
+/>
+
+### HeaderCell
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'headerKey',
+      type: 'string',
+      default: "''",
+      description: '表头键名，供数据单元格通过 headers 引用',
+    },
+    {
+      name: 'headerKind',
+      type: "'column' | 'row'",
+      default: 'undefined',
+      description: '声明列表头（columnheader）或行表头（rowheader）',
+    },
+    {
+      name: 'headers',
+      type: 'readonly string[]',
+      default: '[]',
+      description: '多层表头场景下关联的上级表头键集合',
+    },
+    {
+      name: 'rowSpan',
+      type: 'number',
+      default: '1',
+      description: '无障碍跨行数（正整数）',
+    },
+    {
+      name: 'columnSpan',
+      type: 'number',
+      default: '1',
+      description: '无障碍跨列数（正整数）',
+    },
+  ]}
+/>
+
+### Cell
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'headers',
+      type: 'readonly string[]',
+      default: '[]',
+      description: '按顺序关联的表头 headerKey 列表',
+    },
+    {
+      name: 'rowSpan',
+      type: 'number',
+      default: '1',
+      description: '无障碍跨行数（正整数）',
+    },
+    {
+      name: 'columnSpan',
+      type: 'number',
+      default: '1',
+      description: '无障碍跨列数（正整数）',
+    },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-TABLE.yaml',
+    'P-BRUTALIST-TABLE-CAPTION.yaml',
+    'P-BRUTALIST-TABLE-ROW.yaml',
+    'P-BRUTALIST-TABLE-HEADER-CELL.yaml',
+    'P-BRUTALIST-TABLE-CELL.yaml',
+    'P-BASE-TABLE.yaml',
+  ]}
+/>

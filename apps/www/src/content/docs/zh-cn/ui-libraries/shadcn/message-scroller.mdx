@@ -1,13 +1,13 @@
 ---
 title: 'Message Scroller'
-description: '支持底部自动跟随与跳转最新消息的滚动容器组件。'
+description: '面向聊天与流式消息场景的 Shadcn 风格滚动容器，支持贴底跟随、回看暂停与一键跳回最新消息。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Message Scroller 适用于聊天记录、日志流等持续追加内容的滚动区域，支持在底部自动跟随新消息以及一键跳回最新位置。本页示例使用 **Shadcn Rhea** 风格。
+Message Scroller 面向聊天记录与流式回复场景，在读者位于底部时自动跟随新追加内容，向上回看历史时保持当前阅读位置，并通过浮动跳转按钮一键回到最新消息。本页示例使用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -19,30 +19,149 @@ Message Scroller 适用于聊天记录、日志流等持续追加内容的滚动
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-shadcn/message-scroller` 导入原型并使用目标框架适配器封装。
+
+```ts
+import {
+  messageScrollerRoot,
+  messageScrollerViewport,
+  messageScrollerJump,
+} from '@proto.ui/prototypes-shadcn/message-scroller';
+```
 
 ## 用法
 
-Message Scroller 由 `Root`、`Viewport` 和 `Jump` 组成：
+`Message Scroller` 会填满父容器高度，请将其放入有明确高度约束的容器内：
 
-- 当读者位于滚动区域底部时，新追加的内容会自动跟随滚入视野。
-- 向上回看历史内容时，自动跟随暂停；用户可通过 `Jump` 控件主动跳回最新位置，且跳转不会抢占当前键盘焦点。
-- `newContentCount` 由应用自行传入，用于展示新增消息提示，组件不会自动推断未读业务状态。
-- 通过 `Root` 的 `a11yLabel` 为滚动区域提供无障碍名称，默认值为 `Messages`。
+```tsx
+<div className="flex h-80 flex-col overflow-hidden rounded-xl border border-border">
+  <ShadcnMessageScrollerRoot styleProfile="rhea" a11yLabel="Assistant conversation">
+    <ShadcnMessageScrollerViewport styleProfile="rhea">
+      <div className="flex flex-col gap-3 p-4 pb-14">
+        {messages.map((message) => (
+          <div key={message.id}>{message.text}</div>
+        ))}
+      </div>
+    </ShadcnMessageScrollerViewport>
+    <ShadcnMessageScrollerJump styleProfile="rhea">
+      <span aria-hidden="true">↓</span>
+      <span className="sr-only">Jump to latest</span>
+    </ShadcnMessageScrollerJump>
+  </ShadcnMessageScrollerRoot>
+</div>
+```
+
+### 组件结构与核心原则
+
+Message Scroller 由 `Root`、`Viewport` 和 `Jump` 三个部件组成：
+
+- **仅在跟随状态自动滚底**：当读者已经停留在列表底部时，新追加内容会自动进入视野；一旦向上滚动翻阅历史，自动跟随立即暂停并保留阅读位置。
+- **不抢占焦点的跳转控制**：点击 `Jump` 会滚动到最新位置并恢复自动跟随，同时不会把键盘焦点从输入框等控件上移走。默认 `size="icon"` 适合图标按钮，传入 `size="pill"` 可容纳文本标签与未读计数。
+- **应用层持有未读语义**：`newContentCount` 由业务状态显式传入，组件不会擅自推断未读规则。
+- **无障碍命名**：通过 `Root` 的 `a11yLabel` 为可滚动区域设置无障碍名称，默认值为 `Messages`。
+- **风格预设（`styleProfile`）**：全部三个部件支持 `vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea` 与 `new-york-v4`；省略或设为 `inherit` 时优先继承最近的 [Style Scope](../style-scope/)。
 
 ### 历史位置与选区恢复
 
 如果需要基于稳定 key 恢复历史阅读位置或文本选区，可在自定义组合中于 Shadcn `Viewport` 之后调用公开的 Base Hook `asMessageScrollerReading`。该 Hook 基于同一滚动容器管理锚点捕获、按 key 或前驱恢复位置以及选区恢复，同时应用继续负责内容标识、DOM/Range 操作与持久化存储。详细配置请参阅 [Base Message Scroller](/zh-cn/ui-libraries/base/message-scroller/)。
 
+## 示例
+
+### 实时追加与未读计数
+
+位于底部时点击“Append reply”会自动跟随新回复；先向上滚动再追加，视口会保持原位并更新 `newContentCount` 与胶囊按钮文案。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-message-scroller-live"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 群组频道与系统标记
+
+在同一滚动流中自由组合多人消息、头像与系统事件分隔标记，并搭配 `size="pill"` 展示新增条数提示。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-message-scroller-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 跳转按钮状态
+
+`Jump` 继承 Button 交互语义；禁用 `Jump` 仅阻止一键跳转，不影响读者自由手动滚动消息历史。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-message-scroller-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
 ## API
 
-以下属性属于 `Root`（`Viewport` 无额外属性，`Jump` 接受 Button 属性）：
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
     { name: 'newContentCount', type: 'number', default: '0' },
-    { name: 'a11yLabel', type: 'string', default: 'Messages' },
+    { name: 'a11yLabel', type: 'string', default: "'Messages'" },
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: 'inherit → 最近 scope → new-york-v4',
+    },
+  ]}
+/>
+
+### Viewport
+
+<ApiPropsTable
+  headers={{ name: '属性 / 暴露能力', type: '类型', default: '说明' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: 'inherit → 最近 scope → new-york-v4',
+    },
+    { name: 'atEnd (expose)', type: 'ExposeState<boolean>', default: '当前视口是否位于底部' },
+    {
+      name: 'following (expose)',
+      type: 'ExposeState<ScrollEndFollowState>',
+      default: '末端自动跟随状态',
+    },
+    {
+      name: 'requestStatus (expose)',
+      type: 'ExposeState<ScrollEndFollowRequestStatus>',
+      default: '最近一次滚底请求状态',
+    },
+    { name: 'jumpToEnd() (expose)', type: '() => void', default: '显式请求滚动至末尾' },
+    {
+      name: 'pauseFollowing() (expose)',
+      type: '() => ScrollSurfaceRequestOutcome',
+      default: '暂停末端自动跟随',
+    },
+  ]}
+/>
+
+### Jump
+
+<ApiPropsTable
+  headers={{ name: '属性 / 暴露能力', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'size', type: "'icon' | 'pill'", default: "'icon'" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: 'inherit → 最近 scope → new-york-v4',
+    },
+    { name: 'atEnd (expose)', type: 'ExposeState<boolean>', default: '同步自 Root 的底部状态' },
+    {
+      name: 'newContentCount (expose)',
+      type: 'ExposeState<number>',
+      default: '同步自 Root 的新增条数',
+    },
   ]}
 />
 

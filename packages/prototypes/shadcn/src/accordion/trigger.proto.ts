@@ -48,7 +48,12 @@ export default definePrototype<ShadcnAccordionTriggerProps, AccordionTriggerExpo
       intent: (i) => i.feedback.style.use(tw('border border-transparent')),
     });
     def.rule({
-      when: (w) => w.state(state.hovered).eq(true),
+      when: (w) =>
+        w.all(
+          w.state(state.hovered).eq(true),
+          w.state(state.disabled).eq(false),
+          w.state(state.collapseBlocked).eq(false)
+        ),
       intent: (i) => i.feedback.style.use(tw('underline')),
     });
     def.rule({
@@ -71,17 +76,20 @@ export default definePrototype<ShadcnAccordionTriggerProps, AccordionTriggerExpo
       when: (w) => w.all(w.state(state.focusVisible).eq(true), w.state(style).eq('sera')),
       intent: (i) => i.feedback.style.use(tw('border-ring ring-2 ring-ring/30')),
     });
-    // The remaining source recipes provide no Accordion-specific focus paint;
-    // keep the existing Proto visible-focus safety rather than losing focus.
+    // Bordered overflow-hidden Root presets use inset rings so focus paint never clips along edges.
     def.rule({
       when: (w) => w.all(w.state(state.focusVisible).eq(true), w.state(style).eq('maia')),
       intent: (i) =>
-        i.feedback.style.use(tw('border-ring ring-3 ring-ring/50 forced-colors-focus-outline')),
+        i.feedback.style.use(
+          tw('border-ring ring-3 ring-inset ring-ring/50 forced-colors-focus-outline')
+        ),
     });
     def.rule({
       when: (w) => w.all(w.state(state.focusVisible).eq(true), w.state(style).eq('mira')),
       intent: (i) =>
-        i.feedback.style.use(tw('border-ring ring-2 ring-ring/30 forced-colors-focus-outline')),
+        i.feedback.style.use(
+          tw('border-ring ring-2 ring-inset ring-ring/30 forced-colors-focus-outline')
+        ),
     });
     def.rule({
       when: (w) =>
@@ -90,7 +98,13 @@ export default definePrototype<ShadcnAccordionTriggerProps, AccordionTriggerExpo
           w.any(w.state(style).eq('luma'), w.state(style).eq('rhea'))
         ),
       intent: (i) =>
-        i.feedback.style.use(tw('border-ring ring-3 ring-ring/30 forced-colors-focus-outline')),
+        i.feedback.style.use(
+          tw('border-ring ring-3 ring-inset ring-ring/30 forced-colors-focus-outline')
+        ),
+    });
+    def.rule({
+      when: (w) => w.state(state.collapseBlocked).eq(true),
+      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed')),
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
@@ -134,10 +148,10 @@ export default definePrototype<ShadcnAccordionTriggerProps, AccordionTriggerExpo
           style:
             style.get() === 'sera'
               ? tw(
-                  'pointer-events-none ml-auto flex size-3.5 shrink-0 items-center text-muted-foreground'
+                  'pointer-events-none ms-auto translate-y-0.5 flex size-3.5 shrink-0 items-center text-muted-foreground'
                 )
               : tw(
-                  'pointer-events-none ml-auto flex size-4 shrink-0 items-center text-muted-foreground'
+                  'pointer-events-none ms-auto translate-y-0.5 flex size-4 shrink-0 items-center text-muted-foreground'
                 ),
         },
         r.svg.root(

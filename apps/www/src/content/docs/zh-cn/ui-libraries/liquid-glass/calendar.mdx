@@ -1,23 +1,15 @@
 ---
 title: 'Calendar'
-description: '支持单选、多选与日期范围的 Liquid Glass 公历选择器，提供本地化星期与可组合标题栏。'
+description: '支持单选、多选与日期范围的 Liquid Glass 公历选择器，提供同心圆角层次、减透明回退与可组合标题栏。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Calendar 是公历日期选择组件，支持 `single`（默认）、`multiple` 与 `range` 三种选择模式。日期使用 `YYYY-MM-DD` 字符串，显示月份使用 `YYYY-MM` 字符串，两者均可独立受控。
+Liquid Glass Calendar 是支持 `single`（默认）、`multiple` 与 `range` 三种选择模式的公历组件。容器采用同心圆角、内描边高光与半透明层次（在降低透明度或高对比模式下自动回退为不透明表面），且不叠加嵌套玻璃材质，可安全嵌入 `Date Picker` 浮层中使用。
 
 ## 预览
-
-### 选择模式（单选 / 多选 / 范围）
-
-<PrototypePreviewer
-  demoId="demo-liquid-glass-calendar-selection"
-  initialRuntime="wc"
-  runtimes={['wc', 'react', 'vue', 'vue2']}
-/>
-
-### 基础日历与月份/年份选择组合
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-calendar"
@@ -27,48 +19,191 @@ Liquid Glass Calendar 是公历日期选择组件，支持 `single`（默认）�
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前组件随源码工作区提供，尚未纳入 0.2.0 稳定版 CLI 注册表；可在工作区中直接从 `@proto.ui/prototypes-liquid-glass/calendar` 引入。
 
 ## 用法
 
-### 组成与网格布局
+```tsx
+import {
+  CalendarRoot,
+  CalendarCaption,
+  CalendarPrevious,
+  CalendarHeading,
+  CalendarNext,
+  CalendarGrid,
+  CalendarWeekdays,
+  CalendarWeekday,
+  CalendarRow,
+  CalendarDay,
+} from '@proto.ui/prototypes-liquid-glass/calendar';
 
-Calendar 由十个部件组成：`Root`、`Caption`、`Heading`、`Previous`、`Next`、`Grid`、`Weekdays`、`Weekday`、`Row`、`Day`。
+export function LiquidGlassCalendarExample() {
+  return (
+    <CalendarRoot mode="single" defaultMonth="2026-10" defaultValue="2026-10-12" today="2026-10-08">
+      <CalendarCaption>
+        <CalendarPrevious a11yLabel="Previous month" />
+        <CalendarHeading />
+        <CalendarNext a11yLabel="Next month" />
+      </CalendarCaption>
+      <CalendarGrid>
+        <CalendarWeekdays>
+          {Array.from({ length: 7 }, (_, offset) => (
+            <CalendarWeekday key={offset} offset={offset} />
+          ))}
+        </CalendarWeekdays>
+        {Array.from({ length: 6 }, (_, row) => (
+          <CalendarRow key={row} index={row}>
+            {Array.from({ length: 7 }, (_, col) => (
+              <CalendarDay key={col} offset={row * 7 + col} />
+            ))}
+          </CalendarRow>
+        ))}
+      </CalendarGrid>
+    </CalendarRoot>
+  );
+}
+```
 
-- 在 `Weekdays` 中放置 `offset` 为 `0–6` 的七个 `Weekday`，再使用最多六个带 `index`（`0–5`）的 `Row` 与 `offset`（`0–41`）的 `Day` 作为网格容量。
-- 默认按当月与 `weekStartsOn` 显示最少 4、5 或 6 周；传入 `fixedWeeks={true}` 可固定显示六周。多余的行和日期格会自动暴露 `hidden` 并退出焦点与选择路径。
-- 星期标签与日期无障碍名称随 Root 的 `weekStartsOn`（`0` 为周日）与 `locale` 同步。`direction="rtl"` 会镜像左右方向键；纯图标导航按钮可通过 `a11yLabel` 提供名称。
+### 表面层次、结构与年月组合
 
-### 单选、多选与范围规则
+- Calendar 由十个部件组成：`Root`、`Caption`、`Heading`、`Previous`、`Next`、`Grid`、`Weekdays`、`Weekday`、`Row` 与 `Day`。
+- 为避免玻璃叠玻璃（glass-on-glass），Calendar 本身作为内容层不注册额外的光学材质槽位；外层若由 `Date Picker` 浮层承载，则由浮层独占单一 Liquid Glass 材质。
+- 组件不主动读取系统时钟：请通过 `today` 传入 `YYYY-MM-DD` 字符串标记今天（自动映射 `aria-current="date"`）。
+- `direction="rtl"` 自动镜像左右方向键；可通过 `bindCalendarCaption(source, { month, year })` 将同族 `Select` 与 Calendar 的公开 `month` / `disabled` 及 `requestMonth` 联动（卸载时调用 `dispose()`）。
 
-- **多选（`multiple`）**：每次激活切换该日期；数组自动去重并按日期升序排列。`minSelected` 默认 `0`，省略 `maxSelected` 表示不限上限。
-- **范围（`range`）**：首次激活设定起点 `{ from }`，第二次激活完成闭区间 `{ from, to }`（反向选择会自动排序），再次激活则开始新范围；`{}` 表示清空。`minNights`（默认 `0`，允许单日范围）与 `maxNights` 限制起止日期之间的天数间隔。
-- `min`、`max` 与 Root 的 `unavailable` 约束所有选中日期；跨越不可用日期的范围会被拒绝并保留起点。整组不可用日期请配置在 Root 的 `unavailable`，单个 `Day` 的 `disabled` 仅禁用该格。
-- `readOnly` 禁止修改选择但允许继续翻月浏览；`disabled` 同时禁用选择与导航。
+### 选择模式
 
-### 时钟与月份/年份下拉组合
+| 模式       | 受控 / 初始值属性                                 | 变更事件                     |
+| ---------- | ------------------------------------------------- | ---------------------------- |
+| `single`   | `value` / `defaultValue`（`YYYY-MM-DD`）          | `onValueChange({ value })`   |
+| `multiple` | `values` / `defaultValues`（`readonly string[]`） | `onValuesChange({ values })` |
+| `range`    | `range` / `defaultRange`（`{ from?, to? }`）      | `onRangeChange({ range })`   |
 
-- 组件不主动读取系统时钟或时区：请通过 `today` 传入 `YYYY-MM-DD` 字符串以标记今天（自动映射 `aria-current="date"`）。
-- 初始显示月份优先级为：`month` → `defaultMonth` → 当前模式已有选中日期 → `today` → `1970-01`。
-- 若需要月份与年份下拉框，可通过 `bindCalendarCaption(source, { month, year })` 将本家族的 Select 与 Calendar 的公开 `month`/`disabled` 状态及 `requestMonth` 组合，卸载时调用返回的 `dispose()` 清理，并通过 Select 的 `accessibleLabel` 为触发器提供稳定名称。
+## 示例
+
+### 基础日历
+
+采用同心 `rounded-2xl` / `rounded-xl` 层次与清晰悬停/按压反馈的单日日历。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-calendar-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 日期范围
+
+`mode="range"` 提供无缝衔接的胶囊端点与半透明主色中段区间。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-calendar-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多选与范围约束
+
+结合 `min`、`max`、`unavailable`、`minNights`、`maxNights` 与 `maxSelected` 限制可选日期与跨度。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-calendar-selection"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 快捷预设
+
+配合受控 `value` / `month`、`fixedWeeks` 与同族 Liquid Glass `Button` 快捷选择日期。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-calendar-presets"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 已预订与不可用日期
+
+使用 `unavailable` 与 `min` / `max` 禁用已预订日期区间，保持清晰可读的禁用前景区分。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-calendar-booked-dates"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 从右到左（RTL）
+
+设置 `direction="rtl"`、`locale="ar-SA"` 与 `weekStartsOn={6}` 启用 RTL 布局与镜像键盘导航。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-calendar-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 / 模式 | 属性 | 默认值与说明 |
-| --- | --- | --- |
-| Root | `mode` | `'single' \| 'multiple' \| 'range'`，默认 `'single'` |
-| Root (`single`) | `value` / `defaultValue` | `YYYY-MM-DD` 字符串；变更回调 `onValueChange({ value })` |
-| Root (`multiple`) | `values` / `defaultValues` | 日期数组；配合 `minSelected`（默认 `0`）、`maxSelected` 与 `onValuesChange({ values })` |
-| Root (`range`) | `range` / `defaultRange` | `{ from?, to? }`；配合 `minNights`（默认 `0`）、`maxNights` 与 `onRangeChange({ range })` |
-| Root | `month` / `defaultMonth` | `YYYY-MM` 字符串，可独立受控 |
-| Root | `today` / `min` / `max` / `unavailable` | 今日标记与可选日期边界（`unavailable` 为日期字符串数组） |
-| Root | `weekStartsOn` / `locale` / `direction` / `fixedWeeks` | `weekStartsOn` 默认 `0`；`fixedWeeks` 默认 `false` |
-| Root | `disabled` / `readOnly` | 禁用或只读控制 |
-| Previous / Next | `a11yLabel` / `disabled` | 导航按钮无障碍名称与局部禁用 |
-| Row / Day | `index` / `offset` / `disabled` | 网格容量索引与单格禁用 |
+### Root
 
-### 方法与暴露状态
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: "'single'" },
+    { name: 'value', type: 'string', default: 'undefined' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'values', type: 'readonly string[]', default: 'undefined' },
+    { name: 'defaultValues', type: 'readonly string[]', default: '[]' },
+    { name: 'range', type: 'CalendarRange', default: 'undefined' },
+    { name: 'defaultRange', type: 'CalendarRange', default: '{}' },
+    { name: 'minSelected', type: 'number', default: '0' },
+    { name: 'maxSelected', type: 'number', default: 'undefined' },
+    { name: 'minNights', type: 'number', default: '0' },
+    { name: 'maxNights', type: 'number', default: 'undefined' },
+    { name: 'month', type: 'string', default: 'undefined' },
+    { name: 'defaultMonth', type: 'string', default: 'undefined' },
+    { name: 'min', type: 'string', default: "''" },
+    { name: 'max', type: 'string', default: "''" },
+    { name: 'unavailable', type: 'readonly string[]', default: '[]' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'weekStartsOn', type: 'number', default: '0' },
+    { name: 'fixedWeeks', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "'Calendar'" },
+    { name: 'today', type: 'string', default: "''" },
+    { name: 'locale', type: 'string', default: "'en-US'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+  ]}
+/>
 
-- Root 暴露方法：`requestMonth(month)`、`requestValue(date)`、`requestValues(dates)`、`requestRange(range)`、`getValues()`、`getRange()`。
-- Root 暴露状态：`mode`、`weekCount`、`selectedCount`、`rangeComplete`。
-- Day 暴露状态：`selected`、`rangeStart`、`rangeEnd`、`rangeMiddle`、`rangePending`、`hidden`。Grid 在多选与范围模式下自动设置 `aria-multiselectable`。
+### 子部件属性
+
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Day.date', type: 'string', default: "''" },
+    { name: 'Day.offset', type: 'number', default: '0' },
+    { name: 'Day.disabled', type: 'boolean', default: 'false' },
+    { name: 'Row.index', type: 'number', default: 'undefined' },
+    { name: 'Weekday.offset', type: 'number', default: '0' },
+    { name: 'Caption.a11yLabel', type: 'string', default: "'Calendar navigation'" },
+    {
+      name: 'Previous / Next.a11yLabel',
+      type: 'string',
+      default: "'Previous month' / 'Next month'",
+    },
+    { name: 'Previous / Next.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### 事件、方法与暴露状态
+
+- **事件（Root）**：`onValueChange({ value })`、`onValuesChange({ values })`、`onRangeChange({ range })`、`onMonthChange({ month })`。
+- **方法（Root）**：`requestValue(date)`、`requestValues(dates)`、`requestRange(range)`、`requestMonth(month)`、`getValues()`、`getRange()`。
+- **暴露状态**：Root 暴露 `value`、`mode`、`selectedCount`、`rangeComplete`、`month`、`weekCount`、`disabled`、`direction`；Day 暴露 `date`、`selected`、`rangeStart`、`rangeEnd`、`rangeMiddle`、`rangePending`、`today`、`outside`、`disabled`、`hidden`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-CALENDAR.yaml', 'P-BASE-CALENDAR.yaml']}
+/>

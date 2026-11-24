@@ -1,7 +1,7 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import { asScrollSurface } from '@proto.ui/hooks';
 import { asScrollAreaViewport } from '@proto.ui/prototypes-base/scroll-area';
-import { setupShadcnStyleSelection } from '../style-scope';
+import { SHADCN_STYLE_IDS, setupShadcnStyleSelection } from '../style-scope';
 import type { ShadcnScrollAreaViewportExposes, ShadcnScrollAreaViewportProps } from './types';
 
 const scrollAreaViewport = definePrototype<
@@ -18,15 +18,21 @@ const scrollAreaViewport = definePrototype<
         '[shadcn-scroll-area-viewport] asScrollAreaViewport must project Viewport state handles.'
       );
     }
-    setupShadcnStyleSelection(def, 'new-york-v4');
+    setupShadcnStyleSelection(def, 'new-york-v4', { supportedStyles: SHADCN_STYLE_IDS });
     asScrollSurface().configure({ projection: 'composed' });
     def.feedback.style.use(
       tw('h-full w-full rounded-[inherit] transition-[color,box-shadow] outline-none')
     );
     def.rule({
+      when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
+    def.rule({
       when: (when) => when.state(state.focusVisible).eq(true),
       intent: (intent) =>
-        intent.feedback.style.use(tw('ring-3 ring-ring/50 ring-inset outline-1 outline-ring')),
+        intent.feedback.style.use(
+          tw('ring-3 ring-ring/50 ring-inset outline-1 outline-ring forced-colors-focus-outline')
+        ),
     });
     return inherited.render;
   },

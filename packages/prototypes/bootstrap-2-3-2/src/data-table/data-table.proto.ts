@@ -14,7 +14,7 @@ import type {
   DataTableNextProps,
   DataTableNextExposes,
 } from '@proto.ui/prototypes-base/data-table';
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype, tw, type DefHandle } from '@proto.ui/core';
 import {
   asDataTableRoot,
   asDataTableRow,
@@ -34,9 +34,21 @@ import {
 } from '../button/paint';
 export type * from '@proto.ui/prototypes-base/data-table';
 
+function setupPointerHover(def: DefHandle<any, any>) {
+  const hovered = def.state.bool('dataTablePointerHover', false);
+  const clear = () => hovered.set(false, 'bootstrap data table pointer hover reset');
+  def.event.on('pointer.enter', () =>
+    hovered.set(true, 'bootstrap data table pointer hover enter')
+  );
+  def.event.on('pointer.leave', clear);
+  def.event.on('pointer.cancel', clear);
+  def.lifecycle.onUnmounted(clear);
+  return hovered;
+}
+
 // Base owns sorting, paging, selection and passive Table Structure. Bootstrap
 // 2.3.2 has .table, not this interactive DataTable protocol. The baseline table
-// recipe is used; no bordered/striped/hover class or invented row-group is added.
+// recipe is used while guarding display tokens against Base's hidden state.
 export const dataTableRoot = definePrototype<DataTableRootProps, DataTableRootExposes>({
   name: 'bootstrap-2-3-2-data-table-root',
   modules: asDataTableRoot.modules,
@@ -58,7 +70,26 @@ export const dataTableRow = definePrototype<DataTableRowProps, DataTableRowExpos
   setup(def) {
     const behavior = asDataTableRow();
     const state = behavior.stateHandles!;
-    def.feedback.style.use(tw('table-row'));
+    const hovered = setupPointerHover(def);
+    def.rule({
+      when: (w) => w.state(state.hidden).eq(false),
+      intent: (i) => i.feedback.style.use(tw('table-row')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(state.hidden).eq(false), w.prop('header').eq(false)),
+      intent: (i) => i.feedback.style.use(tw('cursor-pointer')),
+    });
+    // Classic Bootstrap 2.3.2 .table-hover row highlight (#f5f5f5 in light theme via secondary).
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(hovered).eq(true),
+          w.state(state.selected).eq(false),
+          w.state(state.hidden).eq(false),
+          w.prop('header').eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-secondary')),
+    });
     // Selection is a Proto extension, using the family accent pair; the light value is the source .info palette.
     def.rule({
       when: (w) => w.state(state.selected).eq(true),
@@ -79,9 +110,14 @@ export const dataTableCell = definePrototype<DataTableCellProps, DataTableCellEx
   modules: asDataTableCell.modules,
   setup(def) {
     const behavior = asDataTableCell();
+    const state = behavior.stateHandles!;
     def.feedback.style.use(
-      tw('table-cell p-[8px] leading-[20px] text-left align-top font-normal border-t border-[#ddd]')
+      tw('p-[8px] leading-[20px] text-left align-top font-normal border-t border-[#ddd]')
     );
+    def.rule({
+      when: (w) => w.state(state.hidden).eq(false),
+      intent: (i) => i.feedback.style.use(tw('table-cell')),
+    });
     // Base's renderer owns the actual record text, not an anonymous slot copy.
     return behavior.render;
   },
@@ -93,9 +129,15 @@ export const dataTableHeader = definePrototype<DataTableHeaderProps, DataTableHe
   modules: asDataTableHeader.modules,
   setup(def) {
     const behavior = asDataTableHeader();
+    const state = behavior.stateHandles!;
+    const hovered = setupPointerHover(def);
     def.feedback.style.use(
-      tw('table-cell p-[8px] leading-[20px] text-left font-bold border-t border-[#ddd]')
+      tw('p-[8px] leading-[20px] text-left font-bold border-t border-[#ddd] select-none')
     );
+    def.rule({
+      when: (w) => w.state(state.hidden).eq(false),
+      intent: (i) => i.feedback.style.use(tw('table-cell')),
+    });
     def.rule({
       when: (w) => w.prop('headerKind').eq('column'),
       intent: (i) => i.feedback.style.use(tw('align-bottom')),
@@ -103,6 +145,27 @@ export const dataTableHeader = definePrototype<DataTableHeaderProps, DataTableHe
     def.rule({
       when: (w) => w.not(w.prop('headerKind').eq('column')),
       intent: (i) => i.feedback.style.use(tw('align-top')),
+    });
+    def.rule({
+      when: (w) => w.prop('sortable').eq(true),
+      intent: (i) => i.feedback.style.use(tw('cursor-pointer')),
+    });
+    def.rule({
+      when: (w) => w.prop('sortable').eq(false),
+      intent: (i) => i.feedback.style.use(tw('cursor-default')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('sortable').eq(true),
+          w.state(hovered).eq(true),
+          w.state(state.hidden).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-secondary')),
+    });
+    def.rule({
+      when: (w) => w.any(w.state(state.sort).eq('ascending'), w.state(state.sort).eq('descending')),
+      intent: (i) => i.feedback.style.use(tw('bg-secondary underline underline-offset-4')),
     });
     // Header sorting remains with Base. Its public capture does not expose
     // the inherited structure row coordinate, so the source's first-thead
@@ -135,10 +198,14 @@ export const dataTablePrevious = definePrototype<DataTablePreviousProps, DataTab
       throw new Error('[bootstrap-2-3-2-data-table] Required inherited Button states unavailable.');
     def.feedback.style.use(
       tw(
-        'inline-flex shrink-0 items-center justify-center rounded-[4px] border px-[12px] py-[4px] text-[14px] font-normal leading-[20px] select-none cursor-pointer min-w-0 max-w-full whitespace-normal wrap-anywhere text-paint-[#333_0_1px_1px_rgb(255_255_255/75%)] border-[rgb(0_0_0/10%)_rgb(0_0_0/10%)_#b3b3b3_rgb(0_0_0/10%)]'
+        'inline-flex shrink-0 items-center justify-center rounded-[4px] border px-[12px] py-[4px] text-[14px] font-normal leading-[20px] select-none min-w-0 max-w-full whitespace-normal wrap-anywhere text-paint-[#333_0_1px_1px_rgb(255_255_255/75%)] border-[rgb(0_0_0/10%)_rgb(0_0_0/10%)_#b3b3b3_rgb(0_0_0/10%)]'
       )
     );
     def.feedback.style.use(tw(bootstrapButtonRaised));
+    def.rule({
+      when: (w) => w.state(state.disabled).eq(false),
+      intent: (i) => i.feedback.style.use(tw('cursor-pointer')),
+    });
     def.rule({
       when: (w) =>
         w.all(
@@ -207,10 +274,14 @@ export const dataTableNext = definePrototype<DataTableNextProps, DataTableNextEx
       throw new Error('[bootstrap-2-3-2-data-table] Required inherited Button states unavailable.');
     def.feedback.style.use(
       tw(
-        'inline-flex shrink-0 items-center justify-center rounded-[4px] border px-[12px] py-[4px] text-[14px] font-normal leading-[20px] select-none cursor-pointer min-w-0 max-w-full whitespace-normal wrap-anywhere text-paint-[#333_0_1px_1px_rgb(255_255_255/75%)] border-[rgb(0_0_0/10%)_rgb(0_0_0/10%)_#b3b3b3_rgb(0_0_0/10%)]'
+        'inline-flex shrink-0 items-center justify-center rounded-[4px] border px-[12px] py-[4px] text-[14px] font-normal leading-[20px] select-none min-w-0 max-w-full whitespace-normal wrap-anywhere text-paint-[#333_0_1px_1px_rgb(255_255_255/75%)] border-[rgb(0_0_0/10%)_rgb(0_0_0/10%)_#b3b3b3_rgb(0_0_0/10%)]'
       )
     );
     def.feedback.style.use(tw(bootstrapButtonRaised));
+    def.rule({
+      when: (w) => w.state(state.disabled).eq(false),
+      intent: (i) => i.feedback.style.use(tw('cursor-pointer')),
+    });
     def.rule({
       when: (w) =>
         w.all(

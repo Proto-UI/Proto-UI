@@ -1,11 +1,13 @@
 ---
 title: 'Collapsible'
-description: '由 Root、Trigger 和 Content 组成的 Bootstrap 2.3.2 单项折叠展开组件。'
+description: '由 Root、Trigger 和 Content 组成的 Bootstrap 2.3.2 单项折叠展开组件，保留经典 350ms 高度折叠过渡与像素比例。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Collapsible 提供可展开/收起的单项内容区，借鉴归档 Bootstrap 2.3.2 的圆角与边框间距，并使用独立的 Base Collapsible 交互语义。
+Bootstrap 2.3.2 Collapsible 提供可展开/收起的单项内容区，忠实保留归档 Bootstrap 2.3.2 的像素圆角、经典链接色与 350ms 高度过渡，并完全基于 [Base Collapsible](/zh-cn/ui-libraries/base/collapsible/) 语义。
 
 ## 预览
 
@@ -14,14 +16,11 @@ Bootstrap 2.3.2 Collapsible 提供可展开/收起的单项内容区，借鉴归
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
   toolbar={true}
-  codePanel={false}
 />
-
-可通过预览工具栏中的真实 Select 切换 WC、React、Vue 和 Vue 2，页眉中的 Runtime 偏好会自动同步。示例中依次展示了默认收起（关闭时卸载内容）、保持挂载隐藏内容、禁用但保持展开，以及受控确认展开四种场景。
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/collapsible` 导入部件：
 
 ```ts
 import {
@@ -33,19 +32,110 @@ import {
 
 ## 用法
 
-- **三部件结构**：在每个 `Root` 内放置一个 `Trigger` 和一个 `Content`；嵌套或相邻的 `Collapsible` 各自独立维护状态。
-- **状态由 Root 统一管理**：传入 `open` 进入受控模式，收到 `openChange` 事件（载荷为 `{ open, reason }`）后由父组件决定是否更新 `open`；禁用状态会阻止新的切换请求，但不会自动关闭已展开的内容。
-- **内容挂载控制**：关闭时默认卸载内容节点；设置 `keepMounted` 可保留隐藏的 DOM 节点。
-- **布局与缩放**：支持长标签与长单词自动换行，间距以 `rem` 表达以跟随字号缩放，外层容器建议为焦点环留出足够边距。
+```tsx
+import {
+  Bootstrap232CollapsibleRoot,
+  Bootstrap232CollapsibleTrigger,
+  Bootstrap232CollapsibleContent,
+} from '@/components/ui/collapsible';
 
-更多共享请求与生命周期细则请参考 [Base Collapsible](/zh-cn/ui-libraries/base/collapsible/)。
+export function Example() {
+  return (
+    <Bootstrap232CollapsibleRoot>
+      <Bootstrap232CollapsibleTrigger>Order #4189 — Product details</Bootstrap232CollapsibleTrigger>
+      <Bootstrap232CollapsibleContent>
+        Status: Shipped · 100 Market St, San Francisco · 2x Studio Headphones.
+      </Bootstrap232CollapsibleContent>
+    </Bootstrap232CollapsibleRoot>
+  );
+}
+```
+
+### 部件结构与视觉特征
+
+```text
+CollapsibleRoot
+├── CollapsibleTrigger
+└── CollapsibleContent
+```
+
+- **经典像素度量与配色**：保留 Bootstrap 2.3.2 的 `14px/20px` 排版、`4px` 圆角、`15px × 8px` 触发器内边距、`15px × 9px` 内容区内边距，以及 `#08c` 静止链接色与 `#005580` 悬停/按压下划线反馈（暗色模式下自动切换至高可读边框与浅蓝高亮）。
+- **350ms 高度折叠过渡**：`Content` 通过共享 `asTransition()` 绑定 `blockSize` 过渡，在内层容器绘制顶部分隔线与内边距，确保收起高度精确归零。
+- **受控与内容卸载**：传入 `open` 与 `openChange` 即可外部受控；`Content` 默认关闭即卸载，设置 `keepMounted={true}` 可保留隐藏节点。
+
+## 示例
+
+### 基础面板
+
+经典 Bootstrap 2.3.2 折叠面板搭配主色操作按钮。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-collapsible-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控状态
+
+通过外部按钮同步切换折叠面板，展示受控 `open` 与 350ms 平滑高度过渡。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-collapsible-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 嵌套目录
+
+嵌套与并列多个 Bootstrap 2.3.2 折叠组，各自保持独立状态。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-collapsible-file-tree"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 方法 / 事件 | 说明 |
-| --- | --- | --- |
-| `Root` | `open` / `defaultOpen` / `disabled` | 受控或初始展开状态及禁用开关 |
-| `Root` | `openCollapsible()` / `close()` / `toggle()` | 编程式发起展开、收起或切换请求 |
-| `Root` | `openChange` | 状态变更请求事件，载荷为 `{ open, reason }` |
-| `Trigger` | `disabled` / `focusSelf()` | 按钮触发器，支持自然 Tab 顺序与 `Enter`/`Space` 激活 |
-| `Content` | `keepMounted` | 默认 `false`；设为 `true` 时收起后保留隐藏节点 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'keepMounted', type: 'boolean', default: 'false' }]}
+/>
+
+### 事件与方法
+
+- **Root 事件**：`openChange`（载荷 `{ open, reason }`）
+- **Root 方法**：`openCollapsible(reason?)`、`close(reason?)`、`toggle(reason?)`
+- **Trigger 方法**：`focusSelf(options?)`
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-COLLAPSIBLE.yaml',
+    'P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER.yaml',
+    'P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT.yaml',
+    'P-BASE-COLLAPSIBLE.yaml',
+  ]}
+/>

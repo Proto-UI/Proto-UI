@@ -1,0 +1,123 @@
+---
+title: 'Liquid Glass Scroll Area'
+description: 'A content-layer scroll container with concentric corner alignment, translucent overlay scroll thumbs, and accessibility fallbacks.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Scroll Area provides a crisp content-layer scrolling surface—never stacking glass-on-glass on the scroll container itself—paired with concentric corner inheritance, translucent overlay scroll thumbs, and clean layering beneath floating Liquid Glass controls.
+
+## Preview
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-scroll-area"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Liquid Glass Scroll Area is currently provided from workspace source (`@proto.ui/prototypes-liquid-glass/scroll-area`) and does not yet ship a standalone CLI install target.
+
+## Usage
+
+```ts
+import {
+  LiquidGlassScrollAreaRoot,
+  LiquidGlassScrollAreaViewport,
+  LiquidGlassScrollAreaScrollbar,
+  LiquidGlassScrollAreaThumb,
+} from '@proto.ui/prototypes-liquid-glass/scroll-area';
+```
+
+```html
+<liquid-glass-scroll-area-root
+  class="h-56 w-full rounded-xl border border-border/60 bg-background/90"
+>
+  <liquid-glass-scroll-area-viewport>
+    <div class="p-4">Scrollable content here.</div>
+  </liquid-glass-scroll-area-viewport>
+  <liquid-glass-scroll-area-scrollbar orientation="vertical">
+    <liquid-glass-scroll-area-thumb></liquid-glass-scroll-area-thumb>
+  </liquid-glass-scroll-area-scrollbar>
+</liquid-glass-scroll-area-root>
+```
+
+### Composition & Material Guidance
+
+```text
+Root
+├── Viewport
+└── Scrollbar
+    └── Thumb
+```
+
+- **Content vs. floating glass**: `Root` and `Viewport` stay clean content boundaries without glass material, reserving Liquid Glass refraction for floating navigation and action bars layered above scrollable content.
+- **Concentric geometry**: `Viewport` applies `rounded-[inherit]` so inner content clipping and inset focus rings align cleanly with framed `rounded-xl` or `rounded-2xl` containers.
+- **Accessibility fallbacks**: `Thumb` fails closed to a readable opaque pill and enhances to a subtle translucent overlay indicator with a fine inset rim only when reduced-transparency and forced-colors are inactive. Increased contrast, forced colors, and reduced motion automatically tighten contrast and disable transitions.
+
+## Examples
+
+### Vertical Builds
+
+Single-axis vertical scrolling inside a framed card over a colorful backdrop.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-scroll-area-tags"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Horizontal Gallery
+
+Use `orientation="horizontal"` for concentric horizontal media strips.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-scroll-area-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Floating Glass Bar over Scrollable Content
+
+Pair floating `regular` and `prominent` Liquid Glass action controls above a clean non-glass Scroll Area feed to separate interactive navigation chrome from scrollable content.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-scroll-area-floating-bar"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Props
+
+The following prop belongs to `Scrollbar` (`Root`, `Viewport`, and `Thumb` add no props):
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'orientation', type: "'vertical' | 'horizontal'", default: "'vertical'" }]}
+/>
+
+### Exposed States
+
+- **Viewport**: `focused`, `focusVisible`, `scrollAxes`, `scrolling`, `scrollProjection`, `scrollXPosition`, `scrollXVisibleRatio`, `canScrollLeft`, `canScrollRight`, `scrollYPosition`, `scrollYVisibleRatio`, `canScrollUp`, `canScrollDown`.
+- **Scrollbar**: `orientation`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-SCROLL-AREA.yaml',
+    'P-LIQUID-GLASS-SCROLL-AREA-VIEWPORT.yaml',
+    'P-LIQUID-GLASS-SCROLL-AREA-SCROLLBAR.yaml',
+    'P-LIQUID-GLASS-SCROLL-AREA-THUMB.yaml',
+    'P-BASE-SCROLL-AREA.yaml',
+  ]}
+/>

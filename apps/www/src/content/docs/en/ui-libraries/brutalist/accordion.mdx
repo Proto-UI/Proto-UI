@@ -1,13 +1,14 @@
 ---
 title: 'Brutalist Accordion'
-description: 'A five-part collapsible accordion with single or multiple expansion, keyboard navigation, and explicit content mounting.'
+description: 'A five-part collapsible accordion with bold borders, theme-aware hard offset shadows, single or multiple expansion, and keyboard navigation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Accordion organizes collapsible sections with single or multiple open panels, styled with Brutalist borders and hard offset shadows.
+Brutalist Accordion organizes collapsible sections with single or multiple open panels, combining Base Accordion semantics with 5px base corners, 2px borders, and theme-aware 4px hard offset shadows.
 
 ## Preview
 
@@ -15,67 +16,192 @@ Brutalist Accordion organizes collapsible sections with single or multiple open 
   demoId="demo-brutalist-accordion"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-accordion" manager="npm" />
 
-- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-accordion`
-- **Package exports**: import `accordionRoot`, `accordionItem`, `accordionHeading`, `accordionTrigger`, and `accordionContent` from `@proto.ui/prototypes-brutalist/accordion`
+Replace `wc` with `react`, `vue`, or `vue2` to generate local facades, or import the five prototypes directly from `@proto.ui/prototypes-brutalist/accordion`.
 
 ## Usage
 
-### Parts
+```tsx
+import {
+  BrutalistAccordionRoot,
+  BrutalistAccordionItem,
+  BrutalistAccordionHeading,
+  BrutalistAccordionTrigger,
+  BrutalistAccordionContent,
+} from '@/components/proto-ui/react';
 
-Compose `Root -> Item -> Heading -> Trigger`, with `Content` alongside `Heading` inside each `Item`:
+export function BrutalistAccordionUsage() {
+  return (
+    <BrutalistAccordionRoot defaultOpenItems={['item-1']}>
+      <BrutalistAccordionItem value="item-1">
+        <BrutalistAccordionHeading level={3}>
+          <BrutalistAccordionTrigger>Is it accessible?</BrutalistAccordionTrigger>
+        </BrutalistAccordionHeading>
+        <BrutalistAccordionContent>
+          Yes. It adheres to the WAI-ARIA design pattern.
+        </BrutalistAccordionContent>
+      </BrutalistAccordionItem>
+    </BrutalistAccordionRoot>
+  );
+}
+```
 
-- **Root**: Manages the set of open item keys, expansion mode, disabled state, and header navigation settings. Nested roots operate independently.
-- **Item**: Wraps a single section and requires a unique, non-empty `value`.
-- **Heading**: Provides the semantic heading level (`level` 1–6, default `3`). Place only the controlling `Trigger` inside `Heading`, and put persistent secondary actions alongside it.
-- **Trigger**: Toggles its parent item on click or keyboard activation. Accepts no props of its own.
-- **Content**: Renders the collapsible panel body. Unmounts content when closed by default (set `keepMounted` to keep it mounted while hidden).
+### Anatomy
 
-### Controlled and uncontrolled state
+```text
+AccordionRoot
+└── AccordionItem
+    ├── AccordionHeading
+    │   └── AccordionTrigger
+    └── AccordionContent
+```
 
-- **Uncontrolled**: Pass `defaultOpenItems` to initialize open sections once.
-- **Controlled**: Pass `openItems` and listen to `openChange` with payload `{ openItems, value, open, reason }` to update state. `reason` is `'pointer'`, `'keyboard'`, or `'programmatic'`.
-- **Edge cases**: `mode="single"` keeps the first unique key supplied. Setting `allowEmpty={false}` prevents collapsing the last open section. Keys for items that mount later stay dormant until those items register.
+- **Root**: Manages open item keys, expansion mode, disabled state, and header navigation orientation. Nested roots stay independent.
+- **Item**: Wraps one collapsible section with `rounded-base` geometry, 2px borders, and a theme-aware 4px hard offset shadow. Requires a unique non-empty `value`.
+- **Heading**: Sets the semantic heading level (`1`–`6`, default `3`) and wraps only its controlling `Trigger`.
+- **Trigger**: Renders the bold `font-heading` main-accent bar with an inset high-visibility focus ring, press-frame feedback, and expanded bottom divider.
+- **Content**: Renders body copy on `bg-secondary-background` using `font-sans font-medium`. Unmounts when closed unless `keepMounted` is enabled.
 
 ### Keyboard and accessibility
 
-- Enabled triggers and focusable elements inside open panels stay in the natural `Tab` order.
-- Pressing `Enter` or `Space` on a trigger toggles its section.
-- `ArrowUp` / `ArrowDown` (or `ArrowLeft` / `ArrowRight` when `orientation="horizontal"`, reversed in RTL) moves focus between enabled triggers, and `Home` / `End` jumps to the first or last trigger without changing open state.
-- `Trigger` manages `aria-expanded`, `aria-disabled`, and `aria-controls`; `Content` is labelled by its trigger and can opt into a landmark region with `region={true}`.
+- Enabled triggers and focusable elements inside open panels stay in the natural `Tab` order; `Enter` and `Space` toggle the focused section.
+- `ArrowUp` / `ArrowDown` (or `ArrowLeft` / `ArrowRight` when `orientation="horizontal"`, reversed in RTL) and `Home` / `End` move focus between enabled headers without changing open state.
+- `Trigger` manages `aria-expanded`, `aria-disabled`, and `aria-controls`; when `allowEmpty={false}` blocks closing the last open section, the header stays focusable with `aria-disabled`.
+
+## Examples
+
+### Basic
+
+Single-open accordion with the first item expanded by default.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-accordion-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Multiple
+
+Set `mode="multiple"` to allow several items to remain open at the same time.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-accordion-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Disable individual sections with `disabled` on `AccordionItem`.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-accordion-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 ### Root
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
   rows={[
-    { name: 'mode', type: "'single' | 'multiple'", default: 'single' },
-    { name: 'openItems', type: 'string[]', default: 'undefined' },
-    { name: 'defaultOpenItems', type: 'string[]', default: '[]' },
-    { name: 'allowEmpty', type: 'boolean', default: 'true' },
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'orientation', type: "'vertical' | 'horizontal'", default: 'vertical' },
-    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
-    { name: 'loop', type: 'boolean', default: 'true' },
+    {
+      name: 'mode',
+      type: "'single' | 'multiple'",
+      default: "'single'",
+      description: 'Allows one or multiple items open at once',
+    },
+    {
+      name: 'openItems',
+      type: 'string[]',
+      default: '—',
+      description: 'Controlled list of open item keys',
+    },
+    {
+      name: 'defaultOpenItems',
+      type: 'string[]',
+      default: '[]',
+      description: 'Initial open keys in uncontrolled mode',
+    },
+    {
+      name: 'allowEmpty',
+      type: 'boolean',
+      default: 'true',
+      description: 'Prevents closing the last open item when false',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disables interaction for the entire group',
+    },
+    {
+      name: 'orientation',
+      type: "'vertical' | 'horizontal'",
+      default: "'vertical'",
+      description: 'Layout axis and arrow-key header navigation axis',
+    },
+    {
+      name: 'direction',
+      type: "'ltr' | 'rtl'",
+      default: "'ltr'",
+      description: 'Reading direction and horizontal arrow reversal',
+    },
+    {
+      name: 'loop',
+      type: 'boolean',
+      default: 'true',
+      description: 'Wraps keyboard focus from end to start',
+    },
   ]}
 />
 
-### Other parts
+### Item / Heading / Content
 
-- **Item**: `value: string` (required, unique, non-empty), `disabled?: boolean` (default `false`)
-- **Heading**: `level?: 1 | 2 | 3 | 4 | 5 | 6` (default `3`)
-- **Trigger**: No props
-- **Content**: `keepMounted?: boolean` (default `false`), `region?: boolean` (default `false`)
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'Item.value',
+      type: 'string',
+      default: 'Required',
+      description: 'Unique non-empty key for this item',
+    },
+    {
+      name: 'Item.disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disables interaction for this item',
+    },
+    {
+      name: 'Heading.level',
+      type: '1 | 2 | 3 | 4 | 5 | 6',
+      default: '3',
+      description: 'Semantic heading level (aria-level)',
+    },
+    {
+      name: 'Content.keepMounted',
+      type: 'boolean',
+      default: 'false',
+      description: 'Retains the hidden content node when closed',
+    },
+    {
+      name: 'Content.region',
+      type: 'boolean',
+      default: 'false',
+      description: 'Adds an explicit landmark region role',
+    },
+  ]}
+/>
 
-### Methods and events
+### Methods and events (Root)
 
 - **Methods**: `getOpenItems()` returns a copy of the open keys array; `requestOpen(value, open, reason?)` requests an open state change; `openCount` reports the count of open keys.
 - **Events**: `openChange` emits `{ openItems, value, open, reason }` when a state change is requested.
@@ -90,5 +216,6 @@ Compose `Root -> Item -> Heading -> Trigger`, with `Content` alongside `Heading`
     'P-BRUTALIST-ACCORDION-HEADING.yaml',
     'P-BRUTALIST-ACCORDION-TRIGGER.yaml',
     'P-BRUTALIST-ACCORDION-CONTENT.yaml',
+    'P-BASE-ACCORDION.yaml',
   ]}
 />

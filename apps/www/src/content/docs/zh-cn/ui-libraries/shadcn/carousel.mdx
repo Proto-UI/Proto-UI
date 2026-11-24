@@ -17,47 +17,159 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 用法
+## 安装
 
 当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-### 响应式视口与吸附
+## 用法
 
-- `Root` 的 `slidesPerView` 控制同时展示的最大等尺寸卡片数（默认 `1`），`minSlideSize` 设置每张卡片的最小逻辑像素尺寸（默认 `0`）。当容器变窄时会自动减少实际可见数量并允许边缘卡片部分露出。
-- 鼠标或触摸拖动会即时跟随移动，松手或原生滚动停止后自动吸附到最近的可达卡片边界；最后一个吸附位置会贴齐内容末端，不留多余空白。
-- 通过 `Root` 暴露的 `visibleSlides` 与 `maxIndex` 可读取当前视口实际容纳的项数与最大索引。
+```tsx
+import {
+  ShadcnCarouselRoot,
+  ShadcnCarouselViewport,
+  ShadcnCarouselSlide,
+  ShadcnCarouselPrevious,
+  ShadcnCarouselNext,
+} from '../proto-ui/components/react';
 
-### 受控与非受控索引
+export function Example() {
+  return (
+    <ShadcnCarouselRoot styleProfile="rhea" className="mx-auto w-full max-w-xs">
+      <ShadcnCarouselViewport>
+        <ShadcnCarouselSlide>1</ShadcnCarouselSlide>
+        <ShadcnCarouselSlide>2</ShadcnCarouselSlide>
+        <ShadcnCarouselSlide>3</ShadcnCarouselSlide>
+      </ShadcnCarouselViewport>
+      <ShadcnCarouselPrevious aria-label="Previous slide">‹</ShadcnCarouselPrevious>
+      <ShadcnCarouselNext aria-label="Next slide">›</ShadcnCarouselNext>
+    </ShadcnCarouselRoot>
+  );
+}
+```
 
-- 传入 `index` 进入受控模式，交互时通过 `indexChange` 提出目标索引。拖动预览期间不会修改已提交的 `index`，松手后根据外部传入的新值更新或平滑回弹到原位置。
-- `Viewport` 暴露 `dragging`、`scrolling` 与归一化 `scrollPosition`；每个 `Slide` 暴露 `current`（是否位于当前吸附位）与 `hidden`（是否完全在视口外，仍保留布局占位）。
+### 组合结构
 
-### 方向与循环
+```text
+CarouselRoot
+├── CarouselViewport
+│   ├── CarouselSlide
+│   └── CarouselSlide
+├── CarouselPrevious
+└── CarouselNext
+```
 
-- 设置 `orientation="vertical"` 时，请为视口容器指定明确的高度。
-- 水平模式下设置 `direction="rtl"` 会反转物理拖动与左右方向键，同时保持逻辑顺序。
-- 开启 `loop={true}` 后，在首尾两端继续切换会循环跳转索引（按索引循环，不克隆额外 DOM 节点）。
+- **响应式视口与吸附**：`Root` 的 `slidesPerView` 控制同时展示的最大等尺寸项数（默认 `1`），`minSlideSize` 设置单项最小逻辑像素尺寸（默认 `0`）。容器变窄时自动减少实际可见数，且最后一个吸附位贴齐末端。
+- **键盘与无障碍**：聚焦视口后支持 `ArrowLeft` / `ArrowRight`（纵向为 `ArrowUp` / `ArrowDown`）、`Home` 与 `End` 切换；纯图标翻页按钮请配合 `sr-only` 文案或 `aria-label` 提供可访问名称。
+- **受控索引**：传入 `index` 进入受控模式并监听 `indexChange`；拖动过程中不提前改写已提交的 `index`，松手后按外部最新值落位或平滑回弹。
+
+## 示例
+
+### 多项展示（Sizes）
+
+通过 `slidesPerView` 与 `minSlideSize` 在宽容器内并排展示多张卡片，窄屏下自动回退。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-carousel-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 间距调整（Spacing）
+
+在 `Slide` 上调整水平内边距（如 `px-1`）即可收紧或放宽卡片间距。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-carousel-spacing"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 纵向轮播（Orientation）
+
+设置 `orientation="vertical"` 并为 `Viewport` 指定明确高度（如 `h-64`）。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-carousel-orientation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 首尾循环（Loop）
+
+设置 `loop={true}` 后，可在首尾可达位置之间按索引循环跳转（不克隆额外节点）。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-carousel-loop"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 索引追踪（API）
+
+监听 `indexChange` 或读取 `Root` 暴露的 `index`、`slideCount`、`visibleSlides` 与 `maxIndex` 可实时同步页码指示器。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-carousel-api"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 从右到左（RTL）
+
+设置 `direction="rtl"` 会反转水平物理拖动、方向键与翻页按钮左右位置，同时保持逻辑项顺序。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-carousel-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-传入 `index` 进入受控模式。`Viewport` 无额外属性；省略 `Slide` 的 `index` 时按文档顺序自动分配。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
     { name: 'index', type: 'number', default: '—' },
+    { name: 'defaultIndex', type: 'number', default: '0' },
     { name: 'slidesPerView', type: 'number', default: '1' },
     { name: 'minSlideSize', type: 'number', default: '0' },
-    { name: 'defaultIndex', type: 'number', default: '0' },
     { name: 'loop', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
     { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
     { name: 'a11yLabel', type: 'string', default: 'Carousel' },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: 'new-york-v4' },
   ]}
 />
 
-以上属性属于 `Root`。
+### Slide / Previous / Next
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Slide.index', type: 'number', default: '按文档顺序分配' },
+    { name: 'Previous / Next.disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'Previous / Next.variant',
+      type: "'outline' | 'default' | 'secondary' | 'ghost'",
+      default: 'outline',
+    },
+    {
+      name: 'Previous / Next.size',
+      type: "'icon-sm' | 'icon' | 'sm' | 'default'",
+      default: 'icon-sm',
+    },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: '继承自 Root' },
+  ]}
+/>
+
+### 暴露状态、方法与事件
+
+- **Root**：状态 `index`、`slideCount`、`visibleSlides`、`maxIndex`；方法 `requestIndex(next)`；事件 `indexChange`（载荷 `{ index }`）。
+- **Viewport**：状态 `focusVisible`、`dragging`、`scrolling`、`scrollPosition`。
+- **Slide**：状态 `current`、`hidden`、`basis`、`minSize`。
 
 ## 参考
 

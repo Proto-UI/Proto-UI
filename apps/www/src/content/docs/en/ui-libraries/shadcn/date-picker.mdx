@@ -17,7 +17,120 @@ A date picker that composes `Popover` and `Calendar` with single, multiple, and 
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-### Multiple and range selection
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release. `Date Picker` is composed from [Popover](../popover/) and [Calendar](../calendar/) parts imported directly from the workspace.
+
+## Usage
+
+```tsx
+import {
+  ShadcnDatePickerRoot,
+  ShadcnDatePickerTrigger,
+  ShadcnDatePickerValue,
+  ShadcnDatePickerContent,
+  ShadcnDatePickerDay,
+  ShadcnCalendarCaption,
+  ShadcnCalendarPrevious,
+  ShadcnCalendarHeading,
+  ShadcnCalendarNext,
+  ShadcnCalendarGrid,
+  ShadcnCalendarWeekdays,
+  ShadcnCalendarWeekday,
+  ShadcnCalendarRow,
+} from '../proto-ui/components/react';
+
+export function DatePickerExample() {
+  return (
+    <ShadcnDatePickerRoot defaultMonth="2026-10" styleProfile="rhea">
+      <ShadcnDatePickerTrigger className="w-56">
+        <ShadcnDatePickerValue placeholder="Pick a date" />
+        <span aria-hidden="true">▾</span>
+      </ShadcnDatePickerTrigger>
+      <ShadcnDatePickerContent side="bottom" align="start" sideOffset={6}>
+        <ShadcnCalendarCaption>
+          <ShadcnCalendarPrevious a11yLabel="Previous month">‹</ShadcnCalendarPrevious>
+          <ShadcnCalendarHeading />
+          <ShadcnCalendarNext a11yLabel="Next month">›</ShadcnCalendarNext>
+        </ShadcnCalendarCaption>
+        <ShadcnCalendarGrid>
+          <ShadcnCalendarWeekdays>
+            {[0, 1, 2, 3, 4, 5, 6].map((offset) => (
+              <ShadcnCalendarWeekday key={offset} offset={offset} />
+            ))}
+          </ShadcnCalendarWeekdays>
+          {[0, 1, 2, 3, 4, 5].map((row) => (
+            <ShadcnCalendarRow key={row} index={row}>
+              {[0, 1, 2, 3, 4, 5, 6].map((col) => (
+                <ShadcnDatePickerDay key={col} offset={row * 7 + col} />
+              ))}
+            </ShadcnCalendarRow>
+          ))}
+        </ShadcnCalendarGrid>
+      </ShadcnDatePickerContent>
+    </ShadcnDatePickerRoot>
+  );
+}
+```
+
+### Composition
+
+```text
+DatePickerRoot
+├── DatePickerTrigger
+│   └── DatePickerValue
+└── DatePickerContent
+    ├── CalendarCaption
+    │   ├── CalendarPrevious
+    │   ├── CalendarHeading
+    │   └── CalendarNext
+    └── CalendarGrid
+        ├── CalendarWeekdays -> CalendarWeekday (0..6)
+        └── CalendarRow (0..5) -> DatePickerDay (0..41)
+```
+
+### Selection modes and dismissal
+
+- **Single and range modes**: `mode="single"` requests closing the popover once a date is accepted. `mode="range"` keeps the popover open after choosing the start date and requests one close when the second endpoint completes the range. If a controlled selection request is rejected or pending, the popover stays open.
+- **Multiple mode**: `mode="multiple"` keeps the popover open so users can toggle several dates, then close it via outside click or `Escape`.
+- **Formatted display (`Value`)**: Empty selections render `placeholder` with muted placeholder text styling; single mode formats `YYYY-MM-DD`, multiple mode formats a sorted comma-separated list, and range mode formats `from …` while incomplete or `from – to` once complete.
+- **Keyboard and accessibility**: Dismissal and focus restoration are managed by `Popover`; grid arrow navigation, unavailable date skipping, and localized labels are inherited from [Calendar](../calendar/).
+
+## Examples
+
+### Basic
+
+A labeled single-date picker with `min` and `max` date boundaries.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-date-picker-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Range Picker
+
+Select a date range with `mode="range"`, `defaultRange`, `minNights`, `maxNights`, and `unavailable` dates.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-date-picker-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Multiple & Disabled
+
+Use `mode="multiple"` with `maxSelected` to toggle multiple dates while keeping the popover open, paired with a `disabled` picker.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-date-picker-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Range & Multiple Comparison
+
+Compare `mode="range"` and `mode="multiple"` side by side under identical availability rules.
 
 <PrototypePreviewer
   demoId="demo-shadcn-date-picker-selection"
@@ -25,34 +138,48 @@ A date picker that composes `Popover` and `Calendar` with single, multiple, and 
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Usage
+### RTL & Locale
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Pass `direction="rtl"` and `locale="ar-SA"` to mirror grid order and localize headings and weekdays.
 
-### Selection modes and dismissal
-
-- **Single and range modes**: `mode="single"` requests closing the popover once a date is accepted. `mode="range"` keeps the popover open after choosing the start date and requests one close when the second endpoint completes the range. If a controlled selection request is rejected or pending, the popover stays open.
-- **Multiple mode**: `mode="multiple"` keeps the popover open so users can toggle several dates, then close it via outside click or `Escape`.
-- **Shared calendar rules**: `range` / `defaultRange`, `values` / `defaultValues`, availability constraints (`min`, `max`, `unavailable`), and count/night limits work identically to [Calendar](../calendar/).
-
-### Formatted display (`Value`)
-
-The `Value` part formats the current selection automatically:
-
-- Single: one ISO date (`YYYY-MM-DD`);
-- Multiple: a sorted, comma-separated list;
-- Range: `from …` while incomplete, or `from – to` when complete;
-- Empty: renders `placeholder`.
-
-Popover dismissal and focus restoration remain handled by `Popover`.
+<PrototypePreviewer
+  demoId="demo-shadcn-date-picker-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-Open state belongs to `Popover`, and selection mode, values, eligibility constraints, and `month` belong to `Calendar`. `Date Picker` adds one prop on `Value`:
+`Date Picker` consists of `DatePickerRoot`, `DatePickerTrigger`, `DatePickerValue`, `DatePickerContent`, and `DatePickerDay`, reusing `Calendar` caption, navigation, and grid parts inside the popup.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
-  rows={[{ name: 'placeholder', type: 'string', default: 'Pick a date' }]}
+  rows={[
+    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: "'single'" },
+    { name: 'open / defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'value / defaultValue', type: 'string (YYYY-MM-DD)', default: "''" },
+    { name: 'values / defaultValues', type: 'readonly string[]', default: '[]' },
+    { name: 'range / defaultRange', type: '{ from?: string; to?: string }', default: '{}' },
+    { name: 'month / defaultMonth', type: 'string (YYYY-MM)', default: 'current month' },
+    { name: 'min / max', type: 'string (YYYY-MM-DD)', default: '—' },
+    { name: 'unavailable', type: 'readonly string[]', default: '[]' },
+    { name: 'minSelected / maxSelected', type: 'number', default: '—' },
+    { name: 'minNights / maxNights', type: 'number', default: '—' },
+    { name: 'locale', type: 'string', default: "'en-US'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+    { name: 'disabled / readOnly', type: 'boolean', default: 'false' },
+    {
+      name: 'side / align / sideOffset',
+      type: 'PopoverContentProps',
+      default: "'bottom' / 'center' / 4",
+    },
+    { name: 'placeholder (Value)', type: 'string', default: "'Pick a date'" },
+    {
+      name: 'styleProfile',
+      type: "'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'nova'",
+    },
+  ]}
 />
 
 ## References

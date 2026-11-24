@@ -1,11 +1,13 @@
 ---
 title: 'Tree'
-description: 'A Liquid Glass hierarchical tree view with single selection, node expansion, and full keyboard navigation.'
+description: 'A Liquid Glass hierarchical tree view with concentric geometry, neutral content-layer contrast, branch expansion, and RTL keyboard navigation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Tree manages an explicitly keyed hierarchy with single selection, node expansion, and standard arrow-key and typeahead navigation.
+Liquid Glass Tree manages an explicitly keyed hierarchy with single selection, expandable branches, and full keyboard and RTL navigation. Following Apple Liquid Glass HIG, tree content remains on a neutral legible surface rather than stacking glass-on-glass inside list rows, paired with concentric corner radii (`rounded-2xl` outer container, `p-2` inset, `rounded-lg` rows) and readable disabled contrast.
 
 ## Preview
 
@@ -17,19 +19,150 @@ Liquid Glass Tree manages an explicitly keyed hierarchy with single selection, n
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes from `@proto.ui/prototypes-liquid-glass/tree` and adapt them for your target runtime:
+
+```ts
+import { treeRoot, treeItem, treeGroup, treeToggle } from '@proto.ui/prototypes-liquid-glass/tree';
+```
 
 ## Usage
 
-- **Explicit hierarchy**: identify each node with a unique `nodeKey` and reference its parent via `parentKey`; duplicate keys, missing parents, and cycles are ignored safely.
-- **Keyboard navigation**: Up/Down, `Home`/`End`, and first-letter typing move focus across visible nodes; Left/Right collapse or move to the parent, and expand or move to the first child.
-- **Controlled state**: `value` (selected node) and `expandedKeys` (expanded node keys) both support controlled request mode.
+```tsx
+<LiquidGlassTreeRoot defaultValue="button" defaultExpandedKeys={['src', 'components']}>
+  <div className="flex items-center gap-1.5">
+    <LiquidGlassTreeToggle nodeKey="src" size="icon">
+      ▾
+    </LiquidGlassTreeToggle>
+    <LiquidGlassTreeItem nodeKey="src" textValue="src" className="flex-1">
+      src/
+    </LiquidGlassTreeItem>
+  </div>
+  <LiquidGlassTreeGroup nodeKey="src">
+    <LiquidGlassTreeItem nodeKey="button" parentKey="src" textValue="button.tsx">
+      button.tsx
+    </LiquidGlassTreeItem>
+  </LiquidGlassTreeGroup>
+</LiquidGlassTreeRoot>
+```
+
+### Layering & Interaction Semantics
+
+- **Neutral content layer & concentric radii**: Because Tree presents scrollable/hierarchical content rather than floating chrome, it intentionally stays material-neutral (no glass-on-glass) while aligning outer container corners (`rounded-2xl` with `p-2`) concentrically with inner item rows (`rounded-lg`) and capsule disclosure toggles (`rounded-full`).
+- **Accessibility & contrast**: Focus uses an inset ring with `forced-colors` outline fallback; disabled rows switch to semantic muted ink rather than washing out opacity so contrast stays legible under opaque and high-contrast preferences.
+- **Keyboard & RTL**: Up/Down, `Home`/`End`, and first-letter typeahead move focus in visual order; `direction="rtl"` mirrors group indent guides and swaps Left/Right arrow keys.
+
+## Examples
+
+### Controlled Selection & Expansion
+
+Pass `value` and `expandedKeys` to synchronize selection and branch expansion externally via `valueChange` and `expandedChange`.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tree-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled & Read-Only
+
+Disabled items preserve legible muted ink while preventing activation; `readOnly` locks selection while allowing keyboard navigation and branch toggling.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tree-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Right-to-Left (RTL)
+
+Set `direction="rtl"` on `Root` to mirror group guides and horizontal arrow navigation.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tree-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Prop           | Description                                  |
-| -------------- | -------------------------------------------- |
-| `value`        | Controlled `nodeKey` of the selected node    |
-| `expandedKeys` | Controlled list of expanded node keys        |
-| `nodeKey`      | Unique identifier for a node within the tree |
-| `parentKey`    | `nodeKey` of the parent node                 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'undefined (controlled)' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'expandedKeys', type: 'readonly string[]', default: 'undefined (controlled)' },
+    { name: 'defaultExpandedKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: 'Tree' },
+  ]}
+/>
+
+### Item, Group & Toggle
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Item.nodeKey', type: 'string', default: "''" },
+    { name: 'Item.parentKey', type: 'string', default: "''" },
+    { name: 'Item.textValue', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+    { name: 'Group.nodeKey', type: 'string', default: "''" },
+    { name: 'Toggle.nodeKey', type: 'string', default: "''" },
+    { name: 'Toggle.size', type: "'default' | 'icon'", default: 'default' },
+    { name: 'Toggle.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Events & Methods (Root)
+
+<ApiPropsTable
+  headers={{ name: 'Name', type: 'Signature / Payload', default: 'Description' }}
+  rows={[
+    {
+      name: 'valueChange',
+      type: '{ value: string }',
+      default: 'Emitted when a selection change is requested',
+    },
+    {
+      name: 'expandedChange',
+      type: '{ expandedKeys: string[] }',
+      default: 'Emitted when branch expansion changes are requested',
+    },
+    {
+      name: 'getTree',
+      type: '() => TreeEntry[]',
+      default: 'Returns the current validated tree snapshot',
+    },
+    {
+      name: 'getExpandedKeys',
+      type: '() => string[]',
+      default: 'Returns the list of expanded branch keys',
+    },
+    {
+      name: 'requestValue',
+      type: '(key: string) => boolean',
+      default: 'Programmatically requests selecting a node',
+    },
+    {
+      name: 'requestExpanded',
+      type: '(key: string, open: boolean) => boolean',
+      default: 'Programmatically requests expanding or collapsing a branch',
+    },
+    {
+      name: 'refresh',
+      type: '() => void',
+      default: 'Recomputes and publishes the tree hierarchy snapshot',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-TREE.yaml', 'P-BASE-TREE.yaml']}
+/>

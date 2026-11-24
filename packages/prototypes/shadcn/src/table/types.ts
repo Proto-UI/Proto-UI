@@ -27,6 +27,11 @@ export type ShadcnTableRowProps = ShadcnStyleProps & {
    * header rows retain it. No DOM order or semantic row-group is inferred.
    */
   lastInSection?: boolean;
+  /**
+   * Caller-supplied visual selection highlight matching Shadcn's upstream
+   * selected-row fill (`bg-muted`). Does not set ARIA or install a selection owner.
+   */
+  selected?: boolean;
 };
 export type ShadcnTableRowExposes = TableRowExposes;
 export type ShadcnTableHeaderCellProps = TableHeaderCellProps & ShadcnStyleProps;

@@ -1,7 +1,7 @@
 import { withShadcnRheaDemo } from '../shadcn-demo-style';
 import type { DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
 
-const stages = ['First: plan the work', 'Second: build the component', 'Third: verify the result'];
+const slideNumbers = [1, 2, 3, 4, 5];
 
 export default withShadcnRheaDemo({
   type: 'demo',
@@ -14,23 +14,20 @@ export default withShadcnRheaDemo({
         kind: 'proto',
         prototypeId: 'shadcn-carousel-root',
         ref: 'carousel',
-        className: 'mx-auto w-full max-w-lg',
+        className: 'mx-auto w-full max-w-xs',
         props: {
-          a11yLabel: 'Project stages',
-          slidesPerView: 2,
-          minSlideSize: 180,
+          a11yLabel: 'Featured cards',
         },
         children: [
           {
             kind: 'proto',
             prototypeId: 'shadcn-carousel-viewport',
             ref: 'viewport',
-            children: stages.map((stage, index) => ({
+            children: slideNumbers.map((num, index) => ({
               kind: 'proto' as const,
               prototypeId: 'shadcn-carousel-slide',
               props: { index },
-              // Leave room for the Card's ring and shadow within the scroll surface.
-              className: 'px-2 py-1',
+              className: 'py-1',
               children: [
                 {
                   kind: 'proto' as const,
@@ -40,20 +37,13 @@ export default withShadcnRheaDemo({
                     {
                       kind: 'proto' as const,
                       prototypeId: 'shadcn-card-content',
-                      className:
-                        'flex min-h-36 flex-col items-center justify-center gap-3 text-center',
+                      className: 'flex aspect-square items-center justify-center p-6',
                       children: [
                         {
                           kind: 'proto' as const,
                           prototypeId: 'shadcn-text-root',
-                          props: { size: '3xl', weight: 'semibold', tone: 'inherit' },
-                          children: [String(index + 1)],
-                        },
-                        {
-                          kind: 'proto' as const,
-                          prototypeId: 'shadcn-text-root',
-                          props: { size: 'sm', tone: 'muted' },
-                          children: [stage],
+                          props: { size: '4xl', weight: 'semibold', tone: 'inherit' },
+                          children: [String(num)],
                         },
                       ],
                     },

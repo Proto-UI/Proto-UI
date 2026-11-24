@@ -4,12 +4,12 @@ description: '组合 Popover 与 Calendar 的 Liquid Glass 日期选择器，支
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Date Picker 将 Popover 与 Calendar 组合为下拉日期选择器，支持单日期、多选与范围三种模式。`open`、选中值与当前显示月份均可独立受控。
+Liquid Glass Date Picker 将胶囊形触发器、单层 `regular` Liquid Glass 浮动弹层与同心圆形日历单元格组合在一起，支持单日期、多选与范围三种模式，并可通过 `material="opaque"` 显式退回到高可读性不透明表面。
 
 ## 预览
-
-### 单日期选择
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-date-picker"
@@ -17,7 +17,101 @@ Liquid Glass Date Picker 将 Popover 与 Calendar 组合为下拉日期选择器
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-### 范围与多选
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。`Date Picker` 由 Liquid Glass 的 `Popover` 与 `Calendar` 部件组合构成。
+
+## 用法
+
+```tsx
+import {
+  LiquidGlassDatePickerRoot,
+  LiquidGlassDatePickerTrigger,
+  LiquidGlassDatePickerValue,
+  LiquidGlassDatePickerContent,
+  LiquidGlassDatePickerDay,
+  LiquidGlassCalendarCaption,
+  LiquidGlassCalendarPrevious,
+  LiquidGlassCalendarHeading,
+  LiquidGlassCalendarNext,
+  LiquidGlassCalendarGrid,
+  LiquidGlassCalendarWeekdays,
+  LiquidGlassCalendarWeekday,
+  LiquidGlassCalendarRow,
+} from '../proto-ui/components/react';
+
+export function LiquidGlassDatePickerExample() {
+  return (
+    <LiquidGlassDatePickerRoot defaultMonth="2026-10">
+      <LiquidGlassDatePickerTrigger className="w-56" variant="regular">
+        <LiquidGlassDatePickerValue placeholder="Pick a date" />
+        <span aria-hidden="true">▾</span>
+      </LiquidGlassDatePickerTrigger>
+      <LiquidGlassDatePickerContent side="bottom" align="start" sideOffset={6} material="auto">
+        <LiquidGlassCalendarCaption>
+          <LiquidGlassCalendarPrevious a11yLabel="Previous month">‹</LiquidGlassCalendarPrevious>
+          <LiquidGlassCalendarHeading />
+          <LiquidGlassCalendarNext a11yLabel="Next month">›</LiquidGlassCalendarNext>
+        </LiquidGlassCalendarCaption>
+        <LiquidGlassCalendarGrid>
+          <LiquidGlassCalendarWeekdays>
+            {[0, 1, 2, 3, 4, 5, 6].map((offset) => (
+              <LiquidGlassCalendarWeekday key={offset} offset={offset} />
+            ))}
+          </LiquidGlassCalendarWeekdays>
+          {[0, 1, 2, 3, 4, 5].map((row) => (
+            <LiquidGlassCalendarRow key={row} index={row}>
+              {[0, 1, 2, 3, 4, 5, 6].map((col) => (
+                <LiquidGlassDatePickerDay key={col} offset={row * 7 + col} />
+              ))}
+            </LiquidGlassCalendarRow>
+          ))}
+        </LiquidGlassCalendarGrid>
+      </LiquidGlassDatePickerContent>
+    </LiquidGlassDatePickerRoot>
+  );
+}
+```
+
+- **单层材质与同心几何**：仅展开后的 `DatePickerContent` 声明 `regular` 级别 Liquid Glass 材质（不叠加双层玻璃）；`DatePickerTrigger` 使用胶囊形轮廓并支持 `regular` / `prominent` 突出度层级；弹层内日期单元采用圆形同心布局。
+- **材质回退与无障碍**：当宿主启用减少透明度、高对比度或开发者传入 `material="opaque"` 时，弹层回退为 `bg-secondary` + `text-secondary-foreground` 高对比表面；禁用态避免降低整体透明度以保持文字清晰可读；减弱动态效果偏好会自动关闭弹层动画。
+- **选择模式与关闭时机**：单选与完成范围选择后自动请求关闭弹层，多选模式保持展开以便连续选择。日期边界、不可用日期与约束规则继承自 [Calendar](/zh-cn/ui-libraries/liquid-glass/calendar/)。
+
+## 示例
+
+### 基础用法
+
+在彩色背景上展示胶囊触发器与浮动 Liquid Glass 日历弹层。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-date-picker-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 范围选择
+
+通过 `mode="range"` 选择起止日期，端点以主色圆形高亮、中间区间使用与不透明回退层有明显区分的 `bg-muted` 填充带。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-date-picker-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 突出度层级、多选与禁用态
+
+左侧展示 `variant="prominent"` 主色触发器搭配 `mode="multiple"` 多选，右侧展示不透明禁用态（不降低不透明度）。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-date-picker-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 范围与多选对比
+
+同时对比 `mode="range"` 与 `mode="multiple"` 在同一日期约束下的交互体验。
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-date-picker-selection"
@@ -25,31 +119,46 @@ Liquid Glass Date Picker 将 Popover 与 Calendar 组合为下拉日期选择器
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 安装
+### RTL 与本地化
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+传入 `direction="rtl"` 与 `locale="ar-SA"` 呈现从右到左的日历布局与本地化星期标题。
 
-## 用法
-
-- **模式配置**：范围模式使用 `mode="range"` 与 `range` / `defaultRange`，多选模式使用 `mode="multiple"` 与 `values` / `defaultValues`。日期边界、不可用日期、数量与间隔天数规则完全继承 [Calendar](/zh-cn/ui-libraries/liquid-glass/calendar/)。
-- **弹层关闭时机**：
-  - 单日期选择被接受后，自动请求关闭弹层。
-  - 范围模式选择第一个端点时保持打开，第二个端点被接受并形成完整范围后请求关闭一次。
-  - 多选模式持续保持打开以便连续勾选，完成后按 Popover 的常规方式（点击外部、Escape 或关闭按钮）收起。
-  - 若受控模式拒绝了选择请求，弹层会保持打开；外部单纯改值不会触发关闭。
-- **值展示格式**：`Value` 分别显示单个 `YYYY-MM-DD` 日期、逗号分隔的有序日期列表、未完成范围的 `from …` 或完整范围的 `from – to`；为空时显示 `placeholder`。焦点返回与外部关闭由 Popover 管理。
+<PrototypePreviewer
+  demoId="demo-liquid-glass-date-picker-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 属性                       | 说明                                          |
-| -------------------------- | --------------------------------------------- |
-| `open` / `defaultOpen`     | 控制弹层开关（继承 Popover）                  |
-| `mode`                     | `'single'`（默认）、`'multiple'` 或 `'range'` |
-| `value` / `defaultValue`   | 单日期选择值                                  |
-| `values` / `defaultValues` | 多选日期数组                                  |
-| `range` / `defaultRange`   | 范围选择值 `{ from?, to? }`                   |
-| `month` / `defaultMonth`   | 当前显示的日历月份（`YYYY-MM`）               |
-| `placeholder`              | 无选中日期时在 `Value` 中显示的占位文本       |
-| `disabled` / `readOnly`    | 禁用或只读控制                                |
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: "'single'" },
+    { name: 'open / defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'value / defaultValue', type: 'string (YYYY-MM-DD)', default: "''" },
+    { name: 'values / defaultValues', type: 'readonly string[]', default: '[]' },
+    { name: 'range / defaultRange', type: '{ from?: string; to?: string }', default: '{}' },
+    { name: 'month / defaultMonth', type: 'string (YYYY-MM)', default: '当前月' },
+    { name: 'min / max / unavailable', type: 'string / readonly string[]', default: '—' },
+    { name: 'minSelected / maxSelected', type: 'number', default: '—' },
+    { name: 'minNights / maxNights', type: 'number', default: '—' },
+    { name: 'locale / direction', type: "string / 'ltr' | 'rtl'", default: "'en-US' / 'ltr'" },
+    { name: 'disabled / readOnly', type: 'boolean', default: 'false' },
+    { name: 'variant (Trigger)', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'material (Content)', type: "'auto' | 'opaque'", default: "'auto'" },
+    {
+      name: 'side / align / sideOffset',
+      type: 'PopoverContentProps',
+      default: "'bottom' / 'center' / 4",
+    },
+    { name: 'placeholder (Value)', type: 'string', default: "'Pick a date'" },
+  ]}
+/>
 
-完整的日期约束、回调与网格部件请参阅 [Calendar](/zh-cn/ui-libraries/liquid-glass/calendar/)。
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-DATE-PICKER.yaml', 'P-BASE-DATE-PICKER.yaml']}
+/>

@@ -1,5 +1,9 @@
-import { tw, type DefHandle } from '@proto.ui/core';
-import type { CalendarDayContract } from '@proto.ui/prototypes-base/calendar';
+import { tw, type DefHandle, type State } from '@proto.ui/core';
+import type {
+  CalendarDayContract,
+  CalendarPreviousExposes,
+  CalendarPreviousProps,
+} from '@proto.ui/prototypes-base/calendar';
 import {
   SHADCN_STYLE_IDS,
   setupShadcnStyleSelection,
@@ -16,7 +20,7 @@ import {
  * The existing unscoped Nova comparison remains separately bound to the
  * 2026-10-10 base-nova/calendar.json snapshot, SHA256
  * cc9ff16599d1664cec2d6a91ba82d0927953d8eedd51a7d56bba48a6522c28eb.
- * Its p-2 / 1.75rem cells / focused 3px ring are not a New York baseline.
+ * Its p-2 / 1.75rem cells are not a New York baseline.
  */
 export const CALENDAR_ROOT_PROFILE = {
   vega: 'p-3',
@@ -84,6 +88,69 @@ const DAY_PROFILE = {
   rhea: 'rounded-[var(--pui-radius-2xl)] text-sm',
   'new-york-v4': 'rounded-md text-sm',
 } as const satisfies Record<ShadcnStyleId, string>;
+const DAY_RANGE_START_RADIUS = {
+  vega: 'rounded-none rounded-l-md',
+  nova: 'rounded-none rounded-l-lg',
+  maia: 'rounded-none rounded-l-[var(--pui-radius-4xl)]',
+  lyra: 'rounded-none',
+  mira: 'rounded-none rounded-l-md',
+  luma: 'rounded-none rounded-l-[var(--pui-radius-4xl)]',
+  sera: 'rounded-none',
+  rhea: 'rounded-none rounded-l-[var(--pui-radius-2xl)]',
+  'new-york-v4': 'rounded-none rounded-l-md',
+} as const satisfies Record<ShadcnStyleId, string>;
+const DAY_RANGE_END_RADIUS = {
+  vega: 'rounded-none rounded-r-md',
+  nova: 'rounded-none rounded-r-lg',
+  maia: 'rounded-none rounded-r-[var(--pui-radius-4xl)]',
+  lyra: 'rounded-none',
+  mira: 'rounded-none rounded-r-md',
+  luma: 'rounded-none rounded-r-[var(--pui-radius-4xl)]',
+  sera: 'rounded-none',
+  rhea: 'rounded-none rounded-r-[var(--pui-radius-2xl)]',
+  'new-york-v4': 'rounded-none rounded-r-md',
+} as const satisfies Record<ShadcnStyleId, string>;
+const DAY_FOCUS = {
+  vega: 'relative z-10 border-ring ring-3 ring-ring/50 forced-colors-focus-outline',
+  nova: 'relative z-10 border-ring ring-3 ring-ring/50 forced-colors-focus-outline',
+  maia: 'relative z-10 border-ring ring-3 ring-ring/50 forced-colors-focus-outline',
+  lyra: 'relative z-10 border-ring ring-1 ring-ring/50 forced-colors-focus-outline',
+  mira: 'relative z-10 border-ring ring-2 ring-ring/30 forced-colors-focus-outline',
+  luma: 'relative z-10 border-ring ring-3 ring-ring/30 forced-colors-focus-outline',
+  sera: 'relative z-10 border-ring ring-2 ring-ring/30 forced-colors-focus-outline',
+  rhea: 'relative z-10 border-ring ring-3 ring-ring/30 forced-colors-focus-outline',
+  'new-york-v4': 'relative z-10 border-ring ring-3 ring-ring/50 forced-colors-focus-outline',
+} as const satisfies Record<ShadcnStyleId, string>;
+
+const NAV_PROFILE = {
+  vega: 'rounded-md border border-transparent bg-clip-padding text-sm font-medium',
+  nova: 'rounded-lg border border-transparent bg-clip-padding text-sm font-medium',
+  maia: 'rounded-[var(--pui-radius-4xl)] border border-transparent bg-clip-padding text-sm font-medium',
+  lyra: 'rounded-none border border-transparent bg-clip-padding text-xs font-medium',
+  mira: 'rounded-md border border-transparent bg-clip-padding text-xs leading-relaxed font-medium',
+  luma: 'rounded-[var(--pui-radius-4xl)] border border-transparent bg-clip-padding text-sm font-medium',
+  sera: 'rounded-none border border-transparent bg-clip-padding text-xs font-semibold uppercase tracking-widest',
+  rhea: 'rounded-[var(--pui-radius-2xl)] border border-transparent bg-clip-padding text-sm font-medium',
+  'new-york-v4': 'rounded-md text-sm font-medium',
+} as const satisfies Record<ShadcnStyleId, string>;
+
+const NAV_OUTLINE = {
+  vega: 'border border-border bg-background shadow-xs',
+  nova: 'border border-border bg-background',
+  maia: 'border border-border bg-input/30',
+  lyra: 'border border-border bg-background',
+  mira: 'border border-border bg-transparent',
+  luma: 'border border-border bg-background',
+  sera: 'border border-border bg-transparent',
+  rhea: 'border border-border bg-background',
+  'new-york-v4': 'border border-border bg-background shadow-xs',
+} as const satisfies Record<ShadcnStyleId, string>;
+
+export type ShadcnCalendarButtonVariant = 'ghost' | 'outline';
+export type ShadcnCalendarNavProps = CalendarPreviousProps &
+  ShadcnStyleProps & {
+    buttonVariant?: ShadcnCalendarButtonVariant;
+  };
 
 export function setupCalendarDayVisual<
   Props extends ShadcnStyleProps,
@@ -93,9 +160,18 @@ export function setupCalendarDayVisual<
   const style = setupShadcnStyleSelection(def, 'nova');
   def.feedback.style.use(
     tw(
-      'relative isolate z-10 inline-flex shrink-0 flex-col items-center justify-center gap-1 border-0 bg-transparent p-0 text-center font-normal leading-none outline-none select-none cursor-pointer transition-all'
+      'relative isolate z-10 inline-flex shrink-0 flex-col items-center justify-center gap-1 border-0 p-0 text-center font-normal leading-none outline-none select-none cursor-pointer transition-all'
     )
   );
+  def.rule({
+    when: (w) =>
+      w.all(
+        w.state(state.selected).eq(false),
+        w.state(state.today).eq(false),
+        w.any(w.state(state.disabled).eq(true), w.state(state.hovered).eq(false))
+      ),
+    intent: (i) => i.feedback.style.use(tw('bg-transparent')),
+  });
   for (const profile of SHADCN_STYLE_IDS) {
     def.rule({
       when: (w) => w.state(style).eq(profile),
@@ -109,6 +185,25 @@ export function setupCalendarDayVisual<
       when: (w) =>
         w.all(
           w.state(style).eq(profile),
+          w.state(state.rangeStart).eq(true),
+          w.state(state.rangeEnd).eq(false),
+          w.state(state.rangePending).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw(DAY_RANGE_START_RADIUS[profile])),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(style).eq(profile),
+          w.state(state.rangeEnd).eq(true),
+          w.state(state.rangeStart).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw(DAY_RANGE_END_RADIUS[profile])),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(style).eq(profile),
           w.state(state.today).eq(true),
           w.state(state.selected).eq(false)
         ),
@@ -116,8 +211,8 @@ export function setupCalendarDayVisual<
         i.feedback.style.use(
           tw(
             profile === 'new-york-v4'
-              ? 'bg-accent text-accent-foreground'
-              : 'bg-muted text-foreground'
+              ? 'bg-accent text-accent-foreground font-medium'
+              : 'bg-muted text-foreground font-medium'
           )
         ),
     });
@@ -156,10 +251,24 @@ export function setupCalendarDayVisual<
           )
         ),
     });
+    def.rule({
+      when: (w) => w.all(w.state(style).eq(profile), w.state(state.focusVisible).eq(true)),
+      intent: (i) => i.feedback.style.use(tw(DAY_FOCUS[profile])),
+    });
   }
   def.rule({
-    when: (w) => w.all(w.state(state.selected).eq(true), w.state(state.rangeMiddle).eq(false)),
+    when: (w) =>
+      w.all(
+        w.state(state.selected).eq(true),
+        w.state(state.rangeMiddle).eq(false),
+        w.state(state.rangePending).eq(false)
+      ),
     intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
+  });
+  def.rule({
+    when: (w) => w.state(state.rangePending).eq(true),
+    intent: (i) =>
+      i.feedback.style.use(tw('bg-primary/90 text-primary-foreground ring-2 ring-ring/50')),
   });
   def.rule({
     when: (w) => w.state(state.rangeMiddle).eq(true),
@@ -185,12 +294,157 @@ export function setupCalendarDayVisual<
     when: (w) => w.state(state.disabled).eq(true),
     intent: (i) => i.feedback.style.use(tw('pointer-events-none text-muted-foreground opacity-50')),
   });
+  return style;
+}
+
+export function setupCalendarNavVisual(
+  def: DefHandle<ShadcnCalendarNavProps, CalendarPreviousExposes>,
+  state: {
+    disabled: State<boolean>;
+    focusVisible: State<boolean>;
+    hovered: State<boolean>;
+    pressed: State<boolean>;
+  }
+) {
+  def.props.define({
+    buttonVariant: { type: 'enum', options: ['ghost', 'outline'], empty: 'fallback' },
+  });
+  def.props.setDefaults({ buttonVariant: 'ghost' });
+  const style = setupShadcnStyleSelection(def, 'nova');
+  def.feedback.style.use(
+    tw(
+      'inline-flex shrink-0 items-center justify-center p-0 whitespace-nowrap transition-all outline-none select-none cursor-pointer text-foreground'
+    )
+  );
   def.rule({
-    when: (w) => w.state(state.focused).eq(true),
-    intent: (i) =>
-      i.feedback.style.use(
-        tw('relative z-10 border-ring ring-3 ring-ring/50 forced-colors-focus-outline')
+    when: (w) =>
+      w.all(
+        w.prop('buttonVariant').eq('ghost'),
+        w.any(w.state(state.disabled).eq(true), w.state(state.hovered).eq(false))
       ),
+    intent: (i) => i.feedback.style.use(tw('bg-transparent')),
+  });
+  for (const profile of SHADCN_STYLE_IDS) {
+    def.rule({
+      when: (w) => w.state(style).eq(profile),
+      intent: (i) => i.feedback.style.use(tw(NAV_PROFILE[profile])),
+    });
+    def.rule({
+      when: (w) => w.state(style).eq(profile),
+      intent: (i) => i.feedback.style.use(tw(CALENDAR_CELL_SIZE[profile])),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(style).eq(profile), w.prop('buttonVariant').eq('outline')),
+      intent: (i) => i.feedback.style.use(tw(NAV_OUTLINE[profile])),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(style).eq(profile),
+          w.prop('buttonVariant').eq('outline'),
+          w.meta('colorScheme').eq('dark')
+        ),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw(
+            profile === 'maia' || profile === 'mira'
+              ? 'bg-input/30'
+              : profile === 'luma' || profile === 'rhea' || profile === 'sera'
+                ? 'bg-transparent'
+                : 'bg-input/30 border-input'
+          )
+        ),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(style).eq(profile),
+          w.state(state.hovered).eq(true),
+          w.state(state.disabled).eq(false),
+          w.prop('buttonVariant').eq('ghost')
+        ),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw(
+            profile === 'new-york-v4'
+              ? 'bg-accent text-accent-foreground'
+              : 'bg-muted text-foreground'
+          )
+        ),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(style).eq(profile),
+          w.state(state.hovered).eq(true),
+          w.state(state.disabled).eq(false),
+          w.prop('buttonVariant').eq('outline')
+        ),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw(
+            profile === 'new-york-v4'
+              ? 'bg-accent text-accent-foreground'
+              : profile === 'maia' || profile === 'mira'
+                ? 'bg-input/50 text-foreground'
+                : 'bg-muted text-foreground'
+          )
+        ),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(style).eq(profile),
+          w.state(state.hovered).eq(true),
+          w.state(state.disabled).eq(false),
+          w.meta('colorScheme').eq('dark'),
+          w.prop('buttonVariant').eq('ghost')
+        ),
+      intent: (i) =>
+        i.feedback.style.use(tw(profile === 'new-york-v4' ? 'bg-accent/50' : 'bg-muted/50')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(style).eq(profile),
+          w.state(state.hovered).eq(true),
+          w.state(state.disabled).eq(false),
+          w.meta('colorScheme').eq('dark'),
+          w.prop('buttonVariant').eq('outline')
+        ),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw(
+            profile === 'maia' ||
+              profile === 'mira' ||
+              profile === 'vega' ||
+              profile === 'nova' ||
+              profile === 'lyra' ||
+              profile === 'new-york-v4'
+              ? 'bg-input/50'
+              : 'bg-input/30'
+          )
+        ),
+    });
+    if (profile !== 'new-york-v4') {
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
+            w.state(state.pressed).eq(true),
+            w.state(state.disabled).eq(false)
+          ),
+        intent: (i) => i.feedback.style.use(tw('translate-y-px')),
+      });
+    }
+    def.rule({
+      when: (w) => w.all(w.state(style).eq(profile), w.state(state.focusVisible).eq(true)),
+      intent: (i) => i.feedback.style.use(tw(DAY_FOCUS[profile])),
+    });
+  }
+  def.rule({
+    when: (w) => w.state(state.disabled).eq(true),
+    intent: (i) => i.feedback.style.use(tw('pointer-events-none opacity-50')),
   });
   return style;
 }

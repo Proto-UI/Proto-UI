@@ -1,11 +1,13 @@
 ---
-title: 'Accordion'
-description: '由五个组件组成的 Liquid Glass 折叠面板，支持单选/多选展开、自然 Tab 顺序与可控内容生命周期。'
+title: 'Liquid Glass Accordion'
+description: '遵循层级半透明与可读性分离原则的 Liquid Glass 五部件手风琴，支持普通/强调层级、材质回退与完整键盘导航。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Accordion 由 Root、Item、Heading、Trigger、Content 五个部件组成，继承 Base Accordion 语义并为可交互标题提供 Liquid Glass 玻璃外观。
+Liquid Glass Accordion 由 Root、Item、Heading、Trigger、Content 五个部件组成。仅交互式标题（`Trigger`）承载 Liquid Glass 光学材质与按压形变，内容面板保持不透明高对比可读表面，避免玻璃叠玻璃。
 
 ## 预览
 
@@ -14,54 +16,233 @@ Liquid Glass Accordion 由 Root、Item、Heading、Trigger、Content 五个部�
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
   toolbar={true}
-  codePanel={false}
 />
 
 可通过预览工具栏中本体系的真实 Select 切换 WC、React、Vue 或 Vue 2；页面顶部的运行时偏好选择器同样可用并保持同步。
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-liquid-glass/accordion` 导入 `accordionRoot`、`accordionItem`、`accordionHeading`、`accordionTrigger` 与 `accordionContent`。
+当前通过工作区源码包提供，可直接从 `@proto.ui/prototypes-liquid-glass/accordion` 导入五个部件原型：
+
+```ts
+import {
+  accordionRoot,
+  accordionItem,
+  accordionHeading,
+  accordionTrigger,
+  accordionContent,
+} from '@proto.ui/prototypes-liquid-glass/accordion';
+```
 
 ## 用法
 
-### 结构与状态管理
+```tsx
+import {
+  LiquidGlassAccordionRoot,
+  LiquidGlassAccordionItem,
+  LiquidGlassAccordionHeading,
+  LiquidGlassAccordionTrigger,
+  LiquidGlassAccordionContent,
+} from '@/components/proto-ui/react';
 
-按 `Root → Item → Heading → Trigger` 组合，并将 `Content` 与 `Heading` 并列。每个 `Item` 需提供唯一且稳定的非空 `value`。展开集合由 Root 统一管理，嵌套的 Root 彼此独立。`Heading` 内仅放置控制该项的 `Trigger`，常驻次级操作应放在旁边。
+export function LiquidGlassAccordionUsage() {
+  return (
+    <div className="rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6">
+      <LiquidGlassAccordionRoot defaultOpenItems={['item-1']}>
+        <LiquidGlassAccordionItem value="item-1">
+          <LiquidGlassAccordionHeading level={3}>
+            <LiquidGlassAccordionTrigger>How do I reset my password?</LiquidGlassAccordionTrigger>
+          </LiquidGlassAccordionHeading>
+          <LiquidGlassAccordionContent>
+            Click on 'Forgot Password' on the login page to receive a reset link.
+          </LiquidGlassAccordionContent>
+        </LiquidGlassAccordionItem>
+      </LiquidGlassAccordionRoot>
+    </div>
+  );
+}
+```
 
-- 重复的输入键会自动去重，重复注册的 `Item` 标识会被忽略。`single` 模式下只采用首个有效键。
-- 尚未挂载的键会保留为待激活状态，便于渐进挂载；对不存在的项发起请求会被忽略。
-- 受控模式下，触发交互仅发出 `openChange` 请求，不会提前修改状态；将新的 `openItems` 传回 Root 才算完成更新。
+### 部件结构与材质层级
+
+```text
+AccordionRoot
+└── AccordionItem (transparent structural frame)
+    ├── AccordionHeading (paint reservation boundary)
+    │   └── AccordionTrigger (optical Liquid Glass interactive surface)
+    └── AccordionContent (opaque readable content surface)
+```
+
+- **单层光学边界**：`Item` 保持透明底色，避免遮挡背景采样或造成玻璃叠玻璃；`Content` 独立拥有不透明底色、柔和顶部分隔线与内边距，保证长正文可读性。
+- **层级强调与回退**：`Trigger` 支持 `prominence="regular" | "prominent"` 区分常规与强调标题，并支持 `material="opaque"` 显式关闭光学候选。在系统开启降低透明度（`prefers-reduced-transparency: reduce`）、强制配色（`forced-colors: active`）、禁用或不可收起状态，以及宿主未接入材质能力时，组件自动撤回光学候选并保留高对比不透明表面。
+- **无整宿半透明弱化**：禁用态通过撤回阴影与指针交互提示不可用，而非使用 `opacity-50` 降低不透明回退对比度。
 
 ### 键盘与无障碍
 
-- 每个启用的标题及传入的子元素内可聚焦元素保持自然的 Tab 顺序；Enter / Space 切换当前项。
-- 纵向模式使用上下方向键、横向模式使用左右方向键（RTL 下自动反转）及 Home / End 在启用标题间移动焦点，移动焦点不会改变展开状态。
-- 禁用标题会被导航跳过；当 `allowEmpty={false}` 且只剩最后一项展开时，该标题仍可聚焦并通过 `aria-disabled` 阻止关闭。
-- `Heading` 声明标题层级，`Trigger` 自动维护按钮角色、展开状态与精确的 `aria-controls` 关联；需要地标语义时可在 `Content` 上开启 `region={true}`。
+- 启用的 `Trigger` 与内容区可聚焦元素保持自然 `Tab` 顺序；`Enter` / `Space` 切换当前项。
+- 纵向模式使用 `ArrowUp` / `ArrowDown`、横向模式使用 `ArrowLeft` / `ArrowRight`（RTL 自动反转）与 `Home` / `End` 在启用标题间移动焦点，不改变展开状态。
+- 禁用标题会被方向键跳过；`allowEmpty={false}` 阻止收起最后一项时，标题仍可聚焦并通过 `aria-disabled` 提示不可关闭。
 
-### 内容卸载与材质
+## 示例
 
-- 关闭时默认卸载内容节点（设置 `keepMounted={true}` 可保留隐藏节点），但不自动移动焦点或添加延迟关闭定时器。
-- 仅交互式的 `Trigger` 声明 `liquid-glass` 材质意图并响应按压状态，其余部件保持不透明可读外观；宿主不支持材质时自动回退到声明的不透明主题色。
+### 基础用法
+
+在彩色渐变舞台上展示单选展开与标题玻璃质感。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-accordion-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多项展开
+
+传入 `mode="multiple"` 允许多个面板独立展开。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-accordion-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用条目
+
+禁用项自动撤回光学抬升与点击响应，同时保持清晰可读的不透明对比度。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-accordion-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 强调层级与不透明回退
+
+对比 `prominence="regular"`、`prominence="prominent"` 以及 `material="opaque"` 显式回退模式。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-accordion-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 | 默认值与说明 |
-| --- | --- | --- |
-| Root | `mode` | `'single'`；设为 `'multiple'` 时允许多项独立展开 |
-| Root | `openItems` / `defaultOpenItems` | 字符串数组；传入 `openItems` 即进入受控模式，`defaultOpenItems` 仅初始化一次 |
-| Root | `allowEmpty` | `true`；设为 `false` 时禁止关闭最后一个展开项 |
-| Root | `disabled` | `false`；禁用全部交互但不修改受控值 |
-| Root | `orientation` / `direction` / `loop` | `'vertical'` / `'ltr'` / `true`；控制标题键盘导航方向与循环 |
-| Item | `value` / `disabled` | `value` 为必填非空稳定键；`disabled` 默认 `false` |
-| Heading | `level` | `1–6` 整数，默认 `3` |
-| Trigger | — | 从 Item 与 Root 派生交互和无障碍状态 |
-| Content | `keepMounted` / `region` | 均为 `false`；控制关闭后是否保留隐藏节点及是否声明 `region` 地标 |
+### Root
 
-### 事件与方法
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'mode',
+      type: "'single' | 'multiple'",
+      default: "'single'",
+      description: '单选或多选展开模式',
+    },
+    {
+      name: 'openItems',
+      type: 'string[]',
+      default: '—',
+      description: '受控模式的已展开项 value 列表',
+    },
+    {
+      name: 'defaultOpenItems',
+      type: 'string[]',
+      default: '[]',
+      description: '非受控模式的初始展开项列表',
+    },
+    {
+      name: 'allowEmpty',
+      type: 'boolean',
+      default: 'true',
+      description: '设为 false 时禁止关闭最后一个展开项',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: '禁用整组交互但不修改受控值',
+    },
+    {
+      name: 'orientation',
+      type: "'vertical' | 'horizontal'",
+      default: "'vertical'",
+      description: '布局方向与标题方向键导航轴向',
+    },
+    {
+      name: 'direction',
+      type: "'ltr' | 'rtl'",
+      default: "'ltr'",
+      description: '阅读方向及横向方向键反转方向',
+    },
+    { name: 'loop', type: 'boolean', default: 'true', description: '到达首尾标题时是否循环聚焦' },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'material',
+      type: "'auto' | 'opaque'",
+      default: "'auto'",
+      description: 'auto 启用光学材质候选并尊重系统降低透明度偏好；opaque 强制使用不透明表面',
+    },
+    {
+      name: 'prominence',
+      type: "'regular' | 'prominent'",
+      default: "'regular'",
+      description: '常规表面或主色强调表面层级',
+    },
+  ]}
+/>
+
+### Item / Heading / Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    { name: 'Item.value', type: 'string', default: '必填', description: '唯一非空稳定项标识' },
+    { name: 'Item.disabled', type: 'boolean', default: 'false', description: '禁用单个条目交互' },
+    {
+      name: 'Heading.level',
+      type: '1 | 2 | 3 | 4 | 5 | 6',
+      default: '3',
+      description: '标题语义层级（aria-level）',
+    },
+    {
+      name: 'Content.keepMounted',
+      type: 'boolean',
+      default: 'false',
+      description: '收起时保留隐藏节点',
+    },
+    {
+      name: 'Content.region',
+      type: 'boolean',
+      default: 'false',
+      description: '显式声明 region 地标语义',
+    },
+  ]}
+/>
+
+### 方法与事件（Root）
 
 - `getOpenItems()`：返回当前展开键数组的副本。
 - `openCount`：当前展开键数量（含尚未挂载的键）。
 - `requestOpen(value, open, reason?)`：请求展开或收起指定项，`reason` 为 `'pointer' | 'keyboard' | 'programmatic'`。
 - `openChange`：载荷为 `{ openItems, value, open, reason }`；初始化、受控同步与无效请求不触发该事件。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-ACCORDION.yaml',
+    'P-LIQUID-GLASS-ACCORDION-ITEM.yaml',
+    'P-LIQUID-GLASS-ACCORDION-HEADING.yaml',
+    'P-LIQUID-GLASS-ACCORDION-TRIGGER.yaml',
+    'P-LIQUID-GLASS-ACCORDION-CONTENT.yaml',
+    'P-BASE-ACCORDION.yaml',
+  ]}
+/>

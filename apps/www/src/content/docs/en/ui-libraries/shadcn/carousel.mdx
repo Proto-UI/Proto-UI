@@ -17,47 +17,159 @@ An equal-size slide carousel with pointer/touch dragging, continuous wheel and t
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Usage
+## Installation
 
 Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-### Responsive viewport and snapping
+## Usage
 
-- Set `slidesPerView` on `Root` for the maximum equal-sized slides to display (default `1`), and `minSlideSize` for the minimum slide extent in logical pixels (default `0`). Narrowing the viewport reduces visible capacity automatically while allowing partial peeks.
-- Pointer or touch dragging moves the strip live; releasing or finishing native scroll snaps to the nearest reachable boundary. The final snap aligns flush with the strip end without trailing whitespace.
-- Read `visibleSlides` and `maxIndex` from `Root` to inspect the live viewport capacity.
+```tsx
+import {
+  ShadcnCarouselRoot,
+  ShadcnCarouselViewport,
+  ShadcnCarouselSlide,
+  ShadcnCarouselPrevious,
+  ShadcnCarouselNext,
+} from '../proto-ui/components/react';
 
-### Controlled and uncontrolled index
+export function Example() {
+  return (
+    <ShadcnCarouselRoot styleProfile="rhea" className="mx-auto w-full max-w-xs">
+      <ShadcnCarouselViewport>
+        <ShadcnCarouselSlide>1</ShadcnCarouselSlide>
+        <ShadcnCarouselSlide>2</ShadcnCarouselSlide>
+        <ShadcnCarouselSlide>3</ShadcnCarouselSlide>
+      </ShadcnCarouselViewport>
+      <ShadcnCarouselPrevious aria-label="Previous slide">‹</ShadcnCarouselPrevious>
+      <ShadcnCarouselNext aria-label="Next slide">›</ShadcnCarouselNext>
+    </ShadcnCarouselRoot>
+  );
+}
+```
 
-- Pass `index` to control the active snap position externally; `indexChange` emits proposed indexes. While dragging, the committed `index` remains unchanged until release and either adopts the synchronous update or returns to the committed position.
-- `Viewport` exposes `dragging`, `scrolling`, and normalized `scrollPosition`. Each `Slide` exposes `current` and offscreen `hidden` (keeping its layout box intact).
+### Composition
 
-### Orientation and looping
+```text
+CarouselRoot
+├── CarouselViewport
+│   ├── CarouselSlide
+│   └── CarouselSlide
+├── CarouselPrevious
+└── CarouselNext
+```
 
-- When using `orientation="vertical"`, give the viewport container an explicit height.
-- In horizontal mode, `direction="rtl"` reverses physical dragging and Left/Right arrow keys while preserving logical slide order.
-- Setting `loop={true}` wraps index requests between the first and last reachable positions without cloning slide nodes.
+- **Responsive viewport and snapping**: `slidesPerView` caps the maximum equal-sized slides shown at once (default `1`), while `minSlideSize` sets the minimum logical pixel extent per slide (default `0`). Narrowing the viewport reduces visible capacity automatically, and the final snap aligns flush with the strip end.
+- **Keyboard and accessibility**: While the viewport is focused, use `ArrowLeft` / `ArrowRight` (`ArrowUp` / `ArrowDown` in vertical mode), `Home`, and `End` to navigate. Always supply an accessible name via `sr-only` text or `aria-label` on icon-only navigation buttons.
+- **Controlled index**: Pass `index` and listen to `indexChange` to own the committed snap position externally. Live drag previews never overwrite the committed index prematurely.
+
+## Examples
+
+### Sizes
+
+Configure `slidesPerView` and `minSlideSize` to show multiple cards across wide viewports while adapting gracefully on narrow screens.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-carousel-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Spacing
+
+Adjust horizontal slide padding (such as `px-1`) to customize inter-slide spacing.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-carousel-spacing"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Orientation
+
+Set `orientation="vertical"` and provide an explicit bounded height (such as `h-64`) on `Viewport`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-carousel-orientation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Loop
+
+Enable `loop={true}` to wrap navigation seamlessly between the first and last reachable snap stops without cloning slide nodes.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-carousel-loop"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### API
+
+Listen to `indexChange` or inspect `Root`'s exposed `index`, `slideCount`, `visibleSlides`, and `maxIndex` states to drive external indicators.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-carousel-api"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Setting `direction="rtl"` mirrors horizontal dragging, arrow keys, and navigation button placement while keeping logical slide order intact.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-carousel-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-Passing `index` selects controlled mode. `Viewport` takes no props; omitting `Slide`'s `index` uses its document order.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
     { name: 'index', type: 'number', default: '—' },
+    { name: 'defaultIndex', type: 'number', default: '0' },
     { name: 'slidesPerView', type: 'number', default: '1' },
     { name: 'minSlideSize', type: 'number', default: '0' },
-    { name: 'defaultIndex', type: 'number', default: '0' },
     { name: 'loop', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
     { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
     { name: 'a11yLabel', type: 'string', default: 'Carousel' },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: 'new-york-v4' },
   ]}
 />
 
-These props belong to `Root`.
+### Slide / Previous / Next
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Slide.index', type: 'number', default: 'Document order' },
+    { name: 'Previous / Next.disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'Previous / Next.variant',
+      type: "'outline' | 'default' | 'secondary' | 'ghost'",
+      default: 'outline',
+    },
+    {
+      name: 'Previous / Next.size',
+      type: "'icon-sm' | 'icon' | 'sm' | 'default'",
+      default: 'icon-sm',
+    },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: 'Inherited from Root' },
+  ]}
+/>
+
+### Exposed states, methods, and events
+
+- **Root**: states `index`, `slideCount`, `visibleSlides`, `maxIndex`; method `requestIndex(next)`; event `indexChange` (`{ index }`).
+- **Viewport**: states `focusVisible`, `dragging`, `scrolling`, `scrollPosition`.
+- **Slide**: states `current`, `hidden`, `basis`, `minSize`.
 
 ## References
 

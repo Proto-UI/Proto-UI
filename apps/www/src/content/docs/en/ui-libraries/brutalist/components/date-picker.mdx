@@ -5,8 +5,9 @@ description: 'A Brutalist date picker combining Popover and Calendar for single,
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Date Picker pairs `Popover` with `Calendar` to provide single-date, multi-date, and date-range selection while keeping popup open state, selection state, and visible month independently controllable.
+Brutalist Date Picker pairs `Popover` with `Calendar` for single-date, multi-date, and date-range selection, combining 5px `rounded-base` geometry, 2px black borders, a raised 4px hard-shadow trigger, and a 3px floating content panel.
 
 ## Preview
 
@@ -18,11 +19,99 @@ Brutalist Date Picker pairs `Popover` with `Calendar` to provide single-date, mu
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. `Date Picker` composes Brutalist `Popover` and `Calendar` parts directly from the workspace.
 
 ## Usage
 
-### Single, range, and multiple modes
+```tsx
+import {
+  BrutalistDatePickerRoot,
+  BrutalistDatePickerTrigger,
+  BrutalistDatePickerValue,
+  BrutalistDatePickerContent,
+  BrutalistDatePickerDay,
+  BrutalistCalendarCaption,
+  BrutalistCalendarPrevious,
+  BrutalistCalendarHeading,
+  BrutalistCalendarNext,
+  BrutalistCalendarGrid,
+  BrutalistCalendarWeekdays,
+  BrutalistCalendarWeekday,
+  BrutalistCalendarRow,
+} from '../proto-ui/components/react';
+
+export function BrutalistDatePickerExample() {
+  return (
+    <BrutalistDatePickerRoot defaultMonth="2026-10">
+      <BrutalistDatePickerTrigger className="w-56">
+        <BrutalistDatePickerValue placeholder="Pick a date" />
+        <span aria-hidden="true">▾</span>
+      </BrutalistDatePickerTrigger>
+      <BrutalistDatePickerContent side="bottom" align="start" sideOffset={6}>
+        <BrutalistCalendarCaption>
+          <BrutalistCalendarPrevious a11yLabel="Previous month">‹</BrutalistCalendarPrevious>
+          <BrutalistCalendarHeading />
+          <BrutalistCalendarNext a11yLabel="Next month">›</BrutalistCalendarNext>
+        </BrutalistCalendarCaption>
+        <BrutalistCalendarGrid>
+          <BrutalistCalendarWeekdays>
+            {[0, 1, 2, 3, 4, 5, 6].map((offset) => (
+              <BrutalistCalendarWeekday key={offset} offset={offset} />
+            ))}
+          </BrutalistCalendarWeekdays>
+          {[0, 1, 2, 3, 4, 5].map((row) => (
+            <BrutalistCalendarRow key={row} index={row}>
+              {[0, 1, 2, 3, 4, 5, 6].map((col) => (
+                <BrutalistDatePickerDay key={col} offset={row * 7 + col} />
+              ))}
+            </BrutalistCalendarRow>
+          ))}
+        </BrutalistCalendarGrid>
+      </BrutalistDatePickerContent>
+    </BrutalistDatePickerRoot>
+  );
+}
+```
+
+- **Depth and press grammar**: The trigger carries a resting `4px 4px` hard black shadow that collapses on press; the floating popup panel uses a stationary `3px 3px` foreground shadow; day cells stay flat and highlight via color without press translation.
+- **Selection modes and dismissal**: Switch between `mode="single"` (default), `mode="range"`, and `mode="multiple"`. Single picks and completed ranges request closing the popup; multiple mode stays open for consecutive toggles.
+- **Formatted readout**: `Value` renders an ISO date, a sorted comma-separated list, `from …` for an incomplete range, `from – to` for a completed range, or `placeholder` when empty.
+
+## Examples
+
+### Basic
+
+A labeled Brutalist single-date picker with `min` and `max` constraints.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-date-picker-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Range Picker
+
+Select an inclusive range with `mode="range"`, highlighted endpoints, and flat range-middle fill.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-date-picker-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Multiple & Disabled
+
+Toggle multiple dates with `mode="multiple"` alongside a `disabled` trigger state.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-date-picker-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Range & Multiple Comparison
+
+Compare `mode="range"` and `mode="multiple"` side by side with shared date availability rules.
 
 <PrototypePreviewer
   demoId="demo-brutalist-date-picker-selection"
@@ -30,17 +119,46 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-- Select a mode via `mode="single"` (default), `mode="range"` (`range` / `defaultRange`), or `mode="multiple"` (`values` / `defaultValues`), using all the same constraints and callbacks documented on `Calendar`.
-- **Popup dismissal**: Single mode requests close after an accepted pick. Range mode stays open after the first endpoint and requests close once the second endpoint completes the range. Multiple mode stays open for continued toggling until dismissed via standard Popover interactions.
-- **Formatted readout**: `Value` renders a single ISO date, a comma-separated sorted list, `from …` for an in-progress range, or `from – to` for a completed range, falling back to `placeholder` when empty.
+### RTL & Locale
+
+Set `direction="rtl"` and `locale="ar-SA"` to mirror the grid and localize calendar headers.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-date-picker-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-Open state belongs to `Popover`, and selection mode, values, constraints, and month belong to `Calendar`. Date Picker adds one prop on `Value`:
-
-### Value
+Open state belongs to `Popover`, and selection mode, values, constraints, and `month` belong to `Calendar`. `DatePickerValue` adds `placeholder`.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
-  rows={[{ name: 'placeholder', type: 'string', default: 'Pick a date' }]}
+  rows={[
+    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: "'single'" },
+    { name: 'open / defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'value / defaultValue', type: 'string (YYYY-MM-DD)', default: "''" },
+    { name: 'values / defaultValues', type: 'readonly string[]', default: '[]' },
+    { name: 'range / defaultRange', type: '{ from?: string; to?: string }', default: '{}' },
+    { name: 'month / defaultMonth', type: 'string (YYYY-MM)', default: 'current month' },
+    { name: 'min / max / unavailable', type: 'string / readonly string[]', default: '—' },
+    { name: 'minSelected / maxSelected', type: 'number', default: '—' },
+    { name: 'minNights / maxNights', type: 'number', default: '—' },
+    { name: 'locale / direction', type: "string / 'ltr' | 'rtl'", default: "'en-US' / 'ltr'" },
+    { name: 'disabled / readOnly', type: 'boolean', default: 'false' },
+    {
+      name: 'side / align / sideOffset',
+      type: 'PopoverContentProps',
+      default: "'bottom' / 'center' / 4",
+    },
+    { name: 'placeholder (Value)', type: 'string', default: "'Pick a date'" },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-DATE-PICKER.yaml', 'P-BASE-DATE-PICKER.yaml']}
 />

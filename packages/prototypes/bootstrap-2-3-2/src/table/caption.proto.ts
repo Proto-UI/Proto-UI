@@ -16,7 +16,9 @@ export const tableCaption = definePrototype<TableCaptionProps, TableCaptionExpos
   setup(def) {
     const behavior = asTableCaption();
     // Upstream does not turn the table caption into a padded panel or heading.
-    def.feedback.style.use(tw('table-caption text-center font-normal'));
+    def.feedback.style.use(
+      tw('table-caption py-[6px] text-center font-normal text-muted-foreground')
+    );
     return behavior.render;
   },
 });

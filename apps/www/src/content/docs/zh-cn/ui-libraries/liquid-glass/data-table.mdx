@@ -1,11 +1,13 @@
 ---
 title: 'Data Table'
-description: '支持稳定排序、全局过滤、分页与行选择的 Liquid Glass 数据表格组件。'
+description: '支持稳定排序、全局与按列筛选、列显隐、分页及行选择的 Liquid Glass 数据表格组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Data Table 将语义化表格结构与稳定记录 ID、稳定排序、全局过滤、分页及行选择组合在一起。排序和翻页直接更新每个数据槽绑定的真实记录内容，保持 DOM 结构与视觉顺序一致。
+Liquid Glass Data Table 将语义化表格内容层与浮动玻璃控制层清晰分离：高密度数据行与单元格保持高可读性的内容表面（不叠加玻璃套玻璃），筛选工具栏与胶囊形 `Previous`/`Next` 翻页控件则通过 `liquid-glass` 材质与层级（`regular` / `prominent`）悬浮呈现，并在降低透明度或高对比度偏好下自动回退到清晰的实色方案。
 
 ## 预览
 
@@ -21,15 +23,158 @@ Liquid Glass Data Table 将语义化表格结构与稳定记录 ID、稳定排�
 
 ## 用法
 
-- **行与单元格映射**：传入的每条数据 `rows` 需包含唯一 `id`。正文行使用 `DataTableRow` 并按当前页 `index` 编排显示槽，单元格按 `columnKey` 读取当前槽位记录的字段值。
-- **可排序表头行**：将排序表头放置在 `DataTableHeaderRow` 中。它继承被动表格行结构，不额外创建选择、焦点或触发器上下文，从而允许在同一表头行内放置多个排序触发器。
-- Data Table 专注于本地数据的排序、过滤、分页与选择，不内置网络请求、行内编辑或列拖拽重排。
+```tsx
+import {
+  LiquidGlassDataTableCaption,
+  LiquidGlassDataTableCell,
+  LiquidGlassDataTableHeader,
+  LiquidGlassDataTableHeaderRow,
+  LiquidGlassDataTableNext,
+  LiquidGlassDataTablePrevious,
+  LiquidGlassDataTableRoot,
+  LiquidGlassDataTableRow,
+} from '../proto-ui/components/react';
+
+const rows = [
+  { id: 'm5gr84i9', status: 'Success', email: 'ken99@example.com', amount: 316 },
+  { id: '3u1reuv4', status: 'Success', email: 'abe45@example.com', amount: 242 },
+];
+
+export function Example() {
+  return (
+    <LiquidGlassDataTableRoot rows={rows} pageSize={4}>
+      <LiquidGlassDataTableCaption>Recent payments.</LiquidGlassDataTableCaption>
+      <LiquidGlassDataTableHeaderRow>
+        <LiquidGlassDataTableHeader headerKey="status">Status</LiquidGlassDataTableHeader>
+        <LiquidGlassDataTableHeader headerKey="email">Email</LiquidGlassDataTableHeader>
+        <LiquidGlassDataTableHeader headerKey="amount" className="text-right">
+          Amount
+        </LiquidGlassDataTableHeader>
+      </LiquidGlassDataTableHeaderRow>
+      {[0, 1].map((index) => (
+        <LiquidGlassDataTableRow key={index} index={index}>
+          <LiquidGlassDataTableCell columnKey="status" headers={['status']} />
+          <LiquidGlassDataTableCell columnKey="email" headers={['email']} />
+          <LiquidGlassDataTableCell
+            columnKey="amount"
+            headers={['amount']}
+            className="text-right"
+          />
+        </LiquidGlassDataTableRow>
+      ))}
+      <div className="table-caption caption-bottom">
+        <div className="flex justify-end gap-2 pt-3">
+          <LiquidGlassDataTablePrevious>Previous</LiquidGlassDataTablePrevious>
+          <LiquidGlassDataTableNext variant="prominent">Next</LiquidGlassDataTableNext>
+        </div>
+      </div>
+    </LiquidGlassDataTableRoot>
+  );
+}
+```
+
+### 层级与材质说明
+
+- **内容层与控制层分离**：`DataTableRoot` 与各数据行采用高可读性圆角内容表面（`rounded-2xl`），避免在数据行上堆叠多层玻璃；行选中态使用半透明主题色高亮（`bg-primary/15`）保持正文对比度。
+- **浮动翻页控件**：`DataTablePrevious` 与 `DataTableNext` 使用胶囊几何（`rounded-full`）、支持 `variant="regular" | "prominent"` 与 `material="auto" | "opaque"`；禁用态会撤回光学材质并保持实色回退可读，不降低整体不透明度。
+
+## 示例
+
+### 基础表格与排序
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-data-table-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 筛选与列显隐
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-data-table-filtering"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 分页与行选择
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-data-table-pagination"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 只读、禁用与实色回退
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-data-table-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件               | 关键属性    | 说明                                 |
-| ------------------ | ----------- | ------------------------------------ |
-| DataTableRoot      | `rows`      | 记录数组，每条记录需提供唯一 `id`    |
-| DataTableHeaderRow | —           | 表头行容器，可包含多个排序表头触发器 |
-| DataTableRow       | `index`     | 当前页内的数据行显示槽               |
-| DataTableCell      | `columnKey` | 指定单元格读取当前记录的字段键       |
+### Root
+
+传入 `sortKey`、`sortDirection`、`page` 或 `selectedKeys` 可分别进入对应受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'rows', type: 'readonly DataRecord[]', default: '[]' },
+    { name: 'sortKey', type: 'string', default: '—（受控）' },
+    { name: 'defaultSortKey', type: 'string', default: "''" },
+    { name: 'sortDirection', type: "'none' | 'ascending' | 'descending'", default: '—（受控）' },
+    {
+      name: 'defaultSortDirection',
+      type: "'none' | 'ascending' | 'descending'",
+      default: "'none'",
+    },
+    { name: 'filter', type: 'string', default: "''" },
+    { name: 'columnFilters', type: 'Readonly<Record<string, string>>', default: '{}' },
+    { name: 'columnVisibility', type: 'Readonly<Record<string, boolean>>', default: '{}' },
+    { name: 'page', type: 'number', default: '—（受控）' },
+    { name: 'defaultPage', type: 'number', default: '0' },
+    { name: 'pageSize', type: 'number', default: '10' },
+    { name: 'selectedKeys', type: 'readonly string[]', default: '—（受控）' },
+    { name: 'defaultSelectedKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### 子部件属性
+
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Row.index', type: 'number', default: '0' },
+    { name: 'Row.header', type: 'boolean', default: 'false' },
+    { name: 'Header.headerKey', type: 'string', default: "''" },
+    { name: 'Header.headerKind', type: "'column' | 'row'", default: "'column'" },
+    { name: 'Header.sortable', type: 'boolean', default: 'true' },
+    { name: 'Cell.columnKey', type: 'string', default: "''" },
+    { name: 'Cell.headers', type: 'readonly string[]', default: '[]' },
+    { name: 'Cell.renderValue', type: 'boolean', default: 'true' },
+    { name: 'Previous / Next.variant', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'Previous / Next.material', type: "'auto' | 'opaque'", default: "'auto'" },
+  ]}
+/>
+
+### 事件、方法与暴露状态
+
+- **事件（Root）**：`sortChange`、`pageChange`、`selectionChange`。
+- **方法（Root）**：`getRows()`、`getRecord(id)`、`getSelectedKeys()`、`requestSort(key)`、`requestPage(next)`、`requestSelection(id)`、`requestPageSelection(selected?)`。
+- **暴露状态**：Root 暴露 `filteredCount`、`pageSelection`；Row 暴露 `rowKey`、`selected`、`focused`、`focusVisible`；Header 暴露 `sort`；Cell 暴露 `displayValue`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-DATA-TABLE.yaml',
+    'P-LIQUID-GLASS-DATA-TABLE-HEADER-ROW.yaml',
+    'P-BASE-DATA-TABLE.yaml',
+    'P-BASE-DATA-TABLE-HEADER-ROW.yaml',
+  ]}
+/>

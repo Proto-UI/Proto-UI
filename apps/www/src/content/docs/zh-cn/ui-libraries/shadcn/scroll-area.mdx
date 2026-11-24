@@ -12,7 +12,11 @@ Scroll Area 在保留宿主原生滚轮、触摸、惯性和回弹体验的同�
 
 ## 预览
 
-<PrototypePreviewer demoId="demo-shadcn-scroll-area" initialRuntime="wc" />
+<PrototypePreviewer
+  demoId="demo-shadcn-scroll-area"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## 安装
 
@@ -24,27 +28,109 @@ Scroll Area 在保留宿主原生滚轮、触摸、惯性和回弹体验的同�
 
 ## 用法
 
-从 `@proto.ui/prototypes-shadcn/scroll-area` 导入该组件家族，包含四个部件：`Root`、`Viewport`、`Scrollbar` 和 `Thumb`：
+```ts
+import {
+  ShadcnScrollAreaRoot,
+  ShadcnScrollAreaViewport,
+  ShadcnScrollAreaScrollbar,
+  ShadcnScrollAreaThumb,
+} from '@proto.ui/prototypes-shadcn/scroll-area';
+```
 
-- `Root` 提供外层裁切容器。
-- `Viewport` 承载实际可滚动内容，支持通过 `Tab` 聚焦并展示焦点环。
-- `Scrollbar` 提供纵向或横向轨道，通过 `orientation` 指定方向。
-- `Thumb` 在轨道内反映滚动位置并支持拖动滚动；它是纯视觉控制元素，不进入 `Tab` 焦点序列，在高对比度（forced colors）模式下仍保持可见轮廓。
+```html
+<proto-ui-shadcn-scroll-area-root class="h-72 w-48 rounded-md border bg-background">
+  <proto-ui-shadcn-scroll-area-viewport>
+    <div class="p-4">Your scrollable content here.</div>
+  </proto-ui-shadcn-scroll-area-viewport>
+  <proto-ui-shadcn-scroll-area-scrollbar orientation="vertical">
+    <proto-ui-shadcn-scroll-area-thumb></proto-ui-shadcn-scroll-area-thumb>
+  </proto-ui-shadcn-scroll-area-scrollbar>
+</proto-ui-shadcn-scroll-area-root>
+```
 
-### 滚动条表现
+### 组件结构
 
-- `Viewport` 会优先使用自定义滚动条；在不支持自定义滚动条的宿主中，会自动回退到系统原生滚动条。
-- 在 Web 端同时存在纵向和横向滚动条时，两条轨道会自动避让右下角交汇处并保持该区域透明，无需额外放置角块组件；当另一条轨道未挂载或隐藏时，避让空间自动释放。
-- 内容未溢出时，`Thumb` 自动隐藏。
+```text
+Root
+├── Viewport
+└── Scrollbar
+    └── Thumb
+```
+
+- `Root` 提供外层裁切容器并可向下传递 `styleProfile` 样式作用域，自身不设定固定宽高。
+- `Viewport` 承载实际可滚动内容，仅在存在可滚动溢出时进入 `Tab` 焦点序列，并绘制内嵌焦点环与高对比度轮廓。
+- `Scrollbar` 提供纵向或横向轨道，通过 `orientation` 指定方向；在不支持自定义滚动条的宿主中自动隐藏并回退至系统原生滚动条。
+- `Thumb` 反映当前可见比例并支持指针拖动滚动，不进入 `Tab` 焦点序列；在内容未溢出时自动隐藏，在高对比度（forced colors）模式下保留实体边框。
+- 同时挂载纵向与横向轨道时，两条轨道会自动避让交汇角落并保持该区域透明；移除或隐藏另一条轨道时，避让空间自动释放。
+
+## 示例
+
+### 纵向列表
+
+仅挂载纵向滚动条，适合版本标签列表、导航目录与侧边栏面板。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-scroll-area-tags"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 横向滚动
+
+使用 `orientation="horizontal"` 的 `Scrollbar` 构建横向画廊或卡片条。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-scroll-area-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 双轴滚动
+
+同时挂载纵向与横向 `Scrollbar`，适合宽数据矩阵与日志查看器；两条轨道在右下交汇处自动留白避让。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-scroll-area-both-axes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL 方向
+
+在父容器上设置 `dir="rtl"` 可自然呈现从右到左的阅读内容流。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-scroll-area-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Scrollbar`（`Root`、`Viewport` 和 `Thumb` 无额外属性）：
+### 属性
+
+`Root`、`Viewport`、`Scrollbar` 与 `Thumb` 均支持通过 `styleProfile` 指定或继承 Shadcn 风格预设；`orientation` 属于 `Scrollbar`：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
-  rows={[{ name: 'orientation', type: "'vertical' | 'horizontal'", default: 'vertical' }]}
+  rows={[
+    {
+      name: 'orientation (Scrollbar)',
+      type: "'vertical' | 'horizontal'",
+      default: "'vertical'",
+    },
+    {
+      name: 'styleProfile (全部子部件)',
+      type: "'new-york-v4' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea'",
+      default: "'new-york-v4'",
+    },
+  ]}
 />
+
+### 暴露状态
+
+- **Viewport**：`focused`、`focusVisible`、`scrollAxes`、`scrolling`、`scrollProjection`、`scrollXPosition`、`scrollXVisibleRatio`、`canScrollLeft`、`canScrollRight`、`scrollYPosition`、`scrollYVisibleRatio`、`canScrollUp`、`canScrollDown`。
+- **Scrollbar**：`orientation`。
 
 ## 参考
 
@@ -52,7 +138,9 @@ Scroll Area 在保留宿主原生滚轮、触摸、惯性和回弹体验的同�
   directory="spec/prototypes"
   files={[
     'P-SHADCN-SCROLL-AREA.yaml',
+    'P-SHADCN-SCROLL-AREA-VIEWPORT.yaml',
     'P-SHADCN-SCROLL-AREA-SCROLLBAR.yaml',
+    'P-SHADCN-SCROLL-AREA-THUMB.yaml',
     'P-BASE-SCROLL-AREA.yaml',
   ]}
 />

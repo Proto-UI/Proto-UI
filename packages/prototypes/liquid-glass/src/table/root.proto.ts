@@ -24,7 +24,9 @@ export const liquidGlassTableRoot = definePrototype<TableRootProps, TableRootExp
     // neutral readable content layout. CSS table layout does not realize
     // native rowspan/colspan; an outer consumer owns overflow scrolling.
     def.feedback.style.use(
-      tw('table border-collapse border-spacing-0 min-w-0 max-w-full w-full text-foreground text-sm')
+      tw(
+        'table border-collapse border-spacing-0 caption-bottom min-w-0 max-w-full w-full text-foreground text-sm'
+      )
     );
     return behavior.render;
   },

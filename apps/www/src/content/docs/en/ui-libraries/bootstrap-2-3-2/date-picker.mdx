@@ -4,12 +4,12 @@ description: 'A Bootstrap 2.3.2 date picker combining Popover and Calendar for s
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Date Picker composes `Popover` and `Calendar` for single, range, and multiple date selection, with independent controlled or uncontrolled state for open visibility, selection, and visible month.
+Bootstrap 2.3.2 Date Picker pairs the classic `.btn` gradient trigger and `.popover` container with `Calendar` for single, range, and multiple date selection, preserving independent controlled or uncontrolled state for popup visibility, selection, and visible month.
 
 ## Preview
-
-### Single date selection
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-date-picker"
@@ -17,7 +17,102 @@ Date Picker composes `Popover` and `Calendar` for single, range, and multiple da
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-### Range and multiple selection
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release. `Date Picker` composes Bootstrap 2.3.2 `Popover` and `Calendar` parts directly from the workspace.
+
+## Usage
+
+```tsx
+import {
+  Bootstrap232DatePickerRoot,
+  Bootstrap232DatePickerTrigger,
+  Bootstrap232DatePickerValue,
+  Bootstrap232DatePickerContent,
+  Bootstrap232DatePickerDay,
+  Bootstrap232CalendarCaption,
+  Bootstrap232CalendarPrevious,
+  Bootstrap232CalendarHeading,
+  Bootstrap232CalendarNext,
+  Bootstrap232CalendarGrid,
+  Bootstrap232CalendarWeekdays,
+  Bootstrap232CalendarWeekday,
+  Bootstrap232CalendarRow,
+} from '../proto-ui/components/react';
+
+export function BootstrapDatePickerExample() {
+  return (
+    <Bootstrap232DatePickerRoot defaultMonth="2026-10">
+      <Bootstrap232DatePickerTrigger className="w-56">
+        <Bootstrap232DatePickerValue placeholder="Pick a date" />
+        <span aria-hidden="true">▾</span>
+      </Bootstrap232DatePickerTrigger>
+      <Bootstrap232DatePickerContent side="bottom" align="start" sideOffset={10}>
+        <Bootstrap232CalendarCaption>
+          <Bootstrap232CalendarPrevious a11yLabel="Previous month">‹</Bootstrap232CalendarPrevious>
+          <Bootstrap232CalendarHeading />
+          <Bootstrap232CalendarNext a11yLabel="Next month">›</Bootstrap232CalendarNext>
+        </Bootstrap232CalendarCaption>
+        <Bootstrap232CalendarGrid>
+          <Bootstrap232CalendarWeekdays>
+            {[0, 1, 2, 3, 4, 5, 6].map((offset) => (
+              <Bootstrap232CalendarWeekday key={offset} offset={offset} />
+            ))}
+          </Bootstrap232CalendarWeekdays>
+          {[0, 1, 2, 3, 4, 5].map((row) => (
+            <Bootstrap232CalendarRow key={row} index={row}>
+              {[0, 1, 2, 3, 4, 5, 6].map((col) => (
+                <Bootstrap232DatePickerDay key={col} offset={row * 7 + col} />
+              ))}
+            </Bootstrap232CalendarRow>
+          ))}
+        </Bootstrap232CalendarGrid>
+      </Bootstrap232DatePickerContent>
+    </Bootstrap232DatePickerRoot>
+  );
+}
+```
+
+- **Classic Bootstrap 2.3.2 chrome**: The trigger uses the `.btn` top-to-bottom gradient, bevel highlight, and pressed inset shadow; the popup uses `.popover` `6px` corners, `14px / 9px` inner padding, and a `150ms` opacity fade; selected days use `.btn-primary` blue gradient fills.
+- **Range and multiple modes**: Pass `mode="range"` with `range` / `defaultRange`, or `mode="multiple"` with `values` / `defaultValues`. All date eligibility, count, and night rules match [Calendar](/en/ui-libraries/bootstrap-2-3-2/calendar/).
+- **Dismissal behavior**: `single` mode requests closing on an accepted pick; `range` mode stays open on the first endpoint and closes once the second endpoint completes the range; `multiple` mode stays open for consecutive toggles.
+- **Formatted display**: `Value` renders an ISO date, a sorted comma-separated list, `from …` for an unfinished range, `from – to` for a completed range, or `placeholder` when empty.
+
+## Examples
+
+### Basic
+
+A labeled Bootstrap 2.3.2 single-date picker with `min` and `max` date bounds.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-date-picker-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Range Picker
+
+Select an inclusive date range with `.btn-primary` endpoint gradients and soft range-middle cells.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-date-picker-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Multiple & Disabled
+
+Toggle multiple dates with `mode="multiple"` paired with a classic disabled `.btn` trigger.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-date-picker-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Range & Multiple Comparison
+
+Compare `mode="range"` and `mode="multiple"` side by side with shared availability rules.
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-date-picker-selection"
@@ -25,29 +120,44 @@ Date Picker composes `Popover` and `Calendar` for single, range, and multiple da
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Installation
+### RTL & Locale
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Pass `direction="rtl"` and `locale="ar-SA"` for right-to-left grid flow and localized headings.
 
-## Usage
-
-- **Popup composition**: Use any `Calendar` grid, row, heading, and navigation parts inside the popup content. `open`, selection, and `month` each retain independent controlled/uncontrolled boundaries.
-- **Range and multiple modes**: Pass `mode="range"` with `range` / `defaultRange`, or `mode="multiple"` with `values` / `defaultValues`. All date eligibility, count, and night rules match [Calendar](/en/ui-libraries/bootstrap-2-3-2/calendar/).
-- **Dismissal behavior**:
-  - In `single` mode, an accepted selection requests closing the popup.
-  - In `range` mode, the first endpoint keeps the popup open and the second accepted endpoint requests a single close.
-  - In `multiple` mode, the popup stays open for additional toggles until dismissed via Popover interactions.
-- **Formatted display**: `Value` renders a single ISO date, a comma-separated sorted list, `from …` for an unfinished range, `from – to` for a completed range, or `placeholder` when empty.
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-date-picker-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Prop                       | Description                                      |
-| -------------------------- | ------------------------------------------------ |
-| `mode`                     | `'single'` (default), `'range'`, or `'multiple'` |
-| `open` / `defaultOpen`     | Controlled or initial popup open state           |
-| `value` / `defaultValue`   | Single selected date (`YYYY-MM-DD`)              |
-| `range` / `defaultRange`   | Selected range (`{ from?, to? }`)                |
-| `values` / `defaultValues` | Multiple selected dates (`string[]`)             |
-| `month` / `defaultMonth`   | Visible month (`YYYY-MM`)                        |
-| `placeholder`              | Fallback text shown by `Value` when empty        |
-| `disabled` / `readOnly`    | Disables interaction or prevents editing         |
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: "'single'" },
+    { name: 'open / defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'value / defaultValue', type: 'string (YYYY-MM-DD)', default: "''" },
+    { name: 'values / defaultValues', type: 'readonly string[]', default: '[]' },
+    { name: 'range / defaultRange', type: '{ from?: string; to?: string }', default: '{}' },
+    { name: 'month / defaultMonth', type: 'string (YYYY-MM)', default: 'current month' },
+    { name: 'min / max / unavailable', type: 'string / readonly string[]', default: '—' },
+    { name: 'minSelected / maxSelected', type: 'number', default: '—' },
+    { name: 'minNights / maxNights', type: 'number', default: '—' },
+    { name: 'locale / direction', type: "string / 'ltr' | 'rtl'", default: "'en-US' / 'ltr'" },
+    { name: 'disabled / readOnly', type: 'boolean', default: 'false' },
+    {
+      name: 'side / align / sideOffset',
+      type: 'PopoverContentProps',
+      default: "'bottom' / 'center' / 10",
+    },
+    { name: 'placeholder (Value)', type: 'string', default: "'Pick a date'" },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-DATE-PICKER.yaml', 'P-BASE-DATE-PICKER.yaml']}
+/>

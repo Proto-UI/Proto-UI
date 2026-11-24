@@ -5,8 +5,9 @@ description: '支持指针拖拽、触控板/滚轮连续滚动、响应式列�
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Carousel 将等宽滑块条、连续可滚动视口与前后切换控制结合在一起，支持鼠标/触摸拖拽、滚轮/触控板滚动与键盘切换，松手或滚动停止后自动吸附至最近的项目边界。
+Brutalist Carousel 将等宽滑块条、连续可滚动视口与高对比度硬影翻页控制结合在一起，支持鼠标/触摸拖拽、滚轮/触控板滚动与键盘切换，松手或滚动停止后自动吸附至最近的项目边界。
 
 ## 预览
 
@@ -22,17 +23,67 @@ Brutalist Carousel 将等宽滑块条、连续可滚动视口与前后切换控�
 
 ## 用法
 
-### 响应式视口与布局
+```tsx
+import {
+  BrutalistCarouselRoot,
+  BrutalistCarouselViewport,
+  BrutalistCarouselSlide,
+  BrutalistCarouselPrevious,
+  BrutalistCarouselNext,
+} from '../proto-ui/components/react';
 
-- 通过 `slidesPerView`（默认 `1`）设置视口最多同时展示的等尺寸项数，通过 `minSlideSize`（默认 `0`）设定单项最小宽度（逻辑像素）。容器变窄时会自动缩减可见项数；最后一个吸附位置会贴齐内容末端，避免留下大片空白。
-- `Root` 根据实际视口暴露 `visibleSlides` 与 `maxIndex`；`Viewport` 暴露 `dragging`、`scrolling` 与归一化 `scrollPosition`；`Slide` 的 `current` 对应当前吸附项，`hidden` 反映屏外可见性且保留布局尺寸。
-- 使用 `orientation="vertical"` 时，请为视口设置明确的高度；水平方向下 `direction="rtl"` 会反转物理拖动与左右键方向，并保持逻辑项顺序。
-- 设置 `loop={true}` 可在首尾可达索引之间循环切换。
+export function Example() {
+  return (
+    <BrutalistCarouselRoot className="mx-auto w-full max-w-xs">
+      <BrutalistCarouselViewport>
+        <BrutalistCarouselSlide>1</BrutalistCarouselSlide>
+        <BrutalistCarouselSlide>2</BrutalistCarouselSlide>
+        <BrutalistCarouselSlide>3</BrutalistCarouselSlide>
+      </BrutalistCarouselViewport>
+      <BrutalistCarouselPrevious aria-label="Previous slide">←</BrutalistCarouselPrevious>
+      <BrutalistCarouselNext aria-label="Next slide">→</BrutalistCarouselNext>
+    </BrutalistCarouselRoot>
+  );
+}
+```
 
-### 受控与非受控索引
+- **响应式视口与布局**：通过 `slidesPerView`（默认 `1`）与 `minSlideSize`（默认 `0`）控制同时显示的等尺寸卡片数量，容器变窄时自动缩减可见项数并贴齐末端。
+- **Brutalist 几何与反馈**：视口保持 5px 圆角（`rounded-base`），前后按钮采用 2px 黑色边框与 4px 硬阴影，按压时沿阴影方向即时落位。
+- **方向与受控模式**：纵向模式（`orientation="vertical"`）需为视口设置明确高度；传入 `index` 并监听 `indexChange` 可进入受控模式。
 
-- **非受控**：使用 `defaultIndex` 指定初始吸附项。
-- **受控**：传入 `index` 并监听 `indexChange` 更新外部状态。拖动过程中不会提前改写已提交索引，松手时按外部最新值落位。
+## 示例
+
+### 多项展示（Sizes）
+
+<PrototypePreviewer
+  demoId="demo-brutalist-carousel-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 纵向轮播（Orientation）
+
+<PrototypePreviewer
+  demoId="demo-brutalist-carousel-orientation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 首尾循环（Loop）
+
+<PrototypePreviewer
+  demoId="demo-brutalist-carousel-loop"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 索引追踪（API）
+
+<PrototypePreviewer
+  demoId="demo-brutalist-carousel-api"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -42,9 +93,9 @@ Brutalist Carousel 将等宽滑块条、连续可滚动视口与前后切换控�
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
     { name: 'index', type: 'number', default: '—' },
+    { name: 'defaultIndex', type: 'number', default: '0' },
     { name: 'slidesPerView', type: 'number', default: '1' },
     { name: 'minSlideSize', type: 'number', default: '0' },
-    { name: 'defaultIndex', type: 'number', default: '0' },
     { name: 'loop', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
@@ -53,7 +104,23 @@ Brutalist Carousel 将等宽滑块条、连续可滚动视口与前后切换控�
   ]}
 />
 
-### 其他部件属性
+### 其他部件属性与暴露状态
 
-- **Viewport**：无独立属性
-- **Slide**：`index?: number`（省略时按顺序自动分配；显式指定时应与项目顺序一致）
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Slide.index', type: 'number', default: '按文档顺序分配' },
+    { name: 'Previous / Next.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+- **Root**：暴露状态 `index`、`slideCount`、`visibleSlides`、`maxIndex`，方法 `requestIndex(next)` 与事件 `indexChange`。
+- **Viewport**：暴露 `focusVisible`、`dragging`、`scrolling`、`scrollPosition`。
+- **Slide**：暴露 `current`、`hidden`、`basis`、`minSize`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-CAROUSEL.yaml', 'P-BASE-CAROUSEL.yaml']}
+/>

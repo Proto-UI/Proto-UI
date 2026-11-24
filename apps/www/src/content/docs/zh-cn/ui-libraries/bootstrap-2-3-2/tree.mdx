@@ -1,11 +1,13 @@
 ---
 title: 'Tree'
-description: '支持层级展开收起、单选与完整键盘导航的 Bootstrap 2.3.2 树形视图组件。'
+description: '支持层级展开收起、单选、RTL 方向适配与完整键盘导航的 Bootstrap 2.3.2 树形视图组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Tree 用于展示嵌套层级数据，提供节点展开/收起、单选以及符合树视图习惯的方向键与首字母导航。
+Tree 用于展示嵌套层级数据，采用 Bootstrap 2.3.2 经典的 `.well` / `.nav-list` 侧栏导航视觉与 `.btn-mini` 展开按钮，提供节点展开/收起、单选、双向文字方向以及完整的树视图键盘导航。
 
 ## 预览
 
@@ -17,19 +19,136 @@ Tree 用于展示嵌套层级数据，提供节点展开/收起、单选以及�
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/tree` 导入原型并使用目标框架适配器注册：
+
+```ts
+import {
+  treeRoot,
+  treeItem,
+  treeGroup,
+  treeToggle,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/tree';
+```
 
 ## 用法
 
-- **显式层级结构**：每个节点通过树内唯一的 `nodeKey` 标识，并用 `parentKey` 指向父节点；若存在重复键、缺失父节点或循环引用，将忽略非法配置并保持当前状态。
-- **键盘导航**：上下方向键、`Home` / `End` 与首字母输入移动焦点；右方向键展开折叠节点或移至首个子节点，左方向键收起展开节点或返回父节点。
-- **受控状态**：`value`（当前选中节点）和 `expandedKeys`（展开节点集合）均支持受控模式，由父组件响应变更请求并更新。
+```tsx
+<Bootstrap232TreeRoot defaultValue="button" defaultExpandedKeys={['src', 'components']}>
+  <div className="flex items-center gap-1.5">
+    <Bootstrap232TreeToggle nodeKey="src">▾</Bootstrap232TreeToggle>
+    <Bootstrap232TreeItem nodeKey="src" textValue="src" className="flex-1">
+      src/
+    </Bootstrap232TreeItem>
+  </div>
+  <Bootstrap232TreeGroup nodeKey="src">
+    <Bootstrap232TreeItem nodeKey="button" parentKey="src" textValue="button.tsx">
+      button.tsx
+    </Bootstrap232TreeItem>
+  </Bootstrap232TreeGroup>
+</Bootstrap232TreeRoot>
+```
+
+### 结构与交互语义
+
+- **显式层级与分组**：每个 `Item` 使用树内唯一的 `nodeKey`，子节点通过 `parentKey` 指向父节点，并放入共享相同 `nodeKey` 的 `TreeGroup` 以自动维护 `aria-controls` / `aria-labelledby`。
+- **经典视觉投影**：`Root` 采用 `.well` 内凹灰底与边框，`Item` 采用 `.nav-list` 的 `#08c` 链接色、`#eee` 悬停/聚焦底色及 `#08c` 选中高亮，`Toggle` 使用 `.btn-mini` 渐变立体按钮。
+- **键盘导航与 RTL**：上下方向键、`Home` / `End` 与首字母输入移动焦点；设置 `direction="rtl"` 会自动镜像 `TreeGroup` 的 15px 缩进方向与左右方向键映射。
+
+## 示例
+
+### 受控选择与展开
+
+通过 `value`、`expandedKeys` 及对应事件在外部完全掌控树视图状态。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tree-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读状态
+
+支持禁用单个节点或整棵树，以及仅锁定选中态但允许展开浏览的 `readOnly` 模式。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tree-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 从右到左（RTL）
+
+设置 `direction="rtl"` 自动镜像层级缩进（右侧 15px）与左右方向键语义。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tree-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 属性           | 说明                             |
-| -------------- | -------------------------------- |
-| `nodeKey`      | 节点在当前树中的唯一标识         |
-| `parentKey`    | 指向父节点的 `nodeKey`           |
-| `value`        | 当前选中节点键（支持受控）       |
-| `expandedKeys` | 当前展开的节点键集合（支持受控） |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'undefined（受控）' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'expandedKeys', type: 'readonly string[]', default: 'undefined（受控）' },
+    { name: 'defaultExpandedKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: 'Tree' },
+  ]}
+/>
+
+### Item、Group 与 Toggle
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Item.nodeKey', type: 'string', default: "''" },
+    { name: 'Item.parentKey', type: 'string', default: "''" },
+    { name: 'Item.textValue', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+    { name: 'Group.nodeKey', type: 'string', default: "''" },
+    { name: 'Toggle.nodeKey', type: 'string', default: "''" },
+    { name: 'Toggle.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### 事件与方法（Root）
+
+<ApiPropsTable
+  headers={{ name: '名称', type: '签名 / 载荷', default: '说明' }}
+  rows={[
+    { name: 'valueChange', type: '{ value: string }', default: '请求变更选中节点时触发' },
+    {
+      name: 'expandedChange',
+      type: '{ expandedKeys: string[] }',
+      default: '请求展开或折叠分支时触发',
+    },
+    { name: 'getTree', type: '() => TreeEntry[]', default: '返回当前有效节点的层级快照' },
+    { name: 'getExpandedKeys', type: '() => string[]', default: '返回当前已展开分支的键列表' },
+    {
+      name: 'requestValue',
+      type: '(key: string) => boolean',
+      default: '以编程方式请求选中指定节点',
+    },
+    {
+      name: 'requestExpanded',
+      type: '(key: string, open: boolean) => boolean',
+      default: '以编程方式请求展开或折叠分支',
+    },
+    { name: 'refresh', type: '() => void', default: '重新计算并同步树形结构快照' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-TREE.yaml', 'P-BASE-TREE.yaml']}
+/>

@@ -1,12 +1,14 @@
 ---
 title: 'Collapsible'
-description: 'A Brutalist disclosure panel composed of Root, Trigger, and Content with controlled and keepMounted support.'
+description: 'A Brutalist disclosure panel composed of Root, Trigger, and Content with 2px borders, press-only hard-shadow snap, and controlled/keepMounted support.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Collapsible expands and collapses a single content section with crisp Brutalist borders and hard shadows, built on the [Base Collapsible](/en/ui-libraries/base/collapsible/) protocol.
+Brutalist Collapsible expands and collapses a single content section with `rounded-base` geometry, crisp 2px borders, and press-only hard-shadow snap, built on the [Base Collapsible](/en/ui-libraries/base/collapsible/) protocol.
 
 ## Preview
 
@@ -14,15 +16,15 @@ Brutalist Collapsible expands and collapses a single content section with crisp 
   demoId="demo-brutalist-collapsible"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Available from workspace source and the CLI target:
 
-- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-collapsible`
-- **Package exports**:
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-collapsible" manager="npm" />
+
+Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your framework, or import the parts directly from `@proto.ui/prototypes-brutalist/collapsible`:
 
 ```ts
 import {
@@ -34,17 +36,68 @@ import {
 
 ## Usage
 
-### Parts
+```tsx
+import {
+  BrutalistCollapsibleRoot,
+  BrutalistCollapsibleTrigger,
+  BrutalistCollapsibleContent,
+} from '@/components/ui/collapsible';
 
-Place one `Trigger` and one `Content` inside each `Root`. Nested and sibling collapsibles maintain independent state:
+export function Example() {
+  return (
+    <BrutalistCollapsibleRoot>
+      <BrutalistCollapsibleTrigger>Product details</BrutalistCollapsibleTrigger>
+      <BrutalistCollapsibleContent>
+        This panel expands and collapses to reveal additional content.
+      </BrutalistCollapsibleContent>
+    </BrutalistCollapsibleRoot>
+  );
+}
+```
 
-- **Root**: Manages open state via controlled `open` or uncontrolled `defaultOpen`, plus `disabled` (which blocks toggles without closing already-open content).
-- **Trigger**: Accessible toggle button in the natural `Tab` order supporting `Enter` and `Space` activation.
-- **Content**: Renders the collapsible panel body. Unmounts content when closed by default (set `keepMounted` to keep it mounted while hidden). Wraps long labels and shrinks cleanly within narrow containers; leave surrounding room for the focus ring and hard shadow.
+### Parts and Depth Grammar
 
-### Controlled state
+```text
+CollapsibleRoot
+├── CollapsibleTrigger
+└── CollapsibleContent
+```
 
-Pass `open` for controlled mode and update it in response to `openChange` (payload `{ open, reason }`). Ignored requests leave the panel unchanged.
+- **Raised-control feedback**: `default` and `neutral` triggers rest with a 4px hard shadow and settle `+4px, +4px` with `shadow-none` on press only (hover stays stationary without lift).
+- **Theme-aware dark mode**: borders and hard shadows repaint via theme CSS variables across light and dark modes.
+- **Controlled and mount lifecycle**: pass `open` and respond to `openChange` (`{ open, reason }`) for controlled mode; `Content` unmounts when closed unless `keepMounted={true}` is set.
+
+## Examples
+
+### Repositories (Default)
+
+Pair a `variant="noShadow"` trigger with monospace repository cards for a starred-list disclosure.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-collapsible-repositories"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Basic Card
+
+Expand product details and follow-up actions inside a raised Brutalist card surface.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-collapsible-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Settings Panel
+
+Use controlled state with a `variant="neutral"` trigger to reveal extra corner-radius controls.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-collapsible-settings"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -53,19 +106,43 @@ Pass `open` for controlled mode and update it in response to `openChange` (paylo
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
   ]}
 />
 
-Pass `open: boolean` to enable controlled mode.
+### Trigger
 
-### Other parts
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'neutral' | 'noShadow'", default: "'default'" },
+  ]}
+/>
 
-- **Trigger**: `disabled?: boolean` (default `false`)
-- **Content**: `keepMounted?: boolean` (default `false`)
+### Content
 
-### Methods and events
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'keepMounted', type: 'boolean', default: 'false' }]}
+/>
 
-- **Root methods**: `openCollapsible()`, `close()`, `toggle()`; **Trigger method**: `focusSelf()`
+### Methods and Events
+
+- **Root methods**: `openCollapsible(reason?)`, `close(reason?)`, `toggle(reason?)`
+- **Trigger method**: `focusSelf(options?)`
 - **Events**: `openChange` with payload `{ open, reason }`
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-COLLAPSIBLE.yaml',
+    'P-BRUTALIST-COLLAPSIBLE-TRIGGER.yaml',
+    'P-BRUTALIST-COLLAPSIBLE-CONTENT.yaml',
+    'P-BASE-COLLAPSIBLE.yaml',
+  ]}
+/>

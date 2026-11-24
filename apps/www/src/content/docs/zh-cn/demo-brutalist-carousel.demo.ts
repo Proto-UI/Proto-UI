@@ -1,60 +1,68 @@
 import type { DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
+
+const slideNumbers = [1, 2, 3, 4, 5];
+
 export default {
-  'type': 'demo',
-  'root': {
-    'kind': 'proto',
-    'prototypeId': 'brutalist-carousel-root',
-    'children': [
+  type: 'demo',
+  root: {
+    kind: 'box',
+    className: 'w-full min-w-0 px-12',
+    children: [
       {
-        'kind': 'proto',
-        'prototypeId': 'brutalist-carousel-viewport',
-        'children': [
+        kind: 'proto',
+        prototypeId: 'brutalist-carousel-root',
+        ref: 'carousel',
+        className: 'mx-auto w-full max-w-xs',
+        props: {
+          a11yLabel: 'Numbered cards',
+        },
+        children: [
           {
-            'kind': 'proto',
-            'prototypeId': 'brutalist-carousel-slide',
-            'children': ['First: plan the work'],
-            'props': {
-              'index': 0,
-            },
-            'className': 'p-8',
+            kind: 'proto',
+            prototypeId: 'brutalist-carousel-viewport',
+            ref: 'viewport',
+            children: slideNumbers.map((num, index) => ({
+              kind: 'proto' as const,
+              prototypeId: 'brutalist-carousel-slide',
+              props: { index },
+              className: 'py-2',
+              children: [
+                {
+                  kind: 'box',
+                  className:
+                    'flex aspect-square items-center justify-center rounded-[5px] border-2 border-black bg-[#5294ff] p-6 text-black shadow-[4px_4px_0_0_#000]',
+                  children: [
+                    {
+                      kind: 'box',
+                      tag: 'span',
+                      className: 'text-4xl font-bold',
+                      children: [String(num)],
+                    },
+                  ],
+                },
+              ],
+            })),
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'brutalist-carousel-slide',
-            'children': ['Second: build the component'],
-            'props': {
-              'index': 1,
-            },
-            'className': 'p-8',
+            kind: 'proto',
+            prototypeId: 'brutalist-carousel-previous',
+            ref: 'previous',
+            children: [
+              { kind: 'box', tag: 'span', attrs: { 'aria-hidden': 'true' }, children: ['←'] },
+              { kind: 'box', tag: 'span', className: 'sr-only', children: ['Previous slide'] },
+            ],
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'brutalist-carousel-slide',
-            'children': ['Third: verify the result'],
-            'props': {
-              'index': 2,
-            },
-            'className': 'p-8',
+            kind: 'proto',
+            prototypeId: 'brutalist-carousel-next',
+            ref: 'next',
+            children: [
+              { kind: 'box', tag: 'span', attrs: { 'aria-hidden': 'true' }, children: ['→'] },
+              { kind: 'box', tag: 'span', className: 'sr-only', children: ['Next slide'] },
+            ],
           },
         ],
-        'className': 'min-h-36 border border-slate-300',
-      },
-      {
-        'kind': 'proto',
-        'prototypeId': 'brutalist-carousel-previous',
-        'children': ['Previous'],
-      },
-      {
-        'kind': 'proto',
-        'prototypeId': 'brutalist-carousel-next',
-        'children': ['Next'],
       },
     ],
-    'props': {
-      'a11yLabel': 'Project stages',
-      'slidesPerView': 2,
-      'minSlideSize': 180,
-    },
-    'className': 'grid max-w-lg gap-3',
   },
 } satisfies DemoSpec;

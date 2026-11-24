@@ -1,11 +1,13 @@
 ---
 title: 'Message Scroller'
-description: '支持自动贴底跟随新消息与一键回到底部的 Liquid Glass 消息滚动容器。'
+description: '采用同心圆角中性内容层与浮动跳转胶囊的 Liquid Glass 消息滚动容器。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Message Scroller 基于 Scroll Surface 的末端跟随能力：当用户停留在消息底部时，新追加内容会自动滚动到底部；用户向上回看历史消息时保持当前位置，并可通过“Jump to latest”按钮主动恢复跟随。
+Liquid Glass Message Scroller 遵循内容层与浮控层分离原则：消息列表所在的 `Root` 与 `Viewport` 保持清晰的中性内容表面与同心圆角（`rounded-2xl` 外框内嵌 4px 内边距与 `rounded-xl` 视口），`Jump` 作为浮动胶囊控件悬浮在消息流上方，支持 `regular` 与 `prominent` 层级切换。
 
 ## 预览
 
@@ -17,16 +19,118 @@ Liquid Glass Message Scroller 基于 Scroll Surface 的末端跟随能力：当�
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-liquid-glass/message-scroller` 导入原型并使用目标框架适配器封装。
+
+```ts
+import {
+  messageScrollerRoot,
+  messageScrollerViewport,
+  messageScrollerJump,
+} from '@proto.ui/prototypes-liquid-glass/message-scroller';
+```
 
 ## 用法
 
-- **新消息计数**：`newContentCount` 由应用自行传入并控制未读业务含义，组件不会私自推断“未读”状态。
-- **焦点与无障碍**：点击跳转最新按钮只滚动视口，不会抢夺当前键盘焦点。可通过 Root 的 `a11yLabel` 自定义滚动区域的可访问名称（默认 `'Messages'`）。
+为外层容器设置明确高度，让消息内容在中性视口内纵向滚动并从浮动胶囊按钮下方平滑穿过：
+
+```tsx
+<div className="h-80 w-full max-w-lg">
+  <LiquidGlassMessageScrollerRoot a11yLabel="Design conversation">
+    <LiquidGlassMessageScrollerViewport>
+      <div className="flex flex-col gap-3 p-4 pb-16">
+        {messages.map((message) => (
+          <div key={message.id}>{message.text}</div>
+        ))}
+      </div>
+    </LiquidGlassMessageScrollerViewport>
+    <LiquidGlassMessageScrollerJump variant="regular">
+      Jump to latest ↓
+    </LiquidGlassMessageScrollerJump>
+  </LiquidGlassMessageScrollerRoot>
+</div>
+```
+
+### 层级与对比度原则
+
+- **内容层保持中性**：`Root` 与 `Viewport` 始终不叠加额外玻璃材质，确保长对话文本具备清晰对比度并避免玻璃叠玻璃。
+- **层级强调（`regular` 与 `prominent`）**：常规状态下使用 `variant="regular"`；当读者向上回看且 `newContentCount > 0` 时，可切换为 `variant="prominent"` 主色胶囊以突出未读提示。
+- **禁用态清晰对比**：禁用 `Jump` 仅撤回阴影并阻止点击，不使用 `opacity-50` 模糊文字可读性。
+- **不抢占焦点**：激活 `Jump` 仅滚动视口并恢复跟随，不会夺走当前键盘焦点。
+
+## 示例
+
+### 实时消息与层级切换
+
+在底部时点击 **Send reply** 会自动跟随；向上滚动后再发送，未读数增加且浮动胶囊自动由 `regular` 切换为 `prominent`。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-message-scroller-live"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 层级与禁用态对比度
+
+交互切换 `variant`（`regular` / `prominent`）与 `disabled`，验证彩色背景和禁用态下的清晰对比度。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-message-scroller-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性              | 默认值       | 说明                                     |
-| ---- | ----------------- | ------------ | ---------------------------------------- |
-| Root | `a11yLabel`       | `'Messages'` | 滚动区域的可访问名称                     |
-| Root | `newContentCount` | —            | 应用传入的新增消息条数，用于提示跳转最新 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'newContentCount', type: 'number', default: '0' },
+    { name: 'a11yLabel', type: 'string', default: "'Messages'" },
+  ]}
+/>
+
+### Viewport
+
+<ApiPropsTable
+  headers={{ name: '暴露能力', type: '类型', default: '说明' }}
+  rows={[
+    { name: 'atEnd', type: 'ExposeState<boolean>', default: '当前视口是否位于底部' },
+    { name: 'following', type: 'ExposeState<ScrollEndFollowState>', default: '末端自动跟随状态' },
+    {
+      name: 'requestStatus',
+      type: 'ExposeState<ScrollEndFollowRequestStatus>',
+      default: '最近一次滚底请求状态',
+    },
+    { name: 'jumpToEnd()', type: '() => void', default: '显式滚动至末尾' },
+    {
+      name: 'pauseFollowing()',
+      type: '() => ScrollSurfaceRequestOutcome',
+      default: '暂停自动跟随',
+    },
+  ]}
+/>
+
+### Jump
+
+<ApiPropsTable
+  headers={{ name: '属性 / 暴露能力', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'variant', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'atEnd (expose)', type: 'ExposeState<boolean>', default: '同步自 Root 的底部状态' },
+    {
+      name: 'newContentCount (expose)',
+      type: 'ExposeState<number>',
+      default: '同步自 Root 的新增条数',
+    },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-MESSAGE-SCROLLER.yaml', 'P-BASE-MESSAGE-SCROLLER.yaml']}
+/>

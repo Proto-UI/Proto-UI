@@ -1,12 +1,13 @@
 ---
 title: 'Message Scroller'
-description: '支持自动滚底跟随与手动回到底部的 Brutalist 风格消息滚动容器。'
+description: '支持自动贴底跟随与浮动回底按钮的 Brutalist 风格消息滚动容器。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Message Scroller 面向聊天与实时消息流场景，复用 Scroll Surface 的末端跟随能力：当用户停留在列表底部时自动跟随新消息，向上翻阅历史记录后可通过跳转按钮回到最新内容。
+Message Scroller 面向聊天与实时日志流场景，采用 2px 粗黑边框、5px 基础圆角与 4px 硬阴影的 Brutalist 表面规范：当用户停留在底部时自动跟随新消息，向上翻阅历史后可通过浮动跳转按钮快速回到末尾。
 
 ## 预览
 
@@ -18,38 +19,114 @@ Message Scroller 面向聊天与实时消息流场景，复用 Scroll Surface �
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-brutalist/message-scroller` 导入组件原型并使用对应宿主 Adapter 适配。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-brutalist/message-scroller` 导入原型并使用目标框架适配器封装。
+
+```ts
+import {
+  messageScrollerRoot,
+  messageScrollerViewport,
+  messageScrollerJump,
+} from '@proto.ui/prototypes-brutalist/message-scroller';
+```
 
 ## 用法
 
-### 组件结构
+为 `Root` 的父容器提供明确高度，`Root` 负责圆角与 4px 阴影外框，`Viewport` 负责内部直角纵向滚动，`Jump` 浮动在右下角并在按压时沿阴影方向落位 `+4px, +4px`：
 
-Message Scroller 由 `Root`、`Viewport` 和 `Jump` 组成：
+```tsx
+<div className="h-96 w-full max-w-md">
+  <BrutalistMessageScrollerRoot a11yLabel="Team chat messages">
+    <BrutalistMessageScrollerViewport>
+      <div className="flex flex-col gap-3 p-4 pb-16">
+        {messages.map((message) => (
+          <div key={message.id}>{message.text}</div>
+        ))}
+      </div>
+    </BrutalistMessageScrollerViewport>
+    <BrutalistMessageScrollerJump>Scroll to end ↓</BrutalistMessageScrollerJump>
+  </BrutalistMessageScrollerRoot>
+</div>
+```
 
-- `Root`：管理末端跟随状态、新消息计数与滚动区域的无障碍名称。
-- `Viewport`：承载消息列表内容的可滚动视图容器。
-- `Jump`：用户离开底部时用于快速返回最新消息的按钮（接受 Button 属性）。
+### 组件结构与行为
 
-### 关键行为
+- **Root**：提供 `rounded-base`、2px 黑框与 4px 硬阴影外框，并协调末端跟随状态、`newContentCount` 与无障碍名称 `a11yLabel`。
+- **Viewport**：保持直角内边界与 `overflow-y-auto`，负责纵向滚动与历史位置保持。
+- **Jump**：主色抬起型操作按钮，按压即时落入阴影；点击回到底部且不抢占键盘焦点。
 
-- **末端自动跟随**：只有当用户当前位于底部时，追加的新内容才会触发自动滚底；用户主动向上浏览时不会强行拉回。
-- **新消息计数**：`newContentCount` 由应用层按自身业务规则传入，组件不会自行猜测未读数量。
-- **焦点保持**：点击 `Jump` 回到底部时不会主动抢占或移动当前焦点。
-- **无障碍名称**：通过 `Root` 的 `a11yLabel` 为滚动区域提供无障碍名称，默认值为 `'Messages'`。
+## 示例
+
+### 动态追加消息
+
+停留在底部时点击 **Add message** 会自动滚底跟随；向上回看后再追加，阅读位置保持稳定并更新未读计数。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-message-scroller-add-messages"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 频道日志与系统标记
+
+搭配强调色标签与高对比度事件条展示多成员发布日志流。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-message-scroller-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`：
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
     { name: 'newContentCount', type: 'number', default: '0' },
-    { name: 'a11yLabel', type: 'string', default: 'Messages' },
+    { name: 'a11yLabel', type: 'string', default: "'Messages'" },
   ]}
 />
 
-其余子部件：
+### Viewport
 
-- **Viewport**：无属性。
-- **Jump**：接受 Button 的属性。
+<ApiPropsTable
+  headers={{ name: '暴露能力', type: '类型', default: '说明' }}
+  rows={[
+    { name: 'atEnd', type: 'ExposeState<boolean>', default: '当前是否位于列表底部' },
+    { name: 'following', type: 'ExposeState<ScrollEndFollowState>', default: '末端跟随状态' },
+    {
+      name: 'requestStatus',
+      type: 'ExposeState<ScrollEndFollowRequestStatus>',
+      default: '最近一次滚底请求状态',
+    },
+    { name: 'jumpToEnd()', type: '() => void', default: '显式滚动到底部' },
+    {
+      name: 'pauseFollowing()',
+      type: '() => ScrollSurfaceRequestOutcome',
+      default: '暂停自动跟随',
+    },
+  ]}
+/>
+
+### Jump
+
+<ApiPropsTable
+  headers={{ name: '属性 / 暴露能力', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'atEnd (expose)', type: 'ExposeState<boolean>', default: '同步自 Root 的底部状态' },
+    {
+      name: 'newContentCount (expose)',
+      type: 'ExposeState<number>',
+      default: '同步自 Root 的新增条数',
+    },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-MESSAGE-SCROLLER.yaml', 'P-BASE-MESSAGE-SCROLLER.yaml']}
+/>

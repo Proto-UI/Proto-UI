@@ -1,6 +1,6 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import { asScrollAreaThumb } from '@proto.ui/prototypes-base/scroll-area';
-import { setupShadcnStyleSelection } from '../style-scope';
+import { SHADCN_STYLE_IDS, setupShadcnStyleSelection } from '../style-scope';
 import type { ShadcnScrollAreaThumbExposes, ShadcnScrollAreaThumbProps } from './types';
 
 const scrollAreaThumb = definePrototype<ShadcnScrollAreaThumbProps, ShadcnScrollAreaThumbExposes>({
@@ -8,7 +8,9 @@ const scrollAreaThumb = definePrototype<ShadcnScrollAreaThumbProps, ShadcnScroll
   modules: asScrollAreaThumb.modules,
   setup(def) {
     const inherited = asScrollAreaThumb();
-    const style = setupShadcnStyleSelection(def, 'new-york-v4');
+    const style = setupShadcnStyleSelection(def, 'new-york-v4', {
+      supportedStyles: SHADCN_STYLE_IDS,
+    });
     // Fill the track's cross-axis thickness. The Scroll host overrides the
     // scrolling-axis dimension with its measured extent and owns flex-grow: 0.
     // Keeping flex-1 would leave a zero flex basis on the empty hit target.

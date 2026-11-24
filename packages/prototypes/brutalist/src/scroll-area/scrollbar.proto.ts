@@ -10,6 +10,7 @@ export const BrutalistScrollAreaScrollbar = definePrototype<
   BrutalistScrollAreaScrollbarExposes
 >({
   name: 'brutalist-scroll-area-scrollbar',
+  modules: asScrollAreaScrollbar.modules,
   setup(def) {
     // Keep Base scrollbar semantics via as-hook; size from props for reliable CSS tokens.
     asScrollAreaScrollbar();

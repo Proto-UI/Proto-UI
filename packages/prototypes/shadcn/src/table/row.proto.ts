@@ -17,9 +17,14 @@ export const tableRow = definePrototype<ShadcnTableRowProps, ShadcnTableRowExpos
     def.props.define({
       section: { type: 'enum', options: ['header', 'body', 'footer'], empty: 'fallback' },
       lastInSection: { type: 'boolean', empty: 'fallback' },
+      selected: { type: 'boolean', empty: 'fallback' },
     });
-    def.props.setDefaults({ section: 'body', lastInSection: false });
+    def.props.setDefaults({ section: 'body', lastInSection: false, selected: false });
     def.feedback.style.use(tw('table-row border-border transition-colors'));
+    def.rule({
+      when: (w) => w.meta('reducedMotion').eq('reduce'),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
     def.rule({
       when: (w) =>
         w.not(
@@ -54,8 +59,17 @@ export const tableRow = definePrototype<ShadcnTableRowProps, ShadcnTableRowExpos
     def.event.on('pointer.cancel', clearHover);
     def.lifecycle.onUnmounted(clearHover);
     def.rule({
-      when: (w) => w.state(hovered).eq(true),
+      when: (w) =>
+        w.all(
+          w.state(hovered).eq(true),
+          w.not(w.prop('section').eq('header')),
+          w.prop('selected').eq(false)
+        ),
       intent: (i) => i.feedback.style.use(tw('bg-muted/50')),
+    });
+    def.rule({
+      when: (w) => w.prop('selected').eq(true),
+      intent: (i) => i.feedback.style.use(tw('bg-muted')),
     });
     return inherited.render;
   },

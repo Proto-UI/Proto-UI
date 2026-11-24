@@ -6,82 +6,65 @@ import type {
   VirtualListContentProps,
   VirtualListContentExposes,
 } from '@proto.ui/prototypes-base/virtual-list';
-import { definePrototype, tw, type State } from '@proto.ui/core';
+import { definePrototype, tw } from '@proto.ui/core';
 import {
   asVirtualListRoot,
   asVirtualListViewport,
   asVirtualListContent,
 } from '@proto.ui/prototypes-base/virtual-list';
+import { BRUTALIST_PANEL_TOKENS } from '../style';
 export type * from '@proto.ui/prototypes-base/virtual-list';
+
 export const virtualListRoot = definePrototype<VirtualListRootProps, VirtualListRootExposes>({
   name: 'brutalist-virtual-list-root',
+  modules: asVirtualListRoot.modules,
   setup(def) {
     const behavior = asVirtualListRoot();
     def.feedback.style.use(
-      tw(
-        'min-w-0 max-w-full text-foreground rounded-none border-2 border-border bg-background shadow-md grid gap-0'
-      )
+      tw(`min-w-0 max-w-full overflow-hidden grid gap-0 ${BRUTALIST_PANEL_TOKENS}`)
     );
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
     return behavior.render;
   },
 });
 export { virtualListRoot as brutalistVirtualListRoot };
+
 export const virtualListViewport = definePrototype<
   VirtualListViewportProps,
   VirtualListViewportExposes
 >({
   name: 'brutalist-virtual-list-viewport',
+  modules: asVirtualListViewport.modules,
   setup(def) {
     const behavior = asVirtualListViewport();
-    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground min-h-0 overflow-auto'));
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
+    const viewportState = behavior.getAsHookHandle?.('as-scroll-area-viewport')?.stateHandles;
+    if (!viewportState)
+      throw new Error('[brutalist-virtual-list] Required viewport focus state is unavailable.');
+    def.feedback.style.use(
+      tw(
+        'min-w-0 max-w-full min-h-0 overflow-auto rounded-none text-foreground font-sans font-medium outline-none'
+      )
+    );
+    def.rule({
+      when: (w) => w.state(viewportState.focusVisible).eq(true),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('outline-none ring-2 ring-ring ring-inset forced-colors-focus-outline')
+        ),
+    });
     return behavior.render;
   },
 });
 export { virtualListViewport as brutalistVirtualListViewport };
+
 export const virtualListContent = definePrototype<
   VirtualListContentProps,
   VirtualListContentExposes
 >({
   name: 'brutalist-virtual-list-content',
+  modules: asVirtualListContent.modules,
   setup(def) {
     const behavior = asVirtualListContent();
-    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground relative'));
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
+    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground font-sans font-medium relative'));
     return behavior.render;
   },
 });

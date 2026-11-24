@@ -18,7 +18,9 @@ export const liquidGlassTableCell = definePrototype<TableCellProps, TableCellExp
     const behavior = asLiquidGlassTableCell();
     // Base owns headers/span configuration, row/column index projection and
     // the authored slot. The family adds only restrained cell padding and ink.
-    def.feedback.style.use(tw('table-cell align-top px-4 py-3 text-left text-sm text-foreground'));
+    def.feedback.style.use(
+      tw('table-cell align-middle whitespace-nowrap px-4 py-3 text-sm text-foreground')
+    );
     return behavior.render;
   },
 });

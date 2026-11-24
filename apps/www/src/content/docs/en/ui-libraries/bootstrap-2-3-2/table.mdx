@@ -1,0 +1,284 @@
+---
+title: 'Table'
+description: 'A Bootstrap 2.3.2 structured table preserving classic pixel proportions, bordered and condensed variants, and contextual row tones.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Bootstrap 2.3.2 Table layers the archived `.table` typography (`14px/20px`), `8px` cell padding, and top-rule rhythm over [Base Table](/en/ui-libraries/base/table/), with optional classic variants for `.table-bordered`, `.table-condensed`, `.table-striped`, `.table-hover`, and contextual row tones.
+
+For sorting, filtering, pagination, and row selection, use [Data Table](/en/ui-libraries/bootstrap-2-3-2/data-table/).
+
+## Preview
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-table"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the parts from `@proto.ui/prototypes-bootstrap-2-3-2/table`:
+
+```ts
+import {
+  tableRoot,
+  tableCaption,
+  tableRow,
+  tableHeaderCell,
+  tableCell,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/table';
+```
+
+## Usage
+
+```html
+<div class="w-full overflow-x-auto">
+  <bootstrap-2-3-2-table-root>
+    <bootstrap-2-3-2-table-caption>A list of your recent invoices.</bootstrap-2-3-2-table-caption>
+    <bootstrap-2-3-2-table-row section="header">
+      <bootstrap-2-3-2-table-header-cell
+        header-key="invoice"
+        header-kind="column"
+        style="width: 100px"
+      >
+        Invoice
+      </bootstrap-2-3-2-table-header-cell>
+      <bootstrap-2-3-2-table-header-cell header-key="status" header-kind="column"
+        >Status</bootstrap-2-3-2-table-header-cell
+      >
+      <bootstrap-2-3-2-table-header-cell header-key="method" header-kind="column"
+        >Method</bootstrap-2-3-2-table-header-cell
+      >
+      <bootstrap-2-3-2-table-header-cell
+        header-key="amount"
+        header-kind="column"
+        style="text-align: end"
+      >
+        Amount
+      </bootstrap-2-3-2-table-header-cell>
+    </bootstrap-2-3-2-table-row>
+    <bootstrap-2-3-2-table-row section="body">
+      <bootstrap-2-3-2-table-header-cell header-key="inv001" header-kind="row"
+        >INV001</bootstrap-2-3-2-table-header-cell
+      >
+      <bootstrap-2-3-2-table-cell>Paid</bootstrap-2-3-2-table-cell>
+      <bootstrap-2-3-2-table-cell>Credit Card</bootstrap-2-3-2-table-cell>
+      <bootstrap-2-3-2-table-cell style="text-align: end">$250.00</bootstrap-2-3-2-table-cell>
+    </bootstrap-2-3-2-table-row>
+  </bootstrap-2-3-2-table-root>
+</div>
+```
+
+### Composition
+
+```text
+Root
+├── Caption
+├── Row (section="header")
+│   └── HeaderCell (headerKind="column")
+├── Row (section="body")
+│   ├── HeaderCell (headerKind="row")
+│   └── Cell (headers=[...])
+└── Row (section="footer")
+    ├── HeaderCell (headerKind="row")
+    └── Cell (headers=[...])
+```
+
+- Baseline `.table` styling omits the top border on first-row column headers and keeps `8px` cell padding by default.
+- Cell dividers bind to the theme `border-border` token so both light and dark hosts maintain legible contrast alongside `text-foreground`.
+
+## Examples
+
+### Footer
+
+Set `section="footer"` to style summary rows with the secondary surface tint and bold emphasis:
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-table-footer"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Variants & Contextual Rows
+
+Combine `bordered`, `condensed` (`4px 5px` cell padding), `striped`, `hoverable`, and contextual `info` / `warning` / `error` row tones:
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-table-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Actions
+
+Pair rows with Bootstrap 2.3.2 `DropdownMenu` controls in the trailing column:
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-table-actions"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root
+
+`Root` exposes `getStructure()` for inspecting the live row/column snapshot.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'bordered',
+      type: 'boolean',
+      default: 'false',
+      description: 'Applies the classic .table-bordered outer border and 4px radius',
+    },
+  ]}
+/>
+
+### Caption
+
+`Caption` declares no props and renders centered muted caption typography.
+
+### Row
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'section',
+      type: "'header' | 'body' | 'footer'",
+      default: "'body'",
+      description: 'Visual section membership; footer applies secondary fill and bold text',
+    },
+    {
+      name: 'striped',
+      type: 'boolean',
+      default: 'false',
+      description: 'Applies .table-striped alternating secondary shading on body rows',
+    },
+    {
+      name: 'hoverable',
+      type: 'boolean',
+      default: 'false',
+      description: 'Enables passive .table-hover shading on pointer hover',
+    },
+    {
+      name: 'tone',
+      type: "'default' | 'info' | 'warning' | 'error'",
+      default: "'default'",
+      description: 'Classic Bootstrap 2.3.2 contextual row coloring',
+    },
+  ]}
+/>
+
+### HeaderCell
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'headerKey',
+      type: 'string',
+      default: "''",
+      description: 'Unique header identifier referenced by Cell.headers',
+    },
+    {
+      name: 'headerKind',
+      type: "'column' | 'row'",
+      default: 'undefined',
+      description:
+        'Column headers align bottom without a first-row top rule; row headers align top',
+    },
+    {
+      name: 'headers',
+      type: 'readonly string[]',
+      default: '[]',
+      description: 'Ordered parent header keys for multi-level header groups',
+    },
+    {
+      name: 'rowSpan',
+      type: 'number',
+      default: '1',
+      description: 'Positive integer accessible row span',
+    },
+    {
+      name: 'columnSpan',
+      type: 'number',
+      default: '1',
+      description: 'Positive integer accessible column span',
+    },
+    {
+      name: 'condensed',
+      type: 'boolean',
+      default: 'false',
+      description: 'Applies .table-condensed cell padding (4px 5px)',
+    },
+    {
+      name: 'bordered',
+      type: 'boolean',
+      default: 'false',
+      description: 'Adds a leading vertical divider for bordered table layouts',
+    },
+  ]}
+/>
+
+### Cell
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'headers',
+      type: 'readonly string[]',
+      default: '[]',
+      description: 'Ordered list of headerKey references',
+    },
+    {
+      name: 'rowSpan',
+      type: 'number',
+      default: '1',
+      description: 'Positive integer accessible row span',
+    },
+    {
+      name: 'columnSpan',
+      type: 'number',
+      default: '1',
+      description: 'Positive integer accessible column span',
+    },
+    {
+      name: 'condensed',
+      type: 'boolean',
+      default: 'false',
+      description: 'Applies .table-condensed cell padding (4px 5px)',
+    },
+    {
+      name: 'bordered',
+      type: 'boolean',
+      default: 'false',
+      description: 'Adds a leading vertical divider for bordered table layouts',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-TABLE.yaml',
+    'P-BOOTSTRAP-2-3-2-TABLE-CAPTION.yaml',
+    'P-BOOTSTRAP-2-3-2-TABLE-ROW.yaml',
+    'P-BOOTSTRAP-2-3-2-TABLE-HEADER-CELL.yaml',
+    'P-BOOTSTRAP-2-3-2-TABLE-CELL.yaml',
+    'P-BASE-TABLE.yaml',
+  ]}
+/>

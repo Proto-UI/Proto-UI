@@ -28,7 +28,7 @@ export default definePrototype<AccordionContentProps, AccordionContentExposes>({
       renderer.el(
         'div',
         {
-          style: tw('border-t border-[#e5e5e5] px-[15px] py-[9px] overflow-x-auto'),
+          style: tw('border-t border-border px-[15px] py-[9px] overflow-x-auto'),
         },
         renderer.slot()
       );

@@ -1,11 +1,13 @@
 ---
 title: 'Resizable'
-description: '支持多面板百分比布局、约束折叠与嵌套方向的 Liquid Glass 可拖拽分栏组件。'
+description: '遵循中性内容面、同心圆角、半透明胶囊抓握柄与无障碍不透明回退的 Liquid Glass 可拖拽分栏组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Resizable 支持将容器划分为两个或多个按百分比缩放的面板，并通过编号分隔柄（`Handle`）连续调整相邻面板比例。支持指针拖拽、方向键、Home / End、`Shift` 加速、面板折叠与嵌套不同方向的布局。
+Liquid Glass 风格的可调整分栏组件：内容面板保持中性不堆叠多层玻璃，外层容器使用同心 `rounded-2xl` 半透明高光表面（嵌套时通过 `variant="nested"` 去框），分隔柄提供 `regular` / `prominent` 胶囊抓握层次，并在减少透明度、高对比度或 `material="opaque"` 时自动回退为高对比度不透明表面。
 
 ## 预览
 
@@ -15,25 +17,139 @@ Liquid Glass Resizable 支持将容器划分为两个或多个按百分比缩放
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-示例组合了三个水平面板与嵌套的两个垂直面板。每个面板将其无量纲比例导出为 CSS 变量 `--pui-size`，由静态 `flex-basis` 规则驱动布局。
-
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-liquid-glass/resizable` 导入原型并适配到目标宿主：
+
+```ts
+import {
+  resizableRoot,
+  resizablePanel,
+  resizableHandle,
+} from '@proto.ui/prototypes-liquid-glass/resizable';
+```
 
 ## 用法
 
-- **面板与分隔柄配对**：放置 `N` 个 `Panel`（`index` 为 `0..N-1`）与 `N - 1` 个 `Handle`（`index` 为 `0..N-2`），每个 `Handle` 调整其相邻两个面板且保持其余面板大小与两者之和不变；`Handle` 默认可访问名称为 `Resize panels`。
-- **约束与折叠**：`constraints` 按面板顺序提供 `min`（`0`）、`max`（`100`）、`collapsible`（`false`）与 `collapsedSize`（`0`）。所有面板比例自动归一化为总计 `100`；不可行配置会保留上一次有效布局。折叠属于离散停点，当相邻面板已达到 `max` 时会阻止折叠。
-- **受控模式与嵌套**：传入 `sizes` 进入受控模式，`sizesChange` 与 `sizesCommit` 携带 `{ sizes }`（手势取消不触发 `sizesCommit`）；原有的双面板 `value` / `defaultValue` 接口仍可兼容使用，同时传入时以 `sizes` 为准。嵌套的 `Root` 各自独立管理比例、约束和方向，拖拽距离按面板边框盒总长度归一化（不计入固定分隔柄宽度）。
+```tsx
+import {
+  LiquidGlassResizableRoot,
+  LiquidGlassResizablePanel,
+  LiquidGlassResizableHandle,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <div className="w-full max-w-lg rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6">
+      <LiquidGlassResizableRoot defaultSizes={[50, 50]} className="h-56 w-full">
+        <LiquidGlassResizablePanel index={0}>One</LiquidGlassResizablePanel>
+        <LiquidGlassResizableHandle index={0} withHandle />
+        <LiquidGlassResizablePanel index={1}>Two</LiquidGlassResizablePanel>
+      </LiquidGlassResizableRoot>
+    </div>
+  );
+}
+```
+
+### 组合结构
+
+```text
+LiquidGlassResizableRoot (variant="default" | "nested", material="auto" | "opaque")
+├── LiquidGlassResizablePanel (index: 0)
+├── LiquidGlassResizableHandle (index: 0, withHandle?, prominence?, material?)
+└── LiquidGlassResizablePanel (index: 1)
+```
+
+- **层次与同心几何**：内容面板保持中性清晰，外层 `Root` 提供 `rounded-2xl` 外壳，内嵌 `Root` 传入 `variant="nested"` 避免多层边框堆叠；启用 `withHandle` 后在分隔线居中呈现 `rounded-full` 胶囊抓握柄。
+- **材质回退与无障碍**：默认 `material="auto"` 仅在宿主允许透明且非强制配色时启用半透明层次，否则自动回退为不透明配色；禁用态不使用整块降透明度，确保文本与边界对比度清晰可读。
+- **多面板、约束与键盘**：支持 `sizes` / `defaultSizes`、`constraints`、指针拖动、方向键、`Shift` 加速、`Home` / `End` 与 `Enter` 折叠，默认无障碍名称为 `Resize panels`。
+
+## 示例
+
+### 垂直分栏
+
+将 `orientation` 设为 `"vertical"` 构建上下可调分栏。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-resizable-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 可见分隔柄与突出层次
+
+上方示例对比 `prominence="regular"` 与 `prominence="prominent"` 两种胶囊抓握柄，下方展示默认极简分隔线。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-resizable-handle"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 从右到左（RTL）
+
+设置 `direction="rtl"` 镜像分栏顺序与键盘水平调整方向。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-resizable-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多面板与折叠
+
+三栏布局结合可折叠侧栏与约束区间，聚焦首个分隔柄按 `Enter` 可快速收起或展开。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-resizable-collapsible"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 方法 / 事件 | 默认值与说明 |
-| --- | --- | --- |
-| Root | `sizes` / `defaultSizes` | 受控 / 非受控百分比数组（总计 `100`）；优先于双面板 `value` / `defaultValue` |
-| Root | `constraints` | 逐面板配置 `{ min, max, collapsible, collapsedSize }`，默认 `0` / `100` / `false` / `0` |
-| Root | `requestResize(index, nextSize, commit)` / `requestSizes(nextSizes, commit)` | 以编程方式请求调整单个或全部面板比例 |
-| Root | `sizesChange` / `sizesCommit` | 拖拽中与完成时触发，载荷 `{ sizes }` |
-| Panel | `index` | 面板序号（`0..N-1`）；暴露无量纲 `size`（`--pui-size`） |
-| Handle | `index` | 分隔柄序号（`0..N-2`），指向其前一个面板 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'variant', type: "'default' | 'nested'", default: "'default'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'sizes', type: 'readonly number[]', default: '—' },
+    { name: 'defaultSizes', type: 'readonly number[]', default: '—' },
+    { name: 'constraints', type: 'readonly ResizablePanelConstraint[]', default: '[]' },
+    { name: 'value', type: 'number', default: '—' },
+    { name: 'defaultValue', type: 'number', default: '50' },
+    { name: 'min', type: 'number', default: '10' },
+    { name: 'max', type: 'number', default: '90' },
+    { name: 'step', type: 'number', default: '1' },
+    { name: 'collapsible', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+  ]}
+/>
+
+### Panel 与 Handle
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Panel.index', type: 'number', default: '0' },
+    { name: 'Handle.index', type: 'number', default: '0' },
+    { name: 'Handle.withHandle', type: 'boolean', default: 'false' },
+    { name: 'Handle.prominence', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'Handle.material', type: "'auto' | 'opaque'", default: "'auto'" },
+  ]}
+/>
+
+- **暴露状态**：Root 暴露 `value`、`sizes`；Panel 暴露 `size`；Handle 暴露 `value`、`focusVisible`、`disabled`。
+- **事件与方法**：Root 触发 `sizesChange` / `sizesCommit` / `valueChange` / `valueCommit`，并提供 `requestResize(index, next, commit?)`、`requestSizes(next, commit?)`、`requestValue(next, commit?)` 与 `cancelResize()`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-RESIZABLE.yaml', 'P-BASE-RESIZABLE.yaml']}
+/>

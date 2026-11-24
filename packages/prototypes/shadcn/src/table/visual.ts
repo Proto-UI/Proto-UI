@@ -30,7 +30,7 @@ export function setupTableHeaderCellPaint<
   Exposes = Record<string, unknown>,
 >(def: DefHandle<Props, Exposes>) {
   const style = setupTableStyle(def);
-  def.feedback.style.use(tw('table-cell text-left align-middle font-medium whitespace-nowrap'));
+  def.feedback.style.use(tw('table-cell text-start align-middle font-medium whitespace-nowrap'));
   def.rule({
     when: (w) =>
       w.any(

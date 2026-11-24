@@ -7,10 +7,14 @@ import {
 
 export default definePrototype<ScrollAreaRootProps, ScrollAreaRootExposes>({
   name: 'liquid-glass-scroll-area-root',
+  modules: asScrollAreaRoot.modules,
   setup(def) {
     const inherited = asScrollAreaRoot();
-    // A content boundary, not a material, focus or scrolling owner.
-    def.feedback.style.use(tw('relative min-h-0 min-w-0 overflow-hidden text-foreground'));
+    // Content boundary only: never place Liquid Glass material on the scroll
+    // container itself so floating glass bars never stack glass-on-glass.
+    def.feedback.style.use(
+      tw('relative min-h-0 min-w-0 overflow-hidden text-foreground font-sans')
+    );
     return inherited.render;
   },
 });

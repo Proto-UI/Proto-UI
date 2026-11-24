@@ -8,7 +8,7 @@ import type {
   TreeToggleProps,
   TreeToggleExposes,
 } from '@proto.ui/prototypes-base/tree';
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype, tw, type DefHandle, type State } from '@proto.ui/core';
 import { asTreeRoot, asTreeItem, asTreeGroup, asTreeToggle } from '@proto.ui/prototypes-base/tree';
 import {
   bootstrapButtonRestFill,
@@ -20,9 +20,31 @@ import {
 } from '../button/paint';
 export type * from '@proto.ui/prototypes-base/tree';
 
+/** Local pointer paint only; Base remains the sole focus, selection and activation owner. */
+function setupItemHover(def: DefHandle<TreeItemProps, TreeItemExposes>, disabled: State<boolean>) {
+  const hovered = def.state.bool('bootstrapTreeItemPointerPaint', false);
+  const clear = () => hovered.set(false, 'bootstrap tree item pointer paint reset');
+  def.event.on('pointer.enter', () => {
+    if (!disabled.get()) hovered.set(true, 'bootstrap tree item pointer paint enter');
+  });
+  def.event.on('pointer.leave', clear);
+  def.event.on('pointer.cancel', clear);
+  def.lifecycle.onUnmounted(clear);
+  const watchable = disabled as State<boolean> & {
+    watch?: (cb: (run: unknown, event: { type: string; next?: boolean }) => void) => void;
+  };
+  if (typeof watchable.watch === 'function') {
+    watchable.watch((_run, event) => {
+      if (event.type === 'next' && event.next) clear();
+    });
+  }
+  return hovered;
+}
+
 // Tree is a Proto extension. Its ordinary content uses less/navs.less .nav-list
-// and its expansion command uses .btn-mini, not an upstream Tree API. Base
-// remains the only hierarchy, selection, expansion and navigation owner.
+// inside a classic .well frame and its expansion command uses .btn-mini, not an
+// upstream Tree API. Base remains the only hierarchy, selection, expansion and
+// navigation owner.
 export const treeRoot = definePrototype<TreeRootProps, TreeRootExposes>({
   name: 'bootstrap-2-3-2-tree-root',
   modules: asTreeRoot.modules,
@@ -30,7 +52,7 @@ export const treeRoot = definePrototype<TreeRootProps, TreeRootExposes>({
     const behavior = asTreeRoot();
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full m-0 px-[15px] list-none font-sans text-[14px] leading-[20px] text-foreground'
+        'block min-w-0 max-w-full m-0 px-[12px] py-[8px] list-none rounded-[4px] border border-[#e5e5e5] bg-[#f5f5f5] shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)] font-sans text-[14px] leading-[20px] text-[#333]'
       )
     );
     return behavior.render;
@@ -44,8 +66,11 @@ export const treeItem = definePrototype<TreeItemProps, TreeItemExposes>({
   setup(def) {
     const behavior = asTreeItem();
     const state = behavior.stateHandles!;
+    const hovered = setupItemHover(def, state.disabled);
     // Do not impose a horizontal flex row on an arbitrary nested Group slot.
-    def.feedback.style.use(tw('min-w-0 mx-[-15px] px-[15px] py-[3px] no-underline cursor-pointer'));
+    def.feedback.style.use(
+      tw('min-w-0 rounded-[3px] px-[10px] py-[3px] no-underline cursor-pointer select-none')
+    );
     def.rule({
       when: (w) => w.state(state.hidden).eq(false),
       intent: (i) => i.feedback.style.use(tw('block')),
@@ -59,7 +84,7 @@ export const treeItem = definePrototype<TreeItemProps, TreeItemExposes>({
         w.all(
           w.state(state.selected).eq(false),
           w.state(state.disabled).eq(false),
-          w.state(state.focused).eq(true)
+          w.any(w.state(hovered).eq(true), w.state(state.focused).eq(true))
         ),
       intent: (i) => i.feedback.style.use(tw('bg-[#eee]')),
     });
@@ -77,8 +102,6 @@ export const treeItem = definePrototype<TreeItemProps, TreeItemExposes>({
       intent: (i) =>
         i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
     });
-    // Base Item has no public hovered fact. Do not install a second input
-    // owner or pretend that focused paint establishes the source hover path.
     return behavior.render;
   },
 });
@@ -89,7 +112,17 @@ export const treeGroup = definePrototype<TreeGroupProps, TreeGroupExposes>({
   modules: asTreeGroup.modules,
   setup(def) {
     const behavior = asTreeGroup();
-    def.feedback.style.use(tw('block min-w-0 m-0 pl-[15px]'));
+    const state = behavior.stateHandles;
+    if (!state) throw new Error('[bootstrap-2-3-2-tree] Group state unavailable.');
+    def.feedback.style.use(tw('block min-w-0 m-0'));
+    def.rule({
+      when: (w) => w.state(state.direction).eq('ltr'),
+      intent: (i) => i.feedback.style.use(tw('pl-[15px]')),
+    });
+    def.rule({
+      when: (w) => w.state(state.direction).eq('rtl'),
+      intent: (i) => i.feedback.style.use(tw('pr-[15px]')),
+    });
     return behavior.render;
   },
 });

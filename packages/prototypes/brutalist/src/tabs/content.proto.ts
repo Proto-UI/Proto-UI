@@ -19,7 +19,7 @@ const tabsContent = definePrototype<BrutalistTabsContentProps, BrutalistTabsCont
     // focus-visible outline when Base Tabs Content selects the root fallback.
     // P-BRUTALIST-TABS-CONTENT-VISUAL-GRAMMAR — content without a second compulsory frame.
     def.feedback.style.use(
-      tw('block w-full min-h-28 p-4 font-sans font-medium text-sm leading-6 text-foreground')
+      tw('block flex-1 w-full min-h-28 p-4 font-sans font-medium text-sm leading-6 text-foreground')
     );
     // P-BRUTALIST-TABS-CONTENT-HIDDEN-STATE — hidden collapses the panel via the `hidden` token.
     def.rule({

@@ -6,6 +6,7 @@ export {
   liquidGlassTableHeaderCell as tableHeaderCell,
 } from './header-cell.proto';
 export { liquidGlassTableCell, liquidGlassTableCell as tableCell } from './cell.proto';
+export type * from './types';
 export type {
   TableRootProps,
   TableRootExposes,

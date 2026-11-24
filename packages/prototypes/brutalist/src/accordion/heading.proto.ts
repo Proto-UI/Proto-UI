@@ -6,8 +6,10 @@ import {
 } from '@proto.ui/prototypes-base/accordion';
 export default definePrototype<AccordionHeadingProps, AccordionHeadingExposes>({
   name: 'brutalist-accordion-heading',
+  modules: asAccordionHeading.modules,
   setup(def) {
-    asAccordionHeading();
+    const inherited = asAccordionHeading();
     def.feedback.style.use(tw('block m-0 min-w-0'));
+    return inherited.render;
   },
 });

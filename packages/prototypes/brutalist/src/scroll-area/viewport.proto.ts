@@ -8,9 +8,11 @@ export const BrutalistScrollAreaViewport = definePrototype<
   BrutalistScrollAreaViewportExposes
 >({
   name: 'brutalist-scroll-area-viewport',
+  modules: asScrollAreaViewport.modules,
   setup(def) {
     // P-BRUTALIST-SCROLL-AREA-VIEWPORT-BASE-INHERITANCE
-    const viewportState = asScrollAreaViewport().stateHandles;
+    const inherited = asScrollAreaViewport();
+    const viewportState = inherited.stateHandles;
     if (!viewportState) {
       throw new Error(
         '[brutalist-scroll-area-viewport] asScrollAreaViewport must project Viewport state handles.'
@@ -26,9 +28,12 @@ export const BrutalistScrollAreaViewport = definePrototype<
     // the Root clips them with overflow-hidden, so the ring never appears.
     def.rule({
       when: (w) => w.state(focusVisible).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring ring-inset ring-offset-0')),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('ring-2 ring-ring ring-inset ring-offset-0 forced-colors-focus-outline')
+        ),
     });
 
-    return (renderer) => [renderer.r.slot()];
+    return inherited.render;
   },
 });

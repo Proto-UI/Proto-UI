@@ -7,7 +7,9 @@ sidebar:
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
@@ -16,37 +18,106 @@ Scroll Area preserves native host scrolling while styling the scrollbars with 5p
 ## Preview
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-scroll-area" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-scroll-area"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## Installation
 
-Included in `@proto.ui/prototypes-brutalist@0.2.0`. Add it via the CLI target `brutalist-scroll-area`, or import directly from `@proto.ui/prototypes-brutalist/scroll-area`.
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-scroll-area" manager="npm" />
+
+Replace `wc` with `react`, `vue`, or `vue2` to generate framework wrappers, or import directly from `@proto.ui/prototypes-brutalist/scroll-area`.
 
 ## Usage
 
+```ts
+import {
+  BrutalistScrollAreaRoot,
+  BrutalistScrollAreaViewport,
+  BrutalistScrollAreaScrollbar,
+  BrutalistScrollAreaThumb,
+} from '@proto.ui/prototypes-brutalist/scroll-area';
+```
+
+```html
+<brutalist-scroll-area-root class="h-48 w-full max-w-80">
+  <brutalist-scroll-area-viewport>
+    <div class="p-4">Your scrollable content here.</div>
+  </brutalist-scroll-area-viewport>
+  <brutalist-scroll-area-scrollbar orientation="vertical">
+    <brutalist-scroll-area-thumb></brutalist-scroll-area-thumb>
+  </brutalist-scroll-area-scrollbar>
+</brutalist-scroll-area-root>
+```
+
 ### Anatomy
 
-Scroll Area is composed of `Root`, `Viewport`, `Scrollbar`, and `Thumb`:
+```text
+Root
+├── Viewport
+└── Scrollbar
+    └── Thumb
+```
 
-- `Root`: Outer container; give it an explicit size in your layout (the preview uses a `12rem` height with a responsive `20rem` max width).
-- `Viewport`: Native scrollable content viewport.
-- `Scrollbar`: Horizontal or vertical track configured via `orientation`.
-- `Thumb`: Continuously derives its size and offset from live scroll metrics and maps pointer dragging directly to scroll updates, without adding a separate scroll state or focus stop.
+- `Root`: Shadow-free 5px rounded container with a 2px border; supply explicit dimensions from consumer layout.
+- `Viewport`: Native scrollable content viewport that joins the `Tab` order only when overflow exists and draws an inset focus-visible ring with forced-colors outline support.
+- `Scrollbar`: High-contrast vertical or horizontal track configured via `orientation`; when both axes mount, the horizontal bar paints a matching pointer-inert lavender corner intersection that releases automatically if the opposite bar unmounts.
+- `Thumb`: Derives size and offset from live scroll metrics, maps pointer dragging directly to scroll updates, hides when there is no overflow, and keeps a crisp border in forced-colors mode.
 
-### Dual-Track Corner Handling
+## Examples
 
-When both scrollbars are present, each track reserves the lower-right intersection (filled by the horizontal scrollbar with a pointer-inert lavender corner surface) without requiring a separate Corner component. If the opposite track is absent or hidden, that space is released automatically; when a track has no overflow, its surface remains visible while its `Thumb` hides.
+### Default Prose
+
+Mount a vertical scrollbar for long-form prose, notes, and documentation panels.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-scroll-area-prose"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Horizontal
+
+Use `Scrollbar` with `orientation="horizontal"` for horizontal print galleries and card strips.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-scroll-area-horizontal"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-The following prop belongs to `Scrollbar`:
+### Props
+
+The following prop belongs to `Scrollbar` (`Root`, `Viewport`, and `Thumb` add no props):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
-  rows={[{ name: 'orientation', type: "'horizontal' | 'vertical'", default: 'vertical' }]}
+  rows={[{ name: 'orientation', type: "'horizontal' | 'vertical'", default: "'vertical'" }]}
 />
 
-Other parts:
+### Exposed States
 
-- **Root**, **Viewport**, **Thumb**: No props.
+- **Viewport**: `focused`, `focusVisible`, `scrollAxes`, `scrolling`, `scrollProjection`, `scrollXPosition`, `scrollXVisibleRatio`, `canScrollLeft`, `canScrollRight`, `scrollYPosition`, `scrollYVisibleRatio`, `canScrollUp`, `canScrollDown`.
+- **Scrollbar**: `orientation`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-SCROLL-AREA.yaml',
+    'P-BRUTALIST-SCROLL-AREA-VIEWPORT.yaml',
+    'P-BRUTALIST-SCROLL-AREA-SCROLLBAR.yaml',
+    'P-BRUTALIST-SCROLL-AREA-THUMB.yaml',
+    'P-BASE-SCROLL-AREA.yaml',
+  ]}
+/>

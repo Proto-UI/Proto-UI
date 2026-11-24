@@ -1,11 +1,13 @@
 ---
 title: 'Carousel'
-description: 'A Liquid Glass carousel with continuous drag and native scrolling, snap points, responsive capacity, and controlled indexing.'
+description: 'A Liquid Glass carousel pairing uncluttered media slides with floating translucent navigation chrome, responsive capacity, and controlled indexing.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Carousel combines an equal-size slide strip, a continuously scrollable viewport, and Previous/Next controls. Pointer/touch dragging, wheel, trackpad, scrollbar scrolling, and keyboard navigation all share the same snapping index model.
+Liquid Glass Carousel separates solid, vivid slide content from floating circular Liquid Glass navigation controls. Slides stay crisp and unobstructed without glass-on-glass stacking, while Previous/Next controls project adaptive Liquid Glass chrome (`regular` / `prominent`) with automatic opaque fallback for reduced-transparency and high-contrast preferences.
 
 ## Preview
 
@@ -15,27 +17,116 @@ Liquid Glass Carousel combines an equal-size slide strip, a continuously scrolla
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-The preview requests up to two visible slides with a minimum slide extent of `180`; narrowing the container automatically adjusts visible capacity.
-
 ## Installation
 
 Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
 ## Usage
 
-- **Responsive capacity**: `slidesPerView` caps the number of equal-size items shown (default `1`) and `minSlideSize` sets their minimum logical pixel extent (default `0`). The final snap aligns flush with the strip end without empty trailing space.
-- **Controlled index**: pass `index` to control the committed snap position and listen to `indexChange` for proposals. Drag previews do not mutate the committed index until accepted by your state.
-- **Axis and looping**: `orientation="vertical"` requires an explicitly bounded viewport height. Horizontal `direction="rtl"` mirrors drag and arrow keys while preserving logical item order. `loop` wraps index requests between the first and last reachable stops without cloning slides.
-- Carousel targets equal-size slides and user-driven navigation (no autoplay or variable-width slides).
+```tsx
+import {
+  LiquidGlassCarouselRoot,
+  LiquidGlassCarouselViewport,
+  LiquidGlassCarouselSlide,
+  LiquidGlassCarouselPrevious,
+  LiquidGlassCarouselNext,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <LiquidGlassCarouselRoot className="mx-auto w-full max-w-md">
+      <LiquidGlassCarouselViewport>
+        <LiquidGlassCarouselSlide>1</LiquidGlassCarouselSlide>
+        <LiquidGlassCarouselSlide>2</LiquidGlassCarouselSlide>
+        <LiquidGlassCarouselSlide>3</LiquidGlassCarouselSlide>
+      </LiquidGlassCarouselViewport>
+      <LiquidGlassCarouselPrevious aria-label="Previous slide">‹</LiquidGlassCarouselPrevious>
+      <LiquidGlassCarouselNext aria-label="Next slide">›</LiquidGlassCarouselNext>
+    </LiquidGlassCarouselRoot>
+  );
+}
+```
+
+- **Material & hierarchy**: `Previous` and `Next` float over the slide edge as `variant="regular"` circular Liquid Glass buttons; set `variant="prominent"` for an emphasized forward action or `material="opaque"` to force the opaque fallback surface.
+- **Concentric geometry & responsive capacity**: `Viewport` uses `rounded-xl` to nest concentric `rounded-lg` cards inside; configure `slidesPerView` and `minSlideSize` for responsive multi-item layouts.
+- **Orientation & controlled index**: Supports `orientation="vertical"` (with an explicit bounded viewport height), `direction="rtl"`, `loop={true}`, and controlled `index` / `indexChange`.
+
+## Examples
+
+### Sizes
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-carousel-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Orientation
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-carousel-orientation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Loop & Prominence
+
+Demonstrates `loop={true}` alongside `variant="regular"` (Previous) and `variant="prominent"` (Next) floating glass controls.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-carousel-loop"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### API
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-carousel-api"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop / State | Defaults and notes |
-| --- | --- | --- |
-| Root | `slidesPerView` | `1`; maximum equal-size items visible at once |
-| Root | `minSlideSize` | `0`; minimum slide extent in logical host pixels |
-| Root | `index` | Controlled snap index; emits `indexChange` proposals |
-| Root | `orientation`, `direction`, `loop` | Scroll axis, reading direction, and end-to-end index wrapping |
-| Root (exposed) | `visibleSlides`, `maxIndex` | Observed viewport capacity and maximum reachable index |
-| Viewport (exposed) | `dragging`, `scrolling`, `scrollPosition` | Drag/scroll activity and normalized scroll progress |
-| Slide (exposed) | `current`, `hidden` | Active snap marker and offscreen visibility (layout extent is preserved) |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'index', type: 'number', default: '—' },
+    { name: 'defaultIndex', type: 'number', default: '0' },
+    { name: 'slidesPerView', type: 'number', default: '1' },
+    { name: 'minSlideSize', type: 'number', default: '0' },
+    { name: 'loop', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'a11yLabel', type: 'string', default: 'Carousel' },
+  ]}
+/>
+
+### Slide / Previous / Next
+
+<ApiPropsTable
+  headers={{ name: 'Part / Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Slide.index', type: 'number', default: 'Document order' },
+    { name: 'Previous / Next.disabled', type: 'boolean', default: 'false' },
+    { name: 'Previous / Next.variant', type: "'regular' | 'prominent'", default: 'regular' },
+    { name: 'Previous / Next.material', type: "'auto' | 'opaque'", default: 'auto' },
+  ]}
+/>
+
+### Exposed states, methods, and events
+
+- **Root**: states `index`, `slideCount`, `visibleSlides`, `maxIndex`; method `requestIndex(next)`; event `indexChange`.
+- **Viewport**: states `focusVisible`, `dragging`, `scrolling`, `scrollPosition`.
+- **Slide**: states `current`, `hidden`, `basis`, `minSize`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-CAROUSEL.yaml', 'P-BASE-CAROUSEL.yaml']}
+/>

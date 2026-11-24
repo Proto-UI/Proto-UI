@@ -55,7 +55,7 @@ export const calendarRoot = definePrototype<CalendarRootProps, CalendarRootExpos
     const state = behavior.stateHandles!;
     def.feedback.style.use(
       tw(
-        'inline-grid w-fit min-w-0 max-w-full gap-[5px] font-sans text-[14px] leading-[20px] text-foreground'
+        'inline-grid w-fit min-w-0 max-w-full gap-[5px] rounded-[4px] border border-border bg-background p-[8px] font-sans text-[14px] leading-[20px] text-foreground shadow-sm'
       )
     );
     def.rule({
@@ -98,7 +98,7 @@ export const calendarWeekdays = definePrototype<CalendarWeekdaysProps, CalendarW
   modules: asCalendarWeekdays.modules,
   setup(def) {
     const behavior = asCalendarWeekdays();
-    def.feedback.style.use(tw('grid w-full grid-cols-7 border-b border-[#ddd]'));
+    def.feedback.style.use(tw('grid w-full grid-cols-7 border-b border-border'));
     return behavior.render;
   },
 });
@@ -165,7 +165,7 @@ export const calendarPrevious = definePrototype<CalendarPreviousProps, CalendarP
       throw new Error('[bootstrap-2-3-2-calendar] Required inherited Button states unavailable.');
     def.feedback.style.use(
       tw(
-        'inline-flex shrink-0 items-center justify-center rounded-[4px] border px-[12px] py-[4px] text-[14px] font-normal leading-[20px] select-none cursor-pointer text-paint-[#333_0_1px_1px_rgb(255_255_255/75%)] border-[rgb(0_0_0/10%)_rgb(0_0_0/10%)_#b3b3b3_rgb(0_0_0/10%)]'
+        'inline-flex min-w-[30px] shrink-0 items-center justify-center rounded-[4px] border px-[6px] py-[4px] text-[14px] font-normal leading-[20px] select-none cursor-pointer text-paint-[#333_0_1px_1px_rgb(255_255_255/75%)] border-[rgb(0_0_0/10%)_rgb(0_0_0/10%)_#b3b3b3_rgb(0_0_0/10%)]'
       )
     );
     def.feedback.style.use(tw(bootstrapButtonRaised));
@@ -241,7 +241,7 @@ export const calendarNext = definePrototype<CalendarNextProps, CalendarNextExpos
       throw new Error('[bootstrap-2-3-2-calendar] Required inherited Button states unavailable.');
     def.feedback.style.use(
       tw(
-        'inline-flex shrink-0 items-center justify-center rounded-[4px] border px-[12px] py-[4px] text-[14px] font-normal leading-[20px] select-none cursor-pointer text-paint-[#333_0_1px_1px_rgb(255_255_255/75%)] border-[rgb(0_0_0/10%)_rgb(0_0_0/10%)_#b3b3b3_rgb(0_0_0/10%)]'
+        'inline-flex min-w-[30px] shrink-0 items-center justify-center rounded-[4px] border px-[6px] py-[4px] text-[14px] font-normal leading-[20px] select-none cursor-pointer text-paint-[#333_0_1px_1px_rgb(255_255_255/75%)] border-[rgb(0_0_0/10%)_rgb(0_0_0/10%)_#b3b3b3_rgb(0_0_0/10%)]'
       )
     );
     def.feedback.style.use(tw(bootstrapButtonRaised));

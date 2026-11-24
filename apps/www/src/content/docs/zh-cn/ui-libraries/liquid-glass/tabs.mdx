@@ -1,11 +1,13 @@
 ---
 title: 'Tabs'
-description: '具备分段玻璃外观与下划线变体的 Liquid Glass 选项卡组件，继承 Base Tabs 语义。'
+description: '采用胶囊同心圆角分段玻璃材质、支持 prominence 层级与不透明回退的 Liquid Glass 选项卡组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Tabs 由 `Root`、`List`、`Trigger`、`Content` 四个部件组成，继承 [Base Tabs](/zh-cn/ui-libraries/base/tabs/) 协议。默认呈现圆角分段材质样式（自动支持不透明回退），并额外提供透明背景细下划线变体（`appearance="underline"`）。
+Liquid Glass Tabs 基于 [Base Tabs](/zh-cn/ui-libraries/base/tabs/) 语义协议构建，将 Liquid Glass 半透明材质限定在导航层 `TabsList` 上（不在 `TabsTrigger` 或 `TabsContent` 上重复叠加玻璃层），提供胶囊同心圆角分段外观、`regular` / `prominent` 视觉层级以及 `material="opaque"` 显式不透明回退。
 
 ## 预览
 
@@ -17,7 +19,7 @@ Liquid Glass Tabs 由 `Root`、`List`、`Trigger`、`Content` 四个部件组成
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前在源码工作区提供，可直接从 `@proto.ui/prototypes-liquid-glass/tabs` 导入。
 
 ```ts
 import {
@@ -25,20 +27,151 @@ import {
   tabsList,
   tabsTrigger,
   tabsContent,
+  tabsIndicator,
 } from '@proto.ui/prototypes-liquid-glass/tabs';
 ```
 
 ## 用法
 
-- **状态与导航**：选中值由 `Root` 统一管理。方向键与 `Home` / `End` 在可用选项卡之间移动焦点；在手动激活模式下，按 Enter / Space 才切换选中面板（适合避免方向键浏览时频繁重挂内容）。受控模式下需由调用方更新 `value`。
-- **外观变体**：默认使用 Liquid Glass 分段外观；在 `List` 与 `Trigger` 上传入 `appearance="underline"` 可切换为透明背景、与文字等宽的细下划线样式。
+```html
+<wc-liquid-glass-tabs-root default-value="overview">
+  <wc-liquid-glass-tabs-list>
+    <wc-liquid-glass-tabs-trigger value="overview">Overview</wc-liquid-glass-tabs-trigger>
+    <wc-liquid-glass-tabs-trigger value="analytics">Analytics</wc-liquid-glass-tabs-trigger>
+  </wc-liquid-glass-tabs-list>
+  <wc-liquid-glass-tabs-content value="overview">Overview content.</wc-liquid-glass-tabs-content>
+  <wc-liquid-glass-tabs-content value="analytics">Analytics content.</wc-liquid-glass-tabs-content>
+</wc-liquid-glass-tabs-root>
+```
+
+### 组件结构
+
+```text
+TabsRoot
+├── TabsList (Liquid Glass 材质层)
+│   ├── TabsTrigger (同心圆角选中透镜，不叠加玻璃)
+│   └── TabsTrigger
+├── TabsContent (中性内容层，不叠加玻璃)
+└── TabsContent
+```
+
+- **材质分层与回退**：仅 `TabsList` 在 `appearance="default"` 且 `material="auto"` 时声明 `liquid-glass` 材质候选；遇到降低透明度、高对比度或显式 `material="opaque"` 时自动回退到高对比度不透明表面。
+- **动效与无障碍**：选中与悬停过渡自动响应 `prefers-reduced-motion: reduce` 禁用过渡动效，焦点环采用内嵌高对比度轮廓并支持 `forced-colors`。
+
+## 示例
+
+### 层级与不透明回退
+
+使用 `prominence="prominent"` 增强导航条视觉重心，或使用 `material="opaque"` 显式退出玻璃材质。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tabs-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 垂直布局
+
+垂直模式下，外层轨道使用 `rounded-2xl`（16px）搭配 `p-1`（4px）与内层 `rounded-xl`（12px）保持同心圆角几何关系。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tabs-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 下划线变体
+
+在 `TabsList` 与 `TabsTrigger` 上设置 `appearance="underline"`，关闭玻璃容器并切换为轻量下划线导航。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tabs-underline"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用标签
+
+禁用项通过撤销交互与阴影反馈表达不可用状态，不降低整体不透明度，保证不透明回退下的文字可读性。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tabs-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件    | 属性                                | 说明                                             |
-| ------- | ----------------------------------- | ------------------------------------------------ |
-| Root    | `value` / `defaultValue`            | 受控 / 非受控当前选中选项卡标识                  |
-| Root    | `activationMode` / `orientation`    | 自动或手动键盘激活模式 / 水平或垂直排布          |
-| List    | `appearance`                        | 默认分段样式；设为 `'underline'` 使用下划线外观  |
-| Trigger | `value` / `disabled` / `appearance` | 选项卡标识、禁用态与外观变体                     |
-| Content | `value` / `keepMounted`             | 对应选项卡标识；设为 `true` 时切换后保留隐藏节点 |
+### Root
+
+暴露状态 `value` 与事件 `valueChange({ value: string })`。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'undefined' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'activationMode', type: "'automatic' | 'manual'", default: "'automatic'" },
+  ]}
+/>
+
+### List
+
+暴露焦点方法 `focusFirst`、`focusLast`、`focusNext`、`focusPrev`、`focusSelected`。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'appearance', type: "'default' | 'underline'", default: "'default'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'prominence', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'loop', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Trigger
+
+暴露状态 `selected`、`disabled`、`hovered`、`focused`、`focusVisible`、`pressed`，方法 `focusSelf` 及事件 `click`。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'appearance', type: "'default' | 'underline'", default: "'default'" },
+  ]}
+/>
+
+### Content
+
+暴露状态 `current` 与 `hidden`。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'keepMounted', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Indicator
+
+纯语义协议部件，暴露派生状态 `value`、`activeValue`、`orientation`，不声明玻璃材质或额外绘制。
+
+<ApiPropsTable headers={{ name: '属性', type: '类型', default: '默认值' }} rows={[]} />
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-TABS.yaml',
+    'P-LIQUID-GLASS-TABS-LIST.yaml',
+    'P-LIQUID-GLASS-TABS-TRIGGER.yaml',
+    'P-LIQUID-GLASS-TABS-CONTENT.yaml',
+    'P-LIQUID-GLASS-TABS-INDICATOR.yaml',
+    'P-BASE-TABS.yaml',
+  ]}
+/>

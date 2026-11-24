@@ -1,12 +1,13 @@
 ---
 title: 'Table'
-description: '提供清晰语义关联与边框样式的结构化表格组件。'
+description: '提供清晰表头语义、逻辑对齐与 Shadcn 边框配色的响应式结构化表格组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Table 用于呈现结构化二维数据，完整保留 [Base Table](/zh-cn/ui-libraries/base/table/) 的行列与表头语义，并附带 Shadcn 边框、单元格内边距、表头强调及表尾样式。本页示例使用 **Shadcn Rhea** 风格。
+Table 用于呈现结构化二维数据，完整保留 [Base Table](/zh-cn/ui-libraries/base/table/) 的行列索引与表头语义关联，并附带 Shadcn 折叠边框、单元格内边距、行悬停、选中态高亮与表尾样式。本页示例使用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -14,30 +15,260 @@ Table 用于呈现结构化二维数据，完整保留 [Base Table](/zh-cn/ui-li
   demoId="demo-shadcn-table"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-shadcn/table` 导入各部件原型：
+
+```ts
+import {
+  tableRoot,
+  tableCaption,
+  tableRow,
+  tableHeaderCell,
+  tableCell,
+} from '@proto.ui/prototypes-shadcn/table';
+```
 
 ## 用法
 
-Table 由 `Root`、`Caption`、`Row`、`HeaderCell` 和 `Cell` 五个部件组成：
+```html
+<div class="w-full overflow-x-auto">
+  <shadcn-table-root style-profile="rhea">
+    <shadcn-table-caption>A list of your recent invoices.</shadcn-table-caption>
+    <shadcn-table-row section="header" last-in-section>
+      <shadcn-table-header-cell header-key="invoice" header-kind="column" style="width: 100px">
+        Invoice
+      </shadcn-table-header-cell>
+      <shadcn-table-header-cell header-key="status" header-kind="column"
+        >Status</shadcn-table-header-cell
+      >
+      <shadcn-table-header-cell header-key="method" header-kind="column"
+        >Method</shadcn-table-header-cell
+      >
+      <shadcn-table-header-cell header-key="amount" header-kind="column" style="text-align: end">
+        Amount
+      </shadcn-table-header-cell>
+    </shadcn-table-row>
+    <shadcn-table-row section="body" last-in-section>
+      <shadcn-table-header-cell header-key="inv001" header-kind="row"
+        >INV001</shadcn-table-header-cell
+      >
+      <shadcn-table-cell>Paid</shadcn-table-cell>
+      <shadcn-table-cell>Credit Card</shadcn-table-cell>
+      <shadcn-table-cell style="text-align: end">$250.00</shadcn-table-cell>
+    </shadcn-table-row>
+  </shadcn-table-root>
+</div>
+```
 
-- `Root` 建立独立的表格域；`Caption` 提供表格说明文字。
-- `Row` 定义有序逻辑行，并提供两个视觉属性用于控制边框样式：`section`（`'header' | 'body' | 'footer'`，默认 `'body'`）和 `lastInSection`（默认 `false`）。
-- `HeaderCell` 声明 `headerKey` 与 `headerKind`（`'column' | 'row'`）；`Cell` 通过有序的 `headers` 键列表关联所属表头，支持正整数 `rowSpan` 和 `columnSpan`（默认均为 `1`）。
-- 表格聚焦于静态结构化展示；横向滚动容器请在外层自行包裹，如需排序、筛选或行选择，请使用 Data Table。
+### 部件结构
+
+```text
+Root
+├── Caption
+├── Row (section="header")
+│   └── HeaderCell (headerKind="column")
+├── Row (section="body")
+│   ├── HeaderCell (headerKind="row")
+│   └── Cell (headers=[...])
+└── Row (section="footer")
+    ├── HeaderCell (headerKind="row")
+    └── Cell (headers=[...])
+```
+
+- `Root` 建立独立的表格结构域并通过 `getStructure()` 暴露行列与表头快照；横向滚动请在外层容器包裹 `overflow-x-auto`。
+- `Row` 的 `section`、`lastInSection` 与 `selected` 仅用于控制表头/正文/表尾边框与高亮样式，不声明行组角色或选择状态。
+- `HeaderCell` 使用逻辑对齐 `text-start`，在 RTL 布局下自动反向；数值列可通过行内 `text-align: end` 保持尾部对齐。
+- `rowSpan` 与 `columnSpan` 用于声明无障碍跨度元数据；如需排序、筛选、分页或行选择，请使用 [Data Table](/zh-cn/ui-libraries/shadcn/data-table/)。
+
+## 示例
+
+### 表尾
+
+通过 `section="footer"` 为汇总行应用顶部边框、柔灰背景与中等字重：
+
+<PrototypePreviewer
+  demoId="demo-shadcn-table-footer"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 操作菜单
+
+在行尾单元格中组合 `DropdownMenu`，为每一行提供编辑、复制与删除操作：
+
+<PrototypePreviewer
+  demoId="demo-shadcn-table-actions"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Data Table
+
+需要排序、筛选、分页与多选交互时，可在基础表格结构之上使用 [Data Table](/zh-cn/ui-libraries/shadcn/data-table/)。
+
+### RTL
+
+外层容器设置 `dir="rtl"` 时，表头 `text-start` 与尾部对齐单元格自动按阅读方向镜像：
+
+<PrototypePreviewer
+  demoId="demo-shadcn-table-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-`Root`（`TableRootProps`）无额外属性。常用子部件属性如下：
+### Root
 
-- `Row`：`section`（`'header' | 'body' | 'footer'`，默认 `'body'`）、`lastInSection`（`boolean`，默认 `false`）。
-- `HeaderCell`：`headerKey`（`string`）、`headerKind`（`'column' | 'row'`）、`rowSpan`（默认 `1`）、`columnSpan`（默认 `1`）。
-- `Cell`：`headers`（有序表头键集合）、`rowSpan`（默认 `1`）、`columnSpan`（默认 `1`）。
+`Root` 暴露 `getStructure()` 方法，用于读取当前表格结构快照与诊断信息。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: "'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'new-york-v4'",
+      description: '切换表格文字尺度与单元格内边距风格，也可由外层 StyleScope 继承',
+    },
+  ]}
+/>
+
+### Caption
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleId',
+      default: '继承自 Root / Scope',
+      description: '覆盖标题文字尺度风格',
+    },
+  ]}
+/>
+
+### Row
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'section',
+      type: "'header' | 'body' | 'footer'",
+      default: "'body'",
+      description: '指定行所属视觉分区，控制分隔线、悬停反馈与表尾样式',
+    },
+    {
+      name: 'lastInSection',
+      type: 'boolean',
+      default: 'false',
+      description: '标记正文或表尾的末行以隐藏底部分隔线',
+    },
+    {
+      name: 'selected',
+      type: 'boolean',
+      default: 'false',
+      description: '视觉选中高亮（bg-muted），不修改 ARIA 或引入选择所有者',
+    },
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleId',
+      default: '继承自 Root / Scope',
+      description: '覆盖行级风格预设并向下传递至单元格',
+    },
+  ]}
+/>
+
+### HeaderCell
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'headerKey',
+      type: 'string',
+      default: "''",
+      description: '表头唯一键，供 Cell.headers 引用',
+    },
+    {
+      name: 'headerKind',
+      type: "'column' | 'row'",
+      default: 'undefined',
+      description: '声明列表头（columnheader）或行表头（rowheader）',
+    },
+    {
+      name: 'headers',
+      type: 'readonly string[]',
+      default: '[]',
+      description: '多层表头场景下引用的上级表头键列表',
+    },
+    {
+      name: 'rowSpan',
+      type: 'number',
+      default: '1',
+      description: '无障碍跨行数（正整数）',
+    },
+    {
+      name: 'columnSpan',
+      type: 'number',
+      default: '1',
+      description: '无障碍跨列数（正整数）',
+    },
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleId',
+      default: '继承自 Row / Root',
+      description: '覆盖表头单元格字号、高度与内边距风格',
+    },
+  ]}
+/>
+
+### Cell
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'headers',
+      type: 'readonly string[]',
+      default: '[]',
+      description: '按顺序关联的表头 headerKey 列表',
+    },
+    {
+      name: 'rowSpan',
+      type: 'number',
+      default: '1',
+      description: '无障碍跨行数（正整数）',
+    },
+    {
+      name: 'columnSpan',
+      type: 'number',
+      default: '1',
+      description: '无障碍跨列数（正整数）',
+    },
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleId',
+      default: '继承自 Row / Root',
+      description: '覆盖数据单元格内边距风格',
+    },
+  ]}
+/>
 
 ## 参考
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-TABLE.yaml', 'P-BASE-TABLE.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-SHADCN-TABLE.yaml',
+    'P-SHADCN-TABLE-CAPTION.yaml',
+    'P-SHADCN-TABLE-ROW.yaml',
+    'P-SHADCN-TABLE-HEADER-CELL.yaml',
+    'P-SHADCN-TABLE-CELL.yaml',
+    'P-BASE-TABLE.yaml',
+  ]}
+/>

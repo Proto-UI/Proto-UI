@@ -1,15 +1,15 @@
 ---
 title: 'Resizable'
-description: 'A Bootstrap 2.3.2 multi-panel resizable layout with collapsible stops, nested groups, and keyboard resizing.'
+description: 'A Bootstrap 2.3.2 resizable split-panel layout with classic beveled gradients, #52a8ec focus glow, collapsible stops, and RTL support.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Resizable coordinates two or more percentage-sized panels separated by draggable handles, supporting pointer dragging, arrow keys, `Shift` acceleration, `Home` / `End`, panel collapsing, and nested orientations.
+A Bootstrap 2.3.2 extension built on Base Resizable: handles feature the classic `#fff → #e6e6e6` bevel gradient, inset highlight, optional recessed grip badge, and `#52a8ec` focus glow, with full multi-panel ratios, collapsing, RTL, and nested layouts.
 
 ## Preview
-
-The example combines three horizontal panels with a nested two-panel vertical group.
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-resizable"
@@ -19,21 +19,134 @@ The example combines three horizontal panels with a nested two-panel vertical gr
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-bootstrap-2-3-2/resizable` and adapt them for your target runtime:
+
+```ts
+import {
+  resizableRoot,
+  resizablePanel,
+  resizableHandle,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/resizable';
+```
 
 ## Usage
 
-- **Indexed panels and handles**: Render `N` panels (`index: 0..N-1`) and `N - 1` handles (`index: 0..N-2`). Each handle resizes only its adjacent pair while preserving all other panels, with `Resize panels` as the default accessible name.
-- **Constraints and collapsing**: Pass per-panel `min`, `max`, `collapsible`, and `collapsedSize` in `constraints` (defaults `0`, `100`, `false`, `0`). Percentages normalize to `100`; infeasible configurations keep the last valid layout. Collapsing acts as a discrete stop bounded by the neighbor's `max`.
-- **Controlled state and nesting**: Supply `sizes` for controlled mode and handle `sizesChange` / `sizesCommit` (`{ sizes }`). Cancelled drags do not emit `sizesCommit`. Nested roots manage independent sizes and orientations. Panel sizing drives a static Web CSS `flex-basis` via `--pui-size`, excluding fixed handle widths from drag math.
+```tsx
+import {
+  Bootstrap232ResizableRoot,
+  Bootstrap232ResizablePanel,
+  Bootstrap232ResizableHandle,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <Bootstrap232ResizableRoot
+      defaultSizes={[50, 50]}
+      className="h-56 w-full max-w-md rounded-[4px] border border-[#ccc] bg-background shadow-[0_1px_3px_rgb(0_0_0/5.5%)] overflow-hidden"
+    >
+      <Bootstrap232ResizablePanel index={0}>One</Bootstrap232ResizablePanel>
+      <Bootstrap232ResizableHandle index={0} withHandle />
+      <Bootstrap232ResizablePanel index={1}>Two</Bootstrap232ResizablePanel>
+    </Bootstrap232ResizableRoot>
+  );
+}
+```
+
+### Composition
+
+```text
+Bootstrap232ResizableRoot
+├── Bootstrap232ResizablePanel (index: 0)
+├── Bootstrap232ResizableHandle (index: 0, withHandle?)
+└── Bootstrap232ResizablePanel (index: 1)
+```
+
+- **Indexed panels and handles**: render `N` `Panel` parts (`index: 0..N-1`) and `N - 1` `Handle` parts (`index: 0..N-2`). Each handle resizes only its adjacent pair and defaults its accessible name to `Resize panels`.
+- **Classic Bootstrap 2.3.2 cues**: directional `ew-resize` / `ns-resize` cursors, `#52a8ec` focus glow on keyboard focus, and flat `#e6e6e6` `opacity-65` styling when disabled.
+- **Constraints and controlled state**: configure per-panel `min`, `max`, `collapsible`, and `collapsedSize` via `constraints`; supply `sizes` for controlled mode and listen to `sizesChange` / `sizesCommit`.
+
+## Examples
+
+### Vertical
+
+Use `orientation="vertical"` for stacked resizable panes.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-resizable-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Handle
+
+Enable `withHandle` to show a beveled grip badge, or omit it for the default 6px gradient divider bar.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-resizable-handle"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Pass `direction="rtl"` to mirror panel order and horizontal keyboard increments.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-resizable-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Multi-panel & Collapsible
+
+Combine three panels with a collapsible sidebar. Focus the first handle and press `Enter` to toggle collapse.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-resizable-collapsible"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / Methods / Events | Description |
-| --- | --- | --- |
-| `Root` | `sizes` / `defaultSizes` | Full percentage vector (legacy 2-panel `value` / `defaultValue` also supported; `sizes` takes precedence) |
-| `Root` | `constraints` | Per-panel `{ min, max, collapsible, collapsedSize }` rules |
-| `Root` | `requestResize(index, nextSize, commit)` / `requestSizes(nextSizes, commit)` | Programmatic single-panel or full-vector resize requests |
-| `Root` | `sizesChange` / `sizesCommit` | Live and committed percentage events with payload `{ sizes }` |
-| `Panel` | `index` | `0..N-1` panel index applying its size via `--pui-size` |
-| `Handle` | `index` | `0..N-2` separator handle between adjacent panels |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'sizes', type: 'readonly number[]', default: '—' },
+    { name: 'defaultSizes', type: 'readonly number[]', default: '—' },
+    { name: 'constraints', type: 'readonly ResizablePanelConstraint[]', default: '[]' },
+    { name: 'value', type: 'number', default: '—' },
+    { name: 'defaultValue', type: 'number', default: '50' },
+    { name: 'min', type: 'number', default: '10' },
+    { name: 'max', type: 'number', default: '90' },
+    { name: 'step', type: 'number', default: '1' },
+    { name: 'collapsible', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+  ]}
+/>
+
+### Panel & Handle
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Panel.index', type: 'number', default: '0' },
+    { name: 'Handle.index', type: 'number', default: '0' },
+    { name: 'Handle.withHandle', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+- **Exposed states**: Root exposes `value` and `sizes`; Panel exposes `size`; Handle exposes `value`, `focusVisible`, and `disabled`.
+- **Events & methods**: Root emits `sizesChange`, `sizesCommit`, `valueChange`, and `valueCommit`, and exposes `requestResize(index, next, commit?)`, `requestSizes(next, commit?)`, `requestValue(next, commit?)`, and `cancelResize()`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-RESIZABLE.yaml', 'P-BASE-RESIZABLE.yaml']}
+/>

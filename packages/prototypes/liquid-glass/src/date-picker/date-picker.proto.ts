@@ -1,3 +1,9 @@
+import {
+  COMMAND_HOVER,
+  COMMAND_PRESS,
+  COMMAND_FOCUS,
+  COMMAND_DISABLED,
+} from '../interactive-surface';
 import type {
   DatePickerRootProps,
   DatePickerRootExposes,
@@ -19,57 +25,130 @@ import {
   asDatePickerValue,
 } from '@proto.ui/prototypes-base/date-picker';
 export type * from '@proto.ui/prototypes-base/date-picker';
+
+export interface LiquidGlassDatePickerTriggerProps extends DatePickerTriggerProps {
+  variant?: 'regular' | 'prominent';
+}
+
+export interface LiquidGlassDatePickerContentProps extends DatePickerContentProps {
+  /** Auto enhances only when all live preference/support inputs are affirmative. */
+  material?: 'auto' | 'opaque';
+}
+
+const TRIGGER_FILLS = {
+  regular: 'bg-secondary text-secondary-foreground',
+  prominent: 'bg-primary text-primary-foreground',
+} as const;
+
 export const datePickerRoot = definePrototype<DatePickerRootProps, DatePickerRootExposes>({
   name: 'liquid-glass-date-picker-root',
+  modules: asDatePickerRoot.modules,
   setup(def) {
     const behavior = asDatePickerRoot();
-    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground inline-grid gap-2'));
+    const calendar = behavior.getAsHookHandle?.('as-calendar-root')?.stateHandles;
+    if (!calendar)
+      throw new Error('[liquid-glass-date-picker] Required inherited state is unavailable.');
+    def.feedback.style.use(tw('inline-grid min-w-0 max-w-full gap-2 font-sans text-foreground'));
+    def.rule({
+      when: (w) => w.state(calendar.direction).eq('ltr'),
+      intent: (i) => i.feedback.style.use(tw('direction-ltr')),
+    });
+    def.rule({
+      when: (w) => w.state(calendar.direction).eq('rtl'),
+      intent: (i) => i.feedback.style.use(tw('direction-rtl')),
+    });
     return behavior.render;
   },
 });
 export { datePickerRoot as liquidGlassDatePickerRoot };
-export const datePickerTrigger = definePrototype<DatePickerTriggerProps, DatePickerTriggerExposes>({
+
+export const datePickerTrigger = definePrototype<
+  LiquidGlassDatePickerTriggerProps,
+  DatePickerTriggerExposes
+>({
   name: 'liquid-glass-date-picker-trigger',
+  modules: asDatePickerTrigger.modules,
   setup(def) {
+    def.props.define({
+      variant: { type: 'enum', options: ['regular', 'prominent'], empty: 'fallback' },
+    });
+    def.props.setDefaults({ variant: 'regular' });
     const behavior = asDatePickerTrigger();
-    def.feedback.style.use(
-      tw(
-        'min-w-0 max-w-full text-foreground inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-border px-3 py-2 text-sm cursor-pointer'
-      )
-    );
     const states = behavior.getAsHookHandle?.('as-popover-trigger')?.stateHandles;
     if (!states)
       throw new Error('[liquid-glass-date-picker] Required inherited state is unavailable.');
+    // Concentric pill trigger; keeps material neutral so open popup stays the sole glass layer.
+    def.feedback.style.use(
+      tw(
+        'min-w-0 max-w-full inline-flex min-h-9 items-center justify-between gap-2 rounded-full border border-border px-4 py-2 font-sans text-sm font-medium text-start select-none cursor-pointer shadow-sm'
+      )
+    );
+    (Object.keys(TRIGGER_FILLS) as Array<keyof typeof TRIGGER_FILLS>).forEach((variant) => {
+      def.rule({
+        when: (w) => w.prop('variant').eq(variant),
+        intent: (i) => i.feedback.style.use(tw(TRIGGER_FILLS[variant])),
+      });
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(states.hovered).eq(true),
+          w.state(states.pressed).eq(false),
+          w.state(states.disabled).eq(false),
+          w.state(states.focusVisible).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_HOVER)),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(states.pressed).eq(true), w.state(states.disabled).eq(false)),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_PRESS)),
+    });
     def.rule({
       when: (w) => w.state(states.focusVisible).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_FOCUS)),
     });
     def.rule({
       when: (w) => w.state(states.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('cursor-default shadow-none')),
-    });
-    // Presentation consumes the existing owner; no second interaction hook.
-    def.rule({
-      when: (w) => w.all(w.state(states.pressed).eq(true), w.state(states.disabled).eq(false)),
-      intent: (i) => i.feedback.style.use(tw('shadow-xs')),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_DISABLED, 'bg-muted text-muted-foreground')),
     });
     return behavior.render;
   },
 });
 export { datePickerTrigger as liquidGlassDatePickerTrigger };
-export const datePickerContent = definePrototype<DatePickerContentProps, DatePickerContentExposes>({
+
+export const datePickerContent = definePrototype<
+  LiquidGlassDatePickerContentProps,
+  DatePickerContentExposes
+>({
   name: 'liquid-glass-date-picker-content',
+  modules: asDatePickerContent.modules,
   setup(def) {
+    def.props.define({
+      material: { type: 'enum', options: ['auto', 'opaque'], empty: 'fallback' },
+    });
+    def.props.setDefaults({ material: 'auto' });
     const behavior = asDatePickerContent();
     const states = behavior.getAsHookHandle?.('as-popover-content')?.stateHandles;
     if (!states)
       throw new Error('[liquid-glass-date-picker] Required inherited popup state is unavailable.');
+    // Floating regular Liquid Glass layer with concentric rounded-2xl geometry and subtle inset rim.
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full text-secondary-foreground rounded-2xl border border-border bg-secondary shadow-lg p-3'
+        'z-50 grid w-auto min-w-0 max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-y-auto gap-3 rounded-2xl border border-border bg-secondary text-secondary-foreground ring-1 ring-inset ring-border shadow-lg p-3 font-sans outline-none'
       )
     );
+    def.rule({
+      when: (w) => w.state(states.open).eq(true),
+      intent: (i) => i.feedback.style.use(tw('animate-in fade-in-0 zoom-in-95 duration-150')),
+    });
+    def.rule({
+      when: (w) => w.state(states.open).eq(false),
+      intent: (i) => i.feedback.style.use(tw('animate-out fade-out-0 zoom-out-95 duration-150')),
+    });
+    def.rule({
+      when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+      intent: (i) => i.feedback.style.use(tw('animate-none transition-none')),
+    });
     def.feedback.material.declare({
       version: 2,
       shape: { kind: 'rounded-rect', geometry: 'style' },
@@ -77,57 +156,92 @@ export const datePickerContent = definePrototype<DatePickerContentProps, DatePic
       fallback: { fill: 'style', foreground: 'style' },
     });
     def.rule({
-      when: (w) => w.state(states.open).eq(true),
+      when: (w) => w.all(w.state(states.open).eq(true), w.prop('material').eq('auto')),
       intent: (i) => i.feedback.material.use({ intent: 'liquid-glass', variant: 'regular' }),
     });
     return behavior.render;
   },
 });
 export { datePickerContent as liquidGlassDatePickerContent };
+
 export const datePickerDay = definePrototype<DatePickerDayProps, DatePickerDayExposes>({
   name: 'liquid-glass-date-picker-day',
+  modules: asDatePickerDay.modules,
   setup(def) {
     const behavior = asDatePickerDay();
-    def.feedback.style.use(
-      tw(
-        'min-w-0 max-w-full text-foreground inline-flex min-h-9 items-center justify-center rounded-md p-1 cursor-pointer'
-      )
-    );
     const states = behavior.getAsHookHandle?.('as-calendar-day')?.stateHandles;
     if (!states)
       throw new Error('[liquid-glass-date-picker] Required inherited state is unavailable.');
+    // Concentric circular day cells sit directly on the popup glass layer (never glass-on-glass).
+    def.feedback.style.use(
+      tw(
+        'relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-center font-sans text-sm font-medium text-foreground select-none cursor-pointer'
+      )
+    );
     def.rule({
-      when: (w) => w.state(states.focusVisible).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
+      when: (w) =>
+        w.all(
+          w.state(states.hovered).eq(true),
+          w.state(states.disabled).eq(false),
+          w.state(states.selected).eq(false),
+          w.state(states.rangeMiddle).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground shadow-xs')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(states.pressed).eq(true),
+          w.state(states.disabled).eq(false),
+          w.state(states.selected).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-muted shadow-none')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(states.rangePending).eq(true),
+          w.state(states.disabled).eq(false),
+          w.state(states.selected).eq(false),
+          w.state(states.rangeMiddle).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
     });
     def.rule({
       when: (w) => w.all(w.state(states.selected).eq(true), w.state(states.rangeMiddle).eq(false)),
-      intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
+      intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground font-semibold')),
     });
     def.rule({
       when: (w) => w.state(states.rangeMiddle).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(tw('rounded-none bg-secondary text-secondary-foreground')),
+      intent: (i) => i.feedback.style.use(tw('rounded-none bg-muted text-foreground')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(states.today).eq(true), w.state(states.selected).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('bg-background text-primary font-semibold')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(states.outside).eq(true), w.state(states.selected).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('text-muted-foreground')),
     });
     def.rule({
       when: (w) => w.state(states.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('cursor-default shadow-none')),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_DISABLED, 'text-muted-foreground')),
     });
-    // Presentation consumes the existing owner; no second interaction hook.
     def.rule({
-      when: (w) => w.all(w.state(states.pressed).eq(true), w.state(states.disabled).eq(false)),
-      intent: (i) => i.feedback.style.use(tw('shadow-xs')),
+      when: (w) => w.state(states.focusVisible).eq(true),
+      intent: (i) => i.feedback.style.use(tw('z-10', COMMAND_FOCUS)),
     });
     return behavior.render;
   },
 });
 export { datePickerDay as liquidGlassDatePickerDay };
+
 export const datePickerValue = definePrototype<DatePickerValueProps, DatePickerValueExposes>({
   name: 'liquid-glass-date-picker-value',
+  modules: asDatePickerValue.modules,
   setup(def) {
     const behavior = asDatePickerValue();
-    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground text-sm'));
+    def.feedback.style.use(tw('min-w-0 max-w-full font-sans text-sm text-start text-inherit'));
     return behavior.render;
   },
 });

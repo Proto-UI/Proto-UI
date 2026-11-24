@@ -1,12 +1,13 @@
 ---
 title: 'Calendar'
-description: '支持单选、多选与日期范围选择的 Brutalist 公历日历组件，支持本地化星期与自定义年月标题栏。'
+description: '支持单选、多选与日期范围选择的 Brutalist 公历日历组件，采用 2px 硬边框、自适应硬阴影面板与可组合年月标题栏。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Calendar 是支持单日、多日与日期范围选择的公历控件，采用 36px 日期格、28px 翻月按钮、2px 黑色边框与硬阴影面板设计。
+Brutalist Calendar 是支持单选（`single`）、多选（`multiple`）与日期范围（`range`）的公历控件，采用 36px 日期格、28px 翻月按钮、2px 硬边框与亮暗自适应 4px 硬阴影面板设计。
 
 ## 预览
 
@@ -18,11 +19,91 @@ Brutalist Calendar 是支持单日、多日与日期范围选择的公历控件�
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前组件随源码工作区提供，尚未纳入 0.2.0 稳定版 CLI 注册表；可在工作区中直接从 `@proto.ui/prototypes-brutalist/calendar` 引入。
 
 ## 用法
 
-### 选择模式（单选、多选与范围）
+```tsx
+import {
+  CalendarRoot,
+  CalendarCaption,
+  CalendarPrevious,
+  CalendarHeading,
+  CalendarNext,
+  CalendarGrid,
+  CalendarWeekdays,
+  CalendarWeekday,
+  CalendarRow,
+  CalendarDay,
+} from '@proto.ui/prototypes-brutalist/calendar';
+
+export function BrutalistCalendarExample() {
+  return (
+    <CalendarRoot mode="single" defaultMonth="2026-10" defaultValue="2026-10-12" today="2026-10-08">
+      <CalendarCaption>
+        <CalendarPrevious a11yLabel="Previous month" />
+        <CalendarHeading />
+        <CalendarNext a11yLabel="Next month" />
+      </CalendarCaption>
+      <CalendarGrid>
+        <CalendarWeekdays>
+          {Array.from({ length: 7 }, (_, offset) => (
+            <CalendarWeekday key={offset} offset={offset} />
+          ))}
+        </CalendarWeekdays>
+        {Array.from({ length: 6 }, (_, row) => (
+          <CalendarRow key={row} index={row}>
+            {Array.from({ length: 7 }, (_, col) => (
+              <CalendarDay key={col} offset={row * 7 + col} />
+            ))}
+          </CalendarRow>
+        ))}
+      </CalendarGrid>
+    </CalendarRoot>
+  );
+}
+```
+
+### 结构、键盘导航与年月组合
+
+- Calendar 由十个部件组成：`Root`、`Caption`、`Heading`、`Previous`、`Next`、`Grid`、`Weekdays`、`Weekday`、`Row` 与 `Day`。
+- 默认渲染覆盖当月所需的 4–6 周，设置 `fixedWeeks={true}` 固定渲染 6 周；多余行与日期格自动隐藏并移出焦点路径。
+- 不直接读取系统时钟：请由宿主传入 `YYYY-MM-DD` 格式的 `today` 高亮今天（自动输出 `aria-current="date"`）。
+- `direction="rtl"` 自动镜像左右方向键；如需在 `Caption` 中嵌入月份/年份下拉选择，可使用 `bindCalendarCaption(source, { month, year })` 与同族 `Select` 联动（退出时调用 `dispose()`）。
+
+### 选择模式
+
+| 模式       | 受控值 / 初始值                                 | 变更事件                     |
+| ---------- | ----------------------------------------------- | ---------------------------- |
+| `single`   | `value` / `defaultValue`：`YYYY-MM-DD`          | `onValueChange({ value })`   |
+| `multiple` | `values` / `defaultValues`：`readonly string[]` | `onValuesChange({ values })` |
+| `range`    | `range` / `defaultRange`：`{ from?, to? }`      | `onRangeChange({ range })`   |
+
+## 示例
+
+### 基础日历
+
+使用默认月份标题栏的单日选择视图。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-calendar-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 日期范围
+
+`mode="range"` 提供首尾圆角衔接与连续中段高亮。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-calendar-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多选与范围约束
+
+结合 `min`、`max`、`unavailable`、`minNights`、`maxNights` 与 `maxSelected` 限制可选范围与数量。
 
 <PrototypePreviewer
   demoId="demo-brutalist-calendar-selection"
@@ -30,28 +111,35 @@ Brutalist Calendar 是支持单日、多日与日期范围选择的公历控件�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-| 模式       | 受控值 / 初始值                               | 变更事件                     |
-| ---------- | --------------------------------------------- | ---------------------------- |
-| `single`   | `value` / `defaultValue`：`YYYY-MM-DD` 字符串 | `onValueChange({ value })`   |
-| `multiple` | `values` / `defaultValues`：日期字符串数组    | `onValuesChange({ values })` |
-| `range`    | `range` / `defaultRange`：`{ from?, to? }`    | `onRangeChange({ range })`   |
+### 快捷预设
 
-- **多选模式**：点击或按 `Enter` / `Space` 切换日期，数组自动去重并按日期升序排列；可通过 `minSelected` / `maxSelected` 限制选中数量。
-- **范围模式**：首次选择确定起点 `{ from }`，第二次选择完成含两端的 `{ from, to }`（反向选择自动按时间排序），再次点击则开启新范围，`{}` 表示清空。`minNights`（默认 `0`，允许单日范围）与 `maxNights` 限制起止日之间的天数差。
-- **日期限制**：通过 `min`、`max` 与 `unavailable` 限制可选日期；跨越不可用日期的范围选择会被拒绝并保留原起点。`readOnly` 禁止更改选中值但保留翻月浏览。
-- **范围状态**：`Day` 除 `selected` 外还暴露 `rangeStart`、`rangeEnd`、`rangeMiddle` 与 `rangePending`，用于区分端点、起止待定与中段高亮。
+配合受控 `value` / `month`、`fixedWeeks` 与同族 `Button` 快捷切换日期。
 
-### 部件组成与月份显示
+<PrototypePreviewer
+  demoId="demo-brutalist-calendar-presets"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-Calendar 由 `Root`、`Caption`、`Heading`、`Previous`、`Next`、`Grid`、`Weekdays`、`Weekday`、`Row` 和 `Day` 十个部件组成：
+### 已预订与不可用日期
 
-- 默认按当前月份与 `weekStartsOn`（`0` 表示周日）渲染覆盖整月所需的 4–6 周；设置 `fixedWeeks` 可固定渲染 6 周。可以预先放置 6 个带 `index`（0–5）的 `Row` 与 42 个带 `offset`（0–41）的 `Day`，多余行与日期格会自动隐藏并移出焦点路径。
-- 日历不读取系统时钟；如需高亮“今天”，请由应用通过 `today` 传入 `YYYY-MM-DD` 字符串（自动输出 `aria-current="date"`）。初始显示月份优先级为：`month` > `defaultMonth` > 当前模式的选中日期 > `today` > `1970-01`。
-- `direction="rtl"` 会镜像左右方向键，上下键与周边界语义保持不变。纯图标翻月按钮可通过 `a11yLabel` 设置无障碍名称。
+使用 `unavailable` 与 `min` / `max` 禁用不可预订日期区间。
 
-### 年月选择器组合
+<PrototypePreviewer
+  demoId="demo-brutalist-calendar-booked-dates"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-`Caption` 本身是语义分组容器。如需提供月份/年份下拉跳转，可使用 `bindCalendarCaption(source, { month, year })` 将 Calendar 的 `month`、`disabled` 状态及 `requestMonth` 与真实 Select 组合，并在卸载时调用 `dispose()` 清理订阅。
+### 从右到左（RTL）
+
+设置 `direction="rtl"`、`locale="ar-SA"` 与 `weekStartsOn={6}` 启用 RTL 布局与镜像键盘导航。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-calendar-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -60,41 +148,62 @@ Calendar 由 `Root`、`Caption`、`Heading`、`Previous`、`Next`、`Grid`、`We
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
-    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: 'single' },
+    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: "'single'" },
     { name: 'value', type: 'string', default: 'undefined' },
+    { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'values', type: 'readonly string[]', default: 'undefined' },
     { name: 'defaultValues', type: 'readonly string[]', default: '[]' },
     { name: 'range', type: 'CalendarRange', default: 'undefined' },
     { name: 'defaultRange', type: 'CalendarRange', default: '{}' },
-    { name: 'minSelected / minNights', type: 'number', default: '0' },
-    { name: 'maxSelected / maxNights', type: 'number', default: 'undefined' },
-    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'minSelected', type: 'number', default: '0' },
+    { name: 'maxSelected', type: 'number', default: 'undefined' },
+    { name: 'minNights', type: 'number', default: '0' },
+    { name: 'maxNights', type: 'number', default: 'undefined' },
+    { name: 'month', type: 'string', default: 'undefined' },
     { name: 'defaultMonth', type: 'string', default: 'undefined' },
     { name: 'min', type: 'string', default: "''" },
     { name: 'max', type: 'string', default: "''" },
-    { name: 'unavailable', type: 'string[]', default: '[]' },
+    { name: 'unavailable', type: 'readonly string[]', default: '[]' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'weekStartsOn', type: 'number', default: '0' },
     { name: 'fixedWeeks', type: 'boolean', default: 'false' },
-    { name: 'a11yLabel', type: 'string', default: 'Calendar' },
+    { name: 'a11yLabel', type: 'string', default: "'Calendar'" },
     { name: 'today', type: 'string', default: "''" },
-    { name: 'locale', type: 'string', default: 'en-US' },
-    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'locale', type: 'string', default: "'en-US'" },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
   ]}
 />
 
-传入 `value`、`values`、`range` 或 `month` 可分别控制对应状态。
+### 子部件属性
 
-### 其他部件属性
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Day.date', type: 'string', default: "''" },
+    { name: 'Day.offset', type: 'number', default: '0' },
+    { name: 'Day.disabled', type: 'boolean', default: 'false' },
+    { name: 'Row.index', type: 'number', default: 'undefined' },
+    { name: 'Weekday.offset', type: 'number', default: '0' },
+    { name: 'Caption.a11yLabel', type: 'string', default: "'Calendar navigation'" },
+    {
+      name: 'Previous / Next.a11yLabel',
+      type: 'string',
+      default: "'Previous month' / 'Next month'",
+    },
+    { name: 'Previous / Next.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
 
-- **Day**：`date?: string`（默认 `''`），`offset?: number`（默认 `0`），`disabled?: boolean`（默认 `false`）
-- **Row**：`index?: number`
-- **Weekday**：`offset?: number`（默认 `0`）
-- **Caption**：`a11yLabel?: string`（默认 `'Calendar navigation'`）
-- **Previous / Next**：支持 Button 属性，`a11yLabel` 分别默认 `'Previous month'` 与 `'Next month'`
-- **Grid / Heading / Weekdays**：无独立属性
+### 事件、方法与暴露状态
 
-### 方法
+- **事件（Root）**：`onValueChange({ value })`、`onValuesChange({ values })`、`onRangeChange({ range })`、`onMonthChange({ month })`。
+- **方法（Root）**：`requestValue(date)`、`requestValues(dates)`、`requestRange(range)`、`requestMonth(month)`、`getValues()`、`getRange()`。
+- **暴露状态**：Root 暴露 `value`、`mode`、`selectedCount`、`rangeComplete`、`month`、`weekCount`、`disabled`、`direction`；Day 暴露 `date`、`selected`、`rangeStart`、`rangeEnd`、`rangeMiddle`、`rangePending`、`today`、`outside`、`disabled`、`hidden`。
 
-- `requestValue(date)`、`requestValues(dates)`、`requestRange(range)`、`requestMonth(month)`、`getValues()`、`getRange()`
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-CALENDAR.yaml', 'P-BASE-CALENDAR.yaml']}
+/>

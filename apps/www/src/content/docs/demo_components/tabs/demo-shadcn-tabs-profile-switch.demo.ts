@@ -4,6 +4,12 @@ import { createTabsPresetDemo } from './demo-shadcn-tabs-preset.shared';
 
 export const TABS_EXHIBITION_PROFILES = ['nova', 'rhea', 'new-york-v4'] as const;
 
+const PROFILE_LABELS: Record<(typeof TABS_EXHIBITION_PROFILES)[number], string> = {
+  nova: 'Nova',
+  rhea: 'Rhea',
+  'new-york-v4': 'New York v4',
+};
+
 /** One live style-scope owner; controls change paint without replacing Tabs. */
 export default withShadcnRheaDemo({
   type: 'demo',
@@ -20,7 +26,7 @@ export default withShadcnRheaDemo({
           prototypeId: 'shadcn-button',
           ref: `profile-${profile}`,
           props: { variant: 'outline', size: 'sm' },
-          children: [profile],
+          children: [PROFILE_LABELS[profile]],
         })),
       },
       createTabsPresetDemo('rhea').root,
@@ -29,7 +35,7 @@ export default withShadcnRheaDemo({
         ref: 'profileStatus',
         attrs: { role: 'status', 'aria-live': 'polite' },
         className: 'text-sm text-muted-foreground',
-        children: ['Profile: rhea'],
+        children: ['Active preset: rhea'],
       },
     ],
   },
@@ -40,12 +46,10 @@ export default withShadcnRheaDemo({
       if (disposed || profile === current) return;
       api.setProps('profileScope', { styleProfile: profile });
       current = profile;
-      refs.profileStatus.textContent = `Profile: ${profile}`;
+      refs.profileStatus.textContent = `Active preset: ${profile}`;
     };
     for (const profile of TABS_EXHIBITION_PROFILES)
       api.setProps(`profile-${profile}`, { onClick: () => select(profile) });
-    // An explicit modified shortcut can change paint while a tab retains focus.
-    // Ordinary arrows, Enter, Space and typing still belong to their native owner.
     const onKey = (event: KeyboardEvent) => {
       if (!event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.isComposing)
         return;

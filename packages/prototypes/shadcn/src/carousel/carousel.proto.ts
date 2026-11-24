@@ -23,13 +23,22 @@ import {
   setupShadcnStyleSelection,
   type ShadcnStyleProps,
 } from '../style-scope';
-import { setupCarouselAxis, setupCarouselNavigationPaint } from './visual';
+import {
+  setupCarouselAxis,
+  setupCarouselNavigationPaint,
+  type ShadcnCarouselNavigationProps,
+} from './visual';
 export type * from '@proto.ui/prototypes-base/carousel';
+export type {
+  ShadcnCarouselNavigationProps,
+  ShadcnCarouselNavigationSize,
+  ShadcnCarouselNavigationVariant,
+} from './visual';
 export type ShadcnCarouselRootProps = CarouselRootProps & ShadcnStyleProps;
 export type ShadcnCarouselViewportProps = ShadcnStyleProps;
 export type ShadcnCarouselSlideProps = CarouselSlideProps & ShadcnStyleProps;
-export type ShadcnCarouselPreviousProps = CarouselPreviousProps & ShadcnStyleProps;
-export type ShadcnCarouselNextProps = CarouselNextProps & ShadcnStyleProps;
+export type ShadcnCarouselPreviousProps = CarouselPreviousProps & ShadcnCarouselNavigationProps;
+export type ShadcnCarouselNextProps = CarouselNextProps & ShadcnCarouselNavigationProps;
 
 export const carouselRoot = definePrototype<ShadcnCarouselRootProps, CarouselRootExposes>({
   name: 'shadcn-carousel-root',
@@ -78,13 +87,14 @@ export const carouselSlide = definePrototype<ShadcnCarouselSlideProps, CarouselS
     setupShadcnStyleSelection(def, 'new-york-v4');
     const axis = setupCarouselAxis(def);
     def.feedback.style.use(tw('min-w-0 shrink-0 grow-0'));
+    // Symmetric slide gutters avoid a 16px leading-edge indent when Viewport owns scrolling.
     def.rule({
       when: (w) => w.state(axis).eq('horizontal'),
-      intent: (i) => i.feedback.style.use(tw('pl-4')),
+      intent: (i) => i.feedback.style.use(tw('px-2')),
     });
     def.rule({
       when: (w) => w.state(axis).eq('vertical'),
-      intent: (i) => i.feedback.style.use(tw('pt-4')),
+      intent: (i) => i.feedback.style.use(tw('py-2')),
     });
     return inherited.render;
   },
