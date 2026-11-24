@@ -275,16 +275,16 @@ export class FlowProof {
   private calls = 0;
   private heap = 0;
   private readonly cells = new Map<string, number>();
-  private readonly observations = new WeakMap<object, FlowMark>();
+  private readonly observations = new WeakMap<object, readonly FlowMark[]>();
   constructor(
     private readonly writtenFields: ReadonlySet<string>,
     private readonly clock = { next: 0 },
-    private readonly parent?: FlowProof
+    private readonly parents: readonly FlowProof[] = []
   ) {}
 
   /** Alternative branches inherit observations without sharing mutable clocks. */
   fork(): FlowProof {
-    const branch = new FlowProof(this.writtenFields, this.clock, this);
+    const branch = new FlowProof(this.writtenFields, this.clock, [this]);
     branch.calls = this.calls;
     branch.heap = this.heap;
     for (const [key, version] of this.cells) branch.cells.set(key, version);
@@ -293,7 +293,17 @@ export class FlowProof {
   /** Only normally continuing branches belong in this join. Unique versions
    * prevent a sibling write from accidentally matching another branch's mark. */
   join(branches: readonly FlowProof[]): FlowProof {
-    const joined = this.fork();
+    // A condition can read a cell inside a nested short-circuit branch and
+    // then invoke a writer. Retain that read's original clock after joining;
+    // losing the observation would incorrectly make it a fresh proof again.
+    const joined = new FlowProof(
+      this.writtenFields,
+      this.clock,
+      branches.length ? branches : [this]
+    );
+    joined.calls = this.calls;
+    joined.heap = this.heap;
+    for (const [key, version] of this.cells) joined.cells.set(key, version);
     for (const branch of branches) {
       if (branch.clock !== this.clock) throw new Error('Cannot join unrelated flow proofs.');
       joined.calls = Math.max(joined.calls, branch.calls);
@@ -342,18 +352,25 @@ export class FlowProof {
 
   observe(value: ExpressionIR): void {
     const subject = this.subject(value);
-    if (subject) this.observations.set(value, this.mark(subject.key));
+    if (subject) this.observations.set(value, [this.mark(subject.key)]);
   }
   copyObservation(from: object, to: object): void {
-    const mark = this.observation(from);
-    if (mark) this.observations.set(to, mark);
+    const marks = this.observation(from);
+    if (marks.length) this.observations.set(to, marks);
   }
-  private observation(value: object): FlowMark | undefined {
-    for (let proof: FlowProof | undefined = this; proof; proof = proof.parent) {
-      const mark = proof.observations.get(value);
-      if (mark) return mark;
+  private observation(value: object): readonly FlowMark[] {
+    const pending: FlowProof[] = [this];
+    const visited = new Set<FlowProof>();
+    const result: FlowMark[] = [];
+    while (pending.length) {
+      const proof = pending.pop()!;
+      if (visited.has(proof)) continue;
+      visited.add(proof);
+      const marks = proof.observations.get(value);
+      if (marks) result.push(...marks);
+      else pending.push(...proof.parents);
     }
-    return undefined;
+    return result;
   }
   current = (value: ExpressionIR): boolean => {
     // Repeating a getter expression invokes it again, even on a readonly field.
@@ -361,12 +378,14 @@ export class FlowProof {
     if (expressionReadsAccessor(value)) return false;
     if (value.kind === 'member' && !this.current(value.object)) return false;
     const subject = this.subject(value),
-      mark = this.observation(value);
+      marks = this.observation(value);
     return (
       !subject ||
-      !mark ||
-      ((!subject.cell || !this.cellChanged(mark, subject.key)) &&
-        (!subject.heap || !this.heapChanged(mark)))
+      marks.every(
+        (mark) =>
+          (!subject.cell || !this.cellChanged(mark, subject.key)) &&
+          (!subject.heap || !this.heapChanged(mark))
+      )
     );
   };
 }
