@@ -309,6 +309,9 @@ function createDocumentPresenceSink(
       const preference = readWebPreference(doc, 'preference.reducedMotion');
       const containingBlockHeight =
         !preparing && channels.includes('top') ? fixedContainingBlockHeight() : null;
+      // A current preparing view has no measurable profile yet. Defer that
+      // judgment until ready; known ownership loss still refuses the channel.
+      const topProfilePending = preparing && live() && channels.includes('top') && !lost.has('top');
       return {
         preference:
           preference === 'no-preference' || preference === 'reduce' ? preference : 'unknown',
@@ -319,20 +322,18 @@ function createDocumentPresenceSink(
             node.matches('[hidden],[data-pui-view-pending],[data-pui-view-detached]')
           ),
         preparing,
+        topProfilePending,
         width: dimension('width'),
         height: dimension('height'),
         rootFontPx: px(win?.getComputedStyle(doc.documentElement).fontSize),
+        containingBlockHeight,
         intrinsicBlockSize:
           !preparing && channels.includes('blockSize') ? intrinsicBlockSize() : null,
-        containingBlockHeight,
         supported: (['translate', 'opacity', 'top', 'blockSize'] as const).filter(
           (name) =>
             !lost.has(name) &&
             (name !== 'translate' || !!win?.CSS?.supports?.('translate', '1px')) &&
-            // Preparing withholds geometry, not the channel candidate. The
-            // projector waits without acknowledging; readiness checks the
-            // actual containing-block profile before any transient top write.
-            (name !== 'top' || preparing || containingBlockHeight !== null) &&
+            (name !== 'top' || containingBlockHeight !== null) &&
             (name !== 'blockSize' ||
               (!lost.has('block-size') &&
                 !lost.has('overflow') &&
@@ -406,12 +407,12 @@ function createDocumentPresenceSink(
         translation ??= acquireWebTranslation(el, 'presentation');
         if (!translation.canWrite()) return false;
       }
-      if (sample.blockSize !== undefined && (lost.has('block-size') || lost.has('overflow')))
-        return false;
       if (sample.top !== undefined) {
         if (lost.has('top') || sample.topBaseline === undefined) return false;
         if (!writes.has('top') && !topMatchesValue(sample.topBaseline)) return false;
       }
+      if (sample.blockSize !== undefined && (lost.has('block-size') || lost.has('overflow')))
+        return false;
       // All channels pass ownership preflight before the first channel is written.
       if (
         sample.translate &&
@@ -424,13 +425,13 @@ function createDocumentPresenceSink(
       if (!current() || !live()) return false;
       if (sample.opacity !== undefined && !write('opacity', String(sample.opacity))) return false;
       if (!current() || !live()) return false;
+      if (sample.top !== undefined && !write('top', `${sample.top}px`)) return false;
+      if (!current() || !live()) return false;
       if (sample.blockSize !== undefined) {
         if (!write('overflow', 'hidden')) return false;
         if (!current() || !live()) return false;
         if (!write('block-size', `${sample.blockSize}px`)) return false;
       }
-      if (!current() || !live()) return false;
-      if (sample.top !== undefined && !write('top', `${sample.top}px`)) return false;
       if (!current() || !live()) return false;
       // Inline ownership alone does not prove adoption: a host refusal or a
       // foreign !important cascade may leave the declared property unchanged.

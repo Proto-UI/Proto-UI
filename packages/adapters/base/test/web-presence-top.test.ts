@@ -2,6 +2,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { tw, type PresentationOwnerRef } from '@proto.ui/core';
 import type { PresencePresentationFrame } from '@proto.ui/module-feedback';
 import { createWebPresencePresentationSink } from '../src/motion/web-presence-presentation';
+import { PUI_PORTAL_PREPARING_ATTR } from '../src/host/view-visibility';
 
 const cleanups: Array<() => void> = [];
 afterEach(() => {
@@ -220,5 +221,120 @@ it.each(['top', 'opacity'] as const)(
     expect(f.queue.size).toBe(0);
     expect(f.el.style.top).toBe('10%');
     expect(f.el.style.opacity).toBe('');
+  }
+);
+
+it.each([
+  ['document', false],
+  ['shadow', false],
+  ['document', true],
+  ['shadow', true],
+] as const)(
+  'defers top profile reads during portal preparation, then rechecks %s support (transformed=%s)',
+  (scope, transformed) => {
+    vi.spyOn(window.CSS, 'supports').mockReturnValue(true);
+    vi.spyOn(window, 'matchMedia').mockImplementation(
+      (query: string) =>
+        ({
+          matches: query.includes('no-preference'),
+          media: query,
+          onchange: null,
+          addListener() {},
+          removeListener() {},
+          addEventListener() {},
+          removeEventListener() {},
+          dispatchEvent() {
+            return true;
+          },
+        }) satisfies MediaQueryList
+    );
+    const queue = new Map<number, FrameRequestCallback>();
+    let ticket = 0;
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      queue.set(++ticket, callback);
+      return ticket;
+    });
+    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((id) => {
+      queue.delete(id);
+    });
+    const wrapper = document.createElement('div');
+    wrapper.setAttribute(PUI_PORTAL_PREPARING_ATTR, '');
+    if (transformed) wrapper.style.transform = 'translateY(1px)';
+    const el = document.createElement('div');
+    (scope === 'shadow' ? wrapper.attachShadow({ mode: 'open' }) : wrapper).append(el);
+    document.body.append(wrapper);
+    Object.assign(el.style, { position: 'fixed', top: '10px', width: '50px', height: '40px' });
+    const original = window.getComputedStyle.bind(window);
+    let targetReads = 0;
+    let ancestorReads = 0;
+    // Observe the actual host values; neither geometry nor CSS is substituted.
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((target, pseudo) => {
+      const result = original(target, pseudo);
+      if (target === el) targetReads++;
+      if (target === wrapper || target === document.body) ancestorReads++;
+      return result;
+    });
+    let prototype: object | null = Object.getPrototypeOf(document.documentElement);
+    let clientHeight: ((this: Element) => number) | undefined;
+    while (prototype && !clientHeight) {
+      clientHeight = Object.getOwnPropertyDescriptor(prototype, 'clientHeight')?.get;
+      prototype = Object.getPrototypeOf(prototype);
+    }
+    if (!clientHeight) throw new Error('Missing original clientHeight accessor');
+    const readClientHeight = clientHeight;
+    const viewportReads = vi
+      .spyOn(document.documentElement, 'clientHeight', 'get')
+      .mockImplementation(() => readClientHeight.call(document.documentElement));
+    const outcomes: string[] = [];
+    const sink = createWebPresencePresentationSink(el, { queueStyle() {}, requestFlush() {} });
+    cleanups.push(() => sink.release(1));
+    const frame: PresencePresentationFrame = {
+      view: 1,
+      revision: 1,
+      targetRevision: 1,
+      style: tw('fixed top-[10px]'),
+      owner: {
+        owner: Object.freeze({}) as PresentationOwnerRef,
+        revision: 1,
+        phase: 'entering',
+        attempt: { ownerEpoch: 1, phaseAttempt: 1 },
+        completion: 'presentation',
+        durationMs: 300,
+        timeoutMs: 1000,
+      },
+      closed: { top: { px: -25, rootText: 0, containingBlock: 0 }, opacity: 0 },
+      entered: { top: { px: 10, rootText: 0, containingBlock: 0 }, opacity: 1 },
+      easing: [0, 0, 1, 1],
+      bind() {},
+      complete(_binding, outcome) {
+        outcomes.push(outcome);
+      },
+    };
+    sink.commit(frame);
+    expect(targetReads).toBe(0);
+    expect(ancestorReads).toBe(0);
+    expect(viewportReads).not.toHaveBeenCalled();
+    expect(el.style.top).toBe('10px');
+    expect(el.style.opacity).toBe('');
+    expect(outcomes).toEqual([]);
+    expect(queue.size).toBe(0);
+
+    wrapper.removeAttribute(PUI_PORTAL_PREPARING_ATTR);
+    // The same retained view, owner, attempt and target must recheck actual readiness.
+    sink.commit({ ...frame, revision: 2 });
+    expect(targetReads).toBeGreaterThan(0);
+    expect(ancestorReads).toBeGreaterThan(0);
+    if (transformed) {
+      expect(outcomes).toEqual(['missing-capability']);
+      expect(el.style.top).toBe('10px');
+      expect(el.style.opacity).toBe('');
+      expect(queue.size).toBe(0);
+    } else {
+      expect(viewportReads).toHaveBeenCalled();
+      expect(outcomes).toEqual([]);
+      expect(el.style.top).toBe('-25px');
+      expect(el.style.opacity).toBe('0');
+      expect(queue.size).toBe(1);
+    }
   }
 );

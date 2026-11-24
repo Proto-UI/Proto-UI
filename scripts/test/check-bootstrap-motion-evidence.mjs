@@ -7,8 +7,8 @@ import { fileURLToPath } from 'node:url';
 
 export const BOOTSTRAP_MOTION_SUITES = Object.freeze([
   { file: 'packages/core/test/presence-top-declaration.test.ts', cases: 10 },
-  { file: 'packages/modules/feedback/test/presence-top-projector.test.ts', cases: 17 },
-  { file: 'packages/adapters/base/test/web-presence-top.test.ts', cases: 13 },
+  { file: 'packages/modules/feedback/test/presence-top-projector.test.ts', cases: 18 },
+  { file: 'packages/adapters/base/test/web-presence-top.test.ts', cases: 17 },
   {
     file: 'packages/prototypes/bootstrap-2-3-2/test/modal-presence-presentation.test.ts',
     cases: 18,

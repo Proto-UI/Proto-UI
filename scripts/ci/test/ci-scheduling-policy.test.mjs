@@ -555,6 +555,13 @@ test('reusable compiler inputs preserve Adapter and manual browser acceptance bo
       workflow.jobs['browser-compiler'].permissions.contents = 'write';
     },
     (workflow) => {
+      workflow.on.workflow_call.inputs.unreviewed_acceptance = {
+        type: 'boolean',
+        required: false,
+        default: false,
+      };
+    },
+    (workflow) => {
       workflow.on.workflow_call.inputs.package_budget_evidence = {
         type: 'boolean',
         required: false,

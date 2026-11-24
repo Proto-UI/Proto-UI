@@ -2,6 +2,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { tw, type PresentationOwnerRef } from '@proto.ui/core';
 import { acquireWebTranslation } from '@proto.ui/module-positioning';
 import { createWebPresencePresentationSink } from '../src/motion/web-presence-presentation';
+import { PUI_PORTAL_PREPARING_ATTR } from '../src/host/view-visibility';
 import type { PresencePresentationFrame } from '@proto.ui/module-feedback';
 const zero = { px: 0, rootText: 0, ownBox: 0 };
 const cleanups: Array<() => void> = [];
@@ -115,4 +116,58 @@ it('preserves external translation takeover and ends the current attempt', () =>
   expect(f.el.style.getPropertyValue('translate')).toBe('17px 19px');
   expect(f.results).toEqual(['projection-failed']);
   expect(f.frames.size).toBe(0);
+});
+
+function observePreparation(preparing: boolean, channel: 'blockSize' | 'opacity') {
+  const f = fixture();
+  if (preparing) f.el.parentElement!.setAttribute(PUI_PORTAL_PREPARING_ATTR, '');
+  const original = window.getComputedStyle.bind(window);
+  let targetReads = 0;
+  // Observe real host reads without substituting a geometry or style result.
+  vi.spyOn(window, 'getComputedStyle').mockImplementation((target, pseudo) => {
+    const result = original(target, pseudo);
+    if (target === f.el) targetReads++;
+    return result;
+  });
+  const frame: PresencePresentationFrame = {
+    view: 1,
+    revision: 1,
+    targetRevision: 1,
+    style: tw('block'),
+    owner: {
+      owner: Object.freeze({}) as PresentationOwnerRef,
+      revision: 1,
+      phase: 'entering',
+      attempt: { ownerEpoch: 1, phaseAttempt: 1 },
+      completion: 'presentation',
+      durationMs: 350,
+      timeoutMs: 1000,
+    },
+    closed: channel === 'blockSize' ? { blockSize: 0 } : { opacity: 0 },
+    entered: channel === 'blockSize' ? { blockSize: 'intrinsic' } : { opacity: 1 },
+    easing: [0.25, 0.1, 0.25, 1],
+    bind() {},
+    complete: (_, outcome) => f.results.push(outcome),
+  };
+  f.sink.commit(frame);
+  return { ...f, targetReads };
+}
+
+it.each(['opacity', 'blockSize'] as const)(
+  'withholds actual target measurements and presentation writes for %s during portal preparation',
+  (channel) => {
+    const f = observePreparation(true, channel);
+    expect(f.targetReads).toBe(0);
+    expect(f.results).toEqual([]);
+    expect(f.frames.size).toBe(0);
+    expect(f.el.style.getPropertyValue('block-size')).toBe('');
+  }
+);
+
+it('reads the actual ready target before starting intrinsic block-size presentation', () => {
+  const f = observePreparation(false, 'blockSize');
+  expect(f.targetReads).toBeGreaterThan(0);
+  expect(f.el.style.getPropertyValue('block-size')).toBe('0px');
+  expect(f.frames.size).toBe(1);
+  expect(f.results).toEqual([]);
 });
