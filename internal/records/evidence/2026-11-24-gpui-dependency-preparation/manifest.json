@@ -1,0 +1,392 @@
+{
+  "schemaVersion": 1,
+  "kind": "gpui-dependency-preparation-evidence",
+  "observedAt": "2026-11-24T06:43:40.040235+00:00",
+  "baseSha": "b939afe35d30a1a436766d80beea7093a46e4fb2",
+  "branch": "prep/gpui-dependency-source-20261124",
+  "candidateBinding": "Exact 15 reviewed source/document file hashes below. Publication commit/tree are recorded by the PR; this manifest does not contain a future self-referential commit hash.",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/compiler-gpui-source-consumers.yml",
+      "tracked": true,
+      "sha256": "480c5072af97db8e039346fb8576347c0c1b8df9fd960a4d9101b9cf64ef1591"
+    },
+    {
+      "path": "packages/compiler/README.md",
+      "tracked": true,
+      "sha256": "8daa0c763f2ef3a0c4e4993463244d4086b6b2af68b1a3cc93872555518754c4"
+    },
+    {
+      "path": "packages/compiler/src/gpui-capabilities.ts",
+      "tracked": true,
+      "sha256": "5c3a8302bd59bd52bc7bc2b2e92548e296a637ba32635e09c9e20040100ce1b9"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-sdk.ts",
+      "tracked": true,
+      "sha256": "c79c0daf0b86191b51dcf15548f5ab0c3ce94da7a175208a7294ac8be22d380c"
+    },
+    {
+      "path": "packages/compiler/src/targets.ts",
+      "tracked": true,
+      "sha256": "f4b38eae631740cdfa843d89fed82e1bff3b1478686b3e4d2266a622d291823d"
+    },
+    {
+      "path": "packages/compiler/test/fixtures/gpui-a11y-value/produce.mjs",
+      "tracked": true,
+      "sha256": "a33a861b1eff87a9027a9c7aee70e2fb5a0df4e78b384445bb30de7cd36eff71"
+    },
+    {
+      "path": "packages/compiler/test/fixtures/gpui-control-label/produce.mjs",
+      "tracked": true,
+      "sha256": "81de44a50673731a3ef85b33f0a8d6f45ec8e7ddb511a40bbd954a2044755a99"
+    },
+    {
+      "path": "packages/compiler/test/fixtures/gpui-ordinary-values/produce.mjs",
+      "tracked": true,
+      "sha256": "f6fa5fc394716cc1db5392993ff43b30fd2515253f620e8793c3e9c6a02e4dbf"
+    },
+    {
+      "path": "scripts/gpui/check-cargo-graph.mjs",
+      "tracked": true,
+      "sha256": "de3fa6ff9960daaeaee8aaf30bc0ba6fac2282726f4722380ddd97cc0ff5a454"
+    },
+    {
+      "path": "scripts/gpui/lib/cargo-graph.mjs",
+      "tracked": true,
+      "sha256": "cc4391ee3c3a262acb481dcdfc84900a74d3b54ef8a963a989cfbde176393f40"
+    },
+    {
+      "path": "scripts/gpui/test/cargo-graph.test.mjs",
+      "tracked": true,
+      "sha256": "2ab92b2ccfb27a6fdef07b0fb2ca90513beb075c4a51c631b97c8aa1a1ff3255"
+    },
+    {
+      "path": "internal/compiler/gpui-dependency-migration.md",
+      "tracked": false,
+      "sha256": "ab0800306fdf5fcd9a0fbd2f36e22ebd6b3d92de77aef26e4b3fd888752a9edc"
+    },
+    {
+      "path": "packages/compiler/src/gpui-dependency.ts",
+      "tracked": false,
+      "sha256": "6febde6d958bac5979d412f37825f4b91abc21fe30e5e3f62578fe59c9d045c4"
+    },
+    {
+      "path": "scripts/gpui/test/cargo-source-migration.test.mjs",
+      "tracked": false,
+      "sha256": "55afc902d6d1dae150babb9e2dcd4f03fcd1e644af0cfd0abf0c63c7560b17cc"
+    },
+    {
+      "path": "internal/records/2026-11-24-gpui-dependency-preparation.md",
+      "tracked": false,
+      "sha256": "3d39f3df4cd03897a1c2bda524e62184af4d0cdb120c33c7c7a5cffdb6691c53"
+    }
+  ],
+  "environment": {
+    "node": "24.22.3",
+    "pnpm": "10.32.1",
+    "cargo": "1.98.1",
+    "platform": "Linux x86_64",
+    "rustHome": "isolated task-local CARGO_HOME and RUSTUP_HOME"
+  },
+  "checks": [
+    {
+      "id": "default-preservation",
+      "result": "passed",
+      "scope": "Both 15-file SDK inventories, metadata/diagnostic and one compiled ordinary input; baseline and candidate byte comparison",
+      "evidence": "unchanged-default-result.json"
+    },
+    {
+      "id": "compiler-tests",
+      "command": "corepack pnpm@10.32.1 exec vitest run packages/compiler/test/gpui-capabilities.test.ts packages/compiler/test/gpui-sdk-compatibility.test.ts packages/compiler/test/targets.test.ts --maxWorkers=1 --minWorkers=1 --reporter=json",
+      "result": "passed",
+      "exitCode": 0,
+      "tests": 41,
+      "skipped": 0,
+      "evidence": "compiler-tests.json"
+    },
+    {
+      "id": "cargo-graph",
+      "command": "PROTO_UI_REQUIRE_CARGO_GRAPH_TESTS=1 CARGO_TARGET_DIR=<external-temp-dir> node --test scripts/gpui/test/cargo-graph.test.mjs scripts/gpui/test/cargo-source-migration.test.mjs",
+      "result": "passed",
+      "exitCode": 0,
+      "tests": 55,
+      "skipped": 0,
+      "evidence": "cargo-graph-tests-r1-r2.log",
+      "independentReplay": "independent-final-graph-tests.log"
+    },
+    {
+      "id": "registry-target-isolation",
+      "result": "passed",
+      "exitCode": 0,
+      "tests": 35,
+      "subsetOf": "cargo-graph",
+      "evidence": "registry-isolation-r1-r2.log"
+    },
+    {
+      "id": "compiler-source-types",
+      "command": "NODE_OPTIONS=--max-old-space-size=6144 corepack pnpm@10.32.1 exec tsc --noEmit -p <evidence>/tsconfig.compiler.json",
+      "result": "passed",
+      "exitCode": 0,
+      "scope": "extends repo tsconfig.json, includes packages/compiler/src/**/*.ts, excludes node_modules",
+      "evidence": "compiler-typecheck-final.log"
+    },
+    {
+      "id": "workspace-types-first",
+      "result": "failed",
+      "exitCode": 134,
+      "reason": "default Node heap exhausted",
+      "evidence": "typecheck.log"
+    },
+    {
+      "id": "workspace-types-6144",
+      "result": "failed",
+      "exitCode": 2,
+      "reason": "14 errors in unchanged CLI tests and 2 missing generated website style imports; direct workspace check omitted website generation prelude",
+      "evidence": "typecheck-6144.log"
+    },
+    {
+      "id": "format-default-environment",
+      "result": "failed",
+      "exitCode": 1,
+      "reason": "Default pnpm wrapper selected unsupported 11.25.0; corrected to declared Corepack pnpm 10.32.1",
+      "evidence": "format-default-pnpm-failed.log"
+    },
+    {
+      "id": "format-final",
+      "result": "passed",
+      "exitCode": 0,
+      "command": "corepack pnpm@10.32.1 exec prettier --write <15 changed source/document files>",
+      "evidence": "format-final.log"
+    },
+    {
+      "id": "public-docs-final",
+      "result": "passed",
+      "command": "corepack pnpm@10.32.1 check:public-docs",
+      "exitCode": 0,
+      "evidence": "public-docs-archive-final.log"
+    },
+    {
+      "id": "whitespace-final",
+      "result": "passed",
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "review": {
+    "kind": "independent local source review",
+    "discovered": 2,
+    "resolved": 2,
+    "remaining": 0,
+    "evidence": "independent-review.md",
+    "platformApproval": false
+  },
+  "agentEvidence": {
+    "requestParaphrase": "Prepare Proto-UI Compiler for a future migration from old commit-pinned GPUI after the upstream extraction announcement.",
+    "type": "executed internal reproduction and measured state/ownership walkthrough",
+    "walkthrough": "../../2026-11-24-gpui-dependency-preparation.md",
+    "visualDisposition": "not applicable to this internal dependency tooling change",
+    "scopeDisposition": "preparation passed; workspace-wide checks remain partial",
+    "debt": [
+      "Full workspace typecheck not green.",
+      "No actual new-source GPUI compilation, consumer migration, OS input or platform acceptance.",
+      "No remote CI or independent GitHub approval in this local evidence."
+    ]
+  },
+  "evidenceFiles": [
+    {
+      "path": "adversarial-sparse-Bm0tb6/exact-sparse.json",
+      "sha256": "6a520126e2e03855db00badef9ba5c7ceee0d9f03ac65b4f480a3df3561c34b8",
+      "bytes": 2319
+    },
+    {
+      "path": "adversarial-sparse-Bm0tb6/exact-sparse.json.metadata.json",
+      "sha256": "f61f900beb99f98d0b00fae35c1e3ae55cdc921978e005dcca6100bfbff078f6",
+      "bytes": 5691
+    },
+    {
+      "path": "adversarial-sparse-Bm0tb6/registry-prefix-mismatch.json",
+      "sha256": "6a9b7f7b78db8deaf50847411029f0e5fe7df3c1447a669fc62f95557bb5af56",
+      "bytes": 2471
+    },
+    {
+      "path": "adversarial-sparse-Bm0tb6/registry-prefix-mismatch.json.metadata.json",
+      "sha256": "f61f900beb99f98d0b00fae35c1e3ae55cdc921978e005dcca6100bfbff078f6",
+      "bytes": 5691
+    },
+    {
+      "path": "adversarial-sparse-Bm0tb6/result.json",
+      "sha256": "ec7f9fc4e8418503e94197466926a20e917c0872b45510b4300f8351e37ecbbf",
+      "bytes": 781
+    },
+    {
+      "path": "baseline.json",
+      "sha256": "b1383577eb2e65b11cb42670063f87f772c67edceea2e340fc46ddf1f63b04d6",
+      "bytes": 14210
+    },
+    {
+      "path": "cargo-graph-tests-initial.log.gz",
+      "sha256": "c1acc4b7dd116ff77108c596a34b26ac8c9c4afa8e9e29af1bf87bba27268e0b",
+      "bytes": 2419
+    },
+    {
+      "path": "cargo-graph-tests-r1-r2.log",
+      "sha256": "5cd3694582f45b28f668424e950da622f38f53e3b831064cb932889d15cfa0be",
+      "bytes": 5341
+    },
+    {
+      "path": "cargo-graph-tests-target-isolation-first.log",
+      "sha256": "67bf81b94be4cec2d7fd8c102c25f4c15191decdd50bfa1861dca601623d23a4",
+      "bytes": 5032
+    },
+    {
+      "path": "compiler-tests.json",
+      "sha256": "b8f117ae06bf98882a23761a46e6ceb441dce3573f7f9365df2cdca6f8619338",
+      "bytes": 16652
+    },
+    {
+      "path": "compiler-typecheck-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "format-default-pnpm-failed.log",
+      "sha256": "b45a36891eaeedf8ec1d4d3095ca2d0c862b3de5be606d4a21b9303e454fec2f",
+      "bytes": 2194
+    },
+    {
+      "path": "format-final.log",
+      "sha256": "a30ead28858656e69737650680f170a956803c500aed1b0cff2531fd687e1bbf",
+      "bytes": 946
+    },
+    {
+      "path": "independent-ci-target-red.log",
+      "sha256": "133f0822c9a6b14a9eb784c8530212d467aa2cf8fbdb773b9d67b560ba08a349",
+      "bytes": 1253
+    },
+    {
+      "path": "independent-default-preservation.json",
+      "sha256": "85caea9bd49fb952b25a6177a9ce63291affa7b32d4abfdade81c43ac18e3190",
+      "bytes": 586
+    },
+    {
+      "path": "independent-final-graph-tests.log",
+      "sha256": "42bcb8960d8578f0e4050c402cec95800252dc601a7d072b80e3d40645fcafa1",
+      "bytes": 5245
+    },
+    {
+      "path": "independent-registry-cwd-QcaP8S/consumer-cwd.json",
+      "sha256": "e8206685f489c7bc157a0cacde0257ab41cc89ce6b60a54bf6d0747196a429c5",
+      "bytes": 2233
+    },
+    {
+      "path": "independent-registry-cwd-QcaP8S/consumer-cwd.json.metadata.json",
+      "sha256": "3461e02c54f1ddc2bec1de681779499a6c06717b6628fb7996bffbb1c8af0357",
+      "bytes": 5804
+    },
+    {
+      "path": "independent-registry-cwd-QcaP8S/consumer-cwd.stderr.log",
+      "sha256": "537b8a774baffe523cca748ea5ba94952e60d10eca49fea37cf262bfcdd4559d",
+      "bytes": 155
+    },
+    {
+      "path": "independent-registry-cwd-QcaP8S/documented-repo-cwd-fixed.json",
+      "sha256": "9251e87337ba90696568dd85567b5152b95a7397b2afe81ce29b13685e0e1fd3",
+      "bytes": 2344
+    },
+    {
+      "path": "independent-registry-cwd-QcaP8S/documented-repo-cwd-fixed.json.metadata.json",
+      "sha256": "3461e02c54f1ddc2bec1de681779499a6c06717b6628fb7996bffbb1c8af0357",
+      "bytes": 5804
+    },
+    {
+      "path": "independent-registry-cwd-QcaP8S/documented-repo-cwd-fixed.stdout.json",
+      "sha256": "9251e87337ba90696568dd85567b5152b95a7397b2afe81ce29b13685e0e1fd3",
+      "bytes": 2344
+    },
+    {
+      "path": "independent-registry-cwd-QcaP8S/documented-repo-cwd.json",
+      "sha256": "2068c203665e1251c4ac60957263f9951c8a23f0bdd17e91864706ba12c4253c",
+      "bytes": 1691
+    },
+    {
+      "path": "independent-registry-cwd-QcaP8S/documented-repo-cwd.stderr.log",
+      "sha256": "2410907235650fc354e0175cd9e232882ca759ae135f717b7b9b8e3b01cd53d7",
+      "bytes": 222
+    },
+    {
+      "path": "independent-registry-cwd-QcaP8S/result.json",
+      "sha256": "0782925dd995aed94f4c6ca9dbaf4334290c8f5874e42446cdcf58bef8c5fe66",
+      "bytes": 668
+    },
+    {
+      "path": "independent-review-manifest.json",
+      "sha256": "e82f78ebe820dc51643fc991e32ba16b96cdd1f538abbdb8b63b15e0f725dd17",
+      "bytes": 4049
+    },
+    {
+      "path": "independent-review.md",
+      "sha256": "6388d7a9d799a7c2488f22133a082746567eadff4c75b7df872e0ba620a516f8",
+      "bytes": 15259
+    },
+    {
+      "path": "independent-reviewed.patch.gz",
+      "sha256": "2ecdbdcdb6ef8c20da72cb3e663ef789803e6e029407a128d3803b08f519ff8e",
+      "bytes": 8525
+    },
+    {
+      "path": "public-docs-archive-final.log",
+      "sha256": "7bce7212b1152a878228b6877b5b1c99d349dbaca4c0d070e2d969ee8e052823",
+      "bytes": 302
+    },
+    {
+      "path": "public-docs-final.log",
+      "sha256": "7bce7212b1152a878228b6877b5b1c99d349dbaca4c0d070e2d969ee8e052823",
+      "bytes": 302
+    },
+    {
+      "path": "registry-cwd-review.json",
+      "sha256": "48c43b695f5f5e67d225a4bd4224c5511ee81fe0e6009b0d11e0373d9107b05a",
+      "bytes": 3329
+    },
+    {
+      "path": "registry-isolation-r1-r2.log",
+      "sha256": "849a9a558aee706728a3629454758be0afcd889fc84ce79ced8ee6bea1def422",
+      "bytes": 3821
+    },
+    {
+      "path": "target-isolation-first-diagnostic.json",
+      "sha256": "118df0caff626cfda8a8e8e006836151db45ba1eb140d00d31eb19a29a7ca1c9",
+      "bytes": 724
+    },
+    {
+      "path": "typecheck-6144.log",
+      "sha256": "396d68e2e8dbfd38c2b19ced323faa162d555318ad295d29bf330a43996c384a",
+      "bytes": 2296
+    },
+    {
+      "path": "typecheck.log",
+      "sha256": "119d1abc92eeb1bb488409162672ad417df69e304ba8f007cd4d9cd3e648d67c",
+      "bytes": 841
+    },
+    {
+      "path": "unchanged-default-result.json",
+      "sha256": "eb76661dcd70c25d1868a8ff50c1648ec7362dc82f5cb8a0bd71d591a6c08fbe",
+      "bytes": 1069
+    }
+  ],
+  "archivalNotes": [
+    {
+      "path": "cargo-graph-tests-initial.log.gz",
+      "encoding": "gzip",
+      "rawSha256": "f6a21c5e3fe6b727d6c0c3f5b0bef98ab94a4059bf7850a509a75f7cbedd7ca5",
+      "reason": "Preserve original failing-output whitespace without rewriting evidence."
+    },
+    {
+      "path": "independent-reviewed.patch.gz",
+      "encoding": "gzip",
+      "rawSha256": "795a95540ac8a33dd090eabf14e774fe406ceb6817741bdfbf7ea9ac7e92706f",
+      "reason": "Preserve patch context whitespace without rewriting evidence."
+    }
+  ]
+}

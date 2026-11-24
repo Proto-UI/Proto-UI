@@ -52,6 +52,39 @@ it('all actual authored groups have unique locale-safe identities, independent o
   expect(new Set(english).size).toBe(english.length);
   expect(chinese).toEqual(english);
 });
+for (const family of ['bootstrap-2-3-2', 'liquid-glass']) {
+  it(`keeps the ${family} Dropdown Menu sidebar link consistent with both article titles`, () => {
+    const slug = `ui-libraries/${family}/dropdown-menu`;
+    const links: ts.ObjectLiteralExpression[] = [];
+    function visit(node: ts.Node) {
+      if (ts.isObjectLiteralExpression(node)) {
+        const value = property(node, 'slug');
+        if (value && ts.isStringLiteral(value) && value.text === slug) links.push(node);
+      }
+      ts.forEachChild(node, visit);
+    }
+    expect(sidebar).toBeDefined();
+    visit(sidebar!);
+    expect(links).toHaveLength(1);
+    const translations = property(links[0]!, 'translations');
+    if (!translations || !ts.isObjectLiteralExpression(translations))
+      throw new Error(`Missing translations for ${slug}`);
+    for (const [routeLocale, configLocale] of [
+      ['en', 'en'],
+      ['zh-cn', 'zh-CN'],
+    ] as const) {
+      const article = readFileSync(
+        new URL(`../../content/docs/${routeLocale}/${slug}.mdx`, import.meta.url),
+        'utf8'
+      );
+      const frontmatter = article.split(/^---[ \t]*\r?$/m)[1] ?? '';
+      const title = /^title:[ \t]*['"]?([^'"\r\n]+)['"]?[ \t]*\r?$/m.exec(frontmatter)?.[1]?.trim();
+      expect(title).toBe('Dropdown Menu');
+      const label = property(translations, configLocale);
+      expect(label && ts.isStringLiteral(label) ? label.text : undefined).toBe(title);
+    }
+  });
+}
 it('uses the public native tree with one scoped restore owner and the existing legacy session writer or density overrides', () => {
   expect(source).toContain("from '@astrojs/starlight/components/SidebarSublist.astro'");
   expect(source).toContain('collapsedSidebar(Astro.locals.starlightRoute.sidebar, locales)');
@@ -106,9 +139,14 @@ it('renders every early draft as a badge without appending status to translated 
     if (ts.isObjectLiteralExpression(node)) {
       const label = property(node, 'label');
       const translations = property(node, 'translations');
-      for (const value of [label, ...(translations && ts.isObjectLiteralExpression(translations)
-        ? translations.properties.filter(ts.isPropertyAssignment).map((entry) => entry.initializer)
-        : [])]) {
+      for (const value of [
+        label,
+        ...(translations && ts.isObjectLiteralExpression(translations)
+          ? translations.properties
+              .filter(ts.isPropertyAssignment)
+              .map((entry) => entry.initializer)
+          : []),
+      ]) {
         if (value && ts.isStringLiteral(value)) {
           expect(value.text).not.toMatch(/[（(](?:Draft|草案)[）)]/u);
         }

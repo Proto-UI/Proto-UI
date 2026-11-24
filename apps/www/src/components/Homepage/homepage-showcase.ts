@@ -322,11 +322,7 @@ export function createHomepageShowcase(
         // re-entering either can invalidate that callback's phase.
         // Vue's existing nextTick staging must remain ahead of TextControl's owner
         // restoration microtask, or accepted text can lose its caret position.
-        const publishProps = (
-          ref: string,
-          next: Record<string, unknown>,
-          afterEvent = false
-        ) => {
+        const publishProps = (ref: string, next: Record<string, unknown>, afterEvent = false) => {
           next = completeProps(ref, next);
           if (!afterEvent && (runtime === 'vue' || runtime === 'vue2')) {
             context.api.setProps(ref, next);
@@ -500,7 +496,12 @@ export function createHomepageShowcase(
       'aria-label': locale === 'en' ? 'Interactive component gallery' : '可交互的组件展示',
     },
     children: [
-      ...gallery.columns(form, gallery.analytics),
+      {
+        kind: 'box',
+        className: 'home-gallery__stage',
+        attrs: { 'data-home-gallery-stage': '' },
+        children: gallery.columns(form, gallery.analytics),
+      },
       {
         kind: 'box',
         className: 'home-gallery__attribution',

@@ -862,6 +862,14 @@ describe('proto style css renderer', () => {
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 
+  it('renders the finite two-pixel corner used by compact Bootstrap form controls', () => {
+    for (const { render } of STYLE_CSS_LANES) {
+      const css = render(['rounded-[2px]']);
+      expect(css).toContain('border-radius: 2px;');
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+    }
+  });
+
   it('renders the exact box and glyph geometry used by Shadcn Checkbox', () => {
     const css = renderProtoStyleTokenCss(['rounded-[4px]', 'size-4', 'size-3.5']);
 

@@ -9,6 +9,7 @@ import { assertProjectionRecipeClosure } from './projection-composition';
 import { PROJECTION_FAMILY_MANIFESTS, type ProjectionFamilyManifest } from './projection-families';
 import { registerPrototype } from './registry';
 import { renderDemo } from './demo-renderer';
+import { registerPreviewMaterialProvider } from './preview-material-provider';
 import bootstrapDialog from '../../content/docs/demo-bootstrap-2-3-2-dialog.demo';
 import Toggle from '../../../../../packages/prototypes/shadcn/src/toggle/toggle.proto';
 
@@ -98,6 +99,31 @@ describe('RuntimeBox canvas composition', () => {
     assertProjectionRecipeClosure(surface.demo.root, recipe.prototypeIds, recipe.id);
   });
 
+  it('retains the Liquid Glass passive frame when a provider has no visible scene canvas', async () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    const unregister = registerPreviewMaterialProvider(host, () => null);
+    const surface = createRuntimePreviewSurface(
+      { type: 'demo', root: { kind: 'box', children: ['Plain content'] } },
+      'liquid-glass'
+    );
+    try {
+      const result = await renderDemo({ runtime: 'wc', host, demo: surface.demo });
+      try {
+        await surface.ready;
+        const frame = host.querySelector('.pui-runtime-preview-surface')!;
+        expect(frame.closest('[data-material-scene]')).toBeNull();
+        const tokens = frame.getAttribute('data-pui-style')?.split(/\s+/);
+        expect(tokens).toContain('border');
+        expect(tokens).not.toContain('border-0');
+      } finally {
+        await result.destroy();
+      }
+    } finally {
+      unregister();
+    }
+  });
+
   for (const family of ['bootstrap-2-3-2', 'liquid-glass'] as const) {
     for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
       it(`${family}/${runtime}: owns a neutral partial-family canvas without aliasing Shadcn or the demonstrated Button`, async () => {
@@ -177,6 +203,7 @@ describe('RuntimeBox canvas composition', () => {
           const button = context.refs['actual-button'];
           await vi.waitFor(() => expect(button.getAttribute('role')).toBe('button'));
           const tokens = frame.getAttribute('data-pui-style') ?? '';
+          if (family === 'bootstrap-2-3-2') expect(tokens.split(/\s+/)).toContain('border');
           expect(tokens).not.toContain('rounded-xl');
           expect(tokens).toContain(family === 'bootstrap-2-3-2' ? 'rounded-[4px]' : 'rounded-none');
           expect(tokens).not.toContain('backdrop-blur');

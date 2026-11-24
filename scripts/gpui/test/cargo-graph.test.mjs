@@ -55,10 +55,20 @@ test('accepts two components, their shared SDK and one actual GPUI package', () 
   assert.deepEqual(inspect(metadata()), {
     ok: true,
     errors: [],
+    expectedDependency: { kind: 'git', git, revision },
     expectedSource,
+    expectedVersion: null,
+    expectedPlatform: {
+      required: false,
+      dependency: { kind: 'git', git, revision },
+      source: expectedSource,
+      version: null,
+    },
+    requireSdk: true,
     workspaceMembers: ['app', 'component-a', 'component-b', 'sdk'],
     resolvedPackages: 5,
     gpui: [packageOf('gpui', 'gpui', expectedSource)],
+    gpuiPlatform: [],
     sdk: [packageOf('sdk', 'proto-ui-gpui-native')],
   });
 });

@@ -1119,6 +1119,105 @@ describe.sequential('real Liquid Dropdown Content in a bounded scene portal', ()
   }, 90000);
   // The public demo is an acceptance target too. A small owned fixture cannot
   // substitute for the originally reported documentation route.
+  it('keeps one Liquid Glass Dropdown preview surface across real Runtime tab switches', async () => {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1100 } });
+    await context.route('**/*', (route) =>
+      new URL(route.request().url()).origin === new URL(baseUrl).origin
+        ? route.continue()
+        : route.abort()
+    );
+    const page = await context.newPage();
+    try {
+      await preferences(await context.newCDPSession(page), 'light');
+      await page.goto(`${baseUrl}/zh-cn/ui-libraries/liquid-glass/dropdown-menu/`, {
+        waitUntil: 'networkidle',
+      });
+      const preview = page.locator(
+        '.pui-runtime-box[data-demo-id="demo-liquid-glass-dropdown-menu"]'
+      );
+      const tabs = preview.getByRole('tablist', { name: 'Runtime', exact: true });
+      for (const [runtime, label] of [
+        ['wc', 'Web Components'],
+        ['react', 'React'],
+        ['wc', 'Web Components'],
+      ] as const) {
+        const tab = tabs.getByRole('tab', { name: label, exact: true });
+        await tab.click();
+        await waitForPreviewRuntime(page, runtime, '[aria-haspopup="menu"]', 2);
+        await expect.poll(() => tab.getAttribute('aria-selected')).toBe('true');
+        await expect
+          .poll(() => preview.locator('[data-material-scene="visible-app-canvas"]:visible').count())
+          .toBe(1);
+        const surface = preview.locator('.pui-runtime-preview-surface:visible');
+        await expect.poll(() => surface.count()).toBe(1);
+        expect(
+          await surface.evaluate((node) => {
+            const scene = node.closest('[data-material-scene="visible-app-canvas"]');
+            const paint = getComputedStyle(node);
+            return {
+              backdrops: scene?.querySelectorAll(':scope > canvas[data-material-backdrop]').length,
+              borders: [
+                paint.borderTopWidth,
+                paint.borderRightWidth,
+                paint.borderBottomWidth,
+                paint.borderLeftWidth,
+              ],
+              shadow: paint.boxShadow,
+            };
+          })
+        ).toEqual({ backdrops: 1, borders: ['0px', '0px', '0px', '0px'], shadow: 'none' });
+        // The stage radius must show up in those same opaque sampled pixels,
+        // not in a CSS clip that hides pixels the material can still sample.
+        const scene = preview.locator('[data-material-scene="visible-app-canvas"]:visible');
+        await expect
+          .poll(() =>
+            scene.evaluate((node) => {
+              const canvas = node.querySelector<HTMLCanvasElement>(
+                ':scope > canvas[data-material-backdrop]'
+              );
+              const ctx = canvas?.getContext('2d');
+              if (!canvas || !ctx || canvas.width < 24 || canvas.height < 24) return null;
+              const css = getComputedStyle(node);
+              const pixel = (x: number, y: number) => [...ctx.getImageData(x, y, 1, 1).data];
+              const corners = [
+                pixel(0, 0),
+                pixel(canvas.width - 1, 0),
+                pixel(0, canvas.height - 1),
+                pixel(canvas.width - 1, canvas.height - 1),
+              ];
+              const corner = corners[0]!.join();
+              return {
+                radius: css.borderTopLeftRadius,
+                overflow: css.overflow,
+                clippedCanvas: getComputedStyle(canvas).borderTopLeftRadius !== '0px',
+                matteCorners: corners.every((value) => value[3] === 255 && value.join() === corner),
+                interiorDiffers: pixel(14, 14).join() !== corner,
+              };
+            })
+          )
+          .toEqual({
+            radius: '12px',
+            overflow: 'visible',
+            clippedCanvas: false,
+            matteCorners: true,
+            interiorDiffers: true,
+          });
+        const trigger = preview.getByRole('button', { name: 'Open menu', exact: true });
+        await trigger.click();
+        await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('true');
+        const menu = page.getByRole('menu');
+        await menu.waitFor({ state: 'visible' });
+        expect(await menu.evaluate((node) => !!node.closest('[data-material-overlay-mount]'))).toBe(
+          true
+        );
+        await expect.poll(() => menu.getAttribute('data-material-quality')).toBe('self-optical');
+        await page.keyboard.press('Escape');
+        await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
+      }
+    } finally {
+      await context.close();
+    }
+  }, 90000);
   for (const runtime of RUNTIMES)
     for (const locale of ['en', 'zh-cn'])
       for (const theme of ['light', 'dark'])
