@@ -25,7 +25,7 @@ The owner explicitly moved the entire remaining scope of the following **20 Issu
 
 This decision supersedes the earlier 0.3 prerequisite and criterion-split assignments for the remaining work in these named Issues. Their parent references, including #890, #1090, #1178, #1488 and #1673, inherit the same 0.4 disposition; complete Compiler coverage, original IR10 migration, native-target acceptance or cost requirements from these Issues must not return as indirect 0.3 blockers.
 
-Keep these Issues open with their original criteria, completed checkboxes and source-bound evidence. Deferral does not complete a criterion, change an implementation or erase a failed result. Other Issues retain their latest criterion-level release disposition, including the independently retained website, CLI, package and supported Web-consumer requirements.
+Keep these Issues open with their original criteria, completed checkboxes and source-bound evidence. Development and authorized integration into main may continue before the 0.4 release. Deferral does not complete a criterion, change an implementation or erase a failed result. Other Issues retain their latest criterion-level release disposition, including the independently retained website, CLI, package and supported Web-consumer requirements.
 
 The frozen source ledger, acquisition corrections and historical evidence checkpoints retain their original bytes, identities and denominators. This dated owner decision changes the current release disposition; it does not rewrite the captured source inventory.
 
