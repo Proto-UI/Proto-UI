@@ -299,7 +299,8 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
             );
           })
     );
-    if (nestedOpen || ownsExpandedNestedControl(event.target)) nestedEscape.add(event);
+    const target = event.target instanceof (window?.Element ?? Element) ? event.target : null;
+    if (nestedOpen || ownsExpandedNestedControl(target)) nestedEscape.add(event);
   };
   const onEscape = (event: KeyboardEvent) => {
     if (event.key !== 'Escape' || event.defaultPrevented || !open || nestedEscape.has(event))

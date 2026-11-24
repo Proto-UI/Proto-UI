@@ -4,7 +4,7 @@
 # a browser's actual rendered font. Official CI remains required for those.
 set -euo pipefail
 proposal="${1:-$(dirname "$0")/prepare-homepage-composition-fonts.sh}"
-root="$(mktemp -d /tmp/font-prep-mocks.XXXXXX)"
+root="$(mktemp -d "${TMPDIR:-/tmp}/font-prep-mocks.XXXXXX")"
 mkdir -p "$root/bin" "$root/cache"
 printf 'mock font file, not executable\n' > "$root/mock-font.ttc"
 truncate -s 61229778 "$root/cache/fonts-noto-cjk_20230817+repack1-3_all.deb"
