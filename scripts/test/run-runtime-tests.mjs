@@ -20,6 +20,7 @@ import {
   ciContext,
 } from './runtime-ci.mjs';
 import { waitForServerReadiness } from './server-readiness.mjs';
+import { ownProcessTree } from './runtime-process-tree.mjs';
 import {
   readOptionalJson,
   runtimeObservation,
@@ -103,6 +104,34 @@ let serverOutput = '';
 let shuttingDown = false;
 let styleGeneration = null;
 const reportedSnapshots = new Set();
+const ownedProcesses = new Set();
+const cleanupReceipts = [];
+let cleanupFailed = false;
+
+function trackChild(child, label) {
+  const tree = ownProcessTree(child, { label });
+  let stopped;
+  const stop = () => {
+    stopped ??= tree.stop().then((receipt) => {
+      cleanupReceipts.push(receipt);
+      if (receipt.errors.length || receipt.remaining.length) cleanupFailed = true;
+      const { snapshots, ...summary } = receipt;
+      console.error(`[test:runtime] process cleanup ${JSON.stringify(summary)}`);
+      if (selection) {
+        try {
+          writeJson(path.join(evidenceDirectory, `cleanup-${evidenceId}.json`), cleanupReceipts);
+        } catch (error) {
+          cleanupFailed = true;
+          console.error(`[test:runtime] unable to retain cleanup evidence: ${error.message}`);
+        }
+      }
+      return receipt;
+    });
+    return stopped;
+  };
+  ownedProcesses.add(stop);
+  return stop;
+}
 
 function reportServerSnapshot(reason) {
   if (!devServer || reportedSnapshots.has(reason)) return;
@@ -140,6 +169,7 @@ async function waitForServer(url) {
 }
 
 async function generateProtoUiStyle() {
+  if (shuttingDown) throw new Error('Runtime runner is shutting down.');
   styleGeneration ??= new Promise((resolve, reject) => {
     const appsWwwRoot = path.join(root, 'apps', 'www');
     // The parent command requires Corepack on PATH. process.execPath may point
@@ -150,11 +180,17 @@ async function generateProtoUiStyle() {
       env: process.env,
       shell: corepack.shell,
       stdio: 'inherit',
+      detached: process.platform !== 'win32',
+      windowsHide: true,
     });
+    const stop = trackChild(child, 'style-generation');
     child.on('error', reject);
-    child.on('exit', (code, signal) => {
+    child.on('exit', async (code, signal) => {
+      await stop();
       if (signal) reject(new Error(`Proto UI style generation exited on ${signal}.`));
       else if (code !== 0) reject(new Error(`Proto UI style generation exited with code ${code}.`));
+      else if (cleanupFailed)
+        reject(new Error('Proto UI style generation process cleanup failed.'));
       else resolve();
     });
   });
@@ -164,6 +200,7 @@ async function generateProtoUiStyle() {
 async function startServer() {
   await generateProtoUiStyle();
   const port = await availablePort();
+  if (shuttingDown) throw new Error('Runtime runner is shutting down.');
   const appsWwwRoot = path.join(root, 'apps', 'www');
   const astroCli = path.join(appsWwwRoot, 'node_modules', 'astro', 'astro.js');
   devServer = spawn(
@@ -177,6 +214,7 @@ async function startServer() {
       stdio: ['ignore', 'pipe', 'pipe'],
     }
   );
+  trackChild(devServer, 'astro');
   devServer.stdout?.on('data', recordOutput);
   devServer.stderr?.on('data', recordOutput);
 
@@ -190,44 +228,15 @@ async function startServer() {
   return url;
 }
 
-// The child is detached into its own process group, so signal the group to take
-// the dev server's own children with it.
-async function stopServer() {
-  if (shuttingDown || !devServer || devServer.exitCode !== null || !devServer.pid) return;
+// Each acquired producer owns a private POSIX group. Cleanup observes the tree
+// even after the group's leader exits and escalates surviving descendants.
+async function stopOwnedProcesses() {
   shuttingDown = true;
-  const pid = devServer.pid;
-  if (process.platform === 'win32') {
-    await new Promise((resolve) => {
-      const killer = spawn('taskkill', ['/PID', String(pid), '/T', '/F'], {
-        stdio: 'ignore',
-        windowsHide: true,
-      });
-      killer.once('error', resolve);
-      killer.once('exit', resolve);
-    });
-    return;
-  }
-
-  const target = -pid;
-  try {
-    process.kill(target, 'SIGTERM');
-  } catch {
-    return;
-  }
-  const exited = await Promise.race([
-    new Promise((resolve) => devServer.once('exit', () => resolve(true))),
-    new Promise((resolve) => setTimeout(() => resolve(false), 5_000)),
-  ]);
-  if (!exited && devServer.exitCode === null) {
-    try {
-      process.kill(target, 'SIGKILL');
-    } catch {
-      // Already gone.
-    }
-  }
+  await Promise.all([...ownedProcesses].map((stop) => stop()));
 }
 
 async function runVitest(args, baseUrl) {
+  if (shuttingDown) throw new Error('Runtime runner is shutting down.');
   return new Promise((resolve, reject) => {
     // Windows cannot execute a `.cmd` shim through spawn() without a shell.
     // Invoke Vitest's ESM entry with the current Node executable instead so
@@ -260,6 +269,14 @@ async function runVitest(args, baseUrl) {
       env,
       shell: false,
       stdio: ['inherit', 'pipe', 'pipe'],
+      detached: process.platform !== 'win32',
+      windowsHide: true,
+    });
+    const stop = trackChild(child, 'vitest');
+    // A surviving worker can hold inherited stdout/stderr open after Vitest
+    // exits. Begin cleanup on exit, before waiting for the close/pipe drain.
+    child.once('exit', () => {
+      void stop();
     });
     const inspect = observeReadinessFailures(() =>
       reportServerSnapshot('browser readiness failed while the server wrapper may still be running')
@@ -274,6 +291,7 @@ async function runVitest(args, baseUrl) {
     });
     child.on('error', reject);
     child.on('close', async (code, signal) => {
+      await stop();
       if (signal || code !== 0)
         reportServerSnapshot(`Vitest exited: code=${code}; signal=${signal}`);
       // Wait for both captured pipes and their forwarded writes before the
@@ -287,17 +305,20 @@ async function runVitest(args, baseUrl) {
   });
 }
 
-// A signal reaches the whole foreground group, so vitest gets it too and this
-// process only has to make sure the dev server does not outlive the run.
+// The outer timeout may signal only this PID. Explicitly own all child groups
+// instead of assuming that Vitest received the same foreground-group signal.
+let interruption = null;
 for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
   process.on(signal, () => {
+    if (interruption) return;
+    interruption = signal;
     reportServerSnapshot(`runner received ${signal}`);
     try {
       recordObservation({ signal });
     } catch (error) {
       console.error(`[test:runtime] interrupted evidence: ${error.message}`);
     }
-    void stopServer().finally(() => {
+    void stopOwnedProcesses().finally(() => {
       process.exit(signal === 'SIGINT' ? 130 : 143);
     });
   });
@@ -329,6 +350,14 @@ try {
     console.error(`[test:runtime] evidence error: ${evidenceError.message}`);
   }
 } finally {
-  await stopServer();
+  await stopOwnedProcesses();
 }
-process.exit(exitCode);
+process.exit(
+  interruption
+    ? interruption === 'SIGINT'
+      ? 130
+      : 143
+    : cleanupFailed && exitCode === 0
+      ? 1
+      : exitCode
+);
