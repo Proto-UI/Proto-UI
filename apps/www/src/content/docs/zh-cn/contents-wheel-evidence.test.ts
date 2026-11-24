@@ -155,8 +155,6 @@ describe('Contents wheel observation boundaries', () => {
       {
         trusted: false,
         deltaY: 500,
-        clientX: null,
-        clientY: null,
         surfaceInPath: true,
         contentInPath: true,
         defaultPrevented: true,

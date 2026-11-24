@@ -914,6 +914,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
           'components/override/Sidebar.astro',
           'components/override/PageFrame.astro',
           'styles/site-contents-command.css',
+          'content/docs/zh-cn/contents-wheel-evidence.ts',
         ].map((file) => [
           file,
           createHash('sha256')
@@ -1209,47 +1210,51 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
                 return false;
               })
             ).toBe(true);
-            const wheelProbe = await dialog.evaluateHandle(observeContentsWheel);
-            const readWheelProbe = async () => {
-              const dialogs = await dialog.elementHandles();
+            const wheel = await dialog.evaluateHandle(observeContentsWheel);
+            const readWheel = async () => {
+              // Query the current public role without waiting for a replacement
+              // to appear. The retained probe must still belong to that exact
+              // dialog; an old node's unchanged split surface is insufficient.
+              const currentDialogs = await dialog.elementHandles();
               try {
-                return await wheelProbe.evaluate(
-                  (probe, current) => probe.read(current.length === 1 ? current[0] : null),
-                  dialogs
+                return await wheel.evaluate(
+                  (probe, dialogs) => probe.read(dialogs.length === 1 ? dialogs[0] : null),
+                  currentDialogs
                 );
               } finally {
-                await Promise.all(dialogs.map((handle) => handle.dispose()));
+                await Promise.all(currentDialogs.map((current) => current.dispose()));
               }
             };
-            const initialWheelFacts = await readWheelProbe();
-            let wheelFailed = false;
-            let wheelFailure: unknown;
+            let initialGeometry: ReturnType<
+              ReturnType<typeof observeContentsWheel>['read']
+            > | null = null;
+            let scrolling: ReturnType<ReturnType<typeof observeContentsWheel>['read']> | null =
+              null;
+            let wheelError: unknown;
+            const wheelCompletionErrors: unknown[] = [];
             try {
-              const beforeScroll = await page.evaluate(() => scrollY);
-              const scrolling = await dialog.evaluate((element) => {
-                const surface =
-                  element.shadowRoot?.querySelector<HTMLElement>('[data-pui-split-surface]') ??
-                  element;
-                const box = element.getBoundingClientRect();
-                return {
-                  top: surface.scrollTop,
-                  max: surface.scrollHeight - surface.clientHeight,
-                  x: box.left + box.width / 2,
-                  y: box.top + box.height / 2,
-                };
-              });
+              initialGeometry = await readWheel();
+              // Visible slotted navigation and a positive scroll range do not
+              // establish that Content has acquired its positioned viewport:
+              // clientHeight=0 also makes scrollHeight-clientHeight positive.
+              // Observe the existing public available-space commit before input.
+              await expect.poll(async () => (await readWheel()).ready).toBe(true);
+              scrolling = await readWheel();
+              expect(scrolling.hitInContent).toBe(true);
               expect(scrolling.max).toBeGreaterThan(0);
               await page.mouse.move(scrolling.x, scrolling.y);
-              await page.mouse.wheel(0, scrolling.top < scrolling.max / 2 ? 500 : -500);
+              const direction = scrolling.top < scrolling.max / 2 ? 1 : -1;
+              await page.mouse.wheel(0, direction * 500);
               await vi.waitFor(
                 async () => {
-                  const top = await dialog.evaluate((element) => {
-                    const surface =
-                      element.shadowRoot?.querySelector<HTMLElement>('[data-pui-split-surface]') ??
-                      element;
-                    return surface.scrollTop;
-                  });
-                  expect(top).not.toBe(scrolling.top);
+                  const current = await readWheel();
+                  expect(current.connected).toBe(true);
+                  expect(current.sameDialog).toBe(true);
+                  expect(current.sameSurface).toBe(true);
+                  expect(current.ready).toBe(true);
+                  const top = current.top;
+                  expect(top).not.toBe(scrolling!.top);
+                  expect(direction * (top - scrolling!.top)).toBeGreaterThan(0);
                 },
                 { timeout: 1000 }
               );
@@ -1259,51 +1264,70 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
                     requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
                   )
               );
-              expect(await page.evaluate(() => scrollY)).toBe(beforeScroll);
+              const after = await readWheel();
+              expect(after.connected).toBe(true);
+              expect(after.sameDialog).toBe(true);
+              expect(after.sameSurface).toBe(true);
+              expect(after.ready).toBe(true);
+              expect(after.documentY).toBe(scrolling.documentY);
+              expect(
+                after.wheels.some(
+                  (event) =>
+                    event.trusted &&
+                    event.surfaceInPath &&
+                    event.contentInPath &&
+                    !event.defaultPrevented &&
+                    direction * event.deltaY > 0
+                )
+              ).toBe(true);
             } catch (error) {
-              wheelFailed = true;
-              wheelFailure = error;
-              throw error;
+              wheelError = error;
             } finally {
-              const completionErrors: unknown[] = [];
               try {
                 await writeFile(
-                  path.join(directory, `${family}-${runtime}-${action}-wheel-diagnostic.json`),
+                  path.join(directory, `${family}-${runtime}-${action}-wheel.json`),
                   JSON.stringify(
                     {
                       source,
                       family,
                       runtime,
                       action,
-                      scope:
-                        'Passive observation around unchanged original wheel coordinates, input and 1000 ms assertion; no readiness wait added',
-                      initial: initialWheelFacts,
-                      after: await readWheelProbe(),
-                      failed: wheelFailed,
-                      failure: wheelFailed ? String(wheelFailure) : null,
+                      input: 'native mouse wheel',
+                      originalDeadlineMs: 1000,
+                      initialGeometry,
+                      before: scrolling,
+                      after: await readWheel(),
+                      error: wheelError ? String(wheelError) : null,
                     },
                     null,
                     2
                   )
                 );
+                if (wheelError)
+                  await page.screenshot({
+                    path: path.join(directory, `${family}-${runtime}-${action}-wheel-failure.png`),
+                  });
               } catch (error) {
-                completionErrors.push(error);
+                wheelCompletionErrors.push(error);
               }
               try {
-                await wheelProbe.evaluate((probe) => probe.dispose());
+                await wheel.evaluate((probe) => probe.dispose());
               } catch (error) {
-                completionErrors.push(error);
+                wheelCompletionErrors.push(error);
               }
               try {
-                await wheelProbe.dispose();
+                await wheel.dispose();
               } catch (error) {
-                completionErrors.push(error);
-              }
-              if (completionErrors.length) {
-                if (wheelFailed) console.error('[Homepage wheel diagnostic]', completionErrors);
-                else throw new AggregateError(completionErrors, 'Homepage wheel diagnostic failed');
+                wheelCompletionErrors.push(error);
               }
             }
+            if (wheelError) {
+              if (wheelCompletionErrors.length)
+                console.error('[Contents wheel evidence]', wheelCompletionErrors);
+              throw wheelError;
+            }
+            if (wheelCompletionErrors.length)
+              throw new AggregateError(wheelCompletionErrors, 'Contents wheel evidence failed');
             if (action === 'click') {
               const id = `${family}-${runtime}-public-popover-open`;
               const metrics = await dialog.evaluate((element) => {
@@ -1899,38 +1923,6 @@ for (const family of ['shadcn', 'brutalist'] as const) {
       expectedSha: process.env.CANDIDATE_SHA ?? null,
       eventSha: process.env.GITHUB_SHA ?? null,
     };
-    let familyProfiler: Awaited<ReturnType<typeof context.newCDPSession>> | null = null;
-    const stopFamilyProfiler = async () => {
-      const profiler = familyProfiler;
-      familyProfiler = null;
-      if (!profiler) return;
-      try {
-        const { profile } = await profiler.send('Profiler.stop');
-        await writeFile(
-          path.join(evidenceDirectory, `${family}-family-switch.cpuprofile`),
-          JSON.stringify(profile)
-        );
-        await writeFile(
-          path.join(evidenceDirectory, `${family}-profile-scope.json`),
-          JSON.stringify(
-            {
-              source,
-              family,
-              scope:
-                'Read-only sampled CPU profile around original preference input and 1000 ms verdict; sampling can perturb timing',
-            },
-            null,
-            2
-          )
-        );
-      } catch (error) {
-        console.error('[Homepage family profile]', error);
-      } finally {
-        await profiler
-          .detach()
-          .catch((error) => console.error('[Homepage family profile detach]', error));
-      }
-    };
     const records: unknown[] = [];
     const ringFailures: string[] = [];
     const errors: string[] = [];
@@ -2363,12 +2355,6 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         const id = await control.getAttribute('aria-controls');
         if (familyQueryMode === 'hybrid')
           utilityObservation = await prepareUtilityFamilyReadObservation(page);
-        if (process.env.PROTO_UI_HOMEPAGE_PROFILE === '1') {
-          familyProfiler = await context.newCDPSession(page);
-          await familyProfiler.send('Profiler.enable');
-          await familyProfiler.send('Profiler.setSamplingInterval', { interval: 1000 });
-          await familyProfiler.send('Profiler.start');
-        }
         stage = 'family-choice';
         await page
           .locator(`[id=${JSON.stringify(id)}]`)
@@ -2416,7 +2402,6 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         familyCommitTiming.outcome = 'fulfilled';
         await finishFamilyQueryObservation();
         await collectFamilyMutation();
-        await stopFamilyProfiler();
         stage = 'family-ready';
         await ready(page, 'wc');
       }
@@ -2678,7 +2663,6 @@ for (const family of ['shadcn', 'brutalist'] as const) {
       });
       throw error;
     } finally {
-      await stopFamilyProfiler();
       if (family === 'brutalist') await finishFamilyQueryObservation();
       await writeFile(
         path.join(evidenceDirectory, `${family}-lifecycle.json`),

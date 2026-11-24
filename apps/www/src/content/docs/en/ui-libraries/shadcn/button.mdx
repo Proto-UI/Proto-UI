@@ -15,7 +15,7 @@ Shadcn Button adds visual variants and sizes to Base Button. The examples on thi
 
 ## Preview
 
-`P-SHADCN-BUTTON` and `P-BASE-BUTTON` are **early draft**: the protocol is still evolving. The previews use workspace source for Web Components, React, Vue 3, and Vue 2.6; choose the matching package and host version in the installation section. [Current Button test coverage](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-BASE-BUTTON-0001.yaml) records the checked behavior and remaining browser work.
+`P-SHADCN-BUTTON` and `P-BASE-BUTTON` are **early draft**: the protocol is still evolving. The previews use workspace source for Web Components, React, Vue 3, and Vue 2.6; choose the matching package and host version in the installation section. [Base behavior coverage](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-BASE-BUTTON-0001.yaml) and [Shadcn visual coverage](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-SHADCN-BUTTON-0001.yaml) record their respective results and remaining browser work.
 
 <PrototypePreviewer
   demoId="demo-button"
@@ -38,7 +38,7 @@ First [initialize your application](/en/start-here/quick-start/), then add the b
   manager="npm"
 />
 
-Replace `wc` with `react` or `vue` for those hosts. The CLI installs the matching `@proto.ui/prototypes-shadcn` and adapter packages and generates the local facade. Vue 2.6 (`>=2.6.0 <2.7`) and the named `styleProfile` presets shown below require matching workspace CLI, adapter, and prototype source. The published 0.2.0 CLI supports `wc`, `react`, and `vue`.
+Replace `wc` with `react` or `vue` for those hosts. The CLI installs the matching `@proto.ui/prototypes-shadcn` and adapter packages and generates the local facade. Vue 2.6 (`>=2.6.0 <2.7`), the named `styleProfile` presets, the `icon-compact` size, and the `wrap` prop shown below require matching workspace CLI, adapter, and prototype source. The published 0.2.0 CLI supports `wc`, `react`, and `vue`.
 
 ## Usage
 

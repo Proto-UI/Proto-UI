@@ -49,6 +49,9 @@ interface ArrayExtent {
   maximum: number;
 }
 const UNKNOWN_EXTENT: ArrayExtent = { minimum: 0, maximum: Infinity };
+// Private analysis limits, not limits on the authored program's runtime work.
+const CALLABLE_STORE_WORK_LIMIT = 16_777_216;
+const CALLABLE_ACTIVE_CALL_LIMIT = 128;
 type CapturedState = HookCaptureIR['states'][number];
 type TracedOperation = Extract<ExpressionIR, { kind: 'operation' }>;
 type Atom =
@@ -285,6 +288,36 @@ function analyzeCallableFlow(
   const locations = new WeakMap<object, number>();
   let nextLocation = 0;
   let callCount = 0;
+  // Count abstract work, not wall time: small call graphs can still repeatedly
+  // clone and join a growing store before reaching the call-count boundary.
+  let remainingWork = CALLABLE_STORE_WORK_LIMIT;
+  let workSpan = ir.setup.span;
+  class WorkLimit extends Error {
+    readonly span = workSpan;
+    constructor(readonly boundary: 'store-work' | 'call-depth') {
+      super(boundary);
+    }
+  }
+  function spendWork(units: number): void {
+    remainingWork -= units;
+    if (remainingWork < 0) throw new WorkLimit('store-work');
+  }
+  function storeSize(state: Store): number {
+    return (
+      state.cells.size +
+      state.records.size +
+      state.arrays.size +
+      state.installations.size +
+      state.captures.size +
+      state.captureStates.size +
+      state.setupPropOperations.size +
+      1
+    );
+  }
+  function forkStore(state: Store): Store {
+    spendWork(storeSize(state));
+    return copyStore(state);
+  }
   let allocationSerial = 0;
   const hostTypes = new Map<string, Known>();
   type RecordSites = Map<ExpressionIR, RecordValue | Cell>;
@@ -342,7 +375,7 @@ function analyzeCallableFlow(
     store.records.get(record) ?? record.fields;
   const extent = (record: RecordValue): ArrayExtent =>
     store.arrays.get(record) ?? record.array ?? UNKNOWN_EXTENT;
-  const snapshot = (): Store => copyStore(store);
+  const snapshot = (): Store => forkStore(store);
   const captureContents = (capture: Capture): CaptureContents =>
     store.captures.get(capture) ?? capture;
 
@@ -417,7 +450,8 @@ function analyzeCallableFlow(
     store.arrays.set(record, weak ? joinExtents([extent(record), value], true) : value);
   }
   function joinStores(states: readonly Store[]): Store {
-    if (states.length === 1) return copyStore(states[0]);
+    if (states.length === 1) return forkStore(states[0]);
+    spendWork(states.reduce((total, state) => total + storeSize(state), 0));
     const cells = new Set(states.flatMap((state) => [...state.cells.keys()]));
     const records = new Set(states.flatMap((state) => [...state.records.keys()]));
     const result = emptyStore();
@@ -434,6 +468,7 @@ function analyzeCallableFlow(
         result.records.set(record, maps[0]);
         continue;
       }
+      spendWork(maps.reduce((total, map) => total + map.size, 0));
       const names = new Set(maps.flatMap((map) => [...map.keys()]));
       result.records.set(
         record,
@@ -467,6 +502,9 @@ function analyzeCallableFlow(
     const captures = new Set(states.flatMap((state) => [...state.captures.keys()]));
     for (const capture of captures) {
       const contents = states.map((state) => state.captures.get(capture) ?? capture);
+      spendWork(
+        contents.reduce((total, value) => total + value.methods.size + value.children.size, 0)
+      );
       const methods = new Set(contents.flatMap((value) => [...value.methods.keys()]));
       const children = new Set(contents.flatMap((value) => [...value.children.keys()]));
       result.captures.set(capture, {
@@ -532,6 +570,7 @@ function analyzeCallableFlow(
     };
   }
   function applyDelta(target: Store, changes: Store): void {
+    spendWork(storeSize(changes));
     for (const [key, value] of changes.cells) target.cells.set(key, value);
     for (const [key, value] of changes.records) target.records.set(key, value);
     for (const [key, value] of changes.arrays) target.arrays.set(key, value);
@@ -596,7 +635,7 @@ function analyzeCallableFlow(
       results: Known[] = [],
       after: Store[] = [];
     for (const action of actions) {
-      store = copyStore(before);
+      store = forkStore(before);
       reachable = true;
       const result = action();
       if (reachable) {
@@ -625,6 +664,7 @@ function analyzeCallableFlow(
   function fingerprint(values: Known, locationsOnly = false): string {
     const seen = new Map<Atom, number>();
     function visit(value: Atom, depth = 0): unknown {
+      spendWork(1);
       if (depth > 48 || seen.size > 2048) {
         fingerprintExceeded = true;
         return ['widened'];
@@ -908,6 +948,7 @@ function analyzeCallableFlow(
 
   function call(closure: Closure, args: readonly Known[], execution: Execution): Known {
     if (issue) return UNKNOWN;
+    workSpan = closure.fn.span;
     demand?.function(closure.fn);
     fingerprintExceeded = false;
     const installationKey = JSON.stringify(
@@ -956,6 +997,9 @@ function analyzeCallableFlow(
         };
       return UNKNOWN;
     }
+    // Changing captured stores can produce distinct recursive keys forever.
+    // Refuse the incomplete proof before exhausting the JavaScript stack.
+    if (active.size >= CALLABLE_ACTIVE_CALL_LIMIT) throw new WorkLimit('call-depth');
     active.add(key);
     const before = snapshot(),
       allocationsBefore = allocationSerial,
@@ -1588,6 +1632,7 @@ function analyzeCallableFlow(
 
   function expression(value: ExpressionIR, scope: Scope, execution: Execution): Known {
     if (issue || !reachable) return [];
+    workSpan = value.span;
     demand?.expression(value);
     switch (value.kind) {
       case 'undefined':
@@ -2533,11 +2578,11 @@ function analyzeCallableFlow(
             if (!reachable) break;
             const flows: Flow[] = [];
             if (condition !== false) {
-              store = copyStore(before);
+              store = forkStore(before);
               flows.push(statements(statement.then, scope, execution));
             }
             if (condition !== true) {
-              store = copyStore(before);
+              store = forkStore(before);
               flows.push(statements(statement.otherwise, scope, execution));
             }
             accept(joinFlows(flows));
@@ -2555,7 +2600,7 @@ function analyzeCallableFlow(
               converged = false;
             const exits: Flow[] = [{ normal: start }];
             for (let iteration = 0; iteration < 64; iteration++) {
-              store = copyStore(head);
+              store = forkStore(head);
               reachable = true;
               if (
                 statement.kind === 'while' &&
@@ -2621,7 +2666,7 @@ function analyzeCallableFlow(
               for (const kind of ['normal', 'returned', 'thrown'] as const) {
                 const state = kind === 'returned' ? flow.returned?.store : flow[kind];
                 if (!state) continue;
-                store = copyStore(state);
+                store = forkStore(state);
                 const final = statements(statement.finally, scope, execution);
                 completions.push({ returned: final.returned, thrown: final.thrown });
                 if (final.normal)
@@ -2648,67 +2693,84 @@ function analyzeCallableFlow(
     }
   }
 
-  // Module closures share the same module environment as hook and prototype setup.
-  const declarations = (ir.moduleBindings ?? []).filter(
-    (binding): binding is Extract<StatementIR, { kind: 'const' }> => binding.kind === 'const'
-  );
-  const moduleSlots = declarations.map((binding) =>
-    moduleScope.declare(binding.name, binding.bindingId)
-  );
-  declarations.forEach((binding, index) => {
-    moduleSlots[index].value = expression(binding.value, moduleScope, setup);
-  });
-  const returned = call(
-    { kind: 'closure', fn: ir.setup, scope: moduleScope },
-    ir.setup.parameters.map((parameter) => hostValue(parameter.type)),
-    setup
-  );
-  trace?.complete?.(reachable ? store.captureStates : new Set());
-  trace?.completePropOperations?.(
-    reachable && !issue && setupPropsClosed ? store.setupPropOperations : new Set()
-  );
-  if (!trace) scheduleRender(returned);
-  // Installation uses strong updates. After installation, every host/public
-  // callback may run repeatedly in any order; join its post-store with the
-  // quiescent store and revisit roots when their captured callable facts change.
-  let quiescent = snapshot(),
-    progress = true;
-  while (progress && !issue && !trace) {
-    progress = false;
-    store = copyStore(quiescent);
-    for (const root of outwardRoots.values()) escape(root.values, root.execution, root.type, false);
-    for (const registration of callbacks) {
-      const { closure, execution, outward } = registration;
-      store = copyStore(quiescent);
-      reachable = true;
-      const key = `${identity(closure.fn)}:${execution.phase}:${execution.context}:${execution.guarded ? 'guarded' : 'strict'}:${fingerprint([closure])}:${outward ? 'outward' : 'callback'}`;
-      if (analyzedCallbacks.has(key)) continue;
-      analyzedCallbacks.add(key);
+  try {
+    // Module closures share the same module environment as hook and prototype setup.
+    const declarations = (ir.moduleBindings ?? []).filter(
+      (binding): binding is Extract<StatementIR, { kind: 'const' }> => binding.kind === 'const'
+    );
+    const moduleSlots = declarations.map((binding) =>
+      moduleScope.declare(binding.name, binding.bindingId)
+    );
+    declarations.forEach((binding, index) => {
+      moduleSlots[index].value = expression(binding.value, moduleScope, setup);
+    });
+    const returned = call(
+      { kind: 'closure', fn: ir.setup, scope: moduleScope },
+      ir.setup.parameters.map((parameter) => hostValue(parameter.type)),
+      setup
+    );
+    trace?.complete?.(reachable ? store.captureStates : new Set());
+    trace?.completePropOperations?.(
+      reachable && !issue && setupPropsClosed ? store.setupPropOperations : new Set()
+    );
+    if (!trace) scheduleRender(returned);
+    // Installation uses strong updates. After installation, every host/public
+    // callback may run repeatedly in any order; join its post-store with the
+    // quiescent store and revisit roots when their captured callable facts change.
+    let quiescent = snapshot(),
       progress = true;
-      allocationContext = `${identity(closure.fn)}:${fingerprint([closure], true)}`;
-      const callbackThrows: Store[] = [];
-      exceptionSinks.push(callbackThrows);
-      // A host invocation is an analysis root, not a new concrete allocation
-      // on every fixed-point visit. Keep its parameter locations stable while
-      // stores continue to join all possible writes. Different registrations,
-      // parameters and nested fields retain independent host value identities.
-      let args = callbackArguments.get(registration);
-      if (!args) {
-        args = closure.fn.parameters.map((parameter) =>
-          parameter.optional || parameter.default
-            ? merge([hostValue(parameter.type), UNDEFINED])
-            : hostValue(parameter.type)
-        );
-        callbackArguments.set(registration, args);
+    while (progress && !issue && !trace) {
+      progress = false;
+      store = forkStore(quiescent);
+      for (const root of outwardRoots.values())
+        escape(root.values, root.execution, root.type, false);
+      for (const registration of callbacks) {
+        const { closure, execution, outward } = registration;
+        store = forkStore(quiescent);
+        reachable = true;
+        const key = `${identity(closure.fn)}:${execution.phase}:${execution.context}:${execution.guarded ? 'guarded' : 'strict'}:${fingerprint([closure])}:${outward ? 'outward' : 'callback'}`;
+        if (analyzedCallbacks.has(key)) continue;
+        analyzedCallbacks.add(key);
+        progress = true;
+        allocationContext = `${identity(closure.fn)}:${fingerprint([closure], true)}`;
+        const callbackThrows: Store[] = [];
+        exceptionSinks.push(callbackThrows);
+        // A host invocation is an analysis root, not a new concrete allocation
+        // on every fixed-point visit. Keep its parameter locations stable while
+        // stores continue to join all possible writes. Different registrations,
+        // parameters and nested fields retain independent host value identities.
+        let args = callbackArguments.get(registration);
+        if (!args) {
+          args = closure.fn.parameters.map((parameter) =>
+            parameter.optional || parameter.default
+              ? merge([hostValue(parameter.type), UNDEFINED])
+              : hostValue(parameter.type)
+          );
+          callbackArguments.set(registration, args);
+        }
+        const returned = call(closure, args, execution);
+        exceptionSinks.pop();
+        allocationContext = undefined;
+        if (outward) escape(returned, execution, closure.fn.returnType);
+        quiescent = joinStores([quiescent, snapshot(), ...callbackThrows]);
+        if (issue) break;
       }
-      const returned = call(closure, args, execution);
-      exceptionSinks.pop();
-      allocationContext = undefined;
-      if (outward) escape(returned, execution, closure.fn.returnType);
-      quiescent = joinStores([quiescent, snapshot(), ...callbackThrows]);
-      if (issue) break;
     }
-  }
 
-  return issue;
+    return issue;
+  } catch (error) {
+    if (!(error instanceof WorkLimit)) throw error;
+    // A demand-only caller must not use the partial traversal as proof that
+    // unvisited functions or host support are unreachable.
+    demand?.opaque();
+    return (
+      issue ?? {
+        message:
+          error.boundary === 'store-work'
+            ? `Callable provenance exceeds the deterministic analysis store-work budget (${CALLABLE_STORE_WORK_LIMIT} visits; span identifies analysis context).`
+            : `Callable provenance exceeds the finite analysis call-depth boundary (${CALLABLE_ACTIVE_CALL_LIMIT} active states; span identifies analysis context).`,
+        span: error.span,
+      }
+    );
+  }
 }

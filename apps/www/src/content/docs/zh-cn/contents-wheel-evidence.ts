@@ -104,8 +104,6 @@ export function observeContentsWheel(element: HTMLElement) {
       wheels: wheels.map(({ event, surfaceInPath, contentInPath }) => ({
         trusted: event.isTrusted === true,
         deltaY: event.deltaY,
-        clientX: Number.isFinite(event.clientX) ? event.clientX : null,
-        clientY: Number.isFinite(event.clientY) ? event.clientY : null,
         surfaceInPath,
         contentInPath,
         defaultPrevented: event.defaultPrevented,

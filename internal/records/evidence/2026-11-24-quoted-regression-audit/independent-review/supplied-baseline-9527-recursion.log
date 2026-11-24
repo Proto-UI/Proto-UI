@@ -1,0 +1,22 @@
+{
+  "elapsedMs": 368.8003530000001,
+  "result": {
+    "ok": false,
+    "diagnostics": [
+      {
+        "code": "PUI1999",
+        "category": "compiler-defect",
+        "message": "Unexpected frontend failure (source location unknown): RangeError: Maximum call stack size exceeded\n    at JSON.stringify (<anonymous>)\n    at fingerprint (/workspace/scratch/5e512bf106bf/gpui-drawer/packages/compiler/src/callable-effects.ts:729:17)\n    at call (/workspace/scratch/5e512bf106bf/gpui-drawer/packages/compiler/src/callable-effects.ts:922:216)\n    at <anonymous> (/workspace/scratch/5e512bf106bf/gpui-drawer/packages/compiler/src/callable-effects.ts:1063:48)\n    at branches (/workspace/scratch/5e512bf106bf/gpui-drawer/packages/compiler/src/callable-effects.ts:628:22)\n    at calls (/workspace/scratch/5e512bf106bf/gpui-drawer/packages/compiler/src/callable-effects.ts:1061:14)\n    at <anonymous> (/workspace/scratch/5e512bf106bf/gpui-drawer/packages/compiler/src/callable-effects.ts:1416:26)\n    at branches (/workspace/scratch/5e512bf106bf/gpui-drawer/packages/compiler/src/callable-effects.ts:628:22)\n    at expression (/workspace/scratch/5e512bf106bf/gpui-drawer/packages/compiler/src/callable-effects.ts:1389:16)\n    at statements (/workspace/scratch/5e512bf106bf/gpui-drawer/packages/compiler/src/callable-effects.ts:2250:13)",
+        "span": {
+          "file": "input.proto.ts",
+          "start": -1,
+          "end": -1,
+          "line": 0,
+          "column": 0,
+          "endLine": 0,
+          "endColumn": 0
+        }
+      }
+    ]
+  }
+}
