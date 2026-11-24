@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-11-24T10:55:09.081681+00:00",
+  "integrationSource": "24dfb9f112b11c2f0c6789dfab3aa86b528656ee",
+  "includedMain": "4144eb94e5dc5fc7065599a6bf1a1613a5bf2c48",
+  "result": "partial",
+  "sourceBindingReconciliation": {
+    "compilerPaths": [
+      "packages/compiler/src/gpui-source.ts",
+      "packages/compiler/src/targets.ts"
+    ],
+    "basis": "Existing literal imports and exact browser owner retained; only source digests renewed for the reviewed and already integrated native/scalar fixes. No new raw import category.",
+    "mergeConflicts": "Retain the reviewed current Presence/controller/material hashes; remove obsolete duplicate map overrides; retain Sprint7 exact synchronous-steps companion bindings on both current source and sink, and copy the real companion in its negative fixtures.",
+    "controlCasesPassed": 97
+  },
+  "completedChecks": {
+    "prototypeCatalog": {
+      "declarationFiles": 1015,
+      "staticEntries": 1408,
+      "catalogedPrototypeEntities": 469,
+      "knownDebtFiles": 479,
+      "dynamicFactoryFiles": 3,
+      "result": "pass",
+      "boundedMapControls": 7
+    },
+    "officialStylePresetCheck": {
+      "allFourStages": "pass",
+      "motionControlsPassed": 13,
+      "heapMiB": 768,
+      "sourceInputsUnchangedByMainScrollIntegration": true
+    }
+  },
+  "cliExploration": {
+    "totalAssertions": 983,
+    "passedAssertions": 980,
+    "failedAssertions": 3,
+    "pendingAssertions": 0,
+    "exitCode": 1,
+    "acceptance": "not an exact-head complete-green receipt; exploratory run overlapped preset regeneration and later unrelated integration metadata/source changes",
+    "familyFailures": {
+      "count": 2,
+      "observed": "Vitest imported the earlier generated draft-family array before the producer completed; exact frozen original-case replay remains required."
+    },
+    "sourceInventoryFailure": {
+      "unprovedReads": 1081,
+      "boundedTriageCounts": {
+        "subject": 50,
+        "intent": 5,
+        "condition": 4,
+        "comparison": 3,
+        "spec": 1
+      },
+      "boundedTriageTotal": 63,
+      "triageScope": "Nine representative probes, not a census or claimed distribution of all1081.",
+      "actualRuntimeControl": "Identical empty define/setDefaults setup yields different hook results on a fresh root and a borrowed root with an existing validator. Universal Props-prefix promotion is unsound.",
+      "disposition": "Keep original fail-closed assertion. Ordinary helper origins, imported table stability, conditional When and callable Rule-spec propagation require separate bounded work or an explicit fresh-root inventory contract.",
+      "gateEdits": "none"
+    }
+  },
+  "independentCliReview": {
+    "exactSource": "58e43642dd598c0c7d445838581e339d500ccf9b",
+    "sourceHashMatches": 9,
+    "focusedAssertionsPassed": 28,
+    "additionalBoundaryProbesPassed": 11,
+    "result": "no blocking finding in the declared source/resource integration scope; not GitHub platform approval"
+  },
+  "evidence": [
+    {
+      "path": "internal/records/evidence/2026-11-24-release-integration-controls/cli-all-related.json.gz",
+      "sha256": "c431b1390bc1e4ed3cbbca0f453663059d60c295ad0c9f0b4252d809f9930858",
+      "uncompressedSha256": "0813c8110f79edad4f77e67f01f135d24e65eefe5a1f9e195c5cf811a28e0e6d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-integration-controls/cli-all-related.log.gz",
+      "sha256": "3b73bc5e1c791a2fe7b659f734bb7d86a10e2482e3af6c9339f0a3863bf4c635",
+      "uncompressedSha256": "5c70335b0fee428872957e0f2cecfa281ad8bcf7f4c49886b82baa0fc09e8447"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-integration-controls/styles-preset-check-final.log.gz",
+      "sha256": "d5e4203461617e8103d8e08b4569b5687f44ec6d36552338ea432c1ea436c05a",
+      "uncompressedSha256": "fe9158408c640a73d34e976b8b54c8e93ca30d6d578ff7214498bb013a08f267"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-integration-controls/catalog-final.log.gz",
+      "sha256": "bd2442a3c4a12058144fe2e83ace2cd6a108dda284110a56e2511e021e199c37",
+      "uncompressedSha256": "89b0767303257898dae366842feb4a8fea53d97ab1a59c791c9f87b1effa4554"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-integration-controls/coverage-final-binding-controls.log.gz",
+      "sha256": "49a3b1c0c2be1859753a397b6905a876f11154f8aa4e7e39ba404a61fd8009e9",
+      "uncompressedSha256": "068ebd86fa7c2f694d2ef41dcea992ad96b6b98e23cf2528ef14d62207b00677"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-integration-controls/report.md.gz",
+      "sha256": "b4e6d61496c18ddc69ad1d29c3cb9cc045e832d677b3436bda4e7d9122ae794c",
+      "uncompressedSha256": "4c4d31a35f7223c96d28d8f32f11cf6f747ab89988190a452278735327b980dc"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-integration-controls/triage.json.gz",
+      "sha256": "cfb347789027efe1141a578bca94ba4aee1f09aec9369074431445e7ab8434be",
+      "uncompressedSha256": "5dc3b49202d5d200bbe669a1eeda4458b5c80e01eab68242dc3a163dd10aeb91"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-integration-controls/pui-cli-gate-runtime-boundary.mts.gz",
+      "sha256": "ea2648ec8cab3168d19c16f1841a58414ab21baebbb0cb8b5f1599af65884b78",
+      "uncompressedSha256": "bf650a2624384bd91c0e358f83f9e2ad96dd33741b1c78cb9677c634b9ff0e13"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-integration-controls/pui-cli-gate-runtime-boundary.log.gz",
+      "sha256": "468a0206fc6aba2e64d2de814efb54ae9fb78ee59e7ed7c65c2a1e3336dafb30",
+      "uncompressedSha256": "0b6bc3edde2f9bf5d405b198e1d75a9492bedda701e0ae1b3d8476286f140d98"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-integration-controls/pui-cli-gate-prefix-diagnostic.json.gz",
+      "sha256": "09b8570996197e9c97ec8dfa0b0a1b94eecb479a1ebf29a9d0a4684ebb68b8ac",
+      "uncompressedSha256": "95e55a37bf3a778ee27fb0a76cbdc7d1ff523dcc64d57f8fb1a3f31058ae4c69"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-integration-controls/pui-cli-review-focused.log.gz",
+      "sha256": "ff7b1eff6ee2b42509dbb624c966e6ae5d8003d52c0fca13c58b740cec260185",
+      "uncompressedSha256": "a0dd56c691fce23535420621a1a9cd3d5d6e50d800e1b91bd94af235a7f66f8d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-integration-controls/pui-cli-review-boundaries.mts.gz",
+      "sha256": "00e6f658549c41d02fb4cde503e30fa6103141bcf29b25257c8c24db25e5bca3",
+      "uncompressedSha256": "6245e7d691842a5a73536c4aeda3264117178877cb5a5c4d83331bf4c76e50a1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-integration-controls/pui-cli-review-boundaries.log.gz",
+      "sha256": "32a47e26331cad44c56c6d6d52d16a640ed425dbe9c58e48383b59eb13fc694d",
+      "uncompressedSha256": "fc6793e151314428c69b1fcf7d45b46b9a148a5e9bec54febb2984b610be9c7a"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-integration-controls/pui-cli-review-initial-hashes.json.gz",
+      "sha256": "5158a867a1b771de012eff501b6bddb3fed2e36ce156fc0a1ccd68ce317fcd56",
+      "uncompressedSha256": "ce9a1aa584b4099cfb208c724f5674c99487c0706c2d8e5461ebcb4c527ba015"
+    }
+  ],
+  "releaseAcceptance": "No complete cycle, current strict budget, packed consumer, native/AT or final rehearsal acceptance claimed by this record."
+}
