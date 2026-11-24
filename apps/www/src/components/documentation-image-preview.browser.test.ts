@@ -64,12 +64,194 @@ async function capture(page: Page, name: string) {
     focusTimeline: (window as any).__docsFocusTimeline ?? [],
     previewFocus: (window as any).__docsImageFocusProbe?.read(true) ?? null,
     previewFocusTimeline: (window as any).__docsImageFocusProbe?.timeline ?? [],
+    closeReadability: (window as any).__docsImageCloseReadability?.read() ?? null,
   }));
   await writeFile(
     path.join(evidence, `${name}.json`),
     JSON.stringify({ ...state, pageErrors: failuresByPage.get(page) ?? [] }, null, 2)
   );
   await page.screenshot({ path: path.join(evidence, `${name}.png`), fullPage: false });
+}
+async function observeKeyboardCloseReadability(page: Page) {
+  await page.evaluate(() => {
+    (window as any).__docsImageCloseReadability?.dispose();
+    const box = (rect: DOMRect) => ({
+      x: rect.x,
+      y: rect.y,
+      width: rect.width,
+      height: rect.height,
+      top: rect.top,
+      right: rect.right,
+      bottom: rect.bottom,
+      left: rect.left,
+    });
+    // A detached canvas resolves the browser's computed CSS colors to sRGB.
+    // It does not replace the image, alter theme tokens or participate in layout.
+    const colors = new Map<string, number[]>();
+    const context = new OffscreenCanvas(1, 1).getContext('2d', { willReadFrequently: true })!;
+    const rgba = (color: string) => {
+      if (!colors.has(color)) {
+        context.clearRect(0, 0, 1, 1);
+        context.fillStyle = color;
+        context.fillRect(0, 0, 1, 1);
+        colors.set(color, Array.from(context.getImageData(0, 0, 1, 1).data));
+      }
+      return colors.get(color)!;
+    };
+    const read = () => {
+      const node = document.querySelector<HTMLElement>('[data-docs-image-close]');
+      if (!node) return null;
+      const style = getComputedStyle(node);
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const ancestors = [];
+      for (let ancestor: HTMLElement | null = node; ancestor; ancestor = ancestor.parentElement) {
+        const css = getComputedStyle(ancestor);
+        ancestors.push({
+          tag: ancestor.localName,
+          content: ancestor.hasAttribute('data-docs-image-content'),
+          canvas: ancestor.hasAttribute('data-docs-image-canvas'),
+          close: ancestor === node,
+          box: box(ancestor.getBoundingClientRect()),
+          client: {
+            left: ancestor.clientLeft,
+            top: ancestor.clientTop,
+            width: ancestor.clientWidth,
+            height: ancestor.clientHeight,
+          },
+          scroll: {
+            x: ancestor.scrollLeft,
+            y: ancestor.scrollTop,
+            width: ancestor.scrollWidth,
+            height: ancestor.scrollHeight,
+          },
+          overflowX: css.overflowX,
+          overflowY: css.overflowY,
+          clipPath: css.clipPath,
+          clip: css.clip,
+          contain: css.contain,
+          transform: css.transform,
+          maskImage: css.maskImage,
+        });
+      }
+      return {
+        time: performance.now(),
+        text: node.textContent,
+        active: node === document.activeElement,
+        nativeFocusVisible: node.matches(':focus-visible'),
+        dataFocusVisible: node.getAttribute('data-focus-visible'),
+        box: box(node.getBoundingClientRect()),
+        textBox: box(range.getBoundingClientRect()),
+        textRects: Array.from(range.getClientRects(), box),
+        style: {
+          color: style.color,
+          backgroundColor: style.backgroundColor,
+          foregroundRgba: rgba(style.color),
+          backgroundRgba: rgba(style.backgroundColor),
+          fontSize: style.fontSize,
+          lineHeight: style.lineHeight,
+          fontFamily: style.fontFamily,
+          fontWeight: style.fontWeight,
+          opacity: style.opacity,
+          visibility: style.visibility,
+          display: style.display,
+          position: style.position,
+          top: style.top,
+          right: style.right,
+          bottom: style.bottom,
+          left: style.left,
+          width: style.width,
+          height: style.height,
+          padding: style.padding,
+          borderWidth: style.borderWidth,
+          overflowX: style.overflowX,
+          overflowY: style.overflowY,
+          clipPath: style.clipPath,
+          outline: style.outline,
+          boxShadow: style.boxShadow,
+          transitionProperty: style.transitionProperty,
+          transitionDuration: style.transitionDuration,
+          transitionDelay: style.transitionDelay,
+          transitionTimingFunction: style.transitionTimingFunction,
+          animationName: style.animationName,
+        },
+        animations: node.getAnimations({ subtree: false }).map((animation) => ({
+          kind: animation.constructor.name,
+          property: 'transitionProperty' in animation ? animation.transitionProperty : null,
+          playState: animation.playState,
+          currentTime: animation.currentTime,
+          timing: animation.effect?.getComputedTiming(),
+          keyframes: (animation.effect as KeyframeEffect | null)?.getKeyframes(),
+        })),
+        viewport: { width: innerWidth, height: innerHeight, scrollX, scrollY },
+        contentPhase: node
+          .closest('[data-docs-image-content]')
+          ?.getAttribute('data-transition-state'),
+        ancestors,
+      };
+    };
+    const record = {
+      before: read(),
+      input: null as null | { key: string; shift: boolean; trusted: boolean; time: number },
+      atInput: null as ReturnType<typeof read>,
+      frames: [] as Array<NonNullable<ReturnType<typeof read>>>,
+      done: false,
+      read,
+      dispose: () => {
+        removeEventListener('keydown', onKey, true);
+        cancelAnimationFrame(frame);
+      },
+    };
+    let frame = 0;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab' || !event.isTrusted) return;
+      removeEventListener('keydown', onKey, true);
+      record.input = {
+        key: event.key,
+        shift: event.shiftKey,
+        trusted: event.isTrusted,
+        time: event.timeStamp,
+      };
+      record.atInput = read();
+      const started = performance.now();
+      const sample = () => {
+        const facts = read();
+        if (facts) record.frames.push(facts);
+        if (performance.now() - started < 400) frame = requestAnimationFrame(sample);
+        else record.done = true;
+      };
+      frame = requestAnimationFrame(sample);
+    };
+    (window as any).__docsImageCloseReadability = record;
+    addEventListener('keydown', onKey, true);
+  });
+}
+async function collectKeyboardCloseReadability(page: Page, name: string) {
+  // This bounded observation includes the first paint and terminal frames. It
+  // does not delay the input, replace native focus or wait away earlier clipping.
+  await page.waitForFunction(() => (window as any).__docsImageCloseReadability?.done === true);
+  const result = await page.evaluate(() => {
+    const record = (window as any).__docsImageCloseReadability;
+    return {
+      before: record.before,
+      input: record.input,
+      atInput: record.atInput,
+      frames: record.frames,
+      terminal: record.read(),
+    };
+  });
+  if (evidence) {
+    await writeFile(
+      path.join(evidence, `${name}-close-reveal.json`),
+      JSON.stringify(result, null, 2)
+    );
+    await capture(page, `${name}-close-terminal`);
+  }
+  // Data integrity only: the diagnostic does not pre-judge the clipping owner
+  // or treat clip-path:none / a focused semantic state as readable text.
+  expect(result.input?.trusted).toBe(true);
+  expect(result.frames.length).toBeGreaterThan(1);
+  return result;
 }
 async function observePreviewFocus(page: Page, sourceSelector: string) {
   await page.evaluate((selector) => {
@@ -650,6 +832,7 @@ describe('automatic documentation image preview in real Chromium', () => {
             await capture(page, `${width}-${colorScheme}-${family}-fit`);
             await page.locator('.docs-image-full').click();
             expect(await panel.getAttribute('data-transition-state')).toBe('entered');
+            await observeKeyboardCloseReadability(page);
             for (let count = 0; count < 5; count++) {
               await page.keyboard.press('Tab');
               expect(await panel.evaluate((el) => el.contains(document.activeElement))).toBe(true);
@@ -671,6 +854,10 @@ describe('automatic documentation image preview in real Chromium', () => {
                 .evaluate((el) => getComputedStyle(el).clipPath)
             ).toBe('none');
             await capture(page, `${width}-${colorScheme}-${family}-keyboard-close`);
+            const closeReveal = await collectKeyboardCloseReadability(
+              page,
+              `${width}-${colorScheme}-${family}`
+            );
             await page.keyboard.press('Escape');
             await closed(page);
             expect(await trigger.evaluate((el) => el === document.activeElement)).toBe(true);
@@ -721,7 +908,16 @@ describe('automatic documentation image preview in real Chromium', () => {
               await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
             ).toBe(true);
             expect(errors).toEqual([]);
-            records.push({ width, colorScheme, family, style, mask, initialFocus, repeatedFocus });
+            records.push({
+              width,
+              colorScheme,
+              family,
+              style,
+              mask,
+              initialFocus,
+              repeatedFocus,
+              closeReveal,
+            });
           } finally {
             await capture(page, `${width}-${colorScheme}-${family}-last-observed`);
             await context.close();
@@ -1764,11 +1960,13 @@ describe('automatic documentation image preview in real Chromium', () => {
           .locator('[data-docs-image-content]')
           .evaluate((el) => parseFloat(getComputedStyle(el).borderTopWidth))
       ).toBe(0);
+      await observeKeyboardCloseReadability(page);
       await page.keyboard.press('Tab');
       expect(
         await page.locator('[data-docs-image-close]').getAttribute('data-focus-visible')
       ).not.toBeNull();
       await capture(page, 'forced-colors-vector');
+      const vectorCloseReveal = await collectKeyboardCloseReadability(page, 'forced-colors-vector');
       await page.keyboard.press('Escape');
       await closed(page);
       expect(await trigger.evaluate((el) => el === document.activeElement)).toBe(true);
@@ -1793,12 +1991,15 @@ describe('automatic documentation image preview in real Chromium', () => {
         .evaluate((node) => (node as HTMLImageElement).decode());
       expect(await page.locator('.docs-image-toolbar, [data-docs-image-zoom]').count()).toBe(0);
       const whitepaperInitialFocus = await contentInitialFocus(page);
+      await observeKeyboardCloseReadability(page);
       const whitepaperCloseFocus = await keyboardCloseFocus(page);
       records.push({
         forcedColorsWhitepaperInitialFocus: whitepaperInitialFocus,
         forcedColorsWhitepaperCloseFocus: whitepaperCloseFocus,
+        forcedColorsVectorCloseReveal: vectorCloseReveal,
       });
       await capture(page, 'forced-colors-whitepaper-keyboard-close');
+      await collectKeyboardCloseReadability(page, 'forced-colors-whitepaper');
       await page.keyboard.press('Enter');
       await closed(page);
       expect(
