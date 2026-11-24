@@ -46,7 +46,9 @@ export async function collectProtoStyleTokensFromFiles(
  * No module bindings, mutable graph versions or captured source values return
  * to the ordinary collector; only the final immutable string tokens are used.
  */
-async function collectStandardRuntimeRootTokens(sourceFile: ts.SourceFile): Promise<readonly string[]> {
+async function collectStandardRuntimeRootTokens(
+  sourceFile: ts.SourceFile
+): Promise<readonly string[]> {
   const projection = await projectStandardRuntimeRootStyleTokens(
     sourceFile,
     async ({ source, summary }) => {

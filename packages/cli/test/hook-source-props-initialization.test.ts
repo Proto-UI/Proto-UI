@@ -256,7 +256,10 @@ describe('native Props initialization before authored hook capture', () => {
         '} });',
       ].join('\n')
     );
-    for (const files of [[first, second], [second, first]]) {
+    for (const files of [
+      [first, second],
+      [second, first],
+    ]) {
       const tokens = await collectProtoStyleTokensFromFiles(files);
       expect(tokens).toContain('data-[selected]:bg-accent');
       expect(tokens).toContain('bg-destructive');

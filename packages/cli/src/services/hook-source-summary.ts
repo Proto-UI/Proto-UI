@@ -683,13 +683,11 @@ export async function projectStandardRuntimeRootStyleTokens(
       summary: HookSourceSummaryContext;
     }>
   ) => Promise<readonly string[]>
-): Promise<
-  Readonly<{
-    kind: 'standard-runtime-root-style-tokens';
-    source: ts.SourceFile;
-    tokens: readonly string[];
-  }> | null
-> {
+): Promise<Readonly<{
+  kind: 'standard-runtime-root-style-tokens';
+  source: ts.SourceFile;
+  tokens: readonly string[];
+}> | null> {
   const summary = createHookSourceSummaryContextInternal(source);
   if (!summary) return null;
   const tokens = await collect(
@@ -2141,7 +2139,8 @@ function createHookSourceSummaryContextInternal(
       if (registrationLiteral(value) !== unknownRegistrationLiteral) return true;
       if (
         ts.isPrefixUnaryExpression(value) &&
-        (value.operator === ts.SyntaxKind.PlusToken || value.operator === ts.SyntaxKind.MinusToken) &&
+        (value.operator === ts.SyntaxKind.PlusToken ||
+          value.operator === ts.SyntaxKind.MinusToken) &&
         ts.isNumericLiteral(value.operand)
       )
         return true;
@@ -6126,7 +6125,9 @@ function createHookSourceSummaryContextInternal(
    * An export edge is not itself a freshness proof: freshness belongs only to
    * the separate Runtime construction scenario and never to ordinary resolve.
    */
-  function selectStandardRuntimeRootSetup(source: ts.SourceFile): ts.FunctionLikeDeclaration | null {
+  function selectStandardRuntimeRootSetup(
+    source: ts.SourceFile
+  ): ts.FunctionLikeDeclaration | null {
     const module = moduleForSource(source);
     const exported = moduleContext.resolveExport(module, 'default');
     if (!exported || exported.module.source !== source) return null;
@@ -6190,7 +6191,9 @@ function createHookSourceSummaryContextInternal(
             while (outer.parent && unwrap(outer.parent) === node) outer = outer.parent;
             const parent = outer.parent;
             const exportAssignment =
-              ts.isExportAssignment(parent) && !parent.isExportEquals && parent.expression === outer;
+              ts.isExportAssignment(parent) &&
+              !parent.isExportEquals &&
+              parent.expression === outer;
             const exportSpecifier =
               ts.isExportSpecifier(parent) &&
               !parent.isTypeOnly &&
@@ -6217,10 +6220,7 @@ function createHookSourceSummaryContextInternal(
     if (!ts.isCallExpression(firstCall)) return null;
     const module = moduleForSource(rootStyleSource);
     const hasClosedCapture = owner.body.statements.some((statement) => {
-      if (
-        !ts.isVariableStatement(statement) ||
-        statement.declarationList.declarations.length !== 1
-      )
+      if (!ts.isVariableStatement(statement) || statement.declarationList.declarations.length !== 1)
         return false;
       const initializer = statement.declarationList.declarations[0].initializer;
       if (!initializer) return false;
