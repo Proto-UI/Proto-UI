@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "reviewedSource": "6635347b3376e90fdb7dc9618c815aa12b66341d",
+  "source": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts",
+  "sha256": "5cb63d1997b7c567784b96d4f78e7cd2f687c57c9a33b11a102f4c457c0a7b12",
+  "owner": "www.shell.mobile-menu-panel",
+  "state": "blocked",
+  "review": "Read-only geometry and passive wheel capture with bounded8event retention; event cancellation is read after dispatch, exact live dialog/surface identity is retained, listener disposed. No package imports or product-module import edge. Only existing browser diagnostic imports it.",
+  "inputAndDeadline": "Original coordinates, wheel delta selection, offset/document assertions and1000ms deadline unchanged; extra observations may perturb timing and are not an acceptance repair.",
+  "changes": "Bind the exact new diagnostic path to its existing blocked panel owner and fingerprint. No allowlist, acceptance or lifecycle widening.",
+  "coverageBefore": {
+    "exitCode": 1,
+    "issues": 2,
+    "reason": "New diagnostic source missing exact owner and fingerprint"
+  },
+  "nativeEvidence": "Pending frozen663 run; no retroactive success claim"
+}
