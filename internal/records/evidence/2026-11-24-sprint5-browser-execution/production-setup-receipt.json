@@ -17,7 +17,12 @@
     },
     "build": {
       "status": "failed",
-      "command": ["corepack", "pnpm@10.32.1", "run", "build"],
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "run",
+        "build"
+      ],
       "cwd": "/tank/shared/projects/proto-ui-agent/sprint5-f7b2/repo/apps/www",
       "exitCode": null,
       "signal": "SIGTERM",

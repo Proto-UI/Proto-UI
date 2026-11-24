@@ -3,7 +3,7 @@
 Source: `0b7b212d3193ea5c7ae219c0501036ee1255e3f2`. Result: **4/4 passed, 0 skipped, exit 0**, on Chromium 145.0.7632.6 with the Chromium sandbox enabled. The fixture compiled its real source, served the emitted SSR HTML and actual generated client bundle over loopback, then asserted real browser adoption and ownership.
 
 | Scenario | Observed result |
-| --- | --- |
+|---|---|
 | Reconnect from `unmounted` | Original server output adopted; old State retired; reentrant reconnect sees no active owner; exactly one replacement created/mounted; replacement State and paint update to 9. |
 | Reconnect from `disposed` | Same replacement guarantees, including new owner and State identity, no old callback closing the new lifetime, and visible update to 9. |
 | Terminal disposal during reconnect | Old State retired; owner remains null; props rejected; no replacement created; no retained output in the screenshot. |
