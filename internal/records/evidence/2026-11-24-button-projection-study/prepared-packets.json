@@ -1,0 +1,169 @@
+{
+  "preparedAt": "2026-11-23T19:47:46.447775+00:00",
+  "taskSha256": "cf2be86543ff3f49b66c757d9183cc97cdcba7561b729c161eb9911654cd2cdf",
+  "oracleSha256": "a93f49303c4de307292df47271287caefd56da0831ef063c3b917349d7d3671f",
+  "packets": [
+    {
+      "id": "generative-1",
+      "root": "/workspace/scratch/0d7d81e85daf/s7-button-generations/generative-1",
+      "inventory": [
+        {
+          "path": "TASK.md",
+          "sha256": "cf2be86543ff3f49b66c757d9183cc97cdcba7561b729c161eb9911654cd2cdf"
+        },
+        {
+          "path": "project/dependency-provenance.json",
+          "sha256": "7c5dd7c49f3d280059d6a5914dc99430ca975e171774e94afb02831cfd1a2e05"
+        },
+        {
+          "path": "project/generated/Component.tsx",
+          "sha256": "25372e9f52d7de17375b7e1a297e075eb4dc337909543e82786898a99fe11ba3"
+        },
+        {
+          "path": "project/index.html",
+          "sha256": "4c139eefc7c2a605c23ba1f2aca0526396286ea1806f1e10e5db2de6eeec04ba"
+        },
+        {
+          "path": "project/negative-controls/internal-import.ts",
+          "sha256": "b3f6c02fcebf78f8d3a666429ffdcbf5370495d1a171bf74735767fca4eb0cf1"
+        },
+        {
+          "path": "project/package-lock.json",
+          "sha256": "eb05de3d6a314e1f385cfed6494844e91696a8cc68541950a91cf0ace9426fdb"
+        },
+        {
+          "path": "project/package.json",
+          "sha256": "4b348afb82b3c1e63e98514b2825decb576eff8e04b418d1eadd6249d52c9afd"
+        },
+        {
+          "path": "project/src/App.tsx",
+          "sha256": "37801d5e96ee512f271ab24a5d1cfca0ee5006756b3d506d52661ccb637a3318"
+        },
+        {
+          "path": "project/src/main.tsx",
+          "sha256": "c9b21695417842045f07a894953ca6660c86d9c51a89d0f3f47364301e3b0306"
+        },
+        {
+          "path": "project/src/storage.ts",
+          "sha256": "1f8511f39b5a5becf5fdc2e78e50a1287e0dcde96c0fd536d6269b802b38154c"
+        },
+        {
+          "path": "project/src/style.css",
+          "sha256": "3ed2198eae83c9a539d632a461116ff71e6af69abb577e6dd3d7bd9bba98664a"
+        },
+        {
+          "path": "project/tsconfig.json",
+          "sha256": "5f238c85d225fddcdd2c89750a8bc4f283df5f98f905aa7d41d745aff6adcb9f"
+        }
+      ]
+    },
+    {
+      "id": "generative-2",
+      "root": "/workspace/scratch/0d7d81e85daf/s7-button-generations/generative-2",
+      "inventory": [
+        {
+          "path": "TASK.md",
+          "sha256": "cf2be86543ff3f49b66c757d9183cc97cdcba7561b729c161eb9911654cd2cdf"
+        },
+        {
+          "path": "project/dependency-provenance.json",
+          "sha256": "7c5dd7c49f3d280059d6a5914dc99430ca975e171774e94afb02831cfd1a2e05"
+        },
+        {
+          "path": "project/generated/Component.tsx",
+          "sha256": "25372e9f52d7de17375b7e1a297e075eb4dc337909543e82786898a99fe11ba3"
+        },
+        {
+          "path": "project/index.html",
+          "sha256": "4c139eefc7c2a605c23ba1f2aca0526396286ea1806f1e10e5db2de6eeec04ba"
+        },
+        {
+          "path": "project/negative-controls/internal-import.ts",
+          "sha256": "b3f6c02fcebf78f8d3a666429ffdcbf5370495d1a171bf74735767fca4eb0cf1"
+        },
+        {
+          "path": "project/package-lock.json",
+          "sha256": "eb05de3d6a314e1f385cfed6494844e91696a8cc68541950a91cf0ace9426fdb"
+        },
+        {
+          "path": "project/package.json",
+          "sha256": "4b348afb82b3c1e63e98514b2825decb576eff8e04b418d1eadd6249d52c9afd"
+        },
+        {
+          "path": "project/src/App.tsx",
+          "sha256": "37801d5e96ee512f271ab24a5d1cfca0ee5006756b3d506d52661ccb637a3318"
+        },
+        {
+          "path": "project/src/main.tsx",
+          "sha256": "c9b21695417842045f07a894953ca6660c86d9c51a89d0f3f47364301e3b0306"
+        },
+        {
+          "path": "project/src/storage.ts",
+          "sha256": "1f8511f39b5a5becf5fdc2e78e50a1287e0dcde96c0fd536d6269b802b38154c"
+        },
+        {
+          "path": "project/src/style.css",
+          "sha256": "3ed2198eae83c9a539d632a461116ff71e6af69abb577e6dd3d7bd9bba98664a"
+        },
+        {
+          "path": "project/tsconfig.json",
+          "sha256": "5f238c85d225fddcdd2c89750a8bc4f283df5f98f905aa7d41d745aff6adcb9f"
+        }
+      ]
+    },
+    {
+      "id": "generative-3",
+      "root": "/workspace/scratch/0d7d81e85daf/s7-button-generations/generative-3",
+      "inventory": [
+        {
+          "path": "TASK.md",
+          "sha256": "cf2be86543ff3f49b66c757d9183cc97cdcba7561b729c161eb9911654cd2cdf"
+        },
+        {
+          "path": "project/dependency-provenance.json",
+          "sha256": "7c5dd7c49f3d280059d6a5914dc99430ca975e171774e94afb02831cfd1a2e05"
+        },
+        {
+          "path": "project/generated/Component.tsx",
+          "sha256": "25372e9f52d7de17375b7e1a297e075eb4dc337909543e82786898a99fe11ba3"
+        },
+        {
+          "path": "project/index.html",
+          "sha256": "4c139eefc7c2a605c23ba1f2aca0526396286ea1806f1e10e5db2de6eeec04ba"
+        },
+        {
+          "path": "project/negative-controls/internal-import.ts",
+          "sha256": "b3f6c02fcebf78f8d3a666429ffdcbf5370495d1a171bf74735767fca4eb0cf1"
+        },
+        {
+          "path": "project/package-lock.json",
+          "sha256": "eb05de3d6a314e1f385cfed6494844e91696a8cc68541950a91cf0ace9426fdb"
+        },
+        {
+          "path": "project/package.json",
+          "sha256": "4b348afb82b3c1e63e98514b2825decb576eff8e04b418d1eadd6249d52c9afd"
+        },
+        {
+          "path": "project/src/App.tsx",
+          "sha256": "37801d5e96ee512f271ab24a5d1cfca0ee5006756b3d506d52661ccb637a3318"
+        },
+        {
+          "path": "project/src/main.tsx",
+          "sha256": "c9b21695417842045f07a894953ca6660c86d9c51a89d0f3f47364301e3b0306"
+        },
+        {
+          "path": "project/src/storage.ts",
+          "sha256": "1f8511f39b5a5becf5fdc2e78e50a1287e0dcde96c0fd536d6269b802b38154c"
+        },
+        {
+          "path": "project/src/style.css",
+          "sha256": "3ed2198eae83c9a539d632a461116ff71e6af69abb577e6dd3d7bd9bba98664a"
+        },
+        {
+          "path": "project/tsconfig.json",
+          "sha256": "5f238c85d225fddcdd2c89750a8bc4f283df5f98f905aa7d41d745aff6adcb9f"
+        }
+      ]
+    }
+  ]
+}

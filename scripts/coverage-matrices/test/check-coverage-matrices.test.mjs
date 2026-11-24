@@ -108,10 +108,7 @@ for (const scenario of ['exact', 'foreign-owner', 'unlisted-compiler-source']) {
       path.join(root, panel),
       `import { createBrowserCompilerClient } from '../../../../../packages/compiler/src/browser/client';\nexport const panel = createBrowserCompilerClient;\n`
     );
-    fs.writeFileSync(
-      path.join(root, client),
-      "export function createBrowserCompilerClient() {\n  addEventListener('message', () => {});\n  return { compile: () => Promise.resolve(null) };\n}\n"
-    );
+    fs.copyFileSync(new URL(`../../../${client}`, import.meta.url), path.join(root, client));
     let boundSource = client;
     let boundOwners = ['www.demo.raw-adapter-runtimes'];
     if (scenario === 'foreign-owner') boundOwners = ['www.shell.primary-nav'];
@@ -125,6 +122,7 @@ for (const scenario of ['exact', 'foreign-owner', 'unlisted-compiler-source']) {
     writeValidMatrices(root, {}, {}, { websiteBindings: [[boundSource, boundOwners]] });
     const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
     if (scenario === 'exact') {
+      assert.equal(message, '');
       assert.doesNotMatch(message, /source binding must name exactly one/);
       assert.doesNotMatch(message, /is missing a reviewed Source-scan binding/);
       assert.doesNotMatch(message, /is not bound to a matrix row/);
