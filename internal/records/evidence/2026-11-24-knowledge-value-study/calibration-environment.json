@@ -1,0 +1,179 @@
+{
+  "finishedAt": "2026-11-23T19:37:43.243431+00:00",
+  "node": "v24.22.3",
+  "chrome": "Google Chrome for Testing 145.0.7632.6",
+  "chromeSha256": "481fea1516a1f2b76454664272f12cd9dd1f20117b21e1f1498e08bc7f872c00",
+  "commands": [
+    {
+      "name": "positive-wide",
+      "command": [
+        "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/tools/node-v24.22.3-linux-x64/bin/node",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/operator/evaluate-tabs-v5.mjs",
+        "--project",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/s7-tabs-calibration",
+        "--url",
+        "http://127.0.0.1:18734/",
+        "--out",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/results-06/positive-wide"
+      ],
+      "cwd": "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d",
+      "startedAt": "2026-11-23T19:35:58.651277+00:00",
+      "finishedAt": "2026-11-23T19:36:13.931968+00:00",
+      "exitCode": 0
+    },
+    {
+      "name": "positive-narrow-dark",
+      "command": [
+        "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/tools/node-v24.22.3-linux-x64/bin/node",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/operator/evaluate-tabs-v5.mjs",
+        "--project",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/s7-tabs-calibration",
+        "--url",
+        "http://127.0.0.1:18734/",
+        "--out",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/results-06/positive-narrow-dark",
+        "--viewport",
+        "narrow",
+        "--color-scheme",
+        "dark"
+      ],
+      "cwd": "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d",
+      "startedAt": "2026-11-23T19:36:13.932609+00:00",
+      "finishedAt": "2026-11-23T19:36:25.067825+00:00",
+      "exitCode": 0
+    },
+    {
+      "name": "negative-automatic",
+      "command": [
+        "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/tools/node-v24.22.3-linux-x64/bin/node",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/operator/evaluate-tabs-v5.mjs",
+        "--project",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/s7-tabs-calibration",
+        "--url",
+        "http://127.0.0.1:18734/",
+        "--out",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/results-06/negative-automatic",
+        "--negative-control",
+        "automatic"
+      ],
+      "cwd": "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d",
+      "startedAt": "2026-11-23T19:36:25.068367+00:00",
+      "finishedAt": "2026-11-23T19:36:37.513655+00:00",
+      "exitCode": 1
+    },
+    {
+      "name": "negative-relationship",
+      "command": [
+        "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/tools/node-v24.22.3-linux-x64/bin/node",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/operator/evaluate-tabs-v5.mjs",
+        "--project",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/s7-tabs-calibration",
+        "--url",
+        "http://127.0.0.1:18734/",
+        "--out",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/results-06/negative-relationship",
+        "--negative-control",
+        "relationship"
+      ],
+      "cwd": "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d",
+      "startedAt": "2026-11-23T19:36:37.513975+00:00",
+      "finishedAt": "2026-11-23T19:36:50.319977+00:00",
+      "exitCode": 1
+    },
+    {
+      "name": "negative-removal",
+      "command": [
+        "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/tools/node-v24.22.3-linux-x64/bin/node",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/operator/evaluate-tabs-v5.mjs",
+        "--project",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/s7-tabs-calibration",
+        "--url",
+        "http://127.0.0.1:18734/",
+        "--out",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/results-06/negative-removal",
+        "--negative-control",
+        "removal"
+      ],
+      "cwd": "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d",
+      "startedAt": "2026-11-23T19:36:50.320424+00:00",
+      "finishedAt": "2026-11-23T19:37:02.863875+00:00",
+      "exitCode": 1
+    },
+    {
+      "name": "legal-structure",
+      "command": [
+        "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/tools/node-v24.22.3-linux-x64/bin/node",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/operator/evaluate-tabs-v5.mjs",
+        "--project",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/s7-tabs-calibration",
+        "--url",
+        "http://127.0.0.1:18734/",
+        "--out",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/results-06/legal-structure",
+        "--calibration-control",
+        "legal-structure"
+      ],
+      "cwd": "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d",
+      "startedAt": "2026-11-23T19:37:02.864260+00:00",
+      "finishedAt": "2026-11-23T19:37:11.506432+00:00",
+      "exitCode": 0
+    },
+    {
+      "name": "duplicate-panel",
+      "command": [
+        "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/tools/node-v24.22.3-linux-x64/bin/node",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/operator/evaluate-tabs-v5.mjs",
+        "--project",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/s7-tabs-calibration",
+        "--url",
+        "http://127.0.0.1:18734/",
+        "--out",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/results-06/duplicate-panel",
+        "--calibration-control",
+        "duplicate-panel"
+      ],
+      "cwd": "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d",
+      "startedAt": "2026-11-23T19:37:11.506791+00:00",
+      "finishedAt": "2026-11-23T19:37:21.948411+00:00",
+      "exitCode": 1
+    },
+    {
+      "name": "live-off",
+      "command": [
+        "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/tools/node-v24.22.3-linux-x64/bin/node",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/operator/evaluate-tabs-v5.mjs",
+        "--project",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/s7-tabs-calibration",
+        "--url",
+        "http://127.0.0.1:18734/",
+        "--out",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/results-06/live-off",
+        "--calibration-control",
+        "live-off"
+      ],
+      "cwd": "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d",
+      "startedAt": "2026-11-23T19:37:21.948740+00:00",
+      "finishedAt": "2026-11-23T19:37:31.784479+00:00",
+      "exitCode": 1
+    },
+    {
+      "name": "unrelated-count",
+      "command": [
+        "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/tools/node-v24.22.3-linux-x64/bin/node",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/operator/evaluate-tabs-v5.mjs",
+        "--project",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/s7-tabs-calibration",
+        "--url",
+        "http://127.0.0.1:18734/",
+        "--out",
+        "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/results-06/unrelated-count",
+        "--calibration-control",
+        "unrelated-count"
+      ],
+      "cwd": "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d",
+      "startedAt": "2026-11-23T19:37:31.784810+00:00",
+      "finishedAt": "2026-11-23T19:37:42.832288+00:00",
+      "exitCode": 1
+    }
+  ]
+}

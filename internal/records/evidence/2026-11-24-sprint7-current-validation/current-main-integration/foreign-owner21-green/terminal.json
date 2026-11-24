@@ -1,0 +1,21 @@
+{
+  "head": "9b5db82aedd836b49f2f19d255bfb2a9a8eaf09a",
+  "sourceBefore": {
+    "scripts/coverage-matrices/check-coverage-matrices.mjs": "6e2c73251b5c8135ccc70c416288e04498ae82ea8ce2c0a820b84fdeb1f7a59b",
+    "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs": "dd040e8262f8e607e7f16fa2fd9e82b071fe034bf4b6a74c15a05104241b0796"
+  },
+  "sourceAfter": {
+    "scripts/coverage-matrices/check-coverage-matrices.mjs": "6e2c73251b5c8135ccc70c416288e04498ae82ea8ce2c0a820b84fdeb1f7a59b",
+    "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs": "dd040e8262f8e607e7f16fa2fd9e82b071fe034bf4b6a74c15a05104241b0796"
+  },
+  "startedAt": "2026-11-24T05:14:48.958895+00:00",
+  "command": [
+    "node",
+    "--test",
+    "--test-name-pattern=^(compiler browser source binding|browser compiler host source binding):",
+    "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs"
+  ],
+  "exitCode": 0,
+  "timedOut": false,
+  "elapsedMs": 3084
+}

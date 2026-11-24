@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-23T20:53:29.843339+00:00",
+  "cutoff": "2026-11-23T20:47:45.432936+00:00",
+  "scope": "Current-user S7 ten-issue batch",
+  "rows": [
+    {
+      "issue": 1150,
+      "scopeSource": {
+        "path": "connector/1150.json",
+        "bodySha256": "7320355b0fc5cbae980b1e819f9cd95eb5fa17ee9a0eb4b47f4d3974a50a637c"
+      },
+      "review": "Independent bounded source/workflow audit in 2026-11-24-sprint7-idle-batch-review.md; not native APPROVE",
+      "currentOwner": "/root under current-user Sprint 7 assignment",
+      "existingMergedSources": [],
+      "newCarrier": null,
+      "newCarrierHead": null,
+      "newCarrierMerged": null,
+      "newMergeSha": null,
+      "postMergeValidation": null,
+      "trackingWriteByThisAudit": false,
+      "completeLoop": false,
+      "status": "Active execution/assembly by root; final packet not reviewed in this audit"
+    },
+    {
+      "issue": 1151,
+      "scopeSource": {
+        "path": "connector/1151.json",
+        "bodySha256": "1bba4423af06deaa935f925d7246df68f5c86dafe392bbc067ed72b4a1edb670"
+      },
+      "review": "Independent bounded source/workflow audit in 2026-11-24-sprint7-idle-batch-review.md; not native APPROVE",
+      "currentOwner": "/root under current-user Sprint 7 assignment",
+      "existingMergedSources": [
+        {
+          "pr": "Proto-UI/dcbot#5",
+          "mergeSha": "37d252f92cfeb5713b82b4e0002f375e9c02b2d9"
+        }
+      ],
+      "newCarrier": null,
+      "newCarrierHead": null,
+      "newCarrierMerged": null,
+      "newMergeSha": null,
+      "postMergeValidation": null,
+      "trackingWriteByThisAudit": false,
+      "completeLoop": false,
+      "status": "Evidence/development available; actual integration and tracking remain"
+    },
+    {
+      "issue": 1147,
+      "scopeSource": {
+        "path": "connector/1147.json",
+        "bodySha256": "d698ccfa0597521af855fb80af5d76c3d4beee94617af0a927330374e21a6647"
+      },
+      "review": "Independent bounded source/workflow audit in 2026-11-24-sprint7-idle-batch-review.md; not native APPROVE",
+      "currentOwner": "/root under current-user Sprint 7 assignment",
+      "existingMergedSources": [
+        {
+          "pr": "Proto-UI/Proto-UI#1725",
+          "mergeSha": "b715b8a6d08c2c79417272c8d4ca9254984feadb"
+        }
+      ],
+      "newCarrier": 1757,
+      "newCarrierHead": "49d8102da5421cade92de85afec6aa68d46ec85c",
+      "newCarrierMerged": false,
+      "newMergeSha": null,
+      "postMergeValidation": null,
+      "trackingWriteByThisAudit": false,
+      "completeLoop": false,
+      "status": "Evidence/development available; actual integration and tracking remain"
+    },
+    {
+      "issue": 746,
+      "scopeSource": {
+        "path": "connector/746.json",
+        "bodySha256": "71572ff854e83a29d391d7aa3d96d5f5c1da3f7cfce763dc21df8a812dc0e7e9"
+      },
+      "review": "Independent bounded source/workflow audit in 2026-11-24-sprint7-idle-batch-review.md; not native APPROVE",
+      "currentOwner": "/root under current-user Sprint 7 assignment",
+      "existingMergedSources": [
+        {
+          "pr": "cyjin-yl/shenko#389",
+          "mergeSha": "6fb0d8ca2855d51624ae9d4e49ad47c0550fded5"
+        }
+      ],
+      "newCarrier": 1757,
+      "newCarrierHead": "49d8102da5421cade92de85afec6aa68d46ec85c",
+      "newCarrierMerged": false,
+      "newMergeSha": null,
+      "postMergeValidation": null,
+      "trackingWriteByThisAudit": false,
+      "completeLoop": false,
+      "status": "Evidence/development available; actual integration and tracking remain"
+    },
+    {
+      "issue": 745,
+      "scopeSource": {
+        "path": "connector/745.json",
+        "bodySha256": "0d06d1056feb2024b2378a3dbfa6a9c4bb3a1b77d511d7c41e56175d7e026e84"
+      },
+      "review": "Independent bounded source/workflow audit in 2026-11-24-sprint7-idle-batch-review.md; not native APPROVE",
+      "currentOwner": "/root under current-user Sprint 7 assignment",
+      "existingMergedSources": [],
+      "newCarrier": 1757,
+      "newCarrierHead": "49d8102da5421cade92de85afec6aa68d46ec85c",
+      "newCarrierMerged": false,
+      "newMergeSha": null,
+      "postMergeValidation": null,
+      "trackingWriteByThisAudit": false,
+      "completeLoop": false,
+      "status": "Evidence/development available; actual integration and tracking remain"
+    },
+    {
+      "issue": 754,
+      "scopeSource": {
+        "path": "connector/754.json",
+        "bodySha256": "7615dc233221bd3d52fa6c8ae3b380cda297309623ff348941ee2808fa1ad599"
+      },
+      "review": "Independent bounded source/workflow audit in 2026-11-24-sprint7-idle-batch-review.md; not native APPROVE",
+      "currentOwner": "/root under current-user Sprint 7 assignment",
+      "existingMergedSources": [],
+      "newCarrier": 1757,
+      "newCarrierHead": "49d8102da5421cade92de85afec6aa68d46ec85c",
+      "newCarrierMerged": false,
+      "newMergeSha": null,
+      "postMergeValidation": null,
+      "trackingWriteByThisAudit": false,
+      "completeLoop": false,
+      "status": "Evidence/development available; actual integration and tracking remain"
+    },
+    {
+      "issue": 751,
+      "scopeSource": {
+        "path": "connector/751.json",
+        "bodySha256": "ce7139069052d6d5ffbf85f84b0df6e266a3c6153118fff2d9fb46617cc3ef0d"
+      },
+      "review": "Independent bounded source/workflow audit in 2026-11-24-sprint7-idle-batch-review.md; not native APPROVE",
+      "currentOwner": "/root under current-user Sprint 7 assignment",
+      "existingMergedSources": [],
+      "newCarrier": null,
+      "newCarrierHead": null,
+      "newCarrierMerged": null,
+      "newMergeSha": null,
+      "postMergeValidation": null,
+      "trackingWriteByThisAudit": false,
+      "completeLoop": false,
+      "status": "Active execution/assembly by root; final packet not reviewed in this audit"
+    },
+    {
+      "issue": 750,
+      "scopeSource": {
+        "path": "connector/750.json",
+        "bodySha256": "0376e97cb18b2a1ca89f3cff008ee374f026d3d535d65a5e8438019c477ffb8f"
+      },
+      "review": "Independent bounded source/workflow audit in 2026-11-24-sprint7-idle-batch-review.md; not native APPROVE",
+      "currentOwner": "/root under current-user Sprint 7 assignment",
+      "existingMergedSources": [
+        {
+          "pr": "Proto-UI/Proto-UI#1724",
+          "mergeSha": "ba72474cb8c47ea9339f3de7c7b35efaa7dcf09a"
+        },
+        {
+          "pr": "Proto-UI/Proto-UI#1727",
+          "mergeSha": "14653b61411f32ac4df66e2dd88c863a38da1a4b"
+        }
+      ],
+      "newCarrier": null,
+      "newCarrierHead": null,
+      "newCarrierMerged": null,
+      "newMergeSha": null,
+      "postMergeValidation": null,
+      "trackingWriteByThisAudit": false,
+      "completeLoop": false,
+      "status": "Active execution/assembly by root; final packet not reviewed in this audit"
+    },
+    {
+      "issue": 749,
+      "scopeSource": {
+        "path": "connector/749.json",
+        "bodySha256": "d7973409599cb47281194b1082e560b69c9d9f4b85dabaff86a249cdceb25ebb"
+      },
+      "review": "Independent bounded source/workflow audit in 2026-11-24-sprint7-idle-batch-review.md; not native APPROVE",
+      "currentOwner": "/root under current-user Sprint 7 assignment",
+      "existingMergedSources": [],
+      "newCarrier": null,
+      "newCarrierHead": null,
+      "newCarrierMerged": null,
+      "newMergeSha": null,
+      "postMergeValidation": null,
+      "trackingWriteByThisAudit": false,
+      "completeLoop": false,
+      "status": "Active execution/assembly by root; final packet not reviewed in this audit"
+    },
+    {
+      "issue": 734,
+      "scopeSource": {
+        "path": "connector/734.json",
+        "bodySha256": "0a2db9043b0f674db7da61f231458f4523aa92247b7a5d09aff1329b539c3aab"
+      },
+      "review": "Independent bounded source/workflow audit in 2026-11-24-sprint7-idle-batch-review.md; not native APPROVE",
+      "currentOwner": "/root under current-user Sprint 7 assignment",
+      "existingMergedSources": [
+        {
+          "pr": "Proto-UI/Proto-UI#1727",
+          "mergeSha": "14653b61411f32ac4df66e2dd88c863a38da1a4b"
+        }
+      ],
+      "newCarrier": null,
+      "newCarrierHead": null,
+      "newCarrierMerged": null,
+      "newMergeSha": null,
+      "postMergeValidation": null,
+      "trackingWriteByThisAudit": false,
+      "completeLoop": false,
+      "status": "Active execution/assembly by root; final packet not reviewed in this audit"
+    }
+  ],
+  "globalSourcePR": {
+    "pr": 1723,
+    "mergeSha": "ddc1b66469ab7e7ac75fcc6df4c57559ca4fd33a",
+    "note": "Existing Sprint7 merge, not acceptance of remaining conditions"
+  },
+  "platformBlockers": [
+    "PR1757 has no independent native APPROVE",
+    "PR1757 Vercel build-rate-limit FAILURE"
+  ],
+  "githubMutations": 0,
+  "finalAcceptance": false
+}

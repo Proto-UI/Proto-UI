@@ -1,0 +1,134 @@
+[
+  {
+    "name": "deterministic-1",
+    "command": [
+      "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/tools/node-v24.22.3-linux-x64/bin/node",
+      "--import",
+      "tsx",
+      "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/button-common-03/operator-root/scripts/analysis/button-projection-study/observe.mjs",
+      "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/button-primary-observation-01/button-primary-01/deterministic-1",
+      "http://127.0.0.1:19759/"
+    ],
+    "startedAt": "2026-11-23T20:52:02.101302+00:00",
+    "sourceArchiveSha256": "88433f66f5da8fef4dd25ea9357c3d8bf5099e6cc7aa7484830f42cf19448900",
+    "sandbox": true,
+    "exitCode": 0,
+    "status": "passed-shared-button-observation",
+    "failure": null,
+    "checkpoints": 10,
+    "gestures": 5,
+    "errors": [],
+    "spaceActivationEdge": "keydown",
+    "finishedAt": "2026-11-23T20:52:12.706120+00:00"
+  },
+  {
+    "name": "clean-generative-1",
+    "command": [
+      "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/tools/node-v24.22.3-linux-x64/bin/node",
+      "--import",
+      "tsx",
+      "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/button-common-03/operator-root/scripts/analysis/button-projection-study/observe.mjs",
+      "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/button-primary-observation-01/button-primary-01/clean-generative-1",
+      "http://127.0.0.1:19759/"
+    ],
+    "startedAt": "2026-11-23T20:52:12.706953+00:00",
+    "sourceArchiveSha256": "88433f66f5da8fef4dd25ea9357c3d8bf5099e6cc7aa7484830f42cf19448900",
+    "sandbox": true,
+    "exitCode": 0,
+    "status": "passed-shared-button-observation",
+    "failure": null,
+    "checkpoints": 10,
+    "gestures": 5,
+    "errors": [],
+    "spaceActivationEdge": "keyup-or-later",
+    "finishedAt": "2026-11-23T20:52:21.241541+00:00"
+  },
+  {
+    "name": "deterministic-2",
+    "command": [
+      "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/tools/node-v24.22.3-linux-x64/bin/node",
+      "--import",
+      "tsx",
+      "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/button-common-03/operator-root/scripts/analysis/button-projection-study/observe.mjs",
+      "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/button-primary-observation-01/button-primary-01/deterministic-2",
+      "http://127.0.0.1:19759/"
+    ],
+    "startedAt": "2026-11-23T20:52:21.242337+00:00",
+    "sourceArchiveSha256": "88433f66f5da8fef4dd25ea9357c3d8bf5099e6cc7aa7484830f42cf19448900",
+    "sandbox": true,
+    "exitCode": 0,
+    "status": "passed-shared-button-observation",
+    "failure": null,
+    "checkpoints": 10,
+    "gestures": 5,
+    "errors": [],
+    "spaceActivationEdge": "keydown",
+    "finishedAt": "2026-11-23T20:52:27.534709+00:00"
+  },
+  {
+    "name": "clean-generative-2",
+    "command": [
+      "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/tools/node-v24.22.3-linux-x64/bin/node",
+      "--import",
+      "tsx",
+      "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/button-common-03/operator-root/scripts/analysis/button-projection-study/observe.mjs",
+      "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/button-primary-observation-01/button-primary-01/clean-generative-2",
+      "http://127.0.0.1:19759/"
+    ],
+    "startedAt": "2026-11-23T20:52:27.535364+00:00",
+    "sourceArchiveSha256": "88433f66f5da8fef4dd25ea9357c3d8bf5099e6cc7aa7484830f42cf19448900",
+    "sandbox": true,
+    "exitCode": 0,
+    "status": "passed-shared-button-observation",
+    "failure": null,
+    "checkpoints": 10,
+    "gestures": 5,
+    "errors": [],
+    "spaceActivationEdge": "keyup-or-later",
+    "finishedAt": "2026-11-23T20:52:37.093964+00:00"
+  },
+  {
+    "name": "deterministic-3",
+    "command": [
+      "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/tools/node-v24.22.3-linux-x64/bin/node",
+      "--import",
+      "tsx",
+      "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/button-common-03/operator-root/scripts/analysis/button-projection-study/observe.mjs",
+      "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/button-primary-observation-01/button-primary-01/deterministic-3",
+      "http://127.0.0.1:19759/"
+    ],
+    "startedAt": "2026-11-23T20:52:37.095008+00:00",
+    "sourceArchiveSha256": "88433f66f5da8fef4dd25ea9357c3d8bf5099e6cc7aa7484830f42cf19448900",
+    "sandbox": true,
+    "exitCode": 0,
+    "status": "passed-shared-button-observation",
+    "failure": null,
+    "checkpoints": 10,
+    "gestures": 5,
+    "errors": [],
+    "spaceActivationEdge": "keydown",
+    "finishedAt": "2026-11-23T20:52:43.759978+00:00"
+  },
+  {
+    "name": "clean-generative-3",
+    "command": [
+      "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/tools/node-v24.22.3-linux-x64/bin/node",
+      "--import",
+      "tsx",
+      "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/button-common-03/operator-root/scripts/analysis/button-projection-study/observe.mjs",
+      "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/button-primary-observation-01/button-primary-01/clean-generative-3",
+      "http://127.0.0.1:19759/"
+    ],
+    "startedAt": "2026-11-23T20:52:43.760757+00:00",
+    "sourceArchiveSha256": "88433f66f5da8fef4dd25ea9357c3d8bf5099e6cc7aa7484830f42cf19448900",
+    "sandbox": true,
+    "exitCode": 0,
+    "status": "passed-shared-button-observation",
+    "failure": null,
+    "checkpoints": 10,
+    "gestures": 5,
+    "errors": [],
+    "spaceActivationEdge": "keyup-or-later",
+    "finishedAt": "2026-11-23T20:52:56.019263+00:00"
+  }
+]

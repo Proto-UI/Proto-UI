@@ -1,0 +1,318 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-pre-freeze-oracle-source-review",
+  "reviewer": "/root/button_oracle_review",
+  "reviewedAt": "2026-11-23T20:09:00.752915+00:00",
+  "disposition": "source-adequate-with-explicit-limits-calibration-pending",
+  "platformApproval": false,
+  "freezeAcceptance": false,
+  "authorization": {
+    "mode": "human-assisted",
+    "scope": "Read-only independent oracle/support review; write review JSON/MD only in the requested review directory; no external writes"
+  },
+  "independence": {
+    "authoredOracle": false,
+    "authoredDeterministicImplementation": false,
+    "authoredGenerativeImplementation": false,
+    "inspectedParticipantImplementations": false,
+    "inspectedCompiledImplementationSemantics": false,
+    "generatedBytesOnlyHashedForAdmission": true
+  },
+  "reviewedObserver": {
+    "path": "/workspace/scratch/0d7d81e85daf/proto-ui-s7/scripts/analysis/button-projection-study/observe.mjs",
+    "sha256": "5076ef9cfc3abb26a3b83963a9fc70cb03991419b939e026a495697c6b3dbc7d"
+  },
+  "baselineObserverSha256": "25fa94ff6aebd8eebe4d4f6719684de69bf4454a39977db23220258579d8afe5",
+  "intermediateObserverSha256": "f6de5fc328ace2abba0676b6fdb4f0993c0cdf7e45ecfbb79df833a25bbc6267",
+  "reviewedObjects": [
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/proto-ui-s7/scripts/analysis/invisible-consumption/asset-binding.mjs",
+      "sha256": "3c8e5c12757b9789324fe6c57c05711679c1e63e04adedbd17a2e85de077ef18"
+    },
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/proto-ui-s7/scripts/analysis/invisible-consumption/test/asset-binding.test.mjs",
+      "sha256": "59d87a49be675075cb384cc6347e1e535e5c45749b982e30a98951fdb987a9fe"
+    },
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/proto-ui-s7/scripts/benchmark/evidence.mjs",
+      "sha256": "4b6a4ff4826d13f8b29da5bb3e7985298905d3ef86d55034d2fb864d22e837c9"
+    },
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/proto-ui-s7/apps/www/src/content/docs/zh-cn/browser-harness.ts",
+      "sha256": "3033dd603ba75486310cb6f466e72e5e3b02bef111c406b1f68fcf2987247c71"
+    },
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/s7-button-artifact-01/operator/admission.json",
+      "sha256": "9b110a11a07ef0d90b0924bc208a5befb2004a040eb685f7fcb47e695a94790d"
+    },
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/s7-button-artifact-01/clean-consumer.json",
+      "sha256": "a31ab2b5f742f5c8cd1b01a553cf7dd005e8df11f4ea86461dc09f2d3c2209a6"
+    },
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/s7-button-artifact-01/candidate.json",
+      "sha256": "a9f7590b885fedff9255ab13db60a11cf782c417872ff89cf862fae42ec282f7"
+    },
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/s7-button-artifact-01/clean-consumer/package.json",
+      "sha256": "4b348afb82b3c1e63e98514b2825decb576eff8e04b418d1eadd6249d52c9afd"
+    },
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/s7-button-artifact-01/clean-consumer/package-lock.json",
+      "sha256": "eb05de3d6a314e1f385cfed6494844e91696a8cc68541950a91cf0ace9426fdb"
+    },
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/s7-button-artifact-01/clean-consumer/src/App.tsx",
+      "sha256": "37801d5e96ee512f271ab24a5d1cfca0ee5006756b3d506d52661ccb637a3318"
+    },
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/s7-button-artifact-01/clean-consumer/src/main.tsx",
+      "sha256": "c9b21695417842045f07a894953ca6660c86d9c51a89d0f3f47364301e3b0306"
+    },
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/s7-button-artifact-01/clean-consumer/src/style.css",
+      "sha256": "3ed2198eae83c9a539d632a461116ff71e6af69abb577e6dd3d7bd9bba98664a"
+    },
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/s7-button-artifact-01/clean-consumer/index.html",
+      "sha256": "4c139eefc7c2a605c23ba1f2aca0526396286ea1806f1e10e5db2de6eeec04ba"
+    },
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/s7-button-artifact-01/clean-consumer/tsconfig.json",
+      "sha256": "5f238c85d225fddcdd2c89750a8bc4f283df5f98f905aa7d41d745aff6adcb9f"
+    },
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/s7-button-artifact-01/clean-consumer/dependency-provenance.json",
+      "sha256": "7c5dd7c49f3d280059d6a5914dc99430ca975e171774e94afb02831cfd1a2e05"
+    },
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/s7-button-artifact-01/operator/build.result.json",
+      "sha256": "f941d992c4b5cf1051cb95cc06f3432877c76ebc4c919248e0c6b6230a443673"
+    },
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/s7-button-artifact-01/operator/consumer-closure.json",
+      "sha256": "ef4450d39e61626ba4e807edc2e3e4839341ef53ce77555e3c4f96bdfa7c7e3d"
+    },
+    {
+      "path": "/workspace/scratch/0d7d81e85daf/s7-control/issue-749-current.md",
+      "sha256": "3e532457782df205c135e026b73d72a53952734f7b14ac7297da9a419b0b022d"
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/749",
+      "readMethod": "GitHub connector fetch_issue",
+      "updatedAt": "2026-11-06T12:46:50Z",
+      "use": "Common supported scope, independent oracle, frozen controls, retained failures and bounded conclusions"
+    },
+    {
+      "url": "https://www.w3.org/WAI/ARIA/apg/patterns/button/",
+      "use": "Button role/name and Enter/Space activation; this pattern does not impose one Space activation edge"
+    },
+    {
+      "url": "https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fe-disabled",
+      "use": "Native disabled control click suppression"
+    },
+    {
+      "url": "https://www.w3.org/TR/wai-aria-1.2/#aria-disabled",
+      "use": "Disabled state denotes inoperability; state declaration alone is not behavioral evidence"
+    }
+  ],
+  "prerequisiteReadback": {
+    "admission": {
+      "path": "/workspace/scratch/0d7d81e85daf/s7-button-artifact-01/operator/admission.json",
+      "sha256": "9b110a11a07ef0d90b0924bc208a5befb2004a040eb685f7fcb47e695a94790d"
+    },
+    "declaredDisposition": "admitted-for-experiment",
+    "sourceRevision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+    "compilerRevision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+    "outputInventorySha256": "6705b19e96b27aa8dd1a5ff87e26241b655f7bb20c3980ac735ebd73472fb009",
+    "outputInventoryIndependentlyRecomputed": true,
+    "admissionObjectAndEvidenceReferencesChecked": 28,
+    "mismatches": 0,
+    "productionAssetRecordsRechecked": 4,
+    "productionAssetRecordMismatches": 0,
+    "buildReceiptExitCode": 0,
+    "closureReportedOk": true,
+    "closureReportedInternalPackages": [],
+    "publishedAdmission": {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/750#issuecomment-7111867656",
+      "commentId": 7111867656,
+      "readBackThroughGitHub": true,
+      "platformAuthor": "cyjin-yl",
+      "independentReviewerNamedInComment": "/root/harness_closeout",
+      "nativeApproval": false
+    },
+    "limits": [
+      "Existing build/browser/install receipts were inspected or hash-verified; this reviewer did not reinstall, rebuild or run a browser.",
+      "The retained admission contains stale draft-publication wording; actual comment readback establishes publication of its bounded review, not a native GitHub APPROVE.",
+      "This artifact admission is a prerequisite for comparison, not validation of the new common oracle or evidence of generative runs."
+    ]
+  },
+  "commonScope": {
+    "target": "React and React DOM 19.2.6 on one pinned Chromium configuration",
+    "children": "Fixed text Save preference in the shared fixture",
+    "callback": "Observed outward activation count, without event-payload or callback-replacement claims",
+    "disabled": "One controlled false -> true -> false cycle",
+    "inputs": [
+      "native driver pointer click",
+      "Tab to enabled action",
+      "Enter",
+      "one complete Space down/up gesture",
+      "attempted disabled pointer click",
+      "disabled Enter/Space only when the action actually accepts focus",
+      "re-enabled pointer click"
+    ],
+    "geometryAndSemantics": [
+      "nonzero native bounds",
+      "initial center hit target",
+      "named button role lookup",
+      "enabled keyboard focus",
+      "native disabled or aria-disabled state"
+    ],
+    "reset": "A separate zero-count observation after the fresh-document navigation",
+    "temporalBoundary": "Input observer installed before each gesture; final and monotonic interval checks include a finite 250ms after gesture completion"
+  },
+  "fairnessAssessment": [
+    "Accepting one complete Space activation on either down or up is fair for the declared common outcome; preserve edge as diagnostic, not correctness rank.",
+    "Native :disabled and aria-disabled=true are both admitted representations, with actual attempted activation observed separately.",
+    "A native disabled action rejecting focus is a legitimate branch. Record it as focus-rejected / keyboard event not dispatched, and do not count it as an executed Enter/Space attempt.",
+    "The external React fixture uses the same label, functional count callback, disabled state, viewport and input sequence. It must be frozen identically for every treatment.",
+    "No evidence here establishes broad task equivalence beyond these fixed inputs. Freeze and hash the actual shared prompt, scope matrix, dependency lock and runner dependencies before participant release."
+  ],
+  "findings": [
+    {
+      "id": "ORACLE-01",
+      "severity": "high",
+      "confidence": "high",
+      "status": "resolved-in-source-pending-browser-calibration",
+      "title": "Responses must remain bound to the frozen production inventory",
+      "originalRevision": "25fa94ff6aebd8eebe4d4f6719684de69bf4454a39977db23220258579d8afe5",
+      "location": "observe.mjs original lines 24-28, 79-91, 103-109",
+      "finding": "Initial hashes were checked once, but subsequent HTML/JS/CSS responses were compared only with then-current disk bytes. An unlisted same-origin script or a changed disk/served pair was not rejected by a frozen digest comparison.",
+      "correction": "The current source requires each observed script/stylesheet path in frozenAssets, verifies current disk against its frozen hash, and passes the frozen hash to body/cache binding. navigate now requires frozen index.html and compares both current index bytes and the response body to that frozen hash.",
+      "resolvedIn": "5076ef9cfc3abb26a3b83963a9fc70cb03991419b939e026a495697c6b3dbc7d",
+      "evidenceClass": "source analysis plus isolated binding-API demonstration; no browser exploit claimed"
+    },
+    {
+      "id": "ORACLE-02",
+      "severity": "medium",
+      "confidence": "high",
+      "status": "resolved-in-source-pending-browser-calibration",
+      "title": "Verify fresh-document reset before keyboard activation",
+      "originalRevision": "25fa94ff6aebd8eebe4d4f6719684de69bf4454a39977db23220258579d8afe5",
+      "location": "observe.mjs original lines 167-173",
+      "finding": "The second navigate had no immediate zero assertion. A retained count of one combined with a dead Enter handler could satisfy the subsequent expected count of one. The fixed shared React shell reduces this risk, but reset and Enter were not independently established.",
+      "correction": "The current source separately asserts count(0), records 03-fresh-document, and checks the pre-count inside the Enter gesture.",
+      "resolvedIn": "f6de5fc328ace2abba0676b6fdb4f0993c0cdf7e45ecfbb79df833a25bbc6267",
+      "evidenceClass": "source-level counterexample; not a browser reproduction"
+    },
+    {
+      "id": "ORACLE-03",
+      "severity": "high",
+      "confidence": "high",
+      "status": "resolved-in-source-pending-browser-calibration",
+      "title": "Instantaneous counts do not establish finite exactly-once or disabled-key rejection",
+      "originalRevision": "25fa94ff6aebd8eebe4d4f6719684de69bf4454a39977db23220258579d8afe5",
+      "location": "observe.mjs original lines 115-120, 164-182, 220-232",
+      "finding": "waitForFunction returned as soon as the expected count appeared. Delayed duplicate activation could be missed, especially before reload or after the final action; disabled keyboard checks could return before a delayed invalid callback. The pointer-only disabled observer was installed after the input.",
+      "correction": "gesture installs its MutationObserver before input, records initial and final values, waits 250ms after the complete gesture, and rejects samples outside the expected interval, reversals, or an incorrect final count. All positive and attempted disabled pointer/keyboard gestures use it.",
+      "resolvedIn": "f6de5fc328ace2abba0676b6fdb4f0993c0cdf7e45ecfbb79df833a25bbc6267",
+      "evidenceClass": "source analysis; delayed-input browser calibration pending"
+    }
+  ],
+  "openSourceFindingsInDeclaredScope": [],
+  "executedChecks": [
+    {
+      "command": "node --test scripts/analysis/invisible-consumption/test/asset-binding.test.mjs",
+      "exitCode": 0,
+      "tests": 8,
+      "passed": 8,
+      "scope": "200 body hashing and 304 cache provenance controls; not browser calibration"
+    },
+    {
+      "command": "node --check scripts/analysis/button-projection-study/observe.mjs",
+      "exitCode": 0,
+      "observerSha256": "5076ef9cfc3abb26a3b83963a9fc70cb03991419b939e026a495697c6b3dbc7d"
+    },
+    {
+      "command": "Read-only SHA-256 checks of admission objects/evidence and output inventory recomputation",
+      "result": "28/28 direct object/evidence refs and 4/4 production asset records match"
+    },
+    {
+      "command": "Inline isolated bindProductionAsset calls with changed/unlisted 200 samples",
+      "result": "Confirmed the helper itself has no frozen-inventory input, so the caller needed the now-added frozen mapping; not an end-to-end browser reproduction"
+    }
+  ],
+  "calibration": {
+    "status": "not-executed-or-reviewed-by-this-agent",
+    "positiveControls": [
+      "Exact admitted generated artifact",
+      "Independently authored native button with Space keyup and native disabled",
+      "Independently authored ARIA button with Space keydown and a working disabled guard"
+    ],
+    "negativeControls": [
+      {
+        "mutation": "Immediate double Space activation on down and up",
+        "expectedFirstFailure": "space interval or final count"
+      },
+      {
+        "mutation": "Duplicate callback 80ms after an otherwise correct activation",
+        "expectedFirstFailure": "corresponding gesture interval"
+      },
+      {
+        "mutation": "No Space activation",
+        "expectedFirstFailure": "space final count"
+      },
+      {
+        "mutation": "Disabled pointer handler ignores the guard",
+        "expectedFirstFailure": "disabled-pointer interval"
+      },
+      {
+        "mutation": "Only disabled keyboard handler leaks activation",
+        "expectedFirstFailure": "disabled-enter or disabled-space interval"
+      },
+      {
+        "mutation": "Controlled disabled prop ignored",
+        "expectedFirstFailure": "disabled semantic assertion or disabled gesture"
+      },
+      {
+        "mutation": "Button remains disabled after re-enable",
+        "expectedFirstFailure": "reenabled-pointer actionability/final count"
+      },
+      {
+        "mutation": "Persisted count survives fresh-document navigation",
+        "expectedFirstFailure": "fresh-document zero-count assertion"
+      },
+      {
+        "mutation": "Role/name absent",
+        "expectedFirstFailure": "named-role locator"
+      },
+      {
+        "mutation": "Enabled button removed from Tab order",
+        "expectedFirstFailure": "keyboard-focus assertion"
+      },
+      {
+        "mutation": "Extra same-origin JS absent from frozen inventory",
+        "expectedFirstFailure": "asset-binding error"
+      },
+      {
+        "mutation": "Served/disk HTML changed after the initial preimage check",
+        "expectedFirstFailure": "frozen index binding"
+      }
+    ],
+    "acceptanceRule": "Retain each raw failure, expected and actual first divergence, browser version, production bytes and trace. Valid native and ARIA controls must pass; targeted mutations must fail. Unexecuted or blocked calibration rows stay unexecuted/blocked. Handwritten controls are oracle calibration, never Agent-generation samples."
+  },
+  "limits": [
+    "No browser calibration was run or accepted by this review.",
+    "No visual screenshot review, contrast or visible-focus acceptance; recorded outline/color/opacity are diagnostics.",
+    "Named DOM role/state lookup is not a screen-reader or platform accessibility-tree guarantee.",
+    "No arbitrary or dynamic children, event payload/currentTarget, handler replacement, full lifecycle, retained callbacks, cleanup, native mixing, SSR or other-host guarantee.",
+    "No physical keyboard/pointer or AT evidence.",
+    "The 250ms observer proves only the selected finite observation; later callbacks are unmeasured.",
+    "The reducer must classify later cases after an early failure as not reached unless separately executed; the current runner is fail-fast.",
+    "The trusted shared fixture owns the output and functional count updater. The oracle is not an adversarial sandbox against code that rewrites the fixture, output or observer globals.",
+    "No participant prompt, final scope matrix or full final freeze manifest was available for content-bound acceptance in this source review."
+  ],
+  "nextStep": "Owner runs and retains actual positive/negative browser calibration, freezes the exact shared scope/prompt/environment/runner hashes, and requests follow-up independent review of those results before participant release."
+}

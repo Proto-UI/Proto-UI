@@ -1,0 +1,5 @@
+
+> proto-ui@ check:agent-doc /tmp/proto-ui-s7-recovery-456f
+> tsx scripts/spec/generate-agent-project-understanding.mjs --check
+
+ ELIFECYCLE  Command failed with exit code 1.

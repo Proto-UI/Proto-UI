@@ -1,0 +1,268 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-local-consumer-study-results-review",
+  "reviewedAt": "2026-11-23T21:13:44.614590+00:00",
+  "reviewer": {
+    "identity": "/root/s7_consumer_results_review",
+    "role": "independent bounded static evidence reviewer",
+    "producer": false,
+    "participant": false,
+    "operator": false,
+    "platformApproval": false
+  },
+  "execution": {
+    "mode": "human-assisted",
+    "modeSource": "current-user-via-root-task",
+    "authorizationScope": "Read-only review of the original #750 criteria, sealed real study evidence and main record; local review outputs only; no browser/product rerun or external write.",
+    "skills": [
+      "pui-dev",
+      "pui-orient",
+      "pui-review"
+    ],
+    "canonicalPrReviewInput": null,
+    "canonicalPrReviewPacket": false,
+    "nativeApproval": false
+  },
+  "disposition": "adequate-for-bounded-observational-acceptance",
+  "blockingFindings": [],
+  "conclusion": "Accept feasibility for the exact admitted editable Base Button directory, fixed React task and actual consumer-02 journey without hidden Proto onboarding. Accept consumer-01 as retained supplementary real behavior with incomplete operator timing. Do not infer broader usability, demand, relative advantage or acceptance by a platform.",
+  "binding": {
+    "repositoryHead": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+    "evidenceRoot": "/workspace/scratch/0d7d81e85daf/s7-consumer-study-complete-01",
+    "evidenceSeal": "6706ebce99adc9b301f61b626db0c892b81c4fea26fdff09ecf342d7bc324992",
+    "artifactCount": 751,
+    "protocolSha256": "a54dc7579bb3334d48dfb67b4fddb303013a8efc8408cffea818b71dfb5a2ee2",
+    "packetSha256": "2c09d4dc137fdb77f89e897ab739e7175bfdd79088c1ce6eb7deee7826646bd5",
+    "normalizedRunSha256": "dcc3208ff9b159bf2934b2e944debfc099f095ebc8281f0e33d11129bfbb1144",
+    "originalIssueSnapshot": {
+      "path": "/workspace/scratch/0d7d81e85daf/proto-ui-s7/internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/750.json",
+      "sha256": "3af2d678413dd554bffca4e644bfbb578b2c6fe0f26899ae8b6f6d85b8cde5dd",
+      "bodySha256": "0376e97cb18b2a1ca89f3cff008ee374f026d3d535d65a5e8438019c477ffb8f"
+    },
+    "reviewedMainRecord": {
+      "path": "/workspace/scratch/0d7d81e85daf/proto-ui-s7/internal/records/2026-11-24-generated-button-consumption.md",
+      "sha256": "11267119297c827277b6925e04295e078fb108edba2595b1494697b436b1020d"
+    },
+    "admissionUrl": "https://github.com/Proto-UI/Proto-UI/issues/750#issuecomment-7111867656"
+  },
+  "originalCriteria": [
+    {
+      "id": "issue.750.001",
+      "original": "The measured artifact is real, its exact supported scope and provenance are documented, and another operator can reproduce the consumer setup.",
+      "disposition": "accepted-bounded-evidence",
+      "reason": "Real Base Button source and 196 Compiler files match the pinned Git revision; complete generated directory and unchanged provenance are retained. Actual generation, clean install/build/closure, ordinary directory-copy instructions, fixed starter/lock, and the published independent admission bind the consumer setup. No product execution was rerun by this reviewer.",
+      "evidence": [
+        "artifact.json",
+        "operator/admission-published.json",
+        "operator/reproduction.md",
+        "distribution/USAGE.md",
+        "runs/consumer-02/initial-project",
+        "runs/consumer-02/measurement/commands/install-01.json"
+      ]
+    },
+    {
+      "id": "issue.750.002",
+      "original": "The journey is measured from discovery through a ship/build check; completion, failures, time, internals knowledge, code modifications and escape hatches are recorded.",
+      "disposition": "accepted-bounded-evidence",
+      "reason": "consumer-02 preserves the actual release/finish, all 42 ordered events, five stages, commands and failures, five source edits, two explanations, one information-need event, and zero recorded bypass events. Browser result, final source, four production files and nine screenshots support the completed ship. Full elapsed time includes initial reading and operator waiting; stage durations are receipt intervals, not active labor. consumer-01 is retained separately with its missing monotonic tail.",
+      "evidence": [
+        "normalized/consumer-02.json",
+        "runs/consumer-02/measurement/clock.json",
+        "runs/consumer-02/measurement/received.jsonl",
+        "runs/consumer-02/evidence/final-report.md",
+        "runs/consumer-02/operator-feedback/browser-01/result.json",
+        "excluded/consumer-01/disposition.json"
+      ]
+    },
+    {
+      "id": "issue.750.003",
+      "original": "Results include cases where the consumer must learn Proto UI internals or cannot complete the task; no preference/satisfaction result is required.",
+      "disposition": "accepted-observed-outcome-reporting",
+      "reason": "The report retains the observed styling information gap and supplied-source inspection, generated edit, real preview/HTTP failures and recorder interruption, with their actual attribution. No hidden Proto internal onboarding or terminal component task failure was observed. Those absent adverse outcomes are not invented, and the recorder failure is not relabeled as participant/product failure. This accepts inclusive outcome reporting, not a claim that a forced internal-learning or terminal-failure sample was obtained.",
+      "evidence": [
+        "runs/consumer-02/evidence/customization-information.txt",
+        "runs/consumer-02/evidence/experience.json",
+        "runs/consumer-02/evidence/production-server-01-failure-snapshot.log",
+        "runs/consumer-02/measurement/commands/verify-production-http-01.json",
+        "excluded/consumer-01/disposition.json"
+      ]
+    },
+    {
+      "id": "issue.750.004",
+      "original": "Limitations and confounders are documented and conclusions are bounded to the artifact/host/task that was exercised.",
+      "disposition": "accepted-bounded-evidence",
+      "reason": "The supported inference is feasibility for this editable local Base Button artifact, React 19.2.6, one supplied preference task and fresh instructed Agents. Brand name exposure, general framework knowledge, ordinary generated-source access, shared-environment separation, unsegmented initial reading, transport/operator waits, absent provider metrics and the excluded first clock are material limitations. No human-population, preference, product demand, adoption, comparative advantage, full-library, AT or maintenance-economics inference is admitted.",
+      "evidence": [
+        "normalized/consumer-02.json",
+        "runs/consumer-02/evidence/consulted-materials.txt",
+        "runs/consumer-02/evidence/consulted-materials-final.json",
+        "runs/consumer-02/evidence/experience.json",
+        "runs/consumer-02/evidence/final-report.md"
+      ]
+    },
+    {
+      "id": "issue.750.005",
+      "original": "If the artifact prerequisite is not met, the Issue remains staged and blocked without claiming an experimental outcome.",
+      "disposition": "conditional-safeguard-preserved",
+      "reason": "The current artifact has a real, bound, published independent admission; the unmet-prerequisite condition does not describe this run. The original blocked fixture and unchanged collector behavior remain intact, and operator preflight is not counted as consumer outcome. This criterion does not itself close the live Issue.",
+      "evidence": [
+        "operator/admission-published.json",
+        "packet.json"
+      ]
+    }
+  ],
+  "measurements": {
+    "strictPrimary": {
+      "observedRuns": 1,
+      "attempted": 1,
+      "completed": 1,
+      "completionRate": 1,
+      "interpretation": "Descriptive one-run ratio only, not a population success estimate."
+    },
+    "additionalActualAttempts": 1,
+    "excludedActualAttempts": 1,
+    "rawEvents": 42,
+    "internalsEvents": 1,
+    "escapeHatchEvents": 0,
+    "sourceEdits": {
+      "total": 5,
+      "generated": 1,
+      "app": 4
+    },
+    "explanations": 2,
+    "elapsedMs": 2302590.915032,
+    "timeToFirstUseRecordedMs": 2302469.801595,
+    "feedbackAcknowledgementMs": 2113814.160046,
+    "releaseToFirstStageStartMs": 54950.357772,
+    "browserIntervalUtc": [
+      "2026-11-23T20:46:26.281Z",
+      "2026-11-23T20:46:32.555Z"
+    ],
+    "collectorOriginalCriteriaComplete": false,
+    "journey": [
+      {
+        "stage": "discover-install",
+        "startedMs": 54950.357772,
+        "endedMs": 76813.591724,
+        "outcome": "completed",
+        "steps": 3,
+        "durationMs": 21863.233951999995
+      },
+      {
+        "stage": "use",
+        "startedMs": 76857.735048,
+        "endedMs": 123949.286373,
+        "outcome": "completed",
+        "steps": 3,
+        "durationMs": 47091.55132499999
+      },
+      {
+        "stage": "customize",
+        "startedMs": 123992.188937,
+        "endedMs": 232549.358554,
+        "outcome": "completed",
+        "steps": 7,
+        "durationMs": 108557.169617
+      },
+      {
+        "stage": "debug",
+        "startedMs": 232594.468367,
+        "endedMs": 252278.065481,
+        "outcome": "completed",
+        "steps": 4,
+        "durationMs": 19683.597114000004
+      },
+      {
+        "stage": "ship",
+        "startedMs": 252469.899484,
+        "endedMs": 2302556.260821,
+        "outcome": "completed",
+        "steps": 15,
+        "durationMs": 2050086.3613370003
+      }
+    ]
+  },
+  "executedChecks": [
+    {
+      "name": "unchanged inspectStudy with Node v24.22.3",
+      "result": "passed",
+      "status": "observations-recorded",
+      "artifact": {
+        "path": "/workspace/scratch/0d7d81e85daf/s7-consumer-results-review/collector-result.json",
+        "sha256": "c19851f85ceccb9584e22748c36a17b91962929f57095ec31bc5a907404b8805"
+      }
+    },
+    {
+      "name": "full inventory, pinned Git, raw-to-normalized, clock, source, sourcemap, asset and trace static audit",
+      "result": "passed-with-stated-trace-body-limit",
+      "artifact": {
+        "path": "/workspace/scratch/0d7d81e85daf/s7-consumer-results-review/hash-audit.json",
+        "sha256": "859d9d36727dcccaa6fe1d9bd5cd85c445d71094502dd28470605adc85fe6537"
+      }
+    },
+    {
+      "name": "nine original consumer-02 screenshots, every adjacent transition",
+      "result": "inspected",
+      "scope": "1100x800 captured states only; enabled/pending/success/focus/error/retry/reload visible facts"
+    }
+  ],
+  "limitations": [
+    "A content seal is integrity evidence, not externally immutable storage, identity authentication or proof of all operator actions. Actual execution is assessed from retained command/source/result/trace records; this reviewer did not witness or rerun the original browser.",
+    "Prior internal knowledge is recorded as none, but the participant knew the Proto-UI name from the user context and could see generated-source provenance. Instructed shared-environment separation is not secure blinding or proof of absent model pretraining knowledge.",
+    "One recorded internals event concerned the supplied styling host/prop behavior, solved by source inspection and a generated className edit. Zero recorded escape-hatch events does not mean zero modification or zero source knowledge.",
+    "Initial date/list/document reads happened before wrapper use and are disclosed. The 54.950357772 seconds before the first stage-start receipt remain inside total elapsed time but outside the displayed discover-install duration.",
+    "Browser execution, root receipt, participant acknowledgement and successful-use event have separate actual timestamps. The successful-use offset includes queue/transport/resumption/review delay; it is not active implementation time.",
+    "consumer-01 has actual successful production observations but no valid terminal monotonic receipt; no endedMs or 2/2 strict completion rate may be reconstructed.",
+    "The trace includes CSS/HTML response bodies matching dist, but omits embedded JavaScript bodies. JavaScript response-body hashes are bound by the actual observer result; observer source matches its receipt SHA.",
+    "Automation-driver inputs and finite observations do not establish physical hardware, screen-reader, full accessibility, arbitrary late callbacks, other browsers/hosts or full Button conformance.",
+    "Both consumers are Agents with general framework knowledge, with one strict measured primary run. They are not ordinary-human population evidence, independent product demand, adoption or maintenance-cost evidence.",
+    "No new build/browser/installation/native test, live GitHub review/CI/DCO permission readback, integration or Issue update was performed by this local reviewer."
+  ],
+  "nonBlockingRecordClarifications": [
+    {
+      "id": "I750-REPORT-EXPOSURE",
+      "requestedText": "Explicitly say the initial user context identified the Proto-UI name; no hidden internal docs were supplied.",
+      "source": "runs/consumer-02/evidence/experience.json",
+      "status": "resolved",
+      "resolvedAt": "2026-11-23T21:17:14.670826+00:00",
+      "resolutionSource": {
+        "path": "/workspace/scratch/0d7d81e85daf/proto-ui-s7/internal/records/2026-11-24-generated-button-consumption.md",
+        "sha256": "11267119297c827277b6925e04295e078fb108edba2595b1494697b436b1020d",
+        "exactParagraph": "consumer-02 的原 experience 还明确说明：起始 user context 已出现 Proto-UI 的名称。因此不声称参与者完全不知道该项目存在；本轮实际边界是未提供内部 onboarding、未接触先前消费实现，不是品牌盲法。"
+      }
+    },
+    {
+      "id": "I750-REPORT-INITIAL-READS",
+      "requestedText": "Explicitly say initial date/list/document reads preceded recorder-wrapper use; release-to-first-stage-start is 54.950357772 seconds included in total but not the 21.863-second displayed stage.",
+      "source": "runs/consumer-02/evidence/consulted-materials.txt",
+      "status": "resolved",
+      "resolvedAt": "2026-11-23T21:17:14.670826+00:00",
+      "resolutionSource": {
+        "path": "/workspace/scratch/0d7d81e85daf/proto-ui-s7/internal/records/2026-11-24-generated-button-consumption.md",
+        "sha256": "11267119297c827277b6925e04295e078fb108edba2595b1494697b436b1020d",
+        "exactParagraph": "release 到首个阶段 start 另有 54.950357772 秒；参与者在 wrapper 前做过实际 date、目录及材料读取，其 consulted-materials 中已披露。这部分包含在总时钟中，但不在表中 21.863 秒的 discover-install 阶段持续时间里，不能把该阶段数字解释为全部初始阅读成本。"
+      }
+    }
+  ],
+  "integrationBoundary": {
+    "technicalEvidenceAccepted": true,
+    "liveIssueStateCheckedByReviewer": false,
+    "originalCriteriaAutomaticallyCertified": false,
+    "nativeApproval": false,
+    "nextOwner": "root",
+    "nextAction": "Preserve these bounds, finish actual authorized integration and original-criterion tracking with real service readback; this local acceptance supplies no fabricated platform approval or mutation receipt."
+  },
+  "recordClarificationFollowup": {
+    "reviewedAt": "2026-11-23T21:17:14.670826+00:00",
+    "scope": "Only reread the current main record and update clarification state/record binding; no collector, build, installation or browser rerun; no frozen evidence changed.",
+    "recordSha256": "11267119297c827277b6925e04295e078fb108edba2595b1494697b436b1020d",
+    "previousBoundRecordSha256": "11267119297c827277b6925e04295e078fb108edba2595b1494697b436b1020d",
+    "recordDigestChanged": false,
+    "resolvedIds": [
+      "I750-REPORT-EXPOSURE",
+      "I750-REPORT-INITIAL-READS"
+    ],
+    "remainingClarifications": 0
+  },
+  "openNonBlockingFindings": []
+}

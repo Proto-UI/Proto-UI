@@ -1,0 +1,802 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "bounded-current-user-batch-idle-screening",
+  "generatedAt": "2026-11-23T20:51:03.554230+00:00",
+  "batch": [
+    1150,
+    1151,
+    1147,
+    746,
+    745,
+    754,
+    751,
+    750,
+    749,
+    734
+  ],
+  "observationStartedAt": "2026-11-23T20:47:31.037118+00:00",
+  "observationCutoff": "2026-11-23T20:47:45.432936+00:00",
+  "selectionWasPreregistered": false,
+  "basis": "Retrospective/public snapshot taken during an already-active user-assigned Sprint 7 batch; not proof of pre-claim inactivity. Current claim information comes from the live parent assignment, not GitHub assignees.",
+  "rule": "No new intake unless 3h of observed public inactivity AND no known active owner/claim AND eligible bounded source scope. Linked PR updated_at is conservatively counted, but related non-PR issue changes are not propagated absent a new cross-reference event. Known current-task PR1757/comment7111867656 are separately retained, never represented as earlier idle facts.",
+  "unknowns": [
+    "unpublished local work",
+    "other-channel activity",
+    "Project custom owner fields",
+    "exact task-start clock for the parent"
+  ],
+  "newIdleIntakeCount": 0,
+  "rows": [
+    {
+      "issue": 1150,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1150",
+      "issueState": "open",
+      "issueUpdatedAt": "2026-11-06T12:44:02Z",
+      "nativeAssignees": [],
+      "currentClaim": "Current-user Sprint 7 assignment to /root; no new native issue assignment/claim mutation by this audit",
+      "projectBoardOwner": "not queried; unknown",
+      "lastNonTaskDirectPublicEvent": {
+        "at": "2026-11-22T17:35:36Z",
+        "kind": "cross-referenced",
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1723",
+        "eventId": null
+      },
+      "latestConservativeNonTaskPublicActivity": {
+        "at": "2026-11-23T15:55:25Z",
+        "kind": "linked-pr-last-update",
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1723",
+        "number": 1723,
+        "state": "closed"
+      },
+      "secondsSinceConservativeActivity": 17540.432936,
+      "publicClockAtLeastThreeHours": true,
+      "knownThisTaskNativeActivity": [],
+      "newIdleIntakeEligible": false,
+      "exclusionReason": "already actively undertaken under current user request; absence of assigned accounts does not transfer ownership",
+      "conditions": [
+        {
+          "source": "issue-body",
+          "line": 6,
+          "text": "- [ ] 筛选当前满足三小时空闲的事项 — 历史状态 pending"
+        },
+        {
+          "source": "issue-body",
+          "line": 7,
+          "text": "- [ ] 逐项实现独立评审合入并验证闭环 — 历史状态 pending"
+        }
+      ],
+      "bodySha256": "7320355b0fc5cbae980b1e819f9cd95eb5fa17ee9a0eb4b47f4d3974a50a637c",
+      "commentsNativeTimestampBindingVerified": true
+    },
+    {
+      "issue": 1151,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1151",
+      "issueState": "closed",
+      "issueUpdatedAt": "2026-11-22T11:32:47Z",
+      "nativeAssignees": [],
+      "currentClaim": "Current-user Sprint 7 assignment to /root; no new native issue assignment/claim mutation by this audit",
+      "projectBoardOwner": "not queried; unknown",
+      "lastNonTaskDirectPublicEvent": {
+        "at": "2026-11-22T17:35:36Z",
+        "kind": "cross-referenced",
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1723",
+        "eventId": null
+      },
+      "latestConservativeNonTaskPublicActivity": {
+        "at": "2026-11-23T15:55:25Z",
+        "kind": "linked-pr-last-update",
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1723",
+        "number": 1723,
+        "state": "closed"
+      },
+      "secondsSinceConservativeActivity": 17540.432936,
+      "publicClockAtLeastThreeHours": true,
+      "knownThisTaskNativeActivity": [],
+      "newIdleIntakeEligible": false,
+      "exclusionReason": "already actively undertaken under current user request; absence of assigned accounts does not transfer ownership",
+      "conditions": [
+        {
+          "source": "issue-body",
+          "line": 6,
+          "text": "- [ ] 将修复部署到生产并回读确认（DCBot）— 历史状态 blocked"
+        }
+      ],
+      "bodySha256": "1bba4423af06deaa935f925d7246df68f5c86dafe392bbc067ed72b4a1edb670",
+      "commentsNativeTimestampBindingVerified": true
+    },
+    {
+      "issue": 1147,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1147",
+      "issueState": "open",
+      "issueUpdatedAt": "2026-11-22T19:02:00Z",
+      "nativeAssignees": [],
+      "currentClaim": "Current-user Sprint 7 assignment to /root; no new native issue assignment/claim mutation by this audit",
+      "projectBoardOwner": "not queried; unknown",
+      "lastNonTaskDirectPublicEvent": {
+        "at": "2026-11-22T19:02:00Z",
+        "kind": "commented",
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/1147#issuecomment-7084054576",
+        "eventId": 7084054576
+      },
+      "latestConservativeNonTaskPublicActivity": {
+        "at": "2026-11-23T15:55:25Z",
+        "kind": "linked-pr-last-update",
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1723",
+        "number": 1723,
+        "state": "closed"
+      },
+      "secondsSinceConservativeActivity": 17540.432936,
+      "publicClockAtLeastThreeHours": true,
+      "knownThisTaskNativeActivity": [
+        {
+          "id": null,
+          "event": "cross-referenced",
+          "createdAt": "2026-11-23T20:00:06Z",
+          "updatedAt": "2026-11-23T20:00:06Z",
+          "actor": "cyjin-yl",
+          "commitId": null,
+          "url": null,
+          "source": {
+            "number": 1757,
+            "title": "Sprint 7: reconcile Harness, history and Dialog experiment evidence",
+            "state": "open",
+            "updated_at": "2026-11-23T20:35:37Z",
+            "closed_at": null,
+            "html_url": "https://github.com/Proto-UI/Proto-UI/pull/1757",
+            "pull_request": {
+              "url": "https://api.github.com/repos/Proto-UI/Proto-UI/pulls/1757",
+              "html_url": "https://github.com/Proto-UI/Proto-UI/pull/1757",
+              "diff_url": "https://github.com/Proto-UI/Proto-UI/pull/1757.diff",
+              "patch_url": "https://github.com/Proto-UI/Proto-UI/pull/1757.patch",
+              "merged_at": null
+            }
+          }
+        }
+      ],
+      "newIdleIntakeEligible": false,
+      "exclusionReason": "already actively undertaken under current user request; absence of assigned accounts does not transfer ownership",
+      "conditions": [
+        {
+          "source": "issue-body",
+          "line": 9,
+          "text": "- [x] **历史决策恢复记录已落库**：[现有记录](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/internal/records/2026-11-10-legacy-issue-pr-decisions.md)与[原始来源绑定](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/internal/records/2026-11-10-legacy-issue-pr-decisions.json)保留选定Issue/PR决策、未完成条件与范围更正。"
+        },
+        {
+          "source": "issue-body",
+          "line": 10,
+          "text": "- [ ] 为“旧有全部Issue与PR”恢复明确时间截点和完整对象集，逐项覆盖已关闭/已合并对象与原source条件，并记录决定和剩余owner。当前开放portfolio同步是独立有界工作，不能代替全部历史范围。"
+        },
+        {
+          "source": "issue-body",
+          "line": 14,
+          "text": "- [x] **本轮全部87个开放 Issue 的逐项审计与处置判断已完成**：以 `a8bf56087e5836e3c14c153cafbd796bd98bff37` 为源码截止，对照实际实现、原正文和全部现有讨论，判定3项完整关闭、67项更新进度、17项保留准确现状；逐条写回及回读结果汇总于 #890。这个完成项限定本轮开放对象集，原全部历史对象条件继续开放。"
+        },
+        {
+          "source": "issue-body",
+          "line": 23,
+          "text": "- [ ] 同步旧有全部 Issue 与 PR 并记录决策 — 历史状态 pending"
+        }
+      ],
+      "bodySha256": "d698ccfa0597521af855fb80af5d76c3d4beee94617af0a927330374e21a6647",
+      "commentsNativeTimestampBindingVerified": true
+    },
+    {
+      "issue": 746,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/746",
+      "issueState": "open",
+      "issueUpdatedAt": "2026-11-21T17:56:45Z",
+      "nativeAssignees": [],
+      "currentClaim": "Current-user Sprint 7 assignment to /root; no new native issue assignment/claim mutation by this audit",
+      "projectBoardOwner": "not queried; unknown",
+      "lastNonTaskDirectPublicEvent": {
+        "at": "2026-11-23T17:11:55Z",
+        "kind": "cross-referenced",
+        "url": "https://github.com/cyjin-yl/shenko/pull/402",
+        "eventId": null
+      },
+      "latestConservativeNonTaskPublicActivity": {
+        "at": "2026-11-23T18:26:07Z",
+        "kind": "linked-pr-last-update",
+        "url": "https://github.com/cyjin-yl/shenko/pull/402",
+        "number": 402,
+        "state": "open"
+      },
+      "secondsSinceConservativeActivity": 8498.432936,
+      "publicClockAtLeastThreeHours": false,
+      "knownThisTaskNativeActivity": [
+        {
+          "id": null,
+          "event": "cross-referenced",
+          "createdAt": "2026-11-23T20:00:06Z",
+          "updatedAt": "2026-11-23T20:00:06Z",
+          "actor": "cyjin-yl",
+          "commitId": null,
+          "url": null,
+          "source": {
+            "number": 1757,
+            "title": "Sprint 7: reconcile Harness, history and Dialog experiment evidence",
+            "state": "open",
+            "updated_at": "2026-11-23T20:35:37Z",
+            "closed_at": null,
+            "html_url": "https://github.com/Proto-UI/Proto-UI/pull/1757",
+            "pull_request": {
+              "url": "https://api.github.com/repos/Proto-UI/Proto-UI/pulls/1757",
+              "html_url": "https://github.com/Proto-UI/Proto-UI/pull/1757",
+              "diff_url": "https://github.com/Proto-UI/Proto-UI/pull/1757.diff",
+              "patch_url": "https://github.com/Proto-UI/Proto-UI/pull/1757.patch",
+              "merged_at": null
+            }
+          }
+        }
+      ],
+      "newIdleIntakeEligible": false,
+      "exclusionReason": "already actively undertaken under current user request; absence of assigned accounts does not transfer ownership",
+      "conditions": [
+        {
+          "source": "issue-body",
+          "line": 9,
+          "text": "- [x] **可复用组件前置已具备**：[Message Scroller](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/packages/prototypes/base/src/message-scroller/message-scroller.proto.ts)复用真实 ScrollArea endFollow 与 Button，公开 following/atEnd/requestStatus/jumpToEnd 等路径；[组合回归](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/packages/prototypes/base/test/message-scroller.test.ts)与[句柄回归](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/packages/prototypes/base/test/message-scroller-capture.test.ts)在主线。"
+        },
+        {
+          "source": "issue-body",
+          "line": 10,
+          "text": "- [ ] 在 #515 / #533 的真实 Harness React 宿主中完成 transcript append/depart/resume、session/replay 置换、用户滚动优先、键盘/焦点和 disposal/stale 旅程；通用组件不等于此 App 已交付。"
+        },
+        {
+          "source": "issue-body",
+          "line": 11,
+          "text": "- [ ] 为[harness.transcript.follow-tail 矩阵行](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/internal/coverage-matrices/prototype-coverage-matrix.json)和 #513 子索引补齐已接受消费者、真实截图、source/lease 观察及适用审查记录；0.4 #1323 范围保留。"
+        },
+        {
+          "source": "issue-body",
+          "line": 63,
+          "text": "- [ ] A bounded Harness composition consumes the real public/private Proto UI Scroll and Button paths after #515 establishes the app host; no raw Adapter or DOM escape outside a reviewed integration boundary."
+        },
+        {
+          "source": "issue-body",
+          "line": 64,
+          "text": "- [ ] Deterministic transition tests distinguish following, paused and resumed states, replacement/disposal and stale callback effects, with the existing end-follow `T-SCROLL-END-FOLLOW-0001` as authority."
+        },
+        {
+          "source": "issue-body",
+          "line": 65,
+          "text": "- [ ] A real React production-host transcript journey covers append/depart/resume, keyboard access and focus; reusable claims require separate Web Component/Vue evidence. Retain actual component captures and source-bound state/lease observations."
+        },
+        {
+          "source": "issue-body",
+          "line": 66,
+          "text": "- [ ] #514's single Harness matrix row `harness.transcript.follow-tail` and #513 child index link the accepted implementation/evidence; exact-head CI, DCO and independent review precede merge."
+        }
+      ],
+      "bodySha256": "71572ff854e83a29d391d7aa3d96d5f5c1da3f7cfce763dc21df8a812dc0e7e9",
+      "commentsNativeTimestampBindingVerified": true
+    },
+    {
+      "issue": 745,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/745",
+      "issueState": "open",
+      "issueUpdatedAt": "2026-11-21T17:55:11Z",
+      "nativeAssignees": [],
+      "currentClaim": "Current-user Sprint 7 assignment to /root; no new native issue assignment/claim mutation by this audit",
+      "projectBoardOwner": "not queried; unknown",
+      "lastNonTaskDirectPublicEvent": {
+        "at": "2026-11-22T17:44:05Z",
+        "kind": "cross-referenced",
+        "url": "https://github.com/cyjin-yl/shenko/pull/389",
+        "eventId": null
+      },
+      "latestConservativeNonTaskPublicActivity": {
+        "at": "2026-11-23T15:55:25Z",
+        "kind": "linked-pr-last-update",
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1723",
+        "number": 1723,
+        "state": "closed"
+      },
+      "secondsSinceConservativeActivity": 17540.432936,
+      "publicClockAtLeastThreeHours": true,
+      "knownThisTaskNativeActivity": [
+        {
+          "id": null,
+          "event": "cross-referenced",
+          "createdAt": "2026-11-23T20:00:06Z",
+          "updatedAt": "2026-11-23T20:00:06Z",
+          "actor": "cyjin-yl",
+          "commitId": null,
+          "url": null,
+          "source": {
+            "number": 1757,
+            "title": "Sprint 7: reconcile Harness, history and Dialog experiment evidence",
+            "state": "open",
+            "updated_at": "2026-11-23T20:35:37Z",
+            "closed_at": null,
+            "html_url": "https://github.com/Proto-UI/Proto-UI/pull/1757",
+            "pull_request": {
+              "url": "https://api.github.com/repos/Proto-UI/Proto-UI/pulls/1757",
+              "html_url": "https://github.com/Proto-UI/Proto-UI/pull/1757",
+              "diff_url": "https://github.com/Proto-UI/Proto-UI/pull/1757.diff",
+              "patch_url": "https://github.com/Proto-UI/Proto-UI/pull/1757.patch",
+              "merged_at": null
+            }
+          }
+        }
+      ],
+      "newIdleIntakeEligible": false,
+      "exclusionReason": "already actively undertaken under current user request; absence of assigned accounts does not transfer ownership",
+      "conditions": [
+        {
+          "source": "issue-body",
+          "line": 9,
+          "text": "- [x] **两行投影与 Inspector 文档增量已整合**：[权威矩阵](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/internal/agent-harness/dogfood-coverage-matrix.md)及[派生 consumerRows](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/internal/coverage-matrices/prototype-coverage-matrix.json)一致；本次原有五个 projection 测试 5/5 通过。"
+        },
+        {
+          "source": "issue-body",
+          "line": 10,
+          "text": "- [x] **follow-up 引用链已发布**：[#1429](https://github.com/Proto-UI/Proto-UI/pull/1429)／[#1431](https://github.com/Proto-UI/Proto-UI/pull/1431)保留 #745、#531 与既有贡献出处。"
+        },
+        {
+          "source": "issue-body",
+          "line": 11,
+          "text": "- [ ] 完成原 M0 处置、完整矩阵检查与精确 head 独立验收；#513/#514 的历史延期关闭不证明 M0 完成。[原失败与验收缺口](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/internal/records/2026-11-11-editor-inspector-matrix-projection-sync.md)继续保留；Inspector/editor 实现仍属原 0.4 范围。"
+        },
+        {
+          "source": "issue-body",
+          "line": 15,
+          "text": "- [x] **后续派生矩阵修复已整合**：[#1664](https://github.com/Proto-UI/Proto-UI/pull/1664)刷新原有consumer字段与source bindings，两条editor rows的已有投影保留；[来源记录](https://github.com/Proto-UI/Proto-UI/blob/a8bf56087e5836e3c14c153cafbd796bd98bff37/internal/records/2026-11-22-regression-source-bindings.md)明确保留最终完整4491项中4489pass/1fail/1skip及随后单例修复的不同receipt，未伪合成为完整新head全绿。原CI/独立验收条件仍开放。"
+        },
+        {
+          "source": "issue-body",
+          "line": 66,
+          "text": "- [x] **Both exact rows above and their re-review triggers reflect the merged #531 research result, without copying the record into a second source of truth.**"
+        },
+        {
+          "source": "issue-body",
+          "line": 67,
+          "text": "- [ ] #513 points to the landed record and matrix carrier; #514 retains the authoritative matrix link and remains open until its own M0 criteria pass."
+        },
+        {
+          "source": "issue-body",
+          "line": 68,
+          "text": "- [ ] The matrix checker and focused tests pass on the candidate, then exact-head CI and independent review pass before merge."
+        },
+        {
+          "source": "issue-body",
+          "line": 69,
+          "text": "- [x] **The follow-up PR references this Issue and #531 without auto-closing or rewriting the original.**"
+        }
+      ],
+      "bodySha256": "0d06d1056feb2024b2378a3dbfa6a9c4bb3a1b77d511d7c41e56175d7e026e84",
+      "commentsNativeTimestampBindingVerified": true
+    },
+    {
+      "issue": 754,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/754",
+      "issueState": "open",
+      "issueUpdatedAt": "2026-11-21T17:55:23Z",
+      "nativeAssignees": [],
+      "currentClaim": "Current-user Sprint 7 assignment to /root; no new native issue assignment/claim mutation by this audit",
+      "projectBoardOwner": "not queried; unknown",
+      "lastNonTaskDirectPublicEvent": {
+        "at": "2026-11-22T17:35:36Z",
+        "kind": "cross-referenced",
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1723",
+        "eventId": null
+      },
+      "latestConservativeNonTaskPublicActivity": {
+        "at": "2026-11-23T15:55:25Z",
+        "kind": "linked-pr-last-update",
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1723",
+        "number": 1723,
+        "state": "closed"
+      },
+      "secondsSinceConservativeActivity": 17540.432936,
+      "publicClockAtLeastThreeHours": true,
+      "knownThisTaskNativeActivity": [
+        {
+          "id": null,
+          "event": "cross-referenced",
+          "createdAt": "2026-11-23T20:00:06Z",
+          "updatedAt": "2026-11-23T20:00:06Z",
+          "actor": "cyjin-yl",
+          "commitId": null,
+          "url": null,
+          "source": {
+            "number": 1757,
+            "title": "Sprint 7: reconcile Harness, history and Dialog experiment evidence",
+            "state": "open",
+            "updated_at": "2026-11-23T20:35:37Z",
+            "closed_at": null,
+            "html_url": "https://github.com/Proto-UI/Proto-UI/pull/1757",
+            "pull_request": {
+              "url": "https://api.github.com/repos/Proto-UI/Proto-UI/pulls/1757",
+              "html_url": "https://github.com/Proto-UI/Proto-UI/pull/1757",
+              "diff_url": "https://github.com/Proto-UI/Proto-UI/pull/1757.diff",
+              "patch_url": "https://github.com/Proto-UI/Proto-UI/pull/1757.patch",
+              "merged_at": null
+            }
+          }
+        }
+      ],
+      "newIdleIntakeEligible": false,
+      "exclusionReason": "already actively undertaken under current user request; absence of assigned accounts does not transfer ownership",
+      "conditions": [
+        {
+          "source": "issue-body",
+          "line": 9,
+          "text": "- [x] **公开校准准备已交付**：[需求映射、公开 fixture 与定向负控](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/benchmarks/interaction/README.md)已经存在。其手写 HTML controls 只验证测量管道，尚未成为本 Issue 的 Proto Dialog 实验结果。"
+        },
+        {
+          "source": "issue-body",
+          "line": 10,
+          "text": "- [ ] 绑定真实 Dialog baseline、原检查集合与独立审过的预期；执行 valid/broken/legal-customization 和真正 held-out 变体，保留首次分歧。"
+        },
+        {
+          "source": "issue-body",
+          "line": 11,
+          "text": "- [ ] 分开报告漏报、误报、无效 mutation、规则争议、未测环境及已有/新增检查；每个可行动缺口回归既有 owner。公开开发样例不得改名为盲测证据。"
+        },
+        {
+          "source": "issue-body",
+          "line": 72,
+          "text": "- [ ] A reproducible fixture, criterion-to-case mapping and independently reviewed expected outcomes are available."
+        },
+        {
+          "source": "issue-body",
+          "line": 73,
+          "text": "- [ ] Valid controls, broken variants and legal customizations have recorded outcomes; held-out variants challenge the checks rather than only their authors' examples."
+        },
+        {
+          "source": "issue-body",
+          "line": 74,
+          "text": "- [ ] Misses, false alarms, ineffective mutations, disputed rules and untested environments are reported separately."
+        },
+        {
+          "source": "issue-body",
+          "line": 75,
+          "text": "- [ ] The report distinguishes existing-check coverage from checks added during the experiment; any repair comparison preserves failed and neutral results."
+        },
+        {
+          "source": "issue-body",
+          "line": 76,
+          "text": "- [ ] Each actionable gap links to its existing owner or one bounded follow-up. A negative result can complete the experiment."
+        }
+      ],
+      "bodySha256": "7615dc233221bd3d52fa6c8ae3b380cda297309623ff348941ee2808fa1ad599",
+      "commentsNativeTimestampBindingVerified": true
+    },
+    {
+      "issue": 751,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/751",
+      "issueState": "open",
+      "issueUpdatedAt": "2026-11-21T17:55:19Z",
+      "nativeAssignees": [],
+      "currentClaim": "Current-user Sprint 7 assignment to /root; no new native issue assignment/claim mutation by this audit",
+      "projectBoardOwner": "not queried; unknown",
+      "lastNonTaskDirectPublicEvent": {
+        "at": "2026-11-22T17:35:36Z",
+        "kind": "cross-referenced",
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1723",
+        "eventId": null
+      },
+      "latestConservativeNonTaskPublicActivity": {
+        "at": "2026-11-23T15:55:25Z",
+        "kind": "linked-pr-last-update",
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1723",
+        "number": 1723,
+        "state": "closed"
+      },
+      "secondsSinceConservativeActivity": 17540.432936,
+      "publicClockAtLeastThreeHours": true,
+      "knownThisTaskNativeActivity": [],
+      "newIdleIntakeEligible": false,
+      "exclusionReason": "already actively undertaken under current user request; absence of assigned accounts does not transfer ownership",
+      "conditions": [
+        {
+          "source": "issue-body",
+          "line": 9,
+          "text": "- [x] **实验记录基础已落库**：[schema](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/scripts/benchmark/schemas.mjs)与[公开校准框架](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/benchmarks/interaction/README.md)可供后续复用；`stress` 分类本身不代表实验已执行。"
+        },
+        {
+          "source": "issue-body",
+          "line": 10,
+          "text": "- [ ] 固定 adverse 假设、可用路径、同一任务/oracle、模型工具与停止规则，实际运行 generate → test → repair 循环并保留所有失败/未收敛轨迹。"
+        },
+        {
+          "source": "issue-body",
+          "line": 11,
+          "text": "- [ ] 完成同任务比较、残余优势与假设消去成本的分离、限制/混杂与结论；保留原 0.4 研究范围。"
+        },
+        {
+          "source": "issue-body",
+          "line": 53,
+          "text": "- [ ] The adverse assumptions, available paths, task, oracle, tools, model and stopping rule are explicit and repeatable."
+        },
+        {
+          "source": "issue-body",
+          "line": 54,
+          "text": "- [ ] Complete iteration/test/repair traces and final correctness are recorded for each attempted path, including failure to converge and missing prerequisites."
+        },
+        {
+          "source": "issue-body",
+          "line": 55,
+          "text": "- [ ] Remaining advantages are tied to observed evidence and separated from costs assumed away; null or mixed results are acceptable."
+        },
+        {
+          "source": "issue-body",
+          "line": 56,
+          "text": "- [ ] Known limitations, confounders and hypothesis classification are recorded without presenting the scenario as a prediction."
+        },
+        {
+          "source": "issue-body",
+          "line": 57,
+          "text": "- [ ] No claim about business-level usability, overall UX, or future AI certainty is made."
+        }
+      ],
+      "bodySha256": "ce7139069052d6d5ffbf85f84b0df6e266a3c6153118fff2d9fb46617cc3ef0d",
+      "commentsNativeTimestampBindingVerified": true
+    },
+    {
+      "issue": 750,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/750",
+      "issueState": "open",
+      "issueUpdatedAt": "2026-11-23T19:37:32Z",
+      "nativeAssignees": [],
+      "currentClaim": "Current-user Sprint 7 assignment to /root; no new native issue assignment/claim mutation by this audit",
+      "projectBoardOwner": "not queried; unknown",
+      "lastNonTaskDirectPublicEvent": {
+        "at": "2026-11-22T19:28:07Z",
+        "kind": "commented",
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/750#issuecomment-7084424658",
+        "eventId": 7084424658
+      },
+      "latestConservativeNonTaskPublicActivity": {
+        "at": "2026-11-23T15:55:25Z",
+        "kind": "linked-pr-last-update",
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1723",
+        "number": 1723,
+        "state": "closed"
+      },
+      "secondsSinceConservativeActivity": 17540.432936,
+      "publicClockAtLeastThreeHours": true,
+      "knownThisTaskNativeActivity": [
+        {
+          "id": 7111867656,
+          "event": "commented",
+          "createdAt": "2026-11-23T19:37:32Z",
+          "updatedAt": "2026-11-23T19:37:32Z",
+          "actor": "cyjin-yl",
+          "commitId": null,
+          "url": "https://github.com/Proto-UI/Proto-UI/issues/750#issuecomment-7111867656",
+          "source": {
+            "number": null,
+            "title": null,
+            "state": null,
+            "updated_at": null,
+            "closed_at": null,
+            "html_url": null,
+            "pull_request": null
+          }
+        }
+      ],
+      "newIdleIntakeEligible": false,
+      "exclusionReason": "already actively undertaken under current user request; absence of assigned accounts does not transfer ownership",
+      "conditions": [
+        {
+          "source": "issue-body",
+          "line": 9,
+          "text": "- [x] **可复用前置基础已存在**：当前[生成消费者测试](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/packages/compiler/test/observable-consumer.test.ts)与[实验记录框架](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/benchmarks/interaction/README.md)已在 main。它们仅支撑后续选取真实 artifact。"
+        },
+        {
+          "source": "issue-body",
+          "line": 10,
+          "text": "- [ ] 为本实验绑定实际输出、版本、分发方式与复现 consumer 项目，并执行不提供 Proto UI 内部 onboarding 的完整 discovery/install → use/customize/debug → ship 旅程。"
+        },
+        {
+          "source": "issue-body",
+          "line": 11,
+          "text": "- [ ] 记录失败、耗时、内部知识需求、代码改动与 escape hatch，并给出限定结论；现有 calibration／#734 不能充作本实验结果，原研究仍开放。"
+        },
+        {
+          "source": "issue-body",
+          "line": 53,
+          "text": "- [ ] The measured artifact is real, its exact supported scope and provenance are documented, and another operator can reproduce the consumer setup."
+        },
+        {
+          "source": "issue-body",
+          "line": 54,
+          "text": "- [ ] The journey is measured from discovery through a ship/build check; completion, failures, time, internals knowledge, code modifications and escape hatches are recorded."
+        },
+        {
+          "source": "issue-body",
+          "line": 55,
+          "text": "- [ ] Results include cases where the consumer must learn Proto UI internals or cannot complete the task; no preference/satisfaction result is required."
+        },
+        {
+          "source": "issue-body",
+          "line": 56,
+          "text": "- [ ] Limitations and confounders are documented and conclusions are bounded to the artifact/host/task that was exercised."
+        },
+        {
+          "source": "issue-body",
+          "line": 57,
+          "text": "- [ ] If the artifact prerequisite is not met, the Issue remains staged and blocked without claiming an experimental outcome."
+        }
+      ],
+      "bodySha256": "0376e97cb18b2a1ca89f3cff008ee374f026d3d535d65a5e8438019c477ffb8f",
+      "commentsNativeTimestampBindingVerified": true
+    },
+    {
+      "issue": 749,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/749",
+      "issueState": "open",
+      "issueUpdatedAt": "2026-11-06T12:46:50Z",
+      "nativeAssignees": [],
+      "currentClaim": "Current-user Sprint 7 assignment to /root; no new native issue assignment/claim mutation by this audit",
+      "projectBoardOwner": "not queried; unknown",
+      "lastNonTaskDirectPublicEvent": {
+        "at": "2026-11-22T17:35:36Z",
+        "kind": "cross-referenced",
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1723",
+        "eventId": null
+      },
+      "latestConservativeNonTaskPublicActivity": {
+        "at": "2026-11-23T15:55:25Z",
+        "kind": "linked-pr-last-update",
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1723",
+        "number": 1723,
+        "state": "closed"
+      },
+      "secondsSinceConservativeActivity": 17540.432936,
+      "publicClockAtLeastThreeHours": true,
+      "knownThisTaskNativeActivity": [],
+      "newIdleIntakeEligible": false,
+      "exclusionReason": "already actively undertaken under current user request; absence of assigned accounts does not transfer ownership",
+      "conditions": [
+        {
+          "source": "issue-body",
+          "line": 42,
+          "text": "- [ ] The prerequisite gate, selected common support scope, paths, independent oracle, versions, and exact same inputs are recorded; a blocked prerequisite is reported plainly rather than represented as a result."
+        },
+        {
+          "source": "issue-body",
+          "line": 43,
+          "text": "- [ ] All collected runs, cases, failures, exclusions and repeated-generation seeds are retained and summarized with variance where repeated runs occurred."
+        },
+        {
+          "source": "issue-body",
+          "line": 44,
+          "text": "- [ ] Reliability, recurring/rare failure modes, and cross-host conclusions are limited to measured support; untested/unsupported/blocked are not counted as passing."
+        },
+        {
+          "source": "issue-body",
+          "line": 45,
+          "text": "- [ ] Limitations/confounders and hypothesis classification are recorded even if paths tie or the generative path performs better."
+        },
+        {
+          "source": "issue-body",
+          "line": 46,
+          "text": "- [ ] Native mixing and additional lifecycle parity are claimed only after the relevant #733 scope is available and measured."
+        }
+      ],
+      "bodySha256": "d7973409599cb47281194b1082e560b69c9d9f4b85dabaff86a249cdceb25ebb",
+      "commentsNativeTimestampBindingVerified": true
+    },
+    {
+      "issue": 734,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/734",
+      "issueState": "open",
+      "issueUpdatedAt": "2026-11-21T17:56:41Z",
+      "nativeAssignees": [],
+      "currentClaim": "Current-user Sprint 7 assignment to /root; no new native issue assignment/claim mutation by this audit",
+      "projectBoardOwner": "not queried; unknown",
+      "lastNonTaskDirectPublicEvent": {
+        "at": "2026-11-22T19:18:54Z",
+        "kind": "cross-referenced",
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1727",
+        "eventId": null
+      },
+      "latestConservativeNonTaskPublicActivity": {
+        "at": "2026-11-23T15:55:25Z",
+        "kind": "linked-pr-last-update",
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1723",
+        "number": 1723,
+        "state": "closed"
+      },
+      "secondsSinceConservativeActivity": 17540.432936,
+      "publicClockAtLeastThreeHours": true,
+      "knownThisTaskNativeActivity": [],
+      "newIdleIntakeEligible": false,
+      "exclusionReason": "already actively undertaken under current user request; absence of assigned accounts does not transfer ownership",
+      "conditions": [
+        {
+          "source": "issue-body",
+          "line": 9,
+          "text": "- [x] **知识入口、来源和实验脚手架已交付**：[SKILL](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/benchmarks/interaction/knowledge-consumer/SKILL.md)、[固定来源](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/benchmarks/interaction/knowledge-consumer/sources.json)、[协议](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/benchmarks/interaction/knowledge-consumer/protocol.md)及[独立项目示例](https://github.com/Proto-UI/Proto-UI/tree/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/benchmarks/interaction/knowledge-consumer/example)均可检查。此项只确认已编写，README 的未执行状态保留。"
+        },
+        {
+          "source": "issue-body",
+          "line": 10,
+          "text": "- [ ] 修复并实测自动激活负对照：[当前 check.mjs](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/benchmarks/interaction/knowledge-consumer/example/check.mjs)仍注入 `focusin → click()`；按[现有复核](https://github.com/Proto-UI/Proto-UI/issues/734#issuecomment-6783057925)，该事件并未改变固定手动 Tabs 的选择行为。须证明未改版本通过、真实变异在预期断言失败，并保留 relationship/removal 对照。"
+        },
+        {
+          "source": "issue-body",
+          "line": 11,
+          "text": "- [ ] 完成 clean install/build/browser、实际三路径任务运行、时间/成本/缺陷与失败/省略记录，形成可重复且范围受限的 supported / weakened / inconclusive / falsified 结论。"
+        },
+        {
+          "source": "issue-body",
+          "line": 12,
+          "text": "- [ ] 0.4 跟进不设收益阈值，也不把脚手架、提示词审阅或单张截图作为已完成的比较实验。"
+        },
+        {
+          "source": "issue-body",
+          "line": 23,
+          "text": "- [ ] A discoverable skill entry and a real clean-project example explain source knowledge, chosen library/generation route, target versions and limitations."
+        },
+        {
+          "source": "issue-body",
+          "line": 24,
+          "text": "  - [x] **可发现入口、固定来源/版本/限制与独立项目源码已经交付** — 见下方主线证据。"
+        },
+        {
+          "source": "issue-body",
+          "line": 25,
+          "text": "  - [ ] clean-project 安装、构建、真实浏览器执行及负对照校准仍需实际记录；当前 authored/unrun 限制保留。"
+        },
+        {
+          "source": "issue-body",
+          "line": 26,
+          "text": "- [ ] The three comparison paths have explicit interaction, accessibility and host-integration checks; record actual task outcome, defects, time/cost and maintenance burden, including unsuccessful results."
+        },
+        {
+          "source": "issue-body",
+          "line": 27,
+          "text": "- [ ] Findings feed back into concrete knowledge/test gaps. Prompt review or one attractive screenshot is not treated as behavioral evidence."
+        },
+        {
+          "source": "issue-body",
+          "line": 28,
+          "text": "- [ ] Core interaction knowledge is separated from business-specific blocks/scenario skills and their community ownership. Do not create a separate repository or promise maintenance merely because it was discussed."
+        },
+        {
+          "source": "issue-body",
+          "line": 29,
+          "text": "- [ ] No mandatory 36+9 runs, 20% improvement, user-count floor or compiler-completion prerequisite. Choose enough checks for the actual claim and expose what remains unmeasured."
+        },
+        {
+          "source": "issue-body",
+          "line": 71,
+          "text": "- [ ] Conditions, selected primitives, exposure boundary, task requests, oracle, and environment are documented well enough for another operator to repeat the comparison."
+        },
+        {
+          "source": "issue-body",
+          "line": 72,
+          "text": "- [ ] All collected measurements and omitted/deviating runs are recorded with limitations and confounders."
+        },
+        {
+          "source": "issue-body",
+          "line": 73,
+          "text": "- [ ] Results support an interpretable supported / weakened / inconclusive / falsified classification, including when no difference is observed."
+        },
+        {
+          "source": "issue-body",
+          "line": 74,
+          "text": "- [ ] No minimum improvement, favorable direction, statistical-significance threshold, or successful Proto UI implementation is required."
+        },
+        {
+          "source": "issue-body",
+          "line": 75,
+          "text": "- [ ] Claims remain within primitive interaction behavior; this does not evaluate or guarantee business-composition quality or overall product usability."
+        }
+      ],
+      "bodySha256": "0a2db9043b0f674db7da61f231458f4523aa92247b7a5d09aff1329b539c3aab",
+      "commentsNativeTimestampBindingVerified": true
+    }
+  ],
+  "counts": {
+    "issues": 10,
+    "comments": 39,
+    "timelineEvents": 220,
+    "preservedBodyCheckboxLines": 67
+  },
+  "sourceSha256": "1a9eae70c10e69a68014cef5cfef645bc82da6d66c5b9e969135f2d40026319e"
+}
