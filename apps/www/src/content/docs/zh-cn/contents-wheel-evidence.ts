@@ -7,6 +7,7 @@ export function observeContentsWheel(element: HTMLElement) {
     element.shadowRoot?.querySelector<HTMLElement>('[data-pui-split-surface]') ?? element;
   const wheels: Array<{
     event: WheelEvent;
+    path: EventTarget[];
     surfaceInPath: boolean;
     contentInPath: boolean;
   }> = [];
@@ -15,6 +16,7 @@ export function observeContentsWheel(element: HTMLElement) {
     const path = event.composedPath();
     wheels.push({
       event,
+      path,
       surfaceInPath: path.includes(surface),
       contentInPath: path.includes(element),
     });
@@ -23,6 +25,69 @@ export function observeContentsWheel(element: HTMLElement) {
     // rather than freezing a potentially premature capture/microtask value.
   };
   document.addEventListener('wheel', onWheel, { capture: true, passive: true });
+  const describe = (node: Element) => ({
+    tag: node.localName,
+    id: node.id,
+    role: node.getAttribute('role'),
+    classes: node.getAttribute('class'),
+    splitSurface: node.hasAttribute('data-pui-split-surface'),
+    hasShadowRoot: !!node.shadowRoot,
+    rootHost: (node.getRootNode() as ShadowRoot).host?.localName ?? null,
+    isContent: node === element,
+    isSurface: node === surface,
+    connected: node.isConnected,
+  });
+  const scrolls: Array<{
+    at: number;
+    eventTimeStamp: number;
+    trusted: boolean;
+    target: ReturnType<typeof describe>;
+    top: number;
+    left: number;
+  }> = [];
+  const scrollRoots = new Set<Node>();
+  const seenScrolls = new WeakSet<Event>();
+  let disposed = false;
+  let droppedScrolls = 0;
+  const onScroll = (event: Event) => {
+    if (seenScrolls.has(event)) return;
+    const target = event.target === document ? document.scrollingElement : event.target;
+    if (!(target instanceof view.HTMLElement)) return;
+    seenScrolls.add(event);
+    if (scrolls.length >= 64) {
+      droppedScrolls++;
+      return;
+    }
+    scrolls.push({
+      at: view.performance.now(),
+      eventTimeStamp: event.timeStamp,
+      trusted: event.isTrusted === true,
+      target: describe(target),
+      top: target.scrollTop,
+      left: target.scrollLeft,
+    });
+  };
+  const watchScrollRoot = (root: Node) => {
+    if (disposed || scrollRoots.has(root)) return;
+    scrollRoots.add(root);
+    root.addEventListener('scroll', onScroll, { capture: true, passive: true });
+  };
+  watchScrollRoot(document);
+  watchScrollRoot(surface.getRootNode());
+  const hitAt = (x: number, y: number) => {
+    let hit = document.elementFromPoint(x, y);
+    while (hit?.shadowRoot) {
+      const inner = hit.shadowRoot.elementFromPoint(x, y);
+      if (!inner || inner === hit) break;
+      hit = inner;
+    }
+    return hit;
+  };
+  const parent = (node: Node): Node | null =>
+    (node as Element).assignedSlot ??
+    node.parentNode ??
+    (node.getRootNode() as ShadowRoot).host ??
+    null;
   const read = (currentDialog: Element | null = element) => {
     const rect = surface.getBoundingClientRect();
     const host = element.getBoundingClientRect();
@@ -59,26 +124,17 @@ export function observeContentsWheel(element: HTMLElement) {
       css.visibility !== 'hidden';
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;
-    let hit = document.elementFromPoint(x, y);
     // The public dialog can itself be the split surface inside an open shadow
     // root. Document hit testing retargets that point to the outer custom
     // element; resolve each open root before checking the composed ancestry.
-    while (hit?.shadowRoot) {
-      const inner = hit.shadowRoot.elementFromPoint(x, y);
-      if (!inner || inner === hit) break;
-      hit = inner;
-    }
+    const hit = hitAt(x, y);
     let hitInContent = false;
     for (let node: Node | null = hit; node; ) {
       if (node === element || node === surface) {
         hitInContent = true;
         break;
       }
-      node =
-        (node as Element).assignedSlot ??
-        node.parentNode ??
-        (node.getRootNode() as ShadowRoot).host ??
-        null;
+      node = parent(node);
     }
     return {
       ready: positioned && visible && /^(auto|scroll|overlay)$/.test(css.overflowY),
@@ -112,8 +168,58 @@ export function observeContentsWheel(element: HTMLElement) {
   };
   return {
     read,
+    // Kept separate from the original 1000 ms progress poll. Read the actual
+    // flattened hit/dispatch paths before input and after completion; the
+    // presence of a wheel event alone does not identify its native scroll chain.
+    inspect() {
+      const rect = surface.getBoundingClientRect();
+      const hit = hitAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      const chain: Element[] = [];
+      for (let node: Node | null = hit; node && chain.length < 64; node = parent(node)) {
+        if (!(node instanceof view.Element)) continue;
+        chain.push(node);
+        watchScrollRoot(node.getRootNode());
+      }
+      const geometry = (node: Element) => {
+        const css = view.getComputedStyle(node);
+        const rect = node.getBoundingClientRect();
+        return {
+          ...describe(node),
+          top: node.scrollTop,
+          left: node.scrollLeft,
+          clientHeight: node.clientHeight,
+          scrollHeight: node.scrollHeight,
+          clientWidth: node.clientWidth,
+          scrollWidth: node.scrollWidth,
+          overflowX: css.overflowX,
+          overflowY: css.overflowY,
+          overscrollX: css.overscrollBehaviorX,
+          overscrollY: css.overscrollBehaviorY,
+          position: css.position,
+          display: css.display,
+          contain: css.contain,
+          transform: css.transform,
+          rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+        };
+      };
+      return {
+        at: view.performance.now(),
+        content: geometry(element),
+        surface: geometry(surface),
+        hitChain: chain.map(geometry),
+        wheelPathGeometry: 'inspection time, not event time',
+        wheelPaths: wheels.map(({ event, path }) => ({
+          eventTimeStamp: event.timeStamp,
+          path: path.filter((node): node is Element => node instanceof view.Element).map(geometry),
+        })),
+        scrolls: [...scrolls],
+        droppedScrolls,
+      };
+    },
     dispose() {
+      disposed = true;
       document.removeEventListener('wheel', onWheel, true);
+      for (const root of scrollRoots) root.removeEventListener('scroll', onScroll, true);
     },
   };
 }

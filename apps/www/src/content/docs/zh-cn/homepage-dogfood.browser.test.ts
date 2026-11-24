@@ -1230,6 +1230,9 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
             > | null = null;
             let scrolling: ReturnType<ReturnType<typeof observeContentsWheel>['read']> | null =
               null;
+            let wheelChainBefore: ReturnType<
+              ReturnType<typeof observeContentsWheel>['inspect']
+            > | null = null;
             let wheelError: unknown;
             const wheelCompletionErrors: unknown[] = [];
             try {
@@ -1242,6 +1245,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               scrolling = await readWheel();
               expect(scrolling.hitInContent).toBe(true);
               expect(scrolling.max).toBeGreaterThan(0);
+              wheelChainBefore = await wheel.evaluate((probe) => probe.inspect());
               await page.mouse.move(scrolling.x, scrolling.y);
               const direction = scrolling.top < scrolling.max / 2 ? 1 : -1;
               await page.mouse.wheel(0, direction * 500);
@@ -1297,6 +1301,10 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
                       initialGeometry,
                       before: scrolling,
                       after: await readWheel(),
+                      scrollChain: {
+                        before: wheelChainBefore,
+                        after: await wheel.evaluate((probe) => probe.inspect()),
+                      },
                       error: wheelError ? String(wheelError) : null,
                     },
                     null,

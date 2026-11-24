@@ -19,9 +19,9 @@ on:
         required: false
         default: false
       scope:
-        description: Existing repair controls or complete selected Sprint 1 evidence
+        description: Existing repair controls, Sprint 1, or focused Contents wheel evidence
         type: choice
-        options: [repair, sprint1]
+        options: [repair, sprint1, contents-wheel]
         default: repair
   workflow_call:
     inputs:
@@ -38,7 +38,7 @@ concurrency:
 
 jobs:
   focused-browser:
-    if: ${{ inputs.scope != 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true && inputs.shader_presentation != true }}
+    if: ${{ inputs.scope != 'sprint1' && inputs.scope != 'contents-wheel' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true && inputs.shader_presentation != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -86,6 +86,196 @@ jobs:
           name: browser-suite-repair-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/browser-suite-repair
           if-no-files-found: warn
+          retention-days: 30
+
+  # A separate opt-in preserves the original repair and Sprint 1 selections.
+  # This is two oracle controls plus one original public Popover matrix, not
+  # acceptance of the complete homepage suite or the complete CI selection.
+  contents-wheel:
+    if: ${{ inputs.scope == 'contents-wheel' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true && inputs.shader_presentation != true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      CONTENTS_WHEEL_EVIDENCE_DIR: ${{ runner.temp }}/contents-wheel
+      PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/contents-wheel/runtime
+      ASTRO_TELEMETRY_DISABLED: '1'
+    steps:
+      - name: Prepare evidence retention before checkout and setup
+        run: |
+          set -euo pipefail
+          mkdir -p "$CONTENTS_WHEEL_EVIDENCE_DIR"
+          printf '%s\n' "$CANDIDATE_SHA" > "$CONTENTS_WHEEL_EVIDENCE_DIR/requested-source-sha.txt"
+          cat > "$CONTENTS_WHEEL_EVIDENCE_DIR/record-source.mjs" <<'JS'
+          import { spawnSync } from 'node:child_process';
+          import { createHash } from 'node:crypto';
+          import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+          import os from 'node:os';
+          import path from 'node:path';
+          const directory = process.env.CONTENTS_WHEEL_EVIDENCE_DIR;
+          const phase = process.argv[2];
+          const command = (file, args) => {
+            const result = spawnSync(file, args, { encoding: 'utf8' });
+            return { status: result.status, stdout: result.stdout ?? '', stderr: result.stderr ?? '', error: result.error?.message ?? null };
+          };
+          const source = command('git', ['rev-parse', 'HEAD']);
+          const status = command('git', ['status', '--porcelain=v1', '--untracked-files=all']);
+          const hashFile = (file) => {
+            try {
+              const bytes = readFileSync(file);
+              return { path: file, bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') };
+            } catch (error) { return { path: file, error: String(error) }; }
+          };
+          const sourceFiles = [
+            '.github/workflows/browser-suite-repair-evidence.yml', 'pnpm-lock.yaml',
+            'apps/www/package.json', 'apps/www/scripts/generate-website-prototype-tokens.mjs',
+            'apps/www/scripts/prepare-homepage-composition-fonts.sh',
+            'apps/www/src/content/docs/zh-cn/browser-harness.ts',
+            'apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts',
+            'apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts',
+            'apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts',
+            'apps/www/src/styles/site-contents-command.css',
+          ].map(hashFile);
+          // Actual outputs of apps-www generate:proto-ui-style, including the
+          // ignored CSS/Shadow artifacts that git status cannot account for.
+          const generatedFiles = [
+            'shadcn-theme.css', 'proto-ui-style.css', 'proto-ui-tokens.generated.css',
+            'proto-ui-shadow-style.generated.js', 'proto-ui-shadow-style.generated.d.ts',
+          ].map((name) => hashFile(`apps/www/src/styles/${name}`));
+          const archive = path.join(directory, phase, 'generated');
+          mkdirSync(archive, { recursive: true });
+          for (const file of generatedFiles) {
+            if (!file.error) copyFileSync(file.path, path.join(archive, path.basename(file.path)));
+          }
+          const record = {
+            phase, observedAt: new Date().toISOString(), expectedSha: process.env.CANDIDATE_SHA,
+            source, status, dirty: status.status === 0 ? status.stdout !== '' : null,
+            runId: process.env.GITHUB_RUN_ID, runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            event: process.env.GITHUB_EVENT_NAME, ref: process.env.GITHUB_REF,
+            node: process.version, platform: process.platform, arch: process.arch, os: os.release(),
+            chromePath: process.env.CHROME_PATH ?? null,
+            chrome: process.env.CHROME_PATH ? command(process.env.CHROME_PATH, ['--version']) : null,
+            sourceFiles, generatedFiles,
+          };
+          writeFileSync(path.join(directory, `${phase}.json`), JSON.stringify(record, null, 2) + '\n');
+          writeFileSync(path.join(directory, `${phase}-git-status.txt`), status.stdout + status.stderr);
+          if (source.status !== 0 || source.stdout.trim() !== process.env.CANDIDATE_SHA || status.status !== 0)
+            throw new Error('Could not bind evidence to the requested source and worktree state');
+          JS
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install the locked toolchain and official browser surface
+        id: setup
+        timeout-minutes: 4
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile 2>&1 | tee "$CONTENTS_WHEEL_EVIDENCE_DIR/install.log"
+          corepack pnpm@10.32.1 --version | tee "$CONTENTS_WHEEL_EVIDENCE_DIR/pnpm-version.txt"
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          "$CHROME" --version | tee "$CONTENTS_WHEEL_EVIDENCE_DIR/browser-version.txt"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar 2>&1 | tee "$CONTENTS_WHEEL_EVIDENCE_DIR/toolbar-disable.log"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled 2>&1 | tee "$CONTENTS_WHEEL_EVIDENCE_DIR/toolbar-preference.log"
+      - name: Prepare the same official CJK font input as full CI
+        timeout-minutes: 3
+        env:
+          FONT_EVIDENCE_DIR: ${{ runner.temp }}/contents-wheel/fonts
+        run: bash apps/www/scripts/prepare-homepage-composition-fonts.sh
+      - name: Record source and actual CSS before native execution
+        id: before
+        run: node "$CONTENTS_WHEEL_EVIDENCE_DIR/record-source.mjs" beforeTest
+      - name: Run both original native cancellation controls
+        if: ${{ !cancelled() && steps.before.outcome == 'success' }}
+        run: |
+          set -uo pipefail
+          set +e
+          corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
+            apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts \
+            --reporter=default --reporter=json \
+            --outputFile="$CONTENTS_WHEEL_EVIDENCE_DIR/controls-vitest.json" \
+            2>&1 | tee "$CONTENTS_WHEEL_EVIDENCE_DIR/controls.log"
+          results=("${PIPESTATUS[@]}")
+          printf '%s\n' "${results[0]}" > "$CONTENTS_WHEEL_EVIDENCE_DIR/controls-exit-code.txt"
+          if [ "${results[0]}" -ne 0 ]; then exit "${results[0]}"; fi
+          exit "${results[1]}"
+      - name: Run the unchanged public Popover matrix with native input
+        if: ${{ !cancelled() && steps.before.outcome == 'success' }}
+        run: |
+          set -uo pipefail
+          set +e
+          corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
+            apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts \
+            --testNamePattern='^Homepage end-to-end dogfood boundary uses real family Popover Triggers through all four Docs runtimes with keyboard and exact-source visual evidence$' \
+            --reporter=default --reporter=json \
+            --outputFile="$CONTENTS_WHEEL_EVIDENCE_DIR/popover-vitest.json" \
+            2>&1 | tee "$CONTENTS_WHEEL_EVIDENCE_DIR/popover.log"
+          results=("${PIPESTATUS[@]}")
+          printf '%s\n' "${results[0]}" > "$CONTENTS_WHEEL_EVIDENCE_DIR/popover-exit-code.txt"
+          if [ "${results[0]}" -ne 0 ]; then exit "${results[0]}"; fi
+          exit "${results[1]}"
+      - name: Preserve source state and actual generated CSS even after failure
+        if: always()
+        run: node "$CONTENTS_WHEEL_EVIDENCE_DIR/record-source.mjs" afterTest
+      - name: Require exactly two executed controls and the original matrix result
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          import path from 'node:path';
+          const directory = process.env.CONTENTS_WHEEL_EVIDENCE_DIR;
+          const plans = [
+            { id: 'controls', file: 'apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts', titles: [
+              'preserves native cancellation=false and current dialog identity',
+              'preserves native cancellation=true and current dialog identity',
+            ] },
+            { id: 'popover', file: 'apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts', titles: [
+              'uses real family Popover Triggers through all four Docs runtimes with keyboard and exact-source visual evidence',
+            ] },
+          ];
+          const results = plans.map((plan) => {
+            try {
+              const report = JSON.parse(readFileSync(path.join(directory, `${plan.id}-vitest.json`), 'utf8'));
+              const suites = report.testResults ?? [];
+              const assertions = suites.flatMap((suite) => suite.assertionResults ?? []);
+              const selected = assertions.filter((test) => plan.titles.includes(test.title));
+              const executed = assertions.filter((test) => ['passed', 'failed'].includes(test.status));
+              const exactScope = suites.length === 1 && suites[0].name === path.resolve(plan.file)
+                && plan.titles.every((title) => selected.filter((test) => test.title === title).length === 1)
+                && selected.every((test) => ['passed', 'failed'].includes(test.status))
+                && executed.length === plan.titles.length;
+              return { ...plan, exactScope, passed: exactScope && report.success === true && selected.every((test) => test.status === 'passed'),
+                collected: assertions.length, executed: executed.length,
+                skipped: assertions.filter((test) => !['passed', 'failed'].includes(test.status)).length,
+                selected: selected.map(({ title, fullName, status, failureMessages }) => ({ title, fullName, status, failureMessages })) };
+            } catch (error) { return { ...plan, exactScope: false, passed: false, error: String(error) }; }
+          });
+          let generatedEvidence;
+          try {
+            const after = JSON.parse(readFileSync(path.join(directory, 'afterTest.json'), 'utf8'));
+            generatedEvidence = { complete: after.generatedFiles.length === 5
+              && after.generatedFiles.every((file) => !file.error && /^[a-f0-9]{64}$/.test(file.sha256)),
+              files: after.generatedFiles };
+          } catch (error) { generatedEvidence = { complete: false, error: String(error) }; }
+          writeFileSync(path.join(directory, 'selection-results.json'), JSON.stringify({
+            expectedSha: process.env.CANDIDATE_SHA,
+            scope: 'Two authored native oracle controls and one original public Popover matrix; not complete homepage or CI acceptance',
+            results, generatedEvidence,
+          }, null, 2) + '\n');
+          if (results.some((result) => !result.passed) || !generatedEvidence.complete) process.exitCode = 1;
+          JS
+      - name: Retain every focused result and failure artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contents-wheel-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/contents-wheel
+          if-no-files-found: error
           retention-days: 30
 
   sprint1:

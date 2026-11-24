@@ -166,6 +166,62 @@ describe('Contents wheel observation boundaries', () => {
     expect(observer.read().wheels).toHaveLength(1);
   });
 
+  it('distinguishes an inner zero-range containment node from the retained public scroll owner', () => {
+    const { surface, observer } = fixture();
+    const pane = document.createElement('div');
+    pane.id = 'borrowed-pane';
+    pane.style.overflowX = 'hidden';
+    pane.style.overflowY = 'hidden';
+    pane.style.overscrollBehaviorY = 'contain';
+    const target = document.createElement('summary');
+    pane.append(target);
+    surface.append(pane);
+    vi.mocked(document.elementFromPoint).mockReturnValue(target);
+    try {
+      const before = observer.inspect();
+      expect(before.content).toMatchObject({ isContent: true, hasShadowRoot: false });
+      expect(before.hitChain.map((node) => node.tag).slice(0, 3)).toEqual([
+        'summary',
+        'div',
+        'div',
+      ]);
+      expect(before.hitChain[1]).toMatchObject({
+        id: 'borrowed-pane',
+        isSurface: false,
+        overflowY: 'hidden',
+        overscrollY: 'contain',
+        clientHeight: 0,
+        scrollHeight: 0,
+      });
+      target.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: 500 }));
+      // Injected offsets/events exercise the recorder only, not UA scrolling.
+      surface.scrollTop = 100;
+      surface.dispatchEvent(new Event('scroll'));
+      surface.scrollTop = 0;
+      surface.dispatchEvent(new Event('scroll'));
+      const after = observer.inspect();
+      expect(after.wheelPaths[0].path.map((node) => node.tag).slice(0, 3)).toEqual([
+        'summary',
+        'div',
+        'div',
+      ]);
+      expect(
+        after.scrolls.map(({ top, trusted, target }) => [top, trusted, target.isSurface])
+      ).toEqual([
+        [100, false, true],
+        [0, false, true],
+      ]);
+      for (let index = 0; index < 63; index++) surface.dispatchEvent(new Event('scroll'));
+      expect(observer.inspect().scrolls).toHaveLength(64);
+      expect(observer.inspect().droppedScrolls).toBe(1);
+      observer.dispose();
+      surface.dispatchEvent(new Event('scroll'));
+      expect(observer.inspect().droppedScrolls).toBe(1);
+    } finally {
+      observer.dispose();
+    }
+  });
+
   it('samples cancellation at read time even after an intervening microtask checkpoint', async () => {
     const { surface, observer } = fixture();
     const event = new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: 500 });
