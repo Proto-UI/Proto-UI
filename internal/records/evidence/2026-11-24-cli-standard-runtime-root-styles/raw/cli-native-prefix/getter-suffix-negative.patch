@@ -1,0 +1,24 @@
+diff --git a/packages/cli/test/hook-source-props-initialization.test.ts b/packages/cli/test/hook-source-props-initialization.test.ts
+--- a/packages/cli/test/hook-source-props-initialization.test.ts
++++ b/packages/cli/test/hook-source-props-initialization.test.ts
+@@ -120,6 +120,20 @@
+     expect(tokens).not.toContain('data-[selected]:bg-accent');
+   });
+ 
++  it('withholds capture after a getter read following closed Props initialization', async () => {
++    const entry = path.join(directory, 'entry.proto.ts');
++    await writeFile(
++      entry,
++      sourceFor('def.props.define({}); effect.value;').replace(
++        'export default definePrototype(',
++        'const effect = { get value() { asReplacement(); return 1; } };\nexport default definePrototype('
++      )
++    );
++    const tokens = await collectProtoStyleTokensFromFiles([entry]);
++    expect(tokens).toContain('bg-accent');
++    expect(tokens).not.toContain('data-[selected]:bg-accent');
++  });
++
+   it('keeps same-path SourceFile snapshots independent', async () => {
+     const file = path.join(directory, 'entry.proto.ts');
+     const safe = 'def.props.define({});';

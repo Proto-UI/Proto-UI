@@ -76,7 +76,7 @@ export function captureMessageReadingAnchor(
     if (entry && entry.key && entry.end > policy.inset) {
       if (policy.capture === 'first-crossing') {
         if (selected < 0) selected = index;
-      } else if (entry.start < frame.viewportSize) {
+      } else if (frame.viewportSize > 0 && entry.end > 0 && entry.start < frame.viewportSize) {
         if (selected < 0 || (!frame.entries[selected]?.primary && entry.primary)) selected = index;
       }
     }

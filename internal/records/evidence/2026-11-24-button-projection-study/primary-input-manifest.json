@@ -1,0 +1,643 @@
+{
+  "capturedAt": "2026-11-23T20:45:55.879105+00:00",
+  "primaryFreezeSha256": "eda8ab6d22db447eb82483e4560c15a1ef7d280941551a1150148cd910303299",
+  "oracleSha256": "91d6604b33732c7596e33a36af6c0996ac0dc8cb27c00b27d3e91bd9db615937",
+  "cases": [
+    {
+      "id": "deterministic-1",
+      "source": "/workspace/scratch/0d7d81e85daf/s7-button-deterministic-02/deterministic-1",
+      "files": [
+        {
+          "path": "candidate.json",
+          "sha256": "6683b67fef5a43b3c1b2ca81c33ddb8b9f129b1e8f70de7bbfa864eb555781e9",
+          "bytes": 34288
+        },
+        {
+          "path": "clean-consumer/dependency-provenance.json",
+          "sha256": "7c5dd7c49f3d280059d6a5914dc99430ca975e171774e94afb02831cfd1a2e05",
+          "bytes": 4147
+        },
+        {
+          "path": "clean-consumer/dist/assets/index-CPl4YVkR.js",
+          "sha256": "dd5f483bbe189d51b70ae49b1640bc1a1d7e36c946af8f6abd58be75517fe222",
+          "bytes": 270111
+        },
+        {
+          "path": "clean-consumer/dist/assets/index-htbgfkJD.css",
+          "sha256": "c6d39249453778dcd1b4c35709cc5c985adcd3a39c230406bfc63e020bee7b57",
+          "bytes": 372
+        },
+        {
+          "path": "clean-consumer/dist/index.html",
+          "sha256": "cffb35e86763bf177aec7589ba345722c70a13b7b4100c813b6c6bc483839f89",
+          "bytes": 396
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/context/react-v1.ts",
+          "sha256": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78",
+          "bytes": 161
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/context/scope-v1.ts",
+          "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+          "bytes": 8996
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/control-label-types-v1.ts",
+          "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9",
+          "bytes": 1072
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/control-label-v1.ts",
+          "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+          "bytes": 58048
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/focus-ownership-v2.ts",
+          "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+          "bytes": 798
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+          "sha256": "b8145e32e3218896707bcc1dcdead4daa939b4de927516e35e140c7f7f89a26a",
+          "bytes": 45840
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+          "sha256": "e01f916fbc0ef7da2801c438569ad2041d37bb24fe576f77319e397a6f523bd7",
+          "bytes": 55054
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/ownership-v2.ts",
+          "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+          "bytes": 4849
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/style/native-v1.ts",
+          "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+          "bytes": 5912
+        },
+        {
+          "path": "clean-consumer/generated/Component.tsx",
+          "sha256": "0c28c3df8ade01e3355a200d07248d43dafa9565cbb277a76cdb97a31f9a8ab8",
+          "bytes": 57184
+        },
+        {
+          "path": "clean-consumer/generated/Component.tsx.map",
+          "sha256": "e9ddc911dd59fb6d677a13eaed5a98440e77f29864a718625a589adf12dd75dd",
+          "bytes": 8261
+        },
+        {
+          "path": "clean-consumer/generated/provenance.json",
+          "sha256": "7c5dd7c49f3d280059d6a5914dc99430ca975e171774e94afb02831cfd1a2e05",
+          "bytes": 4147
+        },
+        {
+          "path": "clean-consumer/index.html",
+          "sha256": "4c139eefc7c2a605c23ba1f2aca0526396286ea1806f1e10e5db2de6eeec04ba",
+          "bytes": 298
+        },
+        {
+          "path": "clean-consumer/negative-controls/internal-import.ts",
+          "sha256": "b3f6c02fcebf78f8d3a666429ffdcbf5370495d1a171bf74735767fca4eb0cf1",
+          "bytes": 28
+        },
+        {
+          "path": "clean-consumer/package-lock.json",
+          "sha256": "eb05de3d6a314e1f385cfed6494844e91696a8cc68541950a91cf0ace9426fdb",
+          "bytes": 38020
+        },
+        {
+          "path": "clean-consumer/package.json",
+          "sha256": "4b348afb82b3c1e63e98514b2825decb576eff8e04b418d1eadd6249d52c9afd",
+          "bytes": 441
+        },
+        {
+          "path": "clean-consumer/src/App.tsx",
+          "sha256": "37801d5e96ee512f271ab24a5d1cfca0ee5006756b3d506d52661ccb637a3318",
+          "bytes": 562
+        },
+        {
+          "path": "clean-consumer/src/main.tsx",
+          "sha256": "c9b21695417842045f07a894953ca6660c86d9c51a89d0f3f47364301e3b0306",
+          "bytes": 299
+        },
+        {
+          "path": "clean-consumer/src/storage.ts",
+          "sha256": "1f8511f39b5a5becf5fdc2e78e50a1287e0dcde96c0fd536d6269b802b38154c",
+          "bytes": 1047
+        },
+        {
+          "path": "clean-consumer/src/style.css",
+          "sha256": "3ed2198eae83c9a539d632a461116ff71e6af69abb577e6dd3d7bd9bba98664a",
+          "bytes": 477
+        },
+        {
+          "path": "clean-consumer/tsconfig.json",
+          "sha256": "5f238c85d225fddcdd2c89750a8bc4f283df5f98f905aa7d41d745aff6adcb9f",
+          "bytes": 284
+        },
+        {
+          "path": "clean-consumer.json",
+          "sha256": "303a317038a75a7d6e54149696d95442741009b7b732537a13a4265570c01085",
+          "bytes": 1265
+        }
+      ]
+    },
+    {
+      "id": "deterministic-2",
+      "source": "/workspace/scratch/0d7d81e85daf/s7-button-deterministic-02/deterministic-2",
+      "files": [
+        {
+          "path": "candidate.json",
+          "sha256": "7ff0599cbd6e63b210da4ce562da298fdb89562626288fa87a384fe007418b5d",
+          "bytes": 34288
+        },
+        {
+          "path": "clean-consumer/dependency-provenance.json",
+          "sha256": "7c5dd7c49f3d280059d6a5914dc99430ca975e171774e94afb02831cfd1a2e05",
+          "bytes": 4147
+        },
+        {
+          "path": "clean-consumer/dist/assets/index-CPl4YVkR.js",
+          "sha256": "dd5f483bbe189d51b70ae49b1640bc1a1d7e36c946af8f6abd58be75517fe222",
+          "bytes": 270111
+        },
+        {
+          "path": "clean-consumer/dist/assets/index-htbgfkJD.css",
+          "sha256": "c6d39249453778dcd1b4c35709cc5c985adcd3a39c230406bfc63e020bee7b57",
+          "bytes": 372
+        },
+        {
+          "path": "clean-consumer/dist/index.html",
+          "sha256": "cffb35e86763bf177aec7589ba345722c70a13b7b4100c813b6c6bc483839f89",
+          "bytes": 396
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/context/react-v1.ts",
+          "sha256": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78",
+          "bytes": 161
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/context/scope-v1.ts",
+          "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+          "bytes": 8996
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/control-label-types-v1.ts",
+          "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9",
+          "bytes": 1072
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/control-label-v1.ts",
+          "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+          "bytes": 58048
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/focus-ownership-v2.ts",
+          "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+          "bytes": 798
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+          "sha256": "b8145e32e3218896707bcc1dcdead4daa939b4de927516e35e140c7f7f89a26a",
+          "bytes": 45840
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+          "sha256": "e01f916fbc0ef7da2801c438569ad2041d37bb24fe576f77319e397a6f523bd7",
+          "bytes": 55054
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/ownership-v2.ts",
+          "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+          "bytes": 4849
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/style/native-v1.ts",
+          "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+          "bytes": 5912
+        },
+        {
+          "path": "clean-consumer/generated/Component.tsx",
+          "sha256": "0c28c3df8ade01e3355a200d07248d43dafa9565cbb277a76cdb97a31f9a8ab8",
+          "bytes": 57184
+        },
+        {
+          "path": "clean-consumer/generated/Component.tsx.map",
+          "sha256": "e9ddc911dd59fb6d677a13eaed5a98440e77f29864a718625a589adf12dd75dd",
+          "bytes": 8261
+        },
+        {
+          "path": "clean-consumer/generated/provenance.json",
+          "sha256": "7c5dd7c49f3d280059d6a5914dc99430ca975e171774e94afb02831cfd1a2e05",
+          "bytes": 4147
+        },
+        {
+          "path": "clean-consumer/index.html",
+          "sha256": "4c139eefc7c2a605c23ba1f2aca0526396286ea1806f1e10e5db2de6eeec04ba",
+          "bytes": 298
+        },
+        {
+          "path": "clean-consumer/negative-controls/internal-import.ts",
+          "sha256": "b3f6c02fcebf78f8d3a666429ffdcbf5370495d1a171bf74735767fca4eb0cf1",
+          "bytes": 28
+        },
+        {
+          "path": "clean-consumer/package-lock.json",
+          "sha256": "eb05de3d6a314e1f385cfed6494844e91696a8cc68541950a91cf0ace9426fdb",
+          "bytes": 38020
+        },
+        {
+          "path": "clean-consumer/package.json",
+          "sha256": "4b348afb82b3c1e63e98514b2825decb576eff8e04b418d1eadd6249d52c9afd",
+          "bytes": 441
+        },
+        {
+          "path": "clean-consumer/src/App.tsx",
+          "sha256": "37801d5e96ee512f271ab24a5d1cfca0ee5006756b3d506d52661ccb637a3318",
+          "bytes": 562
+        },
+        {
+          "path": "clean-consumer/src/main.tsx",
+          "sha256": "c9b21695417842045f07a894953ca6660c86d9c51a89d0f3f47364301e3b0306",
+          "bytes": 299
+        },
+        {
+          "path": "clean-consumer/src/storage.ts",
+          "sha256": "1f8511f39b5a5becf5fdc2e78e50a1287e0dcde96c0fd536d6269b802b38154c",
+          "bytes": 1047
+        },
+        {
+          "path": "clean-consumer/src/style.css",
+          "sha256": "3ed2198eae83c9a539d632a461116ff71e6af69abb577e6dd3d7bd9bba98664a",
+          "bytes": 477
+        },
+        {
+          "path": "clean-consumer/tsconfig.json",
+          "sha256": "5f238c85d225fddcdd2c89750a8bc4f283df5f98f905aa7d41d745aff6adcb9f",
+          "bytes": 284
+        },
+        {
+          "path": "clean-consumer.json",
+          "sha256": "ba896c896b796f3085cf6ee6afb8e748d238df0ae54351bd1dec62dfc2f48d83",
+          "bytes": 1265
+        }
+      ]
+    },
+    {
+      "id": "deterministic-3",
+      "source": "/workspace/scratch/0d7d81e85daf/s7-button-deterministic-02/deterministic-3",
+      "files": [
+        {
+          "path": "candidate.json",
+          "sha256": "60cf53ef264d9a5fe3a32e5e850c2dddcc4c69394309e45d6aa3f1614fb0805f",
+          "bytes": 34288
+        },
+        {
+          "path": "clean-consumer/dependency-provenance.json",
+          "sha256": "7c5dd7c49f3d280059d6a5914dc99430ca975e171774e94afb02831cfd1a2e05",
+          "bytes": 4147
+        },
+        {
+          "path": "clean-consumer/dist/assets/index-CPl4YVkR.js",
+          "sha256": "dd5f483bbe189d51b70ae49b1640bc1a1d7e36c946af8f6abd58be75517fe222",
+          "bytes": 270111
+        },
+        {
+          "path": "clean-consumer/dist/assets/index-htbgfkJD.css",
+          "sha256": "c6d39249453778dcd1b4c35709cc5c985adcd3a39c230406bfc63e020bee7b57",
+          "bytes": 372
+        },
+        {
+          "path": "clean-consumer/dist/index.html",
+          "sha256": "cffb35e86763bf177aec7589ba345722c70a13b7b4100c813b6c6bc483839f89",
+          "bytes": 396
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/context/react-v1.ts",
+          "sha256": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78",
+          "bytes": 161
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/context/scope-v1.ts",
+          "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+          "bytes": 8996
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/control-label-types-v1.ts",
+          "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9",
+          "bytes": 1072
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/control-label-v1.ts",
+          "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+          "bytes": 58048
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/focus-ownership-v2.ts",
+          "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+          "bytes": 798
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+          "sha256": "b8145e32e3218896707bcc1dcdead4daa939b4de927516e35e140c7f7f89a26a",
+          "bytes": 45840
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+          "sha256": "e01f916fbc0ef7da2801c438569ad2041d37bb24fe576f77319e397a6f523bd7",
+          "bytes": 55054
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/interaction/ownership-v2.ts",
+          "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+          "bytes": 4849
+        },
+        {
+          "path": "clean-consumer/generated/.proto-ui/style/native-v1.ts",
+          "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+          "bytes": 5912
+        },
+        {
+          "path": "clean-consumer/generated/Component.tsx",
+          "sha256": "0c28c3df8ade01e3355a200d07248d43dafa9565cbb277a76cdb97a31f9a8ab8",
+          "bytes": 57184
+        },
+        {
+          "path": "clean-consumer/generated/Component.tsx.map",
+          "sha256": "e9ddc911dd59fb6d677a13eaed5a98440e77f29864a718625a589adf12dd75dd",
+          "bytes": 8261
+        },
+        {
+          "path": "clean-consumer/generated/provenance.json",
+          "sha256": "7c5dd7c49f3d280059d6a5914dc99430ca975e171774e94afb02831cfd1a2e05",
+          "bytes": 4147
+        },
+        {
+          "path": "clean-consumer/index.html",
+          "sha256": "4c139eefc7c2a605c23ba1f2aca0526396286ea1806f1e10e5db2de6eeec04ba",
+          "bytes": 298
+        },
+        {
+          "path": "clean-consumer/negative-controls/internal-import.ts",
+          "sha256": "b3f6c02fcebf78f8d3a666429ffdcbf5370495d1a171bf74735767fca4eb0cf1",
+          "bytes": 28
+        },
+        {
+          "path": "clean-consumer/package-lock.json",
+          "sha256": "eb05de3d6a314e1f385cfed6494844e91696a8cc68541950a91cf0ace9426fdb",
+          "bytes": 38020
+        },
+        {
+          "path": "clean-consumer/package.json",
+          "sha256": "4b348afb82b3c1e63e98514b2825decb576eff8e04b418d1eadd6249d52c9afd",
+          "bytes": 441
+        },
+        {
+          "path": "clean-consumer/src/App.tsx",
+          "sha256": "37801d5e96ee512f271ab24a5d1cfca0ee5006756b3d506d52661ccb637a3318",
+          "bytes": 562
+        },
+        {
+          "path": "clean-consumer/src/main.tsx",
+          "sha256": "c9b21695417842045f07a894953ca6660c86d9c51a89d0f3f47364301e3b0306",
+          "bytes": 299
+        },
+        {
+          "path": "clean-consumer/src/storage.ts",
+          "sha256": "1f8511f39b5a5becf5fdc2e78e50a1287e0dcde96c0fd536d6269b802b38154c",
+          "bytes": 1047
+        },
+        {
+          "path": "clean-consumer/src/style.css",
+          "sha256": "3ed2198eae83c9a539d632a461116ff71e6af69abb577e6dd3d7bd9bba98664a",
+          "bytes": 477
+        },
+        {
+          "path": "clean-consumer/tsconfig.json",
+          "sha256": "5f238c85d225fddcdd2c89750a8bc4f283df5f98f905aa7d41d745aff6adcb9f",
+          "bytes": 284
+        },
+        {
+          "path": "clean-consumer.json",
+          "sha256": "53444af143f9a013c2146ba3b2f95879e04755ec693cec2359b809b3d39b38ff",
+          "bytes": 1265
+        }
+      ]
+    },
+    {
+      "id": "clean-generative-1",
+      "source": "/workspace/scratch/0d7d81e85daf/s7-button-generations-clean/generative-1",
+      "files": [
+        {
+          "path": "clean-consumer/dist/assets/index-BkWtQX3H.js",
+          "sha256": "fe349b084cd3f2ad3c84de13486eb8989543b41ad5fd9034cf7633b1349a1d54",
+          "bytes": 195063
+        },
+        {
+          "path": "clean-consumer/dist/assets/index-htbgfkJD.css",
+          "sha256": "c6d39249453778dcd1b4c35709cc5c985adcd3a39c230406bfc63e020bee7b57",
+          "bytes": 372
+        },
+        {
+          "path": "clean-consumer/dist/index.html",
+          "sha256": "ac41292e49bed260dceba95e7550a33a213ac9b22b25c30fcd501f9a779ccf98",
+          "bytes": 396
+        },
+        {
+          "path": "clean-consumer/generated/Component.tsx",
+          "sha256": "e2a8639ce6874dee4d51905856fc80a2746b92404ad8325337a0967a34e25ef1",
+          "bytes": 435
+        },
+        {
+          "path": "clean-consumer/index.html",
+          "sha256": "4c139eefc7c2a605c23ba1f2aca0526396286ea1806f1e10e5db2de6eeec04ba",
+          "bytes": 298
+        },
+        {
+          "path": "clean-consumer/package-lock.json",
+          "sha256": "eb05de3d6a314e1f385cfed6494844e91696a8cc68541950a91cf0ace9426fdb",
+          "bytes": 38020
+        },
+        {
+          "path": "clean-consumer/package.json",
+          "sha256": "4b348afb82b3c1e63e98514b2825decb576eff8e04b418d1eadd6249d52c9afd",
+          "bytes": 441
+        },
+        {
+          "path": "clean-consumer/src/App.tsx",
+          "sha256": "37801d5e96ee512f271ab24a5d1cfca0ee5006756b3d506d52661ccb637a3318",
+          "bytes": 562
+        },
+        {
+          "path": "clean-consumer/src/main.tsx",
+          "sha256": "c9b21695417842045f07a894953ca6660c86d9c51a89d0f3f47364301e3b0306",
+          "bytes": 299
+        },
+        {
+          "path": "clean-consumer/src/storage.ts",
+          "sha256": "1f8511f39b5a5becf5fdc2e78e50a1287e0dcde96c0fd536d6269b802b38154c",
+          "bytes": 1047
+        },
+        {
+          "path": "clean-consumer/src/style.css",
+          "sha256": "3ed2198eae83c9a539d632a461116ff71e6af69abb577e6dd3d7bd9bba98664a",
+          "bytes": 477
+        },
+        {
+          "path": "clean-consumer/tsconfig.json",
+          "sha256": "5f238c85d225fddcdd2c89750a8bc4f283df5f98f905aa7d41d745aff6adcb9f",
+          "bytes": 284
+        },
+        {
+          "path": "clean-consumer.json",
+          "sha256": "331063005d7ba93294964d6bcb25cab085a2f12e76bc908e98b16160fac3ecf1",
+          "bytes": 727
+        }
+      ]
+    },
+    {
+      "id": "clean-generative-2",
+      "source": "/workspace/scratch/0d7d81e85daf/s7-button-generations-clean/generative-2",
+      "files": [
+        {
+          "path": "clean-consumer/dist/assets/index-BkWtQX3H.js",
+          "sha256": "fe349b084cd3f2ad3c84de13486eb8989543b41ad5fd9034cf7633b1349a1d54",
+          "bytes": 195063
+        },
+        {
+          "path": "clean-consumer/dist/assets/index-htbgfkJD.css",
+          "sha256": "c6d39249453778dcd1b4c35709cc5c985adcd3a39c230406bfc63e020bee7b57",
+          "bytes": 372
+        },
+        {
+          "path": "clean-consumer/dist/index.html",
+          "sha256": "ac41292e49bed260dceba95e7550a33a213ac9b22b25c30fcd501f9a779ccf98",
+          "bytes": 396
+        },
+        {
+          "path": "clean-consumer/generated/Component.tsx",
+          "sha256": "bec14d8c114b7c7cc1d35dbcb015427015886407ac9c34776e7d939947debe4c",
+          "bytes": 522
+        },
+        {
+          "path": "clean-consumer/index.html",
+          "sha256": "4c139eefc7c2a605c23ba1f2aca0526396286ea1806f1e10e5db2de6eeec04ba",
+          "bytes": 298
+        },
+        {
+          "path": "clean-consumer/package-lock.json",
+          "sha256": "eb05de3d6a314e1f385cfed6494844e91696a8cc68541950a91cf0ace9426fdb",
+          "bytes": 38020
+        },
+        {
+          "path": "clean-consumer/package.json",
+          "sha256": "4b348afb82b3c1e63e98514b2825decb576eff8e04b418d1eadd6249d52c9afd",
+          "bytes": 441
+        },
+        {
+          "path": "clean-consumer/src/App.tsx",
+          "sha256": "37801d5e96ee512f271ab24a5d1cfca0ee5006756b3d506d52661ccb637a3318",
+          "bytes": 562
+        },
+        {
+          "path": "clean-consumer/src/main.tsx",
+          "sha256": "c9b21695417842045f07a894953ca6660c86d9c51a89d0f3f47364301e3b0306",
+          "bytes": 299
+        },
+        {
+          "path": "clean-consumer/src/storage.ts",
+          "sha256": "1f8511f39b5a5becf5fdc2e78e50a1287e0dcde96c0fd536d6269b802b38154c",
+          "bytes": 1047
+        },
+        {
+          "path": "clean-consumer/src/style.css",
+          "sha256": "3ed2198eae83c9a539d632a461116ff71e6af69abb577e6dd3d7bd9bba98664a",
+          "bytes": 477
+        },
+        {
+          "path": "clean-consumer/tsconfig.json",
+          "sha256": "5f238c85d225fddcdd2c89750a8bc4f283df5f98f905aa7d41d745aff6adcb9f",
+          "bytes": 284
+        },
+        {
+          "path": "clean-consumer.json",
+          "sha256": "ff850392956d1c55c7420879ab2e5a904b8354c02708006ecca7b5d34e3d6f29",
+          "bytes": 727
+        }
+      ]
+    },
+    {
+      "id": "clean-generative-3",
+      "source": "/workspace/scratch/0d7d81e85daf/s7-button-generations-clean/generative-3",
+      "files": [
+        {
+          "path": "clean-consumer/dist/assets/index-BYREBIsB.js",
+          "sha256": "fcef6c3c9fb81d03e31947eda456dfc69378d76b3237aefc6c4118ab96746a78",
+          "bytes": 195145
+        },
+        {
+          "path": "clean-consumer/dist/assets/index-htbgfkJD.css",
+          "sha256": "c6d39249453778dcd1b4c35709cc5c985adcd3a39c230406bfc63e020bee7b57",
+          "bytes": 372
+        },
+        {
+          "path": "clean-consumer/dist/index.html",
+          "sha256": "d10ea42c9f85f3bd7cf54e8d0443f8d908f6f41c5fe9e27c2b50b2bc3cc91d27",
+          "bytes": 396
+        },
+        {
+          "path": "clean-consumer/generated/Component.tsx",
+          "sha256": "5532d49aeae0cc4f14c6ae98073f5ff7fe4f785e8a65ff496e9eba4cce6b65e4",
+          "bytes": 534
+        },
+        {
+          "path": "clean-consumer/index.html",
+          "sha256": "4c139eefc7c2a605c23ba1f2aca0526396286ea1806f1e10e5db2de6eeec04ba",
+          "bytes": 298
+        },
+        {
+          "path": "clean-consumer/package-lock.json",
+          "sha256": "eb05de3d6a314e1f385cfed6494844e91696a8cc68541950a91cf0ace9426fdb",
+          "bytes": 38020
+        },
+        {
+          "path": "clean-consumer/package.json",
+          "sha256": "4b348afb82b3c1e63e98514b2825decb576eff8e04b418d1eadd6249d52c9afd",
+          "bytes": 441
+        },
+        {
+          "path": "clean-consumer/src/App.tsx",
+          "sha256": "37801d5e96ee512f271ab24a5d1cfca0ee5006756b3d506d52661ccb637a3318",
+          "bytes": 562
+        },
+        {
+          "path": "clean-consumer/src/main.tsx",
+          "sha256": "c9b21695417842045f07a894953ca6660c86d9c51a89d0f3f47364301e3b0306",
+          "bytes": 299
+        },
+        {
+          "path": "clean-consumer/src/storage.ts",
+          "sha256": "1f8511f39b5a5becf5fdc2e78e50a1287e0dcde96c0fd536d6269b802b38154c",
+          "bytes": 1047
+        },
+        {
+          "path": "clean-consumer/src/style.css",
+          "sha256": "3ed2198eae83c9a539d632a461116ff71e6af69abb577e6dd3d7bd9bba98664a",
+          "bytes": 477
+        },
+        {
+          "path": "clean-consumer/tsconfig.json",
+          "sha256": "5f238c85d225fddcdd2c89750a8bc4f283df5f98f905aa7d41d745aff6adcb9f",
+          "bytes": 284
+        },
+        {
+          "path": "clean-consumer.json",
+          "sha256": "bec5eb023c6f7b9cefbf0426039cef2606714f3dcd398765ec8a9a848085e945",
+          "bytes": 727
+        }
+      ]
+    }
+  ]
+}

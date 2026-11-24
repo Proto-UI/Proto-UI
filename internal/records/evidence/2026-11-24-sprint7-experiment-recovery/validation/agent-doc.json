@@ -1,0 +1,25 @@
+{
+  "name": "agent-doc",
+  "command": ["corepack", "pnpm@10.32.1", "check:agent-doc"],
+  "cwd": "/tmp/proto-ui-s7-recovery-456f",
+  "startedAt": "2026-11-24T02:31:37.488878+00:00",
+  "finishedAt": "2026-11-24T02:31:38.155684+00:00",
+  "elapsedSeconds": 0.6668127180018928,
+  "exitCode": 1,
+  "error": null,
+  "sourceBase": "8b052eb9cdb707ab7a4c8b7660c9442a7e3ee489",
+  "candidateTree": "acba1d91555093786477c61049e7011ee015c187",
+  "inputCommit": "4e5e50e159573a627d5e75037b23513ad8f5f164",
+  "logs": [
+    {
+      "path": "agent-doc.stdout.log",
+      "bytes": 179,
+      "sha256": "b9ae6ff8559204778f20cf182cb59a57156e225b76f83f444aa25ca0ea7cfa93"
+    },
+    {
+      "path": "agent-doc.stderr.log",
+      "bytes": 940,
+      "sha256": "fa886b5a7c332f23716ea5f770329590d15fe4460a065617ff61572282c8cc70"
+    }
+  ]
+}

@@ -1,0 +1,1653 @@
+{
+  "schemaVersion": 1,
+  "analyzedAt": "2026-11-23T20:51:34.923894+00:00",
+  "issues": [
+    734,
+    751
+  ],
+  "freezeSha256": "0d4829578a9086a7429c5de4c728837693ba25916fcfaf79d077cf71e68e9da8",
+  "primaryUnit": "Whole submitted initial journey; 22 checks correlated, maintenance follows selected initial implementation",
+  "initial": {
+    "total": 9,
+    "passed": 9,
+    "failed": 0,
+    "repairs": 0,
+    "arms": {
+      "library": {
+        "runs": 3,
+        "passed": 3,
+        "failed": 0,
+        "repairs": 0
+      },
+      "knowledge": {
+        "runs": 3,
+        "passed": 3,
+        "failed": 0,
+        "repairs": 0
+      },
+      "unassisted": {
+        "runs": 3,
+        "passed": 3,
+        "failed": 0,
+        "repairs": 0
+      }
+    }
+  },
+  "maintenance": {
+    "total": 3,
+    "passed": 3,
+    "failed": 0,
+    "repairs": 0,
+    "sourceAndHtmlLinkAndCounter": true
+  },
+  "classification": {
+    "734": "weakened for an observable correctness/repair advantage in this selected task; inconclusive for elapsed/token/billing advantage and broad knowledge value",
+    "751": "null observed remaining knowledge advantage under the stated zero-marginal-cost interpretation; broad value hypothesis inconclusive"
+  },
+  "runs": [
+    {
+      "id": "knowledge-1",
+      "arm": "knowledge",
+      "repeat": 1,
+      "attempt": "initial",
+      "outcome": "passed",
+      "checksPassed": 22,
+      "checksFailed": 0,
+      "checksNotRun": 0,
+      "runtimeErrors": 0,
+      "cleanupErrors": 0,
+      "firstBehavioralDivergence": null,
+      "implementationRepairs": 0,
+      "firstCommandUtc": "2026-11-23T19:49:42.023152Z",
+      "deliveryUtc": "2026-11-23T19:54:27.455168Z",
+      "participantElapsedSeconds": 285.432016,
+      "timeOmissionReason": null,
+      "timeSource": "participants/knowledge-1/DELIVERY.json",
+      "observerStartedAt": "2026-11-23T19:59:32.975Z",
+      "observerFinishedAt": "2026-11-23T19:59:43.195Z",
+      "observerCommandStartedAt": "2026-11-23T19:59:26.689304+00:00",
+      "observerCommandFinishedAt": "2026-11-23T19:59:43.481417+00:00",
+      "observerCommandExit": 0,
+      "report": "raw/submitted-02/knowledge-1-initial-observation/report.json",
+      "reportSha256": "04926f498fe53d763e79af658bb57a1cd9611577028b1851131bffa95ab69824",
+      "browser": "145.0.7632.6",
+      "node": "v24.22.3",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "sourceMainBytes": 5368,
+      "sourceMainLines": 143,
+      "dependencyRoute": "custom React18.3.1; installed Radix unused",
+      "traceAssets": [
+        {
+          "asset": "assets/index-DUY0E9Ud.css",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "index.html",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "assets/index-19PtGoR0.js",
+          "status": 200,
+          "responseBodyCaptured": false
+        }
+      ],
+      "projectInventory": [
+        {
+          "path": "dist/assets/index-19PtGoR0.js",
+          "sha256": "3e4615d5c6ad27f5a8a2f9ded747f45aa6da38c2d7053ff173a70dbed0d7360b",
+          "bytes": 146075
+        },
+        {
+          "path": "dist/assets/index-DUY0E9Ud.css",
+          "sha256": "1848d9b9ece9e23c8d5506658a1b7bb62a39ec1c140bd9520991a7acb1ce7e4b",
+          "bytes": 3055
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "eb5e6b0711e2e839616ecf3d9021051bea34723daeadd9c1e57f708d36fecf00",
+          "bytes": 359
+        },
+        {
+          "path": "index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "src/main.jsx",
+          "sha256": "d1f98ddc443edd6a2d0150863160a72280a8c79bc74c52facc56a6cd33a53be9",
+          "bytes": 5368
+        },
+        {
+          "path": "src/style.css",
+          "sha256": "8bb6868330d231a6bbcad346ef3f548c92819b2dea56d390f8544f82b8ffde40",
+          "bytes": 3545
+        }
+      ]
+    },
+    {
+      "id": "knowledge-2",
+      "arm": "knowledge",
+      "repeat": 2,
+      "attempt": "initial",
+      "outcome": "passed",
+      "checksPassed": 22,
+      "checksFailed": 0,
+      "checksNotRun": 0,
+      "runtimeErrors": 0,
+      "cleanupErrors": 0,
+      "firstBehavioralDivergence": null,
+      "implementationRepairs": 0,
+      "firstCommandUtc": "2026-11-23T19:58:24Z",
+      "deliveryUtc": "2026-11-23T20:01:45.806269+00:00",
+      "participantElapsedSeconds": 201.806269,
+      "timeOmissionReason": null,
+      "timeSource": "participants/knowledge-2/delivery.json",
+      "observerStartedAt": "2026-11-23T20:10:56.873Z",
+      "observerFinishedAt": "2026-11-23T20:11:06.923Z",
+      "observerCommandStartedAt": "2026-11-23T20:10:56.425414+00:00",
+      "observerCommandFinishedAt": "2026-11-23T20:11:07.169417+00:00",
+      "observerCommandExit": 0,
+      "report": "raw/submitted-03/knowledge-2-initial-observation/report.json",
+      "reportSha256": "b52a3c23bd8d54dd0f7c639e9ca127f39389aa903f98f6e52b09c5c26e78d424",
+      "browser": "145.0.7632.6",
+      "node": "v24.22.3",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "sourceMainBytes": 4247,
+      "sourceMainLines": 116,
+      "dependencyRoute": "custom React18.3.1; installed Radix unused",
+      "traceAssets": [
+        {
+          "asset": "assets/index-DgzTP0HB.css",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "index.html",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "assets/index-DCTUe69D.js",
+          "status": 200,
+          "responseBodyCaptured": false
+        }
+      ],
+      "projectInventory": [
+        {
+          "path": "dist/assets/index-DCTUe69D.js",
+          "sha256": "35278a86faada623562eea57602951c68e8dd4c1d098ed807abba790838b4be8",
+          "bytes": 145375
+        },
+        {
+          "path": "dist/assets/index-DgzTP0HB.css",
+          "sha256": "345ff58754cae7f9e4b3d8955ae1a3d35f43690db7451c1026766a67a2f61442",
+          "bytes": 2036
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "a2a4b5a6cd03b4217da02580b82c93df2bbd25af0aacb03d73ad88e87f708501",
+          "bytes": 359
+        },
+        {
+          "path": "index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "src/main.jsx",
+          "sha256": "a680eb5c6baf95b99b107742f04e3b6dc7e3dd42543da2e1a2c617fdda00ad88",
+          "bytes": 4247
+        },
+        {
+          "path": "src/style.css",
+          "sha256": "db2c2477a4fbf9fa1381cf0d6b0d46a1b95d1da5a6edc318b487398f8c74df64",
+          "bytes": 2366
+        }
+      ]
+    },
+    {
+      "id": "knowledge-3",
+      "arm": "knowledge",
+      "repeat": 3,
+      "attempt": "initial",
+      "outcome": "passed",
+      "checksPassed": 22,
+      "checksFailed": 0,
+      "checksNotRun": 0,
+      "runtimeErrors": 0,
+      "cleanupErrors": 0,
+      "firstBehavioralDivergence": null,
+      "implementationRepairs": 0,
+      "firstCommandUtc": "2026-11-23T20:07:32Z",
+      "deliveryUtc": "2026-11-23T20:11:37.925132Z",
+      "participantElapsedSeconds": 245.925132,
+      "timeOmissionReason": null,
+      "timeSource": "participants/knowledge-3/DELIVERY.json",
+      "observerStartedAt": "2026-11-23T20:27:15.714Z",
+      "observerFinishedAt": "2026-11-23T20:27:24.457Z",
+      "observerCommandStartedAt": "2026-11-23T20:27:14.647886+00:00",
+      "observerCommandFinishedAt": "2026-11-23T20:27:24.632955+00:00",
+      "observerCommandExit": 0,
+      "report": "raw/submitted-04/knowledge-3-initial-observation/report.json",
+      "reportSha256": "ad3fe9d0098749b6c059d2b1b385e2277a6f05146b3af4053bfcf7cb679fc9dd",
+      "browser": "145.0.7632.6",
+      "node": "v24.22.3",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "sourceMainBytes": 5121,
+      "sourceMainLines": 142,
+      "dependencyRoute": "custom React18.3.1; installed Radix unused",
+      "traceAssets": [
+        {
+          "asset": "assets/index-D1o0myig.css",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "index.html",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "assets/index-Fra_Qp3a.js",
+          "status": 200,
+          "responseBodyCaptured": false
+        }
+      ],
+      "projectInventory": [
+        {
+          "path": "dist/assets/index-D1o0myig.css",
+          "sha256": "111affd3b83bc944bec09e7ef452bbc2118125d7ca876b1c6e6803d35dd844f0",
+          "bytes": 2899
+        },
+        {
+          "path": "dist/assets/index-Fra_Qp3a.js",
+          "sha256": "f25752bc2560119b8ed5be9f17aca7589edb1428f0261784ced58edfbf601e87",
+          "bytes": 145878
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "60933fb23674ea3ad2cf0657a8fd487efbfa44e1eeeeec86d24063ea1a05c622",
+          "bytes": 359
+        },
+        {
+          "path": "index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "src/main.jsx",
+          "sha256": "99f2717abf8e58facbe4f3cfc469d933b3a1da4e75ed53b4f87a51cafbbf5bf7",
+          "bytes": 5121
+        },
+        {
+          "path": "src/style.css",
+          "sha256": "71f97fe0a61f04b7248524d3e3787b5491686a72e5ad1e31ac3a3b2db4ffdd02",
+          "bytes": 3349
+        }
+      ]
+    },
+    {
+      "id": "library-1",
+      "arm": "library",
+      "repeat": 1,
+      "attempt": "initial",
+      "outcome": "passed",
+      "checksPassed": 22,
+      "checksFailed": 0,
+      "checksNotRun": 0,
+      "runtimeErrors": 0,
+      "cleanupErrors": 0,
+      "firstBehavioralDivergence": null,
+      "implementationRepairs": 0,
+      "firstCommandUtc": "2026-11-23T19:40:46Z",
+      "deliveryUtc": null,
+      "participantElapsedSeconds": null,
+      "timeOmissionReason": "Initial delivery record absent; initial event log stops after actual local browser launch failure. No finish time reconstructed.",
+      "timeSource": "participants/library-1/events.jsonl",
+      "observerStartedAt": "2026-11-23T19:52:38.800Z",
+      "observerFinishedAt": "2026-11-23T19:52:49.008Z",
+      "observerCommandStartedAt": "2026-11-23T19:52:38.344060+00:00",
+      "observerCommandFinishedAt": "2026-11-23T19:52:49.444636+00:00",
+      "observerCommandExit": 0,
+      "report": "raw/submitted-01/library-1-initial-observation/report.json",
+      "reportSha256": "8e5dc2fb972d656f448e5d7d1f09062b44fdea5a270207d8bbc14ecc61585568",
+      "browser": "145.0.7632.6",
+      "node": "v24.22.3",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "sourceMainBytes": 2604,
+      "sourceMainLines": 58,
+      "dependencyRoute": "Radix1.1.13",
+      "traceAssets": [
+        {
+          "asset": "assets/index-Drw8_yyf.css",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "index.html",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "assets/index-DJvQoiRl.js",
+          "status": 200,
+          "responseBodyCaptured": false
+        }
+      ],
+      "projectInventory": [
+        {
+          "path": "dist/assets/index-DJvQoiRl.js",
+          "sha256": "42d68ba613e2d95d90515d4705da7e26b9338c20c548621e1acfbced6bd1c0cc",
+          "bytes": 159746
+        },
+        {
+          "path": "dist/assets/index-Drw8_yyf.css",
+          "sha256": "e59b93d7e2e41ba263d0d67a4e704c9685ec625f57d96ba705c188a2c05befb7",
+          "bytes": 2244
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "191ecf3d34ae9b591dd15f6da79a4c0e7efac8acefe13365ec8592b110b85d92",
+          "bytes": 359
+        },
+        {
+          "path": "index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "src/main.jsx",
+          "sha256": "c8b0dc1286831f804ae33093a22503b8360142c7fdea499482db354541ce7209",
+          "bytes": 2604
+        },
+        {
+          "path": "src/style.css",
+          "sha256": "80ac56575fe9c98f98260e38ea98643dbb4afcf1d6ceb9409b26d90cb0349997",
+          "bytes": 2620
+        }
+      ]
+    },
+    {
+      "id": "library-2",
+      "arm": "library",
+      "repeat": 2,
+      "attempt": "initial",
+      "outcome": "passed",
+      "checksPassed": 22,
+      "checksFailed": 0,
+      "checksNotRun": 0,
+      "runtimeErrors": 0,
+      "cleanupErrors": 0,
+      "firstBehavioralDivergence": null,
+      "implementationRepairs": 0,
+      "firstCommandUtc": "2026-11-23T20:02:22Z",
+      "deliveryUtc": "2026-11-23T20:06:35.947111+00:00",
+      "participantElapsedSeconds": 253.947111,
+      "timeOmissionReason": null,
+      "timeSource": "participants/library-2/telemetry.json",
+      "observerStartedAt": "2026-11-23T20:11:07.602Z",
+      "observerFinishedAt": "2026-11-23T20:11:23.669Z",
+      "observerCommandStartedAt": "2026-11-23T20:11:07.170525+00:00",
+      "observerCommandFinishedAt": "2026-11-23T20:11:23.953457+00:00",
+      "observerCommandExit": 0,
+      "report": "raw/submitted-03/library-2-initial-observation/report.json",
+      "reportSha256": "4b7de4bae5ee7325001a2de6f2151670afa465b3cc714bd301616a3add6747df",
+      "browser": "145.0.7632.6",
+      "node": "v24.22.3",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "sourceMainBytes": 3391,
+      "sourceMainLines": 75,
+      "dependencyRoute": "Radix1.1.13",
+      "traceAssets": [
+        {
+          "asset": "assets/index-BmrRqaAd.css",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "index.html",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "assets/index-BmU2kSUH.js",
+          "status": 200,
+          "responseBodyCaptured": false
+        }
+      ],
+      "projectInventory": [
+        {
+          "path": "dist/assets/index-BmU2kSUH.js",
+          "sha256": "5b89bf59ac461a4f55804d8d9043ed13ab5873d2d0cfcb53ab234656007eac47",
+          "bytes": 160133
+        },
+        {
+          "path": "dist/assets/index-BmrRqaAd.css",
+          "sha256": "27af9cfb79c02345c7d5c8039d4db54dc8065c328969d45837f3cf453184464d",
+          "bytes": 2431
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "bd014c20fa7e534a9f48e92fc4a2fb116ccca6cbf02fd2c16d5ad9f2b4d082b6",
+          "bytes": 453
+        },
+        {
+          "path": "index.html",
+          "sha256": "3a6b4fecb187b2fb934528171b6a74003ff5a5f2821599be2ad480f5d389639b",
+          "bytes": 355
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "src/main.jsx",
+          "sha256": "c14b4dbd9731234bc915e664e47cad42829791742c534ea4cd1a4b5478341343",
+          "bytes": 3391
+        },
+        {
+          "path": "src/style.css",
+          "sha256": "583a04df72ece878f4ff5db993a48230f8c4abfc119350284803572eed731e00",
+          "bytes": 2826
+        }
+      ]
+    },
+    {
+      "id": "library-3",
+      "arm": "library",
+      "repeat": 3,
+      "attempt": "initial",
+      "outcome": "passed",
+      "checksPassed": 22,
+      "checksFailed": 0,
+      "checksNotRun": 0,
+      "runtimeErrors": 0,
+      "cleanupErrors": 0,
+      "firstBehavioralDivergence": null,
+      "implementationRepairs": 0,
+      "firstCommandUtc": null,
+      "deliveryUtc": "2026-11-23T20:15:37.745037+00:00",
+      "participantElapsedSeconds": null,
+      "timeOmissionReason": "The first command did not capture a clock. Exact timestamp is unavailable and not reconstructed. The second command measured 2026-11-23T20:12:41Z.",
+      "timeSource": "participants/library-3/delivery.json",
+      "observerStartedAt": "2026-11-23T20:27:25.056Z",
+      "observerFinishedAt": "2026-11-23T20:27:31.655Z",
+      "observerCommandStartedAt": "2026-11-23T20:27:24.634250+00:00",
+      "observerCommandFinishedAt": "2026-11-23T20:27:31.912490+00:00",
+      "observerCommandExit": 0,
+      "report": "raw/submitted-04/library-3-initial-observation/report.json",
+      "reportSha256": "023060d8cf91fca6cd5a8b23f7b032ec17cae979ba8fdda9e9483e1855b587a8",
+      "browser": "145.0.7632.6",
+      "node": "v24.22.3",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "sourceMainBytes": 2956,
+      "sourceMainLines": 88,
+      "dependencyRoute": "Radix1.1.13",
+      "traceAssets": [
+        {
+          "asset": "assets/index-DVqSM28b.css",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "index.html",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "assets/index-D79vwGtf.js",
+          "status": 200,
+          "responseBodyCaptured": false
+        }
+      ],
+      "projectInventory": [
+        {
+          "path": "dist/assets/index-D79vwGtf.js",
+          "sha256": "24e5e2e17f0db229df0c7b1f62eb01e557c418fd08b27225162e732ce19872a1",
+          "bytes": 159640
+        },
+        {
+          "path": "dist/assets/index-DVqSM28b.css",
+          "sha256": "761ee5bc936ae4726d458fc8586d19393d8f7b8e6c279252f4735e15cb0b879a",
+          "bytes": 1802
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "700570f684cc492b815351085850e6b60c862ce6e17bccdf0d7cb3f1a51ea290",
+          "bytes": 359
+        },
+        {
+          "path": "index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "src/main.jsx",
+          "sha256": "9fce04c189a504480412f7339741a3ff67fb3214643166c7575280f7778785e5",
+          "bytes": 2956
+        },
+        {
+          "path": "src/style.css",
+          "sha256": "55705717ddf2162b6728598344a3999ee415198121a4d04f9fd24c28c8d9af17",
+          "bytes": 2120
+        }
+      ]
+    },
+    {
+      "id": "unassisted-1",
+      "arm": "unassisted",
+      "repeat": 1,
+      "attempt": "initial",
+      "outcome": "passed",
+      "checksPassed": 22,
+      "checksFailed": 0,
+      "checksNotRun": 0,
+      "runtimeErrors": 0,
+      "cleanupErrors": 0,
+      "firstBehavioralDivergence": null,
+      "implementationRepairs": 0,
+      "firstCommandUtc": "2026-11-23T19:40:53Z",
+      "deliveryUtc": "2026-11-23T19:44:29.361850+00:00",
+      "participantElapsedSeconds": 216.36185,
+      "timeOmissionReason": null,
+      "timeSource": "participants/unassisted-1/DELIVERY.json",
+      "observerStartedAt": "2026-11-23T19:52:49.874Z",
+      "observerFinishedAt": "2026-11-23T19:53:00.470Z",
+      "observerCommandStartedAt": "2026-11-23T19:52:49.446046+00:00",
+      "observerCommandFinishedAt": "2026-11-23T19:53:00.581518+00:00",
+      "observerCommandExit": 0,
+      "report": "raw/submitted-01/unassisted-1-initial-observation/report.json",
+      "reportSha256": "b840dc1945560c87b2bc3884b093171b1b95e31db54c8d752ec7229cc8b30eb3",
+      "browser": "145.0.7632.6",
+      "node": "v24.22.3",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "sourceMainBytes": 6105,
+      "sourceMainLines": 168,
+      "dependencyRoute": "custom React18.3.1; installed Radix unused",
+      "traceAssets": [
+        {
+          "asset": "index.html",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "assets/index-COtXLma9.css",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "assets/index-kSIGlmz6.js",
+          "status": 200,
+          "responseBodyCaptured": false
+        }
+      ],
+      "projectInventory": [
+        {
+          "path": "dist/assets/index-COtXLma9.css",
+          "sha256": "ab1fdcfa89ff3a274f0122c941b647ae31130407eec70f56e75e56f36ad7159d",
+          "bytes": 3916
+        },
+        {
+          "path": "dist/assets/index-kSIGlmz6.js",
+          "sha256": "adddbbe51b42fefecea7e250b2e619556591e6793e09582d153a5154505e5259",
+          "bytes": 146992
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "73f62d7dcd4f364053be87b2d4f07f6066283a72efb683bd095246a65f8116f7",
+          "bytes": 451
+        },
+        {
+          "path": "index.html",
+          "sha256": "c1a8b11c0464f5925966187be0d8952e82f7eaa468c696daf63ce1d92ff6e385",
+          "bytes": 353
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "src/main.jsx",
+          "sha256": "a045e894c05e2792b624c0d8befc7e7298d4a696924924c5fded4e422e97e6bb",
+          "bytes": 6105
+        },
+        {
+          "path": "src/style.css",
+          "sha256": "d3fdaac95422445ff6b8e749ab944b450004eab38166a6f8c85ebba96ae503e4",
+          "bytes": 4541
+        }
+      ]
+    },
+    {
+      "id": "unassisted-2",
+      "arm": "unassisted",
+      "repeat": 2,
+      "attempt": "initial",
+      "outcome": "passed",
+      "checksPassed": 22,
+      "checksFailed": 0,
+      "checksNotRun": 0,
+      "runtimeErrors": 0,
+      "cleanupErrors": 0,
+      "firstBehavioralDivergence": null,
+      "implementationRepairs": 0,
+      "firstCommandUtc": "2026-11-23T19:49:37Z",
+      "deliveryUtc": "2026-11-23T19:53:31.886Z",
+      "participantElapsedSeconds": 234.886,
+      "timeOmissionReason": null,
+      "timeSource": "participants/unassisted-2/delivery.json",
+      "observerStartedAt": "2026-11-23T19:59:43.922Z",
+      "observerFinishedAt": "2026-11-23T19:59:53.723Z",
+      "observerCommandStartedAt": "2026-11-23T19:59:43.482554+00:00",
+      "observerCommandFinishedAt": "2026-11-23T19:59:53.828005+00:00",
+      "observerCommandExit": 0,
+      "report": "raw/submitted-02/unassisted-2-initial-observation/report.json",
+      "reportSha256": "27174f4810d67bf209c7932ff25bb87926e3030ab12e0632b5d7bc0885ede70c",
+      "browser": "145.0.7632.6",
+      "node": "v24.22.3",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "sourceMainBytes": 5099,
+      "sourceMainLines": 137,
+      "dependencyRoute": "custom React18.3.1; installed Radix unused",
+      "traceAssets": [
+        {
+          "asset": "assets/index-yMG8HqC5.css",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "index.html",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "assets/index-j0h5v5cd.js",
+          "status": 200,
+          "responseBodyCaptured": false
+        }
+      ],
+      "projectInventory": [
+        {
+          "path": "dist/assets/index-j0h5v5cd.js",
+          "sha256": "27cf239cb39f74897538dc7a2b013eb938f035141a412ba8a5f53d0131018298",
+          "bytes": 146095
+        },
+        {
+          "path": "dist/assets/index-yMG8HqC5.css",
+          "sha256": "fc318f5cb6dea07eaaa24f46ced6a0a56535513bca7b6bd38525e9ade8cfb463",
+          "bytes": 2828
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "3639e27317e5e742497c2f07f5a11281a995b545b6a8fc0424c5c95023774061",
+          "bytes": 359
+        },
+        {
+          "path": "index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "src/main.jsx",
+          "sha256": "0361f2d98b1187eca5e909c86f8d6ad6c91eeab9509a01821605deae3ff7b08f",
+          "bytes": 5099
+        },
+        {
+          "path": "src/style.css",
+          "sha256": "7c0d46b0167a0f2554713b8eb1aef00a15d59071088a21471382110833b3c7ed",
+          "bytes": 3281
+        }
+      ]
+    },
+    {
+      "id": "unassisted-3",
+      "arm": "unassisted",
+      "repeat": 3,
+      "attempt": "initial",
+      "outcome": "passed",
+      "checksPassed": 22,
+      "checksFailed": 0,
+      "checksNotRun": 0,
+      "runtimeErrors": 0,
+      "cleanupErrors": 0,
+      "firstBehavioralDivergence": null,
+      "implementationRepairs": 0,
+      "firstCommandUtc": "2026-11-23T20:26:08Z",
+      "deliveryUtc": "2026-11-23T20:28:59.709234Z",
+      "participantElapsedSeconds": 171.709234,
+      "timeOmissionReason": null,
+      "timeSource": "participants/unassisted-3/delivery.json",
+      "observerStartedAt": "2026-11-23T20:45:38.542Z",
+      "observerFinishedAt": "2026-11-23T20:45:56.012Z",
+      "observerCommandStartedAt": "2026-11-23T20:45:37.455727+00:00",
+      "observerCommandFinishedAt": "2026-11-23T20:45:56.322034+00:00",
+      "observerCommandExit": 0,
+      "report": "raw/submitted-05/unassisted-3-initial-observation/report.json",
+      "reportSha256": "104f4a0fd0224e29b73f47db5b9dc35d425889ceb943c421a4bcd08f13297780",
+      "browser": "145.0.7632.6",
+      "node": "v24.22.3",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "sourceMainBytes": 4595,
+      "sourceMainLines": 117,
+      "dependencyRoute": "custom React18.3.1; installed Radix unused",
+      "traceAssets": [
+        {
+          "asset": "assets/index-Cfrdrsn_.css",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "index.html",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "assets/index-CYmA4ebi.js",
+          "status": 200,
+          "responseBodyCaptured": false
+        }
+      ],
+      "projectInventory": [
+        {
+          "path": "dist/assets/index-CYmA4ebi.js",
+          "sha256": "ba307df0e68ca136377f0e1ce469b8a20ba8f80a4255e3df7c858df5b91a5762",
+          "bytes": 145655
+        },
+        {
+          "path": "dist/assets/index-Cfrdrsn_.css",
+          "sha256": "408d462c92e879a25501e0c084de3ba3665f6c9c1d28bbf64fdfce4e3a88508d",
+          "bytes": 2456
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "95bad5a7f383392d309c63818224c1c1dec94d5b16b4df6c1b1528cc7b41aaa5",
+          "bytes": 359
+        },
+        {
+          "path": "index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "src/main.jsx",
+          "sha256": "2d96d2e5b879a7a4cc7d8f90f9a67c91600aab03862443e2185783c67a95ecbf",
+          "bytes": 4595
+        },
+        {
+          "path": "src/style.css",
+          "sha256": "1e8ba5d40ce9abd6fb22afeef5a4aac440d94794bc8fbc8bfc0c174b6c7471f3",
+          "bytes": 2851
+        }
+      ]
+    },
+    {
+      "id": "knowledge-1",
+      "arm": "knowledge",
+      "repeat": 1,
+      "attempt": "maintenance-1",
+      "outcome": "passed",
+      "checksPassed": 22,
+      "checksFailed": 0,
+      "checksNotRun": 0,
+      "runtimeErrors": 0,
+      "cleanupErrors": 0,
+      "firstBehavioralDivergence": null,
+      "implementationRepairs": 0,
+      "firstCommandUtc": "2026-11-23T20:30:37.895176Z",
+      "deliveryUtc": "2026-11-23T20:31:25.297561Z",
+      "participantElapsedSeconds": 47.402385,
+      "timeOmissionReason": null,
+      "timeSource": "participants/knowledge-1/maintenance/DELIVERY.json",
+      "observerStartedAt": "2026-11-23T20:45:56.788Z",
+      "observerFinishedAt": "2026-11-23T20:46:13.931Z",
+      "observerCommandStartedAt": "2026-11-23T20:45:56.323504+00:00",
+      "observerCommandFinishedAt": "2026-11-23T20:46:14.193232+00:00",
+      "observerCommandExit": 0,
+      "report": "raw/submitted-05/knowledge-1-maintenance-1-observation/report.json",
+      "reportSha256": "ab024886fcf89ea57594f1a48ffb345eabc99324c66cb9d2efe13d968881744f",
+      "browser": "145.0.7632.6",
+      "node": "v24.22.3",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "sourceMainBytes": 5437,
+      "sourceMainLines": 144,
+      "dependencyRoute": "custom React18.3.1; installed Radix unused",
+      "traceAssets": [
+        {
+          "asset": "index.html",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "assets/index-BMmMyxt7.js",
+          "status": 200,
+          "responseBodyCaptured": false
+        },
+        {
+          "asset": "assets/index-DUY0E9Ud.css",
+          "status": 200,
+          "responseBodyCaptured": true
+        }
+      ],
+      "projectInventory": [
+        {
+          "path": "dist/assets/index-BMmMyxt7.js",
+          "sha256": "00ce6a7931923e0dc453db93b64c7baf5badf8cb5ebddc4fd934a6b2ece859d9",
+          "bytes": 146152
+        },
+        {
+          "path": "dist/assets/index-DUY0E9Ud.css",
+          "sha256": "1848d9b9ece9e23c8d5506658a1b7bb62a39ec1c140bd9520991a7acb1ce7e4b",
+          "bytes": 3055
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "cef88df5ca797876d3e3ac17c5d92ca60833c9b88901cc43fde759bde6256df9",
+          "bytes": 359
+        },
+        {
+          "path": "index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "src/main.jsx",
+          "sha256": "389ae9277d17690329ec5c0b9bec0355d16cabd03e9bc11f635e5f6e1aea8186",
+          "bytes": 5437
+        },
+        {
+          "path": "src/style.css",
+          "sha256": "8bb6868330d231a6bbcad346ef3f548c92819b2dea56d390f8544f82b8ffde40",
+          "bytes": 3545
+        }
+      ]
+    },
+    {
+      "id": "library-1",
+      "arm": "library",
+      "repeat": 1,
+      "attempt": "maintenance-1",
+      "outcome": "passed",
+      "checksPassed": 22,
+      "checksFailed": 0,
+      "checksNotRun": 0,
+      "runtimeErrors": 0,
+      "cleanupErrors": 0,
+      "firstBehavioralDivergence": null,
+      "implementationRepairs": 0,
+      "firstCommandUtc": "2026-11-23T20:32:52.482635+00:00",
+      "deliveryUtc": "2026-11-23T20:33:51.683221+00:00",
+      "participantElapsedSeconds": 59.200586,
+      "timeOmissionReason": null,
+      "timeSource": "participants/library-1/maintenance/DELIVERY.json",
+      "observerStartedAt": "2026-11-23T20:46:14.629Z",
+      "observerFinishedAt": "2026-11-23T20:46:22.245Z",
+      "observerCommandStartedAt": "2026-11-23T20:46:14.194322+00:00",
+      "observerCommandFinishedAt": "2026-11-23T20:46:22.626665+00:00",
+      "observerCommandExit": 0,
+      "report": "raw/submitted-05/library-1-maintenance-1-observation/report.json",
+      "reportSha256": "98a7132c6adbdc91284e656be6ad6fe3f5b9e6291e99906e616310d45dc09915",
+      "browser": "145.0.7632.6",
+      "node": "v24.22.3",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "sourceMainBytes": 2700,
+      "sourceMainLines": 59,
+      "dependencyRoute": "Radix1.1.13",
+      "traceAssets": [
+        {
+          "asset": "assets/index-Drw8_yyf.css",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "index.html",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "assets/index-vvRwzd7Z.js",
+          "status": 200,
+          "responseBodyCaptured": false
+        }
+      ],
+      "projectInventory": [
+        {
+          "path": "dist/assets/index-Drw8_yyf.css",
+          "sha256": "e59b93d7e2e41ba263d0d67a4e704c9685ec625f57d96ba705c188a2c05befb7",
+          "bytes": 2244
+        },
+        {
+          "path": "dist/assets/index-vvRwzd7Z.js",
+          "sha256": "f6aef044f7a87f596470c2d3b76ef08a4ff9c6ddc4be88bb177972ba98fd2751",
+          "bytes": 159851
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "f132a749520b03e66a7828d3d982f9007dabdb05204b4e0c4478acaf658bc13a",
+          "bytes": 359
+        },
+        {
+          "path": "index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "src/main.jsx",
+          "sha256": "8f4e9c1ff5a15a81e046624cf9967e8c27646949186b6a8411543455ffe85862",
+          "bytes": 2700
+        },
+        {
+          "path": "src/style.css",
+          "sha256": "80ac56575fe9c98f98260e38ea98643dbb4afcf1d6ceb9409b26d90cb0349997",
+          "bytes": 2620
+        }
+      ]
+    },
+    {
+      "id": "unassisted-1",
+      "arm": "unassisted",
+      "repeat": 1,
+      "attempt": "maintenance-1",
+      "outcome": "passed",
+      "checksPassed": 22,
+      "checksFailed": 0,
+      "checksNotRun": 0,
+      "runtimeErrors": 0,
+      "cleanupErrors": 0,
+      "firstBehavioralDivergence": null,
+      "implementationRepairs": 0,
+      "firstCommandUtc": "2026-11-23T20:18:02Z",
+      "deliveryUtc": "2026-11-23T20:19:02.304442+00:00",
+      "participantElapsedSeconds": 60.304442,
+      "timeOmissionReason": null,
+      "timeSource": "participants/unassisted-1/maintenance/DELIVERY.json",
+      "observerStartedAt": "2026-11-23T20:27:32.327Z",
+      "observerFinishedAt": "2026-11-23T20:27:40.445Z",
+      "observerCommandStartedAt": "2026-11-23T20:27:31.913597+00:00",
+      "observerCommandFinishedAt": "2026-11-23T20:27:40.973424+00:00",
+      "observerCommandExit": 0,
+      "report": "raw/submitted-04/unassisted-1-maintenance-1-observation/report.json",
+      "reportSha256": "04314cf8bd99ff2feb71e251151b062beefcc5e0a19820e0c1619a0c7638082a",
+      "browser": "145.0.7632.6",
+      "node": "v24.22.3",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "sourceMainBytes": 6181,
+      "sourceMainLines": 169,
+      "dependencyRoute": "custom React18.3.1; installed Radix unused",
+      "traceAssets": [
+        {
+          "asset": "assets/index-COtXLma9.css",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "index.html",
+          "status": 200,
+          "responseBodyCaptured": true
+        },
+        {
+          "asset": "assets/index-BojsZpkH.js",
+          "status": 200,
+          "responseBodyCaptured": false
+        }
+      ],
+      "projectInventory": [
+        {
+          "path": "dist/assets/index-BojsZpkH.js",
+          "sha256": "3427bee66b63a7b88874e8684fc2a25c422cf298eb4888954a41b90ff551d4eb",
+          "bytes": 147095
+        },
+        {
+          "path": "dist/assets/index-COtXLma9.css",
+          "sha256": "ab1fdcfa89ff3a274f0122c941b647ae31130407eec70f56e75e56f36ad7159d",
+          "bytes": 3916
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "fa06b04ca067246b8337c9aeeeabb85588b56c9dc70207006b3c002fed23172b",
+          "bytes": 451
+        },
+        {
+          "path": "index.html",
+          "sha256": "c1a8b11c0464f5925966187be0d8952e82f7eaa468c696daf63ce1d92ff6e385",
+          "bytes": 353
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "src/main.jsx",
+          "sha256": "801595cbeef7c836e3883a2df30f55ded3f7af8f3f90f0715c3d6b1194c9af53",
+          "bytes": 6181
+        },
+        {
+          "path": "src/style.css",
+          "sha256": "d3fdaac95422445ff6b8e749ab944b450004eab38166a6f8c85ebba96ae503e4",
+          "bytes": 4541
+        }
+      ]
+    }
+  ],
+  "calibration": [
+    {
+      "batch": "results",
+      "case": "negative-automatic",
+      "report": "raw/results/negative-automatic/report.json",
+      "reportSha256": "81f413a8d1154a6e7b9afcc8dcd4ca9408a92718756083903dd239f17d271916",
+      "passed": 0,
+      "failed": [],
+      "notRun": 22,
+      "browser": null,
+      "evaluatorSha256": "67c8f9e92049ae84785b0091ed10f8f53859916f904d53f18b09616613aec6e4",
+      "firstError": "browserType.launch: Target page, context or browser has been closed",
+      "classification": "pre-page-environment-failure"
+    },
+    {
+      "batch": "results",
+      "case": "negative-relationship",
+      "report": "raw/results/negative-relationship/report.json",
+      "reportSha256": "e79b205a271c22d1c5e3206aacce30ebd57de4996092389955bc3c7f3de4846f",
+      "passed": 0,
+      "failed": [],
+      "notRun": 22,
+      "browser": null,
+      "evaluatorSha256": "67c8f9e92049ae84785b0091ed10f8f53859916f904d53f18b09616613aec6e4",
+      "firstError": "browserType.launch: Target page, context or browser has been closed",
+      "classification": "pre-page-environment-failure"
+    },
+    {
+      "batch": "results",
+      "case": "negative-removal",
+      "report": "raw/results/negative-removal/report.json",
+      "reportSha256": "cc49d75b324f58cd0a69f0c21209693b7d9259540fb8b6ea1c35ec8a9a9d75df",
+      "passed": 0,
+      "failed": [],
+      "notRun": 22,
+      "browser": null,
+      "evaluatorSha256": "67c8f9e92049ae84785b0091ed10f8f53859916f904d53f18b09616613aec6e4",
+      "firstError": "browserType.launch: Target page, context or browser has been closed",
+      "classification": "pre-page-environment-failure"
+    },
+    {
+      "batch": "results",
+      "case": "positive-narrow-dark",
+      "report": "raw/results/positive-narrow-dark/report.json",
+      "reportSha256": "937b54f41ce8a0bc36e865f91832292311ea1f890e95a302b7207ad9f5df1208",
+      "passed": 0,
+      "failed": [],
+      "notRun": 22,
+      "browser": null,
+      "evaluatorSha256": "67c8f9e92049ae84785b0091ed10f8f53859916f904d53f18b09616613aec6e4",
+      "firstError": "browserType.launch: Target page, context or browser has been closed",
+      "classification": "pre-page-environment-failure"
+    },
+    {
+      "batch": "results",
+      "case": "positive-wide",
+      "report": "raw/results/positive-wide/report.json",
+      "reportSha256": "1d3b7ddc22e4004701011ccb6b548030d823a52f1bf7f581c7e343266d528523",
+      "passed": 0,
+      "failed": [],
+      "notRun": 22,
+      "browser": null,
+      "evaluatorSha256": "67c8f9e92049ae84785b0091ed10f8f53859916f904d53f18b09616613aec6e4",
+      "firstError": "browserType.launch: Target page, context or browser has been closed",
+      "classification": "pre-page-environment-failure"
+    },
+    {
+      "batch": "results-03",
+      "case": "negative-automatic",
+      "report": "raw/results-03/negative-automatic/report.json",
+      "reportSha256": "4ccb51f00e93693234df8a8bd77e9f3fed8fa78542dd9f57cd9bdbc2b67c4fc3",
+      "passed": 0,
+      "failed": [],
+      "notRun": 22,
+      "browser": null,
+      "evaluatorSha256": "d7e64033f5bc6e3362c2de2cc7b43e01984533bfd2c36e6731193c3d4c7717d6",
+      "firstError": "browserType.launch: Target page, context or browser has been closed",
+      "classification": "pre-page-environment-failure"
+    },
+    {
+      "batch": "results-03",
+      "case": "negative-relationship",
+      "report": "raw/results-03/negative-relationship/report.json",
+      "reportSha256": "6c4b40e6f64b5a5d3f06155f3079e8a3db07368f8ed8fec92c33df01ef1b1db3",
+      "passed": 0,
+      "failed": [],
+      "notRun": 22,
+      "browser": null,
+      "evaluatorSha256": "d7e64033f5bc6e3362c2de2cc7b43e01984533bfd2c36e6731193c3d4c7717d6",
+      "firstError": "browserType.launch: Target page, context or browser has been closed",
+      "classification": "pre-page-environment-failure"
+    },
+    {
+      "batch": "results-03",
+      "case": "negative-removal",
+      "report": "raw/results-03/negative-removal/report.json",
+      "reportSha256": "16cf6f032be4eaa625f5d5110a7c1add7e7275a15bbebe10d3c582d0848459a7",
+      "passed": 0,
+      "failed": [],
+      "notRun": 22,
+      "browser": null,
+      "evaluatorSha256": "d7e64033f5bc6e3362c2de2cc7b43e01984533bfd2c36e6731193c3d4c7717d6",
+      "firstError": "browserType.launch: Target page, context or browser has been closed",
+      "classification": "pre-page-environment-failure"
+    },
+    {
+      "batch": "results-03",
+      "case": "positive-narrow-dark",
+      "report": "raw/results-03/positive-narrow-dark/report.json",
+      "reportSha256": "151138ab7d7b281fcf25ea87e9282790d8d1a14feccd3396191cef45bf3a69ad",
+      "passed": 0,
+      "failed": [],
+      "notRun": 22,
+      "browser": null,
+      "evaluatorSha256": "d7e64033f5bc6e3362c2de2cc7b43e01984533bfd2c36e6731193c3d4c7717d6",
+      "firstError": "browserType.launch: Target page, context or browser has been closed",
+      "classification": "pre-page-environment-failure"
+    },
+    {
+      "batch": "results-03",
+      "case": "positive-wide",
+      "report": "raw/results-03/positive-wide/report.json",
+      "reportSha256": "9aa2b95d27c4e919b031fe4857976be0ec1b4e20c82e8fa736d1da98b4f9d00a",
+      "passed": 0,
+      "failed": [],
+      "notRun": 22,
+      "browser": null,
+      "evaluatorSha256": "d7e64033f5bc6e3362c2de2cc7b43e01984533bfd2c36e6731193c3d4c7717d6",
+      "firstError": "browserType.launch: Target page, context or browser has been closed",
+      "classification": "pre-page-environment-failure"
+    },
+    {
+      "batch": "results-04",
+      "case": "negative-automatic",
+      "report": "raw/results-04/negative-automatic/report.json",
+      "reportSha256": "770e1cba114b91bd25f84db1bde761978eefd70e259341ced4d44e389d5bf6a5",
+      "passed": 1,
+      "failed": [
+        "initial-selection"
+      ],
+      "notRun": 20,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "d7e64033f5bc6e3362c2de2cc7b43e01984533bfd2c36e6731193c3d4c7717d6",
+      "firstError": "AssertionError [ERR_ASSERTION]: Selection/relationships/focus did not settle: selected=Overview, focused=unspecified",
+      "classification": "pre-freeze-oracle-initial-entry-overconstraint"
+    },
+    {
+      "batch": "results-04",
+      "case": "negative-relationship",
+      "report": "raw/results-04/negative-relationship/report.json",
+      "reportSha256": "0b24ce0f26d9e7abb9222d7a0b122217eda4fd5ef3bb682b23ad8f7a3136f491",
+      "passed": 1,
+      "failed": [
+        "initial-selection"
+      ],
+      "notRun": 20,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "d7e64033f5bc6e3362c2de2cc7b43e01984533bfd2c36e6731193c3d4c7717d6",
+      "firstError": "AssertionError [ERR_ASSERTION]: Selection/relationships/focus did not settle: selected=Overview, focused=unspecified",
+      "classification": "pre-freeze-oracle-initial-entry-overconstraint"
+    },
+    {
+      "batch": "results-04",
+      "case": "negative-removal",
+      "report": "raw/results-04/negative-removal/report.json",
+      "reportSha256": "70b19e11212c4090ca53d90245a56748df06efe1644ee22694e6222c71484a1c",
+      "passed": 1,
+      "failed": [
+        "initial-selection"
+      ],
+      "notRun": 20,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "d7e64033f5bc6e3362c2de2cc7b43e01984533bfd2c36e6731193c3d4c7717d6",
+      "firstError": "AssertionError [ERR_ASSERTION]: Selection/relationships/focus did not settle: selected=Overview, focused=unspecified",
+      "classification": "pre-freeze-oracle-initial-entry-overconstraint"
+    },
+    {
+      "batch": "results-04",
+      "case": "positive-narrow-dark",
+      "report": "raw/results-04/positive-narrow-dark/report.json",
+      "reportSha256": "7c8afadf6e8650999ee23a72dccde4d76b2182069cda2f33e9611ab67abb35a7",
+      "passed": 1,
+      "failed": [
+        "initial-selection"
+      ],
+      "notRun": 20,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "d7e64033f5bc6e3362c2de2cc7b43e01984533bfd2c36e6731193c3d4c7717d6",
+      "firstError": "AssertionError [ERR_ASSERTION]: Selection/relationships/focus did not settle: selected=Overview, focused=unspecified",
+      "classification": "pre-freeze-oracle-initial-entry-overconstraint"
+    },
+    {
+      "batch": "results-04",
+      "case": "positive-wide",
+      "report": "raw/results-04/positive-wide/report.json",
+      "reportSha256": "06cc49a623972912305e85bba40ae0aeb124e59b7aaa3a08338fdda3463f1357",
+      "passed": 1,
+      "failed": [
+        "initial-selection"
+      ],
+      "notRun": 20,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "d7e64033f5bc6e3362c2de2cc7b43e01984533bfd2c36e6731193c3d4c7717d6",
+      "firstError": "AssertionError [ERR_ASSERTION]: Selection/relationships/focus did not settle: selected=Overview, focused=unspecified",
+      "classification": "pre-freeze-oracle-initial-entry-overconstraint"
+    },
+    {
+      "batch": "results-05",
+      "case": "duplicate-panel",
+      "report": "raw/results-05/duplicate-panel/report.json",
+      "reportSha256": "ecf228c211c2a8ed6651b18b36ff3bab480cd486c114b61a23d191db2563cbc9",
+      "passed": 14,
+      "failed": [
+        "repeated-selections"
+      ],
+      "notRun": 7,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "50deebd834a6312337d1c3f1af7c01f66304cd6cff7ca5b85d7ffa267a33e8d5",
+      "firstError": "AssertionError [ERR_ASSERTION]: Each mounted panel belongs to exactly one tab; no tab has duplicate panels",
+      "classification": "expected-negative"
+    },
+    {
+      "batch": "results-05",
+      "case": "legal-structure",
+      "report": "raw/results-05/legal-structure/report.json",
+      "reportSha256": "66509a455da0d2938779b13eb4055f1a0c23ceee396dbcd43b83d6674c43149c",
+      "passed": 22,
+      "failed": [],
+      "notRun": 0,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "50deebd834a6312337d1c3f1af7c01f66304cd6cff7ca5b85d7ffa267a33e8d5",
+      "firstError": null,
+      "classification": "positive"
+    },
+    {
+      "batch": "results-05",
+      "case": "live-off",
+      "report": "raw/results-05/live-off/report.json",
+      "reportSha256": "f3fa96300d85d1997b59ae16ff9be74cd326ab5c21caaf4cdd798ccfcf74113f",
+      "passed": 19,
+      "failed": [
+        "host-action"
+      ],
+      "notRun": 2,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "50deebd834a6312337d1c3f1af7c01f66304cd6cff7ca5b85d7ffa267a33e8d5",
+      "firstError": "AssertionError [ERR_ASSERTION]: A visible polite count starts at zero",
+      "classification": "expected-negative"
+    },
+    {
+      "batch": "results-05",
+      "case": "negative-automatic",
+      "report": "raw/results-05/negative-automatic/report.json",
+      "reportSha256": "6bf2fdc65c6d8979dfb0bf4919136f9f61176b21ca1580ea0965437c9e1b5cc7",
+      "passed": 3,
+      "failed": [
+        "right-skips-disabled"
+      ],
+      "notRun": 18,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "50deebd834a6312337d1c3f1af7c01f66304cd6cff7ca5b85d7ffa267a33e8d5",
+      "firstError": "AssertionError [ERR_ASSERTION]: Selection/relationships/focus did not settle: selected=Overview, focused=Details",
+      "classification": "expected-negative"
+    },
+    {
+      "batch": "results-05",
+      "case": "negative-relationship",
+      "report": "raw/results-05/negative-relationship/report.json",
+      "reportSha256": "72dbc9195edbf567dad1606aeddd16b0be9164a4080eafb46be9ad6729d70b2d",
+      "passed": 1,
+      "failed": [
+        "initial-selection"
+      ],
+      "notRun": 20,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "50deebd834a6312337d1c3f1af7c01f66304cd6cff7ca5b85d7ffa267a33e8d5",
+      "firstError": "AssertionError [ERR_ASSERTION]: Selection/relationships/focus did not settle: selected=Overview, focused=unspecified",
+      "classification": "expected-negative"
+    },
+    {
+      "batch": "results-05",
+      "case": "negative-removal",
+      "report": "raw/results-05/negative-removal/report.json",
+      "reportSha256": "d5fd0ed5fa39e7e1a539d10711bcfd8f669a5af3bfeb918899c1f5585046cc2e",
+      "passed": 17,
+      "failed": [
+        "removal"
+      ],
+      "notRun": 4,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "50deebd834a6312337d1c3f1af7c01f66304cd6cff7ca5b85d7ffa267a33e8d5",
+      "firstError": "locator.waitFor: Timeout 2500ms exceeded.",
+      "classification": "expected-negative"
+    },
+    {
+      "batch": "results-05",
+      "case": "positive-narrow-dark",
+      "report": "raw/results-05/positive-narrow-dark/report.json",
+      "reportSha256": "1ffe3c4f5488220d61fc959922d6f5e0b47eee43e8dbed6b39ba96c7bf129790",
+      "passed": 22,
+      "failed": [],
+      "notRun": 0,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "50deebd834a6312337d1c3f1af7c01f66304cd6cff7ca5b85d7ffa267a33e8d5",
+      "firstError": null,
+      "classification": "positive"
+    },
+    {
+      "batch": "results-05",
+      "case": "positive-wide",
+      "report": "raw/results-05/positive-wide/report.json",
+      "reportSha256": "90332af20da73578b6e049d8741fc740ab0bc6c474c5f8822f15d950be615b2a",
+      "passed": 22,
+      "failed": [],
+      "notRun": 0,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "50deebd834a6312337d1c3f1af7c01f66304cd6cff7ca5b85d7ffa267a33e8d5",
+      "firstError": null,
+      "classification": "positive"
+    },
+    {
+      "batch": "results-05",
+      "case": "unrelated-count",
+      "report": "raw/results-05/unrelated-count/report.json",
+      "reportSha256": "c2fd868f3b52b09159940a4d56eeb250de280b34af572add5f90b33b99621ed8",
+      "passed": 19,
+      "failed": [
+        "host-action"
+      ],
+      "notRun": 2,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "50deebd834a6312337d1c3f1af7c01f66304cd6cff7ca5b85d7ffa267a33e8d5",
+      "firstError": "AssertionError [ERR_ASSERTION]: The same polite live region increments its count from zero to one; unrelated regions cannot supply the result",
+      "classification": "expected-negative"
+    },
+    {
+      "batch": "results-06",
+      "case": "duplicate-panel",
+      "report": "raw/results-06/duplicate-panel/report.json",
+      "reportSha256": "63d71a9d5ed45a269f0cabd04cf643f041535614d4834aee20d868e96c36a0e3",
+      "passed": 14,
+      "failed": [
+        "repeated-selections"
+      ],
+      "notRun": 7,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "firstError": "AssertionError [ERR_ASSERTION]: Each mounted panel belongs to exactly one tab; no tab has duplicate panels",
+      "classification": "expected-negative"
+    },
+    {
+      "batch": "results-06",
+      "case": "legal-structure",
+      "report": "raw/results-06/legal-structure/report.json",
+      "reportSha256": "52075f4c5deaf2a8d3f487802d30c0f65259ae8f6c5b383aa4f0acf330354c85",
+      "passed": 22,
+      "failed": [],
+      "notRun": 0,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "firstError": null,
+      "classification": "positive"
+    },
+    {
+      "batch": "results-06",
+      "case": "live-off",
+      "report": "raw/results-06/live-off/report.json",
+      "reportSha256": "4b8b9b67c5c31210daa15b2ba45d5c02fff4b17a14781155d2d3556f34d3e8e6",
+      "passed": 19,
+      "failed": [
+        "host-action"
+      ],
+      "notRun": 2,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "firstError": "AssertionError [ERR_ASSERTION]: A visible polite count starts at zero",
+      "classification": "expected-negative"
+    },
+    {
+      "batch": "results-06",
+      "case": "negative-automatic",
+      "report": "raw/results-06/negative-automatic/report.json",
+      "reportSha256": "1db18ad39f8807f208d0088e2c6d9c67d4465d862e00bc955538cbc0dab69dbb",
+      "passed": 3,
+      "failed": [
+        "right-skips-disabled"
+      ],
+      "notRun": 18,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "firstError": "AssertionError [ERR_ASSERTION]: Selection/relationships/focus did not settle: selected=Overview, focused=Details",
+      "classification": "expected-negative"
+    },
+    {
+      "batch": "results-06",
+      "case": "negative-relationship",
+      "report": "raw/results-06/negative-relationship/report.json",
+      "reportSha256": "04d3ae2cfcb6d56d4e7d197e2ad981c0f147b70282ecc71a807c06490b5ce4ec",
+      "passed": 1,
+      "failed": [
+        "initial-selection"
+      ],
+      "notRun": 20,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "firstError": "AssertionError [ERR_ASSERTION]: Selection/relationships/focus did not settle: selected=Overview, focused=unspecified",
+      "classification": "expected-negative"
+    },
+    {
+      "batch": "results-06",
+      "case": "negative-removal",
+      "report": "raw/results-06/negative-removal/report.json",
+      "reportSha256": "60ca1e6e2aa085779001f40059cb754186323f48e7e83e256d026c6bd514464d",
+      "passed": 17,
+      "failed": [
+        "removal"
+      ],
+      "notRun": 4,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "firstError": "locator.waitFor: Timeout 2500ms exceeded.",
+      "classification": "expected-negative"
+    },
+    {
+      "batch": "results-06",
+      "case": "positive-narrow-dark",
+      "report": "raw/results-06/positive-narrow-dark/report.json",
+      "reportSha256": "2e6a4d3c0f9e647d8f3d46a6add503bf5b81e600b098bb6f52f894a64c7811ca",
+      "passed": 22,
+      "failed": [],
+      "notRun": 0,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "firstError": null,
+      "classification": "positive"
+    },
+    {
+      "batch": "results-06",
+      "case": "positive-wide",
+      "report": "raw/results-06/positive-wide/report.json",
+      "reportSha256": "b160f9d38df1ec5b119555de94ef6dee445e5a94dab515825ccf78ce570490b9",
+      "passed": 22,
+      "failed": [],
+      "notRun": 0,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "firstError": null,
+      "classification": "positive"
+    },
+    {
+      "batch": "results-06",
+      "case": "unrelated-count",
+      "report": "raw/results-06/unrelated-count/report.json",
+      "reportSha256": "8d9bb1e7f19ce0054578377a7c2f28adeb6f16a0bda39493be128824d24d09a1",
+      "passed": 19,
+      "failed": [
+        "host-action"
+      ],
+      "notRun": 2,
+      "browser": "145.0.7632.6",
+      "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "firstError": "AssertionError [ERR_ASSERTION]: The same polite live region increments its count from zero to one; unrelated regions cannot supply the result",
+      "classification": "expected-negative"
+    }
+  ],
+  "knowledgeSources": [
+    {
+      "path": "spec/prototypes/P-BASE-TABS.yaml",
+      "sha256": "45a157edb149abdb382333aea6860b9793c534b9e1da5068aa818d0f561b1420",
+      "bytes": 21062,
+      "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+      "sha256": "ce2856e08704c40ad19ce92fbbab6d7119314404a49de54f80a5b84f9d1fdd51",
+      "bytes": 8874,
+      "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+      "sha256": "1e79af05f12d575b722da0c951dd47268a0e17b27d4d3c76310f725088fc252b",
+      "bytes": 14122,
+      "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+      "sha256": "4a1d1a7e74ed60bc21bd6a6883f0e52221dcb36ae27500fdc098c340571d11a5",
+      "bytes": 10569,
+      "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45"
+    },
+    {
+      "path": "spec/knowledge/K-COMPONENT-INTERACTION-0001.yaml",
+      "sha256": "9f11e75d4957139220e802f8738bc1ff305f2406d16d0263e8df06795278b26c",
+      "bytes": 2392,
+      "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45"
+    }
+  ],
+  "unavailableMetrics": {
+    "providerSnapshot": null,
+    "seed": null,
+    "tokens": null,
+    "compute": null,
+    "billing": null,
+    "reason": "Not exposed; never substituted with zero"
+  },
+  "stressReuse": "Same trajectories as #734; not independent #751 replication",
+  "actualCostZero": false,
+  "unmeasured": [
+    "Other primitives, target frameworks, real AT, physical input, long-term maintenance, rare-failure rates, stochastic reproducibility with a recorded seed, deterministic Tabs projection, upgrade propagation",
+    "Human/evaluator active time and authoritative provider billing"
+  ],
+  "noBrowserReexecution": true
+}

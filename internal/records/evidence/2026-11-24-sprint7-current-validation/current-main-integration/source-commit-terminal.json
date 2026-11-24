@@ -1,0 +1,23 @@
+{
+  "parent": "9b5db82aedd836b49f2f19d255bfb2a9a8eaf09a",
+  "command": [
+    "git",
+    "commit",
+    "--signoff",
+    "-m",
+    "fix(governance): retain compiler browser source owner diagnostics"
+  ],
+  "exitCode": 0,
+  "elapsedMs": 3780,
+  "head": "052e477345a1201a97834d0e8c8863047ace3249",
+  "before": {
+    "scripts/coverage-matrices/check-coverage-matrices.mjs": "6e2c73251b5c8135ccc70c416288e04498ae82ea8ce2c0a820b84fdeb1f7a59b",
+    "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs": "dd040e8262f8e607e7f16fa2fd9e82b071fe034bf4b6a74c15a05104241b0796"
+  },
+  "after": {
+    "scripts/coverage-matrices/check-coverage-matrices.mjs": "6e2c73251b5c8135ccc70c416288e04498ae82ea8ce2c0a820b84fdeb1f7a59b",
+    "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs": "dd040e8262f8e607e7f16fa2fd9e82b071fe034bf4b6a74c15a05104241b0796"
+  },
+  "status": "",
+  "commit": "commit 052e477345a1201a97834d0e8c8863047ace3249\nAuthor:     Codex <codex@openai.com>\nAuthorDate: Tue Nov 24 13:16:10 2026 +0800\nCommit:     Codex <codex@openai.com>\nCommitDate: Tue Nov 24 13:16:10 2026 +0800\n\n    fix(governance): retain compiler browser source owner diagnostics\n    \n    Signed-off-by: Codex <codex@openai.com>\n"
+}

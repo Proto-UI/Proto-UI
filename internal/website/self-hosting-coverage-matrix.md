@@ -300,7 +300,7 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/components/PrototypePreviewer/demo-associations.ts` | `www.demo.prototype-previewer` | `ce19da5e43e2ed99c5d372027d8b3ff796d9601c8020907ad71c4e260ceb9365` |
 | `apps/www/src/components/CodeExample.astro` | `www.docs.code-example-file-tabs`, `www.docs.code-example-host-tabs`, `www.docs.code-surface` | `991f8c3bd93c21eaee831b98876389b77d58331b5dd68cd8bf186857958c4851` |
 | `apps/www/src/components/PrototypePreviewer/BrowserCompilerPanel.astro` | `www.demo.runtime-select`, `www.demo.code-panel`, `www.demo.authored-controllers` | `f92cfa3023ca6f53b5b8f1f292c951fe73cf37fa180f448845cb61b7656cfb5a` |
-| `apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts` | `www.demo.runtime-select`, `www.demo.code-panel`, `www.demo.authored-controllers`, `www.demo.raw-adapter-runtimes` | `13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9` |
+| `apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts` | `www.demo.runtime-select`, `www.demo.code-panel`, `www.demo.authored-controllers` | `13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9` |
 | `apps/www/src/components/PrototypePreviewer/compiled-preview-sandbox.ts` | `www.demo.raw-adapter-runtimes` | `f159da1722e8c7b7e9e3ebf4772c077c841e60275cde2a8e1f482e5379df153e` |
 | `packages/compiler/src/browser/client.ts` | `www.demo.raw-adapter-runtimes` | `f6af8985c52edbfdbd0e1796fc680e0f54e3c889769d099459abe0f23bc58be7` |
 | `packages/compiler/src/browser/worker.ts` | `www.demo.raw-adapter-runtimes` | `d373263fa25d9f77fe22603b89523461d43a007cdc40e21f53b4a55f39036078` |
@@ -364,6 +364,7 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/components/PrototypePreviewer/runtime-tabs.ts` | `www.demo.runtime-select` | `f4d21125f8019fcf35e75580a77b1950e8a6b69f877a39ef868c07943cfe2178` |
 | `apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts` | `www.demo.preview-surface` | `d89dc89aaae69a0f6e9f1f4b23ce77f171edc62c7e2fba36bdb10244a2af60c2` |
 | `apps/www/src/components/PrototypePreviewer/wc-registry.ts` | `www.demo.raw-adapter-runtimes` | `3176c5c92408e9428283b428c130f818c33ab2fd53666fd255e6d6a99b2a31ca` |
+| `apps/www/src/components/PrototypePreviewer/DemoMatrix.astro` | `www.demo.demo-matrix` | `aafe95f305b3125ec7eea7b388612e847567d6efc8e0adc5243b105dcac6d43e` |
 | `apps/www/src/components/SiteContentsCommand.astro` | `www.shell.mobile-menu-toggle` | `250ea15a4d6f238397dda64dba8df8d60eabb42ddb02979b0ad0895ee3c29a0f` |
 | `apps/www/src/components/SiteCopyBootstrap.astro` | `www.docs.code-panel-copy`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.note-surface` | `25f62b734b220cb862a5321fe70ac0e4aea927157d6454b7c7e208002e768ba3` |
 | `apps/www/src/components/SiteLibraryStyle.astro` | `www.build.style-generation` | `7fec23169c164d43f266b8fc71efbf55aaadba2bb4561f8670dc69e3d8c49e33` |

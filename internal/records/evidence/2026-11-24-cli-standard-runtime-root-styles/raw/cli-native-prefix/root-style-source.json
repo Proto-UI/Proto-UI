@@ -1,0 +1,8 @@
+{
+  "head": "1dd7afa3ea4ff43c1f28306c9b035e87ed11ea62",
+  "files": {
+    "packages/cli/src/services/hook-source-summary.ts": "4f151c31d232f29950be761b324fb71645ae0a3ee8baf6014f81a0888f3aabdb",
+    "packages/cli/src/services/prototype-style-tokens.ts": "5c7391c5a000fc6ba4e2a50af32336a2ef11cde32216ef752360f6c5488a43ca",
+    "packages/cli/test/hook-source-props-initialization.test.ts": "e1ea242e62b51ad24b4b12486a298a1cba209ce621a7518adf59743cf42ab1f1"
+  }
+}

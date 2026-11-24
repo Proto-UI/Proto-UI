@@ -1,0 +1,8 @@
+{
+  "clock": "monotonic-ms-from-task-release",
+  "startedAt": "2026-11-23T20:25:42.838254+00:00",
+  "endedMs": 2302590.915032,
+  "outcome": "finished",
+  "finishedAt": "2026-11-23T21:04:05.429189+00:00",
+  "attribution": "Actual event-receipt offsets. Transport and operator/browser delays remain included and separately described."
+}

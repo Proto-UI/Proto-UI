@@ -1,0 +1,113 @@
+{
+  "collectionTimeNote": "Connector calls ran after the recorded 2026-11-23 20:45:30 UTC clock and before the separate native 20:46:24 UTC read; exact per-call clocks were not captured.",
+  "issue": {
+    "id": 5602953147,
+    "url": "https://github.com/Proto-UI/Proto-UI/issues/751",
+    "title": "[experiment][stress-test] Simulate AI implementation and testing cost collapse",
+    "issue_number": 751,
+    "body": "<!-- proto-ui:issue-governance:20261122:751:v1 -->\n\n## 2026-11-22 当前代码核对\n\nAgent: ChatGPT，按当前用户授权核对与治理。审计截止 [`a8bf56087`](https://github.com/Proto-UI/Proto-UI/commit/a8bf56087e5836e3c14c153cafbd796bd98bff37)；各项执行证据保留其实际 SHA。\n\n核对基线：[`2c7eae25357d`](https://github.com/Proto-UI/Proto-UI/commit/2c7eae25357d0c5bae29bd5e92caae3a4ea39730)。\n\n- [x] **实验记录基础已落库**：[schema](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/scripts/benchmark/schemas.mjs)与[公开校准框架](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/benchmarks/interaction/README.md)可供后续复用；`stress` 分类本身不代表实验已执行。\n- [ ] 固定 adverse 假设、可用路径、同一任务/oracle、模型工具与停止规则，实际运行 generate → test → repair 循环并保留所有失败/未收敛轨迹。\n- [ ] 完成同任务比较、残余优势与假设消去成本的分离、限制/混杂与结论；保留原 0.4 研究范围。\n\n主线增量核对截止 [`a8bf56087e58`](https://github.com/Proto-UI/Proto-UI/commit/a8bf56087e5836e3c14c153cafbd796bd98bff37)；本段已执行的测试仍绑定 `2c7eae25357d`，不重标为新 main 运行。\n\n---\n\n## Context\n\nThis is a deliberately adverse stress test of Proto UI's value proposition, not a forecast about future model capabilities. Assume implementation iterations and test execution have near-zero marginal cost; allow an Agent to generate, run browser tests, inspect failures, repair, and repeat. Report the scenario assumptions explicitly.\n\nThe tested boundary is reusable primitive interaction knowledge and its deterministic projection. Business-level composition and overall product usability remain outside Proto UI's guarantee and outside this experiment's claims.\n\n## Research question / hypothesis\n\nWhat, if anything, remains valuable about Proto UI knowledge or deterministic projection if AI implementation and test execution become almost free? The experiment may find no material advantage under these assumptions.\n\n## Experimental setup\n\nPrefer to run after Round 1 knowledge-reuse and discovery baselines are specified, so the scenario can reuse their selected primitive(s), tasks and independent oracle. Record exact model/agent, tools, browser, source, target versions and assumptions. Do not claim the tools represent real or predicted future systems.\n\nFor the generative path, allow an Agent to iterate without token/compute cost being a primary constraint: `generate → test → repair → repeat`, including automatic browser checks and continued repair from failures. For the Proto UI paths, use the corresponding available shared knowledge and deterministic projection for the same primitive/task/target. Hold the semantic requirements, target environment, stop condition, and independent validation oracle constant. If one Proto UI path is unavailable, report that limitation and compare only the available paths; do not fabricate a deterministic path.\n\nAllow equal task completion criteria and a predeclared stopping rule based on a fixed correctness target or a documented maximum number of repair cycles. Do not convert the maximum into an outcome advantage; preserve convergence failures and cycle counts.\n\n## Baseline / control\n\nThe adversarial baseline is repeated unconstrained generation with automatic browser-test feedback and repair. Compare it with knowledge-assisted generation and, where the selected scope has a real pipeline, deterministic Proto UI projection. Use the same independent oracle; the Proto UI criteria are not automatically the oracle's complete ground truth.\n\n## Measurements\n\nMeasure final correctness and residual failures; cycles to convergence; recurring and rare interaction failures; behavior consistency across hosts/runs; oracle/specification changes needed; ability to accumulate and transfer newly discovered rules; determinism/reproducibility; auditability of why behavior exists; update/upgrade propagation; maintenance consistency; and remaining human/evaluator work. Distinguish benefits that persist under the zero-marginal-cost assumption from benefits that depend only on current token, test, or iteration expense.\n\n## Expected artifacts\n\nA written scenario definition and stopping rule; selected tasks/primitives and source manifests; prompts/tool/browser/model configuration; full generate/test/repair traces; independent oracle and deviations; same-task comparison table; residual defects and recurring failure modes; evidence for each claimed remaining advantage; limitations/confounders; and supported / weakened / inconclusive / falsified classification. Explicitly record a null result if no significant or practically meaningful remaining advantage is observed under the chosen scenario.\n\n## Known limitations / confounders\n\nNear-zero cost is an artificial assumption and does not predict actual future capability, quality, autonomy, or economics. A bounded model/tool/primitive sample may favor either approach. Browser tests may miss unencoded requirements, and independent oracle creation has a cost that this scenario must report rather than erase. “Almost free” does not make requirements discovery, judging ambiguity, ownership, or changing host semantics automatically free. Results do not generalize to business compositions or total product UX.\n\n## Completion criteria\n\n- [ ] The adverse assumptions, available paths, task, oracle, tools, model and stopping rule are explicit and repeatable.\n- [ ] Complete iteration/test/repair traces and final correctness are recorded for each attempted path, including failure to converge and missing prerequisites.\n- [ ] Remaining advantages are tied to observed evidence and separated from costs assumed away; null or mixed results are acceptable.\n- [ ] Known limitations, confounders and hypothesis classification are recorded without presenting the scenario as a prediction.\n- [ ] No claim about business-level usability, overall UX, or future AI certainty is made.\n\n## Related work and sequencing\n\n- Later pressure test, preferably after [#734](https://github.com/Proto-UI/Proto-UI/issues/734) / Experiment 1 and [#748](https://github.com/Proto-UI/Proto-UI/issues/748) / specification-discovery baselines establish reusable tasks and measurements.\n- [#749](https://github.com/Proto-UI/Proto-UI/issues/749) supplies a staged deterministic-versus-generative comparison when its Compiler prerequisites are met; that path is optional if unavailable, and absence must be reported.\n- This Issue does not block normal release work.\n\n## Agent evidence\n\nSanitized request paraphrase: stress-test the protocol's value under an intentionally cheap generate/test/repair loop, without treating this as a forecast. This Issue records a plan only; no future model capability or experiment result is claimed. Actual interaction claims during execution require captured running components and source-bound traces; there is no reproduction image for this planning artifact.\n",
+    "state": "open",
+    "user": {
+      "login": "guangliang2019",
+      "name": "guangliang2019",
+      "email": null,
+      "avatar_url": "https://avatars.githubusercontent.com/u/52768321?v=4",
+      "id": 52768321
+    },
+    "assignees": null,
+    "labels": [
+      {
+        "name": "spike",
+        "color": "fef2c0",
+        "description": "Research or feasibility spike"
+      },
+      {
+        "name": "needs evidence",
+        "color": "fbca04",
+        "description": "Collect or strengthen source-grounded executable evidence; work may continue."
+      },
+      {
+        "name": "area: core",
+        "color": "1d76db",
+        "description": "Core, runtime, hooks, prototype syntax, and foundational Proto UI runtime or kernel changes."
+      }
+    ],
+    "milestone": 7,
+    "state_reason": "reopened",
+    "comments": 3,
+    "created_at": "2026-09-27T13:19:37Z",
+    "updated_at": "2026-11-21T17:55:19Z",
+    "closed_at": null,
+    "display_url": "https://github.com/Proto-UI/Proto-UI/issues/751",
+    "display_title": "[experiment][stress-test] Simulate AI implementation and testing cost collapse"
+  },
+  "comments": [
+    {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/751#issuecomment-5909877221",
+      "body": "## Benchmark-methodology follow-up — make the zero-marginal-cost stress test a controlled extension of the same dataset\n\nThis Issue should reuse frozen benchmark cases and oracle/result manifests from #734/#748/#749 wherever possible. Its purpose is to change the **iteration economics and repair policy**, not the task definition.\n\n### Stress-test condition\n\nFor each selected case, compare the ordinary baseline with an explicitly permissive Agent loop:\n\n`generate -> run tests/browser checks -> inspect failures -> repair -> repeat`\n\nPredeclare the maximum repair-cycle policy and the target correctness/stop condition. Treat token/compute cost as intentionally de-emphasized for the stress-test interpretation, but still record it so future readers can reconstruct the run.\n\n### Model variable\n\nUse exact model/provider snapshot/date, reasoning mode, tools, harness version and context/retrieval boundary. Prefer running the stress condition first on the strongest currently available model, then on additional tiers only when useful. When future frontier models arrive, append reruns against the same frozen cases rather than changing the benchmark to suit them.\n\n### What must remain visible when cost is assumed away\n\nReport separately:\n\n- final correctness and residual semantic defects;\n- convergence/failure-to-converge;\n- cycles to convergence and recurrence of the same failure classes;\n- oracle/evaluator work still required;\n- specification changes needed to make failures detectable;\n- cross-host consistency and reproducibility;\n- whether newly discovered rules are accumulated/reused or repeatedly rediscovered;\n- maintenance/update propagation and auditability.\n\nThe key longitudinal question is whether stronger/cheaper models erase Proto UI's advantage entirely, or merely shift the remaining value from implementation cost toward deterministic guarantees, reusable oracle/spec knowledge, cross-host consistency, and maintenance properties.\n\nDo not collapse the result into a present-day token-cost comparison, and do not modify the held-out oracle after seeing model failures except through a separately versioned benchmark revision.",
+      "user": {
+        "login": "guangliang2019",
+        "name": "guangliang2019",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/52768321?v=4",
+        "id": 52768321
+      },
+      "id": 5909877221,
+      "pull_request_review_id": null,
+      "in_reply_to_id": null,
+      "created_at": null,
+      "updated_at": null,
+      "review": null,
+      "side": null,
+      "line": null,
+      "start_line": null,
+      "path": null,
+      "body_html": "<h2 dir=\"auto\">Benchmark-methodology follow-up — make the zero-marginal-cost stress test a controlled extension of the same dataset</h2>\n<p dir=\"auto\">This Issue should reuse frozen benchmark cases and oracle/result manifests from <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5582685317\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/734\" data-hovercard-type=\"issue\" data-hovercard-url=\"/Proto-UI/Proto-UI/issues/734/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/issues/734\">#734</a>/<a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5602935823\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/748\" data-hovercard-type=\"issue\" data-hovercard-url=\"/Proto-UI/Proto-UI/issues/748/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/issues/748\">#748</a>/<a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5602941886\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/749\" data-hovercard-type=\"issue\" data-hovercard-url=\"/Proto-UI/Proto-UI/issues/749/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/issues/749\">#749</a> wherever possible. Its purpose is to change the <strong>iteration economics and repair policy</strong>, not the task definition.</p>\n<h3 dir=\"auto\">Stress-test condition</h3>\n<p dir=\"auto\">For each selected case, compare the ordinary baseline with an explicitly permissive Agent loop:</p>\n<p dir=\"auto\"><code class=\"notranslate\">generate -&gt; run tests/browser checks -&gt; inspect failures -&gt; repair -&gt; repeat</code></p>\n<p dir=\"auto\">Predeclare the maximum repair-cycle policy and the target correctness/stop condition. Treat token/compute cost as intentionally de-emphasized for the stress-test interpretation, but still record it so future readers can reconstruct the run.</p>\n<h3 dir=\"auto\">Model variable</h3>\n<p dir=\"auto\">Use exact model/provider snapshot/date, reasoning mode, tools, harness version and context/retrieval boundary. Prefer running the stress condition first on the strongest currently available model, then on additional tiers only when useful. When future frontier models arrive, append reruns against the same frozen cases rather than changing the benchmark to suit them.</p>\n<h3 dir=\"auto\">What must remain visible when cost is assumed away</h3>\n<p dir=\"auto\">Report separately:</p>\n<ul dir=\"auto\">\n<li>final correctness and residual semantic defects;</li>\n<li>convergence/failure-to-converge;</li>\n<li>cycles to convergence and recurrence of the same failure classes;</li>\n<li>oracle/evaluator work still required;</li>\n<li>specification changes needed to make failures detectable;</li>\n<li>cross-host consistency and reproducibility;</li>\n<li>whether newly discovered rules are accumulated/reused or repeatedly rediscovered;</li>\n<li>maintenance/update propagation and auditability.</li>\n</ul>\n<p dir=\"auto\">The key longitudinal question is whether stronger/cheaper models erase Proto UI's advantage entirely, or merely shift the remaining value from implementation cost toward deterministic guarantees, reusable oracle/spec knowledge, cross-host consistency, and maintenance properties.</p>\n<p dir=\"auto\">Do not collapse the result into a present-day token-cost comparison, and do not modify the held-out oracle after seeing model failures except through a separately versioned benchmark revision.</p>"
+    },
+    {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/751#issuecomment-6684443908",
+      "body": "Deferred to 0.4. Adverse stress-test experiment on Proto UI's value proposition under near-zero AI implementation cost; outside 0.3 scope.",
+      "user": {
+        "login": "cyjin-yl",
+        "name": "cyjin-yl",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19223209?v=4",
+        "id": 19223209
+      },
+      "id": 6684443908,
+      "pull_request_review_id": null,
+      "in_reply_to_id": null,
+      "created_at": null,
+      "updated_at": null,
+      "review": null,
+      "side": null,
+      "line": null,
+      "start_line": null,
+      "path": null,
+      "body_html": "<p dir=\"auto\">Deferred to 0.4. Adverse stress-test experiment on Proto UI's value proposition under near-zero AI implementation cost; outside 0.3 scope.</p>"
+    },
+    {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/751#issuecomment-6684471070",
+      "body": "Determination detail: this simulates the boundary where AI implementation and test execution cost collapse, asking what Proto knowledge/deterministic projection remains valuable. It is a bounded adversarial research plan with scenario-assumption reporting, not a product change; deferred to 0.4.",
+      "user": {
+        "login": "cyjin-yl",
+        "name": "cyjin-yl",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19223209?v=4",
+        "id": 19223209
+      },
+      "id": 6684471070,
+      "pull_request_review_id": null,
+      "in_reply_to_id": null,
+      "created_at": null,
+      "updated_at": null,
+      "review": null,
+      "side": null,
+      "line": null,
+      "start_line": null,
+      "path": null,
+      "body_html": "<p dir=\"auto\">Determination detail: this simulates the boundary where AI implementation and test execution cost collapse, asking what Proto knowledge/deterministic projection remains valuable. It is a bounded adversarial research plan with scenario-assumption reporting, not a product change; deferred to 0.4.</p>"
+    }
+  ],
+  "serializedAt": "2026-11-23T20:47:45.834194+00:00"
+}

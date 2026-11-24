@@ -1,0 +1,17 @@
+{
+  "before": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+  "after": "28037549e478bc76f95a7192d7ff643330044a03",
+  "roots": [
+    "packages",
+    "scripts/build",
+    "scripts/styles",
+    "tsconfig.json",
+    "tsconfig.workspace.json",
+    "pnpm-lock.yaml",
+    "package.json"
+  ],
+  "changedPaths": [
+    "packages/cli/test/finf-components.test.ts"
+  ],
+  "scope": "The previously tested CLI20 files, all seven modified CLI payload paths, package sources, build and preset generators and workspace configs are unchanged. The sole incoming package change is this full Finf test file, selected anew; whole website types are rerun after the already-merged Header repair. Historical results keep their actual ed64 source binding."
+}

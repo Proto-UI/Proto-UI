@@ -1,0 +1,212 @@
+{
+  "sourceHead": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+  "tree": "d84b02f23621ee9369c45db08bb2d630c332c5cc",
+  "scope": [
+    ".prettierignore",
+    "packages/cli/README.md",
+    "packages/cli/src/generated/brutalist-style-tokens.ts",
+    "packages/cli/src/generated/draft-family-style-tokens.ts",
+    "packages/cli/src/generated/shadcn-style-tokens.ts",
+    "packages/cli/src/services/hook-source-summary.ts",
+    "packages/cli/src/services/prototype-style-tokens.ts",
+    "packages/cli/test/hook-source-props-initialization.test.ts"
+  ],
+  "ignorePatch": "diff --git a/.prettierignore b/.prettierignore\nindex 4b453d6c8..4525e78ca 100644\n--- a/.prettierignore\n+++ b/.prettierignore\n@@ -153,3 +153,11 @@ internal/records/evidence/2026-11-24-react-portal-origin-native/\n \n # Preserve original Scroll Reveal source-gate receipts and logs.\n internal/records/evidence/2026-11-24-scroll-reveal-source-gate/\n+\n+# Preserve the exact incoming Sprint 5 observations and receipt hashes.\n+internal/records/2026-11-24-sprint5-native-direction-acceptance.md\n+internal/records/2026-11-24-sprint5-native-integration.md\n+internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.json\n+internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.md\n+internal/records/evidence/2026-11-24-sprint5-browser-execution/production-setup-receipt.json\n+internal/records/evidence/2026-11-24-sprint5-native-direction-acceptance/receipt.md\n",
+  "jobs": [
+    {
+      "terminal": {
+        "head": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+        "name": "complete-native-props19",
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "vitest",
+          "run",
+          "packages/cli/test/hook-source-props-initialization.test.ts",
+          "--maxWorkers=1",
+          "--minWorkers=1",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile.json=/var/tmp/proto-ui-native-evidence-456f/cli-native-prefix/final-ed64-unit/complete-native-props19.json"
+        ],
+        "startedAt": "2026-11-24T05:34:55.854462+00:00",
+        "exitCode": 0,
+        "timedOut": false,
+        "outerTimeoutSeconds": 180,
+        "elapsedMs": 7901,
+        "headAfter": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+        "statusBefore": "",
+        "statusAfter": "",
+        "nodeOptions": "--max-old-space-size=2048",
+        "cpuAffinity": null,
+        "report": {
+          "success": true,
+          "numTotalTests": 19,
+          "numPassedTests": 19,
+          "numFailedTests": 0,
+          "numPendingTests": 0
+        },
+        "failed": []
+      },
+      "raw": [
+        {
+          "path": "complete-native-props19.log",
+          "bytes": 2904,
+          "sha256": "01909427c91627fa1fc68cd81baa34fe4477444482e91aa04c3cba4697b20624"
+        },
+        {
+          "path": "complete-native-props19.json",
+          "bytes": 7611,
+          "sha256": "44f8553a594832148bb434a4bac3257917195c8f7aa2b0d30449f8313122b0cf"
+        },
+        {
+          "path": "complete-native-props19.terminal.json",
+          "bytes": 940,
+          "sha256": "0deea08609d2903d76f8ed152b94c03e1df9f1f51b99290a97786cddbb8adf23"
+        }
+      ]
+    },
+    {
+      "terminal": {
+        "head": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+        "name": "complete-cli79",
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "vitest",
+          "run",
+          "packages/cli/test/cli.test.ts",
+          "packages/cli/test/codegen-language-admission.test.ts",
+          "--maxWorkers=1",
+          "--minWorkers=1",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile.json=/var/tmp/proto-ui-native-evidence-456f/cli-native-prefix/final-ed64-unit/complete-cli79.json"
+        ],
+        "startedAt": "2026-11-24T05:35:03.876666+00:00",
+        "exitCode": 0,
+        "timedOut": false,
+        "outerTimeoutSeconds": 420,
+        "elapsedMs": 120012,
+        "headAfter": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+        "statusBefore": "",
+        "statusAfter": "",
+        "nodeOptions": "--max-old-space-size=2048",
+        "cpuAffinity": null,
+        "report": {
+          "success": true,
+          "numTotalTests": 79,
+          "numPassedTests": 79,
+          "numFailedTests": 0,
+          "numPendingTests": 0
+        },
+        "failed": []
+      },
+      "raw": [
+        {
+          "path": "complete-cli79.log",
+          "bytes": 6941,
+          "sha256": "c4bed172ad2d308a83104196994a6939f46701d0f53804826f21d20f3322b161"
+        },
+        {
+          "path": "complete-cli79.json",
+          "bytes": 26969,
+          "sha256": "4a630af6ca99cba6d781aeaa8194845e95f5b6ee0fa5d95462b6ed31b7c3c537"
+        },
+        {
+          "path": "complete-cli79.terminal.json",
+          "bytes": 955,
+          "sha256": "5a3339015e178249a1f578b2ab6fedf8b27e4694f42a97d3feae2fe76a71dbd4"
+        }
+      ]
+    },
+    {
+      "terminal": {
+        "head": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+        "name": "related-source-proof602",
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "vitest",
+          "run",
+          "packages/cli/test/hook-source-setup-capability.test.ts",
+          "packages/cli/test/hook-source-rule-input-preservation.test.ts",
+          "packages/cli/test/hook-source-write-index.test.ts",
+          "packages/cli/test/hook-source-export-patterns.test.ts",
+          "packages/cli/test/hook-source-lexical-index.test.ts",
+          "packages/cli/test/hook-source-projector-scope.test.ts",
+          "packages/cli/test/hook-source-inline-record-registration.test.ts",
+          "packages/cli/test/hook-source-receiver-mutation.test.ts",
+          "packages/cli/test/hook-source-projection-accessors.test.ts",
+          "packages/cli/test/hook-source-collision-order.test.ts",
+          "packages/cli/test/hook-source-helper-registration-context.test.ts",
+          "packages/cli/test/hook-source-resolution-mode.test.ts",
+          "packages/cli/test/prototype-style-tokens.test.ts",
+          "packages/cli/test/prototype-style-token-tables.test.ts",
+          "packages/cli/test/proto-style-css.test.ts",
+          "packages/cli/test/prototype-style-tokens-local-container-effects.test.ts",
+          "packages/cli/test/lowered-authored-setup-rows.test.ts",
+          "--maxWorkers=1",
+          "--minWorkers=1",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile.json=/var/tmp/proto-ui-native-evidence-456f/cli-native-prefix/final-ed64-unit/related-source-proof602.json"
+        ],
+        "startedAt": "2026-11-24T05:37:04.116699+00:00",
+        "exitCode": 0,
+        "timedOut": false,
+        "outerTimeoutSeconds": 300,
+        "elapsedMs": 30174,
+        "headAfter": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+        "statusBefore": "",
+        "statusAfter": "",
+        "nodeOptions": "--max-old-space-size=2048",
+        "cpuAffinity": null,
+        "report": {
+          "success": true,
+          "numTotalTests": 602,
+          "numPassedTests": 602,
+          "numFailedTests": 0,
+          "numPendingTests": 0
+        },
+        "failed": []
+      },
+      "raw": [
+        {
+          "path": "related-source-proof602.log",
+          "bytes": 14488,
+          "sha256": "1df153e45594ae0125b2241c4364f0c083b0fa4ff4b3288eee51139130802929"
+        },
+        {
+          "path": "related-source-proof602.json",
+          "bytes": 201937,
+          "sha256": "6a20c7d182dd2c073c4209eff8b6c3b7958131a2cea9c2aa2aed3e7179bbfb65"
+        },
+        {
+          "path": "related-source-proof602.terminal.json",
+          "bytes": 1950,
+          "sha256": "14bb3ba5260d177db0a75c0f12a943607a10c424194262a75e279a1eaf0a4fd4"
+        }
+      ]
+    }
+  ],
+  "generatedCommit": {
+    "head": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+    "exitCode": 0,
+    "elapsedMs": 3835,
+    "before": {
+      "packages/cli/src/generated/shadcn-style-tokens.ts": "ecca6c18728c49baef1f62032c9943e2b861d4faa2230ba8d188d201640c2cbe",
+      "packages/cli/src/generated/brutalist-style-tokens.ts": "132206860118eb4a5977eb0f112b3846fb6088acba1b9aea4cac932acb0b3e8f",
+      "packages/cli/src/generated/draft-family-style-tokens.ts": "c1526a048cdfc2e09a8504015aecac2ef4c7d403ccd3ade387527b09f2098adf"
+    },
+    "after": {
+      "packages/cli/src/generated/shadcn-style-tokens.ts": "ecca6c18728c49baef1f62032c9943e2b861d4faa2230ba8d188d201640c2cbe",
+      "packages/cli/src/generated/brutalist-style-tokens.ts": "132206860118eb4a5977eb0f112b3846fb6088acba1b9aea4cac932acb0b3e8f",
+      "packages/cli/src/generated/draft-family-style-tokens.ts": "c1526a048cdfc2e09a8504015aecac2ef4c7d403ccd3ade387527b09f2098adf"
+    },
+    "status": ""
+  }
+}
