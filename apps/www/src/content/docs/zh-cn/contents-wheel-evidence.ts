@@ -62,7 +62,15 @@ export function observeContentsWheel(element: HTMLElement) {
       css.visibility !== 'hidden';
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;
-    const hit = document.elementFromPoint(x, y);
+    let hit = document.elementFromPoint(x, y);
+    // The public dialog can itself be the split surface inside an open shadow
+    // root. Document hit testing retargets that point to the outer custom
+    // element; resolve each open root before checking the composed ancestry.
+    while (hit?.shadowRoot) {
+      const inner = hit.shadowRoot.elementFromPoint(x, y);
+      if (!inner || inner === hit) break;
+      hit = inner;
+    }
     let hitInContent = false;
     for (let node: Node | null = hit; node; ) {
       if (node === element || node === surface) {

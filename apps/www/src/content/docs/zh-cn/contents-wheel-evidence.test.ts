@@ -11,7 +11,13 @@ function fixture(split = false) {
   const surface = split ? document.createElement('div') : host;
   if (split) {
     surface.setAttribute('data-pui-split-surface', '');
-    host.attachShadow({ mode: 'open' }).append(surface);
+    const root = host.attachShadow({ mode: 'open' });
+    root.append(surface);
+    // happy-dom has no native shadow hit testing; inject its observed target
+    // just as the fixture injects layout and the document-level hit below.
+    Object.defineProperty(root, 'elementFromPoint', {
+      value: () => root.querySelector('[data-pui-split-surface]'),
+    });
   }
   surface.style.overflowY = 'auto';
   Object.defineProperties(surface, {
@@ -67,6 +73,21 @@ describe('Contents wheel observation boundaries', () => {
       expect(surface.scrollTop).toBe(0);
       expect(replacement.scrollTop).toBe(0);
     } finally {
+      observer.dispose();
+    }
+  });
+
+  it('resolves a document hit retargeted to the host of the public shadow surface', () => {
+    const { surface, observer } = fixture(true);
+    const publicSurfaceObserver = observeContentsWheel(surface);
+    try {
+      expect(publicSurfaceObserver.read()).toMatchObject({ hitInContent: true });
+      const outside = document.createElement('button');
+      document.body.append(outside);
+      vi.mocked(document.elementFromPoint).mockReturnValue(outside);
+      expect(publicSurfaceObserver.read()).toMatchObject({ hitInContent: false });
+    } finally {
+      publicSurfaceObserver.dispose();
       observer.dispose();
     }
   });

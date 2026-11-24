@@ -8,7 +8,7 @@ The old test waited for the retained navigation tree and focus entry, then requi
 
 ## Bounded candidate
 
-The revised test waits for measured public available-width/height facts, a positive, viewport-contained scroll surface, and a hit within Content before the wheel. Coordinates now come from that actual scroll surface, including a Web Component's split surface. The original 1000 ms scroll-change assertion remains, with additional signed-progress, retained-owner, trusted-input, uncancelled-event-path and unchanged-document checks.
+The revised test waits for measured public available-width/height facts, a positive, viewport-contained scroll surface, and a hit within Content before the wheel. Coordinates now come from that actual scroll surface, including a Web Component's split surface. Hit testing descends into open shadow roots when the public dialog is itself an inner surface. The original 1000 ms scroll-change assertion remains, with additional signed-progress, retained-owner, trusted-input, uncancelled-event-path and unchanged-document checks.
 
 A passive observer records initial geometry, the pre-input state, final state, wheel delivery and any failure for each family/runtime/opening action. Failure screenshots and observer cleanup are retained without replacing the original assertion error if evidence writing fails. No scroll offset, CSS, focus or synthetic input is injected by the observer.
 
@@ -18,7 +18,7 @@ This is a test-readiness correction and diagnostic improvement. It does not yet 
 
 The candidate is based on main `248f8270dd3458d1fcbc507e618337f98b9fde96`.
 
-- `contents-wheel-evidence.test.ts` and `site-contents-evidence.test.ts`: **15 passed / 0 failed** on Node 24.22.3 and pnpm 10.32.1. The four new controls inject layout to reject zero-height/unpositioned/offscreen/replaced owners and distinguish synthetic or cancelled input. These are oracle checks, not native browser evidence.
+- `contents-wheel-evidence.test.ts` and `site-contents-evidence.test.ts`: **16 passed / 0 failed** on Node 24.22.3 and pnpm 10.32.1. The five new controls inject layout to reject zero-height/unpositioned/offscreen/replaced owners, resolve an open shadow hit, and distinguish synthetic or cancelled input. These are oracle checks, not native browser evidence.
 - The self-contained observer passes a TypeScript no-emit check with ES2022, DOM types, NodeNext resolution and `skipLibCheck`.
 - Local native reproduction first failed before test execution because the workspace ran out of space. A temporary external dependency-store attempt also failed during Astro setup. After those environment conditions were corrected, the website served successfully, but Chromium exited before any test because its process singleton UNIX socket was denied with `EPERM`. None of these setup failures is counted as a product failure or a pass.
 
