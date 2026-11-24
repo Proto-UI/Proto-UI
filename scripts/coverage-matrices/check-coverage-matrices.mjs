@@ -420,6 +420,20 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     sourceSha256: '64de80957e698deb7453372ca73d9a47e3c3386f7f17a991a1fd6684e636cf88',
     specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
   }),
+  'apps/www/src/content/docs/demo-bootstrap-2-3-2-dialog.demo.ts': Object.freeze({
+    sourceSha256: 'bed828050a2f4b8157678f4d903eade26184762b97c42dd181c7e2fdcd836668',
+    specifiers: Object.freeze(['@proto.ui/prototypes-bootstrap-2-3-2/surface']),
+  }),
+  'apps/www/src/content/docs/demo_components/dialog/demo-bootstrap-2-3-2-dialog-no-close.demo.ts':
+    Object.freeze({
+      sourceSha256: 'c4fe8a6e69cbb66faac9011b0417f192018cfc32a76b389abf2c5a36fef0ab4e',
+      specifiers: Object.freeze(['@proto.ui/prototypes-bootstrap-2-3-2/surface']),
+    }),
+  'apps/www/src/content/docs/demo_components/dialog/demo-bootstrap-2-3-2-dialog-sticky-footer.demo.ts':
+    Object.freeze({
+      sourceSha256: 'd368450c905789d1fecb3267b3d91582b4ec37bea95cf65a455ed40c59b8164f',
+      specifiers: Object.freeze(['@proto.ui/prototypes-bootstrap-2-3-2/surface']),
+    }),
   'apps/www/src/content/docs/demo_components/style-scope/demo-shadcn-style-scope-composite.demo.ts':
     Object.freeze({
       sourceSha256: '93b9670fe3be83fa13b44bc5854ee8a4771928700363026d0d245d6cdba564fe',
@@ -537,7 +551,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // Exact lazy Finf registry source under www.demo.prototype-previewer (#1323).
   // Public prototype subpaths plus the Core type import; registrations check identity.
   'apps/www/src/components/PrototypePreviewer/finf-prototype-modules.ts': Object.freeze({
-    sourceSha256: 'df133b1ddf6cb538ff4e602f7bcd68c7c24835e6bf19ac8e33339571057cae7a',
+    sourceSha256: 'd865eb6912784099de15984d20be1774fd031c88b82d06a0d4147152d1b8ab77',
     specifiers: Object.freeze([
       '@proto.ui/core',
       '@proto.ui/prototypes-base/alert-dialog',
@@ -9813,6 +9827,8 @@ const WEBSITE_CLIENT_CHUNKS_RETRY_CONFIGS = Object.freeze([
   '10404ebdfd8ec0f96f74f59bba0b064b9f361b26de9483e82e5550d7aba7e58d',
   // Adds the Bootstrap Image and Liquid Glass Image/Separator sidebar links.
   '2d9b2f28c7435754064aaa15e15a18ff0823f46a4081b11e1e89f302b8725177',
+  // Adds Dialog, Hover Card and Tooltip sidebar links for Bootstrap and Liquid Glass.
+  '83b07d7fbebf1a068297756926aae079e6340ed272b91e30eee065ee85e7020b',
 ]);
 const WEBSITE_CLIENT_CHUNKS_HELPER = [
   'apps/www/scripts/client-chunk-isolation.mjs',
