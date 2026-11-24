@@ -14,6 +14,8 @@ Base Button 是用于触发单次离散动作的可聚焦按钮组件。它统�
 
 ## 预览
 
+`P-BASE-BUTTON` 仍处于 **early draft**，协议仍在演进。预览使用 Web Components、React、Vue 3 与 Vue 2.6 的工作区源码；接入应用时，请按安装部分选择匹配的包和宿主版本。[当前 Button 测试覆盖](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-BASE-BUTTON-0001.yaml)记录了已覆盖的行为与待完成的浏览器验证。
+
 <PrototypePreviewer
   demoId="demo-base-button"
   initialRuntime="wc"
@@ -38,7 +40,7 @@ Base Button 是用于触发单次离散动作的可聚焦按钮组件。它统�
   manager="npm"
 />
 
-React 或 Vue 3 项目请将命令中的 `wc` 替换为 `react` 或 `vue`。CLI 会自动安装匹配版本的 `@proto.ui/prototypes-base` 和对应适配器包，并生成本地 `BaseButton` 组件或 `proto-ui-base-button` 自定义元素。Vue 2（`vue2`）支持目前仅在源码工作区提供。
+React 或 Vue 3 项目请将命令中的 `wc` 替换为 `react` 或 `vue`。CLI 会自动安装匹配版本的 `@proto.ui/prototypes-base` 和对应适配器包，并生成本地 `BaseButton` 组件或 `proto-ui-base-button` 自定义元素。Vue 2.6（`>=2.6.0 <2.7`）需要匹配的工作区 CLI 与适配器源码；已发布的 0.2.0 CLI 支持 `wc`、`react` 和 `vue`。
 
 ## 用法
 
@@ -58,7 +60,7 @@ React 或 Vue 3 项目请将命令中的 `wc` 替换为 `react` 或 `vue`。CLI 
 
 `@proto.ui/prototypes-base/button` 同时导出直接可用的 `button` 原型与用于派生组件的 `asButton()` 钩子。
 
-在当前源码工作区中，还提供了可选的 `asFocusRetainedVisibility` 钩子（及 `FocusRetainedVisibilityProps`）：将其与 `asButton()` 组合后，可通过 `requestedVisible` 控制显隐；当 `requestedVisible` 变为 `false` 但按钮仍持有焦点时，控件会保持可见直到焦点离开（适合“回到最新”等悬浮操作按钮）。
+工作区源码还提供了可选的 `asFocusRetainedVisibility` 钩子（及 `FocusRetainedVisibilityProps`），此 API 尚未包含在已发布的 0.2.0 中：将其与 `asButton()` 组合后，可通过 `requestedVisible` 控制显隐；当 `requestedVisible` 变为 `false` 但按钮仍持有焦点时，控件会保持可见直到焦点离开（适合“回到最新”等悬浮操作按钮）。
 
 ## API
 

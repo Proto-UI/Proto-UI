@@ -14,6 +14,8 @@ Base Button is a focusable command control for triggering a single discrete acti
 
 ## Preview
 
+`P-BASE-BUTTON` is **early draft**: the protocol is still evolving. The previews use workspace source for Web Components, React, Vue 3, and Vue 2.6; choose the matching package and host version in the installation section. [Current Button test coverage](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-BASE-BUTTON-0001.yaml) records the checked behavior and remaining browser work.
+
 <PrototypePreviewer
   demoId="demo-base-button"
   initialRuntime="wc"
@@ -38,7 +40,7 @@ First [initialize your project](/en/start-here/quick-start/), then add Base Butt
   manager="npm"
 />
 
-Replace `wc` with `react` or `vue` for React or Vue 3 projects. The CLI installs matching versions of `@proto.ui/prototypes-base` and the host adapter, generating a local `BaseButton` export or `proto-ui-base-button` custom element. Vue 2 (`vue2`) support is currently available from workspace source only.
+Replace `wc` with `react` or `vue` for React or Vue 3 projects. The CLI installs matching versions of `@proto.ui/prototypes-base` and the host adapter, generating a local `BaseButton` export or `proto-ui-base-button` custom element. Vue 2.6 (`>=2.6.0 <2.7`) requires matching workspace CLI and adapter source; the published 0.2.0 CLI supports `wc`, `react`, and `vue`.
 
 ## Usage
 
@@ -58,7 +60,7 @@ Copy the files for your host below into an existing bundled app. For Web Compone
 
 `@proto.ui/prototypes-base/button` exports both the standalone `button` prototype and the `asButton()` hook for derived components.
 
-Workspace source also includes an opt-in `asFocusRetainedVisibility` hook (with `FocusRetainedVisibilityProps`). Composed with `asButton()`, it takes `requestedVisible?: boolean` (default `false`) and keeps the control visible while focused even after `requestedVisible` turns `false`—useful for floating actions such as "Jump to latest".
+Workspace source also includes an opt-in `asFocusRetainedVisibility` hook (with `FocusRetainedVisibilityProps`), which is not included in the published 0.2.0 API. Composed with `asButton()`, it takes `requestedVisible?: boolean` (default `false`) and keeps the control visible while focused even after `requestedVisible` turns `false`—useful for floating actions such as "Jump to latest".
 
 ## API
 
