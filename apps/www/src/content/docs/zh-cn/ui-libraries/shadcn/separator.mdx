@@ -20,13 +20,15 @@ Separator 以 1px 细线在视觉或语义上划分相邻内容区域，支持�
 
 ## 安装
 
+0.2.0 稳定版 CLI 的组件清单尚未收录此组件。要在应用中复现工作区预览，请安装同一提交构建的 CLI、Shadcn 原型包与目标适配器，用该 CLI 初始化项目，再运行本地命令生成组件封装。
+
 <InstallCommandCard
   manager="npm"
   commands={{
-    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-separator',
-    npm: 'npx @proto.ui/cli@latest add wc shadcn-separator',
-    yarn: 'yarn dlx @proto.ui/cli@latest add wc shadcn-separator',
-    bun: 'bunx @proto.ui/cli@latest add wc shadcn-separator',
+    pnpm: 'pnpm exec proto-ui add wc shadcn-separator',
+    npm: 'npm exec -- proto-ui add wc shadcn-separator',
+    yarn: 'yarn exec proto-ui add wc shadcn-separator',
+    bun: 'bun run proto-ui add wc shadcn-separator',
   }}
 />
 

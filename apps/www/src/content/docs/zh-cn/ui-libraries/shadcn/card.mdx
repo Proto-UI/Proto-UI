@@ -20,13 +20,15 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 ## 安装
 
+此组件由工作区源码提供。请在应用中安装同一工作区提交构建的 CLI、Shadcn 原型包与目标适配器，用该 CLI 初始化项目，再运行本地命令生成组件封装。
+
 <InstallCommandCard
   manager="npm"
   commands={{
-    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-card',
-    npm: 'npx @proto.ui/cli@latest add wc shadcn-card',
-    yarn: 'yarn dlx @proto.ui/cli@latest add wc shadcn-card',
-    bun: 'bunx @proto.ui/cli@latest add wc shadcn-card',
+    pnpm: 'pnpm exec proto-ui add wc shadcn-card',
+    npm: 'npm exec -- proto-ui add wc shadcn-card',
+    yarn: 'yarn exec proto-ui add wc shadcn-card',
+    bun: 'bun run proto-ui add wc shadcn-card',
   }}
 />
 

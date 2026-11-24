@@ -35,9 +35,11 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 ## 安装
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-dropdown" manager="npm" />
+以下命令使用 0.2.0 稳定版 CLI。Vue 2.6 需要使用版本匹配的预发布版或工作区 CLI、适配器和原型包。页面预览使用工作区版本。
 
-把 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的本地组件封装。注意 CLI 的组件标识为 `shadcn-dropdown`。
+<InstallCommandCard command="npx @proto.ui/cli@0.2.0 add wc shadcn-dropdown" manager="npm" />
+
+把 `wc` 替换为 `react` 或 `vue`，即可生成对应框架的本地组件封装。注意 CLI 的组件标识为 `shadcn-dropdown`。
 
 CLI 默认生成 `Root`、`Trigger`、`Content` 与 `Item` 的封装；`Group`、`Label`、`Separator` 与 `Shortcut` 可直接从 `@proto.ui/prototypes-shadcn/dropdown` 导入使用。
 

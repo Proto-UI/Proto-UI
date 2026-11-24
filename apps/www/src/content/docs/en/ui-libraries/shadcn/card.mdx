@@ -20,13 +20,15 @@ A passive, four-part container for grouping related content into `Root`, `Header
 
 ## Installation
 
+This component is available from workspace source. In your application, install the CLI, Shadcn prototypes and target adapter built from the same workspace revision, then initialize the project with that CLI. Run the locally installed CLI to generate the facade.
+
 <InstallCommandCard
   manager="npm"
   commands={{
-    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-card',
-    npm: 'npx @proto.ui/cli@latest add wc shadcn-card',
-    yarn: 'yarn dlx @proto.ui/cli@latest add wc shadcn-card',
-    bun: 'bunx @proto.ui/cli@latest add wc shadcn-card',
+    pnpm: 'pnpm exec proto-ui add wc shadcn-card',
+    npm: 'npm exec -- proto-ui add wc shadcn-card',
+    yarn: 'yarn exec proto-ui add wc shadcn-card',
+    bun: 'bun run proto-ui add wc shadcn-card',
   }}
 />
 

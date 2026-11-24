@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "a8636eb6c4a6bf6144d31caf1e351670a1ea49bc",
-  "scope": "Direct source inventory for the sampled Website routes at the code surface family-selection repair. The previous 33-file reference is retained as website-markup-provenance-723cf85.json. Five input bodies changed. The previewer imports its family lookup from the site family module. Copy selects the family Button directly. The Button examples and Chinese page use the updated Rhea sizes, icons and previews. The Astro configuration adds the client chunk isolation integration, groups concept data with its bootstrap and includes three early-draft sidebar links. This records file identity only. Browser outcomes, served content, transitive dependencies and published CLI compatibility require separate evidence.",
+  "revision": "0b436b388882d73b916ede97c73a1bf304dcf6f6",
+  "scope": "Direct source inventory for the sampled website routes. The Chinese Button install card now uses the stable 0.2.0 CLI and names its supported hosts. This is the only changed body among the 33 direct inputs. The preceding inventory is archived in website-markup-provenance-a8636eb.json. Served content and transitive dependencies require separate evidence.",
   "sourceAdmission": "unverified",
   "sources": [
     {
@@ -75,7 +75,7 @@
     },
     {
       "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/button.mdx",
-      "sha256": "f2ea57c270227ccef990d18be92f87befe01f8ab91619227cc25d5d8c2ae26c0"
+      "sha256": "97c7ff7c0d5b7f72e42a6b41d7b9f33dfe2095505d6758474d31d7eb11580575"
     },
     {
       "path": "apps/www/astro.config.mjs",
