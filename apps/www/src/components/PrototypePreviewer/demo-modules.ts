@@ -24,14 +24,17 @@ export function getAvailableDemos(): string[] {
   return Object.keys(demoModules);
 }
 
+/** The number of registered demo modules the page has to deliver. */
+export function demoModuleCount(): number {
+  return Object.keys(demoModules).length;
+}
+
 /** Deliver every registered demo module to the browser before a measurement
  * phase starts. The Matrix initialization budget measures previewer
  * initialization; delivering the demo modules is the page load that precedes
  * it, and the development server transforms them one at a time. */
 export async function warmDemoModules(): Promise<number> {
-  const delivered = await Promise.allSettled(
-    Object.values(demoModules).map((loader) => loader())
-  );
+  const delivered = await Promise.allSettled(Object.values(demoModules).map((loader) => loader()));
   return delivered.filter((result) => result.status === 'fulfilled').length;
 }
 
