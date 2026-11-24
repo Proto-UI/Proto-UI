@@ -2,6 +2,10 @@
 
 These fixtures project the existing prototype definitions into packed consumers. They do not define a separate component recipe or claim full upstream parity.
 
+## Shadcn Switch
+
+The default non-draggable Switch chooses its Thumb travel at runtime. The packed consumer checks the generated rules for both endpoints, mounts the checked Switch and clicks it to verify the unchecked endpoint. The Root and Thumb must agree on the checked state. In HappyDOM the checked endpoint keeps its percentage-based token. The unchecked endpoint can use the zero token or a zero inline translation supplied by resident motion. Browser tests measure physical travel.
+
 ## Shadcn Button
 
 `P-SHADCN-BUTTON-NEW-YORK-PAINT` governs the accepted shared paint. Its visual source is [New York Button at shadcn-ui/ui 02cad61166c4c20edbc8a3f71bd720eed4c1f49b](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/button.tsx#L7), independently of the entity's older historical compatibility baseline and recorded extensions.
