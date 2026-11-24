@@ -252,6 +252,13 @@ describe('#1488 E native Search controller retirement', () => {
             `${installProbe}(${JSON.stringify({ runtime, state, failure: state === 'active' ? 'undefined' : 'error', reentry: state === 'pending' })})`
           );
           observations.push({ step: 'ready', state: initial });
+          if (
+            !initial ||
+            typeof initial !== 'object' ||
+            !('openers' in initial) ||
+            !('scopeListeners' in initial)
+          )
+            throw new Error('Expected the initial Search disposal probe snapshot');
           expect(initial.openers).toEqual([{ disposed: 0, activated: 1, connected: true }]);
           expect(initial.scopeListeners).toHaveLength(2);
           if (state !== 'unstarted') {
