@@ -3,8 +3,9 @@ import { test } from 'node:test';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import { createRequire } from 'node:module';
 import ts from 'typescript';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
   collectWebsiteProductionBundleIssues,
   validateWebsiteProductionBundle,
@@ -1812,6 +1813,295 @@ const chunkFunction = configSource.statements.find(
 assert.ok(chunkFunction);
 const classifyChunk = vm.runInNewContext(`(${chunkFunction.getText(configSource)})`, {
   normalizedBundleModuleId: (id) => id,
+});
+const configDefinition = configSource.statements.find(ts.isExportAssignment).expression
+  .arguments[0];
+const propertyValue = (object, name) =>
+  object.properties.find((property) => property.name?.getText(configSource) === name)?.initializer;
+const configuredOutput = ['vite', 'build', 'rollupOptions', 'output'].reduce(
+  propertyValue,
+  configDefinition
+);
+const outputOptions = vm.runInNewContext(`(${configuredOutput.getText(configSource)})`, {
+  websiteManualChunk: classifyChunk,
+});
+const clientChunkImport = configSource.statements.find(
+  (node) =>
+    ts.isImportDeclaration(node) &&
+    node.moduleSpecifier.text === './scripts/client-chunk-isolation.mjs'
+);
+const clientChunkFactoryName = clientChunkImport?.importClause?.namedBindings?.elements.find(
+  (binding) => (binding.propertyName ?? binding.name).text === 'websiteClientChunkIsolation'
+)?.name.text;
+const clientChunkIntegrationCall = propertyValue(configDefinition, 'integrations').elements.find(
+  (node) =>
+    ts.isCallExpression(node) &&
+    ts.isIdentifier(node.expression) &&
+    node.expression.text === clientChunkFactoryName &&
+    node.arguments.length === 0
+);
+const { websiteClientChunkIsolation } = await import(
+  new URL('../../../apps/www/scripts/client-chunk-isolation.mjs', import.meta.url)
+);
+const clientChunkIntegration = clientChunkIntegrationCall ? websiteClientChunkIsolation() : null;
+
+// Execute the installed Website bundler: a classifier returning undefined does
+// not by itself stop Rollup from moving a barrel's dependencies into its chunk.
+const wwwRequire = createRequire(new URL('../../../apps/www/package.json', import.meta.url));
+const astroRoot = path.dirname(wwwRequire.resolve('astro/package.json'));
+const astroRequire = createRequire(path.join(astroRoot, 'package.json'));
+const { rollup } = astroRequire('rollup');
+const { runHookBuildSetup } = await import(
+  pathToFileURL(path.join(astroRoot, 'dist/integrations/hooks.js'))
+);
+const { Logger } = await import(pathToFileURL(path.join(astroRoot, 'dist/core/logger/core.js')));
+async function outputOptionsForTarget(target) {
+  const config = await runHookBuildSetup({
+    config: { integrations: clientChunkIntegration ? [clientChunkIntegration] : [] },
+    vite: { build: { ssr: target === 'server', rollupOptions: { output: { ...outputOptions } } } },
+    pages: new Map(),
+    target,
+    logger: new Logger({ level: 'silent', dest: { write() {} } }),
+  });
+  return config.build.rollupOptions.output;
+}
+const optionalSceneModule = 'packages/adapters/base/src/material/shader-scene-host.ts';
+async function buildOptionalSceneFixture(
+  lazy,
+  overrides = {},
+  target = 'client',
+  { reexportScene = false } = {}
+) {
+  const header = 'apps/www/src/components/override/Header.astro';
+  const controls = 'apps/www/src/components/site-shadcn-controls.ts';
+  const barrel = 'packages/adapters/base/src/index.ts';
+  const host = 'packages/adapters/base/src/host/adapter-host.ts';
+  const preview = 'apps/www/src/components/PrototypePreviewer/preview-material-scene.ts';
+  const files = new Map([
+    [
+      header,
+      `import { mount } from '${controls}'; export const ready = mount();` +
+        (lazy ? ` export const loadScene = () => import('${preview}');` : ''),
+    ],
+    [controls, `export { mount } from '${barrel}';`],
+    [barrel, `export { mount } from '${host}'; export { scene } from '${optionalSceneModule}';`],
+    [host, 'export function mount() { return "ordinary-control"; }'],
+    [optionalSceneModule, 'export function scene() { return "optional-scene-code"; }'],
+    [preview, `import { scene } from '${optionalSceneModule}'; export const render = scene;`],
+  ]);
+  if (reexportScene) {
+    const shared = 'packages/adapters/base/src/material/shader-webgl2-host.ts';
+    files.set(
+      host,
+      `import { webgl } from '${shared}'; export function mount() { return webgl(); }`
+    );
+    files.set(
+      optionalSceneModule,
+      `import { webgl } from '${shared}'; export function scene() { return "optional-scene-code" + webgl(); }`
+    );
+    files.set(shared, 'export function webgl() { return "shared-host"; }');
+    files.set(preview, `export { scene as render } from '${optionalSceneModule}';`);
+  }
+  const bundle = await rollup({
+    input: header,
+    plugins: [
+      {
+        name: 'optional-scene-regression-fixture',
+        resolveId: (id) => (files.has(id) ? id : null),
+        load: (id) => files.get(id) ?? null,
+      },
+    ],
+  });
+  try {
+    return (
+      await bundle.generate({
+        format: 'es',
+        ...(await outputOptionsForTarget(target)),
+        ...overrides,
+      })
+    ).output;
+  } finally {
+    await bundle.close();
+  }
+}
+
+test('Astro applies explicit manual chunks only to the client build', async () => {
+  assert.equal(outputOptions.onlyExplicitManualChunks, undefined);
+  assert.ok(clientChunkIntegration, 'The client boundary must be installed in the actual config.');
+  const server = await outputOptionsForTarget('server');
+  assert.deepEqual(server, { ...outputOptions });
+  const client = await outputOptionsForTarget('client');
+  assert.deepEqual(client, { ...outputOptions, onlyExplicitManualChunks: true });
+  assert.deepEqual(await outputOptionsForTarget('server'), server);
+  assert.equal(outputOptions.onlyExplicitManualChunks, undefined);
+
+  const actual = await buildOptionalSceneFixture(true, {}, 'server');
+  const baseline = await buildOptionalSceneFixture(
+    true,
+    { onlyExplicitManualChunks: false },
+    'server'
+  );
+  assert.deepEqual(actual, baseline, 'Server grouping must retain the baseline Rollup strategy.');
+});
+
+test('manual chunks exclude an unreferenced scene from the emitted control graph', async () => {
+  const inherited = await buildOptionalSceneFixture(false, { onlyExplicitManualChunks: false });
+  const oldScene = inherited.find((output) => optionalSceneModule in (output.modules ?? {}));
+  assert.ok(oldScene, 'The old grouping must reproduce the empty eager module record.');
+  assert.equal(oldScene.modules[optionalSceneModule].renderedLength, 0);
+  assert.equal(oldScene.modules[optionalSceneModule].code, null);
+  assert.ok(inherited.every((output) => !output.code.includes('optional-scene-code')));
+
+  const actual = await buildOptionalSceneFixture(false);
+  assert.ok(actual.every((output) => !(optionalSceneModule in output.modules)));
+  assert.deepEqual(
+    actual.map((output) => output.code),
+    inherited.map((output) => output.code),
+    'Removing an empty graph record must not be confused with removing emitted shader code.'
+  );
+});
+
+test('manual chunks retain a reached optional scene only in its lazy consumer', async () => {
+  const inherited = await buildOptionalSceneFixture(true, { onlyExplicitManualChunks: false });
+  const previousBridge = inherited.find((output) => output.name === 'site-shadcn-controls');
+  assert.ok(previousBridge.modules[optionalSceneModule].renderedLength > 0);
+
+  const actual = await buildOptionalSceneFixture(true);
+  const bridge = actual.find((output) => output.name === 'site-shadcn-controls');
+  const scene = actual.find((output) => optionalSceneModule in output.modules);
+  assert.ok(scene?.isDynamicEntry);
+  assert.ok(scene.modules[optionalSceneModule].renderedLength > 0);
+  assert.ok(!(optionalSceneModule in bridge.modules));
+  const chunks = new Map(actual.map((output) => [output.fileName, output]));
+  const pending = actual.filter((output) => output.isEntry).map((output) => output.fileName);
+  const staticChunks = new Set();
+  while (pending.length) {
+    const file = pending.pop();
+    if (staticChunks.has(file)) continue;
+    staticChunks.add(file);
+    pending.push(...chunks.get(file).imports);
+  }
+  assert.ok(!staticChunks.has(scene.fileName), 'No eager chunk may import the optional scene.');
+});
+
+function staticChunkClosure(output, roots = output.filter((chunk) => chunk.isEntry)) {
+  const chunks = new Map(output.map((chunk) => [chunk.fileName, chunk]));
+  const pending = roots.map((chunk) => chunk.fileName);
+  const visited = new Set();
+  while (pending.length) {
+    const file = pending.pop();
+    if (visited.has(file)) continue;
+    const chunk = chunks.get(file);
+    assert.ok(chunk, `The static dependency ${file} must exist in the emitted graph.`);
+    visited.add(file);
+    pending.push(...chunk.imports);
+  }
+  return [...visited].map((file) => chunks.get(file));
+}
+
+test('manual chunks keep a pure scene re-export lazy with a shared eager host', async () => {
+  const fixture = { reexportScene: true };
+  assert.equal(
+    classifyChunk('packages/adapters/base/src/material/shader-webgl2-host.ts'),
+    'site-shadcn-controls'
+  );
+  for (const manualChunks of [
+    classifyChunk,
+    (id) => (id === optionalSceneModule ? 'site-optional-scene' : classifyChunk(id)),
+  ]) {
+    const inherited = await buildOptionalSceneFixture(
+      true,
+      { manualChunks, onlyExplicitManualChunks: false },
+      'client',
+      fixture
+    );
+    const eagerScene = staticChunkClosure(inherited).find(
+      (chunk) => chunk.modules[optionalSceneModule]?.renderedLength > 0
+    );
+    assert.ok(
+      eagerScene,
+      'Both implicit grouping and the exact named-scene alternative must reproduce eager retained code.'
+    );
+  }
+
+  const actual = await buildOptionalSceneFixture(true, {}, 'client', fixture);
+  const scene = actual.find((chunk) => chunk.modules[optionalSceneModule]?.renderedLength > 0);
+  assert.ok(scene, 'The lazy consumer must retain the actual scene implementation.');
+  const eager = staticChunkClosure(actual);
+  assert.ok(!eager.includes(scene), 'The Header static closure must not load the scene.');
+  const lazyFiles = new Set(eager.flatMap((chunk) => chunk.dynamicImports));
+  assert.ok(lazyFiles.size > 0, 'The dynamic consumer must remain a real import.');
+  const lazy = staticChunkClosure(
+    actual,
+    actual.filter((chunk) => lazyFiles.has(chunk.fileName))
+  );
+  assert.ok(lazy.includes(scene), 'The dynamic consumer closure must reach the scene.');
+});
+
+async function buildConceptFixture(manualChunks) {
+  const framePath = 'apps/www/src/components/override/PageFrame.astro';
+  const frame = `${framePath}?astro&type=script&index=1&lang.ts`;
+  const concept = 'apps/www/src/scripts/proto-concept.ts';
+  const data = 'apps/www/src/data/concepts.ts';
+  const frameSource = fs.readFileSync(path.join(repositoryRoot, framePath), 'utf8');
+  const conceptScript = [...frameSource.matchAll(/<script>([\s\S]*?)<\/script>/gu)]
+    .map((match) => match[1])
+    .find((source) => source.includes('../../scripts/proto-concept'));
+  assert.ok(conceptScript, 'Use the real PageFrame concept bootstrap entry.');
+  const files = new Map([
+    [frame, conceptScript],
+    ...[concept, data].map((id) => [
+      id,
+      ts.transpileModule(fs.readFileSync(path.join(repositoryRoot, id), 'utf8'), {
+        compilerOptions: { target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext },
+      }).outputText,
+    ]),
+  ]);
+  const warnings = [];
+  const bundle = await rollup({
+    input: frame,
+    preserveEntrySignatures: 'exports-only',
+    onwarn: (warning) => warnings.push(warning.code),
+    plugins: [
+      {
+        name: 'concept-source-regression-fixture',
+        resolveId(id, importer) {
+          if (files.has(id)) return id;
+          if (!importer || !id.startsWith('.')) return null;
+          const relative = path.posix.normalize(path.posix.join(path.posix.dirname(importer), id));
+          return [relative, `${relative}.ts`].find((candidate) => files.has(candidate)) ?? null;
+        },
+        load: (id) => files.get(id) ?? null,
+      },
+    ],
+  });
+  try {
+    const { output } = await bundle.generate({
+      format: 'es',
+      ...(await outputOptionsForTarget('client')),
+      manualChunks,
+    });
+    return { output, warnings };
+  } finally {
+    await bundle.close();
+  }
+}
+
+test('client concept chunk keeps its data out of the importing page entry', async () => {
+  const data = 'apps/www/src/data/concepts.ts';
+  const inherited = await buildConceptFixture((id) =>
+    id === data ? undefined : classifyChunk(id)
+  );
+  assert.ok(inherited.warnings.includes('CIRCULAR_CHUNK'));
+  assert.ok(inherited.output.some((chunk) => chunk.imports.includes(chunk.fileName)));
+
+  const actual = await buildConceptFixture(classifyChunk);
+  assert.ok(!actual.warnings.includes('CIRCULAR_CHUNK'));
+  assert.ok(actual.output.every((chunk) => !chunk.imports.includes(chunk.fileName)));
+  const concepts = actual.output.find((chunk) => chunk.name === 'site-concepts');
+  assert.ok(concepts.modules[data].renderedLength > 0);
+  assert.ok(concepts.modules['apps/www/src/scripts/proto-concept.ts'].renderedLength > 0);
+  assert.deepEqual(concepts.imports, []);
 });
 const materialBoundary = chunkFunction.body.statements.find(
   (node) =>

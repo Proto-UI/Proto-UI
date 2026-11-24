@@ -8923,9 +8923,13 @@ function isReviewedBuildTimeModuleSpecifier(sourcePath, specifier, rootDir, meta
           WEBSITE_MERGED_RETRY_VIRTUAL_CONFIG_SHA256,
           WEBSITE_SPRINT2_RETRY_VIRTUAL_CONFIG_SHA256,
           WEBSITE_VISUAL_LABELS_RETRY_VIRTUAL_CONFIG_SHA256,
+          WEBSITE_EXPLICIT_CHUNKS_RETRY_VIRTUAL_CONFIG_SHA256,
+          WEBSITE_CLIENT_CHUNKS_RETRY_VIRTUAL_CONFIG_SHA256,
         ].includes(configSha)
       ) {
         inputs.push(...WEBSITE_RETRY_VIRTUAL_HELPERS);
+        if (configSha === WEBSITE_CLIENT_CHUNKS_RETRY_VIRTUAL_CONFIG_SHA256)
+          inputs.push(WEBSITE_CLIENT_CHUNKS_HELPER);
       } else if (
         ![
           PROMOTION_FINF_RETRY_AUDIT_CONFIG_SHA256,
@@ -9797,6 +9801,20 @@ const WEBSITE_SPRINT2_RETRY_VIRTUAL_CONFIG_SHA256 =
 // Keep the same four Retry import owners and exact helper digests.
 const WEBSITE_VISUAL_LABELS_RETRY_VIRTUAL_CONFIG_SHA256 =
   'c0a7f33cceaf8b66e31592b7d266b6cd63d28c032467f6b833eb0e989577f1ee';
+// Header isolation makes manual chunk dependency grouping explicit. The four
+// Retry import owners and exact helpers stay unchanged; general package
+// promotion still requires one of its separately reviewed resolver profiles.
+const WEBSITE_EXPLICIT_CHUNKS_RETRY_VIRTUAL_CONFIG_SHA256 =
+  'e3331ef0b79cdd7d35392ec12c61384b625104c3ead6ca78a6bbb86b76903949';
+// Scope explicit grouping to the client and keep the existing concept data with
+// its bootstrap. Bind the new build hook alongside the existing exact helpers;
+// the four Retry import owners and historical profile requirements stay fixed.
+const WEBSITE_CLIENT_CHUNKS_RETRY_VIRTUAL_CONFIG_SHA256 =
+  '10404ebdfd8ec0f96f74f59bba0b064b9f361b26de9483e82e5550d7aba7e58d';
+const WEBSITE_CLIENT_CHUNKS_HELPER = [
+  'apps/www/scripts/client-chunk-isolation.mjs',
+  'ab1b90b6ab049058595d686ae23b835cdec6d3b96058bd4055982c8a73c57e69',
+];
 const WEBSITE_RETRY_VIRTUAL_HELPERS = [
   [
     'apps/www/src/utils/proto-ui-source.mjs',
