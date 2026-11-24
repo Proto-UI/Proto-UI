@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Toggle'
-description: 'Persistent-state Neo-Brutalist Toggle projection over Base Toggle'
+description: 'A Brutalist-styled two-state toggle button with a persistent inset ink frame for active states.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,15 +9,26 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-Toggle keeps Base activation and `aria-pressed` ownership. Its latched active state adds a persistent inset ink frame as an explicit non-color accessibility extension; transient press keeps the flat geometry without movement. The pinned Neo size recipe uses 40px default, 36px small (0.8rem text), and 44px large (text-sm). Upstream icon-size/side-padding details and variants remain outside this bounded projection. Fresh browser visual verification is pending.
+Toggle is a two-state button with `aria-pressed` semantics. Its Brutalist presentation marks the active state with a persistent inset ink frame as a clear non-color cue, while pressing keeps a flat geometry without shifting position.
+
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-toggle" initialRuntime="wc" />
 </div>
 
+## Installation
+
+Included in `@proto.ui/prototypes-brutalist@0.2.0`. Add it via the CLI target `brutalist-toggle`, or import directly from `@proto.ui/prototypes-brutalist/toggle`.
+
+## Usage
+
+- **Sizes**: Choose `'sm'` (36px, `0.8rem` text), `'default'` (40px), or `'lg'` (44px, `text-sm`).
+- **Controlled vs. uncontrolled**: Use `defaultActive` for uncontrolled initialization, or pass `active` to control the state externally. Set `disabled` to block activation.
+
 ## API
 
-Toggle is workspace source. For this workspace version, the CLI target is `brutalist-toggle`. Use matching CLI and package versions; check the chosen release's availability before installing. Passing `active` selects controlled mode.
+The following props belong to `Root` (pass `active` for controlled mode):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -27,5 +38,3 @@ Toggle is workspace source. For this workspace version, the CLI target is `bruta
     { name: 'size', type: "'default' | 'sm' | 'lg'", default: 'default' },
   ]}
 />
-
-These props belong to Root.

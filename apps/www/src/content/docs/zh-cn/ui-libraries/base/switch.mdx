@@ -1,13 +1,15 @@
 ---
 title: 'Switch'
-description: 'Base Switch 的 Root-owned on/off 语义、anatomy、证据与边界。'
+description: '用于切换开关两种状态的无样式开关控件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Base Switch 是 on/off value control。Root 拥有持久 checked value 与 activation route；Thumb 是可选的 same-domain indicator，不会成为第二个 input target。
+用于表示“开 / 关”二元状态的无样式开关组件，由 `Root` 统一管理选中状态与焦点交互，`Thumb` 作为纯展示滑块跟随状态更新。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-switch"
@@ -16,40 +18,26 @@ Base Switch 是 on/off value control。Root 拥有持久 checked value 与 activ
   codePanel={false}
 />
 
-## Family 与 ownership
+## 安装
 
-Cataloged family 包含：
+0.2.0 稳定版包已导出 `@proto.ui/prototypes-base/switch`（包含 `switchRoot`、`switchThumb`、`asSwitchRoot()` 与 `asSwitchThumb()`），CLI 目标为 `base-switch`。如需带样式的版本，可使用 [Shadcn Switch](/zh-cn/ui-libraries/shadcn/switch/) 或 [Brutalist Switch](/zh-cn/ui-libraries/brutalist/components/switch/)。
 
-- `base-switch-root`（`1..1`）：semantic owner、value owner、focus 与 activation target；
-- `base-switch-thumb`（`0..*`）：消费 Root context 的 presentational indicator。
+## 用法
 
-Root 与 Thumb 连同 `asSwitchRoot()`、`asSwitchThumb()` 一起由 `@proto.ui/prototypes-base/switch` 导出。Root 接受 `checked`、`defaultChecked`、`disabled`，expose checked 与交互事实，提供 `focusSelf()`，并发出 `checkedChange`。
+### 组件结构
 
-受控模式在更新 input 到达前保持 owner 提供的 `checked` fact；非受控 activation 会在本地提交下一个 checked value。Switch 不包含 mixed/indeterminate state；需要该状态时应使用 Checkbox 边界。
+- `base-switch-root`：唯一的可聚焦交互目标，管理 `checked` 状态、激活逻辑与 `role="switch"` 无障碍语义。
+- `base-switch-thumb`（可选）：读取 `Root` 上下文的纯视觉滑块，不参与焦点或点击激活。
 
-## Accessibility 边界
+### 受控与非受控
 
-Root 在唯一可聚焦 control 上投射 `switch` role 与 checked state。Thumb 是 presentational part：它不拥有 activation、value、focus target 或独立 accessibility control 语义。Base 不规定 track geometry、motion、color 或 variant。
-
-## 0.2 交付与证据
-
-稳定版 0.2.0 package 导出了 Switch family，CLI registry 通过 `base-switch` 提供 Root 与 Thumb。`T-BASE-SWITCH-0001` 把 Root criteria 映射到 `packages/prototypes/base/test/switch.test.ts`；本页可直接比较三个 Web Adapter 的投射。
-
-## Lifecycle
-
-`P-BASE-SWITCH` 与 `P-BASE-SWITCH-THUMB` 当前都是 **draft**。它们出现在稳定 package 中是 release evidence，不是 lifecycle promotion。
-
-## 参考
-
-- [P-BASE-SWITCH](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SWITCH.yaml)
-- [P-BASE-SWITCH-THUMB](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SWITCH-THUMB.yaml)
-- [Switch source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/switch)
-- [Switch evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/switch.test.ts)
-- 风格化投射：[Shadcn Switch](/zh-cn/ui-libraries/shadcn/switch/) 与 [Brutalist Switch](/zh-cn/ui-libraries/brutalist/components/switch/)
+- 非受控模式使用 `defaultChecked` 指定初始状态，点击或按键盘切换后在本地提交新状态并发出 `checkedChange`。
+- 受控模式传入 `checked`，交互时仅发出 `checkedChange`，由外部更新 `checked` 后生效。
+- `Switch` 仅表示二元开关；若需要不确定（indeterminate）三态，请使用 `Checkbox`。
 
 ## API
 
-Switch 是工作区源码。当前工作区 CLI 目标为 `base-switch`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。传入 `checked` 进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -61,7 +49,9 @@ Switch 是工作区源码。当前工作区 CLI 目标为 `base-switch`。CLI �
   ]}
 />
 
-这些属性属于 Root。Thumb 没有属性。
+传入 `checked` 可受控管理开关状态。`Thumb` 无额外属性。
+
+- **暴露方法与事件**：提供 `focusSelf()`，状态变更时发出 `checkedChange`。
 
 ## 参考
 

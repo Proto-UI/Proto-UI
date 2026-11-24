@@ -1,6 +1,6 @@
 ---
 title: 'Separator'
-description: 'A Shadcn separator projected from the Base separator protocol.'
+description: 'A horizontal or vertical hairline divider for visual or semantic separation.'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -8,15 +8,11 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Separator renders a 1px horizontal or vertical divider to separate content visually or semantically. The examples on this page use the **Shadcn Rhea** style preset.
 
-This entry shows the current `shadcn` separator implementation in Proto UI.
+## Preview
 
-Base Separator owns the protocol: `orientation` defaults to `horizontal`, and `decorative` defaults to `true`. A decorative separator stays hidden from the accessibility tree with no role, while `decorative={false}` projects the `separator` role and a matching `aria-orientation`. The shadcn layer adds presentation only — the border color and the 1px hairline geometry that follows the inherited orientation.
-
-The separator is contentless and declares no focus, tab stop, or event channel. Length comes from the surrounding layout, and spacing stays with the composition.
-
-The demo is one column: a horizontal rule, a row of vertical rules, then a non-decorative horizontal rule that exposes `separator`.
+The preview below shows a horizontal divider, a row of vertical dividers, and a non-decorative horizontal divider (`decorative={false}`).
 
 <PrototypePreviewer
   demoId="demo-shadcn-separator"
@@ -26,13 +22,21 @@ The demo is one column: a horizontal rule, a row of vertical rules, then a non-d
   codePanel={false}
 />
 
-## Install
+## Installation
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-separator" manager="npm" />
 
-Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your target framework.
+
+## Usage
+
+- `orientation` defaults to `'horizontal'`; set it to `'vertical'` for a vertical rule. Length is determined by the surrounding layout container, and spacing is controlled by your composition.
+- `decorative` defaults to `true`, hiding the divider from assistive technologies. Set `decorative={false}` to expose `role="separator"` and the matching `aria-orientation`.
+- Separator is contentless—it takes no children and does not participate in focus or events.
 
 ## API
+
+The following props belong to `Root`:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -41,8 +45,6 @@ Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
     { name: 'decorative', type: 'boolean', default: 'true' },
   ]}
 />
-
-Root exposes `orientation` and `decorative`. It accepts no children as content and no focus or event props.
 
 ## References
 

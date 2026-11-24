@@ -1,6 +1,8 @@
 # Invisible generated-knowledge consumption — Issue #750
 
-This directory prepares the existing [consumer experiment](https://github.com/Proto-UI/Proto-UI/issues/750). **No generated artifact, participant journey or benefit was measured while authoring it.** The checked-in `blocked.packet.json` truthfully has no artifact and no runs. The study remains behind its real artifact prerequisite and the maintainer's [0.4 deferral](https://github.com/Proto-UI/Proto-UI/issues/750#issuecomment-6684445067).
+This directory implements the existing [consumer experiment](https://github.com/Proto-UI/Proto-UI/issues/750). Its original preparation measured no artifact or participant. The checked-in `blocked.packet.json` remains that truthful missing-prerequisite control; do not rewrite it as a completed study.
+
+The [2026-11-24 execution record](../../../internal/records/2026-11-24-generated-button-consumption.md) now binds a real independently admitted source distribution and two actual consumer attempts. One complete monotonic-clock journey is eligible for the unchanged collector; the other retains successful production behavior but an interrupted operator clock and is excluded from strict timing. The sealed evidence contains all actual failures, edits, source-inspection needs and captures. `originalCriteriaComplete: false` remains the reducer's non-certification boundary. Final Issue acceptance and integration are separate from recorded task completion; the earlier [0.4 deferral](https://github.com/Proto-UI/Proto-UI/issues/750#issuecomment-6684445067) remains readable history.
 
 The experiment asks whether an ordinary consumer can discover/install, use, customize, debug and ship a real generated Button without Proto UI onboarding. It adds no package, public Compiler profile, component subset or release promise. `P-BASE-BUTTON`, `C-AS-TRIGGER-0001`, `C-EXPOSE-EVENT-0001` and `T-BASE-BUTTON-0001` remain draft; `C-PROPS-0001` is active. The experiment does not promote them.
 
@@ -16,7 +18,7 @@ The current job was supplied by the experiment, not independently discovered dem
 
 ## Main-only serial execution
 
-These commands are **proposed, unrun**. Main owns the portfolio's single heavy slot, dependency setup, all native instances, independent review and external writes. Run repository commands in the supplied Issue #750 worktree using Node24. No worker should execute them to refresh evidence.
+The commands below are the original preparation/reproduction playbook, not execution receipts. The dated record above identifies which real commands and versions ran. Main owns the portfolio's single heavy slot, dependency setup, all native instances, independent review and external writes. Run repository commands in the supplied Issue #750 worktree using Node24. No worker should execute them to refresh evidence.
 
 First run only the admission/accounting controls and the real missing-prerequisite producer:
 
@@ -94,7 +96,7 @@ The artifact manifest consumed by `study.mjs` requires these actual fields:
 
 Command receipts contain exact `argv`, `cwd`, ISO `startedAt`/`finishedAt`, actual `exitCode`, `signal`, `error`, and bound `stdout`/`stderr`. A successful wrapper with compiler `ok: false`, missing output, nonzero build, unresolved helper, source link or internal import cannot admit the artifact. A #736 merge, a nominally implemented profile, a self-authored JSON review or Happy DOM trace is insufficient. Main must independently establish actual execution, rights and admission from the real platform/source evidence. The reducer validates bytes and required relationships; it does **not authenticate** those facts.
 
-No admitted manifest is checked in because no genuine artifact is supplied. Main can form it only from the real producer/consumer/native/review results. If any prerequisite is unavailable, preserve `artifact: null` and keep Issue #750 staged/open.
+The original blocked packet intentionally has no admitted manifest. The dated execution archive now includes an actual artifact manifest bound to producer/consumer/native results and the published independent admission comment. Future candidates must independently satisfy the same gate. If a prerequisite is unavailable, preserve `artifact: null` and keep that candidate staged/open.
 
 ## Actual participant recording and reduction
 
@@ -105,6 +107,8 @@ Start the operator-only clock recorder in a fresh external directory:
 ```
 
 On actual task delivery, send one JSON line with `kind: release`, the real `protocolSha256`, task SHA and sanitized `participantAlias`. The task SHA is pinned in `protocol.json`; compute the protocol SHA from its actual file bytes. Send stage events as the observations happen, with `stage`, `kind`, `detail` and bound `evidence` references; `finish` ends recording. The recorder, not the sender, supplies monotonic offsets. It preserves received input, released input, events and the clock receipt. EOF/error before finish is a recorder interruption, never participant completion or abandonment. Receipt timing measures observation delivery; document actual task-delivery brackets and observer delay. Do not estimate missing timestamps or relabel an interrupted recorder as a measured failed consumer.
+
+For a recorder that must survive a lost interactive terminal, `durable-recorder.py` records actual Linux `CLOCK_MONOTONIC` receipt offsets across short processes, checks the boot identity, and preserves command logs. It never accepts a supplied `atMs` or reconstructs a lost tail from UTC timestamps. Recording instructions are measurement mechanics, not component onboarding. The original recorder and interrupted attempt remain retained; this alternative does not change `protocol.json` or the collector.
 
 A session file combines the actual clock/events with:
 
@@ -130,4 +134,4 @@ This is the meaningful before/after input boundary: absent artifact → blocked/
 
 The measured scope is one artifact/profile/version/task, not a whole library. Package/docs maturity, framework familiarity, generated-code style, provenance visibility, participant experience, supplied task realism, local storage, tooling, observer delivery, warm caches and optional reference selection are confounders. Task completion is not voluntary adoption, business usability, overall UX or cross-target maintenance savings. Preserve weakened, inconclusive and falsified outcomes, including a consumer who must learn internals or cannot finish. No preference or satisfaction result is required.
 
-The dated record in `internal/records/2026-11-10-invisible-consumption-750.md` retains every original `issue.750.001`–`issue.750.005` condition and current source/ownership boundaries. All five remain pending actual evidence and integration. A source-ready producer, the synthetic controls and the missing-artifact guard do not complete them.
+The [current execution record](../../../internal/records/2026-11-24-generated-button-consumption.md) maps every original `issue.750.001`–`issue.750.005` condition to actual evidence and the remaining integration boundary. A source-ready producer, synthetic controls and missing-artifact guard alone do not complete them. The observed need to inspect editable generated source for a styling hook remains part of the result; do not describe completion as zero source understanding or zero modification.

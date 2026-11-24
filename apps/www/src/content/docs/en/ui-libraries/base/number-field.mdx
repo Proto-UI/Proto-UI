@@ -1,11 +1,15 @@
 ---
-title: base Number Field
-description: Draft portable input atoms.
+title: 'Number Field'
+description: 'A numeric input supporting stepping, locale formatting, nullable values, and label scrubbing.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+A numeric input with keyboard and button stepping, localized number formatting, optional empty values, and horizontal label scrubbing.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-number-field"
@@ -14,23 +18,23 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root owns `number | null` value/defaultValue, min/max (0/100), positive step (1), disabled/readOnly, name and ariaLabel. Input uses one TextControl editor with spinbutton semantics. Incomplete drafts can remain while editing; blur/Enter commits a valid number or restores accepted canonical state. Increment/Decrement and ArrowUp/ArrowDown share stepping, Shift multiplies by ten, and Home/End reach bounds. Controlled proposals never replace owner values optimistically.
+## Installation
 
-`locale` and `formatOptions` support standard decimal, currency and percent presentation with matching decimal/group separators, localized digits and signs. Display rounding does not change canonical precision, including a commit without edits. Invalid configuration sets `formatInvalid` and falls back to ungrouped decimals; invalid drafts restore accepted text on commit. Omitting formatting props retains the previous decimal representation. IME composition blocks parsing, commits, stepping and scrub initiation; changing locale preserves the ongoing composition text.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Explicit `null` represents emptiness, and `value={null}` remains controlled. `allowEmpty` defaults to `false`; enable it to request `null` by clearing and committing the editor. Root and Input/Control expose `getValue(): number | null` and `empty`. The compatibility numeric `value` readout represents a canonical number only when `empty` is false; while empty it retains its last finite value. Events and Field/Form reports always carry actual null. The first step from null initializes snapped zero within the bounds.
+## Usage
 
-Enable `scrub` to continuously adjust the number by dragging Label. `scrubSteps` (default100) is the number of steps per initial Label width; `direction="rtl"` reverses horizontal movement. A changed successful release commits once. Cancellation restores the uncontrolled starting value, and controlled values always remain owner-owned. The input retains normal text selection. Wheel adjustment remains unimplemented.
+Compose `Root`, `Label`, `Input`, `Control`, `Increment`, and `Decrement`:
 
-Use Control instead of Input inside Field/FormField: FieldLabel names and activates the actual editor; Field policy, canonical numeric validation, IME cancellation, Form serialization and reset are bridged. Standalone Input continues to use NumberFieldLabel.
-
-Parts: root, label, input, control, increment, decrement. All four styled families inherit Base behavior.
-
-Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf completion is claimed.
+- **Editing and stepping**: `Root` manages the `number | null` value. `Input` provides a spinbutton text editor that preserves incomplete drafts while typing and commits a valid number (or restores the last accepted value) on blur or `Enter`. `Increment`/`Decrement` and `ArrowUp`/`ArrowDown` step by `step` (`Shift` multiplies by 10); `Home`/`End` jump to bounds when set, or keep native cursor movement when unbounded. Pass `value` for controlled mode.
+- **Formatting and IME**: `locale` and `formatOptions` support decimal, currency, and percent formatting and parsing (including localized separators, digits, and signs) without altering underlying numeric precision. Invalid formatting options set `formatInvalid` and fall back to ungrouped decimals. Active IME composition pauses parsing, commits, stepping, and scrubbing while preserving composition text across locale changes.
+- **Nullable values**: Explicit `null` represents an empty value, and `value={null}` stays controlled. Set `allowEmpty` to request `null` when clearing and committing the input. Read `getValue(): number | null` and `empty` for exact state (the compatibility numeric `value` readout reflects the number when `empty` is `false`, while events and `Field`/`Form` always receive `null`). Stepping from `null` initializes at snapped `0` within bounds.
+- **Label scrubbing**: Enable `scrub` to adjust the value continuously by dragging `Label`. `scrubSteps` (default `100`) sets the number of steps per initial label width, and `direction="rtl"` reverses horizontal drag direction. Releasing after a change commits once; canceling restores the uncontrolled start value while keeping normal text selection in the input.
+- **Form integration**: Use `Control` instead of `Input` inside `Field`/`FormField` to integrate `FieldLabel`, `required`, numeric validation, serialization, and reset. Use `Label` with standalone `Input`.
 
 ## API
 
-Number Field is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode. Label, Input, Control, Increment, and Decrement add no props of their own.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -55,11 +59,10 @@ Number Field is workspace source. There is no public `proto-ui add` target. Pass
   ]}
 />
 
-These props belong to Root.
+`Label`, `Input`, `Control`, `Increment`, and `Decrement` add no props of their own.
 
-Omitted bounds retain 0/100; explicit `null` removes that bound. `snapToStep={false}` preserves finite initial and edited values while `step` still controls increments. Without a bound, Home/End retain native editor movement for that direction.
-
-`required` combines with any enclosing Field requirement. Input and Control expose the resolved requirement and apply it to both the native editor and accessibility. This does not change nullable value ownership or submit the form.
+- **Bounds and snapping**: Omitted `min`/`max` default to `0`/`100`; pass `null` to remove a bound. Setting `snapToStep={false}` preserves finite initial and edited values while `step` still controls increments.
+- **Required resolution**: `required` combines with any enclosing `Field` requirement and applies to both the native editor and accessibility attributes.
 
 ## References
 

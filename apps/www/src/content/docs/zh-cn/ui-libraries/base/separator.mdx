@@ -1,13 +1,15 @@
 ---
 title: 'Separator'
-description: 'Base Separator 的 orientation 与无交互 accessibility 语义。'
+description: '用于水平或垂直分隔内容的无交互分隔线组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Base Separator 是用于 horizontal/vertical separation 的 contentless、non-interactive boundary。它拥有 orientation 与 decorative 状态；layout、color、thickness 与 visual rhythm 属于设计语言。
+用于表达水平或垂直视觉与语义分隔的无内容、非交互分隔线组件，视觉粗细与配色由具体风格组件决定。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-separator"
@@ -16,37 +18,19 @@ Base Separator 是用于 horizontal/vertical separation 的 contentless、non-in
   codePanel={false}
 />
 
-## 公开表面
+## 安装
 
-`@proto.ui/prototypes-base/separator` 导出 `separatorRoot` 与 `asSeparatorRoot()`。当前 props 是：
+0.2.0 稳定版包已导出 `@proto.ui/prototypes-base/separator`（`separatorRoot` 与 `asSeparatorRoot()`），CLI 目标为 `base-separator`。如需带样式的版本，可使用 [Brutalist Separator](/zh-cn/ui-libraries/brutalist/components/separator/)。
 
-- `orientation?: 'horizontal' | 'vertical'`，默认 `horizontal`；
-- `decorative?: boolean`，默认 `true`。
+## 用法
 
-Root expose `orientation` 与 `decorative` state。它刻意不提供 focus、tab stop、event、command、activation 或 mutable-value channel；renderer 也是 contentless 的，避免 decorative semantics 意外隐藏 authored descendants。
-
-## Accessibility 边界
-
-Decorative mode 会从 accessibility tree 隐藏，既不输出 `separator` role，也不输出 orientation state。Semantic mode 投射 `role="separator"` 和对应 orientation。Divider 是否对辅助技术有意义，是 authoring decision，不是 styling side effect。
-
-## 0.2 交付与证据
-
-稳定版 0.2.0 package 导出了 Separator subpath，CLI registry 提供 `base-separator`。`T-BASE-SEPARATOR-0001` 把 protocol 映射到 `packages/prototypes/base/test/separator.test.ts`；Preview 通过三个 Web Adapter 验证 decorative 与 semantic cases。
-
-## Lifecycle
-
-`P-BASE-SEPARATOR` 当前是 **draft**。它的小型 surface 已有完整证据，但尚未提升为 active protocol guarantee。
-
-## 参考
-
-- [P-BASE-SEPARATOR](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SEPARATOR.yaml)
-- [Separator source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/separator)
-- [Separator evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/separator.test.ts)
-- 风格化投射：[Brutalist Separator](/zh-cn/ui-libraries/brutalist/components/separator/)
+- **方向与装饰性**：通过 `orientation` 指定水平（`'horizontal'`）或垂直（`'vertical'`）方向；通过 `decorative` 控制是否向辅助技术暴露语义。
+- **无障碍语义**：默认 `decorative={true}` 时，分隔线对辅助技术隐藏，不输出 `separator` 角色；设置为 `decorative={false}` 时，输出 `role="separator"` 与对应的方向属性。
+- **纯结构元素**：`separatorRoot` 不包含子内容插槽，也不参与焦点、键盘或事件交互，避免装饰性分隔线意外隐藏传入的子元素。
 
 ## API
 
-Separator 是工作区源码。当前工作区 CLI 目标为 `base-separator`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -56,7 +40,7 @@ Separator 是工作区源码。当前工作区 CLI 目标为 `base-separator`。
   ]}
 />
 
-这些属性属于 Root。
+暴露只读状态 `orientation` 与 `decorative`。
 
 ## 参考
 

@@ -1,7 +1,6 @@
 ---
 title: 'Dialog'
-desp: 'Dialog'
-description: 'Dialog 基础原型'
+description: '提供焦点陷阱、遮罩层、键盘关闭与无障碍关联的基础模态对话框组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -10,6 +9,10 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 import DialogDemoStyles from '@/components/PrototypePreviewer/DialogDemoStyles.astro';
 
 <DialogDemoStyles />
+
+Base Dialog 提供构建模态对话框所需的基础部件，负责开关状态、焦点陷阱、遮罩层、关闭策略与无障碍标题/描述关联。
+
+## 预览
 
 <div class="dialog-demo-container">
   <PrototypePreviewer
@@ -20,31 +23,37 @@ import DialogDemoStyles from '@/components/PrototypePreviewer/DialogDemoStyles.a
   />
 </div>
 
-Dialog 家族提供构建模态窗口的协议层基础部件。Root 持有 open 状态；本页不引入切换非模态的 `modal` prop。
+## 安装
 
-- **dialog-root**：持有 `open` 状态，并向所有子部件提供上下文。
-- **dialog-trigger**：点击时打开或切换对话框。
-- **dialog-mask**：渲染背景遮罩层，跟随 open 状态进入/离开过渡。
-- **dialog-content**：内容容器，负责焦点陷阱、浮层关闭策略（ESC、外部点击）以及进入/离开过渡。
-- **dialog-title**：语义标题，自动通过 `aria-labelledby` 与 content 关联。
-- **dialog-description**：语义描述，自动通过 `aria-describedby` 与 content 关联。
-- **dialog-close**：点击时关闭对话框。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。在工作区中对应的 CLI 目标为 `base-dialog`。
 
-向 `dialog-root` 传入 `alert` 可将其转换为 alert dialog：它会设置 `role="alertdialog"`，并禁用外部点击关闭，同时保留 ESC 关闭行为。
+## 用法
 
-## Draft 工作区中的 Mask 行为
+### 组合结构
 
-工作区修订的 `P-BASE-DIALOG-MASK-DEFAULT-ACTION` 继续让 Content 独立拥有 focus/dismissal。participating Mask 对自身 root-scoped `pointer.down` 请求阻止默认动作，避免背景指针默认行为覆盖 Content 关闭时恢复的焦点；设置 `passthrough=true` 的 Mask 不请求这项阻止。Mask 不接管关闭、事件传播或键盘处理，也不承诺识别其内部任意缺少独立交互 owner 的原生后代。
+- **`dialog-root`**：统一管理 `open` 状态并向子组件提供上下文。
+- **`dialog-trigger`**：点击时打开或切换对话框。
+- **`dialog-mask`**：渲染背景遮罩层，随开关状态执行进入/离开过渡。默认会在 `pointer.down` 时阻止背景默认行为，避免干扰对话框关闭时的焦点恢复；若希望允许点击穿透，可设置 `passthrough={true}`。
+- **`dialog-content`**：内容容器，负责焦点陷阱、关闭策略（`Escape`、外部点击）以及进入/离开过渡。
+- **`dialog-title`**：语义标题，自动通过 `aria-labelledby` 与内容关联。
+- **`dialog-description`**：语义说明，自动通过 `aria-describedby` 与内容关联。
+- **`dialog-close`**：点击时请求关闭对话框。
 
-这是 [PR #777](https://github.com/Proto-UI/Proto-UI/pull/777) 引入的 draft 工作区行为，不是对先前发布的 0.2 包的追加保证。装饰性 [Surface](/zh-cn/ui-libraries/base/surface/) 可以消费已有 Transition 事实来绘制，但不能成为另一份 Dialog、焦点或关闭 owner。
+### 警示模式与外观组合
+
+- 在 `dialog-root` 上设置 `alert={true}` 可切换为警示对话框：自动应用 `role="alertdialog"` 并禁用外部点击关闭，同时保留 `Escape` 键关闭。
+- 如需自定义背景或面板视觉层，可组合使用装饰性 [Surface](/zh-cn/ui-libraries/base/surface/) 读取过渡状态。
 
 ## API
 
-Dialog 是工作区源码。当前工作区 CLI 目标为 `base-dialog`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。传入 `open` 进入受控模式。
+### Root Props
+
+传入 `open` 进入受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'alert', type: 'boolean', default: 'false' },
@@ -52,7 +61,11 @@ Dialog 是工作区源码。当前工作区 CLI 目标为 `base-dialog`。CLI �
   ]}
 />
 
-这些属性属于 Root。Mask 接受 `passthrough`（`false`）以及 Transition 属性。Content 的 `focusEntry` 默认 `auto`，同样接受 Transition 属性。Trigger、Title、Description 与 Close 没有属性。
+### 其他组件属性
+
+- **Mask**：`passthrough` 默认为 `false`，同时支持 Transition 属性。
+- **Content**：`focusEntry` 默认为 `'auto'`，同时支持 Transition 属性。
+- **Trigger、Title、Description、Close**：无额外属性。
 
 ## 参考
 

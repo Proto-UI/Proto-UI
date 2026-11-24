@@ -1,12 +1,14 @@
 ---
 title: 'Command'
-description: '可搜索并发出操作意图的内联命令列表。'
+description: '支持实时过滤与键盘触发执行事件的内联 Brutalist 命令面板组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-可搜索并发出操作意图的内联命令列表。
+Brutalist Command 提供始终内联展开的可搜索命令列表，按 `Enter` 或点击命令项时会发出 `execute` 事件，由应用层执行具体操作。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-command"
@@ -15,17 +17,29 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
   codePanel={false}
 />
 
-列表保持内联显示。Enter 或指针激活发出带选项的 execute；实际操作归应用处理，输入搜索不会执行操作。
+## 安装
 
-宿主管理真实单行编辑器。箭头导航保持输入焦点；IME 组合期间不选择。过滤依据 textValue 与 keywords，忽略大小写及重音。Empty 反映真实匹配数；禁用项不可提交。open、value、inputValue 分别支持受控请求；filter=false 允许调用方提供已过滤子项。重复值选项拒绝提交。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-组成: Root, Input, Content, Item, Empty.
+## 用法
 
-草稿源码；共享 Web A11y 活动后代投影、native/GPUI、编译器、消费、视觉及独立验收仍是独立要求。
+### 部件组成
+
+Command 由 `Root`、`Input`、`Content`、`Item` 和 `Empty` 组成：
+
+- **Root**：管理默认展开状态（`defaultOpen` 默认为 `true`）、查询文本 `inputValue`、过滤开关与循环导航配置；`value`、`inputValue` 与 `open` 均可独立受控。
+- **Input**：单行搜索框；方向键浏览命令项时焦点保留在输入框内，输入法合成期间不会触发误执行。
+- **Content**：承载命令列表的内联面板。
+- **Item**：单个可执行命令，根据 `textValue` 和 `keywords` 执行忽略大小写及重音的过滤；禁用项或重复值不可触发。
+- **Empty**：无匹配命令时显示的空状态区域。
+
+### 命令执行
+
+输入查询仅过滤候选列表，不会自动执行命令；用户点击某项或按 `Enter` 时触发 `execute` 事件并携带对应命令项信息。设置 `filter={false}` 可改为由应用层自行过滤列表。
 
 ## API
 
-Command 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value`、`inputValue` 或 `open` 会使对应事实进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -41,5 +55,11 @@ Command 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `val
   ]}
 />
 
-这些属性属于 Root。Input 的 `placeholder`、`a11yLabel` 与 `name` 默认 `''`。Content 的 `side` 默认 `bottom`，`align` 默认 `start`，`sideOffset` 默认 `4`，`collisionPadding` 默认 `8`。Item 的 `value`、`textValue` 与 `keywords` 默认 `''`，`disabled` 默认 `false`。Empty 没有属性。
+分别传入 `value`、`inputValue` 或 `open` 可独立控制对应状态。
 
+### 其他部件属性
+
+- **Input**：`placeholder?: string`、`a11yLabel?: string`、`name?: string`（默认均为 `''`）
+- **Content**：`side`（默认 `'bottom'`）、`align`（默认 `'start'`）、`sideOffset`（默认 `4`）、`collisionPadding`（默认 `8`）
+- **Item**：`value`、`textValue`、`keywords`（默认均为 `''`）、`disabled?: boolean`（默认 `false`）
+- **Empty**：无独立属性

@@ -1,0 +1,40 @@
+[public-docs] 39 drift issue(s) found:
+- internal/records/README.md: required documentation entrypoint is missing.
+- RELEASE_CHECKLIST.md:3: local link internal/records/2026-11-22-v0-public-launch-checklist.md does not exist.
+- RELEASE_CHECKLIST.md:15: local link internal/records/2026-11-22-documentation-governance.md does not exist.
+- apps/www/public/diagrams/README.md:26: local link ../../../../internal/records/2026-11-22-whitepaper-diagram-dispositions.md does not exist.
+- benchmarks/README.md:26: local link ../internal/records/README.md does not exist.
+- docs/README.md:16: local link ../internal/records/README.md does not exist.
+- docs/superpowers/README.md:17: local link ../../internal/records/README.md does not exist.
+- experiments/README.md:25: local link ../internal/records/README.md does not exist.
+- experiments/effect-graph/README.md:13: local link ../../internal/records/2026-10-03-typed-effect-graph-adr.md does not exist.
+- internal/README.md:10: local link records/README.md does not exist.
+- internal/agent-harness/dogfood-coverage-matrix.md:17: local link ../records/2026-11-22-sprint-7-harness.md does not exist.
+- internal/agent-harness/dogfood-coverage-matrix.md:108: local link ../records/2026-09-05-text-document-surface-boundary.md#proposed-entity-and-evidence-graph does not exist.
+- internal/agent-harness/dogfood-coverage-matrix.md:108: local link ../records/2026-09-05-text-document-surface-boundary.md#proposed-entity-and-evidence-graph does not exist.
+- internal/agent-harness/dogfood-coverage-matrix.md:108: local link ../records/2026-11-10-editor-inspector-matrix-delta.md#source-and-result-evidence does not exist.
+- internal/agent-harness/dogfood-coverage-matrix.md:109: local link ../records/2026-09-05-text-document-surface-boundary.md#proposed-entity-and-evidence-graph does not exist.
+- internal/agent-harness/dogfood-coverage-matrix.md:109: local link ../records/2026-11-10-editor-inspector-matrix-delta.md#source-and-result-evidence does not exist.
+- internal/agent-operations/README.md:111: local link ../records/2026-10-02-cloud-event-incremental-review-proposal.md does not exist.
+- internal/agent-operations/cloud-review-ledger-candidate.md:3: local link ../records/2026-10-02-cloud-event-incremental-review-proposal.md does not exist.
+- internal/compiler/atomic-lowering-completion.md:5: local link ../records/2026-10-29-thin-compiler-direction.md does not exist.
+- internal/contracts/agent-operations/poppy-review-broker.md:54: local link ../../records/2026-08-29-poppy-review-broker-p1-shadow-evidence.md does not exist.
+- internal/governance/ci-cd.md:70: local link ../records/2026-11-22-regression-baseline-governance.md does not exist.
+- internal/governance/documentation-policy.md:15: local link ../records/README.md does not exist.
+- internal/governance/documentation-policy.md:64: local link ../records/2026-11-22-documentation-governance.md does not exist.
+- internal/records/README.md: inventoried documentation file is missing.
+- internal/website/self-hosting-coverage-matrix.md:122: local link ../records/2026-11-22-sprint3-install-source-bindings.md does not exist.
+- internal/website/self-hosting-coverage-matrix.md:132: local link ../records/2026-11-22-regression-source-bindings.md does not exist.
+- internal/website/self-hosting-coverage-matrix.md:132: local link ../records/2026-11-22-regression-source-bindings.json does not exist.
+- internal/website/self-hosting-coverage-matrix.md:174: local link ../records/2026-11-23-sprint4-source-admission-followup.md does not exist.
+- internal/website/self-hosting-coverage-matrix.md:176: local link ../records/2026-11-23-search-opener-handback.md does not exist.
+- internal/website/self-hosting-coverage-matrix.md:212: local link ../records/2026-11-23-integration-code-example-source-bindings.md does not exist.
+- internal/website/self-hosting-coverage-matrix.md:214: local link ../records/2026-11-22-sprint-6-coverage-source-bindings.md does not exist.
+- internal/website/self-hosting-coverage-matrix.md:214: local link ../records/2026-11-22-sprint-6-coverage-source-bindings.json does not exist.
+- internal/website/self-hosting-coverage-matrix.md:218: local link ../records/2026-11-23-integration-bootstrap-source-bindings.md does not exist.
+- packages/compiler/README.md:57: local link ../../internal/records/2026-11-22-sprint2-compiler-consumers.zh-CN.md does not exist.
+- scripts/analysis/declarative-agent-ui/README.md:3: local link ../../../internal/records/2026-11-22-sprint-7-declarative-agent-ui.md does not exist.
+- scripts/coverage-matrices/README.md:9: local link ../../internal/records/2026-11-22-website-markup-reference-reconciliation.md does not exist.
+- scripts/coverage-matrices/README.md:9: local link ../../internal/records/2026-11-23-markup-reference-integration.md does not exist.
+- scripts/coverage-matrices/README.md:59: local link ../../internal/records/2026-10-05-coverage-post-ci-followups.md does not exist.
+- scripts/test/installed-public-consumers/README.md:3: local link ../../../internal/records/2026-11-22-sprint3-tooltip-public-consumers.md does not exist.

@@ -1,4 +1,9 @@
 import { createPresenceController } from './presence/controller';
+import type { AnatomyPort } from '@proto.ui/module-anatomy';
+import {
+  MATERIAL_PAINT_RESERVATION_CAP,
+  MaterialPaintReservationRegistry,
+} from './material/paint-reservation';
 import { OwnedDecorationRegistryModel } from './style/owned-decoration-registry';
 import { OWNED_DECORATION_CAP, type OwnedDecorationBinding } from './style/owned-decoration-cap';
 import type { OwnedDecorationTarget, DecorationStyleFrame } from '@proto.ui/core';
@@ -6,6 +11,7 @@ import { PRESENCE_PRESENTATION_SINK_CAP, PRESENCE_RUN_IN_CALLBACK_CAP } from './
 import type { StatePort } from '@proto.ui/module-state';
 import { snapshotResidentMotion, type ResidentMotionDeclaration } from '@proto.ui/core';
 import { RESIDENT_MOTION_SINK_CAP, type ResidentMotionSink } from './motion/sink';
+import { createMotionNumericSources } from './motion/numeric-sources';
 import type { InstancePhase, MountPhase, ProtoPhase, StyleHandle } from '@proto.ui/core';
 import {
   illegalPhase,
@@ -44,6 +50,22 @@ import {
   type FinalStyleSink,
 } from './material/final-style-sink';
 
+/** Invalidate ownership before entering this helper. A host cleanup failure
+ * cannot strand the remaining resources or replace the first failure. */
+function completeFeedbackCleanup(actions: readonly (() => void)[]): void {
+  let failed = false;
+  let first: unknown;
+  for (const action of actions) {
+    try {
+      action();
+    } catch (error) {
+      if (!failed) first = error;
+      failed = true;
+    }
+  }
+  if (failed) throw first;
+}
+
 export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
   const { init, caps, deps } = ctx;
 
@@ -55,6 +77,18 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
     deps,
     build: ({ init, caps }) => {
       class Impl extends ModuleBase {
+        private feedbackTransition = 0;
+        readonly paintReservations = new MaterialPaintReservationRegistry(
+          () => deps.tryPort<AnatomyPort>('anatomy') ?? null
+        );
+        reserveMaterial(declaration: import('@proto.ui/core').MaterialPaintReservationDeclaration) {
+          this.ensureSetup('def.feedback.material.reserve');
+          if (!this.caps.has(MATERIAL_PAINT_RESERVATION_CAP))
+            throw new Error(
+              '[feedback.material] paint-reservation template unsupported by this target'
+            );
+          return this.paintReservations.declare(declaration);
+        }
         private decoration = new OwnedDecorationRegistryModel();
         private decorationRules = new Map<OwnedDecorationTarget, object>();
         private decorationBound = false;
@@ -204,6 +238,22 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         private motionDeclarations = new Set<ResidentMotionDeclaration>();
         private motionSink: ResidentMotionSink | null = null;
         private motionView = 0;
+        private motionNumbers = createMotionNumericSources({
+          expose: (key) => deps.tryPort<{ get(key: string): unknown }>('expose')?.get(key),
+          state: () => deps.tryPort<StatePort>('state'),
+          invalidate: () => {
+            this.markDirty();
+            if (this.sys?.execPhase() === 'callback' && this.sys.deferAfterCallback)
+              this.sys.deferAfterCallback(() => {
+                if (!this.disposed) this.flushIfPossible();
+              });
+            else this.flushIfPossible();
+          },
+        });
+        registerMotionSource(source: object): void {
+          this.ensureSetup('feedback.motion.registerSource');
+          this.motionNumbers.register(source);
+        }
         declareMotion(declaration: ResidentMotionDeclaration): () => void {
           this.ensureSetup('def.feedback.style.transition');
           if (this.shaderDeclaration)
@@ -521,15 +571,23 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         override onInstancePhase(phase: InstancePhase): void {
           super.onInstancePhase(phase);
           if (phase === 'disposing' || phase === 'disposed') {
+            this.feedbackTransition++;
             this.decorationTerminal = true;
             this.decorationLease = null;
             this.decorationBound = false;
-            this.decoration.dispose();
+            completeFeedbackCleanup([
+              () => this.paintReservations.dispose(),
+              () => this.decoration.dispose(),
+            ]);
           }
         }
 
         override onMountPhase(phase: MountPhase, epoch: number): void {
           if (epoch < this.viewEpoch) return;
+          const transition = ++this.feedbackTransition;
+          const inTransition = (action: () => void) => () => {
+            if (transition === this.feedbackTransition) action();
+          };
           super.onMountPhase(phase, epoch);
           if (phase === 'unmounting' || phase === 'detached') this.decorationLease = null;
           else if (phase === 'mounting' && (epoch > this.viewEpoch || !this.decorationLease))
@@ -548,20 +606,17 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           this.viewEpoch = epoch;
           if (phase === 'unmounting' || phase === 'detached' || epoch !== oldEpoch) {
             this.markDirty();
-            try {
-              this.releaseVisualSink();
-            } finally {
-              try {
-                this.releaseMotionSink();
-              } finally {
-                try {
-                  this.presence.release();
-                } finally {
-                  this.releaseShaderSink();
-                }
-              }
-            }
+            completeFeedbackCleanup([
+              () => this.paintReservations.setActive(false),
+              inTransition(() => this.releaseVisualSink()),
+              inTransition(() => this.releaseMotionSink()),
+              inTransition(() => this.presence.release()),
+              inTransition(() => this.releaseShaderSink()),
+            ]);
           }
+          if (transition !== this.feedbackTransition) return;
+          if (phase === 'mounting' || phase === 'mounted') this.paintReservations.setActive(true);
+          if (transition !== this.feedbackTransition) return;
           if (phase === 'mounting') {
             this.ensureMaterialBinding();
             this.material?.connect();
@@ -661,6 +716,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           const revision = ++this.visualRevision;
           const style = snapshotFinalStyle(handle);
           const pending = { ...style, tokens: [...style.tokens] };
+          if (!this.caps.has(RESIDENT_MOTION_SINK_CAP)) this.motionNumbers.snapshot([]);
           try {
             if (this.shaderDeclaration && this.caps.has(SHADER_PRESENTATION_SINK_CAP)) {
               // Retire a style-only fallback before handing its paint to the
@@ -702,6 +758,13 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
                   revision,
                   style: pending,
                   declarations: Object.freeze([...this.motionDeclarations]),
+                  ...this.motionNumbers.snapshot(
+                    [...this.motionDeclarations].some((declaration) =>
+                      declaration.properties.includes('width')
+                    )
+                      ? pending.tokens
+                      : []
+                  ),
                 })
               );
             } else if (this.caps.has(VISUAL_FEEDBACK_SINK_CAP)) {
@@ -776,6 +839,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
 
         afterRenderCommit(): void {
           if (!this.canProject()) return;
+          this.paintReservations.refresh();
           // A structural commit may replace the current materialized root.
           // Runtime ProtoPhase intentionally remains `setup` until the first
           // commit completes. Mounting is nevertheless after prototype setup,
@@ -804,27 +868,19 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         dispose(): void {
           if (this.disposed) return;
           this.disposed = true;
+          this.feedbackTransition++;
           this.decorationTerminal = true;
           this.decorationLease = null;
-          this.decoration.dispose();
-          try {
-            try {
-              try {
-                this.presence.dispose();
-              } finally {
-                this.releaseVisualSink();
-              }
-            } finally {
-              try {
-                this.releaseMotionSink();
-              } finally {
-                this.releaseShaderSink();
-              }
-            }
-          } finally {
-            try {
-              this.material?.dispose();
-            } finally {
+          completeFeedbackCleanup([
+            () => this.paintReservations.dispose(),
+            () => this.decoration.dispose(),
+            () => this.motionNumbers.dispose(),
+            () => this.presence.dispose(),
+            () => this.releaseVisualSink(),
+            () => this.releaseMotionSink(),
+            () => this.releaseShaderSink(),
+            () => this.material?.dispose(),
+            () => {
               this.recorder = new FeedbackStyleRecorder();
               this.sharedSlot = null;
               this.shaderDeclaration = null;
@@ -833,8 +889,8 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
               this.pendingProjection = null;
               // Discard deferred view work while its entry guards are terminal.
               this.flushPending();
-            }
-          }
+            },
+          ]);
         }
 
         private canProject(): boolean {
@@ -887,7 +943,12 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
 
       const facade: FeedbackFacade = {
         presence: impl.presenceFacade(),
+        motion: { registerSource: (source) => impl.registerMotionSource(source) },
         material: {
+          reserve: (declaration) => impl.reserveMaterial(declaration),
+          hasReservations: () => impl.paintReservations.hasDeclarations,
+          validateReservationTemplate: (targets) =>
+            impl.paintReservations.validateTemplate(targets),
           shader: (declaration) => impl.declareShader(declaration),
           declare: (slot) => impl.declareMaterial(slot),
           use: (candidate) => impl.useMaterial(candidate),
@@ -952,6 +1013,6 @@ export const FeedbackModuleDef = defineModule({
   name: 'feedback',
   resourceOwnership: 'mixed',
   deps: [],
-  optionalDeps: ['expose', 'state'],
+  optionalDeps: ['expose', 'state', 'anatomy'],
   create: createFeedbackModule,
 });

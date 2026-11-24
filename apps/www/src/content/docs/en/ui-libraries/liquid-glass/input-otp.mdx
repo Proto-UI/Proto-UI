@@ -1,9 +1,13 @@
 ---
-title: liquid-glass Input Otp
-description: Draft portable input atoms.
+title: 'Input OTP'
+description: 'A Liquid Glass one-time passcode input backed by a single real text input with passive visual slots.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Liquid Glass Input OTP uses one real text input to preserve native selection, paste, deletion, IME composition, and `one-time-code` autofill while projecting each character into passive visual `Slot` cells.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-input-otp"
@@ -12,10 +16,24 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root owns value/defaultValue, length (1–32, default 6), numeric/alphanumeric filtering, disabled/readOnly, name and ariaLabel. One real Input preserves selection, paste, deletion and composition through TextControl; it requests one-time-code autocomplete. Input commits after composition, strips disallowed characters and bounds length. Slots are passive indexed, aria-hidden readouts; they never create additional editors or tab stops. A focused, editable Input projects its actual TextControl caret or selected range to active slots. Unknown selection, blur, disabled and readOnly have no active slot; the value length is never a substitute for a caret. valueChange is a request; completed emits once for each accepted complete code, not an authentication action. Server verification, SMS retrieval and per-cell focus are outside this implementation.
+## Installation
 
-Use Control instead of Input inside Field/FormField to bridge FieldLabel, canonical string validation, IME cancellation, Form serialization and reset. Standalone Input retains its existing naming. OTP Control validates an accepted canonical change after owner callbacks. A rejected controlled candidate or a normalized no-op does not start automatic change validation; manual and configured blur validation still work. Same-turn accepted edits validate the latest snapshot once, and reset, policy interruption or unmount cancels queued work.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: root, input, control, slot, separator. All four styled families inherit Base behavior.
+## Usage
 
-Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf completion is claimed.
+- **Parts**: `Root`, `Input`, `Control`, `Slot`, `Separator`.
+- **Single input and active slot**: editing lives in a single accessible `Input`; `Slot` elements are passive `aria-hidden` readouts that add no extra Tab stops. Active slot highlighting tracks the actual caret or selection range while focused and editable, clearing on blur, disable, or read-only.
+- **Filtering and completion**: supports `numeric` and `alphanumeric` filtering for lengths `1–32` (default `6`), sanitizing and clamping length after IME composition completes. `valueChange` proposes updates in controlled mode, and `completed` emits once per accepted complete code.
+- **Field and Form integration**: swap `Input` for `Control` inside [Field](/en/ui-libraries/liquid-glass/field/) or [Form](/en/ui-libraries/liquid-glass/form/) to connect `FieldLabel`, validation, IME cancellation, serialization, and reset.
+
+## API
+
+| Part | Prop / Event | Defaults and notes |
+| --- | --- | --- |
+| Root | `value`, `defaultValue` | Controlled / uncontrolled code string |
+| Root | `length` | `6` (range `1–32`) |
+| Root | `disabled`, `readOnly`, `name`, `ariaLabel` | Interaction state, field name, and accessible label |
+| Root | `valueChange`, `completed` | Value proposal event / emitted once per accepted complete code |
+| Input / Control | — | Standalone text editor / Field- and Form-integrated control |
+| Slot / Separator | — | Passive character display cell and visual separator |

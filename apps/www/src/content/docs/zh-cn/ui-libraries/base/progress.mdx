@@ -1,11 +1,15 @@
 ---
-title: base Progress
-description: 基于 Base 共享语义的有界数值展示。
+title: 'Progress'
+description: '用于展示任务完成度或不确定进度的进度指示器。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+用于展示确定区间内的任务完成度或不确定加载状态的被动进度条组件。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-progress"
@@ -14,17 +18,21 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-当前为 Draft 功能实现。Root 拥有有界有限数值；Label 提供名称，Track 容纳 Indicator，Value 显示 valueText 或规范数值。四个视觉家族只投影样式。
+## 安装
 
-Props：value、min（0）、max（100）、ariaLabel、valueText。数值限制在合法范围内；上下界相等时比例为零。省略 value 或设置 indeterminate=true 表示进度未知，不声称当前进度值。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-base/progress` 导入 `progressRoot`、`progressLabel`、`progressTrack`、`progressIndicator` 和 `progressValue`。
 
-Root 及部件暴露 value、percentage、indeterminate、status。被动显示不引入键盘停靠点，不伪造输入。更新 Props 同步所有部件。
+## 用法
 
-包入口统一注册后，可从 progress 子路径导入 progressRoot、progressLabel、progressTrack、progressIndicator、progressValue。现有源码测试仅为阶段性证据；完整 Adapter、Compiler、GPUI、原生绘制、辅助技术、包消费及独立验收尚未完成，不据此勾选 Finf。
+由 `Root`、`Label`、`Track`、`Indicator` 和 `Value` 组成：
+
+- **职责划分**：状态由 `Root` 统一管理；`Label` 提供名称，`Track` 容纳 `Indicator`，`Value` 显示 `valueText` 或规范化数值。
+- **确定与不确定进度**：`value` 会限制在 `[min, max]` 内（上下界相等时比例为 `0`）。省略 `value` 或设置 `indeterminate={true}` 表示进度未知，此时不会向辅助技术上报具体当前值。
+- **被动展示与状态暴露**：组件为纯展示控件，不引入键盘焦点停靠点或编辑事件；更新属性后自动同步所有部件。`Root` 及各部件暴露 `value`、`percentage`、`indeterminate` 和 `status`。
 
 ## API
 
-Progress 是工作区源码，没有公开的 `proto-ui add` 目标。各部件自身没有属性。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -38,7 +46,7 @@ Progress 是工作区源码，没有公开的 `proto-ui add` 目标。各部件�
   ]}
 />
 
-这些属性属于 Root。
+`Label`、`Track`、`Indicator` 与 `Value` 无额外属性。
 
 ## 参考
 

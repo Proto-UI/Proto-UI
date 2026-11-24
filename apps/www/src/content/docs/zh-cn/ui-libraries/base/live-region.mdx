@@ -1,51 +1,36 @@
 ---
 title: 'Live Region'
-desp: 'Live Region base prototype'
-description: 'Live Region base prototype'
+description: '用于向屏幕阅读器播报动态状态更新的无障碍容器组件，同步管理 role、aria-live 与 aria-atomic。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-`base-live-region-root` 是一个窄异步无障碍原语，投射受治理的 ARIA live-region 语义，不声明交互通路。
+`base-live-region-root` 是一个轻量的无障碍实时播报容器，负责将 `politeness` 和 `atomic` 属性同步为标准的 ARIA live-region 语义。
+
+## 预览
 
 <div>
   <PrototypePreviewer demoId="demo-base-live-region" initialRuntime="wc" />
 </div>
 
-它从两个 props 推导 `role`、`aria-live` 与 `aria-atomic`：
+## 安装
 
-- `politeness`：`polite`（默认）投射 `role=status` + `aria-live=polite`；`assertive` 投射 `role=alert` + `aria-live=assertive`
-- `atomic`：`true`（默认）投射 `aria-atomic=true`；`false` 投射 `aria-atomic=false`
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。在工作区中对应的 CLI 目标为 `base-live-region`。
 
-Authored 子内容即为播报载荷。原型不声明 focus、event、command、selection 或 accessible-name override 通路；exposes surface 为空。
+## 用法
 
-## 当前 v0 边界
+将需要向辅助技术播报的动态文本作为子元素放入 `base-live-region-root` 内，组件会根据两个属性自动维护三个 ARIA 属性：
 
-`base-live-region-root` 目前包含：
+- **`politeness`**：`'polite'`（默认）设置 `role="status"` 与 `aria-live="polite"`；`'assertive'` 设置 `role="alert"` 与 `aria-live="assertive"`。
+- **`atomic`**：`true`（默认）设置 `aria-atomic="true"`（内容变化时播报完整区域）；`false` 设置 `aria-atomic="false"`。
 
-- polite/assertive role 与 aria-live 投射
-- atomic aria-atomic 投射
-- mounted prop 变更同步更新全部三个 attribute
-- prop 转换中保留 authored 子内容
-
-不包含：
-
-- `aria-relevant` 粒度控制
-- announcement 定时器或替换状态机
-- accessible-name override
-- focus、event、command 或 selection 通路
-
-## 参考
-
-- 契约：[C-ASYNC-A11Y-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-ASYNC-A11Y-0001.yaml)
-- 源码：[packages/prototypes/base/src/live-region](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/live-region)
-- 测试：[live-region.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/live-region.test.ts)
+仅更新属性时，三个 ARIA 属性会同步更新，且内部传入的子元素保持不变。如需在异步刷新数据时配合加载态使用，可将 Live Region 与 [Async Region](../async-region/) 组合。
 
 ## API
 
-Live Region 是工作区源码。当前工作区 CLI 目标为 `base-live-region`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。
+以下属性属于 `Root`（`base-live-region-root`）。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -54,8 +39,6 @@ Live Region 是工作区源码。当前工作区 CLI 目标为 `base-live-region
     { name: 'atomic', type: 'boolean', default: 'true' },
   ]}
 />
-
-这些属性属于 Root。
 
 ## 参考
 

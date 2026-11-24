@@ -16,9 +16,7 @@ export default definePrototype<CheckboxIndicatorProps, CheckboxIndicatorExposes>
     if (!state)
       throw new Error('[bootstrap-2-3-2-checkbox-indicator] Base context state required.');
     def.feedback.style.use(
-      tw(
-        'inline-flex w-[14px] h-[14px] items-center justify-center text-current pointer-events-none'
-      )
+      tw('inline-flex w-3 h-3 items-center justify-center text-current pointer-events-none')
     );
     let update: { cancel(): void } | null = null;
     const refresh = (run: { update(): void }, event: { type: string }) => {
@@ -52,7 +50,7 @@ export default definePrototype<CheckboxIndicatorProps, CheckboxIndicatorExposes>
                 height: '100%',
                 fill: 'none',
                 stroke: 'currentColor',
-                strokeWidth: 2,
+                strokeWidth: 2.5,
                 strokeLinecap: 'round',
                 strokeLinejoin: 'round',
               },

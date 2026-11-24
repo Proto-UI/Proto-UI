@@ -1,11 +1,13 @@
 ---
 title: 'Toast'
-description: 'Timed live notifications with pause, dismiss and explicit action intent.'
+description: 'A Bootstrap 2.3.2 timed notification with hover/focus pause, keyboard access, and action buttons.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Timed live notifications with pause, dismiss and explicit action intent.
+Toast displays brief, non-blocking notifications that auto-dismiss after a configurable duration, pause on hover or focus, and support explicit actions.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-toast"
@@ -14,8 +16,24 @@ Timed live notifications with pause, dismiss and explicit action intent.
   codePanel={false}
 />
 
-Root defaults open for 5000ms. duration=0 remains open; hover and focus in Toast Action/Close pause the remaining duration. Controlled open emits one timeout request until the owner changes state. Close, focused Escape and Action request dismissal; action side effects belong to the app. Viewport provides the F8 focus shortcut. No global queue or external notification transport is implied.
+## Installation
 
-Parts: Root, Viewport, Title, Description, Action, Close.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+## Usage
+
+Compose `Root`, `Viewport`, `Title`, `Description`, `Action`, and `Close`:
+
+- **Timing and pause**: `Root` stays open for `5000ms` by default; pass `duration={0}` to keep it open indefinitely. Hovering over the toast or focusing `Action` / `Close` pauses the remaining timer.
+- **Actions and dismissal**: `Close`, pressing `Escape` while focused, and `Action` all request dismissal, while your application handles any side effects from `Action`. In controlled `open` mode, timeout emits a single dismissal request until the parent updates state.
+- **Shortcut**: `Viewport` binds `F8` to move keyboard focus to the notification region.
+
+## API
+
+| Part | Prop | Default | Description |
+| --- | --- | --- | --- |
+| `Root` | `open` | — | Controlled visibility state |
+| `Root` | `duration` | `5000` | Auto-dismiss duration in milliseconds (`0` disables auto-dismiss) |
+| `Viewport` | — | — | Toast container region with `F8` focus shortcut |
+| `Title` / `Description` | — | — | Notification heading and message body |
+| `Action` / `Close` | — | — | Action trigger and dismiss button |

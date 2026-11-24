@@ -1,12 +1,14 @@
 ---
 title: 'Drawer'
-description: '可从四个边缘显示的模态面板。'
+description: '支持四个边缘弹出、内容自适应高度、显式吸附点与拖拽关闭的 Brutalist 抽屉面板组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-可从四个边缘显示的模态面板。
+Brutalist Drawer 是可从屏幕四个边缘滑出的模态面板，支持内容自适应尺寸、拖拽关闭、多档吸附高度（snap points）以及垂直滚动长内容。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-drawer"
@@ -15,21 +17,19 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
   codePanel={false}
 />
 
-top/bottom Content 默认按内容高度显示，最大高度为可用高度减去 6 个根文本单位，始终受安全可用区域约束。Content.minExtent/maxExtent 接受中立长度：unit 为 logical、root-text、available 或 available-minus-root-text，value 为非负有限数字。最小高度超过安全上限时以上限优先。left/right 使用 fraction 宽度，缺省上限为 20 个 root-text 单位。显式 maxExtent 替换该默认；宽度、边缘定位与拖动预览由同一受限尺寸计算。例如 `maxExtent={{ unit: 'logical', value: 480 }}` 在空间允许且 snap 为 1 时得到 480 逻辑单位宽度。available 单位按当前安全宽度取比例；fraction 模式忽略合法 minimum。使用 maxExtent 调整面板尺寸，不再用独立 CSS width。
+## 安装
 
-本项目将 Content 组合为 overflow-y-auto 滚动区域；这是项目的组合选择，不等同于固定 Shadcn/Neo 参考 wrapper 的 overflow-hidden Content 加显式滚动 body。长内容示例的 Close 仍在同一滚动区域内。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-Root 是逻辑 owner，仍渲染包装节点。直接放入应用 grid 时，React Root 可设置 `hostStyle={{ display: 'contents' }}`，Web Component Root 可设置 `display: contents`，避免空的 grid 行。中立 Root 没有交互 role；Content、focus scope 与命名继续拥有各自语义节点。应用 header/main 应保留在 modal Content 外。
+## 用法
 
-Root 支持受控 open 或非受控 defaultOpen。禁用命令不激活。调用方拒绝关闭请求时，拖动预览恢复到实际受控状态。
+### 尺寸、边缘与滚动
 
-top/bottom 的 snapPoints 缺省、null 或空数组时按内容高度显示；left/right 保留 fraction 与缺省点 one。非空有效数组启用显式吸附，点为大于 0 且不超过 1 的比例，并排序去重。单独 snapPoint 不开启吸附。显式比例的分母为完整安全上限，不再隐含乘以 85%。defaultSnapPoint 为本地状态；snapPoint 与 snapPointChange 为受控状态。任意方向的非法 points 或长度记录会被拒绝，不转成满高度。
+- **尺寸策略**：`top` / `bottom` 抽屉默认按内容高度自适应（最大不超过可用高度减去 6 个根文本单位）；`left` / `right` 抽屉使用比例宽度（默认上限 20 个根文本单位）。可通过 `Content` 的 `minExtent` / `maxExtent` 传入中立长度配置尺寸（`unit` 支持 `'logical'`、`'root-text'`、`'available'` 或 `'available-minus-root-text'`），例如 `maxExtent={{ unit: 'logical', value: 480 }}`，无需额外覆盖 CSS `width`。
+- **长内容滚动**：`Content` 内置 `overflow-y-auto` 滚动容器；若直接将 `Root` 放进 CSS Grid 布局，可在 React 中设置 `hostStyle={{ display: 'contents' }}`（或在 Web Component 上设置 `display: contents`）避免产生空网格轨道。
+- **拖拽关闭**：设置 `Content` 的 `dragDismissible={false}` 可禁用拖拽关闭，同时保留 `Close` 按钮、`Escape` 键与点击外部关闭。
 
-内容自适应模式的 Handle 是 aria-hidden 的专用指针把手，不提供键盘 resize，也不会因 Enter/Space 变成 Close。显式 snap 保留有名称的 separator、方向键、Home/End 和范围值。Content.dragDismissible=false 禁止拖动关闭；独立 Close、Escape 和外部关闭仍遵循既有协议。接触中断和受控请求拒绝会恢复已接受的呈现。
-
-运行中非法尺寸更新令 extentValid=false，取消 Handle 输入并保留最后有效意图，宿主仍按当前安全约束重算。初始非法输入会在呈现前被拒绝：Root 保留逻辑 open 值，Mask 等待唯一有效的 Content 声明。这些示例使用静态验证的合法输入；本草稿不宣称任意输入安全，也不代表 native、编译器、打包消费或完整 Finf 验收完成。
-
-### 长内容
+### 长内容示例
 
 <PrototypePreviewer
   demoId="demo-brutalist-drawer-scroll"
@@ -38,9 +38,7 @@ top/bottom 的 snapPoints 缺省、null 或空数组时按内容高度显示；l
   codePanel={false}
 />
 
-### 显式半开/全开吸附
-
-此例保留显式 resize 交互并播报已提交的变化。
+### 显式吸附点（Snap Points）
 
 <PrototypePreviewer
   demoId="demo-brutalist-drawer-snap"
@@ -49,9 +47,12 @@ top/bottom 的 snapPoints 缺省、null 或空数组时按内容高度显示；l
   codePanel={false}
 />
 
+- 在 `top` / `bottom` 抽屉上提供非空的 `snapPoints` 数组（取值范围 `(0, 1]`，相对完整安全上限）可启用多档吸附，配合 `defaultSnapPoint`（非受控）或 `snapPoint` / `snapPointChange`（受控）管理当前档位。
+- 在内容自适应模式下，`Handle` 为纯指针拖拽把手；启用显式吸附点后，`Handle` 同时提供具名 `separator` 语义及方向键、`Home` / `End` 调整支持。
+
 ## API
 
-Drawer 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -62,4 +63,11 @@ Drawer 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open
   ]}
 />
 
-这些属性属于 Root。Mask 接受 `passthrough`（`false`）以及 Transition 属性。Content 的 `side` 默认 `bottom`，同样接受 Transition 属性。Handle 的 `disabled` 默认 `false`，`a11yLabel` 默认 `Resize drawer`。Trigger、Title、Description、Header、Footer、Close 与 AcceptedSide 没有属性。
+传入 `open: boolean` 进入受控模式。
+
+### 其他部件属性
+
+- **Mask**：`passthrough?: boolean`（默认 `false`）及 Transition 属性
+- **Content**：`side`（默认 `'bottom'`）、`minExtent`、`maxExtent`、`snapPoints`、`snapPoint`、`defaultSnapPoint`、`dragDismissible` 及 Transition 属性
+- **Handle**：`disabled?: boolean`（默认 `false`），`a11yLabel?: string`（默认 `'Resize drawer'`）
+- **Trigger / Title / Description / Header / Footer / Close / AcceptedSide**：无独立属性

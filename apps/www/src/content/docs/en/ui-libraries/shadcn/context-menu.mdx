@@ -1,15 +1,15 @@
 ---
 title: 'ContextMenu'
-description: 'A context-triggered command menu with keyboard access.'
+description: 'A context menu triggered by right-click, touch/pen long press, or keyboard shortcuts.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+A command menu opened at the pointer or trigger via right-click, touch/pen long press, or keyboard shortcuts (`ContextMenu` / `Shift+F10`), with keyboard navigation, typeahead, and collision-aware positioning. The examples on this page use the **Shadcn Rhea** style preset.
 
-A context-triggered command menu with keyboard access.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-context-menu"
@@ -18,19 +18,26 @@ A context-triggered command menu with keyboard access.
   codePanel={false}
 />
 
-Root supports open/defaultOpen, disabled and closeOnItemCommit. Trigger opens on context.menu or ContextMenu/Shift+F10 and suppresses the native context menu for that handled request; ordinary left click does not open it. Content inherits real Overlay/Focus/Transition navigation, typeahead and controlled dismissal. Right-click and accepted touch/pen holds open at their input point. ContextMenu/Shift+F10 uses the trigger region. The shared host keeps position geometry private and supplies only an opaque input-origin association; no DOM coordinates enter portable props, state or JSON context.
+## Usage
 
-Parts: Root, Trigger, Content, Item.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.
+### Anatomy
 
-A touch/pen contact must remain held for 600 ms within the host movement tolerance. Movement, release, cancellation, disabled state and disposal cancel a pending hold. Accepted keyboard/long-press input suppresses its duplicate native context menu; an accepted hold also suppresses its compatibility click. Ordinary clicks and scrolling are left to the host. Default placement is bottom/start with no gap.
+Compose `ContextMenu` from `Root`, `Trigger`, `Content`, and `Item`:
 
-Controlled open requests remain requests: the native context menu is prevented when the enabled Root accepts delivery, while the owner may keep open=false. A later owner-open uses the latest live input anchor; programmatic openContextMenu uses the trigger fallback. Escape and selection restore the original trigger according to the existing focus policy. Shared source-runtime coverage does not establish compiler/native admission or real-device long-press acceptance.
+- **Trigger**: Opens on right-click, `ContextMenu` / `Shift+F10`, or a 600 ms touch/pen hold within movement tolerance (moving, releasing, or cancelling aborts the hold; ordinary left clicks and scrolling stay untouched).
+- **Content**: Anchors to the pointer point for right-click and long press, and to the trigger region for keyboard or programmatic `openContextMenu` calls. Supports arrow-key navigation, typeahead, and collision flipping.
+- **Item**: Executes a menu command and closes the menu by default (set `closeOnItemCommit={false}` to keep it open).
+
+### Controlled state and focus return
+
+- Pass `open` to control visibility externally: an enabled `Trigger` suppresses the browser's native context menu when delivering the open request, while letting your application decide whether to open.
+- Dismissing with `Escape` or selecting an item restores focus to the trigger.
 
 ## API
 
-Context Menu is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+Passing `open` selects controlled mode.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -47,7 +54,7 @@ Context Menu is workspace source. There is no public `proto-ui add` target. Pass
   ]}
 />
 
-These props belong to Root. Content defaults to `side="bottom"`, `align="start"`, `sideOffset` `0`, `alignOffset` `0`, `avoidCollisions` true, `collisionPadding` `0`, and `excludeAnchorTranslation` false.
+These props belong to `Root`. `Content` defaults to `side="bottom"`, `align="start"`, `sideOffset={0}`, `alignOffset={0}`, `avoidCollisions={true}`, `collisionPadding={0}`, and `excludeAnchorTranslation={false}`.
 
 ## References
 

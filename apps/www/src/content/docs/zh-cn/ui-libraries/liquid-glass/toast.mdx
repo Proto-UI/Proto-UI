@@ -1,11 +1,13 @@
 ---
 title: 'Toast'
-description: '可暂停、关闭并发出明确操作意图的限时实时通知。'
+description: '支持定时自动关闭、悬停/聚焦暂停与操作按钮的 Liquid Glass 实时通知组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-可暂停、关闭并发出明确操作意图的限时实时通知。
+Liquid Glass Toast 提供限时实时通知，支持自动计时关闭、悬停或聚焦时自动暂停剩余时长、键盘快捷键聚焦视口以及显式操作按钮。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-toast"
@@ -14,8 +16,21 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root 默认显示 5000ms，duration=0 持续显示。悬停以及 Toast Action/Close 焦点会暂停剩余时长。受控 open 只发出一次超时关闭请求，等待调用方更新。Close、有焦点时的 Escape、Action 请求关闭；实际副作用归应用处理。Viewport 提供 F8 聚焦快捷键；不包含全局队列或系统通知传输。
+## 安装
 
-组成: Root, Viewport, Title, Description, Action, Close.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码；native/GPUI、编译器、打包消费、截图及完整独立验收仍待完成。
+## 用法
+
+- **部件组成**：`Root`、`Viewport`、`Title`、`Description`、`Action`、`Close`。
+- **计时与暂停**：`Root` 默认显示 `5000ms`，设置 `duration={0}` 可持续显示不自动关闭。指针悬停在通知上或焦点进入 `Action` / `Close` 时会自动暂停倒计时。受控模式下超时仅发出一次关闭请求，等待调用方更新 `open`。
+- **关闭与快捷键**：点击 `Close`、聚焦时按 Escape 或触发 `Action` 均会请求关闭（实际操作副作用由应用处理）。`Viewport` 提供 `F8` 快捷键用于快速将焦点移至通知区域。全局队列编排由应用层自行管理。
+
+## API
+
+| 部件 | 属性 | 默认值与说明 |
+| --- | --- | --- |
+| Root | `open` / `duration` | 受控开关状态 / 自动关闭毫秒数（默认 `5000`，`0` 为不自动关闭） |
+| Viewport | — | 通知展示区域，支持 `F8` 聚焦快捷键 |
+| Title / Description | — | 通知标题与正文内容 |
+| Action / Close | — | 通知内操作按钮与手动关闭按钮 |

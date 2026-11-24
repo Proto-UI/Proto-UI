@@ -42,9 +42,11 @@
     "ArrowLeft",
     "ArrowRight",
     "ArrowUp",
+    "ContextMenu",
     "End",
     "Enter",
     "Escape",
+    "F10",
     "Home",
     "PageDown",
     "PageUp",
@@ -57,7 +59,10 @@
     "host:pointerdown",
     "key.down",
     "key.up",
+    "pointer.cancel",
     "pointer.down",
+    "pointer.enter",
+    "pointer.leave",
     "pointer.move",
     "pointer.up",
     "press.commit"
@@ -72,8 +77,8 @@
   "counts": {
     "core": 6,
     "optional": 13,
-    "accepted": 9,
+    "accepted": 12,
     "rejected": 5,
-    "comparedKeys": 13
+    "comparedKeys": 15
   }
 }

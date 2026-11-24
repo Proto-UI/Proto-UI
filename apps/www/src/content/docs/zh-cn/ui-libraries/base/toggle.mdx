@@ -1,13 +1,15 @@
 ---
 title: 'Toggle'
-description: 'Base Toggle 的持久 active-state 语义、证据与当前边界。'
+description: '具有持久按下激活状态的双态切换按钮组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Base Toggle 是拥有持久二值 `active` 状态的 button-like control。它适合 pin、文字格式启用等 mode；它既不是一次性的 Button action，也不是 Switch 的 on/off value。
+带有持久二元 `active` 按下态的无样式按钮控件，适合置顶、加粗/斜体格式切换等模式开关。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-toggle"
@@ -16,38 +18,18 @@ Base Toggle 是拥有持久二值 `active` 状态的 button-like control。它�
   codePanel={false}
 />
 
-## Protocol 边界
+## 安装
 
-`P-BASE-TOGGLE` 拥有 `active`、activation、disabled 与 focus 行为、瞬时交互事实和 `activeChange`。direct `base-toggle` Prototype 与 `asToggle()` 是同一 protocol 的 authoring entries；Toggle 不从 Button 或 Switch 专属 hook 借取自身语义。
+0.2.0 稳定版包已导出 `@proto.ui/prototypes-base/toggle`（`base-toggle` 原型与 `asToggle()`），CLI 目标为 `base-toggle`。如需带样式的版本，可使用 [Shadcn Toggle](/zh-cn/ui-libraries/shadcn/toggle/) 或 [Brutalist Toggle](/zh-cn/ui-libraries/brutalist/components/toggle/)。
 
-当前 props 是 `active`、`defaultActive` 与 `disabled`。非受控模式会在成功 activation 后翻转 `active`；受控模式会发出所请求的下一个 `{ active }` 值，并在 owner 提供新 input 之前保持 owner fact。
+## 用法
 
-Toggle 是单一 subject。Toggle Group、exclusive/multiple selection、collection membership 与独立 anatomy part 不属于这个 protocol。图标与视觉 indicator 仍是 authored content，而不是 Toggle part。
-
-## 交互与可访问性
-
-Root expose `active`、disabled/focus/press facts、`focusSelf()` 和 `activeChange`。Web accessibility projection 是带 pressed-state 语义的 button-like control。disabled control 会抑制 activation 并清理瞬时状态。
-
-Form integration、group policy 与视觉 variant 仍由下游负责。
-
-## 0.2 交付与证据
-
-稳定版 0.2.0 package 导出了 `@proto.ui/prototypes-base/toggle`，CLI registry 提供 `base-toggle`。`T-BASE-TOGGLE-0001` 把 draft criteria 映射到 `packages/prototypes/base/test/toggle.test.ts`；Preview 通过三个 Web Adapter 运行当前 Web profile。
-
-## Lifecycle
-
-`P-BASE-TOGGLE` 当前是 **draft**。0.2.0 package 包含这个 surface，但 catalog lifecycle 仍允许它继续收敛。
-
-## 参考
-
-- [P-BASE-TOGGLE](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TOGGLE.yaml)
-- [Toggle source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/toggle)
-- [Toggle evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/toggle.test.ts)
-- 风格化投射：[Shadcn Toggle](/zh-cn/ui-libraries/shadcn/toggle/) 与 [Brutalist Toggle](/zh-cn/ui-libraries/brutalist/components/toggle/)
+- **受控与非受控**：使用 `defaultActive` 配置非受控初始态，激活时自动翻转 `active`；传入 `active` 进入受控模式，激活时通过 `activeChange` 发出 `{ active }` 请求并等待外部更新。
+- **单按钮职责与无障碍**：`base-toggle` 在 Web 上呈现带按下状态的按钮语义，图标与标签直接作为传入的子元素放置。设置 `disabled` 会阻止激活并清理瞬时按压态；需要一组互斥或多选按钮时，请使用 [Toggle Group](../toggle-group/)。
 
 ## API
 
-Toggle 是工作区源码。当前工作区 CLI 目标为 `base-toggle`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。传入 `active` 进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -57,7 +39,9 @@ Toggle 是工作区源码。当前工作区 CLI 目标为 `base-toggle`。CLI �
   ]}
 />
 
-这些属性属于 Root。
+传入 `active` 可受控管理激活状态。
+
+- **暴露状态与方法**：暴露 `active` 及禁用/焦点/按压状态，提供 `focusSelf()`，变更时发出 `activeChange`（载荷 `{ active }`）。
 
 ## 参考
 

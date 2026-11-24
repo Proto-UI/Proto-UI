@@ -1,6 +1,6 @@
 ---
 title: 'Bootstrap 2.3.2 Input'
-description: '将归档输入框风格投射到 Base 单行文本协议。'
+description: '沿用归档 Bootstrap 2.3.2 输入框视觉风格的单行文本输入组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,11 +8,11 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-Input 将 Bootstrap 2.3.2 的输入框语言投射到一个 Base Input Root。当前 Web profile 生成唯一的原生 `input[type=text]`，视觉层只增加输入框外观。
+Bootstrap 2.3.2 Input 将归档版本的经典输入框样式应用于 Base Input，在 Web 上渲染单一原生 `input[type=text]` 编辑器，并在深色宿主中保持经典的归档浅色配色。
 
-Base 拥有受控与非受控值、归一化编辑与 IME 事件、原生提示属性、禁用与只读行为、无障碍命名及物理焦点。该原型不渲染子内容，不支持任意 input type，也不新增表单提交、搜索命令、校验 UI 或第二个编辑器。
+## 预览
 
-通过页面运行时选择器比较 Web Components、React、Vue 3 与 Vue 2。可编辑 Project name，聚焦只读输入框，并与禁用输入框比较。
+可编辑输入框内容、聚焦只读输入框，并与禁用状态对比。
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-input"
@@ -22,11 +22,21 @@ Base 拥有受控与非受控值、归一化编辑与 IME 事件、原生提示�
   codePanel={false}
 />
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。[查看已实现的子集](../)。
+
+## 用法
+
+- **值与输入事件**：支持受控 `value` 与非受控 `defaultValue`，统一处理输入、失焦提交与 IME 组合输入事件。
+- **只读与禁用**：`readOnly` 允许聚焦和复制但禁止编辑；`disabled` 阻止聚焦与输入。
+- **表单字段组合**：如需标签、帮助说明与错误提示，请与 `Field` 组合使用。
+
 ## API
 
-- `value` / `defaultValue`、`disabled`、`readOnly`、`placeholder`
-- `name`、`required`、`autoComplete`、`minLength`、`maxLength`、`inputMode`、`enterKeyHint`
-- `ariaLabel`、`labelledBy`、`describedBy`
-- 继承 `valueChange`、`change`、composition 事件、`focusSelf`、`blurSelf`
-
-这是 draft 状态的源码投射，源码包仍为 private、未发布。深色宿主中继续使用归档浅色配色。Web 示例不代表通用 Prototype Compiler 或 GPUI、Flutter、Qt 一致性已经通过。[查看已实现的子集](../)。
+| 分类 | 成员 | 说明 |
+| --- | --- | --- |
+| 值与状态 | `value` / `defaultValue`、`disabled`、`readOnly`、`placeholder` | 文本值与编辑状态 |
+| 表单与输入提示 | `name`、`required`、`autoComplete`、`minLength`、`maxLength`、`inputMode`、`enterKeyHint` | 原生输入行为与软键盘提示 |
+| 无障碍 | `ariaLabel`、`labelledBy`、`describedBy` | 可访问名称与关联说明 |
+| 事件与方法 | `valueChange`、`change`、IME 组合事件、`focusSelf()`、`blurSelf()` | 变更通知与焦点控制 |

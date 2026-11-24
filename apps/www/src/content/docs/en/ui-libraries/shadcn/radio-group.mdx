@@ -1,6 +1,6 @@
 ---
 title: 'Radio Group'
-description: 'Shadcn radio presentation over the Base single-selection protocol.'
+description: 'A single-selection radio group with roving keyboard focus and Shadcn styling.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,57 +8,52 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Radio Group lets users choose one option from a mutually exclusive set, with full `radiogroup`/`radio` accessibility semantics, roving focus, and focus-ring/disabled styling. The examples on this page use the **Shadcn Rhea** style preset.
 
-Radio Group contains Root, Item, and Indicator. Base owns the selected value, item order, roving focus, selection requests, and the `radiogroup`/`radio` accessibility objects. This Shadcn projection adds the circular control, selected dot, focus ring, dark tint, and disabled presentation.
+## Preview
 
 <PrototypePreviewer demoId="demo-shadcn-radio-group" initialRuntime="wc" />
 
-## Compose the three parts
-
-Import `shadcnRadioGroupRoot`, `shadcnRadioGroupItem`, and `shadcnRadioGroupIndicator` from `@proto.ui/prototypes-shadcn/radio-group`, then adapt them to your runtime. The root package also exports these objects and their PascalCase aliases. `proto-ui add react shadcn-radio-group` generates the three React facades; `vue`, `vue2`, and `wc` are supported CLI targets too.
-
-Each Item belongs to its nearest Root. Put an Indicator inside each Item whose selected dot should appear. Indicator is an explicit, optional, repeatable part; the CLI does not insert a hidden default part. Its SVG is decorative and creates no extra radio or tab stop.
-
-| Part | Props | Responsibility |
-| --- | --- | --- |
-| Root | `value?`, `defaultValue?`, `disabled?`, `a11yLabel?` | Owns one selected string and the item collection. |
-| Item | `value` (required), `disabled?` | Requests selection and derives checked/effective-disabled state. |
-| Indicator | None | Reflects the nearest Item's checked state. |
-
-Give Root a meaningful `a11yLabel` and every Item a unique non-empty `value`. Item names come from authored content or host labeling. The demo pairs each Item with an adjacent `labelRoot` from `@proto.ui/prototypes-shadcn/label`. Both receive the same stable `InstanceAssociations.controlLabel` reference from `createControlLabelRef()`; the visible Label is the accessible name, with no hidden duplicate. Base Label activates the paired Item by default and respects Item/Group disabled state. Set `activation={false}` on Label for naming only. The group title is not an Item activation target.
-
-An uncontrolled Root accepts selection and emits `valueChange`. With `value` supplied, it emits a request while the App owns the next value prop; the projection does not manufacture an intermediate checked value. Root retains empty or unmatched values, and a selected Item may remain checked when disabled.
-
-## Try the inherited interaction
-
-Tab into the first group: the selected enabled Item is its entry point. Arrow keys move and select, wrapping across enabled Items; Home and End reach the first and last enabled choices. The disabled Item is skipped. Space selects a focused Item; Enter does not. A successful primary pointer release selects, while a cancelled press does not.
-
-Compare the initially empty group and the disabled group, then repeat in Web Components, React, Vue, and Vue 2. The normal control is 16px with an 8px decorative glyph box. Keyboard focus adds a three-pixel ring; the source recipe adds no color or shadow transition. Changing the website theme changes the input tint without changing selection.
-
-## Comparison and scope
-
-The unscoped compatibility comparison is the [base-nova RadioGroup registry](https://ui.shadcn.com/r/styles/base-nova/radio-group.json) snapshot retrieved on 2026-10-10 (SHA256 874b30662ba338d06362491b663cae9198281a4bc385b6be6425f2de442384d7). That Nova recipe uses grid/full-width/gap-2, a primary selected fill and an 8px primary-foreground dot. Indicator remains a separate public part with host-neutral flex centering instead of upstream internal absolute positioning. Field-label coordination, expanded hit-target selectors and current real-browser visual verification remain outstanding.
-
-The inherited API has no `asChild`, native form submission/validation, `required`, invalid state, public `orientation`/`loop`, or a general visual-variant API; the shared styleProfile is a separate presentation selection. Upstream `aria-invalid` styles are therefore outside this projection. Arrow wrapping is the fixed Base behavior, not a new configurable API. The three catalog entities remain `draft`; this page does not claim full Shadcn/Radix compatibility or stable admission.
-
-The page explicitly selects Rhea: Root uses `gap-3`, Item uses `radius-2xl` and `bg-input/90`, with the same 16px control and 8px decorative dot at the default root font. The shared profile does not add another selection owner.
-
-## Install
+## Installation
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-radio-group" manager="npm" />
 
-Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your target framework.
 
-## Read-only and explicit Form composition
+## Usage
 
-Root accepts `readOnly`. It preserves focus while refusing value proposals; disabled also removes focus participation. A read-only Radio Group can still move roving focus with its supported navigation keys. Ordinary Root does not automatically register with Field or Form.
+Import `shadcnRadioGroupRoot`, `shadcnRadioGroupItem`, and `shadcnRadioGroupIndicator` from `@proto.ui/prototypes-shadcn/radio-group` (or the package root) and adapt them to your runtime:
 
-Use `fieldRadioGroup` from `@proto.ui/prototypes-shadcn/field` inside an explicit `FormField` to connect canonical values, required validation, Label/Description/Error relationships and reset. The [Form choice recipe](../form/) demonstrates controlled refusal, accepted changes, read-only focus, disabled groups and real owner replacement. `resetValue()` requests the instance creation baseline and never forces a controlled owner to accept it.
+| Part | Props | Responsibility |
+| --- | --- | --- |
+| `Root` | `value?`, `defaultValue?`, `disabled?`, `readOnly?`, `a11yLabel?` | Manages the selected value and the collection of items. |
+| `Item` | `value` (required), `disabled?` | Represents an option, requests selection, and derives checked/disabled states. |
+| `Indicator` | None | Optional decorative indicator rendered inside an `Item` when checked. |
+
+### Labeling and accessibility
+
+- Provide a meaningful `a11yLabel` on `Root` and a unique, non-empty `value` on each `Item`.
+- Pair each `Item` with `labelRoot` from `@proto.ui/prototypes-shadcn/label` using a shared reference from `createControlLabelRef()` passed via `InstanceAssociations.controlLabel`. The visible label serves as the accessible name and activates the item on click (set `activation={false}` on `Label` for naming only).
+
+### Controlled and uncontrolled
+
+- Uncontrolled mode initializes from `defaultValue` and emits `valueChange` on selection.
+- Passing `value` switches to controlled mode: `Root` emits change requests while your app provides the next `value`. Empty or unmatched values are preserved, and a selected item remains checked if it becomes disabled.
+- `readOnly` preserves roving focus while preventing value changes; `disabled` removes focus participation as well.
+
+### Keyboard interaction
+
+- Pressing `Tab` focuses the selected enabled `Item`.
+- Arrow keys move focus and select while wrapping across enabled items; `Home` and `End` jump to the first and last enabled items, skipping disabled ones.
+- `Space` selects the focused item; `Enter` does not.
+
+### Form integration
+
+An ordinary `Root` does not auto-register with a form. Inside `FormField`, use `fieldRadioGroup` from `@proto.ui/prototypes-shadcn/field` to wire up required validation, Label/Description/Error associations, and `resetValue()`. See the [Form choice recipe](../form/) for a full example.
 
 ## API
 
-Passing `value` selects controlled mode. There is still no public `orientation` or `loop` prop.
+The following props belong to `Root` (pass `value` for controlled mode):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -70,7 +65,10 @@ Passing `value` selects controlled mode. There is still no public `orientation` 
   ]}
 />
 
-These props belong to Root. Item requires `value` and defaults `disabled` to `false`. Indicator has no props.
+Other part props:
+
+- `Item`: `value` (required), `disabled` (defaults to `false`).
+- `Indicator`: no props.
 
 ## References
 

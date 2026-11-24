@@ -1,6 +1,6 @@
 ---
 title: 'Textarea'
-description: 'A Shadcn textarea projected from the Base textarea protocol.'
+description: 'A multiline text input with controlled state, IME composition events, and form reset support.'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -8,15 +8,11 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Textarea wraps a native multiline text editor with controlled and uncontrolled value management, normalized IME events, accessibility attributes, and Shadcn border and focus-ring styling. The examples on this page use the **Shadcn Rhea** style preset.
 
-This entry shows the current `shadcn` textarea implementation in Proto UI.
+## Preview
 
-Base Textarea owns the protocol: controlled and uncontrolled value, normalized input, change, and IME events, native properties such as `rows`, `maxLength`, and `readOnly`, accessibility projection, and focus and blur. It materializes exactly one host-owned multiline editor, and the shadcn layer adds presentation only — field dimensions, border, focus ring, and the disabled treatment.
-
-The projection is contentless. Authored children never become a second editor, and the slice adds no form workflow, validation message, auto-resize, or rich-text behavior.
-
-The demo is three editors: an uncontrolled note (`rows` 4, `maxLength` 240), a disabled editor, and a read-only editor that remains focusable.
+The preview below shows an uncontrolled note field (`rows={4}`, `maxLength={240}`), a disabled editor, and a focusable read-only editor.
 
 <PrototypePreviewer
   demoId="demo-shadcn-textarea"
@@ -26,19 +22,21 @@ The demo is three editors: an uncontrolled note (`rows` 4, `maxLength` 240), a d
   codePanel={false}
 />
 
-## Install
+## Installation
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-textarea" manager="npm" />
 
-Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your target framework.
 
-## Reset and Field composition
+## Usage
 
-The current 0.3 source exposes `resetValue()`: an uncontrolled editor restores its instance creation value; a controlled editor proposes that value and waits for its owner. Explicit reset remains available while readOnly or disabled and retires composition. Import `fieldTextarea` from `@proto.ui/prototypes-shadcn/field` for the same multiline editor with Field label, description, error and validation ownership. See the [versioned Form recipe](../form/).
+- Textarea manages a single native multiline editor without child content, supporting standard attributes such as `rows`, `maxLength`, `minLength`, `wrap`, `placeholder`, `readOnly`, and `disabled`.
+- Call `resetValue()` to restore the initial value in uncontrolled mode or request a reset in controlled mode. Reset remains callable while `readOnly` or `disabled` and ends any active IME composition.
+- Inside a form, import `fieldTextarea` from `@proto.ui/prototypes-shadcn/field` to connect labels, descriptions, error messages, and validation; see the [Form recipe](../form/).
 
 ## API
 
-Passing `value` selects controlled mode. `minLength` and `maxLength` use `-1` when the limit is omitted.
+The following props belong to `Root` (pass `value` for controlled mode; `minLength` and `maxLength` default to `-1` when unlimited):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -61,7 +59,7 @@ Passing `value` selects controlled mode. `minLength` and `maxLength` use `-1` wh
   ]}
 />
 
-Root exposes `value`, `disabled`, `readOnly`, `focused`, `focusVisible`, and `composing`, plus `valueChange`, `change`, and the composition events. Authored children are not a second editor.
+`Root` exposes `value`, `disabled`, `readOnly`, `focused`, `focusVisible`, `composing`, and `resetValue()`, and emits `valueChange`, `change`, and IME composition events.
 
 ## References
 

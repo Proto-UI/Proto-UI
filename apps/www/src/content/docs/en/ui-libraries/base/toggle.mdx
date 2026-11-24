@@ -1,13 +1,15 @@
 ---
 title: 'Toggle'
-description: 'Base Toggle persistent active-state semantics, evidence, and current boundaries.'
+description: 'An unstyled two-state button with a persistent pressed active state.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Base Toggle is a button-like control that owns a persistent binary `active` state. It is for modes such as pinning or text-format activation—not a one-shot Button action and not a Switch on/off value.
+An unstyled button-like control that maintains a persistent binary `active` state, suited for modes such as pinning or text-format toggles.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-toggle"
@@ -16,38 +18,18 @@ Base Toggle is a button-like control that owns a persistent binary `active` stat
   codePanel={false}
 />
 
-## Protocol boundary
+## Installation
 
-`P-BASE-TOGGLE` owns `active`, activation, disabled and focus behavior, transient interaction facts, and `activeChange`. The direct `base-toggle` Prototype and `asToggle()` are authoring entries of that same protocol; Toggle does not obtain its semantics from Button- or Switch-specific hooks.
+The 0.2.0 stable package exports `@proto.ui/prototypes-base/toggle` (`base-toggle` and `asToggle()`), with CLI target `base-toggle`. For styled versions, see [Shadcn Toggle](/en/ui-libraries/shadcn/toggle/) or [Brutalist Toggle](/en/ui-libraries/brutalist/components/toggle/).
 
-Current props are `active`, `defaultActive`, and `disabled`. In uncontrolled mode, successful activation flips `active`. In controlled mode it emits the requested next `{ active }` value while retaining the owner-provided fact until new input arrives.
+## Usage
 
-Toggle is a single subject. Toggle Group, exclusive or multiple selection, collection membership, and separate anatomy parts are outside this protocol. Icons and visual indicators remain authored content rather than Toggle parts.
-
-## Interaction and accessibility
-
-The root exposes `active`, disabled/focus/press facts, `focusSelf()`, and `activeChange`. Its Web accessibility projection is button-like with pressed-state semantics. Disabled controls suppress activation and clear transient state.
-
-Form integration, group policy, and visual variants remain downstream responsibilities.
-
-## 0.2 delivery and evidence
-
-The stable 0.2.0 package exports `@proto.ui/prototypes-base/toggle`, and the CLI registry exposes `base-toggle`. `T-BASE-TOGGLE-0001` maps the draft criteria to `packages/prototypes/base/test/toggle.test.ts`; the preview runs the Web profile through all three Web adapters.
-
-## Lifecycle
-
-`P-BASE-TOGGLE` is **draft**. The 0.2.0 package contains this surface, but its catalog lifecycle still permits refinement.
-
-## References
-
-- [P-BASE-TOGGLE](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TOGGLE.yaml)
-- [Toggle source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/toggle)
-- [Toggle evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/toggle.test.ts)
-- Styled projections: [Shadcn Toggle](/en/ui-libraries/shadcn/toggle/) and [Brutalist Toggle](/en/ui-libraries/brutalist/components/toggle/)
+- **Controlled and uncontrolled**: Use `defaultActive` for uncontrolled mode, where activation flips `active` locally. Pass `active` for controlled mode so activation emits `activeChange` with `{ active }` while external state stays authoritative.
+- **Single-control scope and accessibility**: `base-toggle` renders button semantics with pressed state on Web; place icons or labels directly as your children. `disabled` suppresses activation and clears transient press state. For grouped single or multiple toggles, use [Toggle Group](../toggle-group/).
 
 ## API
 
-Toggle is workspace source. For this workspace version, the CLI target is `base-toggle`. Use matching CLI and package versions; check the chosen release's availability before installing. Passing `active` selects controlled mode.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -57,7 +39,9 @@ Toggle is workspace source. For this workspace version, the CLI target is `base-
   ]}
 />
 
-These props belong to Root.
+Pass `active` to control the active state.
+
+- **Exposed state, methods, and events**: Exposes `active` plus disabled/focus/press states, `focusSelf()`, and `activeChange` (payload `{ active }`).
 
 ## References
 

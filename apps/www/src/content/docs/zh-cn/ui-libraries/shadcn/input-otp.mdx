@@ -1,13 +1,15 @@
 ---
-title: shadcn Input Otp
-description: 可移植输入原子草稿。
+title: 'Input OTP'
+description: '支持粘贴、选区光标高亮、字符过滤与表单校验的一次性验证码输入组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+用于输入一次性验证码（OTP）的分格输入框，底层使用单一真实文本输入控件以完整支持整段粘贴、删除、选区移动与 `one-time-code` 自动填充。本页示例采用 **Shadcn Rhea** 风格。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-input-otp"
@@ -16,17 +18,26 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root 管理 value/defaultValue、length（1–32，默认6）、numeric/alphanumeric 过滤、disabled/readOnly、name、ariaLabel。唯一真实 Input 由 TextControl 处理选择、粘贴、删除与组合输入，并声明 one-time-code 自动填充；组合结束后过滤和限长。Slot 是按索引被动显示且对辅助技术隐藏，不制造额外编辑器或 Tab 停靠点；可编辑 Input 聚焦时，active 由 TextControl 的真实插入点或选区决定；未知选区、失焦、disabled 和 readOnly 不显示活动槽，不能用值长度代替光标。valueChange 为提案；每个接受的完整代码发一次 completed，不执行验证或获取短信。
+## 用法
 
-在 Field/FormField 内用 Control 替代 Input，桥接 FieldLabel、规范字符串校验、IME 取消、Form 序列化及复位。独立 Input 保留原有命名。OTP Control 在所有者回调结束后为已接受的规范值变化启动校验；受控拒绝或过滤后无变化不触发自动 change 校验，manual 与配置的 blur 校验仍可使用。同一回调批次只校验最新快照，reset、策略中断和卸载会取消排队工作。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-部件: root, input, control, slot, separator. 四个视觉家族继承同一 Base 行为。
+### 部件结构
 
-当前为 Draft 源码工作。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍待完成，不宣称 Finf 验收通过。
+`Input OTP` 由 `Root`、`Input`（独立使用）或 `Control`（表单内使用）、`Slot` 与 `Separator` 组成：
+
+- **Root**：管理 `value` / `defaultValue`、位数 `length`（`1`–`32`，默认 `6`）、字符集过滤（`numeric` 或 `alphanumeric`）、`disabled`、`readOnly`、`name` 与 `ariaLabel`。
+- **Input / Control**：承载唯一的真实单行编辑器，在输入法组合结束后自动过滤非法字符并截断到 `length`。独立场景使用 `Input`；在 [Field](../field/) 或 [Form](../form/) 中使用 `Control` 替代 `Input`，以接入标签聚焦、表单校验、序列化与重置。
+- **Slot / Separator**：`Slot` 按 `index` 展示对应字符且对辅助技术隐藏，不增加额外 `Tab` 顺序；当可编辑的输入框聚焦时，激活格严格跟随真实光标位置或选区范围（失焦、禁用或只读时不显示激活格）。
+
+### 事件与校验行为
+
+- 传入 `value` 进入受控模式时，输入修改会通过 `valueChange` 提出变更请求；每次接受完整位数的有效验证码时触发一次 `completed` 事件。
+- 在表单中使用 `Control` 时，仅当值实际发生有效变化后才触发自动 `onChange` 校验；受控拒绝或过滤后无变化不会重复触发，重置、策略变更或卸载会自动取消排队中的校验。
 
 ## API
 
-Input OTP 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。Input 的 `placeholder` 可选，没有默认值。
+传入 `value` 进入受控模式。`Input` 可选接受 `placeholder`（无默认值）。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -41,7 +52,7 @@ Input OTP 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `v
   ]}
 />
 
-这些属性属于 Root。Slot 的 `index` 默认 `0`。
+以上属性属于 `Root`。`Slot` 的 `index` 默认为 `0`。
 
 ## 参考
 

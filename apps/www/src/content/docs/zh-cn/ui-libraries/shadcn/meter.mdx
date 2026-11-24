@@ -1,13 +1,15 @@
 ---
-title: shadcn Meter
-description: 基于 Base 共享语义的有界数值展示。
+title: 'Meter'
+description: '用于展示有界区间内测量值与状态分段的仪表组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Meter 用于在已知上下界的范围内展示测量值（如磁盘占用、配额余量或强度评分），并可根据阈值区间自动划分状态。本页示例使用 **Shadcn Rhea** 风格。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-meter"
@@ -16,19 +18,28 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-当前为 Draft 功能实现。Root 拥有有界有限数值；Label 提供名称，Track 容纳 Indicator，Value 显示 valueText 或规范数值。四个视觉家族只投影样式。
+## 安装
 
-Props：value、min（0）、max（100）、ariaLabel、valueText。数值限制在合法范围内；上下界相等时比例为零。low、high、optimum 将测量值划分为 optimal、suboptimal、critical，不改变数值本身。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-Root 及部件暴露 value、percentage、indeterminate、status。被动显示不引入键盘停靠点，不伪造输入。更新 Props 同步所有部件。
+## 用法
 
-包入口统一注册后，可从 meter 子路径导入 meterRoot、meterLabel、meterTrack、meterIndicator、meterValue。现有源码测试仅为阶段性证据；完整 Adapter、Compiler、GPUI、原生绘制、辅助技术、包消费及独立验收尚未完成，不据此勾选 Finf。
+在完成包入口注册后，可从 `meter` 子路径导入 `meterRoot`、`meterLabel`、`meterTrack`、`meterIndicator` 和 `meterValue`：
 
-本条目是工作区源码，不在公开的 `proto-ui add` 目录里。
+- `Root` 统一管理有界数值范围与状态计算。
+- `Label` 为仪表提供可读名称。
+- `Track` 与 `Indicator` 展示测量值在区间内的占比。
+- `Value` 显示 `valueText`，未设置时显示规范化后的数值。
+
+### 数值与阈值分段
+
+- `value` 会自动限制在 `[min, max]` 合法范围内；当 `min` 等于 `max` 时，百分比为 `0`。
+- `low`、`high` 和 `optimum` 用于将测量值划分为 `optimal`、`suboptimal` 或 `critical` 状态，不改变数值本身。
+- Meter 为只读展示组件，不会引入额外的键盘焦点停靠点。`Root` 及各部件会随属性更新同步暴露 `value`、`percentage`、`indeterminate` 和 `status`。
 
 ## API
 
-`low`、`high`、`optimum` 只划分测量值，不改变数值本身。
+以下属性属于 `Root`：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -46,7 +57,4 @@ Root 及部件暴露 value、percentage、indeterminate、status。被动显示�
 
 ## 参考
 
-<SpecEntityLinks
-  directory="spec/prototypes"
-  files={['P-SHADCN-METER.yaml', 'P-BASE-METER.yaml']}
-/>
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-METER.yaml', 'P-BASE-METER.yaml']} />

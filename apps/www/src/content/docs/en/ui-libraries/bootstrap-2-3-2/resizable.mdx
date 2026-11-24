@@ -1,15 +1,15 @@
 ---
-title: 'Resizable (WIP)'
-description: 'resizable functional composition and current verification limits.'
+title: 'Resizable'
+description: 'A Bootstrap 2.3.2 multi-panel resizable layout with collapsible stops, nested groups, and keyboard resizing.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Resizable composes two or more percentage-sized panels and indexed separators. Each separator continuously resizes only its adjacent pair. A nested Root owns an independent layout and may use a different orientation. Pointer, arrow-key, Home/End, Shift acceleration and collapse use the same constrained request path.
+Resizable coordinates two or more percentage-sized panels separated by draggable handles, supporting pointer dragging, arrow keys, `Shift` acceleration, `Home` / `End`, panel collapsing, and nested orientations.
 
-This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
+## Preview
 
-Panel exposes its dimensionless size through the existing exposed-state projection. Web CSS uses a static flex-basis recipe consuming --pui-size, so arbitrary ratios do not depend on runtime-generated CSS tokens.
+The example combines three horizontal panels with a nested two-panel vertical group.
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-resizable"
@@ -17,14 +17,23 @@ Panel exposes its dimensionless size through the existing exposed-state projecti
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+- **Indexed panels and handles**: Render `N` panels (`index: 0..N-1`) and `N - 1` handles (`index: 0..N-2`). Each handle resizes only its adjacent pair while preserving all other panels, with `Resize panels` as the default accessible name.
+- **Constraints and collapsing**: Pass per-panel `min`, `max`, `collapsible`, and `collapsedSize` in `constraints` (defaults `0`, `100`, `false`, `0`). Percentages normalize to `100`; infeasible configurations keep the last valid layout. Collapsing acts as a discrete stop bounded by the neighbor's `max`.
+- **Controlled state and nesting**: Supply `sizes` for controlled mode and handle `sizesChange` / `sizesCommit` (`{ sizes }`). Cancelled drags do not emit `sizesCommit`. Nested roots manage independent sizes and orientations. Panel sizing drives a static Web CSS `flex-basis` via `--pui-size`, excluding fixed handle widths from drag math.
+
 ## API
 
-Root `sizes` / `defaultSizes` is the complete percentage vector. Supply N Panels (`index: 0..N-1`) and N−1 Handles (`index: 0..N-2`). A Handle names its preceding panel and retains the accessible name `Resize panels`. The legacy `value` / `defaultValue` API continues to create two panels; `sizes` takes precedence when supplied.
-
-### Multi-panel ownership
-
-`constraints` supplies each panel's `min`, `max`, `collapsible` and `collapsedSize`. Defaults are 0, 100, false and 0. Percentages are normalized to total 100; infeasible layouts retain the previous valid state and reject resizing. A separator preserves its pair's total and every other panel. Collapse is a discrete stop; an adjacent panel's maximum can prevent collapse.
-
-Read `sizes` or call `requestResize(index, nextSize, commit)` / `requestSizes(nextSizes, commit)`. `sizesChange` and `sizesCommit` carry `{ sizes }`. Passing `sizes` makes the layout controlled: update it from the proposal to accept, or retain it to refuse. Panels and ARIA remain at the committed owner value. Cancellation emits no commit.
-
-Nested Roots establish independent ownership, constraints and geometry. The example combines three horizontal panels with a two-panel vertical group. Panel border-box extents form the drag denominator, excluding fixed separator widths.
+| Part | Props / Methods / Events | Description |
+| --- | --- | --- |
+| `Root` | `sizes` / `defaultSizes` | Full percentage vector (legacy 2-panel `value` / `defaultValue` also supported; `sizes` takes precedence) |
+| `Root` | `constraints` | Per-panel `{ min, max, collapsible, collapsedSize }` rules |
+| `Root` | `requestResize(index, nextSize, commit)` / `requestSizes(nextSizes, commit)` | Programmatic single-panel or full-vector resize requests |
+| `Root` | `sizesChange` / `sizesCommit` | Live and committed percentage events with payload `{ sizes }` |
+| `Panel` | `index` | `0..N-1` panel index applying its size via `--pui-size` |
+| `Handle` | `index` | `0..N-2` separator handle between adjacent panels |

@@ -1,15 +1,15 @@
 ---
-title: 'Carousel (WIP)'
-description: 'carousel functional composition and current verification limits.'
+title: 'Carousel'
+description: 'An equal-size slide carousel with continuous dragging, native scroll snapping, responsive viewport capacity, and keyboard navigation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Carousel composes an equal-size slide strip, a continuously scrollable viewport and Previous/Next controls. Pointer or touch dragging moves the strip before release; wheel, trackpad and scrollbar scrolling use the same surface. Releasing a drag or finishing native scrolling snaps to the nearest reachable item boundary. Keyboard navigation uses the same index requests.
+Base Carousel pairs an equal-size slide strip with a continuously scrollable viewport and Previous/Next controls. Pointer/touch dragging, wheel/trackpad scrolling, and keyboard navigation all snap to the nearest reachable slide boundary.
 
-This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-carousel"
@@ -17,17 +17,28 @@ This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package con
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Responsive viewport and controlled index
+## Installation
 
-Set Root `slidesPerView` to the maximum equal items to display (default `1`) and `minSlideSize` to their minimum extent in logical host pixels (default `0`). The demo requests two items with a minimum extent of `180`; narrowing the viewport reduces the actual capacity, including partial items. All slides retain their layout extent. Root exposes `visibleSlides` and `maxIndex` from the observed viewport, and the final snap aligns the strip end without leaving empty space.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-A provided `index` selects controlled mode. `indexChange` proposes the new snap index. While dragging, the committed `index` stays unchanged; release uses synchronous owner acceptance or returns to the existing index. A later owner update moves the viewport when it arrives. Viewport exposes `dragging`, `scrolling` and normalized `scrollPosition`; Slide `current` follows the committed snap, while `hidden` follows actual offscreen visibility without removing the slide from layout.
+## Usage
 
-`orientation="vertical"` requires an explicitly bounded viewport height. Horizontal `direction="rtl"` reverses physical dragging and arrow keys while retaining logical item order. Cancellation, disable, axis changes and removal discard unfinished dragging. `loop` wraps index requests between reachable ends; this slice does not clone slides for a seamless infinite strip. Autoplay and variable-size slides are outside the current contract.
+### Responsive viewport capacity
+
+Use `slidesPerView` (default `1`) to cap the maximum visible equal-size items and `minSlideSize` (default `0`, in logical pixels) to set their minimum extent. Narrowing the viewport reduces visible capacity while keeping every slide's layout extent intact. `Root` exposes `visibleSlides` and `maxIndex`, and the final snap aligns cleanly to the end of the strip without empty trailing space.
+
+### Controlled index and interaction state
+
+- Pass `index` for controlled mode. Drag release and navigation emit `indexChange` with the proposed index; the committed `index` remains unchanged while dragging until the owner updates it.
+- `Viewport` exposes `dragging`, `scrolling`, and normalized `scrollPosition`. `Slide` exposes `current` (matching the committed snap index) and `hidden` (tracking offscreen visibility without removing layout space).
+- When using `orientation="vertical"`, give the viewport an explicit height. Horizontal `direction="rtl"` reverses physical dragging and arrow keys while keeping logical item order.
+- Setting `loop={true}` wraps index navigation between the first and last reachable positions without cloning slides.
 
 ## API
 
-Carousel is workspace source. There is no public `proto-ui add` target. Passing `index` selects controlled mode. Viewport has no props. Omitting Slide `index` uses its current anatomy order. Explicit indexes should match the item order.
+### Root Props
+
+Passing `index` selects controlled mode.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -44,7 +55,10 @@ Carousel is workspace source. There is no public `proto-ui add` target. Passing 
   ]}
 />
 
-These props belong to Root.
+### Other parts
+
+- **Viewport**: no props.
+- **Slide**: optional `index`; omitted indexes follow DOM composition order.
 
 ## References
 

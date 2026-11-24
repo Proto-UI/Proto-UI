@@ -79,7 +79,8 @@ describe('Text public compiler consumption', () => {
           'font-heading',
           'font-mono',
           'text-foreground',
-          ...(family === 'bootstrap-2-3-2' ? ['text-inherit'] : ['text-muted-foreground']),
+          'text-muted-foreground',
+          ...(family === 'bootstrap-2-3-2' ? ['text-inherit'] : []),
         ])
       );
       expect(css).toContain('var(--pui-font-heading');

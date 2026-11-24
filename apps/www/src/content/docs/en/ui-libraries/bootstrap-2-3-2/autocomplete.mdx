@@ -1,11 +1,13 @@
 ---
 title: 'Autocomplete'
-description: 'Editable suggestions with free-text completion.'
+description: 'A Bootstrap 2.3.2 text input with filterable suggestions and free-text submission.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Editable suggestions with free-text completion.
+Autocomplete pairs a single-line text input with a filterable suggestion list, letting users either pick a suggestion or submit free text with `Enter`.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-autocomplete"
@@ -14,10 +16,27 @@ Editable suggestions with free-text completion.
   codePanel={false}
 />
 
-Root.value is committed text, while inputValue is the query. Selecting a suggestion commits its textValue; Enter without an active match may commit free text.
+## Installation
 
-The host owns the real single-line editor. Input retains focus during Arrow navigation; IME composition never selects. Filtering is case/diacritic insensitive over textValue and keywords. Empty reflects actual matches; disabled options cannot commit. open, value and inputValue are independently controlled with corresponding change requests. filter=false supports owner-filtered children. Duplicate-valued choices are rejected.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Input, Content, Item, Empty, Trigger.
+## Usage
 
-Draft source; shared Web A11y active-descendant projection, native/GPUI, compiler, consumer, visual and independent acceptance remain separate requirements.
+Compose `Root`, `Input`, `Trigger`, `Content`, `Item`, and `Empty`:
+
+- **Committed value vs. query**: `value` holds the committed text while `inputValue` holds the live query. Picking a suggestion commits its `textValue`; pressing `Enter` with no active suggestion commits the typed text.
+- **Filtering and empty state**: Built-in filtering matches `textValue` and `keywords` case- and diacritic-insensitively. Pass `filter={false}` to render pre-filtered items. `Empty` appears automatically when zero items match.
+- **Keyboard and IME**: Focus stays in `Input` while navigating with Arrow keys, and IME composition never prematurely commits an item. Disabled and duplicate-valued items cannot be committed.
+- **Independent control**: `open`, `value`, and `inputValue` can each be controlled independently via their change events.
+
+## API
+
+| Part | Props | Description |
+| --- | --- | --- |
+| `Root` | `value` / `inputValue` / `open` | Independently controlled committed text, query, and open state |
+| `Root` | `filter` | Toggle built-in filtering; set `false` for externally filtered children |
+| `Input` | — | Single-line text input that keeps keyboard focus during navigation |
+| `Trigger` | — | Toggles the suggestion list |
+| `Content` | — | Suggestion list container |
+| `Item` | `value` / `textValue` / `keywords` / `disabled` | Individual suggestion entry |
+| `Empty` | — | Displayed when no suggestions match |

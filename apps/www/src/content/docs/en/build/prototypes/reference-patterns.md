@@ -1,62 +1,62 @@
 ---
 title: 'How to Read Reference Implementations'
-description: 'Move from P/T entities into source, tests, exports, and public projections without treating implementation as specification.'
+description: 'Navigate from P/T spec entities into source code, tests, exports, and demos to learn Proto UI authoring patterns.'
 ---
 
-Existing Prototype implementations are important evidence, but they are not the highest authority. Use this reading order:
+When studying reference Prototypes in this repository, start from the spec entities and trace downward into code, tests, and consumer surfaces:
 
 ```text
-applicable P lifecycle and criteria
-→ related decisions / contracts / inheritance
-→ mapped T cases and executable paths
-→ implementation and focused tests
-→ exports, CLI, docs, demo
+Applicable P-* lifecycle and criteria
+→ Related decisions, inheritance, and contracts
+→ Linked T-* test cases and test files
+→ Prototype implementation and focused tests
+→ Exports, CLI, docs, and demos
 ```
 
-When implementation conflicts with an applicable entity, identify drift first. Do not silently change protocol meaning because “the repository currently does it this way.”
+Reading the spec first clarifies why the code is structured the way it is—and makes any drift between code and spec easy to spot.
 
-## 1. Find the applicable P/T graph
+## 1. Locate the applicable `P-*` and `T-*` entities
 
-Search by name, ID, or criterion:
+Search by name, entity ID, or criterion ID:
 
 ```sh
 rg -n "<prototype name|entity id|criterion id>" spec packages/prototypes apps/www internal/records
 ```
 
-Confirm:
+Check five things first:
 
-- whether the P entity is `draft`, `active`, deprecated, or removed;
-- which criteria apply to the current problem;
-- how direct Prototypes, authored asHooks, and Parts are cataloged;
+- the `P-*` entity's lifecycle status (`draft`, `active`, `deprecated`, or `removed`);
+- which criteria apply to your task;
+- how direct Prototypes, `asHook`s, and Parts are cataloged;
 - `inherits.prototypes`, dependencies, and related decisions; and
-- which executable tests the T cases map.
+- which executable tests the `T-*` cases map to.
 
-Legacy contracts and records can explain background. They cannot override an existing applicable spec entity.
+Files under `internal/contracts` and `internal/records` provide helpful context, while applicable `spec/**` entities remain the primary source of truth.
 
-## 2. Read a leaf Prototype
+## 2. Read a single-part Prototype
 
-Button is a relatively small vertical slice:
+`Button` is a compact vertical slice:
 
 - `P-BASE-BUTTON`;
 - `T-BASE-BUTTON-0001`;
 - [button.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/button/button.proto.ts); and
 - `packages/prototypes/base/test/as-button.test.ts`.
 
-Trace criteria into props, state, accessibility, events, exposes, and absence guarantees instead of recording only the order of API calls.
+Trace how each criterion translates into props, state, accessibility, events, exposes, and edge-case tests.
 
-Toggle provides another independent Base protocol for comparison:
+Compare it with `Toggle` to see a second independent Base protocol:
 
 - `P-BASE-TOGGLE` and `T-BASE-TOGGLE-0001`; and
 - [toggle.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/toggle/toggle.proto.ts).
 
-Button and Toggle both having authored asHooks does not permit one protocol to consume the other's protocol-specific hook.
+Even though both export an `asHook`, each hook stays scoped to its own protocol rather than acting as the substrate for the other.
 
 ## 3. Read a compound family
 
-Tabs requires Root and Parts together:
+For compound components like `Tabs`, read Root and Parts together:
 
-- `P-BASE-TABS` plus the List, Trigger, Content, and Indicator P entities;
-- the corresponding `T-BASE-TABS-*` entities;
+- `P-BASE-TABS` along with the List, Trigger, Content, and Indicator entities;
+- the matching `T-BASE-TABS-*` entities;
 - [shared.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/shared.ts);
 - [root.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/root.proto.ts);
 - [list.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/list.proto.ts);
@@ -64,43 +64,39 @@ Tabs requires Root and Parts together:
 - [content.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/content.proto.ts); and
 - [indicator.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/indicator.proto.ts).
 
-Trace owners, context facts, anatomy claims, collection and focus responsibilities, and mapped tests. File count alone does not prove a correct boundary.
+Focus on state ownership, shared `Context` fields, `def.anatomy.claim()` declarations, collection/focus ownership, and family tests.
 
-## 4. Read a design-language projection
+## 4. Read a styled component
 
-Shadcn Button is a compact Base-projection example:
+`Shadcn Button` is a concise example of Base inheritance:
 
 - `P-SHADCN-BUTTON` and `T-SHADCN-BUTTON-0001`;
 - inherited `P-BASE-BUTTON` criteria;
 - [Shadcn Button source](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/shadcn/src/button/button.proto.ts); and
 - `packages/prototypes/shadcn/test/button.test.ts`.
 
-Verify that:
+Look for five patterns:
 
-- the derived P declares only its delta;
-- implementation calls the owning Base asHook;
-- rules depend on inherited protocol states instead of making host selectors a second truth;
-- unsupported upstream APIs and absence assertions are recorded; and
-- package exports, CLI facades, website demos, and the P/T surface agree.
+- the styled `P-*` entity declares only its delta over Base;
+- the implementation calls the owning Base `asHook` first;
+- style `Rule`s react to inherited protocol states instead of treating host selectors as a second state source;
+- unsupported upstream APIs are documented and verified by tests; and
+- package exports, CLI facades, website demos, and specs match.
 
-Shadcn Switch and Tabs offer differently sized projections, but always begin from their own P/T graph rather than mechanically copying directory structure.
+You can also compare Shadcn Switch and Tabs to see how larger compound families are structured.
 
-## 5. Finish with the public delivery surface
+## 5. Check the public delivery surface
 
-After source and tests, inspect:
+After reading code and tests, inspect the consumer-facing surface:
 
 - package subpaths and root exports;
-- CLI registry and generated facades;
-- component-preset or style-token closure when applicable;
-- bilingual docs and a real public-package demo;
-- Web Component, React, and Vue Web evidence; and
-- generated workspace and Agent projections.
+- CLI registry entries and generated facades;
+- component presets and style-token closure (where applicable);
+- bilingual docs and real public-package demos;
+- Web Component, React, and Vue previews; and
+- generated workspace and derived doc artifacts.
 
-This distinguishes “implementation exists” from “the contribution forms a consumable, reviewable closure.”
-
-## Lifecycle note
-
-The Base Button, Toggle, Tabs, and Shadcn Button entities referenced here are currently `draft`. Learn from their ownership and evidence structure without widening current implementation details into uncataloged stable guarantees.
+> Note: The Base Button, Toggle, Tabs, and Shadcn Button spec entities referenced here are currently `draft`; check the spec files for their latest definitions.
 
 ## Further reading
 

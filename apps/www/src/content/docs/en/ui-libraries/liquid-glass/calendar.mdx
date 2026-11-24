@@ -1,27 +1,15 @@
 ---
-title: 'Calendar (WIP)'
-description: 'Gregorian date selection, localized weekdays and explicit caption composition.'
+title: 'Calendar'
+description: 'A Gregorian Liquid Glass calendar supporting single, multiple, and range selection with localized weekdays and composable captions.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Calendar is a Gregorian control with `single` (default), `multiple` and `range` selection modes. `value` uses YYYY-MM-DD; the canonical visible `month` uses YYYY-MM. Selection and month can each be controlled. A successful `requestMonth` means a proposal was emitted, not that the owner accepted it. Refused or pending cross-month keyboard navigation keeps the current valid Tab entry; accepted navigation materializes and focuses only after canonical month changes and current availability is checked. Focus is not stolen back from an external control.
+Liquid Glass Calendar provides Gregorian date selection in `single` (default), `multiple`, and `range` modes. Dates use `YYYY-MM-DD` strings and visible months use `YYYY-MM` strings; selection and month can each be controlled independently.
 
-## Range and multiple selection
+## Preview
 
-| Mode       | Controlled / initial selection              | Request callback             |
-| ---------- | ------------------------------------------- | ---------------------------- |
-| `single`   | `value` / `defaultValue`: YYYY-MM-DD string | `onValueChange({ value })`   |
-| `multiple` | `values` / `defaultValues`: date array      | `onValuesChange({ values })` |
-| `range`    | `range` / `defaultRange`: `{ from?, to? }`  | `onRangeChange({ range })`   |
-
-Multiple selection toggles each activated day. Arrays are deduplicated, sorted by civil date and copied on input and output. `minSelected` defaults to 0; `maxSelected` is unbounded when omitted. Adding a day can build up from empty toward the minimum; removing a day must leave at least the minimum. Explicit `requestValues` replacements validate the complete array against both count limits. Range selection starts with `{ from }`; a second activation completes an inclusive `{ from, to }`, ordering reversed endpoints. Activating a day after completion starts a new range. `{}` clears a range. A same-day range is complete when `minNights=0` (the default). `minNights` and `maxNights` constrain the civil-day interval between endpoints; they do not count selected cells. Omitted maxima are unbounded. Limits must be nonnegative integers.
-
-`min`, `max` and Root `unavailable` apply to every selected date. A completed range crossing an unavailable date is rejected and retains its anchor. Put whole-date restrictions on Root `unavailable`; local Day `disabled` only disables that authored control. Root `disabled` and `readOnly` reject selection requests. Changing eligibility never silently rewrites an owner's current selection.
-
-`requestValue(date)` activates a date in the current mode. `requestValues(dates)` and `requestRange(range)` replace the corresponding selection only in that mode. A true result means a request was emitted; controlled rendering changes only after the matching owner prop is accepted. `getValues()` and `getRange()` return copies. `default*` inputs initialize once, and switching modes preserves each mode's separate selection. Root also exposes `mode`, `selectedCount` and `rangeComplete`.
-
-Day exposes `rangeStart`, `rangeEnd`, `rangeMiddle` and `rangePending` alongside `selected`. A pending anchor has start/pending; a one-day complete range has start/end; interior days have middle. Every date in a complete range is selected. The family recipes distinguish endpoints from middle segments, and Grid projects `aria-multiselectable` for range and multiple modes. Keyboard navigation is unchanged; Enter or Space activates the focused date.
+### Selection modes (single / multiple / range)
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-calendar-selection"
@@ -29,24 +17,58 @@ Day exposes `rangeStart`, `rangeEnd`, `rangeMiddle` and `rangePending` alongside
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Composition and clock ownership
-
-The ten atoms are Root, Caption, Heading, Previous, Next, Grid, Weekdays, Weekday, Row and Day. Compose seven Weekday atoms with offsets 0–6 inside Weekdays, then optionally retain six indexed Rows (`index` 0–5) of Day atoms with offsets 0–41 as capacity. By default the canonical month displays the minimum complete 4, 5 or 6 weeks; Root `fixedWeeks=true` explicitly reserves six. Root exposes `weekCount`; indexed unused Rows and unused offset Days expose `hidden` and are hidden/disabled off the focus path. Unindexed rows and explicit dates remain application-authored. Weekday labels and date order follow Root `weekStartsOn` (0 = Sunday) and `locale`; full localized civil dates name the grid cells. `direction="rtl"` mirrors Left/Right navigation, leaving Up/Down and week boundaries unchanged. Navigation controls accept `a11yLabel` for icon-only accessible naming.
-
-The host supplies `today` as a civil-date string. Base never reads a clock or timezone: no `today` means no current-date marker. Today and selected are independent, including unavailable dates; today projects `aria-current="date"`. Initial month priority is explicit `month`, explicit `defaultMonth`, the active mode’s selected date (single value, earliest multiple value, or range start), supplied `today`, then deterministic 1970-01. Later clock updates do not silently navigate. `unavailable` is a string array; invalid inputs retain their prior valid value/default. Root disabled combines with local Day/Previous/Next disabled policy; readOnly blocks selection while allowing browsing.
-
-## Explicit month/year caption composition
-
-The demo uses real family Select controls and `bindCalendarCaption(source, {month, year})` through public Calendar month/disabled state and `requestMonth`. Caption itself is only a semantic group. Month and year selectors are application composition, not an internal Calendar Select dependency. The helper always restores canonical control values after rejection or pending acceptance, subscribes to later commits, and exposes `dispose()` for teardown. The demo owns an explicit year option list (not a Calendar limit), local-clock today, midnight/visibility refresh and complete controlled prop records. The Month and Year triggers pass stable names through the public Select `accessibleLabel` prop; Select Value independently displays the current month or year. The demo does not write Adapter-owned ARIA attributes. Computed accessible names, name stability after selection, keyboard interaction and focus return still require current-source browser evidence; screen-reader acceptance remains separate.
-
-Liquid Glass is an Apple-inspired material projection, not a one-to-one public Calendar reference implementation. Optical material capability and the opaque fallback must be verified separately.
-
-## Verification boundary
-
-This remains WIP. Calendar behavior has focused actual-host tests including WC, React, Vue and Vue2; public Props/Exposes/AsHook domains are checked independently. The current CLI collector misses some legitimate inherited Calendar/nested Button state tokens, so stateful generated CSS and browser visual fidelity are not accepted. Compiler interpretation is a separate owner’s responsibility, not a reason to constrain valid Prototype semantics. Native GPUI/Qt, compiled and packed parity, exact-commit browser evidence and independent acceptance remain open.
+### Standard calendar with month/year caption selectors
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-calendar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+### Composition and grid capacity
+
+Calendar comprises ten parts: `Root`, `Caption`, `Heading`, `Previous`, `Next`, `Grid`, `Weekdays`, `Weekday`, `Row`, and `Day`.
+
+- Place seven `Weekday` parts (`offset` `0–6`) inside `Weekdays`, and up to six indexed `Row` parts (`index` `0–5`) holding `Day` parts (`offset` `0–41`).
+- By default the calendar renders the minimum 4, 5, or 6 complete weeks needed for the active month; set `fixedWeeks={true}` to always show six weeks. Unused capacity rows and days expose `hidden` and stay out of focus and selection.
+- Weekday headings and full localized cell labels follow `weekStartsOn` (`0` = Sunday) and `locale`. `direction="rtl"` mirrors Left/Right navigation, and `a11yLabel` names icon-only Previous/Next buttons.
+
+### Single, multiple, and range behavior
+
+- **Multiple (`multiple`)**: activating a day toggles it in a deduplicated, sorted array. `minSelected` defaults to `0`, and omitting `maxSelected` leaves the upper bound open.
+- **Range (`range`)**: the first activation sets `{ from }`, the second completes an inclusive `{ from, to }` (automatically sorting reversed endpoints), and a subsequent activation starts a new range. `{}` clears the range. `minNights` (default `0`, allowing single-day ranges) and `maxNights` bound the civil-day span between endpoints.
+- `min`, `max`, and Root `unavailable` apply to every selected date; ranges spanning an unavailable date are rejected while keeping the starting anchor. Use Root `unavailable` for whole-date rules and Day `disabled` for individual cells.
+- `readOnly` prevents selection changes while still allowing month navigation; `disabled` disables both.
+
+### Clock ownership and month/year selectors
+
+- Calendar does not read the system clock or timezone; pass `today` as a `YYYY-MM-DD` string to highlight the current date (`aria-current="date"`).
+- Initial month precedence: `month` → `defaultMonth` → active mode's selected date → `today` → `1970-01`.
+- To add month and year dropdowns, bind real family Select controls with `bindCalendarCaption(source, { month, year })` against Calendar's public `month`/`disabled` state and `requestMonth`, call `dispose()` on teardown, and pass stable names via Select's `accessibleLabel`.
+
+## API
+
+| Part / Mode | Props | Defaults and notes |
+| --- | --- | --- |
+| Root | `mode` | `'single' \| 'multiple' \| 'range'`, default `'single'` |
+| Root (`single`) | `value`, `defaultValue` | `YYYY-MM-DD` string; emits `onValueChange({ value })` |
+| Root (`multiple`) | `values`, `defaultValues` | Date array; pairs with `minSelected` (`0`), `maxSelected`, `onValuesChange({ values })` |
+| Root (`range`) | `range`, `defaultRange` | `{ from?, to? }`; pairs with `minNights` (`0`), `maxNights`, `onRangeChange({ range })` |
+| Root | `month`, `defaultMonth` | `YYYY-MM` string; independently controllable |
+| Root | `today`, `min`, `max`, `unavailable` | Current-date marker and eligibility bounds (`unavailable` is a string array) |
+| Root | `weekStartsOn`, `locale`, `direction`, `fixedWeeks` | `weekStartsOn` defaults to `0`; `fixedWeeks` defaults to `false` |
+| Root | `disabled`, `readOnly` | Disables interaction or blocks selection edits |
+| Previous / Next | `a11yLabel`, `disabled` | Accessible label and local disable |
+| Row / Day | `index`, `offset`, `disabled` | Grid capacity indices and per-day disable |
+
+### Methods and exposed states
+
+- Root methods: `requestMonth(month)`, `requestValue(date)`, `requestValues(dates)`, `requestRange(range)`, `getValues()`, `getRange()`.
+- Root states: `mode`, `weekCount`, `selectedCount`, `rangeComplete`.
+- Day states: `selected`, `rangeStart`, `rangeEnd`, `rangeMiddle`, `rangePending`, `hidden`. Grid sets `aria-multiselectable` in multiple and range modes.

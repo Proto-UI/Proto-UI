@@ -145,7 +145,12 @@ fn readonly_preserves_boolean_facts_without_changing_actions_or_check_state() {
 
 #[test]
 fn readonly_absence_and_invalid_values_do_not_invent_a_boolean_fact() {
-    for value in [None, Some(json!("false")), Some(Value::Null), Some(json!(0))] {
+    for value in [
+        None,
+        Some(json!("false")),
+        Some(Value::Null),
+        Some(json!(0)),
+    ] {
         let mut snapshot = snapshot(json!({
             "semanticObjectId": "checkbox",
             "role": "checkbox",
@@ -157,10 +162,16 @@ fn readonly_absence_and_invalid_values_do_not_invent_a_boolean_fact() {
             snapshot.states.insert("readOnly".into(), value.clone());
         }
         let (projection, issues) = project(&snapshot);
-        assert_eq!(projection.expect("the checkbox still projects").read_only, None);
+        assert_eq!(
+            projection.expect("the checkbox still projects").read_only,
+            None
+        );
         let expected: Vec<_> = value
             .into_iter()
-            .map(|value| A11yIssue::State { name: "readOnly".into(), value })
+            .map(|value| A11yIssue::State {
+                name: "readOnly".into(),
+                value,
+            })
             .collect();
         assert_eq!(issues, expected);
     }

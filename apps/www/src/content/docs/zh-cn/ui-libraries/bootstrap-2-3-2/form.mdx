@@ -1,9 +1,13 @@
 ---
-title: bootstrap-2-3-2 Form
-description: 可移植 form 原子草稿。
+title: 'Bootstrap 2.3.2 Form'
+description: '汇总字段校验、按字段名提交数据并支持重置的 Bootstrap 2.3.2 表单组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Bootstrap 2.3.2 Form 协调表单内所有已注册字段的同步与异步校验，并在全部有效时通过 `submit` 事件输出按字段名组织的表单数据。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-form"
@@ -12,10 +16,26 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root 汇总显式 FormField，通过规范 Field 控件校验后才发出命名值快照 submit。禁用项被排除，重复名称拒绝序列化；异步校验等待当前结果，值变化、移除、取消及卸载撤销旧提交。Form disabled 同时传递到内部 Field。FormSubmit 与 FormReset 支持键盘/指针激活。聚焦的单行 Field、Number Field 和 OTP 编辑器支持隐式 Enter，排除组合输入、修饰键及重复 keydown。requestReset 恢复挂载初值，受控值仅向作者发提议，同时取消编辑和过期校验并发出 reset；resetValidation 只清理校验。不自动联网、原生导航或创建隐藏 HTML 表单项。
+## 安装
 
-四家族继承同一 Base 行为。部件： root, field, submit, reset.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-FormSubmit 与 FormReset 提供明确类型的 disabled、hovered、pressed、focused、focusVisible 及 focusSelf。Form 独立拥有唯一激活语义；四家投影复用各自既有 Button 的被动视觉规则，呈现焦点、悬停、按压和禁用反馈。
+## 用法
 
-当前为 Draft 源码阶段。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍未完成，不据此勾选 Finf。
+由 `Root`、`FormField`、`FormSubmit` 和 `FormReset` 组成：
+
+- **校验与提交**：`Root` 汇总内部显式注册的 `FormField`，校验通过后在 `submit` 事件中返回按字段名组织的表单数据。禁用的字段不参与序列化；存在重复字段名时忽略非法配置并阻止提交。若包含异步校验，会等待最新校验完成，期间值变更、取消或卸载会自动作废旧提交。
+- **快捷提交**：焦点位于单行 `Field`、`Number Field` 或 `Input OTP` 内时，按 `Enter` 可直接触发表单提交（IME 组合输入、修饰键及长按重复触发除外）。
+- **整表禁用与重置**：设置 `Form` 的 `disabled` 会自动传递到内部 `Field`。调用 `requestReset()` 或点击 `FormReset` 会将非受控字段恢复为挂载初值，向受控字段发送重置请求，取消进行中的编辑与校验并触发 `reset` 事件；若仅需清空错误提示，调用 `resetValidation()`。
+- **按钮反馈**：`FormSubmit` 与 `FormReset` 复用 Bootstrap 2.3.2 按钮样式，并暴露 `disabled`、`hovered`、`pressed`、`focused`、`focusVisible` 状态及 `focusSelf()` 方法。表单本身不发起网络请求或页面跳转，由应用监听 `submit` 事件处理提交逻辑。
+
+## API
+
+| 部件 | 属性 / 方法 / 事件 | 说明 |
+| --- | --- | --- |
+| `Root` | `disabled` | 禁用整张表单及内部字段 |
+| `Root` | `submit` / `reset` | 校验通过后提交表单数据事件 / 重置完成事件 |
+| `Root` | `requestReset()` / `resetValidation()` | 重置表单值与状态 / 仅清除校验状态 |
+| `FormField` | — | 向 `Form` 注册单个字段及其字段名 |
+| `FormSubmit` | `focusSelf()` | 触发表单校验与提交的按钮 |
+| `FormReset` | `focusSelf()` | 触发表单重置的按钮 |

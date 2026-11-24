@@ -1,11 +1,13 @@
 ---
 title: 'Toolbar'
-description: '带可访问名称、分隔线及键盘游走操作的工具栏。'
+description: '支持游走焦点、交叉轴分隔线与无障碍命名的 Bootstrap 2.3.2 工具栏组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-带可访问名称、分隔线及键盘游走操作的工具栏。
+Toolbar 将一组操作按钮与视觉分隔线收纳在一个紧凑的键盘游走容器中，适合编辑器和面板操作栏。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-toolbar"
@@ -14,8 +16,21 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root 管理 disabled、orientation、loop、a11yLabel。Button 激活时发出带 value 的 action。仅一个启用命令参与 Tab；箭头在工具栏内移动。Separator 沿交叉轴显示。
+## 安装
 
-组成: Root, Button, Separator.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码；native/GPUI、编译器、打包消费、截图及完整独立验收仍待完成。
+## 用法
+
+由 `Root`、`Button` 和 `Separator` 组成：
+
+- **游走焦点**：整条工具栏仅占一个 Tab 入口，使用方向键在已启用的命令按钮之间移动；开启 `loop` 后可在首尾之间循环。
+- **命令激活与分隔线**：点击或按键盘激活启用的 `Button` 时，发出包含其 `value` 的 `action` 事件；`Separator` 会自动沿工具栏的交叉轴方向渲染。
+
+## API
+
+| 部件 | 属性 / 事件 | 说明 |
+| --- | --- | --- |
+| `Root` | `disabled` / `orientation` / `loop` / `a11yLabel` | 禁用、方向、首尾循环与工具栏可访问名称 |
+| `Button` | `value` / `action` | 命令标识与激活时发出的 `action` 事件 |
+| `Separator` | — | 自动跟随交叉轴方向的分隔线 |

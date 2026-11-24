@@ -2,6 +2,7 @@ import type { CompilerDiagnostic, ExpressionIR, Operation } from './ir';
 import { interactionValueAlternatives } from './interaction-value-shape';
 import type { NativeLexicalScope } from './template-shape';
 import { valueAlternatives } from './value-types';
+import { GPUI_PROFILE_SOURCE } from './gpui-dependency';
 
 /** Native language atoms whose complete coercion/prototype boundary is known. */
 export function gpuiIntrinsicSupported(
@@ -30,8 +31,7 @@ export const GPUI_UNAVAILABLE_OPERATIONS: ReadonlySet<Operation> = new Set([
   'focusEntry.focus',
   'focusEntry.setDisabled',
 ]);
-export const GPUI_MISSING_FOCUS_TREE =
-  'The published GPUI revision 62e5991dd0f0c8a3af8d5e7e9c4652490d468db8 does not provide Window::resolve_focus_entry, focus_tree_generation or observe_focus_tree. Physical FocusEntry requires a separately verified SDK with that API; no focus-moving probe or logical-only fallback is emitted.';
+export const GPUI_MISSING_FOCUS_TREE = `The published GPUI revision ${GPUI_PROFILE_SOURCE.revision} does not provide Window::resolve_focus_entry, focus_tree_generation or observe_focus_tree. Physical FocusEntry requires a separately verified SDK with that API; no focus-moving probe or logical-only fallback is emitted.`;
 
 /** Scope's logical navigation remains available; its optional physical fallback does not. */
 export function gpuiScopeCapabilityDiagnostic(

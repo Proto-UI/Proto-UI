@@ -1,7 +1,6 @@
 ---
 title: 'Tooltip'
-desp: 'Tooltip'
-description: 'Tooltip 与 Tooltip Group 基础原型'
+description: '支持悬停延迟、键盘即时展开与分组预热窗口的文字提示组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -10,17 +9,9 @@ import CodeExample from '@/components/CodeExample.astro';
 import { baseTooltipFiles } from '@/content/docs/demo_components/tooltip-usage';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Base Tooltip 由 Root、Trigger 与 Content 组成；Tooltip Group 是同族的相邻协议，用于在多个 Root 间共享 delay defaults、warm window 与 active owner coordination。
+用于为触发元素提供简短说明文字的无样式提示浮层，支持通过 `TooltipGroup` 在多个提示间共享延迟默认值与快速切换预热窗口。
 
-- 首次 pointer hover 在 `openDelay` 后打开，反向移动会取消 pending task。
-- keyboard focus 立即打开，不等待 pointer delay。
-- `closeDelay` 让指针可以从 Trigger 移入 Content；Content 本身不得包含可聚焦交互。
-- Trigger 只在 open 时以 additive `aria-describedby` 引用 `role="tooltip"` 的 Content。
-- Escape 进入 Root 的统一 close request channel。
-- Group warm window 内切换到 sibling Tooltip 时立即打开；前一个非受控 Tooltip 同步结束感知 presence，不保留可见退场重叠，`skipDelay` 到期后恢复首次延迟。
-- Draft 生命周期规则：当前 active Root 卸载或终止销毁时，Group 立即恢复 cold 延迟；普通关闭仍保留 `skipDelay` window。保留 open fact 的 Root 重新挂载时再次登记；旧 cleanup 不得清除新 active Root，拒绝关闭的受控 Root 也不会被自动重新选主。
-
-当前 Portal 由 Content 的 Overlay/renderer projection 持有，不单独提供 Base Portal 原型。Arrow 需要受治理的 geometry/positioning 通道，暂不属于当前 Base 保证。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-tooltip"
@@ -29,35 +20,35 @@ Base Tooltip 由 Root、Trigger 与 Content 组成；Tooltip Group 是同族的�
   hasCode={true}
 />
 
-## 建议验收路径
+## 安装
 
-1. 把指针移入 `Account`，确认约 500ms 后出现 Tooltip；提前移出时不应闪现。
-2. Tooltip 打开后快速移到 `Notifications`，确认 sibling 在 warm window 内立即打开，且前一个立即消失、没有双 Tooltip 可见重叠。
-3. 等两个 Tooltip 都关闭超过 700ms，再次 hover，确认恢复 500ms 延迟。
-4. 使用 Tab 聚焦 Trigger，确认立即打开；按 Escape 后关闭且焦点仍留在 Trigger。
-5. 在工具栏切换 Web Components、React、Vue 与 Vue 2，重复上述交互。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版（已发布版本的接入方式见[稳定版 Quick Start](/zh-cn/start-here/quick-start/)）。Base Tooltip 通过 `@proto.ui/prototypes-base/tooltip` 直接导出，无独立的 `proto-ui add` 目标。
 
-## 当前源码安装与用法
+从同一份源码修订安装 `@proto.ui/cli`、`@proto.ui/prototypes-base` 与对应宿主 Adapter（`@proto.ui/adapter-web-component`、`@proto.ui/adapter-react`、`@proto.ui/adapter-vue` 或 `@proto.ui/adapter-vue2`，Vue 2 需使用 Vue `>=2.6.0 <2.7`）。本地源码检出可通过仓库的[仅打包流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs)与[干净消费者安装流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs)准备本地包。
 
-以下文件面向当前 0.3 源码包，包括 Vue 2.6 Adapter；工作区版本号不代表这些包已经发布到 npm。从已有宿主应用开始，把 CLI、`@proto.ui/prototypes-base` 与对应 Adapter 从**同一个已审查源码版本**安装。仓库的 [仅打包流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) 生成本地 tarball，[干净消费者安装流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs) 从这些 tarball 安装完整声明的 `@proto.ui/*` 依赖闭包。[稳定版 Quick Start](/zh-cn/start-here/quick-start/) 仍是独立的已发布版本路线。
-
-按宿主使用 `@proto.ui/adapter-web-component`、`@proto.ui/adapter-react`、`@proto.ui/adapter-vue` 或 `@proto.ui/adapter-vue2`。React 与 Vue 保留原应用挂载入口。 React 示例把 `react-dom` 的 `createPortal` 传入 Adapter，使 Content 使用 renderer-owned portal。Vue 2 要求 Vue `>=2.6.0 <2.7`；把 CLI 版本换成 `@latest` 不能让安装结果自动等同于源码预览。
-
-安装配套包后，在应用目录运行本地 CLI。保留生成的 CSS：Base 的 presence 与 positioning 也需要其中的结构规则。下方小型 `tooltip-demo.css` 由应用拥有，不替代这些规则。
+安装后在应用目录运行同版本 CLI 生成结构样式文件 `proto-ui-style.css`（如果入口已导入，保留一次即可）：
 
 ```sh
 node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --prototypes shadcn
 ```
 
-Base Tooltip 提供 `@proto.ui/prototypes-base/tooltip` 公共导出，但**没有 `proto-ui add` 目标**。下方直接适配这些导出；WC 示例通过公开 Adapter 注册自己的 `app-base-tooltip-*` 标签，并使用 `setElementProps` 设置输入。这里使用 Shadcn preset 的结构 CSS，Base 外观仍来自示例自有样式；这不会把 Base 变成 Shadcn Tooltip 家族。
-
-复制一个宿主的文件。WC HTML 加入已有文档，`src/main.ts` 只加载一次；React 与 Vue 保留应用原有入口并使用下方 `App` 组件。如果应用已经加载 `proto-ui-style.css`，保留一个导入入口即可。一个 Group 拥有两个非受控 Root，每个 Root 各有一个独立 Trigger 和一个不含交互控件的 Content。
+React 示例通过向 `createReactAdapter` 传入 `react-dom` 的 `createPortal` 来渲染传送门浮层；Web Components 通过 `setElementProps` 为自定义标签配置属性。
 
 <CodeExample files={baseTooltipFiles} initialHost="wc" label="Base Tooltip 完整宿主用法" />
 
-## 在 Button 上使用 Tooltip
+## 用法
 
-可聚焦命令与 Tooltip 应共用一个 subject。将 draft authored hook `useTooltipTrigger()` 与命令行为组合，适配生成的原型，再把该组件直接放在 Tooltip Root 内与 Content 并列。不要用独立 Trigger 包裹另一个可聚焦 Button，否则会产生两个 Tab 停靠点。
+### 交互与分组协调
+
+由 `Root`、`Trigger`、`Content` 与可选的 `Group` 组成：
+
+- **悬停与键盘聚焦**：首次指针悬停在 `openDelay` 后打开（提前移出会取消延迟）；键盘聚焦则立即打开，无需等待。
+- **关闭延迟与无障碍关联**：`closeDelay` 允许指针从 `Trigger` 平滑移入 `Content`（`Content` 仅放非交互说明文本）。仅在打开时自动维护 `Trigger` 到 `Content`（`role="tooltip"`）的 `aria-describedby` 关联并在卸载或关闭时清理；按 `Escape` 可关闭提示并保留触发器焦点。
+- **Group 预热窗口**：在 `Group` 的 `skipDelay` 预热窗口内切换到同组其他 Tooltip 时会立即打开，并同步收起前一个非受控提示以避免双浮层重叠；超过 `skipDelay` 后恢复首次悬停延迟。当前活动 `Root` 卸载或销毁时，`Group` 立即恢复冷启动延迟。
+
+### 在 Button 上组合 Tooltip
+
+让按钮与提示触发器共用同一个交互节点，使用 `useTooltipTrigger()` 与 `asButton()` 组合，避免用独立 `Trigger` 包裹可聚焦按钮导致双 Tab 停靠点：
 
 ```ts
 import { definePrototype } from '@proto.ui/core';
@@ -73,15 +64,13 @@ export const tooltipButton = definePrototype<ButtonProps, ButtonExposes>({
 });
 ```
 
-Button 保留 role、name、click signal、disabled state 与唯一焦点 owner；Tooltip 只追加 hover/focus intent 与自有 `aria-describedby` 关联。禁用 Tooltip Root 只关闭 Tooltip，命令仍可操作；禁用命令则同时抑制两者。`useTooltipTrigger` 没有 options，也不新增 outward exposes，要求同一 subject 已有焦点能力。独立 `asTooltipTrigger` 保留原焦点行为与 exposes。
+`Button` 保留原有角色、点击信号、禁用态与焦点；`useTooltipTrigger()` 追加悬停/聚焦触发与 `aria-describedby` 关联。禁用 Tooltip `Root` 仅关闭提示，按钮仍可点击；禁用按钮则同时抑制两者。复用已有风格组件时，可在 `definePrototype` 中保留其静态 `modules` 声明，调用原 `setup(def)` 后再调用 `useTooltipTrigger()` 并返回捕获的渲染函数。
 
-复用已有样式原型时，可在 `definePrototype` 中保留该原型的静态 `modules` 声明，调用其 `setup(def)`，再调用 `useTooltipTrigger()`，最后返回之前保存的 render function。这保留 family Button 呈现并只创建一个宿主；与下方独立 Trigger demo 的 passive action-body 样式工作分别追踪。
+### 在 `ShadowRoot` 中使用
 
-## ShadowRoot
+当触发元素位于 `ShadowRoot` 内时，`Content` 也需要挂载在同一棵 Shadow DOM 树中，否则跨 Shadow 边界的 `aria-describedby` 无法为命令元素建立无障碍描述。
 
-命令位于真实 `ShadowRoot` 中时，Tooltip Content 也要留在同一棵树内。Web Adapter 默认把 overlay 投影到 `document.body`；即使 Content 可见、ID 字符串也相同，跨越命令所在 ShadowRoot 的 `aria-describedby` 仍不能形成该命令的可访问描述。
-
-在挂载适配后的 Tooltip 组件前，注册应用拥有的 scene 和独立 overlay 目标。`registerWebPortalDestination` 是 `@proto.ui/adapter-base` 公开导出的 Web 宿主策略，不是 Tooltip 属性。以下 helper 为 React、Vue、Vue 2 或 Web Components 提供挂载点：
+在挂载组件前，通过 `@proto.ui/adapter-base` 导出的 `registerWebPortalDestination` 注册应用管理的容器与浮层挂载点（目标节点需位于 `scene` 内且在 `Content` 之外）：
 
 ```ts
 import { registerWebPortalDestination } from '@proto.ui/adapter-base';
@@ -109,13 +98,11 @@ export function createTooltipScene(container: HTMLElement) {
 }
 ```
 
-通过所选 Adapter 把 Root、共用 subject 的命令和 Content 挂到 `appMount`，并把家族生成的 CSS 放进 `shadow`。在 owner 存活期间保持 `overlays` 已连接。离开 scene 时，把框架的 unmount/destroy 函数传给 `dispose` 并等待完成，先退休组件 owner，再释放 portal 注册。目标必须位于 scene 内，不能放在被投影的 Content 自身内部。
-
-原生消费者回归覆盖 Base、Shadcn、Brutalist 与四个 Web 宿主的该组合，检查 Tab 顺序、浏览器计算出的可访问描述、Escape、命令重新挂载和清理。对应负控保留默认 body 目标，观察 ID 字符串相同但计算描述为空的结果。这是 Web／浏览器可访问性边界；真实辅助技术验收仍单独保留。
+将 `Root`、组合命令和 `Content` 挂载到 `appMount`，并将生成的 CSS 放入 `shadow`。清理时调用 `dispose` 等待框架卸载完成，再移除节点并释放 portal 注册。
 
 ## API
 
-Base Tooltip 以上述当前源码包的公共导出为依据，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -127,7 +114,13 @@ Base Tooltip 以上述当前源码包的公共导出为依据，没有公开的 
   ]}
 />
 
-这些属性属于 Root。Trigger 的 `disabled` 默认 `false`。Content 接受 Transition 属性，`side` 默认 `top`，`align` 默认 `center`，`sideOffset` 默认 `4`，`alignOffset` 与 `collisionPadding` 默认 `0`，`avoidCollisions` 默认 `true`。Group 的 `openDelay` 默认 `700`，`closeDelay` 默认 `100`，`skipDelay` 默认 `300`。
+传入 `open` 可受控管理显示状态。
+
+### 其他部件属性
+
+- **Trigger**：`disabled`（默认 `false`）。
+- **Content**：支持 `Transition` 属性，提供 `side`（默认 `'top'`）、`align`（默认 `'center'`）、`sideOffset`（默认 `4`）、`alignOffset`（默认 `0`）、`collisionPadding`（默认 `0`）、`avoidCollisions`（默认 `true`）。
+- **Group**：`openDelay`（默认 `700`）、`closeDelay`（默认 `100`）、`skipDelay`（默认 `300`）。
 
 ## 参考
 

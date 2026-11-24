@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Dialog'
-description: 'Industrial Neo-Brutalist dialog and dismissal controls'
+description: 'A modal dialog with bold Brutalist borders, hard offset shadows, and high-contrast dismissal controls.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,28 +9,29 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-# Dialog
+Brutalist Dialog pairs [Base Dialog](/en/ui-libraries/base/dialog/) modality, focus management, and command wiring with a bold poster-style panel and high-contrast dismissal controls.
 
-The panel keeps Base Dialog semantics and command wiring while using an industrial poster treatment.
-
-- The opener uses a sky-blue hard-shadow control.
-- The top-right X is a dedicated canary-yellow rounded control, not a borderless icon. Its glyph takes the canary fill's paired foreground, so it stays legible in both themes.
-- Hover changes the X to coral and increases its hard shadow.
-- Press advances the control `1px` in both axes and removes its shadow.
-- Footer dismiss actions use the same explicit close semantics; they must not masquerade as neutral text links. Close owns dismissal without a control surface of its own, so the footer action composes a Button child and the composition keeps one tab stop.
-- Focus remains a visible hard outline; the accessible `Close` name is preserved.
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-dialog" initialRuntime="wc" />
 </div>
 
-## Draft workspace inheritance
+## Installation
 
-The current workspace also inherits the bounded [Base Mask pointer-default behavior](/en/ui-libraries/base/dialog/): participating Mask prevents its root-scoped pointer default from stealing restored focus, while passthrough remains unprevented and Content retains dismissal ownership. This draft revision is separate from any previously published family version; it introduces no new styled Dialog props.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-dialog`
+
+## Usage
+
+- **Trigger and close controls**: The opener uses a sky-blue hard-shadow button, while the top-right close control (accessible name `Close`) is a dedicated canary-yellow rounded button that turns coral on hover and removes its shadow on press while keeping a crisp focus outline.
+- **Footer dismiss action**: `Close` provides dismissal semantics without adding its own button chrome. Wrap a `Button` child inside `Close` for footer dismiss actions while keeping a single `Tab` stop.
+- **Mask behavior**: A non-passthrough `Mask` (`passthrough={false}`) prevents pointer defaults from stealing restored focus, while `Content` governs dismissal rules.
 
 ## API
 
-Dialog is workspace source. For this workspace version, the CLI target is `brutalist-dialog`. Use matching CLI and package versions; check the chosen release's availability before installing. Passing `open` selects controlled mode.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -42,4 +43,10 @@ Dialog is workspace source. For this workspace version, the CLI target is `bruta
   ]}
 />
 
-These props belong to Root. Mask accepts `passthrough` (`false`) plus the Transition props. Content defaults `focusEntry` to `auto` and also accepts the Transition props. Trigger, Title, Description and Close have no props.
+Pass `open: boolean` to enable controlled mode.
+
+### Other parts
+
+- **Mask**: `passthrough?: boolean` (default `false`) and Transition props
+- **Content**: `focusEntry` (default `'auto'`) and Transition props
+- **Trigger / Title / Description / Close**: No props

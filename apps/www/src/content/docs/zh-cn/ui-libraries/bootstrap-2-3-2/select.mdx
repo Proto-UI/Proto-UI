@@ -1,11 +1,15 @@
 ---
 title: 'Select'
-description: 'Bootstrap 2.3.2 Select: five direct Base parts, controlled selection and anchored popup.'
+description: '由五个部件组成、支持受控单选与锚定弹层的 Bootstrap 2.3.2 下拉选择框。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Bootstrap 2.3.2 Select 提供 Root、Trigger、Value、Content、Item 五个真实原型，每个 part 直接消费对应 Base hook。当前是 draft workspace 源码；源码和 synthetic DOM 测试不等于原生宿主验收通过。
+Bootstrap 2.3.2 Select 是基于 Base Select 的设计语言扩展，借鉴归档 Bootstrap 2.3.2 按钮下拉菜单的圆角、阴影与间距，提供完整的受控单选、键盘导航与碰撞避让弹层。
+
+## 预览
+
+示例涵盖非受控选择、禁用态、受控选择（选中后点击 **Accept selection** 提交新值）以及 RTL 长文本换行。
 
 <PrototypePreviewer
   class="select-content-preview"
@@ -15,23 +19,9 @@ Bootstrap 2.3.2 Select 提供 Root、Trigger、Value、Content、Item 五个真�
   codePanel={false}
 />
 
-## 体验
+## 安装
 
-四个例子分别展示非受控 value、禁用、受控 value、RTL 长标签。受控示例选择一个选项后，需要点击 **Accept selection** 才会提供新的 owner value；popup 可以先关闭，已提交值保持原状。预览工具栏使用本体系真实 Select parts 切换 WC、React、Vue、Vue 2。
-
-## 五个 part，一个 owner
-
-- Root 持有 `open`、`value`、selected text、collection 和请求。分别传入 `open`/`value` 时进入独立受控模式；`defaultOpen`/`defaultValue` 初始化非受控状态。保留 `disabled` 与 `closeOnSelect`。
-- Trigger 投射 combobox 关系、effective disabled 和交互状态。指针激活 toggle；Enter/Space 打开；ArrowDown/ArrowUp 从已选项或首/末可用项进入。
-- Value 按 selected text、raw value、placeholder、空内容回退，不拥有输入或 focus。
-- Content 持有 listbox、fixed anchored portal、碰撞处理和键盘导航。保留 `side`、`align`、`sideOffset`、`alignOffset`、`avoidCollisions`、`collisionPadding` 和 Transition props；本投影使用零时长 presence。
-- Item 持有 option identity 与派生 selected/active。指针、Enter、Space 提交可用项；导航和 hover 不提交 value，禁用项从导航中跳过。
-
-Escape 取消并返回 Trigger focus，Tab 关闭但不阻止遍历，outside press 关闭。Root 请求仍为 `openChange` 与 `valueChange`，Item 另发出 `select`。更新已选 Item 的 `textValue` 会刷新显示标签。
-
-长标签换行且可收缩；Content 受宿主 available width/height 约束，文字对齐和尾部指示符遵循逻辑方向。外部需给 Trigger focus ring 留白。此处是 select-only 单选协议；form submission、editable search、multi-select、虚拟化和 item-aligned positioning 不属于当前 Base 保证。
-
-## 使用 workspace 源码
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
 ```ts
 import {
@@ -43,12 +33,27 @@ import {
 } from '@proto.ui/prototypes-bootstrap-2-3-2/select';
 ```
 
-source-only CLI 项 `bootstrap-2-3-2-select` 仅在显式 workspace source mode 下生成四种 Web facade 的完整五 part。包仍是 private、未发布；GPUI facade generation 尚未实现。
+## 用法
 
-## 视觉参考
+### 组合与交互
 
-Bootstrap 2.3.2 原本使用原生 HTML select；当前自定义 Select 明确属于 Proto UI 设计语言扩展，借鉴该版本 button-dropdown 表现。保留 Trigger 4px、panel 6px 圆角、0/5/10px popup shadow 和按 rem 表达的 3px/20px option 留白。改为长标签换行、有界 portal 宽度、明确 focus outline，并加深蓝色高亮以支持白字阅读。不加载 jQuery、Glyphicons 或 upstream JavaScript；源码包保留 Apache 2.0 署名。
+由 `Root`、`Trigger`、`Value`、`Content` 和 `Item` 五个部件组成：
 
-- [Base Select](/zh-cn/ui-libraries/base/select/)
-- [Source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/bootstrap-2-3-2/src/select)
-- [Evidence map](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-SELECT-DRAFT-PROJECTIONS-0001.yaml)
+- **状态由 Root 统一管理**：`open` 与 `value` 可分别独立进入受控模式，非受控初始值通过 `defaultOpen` 和 `defaultValue` 提供。
+- **键盘与鼠标**：点击 `Trigger` 切换展开，`Enter` / `Space` 打开列表，`ArrowDown` / `ArrowUp` 定位到当前已选项或首末可用项；在列表中用方向键浏览不会提前改值，按 `Enter` / `Space` 或点击可用 `Item` 提交选择（禁用项自动跳过）。按 `Escape` 取消并将焦点交回 `Trigger`，按 `Tab` 或点击外部自动关闭。
+- **文本展示与换行**：`Value` 按已选文本 → 原始 `value` → `placeholder` → 空内容依次回退，更新已选 `Item` 的 `textValue` 会自动刷新展示文本。长标签自动换行，弹层宽度与高度自动受视口可用空间约束。
+- **风格细节**：由于归档 Bootstrap 2.3.2 原生依赖浏览器 `<select>`，本组件借鉴其 button-dropdown 视觉语法（4px 触发器圆角、6px 面板圆角、rem 缩放内边距，并加深选中蓝底以确保白字对比度）。
+
+更多协议细节请参阅 [Base Select](/zh-cn/ui-libraries/base/select/)。
+
+## API
+
+| 部件 | 属性 / 事件 | 说明 |
+| --- | --- | --- |
+| `Root` | `open` / `defaultOpen`、`value` / `defaultValue` | 独立控制展开状态与选中值 |
+| `Root` | `disabled` / `closeOnSelect` | 禁用控件 / 选中后是否自动关闭 |
+| `Root` | `openChange` / `valueChange` | 展开状态与选中值变更请求事件 |
+| `Trigger` | — | 带有 `combobox` 语义的触发按钮 |
+| `Value` | `placeholder` | 显示当前选中标签或占位文案 |
+| `Content` | `side` / `align` / `sideOffset` / `alignOffset` / `avoidCollisions` / `collisionPadding` | 锚定列表弹层与碰撞避让配置 |
+| `Item` | `value` / `textValue` / `disabled` / `select` | 单个选项定义及选中事件 |

@@ -1,0 +1,15 @@
+{
+  "head": "ba81d77e73814b32c2c14afc74ef3a809faffc1a",
+  "command": [
+    "node",
+    "scripts/coverage-matrices/prototype-coverage.mjs",
+    "--refresh-candidate",
+    "ba81d77e73814b32c2c14afc74ef3a809faffc1a",
+    "--refresh-consumer-issues",
+    "harness.transcript.follow-tail",
+    "--write"
+  ],
+  "exitCode": 0,
+  "elapsedMs": 51067,
+  "status": "M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md"
+}

@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Toggle'
-description: '基于 Base Toggle 的 Neo-Brutalist 持续状态投射'
+description: '带有持久内嵌墨黑边框激活提示与三档尺寸的 Brutalist 风格二态切换按钮。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,15 +9,26 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-Toggle 保留 Base 的 activation 与 `aria-pressed` 所有权。锁存 active state 使用持续 inset ink frame 作为非颜色无障碍扩展；瞬时 press 保持平面几何，不产生位移。固定 Neo 尺寸 recipe 为默认 40px、small 36px（0.8rem 文字）与 large 44px（text-sm）；上游 icon-size/side-padding 与 variants 仍不在此限定投射范围。当前真实浏览器视觉验证待完成。
+Toggle 是一个可在激活与未激活之间切换的双态按钮，内置 `aria-pressed` 语义。Brutalist 风格在激活态添加持久的内嵌墨黑边框作为非颜色视觉提示，按下时保持扁平几何且不发生位移。
+
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-toggle" initialRuntime="wc" />
 </div>
 
+## 安装
+
+已包含在 `@proto.ui/prototypes-brutalist@0.2.0` 中。可通过 CLI 目标 `brutalist-toggle` 添加，或从 `@proto.ui/prototypes-brutalist/toggle` 导入。
+
+## 用法
+
+- **尺寸档位**：`size` 支持 `'sm'`（36px、`0.8rem` 字号）、`'default'`（40px）与 `'lg'`（44px、`text-sm`）。
+- **受控与非受控**：使用 `defaultActive` 设置初始状态，或传入 `active` 进入受控模式；设置 `disabled` 可阻止交互。
+
 ## API
 
-Toggle 是工作区源码。当前工作区 CLI 目标为 `brutalist-toggle`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。传入 `active` 进入受控模式。
+以下属性属于 `Root`（传入 `active` 进入受控模式）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -27,5 +38,3 @@ Toggle 是工作区源码。当前工作区 CLI 目标为 `brutalist-toggle`。C
     { name: 'size', type: "'default' | 'sm' | 'lg'", default: 'default' },
   ]}
 />
-
-这些属性属于 Root。

@@ -236,6 +236,49 @@ function createDocumentPresenceSink(
       }
     }
   };
+  const fixedContainingBlockHeight = (): number | null => {
+    if (!win || win.getComputedStyle(el).position !== 'fixed') return null;
+    // The initial provider deliberately refuses other containing blocks. The
+    // panel's own dimensions and transformed bounds are never a substitute.
+    for (const node of webMotionAncestors(el).slice(1)) {
+      const css = win.getComputedStyle(node);
+      const nonNone = (value: string) => !!value && value !== 'none';
+      if (
+        [
+          css.transform,
+          css.translate,
+          css.rotate,
+          css.scale,
+          css.perspective,
+          css.filter,
+          css.backdropFilter,
+        ].some(nonNone) ||
+        /(?:^|\s)(?:layout|paint|strict|content)(?:\s|$)/.test(css.contain) ||
+        /(?:^|,|\s)(?:transform|translate|rotate|scale|perspective|filter|backdrop-filter|contain)(?:,|\s|$)/.test(
+          css.willChange
+        ) ||
+        (css.contentVisibility && css.contentVisibility !== 'visible') ||
+        (css.containerType && css.containerType !== 'normal')
+      )
+        return null;
+    }
+    const height = doc.documentElement.clientHeight || win.innerHeight;
+    return Number.isFinite(height) && height >= 0 ? height : null;
+  };
+  const topMatchesValue = (baseline: number): boolean => {
+    const value = win?.getComputedStyle(el).top;
+    const pixels = px(value);
+    if (pixels !== null) return Math.abs(pixels - baseline) < 0.01;
+    // DOM-model providers can retain the computed percentage. This is only an
+    // ownership comparison with the typed endpoint, never a semantic target.
+    const percent = value?.match(/^(-?(?:\d+\.?\d*|\.\d+))%$/);
+    const height = fixedContainingBlockHeight();
+    return (
+      !!percent &&
+      height !== null &&
+      Math.abs((Number(percent[1]) * height) / 100 - baseline) < 0.01
+    );
+  };
   return createPresencePresentationProjector({
     binding,
     now: () => win?.performance.now() ?? performance.now(),
@@ -264,6 +307,11 @@ function createDocumentPresenceSink(
         return Number.isFinite(value) && value >= 0 ? value : null;
       };
       const preference = readWebPreference(doc, 'preference.reducedMotion');
+      const containingBlockHeight =
+        !preparing && channels.includes('top') ? fixedContainingBlockHeight() : null;
+      // A current preparing view has no measurable profile yet. Defer that
+      // judgment until ready; known ownership loss still refuses the channel.
+      const topProfilePending = preparing && live() && channels.includes('top') && !lost.has('top');
       return {
         preference:
           preference === 'no-preference' || preference === 'reduce' ? preference : 'unknown',
@@ -274,15 +322,18 @@ function createDocumentPresenceSink(
             node.matches('[hidden],[data-pui-view-pending],[data-pui-view-detached]')
           ),
         preparing,
+        topProfilePending,
         width: dimension('width'),
         height: dimension('height'),
         rootFontPx: px(win?.getComputedStyle(doc.documentElement).fontSize),
+        containingBlockHeight,
         intrinsicBlockSize:
           !preparing && channels.includes('blockSize') ? intrinsicBlockSize() : null,
-        supported: (['translate', 'opacity', 'blockSize'] as const).filter(
+        supported: (['translate', 'opacity', 'top', 'blockSize'] as const).filter(
           (name) =>
             !lost.has(name) &&
             (name !== 'translate' || !!win?.CSS?.supports?.('translate', '1px')) &&
+            (name !== 'top' || containingBlockHeight !== null) &&
             (name !== 'blockSize' ||
               (!lost.has('block-size') &&
                 !lost.has('overflow') &&
@@ -313,12 +364,14 @@ function createDocumentPresenceSink(
           ],
         });
       doc.addEventListener('visibilitychange', callback);
+      win?.addEventListener('resize', callback);
       return () => {
         runAllSteps([
           () => off?.(),
           () => resize?.disconnect(),
           () => mutation?.disconnect(),
           () => doc.removeEventListener('visibilitychange', callback),
+          () => win?.removeEventListener('resize', callback),
         ]);
       };
     },
@@ -344,14 +397,19 @@ function createDocumentPresenceSink(
       if (sample.opacity !== undefined) {
         if (lost.has('opacity')) return false;
         if (!writes.has('opacity')) {
-          const inline = el.style.getPropertyValue('opacity');
+          const expected = sample.opacityBaseline ?? 1;
           const computed = win?.getComputedStyle(el).opacity ?? '';
-          if ((inline && inline !== '1') || (computed && computed !== '1')) return false;
+          const value = computed === '' ? 1 : Number(computed);
+          if (!Number.isFinite(value) || Math.abs(value - expected) > 0.000001) return false;
         }
       }
       if (sample.translate) {
         translation ??= acquireWebTranslation(el, 'presentation');
         if (!translation.canWrite()) return false;
+      }
+      if (sample.top !== undefined) {
+        if (lost.has('top') || sample.topBaseline === undefined) return false;
+        if (!writes.has('top') && !topMatchesValue(sample.topBaseline)) return false;
       }
       if (sample.blockSize !== undefined && (lost.has('block-size') || lost.has('overflow')))
         return false;
@@ -366,11 +424,27 @@ function createDocumentPresenceSink(
         return false;
       if (!current() || !live()) return false;
       if (sample.opacity !== undefined && !write('opacity', String(sample.opacity))) return false;
+      if (!current() || !live()) return false;
+      if (sample.top !== undefined && !write('top', `${sample.top}px`)) return false;
+      if (!current() || !live()) return false;
       if (sample.blockSize !== undefined) {
         if (!write('overflow', 'hidden')) return false;
         if (!current() || !live()) return false;
         if (!write('block-size', `${sample.blockSize}px`)) return false;
       }
+      if (!current() || !live()) return false;
+      // Inline ownership alone does not prove adoption: a host refusal or a
+      // foreign !important cascade may leave the declared property unchanged.
+      // Compare only with the already typed sample; computed values never
+      // replace the semantic target or enter the interpolation state.
+      if (sample.opacity !== undefined) {
+        const computed = win?.getComputedStyle(el).opacity ?? '';
+        const applied = computed === '' ? 1 : Number(computed);
+        if (!Number.isFinite(applied) || Math.abs(applied - sample.opacity) > 0.000001)
+          return false;
+      }
+      if (!current() || !live()) return false;
+      if (sample.top !== undefined && !topMatchesValue(sample.top)) return false;
       return current() && live();
     },
     release: clear,

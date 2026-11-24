@@ -10,6 +10,11 @@ export default definePrototype<AccordionItemProps, AccordionItemExposes>({
   name: 'liquid-glass-accordion-item',
   setup(def) {
     asAccordionItem();
-    def.feedback.style.use(tw('block min-w-0 rounded-2xl border border-border bg-transparent'));
+    // The explicit Heading reservation may extend the intrinsic border box
+    // equally on both sides. Its Trigger retains the independent Root width;
+    // normal flow reserves space above/below it, including when Content opens.
+    def.feedback.style.use(
+      tw('block min-w-full self-center rounded-2xl border border-border bg-transparent')
+    );
   },
 });

@@ -1,6 +1,6 @@
 ---
 title: 'Tabs'
-description: 'Shadcn tabs reconstructed on Proto UI.'
+description: 'Accessible tabbed panels with keyboard navigation, style presets, and lazy panel mounting.'
 ---
 
 import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
@@ -12,11 +12,12 @@ import { codeMap } from '@/content/docs/demo_components/tabs/tabsCode';
 import { tabsProfileSwitchCode } from '@/content/docs/demo_components/tabs/tabs-profile-switch-code';
 import { getCode } from '@/utils/conversionUtils';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Tabs organizes related views into switchable panels with one active panel at a time, supporting horizontal or vertical orientation and automatic or manual keyboard activation. The examples on this page use the **Shadcn Rhea** style preset.
+
+## Preview
 
 <div data-adapter-panel="wc">
-
-<PrototypePreviewer
+  <PrototypePreviewer
     demoId="demo-shadcn-tabs"
     initialRuntime="wc"
     toolbar={false}
@@ -61,13 +62,19 @@ Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching exampl
 
 <AdapterPanelScript />
 
-## Style Profile preset exhibition
+## Installation
 
-The current authored Tabs recipes cover the eight modern profile IDs (`vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`) and the independent `new-york-v4`. This is source coverage, not full visual or accessibility acceptance. Unknown IDs reject instead of borrowing another recipe.
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-tabs" manager="npm" />
 
-### Change the profile on one live Tabs instance
+Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your target framework.
 
-Select Password, then choose Nova, Rhea, or New York v4 below. Only the surrounding style scope changes; the same Tabs owner retains its selected value and child nodes. To change the profile while a tab keeps keyboard focus, press **Alt+1**, **Alt+2**, or **Alt+3** inside this example. Clicking a profile button follows normal browser focus behavior.
+## Usage
+
+### Style presets and live switching
+
+Tabs supports eight modern presets (`vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`) along with `new-york-v4`; unknown preset IDs are rejected rather than falling back silently.
+
+In the interactive example below, select **Password** and then switch between Nova, Rhea, and New York v4. Updating the enclosing style scope preserves the selected tab and child nodes on the same Tabs instance. To switch presets while a tab holds keyboard focus, press **Alt+1**, **Alt+2**, or **Alt+3** inside the demo.
 
 <div data-adapter-panel="wc">
   <PrototypePreviewer
@@ -113,9 +120,9 @@ Select Password, then choose Nova, Rhea, or New York v4 below. Only the surround
   />
 </div>
 
-The three independent examples below compare the same content and default state. They are static appearance comparisons; the live example above demonstrates profile updates.
+The three static examples below display the same content for direct visual comparison:
 
-### Nova
+#### Nova
 
 <div data-adapter-panel="wc">
   <PrototypePreviewer
@@ -161,7 +168,7 @@ The three independent examples below compare the same content and default state.
   />
 </div>
 
-### Rhea (current default exhibition)
+#### Rhea
 
 <div data-adapter-panel="wc">
   <PrototypePreviewer
@@ -207,7 +214,7 @@ The three independent examples below compare the same content and default state.
   />
 </div>
 
-### New York v4
+#### New York v4
 
 <div data-adapter-panel="wc">
   <PrototypePreviewer
@@ -253,25 +260,16 @@ The three independent examples below compare the same content and default state.
   />
 </div>
 
-## Content mount policy
+### Panel mounting policy
 
-`TabsContent` uses a lazy L1 view by default:
+`TabsContent` unmounts inactive panel content by default (set `keepMounted={true}` to keep hidden panels mounted):
 
-- only the current panel materializes a host view;
-- an inactive panel detaches its view while preserving its Proto instance, state, and exposes;
-- `keepMounted={true}` is the only view-retention option and keeps the complete inactive view mounted.
-
-Web Component keeps the custom element as the owner and hides that owner while its internal view is detached. Reactivating the panel materializes a new view inside the same Proto instance owner.
-
-## Install
-
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-tabs" manager="npm" />
-
-Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+- Only the active panel mounts its content nodes; inactive panels unmount their view while keeping the underlying component instance, state, and exposed handles intact.
+- On Web Components, the custom element host stays mounted and hidden while inactive, then re-renders its inner view inside the same host when reactivated.
 
 ## API
 
-Passing `value` selects controlled mode.
+The following props belong to `Root` (pass `value` for controlled mode):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -282,7 +280,11 @@ Passing `value` selects controlled mode.
   ]}
 />
 
-These props belong to Root. List defaults `orientation` to `horizontal`, `loop` to `false`, and `a11yLabel` to `''`. Trigger defaults `value` to `''` and `disabled` to `false`. Content defaults `value` to `''` and `keepMounted` to `false`.
+Other part defaults:
+
+- `List`: `orientation` defaults to `'horizontal'`, `loop` to `false`, and `a11yLabel` to `''`.
+- `Trigger`: `value` defaults to `''` and `disabled` to `false`.
+- `Content`: `value` defaults to `''` and `keepMounted` to `false`.
 
 ## References
 

@@ -1,13 +1,13 @@
 ---
-title: 'Carousel (WIP)'
-description: 'carousel functional composition and current verification limits.'
+title: 'Carousel'
+description: 'A Bootstrap 2.3.2 carousel with continuous scrolling, snap points, responsive slides, and keyboard navigation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Carousel composes an equal-size slide strip, a continuously scrollable viewport and Previous/Next controls. Pointer or touch dragging moves the strip before release; wheel, trackpad and scrollbar scrolling use the same surface. Releasing a drag or finishing native scrolling snaps to the nearest reachable item boundary. Keyboard navigation uses the same index requests.
+Carousel pairs an equal-size slide strip with a continuously scrollable viewport and Previous/Next controls. Pointer drag, touch drag, wheel/trackpad scrolling, and keyboard navigation all snap to the nearest reachable slide boundary.
 
-This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-carousel"
@@ -15,10 +15,31 @@ This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package con
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Responsive viewport and controlled index
+## Installation
 
-Set Root `slidesPerView` to the maximum equal items to display (default `1`) and `minSlideSize` to their minimum extent in logical host pixels (default `0`). The demo requests two items with a minimum extent of `180`; narrowing the viewport reduces the actual capacity, including partial items. All slides retain their layout extent. Root exposes `visibleSlides` and `maxIndex` from the observed viewport, and the final snap aligns the strip end without leaving empty space.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-A provided `index` selects controlled mode. `indexChange` proposes the new snap index. While dragging, the committed `index` stays unchanged; release uses synchronous owner acceptance or returns to the existing index. A later owner update moves the viewport when it arrives. Viewport exposes `dragging`, `scrolling` and normalized `scrollPosition`; Slide `current` follows the committed snap, while `hidden` follows actual offscreen visibility without removing the slide from layout.
+## Usage
 
-`orientation="vertical"` requires an explicitly bounded viewport height. Horizontal `direction="rtl"` reverses physical dragging and arrow keys while retaining logical item order. Cancellation, disable, axis changes and removal discard unfinished dragging. `loop` wraps index requests between reachable ends; this slice does not clone slides for a seamless infinite strip. Autoplay and variable-size slides are outside the current contract.
+### Responsive viewport and snapping
+
+- Set `slidesPerView` (default `1`) for the maximum equal items shown at once and `minSlideSize` (default `0`, logical pixels) for each slide's minimum extent. Narrower viewports automatically reduce capacity, and the final snap aligns flush with the strip end.
+- The preview above requests 2 slides per view with a `180` minimum size.
+- Set an explicit bounded height on the viewport when using `orientation="vertical"`. Horizontal `direction="rtl"` mirrors dragging and arrow keys while preserving logical slide order.
+- Setting `loop` wraps navigation between the first and last reachable indices without cloning slides.
+
+### Controlled index
+
+- Pass `index` to control the active slide externally and handle `indexChange` proposals.
+- While dragging, the committed `index` remains unchanged; on release it moves to the proposed index if accepted by the parent, or snaps back to the current index.
+
+## API
+
+| Part | Props / States | Description |
+| --- | --- | --- |
+| `Root` | `slidesPerView` / `minSlideSize` | Defaults `1` / `0`; responsive capacity and minimum slide extent |
+| `Root` | `index` / `indexChange` | Controlled snap index and change request event |
+| `Root` | `orientation` / `direction` / `loop` | Axis, text direction, and boundary wrapping |
+| `Root` | `visibleSlides` / `maxIndex` | Read-only states derived from the viewport |
+| `Viewport` | `dragging` / `scrolling` / `scrollPosition` | Live drag/scroll state and normalized scroll position |
+| `Slide` | `current` / `hidden` | Tracks the active snap and offscreen visibility without removing layout extent |

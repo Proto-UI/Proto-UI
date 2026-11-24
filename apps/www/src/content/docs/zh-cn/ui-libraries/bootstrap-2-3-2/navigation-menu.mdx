@@ -1,11 +1,13 @@
 ---
 title: 'NavigationMenu'
-description: '具有原生目的地链接的命名导航展开面板。'
+description: '包含展开面板、命令项与原生锚点链接的 Bootstrap 2.3.2 导航菜单。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-具有原生目的地链接的命名导航展开面板。
+NavigationMenu 用于站点主导航，将可展开的导航面板与原生浏览器链接结合起来，保留完整的链接预览、中键/修饰键新标签页打开等浏览器原生行为。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-navigation-menu"
@@ -14,12 +16,25 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root 是 navigation 地标，Trigger 是展开按钮，Content 是有名称的 region。Root.value 标识唯一展开面板。Item 发出命令；Link 投影带 href、target、rel 与当前页语义的真实锚点。URL 预览、Enter、修饰键/中键浏览及导航由浏览器持有，不合成 Space 激活或应用路由。
+## 安装
 
-组成: Root, Trigger, Content, Item, Link.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码。嵌套子菜单、完整 native/GPUI/编译器证据、消费/视觉验收与独立生命周期准入仍未完成。
+## 用法
 
-Link 在原生激活之后发出只读 navigate 观察，字段为 href、target、rel、modified；它不是可取消的路由请求。普通当前窗口激活会关闭面板，closeOnSelect=false 可保留；修饰键/中键及 \_blank 激活保留当前页面板。禁用 Link 会移除目标并阻止激活。current=true 通过 aria-current 标识当前页。
+由 `Root`、`Trigger`、`Content`、`Item` 和 `Link` 组成：
 
-React/Vue/Vue2 使用原生锚点根节点；Web Components 把调用方内容保留在其持有的局部锚点内，焦点、样式与无障碍投影跟随真实物理表面。演示使用同文档目标，仅观察浏览器导航。源码运行时检查之外的真实浏览器、打包、编译器与 native 验收仍待完成。
+- **语义结构**：`Root` 声明 `navigation` 地标并通过 `value` 控制当前展开的唯一面板；`Trigger` 负责展开/收起，`Content` 作为带名称的 `region` 区域展示导航项。
+- **原生链接与命令项**：`Item` 用于发出动作命令；`Link` 渲染真实原生 `<a>` 链接，完整支持 `href`、`target`、`rel` 及当前页标记 `current`（对应 `aria-current`）。URL 预览、`Enter` 跳转及中键/修饰键打开均由浏览器原生处理。
+- **导航观察与关闭**：`Link` 激活后会发出只读的 `navigate` 事件（载荷为 `{ href, target, rel, modified }`）。普通同窗口点击会自动关闭当前面板（设置 `closeOnSelect={false}` 可保持打开）；中键、修饰键或 `_blank` 激活则保持当前面板打开。禁用状态的 `Link` 会移除跳转目标并阻止激活。
+
+## API
+
+| 部件 | 属性 / 事件 | 说明 |
+| --- | --- | --- |
+| `Root` | `value` | 当前展开的导航面板标识 |
+| `Trigger` | — | 切换导航面板的按钮 |
+| `Content` | — | 命名导航内容区域 |
+| `Item` | — | 导航面板内的命令项 |
+| `Link` | `href` / `target` / `rel` / `current` / `disabled` / `closeOnSelect` | 原生锚点链接属性；`current={true}` 标记当前页 |
+| `Link` | `navigate` | 原生激活后发出的只读事件，载荷为 `{ href, target, rel, modified }` |

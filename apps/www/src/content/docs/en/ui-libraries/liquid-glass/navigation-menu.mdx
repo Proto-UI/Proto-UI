@@ -1,11 +1,13 @@
 ---
-title: 'NavigationMenu'
-description: 'Named navigation disclosures with native destination links.'
+title: 'Navigation Menu'
+description: 'A Liquid Glass navigation bar with named disclosure panels and native anchor links.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Named navigation disclosures with native destination links.
+Liquid Glass Navigation Menu provides a `navigation` landmark with named disclosure panels and real native `<a>` destination links, preserving browser URL previews, Enter activation, and modifier/middle-click opening.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-navigation-menu"
@@ -14,12 +16,22 @@ Named navigation disclosures with native destination links.
   codePanel={false}
 />
 
-Root is a navigation landmark, Trigger is a disclosure button and Content is a labelled region. Root.value identifies one open panel. Item emits a command; Link projects a real anchor with href, target, rel and current-page semantics. The browser owns URL previews, Enter activation, modifier/middle-click browsing and navigation. Link does not synthesize Space activation or call an application router.
+## Installation
 
-Parts: Root, Trigger, Content, Item, Link.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.
+## Usage
 
-Link emits a read-only navigate observation containing href, target, rel and modified after native activation. It is not a cancellable routing request. A normal same-window activation closes the open panel unless closeOnSelect=false; modified/middle-button or \_blank activation keeps the current page’s panel open. Disabled Link removes its destination and prevents activation. Current=true identifies the current page with aria-current.
+- **Parts**: `Root`, `Trigger`, `Content`, `Item`, `Link`.
+- **Panels and commands**: `Root.value` identifies the single open named `region` panel, `Trigger` toggles it, and `Item` emits an application command.
+- **Native links**: `Link` renders a real anchor (`href`, `target`, `rel`, and `current` for `aria-current`) in React, Vue, Vue 2, and inside an owned local anchor in Web Components. Disabled links remove their destination and prevent activation.
+- **Navigation observation**: `Link` emits a read-only `navigate` event (`href`, `target`, `rel`, `modified`) after native activation. Ordinary same-window navigations close the panel unless `closeOnSelect={false}`; modifier clicks, middle clicks, and `_blank` targets leave the panel open.
 
-React/Vue/Vue2 use a native anchor root. Web Components retain caller content in an owned local anchor, and focus/style/accessibility projection follows that physical surface. The demo uses a same-document destination and only observes the navigation. Real-browser/packed/compiler/native acceptance remains pending beyond source-runtime checks.
+## API
+
+| Part | Prop / Event | Description |
+| --- | --- | --- |
+| Root | `value`, `closeOnSelect` | Active panel key / whether same-window link activation closes the panel |
+| Trigger / Content | — | Disclosure button and labelled navigation `region` |
+| Item | — | Actionable navigation item |
+| Link | `href`, `target`, `rel`, `current`, `disabled` | Native link attributes and current-page state; emits read-only `navigate` |

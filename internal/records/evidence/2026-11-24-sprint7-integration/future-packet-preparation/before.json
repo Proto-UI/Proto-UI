@@ -1,0 +1,17 @@
+{
+  "kind": "future-packet-preparation-control",
+  "sourceBeforeSha256": "39dff9077b1a4ef6b3cd45f48f14ededf302a1766614438db67f9c9cff2c3814",
+  "argv": [
+    "node",
+    "/workspace/scratch/0d7d81e85daf/proto-ui-s7/scripts/analysis/knowledge-value-study/prepare.mjs",
+    "/workspace/scratch/0d7d81e85daf/s7-future-packets-pre-fix-01",
+    "/workspace/scratch/0d7d81e85daf/s7-tabs-calibration/package-lock.json"
+  ],
+  "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+  "startedAt": "2026-11-23T21:24:25.982523+00:00",
+  "participantRun": false,
+  "finishedAt": "2026-11-23T21:24:26.056550+00:00",
+  "exitCode": 1,
+  "stdout": "",
+  "stderr": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ '8c22907544c0ee34d6523fbc1a45f772fd538f01ef4e6f7b0505fdb7e072814f'\n- 'b45c258a5f6407aa8943d4dde6bec100a2feca704b68ce334a074fa70461cc16'\n\n    at file:///workspace/scratch/0d7d81e85daf/proto-ui-s7/scripts/analysis/knowledge-value-study/prepare.mjs:20:8 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: '8c22907544c0ee34d6523fbc1a45f772fd538f01ef4e6f7b0505fdb7e072814f',\n  expected: 'b45c258a5f6407aa8943d4dde6bec100a2feca704b68ce334a074fa70461cc16',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v24.22.3\n"
+}

@@ -1,6 +1,6 @@
 ---
 title: 'Dropdown Menu'
-description: '基于 Proto UI 重构的 Shadcn Dropdown Menu。'
+description: '支持分组、分隔线、危险操作样式、缩进对齐与完整键盘导航的下拉菜单组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,45 +8,44 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+由按钮触发的下拉命令菜单，基于 Base 协议提供键盘方向导航、分组命名与焦点恢复，并内置危险操作与图标缩进等常见样式变体。本页示例采用 **Shadcn Rhea** 风格。
 
-当前页面展示 Proto UI 中 `shadcn` 风格的 `dropdown-menu` 条目。
+## 预览
+
+下方展示包含分组、标签、快捷键提示与禁用项的常规菜单：
 
 <PrototypePreviewer demoId="demo-shadcn-dropdown-menu" initialRuntime="wc" />
 
-## 分组动作组成（草稿）
+### 危险操作（Destructive）
 
-Group 与 Label 建立实时辅助技术命名关系；Separator 和 Shortcut 是真实的被动部件。Shortcut 只显示提示，不注册全局快捷键。装饰部件不进入动作集合，也不增加 press owner。示例使用160px菜单、账户与资源分组和禁用的 API 动作。Invite users 的真实子菜单属于随后单独实现的协议片，不用演示盒子模拟。Checkbox/Radio变体及完整native/GPUI、Compiler、打包、视觉和独立验收仍未完成。
-
-## Destructive 动作（草稿）
+参考 `DropdownMenuWithDestructive` 模式，使用 16px Lucide 图标，并为 Delete 设置 `variant="destructive"`（浅色模式 10% 底色、深色模式 20% 底色）。末尾的 **Delete (disabled)** 用于演示禁用项仍可聚焦但不触发选择或关闭菜单。
 
 <PrototypePreviewer demoId="demo-shadcn-dropdown-destructive" initialRuntime="wc" />
 
-Edit/Pencil、Share/Share、Archive/Archive、Delete/Trash 沿用固定上游 `DropdownMenuWithDestructive` 的组成。每个图标都使用真实的 Lucide 固定原型并显式设置 `size: 16`；Delete 使用 `variant: 'destructive'`。最后的 **Delete (disabled)** 是与上游动作分隔的本地验证扩展，保留 Base 的禁用项可聚焦行为，不会触发选择或关闭菜单。Destructive 交互保留 destructive 前景色，浅色模式使用 10% 底色，深色模式使用 20% 底色。按压期间保留同一配色，是在上游 focus 配方之上的本地反馈扩展。
+### 缩进对齐（Inset）
 
-## Inset 动作（草稿）
+参考 `DropdownMenuWithInset`，当同组菜单项混用带图标与无图标项时，可为无图标的 `Item` 或 `Label` 设置 `inset={true}` 实现文字左对齐：
+
+- **Shadcn Rhea**：`inset={false}` 时左右内边距均为 8px；`inset={true}` 时左侧 28px、右侧 8px。
+- **New York 兼容预设**：`inset={false}` 时左右均为 `0.5rem`；`inset={true}` 时物理左侧 `2rem`、右侧 `0.5rem`。
+
+点击示例中的 **Toggle inset** 按钮可切换缩进属性后重新打开菜单对比效果。
 
 <PrototypePreviewer demoId="demo-shadcn-dropdown-inset" initialRuntime="wc" />
-
-第一组沿用上游 Copy/Cut/Paste 动作组成：Copy 和 Cut 使用真实的 16px Lucide Copy、Scissors 图标，Paste 使用 `inset: true`。Actions Label 显式设置 `inset: false`。本地 **More actions** 分组使用 inset Label 和普通 Rename Item，展示 Label 的两种设置，不把普通动作冒充上游 Checkbox、Radio 或 Submenu 部件。Item 和 Label 的 inset 默认值均为 `false`，左右 padding 均为 0.5rem。作为独立比较的[New York 配方](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/dropdown-menu.tsx) 在 `true` 时使用物理左侧 2rem、右侧 0.5rem，RTL 也保持相同方向。Toggle inset 通过现有原型 props 切换 More actions Label、Paste 和 Rename；重新打开菜单即可比较。本页选择的Rhea在16px根字号下使用28px/8px的inset左右padding；inset=false时两侧均为8px。
-
-这两个示例只在 Base 行为上展示有界视觉 recipe。Root、Trigger、Content、Item、Group、Label、Separator 都是真实原型，示例没有增加 Web 专用事件逻辑。Group/Label 命名、动作选择、焦点导航和禁用行为仍归 Base 所有。上方现有 My Account 示例独立保留。
-
-## 参考与证据边界
-
-这是非官方的 Proto UI 投影。动作组成参考静态检查过的 [shadcn 固定源码 c2a67849be260701852b0977ba15eb5f3a0ce2a4](https://github.com/shadcn-ui/ui/blob/c2a67849be260701852b0977ba15eb5f3a0ce2a4/apps/v4/registry/bases/base/examples/dropdown-menu-example.tsx)，具体为 `DropdownMenuWithDestructive` 和 `DropdownMenuWithInset` 中有界的动作部分。Inset 上游示例中的 Checkbox、Radio 和 Submenu 区段不在本次实现范围。
-
-Recipe 加载、结构检查和源码宿主 renderer 检查不代表真实渲染的视觉一致性。跨运行时浏览器绘制、实际 Dropdown surface 的明暗主题对比度、真实输入与辅助技术、native/GPUI、Compiler、打包消费者及独立验收仍未完成。其他组件的截图或 token 断言不能替代这些证据。
-
-可阅读的 recipe：[My Account](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/zh-cn/demo-shadcn-dropdown-menu.demo.ts)、[destructive 动作](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/demo-shadcn-dropdown-destructive.demo.ts)、[inset 动作](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/demo-shadcn-dropdown-inset.demo.ts)。
 
 ## 安装
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-dropdown" manager="npm" />
 
-把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。registry id 是 `shadcn-dropdown`，不是 `shadcn-dropdown-menu`。
+把 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的本地组件封装。注意 CLI 的组件标识为 `shadcn-dropdown`。
 
-当前源码 CLI 目标生成 Root、Trigger、Content 与 Item。Group、Label、Separator 与 Shortcut 是 `@proto.ui/prototypes-shadcn/dropdown` 的额外导出；这个目标不会生成它们的 facade。源码注册不代表已安装包或打包消费者验收。
+CLI 默认生成 `Root`、`Trigger`、`Content` 与 `Item` 的封装；`Group`、`Label`、`Separator` 与 `Shortcut` 可直接从 `@proto.ui/prototypes-shadcn/dropdown` 导入使用。
+
+## 用法
+
+- **分组与装饰部件**：`Group` 与 `Label` 自动建立无障碍分组命名关系；`Separator` 与 `Shortcut` 属于纯展示部件（`Shortcut` 仅展示快捷键文本，不注册全局快捷键）。
+- **示例源码**：[My Account](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/zh-cn/demo-shadcn-dropdown-menu.demo.ts)、[Destructive 动作](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/demo-shadcn-dropdown-destructive.demo.ts)、[Inset 动作](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/demo-shadcn-dropdown-inset.demo.ts)。
+- **说明**：子菜单与复选/单选菜单项将在后续版本中提供。
 
 ## API
 
@@ -67,7 +66,7 @@ Recipe 加载、结构检查和源码宿主 renderer 检查不代表真实渲染
   ]}
 />
 
-这些属性属于 Root。
+以上属性属于 `Root`。
 
 ## 参考
 

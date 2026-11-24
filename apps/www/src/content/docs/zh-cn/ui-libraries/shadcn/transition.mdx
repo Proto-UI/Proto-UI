@@ -1,15 +1,15 @@
 ---
 title: 'Transition'
-description: '覆盖作者内容的透明相位机 presence，不发明动效。'
+description: '用于协调组件进出场显隐阶段的状态机容器组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Transition 为传入的子元素提供透明的进出场阶段状态机（`closed → preparing → entering → entered → leaving`），将具体的视觉过渡样式交由应用或 `Surface` 自由定义。本页示例使用 **Shadcn Rhea** 风格。
 
-覆盖作者内容的透明相位机 presence，不发明动效。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-transition"
@@ -18,17 +18,20 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-该投射是透明的：作者槽位的 presence 由精确的 Base 相位机（`closed → preparing → entering → entered → leaving`）治理，相位通过 `transitionState` expose 与 `isPresent` 可观察，`beforeEnter`/`afterEnter`/`beforeLeave`/`afterLeave` 事件标记边界。`enter`/`leave`/`complete` 命令（也可经 `controls` 到达）驱动状态机；`complete` 将 `entering → entered` 或 `leaving → closed` 推进。`open`（受控）或 `defaultOpen: false` 决定初始 presence；`appear`（默认 `false`）允许首次挂载即进入；`enterDuration`（默认 300）、`leaveDuration`（默认 200）与 `interrupt: 'reverse' | 'wait' | 'immediate'`（默认 `reverse`）塑造每次尝试。该投射不添加宿主动画引擎或 Shadcn 动效外观——视觉动效仍是应用关注点。
+## 安装
 
-组成: Transition.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码。完整真实过渡轨迹、减弱运动行为以及完整的 native/GPUI、编译器与独立验收证据仍未完成。
+## 用法
 
-本条目是工作区源码，不在公开的 `proto-ui add` 目录里。
+- 通过受控属性 `open` 或非受控属性 `defaultOpen` 控制显隐；将 `appear` 设为 `true` 可在首次挂载时直接触发进场阶段。
+- 可通过 `enterDuration`（默认 `300ms`）、`leaveDuration`（默认 `200ms`）以及 `interrupt`（`'reverse' | 'wait' | 'immediate'`，默认 `'reverse'`）配置过渡时长与中途打断策略。
+- 组件暴露 `transitionState` 和 `isPresent` 状态，并在边界时机触发 `beforeEnter`、`afterEnter`、`beforeLeave` 和 `afterLeave` 事件。
+- 支持通过 `enter`、`leave`、`complete`（也可经 `controls` 调用）手动驱动状态机，其中 `complete` 会将 `entering` 推进至 `entered`，或将 `leaving` 推进至 `closed`。
 
 ## API
 
-传入 `open` 进入受控模式。
+以下属性属于 `Transition`（传入 `open` 可进入受控模式）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -41,8 +44,6 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
     { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: 'reverse' },
   ]}
 />
-
-相位机是 `closed → preparing → entering → entered → leaving`。`complete` 把 `entering` 推进到 `entered`，或把 `leaving` 推进到 `closed`。
 
 ## 参考
 

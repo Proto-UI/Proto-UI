@@ -1,13 +1,15 @@
 ---
-title: shadcn Number Field
-description: 可移植输入原子草稿。
+title: 'Number Field'
+description: '支持步进、本地化格式化与拖动调值的数值输入组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Number Field 提供符合 `spinbutton` 语义的数值输入框，支持加减按钮、键盘步进、本地化格式化、空值处理以及标签拖动调值。本页示例使用 **Shadcn Rhea** 风格。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-number-field"
@@ -16,23 +18,46 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root 管理 `number | null` 的 value/defaultValue、min/max（0/100）、正 step（1）、disabled/readOnly、name、ariaLabel。Input 使用 TextControl 唯一编辑器与 spinbutton 语义。未完成草稿可以保留；失焦/Enter 提交合法数值或恢复已接受的规范值。加减按钮与上下箭头共享步进，Shift 十倍，Home/End 达边界；受控提案不覆盖作者值。
+## 安装
 
-`locale` 与 `formatOptions` 支持标准十进制、货币和百分比显示，以及对应的小数、分组、本地数字与符号解析。格式化只影响显示精度，无编辑的提交不会把格式舍入写回数值。非法格式配置通过 `formatInvalid` 报告，并回退无分组十进制；非法输入保留草稿并在提交时恢复。省略格式属性保持原有十进制显示。IME 组合期间不会解析、提交、步进或开始拖擦，切换 locale 也保留正在输入的组合文本。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-显式 `null` 表示空值，`value={null}` 仍然受控。`allowEmpty` 默认 `false`，启用后清空编辑器并提交会请求 `null`。Root 与 Input/Control 的 `getValue()` 返回真实 `number | null`，`empty` 标记空值；兼容数值读口 `value` 仅在 `empty=false` 时表示规范数值，空值时保留最近有限值。事件及 Field/Form 始终传递真实空值。从空值步进先初始化为边界内对齐的零。
+## 用法
 
-启用 `scrub` 后可在 Label 上连续拖动调值；`scrubSteps`（默认100）表示移动一个初始标签宽度对应多少个 step，`direction="rtl"` 反转横向。成功释放且值发生改变时提交一次；取消恢复非受控起值，受控值始终由作者决定。输入框保留普通文本选择，滚轮调整尚未实现。
+Number Field 由 `Root`、`Label`、`Input`、`Control`、`Increment` 和 `Decrement` 组成：
 
-在 Field/FormField 内用 Control 替代 Input，FieldLabel 命名并激活真实编辑器，联动 Field 策略、规范数值校验、IME 取消、Form 序列化及复位。独立 Input 仍使用 NumberFieldLabel。
+- `Root` 统一管理数值（`number | null`）、上下界（默认 `0` 到 `100`）、步长（默认 `1`）及交互状态。
+- `Input` 提供独立数值编辑体验；在 `Field` 或 `FormField` 中使用时，请改用 `Control` 以自动衔接 `FieldLabel`、校验、IME 取消、表单序列化与重置。
+- `Increment` 与 `Decrement` 按钮与键盘方向键共享同一套步进逻辑。
 
-部件: root, label, input, control, increment, decrement. 四个视觉家族继承同一 Base 行为。
+### 键盘与输入编辑
 
-当前为 Draft 源码工作。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍待完成，不宣称 Finf 验收通过。
+- 编辑过程中允许保留尚未输完的草稿文本；按下 `Enter` 或失焦时，会提交合法数值，若输入无效则恢复为上一次有效值。
+- `ArrowUp` / `ArrowDown` 按 `step` 增减，按住 `Shift` 以 10 倍步长调整，`Home` / `End` 直接跳至最小或最大边界。
+- 传入 `value` 进入受控模式，交互操作会发出变更请求，由外部决定最终值。
+- 在输入法（IME）组合输入期间，解析、提交、步进和拖动调值会自动暂停，切换 `locale` 时也会保留当前组合文本。
+
+### 本地化格式化
+
+通过 `locale` 和 `formatOptions` 支持十进制、货币和百分比格式展示，并能解析对应的本地数字、小数点、分组符和正负号。格式化仅影响显示，未做编辑的提交不会将显示舍入写回底层数值。如果格式配置无效，组件会标记 `formatInvalid` 并自动回退到无分组十进制显示。
+
+### 空值支持
+
+- 显式传入 `null` 表示空值，`value={null}` 仍处于受控模式。
+- 默认 `allowEmpty` 为 `false`；将其设为 `true` 后，清空输入框并提交即可请求空值 `null`。
+- `Root`、`Input` 和 `Control` 的 `getValue()` 返回真实的 `number | null`，`empty` 属性标识是否为空；兼容属性 `value` 仅在非空时表示当前值，空值状态下保留最近一次有限数值。事件与 Field/Form 始终传递真实的 `null`。
+- 从空值状态首次步进时，会先初始化为处于上下界内并对齐步长的 `0`。
+
+### 标签拖动调值（Scrub）
+
+设置 `scrub` 后，可在 `Label` 上按住并水平拖动来连续调整数值：
+
+- `scrubSteps`（默认 `100`）控制拖动一个初始标签宽度所对应的步数；`direction="rtl"` 会反转水平方向。
+- 释放指针且数值发生变化时提交一次；取消拖动时在非受控模式下恢复起始值。输入框内部仍保持正常的文本选择体验。
 
 ## API
 
-Number Field 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。Label、Input、Control、Increment、Decrement 自身没有属性。
+以下属性属于 `Root`（`Label`、`Input`、`Control`、`Increment` 和 `Decrement` 无额外属性；传入 `value` 可进入受控模式）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -56,8 +81,6 @@ Number Field 是工作区源码，没有公开的 `proto-ui add` 目标。传入
     { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
   ]}
 />
-
-这些属性属于 Root。
 
 ## 参考
 

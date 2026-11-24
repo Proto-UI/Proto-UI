@@ -1,12 +1,14 @@
 ---
 title: 'Autocomplete'
-description: 'Editable suggestions with free-text completion.'
+description: 'A text input with live-filtered suggestions and free-text submission.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-Editable suggestions with free-text completion.
+Brutalist Autocomplete pairs a single-line text input with a filtered suggestion popup, letting users pick a suggested item or submit arbitrary free text.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-brutalist-autocomplete"
@@ -15,17 +17,31 @@ Editable suggestions with free-text completion.
   codePanel={false}
 />
 
-Root.value is committed text, while inputValue is the query. Selecting a suggestion commits its textValue; Enter without an active match may commit free text.
+## Installation
 
-The host owns the real single-line editor. Input retains focus during Arrow navigation; IME composition never selects. Filtering is case/diacritic insensitive over textValue and keywords. Empty reflects actual matches; disabled options cannot commit. open, value and inputValue are independently controlled with corresponding change requests. filter=false supports owner-filtered children. Duplicate-valued choices are rejected.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Input, Content, Item, Empty, Trigger.
+## Usage
 
-Draft source; shared Web A11y active-descendant projection, native/GPUI, compiler, consumer, visual and independent acceptance remain separate requirements.
+### Parts
+
+Autocomplete is composed of `Root`, `Input`, `Content`, `Item`, `Empty`, and `Trigger`:
+
+- **Root**: Manages committed `value`, query `inputValue`, popup `open` state, built-in filtering, and keyboard looping. Each of `value`, `inputValue`, and `open` can be controlled independently.
+- **Input**: Single-line editor that keeps focus during arrow-key navigation and skips selection during IME composition.
+- **Content**: Anchored suggestion popup supporting placement, alignment, offset, and collision padding.
+- **Item**: Individual suggestion matched case- and diacritic-insensitively across `textValue` and `keywords`. Selecting commits `textValue`; disabled or duplicate-valued items cannot be committed.
+- **Empty**: Displayed when no items match the current query.
+- **Trigger**: Optional toggle button for opening or closing the suggestion popup.
+
+### Filtering and submission
+
+- Pressing `Enter` commits the highlighted suggestion, or commits the current free text when no option is active.
+- Set `filter={false}` to perform custom filtering in your application and render only matching `Item` elements.
 
 ## API
 
-Autocomplete is workspace source. There is no public `proto-ui add` target. Passing `value`, `inputValue`, or `open` selects controlled mode for that fact.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -41,5 +57,12 @@ Autocomplete is workspace source. There is no public `proto-ui add` target. Pass
   ]}
 />
 
-These props belong to Root. Input defaults `placeholder`, `a11yLabel` and `name` to `''`. Content defaults `side` to `bottom`, `align` to `start`, `sideOffset` to `4` and `collisionPadding` to `8`. Item defaults `value`, `textValue` and `keywords` to `''` and `disabled` to `false`. Empty has no props. Trigger defaults `disabled` to `false`.
+Pass `value`, `inputValue`, or `open` to control each state independently.
 
+### Other parts
+
+- **Input**: `placeholder?: string`, `a11yLabel?: string`, `name?: string` (all default to `''`)
+- **Content**: `side` (default `'bottom'`), `align` (default `'start'`), `sideOffset` (default `4`), `collisionPadding` (default `8`)
+- **Item**: `value`, `textValue`, `keywords` (all default to `''`), `disabled?: boolean` (default `false`)
+- **Empty**: No props
+- **Trigger**: `disabled?: boolean` (default `false`)

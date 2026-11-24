@@ -2,10 +2,15 @@ import { getSemanticGroupKeyV0, type ResidentMotionProperty } from '@proto.ui/co
 export type MotionLength = Readonly<{ px: number; rem: number; percent: number }>;
 export type MotionTranslate = Readonly<{ x: MotionLength; y: MotionLength }>;
 export type MotionColor = Readonly<{ role: string; alpha: number }>;
+/** The variable spelling is the governed numeric-State projection, not arbitrary CSS. */
+export function motionWidthSource(token: string): string | null {
+  return token.match(/^w-\[calc\(var\(--pui-([a-z][a-z0-9-]*)\)\*1%\)\]$/)?.[1] ?? null;
+}
 const zero = (): MotionLength => Object.freeze({ px: 0, rem: 0, percent: 0 });
 function length(raw: string, negative: boolean): MotionLength | null {
   let result: MotionLength | null = null;
   if (/^\d+(?:\.\d+)?$/.test(raw)) result = { px: 0, rem: Number(raw) / 4, percent: 0 };
+  else if (raw === 'px') result = { px: 1, rem: 0, percent: 0 };
   else if (/^\d+\/\d+$/.test(raw)) {
     const [numerator, denominator] = raw.split('/').map(Number);
     if (Number.isSafeInteger(numerator) && Number.isSafeInteger(denominator) && denominator > 0)
@@ -61,12 +66,21 @@ function utility(token: string): { value: string; scoped: boolean } {
 /** Consumes final semantic tokens, never lowered host selectors or CSS strings. */
 export function extractResidentMotionTarget(
   tokens: readonly string[],
-  property: ResidentMotionProperty
+  property: ResidentMotionProperty,
+  numbers: Readonly<Record<string, number>> = {}
 ):
-  | { supported: true; value: MotionTranslate | MotionColor; ownedTokens: readonly string[] }
+  | {
+      supported: true;
+      value: MotionTranslate | MotionColor | MotionLength;
+      ownedTokens: readonly string[];
+    }
   | { supported: false; reason: string } {
   const relevant = (t: string) =>
-    property === 'translate' ? /^-?translate-[xy]-/.test(t) : getSemanticGroupKeyV0(t) === 'bg-';
+    property === 'translate'
+      ? /^-?translate-[xy]-/.test(t)
+      : property === 'width'
+        ? /^w-/.test(t)
+        : getSemanticGroupKeyV0(t) === 'bg-';
   const utilities = tokens.map(utility);
   if (utilities.some((t) => t.scoped && relevant(t.value)))
     return { supported: false, reason: 'selector-dependent-target' };
@@ -92,6 +106,22 @@ export function extractResidentMotionTarget(
     return { supported: true, value: Object.freeze({ x, y }), ownedTokens: Object.freeze(owned) };
   }
   if (owned.length !== 1) return { supported: false, reason: 'missing-or-ambiguous-target' };
+  if (property === 'width') {
+    const source = motionWidthSource(owned[0]);
+    const descriptor = source ? Object.getOwnPropertyDescriptor(numbers, source) : undefined;
+    const percent = descriptor && 'value' in descriptor ? descriptor.value : undefined;
+    const value = source
+      ? typeof percent === 'number' && Number.isFinite(percent) && percent >= 0
+        ? Object.freeze({ px: 0, rem: 0, percent })
+        : null
+      : length(owned[0].slice(2), false);
+    if (!value)
+      return {
+        supported: false,
+        reason: source ? 'numeric-source-unavailable' : 'length-unavailable',
+      };
+    return { supported: true, value, ownedTokens: Object.freeze(owned) };
+  }
   const m = owned[0].match(/^bg-([a-z][a-z0-9-]*)(?:\/(\d+(?:\.\d+)?))?$/);
   if (!m || (m[2] !== undefined && Number(m[2]) > 100))
     return { supported: false, reason: 'color-unavailable' };
@@ -120,4 +150,15 @@ export function resolveMotionTranslate(
   const x = axis(value.x, basis.width),
     y = axis(value.y, basis.height);
   return x === null || y === null ? null : Object.freeze([x, y]);
+}
+
+export function resolveMotionWidth(
+  value: MotionLength,
+  basis: { rootFontPx: number | null; containingBlockWidth?: number | null }
+): readonly number[] | null {
+  const resolved = resolveMotionTranslate(
+    { x: value, y: zero() },
+    { rootFontPx: basis.rootFontPx, width: basis.containingBlockWidth ?? null, height: null }
+  );
+  return resolved && resolved[0] >= 0 ? Object.freeze([resolved[0]]) : null;
 }

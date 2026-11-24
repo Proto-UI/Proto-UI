@@ -1,6 +1,6 @@
 ---
 title: 'Async Region'
-description: '覆盖在 Base Async Region 协议之上的 Brutalist Async Region 草案呈现。'
+description: '为异步更新区域标记 aria-busy 语义状态而不附加多余加载外观的 Brutalist 容器组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,32 +9,32 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-这个 draft family 只包含一个 Root。受治理的 busy 语义均由 Base Async Region 所有：`busy` prop（默认 `false`）在区域元素上投射 `aria-busy`，并通过 `getExposes().busy` 暴露同一事实。busy 是语义事实而不是加载组件——本投影不添加 spinner、skeleton、progress、toast、计时器或第二个状态机。authored 后代在仅属性变化的切换中保持挂载与焦点；需要播报时，请在应用层与 Live Region 组合。该区域不声明 focus、event、command 或 accessible-name override 通路。
+Brutalist Async Region 是一个单部件语义容器，用于在区域内容处于异步更新期间同步输出 `aria-busy` 状态，同时保持内部自定义内容挂载与焦点不中断。
 
-Brutalist 层只拥有呈现且语义优先：它一次性消费 `asAsyncRegionRoot()`，保留全部继承 owner，仅追加克制的 family 表面 `min-w-0 max-w-full text-foreground`，使载荷内容可读且有界。上游 Neo 没有对应的 async-region 组件可固定；此层不引入任何边框、阴影、动效或交互外观。
-
-Root 可从已经公开的 `@proto.ui/prototypes-brutalist` package root 或 `@proto.ui/prototypes-brutalist/async-region` anatomy subpath 导入。该 family 刻意没有 `proto-ui add brutalist-async-region` registry entry，也不产生单独的 publication 或 release 承诺。
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-async-region" initialRuntime="wc" />
 </div>
 
-## 建议验收路径
+## 安装
 
-1. 打开 `busy`，确认区域投射 `aria-busy="true"` 且 `getExposes().busy` 读出 `true`，同时 authored 载荷保持挂载。
-2. 关闭 `busy`，确认 `aria-busy` 回到 `"false"`，无重新挂载，也无任何视觉加载外观。
-3. 确认该区域不进入 tab 序，且不暴露任何 interaction 或 command 通路。
-4. 在 Web Components、React、Vue 与 Vue 2 的 Light/Dark 模式中重复检查。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-相关 catalog entities 仍为 `draft`；本页记录当前方向，而不是稳定的 Async Region guarantee。
+- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-async-region`
+- **包导出**：从 `@proto.ui/prototypes-brutalist` 或 `@proto.ui/prototypes-brutalist/async-region` 导入
+
+## 用法
+
+- 设置 `busy={true}` 会在容器上输出 `aria-busy="true"`，并通过 `getExposes().busy` 暴露相同状态。
+- 仅更新 `busy` 属性时，内部传入的子元素保持挂载且不丢失焦点；容器本身只提供 `min-w-0 max-w-full text-foreground` 的基础可读样式，不附加边框、阴影或加载动画。
+- 如需显示视觉加载提示，可在内部自行组合 `Spinner`、`Skeleton` 或 `Progress`；如需屏幕阅读器实时播报状态变化，请配合 `Live Region` 使用。
 
 ## API
 
-Async Region 是工作区源码。当前工作区 CLI 目标为 `brutalist-async-region`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[{ name: 'busy', type: 'boolean', default: 'false' }]}
 />
-
-这些属性属于 Root。

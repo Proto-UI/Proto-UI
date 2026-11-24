@@ -26,19 +26,15 @@ describe('Base Input documentation registration', () => {
     await loadPrototype('shadcn-input-root');
     expect(getPrototype('shadcn-input-root')).not.toBe(inputRoot);
   });
-  it.each(['en', 'zh-cn'])(
-    'registers a real demo on the %s page without promoting draft scope',
-    (locale) => {
-      const path = docs(locale);
-      expect(existsSync(path)).toBe(true);
-      const text = readFileSync(path, 'utf8');
-      expect(text).toContain('demo-base-input');
-      expect(text).toContain('P-BASE-INPUT');
-      expect(text).toMatch(/draft/i);
-      expect(text).toContain("'wc', 'react', 'vue', 'vue2'");
-      expect(text).not.toContain('demo-shadcn-input');
-    }
-  );
+  it.each(['en', 'zh-cn'])('registers a real demo on the %s page', (locale) => {
+    const path = docs(locale);
+    expect(existsSync(path)).toBe(true);
+    const text = readFileSync(path, 'utf8');
+    expect(text).toContain('demo-base-input');
+    expect(text).toContain('P-BASE-INPUT');
+    expect(text).toContain("'wc', 'react', 'vue', 'vue2'");
+    expect(text).not.toContain('demo-shadcn-input');
+  });
   it('makes Base Input discoverable in the sidebar', () => {
     const config = readFileSync(resolve(process.cwd(), 'apps/www/astro.config.mjs'), 'utf8');
     expect(config).toContain("slug: 'ui-libraries/base/input'");

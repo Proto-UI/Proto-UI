@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "corepack",
+    "pnpm@10.32.1",
+    "check:public-docs"
+  ],
+  "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+  "startedAt": "2026-11-23T21:18:26.981628+00:00",
+  "finishedAt": "2026-11-23T21:18:31.179920+00:00",
+  "exitCode": 1
+}

@@ -1,10 +1,19 @@
 ---
 title: 'Hover Card'
 desp: 'Hover Card'
-description: 'Hover Card Shadcn 原型'
+description: '悬停或聚焦触发元素时展示预览内容的 Shadcn 风格悬停卡片组件。'
 ---
 
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Hover Card 在用户悬停或聚焦触发元素时，延迟展示一段轻量预览内容，适合账号名片、链接摘要等场景。本页示例使用 **Shadcn Rhea** 风格。
+
+## 预览
+
+演示在悬停或聚焦 `@proto-ui` 后延迟 `150ms` 打开卡片，移出后延迟 `300ms` 关闭，浮层默认位于下方居中（`side="bottom"`、`align="center"`）。
 
 <div>
   <PrototypePreviewer
@@ -14,3 +23,69 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
     hasCode={true}
   />
 </div>
+
+## 安装
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-hover-card" manager="npm" />
+
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应宿主的组件封装。
+
+## 用法
+
+Hover Card 由三个协作部件组成：
+
+- **Root**：统一管理展开状态（`open`）、开关延时与禁用状态。
+- **Trigger**：响应指针悬停与键盘聚焦，向 Root 请求打开或关闭。
+- **Content**：渲染浮动卡片面板，控制定位与防碰撞，并在指针移入内容区时保持卡片展开。
+
+### 受控与非受控
+
+- **非受控模式**：通过 `defaultOpen` 设置初始状态，由 Root 根据悬停、聚焦及延时自动切换。
+- **受控模式**：传入 `open` 并监听 Root 的 `openChange` 事件，由外部状态驱动展开与收起。
+
+### 延时与禁用
+
+- `openDelay`（默认 `700` ms）与 `closeDelay`（默认 `300` ms）支持取消：指针快速划过触发器或在关闭延时内移入卡片内容区时，不会意外闪烁或关闭。
+- 传入负数或非有限数值作为延时参数时，会自动回退到默认值。
+- 在 Root 或 Trigger 上设置 `disabled` 可禁用交互触发。
+
+## API
+
+下表汇总 Root、Trigger 与 Content 的可用属性。`open`、`defaultOpen`、`openDelay`、`closeDelay` 属于 Root；`disabled` 可用于 Root 与 Trigger；`side` 至 `collisionPadding` 属于 Content。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '300' },
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+  ]}
+/>
+
+### 暴露状态、方法与事件
+
+- **Root**：暴露 `open` 状态、`openHoverCard(reason?)`、`close(reason?)`、`toggle(reason?)` 方法，以及 `openChange` 事件（载荷为 `{ open: boolean; reason: string | null }`）。
+- **Trigger**：暴露 `disabled`、`hovered`、`focused`、`focusVisible` 状态与 `focusSelf(options?)` 方法。
+- **Content**：暴露 `open` 状态。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-SHADCN-HOVER-CARD.yaml',
+    'P-SHADCN-HOVER-CARD-TRIGGER.yaml',
+    'P-SHADCN-HOVER-CARD-CONTENT.yaml',
+    'P-BASE-HOVER-CARD.yaml',
+    'P-BASE-HOVER-CARD-TRIGGER.yaml',
+    'P-BASE-HOVER-CARD-CONTENT.yaml',
+  ]}
+/>

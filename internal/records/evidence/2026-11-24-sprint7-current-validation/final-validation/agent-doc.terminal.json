@@ -1,0 +1,22 @@
+{
+  "head": "f3cfa6801e3c2b86df3b62c47296f08f7b206ee2",
+  "name": "agent-doc",
+  "startedAt": "2026-11-24T03:52:10.598834+00:00",
+  "command": [
+    "corepack",
+    "pnpm@10.32.1",
+    "check:agent-doc"
+  ],
+  "exitCode": 0,
+  "timedOut": false,
+  "outerTimeoutSeconds": 180,
+  "elapsedMs": 13281,
+  "nodeOptions": "--max-old-space-size=1024",
+  "cpuAffinity": [
+    0,
+    1
+  ],
+  "controlledEnvironment": "Only this owned runner and descendants use two allowed CPUs, bounding Node default test concurrency; original npm-script selection, assertions and case timeouts are unchanged.",
+  "headAfter": "f3cfa6801e3c2b86df3b62c47296f08f7b206ee2",
+  "trackedStatusAfter": ""
+}

@@ -1,14 +1,14 @@
 ---
-title: 'Virtual-List (WIP)'
-description: 'virtual-list composition and explicit implementation boundary.'
+title: 'Virtual List'
+description: '将稳定逻辑键序列与按需物化视图分离、支持可变行高测量的 Brutalist 风格虚拟列表组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-Virtual List 将完整稳定逻辑标识序列与物理视图区分。按项 overscan、最大物化数量、修订号与 generation 绑定的提交由宿主无关模型负责。显式 virtual-list/web 入口测量可变项尺寸、管理占位与 Web 节点、保留键对应视图、定位项并清理监听。此 demo 使用该 Web 宿主边界，不代表原生 GPUI 或 Compiler 一致性。应用内容仅按有界可见区间创建。
+Virtual List 将完整的逻辑项标识序列（`itemKeys`）与实际渲染的视图节点解耦，只为可见区间及缓冲区（`overscanItems`）创建应用内容，适合大数据量长列表场景。
 
-当前为功能源码 WIP。完整运行时、Compiler、原生、打包、浏览器与视觉验收仍待补齐。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-virtual-list"
@@ -16,15 +16,26 @@ Virtual List 将完整稳定逻辑标识序列与物理视图区分。按项 ove
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 物化宿主的所有权与退休
+## 安装
 
-每个逻辑集合只接受一个物化宿主租约。`attachWebVirtualList` 在添加占位、行视图或监听之前取得租约；第二个宿主的挂载会失败，且不干扰当前宿主。替换宿主前先 dispose 旧宿主。可移植模型向其他宿主实现提供 `acquireMaterializer(onRetired)`；调用 Web 入口时无需在外层再取得一次租约。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-brutalist/virtual-list` 导入列表原型，并结合 `virtual-list/web` 入口完成 Web 宿主挂载。
 
-Root 卸载或销毁时会让物化宿主退休：在途 generation 失效，已持有视图与观察器被清理；旧宿主晚到的 refresh、滚动、测量或重复 dispose 不能撤销替代宿主。首次渲染或观察器安装失败也释放租约，同一逻辑集合可以重试。这些所有权规则补充 generation 绑定的 request／commit 协议，不代表非 Web 物化器或原生辅助技术已验收。
+## 用法
+
+### 逻辑模型与 Web 物化挂载
+
+- 宿主无关模型管理 `itemKeys`、缓冲区数量（`overscanItems`）、最大物化项数（`maxMaterializedItems`）以及按代次绑定的提交。
+- `virtual-list/web` 提供的 `attachWebVirtualList` 负责测量可变行高、维护上下占位空间、按 key 复用行视图、滚动定位指定 key 以及销毁监听器。
+
+### 物化宿主生命周期
+
+- 每个逻辑列表实例同一时间只允许一个活跃的物化宿主租约。`attachWebVirtualList` 会自动获取租约（自定义其他宿主时可调用 `acquireMaterializer(onRetired)`，使用 Web 入口无需重复获取）。
+- 若已有活跃宿主，再次挂载第二个宿主会失败且不会影响当前宿主；替换前请先销毁（`dispose`）旧宿主。
+- 当 `Root` 卸载或销毁时，当前物化宿主会自动退休，失效在途代次并清理已持有的行视图与观察器；旧宿主晚到的刷新、滚动、测量或重复销毁调用不会影响后续新宿主。首次渲染或观察器初始化失败也会自动释放租约，便于重试。
 
 ## API
 
-Virtual List 是工作区源码，没有公开的 `proto-ui add` 目标。Viewport 与 Content 没有属性。
+以下属性属于 `Root`：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -36,4 +47,6 @@ Virtual List 是工作区源码，没有公开的 `proto-ui add` 目标。Viewpo
   ]}
 />
 
-这些属性属于 Root。
+其余子部件：
+
+- **Viewport**、**Content**：无属性。

@@ -1,41 +1,43 @@
 ---
 title: 'Native File Input'
-description: 'A native file picker with shared availability, naming, required and focus policy.'
+description: 'A native file picker with shared availability, naming, required, and focus policy.'
 ---
 
 import NativeFileInputPreview from '@/components/NativeFileInputPreview.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Base Native File Input supplies control policy for one native file input. The prototype owns availability, required state, accessible naming and focus. The browser owns file selection and the system picker.
+Applies shared availability, required state, accessible naming, and focus policy to a native `<input type="file">`, while leaving file selection and the system picker to the browser.
 
-This prototype is **draft**. The preview mounts the public `nativeFileInput` prototype through the React Adapter on an actual `input[type="file"]`. Its small host bridge applies native file options and reads the browser's `FileList`; it does not upload files. This is an Adapter preview, not an execution of Compiler output or a claim of native-picker and assistive-technology conformance.
+## Preview
+
+The preview mounts `nativeFileInput` onto real `input[type="file"]` elements via the React Adapter—the first is required and accepts multiple files, and the second is disabled (files are read locally from `FileList` and never uploaded).
 
 <NativeFileInputPreview locale="en" />
 
-## One physical file input
+## Installation
 
-Supply one physical `input` root with `type="file"`. Pass `disabled` and `required` to the prototype and apply the same accepted values to that input's native fields. The prototype's accessibility and focus policy and the browser's input behavior then refer to the same target.
-
-The host owns `accept`, `multiple`, picker invocation, native `change` delivery and clearing the input. Read selected files from the native input's `files` property. File objects and their identity remain local to that host; the prototype declares neither a text value nor a portable `valueChange` event.
-
-The first preview input is required and accepts multiple files. The second is disabled. A required input's form-validation behavior is supplied by its browser and form owner; this preview has no form submission or validation UI.
-
-## Focus and naming
-
-`ariaLabel` supplies the accessible name while preserving the file input's native role. `focusSelf(options?)` and `blurSelf()` use the shared Focus protocol. A disabled input rejects `focusSelf()` and leaves normal focus participation; re-enabling restores participation without reopening the picker.
-
-A current ControlLabel request may focus an enabled input. That association does not synthesize a click or grant permission to open a system picker.
-
-## Public authoring entries
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
 ```ts
 import { nativeFileInput, asNativeFileInput } from '@proto.ui/prototypes-base/native-file-input';
 ```
 
-The source subpath also exports the default prototype, `NativeFileInputProps`, `NativeFileInputExposes` and `NativeFileInputAsHookContract`. The package root exports the named entries. The prototype and hook share the same setup.
+This subpath also exports the default prototype, `NativeFileInputProps`, `NativeFileInputExposes`, and `NativeFileInputAsHookContract`, while the package root re-exports the named entries. The prototype and hook share the same setup.
 
-Compiler consumers use this authoring source and an explicit native file-input root. Native refs and file events belong in the host bridge; that bridge must preserve the prototype's focus and policy implementation. Native File Input is workspace source and has no public `proto-ui add` target.
+## Usage
+
+### Binding to a physical file input
+
+Provide a real `<input type="file">` root element and pass `disabled` and `required` to both the prototype and the native element so accessibility, focus policy, and browser behavior target the same input.
+
+Manage `accept`, `multiple`, picker invocation, native `change` events, and clearing directly on the host element, and read selected files from its native `files` property. The prototype has no text value and emits no `valueChange` event.
+
+### Focus and naming
+
+- `ariaLabel` provides the accessible name while preserving the native file input role.
+- `focusSelf(options?)` and `blurSelf()` follow the shared Focus protocol. A disabled input ignores `focusSelf()` and leaves normal focus order; re-enabling restores focus participation without reopening the picker.
+- An associated `ControlLabel` can focus an enabled input without synthesizing a click or opening the system file picker.
 
 ## API
 
@@ -48,12 +50,11 @@ Compiler consumers use this authoring source and an explicit native file-input r
   ]}
 />
 
-Omitting a previously supplied prop restores its default. Exposed states are `disabled`, `required`, `focused` and `focusVisible`; methods are `focusSelf(options?)` and `blurSelf()`.
+Removing a previously supplied prop restores its default value.
+
+- **Exposed states**: `disabled`, `required`, `focused`, `focusVisible`.
+- **Exposed methods**: `focusSelf(options?)`, `blurSelf()`.
 
 ## References
-
-- [Implementation and public source exports](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/native-file-input)
-- [Focus contract](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-AS-FOCUSABLE-0001.yaml)
-- [ControlLabel contract](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-CONTROL-LABEL-0001.yaml)
 
 <SpecEntityLinks directory="spec/prototypes" files={['P-BASE-NATIVE-FILE-INPUT.yaml']} />

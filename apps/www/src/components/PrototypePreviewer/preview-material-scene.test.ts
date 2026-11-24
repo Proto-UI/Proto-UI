@@ -19,6 +19,7 @@ let frames: Map<number, FrameRequestCallback>;
 let resizeCallbacks: ResizeObserverCallback[];
 let rects: WeakMap<Element, DOMRect>;
 let paintedLabels: string[];
+let roundedPaint: number[];
 const rect = (x: number, y: number, w: number, h: number) => new DOMRect(x, y, w, h);
 const viewportRect = (x: number, y: number, w: number, h: number) =>
   rect(originX + x * layoutScale, originY + y * layoutScale, w * layoutScale, h * layoutScale);
@@ -32,6 +33,7 @@ beforeEach(() => {
   resizeCallbacks = [];
   rects = new WeakMap();
   paintedLabels = [];
+  roundedPaint = [];
   let id = 0;
   vi.spyOn(window, 'requestAnimationFrame').mockImplementation((fn) => {
     frames.set(++id, fn);
@@ -75,6 +77,12 @@ beforeEach(() => {
     return {
       fillRect() {},
       beginPath() {},
+      save() {},
+      restore() {},
+      clip() {},
+      roundRect(_x: number, _y: number, _width: number, _height: number, radius: number) {
+        roundedPaint.push(radius);
+      },
       moveTo() {},
       lineTo() {},
       fill() {},
@@ -112,6 +120,31 @@ function resize() {
   }
 }
 describe('bounded visible Previewer source layout', () => {
+  it('rounds only owned RuntimeBox preview paint with a flat matte, without clipping interactions', () => {
+    const owner = document.createElement('div');
+    owner.className = 'pui-runtime-box';
+    owner.style.backgroundColor = 'rgb(255, 255, 255)';
+    document.body.append(owner);
+    const preview = createPreviewMaterialScene(owner, { presentation: 'preview' });
+    cleanups.push(() => preview.dispose());
+    expect(preview.scope.style.borderRadius).toBe(THEME.light['radius-xl']);
+    expect(preview.scope.style.overflow).toBe('');
+    expect(roundedPaint).toContain(Number.parseFloat(THEME.light['radius-xl']));
+    expect(preview.lease.current()).not.toBeNull();
+
+    roundedPaint.length = 0;
+    owner.style.backgroundImage = 'linear-gradient(black, white)';
+    preview.redraw();
+    expect(roundedPaint).toHaveLength(0);
+    expect(preview.lease.current()).not.toBeNull();
+
+    owner.style.removeProperty('background-image');
+    const diagnostic = createPreviewMaterialScene(owner);
+    cleanups.push(() => diagnostic.dispose());
+    expect(diagnostic.scope.style.borderRadius).toBe('');
+    expect(roundedPaint).toHaveLength(0);
+  });
+
   it('owns scene spacing without a second centered preview reserve or outside overrides', () => {
     const parent = document.createElement('div');
     parent.style.setProperty('--runtime-box-content-min', '10rem');

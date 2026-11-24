@@ -1,12 +1,14 @@
 ---
 title: 'ToggleGroup'
-description: 'Independent single or multiple pressed-value selection with roving focus.'
+description: 'A Brutalist-styled group of toggle buttons supporting single or multiple selection and roving focus.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-Independent single or multiple pressed-value selection with roving focus.
+ToggleGroup groups a set of two-state toggle buttons with single or multiple selection and roving keyboard navigation.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-brutalist-toggle-group"
@@ -15,15 +17,28 @@ Independent single or multiple pressed-value selection with roving focus.
   codePanel={false}
 />
 
-value/defaultValue are arrays. multiple=false keeps at most one value; clicking it again clears selection. Controlled valueChange requests never mutate the owner. Disabled, readOnly and duplicate-valued items do not commit. Arrow navigation changes focus without selecting.
+## Installation
 
-Parts: Root, Item.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/toggle-group` and adapt them for your target runtime.
 
-Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+## Usage
+
+### Anatomy
+
+ToggleGroup is composed of `Root` and `Item`:
+
+- `Root`: Manages the active value array, single/multiple mode, orientation, and roving focus.
+- `Item`: Renders each toggle button identified by a unique `value`.
+
+### Selection & Keyboard Navigation
+
+- Both `value` and `defaultValue` are string arrays (`readonly string[]`). With `multiple={false}` (default), at most one item stays active and clicking it again clears the selection; set `multiple={true}` to allow multiple active items.
+- Arrow keys move roving focus between items without toggling selection; press `Enter` or `Space` to toggle the focused item.
+- Disabled items, `readOnly` groups, and items with duplicate values do not commit changes. Pass `value` for controlled mode and listen to `valueChange` to decide when to update state.
 
 ## API
 
-Toggle Group is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
+The following props belong to `Root` (pass `value` for controlled mode):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -38,5 +53,6 @@ Toggle Group is workspace source. There is no public `proto-ui add` target. Pass
   ]}
 />
 
-These props belong to Root. Item defaults `value` to `''` and `disabled` to `false`.
+Other parts:
 
+- **Item**: `value` defaults to `''`; `disabled` defaults to `false`.
