@@ -711,6 +711,21 @@ function createSelectControl<Value extends string>(
       children: selectParts.itemText
         ? [
             createProjectedProto(selectParts.itemText, coordinateAttrs, undefined, {
+              // A control whose Trigger value may reflow must let its popup
+              // rows reflow with it. A row that keeps its intrinsic label
+              // width is wider than the popup at enlarged text sizes, so the
+              // selected row no longer fits its own scrollport and the
+              // placement host refuses to present the popup at all.
+              ...(config.wrapValue
+                ? {
+                    surfaceStyle: {
+                      minWidth: '0',
+                      flex: '1 1 auto',
+                      whiteSpace: 'normal',
+                      overflowWrap: 'anywhere',
+                    },
+                  }
+                : {}),
               children: [option.label],
             }),
           ]

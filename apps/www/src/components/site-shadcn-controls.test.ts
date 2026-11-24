@@ -435,7 +435,12 @@ it.each(['shadcn', 'brutalist'] as const)(
     expect(value.style.overflow).toBe('visible');
     expect(value.style.overflowWrap).toBe('anywhere');
     expect(value.textContent).toBe('Web Components');
-    expect(replay).toHaveBeenCalledWith({ position: 'popper' });
+    // The Docs Runtime popup keeps its own height, so the placement can move
+    // it to the side that has room instead of cropping its rows.
+    expect(replay).toHaveBeenCalledWith({
+      position: 'popper',
+      surfaceStyle: { maxHeight: 'none' },
+    });
     if (family === 'shadcn') {
       const text = document.querySelector<HTMLElement>('wc-shadcn-select-item-text')!;
       expect(text.textContent).toBe('Web Components');

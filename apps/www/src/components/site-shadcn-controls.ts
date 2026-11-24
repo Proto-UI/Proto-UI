@@ -322,6 +322,9 @@ function initializeSelect(root: SiteSelectRoot): void {
     siteControlTags(family);
   root.dataset.siteControlFamily = family;
   const initialized = root.dataset.siteShadcnInitialized === '1';
+  // The documentation Runtime selector owns enlarged-text reflow for its
+  // Trigger, its Value, its popup rows and the popup's own height.
+  const docsRuntime = !!root.closest('[data-docs-site-header] [data-adapter-select]');
   bindSiteSelectDismissal(root, (reason) => {
     const exposes = root.getExposes?.() as SelectCloseExposes | undefined;
     if (exposes?.open?.get?.() === true)
@@ -393,6 +396,14 @@ function initializeSelect(root: SiteSelectRoot): void {
       // Omitted placement belongs to the selected Prototype family.
       ...(content.dataset.position ? { position: content.dataset.position } : {}),
       ...(content.dataset.align ? { align: content.dataset.align } : {}),
+      // This consumer's popup owns a fixed, short option list. The family's
+      // own height clamp would crop the rows that do not fit the current side
+      // and, because the clamp is also what the placement reads as the
+      // popup's height, it hides from the collision placement that the popup
+      // no longer fits there. The popup is therefore measured at its natural
+      // height, so the placement can move it to the side that has room and
+      // every option stays reachable.
+      ...(docsRuntime ? { surfaceStyle: { maxHeight: 'none' } } : {}),
     });
   }
 
@@ -404,7 +415,7 @@ function initializeSelect(root: SiteSelectRoot): void {
     });
   });
 
-  if (root.closest('[data-docs-site-header] [data-adapter-select]')) {
+  if (docsRuntime) {
     // This consumer explicitly uses popper, whose intrinsic rows can grow with
     // the same enlarged text already allowed by its Trigger/Value surface.
     root.querySelectorAll<HTMLElement>(SelectItemText).forEach((text) => {
