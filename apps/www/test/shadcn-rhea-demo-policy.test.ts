@@ -359,6 +359,8 @@ import w5Demo14 from '../src/content/docs/demo_components/live-region/demo-shadc
 import w5Demo15 from '../src/content/docs/demo_components/transition/demo-shadcn-transition-controlled.demo';
 import w5Demo16 from '../src/content/docs/demo_components/transition/demo-shadcn-transition-interrupt.demo';
 import w5Demo17 from '../src/content/docs/demo_components/transition/demo-shadcn-transition-lifecycle.demo';
+import toastPositionDemo from '../src/content/docs/demo_components/toast/demo-shadcn-toast-position.demo';
+import toastRichColorsDemo from '../src/content/docs/demo_components/toast/demo-shadcn-toast-rich-colors.demo';
 const demos: ReadonlyArray<readonly [string, DemoSpec]> = [
   ['demo-button', demo0],
   ['demo-button-default', demo1],
@@ -688,6 +690,8 @@ const demos: ReadonlyArray<readonly [string, DemoSpec]> = [
   ['demo-shadcn-transition-controlled', w5Demo15],
   ['demo-shadcn-transition-interrupt', w5Demo16],
   ['demo-shadcn-transition-lifecycle', w5Demo17],
+  ['demo-shadcn-toast-position', toastPositionDemo],
+  ['demo-shadcn-toast-rich-colors', toastRichColorsDemo],
 ];
 
 const profileExamples = [
@@ -854,7 +858,7 @@ describe('ordinary Shadcn documentation demo policy', () => {
   it('covers every actual Shadcn page demo ID in each locale', () => {
     const ordinaryIds = demos.map(([id]) => id);
     const expected = [...ordinaryIds, ...profileExamples.map(({ id }) => id)].sort();
-    expect(expected).toHaveLength(337);
+    expect(expected).toHaveLength(339);
     for (const locale of ['en', 'zh-cn']) {
       const found = new Set<string>();
       const directory = resolve(

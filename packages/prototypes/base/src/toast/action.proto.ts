@@ -2,6 +2,7 @@ import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
 import { asAccessible, asFocusable, asTrigger } from '@proto.ui/hooks';
 import { TOAST_FAMILY, dismissToast, createToastId } from './shared';
 import type { ToastActionProps, ToastActionExposes, ToastActionAsHookContract } from './types';
+
 function setup(def: DefHandle<ToastActionProps, ToastActionExposes>) {
   const focusId = createToastId();
   let mounted = false,
@@ -15,8 +16,9 @@ function setup(def: DefHandle<ToastActionProps, ToastActionExposes>) {
   def.props.define({
     disabled: { type: 'boolean', empty: 'fallback' },
     a11yLabel: { type: 'string', empty: 'fallback' },
+    keepOpen: { type: 'boolean', empty: 'fallback' },
   });
-  def.props.setDefaults({ disabled: false });
+  def.props.setDefaults({ disabled: false, keepOpen: false });
   const disabled = def.state.bool('disabled', false);
   const focus = asFocusable();
   focus.configure({ disabled: false });
@@ -68,11 +70,13 @@ function setup(def: DefHandle<ToastActionProps, ToastActionExposes>) {
   def.event.on('press.commit', (run) => {
     if (!mounted || disabled.get()) return;
     const epoch = viewEpoch;
+    const keepOpen = !!run.props.get().keepOpen;
     run.expose.emit('action');
-    if (!mounted || epoch !== viewEpoch) return;
+    if (!mounted || epoch !== viewEpoch || keepOpen) return;
     dismissToast(run, 'action');
   });
 }
+
 export const asToastAction = defineAsHook<
   ToastActionProps,
   ToastActionExposes,

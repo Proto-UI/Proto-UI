@@ -85,6 +85,26 @@ Toast 由 `Root`、`Viewport`、`Title`、`Description`、`Action` 和 `Close` �
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+### 显示位置
+
+通过 `Viewport` 的 `position`（`top-left`、`top-center`、`top-right`、`bottom-left`、`bottom-center`、`bottom-right`）将通知栈锚定到任意视口角落或边缘，并可通过 `dismissAll()` 一键清空当前通知。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toast-position"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 语义着色与状态图标
+
+在 `Root` 上开启 `richColors` 可将内置状态图标（`success`、`info`、`warning`、`error`、`loading`）与语义表面配色结合。`type="loading"` 默认常驻直到状态切换或显式超时，`type="error"` 默认升级为 `politeness="assertive"`。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toast-rich-colors"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
 ### 受控与常驻
 
 传入 `open` 与 `duration={0}` 可由应用状态完全接管通知的打开与关闭。
@@ -104,13 +124,24 @@ Toast 由 `Root`、`Viewport`、`Title`、`Description`、`Action` 和 `Close` �
   rows={[
     { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'true' },
-    { name: 'duration', type: 'number', default: '5000' },
+    { name: 'duration', type: 'number', default: '5000（loading 默认 0）' },
     { name: 'paused', type: 'boolean', default: 'false' },
-    { name: 'politeness', type: "'polite' | 'assertive'", default: "'polite'" },
+    {
+      name: 'politeness',
+      type: "'polite' | 'assertive'",
+      default: "'polite'（error 默认 'assertive'）",
+    },
     {
       name: 'type',
       type: "'default' | 'success' | 'info' | 'warning' | 'error' | 'loading'",
       default: "'default'",
+    },
+    { name: 'dismissible', type: 'boolean', default: 'true' },
+    { name: 'richColors', type: 'boolean', default: 'false' },
+    {
+      name: 'position',
+      type: "'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'",
+      default: '继承 Viewport',
     },
     { name: 'appear', type: 'boolean', default: 'false' },
     { name: 'enterDuration', type: 'number', default: '0' },
@@ -127,8 +158,22 @@ Toast 由 `Root`、`Viewport`、`Title`、`Description`、`Action` 和 `Close` �
   rows={[
     { name: 'Viewport.a11yLabel', type: 'string', default: "'Notifications'" },
     { name: 'Viewport.hotkey', type: 'string', default: "'F8'" },
+    {
+      name: 'Viewport.position',
+      type: "'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'",
+      default: "'bottom-right'",
+    },
+    { name: 'Viewport.expand', type: 'boolean', default: 'false' },
+    { name: 'Viewport.visibleToasts', type: 'number', default: '3' },
+    { name: 'Viewport.duration', type: 'number', default: '—' },
+    {
+      name: 'Viewport.swipeDirection',
+      type: "'right' | 'left' | 'up' | 'down' | 'none'",
+      default: "'right'",
+    },
     { name: 'Action.disabled', type: 'boolean', default: 'false' },
     { name: 'Action.a11yLabel', type: 'string', default: '—' },
+    { name: 'Action.keepOpen', type: 'boolean', default: 'false' },
     { name: 'Close.disabled', type: 'boolean', default: 'false' },
   ]}
 />
@@ -136,7 +181,7 @@ Toast 由 `Root`、`Viewport`、`Title`、`Description`、`Action` 和 `Close` �
 事件与暴露方法：
 
 - **事件**：`Root` 暴露 `openChange`（`{ open: boolean; reason: string }`）；`Action` 暴露 `action`（`void`）。
-- **方法**：`Root` 暴露 `openToast()`、`close(reason?)`、`pause()`、`resume()`；`Viewport` 暴露 `focusFirst()`。
+- **方法**：`Root` 暴露 `openToast()`、`close(reason?)`、`pause()`、`resume()`；`Viewport` 暴露 `focusFirst()`、`pauseAll()`、`resumeAll()`、`dismissAll(reason?)`。
 
 ## 参考
 

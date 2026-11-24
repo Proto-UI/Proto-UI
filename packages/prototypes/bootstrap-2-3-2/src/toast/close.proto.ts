@@ -20,7 +20,7 @@ export default definePrototype<ToastCloseProps, ToastCloseExposes>({
     );
     def.rule({
       when: (w) => w.state(state.disabled).eq(false),
-      intent: (i) => i.feedback.style.use(tw('hover:opacity-40')),
+      intent: (i) => i.feedback.style.use(tw('opacity-40')),
     });
     def.rule({
       when: (w) => w.all(w.state(state.disabled).eq(false), w.state(state.focused).eq(true)),
@@ -33,7 +33,9 @@ export default definePrototype<ToastCloseProps, ToastCloseExposes>({
     def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),
       intent: (i) =>
-        i.feedback.style.use(tw('outline-none ring-2 ring-ring ring-offset-2 ring-offset-background')),
+        i.feedback.style.use(
+          tw('outline-none ring-2 ring-ring ring-offset-2 ring-offset-background')
+        ),
     });
     return behavior.render;
   },
