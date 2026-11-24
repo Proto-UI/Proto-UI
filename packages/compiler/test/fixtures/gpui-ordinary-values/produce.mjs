@@ -171,10 +171,6 @@ dependencies.push([
   'public_mutation',
   emit('public_mutation', readFileSync(path.join(fixture, 'public-mutation.proto.ts'), 'utf8')),
 ]);
-dependencies.push([
-  'external_scroll',
-  emit('external_scroll', readFileSync(path.join(fixture, 'external-scroll.proto.ts'), 'utf8')),
-]);
 const hookOnceSource = readFileSync(path.join(fixture, 'hook-once.proto.ts'), 'utf8');
 for (const [name, exportName] of [
   ['hook_pending', 'default'],
