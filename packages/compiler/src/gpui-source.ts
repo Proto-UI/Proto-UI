@@ -19,7 +19,7 @@ import {
 } from './template-shape';
 import { isDataValueType, isPublicValueType, lexicalStoredType, statementsTerminate } from './ir';
 import { inferBinaryType, relationalOperandKind } from './expression-types';
-import { valueAlternatives } from './value-types';
+import { serializableDataType, valueAlternatives } from './value-types';
 import {
   GPUI_MISSING_FOCUS_TREE,
   GPUI_UNAVAILABLE_OPERATIONS,
@@ -338,7 +338,8 @@ export function emitGpuiSource(
           ? node.declaration.intent.ops.flatMap((operation) => operation.handles)
           : [];
     for (const handle of handles)
-      for (const token of handle.tokens) styleTokens.set(token, node.span);
+      if (handle.kind === 'tw')
+        for (const token of handle.tokens) styleTokens.set(token, node.span);
     if (node.kind === 'operation' && GPUI_UNAVAILABLE_OPERATIONS.has(node.operation))
       diagnostics.push({
         code: 'PUI_GPUI_SDK_CAPABILITY',
@@ -367,18 +368,6 @@ export function emitGpuiSource(
         code: 'PUI_GPUI_HOST_REQUIRED',
         category: 'unsupported-input',
         message: `GPUI operation ${node.operation} has no concrete pinned host lowering. No success fallback is emitted.`,
-        span: node.span,
-      });
-    if (
-      node.kind === 'operation' &&
-      ((node.operation === 'controlLabel.label' && node.arguments.length > 0) ||
-        (node.operation === 'controlLabel.target' && node.arguments.length > 1))
-    )
-      diagnostics.push({
-        code: 'PUI_GPUI_CONTROL_LABEL_ANATOMY',
-        category: 'unsupported-input',
-        message:
-          'GPUI ControlLabel supports direct typed InstanceAssociations; anatomy-pair descriptors require an explicit host lowering.',
         span: node.span,
       });
     if (
@@ -559,6 +548,26 @@ export function emitGpuiSource(
   function indexExpression(node: ExpressionIR, scope: NativeLexicalScope): void {
     const capabilityDiagnostic = gpuiScopeCapabilityDiagnostic(node, scope);
     if (capabilityDiagnostic) diagnostics.push(capabilityDiagnostic);
+    if (node.kind === 'call' || node.kind === 'helper-call') {
+      const fn =
+        node.kind === 'call'
+          ? functionTarget(node.callee, scope)
+          : helperFunction(node.name, scope);
+      if (
+        fn &&
+        node.arguments.some(
+          (argument, index) =>
+            fn.parameters[index]?.type === 'unknown' && shapeHasNative(nativeShape(argument, scope))
+        )
+      )
+        diagnostics.push({
+          code: 'PUI4003',
+          category: 'unsupported-input',
+          message:
+            'GPUI native children require a checked native formal; an opaque unknown parameter has no native ABI.',
+          span: node.span,
+        });
+    }
     if (node.kind === 'function') {
       functionDeclarations.set(node.function, scope);
       if (!reached.has(node.function)) return;
@@ -591,7 +600,18 @@ export function emitGpuiSource(
       else if (statement.kind === 'return') {
         if (statement.value) indexExpression(statement.value, scope);
       } else if (statement.kind === 'throw') indexExpression(statement.value, scope);
-      else if (statement.kind === 'try') {
+      else if (statement.kind === 'while' || statement.kind === 'for-of') {
+        indexExpression(
+          statement.kind === 'while' ? statement.condition : statement.iterable,
+          scope
+        );
+        indexBody(
+          statement.body,
+          statement.kind === 'for-of'
+            ? scope.parameter(statement.name, undefined, scope, null)
+            : scope
+        );
+      } else if (statement.kind === 'try') {
         indexBody(statement.body, scope);
         if (statement.catch)
           indexBody(
@@ -619,6 +639,7 @@ export function emitGpuiSource(
       indexBody(fn.body, parameterScope(fn, moduleScope));
     }
   }
+  if (diagnostics.length) return { ok: false, diagnostics };
   function helperFunction(name: string, scope = templateScope): FunctionIR | undefined {
     const seen = new Set<object>();
     let binding = scope.lookup(name);
@@ -865,6 +886,8 @@ export function emitGpuiSource(
         else if (node.kind === 'rule') {
           inspect(node.receiver, scope);
           node.states.forEach((state) => inspect(state.value, scope));
+          node.styles?.forEach((style) => inspect(style.value, scope));
+          node.targets?.forEach((style) => inspect(style.value, scope));
         } else for (const child of gpuiExpressionChildren(node)) inspect(child, scope);
         // Nested functions are separately visited in their own declaration frame.
       }
@@ -884,7 +907,16 @@ export function emitGpuiSource(
               inspect(statement.value, scope);
             }
           } else if (statement.kind === 'throw') inspect(statement.value, scope);
-          else if (statement.kind === 'try') {
+          else if (statement.kind === 'while' || statement.kind === 'for-of') {
+            inspect(statement.kind === 'while' ? statement.condition : statement.iterable, scope);
+            body(
+              fn,
+              statement.body,
+              statement.kind === 'for-of'
+                ? scope.parameter(statement.name, undefined, scope, null)
+                : scope
+            );
+          } else if (statement.kind === 'try') {
             body(fn, statement.body, scope);
             if (statement.catch)
               body(
@@ -1650,6 +1682,8 @@ impl __PuiNativeRecordValue {
           : `capability(&${ownerReference()})`);
     const receiverOwner = () => `&(${receiver()}).owner()`;
     switch (node.kind) {
+      case 'array-spread':
+        throw new Error('Target admission must reject unsupported iterable spread.');
       case 'narrow':
         return expression(node.value, environment, depth);
       case 'undefined':
@@ -1759,6 +1793,8 @@ impl __PuiNativeRecordValue {
             return `Value::number(${rustMathRound(`(${args[0]}).scalar_number()`)})`;
           case 'math.floor':
             return `Value::number((${args[0]}).scalar_number().floor())`;
+          case 'math.abs':
+            return `Value::number((${args[0]}).scalar_number().abs())`;
           case 'string': {
             if (!args.length) return 'Value::string("")';
             // GPUI values coerce scalars exactly as ECMAScript does; a
@@ -1795,6 +1831,20 @@ impl __PuiNativeRecordValue {
             return `freeze(${args[0]})`;
           case 'object.hasOwn':
             return `has_own(&(${args[0]}), &(${args[1]}))`;
+          case 'array.isArray':
+            if (snapshotAbi(node.arguments[0]) || recordAbi(node.arguments[0])) {
+              diagnostics.push({
+                code: 'PUI4003',
+                category: 'unsupported-input',
+                message:
+                  'GPUI Array.isArray currently inspects ordinary values, not native template aggregates.',
+                span: node.span,
+              });
+              return 'Value::boolean(false)';
+            }
+            // Native arrays retain their identity; JSON ingress may retain its
+            // own array tag. Inspect the value once without reading properties.
+            return `Value::boolean(matches!(&(${args[0]}), Value::Array(_) | Value::Json(Json::Array(_))))`;
           case 'array.every':
             return `array_every(${args[0]}, ${args[1]})`;
           case 'array.includes': {
@@ -1940,13 +1990,15 @@ impl __PuiNativeRecordValue {
         const bindings = new Map(node.states.map((state) => [state.id, state.value]));
         function condition(value: RuleCondition): string {
           if (value.type === 'true' || value.type === 'false') return value.type;
-          if (value.type === 'eq') {
+          if (value.type === 'eq' || value.type === 'gte') {
             if (value.left.type === 'meta')
-              throw new Error('Rule Meta must fail GPUI target admission.');
+              throw new Error('Target admission must reject unsupported Rule meta sources.');
             const signal =
               value.left.type === 'prop'
                 ? `read_props(&${ownerReference()}, false).member(${string(value.left.key)}, false)`
                 : `(${expression(bindings.get(value.left.id)!, environment, depth)}).get()`;
+            if (value.type === 'gte')
+              return `matches!((${signal}), Value::Number(value) if value.is_finite() && value >= ${value.right % 1 === 0 ? `${value.right}.0` : value.right})`;
             return `strict_equal(&(${signal}), &(${literal(value.right)}))`;
           }
           if (value.type === 'not') return `!(${condition(value.expr)})`;
@@ -1972,10 +2024,11 @@ impl __PuiNativeRecordValue {
         const predicate = `{${owner} ${captures} Value::Function(Rc::new(move |_| Value::boolean(${body})))}`;
         const handles = node.declaration.intent.ops
           .flatMap((operation) => operation.handles)
-          .map(
-            (handle) =>
-              `Value::Style(vec![${handle.tokens.map((token) => `(${string(token)}.into(), ${string(getSemanticGroupKeyV0(token))}.into())`).join(', ')}])`
-          );
+          .map((handle) => {
+            if (handle.kind !== 'tw')
+              throw new Error('Target admission must reject first-class Rule style handles.');
+            return `Value::Style(vec![${handle.tokens.map((token) => `(${string(token)}.into(), ${string(getSemanticGroupKeyV0(token))}.into())`).join(', ')}])`;
+          });
         const result = `rule(&${ownerReference()}, ${predicate}, vec![${handles.join(', ')}])`;
         return ir.hooks?.length ? `capture_rule(&${ownerReference()}, ${result})` : result;
       }
@@ -2497,7 +2550,9 @@ impl __PuiNativeRecordValue {
           ? `${finalOverrides ? 'authored_finally_override' : 'authored_finally'}(|| -> ${bodyFlow} {\n${pad}${operation}\n${'    '.repeat(depth + 1)}}, || -> ${finalFlow} {\n${branch(statement.finally, depth + 2)}${'    '.repeat(depth + 1)}})`
           : operation;
         code += `${indent}match ${flow} {\n${indent}    std::ops::ControlFlow::Break(value) => return ${completion ? 'std::ops::ControlFlow::Break(value)' : 'value'},\n${indent}    std::ops::ControlFlow::Continue(()) => {}\n${indent}}\n`;
-      } else
+      } else if (statement.kind === 'while' || statement.kind === 'for-of')
+        throw new Error('Target admission must reject unsupported dynamic loops.');
+      else
         code += `${indent}if ${scalarEmitter(scope, depth).truthy(statement.condition)} {\n${statements(statement.then, scope, depth + 1, false, nativeReturn, rendererResult, recordReturn, completion, discardReturn, scalarReturn)}${indent}}${statement.otherwise.length ? ` else {\n${statements(statement.otherwise, scope, depth + 1, false, nativeReturn, rendererResult, recordReturn, completion, discardReturn, scalarReturn)}${indent}}` : ''}\n`;
     }
     templateScope = savedTemplateScope;
@@ -2593,10 +2648,11 @@ impl __PuiNativeRecordValue {
         (!type.index || nativeInput(type.index))) ||
         (type.kind === 'value-union' && type.members.every(nativeInput))));
   function acceptsNative(value: string, type: ExpressionIR['type'], span = ir.setup.span): string {
-    if (isDataValueType(type))
-      return type === 'void'
+    const schema = serializableDataType(type);
+    if (schema !== undefined)
+      return schema === 'void'
         ? `matches!(${value}, Value::Undefined)`
-        : `(${value}).try_data().is_some_and(|data| ${accepts('data', type, span)})`;
+        : `(${value}).try_data().is_some_and(|data| ${accepts('data', schema, span)})`;
     if (type === 'context-key') return `matches!(${value}, Value::ContextKey(_))`;
     if (typeof type !== 'string') {
       if (type.kind === 'object')
@@ -2638,21 +2694,21 @@ impl __PuiNativeRecordValue {
           },
         ],
       };
-    const portableReturn = isDataValueType(exposure.returnType);
-    const returnType = exposure.returnType as DataType;
+    const returnType = serializableDataType(exposure.returnType);
+    const portableReturn = returnType !== undefined;
     const checkedPortableResult = portableReturn
       ? `let result = if matches!(result, Value::Undefined) { Json::Null } else { result.data() };
         if !(${accepts('result', returnType, exposure.span)}) { value_type_error("exposed method returned invalid portable data") }`
       : '';
     const parameters = exposure.parameters
-      .map(
-        (parameter, parameterIndex) =>
-          `argument_${parameterIndex}: ${!isDataValueType(parameter.type) ? 'Value' : parameter.optional ? `Option<${rustType(parameter.type, exposure.span)}>` : rustType(parameter.type, exposure.span)}`
-      )
+      .map((parameter, parameterIndex) => {
+        const schema = serializableDataType(parameter.type);
+        return `argument_${parameterIndex}: ${schema === undefined ? 'Value' : parameter.optional ? `Option<${rustType(schema, exposure.span)}>` : rustType(schema, exposure.span)}`;
+      })
       .join(', ');
     const args = exposure.parameters
       .map((parameter, parameterIndex) =>
-        !isDataValueType(parameter.type)
+        serializableDataType(parameter.type) === undefined
           ? `argument_${parameterIndex}`
           : parameter.optional
             ? `argument_${parameterIndex}.map(|value| Value::json(serde_json::to_value(value).expect("portable argument"))).unwrap_or(Value::Undefined)`
@@ -2692,7 +2748,9 @@ impl __PuiNativeRecordValue {
     if (
       !sourceBinding ||
       !portableReturn ||
-      !exposure.parameters.every((parameter) => isDataValueType(parameter.type)) ||
+      !exposure.parameters.every(
+        (parameter) => serializableDataType(parameter.type) !== undefined
+      ) ||
       !reachedMethodSites.some(
         ({ span }) =>
           span.file === exposure.span.file &&

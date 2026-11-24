@@ -1,15 +1,15 @@
 ---
-title: 'NavigationMenu'
-description: 'Named navigation disclosures with native destination links.'
+title: 'Navigation Menu'
+description: 'Named navigation disclosures paired with native destination links.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Navigation Menu combines expandable navigation panels with native destination links inside a navigation landmark. The examples on this page use the **Shadcn Rhea** style preset.
 
-Named navigation disclosures with native destination links.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-navigation-menu"
@@ -18,19 +18,30 @@ Named navigation disclosures with native destination links.
   codePanel={false}
 />
 
-Root is a navigation landmark, Trigger is a disclosure button and Content is a labelled region. Root.value identifies one open panel. Item emits a command; Link projects a real anchor with href, target, rel and current-page semantics. The browser owns URL previews, Enter activation, modifier/middle-click browsing and navigation. Link does not synthesize Space activation or call an application router.
+## Installation
 
-Parts: Root, Trigger, Content, Item, Link.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.
+## Usage
 
-Link emits a read-only navigate observation containing href, target, rel and modified after native activation. It is not a cancellable routing request. A normal same-window activation closes the open panel unless closeOnSelect=false; modified/middle-button or \_blank activation keeps the current page’s panel open. Disabled Link removes its destination and prevents activation. Current=true identifies the current page with aria-current.
+Navigation Menu consists of `Root`, `Trigger`, `Content`, `Item`, and `Link`:
 
-React/Vue/Vue2 use a native anchor root. Web Components retain caller content in an owned local anchor, and focus/style/accessibility projection follows that physical surface. The demo uses a same-document destination and only observes the navigation. Real-browser/packed/compiler/native acceptance remains pending beyond source-runtime checks.
+- `Root` acts as a `navigation` landmark and manages the currently open panel via `Root.value`.
+- `Trigger` renders the disclosure button and `Content` renders the labelled panel region.
+- `Item` triggers a menu command.
+- `Link` renders a native anchor with `href`, `target`, `rel`, and current-page semantics (`current` maps to `aria-current`).
+
+### Native links and navigation events
+
+- URL previews, `Enter` activation, and modifier-key or middle-click tab opening are handled natively by the browser.
+- After native activation, `Link` emits a read-only `navigate` event with `{ href, target, rel, modified }` for observation or analytics.
+- Standard same-window navigation closes the open panel unless `closeOnSelect={false}`; modifier clicks, middle-clicks, and `target="_blank"` keep the panel open on the current page.
+- Disabling a `Link` removes its destination and prevents activation.
+- React, Vue, and Vue 2 render a native anchor root; Web Components keep your children inside an owned local anchor so focus, styling, and accessibility attributes stay aligned.
 
 ## API
 
-Navigation Menu is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode. It reuses the shared menu-family Root props.
+The following props belong to `Root` (pass `value` for controlled mode):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -42,7 +53,12 @@ Navigation Menu is workspace source. There is no public `proto-ui add` target. P
   ]}
 />
 
-These props belong to Root. Trigger defaults `disabled` to `false`. Content defaults `sideOffset` to `4`. Item defaults `closeOnSelect` to `true`. Link defaults `href` and `rel` to `''`, `current` to `false`, and `target` to `_self`.
+Other part defaults:
+
+- `Trigger`: `disabled` defaults to `false`.
+- `Content`: `sideOffset` defaults to `4`.
+- `Item`: `closeOnSelect` defaults to `true`.
+- `Link`: `href` and `rel` default to `''`, `current` defaults to `false`, and `target` defaults to `'_self'`.
 
 ## References
 

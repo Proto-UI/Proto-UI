@@ -1,5 +1,6 @@
 ---
 title: Separator
+description: 'A flat 2px ink rule for visually or semantically dividing content regions in the Brutalist family.'
 sidebar:
   order: 7
 ---
@@ -9,19 +10,28 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
-> Availability: `@proto.ui/prototypes-brutalist@0.2.0` is published under npm `latest` as part of [v0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0). Lifecycle: [P-BRUTALIST-SEPARATOR](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-SEPARATOR.yaml) and its inherited Base protocol remain `draft`; this page describes the released and tested 0.2 surface, not an active protocol guarantee.
 
-Brutalist Separator preserves Base orientation and decorative accessibility semantics and renders a flat `2px` ink rule.
+Separator renders a flat `2px` ink rule with horizontal or vertical orientation and decorative accessibility semantics. Use it between message date groups, Card sections, navigation lists, and form regions.
 
-Use it for message-date groups, Card sections, navigation lists, and form regions. It has no spacing policy; surrounding composition owns spacing.
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-separator" initialRuntime="wc" />
 </div>
 
+## Installation
+
+Included in `@proto.ui/prototypes-brutalist@0.2.0`. Add it via the CLI target `brutalist-separator`, or import directly from `@proto.ui/prototypes-brutalist/separator`.
+
+## Usage
+
+- Set `orientation` to `'horizontal'` or `'vertical'` to match your layout axis.
+- Keep `decorative={true}` (default) for purely visual dividers, or set `decorative={false}` to expose a semantic separator to assistive technologies.
+- Separator adds no built-in margin; control spacing in the surrounding layout.
+
 ## API
 
-Separator is workspace source. For this workspace version, the CLI target is `brutalist-separator`. Use matching CLI and package versions; check the chosen release's availability before installing.
+The following props belong to `Root`:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -30,5 +40,3 @@ Separator is workspace source. For this workspace version, the CLI target is `br
     { name: 'decorative', type: 'boolean', default: 'true' },
   ]}
 />
-
-These props belong to Root.

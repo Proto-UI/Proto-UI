@@ -40,18 +40,18 @@ criteria:
       prototypes: [P-BASE-COLLAPSIBLE]
   - id: P-BASE-COLLAPSIBLE-CONTENT-DERIVED-STATES
     text:
-      zh-CN: Content 必须 expose open 与 hidden，始终由 canonical Root.open 与 !Root.open 派生；受控 request 未获 owner input 接受时不得改变它们，也不得通过本地 presence/perceptual state 建立第二 open truth。
-      en: Content must expose open and hidden, derived from canonical Root.open and !Root.open respectively; they must not change for a controlled request unaccepted by owner input or establish a second open truth through local presence/perceptual state.
+      zh-CN: 未绑定具名 C-DISCLOSURE-PRESENCE-0001 扩展时，Content 必须 expose open 与 hidden，始终由 canonical Root.open 与 !Root.open 派生；受控 request 未获 owner input 接受时不得改变它们，也不得通过本地 presence/perceptual state 建立第二 open truth。
+      en: Without the named C-DISCLOSURE-PRESENCE-0001 extension, Content must expose open and hidden, derived from canonical Root.open and !Root.open respectively; they must not change for a controlled request unaccepted by owner input or establish a second open truth through local presence/perceptual state.
     dependsOn:
       contracts: [C-STATE-0001, C-EXPOSE-STATE-0001, C-CONTEXT-0007, C-LIFECYCLE-0008]
   - id: P-BASE-COLLAPSIBLE-CONTENT-PRESENCE-POLICY
     text:
       zh-CN: >-
-        Content 只接受 keepMounted?: boolean（默认 false）作为 retention policy；created 与 context/keepMounted runtime callback 必须通过 run.lifecycle.setPresent(keepMounted || open) 更新 intent，不得在 setup/render 阶段调用该 API、直接 host mount/unmount 或维护另一套 lifecycle truth。
+        默认未绑定 presentation 时，Content 只接受 keepMounted?: boolean（默认 false）作为 retention policy；created 与 context/keepMounted runtime callback 必须通过 run.lifecycle.setPresent(keepMounted || open) 更新 intent，不得在 setup/render 阶段调用该 API、直接 host mount/unmount 或维护另一套 lifecycle truth。
 
 
       en: >-
-        Content accepts only keepMounted?: boolean (default false) as its retention policy; created and context/keepMounted runtime callbacks must update intent through run.lifecycle.setPresent(keepMounted || open), never invoke that API from setup/render, directly mount/unmount the host, or maintain another lifecycle truth.
+        On the default unbound presentation path, Content accepts only keepMounted?: boolean (default false) as its retention policy; created and context/keepMounted runtime callbacks must update intent through run.lifecycle.setPresent(keepMounted || open), never invoke that API from setup/render, directly mount/unmount the host, or maintain another lifecycle truth.
 
 
     dependsOn:
@@ -149,6 +149,9 @@ dependsOn:
 verifies:
   tests: [T-BASE-COLLAPSIBLE-0001]
 revisions:
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Preserve the default immediate protocol while naming the independently governed opt-in disclosure presence extension.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged role-neutral Content with callback-only default L1 presence, hidden keepMounted retention, repeatable logical lifetime, exact-key relationship identity and terminal-owner boundaries; retained draft admission.

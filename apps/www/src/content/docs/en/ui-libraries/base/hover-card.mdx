@@ -1,20 +1,15 @@
 ---
 title: 'Hover Card'
-desp: 'Hover Card'
-description: 'Hover Card base prototype'
+description: 'A floating preview card that opens with configurable hover/focus delays, portal positioning, and transition-aware unmounting.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Base Hover Card composes Root, Trigger, and Content. Root supports controlled or uncontrolled open state, `openDelay`, `closeDelay`, and `openChange`; Content uses `asOverlay` plus `asTransition` and detaches only after leave completes. Content uses a logical-owner-preserving Portal, fixed positioning, `side`/`align`, numeric offsets, and collision handling. Arrow, forceMount, custom collision boundaries, sticky positioning, and detached-anchor hiding remain extensions.
+Base Hover Card displays supplementary preview content after a configurable hover or focus delay. Composed of `Root`, `Trigger`, and `Content`, it provides portal rendering, anchor positioning with collision handling, and unmount-after-transition lifecycle management.
 
-Interaction contributions are view-scoped: removing Trigger or Content withdraws only that part's current hover/focus contribution. Retained view remounts start without old hover. The Root still applies `closeDelay` and emits `openChange`; a controlled owner may decline that request.
-
-A new Focus transition observed while a remount is becoming ready is published after the Trigger owner is ready. An unchanged retained `focused=true` is not replayed; canceled mounts and disabled/terminal teardown discard unpublished observations.
-
-The draft Root exposes the typed cooperation method `releaseInteraction(part, contributionId): boolean`, where `part` is `'trigger' | 'content'` and the ID is a positive safe integer unique across publishers and view generations. Trigger/Content borrow it from their same-domain Root before removal. Matching current IDs retire once; invalid, stale, or repeated IDs return `false` without changing Context or restarting a timer. Normal application visibility control continues through `open`, `openHoverCard`, `close`, and `toggle`. This additive cooperation surface does not imply stable lifecycle admission or complete host/native coverage.
+## Preview
 
 <div>
   <PrototypePreviewer
@@ -25,13 +20,33 @@ The draft Root exposes the typed cooperation method `releaseInteraction(part, co
   />
 </div>
 
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release. In the workspace, the CLI target is `base-hover-card`.
+
+## Usage
+
+### Anatomy and interaction
+
+- **`Root`**: manages open state (controlled `open` or uncontrolled `defaultOpen`), `openDelay` / `closeDelay`, and `openChange`, and exposes `openHoverCard()`, `close()`, `toggle()`, and the part-coordination method `releaseInteraction(part, contributionId)`.
+- **`Trigger`**: opens the card on hover or focus; set `disabled={true}` to suppress opening.
+- **`Content`**: renders inside a Portal with `side`/`align` placement, numeric offsets, and collision avoidance, unmounting only after leave transitions finish.
+
+### Controlled state and remounting
+
+- Pass `open` for controlled mode: after `openDelay` or `closeDelay`, `Root` emits `openChange` so your application can update `open`.
+- Unmounting or remounting `Trigger` or `Content` clears only that part's active hover/focus contribution without replaying stale hover state.
+
 ## API
 
-Hover Card is workspace source. For this workspace version, the CLI target is `base-hover-card`. Use matching CLI and package versions; check the chosen release's availability before installing. Passing `open` selects controlled mode.
+### Root Props
+
+Passing `open` selects controlled mode.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'openDelay', type: 'number', default: '700' },
@@ -39,7 +54,10 @@ Hover Card is workspace source. For this workspace version, the CLI target is `b
   ]}
 />
 
-These props belong to Root. Trigger defaults `disabled` to `false`. Content accepts the Transition props and defaults `side` to `bottom`, `align` to `center`, `sideOffset` to `4`, `alignOffset` and `collisionPadding` to `0` and `avoidCollisions` to `true`.
+### Other parts
+
+- **Trigger**: `disabled` defaults to `false`.
+- **Content**: accepts Transition props; defaults `side` to `'bottom'`, `align` to `'center'`, `sideOffset` to `4`, `alignOffset` and `collisionPadding` to `0`, and `avoidCollisions` to `true`.
 
 ## References
 

@@ -1,11 +1,13 @@
 ---
 title: 'Menubar'
-description: '具有键盘协调与独立命令面板的菜单栏。'
+description: '支持水平键盘游走与独立命令面板的 Liquid Glass 顶部菜单栏。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-具有键盘协调与独立命令面板的菜单栏。
+Liquid Glass Menubar 将多个独立的命令菜单组织为单一横向菜单栏，通过游走 Tab 索引和方向键在各个菜单面板之间顺畅切换。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-menubar"
@@ -14,8 +16,21 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root.value 标识一个打开的面板；Trigger.value 与 Content.value 配对。菜单栏提供单一 Tab 入口、左右移动、上下箭头进入、命令纵向导航及文字跳转。Escape 恢复触发器焦点；外部点击与命令选择关闭。受控 value 只发出请求。
+## 安装
 
-组成: Root, Trigger, Content, Item.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码。嵌套子菜单、完整 native/GPUI/编译器证据、消费/视觉验收与独立生命周期准入仍未完成。
+## 用法
+
+- **部件组成**：`Root`、`Trigger`、`Content`、`Item`。
+- **面板配对**：`Root.value` 标识当前唯一展开的面板，每组 `Trigger.value` 与 `Content.value` 一一配对；受控传入 `value` 时仅发出变更请求。
+- **键盘导航**：整条菜单栏占用一个 Tab 停靠点；左右方向键在顶层菜单间切换，上下方向键进入面板并纵向浏览命令，支持首字母输入跳转。按 Escape 关闭面板并恢复对应触发器焦点，点击外部或选择命令同样关闭面板。
+
+## API
+
+| 部件    | 属性    | 说明                            |
+| ------- | ------- | ------------------------------- |
+| Root    | `value` | 当前展开面板的标识（支持受控）  |
+| Trigger | `value` | 与对应 `Content` 配对的面板标识 |
+| Content | `value` | 与对应 `Trigger` 配对的命令面板 |
+| Item    | —       | 面板内的可执行菜单命令          |

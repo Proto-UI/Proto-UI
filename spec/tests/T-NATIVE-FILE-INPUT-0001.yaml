@@ -1,0 +1,42 @@
+id: T-NATIVE-FILE-INPUT-0001
+type: test
+title: Native File Input policy and physical picker boundary
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: These acceptance obligations are recorded as missing independent evidence. Existing shared Focus and native-host checks cover their mechanisms; they are not represented as new completed native-picker scenarios.
+summary: Independent native composition evidence required before promoting the extracted policy.
+cases:
+  - id: T-NATIVE-FILE-INPUT-0001-CASE-POLICY
+    title: One native subject projects accepted policy and current focus
+    covers: [P-BASE-NATIVE-FILE-INPUT-POLICY, P-BASE-NATIVE-FILE-INPUT-FOCUS]
+    expectation: Defaults, accepted changes, disabled focus rejection, label focus, removal and reentrant retirement agree between the prototype's exposed states and the physical input.
+  - id: T-NATIVE-FILE-INPUT-0001-CASE-HOST
+    title: Compiled authoring preserves native picker and file ownership
+    covers: [P-BASE-NATIVE-FILE-INPUT-HOST, P-BASE-NATIVE-FILE-INPUT-ENTRIES]
+    expectation: Both actual authoring entries retain one native file root; browser file identity, multiple/accept options, change delivery and clearing work without a text-value model, synthetic permission or application-owned focus state.
+implementations:
+  - id: independent-native-file-input-conformance
+    kind: adapter-test
+    status: missing
+    required: true
+    consumesCases: [T-NATIVE-FILE-INPUT-0001-CASE-POLICY, T-NATIVE-FILE-INPUT-0001-CASE-HOST]
+    exercises: [P-BASE-NATIVE-FILE-INPUT]
+verifies:
+  prototypes: [P-BASE-NATIVE-FILE-INPUT]
+exercises:
+  prototypes: [P-BASE-NATIVE-FILE-INPUT]
+openQuestions:
+  - id: T-NATIVE-FILE-INPUT-0001-Q-EVIDENCE
+    question:
+      en: Has native consumer and assistive-technology evidence independently satisfied these obligations beyond existing host/focus checks and source emission?
+    blocks:
+      [
+        activation:T-NATIVE-FILE-INPUT-0001,
+        'implementation:T-NATIVE-FILE-INPUT-0001#independent-native-file-input-conformance',
+      ]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Record explicit native-file acceptance obligations and missing evidence without adding or claiming a completed executable scenario.
+tags: [test, native, file-input]

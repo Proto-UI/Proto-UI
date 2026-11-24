@@ -1,9 +1,13 @@
 ---
-title: bootstrap-2-3-2 Slider
-description: 可移植输入原子草稿。
+title: 'Bootstrap 2.3.2 Slider'
+description: '支持指针/触摸拖动、步长吸附、键盘微调与表单集成的 Bootstrap 2.3.2 滑块组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Bootstrap 2.3.2 Slider 用于在连续或离散数值区间内通过拖动或键盘选择单个数值，并支持无缝接入 `Field` 与 `Form`。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-slider"
@@ -12,10 +16,24 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root 管理 value/defaultValue、min/max/step、disabled/readOnly、方向。Track 通过共享 AxisInput 接入真实指针/触摸拖动；Thumb 支持箭头、Shift 十倍、PageUp/PageDown、Home/End，水平 RTL 反向。数值从 min 对齐步长并限制边界；受控请求不覆盖作者值，valueCommit 标记完成，取消恢复非受控拖动起点。当前实现单 thumb，多 thumb 约束待补。
+## 安装
 
-在 Field/FormField 内用 FieldThumb 替代 Thumb，桥接 FieldLabel 激活、规范数值校验、策略、Form 序列化及复位。独立 Thumb 仍使用 SliderLabel。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-部件: root, label, track, indicator, thumb, field-thumb, value. 四个视觉家族继承同一 Base 行为。
+## 用法
 
-当前为 Draft 源码工作。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍待完成，不宣称 Finf 验收通过。
+由 `Root`、`Label`、`Track`、`Indicator`、`Thumb`（在 `Field` / `FormField` 内替换为 `FieldThumb`）和 `Value` 组成：
+
+- **拖动与键盘**：在 `Track` 上支持鼠标与触摸拖动；聚焦 `Thumb` 后可使用方向键、`Shift`（10 倍步长）、`PageUp` / `PageDown` 以及 `Home` / `End` 调整数值，水平 `direction="rtl"` 自动反转左右方向键。数值从 `min` 起按 `step` 对齐并限制在 `[min, max]` 内。
+- **实时变更与提交**：受控模式下拖动发出 `valueChange` 请求但不直接覆盖外部值；操作完成时触发 `valueCommit`，取消拖动则恢复非受控拖动前的起值。
+- **表单集成**：在 `Field` / `FormField` 内使用 `FieldThumb` 替换 `Thumb`，即可联动 `FieldLabel` 激活、数值校验、`Form` 序列化与重置。
+
+## API
+
+| 部件 | 属性 / 事件 | 说明 |
+| --- | --- | --- |
+| `Root` | `value` / `defaultValue` | 受控或初始滑块数值 |
+| `Root` | `min` / `max` / `step` | 数值上下界与步长 |
+| `Root` | `disabled` / `readOnly` / `orientation` / `direction` | 交互状态、方向与书写方向 |
+| `Root` | `valueChange` / `valueCommit` | 拖动过程请求事件与操作完成事件 |
+| `Label` / `Track` / `Indicator` / `Thumb` / `FieldThumb` / `Value` | — | 名称、轨道、进度指示、滑块手柄（表单内用 `FieldThumb`）与数值显示 |

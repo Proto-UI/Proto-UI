@@ -413,13 +413,11 @@ describe('alias writes and mixed record unions', () => {
     });
   });
 
-  it('rejects an unresolved value written through an alias', () => {
-    expect(parsePrototype(aliasSource('writable.value=[1][0];'))).toMatchObject({
-      ok: false,
-      diagnostics: [
-        { code: 'PUI1007', message: expect.stringContaining('Callable provenance is not closed') },
-      ],
-    });
+  it('preserves checked numeric array-element provenance through an alias', () => {
+    // The closed array literal proves this element is pure data. Losing that
+    // proof used to make the hidden field appear to contain an unknown callable.
+    // `parsed` also independently validates the serialized IR.
+    parsed(aliasSource('writable.value=[1][0];'));
   });
 
   it('rejects the setup-only alias write in portable IR', () => {

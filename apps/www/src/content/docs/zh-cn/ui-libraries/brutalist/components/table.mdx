@@ -1,6 +1,6 @@
 ---
 title: 'Table'
-description: '覆盖在 Base Table 协议之上的 Brutalist Table 草案呈现。'
+description: '提供清晰行列结构、表头关联与硬边外框样式的 Brutalist 风格结构化表格组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,11 +9,11 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-这个 draft family 包含五个部件：Root、Caption、Row、HeaderCell 与 Cell。每个部件通过 `defineAsHook` 一次性消费对应的精确 Base Table 原型，保留 Table Structure 的所有权 —— 有序行列索引、`headerKey`/`headerKind` 表头声明、`headers` 成员关系以及 `rowSpan`/`columnSpan` 跨度 —— 同时只添加 family 外观。这是被动的结构化 Table，而不是交互式 [Data Table](/zh-cn/ui-libraries/brutalist/components/data-table/)：没有排序、选择、分页、过滤、编辑或键盘网格行为。
+Table 用于展示静态结构化数据，完整维护行列索引、表头关系与跨行列属性。Brutalist 风格采用 2px 黑边加 4px 实心偏移阴影外框、黑色行分隔线、加粗表头与双线上边框表尾，并在正文行悬停时提供浅色强调高亮。
 
-固定 Neo 来源没有独立的 table 组件，因此表面沿用 family 已实现的容器语法：Root 使用 Card/Image 式外框（`border-2 border-black` 加 `4px/4px` 实心 offset 阴影），行之间用黑色边框分隔而非弱化填充，表头单元格为 semibold，footer 使用加倍的上边框加粗体墨色，行 hover 为被动 `bg-main/20` 着色。Row 携带两个纯视觉 prop：`section: 'header' | 'body' | 'footer'`（默认 `body`）与 `lastInSection`（默认 `false`）；它们只驱动外观规则，不声明 row-group，也不改变可访问性。外部滚动容器仍由消费方提供。
+如需排序、选择、分页、过滤或键盘网格导航等交互能力，请使用 [Data Table](/zh-cn/ui-libraries/brutalist/components/data-table/)。
 
-各部件可从已经公开的 `@proto.ui/prototypes-brutalist` package root 或 `@proto.ui/prototypes-brutalist/table` anatomy subpath 导入。该 family 刻意没有 `proto-ui add brutalist-table` registry entry，也不产生单独的 publication 或 release 承诺。
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer
@@ -23,19 +23,31 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
   />
 </div>
 
-## 建议验收路径
+## 安装
 
-1. 确认 Root 暴露 `getStructure()`，快照报告 demo 的五行三列及有序表头关系。
-2. 确认行间通过黑色边框分隔，footer 保持加倍上边框与粗体墨色而非弱化填充。
-3. 确认指针悬停正文行时呈现 family 强调色并在移出后清除，不新增焦点、选择或命令入口。
-4. 在 Web Components、React、Vue 与 Vue 2 的 Light/Dark 模式中重复检查。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-brutalist` 或 `@proto.ui/prototypes-brutalist/table` 导入各部件（当前工作区 CLI 目标为 `brutalist-table`）。
 
-相关 catalog entities 仍为 `draft`；本页记录当前方向，而不是稳定的 Table guarantee。
+## 用法
+
+### 组件结构
+
+Table 由五个部件组成：`Root`、`Caption`、`Row`、`HeaderCell` 和 `Cell`。
+
+- `Root`：表格容器，管理有序行列索引并通过 `getStructure()` 暴露结构快照。如需横向滚动，可在外层自行包裹滚动容器。
+- `Caption`：表格标题。
+- `Row`：表格行，提供 `section`（`'header' | 'body' | 'footer'`，默认 `'body'`）和 `lastInSection`（默认 `false`）两个纯视觉属性，用于控制表头、正文与表尾的边框和悬停着色。
+- `HeaderCell`：表头单元格，通过 `headerKey` 与 `headerKind` 声明列/行表头，支持 `headers`、`rowSpan` 与 `columnSpan`。
+- `Cell`：普通数据单元格，支持通过 `headers` 关联对应表头以及 `rowSpan` / `columnSpan` 跨度。
 
 ## API
 
-Table 是工作区源码。当前工作区 CLI 目标为 `brutalist-table`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。Root 没有属性。
+`Root` 不声明属性（提供 `getStructure()` 方法读取当前行列与表头结构）：
 
 <ApiPropsTable headers={{ name: '属性', type: '类型', default: '默认值' }} rows={[]} />
 
-Caption 没有属性。Row 默认 `section` 为 `body`、`lastInSection` 为 `false`。Cell 的 `headers` 默认 `[]`，`rowSpan` 与 `columnSpan` 默认 `1`。Header Cell 的 `headerKey` 默认 `''`，`headerKind` 默认 `column`，`headers` 默认 `[]`，`rowSpan` 与 `columnSpan` 默认 `1`。
+其余子部件属性默认值：
+
+- **Caption**：无属性。
+- **Row**：`section` 默认 `'body'`，`lastInSection` 默认 `false`。
+- **Cell**：`headers` 默认 `[]`，`rowSpan` 与 `columnSpan` 默认 `1`。
+- **HeaderCell**：`headerKey` 默认 `''`，`headerKind` 默认 `'column'`，`headers` 默认 `[]`，`rowSpan` 与 `columnSpan` 默认 `1`。

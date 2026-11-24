@@ -1,14 +1,15 @@
 ---
 title: 'Checkbox'
-desp: 'Checkbox'
-description: 'Checkbox 基础原型'
+description: '支持选中、未选中、半选（indeterminate）、只读、禁用与必填状态的基础复选框组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Checkbox 基础原型以单一 canonical 值所有者提供 checked、unchecked、disabled、readOnly 和 indeterminate 交互能力。
+Base Checkbox 提供无样式的复选框交互，支持选中、未选中、半选（`indeterminate`）、禁用、只读以及必填状态。
+
+## 预览
 
 <div>
   <PrototypePreviewer
@@ -19,46 +20,56 @@ Checkbox 基础原型以单一 canonical 值所有者提供 checked、unchecked�
   />
 </div>
 
-## 结构
+## 安装
 
-Checkbox 通过 anatomy 系统拆分为 root 和 indicator 两个部分。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-- **Root** (`base-checkbox-root`) 拥有 canonical `checked`、发送 `checkedChange`，并管理 disabled/readOnly 策略与独立的 `indeterminate` 状态。
-- **Indicator** (`base-checkbox-indicator`) 通过 anatomy 运行时访问读取 root 的 `checked` 和 `indeterminate` 状态，并将这些状态反映给渲染层。它不独立拥有 checkbox 状态。
+## 用法
 
-`base-checkbox` anatomy family 使用 root 到 indicator 的 `contains` 关系。Checkbox 预期至少有一个 indicator；当多个视觉区域需要表达同一份 indicator 语义时，也允许存在多个 indicator。
+### 组合结构
 
-在 Web Components 预览运行时中，prototype ID 会注册为带 `wc-` 前缀的标签：`wc-base-checkbox-root` 和 `wc-base-checkbox-indicator`。
+Checkbox 由 `Root` 和可选的 `Indicator` 两部分组成：
 
-## Indeterminate 行为
+- **Root**（`base-checkbox-root`）：统一管理 `checked`、`indeterminate`、`disabled`、`readOnly` 与 `required` 状态，并发出 `checkedChange` 和 `indeterminateChange` 事件。
+- **Indicator**（`base-checkbox-indicator`）：自动读取所属 `Root` 的 `checked` 和 `indeterminate` 状态用于视觉呈现；一个 `Root` 下可放置多个 `Indicator`。
 
-`indeterminate` 可以通过 `defaultIndeterminate` 作为非受控状态使用，也可以通过 `indeterminate` 作为受控状态使用。
+在 Web Components 预览运行时中，对应注册的标签为 `wc-base-checkbox-root` 与 `wc-base-checkbox-indicator`。
 
-当可编辑的 indeterminate checkbox 成功激活时，Root 先清除或请求清除 `indeterminate`，并发送 `indeterminateChange`。非受控 mixed 状态会直接清除；受控 owner 通过回写 `indeterminate={false}` 接受该请求。
+### 半选（Indeterminate）行为
 
-接着，Root 根据激活开始时的 canonical `checked` 请求相反值，发送 `checkedChange`。如果清除 mixed 的回调已经提交了新的 checked 值，这个旧 checked 阶段会退休，不会把新 owner 值反向切回。只接受 mixed=false、checked 没有改变时，原 checked 请求仍会继续。Disabled 或 readOnly 会阻止这两个值提案。
+`indeterminate` 支持非受控（`defaultIndeterminate`）或受控（`indeterminate`）两种方式：
 
-## 只读与显式 Form 组合
+- 当处于半选状态的复选框被激活时，`Root` 会先清除（或请求清除）`indeterminate` 并发出 `indeterminateChange`，随后再基于激活前的 `checked` 值请求取反并发出 `checkedChange`。
+- 若调用方在处理 `indeterminateChange` 时已同步提交了新的 `checked` 值，则不会重复反转该值。
+- `disabled` 或 `readOnly` 状态下会忽略所有变更请求。
 
-Root 接受 `readOnly`：保留焦点并拒绝新值提案；disabled 还会退出焦点参与。普通 Root 不会自动注册到 Field 或 Form。
+### 只读与表单集成
 
-在显式 `FormField` 中使用 `@proto.ui/prototypes-base/field` 的 `fieldCheckbox`，接入 canonical 值、required 校验、Label/Description/Error 关系与重置。[Form 选择控件示例](../form/) 展示受控拒绝、接受更新、只读焦点、禁用分组与真实 owner 更换。`resetValue()` 请求实例创建时的基线，不会强迫受控 owner 接受。
+- `readOnly` 允许控件继续保持可聚焦，但阻止修改勾选状态；`disabled` 同时移出焦点顺序。
+- 单独使用的 `Root` 不会自动注册到表单。如需接入 `FormField` 的值管理、必填校验、标签/说明/错误关联与重置，请从 `@proto.ui/prototypes-base/field` 使用 `fieldCheckbox`（参见 [Form 选择控件示例](../form/)）。
 
 ## API
 
-Checkbox 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `checked` 或 `indeterminate` 会使对应事实进入受控模式。
+### Root Props
+
+传入 `checked` 或 `indeterminate` 可分别控制对应状态。`Root` 与 `asCheckboxRoot()` 暴露 `checked`、`indeterminate`、`disabled`、`required`、`hovered`、`focused`、`focusVisible`、`pressed` 状态，以及 `checkedChange`、`indeterminateChange` 事件。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'checked', type: 'boolean', default: '—' },
     { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'indeterminate', type: 'boolean', default: '—' },
+    { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
-    { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
   ]}
 />
 
-这些属性属于 Root。Indicator 没有属性。
+### 其他组件属性
+
+- **Indicator**：无额外属性。
 
 ## 参考
 

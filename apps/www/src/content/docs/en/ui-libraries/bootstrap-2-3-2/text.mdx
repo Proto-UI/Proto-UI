@@ -1,11 +1,13 @@
 ---
 title: 'Text'
-description: 'Bootstrap232 passive Text with the complete Base typography vocabulary.'
+description: 'A Bootstrap 2.3.2 typography component supporting all eight independent Base Text presentation axes.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
-`bootstrap-2-3-2-text-root` directly consumes `asTextRoot()`, retaining all eight independent Base presentation axes, defaults and content slots. This real family Text prototype also renders toolbar labels. It introduces no heading, link, label, button, focus, selection or editing owner.
+Bootstrap 2.3.2 Text applies Bootstrap 2.3.2 body, heading, and monospace font stacks and ink tokens across all eight [Base Text](/en/ui-libraries/base/text/) typography axes.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-text"
@@ -13,25 +15,29 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Inputs
+## Installation
 
-- `size`: xs, sm, base, lg, xl, 2xl, 3xl, 4xl, 5xl (default base)
-- `tone`: default, muted, inherit (default default)
-- `weight`: normal, medium, semibold, bold (default normal)
-- `font`: body, heading, mono (default body)
-- `leading`: tight, snug, normal, relaxed (default normal)
-- `tracking`: normal, tight (default normal)
-- `emphasis`: normal, italic (default normal)
-- `decoration`: none, underline, line-through (default none)
-
-Explicit leading takes precedence over composite size line-height; removing props restores defaults. `tone="inherit"` follows the surrounding owner ink. Text never sets user-select: document content retains natural selection and text inside a control follows that actual control’s policy. Native h1, p, label, a and button elements retain semantics, for/href and input behavior.
-
-## Workspace source
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
 ```ts
 import { textRoot, Bootstrap232TextRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/text';
 ```
 
-The package remains private/unreleased; its CLI Text entry requires workspace source mode for WC, React, Vue and Vue 2 facades. The family theme provides body/heading/mono font stacks and default/muted ink without bundling third-party fonts. Real four-Adapter synthetic-DOM checks and compiler mappings are separate evidence; they do not prove native paint or GPUI typography parity. The GPUI CLI host remains explicitly unsupported.
+## Usage
 
-[Base Text](/en/ui-libraries/base/text/) · [Source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/bootstrap-2-3-2/src/text)
+- **Typography precedence**: An explicit `leading` overrides the default line-height associated with `size`; removing a prop restores its default.
+- **Color inheritance and selection**: Pass `tone="inherit"` inside a colored `Surface` or button to inherit its foreground ink. Text never overrides `user-select`, preserving natural document selection and control-specific selection policies.
+- **HTML semantics**: Text is purely typographic; wrap or pair with native `h1`, `p`, `label`, `a`, or `button` elements for document and interactive semantics.
+
+## API
+
+| Prop | Values | Default |
+| --- | --- | --- |
+| `size` | `xs` \| `sm` \| `base` \| `lg` \| `xl` \| `2xl` \| `3xl` \| `4xl` \| `5xl` | `base` |
+| `tone` | `default` \| `muted` \| `inherit` | `default` |
+| `weight` | `normal` \| `medium` \| `semibold` \| `bold` | `normal` |
+| `font` | `body` \| `heading` \| `mono` | `body` |
+| `leading` | `tight` \| `snug` \| `normal` \| `relaxed` | `normal` |
+| `tracking` | `normal` \| `tight` | `normal` |
+| `emphasis` | `normal` \| `italic` | `normal` |
+| `decoration` | `none` \| `underline` \| `line-through` | `none` |

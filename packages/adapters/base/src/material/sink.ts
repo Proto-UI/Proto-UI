@@ -1,11 +1,16 @@
+import { runAllSteps } from '../host/synchronous-steps';
 import { readInternalInitialPaintLease, recordInternalInitialPaint } from './initial-paint-bridge';
 import { withOwnedCarrierMarker } from './paint-mutations';
 import { observeWebPointerContact } from '../events/pointer-contact';
 import { createContactMotion } from './contact-motion';
 import { createContactCarrier, inspectContactCarrier } from './contact-carrier';
 import { contactProfile, contactPaintOutset } from './contact-profile';
+import {
+  updateWebMaterialPaintReservation,
+  releaseWebMaterialPaintFootprint,
+} from './paint-reservation';
 import { styleTintProfile, styleTintContactProfile } from './style-tint-profile';
-import { prepareOpticalImage } from './image-prepare';
+import { createOpticalImageCache } from './image-prepare';
 import { observeMaterialGeometry } from './geometry-watch';
 import type { EffectsPort } from '@proto.ui/core';
 import type { VisualFeedbackFrame, VisualFeedbackSink } from '@proto.ui/module-feedback';
@@ -133,6 +138,7 @@ function createDocumentMaterialSink(
   const program = acquireWebOpticalProgram(document, () => {
     invalidate('optical-context-invalidated');
   });
+  const images = createOpticalImageCache(document);
   let retired = false,
     painting = false,
     again = false;
@@ -244,6 +250,7 @@ function createDocumentMaterialSink(
     const previous = releaseImage;
     releaseImage = () => {};
     previous();
+    if (!keepNeutral) images.clear();
   };
   let safeFallback: Parameters<typeof rgbaCss>[0] | null = null;
   const owned = new Map<string, { before: [string, string]; applied: [string, string] }>();
@@ -507,6 +514,25 @@ function createDocumentMaterialSink(
       // One conservative profile footprint preserves the admitted image lease
       // across rest, held contact and its finite release tail.
       const paintOutset = wantsContact ? contactPaintOutset(rect.width, rect.height) : 0;
+      const reservation =
+        frame.material.slot?.paintReservation === 'required'
+          ? updateWebMaterialPaintReservation(
+              host,
+              requestedCandidate
+                ? {
+                    view: frame.view,
+                    revision: frame.revision,
+                    profile: selectedProfile,
+                    edges: {
+                      top: paintOutset,
+                      right: paintOutset,
+                      bottom: paintOutset,
+                      left: paintOutset,
+                    },
+                  }
+                : null
+            )
+          : null;
       const admission = inspectCanvasBackdrop(host, source, paintOutset);
       const carrierConflict =
         carrier && !carrier.valid(paintedImage)
@@ -554,6 +580,7 @@ function createDocumentMaterialSink(
         axisAligned: geometryValid,
       };
       const policy = resolveMaterialPolicy({
+        paintReservation: reservation?.status,
         slot: frame.material.slot,
         candidates: frame.material.candidates,
         finalStyle: resolved,
@@ -588,7 +615,12 @@ function createDocumentMaterialSink(
       if (policy.decision !== 'eligible' || !source || !admission.valid) {
         fallback(
           resolved.fill,
-          !admission.valid ? admission.reason : (policy.diagnostics[0] ?? 'material-unavailable')
+          !admission.valid
+            ? admission.reason
+            : policy.diagnostics[0] === 'paint-reservation-unavailable' &&
+                reservation?.status === 'unavailable'
+              ? reservation.reason
+              : (policy.diagnostics[0] ?? 'material-unavailable')
         );
         return;
       }
@@ -831,8 +863,7 @@ function createDocumentMaterialSink(
       }
       const ticket = { signature, lease, cancel() {} };
       pending = ticket;
-      ticket.cancel = prepareOpticalImage(
-        document,
+      ticket.cancel = images.prepare(
         image,
         () => {
           if (!currentDocument() || pending !== ticket || frameContactEpoch !== contactEpoch)
@@ -864,6 +895,7 @@ function createDocumentMaterialSink(
             if (
               program.lost ||
               !currentMaterialCompatible() ||
+              (reservation?.status === 'ready' && !reservation.current()) ||
               currentSource !== source ||
               currentPalette.revision !== palette.revision ||
               JSON.stringify(currentPreferences) !== JSON.stringify(prefs) ||
@@ -986,7 +1018,9 @@ function createDocumentMaterialSink(
           }
           lastOwnedStyle = host.getAttribute('style');
           lastOwnedTokens = host.getAttribute('data-pui-style');
-        }
+        },
+        // Preserve held output through release without caching source admission.
+        tracksContact && !!motionFrame.contact?.strength && !motionFrame.animating
       );
     } catch (error) {
       if (currentDocument() && last) {
@@ -1035,6 +1069,7 @@ function createDocumentMaterialSink(
   } catch (error) {
     retired = true;
     sourceRefresh.dispose();
+    images.dispose();
     for (const dispose of disposers) {
       try {
         dispose();
@@ -1061,33 +1096,23 @@ function createDocumentMaterialSink(
     },
     release(view) {
       if (retired || (last && view !== last.view)) return;
+      releaseWebMaterialPaintFootprint(host, view);
       retired = true;
       sourceRefresh.dispose();
       if (scheduled !== null) win!.cancelAnimationFrame(scheduled);
       scheduled = null;
       motion.stop();
       last = null;
-      let error: unknown;
-      let failed = false;
-      for (const dispose of [
+      runAllSteps([
         cancelPending,
         clearImage,
+        images.dispose,
         ...disposers,
         program.release,
         () => initialPaint?.retire(),
         restore,
         clearDiagnostics,
-      ]) {
-        try {
-          dispose();
-        } catch (failure) {
-          if (!failed) {
-            failed = true;
-            error = failure;
-          }
-        }
-      }
-      if (failed) throw error;
+      ]);
     },
   };
 }

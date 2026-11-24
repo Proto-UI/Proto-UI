@@ -1,12 +1,14 @@
 ---
 title: 'AlertDialog'
-description: '带主要说明、安全取消焦点与明确操作意图的模态确认窗口。'
+description: '用于关键操作确认的 Brutalist 模态确认弹窗，默认聚焦取消操作以防误触。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-带主要说明、安全取消焦点与明确操作意图的模态确认窗口。
+Brutalist AlertDialog 用于需要用户明确确认的关键或破坏性操作，默认锁定焦点、禁止点击遮罩关闭，并在打开时优先将焦点落在安全取消按钮上。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-alert-dialog"
@@ -15,19 +17,30 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
   codePanel={false}
 />
 
-Root 固定 alert 语义。Mask 管理模态遮罩；Content 约束焦点、拒绝外部点击关闭并优先聚焦 Cancel。Action 先发出 action，再请求关闭，实际操作由应用处理。Escape 与 Cancel 请求关闭。
+## 安装
 
-Root 支持受控 open 和非受控 defaultOpen。禁用命令不激活。传入 open 时，最终状态仍由调用方持有，通过 openChange 接收请求后再提供新值。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-组成: Root, Trigger, Content, Header, Title, Description, Footer, Cancel, Action, Mask。Header、Footer 是可选的被动布局部件，Props/Exposes 为空；保留作者提供的子项，不增加命令或状态。
+## 用法
 
-桌面组合遵循[固定的 Neo-Brutalist 源码](https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/alert-dialog.tsx)：面板圆角 5px、内边距 24px，标题与说明间隔 8px，按钮保持内容宽度、右对齐且间隔 12px。Footer 在内容放不下时自然反向换行；它不等同于上游 640px 以下的全宽反向纵排。窄屏文本居中、545–639px 的面板宽度仍有差异。既有零时长 transition、主题相对 focus offset 与深色主题保留为 Proto UI 行为或扩展；暂未提供上游 small-size 与 Media 部件。
+### 部件组成
 
-当前是草稿源码实现。完整 native/GPUI、编译器、打包消费、视觉及独立验收仍待完成；本页不表示 Finf 已完成。
+AlertDialog 由 `Root`、`Trigger`、`Mask`、`Content`、`Header`、`Title`、`Description`、`Footer`、`Cancel` 和 `Action` 组成：
+
+- **Root**：管理 `alertdialog` 语义与开关状态，支持受控 `open` 与非受控 `defaultOpen`。
+- **Mask**：模态遮罩层，阻止外部点击关闭弹窗。
+- **Content**：5px 圆角、24px 内边距与硬黑阴影的模态面板，负责焦点锁定并优先聚焦 `Cancel`。
+- **Header / Footer**：可选布局容器，分别组织标题说明与右对齐操作按钮，空间不足时按钮自动反向换行。
+- **Cancel / Action**：`Cancel` 与按 `Escape` 会请求关闭；`Action` 先触发 `action` 事件再请求关闭，实际业务逻辑由应用层执行。
+
+### 受控与非受控模式
+
+- **非受控**：通过 `defaultOpen` 设置初始开关状态。
+- **受控**：传入 `open` 并监听 `openChange` 事件同步更新状态；已禁用的操作按钮不会触发事件。
 
 ## API
 
-Alert Dialog 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -38,5 +51,10 @@ Alert Dialog 是工作区源码，没有公开的 `proto-ui add` 目标。传入
   ]}
 />
 
-这些属性属于 Root。Mask 接受 `passthrough`（`false`）以及 Transition 属性。Content 也接受 Transition 属性。Trigger、Title、Description、Cancel 与 Action 没有属性。
+传入 `open: boolean` 进入受控模式。
 
+### 其他部件属性
+
+- **Mask**：`passthrough?: boolean`（默认 `false`）及 Transition 属性
+- **Content**：支持 Transition 属性
+- **Trigger / Header / Title / Description / Footer / Cancel / Action**：无独立属性

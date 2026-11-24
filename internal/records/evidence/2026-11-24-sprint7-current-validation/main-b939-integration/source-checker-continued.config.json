@@ -1,0 +1,23 @@
+{
+  "root": "/var/tmp/proto-ui-s7-delivery-456f",
+  "head": "39b21268f66bd4d16d95aecd1de14c475fc9a29c",
+  "out": "/var/tmp/proto-ui-s7-transfer-456f/main-b939-integration/source-checker-continued",
+  "tmp": "/var/tmp/pui456f-s7d",
+  "nodeOptions": "--max-old-space-size=4096",
+  "cpuAffinity": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "jobs": [
+    {
+      "name": "source-coverage",
+      "command": [
+        "node",
+        "scripts/coverage-matrices/check-coverage-matrices.mjs"
+      ],
+      "timeout": 900
+    }
+  ]
+}

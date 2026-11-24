@@ -51,3 +51,4 @@ export type {
   WebShaderCanvasSceneLease,
   WebShaderSceneBindings,
 } from './material/shader-scene-host';
+export { createWebMaterialPaintReservationRef } from './material/paint-reservation';

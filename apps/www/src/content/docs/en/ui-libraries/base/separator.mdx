@@ -1,13 +1,15 @@
 ---
 title: 'Separator'
-description: 'Base Separator orientation and accessibility semantics without interaction.'
+description: 'A non-interactive horizontal or vertical divider with explicit decorative or semantic accessibility.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Base Separator is a contentless, non-interactive boundary for horizontal or vertical separation. It owns orientation and whether the separator is decorative; layout, color, thickness, and rhythm belong to the design language.
+A contentless, non-interactive divider for horizontal or vertical separation, leaving color, thickness, and spacing to styled components.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-separator"
@@ -16,37 +18,18 @@ Base Separator is a contentless, non-interactive boundary for horizontal or vert
   codePanel={false}
 />
 
-## Public surface
+## Installation
 
-`@proto.ui/prototypes-base/separator` exports `separatorRoot` and `asSeparatorRoot()`. Current props are:
+The 0.2.0 stable package exports `separatorRoot` and `asSeparatorRoot()` from `@proto.ui/prototypes-base/separator`, with CLI target `base-separator`. For a styled version, see [Brutalist Separator](/en/ui-libraries/brutalist/components/separator/).
 
-- `orientation?: 'horizontal' | 'vertical'`, defaulting to `horizontal`;
-- `decorative?: boolean`, defaulting to `true`.
+## Usage
 
-The root exposes `orientation` and `decorative` state. It intentionally exposes no focus, tab stop, event, command, activation, or mutable-value channel, and its renderer is contentless so decorative semantics cannot accidentally hide authored descendants.
-
-## Accessibility boundary
-
-Decorative mode is hidden from the accessibility tree and emits neither `separator` role nor orientation state. Semantic mode projects `role="separator"` and the corresponding orientation. Whether a divider is meaningful to assistive technology is an authoring decision, not a styling side effect.
-
-## 0.2 delivery and evidence
-
-The stable 0.2.0 package exports the Separator subpath, and the CLI registry exposes `base-separator`. `T-BASE-SEPARATOR-0001` maps the protocol to `packages/prototypes/base/test/separator.test.ts`; the preview verifies both decorative and semantic cases across the Web adapters.
-
-## Lifecycle
-
-`P-BASE-SEPARATOR` is **draft**. Its small surface is fully evidenced, but it has not been promoted to an active protocol guarantee.
-
-## References
-
-- [P-BASE-SEPARATOR](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SEPARATOR.yaml)
-- [Separator source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/separator)
-- [Separator evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/separator.test.ts)
-- Styled projection: [Brutalist Separator](/en/ui-libraries/brutalist/components/separator/)
+- **Orientation and accessibility**: Set `orientation` to `'horizontal'` or `'vertical'`, and choose whether the divider is purely decorative (`decorative={true}`, hidden from the accessibility tree) or meaningful (`decorative={false}`, rendering `role="separator"` with its orientation).
+- **Contentless boundary**: `separatorRoot` exposes no focus stop, events, or child slot so decorative dividers cannot accidentally hide your content from assistive technology.
 
 ## API
 
-Separator is workspace source. For this workspace version, the CLI target is `base-separator`. Use matching CLI and package versions; check the chosen release's availability before installing.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -56,7 +39,7 @@ Separator is workspace source. For this workspace version, the CLI target is `ba
   ]}
 />
 
-These props belong to Root.
+Exposes read-only `orientation` and `decorative` states.
 
 ## References
 

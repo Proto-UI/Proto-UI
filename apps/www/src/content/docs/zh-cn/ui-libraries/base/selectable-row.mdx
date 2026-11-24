@@ -1,0 +1,65 @@
+---
+title: 'Selectable Row'
+description: '将受控选择与行激活动作分离的可选列表行组件。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+用于文件列表、表格或集合中的受控可选行，提供按压、键盘、焦点与 `row` 无障碍语义，并将选择提案与激活动作明确分离。
+
+## 预览
+
+按 `Tab` 聚焦可用行，按 `Space` 提出选择请求；在 **Assets** 行按 `Enter`（或在 Web 端双击）会触发激活请求。
+
+<PrototypePreviewer
+  demoId="demo-base-selectable-row"
+  initialRuntime="react"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+```ts
+import { selectableRow, asSelectableRow } from '@proto.ui/prototypes-base/selectable-row';
+```
+
+该子路径同时导出默认原型、`SelectableRowProps`、`SelectableRowExposes` 与 `SelectableRowAsHookContract`，包根导出同名命名入口；原型与 Hook 共享同一套实现。
+
+## 用法
+
+### 受控选择与独立激活
+
+- `selected` 为受控状态：点击或按 `Space` 时通过 `selectionChange` 发出 `{ value: itemKey }`，由外部决定是否更新 `selected`。
+- 当 `activatable` 为 `true` 时，按 `Enter` 通过 `activate` 发出 `{ value: itemKey }`（不会同时触发选择）；在 Web 端，双击（`host:dblclick`）同样触发 `activate`。
+- 聚焦且可用时会阻止 `Space` 的默认页面滚动，可激活时同时阻止 `Enter` 的默认行为；长按键盘重复触发不会重复提交。
+
+### 焦点、无障碍与集合职责
+
+- 组件自动设置 `role="row"`、`selected` 与 `disabled` 无障碍状态，默认插槽保留传入的子元素。
+- 设置 `disabled` 会阻止选择、激活和 `focusSelf()`，并退出常规焦点顺序，但不会清除外部已选中的 `selected` 状态。
+- 方向键导航、漫游焦点、范围选择与多选由外层集合组件统一协调。
+
+## API
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'itemKey', type: 'string', default: "''" },
+    { name: 'selected', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'activatable', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+- **暴露状态**：`selected`、`disabled`、`focused`、`focusVisible`。
+- **暴露方法**：`focusSelf()`。
+- **事件**：`selectionChange`、`activate`，载荷均为 `{ value: string }`。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-SELECTABLE-ROW.yaml']} />

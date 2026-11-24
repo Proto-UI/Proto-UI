@@ -446,6 +446,46 @@ describe('private compiler CLI', () => {
     }
   });
 
+  it('retires watch when its session path is replaced by a different real directory', async () => {
+    const cwd = await fixture();
+    const watching = watchInvocation(cwd);
+    try {
+      await expect.poll(() => watching.events.find((event) => event.ok)).toBeDefined();
+      const initial = watching.events.find((event) => event.ok)!;
+      const session = path.dirname(initial.result!.directory);
+      const retained = path.join(cwd, 'retained-session');
+      const initialBytes = await readFile(path.join(initial.result!.directory, 'Component.tsx'));
+      await rename(session, retained);
+      await mkdir(session);
+      await writeFile(path.join(session, 'consumer.txt'), 'a replacement is not compiler-owned');
+      await writeFile(
+        path.join(cwd, 'entry.proto.ts'),
+        source.replace('cli-fixture', 'next-owner')
+      );
+
+      await expect.poll(() => watching.events.length).toBeGreaterThan(1);
+      expect(watching.events.find((event) => event.revision > initial.revision)).toMatchObject({
+        ok: false,
+        lastSuccessful: { revision: initial.revision, directory: initial.result!.directory },
+        diagnostics: [{ category: 'output-conflict' }],
+      });
+      expect(await watching.finished).toBe(1);
+      expect(watching.events.filter((event) => event.ok)).toHaveLength(1);
+      expect(await readdir(session)).toEqual(['consumer.txt']);
+      expect(await readFile(path.join(session, 'consumer.txt'), 'utf8')).toBe(
+        'a replacement is not compiler-owned'
+      );
+      expect(
+        await readFile(
+          path.join(retained, path.basename(initial.result!.directory), 'Component.tsx')
+        )
+      ).toEqual(initialBytes);
+    } finally {
+      watching.cancellation.abort();
+      await watching.finished;
+    }
+  });
+
   it('emits one shared GPUI SDK crate that two separately compiled units reference', async () => {
     const cwd = await fixture();
     await writeFile(

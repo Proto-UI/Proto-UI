@@ -35,33 +35,58 @@ export type WebScrollSurfaceHostOptions = Readonly<{
   isCurrentBinding?: () => boolean;
 }>;
 
-type DisplayStyle = Readonly<{ value: string; priority: string }>;
+type StyleEntry = readonly [value: string, priority: string];
+type ScrollGeometry = Readonly<{ offset: number; viewport: number; extent: number }>;
+const movedWithinLayout = (previous: ScrollGeometry, next: ScrollGeometry): boolean =>
+  next.offset !== previous.offset &&
+  next.viewport === previous.viewport &&
+  next.extent === previous.extent;
 // An opt-in styling sink for edge-aligned composed tracks, not a portable fact.
 const TRACK_END_INSET = '--proto-ui-scroll-track-end-inset';
-const hiddenDisplay: DisplayStyle = { value: 'none', priority: 'important' };
-const readDisplay = (target: HTMLElement): DisplayStyle => ({
-  value: target.style.getPropertyValue('display'),
-  priority: target.style.getPropertyPriority('display'),
+const THUMB_SIZE_VAR = '--proto-ui-scroll-thumb-size';
+const THUMB_OFFSET_VAR = '--proto-ui-scroll-thumb-offset';
+const THUMB_STYLE_KEYS = [
+  'width',
+  'height',
+  'transform',
+  'top',
+  'left',
+  'flexGrow',
+  'alignSelf',
+] as const;
+const TRACK_MUTATION_OPTIONS: MutationObserverInit = Object.freeze({
+  attributes: true,
+  attributeFilter: ['class', 'style'],
 });
-const writeDisplay = (target: HTMLElement, next: DisplayStyle) => {
-  const current = readDisplay(target);
-  if (current.value === next.value && current.priority === next.priority) return;
-  if (next.value) target.style.setProperty('display', next.value, next.priority);
-  else target.style.removeProperty('display');
+const EXCLUSIVE_TARGET_MUTATION_OPTIONS: MutationObserverInit = Object.freeze({
+  childList: true,
+  attributes: true,
+  attributeFilter: ['style', 'data-pui-scroll-projection'],
+});
+const HIDDEN_DISPLAY: StyleEntry = ['none', 'important'];
+const readStyleProp = (target: HTMLElement, name: string): StyleEntry => [
+  target.style.getPropertyValue(name),
+  target.style.getPropertyPriority(name),
+];
+const writeStyleProp = (target: HTMLElement, name: string, [value, priority]: StyleEntry) => {
+  if (
+    target.style.getPropertyValue(name) === value &&
+    target.style.getPropertyPriority(name) === priority
+  )
+    return;
+  if (value) target.style.setProperty(name, value, priority);
+  else target.style.removeProperty(name);
 };
+const readDisplay = (target: HTMLElement): StyleEntry => readStyleProp(target, 'display');
+const writeDisplay = (target: HTMLElement, next: StyleEntry) =>
+  writeStyleProp(target, 'display', next);
 
-type ThumbStyleSnapshot = Readonly<{
-  width: string;
-  height: string;
-  transform: string;
-  top: string;
-  left: string;
-  flexGrow: string;
-  alignSelf: string;
-  display: DisplayStyle;
-  sizeVar: string;
-  offsetVar: string;
-}>;
+type ThumbStyleSnapshot = readonly [
+  props: readonly string[],
+  display: StyleEntry,
+  sizeVar: string,
+  offsetVar: string,
+];
 
 const clampRatio = (value: number) =>
   Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0;
@@ -69,10 +94,26 @@ const clampRatio = (value: number) =>
 const DISCRETE_READER_INTENT_WINDOW_MS = 250;
 const horizontalSign = (target: Element): 1 | -1 =>
   target.ownerDocument.defaultView?.getComputedStyle(target).direction === 'rtl' ? -1 : 1;
-const horizontalOffset = (target: HTMLElement): number =>
-  target.scrollLeft * horizontalSign(target);
-const BASE_CONTENT_OBSERVER_OPTIONS = Object.freeze({ childList: true });
-const END_FOLLOW_CONTENT_OBSERVER_OPTIONS = Object.freeze({
+const horizontalOffset = (target: HTMLElement, sign?: 1 | -1): number => {
+  const raw = target.scrollLeft;
+  return raw === 0 ? 0 : raw * (sign ?? horizontalSign(target));
+};
+const sameAxisSnapshot = (a: ScrollAxisSnapshot, b: ScrollAxisSnapshot): boolean =>
+  a.position === b.position &&
+  a.visibleRatio === b.visibleRatio &&
+  a.canScrollBefore === b.canScrollBefore &&
+  a.canScrollAfter === b.canScrollAfter &&
+  a.atEnd === b.atEnd;
+const sameSurfaceSnapshot = (a: ScrollSurfaceSnapshot, b: ScrollSurfaceSnapshot): boolean =>
+  a.axes === b.axes &&
+  a.scrolling === b.scrolling &&
+  a.projection === b.projection &&
+  a.endFollow.state === b.endFollow.state &&
+  a.endFollow.requestStatus === b.endFollow.requestStatus &&
+  sameAxisSnapshot(a.horizontal, b.horizontal) &&
+  sameAxisSnapshot(a.vertical, b.vertical);
+const BASE_CONTENT_OBSERVER_OPTIONS: MutationObserverInit = Object.freeze({ childList: true });
+const END_FOLLOW_CONTENT_OBSERVER_OPTIONS: MutationObserverInit = Object.freeze({
   attributes: true,
   characterData: true,
   childList: true,
@@ -96,59 +137,70 @@ function axisSnapshot(
   });
 }
 
-function resolveRequestOffset(target: HTMLElement, request: ScrollSurfacePositionRequest): number {
-  const horizontal = request.axis === 'horizontal';
-  const viewport = horizontal ? target.clientWidth : target.clientHeight;
-  const extent = horizontal ? target.scrollWidth : target.scrollHeight;
-  const range = Math.max(0, extent - viewport);
-  const current = horizontal ? horizontalOffset(target) : target.scrollTop;
-  let next = current;
+function readMetrics(
+  target: HTMLElement,
+  axis: ScrollAxis,
+  sign?: 1 | -1
+): { offset: number; viewport: number; extent: number; range: number } {
+  const h = axis === 'horizontal';
+  const viewport = h ? target.clientWidth : target.clientHeight;
+  const extent = h ? target.scrollWidth : target.scrollHeight;
+  return {
+    offset: h ? horizontalOffset(target, sign) : target.scrollTop,
+    viewport,
+    extent,
+    range: Math.max(0, extent - viewport),
+  };
+}
+
+function resolveRequestOffset(
+  target: HTMLElement,
+  request: ScrollSurfacePositionRequest,
+  sign?: 1 | -1
+): number {
+  const { offset, viewport, range } = readMetrics(target, request.axis, sign);
+  let next = offset;
   if (request.kind === 'by') next += request.delta;
-  if (request.kind === 'page') next += request.direction === 'after' ? viewport : -viewport;
-  if (request.kind === 'to' || request.kind === 'control-drag') {
+  else if (request.kind === 'page') next += request.direction === 'after' ? viewport : -viewport;
+  else if (request.kind === 'to' || request.kind === 'control-drag') {
     next = range * clampRatio(request.position);
-  }
-  if (request.kind === 'to-end') next = range;
+  } else if (request.kind === 'to-end') next = range;
   return Math.min(range, Math.max(0, next));
 }
 
 function requestReachesEnd(
   target: HTMLElement,
   request: ScrollSurfacePositionRequest,
-  endThreshold: number
+  endThreshold: number,
+  sign?: 1 | -1
 ): boolean {
-  const horizontal = request.axis === 'horizontal';
-  const viewport = horizontal ? target.clientWidth : target.clientHeight;
-  const extent = horizontal ? target.scrollWidth : target.scrollHeight;
-  const range = Math.max(0, extent - viewport);
-  return range - resolveRequestOffset(target, request) <= endThreshold;
+  const { range } = readMetrics(target, request.axis, sign);
+  return range - resolveRequestOffset(target, request, sign) <= endThreshold;
 }
 
-function applyRequest(target: HTMLElement, request: ScrollSurfacePositionRequest): void {
+function applyRequest(
+  target: HTMLElement,
+  request: ScrollSurfacePositionRequest,
+  sign?: 1 | -1
+): void {
   const horizontal = request.axis === 'horizontal';
-  const next = resolveRequestOffset(target, request);
-  if (request.kind === 'to-end') {
-    const authoredScrollBehavior = target.style.getPropertyValue('scroll-behavior');
-    const authoredScrollBehaviorPriority = target.style.getPropertyPriority('scroll-behavior');
-    target.style.setProperty('scroll-behavior', 'auto', 'important');
-    try {
-      if (horizontal) target.scrollLeft = next * horizontalSign(target);
-      else target.scrollTop = next;
-    } finally {
-      if (authoredScrollBehavior) {
-        target.style.setProperty(
-          'scroll-behavior',
-          authoredScrollBehavior,
-          authoredScrollBehaviorPriority
-        );
-      } else {
-        target.style.removeProperty('scroll-behavior');
-      }
-    }
+  const dirSign = horizontal ? (sign ?? horizontalSign(target)) : 1;
+  const next = resolveRequestOffset(target, request, dirSign);
+  const write = () => {
+    if (horizontal) target.scrollLeft = next * dirSign;
+    else target.scrollTop = next;
+  };
+  if (request.kind !== 'to-end') {
+    write();
     return;
   }
-  if (horizontal) target.scrollLeft = next * horizontalSign(target);
-  else target.scrollTop = next;
+  const authored = readStyleProp(target, 'scroll-behavior');
+  target.style.setProperty('scroll-behavior', 'auto', 'important');
+  try {
+    write();
+  } finally {
+    writeStyleProp(target, 'scroll-behavior', authored);
+  }
 }
 
 function px(value: string): number {
@@ -187,27 +239,30 @@ function coordinate(sample: MoveGestureSample, axis: ScrollAxis): number {
   return axis === 'vertical' ? sample.position.y : sample.position.x;
 }
 
+function readTrackBox(track: HTMLElement, axis: ScrollAxis) {
+  const v = axis === 'vertical';
+  const style = track.ownerDocument.defaultView?.getComputedStyle(track);
+  const startInset = style ? px(v ? style.paddingTop : style.paddingLeft) : 0;
+  const endInset = style ? px(v ? style.paddingBottom : style.paddingRight) : 0;
+  const borderStart = style ? px(v ? style.borderTopWidth : style.borderLeftWidth) : 0;
+  const available = Math.max(
+    0,
+    (v ? track.clientHeight : track.clientWidth) - startInset - endInset
+  );
+  return { available, startInset, borderStart };
+}
+
 function measureControl(control: WebScrollControl, axis: ScrollAxis): ControlGeometry {
-  const track = control.trackTarget;
-  const thumb = control.thumbTarget;
-  const ownerWindow = track.ownerDocument.defaultView;
-  const style = ownerWindow?.getComputedStyle(track);
+  const { trackTarget: track, thumbTarget: thumb } = control;
+  const v = axis === 'vertical';
+  const { available, startInset, borderStart } = readTrackBox(track, axis);
   const trackRect = track.getBoundingClientRect();
   const thumbRect = thumb.getBoundingClientRect();
-  const trackExtent = axis === 'vertical' ? track.clientHeight : track.clientWidth;
-  const startInset = style ? px(axis === 'vertical' ? style.paddingTop : style.paddingLeft) : 0;
-  const endInset = style ? px(axis === 'vertical' ? style.paddingBottom : style.paddingRight) : 0;
-  const borderStart = style
-    ? px(axis === 'vertical' ? style.borderTopWidth : style.borderLeftWidth)
-    : 0;
-  const available = Math.max(0, trackExtent - startInset - endInset);
-  const measuredThumbExtent = axis === 'vertical' ? thumbRect.height : thumbRect.width;
-  const projectedThumbExtent = px(thumb.style.getPropertyValue('--proto-ui-scroll-thumb-size'));
+  const measuredThumbExtent = v ? thumbRect.height : thumbRect.width;
+  const projectedThumbExtent = px(thumb.style.getPropertyValue(THUMB_SIZE_VAR));
   const thumbExtent = Math.min(available, Math.max(0, measuredThumbExtent || projectedThumbExtent));
-  const trackStart =
-    (axis === 'vertical' ? trackRect.top : trackRect.left) + borderStart + startInset;
   return Object.freeze({
-    trackStart,
+    trackStart: (v ? trackRect.top : trackRect.left) + borderStart + startInset,
     available,
     thumbExtent,
     travel: Math.max(0, available - thumbExtent),
@@ -252,7 +307,12 @@ export function createWebScrollSurfaceHost(
       let connection = initialConnection;
       let disposed = false;
       let scrolling = false;
-      let cancelScrollEndTimer: (() => void) | null = null;
+      let scrollEndTimer: ReturnType<typeof setTimeout> | undefined;
+      const clearScrollEndTimer = () => {
+        if (scrollEndTimer === undefined) return;
+        clearTimeout(scrollEndTimer);
+        scrollEndTimer = undefined;
+      };
       let endFollowState: ScrollEndFollowState = 'off';
       let endFollowRequestStatus: ScrollEndFollowRequestStatus = 'idle';
       let scheduledEnd: ScheduledEndMovement | null = null;
@@ -260,6 +320,11 @@ export function createWebScrollSurfaceHost(
       let readerIntentUntil = 0;
       let readerArrivalUntil = 0;
       const readerContacts = createReaderContactSession();
+      const clearReaderMovement = () => {
+        readerIntentUntil = 0;
+        readerArrivalUntil = 0;
+        readerContacts.clearMovement();
+      };
       let contactOrigin: {
         axis: ScrollAxis;
         offset: number;
@@ -290,11 +355,20 @@ export function createWebScrollSurfaceHost(
       const endThreshold = Number.isFinite(configuredEndThreshold)
         ? Math.max(0, configuredEndThreshold)
         : 1;
-      let endTimer: ReturnType<typeof setTimeout> | undefined;
       let chromeHidden = false;
+      let cachedDirSign: 1 | -1 | null = null;
+      let lastFacts: ScrollSurfaceSnapshot | null = null;
       const thumbStyles = new Map<HTMLElement, ThumbStyleSnapshot>();
-      const trackStyles = new Map<HTMLElement, DisplayStyle>();
-      const trackInsets = new Map<HTMLElement, DisplayStyle>();
+      const trackStyles = new Map<HTMLElement, StyleEntry>();
+      const trackInsets = new Map<HTMLElement, StyleEntry>();
+      const trackAvailableCache = new Map<HTMLElement, readonly [ScrollAxis, number]>();
+      const projectedThumbState = new Map<
+        HTMLElement,
+        readonly [boolean, ScrollAxis, string, string]
+      >();
+      let observedResizeTargets = new Set<Element>();
+      let observedTargetOpts: MutationObserverInit | null = null;
+      let observedMutationTracks = new Set<HTMLElement>();
       const moveLeases = new Map<HTMLElement, MoveGestureHostLease>();
       const dragGrabOffsets = new Map<HTMLElement, number>();
       const policyLease = options.exclusivePolicy ? createScrollPolicyLease(target) : null;
@@ -303,6 +377,30 @@ export function createWebScrollSurfaceHost(
         overflowY: target.style.overflowY,
         scrollbarWidth: target.style.scrollbarWidth,
         projection: target.getAttribute('data-pui-scroll-projection'),
+      };
+      const now = () => ownerWindow?.performance.now() ?? Date.now();
+      const getControls = () => (connection.composedChrome?.controls ?? []).filter(isWebControl);
+      const getHorizontalSign = (): 1 | -1 => {
+        if (cachedDirSign === null) cachedDirSign = horizontalSign(target);
+        return cachedDirSign;
+      };
+      const readHorizontalOffset = (): number => {
+        const raw = target.scrollLeft;
+        if (raw === 0) return 0;
+        if (raw < 0 && cachedDirSign === 1) cachedDirSign = horizontalSign(target);
+        return raw * getHorizontalSign();
+      };
+      const readAxis = (axis: ScrollAxis) => {
+        const h = axis === 'horizontal';
+        const viewport = h ? target.clientWidth : target.clientHeight;
+        const extent = h ? target.scrollWidth : target.scrollHeight;
+        return {
+          axis,
+          offset: h ? readHorizontalOffset() : target.scrollTop,
+          viewport,
+          extent,
+          range: Math.max(0, extent - viewport),
+        };
       };
 
       const projectPolicy = () => {
@@ -320,7 +418,7 @@ export function createWebScrollSurfaceHost(
         Object.freeze({
           axes: connection.config.axes,
           horizontal: axisSnapshot(
-            horizontalOffset(target),
+            readHorizontalOffset(),
             target.clientWidth,
             target.scrollWidth,
             endThreshold
@@ -340,43 +438,25 @@ export function createWebScrollSurfaceHost(
         });
       const rememberThumb = (thumb: HTMLElement) => {
         if (thumbStyles.has(thumb)) return;
-        thumbStyles.set(
-          thumb,
-          Object.freeze({
-            width: thumb.style.width,
-            height: thumb.style.height,
-            transform: thumb.style.transform,
-            top: thumb.style.top,
-            left: thumb.style.left,
-            flexGrow: thumb.style.flexGrow,
-            alignSelf: thumb.style.alignSelf,
-            display: readDisplay(thumb),
-            sizeVar: thumb.style.getPropertyValue('--proto-ui-scroll-thumb-size'),
-            offsetVar: thumb.style.getPropertyValue('--proto-ui-scroll-thumb-offset'),
-          })
-        );
+        const { style } = thumb;
+        thumbStyles.set(thumb, [
+          THUMB_STYLE_KEYS.map((key) => style[key]),
+          readDisplay(thumb),
+          style.getPropertyValue(THUMB_SIZE_VAR),
+          style.getPropertyValue(THUMB_OFFSET_VAR),
+        ]);
       };
       const restoreThumb = (thumb: HTMLElement) => {
-        const original = thumbStyles.get(thumb);
-        if (!original) return;
-        thumb.style.width = original.width;
-        thumb.style.height = original.height;
-        thumb.style.transform = original.transform;
-        thumb.style.top = original.top;
-        thumb.style.left = original.left;
-        thumb.style.flexGrow = original.flexGrow;
-        thumb.style.alignSelf = original.alignSelf;
-        writeDisplay(thumb, original.display);
-        if (original.sizeVar) {
-          thumb.style.setProperty('--proto-ui-scroll-thumb-size', original.sizeVar);
-        } else {
-          thumb.style.removeProperty('--proto-ui-scroll-thumb-size');
-        }
-        if (original.offsetVar) {
-          thumb.style.setProperty('--proto-ui-scroll-thumb-offset', original.offsetVar);
-        } else {
-          thumb.style.removeProperty('--proto-ui-scroll-thumb-offset');
-        }
+        projectedThumbState.delete(thumb);
+        const saved = thumbStyles.get(thumb);
+        if (!saved) return;
+        const { style } = thumb;
+        THUMB_STYLE_KEYS.forEach((key, i) => {
+          style[key] = saved[0][i]!;
+        });
+        writeDisplay(thumb, saved[1]);
+        writeStyleProp(thumb, THUMB_SIZE_VAR, [saved[2], '']);
+        writeStyleProp(thumb, THUMB_OFFSET_VAR, [saved[3], '']);
         thumbStyles.delete(thumb);
       };
       const restoreInactiveThumbs = (active: ReadonlySet<HTMLElement>) => {
@@ -385,142 +465,140 @@ export function createWebScrollSurfaceHost(
         }
       };
       const restoreTrackDisplay = (track: HTMLElement) => {
-        const original = trackStyles.get(track);
-        if (original === undefined) return;
-        writeDisplay(track, original);
+        const saved = trackStyles.get(track);
+        if (saved === undefined) return;
+        writeDisplay(track, saved);
         trackStyles.delete(track);
       };
       const restoreTrackInsets = (active: ReadonlySet<HTMLElement>) => {
-        for (const [track, original] of trackInsets) {
+        for (const [track, saved] of trackInsets) {
           if (active.has(track)) continue;
-          if (original.value)
-            track.style.setProperty(TRACK_END_INSET, original.value, original.priority);
-          else track.style.removeProperty(TRACK_END_INSET);
+          writeStyleProp(track, TRACK_END_INSET, saved);
           trackInsets.delete(track);
         }
       };
-      const projectTrackInsets = () => {
-        const controls = (connection.composedChrome?.controls ?? []).filter(isWebControl);
+      const projectTrackInsets = (controls: readonly WebScrollControl[]) => {
+        let axesMask = 0;
+        for (const c of controls) axesMask |= c.getAxis() === 'vertical' ? 1 : 2;
         const thickness = { vertical: 0, horizontal: 0 };
-        // Measure every cross-axis thickness before changing either long axis.
-        // Empty-overflow tracks retain their authored paint, so they still reserve
-        // the corner; removing/hiding a track releases its reservation.
-        for (const control of controls) {
-          const axis = control.getAxis();
-          thickness[axis] = Math.max(thickness[axis], measureTrackThickness(control));
+        if (axesMask === 3) {
+          for (const control of controls) {
+            const axis = control.getAxis();
+            thickness[axis] = Math.max(thickness[axis], measureTrackThickness(control));
+          }
         }
         const active = new Set<HTMLElement>();
         for (const control of controls) {
           const track = control.trackTarget;
           active.add(track);
           if (!trackInsets.has(track))
-            trackInsets.set(track, {
-              value: track.style.getPropertyValue(TRACK_END_INSET),
-              priority: track.style.getPropertyPriority(TRACK_END_INSET),
-            });
-          const value = `${thickness[control.getAxis() === 'vertical' ? 'horizontal' : 'vertical']}px`;
-          if (
-            track.style.getPropertyValue(TRACK_END_INSET) !== value ||
-            track.style.getPropertyPriority(TRACK_END_INSET)
-          ) {
-            track.style.setProperty(TRACK_END_INSET, value);
-          }
+            trackInsets.set(track, readStyleProp(track, TRACK_END_INSET));
+          writeStyleProp(track, TRACK_END_INSET, [
+            `${thickness[control.getAxis() === 'vertical' ? 'horizontal' : 'vertical']}px`,
+            '',
+          ]);
         }
         restoreTrackInsets(active);
       };
-      const projectComposedChrome = (facts: ScrollSurfaceSnapshot) => {
+      const projectComposedChrome = (facts: ScrollSurfaceSnapshot, layoutDirty = true) => {
+        const controls = getControls();
         if (connection.projection !== 'composed') {
+          trackAvailableCache.clear();
+          projectedThumbState.clear();
           restoreTrackInsets(new Set());
-          // Hide authored Scrollbar/Thumb chrome while the host projects the
-          // system scrollbar. Reconciled against the current controls on every
-          // pass so controls attached or replaced after the fallback starts
-          // are hidden too: the track (touch-none absolute element) would
-          // otherwise intercept pointer input over the native scrollbar, and
-          // the Thumb (flex-1 bg-border) would paint over it.
           chromeHidden = true;
           const active = new Set<HTMLElement>();
-          for (const control of connection.composedChrome?.controls ?? []) {
-            if (!isWebControl(control)) continue;
-            const track = control.trackTarget;
-            const thumb = control.thumbTarget;
+          for (const { trackTarget: track, thumbTarget: thumb } of controls) {
             active.add(thumb);
             active.add(track);
-            if (!trackStyles.has(track)) {
-              trackStyles.set(track, readDisplay(track));
-            }
-            writeDisplay(track, hiddenDisplay);
-            if (!thumbStyles.has(thumb)) {
-              rememberThumb(thumb);
-            }
-            writeDisplay(thumb, hiddenDisplay);
+            if (!trackStyles.has(track)) trackStyles.set(track, readDisplay(track));
+            writeDisplay(track, HIDDEN_DISPLAY);
+            rememberThumb(thumb);
+            writeDisplay(thumb, HIDDEN_DISPLAY);
           }
           for (const track of Array.from(trackStyles.keys())) {
-            if (active.has(track)) continue;
-            restoreTrackDisplay(track);
+            if (!active.has(track)) restoreTrackDisplay(track);
           }
           restoreInactiveThumbs(active);
           return;
         }
-        const active = new Set<HTMLElement>();
-        // Restore authored chrome visibility when the host re-projects composed.
+        let forceLayout = layoutDirty;
         if (chromeHidden) {
           chromeHidden = false;
-          for (const track of Array.from(trackStyles.keys())) {
-            restoreTrackDisplay(track);
-          }
-          // Thumb display is restored by restoreInactiveThumbs below when
-          // the thumb is no longer active, or by the composed projection
-          // loop when the thumb is active.
+          forceLayout = true;
+          for (const track of Array.from(trackStyles.keys())) restoreTrackDisplay(track);
         }
-        projectTrackInsets();
-        for (const control of connection.composedChrome?.controls ?? []) {
-          if (!isWebControl(control)) continue;
+        if (controls.length === 0) {
+          trackAvailableCache.clear();
+          if (trackInsets.size > 0) restoreTrackInsets(new Set());
+          if (thumbStyles.size > 0) restoreInactiveThumbs(new Set());
+          return;
+        }
+        if (forceLayout) {
+          projectTrackInsets(controls);
+          trackAvailableCache.clear();
+        }
+        // Read phase: batch all track geometry reads before any thumb style writes.
+        const plans = controls.map((control) => {
           const axis = control.getAxis();
           const track = control.trackTarget;
-          const thumb = control.thumbTarget;
+          const cached = trackAvailableCache.get(track);
+          const available =
+            cached && cached[0] === axis ? cached[1] : readTrackBox(track, axis).available;
+          if (!cached || cached[0] !== axis) trackAvailableCache.set(track, [axis, available]);
+          const dirSign: 1 | -1 =
+            axis === 'horizontal' && available > 0 && facts.horizontal.visibleRatio < 1
+              ? getHorizontalSign()
+              : 1;
+          return [axis, control.thumbTarget, available, dirSign] as const;
+        });
+        // Write phase: apply only changed thumb properties.
+        const active = new Set<HTMLElement>();
+        const minThumbSize = Math.max(0, options.minThumbSize ?? 18);
+        for (const [axis, thumb, available, dirSign] of plans) {
           active.add(thumb);
           rememberThumb(thumb);
-
           const axisFacts = facts[axis];
-          const geometry = measureControl(control, axis);
-          const available = geometry.available;
-
+          const prev = projectedThumbState.get(thumb);
           if (available <= 0 || axisFacts.visibleRatio >= 1) {
-            writeDisplay(thumb, hiddenDisplay);
+            if (!prev?.[0]) {
+              writeDisplay(thumb, HIDDEN_DISPLAY);
+              projectedThumbState.set(thumb, [true, axis, '', '']);
+            }
             continue;
           }
-
-          const minThumbSize = Math.max(0, options.minThumbSize ?? 18);
           const thumbExtent = Math.min(
             available,
             Math.max(minThumbSize, available * clampRatio(axisFacts.visibleRatio))
           );
           const position =
-            axis === 'horizontal' && horizontalSign(target) < 0
-              ? 1 - axisFacts.position
-              : axisFacts.position;
-          const offset = Math.max(0, available - thumbExtent) * clampRatio(position);
-          const originalThumbStyle = thumbStyles.get(thumb);
-          if (originalThumbStyle) writeDisplay(thumb, originalThumbStyle.display);
-          thumb.style.setProperty('--proto-ui-scroll-thumb-size', `${thumbExtent}px`);
-          thumb.style.setProperty('--proto-ui-scroll-thumb-offset', `${offset}px`);
-          // flex-1 keeps a minimum thumb on the flex start. Size is host-owned;
-          // top/left travels in the track content box, leaving one pixel of
-          // padding at each long-axis end when the scroll position is 1.
-          thumb.style.flexGrow = '0';
-          thumb.style.alignSelf = 'flex-start';
-          thumb.style.transform = 'none';
-          if (axis === 'vertical') {
-            thumb.style.width = originalThumbStyle?.width ?? '';
-            thumb.style.height = 'var(--proto-ui-scroll-thumb-size)';
-            thumb.style.left = originalThumbStyle?.left ?? '';
-            thumb.style.top = `${offset}px`;
-          } else {
-            thumb.style.height = originalThumbStyle?.height ?? '';
-            thumb.style.width = 'var(--proto-ui-scroll-thumb-size)';
-            thumb.style.top = originalThumbStyle?.top ?? '';
-            thumb.style.left = `${offset}px`;
+            axis === 'horizontal' && dirSign < 0 ? 1 - axisFacts.position : axisFacts.position;
+          const sizeStr = `${thumbExtent}px`;
+          const offsetStr = `${Math.max(0, available - thumbExtent) * clampRatio(position)}px`;
+          const full = !prev || prev[0] || prev[1] !== axis;
+          const { style } = thumb;
+          if (full) {
+            const orig = thumbStyles.get(thumb);
+            if (orig) writeDisplay(thumb, orig[1]);
+            style.flexGrow = '0';
+            style.alignSelf = 'flex-start';
+            style.transform = 'none';
+            if (axis === 'vertical') {
+              style.width = orig?.[0][0] ?? '';
+              style.height = `var(${THUMB_SIZE_VAR})`;
+              style.left = orig?.[0][4] ?? '';
+            } else {
+              style.height = orig?.[0][1] ?? '';
+              style.width = `var(${THUMB_SIZE_VAR})`;
+              style.top = orig?.[0][3] ?? '';
+            }
           }
+          if (full || prev[2] !== sizeStr) style.setProperty(THUMB_SIZE_VAR, sizeStr);
+          if (full || prev[3] !== offsetStr) {
+            style.setProperty(THUMB_OFFSET_VAR, offsetStr);
+            style[axis === 'vertical' ? 'top' : 'left'] = offsetStr;
+          }
+          projectedThumbState.set(thumb, [false, axis, sizeStr, offsetStr]);
         }
         restoreInactiveThumbs(active);
       };
@@ -530,16 +608,9 @@ export function createWebScrollSurfaceHost(
           : null;
       const isAxisEnabled = (axis: ScrollAxis) =>
         connection.config.axes === 'both' || connection.config.axes === axis;
-      const readFollowLayout = (axis: ScrollAxis) =>
-        axis === 'horizontal'
-          ? { axis, viewport: target.clientWidth, extent: target.scrollWidth }
-          : { axis, viewport: target.clientHeight, extent: target.scrollHeight };
+      const readFollowLayout = (axis: ScrollAxis) => readAxis(axis);
       const isAxisAtEnd = (axis: ScrollAxis) => {
-        const horizontal = axis === 'horizontal';
-        const offset = horizontal ? horizontalOffset(target) : target.scrollTop;
-        const viewport = horizontal ? target.clientWidth : target.clientHeight;
-        const extent = horizontal ? target.scrollWidth : target.scrollHeight;
-        const range = Math.max(0, extent - viewport);
+        const { offset, range } = readAxis(axis);
         const clampedOffset = Math.min(range, Math.max(0, Number.isFinite(offset) ? offset : 0));
         return range - clampedOffset <= endThreshold;
       };
@@ -550,15 +621,7 @@ export function createWebScrollSurfaceHost(
       const refreshHeadMarkers = () => {
         headNode = target.firstElementChild;
       };
-      const readAnchorObservation = (axis: ScrollAxis) => {
-        const layout = readFollowLayout(axis);
-        return Object.freeze({
-          axis,
-          viewport: layout.viewport,
-          extent: layout.extent,
-          offset: axis === 'horizontal' ? horizontalOffset(target) : target.scrollTop,
-        });
-      };
+      const readAnchorObservation = (axis: ScrollAxis) => Object.freeze(readAxis(axis));
       const syncAnchorObservation = () => {
         const axis = configuredAnchorAxis();
         anchorObservation = axis && isAxisEnabled(axis) ? readAnchorObservation(axis) : null;
@@ -581,7 +644,7 @@ export function createWebScrollSurfaceHost(
         ) {
           const delta = next.extent - previous.extent;
           if (axis === 'horizontal')
-            target.scrollLeft = (next.offset + delta) * horizontalSign(target);
+            target.scrollLeft = (next.offset + delta) * getHorizontalSign();
           else target.scrollTop = next.offset + delta;
           // The baseline must record the post-compensation offset; otherwise a
           // second head-growth delivery inside the same frame sees a moved
@@ -628,10 +691,11 @@ export function createWebScrollSurfaceHost(
           if (!isAxisEnabled(currentAxis)) {
             endFollowState = configuredFollowAxis() ? 'paused' : 'off';
             endFollowRequestStatus = 'rejected';
-            publish();
+            publish(false);
             return;
           }
-          applyRequest(target, { kind: 'to-end', axis: currentAxis });
+          const dirSign = currentAxis === 'horizontal' ? getHorizontalSign() : undefined;
+          applyRequest(target, { kind: 'to-end', axis: currentAxis }, dirSign);
           if (!readerContacts.active) readerIntentUntil = 0;
           const reachedEnd = isAxisAtEnd(currentAxis);
           const followAxis = configuredFollowAxis();
@@ -644,7 +708,7 @@ export function createWebScrollSurfaceHost(
           if (movement.requestEpoch === endFollowRequestEpoch) {
             endFollowRequestStatus = reachedEnd ? 'applied' : 'rejected';
           }
-          publish();
+          publish(false);
         };
         if (ownerWindow?.requestAnimationFrame) {
           const frame = ownerWindow.requestAnimationFrame(apply);
@@ -668,14 +732,17 @@ export function createWebScrollSurfaceHost(
             // Reject this request without canceling the configured axis's automatic work.
             endFollowRequestEpoch++;
             endFollowRequestStatus = 'rejected';
-            publish();
+            publish(false);
             return;
           }
           scheduleEnd(request.axis);
           return;
         }
+        const dirSign = request.axis === 'horizontal' ? getHorizontalSign() : undefined;
         const requestedAtEnd =
-          followAxis === request.axis ? requestReachesEnd(target, request, endThreshold) : null;
+          followAxis === request.axis
+            ? requestReachesEnd(target, request, endThreshold, dirSign)
+            : null;
         // A boundary-clamped departure emits no scroll event, so the pending
         // automatic end frame must be canceled from the classified input path.
         if (scheduledEnd?.axis === request.axis) cancelScheduledEnd(true);
@@ -685,15 +752,12 @@ export function createWebScrollSurfaceHost(
           // old movement evidence without losing ownership of live contacts.
           explicitPauseObservation = readAnchorObservation(request.axis);
           if (readerRequest) {
-            readerArrivalUntil =
-              (ownerWindow?.performance.now() ?? Date.now()) + DISCRETE_READER_INTENT_WINDOW_MS;
+            readerArrivalUntil = now() + DISCRETE_READER_INTENT_WINDOW_MS;
           } else {
-            readerIntentUntil = 0;
-            readerArrivalUntil = 0;
-            readerContacts.clearMovement();
+            clearReaderMovement();
           }
         }
-        applyRequest(target, request);
+        applyRequest(target, request, dirSign);
         if (configuredAnchorAxis() === request.axis) syncAnchorObservation();
         if (followAxis === request.axis) {
           const atEndAfterRequest = isAxisAtEnd(request.axis);
@@ -701,11 +765,7 @@ export function createWebScrollSurfaceHost(
             const previous = explicitPauseObservation;
             const next = readAnchorObservation(request.axis);
             const readerArrived =
-              readerRequest &&
-              atEndAfterRequest &&
-              next.offset !== previous.offset &&
-              next.viewport === previous.viewport &&
-              next.extent === previous.extent;
+              readerRequest && atEndAfterRequest && movedWithinLayout(previous, next);
             explicitPauseObservation = readerArrived ? null : next;
           }
           const smoothMovement = ownerWindow?.getComputedStyle(target).scrollBehavior === 'smooth';
@@ -716,7 +776,7 @@ export function createWebScrollSurfaceHost(
           requestedDepartureAxis = shouldPause ? request.axis : null;
           endFollowState = shouldPause ? 'paused' : 'following';
         }
-        publish();
+        publish(false);
       };
       const createMoveBinding = (control: WebScrollControl): MoveGestureHostBinding => {
         const thumb = control.thumbTarget;
@@ -728,7 +788,7 @@ export function createWebScrollSurfaceHost(
           if (grabOffset === undefined || geometry.travel <= 0) return;
           let position =
             (coordinate(sample, axis) - geometry.trackStart - grabOffset) / geometry.travel;
-          if (axis === 'horizontal' && horizontalSign(target) < 0) position = 1 - position;
+          if (axis === 'horizontal' && getHorizontalSign() < 0) position = 1 - position;
           executeRequest({ kind: 'control-drag', axis, position: clampRatio(position) }, true);
         };
         return Object.freeze({
@@ -769,8 +829,7 @@ export function createWebScrollSurfaceHost(
       const reconcileMoveGestures = () => {
         const active = new Set<HTMLElement>();
         if (connection.projection === 'composed') {
-          for (const control of connection.composedChrome?.controls ?? []) {
-            if (!isWebControl(control)) continue;
+          for (const control of getControls()) {
             const thumb = control.thumbTarget;
             active.add(thumb);
             const binding = createMoveBinding(control);
@@ -786,14 +845,17 @@ export function createWebScrollSurfaceHost(
           dragGrabOffsets.delete(thumb);
         }
       };
-      const publish = () => {
+      const publish = (layoutDirty = true) => {
         if (disposed || !policyCurrent()) return;
         const facts = snapshot();
-        projectComposedChrome(facts);
+        projectComposedChrome(facts, layoutDirty);
+        if (lastFacts && sameSurfaceSnapshot(lastFacts, facts)) return;
+        lastFacts = facts;
         connection.onFacts(facts);
       };
       const onLayoutChange = () => {
         if (disposed) return;
+        cachedDirSign = null;
         const axis = configuredFollowAxis();
         const anchorAxis = configuredAnchorAxis();
         if (axis) {
@@ -843,24 +905,22 @@ export function createWebScrollSurfaceHost(
         if (explicitPauseObservation) {
           explicitPauseObservation = readAnchorObservation(explicitPauseObservation.axis);
         }
-        publish();
+        publish(true);
       };
       const armReaderIntent = () => {
         requestedDepartureAxis = null;
-        const now = ownerWindow?.performance.now() ?? Date.now();
-        readerIntentUntil = now + DISCRETE_READER_INTENT_WINDOW_MS;
+        readerIntentUntil = now() + DISCRETE_READER_INTENT_WINDOW_MS;
       };
       // A boundary-clamped departure gesture emits no scroll event, so a
       // pending follow frame must not wait for one to be canceled. Input
       // that can still move the surface keeps the deadline-only path.
       const cancelUnscrollableDeparture = (axis: ScrollAxis) => {
         if (!isAxisEnabled(axis) || isAxisAtEnd(axis) || !scheduledEnd) return;
-        const offset = axis === 'horizontal' ? horizontalOffset(target) : target.scrollTop;
-        if (offset > 0) return;
+        if (readAxis(axis).offset > 0) return;
         cancelScheduledEnd(true);
         endFollowState = 'paused';
         requestedDepartureAxis = null;
-        publish();
+        publish(false);
       };
       // Bubbled wheel/key input is evidence for this surface only when no
       // intervening scrollable on the composed path can still consume the
@@ -874,50 +934,40 @@ export function createWebScrollSurfaceHost(
           if (!(node instanceof Element)) continue;
           const style = ownerWindow?.getComputedStyle(node);
           if (!style) continue;
-          if (axis === 'vertical') {
-            const overflow = style.overflowY;
-            if (
-              (overflow === 'auto' || overflow === 'scroll') &&
-              node.scrollHeight > node.clientHeight &&
-              node.scrollTop > 0
-            ) {
-              return true;
-            }
-          } else {
-            const overflow = style.overflowX;
-            if (
-              (overflow === 'auto' || overflow === 'scroll') &&
-              node.scrollWidth > node.clientWidth &&
-              horizontalOffset(node as HTMLElement) > 0
-            ) {
-              return true;
-            }
+          const v = axis === 'vertical';
+          const overflow = v ? style.overflowY : style.overflowX;
+          if (
+            (overflow === 'auto' || overflow === 'scroll') &&
+            (v
+              ? node.scrollHeight > node.clientHeight && node.scrollTop > 0
+              : node.scrollWidth > node.clientWidth &&
+                horizontalOffset(node as HTMLElement, style.direction === 'rtl' ? -1 : 1) > 0)
+          ) {
+            return true;
           }
         }
         return false;
       };
       const hasReaderIntent = () => {
-        const now = ownerWindow?.performance.now() ?? Date.now();
         const axis = configuredFollowAxis();
-        return (axis !== null && readerContacts.hasDeparture(axis)) || readerIntentUntil > now;
+        return (axis !== null && readerContacts.hasDeparture(axis)) || readerIntentUntil > now();
       };
       const onWheel = (event: WheelEvent) => {
         if (event.ctrlKey || event.defaultPrevented) return;
         const axis = configuredFollowAxis();
         if (!axis) return;
+        const dirSign = axis === 'horizontal' ? getHorizontalSign() : 1;
         const delta =
           axis === 'vertical'
             ? event.deltaY
-            : (event.deltaX || (event.shiftKey ? event.deltaY : 0)) * horizontalSign(target);
+            : (event.deltaX || (event.shiftKey ? event.deltaY : 0)) * dirSign;
         if (delta === 0) return;
-        readerArrivalUntil =
-          (ownerWindow?.performance.now() ?? Date.now()) + DISCRETE_READER_INTENT_WINDOW_MS;
+        readerArrivalUntil = now() + DISCRETE_READER_INTENT_WINDOW_MS;
         requestedDepartureAxis = null;
         const leavingEnd =
           axis === 'vertical'
             ? event.deltaY < 0
-            : event.deltaX * horizontalSign(target) < 0 ||
-              (event.shiftKey && event.deltaY * horizontalSign(target) < 0);
+            : event.deltaX * dirSign < 0 || (event.shiftKey && event.deltaY * dirSign < 0);
         if (!leavingEnd) return;
         if (findDepartureConsumer(event, axis)) return;
         armReaderIntent();
@@ -925,12 +975,7 @@ export function createWebScrollSurfaceHost(
       };
       const beginContact = () => {
         const axis = configuredFollowAxis();
-        if (!readerContacts.active && axis) {
-          contactOrigin = {
-            ...readFollowLayout(axis),
-            offset: axis === 'horizontal' ? horizontalOffset(target) : target.scrollTop,
-          };
-        }
+        if (!readerContacts.active && axis) contactOrigin = readAxis(axis);
         readerIntentUntil = 0;
         readerArrivalUntil = 0;
         requestedDepartureAxis = null;
@@ -938,14 +983,14 @@ export function createWebScrollSurfaceHost(
       const onPointerDown = (event: PointerEvent) => {
         beginContact();
         readerContacts.startPointer(event.pointerId, event.pointerType, {
-          x: event.clientX * horizontalSign(target),
+          x: event.clientX * getHorizontalSign(),
           y: event.clientY,
         });
       };
       const onPointerMove = (event: PointerEvent) => {
         sampleContactDeparture();
         readerContacts.movePointer(event.pointerId, {
-          x: event.clientX * horizontalSign(target),
+          x: event.clientX * getHorizontalSign(),
           y: event.clientY,
         });
       };
@@ -955,16 +1000,18 @@ export function createWebScrollSurfaceHost(
         );
         if (owned.length === 0) return;
         beginContact();
+        const dirSign = getHorizontalSign();
         readerContacts.startTouches(
           owned.map((touch) => touch.identifier),
-          owned.map((touch) => ({ x: touch.clientX * horizontalSign(target), y: touch.clientY }))
+          owned.map((touch) => ({ x: touch.clientX * dirSign, y: touch.clientY }))
         );
       };
       const onTouchMove = (event: TouchEvent) => {
         sampleContactDeparture();
+        const dirSign = getHorizontalSign();
         for (const touch of Array.from(event.changedTouches)) {
           readerContacts.moveTouch(touch.identifier, {
-            x: touch.clientX * horizontalSign(target),
+            x: touch.clientX * dirSign,
             y: touch.clientY,
           });
         }
@@ -976,21 +1023,17 @@ export function createWebScrollSurfaceHost(
         const axis = configuredFollowAxis();
         const moved = axis !== null && readerContacts.hasDeparture(axis);
         if (moved && contactOrigin && axis === contactOrigin.axis && isAxisEnabled(axis)) {
-          const layout = readFollowLayout(axis);
-          const offset = axis === 'horizontal' ? horizontalOffset(target) : target.scrollTop;
-          // Sample movement already applied during this session before its
-          // scroll event arrives. A later callback cannot reopen the session.
-          // Neither stationary contact nor reflow alone is input displacement.
+          const cur = readAxis(axis);
           if (
-            layout.viewport === contactOrigin.viewport &&
-            layout.extent === contactOrigin.extent &&
-            offset < contactOrigin.offset &&
+            cur.viewport === contactOrigin.viewport &&
+            cur.extent === contactOrigin.extent &&
+            cur.offset < contactOrigin.offset &&
             !isAxisAtEnd(axis)
           ) {
             cancelScheduledEnd(true);
             endFollowState = 'paused';
             requestedDepartureAxis = null;
-            publish();
+            publish(false);
           }
         }
       };
@@ -1005,8 +1048,6 @@ export function createWebScrollSurfaceHost(
       const onPointerCancel = (event: PointerEvent) => {
         finishContact(() => readerContacts.finishPointer(event.pointerId, true));
       };
-      // Both terminal TouchEvents close owned contacts. Native pointer handoff
-      // remains active only while an owned touch session actually survives.
       const onTouchEnd = (event: TouchEvent) => {
         finishContact(() =>
           readerContacts.finishTouches(
@@ -1025,37 +1066,32 @@ export function createWebScrollSurfaceHost(
         if (event.defaultPrevented) return;
         const axis = configuredFollowAxis();
         if (!axis) return;
+        const k = event.key;
+        const v = axis === 'vertical';
+        const beforeKey = v ? 'ArrowUp' : getHorizontalSign() < 0 ? 'ArrowRight' : 'ArrowLeft';
+        const afterKey = v ? 'ArrowDown' : getHorizontalSign() < 0 ? 'ArrowLeft' : 'ArrowRight';
         const scrollDirection =
-          axis === 'vertical'
-            ? event.key === 'ArrowUp' ||
-              event.key === 'PageUp' ||
-              event.key === 'Home' ||
-              (event.key === ' ' && event.shiftKey)
-              ? 'before'
-              : event.key === 'ArrowDown' ||
-                  event.key === 'PageDown' ||
-                  event.key === 'End' ||
-                  (event.key === ' ' && !event.shiftKey)
-                ? 'after'
-                : null
-            : event.key === (horizontalSign(target) < 0 ? 'ArrowRight' : 'ArrowLeft') ||
-                event.key === 'PageUp' ||
-                event.key === 'Home'
-              ? 'before'
-              : event.key === (horizontalSign(target) < 0 ? 'ArrowLeft' : 'ArrowRight') ||
-                  event.key === 'PageDown' ||
-                  event.key === 'End'
-                ? 'after'
-                : null;
+          k === beforeKey || k === 'PageUp' || k === 'Home' || (v && k === ' ' && event.shiftKey)
+            ? 'before'
+            : k === afterKey ||
+                k === 'PageDown' ||
+                k === 'End' ||
+                (v && k === ' ' && !event.shiftKey)
+              ? 'after'
+              : null;
         if (!scrollDirection) return;
-        readerArrivalUntil =
-          (ownerWindow?.performance.now() ?? Date.now()) + DISCRETE_READER_INTENT_WINDOW_MS;
+        readerArrivalUntil = now() + DISCRETE_READER_INTENT_WINDOW_MS;
         requestedDepartureAxis = null;
         if (scrollDirection === 'before') {
           if (findDepartureConsumer(event, axis)) return;
           armReaderIntent();
           cancelUnscrollableDeparture(axis);
         }
+      };
+      const onScrollEnd = () => {
+        scrollEndTimer = undefined;
+        scrolling = false;
+        publish(false);
       };
       const onScroll = () => {
         scrolling = true;
@@ -1065,21 +1101,13 @@ export function createWebScrollSurfaceHost(
           const atEnd = isAxisAtEnd(axis);
           if (explicitPauseObservation?.axis === axis) {
             const next = readAnchorObservation(axis);
-            const previous = explicitPauseObservation;
-            const moved =
-              next.offset !== previous.offset &&
-              next.viewport === previous.viewport &&
-              next.extent === previous.extent;
-            const readerArrival =
-              readerArrivalUntil > (ownerWindow?.performance.now() ?? Date.now()) ||
-              readerContacts.hasMovement(axis);
+            const moved = movedWithinLayout(explicitPauseObservation, next);
+            const readerArrival = readerArrivalUntil > now() || readerContacts.hasMovement(axis);
             explicitPauseObservation = atEnd && moved && readerArrival ? null : next;
           }
           const requestedDeparture =
             requestedDepartureAxis === axis || explicitPauseObservation?.axis === axis;
           if (atEnd && !scheduledEnd && !requestedDeparture) {
-            // A scroll callback for another axis at the unchanged followed end
-            // is not an arrival; retain evidence for pending native delivery.
             if (endFollowState === 'paused') readerContacts.clearMovement();
             endFollowState = 'following';
           } else if (!atEnd && (readerIntent || requestedDeparture)) {
@@ -1090,13 +1118,9 @@ export function createWebScrollSurfaceHost(
           }
         }
         syncAnchorObservation();
-        publish();
-        cancelScrollEndTimer?.();
-        const timer = setTimeout(() => {
-          scrolling = false;
-          publish();
-        }, options.scrollEndDelay ?? 120);
-        cancelScrollEndTimer = () => clearTimeout(timer);
+        publish(false);
+        clearScrollEndTimer();
+        scrollEndTimer = setTimeout(onScrollEnd, options.scrollEndDelay ?? 120);
       };
       const onContentReflow = () => {
         if (configuredFollowAxis() || configuredAnchorAxis()) onLayoutChange();
@@ -1106,50 +1130,58 @@ export function createWebScrollSurfaceHost(
       const reconcileFontObservation = () => {
         if (!fontFaceSet || typeof fontFaceSet.addEventListener !== 'function') return;
         const shouldObserve = configuredFollowAxis() !== null || configuredAnchorAxis() !== null;
-        if (shouldObserve && !observingFonts) {
-          fontFaceSet.addEventListener('loadingdone', onContentReflow);
-          observingFonts = true;
-        } else if (!shouldObserve && observingFonts) {
-          fontFaceSet.removeEventListener('loadingdone', onContentReflow);
-          observingFonts = false;
-        }
+        if (shouldObserve === observingFonts) return;
+        fontFaceSet[shouldObserve ? 'addEventListener' : 'removeEventListener'](
+          'loadingdone',
+          onContentReflow
+        );
+        observingFonts = shouldObserve;
       };
 
+      const PASSIVE = { passive: true } as const;
+      type ListenerEntry = readonly [
+        EventTarget | null | undefined,
+        string,
+        EventListener,
+        (AddEventListenerOptions | boolean)?,
+      ];
+      const baseListeners: readonly ListenerEntry[] = [
+        [target, 'scroll', onScroll, PASSIVE],
+        [target, 'load', onContentReflow, true],
+        [target, 'transitionend', onContentReflow, true],
+        [target, 'transitioncancel', onContentReflow, true],
+        [target, 'animationend', onContentReflow, true],
+        [target, 'animationcancel', onContentReflow, true],
+        [ownerWindow, 'blur', resetReaderInput],
+        [ownerWindow, 'resize', onLayoutChange],
+      ];
+      const gestureListeners: readonly ListenerEntry[] = [
+        [target, 'wheel', onWheel as EventListener, PASSIVE],
+        [target, 'pointerdown', onPointerDown as EventListener, PASSIVE],
+        [ownerWindow, 'pointermove', onPointerMove as EventListener, PASSIVE],
+        [ownerWindow, 'pointerup', onPointerUp as EventListener, PASSIVE],
+        [ownerWindow, 'pointercancel', onPointerCancel as EventListener, PASSIVE],
+        [target, 'touchstart', onTouchStart as EventListener, PASSIVE],
+        [ownerWindow, 'touchmove', onTouchMove as EventListener, PASSIVE],
+        [ownerWindow, 'touchend', onTouchEnd as EventListener, PASSIVE],
+        [ownerWindow, 'touchcancel', onTouchEnd as EventListener, PASSIVE],
+        [target, 'keydown', onKeyDown as EventListener],
+        [ownerWindow, 'keyup', completeReaderIntent],
+      ];
+      const removeListener = ([el, type, fn, opt]: ListenerEntry) =>
+        el?.removeEventListener(type, fn, typeof opt === 'boolean' ? opt : undefined);
+
       let observingGestures = false;
-      // Reader-input listeners exist only while a follow axis is configured,
-      // so an ordinary Scroll Area never fans window movement events through
-      // every attached surface. Same reconcile discipline as font observation.
       const reconcileGestureObservation = () => {
         const shouldObserve = configuredFollowAxis() !== null;
         if (shouldObserve === observingGestures) return;
         if (shouldObserve) {
-          target.addEventListener('wheel', onWheel, { passive: true });
-          target.addEventListener('pointerdown', onPointerDown, { passive: true });
-          ownerWindow?.addEventListener('pointermove', onPointerMove, { passive: true });
-          ownerWindow?.addEventListener('pointerup', onPointerUp, { passive: true });
-          ownerWindow?.addEventListener('pointercancel', onPointerCancel, { passive: true });
-          target.addEventListener('touchstart', onTouchStart, { passive: true });
-          ownerWindow?.addEventListener('touchmove', onTouchMove, { passive: true });
-          ownerWindow?.addEventListener('touchend', onTouchEnd, { passive: true });
-          ownerWindow?.addEventListener('touchcancel', onTouchEnd, { passive: true });
-          target.addEventListener('keydown', onKeyDown);
-          ownerWindow?.addEventListener('keyup', completeReaderIntent);
-          observingGestures = true;
-          return;
+          for (const [el, type, fn, opt] of gestureListeners) el?.addEventListener(type, fn, opt);
+        } else {
+          resetReaderInput();
+          for (const entry of gestureListeners) removeListener(entry);
         }
-        resetReaderInput();
-        target.removeEventListener('wheel', onWheel);
-        target.removeEventListener('pointerdown', onPointerDown);
-        ownerWindow?.removeEventListener('pointermove', onPointerMove);
-        ownerWindow?.removeEventListener('pointerup', onPointerUp);
-        ownerWindow?.removeEventListener('pointercancel', onPointerCancel);
-        target.removeEventListener('touchstart', onTouchStart);
-        ownerWindow?.removeEventListener('touchmove', onTouchMove);
-        ownerWindow?.removeEventListener('touchend', onTouchEnd);
-        ownerWindow?.removeEventListener('touchcancel', onTouchEnd);
-        target.removeEventListener('keydown', onKeyDown);
-        ownerWindow?.removeEventListener('keyup', completeReaderIntent);
-        observingGestures = false;
+        observingGestures = shouldObserve;
       };
       let resizeObserver: ResizeObserver | undefined;
       let mutationObserver: MutationObserver | undefined;
@@ -1162,9 +1194,6 @@ export function createWebScrollSurfaceHost(
               record.target === target &&
               record.addedNodes.length > 0
           );
-          // headNode must have existed before the mutation: the first append
-          // to an empty target changes firstElementChild without moving any
-          // existing content, so it is not head growth.
           if (inserted && headNode && target.firstElementChild !== headNode)
             anchorHeadGrowthPending = true;
         }
@@ -1176,31 +1205,49 @@ export function createWebScrollSurfaceHost(
       };
       function observeGeometry() {
         refreshHeadMarkers();
-        resizeObserver?.disconnect();
-        mutationObserver?.disconnect();
-        resizeObserver?.observe(target);
-        for (const contentTarget of Array.from(target.children)) {
-          resizeObserver?.observe(contentTarget);
+        const controls = getControls();
+        if (resizeObserver) {
+          const nextResize = new Set<Element>([target]);
+          for (let child = target.firstElementChild; child; child = child.nextElementSibling) {
+            nextResize.add(child);
+          }
+          for (const control of controls) nextResize.add(control.trackTarget);
+          const hasUnobserve = typeof resizeObserver.unobserve === 'function';
+          let reset = false;
+          for (const previous of observedResizeTargets) {
+            if (nextResize.has(previous)) continue;
+            if (hasUnobserve) resizeObserver.unobserve(previous);
+            else {
+              reset = true;
+              break;
+            }
+          }
+          if (reset) {
+            resizeObserver.disconnect();
+            observedResizeTargets.clear();
+          }
+          for (const next of nextResize) {
+            if (!observedResizeTargets.has(next)) resizeObserver.observe(next);
+          }
+          observedResizeTargets = nextResize;
         }
-        mutationObserver?.observe(
-          target,
-          configuredFollowAxis()
+        if (mutationObserver) {
+          const nextOpts = configuredFollowAxis()
             ? END_FOLLOW_CONTENT_OBSERVER_OPTIONS
             : options.exclusivePolicy
-              ? {
-                  childList: true,
-                  attributes: true,
-                  attributeFilter: ['style', 'data-pui-scroll-projection'],
-                }
-              : BASE_CONTENT_OBSERVER_OPTIONS
-        );
-        for (const control of connection.composedChrome?.controls ?? []) {
-          if (!isWebControl(control)) continue;
-          resizeObserver?.observe(control.trackTarget);
-          mutationObserver?.observe(control.trackTarget, {
-            attributes: true,
-            attributeFilter: ['class', 'style'],
-          });
+              ? EXCLUSIVE_TARGET_MUTATION_OPTIONS
+              : BASE_CONTENT_OBSERVER_OPTIONS;
+          const nextTracks = new Set(controls.map((control) => control.trackTarget));
+          const tracksChanged =
+            nextTracks.size !== observedMutationTracks.size ||
+            controls.some((control) => !observedMutationTracks.has(control.trackTarget));
+          if (nextOpts !== observedTargetOpts || tracksChanged) {
+            mutationObserver.disconnect();
+            mutationObserver.observe(target, nextOpts);
+            for (const track of nextTracks) mutationObserver.observe(track, TRACK_MUTATION_OPTIONS);
+            observedTargetOpts = nextOpts;
+            observedMutationTracks = nextTracks;
+          }
         }
       }
       const resetEndFollow = () => {
@@ -1246,39 +1293,23 @@ export function createWebScrollSurfaceHost(
         anchorObservation = null;
         anchorHeadGrowthPending = false;
         headNode = null;
+        cachedDirSign = null;
+        lastFacts = null;
         attempt(() => cancelScheduledEnd(false));
-        attempt(() => cancelScrollEndTimer?.());
-        for (const [type, listener, capture] of [
-          ['scroll', onScroll],
-          ['load', onContentReflow, true],
-          ['transitionend', onContentReflow, true],
-          ['transitioncancel', onContentReflow, true],
-          ['animationend', onContentReflow, true],
-          ['animationcancel', onContentReflow, true],
-          ['wheel', onWheel],
-          ['pointerdown', onPointerDown],
-          ['touchstart', onTouchStart],
-          ['keydown', onKeyDown],
-        ] as const)
-          attempt(() => target.removeEventListener(type, listener as EventListener, capture));
-        for (const [type, listener] of [
-          ['pointermove', onPointerMove],
-          ['pointerup', onPointerUp],
-          ['pointercancel', onPointerCancel],
-          ['touchmove', onTouchMove],
-          ['touchend', onTouchEnd],
-          ['touchcancel', onTouchEnd],
-          ['keyup', completeReaderIntent],
-          ['blur', resetReaderInput],
-          ['resize', onLayoutChange],
-        ] as const)
-          attempt(() => ownerWindow?.removeEventListener(type, listener as EventListener));
+        attempt(clearScrollEndTimer);
+        for (const entry of baseListeners) attempt(() => removeListener(entry));
+        for (const entry of gestureListeners) attempt(() => removeListener(entry));
         if (observingFonts) {
           observingFonts = false;
           attempt(() => fontFaceSet?.removeEventListener('loadingdone', onContentReflow));
         }
         attempt(() => resizeObserver?.disconnect());
         attempt(() => mutationObserver?.disconnect());
+        observedResizeTargets.clear();
+        observedMutationTracks.clear();
+        observedTargetOpts = null;
+        trackAvailableCache.clear();
+        projectedThumbState.clear();
         const leases = Array.from(moveLeases.values());
         moveLeases.clear();
         for (const lease of leases) attempt(() => lease.dispose());
@@ -1289,35 +1320,32 @@ export function createWebScrollSurfaceHost(
           attempt(() => restoreTrackDisplay(track));
         if (policyLease) attempt(() => policyLease.release());
         else {
-          attempt(() => {
-            target.style.overflowX = original.overflowX;
-          });
-          attempt(() => {
-            target.style.overflowY = original.overflowY;
-          });
-          attempt(() => {
-            target.style.scrollbarWidth = original.scrollbarWidth;
-          });
-          attempt(() => {
-            if (original.projection === null) target.removeAttribute('data-pui-scroll-projection');
-            else target.setAttribute('data-pui-scroll-projection', original.projection);
-          });
+          for (const fn of [
+            () => {
+              target.style.overflowX = original.overflowX;
+            },
+            () => {
+              target.style.overflowY = original.overflowY;
+            },
+            () => {
+              target.style.scrollbarWidth = original.scrollbarWidth;
+            },
+            () => {
+              if (original.projection === null)
+                target.removeAttribute('data-pui-scroll-projection');
+              else target.setAttribute('data-pui-scroll-projection', original.projection);
+            },
+          ])
+            attempt(fn);
         }
         if (failed) throw failure;
       };
       try {
-        target.addEventListener('scroll', onScroll, { passive: true });
-        target.addEventListener('load', onContentReflow, true);
-        target.addEventListener('transitionend', onContentReflow, true);
-        target.addEventListener('transitioncancel', onContentReflow, true);
-        target.addEventListener('animationend', onContentReflow, true);
-        target.addEventListener('animationcancel', onContentReflow, true);
-        ownerWindow?.addEventListener('blur', resetReaderInput);
+        for (const [el, type, fn, opt] of baseListeners) el?.addEventListener(type, fn, opt);
         const Resize = ownerWindow?.ResizeObserver;
         const Mutation = ownerWindow?.MutationObserver;
         resizeObserver = typeof Resize === 'function' ? new Resize(onLayoutChange) : undefined;
         mutationObserver = typeof Mutation === 'function' ? new Mutation(onMutation) : undefined;
-        ownerWindow?.addEventListener('resize', onLayoutChange);
         projectPolicy();
         reconcileMoveGestures();
         observeGeometry();
@@ -1338,7 +1366,9 @@ export function createWebScrollSurfaceHost(
           if (disposed || !policyCurrent()) return;
           const previousAxis = configuredFollowAxis();
           const previousAxes = connection.config.axes;
+          const previousOnFacts = connection.onFacts;
           connection = nextConnection;
+          if (nextConnection.onFacts !== previousOnFacts) lastFacts = null;
           projectPolicy();
           reconcileMoveGestures();
           observeGeometry();
@@ -1359,9 +1389,7 @@ export function createWebScrollSurfaceHost(
           const axis = configuredFollowAxis();
           if (!axis || !isAxisEnabled(axis)) return false;
           cancelScheduledEnd(true);
-          readerIntentUntil = 0;
-          readerArrivalUntil = 0;
-          readerContacts.clearMovement();
+          clearReaderMovement();
           endFollowState = 'paused';
           // Input intent alone cannot resume: a reader must actually arrive at
           // the end. Keep an observation through stationary contact, editing,
@@ -1369,7 +1397,7 @@ export function createWebScrollSurfaceHost(
           requestedDepartureAxis = axis;
           explicitPauseObservation = readAnchorObservation(axis);
           syncAnchorObservation();
-          publish();
+          publish(false);
           return !disposed && policyCurrent();
         },
         reveal(subject, axis, isCurrentTarget) {
@@ -1381,9 +1409,7 @@ export function createWebScrollSurfaceHost(
           if (!accepted || !current()) return false;
           if (configuredFollowAxis() === axis) {
             if (explicitPauseObservation) {
-              readerIntentUntil = 0;
-              readerArrivalUntil = 0;
-              readerContacts.clearMovement();
+              clearReaderMovement();
               explicitPauseObservation = readAnchorObservation(axis);
             }
             const atEnd = isAxisAtEnd(axis);
@@ -1391,7 +1417,7 @@ export function createWebScrollSurfaceHost(
             requestedDepartureAxis = shouldPause ? axis : null;
             endFollowState = shouldPause ? 'paused' : 'following';
           }
-          publish();
+          publish(false);
           return current();
         },
         dispose,

@@ -63,8 +63,8 @@ const owner = definePrototype<SelectContentProps>({
     def.lifecycle.onBeforeDispose(() => controller.dispose());
     def.expose.method('setPresent', (present: boolean) => currentRun.lifecycle.setPresent(present));
     def.expose.method('snapshot', () => ({
-      phase: controller.phase,
-      diagnostic: controller.diagnostic,
+      phase: controller.getPhase(),
+      diagnostic: controller.getDiagnostic(),
       value: currentRun.context.read(SELECT_CONTEXT).value,
     }));
     def.expose.method('deliverFirst', () => bindings[0]?.onAlignment({ status: 'applied' }));

@@ -1,9 +1,13 @@
 ---
 title: 'Dropdown Menu'
-description: 'Grouped action-menu composition.'
+description: 'A Liquid Glass action menu with grouped items, accessible group labels, shortcut hints, and glass surface styling.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Liquid Glass Dropdown Menu organizes menu actions into named groups with dividers and shortcut hints, pairing Liquid Glass material styling on the trigger and open menu panel with automatic opaque fallback.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-dropdown-menu"
@@ -12,14 +16,25 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-## Grouped action composition (draft)
+The preview shows a 160px menu with account and resource groups, a disabled action item, and a separate disabled trigger.
 
-Group and Label provide a live accessible naming relationship; Separator and Shortcut are real passive parts. Shortcut only displays a hint and does not register a global binding. Decorative parts do not enter the action collection or add a press owner. The demo uses a 160px menu, grouped account/resources actions and a disabled API action. The real Invite users submenu is a separately pending protocol slice, not a simulated demo box. Checkbox/radio variants and complete native/GPUI, compiler, packed, visual and independent acceptance remain open.
+## Installation
 
-## Explicit Trigger material (draft)
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Trigger now declares the shared `liquid-glass` intent. Its existing Dropdown pressed state selects rest/pressed deformation; rounded geometry and the complete opaque fallback come from final style. Hover, focus-visible, disabled and menu activation remain owned by Base. Content keeps its existing open-state material intent; this change does not add a second command owner or a demo-only effect.
+## Usage
 
-The existing shared Web material provider can realize the intent only with an admitted in-app canvas source, geometry and preferences. Missing capability, unsafe contrast or unavailable source retains the opaque fallback. A portaled menu may lack an admitted source even when its Trigger is enhanced. This is not native blur or an Apple-native parity claim. The source recipe and isolated intent tests are implementation evidence only: source-bound WC/React/Vue/Vue 2 light/dark screenshots, actual interaction paint, GPUI and independent visual acceptance remain pending.
+- **Grouping and passive parts**: `Group` and `Label` establish a live accessible naming relationship. `Separator` and `Shortcut` are passive parts excluded from keyboard action traversal; `Shortcut` displays hint text only without registering global keybindings.
+- **Trigger and panel material**: `Trigger` declares `liquid-glass` optical intent with press deformation, and `Content` requests glass optics while open. When an in-app canvas backdrop is unavailable (including for portaled menus outside the canvas), or when contrast or preferences disallow glass, both fall back cleanly to readable opaque styling.
+- Hover, focus-visible, disabled state, and menu activation are handled by Base Dropdown Menu.
 
-The public preview also includes a separately owned disabled Trigger; its immutable authored disabled prop is exercised without test-only DOM mutation.
+## API
+
+| Part                 | Description                                                           |
+| -------------------- | --------------------------------------------------------------------- |
+| Root                 | Manages menu open state and coordination                              |
+| Trigger              | Menu trigger button supporting `disabled` and press material feedback |
+| Content              | Menu panel with open-state glass material and automatic fallback      |
+| Group / Label        | Groups related commands with an accessible group name                 |
+| Item                 | Actionable menu command with optional disabled state                  |
+| Separator / Shortcut | Passive divider and shortcut hint display                             |

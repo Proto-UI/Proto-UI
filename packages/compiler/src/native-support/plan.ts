@@ -1,6 +1,12 @@
 import { createHash } from 'node:crypto';
 import type { PrototypeIR } from '../ir';
 import type { TargetOperationAnalysis } from '../targets';
+import {
+  webHostSourceInputs,
+  type WebHostPrimitive,
+  type WebHostSourceInput,
+} from './web-host-primitives';
+import { webTargetAlignmentSourceInputs } from './web-target-alignment';
 
 /** Host implementation units, not component names or authored semantic hooks. */
 export const nativeSupportFeatures = [
@@ -23,6 +29,10 @@ export const nativeSupportFeatures = [
   'scroll',
   'text',
   'image',
+  'native-link',
+  'axis-input',
+  'available-space',
+  'target-alignment',
   'table',
 ] as const;
 export type NativeSupportFeature = (typeof nativeSupportFeatures)[number];
@@ -108,8 +118,19 @@ export const nativeSupportUnits: Readonly<Record<NativeSupportFeature, NativeSup
   },
   boundary: {
     imports: ['ownership'],
-    resources: ['boundary-regions', 'boundary-stack', 'outside-pointer-listener'],
-    cleanup: ['release-boundary-stack', 'remove-outside-listener'],
+    resources: [
+      'boundary-regions',
+      'boundary-stack',
+      'outside-pointer-listener',
+      'current-focus-listener',
+      'pointer-focus-intent-scope',
+    ],
+    cleanup: [
+      'release-boundary-stack',
+      'remove-outside-listener',
+      'remove-focus-listener',
+      'release-pointer-focus-scope',
+    ],
   },
   hit: {
     imports: ['ownership'],
@@ -122,7 +143,7 @@ export const nativeSupportUnits: Readonly<Record<NativeSupportFeature, NativeSup
     cleanup: ['stop-position-update', 'restore-position-styles'],
   },
   overlay: {
-    imports: ['boundary', 'positioning', 'focus'],
+    imports: ['boundary', 'positioning', 'focus', 'available-space'],
     resources: ['overlay-observation', 'modal-lock', 'overlay-dismiss-listeners'],
     cleanup: ['release-modal-lock', 'remove-dismiss-listeners'],
   },
@@ -147,6 +168,44 @@ export const nativeSupportUnits: Readonly<Record<NativeSupportFeature, NativeSup
     resources: ['image-request', 'image-completion-boundary'],
     cleanup: ['invalidate-image-request', 'remove-image-listeners'],
   },
+  'native-link': {
+    imports: ['ownership'],
+    resources: [
+      'native-link-attributes',
+      'native-link-activation-listeners',
+      'native-link-observation-tasks',
+    ],
+    cleanup: [
+      'restore-native-link-attributes',
+      'remove-native-link-listeners',
+      'cancel-native-link-observations',
+    ],
+  },
+  'axis-input': {
+    imports: ['anatomy'],
+    resources: ['axis-contact', 'axis-anatomy-binding', 'axis-extent-observer'],
+    cleanup: ['cancel-axis-contact', 'release-axis-binding', 'remove-axis-observer'],
+  },
+  'available-space': {
+    imports: ['ownership'],
+    resources: ['available-region-lease', 'root-space-observer', 'available-layout-projection'],
+    cleanup: ['release-available-region', 'remove-root-space-observer', 'restore-available-layout'],
+  },
+  'target-alignment': {
+    imports: ['overlay', 'anatomy'],
+    resources: [
+      'alignment-association',
+      'alignment-target-observation',
+      'alignment-geometry-lease',
+      'alignment-size-ownership',
+    ],
+    cleanup: [
+      'release-alignment-association',
+      'unsubscribe-alignment-targets',
+      'dispose-alignment-geometry',
+      'restore-alignment-size',
+    ],
+  },
   table: {
     imports: ['anatomy', 'a11y'],
     resources: ['table-state', 'table-projection'],
@@ -162,6 +221,7 @@ export interface NativeSupportPlan {
   readonly resources: readonly string[];
   readonly cleanup: readonly string[];
   readonly packages: readonly string[];
+  readonly inputs: readonly WebHostSourceInput[];
   readonly interactionPath: string;
   readonly modulesPath: string;
 }
@@ -189,6 +249,19 @@ export function nativeSupportPlanFromFeatures(
     resources: [...new Set(features.flatMap((feature) => nativeSupportUnits[feature].resources))],
     cleanup: [...new Set(features.flatMap((feature) => nativeSupportUnits[feature].cleanup))],
     packages: reached.has('positioning') ? ['@floating-ui/dom'] : [],
+    inputs: [
+      ...new Map(
+        [
+          ...webHostSourceInputs(
+            features.filter(
+              (feature): feature is WebHostPrimitive & NativeSupportFeature =>
+                feature === 'axis-input' || feature === 'available-space'
+            )
+          ),
+          ...(reached.has('target-alignment') ? webTargetAlignmentSourceInputs() : []),
+        ].map((input) => [input.file, input])
+      ).values(),
+    ].sort((a, b) => a.file.localeCompare(b.file)),
     interactionPath: `.proto-ui/interaction/native-${id}-v2.ts`,
     modulesPath: `.proto-ui/interaction/modules-${id}-v2.ts`,
   });
@@ -209,6 +282,8 @@ const hookFeatures: Readonly<Record<string, NativeSupportFeature>> = {
   asScrollSurface: 'scroll',
   asTextControl: 'text',
   asImageView: 'image',
+  asNativeLink: 'native-link',
+  asAxisInput: 'axis-input',
   asTableStructure: 'table',
 };
 const operationFeatures: Readonly<Record<string, NativeSupportFeature>> = {
@@ -232,6 +307,8 @@ const operationFeatures: Readonly<Record<string, NativeSupportFeature>> = {
   scroll: 'scroll',
   textControl: 'text',
   imageView: 'image',
+  nativeLink: 'native-link',
+  axisInput: 'axis-input',
   tableStructure: 'table',
   host: 'ownership',
 };
@@ -245,6 +322,7 @@ const ownerOperations = new Set([
   'style',
   'rule',
   'feedback',
+  'decoration',
   'run',
   'subscription',
   'binding',
@@ -265,6 +343,7 @@ export function planNativeSupport(
   for (const operation of admitted.operations) {
     if (operation === 'accessible.part' || operation === 'accessible.relation')
       roots.add('part-relationships');
+    if (operation === 'overlay.registerTargetAlignment') roots.add('target-alignment');
     const [family, name] = operation.split('.');
     if (ownerOperations.has(family)) continue;
     const feature = family === 'hook' ? hookFeatures[name] : operationFeatures[family];
@@ -285,6 +364,7 @@ export function planNativeSupport(
       declaration.id === '@proto.ui/image-view/declaration'
     )
       roots.add('image');
+    else if (declaration.id === '@proto.ui/native-link/declaration') roots.add('native-link');
     else
       throw new Error(
         `Missing native support dependency contract for declaration ${declaration.id}.`

@@ -11,7 +11,9 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 Liquid Glass Button 用柔和的边缘高光与背景折射，将操作控件与内容区分开。常规按钮适合返回等次要操作；强调按钮通过染色突出当前主要操作，两者保持相同尺寸。
 
-预览背景保持静止，让注意力集中在按钮的悬停、按下和键盘焦点上。点击 Back 可观察激活次数，也可以用页面顶部的运行时选择器比较同一组件在四种 Web 适配器中的表现。
+## 预览
+
+预览背景保持静止，便于观察按钮的悬停、按下和键盘焦点反馈。点击 Back 可查看激活次数，也可通过页面顶部的运行时选择器切换 Web Components、React、Vue 3 与 Vue 2。
 
 <div data-adapter-panel="wc">
   <PrototypePreviewer
@@ -362,17 +364,18 @@ export default {
 
 ## 材质与无障碍
 
-默认的 regular 材质用于可读的功能控件。仅为主要操作使用 `variant="prominent"`，避免在玻璃容器内再叠加玻璃按钮。这些取舍参考 Apple 的 [Materials](https://developer.apple.com/design/human-interface-guidelines/materials)、[Color](https://developer.apple.com/design/human-interface-guidelines/color) 与 [Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons) 指南。
+默认的 `regular` 材质用于常规操作控件；`variant="prominent"` 适合突出一组操作中的主要按钮，避免在玻璃容器内再叠加玻璃按钮。设计取舍参考 Apple [Materials](https://developer.apple.com/design/human-interface-guidelines/materials)、[Color](https://developer.apple.com/design/human-interface-guidelines/color) 与 [Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons) 指南。
 
-`material="auto"` 在宿主支持时启用光学效果；`material="opaque"` 使用不透明表面。网页预览采样的是它实际显示的 canvas 背景。普通 DOM 背景或遮挡内容不在该来源内时，按钮保留可读的不透明样式。
-
-减弱动态效果会关闭弹性形变并保留静态材质；减少透明度、增强对比度或强制颜色模式会使用可读回退。禁用按钮保留文字和轮廓，不响应激活。
+- `material="auto"` 在宿主支持且存在可见 canvas 背景源时启用光学折射；当背景为普通 DOM、存在遮挡或设为 `material="opaque"` 时，按钮保持高对比度的不透明样式。
+- 系统开启减弱动态效果时，会关闭弹性按压形变并保留静态材质；开启减少透明度、增强对比度或强制颜色模式时，自动切换为可读的不透明回退。
+- 禁用态保留文字与轮廓，不响应激活事件。
 
 ## API
 
-- variant: regular / prominent，默认 regular
-- material: auto / opaque，默认 auto
-- disabled: boolean，默认 false
-- 激活、焦点、键盘与禁用逻辑继承 Base Button，视觉层没有第二个状态拥有者。
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `variant` | `'regular' \| 'prominent'` | `'regular'` | 常规玻璃或强调染色样式 |
+| `material` | `'auto' \| 'opaque'` | `'auto'` | 设为 `'opaque'` 时关闭光学效果，使用不透明表面 |
+| `disabled` | `boolean` | `false` | 禁用按钮交互 |
 
-Liquid Glass 仍为 WIP / 实验性家族，源码包尚未发布。这里展示独立实现的 Web 效果；原生平台呈现、组件间融合与完整 Compiler 支持仍在开发中。
+激活、焦点、键盘与禁用语义均由 [Base Button](/zh-cn/ui-libraries/base/button/) 统一管理。

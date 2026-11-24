@@ -1,49 +1,48 @@
 ---
 title: 'Writing a Custom Primitive Prototype'
-description: 'Understand the minimal shape of direct and authored-asHook entries inside a governed or candidate boundary.'
+description: 'Learn the minimal structure of a single-part Prototype, the def/run split, and when to provide an asHook.'
 ---
 
-A leaf Prototype represents a protocol subject with a clear boundary and an independent information-flow responsibility. Button and Toggle are two relatively clear current examples.
+A primitive (single-part) Prototype models one self-contained interaction subject—such as `Button` or `Toggle`—with a clear input-to-output boundary.
 
-> This guide explains authoring structure. Existing governed subjects proceed directly from their current P/T graph. For a genuinely new Base subject, research, a candidate graph, draft entities, implementation probes, and tests may proceed immediately; the one unresolved semantic decision is whether Proto UI admits that independent subject as a Base identity. Use [Implementing a Governed Base Semantic Slice](/en/build/prototypes/implementing-an-approved-base-slice/) to carry either path through coherent delivery.
+This guide focuses on code structure and authoring patterns. Existing Base subjects build directly on their `P-*` and `T-*` specs; brand-new subjects can start as `draft` candidates with implementation probes and tests before following [Implementing a Governed Base Semantic Slice](/en/build/prototypes/implementing-an-approved-base-slice/) through full delivery.
 
-## Start from entities and evidence
+## Start from specs and tests
 
-Do not begin by copying source. For Button, read in this order:
+Before writing code, read the spec and existing tests to build an accurate mental model. For Button, read in this order:
 
-1. lifecycle, criteria, relations, and sources in `P-BASE-BUTTON`;
-2. cases and executable mappings in `T-BASE-BUTTON-0001`;
+1. `P-BASE-BUTTON` lifecycle, criteria, relations, and sources;
+2. `T-BASE-BUTTON-0001` test cases and executable mappings;
 3. [packages/prototypes/base/src/button/button.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/button/button.proto.ts);
-4. `packages/prototypes/base/test/as-button.test.ts` and applicable Adapter evidence; and
-5. package exports, CLI, documentation, and demos.
+4. `packages/prototypes/base/test/as-button.test.ts` and adapter tests; and
+5. package exports, CLI registration, docs, and demos.
 
-`P-BASE-BUTTON` is currently `draft`. Source is implementation evidence, not authority above the applicable entity.
+`P-BASE-BUTTON` is currently `draft`; treat the spec entity as the design source of truth and align implementation to it.
 
-## What `base-button` demonstrates
+## Anatomy of `base-button`
 
-Button has two official authoring entries:
+Button exposes two authoring entries for one shared protocol:
 
-- the `base-button` direct Prototype; and
-- the `asButton` authored asHook.
+- `base-button`: the direct Prototype entry; and
+- `asButton`: the `asHook` entry reused by styled button variants.
 
-They share `setupButton(def)` instead of maintaining two versions of Button semantics. That arrangement realizes `P-BASE-BUTTON-AUTHORING-ENTRIES`; it is not a fixed template that every Prototype must copy.
+Both delegate to a shared `setupButton(def)` helper so Button semantics live in one place (as defined in `P-BASE-BUTTON-AUTHORING-ENTRIES`). Treat this as a pattern to apply when needed, rather than a mandatory template for every Prototype.
 
-The current implementation includes:
+Key building blocks inside `setupButton(def)`:
 
-- `def.props.define()` for `disabled`;
-- `def.state.bool()` for states such as `disabled`, `hovered`, and `pressed`;
-- `asFocusable()` for `focused`, `focusVisible`, and the focus method;
-- `def.event.on()` for pointer routes and `press.commit`;
-- `def.expose.state()`, `def.expose.method()`, and `def.expose.event()` for outward surfaces; and
-- `asAccessible()` for Button role, name, state, and action.
+- `def.props.define()` to declare input props such as `disabled`;
+- `def.state.bool()` to declare interaction states (`disabled`, `hovered`, `pressed`);
+- `asFocusable()` to compose focus handling (`focused`, `focusVisible`, focus method);
+- `def.event.on()` to subscribe to pointer routes and `press.commit`;
+- `def.expose.state()`, `def.expose.method()`, and `def.expose.event()` to define the public surface; and
+- `asAccessible()` to declare role, accessible name, state, and actions.
 
-The former `def.state.fromInteraction()` example no longer describes the current Button implementation and must not be used as the example for this guide.
+## The `def` vs. `run` boundary
 
-## The boundary between `def` and `run`
+Proto UI separates **setup-time declaration** (`def`) from **runtime execution** (`run`):
 
-`def` declares the setup-time plan: props, state, events, exposes, accessibility, rules, and lifecycle hooks. `run` appears inside runtime callbacks and provides access to current props, context, lifecycle, and outward effects.
-
-For example:
+- `def` declares the static blueprint inside `setup`: props, state, events, exposes, accessibility, style rules, and lifecycle hooks.
+- `run` is passed into runtime callbacks to read current props or context, inspect state, and trigger outward effects.
 
 ```ts
 def.event.on('press.commit', (run) => {
@@ -52,41 +51,39 @@ def.event.on('press.commit', (run) => {
 });
 ```
 
-The event route is registered during setup; the outward signal is emitted through `run` when the event occurs.
+Here, the `press.commit` handler is wired up during setup, and the outward `click` event is emitted via `run` when the interaction fires.
 
-## When to provide an authored asHook
+## When to provide an `asHook`
 
-Do not treat “exports a Prototype but no asHook” as a universal error. Ask:
+Exporting a direct Prototype without an `asHook` is completely valid. Add an `asHook` when:
 
-- Does the applicable P catalog direct and authored-asHook forms as two entries of one protocol?
-- Should both entries share the complete protocol surface and implementation?
-- Does the hook serve only its owning protocol rather than becoming cross-Prototype substrate?
-- Would the entry introduce ungoverned options, merge, or configure semantics?
+- the applicable `P-*` entity lists both direct and `asHook` forms for the same protocol;
+- both entries share one protocol surface and implementation;
+- the hook serves only its owning protocol (rather than acting as generic glue for unrelated Base protocols); and
+- any configuration options stay within a clearly specified contract.
 
-`D-PROTOTYPE-ENTITY-NAMING-0001` requires existing entries for one protocol to be cataloged in the same P entity; it does not require every direct Prototype to generate an asHook. `D-AS-HOOK-CONFIGURABLE-AUTHORED-0001` also keeps ordinary configurable authored asHooks in governed future design space.
+Per `D-PROTOTYPE-ENTITY-NAMING-0001`, multiple entries for one protocol live under the same `P-*` entity. Per `D-AS-HOOK-CONFIGURABLE-AUTHORED-0001`, configurable authored `asHook`s should only be introduced with an explicit contract.
 
-## What completes a leaf slice
+## End-to-end delivery checklist
 
-A source file is only one part of delivery. A governed leaf or clearly marked candidate normally follows:
+A complete single-part slice connects specs, code, tooling, and docs:
 
 ```text
-governed identity or candidate draft
-→ P criteria and relations
-→ T cases and executable tests
-→ implementation and public exports
+Spec entity (admitted or draft candidate)
+→ P-* criteria and relations
+→ T-* cases and executable tests
+→ Implementation and public exports
 → CLI facade generation
-→ bilingual docs and real public-package demo
-→ applicable WC / React / Vue evidence
+→ Bilingual docs and real public-package demo
+→ Web Component, React, and Vue previews
 ```
 
-The three current Adapter previews verify one Web host profile; they do not automatically prove multi-host conformance.
+## Handling boundary changes
 
-## When to pause
+If implementation uncovers the need for a new public prop/event/state, a different state owner, a host escape hatch, or a conflict with the spec, update the spec entities, tests, and docs together in the same reviewable change. If a genuinely new Base identity is needed, keep it marked `draft` while admission is decided.
 
-If implementation needs a new public prop/event/state, changes ownership, requires a raw host object, or exposes a contradiction between P/T and implementation, update the candidate or governed graph, tests, and evidence together instead of widening source alone. Continue the reversible work through fresh review. Escalate only when the evidence requires admission of a different new Base identity; keep that identity draft while the admission choice is unresolved.
+## Next steps
 
-## Next
-
-- For a compound family, read [Writing a Compound Prototype](/en/build/prototypes/writing-a-compound-prototype/)
-- For a design-language projection, read [Building a Styled Library on Top of Base](/en/build/prototypes/building-a-styled-library-on-top-of-base/)
-- Before opening a pull request, use the [Prototype Author Checklist](/en/build/prototypes/checklist/)
+- Model a multi-part family: [Writing a Compound Prototype](/en/build/prototypes/writing-a-compound-prototype/)
+- Layer a design language onto Base: [Building a Styled Library on Top of Base](/en/build/prototypes/building-a-styled-library-on-top-of-base/)
+- Review before opening a PR: [Prototype Author Checklist](/en/build/prototypes/checklist/)

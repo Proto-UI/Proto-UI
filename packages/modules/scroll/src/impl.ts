@@ -5,6 +5,8 @@ import type {
   ProtoPhase,
   ScrollComposedChromeBinding,
   ScrollAxes,
+  ScrollAxis,
+  ScrollAxisFactsHandle,
   ScrollAxisSnapshot,
   ScrollEndFollowRequestStatus,
   ScrollEndFollowState,
@@ -45,6 +47,13 @@ const EMPTY_AXIS: ScrollAxisSnapshot = Object.freeze({
 const END_FOLLOW_OFF = Object.freeze({ mode: 'off' as const });
 const ANCHOR_OFF = Object.freeze({ mode: 'off' as const });
 type LeaseCommand = ScrollSurfacePositionRequest | Readonly<{ kind: 'pause-following' }>;
+type AxisOwnedHandles = Readonly<{
+  position: OwnedStateHandle<number>;
+  visibleRatio: OwnedStateHandle<number>;
+  canScrollBefore: OwnedStateHandle<boolean>;
+  canScrollAfter: OwnedStateHandle<boolean>;
+  atEnd: OwnedStateHandle<boolean>;
+}>;
 
 const DEFAULT_CONFIG: ScrollSurfaceConfig = Object.freeze({
   axes: 'both',
@@ -82,16 +91,8 @@ export class ScrollModuleImpl extends ModuleBase {
   private readonly projectionOwned: OwnedStateHandle<ScrollResolvedProjection>;
   private readonly endFollowStateOwned: OwnedStateHandle<ScrollEndFollowState>;
   private readonly endFollowRequestStatusOwned: OwnedStateHandle<ScrollEndFollowRequestStatus>;
-  private readonly horizontalPositionOwned: OwnedStateHandle<number>;
-  private readonly horizontalVisibleOwned: OwnedStateHandle<number>;
-  private readonly horizontalBeforeOwned: OwnedStateHandle<boolean>;
-  private readonly horizontalAfterOwned: OwnedStateHandle<boolean>;
-  private readonly horizontalAtEndOwned: OwnedStateHandle<boolean>;
-  private readonly verticalPositionOwned: OwnedStateHandle<number>;
-  private readonly verticalVisibleOwned: OwnedStateHandle<number>;
-  private readonly verticalBeforeOwned: OwnedStateHandle<boolean>;
-  private readonly verticalAfterOwned: OwnedStateHandle<boolean>;
-  private readonly verticalAtEndOwned: OwnedStateHandle<boolean>;
+  private readonly horizontalOwned: AxisOwnedHandles;
+  private readonly verticalOwned: AxisOwnedHandles;
 
   private readonly handle: ScrollSurfaceHandle<PropsBaseType>;
 
@@ -117,37 +118,13 @@ export class ScrollModuleImpl extends ModuleBase {
     this.endFollowRequestStatusOwned = stateFacade.enum('@scroll/endFollowRequestStatus', 'idle', {
       options: ['idle', 'pending', 'applied', 'rejected'] as const,
     });
-    this.horizontalPositionOwned = this.createRatio(stateFacade, '@scroll/horizontalPosition', 0);
-    this.horizontalVisibleOwned = this.createRatio(
-      stateFacade,
-      '@scroll/horizontalVisibleRatio',
-      1
-    );
-    this.horizontalBeforeOwned = stateFacade.bool('@scroll/horizontalCanScrollBefore', false);
-    this.horizontalAfterOwned = stateFacade.bool('@scroll/horizontalCanScrollAfter', false);
-    this.horizontalAtEndOwned = stateFacade.bool('@scroll/horizontalAtEnd', true);
-    this.verticalPositionOwned = this.createRatio(stateFacade, '@scroll/verticalPosition', 0);
-    this.verticalVisibleOwned = this.createRatio(stateFacade, '@scroll/verticalVisibleRatio', 1);
-    this.verticalBeforeOwned = stateFacade.bool('@scroll/verticalCanScrollBefore', false);
-    this.verticalAfterOwned = stateFacade.bool('@scroll/verticalCanScrollAfter', false);
-    this.verticalAtEndOwned = stateFacade.bool('@scroll/verticalAtEnd', true);
+    this.horizontalOwned = this.createAxis(stateFacade, 'horizontal');
+    this.verticalOwned = this.createAxis(stateFacade, 'vertical');
 
     this.handle = {
       axes: this.observed(this.axesOwned),
-      horizontal: {
-        position: this.observed(this.horizontalPositionOwned),
-        visibleRatio: this.observed(this.horizontalVisibleOwned),
-        canScrollBefore: this.observed(this.horizontalBeforeOwned),
-        canScrollAfter: this.observed(this.horizontalAfterOwned),
-        atEnd: this.observed(this.horizontalAtEndOwned),
-      },
-      vertical: {
-        position: this.observed(this.verticalPositionOwned),
-        visibleRatio: this.observed(this.verticalVisibleOwned),
-        canScrollBefore: this.observed(this.verticalBeforeOwned),
-        canScrollAfter: this.observed(this.verticalAfterOwned),
-        atEnd: this.observed(this.verticalAtEndOwned),
-      },
+      horizontal: this.observeAxis(this.horizontalOwned),
+      vertical: this.observeAxis(this.verticalOwned),
       scrolling: this.observed(this.scrollingOwned),
       projection: this.observed(this.projectionOwned),
       endFollow: {
@@ -167,8 +144,38 @@ export class ScrollModuleImpl extends ModuleBase {
     return stateFacade.numberRange(semantic, value, { min: 0, max: 1, clamp: true });
   }
 
+  private createAxis(stateFacade: StateFacade, axis: ScrollAxis): AxisOwnedHandles {
+    return {
+      position: this.createRatio(stateFacade, `@scroll/${axis}Position`, 0),
+      visibleRatio: this.createRatio(stateFacade, `@scroll/${axis}VisibleRatio`, 1),
+      canScrollBefore: stateFacade.bool(`@scroll/${axis}CanScrollBefore`, false),
+      canScrollAfter: stateFacade.bool(`@scroll/${axis}CanScrollAfter`, false),
+      atEnd: stateFacade.bool(`@scroll/${axis}AtEnd`, true),
+    };
+  }
+
   private observed<V>(handle: OwnedStateHandle<V>) {
     return this.statePort.createObservedHandle(handle) as never;
+  }
+
+  private observeAxis(axis: AxisOwnedHandles): ScrollAxisFactsHandle {
+    return {
+      position: this.observed(axis.position),
+      visibleRatio: this.observed(axis.visibleRatio),
+      canScrollBefore: this.observed(axis.canScrollBefore),
+      canScrollAfter: this.observed(axis.canScrollAfter),
+      atEnd: this.observed(axis.atEnd),
+    };
+  }
+
+  private readAxis(axis: AxisOwnedHandles): ScrollAxisSnapshot {
+    return Object.freeze({
+      position: axis.position.get(),
+      visibleRatio: axis.visibleRatio.get(),
+      canScrollBefore: axis.canScrollBefore.get(),
+      canScrollAfter: axis.canScrollAfter.get(),
+      atEnd: axis.atEnd.get(),
+    });
   }
 
   private ensureSetup(operation: string): void {
@@ -338,20 +345,8 @@ export class ScrollModuleImpl extends ModuleBase {
   getSnapshot(): ScrollSurfaceSnapshot {
     return Object.freeze({
       axes: this.axesOwned.get(),
-      horizontal: Object.freeze({
-        position: this.horizontalPositionOwned.get(),
-        visibleRatio: this.horizontalVisibleOwned.get(),
-        canScrollBefore: this.horizontalBeforeOwned.get(),
-        canScrollAfter: this.horizontalAfterOwned.get(),
-        atEnd: this.horizontalAtEndOwned.get(),
-      }),
-      vertical: Object.freeze({
-        position: this.verticalPositionOwned.get(),
-        visibleRatio: this.verticalVisibleOwned.get(),
-        canScrollBefore: this.verticalBeforeOwned.get(),
-        canScrollAfter: this.verticalAfterOwned.get(),
-        atEnd: this.verticalAtEndOwned.get(),
-      }),
+      horizontal: this.readAxis(this.horizontalOwned),
+      vertical: this.readAxis(this.verticalOwned),
       scrolling: this.scrollingOwned.get(),
       projection: this.projectionOwned.get(),
       endFollow: Object.freeze({
@@ -730,31 +725,16 @@ export class ScrollModuleImpl extends ModuleBase {
     epoch: number
   ): boolean {
     const value = snapshot ?? EMPTY_AXIS;
-    const handles =
-      axis === 'horizontal'
-        ? [
-            this.horizontalPositionOwned,
-            this.horizontalVisibleOwned,
-            this.horizontalBeforeOwned,
-            this.horizontalAfterOwned,
-            this.horizontalAtEndOwned,
-          ]
-        : [
-            this.verticalPositionOwned,
-            this.verticalVisibleOwned,
-            this.verticalBeforeOwned,
-            this.verticalAfterOwned,
-            this.verticalAtEndOwned,
-          ];
-    this.set(handles[0] as OwnedStateHandle<number>, clampRatio(value.position));
+    const handles = axis === 'horizontal' ? this.horizontalOwned : this.verticalOwned;
+    this.set(handles.position, clampRatio(value.position));
     if (epoch !== this.snapshotEpoch) return false;
-    this.set(handles[1] as OwnedStateHandle<number>, clampRatio(value.visibleRatio));
+    this.set(handles.visibleRatio, clampRatio(value.visibleRatio));
     if (epoch !== this.snapshotEpoch) return false;
-    this.set(handles[2] as OwnedStateHandle<boolean>, value.canScrollBefore);
+    this.set(handles.canScrollBefore, value.canScrollBefore);
     if (epoch !== this.snapshotEpoch) return false;
-    this.set(handles[3] as OwnedStateHandle<boolean>, value.canScrollAfter);
+    this.set(handles.canScrollAfter, value.canScrollAfter);
     if (epoch !== this.snapshotEpoch) return false;
-    this.set(handles[4] as OwnedStateHandle<boolean>, value.atEnd);
+    this.set(handles.atEnd, value.atEnd);
     return epoch === this.snapshotEpoch;
   }
 

@@ -1,13 +1,15 @@
 ---
-title: 'Date-Picker (WIP)'
-description: 'date-picker composition and explicit implementation boundary.'
+title: 'Date Picker'
+description: 'A Bootstrap 2.3.2 date picker combining Popover and Calendar for single, range, and multiple selection.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Date Picker is a composition of the real Popover and Calendar atoms. Selection uses Calendar’s single, multiple or range mode. Popover closes only after an accepted complete single/range selection. Open, selection and month retain their independent controlled/uncontrolled boundaries. Calendar grid, row, heading and navigation atoms can be used inside the content.
+Date Picker composes `Popover` and `Calendar` for single, range, and multiple date selection, with independent controlled or uncontrolled state for open visibility, selection, and visible month.
 
-WIP functional source. Full runtime/Compiler/native, packaging, browser and visual acceptance remain pending.
+## Preview
+
+### Single date selection
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-date-picker"
@@ -15,16 +17,37 @@ WIP functional source. Full runtime/Compiler/native, packaging, browser and visu
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Range and multiple selection
-
-Pass `mode="range"` with `range` / `defaultRange`, or `mode="multiple"` with `values` / `defaultValues`. These are the same Calendar inputs, callbacks, methods and eligibility rules documented on the Calendar page, including range-interior availability and count/night limits.
-
-The first range endpoint keeps the popup open. The second accepted endpoint completes the range and requests one close. A rejected or pending controlled request leaves the popup open; matching later owner acceptance closes it only within the same open session. Closing/reopening, unmounting, mode changes, disabled/readOnly changes and replacement owner selections retire stale completion. External value changes alone do not close the popup. Controlled `open` can still refuse the close request. Multiple selections keep it open for further toggles; use the normal Popover dismissal behavior to finish.
-
-Value displays one ISO civil date, a comma-separated sorted list, `from …` for an unfinished range, or `from – to` for a complete range. An empty selection uses `placeholder`. Calendar Day facts and family range painting are inherited directly. Popover continues to own focus return and dismissal.
+### Range and multiple selection
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-date-picker-selection"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+- **Popup composition**: Use any `Calendar` grid, row, heading, and navigation parts inside the popup content. `open`, selection, and `month` each retain independent controlled/uncontrolled boundaries.
+- **Range and multiple modes**: Pass `mode="range"` with `range` / `defaultRange`, or `mode="multiple"` with `values` / `defaultValues`. All date eligibility, count, and night rules match [Calendar](/en/ui-libraries/bootstrap-2-3-2/calendar/).
+- **Dismissal behavior**:
+  - In `single` mode, an accepted selection requests closing the popup.
+  - In `range` mode, the first endpoint keeps the popup open and the second accepted endpoint requests a single close.
+  - In `multiple` mode, the popup stays open for additional toggles until dismissed via Popover interactions.
+- **Formatted display**: `Value` renders a single ISO date, a comma-separated sorted list, `from …` for an unfinished range, `from – to` for a completed range, or `placeholder` when empty.
+
+## API
+
+| Prop                       | Description                                      |
+| -------------------------- | ------------------------------------------------ |
+| `mode`                     | `'single'` (default), `'range'`, or `'multiple'` |
+| `open` / `defaultOpen`     | Controlled or initial popup open state           |
+| `value` / `defaultValue`   | Single selected date (`YYYY-MM-DD`)              |
+| `range` / `defaultRange`   | Selected range (`{ from?, to? }`)                |
+| `values` / `defaultValues` | Multiple selected dates (`string[]`)             |
+| `month` / `defaultMonth`   | Visible month (`YYYY-MM`)                        |
+| `placeholder`              | Fallback text shown by `Value` when empty        |
+| `disabled` / `readOnly`    | Disables interaction or prevents editing         |

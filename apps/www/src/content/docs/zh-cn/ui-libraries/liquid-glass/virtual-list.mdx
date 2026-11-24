@@ -1,16 +1,30 @@
 ---
-title: 'Virtual-List (WIP)'
-description: 'virtual-list composition and explicit implementation boundary.'
+title: 'Virtual List'
+description: '按可见窗口按需渲染可变高度列表项的 Liquid Glass 虚拟列表组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Virtual List 将完整稳定逻辑标识序列与物理视图区分。按项 overscan、最大物化数量、修订号与 generation 绑定的提交由宿主无关模型负责。显式 virtual-list/web 入口测量可变项尺寸、管理占位与 Web 节点、保留键对应视图、定位项并清理监听。此 demo 使用该 Web 宿主边界，不代表原生 GPUI 或 Compiler 一致性。应用内容仅按有界可见区间创建。
+Liquid Glass Virtual List 将稳定的逻辑项标识序列与物理渲染节点分离，仅为当前可见窗口及其缓冲区（overscan）创建内容节点，适用于大数据集与可变高度列表项。
 
-当前为功能源码 WIP。完整运行时、Compiler、原生、打包、浏览器与视觉验收仍待补齐。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-virtual-list"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+## 用法
+
+- **逻辑模型与 Web 物化分离**：核心列表模型与宿主无关，负责按项 overscan、最大物化数量上限、修订号与基于 generation 的提交；Web 端通过显式 `virtual-list/web` 入口测量可变项尺寸、管理占位 spacer 与 DOM 节点复用、支持按键滚动定位，并在卸载时自动清理监听。
+- **按需创建内容**：应用仅需为有界可见区间内的键渲染实际内容，复用已有键对应的视图以保持滚动流畅。
+
+## API
+
+- **核心模型能力**：稳定逻辑键序列、按项 overscan 缓冲、最大物化节点上限、修订追踪。
+- **Web 宿主入口（`virtual-list/web`）**：可变项高度/宽度测量、占位管理、按键视图复用、滚动到指定键以及监听清理。

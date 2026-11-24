@@ -7,7 +7,9 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-A keyboard-coordinated bar of independent command panels.
+A horizontal menubar with roving keyboard focus and independent dropdown command panels.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-menubar"
@@ -16,15 +18,21 @@ A keyboard-coordinated bar of independent command panels.
   codePanel={false}
 />
 
-Root.value identifies one open panel. Trigger.value and Content.value pair a panel. The bar uses one roving tab stop, left/right movement, ArrowDown/Up entry, vertical command navigation and typeahead. Escape restores the matching trigger; outside press and command selection dismiss. Controlled value emits requests without changing the owner.
+## Installation
 
-Parts: Root, Trigger, Content, Item.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.
+## Usage
+
+Compose `Root`, `Trigger`, `Content`, and `Item`:
+
+- **Panel pairing**: `Root` manages the active panel state via `value`, pairing each `Trigger` and `Content` that share the same `value`.
+- **Controlled and uncontrolled**: Pass `value` for controlled mode (interactions emit change requests without mutating external state), or use `defaultValue` for an uncontrolled initial panel.
+- **Keyboard and focus**: The bar uses a single roving tab stop with Left/Right movement across triggers, `ArrowDown`/`ArrowUp` to enter a panel, and vertical navigation with typeahead inside menus. `Escape` closes the panel and restores focus to its trigger; outside press and item selection also dismiss the panel.
 
 ## API
 
-Menubar is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -36,7 +44,13 @@ Menubar is workspace source. There is no public `proto-ui add` target. Passing `
   ]}
 />
 
-These props belong to Root. Trigger defaults `value` to `''` and `disabled` to `false`. Content defaults `value` and `a11yLabel` to `''` and `sideOffset` to `4`. Item defaults `value` and `textValue` to `''`, `disabled` to `false` and `closeOnSelect` to `true`.
+Pass `value` to control the active panel identifier.
+
+### Part Props
+
+- **Trigger**: `value` (default `''`), `disabled` (default `false`).
+- **Content**: `value` (default `''`), `a11yLabel` (default `''`), `sideOffset` (default `4`).
+- **Item**: `value` (default `''`), `textValue` (default `''`), `disabled` (default `false`), `closeOnSelect` (default `true`).
 
 ## References
 

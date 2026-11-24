@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "8d4d48d7ef4308b6facbe07a737b438421e26a79",
-  "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners, the Button example producer, the extracted InstallCommandCard client and the optional BrowserCompilerPanel template/client owners. Transitive/runtime and served-source proof remain unobserved. Earlier references and their original execution results are retained separately.",
+  "revision": "bd2d1cf66f72532c0aa529349a40893d00f513bc",
+  "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners, the Button example producer, the extracted InstallCommandCard client and the optional BrowserCompilerPanel template/client owners. Transitive/runtime and served-source proof remain unobserved. Earlier references and their original execution results are retained separately. Sprint 2 integration retains the previous exact reference as website-markup-provenance-8d4d48d.json; only the two added documentation sidebar links change the Astro configuration source hash. The website visual source reference archives the preceding bytes as website-markup-provenance-d8dfeab.json, renews the integrated Astro configuration, CodePanel, its client and PrototypePreviewer, and adds the two direct scroll sources. This does not observe served/transitive closure or run native browser acceptance.",
   "sourceAdmission": "unverified",
   "sources": [
     {
       "path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
-      "sha256": "008827e9e757d342728638b51f0b62fdc753c70479f6a6c4324c6fdbaedae286"
+      "sha256": "4fd03809c049a6a70e774dd6a5402edad258b08e16fdd43648cc6e4159f73460"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/CodePanel.astro",
-      "sha256": "38afd6e5c7fd509682bbb4211fc4c0f637b49d7d6f7134afb04ff6dc1e518403"
+      "sha256": "a4ae6efe883bdbbd038167179669e811df6582a13bf77853b7314ea2bbcabde3"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-highlight.ts",
@@ -35,7 +35,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-panel-client.ts",
-      "sha256": "a313d5a363ec493b3ccd8284a5b3533367de344374148e781896b8916477411f"
+      "sha256": "0d9271cdf2edb564cfbe0441d717a55278026ca18ef96301f77b006d27640c0c"
     },
     {
       "path": "apps/www/src/components/InstallCommandCard.astro",
@@ -79,7 +79,7 @@
     },
     {
       "path": "apps/www/astro.config.mjs",
-      "sha256": "ea20b9f9fb07bf0114bf331388e9af7e9dc9684bc0e8975055d2de8ab04ee0ae"
+      "sha256": "c0a7f33cceaf8b66e31592b7d266b6cd63d28c032467f6b833eb0e989577f1ee"
     },
     {
       "path": "apps/www/package.json",
@@ -127,7 +127,15 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
-      "sha256": "f734e78b8ec62770c3432c8ffdf002c258b1378ce88ea90fbf7bdb746f7f9112"
+      "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/CodeScrollArea.astro",
+      "sha256": "bfce678e82b0e8b1ef580098575b36d987beb5e74f2afa16217b710dd50b3daf"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/code-scroll-area-client.ts",
+      "sha256": "bfa460a54734e816879bccecdbbb5f32f184ba4d73e34c8c752da13d3b8f9f1f"
     }
   ]
 }

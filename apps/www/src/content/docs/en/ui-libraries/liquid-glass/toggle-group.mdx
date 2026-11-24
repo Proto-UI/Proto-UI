@@ -1,11 +1,13 @@
 ---
-title: 'ToggleGroup'
-description: 'Independent single or multiple pressed-value selection with roving focus.'
+title: 'Toggle Group'
+description: 'A Liquid Glass group of single- or multi-select toggle buttons with roving keyboard focus.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Independent single or multiple pressed-value selection with roving focus.
+Liquid Glass Toggle Group coordinates related toggle buttons in a roving-focus container supporting single (clearable) or multiple pressed selections.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-toggle-group"
@@ -14,8 +16,21 @@ Independent single or multiple pressed-value selection with roving focus.
   codePanel={false}
 />
 
-value/defaultValue are arrays. multiple=false keeps at most one value; clicking it again clears selection. Controlled valueChange requests never mutate the owner. Disabled, readOnly and duplicate-valued items do not commit. Arrow navigation changes focus without selecting.
+## Installation
 
-Parts: Root, Item.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+## Usage
+
+- **Parts**: `Root`, `Item`.
+- **Single and multiple modes**: `value` and `defaultValue` are always string arrays. With `multiple={false}`, at most one item stays active and clicking it again clears the selection. Controlled mode emits `valueChange` proposals without mutating caller state.
+- **Keyboard and guards**: arrow keys move roving focus without toggling; disabled, read-only, and duplicate-valued items cannot commit.
+
+## API
+
+| Part | Prop / Event | Description |
+| --- | --- | --- |
+| Root | `value`, `defaultValue` | Controlled / uncontrolled array of pressed values |
+| Root | `multiple` | Enables multiple selection; `false` allows at most one active value |
+| Root | `disabled`, `readOnly`, `valueChange` | Interaction state and selection proposal event |
+| Item | `value`, `disabled` | Unique item value and per-item disabled flag |

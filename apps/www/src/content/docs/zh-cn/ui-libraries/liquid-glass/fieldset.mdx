@@ -1,9 +1,13 @@
 ---
-title: liquid-glass Fieldset
-description: 可移植 fieldset 原子草稿。
+title: 'Fieldset'
+description: '为相关表单字段提供分组名称、说明与级联禁用策略的 Liquid Glass 分组容器。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Liquid Glass Fieldset 由 `Root`、`Legend`、`Description` 三个部件组成，用于将多个相关字段组织为语义分组，并向下级联禁用策略。它属于内容层分组容器，保持圆角边框的普通不透明表面（`gap-3`），不请求玻璃材质，内部交互控件保留各自的外观与材质策略。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-fieldset"
@@ -12,40 +16,26 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-## Draft 定义与所有权
+## 安装
 
-C-FIELDSET-0001 独立定义此被动分组；C-FIELD-0001 明确排除 Fieldset，不能替代它。P-LIQUID-GLASS-FIELDSET、P-LIQUID-GLASS-FIELDSET-LEGEND 与 P-LIQUID-GLASS-FIELDSET-DESCRIPTION 从 0.3.0-alpha.1 起为 draft；编目不等于稳定准入。T-BASE-FIELDSET-0001 记录验收计划与边界。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-Root 拥有分组语义与 effective disabled：本地 disabled 或外层 Fieldset 策略。嵌套分组不遮蔽祖先，重新启用祖先保留本地限制。参与的 Field 消费此策略并自行拥有校验失效处理。Fieldset 不猜测任意控件，也不拥有值、编辑器、校验、提交、重置或额外焦点目标。
+## 用法
 
-## 公开 API 与嵌套策略
+- **级联禁用**：有效禁用状态等于“自身 `disabled` 或外层 `Fieldset` 已禁用”。在三层嵌套（`outer → middle → inner`）中：
+  - 仅禁用 `outer` 时，三层均处于禁用状态；
+  - 将 `middle` 也设为禁用后重新启用 `outer`，`middle` 与 `inner` 仍保持禁用；
+  - 再启用 `middle` 时，`inner` 恢复可用（除非自身仍设为 `disabled`）。
+- 组内参与的 Field（包括位于 `Legend` 内的 Field）均会继承禁用状态并自行处理校验失效；Fieldset 本身不管理值、校验或表单提交。
+- **无障碍关联**：`Root` 自动声明 `group` 角色并将 `Legend` 与 `Description` 关联为分组名称和描述，无需手写 DOM ID。每个分组最多包含一个 `Legend` 与一个 `Description`（重复声明会被忽略），且嵌套分组不会互相借用名称或说明。
 
-Root Props：disabled?: boolean（默认 false）、ariaLabel?: string（默认空字符串）。Legend 与 Description 没有声明 Props。三者都暴露只读 effective disabled 状态；通过 Root Props 改变策略，不写 expose 状态。
+## API
 
-以 outer → middle → inner 三层 Root 为例：
+| 部件        | 属性        | 默认值  | 说明                                           |
+| ----------- | ----------- | ------- | ---------------------------------------------- |
+| Root        | `disabled`  | `false` | 禁用本组及嵌套子组内的参与字段                 |
+| Root        | `ariaLabel` | `''`    | 分组的可访问名称                               |
+| Legend      | —           | —       | 可选的半粗体分组标题，继承有效 `disabled` 状态 |
+| Description | —           | —       | 可选的弱化色分组说明，继承有效 `disabled` 状态 |
 
-- 只有 outer disabled 时，三层都 disabled。
-- 设 middle disabled 后启用 outer：middle 与 inner 仍 disabled。
-- 再启用 middle：inner 随之启用，除非其本地 disabled 仍为 true。
-
-## 部件与无障碍关系
-
-- Root 接受 disabled 与 ariaLabel，暴露 effective disabled 并渲染子内容。
-- Legend 是可选的被动命名内容；Description 是可选的被动帮助内容。两者暴露继承 disabled，不添加 Tab 停靠或激活行为。
-- Root 声明 group 角色及限定域的 labelledBy/describedBy Anatomy 关系。A11y 与宿主投射关系，作者不手工编写 DOM ID。原生名称计算，包括 ariaLabel 与 Legend 同时存在时的结果，仍需辅助技术验收。
-- 每组最多一个 Legend 和一个 Description。重复精确关系目标 fail closed，不选择第一个；完整终止/重挂载验收仍待补；嵌套分组不得借用彼此名称或描述目标。
-- 可移植定义不采用原生 HTML first-Legend disabled 豁免；Legend 内参与的 Field 也继承 disabled。
-
-## 证据边界
-
-Base 与四个视觉 family 共享语义 atoms。synthetic WebComponent 测试覆盖策略和限定域关系用例；family smoke 与源码 token 检查仅为较窄证据，不代表完整 Adapter 或像素验收。类型检查覆盖公开投影兼容。原生键盘、辅助技术、跨 Adapter/Compiler 组合、GPUI、生成 CSS/视觉与包消费验收仍未完成，不据此勾选 Finf。
-
-## Family 外观
-
-- Root: 普通圆角边框内边距内容分组，gap-3；不声明 material slot 或 candidate，disabled 时也不隐式请求玻璃。
-- Legend: 半粗体正文尺寸被动 legend。
-- Description: 小号弱化色被动 description。
-
-这些是 draft 外观标准，不是像素一致性声明。
-
-Fieldset 保持普通内容；功能子项保留各自既有的呈现与材质策略，不增加外层材质 owner。普通绘制与对比度仍需原生证据，不声称 Apple 视觉一致。[Apple 材质指南](https://developer.apple.com/design/human-interface-guidelines/materials) 区分功能/导航玻璃与内容层；家族名称不意味着所有分组都是玻璃表面。
+三个部件均暴露只读的有效 `disabled` 状态；如需更改禁用策略，请更新 `Root` 的 `disabled` 属性。

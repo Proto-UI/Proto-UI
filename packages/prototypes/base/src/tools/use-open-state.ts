@@ -32,7 +32,7 @@ export const useOpenState = defineHook<
 >({
   name: 'useOpenState',
   mode: 'configurable',
-  setup(def, options, api) {
+  setup(def, options) {
     const prop = options?.prop ?? 'open';
     const defaultProp = options?.defaultProp ?? 'defaultOpen';
     const disabledProp = options?.disabledProp ?? 'disabled';
@@ -53,17 +53,10 @@ export const useOpenState = defineHook<
     } as any);
 
     const open = def.state.bool(stateKey, false);
-    api.store.prop = prop;
-    api.store.defaultProp = defaultProp;
-    api.store.disabledProp = disabledProp;
-    api.store.open = open;
-    api.store.controlled = false;
-    api.store.disabled = false;
+    let activeRun: RunHandle<any> | undefined;
 
     const syncFromProps = (run: RunHandle<any>) => {
       const controlled = run.props.isProvided(prop as any);
-      api.store.controlled = controlled;
-      api.store.disabled = !!run.props.get()[disabledProp as any];
       const nextOpen = controlled
         ? !!run.props.get()[prop as any]
         : !!run.props.get()[defaultProp as any];
@@ -71,9 +64,7 @@ export const useOpenState = defineHook<
     };
 
     const syncControlled = (run: RunHandle<any>, nextOpen: boolean) => {
-      api.store.controlled = run.props.isProvided(prop as any);
-      api.store.disabled = !!run.props.get()[disabledProp as any];
-      if (!api.store.controlled) return;
+      if (!run.props.isProvided(prop as any)) return;
       open.set(nextOpen, 'reason: useOpenState.syncControlled => controlled sync');
     };
 
@@ -82,17 +73,13 @@ export const useOpenState = defineHook<
     };
 
     const requestOpen = (next: boolean, reason: string) => {
-      const run = api.store.run as RunHandle<any> | undefined;
+      const run = activeRun;
       if (options?.requestOpen && run) {
         options.requestOpen(run, next, reason);
         return;
       }
       setOpen(next, reason);
     };
-
-    api.store.syncFromProps = syncFromProps;
-    api.store.syncControlled = syncControlled;
-    api.store.setOpen = setOpen;
 
     def.expose.state(exposeStateKey as keyof OpenStateExposes & string, open);
     def.expose.method(exposeOpenMethodKey as keyof OpenStateExposes & string, (reason?: string) => {
@@ -112,21 +99,20 @@ export const useOpenState = defineHook<
     );
 
     def.lifecycle.onCreated((run) => {
-      api.store.run = run;
+      activeRun = run;
       syncFromProps(run);
     });
 
     def.lifecycle.onMounted((run) => {
-      api.store.run = run;
+      activeRun = run;
     });
 
     def.lifecycle.onBeforeDispose(() => {
-      api.store.run = undefined;
+      activeRun = undefined;
     });
 
     def.props.watch([prop as any, disabledProp as any], (run, next) => {
-      syncControlled(run, !!(next as Record<string, unknown>)[prop]);
-      api.store.disabled = !!(next as Record<string, unknown>)[disabledProp];
+      syncControlled(run, !!next[prop as any]);
     });
   },
 });

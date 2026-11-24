@@ -1,11 +1,13 @@
 ---
 title: 'Toolbar'
-description: '带可访问名称、分隔线及键盘游走操作的工具栏。'
+description: '具备游走焦点、可访问名称与交叉轴分隔线的 Liquid Glass 工具栏组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-带可访问名称、分隔线及键盘游走操作的工具栏。
+Liquid Glass Toolbar 将一组命令按钮与视觉分隔线组织为单一 Tab 入口的工具栏，使用方向键在可用命令之间快速移动。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-toolbar"
@@ -14,8 +16,19 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root 管理 disabled、orientation、loop、a11yLabel。Button 激活时发出带 value 的 action。仅一个启用命令参与 Tab；箭头在工具栏内移动。Separator 沿交叉轴显示。
+## 安装
 
-组成: Root, Button, Separator.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码；native/GPUI、编译器、打包消费、截图及完整独立验收仍待完成。
+## 用法
+
+- **部件组成**：`Root`、`Button`、`Separator`。
+- **键盘导航与命令**：整条工具栏仅保留一个 Tab 停靠点，方向键在启用的命令之间循环移动（受 `orientation` 与 `loop` 控制）。点击或键盘激活可用 `Button` 时，发出携带其 `value` 的 `action` 事件。`Separator` 自动沿交叉轴排布。
+
+## API
+
+| 部件 | 属性 / 事件 | 说明 |
+| --- | --- | --- |
+| Root | `disabled` / `orientation` / `loop` / `a11yLabel` | 整条工具栏禁用、排列方向、首尾循环与可访问名称 |
+| Button | `value` / `action` | 命令标识及激活时发出的操作事件 |
+| Separator | — | 沿工具栏交叉轴显示的被动分隔线 |

@@ -1,5 +1,6 @@
 ---
 title: Separator
+description: '以 2px 墨黑平涂线条划分内容区块的 Brutalist 风格分隔线组件。'
 sidebar:
   order: 7
 ---
@@ -9,19 +10,28 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
-> 可用状态：`@proto.ui/prototypes-brutalist@0.2.0` 已通过 npm `latest` 随 [v0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0) 发布。生命周期：[P-BRUTALIST-SEPARATOR](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-SEPARATOR.yaml) 及其继承的 Base 协议仍为 `draft`；本页描述已发布并经过测试的 0.2 surface，不构成 active 协议保证。
 
-Brutalist Separator 保留 Base orientation 与 decorative accessibility 语义，并渲染为平涂 `2px` ink 分隔线。
+Separator 渲染一条平涂 `2px` 墨黑分隔线，支持水平与垂直方向及装饰性无障碍语义，适合消息日期分组、Card 分区、导航列表和表单区域。
 
-用于消息日期分组、Card 分区、导航列表和表单区域。Separator 不拥有 spacing 策略；周围组合负责间距。
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-separator" initialRuntime="wc" />
 </div>
 
+## 安装
+
+已包含在 `@proto.ui/prototypes-brutalist@0.2.0` 中。可通过 CLI 目标 `brutalist-separator` 添加，或从 `@proto.ui/prototypes-brutalist/separator` 导入。
+
+## 用法
+
+- 通过 `orientation` 切换水平（`'horizontal'`）或垂直（`'vertical'`）分隔线。
+- 默认 `decorative={true}` 仅作视觉分隔并从无障碍树隐藏；当分隔线需要传达语义分组时，将其设为 `false`。
+- Separator 本身不内置外边距，间距由外围布局控制。
+
 ## API
 
-Separator 是工作区源码。当前工作区 CLI 目标为 `brutalist-separator`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。
+以下属性属于 `Root`：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -30,5 +40,3 @@ Separator 是工作区源码。当前工作区 CLI 目标为 `brutalist-separato
     { name: 'decorative', type: 'boolean', default: 'true' },
   ]}
 />
-
-这些属性属于 Root。

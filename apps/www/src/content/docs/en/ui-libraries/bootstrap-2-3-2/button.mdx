@@ -1,6 +1,6 @@
 ---
 title: 'Bootstrap 2.3.2 Button'
-description: 'Bootstrap 2.3.2 button styling over the shared Base Button protocol.'
+description: 'A button styled with archived Bootstrap 2.3.2 gradients, borders, and inset shadows over Base Button.'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -9,9 +9,11 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-A Bootstrap 2.3.2 button uses the archived gradient, border and inset-shadow treatment while Base Button owns activation, keyboard input, focus and disabled behavior.
+Bootstrap 2.3.2 Button applies the archived gradient, border, and inset-shadow styling while Base Button handles activation, keyboard input, focus, and disabled behavior.
 
-The example below shows the supported variants, four sizes and a disabled button. Use the runtime selector to run the same prototype with Web Components, React, Vue 3 or Vue 2.
+## Preview
+
+Explore the supported variants, four sizes, and disabled state across Web Components, React, Vue 3, and Vue 2.
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-button"
@@ -21,14 +23,16 @@ The example below shows the supported variants, four sizes and a disabled button
   codePanel={false}
 />
 
-## Install
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
 <InstallCommandCard
   command="npx @proto.ui/cli@latest add wc bootstrap-2-3-2-button"
   manager="npm"
 />
 
-Replace `wc` with `react`, `vue` or `vue2` to generate the corresponding facade. This is a draft, private, unreleased source projection; the command describes the workspace delivery path, not a claim that this family is published as a stable package.
+Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your framework.
 
 ## Usage
 
@@ -77,14 +81,15 @@ export default {
 </script>
 ```
 
-## Variants and sizes
+### Styling and accessibility
 
-- `variant`: `default`, `primary`, `warning`, `danger`, `success`, `info` or `inverse`.
-- `size`: `default`, `large`, `small` or `mini`.
-- `disabled`: `false` by default. Disabled buttons do not emit activation requests.
+- The archived style uses fixed pixel dimensions rather than scaling with root font size, and keeps its classic light palette even in dark hosts.
+- Accessible naming comes from the button's children; keyboard activation, focus handling, and disabled suppression are inherited from Base Button.
 
-The archived recipe uses fixed pixel dimensions. It does not rescale with the document's root font size, and this Web demo is not GPUI, Flutter or Qt conformance evidence.
+## API
 
-## Accessibility
-
-Button naming comes from its content. Keyboard activation, focus and disabled suppression are inherited from Base Button; the Bootstrap projection adds no second interaction state.
+| Prop | Values | Default | Description |
+| --- | --- | --- | --- |
+| `variant` | `default` \| `primary` \| `warning` \| `danger` \| `success` \| `info` \| `inverse` | `default` | Button color variant |
+| `size` | `default` \| `large` \| `small` \| `mini` | `default` | Button size |
+| `disabled` | `boolean` | `false` | Prevents pointer and keyboard activation when enabled |

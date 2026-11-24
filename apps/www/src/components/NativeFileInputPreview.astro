@@ -1,0 +1,62 @@
+---
+interface Props {
+  locale?: 'en' | 'zh-cn';
+}
+const { locale = 'en' } = Astro.props;
+---
+
+<div class="native-file-preview" data-native-file-preview data-locale={locale}>
+  <p>
+    {
+      locale === 'zh-cn'
+        ? '正在加载真实 Base Native File Input…'
+        : 'Loading the actual Base Native File Input…'
+    }
+  </p>
+</div>
+
+<style is:global>
+  .native-file-preview {
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+  }
+  .native-file-preview__examples {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .native-file-preview__label {
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+  }
+  .native-file-preview input {
+    max-width: 100%;
+    font: inherit;
+  }
+  .native-file-preview input:focus-visible {
+    outline: 2px solid var(--sl-color-text-accent);
+    outline-offset: 4px;
+  }
+  .native-file-preview input:disabled {
+    opacity: 0.55;
+  }
+  .native-file-preview__status {
+    margin: 0;
+    color: var(--sl-color-gray-2);
+    overflow-wrap: anywhere;
+  }
+</style>
+
+<script>
+  let generation = 0;
+  const mount = async () => {
+    const expected = ++generation;
+    if (!document.querySelector('[data-native-file-preview]')) return;
+    const { initNativeFileInputPreviews } = await import('./native-file-input-preview');
+    if (expected !== generation) return;
+    initNativeFileInputPreviews(document);
+  };
+  document.addEventListener('astro:before-swap', () => generation++);
+  document.addEventListener('astro:page-load', () => void mount());
+  void mount();
+</script>

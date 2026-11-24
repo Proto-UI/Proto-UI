@@ -2,6 +2,9 @@ import { expect, it, vi } from 'vitest';
 // @ts-expect-error Existing adapter-local JavaScript runtime, shared with the browser fixture.
 import { act } from '../../../adapters/react/node_modules/react';
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+// This cold-imports four framework runtimes and checks their complete combined
+// journey. Keep each vi.waitFor deadline unchanged; the cumulative test budget
+// also includes module transformation and all four consumers' cleanup.
 it('mounts the actual four-framework Select evidence app with shared Field ownership', async () => {
   document.body.innerHTML = '<main></main>';
   await act(async () => {
@@ -117,4 +120,4 @@ it('mounts the actual four-framework Select evidence app with shared Field owner
     vi.restoreAllMocks();
     (globalThis as any).IS_REACT_ACT_ENVIRONMENT = false;
   }
-});
+}, 15_000);

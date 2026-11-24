@@ -111,6 +111,18 @@ describe('outward JSON retains actual ordinary-value provenance', () => {
       `current=view;run.expose.emit('changed',current);`,
     ],
     [
+      'mutable container returned through a closure',
+      `${view('undefined')} let current:Readonly<{value:string}>={value:'safe'};
+      const snapshot=()=>current;`,
+      `current=view;run.expose.emit('changed',{child:snapshot()});`,
+    ],
+    ...['??', '||'].map((operator) => [
+      `a short-circuit ${operator} result retains its unsafe container`,
+      `${view('undefined')} const flag=def.state.bool('flag',false);`,
+      `const selected=flag.get()?undefined:view;
+      run.expose.emit('changed',selected ${operator} {value:'fallback'});`,
+    ]),
+    [
       'an absent optional spread cannot hide the existing undefined field',
       `const flag=def.state.bool('flag',false);`,
       `${optionalOverlay('undefined')}run.expose.emit('changed',view);`,
@@ -160,9 +172,27 @@ describe('outward JSON retains actual ordinary-value provenance', () => {
       `const flag=def.state.bool('flag',false);`,
       `${optionalOverlay("'original'")}run.expose.emit('changed',view);`,
     ],
+    [
+      'a shared data child is not a circular object',
+      `const shared={value:'ok'};`,
+      `run.expose.emit('changed',{left:shared,right:shared});`,
+    ],
   ])('preserves %s', (_, setup, callback) => {
     const result = compilePrototype(prototype(setup, callback), { profile: 'gpui-source-v1' });
     expect(result.ok, JSON.stringify(result.ok ? null : result.diagnostics)).toBe(true);
+  });
+
+  it('preserves the earlier authority refusal for a type view that hides a getter', () => {
+    const result = parsePrototype(
+      prototype(
+        `const original={value:'ok',get hidden(){return 'secret';}};
+      const view:Readonly<{value:string}>=original;`,
+        `run.expose.emit('changed',view);`
+      )
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok)
+      expect(result.diagnostics[0].message).toContain('A structural type view cannot hide');
   });
 
   it.each([
@@ -171,6 +201,13 @@ describe('outward JSON retains actual ordinary-value provenance', () => {
       'optional spread overlay',
       `const flag=def.state.bool('flag',false);`,
       optionalOverlay('undefined'),
+    ],
+    [
+      'mutable lexical cell view',
+      `const original={value:'ok',hidden:undefined};
+      let view:Readonly<{value:string}>={value:'safe'};
+      const replace=(next:Readonly<{value:string}>)=>{view=next;};`,
+      `replace(original);`,
     ],
   ])(
     'independently rejects serialized IR substitution of %s for a fresh copy',
@@ -204,6 +241,94 @@ describe('outward JSON retains actual ordinary-value provenance', () => {
       expect(result.ok).toBe(false);
       if (!result.ok)
         expect(result.diagnostics[0].message).toContain('Outward JSON payload retains');
+    }
+  );
+});
+
+describe('mutable scalar outward snapshots retain their checked data domain', () => {
+  const cases = [
+    [
+      'scalar cells shared by callbacks and a snapshot closure',
+      `let amount=0;let revision='';let enabled=false;let selected:number|null=null;
+      def.expose.method('sync',(next:number,label:string,active:boolean)=>{
+        amount=next;revision=label;enabled=active;selected=next;
+      });
+      const snapshot=()=>({amount,revision,enabled,selected});`,
+      `run.expose.emit('changed',snapshot());`,
+    ],
+    [
+      'a mutable local returned from a numeric helper',
+      `const clamp=(next:number):number=>{
+        let proposal=next;
+        if(proposal<0)proposal=0;
+        if(proposal>1)proposal=1;
+        return proposal;
+      };`,
+      `run.expose.emit('changed',{value:clamp(2)});`,
+    ],
+    [
+      'a finite scalar union',
+      `let value:number|string|boolean|null=0;
+      def.expose.method('update',(next:number|string|boolean|null)=>{value=next;});`,
+      `run.expose.emit('changed',{value});`,
+    ],
+    [
+      'an optional scalar at the existing root void boundary',
+      `let value:string|undefined=undefined;
+      def.expose.method('update',(next:string)=>{value=next;});`,
+      `run.expose.emit('changed',value);`,
+    ],
+    ...['??', '||'].map((operator) => [
+      `a ${operator} fallback excludes the absent left alternative`,
+      `const flag=def.state.bool('flag',false);`,
+      `const selected=flag.get()?undefined:3;
+      run.expose.emit('changed',{value:selected ${operator} 7});`,
+    ]),
+    [
+      'a truthy left container is not retained by &&',
+      `${view('undefined')} const flag=def.state.bool('flag',false);`,
+      `const selected=flag.get()?null:view;
+      run.expose.emit('changed',{value:selected&&'safe'});`,
+    ],
+    [
+      'a checked scalar result from an ordinary recursive helper',
+      `const find=(values:number[],index:number=0):number=>{
+        if(index>=values.length)return -1;
+        if(values[index]===7)return index;
+        return find(values,index+1);
+      };`,
+      `const index=find([2,7]);run.expose.emit('changed',{index});`,
+    ],
+  ];
+
+  describe.each([
+    'gpui-source-v1',
+    'react-dom-source-v1',
+    'vue-source-v1',
+    'vue2-source-v1',
+    'web-component-source-v1',
+  ] as const)('%s', (profile) => {
+    it.each(cases)('admits %s in source and cold IR', (_, setup, callback) => {
+      const result = compilePrototype(prototype(setup, callback), { profile });
+      expect(result.ok, JSON.stringify(result.ok ? null : result.diagnostics)).toBe(true);
+      if (!result.ok) return;
+      const cold = validateIR(JSON.parse(JSON.stringify(result.value.ir)));
+      expect(cold.ok, JSON.stringify(cold.ok ? null : cold.diagnostics)).toBe(true);
+    });
+  });
+
+  it.each(['{value}', '[value]'])(
+    'does not admit a mutable optional scalar nested in %s',
+    (payload) => {
+      const result = parsePrototype(
+        prototype(
+          `let value:string|undefined=undefined;
+          def.expose.method('update',(next:string)=>{value=next;});`,
+          `run.expose.emit('changed',${payload});`
+        )
+      );
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.diagnostics[0].message).toContain('declared data boundary');
     }
   );
 });

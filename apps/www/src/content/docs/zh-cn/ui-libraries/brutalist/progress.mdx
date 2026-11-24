@@ -1,11 +1,15 @@
 ---
-title: brutalist Progress
-description: 基于 Base 共享语义的有界数值展示。
+title: 'Brutalist Progress'
+description: '用于展示任务完成进度或不确定加载状态的 Brutalist 进度条组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Brutalist Progress 用于展示任务的确定完成进度或不确定加载状态，采用清晰的粗边框轨道与高对比度填充条呈现。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-progress"
@@ -14,17 +18,29 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-当前为 Draft 功能实现。Root 拥有有界有限数值；Label 提供名称，Track 容纳 Indicator，Value 显示 valueText 或规范数值。四个视觉家族只投影样式。
+## 安装
 
-Props：value、min（0）、max（100）、ariaLabel、valueText。数值限制在合法范围内；上下界相等时比例为零。省略 value 或设置 indeterminate=true 表示进度未知，不声称当前进度值。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-Root 及部件暴露 value、percentage、indeterminate、status。被动显示不引入键盘停靠点，不伪造输入。更新 Props 同步所有部件。
+- **包导出**：从 `@proto.ui/prototypes-brutalist/progress` 导入 `progressRoot`、`progressLabel`、`progressTrack`、`progressIndicator`、`progressValue`
 
-包入口统一注册后，可从 progress 子路径导入 progressRoot、progressLabel、progressTrack、progressIndicator、progressValue。现有源码测试仅为阶段性证据；完整 Adapter、Compiler、GPUI、原生绘制、辅助技术、包消费及独立验收尚未完成，不据此勾选 Finf。
+## 用法
+
+### 部件组成
+
+- **Root**：管理当前进度 `value`、范围 `min` / `max`（默认 `0` / `100`）与 `indeterminate` 状态。数值自动约束在 `[min, max]` 内；当 `min` 与 `max` 相等时比例为 `0`。
+- **Label**：提供可读的进度条名称。
+- **Track / Indicator**：进度轨道与填充条，根据计算百分比渲染进度。
+- **Value**：展示 `valueText` 或当前进度数值。
+
+### 不确定进度与无障碍
+
+- 省略 `value` 或将 `indeterminate` 设为 `true` 时，组件进入不确定进度状态，此时不会向辅助技术报告具体进度值。
+- Progress 为被动展示组件，不引入键盘停靠点；更新 `Root` 属性会自动同步所有子部件暴露的 `value`、`percentage`、`indeterminate` 与 `status`。
 
 ## API
 
-Progress 是工作区源码，没有公开的 `proto-ui add` 目标。各部件自身没有属性。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -38,7 +54,7 @@ Progress 是工作区源码，没有公开的 `proto-ui add` 目标。各部件�
   ]}
 />
 
-这些属性属于 Root。
+`Label`、`Track`、`Indicator` 与 `Value` 不声明独立属性。
 
 ## 参考
 

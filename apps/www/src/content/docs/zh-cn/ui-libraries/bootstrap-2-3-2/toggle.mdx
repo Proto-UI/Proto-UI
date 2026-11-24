@@ -1,6 +1,6 @@
 ---
 title: 'Bootstrap 2.3.2 Toggle'
-description: '基于 Base Toggle 的 Bootstrap 2.3.2 设计语言扩展。'
+description: '基于 Base Toggle 的 Bootstrap 2.3.2 设计语言扩展切换按钮。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,11 +8,11 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-此 Toggle 是设计语言扩展（design-language extension），不是 Bootstrap 2.3.2 的原版组件，也不是其 jQuery button plugin 的移植。它将归档按钮外观与独立的 Base Toggle 协议组合。
+Bootstrap 2.3.2 Toggle 是一项设计语言扩展（design-language extension），不是 Bootstrap 2.3.2 的原版组件。它将归档按钮外观与独立的 Base Toggle 协议结合，提供持久的按下/未按下双态切换，并在深色宿主中保持经典的归档浅色配色。
 
-Base Toggle 拥有持久 `active` 状态、受控与非受控值归属、激活、禁用、焦点与按压态无障碍信息。视觉层不维护第二份 active 状态，也不将此控件解释成 Switch 或 Checkbox。
+## 预览
 
-通过页面运行时选择器比较 Web Components、React、Vue 3 与 Vue 2。Bold 初始未激活，Italic 初始激活，禁用示例无法切换。
+示例中 Bold 初始未激活，Italic 初始激活，第三个禁用按钮无法切换。
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-toggle"
@@ -22,10 +22,19 @@ Base Toggle 拥有持久 `active` 状态、受控与非受控值归属、激活�
   codePanel={false}
 />
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。[查看已实现的子集](../)。
+
+## 用法
+
+- 支持受控 `active` 与非受控 `defaultActive`，统一处理点击、键盘激活、禁用状态与 `aria-pressed` 无障碍信息。
+- 如需一组互斥或多选的切换按钮，请使用 [ToggleGroup](/zh-cn/ui-libraries/bootstrap-2-3-2/toggle-group/)。
+
 ## API
 
-- `active` / `defaultActive`：受控值或初始激活状态
-- `disabled`：继承的禁用行为
-- `activeChange`：继承的 outward signal
-
-这是 draft 状态的源码投射，源码包仍为 private、未发布。深色宿主中继续使用归档浅色配色。Web 示例不代表通用 Prototype Compiler 或 GPUI、Flutter、Qt 一致性已经通过。[查看已实现的子集](../)。
+| 属性 / 事件                | 说明               |
+| -------------------------- | ------------------ |
+| `active` / `defaultActive` | 受控或初始激活状态 |
+| `disabled`                 | 禁用按钮交互       |
+| `activeChange`             | 激活状态变更事件   |

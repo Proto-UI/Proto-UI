@@ -49,6 +49,7 @@ jobs:
         run: |
           node --test scripts/ci/test/ci-scheduling-policy.test.mjs
           node --test scripts/ci/test/cycle-job-inventory.test.mjs scripts/ci/test/cycle-report.test.mjs
+          node --test scripts/ci/test/compiler-library-inventory.test.mjs
           node --test scripts/ci/test/release-source-ledger-checkpoints.test.mjs
           node scripts/ci/check-ci-schedule.mjs
 
@@ -80,6 +81,12 @@ jobs:
   compiler-gpui-consumers:
     if: ${{ github.event_name != 'pull_request' }}
     uses: ./.github/workflows/compiler-gpui-source-consumers.yml
+    permissions:
+      contents: read
+
+  compiler-library-inventory:
+    if: ${{ github.event_name != 'pull_request' }}
+    uses: ./.github/workflows/compiler-library-inventory.yml
     permissions:
       contents: read
 
@@ -1022,6 +1029,7 @@ jobs:
         cli-smoke,
         production-suites,
         compiler-gpui-consumers,
+        compiler-library-inventory,
       ]
     runs-on: ubuntu-latest
     timeout-minutes: 10

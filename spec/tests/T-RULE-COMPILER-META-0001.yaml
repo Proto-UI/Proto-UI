@@ -1,0 +1,60 @@
+id: T-RULE-COMPILER-META-0001
+type: test
+title: Direct React DOM Rule meta and mounted source evidence
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: Generated React consumers exercise DOM lifecycle and host-input projection in happy-dom. Native-browser rendering, other source profiles and independent stable admission remain separate evidence boundaries.
+summary: Direct generated predicates, exact authored dependencies, retained children and explicit unsupported providers.
+cases:
+  - id: T-RULE-COMPILER-META-0001-CASE-PROJECTION
+    title: Theme, width and forced-color changes preserve the owner, editor and selection
+    covers:
+      [
+        C-RULE-COLOR-SCHEME-0001-COMPILER,
+        C-RULE-VIEWPORT-WIDTH-0001-D,
+        C-RULE-PREFERENCES-0001-COMPILER,
+      ]
+    expectation: direct-predicate-projection-without-structural-update-and-fresh-remount
+  - id: T-RULE-COMPILER-META-0001-CASE-LEASE
+    title: Exact authored keys share lazy Document resources and retire stale callbacks
+    covers: [C-RULE-COLOR-SCHEME-0001-COMPILER, C-RULE-PREFERENCES-0001-COMPILER]
+    expectation: one-shared-source-per-document-key-last-lease-cleanup-and-no-unrequested-resize-listener
+  - id: T-RULE-COMPILER-META-0001-CASE-BOUNDARY
+    title: Unknown native sources and unsupported profiles remain explicit diagnostics
+    covers:
+      [
+        C-RULE-COLOR-SCHEME-0001-COMPILER,
+        C-RULE-VIEWPORT-WIDTH-0001-D,
+        C-RULE-PREFERENCES-0001-COMPILER,
+      ]
+    expectation: no-silent-meta-fallback-or-unsupported-profile-claim
+  - id: T-RULE-COMPILER-META-0001-CASE-INSTALLED
+    title: Authored helper operands retain identity and unused setup branches acquire no source
+    covers: [C-RULE-COLOR-SCHEME-0001-COMPILER, C-RULE-VIEWPORT-WIDTH-0001-D]
+    expectation: checked-style-and-state-handles-captured-once-with-only-installed-meta-dependencies
+implementations:
+  - id: generated-react-dom
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/react-rule-meta-source.test.ts
+    required: true
+    consumesCases:
+      [
+        T-RULE-COMPILER-META-0001-CASE-PROJECTION,
+        T-RULE-COMPILER-META-0001-CASE-LEASE,
+        T-RULE-COMPILER-META-0001-CASE-BOUNDARY,
+        T-RULE-COMPILER-META-0001-CASE-INSTALLED,
+      ]
+verifies:
+  contracts:
+    - id: C-RULE-COLOR-SCHEME-0001
+      anchors: [C-RULE-COLOR-SCHEME-0001-COMPILER]
+    - id: C-RULE-VIEWPORT-WIDTH-0001
+      anchors: [C-RULE-VIEWPORT-WIDTH-0001-D]
+    - id: C-RULE-PREFERENCES-0001
+      anchors: [C-RULE-PREFERENCES-0001-COMPILER]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Separates generated React source evidence from Runtime/Adapter and native-browser acceptance.
+tags: [rule, compiler, meta, lifecycle, draft]

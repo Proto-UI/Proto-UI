@@ -113,7 +113,7 @@ jobs:
         env:
           RUSTUP_TOOLCHAIN: 1.98.1
           PROTO_UI_REQUIRE_CARGO_GRAPH_TESTS: '1'
-        run: node --test scripts/gpui/test/cargo-graph.test.mjs
+        run: node --test scripts/gpui/test/cargo-graph.test.mjs scripts/gpui/test/cargo-source-migration.test.mjs
       - name: Install Linux native build dependencies
         if: runner.os == 'Linux'
         run: |
@@ -140,16 +140,14 @@ jobs:
           set -euo pipefail
           node scripts/gpui/check-cargo-graph.mjs \
             --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" \
-            --git https://github.com/zed-industries/zed \
-            --rev 62e5991dd0f0c8a3af8d5e7e9c4652490d468db8 \
+            --profile gpui-source-v1 \
             --toolchain 1.98.1 \
             --output "$RUNNER_TEMP/gpui-evidence/cargo-graph.json" \
             2>&1 | tee "$RUNNER_TEMP/gpui-evidence/cargo-graph.log"
           cargo +1.98.1 metadata --all-features --format-version 1 --manifest-path "$RUNNER_TEMP/gpui-evidence/official-control-label/Cargo.toml" > "$RUNNER_TEMP/gpui-evidence/official-control-label-metadata.json"
           node scripts/gpui/check-cargo-graph.mjs \
             --manifest-path "$RUNNER_TEMP/gpui-evidence/official-control-label/Cargo.toml" \
-            --git https://github.com/zed-industries/zed \
-            --rev 62e5991dd0f0c8a3af8d5e7e9c4652490d468db8 \
+            --profile gpui-source-v1 \
             --toolchain 1.98.1 \
             --output "$RUNNER_TEMP/gpui-evidence/official-control-label-graph.json" \
             2>&1 | tee "$RUNNER_TEMP/gpui-evidence/official-control-label-graph.log"
@@ -191,8 +189,7 @@ jobs:
           cargo +1.98.1 metadata --all-features --format-version 1 --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" > "$RUNNER_TEMP/gpui-evidence/numeric-metadata.json"
           node scripts/gpui/check-cargo-graph.mjs \
             --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" \
-            --git https://github.com/zed-industries/zed \
-            --rev 62e5991dd0f0c8a3af8d5e7e9c4652490d468db8 \
+            --profile gpui-source-v1 \
             --toolchain 1.98.1 \
             --output "$RUNNER_TEMP/gpui-evidence/numeric-graph.json" \
             2>&1 | tee "$RUNNER_TEMP/gpui-evidence/numeric-graph.log"

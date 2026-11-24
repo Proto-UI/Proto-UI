@@ -55,6 +55,10 @@ export type TransitionExposes = {
   configurePresentation: ExposeMethod<(config: TransitionConfig) => void>;
   /** Authored capture/projection entry; always setup-only, never a runtime command. */
   bindInitialOpen: ExposeMethod<TransitionInitialOpenBinding>;
+  /** Setup-only canonical context target, independent of standalone open props. */
+  bindOpenContext: ExposeMethod<TransitionInitialOpenBinding>;
+  /** Runtime retention policy; never a mounted fact or an open target. */
+  retainClosedView: ExposeMethod<(retained: boolean) => void>;
   beforeEnter: ExposeEvent<void>;
   afterEnter: ExposeEvent<void>;
   beforeLeave: ExposeEvent<void>;
@@ -79,6 +83,8 @@ export type TransitionHandles = {
   configure(config: TransitionConfig): void;
   /** Samples a boolean context field once at created only without explicit own open/defaultOpen. */
   bindInitialOpen: TransitionInitialOpenBinding;
+  bindOpenContext: TransitionInitialOpenBinding;
+  retainClosedView(retained: boolean): void;
 };
 
 export type TransitionAsHookContract = {

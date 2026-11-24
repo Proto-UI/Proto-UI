@@ -56,8 +56,11 @@ function exportBinding(
     const stars: ts.ExportDeclaration[] = [];
     for (const statement of owner.file.statements) {
       if (
-        value && ts.isVariableStatement(statement) &&
-        ts.getModifiers(statement)?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)
+        value &&
+        ts.isVariableStatement(statement) &&
+        ts
+          .getModifiers(statement)
+          ?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)
       ) {
         const declaration = statement.declarationList.declarations.find(
           (declaration) => ts.isIdentifier(declaration.name) && declaration.name.text === name
@@ -109,7 +112,9 @@ function exportBinding(
 function sameBinding(left: SourceBinding, right: SourceBinding): boolean {
   return left.kind === 'external'
     ? right.kind === 'external' && left.module === right.module && left.name === right.name
-    : right.kind !== 'external' && right.kind === left.kind && left.declaration === right.declaration;
+    : right.kind !== 'external' &&
+        right.kind === left.kind &&
+        left.declaration === right.declaration;
 }
 
 function importedBinding(
@@ -136,9 +141,14 @@ function localBinding(
   for (const statement of owner.file.statements) {
     let candidate: SourceBinding | undefined;
     if (
-      value && (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) ||
-        ts.isEnumDeclaration(statement) || ts.isModuleDeclaration(statement)) && statement.name?.text === name
-    ) rejectNode(statement, 'PUI1020', `Non-tuple value binding ${name}.`);
+      value &&
+      (ts.isFunctionDeclaration(statement) ||
+        ts.isClassDeclaration(statement) ||
+        ts.isEnumDeclaration(statement) ||
+        ts.isModuleDeclaration(statement)) &&
+      statement.name?.text === name
+    )
+      rejectNode(statement, 'PUI1020', `Non-tuple value binding ${name}.`);
     if (value && ts.isVariableStatement(statement)) {
       const declaration = statement.declarationList.declarations.find(
         (declaration) => ts.isIdentifier(declaration.name) && declaration.name.text === name
@@ -198,7 +208,10 @@ export function resolveSourceType(
 }
 
 /** Resolve an erased value query through the same closed source graph as types. */
-export function resolveSourceValue(owner: TypeSource, name: ts.Identifier): SourceValueBinding | undefined {
+export function resolveSourceValue(
+  owner: TypeSource,
+  name: ts.Identifier
+): SourceValueBinding | undefined {
   const binding = resolveSourceBinding(owner, name, new Set(), true);
   return binding?.kind === 'value' ? binding : undefined;
 }
@@ -238,6 +251,22 @@ export function sourceTypeIdentity(
   active = new Set<TypeDeclaration>()
 ): Extract<SourceTypeBinding, { kind: 'external' }> | undefined {
   if (ts.isParenthesizedTypeNode(node)) return sourceTypeIdentity(owner, node.type, active);
+  if (
+    ts.isImportTypeNode(node) &&
+    !node.isTypeOf &&
+    node.qualifier &&
+    ts.isIdentifier(node.qualifier) &&
+    ts.isLiteralTypeNode(node.argument) &&
+    ts.isStringLiteral(node.argument.literal) &&
+    (node.argument.literal.text === '@proto.ui/core' ||
+      node.argument.literal.text === '@proto.ui/types')
+  )
+    return {
+      kind: 'external',
+      module: node.argument.literal.text,
+      name: node.qualifier.text,
+      node,
+    };
   if (!ts.isTypeReferenceNode(node)) return undefined;
   const binding = resolveSourceType(owner, node.typeName);
   if (!binding) return undefined;

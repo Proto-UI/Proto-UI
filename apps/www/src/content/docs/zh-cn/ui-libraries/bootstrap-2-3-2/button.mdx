@@ -1,6 +1,6 @@
 ---
 title: 'Bootstrap 2.3.2 Button'
-description: '在共享 Base Button 协议上使用 Bootstrap 2.3.2 按钮外观。'
+description: '沿用归档 Bootstrap 2.3.2 渐变、边框与内阴影风格的按钮组件。'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -9,9 +9,11 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-Bootstrap 2.3.2 Button 保留归档版本的渐变、边框和内阴影；Base Button 负责激活、键盘输入、焦点和禁用行为。
+Bootstrap 2.3.2 Button 保留归档版本的渐变背景、边框与内阴影样式，交互、键盘激活、焦点与禁用状态由 Base Button 统一提供。
 
-下面的示例包含当前支持的变体、四种尺寸和禁用状态。使用运行时选择器，可以在 Web Components、React、Vue 3 和 Vue 2 中运行同一个原型。
+## 预览
+
+下面的示例展示了全部变体、四种尺寸以及禁用状态，可切换 Web Components、React、Vue 3 与 Vue 2 体验同一原型。
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-button"
@@ -23,14 +25,16 @@ Bootstrap 2.3.2 Button 保留归档版本的渐变、边框和内阴影；Base B
 
 ## 安装
 
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
 <InstallCommandCard
   command="npx @proto.ui/cli@latest add wc bootstrap-2-3-2-button"
   manager="npm"
 />
 
-把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应框架的 facade。当前内容是 draft、私有且未发布的源码投影；该命令描述工作区交付路径，不代表这个组件族已经作为稳定包发布。
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件代码。
 
-## 使用
+## 用法
 
 Web Components：
 
@@ -77,14 +81,15 @@ export default {
 </script>
 ```
 
-## 变体与尺寸
+### 样式与无障碍
 
-- `variant`：`default`、`primary`、`warning`、`danger`、`success`、`info` 或 `inverse`。
-- `size`：`default`、`large`、`small` 或 `mini`。
-- `disabled`：默认为 `false`。禁用按钮不会发出激活请求。
+- 归档样式采用固定像素尺寸，不会随文档根字号缩放，并在深色宿主中保持经典的浅色配色。
+- 按钮的可访问名称来自其子内容，键盘激活、焦点管理与禁用拦截均继承自 Base Button。
 
-归档配方使用固定像素尺寸，不会随文档根字体大小缩放。这个 Web 示例不构成 GPUI、Flutter 或 Qt 的一致性证据。
+## API
 
-## 无障碍
-
-按钮名称来自其内容。键盘激活、焦点和禁用输入抑制继承自 Base Button；Bootstrap 投影不建立第二套交互状态。
+| 属性 | 可选值 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `variant` | `default` \| `primary` \| `warning` \| `danger` \| `success` \| `info` \| `inverse` | `default` | 按钮语义配色 |
+| `size` | `default` \| `large` \| `small` \| `mini` | `default` | 按钮尺寸 |
+| `disabled` | `boolean` | `false` | 禁用后不再响应点击与键盘激活 |

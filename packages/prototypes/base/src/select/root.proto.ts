@@ -1,3 +1,4 @@
+import type { CollectionItemSnapshot, RunHandle } from '@proto.ui/core';
 import { FIELD_CONTEXT } from '../field/shared';
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
 import { asBoundary, asCollection } from '@proto.ui/hooks';
@@ -28,8 +29,6 @@ function sameContext(a: SelectContextValue, b: SelectContextValue): boolean {
 type ControlledFrame = {
   /** This request still awaits an owner acceptance of its canonical value. */
   pendingControlled: boolean;
-  /** The request that encloses this one in the synchronous request stack. */
-  parent: ControlledFrame | null;
 };
 
 function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): void {
@@ -79,7 +78,10 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   };
   def.context.provide(SELECT_CONTEXT, initialContext);
 
-  let submitOpenRequest = (_run: any, _request: SelectOpenRequest): boolean => false;
+  let submitOpenRequest = (
+    _run: RunHandle<SelectRootProps>,
+    _request: SelectOpenRequest
+  ): boolean => false;
   const openState = useOpenState({
     requestOpen(run, nextOpen, reason) {
       submitOpenRequest(run, {
@@ -99,7 +101,7 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
 
   let snapshot = initialContext;
   let published = initialContext;
-  let currentRun: any = null;
+  let currentRun: RunHandle<SelectRootProps> | null = null;
   // A state/Context notification may retire and remount this same instance.
   // Run-handle identity alone cannot distinguish the old continuation.
   let viewEpoch = 0;
@@ -110,46 +112,50 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   let valueRequestDepth = 0;
   // Each active request owns its own acceptance budget. The anonymous counter
   // only carries delivered proposals whose owner accepts after they returned.
-  let activeControlledFrame: ControlledFrame | null = null;
+  // Retain the actual frame object for each active request. Array order is the
+  // synchronous nesting order; retiring a view replaces the whole stack.
+  let activeControlledFrames: ControlledFrame[] = [];
   const ownsView = (epoch: number) => currentRun !== null && epoch === viewEpoch;
 
   const nearestPendingFrame = (): ControlledFrame | null => {
-    let frame = activeControlledFrame;
-    while (frame && !frame.pendingControlled) frame = frame.parent;
-    return frame;
+    let pending: ControlledFrame | null = null;
+    for (const frame of activeControlledFrames) {
+      if (frame.pendingControlled) pending = frame;
+    }
+    return pending;
   };
 
   /** Cancels every outstanding acceptance budget; accepted notifications stay queued. */
   const cancelOutstandingAcceptances = () => {
     pendingControlledChanges = 0;
-    for (let frame = activeControlledFrame; frame; frame = frame.parent) {
+    for (const frame of activeControlledFrames) {
       frame.pendingControlled = false;
     }
   };
 
-  const notifyFieldChange = (run: any) => {
+  const notifyFieldChange = (run: RunHandle<SelectRootProps>) => {
     const notify = run.anatomy
       .partsOf(SELECT_FAMILY, 'trigger')[0]
       ?.getExpose('__fieldSelectChange');
     if (typeof notify === 'function') notify();
   };
 
-  const flushControlledNotifications = (run: any, epoch: number) => {
+  const flushControlledNotifications = (run: RunHandle<SelectRootProps>, epoch: number) => {
     while (ownsView(epoch) && valueRequestDepth === 0 && queuedControlledNotifications > 0) {
       queuedControlledNotifications--;
       notifyFieldChange(run);
     }
   };
 
-  const resolveTextValue = (run: any, nextValue: string): string => {
+  const resolveTextValue = (run: RunHandle<SelectRootProps>, nextValue: string): string => {
     if (!nextValue) return '';
     const itemSnapshot = collection
       .getItems()
-      .find((item: Record<string, unknown>) => item.value === nextValue);
+      .find((item: CollectionItemSnapshot) => item.value === nextValue);
     return itemSnapshot ? String(itemSnapshot.textValue || itemSnapshot.value || '') : '';
   };
 
-  const syncContext = (run: any) => {
+  const syncContext = (run: RunHandle<SelectRootProps>) => {
     const previous = snapshot;
     const next = {
       ...previous,
@@ -175,10 +181,11 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
 
   // The Root remains observable while Content's opening view is being installed.
   boundary.subscribeOutside((event) => {
-    if (event.observation !== 'focus.move' || !currentRun) return;
+    const run = currentRun;
+    if (event.observation !== 'focus.move' || !run) return;
     if (!snapshot.open && !snapshot.pendingOpen) return;
     snapshot = recordSelectFocusHandoff(snapshot);
-    syncContext(currentRun);
+    syncContext(run);
   });
 
   def.context.trySubscribe(FIELD_CONTEXT, (run) => {
@@ -186,8 +193,8 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   });
 
   let collectionSnapshot = '';
-  const refreshSelectedText = (run: any) => {
-    const records = collection.getItems().map((item: Record<string, unknown>) => ({
+  const refreshSelectedText = (run: RunHandle<SelectRootProps>) => {
+    const records = collection.getItems().map((item: CollectionItemSnapshot) => ({
       value: String(item.value ?? ''),
       textValue: String(item.textValue ?? ''),
       disabled: item.disabled === true,
@@ -266,11 +273,16 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     }
   };
 
-  const submitValueRequest = (run: any, request: SelectValueRequest): boolean => {
+  const submitValueRequest = (
+    run: RunHandle<SelectRootProps>,
+    request: SelectValueRequest
+  ): boolean => {
     if (!currentRun || snapshot.disabled || snapshot.readOnly) return false;
     const fieldPolicy = run.anatomy
       .partsOf(SELECT_FAMILY, 'trigger')[0]
-      ?.getExpose('__selectFieldPolicy');
+      ?.getExpose('__selectFieldPolicy') as
+      | (() => { disabled: boolean; readOnly: boolean })
+      | undefined;
     const policy = typeof fieldPolicy === 'function' ? fieldPolicy() : null;
     if (policy?.disabled || policy?.readOnly) return false;
     const previousValue = value.get();
@@ -281,8 +293,8 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     let frame: ControlledFrame | null = null;
     if (controlledRequest) {
       // This request owns its acceptance budget while it runs.
-      frame = { pendingControlled: true, parent: activeControlledFrame };
-      activeControlledFrame = frame;
+      frame = { pendingControlled: true };
+      activeControlledFrames.push(frame);
     } else {
       cancelOutstandingAcceptances();
     }
@@ -336,7 +348,8 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
         }
         // Detach this request's frame. The epoch guard keeps a retired view
         // from restoring a stale parent.
-        if (frame && activeControlledFrame === frame) activeControlledFrame = frame.parent;
+        if (frame && activeControlledFrames[activeControlledFrames.length - 1] === frame)
+          activeControlledFrames.pop();
       }
     }
   };
@@ -377,7 +390,7 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     pendingControlledChanges = 0;
     queuedControlledNotifications = 0;
     valueRequestDepth = 0;
-    activeControlledFrame = null;
+    activeControlledFrames = [];
     currentRun = run;
     refreshSelectedText(run);
   });
@@ -393,7 +406,7 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     pendingControlledChanges = 0;
     queuedControlledNotifications = 0;
     valueRequestDepth = 0;
-    activeControlledFrame = null;
+    activeControlledFrames = [];
     currentRun = null;
   };
   def.lifecycle.onUnmounted(retireView);

@@ -75,7 +75,17 @@ export interface AccordionContentProps {
   keepMounted?: boolean;
   region?: boolean;
 }
-export type AccordionContentExposes = { open: ExposeState<boolean>; hidden: ExposeState<boolean> };
+export type AccordionContentExposes = {
+  open: ExposeState<boolean>;
+  hidden: ExposeState<boolean>;
+  bindPresence: ExposeMethod<(transition: import('../transition/types').TransitionHandles) => void>;
+};
 export type AccordionContentAsHookContract = {
   state: { open: State<boolean>; hidden: State<boolean> };
+};
+export type AccordionContentHandles = import('@proto.ui/core').AsHookResult<
+  AccordionContentProps,
+  AccordionContentAsHookContract
+> & {
+  bindPresence(transition: import('../transition/types').TransitionHandles): void;
 };

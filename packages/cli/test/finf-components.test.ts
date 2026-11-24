@@ -20,18 +20,32 @@ describe('Finf workspace-source facade boundaries', () => {
       const manifest = JSON.parse(
         fs.readFileSync(path.resolve('packages/prototypes', family, 'package.json'), 'utf8')
       );
-      expect(manifest.exports[`./${component}`]).toEqual(
-        manifest.private
-          ? { types: `./src/${component}/index.ts`, default: `./src/${component}/index.ts` }
-          : {
-              // Base publishes its authored entry for compiler source resolution;
-              // this condition does not admit the workspace-only CLI facade.
-              ...(family === 'base' ? { proto: `./src/${component}/index.ts` } : {}),
-              types: `./dist/${component}/index.d.ts`,
-              import: `./dist/${component}/index.js`,
-              default: `./dist/${component}/index.js`,
-            }
-      );
+      const published = manifest.exports[`./${component}`] as {
+        types?: string;
+        import?: string;
+        default?: string;
+        proto?: string;
+      };
+      if (manifest.private) {
+        expect(published).toEqual({
+          types: `./src/${component}/index.ts`,
+          default: `./src/${component}/index.ts`,
+        });
+      } else {
+        expect(published).toMatchObject({
+          types: `./dist/${component}/index.d.ts`,
+          import: `./dist/${component}/index.js`,
+          default: `./dist/${component}/index.js`,
+        });
+        // A published family may expose its authored entry for compiler source
+        // resolution. Base does, and so does a published family that owns a
+        // workspace-source facade such as the Shadcn Finf components. When the
+        // entry is present it must name the authored source and never the built
+        // output; this condition still does not admit the workspace-only CLI
+        // facade.
+        if (published.proto !== undefined)
+          expect(published.proto).toBe(`./src/${component}/index.ts`);
+      }
     });
   }
 });

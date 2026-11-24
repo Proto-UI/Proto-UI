@@ -1,12 +1,14 @@
 ---
 title: 'Text'
-description: 'Brutalist passive text content and reusable typography inputs.'
+description: 'A Brutalist-styled typography primitive providing consistent scale, weight, leading, tracking, and ink tokens.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-`brutalist-text-root` is a draft reusable Text atom. It inherits the [Base Text](/en/ui-libraries/base/text/) input vocabulary and content slot through `asTextRoot()`. The Brutalist theme owns typography and ink. This is Proto UI's own Text projection, with no claim of upstream Text-component API parity.
+Text realizes [Base Text](/en/ui-libraries/base/text/) with Brutalist typography and ink tokens, giving you a consistent vocabulary for text scale, font family, weight, line height, tracking, and tone.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-brutalist-text"
@@ -14,9 +16,13 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-The examples are actual package prototypes. Their outer stack supplies only demonstration layout; each Text instance owns its content and its applicable presentation. The examples add no click handlers or editing state.
+## Installation
 
-## Use Text
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `brutalistTextRoot` (also aliased as `textRoot` and `BrutalistTextRoot`) from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/text` (workspace CLI target: `brutalist-text`).
+
+## Usage
+
+### Basic Example
 
 ```tsx
 import * as React from 'react';
@@ -36,40 +42,15 @@ export function SectionTitle() {
 }
 ```
 
-The same subpath and package root also export `textRoot` and `BrutalistTextRoot` aliases. Family-aliased types retain the Base input contract.
+### Semantic Composition & Typography Rules
 
-`rootTag: 'span'` is Web Adapter configuration, not a Text prop. The surrounding native `h1`, `p`, `label` or `a` remains the document or interaction owner. For a label, keep `htmlFor`/`for` on the native label; for a link, keep `href`, target and download behavior on the native anchor. Text does not create a second focus stop or synthesize activation.
-
-## Inputs
-
-| Prop         | Values                                                     | Default   |
-| ------------ | ---------------------------------------------------------- | --------- |
-| `size`       | `xs`, `sm`, `base`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` | `base`    |
-| `tone`       | `default`, `muted`, `inherit`                              | `default` |
-| `weight`     | `normal`, `medium`, `semibold`, `bold`                     | `normal`  |
-| `font`       | `body`, `heading`, `mono`                                  | `body`    |
-| `leading`    | `size`, `tighter`, `tight`, `snug`, `normal`, `relaxed`    | `normal`  |
-| `tracking`   | `normal`, `tight`, `tighter`                               | `normal`  |
-| `emphasis`   | `normal`, `italic`                                         | `normal`  |
-| `decoration` | `none`, `underline`, `line-through`                        | `none`    |
-
-`tone="inherit"` keeps the enclosing semantic or Surface owner's foreground, which is useful for contrast on solid or accent surfaces. Removing a prop restores its default. The single anonymous slot preserves authored text and children. There are no exposed states, methods or events. No page role, copy, heading level, `asChild`, `tag`, `href`, `for`, content parser, editor, or automatic responsive breakpoint is part of this API.
-
-`leading="size"` keeps the line box built into the selected size instead of adding a leading override. Shadcn and Brutalist map `xs`, `sm`, `base`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, and `5xl` to line heights of `1rem`, `1.25rem`, `1.5rem`, `1.75rem`, `1.75rem`, `2rem`, `2.25rem`, `2.5rem`, and `1` respectively. For example, `size="base"` uses 16/24 and `size="lg"` uses 18/28 at a 16px root size. Omitting size restores `base`. An initially invalid size also falls back to `base`; a provided empty or invalid size after a valid value retains that previous value under the existing Props contract. `leading="tighter"` selects `1.1`; `tracking="tighter"` selects `-0.05em`. The existing `normal` defaults are unchanged. These options are finite visual semantics, not numeric or arbitrary-CSS inputs. Base only normalizes them; this density extension is verified for Shadcn and Brutalist, not every family or native target.
-
-## Adapter and Compiler boundary
-
-The implemented Web profile is exercised through Web Components, React, Vue 3 and Vue 2, including property changes/removal, retained content and native-owner composition. Web compiler source-closure and generated-facade checks are separate from that Adapter evidence; they do not establish arbitrary Prototype AOT or native parity.
-
-The CLI's unsupported GPUI target is rejected. Native GPUI typography mapping still omits `font-style`, `letter-spacing` and `text-decoration-line`; those omissions are diagnostic limits, not an equivalent rendering. `tone="inherit"` currently reports `UnsupportedValue(color, inherit)` on GPUI. Unknown style tokens report `Unsupported Proto UI style tokens` rather than silently succeeding. Real-browser visual acceptance and each target's execution evidence remain distinct from source and DOM tests.
-
-## Authority
-
-`P-BRUTALIST-TEXT` and `T-TEXT-0001` govern this slice. The source is `packages/prototypes/brutalist/src/text/`. Catalog lifecycle remains draft.
+- **Keep native document semantics outside**: `rootTag: 'span'` is a Web Adapter option. Keep headings (`h1`–`h6`), paragraphs (`p`), labels (`label` with `htmlFor`/`for`), and links (`a` with `href`/`target`/`download`) on native outer elements—Text stays passive and adds no focus stop or activation handler.
+- **Foreground inheritance & defaults**: Set `tone="inherit"` when placing Text inside a solid or accent `Surface` so it inherits the enclosing ink color. Removing any prop restores its default; an invalid initial `size` falls back to `'base'`, while an invalid update after a valid value retains the previous valid value.
+- **Scale-matched leading & tight tracking**: Setting `leading="size"` keeps each size's built-in line height (`xs` through `5xl` map to `1rem`, `1.25rem`, `1.5rem`, `1.75rem`, `1.75rem`, `2rem`, `2.25rem`, `2.5rem`, and `1` respectively). `leading="tighter"` maps to `1.1` and `tracking="tighter"` maps to `-0.05em`.
 
 ## API
 
-Text is workspace source. For this workspace version, the CLI target is `brutalist-text`. Use matching CLI and package versions; check the chosen release's availability before installing.
+The following props belong to `Root`:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -92,5 +73,3 @@ Text is workspace source. For this workspace version, the CLI target is `brutali
     { name: 'decoration', type: "'none' | 'underline' | 'line-through'", default: 'none' },
   ]}
 />
-
-These props belong to Root.

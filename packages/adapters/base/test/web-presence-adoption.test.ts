@@ -238,10 +238,49 @@ it('throwing old observer cleanup cannot wedge destination admission', () => {
 });
 it('subscription registration reentry queues newest frame without duplicate registration', () => {
   const f = fixture();
-  f.onSubscribe(() => f.sink.commit(f.make('leaving')));
+  const now = vi.spyOn(window.performance, 'now').mockReturnValue(0);
+  const deliverFrame = (time: number) => {
+    now.mockReturnValue(time);
+    const frames = [...f.oldFrames.values()];
+    f.oldFrames.clear();
+    frames.forEach((callback) => callback(time));
+  };
+  f.onSubscribe(() => {
+    expect(f.el.style.opacity).toBe('');
+    expect(f.oldFrames.size).toBe(0);
+    f.sink.commit(f.make('leaving'));
+  });
   f.sink.commit(f.make());
   expect(f.subscriptions()).toBe(1);
+  // Registration replaces the first frame before any closed sample was
+  // applied. This first leave starts at entered, unlike an active reversal.
+  expect(f.results).toEqual([]);
+  expect(f.oldFrames.size).toBe(1);
+  deliverFrame(250);
+  expect(Number(f.el.style.opacity)).toBeGreaterThan(0);
+  expect(Number(f.el.style.opacity)).toBeLessThan(1);
+  expect(f.results).toEqual([]);
+  deliverFrame(500);
+  expect(f.subscriptions()).toBe(1);
   expect(f.results).toEqual(['finished']);
+  expect(f.oldFrames.size).toBe(0);
+  expect(f.newFrames.size).toBe(0);
+});
+it('reverses an applied cold zero synchronously without flashing the entered endpoint', () => {
+  const f = fixture();
+  f.sink.commit(f.make());
+  expect(f.el.style.opacity).toBe('0');
+  expect(f.oldFrames.size).toBe(1);
+  const stale = [...f.oldFrames.values()];
+  f.sink.commit(f.make('leaving'));
+  expect(f.results).toEqual(['finished']);
+  expect(f.subscriptions()).toBe(1);
+  expect(f.oldFrames.size).toBe(0);
+  expect(f.newFrames.size).toBe(0);
+  const terminalOpacity = f.el.style.opacity;
+  stale.forEach((callback) => callback(500));
+  expect(f.results).toEqual(['finished']);
+  expect(f.el.style.opacity).toBe(terminalOpacity);
   expect(f.oldFrames.size).toBe(0);
 });
 it('disposal during subscription registration releases its returned lease once', () => {

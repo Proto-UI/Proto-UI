@@ -5,6 +5,7 @@ import type {
   ModuleCapabilityType,
   HookCaptureIR,
   ExpressionIR,
+  StatementIR,
 } from './ir';
 import { isCapabilityAssignable } from './ir';
 import {
@@ -14,6 +15,12 @@ import {
   objectValueType,
   dataBoundaryType,
   isTemplateChildType,
+  serializableDataType,
+  contextRuntimeValueType,
+  objectFields,
+  spreadObjectFields,
+  iterableElementType,
+  valueAlternatives,
 } from './value-types';
 export { isTemplateChildType } from './value-types';
 import {
@@ -26,8 +33,15 @@ import {
   PRESENTATION_RECEIPT_TYPE,
   SCROLL_REQUEST_TYPE,
   SCROLL_REQUEST_OUTCOME_TYPE,
+  AXIS_INPUT_SAMPLE_TYPE,
+  FOCUS_ROVING_MEMBER_STATUS_TYPE,
+  OVERLAY_TARGET_ALIGNMENT_BINDING_TYPE,
+  TARGET_ALIGNMENT_STATUS_TYPE,
+  OVERLAY_CONFIG_PATCH_TYPE,
 } from './core-value-types';
 import { dataTypeEqual, isAssignable, parseDataType, type DataType } from './data-types';
+import { SVG_ROOT_PROPS_TYPE, SVG_PATH_PROPS_TYPE } from './svg-templates';
+import { isEcmaIntrinsic } from './ecmascript-values';
 
 export type CallbackContext =
   | 'helper'
@@ -165,6 +179,20 @@ const boolean: ArgumentRule = { role: 'value', types: ['boolean'] };
 // Native watch cleanup has a fixed callable ABI. A coarse 'function' marker
 // cannot prove either its invocation contract or its setup-result transport.
 const watchDisposer: ValueType = { kind: 'callable', parameters: [], returnType: 'void' };
+const controlLabelPairArgument: ArgumentRule = {
+  role: 'value',
+  optional: true,
+  // Pair declarations are immutable borrowed configuration. In particular the
+  // family remains nominal; an opaque record cannot manufacture that identity.
+  valueSchema: joinValueTypes([
+    objectValueType([
+      { name: 'family', type: 'anatomy-family', readonly: true },
+      { name: 'labelRole', type: 'string', readonly: true },
+      { name: 'targetRole', type: 'string', readonly: true },
+    ]),
+    'void',
+  ]),
+};
 const contextKey: ArgumentRule = { role: 'context-key' };
 const stringSpec: DataType = {
   kind: 'record',
@@ -389,6 +417,24 @@ const imageEvent: DataType = {
     { name: 'source', type: 'string' },
   ],
 };
+const nativeLinkSnapshot: DataType = {
+  kind: 'record',
+  fields: [
+    { name: 'href', type: 'string' },
+    { name: 'target', type: 'string' },
+    { name: 'rel', type: 'string' },
+    { name: 'disabled', type: 'boolean' },
+  ],
+};
+const nativeLinkEvent: DataType = {
+  kind: 'record',
+  fields: [
+    { name: 'href', type: 'string' },
+    { name: 'target', type: 'string' },
+    { name: 'rel', type: 'string' },
+    { name: 'modified', type: 'boolean' },
+  ],
+};
 const positionSnapshot: DataType = {
   kind: 'record',
   fields: [
@@ -484,6 +530,16 @@ const contextNext: ArgumentRule = {
     contextFrom: 'caller',
   },
 };
+
+const setPresentContract = rule(
+  'run',
+  'lifecycle.setPresent',
+  callbackPhase,
+  'void',
+  [boolean],
+  [effect('write', 'view-intent')],
+  { contexts: aliveContexts }
+);
 
 /** The single admission/emission vocabulary. Paths are exact public handle names. */
 export const OPERATION_RULES = {
@@ -606,6 +662,25 @@ export const OPERATION_RULES = {
   'rule.dispose': rule('rule-handle', 'dispose', setup, 'void', [], [effect('write', 'style')], {
     requiredCapabilities: ['style-projection'],
   }),
+  'feedback.style.declareDecoration': rule(
+    'def',
+    'feedback.style.declareDecoration',
+    setup,
+    'decoration-target',
+    [],
+    [effect('declare', 'style')],
+    { requiredCapabilities: ['style-projection'] }
+  ),
+  'feedback.style.to': rule(
+    'def',
+    'feedback.style.to',
+    setup,
+    'decoration-style',
+    [{ role: 'value', types: ['decoration-target'] }],
+    [],
+    { requiredCapabilities: ['style-projection'] }
+  ),
+  'decoration.style.use': styleRule('decoration-style', 'use', setup, 'style-disposer'),
   'feedback.style.use': styleRule('def', 'feedback.style.use', setup, 'style-disposer'),
   'feedback.material.shader': rule(
     'def',
@@ -702,18 +777,7 @@ export const OPERATION_RULES = {
     'label',
     setup,
     'control-label-handle',
-    [
-      {
-        role: 'value',
-        types: ['record', 'module-config'],
-        optional: true,
-        fields: {
-          family: { role: 'value', types: ['anatomy-family'] },
-          labelRole: { role: 'value', types: ['string'] },
-          targetRole: { role: 'value', types: ['string'] },
-        },
-      },
-    ],
+    [controlLabelPairArgument],
     [effect('declare', 'accessibility')]
   ),
   'controlLabel.target': rule(
@@ -721,19 +785,7 @@ export const OPERATION_RULES = {
     'target',
     setup,
     'control-label-handle',
-    [
-      cb('control-label-target', ['run', 'control-label-request']),
-      {
-        role: 'value',
-        types: ['record', 'module-config'],
-        optional: true,
-        fields: {
-          family: { role: 'value', types: ['anatomy-family'] },
-          labelRole: { role: 'value', types: ['string'] },
-          targetRole: { role: 'value', types: ['string'] },
-        },
-      },
-    ],
+    [cb('control-label-target', ['run', 'control-label-request']), controlLabelPairArgument],
     [effect('declare', 'accessibility')]
   ),
   'controlLabel.sync': rule(
@@ -776,7 +828,7 @@ export const OPERATION_RULES = {
     'props.define',
     setup,
     'void',
-    [record],
+    [{ role: 'value' }],
     [effect('declare', 'props-schema')]
   ),
   'props.setDefaults': rule(
@@ -987,15 +1039,12 @@ export const OPERATION_RULES = {
     ],
     [effect('signal', 'expose')]
   ),
-  'lifecycle.setPresent': rule(
-    'run',
-    'lifecycle.setPresent',
-    callbackPhase,
-    'void',
-    [boolean],
-    [effect('write', 'view-intent')],
-    { contexts: aliveContexts }
-  ),
+  'lifecycle.setPresent': setPresentContract,
+  'lifecycle.setPresentFromModule': {
+    ...setPresentContract,
+    receiver: 'run-lifecycle',
+    path: 'setPresent',
+  } satisfies OperationRule,
   'lifecycle.onCreated': rule(
     'def',
     'lifecycle.onCreated',
@@ -1199,6 +1248,36 @@ export const OPERATION_RULES = {
   'render.slot': rule('render', 'slot', render, 'template', [], [effect('write', 'view', 'view')], {
     requiredCapabilities: ['view-render'],
   }),
+  'render.svg.root': rule(
+    'render',
+    'svg.root',
+    render,
+    'template',
+    [
+      { ...record, schema: SVG_ROOT_PROPS_TYPE },
+      { role: 'value', types: ['template'], optional: true },
+    ],
+    [effect('write', 'view', 'view')],
+    { requiredCapabilities: ['view-render'] }
+  ),
+  'render.svg.path': rule(
+    'render',
+    'svg.path',
+    render,
+    'template',
+    [{ ...record, schema: SVG_PATH_PROPS_TYPE }],
+    [effect('write', 'view', 'view')],
+    { requiredCapabilities: ['view-render'] }
+  ),
+  'render.decoration': rule(
+    'render',
+    'decoration',
+    render,
+    'template',
+    [{ role: 'value', types: ['decoration-target'] }],
+    [effect('write', 'view', 'view')],
+    { requiredCapabilities: ['view-render', 'style-projection'] }
+  ),
   'context.provide': rule(
     'def',
     'context.provide',
@@ -1245,6 +1324,31 @@ export const OPERATION_RULES = {
     [contextKey],
     [effect('read', 'context')],
     { resultFrom: 'context-value' }
+  ),
+  'context.trySubscribeAncestor': rule(
+    'def',
+    'context.trySubscribeAncestor',
+    setup,
+    { kind: 'callable', parameters: [], returnType: 'void' },
+    [
+      contextKey,
+      {
+        ...cb('context-watch', ['run', 'record', 'record'], {
+          parameterPolicy: 'nullable-context-value',
+        }),
+        optional: true,
+      },
+    ],
+    [effect('subscribe', 'context', 'subscription')]
+  ),
+  'context.tryReadAncestor': rule(
+    'run',
+    'context.tryReadAncestor',
+    callbackPhase,
+    'unknown',
+    [contextKey],
+    [effect('read', 'context')],
+    { resultFrom: 'context-value-or-null' }
   ),
   'context.tryRead': rule(
     'run',
@@ -1338,11 +1442,29 @@ export const OPERATION_RULES = {
     [effect('declare', 'view')],
     { requiredCapabilities: ['view-render'] }
   ),
+  'hook.asAxisInput': rule(
+    'void',
+    'asAxisInput',
+    setup,
+    'axis-input',
+    [],
+    [effect('declare', 'view')],
+    { requiredCapabilities: ['view-render', 'input-events'] }
+  ),
   'hook.asImageView': rule(
     'void',
     'asImageView',
     setup,
     'image-view',
+    [],
+    [effect('declare', 'view')],
+    { requiredCapabilities: ['view-render'] }
+  ),
+  'hook.asNativeLink': rule(
+    'void',
+    'asNativeLink',
+    setup,
+    'native-link',
     [],
     [effect('declare', 'view')],
     { requiredCapabilities: ['view-render'] }
@@ -1370,7 +1492,7 @@ export const OPERATION_RULES = {
     'asHitParticipation',
     setup,
     'hit-participation',
-    [],
+    [{ ...record, optional: true }],
     [effect('declare', 'view')],
     { requiredCapabilities: ['view-render'] }
   ),
@@ -1494,7 +1616,7 @@ export const OPERATION_RULES = {
     'setRovingStatus',
     callbackPhase,
     'void',
-    [record],
+    [{ role: 'value', valueSchema: FOCUS_ROVING_MEMBER_STATUS_TYPE }],
     [effect('write', 'focus')]
   ),
   'focus.focusFirst': rule(
@@ -1700,6 +1822,18 @@ export const OPERATION_RULES = {
     [{ role: 'value', types: ['anatomy-family'] }, finiteKey],
     [effect('read', 'view')]
   ),
+  'anatomy.descendantsOf': rule(
+    'run',
+    'anatomy.descendantsOf',
+    runtime,
+    'anatomy-parts',
+    [
+      { role: 'value', types: ['anatomy-family'] },
+      { role: 'value', types: ['anatomy-part'] },
+      finiteKey,
+    ],
+    [effect('read', 'view')]
+  ),
   'anatomy.order.version': rule(
     'run',
     'anatomy.order.version',
@@ -1760,8 +1894,8 @@ export const OPERATION_RULES = {
     'anatomy-part',
     'getExpose',
     runtime,
-    'unknown',
-    [key],
+    'public-expose',
+    [{ role: 'value', types: ['string'] }],
     [effect('read', 'expose')]
   ),
   'anatomyPart.hasHook': rule(
@@ -1929,6 +2063,14 @@ export const OPERATION_RULES = {
     [{ role: 'host-target' }, { ...record, optional: true }],
     [effect('subscribe', 'view', 'subscription')]
   ),
+  'hitParticipation.registerSelfRegion': rule(
+    'hit-participation',
+    'registerSelfRegion',
+    bindingPhase,
+    'binding-disposer',
+    [{ ...record, optional: true }],
+    [effect('subscribe', 'view', 'subscription')]
+  ),
   'hitParticipation.unregisterRegion': rule(
     'hit-participation',
     'unregisterRegion',
@@ -1974,7 +2116,7 @@ export const OPERATION_RULES = {
     'configure',
     setup,
     'void',
-    [record],
+    [{ ...capabilityConfig, valueSchema: OVERLAY_CONFIG_PATCH_TYPE }],
     [effect('declare', 'view')]
   ),
   'overlay.updatePosition': rule(
@@ -2031,6 +2173,20 @@ export const OPERATION_RULES = {
     setup,
     'void',
     [],
+    [effect('write', 'view')]
+  ),
+  'overlay.registerTargetAlignment': rule(
+    'overlay',
+    'registerTargetAlignment',
+    callbackPhase,
+    'void',
+    [
+      {
+        role: 'value',
+        valueSchema: joinValueTypes([OVERLAY_TARGET_ALIGNMENT_BINDING_TYPE, 'null']),
+        fields: { onAlignment: cb('positioning', [TARGET_ALIGNMENT_STATUS_TYPE]) },
+      },
+    ],
     [effect('write', 'view')]
   ),
   'overlay.bindPresence': rule(
@@ -2110,6 +2266,41 @@ export const OPERATION_RULES = {
     [],
     [effect('read', 'view')]
   ),
+  'axisInput.configure': rule(
+    'axis-input',
+    'configure',
+    setup,
+    'void',
+    [
+      {
+        role: 'value',
+        valueSchema: objectValueType([
+          { name: 'anatomy', type: 'anatomy-family' },
+          { name: 'inputRole', type: 'string' },
+          { name: 'geometryRole', type: 'string' },
+          { name: 'travelRole', type: 'string', optional: true },
+          { name: 'deltaBasisRole', type: 'string', optional: true },
+        ]),
+      },
+    ],
+    [effect('declare', 'view')]
+  ),
+  'axisInput.on': rule(
+    'axis-input',
+    'on',
+    setup,
+    'void',
+    [cb('event', ['run', AXIS_INPUT_SAMPLE_TYPE])],
+    [effect('subscribe', 'view', 'subscription')]
+  ),
+  'axisInput.sync': rule(
+    'axis-input',
+    'sync',
+    callbackPhase,
+    'void',
+    [record],
+    [effect('write', 'view')]
+  ),
   'textControl.on': rule(
     'text-control',
     'on',
@@ -2163,6 +2354,30 @@ export const OPERATION_RULES = {
     'snapshot',
     runtime,
     { kind: 'union', members: [imageSnapshot, 'null'] },
+    [],
+    [effect('read', 'view')]
+  ),
+  'nativeLink.on': rule(
+    'native-link',
+    'on',
+    setup,
+    'subscription-disposer',
+    [{ role: 'static-key' }, cb('event', ['run', nativeLinkEvent])],
+    [effect('subscribe', 'view', 'subscription')]
+  ),
+  'nativeLink.sync': rule(
+    'native-link',
+    'sync',
+    callbackPhase,
+    'void',
+    [record],
+    [effect('write', 'view')]
+  ),
+  'nativeLink.snapshot': rule(
+    'native-link',
+    'snapshot',
+    runtime,
+    { kind: 'union', members: [nativeLinkSnapshot, 'null'] },
     [],
     [effect('read', 'view')]
   ),
@@ -2258,6 +2473,7 @@ export interface OperationCallback {
   context?: FunctionContext;
   parameters: readonly { type: ValueType; optional?: boolean }[];
   returnType?: ValueType;
+  body?: readonly StatementIR[];
 }
 export function finiteStringKeys(argument: OperationArgument): string[] | undefined {
   if (argument.kind === 'literal' && typeof argument.value === 'string' && argument.value)
@@ -2287,20 +2503,9 @@ function lookup(operation: string): OperationRule | undefined {
     : undefined;
 }
 function data(type: ValueType): DataType | undefined {
-  if (typeof type === 'string')
-    return type === 'boolean' ||
-      type === 'number' ||
-      type === 'string' ||
-      type === 'null' ||
-      type === 'void'
-      ? type
-      : undefined;
-  try {
-    return parseDataType(type);
-  } catch (error) {
-    if (error instanceof TypeError) return undefined;
-    throw error;
-  }
+  // Semantic operations borrow finite data. A mutable ordinary array has the
+  // same data domain without changing the write permission on its source view.
+  return serializableDataType(type);
 }
 function assignable(actual: ValueType, expected: ValueType): boolean {
   if (valueAssignable(actual, expected)) return true;
@@ -2322,6 +2527,16 @@ function templateProps(type: ValueType): boolean {
   );
 }
 export function stateValue(receiver?: ValueType): 'boolean' | 'number' | 'string' | undefined {
+  if (
+    receiver &&
+    typeof receiver !== 'string' &&
+    (receiver.kind === 'value-union' || receiver.kind === 'union')
+  ) {
+    const values = receiver.members.map(stateValue);
+    return values.length && values[0] !== undefined && values.every((value) => value === values[0])
+      ? values[0]
+      : undefined;
+  }
   if (
     receiver === 'state:boolean' ||
     receiver === 'observed:boolean' ||
@@ -2357,6 +2572,7 @@ export function stateDeclarationData(
   });
 }
 const capabilityMembers: Readonly<Record<string, Readonly<Record<string, ValueType>>>> = {
+  run: { lifecycle: 'run-lifecycle' },
   'presence-owner': { ref: 'presentation-owner-ref', writer: 'presentation-owner-writer' },
   'context-key': { __brand: { kind: 'literal', value: 'ContextKey' } },
   'control-label-request': {
@@ -2413,6 +2629,14 @@ const capabilityMembers: Readonly<Record<string, Readonly<Record<string, ValueTy
   },
   'boundary-outside-event': {
     classification: { kind: 'literal', value: 'outside' },
+    observation: {
+      kind: 'union',
+      members: [
+        { kind: 'literal', value: 'pointer.press' },
+        { kind: 'literal', value: 'focus.move' },
+        'void',
+      ],
+    },
     sample: 'optional:boundary-sample',
   },
   'boundary-sample': {
@@ -2515,6 +2739,10 @@ export function capabilityMemberType(
     if (/^(0|[1-9]\d*)$/.test(property) && Number(property) < 0xffffffff)
       return `optional:${capabilityListMembers[owner]}`;
   }
+  // Core CollectionItemSnapshot declares a readonly public metadata index.
+  // An unknown metadata value does not grant callable or owner authority.
+  if (owner === 'collection-snapshot' && !Object.hasOwn(capabilityMembers[owner], property))
+    return 'unknown';
   return Object.hasOwn(capabilityMembers, owner) &&
     Object.hasOwn(capabilityMembers[owner], property)
     ? capabilityMembers[owner][property]
@@ -2614,9 +2842,11 @@ export function operationResultType(
     case 'receiver-value':
       return bindings.stateDataType ?? stateValue(receiver);
     case 'context-value':
-      return bindings.contextValueType;
+      return bindings.contextValueType && contextRuntimeValueType(bindings.contextValueType);
     case 'context-value-or-null':
-      return bindings.contextValueType ? nullable(bindings.contextValueType) : undefined;
+      return bindings.contextValueType
+        ? nullable(contextRuntimeValueType(bindings.contextValueType))
+        : undefined;
     default:
       return contract.result;
   }
@@ -2648,6 +2878,32 @@ export function validateOperationPhase(
   return [];
 }
 
+/** This new module value is transported only by an existing owner. Public
+ * callers cannot supply it, including through containers or callbacks. Keep
+ * older profile-specific parameter admissions separate from this boundary. */
+function hasLifecycleModule(type: ValueType): boolean {
+  if (typeof type === 'string')
+    return type.replace(/^(nullable|optional):/, '') === 'run-lifecycle';
+  if (type.kind === 'callable')
+    return (
+      type.parameters.some((parameter) => hasLifecycleModule(parameter.type)) ||
+      hasLifecycleModule(type.returnType)
+    );
+  if (type.kind === 'object')
+    return (
+      type.fields.some((field) => hasLifecycleModule(field.type)) ||
+      (type.index !== undefined && hasLifecycleModule(type.index))
+    );
+  if (type.kind === 'record') return type.fields.some((field) => hasLifecycleModule(field.type));
+  if (type.kind === 'value-union' || type.kind === 'union')
+    return type.members.some(hasLifecycleModule);
+  if (type.kind === 'value-array' || type.kind === 'array' || type.kind === 'set')
+    return hasLifecycleModule(type.element);
+  if (type.kind === 'map') return hasLifecycleModule(type.key) || hasLifecycleModule(type.value);
+  if (type.kind === 'cell') return hasLifecycleModule(type.value);
+  return false;
+}
+
 /** Check callback capability types exactly: annotating a run/event/data parameter as another
  * capability must not grant authority. Callbacks may omit unused trailing parameters. */
 export function validateOperationCallback(
@@ -2672,6 +2928,11 @@ export function validateOperationCallback(
     parameters = bindings.methodParameters;
     result = bindings.methodReturnType;
     max = parameters.length;
+    if (parameters.some((parameter) => hasLifecycleModule(parameter.type)))
+      issues.push({
+        code: 'callback-type',
+        message: 'Public method parameters cannot receive an internal runtime lifecycle module.',
+      });
   } else if (signature.parameterPolicy === 'input-payload') {
     if (!bindings.inputPayloadType)
       return [
@@ -2700,8 +2961,8 @@ export function validateOperationCallback(
       ];
     const value =
       signature.parameterPolicy === 'nullable-context-value'
-        ? nullable(bindings.contextValueType)
-        : bindings.contextValueType;
+        ? nullable(contextRuntimeValueType(bindings.contextValueType))
+        : contextRuntimeValueType(bindings.contextValueType);
     parameters =
       signature.parameterPolicy === 'context-updater'
         ? [{ type: value }]
@@ -2792,11 +3053,216 @@ export function argumentData(argument: OperationArgument): DataType | undefined 
 export function argumentValue(argument: OperationArgument): ValueType {
   if (argument.kind === 'conditional' && argument.then && argument.otherwise)
     return joinValueTypes([argumentValue(argument.then), argumentValue(argument.otherwise)]);
+  if (argument.kind === 'literal') return argumentData(argument) ?? argument.type;
   if (argument.kind === 'record' && argument.entries)
     return objectValueType(
-      argument.entries.map(({ key, value }) => ({ name: key, type: argumentValue(value) }))
+      argument.entries.map(({ key, value }) => ({
+        ...objectFields(argument.type)?.find((field) => field.name === key),
+        name: key,
+        type: argumentValue(value),
+      }))
     );
-  return argumentData(argument) ?? argument.type;
+  if (
+    argument.kind === 'array' &&
+    argument.elements &&
+    typeof argument.type !== 'string' &&
+    (argument.type.kind === 'array' || argument.type.kind === 'value-array')
+  )
+    return {
+      ...argument.type,
+      element: joinValueTypes(argument.elements.map(argumentValue)),
+    } as ValueType;
+  // Semantic data schemas borrow a read-only data domain; ordinary aliases and
+  // assertions must retain write permissions and nested runtime provenance.
+  // In particular, projecting a Readonly object to DataType here would turn it
+  // into a mutable record before the ordinary assignability check.
+  return argument.type;
+}
+
+/** A fresh aggregate retains object identities. A later operand may mutate an
+ * earlier shared object, invalidating the type checked when it was captured.
+ * Unknown expressions count as effects; this is not a helper purity proof. */
+function orderedContextLiteral(argument: OperationArgument): boolean {
+  interface Evaluation {
+    ordered: boolean;
+    shared: boolean;
+    effects: boolean;
+  }
+  type EvaluatedArgument = OperationArgument & {
+    condition?: OperationArgument;
+    parts?: readonly { kind?: string; spread?: boolean; value: OperationArgument }[];
+    name?: string;
+    operation?: string;
+    operator?: string;
+    callee?: OperationArgument;
+    receiver?: OperationArgument;
+    object?: OperationArgument;
+    index?: OperationArgument;
+    cell?: OperationArgument;
+    operand?: OperationArgument;
+    left?: OperationArgument;
+    right?: OperationArgument;
+    arguments?: readonly OperationArgument[];
+  };
+  const expression = (value: unknown): value is OperationArgument =>
+    !!value && typeof value === 'object' && 'kind' in value && 'type' in value;
+  const structured = (type: ValueType): boolean =>
+    typeof type !== 'string' &&
+    (type.kind === 'record' ||
+      type.kind === 'object' ||
+      type.kind === 'array' ||
+      type.kind === 'value-array' ||
+      ((type.kind === 'union' || type.kind === 'value-union') && type.members.some(structured)));
+  const scalar = (type: ValueType): boolean =>
+    valueAlternatives(type).every((member) =>
+      typeof member === 'string'
+        ? ['string', 'number', 'boolean', 'null', 'void'].includes(member)
+        : member.kind === 'literal'
+    );
+  const sequence = (values: readonly Evaluation[]): Evaluation => {
+    const result: Evaluation = { ordered: true, shared: false, effects: false };
+    for (const next of values) {
+      result.ordered &&= next.ordered && !(result.shared && next.effects);
+      result.shared ||= next.shared;
+      result.effects ||= next.effects;
+    }
+    return result;
+  };
+  const evaluate = (value: OperationArgument): Evaluation => {
+    if (value.kind === 'narrow') {
+      const inner = value.value;
+      if (!expression(inner)) return { ordered: false, shared: true, effects: true };
+      return evaluate(inner);
+    }
+    if (value.kind === 'record' && value.entries)
+      return sequence(value.entries.map((entry) => evaluate(entry.value)));
+    if (value.kind === 'array' && value.elements) return sequence(value.elements.map(evaluate));
+    const node = value as EvaluatedArgument;
+    if ((value.kind === 'object-spread' || value.kind === 'array-spread') && node.parts)
+      return sequence(
+        node.parts.map((part) => {
+          const next = evaluate(part.value);
+          if (part.kind !== 'spread' && !part.spread) return next;
+          // A shallow copy drops the source container's identity, but keeps any
+          // nested object identities. Only checked scalar fields/elements prove
+          // that no shared identity survives in the fresh result.
+          const fields =
+            value.kind === 'object-spread' ? spreadObjectFields(part.value.type) : undefined;
+          const element =
+            value.kind === 'array-spread' ? iterableElementType(part.value.type) : undefined;
+          const copiedScalars =
+            fields !== undefined
+              ? fields.every((field) => scalar(field.type))
+              : element !== undefined && scalar(element);
+          return { ...next, shared: next.shared && !copiedScalars };
+        })
+      );
+    if (
+      value.kind === 'binary' &&
+      ['??', '||', '&&'].includes(node.operator ?? '') &&
+      node.left &&
+      node.right
+    ) {
+      const left = evaluate(node.left),
+        right = evaluate(node.right);
+      // The left result is returned or discarded before the right executes;
+      // it is never a retained earlier sibling of the right result.
+      // Objects are truthy, so && can retain an object only from its right side.
+      return {
+        ordered: left.ordered && right.ordered,
+        shared: structured(value.type) && ((node.operator !== '&&' && left.shared) || right.shared),
+        effects: left.effects || right.effects,
+      };
+    }
+    if (value.kind === 'conditional' && value.then && value.otherwise) {
+      const yes = evaluate(value.then),
+        no = evaluate(value.otherwise),
+        condition = node.condition ? evaluate(node.condition) : undefined;
+      return {
+        ordered: (condition?.ordered ?? true) && yes.ordered && no.ordered,
+        shared: yes.shared || no.shared,
+        effects: (condition?.effects ?? true) || yes.effects || no.effects,
+      };
+    }
+    // Inspect eager operands, never a nested function's body. An intrinsic or
+    // ordinary call cannot hide an aggregate's own unsafe evaluation order.
+    const eager = sequence(
+      [
+        node.callee,
+        node.receiver,
+        node.object,
+        node.index,
+        node.cell,
+        node.operand,
+        node.left,
+        node.right,
+        ...(node.arguments ?? []),
+        node.value,
+      ]
+        .filter(expression)
+        .map(evaluate)
+    );
+    // These already checked numeric intrinsics accept no authored conversion
+    // callbacks. Their operands still contribute effects through `eager`.
+    const scalarIntrinsic =
+      value.kind === 'intrinsic' &&
+      node.name !== undefined &&
+      isEcmaIntrinsic(node.name) &&
+      (node.name === 'number' || node.name.startsWith('number.') || node.name.startsWith('math.'));
+    const operation =
+      value.kind === 'operation' && node.operation ? lookup(node.operation) : undefined;
+    // The shared operation contract makes a no-argument State/resolved-Props
+    // observation non-reentrant. Reading its receiver still evaluates the
+    // authored expression above; an effectful helper cannot hide behind get().
+    const snapshotObservation =
+      operation !== undefined &&
+      operation.arguments.length === 0 &&
+      !operation.callback &&
+      operation.effects.length > 0 &&
+      operation.effects.every(
+        (effect) => effect.kind === 'read' && ['state', 'props'].includes(effect.resource)
+      );
+    return {
+      ordered: eager.ordered,
+      shared: structured(value.type),
+      effects:
+        eager.effects ||
+        (!scalarIntrinsic &&
+          !snapshotObservation &&
+          ![
+            'literal',
+            'undefined',
+            'reference',
+            'member',
+            'element',
+            'unary',
+            'binary',
+            'lexical-read',
+            'context-key',
+            'static-capability',
+            'style-handle',
+          ].includes(value.kind)),
+    };
+  };
+  return evaluate(argument).ordered;
+}
+
+function orderedContextReturns(body: readonly StatementIR[]): boolean {
+  return body.every((statement) => {
+    if (statement.kind === 'return')
+      return !statement.value || orderedContextLiteral(statement.value);
+    if (statement.kind === 'if')
+      return orderedContextReturns(statement.then) && orderedContextReturns(statement.otherwise);
+    if (statement.kind === 'while' || statement.kind === 'for-of')
+      return orderedContextReturns(statement.body);
+    if (statement.kind === 'try')
+      return (
+        orderedContextReturns(statement.body) &&
+        (!statement.catch || orderedContextReturns(statement.catch.body)) &&
+        (!statement.finally || orderedContextReturns(statement.finally))
+      );
+    return true;
+  });
 }
 
 /** Receiver, argument and callback validation shared by source admission and external IR.
@@ -2816,13 +3282,23 @@ export function validateOperationArguments(
       : (receiver ?? 'void') !== contract.receiver
   )
     issues.push({ code: 'receiver', message: `${operation} has an incompatible receiver.` });
+  const stateReceivers: ValueType[] =
+    receiver &&
+    typeof receiver !== 'string' &&
+    (receiver.kind === 'union' || receiver.kind === 'value-union')
+      ? [...receiver.members]
+      : receiver === undefined
+        ? []
+        : [receiver];
   if (
     (operation === 'state.set' || operation === 'state.setDefault') &&
-    typeof receiver === 'string' &&
-    receiver.startsWith('observed:')
+    stateReceivers.some((member) => typeof member === 'string' && member.startsWith('observed:'))
   )
     issues.push({ code: 'receiver', message: 'Observed facts have no write authority.' });
-  if (operation === 'state.watch' && typeof receiver === 'string' && receiver.startsWith('state:'))
+  if (
+    operation === 'state.watch' &&
+    stateReceivers.some((member) => typeof member === 'string' && member.startsWith('state:'))
+  )
     issues.push({
       code: 'receiver',
       message:
@@ -2846,7 +3322,12 @@ export function validateOperationArguments(
   args.forEach((argument, index) => {
     const requirement =
       contract.arguments[index] ??
-      (['feedback.style.use', 'feedback.style.patch', 'feedback.style.suppress'].includes(operation)
+      ([
+        'feedback.style.use',
+        'decoration.style.use',
+        'feedback.style.patch',
+        'feedback.style.suppress',
+      ].includes(operation)
         ? contract.arguments[0]
         : undefined);
     if (!requirement) return;
@@ -2854,11 +3335,75 @@ export function validateOperationArguments(
       issues.push({ code, message, argument: index });
     if (requirement.types && !requirement.types.some((type) => assignable(argument.type, type)))
       reject('argument-type', `Argument ${index + 1} has an incompatible type.`);
+    if (operation === 'props.define') {
+      if (argument.kind !== 'record')
+        reject('argument-type', 'Props schemas require finite literal declarations.');
+      for (const entry of argument.entries ?? []) {
+        if (entry.value.kind !== 'record') {
+          reject('argument-type', 'A prop specification requires a finite literal record.');
+          continue;
+        }
+        const tag = entry.value.entries?.find((field) => field.key === 'type')?.value;
+        const type = tag?.kind === 'literal' ? tag.value : undefined;
+        if (!['boolean', 'number', 'string', 'object', 'enum', 'any'].includes(String(type)))
+          reject('argument-type', 'A prop specification requires an admitted static type.');
+        for (const field of entry.value.entries ?? []) {
+          if (!['type', 'empty', 'options', 'range', 'validator', 'default'].includes(field.key))
+            reject('argument-type', `Unknown prop specification field ${field.key}.`);
+          if (field.key === 'validator') {
+            const signature = field.value.type;
+            if (
+              typeof signature === 'string' ||
+              signature.kind !== 'callable' ||
+              signature.parameters.length > 1 ||
+              signature.parameters.some((parameter) => parameter.rest) ||
+              !valueAssignable(signature.returnType, 'boolean') ||
+              ((type === 'boolean' || type === 'number' || type === 'string' || type === 'enum') &&
+                signature.parameters[0] &&
+                !valueAssignable(type === 'enum' ? 'string' : type, signature.parameters[0].type))
+            )
+              reject(
+                'argument-type',
+                'A prop validator requires a checked boolean callback of its declared value.'
+              );
+          } else if (serializableDataType(field.value.type) === undefined)
+            reject('argument-type', 'Prop specification values must be data.');
+        }
+      }
+    }
+
     if (
       requirement.valueSchema &&
       !valueAssignable(argumentValue(argument), requirement.valueSchema)
     )
       reject('argument-type', `Argument ${index + 1} does not satisfy its checked value schema.`);
+    if (requirement.valueSchema === OVERLAY_CONFIG_PATCH_TYPE) {
+      const names = new Set(objectFields(OVERLAY_CONFIG_PATCH_TYPE)!.map((field) => field.name));
+      for (const member of valueAlternatives(argumentValue(argument))) {
+        const fields = objectFields(member);
+        if (
+          !fields ||
+          (typeof member !== 'string' && member.kind === 'object' && member.index !== undefined)
+        ) {
+          reject('argument-type', 'Overlay configuration requires a finite checked field set.');
+          continue;
+        }
+        for (const field of fields) {
+          if (!names.has(field.name))
+            reject('argument-type', `Unknown Overlay configuration field ${field.name}.`);
+          // Core permits opaque metadata; this compiler boundary admits only a
+          // proven data record, preserving the previous data-only restriction.
+          if (field.name === 'meta') {
+            const value = joinValueTypes(
+              valueAlternatives(field.type).filter((type) => !field.optional || type !== 'void')
+            );
+            const metadata = serializableDataType(value);
+            if (typeof metadata !== 'object' || metadata.kind !== 'record')
+              reject('argument-type', 'Overlay metadata requires a finite data record.');
+          }
+        }
+      }
+    }
     if (
       requirement.types?.includes('module-config') &&
       typeof argument.type !== 'string' &&
@@ -2898,7 +3443,10 @@ export function validateOperationArguments(
         reject('argument-type', 'Configuration records require a finite checked field set.');
     }
     if (requirement.schema) {
-      const actual = argumentData(argument);
+      // Semantic configuration/data boundaries borrow the value; normalizing
+      // optional/readonly fields here must never grant write permission to an
+      // ordinary alias, assertion, or callable parameter elsewhere.
+      const actual = serializableDataType(argumentData(argument) ?? argument.type);
       const expected: DataType = requirement.optional
         ? { kind: 'union', members: [requirement.schema, 'void'] }
         : requirement.schema;
@@ -2915,6 +3463,11 @@ export function validateOperationArguments(
               ? type.members.flatMap(fields)
               : [];
       const keys = actual ? fields(actual) : [];
+      if (
+        operation.startsWith('render.svg.') &&
+        keys.some((key) => !fields(requirement.schema!).includes(key))
+      )
+        reject('argument-type', 'SVG props contain an unsupported field.');
       if (
         requirement.schema === FOCUS_ACTIVATION_OPTIONS_TYPE &&
         keys.some((key) => !['reason', 'preventScroll', 'entry'].includes(key))
@@ -2992,8 +3545,26 @@ export function validateOperationArguments(
         break;
       case 'context-value':
       case 'context-next':
-        if (requirement.role === 'context-next' && argument.kind === 'function') break;
-        if (!bindings.contextValueType || !assignable(argument.type, bindings.contextValueType))
+        if (requirement.role === 'context-next' && argument.kind === 'function') {
+          if (argument.function?.body && !orderedContextReturns(argument.function.body))
+            reject(
+              'argument-type',
+              'Context updater literals cannot retain shared values before later potentially effectful expressions.'
+            );
+          break;
+        }
+        if (!orderedContextLiteral(argument))
+          reject(
+            'argument-type',
+            'Context literals cannot retain shared values before later potentially effectful expressions.'
+          );
+        if (
+          !bindings.contextValueType ||
+          !assignable(
+            serializableDataType(argument.type) ?? argument.type,
+            bindings.contextValueType
+          )
+        )
           reject('argument-type', 'Context value does not match its declared key type.');
         break;
       case 'event-payload':

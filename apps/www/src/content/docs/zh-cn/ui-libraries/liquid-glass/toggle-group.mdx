@@ -1,11 +1,13 @@
 ---
-title: 'ToggleGroup'
-description: '带游走焦点的单选或多选按下状态组。'
+title: 'Toggle Group'
+description: '支持单选/多选按下状态与游走键盘焦点的 Liquid Glass 切换按钮组。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-带游走焦点的单选或多选按下状态组。
+Liquid Glass Toggle Group 将一组相关的双态切换按钮组合为统一的游走焦点容器，支持单选（可清空）或多选模式。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-toggle-group"
@@ -14,8 +16,21 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-value/defaultValue 为数组。multiple=false 最多保留一个值，再次点击可以清除。受控 valueChange 不修改调用方状态。禁用、只读以及重复值选项不能提交；箭头导航仅移动焦点。
+## 安装
 
-组成: Root, Item.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码；native/GPUI、编译器、打包消费、截图及完整独立验收仍待完成。
+## 用法
+
+- **部件组成**：`Root`、`Item`。
+- **单选与多选**：`value` 与 `defaultValue` 均为字符串数组。当 `multiple={false}` 时最多保留一个选中值，再次点击已选中项可清空选择。受控模式下交互仅发出 `valueChange` 请求，不会直接改写调用方状态。
+- **键盘与边界**：方向键仅在选项间移动游走焦点而不改变选中状态；禁用、只读以及重复值的选项不会提交变更。
+
+## API
+
+| 部件 | 属性 / 事件 | 说明 |
+| --- | --- | --- |
+| Root | `value` / `defaultValue` | 受控 / 非受控选中值字符串数组 |
+| Root | `multiple` | 是否允许多选；`false` 时为单选且支持再次点击清空 |
+| Root | `disabled` / `readOnly` / `valueChange` | 禁用、只读与选中变更请求事件 |
+| Item | `value` / `disabled` | 选项唯一值与单项禁用状态 |

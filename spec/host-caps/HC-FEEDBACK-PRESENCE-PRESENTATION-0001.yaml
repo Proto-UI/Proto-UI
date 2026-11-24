@@ -3,7 +3,7 @@ type: host-cap
 title: Presence endpoints receive physical-view application receipts
 status: draft
 since: 0.2.0-rc.0
-summary: One host-owned projection applies typed translate and opacity without becoming phase authority.
+summary: One host-owned projection applies typed translate, opacity and containing-block top without becoming phase authority.
 lifecycleRationale:
   en: Real Document, Shadow and native frame evidence and independent Compiler interpretation remain required. Source-model or CSSOM checks do not establish physical animation conformance.
 statement:
@@ -20,10 +20,10 @@ criteria:
       en: Layout and presentation provide separate typed affine translation leases to one physical translation writer. The writer composes the live layout baseline and presentation delta, preserves unrelated transform channels, and applies layout updates while presentation is active. Releasing presentation restores the latest layout baseline rather than a stale captured baseline. No CSS parsing, computed-transform decomposition or hardcoded component offsets supply typed geometry.
   - id: HC-FEEDBACK-PRESENCE-PRESENTATION-0001-PROFILE
     text:
-      en: The first source-Web provider admits neutral entered endpoints only, with zero coefficients on both translate axes and opacity one or absent. It detects unsupported-endpoint before acquiring or writing transient presentation leases, preserves the ordinary semantic baseline and requests current-attempt diagnosed settlement. Generic syntax remains broader; other backends may independently implement it. Unsupported profiles never claim a successfully presented arbitrary endpoint.
+      en: The source-Web provider admits zero coefficients on both entered translate axes, neutral opacity one or a non-neutral value matching final finite unqualified opacity intent, and top matching final finite unqualified top intent. Top and opacity use separate inline leases, check their typed entered semantic baselines before acquisition, and release to ordinary style on settlement. Top's initial supported basis is fixed positioning against the initial containing block; transformed, contained or otherwise uncertain ancestor containing blocks are explicitly unsupported. Unsupported endpoints diagnose before transient writes, preserve the ordinary semantic baseline and request current-attempt settlement. Generic syntax remains broader; other backends may independently implement it. Unsupported profiles never claim a successfully presented arbitrary endpoint.
   - id: HC-FEEDBACK-PRESENCE-PRESENTATION-0001-INPUTS
     text:
-      en: An empty-channel application projects the current semantic style without acquiring or releasing transient channel leases; dimensions are consumed only after that application returns accepted under the same binding. A semantic-only application is not a presentation-frame acknowledgement. Own-box dimensions are actual layout-space reference-box extents; rootText uses the real root font. Missing or non-finite bases, unsupported channels and unknown preferences are diagnosed without computed-CSS inference or guessed viewport offsets. A new physical view cannot inherit an old displayed sample. Settled, hidden and reduced states do not poll or replay on restoration.
+      en: An empty-channel application projects the current semantic style without acquiring or releasing transient channel leases; dimensions are consumed only after that application returns accepted under the same binding. A semantic-only application is not a presentation-frame acknowledgement. Own-box dimensions are actual layout-space reference-box extents; rootText uses the real root font. Top's containingBlock basis is separately identified and measured in layout space, and updates retarget from the last acknowledged display without renewing the phase deadline. Missing or non-finite bases, unsupported channels and unknown preferences diagnose without computed-CSS target inference or guessed offsets. Computed CSS may verify lease ownership against an already typed semantic endpoint; it never supplies the target. A new physical view cannot inherit an old displayed sample. Settled, hidden and reduced states do not poll or replay on restoration.
   - id: HC-FEEDBACK-PRESENCE-PRESENTATION-0001-EVIDENCE
     text:
       en: Cold and endpoint acknowledgements are current frame application receipts, not rasterization certificates. Conformance additionally requires exact-build real frame captures for cold open, retained close, four directions, reversal and two independently retained Content and Mask surfaces. Pure-model tests, token output and explicit unsupported diagnostics do not substitute for host or Compiler acceptance.
@@ -34,3 +34,6 @@ revisions:
   - version: 0.2.0-rc.0
     change: introduced
     summary: Establish physical binding, atomic application and evidence boundaries for presence presentation.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Define bounded top and non-neutral opacity baseline leases with explicit containing-block input independently from own-box translation.

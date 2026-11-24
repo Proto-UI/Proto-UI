@@ -1,11 +1,13 @@
 ---
 title: 'Menubar'
-description: '具有键盘协调与独立命令面板的菜单栏。'
+description: '支持游走焦点与多面板键盘协调切换的 Bootstrap 2.3.2 顶部菜单栏。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-具有键盘协调与独立命令面板的菜单栏。
+Menubar 提供桌面应用风格的水平菜单栏，支持单一 Tab 入口、方向键快速切换菜单面板及首字母搜索。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-menubar"
@@ -14,8 +16,23 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root.value 标识一个打开的面板；Trigger.value 与 Content.value 配对。菜单栏提供单一 Tab 入口、左右移动、上下箭头进入、命令纵向导航及文字跳转。Escape 恢复触发器焦点；外部点击与命令选择关闭。受控 value 只发出请求。
+## 安装
 
-组成: Root, Trigger, Content, Item.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码。嵌套子菜单、完整 native/GPUI/编译器证据、消费/视觉验收与独立生命周期准入仍未完成。
+## 用法
+
+由 `Root`、`Trigger`、`Content` 和 `Item` 组成：
+
+- **面板配对**：`Root` 的 `value` 表示当前打开的面板标识，与对应的 `Trigger.value` 和 `Content.value` 匹配；受控模式下仅发出变更请求，由父组件更新 `value`。
+- **键盘导航**：整个菜单栏只占一个游走 Tab 焦点位；按左右方向键在菜单触发器间移动，按上下方向键进入菜单并浏览命令项，支持输入字符快速跳转。
+- **关闭与焦点恢复**：按 `Escape` 关闭当前面板并将焦点交回对应 `Trigger`；点击外部区域或激活命令项时自动关闭面板。
+
+## API
+
+| 部件      | 属性    | 说明                              |
+| --------- | ------- | --------------------------------- |
+| `Root`    | `value` | 当前展开的菜单面板键（支持受控）  |
+| `Trigger` | `value` | 菜单栏按钮，与同值 `Content` 配对 |
+| `Content` | `value` | 对应的下拉命令面板                |
+| `Item`    | —       | 面板内的可执行命令项              |

@@ -1,0 +1,287 @@
+{
+  "kind": "sprint2-bootstrap-observer-raw-manifest",
+  "parentHead": "3d64911f980957ab78bfb616cdd5b523b5f4482c",
+  "fixtureSha256": "f061d42f58be9c0118cbf8c3e145d7deb08af6376ca325e2a0caeb1e71f6dd02",
+  "files": [
+    {
+      "path": "candidate-source/scripts/analysis/bootstrap-collapse-browser.mjs",
+      "bytes": 16582,
+      "sha256": "97a827748271666c4ab84f91a3672838581c9a5a763acb0fcbe4adbecffb45a6"
+    },
+    {
+      "path": "candidate-source/scripts/analysis/bootstrap-collapse-endpoint-oracle.mjs",
+      "bytes": 14461,
+      "sha256": "0984ee83fe85b0006609e8e8d929e85c493760cf0d7c3c496fa46f5eada3ae75"
+    },
+    {
+      "path": "candidate-source/scripts/analysis/fixtures/bootstrap-collapse-browser.ts",
+      "bytes": 6601,
+      "sha256": "f061d42f58be9c0118cbf8c3e145d7deb08af6376ca325e2a0caeb1e71f6dd02"
+    },
+    {
+      "path": "drivers/bootstrap-four-web-pure-read-01.spec.json",
+      "bytes": 1374,
+      "sha256": "29b84a37bdae6aa0d456f6df4ac1b12e3329aaa739352e4ef9fe763218146bb3"
+    },
+    {
+      "path": "drivers/bootstrap-read-calibration-02.mjs",
+      "bytes": 9777,
+      "sha256": "cdeefc374d70e1b8da9b27516ae73928eb26659023b2038bbbc10fb906b52955"
+    },
+    {
+      "path": "drivers/bootstrap-read-calibration.mjs",
+      "bytes": 9693,
+      "sha256": "83b28fa0075c1fea1029ecdaba916c14a0ea08ad32e21a95223d2e8a644aa939"
+    },
+    {
+      "path": "drivers/bootstrap-snapshot-pure-read.patch",
+      "bytes": 1241,
+      "sha256": "e7b0a820eb8a51903580f08cc651794363dfc26d1b5c10ce8d2e5df5c8a2c75c"
+    },
+    {
+      "path": "drivers/run-bootstrap-four-web-pure-read-01.py",
+      "bytes": 2304,
+      "sha256": "e3b379ff2c8872d6e5bb5e7cf03563b4814bf9474e7ecf204ab1cc32867abb69"
+    },
+    {
+      "path": "evidence/bootstrap-four-web-endpoint-6b6462/result.json",
+      "bytes": 1678,
+      "sha256": "8778383b052c69aaafbe1f2b1b3d3ee2cd4fd1dcb5229d6b5cce803bbc369b2d"
+    },
+    {
+      "path": "evidence/bootstrap-four-web-endpoint-6b6462/start.json",
+      "bytes": 185,
+      "sha256": "41e660f3a2e3f8219a4622b68f908fb67132cc4c8487bf372b78703200aaffd0"
+    },
+    {
+      "path": "evidence/bootstrap-four-web-endpoint-6b6462/stdout.log",
+      "bytes": 2605,
+      "sha256": "2fdc1dbad70da1c905cb4b84cc39c4bb5778d712d84962b2abbfff54090b29f8"
+    },
+    {
+      "path": "evidence/bootstrap-four-web-endpoint-6b6462/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/bootstrap-four-web-pure-read-01/result.json",
+      "bytes": 1646,
+      "sha256": "a3a906e2b7a82649251564fac72cff8ba1556cfc027278be03b3a40c1c13b59b"
+    },
+    {
+      "path": "evidence/bootstrap-four-web-pure-read-01/source-before.json",
+      "bytes": 871,
+      "sha256": "140cef66d5c5b0c175186ae79f2119597b823941777987c151d0e661f86c57eb"
+    },
+    {
+      "path": "evidence/bootstrap-four-web-pure-read-01/start.json",
+      "bytes": 181,
+      "sha256": "86c0a6d6bc9cee76038f96962728a609cf08407b148c54d36cdd6d2fc89cca6b"
+    },
+    {
+      "path": "evidence/bootstrap-four-web-pure-read-01/stdout.log",
+      "bytes": 2840,
+      "sha256": "d5bd72d0dbbb2c7df8fdf8cfbc8d8cddaaa724527fea708c605fed2be4fc36af"
+    },
+    {
+      "path": "evidence/bootstrap-four-web-pure-read-01/verification.json",
+      "bytes": 261,
+      "sha256": "e2a4d1737ff90c33d1f746ee29e1063e628858fd06c6972eca8dbf087f7aa0ec"
+    },
+    {
+      "path": "evidence/bootstrap-four-web-pure-read-01/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/bootstrap-read-calibration-01/candidate-source.json",
+      "bytes": 231,
+      "sha256": "db035081daf87262deeb54fe1b50585a1df7281984c11994723341c27cbe827a"
+    },
+    {
+      "path": "evidence/bootstrap-read-calibration-01/result.json",
+      "bytes": 1742,
+      "sha256": "deff65d3aea61c174e5e8126aa05810a86fe20e2b0c0aaaa2a454021473a4af2"
+    },
+    {
+      "path": "evidence/bootstrap-read-calibration-01/start.json",
+      "bytes": 179,
+      "sha256": "5f7643199f5b3d70acef6c8be8de9aab523f55164ef0bc4a7f93df502d766b0a"
+    },
+    {
+      "path": "evidence/bootstrap-read-calibration-01/stdout.log",
+      "bytes": 2711,
+      "sha256": "52074e6929c2270d9dbb2c129c57e61d880b4c6fad72aec3a4123400e551f0b9"
+    },
+    {
+      "path": "evidence/bootstrap-read-calibration-01/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/bootstrap-read-calibration-02/candidate-source.json",
+      "bytes": 311,
+      "sha256": "f993f89aeac92ea4b912407957948e374e25d8f92a95d62d424f46cc9dab4e0b"
+    },
+    {
+      "path": "evidence/bootstrap-read-calibration-02/result.json",
+      "bytes": 1742,
+      "sha256": "e5f480a505e3ca2948c91ab00252f4fc695f08107fb1d1fe598b07f9fa8d855d"
+    },
+    {
+      "path": "evidence/bootstrap-read-calibration-02/start.json",
+      "bytes": 179,
+      "sha256": "896eb6980bc6b16ea85940d82ffc03718515f0cea6a1f172a1c0aeece88d3f1e"
+    },
+    {
+      "path": "evidence/bootstrap-read-calibration-02/stdout.log",
+      "bytes": 497,
+      "sha256": "c616997abd42ebbfa1ecaf3471ce6973a771ecbe74c8b6cb7edf53ed86df2caa"
+    },
+    {
+      "path": "evidence/bootstrap-read-calibration-02/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "original-source/scripts/analysis/fixtures/bootstrap-collapse-browser.ts",
+      "bytes": 6086,
+      "sha256": "a110e5a2714928bac7e676e1b23822646f09fca238cef8957d5330a73b53b211"
+    },
+    {
+      "path": "results/bootstrap-four-web-endpoint-6b6462/consumer.css",
+      "bytes": 8167,
+      "sha256": "7e7f3494e8072eee61f39f2b3de170b69526503275179be1e64684be4bdcbef6"
+    },
+    {
+      "path": "results/bootstrap-four-web-endpoint-6b6462/consumer.js",
+      "bytes": 3167006,
+      "sha256": "692482b686dcac92b8219bbe7b5984cf6d3035cf16e233b41610ba713e1cccec"
+    },
+    {
+      "path": "results/bootstrap-four-web-endpoint-6b6462/react-accordion-entered.png",
+      "bytes": 28293,
+      "sha256": "35cbde26cdaf7a29500cc7487d1821da789189cf39058368313de5041d9b828e"
+    },
+    {
+      "path": "results/bootstrap-four-web-endpoint-6b6462/react-collapsible-entered.png",
+      "bytes": 28716,
+      "sha256": "a1502c1a8520e0b9dc1e917f48076e26a9d09ef7d847c4e083e3d2eaa6832c44"
+    },
+    {
+      "path": "results/bootstrap-four-web-endpoint-6b6462/report.json",
+      "bytes": 2550445,
+      "sha256": "7b588e98496cbaf98c95edd9ffe61ae9795a88e898305c1528594d601c43a298"
+    },
+    {
+      "path": "results/bootstrap-four-web-endpoint-6b6462/vue-accordion-entered.png",
+      "bytes": 28344,
+      "sha256": "d0905bb6fc8386d579ba8340031017ccc4957b1085f883b9de9c0ce1699723e2"
+    },
+    {
+      "path": "results/bootstrap-four-web-endpoint-6b6462/vue-collapsible-entered.png",
+      "bytes": 28578,
+      "sha256": "f1d07c23ef30fd11c7893a89fb54be83d5fadfbee63cdbea46af607de40b572c"
+    },
+    {
+      "path": "results/bootstrap-four-web-endpoint-6b6462/vue2-accordion-entered.png",
+      "bytes": 28374,
+      "sha256": "56b2b01f198fd07f0ec02d259297d3f2d7461c2069d1608299356ff94f09c22c"
+    },
+    {
+      "path": "results/bootstrap-four-web-endpoint-6b6462/vue2-collapsible-entered.png",
+      "bytes": 28791,
+      "sha256": "1f67e165f4d1cfe686b8305433c2a0ede7b73234684b726d021d86d90518c743"
+    },
+    {
+      "path": "results/bootstrap-four-web-endpoint-6b6462/wc-accordion-entered.png",
+      "bytes": 28314,
+      "sha256": "d85d7cbcd49111a45415be78bc3e74f84e59bd29d8dbc98032c33cb133604902"
+    },
+    {
+      "path": "results/bootstrap-four-web-endpoint-6b6462/wc-collapsible-entered.png",
+      "bytes": 28797,
+      "sha256": "8e3e17d128a99582070350994c91b66353cfe46c6057631097c3742d58ec2e2a"
+    },
+    {
+      "path": "results/bootstrap-four-web-pure-read-01/consumer.css",
+      "bytes": 8167,
+      "sha256": "7e7f3494e8072eee61f39f2b3de170b69526503275179be1e64684be4bdcbef6"
+    },
+    {
+      "path": "results/bootstrap-four-web-pure-read-01/consumer.js",
+      "bytes": 3167252,
+      "sha256": "aaccb74b9b43d48564d51ae2c070db39c5feab0d926e2d23f0cc463a7c432195"
+    },
+    {
+      "path": "results/bootstrap-four-web-pure-read-01/react-accordion-entered.png",
+      "bytes": 28293,
+      "sha256": "35cbde26cdaf7a29500cc7487d1821da789189cf39058368313de5041d9b828e"
+    },
+    {
+      "path": "results/bootstrap-four-web-pure-read-01/react-collapsible-entered.png",
+      "bytes": 28716,
+      "sha256": "a1502c1a8520e0b9dc1e917f48076e26a9d09ef7d847c4e083e3d2eaa6832c44"
+    },
+    {
+      "path": "results/bootstrap-four-web-pure-read-01/report.json",
+      "bytes": 2162039,
+      "sha256": "2b779b4effceba4dce0b8406d3e2f8a86c62faffbd100ef09f2e054df961fe4b"
+    },
+    {
+      "path": "results/bootstrap-four-web-pure-read-01/vue-accordion-entered.png",
+      "bytes": 28344,
+      "sha256": "d0905bb6fc8386d579ba8340031017ccc4957b1085f883b9de9c0ce1699723e2"
+    },
+    {
+      "path": "results/bootstrap-four-web-pure-read-01/vue-collapsible-entered.png",
+      "bytes": 28578,
+      "sha256": "f1d07c23ef30fd11c7893a89fb54be83d5fadfbee63cdbea46af607de40b572c"
+    },
+    {
+      "path": "results/bootstrap-four-web-pure-read-01/vue2-accordion-entered.png",
+      "bytes": 28374,
+      "sha256": "56b2b01f198fd07f0ec02d259297d3f2d7461c2069d1608299356ff94f09c22c"
+    },
+    {
+      "path": "results/bootstrap-four-web-pure-read-01/vue2-collapsible-entered.png",
+      "bytes": 28791,
+      "sha256": "1f67e165f4d1cfe686b8305433c2a0ede7b73234684b726d021d86d90518c743"
+    },
+    {
+      "path": "results/bootstrap-four-web-pure-read-01/wc-accordion-entered.png",
+      "bytes": 28314,
+      "sha256": "d85d7cbcd49111a45415be78bc3e74f84e59bd29d8dbc98032c33cb133604902"
+    },
+    {
+      "path": "results/bootstrap-four-web-pure-read-01/wc-collapsible-entered.png",
+      "bytes": 28797,
+      "sha256": "8e3e17d128a99582070350994c91b66353cfe46c6057631097c3742d58ec2e2a"
+    },
+    {
+      "path": "results/bootstrap-read-calibration-02/calibration-fixture.ts",
+      "bytes": 8320,
+      "sha256": "10e9aee47471442bd3899a9a82d104aaf6ce917e7e88547c53f5e7d8ccd793b1"
+    },
+    {
+      "path": "results/bootstrap-read-calibration-02/consumer.css",
+      "bytes": 8167,
+      "sha256": "7e7f3494e8072eee61f39f2b3de170b69526503275179be1e64684be4bdcbef6"
+    },
+    {
+      "path": "results/bootstrap-read-calibration-02/consumer.js",
+      "bytes": 3169133,
+      "sha256": "fdf0f6965bf15be2b278d437ecb55e989070b84e3935f168e0a7c7450d1e5b03"
+    },
+    {
+      "path": "results/bootstrap-read-calibration-02/driver.mjs",
+      "bytes": 9777,
+      "sha256": "cdeefc374d70e1b8da9b27516ae73928eb26659023b2038bbbc10fb906b52955"
+    },
+    {
+      "path": "results/bootstrap-read-calibration-02/report.json",
+      "bytes": 104504,
+      "sha256": "3521d9fedb30bd50307d4aad1d75cd865aac300e7196bfbcf275e4296a762ac4"
+    }
+  ]
+}

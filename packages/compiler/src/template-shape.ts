@@ -265,7 +265,9 @@ export function nativeShape(
       return collect([value.left, value.right], scope, 'union');
     if (
       value.kind === 'operation' &&
-      (value.operation === 'render.el' || value.operation === 'render.slot')
+      (value.operation === 'render.el' ||
+        value.operation === 'render.slot' ||
+        value.operation.startsWith('render.svg.'))
     )
       return { kind: 'node' };
     if (value.kind === 'member') {

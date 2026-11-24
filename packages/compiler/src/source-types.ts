@@ -4,6 +4,7 @@ import type { SourceModule } from './parser-module';
 import { rejectNode } from './source-syntax';
 import type { ValueType } from './ir';
 import { parseSourceValueType } from './source-values';
+import { joinValueTypes, valueAlternatives } from './value-types';
 
 /** JSON boundaries use the ordinary resolved type grammar, followed by a data proof. */
 export function parseSourceDataType(module: SourceModule, node: ts.TypeNode): DataType {
@@ -14,7 +15,8 @@ export function parseSourceDataType(module: SourceModule, node: ts.TypeNode): Da
       if (top && type === 'void') return 'void';
     } else {
       if (type.kind === 'literal') return type;
-      if (type.kind === 'array') return { kind: 'array', element: data(type.element) };
+      if (type.kind === 'array' || type.kind === 'value-array')
+        return { kind: 'array', element: data(type.element) };
       if (type.kind === 'union' || type.kind === 'value-union')
         return { kind: 'union', members: type.members.map((member) => data(member)) };
       if (
@@ -25,7 +27,11 @@ export function parseSourceDataType(module: SourceModule, node: ts.TypeNode): Da
           kind: 'record',
           fields: type.fields.map(({ name, type, optional }) => ({
             name,
-            type: data(type),
+            type: data(
+              optional
+                ? joinValueTypes(valueAlternatives(type).filter((member) => member !== 'void'))
+                : type
+            ),
             ...(optional ? { optional: true } : {}),
           })),
         };

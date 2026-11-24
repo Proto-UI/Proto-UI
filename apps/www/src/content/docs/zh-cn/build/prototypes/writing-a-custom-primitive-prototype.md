@@ -1,49 +1,48 @@
 ---
 title: '编写一个定制的单体原型'
-description: '在受治理边界或候选边界内理解 direct Prototype 与 authored asHook 的最小结构。'
+description: '掌握单体原型与 asHook 的最小代码结构、def/run 分工以及完整交付路径。'
 ---
 
-单体 Prototype 对应一个边界明确、可以独立承担信息通路责任的 protocol subject。Button 与 Toggle 是当前较清楚的例子。
+单体原型（Primitive Prototype）对应一个边界清晰、能够独立承担交互职责的协议主题，例如 `Button` 和 `Toggle`。
 
-> 本文解释 authoring 结构。已有受治理 subject 直接从当前 P/T 图继续推进。对于全新的 Base subject，research、candidate graph、draft entity、实现探针和测试都可以立即开始；唯一未决语义决定是 Proto UI 是否把这个独立 subject 准入为 Base identity。两条路径都使用[实现受治理的 Base Semantic Slice](/zh-cn/build/prototypes/implementing-an-approved-base-slice/)完成 coherent delivery。
+本文聚焦单体原型的代码结构与设计原则。对于已有 Base 主题，可以直接从现有 `P-*` / `T-*` 规范推进；对于全新主题，可以先以 `draft` 候选形态编写规范与实现探针，并按[实现受治理的 Base Semantic Slice](/zh-cn/build/prototypes/implementing-an-approved-base-slice/)完成整体交付。
 
-## 从实体和证据开始
+## 从规范和测试切入
 
-不要先复制源码。以 Button 为例，阅读顺序应是：
+动手写代码前，先通过规范建立完整心智模型。以 Button 为例，推荐按以下顺序阅读：
 
-1. `P-BASE-BUTTON` 的 lifecycle、criteria、relations 与 sources；
-2. `T-BASE-BUTTON-0001` 的 cases 与 executable mappings；
+1. `P-BASE-BUTTON` 的生命周期、核心准则（criteria）、关联关系与来源；
+2. `T-BASE-BUTTON-0001` 的测试用例与可执行文件映射；
 3. [packages/prototypes/base/src/button/button.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/button/button.proto.ts)；
-4. `packages/prototypes/base/test/as-button.test.ts` 及相关 Adapter evidence；
-5. package exports、CLI、文档和 Demo。
+4. `packages/prototypes/base/test/as-button.test.ts` 与对应的 Adapter 测试；
+5. 包导出、CLI 注册、文档与 Demo。
 
-当前 `P-BASE-BUTTON` 是 `draft`。源码是当前实现证据，不高于适用实体。
+`P-BASE-BUTTON` 当前处于 `draft` 阶段，以规范实体作为核心依据，源码实现用来验证和对齐规范。
 
-## `base-button` 展示了什么
+## `base-button` 的典型结构
 
-Button 的两个官方 authoring entries 是：
+Button 为同一套交互协议提供了两个入口：
 
-- `base-button` direct prototype；
-- `asButton` authored asHook。
+- `base-button`：直接使用的单体原型；
+- `asButton`：供风格化原型复用的 `asHook`。
 
-它们共享 `setupButton(def)`，所以不会各自维护一套 Button 语义。这是 `P-BASE-BUTTON-AUTHORING-ENTRIES` 的具体投影，不是每个 Prototype 都必须复制的固定模板。
+两者共同调用 `setupButton(def)`，确保协议行为只有一份实现（对应 `P-BASE-BUTTON-AUTHORING-ENTRIES`）。具体做法按需决定，并非每个原型都需要同时提供两个入口。
 
-当前实现的关键结构包括：
+`setupButton(def)` 展示了单体原型的常见组成：
 
-- `def.props.define()` 声明 `disabled`；
-- `def.state.bool()` 建立 `disabled`、`hovered` 与 `pressed` 等状态；
-- `asFocusable()` 提供 `focused`、`focusVisible` 与 focus method；
-- `def.event.on()` 承接 pointer 与 `press.commit`；
-- `def.expose.state()`、`def.expose.method()` 和 `def.expose.event()` 提供 outward surface；
-- `asAccessible()` 声明 Button 的 role、name、state 与 action。
+- `def.props.define()`：声明输入属性（如 `disabled`）；
+- `def.state.bool()`：声明交互状态（如 `disabled`、`hovered`、`pressed`）；
+- `asFocusable()`：复用焦点能力，获得 `focused`、`focusVisible` 状态与聚焦方法；
+- `def.event.on()`：订阅指针事件与 `press.commit`；
+- `def.expose.state()` / `def.expose.method()` / `def.expose.event()`：暴露对外接口；
+- `asAccessible()`：声明无障碍角色（role）、名称、状态与动作。
 
-旧的 `def.state.fromInteraction()` 例子已经不代表当前 Button 实现，不应继续作为这篇指南的示例。
+## 厘清 `def` 与 `run` 的分工
 
-## `def` 与 `run` 的边界
+在 Proto UI 中，`def` 和 `run` 分别对应**声明期**与**运行期**：
 
-`def` 用于声明 setup-time 计划：props、state、events、exposes、a11y、rules 与 lifecycle hooks。`run` 只在具体 runtime callback 中提供当前 props、context、lifecycle 与 outward effect 入口。
-
-例如：
+- `def` 在 `setup` 阶段声明静态结构：props、state、events、exposes、a11y、style rules 与生命周期钩子。
+- `run` 在具体回调触发时传入，用来读取当前 props/context、访问运行时状态以及触发对外副作用。
 
 ```ts
 def.event.on('press.commit', (run) => {
@@ -52,41 +51,39 @@ def.event.on('press.commit', (run) => {
 });
 ```
 
-这里 event route 在 setup 期注册；真正的 outward signal 在事件发生时通过 `run` 发出。
+上面的代码在 `setup` 阶段注册了 `press.commit` 路由；当事件真正发生时，再通过 `run.expose.emit('click')` 向外发出信号。
 
-## 什么时候提供 authored asHook
+## 什么时候需要提供 `asHook`
 
-不要把“只导出 prototype，不导出 asHook”当成通用错误。先问：
+只导出直接原型而不导出 `asHook` 是完全合理的。决定是否提供 `asHook` 时，可以检查：
 
-- applicable P 是否把 direct form 与 authored asHook 记录为同一 protocol 的两个 entries？
-- 两者是否应共享完整协议面与实现？
-- 这个 hook 是否只服务其 owning protocol，而不是被误用为跨 Prototype substrate？
-- 新增 entry 是否会引入未经治理的 options、merge 或 configure 语义？
+- 对应的 `P-*` 实体是否将直接原型与 `asHook` 共同列为同一协议的入口；
+- 两者是否共享同一份协议面与核心实现；
+- 该钩子是否只服务于所属协议（而不是被当成其他 Base 协议的通用底层能力）；
+- 是否会引入未经规范化的配置项（options/merge/configure）。
 
-`D-PROTOTYPE-ENTITY-NAMING-0001` 要求同一协议已有的多个 entries 编目在同一个 P 实体；它不要求每个 direct Prototype 自动生成 asHook。`D-AS-HOOK-CONFIGURABLE-AUTHORED-0001` 还将普通 configurable authored asHook 保留为待治理设计空间。
+根据 `D-PROTOTYPE-ENTITY-NAMING-0001`，同一协议的多个入口记录在同一个 `P-*` 实体中；根据 `D-AS-HOOK-CONFIGURABLE-AUTHORED-0001`，可配置的用户侧 `asHook` 需在明确的规范边界内设计。
 
-## 一个完整单体 slice 还需要什么
+## 一个完整单体切片的交付面
 
-源码文件只是交付面的一部分。受治理 leaf 或明确标记的 candidate 通常按下面的链路推进：
+源码只是交付的一部分，完整的单体原型通常按以下链路闭环：
 
 ```text
-governed identity or candidate draft
-→ P criteria and relations
-→ T cases and executable tests
-→ implementation and public exports
-→ CLI facade generation
-→ bilingual docs and real public-package demo
-→ applicable WC / React / Vue evidence
+规范实体（已准入或 draft 候选）
+→ P-* 准则与关系
+→ T-* 用例与可执行测试
+→ 源码实现与公开导出
+→ CLI facade 生成
+→ 中英文文档与真实包导出 Demo
+→ Web Component / React / Vue 预览验证
 ```
 
-三套当前 Adapter 预览验证的是一个 Web host profile，不能自动推导为多宿主 conformance。
+## 遇到边界变化时如何处理
 
-## 何时暂停
-
-如果实现中需要新增公共 prop/event/state、改变 owner、引入 raw host object，或发现 P/T 与实现互相矛盾，应同步更新 candidate 或 governed graph、测试和证据，而不是只在源码里扩张边界；可逆工作继续进入 fresh review。只有证据要求准入另一个全新 Base identity 时才升级，并在准入选择未决期间保持该 identity 为 draft。
+如果在实现中发现需要新增公开 prop/event/state、调整状态归属、接触宿主原生对象，或发现代码与规范存在分歧，请同步更新规范实体、测试与文档，让改动在评审中保持一致；如果涉及引入新的 Base 身份，在准入前保持其 `draft` 状态即可。
 
 ## 下一步
 
-- 复合 family：读[编写一个定制的复合原型](/zh-cn/build/prototypes/writing-a-compound-prototype/)
-- 设计语言投射：读[基于 Base 长出一个带风格的原型库](/zh-cn/build/prototypes/building-a-styled-library-on-top-of-base/)
-- 提交前：使用[原型作者检查清单](/zh-cn/build/prototypes/checklist/)
+- 构建多部件复合组件：[编写一个定制的复合原型](/zh-cn/build/prototypes/writing-a-compound-prototype/)
+- 基于 Base 构建设计语言风格库：[基于 Base 长出一个带风格的原型库](/zh-cn/build/prototypes/building-a-styled-library-on-top-of-base/)
+- 提交 PR 前逐项核对：[原型作者检查清单](/zh-cn/build/prototypes/checklist/)

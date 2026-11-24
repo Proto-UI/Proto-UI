@@ -1,19 +1,15 @@
 ---
-title: 'Message-Scroller (WIP)'
-description: 'message-scroller functional composition and current verification limits.'
+title: 'Message Scroller'
+description: '支持底部自动跟随与跳转最新消息的滚动容器组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Message Scroller 适用于聊天记录、日志流等持续追加内容的滚动区域，支持在底部自动跟随新消息以及一键跳回最新位置。本页示例使用 **Shadcn Rhea** 风格。
 
-Message Scroller 复用 Scroll Surface 的 end-follow。读者位于末端时跟随追加；离开末端后可以通过 Jump to latest 显式恢复。newContentCount 由应用提供，不推断未读业务事实。跳转不会主动请求焦点。
-
-当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
-
-Root 的 a11yLabel 为滚动区域提供无障碍名称，默认值是 Messages。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-message-scroller"
@@ -21,9 +17,26 @@ Root 的 a11yLabel 为滚动区域提供无障碍名称，默认值是 Messages�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+## 用法
+
+Message Scroller 由 `Root`、`Viewport` 和 `Jump` 组成：
+
+- 当读者位于滚动区域底部时，新追加的内容会自动跟随滚入视野。
+- 向上回看历史内容时，自动跟随暂停；用户可通过 `Jump` 控件主动跳回最新位置，且跳转不会抢占当前键盘焦点。
+- `newContentCount` 由应用自行传入，用于展示新增消息提示，组件不会自动推断未读业务状态。
+- 通过 `Root` 的 `a11yLabel` 为滚动区域提供无障碍名称，默认值为 `Messages`。
+
+### 历史位置与选区恢复
+
+如果需要基于稳定 key 恢复历史阅读位置或文本选区，可在自定义组合中于 Shadcn `Viewport` 之后调用公开的 Base Hook `asMessageScrollerReading`。该 Hook 基于同一滚动容器管理锚点捕获、按 key 或前驱恢复位置以及选区恢复，同时应用继续负责内容标识、DOM/Range 操作与持久化存储。详细配置请参阅 [Base Message Scroller](/zh-cn/ui-libraries/base/message-scroller/)。
+
 ## API
 
-Message Scroller 是工作区源码，没有公开的 `proto-ui add` 目标。Viewport 没有属性。Jump 接受 Button 的属性。
+以下属性属于 `Root`（`Viewport` 无额外属性，`Jump` 接受 Button 属性）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -32,8 +45,6 @@ Message Scroller 是工作区源码，没有公开的 `proto-ui add` 目标。Vi
     { name: 'a11yLabel', type: 'string', default: 'Messages' },
   ]}
 />
-
-这些属性属于 Root。
 
 ## 参考
 

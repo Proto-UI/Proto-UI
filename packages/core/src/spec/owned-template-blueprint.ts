@@ -8,6 +8,7 @@ import type {
   TemplateNode,
 } from './template';
 import type { OwnedDecorationTarget, TemplateStyleHandle } from './feedback/style';
+import type { MaterialPaintReservation } from '../material-paint-reservation';
 
 const svgKeys = [
   'viewBox',
@@ -160,6 +161,15 @@ export function snapshotOwnedTemplateBlueprint(input: unknown): TemplateChildren
           target: target as OwnedDecorationTarget,
         });
       }
+      if (kind === 'paint-reservation') {
+        record(source, ['kind', 'target']);
+        const target = captured.read('target');
+        if (!target || typeof target !== 'object') fail('invalid material paint reservation');
+        return Object.freeze({
+          kind: 'paint-reservation' as const,
+          target: target as MaterialPaintReservation,
+        });
+      }
       return fail('unsupported template type');
     });
   };
@@ -224,6 +234,10 @@ export function snapshotOwnedTemplateBlueprint(input: unknown): TemplateChildren
       }
       const rawStyle = captured.read('style');
       const rawChildren = captured.read('children');
+      if (typeof nodeType === 'object' && nodeType.kind === 'paint-reservation') {
+        if (rawStyle !== undefined) fail('paint reservation is an unstyled owned part');
+        return Object.freeze({ type: nodeType, children: children(rawChildren) });
+      }
       if (typeof nodeType === 'object') {
         if (rawStyle !== undefined || (rawChildren !== null && rawChildren !== undefined))
           fail('slot must be an empty unstyled node');
@@ -278,7 +292,7 @@ export function equalOwnedTemplateBlueprint(
     if (keys.length !== Object.keys(bb).length) return false;
     for (const key of keys) {
       if (!Object.prototype.hasOwnProperty.call(bb, key)) return false;
-      if (key === 'target' && aa.kind === 'decoration') {
+      if (key === 'target' && (aa.kind === 'decoration' || aa.kind === 'paint-reservation')) {
         if (!Object.is(aa[key], bb[key])) return false;
       } else if (!equal(aa[key], bb[key])) return false;
     }

@@ -1,15 +1,15 @@
 ---
-title: 'Date-Picker (WIP)'
-description: 'date-picker composition and explicit implementation boundary.'
+title: 'Date Picker'
+description: 'A popover-based date picker composing Popover and Calendar for single, multiple, and range date selection.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Date Picker is a composition of the real Popover and Calendar atoms. Selection uses Calendar’s single, multiple or range mode. Popover closes only after an accepted complete single/range selection. Open, selection and month retain their independent controlled/uncontrolled boundaries. Calendar grid, row, heading and navigation atoms can be used inside the content.
+Base Date Picker combines Popover and Calendar into a single date selection control supporting single, multiple, and range modes. Open state, selected value, and visible month each retain independent controlled/uncontrolled boundaries.
 
-WIP functional source. Full runtime/Compiler/native, packaging, browser and visual acceptance remain pending.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-date-picker"
@@ -17,13 +17,7 @@ WIP functional source. Full runtime/Compiler/native, packaging, browser and visu
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Range and multiple selection
-
-Pass `mode="range"` with `range` / `defaultRange`, or `mode="multiple"` with `values` / `defaultValues`. These are the same Calendar inputs, callbacks, methods and eligibility rules documented on the Calendar page, including range-interior availability and count/night limits.
-
-The first range endpoint keeps the popup open. The second accepted endpoint completes the range and requests one close. A rejected or pending controlled request leaves the popup open; matching later owner acceptance closes it only within the same open session. Closing/reopening, unmounting, mode changes, disabled/readOnly changes and replacement owner selections retire stale completion. External value changes alone do not close the popup. Controlled `open` can still refuse the close request. Multiple selections keep it open for further toggles; use the normal Popover dismissal behavior to finish.
-
-Value displays one ISO civil date, a comma-separated sorted list, `from …` for an unfinished range, or `from – to` for a complete range. An empty selection uses `placeholder`. Calendar Day facts and family range painting are inherited directly. Popover continues to own focus return and dismissal.
+Range and multiple date selection:
 
 <PrototypePreviewer
   demoId="demo-base-date-picker-selection"
@@ -31,9 +25,27 @@ Value displays one ISO civil date, a comma-separated sorted list, `from …` for
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+### Single, range, and multiple selection
+
+- **Single mode**: requests closing the popover once an accepted date is selected.
+- **Range mode (`mode="range"`)**: uses `range` / `defaultRange`. Selecting the first endpoint keeps the popover open; selecting the second accepted endpoint completes the range and requests closing once.
+- **Multiple mode (`mode="multiple"`)**: uses `values` / `defaultValues`. The popover stays open as dates are toggled and closes through normal Popover dismissal.
+- Selection callbacks, date constraints (`min`, `max`, `unavailable`), and count/night limits (`minSelected`, `maxSelected`, `minNights`, `maxNights`) are inherited directly from [Calendar](../calendar/).
+
+### Formatted display and focus
+
+- `Value` displays a single ISO date, a comma-separated sorted list for multiple dates, `from …` for a pending range, `from – to` for a completed range, or `placeholder` when empty.
+- Popover manages dismissal and focus restoration; in controlled `open` mode, your application can still approve or ignore close requests.
+
 ## API
 
-Date Picker is workspace source. There is no public `proto-ui add` target. Open stays on Popover; mode, value/values/range, selection constraints and month stay on Calendar. The only Date Picker prop is on Value.
+Open state props belong to Popover; `mode`, `value` / `values` / `range`, constraints, and `month` belong to Calendar. Date Picker itself defines one prop on `Value`:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}

@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-24T08:58:06.178802+00:00",
+  "pullRequest": "https://github.com/Proto-UI/Proto-UI/pull/1712",
+  "direction": {
+    "request": "Continue Sprint 6 source integration, including 0.4 scope, to avoid further main drift.",
+    "supersedesReleaseHoldComments": [7099921619, 7111998346],
+    "preservedBoundaries": [
+      "Experimental/WIP lifecycle and stable 0.3 release selection",
+      "Required CI, native DCO and independent platform approval",
+      "No registry publication or review/CI waiver"
+    ]
+  },
+  "source": {
+    "initialMain": "b939afe35d30a1a436766d80beea7093a46e4fb2",
+    "sprint6Parent": "1b21061f24d9f45e5e16ea1a4cfa8f445742d412",
+    "latestMainToInclude": "88fc0883bec70abbc0d7505d88370657c279639e",
+    "latestMainDelta": "PR #1790 changes 554 documentation and coupled test/lint files, with zero overlap against the prepared S6 changes.",
+    "sourceTreeBeforeRecord": "5f948bd8253359654146c5f0c0149f46274fa61e",
+    "finalRelevantSourceSha256": {
+      "packages/core/src/presence-presentation.ts": "edb67aa4b338842825d2640db1b1754f79e692596ea7ec15885a38153f5fc473",
+      "packages/modules/feedback/src/presence/controller.ts": "6b0a20182e495e2113f13aa21d74a4bcb7ef7ea358044241d7c4d20f66072ab1",
+      "packages/modules/feedback/src/presence/projector.ts": "ab87adbe9a2da27b5e78dedafac4518a720161e2d14724119d255ff14a4162e0",
+      "packages/modules/feedback/src/presence/sampler.ts": "180dff0c4c9df44567037abf2c1d5544bd510c76198644a9f96b1ba5c6c2b561",
+      "packages/modules/feedback/test/presence-channel-union.test.ts": "d117c5399f2b5ed7c494d407d1baa36a4717568f29736f45acf9d2cd7c5eb65d",
+      "packages/adapters/base/src/motion/web-presence-presentation.ts": "2e7849c42324a82399e9d9a523d83c1c1248e147225199ec01f56681a32f71bd",
+      "packages/adapters/base/src/motion/web-resident-motion.ts": "022e92094ddee8e77a72ff8dce6b94bb4cd6fd0ac2a91f6a6fdd7cadc6f200d0",
+      "packages/adapters/base/test/web-presence-combined-channels.test.ts": "bbcdadc4a8085656e495d5c20da84b83184e5a63518c397add675cdb77a56220",
+      "packages/adapters/web-component/test/portal-presence-preparation.test.ts": "157fe4027d94a53bd81f96b8860edbc48f2521c2fe79e6bff53c04a9ff0107ae",
+      "packages/prototypes/bootstrap-2-3-2/test/modal-presence-presentation.test.ts": "2ea4d497e0a772aba17aa9468d0420aa239e2b05c176996ca6d05cca3df282d4",
+      "packages/compiler/src/native-support/web-presence.ts": "73cfb44276f89390c218eae7dac6acc094bca7dd3e1ca1a63bcd9c40b4719c82",
+      "packages/compiler/src/native-support/web-host-sources.generated.ts": "e63e9fc14b30a665562a0a8ebce655390f91625ee4c83f1f1abdff9d513f7437",
+      "scripts/compiler/generate-web-host-sources.mjs": "246b18a9499ba7720a64cf27adf7a6b8ab57ffd4e3dde69e7d2d7272434abae0"
+    }
+  },
+  "implementation": [
+    "Resolve fourteen merge conflicts by retaining both main intrinsic block-size/shader support and S6 top/channel easing/material reservation support.",
+    "Use independent five-slot presence samples: translate x/y, opacity, top, blockSize; preserve channel-specific lease and failure behavior.",
+    "Revalidate candidate ownership after the reentrant host clock; retain only acknowledged clamped opacity and nonnegative block-size samples.",
+    "Preserve warm retained top/opacity reopen while remeasuring the initial endpoint; intrinsic block-size still requires a newly acknowledged zero frame.",
+    "Observe actual synchronous first portal preparation in the fixture; preserve all fifteen scenarios and the unchanged eighteen Modal timing assertions.",
+    "Regenerate canonical compiler sources and complete their transitive declaration/helper closure without changing backend admission or claiming full native conformance."
+  ],
+  "validation": [
+    {
+      "name": "initial combined run",
+      "files": 70,
+      "tests": 1123,
+      "passed": 1107,
+      "failed": 15,
+      "todo": 1,
+      "sourceChangedDuringRun": false,
+      "report": "focused-union.json",
+      "status": "failed before the final Portal/Modal fixes"
+    },
+    {
+      "name": "final affected graph",
+      "files": 22,
+      "tests": 310,
+      "passed": 309,
+      "failed": 0,
+      "todo": 1,
+      "sourceChangedDuringRun": false,
+      "report": "presence-union-final.json",
+      "scope": "Includes original blockSize 25, combined-channel 10, Portal 15, Modal 18, four compiler emitted-type profiles and native presentation consumers.",
+      "status": "passed with one pre-existing todo"
+    },
+    {
+      "name": "compiler current-source closure",
+      "before": "3 passed / 1 failed, with twelve missing symbols/dependencies after regenerating current source",
+      "after": "4/4 passed; included again in final affected graph",
+      "staleSnapshotControl": "The earlier 4/4 run against stale generated input is preserved and is not current-source evidence."
+    },
+    {
+      "name": "public type contracts",
+      "command": "corepack pnpm@10.32.1 test:types",
+      "exitCode": 0
+    },
+    {
+      "name": "public manifest check",
+      "command": "node scripts/build/sync-public-manifests.mjs --check",
+      "exitCode": 0
+    },
+    {
+      "name": "generated canonical source check",
+      "command": "node scripts/compiler/generate-web-host-sources.mjs --check",
+      "exitCode": 0,
+      "independentReadback": "38/38 canonical inputs and fourteen artifact import closures verified"
+    },
+    {
+      "name": "local native browser attempt",
+      "files": 2,
+      "testsPlanned": 13,
+      "testsExecuted": 0,
+      "exitCode": 1,
+      "classification": "environment setup failure",
+      "reason": "Chromium process singleton socket() denied with Operation not permitted before test execution; sandbox setting unchanged.",
+      "nextAction": "Execute unchanged Modal/Progress browser cases on the existing hosted Bootstrap evidence workflow."
+    },
+    {
+      "name": "prototype catalog check",
+      "exitCode": 1,
+      "classification": "inherited main failure",
+      "reason": "Base message-scroller reading hook is uncataloged and absent from the declared debt inventory.",
+      "control": "Reproduced identically on isolated main 88fc0883; only a temporary dependency symlink existed during the control and was removed afterward."
+    }
+  ],
+  "independentLocalReview": {
+    "reviewer": "Separate fresh-context Codex reviewer",
+    "platformApproval": false,
+    "resolvedFindings": [
+      "S6-LOCAL-PRESENCE-001: reentrant now() must not mutate the replacement attempt",
+      "S6-LOCAL-PRESENCE-002: reversal must use the actual clamped acknowledged sample"
+    ],
+    "closureAndWarmReopen": "No new blocking finding in the bounded source review; final file hashes read back.",
+    "retainedFinding": {
+      "id": "S6-LOCAL-COMPILER-001",
+      "severity": "P2",
+      "status": "inherited compiler completion debt",
+      "details": "top/channelEasing compile successfully but Vue/Vue2/WC legacy emitted presentation host rejects unknown fields during setup; same defect reproduced on main b939. S6 parent runtime equivalence inspected; its full parent compiler probe was interrupted and is not a passing execution.",
+      "tracking": [1148, 1049]
+    }
+  },
+  "budgetBaseline": {
+    "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/45350394271",
+    "head": "b939afe35d30a1a436766d80beea7093a46e4fb2",
+    "status": "canonical strict failure with successful full build and measurement controls",
+    "reportSha256": "7260777668efe6d4c124abd054e52103ad576fbbbbf749a4114e16f23840df85",
+    "gzipBytes": {
+      "core": 12710,
+      "runtime": 104125,
+      "react": 173379,
+      "vue": 172258,
+      "web-component": 208711
+    },
+    "inheritedOverrun": "Vue 78 bytes; do not attribute it to Sprint 6.",
+    "candidateStatus": "Final combined canonical package measurement pending; no ceiling changed in this source reconciliation."
+  },
+  "remainingAcceptance": [
+    "Final combined hosted browser, package and source checks",
+    "Independent exact-head GitHub approval and genuine native DCO",
+    "Full family/Compiler/native coverage on #1148/#1049",
+    "Physical performance, complete optical comparison and OS IME/AT acceptance remain open on the original Sprint 6 criteria"
+  ],
+  "visualEvidence": {
+    "status": "pending for current combined candidate",
+    "localCaptures": 0,
+    "uploadedCaptures": 0,
+    "reason": "Local browser could not start; historical S6 visuals are not relabeled as current-source captures.",
+    "nextAction": "Inspect actual hosted Bootstrap/Liquid rendered captures and publish their exact-head artifact receipts."
+  },
+  "provenance": {
+    "assistance": "Codex implementation, regression tests, merge reconciliation and independent Agent review",
+    "sources": "Existing Proto-UI main and Sprint 6 repository code under its retained MIT license; no new third-party implementation/assets or private source supplied.",
+    "humanReview": "Not claimed for this reconciliation; formal independent GitHub approval remains required."
+  },
+  "rawEvidence": {
+    "path": "internal/records/evidence/2026-11-24-sprint6-main-reconciliation/local-validation.tar.gz",
+    "sha256": "9a9f4251e06425cb9d5bac3ddf05aab77d75a7536da1447bf56890587d25ec85",
+    "bytes": 1300100,
+    "members": 55,
+    "note": "Contains original failed and passing logs/reports, source input maps and the browser setup failure. Counts are scoped and prior failures are not overwritten."
+  }
+}

@@ -1,6 +1,6 @@
 ---
-title: Tabs
-description: 标签页组件
+title: 'Tabs'
+description: '支持键盘导航、多种外观预设与按需挂载面板的标签页组件。'
 ---
 
 import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
@@ -12,12 +12,12 @@ import { codeMap } from '@/content/docs/demo_components/tabs/tabsCode';
 import { tabsProfileSwitchCode } from '@/content/docs/demo_components/tabs/tabs-profile-switch-code';
 import { getCode } from '@/utils/conversionUtils';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Tabs 将关联内容分组到可切换的标签面板中，同一时刻展示一个活动面板，支持水平或垂直排列以及自动/手动键盘激活。本页示例使用 **Shadcn Rhea** 风格。
+
+## 预览
 
 <div data-adapter-panel="wc">
-  这是 wc 的 tabs 组件
-
-<PrototypePreviewer
+  <PrototypePreviewer
     demoId="demo-shadcn-tabs"
     initialRuntime="wc"
     toolbar={false}
@@ -28,7 +28,6 @@ import { getCode } from '@/utils/conversionUtils';
 </div>
 
 <div data-adapter-panel="react" style="display:none;">
-  这是 react 的 tabs 组件
   <PrototypePreviewer
     demoId="demo-shadcn-tabs"
     initialRuntime="react"
@@ -40,7 +39,6 @@ import { getCode } from '@/utils/conversionUtils';
 </div>
 
 <div data-adapter-panel="vue" style="display:none;">
-  这是 vue 的 tabs 组件
   <PrototypePreviewer
     demoId="demo-shadcn-tabs"
     initialRuntime="vue"
@@ -52,7 +50,6 @@ import { getCode } from '@/utils/conversionUtils';
 </div>
 
 <div data-adapter-panel="vue2" style="display:none;">
-  这是 vue2 的 tabs 组件
   <PrototypePreviewer
     demoId="demo-shadcn-tabs"
     initialRuntime="vue2"
@@ -65,13 +62,19 @@ import { getCode } from '@/utils/conversionUtils';
 
 <AdapterPanelScript />
 
-## Style Profile 预设展示
+## 安装
 
-当前 Tabs 源码已编写八种现代 profile（`vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea`）及独立的 `new-york-v4` 配方。这表示源码覆盖，不代表完整视觉或辅助技术验收；未知 ID 会明确拒绝，不会借用另一种样式。
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-tabs" manager="npm" />
 
-### 在同一个 Tabs 实例上切换样式
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件封装。
 
-先选中 Password，再点击下方 Nova、Rhea 或 New York v4。这里只更新外层 style scope，同一个 Tabs owner 保留已选值和子节点。要在 Tab 保持键盘焦点时切换，请在示例内按 **Alt+1**、**Alt+2** 或 **Alt+3**；点击样式按钮时仍遵循浏览器正常的焦点行为。
+## 用法
+
+### 风格预设与实时切换
+
+Tabs 支持八种现代预设（`vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea`）以及独立的 `new-york-v4` 预设；传入未识别的预设 ID 会被拒绝。
+
+在下方示例中，你可以先切换到 **Password** 标签，再点击切换 Nova、Rhea 或 New York v4。更新外层样式作用域时，Tabs 会保留当前选中项和内部节点而不会重建实例。若想在标签保持键盘焦点时切换，请在示例区域内按 **Alt+1**、**Alt+2** 或 **Alt+3**。
 
 <div data-adapter-panel="wc">
   <PrototypePreviewer
@@ -117,9 +120,9 @@ import { getCode } from '@/utils/conversionUtils';
   />
 </div>
 
-以下三个独立示例使用相同内容与默认状态，仅用于比较静态外观；上方交互示例才演示同实例更新。
+下方三个静态示例使用相同内容，便于直接对比不同预设的外观差异：
 
-### Nova
+#### Nova
 
 <div data-adapter-panel="wc">
   <PrototypePreviewer
@@ -165,7 +168,7 @@ import { getCode } from '@/utils/conversionUtils';
   />
 </div>
 
-### Rhea（当前默认展示）
+#### Rhea
 
 <div data-adapter-panel="wc">
   <PrototypePreviewer
@@ -211,7 +214,7 @@ import { getCode } from '@/utils/conversionUtils';
   />
 </div>
 
-### New York v4
+#### New York v4
 
 <div data-adapter-panel="wc">
   <PrototypePreviewer
@@ -257,25 +260,17 @@ import { getCode } from '@/utils/conversionUtils';
   />
 </div>
 
-## Content mount 策略
+### 面板挂载策略
 
-`TabsContent` 默认采用 lazy L1 view：
+`TabsContent` 默认采用按需挂载策略：
 
-- 只有当前 panel 会物化 host view。
-- panel 失活时会 detach view，但保留 Proto instance、状态与 exposes。
-- `keepMounted={true}` 是唯一的 view retention 选项，会让 inactive panel 继续保留完整 view。
-
-Web Component 会保留 custom element 作为 owner，并在 internal view detached 时隐藏该 owner；重新激活后，同一个 Proto instance 会在该 owner 内物化新的 view。
-
-## 安装
-
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-tabs" manager="npm" />
-
-把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+- 仅当前激活的面板会渲染内容节点；关闭或切换离开时默认卸载内容节点（设置 `keepMounted={true}` 可保留隐藏节点）。
+- 卸载非活动面板的视图时，其组件实例、内部状态与暴露接口依然保持存活；重新切回该面板时会自动恢复渲染。
+- 在 Web Components 中，外层自定义元素保持挂载并在非激活时隐藏，再次激活时在同一个元素内重新渲染内容。
 
 ## API
 
-传入 `value` 进入受控模式。
+以下属性属于 `Root`（传入 `value` 可进入受控模式）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -286,7 +281,11 @@ Web Component 会保留 custom element 作为 owner，并在 internal view detac
   ]}
 />
 
-这些属性属于 Root。List 的 `orientation` 默认 `horizontal`，`loop` 默认 `false`，`a11yLabel` 默认 `''`。Trigger 的 `value` 默认 `''`，`disabled` 默认 `false`。Content 的 `value` 默认 `''`，`keepMounted` 默认 `false`。
+其他部件的默认属性：
+
+- `List`：`orientation` 默认 `'horizontal'`，`loop` 默认 `false`，`a11yLabel` 默认 `''`。
+- `Trigger`：`value` 默认 `''`，`disabled` 默认 `false`。
+- `Content`：`value` 默认 `''`，`keepMounted` 默认 `false`。
 
 ## 参考
 

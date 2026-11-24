@@ -1,6 +1,7 @@
 ---
 import { codeFileIcon, type CodeFileIcon } from '../code-file-icon';
 import StaticLucideIcon from '../StaticLucideIcon.astro';
+import CodeScrollArea from './CodeScrollArea.astro';
 import SiteCopyBootstrap from '../SiteCopyBootstrap.astro';
 import { resolveSiteLibraryFamily, siteControlTags } from '../site-library-family';
 const siteFamily = resolveSiteLibraryFamily(Astro.url.pathname);
@@ -27,6 +28,7 @@ interface Props {
   titleIcon?: 'terminal' | 'folder-tree' | CodeFileIcon;
   lineNumbers?: boolean;
   presentation?: 'docs';
+  scrollLimit?: 'preview' | 'file' | 'unbounded';
   panelRole?: 'tabpanel' | 'region';
 }
 
@@ -46,6 +48,7 @@ const {
   titleIcon,
   lineNumbers = true,
   presentation,
+  scrollLimit,
   panelRole = 'tabpanel',
 } = Astro.props;
 const highlighted = await highlightCode(code, lang);
@@ -105,7 +108,18 @@ const highlighted = await highlightCode(code, lang);
       )
     }
 
-    <div class="min-w-0 max-w-full" data-code-content set:html={highlighted} />
+    {
+      scrollLimit ? (
+        <CodeScrollArea
+          limit={scrollLimit}
+          label={title ?? (isChinese ? '示例代码' : 'Example source')}
+        >
+          <div class="min-w-0 max-w-full" data-code-content set:html={highlighted} />
+        </CodeScrollArea>
+      ) : (
+        <div class="min-w-0 max-w-full" data-code-content set:html={highlighted} />
+      )
+    }
 
     {
       collapsible && (
@@ -140,6 +154,61 @@ const highlighted = await highlightCode(code, lang);
 </script>
 
 <style is:global>
+  /* The static pre remains the scroll and focus owner if the browser does not
+     upgrade the Shadcn anatomy. A ready viewport is the only scroll owner. */
+  [data-code-scroll-root][data-code-scroll-limit='file']:not([data-code-scroll-ready])
+    .proto-previewer__code {
+    max-height: 28rem;
+  }
+  [data-code-scroll-root],
+  [data-code-scroll-anatomy],
+  [data-code-scroll-ready] [data-code-scroll-viewport] {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+  }
+  [data-code-scroll-ready] [data-code-scroll-viewport] {
+    height: auto;
+    overflow: auto;
+    overscroll-behavior-x: contain;
+    overscroll-behavior-y: auto;
+  }
+  [data-code-scroll-ready][data-code-scroll-limit='file'] [data-code-scroll-viewport] {
+    max-height: 28rem;
+  }
+  [data-code-scroll-ready][data-code-scroll-limit='preview'] [data-code-scroll-viewport] {
+    max-height: min(36rem, 65svh);
+  }
+  [data-code-expanded='false']
+    [data-code-scroll-ready][data-code-scroll-limit='preview']
+    [data-code-scroll-viewport] {
+    max-height: 4.5rem;
+  }
+  @container code-panel (max-width: 14rem) {
+    [data-code-expanded='true']
+      [data-code-scroll-ready][data-code-scroll-limit='preview']
+      [data-code-scroll-viewport] {
+      max-height: min(36rem, 65svh, max(6rem, calc(100svh - var(--header-height, 4rem) - 4rem)));
+    }
+  }
+  [data-code-scroll-ready] [data-code-scroll-viewport] .proto-previewer__code {
+    box-sizing: border-box;
+    width: max-content;
+    min-width: 100%;
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+  }
+  [data-code-expanded='false'] [data-code-scroll-ready] [data-code-scroll-viewport] {
+    mask-image: linear-gradient(to bottom, black, transparent);
+  }
+  [data-code-expanded='false'] [data-code-scroll-ready] [data-code-content] {
+    mask-image: none;
+  }
+  [data-code-scroll-ready] [data-code-scroll-viewport]:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: -2px;
+  }
   .code-panel__title {
     display: flex;
     align-items: center;
@@ -157,7 +226,9 @@ const highlighted = await highlightCode(code, lang);
     align-items: start;
     column-gap: 0.5rem;
   }
-  [data-code-collapsible='false'] [data-code-content] {
+  [data-code-collapsible='false']
+    [data-code-inner]
+    > :is([data-code-content], [data-code-scroll-root]) {
     grid-column: 1;
     grid-row: 1;
   }

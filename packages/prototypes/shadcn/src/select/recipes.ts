@@ -53,8 +53,10 @@ export const SELECT_TRIGGER_SIZE: Record<SelectTranslucentStyle, { default: stri
   };
 
 /** Nova sm additionally caps the theme radius at the pinned 10px limit. */
-export const SELECT_TRIGGER_SM_RADIUS: Partial<Record<SelectTranslucentStyle, string>> = {
-  nova: 'rounded-[min(var(--pui-radius-md),10px)]',
+export const SELECT_TRIGGER_SM_RADIUS: Readonly<
+  Partial<Record<SelectTranslucentStyle, StyleHandle>>
+> = {
+  nova: tw('rounded-[min(var(--pui-radius-md),10px)]'),
 };
 
 /** focus-visible border/ring per pinned recipe (suppressed while invalid). */
@@ -70,54 +72,55 @@ export const SELECT_TRIGGER_FOCUS: Record<SelectTranslucentStyle, string> = {
 };
 
 /** aria-invalid ring/border per pinned recipe, split by light/dark meta. */
-export const SELECT_TRIGGER_INVALID: Record<
-  SelectTranslucentStyle,
-  { light: string; dark: string }
+export const SELECT_TRIGGER_INVALID: Readonly<
+  Record<SelectTranslucentStyle, { readonly light: StyleHandle; readonly dark: StyleHandle }>
 > = {
   vega: {
-    light: 'border-destructive ring-3 ring-destructive/20',
-    dark: 'border-destructive/50 ring-3 ring-destructive/40',
+    light: tw('border-destructive ring-3 ring-destructive/20'),
+    dark: tw('border-destructive/50 ring-3 ring-destructive/40'),
   },
   nova: {
-    light: 'border-destructive ring-3 ring-destructive/20',
-    dark: 'border-destructive/50 ring-3 ring-destructive/40',
+    light: tw('border-destructive ring-3 ring-destructive/20'),
+    dark: tw('border-destructive/50 ring-3 ring-destructive/40'),
   },
   maia: {
-    light: 'border-destructive ring-3 ring-destructive/20',
-    dark: 'border-destructive/50 ring-3 ring-destructive/40',
+    light: tw('border-destructive ring-3 ring-destructive/20'),
+    dark: tw('border-destructive/50 ring-3 ring-destructive/40'),
   },
   lyra: {
-    light: 'border-destructive ring-1 ring-destructive/20',
-    dark: 'border-destructive/50 ring-1 ring-destructive/40',
+    light: tw('border-destructive ring-1 ring-destructive/20'),
+    dark: tw('border-destructive/50 ring-1 ring-destructive/40'),
   },
   mira: {
-    light: 'border-destructive ring-2 ring-destructive/20',
-    dark: 'border-destructive/50 ring-2 ring-destructive/40',
+    light: tw('border-destructive ring-2 ring-destructive/20'),
+    dark: tw('border-destructive/50 ring-2 ring-destructive/40'),
   },
   luma: {
-    light: 'border-destructive ring-3 ring-destructive/20',
-    dark: 'border-destructive/50 ring-3 ring-destructive/40',
+    light: tw('border-destructive ring-3 ring-destructive/20'),
+    dark: tw('border-destructive/50 ring-3 ring-destructive/40'),
   },
   sera: {
-    light: 'border-b-destructive',
-    dark: 'border-b-destructive/50',
+    light: tw('border-b-destructive'),
+    dark: tw('border-b-destructive/50'),
   },
   rhea: {
-    light: 'border-destructive ring-3 ring-destructive/20',
-    dark: 'border-destructive/50 ring-3 ring-destructive/40',
+    light: tw('border-destructive ring-3 ring-destructive/20'),
+    dark: tw('border-destructive/50 ring-3 ring-destructive/40'),
   },
 };
 
 /** Light/dark input-surface backgrounds per pinned recipe. */
-export const SELECT_TRIGGER_SURFACE_BG: Record<
-  SelectTranslucentStyle,
-  { dark: string | null; darkHover: string | null }
+export const SELECT_TRIGGER_SURFACE_BG: Readonly<
+  Record<
+    SelectTranslucentStyle,
+    { readonly dark: StyleHandle | null; readonly darkHover: StyleHandle | null }
+  >
 > = {
-  vega: { dark: 'bg-input/30', darkHover: 'bg-input/50' },
-  nova: { dark: 'bg-input/30', darkHover: 'bg-input/50' },
-  maia: { dark: null, darkHover: 'bg-input/50' },
-  lyra: { dark: 'bg-input/30', darkHover: 'bg-input/50' },
-  mira: { dark: 'bg-input/30', darkHover: 'bg-input/50' },
+  vega: { dark: tw('bg-input/30'), darkHover: tw('bg-input/50') },
+  nova: { dark: tw('bg-input/30'), darkHover: tw('bg-input/50') },
+  maia: { dark: null, darkHover: tw('bg-input/50') },
+  lyra: { dark: tw('bg-input/30'), darkHover: tw('bg-input/50') },
+  mira: { dark: tw('bg-input/30'), darkHover: tw('bg-input/50') },
   luma: { dark: null, darkHover: null },
   sera: { dark: null, darkHover: null },
   rhea: { dark: null, darkHover: null },
@@ -166,16 +169,23 @@ export const SELECT_ITEM_SURFACE: Record<SelectTranslucentStyle, string> = {
   rhea: 'min-h-7 gap-2 rounded-[var(--pui-radius-xl)] py-1.5 pe-8 ps-2 text-sm',
 };
 
-/** cn-select-item-indicator span size; mira leaves sizing to the inner svg. */
-export const SELECT_ITEM_INDICATOR_SIZE: Record<SelectTranslucentStyle, string | null> = {
-  vega: 'size-4',
-  nova: 'size-4',
-  maia: 'size-4',
-  lyra: 'size-4',
-  mira: null,
-  luma: 'size-4',
-  sera: 'size-4',
-  rhea: 'size-4',
+// The indicator owns the inline-end edge of the row. A physical edge
+// would keep the check beside the text in an RTL row, where the text
+// starts at the inline end and the reserved space would be measured
+// on the wrong side of the matched Trigger width.
+const ITEM_INDICATOR_BASE =
+  'pointer-events-none absolute end-2 flex shrink-0 items-center justify-center';
+/** Immutable recipe handles are shared between renders; Mira leaves sizing to the inner SVG. */
+export const SELECT_ITEM_INDICATOR_STYLE: Readonly<Record<ShadcnStyleId, StyleHandle>> = {
+  'new-york-v4': tw(ITEM_INDICATOR_BASE, 'size-3.5'),
+  vega: tw(ITEM_INDICATOR_BASE, 'size-4'),
+  nova: tw(ITEM_INDICATOR_BASE, 'size-4'),
+  maia: tw(ITEM_INDICATOR_BASE, 'size-4'),
+  lyra: tw(ITEM_INDICATOR_BASE, 'size-4'),
+  mira: tw(ITEM_INDICATOR_BASE),
+  luma: tw(ITEM_INDICATOR_BASE, 'size-4'),
+  sera: tw(ITEM_INDICATOR_BASE, 'size-4'),
+  rhea: tw(ITEM_INDICATOR_BASE, 'size-4'),
 };
 
 /** cn-select-group scroll margin and padding per pinned recipe. */

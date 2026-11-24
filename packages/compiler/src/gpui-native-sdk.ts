@@ -6,14 +6,12 @@ import { gpuiNativeMoveSource } from './gpui-native-move';
 import { buildGpuiNativeStyleFiles } from './gpui-native-style';
 import { createHash } from 'node:crypto';
 import type { GeneratedModule } from './ir';
+import { GPUI_PROFILE_CARGO_DEPENDENCY } from './gpui-dependency';
 
 export const GPUI_NATIVE_SDK_PATH = '.proto-ui/gpui-native';
 export const GPUI_NATIVE_SDK_VERSION = '0.2.0';
-const GPUI_PINNED_DEPENDENCY =
-  'git = "https://github.com/zed-industries/zed", rev = "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8"';
-
 export function gpuiCargoDependency(useWorkspace: boolean): string {
-  return useWorkspace ? 'workspace = true' : GPUI_PINNED_DEPENDENCY;
+  return useWorkspace ? 'workspace = true' : GPUI_PROFILE_CARGO_DEPENDENCY;
 }
 
 /** Content compatibility is stricter than Cargo's package version equality. */

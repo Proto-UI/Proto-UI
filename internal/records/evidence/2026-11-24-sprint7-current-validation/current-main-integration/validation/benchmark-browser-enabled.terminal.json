@@ -1,0 +1,24 @@
+{
+  "head": "9b5db82aedd836b49f2f19d255bfb2a9a8eaf09a",
+  "name": "benchmark-browser-enabled",
+  "command": [
+    "corepack",
+    "pnpm@10.32.1",
+    "benchmark:test"
+  ],
+  "startedAt": "2026-11-24T04:55:35.020441+00:00",
+  "exitCode": 0,
+  "timedOut": false,
+  "outerTimeoutSeconds": 600,
+  "elapsedMs": 121048,
+  "cpuAffinity": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "nodeOptions": "--max-old-space-size=1536",
+  "browserOptIn": true,
+  "headAfter": "9b5db82aedd836b49f2f19d255bfb2a9a8eaf09a",
+  "trackedStatusAfter": ""
+}

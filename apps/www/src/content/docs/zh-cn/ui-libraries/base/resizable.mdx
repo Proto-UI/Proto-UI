@@ -1,17 +1,15 @@
 ---
-title: 'Resizable (WIP)'
-description: 'resizable functional composition and current verification limits.'
+title: 'Resizable'
+description: '支持多面板比例分配、嵌套布局与键盘调节的可缩放分栏组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Resizable 支持两个或多个比例面板及逐个编号的分隔柄。每个柄连续调整相邻两个面板；嵌套 Root 独立管理自己的比例和方向。指针、方向键、Home/End、Shift 加速与折叠走同一条约束请求路径。
+支持两个或多个按百分比分配尺寸的面板及分隔柄，可通过拖拽、方向键、快捷键和折叠停点调节布局，并支持任意深度的嵌套分栏。
 
-当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
-
-Panel 通过既有 exposed-state 投影导出无量纲 size；Web CSS 使用读取 --pui-size 的静态 flex-basis 规则，不再依赖运行时动态百分比 token。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-resizable"
@@ -19,9 +17,22 @@ Panel 通过既有 exposed-state 投影导出无量纲 size；Web CSS 使用读�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+## 用法
+
+由 `Root`、`Panel` 和 `Handle` 组成：
+
+- **面板与分隔柄索引**：当配置 `N` 个面板时，为 `Panel` 依次设置 `index: 0..N-1`，为相邻面板间的 `N-1` 个 `Handle` 设置 `index: 0..N-2`（每个 `Handle` 调整其紧邻的前后两个面板，并保持其他面板尺寸不变，默认无障碍名称为 `Resize panels`）。
+- **尺寸表示与布局**：`Root` 的 `sizes` / `defaultSizes` 表示总计为 `100` 的百分比数组；同时兼容旧的双面板 `value` / `defaultValue` 属性（同时传入时以 `sizes` 为准）。每个 `Panel` 导出无量纲 `size` 状态，Web 端可直接通过读取 `--pui-size` 的静态 `flex-basis` 规则驱动宽度或高度，拖拽计算基于面板实际总长度（不含固定分隔柄宽度）。
+- **交互与约束**：拖拽、方向键、`Home`/`End`、`Shift` 加速步进与折叠均共用同一约束路径。通过 `constraints` 可逐面板配置 `min`（默认 `0`）、`max`（默认 `100`）、`collapsible`（默认 `false`）和 `collapsedSize`（默认 `0`）。若布局不可行则保留上一个有效状态并忽略非法调整；折叠为离散停点，受相邻面板上限约束。
+- **受控模式与嵌套**：传入 `sizes` 进入受控模式，监听 `sizesChange` / `sizesCommit`（载荷均为 `{ sizes }`），回传提议即接受，保持原值即拒绝；取消手势不会触发 `sizesCommit`。嵌套的 `Root` 各自独立管理比例、方向和约束。
+
 ## API
 
-Root 的 `sizes` / `defaultSizes` 表示完整百分比数组。N 个 Panel 使用 `index: 0..N-1`，N−1 个 Handle 使用 `index: 0..N-2`；Handle 的 index 指向其前一个面板，无障碍名称仍是 `Resize panels`。原有 `value` / `defaultValue` 双面板 API 保留；显式提供 `sizes` 时以数组为准。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -38,16 +49,11 @@ Root 的 `sizes` / `defaultSizes` 表示完整百分比数组。N 个 Panel 使�
   ]}
 />
 
-这些属性属于 Root。Panel 的 `index` 默认 `0`。
+多面板模式支持 `sizes`、`defaultSizes` 与 `constraints`。`Panel` 与 `Handle` 支持 `index`（默认 `0`）。
+
+- **公开状态与方法**：读取 `sizes`，或调用 `requestResize(index, nextSize, commit)` / `requestSizes(nextSizes, commit)`。
+- **事件**：`sizesChange`、`sizesCommit`（载荷为 `{ sizes }`）。
 
 ## 参考
 
 <SpecEntityLinks directory="spec/prototypes" files={['P-BASE-RESIZABLE.yaml']} />
-
-### 多面板所有权
-
-`constraints` 逐面板提供 `min`、`max`、`collapsible`、`collapsedSize`，默认分别为 0、100、false、0。比例归一化为总计 100；不可行布局保留上一个有效状态并拒绝调整。分隔柄保留相邻两面板的总量和其他面板的大小。折叠是离散停点，相邻面板的上限可能阻止折叠。
-
-读取 `sizes`，或调用 `requestResize(index, nextSize, commit)` / `requestSizes(nextSizes, commit)`。`sizesChange`、`sizesCommit` 的载荷为 `{ sizes }`。传入 `sizes` 进入受控模式，父级回传提议表示接受，保持原值表示拒绝；面板与 ARIA 始终跟随已提交值。取消手势不发 commit。
-
-嵌套 Root 独立管理所有权、约束和几何。示例包含三个水平面板，以及内部两个垂直面板；拖动按面板实际总长度归一化，不把固定分隔柄宽度计入分母。

@@ -1,11 +1,13 @@
 ---
 title: 'ContextMenu'
-description: '支持键盘访问的上下文命令菜单。'
+description: '支持右键、长按与键盘快捷键触发的 Bootstrap 2.3.2 上下文命令菜单。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-支持键盘访问的上下文命令菜单。
+ContextMenu 在右键点击、触摸/手写笔长按或按下 `ContextMenu` / `Shift+F10` 时打开上下文命令菜单，并支持完整的键盘导航与首字母快速跳转。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-context-menu"
@@ -14,12 +16,26 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root 提供 open/defaultOpen、disabled、closeOnItemCommit。Trigger 在 context.menu 或 ContextMenu/Shift+F10 时打开，并阻止已处理请求的原生菜单；普通左键不打开。Content 使用真实 Overlay/Focus/Transition 导航、文字跳转与受控关闭。右键与已接受的触摸/笔长按使用输入位置锚点，ContextMenu/Shift+F10 使用触发区域锚点。共享宿主私有保存几何，只提供不透明的输入来源关联；DOM 坐标不进入可移植 props、state 或 JSON context。
+## 安装
 
-组成: Root, Trigger, Content, Item.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码。嵌套子菜单、完整 native/GPUI/编译器证据、消费/视觉验收与独立生命周期准入仍未完成。
+## 用法
 
-触摸/笔需要在宿主移动容差内持续按住 600 ms。移动、释放、取消、禁用与卸载均取消待完成长按。已接受的键盘/长按会抑制其重复原生菜单事件，长按还抑制其兼容点击；普通点击与滚动仍由宿主处理。默认 bottom/start 放置且无额外间距。
+由 `Root`、`Trigger`、`Content` 和 `Item` 组成：
 
-受控 open 仍是请求：启用的 Root 接受请求传递时才阻止原生菜单，调用方可以继续保留 open=false。之后调用方打开时使用最近仍有效的输入锚点；程序方法 openContextMenu 使用触发器后备锚点。Escape 与选择完成按现有焦点策略恢复触发器。共享源码运行时覆盖不代表 compiler/native 准入或真实设备长按验收。
+- **触发与定位**：右键或触摸/手写笔长按（在移动容差内保持 `600ms`）会在指针位置打开菜单；`ContextMenu` / `Shift+F10` 或调用 `openContextMenu()` 时以触发区域作为锚点（默认 `bottom`/`start` 对齐）。普通左键点击与滚动仍由页面正常处理。
+- **原生菜单处理**：当启用的 `Root` 接受触发请求时，会自动阻止浏览器默认右键菜单；长按触发同时阻止后续兼容点击事件。拖动、抬起、禁用或卸载都会取消进行中的长按。
+- **受控模式**：传入 `open` 进入受控模式，由父组件决定是否打开；按 `Escape` 或选择命令项后会按焦点策略将焦点交回触发器。
+
+## API
+
+| 部件      | 属性 / 方法            | 说明                                                    |
+| --------- | ---------------------- | ------------------------------------------------------- |
+| `Root`    | `open` / `defaultOpen` | 受控或初始展开状态                                      |
+| `Root`    | `disabled`             | 禁用上下文菜单触发                                      |
+| `Root`    | `closeOnItemCommit`    | 激活菜单项后是否自动关闭                                |
+| `Root`    | `openContextMenu()`    | 以触发区域为锚点编程式打开菜单                          |
+| `Trigger` | —                      | 响应右键、长按与 `ContextMenu` / `Shift+F10` 的触发区域 |
+| `Content` | —                      | 悬浮菜单面板，支持方向键导航与文字跳转                  |
+| `Item`    | —                      | 单个可执行菜单命令                                      |

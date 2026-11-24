@@ -1,0 +1,47 @@
+id: T-DISCLOSURE-PRESENCE-0001
+type: test
+title: Canonical disclosure target and optional retained presentation
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: Optional source composition and native runner evidence do not promote Base disclosure or the experimental Bootstrap family.
+summary: Keeps canonical Root requests, perceptual phase, retained view policy and actual native geometry independently observable.
+cases:
+  - id: T-DISCLOSURE-PRESENCE-0001-CASE-BINDING
+    title: Canonical context target and closed retention preserve one owner
+    covers: [C-DISCLOSURE-PRESENCE-0001-BINDING, C-DISCLOSURE-PRESENCE-0001-PRESENCE]
+    expectation: one-canonical-context-and-one-view-intent-writer
+  - id: T-DISCLOSURE-PRESENCE-0001-CASE-BOOTSTRAP
+    title: Actual Bootstrap Disclosure entry, exit and interruption
+    covers: [C-DISCLOSURE-PRESENCE-0001-PRESENCE, C-DISCLOSURE-PRESENCE-0001-BOOTSTRAP]
+    expectation: measured-350ms-ease-with-controlled-refusal-and-retained-identity
+verifies:
+  contracts: [C-DISCLOSURE-PRESENCE-0001]
+implementations:
+  - id: canonical-transition-target
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/transition-initial-context.test.ts
+    required: true
+    consumesCases: [T-DISCLOSURE-PRESENCE-0001-CASE-BINDING]
+  - id: disclosure-binding-order
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/disclosure-presence-binding.test.ts
+    required: true
+    consumesCases: [T-DISCLOSURE-PRESENCE-0001-CASE-BINDING]
+  - id: bootstrap-native-four-web
+    kind: adapter-test
+    status: active
+    path: scripts/analysis/bootstrap-collapse-browser.mjs
+    required: true
+    consumesCases: [T-DISCLOSURE-PRESENCE-0001-CASE-BOOTSTRAP]
+    notes:
+      [
+        Native geometry and screenshots require an actual executed receipt; models and happy-dom cannot substitute.,
+      ]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Add optional disclosure binding and native Bootstrap Collapse acceptance paths without replacing other families or original AT conditions.
+tags: [disclosure, transition, bootstrap, conformance]

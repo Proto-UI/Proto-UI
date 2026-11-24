@@ -2354,20 +2354,28 @@ for (const width of [320, 390]) {
           await expect
             .poll(async () => (await page.evaluate(readSearchPublicState)).open)
             .toBe(false);
+          stage(page, id, `font-modal-${runtime}-reopen`);
           await header
             .locator('site-search [data-projection-generation-state="active"] [data-open-modal]')
             .click();
+          await expect
+            .poll(async () => (await page.evaluate(readSearchPublicState)).open)
+            .toBe(true);
           const keyboardClose = await searchPart(page, 'close');
+          stage(page, id, `font-modal-${runtime}-keyboard-close`);
           await keyboardClose.focus();
+          await expect
+            .poll(() => keyboardClose.evaluate((node) => node === document.activeElement))
+            .toBe(true);
           await page.keyboard.press('Enter');
           await expect
             .poll(async () => (await page.evaluate(readSearchPublicState)).open)
             .toBe(false);
           await page.setViewportSize(originalViewport);
         }
-        // Keep all geometry assertions on the Button page above. Brutalist
-        // Button has no authored section heading, so verify sticky offsets on
-        // the same family's real Card contract section instead.
+        // Keep the existing Button/Card route witnesses and target their real
+        // installation section. An authored preview may precede that section;
+        // its insertion must not change the sticky-heading target.
         const headingRoute =
           family === 'brutalist'
             ? '/zh-cn/ui-libraries/brutalist/components/card/'
@@ -2389,7 +2397,7 @@ for (const width of [320, 390]) {
           });
         }
         stage(page, id, 'heading-offset');
-        const heading = page.locator('[data-doc-flow] h2[id]').first();
+        const heading = page.locator('[data-doc-flow] h2[id="安装"]');
         expect(await heading.count()).toBe(1);
         expect(await heading.isVisible()).toBe(true);
         const headingFacts = await heading.evaluate((element) => ({
@@ -2408,8 +2416,8 @@ for (const width of [320, 390]) {
         expect(headingFacts.inActualFlow).toBe(true);
         expect(headingFacts.route).toBe(headingRoute);
         expect(headingFacts.rootFontSize).toBe('32px');
-        expect(headingFacts.text).toContain(family === 'brutalist' ? '契约' : '安装');
-        expect(headingFacts.id).toBeTruthy();
+        expect(headingFacts.text).toBe('安装');
+        expect(headingFacts.id).toBe('安装');
         expect(headingFacts.text).toBeTruthy();
         expect(headingFacts.box.width).toBeGreaterThan(0);
         expect(headingFacts.box.height).toBeGreaterThan(0);

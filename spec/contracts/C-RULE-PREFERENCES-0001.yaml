@@ -8,8 +8,8 @@ lifecycleRationale:
   zh-CN: Issue 793 的有界实验片，固定词表和生命周期可审查；仍需独立接纳与完整 provider 证据，不是通用 reactive Meta 总线或材质实现保证。
 summary: Four new preference keys require a matching active source; legacy Meta keys remain sampled.
 statement:
-  en: Rule Meta owns a separate mounted preference lease. Prototype Rules choose presentation policy; the host supplies preference facts only. No Base interaction, existing sampled key, colorScheme contract, structural render or Compiler/native support is changed.
-  zh-CN: Rule Meta 拥有独立 mounted preference 租约，Prototype Rule 决定呈现策略，host 仅提供偏好事实。不改变 Base 交互、既有 sampled key、colorScheme 契约、结构渲染或 Compiler/native 支持。
+  en: Rule Meta owns a separate mounted preference lease. Prototype Rules choose presentation policy; the host supplies preference facts only. React DOM source lowering uses direct predicates and a paired default-web source. No Base interaction, existing sampled key, colorScheme contract or structural render is changed; other compiler/native providers remain outside this slice.
+  zh-CN: Rule Meta 拥有独立 mounted preference 租约，Prototype Rule 决定呈现策略，host 仅提供偏好事实。React DOM source lowering 使用直接条件和配对的默认 Web source。不改变 Base 交互、既有 sampled key、colorScheme 契约或结构渲染；其他 Compiler/native provider 仍不在本片范围。
 criteria:
   - id: C-RULE-PREFERENCES-0001-A
     text:
@@ -27,6 +27,8 @@ criteria:
     text:
       en: Notifications request the existing Rule style reevaluation port, without direct Props pulls, structural renders, delivered value caches or a second evaluator. Unknown must not affirmatively enable preference-dependent presentation.
       zh-CN: 通知只请求既有 Rule style reevaluation port，不直接拉取 Props、结构重渲染、传递值缓存或引入第二 evaluator。unknown 不得肯定启用依赖偏好的呈现。
+  - id: C-RULE-PREFERENCES-0001-COMPILER
+    text: React DOM source output lowers checked fixed-key Rules to ordinary predicates and one mounted source owner. Support is shared per generated support module and Document/key, with subscription before reconciliation, last-lease resource release and stale-generation exclusion. Unsupported targets and keys keep explicit diagnostics; SSR is not admitted. Generated output has no Proto Runtime or serialized Rule evaluator.
 verifies:
   tests: [T-RULE-PREFERENCES-0001]
 relates:
@@ -35,13 +37,17 @@ relates:
 openQuestions:
   - id: C-RULE-PREFERENCES-0001-Q-ADMISSION
     question:
-      en: Has the bounded API and real Web provider evidence received independent admission? Compiler, GPUI, Flutter and Qt are not implemented by this slice.
-      zh-CN: 有界 API 与真实 Web provider 证据是否已独立接纳？本片未实现 Compiler、GPUI、Flutter 或 Qt。
+      en: Has the bounded API and real Web provider evidence received independent admission? Only React DOM source has bounded compiler lowering; GPUI, Flutter, Qt and other source profiles are not implemented by this slice.
+      zh-CN: 有界 API 与真实 Web provider 证据是否已独立接纳？仅 React DOM source 提供有界 Compiler lowering；本片未实现 GPUI、Flutter、Qt 或其他 source profile。
     blocks: [activation:C-RULE-PREFERENCES-0001]
 sources:
   - path: packages/modules/rule-meta/src/caps.ts
   - path: packages/modules/rule-meta/src/create.ts
+  - path: packages/compiler/src/native-rule-meta.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Records bounded React DOM source lowering without promoting lifecycle or claiming other compiler providers.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Proposed fixed live preference namespace without broadening existing sampled Meta keys.

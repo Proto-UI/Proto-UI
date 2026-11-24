@@ -47,33 +47,46 @@ describe('opaque raw Props static members', () => {
   });
 
   it('composes imported generic declaration helpers with raw observation', () => {
-    const result = parsePrototype(`import {definePrototype} from '@proto.ui/core';
+    const result = parsePrototype(
+      `import {definePrototype} from '@proto.ui/core';
       import {declareChoice} from './choice';
       export default definePrototype({name:'imported-raw',setup(def){
         declareChoice(def);
         def.props.watchRawAll((run)=>{const choice=run.props.getRaw().choice;});
-      }});`, {
-      fileName: 'entry.proto.ts',
-      files: {
-        'choice.ts': `import type {DefHandle} from '@proto.ui/core';
+      }});`,
+      {
+        fileName: 'entry.proto.ts',
+        files: {
+          'choice.ts': `import type {DefHandle} from '@proto.ui/core';
           const IDS=['a','b'] as const;
           type Props={choice?:'a'|'b'};
           export function declareChoice(def:DefHandle<Props>){
             const checked=def as unknown as DefHandle<Props>;
             checked.props.define({choice:{type:'enum',options:[...IDS]}});
           }`,
-      },
-    });
+        },
+      }
+    );
     if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
-    expect(result.value.props).toMatchObject([{name:'choice',type:{kind:'union',members:[
-      {kind:'literal',value:'a'},{kind:'literal',value:'b'},
-    ]}}]);
+    expect(result.value.props).toMatchObject([
+      {
+        name: 'choice',
+        type: {
+          kind: 'union',
+          members: [
+            { kind: 'literal', value: 'a' },
+            { kind: 'literal', value: 'b' },
+          ],
+        },
+      },
+    ]);
     expect(rawMembers(result.value)[0].type).toBe('unknown');
     expect(validateIR(JSON.parse(JSON.stringify(result.value))).ok).toBe(true);
   });
 
   it.each(['string', 'run', { kind: 'literal', value: 'a' }] as const)(
-    'rejects forged checked raw member type %j', (type) => {
+    'rejects forged checked raw member type %j',
+    (type) => {
       const ir = parsed(`def.props.watchRawAll((run)=>{const choice=run.props.getRaw().choice;});`);
       rawMembers(ir)[0].type = type;
       expect(validateIR(ir)).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI2002' }] });
@@ -87,15 +100,24 @@ describe('opaque raw Props static members', () => {
     `def.props.watchRawAll((run)=>{const raw=run.props.getRaw();raw.choice='b';});`,
     `def.props.watchRawAll((run)=>{const choice=run.props.get().undeclared;});`,
     `def.expose.method('read',()=>({other:1}).choice);`,
-    `def.props.watchRawAll((run)=>{const read=(key:string)=>run.props.getRaw()[key];});`,
+    `def.props.watchRawAll((run)=>{const read=(key:string)=>run.props.getRaw()[key];read('choice');});`,
   ])('preserves rejected authority, writes and missing finite fields: %s', (body) => {
     expect(parsePrototype(source(body))).toMatchObject({ ok: false });
   });
 
+  it('does not admit the body of a raw-member helper that is never called', () => {
+    const ir = parsed(
+      `def.props.watchRawAll((run)=>{const read=(key:string)=>run.props.getRaw()[key];});`
+    );
+    expect(validateIR(JSON.parse(JSON.stringify(ir))).ok).toBe(true);
+  });
+
   it('distinguishes opaque markers from finite records and checked fields', () => {
     expect(memberValueType('record', 'absent')).toBe('unknown');
-    expect(memberValueType({kind:'record',fields:[{name:'choice',type:'string'}]}, 'choice')).toBe('string');
-    expect(() => memberValueType({kind:'record',fields:[]}, 'choice')).toThrow();
-    expect(() => memberValueType({kind:'object',fields:[]}, 'choice')).toThrow();
+    expect(
+      memberValueType({ kind: 'record', fields: [{ name: 'choice', type: 'string' }] }, 'choice')
+    ).toBe('string');
+    expect(() => memberValueType({ kind: 'record', fields: [] }, 'choice')).toThrow();
+    expect(() => memberValueType({ kind: 'object', fields: [] }, 'choice')).toThrow();
   });
 });

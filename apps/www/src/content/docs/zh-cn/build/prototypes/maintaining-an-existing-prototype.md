@@ -1,133 +1,130 @@
 ---
 title: '维护已有 Prototype'
-description: '从适用 P/T 实体出发，修复行为、补证据并解决公开投影 drift。'
+description: '从适用的 P/T 规范实体出发，修复交互偏差、补充回归测试并同步导出、文档与 Demo。'
 ---
 
-维护已有 Prototype 是进入 Proto UI 最直接的工程路径。你不需要重新证明这个 Prototype 是否应该存在，但必须先确认它当前承诺了什么，以及问题属于实现、证据还是公开投影。
+维护已有原型是参与 Proto UI 最直接的入口。你不需要重新论证这个组件是否应该存在，而是先核对它当前承诺的行为，再判断问题出在实现、测试还是公开文档与导出。
 
 ## 适合这条路径的工作
 
-- 修复与现有 `P-*` criterion 不一致的行为；
-- 为已有保证补 regression 或 characterization test；
-- 修复 package export、CLI registry、文档或 Demo drift；
-- 补充某个已定义状态在 Light、Dark、键盘、窄屏或三 Adapter 预览中的证据；
-- 修正来源、上游版本或兼容边界说明；
-- 删除已经被实体明确排除的错误能力暗示。
+- 修复与现有 `P-*` 准则不一致的交互行为；
+- 为已有行为补充回归测试或边界测试；
+- 修复包导出、CLI 注册表、文档或 Demo 与实际实现不一致的问题；
+- 为已定义状态补充浅色/深色主题、键盘导航、窄屏或三套 Adapter 预览验证；
+- 修正上游版本引用、许可证说明或兼容边界描述；
+- 移除文档中与规范不符的过期 API 说明。
 
-如果你想增加新的 props、events、states、anatomy part 或兼容承诺，这通常已经不是普通维护。先判断是否需要修改 P criterion、revision 或关联 decision。
+如果你打算新增 props、events、states、Anatomy 部件或扩大兼容承诺，先检查对应的 `P-*` 规范或关联设计决策是否需要同步调整。
 
-## 第一步：找到适用实体
+## 第一步：定位适用规范实体
 
-不要从文件名开始猜规则。先搜索：
+不要仅靠文件名猜测规则，先检索相关规范与源码：
 
 ```sh
 rg -n "<prototype name|entity id|criterion id>" spec packages/prototypes apps/www internal/records
 ```
 
-至少确认：
+重点确认六项信息：
 
-1. 适用的 `P-*` 实体及其 `status`；
-2. 与问题相关的 criterion；
-3. 映射的 `T-*` 实体和 executable implementation path；
-4. Base inheritance、related decision 和负向边界；
-5. 相关 package source、tests、exports、CLI registry、docs 和 Demo；
-6. 是否存在更新的相关 record 描述短期方向。
+1. 适用的 `P-*` 实体及其生命周期状态（`draft` 或 `active`）；
+2. 与当前问题直接相关的准则（criterion）；
+3. 对应的 `T-*` 测试实体与可执行测试路径；
+4. Base 继承关系、关联决策及明确排除的边界；
+5. 源码实现、单元测试、包导出、CLI 注册、文档与 Demo；
+6. `internal/records` 中是否有近期相关的背景记录。
 
-`draft` 是当前编目方向，不等于稳定公共保证；`active` 才是当前稳定保证。实现与适用实体冲突时，把它视为 drift，不要默认当前实现获胜。
+当源码实现与规范实体出现分歧时，以规范实体为基准定位偏差，再决定修复实现还是修订规范。
 
-## 第二步：给问题分类
+## 第二步：给问题归类
 
-### 实现 drift
+### 实现偏差
 
-实体和测试期望明确，但运行行为不一致。修复实现，并添加能在修复前失败的测试。
+规范与预期测试清晰，但实际运行结果不符。先编写能复现问题的失败测试，再修复实现。
 
-### Evidence gap
+### 测试覆盖不足
 
-行为可能正确，但 `T-*`、focused test、三 Adapter preview 或真实消费证据不足。补最小可执行证据，不要顺手扩大语义。
+运行行为符合预期，但缺少对应的 `T-*` 用例、聚焦单测或三套 Adapter 预览覆盖。补充最小且精准的可执行测试，不顺带改动公开语义。
 
-### Projection drift
+### 导出或文档偏差
 
-实现和实体一致，但 export、CLI、README、网站、Demo 或生成数据不一致。修改治理源或手写投影，并通过 generator 更新生成物。
+实现与规范一致，但包导出、CLI、README、文档页面、Demo 或生成数据滞后。更新源文件并通过对应的 generator 重新生成派生文件。
 
-### Spec change
+### 规范变更
 
-期望行为本身需要变化。先追踪 active entity、已接受 draft direction、Issue acceptance criteria 或 decision 是否已经固定新结果；若已固定，就同步更新 entity revision、T evidence、实现与投影。若尚未固定，则把受影响 criterion、兼容影响和备选方案收敛为一个 `unresolved-product-direction` 决定，再选择方向。
+如果预期行为本身需要演进，先查看已有决策或 Issue 验收标准是否已经明确方向；方向明确时，在同一变更中同步更新规范版本、`T-*` 测试、实现与文档。如果方向尚未敲定，先整理受影响准则、兼容影响与备选方案供评审确认。
 
 ## 第三步：保持改动闭环
 
-一个行为修复通常应按这条链检查：
+处理行为修复时，按以下链路检查受影响环节：
 
 ```text
-P criterion
-→ T case and executable test
-→ Prototype implementation
-→ Base or design-language inheritance boundary
-→ package exports and CLI surface when affected
-→ docs, demo, and real preview
+P-* 准则
+→ T-* 用例与可执行测试
+→ Prototype 源码实现
+→ Base 或风格层继承边界
+→ 包导出与 CLI（如受影响）
+→ 文档、Demo 与本地预览
 ```
 
-不是每次都要修改链上的每个文件；只有发生 drift 的部分才需要改变。但 PR 描述应说明检查了哪些节点，以及为什么其他节点不需要更新。
+只需修改真正受影响的节点，并在 PR 说明中简述排查范围。
 
-## 测试原则
+## 测试编写建议
 
-- 测试应锚定 criterion 或明确的既有行为，而不是当前实现细节。
-- 行为修复应证明测试在修改前失败。
-- 风格状态应同时验证正向效果和不应出现的能力。
-- 涉及跨 Adapter 语义时，先确认问题属于 Prototype 还是 Adapter；不要用 Prototype 私有逻辑掩盖 Adapter parity drift。
-- 测试 teardown、remount 或异步行为时，保留 owner 和生命周期边界。
+- 让测试锚定 `P-*` 准则或明确的用户可观察行为，避免绑定内部实现细节。
+- 修复 Bug 时，先确认新增测试在修复前会失败。
+- 测试风格组件状态时，既验证生效的样式规则，也验证已排除的接口保持不可用。
+- 遇到跨 Adapter 表现差异时，先定位问题归属 Prototype 还是 Adapter，避免在原型层用特判掩盖 Adapter 问题。
+- 测试卸载（teardown）、重挂载与异步延时场景时，确保清理逻辑完整、不泄露状态。
 
-Focused test 示例：
+运行单个聚焦测试示例：
 
 ```sh
 corepack pnpm@10.32.1 vitest run packages/prototypes/base/test/separator.test.ts
 ```
 
-## 文档和 Demo
+## 文档与 Demo 原则
 
-当改动改变公开行为、状态、anatomy、样式或推荐用法时，必须在同一 PR 中更新官网已有的 Prototype 页面。纯测试、内部重构或不影响现有预览的修复不需要新建页面，但 PR 应说明为什么现有页面仍然准确。
+只要改动影响了公开行为、状态、Anatomy、样式或推荐用法，就在同一 PR 中同步更新官网文档页。纯测试或内部重构如果不影响公开行为，无需修改文档。
 
-Demo 是真实 package export 的消费证据，不应成为另一套实现。官网 Demo 应尽量拟合开发者安装 package 后的直接使用方式：
+官网 Demo 应当真实反映开发者安装包后的使用体验：
 
-- 从公开 package subpath 使用 Prototype；
-- 展示该改动涉及的状态或行为；
-- 在适用时通过 Web Component、React 和 Vue 预览；
-- 优先使用 Prototype 自己的 anatomy、trigger、state、event 和 default behavior 完成交互；
-- 不通过页面私有 CSS、脚本或额外控制逻辑绕过协议问题；
-- 为交互控件提供可访问名称。
+- 直接从公开包路径导入组件；
+- 直观展示本次改动涉及的状态与交互；
+- 在适用时覆盖 Web Component、React 与 Vue 预览；
+- 优先使用组件自身的 Anatomy、Trigger、状态与默认行为驱动交互；
+- 避免通过页面私有 CSS、脚本或额外控制逻辑绕开协议问题；
+- 为交互控件提供清晰的可访问名称。
 
-例如，Dialog 应由 `dialog-trigger` 打开；不要为了让 Demo 成立，在无关 Button 的 click callback 中调用 Dialog expose。只有原型按设计没有自然 trigger，或其公开 controls 本身就是被演示的能力时，才允许最小外部控制，例如 Toast-style invocation 或直接驱动 Transition。例外代码必须：
+例如，Dialog 应通过自带的 `dialog-trigger` 打开，而不是用无关按钮的回调手动调用暴露方法。只有在组件天然没有触发器（如 Toast 调用）或专门演示外部控制 API（如直接驱动 Transition）时，才在组件外部保留最小化的公开 API 调用，并在源码注释和 PR 中说明哪些胶水代码需由应用侧自行编写。
 
-- 位于 Prototype 之外，只使用公开 API；
-- 保持为完成演示所需的最小范围；
-- 在 Demo source 与 PR 中标记为不会随 package 安装、需要消费者自行实现的 orchestration；
-- 不得掩盖缺失 anatomy、错误 ownership 或 Adapter drift。
+如果要新增全新的公开原型，请在同一 PR 中补充接入导航的文档页并附上本地预览路由。
 
-新增公开 Prototype 不属于普通维护；对应贡献必须提供一个接入官网文档入口的可访问页面，并在 PR 中填写本地预览路由。内部 Demo Matrix 只能作为补充证据，不能替代官网页面。
+## 本地检查
 
-## 提交前检查
+提交前运行基础检查：
 
 ```sh
 corepack pnpm@10.32.1 check:prototype-catalog
 corepack pnpm@10.32.1 check:types
 ```
 
-涉及文档或 Demo 时再运行：
+如果修改了文档或 Demo，同时构建站点验证：
 
 ```sh
 corepack pnpm@10.32.1 docs:build
 ```
 
-完整测试是否需要运行取决于影响范围。PR 中应记录 focused test、catalog、types、docs 和任何手动验证的实际结果。
+根据改动范围补充相关单元测试，并在 PR 中附上实际执行的检查结果。
 
-## 什么时候升级为设计工作？
+## 何时转为设计讨论？
 
-遇到以下变化时先重读 Issue 与当前权威；已有方向就直接继续，只有尚未决定时才提交最小的 `unresolved-product-direction`：
+遇到以下情形且现有规范或 Issue 尚未给出明确结论时，先收敛方案再动手改代码：
 
-- 需要增加或改变 P criterion；
-- 需要改变 Base 与 styled projection 的所有权；
-- 需要新增 anatomy identity；
-- 需要把宿主事实提升为跨宿主协议；
-- 现有 P、T、实现和文档互相矛盾，无法确定哪个是 drift；
-- 需要扩大第三方兼容声明。
+- 需要新增或修改 `P-*` 核心准则；
+- 需要调整 Base 与风格层之间的状态归属；
+- 需要新增 Anatomy 角色身份；
+- 需要将宿主特有事实提升为跨宿主协议；
+- 规范、测试、实现与文档互相冲突且无法判定哪一方过时；
+- 需要扩大第三方设计系统的兼容承诺。
 
-下一步：如果你的工作是基于已有 Base 增加设计语言表面，阅读[从 Base 投射风格化 Prototype](/zh-cn/build/prototypes/projecting-base-into-a-design-language/)。
+下一步：如果你要基于现有 Base 协议开发新的设计语言组件，阅读[从 Base 投射风格化 Prototype](/zh-cn/build/prototypes/projecting-base-into-a-design-language/)。

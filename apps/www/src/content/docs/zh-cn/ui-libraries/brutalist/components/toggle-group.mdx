@@ -1,12 +1,14 @@
 ---
 title: 'ToggleGroup'
-description: '带游走焦点的单选或多选按下状态组。'
+description: '支持单选与多选按下状态及方向键漫游焦点的 Brutalist 风格切换按钮组。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-带游走焦点的单选或多选按下状态组。
+ToggleGroup 将一组切换按钮组织在一起，支持单选或多选按下状态，并通过方向键在组内漫游焦点。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-toggle-group"
@@ -15,15 +17,28 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
   codePanel={false}
 />
 
-value/defaultValue 为数组。multiple=false 最多保留一个值，再次点击可以清除。受控 valueChange 不修改调用方状态。禁用、只读以及重复值选项不能提交；箭头导航仅移动焦点。
+## 安装
 
-组成: Root, Item.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-brutalist/toggle-group` 导入组件原型并使用对应宿主 Adapter 适配。
 
-草稿源码；native/GPUI、编译器、打包消费、截图及完整独立验收仍待完成。
+## 用法
+
+### 组件结构
+
+ToggleGroup 由 `Root` 和 `Item` 两个部分组成：
+
+- `Root`：统一管理选中的值数组、单选/多选策略、方向与漫游焦点。
+- `Item`：组内的单个切换按钮，通过唯一 `value` 标识自身。
+
+### 选择模式与键盘交互
+
+- `value` 与 `defaultValue` 均为字符串数组（`readonly string[]`）。当 `multiple={false}`（默认）时，最多保持一个选中项，再次点击当前选中项可取消选择；设置 `multiple={true}` 可同时激活多项。
+- 方向键仅在按钮间移动焦点，不会自动切换选中状态；按 `Enter` 或 `Space` 提交切换。
+- 禁用项、`readOnly` 状态以及具有重复 `value` 的项不会提交变更。传入 `value` 进入受控模式，通过监听 `valueChange` 决定是否更新外部状态。
 
 ## API
 
-Toggle Group 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。
+以下属性属于 `Root`（传入 `value` 进入受控模式）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -38,5 +53,6 @@ Toggle Group 是工作区源码，没有公开的 `proto-ui add` 目标。传入
   ]}
 />
 
-这些属性属于 Root。Item 的 `value` 默认 `''`，`disabled` 默认 `false`。
+其余子部件：
 
+- **Item**：`value` 默认 `''`，`disabled` 默认 `false`。

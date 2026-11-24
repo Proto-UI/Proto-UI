@@ -70,7 +70,7 @@ function fixture(scope: 'document' | 'shadow' = 'document') {
     if (element !== surface) return style;
     // Inject only the native receipt's computed geometry: display suppression
     // yielded auto, not a usable reference box. The real portal owns its marker
-    // and two-frame lifetime; this DOM model does not claim layout or paint.
+    // and synchronous first-render lifetime; this model does not claim paint.
     return new Proxy(style, {
       get(target, property) {
         if (
@@ -120,13 +120,37 @@ function fixture(scope: 'document' | 'shadow' = 'document') {
     sink.commit(next);
     return next;
   };
-  const begin = () => {
+  const begin = (duringPreparation: () => void) => {
     // The acquisition is deliberately controlled. Separate existing tests use
     // actual Runtime epochs to prove reentry and retained-view acquisition.
+    // Observe the real projection before presentFirstRender withdraws its
+    // guard. The first-render guard cannot survive this synchronous boundary;
+    // only an already presented view keeps the separate two-layout theme guard.
+    const appendChild = document.body.appendChild.bind(document.body);
+    let observed = false;
+    const append = vi
+      .spyOn(document.body, 'appendChild')
+      .mockImplementation(<T extends Node>(node: T) => {
+        const result = appendChild(node);
+        if (node === host) {
+          observed = true;
+          expect(host.parentElement).toBe(document.body);
+          expect(host.hasAttribute(PUI_PORTAL_PREPARING_ATTR)).toBe(true);
+          duringPreparation();
+          expect(host.hasAttribute(PUI_PORTAL_PREPARING_ATTR)).toBe(true);
+        }
+        return result;
+      });
     const releaseAcquisition = beginWebComponentPortalViewAcquisition(host);
-    portal.mount(host);
-    releaseAcquisition();
-    expect(host.hasAttribute(PUI_PORTAL_PREPARING_ATTR)).toBe(true);
+    try {
+      portal.mount(host);
+    } finally {
+      releaseAcquisition();
+      append.mockRestore();
+    }
+    expect(observed).toBe(true);
+    expect(host.hasAttribute(PUI_PORTAL_PREPARING_ATTR)).toBe(false);
+    expect(host.hasAttribute('data-pui-view-revealing')).toBe(false);
   };
   const flushMutations = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
   const frame = async (time: number) => {
@@ -148,6 +172,7 @@ function fixture(scope: 'document' | 'shadow' = 'document') {
     commit,
     begin,
     frame,
+    flushMutations,
     resize: () => {
       for (const callback of resizeCallbacks) callback([], {} as ResizeObserver);
     },
@@ -167,17 +192,30 @@ it.each(['document', 'shadow'] as const)(
     const f = fixture(scope);
     f.commit();
     expect(f.surface.style.getPropertyValue('translate')).toContain('200px');
-    f.begin();
-    f.resize();
+    f.begin(() => {
+      f.resize();
+      expect(f.results).toEqual([]);
+      expect(f.preparedGeometryReads()).toBe(0);
+      expect(f.surface.style.getPropertyValue('translate')).toContain('200px');
+    });
+    expect(f.frames.size).toBe(1);
     await f.frame(16);
     expect(f.results).toEqual([]);
     expect(f.preparedGeometryReads()).toBe(0);
-    expect(f.host.hasAttribute(PUI_PORTAL_PREPARING_ATTR)).toBe(true);
+    expect(f.surface.style.getPropertyValue('translate')).toContain('200px');
     await f.frame(32);
     expect(f.host.hasAttribute(PUI_PORTAL_PREPARING_ATTR)).toBe(false);
     expect(f.results).toEqual([]);
     await f.frame(48);
-    expect(f.surface.style.getPropertyValue('translate')).toContain('200px');
+    const translateY = Number.parseFloat(
+      f.surface.style.getPropertyValue('translate').split(' ')[1]
+    );
+    expect(translateY).toBeGreaterThan(0);
+    expect(translateY).toBeLessThan(200);
+    await f.frame(515);
+    expect(f.results).toEqual([]);
+    await f.frame(516);
+    expect(f.results).toEqual([{ attempt: 1, outcome: 'finished' }]);
     await f.frame(548);
     expect(f.results).toEqual([{ attempt: 1, outcome: 'finished' }]);
     expect(f.frames.size).toBe(0);
@@ -186,29 +224,35 @@ it.each(['document', 'shadow'] as const)(
 
 it('accepts semantic style and the latest binding while preparation withholds geometry', async () => {
   const f = fixture();
-  f.begin();
-  const first = f.commit(1);
-  const latest = f.commit(2);
-  expect(f.effects.queueStyle).toHaveBeenCalledWith(first.style);
-  expect(f.effects.queueStyle).toHaveBeenCalledWith(latest.style);
-  expect(f.bindings).toHaveLength(2);
-  expect(f.preparedGeometryReads()).toBe(0);
-  expect(f.results).toEqual([]);
+  f.begin(() => {
+    const first = f.commit(1);
+    const latest = f.commit(2);
+    expect(f.effects.queueStyle).toHaveBeenCalledWith(first.style);
+    expect(f.effects.queueStyle).toHaveBeenCalledWith(latest.style);
+    expect(f.bindings).toHaveLength(2);
+    expect(f.preparedGeometryReads()).toBe(0);
+    expect(f.results).toEqual([]);
+  });
+  await f.flushMutations();
   await f.frame(16);
   await f.frame(32);
   await f.frame(48);
+  await f.frame(515);
+  expect(f.results).toEqual([]);
+  await f.frame(516);
+  expect(f.results).toEqual([{ attempt: 2, outcome: 'finished' }]);
   await f.frame(548);
   expect(f.results).toEqual([{ attempt: 2, outcome: 'finished' }]);
 });
 
 it('settles the independent deadline before preparation releases and never replays it', async () => {
   const f = fixture();
-  f.begin();
-  f.commit();
-  expect(f.results).toEqual([]);
-  expect(f.sink.settle('deadline')).toBe(true);
-  expect(f.results).toEqual([{ attempt: 1, outcome: 'deadline' }]);
-  expect(f.host.hasAttribute(PUI_PORTAL_PREPARING_ATTR)).toBe(true);
+  f.begin(() => {
+    f.commit();
+    expect(f.results).toEqual([]);
+    expect(f.sink.settle('deadline')).toBe(true);
+    expect(f.results).toEqual([{ attempt: 1, outcome: 'deadline' }]);
+  });
   await f.frame(16);
   await f.frame(32);
   await f.frame(1000);
@@ -222,10 +266,11 @@ it.each(['cancel', 'release'] as const)(
     const f = fixture();
     f.commit();
     const stale = [...f.frames.values()][0]!;
-    f.begin();
-    if (operation === 'release') f.sink.release(1);
-    else f.sink.cancel();
-    stale(16);
+    f.begin(() => {
+      if (operation === 'release') f.sink.release(1);
+      else f.sink.cancel();
+      stale(16);
+    });
     await f.frame(16);
     await f.frame(32);
     await f.frame(548);
@@ -246,13 +291,14 @@ it('still diagnoses unresolved units outside an owned preparation barrier', () =
 
 it('does not defer invalid policy or zero duration behind preparation', () => {
   const f = fixture();
-  f.begin();
-  f.commit(1, 1000);
-  expect(f.results).toEqual([{ attempt: 1, outcome: 'invalid-policy' }]);
-  f.commit(2, 0);
-  // The original missing-unit outcome stays immediate, including when a zero
-  // duration does not need an animation frame. Preparation grants no fallback.
-  expect(f.results.at(-1)).toEqual({ attempt: 2, outcome: 'unresolved-units' });
+  f.begin(() => {
+    f.commit(1, 1000);
+    expect(f.results).toEqual([{ attempt: 1, outcome: 'invalid-policy' }]);
+    f.commit(2, 0);
+    // The original missing-unit outcome stays immediate, including when a zero
+    // duration does not need an animation frame. Preparation grants no fallback.
+    expect(f.results.at(-1)).toEqual({ attempt: 2, outcome: 'unresolved-units' });
+  });
 });
 
 it('does not withhold a retained portal view under the separate theme reveal guard', async () => {
@@ -263,6 +309,9 @@ it('does not withhold a retained portal view under the separate theme reveal gua
   f.commit();
   expect(f.surface.style.getPropertyValue('translate')).toContain('200px');
   await f.frame(16);
+  expect(f.host.getAttribute('data-pui-view-revealing')).toBe('portal');
+  await f.frame(32);
+  expect(f.host.hasAttribute('data-pui-view-revealing')).toBe(false);
   await f.frame(516);
   expect(f.results).toEqual([{ attempt: 1, outcome: 'finished' }]);
 });
@@ -277,15 +326,17 @@ it.each([
   async (cause, outcome) => {
     const f = fixture();
     f.commit();
-    f.begin();
-    if (cause === 'hidden') f.host.hidden = true;
-    else if (cause === 'lost-opacity') f.surface.style.opacity = '.4';
-    else f.preference(cause);
-    f.resize();
-    expect(f.results).toEqual([{ attempt: 1, outcome }]);
-    expect(f.host.hasAttribute(PUI_PORTAL_PREPARING_ATTR)).toBe(true);
-    // Only the existing portal reveal barrier remains queued, not presentation.
-    expect(f.frames.size).toBe(1);
+    f.begin(() => {
+      if (cause === 'hidden') f.host.hidden = true;
+      else if (cause === 'lost-opacity') f.surface.style.opacity = '.4';
+      else f.preference(cause);
+      f.resize();
+      expect(f.results).toEqual([{ attempt: 1, outcome }]);
+      // Only the portal's provisional layout callback remains; projecting the
+      // first render cancels it before mount returns, without delivering it.
+      expect(f.frames.size).toBe(1);
+    });
+    expect(f.frames.size).toBe(0);
     await f.frame(16);
     await f.frame(32);
     await f.frame(548);
@@ -301,11 +352,12 @@ it.each([
   'settles an initial nonzero %s owner while the portal is still preparing',
   (preference, outcome) => {
     const f = fixture();
-    f.begin();
-    f.preference(preference);
-    f.commit();
-    expect(f.results).toEqual([{ attempt: 1, outcome }]);
-    expect(f.host.hasAttribute(PUI_PORTAL_PREPARING_ATTR)).toBe(true);
-    expect(f.frames.size).toBe(1);
+    f.begin(() => {
+      f.preference(preference);
+      f.commit();
+      expect(f.results).toEqual([{ attempt: 1, outcome }]);
+      expect(f.frames.size).toBe(1);
+    });
+    expect(f.frames.size).toBe(0);
   }
 );

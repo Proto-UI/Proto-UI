@@ -1,13 +1,15 @@
 ---
-title: Base Accordion
-description: 五个原子组成的 Accordion，具备 canonical 组所有权、自然 Tab 顺序与明确的内容生命周期。
+title: 'Base Accordion'
+description: '由五个组件组成的折叠面板，支持单选与多选展开、自然 Tab 顺序以及按需卸载内容节点。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-这是 draft 工作区 family。当前源码与 synthetic-DOM 测试不代表浏览器/native、辅助技术、材质或 GPUI 已完整验收。
+Base Accordion 提供无样式的折叠面板交互与无障碍语义，由 `Root`、`Item`、`Heading`、`Trigger` 和 `Content` 五个部分组成，支持单选与多选展开模式。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-accordion"
@@ -16,62 +18,48 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-## 解剖结构与所有权
+## 安装
 
-组合 Root → Item → Heading → Trigger，Content 与 Heading 并列。每个 Item 必须有唯一、稳定、非空的 value。Root 拥有选中键集合，Item、Trigger、Content 派生事实。嵌套 Root 各有独立域。Heading 内只放控制它的 Trigger，持续显示的次级操作放在旁边。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。在工作区中可通过 `proto-ui add react base-accordion`（也支持 `vue`、`vue2`、`wc`）生成对应宿主包装，或直接从 `@proto.ui/prototypes-base/accordion` 导入 `accordionRoot`、`accordionItem`、`accordionHeading`、`accordionTrigger`、`accordionContent` 以及对应的 `asAccordion*` 组合钩子。
 
-风格投影消费对应 Base 原子，不另建私有 accordion，不在聚焦时改写展开，也不消费其他 Base 协议钩子。APG 和风格库仅为设计参考，不是实现上游。
+## 用法
 
-## JSON Props
+### 组合结构
 
-| Part | Props | 默认与边界 |
-| --- | --- | --- |
-| Root | mode | single；multiple 允许多项独立展开 |
-| Root | openItems、defaultOpenItems | string 数组；提供 openItems 即受控，default 只初始化一次 |
-| Root | allowEmpty | true；false 阻止关闭最后一个选择键 |
-| Root | disabled | false；抑制激活但不改写 owner 输入 |
-| Root | orientation、direction、loop | vertical、ltr、true；仅影响标题导航 |
-| Item | value、disabled | 必填的非空稳定键；disabled 默认 false |
-| Heading | level | 1–6 整数，默认 3；由作者选择页面层级 |
-| Trigger | 无 | 从 Item 与 Root 派生状态 |
-| Content | keepMounted、region | 均为 false；显式保留隐藏 view 与可选 landmark |
+按 `Root → Item → Heading → Trigger` 的层级组织，并将 `Content` 与 `Heading` 并列放置在 `Item` 内。每个 `Item` 都需要一个唯一且非空的 `value`。
 
-输入重复键去重，重复登记的 Item 身份拒绝。single 取首个唯一输入键。未知 owner/default 键保留休眠以支持逐步挂载，向缺失键发请求拒绝。非受控曾登记后移除的键退役，改名按删除/新增处理。空组 allowEmpty=false 不会凭空造内容，受控空输入仍由 owner 决定。
+- 展开状态由 `Root` 统一管理，`Item`、`Trigger` 和 `Content` 自动同步对应状态。
+- 嵌套的 `Root` 各自独立，互不干扰。
+- `Heading` 中只放置控制当前面板的 `Trigger`，其他持久可见的辅助操作应放在 `Heading` 外侧。
 
-## Exposes 与受控用法
+### 受控与非受控模式
 
-Root 暴露 getOpenItems()、openCount、requestOpen(value, open, reason?) 与 openChange signal，JSON payload 为 `{ openItems, value, open, reason }`。getOpenItems 返回副本，openCount 包含休眠 canonical 键；reason 为 pointer、keyboard 或 programmatic。重复无效或 disabled 请求不发事件。
+- 传入 `openItems` 即进入受控模式，由调用方持有当前展开项；交互时会触发 `openChange` 事件（事件数据为 `{ openItems, value, open, reason }`，其中 `reason` 为 `'pointer'`、`'keyboard'` 或 `'programmatic'`），需将新的 `openItems` 回传给 `Root` 才会更新状态。
+- 不传 `openItems` 时为非受控模式，可通过 `defaultOpenItems` 设置初始展开项（仅在首次挂载时生效）。
+- 输入数组中的重复键会自动去重；在 `single` 模式下仅保留首个有效键。对于尚未挂载的键，`Root` 会保留记录以支持异步或分步渲染 `Item`。
 
-受控请求不乐观改写任何 part。把请求的 openItems 传回 Root 才算接受。Adapter callback 是 expose signal 的宿主投影，不是 Proto UI callback Props。初始化、owner 同步、结构 fallback、后续 default 变更均不发 openChange。较新的同步 owner 接受（含请求时删除 Item）优于旧通知。
+### 内容生命周期
 
-## 键盘与无障碍
+折叠状态下，`Content` 默认卸载内容节点以减少渲染开销；若需在收起后保留内部子元素状态，请设置 `keepMounted`。折叠时不会自动抢占或移动焦点。
 
-每个启用 header 与作者内容中可聚焦元素保持自然 Tab 顺序。Enter/Space 仅 toggle 一次。纵向上下键或横向左右键在启用标题间移动；RTL 反转横向。Home/End 到首末标题，导航不改变 openItems。loop=false 保持边界焦点。disabled header 跳过，最后一个必开标题仍可聚焦但 aria-disabled 阻止关闭。
+### 键盘与无障碍
 
-Heading 声明 heading/level；Trigger 声明 button、内容名称、expanded、disabled 与精确 item 域 controls。Content 由 Trigger 命名，region=true 显式启用 landmark。多开大量内容时谨慎使用地标。native 聚焦、辅助技术输出、平台保真度仍须各自实证。
-
-## Presence、动画与安全布局
-
-关闭的 Content 默认执行可重复 L1 detach。保留逻辑实例身份，不承诺宿主子组件状态或 native view 保留。keepMounted 保留完整但隐藏的 view。Content 不创建 autofocus、focus return 或 Tab stop。焦点在作者内容中时关闭，遵循宿主正常移除行为，Accordion 不代替作者移动焦点。
-
-本协议不增加延迟关闭或动画计时 API。消费者动画必须保留 canonical open/hidden 所有权。投影支持长标签折行、容器收缩与横向内容溢出容纳，页面 safe-area 留白由容器布局承担。真实窄屏、200% 字号、焦点轮廓与溢出截图仍是独立验收要求。
-
-## 使用与状态
-
-从 @proto.ui/prototypes-base/accordion 导入 accordionRoot、accordionItem、accordionHeading、accordionTrigger、accordionContent。Base 另导出同名 asAccordion\* authoring entries。Web Component、React、Vue、Vue 2 消费同一 API。
-
-当前工作区 CLI facade：proto-ui add react base-accordion（也支持 vue、vue2、wc）。包发布及版本可用性与本 draft 源码分开判断。
-
-[APG 设计参考](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/) · [源码](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/accordion)
+- 每个启用的标题触发器及展开内容中的可聚焦元素都保持自然 Tab 顺序。
+- `Enter` / `Space` 切换当前面板的展开状态。
+- 纵向使用 `ArrowUp` / `ArrowDown`、横向使用 `ArrowLeft` / `ArrowRight`（在 `rtl` 下自动反转）在启用的标题间移动焦点，`Home` / `End` 跳转到首尾项；焦点移动不会改变展开状态。
+- `Heading` 提供对应层级的标题语义，`Trigger` 自动关联 `aria-expanded`、`aria-disabled` 与 `aria-controls`，`Content` 默认由对应 `Trigger` 命名；需要将其声明为地标区域时，可显式设置 `region={true}`。
 
 ## API
 
-Accordion 是工作区源码。当前工作区 CLI 目标为 `base-accordion`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。传入 `openItems` 进入受控模式。
+### Root Props
+
+传入 `openItems` 进入受控模式；`Root` 同时暴露 `getOpenItems()`、`openCount`、`requestOpen(value, open, reason?)` 方法与属性，以及 `openChange` 事件。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
     { name: 'mode', type: "'single' | 'multiple'", default: 'single' },
+    { name: 'openItems', type: 'string[]', default: '—' },
     { name: 'defaultOpenItems', type: 'string[]', default: '[]' },
     { name: 'allowEmpty', type: 'boolean', default: 'true' },
     { name: 'disabled', type: 'boolean', default: 'false' },
@@ -81,7 +69,12 @@ Accordion 是工作区源码。当前工作区 CLI 目标为 `base-accordion`。
   ]}
 />
 
-这些属性属于 Root。Item 需要非空的 `value`，`disabled` 默认 `false`。Heading 的 `level` 默认 `3`。Content 的 `keepMounted` 与 `region` 默认 `false`。Trigger 没有属性。
+### 其他组件属性
+
+- **Item**：必填非空字符串 `value`；`disabled` 默认为 `false`。
+- **Heading**：`level` 为 `1`–`6` 的整数，默认为 `3`。
+- **Trigger**：无额外属性，自动从所属 `Item` 和 `Root` 读取状态。
+- **Content**：`keepMounted` 与 `region` 默认均为 `false`。
 
 ## 参考
 

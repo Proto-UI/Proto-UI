@@ -1,0 +1,60 @@
+---
+title: 'Native File Input'
+description: 'A native file picker with shared availability, naming, required, and focus policy.'
+---
+
+import NativeFileInputPreview from '@/components/NativeFileInputPreview.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Applies shared availability, required state, accessible naming, and focus policy to a native `<input type="file">`, while leaving file selection and the system picker to the browser.
+
+## Preview
+
+The preview mounts `nativeFileInput` onto real `input[type="file"]` elements via the React Adapter—the first is required and accepts multiple files, and the second is disabled (files are read locally from `FileList` and never uploaded).
+
+<NativeFileInputPreview locale="en" />
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+```ts
+import { nativeFileInput, asNativeFileInput } from '@proto.ui/prototypes-base/native-file-input';
+```
+
+This subpath also exports the default prototype, `NativeFileInputProps`, `NativeFileInputExposes`, and `NativeFileInputAsHookContract`, while the package root re-exports the named entries. The prototype and hook share the same setup.
+
+## Usage
+
+### Binding to a physical file input
+
+Provide a real `<input type="file">` root element and pass `disabled` and `required` to both the prototype and the native element so accessibility, focus policy, and browser behavior target the same input.
+
+Manage `accept`, `multiple`, picker invocation, native `change` events, and clearing directly on the host element, and read selected files from its native `files` property. The prototype has no text value and emits no `valueChange` event.
+
+### Focus and naming
+
+- `ariaLabel` provides the accessible name while preserving the native file input role.
+- `focusSelf(options?)` and `blurSelf()` follow the shared Focus protocol. A disabled input ignores `focusSelf()` and leaves normal focus order; re-enabling restores focus participation without reopening the picker.
+- An associated `ControlLabel` can focus an enabled input without synthesizing a click or opening the system file picker.
+
+## API
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+Removing a previously supplied prop restores its default value.
+
+- **Exposed states**: `disabled`, `required`, `focused`, `focusVisible`.
+- **Exposed methods**: `focusSelf(options?)`, `blurSelf()`.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-NATIVE-FILE-INPUT.yaml']} />

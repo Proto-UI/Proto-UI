@@ -1,6 +1,6 @@
 ---
 title: 'Toggle'
-description: 'A Shadcn toggle projected from the Base toggle protocol.'
+description: 'A two-state toggle button with default and outline variants across three sizes.'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -8,15 +8,11 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Toggle is a two-state button that switches between active (pressed) and inactive states, commonly used in formatting bars and option strips. The examples on this page use the **Shadcn Rhea** style preset.
 
-This entry shows the current `shadcn` toggle implementation in Proto UI.
+## Preview
 
-The selected Rhea recipe maps to the pinned [Rhea style source](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css): default/sm/lg heights are 2rem/1.75rem/2.25rem (16px root font), min-width matches height, inline padding is 0.625rem on every size, gap is 0.25rem and the radius is `rounded-2xl` (upstream contract `--radius` ×1.8; Proto currently approximates it as `--pui-radius` +8px — the two agree only at the pinned 0.625rem/10px base, so no dynamic-base parity is claimed); outline keeps `border-input` with no shadow; pressed uses a muted surface; hover uses the foreground ink plus a muted surface that the shared [base recipe](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/bases/base/ui/toggle.tsx) `hover:bg-muted` defines for both variants at the same pinned revision — `.cn-toggle-variant-outline` merely repeats it, so the default-variant hover surface is source-defined, not a Proto addition. The separate [02cad611 New York source](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/toggle.tsx) retains its 36/32/40px heights, accent active paint, outline shadow-xs and muted-foreground default hover as the compatibility profile. These are distinct profiles, not a claim of cross-target rendered parity.
-
-Toggle active, disabled, keyboard and a11y remain Base-owned. `asChild` is intentionally unavailable; native-prop and pressed-API aliases, invalid handling and arbitrary nested-SVG styling remain compatibility differences. This page and source tests are not four-runtime, two-theme native pixel acceptance.
-
-The demo is Bold, pressed Italic outline, small Underline, disabled pressed Strikethrough, large text, and an outline toggle. Names for the icon toggles are visually hidden.
+The preview below shows a default icon toggle, an active `outline` toggle, a small toggle, a disabled active toggle, a large text toggle, and an `outline` toggle (icon-only toggles include visually hidden accessible names).
 
 <PrototypePreviewer
   demoId="demo-shadcn-toggle"
@@ -26,15 +22,21 @@ The demo is Bold, pressed Italic outline, small Underline, disabled pressed Stri
   codePanel={false}
 />
 
-## Install
+## Installation
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-toggle" manager="npm" />
 
-Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your target framework.
+
+## Usage
+
+- Choose `'default'` or `'outline'` via `variant`, and `'default'`, `'sm'`, or `'lg'` via `size`.
+- Under the **Shadcn Rhea** preset, `default`, `sm`, and `lg` heights are `2rem`, `1.75rem`, and `2.25rem`, with shadowless `outline` borders and muted hover/pressed surfaces. Under `new-york-v4`, heights are `36px` / `32px` / `40px` with accent active styling.
+- Pass `active` and listen to `activeChange` for controlled state, or use `defaultActive` for uncontrolled state.
 
 ## API
 
-Passing `active` selects controlled mode.
+The following props belong to `Root` (pass `active` for controlled mode):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -47,7 +49,7 @@ Passing `active` selects controlled mode.
   ]}
 />
 
-Root exposes `active`, `disabled`, `hovered`, `focused`, `focusVisible`, and `pressed`, plus `activeChange`.
+`Root` exposes `active`, `disabled`, `hovered`, `focused`, `focusVisible`, and `pressed`, and emits `activeChange`.
 
 ## References
 

@@ -1,11 +1,13 @@
 ---
 title: 'Tabs'
-description: 'Bootstrap 2.3.2 Tabs：四个真实 Base 协议投影。'
+description: '沿用归档 Bootstrap 2.3.2 标签页样式并支持下划线变体的选项卡组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Root、List、Trigger、Content 分别消费 [Base Tabs 协议](/zh-cn/ui-libraries/base/tabs/)。Root 独占选中值；方向键和 Home/End 在可用标签间移动；手动模式下 Enter/Space 才激活。受控请求须等待 owner 更新 value。
+Bootstrap 2.3.2 Tabs 借鉴归档 Bootstrap 2.3.2 `nav-tabs` 的顶部圆角与内边距（以 `rem` 缩放），并基于 [Base Tabs](/zh-cn/ui-libraries/base/tabs/) 实现完整的键盘导航与受控切换。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-tabs"
@@ -13,10 +15,33 @@ Root、List、Trigger、Content 分别消费 [Base Tabs 协议](/zh-cn/ui-librar
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-从 `@proto.ui/prototypes-bootstrap-2-3-2/tabs` 导入 `tabsRoot`、`tabsList`、`tabsTrigger`、`tabsContent`。当前仍是私有 draft workspace 源码，不表示公开发布或 native/Compiler 已贯通。
+## 安装
 
-List 与 Trigger 的 `appearance="underline"` 提供 Runtime Box 的透明背景、文字宽细下划线；默认仍保留本家外观。Root 接收 `value`/`defaultValue`、`activationMode`、`orientation`；Trigger 接收 `value`/`disabled`；Content 接收 `value`/`keepMounted`。Runtime 使用手动激活，因此方向键移动不会重挂示例。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-源码与模拟 DOM 证据不替代绑定新提交的原生截图、窄屏几何及独立视觉验收；这些浏览器检查仍待执行。
+```ts
+import {
+  tabsRoot,
+  tabsList,
+  tabsTrigger,
+  tabsContent,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/tabs';
+```
 
-默认配方参考 [Bootstrap v2.3.2 navs.less](https://github.com/twbs/bootstrap/blob/v2.3.2/less/navs.less). 保留 12px/8px 间距、2px 间隔和上方 4px 圆角，以 rem 缩放；使用 Base Tabs 而非 jQuery 插件，焦点环与主题颜色存在明确差异。Apache 2.0 通知随源码保留。
+## 用法
+
+由 `Root`、`List`、`Trigger` 和 `Content` 组成：
+
+- **状态与激活模式**：状态由 `Root` 统一管理，支持受控 `value` 与非受控 `defaultValue`。方向键与 `Home` / `End` 在可用标签间移动焦点；手动激活模式下（`activationMode="manual"`），按 `Enter` / `Space` 才会切换内容面板，适合避免在浏览标签时频繁卸载重挂面板。
+- **外观变体**：`List` 与 `Trigger` 默认使用 Bootstrap 2.3.2 经典标签页外观，也可设置 `appearance="underline"` 切换为透明背景、与文字等宽的细下划线样式。
+- **内容挂载**：未选中面板默认卸载内容节点；在 `Content` 上设置 `keepMounted` 可在切换时保留隐藏节点。
+
+## API
+
+| 部件      | 属性                                | 说明                                          |
+| --------- | ----------------------------------- | --------------------------------------------- |
+| `Root`    | `value` / `defaultValue`            | 受控或初始选中标签值                          |
+| `Root`    | `activationMode` / `orientation`    | 切换激活模式（自动/手动）与标签栏方向         |
+| `List`    | `appearance`                        | 可选 `'underline'` 切换为细下划线风格         |
+| `Trigger` | `value` / `disabled` / `appearance` | 标签标识、禁用状态与外观变体                  |
+| `Content` | `value` / `keepMounted`             | 对应面板标识；设置 `keepMounted` 保留隐藏节点 |

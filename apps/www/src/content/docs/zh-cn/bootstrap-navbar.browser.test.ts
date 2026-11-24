@@ -29,7 +29,7 @@ const expectedCases = [
   ...THEMES.flatMap((theme) => VIEWPORTS.map(({ width }) => `docs-${theme}-${width}`)),
   ...THEMES.flatMap((theme) => RUNTIMES.map((runtime) => `paint-${runtime}-${theme}`)),
 ];
-const cases = new Map<string, { status: string; error?: string }>();
+const cases = new Map<string, { status: string; error?: string; stack?: string }>();
 const results: Array<{ name: string; status: string; errors: unknown }> = [];
 const observations: unknown[] = [];
 const screenshots: string[] = [];
@@ -108,7 +108,16 @@ async function cell(name: string, run: () => Promise<void>) {
     await run();
     cases.set(name, { status: 'passed' });
   } catch (error) {
-    cases.set(name, { status: 'failed', error: String(error) });
+    cases.set(name, {
+      status: 'failed',
+      error: String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    try {
+      observations.push({ name, phase: 'failure-state', ...(await observeSearchState()) });
+    } catch (observationError) {
+      observations.push({ name, phase: 'failure-state', error: String(observationError) });
+    }
     try {
       await capture(`${name}-failure`);
     } catch {
@@ -143,6 +152,68 @@ async function newPage(theme: 'light' | 'dark', runtime = 'wc') {
   page = await context.newPage();
   page.setDefaultTimeout(10_000);
   page.on('pageerror', (error) => pageErrors.push(error.message));
+  await page.addInitScript(() => {
+    type Entry = Record<string, unknown>;
+    const trace: Entry[] = [];
+    const describe = (target: EventTarget | null) => {
+      if (!(target instanceof Element)) return null;
+      return {
+        tag: target.tagName,
+        id: target.id,
+        ref: target.getAttribute('data-demo-ref'),
+        role: target.getAttribute('role'),
+        owner: target.closest('[data-projection-owner]')?.getAttribute('data-projection-owner'),
+      };
+    };
+    const record = (entry: Entry) => {
+      trace.push({ time: performance.now(), ...entry });
+      if (trace.length > 160) trace.shift();
+    };
+    Object.defineProperty(window, '__bootstrapNavbarSearchTrace', { value: trace });
+    for (const type of ['click', 'keydown', 'keyup', 'focusin', 'focusout']) {
+      document.addEventListener(
+        type,
+        (event) =>
+          record({
+            type,
+            key: event instanceof KeyboardEvent ? event.key : undefined,
+            trusted: event.isTrusted,
+            target: describe(event.target),
+            active: describe(document.activeElement),
+          }),
+        true
+      );
+    }
+    new MutationObserver((records) => {
+      for (const mutation of records) {
+        const target = mutation.target;
+        if (
+          !(target instanceof Element) ||
+          !target.closest('[data-projection-owner^="site-search-"]')
+        )
+          continue;
+        record({
+          type: 'attribute',
+          target: describe(target),
+          attribute: mutation.attributeName,
+          oldValue: mutation.oldValue,
+          value: target.getAttribute(mutation.attributeName!),
+        });
+      }
+    }).observe(document, {
+      subtree: true,
+      attributes: true,
+      attributeOldValue: true,
+      attributeFilter: [
+        'data-transition-state',
+        'data-is-present',
+        'aria-hidden',
+        'aria-expanded',
+        'hidden',
+        'inert',
+      ],
+    });
+  });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   return page;
 }
@@ -158,6 +229,48 @@ function themeButton() {
 }
 function searchButton() {
   return page!.locator('[data-site-header] [data-open-modal]');
+}
+async function observeSearchState() {
+  return page!.evaluate(() => {
+    const describe = (element: Element | null) => {
+      if (!(element instanceof HTMLElement)) return null;
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return {
+        tag: element.tagName,
+        id: element.id,
+        attributes: Object.fromEntries(
+          [...element.attributes].map((attribute) => [attribute.name, attribute.value])
+        ),
+        connected: element.isConnected,
+        hidden: element.hidden,
+        inert: element.inert,
+        focused: document.activeElement === element,
+        focusWithin: element.contains(document.activeElement),
+        rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+        style: {
+          display: style.display,
+          visibility: style.visibility,
+          opacity: style.opacity,
+          position: style.position,
+          top: style.top,
+          pointerEvents: style.pointerEvents,
+        },
+      };
+    };
+    return {
+      time: performance.now(),
+      reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
+      active: describe(document.activeElement),
+      search: [
+        ...document.querySelectorAll(
+          '[data-projection-owner^="site-search-"][data-demo-ref], [data-search-dialog-mount], [data-open-modal]'
+        ),
+      ].map(describe),
+      trace: (window as unknown as { __bootstrapNavbarSearchTrace?: Record<string, unknown>[] })
+        .__bootstrapNavbarSearchTrace,
+    };
+  });
 }
 async function paint(control: Locator) {
   return control.evaluate((element) => {

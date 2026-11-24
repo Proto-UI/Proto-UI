@@ -1,6 +1,6 @@
 ---
 title: 'Switch'
-description: '基于 Proto UI 重构的 Shadcn Switch。'
+description: '支持尺寸切换、表单组合与可选拖动的双态开关组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,46 +8,47 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Switch 用于在开启与关闭两种状态之间切换，支持键盘操作、不同尺寸预设、选项卡片组合以及可选的指针拖动。本页示例使用 **Shadcn Rhea** 风格。
 
-当前页面展示 Proto UI 中 `shadcn` 风格的 `switch` 条目。
-
-在 Root 上设置 `size="sm"` 使用小尺寸；省略 `size` 或设置 `size="default"` 使用默认尺寸。Thumb 从实际所属的逻辑 Switch Root 派生尺寸，没有独立 size prop。尺寸变化不会改变 checked 值或发出 `checkedChange`。
-
-本页 Rhea 配方的默认Root为2rem × 1.25rem，小号为1.5rem × 1rem，Thumb分别为1rem/0.75rem，使用2px透明边框与家族`radius-2xl`；选中位移为Thumb宽减4px。来源为 [Rhea 样式源码](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css)。独立 [02cad611 New York源码](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/switch.tsx) 仍保留2rem × 1.15rem / 1.5rem × 0.875rem与减2px位移，属于兼容profile；两者不混称跨宿主已视觉等价。
+## 预览
 
 <PrototypePreviewer demoId="demo-shadcn-switch" initialRuntime="wc" />
-
-## 组合与可选拖动能力
-
-默认 Switch 组合保持点击/Space 激活，拖动仅由 `draggable: true` 明确开启，不改上游默认。上方尺寸示例只有“Email alerts”启用拖动；下方两个独立增强示例分别展示 LTR 和 RTL 拖动。
-
-下方真实页面组合复用现有 Field 的 Label、Description 和 Switch owner。Choice Card 的卡片空白区域可点击，但不创建第二个按钮或转发 click；卡内“Learn more”链接保持自己的操作。卡片选中色跟随已接受的 checked 值，受控 owner 拒绝请求时不乐观变色。disabled 和 readOnly 示例不得发出改值请求。
-
-上游[Choice Card anatomy](https://github.com/shadcn-ui/ui/blob/96da9cc7f1aa10580a3741664e2a77c721206c00/apps/v4/examples/base/switch-choice-card.tsx)由 FieldLabel 包住 Field。Proto 保留自己的 Field anatomy 和独立 description 关联，不导入该框架，也不改变当前样式 profile。这不是 Liquid Glass Switch 的实现。
-
-<PrototypePreviewer demoId="demo-shadcn-switch-compositions" initialRuntime="wc" />
-
-<div id="switch-composition-details">
-  Label 命名控件，Description 提供帮助。拖动按住期间只预览位置，释放才请求值；Root 始终是 checked
-  的唯一 owner。
-</div>
 
 ## 安装
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-switch" manager="npm" />
 
-把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件封装。
 
-### 设置生成的 Web Component 样式
+## 用法
 
-生成的 `ShadcnSwitchElement` 使用 `<proto-ui-shadcn-switch>`，并提供默认 Thumb。使用这个组合时，轨道 CSS 应匹配 `proto-ui-shadcn-switch`。单独导出的原始 Root 使用 `<proto-ui-shadcn-switch-root>`；它的标签选择器不会匹配组合元素。
+### 尺寸与预设
 
-自定义 Root 尺寸、Thumb 尺寸和选中位移需要配套调整。只修改 Thumb 时，它可能仍在未改变的轨道中移动。[Web Component 样式指南](https://github.com/Proto-UI/Proto-UI/blob/main/packages/adapters/web-component/README.md#styling-the-composed-host) 提供了完整的默认尺寸 LTR 示例。使用家族配方时，仍在 Root 上选择 `styleProfile` 和 `size`，让 Thumb 跟随实际所属的 Root。
+- 在 `Root` 上设置 `size="sm"` 可切换为小号开关，省略或设置 `size="default"` 使用默认尺寸。`Thumb` 会自动跟随所属 `Root` 的尺寸，无需单独传参。
+- 切换 `size` 仅更新视觉外观，不会改变 `checked` 值或触发 `checkedChange`。
+- 在 **Shadcn Rhea** 预设中，默认尺寸为 `2rem × 1.25rem`（Thumb 为 `1rem`），小号为 `1.5rem × 1rem`（Thumb 为 `0.75rem`）；`new-york-v4` 预设则沿用 `2rem × 1.15rem` 与 `1.5rem × 0.875rem` 的尺寸比例。
+
+### 组合模式与可选拖动
+
+Switch 默认通过点击或按 `Space` 键切换；传入 `draggable={true}` 可按需开启滑块拖动（支持 LTR 与 RTL 方向）。下方示例展示了搭配 Field `Label`、`Description` 以及 Choice Card 的完整组合用法：卡片空白区域可直接点击切换，内部的“Learn more”链接保留自身跳转行为；受控模式下卡片高亮跟随已确认的 `checked` 状态，`disabled` 与 `readOnly` 状态不会发出变更请求。
+
+<PrototypePreviewer demoId="demo-shadcn-switch-compositions" initialRuntime="wc" />
+
+<div id="switch-composition-details">
+  Label 为开关提供名称，Description
+  提供辅助说明。按住拖动时仅实时预览滑块位置，松开时才提交状态变更请求；开关状态始终由 Root
+  统一管理。
+</div>
+
+### 自定义 Web Component 样式
+
+- CLI 生成的组合组件 `ShadcnSwitchElement` 使用标签 `<proto-ui-shadcn-switch>` 并内置默认 `Thumb`，覆盖轨道样式时请以 `proto-ui-shadcn-switch` 为选择器。
+- 单独导出的原始 `Root` 使用标签 `<proto-ui-shadcn-switch-root>`，其标签选择器不会命中上述组合元素。
+- 自定义轨道尺寸、滑块尺寸和选中位移时请同步调整三者比例；完整示例可参考 [Web Component 样式指南](https://github.com/Proto-UI/Proto-UI/blob/main/packages/adapters/web-component/README.md#styling-the-composed-host)。使用内置预设时，只需在 `Root` 上设置 `styleProfile` 和 `size`，`Thumb` 会自动匹配。
 
 ## API
 
-传入 `checked` 进入受控模式。
+以下属性属于 `Root`（传入 `checked` 可进入受控模式，`Thumb` 无额外属性）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -60,8 +61,6 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
     { name: 'size', type: "'default' | 'sm'", default: 'default' },
   ]}
 />
-
-`size` 是 Shadcn 的呈现属性。Thumb 没有属性。Root 仍是 checked 的唯一 owner。
 
 ## 参考
 

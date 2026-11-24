@@ -1,9 +1,13 @@
 ---
 title: 'Dropdown Menu'
-description: 'Grouped action-menu composition.'
+description: '支持操作分组、标题、分隔线与快捷键提示的 Bootstrap 2.3.2 下拉菜单。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Dropdown Menu 通过按钮触发展开一组可操作菜单项，支持分组标签、分隔线与快捷键提示。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-dropdown-menu"
@@ -12,6 +16,21 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-## 分组动作组成（草稿）
+## 安装
 
-Group 与 Label 建立实时辅助技术命名关系；Separator 和 Shortcut 是真实的被动部件。Shortcut 只显示提示，不注册全局快捷键。装饰部件不进入动作集合，也不增加 press owner。示例使用160px菜单、账户与资源分组和禁用的 API 动作。Invite users 的真实子菜单属于随后单独实现的协议片，不用演示盒子模拟。Checkbox/Radio变体及完整native/GPUI、Compiler、打包、视觉和独立验收仍未完成。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+## 用法
+
+- **分组与装饰部件**：使用 `Group` 和 `Label` 将相关操作分组并自动建立无障碍命名关联；使用 `Separator` 分隔区域，使用 `Shortcut` 展示快捷键提示。
+- **装饰性提示**：`Separator` 与 `Shortcut` 均为被动展示部件，不参与键盘焦点顺序；`Shortcut` 仅用于显示快捷键文字，不会自动注册全局热键。
+- 示例展示了一个宽度为 `160px` 的菜单，包含账户与资源两个分组以及禁用的 API 项。
+
+## API
+
+| 部件        | 说明                             |
+| ----------- | -------------------------------- |
+| `Group`     | 将相关菜单项归为一组并关联组标签 |
+| `Label`     | 菜单分组的只读标题               |
+| `Separator` | 分隔菜单分组的视觉分割线         |
+| `Shortcut`  | 展示在菜单项右侧的快捷键提示文本 |

@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Hover Card'
-description: '基于 Base Hover Card 的海报式投影'
+description: '悬停触发、带可配置开合延迟与硬表面浮层的 Brutalist 悬浮预览卡片组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,15 +9,28 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-Hover Card 保留 Base 的开合时序与定位契约，内容区使用 paper/ink 硬表面。
+Brutalist Hover Card 在悬停触发器时以可配置的延迟展开预览浮层，保留 Base Hover Card 的开合时序与定位逻辑，并以高对比度的硬边框与阴影面板呈现内容。
+
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-hover-card" initialRuntime="wc" />
 </div>
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-hover-card`
+
+## 用法
+
+- `Root` 通过 `openDelay`（默认 `700ms`）与 `closeDelay`（默认 `300ms`）控制悬停展开与收起节奏，也支持传入 `open` 进入受控模式。
+- `Trigger` 承载触发区域，`Content` 支持定位方向、对齐、偏移、碰撞避让与过渡动画属性。
+
 ## API
 
-Hover Card 是工作区源码。当前工作区 CLI 目标为 `brutalist-hover-card`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。传入 `open` 进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -29,4 +42,9 @@ Hover Card 是工作区源码。当前工作区 CLI 目标为 `brutalist-hover-c
   ]}
 />
 
-这些属性属于 Root。Trigger 的 `disabled` 默认 `false`。Content 接受 Transition 属性，`side` 默认 `bottom`，`align` 默认 `center`，`sideOffset` 默认 `4`，`alignOffset` 与 `collisionPadding` 默认 `0`，`avoidCollisions` 默认 `true`。
+传入 `open: boolean` 进入受控模式。
+
+### 其他部件属性
+
+- **Trigger**：`disabled?: boolean`（默认 `false`）
+- **Content**：支持 Transition 属性；`side`（默认 `'bottom'`）、`align`（默认 `'center'`）、`sideOffset`（默认 `4`）、`alignOffset`（默认 `0`）、`collisionPadding`（默认 `0`）、`avoidCollisions`（默认 `true`）

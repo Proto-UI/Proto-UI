@@ -1,11 +1,15 @@
 ---
-title: brutalist Input Otp
-description: 可移植输入原子草稿。
+title: 'Brutalist Input OTP'
+description: '支持逐位展示、格式过滤与表单集成的 Brutalist 一次性验证码输入组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Brutalist Input OTP 使用单个真实输入框搭配按索引渲染的槽位显示，完整支持粘贴、选区编辑、输入法合成与 `one-time-code` 自动填充，并以高对比度边框突出当前激活槽位。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-input-otp"
@@ -14,17 +18,30 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root 管理 value/defaultValue、length（1–32，默认6）、numeric/alphanumeric 过滤、disabled/readOnly、name、ariaLabel。唯一真实 Input 由 TextControl 处理选择、粘贴、删除与组合输入，并声明 one-time-code 自动填充；组合结束后过滤和限长。Slot 是按索引被动显示且对辅助技术隐藏，不制造额外编辑器或 Tab 停靠点；可编辑 Input 聚焦时，active 由 TextControl 的真实插入点或选区决定；未知选区、失焦、disabled 和 readOnly 不显示活动槽，不能用值长度代替光标。valueChange 为提案；每个接受的完整代码发一次 completed，不执行验证或获取短信。
+## 安装
 
-在 Field/FormField 内用 Control 替代 Input，桥接 FieldLabel、规范字符串校验、IME 取消、Form 序列化及复位。独立 Input 保留原有命名。OTP Control 在所有者回调结束后为已接受的规范值变化启动校验；受控拒绝或过滤后无变化不触发自动 change 校验，manual 与配置的 blur 校验仍可使用。同一回调批次只校验最新快照，reset、策略中断和卸载会取消排队工作。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-部件: root, input, control, slot, separator. 四个视觉家族继承同一 Base 行为。
+## 用法
 
-当前为 Draft 源码工作。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍待完成，不宣称 Finf 验收通过。
+### 部件组成
+
+Input OTP 由 `Root`、`Input`、`Control`、`Slot` 和 `Separator` 组成：
+
+- **Root**：管理 `value` / `defaultValue`、位数 `length`（1–32，默认 `6`）、字符过滤模式 `pattern`（`'numeric'` 或 `'alphanumeric'`）、`disabled`、`readOnly`、`name` 与 `ariaLabel`。
+- **Input**：独立使用时承载真实文本输入，自动处理粘贴、删除、选区与输入法合成，并启用 `one-time-code` 自动填充；合成结束后过滤非法字符并截断至设定长度。
+- **Control**：在 `Field` 或 `FormField` 内替代 `Input` 使用，自动衔接标签点击聚焦、表单校验、序列化与重置。
+- **Slot**：按 `index` 展示对应字符的只读视觉格，对辅助技术隐藏，不增加额外的 Tab 停靠点。输入框聚焦且可编辑时，根据真实光标或选区高亮当前活动槽位。
+- **Separator**：可选的视觉分隔符。
+
+### 事件与校验
+
+- 传入 `value` 进入受控模式，输入变更通过 `valueChange` 发出提议；每次填满并接受完整验证码时触发一次 `completed` 事件。
+- 在 `Field` 内使用 `Control` 时，仅在外部接受了有效的值变化后触发自动变更校验，被拒绝或过滤后未变化的输入不会重复触发校验。
 
 ## API
 
-Input OTP 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。Input 的 `placeholder` 可选，没有默认值。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -39,7 +56,13 @@ Input OTP 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `v
   ]}
 />
 
-这些属性属于 Root。Slot 的 `index` 默认 `0`。
+传入 `value: string` 可切换为受控模式。
+
+### 其他部件属性
+
+- **Input**：`placeholder?: string`（可选）
+- **Slot**：`index?: number`（默认 `0`）
+- **Control / Separator**：无独立属性
 
 ## 参考
 

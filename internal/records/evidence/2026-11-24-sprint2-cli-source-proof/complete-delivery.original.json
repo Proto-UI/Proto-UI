@@ -1,0 +1,93 @@
+{
+  "kind": "sprint2-cli-candidate04-complete-delivery.v1",
+  "sourceBase": "5cb80eb937f20982dd7dc8cbc93a90e91d665c31",
+  "copyFiles": [
+    {
+      "path": "2026-11-24-sprint2-cli-source-proof-and-rhea.md",
+      "bytes": 10372,
+      "sha256": "0e9acd614f97f4b786801c24139b582183cc81624f7c5e7a6ae8c32ab6486d50"
+    },
+    {
+      "path": "receipts.tar.xz",
+      "bytes": 392300,
+      "sha256": "5f911639ab383fdcf4bdc9297ec86e8634b5021bd8e379e79c0066dfd6d18701"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 30143,
+      "sha256": "388390eb10a31bc8982d9552e49eee7e8e185e8f014cf9e90557d9840952cf71"
+    },
+    {
+      "path": "delivery.json",
+      "bytes": 220,
+      "sha256": "db6cbdf21cf81e8fb84e0282ee45a11df2b7ff7faafed556046d9f99b11dc157"
+    },
+    {
+      "path": "local-original-receipts.tar.xz",
+      "bytes": 785720,
+      "sha256": "3d7640ab0fe174171986766c12d513528542f3930c02e63f5ccb4738d6d97e6b"
+    },
+    {
+      "path": "local-original.manifest.json",
+      "bytes": 13073,
+      "sha256": "325676c061a8c7f6f9aa2d22ea0d6a88e3bea529db0cad303d7cc27c1e0ff55b"
+    },
+    {
+      "path": "local-original.delivery.json",
+      "bytes": 194,
+      "sha256": "2ce58dff961b91ed17991f8be3b4a5eea51d0483ec8110c7b20b05c5e1639dac"
+    },
+    {
+      "path": "final-local.tar.xz",
+      "bytes": 46160,
+      "sha256": "c005284b5c3efa11fc7f2c379a3fea7a3eddf7a8d4168ebe53a4aa1bb0440fb8"
+    },
+    {
+      "path": "final-local.manifest.json",
+      "bytes": 2041,
+      "sha256": "fa95c00f8b5a992ea6b6eb15884f926cdcbb083f7535af5425643b1c08a18c0e"
+    },
+    {
+      "path": "supplement/accordion-cli-source-and-presets-candidate04-full-index.patch",
+      "bytes": 64983,
+      "sha256": "9fb330a84d11993d495cf894512a5e440959cc2757831a4d5941af175395dcbf"
+    }
+  ],
+  "rawArchives": [
+    {
+      "path": "receipts.tar.xz",
+      "verifiedMembers": 142
+    },
+    {
+      "path": "local-original-receipts.tar.xz",
+      "verifiedMembers": 53
+    },
+    {
+      "path": "final-local.tar.xz",
+      "verifiedMembers": 8
+    }
+  ],
+  "status": {
+    "rheaSelected": {
+      "pass": 8,
+      "fail": 0,
+      "unselected": 20
+    },
+    "buttonGhost": {
+      "pass": 2,
+      "fail": 0
+    },
+    "fullCli": {
+      "pass": 343,
+      "fail": 1,
+      "total": 344
+    },
+    "fullRuleInventory": {
+      "files": 5000,
+      "unresolved": 947,
+      "accepted": false
+    }
+  },
+  "existingReceiptsRewritten": false,
+  "newGitCommitCreatedByChild": false
+}

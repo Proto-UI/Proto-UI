@@ -1,6 +1,6 @@
 ---
 title: 'Liquid Glass Toggle'
-description: 'Base 持久 active 状态、regular 玻璃与可读回退。'
+description: '采用 Liquid Glass 玻璃材质与可读回退的双态切换按钮，继承 Base Toggle 语义。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -9,11 +9,13 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-这是 [Base Toggle](/zh-cn/ui-libraries/base/toggle/) 的 Proto 设计语言扩展草案，不是 Apple Toggle 复刻，也不声明 Apple 光学效果完全等价。
+Liquid Glass Toggle 继承 [Base Toggle](/zh-cn/ui-libraries/base/toggle/) 的持久选中语义与键盘交互，采用 Liquid Glass 玻璃外观：未激活时呈现中性 `regular` 玻璃（`secondary` 填色与前景色），激活时呈现基于主题主色的染色玻璃（`primary` 与 `primary-foreground`）。
 
-未激活状态请求中性的 regular 玻璃，使用主题 secondary 填色与前景色。已激活状态从已治理的 primary 填色请求 regular style-fill tint，并使用 primary-foreground。小型 currentColor 装饰勾选在两个状态中占据相同的预留空间，提供非颜色选择标记，不再默认添加下划线。首尾等宽预留让文字或图标本身居中，紧凑的对称内边距避免原先只有尾部预留造成的留白偏移。已有的 1px 选择边框与外部几何在选择切换中保持不变。指针短暂按压引起的形变与持久 active 状态分别处理。
+组件内置等宽预留空间的小型 `currentColor` 装饰勾选，在切换状态时保持文字或图标居中、外框几何稳定，即使不依赖颜色或光学材质也能清晰区分激活状态。指针按压形变与持久 `active` 状态彼此独立。
 
-用页面顶部选择器切换 Web Components、React、Vue 3、Vue 2。Bold 初始未激活，Italic 初始已激活；点击、Space 和 Enter 发出 active 变更请求。Unavailable 禁用后仍保留 active。状态文本只观察真实 Base activeChange 信号。
+## 预览
+
+使用页面顶部的运行时选择器可在 Web Components、React、Vue 3 与 Vue 2 之间切换。示例中 Bold 初始未激活，Italic 初始已激活，Unavailable 处于禁用态并保持原选中状态；点击、Space 或 Enter 会发出 `activeChange` 请求。
 
 <div data-adapter-panel="wc">
   <PrototypePreviewer
@@ -54,25 +56,30 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <AdapterPanelScript />
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+## 用法
+
+### 材质与无障碍
+
+- 共享 Web 材质提供者仅采样应用显式提供的可见 canvas 背景，不会抓取任意 DOM。
+- 当背景源不可用、存在绘制重叠、处于禁用态、`material="opaque"`，或系统启用减弱透明度、增强对比度、强制颜色模式时，按钮会自动回退到高对比度的不透明主题色对（激活态为 `primary`/`primary-foreground`，未激活态为 `secondary`/`secondary-foreground`），并保留勾选标记以清晰表达选中状态。
+- 开启减弱动态效果时，会关闭弹性按压形变并保留静态材质效果。
+- 多个玻璃控件之间应留出足够间距以容纳扩展的光学绘制（示例中为 `32px`，较宽的控件可按需增大），避免相互重叠。
+- 纯图标按钮仍需提供明确的可访问名称（如 `aria-labelledby`）。设计原则参考 Apple [Materials](https://developer.apple.com/design/human-interface-guidelines/materials) 与 [Meet Liquid Glass](https://developer.apple.com/videos/play/wwdc2025/219/)。
+
 ## API
 
-- active?: boolean：受控选择。activeChange 只请求下一个值，owner 可拒绝或延后更新。
-- defaultActive?: boolean：非受控初始值，默认 false。
-- disabled?: boolean：默认 false。抑制激活，清除瞬时交互，保留 active 选择。
-- material?: 'auto' | 'opaque'：默认 auto。opaque 主动关闭光学增强。
-- activeChange：`{ active: boolean }`。Previewer 使用 onActiveChange 观察 outward signal；它不是 Toggle 的语义 prop。
-- role="button"、aria-pressed 对应持久 active；exposed pressed 表示短暂指针按压。焦点与键盘行为直接继承 Base Toggle。
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `active` | `boolean` | — | 受控激活状态；通过 `activeChange` 请求变更，由调用方决定是否更新 |
+| `defaultActive` | `boolean` | `false` | 非受控初始激活状态 |
+| `disabled` | `boolean` | `false` | 禁用交互并清除瞬时按压态，同时保留已有 `active` 状态 |
+| `material` | `'auto' \| 'opaque'` | `'auto'` | 设为 `'opaque'` 时关闭光学增强，始终使用不透明样式 |
 
-## 材质与可访问性
+### 事件与状态
 
-共享 Web provider 只采样 Previewer 提供的可见应用 canvas，不捕获任意 DOM 或浏览器 compositor。来源缺失、撤销、被其他绘制遮挡，以及偏好未知、减弱透明度、增强对比度、强制颜色时，均保留不透明回退；减弱动态效果使用静态光学路径。禁用与 material="opaque" 同样回退。回退保留当前状态完整的不透明颜色对：active 使用 primary/primary-foreground，inactive 使用 secondary/secondary-foreground。不支持 tint profile 时同样回退，不静默改成中性玻璃。光学绘制不可用时，勾选仍能标识已激活状态；强制颜色仍由用户代理控制。
-
-控件之间需为扩展的光学绘制留出空间。此示例使用 32px 间距；更宽的控件可能需要更大间距。重叠绘制会被主动拒绝，不代表已支持堆叠玻璃。
-
-[Apple Materials 指南](https://developer.apple.com/design/human-interface-guidelines/materials) 说明材质应响应透明度与对比度偏好；[Meet Liquid Glass](https://developer.apple.com/videos/play/wwdc2025/219/) 也讨论减弱动态效果。本原型使用自身共享 provider 的严格门控，保留可读主题填色和前景色，不模拟未支持的光学能力。
-
-源码包仍为 private/unreleased。此 selected-tint 切片仍是草案，须补齐四个 Web Adapter 的 exact-head 浏览器证据。证据必须将解码后的内容区域像素与同一冻结 receipt、前景色配对，要求有效采样非空且对比度至少 4.5，并另做固定来源的 neutral/tinted 与 tinted/zero-refraction GPU 对照。透明 host 背景或变化的图像 hash 不构成光学对比度或 tint 证据。直接 program 诊断仅证明算法，不替代 provider 与公共页面验收。
-
-共享原型为文字与 icon-only 内容提供同一个非颜色勾选标记；icon-only 消费者仍须提供明确的可访问名称，测试页使用既有 aria-labelledby 关联。该标记是 Proto 的设计选择，不是 Apple 的强制符号，也不声称映射了 Apple 的 Differentiate Without Color 设置。完整 Compiler、GPUI/Flutter/Qt、Apple 原生呈现与 group/morph 等价性仍不属于此交付。
-
-[Apple 的 Liquid Glass 着色说明](https://developer.apple.com/videos/play/wwdc2025/219/?time=1023)要求着色后仍与背后内容保持视觉关联；选中着色不表示应把玻璃替换成纯色填充。新增的粗粒度图案测试分别度量内容内部的变化幅度、空间结构与同直方图来源换位响应，纯色、噪声和已退役的窄幅着色是负控。这些是工程验收条件，不是 Apple 给出的数值；整图颜色数量或交互测试通过都不能单独证明玻璃观感。
+- `activeChange`：载荷为 `{ active: boolean }`。在宿主适配器中通常以 `onActiveChange` 监听该事件。
+- 无障碍与暴露状态：通过 `role="button"` 与 `aria-pressed` 反映持久 `active` 状态；暴露的 `pressed` 表示短暂的指针按压状态。焦点与键盘交互继承自 Base Toggle。

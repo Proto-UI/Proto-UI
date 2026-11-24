@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "ours": "24e553961e7a898b74b959792d35f49364f35efc",
+  "main": "0adde15d1e5dacb112cdad4d8d7811e015cc4456",
+  "archive": "source-validation.tar.gz",
+  "archiveSha256": "b922737c9e94823850707a9c35cada22c13b702ea024bd3ddf7ceaca67ef9fbb",
+  "files": [
+    {
+      "path": "source.json",
+      "bytes": 34469,
+      "sha256": "5f1ab92dba5f0f93780463eac73d6d5dbe10b073ec88036e98af36ac8db701cb"
+    },
+    {
+      "path": "source.log",
+      "bytes": 26723,
+      "sha256": "b13b1400b8a5bc07348f35b23488d6d7930bab57613708111a362a0a121131aa"
+    },
+    {
+      "path": "type-contracts.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "merge-inputs.json",
+      "bytes": 136378,
+      "sha256": "22f612024389a96f974a0f9641e0d6d58cf28fb672c10cf75f8b04b519b41354"
+    }
+  ],
+  "validation": {
+    "files": 11,
+    "tests": 99,
+    "failed": 0,
+    "pending": 0,
+    "publicTypeContractsExit": 0,
+    "fullWorkspaceNativePackageAcceptance": "pending"
+  }
+}

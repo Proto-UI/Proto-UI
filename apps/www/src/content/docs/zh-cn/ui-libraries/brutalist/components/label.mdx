@@ -1,12 +1,14 @@
 ---
 title: 'Label'
-description: '用显式 Proto UI 关联分别表达可访问名称与控件激活。'
+description: '通过显式实例关联为控件提供无障碍命名与点击激活的 Brutalist 标签组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-Label 当前仍是 **draft**。brutalist 投影复用独立的 Base Label 协议；Proto UI 是独立项目，设计资料用于比较与自主采纳，不构成其他项目对 Proto UI 的权威。
+Brutalist Label 通过显式引用关联为 `Checkbox`、`Switch`、`Radio Group Item`、`Input`、`Textarea`、`Button`、`Toggle` 和 `Toggle Group Item` 提供无障碍命名与点击激活能力，而无需手动维护 DOM ID。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-label"
@@ -14,38 +16,33 @@ Label 当前仍是 **draft**。brutalist 投影复用独立的 Base Label 协议
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-此例将 Brutalist Label 与 Brutalist Checkbox、Switch、Radio Group Item、Input、Textarea 配对，并使用本家族的 Indicator 与 Thumb 部件。可操作标签使用公开默认值；仅命名的示例显式设置 `activation={false}`。On/Off 读取目标的公开状态；Requests 记录受控 Checkbox 的普通 `checkedChange` 提案次数，应用所有者仍保持 `checked={false}`。Label 不转发 DOM click，也不拥有另一套控件值。Input 与 Textarea 仍由原生编辑器承载；只读示例可以通过 Label 获得焦点，文字保持不变。禁用选项保留名称，但拒绝激活和聚焦。
+## 安装
 
-## 分开声明名称和激活
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-- `naming` 默认 `true`：目标通过可访问关系引用真实渲染的 Label，不再放置重复的隐藏名称。
-- `activation` 默认 `true`：显式配对后，符合条件的指针动作或可信的非指针激活请求目标已有操作。设为 `false` 可保留命名而关闭激活；重新设为 `true` 或移除该 Prop 会恢复默认激活。Checkbox、Switch 保持 disabled 与 controlled 规则；Radio Item 向 Group 请求选值；Input、Textarea 只请求 focus，不由 Label 改值或操纵选区。
-- Label 不增加 button role、Tab 停靠点或独立键盘激活。嵌套链接/按钮、带修饰键的输入、pointercancel 与拖拽手势不转发。
-- 仅命名的 Label 与长说明仍可复制。短操作标签在自己的原型上表达选择策略。受控示例会拒绝接受切换提案，保持关闭，这是应用的值所有权决定。
+- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-label`
+- **包导出**：从 `@proto.ui/prototypes-brutalist/label` 导入
 
-升级提示：已配对但省略 `activation` 的 Label 现在默认可激活；需要保留被动命名时，请显式设为 `false`。`selection='policy'` 会抑制操作标签上的误选文字；操作标签仍需可复制时可设 `selection='text'`。未配对的 Label 不会寻找父级或附近的控件。
+## 用法
 
-## 关联不进入 JSON Props
+### 独立控制命名与激活
 
-从 `@proto.ui/core` 调用 `createControlLabelRef()`，每一对控件/标签保留一个稳定引用。React、Vue、Vue 2 向双方传 Adapter-owned `instanceAssociations: { controlLabel: ref }`。这不是普通 Proto Props；即使自定义 getProps，也会在 raw/resolved Props 之前剥离。
+- **`naming`（默认 `true`）**：目标控件自动关联真实渲染的 `Label` 作为无障碍名称，无需额外放置隐藏文本。
+- **`activation`（默认 `true`）**：配对后，点击标签会在同一次点击时机触发目标控件的对应操作——`Checkbox` / `Switch` 遵循自身的受控与禁用规则，`Radio Item` 向分组请求选中，`Input` / `Textarea` 请求聚焦（只读文本框仍可聚焦，禁用控件保留名称但忽略激活）。如仅需命名而不希望点击激活，请显式设置 `activation={false}`。
+- **`selection`（默认 `'policy'`）**：可激活标签默认避免点击时误选文字；若需要允许用户复制标签文案，可设为 `'text'`。嵌套链接/按钮、修饰键点击与拖拽手势不会误触发激活，未配对的 `Label` 也不会自动吸附附近控件。
 
-WC 使用 `@proto.ui/adapter-web-component` 的 `setElementAssociations(target, { controlLabel: ref })`，Label 同样调用。普通 Props 只传 naming、activation 和控件值。attribute 字符串、JSON clone 后的对象、未知关联键会被拒绝。DemoSpec 用 `associations: { controlLabel: 'row-key' }` 表达纯数据意图，每个 render instance 单独物化公开引用。
+### 建立显式关联
 
-每个引用仅支持一个 live Label 和一个 live target。缺失、重复、过期时不选取 DOM 顺序上的赢家。显式配对的 siblings 可以关联，但 Web 还要求相同 Document 与 tree root；不隐式跨 document/shadow root，也不提供 DOM 查询或任意 action bus。已有非空 ariaLabel/labelledBy 保留命名所有权；与 Label 命名冲突时明确诊断，必要时显式选择 activation-only。
+从 `@proto.ui/core` 调用 `createControlLabelRef()` 为每对标签与控件创建一个稳定引用（一对一绑定，且需位于同一文档/Shadow 树内）：
 
-## 消费与范围
+- **React / Vue / Vue 2**：向双方组件传入 `instanceAssociations: { controlLabel: ref }`（由 Adapter 层处理，不进入普通 JSON Props）。
+- **Web Components**：从 `@proto.ui/adapter-web-component` 调用 `setElementAssociations(element, { controlLabel: ref })` 分别绑定目标控件与 `Label`。
 
-入口为 `@proto.ui/prototypes-brutalist/label`。CLI component `brutalist-label` 可生成 WC、React、Vue、Vue 2 facade。
-
-声明的关联目标集合为 Checkbox、Switch、Radio Group Item、Input、Textarea、Button、Toggle、Toggle Group Item。仅图标命令可以通过同一关联使用独立 Label；Button 保留 click signal，Toggle 保留 activeChange，Toggle Group Item 将选择请求交给 Group。每个目标自行声明参与，并通过 Prototype 包与其 Adapter 使用。在这些目标中，私有 Compiler 只把 Button、Toggle 与 Label 降级为独立 Web 源码，其余目标（包括 Toggle Group Root 与 Item）保留明确的 unsupported 诊断。此关联不附带 Form submission、validation、多 Label 排序或原生平台/辅助技术认证。真实浏览器验收与源码、合成宿主测试分别追踪。
-
-- [关联契约](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-CONTROL-LABEL-0001.yaml)
-- [P-BRUTALIST-LABEL](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-LABEL.yaml)
-- [测试映射](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-CONTROL-LABEL-0001.yaml)
-
-Web activation 保留在原 click 调用时段，不用定时器推迟编辑器 focus。宿主监听器已观察到的 click 取消会被尊重；后续监听器不能撤回已经提交的操作。仅取消 pointerup 不等于取消 click。这是有界的自定义 Label 协议，未声称复现原生 HTML label 的全部默认动作细节；真实辅助技术行为仍待验证。
+如果目标控件已显式设置非空的 `ariaLabel` 或 `labelledBy`，则会保留该命名并提示冲突；此时可将 `Label` 设为 `naming={false}` 仅用于点击激活。
 
 ## API
+
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -55,5 +52,3 @@ Web activation 保留在原 click 调用时段，不用定时器推迟编辑器 
     { name: 'selection', type: "'policy' | 'auto' | 'text' | 'none'", default: 'policy' },
   ]}
 />
-
-这些属性属于 Root。

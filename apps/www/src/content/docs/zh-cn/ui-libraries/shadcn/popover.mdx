@@ -1,15 +1,15 @@
 ---
 title: 'Popover'
-description: '用于少量交互内容的非模态锚定弹层。'
+description: '用于呈现少量交互内容的非模态锚定弹层组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Popover 在触发元素附近展示非模态浮层，适合放置快捷设置、表单片段或轻量级导航内容。本页示例使用 **Shadcn Rhea** 风格。
 
-用于少量交互内容的非模态锚定弹层。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-popover"
@@ -18,17 +18,26 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Content 相对 Trigger 定位，提供 side、align、sideOffset、alignOffset、collisionPadding。非模态内容不锁定背景滚动或限制 Tab；外部点击、焦点移出 Trigger 与 Content、Escape 与 Close 请求关闭。在 Trigger 和 Portal 中的内容之间移动焦点仍属于内部操作。焦点移出后关闭会保留外部控件上的焦点，不返回 Trigger。
+## 安装
 
-Root 支持受控 open 和非受控 defaultOpen。禁用命令不激活。传入 open 时，最终状态仍由调用方持有，通过 openChange 接收请求后再提供新值。拒绝 focus.outside 请求时 Content 保持显示且不限制外部焦点，后续交互仍可再次请求关闭。中立的焦点观察无法识别输入设备，因此纯焦点移出请求的 focusReason 为 programmatic。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-组成: Root, Trigger, Content, Title, Description, Close.
+## 用法
 
-当前是草稿源码实现。完整 native/GPUI、编译器、打包消费、视觉及独立验收仍待完成；本页不表示 Finf 已完成。
+Popover 由 `Root`、`Trigger`、`Content`、`Title`、`Description` 和 `Close` 组成：
 
-## 导航呈现
+- `Content` 相对 `Trigger` 定位，支持通过 `side`、`align`、`sideOffset`、`alignOffset` 和 `collisionPadding` 调整位置与防碰撞边距。
+- 非模态设计不会锁定背景滚动或限制 `Tab` 键移动。
+- 点击外部区域、焦点移出 `Trigger` 与 `Content`、按下 `Escape` 或触发 `Close` 都会请求关闭。焦点在 `Trigger` 与 Portal 中的 `Content` 之间切换仍视为内部操作；因焦点移出外部控件而关闭时，焦点保留在目标外部控件上。
 
-此独立示例为 Trigger 和 Content 显式选择 `presentation="navigation"`。内容使用锚点的可用区域并在自身内部滚动；上方原默认示例保持不变。
+### 受控与非受控
+
+- `Root` 支持通过 `open` 受控或通过 `defaultOpen` 非受控管理展开状态。
+- 传入 `open` 时，请监听 `openChange` 事件并在回调中更新状态。若拒绝 `focus.outside` 关闭请求，`Content` 会保持显示且不影响外部焦点。纯焦点移出触发的关闭请求中，`focusReason` 为 `'programmatic'`。
+
+### 导航呈现
+
+将 `Trigger` 和 `Content` 的 `presentation` 设为 `'navigation'`，可展示适配锚点可用空间并支持内部滚动的导航面板，内部链接保持浏览器原生交互语义：
 
 <PrototypePreviewer
   demoId="demo-shadcn-popover-navigation"
@@ -37,13 +46,9 @@ Root 支持受控 open 和非受控 defaultOpen。禁用命令不激活。传入
   codePanel={false}
 />
 
-链接保留浏览器原生活动语义。本示例不实现网站目录的唯一树借用/归还，也不增加页面特有的焦点所有者。Trigger 样式仍待设计核对；新导航模式的四 runtime 原生证据尚待完成，普通 Popover 的结果不替代此模式验收。
-
-本条目是工作区源码，不在公开的 `proto-ui add` 目录里。
-
 ## API
 
-传入 `open` 进入受控模式。Content 的位置默认值与 Root 分开。
+传入 `open` 可进入受控模式。`Root` 暴露 `open`、`openPopover`、`close`、`toggle` 和 `openChange`：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -61,8 +66,15 @@ Root 支持受控 open 和非受控 defaultOpen。禁用命令不激活。传入
   ]}
 />
 
-`side` 到 `collisionPadding` 属于 Content。`presentation` 是 Shadcn Trigger 与 Content 的呈现属性。Root 暴露 `open`、`openPopover`、`close`、`toggle` 和 `openChange`。
+属性归属说明：
+
+- `open`、`defaultOpen`、`disabled`、`a11yLabel` 属于 `Root`。
+- `side`、`align`、`sideOffset`、`alignOffset`、`collisionPadding` 属于 `Content`。
+- `presentation` 属于 `Trigger` 和 `Content`。
 
 ## 参考
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-POPOVER.yaml', 'P-BASE-POPOVER.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-POPOVER.yaml', 'P-BASE-POPOVER.yaml']}
+/>

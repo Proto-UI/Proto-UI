@@ -231,7 +231,7 @@ export function createSelectAlignmentController(options: {
         value: snapshot?.value ?? '',
         textValue: String(snapshot?.textValue ?? ''),
         disabled: snapshot?.disabled ?? true,
-        hasSnapshot: snapshot != null,
+        hasSnapshot: snapshot !== null && snapshot !== undefined,
         row,
         text: text.length === 1 ? text[0] : null,
       };
@@ -248,15 +248,16 @@ export function createSelectAlignmentController(options: {
     // Detaching can remove or recreate presentation-owned claims. A collection
     // notification alone can retry a detached view only with a real scalar edit
     // to a complete list, not an intermediate count or the same re-created list.
+    const previousGeometry = rejectedGeometry;
     if (
       recoveringGeometry &&
       !mounted &&
       !structural &&
-      rejectedGeometry &&
-      (records.length !== rejectedGeometry.recordCount ||
+      previousGeometry &&
+      (records.length !== previousGeometry.recordCount ||
         records.filter((record) => record.value !== '').length <
-          rejectedGeometry.nonemptyValueCount ||
-        JSON.stringify(recordScalars) === rejectedGeometry.recordsSignature)
+          previousGeometry.nonemptyValueCount ||
+        JSON.stringify(recordScalars) === previousGeometry.recordsSignature)
     )
       return;
     // Anatomy wrappers are fresh views, not identities. Structural generation
@@ -317,7 +318,7 @@ export function createSelectAlignmentController(options: {
           ? { kind: 'value' as const, value: ctx.value }
           : { kind: 'unset' as const },
       records,
-      reference: { trigger: triggers[0], value: values[0] },
+      reference: { trigger: triggers[0] ?? null, value: values[0] ?? null },
     };
     const intent = initial
       ? resolveInitialSelectAlignment(input)
@@ -351,8 +352,8 @@ export function createSelectAlignmentController(options: {
     if (!current()) return;
     options.overlay.registerTargetAlignment({
       family: SELECT_FAMILY,
-      surface: surfaces[0],
-      scrollport: viewports[0],
+      surface: surfaces[0]!,
+      scrollport: viewports[0]!,
       blockReference: intent.reference.block,
       inlineReference: intent.reference.inline,
       blockTarget: intent.floating.block,
@@ -398,16 +399,16 @@ export function createSelectAlignmentController(options: {
     });
   };
   return {
-    get phase() {
+    getPhase() {
       return phase;
     },
-    get surfacePaint() {
+    getSurfacePaint() {
       return surfacePaint;
     },
-    get diagnostic() {
+    getDiagnostic() {
       return diagnostic;
     },
-    get retainsPendingFocusScope() {
+    retainsPendingFocusScope() {
       // Before full-pending, reconcile checked the current ordered non-sizing
       // shape against the last accepted entry. No new focus request is granted.
       return phase === 'full-pending' && lastAcceptedFocusShape !== null;

@@ -1,3 +1,5 @@
+import { runAllSteps } from '../host/synchronous-steps';
+import { createWebMotionStyleOwnership, webMotionAncestors } from './web-motion-style-ownership';
 import { acquireWebTranslation } from '@proto.ui/module-positioning';
 import type { EffectsPort, PresentationViewBinding } from '@proto.ui/core';
 import {
@@ -166,12 +168,16 @@ function createDocumentPresenceSink(
   const doc = el.ownerDocument,
     win = doc.defaultView;
   let translation: ReturnType<typeof acquireWebTranslation> | null = null;
-  const baseline = new Map<string, { value: string; priority: string }>();
-  const writes = new Map<string, { value: string; priority: string }>();
-  const lost = new Set<string>();
-  const owned = (name: string, value: { value: string; priority: string }) =>
-    el.style.getPropertyValue(name) === value.value &&
-    el.style.getPropertyPriority(name) === value.priority;
+  const {
+    writes,
+    lost,
+    owned,
+    detectLoss,
+    clear: clearOwnedStyles,
+    write: writeOwnedStyle,
+  } = createWebMotionStyleOwnership(el, (name) => {
+    if (name === 'opacity') clearZeroOpacityOwner();
+  });
   const ownsZeroOpacity = () => {
     const opacity = writes.get('opacity');
     return (
@@ -181,41 +187,17 @@ function createDocumentPresenceSink(
   const clearZeroOpacityOwner = () => {
     if (zeroOpacityOwners.get(el) === ownsZeroOpacity) zeroOpacityOwners.delete(el);
   };
-  const detectLoss = () => {
-    for (const [name, value] of writes)
-      if (!owned(name, value)) {
-        lost.add(name);
-        writes.delete(name);
-        baseline.delete(name);
-        if (name === 'opacity') clearZeroOpacityOwner();
-      }
-  };
+  let styleRevision = 0;
   const clear = () => {
+    styleRevision++;
     clearZeroOpacityOwner();
     translation?.release();
     translation = null;
-    for (const [name, value] of writes)
-      if (owned(name, value)) {
-        const before = baseline.get(name)!;
-        if (before.value) el.style.setProperty(name, before.value, before.priority);
-        else el.style.removeProperty(name);
-      }
-    writes.clear();
-    baseline.clear();
+    clearOwnedStyles();
   };
   const write = (name: string, value: string) => {
-    detectLoss();
-    if (lost.has(name)) return false;
-    if (!baseline.has(name))
-      baseline.set(name, {
-        value: el.style.getPropertyValue(name),
-        priority: el.style.getPropertyPriority(name),
-      });
-    el.style.setProperty(name, value);
-    writes.set(name, {
-      value: el.style.getPropertyValue(name),
-      priority: el.style.getPropertyPriority(name),
-    });
+    styleRevision++;
+    if (!writeOwnedStyle(name, value)) return false;
     if (name === 'opacity') {
       if (Number.parseFloat(value) === 0 && ownsZeroOpacity())
         zeroOpacityOwners.set(el, ownsZeroOpacity);
@@ -225,23 +207,84 @@ function createDocumentPresenceSink(
   };
   const px = (value: string | undefined) =>
     value && /^-?(?:\d+\.?\d*|\.\d+)px$/.test(value) ? Number.parseFloat(value) : null;
-  const ancestors = () => {
-    const result: HTMLElement[] = [];
-    let node: HTMLElement | null = el;
-    while (node) {
-      result.push(node);
-      const root: Node = node.getRootNode();
-      node =
-        node.parentElement ?? ('host' in root ? ((root as ShadowRoot).host as HTMLElement) : null);
+  const intrinsicBlockSize = () => {
+    const lease = writes.get('block-size');
+    if (lost.has('block-size') || (lease && !owned('block-size', lease))) return null;
+    // The canonical style owner restores the current semantic baseline. A
+    // constrained scroll extent cannot prove shrinkage; release and reacquire
+    // this single lease synchronously around the actual layout read.
+    const revision = styleRevision;
+    if (lease && !writeOwnedStyle('block-size', undefined)) return null;
+    const semantic = {
+      value: el.style.getPropertyValue('block-size'),
+      priority: el.style.getPropertyPriority('block-size'),
+    };
+    try {
+      const css = win?.getComputedStyle(el);
+      const vertical =
+        css?.writingMode?.startsWith('vertical') || css?.writingMode?.startsWith('sideways');
+      const value = px(css?.blockSize) ?? px(vertical ? css?.width : css?.height);
+      return value !== null && Number.isFinite(value) && value >= 0 ? value : null;
+    } finally {
+      if (lease && live() && revision === styleRevision && !writes.has('block-size')) {
+        if (owned('block-size', semantic)) {
+          writeOwnedStyle('block-size', lease.value);
+        } else {
+          // Preserve takeover during the read; never resurrect an old lease.
+          lost.add('block-size');
+        }
+      }
     }
-    return result;
+  };
+  const fixedContainingBlockHeight = (): number | null => {
+    if (!win || win.getComputedStyle(el).position !== 'fixed') return null;
+    // The initial provider deliberately refuses other containing blocks. The
+    // panel's own dimensions and transformed bounds are never a substitute.
+    for (const node of webMotionAncestors(el).slice(1)) {
+      const css = win.getComputedStyle(node);
+      const nonNone = (value: string) => !!value && value !== 'none';
+      if (
+        [
+          css.transform,
+          css.translate,
+          css.rotate,
+          css.scale,
+          css.perspective,
+          css.filter,
+          css.backdropFilter,
+        ].some(nonNone) ||
+        /(?:^|\s)(?:layout|paint|strict|content)(?:\s|$)/.test(css.contain) ||
+        /(?:^|,|\s)(?:transform|translate|rotate|scale|perspective|filter|backdrop-filter|contain)(?:,|\s|$)/.test(
+          css.willChange
+        ) ||
+        (css.contentVisibility && css.contentVisibility !== 'visible') ||
+        (css.containerType && css.containerType !== 'normal')
+      )
+        return null;
+    }
+    const height = doc.documentElement.clientHeight || win.innerHeight;
+    return Number.isFinite(height) && height >= 0 ? height : null;
+  };
+  const topMatchesValue = (baseline: number): boolean => {
+    const value = win?.getComputedStyle(el).top;
+    const pixels = px(value);
+    if (pixels !== null) return Math.abs(pixels - baseline) < 0.01;
+    // DOM-model providers can retain the computed percentage. This is only an
+    // ownership comparison with the typed endpoint, never a semantic target.
+    const percent = value?.match(/^(-?(?:\d+\.?\d*|\.\d+))%$/);
+    const height = fixedContainingBlockHeight();
+    return (
+      !!percent &&
+      height !== null &&
+      Math.abs((Number(percent[1]) * height) / 100 - baseline) < 0.01
+    );
   };
   return createPresencePresentationProjector({
     binding,
     now: () => win?.performance.now() ?? performance.now(),
-    environment() {
+    environment(channels = []) {
       detectLoss();
-      const tree = ancestors();
+      const tree = webMotionAncestors(el);
       const preparing = tree.some((node) => node.hasAttribute(PUI_PORTAL_PREPARING_ATTR));
       // The portal still owns the first-render display barrier. Its temporarily
       // unavailable box must not be measured or borrowed from an earlier layout;
@@ -264,6 +307,11 @@ function createDocumentPresenceSink(
         return Number.isFinite(value) && value >= 0 ? value : null;
       };
       const preference = readWebPreference(doc, 'preference.reducedMotion');
+      const containingBlockHeight =
+        !preparing && channels.includes('top') ? fixedContainingBlockHeight() : null;
+      // A current preparing view has no measurable profile yet. Defer that
+      // judgment until ready; known ownership loss still refuses the channel.
+      const topProfilePending = preparing && live() && channels.includes('top') && !lost.has('top');
       return {
         preference:
           preference === 'no-preference' || preference === 'reduce' ? preference : 'unknown',
@@ -274,12 +322,22 @@ function createDocumentPresenceSink(
             node.matches('[hidden],[data-pui-view-pending],[data-pui-view-detached]')
           ),
         preparing,
+        topProfilePending,
         width: dimension('width'),
         height: dimension('height'),
         rootFontPx: px(win?.getComputedStyle(doc.documentElement).fontSize),
-        supported: (['translate', 'opacity'] as const).filter(
+        containingBlockHeight,
+        intrinsicBlockSize:
+          !preparing && channels.includes('blockSize') ? intrinsicBlockSize() : null,
+        supported: (['translate', 'opacity', 'top', 'blockSize'] as const).filter(
           (name) =>
-            !lost.has(name) && (name !== 'translate' || !!win?.CSS?.supports?.('translate', '1px'))
+            !lost.has(name) &&
+            (name !== 'translate' || !!win?.CSS?.supports?.('translate', '1px')) &&
+            (name !== 'top' || containingBlockHeight !== null) &&
+            (name !== 'blockSize' ||
+              (!lost.has('block-size') &&
+                !lost.has('overflow') &&
+                !!win?.CSS?.supports?.('block-size', '1px')))
         ),
       };
     },
@@ -295,7 +353,7 @@ function createDocumentPresenceSink(
       const resize = win?.ResizeObserver ? new win.ResizeObserver(callback) : null;
       resize?.observe(el);
       const mutation = win?.MutationObserver ? new win.MutationObserver(callback) : null;
-      for (const node of ancestors())
+      for (const node of webMotionAncestors(el))
         mutation?.observe(node, {
           attributes: true,
           attributeFilter: [
@@ -306,25 +364,15 @@ function createDocumentPresenceSink(
           ],
         });
       doc.addEventListener('visibilitychange', callback);
+      win?.addEventListener('resize', callback);
       return () => {
-        let failed = false;
-        let firstError: unknown;
-        for (const cleanup of [
+        runAllSteps([
           () => off?.(),
           () => resize?.disconnect(),
           () => mutation?.disconnect(),
           () => doc.removeEventListener('visibilitychange', callback),
-        ]) {
-          try {
-            cleanup();
-          } catch (error) {
-            if (!failed) {
-              failed = true;
-              firstError = error;
-            }
-          }
-        }
-        if (failed) throw firstError;
+          () => win?.removeEventListener('resize', callback),
+        ]);
       };
     },
     requestFrame: (callback) =>
@@ -349,15 +397,22 @@ function createDocumentPresenceSink(
       if (sample.opacity !== undefined) {
         if (lost.has('opacity')) return false;
         if (!writes.has('opacity')) {
-          const inline = el.style.getPropertyValue('opacity');
+          const expected = sample.opacityBaseline ?? 1;
           const computed = win?.getComputedStyle(el).opacity ?? '';
-          if ((inline && inline !== '1') || (computed && computed !== '1')) return false;
+          const value = computed === '' ? 1 : Number(computed);
+          if (!Number.isFinite(value) || Math.abs(value - expected) > 0.000001) return false;
         }
       }
       if (sample.translate) {
         translation ??= acquireWebTranslation(el, 'presentation');
         if (!translation.canWrite()) return false;
       }
+      if (sample.top !== undefined) {
+        if (lost.has('top') || sample.topBaseline === undefined) return false;
+        if (!writes.has('top') && !topMatchesValue(sample.topBaseline)) return false;
+      }
+      if (sample.blockSize !== undefined && (lost.has('block-size') || lost.has('overflow')))
+        return false;
       // All channels pass ownership preflight before the first channel is written.
       if (
         sample.translate &&
@@ -369,6 +424,27 @@ function createDocumentPresenceSink(
         return false;
       if (!current() || !live()) return false;
       if (sample.opacity !== undefined && !write('opacity', String(sample.opacity))) return false;
+      if (!current() || !live()) return false;
+      if (sample.top !== undefined && !write('top', `${sample.top}px`)) return false;
+      if (!current() || !live()) return false;
+      if (sample.blockSize !== undefined) {
+        if (!write('overflow', 'hidden')) return false;
+        if (!current() || !live()) return false;
+        if (!write('block-size', `${sample.blockSize}px`)) return false;
+      }
+      if (!current() || !live()) return false;
+      // Inline ownership alone does not prove adoption: a host refusal or a
+      // foreign !important cascade may leave the declared property unchanged.
+      // Compare only with the already typed sample; computed values never
+      // replace the semantic target or enter the interpolation state.
+      if (sample.opacity !== undefined) {
+        const computed = win?.getComputedStyle(el).opacity ?? '';
+        const applied = computed === '' ? 1 : Number(computed);
+        if (!Number.isFinite(applied) || Math.abs(applied - sample.opacity) > 0.000001)
+          return false;
+      }
+      if (!current() || !live()) return false;
+      if (sample.top !== undefined && !topMatchesValue(sample.top)) return false;
       return current() && live();
     },
     release: clear,

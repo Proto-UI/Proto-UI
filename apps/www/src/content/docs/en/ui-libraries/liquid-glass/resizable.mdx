@@ -1,15 +1,13 @@
 ---
-title: 'Resizable (WIP)'
-description: 'resizable functional composition and current verification limits.'
+title: 'Resizable'
+description: 'A Liquid Glass multi-panel resizable layout with percentage sizing, collapsible bounds, and nested orientations.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Resizable composes two or more percentage-sized panels and indexed separators. Each separator continuously resizes only its adjacent pair. A nested Root owns an independent layout and may use a different orientation. Pointer, arrow-key, Home/End, Shift acceleration and collapse use the same constrained request path.
+Liquid Glass Resizable splits a container into two or more percentage-sized panels separated by indexed drag handles. Each handle resizes only its adjacent pair through pointer drag, arrow keys, Home/End, Shift acceleration, and optional collapsing.
 
-This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
-
-Panel exposes its dimensionless size through the existing exposed-state projection. Web CSS uses a static flex-basis recipe consuming --pui-size, so arbitrary ratios do not depend on runtime-generated CSS tokens.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-resizable"
@@ -17,14 +15,25 @@ Panel exposes its dimensionless size through the existing exposed-state projecti
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+The preview nests a two-panel vertical group inside a three-panel horizontal layout. Each panel exposes its dimensionless size via `--pui-size` for static `flex-basis` styling.
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+- **Panels and handles**: provide `N` `Panel` parts (`index: 0..N-1`) and `N - 1` `Handle` parts (`index: 0..N-2`). Each handle keeps the pair total and all other panels unchanged, with default accessible name `Resize panels`.
+- **Constraints and collapsing**: pass per-panel `constraints` (`min: 0`, `max: 100`, `collapsible: false`, `collapsedSize: 0`). Ratios normalize to `100`, and infeasible layouts retain the previous valid state. Collapsing acts as a discrete stop and respects the neighbor's `max`.
+- **Controlled mode and nesting**: pass `sizes` for controlled mode and handle `sizesChange` / `sizesCommit` with payload `{ sizes }` (cancelled drags emit no commit). The legacy two-panel `value` / `defaultValue` props remain supported when `sizes` is omitted. Nested Roots maintain independent layouts and constraints, and dragging normalizes against panel border-box extent without counting fixed handle widths.
+
 ## API
 
-Root `sizes` / `defaultSizes` is the complete percentage vector. Supply N Panels (`index: 0..N-1`) and N−1 Handles (`index: 0..N-2`). A Handle names its preceding panel and retains the accessible name `Resize panels`. The legacy `value` / `defaultValue` API continues to create two panels; `sizes` takes precedence when supplied.
-
-### Multi-panel ownership
-
-`constraints` supplies each panel's `min`, `max`, `collapsible` and `collapsedSize`. Defaults are 0, 100, false and 0. Percentages are normalized to total 100; infeasible layouts retain the previous valid state and reject resizing. A separator preserves its pair's total and every other panel. Collapse is a discrete stop; an adjacent panel's maximum can prevent collapse.
-
-Read `sizes` or call `requestResize(index, nextSize, commit)` / `requestSizes(nextSizes, commit)`. `sizesChange` and `sizesCommit` carry `{ sizes }`. Passing `sizes` makes the layout controlled: update it from the proposal to accept, or retain it to refuse. Panels and ARIA remain at the committed owner value. Cancellation emits no commit.
-
-Nested Roots establish independent ownership, constraints and geometry. The example combines three horizontal panels with a two-panel vertical group. Panel border-box extents form the drag denominator, excluding fixed separator widths.
+| Part | Prop / Method / Event | Defaults and notes |
+| --- | --- | --- |
+| Root | `sizes`, `defaultSizes` | Controlled / uncontrolled percentage array totaling `100` (takes precedence over `value` / `defaultValue`) |
+| Root | `constraints` | Per-panel `{ min, max, collapsible, collapsedSize }` (defaults `0`, `100`, `false`, `0`) |
+| Root | `requestResize(index, nextSize, commit)`, `requestSizes(nextSizes, commit)` | Programmatically propose panel resize updates |
+| Root | `sizesChange`, `sizesCommit` | Emitted during resize and on commit with `{ sizes }` |
+| Panel | `index` | Panel index (`0..N-1`); exposes dimensionless `size` (`--pui-size`) |
+| Handle | `index` | Separator index (`0..N-2`) referencing its preceding panel |

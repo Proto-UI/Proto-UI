@@ -1,11 +1,15 @@
 ---
-title: brutalist Meter
-description: 基于 Base 共享语义的有界数值展示。
+title: 'Brutalist Meter'
+description: '用于展示有界区间内标量度量值与阈值区间的 Brutalist 计量条组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Brutalist Meter 用于直观展示已知范围内的标量度量值（如磁盘占用、配额或健康评分），支持按 `low`、`high` 与 `optimum` 划分状态区间。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-meter"
@@ -14,17 +18,29 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-当前为 Draft 功能实现。Root 拥有有界有限数值；Label 提供名称，Track 容纳 Indicator，Value 显示 valueText 或规范数值。四个视觉家族只投影样式。
+## 安装
 
-Props：value、min（0）、max（100）、ariaLabel、valueText。数值限制在合法范围内；上下界相等时比例为零。low、high、optimum 将测量值划分为 optimal、suboptimal、critical，不改变数值本身。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-Root 及部件暴露 value、percentage、indeterminate、status。被动显示不引入键盘停靠点，不伪造输入。更新 Props 同步所有部件。
+- **包导出**：从 `@proto.ui/prototypes-brutalist/meter` 导入 `meterRoot`、`meterLabel`、`meterTrack`、`meterIndicator`、`meterValue`
 
-包入口统一注册后，可从 meter 子路径导入 meterRoot、meterLabel、meterTrack、meterIndicator、meterValue。现有源码测试仅为阶段性证据；完整 Adapter、Compiler、GPUI、原生绘制、辅助技术、包消费及独立验收尚未完成，不据此勾选 Finf。
+## 用法
+
+### 部件组成
+
+- **Root**：管理度量值 `value`、范围 `min` / `max` 以及阈值 `low`、`high`、`optimum`。数值会自动约束在 `[min, max]` 区间内；当 `min` 与 `max` 相等时比例为 `0`。
+- **Label**：提供可读的计量名称。
+- **Track / Indicator**：轨道与填充指示条，根据计算出的百分比呈现当前占比。
+- **Value**：显示 `valueText` 或格式化后的当前数值。
+
+### 状态区间与无障碍
+
+- 配置 `low`、`high` 与 `optimum` 可将当前度量值自动分类为 `'optimal'`、`'suboptimal'` 或 `'critical'`，且不会改动原始数值。
+- Meter 为被动展示组件，不增加键盘 Tab 停靠点，各部件自动同步暴露 `value`、`percentage`、`indeterminate` 与 `status`。
 
 ## API
 
-Meter 是工作区源码，没有公开的 `proto-ui add` 目标。各部件自身没有属性。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -40,7 +56,7 @@ Meter 是工作区源码，没有公开的 `proto-ui add` 目标。各部件自�
   ]}
 />
 
-这些属性属于 Root。
+`Label`、`Track`、`Indicator` 与 `Value` 不声明独立属性。
 
 ## 参考
 
