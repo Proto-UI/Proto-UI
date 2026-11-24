@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   scanRuleStateReads,
+  scanRuleStateReadInventory,
   scanRuleStateReadsWithSites,
   type RuleStateScan,
 } from '../src/services/lowered-hook-coverage';
@@ -44,11 +45,17 @@ const plain = (scan: RuleStateScan) => ({
   })),
 });
 
-async function observe(text: string) {
+async function observe(
+  text: string,
+  extraFiles: Readonly<Record<string, string>> = {},
+  includeSourceInventory = false
+) {
   const directory = await realpath(await mkdtemp(path.join(tmpdir(), 'rule-site-inventory-')));
   try {
     await writeFile(path.join(directory, 'tsconfig.json'), '{}');
     await writeFile(path.join(directory, 'facts.ts'), facts);
+    for (const [name, content] of Object.entries(extraFiles))
+      await writeFile(path.join(directory, name), content);
     const file = path.join(directory, 'consumer.proto.ts');
     await writeFile(file, text);
     const inventory = scanRuleStateReadsWithSites(text, file);
@@ -60,7 +67,14 @@ async function observe(text: string) {
         text.slice(site.call.getStart(inventory.source), site.call.end)
       );
     }
-    return inventory;
+    const sourceInventory = includeSourceInventory
+      ? scanRuleStateReadInventory([
+          path.join(directory, 'facts.ts'),
+          ...Object.keys(extraFiles).map((name) => path.join(directory, name)),
+          file,
+        ])
+      : undefined;
+    return { ...inventory, sourceInventory };
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
@@ -84,6 +98,88 @@ describe('same-AST Rule site inventory', () => {
     );
     expect(site.visits[0].invocations[0].call.getText()).toBe('paint(def, asFacts().ready)');
   });
+
+  it.each([false, true])(
+    'keeps same-AST local sites beside imported reads with imported-first=%s',
+    async (importedFirst) => {
+      const calls = ['paint(def, held);', 'foreignPaint(def, held);'];
+      if (importedFirst) calls.reverse();
+      const inventory = await observe(
+        source(
+          ['const held = asFacts().ready;', ...calls].join('\n'),
+          ["import { foreignPaint } from './foreign';", helper].join('\n')
+        ),
+        {
+          'foreign.ts': [
+            "import { tw } from '@proto.ui/core';",
+            helper.replace('function paint', 'export function foreignPaint'),
+          ].join('\n'),
+        },
+        true
+      );
+      const foreignFile = path.join(path.dirname(inventory.source.fileName), 'foreign.ts');
+      // The aggregate keeps both actual calls exactly once and preserves the
+      // foreign Rule's file. `observe` also compares it with the production API.
+      expect(inventory.scan.usages.map((usage) => usage.state)).toEqual(['ready', 'ready']);
+      expect(inventory.scan.usages.map((usage) => usage.file)).toEqual(
+        importedFirst
+          ? [foreignFile, inventory.source.fileName]
+          : [inventory.source.fileName, foreignFile]
+      );
+      expect(inventory.scan.unresolved).toEqual([]);
+      expect(inventory.raw.usages).toEqual([]);
+      expect(inventory.raw.unresolved.map((gap) => gap.reason)).toEqual(['subject']);
+      // This API inventories this source's syntax, not the aggregate's foreign
+      // helper body. The caller's one local Rule still has its raw and actual visit.
+      expect(inventory.sites).toHaveLength(1);
+      const site = inventory.sites[0];
+      expect(site.call.getSourceFile()).toBe(inventory.source);
+      expect(site.rawVisits).toHaveLength(1);
+      expect(site.rawVisits[0].invocations).toEqual([]);
+      expect(site.visits).toHaveLength(1);
+      expect(site.visits[0].usages.map((usage) => usage.state)).toEqual(['ready']);
+      expect(site.visits[0].unresolved).toEqual([]);
+      expect(site.visits[0].invocations).toHaveLength(1);
+      expect(site.visits[0].invocations[0].call.getText()).toBe('paint(def, held)');
+      expect(site.visits[0].invocations[0].helper.getSourceFile()).toBe(inventory.source);
+
+      // The cross-file API keeps both rule owners under the original caller.
+      // It is a separate inventory, not a replacement for the one-AST sites.
+      const acrossFiles = inventory.sourceInventory!;
+      expect(acrossFiles.files).toEqual([
+        path.join(path.dirname(inventory.source.fileName), 'facts.ts'),
+        foreignFile,
+        inventory.source.fileName,
+      ]);
+      const reached = acrossFiles.evaluated.filter(
+        (row) => row.entryFile === inventory.source.fileName
+      );
+      expect(reached).toHaveLength(2);
+      expect(reached.map((row) => row.rule.file)).toEqual(
+        importedFirst
+          ? [foreignFile, inventory.source.fileName]
+          : [inventory.source.fileName, foreignFile]
+      );
+      expect(reached.map((row) => row.usages.map((usage) => usage.state))).toEqual([
+        ['ready'],
+        ['ready'],
+      ]);
+      expect(reached.flatMap((row) => row.unresolved)).toEqual([]);
+      expect(reached.map((row) => row.callPath)).toEqual(
+        calls.map((call) => [
+          {
+            file: inventory.source.fileName,
+            start: inventory.source.text.lastIndexOf(call.slice(0, -1)),
+          },
+        ])
+      );
+      expect(
+        acrossFiles.observations.filter(
+          (row) => row.declarationOnly && row.rule.file === foreignFile
+        )
+      ).toHaveLength(1);
+    }
+  );
 
   it('does not let a known call erase another unknown context at the same Rule node', async () => {
     const inventory = await observe(

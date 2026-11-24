@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 
 import { createExposeStateWebNameMap } from '../../modules/expose-state-web/src/utils';
 import {
+  pendingHelperRuleReads,
   scanRuleStateReads,
   scanRuleStateReadInventory,
 } from '../src/services/lowered-hook-coverage';
@@ -44,6 +45,39 @@ async function prototypeSourceFiles(): Promise<string[]> {
   }
   return files;
 }
+
+/**
+ * A file that registers a rule carries a rule condition, and a file that
+ * imports a local module may call a helper that registers one. The gate scans
+ * both, so the replay of every call site is reachable.
+ */
+const RULE_BEARING = /\brule\b/;
+
+/**
+ * The modules that register a rule, by their path without the extension. A
+ * file that imports one of them may call the helper that registers the rule.
+ */
+const ruleModulePaths = async (files: readonly string[]): Promise<Set<string>> => {
+  const modules = new Set<string>();
+  for (const absolute of files) {
+    const text = await readFile(absolute, 'utf8');
+    if (!RULE_BEARING.test(text)) continue;
+    const relative = path.relative(REPO_ROOT, absolute).split(path.sep).join('/');
+    modules.add(relative.replace(/\.(ts|tsx|mts|cts|js|jsx|mjs|cjs)$/, ''));
+  }
+  return modules;
+};
+
+/** Whether a file imports a module that registers a rule. */
+const importsRuleModule = (file: string, text: string, modules: ReadonlySet<string>): boolean => {
+  const directory = path.posix.dirname(file);
+  for (const match of text.matchAll(/from\s+['"](\.\.?\/[^'"]+)['"]/g)) {
+    const specifier = match[1] ?? '';
+    const base = path.posix.normalize(path.posix.join(directory, specifier));
+    if (modules.has(base) || modules.has(`${base}/index`)) return true;
+  }
+  return false;
+};
 
 /** A real intent: the variant is a prefix on tokens, so a stub yields nothing. */
 const rule = (condition: string) =>
@@ -5722,6 +5756,284 @@ describe('lowered hook coverage', () => {
     });
   });
 
+  describe('helper call-site isolation', () => {
+    it.each([
+      ['field/textarea.proto.ts', 'textarea/root.proto.ts'],
+      ['textarea/root.proto.ts', 'field/textarea.proto.ts'],
+    ])('keeps both authored producers when scanning %s before %s', async (first, second) => {
+      const summary = createHookSourceSummaryContext();
+      const owner = path.join(PROTOTYPE_PACKAGES, 'brutalist/src/textarea/visual.ts');
+      for (const relative of [first, second]) {
+        const absolute = path.join(PROTOTYPE_PACKAGES, 'brutalist/src', relative);
+        const scan = scanRuleStateReads(await readFile(absolute, 'utf8'), absolute, summary);
+        const hook = relative.startsWith('field/') ? 'asFieldTextarea' : 'asTextareaRoot';
+        expect(scan.usages).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ hook, state: 'focusVisible' }),
+            expect.objectContaining({ hook, state: 'disabled' }),
+          ])
+        );
+        for (const usage of scan.usages) {
+          expect(usage.file).toBe(owner);
+          expect(usage.provenance).toBeDefined();
+        }
+      }
+      const declaration = scanRuleStateReads(await readFile(owner, 'utf8'), owner, summary);
+      expect(declaration.usages).toEqual([]);
+      expect(pendingHelperRuleReads(summary)).toEqual([]);
+    });
+
+    it('does not replay unrelated declarations in an imported helper module', async () => {
+      await withLoopFixture(
+        {
+          'visual.ts': [
+            'export function selected(def, state) {',
+            rule('w.state(state.checked).eq(true)'),
+            '}',
+            'export function unrelated(def) {',
+            rule('w.state(foreign.unknown).eq(true)'),
+            '}',
+          ].join('\n'),
+        },
+        [
+          "import { selected } from './visual';",
+          'const state = asCheckboxRoot().stateHandles;',
+          'selected(def, state);',
+        ].join('\n'),
+        (scan) => {
+          expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
+          expect(scan.unresolved).toEqual([]);
+        }
+      );
+    });
+
+    it('retains an unknown later invocation after a proven invocation', async () => {
+      await withLoopFixture(
+        {
+          'visual.ts': [
+            'export function selected(def, state) {',
+            rule('w.state(state.checked).eq(true)'),
+            '}',
+          ].join('\n'),
+        },
+        [
+          "import { selected } from './visual';",
+          'const state = asCheckboxRoot().stateHandles;',
+          'selected(def, state);',
+          'selected(def, foreign);',
+        ].join('\n'),
+        (scan) => {
+          expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
+          expect(scan.unresolved).toEqual([{ expression: 'state.checked', reason: 'subject' }]);
+        }
+      );
+    });
+
+    it('binds member expressions independently for every call', async () => {
+      await withLoopFixture(
+        {
+          'visual.ts': [
+            'export function selected(def, state) {',
+            rule('w.state(state.disabled).eq(true)'),
+            '}',
+          ].join('\n'),
+        },
+        [
+          "import { selected } from './visual';",
+          'const checkbox = asCheckboxRoot();',
+          'const textarea = asTextareaRoot();',
+          'selected(def, checkbox.stateHandles);',
+          'selected(def, textarea.stateHandles);',
+        ].join('\n'),
+        (scan) => {
+          expect(scan.usages).toEqual([
+            { hook: 'asCheckboxRoot', state: 'disabled' },
+            { hook: 'asTextareaRoot', state: 'disabled' },
+          ]);
+          expect(scan.unresolved).toEqual([]);
+        }
+      );
+    });
+
+    it.each([
+      ['', false],
+      [', undefined', false],
+      [', void 0', false],
+      ['', true],
+      [', undefined', true],
+      [', void 0', true],
+    ] as const)(
+      'evaluates a missing or undefined argument (%s) with default %s in the helper scope',
+      async (argument, enabled) => {
+        await withLoopFixture(
+          {
+            'visual.ts': [
+              `export function selected(def, state, enabled = ${enabled}) {`,
+              'if (enabled) {',
+              rule('w.state(state.checked).eq(true)'),
+              '}',
+              '}',
+            ].join('\n'),
+          },
+          [
+            "import { selected } from './visual';",
+            'const state = asCheckboxRoot().stateHandles;',
+            `selected(def, state${argument});`,
+          ].join('\n'),
+          (scan) => {
+            expect(scan.usages).toEqual(
+              enabled ? [{ hook: 'asCheckboxRoot', state: 'checked' }] : []
+            );
+            expect(scan.unresolved).toEqual([]);
+          }
+        );
+      }
+    );
+
+    it('does not bind an entire destructured default to a missing member', async () => {
+      await withLoopFixture(
+        {
+          'visual.ts': [
+            'export function selected(def, { input } = asCheckboxRoot().stateHandles) {',
+            rule('w.state(input.checked).eq(true)'),
+            '}',
+          ].join('\n'),
+        },
+        ["import { selected } from './visual';", 'selected(def);'].join('\n'),
+        (scan) => {
+          expect(scan.usages).toEqual([]);
+          expect(scan.unresolved).toEqual([{ expression: 'input.checked', reason: 'subject' }]);
+        }
+      );
+    });
+
+    it('keeps a rule guarded by an unsupported destructured member default', async () => {
+      await withLoopFixture(
+        {
+          'visual.ts': [
+            'export function selected(def, state, { enabled = true } = {}) {',
+            'if (enabled) {',
+            rule('w.state(state.checked).eq(true)'),
+            '}',
+            '}',
+          ].join('\n'),
+        },
+        [
+          "import { selected } from './visual';",
+          'const state = asCheckboxRoot().stateHandles;',
+          'selected(def, state, {});',
+        ].join('\n'),
+        (scan) => {
+          expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
+          expect(scan.unresolved).toEqual([]);
+        }
+      );
+    });
+  });
+
+  describe('imported helper proven record transport', () => {
+    const producers = [
+      "import { defineAsHook } from '@proto.ui/core';",
+      "export const asA = defineAsHook({ name: 'record-a', setup(def) {",
+      "  def.state.bool('alpha', false);",
+      '}, projectHandle: result => ({ ready: result.stateHandles.alpha }) });',
+      "export const asB = defineAsHook({ name: 'record-b', setup(def) {",
+      "  def.state.bool('beta', false);",
+      '}, projectHandle: result => ({ ready: result.stateHandles.beta }) });',
+    ].join('\n');
+
+    const observe = async (
+      setup: string,
+      run: (scan: RuleStateScan) => void,
+      subject = 'facts.ready'
+    ): Promise<void> => {
+      await withLoopFixture(
+        {
+          'producer.ts': producers,
+          'visual.ts': [
+            "import { tw } from '@proto.ui/core';",
+            'export function paint(def, facts, ignored) {',
+            rule(`w.state(${subject}).eq(true)`),
+            '}',
+          ].join('\n'),
+        },
+        [
+          "import { definePrototype } from '@proto.ui/core';",
+          "import { asA, asB } from './producer';",
+          "import { paint } from './visual';",
+          "export default definePrototype({ name: 'record-consumer', setup(def) {",
+          setup,
+          '} });',
+        ].join('\n'),
+        run
+      );
+    };
+
+    const expectStates = (scan: RuleStateScan, names: string[]): void => {
+      expect(scan.unresolved).toEqual([]);
+      expect(scan.usages.map(({ state }) => state)).toEqual(names);
+      for (const usage of scan.usages) {
+        expect(usage.provenance?.declaredName).toBe(usage.state);
+        expect(usage.provenance?.declaration.file).toMatch(/[/\\]producer\.ts$/);
+        expect(usage.file).toMatch(/[/\\]visual\.ts$/);
+      }
+    };
+
+    it.each([
+      [
+        'a copied member',
+        'const facts = asA(); paint(def, { ready: facts.ready });',
+        'facts.ready',
+      ],
+      ['a shorthand member', 'const ready = asA().ready; paint(def, { ready });', 'facts.ready'],
+      [
+        'a nested record',
+        'const facts = asA(); paint(def, { nested: { ready: facts.ready } });',
+        'facts.nested.ready',
+      ],
+    ])('transports %s with its actual source declaration', async (_name, setup, subject) => {
+      await observe(setup, (scan) => expectStates(scan, ['alpha']), subject);
+    });
+
+    it.each([
+      ['asA', 'asB', ['alpha', 'beta']],
+      ['asB', 'asA', ['beta', 'alpha']],
+    ] as const)('keeps %s then %s record arguments call-local', async (first, second, names) => {
+      await observe(
+        `const first = ${first}(); const second = ${second}();
+         paint(def, { ready: first.ready }); paint(def, { ready: second.ready });`,
+        (scan) => expectStates(scan, [...names])
+      );
+    });
+
+    it('retains a copied State before a later argument writes its original container', async () => {
+      await observe(
+        'const facts = asA(); paint(def, { ready: facts.ready }, Object.assign(facts, asB()));',
+        (scan) => expectStates(scan, ['alpha'])
+      );
+    });
+
+    it('refreshes a nested borrowed container after a later argument writes it', async () => {
+      await observe(
+        'const facts = asA(); paint(def, { nested: facts }, Object.assign(facts, asB()));',
+        (scan) => expectStates(scan, ['beta']),
+        'facts.nested.ready'
+      );
+    });
+
+    it.each([
+      ['an unknown member beside a proven one', '{ ready: foreign, other: facts.ready }'],
+      ['an unproved same-spelling accessor', '{ ready: getState("alpha"), other: facts.ready }'],
+      ['a getter member', '{ get ready() { return facts.ready; } }'],
+      ['an effectful member read', '{ ready: (Object.assign(facts, asB()), facts.ready) }'],
+    ])('refuses %s without inventing declaration provenance', async (_name, argument) => {
+      await observe(`const facts = asA(); paint(def, ${argument});`, (scan) => {
+        expect(scan.usages).toEqual([]);
+        expect(scan.unresolved).toEqual([{ reason: 'subject', expression: 'facts.ready' }]);
+      });
+    });
+  });
+
   it('resolves every hook state a shipped rule condition reads', async () => {
     const found: Array<{
       file: string;
@@ -5800,5 +6112,107 @@ describe('lowered hook coverage', () => {
     ).toEqual([]);
     // The whole-tree rule-state scan outgrew 60s once the R91 multi-profile
     // family sources landed; keep the unfiltered scan.
+  }, 240_000);
+
+  it('resolves every hook state through the flat helper replay', async () => {
+    const found: Array<{
+      file: string;
+      hook: string;
+      state: string;
+      provenance?: HookSourceState;
+    }> = [];
+    const blind: string[] = [];
+    const exposed: Array<{ file: string; state: string; exposedAs: string; attribute: string }> =
+      [];
+
+    const sourceSummary = createHookSourceSummaryContext();
+    const shipped = await prototypeSourceFiles();
+    const ruleModules = await ruleModulePaths(shipped);
+    for (const absolute of shipped) {
+      const file = path.relative(REPO_ROOT, absolute).split(path.sep).join('/');
+      const text = await readFile(absolute, 'utf8');
+      if (!RULE_BEARING.test(text) && !importsRuleModule(file, text, ruleModules)) continue;
+      const scan = scanRuleStateReads(text, absolute, sourceSummary);
+      for (const usage of scan.usages)
+        found.push({
+          file: usage.file ? path.relative(REPO_ROOT, usage.file).split(path.sep).join('/') : file,
+          hook: usage.hook,
+          state: usage.state,
+          provenance: usage.provenance,
+        });
+      for (const miss of scan.unresolved) blind.push(`${file}: ${miss.reason} ${miss.expression}`);
+      for (const local of scan.exposedLocals) exposed.push({ file, ...local });
+    }
+
+    // Every exposed prototype-owned state a rule reads has to name an attribute
+    // the extractor can emit, or the runtime lowers a variant with no CSS.
+    // `C-EXPOSE-0004-A` admits any non-empty key, and both analyzers normalize
+    // it, so the normalized attribute is what has to be usable — not the key.
+    expect(
+      exposed.filter(({ attribute }) => !SELECTABLE_ATTRIBUTE.test(attribute)),
+      'exposed states whose attribute cannot be written as a data selector'
+    ).toEqual([]);
+    // The two-step shape must be reached in the shipped tree, not just fixtures.
+    // The rule lives in the family's visual helper since commit 4c64eff92
+    // moved it out of the prototype root, so the read is owned by that file.
+    expect(found).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          file: 'packages/prototypes/brutalist/src/textarea/visual.ts',
+          hook: 'asTextareaRoot',
+          state: 'focusVisible',
+        }),
+        expect.objectContaining({
+          file: 'packages/prototypes/brutalist/src/checkbox-group/item.proto.ts',
+          hook: 'asCheckboxGroupItem',
+          state: 'focusVisible',
+        }),
+      ])
+    );
+
+    // Fail closed: a shape the scanner cannot trace is a gate failure. In
+    // particular, a privileged Focus fact remains visible as a failure until
+    // its producer supplies bounded declaration metadata.
+
+    expect(blind, 'lowerable rule states the scanner could not trace').toEqual([]);
+
+    // A rule whose subject is a parameter only the call site binds waits for
+    // the replay of that call. A read that no call site replays stays here.
+    expect(pendingHelperRuleReads(sourceSummary), 'rule states that no call site replays').toEqual(
+      []
+    );
+
+    const missing = found.filter(({ provenance }) => !provenance);
+
+    expect(
+      missing.map(({ file, hook, state }) => `${file}: ${hook}().${state}`),
+      'rule conditions whose imported producer state has no declaration provenance'
+    ).toEqual([]);
+
+    // A string comparison only lowers against a `data-[x]` variant. Every table
+    // entry is one today; if that stops being true, the scanner's string form
+    // would start counting rules the extractor drops.
+    const unshaped = found.filter(({ provenance }) => {
+      const declared = provenance?.declaredName ?? '';
+      return !/^[-a-zA-Z0-9]+$/.test(
+        declared
+          .trim()
+          .replace(/\s+/g, '-')
+          .replace(/\./g, '-')
+          .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+          .replace(/[^a-zA-Z0-9-]/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .toLowerCase()
+      );
+    });
+
+    expect(
+      unshaped.map(({ hook, state }) => `${hook}().${state}`),
+      'hook states whose declared source name cannot lower to a data selector'
+    ).toEqual([]);
+    // The whole-tree rule-state scan outgrew 60s once the R91 multi-profile
+    // family sources landed, and the helper replay scans the call sites of
+    // every rule-registering helper; keep the unfiltered scan.
   }, 240_000);
 });
