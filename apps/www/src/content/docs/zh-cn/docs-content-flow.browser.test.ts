@@ -38,6 +38,7 @@ type FlowFacts = {
 };
 
 type SelectFacts = {
+  headingToPreviewer: number;
   paragraphToPreviewer: number;
   previewerToHeading: number;
   panelToContentBox: number;
@@ -45,7 +46,8 @@ type SelectFacts = {
   hasLegacyHeader: boolean;
   hasProjectedControls: boolean;
   hasProjectedContent: boolean;
-  previousTag: string;
+  hasPreviewHeading: boolean;
+  hasExampleParagraph: boolean;
   nextClass: string;
 };
 
@@ -120,31 +122,38 @@ async function readFlowFacts(page: Page): Promise<FlowFacts> {
 }
 
 async function readSelectFacts(page: Page): Promise<SelectFacts> {
-  await page.locator('[data-previewer-id][data-inited="1"]').first().waitFor({ state: 'visible' });
+  const hero = page.locator('[data-demo-id="demo-shadcn-select"][data-inited="1"]');
+  await hero.waitFor({ state: 'visible' });
 
   // data-inited marks startup admission, not the asynchronous projection commit.
   // Observe the actual controls before measuring the completed document flow.
-  await page
-    .locator('[data-previewer-id] .pui-projection-controls')
-    .first()
-    .waitFor({ state: 'attached' });
+  await hero.locator('.pui-projection-controls').first().waitFor({ state: 'attached' });
   return page.evaluate(() => {
     const flow = document.querySelector<HTMLElement>('[data-doc-flow]');
-    const previewer = flow?.querySelector<HTMLElement>(':scope > [data-previewer-id]');
-    const paragraph = previewer?.previousElementSibling as HTMLElement | null;
+    const previewer = flow?.querySelector<HTMLElement>(
+      ':scope > [data-demo-id="demo-shadcn-select"]'
+    );
+    const previewHeading = previewer?.previousElementSibling;
+    // The primary preview follows a heading. The Scrollable example follows its explanatory prose.
+    const example = flow?.querySelector<HTMLElement>(
+      ':scope > [data-demo-id="demo-shadcn-select-scrollable"]'
+    );
+    const paragraph = example?.previousElementSibling;
     const heading = previewer?.nextElementSibling as HTMLElement | null;
     const panel = previewer?.querySelector<HTMLElement>('.proto-previewer__preview-panel');
     const projectedControls = panel?.querySelector<HTMLElement>('.pui-projection-controls');
     const projectedContent = panel?.querySelector<HTMLElement>('.pui-projection-content');
-    if (!flow || !previewer || !paragraph || !heading || !panel) {
+    if (!previewer || !previewHeading || !example || !paragraph || !heading || !panel) {
       throw new Error(
         'The Select page must expose its prose, previewer, heading, and projected panel.'
       );
     }
 
     return {
+      headingToPreviewer:
+        previewer.getBoundingClientRect().top - previewHeading.getBoundingClientRect().bottom,
       paragraphToPreviewer:
-        previewer.getBoundingClientRect().top - paragraph.getBoundingClientRect().bottom,
+        example.getBoundingClientRect().top - paragraph.getBoundingClientRect().bottom,
       previewerToHeading:
         heading.getBoundingClientRect().top - previewer.getBoundingClientRect().bottom,
       panelToContentBox:
@@ -155,7 +164,8 @@ async function readSelectFacts(page: Page): Promise<SelectFacts> {
       hasLegacyHeader: Boolean(previewer.querySelector('.proto-previewer__header')),
       hasProjectedControls: Boolean(projectedControls),
       hasProjectedContent: Boolean(projectedContent),
-      previousTag: paragraph.tagName,
+      hasPreviewHeading: Boolean(previewHeading.querySelector(':scope > h2')),
+      hasExampleParagraph: paragraph.matches('p'),
       nextClass: heading.className,
     };
   });
@@ -163,7 +173,11 @@ async function readSelectFacts(page: Page): Promise<SelectFacts> {
 
 async function readQuickStartFacts(page: Page): Promise<QuickStartFacts> {
   await page.locator('[data-code-example]').waitFor({ state: 'visible' });
-  await page.locator('[data-code-example] [data-code-file-browser]:visible [data-code-example-tree][role="tree"]').waitFor();
+  await page
+    .locator(
+      '[data-code-example] [data-code-file-browser]:visible [data-code-example-tree][role="tree"]'
+    )
+    .waitFor();
   await page.locator('[data-code-presentation="docs"]').first().waitFor({ state: 'visible' });
 
   return page.evaluate(() => {
@@ -191,7 +205,9 @@ async function readQuickStartFacts(page: Page): Promise<QuickStartFacts> {
     };
 
     const flow = document.querySelector<HTMLElement>('[data-doc-flow]');
-    const standaloneCode = flow?.querySelector<HTMLElement>(':scope > [data-code-presentation="docs"]');
+    const standaloneCode = flow?.querySelector<HTMLElement>(
+      ':scope > [data-code-presentation="docs"]'
+    );
     const codeExample = flow?.querySelector<HTMLElement>(':scope > [data-code-example]');
     const standalonePrevious = standaloneCode
       ? renderedSibling(standaloneCode, 'previousElementSibling')
@@ -205,7 +221,8 @@ async function readQuickStartFacts(page: Page): Promise<QuickStartFacts> {
     const exampleNext = codeExample ? renderedSibling(codeExample, 'nextElementSibling') : null;
     const hostList = codeExample?.querySelector<HTMLElement>('[data-code-example-tablist="host"]');
     const hint = codeExample?.querySelector<HTMLElement>('[data-code-host-overflow]');
-    const exampleStrip = hint && !hint.hidden && hint.getBoundingClientRect().height > 0 ? hint : hostList;
+    const exampleStrip =
+      hint && !hint.hidden && hint.getBoundingClientRect().height > 0 ? hint : hostList;
     const examplePanel = codeExample?.querySelector<HTMLElement>(
       '[data-code-host-panel]:not([hidden])'
     );
@@ -214,7 +231,8 @@ async function readQuickStartFacts(page: Page): Promise<QuickStartFacts> {
     const source = examplePanel?.querySelector<HTMLElement>('[data-code-file-browser]');
 
     if (
-      !command || !source ||
+      !command ||
+      !source ||
       !flow ||
       !standaloneCode ||
       !codeExample ||
@@ -229,8 +247,13 @@ async function readQuickStartFacts(page: Page): Promise<QuickStartFacts> {
     }
 
     return {
-      commandBeforeSource: command.getBoundingClientRect().bottom <= source.getBoundingClientRect().top,
-      independentCommandAndSource: !command.contains(source) && !source.contains(command) && command.getAttribute('data-site-code-surface') === 'frame' && source.getAttribute('data-site-code-surface') === 'frame',
+      commandBeforeSource:
+        command.getBoundingClientRect().bottom <= source.getBoundingClientRect().top,
+      independentCommandAndSource:
+        !command.contains(source) &&
+        !source.contains(command) &&
+        command.getAttribute('data-site-code-surface') === 'frame' &&
+        source.getAttribute('data-site-code-surface') === 'frame',
       hasFileTree: Boolean(source.querySelector('[data-code-example-tree][role="tree"]')),
       paragraphToStandaloneCode:
         standaloneCode.getBoundingClientRect().top -
@@ -290,7 +313,9 @@ describe.sequential('documentation content-flow browser regression', () => {
           const flow = await readFlowFacts(page);
           const select = await readSelectFacts(page);
           expectFlowBoundary(flow, label);
-          expect(select.previousTag, `${label}/previewer predecessor`).toBe('P');
+          expect(select.hasPreviewHeading, `${label}/primary preview section`).toBe(true);
+          expect(select.hasExampleParagraph, `${label}/example introduction`).toBe(true);
+          expectGap(select.headingToPreviewer, ORDINARY_FLOW_GAP_PX, `${label}/heading-preview`);
           expect(select.nextClass, `${label}/previewer successor`).toContain('sl-heading-wrapper');
           expectGap(select.paragraphToPreviewer, ORDINARY_FLOW_GAP_PX, `${label}/prose-preview`);
           expectGap(select.previewerToHeading, SECTION_FLOW_GAP_PX, `${label}/preview-heading`);
@@ -315,7 +340,10 @@ describe.sequential('documentation content-flow browser regression', () => {
           const quickStart = await readQuickStartFacts(page);
           expectFlowBoundary(flow, label);
           expect(quickStart.commandBeforeSource, `${label}/install before usage`).toBe(true);
-          expect(quickStart.independentCommandAndSource, `${label}/separate install and source frames`).toBe(true);
+          expect(
+            quickStart.independentCommandAndSource,
+            `${label}/separate install and source frames`
+          ).toBe(true);
           expect(quickStart.hasFileTree, `${label}/real file Tree`).toBe(true);
           expect(quickStart.standalonePreviousTag, `${label}/code predecessor`).toBe('P');
           expect(quickStart.standaloneNextTag, `${label}/code successor`).toBe('P');
