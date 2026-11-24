@@ -734,9 +734,6 @@ importers:
 
   packages/compiler:
     dependencies:
-      '@proto.ui/adapter-react':
-        specifier: workspace:*
-        version: link:../adapters/react
       '@proto.ui/core':
         specifier: workspace:*
         version: link:../core

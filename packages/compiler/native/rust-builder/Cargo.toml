@@ -1,0 +1,18 @@
+[package]
+name = "proto-ui-rust-ast-builder"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[[bin]]
+name = "proto-ui-rust-ast-builder"
+path = "src/main.rs"
+
+[dependencies]
+syn = { version = "=2.0.119", features = ["full", "extra-traits"] }
+proc-macro2 = "1"
+prettyplease = "=0.2.37"
+serde_json = { version = "1", features = ["float_roundtrip"] }
+toml = "0.8"

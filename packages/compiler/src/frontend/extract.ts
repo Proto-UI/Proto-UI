@@ -1,9 +1,35 @@
 import path from 'node:path';
 import ts from 'typescript';
-import { diagnostic, type CompilerDiagnostic, type SourceSpan } from '../diagnostics';
+import { diagnostic, type CompilerDiagnostic } from '../diagnostics';
+import {
+  spanOf,
+  sanitizeSym,
+  unwrapExpr,
+  extractScalarLiteral,
+  resolveAliasedSymbol,
+  resolveCallName,
+  findFactoryCall,
+  resolveFunctionLike,
+  propAccessChain,
+  extractObjectProperty,
+  extractSetupFunction,
+  resolveDefinitionObject,
+  isPrototypeType,
+  isCoreIntrinsic,
+} from './syntax';
+import { propKindToSsaType, stateKindToSsaType, internString } from './scalars';
+import { parseRuleCondition } from './rules';
+import { collectTwTokens, collectRuleStyleTokens, parseTemplateElement } from './template';
+import {
+  detectSimpleEventAction,
+  lowerRuleToSsa,
+  lowerCombinedRuleMask,
+  lowerEventActionsToSsa,
+  tryLowerPureScalarFunction,
+} from './kernel';
+import { lowerActionBody } from './actions';
 import {
   PROTO_IR_VERSION,
-  SsaBuilder,
   computePrototypeCapabilities,
   type AuthoredHookSummary,
   type CompilationTier,
@@ -12,6 +38,9 @@ import {
   type ExposeDeclIR,
   type HookCallIR,
   type LifecycleHookName,
+  type LifecycleDeclIR,
+  type PropWatchDeclIR,
+  type LoweringGapIR,
   type ModuleIR,
   type PropDeclIR,
   type PrototypeIR,
@@ -20,10 +49,7 @@ import {
   type RuleIR,
   type ScalarLiteral,
   type SsaFunction,
-  type SsaType,
   type StateDeclIR,
-  type TemplateChildIR,
-  type TemplateElementIR,
 } from '../ir';
 
 const BUILTIN_HOOK_NAMES = new Set([
@@ -68,783 +94,6 @@ export interface ExtractOutput {
   readonly diagnostics: readonly CompilerDiagnostic[];
 }
 
-function spanOf(node: ts.Node, sf: ts.SourceFile): SourceSpan {
-  const start = sf.getLineAndCharacterOfPosition(node.getStart(sf));
-  const end = sf.getLineAndCharacterOfPosition(node.getEnd());
-  return {
-    file: sf.fileName,
-    line: start.line + 1,
-    column: start.character + 1,
-    endLine: end.line + 1,
-    endColumn: end.character + 1,
-  };
-}
-
-function sanitizeSym(name: string): string {
-  return name.replace(/[^A-Za-z0-9_]/g, '_').replace(/^(\d)/, '_$1');
-}
-
-function unwrapExpr(expr: ts.Expression): ts.Expression {
-  let cur = expr;
-  while (
-    ts.isParenthesizedExpression(cur) ||
-    ts.isAsExpression(cur) ||
-    ts.isSatisfiesExpression(cur) ||
-    ts.isNonNullExpression(cur)
-  ) {
-    cur = cur.expression;
-  }
-  return cur;
-}
-
-function extractScalarLiteral(
-  expr: ts.Expression,
-  checker: ts.TypeChecker
-): ScalarLiteral | undefined {
-  const e = unwrapExpr(expr);
-  if (ts.isStringLiteral(e) || ts.isNoSubstitutionTemplateLiteral(e)) return e.text;
-  if (ts.isNumericLiteral(e)) return Number(e.text);
-  if (e.kind === ts.SyntaxKind.TrueKeyword) return true;
-  if (e.kind === ts.SyntaxKind.FalseKeyword) return false;
-  if (e.kind === ts.SyntaxKind.NullKeyword) return null;
-  if (
-    ts.isPrefixUnaryExpression(e) &&
-    (e.operator === ts.SyntaxKind.MinusToken || e.operator === ts.SyntaxKind.PlusToken) &&
-    ts.isNumericLiteral(e.operand)
-  ) {
-    return e.operator === ts.SyntaxKind.MinusToken
-      ? -Number(e.operand.text)
-      : Number(e.operand.text);
-  }
-  // Use TypeScript's real TypeChecker to resolve const literal types (e.g. `const X = 'foo'`).
-  const t = checker.getTypeAtLocation(e);
-  if (t.isStringLiteral()) return t.value;
-  if (t.isNumberLiteral()) return t.value;
-  if (t.flags & ts.TypeFlags.BooleanLiteral) {
-    return checker.typeToString(t) === 'true';
-  }
-  return undefined;
-}
-
-function resolveAliasedSymbol(
-  checker: ts.TypeChecker,
-  sym: ts.Symbol | undefined
-): ts.Symbol | undefined {
-  if (!sym) return undefined;
-  return sym.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(sym) : sym;
-}
-
-function resolveCallName(
-  expr: ts.Expression,
-  checker: ts.TypeChecker
-): { name: string; sourceFile?: string } | undefined {
-  const e = unwrapExpr(expr);
-  const sym = resolveAliasedSymbol(checker, checker.getSymbolAtLocation(e));
-  if (sym) {
-    const decl = sym.valueDeclaration ?? sym.declarations?.[0];
-    return { name: sym.getName(), sourceFile: decl?.getSourceFile().fileName };
-  }
-  if (ts.isIdentifier(e)) return { name: e.text };
-  return undefined;
-}
-
-function findFactoryCall(
-  expr: ts.Expression,
-  checker: ts.TypeChecker,
-  factoryNames: readonly string[],
-  visited = new Set<ts.Node>()
-): { call: ts.CallExpression; factory: string } | undefined {
-  const e = unwrapExpr(expr);
-  if (visited.has(e)) return undefined;
-  visited.add(e);
-
-  if (ts.isCallExpression(e)) {
-    const resolved = resolveCallName(e.expression, checker);
-    if (resolved && factoryNames.includes(resolved.name)) {
-      return { call: e, factory: resolved.name };
-    }
-  }
-  if (ts.isIdentifier(e)) {
-    const sym = resolveAliasedSymbol(checker, checker.getSymbolAtLocation(e));
-    const decl = sym?.valueDeclaration ?? sym?.declarations?.[0];
-    if (decl && ts.isVariableDeclaration(decl) && decl.initializer) {
-      return findFactoryCall(decl.initializer, checker, factoryNames, visited);
-    }
-  }
-  return undefined;
-}
-
-function resolveFunctionLike(
-  expr: ts.Expression,
-  checker: ts.TypeChecker
-): ts.FunctionLikeDeclaration | undefined {
-  const e = unwrapExpr(expr);
-  if (ts.isArrowFunction(e) || ts.isFunctionExpression(e)) return e;
-  if (ts.isIdentifier(e)) {
-    const sym = resolveAliasedSymbol(checker, checker.getSymbolAtLocation(e));
-    const decl = sym?.valueDeclaration ?? sym?.declarations?.[0];
-    if (!decl) return undefined;
-    if (ts.isFunctionDeclaration(decl) || ts.isMethodDeclaration(decl)) return decl;
-    if (ts.isVariableDeclaration(decl) && decl.initializer) {
-      return resolveFunctionLike(decl.initializer, checker);
-    }
-  }
-  return undefined;
-}
-
-function propKindToSsaType(kind: PropDeclIR['kind']): Exclude<SsaType, 'void'> {
-  switch (kind) {
-    case 'boolean':
-      return 'i1';
-    case 'number':
-      return 'f64';
-    case 'string':
-    case 'enum':
-      return 'i32'; // Interned string/enum ID in LLVM kernel ABI
-    default:
-      return 'ptr';
-  }
-}
-
-function stateKindToSsaType(kind: StateDeclIR['kind']): Exclude<SsaType, 'void'> {
-  switch (kind) {
-    case 'bool':
-      return 'i1';
-    case 'number.discrete':
-    case 'number.range':
-      return 'f64';
-    case 'string':
-    case 'enum':
-      return 'i32';
-  }
-}
-
-function internString(table: string[], value: string): number {
-  const existing = table.indexOf(value);
-  if (existing >= 0) return existing;
-  table.push(value);
-  return table.length - 1;
-}
-
-function propAccessChain(expr: ts.Expression): string[] | undefined {
-  const parts: string[] = [];
-  let cur: ts.Expression = unwrapExpr(expr);
-  while (ts.isPropertyAccessExpression(cur)) {
-    parts.unshift(cur.name.text);
-    cur = unwrapExpr(cur.expression);
-  }
-  if (ts.isIdentifier(cur)) {
-    parts.unshift(cur.text);
-    return parts;
-  }
-  return undefined;
-}
-
-function extractObjectProperty(
-  obj: ts.ObjectLiteralExpression,
-  name: string
-): ts.Expression | undefined {
-  for (const prop of obj.properties) {
-    if (ts.isPropertyAssignment(prop)) {
-      const key =
-        ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name) ? prop.name.text : undefined;
-      if (key === name) return prop.initializer;
-    } else if (ts.isShorthandPropertyAssignment(prop) && prop.name.text === name) {
-      return prop.name;
-    } else if (ts.isMethodDeclaration(prop)) {
-      const key =
-        ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name) ? prop.name.text : undefined;
-      if (key === name) {
-        // Return a synthetic-free reference via caller checking method declarations separately.
-        return undefined;
-      }
-    }
-  }
-  return undefined;
-}
-
-function extractSetupFunction(
-  obj: ts.ObjectLiteralExpression,
-  checker: ts.TypeChecker
-): ts.FunctionLikeDeclaration | undefined {
-  for (const prop of obj.properties) {
-    if (ts.isMethodDeclaration(prop) && ts.isIdentifier(prop.name) && prop.name.text === 'setup') {
-      return prop;
-    }
-    if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name) && prop.name.text === 'setup') {
-      return resolveFunctionLike(prop.initializer, checker);
-    }
-    if (ts.isShorthandPropertyAssignment(prop) && prop.name.text === 'setup') {
-      return resolveFunctionLike(prop.name, checker);
-    }
-  }
-  return undefined;
-}
-
-function parseRuleCondition(
-  expr: ts.Expression,
-  builderParam: string,
-  stateVarToName: ReadonlyMap<string, string>,
-  checker: ts.TypeChecker
-): RuleExpr | undefined {
-  const e = unwrapExpr(expr);
-  if (!ts.isCallExpression(e)) return undefined;
-  const callee = unwrapExpr(e.expression);
-  if (!ts.isPropertyAccessExpression(callee)) return undefined;
-  const method = callee.name.text;
-  const recv = unwrapExpr(callee.expression);
-
-  if (ts.isIdentifier(recv) && recv.text === builderParam) {
-    if (method === 't') return { kind: 'true' };
-    if (method === 'f') return { kind: 'false' };
-    if (method === 'not' && e.arguments[0]) {
-      const inner = parseRuleCondition(e.arguments[0], builderParam, stateVarToName, checker);
-      return inner ? { kind: 'not', expr: inner } : undefined;
-    }
-    if ((method === 'all' || method === 'any') && e.arguments.length > 0) {
-      const exprs: RuleExpr[] = [];
-      for (const arg of e.arguments) {
-        const sub = parseRuleCondition(arg, builderParam, stateVarToName, checker);
-        if (!sub) return undefined;
-        exprs.push(sub);
-      }
-      return { kind: method, exprs };
-    }
-    return undefined;
-  }
-
-  // w.prop('x').eq(val) / w.state(s).eq(val) / w.meta('k').eq(val) / .gte(n)
-  if ((method === 'eq' || method === 'gte') && ts.isCallExpression(recv) && e.arguments[0]) {
-    const innerCallee = unwrapExpr(recv.expression);
-    if (
-      ts.isPropertyAccessExpression(innerCallee) &&
-      ts.isIdentifier(unwrapExpr(innerCallee.expression)) &&
-      (unwrapExpr(innerCallee.expression) as ts.Identifier).text === builderParam &&
-      recv.arguments[0]
-    ) {
-      const src = innerCallee.name.text;
-      if (src !== 'prop' && src !== 'state' && src !== 'meta') return undefined;
-      const rhs = extractScalarLiteral(e.arguments[0], checker);
-      if (rhs === undefined) return undefined;
-      let key: string | undefined;
-      if (src === 'state') {
-        const arg = unwrapExpr(recv.arguments[0]);
-        if (ts.isIdentifier(arg)) key = stateVarToName.get(arg.text) ?? arg.text;
-        else if (ts.isPropertyAccessExpression(arg)) key = arg.name.text;
-      } else {
-        const lit = extractScalarLiteral(recv.arguments[0], checker);
-        if (typeof lit === 'string') key = lit;
-      }
-      if (!key) return undefined;
-      return { kind: 'cmp', operator: method, source: src, key, value: rhs };
-    }
-  }
-  return undefined;
-}
-
-function collectTwTokens(expr: ts.Expression, checker: ts.TypeChecker, out: string[]): void {
-  const visit = (node: ts.Node) => {
-    if (ts.isCallExpression(node)) {
-      const resolved = resolveCallName(node.expression, checker);
-      if (resolved?.name === 'tw') {
-        for (const arg of node.arguments) {
-          const lit = extractScalarLiteral(arg, checker);
-          if (typeof lit === 'string') {
-            for (const tok of lit.trim().split(/\s+/)) {
-              if (tok && !out.includes(tok)) out.push(tok);
-            }
-          }
-        }
-        return;
-      }
-    }
-    ts.forEachChild(node, visit);
-  };
-  visit(expr);
-}
-
-function parseTemplateChild(
-  expr: ts.Expression,
-  renderParam: string,
-  stateVarToName: ReadonlyMap<string, string>,
-  checker: ts.TypeChecker
-): { children: TemplateChildIR[]; reactive: boolean } | undefined {
-  const e = unwrapExpr(expr);
-  if (ts.isArrayLiteralExpression(e)) {
-    const children: TemplateChildIR[] = [];
-    let reactive = false;
-    for (const elem of e.elements) {
-      const parsed = parseTemplateChild(elem, renderParam, stateVarToName, checker);
-      if (!parsed) return undefined;
-      children.push(...parsed.children);
-      reactive ||= parsed.reactive;
-    }
-    return { children, reactive };
-  }
-  const lit = extractScalarLiteral(e, checker);
-  if (typeof lit === 'string' || typeof lit === 'number') {
-    return { children: [{ kind: 'text', value: String(lit) }], reactive: false };
-  }
-  if (ts.isCallExpression(e)) {
-    const chain = propAccessChain(e.expression);
-    if (chain && chain[0] === renderParam) {
-      if (chain.length === 2 && chain[1] === 'slot') {
-        return { children: [{ kind: 'slot' }], reactive: false };
-      }
-      if (chain.length === 2 && chain[1] === 'el') {
-        const el = parseTemplateElement(e, renderParam, stateVarToName, checker);
-        if (!el) return undefined;
-        return { children: [{ kind: 'element', node: el.node }], reactive: el.reactive };
-      }
-    }
-    // state.get()
-    if (chain && chain.length === 2 && chain[1] === 'get') {
-      const stateName = stateVarToName.get(chain[0]);
-      if (stateName) {
-        return { children: [{ kind: 'state-read', stateName }], reactive: true };
-      }
-    }
-  }
-  // r.read.props.get().<propName>
-  if (ts.isPropertyAccessExpression(e) && ts.isCallExpression(unwrapExpr(e.expression))) {
-    const call = unwrapExpr(e.expression) as ts.CallExpression;
-    const chain = propAccessChain(call.expression);
-    if (chain && chain[0] === renderParam && chain.slice(1).join('.') === 'read.props.get') {
-      return { children: [{ kind: 'prop-read', propName: e.name.text }], reactive: true };
-    }
-  }
-  return undefined;
-}
-
-function parseTemplateElement(
-  call: ts.CallExpression,
-  renderParam: string,
-  stateVarToName: ReadonlyMap<string, string>,
-  checker: ts.TypeChecker
-): { node: TemplateElementIR; reactive: boolean } | undefined {
-  if (call.arguments.length === 0) return undefined;
-  const tagLit = extractScalarLiteral(call.arguments[0], checker);
-  if (typeof tagLit !== 'string') return undefined;
-
-  let styleTokens: string[] | undefined;
-  let childrenArg: ts.Expression | undefined;
-
-  if (call.arguments.length === 2) {
-    const second = unwrapExpr(call.arguments[1]);
-    if (ts.isObjectLiteralExpression(second)) {
-      const styleExpr = extractObjectProperty(second, 'style');
-      if (styleExpr) {
-        const toks: string[] = [];
-        collectTwTokens(styleExpr, checker, toks);
-        if (toks.length) styleTokens = toks;
-      }
-    } else {
-      childrenArg = second;
-    }
-  } else if (call.arguments.length >= 3) {
-    const second = unwrapExpr(call.arguments[1]);
-    if (ts.isObjectLiteralExpression(second)) {
-      const styleExpr = extractObjectProperty(second, 'style');
-      if (styleExpr) {
-        const toks: string[] = [];
-        collectTwTokens(styleExpr, checker, toks);
-        if (toks.length) styleTokens = toks;
-      }
-    }
-    childrenArg = call.arguments[2];
-  }
-
-  let children: TemplateChildIR[] = [];
-  let reactive = false;
-  if (childrenArg) {
-    const parsed = parseTemplateChild(childrenArg, renderParam, stateVarToName, checker);
-    if (!parsed) return undefined;
-    children = parsed.children;
-    reactive = parsed.reactive;
-  }
-  return {
-    node: { tag: tagLit, ...(styleTokens ? { styleTokens } : {}), children },
-    reactive,
-  };
-}
-
-function detectSimpleEventAction(
-  handler: ts.FunctionLikeDeclaration,
-  stateVarToName: ReadonlyMap<string, string>,
-  checker: ts.TypeChecker
-): EventDeclIR['simpleAction'] | undefined {
-  if (!handler.body) return undefined;
-  const stmts = ts.isBlock(handler.body) ? handler.body.statements : [];
-  let expr: ts.Expression | undefined;
-  if (ts.isBlock(handler.body)) {
-    if (stmts.length !== 1 || !ts.isExpressionStatement(stmts[0])) return undefined;
-    expr = stmts[0].expression;
-  } else {
-    expr = handler.body;
-  }
-  const call = unwrapExpr(expr);
-  if (!ts.isCallExpression(call)) return undefined;
-  const chain = propAccessChain(call.expression);
-  if (!chain || chain.length !== 2 || chain[1] !== 'set' || call.arguments.length < 1) {
-    return undefined;
-  }
-  const stateName = stateVarToName.get(chain[0]);
-  if (!stateName) return undefined;
-  const arg = unwrapExpr(call.arguments[0]);
-
-  // count.set(count.get() + 1)
-  if (
-    ts.isBinaryExpression(arg) &&
-    (arg.operatorToken.kind === ts.SyntaxKind.PlusToken ||
-      arg.operatorToken.kind === ts.SyntaxKind.MinusToken)
-  ) {
-    const left = unwrapExpr(arg.left);
-    const right = extractScalarLiteral(arg.right, checker);
-    if (ts.isCallExpression(left) && typeof right === 'number') {
-      const lc = propAccessChain(left.expression);
-      if (lc && lc.length === 2 && lc[0] === chain[0] && lc[1] === 'get') {
-        const delta = arg.operatorToken.kind === ts.SyntaxKind.PlusToken ? right : -right;
-        return { kind: 'increment-state', stateName, delta };
-      }
-    }
-  }
-  // flag.set(!flag.get())
-  if (ts.isPrefixUnaryExpression(arg) && arg.operator === ts.SyntaxKind.ExclamationToken) {
-    const inner = unwrapExpr(arg.operand);
-    if (ts.isCallExpression(inner)) {
-      const ic = propAccessChain(inner.expression);
-      if (ic && ic.length === 2 && ic[0] === chain[0] && ic[1] === 'get') {
-        return { kind: 'toggle-state', stateName };
-      }
-    }
-  }
-  // state.set(literal)
-  const lit = extractScalarLiteral(arg, checker);
-  if (lit !== undefined) {
-    return { kind: 'set-state', stateName, value: lit };
-  }
-  return undefined;
-}
-
-/** Lower declarative RuleIR condition AST into an executable SSA function. */
-function lowerRuleToSsa(
-  protoSym: string,
-  rule: RuleIR,
-  props: readonly PropDeclIR[],
-  states: readonly StateDeclIR[],
-  stringTable: string[]
-): SsaFunction {
-  const b = new SsaBuilder(
-    `${protoSym}_rule_${rule.id}`,
-    [
-      { id: '%props', type: 'ptr' },
-      { id: '%states', type: 'ptr' },
-    ],
-    'i1',
-    {
-      exported: true,
-      pure: true,
-      comment: `Compiled rule #${rule.id} -> [${rule.styleTokens.join(' ')}]`,
-    }
-  );
-
-  const propByName = new Map(props.map((p) => [p.name, p]));
-  const stateByName = new Map(states.map((s) => [s.name, s]));
-
-  const emitExpr = (expr: RuleExpr): string => {
-    switch (expr.kind) {
-      case 'true':
-        return b.constI1(true);
-      case 'false':
-        return b.constI1(false);
-      case 'not':
-        return b.not(emitExpr(expr.expr));
-      case 'all': {
-        let acc = emitExpr(expr.exprs[0]);
-        for (let i = 1; i < expr.exprs.length; i++) {
-          acc = b.binop('and', 'i1', acc, emitExpr(expr.exprs[i]));
-        }
-        return acc;
-      }
-      case 'any': {
-        let acc = emitExpr(expr.exprs[0]);
-        for (let i = 1; i < expr.exprs.length; i++) {
-          acc = b.binop('or', 'i1', acc, emitExpr(expr.exprs[i]));
-        }
-        return acc;
-      }
-      case 'cmp': {
-        const cmpOp = expr.operator === 'eq' ? 'eq' : 'ge';
-        if (expr.source === 'prop') {
-          const prop = propByName.get(expr.key);
-          const slot = prop?.index ?? 0;
-          if (typeof expr.value === 'boolean') {
-            const v = b.loadProp('%props', slot, expr.key, 'i1');
-            return b.cmp(cmpOp, 'i1', v, b.constI1(expr.value));
-          }
-          if (typeof expr.value === 'number') {
-            const v = b.loadProp('%props', slot, expr.key, 'f64');
-            return b.cmp(cmpOp, 'f64', v, b.constF64(expr.value));
-          }
-          if (typeof expr.value === 'string') {
-            const v = b.loadProp('%props', slot, expr.key, 'i32');
-            return b.cmp(cmpOp, 'i32', v, b.constI32(internString(stringTable, expr.value)));
-          }
-          return b.constI1(false);
-        }
-        if (expr.source === 'state') {
-          const st = stateByName.get(expr.key);
-          const slot = st?.index ?? 0;
-          if (typeof expr.value === 'boolean') {
-            const v = b.loadState('%states', slot, expr.key, 'i1');
-            return b.cmp(cmpOp, 'i1', v, b.constI1(expr.value));
-          }
-          if (typeof expr.value === 'number') {
-            const v = b.loadState('%states', slot, expr.key, 'f64');
-            return b.cmp(cmpOp, 'f64', v, b.constF64(expr.value));
-          }
-          if (typeof expr.value === 'string') {
-            const v = b.loadState('%states', slot, expr.key, 'i32');
-            return b.cmp(cmpOp, 'i32', v, b.constI32(internString(stringTable, expr.value)));
-          }
-          return b.constI1(false);
-        }
-        // Meta reads depend on host environment; keep conservative false in pure kernel.
-        return b.constI1(false);
-      }
-    }
-  };
-
-  const res = emitExpr(rule.condition);
-  b.ret(res);
-  return b.build();
-}
-
-/** Lower combined rule bitmask evaluator: returns i32 bitmask of matching rules (up to 31 rules). */
-function lowerCombinedRuleMask(protoSym: string, rules: readonly RuleIR[]): SsaFunction {
-  const b = new SsaBuilder(
-    `${protoSym}_eval_rules`,
-    [
-      { id: '%props', type: 'ptr' },
-      { id: '%states', type: 'ptr' },
-    ],
-    'i32',
-    { exported: true, pure: true, comment: `Evaluates bitmask of ${rules.length} compiled rules` }
-  );
-
-  let mask = b.constI32(0);
-  const limit = Math.min(rules.length, 31);
-  for (let i = 0; i < limit; i++) {
-    const matched = b.call(`${protoSym}_rule_${rules[i].id}`, 'i1', [
-      { id: '%props', type: 'ptr' },
-      { id: '%states', type: 'ptr' },
-    ])!;
-    const bit = b.select('i32', matched, b.constI32(1 << i), b.constI32(0));
-    mask = b.binop('or', 'i32', mask, bit);
-  }
-  b.ret(mask);
-  return b.build();
-}
-
-/** Lower simple event state transition actions into real SSA state-transition functions. */
-function lowerEventActionsToSsa(
-  protoSym: string,
-  events: readonly EventDeclIR[],
-  states: readonly StateDeclIR[],
-  stringTable: string[]
-): SsaFunction[] {
-  const stateByName = new Map(states.map((s) => [s.name, s]));
-  const fns: SsaFunction[] = [];
-
-  events.forEach((ev, idx) => {
-    const act = ev.simpleAction;
-    if (!act) return;
-    const st = stateByName.get(act.stateName);
-    if (!st) return;
-
-    const b = new SsaBuilder(
-      `${protoSym}_on_${sanitizeSym(ev.eventName)}_${idx}`,
-      [{ id: '%states', type: 'ptr' }],
-      'void',
-      { exported: true, comment: `State transition kernel for event '${ev.eventName}'` }
-    );
-
-    if (act.kind === 'increment-state' && st.ssaType === 'f64') {
-      const cur = b.loadState('%states', st.index, st.name, 'f64');
-      const next = b.binop('add', 'f64', cur, b.constF64(act.delta));
-      b.storeState('%states', st.index, next, 'f64');
-    } else if (act.kind === 'toggle-state' && st.ssaType === 'i1') {
-      const cur = b.loadState('%states', st.index, st.name, 'i1');
-      const next = b.not(cur);
-      b.storeState('%states', st.index, next, 'i1');
-    } else if (act.kind === 'set-state') {
-      if (st.ssaType === 'i1' && typeof act.value === 'boolean') {
-        b.storeState('%states', st.index, b.constI1(act.value), 'i1');
-      } else if (st.ssaType === 'f64' && typeof act.value === 'number') {
-        b.storeState('%states', st.index, b.constF64(act.value), 'f64');
-      } else if (st.ssaType === 'i32' && typeof act.value === 'string') {
-        b.storeState('%states', st.index, b.constI32(internString(stringTable, act.value)), 'i32');
-      }
-    }
-    b.ret();
-    fns.push(b.build());
-  });
-
-  return fns;
-}
-
-/**
- * Lower pure scalar TypeScript helper functions (arithmetic, cmp, ternary, if/else)
- * directly to SSA IR so LLVM opt/llc can compile authored pure logic to native/WASM.
- */
-function tryLowerPureScalarFunction(
-  fn: ts.FunctionDeclaration,
-  checker: ts.TypeChecker
-): SsaFunction | undefined {
-  if (!fn.name || !fn.body) return undefined;
-  const sig = checker.getSignatureFromDeclaration(fn);
-  if (!sig) return undefined;
-
-  const tsTypeToSsa = (t: ts.Type): 'i1' | 'f64' | undefined => {
-    if (t.flags & (ts.TypeFlags.Number | ts.TypeFlags.NumberLiteral)) return 'f64';
-    if (t.flags & (ts.TypeFlags.Boolean | ts.TypeFlags.BooleanLiteral)) return 'i1';
-    return undefined;
-  };
-
-  const retType = tsTypeToSsa(checker.getReturnTypeOfSignature(sig));
-  if (!retType) return undefined;
-
-  const params: { id: string; name: string; type: 'i1' | 'f64' }[] = [];
-  for (const p of fn.parameters) {
-    if (!ts.isIdentifier(p.name) || p.dotDotDotToken) return undefined;
-    const pt = tsTypeToSsa(checker.getTypeAtLocation(p));
-    if (!pt) return undefined;
-    params.push({ id: `%${sanitizeSym(p.name.text)}`, name: p.name.text, type: pt });
-  }
-
-  const b = new SsaBuilder(
-    `helper_${sanitizeSym(fn.name.text)}`,
-    params.map(({ id, type }) => ({ id, type })),
-    retType,
-    { exported: true, pure: true, comment: `Lowered pure scalar helper ${fn.name.text}` }
-  );
-
-  const env = new Map<string, { id: string; type: 'i1' | 'f64' }>(
-    params.map((p) => [p.name, { id: p.id, type: p.type }])
-  );
-
-  const lowerExpr = (raw: ts.Expression): { id: string; type: 'i1' | 'f64' } | undefined => {
-    const e = unwrapExpr(raw);
-    if (ts.isNumericLiteral(e)) return { id: b.constF64(Number(e.text)), type: 'f64' };
-    if (e.kind === ts.SyntaxKind.TrueKeyword) return { id: b.constI1(true), type: 'i1' };
-    if (e.kind === ts.SyntaxKind.FalseKeyword) return { id: b.constI1(false), type: 'i1' };
-    if (ts.isIdentifier(e)) return env.get(e.text);
-    if (ts.isPrefixUnaryExpression(e)) {
-      const inner = lowerExpr(e.operand);
-      if (!inner) return undefined;
-      if (e.operator === ts.SyntaxKind.ExclamationToken && inner.type === 'i1') {
-        return { id: b.not(inner.id), type: 'i1' };
-      }
-      if (e.operator === ts.SyntaxKind.MinusToken && inner.type === 'f64') {
-        return { id: b.binop('sub', 'f64', b.constF64(0), inner.id), type: 'f64' };
-      }
-      return undefined;
-    }
-    if (ts.isBinaryExpression(e)) {
-      const l = lowerExpr(e.left);
-      const r = lowerExpr(e.right);
-      if (!l || !r || l.type !== r.type) return undefined;
-      const k = e.operatorToken.kind;
-      if (l.type === 'f64') {
-        if (k === ts.SyntaxKind.PlusToken)
-          return { id: b.binop('add', 'f64', l.id, r.id), type: 'f64' };
-        if (k === ts.SyntaxKind.MinusToken)
-          return { id: b.binop('sub', 'f64', l.id, r.id), type: 'f64' };
-        if (k === ts.SyntaxKind.AsteriskToken)
-          return { id: b.binop('mul', 'f64', l.id, r.id), type: 'f64' };
-        if (k === ts.SyntaxKind.SlashToken)
-          return { id: b.binop('div', 'f64', l.id, r.id), type: 'f64' };
-        if (k === ts.SyntaxKind.EqualsEqualsEqualsToken)
-          return { id: b.cmp('eq', 'f64', l.id, r.id), type: 'i1' };
-        if (k === ts.SyntaxKind.ExclamationEqualsEqualsToken)
-          return { id: b.cmp('ne', 'f64', l.id, r.id), type: 'i1' };
-        if (k === ts.SyntaxKind.LessThanToken)
-          return { id: b.cmp('lt', 'f64', l.id, r.id), type: 'i1' };
-        if (k === ts.SyntaxKind.LessThanEqualsToken)
-          return { id: b.cmp('le', 'f64', l.id, r.id), type: 'i1' };
-        if (k === ts.SyntaxKind.GreaterThanToken)
-          return { id: b.cmp('gt', 'f64', l.id, r.id), type: 'i1' };
-        if (k === ts.SyntaxKind.GreaterThanEqualsToken)
-          return { id: b.cmp('ge', 'f64', l.id, r.id), type: 'i1' };
-      } else {
-        if (k === ts.SyntaxKind.AmpersandAmpersandToken)
-          return { id: b.binop('and', 'i1', l.id, r.id), type: 'i1' };
-        if (k === ts.SyntaxKind.BarBarToken)
-          return { id: b.binop('or', 'i1', l.id, r.id), type: 'i1' };
-        if (k === ts.SyntaxKind.EqualsEqualsEqualsToken)
-          return { id: b.cmp('eq', 'i1', l.id, r.id), type: 'i1' };
-        if (k === ts.SyntaxKind.ExclamationEqualsEqualsToken)
-          return { id: b.cmp('ne', 'i1', l.id, r.id), type: 'i1' };
-      }
-      return undefined;
-    }
-    if (ts.isConditionalExpression(e)) {
-      const c = lowerExpr(e.condition);
-      const t = lowerExpr(e.whenTrue);
-      const f = lowerExpr(e.whenFalse);
-      if (!c || c.type !== 'i1' || !t || !f || t.type !== f.type) return undefined;
-      return { id: b.select(t.type, c.id, t.id, f.id), type: t.type };
-    }
-    return undefined;
-  };
-
-  let blockIdx = 0;
-  let terminated = false;
-  for (const stmt of fn.body.statements) {
-    if (terminated) break;
-    if (ts.isVariableStatement(stmt)) {
-      for (const decl of stmt.declarationList.declarations) {
-        if (!ts.isIdentifier(decl.name) || !decl.initializer) return undefined;
-        const val = lowerExpr(decl.initializer);
-        if (!val) return undefined;
-        env.set(decl.name.text, val);
-      }
-    } else if (ts.isIfStatement(stmt)) {
-      const cond = lowerExpr(stmt.expression);
-      if (!cond || cond.type !== 'i1') return undefined;
-      const thenRet =
-        ts.isReturnStatement(stmt.thenStatement) && stmt.thenStatement.expression
-          ? stmt.thenStatement.expression
-          : ts.isBlock(stmt.thenStatement) &&
-              stmt.thenStatement.statements.length === 1 &&
-              ts.isReturnStatement(stmt.thenStatement.statements[0]) &&
-              stmt.thenStatement.statements[0].expression
-            ? stmt.thenStatement.statements[0].expression
-            : undefined;
-      if (!thenRet) return undefined;
-      const id = blockIdx++;
-      const thenBlk = b.createBlock(`if_then_${id}`);
-      const elseBlk = b.createBlock(`if_else_${id}`);
-      b.condbr(cond.id, thenBlk.label, elseBlk.label);
-      b.positionAt(thenBlk);
-      const tv = lowerExpr(thenRet);
-      if (!tv || tv.type !== retType) return undefined;
-      b.ret(tv.id);
-      b.positionAt(elseBlk);
-    } else if (ts.isReturnStatement(stmt) && stmt.expression) {
-      const rv = lowerExpr(stmt.expression);
-      if (!rv || rv.type !== retType) return undefined;
-      b.ret(rv.id);
-      terminated = true;
-    } else {
-      return undefined;
-    }
-  }
-
-  if (!terminated) return undefined;
-  return b.build();
-}
-
 /**
  * Extract Proto SSA IR from a real TypeScript SourceFile using ts.Program + ts.TypeChecker.
  */
@@ -876,7 +125,7 @@ export function extractModuleIR(
 
   const checker = program.getTypeChecker();
 
-  if (options.checkTypes) {
+  if (options.checkTypes !== false) {
     const tsDiags = [...program.getSyntacticDiagnostics(sf), ...program.getSemanticDiagnostics(sf)];
     for (const d of tsDiags) {
       const msg = ts.flattenDiagnosticMessageText(d.messageText, '\n');
@@ -925,7 +174,48 @@ export function extractModuleIR(
       'defineAsHook',
       'defineHook',
     ]);
-    if (!found) continue;
+    if (!found) {
+      const value = unwrapExpr(initExpr);
+      if (isPrototypeType(value, checker)) {
+        const partial: PrototypeIR = ts.isCallExpression(value)
+          ? extractPrototype(value, expName, expName === 'default', sf.fileName, checker)
+          : {
+              name: expName,
+              exportName: expName,
+              isDefaultExport: expName === 'default',
+              sourceFile: sf.fileName,
+              span: spanOf(value, sf),
+              tier: 'static',
+              props: [],
+              states: [],
+              exposes: [],
+              events: [],
+              hooks: [],
+              contexts: [],
+              staticStyleTokens: [],
+              rules: [],
+              lifecycle: [],
+              render: { kind: 'default-slot' },
+              capabilities: [],
+              capabilityMask: 0n,
+              functions: [],
+              stringTable: [],
+            };
+        prototypes.push({
+          ...partial,
+          unlowered: [
+            ...(partial.unlowered ?? []),
+            {
+              operation: 'prototype-factory',
+              message:
+                'The prototype-producing call has no proven factory lowering; its declaration remains in coverage.',
+              span: spanOf(value, sf),
+            },
+          ],
+        });
+      }
+      continue;
+    }
 
     if (found.factory === 'definePrototype') {
       if (seenCalls.has(found.call) && !options.exportName) continue;
@@ -957,6 +247,70 @@ export function extractModuleIR(
     }
   }
 
+  const pureInitializer = (raw: ts.Expression): boolean => {
+    const value = unwrapExpr(raw);
+    if (
+      extractScalarLiteral(value, checker) !== undefined ||
+      ts.isIdentifier(value) ||
+      ts.isArrowFunction(value) ||
+      ts.isFunctionExpression(value)
+    )
+      return true;
+    if (ts.isArrayLiteralExpression(value))
+      return value.elements.every(
+        (element) => !ts.isSpreadElement(element) && pureInitializer(element)
+      );
+    if (ts.isObjectLiteralExpression(value))
+      return value.properties.every(
+        (field) =>
+          ((ts.isMethodDeclaration(field) ||
+            ts.isGetAccessorDeclaration(field) ||
+            ts.isSetAccessorDeclaration(field)) &&
+            !ts.isComputedPropertyName(field.name)) ||
+          ts.isShorthandPropertyAssignment(field) ||
+          (ts.isPropertyAssignment(field) &&
+            !ts.isComputedPropertyName(field.name) &&
+            pureInitializer(field.initializer))
+      );
+    const intrinsic =
+      ts.isCallExpression(value) || ts.isPropertyAccessExpression(value)
+        ? resolveCallName(ts.isCallExpression(value) ? value.expression : value, checker)
+        : undefined;
+    return (
+      !!intrinsic &&
+      isCoreIntrinsic(intrinsic) &&
+      ['definePrototype', 'defineAsHook', 'defineHook'].includes(intrinsic.name) &&
+      (!ts.isCallExpression(value) || value.arguments.every(pureInitializer))
+    );
+  };
+  const moduleEffects: LoweringGapIR[] = sf.statements
+    .filter(
+      (statement) =>
+        (ts.isExpressionStatement(statement) && !ts.isStringLiteral(statement.expression)) ||
+        ts.isIfStatement(statement) ||
+        ts.isIterationStatement(statement, false) ||
+        ts.isTryStatement(statement) ||
+        ts.isThrowStatement(statement) ||
+        (ts.isVariableStatement(statement) &&
+          statement.declarationList.declarations.some(
+            (declaration) =>
+              !ts.isIdentifier(declaration.name) ||
+              (declaration.initializer && !pureInitializer(declaration.initializer))
+          )) ||
+        (ts.isImportDeclaration(statement) && !statement.importClause)
+    )
+    .map((statement) => ({
+      operation: 'module-effect',
+      message: 'Top-level executable effects require explicit module-initialization lowering.',
+      span: spanOf(statement, sf),
+    }));
+  if (moduleEffects.length) {
+    for (let index = 0; index < prototypes.length; index++)
+      prototypes[index] = {
+        ...prototypes[index],
+        unlowered: [...moduleEffects, ...(prototypes[index].unlowered ?? [])],
+      };
+  }
   return {
     ir: {
       irVersion: PROTO_IR_VERSION,
@@ -975,8 +329,15 @@ function extractAuthoredHookSummary(
   factory: string,
   checker: ts.TypeChecker
 ): AuthoredHookSummary | undefined {
-  const arg = call.arguments[0] ? unwrapExpr(call.arguments[0]) : undefined;
-  if (!arg || !ts.isObjectLiteralExpression(arg)) return undefined;
+  const arg = call.arguments[0] ? resolveDefinitionObject(call.arguments[0], checker) : undefined;
+  if (!arg)
+    return {
+      name: exportName,
+      exportName,
+      kind: factory === 'defineAsHook' ? 'as-hook' : 'hook',
+      sourceFile: call.getSourceFile().fileName,
+      capabilities: [],
+    };
   const nameExpr = extractObjectProperty(arg, 'name');
   const nameLit = nameExpr ? extractScalarLiteral(nameExpr, checker) : undefined;
   const name = typeof nameLit === 'string' ? nameLit : exportName;
@@ -999,13 +360,55 @@ function extractPrototype(
   isDefaultExport: boolean,
   entryFile: string,
   checker: ts.TypeChecker
-): PrototypeIR | undefined {
-  const arg = call.arguments[0] ? unwrapExpr(call.arguments[0]) : undefined;
-  if (!arg || !ts.isObjectLiteralExpression(arg)) return undefined;
-  const nameExpr = extractObjectProperty(arg, 'name');
+): PrototypeIR {
+  const arg = call.arguments[0] ? resolveDefinitionObject(call.arguments[0], checker) : undefined;
+  const definitionGaps: LoweringGapIR[] = [];
+  const definitionGap = (node: ts.Node, operation: string, message: string) =>
+    definitionGaps.push({ operation, message, span: spanOf(node, node.getSourceFile()) });
+  if (!arg)
+    definitionGap(
+      call,
+      'prototype-options',
+      'Definition options cannot be resolved without evaluating dynamic code; the declaration remains in coverage.'
+    );
+  if (call.arguments.length !== 1)
+    definitionGap(call, 'prototype-options', 'Unexpected definition arguments require lowering.');
+  for (const field of arg?.properties ?? []) {
+    if (
+      !('name' in field) ||
+      !field.name ||
+      (!ts.isIdentifier(field.name) && !ts.isStringLiteral(field.name)) ||
+      !['name', 'setup'].includes(field.name.text)
+    )
+      definitionGap(
+        field,
+        'prototype-options',
+        'Definition field requires explicit semantic lowering.'
+      );
+  }
+  const nameExpr = arg ? extractObjectProperty(arg, 'name') : undefined;
   const nameLit = nameExpr ? extractScalarLiteral(nameExpr, checker) : undefined;
   const name = typeof nameLit === 'string' ? nameLit : exportName;
-  const setupFn = extractSetupFunction(arg, checker);
+  if (typeof nameLit !== 'string' || !nameLit)
+    definitionGap(
+      nameExpr ?? call,
+      'prototype-name',
+      'Prototype name must be a non-empty proven static string.'
+    );
+  const setupFn = arg ? extractSetupFunction(arg, checker) : undefined;
+  const setupField = arg?.properties.find(
+    (field) =>
+      'name' in field &&
+      field.name &&
+      (ts.isIdentifier(field.name) || ts.isStringLiteral(field.name)) &&
+      field.name.text === 'setup'
+  );
+  if (!setupFn)
+    definitionGap(
+      setupField ?? call,
+      'prototype-setup',
+      'The required setup implementation could not be resolved.'
+    );
 
   // Extract explicit generic type arguments from `definePrototype<Props, Exposes>(...)`.
   const propsTypeText = call.typeArguments?.[0]?.getText(call.getSourceFile());
@@ -1033,11 +436,12 @@ function extractPrototype(
       render: { kind: 'default-slot' } as RenderIR,
       functions: [],
       stringTable: [],
+      unlowered: definitionGaps,
     };
     return { ...base, ...computePrototypeCapabilities(base) };
   }
 
-  return analyzeSetup(
+  const result = analyzeSetup(
     setupFn,
     name,
     exportName,
@@ -1048,6 +452,7 @@ function extractPrototype(
     propsTypeText,
     exposesTypeText
   );
+  return { ...result, unlowered: [...definitionGaps, ...(result.unlowered ?? [])] };
 }
 
 function analyzeSetup(
@@ -1063,7 +468,7 @@ function analyzeSetup(
 ): PrototypeIR {
   const propsMap = new Map<string, PropDeclIR>();
   const states: StateDeclIR[] = [];
-  const stateVarToName = new Map<string, string>();
+  const stateVarToName = new Map<ts.Symbol, string>();
   const exposes: ExposeDeclIR[] = [];
   const events: EventDeclIR[] = [];
   const hooks: HookCallIR[] = [];
@@ -1071,8 +476,28 @@ function analyzeSetup(
   const staticStyleTokens: string[] = [];
   const rules: RuleIR[] = [];
   const lifecycle = new Set<LifecycleHookName>();
+  const lifecycleHandlers: LifecycleDeclIR[] = [];
+  const propWatches: PropWatchDeclIR[] = [];
   const stringTable: string[] = [];
+  const unlowered: LoweringGapIR[] = [];
+  const gap = (node: ts.Node, operation: string, message: string): void => {
+    unlowered.push({ operation, message, span: spanOf(node, node.getSourceFile()) });
+  };
   const renderBox: { current: RenderIR } = { current: { kind: 'default-slot' } };
+
+  const acceptsDefault = (declaration: PropDeclIR, value: ScalarLiteral): boolean => {
+    if (value === null) return declaration.empty !== 'error';
+    if (typeof value === 'number' && !Number.isFinite(value)) return false;
+    if (declaration.kind === 'enum') {
+      if (typeof value !== 'string' || !declaration.options?.includes(value)) return false;
+    } else if (declaration.kind !== 'any' && typeof value !== declaration.kind) return false;
+    return (
+      !declaration.range ||
+      (typeof value === 'number' &&
+        (declaration.range.min === undefined || value >= declaration.range.min) &&
+        (declaration.range.max === undefined || value <= declaration.range.max))
+    );
+  };
 
   const visitedFns = new Set<ts.FunctionLikeDeclaration>();
 
@@ -1107,15 +532,96 @@ function analyzeSetup(
   };
 
   const walkFunction = (fn: ts.FunctionLikeDeclaration, defParamName?: string) => {
-    if (!fn.body || visitedFns.has(fn)) return;
+    if (!fn.body) {
+      gap(fn, 'setup', 'Setup implementation is not available.');
+      return;
+    }
+    if (visitedFns.has(fn)) {
+      gap(
+        fn,
+        'setup-composition',
+        'Repeated or recursive setup composition requires instance-sensitive expansion.'
+      );
+      return;
+    }
     visitedFns.add(fn);
 
     const p0 = fn.parameters[0];
     const defName = defParamName ?? (p0 && ts.isIdentifier(p0.name) ? p0.name.text : undefined);
+    const defBinding = fn.parameters.find(
+      (parameter) => ts.isIdentifier(parameter.name) && parameter.name.text === defName
+    );
+    const defSymbol = defBinding && checker.getSymbolAtLocation(defBinding.name);
+    const defAliases = new Set<ts.Symbol>(defSymbol ? [defSymbol] : []);
+    const rootBinding = (expression: ts.Expression): ts.Symbol | undefined => {
+      let root = unwrapExpr(expression);
+      while (ts.isPropertyAccessExpression(root)) root = unwrapExpr(root.expression);
+      return ts.isIdentifier(root) ? checker.getSymbolAtLocation(root) : undefined;
+    };
+    let returned = false;
 
     const visit = (node: ts.Node) => {
-      // Do not descend into nested functions except when explicitly analyzing render/event/rule.
+      // Preserve sequential completion, including returns nested in unconditional blocks.
+      if (returned) return;
       if (node !== fn && ts.isFunctionLike(node)) return;
+      if (ts.isBlock(node)) {
+        for (const statement of node.statements) {
+          if (returned) break;
+          visit(statement);
+        }
+        return;
+      }
+      if (ts.isReturnStatement(node)) returned = true;
+      if (ts.isVariableDeclaration(node) && !ts.isIdentifier(node.name)) {
+        gap(
+          node,
+          'setup-binding',
+          'Destructuring requires explicit binding and property-access lowering.'
+        );
+        return;
+      }
+      if (ts.isExpressionStatement(node) && !ts.isCallExpression(unwrapExpr(node.expression))) {
+        gap(node, 'setup-effect', 'This setup effect has no semantic lowering.');
+        return;
+      }
+
+      if (
+        ts.isIfStatement(node) ||
+        ts.isIterationStatement(node, false) ||
+        ts.isSwitchStatement(node) ||
+        ts.isTryStatement(node) ||
+        ts.isThrowStatement(node)
+      ) {
+        gap(
+          node,
+          'setup-control-flow',
+          'Dynamic setup control flow is retained as an unsupported operation; declarations are not hoisted out of branches.'
+        );
+        return;
+      }
+      if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer) {
+        const initial = unwrapExpr(node.initializer);
+        if (ts.isIdentifier(initial) && defAliases.has(checker.getSymbolAtLocation(initial)!)) {
+          defAliases.add(checker.getSymbolAtLocation(node.name)!);
+          return;
+        }
+        if (ts.isIdentifier(initial) && stateVarToName.has(checker.getSymbolAtLocation(initial)!)) {
+          stateVarToName.set(
+            checker.getSymbolAtLocation(node.name)!,
+            stateVarToName.get(checker.getSymbolAtLocation(initial)!)!
+          );
+          return;
+        }
+        if (
+          !ts.isCallExpression(initial) &&
+          !ts.isArrowFunction(initial) &&
+          !ts.isFunctionExpression(initial) &&
+          extractScalarLiteral(initial, checker) === undefined
+        ) {
+          gap(node, 'setup-binding', 'The local binding initializer has no semantic lowering.');
+          return;
+        }
+      }
 
       // Capture return statement in top-level setup as RenderIR.
       if (fn === setupFn && ts.isReturnStatement(node) && node.expression) {
@@ -1134,9 +640,20 @@ function analyzeSetup(
             const u = unwrapExpr(bodyExpr);
             if (ts.isCallExpression(u)) {
               const chain = propAccessChain(u.expression);
-              if (chain && chain[0] === renderParam && chain[1] === 'slot') {
+              if (
+                chain &&
+                chain.length === 2 &&
+                chain[0] === renderParam &&
+                chain[1] === 'slot' &&
+                u.arguments.length === 0
+              ) {
                 renderBox.current = { kind: 'default-slot' };
-              } else if (chain && chain[0] === renderParam && chain[1] === 'el') {
+              } else if (
+                chain &&
+                chain.length === 2 &&
+                chain[0] === renderParam &&
+                chain[1] === 'el'
+              ) {
                 const parsed = parseTemplateElement(u, renderParam, stateVarToName, checker);
                 renderBox.current = parsed
                   ? { kind: parsed.reactive ? 'reactive-tree' : 'static-tree', root: parsed.node }
@@ -1156,27 +673,42 @@ function analyzeSetup(
         return;
       }
 
+      if (ts.isReturnStatement(node)) {
+        if (node.expression && extractScalarLiteral(node.expression, checker) === undefined)
+          gap(node, 'setup-return', 'A helper return value requires explicit lowering.');
+        return;
+      }
+
       if (ts.isCallExpression(node)) {
         const chain = propAccessChain(node.expression);
 
         // 1. def.* operations
-        if (defName && chain && chain[0] === defName) {
+        if (chain && defAliases.has(rootBinding(node.expression)!)) {
           const sub = chain.slice(1).join('.');
 
           // def.props.define({...})
           if (sub === 'props.define' && node.arguments[0]) {
+            if (node.arguments.length !== 1)
+              gap(node, sub, 'Unexpected declaration arguments cannot be discarded.');
             const obj = unwrapExpr(node.arguments[0]);
             if (ts.isObjectLiteralExpression(obj)) {
               for (const p of obj.properties) {
-                if (!ts.isPropertyAssignment(p)) continue;
+                if (!ts.isPropertyAssignment(p)) {
+                  gap(p, sub, 'Property declarations must be explicit named fields.');
+                  continue;
+                }
                 const key =
                   ts.isIdentifier(p.name) || ts.isStringLiteral(p.name) ? p.name.text : undefined;
-                if (!key) continue;
+                if (!key) {
+                  gap(p, sub, 'Computed property names need explicit lowering.');
+                  continue;
+                }
                 const spec = unwrapExpr(p.initializer);
                 let kind: PropDeclIR['kind'] = 'any';
                 let defaultValue: ScalarLiteral | undefined;
                 let empty: PropDeclIR['empty'];
                 let options: ScalarLiteral[] | undefined;
+                let range: PropDeclIR['range'];
 
                 if (ts.isObjectLiteralExpression(spec)) {
                   const typeExpr = extractObjectProperty(spec, 'type');
@@ -1192,19 +724,66 @@ function analyzeSetup(
                     kind = typeLit;
                   }
                   const defExpr = extractObjectProperty(spec, 'default');
-                  if (defExpr) defaultValue = extractScalarLiteral(defExpr, checker);
+                  if (defExpr) {
+                    defaultValue = extractScalarLiteral(defExpr, checker);
+                    if (defaultValue === undefined)
+                      gap(defExpr, sub, 'Property default is not a proven static scalar.');
+                  }
                   const emptyExpr = extractObjectProperty(spec, 'empty');
                   const emptyLit = emptyExpr ? extractScalarLiteral(emptyExpr, checker) : undefined;
                   if (emptyLit === 'accept' || emptyLit === 'fallback' || emptyLit === 'error') {
                     empty = emptyLit;
-                  }
+                  } else if (emptyExpr)
+                    gap(emptyExpr, sub, 'Empty behavior must be statically known.');
                   const optExpr = extractObjectProperty(spec, 'options');
                   if (optExpr && ts.isArrayLiteralExpression(unwrapExpr(optExpr))) {
                     options = (unwrapExpr(optExpr) as ts.ArrayLiteralExpression).elements
                       .map((el) => extractScalarLiteral(el, checker))
                       .filter((v): v is ScalarLiteral => v !== undefined);
+                    if (
+                      options.length !==
+                      (unwrapExpr(optExpr) as ts.ArrayLiteralExpression).elements.length
+                    )
+                      gap(optExpr, sub, 'Every enum option must be a proven scalar.');
+                  } else if (optExpr)
+                    gap(optExpr, sub, 'Property options require an explicit scalar array.');
+                  const rangeExpr = extractObjectProperty(spec, 'range');
+                  if (rangeExpr && ts.isObjectLiteralExpression(unwrapExpr(rangeExpr))) {
+                    const limits = unwrapExpr(rangeExpr) as ts.ObjectLiteralExpression;
+                    if (
+                      limits.properties.some(
+                        (field) =>
+                          !ts.isPropertyAssignment(field) ||
+                          (!ts.isIdentifier(field.name) && !ts.isStringLiteral(field.name)) ||
+                          !['min', 'max'].includes(field.name.text)
+                      )
+                    )
+                      gap(rangeExpr, sub, 'Every range field must have explicit lowering.');
+                    const minExpr = extractObjectProperty(limits, 'min');
+                    const maxExpr = extractObjectProperty(limits, 'max');
+                    const min = minExpr ? extractScalarLiteral(minExpr, checker) : undefined;
+                    const max = maxExpr ? extractScalarLiteral(maxExpr, checker) : undefined;
+                    if (
+                      (minExpr && typeof min !== 'number') ||
+                      (maxExpr && typeof max !== 'number')
+                    )
+                      gap(rangeExpr, sub, 'Property range bounds must be static numbers.');
+                    range = {
+                      ...(typeof min === 'number' ? { min } : {}),
+                      ...(typeof max === 'number' ? { max } : {}),
+                    };
+                  } else if (rangeExpr)
+                    gap(rangeExpr, sub, 'Property range must be statically available.');
+                  for (const field of spec.properties) {
+                    if (
+                      !ts.isPropertyAssignment(field) ||
+                      (!ts.isIdentifier(field.name) && !ts.isStringLiteral(field.name)) ||
+                      !['type', 'default', 'empty', 'options', 'range'].includes(field.name.text)
+                    ) {
+                      gap(field, sub, 'Property configuration has no semantic lowering.');
+                    }
                   }
-                }
+                } else gap(spec, sub, 'Property specification must be statically available.');
 
                 const tsType =
                   kind === 'enum' && options?.length
@@ -1224,29 +803,49 @@ function analyzeSetup(
                     ...(defaultValue !== undefined ? { defaultValue } : {}),
                     ...(options ? { options } : {}),
                     ...(empty ? { empty } : {}),
+                    ...(range ? { range } : {}),
                     ssaType: propKindToSsaType(kind),
                   });
-                }
+                } else
+                  gap(p, sub, 'Repeated property definitions require declaration merge lowering.');
               }
-            }
+            } else gap(obj, sub, 'Dynamic props declarations require explicit lowering.');
           }
 
           // def.props.setDefaults({...})
           else if (sub === 'props.setDefaults' && node.arguments[0]) {
+            if (node.arguments.length !== 1)
+              gap(node, sub, 'Unexpected default arguments cannot be discarded.');
             const obj = unwrapExpr(node.arguments[0]);
             if (ts.isObjectLiteralExpression(obj)) {
               for (const p of obj.properties) {
-                if (!ts.isPropertyAssignment(p)) continue;
+                if (!ts.isPropertyAssignment(p)) {
+                  gap(p, sub, 'Defaults must be explicit named fields.');
+                  continue;
+                }
                 const key =
                   ts.isIdentifier(p.name) || ts.isStringLiteral(p.name) ? p.name.text : undefined;
-                if (!key) continue;
+                if (!key) {
+                  gap(p, sub, 'Computed default names require lowering.');
+                  continue;
+                }
                 const existing = propsMap.get(key);
                 const val = extractScalarLiteral(p.initializer, checker);
                 if (existing && val !== undefined) {
-                  propsMap.set(key, { ...existing, defaultValue: val });
-                }
+                  if (typeof val === 'number' && !Number.isFinite(val)) {
+                    gap(p, sub, 'Defaults must be JSON scalar values.');
+                  } else if (acceptsDefault(existing, val)) {
+                    // Invalid latest layers retain the preceding valid fallback.
+                    propsMap.set(key, { ...existing, defaultValue: val });
+                  }
+                } else
+                  gap(
+                    p,
+                    sub,
+                    'Defaults must target a declared property and have a proven scalar value.'
+                  );
               }
-            }
+            } else gap(obj, sub, 'Dynamic defaults require explicit lowering.');
           }
 
           // def.state.{bool,string,enum,numberDiscrete,numberRange}(name, initial)
@@ -1257,6 +856,8 @@ function analyzeSetup(
             sub === 'state.numberDiscrete' ||
             sub === 'state.numberRange'
           ) {
+            if (node.arguments.length < 2 || node.arguments.length > 3)
+              gap(node, sub, 'Unexpected state declaration arguments cannot be discarded.');
             const nameLit = node.arguments[0]
               ? extractScalarLiteral(node.arguments[0], checker)
               : undefined;
@@ -1271,11 +872,53 @@ function analyzeSetup(
               'state.numberRange': 'number.range',
             };
             const kind = kindMap[sub];
-            const stateName = typeof nameLit === 'string' ? nameLit : `state_${states.length}`;
+            if (typeof nameLit !== 'string' || !/^[a-z0-9-]+(\.[a-z0-9-]+)*$/.test(nameLit))
+              gap(node, sub, 'State semantic must be a valid static name.');
+            if (initLit === undefined)
+              gap(node, sub, 'State initializer has no proven value or expression lowering.');
+            if (typeof initLit === 'string') internString(stringTable, initLit);
+            const stateName = typeof nameLit === 'string' ? nameLit : '';
+            if (states.some((s) => s.name === stateName))
+              gap(node, sub, 'Repeated state names require explicit identity resolution.');
+            const stateSpec: {
+              options?: ScalarLiteral[];
+              min?: number;
+              max?: number;
+              step?: number;
+              clamp?: boolean;
+            } = {};
+            const specArg = node.arguments[2] && unwrapExpr(node.arguments[2]);
+            if (specArg) {
+              if (ts.isObjectLiteralExpression(specArg)) {
+                for (const field of specArg.properties) {
+                  if (
+                    !ts.isPropertyAssignment(field) ||
+                    (!ts.isIdentifier(field.name) && !ts.isStringLiteral(field.name))
+                  ) {
+                    gap(field, sub, 'State specification must use explicit fields.');
+                    continue;
+                  }
+                  const key = field.name.text;
+                  const init = unwrapExpr(field.initializer);
+                  if (key === 'options' && ts.isArrayLiteralExpression(init)) {
+                    const values = init.elements.map((e) => extractScalarLiteral(e, checker));
+                    if (values.some((v) => v === undefined))
+                      gap(field, sub, 'State options must be static scalar values.');
+                    else stateSpec.options = values as ScalarLiteral[];
+                  } else {
+                    const v = extractScalarLiteral(init, checker);
+                    if (['min', 'max', 'step'].includes(key) && typeof v === 'number')
+                      stateSpec[key as 'min' | 'max' | 'step'] = v;
+                    else if (key === 'clamp' && typeof v === 'boolean') stateSpec.clamp = v;
+                    else gap(field, sub, 'State specification field is not lowered.');
+                  }
+                }
+              } else gap(specArg, sub, 'Dynamic state specifications are not lowered.');
+            }
             let variableName: string | undefined;
             if (ts.isVariableDeclaration(node.parent) && ts.isIdentifier(node.parent.name)) {
               variableName = node.parent.name.text;
-              stateVarToName.set(variableName, stateName);
+              stateVarToName.set(checker.getSymbolAtLocation(node.parent.name)!, stateName);
             }
             states.push({
               index: states.length,
@@ -1283,6 +926,7 @@ function analyzeSetup(
               variableName,
               kind,
               ...(initLit !== undefined ? { initialValue: initLit } : {}),
+              ...stateSpec,
               ssaType: stateKindToSsaType(kind),
             });
           }
@@ -1308,12 +952,57 @@ function analyzeSetup(
 
           // def.props.watch / def.props.watchAll / def.props.watchRaw
           else if (sub.startsWith('props.watch')) {
+            if (node.arguments.length !== (sub === 'props.watch' ? 2 : 1))
+              gap(node, sub, 'Unexpected watcher arguments cannot be discarded.');
             const cbArg = node.arguments[node.arguments.length - 1];
-            if (cbArg) scanRunCallback(resolveFunctionLike(cbArg, checker));
+            const handler = cbArg ? resolveFunctionLike(cbArg, checker) : undefined;
+            scanRunCallback(handler);
+            if (sub !== 'props.watch' && sub !== 'props.watchAll') {
+              gap(
+                node,
+                sub,
+                'Raw property subscriptions require a raw snapshot and metadata lowering.'
+              );
+            } else {
+              let keys: string[] | null | undefined = sub === 'props.watchAll' ? null : undefined;
+              const keysArg = node.arguments[0] && unwrapExpr(node.arguments[0]);
+              if (sub === 'props.watch' && keysArg && ts.isArrayLiteralExpression(keysArg)) {
+                const values = keysArg.elements.map((key) => extractScalarLiteral(key, checker));
+                if (values.every((key): key is string => typeof key === 'string')) keys = values;
+              }
+              const propParameters = new Map<string, 'current' | 'previous'>();
+              if (handler?.parameters[1] && ts.isIdentifier(handler.parameters[1].name))
+                propParameters.set(handler.parameters[1].name.text, 'current');
+              if (handler?.parameters[2] && ts.isIdentifier(handler.parameters[2].name))
+                propParameters.set(handler.parameters[2].name.text, 'previous');
+              const lowered = handler
+                ? lowerActionBody(handler, {
+                    states: stateVarToName,
+                    checker,
+                    runParameter:
+                      handler.parameters[0] && ts.isIdentifier(handler.parameters[0].name)
+                        ? handler.parameters[0].name.text
+                        : undefined,
+                    propParameters,
+                    constant: (expression) => extractScalarLiteral(expression, checker),
+                  })
+                : undefined;
+              if (keys === undefined || keys?.some((key) => !propsMap.has(key)))
+                gap(node, sub, 'A watcher must select static declared property keys.');
+              else if (!lowered?.ok)
+                gap(
+                  lowered && !lowered.ok ? lowered.node : node,
+                  sub,
+                  lowered && !lowered.ok ? lowered.message : 'Watcher callback is unavailable.'
+                );
+              else propWatches.push({ keys, body: lowered.body });
+            }
           }
 
           // def.event.on / def.event.onGlobal
           else if (sub === 'event.on' || sub === 'event.onGlobal') {
+            if (node.arguments.length !== 2)
+              gap(node, sub, 'Event options need explicit host lowering.');
             const evLit = node.arguments[0]
               ? extractScalarLiteral(node.arguments[0], checker)
               : undefined;
@@ -1325,20 +1014,67 @@ function analyzeSetup(
               const simpleAction = handler
                 ? detectSimpleEventAction(handler, stateVarToName, checker)
                 : undefined;
+              const action = handler
+                ? lowerActionBody(handler, {
+                    states: stateVarToName,
+                    checker,
+                    runParameter:
+                      handler.parameters[0] && ts.isIdentifier(handler.parameters[0].name)
+                        ? handler.parameters[0].name.text
+                        : undefined,
+                    constant: (expression) => extractScalarLiteral(expression, checker),
+                  })
+                : undefined;
+              if (!action?.ok)
+                gap(
+                  action && !action.ok ? action.node : node,
+                  sub,
+                  action && !action.ok ? action.message : 'Event callback body is unavailable.'
+                );
               events.push({
                 scope: sub === 'event.onGlobal' ? 'global' : 'root',
                 eventName: evLit,
                 ...(simpleAction ? { simpleAction } : {}),
+                ...(action?.ok ? { body: action.body } : {}),
               });
-            }
+            } else gap(node, sub, 'Event identity must be a static supported name.');
           }
 
           // def.lifecycle.*
           else if (sub.startsWith('lifecycle.')) {
+            if (node.arguments.length !== 1)
+              gap(node, sub, 'Unexpected lifecycle arguments cannot be discarded.');
             const method = sub.slice('lifecycle.'.length) as LifecycleHookName;
             if (LIFECYCLE_METHODS.has(method)) lifecycle.add(method);
             const cbArg = node.arguments[0];
-            if (cbArg) scanRunCallback(resolveFunctionLike(cbArg, checker));
+            const handler = cbArg ? resolveFunctionLike(cbArg, checker) : undefined;
+            scanRunCallback(handler);
+            const lowered = handler
+              ? lowerActionBody(handler, {
+                  states: stateVarToName,
+                  checker,
+                  runParameter:
+                    handler.parameters[0] && ts.isIdentifier(handler.parameters[0].name)
+                      ? handler.parameters[0].name.text
+                      : undefined,
+                  constant: (expression) => extractScalarLiteral(expression, checker),
+                })
+              : undefined;
+            const phases: Record<LifecycleHookName, LifecycleDeclIR['phase']> = {
+              onCreated: 'created',
+              onMounted: 'mounted',
+              onUpdated: 'updated',
+              onUnmounted: 'unmounted',
+              onBeforeDispose: 'before-dispose',
+            };
+            if (!LIFECYCLE_METHODS.has(method)) gap(node, sub, 'Lifecycle phase is unknown.');
+            else if (!lowered?.ok)
+              gap(
+                lowered && !lowered.ok ? lowered.node : node,
+                sub,
+                lowered && !lowered.ok ? lowered.message : 'Lifecycle callback is unavailable.'
+              );
+            else lifecycleHandlers.push({ phase: phases[method], body: lowered.body });
           }
 
           // def.context.*
@@ -1350,17 +1086,40 @@ function analyzeSetup(
 
           // def.feedback.style.use(tw(...))
           else if (sub === 'feedback.style.use') {
-            for (const a of node.arguments) collectTwTokens(a, checker, staticStyleTokens);
+            for (const a of node.arguments) {
+              if (!collectTwTokens(a, checker, staticStyleTokens))
+                gap(
+                  a,
+                  sub,
+                  'Style values must have explicit semantic lowering; dynamic expressions are not flattened.'
+                );
+            }
           }
 
           // def.rule({ when: (w) => ..., intent: (i) => ... })
           else if (sub === 'rule' && node.arguments[0]) {
+            if (node.arguments.length !== 1)
+              gap(node, sub, 'Unexpected rule arguments cannot be discarded.');
             const obj = unwrapExpr(node.arguments[0]);
             if (ts.isObjectLiteralExpression(obj)) {
               const whenExpr = extractObjectProperty(obj, 'when');
               const intentExpr = extractObjectProperty(obj, 'intent');
               const styleTokens: string[] = [];
-              if (intentExpr) collectTwTokens(intentExpr, checker, styleTokens);
+              if (!intentExpr || !collectRuleStyleTokens(intentExpr, checker, styleTokens)) {
+                gap(
+                  intentExpr ?? obj,
+                  sub,
+                  'The rule intent must lower every operation and effect.'
+                );
+              }
+              for (const field of obj.properties) {
+                if (
+                  !ts.isPropertyAssignment(field) ||
+                  (!ts.isIdentifier(field.name) && !ts.isStringLiteral(field.name)) ||
+                  !['when', 'intent'].includes(field.name.text)
+                )
+                  gap(field, sub, 'Rule configuration has no semantic lowering.');
+              }
               let condition: RuleExpr = { kind: 'true' };
               let dynamic = false;
               if (whenExpr) {
@@ -1390,8 +1149,11 @@ function analyzeSetup(
                 styleTokens,
                 ...(dynamic ? { dynamic: true } : {}),
               });
-            }
+            } else gap(obj, sub, 'Rule declaration must be statically available.');
+          } else {
+            gap(node, sub, 'This Proto operation has no semantic lowering.');
           }
+          return;
         }
 
         // 2. Hook calls (`asTrigger()`, `asFocusable()`, `asButton()`, ...)
@@ -1426,13 +1188,16 @@ function analyzeSetup(
               if (hookArg && ts.isObjectLiteralExpression(hookArg)) {
                 const nestedSetup = extractSetupFunction(hookArg, checker);
                 if (nestedSetup) walkFunction(nestedSetup);
-              }
+                else gap(node, 'hook-composition', 'Authored hook setup could not be resolved.');
+              } else
+                gap(node, 'hook-composition', 'Hook calls require a resolved authored definition.');
             }
           } else if (
             defName &&
             node.arguments.some(
               (a) =>
-                ts.isIdentifier(unwrapExpr(a)) && (unwrapExpr(a) as ts.Identifier).text === defName
+                ts.isIdentifier(unwrapExpr(a)) &&
+                defAliases.has(checker.getSymbolAtLocation(unwrapExpr(a))!)
             )
           ) {
             // Follow local helper calls passing `def` (e.g. `setupShadcnStyleSelection(def, ...)`).
@@ -1441,17 +1206,32 @@ function analyzeSetup(
               const defArgIdx = node.arguments.findIndex(
                 (a) =>
                   ts.isIdentifier(unwrapExpr(a)) &&
-                  (unwrapExpr(a) as ts.Identifier).text === defName
+                  defAliases.has(checker.getSymbolAtLocation(unwrapExpr(a))!)
               );
               const targetParam = helperFn.parameters[defArgIdx];
               const targetParamName =
                 targetParam && ts.isIdentifier(targetParam.name)
                   ? targetParam.name.text
                   : undefined;
-              if (targetParamName) walkFunction(helperFn, targetParamName);
-            }
+              if (
+                targetParamName &&
+                node.arguments.length === 1 &&
+                helperFn.parameters.length === 1
+              )
+                walkFunction(helperFn, targetParamName);
+              else
+                gap(
+                  node,
+                  'setup-composition',
+                  'Helper arguments require explicit parameter substitution before expansion.'
+                );
+            } else
+              gap(node, 'setup-composition', 'Setup helper implementation could not be resolved.');
+          } else if (extractScalarLiteral(node, checker) === undefined) {
+            gap(node, resolved.name, 'Setup call has no lowering and cannot be omitted.');
           }
-        }
+        } else gap(node, 'call', 'Setup call binding could not be resolved.');
+        return;
       }
 
       ts.forEachChild(node, visit);
@@ -1468,36 +1248,42 @@ function analyzeSetup(
   // Lower rules & simple event actions into real executable SSA functions!
   const functions: SsaFunction[] = [];
   for (const rule of rules) {
-    if (!rule.dynamic) {
+    const needsHostMeta = (condition: RuleExpr): boolean =>
+      condition.kind === 'cmp'
+        ? condition.source === 'meta'
+        : condition.kind === 'not'
+          ? needsHostMeta(condition.expr)
+          : condition.kind === 'all' || condition.kind === 'any'
+            ? condition.exprs.some(needsHostMeta)
+            : false;
+    if (needsHostMeta(rule.condition))
+      gap(
+        originCall,
+        'rule.meta',
+        'Host meta must be an explicit kernel input; it cannot be replaced with false.'
+      );
+    if (!rule.dynamic && !needsHostMeta(rule.condition)) {
       functions.push(lowerRuleToSsa(protoSym, rule, props, states, stringTable));
     }
   }
-  const compiledRules = rules.filter((r) => !r.dynamic);
+  const compiledRules = rules.filter((r) =>
+    functions.some((f) => f.name === `${protoSym}_rule_${r.id}`)
+  );
   if (compiledRules.length > 0) {
     functions.push(lowerCombinedRuleMask(protoSym, compiledRules));
   }
   functions.push(...lowerEventActionsToSsa(protoSym, events, states, stringTable));
 
   const render = renderBox.current;
-  // Determine compilation tier honestly from actual reached capabilities!
-  const hasProtocolFeatures =
-    hooks.length > 0 ||
-    exposes.length > 0 ||
-    contexts.length > 0 ||
-    lifecycle.size > 0 ||
-    rules.length > 0 ||
-    render.kind === 'dynamic';
-
-  let tier: CompilationTier = 'protocol';
-  if (!hasProtocolFeatures && states.length === 0 && events.length === 0) {
-    tier = 'static';
-  } else if (
-    !hasProtocolFeatures &&
-    (render.kind === 'reactive-tree' || render.kind === 'static-tree') &&
-    events.every((e) => e.scope === 'root' && e.simpleAction !== undefined)
-  ) {
-    tier = 'reactive';
-  }
+  const tier: CompilationTier =
+    props.length ||
+    states.length ||
+    events.length ||
+    lifecycle.size ||
+    propWatches.length ||
+    rules.length
+      ? 'reactive'
+      : 'static';
 
   const partial = {
     name,
@@ -1517,9 +1303,12 @@ function analyzeSetup(
     staticStyleTokens,
     rules,
     lifecycle: [...lifecycle],
+    lifecycleHandlers,
+    propWatches,
     render,
     functions,
     stringTable,
+    unlowered,
   };
 
   return {

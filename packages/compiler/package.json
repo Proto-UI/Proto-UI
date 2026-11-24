@@ -23,7 +23,6 @@
     }
   },
   "dependencies": {
-    "@proto.ui/adapter-react": "workspace:*",
     "@proto.ui/core": "workspace:*",
     "typescript": "^5.0.0"
   },
@@ -35,5 +34,8 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
-  "description": "Proto UI v2 compiler (0.4 scope): TypeScript TypeChecker frontend, Proto SSA IR, LLVM IR pipeline, and thin React codegen over shared runtime."
+  "description": "Proto UI compiler: TypeScript semantic frontend, typed HIR and SSA, native React and GPUI AST targets, and LLVM IRBuilder.",
+  "scripts": {
+    "check:types": "tsc -p tsconfig.check.json --noEmit"
+  }
 }

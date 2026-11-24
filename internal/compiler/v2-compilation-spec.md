@@ -1,330 +1,270 @@
-# Proto UI v2 编译器架构与编译方案规范（0.4 Scope）
+# Proto UI v2 编译方案：语义 HIR、目标降级与结构化代码生成
 
-> **状态**：Draft（`0.4 scope`，跟踪 Issue [#1809](https://github.com/Proto-UI/Proto-UI/issues/1809)）  
-> **关联权威实体**：`D-COMPILER-ARCH-0001`、`C-COMPILER-PIPELINE-0001`、`T-COMPILER-PIPELINE-0001`  
-> **关联工程标准**：[`atomic-lowering-completion.md`](./atomic-lowering-completion.md)  
-> **包边界**：`packages/compiler`（`private: true`，`protoUi.release.scan: false`）；不替代或晋升任何 `0.3` 稳定发布承诺。
+> 状态：Draft，`0.4 scope`，跟踪 [#1809](https://github.com/Proto-UI/Proto-UI/issues/1809)。权威实体：[D-COMPILER-ARCH-0001](../../spec/decisions/D-COMPILER-ARCH-0001.yaml)、[C-COMPILER-PIPELINE-0001](../../spec/contracts/C-COMPILER-PIPELINE-0001.yaml)、[T-COMPILER-PIPELINE-0001](../../spec/tests/T-COMPILER-PIPELINE-0001.yaml)。工程标准：[`atomic-lowering-completion.md`](./atomic-lowering-completion.md)。2026-11-25 的当前用户指令要求真正的编译管线，禁止字符串源码模板，禁止以原型运行时包装器充当编译产物。本修订替换原三层包装方案，不改变既有原型定义或自动缩减目标与消费者承诺。
 
----
+## 1. 交付目标与历史边界
 
-## 1. 背景、问题诊断与架构红线
+编译器必须从 Proto 定义及 authored 行为中建立可分析的语义表示，完成目标准入和语义降级，并生成 React、GPUI 等目标原生程序。最终组件不得重新导入原 `.proto.ts`，不得委托 `@proto.ui/runtime`、`@proto.ui/adapter-*` 或等价的原型执行器完成尚未编译的行为。达到定义要求的宿主原语可以通过普通目标库导入；它们的作用域、调用和清理必须来自编译期降级，不能承载一套通用 Proto 协议执行循环。
 
-### 1.1 旧版 v1 编译器失败根因复盘（#1809）
+**当前官方Base覆盖结果为React和GPUI各0/212原型原生产出。** 本轮完整扫描了184个输入文件，识别212个原型和214个authored Hook；所有212个原型均有明确未支持结果，没有source error，也没有消费者执行声明。已通过的原生功能和目标构建测试证明相应测试输入的编译行为，不能替代这212个原型的降级工作。完整Base及消费者迁移保持required missing，不改变定义来迎合当前实现。
 
-在清理重做前的 `origin/main`（`8fac6eeb0`）基线上，`packages/compiler` 累计膨胀至 **663 个文件 / 180,744 行代码**（其中 `src/` 214 文件 / 90,572 行，`test/` 447 文件 / 90,172 行），却存在系统性架构失效：
+### 1.1 原方案的教训
 
-1. **字符串模板拷贝运行时（`String.raw` 伪编译）**：将数千行手写 DOM 模块、状态机与胶水代码以 `String.raw` 硬编码在 emitter 内部，每编译一个组件便整块复制。结果是一个 4 行空组件生成 1,060 行（53.3 KB）React 或 9,855 行（728 KB）GPUI；178 行 `base/button` 生成 5,459 行（251.5 KB / 10 文件）React；且 4 个 Web 后端重复维护 4 份高度冗余的模板。
-2. **重复造轮子的前端**：在已依赖 `typescript` 的前提下，仍手写 ~30,000 行自制语法/类型/表达式分析器与 2,800 行平行 IR 校验器，导致真实的 `dialog`、`popover`、`select`、`hover-card`、`tooltip`、`slider` 等官方 Base 原型编译直接失败。
-3. **虚假的中间表示与运行时解释器**：IR 未采用规范 SSA 形式，未接入成熟编译器优化/后端基础设施；GPUI 后端甚至内嵌迷你 JS 解释器，违背「编译期消除、目标原生表示」原则。
-4. **失控的交付复杂度**：为在浏览器文档页运行旧版编译器，强行引入 QuickJS-in-WASM 沙箱、自研文件链接器与多套历史迁移脚本，同时堆积未真正可用的 Flutter / Qt / SSR 幽灵文件。
+旧版源码模板复制了大量通用机制，后端间重复实现语义，导致维护与产物成本扩大。`73ff2847` 的重建删除了这些实现，并采用真实 TypeScript 工具链及标量 LLVM 管线，但复杂原型仍通过 `protocol` tier 导入原定义并交给现有 adapter/runtime。它解决了部分代码重复问题，未完成这些原型的原生编译。
 
-### 1.2 v2 架构不可违背的六条红线
+保留原交付说明的历史统计及其证明边界：
 
-1. **零 `String.raw` 嵌入式运行时**：`packages/compiler/src/**` 中禁止将运行时模块以大段源码模板复制到生成产物。共享运行时逻辑归位到可 Tree-Shake 的 `@proto.ui/compiler/runtime`（复用规范的 `@proto.ui/adapter-react` 与 `@proto.ui/runtime`）。
-2. **真实 TypeScript 编译器前端**：基于工作区真实 `tsconfig.json` 的缓存 `ts.Program` + `ts.TypeChecker` 完成符号解析、别名追踪与类型读取；禁止正则匹配或文件名启发式猜测。
-3. **正规类型化 Proto SSA IR**：具备显式基本块、单赋值 SSA 寄存器、严格结构校验器（`verifyModuleIR`）以及目标无关优化 Pass。
-4. **真实 LLVM IR 与工具链集成**：直接发射合法的 Opaque-Pointer LLVM IR（`.ll`），并接入真实 LLVM 22 工具链（`opt`、`llvm-as`、`llc`、`wasm-ld`）执行验证、`O2` 优化、bitcode/原生汇编/目标文件生成以及可执行 `wasm32` 内核编译。
-5. **能力驱动的三层渐进降级（0 组件名分发）**：输出层级完全由编译期计算出的 64-bit 能力闭包与模板/动作形态决定，严禁按组件名、导出名或文件路径特判业务逻辑。
-6. **诚实可证的证据边界**：所有性能、体积、LLVM 验证与真机执行数据均由自动化测试直接产生；未安装 LLVM 或未实现的后端必须显式降级/拒绝，严禁伪造通过。
+| 当时报告 | 实际能证明的范围 |
+| --- | --- |
+| 净删除约 175,348 行；源码从 214 文件缩为 23 文件 | 代码组织和规模变化，不能证明语义等价或消费者可用 |
+| 184/184 Base 文件接受，212 原型、214 authored hooks | 当时抽取和包装生成路径的接受情况；包含原型运行时包装，不能算全量原生降级 |
+| 5 个编译器测试文件、14 个用例通过 | 当时有限示例与工具链检查，不能替代被删除的语义回归和真实消费者验收 |
+| Base Button 包装器约 23 行、1,044 字节 | 单个入口文件，未计原定义、adapter、runtime 与传递依赖 |
+| React 计数器生成 `.wasm` | 独立内核生成；当时 React 组件并未调用该内核 |
 
----
+这些记录不延续为本修订的通过证据。原有测试和跨目标欠项仍须逐项迁移；将失效映射登记为 `missing` 是证据债务，不能抵消债务。
 
-## 2. 总体编译管线架构
+IR 的价值由所表达的语义、不变量和消费方式决定。SSA 用于适合它的标量与控制流层；没有采用 SSA 本身不能证明一种 IR 无效。LLVM 验证通过也不能证明源程序语义被正确保存。
+
+## 2. 管线和责任边界
 
 ```mermaid
-flowchart LR
-  SRC["*.proto.ts\n(TypeScript Source)"] --> FE["Stage 1: TS Frontend\nTsProgramSession + ts.TypeChecker"]
-  FE --> IR["Stage 2: Proto SSA IR\nModuleIR / PrototypeIR / SsaFunction"]
-  IR --> VER1["Stage 3: Structural SSA Verifier\nverifyModuleIR()"]
-  VER1 --> OPT["Stage 4: Target-Independent Passes\nConstFold -> AlgSimp -> DeadBlock -> DCE -> CapClosure"]
-  OPT --> VER2["Post-Opt SSA Verify"]
-  VER2 --> LLVM["Stage 5A: LLVM IR Emitter\nOpaque-Pointer .ll"]
-  LLVM --> TOOL["LLVM 22 Toolchain\nopt / llvm-as / llc / wasm-ld"]
-  TOOL --> BIN[".ll (O2) / .bc / .s / .o / .wasm"]
-  VER2 --> REACT["Stage 5B: 3-Tier Thin React Emitter\nstatic | reactive | protocol"]
-  REACT --> OUT["Thin .tsx Component\n(0 runtime | useState | @proto.ui/compiler/runtime)"]
+flowchart TD
+  TS["TypeScript binding and types"] --> HIR["Proto semantic HIR"]
+  HIR --> CHECK["Target capability admission"]
+  CHECK --> REACT["React AST lowering"]
+  REACT --> PRINT["TypeScript Printer"]
+  CHECK --> RUST["Rust AST lowering"]
+  RUST --> GPUI["GPUI native component"]
+  CHECK --> KERNEL["Typed kernel lowering"]
+  KERNEL --> LLVM["LLVM IRBuilder"]
+  LLVM --> NATIVE["LLVM verify and native output"]
+  CHECK --> DIAG["Unsupported diagnostics"]
 ```
 
-### 2.1 目录与职责边界
-
-| 目录 / 模块 | 职责 | 禁止越界项 |
+| 层 | 责任 | 不得替代的工作 |
 | --- | --- | --- |
-| `packages/compiler/src/frontend/` | `TsProgramSession` 缓存管理、符号/别名解析、Prototype/Hook/Rule/Template/Helper 抽取与初始 SSA 构造 | 禁止内嵌目标框架代码或手写平行类型系统 |
-| `packages/compiler/src/ir/` | `PROTO_IR_VERSION = 2` 类型定义、64-bit 能力位图、`SsaBuilder`、结构校验器、SSA 优化 Pass、`.pir` 文本打印器 | 禁止耦合 React/DOM/Web/Rust 特定细节 |
-| `packages/compiler/src/llvm/` | Proto SSA IR -> Opaque-Pointer LLVM IR (`.ll`) 发射器、LLVM 工具链探测与子进程封装（`opt`/`llvm-as`/`llc`/`wasm-ld`） | 禁止静默吞掉 `opt -passes=verify` 错误 |
-| `packages/compiler/src/targets/` | 面向具体目标的薄型代码生成器（当前为 3-Tier React emitter；后续扩展 Vue 3 / WC / Native） | 禁止 `String.raw` 拷贝运行时；禁止按组件名分支 |
-| `packages/compiler/src/runtime/` | 导出 `@proto.ui/compiler/runtime`：`createCompiledReactComponent` 薄桥接层、`PrototypeProps<T>` 类型辅助、`instantiateWasmKernel` 8-byte Slot ABI 宿主封装 | 禁止重实现 Proto UI Kernel 或重复维护 DOM 模块 |
-| `packages/compiler/src/browser/` | 面向文档站的最小协议类型兼容边界（已移除 QuickJS-in-WASM） | 禁止引入浏览器内嵌 JS VM |
-| `packages/compiler/src/compiler.ts`, `cli.ts` | 编译编排器（`createCompiler`/`compileFile`/`compilePrototype`/`compileProject`）与 CLI（`info`/`check`/`ir`/`llvm`/`compile`） | 禁止隐式覆盖已存在输出或隐藏诊断 |
+| TS 前端 | 按真实 tsconfig 建立 Program、绑定、类型、导入和别名事实 | 不推定 TS 类型正确就满足 Proto 阶段、能力和生命周期契约 |
+| Proto 语义 HIR | 表示执行顺序、表达式、控制流、状态、事件、生命周期和能力所有权 | 不把语法扫描得到的数量或位图当作完整行为 |
+| 目标准入 | 检查目标是否能完整承接所需语义，为未支持项定位并报告 | 不跳过未知语句，不将未降级行为移交给原型 runtime |
+| React 降级 | 将已准入语义构造成 TypeScript AST；使用目标原生状态、事件和生命周期 | 不拼接组件源码，不解析人工拼接源码来伪装 AST 生成 |
+| GPUI 降级 | 构造 Rust AST、原生组件结构与 GPUI Render/事件/生命周期接线 | 不用 LLVM 内核或原生壳代替 authored UI 行为 |
+| 标量内核降级 | 将可证明的纯计算及显式状态转移降低为类型化函数和基本块 | 不把元数据函数或部分规则当作完整组件 |
+| LLVM 后端 | 用 LLVM C++ IRBuilder 构造 Module，验证后由标准 printer 输出 | 不拼接 `.ll`，不调用 LLVM parser 接收自造源码模板 |
+| 宿主集成 | 连接原生产物、输入、状态、回调、布局、辅助功能与清理 | 不以目标文件生成替代消费者执行验收 |
 
----
+React-only 编译无需为未请求的附属内核生成强制构建 LLVM。显式请求 LLVM 验证或产物时，工具链缺失必须产生失败诊断，不能返回假定已验证的结果。
 
-## 3. Stage 1：TypeScript 前端与语义抽取规范
+## 3. TypeScript 前端
 
-### 3.1 `TsProgramSession` 会话与缓存模型
+使用工作区 tsconfig 和缓存 `ts.Program` / `ts.TypeChecker` 处理模块、导出、别名、符号身份及类型。语言级事实只从同一工具链读取；Proto 专用的阶段、效果、能力和所有权分析在此基础上进行。
 
-- 读取工作区根目录（或显式传入）的 `tsconfig.json`，合并安全默认项（`noEmit: true`、`skipLibCheck: true`）。
-- 同一编译器实例内部复用 `SourceFile` 缓存与增量 `ts.Program`：
-  - 批量编译（`compileProject(files)`）通过 `session.ensureFiles(files)` 一次性构建 `ts.Program`，所有文件共享同一个 `ts.TypeChecker`。
-  - 内存/虚拟源码编译（`compilePrototype(source, { fileName, files })`）通过 `createVirtualProgram` 叠加虚拟文件映射并复用基础库/工作区类型，编译完成后清理虚拟映射以避免污染会话。
-  - 文件变更时支持 `invalidateFile(path)` 精确失效。
+入口识别必须基于实际符号及声明来源。名称相同的用户函数、阴影变量、源码路径或组件导出名都不能改变语言规则。组合 Hook 和 helper 的分析依赖解析后的调用及实参绑定，不能通过 `as[A-Z]*` 命名规则证明语义。
 
-### 3.2 符号与组合解析规则
+每个分析单元保留源位置和诊断。已识别的语句必须产生 HIR 或明确证明可消除；无法解释的语句、回调、属性选项、动态访问或外部调用必须报告。不得仅因它们未出现在能力位图中而消失。
 
-1. **原型与 Hook 入口识别**：沿 `checker.getExportsOfModule(moduleSym)` 与 `checker.getAliasedSymbol` 追踪导出的 `definePrototype(...)`、`defineAsHook(...)`、`defineHook(...)` 调用，支持 `export default`、具名导出、变量中转与跨模块 re-export。
-2. **字面量与常量求值**：优先提取 AST 标量字面量，并回退到 `checker.getTypeAtLocation(expr)` 的字符串/数字/布尔字面量类型，从而正确解析 `const KEY = 'disabled'` 等类型级常量。
-3. **组合闭包追踪（Authored Hooks & Local Helpers）**：
-   - 遇到内置 Hook（如 `asTrigger`、`asFocusable`、`asAccessible`、`asOverlay`、`asPositioning`、`asAnatomy` 等 21 个标准原子 Hook），记录为 `kind: 'builtin'`。
-   - 遇到 `as[A-Z]*` 形态的 authored hook（如 `asButton`、`asDialogRoot`），在 `ts.Program` 中定位其 `defineAsHook` / `defineHook` 定义并递归扫描其 `setup` 体（带 `visitedFns` 环路保护），将间接声明的 props、states、hooks、rules、context、lifecycle 纳入原型闭包。
-   - 遇到将 `def` 作为参数传入的本地辅助函数（如 `setupShadcnStyleSelection(def, ...)`），递归追踪形参对应的 `def.*` 操作。
-4. **运行时回调能力扫描（`run.*`）**：对 `def.lifecycle.*`、`def.event.on*`、`def.props.watch*`、`def.context.subscribe*` 传入的回调体扫描首个 `run` 形参的 `run.context.*` 访问（例如 `run.context.tryReadAncestor(KEY)`），防止仅在运行时回调使用的能力被漏判。
-5. **纯标量 Helper 降级**：模块顶层声明的纯标量 TypeScript 函数（参数与返回值均为 `number` / `boolean`，函数体由算术、比较、逻辑、三元条件、`if/return`、局部变量绑定构成）会被直接降级为导出的 SSA 函数 `helper_<name>`，随原型一起进入 LLVM 优化与 WASM/原生编译。
+对类型断言、`any` 或不完整类型信息不能作额外语义保证。不能证明能够安全降低时，返回目标不支持；不得通过修改合法原型来迎合当前编译子集。输入不合法与合法但未支持应分别诊断。
 
-### 3.3 64-Bit 能力位图规范（`CAPABILITY_BITS`）
+## 4. Proto 语义 HIR
 
-编译期为每个原型计算确定性的 `bigint` 能力位图 `capabilityMask` 及规范名称列表 `capabilities`，既用于分层判定，也直接以 `define i64 @<protoSym>_capabilities()` 导出到 LLVM IR 与 `<Name>Meta`：
+HIR 是语义层，不要求所有 UI 结构先变成低级 SSA。实现至少须为下列内容提供显式表示，或在进入后端前给出对应的未支持诊断。
 
-| Bit | 名称 | 触发来源 |
+| 语义               | 必须保存的事实                                                      |
+| ------------------ | ------------------------------------------------------------------- |
+| 符号、作用域与闭包 | 绑定身份、捕获、可变性、可见性、求值次数；不得只按文本变量名联接    |
+| 表达式和控制流     | 操作数类型和顺序、短路、条件分支两侧、返回、循环及异常边界          |
+| Props              | 声明、类型、默认值、empty/null/undefined 处理、受控输入、更新和订阅 |
+| State              | 实例所有者、初值、读取、更新、更新后读取、通知与批处理契约          |
+| 事件               | 事件类型、作用域、处理器顺序、payload、取消与传播、注册和卸载       |
+| 生命周期           | 注册阶段、执行顺序、重入限制、挂载/更新/卸载和清理关联              |
+| 能力与上下文       | 能力身份、owner、提供/读取/订阅、作用域、引用寿命和释放             |
+| Render、规则与样式 | 元素、slot、子项、属性、动态依赖、规则优先级、命中语义              |
+| 宿主操作           | 输入/焦点/可访问性/几何等目标原语的明确调用与效果                   |
+
+能力集合与位图是 HIR 的摘要。摘要无法取代动作体、表达式或控制流；“未收集到某能力”也不能证明原程序没有该能力。
+
+### 4.1 当前表示与覆盖边界
+
+`ValueExprIR` 表示 literal、state/prop/local 读取、一元/二元运算和条件表达式；prop 读取区分当前值与上一次已解析值。`ActionStatementIR` 表示 state-set、局部绑定、if 的两个分支及 return；事件的 `body` 保存动作序列。`LifecycleDeclIR` 和 `PropWatchDeclIR` 保存生命周期回调及 resolved props 订阅的动作体与键集合。`LoweringGapIR` 与原型的 `unlowered` 保存操作、原因及源位置。
+
+当前 React 执行证据已覆盖 created 首次渲染前执行、mounted/unmounted 重挂载保留状态、resolved props watch 的 hydration 跳过及 FIFO/current/previous/批量变化规则、watch 状态同步写入和 updated 的顺序。该证据限于相应回归测试；完整闭包/所有权、上下文、before-dispose、raw props 订阅及其他未支持行为仍须补充表示及降级。未具备实现时按本规范拒绝，不能仅在能力摘要出现名字就视为已实现。
+
+### 4.2 不完整分析的处理
+
+保留分析结果与未支持原因，方便扩大覆盖。请求某一目标的编译只有在全部相关行为具有实现时才能成功。分析出 props/state 或成功生成元数据不构成原生编译成功。
+
+跨组件引用应解析到普通已编译目标模块。尚不能编译被引用定义时，报告依赖链；不得通过导入原定义绕开。
+
+## 5. 目标准入与 React AST 生成
+
+目标准入按行为及宿主能力判断，禁止组件名、导出名或路径特判。`static` / `reactive` 等可作为已编译产物的实现分类；`protocol` 不再是一个允许执行原定义的回退 tier。
+
+React 生成器使用 `ts.factory` 构造完整语法节点，使用 `ts.Printer` 输出源码。允许构造标识符、普通字面量、类型、导入、函数、语句及表达式节点。禁止通过字符串插值、连接、`String.raw`、原始源码片段或“先拼源码再 parse”生成程序。诊断消息、输出文件名和标准 printer 产生的文本不属于源码模板。
+
+生成器必须保存已准入语义，包括 props 默认/empty 规则、状态的实例隔离、一个事件内读写顺序、同事件多处理器的顺序、规则的命中和样式组合、生命周期清理。选择 `useState`、`useRef` 或原生 effect 是降级决策，不能因此修改定义规定的观察行为。
+
+未实现的事件、Hook、Context、Expose、生命周期或其他行为必须产生明确的目标诊断。不得生成貌似可用但省略行为的组件。目标原生组件不得依赖原 `.proto.ts`、`createReactAdapter`、`@proto.ui/runtime` 或等价执行入口。
+
+AST printer 成功之后还要验证生成模块可被目标工具链检查、构建和执行；源码可打印不等于组件正确。
+
+## 6. 类型化内核与优化
+
+适合独立降低的规则谓词、纯计算和明确状态转移可进入类型化内核表示。`i1`、`i32`、`f64`、指针等低层类型只用于该层；不得将全部 JS/Proto 值无条件转成一个动态 `Value` 容器并在运行时解释原程序。
+
+控制流须保存所有可达分支。短路表达式须保持效果和求值次数；只有证明分支无可观察差异时才可变为无条件求值的 `select`。
+
+结构校验覆盖值唯一性、类型、支配关系、基本块终结、PHI 前驱、函数调用签名、返回值、指针和槽访问。优化前后均验证。副作用、可能抛错/陷阱的操作和生命周期清理不得因结果未使用而随意消除。
+
+浮点遵守 JS `number` 的适用语义：`NaN`、Infinity、±0、舍入、比较和一元负号必须保真。禁止未经条件证明的 `f64 x + 0 -> x`，不得用 `0 - x` 代替所有输入上的 `-x`。整数计算明确位宽和溢出规则；编译期折叠与目标执行须一致。优化测试比较源语义、优化前后内核及实际目标结果。
+
+元数据导出、规则子集和状态转移内核分别记录覆盖范围。生成内核并未自动实现对应 UI 的输入、生命周期、焦点、布局或无障碍契约。
+
+## 7. LLVM IRBuilder 后端与 ABI
+
+### 7.1 原生 builder
+
+后端通过 `packages/compiler/native/llvm-builder.cpp` 的原生驱动构造 LLVM Module。TypeScript 侧传递结构化请求：协议版本、类型化模块和目标 triple；该请求是编译期传输格式，最终组件不携带它运行。
+
+驱动使用 LLVM C++ API 中的 `LLVMContext`、`Module`、`IRBuilder` 与 verifier，随后通过 `Module::print` 或 LLVM 标准产物接口输出。禁止将手写 `.ll` 交给 parser 再称作结构化生成。LLVM optimizer、assembler、代码生成器及 linker 承接各自标准工作。
+
+对 NaN、Infinity 和负零使用显式常量编码，避免 JSON 数值序列化丢失信息。能力位图等超出 JSON number 精度的字段使用明确编码。
+
+构建 driver 的缓存键须覆盖源码、LLVM 工具链版本和相关编译/链接参数。没有 LLVM SDK、编译器不可用、driver 构建失败、请求非法或验证失败分别返回结构化诊断。不得以空模块、占位函数或跳过验证代替所请求产物。
+
+### 7.2 内存与调用 ABI
+
+标量 props/state 使用版本化的 8 字节槽布局。ABI 必须公布版本、槽宽和各区域容量，声明各类型表示、字节序、目标指针宽度、对齐和 owner。字符串/枚举 ID 的有效域须明确；不能用碰巧相同的整数假定两个独立表具有相同身份。
+
+WASM 宿主使用实例实际导出的内存，按导出的堆边界和容量分配非重叠区域，按需 grow，并在每次访问验证槽号及界限。禁止固定 `1024` / `2048` 作为适用于所有产物的布局保证；禁止在模块没有导出内存时创建与模块无关的临时内存继续运行。
+
+多实例和多 owner 的 props/state 必须隔离。重新获取 grow 后的 buffer/view；明确内存与回调生命周期。任何未实现的字符串、聚合、闭包、外部引用或宿主 callback ABI 都是未支持项，不能靠未解析导入或默认常量掩盖。
+
+LLVM verifier 证明 Module 满足 LLVM 结构约束；源语义保真、宿主集成和 ABI 安全另行执行验证。
+
+## 8. 本轮 GPUI 原生后端
+
+GPUI 与 React、LLVM 基础设施在本轮并行实施。它有独立的组件降级和真实消费验收；WASM、目标文件或元数据内核通过不能标记 GPUI 完成。
+
+### 8.1 Rust AST 管线
+
+GPUI 从同一 Proto 语义 HIR 进入目标能力准入，再构造 Rust 的 item、类型、表达式、语句、模式和 impl 节点。原生 Rust builder 使用 `syn` 2 的节点类型与 `prettyplease` printer；禁止通过 `quote!` / `parse_quote!` 整段模板、源码字符串连接或“先拼 Rust 再 parse”构造产物。
+
+当前实现入口为 `packages/compiler/src/targets/gpui.ts`，结构化 driver 位于 `packages/compiler/native/rust-builder/`。它们传输编译期数据，输出普通 Rust 组件；生成程序不携带 HIR 解释器、JS 值虚拟机或 Proto 原型执行入口。
+
+### 8.2 原生组件及宿主边界
+
+| Proto 语义 | GPUI 降级责任 | 验收点 |
 | --- | --- | --- |
-| `0` | `props` | `def.props.define` 声明至少一个 prop |
-| `1` | `state` | `def.state.*` 声明至少一个 state |
-| `2` | `expose` | `def.expose.*` 声明至少一个对外暴露项 |
-| `3` | `event` | `def.event.on` / `def.event.onGlobal` |
-| `4` | `lifecycle` | `def.lifecycle.{onCreated,onMounted,onUpdated,onUnmounted,onBeforeDispose}` |
-| `5` | `context` | `def.context.*` 或回调内 `run.context.*` |
-| `6` | `style` | `def.feedback.style.use(tw(...))` 或含静态样式 token 的 `def.rule` |
-| `7` | `rule` | `def.rule(...)` |
-| `8` | `render` | 所有原型均包含渲染输出（`default-slot` / `static-tree` / `reactive-tree` / `dynamic`） |
-| `9..25` | `trigger`, `focus`, `accessible`, `controlLabel`, `anatomy`, `collection`, `overlay`, `boundary`, `hitParticipation`, `positioning`, `scroll`, `textControl`, `imageView`, `tableStructure`, `nativeLink`, `axisInput`, `presence` | 对应内置原子 Hook 调用 |
-| `26` | `shader` | shader 表现能力保留位 |
-| `27` | `authoredHooks` | 调用任何 `kind: 'authored'` 组合 Hook |
+| Props 与 State | 生成具名、带类型的实例字段，保存初始化、默认/empty、更新、状态约束与所有权 | 多实例隔离，props更新，状态读写与渲染一致 |
+| Render 与子树 | 生成 GPUI `Render` 实现及目标原生元素树；子组件使用普通已编译模块 | 实际GPUI依赖下可构建，显示结构与定义一致 |
+| 表达式、分支与事件动作 | 将动作体降为 Rust AST，保存局部绑定、if/else、return、短路和顺序；对接原生事件回调及刷新 | 一个事件内更新后读取正确，事件种类/顺序/取消语义正确 |
+| Rule 与样式 | 按明确定义的目标样式映射降低谓词和效果 | 规则命中和优先级一致，未知样式不得静默无效 |
+| 生命周期与资源 | 将已支持注册、订阅、更新和清理连接到GPUI宿主生命周期 | 组件销毁和重挂载不泄漏输入监听、订阅、焦点或其他资源 |
+| 焦点、辅助功能与几何 | 由目标宿主原语实现物理行为，HIR保留语义意图与owner | 真实输入及辅助功能契约通过，而非只存在方法名 |
 
----
+目标实现应使用实际锁定的 GPUI 依赖源码和 API。Cargo 依赖身份、版本/commit pin、feature与去重须可核对，不能为让编译通过悄悄切换现有消费者的GPUI版本。
 
-## 4. Stage 2 & 3：Proto SSA IR 规格与结构校验器
+`Context`、`Expose`、生命周期、slot、动态render或其他尚不能完整保真的能力必须报告目标诊断。不能先生成一个GPUI壳，再由用户或消费者手工重写剩余行为来满足“编译成功”。对同一能力的目标拒绝保留未来实现义务。
 
-### 4.1 顶层 IR 结构（`PROTO_IR_VERSION = 2`）
+### 8.3 三级证据
 
-```text
-ModuleIR
- ├─ irVersion: 2
- ├─ sourceFile: string
- ├─ prototypes: PrototypeIR[]
- │   ├─ identity: name, exportName, isDefaultExport, span
- │   ├─ tier: 'static' | 'reactive' | 'protocol'
- │   ├─ capabilities: CapabilityName[], capabilityMask: bigint
- │   ├─ declarations: props[], states[], exposes[], events[], hooks[], contexts[], lifecycle[]
- │   ├─ presentation: staticStyleTokens[], rules[], render (RenderIR)
- │   ├─ stringTable: string[] (驻留字符串/枚举 ID 表)
- │   └─ functions: SsaFunction[] (规则谓词、规则位图求值器、事件状态转移内核)
- ├─ authoredHooks: AuthoredHookSummary[]
- └─ functions: SsaFunction[] (模块顶层降级的纯标量 Helper)
-```
+1. **结构化生成**：生成器实际构造Rust AST；产物中没有原始Proto源码、原型runtime、通用动态Value或HIR分派器。
+2. **真实目标构建与行为**：使用项目真实GPUI依赖执行Cargo检查/构建，并执行可覆盖的输入、state、props、rule及生命周期回归。仅通过Rust语法解析不算目标构建。
+3. **消费者验收**：Verdant的GPUI compiler pin、生成接口、集成构建、实际输入、状态、焦点、生命周期和辅助功能路径分别验证。Shenko在本轮读取的工作区是React/Web消费者，未发现GPUI依赖，按React消费者验收；不得虚列为已存在的GPUI消费路径。结构化生成或孤立Cargo成功不能替代对应消费者的回读。
 
-### 4.2 SSA 类型系统与指令集
+本轮消费者依赖快照（用于选择真实验证对象，不是兼容性通过结论）：
 
-SSA 类型与 LLVM 标量/指针类型 **1-to-1 对应**：
-
-| SSA 类型 | 语义                                          | LLVM IR 类型 |
-| -------- | --------------------------------------------- | ------------ |
-| `void`   | 无返回值                                      | `void`       |
-| `i1`     | 1-bit 布尔值                                  | `i1`         |
-| `i32`    | 32-bit 整数 / 驻留字符串或枚举 ID / 规则位图  | `i32`        |
-| `f64`    | IEEE-754 双精度浮点数（JS `number`）          | `double`     |
-| `ptr`    | 不透明指针（`%props` / `%states` 槽数组基址） | `ptr`        |
-
-支持的核心指令（`SsaInst`）与终结指令（`SsaTerminator`）：
-
-- **纯值指令**：
-  - `const <type> <value>`：常量物化。
-  - `load_prop <type> <propsPtr>[slot]`：从只读 props 槽加载标量。
-  - `load_state <type> <statesPtr>[slot]`：从 states 槽加载标量。
-  - `binop <add|sub|mul|div|rem|and|or|xor> <type> <lhs>, <rhs>`：同类型二元算术/逻辑运算。
-  - `cmp <eq|ne|lt|le|gt|ge> <operandType> <lhs>, <rhs> -> i1`：标量比较。
-  - `not <operand> -> i1`：布尔取反。
-  - `select <type> <cond:i1>, <trueVal>, <falseVal>`：无分支条件选择。
-- **调用与副作用指令**：
-  - `store_state <statesPtr>[slot] = <value:type>`：向 states 槽写回更新值。
-  - `call <callee>(<args...>) -> <returnType>`：模块内 SSA 函数调用。
-  - `host_op <emit_event|request_update|set_present|apply_style_rule>(<args...>)`：显式宿主副作用钩子。
-- **基本块终结指令（每块恰好 1 条）**：
-  - `br <targetLabel>`
-  - `condbr <cond:i1>, <trueLabel>, <falseLabel>`
-  - `ret [value]`
-
-### 4.3 结构校验器不变量（`verifySsaFunction` / `verifyModuleIR`）
-
-任何 IR 在进入优化前与优化后都必须满足以下不变量；违背任一条均产生 `PUI_IR0xx` 错误并阻断后端代码生成：
-
-1. `irVersion` 必须严格等于 `PROTO_IR_VERSION`（`2`）。
-2. 函数至少包含 1 个基本块；所有基本块标签在函数内唯一。
-3. 严格 SSA 单赋值：函数参数与所有指令结果 `%id` 不得重复定义。
-4. 终结指令的跳转目标标签必须存在于当前函数的基本块集合中。
-5. 所有操作数引用必须已在当前作用域/参数中定义，且满足静态类型规则：
-   - `condbr.cond`、`select.cond`、`not.operand` 必须为 `i1`；
-   - `binop` 与 `cmp` 左右操作数类型必须与指令声明类型一致；
-   - `select` 两个分支值类型必须与 `select.type` 一致；
-   - `ret` 存在返回值当且仅当函数 `returnType !== 'void'`，且类型精确匹配；
-   - `load_prop` / `load_state` / `store_state` 的基址必须为 `ptr`，且 `slot >= 0`。
-
----
-
-## 5. Stage 4：目标无关 SSA 优化 Pass 规范
-
-`optimizeModuleIR` 对所有原型函数和模块辅助函数执行有界不动点迭代（最多 8 轮，任一轮无变更即提前收敛）：
-
-1. **Constant Folding（常量折叠）**：
-   - 对全常量操作数的 `binop`、`cmp`、`not`、`select` 直接在编译期求值并替换为 `const`。
-   - 对 `condbr` 条件为已知常量的终结指令直接折叠为无条件 `br`。
-2. **Algebraic Simplification（代数化简）**：
-   - `f64` / `i32`：`x + 0 -> x`、`x - 0 -> x`、`x * 1 -> x`、`x / 1 -> x`（注意保持 IEEE-754 边界，不对可能产生 `-0` 或 `NaN` 的危险情形激进消除）；
-   - `i1`：`x && true -> x`、`x && false -> false`、`x || false -> x`、`x || true -> true`、`!!x -> x`。
-3. **Dead Basic Block Pruning（不可达基本块裁剪）**：
-   - 从入口块（`blocks[0]`）执行 BFS，仅保留可达基本块，消除因常量分支折叠产生的死路径。
-4. **Backward Liveness DCE（反向活跃性死代码消除）**：
-   - 将终结指令与副作用指令（`store_state`、`call`、`host_op`）作为根集合，沿 def-use 链反向标记所有活跃 SSA 值，删除全部未被引用的纯指令。
-5. **Capability Closure Pass**：
-   - 依据最终抽取和降级结果重新收敛 `capabilities` 与 `capabilityMask`。
-
-每次优化完成后必须通过 `verifyModuleIR` 二次校验，保证 Pass 本身不会破坏 SSA 结构合法性。
-
----
-
-## 6. Stage 5A：LLVM 22 IR 降级、8-Byte Slot ABI 与原生工具链
-
-### 6.1 LLVM IR 生成规则（`src/llvm/emit.ts`）
-
-发射目标采用 **LLVM 22 原生 Opaque-Pointer（`ptr`）语法**，具备完整头部元信息（`source_filename`、`target datalayout`、`target triple`）：
-
-- **双精度常量编码**：除有限简单十进制外，对浮点字面量使用 LLVM IEEE-754 64-bit 十六进制编码（`0x...`），杜绝十进制文本往返带来的精度漂移或 `-0.0` 丢失。
-- **函数属性标注**：对无副作用的纯函数（规则谓词、规则位图求值器、能力位图函数、纯标量 helper）标注 `nounwind`（及适用时的 `willreturn`），帮助 LLVM `opt -O2` 进行激进内联与常量传播。
-- **标准导出符号约定**：
-  - `@<protoSym>_capabilities() -> i64`：返回原型 64-bit 能力位图常量。
-  - `@<protoSym>_rule_<id>(ptr %props, ptr %states) -> i1`：单条声明式规则的纯谓词求值。
-  - `@<protoSym>_eval_rules(ptr %props, ptr %states) -> i32`：合并前 31 条规则返回命中位图（供宿主一次 FFI/WASM 调用批量计算样式条件）。
-  - `@<protoSym>_on_<event>_<idx>(ptr %states) -> void`：纯事件状态转移内核（如 `count + 1`、`!flag`、`set literal`）。
-  - `@helper_<name>(...)`：顶层纯标量 TS 辅助函数。
-
-### 6.2 Uniform 8-Byte Aligned Slot ABI
-
-为保证 JS/TS 宿主、WebAssembly 线性内存与未来原生 C/Rust FFI 之间共享同一个极简且零对齐陷阱的内存布局，`%props` 与 `%states` 缓冲区采用 **统一 8 字节对齐槽数组（Uniform 8-Byte Slot Array）**：
-
-| Slot 索引 | 字节偏移 | `i1` (bool) 布局 | `i32` (string/enum ID) 布局 | `f64` (number) 布局 |
-| --- | --- | --- | --- | --- |
-| `0` | `+0` | offset `+0` 存 `i8` (`0` / `1`)，`trunc`/`zext` <-> `i1` | offset `+0` 存小端 `i32` | offset `+0` 存 IEEE-754 小端 `f64` |
-| `1` | `+8` | offset `+8` 存 `i8` | offset `+8` 存小端 `i32` | offset `+8` 存小端 `f64` |
-| `k` | `+8 * k` | `getelementptr inbounds i8, ptr %base, i64 (8*k)` | 同左 | 同左 |
-
-WASM 宿主封装（`@proto.ui/compiler/runtime` 中的 `instantiateWasmKernel`）：
-
-- 默认约定线性内存区间：`propsBase = 1024`，`statesBase = 2048`（避开零地址和栈区），支持自定义偏移；
-- 通过 `DataView` 提供类型安全的 `setPropBool/F64/I32`、`setStateBool/F64/I32`、`getStateBool/F64/I32` 与直接导出函数调用。
-
-### 6.3 真实 LLVM 22 工具链流水线（`src/llvm/toolchain.ts`）
-
-| 能力函数 | 底层 LLVM 命令 | 产出物 | 失败语义 |
-| --- | --- | --- | --- |
-| `detectLlvmToolchain()` | `opt --version` + 路径探测 `opt`/`llc`/`llvm-as`/`wasm-ld` | 工具链可用性与精确版本号 | 无 LLVM 时返回 `{ available: false }`，绝不伪造成功 |
-| `verifyLlvmIr(ir)` | `opt -passes=verify -disable-output` | 验证通过/失败 | 语法或类型错误返回 `PUI_LLVM002` + 完整 stderr |
-| `optimizeLlvmIr(ir, level)` | `opt -passes=verify,default<O2> -S` | 优化后的 `.ll` | 失败返回 `PUI_LLVM003` |
-| `assembleLlvmBitcode(ir)` | `llvm-as` | 二进制 LLVM bitcode (`.bc`) | 失败返回 `PUI_LLVM004` |
-| `compileLlvmToAssembly(ir, triple)` | `llc -mtriple=<triple> -filetype=asm` | 目标汇编 (`.s`) | 失败返回 `PUI_LLVM005` |
-| `compileLlvmToObject(ir, triple)` | `llc -mtriple=<triple> -filetype=obj` | 原生目标文件 (`.o`) | 失败返回 `PUI_LLVM005` |
-| `compileLlvmToWasm(ir)` | `opt -passes=verify,default<O2>` -> `llc -mtriple=wasm32-unknown-unknown -filetype=obj` -> `wasm-ld --no-entry --export-all --allow-undefined --initial-memory=65536` | 可直接交给 `WebAssembly.instantiate` 执行的 `.wasm` 字节码 | 缺 `wasm-ld` 或链接错误返回 `PUI_LLVM006` |
-
----
-
-## 7. Stage 5B：三层渐进式降级与 React 代码生成规范
-
-### 7.1 分层判定函数（纯能力闭包驱动）
-
-```text
-hasProtocolFeatures :=
-    hooks.length > 0
- || exposes.length > 0
- || contexts.length > 0
- || lifecycle.length > 0
- || rules.length > 0
- || render.kind === 'dynamic'
-
-if (!hasProtocolFeatures && states.length === 0 && events.length === 0)
-    tier = 'static'          // Tier 0
-else if (!hasProtocolFeatures
-         && (render.kind === 'static-tree' || render.kind === 'reactive-tree')
-         && events.every(e => e.scope === 'root' && e.simpleAction !== undefined))
-    tier = 'reactive'        // Tier 1
-else
-    tier = 'protocol'        // Tier 2
-```
-
-### 7.2 各层输出契约
-
-1. **Tier 0（`static`）**：
-   - 生成纯 React 函数组件（约 14 LOC），仅 `import * as React from 'react'`。
-   - 静态元素树与静态 `tw(...)` 类名直接编译为原生 `React.createElement(...)` 与 `className` 合并，**零 Proto UI 运行时导入**。
-2. **Tier 1（`reactive`）**：
-   - 生成原生 React Hooks 组件（约 15–30 LOC），仅 `import * as React from 'react'`。
-   - 每个 `def.state.*` 直接降级为 `React.useState(initialValue)`；
-   - 每个 `simpleAction` 事件直接降级为原生 React 事件 prop（`onClick` 等）调用 `setState((v) => ...)`；
-   - **零 Proto UI 运行时或 kernel 导入**；同时 LLVM 管道独立产出该组件的状态转移 `.wasm` 内核以供验证或跨宿主复用。
-3. **Tier 2（`protocol`）**：
-   - 生成紧凑且强类型的 React 包装器（~20–25 LOC，**零 `any`**）：
-     - 导入 `createCompiledReactComponent` 与 `PrototypeProps`（来自 `@proto.ui/compiler/runtime`）；
-     - 以可移植相对路径（磁盘输出）或包路径导入原 `.proto.ts` 定义；
-     - 导出冻结的 `<Name>Meta: CompiledComponentMeta`（含 `tier`、`capabilities`、`capabilityMask`、`props`、`states`、`exposes`、`staticStyleTokens`）；
-     - 导出 `create<Name>(options?)` 与默认组件 `<Name>`。
-   - 完整运行时语义（Focus、Accessibility、Overlay、Positioning、Anatomy、Context、Lifecycle、Rule 动态订阅）全部由规范的 `@proto.ui/adapter-react` + `@proto.ui/runtime` 统一承接，彻底消灭 N 份重复复制的 DOM 补丁代码。
-
----
-
-## 8. 诊断规范、CLI 契约与验证矩阵
-
-### 8.1 统一诊断结构
-
-每条诊断均为不可变结构化对象：
-
-```ts
-interface CompilerDiagnostic {
-  readonly code: string; // PUI_FE0xx | TSxxxx | PUI_IR0xx | PUI_LLVM0xx | PUI_EMIT0xx
-  readonly severity: 'error' | 'warning' | 'info';
-  readonly category: 'input' | 'typecheck' | 'frontend' | 'ir' | 'llvm' | 'emit';
-  readonly message: string;
-  readonly span?: {
-    file: string;
-    line: number;
-    column: number;
-    endLine?: number;
-    endColumn?: number;
-  };
-}
-```
-
-### 8.2 CLI 命令契约
-
-入口：`packages/compiler/src/cli-entry.ts`（逻辑位于 `src/cli.ts`）
-
-- `info`：输出 `PROTO_IR_VERSION`、已探测 LLVM 工具链版本与工具路径（JSON）。
-- `check <file> [--types] [--verify-llvm]`：执行前端抽取、SSA 校验与优化，可选开启 TS 类型检查与 LLVM `opt -passes=verify`。
-- `ir <file>`：打印优化后的 `.pir` 文本表示。
-- `llvm <file> [--optimize]`：打印验证通过的 LLVM IR（`.ll`），`--optimize` 输出经 `opt -passes=verify,default<O2>` 优化后的 `.ll`。
-- `compile <file> --out <dir> [--ll] [--pir] [--wasm]`：写出薄型 React `.tsx` 组件及可选的 `.ll` / `.pir` / `.wasm` 产物。
-
-### 8.3 四层可执行验证矩阵（对应 `T-COMPILER-PIPELINE-0001`）
-
-| 层次 | 测试文件 | 验证内容 |
+| 对象 | 已读到的状态 | 本轮验证责任 |
 | --- | --- | --- |
-| SSA IR 与优化 | `packages/compiler/test/ssa-ir.test.ts` | 64-bit 能力编码、常量折叠、代数化简、死块裁剪、反向活跃性 DCE、非法 SSA 拒绝（`PUI_IR0xx`）、`.pir` 打印 |
-| LLVM 22 与 WASM 真机执行 | `packages/compiler/test/llvm-pipeline.test.ts` | 真实 `opt -passes=verify`、`opt -O2`、`llvm-as` `.bc`、`llc` 原生 `.s`/`.o`、`wasm32` `.wasm` 链接并在 `WebAssembly.instantiate` 中通过 8-byte Slot ABI 实测规则位图/状态转移/纯 helper 执行；以及非法 LLVM IR 拒绝（`PUI_LLVM002`） |
-| 3-Tier React 实测执行 | `packages/compiler/test/react-codegen.test.ts` | React 19 + `happy-dom` 真实挂载与交互验证 Tier 0 (`static`)、Tier 1 (`reactive` 计数器点击递增)、Tier 2 (`base/button`, `base/toggle`, `base/switch`)；静态断言 `packages/compiler/src/**` 零 `String.raw` |
-| 官方全量语料与 CLI | `packages/compiler/test/base-corpus.test.ts`, `packages/compiler/test/cli.test.ts` | 184/184 `packages/prototypes/base/src/**/*.proto.ts`（212 原型 + 214 authored hooks）100% 编译通过、平均 < 20 LOC / 热编译 < 50 ms/file、复杂家族抽样通过 LLVM 22 `opt -passes=verify`；Shadcn Button 含规则编译验证；CLI 全子命令端到端测试 |
+| Verdant，HEAD `44aeee6383` | workspace GPUI来自`cyjin-yl/z3rm@e5f2f9db75e97613232b5c1946333e61fa3828ab` | 用该实际依赖检查生成组件与消费者构建/行为 |
+| Verdant `compiler.pin.json` | `upstreamGPUI`记录`62e5991` | 独立核验该编译器上游基准与workspace fork的关系；不得把两针描述成同一个版本 |
+| Shenko，本轮读取工作区 | React/Web消费，当前没有GPUI依赖 | 验证React产物及真实Web集成；新增GPUI消费需另有实际源码证据 |
 
----
+各层单独记录passing/missing。消费者或某项能力未完成时，保留draft与required缺失证据，继续推进实现。
 
-## 9. 0.4 后续演进路线（Steps 4+）
+### 8.4 当前已执行的原生范围
 
-本规范当前完成 **Steps 1–3**（清理重建、TS 前端 + Proto SSA IR + LLVM 22/WASM 管线、3-Tier 薄型 React 后端与全量 Base 语料验证）。后续在 `0.4 scope` 下沿同一 IR 骨架继续渐进演进：
+当前GPUI路径已执行Rust AST生成测试，以及使用Verdant实际workspace fork `e5f2f9db75e97613232b5c1946333e61fa3828ab` 的生成组件Cargo检查与原生测试。验收夹具包括原生click产生的状态转移、bool切换、真实Render进入GPUI文本布局系统、props更新及default/empty/invalid/prevValid、实例隔离、数值边界、处理器顺序与错误中止。文本布局记录是实际GPUI元素执行证据，不是像素截图或辅助功能树验收。
 
-1. **更广的 SSA 降级与 Tier-1 覆盖**：将带条件分支、只读对象/数组访问、多规则样式计算与受控 props 计算下沉为纯 SSA 函数与原生 React/Vue 响应式代码，进一步缩小需要回退到 Tier 2 的集合，同时严格遵守 [`atomic-lowering-completion.md`](./atomic-lowering-completion.md) 的语义保真边界（NaN、`-0`、UTF-16 长度、单次求值）。
-2. **多 Web 目标薄型后端**：基于同一 `ModuleIR` 与能力闭包实现薄型 Vue 3（Composition API）与 Web Component 后端，共享相同 3-tier 判定而不复制运行时。
-3. **原生宿主（GPUI / Rust）LLVM 直连**：通过 LLVM IR -> 目标 `.o` / `.a` 静态库或薄型 FFI 绑定直接复用意图/规则/状态转移内核，彻底替代旧版 10k 行 Rust 嵌入式 JS VM。
-4. **文档站按需编译体验**：若 `0.4` 需要恢复文档站浏览器编译体验，应基于轻量级标准 Worker 方案重构，不再重新引入 QuickJS-in-WASM。
+该已准入范围使用明确的div/span元素树、标量props/state、已降低表达式与动作、显式映射且不重叠的样式和`host:click`。样式冲突仍待canonical cascade降级；Hook、Context、Expose、生命周期、props watch、slot/dynamic render、未映射事件/样式及无法保真的类型行为仍明确拒绝。实际代码与回执所对应的细项以test实体为准。
+
+默认upstream GPUI pin `62e5991` 的真实生成`GpuiPinned` crate也已独立通过Cargo检查及`--locked`检查；这份证据证明该pin下的目标构建，不继承fork的原生执行结果。
+
+上述fork测试夹具没有替换Verdant真实应用，也不覆盖Shenko的Web消费者。不能把一个依赖或孤立组件通过推导为另一依赖、应用迁移或完整能力通过。完整原型语义、真实应用集成、焦点与辅助功能仍保留各自验收义务。
+
+可复现命令见[GPUI原生验收说明](../../packages/compiler/native/rust-builder/test-support/README.md)；原始运行输出分别保存为[fork构建与6项原生测试](../../packages/compiler/native/rust-builder/test-support/evidence/verdant-fork.txt.gz)、[upstream独立构建](../../packages/compiler/native/rust-builder/test-support/evidence/upstream-pinned.txt.gz)和[driver冷缓存重建](../../packages/compiler/native/rust-builder/test-support/evidence/cache-rebuild.txt.gz)。
+
+## 9. 诊断、统计与命令行
+
+API 和 CLI 共享结构化诊断：错误码、类别、严重度、源位置、目标、未支持能力及其依赖原因。错误定位应回到原始 Proto 源码或具体生成阶段。显式请求的产物失败时返回失败；多个目标应分别报告结果，不能以一个目标的通过覆盖另一个目标失败。
+
+统计至少区分：
+
+| 结果                 | 计数边界                                                            |
+| -------------------- | ------------------------------------------------------------------- |
+| `analyzed`           | 建立了分析结果；可能仍含未支持项                                    |
+| `compiled-native`    | 所选目标全部相关行为已降级，生成可构建目标程序，无原型 runtime 回退 |
+| `unsupported`        | 合法行为尚无完整降级；保留能力和位置诊断                            |
+| `invalid`            | 输入或中间表示不符合适用定义                                        |
+| `kernel-emitted`     | 生成了明确覆盖范围的内核；不等于组件完成                            |
+| `consumer-exercised` | 真实消费者已执行定义对应的输入、状态、生命周期等路径                |
+
+当前编排API选择`target: react | gpui | kernel | ir`。`ir`是分析/中间表示输出，`kernel`是显式内核目标，二者不得计入UI组件完成。`inventoryProject`使用实际结果`emitted`、`unsupported`、`source-error`、`hook-analysis`，并单独报告`executionVerifiedPrototypes`：
+
+- `emitted`说明对应目标产物已生成，尚不能单凭该状态认定已通过目标构建或行为验收。
+- `unsupported`保留准入/降级诊断；`source-error`保留输入错误；`hook-analysis`只记录Hook分析，不虚增组件数量。
+- 未运行目标行为验证时`executionVerifiedPrototypes`为`0`，不能由生成成功推导成通过。
+
+上表的`compiled-native`和`consumer-exercised`是需要构建/执行证据的验收分类，不是把`emitted`改名。同一文件可含多个导出；文件数、原型数和 hook 数分别报告。
+
+`info` 报工具链及目标能力；`check` 不得将未支持的目标记为通过；`ir` 展示所请求的中间表示及未支持原因；`llvm` 与 `compile --wasm` 必须实际完成所请求的 LLVM 阶段；`compile` 仅在产物成功后发布输出。所有失败都保留诊断并使用确定退出码，不覆盖已有输出掩盖失败。
+
+## 10. 验收与测试映射
+
+以下是验收义务，当前证据以 `T-COMPILER-PIPELINE-0001` 的实现映射与本次提交的执行回执为准。
+
+本轮[官方Base双目标统计](../../packages/compiler/evidence/ast-pipeline-20261125/base-inventory-summary.json)如下。两次统计均分析184个输入文件、识别212个原型及214个authored Hook；每个目标为179个unsupported文件及5个hook-analysis文件。
+
+| 目标  | 原型声明 | Native emitted | Unsupported原型 | Source error文件 | Execution verified |
+| ----- | -------- | -------------- | --------------- | ---------------- | ------------------ |
+| React | 212      | 0              | 212             | 0                | 0                  |
+| GPUI  | 212      | 0              | 212             | 0                | 0                  |
+
+按doesworkstation日志日期2026-11-25，本轮最终编译器集成执行了12个Vitest文件、61项测试，全部通过且无跳过；包含前端HIR 15项、CLI 5项、内核准入2项、Base统计1项、React AST 10项及源码编译4项、SSA 3项及LLVM builder 8项、WASM ABI 3项及LLVM pipeline 3项、GPUI AST 5项、native assets 2项。另有Verdant fork下6项原生Rust测试，以及fork工作区与默认upstream pin的独立Cargo检查。
+
+strict TypeScript检查已覆盖compiler全部src/test与build-pinned、pinned-cli-entry脚本，可通过compiler的`check:types`脚本复现。另行执行的仓库`check:types:workspace`也已在当前工作树及干净`73ff2847`基线分别以0错误通过；此前隔离环境的依赖和ignored生成文件缺失已补齐，没有通过业务源码改写或类型忽略消除错误。Base统计测试验证未支持项及零执行声明的诚实报告；它不证明整个Base语料已原生编译。完整应用迁移仍为required missing。
+
+集成执行保留[Vitest原始日志](../../packages/compiler/evidence/ast-pipeline-20261125/vitest.log)、[退出回执](../../packages/compiler/evidence/ast-pipeline-20261125/vitest-exit.json)和[汇总回执](../../packages/compiler/evidence/ast-pipeline-20261125/receipt.json)。临时固定包的移位/冷缓存消费是另一份[机制验证](../../packages/compiler/evidence/pinned-package-snapshot-01a33b38/README.md)，不等于最终candidate pin验收。
+
+| 层 | 必须执行的检查 |
+| --- | --- |
+| 绑定与前端 | 导入别名、re-export、阴影变量、组合与 helper、未知语句定位、分支与效果保存 |
+| HIR/内核 | 控制流及类型不变量、优化差分、±0/NaN/Infinity、短路、状态读写顺序和所有权 |
+| React AST | 静态输出、props 更新/default/empty、多个 state/handler、规则、已支持生命周期、卸载；生成代码无原型/runtime回退 |
+| LLVM builder | 真实 C++ driver 构建、结构化请求、LLVM验证、实际WASM/原生产物、数值差分与失败诊断 |
+| GPUI AST与宿主 | Rust AST结构化构造、真实GPUI依赖的Cargo构建、props/state/events/rules/lifecycle，尚未支持能力明确诊断 |
+| ABI | 槽界限、容量、实际内存、grow、多个实例、缺失元数据/内存的明确失败 |
+| 全量语料 | 每个导出的 analyzed/compiled-native/unsupported/invalid 结果与原因，不要求错误地全绿 |
+| 真实消费者 | 原有 GPUI、Shenko、Verdant 及其他承诺场景的真实编译、构建、运行与回归 |
+
+对已编译组件计最终传递依赖和宿主支持成本；分别记录冷、热与增量编译耗时，不能把已有 Program 的单文件扫描与全量冷编译直接比较。行数和字符串模板关键词检查可作为辅助检查，不能替代 AST 构造证据与行为测试。
+
+扩大原生覆盖是交付工作。明确拒绝未知语义可以修复静默误编译，但拒绝本身不能勾掉该语义原先的实现承诺。
+
+## 11. 目标与消费者迁移债务
+
+本轮同步建立前端、语义层、React AST、GPUI Rust AST及LLVM IRBuilder后端。React和GPUI逐项实现目标能力；两者与LLVM标量内核分别验收。GPUI已进入本轮实施，真实组件和消费者仍须取得各自证据。以下责任不会因本次删除或重命名自动消失：
+
+- 全量 Base 及各设计家族的原生编译覆盖与语义回归。
+- Vue、Vue 2、Web Components、SSR、GPUI/Rust、Qt、Flutter 等已记录目标的状态与原有承诺核对；实现、未实现和明确经决策退出须分别记录。
+- Shenko的React/Web消费，以及Verdant的GPUI消费：分别核对compiler pin、产物接口、构建、输入、状态、生命周期和辅助功能；Verdant workspace与compiler.pin上游GPUI两针独立验证。
+- 文档站/浏览器编译、CLI、库/链接及现有产物迁移路径。
+- 旧测试及 spec 中失效证据的替代、正式验收和发布要求。
+
+未完成目标保持明确状态，不借 `private: true`、`0.4 scope` 或包扫描配置宣告完成或取消。对应定义仍为 draft；任何稳定承诺的晋升需要真实实现和适用验收。
+
+## 12. 工具链参考
+
+- [TypeScript Compiler API](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)：Program、绑定与类型查询。
+- [LLVM Programmer’s Manual](https://llvm.org/docs/ProgrammersManual.html)：LLVM 类型、Module 与 IR 构造 API。
+- [LLVM Language Reference](https://llvm.org/docs/LangRef.html)：指令、属性、数据布局与 well-formedness；不替代 Proto 源语义。

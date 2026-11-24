@@ -1,0 +1,86 @@
+{
+  "build-and-smoke.log": {
+    "bytes": 3423,
+    "sha256": "884f2300b96fda5c0673234e0d38e622d87348c1b119e188a9933ae315fbd3cd"
+  },
+  "build-status.json": {
+    "bytes": 288,
+    "sha256": "c76cd3a5fa47df376533975bad8cb93d4479cc5b77c35d22a8c976bdfb232057"
+  },
+  "consumer-summary.json": {
+    "bytes": 2062,
+    "sha256": "ad5dfb065c0e7f016dec710a1c1d0534029ec9ee0e34db71dd44dcd124a39a00"
+  },
+  "compiler-build.json": {
+    "bytes": 18451,
+    "sha256": "fbf4c0316186427bd85500cc8843c62bc50187ad5be89dab2fa5b7f42a57ca45"
+  },
+  "profiles.json": {
+    "bytes": 387,
+    "sha256": "67b4397df4236f27f9278a6042c4d41caa5a0f2da443f72ceac6ea754844dc7d"
+  },
+  "native-assets-tests.log": {
+    "bytes": 1754,
+    "sha256": "0e10466b71f8a368397504a6efe131fa261529523f3465a94d4d1fafe70f1a2e"
+  },
+  "native-assets-tests-status.json": {
+    "bytes": 47,
+    "sha256": "1cd0b9332f90a20bb551075af625b5ea8d9247c569cf99c2fd7970972a03a416"
+  },
+  "generated/react-component.tsx": {
+    "bytes": 2431,
+    "sha256": "96a8b7423261f9375444ef0f0e49b7fb229dde3dae4cb12edf56324031343626"
+  },
+  "generated/react-component.mjs": {
+    "bytes": 2078,
+    "sha256": "df455aecea36cde47b425926ba48e5b28367204e000e28fb769312628e00295b"
+  },
+  "generated/module.ll": {
+    "bytes": 1341,
+    "sha256": "d8187c755aaaca43691358812e2ba3acbb8bbdc648fb6bbcd58662271eb62e0a"
+  },
+  "generated/gpui-component.rs": {
+    "bytes": 3766,
+    "sha256": "8002c2dd760a3814e9d759c2606868ef0e70710c3011939c9bda31e828e19f8c"
+  },
+  "generated/Cargo.toml": {
+    "bytes": 283,
+    "sha256": "86544531fc2f11181fb0ddc475ca0a34343fbc32d75cef3a32ed1595bed7efb7"
+  },
+  "source/entry.proto.ts": {
+    "bytes": 503,
+    "sha256": "4023bf692a5f2168e2a687c3938b623c1b8a0d3dba645ad75480424a4bb72458"
+  },
+  "commands/build-info.stdout.log": {
+    "bytes": 18451,
+    "sha256": "fbf4c0316186427bd85500cc8843c62bc50187ad5be89dab2fa5b7f42a57ca45"
+  },
+  "commands/build-info.stderr.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "commands/cli-info.stdout.log": {
+    "bytes": 353,
+    "sha256": "2c440f529d146f1bcf35f7244a59364129ef8a67369bdd2bbfc829c682fb354d"
+  },
+  "commands/cli-info.stderr.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "commands/invalid-command.stdout.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "commands/invalid-command.stderr.log": {
+    "bytes": 33,
+    "sha256": "1919cc81cce6e2e3c9ebf52960fdcd8ad8612b2859b1d05b83a14de18d0b123f"
+  },
+  "commands/cli-compile.stdout.log": {
+    "bytes": 229,
+    "sha256": "296f0e6b56fca50afafaf65d3efd98ad50f04c36ba0e3fd69bd51bd0e7d6e46c"
+  },
+  "commands/cli-compile.stderr.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "resolvedFailures": [
+    {
+      "check": "integrated compiler tests before final correction",
+      "result": "52 passed; 1 failed",
+      "cause": "CLI fixture expected a state initializer for a prototype declaring zero state slots. Compilation itself succeeded.",
+      "resolution": "Assert the actually required ABI-version export; final CLI suite passed 5/5."
+    },
+    {
+      "check": "strict compiler typecheck before final correction",
+      "cause": "GPUI fixture used mounted instead of the declared lifecycle hook name onMounted.",
+      "resolution": "Use the canonical hook name; strict compiler/scripts typecheck now passes."
+    },
+    {
+      "check": "workspace typecheck in new worktree",
+      "result": "718 errors, then 2, then 0",
+      "cause": "Workspace dependency links and ignored generated style modules were missing.",
+      "resolution": "Restore current-worktree dependency links and matching baseline-generated style modules; compare clean baseline and rerun current typecheck."
+    }
+  ],
+  "incompleteChecks": [
+    {
+      "check": "check:agent-operations",
+      "result": "1208 passed; 1 cancelled",
+      "cause": "connector-review.test.mjs pending Promise; outer 240-second limit ended this auxiliary run.",
+      "disposition": "Not counted as passed. Compiler-focused, spec and documentation results are separate."
+    },
+    {
+      "check": "generate:proto-ui-style",
+      "result": "exit 124 after 120-second budget",
+      "cause": "Full token generation did not finish within the bounded run.",
+      "disposition": "Relevant generated files and tracked CSS were unchanged. Typecheck uses hash-verified generated files from the identical baseline; fresh generation is not claimed."
+    }
+  ],
+  "acceptanceNotMet": [
+    "Complete Base native lowering: React 0/212 and GPUI 0/212",
+    "Real Verdant and Shenko application migration",
+    "Full declared target/API compatibility and accessibility acceptance"
+  ]
+}

@@ -27,6 +27,7 @@ function isPureInst(inst: SsaInst): boolean {
     case 'binop':
     case 'cmp':
     case 'not':
+    case 'fneg':
     case 'select':
     case 'phi':
       return true;
@@ -51,6 +52,7 @@ function usedOperands(inst: SsaInst): string[] {
     case 'cmp':
       return [inst.lhs, inst.rhs];
     case 'not':
+    case 'fneg':
       return [inst.operand];
     case 'select':
       return [inst.cond, inst.thenVal, inst.elseVal];
@@ -93,14 +95,16 @@ function evalBinOp(
       out = na - nb;
       break;
     case 'mul':
-      out = na * nb;
+      out = type === 'i32' ? Math.imul(na, nb) : na * nb;
       break;
     case 'div':
       if (type === 'i32' && (nb | 0) === 0) return undefined;
+      if (type === 'i32' && na === -2147483648 && nb === -1) return undefined;
       out = type === 'i32' ? Math.trunc(na / nb) : na / nb;
       break;
     case 'rem':
       if (type === 'i32' && (nb | 0) === 0) return undefined;
+      if (type === 'i32' && na === -2147483648 && nb === -1) return undefined;
       out = na % nb;
       break;
     case 'and':
@@ -185,6 +189,17 @@ export function optimizeSsaFunction(fn: SsaFunction): {
           if (typeof cv === 'boolean') {
             consts.set(inst.result, !cv);
             nextInsts.push({ op: 'const', result: inst.result, type: 'i1', value: !cv });
+            foldedConstants++;
+            changed = true;
+            continue;
+          }
+        }
+        if (inst.op === 'fneg') {
+          const cv = consts.get(inst.operand);
+          if (typeof cv === 'number') {
+            const folded = -cv;
+            consts.set(inst.result, folded);
+            nextInsts.push({ op: 'const', result: inst.result, type: 'f64', value: folded });
             foldedConstants++;
             changed = true;
             continue;
@@ -319,11 +334,32 @@ export function optimizeSsaFunction(fn: SsaFunction): {
     }
   }
   blocks = blocks.filter((b) => reachable.has(b.label));
+  const incomingEdges = new Map<string, Map<string, number>>();
+  for (const block of blocks) incomingEdges.set(block.label, new Map());
+  for (const block of blocks) {
+    const term = block.terminator;
+    const targets =
+      term.op === 'br'
+        ? [term.target]
+        : term.op === 'condbr'
+          ? [term.thenTarget, term.elseTarget]
+          : [];
+    for (const target of targets) {
+      const incoming = incomingEdges.get(target);
+      if (incoming) incoming.set(block.label, (incoming.get(block.label) ?? 0) + 1);
+    }
+  }
   for (const block of blocks) {
     for (let i = 0; i < block.instructions.length; i++) {
       const inst = block.instructions[i];
       if (inst.op === 'phi') {
-        const live = inst.incoming.filter((inc) => reachable.has(inc.label));
+        const remaining = new Map(incomingEdges.get(block.label));
+        const live = inst.incoming.filter((inc) => {
+          const count = remaining.get(inc.label) ?? 0;
+          if (count === 0) return false;
+          remaining.set(inc.label, count - 1);
+          return true;
+        });
         block.instructions[i] = { ...inst, incoming: live };
       }
     }
@@ -399,6 +435,7 @@ function rewriteInstOperands(inst: SsaInst, resolve: (id: string) => string): Ss
     case 'cmp':
       return { ...inst, lhs: resolve(inst.lhs), rhs: resolve(inst.rhs) };
     case 'not':
+    case 'fneg':
       return { ...inst, operand: resolve(inst.operand) };
     case 'select':
       return {

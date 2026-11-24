@@ -1,0 +1,224 @@
+PUI_DRIVER_CACHE_WAS_PRESENT False
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+▲ [WARNING] Cannot find base config file "astro/tsconfigs/strict" [tsconfig.json]
+
+    apps/www/tsconfig.json:2:14:
+      2 │   "extends": ["astro/tsconfigs/strict", "../../tsconfig.json"],
+        ╵               ~~~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+
+ RUN  v2.1.9 /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125
+
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import fs from 'node:fs';
+2  |  import path from 'node:path';
+   |                       ^
+3  |  import { describe, expect, it } from 'vitest';
+4  |  import { TsProgramSession, extractModuleIR } from '../src/frontend';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/test/gpui-ast-codegen.test.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  export { TsProgramSession, type CompilerSessionOptions } from './program';
+   |                                                 ^
+2  |  export { extractModuleIR, type ExtractOptions, type ExtractOutput } from './extract';
+3  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/index.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import fs from 'node:fs';
+2  |  import path from 'node:path';
+   |                       ^
+3  |  import ts from 'typescript';
+4  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/program.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import path from 'node:path';
+2  |  import ts from 'typescript';
+   |                   ^
+3  |  import { diagnostic, type CompilerDiagnostic } from '../diagnostics';
+4  |  import { spanOf, sanitizeSym, unwrapExpr, extractScalarLiteral, resolveAliasedSymbol, resolveCallName, findFactoryCall, resolveFunctionLike, propAccessChain, extractObjectProperty, extractSetupFunction, resolveDefinitionObject, isPrototypeType } from './syntax';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/extract.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  export interface SourceSpan {
+2  |    readonly file: string;
+   |                   ^
+3  |    readonly line: number;
+4  |    readonly column: number;
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/diagnostics.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { SourceSpan } from '../diagnostics';
+   |                    ^
+3  |  import type { ScalarLiteral } from '../ir';
+4  |  import { evaluateStaticScalar } from './constants';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/syntax.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { ScalarLiteral } from '../ir/types';
+   |                    ^
+3  |  import { hasBindingWrites, isConstDeclaration } from './bindings';
+4  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/constants.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |
+3  |  /** Function declarations are mutable in JavaScript even though they are not `let`. */
+   |                   ^
+4  |  export function hasBindingWrites(binding: ts.Symbol, checker: ts.TypeChecker): boolean {
+5  |    const files = new Set(binding.declarations?.map(declaration => declaration.getSourceFile()) ?? []);
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/bindings.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import type { PropDeclIR, StateDeclIR, SsaType } from '../ir';
+   |                                                 ^
+2  |
+3  |  export function propKindToSsaType(kind: PropDeclIR['kind']): Exclude<SsaType, 'void'> {
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/scalars.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { RuleExpr } from '../ir';
+   |                    ^
+3  |  import { unwrapExpr, extractScalarLiteral } from './syntax';
+4  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/rules.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { TemplateChildIR, TemplateElementIR } from '../ir';
+   |                    ^
+3  |  import { unwrapExpr, extractScalarLiteral, resolveCallName, propAccessChain, extractObjectProperty, isCoreIntrinsic, resolveFunctionLike } from './syntax';
+4  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/template.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import { SsaBuilder, type EventDeclIR, type RuleIR, type RuleExpr, type PropDeclIR, type StateDeclIR, type SsaFunction } from '../ir';
+   |                    ^
+3  |  import { unwrapExpr, extractScalarLiteral, propAccessChain, sanitizeSym } from './syntax';
+4  |  import { internString } from './scalars';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/kernel.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  export * from './types';
+2  |  export { SsaBuilder } from './builder';
+   |                        ^
+3  |  export { verifyModuleIR, verifySsaFunction } from './verify';
+4  |  export {
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/index.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import type { SourceSpan } from '../diagnostics';
+   |                                                 ^
+2  |
+3  |  export const PROTO_IR_VERSION = 2 as const;
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/types.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+2  |    HostOpKind,
+3  |    SsaBasicBlock,
+4  |    SsaBinOp,
+   |    ^
+5  |    SsaCmpOp,
+6  |    SsaFunction,
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/builder.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { diagnostic, type CompilerDiagnostic } from '../diagnostics';
+   |                                                 ^
+2  |  import {
+3  |    PROTO_IR_VERSION,
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/verify.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import {
+2  |    encodeCapabilityMask,
+3  |    type CapabilityName,
+   |                ^
+4  |    type ModuleIR,
+5  |    type PrototypeIR,
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/passes.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import type { ModuleIR, PrototypeIR, SsaFunction } from './types';
+   |                                                 ^
+2  |
+3  |  /** Diagnostic serialization of typed IR. Target source is printed by target SDKs. */
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/print.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { ActionStatementIR, ScalarLiteral, ValueExprIR } from '../ir/types';
+   |                    ^
+3  |
+4  |  export interface ActionBindings {
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/actions.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import fs from 'node:fs';
+2  |  import os from 'node:os';
+   |                       ^
+3  |  import path from 'node:path';
+4  |  import { spawnSync } from 'node:child_process';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/targets/gpui.ts
+01:11:14 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { fileURLToPath } from 'node:url';
+2  |
+3  |  // The pinned Node bundle defines this path relative to its emitted index.js.
+   |      ^
+4  |  // Source execution resolves from this module, never from a caller's cwd.
+5  |  declare const __PUI_COMPILER_NATIVE_ASSET_BASE__: string | undefined;
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/native-assets.ts
+ ✓ packages/compiler/test/gpui-ast-codegen.test.ts (5 tests) 8420ms
+   ✓ GPUI Rust AST target > compiles authored props/state/control flow to an actual native Render component 8092ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  01:11:13
+   Duration  9.96s (transform 284ms, setup 0ms, collect 871ms, tests 8.42s, environment 215ms, prepare 72ms)
+
+PUI_TEST_EXIT 0
+PUI_GENERATED_IDENTICAL True
+PUI_DRIVER_CACHE_NOW_PRESENT True
+PUI_DRIVER_SOURCE_SHA 6439e23fdbaf8ea88a49a6710c0916a31f6810db827e6a63b212900b222dafb5
+PUI_DRIVER_BINARY_SHA fdd429a53966b453494069464183918b7f65cbe58d3031c65293e71bf7c4ba4b
+PUI_FINAL_EXIT 0

@@ -12,11 +12,22 @@ import {
 import {
   compileLlvmToWasm,
   detectLlvmToolchain,
-  emitLlvmIR,
+  emitLlvmIRResult,
   optimizeLlvmIr,
   verifyLlvmIr,
 } from './llvm';
-import { emitReactComponent, type ReactEmitOptions, type ReactEmitResult } from './targets';
+import {
+  emitReactComponent,
+  getReactLoweringDiagnostics,
+  getKernelLoweringDiagnostics,
+  emitGpuiComponent,
+  type ReactEmitOptions,
+  type ReactEmitResult,
+  type GpuiEmitOptions,
+  type GpuiEmitResult,
+} from './targets';
+
+export type CompilationTarget = 'react' | 'gpui' | 'kernel' | 'ir';
 
 export interface LlvmPipelineOptions {
   readonly targetTriple?: string;
@@ -29,12 +40,22 @@ export interface LlvmPipelineOptions {
 }
 
 export interface CompileOptions {
+  readonly target?: CompilationTarget;
   readonly exportName?: string;
   readonly componentName?: string;
   readonly checkTypes?: boolean;
   readonly allowHookOnly?: boolean;
+  /** Select kernel artifacts explicitly. This does not claim to implement a UI host. */
+  readonly emitReact?: boolean;
   readonly react?: Omit<ReactEmitOptions, 'componentName'>;
+  readonly gpui?: Omit<GpuiEmitOptions, 'componentName'>;
   readonly llvm?: LlvmPipelineOptions;
+}
+
+export interface GpuiPrototypeArtifact {
+  readonly name: string;
+  readonly exportName: string;
+  readonly gpui: GpuiEmitResult;
 }
 
 export interface PrototypeArtifact {
@@ -45,6 +66,7 @@ export interface PrototypeArtifact {
 }
 
 export interface CompilationOutput {
+  readonly artifactKind: 'react-components' | 'gpui-components' | 'kernel-module' | 'semantic-ir';
   readonly sourceFile: string;
   readonly ir: ModuleIR;
   readonly irText: string;
@@ -52,7 +74,10 @@ export interface CompilationOutput {
   readonly prototypes: readonly PrototypeArtifact[];
   /** Primary prototype output (first prototype in module) for single-component callers. */
   readonly primary?: PrototypeArtifact;
+  readonly gpuiPrototypes: readonly GpuiPrototypeArtifact[];
+  readonly primaryGpui?: GpuiPrototypeArtifact;
   readonly llvm: {
+    readonly emitted: boolean;
     readonly ir: string;
     readonly optimizedIr?: string;
     readonly verified: boolean;
@@ -80,6 +105,42 @@ export interface ProtoCompiler {
     entries: readonly string[],
     options?: CompileOptions
   ): CompileResult<ProjectCompilationOutput>;
+  inventoryProject(
+    entries: readonly string[],
+    options?: CompileOptions
+  ): CompileResult<ProjectCoverageReport>;
+}
+
+export interface FileCoverage {
+  readonly sourceFile: string;
+  readonly status: 'emitted' | 'unsupported' | 'source-error' | 'hook-analysis';
+  readonly prototypes: readonly string[];
+  readonly authoredHooks: readonly string[];
+  readonly nativeEmittedPrototypes: number;
+  readonly diagnostics: readonly CompilerDiagnostic[];
+}
+
+export interface ProjectCoverageReport {
+  readonly schemaVersion: 1;
+  readonly target: 'react' | 'gpui';
+  readonly files: readonly FileCoverage[];
+  readonly totals: {
+    readonly inputFiles: number;
+    readonly analyzedFiles: number;
+    readonly prototypeDeclarations: number;
+    readonly authoredHookDeclarations: number;
+    readonly nativeEmittedPrototypes: number;
+    readonly unsupportedPrototypes: number;
+    readonly sourceErrorFiles: number;
+    readonly executionVerifiedPrototypes: 0;
+  };
+  readonly completeNativeCoverage: boolean;
+}
+
+function selectedTarget(options: CompileOptions): CompilationTarget {
+  return (
+    options.target ?? (options.emitReact === false ? (options.llvm ? 'kernel' : 'ir') : 'react')
+  );
 }
 
 function finalizeCompilation(
@@ -89,6 +150,7 @@ function finalizeCompilation(
   rootDir: string
 ): CompileResult<CompilationOutput> {
   const allDiags: CompilerDiagnostic[] = [...extracted.diagnostics];
+  const target = selectedTarget(options);
   const hasErrors = allDiags.some((d) => d.severity === 'error');
   if (hasErrors) return err(allDiags);
 
@@ -109,22 +171,53 @@ function finalizeCompilation(
   const postVerifyIssues = verifyModuleIR(ir);
   if (postVerifyIssues.length > 0) return err([...allDiags, ...postVerifyIssues]);
 
-  const prototypes: PrototypeArtifact[] = ir.prototypes.map((proto, index) => {
-    const react = emitReactComponent(proto, {
-      rootDir,
-      ...options.react,
-      ...(index === 0 && options.componentName ? { componentName: options.componentName } : {}),
-    });
-    return {
-      name: proto.name,
-      exportName: proto.exportName,
-      tier: proto.tier,
-      react,
-    };
-  });
+  if (target === 'react') {
+    for (const proto of ir.prototypes) allDiags.push(...getReactLoweringDiagnostics(proto));
+    if (allDiags.some((d) => d.severity === 'error')) return err(allDiags);
+  }
+  const prototypes: PrototypeArtifact[] = [];
+  const gpuiPrototypes: GpuiPrototypeArtifact[] = [];
+  for (const [index, proto] of ir.prototypes.entries()) {
+    const component =
+      index === 0 && options.componentName ? { componentName: options.componentName } : {};
+    if (target === 'react') {
+      try {
+        const react = emitReactComponent(proto, { rootDir, ...options.react, ...component });
+        prototypes.push({
+          name: proto.name,
+          exportName: proto.exportName,
+          tier: react.tier,
+          react,
+        });
+      } catch (error) {
+        return err([
+          ...allDiags,
+          diagnostic(
+            'PUI_REACT_EMIT',
+            'codegen',
+            error instanceof Error ? error.message : String(error),
+            proto.span
+          ),
+        ]);
+      }
+    } else if (target === 'gpui') {
+      const output = emitGpuiComponent(proto, { ...options.gpui, ...component });
+      allDiags.push(...output.diagnostics);
+      if (!output.ok) return err(allDiags);
+      gpuiPrototypes.push({ name: proto.name, exportName: proto.exportName, gpui: output.value });
+    }
+  }
 
-  const llvmIr = emitLlvmIR(ir, { targetTriple: options.llvm?.targetTriple });
-  const tc = detectLlvmToolchain();
+  let llvmIr = '';
+  const llvmRequested = options.llvm !== undefined || target === 'kernel';
+  const tc = llvmRequested ? detectLlvmToolchain() : { available: false, version: undefined };
+  if (llvmRequested) {
+    const kernelIssues = getKernelLoweringDiagnostics(ir);
+    if (kernelIssues.length) return err([...allDiags, ...kernelIssues]);
+    const emission = emitLlvmIRResult(ir, { targetTriple: options.llvm?.targetTriple });
+    if (!emission.ok) return err([...allDiags, ...emission.diagnostics]);
+    llvmIr = emission.value;
+  }
   let verified = false;
   let optimizedIr: string | undefined;
   let wasm: Uint8Array | undefined;
@@ -145,31 +238,50 @@ function finalizeCompilation(
       verified = true;
       optimizedIr = optRes.value.ir;
     } else {
-      allDiags.push(
+      return err([
+        ...allDiags,
         diagnostic(
-          'PUI_LLVM_SKIP',
+          'PUI_LLVM_UNAVAILABLE',
           'llvm',
-          'LLVM toolchain not found on PATH; skipping LLVM opt optimization.',
-          undefined,
-          'warning'
-        )
-      );
+          'LLVM optimization was requested but its toolchain is unavailable.'
+        ),
+      ]);
     }
   } else if (options.llvm?.verify && tc.available) {
     const verRes = verifyLlvmIr(llvmIr);
     if (!verRes.ok) return err([...allDiags, ...verRes.diagnostics]);
     verified = true;
+  } else if (options.llvm?.verify) {
+    return err([
+      ...allDiags,
+      diagnostic(
+        'PUI_LLVM_UNAVAILABLE',
+        'llvm',
+        'LLVM verification was requested but its toolchain is unavailable.'
+      ),
+    ]);
   }
 
   return ok(
     {
+      artifactKind:
+        target === 'react'
+          ? 'react-components'
+          : target === 'gpui'
+            ? 'gpui-components'
+            : target === 'kernel'
+              ? 'kernel-module'
+              : 'semantic-ir',
       sourceFile: ir.sourceFile,
       ir,
       irText: printModuleIR(ir),
       ssaStats,
       prototypes,
       primary: prototypes[0],
+      gpuiPrototypes,
+      primaryGpui: gpuiPrototypes[0],
       llvm: {
+        emitted: llvmRequested,
         ir: llvmIr,
         ...(optimizedIr !== undefined ? { optimizedIr } : {}),
         verified,
@@ -243,7 +355,7 @@ export function createCompiler(options: CompilerSessionOptions = {}): ProtoCompi
         diagnostics.push(...res.diagnostics);
         if (!res.ok) return err(diagnostics);
         outputs.push(res.value);
-        totalPrototypes += res.value.prototypes.length;
+        totalPrototypes += res.value.prototypes.length + res.value.gpuiPrototypes.length;
         totalAuthoredHooks += res.value.ir.authoredHooks.length;
       }
 
@@ -256,6 +368,75 @@ export function createCompiler(options: CompilerSessionOptions = {}): ProtoCompi
         },
         diagnostics
       );
+    },
+
+    inventoryProject(entries, compileOptions = {}) {
+      const target = selectedTarget(compileOptions);
+      if (target !== 'react' && target !== 'gpui')
+        return err([
+          diagnostic(
+            'PUI_COVERAGE_TARGET',
+            'input',
+            'Native coverage must select the React or GPUI component target.'
+          ),
+        ]);
+      const resolved = [...new Set(entries.map((entry) => path.resolve(session.rootDir, entry)))];
+      for (const entry of resolved)
+        if (!fs.existsSync(entry))
+          return err([diagnostic('PUI_IO001', 'io', 'Entry file does not exist: ' + entry)]);
+      const program = session.ensureFiles(resolved);
+      const files: FileCoverage[] = [];
+      for (const entry of resolved) {
+        const extracted = extractModuleIR(program, entry, {
+          checkTypes: compileOptions.checkTypes,
+          exportName: compileOptions.exportName,
+        });
+        const prototypes = extracted.ir.prototypes.map((proto) => proto.name);
+        const authoredHooks = extracted.ir.authoredHooks.map((hook) => hook.name);
+        const base = { sourceFile: entry, prototypes, authoredHooks, nativeEmittedPrototypes: 0 };
+        if (extracted.diagnostics.some((issue) => issue.severity === 'error')) {
+          files.push({ ...base, status: 'source-error', diagnostics: extracted.diagnostics });
+        } else if (prototypes.length === 0 && authoredHooks.length > 0) {
+          files.push({ ...base, status: 'hook-analysis', diagnostics: extracted.diagnostics });
+        } else {
+          const compiled = finalizeCompilation(
+            extracted,
+            { ...compileOptions, target, llvm: undefined },
+            performance.now(),
+            session.rootDir
+          );
+          files.push({
+            ...base,
+            status: compiled.ok ? 'emitted' : 'unsupported',
+            nativeEmittedPrototypes: compiled.ok
+              ? compiled.value.prototypes.length + compiled.value.gpuiPrototypes.length
+              : 0,
+            diagnostics: compiled.diagnostics,
+          });
+        }
+      }
+      const totals = {
+        inputFiles: files.length,
+        analyzedFiles: files.filter((file) => file.status !== 'source-error').length,
+        prototypeDeclarations: files.reduce((sum, file) => sum + file.prototypes.length, 0),
+        authoredHookDeclarations: files.reduce((sum, file) => sum + file.authoredHooks.length, 0),
+        nativeEmittedPrototypes: files.reduce((sum, file) => sum + file.nativeEmittedPrototypes, 0),
+        unsupportedPrototypes: files
+          .filter((file) => file.status === 'unsupported')
+          .reduce((sum, file) => sum + file.prototypes.length, 0),
+        sourceErrorFiles: files.filter((file) => file.status === 'source-error').length,
+        executionVerifiedPrototypes: 0 as const,
+      };
+      return ok({
+        schemaVersion: 1,
+        target,
+        files,
+        totals,
+        completeNativeCoverage:
+          totals.prototypeDeclarations > 0 &&
+          files.every((file) => file.status === 'emitted' || file.status === 'hook-analysis') &&
+          totals.nativeEmittedPrototypes === totals.prototypeDeclarations,
+      });
     },
   };
 }
@@ -292,4 +473,11 @@ export function compileProject(
   options: CompileOptions & { rootDir?: string } = {}
 ): CompileResult<ProjectCompilationOutput> {
   return sharedCompiler(options.rootDir).compileProject(entries, options);
+}
+
+export function inventoryProject(
+  entries: readonly string[],
+  options: CompileOptions & { rootDir?: string } = {}
+): CompileResult<ProjectCoverageReport> {
+  return sharedCompiler(options.rootDir).inventoryProject(entries, options);
 }

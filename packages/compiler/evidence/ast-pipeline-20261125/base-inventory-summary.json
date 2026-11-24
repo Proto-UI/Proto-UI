@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "scope": "Official Base inventory; emission is not execution evidence",
+  "targets": {
+    "react": {
+      "totals": {
+        "inputFiles": 184,
+        "analyzedFiles": 184,
+        "prototypeDeclarations": 212,
+        "authoredHookDeclarations": 214,
+        "nativeEmittedPrototypes": 0,
+        "unsupportedPrototypes": 212,
+        "sourceErrorFiles": 0,
+        "executionVerifiedPrototypes": 0
+      },
+      "completeNativeCoverage": false,
+      "fileStatuses": {
+        "unsupported": 179,
+        "hook-analysis": 5
+      },
+      "diagnosticsByCode": {
+        "PUI_REACT_UNSUPPORTED": 3093
+      }
+    },
+    "gpui": {
+      "totals": {
+        "inputFiles": 184,
+        "analyzedFiles": 184,
+        "prototypeDeclarations": 212,
+        "authoredHookDeclarations": 214,
+        "nativeEmittedPrototypes": 0,
+        "unsupportedPrototypes": 212,
+        "sourceErrorFiles": 0,
+        "executionVerifiedPrototypes": 0
+      },
+      "completeNativeCoverage": false,
+      "fileStatuses": {
+        "unsupported": 179,
+        "hook-analysis": 5
+      },
+      "diagnosticsByCode": {
+        "PUI_GPUI_UNSUPPORTED": 2025
+      }
+    }
+  }
+}

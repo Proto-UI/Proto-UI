@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-25",
+  "branch": "feat/compiler-ast-pipeline-1809",
+  "baseline": "73ff284730c4b93a8c145bd23a4ab0370edec9a1",
+  "scope": "Compiler source and fixtures; full native Base and real application migration remain incomplete",
+  "tests": {
+    "command": "corepack pnpm@10.32.1 exec vitest run packages/compiler/test --reporter=default",
+    "filesPassed": 12,
+    "testsPassed": 61,
+    "testsFailed": 0,
+    "testsSkipped": 0
+  },
+  "typecheck": {
+    "command": "corepack pnpm@10.32.1 --filter @proto.ui/compiler check:types",
+    "includes": ["compiler source", "compiler tests", "build-pinned.ts", "pinned-cli-entry.ts"],
+    "status": "passed"
+  },
+  "inventory": {
+    "command": "node --import tsx scripts/compiler/pinned-cli-entry.ts inventory packages/prototypes/base/src --target <react|gpui> --json",
+    "summary": "base-inventory-summary.json",
+    "executionVerifiedPrototypes": 0
+  },
+  "files": {
+    "packages/compiler/src/browser/client.ts": "0233d12601153c8b42ddf333a25afb4419cd44faa7ede928f7ca2800c7b0c353",
+    "packages/compiler/src/browser/index.ts": "4205bd24828cb64da99b66db799a465ffb69f78b3621ff9b551a86c6e100e596",
+    "packages/compiler/src/browser/protocol.ts": "5e788d4fde5c1df934af656018254433a1da33d5fdaca73b7e665304a465c773",
+    "packages/compiler/src/cli-entry.ts": "e4534ec5e7da4036f3991aa72c6e52f451615889840079cbed371f732d75419a",
+    "packages/compiler/src/cli.ts": "ed9d7209160233a46b19f0bf3280046c8082cb525389c339a6e6a50d09a8bf45",
+    "packages/compiler/src/compiler.ts": "4015124838368bd57022b0d273f550df5d1f64a678c878b9e621ae5c57b33681",
+    "packages/compiler/src/diagnostics.ts": "c452fa53654aa945d0f277793616ab6a6ebb80442810c80ed86f9bbd323abcb0",
+    "packages/compiler/src/frontend/actions.ts": "6777a8363732f5518e3dd0d29d017ee1a4e4d0a3bdd7eac1ce89c3ae9d844104",
+    "packages/compiler/src/frontend/bindings.ts": "4c9445c97bf6973eac8c35c3425a098e5b6580a2a7f0da507a6d043a9e814103",
+    "packages/compiler/src/frontend/constants.ts": "4c5d5602764909974b9ed96bf802aec88344c1435b6cc4b2036d5b47d6b25e9f",
+    "packages/compiler/src/frontend/extract.ts": "43e5f3ac3f6c20dc56da32c6620ca5e3813e2a86fa6c2ae69d3f9a513cc9afde",
+    "packages/compiler/src/frontend/index.ts": "2665a9821dbbc3790435b9e29dc2dd919a6a6ecf4157797ec67543a8f8ad6def",
+    "packages/compiler/src/frontend/kernel.ts": "4bae564dd8161e88460c272113b48833672e2e2480d5275a99cade025dd1d3f2",
+    "packages/compiler/src/frontend/program.ts": "dc0429508c0fef2e80b5db197c350412b8f023a6a3b0b5a9dda2cbe7ad4b91d5",
+    "packages/compiler/src/frontend/rules.ts": "05addc7f5516ee761136054ad4c455a63b905af4cf49e8ea75aee334a921d1bf",
+    "packages/compiler/src/frontend/scalars.ts": "0e351af2c75f056dc1a0cfd6430ba691979b7dc6ce43907e10986fa1ff463dbf",
+    "packages/compiler/src/frontend/syntax.ts": "59b6c2338de8ea2c160948f27f5b439c90fa6508686f572249741142f07ba735",
+    "packages/compiler/src/frontend/template.ts": "3d932605ab4ba07f64bc8fa736bcdd93af77afa5a46053b146a9fe67a6061735",
+    "packages/compiler/src/index.ts": "30e8004b874a1497e09c497458f61da2761a274b3e7b32cd5bf44f399d572b07",
+    "packages/compiler/src/ir/builder.ts": "db07b4c27e3d50c426015194474d8193925914aecf87da49b2b1c20e79313927",
+    "packages/compiler/src/ir/index.ts": "82db38445f6361b4be526d6df0b2fe3d0dca7f8cd963a29a7ee9e349e3a888e5",
+    "packages/compiler/src/ir/passes.ts": "74b1bbf92207b4c0f1341e9223c69f3c177547ee469617d6978a627d5be52b9c",
+    "packages/compiler/src/ir/print.ts": "77e8bda18fe82f079ac92d2eb02ba9da5b7ede79608b1bc961583bf4dc2876cc",
+    "packages/compiler/src/ir/types.ts": "d6caa1ef1a20260315d42937e22536c0ce46b7de49b0cc32745d2ad3cb3464d2",
+    "packages/compiler/src/ir/verify.ts": "891dc20a3c39fabe0ee399e65a22dff942d0fd58f6e72d00243b78e859ccea8d",
+    "packages/compiler/src/llvm/emit.ts": "5cdf9577c31deee8c7e53eaff1269da3c4e7a6cfa9491c9cda7308812a16f692",
+    "packages/compiler/src/llvm/index.ts": "b7115e53cf6315a8bfb57005b77cf38186a7c49a22abebb6bd7f52ae40964843",
+    "packages/compiler/src/llvm/toolchain.ts": "549b6b1e132a1e3fa87d0a1f26a4cfd9c927c5cfa208c5e2188ee3dfe0c40c84",
+    "packages/compiler/src/native-assets.ts": "9288fa05528911e6626986e46b07373c35befabb4bc649d9d09ef0a5a3883d52",
+    "packages/compiler/src/runtime/index.ts": "f52b8d6676d468b24231386dc3926ae9373b28c6122c5026acb4a98bd85be13b",
+    "packages/compiler/src/targets/gpui.ts": "225de7bf57274534b72e794abbbc94c1f64d6b35a3dac6b570b6a487c033692d",
+    "packages/compiler/src/targets/index.ts": "a3347d34fd9f71ab2ab21538a7754b5f63257085f7d50fdc4fb35aa42c66535a",
+    "packages/compiler/src/targets/kernel.ts": "624c0dec2fe699de6156330bd61b5f4c0eabf805c8013f2ffa9d6c0628517dd2",
+    "packages/compiler/src/targets/react.ts": "c601ae338c60fa3305bc53ab0348f385babb1706ac85047864adf3e606775e75"
+  }
+}

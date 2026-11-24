@@ -1,0 +1,34 @@
+[package]
+name = "proto-ui-gpui-native-tests"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+members = [
+  "generated/GpuiCounter",
+  "generated/PropsMatrix",
+  "generated/RequiredProp",
+  "generated/NumericState",
+  "generated/EscapedText",
+]
+resolver = "2"
+
+[workspace.dependencies]
+# The real Verdant workspace dependency, independently of the upstream default.
+gpui = { git = "https://github.com/cyjin-yl/z3rm", rev = "e5f2f9db75e97613232b5c1946333e61fa3828ab", default-features = false, features = ["test-support"] }
+
+[dependencies]
+anyhow = "1"
+gpui.workspace = true
+compiled-gpuicounter = { path = "generated/GpuiCounter" }
+compiled-propsmatrix = { path = "generated/PropsMatrix" }
+compiled-requiredprop = { path = "generated/RequiredProp" }
+compiled-numericstate = { path = "generated/NumericState" }
+compiled-escapedtext = { path = "generated/EscapedText" }
+
+[profile.dev]
+debug = 0
+
+[profile.test]
+debug = 0

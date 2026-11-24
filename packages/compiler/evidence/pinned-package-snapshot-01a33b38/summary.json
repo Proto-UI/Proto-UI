@@ -1,0 +1,50 @@
+{
+  "schema": "proto-ui.compiler-packaging-snapshot-evidence.v1",
+  "status": "temporary-mechanism-snapshot-not-final-candidate",
+  "revision": "01a33b38f28782838c1baf76f78041b7a3a73fcc",
+  "scope": [
+    "native asset resolution from source and relocated Node bundle",
+    "current API and CLI handling",
+    "React generated artifact consumption",
+    "packaged LLVM IRBuilder cold compilation and LLVM verification",
+    "packaged locked Rust syntax builder cold compilation and GPUI emission"
+  ],
+  "sourceSnapshot": "/tmp/proto-pinned-package-stage1-2m1oxb1g/source",
+  "packageDirectory": "/tmp/proto-pinned-package-stage1-2m1oxb1g/relocated/compiler",
+  "receiptArchive": "receipts.tar.gz",
+  "receiptArchiveSha256": "7e2b3fd896b7688d37b8cc7e69e07c9628f4731793891d79ae550e0479d105bc",
+  "assetTests": {
+    "passed": 2,
+    "total": 2
+  },
+  "consumerPassed": true,
+  "commands": [
+    {
+      "name": "build-info",
+      "status": 0
+    },
+    {
+      "name": "cli-info",
+      "status": 0
+    },
+    {
+      "name": "invalid-command",
+      "status": 2
+    },
+    {
+      "name": "cli-compile",
+      "status": 0
+    }
+  ],
+  "consumerDependencies": {
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "scheduler": "0.27.0"
+  },
+  "limitations": [
+    "The SHA belongs to a temporary isolated clone, not the final candidate branch.",
+    "The final source commit and package must be built and verified separately.",
+    "React SSR is the package-consumption smoke; lifecycle/event behavior is covered by the separate React artifact tests.",
+    "GPUI emitted Rust is checked here; native application execution is a separate backend acceptance test."
+  ]
+}

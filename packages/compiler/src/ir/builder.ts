@@ -118,6 +118,12 @@ export class SsaBuilder {
     return result;
   }
 
+  fneg(operand: string): string {
+    const result = this.fresh('neg');
+    this.emit({ op: 'fneg', result, operand });
+    return result;
+  }
+
   select(type: Exclude<SsaType, 'void'>, cond: string, thenVal: string, elseVal: string): string {
     const result = this.fresh('sel');
     this.emit({ op: 'select', result, type, cond, thenVal, elseVal });

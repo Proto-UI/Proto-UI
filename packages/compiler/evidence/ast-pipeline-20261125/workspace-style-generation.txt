@@ -1,0 +1,15 @@
+PUI_STYLE_BEFORE {"apps/www/src/styles/proto-ui-shadow-style.generated.js": "67e3e6adf39453463137e6f1fb16e58af52c4098d5f5e40a40be0cddaeafb29f", "apps/www/src/styles/proto-ui-shadow-style.generated.d.ts": "76d772bac1c5de84e6fb455683513c74c6d40b55de2744caaf3dfc4e4ead94b8"}
+
+> apps-www@0.0.1 generate:proto-ui-style /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/apps/www
+> node ./scripts/generate-cli-init-docs.mjs && node ../../packages/cli/bin/proto-ui.js theme shadcn --out ./src/styles/shadcn-theme.css && node ./scripts/generate-website-prototype-tokens.mjs && node ../../packages/cli/bin/proto-ui.js style --out ./src/styles/proto-ui-style.css --theme-import ./shadcn-theme.css --tokens-import ./proto-ui-tokens.generated.css
+
+[docs] extracted real @proto.ui/cli@0.3.0 init: 4 files
+[proto-ui] theme(shadcn): wrote src/styles/shadcn-theme.css
+PUI_STYLE_TIMEOUT_120_SECONDS
+PUI_STYLE_AFTER {"apps/www/src/styles/proto-ui-shadow-style.generated.js": "67e3e6adf39453463137e6f1fb16e58af52c4098d5f5e40a40be0cddaeafb29f", "apps/www/src/styles/proto-ui-shadow-style.generated.d.ts": "76d772bac1c5de84e6fb455683513c74c6d40b55de2744caaf3dfc4e4ead94b8"}
+PUI_STYLE_HASHES_MATCH True
+PUI_STYLE_TRACKED_CSS_RESTORED False
+PUI_STYLE_GENERATE_EXIT 124
+PUI_STYLE_SECONDS 120.012
+[website-prototypes] generated one style sheet and its Shadow companion from 1483 package + website tokens
+[proto-ui] style: wrote src/styles/proto-ui-style.css

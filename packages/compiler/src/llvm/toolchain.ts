@@ -2,7 +2,9 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { diagnostic, err, ok, type CompileResult } from '../diagnostics';
+import { resolveCompilerNativeAsset } from '../native-assets';
 
 export interface LlvmToolchainInfo {
   readonly available: boolean;
@@ -11,6 +13,7 @@ export interface LlvmToolchainInfo {
   readonly llc?: string;
   readonly llvmAs?: string;
   readonly wasmLd?: string;
+  readonly llvmConfig?: string;
 }
 
 export interface LlvmOptimizeResult {
@@ -21,8 +24,20 @@ export interface LlvmOptimizeResult {
 }
 
 function findBinary(name: string): string | undefined {
-  const res = spawnSync('which', [name], { encoding: 'utf8' });
-  if (res.status === 0 && res.stdout.trim()) return res.stdout.trim();
+  const candidates = path.isAbsolute(name)
+    ? [name]
+    : (process.env.PATH ?? '')
+        .split(path.delimiter)
+        .filter(Boolean)
+        .map((dir) => path.join(dir, name));
+  for (const candidate of candidates) {
+    try {
+      fs.accessSync(candidate, fs.constants.X_OK);
+      if (fs.statSync(candidate).isFile()) return candidate;
+    } catch {
+      // Keep checking PATH; absence is reported by the requesting operation.
+    }
+  }
   return undefined;
 }
 
@@ -35,7 +50,7 @@ export function detectLlvmToolchain(forceRefresh = false): LlvmToolchainInfo {
   const llc = findBinary('llc');
   const llvmAs = findBinary('llvm-as');
   const wasmLd = findBinary('wasm-ld');
-  const llvmConfig = findBinary('llvm-config');
+  const llvmConfig = findBinary(process.env.PUI_LLVM_CONFIG ?? 'llvm-config');
   let version: string | undefined;
   if (llvmConfig) {
     const v = spawnSync(llvmConfig, ['--version'], { encoding: 'utf8' });
@@ -52,6 +67,7 @@ export function detectLlvmToolchain(forceRefresh = false): LlvmToolchainInfo {
     llc,
     llvmAs,
     wasmLd,
+    llvmConfig,
   };
   return cachedToolchain;
 }
@@ -236,4 +252,159 @@ export function compileLlvmToWasm(
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
+}
+
+/** Tokenize llvm-config's quoted argv without executing a shell. */
+function configArguments(output: string): string[] {
+  const result: string[] = [];
+  let token = '';
+  let quote = '';
+  let escaped = false;
+  for (const character of output.trim()) {
+    if (escaped) {
+      token += character;
+      escaped = false;
+      continue;
+    }
+    if (character === '\\' && quote !== "'") {
+      escaped = true;
+      continue;
+    }
+    if (quote) {
+      if (character === quote) quote = '';
+      else token += character;
+    } else if (character === '"' || character === "'") {
+      quote = character;
+    } else if (/\s/.test(character)) {
+      if (token) result.push(token);
+      token = '';
+    } else token += character;
+  }
+  if (quote || escaped) throw new Error('llvm-config returned malformed quoted arguments.');
+  if (token) result.push(token);
+  return result;
+}
+
+/**
+ * Compile the small C++ driver against the installed LLVM development SDK.
+ * The cache is derived from source, compiler identity and the SDK's exact flags.
+ */
+function llvmBuilderBinary(): CompileResult<string> {
+  const tc = detectLlvmToolchain();
+  const cxx =
+    findBinary(process.env.PUI_LLVM_CXX ?? 'clang++') ?? findBinary('g++') ?? findBinary('c++');
+  if (!tc.llvmConfig || !cxx || !tc.version?.startsWith('22.')) {
+    return err([
+      diagnostic(
+        'PUI_LLVM_BUILDER001',
+        'llvm',
+        'LLVM emission requires the LLVM 22 development SDK (llvm-config, headers and shared library) ' +
+          'and a C++ compiler. No textual emitter fallback is available.'
+      ),
+    ]);
+  }
+  const sourcePath = resolveCompilerNativeAsset('llvm-builder.cpp');
+  if (!fs.existsSync(sourcePath)) {
+    return err([
+      diagnostic(
+        'PUI_LLVM_BUILDER001',
+        'llvm',
+        'The native LLVM builder source is missing from this compiler installation.'
+      ),
+    ]);
+  }
+  const config = spawnSync(
+    tc.llvmConfig,
+    ['--cxxflags', '--ldflags', '--link-shared', '--libs', 'all', '--system-libs'],
+    { encoding: 'utf8', timeout: 10_000, maxBuffer: 1024 * 1024 }
+  );
+  const libdir = spawnSync(tc.llvmConfig, ['--libdir'], { encoding: 'utf8', timeout: 10_000 });
+  const identity = spawnSync(cxx, ['--version'], { encoding: 'utf8', timeout: 10_000 });
+  if (config.status !== 0 || libdir.status !== 0 || identity.status !== 0) {
+    return err([
+      diagnostic(
+        'PUI_LLVM_BUILDER001',
+        'llvm',
+        'Cannot inspect the LLVM development SDK and C++ compiler: ' +
+          [config.stderr, libdir.stderr, identity.stderr].filter(Boolean).join('\n')
+      ),
+    ]);
+  }
+  let flags: string[];
+  try {
+    flags = configArguments(config.stdout).filter((flag) => flag !== '-fno-exceptions');
+  } catch (error) {
+    return err([diagnostic('PUI_LLVM_BUILDER001', 'llvm', String(error))]);
+  }
+  const digest = createHash('sha256')
+    .update(fs.readFileSync(sourcePath))
+    .update(JSON.stringify({ cxx, identity: identity.stdout, version: tc.version, flags }))
+    .digest('hex');
+  const cacheDir = path.join(os.tmpdir(), 'pui-llvm-builder', digest);
+  const binaryPath = path.join(
+    cacheDir,
+    process.platform === 'win32' ? 'llvm-builder.exe' : 'llvm-builder'
+  );
+  if (fs.existsSync(binaryPath)) return ok(binaryPath);
+  fs.mkdirSync(cacheDir, { recursive: true });
+  const buildDir = fs.mkdtempSync(path.join(cacheDir, 'build-'));
+  const temporaryBinary = path.join(buildDir, 'llvm-builder');
+  try {
+    const args = [
+      sourcePath,
+      '-o',
+      temporaryBinary,
+      ...flags,
+      '-std=c++17',
+      '-fexceptions',
+      '-O2',
+      ...(process.platform === 'win32' ? [] : ['-Wl,-rpath,' + libdir.stdout.trim()]),
+    ];
+    const built = spawnSync(cxx, args, {
+      encoding: 'utf8',
+      timeout: 120_000,
+      maxBuffer: 4 * 1024 * 1024,
+    });
+    if (built.status !== 0) {
+      return err([
+        diagnostic(
+          'PUI_LLVM_BUILDER002',
+          'llvm',
+          'Building the LLVM IRBuilder driver failed: ' +
+            (built.stderr || built.stdout || built.error?.message || String(built.signal)).trim()
+        ),
+      ]);
+    }
+    fs.renameSync(temporaryBinary, binaryPath);
+    return ok(binaryPath);
+  } finally {
+    fs.rmSync(buildDir, { recursive: true, force: true });
+  }
+}
+
+export function invokeLlvmBuilder(requestJson: string): CompileResult<string> {
+  const binary = llvmBuilderBinary();
+  if (!binary.ok) return binary;
+  const emitted = spawnSync(binary.value, [], {
+    input: requestJson,
+    encoding: 'utf8',
+    timeout: 30_000,
+    maxBuffer: 16 * 1024 * 1024,
+  });
+  if (emitted.status !== 0) {
+    return err([
+      diagnostic(
+        'PUI_LLVM_BUILDER003',
+        'llvm',
+        'LLVM could not construct and verify this module: ' +
+          (
+            emitted.stderr ||
+            emitted.stdout ||
+            emitted.error?.message ||
+            String(emitted.signal)
+          ).trim()
+      ),
+    ]);
+  }
+  return ok(emitted.stdout);
 }

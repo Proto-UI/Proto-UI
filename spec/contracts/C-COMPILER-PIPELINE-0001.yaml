@@ -1,71 +1,107 @@
 id: C-COMPILER-PIPELINE-0001
 type: contract
-title: Proto UI v2 compilation pipeline, SSA IR invariants, LLVM Slot ABI, and 3-tier thin React output
+title: Proto semantic compilation, target admission, AST/LLVM construction, and evidence boundaries
 status: draft
 since: 0.3.0
 lifecycleRationale: >-
-  Defines the normative 0.4-scope compilation contract for the rebuilt private @proto.ui/compiler pipeline (#1809), covering TypeScript frontend extraction, Proto SSA IR verification and optimization, LLVM IR and 8-byte slot WASM ABI, 3-tier React emission, and structured diagnostics. Kept draft pending broader multi-target backends and independent review admission.
+  Defines the corrected #1809 0.4-scope compiler contract from TypeScript binding and Proto semantic HIR through target admission, React/GPUI AST generation, and native LLVM IRBuilder output. Replaces the former protocol-wrapper route under the current user's explicit instruction. Remains draft pending full semantic coverage, regression migration, cross-target consumer evidence, and applicable acceptance; earlier wrapper and metadata tests are not inherited proof.
 
-summary: Normative behavioral boundaries for the v2 compiler pipeline from TypeScript prototype source through verified Proto SSA IR and LLVM IR/WASM to 3-tier thin React components.
+summary: Preserve authored semantics through explicit HIR and verified target lowering; reject unsupported behavior and generate programs through target AST/IR APIs without runtime fallback.
 statement:
   zh-CN: >-
-    `@proto.ui/compiler` v2 管线必须将合法的 Proto UI TypeScript 原型源码确定性地转换为经结构校验和优化的 Proto SSA IR（`PROTO_IR_VERSION = 2`）、合法的 Opaque-Pointer LLVM IR（`.ll`）以及按能力闭包分层的薄型 React 组件。规则谓词、状态转移内核与纯标量辅助函数在 LLVM/WASM 边界上遵循统一的 8 字节对齐槽 ABI（`props` / `states` 槽数组）；所有前后端错误须通过结构化诊断码显式报告并快速失败。
+    编译器必须将合法的 Proto UI 定义与 authored 行为表示为可追踪源位置的语义 HIR，按所选目标检查能力并保存求值顺序、控制流、状态、事件、生命周期和所有权，再通过 TypeScript AST、GPUI Rust AST 或原生 LLVM IRBuilder 构造目标程序。未实现语义必须给出明确的未支持诊断；不得静默删除或委托原型 runtime。请求的产物须实际构建及验证，分析成功、内核输出、组件原生编译和真实消费者执行分别报告。
 
   en: >-
-    The `@proto.ui/compiler` v2 pipeline must deterministically transform valid Proto UI TypeScript prototype sources into structurally verified and optimized Proto SSA IR (`PROTO_IR_VERSION = 2`), valid opaque-pointer LLVM IR (`.ll`), and capability-tiered thin React components. Lowered rule predicates, state transition kernels, and pure scalar helpers obey a uniform 8-byte aligned slot ABI across the LLVM/WASM boundary; all pipeline errors fail closed with structured diagnostic codes.
+    The compiler must represent valid Proto UI definitions and authored behavior as source-traceable semantic HIR, admit capabilities for the selected target, preserve evaluation order, control flow, state, events, lifecycle, and ownership, then construct target programs through TypeScript AST, GPUI Rust AST, or native LLVM IRBuilder. Unsupported semantics receive explicit diagnostics and must not be erased or delegated to a prototype runtime. Requested artifacts must actually be built and verified; analysis, kernel emission, native component compilation, and consumer execution are reported separately.
 
 criteria:
   - id: C-COMPILER-PIPELINE-0001-FRONTEND
     text:
-      zh-CN: 前端必须通过缓存 `ts.Program` 与 `ts.TypeChecker` 抽取 `definePrototype` / `defineAsHook` / `defineHook` 声明，递归收敛 authored hook、传入 `def` 的局部 helper 及回调内 `run.context.*` 访问，并计算精确的 64-bit `capabilityMask`。
-      en: The frontend must extract `definePrototype`, `defineAsHook`, and `defineHook` declarations via a cached `ts.Program` and `ts.TypeChecker`, transitively traversing authored hooks, local helpers receiving `def`, and callback `run.context.*` accesses to compute an exact 64-bit `capabilityMask`.
+      zh-CN: 使用缓存 ts.Program/ts.TypeChecker 解析真实符号、导出、别名及组合；已识别操作产生语义表示，无法分析的语句/回调/选项产生含源位置和原因的 lowering gap，不得仅以名称、语法扫描或能力缺失推定可静态编译。
+      en: Resolve real symbols, exports, aliases, and composition through cached ts.Program/ts.TypeChecker sessions. Recognized operations produce semantics; unanalyzed statements/callbacks/options produce source-located lowering gaps rather than being treated as statically compilable because a name scan or capability summary omitted them.
+  - id: C-COMPILER-PIPELINE-0001-HIR
+    text:
+      zh-CN: HIR 必须保存表达式与动作体、if/else 两侧、短路及求值次数、绑定身份、props/default/empty/update、state读写与事件顺序、生命周期及能力owner；任何尚未完整表示或降低的相关行为在目标生成前明确拒绝，不得被摘要或默认常量代替。
+      en: HIR must preserve expressions and action bodies, both if/else branches, short-circuit evaluation, binding identity, props/default/empty/update semantics, state and event order, lifecycle, and capability ownership. Relevant behavior not fully represented or lowered is rejected before target emission, never replaced by summaries or default constants.
   - id: C-COMPILER-PIPELINE-0001-SSA-IR
     text:
-      zh-CN: Proto SSA IR 必须满足单赋值、显式基本块终结、目标标签存在与静态操作数/返回类型一致等结构不变量；任何非法 SSA 函数必须被 `verifySsaFunction` / `verifyModuleIR` 拒绝并返回 `PUI_IR0xx` 诊断。
-      en: Proto SSA IR must uphold single-assignment, explicit block termination, valid branch target labels, and operand/return type consistency; malformed SSA functions must be rejected by `verifySsaFunction` / `verifyModuleIR` with `PUI_IR0xx` diagnostics.
+      zh-CN: 类型化内核必须满足值唯一性、基本块终结、操作数与返回类型、支配关系、PHI前驱、调用签名及指针/槽范围不变量；优化前后校验，非法IR必须在目标构造前失败。
+      en: Typed kernels must uphold value uniqueness, block termination, operand/return types, dominance, PHI predecessor coverage, call signatures, and pointer/slot invariants. Verification runs before and after optimization, and malformed IR fails before target construction.
   - id: C-COMPILER-PIPELINE-0001-OPT
     text:
-      zh-CN: 目标无关优化 Pass（常量折叠、代数化简、不可达块裁剪、反向活跃性 DCE）必须在保持语义与副作用指令（`store_state`/`call`/`host_op`）的前提下收敛，且优化后 IR 必须重新通过结构校验。
-      en: Target-independent optimization passes (constant folding, algebraic simplification, dead-block pruning, and backward liveness DCE) must preserve semantics and side-effecting instructions (`store_state`, `call`, `host_op`) and re-pass structural verification.
+      zh-CN: 优化必须保存源语义、控制流、求值次数、副作用和清理；f64保留NaN、Infinity、正负零及比较语义，整数折叠遵守目标位宽与溢出规则。不得以LLVM结构校验替代优化前后及源语义的执行差分。
+      en: Optimization preserves source semantics, control flow, evaluation counts, effects, and cleanup. f64 preserves NaN, Infinity, signed zero, and comparison behavior; integer folding follows target width/overflow rules. LLVM structural verification does not replace execution comparisons against source and pre-optimization semantics.
   - id: C-COMPILER-PIPELINE-0001-LLVM-ABI
     text:
-      zh-CN: LLVM 发射器必须产出可通过 `opt -passes=verify` 校验的 Opaque-Pointer `.ll`，导出 `<protoSym>_capabilities`、规则谓词/位图与状态转移内核，遵循统一 8 字节对齐槽 ABI（slot `k` 偏移 `8 * k`），并可通过 `opt`/`llc`/`wasm-ld` 编译为可在 `WebAssembly.instantiate` 执行的 `.wasm` 二进制；非法 LLVM IR 必须返回 `PUI_LLVM002`。
-      en: The LLVM emitter must produce opaque-pointer `.ll` accepted by `opt -passes=verify`, exporting `<protoSym>_capabilities`, rule predicate/mask functions, and state transition kernels under the uniform 8-byte aligned slot ABI (slot `k` at byte offset `8 * k`), compilable via `opt`/`llc`/`wasm-ld` to executable `.wasm`; malformed LLVM IR must fail with `PUI_LLVM002`.
+      zh-CN: LLVM产物须由C++ IRBuilder/Module构造、verifyModule验证并由标准接口输出；ABI明确版本、槽宽、容量、对齐、所有权与实际内存。WASM宿主按实际堆边界分区、检查每次访问、处理grow并隔离实例；缺少内存或未定义ABI不得使用临时内存或默认值继续。
+      en: LLVM artifacts are constructed with C++ IRBuilder/Module, verified with verifyModule, and emitted through standard interfaces. The ABI declares version, slot size, capacities, alignment, ownership, and actual memory. WASM hosts allocate beyond the actual heap boundary, check accesses, handle growth, and isolate instances; missing memory or undefined ABI must not be masked with temporary memory or defaults.
   - id: C-COMPILER-PIPELINE-0001-THIN-EMIT
     text:
-      zh-CN: React 代码生成器必须严格输出三层薄产物：`static` 零 Proto 运行时导入、`reactive` 使用原生 `React.useState` 且零 Proto kernel 导入、`protocol` 输出紧凑强类型包装并委托 `@proto.ui/compiler/runtime`；编译器源码中不得包含 `String.raw` 嵌入式运行时，且官方 `packages/prototypes/base/src/**/*.proto.ts` 语料全部可薄型编译并通过执行验证。
-      en: The React emitter must emit strictly tiered thin output (`static` with zero Proto runtime imports, `reactive` with native `React.useState` and zero Proto kernel imports, and `protocol` as a compact strictly typed wrapper over `@proto.ui/compiler/runtime`), with zero `String.raw` embedded runtimes in compiler source and full compilation coverage across `packages/prototypes/base/src/**/*.proto.ts`.
+      zh-CN: React生成器通过ts.factory/ts.Printer构造并输出原生组件，完整保存所准入的props/state/event/rule/lifecycle语义。禁止源代码字符串模板、先拼源码再解析、原.proto.ts导入及Proto runtime/adapter回退。未支持行为必须阻断目标生成。
+      en: React code generation constructs native components through ts.factory/ts.Printer, preserving admitted props/state/event/rule/lifecycle semantics. Source templates, parsing constructed source, original prototype imports, and Proto runtime/adapter fallback are prohibited. Unsupported behavior blocks target emission.
+  - id: C-COMPILER-PIPELINE-0001-GPUI
+    text:
+      zh-CN: GPUI后端必须通过syn节点及prettyplease构造Rust组件，保存已准入的props/state/Render/事件/规则/生命周期语义，禁止Rust源码模板和原型执行回退。依赖pin和feature与真实消费者保持可核对；真实Cargo构建、行为及Verdant GPUI验收分别记录，缺失能力明确诊断。
+      en: The GPUI backend must construct Rust components through syn nodes and prettyplease, preserving admitted props/state/Render/event/rule/lifecycle semantics without Rust source templates or prototype execution fallback. Dependency pins/features remain auditable against real consumers; actual Cargo builds, behavior, and Verdant GPUI acceptance are recorded separately, with diagnostics for missing capabilities.
   - id: C-COMPILER-PIPELINE-0001-DIAGNOSTICS
     text:
-      zh-CN: 编译器 API 与 CLI（`info`、`check`、`ir`、`llvm`、`compile`）必须返回结构化诊断与确定性退出码，缺失原型声明时返回 `PUI_FE002`，在工具链不可用或校验失败时显式报错而不静默跳过。
-      en: Compiler APIs and CLI subcommands (`info`, `check`, `ir`, `llvm`, `compile`) must emit structured diagnostics and deterministic exit codes, report `PUI_FE002` when no prototype is found (unless hook-only is permitted), and fail explicitly on verification or toolchain errors.
+      zh-CN: API/CLI输出结构化诊断与确定退出码，区分输入非法、目标未支持、构建或验证失败。显式请求的LLVM/原生/WASM阶段必须真实执行；工具链不可用时失败，不以warning或静默跳过记作通过，输出失败不得伪造成功产物。
+      en: APIs/CLI emit structured diagnostics and deterministic exits distinguishing invalid input, unsupported targets, and build/verification failure. Explicit LLVM/native/WASM stages actually run and fail when unavailable rather than passing with warnings or silent skips; failed output must not be presented as a successful artifact.
+  - id: C-COMPILER-PIPELINE-0001-COVERAGE
+    text:
+      zh-CN: 每文件、原型、hook及目标分别报告分析、原生编译、未支持/非法、内核生成与消费者执行；统计包含原因和证明边界。产物体积计入传递依赖，冷/热/增量耗时分开，包装行数与删除代码量不能代表覆盖或性能收益。
+      en: Report analysis, native compilation, unsupported/invalid results, kernel emission, and consumer execution per file/prototype/hook/target with reasons and evidence limits. Size includes transitive dependencies and timing distinguishes cold/warm/incremental work; wrapper line counts and deleted code volume do not establish coverage or performance benefit.
+  - id: C-COMPILER-PIPELINE-0001-CONSUMERS
+    text:
+      zh-CN: 全量官方Base/设计家族、其他已承诺后端、浏览器/CLI/库接口及Shenko React/Web、Verdant GPUI等真实消费者的原生编译、构建和行为验收必须保留并迁移。显式未支持只完成诊断义务，不取消原有能力与回归测试债务。
+      en: Native compilation, build, and behavioral acceptance for the full official Base/family corpus, other committed backends, browser/CLI/library interfaces, and real consumers including Shenko React/Web and Verdant GPUI remain migration obligations. Explicit unsupported results fulfill diagnostics only and do not cancel capability or regression-test debt.
 dependsOn:
   decisions:
     - D-COMPILER-ARCH-0001
 sources:
   - path: internal/compiler/v2-compilation-spec.md
   - path: packages/compiler/src/frontend/extract.ts
+  - path: packages/compiler/src/frontend/bindings.ts
+  - path: packages/compiler/src/frontend/actions.ts
+  - path: packages/compiler/src/frontend/constants.ts
+  - path: packages/compiler/src/frontend/scalars.ts
+  - path: packages/compiler/src/frontend/template.ts
+  - path: packages/compiler/src/frontend/rules.ts
+  - path: packages/compiler/src/frontend/syntax.ts
+  - path: packages/compiler/src/frontend/kernel.ts
+  - path: packages/compiler/src/ir/types.ts
   - path: packages/compiler/src/ir/verify.ts
   - path: packages/compiler/src/ir/passes.ts
   - path: packages/compiler/src/llvm/emit.ts
   - path: packages/compiler/src/llvm/toolchain.ts
+  - path: packages/compiler/src/native-assets.ts
+  - path: packages/compiler/native/llvm-builder.cpp
   - path: packages/compiler/src/targets/react.ts
+  - path: packages/compiler/src/targets/kernel.ts
+  - path: packages/compiler/src/targets/gpui.ts
+  - path: packages/compiler/native/rust-builder/src/main.rs
+  - path: packages/compiler/native/rust-builder/test-support/Cargo.toml
   - path: packages/compiler/src/runtime/index.ts
 openQuestions:
   - id: C-COMPILER-PIPELINE-0001-Q-NON-REACT-TARGETS
     question:
-      zh-CN: 当前仅 React 与 LLVM/WASM 后端具备完整端到端执行验证；Vue 3、Web Components 与 GPUI 原生后端的薄型契约与消费者证据尚待 0.4 后续批次补齐。
-      en: Only React and LLVM/WASM backends have full end-to-end execution evidence today; thin Vue 3, Web Components, and native GPUI consumer contracts remain for follow-up 0.4 slices.
+      zh-CN: 全量原型语义和各目标降级、浏览器/CLI/库兼容、旧回归及GPUI/Shenko/Verdant真实消费者证据尚待逐项完成；局部React与LLVM内核用例不能覆盖这些义务。
+      en: Full prototype semantics and target lowering, browser/CLI/library compatibility, prior regressions, and real GPUI/Shenko/Verdant consumer evidence remain to be completed explicitly. Local React and LLVM kernel examples do not cover these obligations.
     blocks:
       - activation:C-COMPILER-PIPELINE-0001
+      - criterion:C-COMPILER-PIPELINE-0001#C-COMPILER-PIPELINE-0001-CONSUMERS
 revisions:
   - version: 0.3.0
     change: introduced
     summary: Defined the v2 compiler pipeline contract for TS TypeChecker extraction, Proto SSA IR verification/optimization, LLVM 8-byte slot ABI/WASM execution, 3-tier thin React codegen, and CLI diagnostics (#1809).
+  - version: 0.3.0
+    change: refined
+    summary: Refined the pipeline contract to preserve authored control flow and ownership, fail explicitly on unsupported behavior, construct React and GPUI targets through AST/IR APIs, verify the real ABI, and separate analysis, native compilation, kernels, and consumer evidence.
 tags:
   - compiler
   - pipeline
-  - ssa
+  - hir
+  - ast
   - llvm
   - wasm
   - react

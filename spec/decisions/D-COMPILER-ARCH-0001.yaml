@@ -1,40 +1,44 @@
 id: D-COMPILER-ARCH-0001
 type: decision
-title: Clean-slate Proto UI v2 compiler architecture (TS TypeChecker, Proto SSA IR, LLVM IR, 3-tier thin lowering)
+title: Proto semantic compiler with React and GPUI AST lowering and LLVM IRBuilder
 status: draft
 since: 0.3.0
 lifecycleRationale: >-
-  Records the 0.4-scope architectural reset authorized under issue #1809 to replace the legacy 180k-LOC string-template compiler with a real TypeScript TypeChecker frontend, typed Proto SSA IR, LLVM IR toolchain pipeline, and 3-tier thin React codegen over a shared runtime. Kept draft because packages/compiler remains private 0.4 experimental scope pending multi-target completion and independent acceptance.
+  Records the current-user correction of the #1809 0.4-scope rebuild: compile authored semantics through a Proto HIR and target lowering, construct React and GPUI programs through TypeScript/Rust AST and kernels through LLVM C++ APIs, and remove prototype-runtime wrapper fallback. Remains draft while semantic coverage, cross-target migration, consumer integration, and independent acceptance are incomplete. Historical wrapper acceptance and deleted code volume do not establish native compiler completion.
 
-summary: Replace embedded String.raw runtime duplication and hand-rolled parsing with a real TypeScript frontend, verified Proto SSA IR, native LLVM IR/WASM lowering, and capability-driven 3-tier thin codegen.
+summary: Compile Proto semantics through explicit HIR and target admission into structurally constructed native programs, with unsupported diagnostics and no prototype-runtime fallback.
 statement:
   zh-CN: >-
-    Proto UI 私有编译器（`packages/compiler`，0.4 scope，#1809）采用四段式真实编译器架构：以工作区 `tsconfig.json` 驱动的缓存 `ts.Program` + `ts.TypeChecker` 为前端；以强类型、单赋值、经结构校验且具备常量折叠/代数化简/死块裁剪/反向活跃性 DCE 的 Proto SSA IR 为核心中间表示；以 Opaque-Pointer LLVM IR（`.ll`）及真实 LLVM 工具链（`opt`、`llvm-as`、`llc`、`wasm-ld`）承接验证、优化与原生/WASM 标量内核生成；并按编译期 64-bit 能力闭包实行三层渐进式薄输出（`static` 零运行时、`reactive` 原生 `React.useState`、`protocol` 薄包装委托共享运行时 `@proto.ui/compiler/runtime`）。严禁在编译器源码中使用 `String.raw` 复制嵌入式运行时，严禁按组件名或源码路径特判业务逻辑，并移除文档站 QuickJS-in-WASM 嵌套沙箱。
+    Proto UI 编译器以真实 ts.Program 和 ts.TypeChecker 提供的绑定与类型事实为基础，建立保留表达式、控制流、props/state、事件、生命周期及能力所有权的 Proto 语义 HIR；经目标能力准入与降级，使用 ts.factory 和 ts.Printer 构造 React 程序、使用 syn Rust AST 和 prettyplease 构造 GPUI 原生组件，使用 LLVM C++ IRBuilder、Module 和标准 printer 构造适用的原生/WASM 内核。禁止源码字符串模板、先拼源码再解析的替代手法，以及导入原 .proto.ts 或调用 Proto runtime/adapter 执行未编译行为的回退。未实现的合法语义必须明确诊断，并继续保留其原有交付与消费者验收义务。
 
   en: >-
-    The private Proto UI compiler (`packages/compiler`, 0.4 scope, #1809) adopts a four-stage real compiler architecture: a cached `ts.Program` + `ts.TypeChecker` frontend backed by workspace `tsconfig.json`; a typed, single-assignment, structurally verified Proto SSA IR with target-independent passes (constant folding, algebraic simplification, dead-block pruning, backward liveness DCE, and 64-bit capability closure); native opaque-pointer LLVM IR (`.ll`) emission integrated with real LLVM tooling (`opt`, `llvm-as`, `llc`, `wasm-ld`) for verification, optimization, and native/WASM kernel compilation; and capability-driven 3-tier thin target emission (`static` zero-runtime, `reactive` native `React.useState`, and `protocol` thin wrappers delegating to `@proto.ui/compiler/runtime`). Embedded `String.raw` runtime copies, component-name/path business dispatch, and the legacy QuickJS-in-WASM browser VM are rejected.
+    The Proto UI compiler uses binding and type facts from a real ts.Program and ts.TypeChecker to construct a semantic Proto HIR preserving expressions, control flow, props/state, events, lifecycle, and capability ownership. Target admission and lowering construct React programs through ts.factory and ts.Printer, native GPUI components through syn Rust AST and prettyplease, and applicable native/WASM kernels through LLVM C++ IRBuilder, Module, and standard printers. Source templates, parsing constructed source as a substitute for structured generation, and fallback that imports the original prototype or executes it through a Proto runtime/adapter are prohibited. Valid but unsupported semantics receive explicit diagnostics while retaining their existing delivery and consumer obligations.
 
 criteria:
   - id: D-COMPILER-ARCH-0001-A
     text:
-      zh-CN: '`packages/compiler/src/**` 不得通过 `String.raw` 或等价多行字符串模板将 DOM/运行时模块复制到生成产物；完整协议组件必须委托给共享运行时入口 `@proto.ui/compiler/runtime`。'
-      en: '`packages/compiler/src/**` must not embed copied DOM or runtime modules via `String.raw` or equivalent string templates; protocol-tier components must delegate to the shared `@proto.ui/compiler/runtime` entry.'
+      zh-CN: 目标程序必须通过结构化 AST/IR API 构造；禁止源码字符串模板及拼接后再解析。生成组件不得导入原 .proto.ts、Proto runtime/adapter 或等价原型执行桥；共享宿主原语不得承载通用 Proto 执行器。
+      en: Target programs must be constructed through structured AST/IR APIs without source templates or parsing constructed source. Generated components must not import original prototypes, Proto runtimes/adapters, or equivalent execution bridges; shared host primitives must not carry a generic Proto executor.
   - id: D-COMPILER-ARCH-0001-B
     text:
-      zh-CN: 前端抽取必须基于真实 `ts.Program` 与 `ts.TypeChecker` 解析导出、导入别名、组合 Hook 与 `def.*`/`run.*` 能力闭包，不得以组件名、导出名或源码路径决定语义行为。
-      en: Frontend extraction must use a real `ts.Program` and `ts.TypeChecker` to resolve exports, import aliases, authored hooks, and `def.*`/`run.*` capability closures without dispatching business semantics by component name, export name, or source path.
+      zh-CN: 前端必须基于真实 TypeScript 绑定、符号与类型事实解析导入、导出、别名、组合和能力，不得按组件名、文件路径或命名形态决定语义。未知语句、回调与选项必须保留未降级原因，不得静默丢弃。
+      en: The frontend must resolve imports, exports, aliases, composition, and capabilities from real TypeScript binding, symbol, and type facts without name/path heuristics for semantics. Unknown statements, callbacks, and options must retain lowering gaps rather than disappearing silently.
   - id: D-COMPILER-ARCH-0001-C
     text:
-      zh-CN: 中间表示必须采用带显式基本块与单赋值约束的 Proto SSA IR，并通过结构校验器及目标无关优化 Pass，任何结构非法 IR 必须在后端发射前失败。
-      en: The intermediate representation must be a typed Proto SSA IR with explicit basic blocks and single-assignment invariants, guarded by a structural verifier and target-independent optimization passes that fail closed before emission.
+      zh-CN: Proto 语义 HIR 必须保存执行顺序、表达式、控制流、状态、事件、生命周期与能力所有权；类型化标量内核可进一步降低为 SSA。各层必须校验自身不变量，能力位图与元数据不得替代实际行为表示。
+      en: Semantic Proto HIR must preserve evaluation order, expressions, control flow, state, events, lifecycle, and capability ownership; typed scalar kernels may lower further to SSA. Each layer verifies its invariants, and capability masks or metadata must not substitute for behavioral representation.
   - id: D-COMPILER-ARCH-0001-D
     text:
-      zh-CN: 编译器必须发射合法的 Opaque-Pointer LLVM IR（`.ll`），并支持对接本机 LLVM 工具链（`opt`、`llvm-as`、`llc`、`wasm-ld`）完成验证、`O2` 优化与可执行 `wasm32` 内核编译；当宿主机未安装 LLVM 时须显式降级而非伪造通过。
-      en: The compiler must emit valid opaque-pointer LLVM IR (`.ll`) and integrate with installed LLVM tooling (`opt`, `llvm-as`, `llc`, `wasm-ld`) for verification, `O2` optimization, and executable `wasm32` kernel generation, degrading explicitly when LLVM tools are absent.
+      zh-CN: LLVM 后端必须使用原生 LLVM C++ API 构造并验证 Module，由标准 printer/产物接口输出，不得拼接 .ll 后交给 parser。显式请求 LLVM 产物或验证时，工具链缺失及各阶段失败必须报告；React-only 编译无需生成未请求的 LLVM 附属产物。
+      en: The LLVM backend must construct and verify modules through native LLVM C++ APIs and use standard printers/artifact interfaces, never assembling .ll strings for a parser. Explicit LLVM artifact or verification requests fail on missing tools or stage errors; React-only compilation need not generate unrequested LLVM sidecars.
   - id: D-COMPILER-ARCH-0001-E
     text:
-      zh-CN: 目标降级必须严格按能力闭包分为 `static`（零 Proto 运行时）、`reactive`（原生宿主响应状态，零 Proto kernel）与 `protocol`（薄包装共享运行时）三层，并支持全量官方 Base 原型编译而不引入人工阻断。
-      en: Target lowering must classify prototypes strictly by capability closure into `static` (zero Proto runtime), `reactive` (target-native reactivity, zero Proto kernel), and `protocol` (thin shared-runtime wrapper), compiling the official Base prototype corpus cleanly.
+      zh-CN: 按目标逐项准入并原生降级完整行为，分别报告 analyzed、compiled-native、unsupported 和消费者执行证据；禁止 runtime 包装回退。全量官方 Base 与已承诺目标及消费者仍需完成原生编译和行为验收，明确拒绝未支持项不等于完成该项。
+      en: Admit and natively lower complete behavior per target, reporting analyzed, compiled-native, unsupported, and consumer execution evidence separately without runtime-wrapper fallback. Full official Base coverage and committed targets/consumers still require native compilation and behavioral acceptance; an explicit unsupported diagnostic does not complete that obligation.
+  - id: D-COMPILER-ARCH-0001-F
+    text:
+      zh-CN: GPUI为本轮并行实施目标：从同一语义HIR降级为Rust AST、类型化组件及真实GPUI Render/事件/生命周期接线。结构化生成、真实GPUI依赖构建与Verdant GPUI消费者验收分别提供证据；LLVM内核或原生壳不能代替完整组件。
+      en: GPUI is a parallel implementation target in this iteration, lowering the same semantic HIR into Rust AST, typed components, and real GPUI Render/event/lifecycle integration. Structured generation, real GPUI dependency builds, and Verdant GPUI consumer acceptance require separate evidence; LLVM kernels or native shells do not substitute for complete components.
 sources:
   - path: internal/compiler/v2-compilation-spec.md
   - path: internal/compiler/atomic-lowering-completion.md
@@ -43,19 +47,23 @@ sources:
 openQuestions:
   - id: D-COMPILER-ARCH-0001-Q-MULTI-TARGET
     question:
-      zh-CN: Vue 3、Web Components 与 GPUI/Rust 原生后端尚未在 v2 SSA/LLVM 架构下完成独立实现与消费者验收；在此之前本决策保持 `draft` 与 `0.4 scope`。
-      en: Thin Vue 3, Web Components, and native GPUI/Rust backends on the v2 SSA/LLVM pipeline remain to be implemented and consumer-verified before stable admission beyond 0.4 experimental scope.
+      zh-CN: 语义 HIR 和各目标原生降级覆盖、旧回归迁移、浏览器/CLI/库接口及 GPUI/Rust、Shenko、Verdant 等消费者验收仍须逐项补齐；其余已记录目标不得因本次重建自动退出。
+      en: Semantic HIR and target lowering coverage, regression migration, browser/CLI/library interfaces, and GPUI/Rust, Shenko, Verdant, and other consumer acceptance require explicit completion. Other recorded targets do not automatically exit scope because of this rebuild.
     blocks:
       - activation:D-COMPILER-ARCH-0001
+      - criterion:D-COMPILER-ARCH-0001#D-COMPILER-ARCH-0001-E
 revisions:
   - version: 0.3.0
     change: introduced
     summary: Recorded the #1809 clean-slate v2 compiler architecture decision (TS TypeChecker frontend, Proto SSA IR, LLVM IR/WASM pipeline, 3-tier thin React lowering over shared runtime).
+  - version: 0.3.0
+    change: refined
+    summary: Refined #1809 under the 2026-11-25 current-user instruction to require semantic HIR, target admission, TypeScript AST and LLVM C++ IRBuilder construction, prohibit source templates and prototype-runtime fallback, implement GPUI Rust AST lowering in parallel, and preserve full native corpus and consumer obligations.
 tags:
   - compiler
   - architecture
   - ir
-  - ssa
+  - ast
   - llvm
   - wasm
   - react

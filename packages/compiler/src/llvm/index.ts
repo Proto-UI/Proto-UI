@@ -1,4 +1,4 @@
-export { emitLlvmIR, formatLlvmDouble, type LlvmEmitOptions } from './emit';
+export { emitLlvmIR, emitLlvmIRResult, LlvmEmissionError, type LlvmEmitOptions } from './emit';
 export {
   detectLlvmToolchain,
   verifyLlvmIr,

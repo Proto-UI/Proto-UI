@@ -1,0 +1,78 @@
+{
+  "branch": "feat/compiler-ast-pipeline-1809",
+  "localRoot": "/workspace/scratch/64af6171bd8b/compiler-ast-1809",
+  "remoteRoot": "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125",
+  "files": [
+    {
+      "path": "internal/compiler/v2-compilation-spec.md",
+      "sha256": "9c25688887a1a28bf74c6457b447877184e06a1085c8a91fcabd9fb6302cb71c"
+    },
+    {
+      "path": "packages/compiler/README.md",
+      "sha256": "5ead0903beb30c5bd2aa800023ddf74060504ae71f29ba82fded5578809fd6a0"
+    },
+    {
+      "path": "spec/decisions/D-COMPILER-ARCH-0001.yaml",
+      "sha256": "f1abc0952fdd40eedc32c3c3530aa34a5f30128b47cdf85e5eaba375ea0c8125"
+    },
+    {
+      "path": "spec/contracts/C-COMPILER-PIPELINE-0001.yaml",
+      "sha256": "34a5f84fef9f59ce1555e845b7101902c44db011b6aa9fca5194b300caf6478a"
+    },
+    {
+      "path": "spec/tests/T-COMPILER-PIPELINE-0001.yaml",
+      "sha256": "5247519b85715d2d376a6b3eccc6572cc9f1586d10ca141629fc285a06ba452f"
+    }
+  ],
+  "validation": {
+    "specAuthoring": {
+      "exitCode": 0,
+      "changedEntities": 3,
+      "base": "73ff284730c4b93a8c145bd23a4ab0370edec9a1",
+      "log": "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-doc-gates/delivery-authoring-wpuqq0gx/check.log"
+    },
+    "catalogEvidence": {
+      "exitCode": 0,
+      "passed": 13,
+      "log": "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-doc-gates/delivery-evidence-x213b9tv/check.log"
+    },
+    "agentDocs": {
+      "generateExitCode": 0,
+      "checkExitCode": 0,
+      "generatedIsIgnored": true,
+      "log": "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-doc-gates/delivery-agent-doc-qnqlzo6m/check.log"
+    },
+    "publicDocs": {
+      "exitCode": 0,
+      "maintainedDocuments": 450,
+      "log": "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-doc-gates/delivery-public-docs-corrected/check.log"
+    }
+  },
+  "entities": {
+    "status": "draft",
+    "criteria": 16,
+    "cases": 10,
+    "implementations": 14,
+    "requiredMissing": ["compiler-base-shadcn-corpus", "compiler-real-consumers"]
+  },
+  "corpus": {
+    "targets": ["react", "gpui"],
+    "inputFiles": 184,
+    "prototypes": 212,
+    "authoredHooks": 214,
+    "nativeEmittedPerTarget": 0,
+    "unsupportedPrototypesPerTarget": 212,
+    "sourceErrorFilesPerTarget": 0,
+    "executionVerifiedPerTarget": 0,
+    "unsupportedFilesPerTarget": 179,
+    "hookAnalysisFilesPerTarget": 5
+  },
+  "separateNonPassingRun": {
+    "command": "check:agent-operations",
+    "passed": 1208,
+    "cancelled": 1,
+    "exitCode": 1,
+    "scope": "Earlier extra full agent-operations run; connector-review pending Promise/cancellation; not rerun per parent instruction.",
+    "log": "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-doc-gates/agent-operations-vir7vi6_/output.log"
+  }
+}

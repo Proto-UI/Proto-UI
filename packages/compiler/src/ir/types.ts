@@ -119,6 +119,11 @@ export type SsaInst =
       readonly operand: string;
     }
   | {
+      readonly op: 'fneg';
+      readonly result: string;
+      readonly operand: string;
+    }
+  | {
       readonly op: 'select';
       readonly result: string;
       readonly type: Exclude<SsaType, 'void'>;
@@ -186,6 +191,7 @@ export interface PropDeclIR {
   readonly defaultValue?: ScalarLiteral;
   readonly options?: readonly ScalarLiteral[];
   readonly empty?: 'accept' | 'fallback' | 'error';
+  readonly range?: { readonly min?: number; readonly max?: number };
   readonly ssaType: Exclude<SsaType, 'void'>;
 }
 
@@ -195,6 +201,11 @@ export interface StateDeclIR {
   readonly variableName?: string;
   readonly kind: 'bool' | 'string' | 'enum' | 'number.discrete' | 'number.range';
   readonly initialValue?: ScalarLiteral;
+  readonly options?: readonly ScalarLiteral[];
+  readonly min?: number;
+  readonly max?: number;
+  readonly step?: number;
+  readonly clamp?: boolean;
   readonly ssaType: Exclude<SsaType, 'void'>;
 }
 
@@ -207,6 +218,7 @@ export interface ExposeDeclIR {
 export interface EventDeclIR {
   readonly scope: 'root' | 'global';
   readonly eventName: string;
+  readonly body?: readonly ActionStatementIR[];
   readonly simpleAction?:
     | {
         readonly kind: 'increment-state';
@@ -222,6 +234,68 @@ export interface EventDeclIR {
         readonly stateName: string;
         readonly value: ScalarLiteral;
       };
+}
+
+/** Values preserve source evaluation order. No source fragments survive into this IR. */
+export type ValueExprIR =
+  | { readonly kind: 'literal'; readonly value: ScalarLiteral }
+  | { readonly kind: 'state'; readonly name: string }
+  | { readonly kind: 'prop'; readonly name: string; readonly source?: 'current' | 'previous' }
+  | { readonly kind: 'local'; readonly name: string }
+  | { readonly kind: 'unary'; readonly operator: '!' | '-' | '+'; readonly operand: ValueExprIR }
+  | {
+      readonly kind: 'binary';
+      readonly operator:
+        | '+'
+        | '-'
+        | '*'
+        | '/'
+        | '%'
+        | '==='
+        | '!=='
+        | '<'
+        | '<='
+        | '>'
+        | '>='
+        | '&&'
+        | '||'
+        | '??';
+      readonly left: ValueExprIR;
+      readonly right: ValueExprIR;
+    }
+  | {
+      readonly kind: 'conditional';
+      readonly condition: ValueExprIR;
+      readonly then: ValueExprIR;
+      readonly otherwise: ValueExprIR;
+    };
+
+export type ActionStatementIR =
+  | { readonly kind: 'state-set'; readonly stateName: string; readonly value: ValueExprIR }
+  | { readonly kind: 'local'; readonly name: string; readonly value: ValueExprIR }
+  | {
+      readonly kind: 'if';
+      readonly condition: ValueExprIR;
+      readonly then: readonly ActionStatementIR[];
+      readonly otherwise: readonly ActionStatementIR[];
+    }
+  | { readonly kind: 'return' };
+
+export interface LoweringGapIR {
+  readonly operation: string;
+  readonly message: string;
+  readonly span?: SourceSpan;
+}
+
+export interface LifecycleDeclIR {
+  readonly phase: 'created' | 'mounted' | 'updated' | 'unmounted' | 'before-dispose';
+  readonly body: readonly ActionStatementIR[];
+}
+
+export interface PropWatchDeclIR {
+  /** null selects every declared resolved property. Raw subscriptions are a separate capability. */
+  readonly keys: readonly string[] | null;
+  readonly body: readonly ActionStatementIR[];
 }
 
 export interface HookCallIR {
@@ -282,13 +356,8 @@ export type RenderIR =
   | { readonly kind: 'reactive-tree'; readonly root: TemplateElementIR }
   | { readonly kind: 'dynamic' };
 
-/**
- * Compilation tier selected from static capability closure:
- * - `static`: pure functional React component, zero runtime dependency (<20 LOC)
- * - `reactive`: direct React hooks (`useState` + native handlers), zero Proto kernel
- * - `protocol`: thin typed React wrapper over canonical `@proto.ui/compiler/runtime`
- */
-export type CompilationTier = 'static' | 'reactive' | 'protocol';
+/** Structural reactivity classification. Target admission is checked separately. */
+export type CompilationTier = 'static' | 'reactive';
 
 export interface PrototypeIR {
   readonly name: string;
@@ -308,11 +377,14 @@ export interface PrototypeIR {
   readonly staticStyleTokens: readonly string[];
   readonly rules: readonly RuleIR[];
   readonly lifecycle: readonly LifecycleHookName[];
+  readonly lifecycleHandlers?: readonly LifecycleDeclIR[];
+  readonly propWatches?: readonly PropWatchDeclIR[];
   readonly render: RenderIR;
   readonly capabilities: readonly CapabilityName[];
   readonly capabilityMask: bigint;
   readonly functions: readonly SsaFunction[];
   readonly stringTable: readonly string[];
+  readonly unlowered?: readonly LoweringGapIR[];
 }
 
 export interface AuthoredHookSummary {

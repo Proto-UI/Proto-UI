@@ -55,7 +55,9 @@ describe('Proto SSA IR', () => {
     expect(stats.eliminatedBlocks).toBe(1);
     expect(stats.eliminatedInstructions).toBeGreaterThan(0);
     expect(opt.blocks.map((blk) => blk.label)).toEqual(['entry', 'then_blk']);
-    expect(printSsaFunction(opt)).toContain('select.i32 %x');
+    expect(JSON.parse(printSsaFunction(opt)).blocks[1].instructions).toContainEqual(
+      expect.objectContaining({ op: 'select', type: 'i32', cond: '%x' })
+    );
   });
 
   it('rejects malformed SSA invariants cleanly', () => {

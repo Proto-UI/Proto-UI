@@ -1,81 +1,215 @@
 id: T-COMPILER-PIPELINE-0001
 type: test
-title: Proto UI v2 compiler SSA IR, LLVM 22/WASM execution, 3-tier React, Base corpus, and CLI tests
+title: Semantic HIR, AST generation, native LLVM construction, and compiler coverage evidence
 status: draft
 since: 0.3.0
 lifecycleRationale: >-
-  Maps the executable Vitest evidence suite created for the #1809 clean-slate v2 compiler rebuild across SSA IR invariants, real LLVM 22 verification/WASM execution, React 19 happy-dom execution, the full 184-file Base prototype corpus, and CLI subcommands. Remains draft alongside D-COMPILER-ARCH-0001 and C-COMPILER-PIPELINE-0001 in 0.4 experimental scope.
+  Maps acceptance for the current-user correction of #1809 to a semantic compiler with no source-template generation or prototype-runtime fallback. Earlier passing mappings described the 73ff2847 wrapper/metadata snapshot and are not inherited as evidence for this contract. Required native corpus, regression, and consumer coverage remains explicit debt; individual mappings may become passing only after their revised executable tests are run and reviewed.
 
-summary: Executable verification suite covering v2 Proto SSA IR, optimization passes, real LLVM 22 verification and wasm32 execution, 3-tier React runtime behavior, 100% Base corpus coverage, and CLI behavior.
+summary: Separate behavioral compilation evidence from analysis, coverage reporting, kernel output, and real consumer acceptance.
 cases:
+  - id: T-COMPILER-PIPELINE-0001-CASE-HIR
+    title: TypeScript binding and Proto HIR preserve authored behavior or report a located lowering gap
+    covers:
+      - D-COMPILER-ARCH-0001-B
+      - D-COMPILER-ARCH-0001-C
+      - C-COMPILER-PIPELINE-0001-FRONTEND
+      - C-COMPILER-PIPELINE-0001-HIR
+    expectation: symbol-binding-alias-shadowing-control-flow-state-event-order-and-explicit-unsupported-without-silent-erasure
   - id: T-COMPILER-PIPELINE-0001-CASE-SSA-OPT
-    title: SSA builder, capability bitmask, verifier rejection, and optimization passes converge cleanly
+    title: Kernel verification and optimization preserve source values, control flow, and effects
     covers:
       - D-COMPILER-ARCH-0001-C
       - C-COMPILER-PIPELINE-0001-SSA-IR
       - C-COMPILER-PIPELINE-0001-OPT
-    expectation: constant-folding-algebraic-simplification-dead-block-pruning-dce-and-malformed-ssa-rejection
+    expectation: malformed-ir-rejection-and-source-versus-optimized-execution-including-nan-infinity-signed-zero-branches-and-side-effects
   - id: T-COMPILER-PIPELINE-0001-CASE-LLVM-WASM
-    title: LLVM 22 verifies, optimizes, emits bitcode/asm/obj, and compiles executable wasm32 kernels under 8-byte slot ABI
-    covers:
-      - D-COMPILER-ARCH-0001-D
-      - C-COMPILER-PIPELINE-0001-LLVM-ABI
-    expectation: opt-verify-o2-llvm-as-llc-wasm-ld-native-webassembly-execution-and-malformed-ir-rejection
-  - id: T-COMPILER-PIPELINE-0001-CASE-THIN-REACT
-    title: 3-tier React components mount and interact in React 19 happy-dom with zero String.raw runtimes
+    title: LLVM C++ IRBuilder constructs and verifies modules that execute through the real native or WASM pipeline
     covers:
       - D-COMPILER-ARCH-0001-A
-      - D-COMPILER-ARCH-0001-E
-      - C-COMPILER-PIPELINE-0001-THIN-EMIT
-    expectation: static-zero-runtime-reactive-usestate-protocol-shared-runtime-and-zero-string-raw
-  - id: T-COMPILER-PIPELINE-0001-CASE-BASE-CORPUS
-    title: 100% of official Base .proto.ts files and Shadcn Button compile fast, thin, and LLVM-verified
+      - D-COMPILER-ARCH-0001-D
+      - C-COMPILER-PIPELINE-0001-LLVM-ABI
+    expectation: real-native-builder-structured-request-module-verification-standard-printing-executable-output-and-invalid-request-rejection
+  - id: T-COMPILER-PIPELINE-0001-CASE-ABI-BOUNDS
+    title: Versioned kernel ABI uses the actual module memory with checked capacities and isolated instances
     covers:
-      - D-COMPILER-ARCH-0001-B
-      - D-COMPILER-ARCH-0001-E
-      - C-COMPILER-PIPELINE-0001-FRONTEND
+      - C-COMPILER-PIPELINE-0001-LLVM-ABI
+    expectation: heap-based-nonoverlapping-slots-capacity-and-growth-checks-instance-isolation-and-missing-memory-or-metadata-rejection
+  - id: T-COMPILER-PIPELINE-0001-CASE-THIN-REACT
+    title: Native React AST output executes admitted semantics and rejects unsupported behavior without runtime fallback
+    covers:
+      - D-COMPILER-ARCH-0001-A
+      - C-COMPILER-PIPELINE-0001-HIR
       - C-COMPILER-PIPELINE-0001-THIN-EMIT
-    expectation: full-base-corpus-coverage-under-35-lines-and-sampled-llvm-verify
+    expectation: ts-factory-printer-native-output-props-default-empty-updates-state-event-order-rules-and-lifecycle-or-explicit-unsupported
+  - id: T-COMPILER-PIPELINE-0001-CASE-GPUI
+    title: Rust AST output builds against the real GPUI dependency and preserves admitted native component behavior
+    covers:
+      - D-COMPILER-ARCH-0001-A
+      - D-COMPILER-ARCH-0001-F
+      - C-COMPILER-PIPELINE-0001-GPUI
+    expectation: syn-prettyplease-structured-components-real-gpui-cargo-build-props-state-render-events-rules-lifecycle-or-explicit-unsupported
+  - id: T-COMPILER-PIPELINE-0001-CASE-COVERAGE-REPORT
+    title: Corpus reports distinguish analysis, native compilation, unsupported input, kernels, and consumer evidence
+    covers:
+      - C-COMPILER-PIPELINE-0001-COVERAGE
+      - C-COMPILER-PIPELINE-0001-DIAGNOSTICS
+    expectation: exact-per-export-target-outcomes-and-reasons-without-counting-wrapper-or-metadata-success-as-native-coverage
+  - id: T-COMPILER-PIPELINE-0001-CASE-BASE-CORPUS
+    title: Official Base and committed family components compile natively and preserve their defined behavior
+    covers:
+      - D-COMPILER-ARCH-0001-E
+      - C-COMPILER-PIPELINE-0001-CONSUMERS
+    expectation: full-required-native-corpus-and-behavioral-regression-coverage-without-prototype-runtime-imports
+  - id: T-COMPILER-PIPELINE-0001-CASE-CONSUMERS
+    title: Existing targets, tools, and real consumers migrate with build and behavior evidence
+    covers:
+      - D-COMPILER-ARCH-0001-E
+      - C-COMPILER-PIPELINE-0001-CONSUMERS
+    expectation: target-browser-cli-library-shenko-react-verdant-gpui-build-input-state-lifecycle-and-accessibility-acceptance
   - id: T-COMPILER-PIPELINE-0001-CASE-CLI
-    title: CLI info, check, ir, llvm --optimize, and compile --wasm produce structured outputs and expected diagnostics
+    title: CLI and API propagate requested-stage failures and emit only successful target artifacts
     covers:
       - C-COMPILER-PIPELINE-0001-DIAGNOSTICS
-    expectation: deterministic-cli-subcommands-and-structured-diagnostics
+      - C-COMPILER-PIPELINE-0001-COVERAGE
+    expectation: deterministic-exit-structured-diagnostics-real-requested-verification-and-no-fabricated-output
 implementations:
+  - id: compiler-semantic-hir
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/frontend-hir.test.ts
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-HIR
+    notes:
+      - The final revised file passed 15 of 15 tests in the isolated worktree on 2026-11-25; tests inspect semantic HIR and target admission rather than counting wrapper generation.
+      - Covers canonical factory aliases and setup-handle aliases, proven pure initializers versus unproven external calls, callback control flow, dynamic setup and rule effects rejected without erasure, default precedence, lifecycle/watch bodies, both helper return branches, and floating-point negation.
+      - Additional regression cases retain unresolved definitions in the inventory denominator, resolve immutable local factory aliases and quoted setup keys, bind shadowed state symbols, preserve return completion, reject mutable-function constant folding, and retain executable module initializers as explicit unsupported behavior.
+      - This test record does not establish full helper/Hook composition, closure/ownership semantics, or complete Base/family coverage.
   - id: compiler-ssa-ir-unit
     kind: module-test
     status: passing
-    path: packages/compiler/test/ssa-ir.test.ts
+    path: packages/compiler/test/ssa-llvm-builder.test.ts
     required: true
     consumesCases:
       - T-COMPILER-PIPELINE-0001-CASE-SSA-OPT
+    notes:
+      - The revised file passed 8 of 8 tests with no skips in the isolated worktree on 2026-11-25 using LLVM 22.1.8; it is shared with the LLVM pipeline mapping and is not a second test-count total.
+      - Covers dominance/use-before-definition, call signatures, return types, slot and PHI invariants, removed-edge PHI repair, i32 constant multiplication, fneg and IEEE constants, and execution of the repaired CFG.
   - id: compiler-llvm-wasm-pipeline
     kind: module-test
     status: passing
-    path: packages/compiler/test/llvm-pipeline.test.ts
+    path: packages/compiler/test/ssa-llvm-builder.test.ts
     required: true
     consumesCases:
       - T-COMPILER-PIPELINE-0001-CASE-LLVM-WASM
     notes:
-      - Exercises real LLVM 22 opt, llvm-as, llc, and wasm-ld when installed on the host and executes compiled wasm32 rule/state/helper kernels via native WebAssembly.instantiate.
+      - Executed with the native C++ LLVM 22.1.8 SDK driver, IRBuilder/Module construction and verification, standard printing, opt/llc/wasm-ld, and WebAssembly execution; the revised file passed 8 of 8 tests without skips on 2026-11-25.
+      - Includes mapped string initialization and a compiled 129-prop module consumed through the real slot ABI; kernel execution does not establish a native GPUI component or UI consumer migration.
+  - id: compiler-kernel-admission
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/kernel-admission.test.ts
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-HIR
+      - T-COMPILER-PIPELINE-0001-CASE-LLVM-WASM
+    notes:
+      - Both revised tests passed with the actual LLVM/WASM toolchain in the isolated worktree on 2026-11-25. Kernel admission rejects action control flow or state-domain validation that the scalar backend cannot preserve.
+      - Actual WASM execution verifies that numeric gte rejects Infinity and preserves finite comparison behavior. Kernel acceptance is separate from React/GPUI component admission.
+  - id: compiler-wasm-abi-bounds
+    kind: runtime-test
+    status: passing
+    path: packages/compiler/test/wasm-kernel-layout.test.ts
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-ABI-BOUNDS
+    notes:
+      - Executed in the isolated compiler worktree on 2026-11-25; 3 of 3 tests passed against actual WebAssembly memory.
+      - Covers real memory growth for 9000 props, non-overlapping props/state after slot 128, access and int32 bounds, separate instances, signed-zero/NaN/Infinity preservation, and rejection of missing memory/layout or invalid offsets.
   - id: compiler-react-codegen-execution
     kind: runtime-test
     status: passing
-    path: packages/compiler/test/react-codegen.test.ts
+    path: packages/compiler/test/react-ast-codegen.test.ts
     required: true
     consumesCases:
       - T-COMPILER-PIPELINE-0001-CASE-THIN-REACT
     notes:
-      - Mounts compiled Tier 0 static, Tier 1 reactive, and Tier 2 protocol components (base/button, base/toggle, base/switch) in React 19 + happy-dom and asserts zero String.raw occurrences across packages/compiler/src.
-  - id: compiler-base-shadcn-corpus
+      - The revised file passed 10 of 10 tests in the isolated worktree on 2026-11-25; generated modules underwent strict TypeScript checking and React 19/happy-dom execution, with an import allowlist containing only React.
+      - Covers props updates and prevValid, missing/empty/error fallback, native keyboard callbacks with local/if/else/return and synchronous state reads, listener cleanup, static/rule styles, signed-zero/text literals, and explicit unsupported diagnostics.
+      - Also covers created before the first render, actual React StrictMode detach/remount preserving state, resolved watcher hydration skipping and FIFO/current/previous/batched-change semantics, synchronous watcher state writes before updated callbacks, Object.is signed-zero changes, finite gte rules, and semantic style-token merging.
+      - Nullable current/previous props retain native primitive arithmetic, string concatenation and comparison, nullish right-hand values, and signed-zero unary semantics through AST-generated helpers.
+      - Hook/context/expose, global or unsupported events, dynamic render, non-scalar props, before-dispose, and raw props subscriptions remain unsupported; this record does not claim full prototype coverage.
+  - id: compiler-gpui-ast-output
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/gpui-ast-codegen.test.ts
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-GPUI
+    notes:
+      - The revised AST target suite passed 5 of 5 tests in the isolated worktree on 2026-11-25, using the actual syn/prettyplease builder with authored control flow, typed raw/resolved props, numeric edge cases, safe literals, and explicit unsupported diagnostics.
+      - The final formatted driver was rebuilt with a new cold cache key and the six generated fixture crates retained identical printer output; raw logs are retained under packages/compiler/native/rust-builder/test-support/evidence.
+      - AST generation is recorded separately from native Cargo execution and real application integration.
+  - id: compiler-gpui-native-output
+    kind: runtime-test
+    status: passing
+    path: packages/compiler/native/rust-builder/test-support/src/tests.rs
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-GPUI
+    notes:
+      - The generated-component workspace passed cargo +1.98.1 check --workspace --all-targets and 6 native tests with no skips on 2026-11-25, using the actual Verdant fork cyjin-yl/z3rm at e5f2f9db75e97613232b5c1946333e61fa3828ab.
+      - Covers real native clicks changing state 0 to 1 to 0.5, boolean toggles, Render entering the GPUI text-layout system, props updates and fallback history, instance isolation, signed zero/Infinity/NaN behavior, safe text, and handler order with error abort. Layout observations do not claim pixel output or accessibility-tree acceptance.
+      - This is an isolated native harness against the consumer dependency. Full Verdant application migration remains required separately, and Shenko remains a React/Web consumer.
+  - id: compiler-gpui-upstream-pin
+    kind: module-test
+    status: passing
+    path: packages/compiler/native/rust-builder/test-support/generated/GpuiPinned/Cargo.toml
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-GPUI
+    notes:
+      - The actual generated GpuiPinned crate passed cargo +1.98.1 check against upstream GPUI 62e5991 on 2026-11-25, followed by a successful --locked check using its recorded manifest and lockfile.
+      - This is independent build evidence for the default upstream pin. It does not inherit the different Verdant fork's native execution result or establish real consumer migration.
+  - id: compiler-corpus-report
     kind: module-test
     status: passing
     path: packages/compiler/test/base-corpus.test.ts
     required: true
     consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-COVERAGE-REPORT
+    notes:
+      - The revised coverage-report test passed in the isolated worktree on 2026-11-25, enumerating every official Base input and checking declared/unsupported/source-error accounting, explicit failure diagnostics, incomplete native coverage, and zero execution claims.
+      - The final actual React and GPUI inventories each analyzed 184 files, identified 212 prototypes and 214 authored Hooks, emitted 0 of 212 prototypes natively, and reported 212 unsupported prototypes with 0 source-error files and 0 execution-verified prototypes. Each target has 179 unsupported files and 5 hook-analysis files; the summary is retained at packages/compiler/evidence/ast-pipeline-20261125/base-inventory-summary.json.
+      - A correct report may include unsupported components and does not satisfy the separate full native corpus case.
+  - id: compiler-base-shadcn-corpus
+    kind: runtime-test
+    status: missing
+    required: true
+    consumesCases:
       - T-COMPILER-PIPELINE-0001-CASE-BASE-CORPUS
     notes:
-      - Compiles all 184 .proto.ts files in packages/prototypes/base/src (212 prototypes, 214 authored hooks) plus Shadcn Button, asserting thin output (< 35 LOC per Base prototype), fast warm compile, and LLVM 22 opt verification on complex families.
+      - The old 184/184 report included runtime-wrapper generation. The current actual React and GPUI inventories both emit 0 of 212 official Base prototypes natively. Full native lowering and behavior evidence remains required.
+  - id: compiler-native-assets
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/native-assets.test.ts
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-CONSUMERS
+    notes:
+      - Both native-asset location tests passed in the isolated worktree on 2026-11-25, covering source and relocated bundle layouts for the LLVM and Rust drivers.
+      - The separate pinned-package smoke exercised a temporary clean snapshot with fresh native caches; it is mechanism evidence and not approval of the final candidate pin or a substitute for real application migration.
+      - Raw mechanism receipts are retained at packages/compiler/evidence/pinned-package-snapshot-01a33b38, explicitly identifying the temporary snapshot rather than the final candidate.
+  - id: compiler-real-consumers
+    kind: runtime-test
+    status: missing
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-CONSUMERS
+    notes:
+      - Retains cross-target, browser/library, Shenko React/Web, and Verdant GPUI migration obligations. Verdant workspace z3rm@e5f2f9db75e97613232b5c1946333e61fa3828ab and compiler upstreamGPUI 62e5991 require separate checks, not an assertion of one identical version.
   - id: compiler-cli-e2e
     kind: module-test
     status: passing
@@ -83,6 +217,9 @@ implementations:
     required: true
     consumesCases:
       - T-COMPILER-PIPELINE-0001-CASE-CLI
+    notes:
+      - All 5 revised CLI tests passed with no skips in the final isolated-worktree integration run on 2026-11-25. They cover target/toolchain identity, option position and invalid combinations, React without LLVM, explicit missing-toolchain failures, output/input overwrite protection, no output after unsupported source failure, and a real requested optimized LLVM module.
+      - The final compiler integration run passed 12 Vitest files and 61 tests with zero failures or skips. The 6 GPUI native Rust tests and independent Cargo checks are separate evidence; neither total is a full native corpus or application-migration claim.
 verifies:
   decisions:
     - id: D-COMPILER-ARCH-0001
@@ -92,22 +229,40 @@ verifies:
         - D-COMPILER-ARCH-0001-C
         - D-COMPILER-ARCH-0001-D
         - D-COMPILER-ARCH-0001-E
+        - D-COMPILER-ARCH-0001-F
   contracts:
     - id: C-COMPILER-PIPELINE-0001
       anchors:
         - C-COMPILER-PIPELINE-0001-FRONTEND
+        - C-COMPILER-PIPELINE-0001-HIR
         - C-COMPILER-PIPELINE-0001-SSA-IR
         - C-COMPILER-PIPELINE-0001-OPT
         - C-COMPILER-PIPELINE-0001-LLVM-ABI
         - C-COMPILER-PIPELINE-0001-THIN-EMIT
+        - C-COMPILER-PIPELINE-0001-GPUI
         - C-COMPILER-PIPELINE-0001-DIAGNOSTICS
+        - C-COMPILER-PIPELINE-0001-COVERAGE
+        - C-COMPILER-PIPELINE-0001-CONSUMERS
+openQuestions:
+  - id: T-COMPILER-PIPELINE-0001-Q-NATIVE-ACCEPTANCE
+    question:
+      zh-CN: 修订后的结构化后端、语义差分与诊断需新执行回执；完整原生语料与真实消费者验收仍独立未完成，不能由覆盖报告测试代替。
+      en: Revised structured backends, semantic comparisons, and diagnostics need new execution receipts. Full native corpus and real consumer acceptance remain independently incomplete and cannot be replaced by coverage-report tests.
+    blocks:
+      - activation:T-COMPILER-PIPELINE-0001
+      - implementation:T-COMPILER-PIPELINE-0001#compiler-base-shadcn-corpus
+      - implementation:T-COMPILER-PIPELINE-0001#compiler-real-consumers
 revisions:
   - version: 0.3.0
     change: introduced
     summary: Mapped the five executable Vitest suites validating the #1809 v2 compiler pipeline (SSA IR, LLVM 22/WASM, 3-tier React, full Base corpus, and CLI).
+  - version: 0.3.0
+    change: refined
+    summary: Refined acceptance mappings for the AST/IRBuilder compiler; historical wrapper-based passing evidence is not inherited, and GPUI structured component generation is a current required track, and coverage reporting is separate from required full native corpus and consumer migration evidence.
 tags:
   - compiler
-  - ssa
+  - hir
+  - ast
   - llvm
   - wasm
   - react

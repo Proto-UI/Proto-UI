@@ -1,0 +1,14 @@
+[dependencies]
+ryu-js = "=1.0.3"
+
+[dependencies.gpui]
+workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[package]
+edition = "2021"
+name = "compiled-numericstate"
+publish = false
+version = "0.0.0"

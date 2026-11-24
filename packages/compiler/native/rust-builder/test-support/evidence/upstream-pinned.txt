@@ -1,0 +1,542 @@
+PUI_STAGE corepack pnpm@10.32.1 exec vitest run packages/compiler/test/gpui-ast-codegen.test.ts
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+▲ [WARNING] Cannot find base config file "astro/tsconfigs/strict" [tsconfig.json]
+
+    apps/www/tsconfig.json:2:14:
+      2 │   "extends": ["astro/tsconfigs/strict", "../../tsconfig.json"],
+        ╵               ~~~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+
+ RUN  v2.1.9 /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125
+
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import fs from 'node:fs';
+2  |  import path from 'node:path';
+   |                       ^
+3  |  import { describe, expect, it } from 'vitest';
+4  |  import { TsProgramSession, extractModuleIR } from '../src/frontend';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/test/gpui-ast-codegen.test.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  export { TsProgramSession, type CompilerSessionOptions } from './program';
+   |                                                 ^
+2  |  export { extractModuleIR, type ExtractOptions, type ExtractOutput } from './extract';
+3  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/index.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import fs from 'node:fs';
+2  |  import path from 'node:path';
+   |                       ^
+3  |  import ts from 'typescript';
+4  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/program.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import path from 'node:path';
+2  |  import ts from 'typescript';
+   |                   ^
+3  |  import { diagnostic, type CompilerDiagnostic } from '../diagnostics';
+4  |  import { spanOf, sanitizeSym, unwrapExpr, extractScalarLiteral, resolveAliasedSymbol, resolveCallName, findFactoryCall, resolveFunctionLike, propAccessChain, extractObjectProperty, extractSetupFunction, resolveDefinitionObject, isPrototypeType } from './syntax';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/extract.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  export interface SourceSpan {
+2  |    readonly file: string;
+   |                   ^
+3  |    readonly line: number;
+4  |    readonly column: number;
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/diagnostics.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { SourceSpan } from '../diagnostics';
+   |                    ^
+3  |  import type { ScalarLiteral } from '../ir';
+4  |  import { evaluateStaticScalar } from './constants';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/syntax.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { ScalarLiteral } from '../ir/types';
+   |                    ^
+3  |  import { hasBindingWrites, isConstDeclaration } from './bindings';
+4  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/constants.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |
+3  |  /** Function declarations are mutable in JavaScript even though they are not `let`. */
+   |                   ^
+4  |  export function hasBindingWrites(binding: ts.Symbol, checker: ts.TypeChecker): boolean {
+5  |    const files = new Set(binding.declarations?.map(declaration => declaration.getSourceFile()) ?? []);
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/bindings.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import type { PropDeclIR, StateDeclIR, SsaType } from '../ir';
+   |                                                 ^
+2  |
+3  |  export function propKindToSsaType(kind: PropDeclIR['kind']): Exclude<SsaType, 'void'> {
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/scalars.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { RuleExpr } from '../ir';
+   |                    ^
+3  |  import { unwrapExpr, extractScalarLiteral } from './syntax';
+4  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/rules.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { TemplateChildIR, TemplateElementIR } from '../ir';
+   |                    ^
+3  |  import { unwrapExpr, extractScalarLiteral, resolveCallName, propAccessChain, extractObjectProperty, isCoreIntrinsic, resolveFunctionLike } from './syntax';
+4  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/template.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import { SsaBuilder, type EventDeclIR, type RuleIR, type RuleExpr, type PropDeclIR, type StateDeclIR, type SsaFunction } from '../ir';
+   |                    ^
+3  |  import { unwrapExpr, extractScalarLiteral, propAccessChain, sanitizeSym } from './syntax';
+4  |  import { internString } from './scalars';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/kernel.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  export * from './types';
+2  |  export { SsaBuilder } from './builder';
+   |                        ^
+3  |  export { verifyModuleIR, verifySsaFunction } from './verify';
+4  |  export {
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/index.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import type { SourceSpan } from '../diagnostics';
+   |                                                 ^
+2  |
+3  |  export const PROTO_IR_VERSION = 2 as const;
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/types.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+2  |    HostOpKind,
+3  |    SsaBasicBlock,
+4  |    SsaBinOp,
+   |    ^
+5  |    SsaCmpOp,
+6  |    SsaFunction,
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/builder.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { diagnostic, type CompilerDiagnostic } from '../diagnostics';
+   |                                                 ^
+2  |  import {
+3  |    PROTO_IR_VERSION,
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/verify.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import {
+2  |    encodeCapabilityMask,
+3  |    type CapabilityName,
+   |                ^
+4  |    type ModuleIR,
+5  |    type PrototypeIR,
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/passes.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import type { ModuleIR, PrototypeIR, SsaFunction } from './types';
+   |                                                 ^
+2  |
+3  |  /** Diagnostic serialization of typed IR. Target source is printed by target SDKs. */
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/print.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { ActionStatementIR, ScalarLiteral, ValueExprIR } from '../ir/types';
+   |                    ^
+3  |
+4  |  export interface ActionBindings {
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/actions.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import fs from 'node:fs';
+2  |  import os from 'node:os';
+   |                       ^
+3  |  import path from 'node:path';
+4  |  import { spawnSync } from 'node:child_process';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/targets/gpui.ts
+01:08:39 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { fileURLToPath } from 'node:url';
+2  |
+3  |  // The pinned Node bundle defines this path relative to its emitted index.js.
+   |      ^
+4  |  // Source execution resolves from this module, never from a caller's cwd.
+5  |  declare const __PUI_COMPILER_NATIVE_ASSET_BASE__: string | undefined;
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/native-assets.ts
+ ✓ packages/compiler/test/gpui-ast-codegen.test.ts (5 tests) 1659ms
+   ✓ GPUI Rust AST target > compiles authored props/state/control flow to an actual native Render component 1358ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  01:08:38
+   Duration  3.04s (transform 246ms, setup 0ms, collect 775ms, tests 1.66s, environment 217ms, prepare 70ms)
+
+PUI_STAGE_EXIT 0
+PUI_STAGE cargo +1.98.1 check --manifest-path /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/GpuiPinned/Cargo.toml --jobs 4
+    Updating git repository `https://github.com/zed-industries/zed`
+来自 https://github.com/zed-industries/zed
+ * [新引用]                62e5991dd0f0c8a3af8d5e7e9c4652490d468db8 -> refs/commit/62e5991dd0f0c8a3af8d5e7e9c4652490d468db8
+    Updating `rsproxy-sparse` index
+    Updating git repository `https://github.com/zed-industries/scap`
+    Updating git repository `https://github.com/zed-industries/font-kit`
+     Locking 462 packages to latest compatible versions
+      Adding ryu-js v1.0.3 (available: v1.0.4)
+ Downloading crates ...
+  Downloaded erased-serde v0.4.11 (registry `rsproxy-sparse`)
+  Downloaded compression-core v0.4.34 (registry `rsproxy-sparse`)
+  Downloaded ctor v1.0.14 (registry `rsproxy-sparse`)
+  Downloaded toml v1.2.2+spec-1.1.0 (registry `rsproxy-sparse`)
+  Downloaded lyon_algorithms v1.0.22 (registry `rsproxy-sparse`)
+  Downloaded sval_json v2.22.0 (registry `rsproxy-sparse`)
+  Downloaded sval_nested v2.22.0 (registry `rsproxy-sparse`)
+  Downloaded value-bag v1.14.1 (registry `rsproxy-sparse`)
+  Downloaded link-section v0.19.4 (registry `rsproxy-sparse`)
+  Downloaded sval_fmt v2.22.0 (registry `rsproxy-sparse`)
+  Downloaded sval v2.22.0 (registry `rsproxy-sparse`)
+  Downloaded libbz2-rs-sys v0.2.7 (registry `rsproxy-sparse`)
+  Downloaded sval_buffer v2.22.0 (registry `rsproxy-sparse`)
+  Downloaded lyon_tessellation v1.0.23 (registry `rsproxy-sparse`)
+  Downloaded sval_serde v2.22.0 (registry `rsproxy-sparse`)
+  Downloaded sval_ref v2.22.0 (registry `rsproxy-sparse`)
+  Downloaded value-bag-sval2 v1.14.1 (registry `rsproxy-sparse`)
+  Downloaded sval_dynamic v2.22.0 (registry `rsproxy-sparse`)
+  Downloaded value-bag-serde1 v1.14.1 (registry `rsproxy-sparse`)
+  Downloaded async-compression v0.4.54 (registry `rsproxy-sparse`)
+  Downloaded compression-codecs v0.4.49 (registry `rsproxy-sparse`)
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.229
+    Checking cfg-if v1.0.5
+   Compiling typeid v1.0.3
+   Compiling erased-serde v0.4.11
+   Compiling libm v0.2.16
+    Checking smallvec v1.16.6
+   Compiling libc v0.2.191
+   Compiling syn v3.0.10
+   Compiling syn v2.0.119
+    Checking memchr v2.8.3
+    Checking serde_fmt v1.1.0
+    Checking simd-adler32 v0.3.10
+    Checking value-bag-serde1 v1.14.1
+   Compiling autocfg v1.5.1
+   Compiling num-traits v0.2.19
+    Checking value-bag v1.14.1
+    Checking stable_deref_trait v1.2.1
+    Checking adler2 v2.0.1
+    Checking log v0.4.35
+    Checking pin-project-lite v0.2.18
+    Checking miniz_oxide v0.9.1
+   Compiling anyhow v1.0.105
+   Compiling synstructure v0.14.0
+   Compiling crc32fast v1.5.6
+   Compiling crossbeam-utils v0.8.23
+    Checking arrayvec v0.7.8
+   Compiling serde v1.0.229
+    Checking futures-core v0.3.34
+    Checking flate2 v1.1.11
+   Compiling zmij v1.0.23
+   Compiling zerocopy v0.8.64
+    Checking futures-io v0.3.34
+    Checking hashbrown v0.17.2
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling serde_derive v1.0.229
+   Compiling zerovec-derive v0.11.7
+   Compiling displaydoc v0.2.7
+    Checking zerofrom v0.1.8
+    Checking yoke v0.8.4
+   Compiling zerocopy-derive v0.8.64
+    Checking zerovec v0.11.9
+    Checking equivalent v1.0.3
+    Checking indexmap v2.14.2
+    Checking tinystr v0.8.5
+   Compiling crossbeam-epoch v0.9.21
+    Checking scopeguard v1.2.0
+    Checking litemap v0.8.3
+    Checking utf_types v1.0.0
+    Checking futures-sink v0.3.34
+   Compiling serde_json v1.0.154
+    Checking writeable v0.6.4
+    Checking bytemuck v1.25.2
+    Checking icu_locale_core v2.4.0
+    Checking utf8_iter v1.1.0
+    Checking lock_api v0.4.14
+    Checking potential_utf v0.1.6
+    Checking zerotrie v0.2.5
+   Compiling icu_normalizer_data v2.4.0
+   Compiling crossbeam-deque v0.8.8
+   Compiling target-features v0.1.6
+    Checking itoa v1.0.19
+   Compiling icu_properties_data v2.4.0
+   Compiling version_check v0.9.5
+    Checking icu_provider v2.4.0
+   Compiling slotmap v1.1.1
+    Checking icu_collections v2.4.0
+    Checking futures-channel v0.3.34
+   Compiling futures-macro v0.3.34
+    Checking euclid v0.22.14
+    Checking miniz_oxide v0.8.9
+   Compiling rayon-core v1.13.0
+   Compiling parking_lot_core v0.9.12
+    Checking slab v0.4.12
+    Checking once_cell v1.21.4
+    Checking futures-task v0.3.34
+   Compiling getrandom v0.3.4
+    Checking tracing-core v0.1.36
+    Checking futures-util v0.3.34
+    Checking fdeflate v0.3.7
+    Checking core_maths v0.1.1
+    Checking bitflags v2.13.2
+    Checking parking v2.2.1
+   Compiling winnow v1.0.5
+    Checking iana-time-zone v0.1.65
+    Checking float-cmp v0.9.0
+    Checking strict-num v0.1.1
+   Compiling toml_parser v1.1.6+spec-1.1.0
+    Checking chrono v0.4.45
+    Checking ttf-parser v0.25.1
+    Checking icu_properties v2.4.0
+    Checking futures-executor v0.3.34
+    Checking icu_normalizer v2.4.0
+    Checking lyon_geom v1.0.20
+    Checking gpui_util v0.1.0 (https://github.com/zed-industries/zed?rev=62e5991dd0f0c8a3af8d5e7e9c4652490d468db8#62e5991d)
+    Checking polycool v0.4.0
+   Compiling toml_datetime v1.1.3+spec-1.1.0
+   Compiling serde_spanned v1.1.3
+   Compiling semver v1.0.28
+    Checking libbz2-rs-sys v0.2.7
+    Checking fastrand v2.5.0
+    Checking rustc-hash v2.1.3
+    Checking lazy_static v1.5.1
+   Compiling ref-cast v1.0.27
+    Checking zune-core v0.5.3
+   Compiling shlex v2.0.1
+   Compiling getrandom v0.4.3
+    Checking quick-error v2.0.1
+    Checking foldhash v0.2.0
+    Checking weezl v0.1.12
+    Checking either v1.19.0
+   Compiling find-msvc-tools v0.1.15
+   Compiling toml_writer v1.2.0+spec-1.1.0
+    Checking roxmltree v0.20.0
+    Checking percent-encoding v2.3.2
+   Compiling unicode-segmentation v1.13.3
+    Checking arrayref v0.3.9
+    Checking tiny-skia-path v0.11.4
+    Checking form_urlencoded v1.2.3
+    Checking fontconfig-parser v0.5.8
+   Compiling convert_case v0.10.0
+   Compiling toml v1.2.2+spec-1.1.0
+   Compiling cc v1.11.3
+    Checking bzip2 v0.6.1
+    Checking zune-jpeg v0.5.15
+    Checking sharded-slab v0.1.7
+    Checking collections v0.1.0 (https://github.com/zed-industries/zed?rev=62e5991dd0f0c8a3af8d5e7e9c4652490d468db8#62e5991d)
+   Compiling rustc_version v0.4.1
+    Checking kurbo v0.13.1
+   Compiling multiversion-macros v0.8.1
+    Checking lyon_path v1.0.19
+    Checking idna_adapter v1.2.2
+    Checking rand_core v0.9.5
+    Checking parking_lot v0.12.5
+    Checking futures v0.3.34
+    Checking ppv-lite86 v0.2.21
+    Checking half v2.7.1
+    Checking tracing-log v0.2.0
+   Compiling tracing-attributes v0.1.31
+   Compiling pin-project-internal v1.2.0
+   Compiling ref-cast-impl v1.0.27
+   Compiling serde_derive_internals v0.30.0
+    Checking memmap2 v0.9.12
+    Checking thread_local v1.1.10
+    Checking gimli v0.34.0
+   Compiling ztracing v0.1.0 (https://github.com/zed-industries/zed?rev=62e5991dd0f0c8a3af8d5e7e9c4652490d468db8#62e5991d)
+   Compiling heck v0.5.0
+   Compiling thiserror v1.0.69
+    Checking unicode-ccc v0.4.0
+    Checking bytes v1.12.2
+   Compiling unicode-xid v0.2.6
+    Checking color_quant v1.1.0
+    Checking bitflags v1.3.2
+    Checking compression-core v0.4.34
+   Compiling heapless v0.9.4
+    Checking unicode-script v0.5.9
+    Checking siphasher v1.0.4
+    Checking unicode-bidi-mirroring v0.4.0
+    Checking byteorder-lite v0.1.0
+    Checking nu-ansi-term v0.50.3
+    Checking byteorder v1.5.0
+    Checking tinyvec v1.13.3
+    Checking unicode-properties v0.1.5
+    Checking tracing-subscriber v0.3.23
+    Checking rustybuzz v0.20.1
+    Checking fontdb v0.23.0
+    Checking hash32 v0.3.1
+    Checking image-webp v0.2.4
+    Checking addr2line v0.27.1
+    Checking svgtypes v0.16.2
+    Checking http v1.5.0
+    Checking compression-codecs v0.4.49
+    Checking png v0.17.16
+    Checking gif v0.14.2
+   Compiling derive_more-impl v2.1.1
+   Compiling schemars_derive v1.2.3
+    Checking tracing v0.1.44
+    Checking pin-project v1.2.0
+    Checking multiversion v0.8.1
+    Checking rand_chacha v0.9.0
+    Checking idna v1.1.0
+   Compiling embed-resource v3.0.12
+    Checking zlog v0.1.0 (https://github.com/zed-industries/zed?rev=62e5991dd0f0c8a3af8d5e7e9c4652490d468db8#62e5991d)
+    Checking rayon v1.12.0
+    Checking event-listener v5.4.2
+    Checking spin v0.9.9
+   Compiling thiserror-impl v1.0.69
+    Checking simplecss v0.2.2
+    Checking zune-inflate v0.2.54
+    Checking object v0.40.0
+    Checking roxmltree v0.21.2
+    Checking aho-corasick v1.1.5
+    Checking float_next_after v1.0.0
+    Checking sha1_smol v1.0.1
+    Checking regex-syntax v0.8.12
+    Checking base64 v0.22.1
+    Checking data-url v0.3.2
+    Checking pxfm v0.1.30
+    Checking pico-args v0.5.0
+    Checking unicode-vo v0.1.0
+    Checking xmlwriter v0.1.0
+   Compiling thiserror v2.0.21
+    Checking ryu v1.0.23
+    Checking imagesize v0.14.0
+   Compiling ztracing_macro v0.1.0 (https://github.com/zed-industries/zed?rev=62e5991dd0f0c8a3af8d5e7e9c4652490d468db8#62e5991d)
+    Checking lebe v0.5.3
+    Checking dyn-clone v1.0.20
+    Checking fax v0.2.7
+    Checking rustc-demangle v0.1.28
+    Checking bit_field v0.10.4
+    Checking unicode-bidi v0.3.18
+    Checking exr v1.74.3
+    Checking usvg v0.46.0
+    Checking moxcms v0.8.1
+    Checking tiff v0.11.3
+    Checking backtrace v0.3.77
+    Checking regex-automata v0.4.19
+    Checking schemars v1.2.3
+    Checking serde_urlencoded v0.7.1
+    Checking uuid v1.29.3
+    Checking lyon_tessellation v1.0.23
+    Checking derive_more v2.1.1
+    Checking flume v0.12.0
+   Compiling perf v0.1.0 (https://github.com/zed-industries/zed?rev=62e5991dd0f0c8a3af8d5e7e9c4652490d468db8#62e5991d)
+    Checking event-listener-strategy v0.5.4
+   Compiling gpui v0.2.2 (https://github.com/zed-industries/zed?rev=62e5991dd0f0c8a3af8d5e7e9c4652490d468db8#62e5991d)
+    Checking url v2.5.9
+    Checking rand v0.9.5
+    Checking tiny-skia v0.11.4
+    Checking http-body v1.1.0
+    Checking async-compression v0.4.54
+   Compiling strum_macros v0.28.0
+    Checking lyon_algorithms v1.0.22
+    Checking futures-lite v2.6.1
+    Checking png v0.18.1
+    Checking rgb v0.8.53
+    Checking qoi v0.4.1
+   Compiling profiling-procmacros v1.0.18
+   Compiling derive_refineable v0.1.0 (https://github.com/zed-industries/zed?rev=62e5991dd0f0c8a3af8d5e7e9c4652490d468db8#62e5991d)
+   Compiling enumn v0.1.14
+   Compiling thiserror-impl v2.0.21
+    Checking concurrent-queue v2.5.0
+    Checking crossbeam-queue v0.3.14
+    Checking fixedbitset v0.5.9
+    Checking web-time v1.1.0
+    Checking svg_fmt v0.4.5
+    Checking link-section v0.19.4
+    Checking async-task v4.7.1
+   Compiling linktime-proc-macro v0.2.3
+    Checking pollster v0.2.5
+    Checking atomic v0.5.3
+    Checking smol_str v0.3.7
+    Checking static_assertions v1.1.0
+    Checking gpui_shared_string v0.1.0 (https://github.com/zed-industries/zed?rev=62e5991dd0f0c8a3af8d5e7e9c4652490d468db8#62e5991d)
+    Checking postage v0.5.0
+    Checking scheduler v0.1.0 (https://github.com/zed-industries/zed?rev=62e5991dd0f0c8a3af8d5e7e9c4652490d468db8#62e5991d)
+    Checking strum v0.28.0
+    Checking etagere v0.2.15
+    Checking futures-concurrency v7.7.1
+    Checking refineable v0.1.0 (https://github.com/zed-industries/zed?rev=62e5991dd0f0c8a3af8d5e7e9c4652490d468db8#62e5991d)
+    Checking ctor v1.0.14
+    Checking async-channel v2.5.0
+    Checking accesskit v0.24.1
+    Checking image v0.25.10
+    Checking profiling v1.0.18
+    Checking resvg v0.46.0
+    Checking sum_tree v0.1.0 (https://github.com/zed-industries/zed?rev=62e5991dd0f0c8a3af8d5e7e9c4652490d468db8#62e5991d)
+    Checking lyon v1.0.19
+    Checking http_client v0.1.0 (https://github.com/zed-industries/zed?rev=62e5991dd0f0c8a3af8d5e7e9c4652490d468db8#62e5991d)
+   Compiling util_macros v0.1.0 (https://github.com/zed-industries/zed?rev=62e5991dd0f0c8a3af8d5e7e9c4652490d468db8#62e5991d)
+    Checking regex v1.13.2
+   Compiling gpui_macros v0.1.0 (https://github.com/zed-industries/zed?rev=62e5991dd0f0c8a3af8d5e7e9c4652490d468db8#62e5991d)
+    Checking itertools v0.14.0
+    Checking taffy v0.13.0
+    Checking spin v0.10.1
+    Checking num_cpus v1.17.0
+    Checking raw-window-handle v0.6.2
+    Checking waker-fn v1.2.0
+    Checking pollster v0.4.0
+    Checking inventory v0.3.25
+    Checking seahash v4.1.0
+    Checking ryu-js v1.0.3
+    Checking compiled-gpuipinned v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/GpuiPinned)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 55.48s
+PUI_STAGE_EXIT 0
+PUI_STAGE cargo +1.98.1 check --locked --manifest-path /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/GpuiPinned/Cargo.toml --jobs 4
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.29s
+PUI_STAGE_EXIT 0
+PUI_ALL_FINISHED

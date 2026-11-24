@@ -2,24 +2,24 @@
 /** Supported build-time CLI/JavaScript artifact from a clean, immutable source pin. */
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
-import { mkdir, readFile, realpath, writeFile } from 'node:fs/promises';
+import { chmod, lstat, mkdir, readFile, readdir, realpath, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build, version as esbuildVersion } from 'esbuild';
 import ts from 'typescript';
 import { parse as parseYaml } from 'yaml';
-import { PROTO_IR_VERSION } from '../../packages/compiler/src/index';
+import { PROTO_IR_VERSION } from '../../packages/compiler/src/ir/types';
 
 const IR_VERSION = PROTO_IR_VERSION;
-const TARGET_PROFILES = ['react', 'llvm-ir', 'wasm32'] as const;
+const TARGETS = ['react', 'gpui', 'kernel', 'ir'] as const;
 
 interface CompilerBuildIdentity {
-  readonly schema: 'proto-ui.compiler-build.v2';
+  readonly schema: 'proto-ui.compiler-package.v3';
   readonly revision: string;
   readonly lockSha256: string;
   readonly profilesSha256: string;
+  readonly nativeSourcesSha256: string;
   readonly node: string;
   readonly typescript: string;
   readonly esbuild: string;
@@ -27,23 +27,32 @@ interface CompilerBuildIdentity {
 
 interface OutputArtifact {
   readonly path: string;
-  readonly contents: string;
-  readonly kind: 'source' | 'source-map' | 'manifest';
+  readonly contents: string | Uint8Array;
+  readonly kind: 'source' | 'source-map' | 'manifest' | 'native-source';
+  readonly executable?: boolean;
 }
 
 async function writeArtifactSet(
   artifacts: readonly OutputArtifact[],
   destination: string
 ): Promise<{ ok: true; value: { files: string[] } } | { ok: false; diagnostics: string[] }> {
-  if (existsSync(destination)) {
-    return { ok: false, diagnostics: [`Refusing to overwrite existing output: ${destination}`] };
+  // Claim the fresh directory atomically, including against dangling symlinks.
+  try {
+    await mkdir(destination);
+  } catch (error) {
+    return {
+      ok: false,
+      diagnostics: [
+        'Cannot create a fresh package directory: ' + destination + ': ' + String(error),
+      ],
+    };
   }
-  await mkdir(destination, { recursive: true });
   const written: string[] = [];
   for (const artifact of artifacts) {
     const outPath = path.join(destination, artifact.path);
     await mkdir(path.dirname(outPath), { recursive: true });
-    await writeFile(outPath, artifact.contents, 'utf8');
+    await writeFile(outPath, artifact.contents, { flag: 'wx' });
+    if (artifact.executable) await chmod(outPath, 0o755);
     written.push(artifact.path);
   }
   return { ok: true, value: { files: written } };
@@ -77,6 +86,35 @@ function argumentsFrom(argv: string[]) {
   return { revision: options['--revision'], output: path.resolve(options['--output']) };
 }
 
+async function nativeSources(): Promise<{ source: string; artifact: OutputArtifact }[]> {
+  const base = 'packages/compiler/native/';
+  const names = ['llvm-builder.cpp', 'rust-builder/Cargo.toml', 'rust-builder/Cargo.lock'];
+  const visit = async (directory: string): Promise<void> => {
+    for (const entry of await readdir(path.join(root, base, directory), { withFileTypes: true })) {
+      const name = path.posix.join(directory, entry.name);
+      if (entry.isDirectory()) await visit(name);
+      else if (entry.isFile()) names.push(name);
+      else throw new Error('Native builder assets must be regular source files: ' + name);
+    }
+  };
+  await visit('rust-builder/src');
+  return Promise.all(
+    names.sort().map(async (name) => {
+      const source = base + name;
+      if (!(await lstat(path.join(root, source))).isFile())
+        throw new Error('Invalid native source: ' + source);
+      return {
+        source,
+        artifact: {
+          path: 'native/' + name,
+          kind: 'native-source' as const,
+          contents: await readFile(path.join(root, source)),
+        },
+      };
+    })
+  );
+}
+
 async function main() {
   const { revision, output } = argumentsFrom(process.argv.slice(2));
   cleanPin(revision);
@@ -93,12 +131,30 @@ async function main() {
   const integrity = parsedLock.packages[`typescript@${ts.version}`]?.resolution?.integrity;
   if (typeof integrity !== 'string')
     throw new Error('The lockfile must declare TypeScript integrity.');
-  const profiles = json({ irVersion: IR_VERSION, profiles: TARGET_PROFILES });
+  const native = await nativeSources();
+  const nativeInventory = native.map(({ artifact }) => ({
+    path: artifact.path,
+    bytes: artifact.contents.length,
+    sha256: hash(artifact.contents),
+  }));
+  const profiles = json({
+    irVersion: IR_VERSION,
+    targets: TARGETS,
+    optionalKernelArtifacts: ['llvm-ir', 'wasm32'],
+    backends: {
+      react: 'typescript-factory-printer',
+      gpui: 'syn-prettyplease',
+      kernel: 'llvm-irbuilder',
+    },
+    admission:
+      'Each target reports unsupported semantics; targets do not imply full prototype coverage.',
+  });
   const identity: CompilerBuildIdentity = Object.freeze({
-    schema: 'proto-ui.compiler-build.v2',
+    schema: 'proto-ui.compiler-package.v3',
     revision,
     lockSha256: hash(lock),
     profilesSha256: hash(profiles),
+    nativeSourcesSha256: hash(json(nativeInventory)),
     node: process.versions.node,
     typescript: ts.version,
     esbuild: esbuildVersion,
@@ -107,32 +163,25 @@ async function main() {
   const virtualOutput = path.join(root, '.pinned-compiler-build');
   const bundled = await build({
     absWorkingDir: root,
-    entryPoints: { index: 'packages/compiler/src/index.ts' },
+    entryPoints: {
+      index: 'packages/compiler/src/index.ts',
+      cli: 'scripts/compiler/pinned-cli-entry.ts',
+    },
     outdir: virtualOutput,
     bundle: true,
     format: 'esm',
     platform: 'node',
     target: 'node24',
     external: ['typescript'],
+    // Each entry is emitted at package root. Native paths remain package-relative
+    // after the package is moved; no source checkout path is embedded.
+    define: { __PUI_COMPILER_NATIVE_ASSET_BASE__: JSON.stringify('./native/') },
+    alias: { '@proto.ui/core': path.join(root, 'packages/core/src/index.ts') },
     sourcemap: 'linked',
     sourcesContent: true,
     write: false,
     metafile: true,
     logLevel: 'silent',
-    plugins: [
-      {
-        name: 'verified-compiler-build-identity',
-        setup(builder) {
-          builder.onLoad({ filter: /[/\\]compiler-build\.ts$/ }, ({ path: filename }) => {
-            if (filename !== path.join(root, 'packages/compiler/src/compiler-build.ts')) return;
-            return {
-              contents: `export const compilerBuildIdentity = Object.freeze(${JSON.stringify(identity)});`,
-              loader: 'ts',
-            };
-          });
-        },
-      },
-    ],
   });
   const externalImports = [
     ...new Set(
@@ -152,15 +201,19 @@ async function main() {
   const inputPaths = [
     ...new Set([
       ...Object.keys(bundled.metafile!.inputs),
+      ...native.map((value) => value.source),
       'scripts/compiler/build-pinned.ts',
       'packages/compiler/package.json',
       'package.json',
+      'tsconfig.json',
       'pnpm-lock.yaml',
       'LICENSE',
     ]),
   ].sort();
   const inputs = await Promise.all(
     inputPaths.map(async (filename) => {
+      if (path.isAbsolute(filename) || filename.split(/[\\/]/).includes('..'))
+        throw new Error('Compiler input escaped the source pin: ' + filename);
       const bytes = await readFile(path.join(root, filename));
       // Every compile-time input must belong to the exact pin; generated/vendor files
       // must not silently become a second source authority.
@@ -187,7 +240,7 @@ async function main() {
     bin: { 'proto-ui-compiler': './cli.js' },
     dependencies: { typescript: ts.version },
     description:
-      'Supported source-pinned build-time compiler artifact; private experimental profiles, no registry publication.',
+      'Source-pinned compiler with native React/GPUI AST targets and LLVM IRBuilder assets; target admission is explicit.',
   };
   const npmLock = {
     name,
@@ -216,14 +269,10 @@ async function main() {
     path: path.relative(virtualOutput, file.path).split(path.sep).join('/'),
     contents: file.text,
     kind: file.path.endsWith('.map') ? 'source-map' : 'source',
+    executable: path.basename(file.path) === 'cli.js',
   }));
   artifacts.push(
-    {
-      path: 'cli.js',
-      kind: 'source',
-      contents:
-        "#!/usr/bin/env node\nimport { runCompilerCli, compilerBuildIdentity } from './index.js';\nif (process.argv.length === 3 && process.argv[2] === '--build-info') console.log(JSON.stringify(compilerBuildIdentity, null, 2));\nelse process.exitCode = await runCompilerCli(process.argv.slice(2));\n",
-    },
+    ...native.map((value) => value.artifact),
     { path: 'package.json', kind: 'manifest', contents: json(manifest) },
     { path: 'package-lock.json', kind: 'manifest', contents: json(npmLock) },
     { path: 'profiles.json', kind: 'manifest', contents: profiles },
@@ -235,7 +284,30 @@ async function main() {
     {
       path: 'README.md',
       kind: 'manifest',
-      contents: `# Proto-UI pinned compiler\n\nSource revision: ${revision}\n\nRun \`npm ci --ignore-scripts\` in this directory, then \`node cli.js --build-info\` and \`node cli.js check <entry.proto.ts> --root <source root> --profile <profile>\`. The only compiler runtime package is TypeScript ${ts.version}; Node 24 built-ins supply the remaining imports. No Proto-UI public-package build or Floating UI installation is needed for the compiler. Generated consumers must install the exact dependencies in their own provenance.\n\nKeep this directory immutable. Generated output is consumer-owned and editable; compile uses a new destination, diff is read-only, and watch keeps immutable revisions. Create the parent directory yourself; existing output is never overwritten. The source SHA and profiles.json digest are the support pin. These private experimental profiles are not registry releases or broader semantic admission. JavaScript API exports are available through index.js; this artifact does not provide a declaration-file release.\n`,
+      contents: [
+        '# Proto-UI pinned compiler',
+        '',
+        'Source revision: ' + revision,
+        '',
+        'Use Node 24. Run `npm ci --ignore-scripts` here, then `node cli.js --build-info` and `node cli.js info`.',
+        'Compile with `node cli.js compile <entry.proto.ts> --root <authoring workspace> --target react --out <fresh directory>`.',
+        'Targets are react, gpui, kernel and ir. `--ll`, `--wasm` and `--optimize` request optional LLVM kernel work.',
+        '',
+        'The JavaScript package dependency is TypeScript ' +
+          ts.version +
+          '. Node built-ins supply the remaining compiler imports.',
+        'The authoring workspace must resolve its own Proto-UI source/types. Generated React components import React only.',
+        'The GPUI backend requires Cargo and builds the included locked syn/prettyplease driver; generated crates declare their GPUI dependency.',
+        'The LLVM backend requires llvm-config and a compatible C++ compiler. Verification/WASM additionally require opt, llc and wasm-ld as reported by `info`.',
+        'The native/ directory is part of this package and must travel with index.js and cli.js. Builder binaries are cached outside the installation.',
+        '',
+        'compiler-build.json records the full source SHA, lock/tool versions, input hashes and output hashes, including native source and Cargo.lock.',
+        'Move the whole directory as a unit. Compilation does not need the compiler source checkout.',
+        'Unsupported semantics produce diagnostics; this package does not promise that every Base prototype is admitted.',
+        'CLI compilation rejects existing generated files unless --overwrite is supplied. The current CLI does not provide the historical diff/watch commands.',
+        'index.js exports the current compiler API. This artifact does not publish TypeScript declaration files or the historical compilerBuildIdentity API.',
+        '',
+      ].join('\n'),
     }
   );
   const files = artifacts
@@ -257,15 +329,15 @@ async function main() {
       externalImports,
       inputs,
       files,
-      costs: {
+      nativeSources: nativeInventory,
+      bytes: {
         bundledSourceBytes: files
           .filter((file) => file.path.endsWith('.js'))
           .reduce((sum, file) => sum + file.bytes, 0),
         mapBytes: files
           .filter((file) => file.path.endsWith('.map'))
           .reduce((sum, file) => sum + file.bytes, 0),
-        retainedConsumerBytes: null,
-        consumerInitialization: null,
+        nativeSourceBytes: nativeInventory.reduce((sum, file) => sum + file.bytes, 0),
       },
     }),
   });

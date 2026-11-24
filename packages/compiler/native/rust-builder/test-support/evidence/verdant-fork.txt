@@ -1,0 +1,478 @@
+PUI_STAGE corepack pnpm@10.32.1 exec vitest run packages/compiler/test/gpui-ast-codegen.test.ts
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+▲ [WARNING] Cannot find base config file "astro/tsconfigs/strict" [tsconfig.json]
+
+    apps/www/tsconfig.json:2:14:
+      2 │   "extends": ["astro/tsconfigs/strict", "../../tsconfig.json"],
+        ╵               ~~~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+
+ RUN  v2.1.9 /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125
+
+01:03:37 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import fs from 'node:fs';
+2  |  import path from 'node:path';
+   |                       ^
+3  |  import { describe, expect, it } from 'vitest';
+4  |  import { TsProgramSession, extractModuleIR } from '../src/frontend';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/test/gpui-ast-codegen.test.ts
+01:03:37 [vite] warning: Unrecognized target environment "ES2024"
+1  |  export { TsProgramSession, type CompilerSessionOptions } from './program';
+   |                                                 ^
+2  |  export { extractModuleIR, type ExtractOptions, type ExtractOutput } from './extract';
+3  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/index.ts
+01:03:37 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import fs from 'node:fs';
+2  |  import path from 'node:path';
+   |                       ^
+3  |  import ts from 'typescript';
+4  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/program.ts
+01:03:38 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import path from 'node:path';
+2  |  import ts from 'typescript';
+   |                   ^
+3  |  import { diagnostic, type CompilerDiagnostic } from '../diagnostics';
+4  |  import { spanOf, sanitizeSym, unwrapExpr, extractScalarLiteral, resolveAliasedSymbol, resolveCallName, findFactoryCall, resolveFunctionLike, propAccessChain, extractObjectProperty, extractSetupFunction } from './syntax';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/extract.ts
+01:03:38 [vite] warning: Unrecognized target environment "ES2024"
+1  |  export interface SourceSpan {
+2  |    readonly file: string;
+   |                   ^
+3  |    readonly line: number;
+4  |    readonly column: number;
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/diagnostics.ts
+01:03:38 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { SourceSpan } from '../diagnostics';
+   |                    ^
+3  |  import type { ScalarLiteral } from '../ir';
+4  |  import { evaluateStaticScalar } from './constants';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/syntax.ts
+01:03:38 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { ScalarLiteral } from '../ir/types';
+   |                    ^
+3  |
+4  |  type Evaluation = { known: true; value: ScalarLiteral } | { known: false };
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/constants.ts
+01:03:38 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import type { PropDeclIR, StateDeclIR, SsaType } from '../ir';
+   |                                                 ^
+2  |
+3  |  export function propKindToSsaType(kind: PropDeclIR['kind']): Exclude<SsaType, 'void'> {
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/scalars.ts
+01:03:38 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { RuleExpr } from '../ir';
+   |                    ^
+3  |  import { unwrapExpr, extractScalarLiteral } from './syntax';
+4  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/rules.ts
+01:03:38 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { TemplateChildIR, TemplateElementIR } from '../ir';
+   |                    ^
+3  |  import { unwrapExpr, extractScalarLiteral, resolveCallName, propAccessChain, extractObjectProperty, isCoreIntrinsic, resolveFunctionLike } from './syntax';
+4  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/template.ts
+01:03:38 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import { SsaBuilder, type EventDeclIR, type RuleIR, type RuleExpr, type PropDeclIR, type StateDeclIR, type SsaFunction } from '../ir';
+   |                    ^
+3  |  import { unwrapExpr, extractScalarLiteral, propAccessChain, sanitizeSym } from './syntax';
+4  |  import { internString } from './scalars';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/kernel.ts
+01:03:38 [vite] warning: Unrecognized target environment "ES2024"
+1  |  export * from './types';
+2  |  export { SsaBuilder } from './builder';
+   |                        ^
+3  |  export { verifyModuleIR, verifySsaFunction } from './verify';
+4  |  export {
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/index.ts
+01:03:38 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import type { SourceSpan } from '../diagnostics';
+   |                                                 ^
+2  |
+3  |  export const PROTO_IR_VERSION = 2 as const;
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/types.ts
+01:03:38 [vite] warning: Unrecognized target environment "ES2024"
+2  |    HostOpKind,
+3  |    SsaBasicBlock,
+4  |    SsaBinOp,
+   |    ^
+5  |    SsaCmpOp,
+6  |    SsaFunction,
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/builder.ts
+01:03:38 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { diagnostic, type CompilerDiagnostic } from '../diagnostics';
+   |                                                 ^
+2  |  import {
+3  |    PROTO_IR_VERSION,
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/verify.ts
+01:03:38 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import {
+2  |    encodeCapabilityMask,
+3  |    type CapabilityName,
+   |                ^
+4  |    type ModuleIR,
+5  |    type PrototypeIR,
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/passes.ts
+01:03:38 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import type { ModuleIR, PrototypeIR, SsaFunction } from './types';
+   |                                                 ^
+2  |
+3  |  /** Diagnostic serialization of typed IR. Target source is printed by target SDKs. */
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/print.ts
+01:03:38 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { ActionStatementIR, ScalarLiteral, ValueExprIR } from '../ir/types';
+   |                    ^
+3  |
+4  |  export interface ActionBindings {
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/actions.ts
+01:03:38 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import fs from 'node:fs';
+2  |  import os from 'node:os';
+   |                       ^
+3  |  import path from 'node:path';
+4  |  import { spawnSync } from 'node:child_process';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/targets/gpui.ts
+01:03:38 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { fileURLToPath } from 'node:url';
+2  |
+3  |  // The pinned Node bundle defines this path relative to its emitted index.js.
+   |      ^
+4  |  // Source execution resolves from this module, never from a caller's cwd.
+5  |  declare const __PUI_COMPILER_NATIVE_ASSET_BASE__: string | undefined;
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/native-assets.ts
+ ✓ packages/compiler/test/gpui-ast-codegen.test.ts (5 tests) 7975ms
+   ✓ GPUI Rust AST target > compiles authored props/state/control flow to an actual native Render component 7656ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  01:03:36
+   Duration  9.37s (transform 248ms, setup 0ms, collect 783ms, tests 7.97s, environment 203ms, prepare 70ms)
+
+PUI_STAGE_EXIT 0
+PUI_STAGE cargo +1.98.1 check --manifest-path /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/Cargo.toml --workspace --all-targets --jobs 4
+    Checking compiled-propsmatrix v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/PropsMatrix)
+    Checking compiled-escapedtext v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/EscapedText)
+    Checking compiled-gpuicounter v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/GpuiCounter)
+    Checking compiled-numericstate v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/NumericState)
+    Checking compiled-requiredprop v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/RequiredProp)
+    Checking proto-ui-gpui-native-tests v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support)
+    Finished `dev` profile [unoptimized] target(s) in 1.00s
+PUI_STAGE_EXIT 0
+PUI_STAGE cargo +1.98.1 test --manifest-path /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/Cargo.toml -p proto-ui-gpui-native-tests --jobs 4 -- --nocapture
+   Compiling cfg-if v1.0.5
+   Compiling libc v0.2.191
+   Compiling smallvec v1.16.6
+   Compiling serde_core v1.0.229
+   Compiling stable_deref_trait v1.2.1
+   Compiling zerofrom v0.1.8
+   Compiling libm v0.2.16
+   Compiling memchr v2.8.3
+   Compiling yoke v0.8.4
+   Compiling simd-adler32 v0.3.10
+   Compiling zerovec v0.11.9
+   Compiling adler2 v2.0.1
+   Compiling pin-project-lite v0.2.18
+   Compiling writeable v0.6.4
+   Compiling crossbeam-utils v0.8.23
+   Compiling miniz_oxide v0.9.1
+   Compiling tinystr v0.8.5
+   Compiling litemap v0.8.3
+   Compiling futures-core v0.3.34
+   Compiling log v0.4.35
+   Compiling icu_locale_core v2.4.0
+   Compiling potential_utf v0.1.6
+   Compiling num-traits v0.2.19
+   Compiling zerotrie v0.2.5
+   Compiling bitflags v2.13.2
+   Compiling rand_core v0.10.1
+   Compiling utf_types v1.0.0
+   Compiling utf8_iter v1.1.0
+   Compiling zerocopy v0.8.64
+   Compiling crc32fast v1.5.6
+   Compiling arrayvec v0.7.8
+   Compiling scopeguard v1.2.0
+   Compiling bytemuck v1.25.2
+   Compiling lock_api v0.4.14
+   Compiling icu_provider v2.4.0
+   Compiling flate2 v1.1.11
+   Compiling icu_collections v2.4.0
+   Compiling once_cell v1.21.4
+   Compiling futures-io v0.3.34
+   Compiling futures-sink v0.3.34
+   Compiling itoa v1.0.19
+   Compiling serde v1.0.229
+   Compiling getrandom v0.4.3
+   Compiling crossbeam-epoch v0.9.21
+   Compiling miniz_oxide v0.8.9
+   Compiling equivalent v1.0.3
+   Compiling hashbrown v0.17.2
+   Compiling crossbeam-deque v0.8.8
+   Compiling icu_normalizer_data v2.4.0
+   Compiling icu_properties_data v2.4.0
+   Compiling futures-channel v0.3.34
+   Compiling fdeflate v0.3.7
+   Compiling indexmap v2.14.2
+   Compiling core_maths v0.1.1
+   Compiling futures-task v0.3.34
+   Compiling float-cmp v0.9.0
+   Compiling slab v0.4.12
+   Compiling fastrand v2.5.0
+   Compiling parking v2.2.1
+   Compiling futures-util v0.3.34
+   Compiling strict-num v0.1.1
+   Compiling ttf-parser v0.25.1
+   Compiling slotmap v1.1.1
+   Compiling icu_properties v2.4.0
+   Compiling icu_normalizer v2.4.0
+   Compiling rayon-core v1.13.0
+   Compiling getrandom v0.3.4
+   Compiling parking_lot_core v0.9.12
+   Compiling zmij v1.0.23
+   Compiling polycool v0.4.0
+   Compiling weezl v0.1.12
+   Compiling arrayref v0.3.9
+   Compiling percent-encoding v2.3.2
+   Compiling either v1.19.0
+   Compiling linux-raw-sys v0.12.1
+   Compiling foldhash v0.2.0
+   Compiling quick-error v2.0.1
+   Compiling roxmltree v0.20.0
+   Compiling zune-core v0.5.3
+   Compiling serde_json v1.0.154
+   Compiling rustix v1.1.6
+   Compiling zune-jpeg v0.5.15
+   Compiling fontconfig-parser v0.5.8
+   Compiling form_urlencoded v1.2.3
+   Compiling tiny-skia-path v0.11.4
+   Compiling kurbo v0.13.1
+   Compiling futures-executor v0.3.34
+   Compiling parking_lot v0.12.5
+   Compiling rand_core v0.9.5
+   Compiling idna_adapter v1.2.2
+   Compiling ppv-lite86 v0.2.21
+   Compiling half v2.7.1
+   Compiling anyhow v1.0.105
+   Compiling tracing-core v0.1.36
+   Compiling euclid v0.22.14
+   Compiling memmap2 v0.9.12
+   Compiling byteorder v1.5.0
+   Compiling color_quant v1.1.0
+   Compiling regex-syntax v0.8.12
+   Compiling gimli v0.34.0
+   Compiling bitflags v1.3.2
+   Compiling unicode-properties v0.1.5
+   Compiling bytes v1.12.2
+   Compiling siphasher v1.0.4
+   Compiling unicode-script v0.5.9
+   Compiling unicode-ccc v0.4.0
+   Compiling tinyvec v1.13.3
+   Compiling unicode-bidi-mirroring v0.4.0
+   Compiling byteorder-lite v0.1.0
+   Compiling image-webp v0.2.4
+   Compiling fontdb v0.23.0
+   Compiling rustybuzz v0.20.1
+   Compiling addr2line v0.27.1
+   Compiling http v1.5.0
+   Compiling svgtypes v0.16.2
+   Compiling png v0.17.16
+   Compiling gif v0.14.2
+   Compiling hash32 v0.3.1
+   Compiling ref-cast v1.0.27
+   Compiling pin-project v1.2.0
+   Compiling tracing v0.1.44
+   Compiling tempfile v3.27.0
+   Compiling rand_chacha v0.9.0
+   Compiling idna v1.1.0
+   Compiling multiversion v0.8.1
+   Compiling futures v0.3.34
+   Compiling icu_locale_fallback_data v2.4.0
+   Compiling rayon v1.12.0
+   Compiling event-listener v5.4.2
+   Compiling spin v0.9.9
+   Compiling simplecss v0.2.2
+   Compiling zune-inflate v0.2.54
+   Compiling wait-timeout v0.2.1
+   Compiling roxmltree v0.21.2
+   Compiling object v0.40.0
+   Compiling aho-corasick v1.1.5
+   Compiling fax v0.2.7
+   Compiling rustc-demangle v0.1.28
+   Compiling quick-error v1.2.3
+   Compiling cpufeatures v0.3.1
+   Compiling unicode-bidi v0.3.18
+   Compiling lebe v0.5.3
+   Compiling bit-vec v0.10.2
+   Compiling pxfm v0.1.30
+   Compiling fnv v1.0.7
+   Compiling unicode-vo v0.1.0
+   Compiling dyn-clone v1.0.20
+   Compiling xmlwriter v0.1.0
+   Compiling data-url v0.3.2
+   Compiling pico-args v0.5.0
+   Compiling base64 v0.22.1
+   Compiling iana-time-zone v0.1.65
+   Compiling imagesize v0.14.0
+   Compiling bit_field v0.10.4
+   Compiling ryu v1.0.23
+   Compiling serde_urlencoded v0.7.1
+   Compiling usvg v0.46.0
+   Compiling exr v1.74.3
+   Compiling backtrace v0.3.77
+   Compiling moxcms v0.8.1
+   Compiling chrono v0.4.45
+   Compiling ztracing v0.1.0 (https://github.com/cyjin-yl/z3rm?rev=e5f2f9db75e97613232b5c1946333e61fa3828ab#e5f2f9db)
+   Compiling schemars v1.2.3
+   Compiling rusty-fork v0.3.1
+   Compiling bit-set v0.11.1
+   Compiling chacha20 v0.10.2
+   Compiling regex-automata v0.4.19
+   Compiling tiff v0.11.3
+   Compiling thiserror v1.0.69
+   Compiling flume v0.12.0
+   Compiling event-listener-strategy v0.5.4
+   Compiling icu_locale_fallback v2.4.0
+   Compiling url v2.5.9
+   Compiling rand v0.9.5
+   Compiling heapless v0.9.4
+   Compiling tiny-skia v0.11.4
+   Compiling http-body v1.1.0
+   Compiling icu_segmenter_data v2.4.0
+   Compiling lyon_geom v1.0.20
+   Compiling gpui_util v0.1.0 (https://github.com/cyjin-yl/z3rm?rev=e5f2f9db75e97613232b5c1946333e61fa3828ab#e5f2f9db)
+   Compiling futures-lite v2.6.1
+   Compiling png v0.18.1
+   Compiling rand v0.10.4
+   Compiling uuid v1.29.3
+   Compiling rgb v0.8.53
+   Compiling qoi v0.4.1
+   Compiling rand_xorshift v0.5.0
+   Compiling smol_str v0.3.7
+   Compiling concurrent-queue v2.5.0
+   Compiling crossbeam-queue v0.3.14
+   Compiling fixedbitset v0.5.9
+   Compiling web-time v1.1.0
+   Compiling rustc-hash v2.1.3
+   Compiling async-task v4.7.1
+   Compiling pollster v0.2.5
+   Compiling unarray v0.1.4
+   Compiling static_assertions v1.1.0
+   Compiling core_detect v1.0.0
+   Compiling svg_fmt v0.4.5
+   Compiling atomic v0.5.3
+   Compiling scheduler v0.1.0 (https://github.com/cyjin-yl/z3rm?rev=e5f2f9db75e97613232b5c1946333e61fa3828ab#e5f2f9db)
+   Compiling proptest v1.12.0
+   Compiling postage v0.5.0
+   Compiling etagere v0.2.15
+   Compiling futures-concurrency v7.7.1
+   Compiling collections v0.1.0 (https://github.com/cyjin-yl/z3rm?rev=e5f2f9db75e97613232b5c1946333e61fa3828ab#e5f2f9db)
+   Compiling async-channel v2.5.0
+   Compiling gpui_shared_string v0.1.0 (https://github.com/cyjin-yl/z3rm?rev=e5f2f9db75e97613232b5c1946333e61fa3828ab#e5f2f9db)
+   Compiling thiserror v2.0.21
+   Compiling profiling v1.0.18
+   Compiling refineable v0.1.0 (https://github.com/cyjin-yl/z3rm?rev=e5f2f9db75e97613232b5c1946333e61fa3828ab#e5f2f9db)
+   Compiling accesskit v0.24.1
+   Compiling resvg v0.46.0
+   Compiling image v0.25.10
+   Compiling strum v0.28.0
+   Compiling lyon_path v1.0.19
+   Compiling icu_segmenter v2.4.0
+   Compiling http_client v0.1.0 (https://github.com/cyjin-yl/z3rm?rev=e5f2f9db75e97613232b5c1946333e61fa3828ab#e5f2f9db)
+   Compiling sum_tree v0.1.0 (https://github.com/cyjin-yl/z3rm?rev=e5f2f9db75e97613232b5c1946333e61fa3828ab#e5f2f9db)
+   Compiling regex v1.13.2
+   Compiling derive_more v2.1.1
+   Compiling itertools v0.14.0
+   Compiling taffy v0.15.0
+   Compiling spin v0.10.1
+   Compiling num_cpus v1.17.0
+   Compiling raw-window-handle v0.6.2
+   Compiling inventory v0.3.25
+   Compiling waker-fn v1.2.0
+   Compiling seahash v4.1.0
+   Compiling pollster v0.4.0
+   Compiling ryu-js v1.0.3
+   Compiling gpui v0.2.2 (https://github.com/cyjin-yl/z3rm?rev=e5f2f9db75e97613232b5c1946333e61fa3828ab#e5f2f9db)
+   Compiling compiled-escapedtext v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/EscapedText)
+   Compiling compiled-gpuicounter v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/GpuiCounter)
+   Compiling compiled-numericstate v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/NumericState)
+   Compiling compiled-propsmatrix v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/PropsMatrix)
+   Compiling compiled-requiredprop v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/RequiredProp)
+   Compiling proto-ui-gpui-native-tests v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support)
+    Finished `test` profile [unoptimized] target(s) in 47.00s
+     Running unittests src/lib.rs (/tmp/pui-gpui-native-target-1809/debug/deps/proto_ui_gpui_native_tests-52a9a1b9050dc27d)
+
+running 6 tests
+test tests::native_f64_actions_match_signed_zero_fraction_and_non_nan_validation ... ok
+test tests::full_prop_snapshots_preserve_canonical_fallback_history ... ok
+test tests::required_props_error_only_when_no_nonempty_fallback_exists ... ok
+test tests::escaped_literals_reach_gpui_as_text ... ok
+test tests::numeric_display_uses_ecmascript_formatting_in_real_render ... ok
+test tests::real_native_click_changes_state_and_reaches_text_layout ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+   Doc-tests proto_ui_gpui_native_tests
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PUI_STAGE_EXIT 0
+PUI_ALL_FINISHED
