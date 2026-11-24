@@ -1,6 +1,6 @@
 import { ordinaryValueChildren } from './value-children';
+import { serializableDataType } from './value-types';
 import {
-  isDataValueType,
   type CompilerDiagnostic,
   type ExpressionIR,
   type FunctionIR,
@@ -51,6 +51,32 @@ export function unsupportedNumericAccessibility(
         : undefined,
     undefined,
     emitted
+  );
+}
+
+/** Checked Props declarations are finite literal records at every IR entry. */
+export function hasPropsValidatorDeclaration(value: ExpressionIR): boolean {
+  return (
+    value.kind === 'operation' &&
+    value.operation === 'props.define' &&
+    value.arguments[0]?.kind === 'record' &&
+    value.arguments[0].entries.some(
+      (entry) =>
+        entry.value.kind === 'record' &&
+        entry.value.entries.some((field) => field.key === 'validator')
+    )
+  );
+}
+
+/** Direct native emitters must not retain a callback that their host ignores. */
+export function unsupportedPropsValidators(ir: PrototypeIR, target: string): CompilerDiagnostic[] {
+  return unsupportedSourceExpressions(
+    ir,
+    target,
+    'emitted-declarations',
+    (value) => (hasPropsValidatorDeclaration(value) ? 'Authored Props validators' : undefined),
+    undefined,
+    { hookMembers: 'setup' }
   );
 }
 
@@ -126,7 +152,7 @@ export function unsupportedJavaScriptIntrinsics(
 /** Ordinary calls use native closures; the remaining structural additions do not. */
 export function unsupportedDartOrdinaryValues(ir: PrototypeIR): CompilerDiagnostic[] {
   function supportedType(type: ValueType): boolean {
-    if (typeof type === 'string' || isDataValueType(type)) return true;
+    if (typeof type === 'string' || serializableDataType(type) !== undefined) return true;
     if (type.kind === 'cell') return supportedType(type.value);
     if (type.kind === 'callable')
       return supportedType(type.returnType) && type.parameters.every((p) => supportedType(p.type));
@@ -265,6 +291,8 @@ function unsupportedSourceExpressions(
       case 'rule':
         expression(value.receiver, scope);
         value.states.forEach((state) => expression(state.value, scope));
+        value.styles?.forEach((style) => expression(style.value, scope));
+        value.targets?.forEach((style) => expression(style.value, scope));
         return;
       case 'operation':
         if (value.receiver) expression(value.receiver, scope);
@@ -303,6 +331,17 @@ function unsupportedSourceExpressions(
           statements(statement.then, new Map(scope));
           statements(statement.otherwise, new Map(scope));
           break;
+        case 'while':
+          expression(statement.condition, scope);
+          statements(statement.body, new Map(scope));
+          break;
+        case 'for-of': {
+          expression(statement.iterable, scope);
+          const loop = new Map(scope);
+          loop.set(statement.name, undefined);
+          statements(statement.body, loop);
+          break;
+        }
         case 'try':
           statements(statement.body, new Map(scope));
           if (statement.catch) statements(statement.catch.body, new Map(scope));

@@ -5,7 +5,9 @@ import type {
   CollapsibleContentAsHookContract,
   CollapsibleContentExposes,
   CollapsibleContentProps,
+  CollapsibleContentHandles,
 } from './types';
+import type { TransitionHandles } from '../transition/types';
 
 function setupCollapsibleContent(
   def: DefHandle<CollapsibleContentProps, CollapsibleContentExposes>
@@ -15,6 +17,8 @@ function setupCollapsibleContent(
   def.props.setDefaults({ keepMounted: false });
   const open = def.state.bool('open', false);
   const hidden = def.state.bool('hidden', true);
+  let presence: TransitionHandles | null = null;
+  let syncRevision = 0;
   def.expose.state('open', open);
   def.expose.state('hidden', hidden);
   const accessible = asAccessible();
@@ -23,14 +27,35 @@ function setupCollapsibleContent(
   accessible.state('hidden', hidden);
 
   const syncPresence = (run: RunHandle<CollapsibleContentProps>) => {
+    const revision = ++syncRevision;
     rejectDuplicateCollapsiblePart(run, 'content');
     // Reentrant acceptance wins over an older request notification.
     const nextOpen = run.context.read(COLLAPSIBLE_CONTEXT).open;
     open.set(nextOpen, 'reason: collapsible canonical content');
-    hidden.set(!nextOpen, 'reason: collapsible content hidden');
+    if (revision !== syncRevision) return;
+    const currentOpen = run.context.read(COLLAPSIBLE_CONTEXT).open;
+    hidden.set(
+      presence ? !presence.isPresent.get() : !currentOpen,
+      'reason: collapsible content hidden'
+    );
+    if (revision !== syncRevision) return;
     // P-BASE-COLLAPSIBLE-CONTENT-L1: instance ownership stays with Runtime.
-    run.lifecycle.setPresent(!!run.props.get().keepMounted || nextOpen);
+    if (presence) presence.retainClosedView(!!run.props.get().keepMounted);
+    else run.lifecycle.setPresent(!!run.props.get().keepMounted || currentOpen);
   };
+  def.expose.method('bindPresence', (transition: TransitionHandles) => {
+    hidden.setDefault(hidden.get());
+    if (presence) {
+      if (presence === transition) return;
+      throw new Error('[asCollapsibleContent] presence is already bound.');
+    }
+    transition.bindOpenContext({ context: COLLAPSIBLE_CONTEXT, field: 'open' });
+    presence = transition;
+    transition.isPresent.watch((_run, event) => {
+      if (event.type !== 'next') return;
+      hidden.set(!transition.isPresent.get(), 'reason: collapsible perceptual content');
+    });
+  });
   def.context.subscribe(COLLAPSIBLE_CONTEXT, syncPresence);
   def.lifecycle.onCreated(syncPresence);
   def.lifecycle.onMounted(syncPresence);
@@ -46,8 +71,19 @@ function setupCollapsibleContent(
 export const asCollapsibleContent = defineAsHook<
   CollapsibleContentProps,
   CollapsibleContentExposes,
-  CollapsibleContentAsHookContract
->({ name: 'as-collapsible-content', setup: setupCollapsibleContent });
+  CollapsibleContentAsHookContract,
+  CollapsibleContentHandles
+>({
+  name: 'as-collapsible-content',
+  setup: setupCollapsibleContent,
+  projectHandle(result) {
+    const bindPresence = result.getMethod?.('bindPresence') as
+      | CollapsibleContentHandles['bindPresence']
+      | undefined;
+    if (!bindPresence) throw new Error('[asCollapsibleContent] missing presence binding.');
+    return { ...result, bindPresence };
+  },
+});
 
 const collapsibleContent = definePrototype({
   name: 'base-collapsible-content',

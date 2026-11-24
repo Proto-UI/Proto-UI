@@ -1,0 +1,111 @@
+{
+  "attempt": 6,
+  "active": "button",
+  "buttons": 1,
+  "contentId": "pui-tooltip-1-content",
+  "description": "pui-tooltip-1-content",
+  "originalAssertionPass": true,
+  "originalBoundary": {
+    "reason": "original-id-assertion-point",
+    "time": 925.3000000119209,
+    "open": true,
+    "contentNode": 2,
+    "contentId": "pui-tooltip-1-content",
+    "contentHtml": "<div data-pui-root=\"\" data-demo-ref=\"content\" data-pui-style=\"absolute z-50\" data-transition-state=\"entered\" data-open=\"\" data-pui-view-revealing=\"presence\" data-is-present=\"\" dir=\"ltr\" style=\"z-index: 10000; position: fixed; left: 0px; top: 5px; --proto-ui-anchor-width: 59.6875px; --proto-ui-anchor-height: 48px; --proto-ui-available-width: 1200px; --proto-ui-available-height: 29px;\" data-side=\"top\" data-align=\"center\" id=\"pui-tooltip-1-content\" role=\"tooltip\">Save this document</div>",
+    "description": "pui-tooltip-1-content",
+    "active": "button"
+  },
+  "trace": [
+    {
+      "reason": "mounted",
+      "time": 846.2000000476837,
+      "open": false,
+      "contentNode": 1,
+      "contentId": null,
+      "contentHtml": "<div data-pui-root=\"\" data-pui-view-detached=\"\" data-pui-view-pending=\"\" data-demo-ref=\"content\">Save this document</div>",
+      "description": null,
+      "active": null
+    },
+    {
+      "reason": "mutation:childList:,childList:,childList:,childList:,attributes:id,attributes:aria-describedby,attributes:id,attributes:id,attributes:id,attributes:id,attributes:id,attributes:id,attributes:data-pui-view-pending,attributes:id,attributes:id,attributes:id,attributes:id",
+      "time": 905.7000000476837,
+      "open": true,
+      "contentNode": 2,
+      "contentId": "pui-tooltip-1-content",
+      "contentHtml": "<div data-pui-root=\"\" data-demo-ref=\"content\" data-pui-style=\"absolute z-50 hidden\" data-transition-state=\"closed\" data-open=\"\" data-pui-view-revealing=\"presence\" id=\"pui-tooltip-1-content\" role=\"tooltip\">Save this document</div>",
+      "description": "pui-tooltip-1-content",
+      "active": "button"
+    },
+    {
+      "reason": "mutation:attributes:id,attributes:id",
+      "time": 914.3000000119209,
+      "open": true,
+      "contentNode": 2,
+      "contentId": "pui-tooltip-1-content",
+      "contentHtml": "<div data-pui-root=\"\" data-demo-ref=\"content\" data-pui-style=\"absolute z-50\" data-transition-state=\"entering\" data-open=\"\" data-pui-view-revealing=\"presence\" data-is-present=\"\" dir=\"ltr\" style=\"z-index: 10000; position: fixed; top: 0px; left: 0px;\" id=\"pui-tooltip-1-content\" role=\"tooltip\">Save this document</div>",
+      "description": "pui-tooltip-1-content",
+      "active": "button"
+    },
+    {
+      "reason": "mutation:attributes:id,attributes:id",
+      "time": 924.7000000476837,
+      "open": true,
+      "contentNode": 2,
+      "contentId": "pui-tooltip-1-content",
+      "contentHtml": "<div data-pui-root=\"\" data-demo-ref=\"content\" data-pui-style=\"absolute z-50\" data-transition-state=\"entered\" data-open=\"\" data-pui-view-revealing=\"presence\" data-is-present=\"\" dir=\"ltr\" style=\"z-index: 10000; position: fixed; left: 0px; top: 5px; --proto-ui-anchor-width: 59.6875px; --proto-ui-anchor-height: 48px; --proto-ui-available-width: 1200px; --proto-ui-available-height: 29px;\" data-side=\"top\" data-align=\"center\" id=\"pui-tooltip-1-content\" role=\"tooltip\">Save this document</div>",
+      "description": "pui-tooltip-1-content",
+      "active": "button"
+    },
+    {
+      "reason": "mutation:attributes:id,attributes:id",
+      "time": 925,
+      "open": true,
+      "contentNode": 2,
+      "contentId": "pui-tooltip-1-content",
+      "contentHtml": "<div data-pui-root=\"\" data-demo-ref=\"content\" data-pui-style=\"absolute z-50\" data-transition-state=\"entered\" data-open=\"\" data-pui-view-revealing=\"presence\" data-is-present=\"\" dir=\"ltr\" style=\"z-index: 10000; position: fixed; left: 0px; top: 5px; --proto-ui-anchor-width: 59.6875px; --proto-ui-anchor-height: 48px; --proto-ui-available-width: 1200px; --proto-ui-available-height: 29px;\" data-side=\"top\" data-align=\"center\" id=\"pui-tooltip-1-content\" role=\"tooltip\">Save this document</div>",
+      "description": "pui-tooltip-1-content",
+      "active": "button"
+    },
+    {
+      "reason": "original-id-assertion-point",
+      "time": 925.3000000119209,
+      "open": true,
+      "contentNode": 2,
+      "contentId": "pui-tooltip-1-content",
+      "contentHtml": "<div data-pui-root=\"\" data-demo-ref=\"content\" data-pui-style=\"absolute z-50\" data-transition-state=\"entered\" data-open=\"\" data-pui-view-revealing=\"presence\" data-is-present=\"\" dir=\"ltr\" style=\"z-index: 10000; position: fixed; left: 0px; top: 5px; --proto-ui-anchor-width: 59.6875px; --proto-ui-anchor-height: 48px; --proto-ui-available-width: 1200px; --proto-ui-available-height: 29px;\" data-side=\"top\" data-align=\"center\" id=\"pui-tooltip-1-content\" role=\"tooltip\">Save this document</div>",
+      "description": "pui-tooltip-1-content",
+      "active": "button"
+    },
+    {
+      "reason": "diagnostic-next-frame-1",
+      "time": 944.2000000476837,
+      "open": true,
+      "contentNode": 2,
+      "contentId": "pui-tooltip-1-content",
+      "contentHtml": "<div data-pui-root=\"\" data-demo-ref=\"content\" data-pui-style=\"absolute z-50\" data-transition-state=\"entered\" data-open=\"\" data-is-present=\"\" dir=\"ltr\" style=\"z-index: 10000; position: fixed; left: 0px; top: 5px; --proto-ui-anchor-width: 59.6875px; --proto-ui-anchor-height: 48px; --proto-ui-available-width: 1200px; --proto-ui-available-height: 29px;\" data-side=\"top\" data-align=\"center\" id=\"pui-tooltip-1-content\" role=\"tooltip\">Save this document</div>",
+      "description": "pui-tooltip-1-content",
+      "active": "button"
+    },
+    {
+      "reason": "diagnostic-next-frame-2",
+      "time": 960.9000000357628,
+      "open": true,
+      "contentNode": 2,
+      "contentId": "pui-tooltip-1-content",
+      "contentHtml": "<div data-pui-root=\"\" data-demo-ref=\"content\" data-pui-style=\"absolute z-50\" data-transition-state=\"entered\" data-open=\"\" data-is-present=\"\" dir=\"ltr\" style=\"z-index: 10000; position: fixed; left: 0px; top: 5px; --proto-ui-anchor-width: 59.6875px; --proto-ui-anchor-height: 48px; --proto-ui-available-width: 1200px; --proto-ui-available-height: 29px;\" data-side=\"top\" data-align=\"center\" id=\"pui-tooltip-1-content\" role=\"tooltip\">Save this document</div>",
+      "description": "pui-tooltip-1-content",
+      "active": "button"
+    },
+    {
+      "reason": "diagnostic-next-frame-3",
+      "time": 977.5,
+      "open": true,
+      "contentNode": 2,
+      "contentId": "pui-tooltip-1-content",
+      "contentHtml": "<div data-pui-root=\"\" data-demo-ref=\"content\" data-pui-style=\"absolute z-50\" data-transition-state=\"entered\" data-open=\"\" data-is-present=\"\" dir=\"ltr\" style=\"z-index: 10000; position: fixed; left: 0px; top: 5px; --proto-ui-anchor-width: 59.6875px; --proto-ui-anchor-height: 48px; --proto-ui-available-width: 1200px; --proto-ui-available-height: 29px;\" data-side=\"top\" data-align=\"center\" id=\"pui-tooltip-1-content\" role=\"tooltip\">Save this document</div>",
+      "description": "pui-tooltip-1-content",
+      "active": "button"
+    }
+  ],
+  "errors": []
+}

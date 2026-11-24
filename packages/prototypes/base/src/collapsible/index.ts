@@ -11,6 +11,7 @@ export type {
   CollapsibleContentExposes,
   CollapsibleContentStateHandles,
   CollapsibleContentAsHookContract,
+  CollapsibleContentHandles,
 } from './types';
 export type { CollapsibleContextValue, CollapsibleOpenReason } from './shared';
 export { COLLAPSIBLE_CONTEXT, COLLAPSIBLE_FAMILY } from './shared';

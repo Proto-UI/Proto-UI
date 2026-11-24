@@ -1,3 +1,4 @@
+import { runAllSteps } from '../host/synchronous-steps';
 import { readInternalInitialPaintLease, recordInternalInitialPaint } from './initial-paint-bridge';
 import { withOwnedCarrierMarker } from './paint-mutations';
 import { observeWebPointerContact } from '../events/pointer-contact';
@@ -1102,9 +1103,7 @@ function createDocumentMaterialSink(
       scheduled = null;
       motion.stop();
       last = null;
-      let error: unknown;
-      let failed = false;
-      for (const dispose of [
+      runAllSteps([
         cancelPending,
         clearImage,
         images.dispose,
@@ -1113,17 +1112,7 @@ function createDocumentMaterialSink(
         () => initialPaint?.retire(),
         restore,
         clearDiagnostics,
-      ]) {
-        try {
-          dispose();
-        } catch (failure) {
-          if (!failed) {
-            failed = true;
-            error = failure;
-          }
-        }
-      }
-      if (failed) throw error;
+      ]);
     },
   };
 }

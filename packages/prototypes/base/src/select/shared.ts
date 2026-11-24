@@ -1,3 +1,4 @@
+import type { RunHandle } from '@proto.ui/core';
 import { createAnatomyFamily, createContextKey } from '@proto.ui/core';
 
 export type SelectFocusReason = 'programmatic' | 'keyboard' | 'pointer';
@@ -70,7 +71,7 @@ export function createSelectContentId(rootId: string): string {
   return `${rootId || 'pui-select'}-content`;
 }
 
-export function requestSelectOpen(run: any, request: SelectOpenRequest): boolean {
+export function requestSelectOpen(run: RunHandle<any>, request: SelectOpenRequest): boolean {
   try {
     if (!request.open && request.reason === 'tab') {
       const contents = run.anatomy.partsOf(SELECT_FAMILY, 'content');
@@ -90,7 +91,7 @@ export function requestSelectOpen(run: any, request: SelectOpenRequest): boolean
   }
 }
 
-export function requestSelectValue(run: any, request: SelectValueRequest): boolean {
+export function requestSelectValue(run: RunHandle<any>, request: SelectValueRequest): boolean {
   try {
     const root = run.anatomy.partsOf(SELECT_FAMILY, 'root')[0] ?? null;
     const requestValue = root?.getExpose('requestValue') as
@@ -103,7 +104,7 @@ export function requestSelectValue(run: any, request: SelectValueRequest): boole
   }
 }
 
-export function notifySelectItemSnapshotChanged(run: any): void {
+export function notifySelectItemSnapshotChanged(run: RunHandle<any>): void {
   const root = run.anatomy.partsOf(SELECT_FAMILY, 'root')[0] ?? null;
   const refresh = root?.getExpose('__refreshSelectedText') as (() => void) | null;
   refresh?.();

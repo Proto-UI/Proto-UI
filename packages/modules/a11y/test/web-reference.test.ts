@@ -73,6 +73,7 @@ describe('Web A11y opaque semantic-object references', () => {
     const project = createWebA11yProjector(() => target);
     project({ ...semanticSnapshot(createA11ySemanticObjectRef()), name: { kind: 'content' } });
     expect(project.hasAuthoredName?.()).toBe(true);
+    expect(target.getAttribute('aria-label')).toBe('Consumer name');
     project.dispose?.();
     expect(target.getAttribute('aria-label')).toBe('Consumer name');
   });

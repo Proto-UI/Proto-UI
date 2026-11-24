@@ -97,6 +97,7 @@ export function createPresenceController(options: PresenceControllerOptions) {
         ...(recipe?.closed.translate ? ['translate' as const] : []),
         ...(recipe?.closed.opacity !== undefined ? ['opacity' as const] : []),
         ...(recipe?.closed.top ? ['top' as const] : []),
+        ...(recipe?.closed.blockSize !== undefined ? ['blockSize' as const] : []),
       ]),
       outcome,
     });
@@ -127,6 +128,7 @@ export function createPresenceController(options: PresenceControllerOptions) {
       ...(translate ? { translate } : {}),
       ...(endpoint.opacity !== undefined ? { opacity: endpoint.opacity } : {}),
       ...(endpoint.top ? { top: endpoint.top } : {}),
+      ...(endpoint.blockSize !== undefined ? { blockSize: endpoint.blockSize } : {}),
     });
   };
   const release = (advance = true) => {

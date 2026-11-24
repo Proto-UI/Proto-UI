@@ -156,7 +156,7 @@ export function fieldRootMethod(
     if ((error as { code?: string }).code === 'ANATOMY_CLAIM_INVALID') return null;
     throw error;
   }
-  const method = parts.length === 1 ? parts[0].getExpose(key) : null;
+  const method = parts.length === 1 ? parts[0]!.getExpose(key) : null;
   return typeof method === 'function' ? (method as (...args: any[]) => any) : null;
 }
 export function rejectFieldDuplicates(run: RunHandle<any>, role: string) {

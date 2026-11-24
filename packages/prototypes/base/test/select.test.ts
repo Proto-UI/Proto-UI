@@ -629,7 +629,7 @@ describe('prototypes/base: select', () => {
       },
     });
     try {
-      const { root, trigger, content } = createSelect({
+      const { root, trigger, content, items } = createSelect({
         contentElement: new TracedContent(),
         content: { side: 'top', align: 'end', sideOffset: 12, alignOffset: 3 },
       });
@@ -651,18 +651,15 @@ describe('prototypes/base: select', () => {
       trigger.click();
       await settle();
       expect(content.getExposes().transitionState.get()).toBe('closed');
-      // The shared marker follows not-present intent immediately. Physical
-      // portal retirement still crosses both rendering opportunities.
-      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
-      expect(content.parentElement).toBe(document.body);
-      expect(lifecycle).toEqual(mounted);
-      expect(await frame()).toBeGreaterThan(0);
+      // C-HOST-VIEW-ATTACHMENT-0001 projects not-present immediately. The
+      // existing two-frame barrier separately retires the physical Portal.
       expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
       expect(content.parentElement).toBe(document.body);
       expect(lifecycle).toEqual(mounted);
       expect(await frame()).toBeGreaterThan(0);
       expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
       expect(content.parentElement).toBe(root);
+      expect([...content.querySelectorAll('base-select-item')]).toEqual(items);
       expect(lifecycle).toEqual([
         ...mounted,
         { type: 'unmount.begin', epoch },

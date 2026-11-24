@@ -1,8 +1,10 @@
 import { pruneDeadValues } from './demand-pruning';
+import { unsupportedLifecycleModules } from './lifecycle-module-admission';
 import {
   unsupportedCheckedHelperParameters,
   unsupportedControlLabel,
   unsupportedNumericAccessibility,
+  unsupportedPropsValidators,
   unsupportedPointerFacts,
   unsupportedDartOrdinaryValues,
 } from './pointer-facts-admission';
@@ -26,7 +28,12 @@ import type { RuleCondition } from './rule-declarations';
 import { getSemanticGroupKeyV0 } from '../../core/src/spec/feedback/semantic-merge';
 import { flutterNativeSource } from './flutter-native-host';
 import { partitionModuleBindings } from './source-module-bindings';
-import { callableValue, valueAlternatives } from './value-types';
+import {
+  arrayElementType,
+  callableValue,
+  serializableDataType,
+  valueAlternatives,
+} from './value-types';
 
 /** Checked statements become ordinary Dart; the supporting host has no semantic IR. */
 export function emitFlutterSource(
@@ -36,6 +43,10 @@ export function emitFlutterSource(
   const checked = validateIR(input);
   if (!checked.ok) return checked;
   const ir = pruneDeadValues(checked.value);
+  const lifecycleDiagnostics = unsupportedLifecycleModules(ir, 'flutter-source');
+  if (lifecycleDiagnostics.length) return { ok: false, diagnostics: lifecycleDiagnostics };
+  const validatorDiagnostics = unsupportedPropsValidators(ir, 'flutter-source');
+  if (validatorDiagnostics.length) return { ok: false, diagnostics: validatorDiagnostics };
   const numericDiagnostics = unsupportedNumericAccessibility(ir, 'flutter-source');
   if (numericDiagnostics.length) return { ok: false, diagnostics: numericDiagnostics };
   const moduleParts = partitionModuleBindings(ir);
@@ -242,7 +253,8 @@ export function emitFlutterSource(
   }
   function type(type: ValueType): string {
     if (type === 'exception') return 'Object?';
-    if (isDataValueType(type)) return data(type);
+    const schema = serializableDataType(type);
+    if (schema !== undefined) return data(schema);
     if (typeof type !== 'string') {
       if (type.kind === 'cell') return dartType(type.value);
       if (type.kind === 'capture') return 'Object';
@@ -498,24 +510,33 @@ export function emitFlutterSource(
       case 'rule': {
         const bindings = new Map(value.states.map((entry) => [entry.id, entry.value]));
         const condition = (node: RuleCondition): string => {
-          if (node.type === 'eq') {
+          if (node.type === 'true' || node.type === 'false') return node.type;
+          if (node.type === 'eq' || node.type === 'gte') {
             if (node.left.type === 'meta')
-              throw new Error('Rule Meta must fail Flutter target admission.');
-            return `(${node.left.type === 'prop' ? `_owner.props.${publicName(node.left.key)}` : `${expr(bindings.get(node.left.id)!, depth)}.get()`} == ${quote(node.right)})`;
+              throw new Error('Target admission must reject unsupported Rule meta sources.');
+            const signal =
+              node.left.type === 'prop'
+                ? `_owner.props.${publicName(node.left.key)}`
+                : `${expr(bindings.get(node.left.id)!, depth)}.get()`;
+            return node.type === 'eq'
+              ? `(${signal} == ${quote(node.right)})`
+              : `((Object? value) => value is num && value.isFinite && value >= ${node.right})(${signal})`;
           }
-          return node.type === 'true' || node.type === 'false'
-            ? node.type
-            : node.type === 'not'
-              ? `!(${condition(node.expr)})`
-              : `(${node.exprs.map(condition).join(node.type === 'all' ? ' && ' : ' || ') || (node.type === 'all' ? 'true' : 'false')})`;
+          if (node.type === 'not') return `!(${condition(node.expr)})`;
+          return `(${node.exprs.map(condition).join(node.type === 'all' ? ' && ' : ' || ') || (node.type === 'all' ? 'true' : 'false')})`;
         };
         return `_owner.style.rule(() => ${condition(value.declaration.when)}, <NativeStyleHandle>[${value.declaration.intent.ops
           .flatMap((op) => op.handles)
-          .map(style)
+          .map((handle) => {
+            if (handle.kind !== 'tw')
+              throw new Error('Target admission must reject first-class Rule style handles.');
+            return style(handle);
+          })
           .join(', ')}])`;
       }
       case 'member': {
         const receiver = expr(value.object, depth);
+        const dataReceiver = serializableDataType(value.object.type);
         if (value.object.type === 'exception') {
           usesExceptions = true;
           return `_puiCaughtMember(${receiver}, ${quote(value.property)}, ${value.optional})`;
@@ -550,12 +571,20 @@ export function emitFlutterSource(
           ['ctrlKey', 'shiftKey', 'altKey', 'metaKey', 'repeat'].includes(value.property)
         )
           return `NativeOptional<bool>.value(${receiver}.${value.property})`;
-        if (typeof value.object.type !== 'string' && value.object.type.kind === 'array')
+        if (
+          dataReceiver !== undefined &&
+          typeof dataReceiver !== 'string' &&
+          dataReceiver.kind === 'array'
+        )
           return value.property === 'length'
             ? `${receiver}.length.toDouble()`
             : `nativeIndex(${receiver}, ${Number(value.property)})`;
-        if (typeof value.object.type !== 'string' && value.object.type.kind === 'union') {
-          const alternatives = value.object.type.members;
+        if (
+          dataReceiver !== undefined &&
+          typeof dataReceiver !== 'string' &&
+          dataReceiver.kind === 'union'
+        ) {
+          const alternatives = dataReceiver.members;
           const optionalResult = type(value.type).startsWith('NativeOptional<');
           const resultType = type(value.type);
           const branches = alternatives
@@ -579,13 +608,18 @@ export function emitFlutterSource(
         if (
           value.optional &&
           type(value.type).startsWith('NativeOptional<') &&
-          typeof value.object.type !== 'string' &&
-          value.object.type.kind === 'record'
+          dataReceiver !== undefined &&
+          typeof dataReceiver !== 'string' &&
+          dataReceiver.kind === 'record'
         ) {
           return `nativeOptionalResult<${type(value.type).slice(15, -1)}>((${receiver}).${publicName(value.property)})`;
         }
-        if (typeof value.object.type !== 'string' && value.object.type.kind === 'record')
-          return `(${receiver}).${publicName(value.property)}${value.object.type.fields.find((field) => field.name === value.property)?.optional ? '' : '.value'}`;
+        if (
+          dataReceiver !== undefined &&
+          typeof dataReceiver !== 'string' &&
+          dataReceiver.kind === 'record'
+        )
+          return `(${receiver}).${publicName(value.property)}${dataReceiver.fields.find((field) => field.name === value.property)?.optional ? '' : '.value'}`;
         if (value.object.type === 'props') return `(${receiver}).${publicName(value.property)}`;
         if (value.object.type === 'record' || value.object.type === 'template-props')
           return `((${receiver})${value.optional ? '?' : ''}[${quote(value.property)}] as ${type(value.type)})`;
@@ -624,12 +658,17 @@ export function emitFlutterSource(
           ? `(nativeNumber(${left}).remainder(nativeNumber(${right})))`
           : `(nativeNumber(${left}) ${value.operator} nativeNumber(${right}))`;
       }
-      case 'array':
-        return `<${typeof value.type !== 'string' && value.type.kind === 'array' ? data(value.type.element) : 'Object?'}>[${value.elements.map((item) => expr(item, depth)).join(', ')}]`;
+      case 'array-spread':
+        throw new Error('Target admission must reject unsupported iterable spread.');
+      case 'array': {
+        const element = arrayElementType(value.type);
+        return `<${element === undefined ? 'Object?' : type(element)}>[${value.elements.map((item) => expr(item, depth)).join(', ')}]`;
+      }
       case 'record': {
-        if (typeof value.type !== 'string' && value.type.kind === 'record') {
-          if (!value.type.fields.length) return 'NativeEmptyRecord()';
-          return `${data(value.type)}Value(${value.type.fields
+        const schema = serializableDataType(value.type);
+        if (schema !== undefined && typeof schema !== 'string' && schema.kind === 'record') {
+          if (!schema.fields.length) return 'NativeEmptyRecord()';
+          return `${data(schema)}Value(${schema.fields
             .map((field) => {
               const entry = value.entries.find((entry) => entry.key === field.name);
               return `${publicName(field.name)}: ${entry ? `NativeOptional.value(${expr(entry.value, depth)})` : 'const NativeOptional<Never>.absent()'}`;
@@ -986,7 +1025,9 @@ export function emitFlutterSource(
           }
         };
         result += `${indent}try {\n${branch(statement.body)}${indent}}${caught ? ` on _PuiThrown${caught.name ? ' catch (caughtValue)' : ''} {\n${caught.name ? `${indent}  final ${id(caught.name)} = caughtValue.value;\n` : ''}${branch(caught.body, caught.name)}${indent}}` : ''}${statement.finally ? ` finally {\n${branch(statement.finally)}${indent}}` : ''}\n`;
-      } else
+      } else if (statement.kind === 'while' || statement.kind === 'for-of')
+        throw new Error('Target admission must reject unsupported dynamic loops.');
+      else
         result += `${indent}if (${truthy(statement.condition, depth)}) {\n${statements(statement.then, depth + 1, returnType)}${indent}}${statement.otherwise.length ? ` else {\n${statements(statement.otherwise, depth + 1, returnType)}${indent}}` : ''}\n`;
     }
     helperBindings = previousBindings;
@@ -1009,6 +1050,8 @@ export function emitFlutterSource(
   const exposureBindings = ir.exposes
     .filter((entry) => entry.kind !== 'event')
     .map((entry) => {
+      const resultSchema =
+        entry.kind === 'method' ? serializableDataType(entry.returnType) : undefined;
       const t =
         entry.kind === 'state'
           ? `NativeObserved<${data(entry.type)}>`
@@ -1027,22 +1070,23 @@ export function emitFlutterSource(
       const methodBody =
         entry.kind === 'method'
           ? `(${params}) {\n      ensureExternal();\n${entry.parameters
-              .map((parameter) =>
-                isDataValueType(parameter.type)
-                  ? `      if (!(${parameter.optional ? `!${id(parameter.name)}.present || ${predicate(`${id(parameter.name)}.value`, parameter.type, true)}` : predicate(id(parameter.name), parameter.type, true)})) throw ArgumentError('Invalid Expose method argument');`
-                  : ''
-              )
+              .map((parameter) => {
+                const schema = serializableDataType(parameter.type);
+                return schema !== undefined
+                  ? `      if (!(${parameter.optional ? `!${id(parameter.name)}.present || ${predicate(`${id(parameter.name)}.value`, schema, true)}` : predicate(id(parameter.name), schema, true)})) throw ArgumentError('Invalid Expose method argument');`
+                  : '';
+              })
               .filter(Boolean)
               .join(
                 '\n'
-              )}\n      ${entry.returnType === 'void' ? `inScope('expose-method', () => value(${entry.parameters.map((p) => id(p.name)).join(', ')}));` : `final result = inScope('expose-method', () => value(${entry.parameters.map((p) => id(p.name)).join(', ')}));\n      ${isDataValueType(entry.returnType) ? `if (!(${predicate('result', entry.returnType, true)})) throw ArgumentError('Invalid Expose method result');` : ''}\n      return result;`}\n    }`
+              )}\n      ${entry.returnType === 'void' ? `inScope('expose-method', () => value(${entry.parameters.map((p) => id(p.name)).join(', ')}));` : `final result = inScope('expose-method', () => value(${entry.parameters.map((p) => id(p.name)).join(', ')}));\n      ${resultSchema !== undefined ? `if (!(${predicate('result', resultSchema, true)})) throw ArgumentError('Invalid Expose method result');` : ''}\n      return result;`}\n    }`
           : '';
       const moduleFallback =
         entry.kind === 'method' &&
         entry.parameters.length === 0 &&
-        isDataValueType(entry.returnType) &&
-        typeof entry.returnType !== 'string'
-          ? `() => ${nativeData(`(super.publicExposure(${quote(entry.name)}) as Object? Function())()`, entry.returnType)}`
+        resultSchema !== undefined &&
+        typeof resultSchema !== 'string'
+          ? `() => ${nativeData(`(super.publicExposure(${quote(entry.name)}) as Object? Function())()`, resultSchema)}`
           : `(super.publicExposure(${quote(entry.name)}) as ${t})`;
       return `  ${t}? _bound_${id(entry.name)};
   ${t} get ${id(entry.name)} { ensureExternal(); return _bound_${id(entry.name)} ?? (${moduleFallback}); }

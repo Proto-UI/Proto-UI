@@ -24,17 +24,9 @@ import {
 afterAll(cleanupOutputs);
 const targets = Object.keys(CONTROL_LABEL_PROFILES) as WebTarget[];
 const kinds = Object.keys(CONTROL_LABEL_ENTRIES) as ComponentKind[];
-const unsupportedGroupEntries = [
-  {
-    entry: 'packages/prototypes/base/src/toggle-group/root.proto.ts',
-    code: 'PUI1020',
-    message: 'Array elements must be data values.',
-  },
-  {
-    entry: 'packages/prototypes/base/src/toggle-group/item.proto.ts',
-    code: 'PUI1006',
-    message: 'Read of undeclared prop value.',
-  },
+const groupEntries = [
+  { entry: 'packages/prototypes/base/src/toggle-group/root.proto.ts' },
+  { entry: 'packages/prototypes/base/src/toggle-group/item.proto.ts' },
 ];
 
 describe.each(targets)('actual Control Label source admission: %s', (target) => {
@@ -63,27 +55,26 @@ describe.each(targets)('actual Control Label source admission: %s', (target) => 
     }
   );
 
-  it.each(unsupportedGroupEntries)(
-    'retains a located diagnostic for the existing unsupported $entry language boundary',
-    async ({ entry, code, message }) => {
-      // Same-compiler comparison with the 7d30 source baseline established that
-      // Toggle Group already lacked compiler admission before Control Label.
-      // Its typed collection/reflection/queue language is a separate workstream;
-      // explicit rejection is not counted as successful Group lowering.
+  it.each(groupEntries)(
+    'admits actual Toggle Group $entry source with explicit target operation limits',
+    async ({ entry }) => {
+      // The original source inputs now use ordinary checked collection and
+      // reflection lowering. Vue2's all-key watchers now have independent
+      // generated-consumer admission in raw-props-consumer.test.ts.
       const result = await compileFile(entry, {
         root: REPOSITORY,
         profile: CONTROL_LABEL_PROFILES[target],
       });
-      expect(result.ok).toBe(false);
-      if (result.ok) throw new Error('Toggle Group support requires its independent acceptance');
-      expect(result.diagnostics).toEqual([
-        expect.objectContaining({
-          code,
-          category: 'unsupported-input',
-          message,
-          span: expect.objectContaining({ file: entry }),
-        }),
-      ]);
+      expect(result.ok, result.ok ? undefined : JSON.stringify(result.diagnostics)).toBe(true);
+      if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+      expect(result.value.ir.sourceFiles.some((source) => source.file === entry)).toBe(true);
+      expect(result.value.output.profile).toBe(CONTROL_LABEL_PROFILES[target]);
+      expect(
+        [
+          result.value.output.code,
+          ...(result.value.output.supportingFiles ?? []).map((file) => file.contents),
+        ].join('\n')
+      ).not.toMatch(/from\s+['"]@proto\.ui\/(?:runtime|hooks|module-|prototypes-|adapter-)/);
     }
   );
 
@@ -141,21 +132,24 @@ describe.each(targets)('actual Control Label source admission: %s', (target) => 
 
 describe('checked callback IR compatibility boundary', () => {
   it('advances the private compiler IR schema for checked ordinary values and captures', () => {
-    expect(IR_VERSION).toBe(7);
+    expect(IR_VERSION).toBe(8);
   });
 
   it.each([emitReactSource, emitVueSource, emitVue2Source, emitWebComponentSource])(
-    'rejects an old schema 5 input instead of interpreting it as the new callback ABI',
+    'rejects an old schema 7 input and requires source recompilation',
     (emit) => {
       const parsed = parsePrototype(
         "import {definePrototype} from '@proto.ui/core'; export default definePrototype({name:'old-ir',setup(){return r=>r.el('span','old');}});"
       );
       if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-      const result = emit({ ...parsed.value, schemaVersion: 5 } as unknown as PrototypeIR);
+      const result = emit({ ...parsed.value, schemaVersion: 7 } as unknown as PrototypeIR);
       expect(result.ok).toBe(false);
       if (result.ok) throw new Error('Old IR schema was accepted');
       expect(
-        result.diagnostics.some((diagnostic) => /schema|version/i.test(diagnostic.message))
+        result.diagnostics.some(
+          (diagnostic) =>
+            diagnostic.code === 'PUI2001' && /recompile.*schema 8/i.test(diagnostic.message)
+        )
       ).toBe(true);
     }
   );

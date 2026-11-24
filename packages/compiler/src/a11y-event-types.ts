@@ -186,6 +186,17 @@ export function inferInputPayloadSchemas(
           statements(statement.then, scope, state);
           statements(statement.otherwise, scope, state);
           break;
+        case 'while':
+          expression(statement.condition, scope, state);
+          statements(statement.body, scope, state);
+          break;
+        case 'for-of': {
+          expression(statement.iterable, scope, state);
+          const loopScope = new Map(scope);
+          loopScope.set(name(statement.name), undefined);
+          statements(statement.body, loopScope, state);
+          break;
+        }
         case 'try':
           statements(statement.body, scope, state);
           if (statement.catch !== undefined) {
@@ -206,10 +217,10 @@ export function inferInputPayloadSchemas(
     const node = record<ExpressionIR>(value);
     // Validate containers before using the common operand-order helper.
     if (node.kind === 'call' || node.kind === 'intrinsic') array(node.arguments);
-    if (node.kind === 'object-spread')
-      for (const part of array<Extract<ExpressionIR, { kind: 'object-spread' }>['parts'][number]>(
-        node.parts
-      ))
+    if (node.kind === 'object-spread' || node.kind === 'array-spread')
+      for (const part of array<
+        Extract<ExpressionIR, { kind: 'object-spread' | 'array-spread' }>['parts'][number]
+      >(node.parts))
         record(part);
     const ordinary = ordinaryValueChildren(node);
     if (ordinary) {
@@ -258,10 +269,11 @@ export function inferInputPayloadSchemas(
         return;
       case 'rule':
         expression(node.receiver, scope, state);
-        for (const entry of array<Extract<ExpressionIR, { kind: 'rule' }>['states'][number]>(
-          node.states
-        ))
-          expression(record<typeof entry>(entry).value, scope, state);
+        for (const entries of [node.states, node.styles ?? [], node.targets ?? []])
+          for (const entry of array<Extract<ExpressionIR, { kind: 'rule' }>['states'][number]>(
+            entries
+          ))
+            expression(record<typeof entry>(entry).value, scope, state);
         return;
       case 'function':
         fn(node.function, scope, state);
@@ -275,10 +287,11 @@ export function inferInputPayloadSchemas(
       case 'authored-hook': {
         const hook = hooks.get(name(node.hookId));
         if (!hook) malformed('Unknown authored hook in input schema discovery.');
-        // Authored hooks discover setup/configure/projectHandle before options.
-        expandHook(hook!, state);
+        // Executable caller options are checked first, in their JavaScript
+        // evaluation order. The resulting closed shape specializes the hook.
         for (const argument of array<ExpressionIR>(node.arguments ?? []))
           expression(argument, scope, state);
+        expandHook(hook!, state);
         return;
       }
       case 'operation': {

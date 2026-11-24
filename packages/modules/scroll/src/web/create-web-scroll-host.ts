@@ -36,6 +36,11 @@ export type WebScrollSurfaceHostOptions = Readonly<{
 }>;
 
 type DisplayStyle = Readonly<{ value: string; priority: string }>;
+type ScrollGeometry = Readonly<{ offset: number; viewport: number; extent: number }>;
+const movedWithinLayout = (previous: ScrollGeometry, next: ScrollGeometry): boolean =>
+  next.offset !== previous.offset &&
+  next.viewport === previous.viewport &&
+  next.extent === previous.extent;
 // An opt-in styling sink for edge-aligned composed tracks, not a portable fact.
 const TRACK_END_INSET = '--proto-ui-scroll-track-end-inset';
 const hiddenDisplay: DisplayStyle = { value: 'none', priority: 'important' };
@@ -260,6 +265,11 @@ export function createWebScrollSurfaceHost(
       let readerIntentUntil = 0;
       let readerArrivalUntil = 0;
       const readerContacts = createReaderContactSession();
+      const clearReaderMovement = () => {
+        readerIntentUntil = 0;
+        readerArrivalUntil = 0;
+        readerContacts.clearMovement();
+      };
       let contactOrigin: {
         axis: ScrollAxis;
         offset: number;
@@ -688,9 +698,7 @@ export function createWebScrollSurfaceHost(
             readerArrivalUntil =
               (ownerWindow?.performance.now() ?? Date.now()) + DISCRETE_READER_INTENT_WINDOW_MS;
           } else {
-            readerIntentUntil = 0;
-            readerArrivalUntil = 0;
-            readerContacts.clearMovement();
+            clearReaderMovement();
           }
         }
         applyRequest(target, request);
@@ -701,11 +709,7 @@ export function createWebScrollSurfaceHost(
             const previous = explicitPauseObservation;
             const next = readAnchorObservation(request.axis);
             const readerArrived =
-              readerRequest &&
-              atEndAfterRequest &&
-              next.offset !== previous.offset &&
-              next.viewport === previous.viewport &&
-              next.extent === previous.extent;
+              readerRequest && atEndAfterRequest && movedWithinLayout(previous, next);
             explicitPauseObservation = readerArrived ? null : next;
           }
           const smoothMovement = ownerWindow?.getComputedStyle(target).scrollBehavior === 'smooth';
@@ -1066,10 +1070,7 @@ export function createWebScrollSurfaceHost(
           if (explicitPauseObservation?.axis === axis) {
             const next = readAnchorObservation(axis);
             const previous = explicitPauseObservation;
-            const moved =
-              next.offset !== previous.offset &&
-              next.viewport === previous.viewport &&
-              next.extent === previous.extent;
+            const moved = movedWithinLayout(previous, next);
             const readerArrival =
               readerArrivalUntil > (ownerWindow?.performance.now() ?? Date.now()) ||
               readerContacts.hasMovement(axis);
@@ -1359,9 +1360,7 @@ export function createWebScrollSurfaceHost(
           const axis = configuredFollowAxis();
           if (!axis || !isAxisEnabled(axis)) return false;
           cancelScheduledEnd(true);
-          readerIntentUntil = 0;
-          readerArrivalUntil = 0;
-          readerContacts.clearMovement();
+          clearReaderMovement();
           endFollowState = 'paused';
           // Input intent alone cannot resume: a reader must actually arrive at
           // the end. Keep an observation through stationary contact, editing,
@@ -1381,9 +1380,7 @@ export function createWebScrollSurfaceHost(
           if (!accepted || !current()) return false;
           if (configuredFollowAxis() === axis) {
             if (explicitPauseObservation) {
-              readerIntentUntil = 0;
-              readerArrivalUntil = 0;
-              readerContacts.clearMovement();
+              clearReaderMovement();
               explicitPauseObservation = readAnchorObservation(axis);
             }
             const atEnd = isAxisAtEnd(axis);

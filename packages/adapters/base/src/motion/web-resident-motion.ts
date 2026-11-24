@@ -1,3 +1,4 @@
+import { webMotionAncestors } from './web-motion-style-ownership';
 import type { EffectsPort, ResidentMotionProperty } from '@proto.ui/core';
 import {
   createResidentMotionProjector,
@@ -77,18 +78,6 @@ export function createWebResidentMotionSink(
     )
       return { supported: false, reason: 'layout-profile-unavailable' };
     return { supported: true };
-  }
-  function ancestors(): HTMLElement[] {
-    const result: HTMLElement[] = [];
-    let current: HTMLElement | null = el;
-    while (current) {
-      result.push(current);
-      const root = current.getRootNode();
-      current =
-        current.parentElement ??
-        ('host' in root ? ((root as ShadowRoot).host as HTMLElement) : null);
-    }
-    return result;
   }
   type InlineDeclaration = { value: string; priority: string };
   type Lease = {
@@ -214,7 +203,7 @@ export function createWebResidentMotionSink(
       const font = win
         ? Number.parseFloat(win.getComputedStyle(doc.documentElement).fontSize)
         : NaN;
-      const hidden = ancestors().some((node) =>
+      const hidden = webMotionAncestors(el).some((node) =>
         node.matches('[hidden],[data-pui-view-pending],[data-pui-view-detached]')
       );
       return {
@@ -279,7 +268,7 @@ export function createWebResidentMotionSink(
       if (containingBlock) resize?.observe(containingBlock, { box: 'content-box' });
       const observer =
         typeof win?.MutationObserver === 'function' ? new win.MutationObserver(invalidate) : null;
-      for (const node of ancestors())
+      for (const node of webMotionAncestors(el))
         observer?.observe(node, {
           attributes: true,
           attributeFilter: ['hidden', 'data-pui-view-pending', 'data-pui-view-detached'],

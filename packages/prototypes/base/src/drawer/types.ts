@@ -7,6 +7,7 @@ import type {
   ExposeMethod,
   ExposeState,
   State,
+  Unsubscribe,
 } from '@proto.ui/core';
 import type { DrawerOpenFocusReason } from './shared';
 import type { TransitionExposes, TransitionHandles, TransitionProps } from '../transition/types';
@@ -125,7 +126,7 @@ export type DrawerSide = 'top' | 'right' | 'bottom' | 'left';
 /** Read-only observation, not a Rule State token. observe is setup-only. */
 export interface DrawerAcceptedSideObservation {
   read(): DrawerSide | null;
-  observe(listener: (side: DrawerSide | null) => void): () => void;
+  observe(listener: (side: DrawerSide | null) => void): Unsubscribe;
 }
 
 export type DrawerContentStateHandles = {

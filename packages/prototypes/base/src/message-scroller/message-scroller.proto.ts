@@ -92,7 +92,9 @@ function setupViewport(
   def.expose.state('atEnd', scroll.vertical.atEnd);
   def.expose.state('following', scroll.endFollow.state);
   def.expose.state('requestStatus', scroll.endFollow.requestStatus);
-  def.expose.method('jumpToEnd', () => scroll.request({ kind: 'to-end', axis: 'vertical' }));
+  def.expose.method('jumpToEnd', () => {
+    scroll.request({ kind: 'to-end', axis: 'vertical' });
+  });
   def.expose.method('pauseFollowing', () => scroll.pauseFollowing());
   const publish = (run: RunHandle<any>) => {
     const c = run.context.tryRead(MESSAGE_SCROLLER_CONTEXT);
@@ -145,7 +147,8 @@ function setupJump(def: DefHandle<MessageScrollerJumpProps, MessageScrollerJumpE
   def.lifecycle.onCreated(sync);
   def.event.on('press.commit', (run) => {
     if (button.stateHandles!.disabled.get()) return;
-    const fn = run.anatomy.partsOf(MESSAGE_SCROLLER_FAMILY, 'viewport')[0]?.getExpose('jumpToEnd');
+    const viewport = run.anatomy.partsOf(MESSAGE_SCROLLER_FAMILY, 'viewport')[0];
+    const fn = viewport?.getExpose('resumeReading') ?? viewport?.getExpose('jumpToEnd');
     if (typeof fn === 'function') fn();
   });
 }

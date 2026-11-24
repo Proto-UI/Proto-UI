@@ -15,6 +15,10 @@ criteria:
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
       en: Draft admission requires exact-head browser/native evidence and independent review.
+  - id: P-SHADCN-MESSAGE-SCROLLER-KEYED-COMPOSITION
+    text:
+      zh-CN: '应用可在实际 Shadcn viewport 之后组合 Base asMessageScrollerReading，继承同一 Scroll Surface 与有限数据恢复协议。Shadcn 不复制锚点选择、hint 生命周期或选区恢复策略；该显式组合关闭 generic preserve-visible，保留一个 anchor owner。'
+      en: 'Applications may compose Base asMessageScrollerReading after the actual Shadcn viewport, sharing the same Scroll Surface and finite-data restoration protocol. Shadcn does not duplicate anchor selection, hint lifetime or selection restoration policy; that explicit composition disables generic preserve-visible and retains one anchor owner.'
 dependsOn:
   contracts:
     - C-PROPS-0001
@@ -35,6 +39,9 @@ openQuestions:
     blocks:
       - activation:P-SHADCN-MESSAGE-SCROLLER
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Documented optional composition with the Base stable-key reading Hook without adding a presentation-owned policy.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the shadcn message scroller family as draft.

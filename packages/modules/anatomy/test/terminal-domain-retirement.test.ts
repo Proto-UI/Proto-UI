@@ -51,7 +51,12 @@ describe('terminal Anatomy domains do not adopt their retiring descendants', () 
     const child = node('nested-item', nested.token, [[a, 'item']]);
     const seen: unknown[][] = [];
     outer.impl.port.subscribeOrder(a, () => seen.push(names(outer.impl, a)));
+    const savedRoot = nested.impl.port.parts(a)!.find((part) => part.role === 'root')!;
+    expect(savedRoot.hasExpose('name')).toBe(true);
+    expect(savedRoot.getExpose('name')).toBe('nested');
     nested.impl.dispose();
+    expect(savedRoot.hasExpose('name')).toBe(false);
+    expect(savedRoot.getExpose('name')).toBeNull();
     expect(names(outer.impl, a)).toEqual(['outer', 'outer-item']);
     expect(child.impl.port.resolveDomainScope(a)).toBeNull();
     expect(() => child.impl.port.parts(a)).toThrow(/valid domain/);

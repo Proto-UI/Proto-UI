@@ -16,11 +16,21 @@ import {
 } from './plan';
 import { specializeNativeTemplate } from './specialize';
 import { nativeControlLabelArtifact } from '../native-control-label';
+import { webHostPrimitiveArtifacts, type WebHostPrimitive } from './web-host-primitives';
+import { webTargetAlignmentArtifacts } from './web-target-alignment';
 
 function legacyFullPlan(options: { controlLabel?: boolean }) {
-  return nativeSupportPlanFromFeatures(
+  const plan = nativeSupportPlanFromFeatures(
     nativeSupportFeatures.filter((feature) => feature !== 'control-label' || options.controlLabel)
   );
+  // The legacy full ABI never acquired these later native host extensions.
+  return {
+    ...plan,
+    features: plan.features.filter(
+      (feature) =>
+        feature !== 'axis-input' && feature !== 'available-space' && feature !== 'target-alignment'
+    ),
+  };
 }
 const baseModuleNames = [
   'owners',
@@ -91,8 +101,14 @@ const familyUnits = [
   {
     feature: 'boundary',
     file: 'boundary-ownership-v2',
-    names: ['boundaryStacks', 'boundarySampleOwners'],
-    types: ['Owner'],
+    names: [
+      'boundaryStacks',
+      'boundarySampleOwners',
+      'NativeBoundaryPointerSequence',
+      'boundaryPointerScopes',
+      'nativeBoundaryOwner',
+    ],
+    types: ['Owner', 'NativeConfig'],
   },
   { feature: 'overlay', file: 'overlay-ownership-v2', names: ['modalLocks'], types: [] },
   { feature: 'hit', file: 'hit-ownership-v2', names: ['hitClaims'], types: [] },
@@ -274,7 +290,9 @@ function buildPlannedNativeInteractionArtifacts(
     const names = (
       unit.feature === 'part-relationships' ? ['createNativePartRelationships'] : unit.names
     ).map((name) =>
-      ['ScopeEntryIntent', 'NativeTableRecord'].includes(name) ? 'type ' + name : name
+      ['ScopeEntryIntent', 'NativeTableRecord', 'NativeBoundaryPointerSequence'].includes(name)
+        ? 'type ' + name
+        : name
     );
     imports += `import { ${names.join(', ')}${unit.feature === 'focus' ? ', focusState' : ''} } from './${unit.file}';\n`;
   }
@@ -337,5 +355,16 @@ function buildPlannedNativeInteractionArtifacts(
       ['createNativeInteraction', 'markNativeExposeEvent']
     ),
   };
-  return [...shared, modules, native];
+  return [
+    ...shared,
+    modules,
+    native,
+    ...webHostPrimitiveArtifacts(
+      plan.features.filter(
+        (feature): feature is WebHostPrimitive & NativeSupportFeature =>
+          feature === 'axis-input' || feature === 'available-space'
+      )
+    ),
+    ...(plan.features.includes('target-alignment') ? webTargetAlignmentArtifacts() : []),
+  ];
 }

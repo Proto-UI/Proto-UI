@@ -54,6 +54,7 @@ sources:
   - path: packages/modules/boundary/src/impl.ts
     sections:
       - BoundaryModuleImpl
+  - path: packages/compiler/src/native-support/dom-modules.template.ts
 dependsOn:
   contracts:
     - C-LIFECYCLE-0008

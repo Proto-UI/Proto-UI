@@ -21,8 +21,10 @@ export type PresenceEndpoint = Readonly<{
   translate?: Translation | FiniteSelection<Translation>;
   opacity?: number;
   top?: ContainingBlockLength;
+  /** Named draft extension; intrinsic is measured from the current semantic layout. */
+  blockSize?: number | 'intrinsic';
 }>;
-export type PresentationChannel = 'translate' | 'opacity' | 'top';
+export type PresentationChannel = 'translate' | 'opacity' | 'top' | 'blockSize';
 export type PresentationOutcome =
   | 'finished'
   | 'reduced-motion'
@@ -189,13 +191,14 @@ function selectedTranslation(value: unknown): Translation | FiniteSelection<Tran
   return Object.freeze({ source, cases: Object.freeze(cases) });
 }
 function endpoint(value: unknown): PresenceEndpoint {
-  const v = shape(value, ['translate', 'opacity', 'top'], []);
+  const v = shape(value, ['translate', 'opacity', 'top', 'blockSize'], []);
   const keys = Reflect.ownKeys(v);
   if (!keys.length) return fail();
   const result: {
     translate?: Translation | FiniteSelection<Translation>;
     opacity?: number;
     top?: ContainingBlockLength;
+    blockSize?: number | 'intrinsic';
   } = {};
   if (keys.includes('translate')) result.translate = selectedTranslation(field(v, 'translate'));
   if (keys.includes('opacity')) {
@@ -204,6 +207,10 @@ function endpoint(value: unknown): PresenceEndpoint {
     result.opacity = opacity;
   }
   if (keys.includes('top')) result.top = containingBlockLength(field(v, 'top'));
+  if (keys.includes('blockSize')) {
+    const size = field(v, 'blockSize');
+    result.blockSize = size === 'intrinsic' ? size : nonnegative(size);
+  }
   return Object.freeze(result);
 }
 export function snapshotPresencePresentation(

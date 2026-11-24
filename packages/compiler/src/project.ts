@@ -5,7 +5,7 @@ import { compileFile, type Compilation } from './compile';
 import { CompilerRejection, unexpectedFailureEvidence, unknownDiagnosticSpan } from './diagnostics';
 import { IR_VERSION, type CompileResult, type CompilerDiagnostic } from './ir';
 import { sourceName } from './source-resolution';
-import { FileSourceGraph, type ParsedFileSource } from './source-loader';
+import { FileSourceGraph, type ParsedFileSource, type SourceRootIdentity } from './source-loader';
 import {
   gpuiNativeSdkInputPaths,
   gpuiNativeSdkPathLinks,
@@ -14,10 +14,14 @@ import {
 
 export interface CompileProjectOptions {
   root: string;
+  /** Explicit logical identities survive relocating reviewed source checkouts. */
+  sourceRootIdentities?: readonly SourceRootIdentity[];
   entries: readonly string[];
   profile?: string;
   exportName?: string;
   componentName?: string;
+  /** Per-entry host delivery choices; keys use the same root-relative identity as entries. */
+  entryOptions?: Readonly<Record<string, { componentName?: string; rootTag?: string }>>;
   nativeSdkPath?: string;
   gpuiDependency?: 'workspace';
   /** Explicit identity/watch inputs; the project compiler does not interpret configuration files. */
@@ -145,7 +149,7 @@ export class CompilerProject {
 
   private async compileAttempt(options: CompileProjectOptions): Promise<ProjectCompileResult> {
     const revision = ++this.revision;
-    const sources = new FileSourceGraph(this.root, this.sourceCache);
+    const sources = new FileSourceGraph(this.root, this.sourceCache, options.sourceRootIdentities);
     const dependencies = sources.dependencies;
     const diagnostics: CompilerDiagnostic[] = [];
     const entryResults: ProjectEntryCompilation[] = [];
@@ -171,6 +175,8 @@ export class CompilerProject {
       if (!entries.length) throw new Error('A compiler project requires at least one entry.');
       if (new Set(entries).size !== entries.length)
         throw new Error('Project entries must be unique.');
+      if (Object.keys(options.entryOptions ?? {}).some((entry) => !entries.includes(entry)))
+        throw new Error('Per-entry compiler options must name a requested project entry.');
     } catch (error) {
       diagnostics.push(diagnostic(error, '<project>'));
     }
@@ -238,6 +244,7 @@ export class CompilerProject {
         profile: options.profile ?? 'react-runtime-v1',
         exportName: options.exportName ?? 'default',
         componentName: options.componentName ?? null,
+        entryOptions: options.entryOptions ?? null,
         nativeSdkPath: options.nativeSdkPath ?? null,
         gpuiDependency: options.gpuiDependency ?? null,
         configuration,
@@ -264,7 +271,9 @@ export class CompilerProject {
             root: this.root,
             profile: options.profile,
             exportName: options.exportName,
-            componentName: options.componentName,
+            componentName:
+              options.entryOptions?.[requestedEntry]?.componentName ?? options.componentName,
+            rootTag: options.entryOptions?.[requestedEntry]?.rootTag,
             nativeSdkPath: options.nativeSdkPath,
             gpuiDependency: options.gpuiDependency,
             sourceSnapshot: closure,

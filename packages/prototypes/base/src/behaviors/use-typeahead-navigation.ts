@@ -18,18 +18,14 @@ export type TypeaheadNavigationOptions<P extends PropsBaseType, Entry> = {
 export const useTypeaheadNavigation = defineHook<any, {}, {}, TypeaheadNavigationOptions<any, any>>(
   {
     name: 'useTypeaheadNavigation',
-    setup(def, options, api) {
-      const store = api.store as {
-        buffer?: string;
-        resetTask?: DelayTask | null;
-      };
-      store.buffer = '';
-      store.resetTask = null;
+    setup(def, options) {
+      let buffer = '';
+      let resetTask: DelayTask | null = null;
 
       const clear = () => {
-        store.resetTask?.cancel();
-        store.resetTask = null;
-        store.buffer = '';
+        resetTask?.cancel();
+        resetTask = null;
+        buffer = '';
       };
 
       def.event.onGlobal('key.down', (run, ev) => {
@@ -42,12 +38,12 @@ export const useTypeaheadNavigation = defineHook<any, {}, {}, TypeaheadNavigatio
         const entries = options.getEntries(run);
         if (entries.length === 0) return;
         const currentIndex = Math.max(-1, options.getCurrentIndex(run, entries));
-        const nextBuffer = `${store.buffer ?? ''}${key}`.toLowerCase();
-        store.buffer = nextBuffer;
-        store.resetTask?.cancel();
-        store.resetTask = delay(options.resetAfter ?? 400, () => {
-          store.buffer = '';
-          store.resetTask = null;
+        const nextBuffer = `${buffer ?? ''}${key}`.toLowerCase();
+        buffer = nextBuffer;
+        resetTask?.cancel();
+        resetTask = delay(options.resetAfter ?? 400, () => {
+          buffer = '';
+          resetTask = null;
         });
 
         const findMatch = (query: string) => {

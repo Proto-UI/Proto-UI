@@ -35,6 +35,8 @@ Message Scroller is workspace source. There is no public `proto-ui add` target. 
 
 These props belong to Root.
 
+For stable-key history and selection restoration, an authored composition can call the public Base `asMessageScrollerReading` Hook after this Shadcn viewport. The Hook owns capture, exact-key/predecessor restoration, initial-hint retirement and selection eligibility over the same Scroll Surface; the Shadcn layer adds no competing policy. It disables generic `preserve-visible`, consumes finite host measurements and issues shared scroll requests. Applications retain opaque content identities, DOM/Range work and storage. See the [Base Message Scroller reading API](/en/ui-libraries/base/message-scroller/#stable-key-reading-composition) for its policy props, methods and pending acceptance boundaries.
+
 ## References
 
 <SpecEntityLinks

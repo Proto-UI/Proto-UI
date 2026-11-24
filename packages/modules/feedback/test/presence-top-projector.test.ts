@@ -260,4 +260,37 @@ describe('independent containing-block presence channels', () => {
     expect(missing.outcomes).toEqual(['unsupported-endpoint']);
     expect(missing.samples.every((sample) => sample.opacity === undefined)).toBe(true);
   });
+  it('keeps containing-block top and intrinsic block-size curves independent in one attempt', () => {
+    const f = fixture();
+    f.env.value = {
+      ...f.env.value,
+      intrinsicBlockSize: 200,
+      supported: ['top', 'opacity', 'blockSize'],
+    };
+    const original = f.frame();
+    f.sink.commit({
+      ...original,
+      closed: { ...original.closed, blockSize: 0 },
+      entered: { ...original.entered, blockSize: 'intrinsic' },
+      channelEasing: { ...original.channelEasing, blockSize: [0, 0, 1, 1] },
+    });
+    expect(f.samples.at(-1)).toMatchObject({ top: -250, opacity: 0, blockSize: 0 });
+    expect(f.outcomes).toEqual([]);
+    f.step(16);
+    f.step(166);
+    expect(f.samples.at(-1)?.top).toBeCloseTo(-250 + 350 * 0.684643187, 5);
+    expect(f.samples.at(-1)?.opacity).toBeCloseTo(0.5, 8);
+    expect(f.samples.at(-1)?.blockSize).toBeCloseTo(100, 8);
+    expect(f.outcomes).toEqual([]);
+    f.step(316);
+    expect(f.samples.at(-1)).toMatchObject({ top: 100, opacity: 1, blockSize: 200 });
+    expect(f.outcomes).toEqual(['finished']);
+    expect(f.queue.size).toBe(0);
+    const completedSamples = f.samples.length;
+    f.env.value = { ...f.env.value, intrinsicBlockSize: 350 };
+    f.invalidate();
+    expect(f.samples).toHaveLength(completedSamples);
+    expect(f.outcomes).toEqual(['finished']);
+    expect(f.queue.size).toBe(0);
+  });
 });

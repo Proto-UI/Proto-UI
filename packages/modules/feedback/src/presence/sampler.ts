@@ -8,6 +8,7 @@ export function createPresenceMotionSampler(frame: PresencePresentationFrame) {
     ['translate', 0, 2],
     ['opacity', 2, 3],
     ['top', 3, 4],
+    ['blockSize', 4, 5],
   ];
   const config = { durationMs: frame.owner.durationMs, easing: frame.easing };
   // Preserve the original coupled-vector shortening for existing declarations.

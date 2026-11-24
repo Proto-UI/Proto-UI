@@ -1,3 +1,4 @@
+import type { RunHandle } from '@proto.ui/core';
 import { createAnatomyFamily, createContextKey } from '@proto.ui/core';
 
 export type DrawerOpenFocusReason = 'programmatic' | 'keyboard' | 'pointer';
@@ -37,7 +38,7 @@ export function createDrawerPartId(
 }
 
 export function requestDrawerOpen(
-  run: any,
+  run: RunHandle<any>,
   nextOpen: boolean,
   reason: string,
   focusReason: DrawerOpenFocusReason | null,

@@ -74,6 +74,14 @@ Space 参与按压生命周期并阻止滚动默认行为。禁用 Button 会清
   rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
 />
 
+### 可选的焦点保留显示策略
+
+当前 draft 源码从 `@proto.ui/prototypes-base/button` 公开 `asFocusRetainedVisibility` 与 `FocusRetainedVisibilityProps`。派生 action 可将此 Hook 与 `asButton()` 或真实的风格化 Button 原型组合。其 `requestedVisible?: boolean` 输入默认为 `false`；未显式组合时，普通 Button 不会增加这个 prop。
+
+保持组合控件挂载，只传入应用的显示请求。请求变为 false 时，若控件仍拥有焦点，就继续显示到焦点离开；请求为 true 时，失焦不会隐藏它。Hook 与 Button 共享 `asFocusable()`，仅当请求和焦点事实均为 false 时由 Rule feedback 隐藏。它不请求焦点，不覆盖 disabled／导航策略，也不替代业务动作。“回到最新”动作因此可以完成，而不会立即移除键盘用户仍聚焦的控件。父级布局容器可以持续挂载，但不能仅根据请求自行隐藏或卸载这个 action。
+
+这项可选的源码能力仍属于 draft `P-BASE-BUTTON`，不代表旧稳定版 0.2.0 已有该 API，也不代表所有宿主的焦点与显示旅程已经验收。
+
 ## 交付、生命周期与证据
 
 稳定版 0.2.0 包导出 `@proto.ui/prototypes-base/button`，其 CLI 提供 `base-button`。网站的四宿主源码预览与旧稳定版包是两个交付表面。`P-BASE-BUTTON` 保持 **draft**；发布既不冻结协议，也不能证明当前浏览器或辅助技术验收通过。

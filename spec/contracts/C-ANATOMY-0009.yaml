@@ -34,6 +34,10 @@ criteria:
     text:
       zh-CN: PartView 读取到的 exposed method 在调用时必须进入目标 part 的 callback scope；调用方不得获得目标 instance 或 run handle，返回值与异常必须同步投射给调用方。
       en: An exposed method read through a PartView must enter the target part's callback scope when invoked; the caller must not receive the target instance or run handle, and the return value or error must be synchronously projected back to the caller.
+  - id: C-ANATOMY-0009-F
+    text:
+      zh-CN: 保存的 PartView 不延长目标 declaration 的生命周期。目标 claim 已退役或其公开 Expose entry 已因 terminal teardown 不可用时，新的 hasExpose/getExpose 读取必须分别返回 false/null，不得进入目标 callback 或重用旧 registry；仍存活目标的 repeatable view detach 不导致该失效。调用方权限、phase 与来源校验仍须保留，不能把这些错误转换为缺席。此前取出的 method 保持原有生命周期检查，该读取规则不授权其在目标终止后执行。
+      en: A retained PartView does not extend its target declaration's lifetime. When the target claim is retired or its public Expose entries are unavailable due to terminal teardown, a fresh hasExpose/getExpose lookup must return false/null respectively without entering a target callback or reusing a stale registry; repeatable view detachment of a live target does not cause this invalidation. Caller authority, phase, and provenance checks remain in force and their failures must not become absence. Previously retrieved methods retain their existing lifecycle checks; this lookup rule does not authorize executing them after target retirement.
 sources:
   - path: internal/contracts/anatomy/base-text/01.terminology.v0.zh-CN.md
     sections:
@@ -49,6 +53,9 @@ relates:
     - C-ANATOMY-0001
     - C-ANATOMY-0008
 revisions:
+  - version: 0.1.2
+    change: refined
+    summary: Defined safe absent reads for retired target declarations while preserving caller checks and previously retrieved method lifecycle boundaries.
   - version: 0.1.0
     change: introduced
     summary: Captured PartView expose reads and Anatomy's implementation dependency on Expose.

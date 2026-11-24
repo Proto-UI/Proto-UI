@@ -27,6 +27,13 @@ const missing = (error: unknown): boolean =>
   (error.code === 'ENOENT' || error.code === 'ENOTDIR');
 const MAX_SOURCE_CACHE = 512;
 
+/** Explicit build identity for one canonical external source tree. Identity is
+ * independent of checkout location; distinct trees must never share it. */
+export interface SourceRootIdentity {
+  readonly root: string;
+  readonly identity: string;
+}
+
 export interface ParsedFileSource {
   digest: string;
   runtimeSpecifiers: readonly string[];
@@ -174,11 +181,69 @@ export class FileSourceGraph {
   private readonly reads = new Map<string, Promise<ReadSource>>();
   private readonly resolutions = new Map<string, Promise<ResolvedEdge>>();
   private readonly packageOwners = new Map<string, PackageOwner>();
+  private readonly canonicalIdentityRoots: SourceRootIdentity[] = [];
+  private readonly logicalLocations = new Map<string, string>();
+  private identityRootsReady: Promise<void> | undefined;
 
   constructor(
     readonly root: string,
-    private readonly cache = new Map<string, ParsedFileSource>()
+    private readonly cache = new Map<string, ParsedFileSource>(),
+    private readonly identityRoots: readonly SourceRootIdentity[] = []
   ) {}
+
+  private initializeIdentityRoots(): Promise<void> {
+    return (this.identityRootsReady ??= (async () => {
+      if (!Array.isArray(this.identityRoots))
+        throw new Error('Source root identities require an explicit array of root/identity pairs.');
+      for (const declared of this.identityRoots) {
+        if (
+          !declared ||
+          typeof declared !== 'object' ||
+          typeof declared.root !== 'string' ||
+          !declared.root ||
+          typeof declared.identity !== 'string' ||
+          !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(declared.identity)
+        )
+          throw new Error(
+            'A source root identity requires a directory and a stable nonempty identifier.'
+          );
+        const requested = path.resolve(this.root, declared.root);
+        this.dependency(requested);
+        const root = await realpath(requested);
+        this.dependency(root);
+        if (!(await stat(root)).isDirectory())
+          throw new Error('A source identity root must be a directory.');
+        if (inside(root, this.root) || inside(this.root, root))
+          throw new Error('Explicit source identity roots must be disjoint from the project root.');
+        if (
+          this.canonicalIdentityRoots.some(
+            (other) =>
+              other.identity === declared.identity ||
+              inside(other.root, root) ||
+              inside(root, other.root)
+          )
+        )
+          throw new Error(
+            'Source root identities must be a bijection over disjoint canonical roots.'
+          );
+        this.canonicalIdentityRoots.push({ root, identity: declared.identity });
+      }
+      this.canonicalIdentityRoots.sort((a, b) => a.identity.localeCompare(b.identity));
+    })());
+  }
+
+  /** Only logical provenance changes. Dependency/watch records retain physical paths. */
+  private logicalPath(file: string): string {
+    const owner = this.canonicalIdentityRoots.find((candidate) => inside(candidate.root, file));
+    const identity = owner
+      ? `.proto-ui/source-roots/${owner.identity}/${slash(path.relative(owner.root, file))}`
+      : slash(path.relative(this.root, file));
+    const existing = this.logicalLocations.get(identity);
+    if (existing && existing !== file)
+      throw new Error(`Conflicting logical source location ${identity}.`);
+    this.logicalLocations.set(identity, file);
+    return identity;
+  }
 
   private dependency(file: string): void {
     this.dependencies.add(inside(this.root, file) ? slash(path.relative(this.root, file)) : file);
@@ -190,7 +255,7 @@ export class FileSourceGraph {
     const relative = sourceName(slash(path.relative(boundary, file)));
     const identity = inside(this.root, file)
       ? sourceName(slash(path.relative(this.root, file)))
-      : `.proto-ui/source-packages/${hash(slash(path.relative(this.root, boundary))).slice(0, 24)}/${relative}`;
+      : `.proto-ui/source-packages/${hash(this.logicalPath(boundary)).slice(0, 24)}/${relative}`;
     const existing = this.locations.get(identity);
     if (existing && existing.file !== file)
       throw new Error(`Conflicting source identity ${identity}.`);
@@ -208,6 +273,7 @@ export class FileSourceGraph {
   }
 
   async entry(filename: string): Promise<SourceLocation> {
+    await this.initializeIdentityRoots();
     const requested = path.resolve(this.root, filename);
     sourceName(slash(path.relative(this.root, requested)));
     this.dependency(requested);
@@ -305,7 +371,7 @@ export class FileSourceGraph {
           manifestFile = await realpath(candidate);
         } catch (error) {
           if (!missing(error)) throw error;
-          inputs.push([slash(path.relative(this.root, candidate)), null]);
+          inputs.push([this.logicalPath(candidate), null]);
           const parent = path.dirname(directory);
           if (parent === directory) return { specifier, inputs, packages: [] };
           directory = parent;
@@ -321,7 +387,7 @@ export class FileSourceGraph {
         if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest))
           throw new Error(`Package ${parsed.name} has no static package.json object.`);
         const record = {
-          manifest: slash(path.relative(this.root, manifestFile)),
+          manifest: this.logicalPath(manifestFile),
           sha256: hash(bytes),
         };
         const packageOwner = { root: packageRoot, manifest, record };
@@ -334,6 +400,7 @@ export class FileSourceGraph {
   }
 
   async load(entry: SourceLocation): Promise<LoadedFileClosure> {
+    await this.initializeIdentityRoots();
     const files: Record<string, string> = Object.create(null);
     const imports: Record<string, string> = Object.create(null);
     const packages = new Map<string, PackageInput>();

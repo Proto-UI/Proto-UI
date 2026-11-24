@@ -10,6 +10,7 @@ native/gpui/fixtures/
 # Pinned MIT upstream artifacts; checksums bind their unmodified UTF-8 LF bytes.
 scripts/agent-operations/vendor/modeltrace/
 # Coverage views are generated and checked byte-for-byte by prototype-coverage.mjs.
+internal/coverage-matrices/prototype-coverage-matrix.json
 internal/coverage-matrices/prototype-coverage-matrix.md
 internal/coverage-matrices/finf-delivery-checklist.md
 # Exact pre-migration Issue body snapshots retain their original formatting.
@@ -46,6 +47,9 @@ internal/records/evidence/2026-11-22-sprint2-compiler/
 internal/records/evidence/2026-11-22-sprint2-datepicker-review/
 internal/records/evidence/2026-11-22-sprint2-input/
 internal/records/evidence/2026-11-22-sprint2-native-round1/
+# Byte-bound original PR #1732 observations imported by the S2 integration.
+internal/records/evidence/2026-11-23-shenko-native-controls/
+internal/records/evidence/2026-11-23-shenko-native-followup/
 
 # Original Sprint 4 raw observations and execution receipts.
 internal/records/evidence/2026-11-22-sprint4/
@@ -136,6 +140,24 @@ internal/records/2026-11-23-gpui-direct-control-label.md
 internal/records/2026-11-23-gpui-native-consumer-composition.md
 internal/records/2026-11-23-shadow-s4-paint-partial.md
 internal/records/2026-11-23-train-package-budget.json
+# Exact Sprint 2 regression, distribution and complete-inventory receipts.
+# These byte-bound artifacts are verified against their retained manifests.
+internal/records/evidence/2026-11-23-sprint2-compiler-inventory/
+internal/records/evidence/2026-11-24-sprint2-final-distribution/
+internal/records/evidence/2026-11-24-sprint2-regression-repairs/
+internal/records/evidence/2026-11-24-sprint2-runtime-final/
+
+# Frozen CLI source, generated preset and native Rhea regression receipts.
+internal/records/evidence/2026-11-24-sprint2-cli-source-proof/
+
+# Exact Bootstrap observer source, frames, images and original execution bytes.
+internal/records/evidence/2026-11-24-sprint2-bootstrap-observer/
+
+# Original compiler profiles, controlled stops, inputs and independent review bytes.
+internal/records/evidence/2026-11-24-sprint2-compiler-convergence/
+
+# Exact historical payloads bound by retained byte hashes; keep their original bytes.
+# See internal/records/2026-11-24-sprint1-main-integration.md.
 internal/records/evidence/2026-11-23-liquid-view-operation/strict-project.json
 internal/records/evidence/2026-11-23-s3-intrinsic-full-width/frozen-css.json
 internal/records/evidence/2026-11-23-s3-intrinsic-full-width/s2-complete-gate-restored.json
@@ -170,3 +192,5 @@ internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.jso
 internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.md
 internal/records/evidence/2026-11-24-sprint5-browser-execution/production-setup-receipt.json
 internal/records/evidence/2026-11-24-sprint5-native-direction-acceptance/receipt.md
+# Preserve original Tooltip view-readiness receipts, probes and captures.
+internal/records/evidence/2026-11-24-tooltip-consumer-view-readiness/

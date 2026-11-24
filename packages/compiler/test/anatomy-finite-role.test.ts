@@ -95,7 +95,9 @@ describe('finite runtime Anatomy role selectors', () => {
       function inspect(run:RunHandle<{}>,role:${role}){return run.anatomy.partsOf(FAMILY,role);}
       export default definePrototype({name:'invalid-role',setup(def){
         def.anatomy.claim(FAMILY,{role:'root'});
-        def.lifecycle.onMounted(run=>{inspect(run,'root');});
+        let current:RunHandle<{}>|null=null;
+        def.lifecycle.onCreated(run=>{current=run;});
+        def.expose.method('query',(role:${role})=>current?inspect(current,role):null);
       }});`;
       expect(parsePrototype(input)).toMatchObject({ ok: false });
     }

@@ -137,7 +137,8 @@ function setupRoot(def: DefHandle<TreeRootProps, TreeRootExposes>) {
   let expanded: string[] = [],
     owner: RunHandle<TreeRootProps> | null = null,
     snapshot: TreeEntry[] = [];
-  let viewEpoch = 0;
+  let viewEpoch = 0,
+    syncRevision = 0;
   const publish = (run: RunHandle<TreeRootProps>) => {
     const epoch = viewEpoch;
     const p = run.props.get(),
@@ -236,12 +237,17 @@ function setupRoot(def: DefHandle<TreeRootProps, TreeRootExposes>) {
   });
   const sync = (run: RunHandle<TreeRootProps>, created = false) => {
     owner = run;
+    const revision = ++syncRevision,
+      epoch = viewEpoch;
     const p = run.props.get();
     if (created || run.props.isProvided('value'))
       value.set(
         (run.props.isProvided('value') ? p.value : p.defaultValue) ?? '',
         'tree owner value'
       );
+    // Public State observers may synchronously accept a newer controlled
+    // snapshot, detach this view, or issue a nested owner update.
+    if (owner !== run || viewEpoch !== epoch || syncRevision !== revision) return;
     if (created || run.props.isProvided('expandedKeys'))
       expanded = [
         ...((run.props.isProvided('expandedKeys') ? p.expandedKeys : p.defaultExpandedKeys) ?? []),

@@ -26,10 +26,9 @@ export function nativeMediaBinding(query: MediaQueryList | undefined, notify: ()
   };
 }
 export function releaseNativeMeta(releases: readonly (() => void)[]): void {
-  const failures: unknown[] = [];
-  for (const release of releases) { try { release(); } catch (error) { failures.push(error); } }
-  if (failures.length === 1) throw failures[0];
-  if (failures.length) throw new AggregateError(failures, 'Native Meta cleanup failed.');
+  let failure: { error: unknown } | undefined;
+  for (const release of releases) { try { release(); } catch (error) { failure ??= { error }; } }
+  if (failure) throw failure.error;
 }
 `,
 };
@@ -84,6 +83,10 @@ export function subscribeNativeColorScheme(doc: Document | undefined, notify: ()
 }
 `,
 };
+import {
+  nativePresencePresentationArtifact as canonicalPresenceArtifact,
+  webPresenceArtifacts,
+} from './native-support/web-presence';
 
 export const nativeMetaArtifact: NonNullable<GeneratedModule['supportingFiles']>[number] = {
   path: '.proto-ui/meta/web-snapshot-v1.ts',
@@ -188,8 +191,13 @@ export function nativeHostAtomPlan(
   prefix: string,
   ruleMetaKeys: readonly RuleMetaKey[] = [],
   shaderKernels: readonly ShaderKernel[] = [],
+  canonicalPresence = false,
   shaderScenes = false
 ) {
+  const complete = (steps: string[]) => {
+    if (steps.length < 2) return steps.join('');
+    return `{ let failed = false, first; for (const release of [${steps.map((step) => `() => { ${step} }`).join(', ')}]) { try { release(); } catch (error) { if (!failed) { failed = true; first = error; } } } if (failed) throw first; }`;
+  };
   const delay = operations.includes('scheduler.delay');
   const presentation = operations.includes('feedback.style.presence');
   const shader = operations.includes('feedback.material.shader');
@@ -200,12 +208,19 @@ export function nativeHostAtomPlan(
   const rulePreferences = ruleMetaKeys.filter((key) => key.startsWith('preference.'));
   const ruleMeta = ruleColorScheme || rulePreferences.length > 0;
   const meta = operations.includes('meta.get') || ruleMeta;
-  const presenceFile = presentation ? nativePresencePresentationArtifact : nativePresenceArtifact;
+  const presenceFile =
+    presentation && !canonicalPresence
+      ? nativePresencePresentationArtifact
+      : nativePresenceArtifact;
   const presenceImport = './' + presenceFile.path.replace(/\.ts$/, '');
   const files = [
     ...(delay ? [nativeDelayArtifact] : []),
     ...(shader ? nativeShaderArtifacts(shaderKernels, shaderScenes) : []),
-    ...(snapshot ? [presenceFile] : []),
+    ...(canonicalPresence && presentation
+      ? [nativePresenceArtifact, ...webPresenceArtifacts(), canonicalPresenceArtifact]
+      : snapshot
+        ? [presenceFile]
+        : []),
     ...(meta ? [nativeMetaArtifact] : []),
     ...(ruleMeta ? [nativeMetaSubscriptionArtifact] : []),
     ...(ruleColorScheme ? [nativeRuleColorSchemeArtifact] : []),
@@ -229,12 +244,20 @@ export function nativeHostAtomPlan(
           ? `${prefix}SubscribePreferences(${document}, ${JSON.stringify(rulePreferences)}, notify)`
           : '',
       ].filter(Boolean);
-      const read = rulePreferences.length
-        ? `key.startsWith('preference.') ? ${prefix}ReadPreference(${document}, key) : ${prefix}ReadMeta(${document}, key)`
-        : `${prefix}ReadMeta(${document}, key)`;
+      // This source owns only these keys. Extra React sources (notably viewport)
+      // must retain their paired reader, including an authoritative unknown.
+      const read = [
+        ruleColorScheme ? `key === 'colorScheme' ? ${prefix}ReadMeta(${document}, key)` : '',
+        rulePreferences.length
+          ? `key.startsWith('preference.') ? ${prefix}ReadPreference(${document}, key)`
+          : '',
+        'undefined',
+      ]
+        .filter(Boolean)
+        .join(' : ');
       const subscribe = leases.map((lease) => `leases.push(${lease});`).join(' ');
       return ruleMeta
-        ? `getMeta: ${typed ? '(key: string)' : '/** @param {string} key */ (key)'} => ${read}, subscribeMeta: ${typed ? '(notify: () => void)' : '/** @param {() => void} notify */ (notify)'} => { ${typed ? 'const leases: (() => void)[] = [];' : '/** @type {(() => void)[]} */ const leases = [];'} try { ${subscribe} } catch (error) { ${prefix}ReleaseMeta([() => { throw error; }, ...leases]); } return () => ${prefix}ReleaseMeta(leases); },`
+        ? `getMeta: ${typed ? '(key: string)' : '/** @param {string} key */ (key)'} => ${read}, subscribeMeta: ${typed ? '(notify: () => void)' : '/** @param {() => void} notify */ (notify)'} => { ${typed ? 'const leases: (() => void)[] = [];' : 'const leases = /** @type {(() => void)[]} */ ([]);'} try { ${subscribe} } catch (error) { ${prefix}ReleaseMeta([() => { throw error; }, ...leases]); } return () => ${prefix}ReleaseMeta(leases); },`
         : '';
     },
     imports: [
@@ -255,6 +278,9 @@ export function nativeHostAtomPlan(
         : '',
       snapshot
         ? `import { createNativePresence as ${prefix}CreatePresence, snapshotNativeCompletion as ${prefix}SnapshotCompletion, type NativePresenceOwner as ${prefix}PresenceOwner } from '${presenceImport}';`
+        : '',
+      presentation && canonicalPresence
+        ? `import { createNativePresencePresentation as ${prefix}CreatePresencePresentation } from './.proto-ui/async/presence-presentation-v1';`
         : '',
       meta
         ? `import { readNativeWebMeta as ${prefix}ReadMeta } from './.proto-ui/meta/web-snapshot-v1';`
@@ -286,6 +312,9 @@ export function nativeHostAtomPlan(
         : '',
       snapshot
         ? `import { createNativePresence as ${prefix}CreatePresence, snapshotNativeCompletion as ${prefix}SnapshotCompletion } from '${presenceImport}';\n/** @template Run @typedef {import('${presenceImport}').NativePresenceOwner<Run>} ${prefix}PresenceOwner */`
+        : '',
+      presentation && canonicalPresence
+        ? `import { createNativePresencePresentation as ${prefix}CreatePresencePresentation } from './.proto-ui/async/presence-presentation-v1';`
         : '',
       meta
         ? `import { readNativeWebMeta as ${prefix}ReadMeta } from './.proto-ui/meta/web-snapshot-v1';`
@@ -324,6 +353,9 @@ export function nativeHostAtomPlan(
       prepare?: string;
       shaderHost?: string;
       typed?: boolean;
+      tokens?: string;
+      project?: string;
+      watch?: string;
     }): string {
       const typed = options.typed !== false;
       return [
@@ -333,9 +365,11 @@ export function nativeHostAtomPlan(
         delay
           ? `const ${prefix}Delay = ${prefix}CreateDelay({ runtime: () => { ${options.runtime}; }, alive: () => ${options.alive}, invoke: callback => { ${options.invoke}; }, report: error => console.error('[Delay] callback failed', error) });`
           : '',
-        presence
-          ? `const ${prefix}Presence = ${prefix}CreatePresence${typed ? `<${options.run}>` : ''}({ setup: () => { ${options.setup}; }, runtime: () => { ${options.runtime}; }, alive: () => ${options.alive}, invoke: callback => { ${options.invokeRun}; }${presentation ? `, root: () => ${options.root ?? 'null'}, prepare: () => { ${options.prepare ?? ''} }` : ''} });`
-          : '',
+        canonicalPresence && presentation
+          ? `const ${prefix}Presence = ${prefix}CreatePresencePresentation${typed ? `<${options.run}>` : ''}({ setup: () => { ${options.setup}; }, runtime: () => { ${options.runtime}; }, alive: () => ${options.alive}, invoke: callback => { ${options.invokeRun}; }, root: () => ${options.root ?? 'null'}, tokens: () => ${options.tokens ?? '[]'}, project: tokens => { ${options.project ?? ''}; }, watch: (source, callback) => { ${options.watch ?? "throw new Error('[Presence] State subscription is not available');"} } });`
+          : presence
+            ? `const ${prefix}Presence = ${prefix}CreatePresence${typed ? `<${options.run}>` : ''}({ setup: () => { ${options.setup}; }, runtime: () => { ${options.runtime}; }, alive: () => ${options.alive}, invoke: callback => { ${options.invokeRun}; }${presentation ? `, root: () => ${options.root ?? 'null'}, prepare: () => { ${options.prepare ?? ''} }` : ''} });`
+            : '',
         meta
           ? `const ${prefix}Meta = ${typed ? '(key: string)' : '/** @param {string} key */ (key)'} => ${prefix}ReadMeta(${options.document}, key);`
           : '',
@@ -343,13 +377,25 @@ export function nativeHostAtomPlan(
         .filter(Boolean)
         .join('\n');
     },
-    detach: `${delay ? `${prefix}Delay.cancelView();` : ''}${presence ? `${prefix}Presence.detach();` : ''}${shader ? `${prefix}Shader.detach();` : ''}`,
-    mount: `${presentation ? `${prefix}Presence.mount();` : ''}${shader ? `${prefix}Shader.mount();` : ''}`,
+    detach: complete(
+      [
+        delay ? `${prefix}Delay.cancelView();` : '',
+        presence ? `${prefix}Presence.detach();` : '',
+        shader ? `${prefix}Shader.detach();` : '',
+      ].filter(Boolean)
+    ),
+    mount: `${presentation ? `${prefix}Presence.mount(${canonicalPresence ? 'epoch' : ''});` : ''}${shader ? `${prefix}Shader.mount();` : ''}`,
     refresh: `${presentation ? `${prefix}Presence.refresh();` : ''}${shader ? `${prefix}Shader.refresh();` : ''}`,
     registerSource(source: string): string {
       return presentation ? `${prefix}Presence.registerSource(${source});` : '';
     },
-    dispose: `${delay ? `${prefix}Delay.dispose();` : ''}${presence ? `${prefix}Presence.dispose();` : ''}${shader ? `${prefix}Shader.dispose();` : ''}`,
+    dispose: complete(
+      [
+        delay ? `${prefix}Delay.dispose();` : '',
+        presence ? `${prefix}Presence.dispose();` : '',
+        shader ? `${prefix}Shader.dispose();` : '',
+      ].filter(Boolean)
+    ),
   };
 }
 
@@ -419,6 +465,11 @@ export function createNativeDelay(options: {
 }) {
   const pending = new Set<NativeDelayTask>();
   let disposed = false;
+  function cancelPending(): void {
+    let failure: { error: unknown } | undefined;
+    for (const task of [...pending]) { try { task.cancel(); } catch (error) { failure ??= { error }; } }
+    if (failure) throw failure.error;
+  }
   return {
     schedule(durationMs: number, callback: () => void): NativeDelayTask {
       options.runtime();
@@ -445,8 +496,8 @@ export function createNativeDelay(options: {
       pending.add(task);
       return task;
     },
-    cancelView() { for (const task of [...pending]) task.cancel(); },
-    dispose() { if (disposed) return; disposed = true; for (const task of [...pending]) task.cancel(); },
+    cancelView: cancelPending,
+    dispose() { if (disposed) return; disposed = true; cancelPending(); },
   };
 }
 `,
@@ -475,7 +526,7 @@ export interface NativePresentationReceipt {
   readonly viewBinding: object;
   readonly ownerRevision: number;
   readonly targetRevision: number;
-  readonly channels: readonly ('opacity' | 'translate')[];
+  readonly channels: readonly ('opacity' | 'translate' | 'blockSize')[];
   readonly outcome: NativePresentationOutcome;
 }
 export interface NativePresenceOwner<Run> {

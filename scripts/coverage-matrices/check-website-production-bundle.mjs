@@ -11,6 +11,20 @@ const SERVER_ONLY_PRERENDER_MODULES = new Set([
   'packages/cli/src/services/proto-style-css.ts',
 ]);
 const DEFAULT_GRAPH_PATH = 'apps/www/dist/proto-ui-bundle-graph.json';
+// This native-input documentation example needs a real input root, which the
+// div/span DemoSpec profile cannot supply. Its one lazy React client is reviewed
+// separately; it admits no additional host or ordinary Website controller.
+const REVIEWED_SINGLE_HOST_DEMONSTRATIONS = new Map([
+  [
+    'apps/www/src/components/NativeFileInputPreview.astro?astro&type=script&index=0&lang.ts',
+    Object.freeze({
+      client: 'apps/www/src/components/native-file-input-preview.ts',
+      family: 'react',
+      adapter: 'packages/adapters/react/src/index.ts',
+      prototype: 'packages/prototypes/base/src/native-file-input/root.proto.ts',
+    }),
+  ],
+]);
 const APPROVED_DEMONSTRATION_ENTRY_FACADES = new Set([
   // Private full-Card producer; normal Library roots must not reach its material entry.
   'apps/www/src/components/LibraryLiquidCandidatePage.astro?astro&type=script&index=0&lang.ts',
@@ -40,6 +54,7 @@ const APPROVED_DEMONSTRATION_ENTRY_FACADES = new Set([
   'apps/www/src/pages/en/test/liquid-glass-portal.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/liquid-glass-prominent-tint.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/liquid-glass-toggle.astro?astro&type=script&index=0&lang.ts',
+  ...REVIEWED_SINGLE_HOST_DEMONSTRATIONS.keys(),
 ]);
 // These existing test routes own material-only GPU diagnostics, not controls or
 // demonstration framework runtimes. Admission requires their exact source edges;
@@ -98,6 +113,9 @@ const OPTIONAL_DEMONSTRATION_ENTRY_FACADES = new Set([
   'apps/www/src/pages/en/test/site-typography.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/bootstrap-state-controls.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/liquid-glass-state-controls.astro?astro&type=script&index=0&lang.ts',
+  // Older graph fixtures and builds without this documentation page retain
+  // their scope. Whenever emitted, the exact entry/client profile is required.
+  ...REVIEWED_SINGLE_HOST_DEMONSTRATIONS.keys(),
 ]);
 for (const facade of OPTIONAL_DEMONSTRATION_ENTRY_FACADES)
   APPROVED_DEMONSTRATION_ENTRY_FACADES.add(facade);
@@ -321,6 +339,89 @@ function runtimeFamilyModulesInClosure(chunksByFileName, rootFileName, edgeField
   }
   return families;
 }
+
+function validateSingleHostDemonstration(bundleGraph, chunksByFileName, root, profile, issues) {
+  const context = `reviewed single-host demonstration \`${root.facadeModuleId}\``;
+  const records = bundleGraph.modules;
+  const modules = new Map();
+  let valid = Array.isArray(records);
+  for (const record of Array.isArray(records) ? records : []) {
+    if (
+      !record ||
+      typeof record.id !== 'string' ||
+      !record.id ||
+      modules.has(record.id) ||
+      !['imports', 'dynamicImports'].every(
+        (field) =>
+          Array.isArray(record[field]) && record[field].every((id) => typeof id === 'string')
+      )
+    ) {
+      valid = false;
+      continue;
+    }
+    modules.set(record.id, record);
+  }
+  for (const record of modules.values()) {
+    if ([...record.imports, ...record.dynamicImports].some((id) => !modules.has(id))) valid = false;
+  }
+  const completeChunks = closure(chunksByFileName, root.fileName, ['imports', 'dynamicImports']);
+  for (const file of completeChunks) {
+    if ((chunksByFileName.get(file)?.moduleIds ?? []).some((id) => !modules.has(id))) valid = false;
+  }
+  if (!valid || !modules.has(root.facadeModuleId) || !modules.has(profile.client)) {
+    issues.push(`${context} requires complete exact entry/client module-edge provenance`);
+    return;
+  }
+  const entry = modules.get(root.facadeModuleId);
+  const staticModules = closure(modules, root.facadeModuleId, ['imports']);
+  if (!entry.dynamicImports.includes(profile.client) || staticModules.has(profile.client)) {
+    issues.push(`${context} must enter its reviewed client through the exact dynamic import`);
+  }
+  const clientChunks = [...completeChunks]
+    .map((file) => chunksByFileName.get(file))
+    .filter((chunk) => Array.isArray(chunk?.moduleIds) && chunk.moduleIds.includes(profile.client));
+  if (clientChunks.length !== 1 || clientChunks[0].isEntry || !clientChunks[0].isDynamicEntry) {
+    issues.push(`${context} requires one dynamic-only chunk containing its actual client`);
+  }
+  const clientModules = closure(modules, profile.client, ['imports', 'dynamicImports']);
+  const emittedModules = new Set(
+    [...completeChunks].flatMap((file) => chunksByFileName.get(file)?.moduleIds ?? [])
+  );
+  if (
+    !clientModules.has(profile.adapter) ||
+    !clientModules.has(profile.prototype) ||
+    !emittedModules.has(profile.adapter) ||
+    !emittedModules.has(profile.prototype)
+  ) {
+    issues.push(
+      `${context} must reach its real ${profile.family} Adapter and native-input prototype`
+    );
+  }
+  const adapterModules = closure(modules, profile.adapter, ['imports', 'dynamicImports']);
+  const ownedModules = closure(modules, root.facadeModuleId, ['imports', 'dynamicImports']);
+  for (const id of ownedModules) {
+    const family = forbiddenFrameworkFamily(id);
+    const adapter = isProtoUiAdapterModule(id);
+    if (
+      (family && family !== profile.family) ||
+      isWebComponentAdapterModule(id) ||
+      /(?:^|\/)node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?vue2-runtime(?:\/|$)/u.test(
+        moduleIdWithoutQuery(id)
+      )
+    ) {
+      issues.push(`${context} reaches an unreviewed host module: ${id}`);
+    }
+    if ((family || adapter) && (staticModules.has(id) || !clientModules.has(id))) {
+      issues.push(`${context} acquires a host outside its lazy client boundary: ${id}`);
+    }
+    if (adapter && !adapterModules.has(id)) {
+      issues.push(
+        `${context} reaches an Adapter outside its reviewed Adapter dependency closure: ${id}`
+      );
+    }
+  }
+}
+
 function loadGraph(rootDir, graphPath, issues) {
   const absolutePath = path.resolve(rootDir, graphPath);
   if (!fs.existsSync(absolutePath) || !fs.statSync(absolutePath).isFile()) {
@@ -578,6 +679,20 @@ export function collectWebsiteProductionBundleIssues({
       );
     }
   }
+  for (const [facade, profile] of REVIEWED_SINGLE_HOST_DEMONSTRATIONS) {
+    const owners = approvedDemoRoots.filter((chunk) => chunk.facadeModuleId === facade);
+    if (
+      (chunks.some(
+        (chunk) => Array.isArray(chunk.moduleIds) && chunk.moduleIds.includes(profile.client)
+      ) &&
+        owners.length !== 1) ||
+      owners.some((chunk) => !chunk.isEntry)
+    ) {
+      issues.push(
+        `reviewed single-host client \`${profile.client}\` requires its exact route entry`
+      );
+    }
+  }
   const routeOwnedDemoRoots = approvedDemoRoots.filter((chunk) => chunk.isEntry);
   const materialDiagnosticRoots = chunks.filter(
     (chunk) => chunk.isEntry && REVIEWED_MATERIAL_DIAGNOSTIC_OWNERS.has(chunk.facadeModuleId)
@@ -736,6 +851,17 @@ export function collectWebsiteProductionBundleIssues({
       'imports',
       'dynamicImports',
     ]);
+    const singleHostProfile = REVIEWED_SINGLE_HOST_DEMONSTRATIONS.get(demoRoot.facadeModuleId);
+    if (singleHostProfile) {
+      validateSingleHostDemonstration(
+        bundleGraph,
+        chunksByFileName,
+        demoRoot,
+        singleHostProfile,
+        issues
+      );
+      continue;
+    }
     if (
       demoRoot.facadeModuleId ===
       'apps/www/src/components/LibraryLiquidCandidatePage.astro?astro&type=script&index=0&lang.ts'

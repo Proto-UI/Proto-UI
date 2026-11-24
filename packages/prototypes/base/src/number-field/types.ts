@@ -19,11 +19,16 @@ export type NumberFieldFormatOptions = Omit<
 export interface NumberFieldRootProps {
   value?: number | null;
   defaultValue?: number | null;
-  min?: number;
-  max?: number;
+  /** Explicit null removes this bound; omission retains the 0/100 defaults. */
+  min?: number | null;
+  max?: number | null;
   step?: number;
+  /** False preserves finite edits/initial values; step still controls stepping. */
+  snapToStep?: boolean;
   disabled?: boolean;
   readOnly?: boolean;
+  /** Native editor requirement, combined with any enclosing Field requirement. */
+  required?: boolean;
   ariaLabel?: string;
   name?: string;
   /** Allow an empty editor draft to commit null; explicit null props are always supported. */
@@ -77,6 +82,7 @@ export type NumberFieldInputExposes = {
   getValue: ExposeMethod<() => number | null>;
   disabled: ExposeState<boolean>;
   readOnly: ExposeState<boolean>;
+  required: ExposeState<boolean>;
   focused: ExposeState<boolean>;
   focusVisible: ExposeState<boolean>;
   focusSelf: ExposeMethod<() => void>;

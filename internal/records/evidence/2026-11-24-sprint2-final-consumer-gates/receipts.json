@@ -1,0 +1,54 @@
+{
+  "base": "dd0a3861508338ff859358f43cab99ded65563fc",
+  "scope": "Preparation for final frozen source; code hashes identify the tested local candidate",
+  "candidateFiles": {
+    "packages/compiler/src/targets.ts": "cbd9d9130d8c1620110c7fc4cbcd55b2f2c51fcecc2d91ec18d6ea243115730e",
+    "packages/compiler/src/react.ts": "fd17cf6deec91a3b74f36c9a718340e76162fa69fcca2949c0214c6a62da8dbf",
+    "packages/compiler/test/targets.test.ts": "f4e239c98c1992d9c323c534651e80aec8bd0bc4277f29529473a70108afa507",
+    "scripts/compiler/packed-generated-smoke.mjs": "cde0f4523c744137ceb37d54a071ddfbdf155b6b88109f066a7610f5d7816383",
+    "scripts/compiler/release-family-costs.mjs": "5329078cb514cdf5a87201ab06ac5f6394f4766c832f736abf843efa22f7e66d",
+    "scripts/compiler/host-cost-observer.mjs": "53ddd352cb9e8c0b2e2a7fded35b70d36526450fd4eda56f810cf75d46974b44",
+    "scripts/compiler/host-cost-observer.test.mjs": "a38c293e4055e8f69c60c34f51646428afe5d155467fd781065e6a476cff9a01",
+    "scripts/compiler/release-family-cost-runtime.mjs": "68ddf8f14ee4bc5744f50114b6a37ec245e14e4c1afe108db8e578eef27ca589"
+  },
+  "targetAndOutputTests": {
+    "passed": 17,
+    "failed": 0
+  },
+  "runtimeEmitterBefore": {
+    "passed": 0,
+    "failed": 1,
+    "reason": "emitted dependency remained alpha.1 while actual public package manifests declare alpha.2"
+  },
+  "packedVersionRejection": {
+    "directory": "/tmp/s2-packed-version-negative-mwuxsg1a",
+    "evidence": "/tmp/proto-compiler-packed-generated-kdiz8M",
+    "status": 1,
+    "wallSeconds": 2.3514686330017867,
+    "compilerResult": {
+      "ok": true,
+      "diagnostics": []
+    },
+    "error": "AssertionError [ERR_ASSERTION]: Generated dependency @proto.ui/core@0.3.0-alpha.2 does not match the packed version; never silently substitute versions\n+ actual - expected\n\n+ '0.3.0-alpha.1'\n- '0.3.0-alpha.2'\n               ^\n\n    at <anonymous> (/workspace/scratch/b2027510c911/s2-consumer-final/scripts/compiler/packed-generated-smoke.mjs:210:14)",
+    "installStarted": false
+  },
+  "costGuards": {
+    "directory": "/tmp/s2-cost-guard-clpee144",
+    "unacceptedInputStatus": 1,
+    "reportOk": false,
+    "measuredRows": 0,
+    "secondStatus": 1,
+    "oldReceiptPreserved": true,
+    "sha256": "42a2d3d8a8eec76e7e19e0c69d7cc3c966101d70cab48a64ae6b3479b7d89cb0"
+  },
+  "frameworkRootPreflight": {
+    "count": 0,
+    "ok": true,
+    "scope": "React-only zero-root observer runner preflight; no Compiler output, no final-source acceptance"
+  },
+  "fullPinnedBuildExecuted": false,
+  "finalRegistryExecuted": false,
+  "completeCostMatrixExecuted": false,
+  "acceptedBudget": null,
+  "archiveSha256": "522c163639f55cd46c178d0015a54bd801f5b16b6598006cfbd1909551712f97"
+}

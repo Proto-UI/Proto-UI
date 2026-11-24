@@ -13,8 +13,8 @@ statement:
 criteria:
   - id: P-BASE-ACCORDION-CONTENT-PRESENCE
     text:
-      zh-CN: Content 派生 open/hidden 及仅 callback 内的 desired presence=keepMounted || open。默认 L1 detach 保留逻辑实例，不承诺宿主子节点/native状态；keepMounted 保留完整隐藏 view。不新增transition计时、延迟关闭语义、focus entry或focus return；消费者动画不得成为第二个canonical open owner。
-      en: Content derives open/hidden and callback-only desired presence keepMounted || open. Default L1 detach preserves the logical instance, not host children or native state; keepMounted retains the complete hidden view. No transition timer, delayed-close semantics, focus entry or focus return is added. Consumer-authored transitions must not create a second canonical open owner.
+      zh-CN: 默认未绑定 C-DISCLOSURE-PRESENCE-0001 扩展时，Content 派生 open/hidden 及仅 callback 内的 desired presence=keepMounted || open。默认 L1 detach 保留逻辑实例，不承诺宿主子节点/native状态；keepMounted 保留完整隐藏 view。不新增transition计时、延迟关闭语义、focus entry或focus return；消费者动画不得成为第二个canonical open owner。
+      en: On the default path without C-DISCLOSURE-PRESENCE-0001 binding, Content derives open/hidden and callback-only desired presence keepMounted || open. Default L1 detach preserves the logical instance, not host children or native state; keepMounted retains the complete hidden view. No transition timer, delayed-close semantics, focus entry or focus return is added. Consumer-authored transitions must not create a second canonical open owner.
   - id: P-BASE-ACCORDION-CONTENT-RELATIONSHIP
     text:
       zh-CN: Content 声明 item 域 panel identity 及 labelledBy Trigger。region 默认 false，true 显式启用 region landmark，作者需避免过多地标。detach/reopen 的identity reservation及IDREF撤销/恢复服从既有 A11y relationship service。
@@ -47,6 +47,9 @@ openQuestions:
     blocks:
       - activation:P-BASE-ACCORDION-CONTENT
 revisions:
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Preserve the default immediate protocol while naming the independently governed opt-in disclosure presence extension.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the bounded Accordion family independently; retained draft admission and explicit native evidence debt.

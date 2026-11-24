@@ -6,7 +6,8 @@ import {
   type RunHandle,
   type RendererHandle,
 } from '@proto.ui/core';
-import { finite, range, quantize } from '../progress/range';
+import { finite } from '../progress/range';
+import { numberFieldRange, normalizeNumberFieldValue } from './range';
 import { NUMBER_FIELD_CONTEXT, NUMBER_FIELD_FAMILY } from './shared';
 import { createNumberFieldFormat, type NumberFieldFormat } from './format';
 import type {
@@ -19,11 +20,13 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
   def.props.define({
     value: { type: 'number', empty: 'accept' },
     defaultValue: { type: 'number', empty: 'accept' },
-    min: { type: 'number', empty: 'fallback' },
-    max: { type: 'number', empty: 'fallback' },
+    min: { type: 'number', empty: 'accept' },
+    max: { type: 'number', empty: 'accept' },
     step: { type: 'number', empty: 'fallback', validator: (v) => Number.isFinite(v) && v > 0 },
+    snapToStep: { type: 'boolean', empty: 'fallback' },
     disabled: { type: 'boolean', empty: 'fallback' },
     readOnly: { type: 'boolean', empty: 'fallback' },
+    required: { type: 'boolean', empty: 'fallback' },
     ariaLabel: { type: 'string', empty: 'fallback' },
     name: { type: 'string', empty: 'fallback' },
     allowEmpty: { type: 'boolean', empty: 'fallback' },
@@ -42,8 +45,10 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
     min: 0,
     max: 100,
     step: 1,
+    snapToStep: true,
     disabled: false,
     readOnly: false,
+    required: false,
     ariaLabel: '',
     name: '',
     allowEmpty: false,
@@ -83,6 +88,8 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
     readOnly: false,
     controlDisabled: false,
     controlReadOnly: false,
+    controlRequired: false,
+    required: false,
     label: '',
     name: '',
     formatted: '0',
@@ -106,9 +113,14 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
   const live = (current: typeof run, epoch: number) =>
     !!run && run === current && commandEpoch === epoch;
   const normalize = (v: number) => {
-    const p = run?.props.get(),
-      b = range(p?.min, p?.max);
-    return quantize(v, b.min, b.max, finite(p?.step, 1));
+    const p = run?.props.get();
+    return normalizeNumberFieldValue(
+      v,
+      p?.min,
+      p?.max,
+      finite(p?.step, 1),
+      p?.snapToStep !== false
+    );
   };
   const accept = (next: number | null, reason: string) => {
     const current = run,
@@ -155,12 +167,14 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
     run.context.update(NUMBER_FIELD_CONTEXT, {
       value: canonical(),
       draft: draft.get(),
-      ...range(p.min, p.max),
+      ...numberFieldRange(p.min, p.max),
       step: finite(p.step, 1),
       disabled: disabled.get(),
       readOnly: readOnly.get(),
       controlDisabled: !!p.disabled,
       controlReadOnly: !!p.readOnly,
+      controlRequired: !!p.required,
+      required: !!p.required || !!run.context.tryRead(FIELD_CONTEXT)?.required,
       label: p.ariaLabel ?? '',
       name: p.name ?? '',
       formatted: format.format(canonical()),
@@ -353,6 +367,7 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
     if (!live(current, epoch)) return false;
     editRevision++;
     composing.set(false, 'reason: number reset composition');
+    if (!live(current, epoch)) return false;
     const next = initialValue === null ? null : normalize(initialValue);
     if (!run.props.isProvided('value')) accept(next, 'reason: number-field value reset');
     if (!live(current, epoch)) return true;
@@ -383,7 +398,10 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
     const epoch = commandEpoch;
     const valueChanged = next.value !== previous.value;
     const policyChanged =
-      next.min !== previous.min || next.max !== previous.max || next.step !== previous.step;
+      next.min !== previous.min ||
+      next.max !== previous.max ||
+      next.step !== previous.step ||
+      next.snapToStep !== previous.snapToStep;
     const formatChanged =
       next.locale !== previous.locale || next.formatOptions !== previous.formatOptions;
     const scrubChanged =

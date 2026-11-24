@@ -46,7 +46,8 @@ it('uses public ghost feedback for navigation, not text-link underline', () => {
       actionProfile: 'rhea',
       hovered: facts.hovered || facts.current,
       focusVisible: facts.focusVisible,
-      pressed: facts.pressed,
+      // Native navigation preserves stationary text selection rather than press feedback.
+      pressed: false,
     });
     expect(linkSurfaceLayout('shadcn', 'nav', 'minimal', facts)).toMatchObject({
       minHeight: 'var(--site-control-height, 2.75rem)',

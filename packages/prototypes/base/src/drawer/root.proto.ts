@@ -1,3 +1,4 @@
+import type { RunHandle } from '@proto.ui/core';
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
 import { useOpenState } from '../tools';
 import {
@@ -90,11 +91,11 @@ function setupDrawerRoot(def: DefHandle<DrawerRootProps, DrawerRootExposes>): vo
   let published: DrawerContextValue = initialContext;
   let lastRequestVersion = 0;
 
-  let currentRun: any = null;
+  let currentRun: RunHandle<DrawerRootProps> | null = null;
   let contentId: string | null = null;
   let generation = 0;
   let dead = false;
-  const syncContext = (run: any) => {
+  const syncContext = (run: RunHandle<DrawerRootProps>) => {
     if (dead) return;
     currentRun = run;
     const next = {
@@ -122,7 +123,7 @@ function setupDrawerRoot(def: DefHandle<DrawerRootProps, DrawerRootExposes>): vo
         contentId = null;
         generation++;
         try {
-          syncContext(currentRun);
+          if (currentRun) syncContext(currentRun);
         } catch (rollbackError) {
           throw new AggregateError(
             [error, rollbackError],
@@ -137,7 +138,7 @@ function setupDrawerRoot(def: DefHandle<DrawerRootProps, DrawerRootExposes>): vo
     return acceptedGeneration;
   });
   def.expose.method('__releaseContent', (instanceId, leaseGeneration) => {
-    if (dead || contentId !== instanceId || generation !== leaseGeneration) return;
+    if (dead || !currentRun || contentId !== instanceId || generation !== leaseGeneration) return;
     contentId = null;
     generation++;
     syncContext(currentRun);

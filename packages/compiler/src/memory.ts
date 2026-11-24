@@ -22,6 +22,8 @@ export interface Compilation {
 }
 export interface CompileOptions extends ParseOptions {
   componentName?: string;
+  /** Explicit React DOM Root; checked against authored physical-root declarations. */
+  rootTag?: string;
   profile?: string | TargetSelection;
   /** GPUI source dependency shared by composed prototypes; omission bundles the editable SDK. */
   nativeSdkPath?: string;
@@ -36,11 +38,25 @@ export function compilePrototype(
   if (!parsed.ok) return parsed;
   const profile = resolveTargetProfile(options.profile ?? 'react-runtime-v1');
   if (!profile.ok) return profile;
+  if (options.rootTag !== undefined && profile.value.id !== 'react-dom-source-v1') {
+    return {
+      ok: false,
+      diagnostics: [
+        {
+          code: 'PUI4003',
+          category: 'unsupported-input',
+          message: 'Explicit rootTag is currently implemented only by react-dom-source-v1.',
+          span: parsed.value.setup.span,
+        },
+      ],
+    };
+  }
   const admitted = checkTargetOperations(parsed.value, profile.value);
   if (!admitted.ok) return admitted;
   let emitted: CompileResult<GeneratedModule>;
   const emitOptions = {
     componentName: options.componentName,
+    rootTag: options.rootTag,
     propsUpdatePolicy: profile.value.observableSemantics.props.update,
   };
   switch (profile.value.id) {

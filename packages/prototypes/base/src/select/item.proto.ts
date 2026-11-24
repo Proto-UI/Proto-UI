@@ -1,3 +1,4 @@
+import type { RunHandle } from '@proto.ui/core';
 import { defineAsHook, definePrototype, type DefHandle, type ExposeMethod } from '@proto.ui/core';
 import { asAccessible, asCollectionItem, asFocusable } from '@proto.ui/hooks';
 import { setupSelectCommand } from './command';
@@ -49,7 +50,7 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
   accessible.state('disabled', command.disabled);
   accessible.action('activate', { event: 'select' });
 
-  const readContext = (run: any): SelectContextValue | null => {
+  const readContext = (run: RunHandle<SelectItemProps>): SelectContextValue | null => {
     try {
       return run.context.read(SELECT_CONTEXT);
     } catch (error) {
@@ -58,7 +59,7 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
     }
   };
 
-  const sync = (run: any, ctx: SelectContextValue) => {
+  const sync = (run: RunHandle<SelectItemProps>, ctx: SelectContextValue) => {
     const ownValue = run.props.get().value ?? '';
     const nextDisabled = !!run.props.get().disabled || ctx.disabled;
     command.syncDisabled(nextDisabled);
@@ -98,7 +99,7 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
     if (!nextOwnDisabled && !disposed) notifySelectItemSnapshotChanged(run);
   });
 
-  const updateActiveValue = (run: any, focused = false) => {
+  const updateActiveValue = (run: RunHandle<SelectItemProps>, focused = false) => {
     if (command.disabled.get()) return;
     const ownValue = run.props.get().value ?? '';
     if (!ownValue) return;
@@ -110,7 +111,7 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
     });
   };
 
-  const clearTransientActive = (run: any, reason: string) => {
+  const clearTransientActive = (run: RunHandle<SelectItemProps>, reason: string) => {
     const ctx = readContext(run);
     const ownValue = run.props.get().value ?? '';
     active.set(false, reason);

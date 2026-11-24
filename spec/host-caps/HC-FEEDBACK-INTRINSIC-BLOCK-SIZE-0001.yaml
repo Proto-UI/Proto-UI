@@ -1,0 +1,27 @@
+id: HC-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001
+type: host-cap
+title: View-owned intrinsic block-size measurement and clipping
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: Source-Web provider extension with separate model and CSSOM evidence. Real four-Web geometry captures, independent native implementations and compiler admission remain separately judged.
+summary: A host measures semantic logical size and owns temporary block-size and overflow writes for the existing presence protocol.
+criteria:
+  - id: HC-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-INPUT
+    text:
+      en: After current semantic style application, the provider returns finite nonnegative used block size in the logical writing direction. It temporarily removes only its current size lease and restores it synchronously after measurement; a replaced or retired lease is never restored. The result can shrink below the constrained current size and never substitutes scrollHeight or transformed visual bounds. Unavailable input stays unresolved.
+  - id: HC-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-LEASE
+    text:
+      en: The declared blockSize channel jointly acquires logical-size and overflow clipping writes. It preserves prior semantic inline values and priorities, detects external takeover, and releases only values still owned by this physical view. Frame retirement, document adoption and disposal cancel pending callbacks and reuse the existing presence binding checks. Entered completion restores natural semantic sizing. Closed semantic hiding remains with the disclosure prototype.
+dependsOn:
+  contracts: [C-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001]
+  hostCaps: [HC-FEEDBACK-PRESENCE-PRESENTATION-0001]
+sources:
+  - path: packages/adapters/base/src/motion/web-presence-presentation.ts
+verifies:
+  tests: [T-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Define the actual host measurement and transient clipping lease independently from disclosure semantics.
+tags: [motion, layout, host-capability]
