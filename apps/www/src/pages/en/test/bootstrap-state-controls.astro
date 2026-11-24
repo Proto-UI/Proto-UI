@@ -190,10 +190,34 @@ const themeCss = renderThemeCss({
             switchControlled: ['checkedChange'],
             toggle: ['activeChange'],
             toggleControlled: ['activeChange'],
-            input: ['valueChange', 'change'],
-            inputControlled: ['valueChange', 'change'],
-            textarea: ['valueChange', 'change'],
-            textareaControlled: ['valueChange', 'change'],
+            input: [
+              'valueChange',
+              'change',
+              'compositionStart',
+              'compositionUpdate',
+              'compositionEnd',
+            ],
+            inputControlled: [
+              'valueChange',
+              'change',
+              'compositionStart',
+              'compositionUpdate',
+              'compositionEnd',
+            ],
+            textarea: [
+              'valueChange',
+              'change',
+              'compositionStart',
+              'compositionUpdate',
+              'compositionEnd',
+            ],
+            textareaControlled: [
+              'valueChange',
+              'change',
+              'compositionStart',
+              'compositionUpdate',
+              'compositionEnd',
+            ],
           };
           const demo: DemoSpec = {
             type: 'demo',

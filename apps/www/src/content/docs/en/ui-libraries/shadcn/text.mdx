@@ -1,6 +1,6 @@
 ---
 title: 'Text'
-description: 'Shadcn passive text content and reusable typography inputs.'
+description: 'Reusable typography component for consistent sizing, weight, line height, and text tone.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,9 +8,9 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Text inherits the [Base Text](/en/ui-libraries/base/text/) typography contract and applies Shadcn font, size, line-height, tracking, and ink tokens while leaving document semantics to surrounding native elements. The examples on this page use the **Shadcn Rhea** style preset.
 
-`shadcn-text-root` is a draft reusable Text atom. It inherits the [Base Text](/en/ui-libraries/base/text/) input vocabulary and content slot through `asTextRoot()`. The Shadcn theme owns typography and ink. This is Proto UI's own Text projection, with no claim of upstream Text-component API parity.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-text"
@@ -18,9 +18,15 @@ Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching exampl
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-The examples are actual package prototypes. Their outer stack supplies only demonstration layout; each Text instance owns its content and its applicable presentation. The examples add no click handlers or editing state.
+## Installation
 
-## Use Text
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-text" manager="npm" />
+
+Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your target framework.
+
+## Usage
+
+Import `shadcnTextRoot` (also exported as `textRoot` and `ShadcnTextRoot`) from `@proto.ui/prototypes-shadcn/text` or the package root, and configure the host element tag through your Adapter:
 
 ```tsx
 import * as React from 'react';
@@ -40,68 +46,44 @@ export function SectionTitle() {
 }
 ```
 
-The same subpath and package root also export `textRoot` and `ShadcnTextRoot` aliases. Family-aliased types retain the Base input contract.
+### Semantics and color inheritance
 
-`rootTag: 'span'` is Web Adapter configuration, not a Text prop. The surrounding native `h1`, `p`, `label` or `a` remains the document or interaction owner. For a label, keep `htmlFor`/`for` on the native label; for a link, keep `href`, target and download behavior on the native anchor. Text does not create a second focus stop or synthesize activation.
+- `rootTag: 'span'` is a Web Adapter option rather than a component prop. Keep document and interactive semantics—such as `h1`, `p`, `label` (`htmlFor`/`for`), and `a` (`href`, `target`, `download`)—on the enclosing native elements.
+- Use `tone="inherit"` when rendering text inside a `solid` or `accent` `Surface` so it inherits the enclosing container's foreground color.
 
-## Inputs
+### Line height and tracking scale
 
-| Prop         | Values                                                     | Default   |
-| ------------ | ---------------------------------------------------------- | --------- |
-| `size`       | `xs`, `sm`, `base`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` | `base`    |
-| `tone`       | `default`, `muted`, `inherit`                              | `default` |
-| `weight`     | `normal`, `medium`, `semibold`, `bold`                     | `normal`  |
-| `font`       | `body`, `heading`, `mono`                                  | `body`    |
-| `leading`    | `size`, `tighter`, `tight`, `snug`, `normal`, `relaxed`    | `normal`  |
-| `tracking`   | `normal`, `tight`, `tighter`                               | `normal`  |
-| `emphasis`   | `normal`, `italic`                                         | `normal`  |
-| `decoration` | `none`, `underline`, `line-through`                        | `none`    |
-
-`tone="inherit"` keeps the enclosing semantic or Surface owner's foreground, which is useful for contrast on solid or accent surfaces. Removing a prop restores its default. The single anonymous slot preserves authored text and children. There are no exposed states, methods or events. No page role, copy, heading level, `asChild`, `tag`, `href`, `for`, content parser, editor, or automatic responsive breakpoint is part of this API.
-
-`leading="size"` keeps the line box built into the selected size instead of adding a leading override. Shadcn and Brutalist map `xs`, `sm`, `base`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, and `5xl` to line heights of `1rem`, `1.25rem`, `1.5rem`, `1.75rem`, `1.75rem`, `2rem`, `2.25rem`, `2.5rem`, and `1` respectively. For example, `size="base"` uses 16/24 and `size="lg"` uses 18/28 at a 16px root size. Omitting size restores `base`. An initially invalid size also falls back to `base`; a provided empty or invalid size after a valid value retains that previous value under the existing Props contract. `leading="tighter"` selects `1.1`; `tracking="tighter"` selects `-0.05em`. The existing `normal` defaults are unchanged. These options are finite visual semantics, not numeric or arbitrary-CSS inputs. Base only normalizes them; this density extension is verified for Shadcn and Brutalist, not every family or native target.
-
-Shadcn action composition keeps its existing precedence: `actionProfile="rhea"` or `"luma"` still selects `1.25rem` leading, including when `leading="size"` or `"tighter"` is supplied.
-
-## Adapter and Compiler boundary
-
-The implemented Web profile is exercised through Web Components, React, Vue 3 and Vue 2, including property changes/removal, retained content and native-owner composition. Web compiler source-closure and generated-facade checks are separate from that Adapter evidence; they do not establish arbitrary Prototype AOT or native parity.
-
-The CLI's unsupported GPUI target is rejected. Native GPUI typography mapping still omits `font-style`, `letter-spacing` and `text-decoration-line`; those omissions are diagnostic limits, not an equivalent rendering. `tone="inherit"` currently reports `UnsupportedValue(color, inherit)` on GPUI. Unknown style tokens report `Unsupported Proto UI style tokens` rather than silently succeeding. Real-browser visual acceptance and each target's execution evidence remain distinct from source and DOM tests.
-
-The density values are checked against the [pinned shadcn page-header source](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/components/page-header.tsx) under its [MIT license](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/LICENSE.md): the heading uses `lg:leading-[1.1]` and `xl:tracking-tighter`, while the description uses size-owned `text-base` and `sm:text-lg` line boxes. This is reference evidence for reusable typography choices, not an upstream Text component or a page-specific Text API.
-
-## Authority
-
-`P-SHADCN-TEXT` and `T-TEXT-0001` govern this slice. The source is `packages/prototypes/shadcn/src/text/`. Catalog lifecycle remains draft.
-
-## Install
-
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-text" manager="npm" />
-
-Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+- `leading="size"` uses the built-in line height for each size step: `xs` (`1rem`), `sm` (`1.25rem`), `base` (`1.5rem`), `lg` (`1.75rem`), `xl` (`1.75rem`), `2xl` (`2rem`), `3xl` (`2.25rem`), `4xl` (`2.5rem`), and `5xl` (`1`).
+- `leading="tighter"` maps to `1.1`, and `tracking="tighter"` maps to `-0.05em`.
+- Removing a prop restores its default. An invalid initial `size` falls back to `base`, while an invalid update retains the previous valid value.
+- Inside Shadcn action compositions, `actionProfile="rhea"` and `"luma"` consistently apply `1.25rem` line height.
 
 ## API
+
+The following props belong to `Root`:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'size', type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'", default: 'base' },
+    {
+      name: 'size',
+      type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'",
+      default: 'base',
+    },
     { name: 'tone', type: "'default' | 'muted' | 'inherit'", default: 'default' },
     { name: 'weight', type: "'normal' | 'medium' | 'semibold' | 'bold'", default: 'normal' },
     { name: 'font', type: "'body' | 'heading' | 'mono'", default: 'body' },
-    { name: 'leading', type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'", default: 'normal' },
+    {
+      name: 'leading',
+      type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'",
+      default: 'normal',
+    },
     { name: 'tracking', type: "'normal' | 'tight' | 'tighter'", default: 'normal' },
     { name: 'emphasis', type: "'normal' | 'italic'", default: 'normal' },
     { name: 'decoration', type: "'none' | 'underline' | 'line-through'", default: 'none' },
   ]}
 />
 
-These props belong to Root. Text does not synthesize a host role.
-
 ## References
 
-<SpecEntityLinks
-  directory="spec/prototypes"
-  files={['P-SHADCN-TEXT.yaml', 'P-BASE-TEXT.yaml']}
-/>
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-TEXT.yaml', 'P-BASE-TEXT.yaml']} />

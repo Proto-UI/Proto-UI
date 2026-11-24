@@ -1,128 +1,124 @@
 ---
 title: 'Implementing a Governed Base Semantic Slice'
-description: 'Turn a governed or explicitly draft Base P/T boundary into a minimal, coherent, executable vertical slice.'
+description: 'Turn an admitted or draft Base P/T spec into a minimal, complete, and verifiable vertical slice.'
 ---
 
-Implementing a Base Prototype is normally an advanced contribution. Existing governed subjects proceed from their current protocol graph. A genuinely new subject may accumulate research, a candidate graph, draft entities, implementation probes, and executable evidence before admission; the one unresolved semantic decision is whether Proto UI admits that independent subject as a Base identity.
+Implementing a Base Prototype is an advanced contribution focused on core interaction protocols. Existing Base subjects build directly on their `P-*` and `T-*` specs. For a brand-new Base identity, start in `draft` mode with research, candidate specs, implementation probes, and tests to make the admission decision concrete.
 
-## Admission and governed direction
+## Clarify the protocol model up front
 
-Before presenting a genuinely new Base identity as governed, record the admission decision that its independent protocol subject belongs in Base. Candidate work can and should make the following explicit before or after that decision as evidence evolves:
+Whether an identity is already admitted or still a `draft` candidate, make these details explicit as specs and code evolve:
 
-- the independent protocol subject and Base-admission conclusion;
-- input facts, owners, observable outputs, and synchronization rules;
-- the negative boundary;
-- Root, Part, and anatomy identities;
+- the independent protocol subject and its role in Base;
+- input facts, state ownership, observable outputs, and synchronization rules;
+- explicit negative boundaries (what stays outside this protocol);
+- Root, Part, and `Anatomy` role identities;
 - exact props, states, events, methods, and absence assertions;
-- the P entity, T entity, and executable-evidence plan;
-- required Module, Host Capability, and cross-Adapter evidence; and
-- later design-language projections and compositions that remain out of scope.
+- the `P-*` spec, `T-*` cases, and executable test plan;
+- required Module, Host Capability, and cross-Adapter test scope; and
+- downstream styled libraries and compositions left to separate PRs.
 
-A directory name, draft code, informal consensus, or reference component library is not Base-admission evidence by itself. An unresolved admission marker keeps the identity candidate/draft; it does not block research, graph authoring, implementation probes, or tests. Once an identity is governed, implementation and projection continue by default through independent review.
+## Base admission self-check
 
-## Base-admission check
+A solid Base protocol slice satisfies six criteria:
 
-A governed or candidate slice should demonstrate:
+1. **Independent subject**: It models a real interaction protocol, not just an inheritance hook for a styled library.
+2. **Explicit information path**: Every core guarantee has a clear input, state owner, output, and rule.
+3. **Cross-host stability**: Protocol semantics work cleanly without React-, Vue-, or DOM-specific tricks.
+4. **Distinct responsibility**: Existing Base protocols or host-level composition cannot express it cleanly.
+5. **Clear negative boundaries**: Styling, business logic, layout, forms, and announcements stay outside the protocol.
+6. **Executable tests**: Every retained criterion maps to concrete `T-*` cases and automated tests.
 
-1. **Independent subject**: it does not exist for styled-library inheritance or package symmetry.
-2. **Explicit information path**: each core guarantee has an input fact, owner, output, and rule.
-3. **Cross-host stability**: protocol meaning does not depend on React, Vue, or a DOM trick.
-4. **Distinct responsibility**: existing Base protocols or composition cannot express it without loss.
-5. **Negative boundary**: visual, business, focus, layout, form, and announcement responsibilities that it does not own are explicit.
-6. **Executable evidence**: every retained criterion maps to a substantive T case and real test.
-
-If implementation reveals that one of these cannot hold, revise the candidate or governed graph and record the evidence instead of forcing the code through an empty `asHook`, host escape hatch, or special-case branch. Escalate only if the evidence changes the Base-identity admission conclusion.
+If implementation shows that one of these criteria fails to hold, refine the spec and design rather than forcing it through an empty `asHook`, host escape hatch, or special-case branch.
 
 ## Implementation workflow
 
-### 1. Turn criteria into a delivery map
+### 1. Map `P-*` criteria to a delivery checklist
 
-For each P criterion, list:
+For each `P-*` criterion, list:
 
-- owner;
-- allowed inputs;
+- state owner;
+- allowed inputs and edge values;
 - observable output;
-- controlled/uncontrolled or lifecycle rule;
-- negative assertion;
-- T case;
-- implementation path; and
-- required Adapter or host profile.
+- controlled/uncontrolled and lifecycle rules;
+- absence assertions (what must stay omitted);
+- linked `T-*` case and test file path; and
+- target Adapter and host verification scope.
 
-This mapping is the review spine. File count is not a completion measure.
+Organizing review around criteria rather than file count keeps changes focused.
 
-### 2. Implement the smallest owner
+### 2. Implement the minimal owner first
 
-- Only the declared owner holds state.
-- Parts consume ownership through context, relationships, or existing shared capabilities.
-- Keep styled variants, host raw objects, and future composition out of Base.
-- When direct Prototype and authored `asHook` describe one protocol, share implementation rather than fork behavior.
-- Respect existing setup, runtime, view-epoch, and terminal-disposal boundaries.
+- Keep interaction state inside the declared owner.
+- Have collaborating parts read and interact through `Context`, Anatomy relations, or shared hooks.
+- Keep styled variants, raw host objects, and app-level composition out of Base.
+- Share one core setup implementation when a direct Prototype and an `asHook` express the same protocol.
+- Respect `setup`, runtime update, and teardown cleanup boundaries.
 
-### 3. Build P/T and focused evidence
+### 3. Add `P-*`/`T-*` specs and focused tests
 
-- Make P criteria individually addressable.
-- Anchor T cases to exact criteria.
-- Verify results and absence assertions in executable tests.
-- Controlled requests must not silently mutate final state.
-- Cover disabled, empty, duplicate, structural-churn, teardown, and other declared boundaries.
-- Tests across the three Web Adapters prove one Web host profile, not general multi-host conformance.
+- Keep each `P-*` criterion individually addressable.
+- Anchor `T-*` cases to exact criteria.
+- Cover both positive behavior and explicit absence assertions.
+- In controlled mode, user interactions emit change requests while the external controlled prop governs the final state.
+- Test disabled states, empty/duplicate values, dynamic child changes, and teardown cleanup.
+- Verify consistent behavior across the Web Component, React, and Vue Adapters.
 
-### 4. Complete package and consumer surfaces
+### 4. Complete exports and website delivery
 
-Every new public Base identity or anatomy family must appear on a reachable website page in the same pull request. The governing criteria and evidence determine which states the page demonstrates; the preview surface remains part of delivery. Record the local preview route in the pull request.
+Every new public Base identity or compound family ships with a reachable website page and a local preview route in the same PR.
 
 The complete consumer surface includes:
 
-- family source, shared types, and public subpath;
-- exact root exports;
-- CLI registry and facade generation;
-- Base docs, API notes, and a real demo;
+- family source, shared types, and public package subpath;
+- root package exports;
+- CLI registry entries and facade generation;
+- bilingual Base docs, API reference, and a real public-package demo;
 - Web Component, React, and Vue previews; and
-- spec workspace and Agent projections.
+- regenerated workspace and derived docs files via their generators.
 
-Keep later Shadcn, Brutalist, or other design-language projections in separate contributions.
+Keep downstream Shadcn, Brutalist, or other styled implementations in separate PRs.
 
-#### Use the website demo as real consumption evidence
+#### Keep the website demo faithful to real usage
 
-The demo should consume Base through a public package subpath and prefer Base's own anatomy, triggers, state, events, and defaults for visible interaction. It must not rely on page control logic that consumers do not receive with the package to simulate autonomous behavior.
+Import Base from its public package subpath and drive interaction through its own anatomy, triggers, states, events, and defaults:
 
-For example, a Dialog demo should use `dialog-trigger` to request Root open. Calling a Dialog expose from an unrelated Button callback bypasses the cataloged anatomy information path. Minimal external orchestration is allowed only when Base has no natural trigger by design, or when public controls are themselves the protocol under demonstration. Toast-style invocation and direct Transition control are typical exceptions.
+- Open a Dialog through `dialog-trigger` instead of invoking an exposed method from an unrelated button.
+- Only add minimal external glue using public APIs when Base has no natural trigger by design (such as imperative Toast invocation) or when demonstrating imperative controls (such as Transition), and note in the demo source and PR what consumers need to wire up themselves.
 
-Keep any exception outside the Prototype, use public APIs only, and explain its necessity and the consumer-owned portion in the demo source and pull request. It must not hide missing anatomy, misplaced ownership, uncataloged capability, or Adapter drift. The internal Demo Matrix may add three-Adapter evidence but cannot replace the website page.
+### 5. Feed design gaps back into the spec loop
 
-### 5. Keep design gaps in the implementation loop
+When implementation surfaces any of the following, update the spec, tests, and review packet together rather than quietly expanding code alone:
 
-Treat these findings as inputs to the next graph, implementation, evidence, and fresh-review iteration:
+- a criterion lacks a clear single owner;
+- implementation requires a new public API not yet in the spec;
+- existing Modules or Host Capabilities cannot carry a required behavior;
+- Adapters exhibit conflicting protocol semantics;
+- implementation requires a raw host event or host object;
+- a negative boundary conflicts with intended behavior; or
+- two spec entities contradict each other.
 
-- a criterion has no unique owner;
-- implementation needs public API absent from the current graph;
-- existing Module or Host Capability slices cannot carry required behavior;
-- the three Adapters expose different protocol semantics;
-- implementation needs a raw host event, target, or object escape hatch;
-- the negative boundary prevents the intended behavior; or
-- applicable entities genuinely contradict one another.
+If a finding introduces a brand-new Base identity, keep it marked `draft` while admission is decided.
 
-Update the exact criterion, implementation evidence, and alternatives instead of silently widening source alone. The only semantic decision to escalate is admission of a genuinely new independent Base identity, or evidence that invalidates an earlier admission conclusion. Keep that identity draft while unresolved; all other reversible remediation continues through independent review.
+## Structuring the pull request
 
-## Pull-request organization
-
-A reviewer should be able to follow:
+Structure your changes and PR summary so reviewers can follow this path:
 
 ```text
-governed identity or candidate draft
-→ P criteria and relations
-→ T cases and executable paths
-→ owner implementation
-→ focused Base tests
-→ required Adapter evidence
-→ exports, CLI, docs, and demo
+Spec identity (admitted or draft candidate)
+→ P-* criteria and relations
+→ T-* cases and executable test paths
+→ Core owner implementation
+→ Focused Base unit tests
+→ Required Adapter verification
+→ Exports, CLI, docs, and demo
 ```
 
-Stacked or draft pull requests may help review a large slice, but do not separately merge half of a public guarantee when that would create known spec drift. Every merged unit must be independently coherent and valuable.
+For large slices, you can split review across stacked PRs as long as every merged unit is self-contained and keeps specs, code, and docs in sync.
 
-## Validation
+## Local checks
 
-Run issue-specific focused tests first, then at least:
+Run your focused tests first, then run:
 
 ```sh
 corepack pnpm@10.32.1 check:prototype-catalog
@@ -133,13 +129,13 @@ corepack pnpm@10.32.1 test
 corepack pnpm@10.32.1 docs:build
 ```
 
-Changes to the public package graph also require package manifest, build, budget, and relevant consumer smoke checks. Record what was run, what was not applicable, and all remaining uncertainty.
+If you changed public package exports or dependencies, run package manifest, build, and budget checks as well, and include the actual run results in your PR.
 
-## Final check
+## Final checklist
 
-- Public API changes are explicit in the governed or candidate graph rather than introduced by implementation analogy.
-- No empty Base identity was created for a styled-library need.
-- A single Web Adapter fact was not promoted into cross-host semantics.
-- P criteria, T evidence, implementation, and public projections agree.
-- Later styled projections and compositions can proceed as separate coherent contributions.
-- DCO, provenance, and material AI-assistance disclosure are complete.
+- All public API changes are recorded in the spec entities.
+- No empty Base identity was added solely for a styled library.
+- Protocol semantics remain host-neutral.
+- `P-*` criteria, `T-*` tests, implementation, and website docs agree.
+- Downstream styled projections and compositions can build cleanly in follow-up PRs.
+- DCO sign-off and provenance notes are complete.

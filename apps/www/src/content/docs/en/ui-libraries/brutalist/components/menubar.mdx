@@ -1,12 +1,14 @@
 ---
 title: 'Menubar'
-description: 'A keyboard-coordinated bar of independent command panels.'
+description: 'A Brutalist-styled menubar with roving keyboard navigation and independent command panels.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-A keyboard-coordinated bar of independent command panels.
+Menubar organizes a horizontal bar of mutually exclusive command menus with roving keyboard navigation, focus management, and command selection.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-brutalist-menubar"
@@ -15,15 +17,35 @@ A keyboard-coordinated bar of independent command panels.
   codePanel={false}
 />
 
-Root.value identifies one open panel. Trigger.value and Content.value pair a panel. The bar uses one roving tab stop, left/right movement, ArrowDown/Up entry, vertical command navigation and typeahead. Escape restores the matching trigger; outside press and command selection dismiss. Controlled value emits requests without changing the owner.
+## Installation
 
-Parts: Root, Trigger, Content, Item.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/menubar` and adapt them for your target runtime.
 
-Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.
+## Usage
+
+### Anatomy
+
+Menubar is composed of four parts: `Root`, `Trigger`, `Content`, and `Item`.
+
+- `Root`: Manages the active panel value and coordinates keyboard navigation across the bar.
+- `Trigger`: Opens or switches to the menu panel matching its `value`.
+- `Content`: Renders the command panel paired with a `Trigger` by `value`.
+- `Item`: Represents a selectable command inside a panel.
+
+### Keyboard & Focus
+
+- The bar participates as a single roving `Tab` stop; `ArrowLeft` and `ArrowRight` move between triggers.
+- `ArrowDown` and `ArrowUp` open a panel and move vertically through items, with typeahead character matching.
+- Pressing `Escape` dismisses the open panel and returns focus to its matching `Trigger`. Pressing outside or selecting an item also dismisses the panel unless `closeOnSelect` is set to `false` on the `Item`.
+
+### Controlled vs. Uncontrolled
+
+- Use `defaultValue` on `Root` for uncontrolled state.
+- Pass `value` on `Root` for controlled mode; updates emit change requests so your state controls which panel is open.
 
 ## API
 
-Menubar is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
+The following props belong to `Root` (pass `value` to enter controlled mode):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -35,5 +57,8 @@ Menubar is workspace source. There is no public `proto-ui add` target. Passing `
   ]}
 />
 
-These props belong to Root. Trigger defaults `value` to `''` and `disabled` to `false`. Content defaults `value` and `a11yLabel` to `''` and `sideOffset` to `4`. Item defaults `value` and `textValue` to `''`, `disabled` to `false` and `closeOnSelect` to `true`.
+Other part props and defaults:
 
+- **Trigger**: `value` defaults to `''`; `disabled` defaults to `false`.
+- **Content**: `value` and `a11yLabel` default to `''`; `sideOffset` defaults to `4`.
+- **Item**: `value` and `textValue` default to `''`; `disabled` defaults to `false`; `closeOnSelect` defaults to `true`.

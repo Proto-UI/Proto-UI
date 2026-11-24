@@ -1,41 +1,43 @@
 ---
 title: 'Native File Input'
-description: '原生文件选择输入，共享可用性、命名、必填与焦点策略。'
+description: '为原生文件选择输入提供统一可用性、必填、命名与焦点策略的控件。'
 ---
 
 import NativeFileInputPreview from '@/components/NativeFileInputPreview.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Base Native File Input 为一个原生文件输入提供控件策略。原型负责可用性、必填状态、辅助功能命名与焦点；浏览器负责文件选择和系统选择器。
+为原生 `<input type="file">` 提供共享的可用性、必填状态、无障碍命名与焦点策略，同时将文件选择与系统文件选择器完全交由浏览器处理。
 
-该原型当前为 **draft**。本页通过 React Adapter 将公开的 `nativeFileInput` 挂载到真实 `input[type="file"]`。小型宿主桥负责设置原生文件选项和读取浏览器的 `FileList`，不会上传文件。这是 Adapter 预览，不是 Compiler 产物运行，也不代表原生选择器和辅助技术验收已经完成。
+## 预览
+
+预览通过 React Adapter 将 `nativeFileInput` 挂载到真实的 `input[type="file"]` 上，第一个示例为必填且支持多选，第二个示例为禁用状态（仅读取本地 `FileList`，不会上传文件）。
 
 <NativeFileInputPreview locale="zh-cn" />
 
-## 一个物理文件输入
+## 安装
 
-宿主应提供一个实际的 `input` 根，设置 `type="file"`。将 `disabled` 和 `required` 传给原型，同时把相同的已接纳值设置到该输入的原生字段。原型的辅助功能、焦点策略与浏览器输入行为由此作用于同一个目标。
-
-`accept`、`multiple`、选择器调用、原生 `change` 传递和清空输入由宿主负责。通过原生输入的 `files` 属性读取文件；文件对象及其身份留在该宿主内。原型没有文本值，也不声明可移植的 `valueChange` 事件。
-
-预览中的第一个输入为必填并允许多选，第二个不可用。必填输入的表单验证行为来自浏览器与表单所有者；本预览没有表单提交或验证界面。
-
-## 焦点与命名
-
-`ariaLabel` 提供辅助功能名称，保留文件输入原本的原生角色。`focusSelf(options?)` 和 `blurSelf()` 使用共享 Focus 协议。不可用的输入会拒绝 `focusSelf()`，并退出普通焦点参与；重新启用后恢复参与，不会重新打开选择器。
-
-有效的 ControlLabel 请求可以使已启用的输入获得焦点。这种关联不会合成点击，也不会授予打开系统选择器的权限。
-
-## 公开作者入口
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
 ```ts
 import { nativeFileInput, asNativeFileInput } from '@proto.ui/prototypes-base/native-file-input';
 ```
 
-该源码子路径还导出默认原型、`NativeFileInputProps`、`NativeFileInputExposes` 与 `NativeFileInputAsHookContract`；包根导出命名入口。原型与 hook 复用同一份 setup。
+该子路径同时导出默认原型、`NativeFileInputProps`、`NativeFileInputExposes` 与 `NativeFileInputAsHookContract`，包根导出同名命名入口；原型与 Hook 共享同一套实现。
 
-Compiler 消费者使用这份作者源码，并明确提供原生文件输入根。原生 ref 和文件事件属于宿主桥，宿主桥需要保留原型的焦点与策略实现。Native File Input 是工作区源码，没有公开的 `proto-ui add` 目标。
+## 用法
+
+### 绑定原生文件输入
+
+宿主需要提供一个实际的 `<input type="file">` 元素作为根节点，并将 `disabled` 与 `required` 同时传递给原型与该原生输入元素，使辅助功能、焦点策略与浏览器行为指向同一个目标。
+
+`accept`、`multiple`、系统选择器调起、原生 `change` 事件与清空输入均由宿主直接控制；已选文件从原生输入的 `files` 属性读取（该控件不声明文本值或 `valueChange` 事件）。
+
+### 焦点与命名
+
+- `ariaLabel` 为控件设置无障碍名称，同时保留文件输入本身的原生语义角色。
+- `focusSelf(options?)` 和 `blurSelf()` 遵循共享 Focus 协议；禁用状态下会拒绝 `focusSelf()` 并退出常规焦点序列，重新启用后恢复参与，但不会自动打开选择器。
+- 关联的 `ControlLabel` 可以将焦点移至启用状态的输入，但不会合成点击或自动触发系统文件选择器。
 
 ## API
 
@@ -48,12 +50,11 @@ Compiler 消费者使用这份作者源码，并明确提供原生文件输入�
   ]}
 />
 
-移除之前传入的属性会恢复默认值。公开状态为 `disabled`、`required`、`focused` 和 `focusVisible`；方法为 `focusSelf(options?)` 与 `blurSelf()`。
+移除已传入的属性后会恢复默认值。
+
+- **暴露状态**：`disabled`、`required`、`focused`、`focusVisible`。
+- **暴露方法**：`focusSelf(options?)`、`blurSelf()`。
 
 ## 参考
-
-- [实现与公开源码导出](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/native-file-input)
-- [Focus 契约](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-AS-FOCUSABLE-0001.yaml)
-- [ControlLabel 契约](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-CONTROL-LABEL-0001.yaml)
 
 <SpecEntityLinks directory="spec/prototypes" files={['P-BASE-NATIVE-FILE-INPUT.yaml']} />

@@ -8937,6 +8937,7 @@ function isReviewedBuildTimeModuleSpecifier(sourcePath, specifier, rootDir, meta
           WEBSITE_BROWSER_COMPILER_RETRY_VIRTUAL_CONFIG_SHA256,
           WEBSITE_MERGED_RETRY_VIRTUAL_CONFIG_SHA256,
           WEBSITE_SPRINT2_RETRY_VIRTUAL_CONFIG_SHA256,
+          WEBSITE_VISUAL_LABELS_RETRY_VIRTUAL_CONFIG_SHA256,
         ].includes(configSha)
       ) {
         inputs.push(...WEBSITE_RETRY_VIRTUAL_HELPERS);
@@ -9807,6 +9808,10 @@ const WEBSITE_MERGED_RETRY_VIRTUAL_CONFIG_SHA256 =
 // entries to that merged configuration. Retry/Worker imports and owners match.
 const WEBSITE_SPRINT2_RETRY_VIRTUAL_CONFIG_SHA256 =
   '26e4307893b07f9f17e5c22c38842d0992391d68603c1c9db506f07a556c668d';
+// Integrated visual changes only the two existing zh-CN Dropdown Menu labels.
+// Keep the same four Retry import owners and exact helper digests.
+const WEBSITE_VISUAL_LABELS_RETRY_VIRTUAL_CONFIG_SHA256 =
+  'c0a7f33cceaf8b66e31592b7d266b6cd63d28c032467f6b833eb0e989577f1ee';
 const WEBSITE_RETRY_VIRTUAL_HELPERS = [
   [
     'apps/www/src/utils/proto-ui-source.mjs',

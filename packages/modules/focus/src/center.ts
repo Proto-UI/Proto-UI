@@ -218,6 +218,10 @@ export class FocusCenter {
       const entry = this.entries.get(this.activeScopes[i]!.scope);
       if (entry?.isScopeProvider()) return entry;
       if (this.pendingRovingEntries.has(this.activeScopes[i]!.scope)) return null;
+      // detach retires only the physical entry. Preserve its active record
+      // while still allowing an attached ancestor to own the ordinary gate.
+      // Terminal remove explicitly retires that record.
+      if (!entry) continue;
       this.activeScopes.splice(i, 1);
       this.scopeRevision += 1;
     }
@@ -429,6 +433,10 @@ export class FocusCenter {
       return false;
     }
 
+    // A retained active scope can close after its physical view has detached.
+    // Restore only its missing logical entry; an existing entry remains owned
+    // by its current registration, and terminal remove has no active record.
+    if (!this.entries.has(scope.instance)) this.entries.set(scope.instance, scope);
     const [{ previous }] = this.activeScopes.splice(index, 1);
     const revision = ++this.scopeRevision;
     const epoch = this.ownerEpoch;

@@ -1,11 +1,13 @@
 ---
 title: 'Autocomplete'
-description: 'Editable suggestions with free-text completion.'
+description: 'A Liquid Glass text input with filterable suggestions and free-text submission.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Editable suggestions with free-text completion.
+Liquid Glass Autocomplete pairs a single-line text input with filterable suggestions. Selecting a suggestion commits its `textValue`, while pressing Enter with no active suggestion commits free text.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-autocomplete"
@@ -14,10 +16,22 @@ Editable suggestions with free-text completion.
   codePanel={false}
 />
 
-Root.value is committed text, while inputValue is the query. Selecting a suggestion commits its textValue; Enter without an active match may commit free text.
+## Installation
 
-The host owns the real single-line editor. Input retains focus during Arrow navigation; IME composition never selects. Filtering is case/diacritic insensitive over textValue and keywords. Empty reflects actual matches; disabled options cannot commit. open, value and inputValue are independently controlled with corresponding change requests. filter=false supports owner-filtered children. Duplicate-valued choices are rejected.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Input, Content, Item, Empty, Trigger.
+## Usage
 
-Draft source; shared Web A11y active-descendant projection, native/GPUI, compiler, consumer, visual and independent acceptance remain separate requirements.
+- **Parts**: `Root`, `Input`, `Content`, `Item`, `Empty`, `Trigger`.
+- **Independent state**: `Root` tracks committed text (`value`), live query (`inputValue`), and popup visibility (`open`), each controllable independently through its corresponding change request.
+- **Filtering and keyboard**: built-in filtering matches `textValue` and `keywords` case- and diacritic-insensitively; pass `filter={false}` to supply pre-filtered items. Arrow navigation keeps focus in `Input`, and IME composition never selects an option.
+- **Validation**: `Empty` reflects actual match count; disabled or duplicate-valued items cannot commit.
+
+## API
+
+| Part | Prop | Description |
+| --- | --- | --- |
+| Root | `value`, `inputValue`, `open` | Independently controllable committed text, query text, and popup state |
+| Root | `filter` | Built-in filtering by default; set `false` for caller-filtered items |
+| Item | `textValue`, `keywords`, `disabled` | Option text, search keywords, and disabled flag |
+| Empty | — | Displays fallback content when no items match |

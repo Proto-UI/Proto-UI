@@ -1,11 +1,15 @@
 ---
-title: brutalist Progress
-description: A bounded numerical completion indicator with shared Base semantics.
+title: 'Brutalist Progress'
+description: 'Display determinate completion progress or an indeterminate loading state in Brutalist style.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Brutalist Progress displays a task's completion progress or an indeterminate loading state with bold Brutalist borders and a high-contrast fill bar.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-brutalist-progress"
@@ -14,17 +18,29 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Draft implementation. Root owns the finite range; Label names it, Track contains Indicator, and Value displays valueText or the canonical number. All styled atoms inherit the same Base protocol.
+## Installation
 
-Props: value, min (0), max (100), ariaLabel and valueText. Values clamp to ordered finite bounds; an equal min/max has zero percentage. Omitted value or indeterminate=true represents unknown progress and withholds the current accessible value.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Root and parts expose value, percentage, indeterminate and status. These are passive readouts with no keyboard stop or editing event. Updating Props updates every part. Range states use portable A11y declarations; exact native and assistive-technology mappings still need verification.
+- **Package exports**: import `progressRoot`, `progressLabel`, `progressTrack`, `progressIndicator`, and `progressValue` from `@proto.ui/prototypes-brutalist/progress`
 
-Import progressRoot, progressLabel, progressTrack, progressIndicator and progressValue from the progress subpath after shared package registration. Source tests are incremental evidence. Full Adapter/Compiler/GPUI, native input/paint, package consumer and independent acceptance remain open; this page does not mark the Finf item complete.
+## Usage
+
+### Parts
+
+- **Root**: Manages `value`, bounds `min` / `max` (default `0` / `100`), and `indeterminate` state. Values clamp to `[min, max]`, and equal bounds evaluate to `0` percentage.
+- **Label**: Provides the accessible name for the progress bar.
+- **Track / Indicator**: Render the track container and filled indicator bar.
+- **Value**: Displays `valueText` when provided, otherwise the clamped numeric value.
+
+### Indeterminate mode and accessibility
+
+- Omitting `value` or setting `indeterminate={true}` puts the progress bar into an indeterminate state and withholds a concrete numeric value from assistive technologies.
+- Progress is a passive display with no keyboard tab stop; updating `Root` props automatically synchronizes `value`, `percentage`, `indeterminate`, and `status` across all parts.
 
 ## API
 
-Progress is workspace source. There is no public `proto-ui add` target. Parts do not add props of their own.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -38,7 +54,7 @@ Progress is workspace source. There is no public `proto-ui add` target. Parts do
   ]}
 />
 
-These props belong to Root.
+`Label`, `Track`, `Indicator`, and `Value` declare no props of their own.
 
 ## References
 

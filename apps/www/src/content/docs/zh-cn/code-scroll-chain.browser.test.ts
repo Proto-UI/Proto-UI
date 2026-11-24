@@ -10,6 +10,8 @@ import { launchBrowser, startServer, stopServer } from './browser-harness';
 
 const quick = '/zh-cn/start-here/quick-start/';
 const long = '/zh-cn/ui-libraries/base/transition/';
+const scrollOwner =
+  '[data-code-scroll-ready] [data-code-scroll-viewport], pre.proto-previewer__code:not([data-code-scroll-ready] pre)';
 const out =
   process.env.PROTO_UI_CODE_SCROLL_EVIDENCE_DIR ??
   (process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR
@@ -21,6 +23,9 @@ const receipt: any = {
   revision: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
   expectedRevision: process.env.EVIDENCE_HEAD_SHA ?? null,
   sources: [
+    'apps/www/src/components/PrototypePreviewer/CodePanel.astro',
+    'apps/www/src/components/PrototypePreviewer/CodeScrollArea.astro',
+    'apps/www/src/components/PrototypePreviewer/code-scroll-area-client.ts',
     'apps/www/src/styles/code-surfaces.css',
     'apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts',
   ].map((path) => ({
@@ -96,7 +101,14 @@ async function ready(page: Page): Promise<void> {
     const visibleReady = [...sources]
       .filter((root) => root.checkVisibility())
       .every((root) => root.dataset.codeSurfaceView === 'ready');
-    return visibleReady && (!previewer || Boolean(previewer.__previewer__?.getCurrentRuntime()));
+    const scrollReady = [...document.querySelectorAll('[data-code-scroll-root]')]
+      .filter((root) => root.closest('[data-code-shell]')?.checkVisibility())
+      .every((root) => root.hasAttribute('data-code-scroll-ready'));
+    return (
+      visibleReady &&
+      scrollReady &&
+      (!previewer || Boolean(previewer.__previewer__?.getCurrentRuntime()))
+    );
   });
 }
 
@@ -178,7 +190,9 @@ async function run(name: string, width: number, body: (page: Page, entry: any) =
       'wheel',
       (event) => {
         const target = event.target instanceof Element ? event.target : null;
-        const pre = target?.closest('pre');
+        const pre =
+          target?.closest('[data-code-scroll-ready] [data-code-scroll-viewport]') ??
+          target?.closest('pre');
         (window as any).__codeScrollWheels.push({
           trusted: event.isTrusted,
           deltaX: event.deltaX,
@@ -594,7 +608,7 @@ it('chains reverse wheel from an independently located real short PRE to the doc
   await run('short-code-product-chain', 1440, async (page, entry) => {
     await page.goto(baseUrl + quick, { waitUntil: 'networkidle' });
     await ready(page);
-    const candidates = await page.locator('pre.proto-previewer__code').evaluateAll((elements) =>
+    const candidates = await page.locator(scrollOwner).evaluateAll((elements) =>
       elements.map((element, index) => {
         const r = element.getBoundingClientRect();
         return {
@@ -616,7 +630,7 @@ it('chains reverse wheel from an independently located real short PRE to the doc
         item.documentTop > 1000
     );
     expect(selected, 'A real short code block below the first screen is required').toBeDefined();
-    const pre = page.locator('pre.proto-previewer__code').nth(selected!.index);
+    const pre = page.locator(scrollOwner).nth(selected!.index);
     await pre.evaluate((element) => element.scrollIntoView({ block: 'center' }));
     const before = await observe(entry, 'short-before-wheel', page, pre);
     expect(before.scrollY).toBeGreaterThan(500);
@@ -655,9 +669,9 @@ it('chains reverse wheel from an independently located real short PRE to the doc
               requestedDeltaY: -220,
               requestedClientX: args.point.x,
               requestedClientY: args.point.y,
-              selectedPreIndex: [...document.querySelectorAll('pre')].indexOf(
-                element as HTMLPreElement
-              ),
+              selectedPreIndex: [
+                ...document.querySelectorAll('pre, [data-code-scroll-viewport]'),
+              ].indexOf(element as HTMLPreElement),
               selectedIsObservedPre: element === (window as any).__selectedScrollPre,
               scrollY,
               selectedConnected: element.isConnected,
@@ -725,7 +739,7 @@ it('diagnoses wheel scheduling with a non-passive observer without cancelling na
     entry.acceptance = false;
     entry.scope =
       'Diagnostic only: this listener changes dispatch scheduling, not a replacement for passive product acceptance';
-    const candidates = await page.locator('pre.proto-previewer__code').evaluateAll((elements) =>
+    const candidates = await page.locator(scrollOwner).evaluateAll((elements) =>
       elements.map((element, index) => {
         const r = element.getBoundingClientRect();
         return {
@@ -747,7 +761,7 @@ it('diagnoses wheel scheduling with a non-passive observer without cancelling na
         item.documentTop > 1000
     );
     expect(selected, 'A real short code block below the first screen is required').toBeDefined();
-    const pre = page.locator('pre.proto-previewer__code').nth(selected!.index);
+    const pre = page.locator(scrollOwner).nth(selected!.index);
     await pre.evaluate((element) => element.scrollIntoView({ block: 'center' }));
     const before = await observe(entry, 'short-before-wheel', page, pre);
     expect(before.scrollY).toBeGreaterThan(500);
@@ -815,9 +829,9 @@ it('diagnoses wheel scheduling with a non-passive observer without cancelling na
               requestedDeltaY: -220,
               requestedClientX: args.point.x,
               requestedClientY: args.point.y,
-              selectedPreIndex: [...document.querySelectorAll('pre')].indexOf(
-                element as HTMLPreElement
-              ),
+              selectedPreIndex: [
+                ...document.querySelectorAll('pre, [data-code-scroll-viewport]'),
+              ].indexOf(element as HTMLPreElement),
               selectedIsObservedPre: element === (window as any).__selectedScrollPre,
               scrollY,
               selectedConnected: element.isConnected,
@@ -869,7 +883,25 @@ for (const width of [1440, 320])
       const panel = page.locator('[data-code-shell]:visible').first();
       await panel.locator('[data-code-toggle]').click();
       await expect.poll(() => panel.getAttribute('data-code-expanded')).toBe('true');
-      const pre = panel.locator('pre.proto-previewer__code');
+      const pre = panel.locator(scrollOwner);
+      expect(
+        await pre.evaluate((viewport) => {
+          const source = viewport.querySelector('pre');
+          return {
+            tag: viewport.localName,
+            tracks: viewport
+              .closest('[data-code-scroll-anatomy]')
+              ?.querySelectorAll('[data-code-scroll-track]').length,
+            sourceNativeBars: source ? getComputedStyle(source).overflowX : null,
+            viewportNativeBars: getComputedStyle(viewport).scrollbarWidth,
+          };
+        })
+      ).toEqual({
+        tag: 'wc-site-code-scroll-viewport',
+        tracks: 2,
+        sourceNativeBars: 'visible',
+        viewportNativeBars: 'none',
+      });
       await pre.evaluate((e) => {
         e.scrollIntoView({ block: 'center' });
         e.scrollTop = 0;
@@ -958,7 +990,7 @@ it('compares fresh static auto and original contain policy without prior wheel i
       await page.goto(baseUrl + quick, { waitUntil: 'networkidle' });
       await ready(page);
       await page.evaluate(() => document.fonts.ready.then(() => undefined));
-      const candidates = await page.locator('pre.proto-previewer__code').evaluateAll((elements) =>
+      const candidates = await page.locator(scrollOwner).evaluateAll((elements) =>
         elements.map((element, index) => ({
           index,
           visible: element.checkVisibility(),
@@ -975,7 +1007,7 @@ it('compares fresh static auto and original contain policy without prior wheel i
           item.documentTop > 1000
       );
       expect(selected).toBeDefined();
-      const pre = page.locator('pre.proto-previewer__code').nth(selected!.index);
+      const pre = page.locator(scrollOwner).nth(selected!.index);
       entry.pairIdentity = {
         index: selected!.index,
         documentTop: selected!.documentTop,

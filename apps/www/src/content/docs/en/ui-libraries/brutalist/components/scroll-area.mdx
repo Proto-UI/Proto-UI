@@ -1,5 +1,6 @@
 ---
 title: Scroll Area
+description: 'A Brutalist-styled scroll container pairing native host scrolling with high-contrast custom scrollbars.'
 sidebar:
   order: 9
 ---
@@ -10,23 +11,42 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Scroll Area preserves the Base host-owned scrolling surface, normalized viewport facts, orientation, and resolved projection. It prefers composed chrome and adds rounded paper surfaces plus high-contrast Lavender/ink controls. A family-level host session continuously derives Thumb size and position from actual scroll facts and maps pointer dragging on the Thumb back to normalized scroll requests. Grabbing the Thumb does not create a second scroll state or make it an independent focus/ARIA control. Track-page presses and full Drag and Drop remain outside the current passing guarantee.
+Scroll Area preserves native host scrolling while styling the scrollbars with 5px rounded paper surfaces and high-contrast Lavender/ink controls. It works well for chat histories, conversation lists, command output, logs, and dense panels.
 
-Use it for ChatUI conversation history, conversation lists, command results, logs, and dense SaaS panels. Surrounding layout must give Root an explicit size. The reference demo keeps the 12rem height and caps its responsive width at 20rem, preserving the desktop composition while keeping the complete Root and visual scrollbar inside phone preview frames.
-
-In the Web composed projection, the two tracks reserve a lower-right intersection that contains neither track nor Thumb. A missing or display-hidden opposite track releases that space; a track without overflow retains its authored surface while its Thumb hides. This is host-local presentation, not a separate Corner control. The horizontal Scrollbar paints this reserved area with a private pointer-inert lavender surface and structural borders. A zero reservation clips that paint completely; the public family stays Root, Viewport, Scrollbar and Thumb.
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-scroll-area" initialRuntime="wc" />
 </div>
 
+## Installation
+
+Included in `@proto.ui/prototypes-brutalist@0.2.0`. Add it via the CLI target `brutalist-scroll-area`, or import directly from `@proto.ui/prototypes-brutalist/scroll-area`.
+
+## Usage
+
+### Anatomy
+
+Scroll Area is composed of `Root`, `Viewport`, `Scrollbar`, and `Thumb`:
+
+- `Root`: Outer container; give it an explicit size in your layout (the preview uses a `12rem` height with a responsive `20rem` max width).
+- `Viewport`: Native scrollable content viewport.
+- `Scrollbar`: Horizontal or vertical track configured via `orientation`.
+- `Thumb`: Continuously derives its size and offset from live scroll metrics and maps pointer dragging directly to scroll updates, without adding a separate scroll state or focus stop.
+
+### Dual-Track Corner Handling
+
+When both scrollbars are present, each track reserves the lower-right intersection (filled by the horizontal scrollbar with a pointer-inert lavender corner surface) without requiring a separate Corner component. If the opposite track is absent or hidden, that space is released automatically; when a track has no overflow, its surface remains visible while its `Thumb` hides.
+
 ## API
 
-Scroll Area is workspace source. For this workspace version, the CLI target is `brutalist-scroll-area`. Use matching CLI and package versions; check the chosen release's availability before installing. Root has no props.
+The following prop belongs to `Scrollbar`:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[{ name: 'orientation', type: "'horizontal' | 'vertical'", default: 'vertical' }]}
 />
 
-This prop belongs to Scrollbar. Viewport and Thumb have no props.
+Other parts:
+
+- **Root**, **Viewport**, **Thumb**: No props.

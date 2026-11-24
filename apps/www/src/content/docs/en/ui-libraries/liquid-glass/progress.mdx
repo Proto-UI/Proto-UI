@@ -1,9 +1,13 @@
 ---
-title: liquid-glass Progress
-description: A bounded numerical completion indicator with shared Base semantics.
+title: 'Progress'
+description: 'A Liquid Glass progress bar supporting determinate ranges and indeterminate task states.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Liquid Glass Progress indicates task completion within a finite range or in an indeterminate state when completion percentage is unknown.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-progress"
@@ -12,10 +16,22 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Draft implementation. Root owns the finite range; Label names it, Track contains Indicator, and Value displays valueText or the canonical number. All styled atoms inherit the same Base protocol.
+## Installation
 
-Props: value, min (0), max (100), ariaLabel and valueText. Values clamp to ordered finite bounds; an equal min/max has zero percentage. Omitted value or indeterminate=true represents unknown progress and withholds the current accessible value.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `progressRoot`, `progressLabel`, `progressTrack`, `progressIndicator`, and `progressValue` from the `progress` subpath.
 
-Root and parts expose value, percentage, indeterminate and status. These are passive readouts with no keyboard stop or editing event. Updating Props updates every part. Range states use portable A11y declarations; exact native and assistive-technology mappings still need verification.
+## Usage
 
-Import progressRoot, progressLabel, progressTrack, progressIndicator and progressValue from the progress subpath after shared package registration. Source tests are incremental evidence. Full Adapter/Compiler/GPUI, native input/paint, package consumer and independent acceptance remain open; this page does not mark the Finf item complete.
+- **Parts**: `Root` manages bounds, `Label` names the bar, `Track` contains `Indicator`, and `Value` displays `valueText` or the canonical number.
+- **Determinate and indeterminate**: values clamp to `[min, max]` (equal bounds yield `0%`). Omitting `value` or passing `indeterminate={true}` represents unknown progress and omits the current accessible value.
+- Progress is a passive readout with no Tab stop; updating props synchronizes every part.
+
+## API
+
+| Part | Prop / Exposed State | Defaults and notes |
+| --- | --- | --- |
+| Root | `value` | Current completion value; omit for indeterminate mode |
+| Root | `min`, `max` | `0`, `100` |
+| Root | `indeterminate` | `false`; marks progress as unknown |
+| Root | `ariaLabel`, `valueText` | Accessible label and human-readable value text |
+| Root / Parts (exposed) | `value`, `percentage`, `indeterminate`, `status` | Clamped value, percentage, and derived status |

@@ -1,9 +1,13 @@
 ---
-title: bootstrap-2-3-2 Meter
-description: 基于 Base 共享语义的有界数值展示。
+title: 'Bootstrap 2.3.2 Meter'
+description: '用于展示已知区间标量测量值与优劣区段的 Bootstrap 2.3.2 计量条组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Bootstrap 2.3.2 Meter 用于展示已知上下界范围内的标量测量值（如磁盘占用、配额或评分），并根据 `low`、`high` 和 `optimum` 自动区分正常、偏离与告警区间。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-meter"
@@ -12,10 +16,34 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-当前为 Draft 功能实现。Root 拥有有界有限数值；Label 提供名称，Track 容纳 Indicator，Value 显示 valueText 或规范数值。四个视觉家族只投影样式。
+## 安装
 
-Props：value、min（0）、max（100）、ariaLabel、valueText。数值限制在合法范围内；上下界相等时比例为零。low、high、optimum 将测量值划分为 optimal、suboptimal、critical，不改变数值本身。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-Root 及部件暴露 value、percentage、indeterminate、status。被动显示不引入键盘停靠点，不伪造输入。更新 Props 同步所有部件。
+```ts
+import {
+  meterRoot,
+  meterLabel,
+  meterTrack,
+  meterIndicator,
+  meterValue,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/meter';
+```
 
-包入口统一注册后，可从 meter 子路径导入 meterRoot、meterLabel、meterTrack、meterIndicator、meterValue。现有源码测试仅为阶段性证据；完整 Adapter、Compiler、GPUI、原生绘制、辅助技术、包消费及独立验收尚未完成，不据此勾选 Finf。
+## 用法
+
+由 `Root`、`Label`、`Track`、`Indicator` 和 `Value` 组成：
+
+- **数值与区间**：`Root` 管理 `value` 以及 `min`（默认 `0`）、`max`（默认 `100`），越界数值会自动钳制到 `[min, max]`；当 `min === max` 时比例为 `0`。
+- **区间状态分类**：配置 `low`、`high` 与 `optimum` 后，组件自动将当前值归类为 `'optimal'`、`'suboptimal'` 或 `'critical'`（不会修改数值本身）。
+- **只读展示**：`Label` 提供无障碍名称，`Track` 与 `Indicator` 渲染比例条，`Value` 优先显示 `valueText` 或规范化后的数值。作为被动展示控件，不占用 Tab 焦点顺序。
+
+## API
+
+| 部件 | 属性 / 状态 | 说明 |
+| --- | --- | --- |
+| `Root` | `value` / `min` / `max` | 测量值与上下界（默认 `min=0`、`max=100`） |
+| `Root` | `low` / `high` / `optimum` | 将当前值划分为 `optimal`、`suboptimal` 或 `critical` |
+| `Root` | `ariaLabel` / `valueText` | 可访问名称与自定义格式化显示文本 |
+| 全部部件 | `value` / `percentage` / `indeterminate` / `status` | 同步暴露的只读测量状态 |
+| `Label` / `Track` / `Indicator` / `Value` | — | 名称、轨道、填充指示条与数值展示部件 |

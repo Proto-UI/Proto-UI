@@ -1,6 +1,6 @@
 ---
 title: 'Toggle'
-description: '从 Base Toggle 协议投影出的 Shadcn Toggle。'
+description: '支持多种尺寸与边框变体的双态切换按钮组件。'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -8,17 +8,11 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Toggle 是一个可在按下（激活）与未按下状态之间切换的双态按钮，适用于富文本工具栏等开关操作场景。本页示例使用 **Shadcn Rhea** 风格。
 
-当前页面展示 Proto UI 中 `shadcn` 风格的 `toggle` 条目。
+## 预览
 
-本页 Rhea 配方对照固定 [Rhea 样式源码](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css)：default/sm/lg 高度为 2rem/1.75rem/2.25rem（16px 根字号），min-width 与高度一致，内边距均为 0.625rem，gap 0.25rem，圆角 `rounded-2xl`（上游约定为 `--radius` ×1.8；Proto 当前以 `--pui-radius` +8px 近似，仅在固定 0.625rem/10px 基础下同为18px，不宣称动态一致）；outline 保留 border-input、无 shadow；pressed 使用 muted 表面；hover 使用 foreground 墨色并叠加 muted 表面——该 hover 表面来自同一固定修订的共享 [base 配方](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/bases/base/ui/toggle.tsx) `hover:bg-muted`，对两变体均生效，`.cn-toggle-variant-outline` 只是重复它，不属于 Proto 自行添加。独立 [02cad611 New York 源码](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/toggle.tsx) 仍保留 36/32/40px 高度、accent active、outline shadow-xs 与 muted-foreground default hover，属于兼容 profile；两者不混称跨宿主已视觉等价。
-
-Toggle 的 active、disabled、键盘与 a11y 仍由 Base 所有。`asChild` 有意不提供；原生属性/pressed API 别名、invalid 与任意嵌套 SVG 样式仍属兼容性差异。本页和源码测试不等于四 runtime、双主题的原生像素验收。
-
-演示依次是 Bold、已按下的 Italic outline、小号 Underline、禁用且已按下的 Strikethrough、大号文字，以及一个 outline toggle。图标按钮的名称是视觉隐藏的。
-
-使用页首的“预览 Runtime”切换 Web Components、React、Vue 或 Vue 2；窄屏时先打开“导航与设置”。本页示例隐藏自身的 Runtime 工具栏。
+下方依次展示了默认图标按钮、已激活的 `outline` 按钮、小号按钮、禁用且已激活按钮、大号文字按钮以及 `outline` 切换按钮（纯图标按钮均配有视觉隐藏的无障碍名称）。
 
 <PrototypePreviewer
   demoId="demo-shadcn-toggle"
@@ -32,11 +26,17 @@ Toggle 的 active、disabled、键盘与 a11y 仍由 Base 所有。`asChild` 有
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-toggle" manager="npm" />
 
-把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件封装。
+
+## 用法
+
+- 通过 `variant` 选择 `'default'` 或 `'outline'` 外观，通过 `size` 选择 `'default'`、`'sm'` 或 `'lg'` 尺寸。
+- 在 **Shadcn Rhea** 预设下，`default` / `sm` / `lg` 高度分别为 `2rem`、`1.75rem` 和 `2.25rem`，`outline` 变体使用无阴影边框，激活与悬停均呈现柔和的 muted 表面。切换到 `new-york-v4` 预设时，则采用 `36px` / `32px` / `40px` 高度与 accent 激活态样式。
+- 传入 `active` 进入受控模式，监听 `activeChange` 响应状态变更；使用 `defaultActive` 进入非受控模式。
 
 ## API
 
-传入 `active` 进入受控模式。
+以下属性属于 `Root`（传入 `active` 可进入受控模式）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -49,7 +49,7 @@ Toggle 的 active、disabled、键盘与 a11y 仍由 Base 所有。`asChild` 有
   ]}
 />
 
-Root 暴露 `active`、`disabled`、`hovered`、`focused`、`focusVisible`、`pressed`，以及 `activeChange`。
+`Root` 暴露 `active`、`disabled`、`hovered`、`focused`、`focusVisible` 和 `pressed` 状态，以及 `activeChange` 事件。
 
 ## 参考
 

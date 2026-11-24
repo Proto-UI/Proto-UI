@@ -1,62 +1,62 @@
 ---
 title: '参考实现应该怎么看'
-description: '从 P/T 实体进入源码、测试、导出与公开投影，而不是把实现当规范。'
+description: '从 P/T 规范实体切入阅读源码、测试、包导出与文档，快速掌握 Proto UI 的实现模式。'
 ---
 
-现有 Prototype 实现是重要证据，但不是最高权威。一个更稳的阅读顺序是：
+阅读仓库中的参考实现时，推荐从规范实体切入，再一路追到源码、测试与公开交付面：
 
 ```text
-applicable P lifecycle and criteria
-→ related decisions / contracts / inheritance
-→ mapped T cases and executable paths
-→ implementation and focused tests
-→ exports, CLI, docs, demo
+适用的 P-* 生命周期与准则
+→ 关联决策、继承关系与契约说明
+→ 对应的 T-* 测试用例与测试文件
+→ Prototype 实现与聚焦单测
+→ 包导出、CLI、文档与 Demo
 ```
 
-如果实现与适用实体冲突，先把它标记为 drift；不要用“仓库现在这样写”静默修改协议含义。
+先看规范再读代码，能更快理解每行实现背后的设计意图；如果发现源码与规范不一致，就能一眼识别出需要修复的偏差。
 
-## 1. 找到适用 P/T
+## 1. 定位对应的 `P-*` / `T-*` 实体
 
-可以从名称、ID 或 criterion 搜索：
+先按名称、实体 ID 或准则 ID 检索：
 
 ```sh
 rg -n "<prototype name|entity id|criterion id>" spec packages/prototypes apps/www internal/records
 ```
 
-先确认：
+重点看清五件事：
 
-- P entity 是 `draft`、`active`、deprecated 还是 removed；
-- 哪些 criteria 真正适用于当前问题；
-- direct Prototype、authored asHook 与 parts 如何被编目；
-- `inherits.prototypes`、dependsOn 与 related decisions；
-- T cases 映射到了哪些可执行测试。
+- `P-*` 实体当前的生命周期状态（`draft`、`active`、`deprecated` 或 `removed`）；
+- 与当前任务直接相关的准则；
+- 直接原型、`asHook` 与各个 Part 如何在实体中编目；
+- `inherits.prototypes`、依赖关系与关联决策；
+- `T-*` 用例映射到了哪些可执行测试文件。
 
-旧 contract 与 record 可以解释背景；在已有实体的主题上，它们不能覆盖 spec。
+`internal/contracts` 与 `internal/records` 可以补充历史背景，规范规则仍以适用的 `spec/**` 实体为准。
 
-## 2. 阅读单体 Prototype
+## 2. 阅读单体原型
 
-Button 是较小的垂直切片：
+`Button` 是一个紧凑的单体垂直切片：
 
 - `P-BASE-BUTTON`；
 - `T-BASE-BUTTON-0001`；
 - [button.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/button/button.proto.ts)；
 - `packages/prototypes/base/test/as-button.test.ts`。
 
-重点看 criterion 如何落到 props、state、a11y、event、expose 与 absence guarantees，而不是只记录 API 调用顺序。
+阅读时重点追踪每条准则如何落到 props、state、无障碍属性、事件、expose 以及边界测试上。
 
-Toggle 可用于比较另一个独立 Base protocol：
+可以同时对比 `Toggle`，观察另一个独立的 Base 协议：
 
 - `P-BASE-TOGGLE` 与 `T-BASE-TOGGLE-0001`；
 - [toggle.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/toggle/toggle.proto.ts)。
 
-不要因为 Button 与 Toggle 都有 authored asHook，就让一个 protocol 消费另一个 protocol-specific hook。
+注意两者虽然都导出了 `asHook`，但各自只服务于自身协议，互不作为对方的底层实现。
 
-## 3. 阅读复合 family
+## 3. 阅读复合原型家族
 
-Tabs 需要同时阅读 Root 与 Parts：
+阅读 `Tabs` 这类复合组件时，建议把 Root 与各个 Part 结合起来看：
 
-- `P-BASE-TABS` 及 List、Trigger、Content、Indicator P entities；
-- 对应的 `T-BASE-TABS-*` entities；
+- `P-BASE-TABS` 及 List、Trigger、Content、Indicator 实体；
+- 对应的 `T-BASE-TABS-*` 测试实体；
 - [shared.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/shared.ts)；
 - [root.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/root.proto.ts)；
 - [list.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/list.proto.ts)；
@@ -64,43 +64,39 @@ Tabs 需要同时阅读 Root 与 Parts：
 - [content.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/content.proto.ts)；
 - [indicator.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/indicator.proto.ts)。
 
-阅读时追踪 owner、context facts、anatomy claims、collection/focus responsibility 与 mapped tests。文件数量本身不能证明边界正确。
+阅读重点放在状态归属、`Context` 共享字段、`def.anatomy.claim()` 声明、集合与焦点职责以及对应的家族测试上。
 
-## 4. 阅读设计语言投射
+## 4. 阅读设计语言风格组件
 
-Shadcn Button 是 Base projection 的紧凑例子：
+`Shadcn Button` 是基于 Base 继承的典型小切片：
 
 - `P-SHADCN-BUTTON` 与 `T-SHADCN-BUTTON-0001`；
-- inherited `P-BASE-BUTTON` criteria；
-- [Shadcn Button source](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/shadcn/src/button/button.proto.ts)；
+- 继承自 `P-BASE-BUTTON` 的基础准则；
+- [Shadcn Button 源码](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/shadcn/src/button/button.proto.ts)；
 - `packages/prototypes/shadcn/test/button.test.ts`。
 
-重点确认：
+重点核对五点：
 
-- derived P 只声明 delta；
-- 实现确实调用 owning Base asHook；
-- rules 依赖 inherited protocol states，而不是宿主 selector 成为第二真相；
-- unsupported upstream API 与 absence assertions 有记录；
-- package export、CLI facade、官网 Demo 与 P/T surface 一致。
+- 风格层 `P-*` 实体只记录相对 Base 的增量；
+- 源码先调用对应的 Base `asHook`；
+- 样式 `Rule` 基于继承来的协议状态，而不是把宿主选择器当作第二套状态源；
+- 明确不支持的上游 API 有记录且有对应的测试验证；
+- 包导出、CLI facade、官网 Demo 与 `P-*` / `T-*` 表面一致。
 
-还可以用 Shadcn Switch 和 Tabs 比较不同大小的投射，但每次都应从各自 P/T 开始，而不是机械复制目录结构。
+也可以进一步对比 Shadcn Switch 与 Tabs，观察不同规模组件的风格层组织方式。
 
-## 5. 最后检查公开交付面
+## 5. 检查完整的公开交付面
 
-源码和测试通过后，继续检查：
+看完源码和测试后，最后沿公开交付面走一遍：
 
-- package subpath 与 root exports；
-- CLI registry 和 generated facades；
-- component preset / style token closure（如适用）；
-- 双语文档与真实 public-package demo；
-- WC、React、Vue 的 Web evidence；
-- generated workspace 与 Agent projection。
+- 包子路径与根入口导出；
+- CLI 注册表与生成的 facade；
+- component preset 与样式 Token 闭包（如适用）；
+- 中英文文档与真实包导出 Demo；
+- Web Component、React 与 Vue 预览；
+- 通过 generator 生成的 workspace 与派生文档文件。
 
-这一步能区分“实现存在”和“贡献已经形成可消费闭环”。
-
-## Lifecycle 提醒
-
-本文列出的 Base Button、Toggle、Tabs 与 Shadcn Button 实体当前均为 `draft`。学习它们的 owner/evidence 结构，不要把当前实现细节扩张为未编目的稳定保证。
+> 注：本页列举的 Base Button、Toggle、Tabs 与 Shadcn Button 规范实体当前均处于 `draft` 阶段，具体细节请以对应规范文件为准。
 
 ## 延伸阅读
 

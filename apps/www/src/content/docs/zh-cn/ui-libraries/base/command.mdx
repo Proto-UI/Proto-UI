@@ -1,13 +1,15 @@
 ---
 title: 'Command'
-description: '可搜索并发出操作意图的内联命令列表。'
+description: '支持即时过滤与键盘导航的内联命令面板组件，激活后发出 execute 事件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-可搜索并发出操作意图的内联命令列表。
+Base Command 提供常驻内联展开的可搜索命令列表。用户按 `Enter` 或点击命令项时会发出 `execute` 事件，由应用执行对应操作。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-command"
@@ -16,23 +18,39 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-列表保持内联显示。Enter 或指针激活发出带选项的 execute；实际操作归应用处理，输入搜索不会执行操作。
+## 安装
 
-宿主管理真实单行编辑器。箭头导航保持输入焦点；IME 组合期间不选择。过滤依据 textValue 与 keywords，忽略大小写及重音。Empty 反映真实匹配数；禁用项不可提交。open、value、inputValue 分别支持受控请求；filter=false 允许调用方提供已过滤子项。重复值选项拒绝提交。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-组成: Root, Input, Content, Item, Empty.
+## 用法
 
-草稿源码；共享 Web A11y 活动后代投影、native/GPUI、编译器、消费、视觉及独立验收仍是独立要求。
+### 组合结构
+
+组件由 `Root`、`Input`、`Content`、`Item` 和 `Empty` 组成：
+
+- 列表默认保持展开（`defaultOpen` 默认为 `true`），输入关键词仅过滤候选项，不会直接触发命令。
+- 过滤基于 `Item` 的 `textValue` 和 `keywords`，忽略大小写与重音符号；设置 `filter={false}` 时可由应用自行提供过滤后的子项。
+- `Empty` 根据实际匹配项数量自动显示或隐藏；禁用项与重复值项不可执行。
+
+### 受控模式与键盘交互
+
+- `value`、`inputValue` 与 `open` 均支持独立受控。
+- 上下方向键切换高亮命令时焦点保持在 `Input` 上；输入法（IME）组合期间不会误触命令执行。
 
 ## API
 
-Command 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value`、`inputValue` 或 `open` 会使对应事实进入受控模式。
+### Root Props
+
+传入 `value`、`inputValue` 或 `open` 可分别控制对应状态。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
     { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'true' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -42,7 +60,12 @@ Command 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `val
   ]}
 />
 
-这些属性属于 Root。Input 的 `placeholder`、`a11yLabel` 与 `name` 默认 `''`。Content 的 `side` 默认 `bottom`，`align` 默认 `start`，`sideOffset` 默认 `4`，`collisionPadding` 默认 `8`。Item 的 `value`、`textValue` 与 `keywords` 默认 `''`，`disabled` 默认 `false`。Empty 没有属性。
+### 其他组件属性
+
+- **Input**：`placeholder`、`a11yLabel`、`name` 默认均为 `''`。
+- **Content**：`side` 默认 `'bottom'`，`align` 默认 `'start'`，`sideOffset` 默认 `4`，`collisionPadding` 默认 `8`。
+- **Item**：`value`、`textValue`、`keywords` 默认均为 `''`，`disabled` 默认 `false`。
+- **Empty**：无额外属性。
 
 ## 参考
 

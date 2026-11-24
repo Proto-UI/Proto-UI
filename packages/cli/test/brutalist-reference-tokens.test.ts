@@ -52,13 +52,13 @@ describe('source-aligned Brutalist style closure', () => {
     expect(BRUTALIST_STYLE_TOKENS).toContain('rounded-full');
     expect(BRUTALIST_STYLE_TOKENS).toContain('font-mono');
     const root = path.resolve('packages/prototypes/brutalist/src');
-    const ordinary = (
-      await Promise.all(
-        readdirSync(root, { withFileTypes: true })
-          .filter((entry) => entry.isDirectory() && entry.name !== 'text')
-          .map((entry) => collectProtoStyleTokens(path.join(root, entry.name)))
-      )
-    ).flat();
+    const ordinary: string[] = [];
+    // Each collection owns a complete source graph. Keep only one graph live
+    // while preserving every family directory and the original assertions.
+    for (const entry of readdirSync(root, { withFileTypes: true })) {
+      if (entry.isDirectory() && entry.name !== 'text')
+        ordinary.push(...(await collectProtoStyleTokens(path.join(root, entry.name))));
+    }
     expect(ordinary).not.toContain('font-mono');
     // Progress and Meter labels author `uppercase` in the pinned neobrutalism
     // recipes, so it is now a lawful preset member.

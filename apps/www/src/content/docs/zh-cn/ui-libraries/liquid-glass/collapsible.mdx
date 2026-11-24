@@ -1,11 +1,13 @@
 ---
 title: 'Collapsible'
-description: 'Liquid Glass Collapsible: Root, Trigger, Content and inherited Base disclosure semantics.'
+description: '由 Root、Trigger、Content 组成的 Liquid Glass 折叠披露组件，继承 Base Collapsible 语义。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Liquid Glass Collapsible 包含 Root、Trigger、Content 三个真实 Proto UI 原型，各自消费对应的 Base Collapsible hook。Root 仍是唯一展开状态 owner；本体系只增加表现。当前为独立维护的 draft 设计投影。
+Liquid Glass Collapsible 由 Root、Trigger、Content 三个部件组成，继承 [Base Collapsible](/zh-cn/ui-libraries/base/collapsible/) 的展开语义，并为 Trigger 提供 Liquid Glass 材质外观。展开状态由 Root 统一管理。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-collapsible"
@@ -15,29 +17,11 @@ Liquid Glass Collapsible 包含 Root、Trigger、Content 三个真实 Proto UI �
   codePanel={false}
 />
 
-通过预览工具栏的本体系真实 Select 选择 WC、React、Vue、Vue 2；页眉的 Runtime 偏好仍可用，并同步当前选择。
+可通过预览工具栏的本体系 Select 切换 WC、React、Vue 与 Vue 2。示例依次展示默认卸载、保留隐藏节点、禁用时保持展开以及需点击 **Accept** 确认的受控展开。
 
-## 体验协议
+## 安装
 
-Demo 在四种 Web Adapter 中使用真实库原型。第一个 disclosure 初始关闭并 detach Content view；第二个初始打开，关闭后保留隐藏 view；第三个禁用但保持展开；第四个收到请求后仍然关闭，直到激活 **Accept**。这个接受按钮是独立的应用操作，不是 Trigger 内的第二个交互 owner。
-
-## 三个 part，一个状态 owner
-
-- Root：`open?`、`defaultOpen?`、`disabled?`；公开 `open`、请求方法 `openCollapsible`、`close`、`toggle` 和携带 `{ open, reason }` 的 `openChange`。
-- Trigger：`disabled?`；继承 expanded、effective disabled、hover、press、focused、focus-visible、button accessibility、自然 Tab 顺序、Enter/Space 激活与受保护的 `focusSelf`。
-- Content：`keepMounted?`；继承派生 `open`/`hidden`、role-neutral content 与 L1 view presence。关闭不销毁逻辑实例；不承诺 detached native child/view state 保留。
-
-Root 的自身 anatomy domain 必须恰有一个 Trigger 和一个 Content。嵌套与相邻 disclosure 独立持有状态。受控请求只有在 owner 提供新 `open` 后才改变 canonical expansion；忽略请求就保持原状。disabled 抑制请求，但不会关闭已经展开的内容。此处没有 heading 前置条件、Accordion selection、方向键导航、region landmark、自动 focus movement 或 Overlay。
-
-## 表现与窄屏
-
-原型使用有界宽度、可收缩布局、长词换行、可缩放内边距，不设固定内容高度。focus 与 disabled 外观消费 Base state。外围需保留 focus ring 的空间；Neobrutalist 还需容纳硬阴影及移动后的 pointer envelope。Demo 包含长标签与连续长词，browser acceptance 覆盖 320px、200% 根文字尺寸与明暗主题。源码或 synthetic DOM 通过不代表这些实际绘制与原生输入已通过。
-
-Trigger 现在声明共享显式 `liquid-glass` 材质意图，消费已有 Base pressed 状态，以互斥规则选择 rest/pressed deformation。圆角 geometry 和不透明 fallback fill/foreground 来自最终 style。Root 与长文 Content 保持 material-neutral。当前缺少共享 visual capability 的 Web host 继续使用完整不透明 fallback，并报告 `material-host-unavailable`；记录意图不等于实际绘出玻璃。自实现光学 host、source/preferences/geometry 处理与 GPUI fidelity 仍是未完成的共享工作。没有组件私有 `material` flag，也不以 native blur 替代显式玻璃；本预览不证明 Apple-native 材质 parity。
-
-## 使用
-
-此包仍是 private、未发布的 workspace source。在工作区导入源码原型并选择 Adapter。内部 facade generation 必须显式使用 workspace source mode；公开 installed-consumer CLI 会拒绝此项。该源码入口不代表 registry 发布。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
 ```ts
 import {
@@ -47,12 +31,24 @@ import {
 } from '@proto.ui/prototypes-liquid-glass/collapsible';
 ```
 
-适配导出的原型时保留三 part composition。[Base 协议](/zh-cn/ui-libraries/base/collapsible/) 说明共享请求与生命周期保证。
+## 用法
 
-## 证据与参考
+- **部件组合**：每个 `Root` 内放置一个 `Trigger` 与一个 `Content`；嵌套或并列的折叠区块各自独立维护状态。
+- **受控与禁用**：受控模式下仅发出 `openChange` 请求，待调用方更新 `open` 后内容才展开或收起。`disabled` 会禁止新操作，但不会关闭已经展开的内容。
+- **内容挂载与布局**：关闭时默认卸载内容节点（设置 `keepMounted={true}` 可保留隐藏节点）。组件内置可收缩宽度、长词换行与自适应高度，建议在容器外预留焦点环空间。
+- **材质表现**：仅 `Trigger` 声明 `liquid-glass` 材质意图并响应按压状态，`Root` 与正文 `Content` 保持不透明可读样式；宿主不支持材质时自动使用声明的不透明回退色。参考 [Apple Materials 指南](https://developer.apple.com/design/human-interface-guidelines/materials)。
 
-四 Adapter synthetic DOM 与 compiler mappings，和已注册 browser journeys、截图、GPUI native execution、独立稳定准入是分开的证据。未执行的宿主证据仍是验收缺口。
+## API
 
-- [实现源码](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/liquid-glass/src/collapsible)
-- [Apple material design reference](https://developer.apple.com/design/human-interface-guidelines/materials)
-- [可执行证据映射](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-COLLAPSIBLE-PROJECTIONS-0001.yaml)
+| 部件 | 属性 | 默认值与说明 |
+| --- | --- | --- |
+| Root | `open` / `defaultOpen` | 受控展开状态 / 非受控初始展开状态 |
+| Root | `disabled` | `false`；禁用全部切换请求但不关闭已展开内容 |
+| Trigger | `disabled` | `false`；局部禁用触发按钮，支持自然 Tab 顺序与 Enter / Space 激活 |
+| Content | `keepMounted` | `false`；设为 `true` 时关闭后保留隐藏节点 |
+
+### 事件与方法
+
+- Root 暴露：`open` 状态、`openCollapsible()`、`close()`、`toggle()` 以及 `openChange` 事件（载荷 `{ open, reason }`）。
+- Trigger 暴露：展开、禁用、悬停、按压、焦点状态与 `focusSelf()`。
+- Content 暴露：派生的 `open` / `hidden` 状态。

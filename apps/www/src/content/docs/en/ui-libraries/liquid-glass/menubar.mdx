@@ -1,11 +1,13 @@
 ---
 title: 'Menubar'
-description: 'A keyboard-coordinated bar of independent command panels.'
+description: 'A keyboard-coordinated Liquid Glass menu bar with paired command panels.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-A keyboard-coordinated bar of independent command panels.
+Liquid Glass Menubar organizes multiple command menus into a horizontal bar with a single roving Tab stop and seamless arrow-key switching between panels.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-menubar"
@@ -14,8 +16,21 @@ A keyboard-coordinated bar of independent command panels.
   codePanel={false}
 />
 
-Root.value identifies one open panel. Trigger.value and Content.value pair a panel. The bar uses one roving tab stop, left/right movement, ArrowDown/Up entry, vertical command navigation and typeahead. Escape restores the matching trigger; outside press and command selection dismiss. Controlled value emits requests without changing the owner.
+## Installation
 
-Parts: Root, Trigger, Content, Item.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.
+## Usage
+
+- **Parts**: `Root`, `Trigger`, `Content`, `Item`.
+- **Panel pairing**: `Root.value` identifies the single open panel, matching a `Trigger.value` to its `Content.value`. Controlled `value` emits requests without mutating caller state.
+- **Keyboard navigation**: the bar uses one roving Tab stop. Left/Right move across top-level triggers, Up/Down enter and navigate menu items, and typeahead jumps to matching commands. Escape restores focus to the active trigger; outside clicks and item selection dismiss the panel.
+
+## API
+
+| Part    | Prop    | Description                                                       |
+| ------- | ------- | ----------------------------------------------------------------- |
+| Root    | `value` | Identifier of the currently open panel (supports controlled mode) |
+| Trigger | `value` | Panel identifier paired with `Content`                            |
+| Content | `value` | Command panel paired with `Trigger`                               |
+| Item    | —       | Actionable menu command                                           |

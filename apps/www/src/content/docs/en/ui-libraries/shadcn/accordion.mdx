@@ -1,6 +1,6 @@
 ---
 title: Shadcn Accordion
-description: Five atomic Accordion parts with canonical group ownership, natural Tab order and explicit content lifetime.
+description: A vertically stacked set of collapsible sections with single or multiple expansion, full keyboard navigation, and controlled content lifecycle.
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -8,9 +8,9 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+A vertically stacked set of collapsible content panels with single or multiple expansion, controlled state support, and keyboard navigation aligned with the [WAI-ARIA Accordion Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/). The examples on this page use the **Shadcn Rhea** style preset.
 
-This is a draft workspace family. The current source and synthetic-DOM tests do not establish browser/native, assistive-technology, material or GPUI completion.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-accordion"
@@ -19,78 +19,119 @@ This is a draft workspace family. The current source and synthetic-DOM tests do 
   codePanel={false}
 />
 
-## Anatomy and ownership
-
-Compose Root → Item → Heading → Trigger, with Content beside Heading. Each Item needs a unique, stable, non-empty value. Root owns the selected key set; Item, Trigger and Content derive their facts. Nested Roots establish independent domains. Heading must contain only its controlling Trigger; place persistent secondary actions beside it.
-
-The style projection consumes the corresponding Base atom. It does not create a private accordion, switch open state on focus, or inherit another Base protocol hook. APG and design systems are design references, not implementation upstreams.
-
-## JSON Props
-
-| Part | Props | Defaults and boundaries |
-| --- | --- | --- |
-| Root | mode | single; multiple permits independent open items |
-| Root | openItems, defaultOpenItems | string arrays; supplying openItems is controlled; default initializes once |
-| Root | allowEmpty | true; false prevents closing the final selected key |
-| Root | disabled | false; suppresses activation without rewriting owner input |
-| Root | orientation, direction, loop | vertical, ltr, true; affect header navigation only |
-| Item | value, disabled | required non-empty stable value; disabled defaults false |
-| Heading | level | integer 1–6, default 3; choose the page hierarchy |
-| Trigger | none | derives state from Item and Root |
-| Content | keepMounted, region | both false; explicit hidden-view retention and optional landmark |
-
-Input duplicates normalize; duplicate registered Item identities are rejected. Single mode takes the first supplied unique key. Unknown owner/default keys remain dormant for progressively mounted Items. Requests to missing keys are rejected. Uncontrolled keys retire after a previously registered Item disappears; changing value is removal/addition. In an empty group, allowEmpty=false cannot invent content. Controlled empty input remains the owner's choice.
-
-## Exposes and controlled usage
-
-Root exposes getOpenItems(), openCount, requestOpen(value, open, reason?) and the openChange signal with JSON payload `{ openItems, value, open, reason }`. getOpenItems returns a copy; openCount includes dormant canonical keys. reason is pointer, keyboard or programmatic. Repeated no-op or disabled requests emit nothing.
-
-A controlled request does not optimistically update any part. Accept it by supplying its openItems to Root. Adapter callbacks are the host projection of expose signals, not callback-valued Proto UI Props. Initialization, controlled sync, structural fallback and later default changes emit no openChange. Newer synchronous owner acceptance, including item removal during a request, wins over old notifications.
-
-## Keyboard and accessibility
-
-Every enabled header remains in the natural Tab sequence, along with authored focusable content. Enter/Space toggles once. Vertical Up/Down or horizontal Left/Right navigate enabled headers; RTL reverses horizontal navigation. Home/End go to the first/last header. Navigation never changes openItems. loop=false keeps focus at the ends. Disabled headers are skipped; a required last-open header remains focusable while aria-disabled prevents collapse.
-
-Heading declares heading/level. Trigger declares button, its content name, expanded, disabled and exact item-scoped controls. Content is labelled by its Trigger; region=true opts into a landmark. Use landmarks selectively, especially for large multiple-open groups. Native focus, assistive-technology output and platform fidelity still require their own evidence.
-
-## Presence, motion and safe layout
-
-Closed Content uses repeatable L1 detach by default. Logical instance identity persists; host child state and native view retention are not promised. keepMounted preserves a complete but hidden view. Content creates no autofocus, focus return or Tab stop. Closing while focus is inside authored content follows the host's normal removal behavior; Accordion does not relocate it.
-
-No delayed-close or transition timing API is introduced. Consumer-authored animation must preserve canonical open/hidden ownership. Style atoms wrap long labels, shrink within their container and contain horizontal content overflow. Page safe-area padding belongs to the containing layout. Actual narrow, 200% text, focus-outline and overflow screenshots remain a separate acceptance requirement.
-
-## Consumption and status
-
-Import accordionRoot, accordionItem, accordionHeading, accordionTrigger and accordionContent from @proto.ui/prototypes-shadcn/accordion. Base also exports the matching asAccordion\* authoring entries. All five atoms use the same API across Web Component, React, Vue and Vue 2.
-
-Current-workspace CLI facade: proto-ui add react shadcn-accordion (also vue, vue2 and wc). Package publication/version availability is separate from this draft source.
-
-[APG design reference](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/) · [Source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/shadcn/src/accordion)
-
-## Install
+## Installation
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-accordion" manager="npm" />
 
-Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+Replace `wc` with `react`, `vue`, or `vue2` to generate the local facade for your framework.
+
+You can also import `accordionRoot`, `accordionItem`, `accordionHeading`, `accordionTrigger`, and `accordionContent` directly from `@proto.ui/prototypes-shadcn/accordion`.
+
+## Usage
+
+### Anatomy
+
+Compose `Root` → `Item` → `Heading` → `Trigger`, with `Content` as a sibling of `Heading`:
+
+- **Root**: Manages the set of open item keys and header navigation orientation. Nested `Root` instances keep independent state.
+- **Item**: Represents one collapsible section and requires a unique, stable, non-empty `value`.
+- **Heading**: Declares the heading level (`1`–`6`, default `3`). Place only the controlling `Trigger` inside `Heading`; place any persistent secondary actions beside it.
+- **Trigger**: Derives open and disabled state from `Item` and `Root`, and automatically links to its `Content`.
+- **Content**: Holds the collapsible panel content. It unmounts content when closed by default; set `keepMounted` to keep the hidden node in place.
+
+### Controlled and uncontrolled state
+
+- **Uncontrolled**: Pass `defaultOpenItems` to set the initial open keys (read once on mount).
+- **Controlled**: Pass `openItems` to manage the open keys externally. When the user interacts, `Root` emits `openChange` with payload `{ openItems, value, open, reason }` (`reason` is `'pointer'`, `'keyboard'`, or `'programmatic'`). Pass the updated `openItems` back to `Root` to commit the change.
+
+Key behaviors:
+
+- Duplicate input keys are deduplicated; `mode="single"` keeps the first unique key.
+- Keys without a mounted `Item` stay dormant until that `Item` mounts; calling `requestOpen` for a missing key is ignored.
+- In uncontrolled mode, removing an open `Item` retires its key. When `allowEmpty={false}`, the last remaining open item cannot be collapsed.
+
+### Keyboard and accessibility
+
+- `Tab` / `Shift + Tab`: Follows the natural tab sequence across enabled triggers and focusable elements inside open panels.
+- `Enter` / `Space`: Toggles the focused item.
+- `ArrowUp` / `ArrowDown` (vertical) or `ArrowLeft` / `ArrowRight` (horizontal, reversed in RTL): Moves focus across enabled headers without changing open state. Set `loop={false}` to stop at the first and last headers.
+- `Home` / `End`: Moves focus to the first or last enabled header.
+- Disabled headers are skipped during arrow-key navigation. When `allowEmpty={false}` prevents collapsing the last open header, it stays focusable with `aria-disabled`.
+- `Content` is automatically labelled by its `Trigger`. Set `region={true}` to opt into a landmark region (use selectively when many sections can be open at once).
+
+### Animation and layout
+
+- Pair `keepMounted` with your own CSS or transition logic when animating panel height or opacity.
+- Built-in styles wrap long labels, shrink inside narrow containers, and contain horizontal overflow within the panel.
 
 ## API
 
-Passing `openItems` selects controlled mode.
+### Root props
+
+Passing `openItems` switches `Root` to controlled mode.
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
   rows={[
-    { name: 'mode', type: "'single' | 'multiple'", default: 'single' },
-    { name: 'defaultOpenItems', type: 'string[]', default: '[]' },
-    { name: 'allowEmpty', type: 'boolean', default: 'true' },
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'orientation', type: "'vertical' | 'horizontal'", default: 'vertical' },
-    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
-    { name: 'loop', type: 'boolean', default: 'true' },
+    {
+      name: 'mode',
+      type: "'single' | 'multiple'",
+      default: 'single',
+      description: 'Allows one or multiple items open at a time',
+    },
+    { name: 'openItems', type: 'string[]', description: 'Controlled list of open item values' },
+    {
+      name: 'defaultOpenItems',
+      type: 'string[]',
+      default: '[]',
+      description: 'Initial open item values for uncontrolled mode',
+    },
+    {
+      name: 'allowEmpty',
+      type: 'boolean',
+      default: 'true',
+      description: 'When false, prevents closing the last open item',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disables interaction for the entire group',
+    },
+    {
+      name: 'orientation',
+      type: "'vertical' | 'horizontal'",
+      default: 'vertical',
+      description: 'Axis for arrow-key header navigation',
+    },
+    {
+      name: 'direction',
+      type: "'ltr' | 'rtl'",
+      default: 'ltr',
+      description: 'Reading direction for horizontal navigation',
+    },
+    {
+      name: 'loop',
+      type: 'boolean',
+      default: 'true',
+      description: 'Wraps focus from the last header back to the first',
+    },
   ]}
 />
 
-These props belong to Root. Item requires `value` and defaults `disabled` to `false`. Heading defaults `level` to `3`. Trigger has no props. Content defaults `keepMounted` and `region` to `false`.
+### Other parts
+
+- **Item**: `value: string` (required, unique non-empty key), `disabled?: boolean` (default `false`).
+- **Heading**: `level?: 1 | 2 | 3 | 4 | 5 | 6` (default `3`).
+- **Trigger**: No props; derives state from `Item` and `Root`.
+- **Content**: `keepMounted?: boolean` (default `false`), `region?: boolean` (default `false`).
+
+### Methods and events (Root)
+
+- `getOpenItems()`: Returns a copy of the currently open item keys.
+- `openCount`: Number of open keys, including dormant keys awaiting mount.
+- `requestOpen(value, open, reason?)`: Programmatically requests an open or close change.
+- `openChange`: Emits `{ openItems, value, open, reason }` when a state change is requested.
 
 ## References
 

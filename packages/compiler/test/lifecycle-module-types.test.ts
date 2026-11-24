@@ -47,13 +47,11 @@ for (const profile of [
         },
       });
       expect(
-        ts
-          .getPreEmitDiagnostics(program)
-          .map((d) => ({
-            code: d.code,
-            file: d.file?.fileName.replace(output, '<artifact>'),
-            message: ts.flattenDiagnosticMessageText(d.messageText, '\n'),
-          }))
+        ts.getPreEmitDiagnostics(program).map((d) => ({
+          code: d.code,
+          file: d.file?.fileName.replace(output, '<artifact>'),
+          message: ts.flattenDiagnosticMessageText(d.messageText, '\n'),
+        }))
       ).toEqual([]);
     } finally {
       await rm(temporary, { recursive: true, force: true });

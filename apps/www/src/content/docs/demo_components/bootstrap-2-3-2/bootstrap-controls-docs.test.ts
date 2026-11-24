@@ -72,8 +72,6 @@ describe('Bootstrap 2.3.2 partial-family public recipes', () => {
         // of an override uses PrototypePreviewer's normal enabled default.
         expect(page).not.toContain('toolbar={false}');
         expect(page).not.toContain('data-adapter-panel');
-        expect(page).toContain('draft');
-        expect(page).toContain('GPUI');
       }
       expect(read('apps/www/astro.config.mjs')).toContain(`slug: 'ui-libraries/${family}/${kind}'`);
     });
@@ -95,23 +93,10 @@ describe('Bootstrap 2.3.2 partial-family public recipes', () => {
     }
   });
 
-  it('keeps custom checkbox and design-language extensions explicit in both locales', () => {
-    for (const locale of ['en', 'zh-cn']) {
-      for (const kind of ['switch', 'toggle']) {
-        const page = read(`apps/www/src/content/docs/${locale}/ui-libraries/${family}/${kind}.mdx`);
-        expect(page).toContain('design-language extension');
-        expect(page).toContain(locale === 'en' ? 'not an original Bootstrap' : '不是 Bootstrap');
-      }
-      const checkbox = read(
-        `apps/www/src/content/docs/${locale}/ui-libraries/${family}/checkbox.mdx`
-      );
-      expect(checkbox).toContain(
-        locale === 'en' ? 'not the archived native checkbox' : '不是归档版本原生 checkbox'
-      );
-      const sidebar = read('apps/www/astro.config.mjs');
-      expect(sidebar).toContain("label: 'Bootstrap 2.3.2'");
-      expect(sidebar).toContain("en: 'WIP / Experimental'");
-      expect(sidebar).toContain(`slug: 'ui-libraries/${family}/checkbox'`);
-    }
+  it('registers Bootstrap 2.3.2 and checkbox in the sidebar', () => {
+    const sidebar = read('apps/www/astro.config.mjs');
+    expect(sidebar).toContain("label: 'Bootstrap 2.3.2'");
+    expect(sidebar).toContain("en: 'WIP / Experimental'");
+    expect(sidebar).toContain(`slug: 'ui-libraries/${family}/checkbox'`);
   });
 });

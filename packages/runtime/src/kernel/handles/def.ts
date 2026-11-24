@@ -70,6 +70,7 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
     const name = (handle as any)?.__stateName;
     rt?.registerStateName(name, (handle as any)?.__stateId);
     feedback.presence.registerSource(handle as object);
+    feedback.motion.registerSource(handle as object);
   };
 
   const facades = modules.getFacades();
@@ -174,6 +175,10 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
         },
       },
       material: {
+        reserve(declaration) {
+          ensureSetup('def.feedback.material.reserve');
+          return feedback.material.reserve(declaration);
+        },
         shader(declaration) {
           ensureSetup('def.feedback.material.shader');
           const off = feedback.material.shader(declaration);

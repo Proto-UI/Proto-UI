@@ -21,7 +21,12 @@ const decoding = vi.hoisted(() => ({
   }),
 }));
 vi.mock('../src/material/image-prepare', () => ({
-  prepareOpticalImage: decoding.prepare,
+  createOpticalImageCache: (doc: Document) => ({
+    prepare: (source: string, ready: () => void, failed: () => void) =>
+      decoding.prepare(doc, source, ready, failed),
+    clear() {},
+    dispose() {},
+  }),
   inspectOpticalImageResources: () => ({}),
 }));
 vi.mock('../src/material/program', () => ({ createWebOpticalProgram: () => optical }));
@@ -2124,7 +2129,7 @@ describe('warm rest source task admission (mock GPU/decode, not performance evid
       expect(f.host.dataset.materialSourceRevision).toBe('1');
       expect(f.host.style.getPropertyValue('--pui-material-image')).toBe(previous);
       expect(q.postTask).toHaveBeenCalledOnce();
-      expect(q.postTask.mock.calls[0][1]).toMatchObject({ priority: 'user-visible' });
+      expect(q.postTask.mock.calls[0][1]).toMatchObject({ priority: 'background' });
       const first = q.tasks[0];
       for (let revision = 3; revision <= 20; revision++) f.source(true, revision);
       expect(q.postTask).toHaveBeenCalledOnce();

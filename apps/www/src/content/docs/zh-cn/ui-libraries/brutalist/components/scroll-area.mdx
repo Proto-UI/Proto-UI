@@ -1,5 +1,6 @@
 ---
 title: Scroll Area
+description: '保留原生滚动体验并配以高对比 Brutalist 组合滚动条的可滚动区域组件。'
 sidebar:
   order: 9
 ---
@@ -10,23 +11,42 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Scroll Area 保留 Base 的宿主滚动面、归一化 viewport facts、orientation 与已解析 projection。它偏好 composed chrome，并增加5px 圆角 paper 表面和高对比 Lavender/ink 控件。家族级 host session 会根据实际 scroll facts 连续投射 Thumb 尺寸与位置，并把 Thumb 上的 pointer 拖动映射回归一化 scroll request。抓取 Thumb 不会创建第二份 scroll state，也不会使其成为独立 focus/ARIA control。track page press 与完整 Drag and Drop 仍不属于当前 passing guarantee。
+Scroll Area 在保留宿主原生滚动体验的同时，提供 5px 圆角纸面容器与高对比 Lavender/墨黑组合滚动条，适合聊天记录、会话列表、命令结果、日志和密集型面板。
 
-用于 ChatUI conversation history、会话列表、命令结果、日志和密集 SaaS 面板。外围 layout 必须给 Root 明确尺寸。参考 demo 保留 12rem 高度，并把响应式宽度上限设为 20rem：桌面 composition 不变，同时完整 Root 与 visual scrollbar 在手机 preview frame 内保持可见。
-
-Web composed projection 的两条 track 会避让右下交点，该区域不包含 track 或 Thumb。另一条 track 缺失或 display 隐藏时释放避让；没有 overflow 时仍保留 track 表面，仅隐藏 Thumb。这属于 host-local presentation，不是独立 Corner control。horizontal Scrollbar 用私有、pointer-inert 的 lavender surface 与结构边框填充预留区，避让为零时完全裁剪填充。公共 anatomy 仍只有 Root、Viewport、Scrollbar 与 Thumb。
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-scroll-area" initialRuntime="wc" />
 </div>
 
+## 安装
+
+已包含在 `@proto.ui/prototypes-brutalist@0.2.0` 中。可通过 CLI 目标 `brutalist-scroll-area` 添加，或从 `@proto.ui/prototypes-brutalist/scroll-area` 导入。
+
+## 用法
+
+### 组件结构
+
+Scroll Area 由 `Root`、`Viewport`、`Scrollbar` 和 `Thumb` 四个部分组成：
+
+- `Root`：外层滚动容器，需由外围布局提供明确的尺寸约束（示例使用 `12rem` 高度和响应式 `20rem` 最大宽度）。
+- `Viewport`：实际的宿主滚动视口。
+- `Scrollbar`：水平或垂直滚动轨道，通过 `orientation` 指定方向。
+- `Thumb`：根据实时滚动指标连续同步尺寸与位置的滑块；拖动滑块会直接映射为滚动请求，不会创建第二套滚动状态或额外的焦点停靠点。
+
+### 双轴交点处理
+
+同时显示水平与垂直两条轨道时，两者会自动为右下交点预留避让区域（由水平滚动条绘制匹配的浅紫底色与边框），无需额外的 Corner 组件；当另一条轨道未渲染或隐藏时，预留空间会自动释放。没有内容溢出时，轨道保持可见而滑块自动隐藏。
+
 ## API
 
-Scroll Area 是工作区源码。当前工作区 CLI 目标为 `brutalist-scroll-area`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。Root 没有属性。
+以下属性属于 `Scrollbar`：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[{ name: 'orientation', type: "'horizontal' | 'vertical'", default: 'vertical' }]}
 />
 
-这个属性属于 Scrollbar。Viewport 与 Thumb 没有属性。
+其余子部件：
+
+- **Root**、**Viewport**、**Thumb**：无属性。

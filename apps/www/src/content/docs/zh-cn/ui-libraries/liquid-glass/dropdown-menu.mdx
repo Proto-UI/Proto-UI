@@ -1,9 +1,13 @@
 ---
 title: 'Dropdown Menu'
-description: 'Grouped action-menu composition.'
+description: '支持动作分组、标签命名、分隔线、快捷键提示与玻璃材质的 Liquid Glass 下拉菜单。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Liquid Glass Dropdown Menu 用于展示按组组织的下拉命令列表，支持分组标签、分隔线、快捷键文本提示，以及在触发按钮与展开面板上呈现 Liquid Glass 光学材质。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-dropdown-menu"
@@ -12,14 +16,25 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-## 分组动作组成（草稿）
+示例展示了包含账户与资源分组的 160px 菜单、禁用操作项以及独立的禁用触发按钮。
 
-Group 与 Label 建立实时辅助技术命名关系；Separator 和 Shortcut 是真实的被动部件。Shortcut 只显示提示，不注册全局快捷键。装饰部件不进入动作集合，也不增加 press owner。示例使用160px菜单、账户与资源分组和禁用的 API 动作。Invite users 的真实子菜单属于随后单独实现的协议片，不用演示盒子模拟。Checkbox/Radio变体及完整native/GPUI、Compiler、打包、视觉和独立验收仍未完成。
+## 安装
 
-## 显式 Trigger 材质（草稿）
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-Trigger 现在声明共享 `liquid-glass` 意图，借用已有 Dropdown pressed 状态选择 rest/pressed deformation；圆角 geometry 与完整不透明 fallback 来自最终 style。Hover、focus-visible、disabled 和菜单激活仍由 Base 管理。Content 保留已有的 open 状态材质意图；此改动不新增 command owner，也不是仅存在于 demo 的效果。
+## 用法
 
-现有共享 Web material provider 仅在应用内 Canvas source、geometry 与 preferences 获得准入时实现该意图。缺少能力、对比度不安全或 source 不可用时保留不透明 fallback；Trigger 可增强也不代表 portal 菜单必然有合法 source。这不是 native blur，也不声明 Apple-native parity。源码配方与隔离意图测试只属于实现证据：绑定新源码的 WC/React/Vue/Vue 2 明暗主题截图、真实交互绘制、GPUI 与独立视觉验收仍待完成。
+- **分组与装饰部件**：`Group` 与 `Label` 自动建立分组的无障碍命名关联；`Separator` 与 `Shortcut` 属于被动装饰部件，不进入键盘焦点队列。`Shortcut` 仅展示提示文字，不注册全局快捷键。
+- **触发器与面板材质**：`Trigger` 声明 `liquid-glass` 材质意图并随按压状态产生形变，`Content` 在展开时请求玻璃材质。当应用未提供合法可见 canvas 源、宿主不支持或对比度不安全时，自动保留高对比度不透明回退样式；若浮层传送（portal）到画布源之外，菜单面板同样会自动回退为不透明外观。
+- 悬停、键盘焦点、禁用与菜单项激活均由 Base Dropdown Menu 统一管理。
 
-公开预览同时提供独立 owner 的禁用 Trigger；通过真实 authored disabled prop 验证禁用行为，不使用测试专属 DOM 改写。
+## API
+
+| 部件                 | 说明                                         |
+| -------------------- | -------------------------------------------- |
+| Root                 | 管理菜单打开状态与整体交互                   |
+| Trigger              | 菜单触发按钮，支持 `disabled` 与按压材质反馈 |
+| Content              | 下拉菜单容器，展开时启用玻璃材质并自动回退   |
+| Group / Label        | 将相关命令分组并提供实时无障碍组名称         |
+| Item                 | 可激活菜单命令项，支持禁用态                 |
+| Separator / Shortcut | 被动分组分隔线与快捷键文本提示               |

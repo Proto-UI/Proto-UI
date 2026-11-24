@@ -1,6 +1,6 @@
 ---
 title: 'Hover Card'
-description: '从 Base Hover Card 协议投影出的 Shadcn Hover Card。'
+description: '悬停或聚焦触发器时延时展示补充信息的浮层卡片组件。'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -8,11 +8,11 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+在用户悬停或聚焦触发元素时延迟展示预览信息的浮层卡片，支持自定义开闭延迟、锚点方位与视口碰撞翻转。本页示例采用 **Shadcn Rhea** 风格。
 
-Base Hover Card 持有 open。Root 接受受控 `open` 或非受控 `defaultOpen`，以及 `openDelay` 与 `closeDelay`。Trigger 的 hover/focus 和 Content 的 hover 只提交请求，不能绕过这个 owner。Content 另有 `side`、`align` 和下表的数值偏移。Arrow 与 `forceMount` 不是这个 surface 的属性。
+## 预览
 
-演示在 150ms 后打开 `@proto-ui`，300ms 后关闭。Content 为 `side="bottom"`、`align="center"`。
+下方示例在悬停 `@proto-ui` 150ms 后打开浮层，移开 300ms 后关闭，内容位于触发器下方居中（`side="bottom"`、`align="center"`）：
 
 <PrototypePreviewer
   demoId="demo-shadcn-hover-card"
@@ -26,11 +26,19 @@ Base Hover Card 持有 open。Root 接受受控 `open` 或非受控 `defaultOpen
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-hover-card" manager="npm" />
 
-把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+把 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的本地组件封装。
+
+## 用法
+
+`Hover Card` 由 `Root`、`Trigger` 与 `Content` 三个部件组成：
+
+- **Root**：统一管理打开状态（受控 `open` 或非受控 `defaultOpen`）以及 `openDelay` / `closeDelay` 延迟时间。
+- **Trigger**：悬停或聚焦时向 `Root` 发起打开请求；支持独立的 `disabled` 属性。
+- **Content**：将鼠标移入卡片内部时会保持卡片打开，支持方位、对齐、偏移及碰撞检测配置。
 
 ## API
 
-传入 `open` 进入受控模式。延时必须是有限数且不小于 0，否则回落到默认值。
+传入 `open` 进入受控模式。`openDelay` 与 `closeDelay` 须为非负有限数值，非法值会自动回退到默认值。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -49,7 +57,9 @@ Base Hover Card 持有 open。Root 接受受控 `open` 或非受控 `defaultOpen
   ]}
 />
 
-`side` 到 `collisionPadding` 属于 Content。Trigger 只增加 `disabled`，默认 `false`。Root 暴露 `open`、`openHoverCard`、`close`、`toggle` 和 `openChange`。
+- `open`、`defaultOpen`、`disabled`、`openDelay` 与 `closeDelay` 属于 `Root`；`Root` 暴露 `open` 状态、`openHoverCard` / `close` / `toggle` 方法以及 `openChange` 事件。
+- `side` 至 `collisionPadding` 属于 `Content`。
+- `Trigger` 仅提供 `disabled` 属性（默认 `false`）。
 
 ## 参考
 

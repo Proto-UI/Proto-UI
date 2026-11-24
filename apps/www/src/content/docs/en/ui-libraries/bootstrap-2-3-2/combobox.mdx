@@ -1,11 +1,13 @@
 ---
 title: 'Combobox'
-description: 'Editable search with committed option identity.'
+description: 'A Bootstrap 2.3.2 searchable select that keeps query text separate from the committed option value.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Editable search with committed option identity.
+Combobox combines an editable search input with a dropdown list of options, keeping the committed option key (`value`) distinct from the live query (`inputValue`).
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-combobox"
@@ -14,10 +16,27 @@ Editable search with committed option identity.
   codePanel={false}
 />
 
-Root.value is a selected item key. inputValue is independent editable text. Unmatched text is never silently accepted as an option.
+## Installation
 
-The host owns the real single-line editor. Input retains focus during Arrow navigation; IME composition never selects. Filtering is case/diacritic insensitive over textValue and keywords. Empty reflects actual matches; disabled options cannot commit. open, value and inputValue are independently controlled with corresponding change requests. filter=false supports owner-filtered children. Duplicate-valued choices are rejected.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Input, Content, Item, Empty, Trigger.
+## Usage
 
-Draft source; shared Web A11y active-descendant projection, native/GPUI, compiler, consumer, visual and independent acceptance remain separate requirements.
+Compose `Root`, `Input`, `Trigger`, `Content`, `Item`, and `Empty`:
+
+- **Separate value and query**: `value` represents the selected option key while `inputValue` holds editable search text. Unmatched text is never silently committed as an option.
+- **Filtering and empty state**: Built-in filtering matches `textValue` and `keywords` case- and diacritic-insensitively. Pass `filter={false}` to supply pre-filtered items. `Empty` displays when nothing matches.
+- **Keyboard and IME**: Focus remains in `Input` while navigating with Arrow keys, and IME composition never selects an option. Disabled and duplicate-valued items cannot commit.
+- **Independent control**: `open`, `value`, and `inputValue` can each be controlled independently through their change requests.
+
+## API
+
+| Part | Props | Description |
+| --- | --- | --- |
+| `Root` | `value` / `inputValue` / `open` | Independently controlled option value, query text, and open state |
+| `Root` | `filter` | Toggle built-in filtering; set `false` for externally filtered items |
+| `Input` | — | Single-line search input |
+| `Trigger` | — | Toggles the option list |
+| `Content` | — | Option list container |
+| `Item` | `value` / `textValue` / `keywords` / `disabled` | Individual selectable option |
+| `Empty` | — | Rendered when no items match the query |

@@ -1,9 +1,13 @@
 ---
-title: bootstrap-2-3-2 Progress
-description: 基于 Base 共享语义的有界数值展示。
+title: 'Bootstrap 2.3.2 Progress'
+description: '支持确定进度与不确定加载态展示的 Bootstrap 2.3.2 进度条组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Bootstrap 2.3.2 Progress 用于展示任务的完成进度，同时支持明确数值进度与不确定（`indeterminate`）等待状态。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-progress"
@@ -12,10 +16,33 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-当前为 Draft 功能实现。Root 拥有有界有限数值；Label 提供名称，Track 容纳 Indicator，Value 显示 valueText 或规范数值。四个视觉家族只投影样式。
+## 安装
 
-Props：value、min（0）、max（100）、ariaLabel、valueText。数值限制在合法范围内；上下界相等时比例为零。省略 value 或设置 indeterminate=true 表示进度未知，不声称当前进度值。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-Root 及部件暴露 value、percentage、indeterminate、status。被动显示不引入键盘停靠点，不伪造输入。更新 Props 同步所有部件。
+```ts
+import {
+  progressRoot,
+  progressLabel,
+  progressTrack,
+  progressIndicator,
+  progressValue,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/progress';
+```
 
-包入口统一注册后，可从 progress 子路径导入 progressRoot、progressLabel、progressTrack、progressIndicator、progressValue。现有源码测试仅为阶段性证据；完整 Adapter、Compiler、GPUI、原生绘制、辅助技术、包消费及独立验收尚未完成，不据此勾选 Finf。
+## 用法
+
+由 `Root`、`Label`、`Track`、`Indicator` 和 `Value` 组成：
+
+- **确定与不确定进度**：`Root` 将 `value` 钳制在 `min`（默认 `0`）至 `max`（默认 `100`）之间；当 `min === max` 时比例为 `0`。省略 `value` 或设置 `indeterminate={true}` 进入不确定进度态，此时不向辅助技术上报具体进度百分比。
+- **只读展示**：`Label` 提供无障碍名称，`Track` 与 `Indicator` 渲染进度条，`Value` 优先显示 `valueText` 或规范数值。作为被动显示组件，不引入键盘焦点停靠点。
+
+## API
+
+| 部件 | 属性 / 状态 | 说明 |
+| --- | --- | --- |
+| `Root` | `value` / `min` / `max` | 当前进度与范围上下界（默认 `0`–`100`） |
+| `Root` | `indeterminate` | 设为 `true`（或省略 `value`）表示不确定进度 |
+| `Root` | `ariaLabel` / `valueText` | 可访问名称与自定义进度文本 |
+| 全部部件 | `value` / `percentage` / `indeterminate` / `status` | 同步暴露的只读进度状态 |
+| `Label` / `Track` / `Indicator` / `Value` | — | 名称、轨道、进度填充条与数值显示部件 |

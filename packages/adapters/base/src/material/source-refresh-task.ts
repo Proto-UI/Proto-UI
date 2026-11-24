@@ -23,7 +23,7 @@ type TaskWindow = Window & {
   scheduler?: {
     postTask(
       callback: () => void,
-      options: { priority: 'user-visible'; signal: AbortSignal }
+      options: { priority: 'background'; signal: AbortSignal }
     ): Promise<unknown>;
   };
 };
@@ -136,9 +136,14 @@ export function createSourceRefreshTask(document: Document, refresh: () => void)
           task.abort = () => controller.abort();
           const signal = controller.signal;
           if (!owns(task)) return true;
+          // Admission permits only an already painted, compatible neutral
+          // surface to continue here. Let fresh input and image publication
+          // compete ahead of this work where the host supports that ordering.
+          // Keep the original queue position; this hint promises no deadline
+          // or starvation bound, and the timer fallback remains unchanged.
           postTask
             .call(scheduler, callbackFor(task, 'scheduler'), {
-              priority: 'user-visible',
+              priority: 'background',
               signal,
             })
             .then(undefined, rejectionFor(task));

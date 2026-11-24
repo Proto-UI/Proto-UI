@@ -1,6 +1,6 @@
 ---
 title: 'Tooltip'
-description: 'Draft shadcn presentation over the Base Tooltip family.'
+description: 'A lightweight floating popup that displays supplementary labels on hover or keyboard focus.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -9,45 +9,38 @@ import CodeExample from '@/components/CodeExample.astro';
 import { shadcnTooltipFiles } from '@/content/docs/demo_components/tooltip-usage';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-This page targets **Shadcn Rhea** and explicitly selects it for profile-aware parts. The headless trigger/action-body gap below remains open; this is not yet a fully unified Rhea demonstration. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Tooltip reveals brief supplementary text when a user hovers or focuses a trigger, with shared open/close delay coordination across tooltips in the same group. The examples on this page use the **Shadcn Rhea** style preset.
 
-This draft family contains Group, Root, Trigger, and Content. Base Tooltip remains the sole owner of open state, controlled ownership, disabled behavior, pointer and focus intent, delay and dismissal sequencing, `aria-describedby`, presence, Escape handling, renderer-owned Portal projection, and anchored positioning. The shadcn layer adds only Group layout, Trigger feedback, and a compact Content surface.
-
-The historical API comparison is shadcn-ui/ui `f31ed81983653919dd4fe77aee4b4859f610f1dc`, `apps/v4/registry/new-york-v4/ui/tooltip.tsx`; it is not this page's selected visual profile. Its Provider defaults pointer delay to 0ms; Proto UI retains Base Group's 700ms open, 100ms close and 300ms skip. Its Content defaults sideOffset to 0; Proto UI retains 4. Portal remains renderer-owned and Arrow remains unavailable without a governed geometry channel.
-
-Content selects the [Rhea style source](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css): inline-flex, fit-content width, a 20rem maximum, 6px gap and `rounded-xl`, with foreground/background theme colors inverted for the tooltip surface. The 2026-10-10 [base-nova snapshot](https://ui.shadcn.com/r/styles/base-nova/tooltip.json) (SHA256 `2f55867faecee2d3616cfd8c6a80b538909a21e62fdfa2788b1ead56093e5395`) is retained only as the unscoped compatibility reference. Trigger is a headless semantic owner with existing Proto feedback, not a Button. A reusable Rhea passive action-body composition is still needed to replace the demo's historical authored trigger paint without adding a second focus/activation owner. Arrow, transform-origin, directional motion, kbd descendant styling and native visual acceptance remain open.
-
-Import the family from `@proto.ui/prototypes-shadcn/tooltip`, or generate its React facade with `proto-ui add react shadcn-tooltip`. Content remains supplementary, non-focusable, and non-essential; interactive task content belongs to Popover or a non-modal Dialog.
+## Preview
 
 <PrototypePreviewer demoId="demo-shadcn-tooltip" initialRuntime="wc" />
 
-## Suggested acceptance path
+## Installation
 
-1. Hover Account and confirm the cold Tooltip opens after about 700ms; leave early and confirm no flash appears.
-2. Move to Notifications before the 300ms warm window expires and confirm the sibling opens immediately with one active owner.
-3. Tab to either Trigger and confirm immediate opening, a visible focus ring, and no button role.
-4. Confirm Content is portaled outside the preview frame, remains linked by `aria-describedby`, and contains no focusable control or Arrow.
-5. Press Escape and confirm Content closes while focus remains on Trigger.
-6. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
+The complete examples below target the current workspace 0.3 source packages (including the Vue 2.6 Adapter). For the published 0.2.0 release, see [Quick Start](/en/start-here/quick-start/).
 
-The related entities are `draft`; this page describes the current cataloged direction, not a stable compatibility guarantee.
+When installing from workspace source in an existing app, install the CLI, `@proto.ui/prototypes-shadcn`, and your host Adapter (`@proto.ui/adapter-web-component`, `@proto.ui/adapter-react`, `@proto.ui/adapter-vue`, or `@proto.ui/adapter-vue2`, where Vue 2 requires Vue `>=2.6.0 <2.7`) from the same source revision. See [scripts/release/publish.mjs](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) and [scripts/release/consumer-smoke-cli.mjs](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs) for the local tarball pack and clean consumer install flow.
 
-## Current-source installation and Usage
-
-These files target the current 0.3 source packages, including the Vue 2.6 Adapter. They do not claim that the workspace version is published to npm. Start with an existing host application and install the CLI, `@proto.ui/prototypes-shadcn` and that host's Adapter from **the same reviewed source revision**. The repository's [pack-only flow](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) produces local tarballs; its [clean consumer installation](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs) installs the complete declared `@proto.ui/*` dependency closure from those tarballs. The [stable Quick Start](/en/start-here/quick-start/) remains a separate published-version route.
-
-Use `@proto.ui/adapter-web-component`, `@proto.ui/adapter-react`, `@proto.ui/adapter-vue` or `@proto.ui/adapter-vue2` for the selected host. React and Vue keep their existing application mount entry. Vue 2 requires Vue `>=2.6.0 <2.7`; replacing the CLI version with `@latest` does not make a source preview reproducible.
-
-After installing the matching packages, run the local CLI in the application directory. Keep the generated CSS: Base presence and positioning also need its structural rules. The small `tooltip-demo.css` below belongs to the application and does not replace those rules.
+Once those packages are installed, run the local CLI in your app directory and keep the generated `proto-ui-style.css` (which provides the layout and positioning rules):
 
 ```sh
 node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --prototypes shadcn
 node node_modules/@proto.ui/cli/bin/proto-ui.js add wc shadcn-tooltip --no-install --no-interactive
 ```
 
-Replace `wc` with `react`, `vue` or `vue2` for the matching facade. The generated four-part exports and WC tags are used below; `--no-install` assumes the matching packages were already installed. Trigger and Content explicitly select Rhea. Their passive Trigger paint remains application-owned.
+Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your target framework.
 
-Copy the files for one host. Add the WC HTML to your existing document and load `src/main.ts` once; for React or Vue, keep the app's usual mount entry and use the provided `App` component. Import `proto-ui-style.css` once if the application already loads it. One Group owns two uncontrolled Roots, and each Root has one standalone Trigger and one non-interactive Content.
+## Usage
+
+Tooltip consists of `Group`, `Root`, `Trigger`, and `Content`:
+
+- `Group` coordinates timing across sibling tooltips: a cold hover opens after `700ms`, closes after `100ms`, and opens sibling tooltips immediately within the `300ms` skip window so at most one tooltip stays open at once.
+- Focusing a `Trigger` via `Tab` opens its tooltip immediately; pressing `Escape` closes it while keeping focus on the trigger.
+- `Content` renders in a portal and automatically links and cleans up `aria-describedby`. Keep tooltip content brief and non-interactive; use Popover or a non-modal Dialog for interactive content.
+
+### Complete host examples
+
+Copy the files for your target host below (one `Group` coordinating two uncontrolled `Root` instances, each with its own `Trigger` and non-interactive `Content`):
 
 <CodeExample
   files={shadcnTooltipFiles}
@@ -55,9 +48,9 @@ Copy the files for one host. Add the WC HTML to your existing document and load 
   label="Shadcn Tooltip complete host Usage"
 />
 
-## Tooltip on a Button
+### Tooltip on a Button
 
-A focusable command and Tooltip should share one subject. Compose the draft `useTooltipTrigger()` authored hook with the command behavior, adapt the resulting prototype, and place that component directly inside Tooltip Root alongside Content. Do not wrap a separately focusable Button in the standalone Trigger: that creates two Tab stops.
+When attaching a tooltip to a focusable button, compose `useTooltipTrigger()` directly with `asButton()` on the same prototype rather than nesting a button inside a separate `Trigger` (which would create two `Tab` stops):
 
 ```ts
 import { definePrototype } from '@proto.ui/core';
@@ -73,15 +66,13 @@ export const tooltipButton = definePrototype<ButtonProps, ButtonExposes>({
 });
 ```
 
-Button retains its role, name, click signal, disabled state and single focus owner. Tooltip adds hover/focus intent and the owned `aria-describedby` relation. Disabling Tooltip Root suppresses Tooltip while leaving the command available; disabling the command suppresses both. `useTooltipTrigger` takes no options and adds no outward exposes. It requires an existing focusable subject. Standalone `asTooltipTrigger` retains its original focus behavior and exposes.
-
-For an existing styled prototype, use the same setup composition while preserving its render function: call the styled prototype's `setup(def)`, then `useTooltipTrigger()`, and return the captured render function from your `definePrototype`. Keep the styled prototype's static `modules` declaration. This shares one host and preserves the family's Button presentation; it is separate from the passive action-body styling used by the standalone demo below.
-
-For a command inside a real ShadowRoot, use the [same-tree portal scene recipe](/en/ui-libraries/base/tooltip/#shadowroot). The default body destination cannot supply that shadow command's accessible description through an ID string alone.
+- The button retains its role, accessible name, click behavior, disabled state, and single focus target, while `useTooltipTrigger()` adds hover/focus intent and `aria-describedby`. Disabling Tooltip `Root` suppresses only the tooltip; disabling the button suppresses both.
+- To wrap an existing styled button prototype, preserve its static `modules` declaration, call its `setup(def)` followed by `useTooltipTrigger()`, and return its render function.
+- When the button lives inside a `ShadowRoot`, use the [same-tree portal recipe](/en/ui-libraries/base/tooltip/#shadowroot) so `aria-describedby` resolves across the shadow boundary.
 
 ## API
 
-Passing `open` on Root selects controlled mode. Group delays apply when Root does not set its own.
+Pass `open` on `Root` for controlled mode. `Root` inherits `Group` delays unless overridden:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -100,7 +91,11 @@ Passing `open` on Root selects controlled mode. Group delays apply when Root doe
   ]}
 />
 
-`openDelay`, `closeDelay`, and `skipDelay` belong to Group. `side` through `collisionPadding` belong to Content. Trigger only adds `disabled`.
+Prop ownership:
+
+- `defaultOpen` and `disabled` belong to `Root` (`Trigger` also accepts `disabled`).
+- `openDelay`, `closeDelay`, and `skipDelay` belong to `Group`.
+- `side`, `align`, `sideOffset`, `alignOffset`, `avoidCollisions`, and `collisionPadding` belong to `Content`.
 
 ## References
 

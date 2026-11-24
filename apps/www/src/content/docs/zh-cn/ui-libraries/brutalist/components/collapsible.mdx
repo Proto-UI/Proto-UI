@@ -1,12 +1,14 @@
 ---
 title: 'Collapsible'
-description: 'Neobrutalist Collapsible: Root, Trigger, Content and inherited Base disclosure semantics.'
+description: '由 Root、Trigger 与 Content 组成的 Brutalist 折叠展开组件，支持受控模式与按需卸载。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-Neobrutalist Collapsible 包含 Root、Trigger、Content 三个真实 Proto UI 原型，各自消费对应的 Base Collapsible hook。Root 仍是唯一展开状态 owner；本体系只增加表现。当前为独立维护的 draft 设计投影。
+Brutalist Collapsible 用于控制单个内容区块的展开与收起，提供高对比度边框与硬阴影视觉，并完整继承 [Base Collapsible](/zh-cn/ui-libraries/base/collapsible/) 的交互与状态机制。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-collapsible"
@@ -15,27 +17,12 @@ Neobrutalist Collapsible 包含 Root、Trigger、Content 三个真实 Proto UI �
   codePanel={false}
 />
 
-## 体验协议
+## 安装
 
-Demo 在四种 Web Adapter 中使用真实库原型。第一个 disclosure 初始关闭并 detach Content view；第二个初始打开，关闭后保留隐藏 view；第三个禁用但保持展开；第四个收到请求后仍然关闭，直到激活 **Accept**。这个接受按钮是独立的应用操作，不是 Trigger 内的第二个交互 owner。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-## 三个 part，一个状态 owner
-
-- Root：`open?`、`defaultOpen?`、`disabled?`；公开 `open`、请求方法 `openCollapsible`、`close`、`toggle` 和携带 `{ open, reason }` 的 `openChange`。
-- Trigger：`disabled?`；继承 expanded、effective disabled、hover、press、focused、focus-visible、button accessibility、自然 Tab 顺序、Enter/Space 激活与受保护的 `focusSelf`。
-- Content：`keepMounted?`；继承派生 `open`/`hidden`、role-neutral content 与 L1 view presence。关闭不销毁逻辑实例；不承诺 detached native child/view state 保留。
-
-Root 的自身 anatomy domain 必须恰有一个 Trigger 和一个 Content。嵌套与相邻 disclosure 独立持有状态。受控请求只有在 owner 提供新 `open` 后才改变 canonical expansion；忽略请求就保持原状。disabled 抑制请求，但不会关闭已经展开的内容。此处没有 heading 前置条件、Accordion selection、方向键导航、region landmark、自动 focus movement 或 Overlay。
-
-## 表现与窄屏
-
-原型使用有界宽度、可收缩布局、长词换行、可缩放内边距，不设固定内容高度。focus 与 disabled 外观消费 Base state。外围需保留 focus ring 的空间；Neobrutalist 还需容纳硬阴影及移动后的 pointer envelope。Demo 包含长标签与连续长词，browser acceptance 覆盖 320px、200% 根文字尺寸与明暗主题。源码或 synthetic DOM 通过不代表这些实际绘制与原生输入已通过。
-
-固定版本的参考项目导出的是 unstyled Collapsible primitives。此处的安全间距及控制/内容表面是 Proto UI 明确增加的设计语言默认值，不宣称参考源码已有这些样式。行为由 Base 提供，参考项目的 React primitive 不是实现依赖。
-
-## 使用
-
-当前源码为 `react`、`vue`、`vue2`、`wc` 提供 `brutalist-collapsible` CLI facade；新增源码入口不代表某个已发布版本已经具备它。
+- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-collapsible`
+- **包导出**：
 
 ```ts
 import {
@@ -45,19 +32,23 @@ import {
 } from '@proto.ui/prototypes-brutalist/collapsible';
 ```
 
-适配导出的原型时保留三 part composition。[Base 协议](/zh-cn/ui-libraries/base/collapsible/) 说明共享请求与生命周期保证。
+## 用法
 
-## 证据与参考
+### 部件组成
 
-四 Adapter synthetic DOM 与 compiler mappings，和已注册 browser journeys、截图、GPUI native execution、独立稳定准入是分开的证据。未执行的宿主证据仍是验收缺口。
+每个 `Root` 内放置一个 `Trigger` 和一个 `Content`，嵌套或相邻的 `Collapsible` 彼此独立：
 
-- [实现源码](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/brutalist/src/collapsible)
-- [neobrutalism-components reference](https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/collapsible.tsx)
-- [可执行证据映射](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-COLLAPSIBLE-PROJECTIONS-0001.yaml)
+- **Root**：管理展开状态，支持受控 `open` 与非受控 `defaultOpen`，以及整体禁用 `disabled`（禁用后阻止切换，但不会强制收起已展开的内容）。
+- **Trigger**：按钮触发器，支持自然 `Tab` 顺序与 `Enter` / `Space` 切换，自动同步展开与禁用状态。
+- **Content**：承载折叠内容；关闭时默认卸载内容节点（设置 `keepMounted` 可保留隐藏节点）。支持长文本折行与容器收缩，布局外围建议为焦点环与硬阴影预留空间。
+
+### 受控模式
+
+传入 `open` 进入受控模式，监听 `openChange` 事件（负载为 `{ open, reason }`）后更新外部状态；若外部未接受该变更，面板保持原状态。
 
 ## API
 
-Collapsible 是工作区源码。当前工作区 CLI 目标为 `brutalist-collapsible`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。传入 `open` 进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -67,4 +58,14 @@ Collapsible 是工作区源码。当前工作区 CLI 目标为 `brutalist-collap
   ]}
 />
 
-这些属性属于 Root。Trigger 的 `disabled` 默认 `false`。Content 的 `keepMounted` 默认 `false`。
+传入 `open: boolean` 进入受控模式。
+
+### 其他部件属性
+
+- **Trigger**：`disabled?: boolean`（默认 `false`）
+- **Content**：`keepMounted?: boolean`（默认 `false`）
+
+### 方法与事件
+
+- **Root 方法**：`openCollapsible()`、`close()`、`toggle()`；**Trigger 方法**：`focusSelf()`
+- **事件**：`openChange`（负载 `{ open, reason }`）

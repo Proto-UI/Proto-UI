@@ -53,7 +53,7 @@ describe('private source refresh task ownership (controlled task queue, not brow
     try {
       for (let i = 0; i < 100; i++) expect(e.queue.schedule()).toBe(true);
       expect(e.postTask).toHaveBeenCalledOnce();
-      expect(e.postTask.mock.calls[0][1]).toMatchObject({ priority: 'user-visible' });
+      expect(e.postTask.mock.calls[0][1]).toMatchObject({ priority: 'background' });
       expect(e.signals[0]).toBeInstanceOf(
         (e.win as Window & { AbortSignal: typeof AbortSignal }).AbortSignal
       );

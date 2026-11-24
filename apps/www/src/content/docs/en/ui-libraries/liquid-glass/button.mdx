@@ -11,7 +11,9 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 Liquid Glass Button uses soft edge highlights and background refraction to distinguish controls from content. Use the regular style for secondary actions such as Back, and the prominent tint for the primary action. Both styles keep the same size.
 
-The preview background stays still so you can focus on hover, press and keyboard focus feedback. Click Back to observe its activation count, or use the page runtime selector to compare the same component across four Web adapters.
+## Preview
+
+The preview background stays still so you can focus on hover, press, and keyboard focus feedback. Click Back to observe its activation count, or use the page runtime selector to compare Web Components, React, Vue 3, and Vue 2.
 
 <div data-adapter-panel="wc">
   <PrototypePreviewer
@@ -52,7 +54,7 @@ The preview background stays still so you can focus on hover, press and keyboard
 
 <AdapterPanelScript />
 
-## Install
+## Installation
 
 <div data-liquid-glass-button-availability="workspace-source-only">
   <p>
@@ -365,17 +367,18 @@ export default {
 
 ## Material and accessibility
 
-The default regular material is intended for readable functional controls. Reserve `variant="prominent"` for primary actions, and avoid layering glass buttons over glass containers. These choices follow Apple's [Materials](https://developer.apple.com/design/human-interface-guidelines/materials), [Color](https://developer.apple.com/design/human-interface-guidelines/color) and [Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons) guidance.
+The default `regular` material suits everyday actions; reserve `variant="prominent"` for the primary action in a group, and avoid stacking glass buttons on top of glass containers. Design choices follow Apple's [Materials](https://developer.apple.com/design/human-interface-guidelines/materials), [Color](https://developer.apple.com/design/human-interface-guidelines/color), and [Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons) guidance.
 
-`material="auto"` enables optics when the host supports them; `material="opaque"` uses an opaque surface. The Web preview samples its actual visible canvas background. Ordinary DOM backgrounds or intervening content outside that source retain a readable opaque button.
-
-Reduced motion disables elastic deformation while retaining static material. Reduced transparency, increased contrast and forced colors use a readable fallback. Disabled buttons keep their label and outline without accepting activation.
+- `material="auto"` enables optical refraction when the host supports it over a visible canvas backdrop; over ordinary DOM backgrounds, intervening content, or with `material="opaque"`, the button retains a readable opaque surface.
+- Reduced motion disables elastic deformation while keeping static material. Reduced transparency, increased contrast, and forced colors use an accessible opaque fallback.
+- Disabled buttons keep their label and outline without accepting activation.
 
 ## API
 
-- variant: regular / prominent, default regular
-- material: auto / opaque, default auto
-- disabled: boolean, default false
-- Activation, focus, keyboard and disabled behavior are inherited from Base Button; the visual layer owns no second interaction state.
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `variant` | `'regular' \| 'prominent'` | `'regular'` | Regular glass or prominent tinted style |
+| `material` | `'auto' \| 'opaque'` | `'auto'` | Set to `'opaque'` to use an opaque surface instead of optics |
+| `disabled` | `boolean` | `false` | Disables button activation |
 
-Liquid Glass remains a WIP / experimental family, and its source package is unreleased. These previews show an independent Web implementation; native rendering, morphing between components and complete Compiler support are still in development.
+Activation, focus, keyboard, and disabled behavior are managed by [Base Button](/en/ui-libraries/base/button/).

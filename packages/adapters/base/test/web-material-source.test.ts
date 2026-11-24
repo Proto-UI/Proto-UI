@@ -301,6 +301,42 @@ describe('visible in-app canvas backdrop lease', () => {
 });
 
 describe('expanded contact paint source admission', () => {
+  it('rejects ancestor pseudo paint separately from ordinary border clearance', () => {
+    const { host, lease, scope } = fixture();
+    const panel = document.createElement('div');
+    scope.append(panel);
+    panel.append(host);
+    const native = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudo) => {
+      if (element === panel && pseudo === '::before')
+        return {
+          content: '""',
+          display: 'block',
+          visibility: 'visible',
+          opacity: '1',
+        } as CSSStyleDeclaration;
+      return native(element, pseudo);
+    });
+    expect(inspectCanvasBackdrop(host, lease.current(), 9)).toMatchObject({
+      valid: false,
+      reason: 'source-painted-ancestor-pseudo',
+    });
+  });
+  it('does not omit an ancestor rounded border intersecting only the expanded corners', () => {
+    const { host, lease, scope } = fixture();
+    const panel = document.createElement('div');
+    panel.style.cssText =
+      'border-width:1px;border-style:solid;border-color:#222;border-radius:16px';
+    scope.append(panel);
+    panel.append(host);
+    vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue(rect(30, 20, 120, 80));
+    expect(inspectCanvasBackdrop(host, lease.current(), 9)).toMatchObject({
+      valid: false,
+      reason: 'source-painted-ancestor-border',
+    });
+    vi.mocked(host.getBoundingClientRect).mockReturnValue(rect(40, 46, 100, 18));
+    expect(inspectCanvasBackdrop(host, lease.current(), 9).valid).toBe(true);
+  });
   it('checks the full paint box without changing source mapping or hitbox', () => {
     const { host, lease } = fixture();
     expect(inspectCanvasBackdrop(host, lease.current(), 9)).toMatchObject({

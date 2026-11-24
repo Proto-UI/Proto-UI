@@ -220,8 +220,8 @@ export function createKernel<P extends PropsBaseType>(
     },
   };
 
-  const { el, slot, r, svg, decoration } = createRendererPrimitives();
-  const renderer: RendererHandle<P> = { el, slot, r, svg, decoration, read };
+  const { el, slot, r, svg, decoration, paintReservation } = createRendererPrimitives();
+  const renderer: RendererHandle<P> = { el, slot, r, svg, decoration, paintReservation, read };
 
   // ----------------
   // render
@@ -231,13 +231,16 @@ export function createKernel<P extends PropsBaseType>(
     setPhase('render');
     try {
       const feedback = modules.getFacades()['feedback'] as FeedbackFacade;
-      const guarded = feedback?.style.hasDecorationTargets?.() ?? false;
+      const guarded =
+        (feedback?.style.hasDecorationTargets?.() ?? false) ||
+        (feedback?.material.hasReservations?.() ?? false);
       const lease = guarded ? feedback.style.captureDecorationLease() : undefined;
       const rendered = renderFn(renderer);
       const children = guarded ? snapshotOwnedTemplateBlueprint(rendered) : rendered;
       if (guarded && feedback.style.captureDecorationLease() !== lease)
         throw new Error('[Template] stale owned blueprint lease');
       const targets: import('@proto.ui/core').OwnedDecorationTarget[] = [];
+      const reservations: import('@proto.ui/core').MaterialPaintReservation[] = [];
       const visit = (node: any): void => {
         if (Array.isArray(node)) {
           for (const n of node) visit(n);
@@ -251,12 +254,18 @@ export function createKernel<P extends PropsBaseType>(
           )
             throw new Error('[Template] decoration must be an empty owned leaf');
           targets.push(node.type.target);
-        } else visit(node.children);
+        } else {
+          if (node.type?.kind === 'paint-reservation') reservations.push(node.type.target);
+          visit(node.children);
+        }
       };
       visit(children);
       if (feedback?.style.validateDecorationTemplate)
         feedback.style.validateDecorationTemplate(targets);
       else if (targets.length) throw new Error('[Template] owned-decoration unsupported');
+      if (feedback?.material.validateReservationTemplate)
+        feedback.material.validateReservationTemplate(reservations);
+      else if (reservations.length) throw new Error('[Template] paint-reservation unsupported');
       return children;
     } finally {
       setPhase(previousPhase);

@@ -17,9 +17,12 @@ const files = {
   projector: 'packages/modules/feedback/src/presence/projector.ts',
   sink: 'packages/modules/feedback/src/presence/sink.ts',
   sampler: 'packages/modules/feedback/src/motion/sampler.ts',
+  channelSampler: 'packages/modules/feedback/src/presence/sampler.ts',
+  topTarget: 'packages/modules/feedback/src/presence/top-target.ts',
   web: 'packages/adapters/base/src/motion/web-presence-presentation.ts',
   styleOwnership: 'packages/adapters/base/src/motion/web-motion-style-ownership.ts',
   steps: 'packages/adapters/base/src/host/synchronous-steps.ts',
+  visibility: 'packages/adapters/base/src/host/view-visibility.ts',
   preference: 'packages/adapters/base/src/platform/web-preference-source.ts',
 } as const;
 const sources = new Map<string, { file: string; sha256: string; contents: string }>(
@@ -46,11 +49,14 @@ const paths = new Map([
   ['@proto.ui/core', './declarations-v1'],
   ['./sink', './sink-v1'],
   ['../motion/sampler', './sampler-v1'],
+  ['./sampler', './channel-sampler-v1'],
+  ['./top-target', './top-target-v1'],
   ['@proto.ui/module-feedback', './projector-v1'],
   ['@proto.ui/module-positioning', '../host-web/translation-composition-v1'],
   ['../platform/web-preference-source', './preferences-v1'],
   ['./web-motion-style-ownership', './motion-style-ownership-v1'],
   ['../host/synchronous-steps', './synchronous-steps-v1'],
+  ['../host/view-visibility', './view-visibility-v1'],
 ]);
 function retarget(contents: string) {
   const parsed = parseSupportTemplate(mapSupportImports(contents, paths));
@@ -106,6 +112,8 @@ export function webPresenceArtifacts() {
     selected(files.declaration, [
       'PresencePhase',
       'AffineLength',
+      'ContainingBlockLength',
+      'PresentationEasing',
       'Translation',
       'FiniteSelection',
       'PresenceEndpoint',
@@ -132,6 +140,8 @@ export function webPresenceArtifacts() {
       'integer',
       'dense',
       'affine',
+      'containingBlockLength',
+      'curve',
       'translation',
       'selectedTranslation',
       'endpoint',
@@ -144,7 +154,7 @@ export function webPresenceArtifacts() {
     source(files.motionDeclaration).contents,
   ].join('\n');
   const sink =
-    `import type { PresenceEndpoint, PresentationOwnerFrame, PresentationViewBinding, PresentationOutcome, StyleHandle } from './declarations-v1';\n` +
+    `import type { PresenceEndpoint, PresencePresentationDeclaration, PresentationOwnerFrame, PresentationViewBinding, PresentationOutcome, StyleHandle } from './declarations-v1';\n` +
     retarget(
       selected(files.sink, [
         'ResolvedPresenceEndpoint',
@@ -162,9 +172,12 @@ export function webPresenceArtifacts() {
     canonical('controller', files.controller),
     projector,
     canonical('sampler', files.sampler),
+    canonical('channel-sampler', files.channelSampler),
+    canonical('top-target', files.topTarget),
     canonical('web', files.web),
     canonical('motion-style-ownership', files.styleOwnership),
     canonical('synchronous-steps', files.steps),
+    canonical('view-visibility', files.visibility),
     canonical('preferences', files.preference),
   ];
 }

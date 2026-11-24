@@ -1,15 +1,15 @@
 ---
-title: 'Virtual-List (WIP)'
-description: 'virtual-list composition and explicit implementation boundary.'
+title: 'Virtual List'
+description: '将逻辑键序列与有界可见项渲染分离的虚拟列表组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Virtual List 将完整稳定逻辑标识序列与物理视图区分。按项 overscan、最大物化数量、修订号与 generation 绑定的提交由宿主无关模型负责。显式 virtual-list/web 入口测量可变项尺寸、管理占位与 Web 节点、保留键对应视图、定位项并清理监听。此 demo 使用该 Web 宿主边界，不代表原生 GPUI 或 Compiler 一致性。应用内容仅按有界可见区间创建。
+将稳定的逻辑条目键序列（`itemKeys`）与物理节点渲染解耦，仅在可见视口及 overscan 缓冲范围内创建和复用应用内容，适合大数据量与可变高度列表。
 
-当前为功能源码 WIP。完整运行时、Compiler、原生、打包、浏览器与视觉验收仍待补齐。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-virtual-list"
@@ -17,15 +17,21 @@ Virtual List 将完整稳定逻辑标识序列与物理视图区分。按项 ove
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 物化宿主的所有权与退休
+## 安装
 
-每个逻辑集合只接受一个物化宿主租约。`attachWebVirtualList` 在添加占位、行视图或监听之前取得租约；第二个宿主的挂载会失败，且不干扰当前宿主。替换宿主前先 dispose 旧宿主。可移植模型向其他宿主实现提供 `acquireMaterializer(onRetired)`；调用 Web 入口时无需在外层再取得一次租约。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-Root 卸载或销毁时会让物化宿主退休：在途 generation 失效，已持有视图与观察器被清理；旧宿主晚到的 refresh、滚动、测量或重复 dispose 不能撤销替代宿主。首次渲染或观察器安装失败也释放租约，同一逻辑集合可以重试。这些所有权规则补充 generation 绑定的 request／commit 协议，不代表非 Web 物化器或原生辅助技术已验收。
+## 用法
+
+由 `Root`、`Viewport` 和 `Content` 组成：
+
+- **逻辑模型与 Web 物化**：`Root` 负责管理完整键序列、按项 `overscanItems`、最大物化数量 `maxMaterializedItems`、修订号及 generation 绑定的提交。Web 端通过 `@proto.ui/prototypes-base/virtual-list/web` 的 `attachWebVirtualList` 测量可变条目高度、维护上下占位节点、按键复用视图、支持滚动定位到指定 key 并在销毁时清理监听。
+- **单一物化租约与生命周期**：每个逻辑集合同一时刻只允许挂载一个物化宿主。`attachWebVirtualList` 会在挂载节点与监听器之前获取租约；重复挂载会失败且不干扰现有宿主，替换前需先调用旧宿主的 `dispose`。自定义宿主可通过 `acquireMaterializer(onRetired)` 获取租约（使用 `attachWebVirtualList` 时无需在外层重复申请）。
+- **卸载与错误恢复**：`Root` 卸载或销毁时会自动注销当前物化宿主，使在途 generation 失效并清理视图与观察器，旧宿主延迟触发的刷新、滚动、测量或重复 `dispose` 不会影响新替换的宿主。若首次渲染或观察器安装失败，租约会自动释放以便重新挂载。
 
 ## API
 
-Virtual List 是工作区源码，没有公开的 `proto-ui add` 目标。Viewport 与 Content 没有属性。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -37,7 +43,7 @@ Virtual List 是工作区源码，没有公开的 `proto-ui add` 目标。Viewpo
   ]}
 />
 
-这些属性属于 Root。
+`Viewport` 与 `Content` 无额外属性。
 
 ## 参考
 

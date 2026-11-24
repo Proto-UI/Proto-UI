@@ -1,0 +1,1690 @@
+{
+  "schemaVersion": 1,
+  "scope": "Local exact-source integration evidence before final commit and original hosted Bootstrap/public acceptance.",
+  "headBeforeCommit": "cf15c6b15ea575f5c62f891c9c5502621bdf7882",
+  "normalMergeHead": "ee2379da5a71c811268efb1b692e38d35c70c870",
+  "mainParent": "0fbb52ef832cc27c78e24c28c59a55a16f51d7fe",
+  "preparedSourceTree": "fec2f858c9a7fe87a163b49fc84bcc80a4a74afd",
+  "originalCombinedSourceTree": "b5347d12a49ec914cfa2193dd7a0dd4d6be48240",
+  "ownSourcePaths": [
+    ".github/workflows/bootstrap-state-controls-evidence.yml",
+    "packages/adapters/web-component/src/adapt.ts",
+    "packages/adapters/web-component/test/portal-conceal.test.ts",
+    "packages/cli/test/text-prototype.test.ts",
+    "packages/prototypes/bootstrap-2-3-2/test/modal-presence-presentation.test.ts",
+    "packages/prototypes/bootstrap-2-3-2/test/modal-presence.browser.test.ts",
+    "scripts/test/bootstrap-modal-observation.ts",
+    "scripts/test/bootstrap-state-controls-evidence.test.mjs",
+    "scripts/test/check-bootstrap-motion-evidence.mjs",
+    "scripts/test/check-bootstrap-motion-evidence.test.mjs",
+    "packages/adapters/base/test/material-paint-reservation.test.ts",
+    "packages/modules/feedback/test/material-reservation-cleanup.test.ts"
+  ],
+  "sourceSha256": {
+    ".github/workflows/bootstrap-state-controls-evidence.yml": "86e34087fca80fb6fca958d361ead29595ff526c81a2135a95da6db37a9b075e",
+    ".github/workflows/ci.yml": "08ed3b91546d16be1e581647afa1991ec3ec2c74e8d278d80324b4248724dd67",
+    ".github/workflows/finf-representative-features-evidence.yml": "afc15cc0307b3975463d8dc90f2474d8ea054009793912d11c7c696dc8fe9d84",
+    ".prettierignore": "41fa08f6738402dc1747c431e434f34defcad906b2b8ced59c25afcecca0a8b2",
+    "apps/www/src/content/docs/zh-cn/bootstrap-navbar.browser.test.ts": "fe63acc242daed2a9cace7b60de3f3fc823659a7216bee41e09e343d99c45c7b",
+    "apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts": "aef3f4c9070b5ec49935dda5e5cb492ddcff792cc60cce2256928b5a3bb3ef30",
+    "apps/www/src/content/docs/zh-cn/finf-representative-features-evidence.test.ts": "44ff54cce1094ef2f92d70c1a530804227ac5d7cc784386c51b1c9da37a580d8",
+    "apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts": "95e58f3cece104603564cc64467c5c2e29d37f5dfe20059087ba07bdadf817a9",
+    "apps/www/src/content/docs/zh-cn/finf-representative-workflow-selection.test.ts": "884f839f77f6a9486304920d8d8b82c42eb78919b16aad65c0a4dde5a67ed277",
+    "apps/www/src/pages/en/test/bootstrap-state-controls.astro": "e1b429683a78b52b10ab3c24efb411d10097da439167fe9288003b130fe3425a",
+    "package.json": "d026b1c052fd938af98c09c06436bc2efdc60da34c87fda0bfd358735b47332b",
+    "packages/adapters/base/src/index.ts": "dacaa927063c4b5ee4ebcf1588743961c1a36dc50c3a296f6470854085cb373b",
+    "packages/adapters/base/src/material/border-outline.ts": "2ca0236abb2b2153e0c3c139af68aa12d1e885dbdc1d6d8f33cd030deca355ab",
+    "packages/adapters/base/src/material/contact-carrier.ts": "f77a529c60a5736783f3f6b71d969399b95eeb8d6cae47aefb10e0a1ff706ec1",
+    "packages/adapters/base/src/material/image-prepare.ts": "3668b4d200b2da4fbe830038d41f15060b57ab352dbbe1b8ade4279a1aa4da29",
+    "packages/adapters/base/src/material/paint-reservation.ts": "531a999fa3ff7683ae7d940809447b9306018ad889b5c297b373426c119e8e2d",
+    "packages/adapters/base/src/material/sink.ts": "2961c9100c330914ee2e58a8ac5dd1f0147113555a9b8819be3ea8ed8e62e54e",
+    "packages/adapters/base/src/material/source-refresh-task.ts": "1fd17ab8779d367c23e54c213c5777cd26883782c374e99bb982c5942bd316e5",
+    "packages/adapters/base/src/material/source.ts": "144b8163df68c6eefec57a0dc04afa8601a5e568237e0386b724d2a05f2cea5b",
+    "packages/adapters/base/src/motion/web-resident-motion.ts": "88641824b05d6aee4032d2ce221ec837ee0a27b671ef47a24d3b16069ce9c495",
+    "packages/adapters/base/test/fixtures/material-reservation-conformance.ts": "73dff369c7e58c39c5433cc3c2c32b1a1a1b227b06c81cbf35cd03ac62009d3f",
+    "packages/adapters/base/test/material-border-outline.test.ts": "cdb3cb0d9415eacb80a2d88aba87e1dce50d259b3fe80cec8d7bae02abb3c73f",
+    "packages/adapters/base/test/material-paint-reservation.test.ts": "314d61db9d8458fa474134dd9356ba7fd083eb1596097cd6cbaad96f033a1fea",
+    "packages/adapters/base/test/web-material-adoption.test.ts": "da299812d7684e32ca4f82c0dc90a42ed619f59de43f007c75ae0894074106e6",
+    "packages/adapters/base/test/web-material-image-cache.test.ts": "9b51fa6f65d6899e3a247a601f9870653983e45d4fca2c7bbfba7947220b702f",
+    "packages/adapters/base/test/web-material-initial-paint.test.ts": "455d2b737628d7949c249a1b9ab133e9008cfa47f602032b1569c6a68c54e598",
+    "packages/adapters/base/test/web-material-preferences-sequence.test.ts": "2a73a943756074f95801e046c1d198504936b1891b7073be5dbaa76230cacf90",
+    "packages/adapters/base/test/web-material-sink.test.ts": "9a17b146551e926c2f866c96d1a149f681afc0a7915b62c338318603e8714fe1",
+    "packages/adapters/base/test/web-material-source-refresh-task.test.ts": "2eb404c80e4ddc6380d8950a12160f50c13f51c81b181bc2b6ff7d7aa6555073",
+    "packages/adapters/base/test/web-material-source.test.ts": "b5d9fae8617a418519a46ef5e1ff3ee85a4490c04ef384825ad1b4dc206ce883",
+    "packages/adapters/base/test/web-presence-top.test.ts": "7c9081cc1ea01eba71833a7a762870a4c10802183c399bb84824a3760c5999d1",
+    "packages/adapters/base/test/web-resident-width-adoption.test.ts": "d90d4e15514768a635ae1cbb915dd4fce1ebb6f2ad6db004fcc199d4580dd57f",
+    "packages/adapters/base/test/web-resident-width.test.ts": "32117204b5ad75a9f479d3cef4bc7e40fb729ea0806e3d17db9b07ba1d2553af",
+    "packages/adapters/react/src/runtime/modules.ts": "6d203a3b60b79e419c41432b17090e7cd8e6d7840ce175b9a3fd2e867c624839",
+    "packages/adapters/react/src/template.ts": "e9e976f4e66b25c00dc8e929dbcd96d1e97c863c9079fc4d4b9ac6e8789b7254",
+    "packages/adapters/react/test/material-reservation.integration.test.ts": "8d133a91c703543e8b36f25971e01918f3e0513d16599092fad7f890b439efb4",
+    "packages/adapters/vue/src/runtime/modules.ts": "557697bc9ac6ef3f142bcd60a3fa8bafd22b98c0e73e039b0839af54c85e8d4c",
+    "packages/adapters/vue/src/template.ts": "9f3cd859224a18bc35c84bb2b6c1da39f35e8f7252dc9bf412511a87938b0e2c",
+    "packages/adapters/vue/test/material-reservation.integration.test.ts": "a81003db696156e019257c45f63e1c8848cadab932fce83ceba15c47759facdd",
+    "packages/adapters/vue2/src/adapt.ts": "14172d8b11c61df667e5eaba4b7d7d16e9eb0088e17da8f5b2fb09e258fc707a",
+    "packages/adapters/vue2/src/runtime/modules.ts": "f4c056e80ade2471d9d42c07e10503661e6753ec78c8b74362c99091982fb49b",
+    "packages/adapters/vue2/src/template.ts": "52617d81f9ab789a4c4869931efc0d27f546ccff9c80ddb5af46da1dbd190755",
+    "packages/adapters/vue2/test/dialog-close-request-lifetime.test.ts": "2f1fa202353da9bebb80c1091b6a94996be0598812ced0bbe8863b63ca906620",
+    "packages/adapters/vue2/test/material-reservation.integration.test.ts": "7046d34833015c6899a3655df6710b67117381ad970a66632f40e7ca64a75c3f",
+    "packages/adapters/vue2/test/view-reentrant-presence.test.ts": "6baae2b474504bc8b922972756d0330de604f30ab5d12076a39c77a5b989b45d",
+    "packages/adapters/web-component/src/adapt.ts": "1c88a9be882a70d672006c9a4450b2125bf30b22b9a92ca4f87c1028aea70ee8",
+    "packages/adapters/web-component/src/commit.ts": "e6306b3e5c5f0cf235442e67cb9b8b6c05d0fcf70db4f511e97c2c2fc5c93c48",
+    "packages/adapters/web-component/src/runtime/modules.ts": "211f139118382dd45e2baa54073898c5ea13443b6a3be4276e2f0fbff5e75f65",
+    "packages/adapters/web-component/test/dialog-overlay.test.ts": "b3da27ed087145a4e7a9035fb0474e1af438b78d3f987ac8f1ab29459ffa34ba",
+    "packages/adapters/web-component/test/material-reservation-stage.test.ts": "c0d3a5396a5f176954fd0a5961d831e8ca91b4b7fce5bda58dd048d86324b79d",
+    "packages/adapters/web-component/test/material-reservation.integration.test.ts": "9f2e573b9ba83a0c897f4796899f9cdacd6e60363ad088000fe3770b3d792d39",
+    "packages/adapters/web-component/test/portal-conceal.test.ts": "6109f9a7d025b75631dbc16006ee61466c99d08d64594249ffd34b2390bde242",
+    "packages/adapters/web-component/test/portal-first-render-reentry.test.ts": "c52f4fc91a53486b9873d15233c128fd2be1915ef4f96b78d2f74cdeb5e78a2d",
+    "packages/cli/src/generated/brutalist-style-tokens.ts": "47e2b395e769b328d58e48779815ecd6d7557a9f0656439fde4b920fb7c4eeaa",
+    "packages/cli/src/generated/draft-family-style-tokens.ts": "aaa7980d8e29de0e9b68722f5f2b5a8461f628165e98203182950c6c010d2587",
+    "packages/cli/src/services/hook-source-summary.ts": "3943d9af060dcc72133bfd50fe4b583b2ba82605c637e16d0ea32aeb1b9a6130",
+    "packages/cli/src/services/proto-style-css.ts": "598512e65c3b77eacdeeab674b436b3e490e942908d147289d3ae4c8f43e8be8",
+    "packages/cli/test/brutalist-reference-tokens.test.ts": "03b9142dbeee98ea57e8e25f434b2e65b5d07838561c16b9a708739337dacf88",
+    "packages/cli/test/hook-source-projection-accessors.test.ts": "3a758d31a644b4afab0c5c5519886779adaddbb40ac0bf1964156bf38f6bae66",
+    "packages/cli/test/material-reservation-layout-css.test.ts": "52924298b2ae3f27ece4541677ebeaada376e2b0c8abc8d366deaecc73c756c7",
+    "packages/cli/test/text-prototype.test.ts": "8c6f2afd874ac1d00fbec615830fb5df0d626814b32f2468bf357509b58ea379",
+    "packages/core/src/handles.ts": "25b7d940e4fbe8c12d9ae1f244c0346cc9a1adfc06af05c7cbcc8e53c8ef1032",
+    "packages/core/src/index.ts": "354e1d965b701feb0164b407c78a3c793a30aa2cd501f010247faf16a1e782a4",
+    "packages/core/src/material-paint-reservation.ts": "288d506b2df7d30f54ccac480a70136533abfa037475072e46ce7080af20d95e",
+    "packages/core/src/material.ts": "47cbaf20254ab4340e7057c86ab4695878b5df6bf3e2f750e4561aad50d98627",
+    "packages/core/src/spec/owned-template-blueprint.ts": "fcfe513cdb1a6533c164fdedc25ae3e085d97f209953c149e8c867df899cb3b2",
+    "packages/core/src/spec/svg-tags.ts": "816196bcb9d6899d9185a4dfd11ebe07398a7717afccdb9b5e56e46f95e30bf0",
+    "packages/core/src/spec/template.ts": "6e63757bad33a6b6a23ea94b95fb34b44e5a4f78d97aca8d8938d9089bb42c6f",
+    "packages/core/test/material-paint-reservation.test.ts": "62aaf6a15b353407c2b900b692542beb8ebf7bee15022fa573807a343a0366f6",
+    "packages/core/test/presence-top-declaration.test.ts": "5fd41d065896a78f33634036a4b33a507a6e0b978bc29efc73d1b45e9eb4dd89",
+    "packages/modules/feedback/package.json": "3b359c6a19cd1515419b1cfd612a17912308d97c46db67ccb4aa571934a6ea2c",
+    "packages/modules/feedback/src/create.ts": "7faa1043eebc7e6874623de07ff2fc0c761b7eb2b15de9c57fcbc18b6b2f72b9",
+    "packages/modules/feedback/src/index.ts": "7f53f752e2f67a1e2eaacaffcb66c09fb570799d5183cd58debd6bed73304ae8",
+    "packages/modules/feedback/src/material/paint-reservation.ts": "80ddbe82bafed66ccce9dfb78b3a250836a5b5a57855aaaa6a68e80af9daaf92",
+    "packages/modules/feedback/src/material/shared-policy.ts": "50b60c635bc325a7ba6c70dbae0e47c9a29a7077212c31b35fca0df701ff448b",
+    "packages/modules/feedback/src/motion/projector.ts": "2408989649ea882ad3ff9ba735e88839798312eaaf66e6ed96d5d36459702359",
+    "packages/modules/feedback/src/types.ts": "206f99186501ec20175be19041a1783f45294ee7398983444cd19efbf7f5dafe",
+    "packages/modules/feedback/test/material-paint-reservation.test.ts": "51ce849b44fde15fd0c85497afacdaee18e185cbb200d2694ae24dde27ca3e70",
+    "packages/modules/feedback/test/material-reservation-cleanup.test.ts": "5d621411171bd421d344ff424c9dc6f37fa4b86347883f4339410626cf9faba1",
+    "packages/modules/feedback/test/presence-top-projector.test.ts": "45d069144c355b413e4ff242fc9e8299aa1ce92253940f78aa0cbb9df43c7297",
+    "packages/modules/feedback/test/resident-width.test.ts": "22f29b36024207380f2ac67720c8e289d617c8368e6c9af4b49f6dba5e8beeb0",
+    "packages/modules/feedback/test/shared-material-policy.test.ts": "956def4260e5a008cba8af15210f3dc8118bdd6d00fafe8b0f066e851f4e5c59",
+    "packages/modules/focus/src/center.ts": "b76c815f6c60ee34d3e7762a420840f214f4fa343a762245b8fc8ff1ffc7e4b1",
+    "packages/modules/focus/test/scope-restore-mode.test.ts": "3d6badca77b2c0c5e07b13372ba61548421f24fba51d5b005378b8d57503c969",
+    "packages/prototypes/base/src/dialog/content.proto.ts": "363dd5847030f4f9290b81503c2ce838f4ce39700dd07bff3a582b79cb3de684",
+    "packages/prototypes/base/src/dialog/shared.ts": "7e7c7792ce52a3a4deefb8973838eee1f2640389466760c7df15ced6fd468c3b",
+    "packages/prototypes/bootstrap-2-3-2/src/text/root.proto.ts": "73030c218ab22a3f68379c6e09c45c1325b7633c85ad20c524c65309dcf51294",
+    "packages/prototypes/bootstrap-2-3-2/test/modal-presence-presentation.test.ts": "2ea4d497e0a772aba17aa9468d0420aa239e2b05c176996ca6d05cca3df282d4",
+    "packages/prototypes/bootstrap-2-3-2/test/modal-presence.browser.test.ts": "40a9416b4a5e5e340a48d0ee245b34b66609e1679005a30c1d16827dbd5727fc",
+    "packages/prototypes/bootstrap-2-3-2/test/progress-width-motion.browser.test.ts": "056fd154b091c96187ee30e5b9550d14d9cc3c9be984473834d2bbb008c96199",
+    "packages/prototypes/liquid-glass/src/accordion/content.proto.ts": "4b57b6ba07a0e1993ee6473ee0d6930c1ee4a3631a7c16a2fcfaa631483b2f7b",
+    "packages/prototypes/liquid-glass/src/accordion/heading.proto.ts": "f63c9be2dcbf8ca68cc3fb5a260d5859f7b0e819a5c2d7844d08baf862ccb3d4",
+    "packages/prototypes/liquid-glass/src/accordion/item.proto.ts": "1fef78098d13d6864fdc47e325f1593f42d2acd550f67ae149284988a165f2ca",
+    "packages/prototypes/liquid-glass/src/accordion/root.proto.ts": "c967402f67b28c4288d61511e6c04d3ff173c8f012e19d5000496cabcf91f0d3",
+    "packages/prototypes/liquid-glass/src/accordion/trigger.proto.ts": "ba2ec21d4f91824e19cc89bb3e9b9042818a2a0db209ecc4a7010f43ae46b189",
+    "packages/prototypes/liquid-glass/test/accordion-material.test.ts": "5e6b401466baebfd3b11eeabacd098b735e8fbbe3a3fdbd62ef55ce482c780d8",
+    "packages/runtime/src/kernel/handles/def.ts": "1655ee15904f3f8bc11848a31b869f00d7449c61b7c0355e0d6ea91a331b8c0b",
+    "packages/runtime/src/kernel/kernel.ts": "4d1953ef05d507714b1d25a6a4d167d8e00e96d5816f8bc83ec79fc7757b4a39",
+    "packages/runtime/test/contract/resident-width.contract.test.ts": "94495aa8b9387ad6917d812aa3a58f63416f02ff036b3c641203904c61443c64",
+    "packages/spec/graph/test/shadcn-dropdown-evidence.test.ts": "23125e8fde9710789ac08ee63050dc7792e0f5c9b4a475b496cb604a9b523596",
+    "pnpm-lock.yaml": "eae18430bd967c94def36809b6d3305fa156a96548b08215a18dfe8a43923c07",
+    "pnpm-workspace.yaml": "8281b0ca82d44d4ba284a9f60088258e7ca7283475a38e97ea66b2d785466ee7",
+    "scripts/test/bootstrap-modal-observation.ts": "98ff9ec8815b92579fedb47fb9faefc244dae5f00af1129f35e400843740c01b",
+    "scripts/test/bootstrap-state-controls-evidence.test.mjs": "6df95b838a645b0580efae8693816d0dfc60cd70541f4a87b45c8ca582cbdf65",
+    "scripts/test/bootstrap-state-controls-receipt.mjs": "d14aba141cb4086e3a2bc9de4992d52a49a040fc2028f6281633f8928b75c446",
+    "scripts/test/check-bootstrap-motion-evidence.mjs": "b65f27a58fdb2a3d684b125819cb821a58f12427b892a8ab66cbe1b6eefc6606",
+    "scripts/test/check-bootstrap-motion-evidence.test.mjs": "43a52fd0e8328b9c8acebde06005678f6b8060d964bed47e8e417034924582c0",
+    "scripts/test/run-bootstrap-public-validation.mjs": "c4e8dc453f7bac974fed6b6d2b11568aa1eb835696d9bc533b18c8625739f285",
+    "scripts/test/run-bootstrap-public-validation.test.mjs": "613312e053c1e0f27b3e1591f9795d63084c02a23f87aab1155aa448e21d9cef",
+    "scripts/test/runtime-test-plan.mjs": "f901ead2eb5b53fc49cee602bfc42b074effaea5bbf1df20bd9edb2df33b6579",
+    "spec/contracts/C-MATERIAL-PAINT-RESERVATION-0001.yaml": "0040d2bcaa5e291dac78c289cba43a17b6a975c71d217df680843298a61fbf02",
+    "spec/host-caps/HC-CONTROL-LABEL-0001.yaml": "c893ca5d8ff4944e3140ad2e1e4171f48effdacde8ea76fa88fd5337f2fa6dad",
+    "spec/tests/T-FEEDBACK-PRESENCE-PRESENTATION-0001.yaml": "02a8b5b970f4e4ebce0de552fee3eae801814de7d8a35a55bb1929c34c35227d",
+    "spec/tests/T-MATERIAL-PAINT-RESERVATION-0001.yaml": "7fe35b448a665ff43ed6f60a3be2b5666696a7dc26366dbadd6a6786dc298aed",
+    "tsconfig.workspace.json": "1442bf4ca8be52326c5dde9feed933b03e5df795bd95ba151087959f330ecb3d"
+  },
+  "sourceBindings": 115,
+  "sourcePatchSha256": "f193f7a2be110d44244f1f10159e6901cfe611cfe4e68342af17c72e09667692",
+  "motionInventory": {
+    "suites": [
+      {
+        "file": "packages/core/test/presence-top-declaration.test.ts",
+        "cases": 10
+      },
+      {
+        "file": "packages/modules/feedback/test/presence-top-projector.test.ts",
+        "cases": 17
+      },
+      {
+        "file": "packages/adapters/base/test/web-presence-top.test.ts",
+        "cases": 13
+      },
+      {
+        "file": "packages/prototypes/bootstrap-2-3-2/test/modal-presence-presentation.test.ts",
+        "cases": 18
+      },
+      {
+        "file": "packages/adapters/web-component/test/portal-conceal.test.ts",
+        "cases": 31
+      },
+      {
+        "file": "packages/modules/feedback/test/resident-width.test.ts",
+        "cases": 9
+      },
+      {
+        "file": "packages/adapters/base/test/web-resident-width.test.ts",
+        "cases": 11
+      },
+      {
+        "file": "packages/adapters/base/test/web-resident-width-adoption.test.ts",
+        "cases": 13
+      },
+      {
+        "file": "packages/runtime/test/contract/resident-width.contract.test.ts",
+        "cases": 2
+      },
+      {
+        "file": "packages/prototypes/bootstrap-2-3-2/test/modal-presence.browser.test.ts",
+        "cases": 6
+      },
+      {
+        "file": "packages/prototypes/bootstrap-2-3-2/test/progress-width-motion.browser.test.ts",
+        "cases": 7
+      }
+    ],
+    "total": 137,
+    "source": 124,
+    "nativePositive": 12,
+    "splitRejected": 1
+  },
+  "localSourceResult": {
+    "numPassedTests": 148,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTests": 148,
+    "reportSha256": "171abea9f2cb6553471539e60e4ea3779eb048d32987c75f64ce79f6b0cff1fc",
+    "files": [
+      {
+        "file": "packages/cli/test/text-prototype.test.ts",
+        "assertions": 14,
+        "passed": 14,
+        "failed": 0,
+        "pending": 0
+      },
+      {
+        "file": "packages/core/test/presence-top-declaration.test.ts",
+        "assertions": 10,
+        "passed": 10,
+        "failed": 0,
+        "pending": 0
+      },
+      {
+        "file": "packages/adapters/base/test/web-presence-top.test.ts",
+        "assertions": 13,
+        "passed": 13,
+        "failed": 0,
+        "pending": 0
+      },
+      {
+        "file": "packages/adapters/base/test/web-resident-width-adoption.test.ts",
+        "assertions": 13,
+        "passed": 13,
+        "failed": 0,
+        "pending": 0
+      },
+      {
+        "file": "packages/adapters/base/test/web-resident-width.test.ts",
+        "assertions": 11,
+        "passed": 11,
+        "failed": 0,
+        "pending": 0
+      },
+      {
+        "file": "packages/adapters/web-component/test/dialog-overlay.test.ts",
+        "assertions": 8,
+        "passed": 8,
+        "failed": 0,
+        "pending": 0
+      },
+      {
+        "file": "packages/adapters/web-component/test/portal-conceal.test.ts",
+        "assertions": 31,
+        "passed": 31,
+        "failed": 0,
+        "pending": 0
+      },
+      {
+        "file": "packages/adapters/web-component/test/portal-first-render-reentry.test.ts",
+        "assertions": 2,
+        "passed": 2,
+        "failed": 0,
+        "pending": 0
+      },
+      {
+        "file": "packages/modules/feedback/test/presence-top-projector.test.ts",
+        "assertions": 17,
+        "passed": 17,
+        "failed": 0,
+        "pending": 0
+      },
+      {
+        "file": "packages/modules/feedback/test/resident-width.test.ts",
+        "assertions": 9,
+        "passed": 9,
+        "failed": 0,
+        "pending": 0
+      },
+      {
+        "file": "packages/prototypes/bootstrap-2-3-2/test/modal-presence-presentation.test.ts",
+        "assertions": 18,
+        "passed": 18,
+        "failed": 0,
+        "pending": 0
+      },
+      {
+        "file": "packages/runtime/test/contract/resident-width.contract.test.ts",
+        "assertions": 2,
+        "passed": 2,
+        "failed": 0,
+        "pending": 0
+      }
+    ],
+    "failures": []
+  },
+  "nodeResult": {
+    "counts": {
+      "tests": 98,
+      "pass": 98,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "identities": [
+      "fixture uses all eight actual Bootstrap exports and only source-derived component paint",
+      "browser suite is Actions-only and exact-head guarded before starting any server",
+      "browser test and fixture script have no TypeScript syntax diagnostics",
+      "isolated Bootstrap producer stays out of both generic phases and every shared shard",
+      "navbar evidence is independently guarded, scheduled and terminal after another suite fails",
+      "historical navbar capture keeps candidate instrumentation outside the pinned measured tree",
+      "Button motion uses actual native trajectories in an independently guarded sequential lane",
+      "registered browser suite stays with its dedicated owner, outside both generic phases",
+      "the full CI cycle requires the same-commit independent Bootstrap producer and receipt",
+      "receipt gate retains fifteen original journeys and all sixteen composition combinations",
+      "the old fifteen-case green receipt cannot admit unexecuted composition journeys",
+      "composition receipt rejects a missing combination: wc/input/uncontrolled: native CDP composition preserves editor and owner",
+      "composition receipt rejects a missing combination: wc/input/controlled: native CDP composition preserves editor and owner",
+      "composition receipt rejects a missing combination: wc/textarea/uncontrolled: native CDP composition preserves editor and owner",
+      "composition receipt rejects a missing combination: wc/textarea/controlled: native CDP composition preserves editor and owner",
+      "composition receipt rejects a missing combination: react/input/uncontrolled: native CDP composition preserves editor and owner",
+      "composition receipt rejects a missing combination: react/input/controlled: native CDP composition preserves editor and owner",
+      "composition receipt rejects a missing combination: react/textarea/uncontrolled: native CDP composition preserves editor and owner",
+      "composition receipt rejects a missing combination: react/textarea/controlled: native CDP composition preserves editor and owner",
+      "composition receipt rejects a missing combination: vue/input/uncontrolled: native CDP composition preserves editor and owner",
+      "composition receipt rejects a missing combination: vue/input/controlled: native CDP composition preserves editor and owner",
+      "composition receipt rejects a missing combination: vue/textarea/uncontrolled: native CDP composition preserves editor and owner",
+      "composition receipt rejects a missing combination: vue/textarea/controlled: native CDP composition preserves editor and owner",
+      "composition receipt rejects a missing combination: vue2/input/uncontrolled: native CDP composition preserves editor and owner",
+      "composition receipt rejects a missing combination: vue2/input/controlled: native CDP composition preserves editor and owner",
+      "composition receipt rejects a missing combination: vue2/textarea/uncontrolled: native CDP composition preserves editor and owner",
+      "composition receipt rejects a missing combination: vue2/textarea/controlled: native CDP composition preserves editor and owner",
+      "receipt gate rejects missing source receipt",
+      "receipt gate rejects stale source",
+      "receipt gate rejects wrong expected source",
+      "receipt gate rejects other run",
+      "receipt gate rejects other attempt",
+      "receipt gate rejects pending manifest",
+      "receipt gate rejects failed cleanup",
+      "receipt gate rejects startup failure",
+      "receipt gate rejects zero browser results",
+      "receipt gate rejects partial browser results",
+      "receipt gate rejects duplicate browser results",
+      "receipt gate rejects skipped manifest result",
+      "receipt gate rejects browser errors",
+      "receipt gate rejects missing browser suite",
+      "receipt gate rejects missing supporting suite",
+      "receipt gate rejects skipped browser assertion",
+      "receipt gate rejects todo supporting assertion",
+      "receipt gate rejects partial Vitest browser results",
+      "receipt gate rejects duplicate Vitest browser results",
+      "receipt gate rejects false total count",
+      "runner-dependent evidence paths are evaluated only in supported step env contexts",
+      "native-sequence oracle remains discriminating and runs with the browser evidence",
+      "disabled-paint oracle and its negative controls run in exact-head browser evidence",
+      "requires eleven exact files and 137 executed cases while separating positive and rejected profiles",
+      "rejects missing required file",
+      "rejects duplicate file replacing another",
+      "rejects unexpected extra file",
+      "rejects empty selected file",
+      "rejects only five Modal cases",
+      "rejects missing Progress rejection",
+      "rejects only thirty Portal cases",
+      "rejects green extra case replacing the Portal reentry",
+      "rejects duplicate Portal reentry with distinct generic identities",
+      "rejects duplicate case identity",
+      "rejects skipped assertion",
+      "rejects todo assertion",
+      "rejects pending test total",
+      "rejects pending suite total",
+      "rejects todo total",
+      "rejects false assertion total",
+      "rejects runtime error",
+      "rejects green extra case replacing the rejection",
+      "a failed or unstarted step cannot reuse an old green JSON report",
+      "requires native source/terminal images and preserves the unsupported split disposition",
+      "source binding rejects dirty, wrong-head and changed inputs",
+      "rejects nested Modal history/disposal and Progress final capture failures",
+      "binds the rejected split case to the same Progress bundle and stylesheet",
+      "the dedicated workflow selects every required file and always gates and uploads evidence",
+      "source validation uses real prerequisites, step-scoped evidence initialization and a terminal gate",
+      "source finalizer accepts complete source, graph and consumer execution receipts",
+      "source finalizer rejects skipped command despite green reports and retains failed evidence",
+      "source finalizer rejects failed command despite green reports and retains failed evidence",
+      "source finalizer rejects failed log capture despite green reports and retains failed evidence",
+      "source finalizer rejects missing graph report and retains failed evidence",
+      "source finalizer rejects skipped graph assertion despite a green total and retains failed evidence",
+      "source finalizer rejects inflated consumer TAP footer and retains failed evidence",
+      "source finalizer rejects incomplete consumer TAP and retains failed evidence",
+      "source finalizer rejects dirty final source and retains failed evidence",
+      "source finalizer rejects changed final head and retains failed evidence",
+      "Modal observation waits for physical withdrawal and acknowledged unmount",
+      "Modal observation rejects replaced lifetimes and missing conceal ownership",
+      "plans require full canonical commands and reject preparation or shortcut arguments",
+      "accepts complete source-bound evidence for all three fixed groups",
+      "rejects missing commands, prepared-only records, changed argv and abnormal exits",
+      "rejects source drift and receipts from another workflow attempt or group",
+      "rejects missing logs, changed raw bytes and nonzero receipts despite success text",
+      "rejects advisory, incomplete, inconsistent and differently bound budget reports",
+      "records real command failure independently from a successful tee and PASS stdout",
+      "records a real tee write failure even when the executed command returns zero",
+      "captures actual clean Git source and detects a new untracked source file",
+      "always finalization writes a failed manifest when execution never happened"
+    ],
+    "sourceSha256": {
+      "scripts/test/bootstrap-state-controls-evidence.test.mjs": "6df95b838a645b0580efae8693816d0dfc60cd70541f4a87b45c8ca582cbdf65",
+      "scripts/test/check-bootstrap-motion-evidence.test.mjs": "43a52fd0e8328b9c8acebde06005678f6b8060d964bed47e8e417034924582c0",
+      "scripts/test/run-bootstrap-public-validation.test.mjs": "613312e053c1e0f27b3e1591f9795d63084c02a23f87aab1155aa448e21d9cef"
+    }
+  },
+  "commands": [
+    {
+      "name": "node-version",
+      "command": ["node", "--version"],
+      "exit": 0,
+      "seconds": 0.009,
+      "logSha256": "4409d3bfa08b82f385bd424eeda65fc63b756129f0e89e82df77f1fecafccc14"
+    },
+    {
+      "name": "frozen-install",
+      "command": ["corepack", "pnpm@10.32.1", "install", "--frozen-lockfile"],
+      "exit": 0,
+      "seconds": 5.89,
+      "logSha256": "fd822830694cc2c9d9ba2a101438c64e5f055f4ef4b7c3da321081e3ee6ac203"
+    },
+    {
+      "name": "strict-node-controls",
+      "command": [
+        "node",
+        "--test",
+        "--test-reporter=tap",
+        "scripts/test/bootstrap-state-controls-evidence.test.mjs",
+        "scripts/test/check-bootstrap-motion-evidence.test.mjs",
+        "scripts/test/run-bootstrap-public-validation.test.mjs"
+      ],
+      "exit": 0,
+      "seconds": 2.022,
+      "logSha256": "b8daccca43a6ddce0e8ce0f3a8f5465561577d0c07018781ed1bc4cd945bdcc9"
+    },
+    {
+      "name": "combined-source",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/core/test/presence-top-declaration.test.ts",
+        "packages/modules/feedback/test/presence-top-projector.test.ts",
+        "packages/adapters/base/test/web-presence-top.test.ts",
+        "packages/prototypes/bootstrap-2-3-2/test/modal-presence-presentation.test.ts",
+        "packages/adapters/web-component/test/portal-conceal.test.ts",
+        "packages/modules/feedback/test/resident-width.test.ts",
+        "packages/adapters/base/test/web-resident-width.test.ts",
+        "packages/adapters/base/test/web-resident-width-adoption.test.ts",
+        "packages/runtime/test/contract/resident-width.contract.test.ts",
+        "packages/adapters/web-component/test/portal-first-render-reentry.test.ts",
+        "packages/adapters/web-component/test/dialog-overlay.test.ts",
+        "packages/cli/test/text-prototype.test.ts",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=json",
+        "--outputFile=/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/combined-source.json"
+      ],
+      "exit": 0,
+      "seconds": 307.064,
+      "logSha256": "e73fc755165c6b2b706620ed60511ce279aacb17c1235643ece782d50243bd87"
+    },
+    {
+      "name": "current-base-authoring",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "check:spec-authoring",
+        "--",
+        "--base",
+        "0fbb52ef832cc27c78e24c28c59a55a16f51d7fe"
+      ],
+      "exit": 0,
+      "seconds": 24.915,
+      "logSha256": "922e42a4cdb73a69ccd42bd4439017b83e993de1b3fc84a73a615172018d33f9"
+    },
+    {
+      "name": "current-catalog",
+      "command": ["corepack", "pnpm@10.32.1", "check:prototype-catalog"],
+      "exit": 0,
+      "seconds": 6.415,
+      "logSha256": "8c93c742d83e6775940dbc2b30ecb75ed1b3763d75fceebd717b72be3ae7046d"
+    },
+    {
+      "name": "current-spec-loader",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/current-spec-loader.mjs"
+      ],
+      "exit": 0,
+      "seconds": 4.64,
+      "logSha256": "6eb5f4955a230e7c9df9186c830d537a0e447c203f481ee44550d5fb1da85d36"
+    },
+    {
+      "name": "draft-family-generator",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/styles/generate-draft-family-style-tokens.ts"
+      ],
+      "exit": 0,
+      "seconds": 145.437,
+      "logSha256": "c2a5f3e9af2b14c1b01a784a5e387c083bb4acc0cc2d93ddf0f633e083e5e48a"
+    },
+    {
+      "name": "draft-family-generator-check",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/styles/generate-draft-family-style-tokens.ts",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 157.77,
+      "logSha256": "5a8c0763f9033a3f4ec5e33e1946e0685f9abd2480e45de0c06dff9385aa5841"
+    },
+    {
+      "name": "official-cli-build",
+      "command": ["node", "scripts/build/public-packages.mjs", "--package", "@proto.ui/cli"],
+      "exit": 0,
+      "seconds": 5.142,
+      "logSha256": "7e24ac7108e1333e5ab382809cec6fbd2d190216a83b117907e3d885677b8bc9"
+    },
+    {
+      "name": "official-website-token-generator",
+      "command": ["node", "apps/www/scripts/generate-website-prototype-tokens.mjs"],
+      "exit": 0,
+      "seconds": 145.632,
+      "logSha256": "485d32e37e08ebf385225edb2fcfc088c292a53b59ae313358e2381d45bcb439"
+    },
+    {
+      "name": "public-type-contracts",
+      "command": [
+        "node",
+        "--max-old-space-size=6144",
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "internal/contracts/types/tsconfig.json"
+      ],
+      "exit": 0,
+      "seconds": 13.777,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "workspace-types",
+      "command": [
+        "node",
+        "--max-old-space-size=6144",
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.workspace.json",
+        "--noEmit"
+      ],
+      "exit": 2,
+      "seconds": 86.294,
+      "logSha256": "7fc95875acc1418a4e66fb8d6a5cf298c517ec33c771957e5a210d3c7c64bfdc"
+    },
+    {
+      "name": "original-deadline-graph",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/spec/graph/test/shadcn-dropdown-evidence.test.ts",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=json",
+        "--outputFile=/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/original-deadline-graph.json"
+      ],
+      "exit": 1,
+      "seconds": 10.57,
+      "logSha256": "7e1d444b508beb52a7038b786734e3747b315a22808823a516727dc38073c41f"
+    },
+    {
+      "name": "original-deadline-schema",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/spec/fixtures/test/prototype-inheritance-schema.test.ts",
+        "packages/spec/fixtures/test/adapter-profile-schema.test.ts",
+        "packages/spec/fixtures/test/feedback-style-authoring.test.ts",
+        "packages/spec/fixtures/test/feedback-style-runtime-patch.test.ts",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=json",
+        "--outputFile=/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/original-deadline-schema.json"
+      ],
+      "exit": 0,
+      "seconds": 16.829,
+      "logSha256": "b591738470cf9c65ea22709756c8a5f9b76f25bc3b4a827ab65c0767287c8be8"
+    }
+  ],
+  "graph": {
+    "numPassedTests": 0,
+    "numFailedTests": 1,
+    "numPendingTests": 0,
+    "numTotalTests": 1,
+    "reportSha256": "5236af6bb49774fd80774e9a6cce4e7a8884fc958a8805382502886a48681e01",
+    "files": [
+      {
+        "file": "packages/spec/graph/test/shadcn-dropdown-evidence.test.ts",
+        "assertions": 1,
+        "passed": 0,
+        "failed": 1,
+        "pending": 0
+      }
+    ],
+    "failures": [
+      {
+        "file": "packages/spec/graph/test/shadcn-dropdown-evidence.test.ts",
+        "title": "shadcn Dropdown Item evidence text preserves the complete parsed destructive evidence boundary",
+        "messages": [
+          "Error: Test timed out in 5000ms.\nIf this is a long-running test, pass a timeout value as the last argument or configure it globally with \"testTimeout\".\n    at Timeout.<anonymous> (file:///tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:44:18)\n    at listOnTimeout (node:internal/timers:685:17)\n    at processTimers (node:internal/timers:618:7)"
+        ]
+      }
+    ]
+  },
+  "schema": {
+    "numPassedTests": 11,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTests": 11,
+    "reportSha256": "f8c58d09b0ff842e2ae5ab01f875cd2e72655f839528fa8f0afec2a36c9999b9",
+    "files": [
+      {
+        "file": "packages/spec/fixtures/test/adapter-profile-schema.test.ts",
+        "assertions": 6,
+        "passed": 6,
+        "failed": 0,
+        "pending": 0
+      },
+      {
+        "file": "packages/spec/fixtures/test/feedback-style-authoring.test.ts",
+        "assertions": 1,
+        "passed": 1,
+        "failed": 0,
+        "pending": 0
+      },
+      {
+        "file": "packages/spec/fixtures/test/feedback-style-runtime-patch.test.ts",
+        "assertions": 1,
+        "passed": 1,
+        "failed": 0,
+        "pending": 0
+      },
+      {
+        "file": "packages/spec/fixtures/test/prototype-inheritance-schema.test.ts",
+        "assertions": 3,
+        "passed": 3,
+        "failed": 0,
+        "pending": 0
+      }
+    ],
+    "failures": []
+  },
+  "fixtureTypeRepair": {
+    "originalWorkspaceTypeExit": 2,
+    "originalWorkspaceTypeLogSha256": "7fc95875acc1418a4e66fb8d6a5cf298c517ec33c771957e5a210d3c7c64bfdc",
+    "changedFiles": {
+      "packages/adapters/base/test/material-paint-reservation.test.ts": "314d61db9d8458fa474134dd9356ba7fd083eb1596097cd6cbaad96f033a1fea",
+      "packages/modules/feedback/test/material-reservation-cleanup.test.ts": "5d621411171bd421d344ff424c9dc6f37fa4b86347883f4339410626cf9faba1"
+    },
+    "patchSha256": "f30b313f968dece9ed30eb5d149137d53e82129a5fd7e08d2ba03565fe12a528",
+    "peerReviewSha256": "f10a71b4cd02e3d52b180fda24c9c018831d4d0b7aa803d6d18e50a088c0f4dd",
+    "commands": [
+      {
+        "name": "format-fixtures",
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "prettier",
+          "--write",
+          "packages/adapters/base/test/material-paint-reservation.test.ts",
+          "packages/modules/feedback/test/material-reservation-cleanup.test.ts"
+        ],
+        "exit": 0,
+        "seconds": 1.556,
+        "logSha256": "8aafaae19cd8d91a2abfd53cddf71acb23b2c211479ad3cbf8acd5a18c3bbb02"
+      },
+      {
+        "name": "stage-fixtures",
+        "command": [
+          "git",
+          "add",
+          "--",
+          "packages/adapters/base/test/material-paint-reservation.test.ts",
+          "packages/modules/feedback/test/material-reservation-cleanup.test.ts"
+        ],
+        "exit": 0,
+        "seconds": 0.065,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "whitespace",
+        "command": ["git", "diff", "--cached", "--check"],
+        "exit": 0,
+        "seconds": 0.769,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "fixture-tests",
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "vitest",
+          "run",
+          "packages/adapters/base/test/material-paint-reservation.test.ts",
+          "packages/modules/feedback/test/material-reservation-cleanup.test.ts",
+          "--maxWorkers=1",
+          "--no-file-parallelism",
+          "--reporter=json",
+          "--outputFile=/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/type-repair/fixtures.json"
+        ],
+        "exit": 0,
+        "seconds": 3.696,
+        "logSha256": "6991ba7d9f5b992d7d6e49a4062e8ef20f968ff40d4aff6e998ab19543d9697a"
+      },
+      {
+        "name": "workspace-types",
+        "command": [
+          "node",
+          "--max-old-space-size=6144",
+          "node_modules/typescript/bin/tsc",
+          "-p",
+          "tsconfig.workspace.json",
+          "--noEmit"
+        ],
+        "exit": 0,
+        "seconds": 71.844,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "fixtures": {
+      "numTotalTests": 11,
+      "numPassedTests": 11,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "reportSha256": "c02ceade5a6868007b14d399cac96391fc582534c51b3c7901ac61eaed08e450"
+    },
+    "unchangedSourceBindings": 113,
+    "boundary": "Only two incoming material test fixtures changed after the original combined run. The 148 source cases and 98 protocol cases were not rerun or relabelled as a new combined execution."
+  },
+  "incomingCI": {
+    "scope": "Prior ee2379 runs only; not acceptance of the later union.",
+    "readbackSha256": "095441d1904669892b80c531543bac8fdf84042e8a4307961e8e1a2a47f8beca",
+    "head": "ee2379da5a71c811268efb1b692e38d35c70c870",
+    "tree": "5436844100fd03f66b8e64753a7ca0e88670085c",
+    "budget": {
+      "run": 45265557437,
+      "passedEntries": 4,
+      "failedEntries": 5
+    },
+    "cleanSource": {
+      "run": 45265516671,
+      "nativeExecuted": false
+    },
+    "representative": {
+      "run": 45265290475,
+      "counts": {
+        "numTotalTests": 4,
+        "numPassedTests": 0,
+        "numFailedTests": 4,
+        "numPendingTests": 0,
+        "numTodoTests": 0
+      }
+    }
+  },
+  "nativeAcceptance": {
+    "state": "pending-on-new-combination",
+    "originalWorkflow": "bootstrap-state-controls-evidence.yml",
+    "positiveCases": 12,
+    "splitRejectionCases": 1,
+    "priorSameInputAttempts": [
+      {
+        "sourceTree": "8882ea51f4ce4ce99f37dbdc5df75d5975efa3fc",
+        "result": "5/6",
+        "failure": "Dialog cold acknowledgement 13.400062476158382ms >=12ms"
+      },
+      {
+        "sourceTree": "8882ea51f4ce4ce99f37dbdc5df75d5975efa3fc",
+        "result": "5/6",
+        "failure": "Dialog later visual-enter capture timeout1000ms, zero samples in the original opacity interval"
+      }
+    ]
+  },
+  "checkpointPreserved": {
+    "commit": "cf15c6b15ea575f5c62f891c9c5502621bdf7882",
+    "record": "internal/records/2026-11-23-sprint6-current-main-reentry.md",
+    "recordSha256": "aeb5823e6504f0e8189443f5c039473a4c0161e9819eebdc8c3dd17b2f423692",
+    "manifest": "internal/records/evidence/2026-11-23-sprint6-current-main-reentry/manifest.json",
+    "manifestSha256": "f7b1dcce691a183966ff6ec880b00e98345a313df907ea3795bbf176976d1446",
+    "restored16": [
+      {
+        "path": "internal/records/2026-11-23-gpui-authored-input-atoms.md",
+        "sha256": "e4567b83c3cac7dbcaa44e0b38fded5a20a849936d319625b3566d67e415e17c"
+      },
+      {
+        "path": "internal/records/2026-11-23-gpui-direct-control-label.md",
+        "sha256": "b2a9c3a48ab464198a9ef9c7136d9bd72cf196e40c456143497060e20b661ad7"
+      },
+      {
+        "path": "internal/records/2026-11-23-gpui-native-consumer-composition.md",
+        "sha256": "3d410f0a53260135cbbb37b0db29fa3bc2657347f8d6eb71478de00bf3edcf1c"
+      },
+      {
+        "path": "internal/records/2026-11-23-shadow-s4-paint-partial.md",
+        "sha256": "df727cb011c9f875dc6b899c8644e505706713ba476fba28fc6364fa1389ea09"
+      },
+      {
+        "path": "internal/records/2026-11-23-train-package-budget.json",
+        "sha256": "4a6599a3edfdd5d9fad02c53af7c746015fe23f436b5eab10bd0ba8901a7e03e"
+      },
+      {
+        "path": "internal/records/evidence/2026-11-23-liquid-view-operation/strict-project.json",
+        "sha256": "a7a0dc23a6b3c4b1fda249d3c87483e32da638655d5134dd7767ba8aeca16570"
+      },
+      {
+        "path": "internal/records/evidence/2026-11-23-s3-intrinsic-full-width/frozen-css.json",
+        "sha256": "e3b5d5e71e0f6cc922eaac94f0339ceb7ceedaa3eec87d036047cf7cbca241f9"
+      },
+      {
+        "path": "internal/records/evidence/2026-11-23-s3-intrinsic-full-width/s2-complete-gate-restored.json",
+        "sha256": "876bf17e91e8e6408886b840a018f7f59172464f30793ccf9e03acfa798fa996"
+      },
+      {
+        "path": "internal/records/evidence/2026-11-23-s3-intrinsic-full-width/transport-driver.mjs",
+        "sha256": "87b43ba70da2894e996a525b1c1b45c16da67fc4ac89a5beeda75fde330d45bf"
+      },
+      {
+        "path": "internal/records/evidence/2026-11-23-shadow-percentage-native/consumer-strict.json",
+        "sha256": "47a8c2c3beaeb4e1b6c584119dbce2d522ae91d1b43e2e6bbedff027ba929ff8"
+      },
+      {
+        "path": "internal/records/evidence/2026-11-23-shadow-percentage-native/prepare-02-0-receipt.json",
+        "sha256": "add5a97b4165e422d7f4f3a885216fef242861a1edd571358987a4f4a46b9ac6"
+      },
+      {
+        "path": "internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-en-light-brutalist-enhanced-group-hover.json",
+        "sha256": "df351b094bc24f921856d1101ce56493b4ad62a44d184e1be412fa668b5e8d75"
+      },
+      {
+        "path": "internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-en-light-brutalist-failed-scripts-group-hover.json",
+        "sha256": "6207e9d38f0cd7e10aef1ec24157f89963343f8703a79a05c9133bb05812559f"
+      },
+      {
+        "path": "internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-mobile-en-brutalist-enhanced.json",
+        "sha256": "77b1bd19c264046dd3fb1e022cd370e2c0b0e04316606bcfa8a9ba173ae3b359"
+      },
+      {
+        "path": "internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-mobile-en-brutalist-no-js.json",
+        "sha256": "3b7e8b871046be85562dbf1ecb19b7343b781623527f76fd5f5b890e546e3229"
+      },
+      {
+        "path": "internal/records/evidence/2026-11-23-train-package-budget/candidate.json",
+        "sha256": "effc8565d3402699a5e487f4020e6ec265833b830822e49675fe6b094d97fdd9"
+      }
+    ]
+  },
+  "reviewBoundary": "Root reviewed the original ten source paths relative to ee2379. The two subsequent fixture files have a separate bounded review. Neither is a blanket review of all external material capability paths or GitHub APPROVED.",
+  "artifacts": [
+    {
+      "file": "raw/merge-launch.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/merge-launch.json",
+      "rawBytes": 223,
+      "rawSha256": "275146619fb67a8412ba5d040bf1c15c2ff64470f5acc183df1fad52649faa06",
+      "storedBytes": 192,
+      "storedSha256": "a9b542ff9af118925512c9e14646d910b1a4d82aacf3e1f95a412331ceac57ae",
+      "encoding": "gzip"
+    },
+    {
+      "file": "raw/merge-status.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/merge-status.json",
+      "rawBytes": 2949,
+      "rawSha256": "a93a5de7f5e18705a7f5db5fef4734d18b7b7632d1de5a4c6490c838a902585a",
+      "storedBytes": 1024,
+      "storedSha256": "fea8840bf2575830d3312ea4df74cac99a65fb1153a981a6d4525df6ed751487",
+      "encoding": "gzip"
+    },
+    {
+      "file": "raw/fetch-external.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/fetch-external.log",
+      "rawBytes": 313,
+      "rawSha256": "b93e53b14eda232fe7a7941dbc512264f1fbd58c800e2b3a2c263597688d63d9",
+      "storedBytes": 184,
+      "storedSha256": "7e3100675d82d03c8371dd2cb687c452962f4c8b6e69e07762f38cadd6f2b71e",
+      "encoding": "gzip"
+    },
+    {
+      "file": "raw/verify-motion-parent.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/verify-motion-parent.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "encoding": "gzip"
+    },
+    {
+      "file": "raw/verify-main-parent.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/verify-main-parent.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "encoding": "gzip"
+    },
+    {
+      "file": "raw/incoming-stat.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/incoming-stat.log",
+      "rawBytes": 4734,
+      "rawSha256": "dc35db1e3915d0c855ec2e5802c1d8b3f03dda6134adcac77f46db1caa79ea59",
+      "storedBytes": 1258,
+      "storedSha256": "9be895d1c31419c3c89e9c8942e6063874e424466d897b682670ad2d55b0322e",
+      "encoding": "gzip"
+    },
+    {
+      "file": "raw/normal-merge-external.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/normal-merge-external.log",
+      "rawBytes": 532,
+      "rawSha256": "37427cffbd64873ba9eeab252c5081176211a697e1003f08f538313a7eb0acde",
+      "storedBytes": 222,
+      "storedSha256": "8fb8826db886056dbc355b6d9d0c6b06a1b31241484091dd2550f818e533e17b",
+      "encoding": "gzip"
+    },
+    {
+      "file": "raw/unmerged-diff.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/unmerged-diff.log",
+      "rawBytes": 4472,
+      "rawSha256": "d030592d229ec351b13a477891f676abfe63c514087fd8d7c44ba3fa06d34ff2",
+      "storedBytes": 1476,
+      "storedSha256": "1b405d7fa9de4e8f7b69ab4904627ff564b67d5a9f5071c2f58d486a383676c8",
+      "encoding": "gzip"
+    },
+    {
+      "file": "raw/conflict-blocks.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/conflict-blocks.json",
+      "rawBytes": 2248,
+      "rawSha256": "2cca3b5fea74629c569b8dbb5f39b84d81b50175bc0b012a9688578e02149942",
+      "storedBytes": 653,
+      "storedSha256": "e7320f4bd01a6afaa56f477a2b59ee469e68815a2f553f35b0c3f6f2acb60de7",
+      "encoding": "gzip"
+    },
+    {
+      "file": "raw/resolution-launch.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/resolution-launch.json",
+      "rawBytes": 231,
+      "rawSha256": "bb482cd87726f7d6ad83aad8df9f99972c46e2373c87313fac8de7a1df2ae4bc",
+      "storedBytes": 198,
+      "storedSha256": "803f5fff0475d3712faf4215b74cb854c51fe5cf60fc9cee99d90515c428d86b",
+      "encoding": "gzip"
+    },
+    {
+      "file": "raw/resolution-status.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/resolution-status.json",
+      "rawBytes": 20191,
+      "rawSha256": "54acd1558d750a704d8a2f7179f3ff76b16ab9cea1cbb6108e59568b955b885e",
+      "storedBytes": 7140,
+      "storedSha256": "a09a9f27783df38036a570d7671ea7650d664dc606e576a0f7c58850f8eefeb5",
+      "encoding": "gzip"
+    },
+    {
+      "file": "raw/resolution-format.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/resolution-format.log",
+      "rawBytes": 66,
+      "rawSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "storedBytes": 82,
+      "storedSha256": "6cd316ae8e81df0ff79776205007450fac3d62e1ba8e884e169e326d7955ebe5",
+      "encoding": "gzip"
+    },
+    {
+      "file": "raw/resolution-stage.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/resolution-stage.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "encoding": "gzip"
+    },
+    {
+      "file": "raw/resolution-whitespace.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/resolution-whitespace.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "encoding": "gzip"
+    },
+    {
+      "file": "raw/source-relative-to-external.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/source-relative-to-external.log",
+      "rawBytes": 37355,
+      "rawSha256": "f193f7a2be110d44244f1f10159e6901cfe611cfe4e68342af17c72e09667692",
+      "storedBytes": 9353,
+      "storedSha256": "40dbebe65cf819994ff378af185ae6acf95deac4abcc0b6f13d2b7cccc79f3aa",
+      "encoding": "gzip"
+    },
+    {
+      "file": "raw/motion-inventory.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/motion-inventory.json",
+      "rawBytes": 1315,
+      "rawSha256": "ad970c6001475f281106b4d713cddd52657ec2e822ea8f9e86e343391cc18023",
+      "storedBytes": 347,
+      "storedSha256": "d88cf1bbf7737590a79af5a0737a26cd1608dd4856baeec14c74c2fd3730f2d9",
+      "encoding": "gzip"
+    },
+    {
+      "file": "raw/root-review.md.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/root-review.md",
+      "rawBytes": 2581,
+      "rawSha256": "ddd02d24e93431e374596ce7dbdcb0639a21d5349136ff596f730e31c55d5a57",
+      "storedBytes": 1369,
+      "storedSha256": "f4c715799a499e20c7d23e2834a17bdec6b352db63206eda4fc5af9bdae434e7",
+      "encoding": "gzip"
+    },
+    {
+      "file": "raw/incoming-inventory-review.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/incoming-inventory-review.json",
+      "rawBytes": 3291,
+      "rawSha256": "7d11cae81372e0682b73a4e22615675ddd8305bd4124aa9260c0e0dc208e88f4",
+      "storedBytes": 789,
+      "storedSha256": "9039d525aecac03c692948c72e90cc052ed607ddc46800744d54e5ebe577d31e",
+      "encoding": "gzip"
+    },
+    {
+      "file": "conflict-inputs/1/.github/workflows/bootstrap-state-controls-evidence.yml.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/conflict-inputs/1/.github/workflows/bootstrap-state-controls-evidence.yml",
+      "rawBytes": 37914,
+      "rawSha256": "fa2a0d4dc3618a3f2a2f076f5b1aecbef6025e1e13551695c7e3f197e1d71361",
+      "storedBytes": 7741,
+      "storedSha256": "bdc7c98a5b0208acbfb676e5ba5915f1523bcb0ceb2a5406c75d244ced5779ae",
+      "encoding": "gzip"
+    },
+    {
+      "file": "conflict-inputs/1/scripts/test/check-bootstrap-motion-evidence.mjs.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/conflict-inputs/1/scripts/test/check-bootstrap-motion-evidence.mjs",
+      "rawBytes": 14813,
+      "rawSha256": "7abac26462a86173f9a6b043093b9a0513e4734f62713154cb5005ee8fc07ac0",
+      "storedBytes": 4562,
+      "storedSha256": "7897f7a855c5c554d876061e44212db94dcc0c9c99dfeffc0e6e1ef075da56ed",
+      "encoding": "gzip"
+    },
+    {
+      "file": "conflict-inputs/1/scripts/test/check-bootstrap-motion-evidence.test.mjs.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/conflict-inputs/1/scripts/test/check-bootstrap-motion-evidence.test.mjs",
+      "rawBytes": 20571,
+      "rawSha256": "69d823b1518016deab2a6082c7fc3902fb638a971b3ebc4f4e3260d63431a7fd",
+      "storedBytes": 5813,
+      "storedSha256": "a71ca98c6d995e0fa466e69ed4393162f2076a58824055e1fe1100d36944f594",
+      "encoding": "gzip"
+    },
+    {
+      "file": "conflict-inputs/2/.github/workflows/bootstrap-state-controls-evidence.yml.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/conflict-inputs/2/.github/workflows/bootstrap-state-controls-evidence.yml",
+      "rawBytes": 37914,
+      "rawSha256": "d87028cde9b90fab35efaf7921dc6665b20dcfc31bf6afb565173f500536d368",
+      "storedBytes": 7741,
+      "storedSha256": "85289a9fca0085f796e38c5830d8f5fc4bc23f7a06ae88778ce297cfacf2d2a5",
+      "encoding": "gzip"
+    },
+    {
+      "file": "conflict-inputs/2/scripts/test/check-bootstrap-motion-evidence.mjs.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/conflict-inputs/2/scripts/test/check-bootstrap-motion-evidence.mjs",
+      "rawBytes": 15515,
+      "rawSha256": "6db72737054a9a4ca24ed387d82a3f67807438eb5ce185ab90bbe3c77e295156",
+      "storedBytes": 4696,
+      "storedSha256": "4bef7dc87d8207f50cbe1c72ed805d061b290685bc291a9ae8e8e7cc3b15a6a8",
+      "encoding": "gzip"
+    },
+    {
+      "file": "conflict-inputs/2/scripts/test/check-bootstrap-motion-evidence.test.mjs.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/conflict-inputs/2/scripts/test/check-bootstrap-motion-evidence.test.mjs",
+      "rawBytes": 23853,
+      "rawSha256": "fd814abdf1370053b2185b745ca516e5ea7cf9e0e2b5b7ffe54b15520612d3d7",
+      "storedBytes": 6433,
+      "storedSha256": "58fa9a5f6e8585dc2fa383c32afa64bec8783ad8ff5959c8ed9eed6cb7a4ab1d",
+      "encoding": "gzip"
+    },
+    {
+      "file": "conflict-inputs/3/.github/workflows/bootstrap-state-controls-evidence.yml.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/conflict-inputs/3/.github/workflows/bootstrap-state-controls-evidence.yml",
+      "rawBytes": 38506,
+      "rawSha256": "1c9f9334a3a23b101c4041d3a4720c28c5f7ea76632e886f1f938b990ee1fe78",
+      "storedBytes": 7918,
+      "storedSha256": "4b664c1d0ae9f1740f4c748caf33a7309d3380291db2e8f9a53896296a18fc74",
+      "encoding": "gzip"
+    },
+    {
+      "file": "conflict-inputs/3/scripts/test/check-bootstrap-motion-evidence.mjs.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/conflict-inputs/3/scripts/test/check-bootstrap-motion-evidence.mjs",
+      "rawBytes": 14814,
+      "rawSha256": "ec322b70399330d7767dfb5c792261d759629759ffe203d029fa1cf416bfd790",
+      "storedBytes": 4564,
+      "storedSha256": "a0b414f5296fb5bcde93a0a4ac193c3cecd87e3269bc4e96bff751360c336d22",
+      "encoding": "gzip"
+    },
+    {
+      "file": "conflict-inputs/3/scripts/test/check-bootstrap-motion-evidence.test.mjs.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/conflict-inputs/3/scripts/test/check-bootstrap-motion-evidence.test.mjs",
+      "rawBytes": 20571,
+      "rawSha256": "003e9974dde4dd3d04fa77a7d4ce95a797216a5cf09a12b1c9c385464bb48b00",
+      "storedBytes": 5814,
+      "storedSha256": "2d1b39a1d456db79834c3a6b777d30ada214d941bebf334108718f44d46e6cb4",
+      "encoding": "gzip"
+    },
+    {
+      "file": "resolved-inputs/.github/workflows/bootstrap-state-controls-evidence.yml.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/resolved-inputs/.github/workflows/bootstrap-state-controls-evidence.yml",
+      "rawBytes": 38506,
+      "rawSha256": "86e34087fca80fb6fca958d361ead29595ff526c81a2135a95da6db37a9b075e",
+      "storedBytes": 7919,
+      "storedSha256": "ca57682b65e87a506da59a98c12e76ca3db696466d6f5b1a909c031685e2cdbc",
+      "encoding": "gzip"
+    },
+    {
+      "file": "resolved-inputs/scripts/test/check-bootstrap-motion-evidence.mjs.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/resolved-inputs/scripts/test/check-bootstrap-motion-evidence.mjs",
+      "rawBytes": 15516,
+      "rawSha256": "b65f27a58fdb2a3d684b125819cb821a58f12427b892a8ab66cbe1b6eefc6606",
+      "storedBytes": 4697,
+      "storedSha256": "5f1e8145744d0ecbc11c6343c9668d93a384b5e97281dd7fa511db609de70189",
+      "encoding": "gzip"
+    },
+    {
+      "file": "resolved-inputs/scripts/test/check-bootstrap-motion-evidence.test.mjs.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/resolved-inputs/scripts/test/check-bootstrap-motion-evidence.test.mjs",
+      "rawBytes": 23853,
+      "rawSha256": "43a52fd0e8328b9c8acebde06005678f6b8060d964bed47e8e417034924582c0",
+      "storedBytes": 6440,
+      "storedSha256": "fefa46a1cdb4990f32208ca219630b68a45d98c6798aae75b1de57757333cc43",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/combined-source.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/combined-source.json",
+      "rawBytes": 55836,
+      "rawSha256": "171abea9f2cb6553471539e60e4ea3779eb048d32987c75f64ce79f6b0cff1fc",
+      "storedBytes": 7158,
+      "storedSha256": "b26acd8e1fcb594401fda8e04bccef63d3d84e257e98834979da2124c77efbcd",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/combined-source.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/combined-source.log",
+      "rawBytes": 334148,
+      "rawSha256": "e73fc755165c6b2b706620ed60511ce279aacb17c1235643ece782d50243bd87",
+      "storedBytes": 29397,
+      "storedSha256": "4c5ed19c972fcecc8df7fb6e059fab818a05d3af3df02b4f10523d017ae4af0a",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/current-base-authoring.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/current-base-authoring.log",
+      "rawBytes": 308,
+      "rawSha256": "922e42a4cdb73a69ccd42bd4439017b83e993de1b3fc84a73a615172018d33f9",
+      "storedBytes": 216,
+      "storedSha256": "5734dc1dce5b8aac85311307a3e64e9cb015537ac07ec21dcf5676a191b01e3a",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/current-catalog.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/current-catalog.log",
+      "rawBytes": 972,
+      "rawSha256": "8c93c742d83e6775940dbc2b30ecb75ed1b3763d75fceebd717b72be3ae7046d",
+      "storedBytes": 567,
+      "storedSha256": "9749ecb61e5ce556a89a458316f768f7094ffda4af033ce14171817e1061c977",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/current-spec-loader.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/current-spec-loader.json",
+      "rawBytes": 70,
+      "rawSha256": "ff141fb134bcfe0be9f0d49c61492821c9e2b3fef74e12cd61dda6527baa5e99",
+      "storedBytes": 81,
+      "storedSha256": "011e7034f092819ffb5ed612591628ffcb4e502cc2207b726729dc7d345f6c30",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/current-spec-loader.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/current-spec-loader.log",
+      "rawBytes": 57,
+      "rawSha256": "6eb5f4955a230e7c9df9186c830d537a0e447c203f481ee44550d5fb1da85d36",
+      "storedBytes": 75,
+      "storedSha256": "64f06ed809337a2b93485fb485332d11e11cd8b29f1783c0c0d63b3bc5882f82",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/current-spec-loader.mjs.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/current-spec-loader.mjs",
+      "rawBytes": 751,
+      "rawSha256": "851aaed440cab948f43666f5f4d0ff70fc5994aa88626f70f2909d75f981ebe8",
+      "storedBytes": 390,
+      "storedSha256": "b7ca0d746cf12eb2b584693f737036a3f35c454eec56ea65e617b8e2a517abbb",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/draft-family-generator-check.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/draft-family-generator-check.log",
+      "rawBytes": 48,
+      "rawSha256": "5a8c0763f9033a3f4ec5e33e1946e0685f9abd2480e45de0c06dff9385aa5841",
+      "storedBytes": 68,
+      "storedSha256": "4f9827cd32f8f53228444b88787c625e7cd7452cd22e4e5f07609abb32eef6bc",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/draft-family-generator.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/draft-family-generator.log",
+      "rawBytes": 67,
+      "rawSha256": "c2a5f3e9af2b14c1b01a784a5e387c083bb4acc0cc2d93ddf0f633e083e5e48a",
+      "storedBytes": 81,
+      "storedSha256": "fd168aaea5f5b8be5159a76c82ed1c8bae2c25ed1604eb06e77a3a0ec895ee73",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/driver.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/driver.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/frozen-install.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/frozen-install.log",
+      "rawBytes": 227,
+      "rawSha256": "fd822830694cc2c9d9ba2a101438c64e5f055f4ef4b7c3da321081e3ee6ac203",
+      "storedBytes": 179,
+      "storedSha256": "dda97b553f6d84141aa28146f0ab9c506ed9d465b967c5a9c094e80d185688c5",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/launch.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/launch.json",
+      "rawBytes": 232,
+      "rawSha256": "2e1a2caf4647bd6f95b55e5a2b37cb51bf8758ae4dadd3a495340181c40f444e",
+      "storedBytes": 200,
+      "storedSha256": "74b8bc888af87cc021178dff850b16208ac4d68ad83fe605478bd9909dc649c7",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/node-version.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/node-version.log",
+      "rawBytes": 9,
+      "rawSha256": "4409d3bfa08b82f385bd424eeda65fc63b756129f0e89e82df77f1fecafccc14",
+      "storedBytes": 29,
+      "storedSha256": "69cb40fbcedc434b2f29aeb692167e8690a57ee35f2fe68affd46b4f25137494",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/official-cli-build.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/official-cli-build.log",
+      "rawBytes": 95,
+      "rawSha256": "7e24ac7108e1333e5ab382809cec6fbd2d190216a83b117907e3d885677b8bc9",
+      "storedBytes": 95,
+      "storedSha256": "cc938f55ee2c6a035b15562beaea23496bc2be19d2b2323b591478f77459fa16",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/official-website-token-generator.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/official-website-token-generator.log",
+      "rawBytes": 107,
+      "rawSha256": "485d32e37e08ebf385225edb2fcfc088c292a53b59ae313358e2381d45bcb439",
+      "storedBytes": 110,
+      "storedSha256": "4e37455981b470726c812c20708826b7b446a4ae887440f320fcd0044a26808a",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/original-deadline-graph.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/original-deadline-graph.json",
+      "rawBytes": 1501,
+      "rawSha256": "5236af6bb49774fd80774e9a6cce4e7a8884fc958a8805382502886a48681e01",
+      "storedBytes": 713,
+      "storedSha256": "f82f31df248fd70c52313a73398cba08913faace350e1a9016182c9e9fa3b30a",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/original-deadline-graph.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/original-deadline-graph.log",
+      "rawBytes": 2470,
+      "rawSha256": "7e1d444b508beb52a7038b786734e3747b315a22808823a516727dc38073c41f",
+      "storedBytes": 724,
+      "storedSha256": "7f13111b6cb0143589f1266f3c6f7c215cf5b172755770250d0ad5a671c28b2b",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/original-deadline-schema.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/original-deadline-schema.json",
+      "rawBytes": 4754,
+      "rawSha256": "f8c58d09b0ff842e2ae5ab01f875cd2e72655f839528fa8f0afec2a36c9999b9",
+      "storedBytes": 1056,
+      "storedSha256": "236aadf74ab670a177d30a05eadab5ef9039e216368103c0cc81db27d6101c1d",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/original-deadline-schema.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/original-deadline-schema.log",
+      "rawBytes": 4784,
+      "rawSha256": "b591738470cf9c65ea22709756c8a5f9b76f25bc3b4a827ab65c0767287c8be8",
+      "storedBytes": 1012,
+      "storedSha256": "5b14fa98ce67d45481548d6f5f0026318257f0829ebc1330dac9d63fbb9f8f4e",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/public-type-contracts.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/public-type-contracts.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/status.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/status.json",
+      "rawBytes": 35751,
+      "rawSha256": "f70fcbf532c7501b5ced2e8ea5f7de6d9b2cc5d531090e116ab464450dbb59c2",
+      "storedBytes": 10951,
+      "storedSha256": "93af7d919eda68e67d2eec5433f64980ef60277e4d00d45fe705a1ce7291df48",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/strict-node-controls.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/strict-node-controls.log",
+      "rawBytes": 21244,
+      "rawSha256": "b8daccca43a6ddce0e8ce0f3a8f5465561577d0c07018781ed1bc4cd945bdcc9",
+      "storedBytes": 3620,
+      "storedSha256": "7bda83aced4c885e0bad737e8263124802441f10d46d7af08aa78eed737aa28b",
+      "encoding": "gzip"
+    },
+    {
+      "file": "validation/workspace-types.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/validation/workspace-types.log",
+      "rawBytes": 4136,
+      "rawSha256": "7fc95875acc1418a4e66fb8d6a5cf298c517ec33c771957e5a210d3c7c64bfdc",
+      "storedBytes": 623,
+      "storedSha256": "4652ca07f99df8ded9e4f8483b99a3e99bda4c23410dabd0099a81bd1232cf0c",
+      "encoding": "gzip"
+    },
+    {
+      "file": "incoming-ci/readback.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/incoming-ci/readback.json",
+      "rawBytes": 21999,
+      "rawSha256": "095441d1904669892b80c531543bac8fdf84042e8a4307961e8e1a2a47f8beca",
+      "storedBytes": 5370,
+      "storedSha256": "b6d46359d37e722c4802b25bc9b49cdfaf111ec5cd0a837b9bd09624517405ea",
+      "encoding": "gzip"
+    },
+    {
+      "file": "incoming-ci/budget/s6-ee-job-138011409101.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/incoming-ci/budget/s6-ee-job-138011409101.log",
+      "rawBytes": 133504,
+      "rawSha256": "afec08b53a6b9e32dfdc26fa9806837f5ae2f7240ce75e74cd247ffe8977348a",
+      "storedBytes": 25825,
+      "storedSha256": "bcf535052f2caa9fd2380a3af7a5eaf08675cd92ccb71ed2554652e49e123df1",
+      "encoding": "gzip"
+    },
+    {
+      "file": "incoming-ci/budget/steps-138011409101.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/incoming-ci/budget/steps-138011409101.json",
+      "rawBytes": 2065,
+      "rawSha256": "4061ac6b36c5403c38e3e3269ce06745a61b617f9e19bcefe55f496acff8badc",
+      "storedBytes": 449,
+      "storedSha256": "5e3ff90671ab6f415b70ed33e719df6b68cd9a26eee924728927191b76a32557",
+      "encoding": "gzip"
+    },
+    {
+      "file": "incoming-ci/cleanSource/s6-ee-job-138011265128.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/incoming-ci/cleanSource/s6-ee-job-138011265128.log",
+      "rawBytes": 63048,
+      "rawSha256": "b2ad0a5daea11c35625f013ab9353013dc7314255ac4d072eb0de55f8b4852ff",
+      "storedBytes": 13549,
+      "storedSha256": "adaddb3809a2234412dc0941f5bb867813aff31fe474a27642bd312fba977d61",
+      "encoding": "gzip"
+    },
+    {
+      "file": "incoming-ci/cleanSource/steps-138011265128.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/incoming-ci/cleanSource/steps-138011265128.json",
+      "rawBytes": 4130,
+      "rawSha256": "9a8c41125d4ffc22002a1f4f15eddac114069425ed84204cd202407250a06e9c",
+      "storedBytes": 683,
+      "storedSha256": "e48219050712dbcc1115ac804d3528e9dfae2d52dad7b7f520c263937f9f605c",
+      "encoding": "gzip"
+    },
+    {
+      "file": "incoming-ci/representative/s6-ee-job-138010515786.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/incoming-ci/representative/s6-ee-job-138010515786.log",
+      "rawBytes": 55801,
+      "rawSha256": "ee7e6aaf63d29b80b412aa99f5c18d5ebab5d42d5d50499a9bad415709026e72",
+      "storedBytes": 13448,
+      "storedSha256": "ee1152eca06d47d5788d99fe487f7cd71b547179247af583982283ec0a3ebd7e",
+      "encoding": "gzip"
+    },
+    {
+      "file": "incoming-ci/representative/steps-138010515786.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/incoming-ci/representative/steps-138010515786.json",
+      "rawBytes": 1737,
+      "rawSha256": "990895b47229d188e03569e85efbf0ac298ace3c6e447dc6811dce1dac475824",
+      "storedBytes": 391,
+      "storedSha256": "a851876d42983d737d370bae78d43eee7e54c300ff5e8196cbde71b27879acb4",
+      "encoding": "gzip"
+    },
+    {
+      "file": "incoming-ci/budget/report.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/incoming-ci/budget/report.json",
+      "rawBytes": 1561567,
+      "rawSha256": "ff58db49e0885042bf9e92b3058d64834b468c7b01b0c3a5f42d2581159ce724",
+      "storedBytes": 314317,
+      "storedSha256": "eb07bd58caaf59f35e51d1e3a89a5154bfa9fdb90e53682963153c9c9fec0f38",
+      "encoding": "gzip"
+    },
+    {
+      "file": "incoming-ci/representative/vitest.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/incoming-ci/representative/vitest.json",
+      "rawBytes": 8513,
+      "rawSha256": "3f44316e146fbcaa56f09f8718d1544067566fbe8b84f087f61d55169fddd58d",
+      "storedBytes": 907,
+      "storedSha256": "8c82026e6bbf9b38c56269df441177919c252fc5f826b7c8dcdae026f2578f25",
+      "encoding": "gzip"
+    },
+    {
+      "file": "incoming-ci/representative/source.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/incoming-ci/representative/source.json",
+      "rawBytes": 1261,
+      "rawSha256": "9a9bc0610bb62327c6b320c46b37ec6853894c72b99b833edb926fa9ca031562",
+      "storedBytes": 341,
+      "storedSha256": "39a08e77ed4dbc168307c2541f8625aba2dc631c1f78e4157017500cf9ab9852",
+      "encoding": "gzip"
+    },
+    {
+      "file": "incoming-ci/representative/liquid-glass-accordion-react-reservation.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/incoming-ci/representative/liquid-glass-accordion-react-reservation.json",
+      "rawBytes": 963996,
+      "rawSha256": "df602b530b2e4ec2ad3909903cc584011902d2abdf1ea60d3bb8c9f297872da9",
+      "storedBytes": 13684,
+      "storedSha256": "a4b279c24745f013a250f65c77dd786e365bd2573162bc91d811405a37858c8a",
+      "encoding": "gzip"
+    },
+    {
+      "file": "incoming-ci/representative/liquid-glass-accordion-vue-reservation.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/incoming-ci/representative/liquid-glass-accordion-vue-reservation.json",
+      "rawBytes": 963982,
+      "rawSha256": "8d949aaa5e157ff3e3abb2223d330ae9f64efbcfc100edf1ac60dae89a2060a3",
+      "storedBytes": 13681,
+      "storedSha256": "00254fff2f27da510d4b99f504fef33b5cc89cf3292c180e81308914b2f855d3",
+      "encoding": "gzip"
+    },
+    {
+      "file": "incoming-ci/representative/liquid-glass-accordion-vue2-reservation.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/incoming-ci/representative/liquid-glass-accordion-vue2-reservation.json",
+      "rawBytes": 963989,
+      "rawSha256": "2e0e410dd812304e44c943eda23383181f49e3f3df35fdba13aa4e35af8c2f5b",
+      "storedBytes": 13685,
+      "storedSha256": "d7f99f59ce3b24196230df3a77a8d7a6ec3ed343fb9cbf53624ae60235954e0e",
+      "encoding": "gzip"
+    },
+    {
+      "file": "incoming-ci/representative/liquid-glass-accordion-wc-reservation.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/incoming-ci/representative/liquid-glass-accordion-wc-reservation.json",
+      "rawBytes": 970740,
+      "rawSha256": "70b92259df69feaa8300bf5472a663753bb97a7cbf4671f484606c2eecfb232f",
+      "storedBytes": 14174,
+      "storedSha256": "42363ac34e4a984d751a6d95f3d9c9931068c6b722942c1e1cdd61a2870466dd",
+      "encoding": "gzip"
+    },
+    {
+      "file": "type-repair/actual.patch.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/type-repair/actual.patch",
+      "rawBytes": 5636,
+      "rawSha256": "f30b313f968dece9ed30eb5d149137d53e82129a5fd7e08d2ba03565fe12a528",
+      "storedBytes": 1704,
+      "storedSha256": "6e47e64c2bbd7a6e873e3195a8c87a434046fb3bce781b74bb0c4e4a8851b176",
+      "encoding": "gzip"
+    },
+    {
+      "file": "type-repair/before/0.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/type-repair/before/0",
+      "rawBytes": 8388,
+      "rawSha256": "05b1b6ffafc5ac3269f5d3a0ab81cf63db6a2ea9f094f125f7286a3e37fe2ba1",
+      "storedBytes": 1986,
+      "storedSha256": "b01aa9a0019d11eb2b472f739f7275bc7f8aed2a69306cedc7c0ee1a1f9001ea",
+      "encoding": "gzip"
+    },
+    {
+      "file": "type-repair/before/1.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/type-repair/before/1",
+      "rawBytes": 7360,
+      "rawSha256": "0e930ec3af7ed8c62e15617ab595b90b80d6d36ed48182dc268d138eeb6ea2e3",
+      "storedBytes": 1808,
+      "storedSha256": "ee9664e1fa270709c986a0bd8df02ddd7cc27a1561460579a25c25ca38a61346",
+      "encoding": "gzip"
+    },
+    {
+      "file": "type-repair/fixture-tests.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/type-repair/fixture-tests.log",
+      "rawBytes": 35418,
+      "rawSha256": "6991ba7d9f5b992d7d6e49a4062e8ef20f968ff40d4aff6e998ab19543d9697a",
+      "storedBytes": 4740,
+      "storedSha256": "8b81900aa1f7430f129e1728b05872997b0886ceae26c5b1a2e4890b3e7593c7",
+      "encoding": "gzip"
+    },
+    {
+      "file": "type-repair/fixtures.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/type-repair/fixtures.json",
+      "rawBytes": 4774,
+      "rawSha256": "c02ceade5a6868007b14d399cac96391fc582534c51b3c7901ac61eaed08e450",
+      "storedBytes": 1139,
+      "storedSha256": "fe759fffffbbdf1967a1d8d0cdde8834457d1990404187048e1d02f61a4f6203",
+      "encoding": "gzip"
+    },
+    {
+      "file": "type-repair/format-fixtures.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/type-repair/format-fixtures.log",
+      "rawBytes": 167,
+      "rawSha256": "8aafaae19cd8d91a2abfd53cddf71acb23b2c211479ad3cbf8acd5a18c3bbb02",
+      "storedBytes": 125,
+      "storedSha256": "12cabcda8cefee7de5de83b9ff3bef94be16babfc18999504d4b1a103ea43a12",
+      "encoding": "gzip"
+    },
+    {
+      "file": "type-repair/launch.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/type-repair/launch.json",
+      "rawBytes": 231,
+      "rawSha256": "4f06212c7c19ea5e821741cb6523c852f7b85678844b282b1c291735bc81db9a",
+      "storedBytes": 197,
+      "storedSha256": "1a9bb7a1e7d4c1a10c54b5b8a482b051a1aa9b7404e4fa0da364b718cfe3edfa",
+      "encoding": "gzip"
+    },
+    {
+      "file": "type-repair/root-review.md.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/type-repair/root-review.md",
+      "rawBytes": 2606,
+      "rawSha256": "f10a71b4cd02e3d52b180fda24c9c018831d4d0b7aa803d6d18e50a088c0f4dd",
+      "storedBytes": 1357,
+      "storedSha256": "42037e8fef93041228067ac8ef3842fad1d9042e98ca2d8af4056ac2bc2280a3",
+      "encoding": "gzip"
+    },
+    {
+      "file": "type-repair/stage-fixtures.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/type-repair/stage-fixtures.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "encoding": "gzip"
+    },
+    {
+      "file": "type-repair/status.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/type-repair/status.json",
+      "rawBytes": 18329,
+      "rawSha256": "176e9d96c4344f608818e3cea505d40bba56c7872ed5de5f3f22fce7937c9508",
+      "storedBytes": 7256,
+      "storedSha256": "e37f21237d6983ff2050fa0713969b82e84b264c5f876778f8e55d81c8d14b1a",
+      "encoding": "gzip"
+    },
+    {
+      "file": "type-repair/whitespace.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/type-repair/whitespace.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "encoding": "gzip"
+    },
+    {
+      "file": "type-repair/worker.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/type-repair/worker.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "encoding": "gzip"
+    },
+    {
+      "file": "type-repair/workspace-types.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/type-repair/workspace-types.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "encoding": "gzip"
+    },
+    {
+      "file": "checkpoint-publication/checkpoint-publish-status.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/final-current/checkpoint-publish-status.json",
+      "rawBytes": 41915,
+      "rawSha256": "532eebde0483b3181140448282be11a1cfc4afbd83ff64364fdebd64e704266b",
+      "storedBytes": 4456,
+      "storedSha256": "27334a27ed6f92a1d96a9dc366bddb7d650ebb5a0bf09eab8539789666350d38",
+      "encoding": "gzip"
+    },
+    {
+      "file": "checkpoint-publication/checkpoint-publish.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/final-current/checkpoint-publish.log",
+      "rawBytes": 46,
+      "rawSha256": "adcd1294e713f0a6b5447c4f14677dbc86a68704274e1518a37d0dc906a7e9dd",
+      "storedBytes": 66,
+      "storedSha256": "61e0ffef1258d76894ea00d4ead5be868a45cf933c52d9920c39fa2b954b57b3",
+      "encoding": "gzip"
+    },
+    {
+      "file": "checkpoint-publication/checkpoint-publish-r2-status.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/final-current/checkpoint-publish-r2-status.json",
+      "rawBytes": 3064,
+      "rawSha256": "6d726056ef276bfa5196d5c41b0ee4463d13aaae4bce83ead0813989c240402c",
+      "storedBytes": 1486,
+      "storedSha256": "08185f4a15748c8bff07088637ac3190f4eb303331880c39a42e8102a5573686",
+      "encoding": "gzip"
+    },
+    {
+      "file": "checkpoint-publication/checkpoint-publish-r2.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/final-current/checkpoint-publish-r2.log",
+      "rawBytes": 224,
+      "rawSha256": "94fb83093c6edfc3ef1d5d94d27d213796139e7538d24097e35d966e42252c98",
+      "storedBytes": 198,
+      "storedSha256": "653cbed6ec8193ec2e78bc6490c88616cb24ab1d8555d8848f662c0712ab8742",
+      "encoding": "gzip"
+    },
+    {
+      "file": "execution/union-ee.py.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee.py",
+      "rawBytes": 6153,
+      "rawSha256": "10d69b30490030f355d8651b29e54c03009c6dce0f4db663fd7e600283afb7d2",
+      "storedBytes": 2491,
+      "storedSha256": "1983742d5278a1c7a7cd68ce26f64911bc122d20044a278dbce195f5a9f35f92",
+      "encoding": "gzip"
+    },
+    {
+      "file": "execution/union-ee-resolve.py.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee-resolve.py",
+      "rawBytes": 8396,
+      "rawSha256": "e44d55ce2b616b7c6b88a6bfbdf7c0c358402f65f15ec6a4c709675abc2dd99c",
+      "storedBytes": 3213,
+      "storedSha256": "91408da5d24b1bae4d926fdca17d889cbf9ea0e97be259941f8ffcbf53087659",
+      "encoding": "gzip"
+    },
+    {
+      "file": "execution/union-ee-validate.py.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee-validate.py",
+      "rawBytes": 9076,
+      "rawSha256": "d4e609df1b75080d05b9bf02ab596e5a63343766010e5d4b953fea6a9c750fb1",
+      "storedBytes": 3690,
+      "storedSha256": "9131a947706a8c8a852baa89b6f30f7383752d02a00f07879bb7472636f2e67e",
+      "encoding": "gzip"
+    },
+    {
+      "file": "execution/union-ee-fixture-types.py.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee-fixture-types.py",
+      "rawBytes": 8664,
+      "rawSha256": "cb2508404cb6ed1dec61ac2bebb42ccc7b534e8f80c2d89e9ac282cb7506a329",
+      "storedBytes": 3367,
+      "storedSha256": "aa9df1181618953926980800ec730c8b69bcfc91fa6e1ef495ce7bb429acb8bf",
+      "encoding": "gzip"
+    },
+    {
+      "file": "execution/union-ee-archive.py.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee-archive.py",
+      "rawBytes": 22469,
+      "rawSha256": "d2cf5ef87e982d3dcf8badbb4bfe1351f6e84a3dc3c443e5d6a76769b12377d7",
+      "storedBytes": 8530,
+      "storedSha256": "a78698b4e4c0f066a7f3e4b12df94a9ad593f2430877b2d3d360628ad896abfb",
+      "encoding": "gzip"
+    },
+    {
+      "file": "execution/checkpoint-publish.py.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/checkpoint-publish.py",
+      "rawBytes": 6139,
+      "rawSha256": "dbf942101568d8bda7e35378f00dcb20a079df50af037c0dfefc22e9e03caf16",
+      "storedBytes": 2652,
+      "storedSha256": "5430c2d892a6b52fce0318f2294a607ad79ff3feba9abe263593285bb9598be1",
+      "encoding": "gzip"
+    },
+    {
+      "file": "execution/checkpoint-publish-r2.py.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/checkpoint-publish-r2.py",
+      "rawBytes": 6892,
+      "rawSha256": "b76a3d3e209d16fe61ce2980ceeb890a967e8fcbff59c99bcbc9df57db5c8883",
+      "storedBytes": 2890,
+      "storedSha256": "7276db0f9172e0a55d940ff366066587078be0fa7d8efd3556f51e02419c9953",
+      "encoding": "gzip"
+    }
+  ]
+}

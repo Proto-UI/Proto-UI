@@ -1,9 +1,13 @@
 ---
-title: liquid-glass Form
-description: Draft portable form atoms.
+title: 'Form'
+description: 'A Liquid Glass form container that coordinates field validation, keyed submission payloads, and reset.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Liquid Glass Form composes `Root`, `Field`, `Submit`, and `Reset` to validate registered fields (including async checks), emit form values keyed by field name on submit, and reset fields cleanly.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-form"
@@ -12,10 +16,23 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root gathers explicitly registered FormField atoms, validates their canonical Field controls and emits submit with named value snapshots only when all enabled fields are valid. Disabled fields are omitted; duplicate names fail closed. Async validation waits for current results and rejects changed values, removal, cancellation and detach. Form disabled also reaches contained Fields. FormSubmit and FormReset own keyboard/pointer activation. Focused single-line Field, Number Field and OTP editors support implicit Enter submission, excluding IME composition, modifiers and repeated keydown. requestReset restores mounted initial uncontrolled values, requests controlled-owner changes without overwriting them, cancels editing and pending validation, then emits reset. resetValidation only clears validation. No network submission, native navigation or hidden HTML inputs are created.
+## Installation
 
-All four visual families inherit Base behavior. Parts: root, field, submit, reset.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-FormSubmit and FormReset expose typed disabled, hovered, pressed, focused and focusVisible states plus focusSelf. Their single Form activation owner is independent of Button; styled projections use each family’s existing passive Button recipe for focus, hover, press and disabled feedback. Liquid Form actions accept material="auto" or "opaque". Disabled actions withdraw optical candidates; press deformation is an intent, not evidence of a native optical render.
+## Usage
 
-Draft source delivery. Native, assistive-technology, full Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf checklist item is marked complete.
+- **Parts**: `Root`, `Field`, `Submit`, `Reset`.
+- **Validation and submission**: activating `Submit` (or pressing Enter inside a focused single-line Field, Number Field, or Input OTP, excluding IME composition and modifiers) validates every enabled registered field and emits `submit` with values keyed by field name once valid. Disabled fields are excluded and duplicate names are ignored; in-flight async checks discard stale submissions on edit, cancel, or unmount. Form does not trigger network requests, navigation, or hidden HTML inputs.
+- **Reset**: `Reset` or `requestReset()` restores uncontrolled initial values, proposes resets to controlled fields without overwriting them, cancels pending edits/validation, and emits `reset`. `resetValidation()` clears validation state only.
+- **Action buttons**: `FormSubmit` and `FormReset` share Liquid Glass Button visual feedback and accept `material="auto"` or `"opaque"`, reverting to opaque styling when disabled.
+
+## API
+
+| Part | Prop / Method / Event | Description |
+| --- | --- | --- |
+| Root | `disabled` | Disables the form and propagates disabled state to contained fields |
+| Root | `requestReset()`, `resetValidation()` | Resets values and validation / clears validation only |
+| Root | `submit`, `reset` | Emits form values keyed by field name on valid submit / emitted on reset |
+| Field | — | Registers a field for form validation and serialization |
+| Submit / Reset | `material` | `'auto' \| 'opaque'`; exposes `disabled`, `hovered`, `pressed`, `focused`, `focusVisible`, and `focusSelf()` |

@@ -1,19 +1,15 @@
 ---
-title: 'Resizable (WIP)'
-description: 'resizable functional composition and current verification limits.'
+title: 'Resizable'
+description: 'Percentage-sized resizable split panels supporting collapsing and nested layouts.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Resizable divides a container into two or more percentage-sized panels with draggable, keyboard-accessible split handles and support for nested split groups. The examples on this page use the **Shadcn Rhea** style preset.
 
-Resizable composes two or more percentage-sized panels and indexed separators. Each separator continuously resizes only its adjacent pair. A nested Root owns an independent layout and may use a different orientation. Pointer, arrow-key, Home/End, Shift acceleration and collapse use the same constrained request path.
-
-This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
-
-Panel exposes its dimensionless size through the existing exposed-state projection. Web CSS uses a static flex-basis recipe consuming --pui-size, so arbitrary ratios do not depend on runtime-generated CSS tokens.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-resizable"
@@ -21,9 +17,38 @@ Panel exposes its dimensionless size through the existing exposed-state projecti
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+Resizable consists of `Root`, `Panel`, and `Handle`:
+
+- `Root` manages panel proportions, orientation, and constraints.
+- Place N `Panel` elements (`index: 0..N-1`) and N−1 `Handle` elements (`index: 0..N-2`). Each `Handle` resizes only its two adjacent panels while preserving their combined size and every other panel.
+- Each `Panel` exposes its dimensionless size via the `--pui-size` CSS variable for static `flex-basis` layout rules.
+
+### Multi-panel layout and constraints
+
+- Use `sizes` (controlled) or `defaultSizes` (uncontrolled) to pass a complete percentage vector. The two-panel `value` / `defaultValue` API remains available; when `sizes` is supplied, it takes precedence.
+- Pass `constraints` to configure per-panel `min` (`0`), `max` (`100`), `collapsible` (`false`), and `collapsedSize` (`0`). Percentages normalize to `100`; infeasible configurations keep the last valid layout and ignore invalid resize requests.
+- Collapsing acts as a discrete stop and respects the adjacent panel's `max` limit.
+
+### Interaction and nesting
+
+- Pointer dragging, arrow keys, `Shift` acceleration, `Home`/`End`, and collapse share one constrained resize pipeline. Drag deltas are normalized against total panel extents, excluding fixed handle widths.
+- Each `Handle` carries the default accessible name `Resize panels`.
+- Nested `Root` groups manage their own ratios, constraints, and orientation independently so horizontal and vertical splits compose cleanly.
+
+### Controlled mode and methods
+
+- Passing `sizes` enables controlled mode: listen to `sizesChange` and `sizesCommit` (payload `{ sizes }`) and pass updated values back to accept changes. Canceled gestures emit no `sizesCommit`.
+- Programmatic resizing is available via `requestResize(index, nextSize, commit)` and `requestSizes(nextSizes, commit)`.
+
 ## API
 
-Root `sizes` / `defaultSizes` is the complete percentage vector. Supply N Panels (`index: 0..N-1`) and N−1 Handles (`index: 0..N-2`). A Handle names its preceding panel and retains the accessible name `Resize panels`. The legacy `value` / `defaultValue` API continues to create two panels; `sizes` takes precedence when supplied.
+The following props belong to `Root` (`Panel` defaults `index` to `0`):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -40,19 +65,9 @@ Root `sizes` / `defaultSizes` is the complete percentage vector. Supply N Panels
   ]}
 />
 
-These props belong to Root. Panel defaults `index` to `0`.
-
 ## References
 
 <SpecEntityLinks
   directory="spec/prototypes"
   files={['P-SHADCN-RESIZABLE.yaml', 'P-BASE-RESIZABLE.yaml']}
 />
-
-### Multi-panel ownership
-
-`constraints` supplies each panel's `min`, `max`, `collapsible` and `collapsedSize`. Defaults are 0, 100, false and 0. Percentages are normalized to total 100; infeasible layouts retain the previous valid state and reject resizing. A separator preserves its pair's total and every other panel. Collapse is a discrete stop; an adjacent panel's maximum can prevent collapse.
-
-Read `sizes` or call `requestResize(index, nextSize, commit)` / `requestSizes(nextSizes, commit)`. `sizesChange` and `sizesCommit` carry `{ sizes }`. Passing `sizes` makes the layout controlled: update it from the proposal to accept, or retain it to refuse. Panels and ARIA remain at the committed owner value. Cancellation emits no commit.
-
-Nested Roots establish independent ownership, constraints and geometry. The example combines three horizontal panels with a two-panel vertical group. Panel border-box extents form the drag denominator, excluding fixed separator widths.

@@ -1,9 +1,13 @@
 ---
-title: bootstrap-2-3-2 Checkbox Group
-description: Draft portable checkbox-group atoms.
+title: 'Bootstrap 2.3.2 Checkbox Group'
+description: 'A Bootstrap 2.3.2 checkbox group with select-all support and Field/Form integration.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Bootstrap 2.3.2 Checkbox Group coordinates a set of checkboxes sharing a string-array value, with built-in select-all (including indeterminate state) and seamless `Field` / `Form` integration.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-checkbox-group"
@@ -12,10 +16,25 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root owns string-array value/defaultValue, disabled/readOnly and ariaLabel. Item has value/disabled; All toggles enabled registered items and derives checked/mixed while preserving disabled selections. Each item has a Tab stop and Space activation; Enter does not toggle. Controlled requests emit valueChange without overwriting owner state. getValue returns a copy; duplicate item values reject ambiguous toggles. Inside Field/FormField, Root reports the canonical array, group focus and local policy, supports label activation, required validation, Form serialization and reset. Native hidden HTML entries are not created.
+## Installation
 
-All four visual families inherit Base behavior. Parts: root, item, all.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Styled Item/All include an aria-hidden decorative indicator: check for checked, dash for mixed, and an empty outline for unchecked. Color is not the only state signal. The SVG is passive and adds no role, tab stop or interaction owner.
+## Usage
 
-Draft source delivery. Native, assistive-technology, full Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf checklist item is marked complete.
+Compose `Root`, `Item`, and an optional `All` control:
+
+- **State management**: `Root` manages a `string[]` via `value` / `defaultValue`. In controlled mode it emits `valueChange` without mutating caller state; `getValue()` returns a copy. Duplicate item values are ignored.
+- **Select all**: `All` reflects checked, mixed (dash), or unchecked across enabled items and toggles only enabled items while preserving disabled selections.
+- **Keyboard and visuals**: Each item has its own Tab stop and toggles with `Space` (`Enter` does not toggle). The decorative indicator uses check, dash, and empty box shapes so state is not conveyed by color alone.
+- **Form integration**: Inside `Field` or `FormField`, `Root` automatically participates in label activation, required validation, form serialization, and reset.
+
+## API
+
+| Part | Props / Events / Methods | Description |
+| --- | --- | --- |
+| `Root` | `value` / `defaultValue` | `string[]` of selected item values |
+| `Root` | `disabled` / `readOnly` / `ariaLabel` | Group disabled, read-only, and accessible name props |
+| `Root` | `valueChange` / `getValue()` | Change request event and copy reader |
+| `Item` | `value` / `disabled` | Unique item key and per-item disabled flag |
+| `All` | — | Toggles all enabled items and reflects mixed state |

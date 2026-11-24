@@ -1,5 +1,6 @@
 ---
 title: Card
+description: '带 2px 黑色外框与 4px 硬黑阴影的 Brutalist 静态内容分组卡片组件。'
 sidebar:
   order: 4
 ---
@@ -10,25 +11,32 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Card 是没有 Base counterpart 的 direct styled-only 分组表面。
+Brutalist Card 是用于视觉分组内容的静态面板组件，由 5px 圆角、`2px` 黑色外框与 4px 硬黑阴影构成。
 
-## 契约
-
-- 公开 surface 有意只保留 Root、Header、Content 与 Footer。
-- Root 是被动的 5px 圆角 paper 面板，带 `2px` 黑色外框 与偏移硬阴影；它没有 role、focus、activation 或 selection mode。
-- Header 与 Footer 拥有布局与间距，默认不加分段边框；Content 拥有水平间距。Root 拥有唯一的 5px 圆角外框与 4px 黑色硬阴影。
-- Title 与 description 使用普通内容；action 组合 Button 或 Link child，并保留这些 child 自己的语义。
-
-Card 用于被动视觉分组。Selection、disclosure、navigation 与 activation 属于各自协议，而不是 Card mode。
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-card" initialRuntime="wc" />
 </div>
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-card`
+
+## 用法
+
+Card 提供 `Root`、`Header`、`Content` 和 `Footer` 四个部件：
+
+- **Root**：外层容器，提供 5px 圆角、`2px` 黑色外框与 4px 偏移硬阴影，本身为被动布局容器。
+- **Header / Footer**：负责头部与底部区域排布和间距，默认不加分段边框。
+- **Content**：提供主体内容区域的水平间距。
+
+标题与说明直接使用普通文本元素即可；如需在卡片内放置交互操作，请在内部组合 `Button` 或链接组件。
+
 ## API
 
-Card 是工作区源码。当前工作区 CLI 目标为 `brutalist-card`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。Root 没有属性。
+Card 的 `Root`、`Header`、`Content` 与 `Footer` 仅接收传入的子元素，不声明独立属性。
 
 <ApiPropsTable headers={{ name: '属性', type: '类型', default: '默认值' }} rows={[]} />
-
-Header、Content 与 Footer 仅接受 children，不增加属性。

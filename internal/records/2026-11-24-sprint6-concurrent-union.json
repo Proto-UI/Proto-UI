@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-24T09:26:02.819303+00:00",
+  "pullRequest": "https://github.com/Proto-UI/Proto-UI/pull/1712",
+  "previousRecord": "internal/records/2026-11-24-sprint6-main-reconciliation.json",
+  "purpose": "Preserve concurrent published Sprint 6 fixes and all local fixes by normal merges. The 0.4 source integration direction continues; no source history is rewritten and no acceptance is waived.",
+  "sources": {
+    "localPriorCandidate": "2f8f3d8b59963104ea3fef2b06b739f9efce8662",
+    "publishedConcurrentSource": "ffc8ba6bea65975cb4ee552a965966ad24cf820c",
+    "publishedInventorySuccessor": "92f5028e5acb99c3d7d30bcf468e6770322b5cd3",
+    "combinedSourceCommit": "b388a8947d77117d526b890bc1c74f3d00486fe6",
+    "mainIncluded": "88fc0883bec70abbc0d7505d88370657c279639e",
+    "sha256": {
+      "packages/modules/feedback/src/presence/projector.ts": "d9a0ccfd12053e193e2c0a2ff0cd8a435a083c23aa04ae466ae28625ead2b2a4",
+      "packages/adapters/base/src/motion/web-presence-presentation.ts": "f4c228935b36d8e026991dda8e8f31e632eeed48716e09a62e5f5eb336096bff",
+      "packages/compiler/src/native-support/web-presence.ts": "17fd5f4a6a19e1a50cee504f062645d20a9c3d4db2229a355fdd921a2af784d5",
+      "packages/compiler/src/native-support/web-host-sources.generated.ts": "43a3869aa644f3fa854123707fbe87bf0221a3f59159095327b38f585eb81aa5",
+      "scripts/compiler/generate-web-host-sources.mjs": "e3ed041c4a91a3015c6c4e9c8d343f3208f548e3a8c627c8c19d8f23c5e39fbb",
+      "scripts/test/check-bootstrap-motion-evidence.mjs": "d44f17585a848b403bc0d33206e30de6d5df5e4ff394d496936aecffeb39a752",
+      "scripts/test/check-bootstrap-motion-evidence.test.mjs": "ec0c24736f260f4901a9cbe7dc51e96aea0513a82759b61b4294b4045eefa2ff",
+      ".github/workflows/bootstrap-state-controls-evidence.yml": "b91ad31d458bca61736a9ffaa355b77e86c4ce58c615d99f3941902bbf8506e5"
+    }
+  },
+  "reconciliation": [
+    "Use the incoming enteredView witness, established by a real accepted entering frame, to determine retained admission. It replaces the earlier conservative blockSize cold approximation while preserving both original cold-first-leave and actual-entered intrinsic-reopen tests.",
+    "Retain the local post-now ownership check, clamped acknowledged samples, five independent scalar slots and complete declared-channel settlement checks. Keep one fresh warm seed after the clock reentry guard.",
+    "Retain the incoming topProfilePending and bounded preparation settlement without treating an unmeasured profile as supported. The Web host source is byte-identical to ffc8.",
+    "Retain both shader and material reservation wiring. Internal sampler aliases use the incoming channel-sampler-v1 consistently; remove duplicate canonical source-list entries, then regenerate through the producer.",
+    "Retain main88fc documentation and the concurrent historical evidence byte repairs. Union historical Prettier exclusions; do not format archived receipts.",
+    "Retain the incoming92 exact142-case inventory. Add only a negative control that rejects an internally consistent137-case green report. Original eleven selected files, all skip/error checks and native thresholds remain unchanged."
+  ],
+  "validation": {
+    "affectedGraph": {
+      "selectedFiles": 26,
+      "total": 342,
+      "passed": 341,
+      "failed": 0,
+      "todo": 1,
+      "exitCode": 0,
+      "unchangedPackageInputsDuringRun": true,
+      "report": "concurrent-union.json"
+    },
+    "modulePresence": {
+      "files": 7,
+      "passed": 131,
+      "exitCode": 0,
+      "includes": "Original blockSize25, local combined10, incoming retained12 and top18; plus original controller/projector/semantic-style suites."
+    },
+    "evidenceProducerControls": {
+      "passed": 89,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "exitCode": 0,
+      "report": "motion-inventory-repair/node-tests.log"
+    },
+    "nativeMotionInventory": {
+      "originalCount": 137,
+      "currentCount": 142,
+      "changes": {
+        "presence-top-projector": {
+          "before": 17,
+          "after": 18
+        },
+        "web-presence-top": {
+          "before": 13,
+          "after": 17
+        }
+      },
+      "browserExecution": "Current combined browser execution remains pending hosted CI; local Chromium socket denial is retained in previous record."
+    },
+    "canonicalGenerator": {
+      "command": "node scripts/compiler/generate-web-host-sources.mjs --check",
+      "exitCode": 0
+    },
+    "coverageBinding": {
+      "sourceCommit": "b388a8947d77117d526b890bc1c74f3d00486fe6",
+      "refreshExit": 0,
+      "checkExit": 0,
+      "comparisonRows": 71,
+      "baseProjectionRows": 22,
+      "consumerRows": 141,
+      "migratedLinks": 101,
+      "priorMatrixSha256": "dd0904c23e112ed40ec81a83d819a1cf8447f6f1bcc7204ebf930f2b689c34e4",
+      "acceptanceFlags": "Unchanged; source inventory refresh is not completion."
+    }
+  },
+  "independentReview": {
+    "reviewer": "Fresh-context separate Codex reviewer s6_final_union_review",
+    "reviewedProjectorSha256": "d9a0ccfd12053e193e2c0a2ff0cd8a435a083c23aa04ae466ae28625ead2b2a4",
+    "reviewedWebHostSha256": "f4c228935b36d8e026991dda8e8f31e632eeed48716e09a62e5f5eb336096bff",
+    "reviewedEmitterSha256": "17fd5f4a6a19e1a50cee504f062645d20a9c3d4db2229a355fdd921a2af784d5",
+    "findings": [],
+    "scope": "Channel independence, actual acknowledgements, reentry, retained owner/view admission, pending top and bounded settlement, canonical helper closure.",
+    "executedByReviewer": "Read-only source review, no tests/build/browser runs; executable evidence above was run separately.",
+    "githubApproval": false
+  },
+  "remaining": {
+    "hostedCandidateChecks": "Pending at this record timestamp: current combined Bootstrap, Liquid browser-only partition, public packages/consumers and strict budget.",
+    "inheritedDebt": [
+      "Non-React Compiler top/channelEasing runtime rejection despite compile acceptance (#1148/#1049)",
+      "Uncataloged main message-scroller reading hook",
+      "Physical performance, optical comparison and OS IME/AT acceptance remain open"
+    ],
+    "mergeConditions": "Genuine DCO, trusted required CI and independent exact-head GitHub approval remain required."
+  },
+  "rawEvidence": {
+    "archive": "internal/records/evidence/2026-11-24-sprint6-main-reconciliation/concurrent-validation.tar.gz",
+    "sha256": "e67a97813a65b191f0d545471fb84ce1271d95bc454ba898ecf028f5452b247e",
+    "bytes": 1173917,
+    "members": 46,
+    "originalFailures": "Preserved in previous archive and current producer negative-control red record; no historical result is relabeled."
+  }
+}

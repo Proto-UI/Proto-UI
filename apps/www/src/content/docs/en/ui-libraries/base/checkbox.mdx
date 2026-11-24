@@ -1,14 +1,15 @@
 ---
 title: 'Checkbox'
-desp: 'Checkbox'
-description: 'Checkbox base prototype'
+description: 'An unstyled checkbox supporting checked, unchecked, indeterminate, disabled, read-only, and required states.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-The Checkbox base prototype owns checked, unchecked, disabled, read-only and indeterminate interactions and the required control fact through one canonical choice owner.
+Base Checkbox provides unstyled checkbox behavior covering checked, unchecked, `indeterminate`, `disabled`, `readOnly`, and `required` states.
+
+## Preview
 
 <div>
   <PrototypePreviewer
@@ -19,51 +20,56 @@ The Checkbox base prototype owns checked, unchecked, disabled, read-only and ind
   />
 </div>
 
-## Anatomy
+## Installation
 
-Checkbox is split into root and indicator parts connected through the anatomy system.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-- **Root** (`base-checkbox-root`) owns canonical `checked`, emits `checkedChange`, and manages disabled/read-only policy and the independent `indeterminate` state and `required` fact.
-- **Indicator** (`base-checkbox-indicator`) reads the root `checked` and `indeterminate` states through anatomy runtime access and reflects them for rendering. It does not own checkbox state.
+## Usage
 
-The `base-checkbox` anatomy family uses a `contains` relation from root to indicator. Indicators are optional, and multiple visual surfaces can read the same root state through separate indicators.
+### Anatomy
 
-In the Web Components preview runtime, prototype IDs are registered with a `wc-` tag prefix: `wc-base-checkbox-root` and `wc-base-checkbox-indicator`.
+Checkbox consists of `Root` and an optional `Indicator`:
 
-## Indeterminate Behavior
+- **Root** (`base-checkbox-root`): manages `checked`, `indeterminate`, `disabled`, `readOnly`, and `required`, and emits `checkedChange` and `indeterminateChange`.
+- **Indicator** (`base-checkbox-indicator`): reads `checked` and `indeterminate` from its `Root` for visual rendering. Multiple indicators can share the same `Root`.
 
-`indeterminate` may be uncontrolled via `defaultIndeterminate` or controlled via `indeterminate`.
+In the Web Components preview runtime, these parts register as `wc-base-checkbox-root` and `wc-base-checkbox-indicator`.
 
-When an editable indeterminate checkbox activates, Root first clears or requests clearing `indeterminate` and emits `indeterminateChange`. Uncontrolled mixed state clears directly; a controlled owner accepts by passing `indeterminate={false}` back.
+### Indeterminate behavior
 
-Root then requests the opposite of the canonical `checked` value at activation start and emits `checkedChange`. If the mixed-clear callback already commits a newer checked value, the older checked stage retires instead of reversing that new owner decision. Confirming only mixed=false while checked stays unchanged retains the original checked request. Disabled or readOnly blocks both value proposals.
+`indeterminate` can be uncontrolled (`defaultIndeterminate`) or controlled (`indeterminate`):
 
-## Read-only and explicit Form composition
+- Activating an editable indeterminate checkbox first clears (or requests clearing) `indeterminate` via `indeterminateChange`, then requests toggling `checked` via `checkedChange`.
+- If your `indeterminateChange` handler already commits a new `checked` value, the pending toggle step is skipped rather than reversing your update.
+- `disabled` and `readOnly` block both state change requests.
 
-Root accepts `readOnly`. It preserves focus while refusing value proposals; disabled also removes focus participation. Ordinary Root does not automatically register with Field or Form.
+### Read-only and Form integration
 
-Use `fieldCheckbox` from `@proto.ui/prototypes-base/field` inside an explicit `FormField` to connect canonical values, required validation, Label/Description/Error relationships and reset. The [Form choice recipe](../form/) demonstrates controlled refusal, accepted changes, read-only focus, disabled groups and real owner replacement. `resetValue()` requests the instance creation baseline and never forces a controlled owner to accept it.
+- `readOnly` keeps the checkbox focusable while blocking value changes; `disabled` also removes it from the focus sequence.
+- Standalone `Root` does not auto-register with a form. Inside an explicit `FormField`, use `fieldCheckbox` from `@proto.ui/prototypes-base/field` for value tracking, required validation, Label/Description/Error linking, and reset (see the [Form choice recipe](../form/)).
 
 ## API
 
-Checkbox is workspace source. There is no public `proto-ui add` target. Passing `checked` or `indeterminate` selects controlled mode for that fact.
+### Root Props
+
+Pass `checked` or `indeterminate` to control the corresponding state. `Root` and `asCheckboxRoot()` expose `checked`, `indeterminate`, `disabled`, `required`, `hovered`, `focused`, `focusVisible`, and `pressed`, plus `checkedChange` and `indeterminateChange`.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'checked', type: 'boolean', default: '—' },
     { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'indeterminate', type: 'boolean', default: '—' },
+    { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'required', type: 'boolean', default: 'false' },
-    { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
   ]}
 />
 
-These props belong to Root. Indicator has no props.
+### Other parts
 
-Root and `asCheckboxRoot()` expose `checked`, `indeterminate`, `disabled`, `required`, `hovered`, `focused`, `focusVisible`, and `pressed`, plus `checkedChange` and `indeterminateChange`.
-
-The `required` prop initializes and updates one owned state, which also supplies the accessible required fact. It does not change the checked value or prevent unchecking. Native form constraint validation, submission, and Field validation remain responsibilities of an explicit composition; the atomic Checkbox does not create a hidden form input or install a Field binding automatically.
+- **Indicator**: no props.
 
 ## References
 

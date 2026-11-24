@@ -1,13 +1,15 @@
 ---
-title: shadcn Progress
-description: A bounded numerical completion indicator with shared Base semantics.
+title: 'Progress'
+description: 'A bounded completion indicator supporting determinate and indeterminate states.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Progress visualizes task completion across a bounded range, and supports an indeterminate state when completion percentage is unknown. The examples on this page use the **Shadcn Rhea** style preset.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-progress"
@@ -16,19 +18,28 @@ Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching exampl
   codePanel={false}
 />
 
-Draft implementation. Root owns the finite range; Label names it, Track contains Indicator, and Value displays valueText or the canonical number. All styled atoms inherit the same Base protocol.
+## Installation
 
-Props: value, min (0), max (100), ariaLabel and valueText. Values clamp to ordered finite bounds; an equal min/max has zero percentage. Omitted value or indeterminate=true represents unknown progress and withholds the current accessible value.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Root and parts expose value, percentage, indeterminate and status. These are passive readouts with no keyboard stop or editing event. Updating Props updates every part. Range states use portable A11y declarations; exact native and assistive-technology mappings still need verification.
+## Usage
 
-Import progressRoot, progressLabel, progressTrack, progressIndicator and progressValue from the progress subpath after shared package registration. Source tests are incremental evidence. Full Adapter/Compiler/GPUI, native input/paint, package consumer and independent acceptance remain open; this page does not mark the Finf item complete.
+After registering the package entry, import `progressRoot`, `progressLabel`, `progressTrack`, `progressIndicator`, and `progressValue` from the `progress` subpath:
 
-This entry is workspace source. It is not a public `proto-ui add` catalog id.
+- `Root` manages the finite range and progress state.
+- `Label` provides the accessible name.
+- `Track` holds `Indicator` to visualize the current percentage.
+- `Value` displays `valueText`, or falls back to the normalized numeric value.
+
+### Range and indeterminate state
+
+- Values clamp within `[min, max]`; when `min` equals `max`, the percentage is `0`.
+- Omit `value` or set `indeterminate={true}` to represent unknown progress; in this state, no current numeric value is reported to assistive technologies.
+- Progress is a read-only display with no keyboard tab stop. `Root` and its parts expose `value`, `percentage`, `indeterminate`, and `status`, updating together whenever props change.
 
 ## API
 
-An omitted `value`, or `indeterminate`, means unknown progress and withholds the current accessible value.
+The following props belong to `Root`:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}

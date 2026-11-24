@@ -6,6 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { compileFile, writeCompilation } from '../../../src/compile.ts';
+import { GPUI_PROFILE_SOURCE } from '../../../src/gpui-dependency.ts';
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
@@ -20,8 +21,8 @@ const output = positionals[0];
 if (positionals.length !== 1 || !path.isAbsolute(output ?? '') || existsSync(output))
   throw new Error('Provide a fresh absolute output directory.');
 const workspace = values['gpui-git'] !== undefined || values['gpui-rev'] !== undefined;
-const git = values['gpui-git'] ?? 'https://github.com/zed-industries/zed';
-const rev = values['gpui-rev'] ?? '62e5991dd0f0c8a3af8d5e7e9c4652490d468db8';
+const git = values['gpui-git'] ?? GPUI_PROFILE_SOURCE.git;
+const rev = values['gpui-rev'] ?? GPUI_PROFILE_SOURCE.revision;
 const sdkFeatures = [
   'test-support',
   ...(values['gpui-text-selection-notification'] ? ['gpui-text-selection-notification'] : []),
@@ -96,6 +97,10 @@ serde_json = "1.0"
 await mkdir(path.join(output, 'tests'));
 await copyFile(path.join(fixture, 'consumer.rs'), path.join(output, 'tests', 'a11y_value.rs'));
 await copyFile(
+  path.join(fixture, 'press_modifiers.rs'),
+  path.join(output, 'tests', 'press_modifiers.rs')
+);
+await copyFile(
   path.join(fixture, 'sequential_focus.rs'),
   path.join(output, 'tests', 'sequential_focus.rs')
 );
@@ -116,6 +121,7 @@ const receipt = {
     }))
   ),
   consumerSha256: sha256(await readFile(path.join(fixture, 'consumer.rs'))),
+  pressModifiersConsumerSha256: sha256(await readFile(path.join(fixture, 'press_modifiers.rs'))),
   sequentialFocusConsumerSha256: sha256(await readFile(path.join(fixture, 'sequential_focus.rs'))),
   generatedPackageName: name,
   nativeSdk: provenance.nativeSdk,

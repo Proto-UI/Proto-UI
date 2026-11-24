@@ -1,14 +1,15 @@
 ---
 title: 'Select'
-desp: 'Select 基础原型'
-description: 'Select 基础原型'
+description: '提供单选下拉语义、键盘导航与内置值展示部件的无样式选择框组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-`base-select` 是一个已经编目的 select-only 复合原型，也是 base 原型库里首个正式定义 `value` 类呈现部件的 family。
+基于 APG select-only combobox 模式的无样式单选下拉组件：`Trigger` 提供 `combobox` 语义，`Content` 提供 `listbox`，`Item` 提供 `option`，并内置 `Value` 部件直接渲染当前选中文本或占位符。
+
+## 预览
 
 <div>
   <PrototypePreviewer
@@ -19,83 +20,41 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   />
 </div>
 
-它使用 APG select-only combobox 语义：Trigger 投影 `combobox`，Content 投影 `listbox`，Item 投影 `option`。选中值是持久状态；打开后的 active item 是瞬时导航状态，两者不会混为一谈。
+## 安装
 
-## 当前源码的安装与 Usage
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版（工作区 CLI 目标为 `base-select`；已发布版本的接入方式见[稳定版 Quick Start](/zh-cn/start-here/quick-start/)）。
 
-Code 面板使用当前工作区中的公开包导出。请先安装 `@proto.ui/cli`、`@proto.ui/prototypes-base`、`@proto.ui/prototypes-lucide` 和所选宿主的 Adapter，并确保这些 Proto UI 包和 CLI 来自同一份审阅过的源码修订。对于源码检出版本，可以使用仓库的[仅打包流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs)和[干净消费者安装流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs)准备本地包及其声明的完整依赖。这里不承诺工作区版本已经发布到 npm；已发布版本的接入方式见[稳定版 Quick Start](/zh-cn/start-here/quick-start/)。
+预览面板的完整代码使用 `@proto.ui/cli`、`@proto.ui/prototypes-base`、`@proto.ui/prototypes-lucide` 以及对应宿主的 Adapter 包（Vue 2 需使用 Vue `>=2.6.0 <2.7`）：
 
-每个面板都提供用于已有应用构建配置的完整文件。React 和 Vue 沿用应用原有的挂载入口；Vue 2 使用 Vue `>=2.6.0 <2.7`。
-
-| 宿主           | Adapter 包                        | 复制到的文件  |
+| 宿主           | Adapter 包                        | 示例入口文件  |
 | -------------- | --------------------------------- | ------------- |
 | Web Components | `@proto.ui/adapter-web-component` | `index.html`  |
 | React          | `@proto.ui/adapter-react`         | `src/App.tsx` |
 | Vue            | `@proto.ui/adapter-vue`           | `src/App.vue` |
 | Vue 2          | `@proto.ui/adapter-vue2`          | `src/App.vue` |
 
-首次接入 Proto UI 时，在应用目录运行已经安装的同版本 CLI：
+首次接入时运行同版本 CLI 初始化结构样式文件 `src/styles/proto-ui-style.css`（若入口已导入，保留一次即可）：
 
 ```sh
 node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --prototypes shadcn
 ```
 
-保留生成的 `src/styles/proto-ui-style.css`：示例通过导入它取得 Proto UI 的结构规则；如果应用入口已经导入，保留一次导入即可。每份示例还包含应用自身的 Base Select 布局与装饰样式，初始化预设不会改变所适配的 Base 原型。
+在各宿主中，Web Components 在连接到文档前通过 `setElementProps` 设置 `accessibleLabel`、`placeholder` 与选项值；React 将 `react-dom` 的 `createPortal` 传入 `createReactAdapter` 以托管弹层传送门；Vue 与 Vue 2 注册所使用的各部件。通过 `Trigger` 的 `accessibleLabel` 可为控件设置独立于选中值的无障碍名称。
 
-选择一个宿主并复制完整面板。WC 注册应用自己的 `app-base-select-*` 元素，并在连接到文档前通过 `setElementProps` 设置 `accessibleLabel`、`placeholder`、图标尺寸和各选项值。React 将 `react-dom` 的 `createPortal` 传给 `createReactAdapter`，由 React 持有 Content 的 portal。两种 Vue 示例都注册了自身使用的全部组件。Trigger 的 `accessibleLabel` 为控件提供独立于选中值的名称。
+## 用法
 
-## Family Parts
+### 组件结构
 
-- `select-root`：持有受控/非受控 `open`、`value`、`textValue`，并裁决变更请求
-- `select-trigger`：独立 command surface，投影 combobox ARIA，并负责键盘/指针开合
-- `select-value`：通过显式 `run.update()` 渲染 `displayValue` 或 placeholder，不拥有输入行为
-- `select-content`：组合 `asOverlay`、`asTransition`、`asFocusRoving` 与锚点定位
-- `select-item`：投影 option，区分瞬时 `active` 与持久 `selected`，并提交选择请求
+- `select-root`：统一管理受控或非受控的 `open`、`value` 与 `textValue`，并仲裁变更请求。
+- `select-trigger`：独立触发器，提供 `combobox` 无障碍语义并处理指针与键盘开关。
+- `select-value`：由组件内部渲染当前 `displayValue` 或 `placeholder`，无需应用手工拼接显示文本。
+- `select-content`：组合弹层、过渡、漫游焦点与锚点定位。
+- `select-item`：提供 `option` 语义，严格区分打开时的瞬时导航焦点（`active`）与已提交的持久选中态（`selected`）。
+- **可选分组与结构部件**：`select-surface`、`select-viewport`、`select-item-text` 提供显式对齐容器；`select-group` 与 `select-label` 为选项分组提供独立的无障碍命名（缺少或重复标签时忽略命名，嵌套 Select 之间互不串名）；`select-separator` 为对辅助技术隐藏的纯装饰分隔线（组合 `asSelectSeparator` 时需显式返回空渲染器）。三者同时导出 `asSelectGroup`、`asSelectLabel`、`asSelectSeparator`。
 
-## 为什么它重要
+### 键盘、指针与触摸交互
 
-这个 family 不只是为了扩充 base 库，还承担了一次 value 类组件的实践验证：
-
-- 选中值文本由原型 family 自己定义
-- 宿主应用不需要手动渲染这段文本
-- value 呈现可以通过显式 update 驱动重渲染完成刷新
-
-因此，`select-value` 是一个明确的 `render-consumed-value` 样本，而不只是 exposed-state 样本。
-
-## 当前 v0 边界
-
-`base-select` 目前包含：
-
-- 单选语义
-- 鼠标与 select-only 键盘交互，包括方向键、Home/End 与 typeahead
-- Escape、Tab、外部点击关闭及所需的焦点恢复
-- 打开后优先聚焦 selected item，否则从边界项开始
-- combobox/listbox/option 的 ARIA 关系和选中状态
-- 受控值只发送请求、不制造临时成功状态
-- family 内部自带的 value 呈现部件
-
-它暂时不包含：
-
-- 表单语义
-- 原生 `<select>` 等价行为
-- 可编辑 combobox / 搜索能力
-- 滚动按钮与 `ItemIndicator`
-- 表单提交与 hidden input
-- 多选
-
-## References
-
-- 契约：[select.v0.md](https://github.com/Proto-UI/Proto-UI/blob/main/internal/contracts/prototype-base/select.v0.md)
-- 源码：[packages/prototypes/base/src/select](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/select)
-- 测试：[select.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/select.test.ts)
-
-## 可选分组与结构 parts
-
-`select-surface`、`select-viewport`、`select-item-text` 提供显式对齐结构。`select-group` 是被动容器；`select-label` 保留子内容，仅命名所属 Group，不是 control label，也没有激活行为。`select-separator` 是隐藏于无障碍树、无子内容的装饰性分隔。
-
-它们提供 `asSelectGroup`、`asSelectLabel`、`asSelectSeparator`；asHook 继承语义声明，使用 `asSelectSeparator` 的作者必须显式返回空 renderer。标签缺失或重复时命名 fail closed，嵌套 Select 根之间不串名。选择、collection 与焦点仍由原 owner 持有。原生辅助技术验收仍待完成；GPUI peer 当前尚未传输 Separator 的 hidden-tree 事实。
-
-## 鼠标、键盘与触摸所有权
+打开列表时优先聚焦当前选中项（无选中项时聚焦边界项），支持方向键、`Home`/`End` 与首字母跳转；按 `Escape`、`Tab` 或点击外部关闭并按需恢复焦点。
 
 <PrototypePreviewer
   demoId="demo-base-select-input"
@@ -104,11 +63,11 @@ node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --pr
   codePanel={false}
 />
 
-这个可滚动的公开配方区分焦点与已提交选择。已知、无按住按钮的鼠标移动可导航；触摸、笔与拖动不借用该 hover 路径。受控拒绝开关显示提案，同时由 owner 保留当前值。弹层采用公开 popper 定位，触摸滚动与捕获由浏览器负责。
+在可滚动选项列表中，未按下鼠标按键的悬停移动可用于切换高亮焦点，触摸、手写笔与拖拽则交给浏览器原生滚动；传入 `open` 或 `value` 进入受控模式，交互仅发出变更请求，由外部决定是否更新。
 
 ## API
 
-Select 是工作区源码。当前工作区 CLI 目标为 `base-select`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。传入 `open` 或 `value` 会使对应事实进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -121,7 +80,15 @@ Select 是工作区源码。当前工作区 CLI 目标为 `base-select`。CLI �
   ]}
 />
 
-这些属性属于 Root。Trigger 的 `accessibleLabel` 默认 `''`。Value 的 `placeholder` 默认 `''`。Content 接受 Transition 属性，`position` 默认 `popper`，`side` 默认 `bottom`，`align` 默认 `center`，`sideOffset` 默认 `4`，`alignOffset` 默认 `0`，`avoidCollisions` 默认 `true`，`collisionPadding` 默认 `10`。Item 的 `disabled` 默认 `false`，`value` 与 `textValue` 默认 `''`；`closeOnSelect` 没有默认值，回退到 Root 策略。Group、Label、Surface、ItemText、Viewport 与 Separator 没有属性。
+传入 `open` 或 `value` 可分别受控管理展开状态或选中值。
+
+### 其他部件属性
+
+- **Trigger**：`accessibleLabel`（默认 `''`）。
+- **Value**：`placeholder`（默认 `''`）。
+- **Content**：支持 `Transition` 属性，提供 `position`（默认 `'popper'`）、`side`（默认 `'bottom'`）、`align`（默认 `'center'`）、`sideOffset`（默认 `4`）、`alignOffset`（默认 `0`）、`avoidCollisions`（默认 `true`）、`collisionPadding`（默认 `10`）。
+- **Item**：`disabled`（默认 `false`）、`value`（默认 `''`）、`textValue`（默认 `''`）、`closeOnSelect`（默认跟随 `Root` 设置）。
+- **Group**、**Label**、**Surface**、**ItemText**、**Viewport**、**Separator**：无额外属性。
 
 ## 参考
 

@@ -1,14 +1,15 @@
 ---
 title: 'Radio Group'
-desp: 'Base single-selection group protocol'
-description: 'A host-neutral, accessible single-selection group with roving focus.'
+description: 'An accessible single-selection radio group with roving keyboard focus.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-`base-radio-group` is a draft Base protocol for choosing one value from a visible set. The Root is the sole selected-value owner; Items derive `checked` and effective `disabled` state from it, and Indicators only render those facts.
+An unstyled single-selection radio group with roving focus management and built-in `radiogroup` / `radio` accessibility semantics.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-radio-group"
@@ -16,72 +17,45 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   runtimes={['wc', 'react', 'vue']}
 />
 
-## Family Parts
+## Installation
 
-- `radio-group-root`: owns controlled or uncontrolled `value`, Collection order, roving focus, group disabled state, and the `radiogroup` accessibility object
-- `radio-group-item`: contributes one value, projects one focusable `radio`, and requests selection without owning checked state
-- `radio-group-indicator`: derives checked and disabled facts from its nearest Item; it has no focus, activation, event, or control semantics
+Currently available from workspace source; not yet included in the 0.2.0 stable release (workspace CLI target: `base-radio-group`).
 
-The anatomy is deliberately small. The `radiogroup` is already both the semantic group and the focus collection, so an extra List part would not carry an independent protocol.
+## Usage
 
-## Value Ownership
+### Parts
 
-Use `defaultValue` for an uncontrolled initial selection or `value` for a controlled group. Accepted uncontrolled requests update Root state and emit `valueChange` once. Controlled requests emit the proposed value but do not create temporary checked state; the next `value` prop remains authoritative.
+- `radio-group-root`: Manages the selected value, item collection order, roving focus, group disabled/read-only state, and `role="radiogroup"`.
+- `radio-group-item`: Declares an option `value` with `role="radio"`, derives `checked` and effective `disabled` state from `Root`, and emits selection requests.
+- `radio-group-indicator`: Derives `checked` and `disabled` state from its nearest `Item` for visual feedback without owning focus or events.
 
-Empty and unmatched values are preserved. They produce no checked Item rather than silently selecting the first option. Removing, disabling, or changing the selected Item also leaves the Root value intact; adding a matching Item later restores its derived checked state.
+### Controlled and uncontrolled
 
-Item values should be non-empty and unique. If duplicate values are authored, only the first matching Item can be checked and a request for that ambiguous value is rejected.
+- Use `defaultValue` for uncontrolled mode; accepted requests update state and emit `valueChange` once.
+- Pass `value` for controlled mode; interactions emit `valueChange` with the proposed value while external state remains authoritative.
+- Empty and unmatched values are preserved rather than silently selecting the first option. Removing, disabling, or renaming the selected item leaves the `Root` value intact and restores checked state if a matching item returns.
+- Keep `Item` values non-empty and unique within a group; if duplicates occur, only the first match appears checked and ambiguous selection requests are ignored.
 
-## Keyboard and Focus
+### Keyboard, focus, and accessibility
 
-Exactly one enabled Item participates in normal Tab order: the checked enabled Item, otherwise the first enabled Item. Plain focus entry does not invent a selection.
+Exactly one enabled `Item` participates in normal `Tab` order (the checked item, or the first enabled item if none is checked). Moving focus into the group does not automatically select an option.
 
-Once focus or keyboard navigation establishes the current Item, unrelated Root updates preserve that tab stop. A controlled `value` update changes checked state without stealing current focus.
+- `Space`: Selects the focused enabled item and prevents page scroll.
+- `ArrowRight` / `ArrowDown`: Moves focus to and selects the next enabled item (wrapping and skipping disabled items).
+- `ArrowLeft` / `ArrowUp`: Moves focus to and selects the previous enabled item (wrapping and skipping disabled items).
+- `Home` / `End`: Moves focus to and selects the first or last enabled item.
+- `focusSelf()` moves focus programmatically without changing selection; pointer presses select only on completed commit.
 
-- **Space** selects the focused enabled Item and prevents page scrolling.
-- **Right / Down** focus and select the next enabled Item.
-- **Left / Up** focus and select the previous enabled Item.
-- **Home / End** focus and select the first or last enabled Item.
-- Arrow movement wraps and skips disabled Items.
-- **Enter** does not select outside a future Toolbar-specific protocol.
-- `focusSelf()` moves focus programmatically without changing selection.
+Provide an accessible group name via `a11yLabel` (or host labeling). Each `Item` automatically sets `role="radio"`, `aria-checked`, and `aria-disabled`.
 
-Pointer activation focuses and selects only after a successful commit. Canceled input does not select.
+### Read-only and Form integration
 
-## Accessibility
-
-Root projects `role="radiogroup"`, dynamic disabled state, and `a11yLabel` as its explicit accessible name. App Makers must provide a meaningful group name through `a11yLabel` or an equivalent host projection.
-
-Each Item projects `role="radio"`, boolean `aria-checked`, effective `aria-disabled`, and a content-derived name. Indicator is visual feedback only and must not create a second radio object.
-
-## Current Boundary
-
-This first slice intentionally does **not** include:
-
-- `name`, form owner, submission, validation, `required`, or hidden/native inputs
-- native `<input type="radio">` event and grouping parity
-- public `orientation` or `loop` configuration
-- Toolbar-specific arrow behavior
-- Label or Description parts
-- Shadcn/Radix compatibility claims
-
-Those concerns require separate host or semantic contracts; they are not approximated here.
-
-## References
-
-- Catalog: [P-BASE-RADIO-GROUP](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-RADIO-GROUP.yaml)
-- Source: [packages/prototypes/base/src/radio-group](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/radio-group)
-- Tests: [radio-group.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/radio-group.test.ts)
-
-## Read-only and explicit Form composition
-
-Root accepts `readOnly`. It preserves focus while refusing value proposals; disabled also removes focus participation. A read-only Radio Group can still move roving focus with its supported navigation keys. Ordinary Root does not automatically register with Field or Form.
-
-Use `fieldRadioGroup` from `@proto.ui/prototypes-base/field` inside an explicit `FormField` to connect canonical values, required validation, Label/Description/Error relationships and reset. The [Form choice recipe](../form/) demonstrates controlled refusal, accepted changes, read-only focus, disabled groups and real owner replacement. `resetValue()` requests the instance creation baseline and never forces a controlled owner to accept it.
+- `readOnly` keeps keyboard focus navigation active while rejecting value changes; `disabled` also removes items from normal focus order.
+- Standard `radio-group-root` does not auto-register with forms. To connect validation, Label/Description/Error linking, and form reset, use `fieldRadioGroup` from `@proto.ui/prototypes-base/field` inside a `FormField` (see the [Form choice recipe](../form/)). `resetValue()` requests returning to the instance's initial baseline value.
 
 ## API
 
-Radio Group is workspace source. For this workspace version, the CLI target is `base-radio-group`. Use matching CLI and package versions; check the chosen release's availability before installing. Passing `value` selects controlled mode.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -93,7 +67,12 @@ Radio Group is workspace source. For this workspace version, the CLI target is `
   ]}
 />
 
-These props belong to Root. Item defaults `value` to `''` and `disabled` to `false`. Indicator has no props.
+Pass `value` to control the selected value.
+
+### Part Props
+
+- **Item**: `value` (default `''`), `disabled` (default `false`).
+- **Indicator**: No additional props.
 
 ## References
 

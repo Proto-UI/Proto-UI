@@ -35,6 +35,8 @@ const sources = [
   'packages/core/src/spec/feedback/style.ts',
   'packages/modules/feedback/src/presence/controller.ts',
   'packages/modules/feedback/src/presence/projector.ts',
+  'packages/modules/feedback/src/presence/sampler.ts',
+  'packages/modules/feedback/src/presence/top-target.ts',
   'packages/modules/feedback/src/presence/sink.ts',
   'packages/modules/feedback/src/motion/sampler.ts',
   'packages/adapters/base/src/motion/web-presence-presentation.ts',

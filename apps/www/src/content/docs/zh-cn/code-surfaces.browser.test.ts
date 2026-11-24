@@ -93,30 +93,43 @@ async function surfaceFacts(page: Page, ecPage: Page = page): Promise<SurfaceFac
   const ecFacts = await ecPage.evaluate(() => {
     const ec = document.querySelector<HTMLElement>('.expressive-code pre')!;
     const sourceFrame = ec.closest<HTMLElement>('[data-site-code-surface="frame"]')!;
-    const frame = sourceFrame
-      .querySelector<HTMLElement>(':scope > .site-code-surface-mount .site-code-surface-paint')!;
+    const frame = sourceFrame.querySelector<HTMLElement>(
+      ':scope > .site-code-surface-mount .site-code-surface-paint'
+    )!;
     const frameStyle = getComputedStyle(frame);
     const facts = (element: HTMLElement): CodeStyleFacts => {
       const style = getComputedStyle(element);
-      return { background: style.backgroundColor,
-        color: style.color, font: style.fontFamily, size: style.fontSize, lineHeight: style.lineHeight };
+      return {
+        background: style.backgroundColor,
+        color: style.color,
+        font: style.fontFamily,
+        size: style.fontSize,
+        lineHeight: style.lineHeight,
+      };
     };
-    return { pre: facts(ec), code: facts(ec.querySelector('code')!),
+    return {
+      pre: facts(ec),
+      code: facts(ec.querySelector('code')!),
       frame: {
         background: frameStyle.backgroundColor,
         border: frameStyle.borderLeftColor,
         borderWidth: frameStyle.borderLeftWidth,
         radius: frameStyle.borderRadius,
-        surfaceCount: sourceFrame.querySelectorAll(':scope > .site-code-surface-mount .site-code-surface-paint').length,
+        surfaceCount: sourceFrame.querySelectorAll(
+          ':scope > .site-code-surface-mount .site-code-surface-paint'
+        ).length,
         role: frame.getAttribute('role'),
         tabIndex: frame.getAttribute('tabindex'),
         pointerEvents: getComputedStyle(frame.closest('.site-code-surface-mount')!).pointerEvents,
-      } };
+      },
+    };
   });
   return page.evaluate((ecFacts) => {
-    const preview = [...document.querySelectorAll<HTMLElement>('.proto-previewer .proto-previewer__code, [data-code-example-command] .proto-previewer__code')].find(
-      (element) => element.checkVisibility()
-    )!;
+    const preview = [
+      ...document.querySelectorAll<HTMLElement>(
+        '.proto-previewer .proto-previewer__code, [data-code-example-command] .proto-previewer__code'
+      ),
+    ].find((element) => element.checkVisibility())!;
     const card = preview.closest<HTMLElement>('.proto-previewer, .code-example')!;
     const isRuntimePreview = card.matches('.proto-previewer');
     const canvases = card.querySelectorAll<HTMLElement>(
@@ -148,16 +161,22 @@ async function surfaceFacts(page: Page, ecPage: Page = page): Promise<SurfaceFac
       ecCode: ecFacts.code,
       previewCode: facts(code),
       ecFrame: ecFacts.frame,
-      previewFrame: frame && frameStyle && sourceFrame ? {
-        background: frameStyle.backgroundColor,
-        border: frameStyle.borderLeftColor,
-        borderWidth: frameStyle.borderLeftWidth,
-        radius: frameStyle.borderRadius,
-        surfaceCount: sourceFrame.querySelectorAll(':scope > .site-code-surface-mount .site-code-surface-paint').length,
-        role: frame.getAttribute('role'),
-        tabIndex: frame.getAttribute('tabindex'),
-        pointerEvents: getComputedStyle(frame.closest('.site-code-surface-mount')!).pointerEvents,
-      } : null,
+      previewFrame:
+        frame && frameStyle && sourceFrame
+          ? {
+              background: frameStyle.backgroundColor,
+              border: frameStyle.borderLeftColor,
+              borderWidth: frameStyle.borderLeftWidth,
+              radius: frameStyle.borderRadius,
+              surfaceCount: sourceFrame.querySelectorAll(
+                ':scope > .site-code-surface-mount .site-code-surface-paint'
+              ).length,
+              role: frame.getAttribute('role'),
+              tabIndex: frame.getAttribute('tabindex'),
+              pointerEvents: getComputedStyle(frame.closest('.site-code-surface-mount')!)
+                .pointerEvents,
+            }
+          : null,
       source: {
         raw: code.getAttribute('data-raw-code'),
         text: code.textContent,
@@ -247,8 +266,16 @@ async function expectSurfaces(page: Page, ecPage: Page = page): Promise<SurfaceF
   return facts;
 }
 
-async function expectCopyControls(page: Page, codeExample = false, ecPage: Page = page): Promise<void> {
-  const panel = page.locator(codeExample ? '[data-code-example] [data-code-shell]:visible' : '[data-code-shell]:visible').first();
+async function expectCopyControls(
+  page: Page,
+  codeExample = false,
+  ecPage: Page = page
+): Promise<void> {
+  const panel = page
+    .locator(
+      codeExample ? '[data-code-example] [data-code-shell]:visible' : '[data-code-shell]:visible'
+    )
+    .first();
   const toggle = panel.locator('[data-code-toggle]');
   if (await toggle.isVisible()) await toggle.click();
   const ec = ecPage
@@ -296,11 +323,17 @@ async function expectCopyControls(page: Page, codeExample = false, ecPage: Page 
     // Ordinary controls use the public Rhea icon size-8 and 18px glyphs.
     // CodeExample explicitly opts into Proto icon-compact: the Blocks
     // toolbar size-7 consumer geometry, not upstream icon-sm.
-    const inCodeExample = await control.evaluate((node) => Boolean(node.closest('[data-code-example]')));
-    expect([facts.width, facts.height, ...facts.glyph]).toEqual(inCodeExample ? ['28px', '28px', '16px', '16px'] : ['32px', '32px', '18px', '18px']);
+    const inCodeExample = await control.evaluate((node) =>
+      Boolean(node.closest('[data-code-example]'))
+    );
+    expect([facts.width, facts.height, ...facts.glyph]).toEqual(
+      inCodeExample ? ['28px', '28px', '16px', '16px'] : ['32px', '32px', '18px', '18px']
+    );
     expect(facts.radius).toBe(facts.expectedRadius);
     expect(facts.opacity).toBe('1');
-    expect(facts.tokens).toContain(inCodeExample ? 'rounded-md' : 'rounded-[var(--pui-radius-2xl)]');
+    expect(facts.tokens).toContain(
+      inCodeExample ? 'rounded-md' : 'rounded-[var(--pui-radius-2xl)]'
+    );
     expect(facts.tokens).toContain(inCodeExample ? 'size-7' : 'size-8');
     expect(Math.max(...facts.center)).toBeLessThanOrEqual(1);
     await page.keyboard.press('Tab');
@@ -320,9 +353,7 @@ async function expectCopyControls(page: Page, codeExample = false, ecPage: Page 
     const expected = document.createElement('div');
     // Fixed Rhea outline is background-colored in light and transparent in dark.
     expected.style.backgroundColor =
-      document.documentElement.dataset.theme === 'dark'
-        ? 'transparent'
-        : 'var(--pui-background)';
+      document.documentElement.dataset.theme === 'dark' ? 'transparent' : 'var(--pui-background)';
     element.append(expected);
     const facts = {
       actual: getComputedStyle(element).backgroundColor,
@@ -331,24 +362,35 @@ async function expectCopyControls(page: Page, codeExample = false, ecPage: Page 
     expected.remove();
     return facts;
   });
-  await expect.poll(
-    () => ec.evaluate((element) => getComputedStyle(element).backgroundColor),
-    { timeout: 2_000 }
-  ).toBe(ecPaint.expected);
+  await expect
+    .poll(() => ec.evaluate((element) => getComputedStyle(element).backgroundColor), {
+      timeout: 2_000,
+    })
+    .toBe(ecPaint.expected);
   const ecBackground = ecPaint.expected;
-  const previewBackground = await preview.evaluate((element) => getComputedStyle(element).backgroundColor);
+  const previewBackground = await preview.evaluate(
+    (element) => getComputedStyle(element).backgroundColor
+  );
   if (codeExample) {
     // CodeExample intentionally follows upstream docs' ghost Copy. Ordinary
     // Expressive Code and Previewer Copy retain the existing outline recipe.
-    expect(await preview.evaluate((element) => Boolean(element.closest('[data-code-example]')))).toBe(true);
+    expect(
+      await preview.evaluate((element) => Boolean(element.closest('[data-code-example]')))
+    ).toBe(true);
     expect(await preview.getAttribute('data-pui-style')).toContain('bg-transparent');
     expect(previewBackground).toBe('rgba(0, 0, 0, 0)');
-    expect(await preview.evaluate((element) =>
-      element.closest('[data-site-copy]')?.querySelector('[data-demo-ref="copy-backplate"]') !== null
-    )).toBe(false);
+    expect(
+      await preview.evaluate(
+        (element) =>
+          element.closest('[data-site-copy]')?.querySelector('[data-demo-ref="copy-backplate"]') !==
+          null
+      )
+    ).toBe(false);
     // Outline remains independently source-bound above; dark Rhea is also transparent.
   } else {
-    expect(await preview.evaluate((element) => Boolean(element.closest('[data-code-example]')))).toBe(false);
+    expect(
+      await preview.evaluate((element) => Boolean(element.closest('[data-code-example]')))
+    ).toBe(false);
     expect(previewBackground).toBe(ecBackground);
   }
 }
@@ -476,6 +518,8 @@ function installNativeSelectionEventProbe(
     };
   };
   const snapshot = () => {
+    const scroll =
+      pre.closest<HTMLElement>('[data-code-scroll-ready] [data-code-scroll-viewport]') ?? pre;
     const selection = getSelection();
     return {
       token: {
@@ -490,8 +534,8 @@ function installNativeSelectionEventProbe(
       },
       pre: {
         rect: rect(pre.getBoundingClientRect()),
-        scrollLeft: pre.scrollLeft,
-        scrollTop: pre.scrollTop,
+        scrollLeft: scroll.scrollLeft,
+        scrollTop: scroll.scrollTop,
       },
       selection: {
         text: selection?.toString() ?? null,
@@ -610,6 +654,8 @@ function readNativeSelectionDiagnostics(
   };
   const selection = getSelection();
   const pre = element.closest('pre')!;
+  const scroll =
+    pre.closest<HTMLElement>('[data-code-scroll-ready] [data-code-scroll-viewport]') ?? pre;
   const style = getComputedStyle(pre);
   return {
     selectedText: selection?.toString() ?? null,
@@ -626,10 +672,10 @@ function readNativeSelectionDiagnostics(
     nextRun: textRuns(element.nextSibling),
     pre: {
       rect: rect(pre.getBoundingClientRect()),
-      scrollLeft: pre.scrollLeft,
-      scrollTop: pre.scrollTop,
-      clientWidth: pre.clientWidth,
-      scrollWidth: pre.scrollWidth,
+      scrollLeft: scroll.scrollLeft,
+      scrollTop: scroll.scrollTop,
+      clientWidth: scroll.clientWidth,
+      scrollWidth: scroll.scrollWidth,
       font: style.font,
       whiteSpace: style.whiteSpace,
       userSelect: style.userSelect,
@@ -703,7 +749,11 @@ async function retainEvidence(page: Page, name: string, facts: unknown): Promise
   await writeFile(join(directory, `${name}.json`), JSON.stringify(facts, null, 2));
   await page
     .locator(
-      name.endsWith('-install') ? '.install-command-card:visible' : name.endsWith('-after-navigation') ? '[data-code-example] [data-code-shell]:visible' : '[data-code-shell]:visible'
+      name.endsWith('-install')
+        ? '.install-command-card:visible'
+        : name.endsWith('-after-navigation')
+          ? '[data-code-example] [data-code-shell]:visible'
+          : '[data-code-shell]:visible'
     )
     .first()
     .evaluate((element) => element.scrollIntoView({ block: 'center' }));
@@ -756,11 +806,13 @@ describe.sequential('code-surface dogfood matrix (#630, #420, #568)', () => {
           const pre = page.locator('.proto-previewer__code').first();
           const collapsed = await pre.evaluate((element) => {
             const content = element.closest('[data-code-content]')!;
+            const scroll =
+              element.closest('[data-code-scroll-ready] [data-code-scroll-viewport]') ?? element;
             return {
               expanded: element.closest<HTMLElement>('[data-code-shell]')!.dataset.codeExpanded,
               selectable: getComputedStyle(content).userSelect !== 'none',
-              overflow: getComputedStyle(element).overflowX,
-              scrollable: element.scrollWidth > element.clientWidth,
+              overflow: getComputedStyle(scroll).overflowX,
+              scrollable: scroll.scrollWidth > scroll.clientWidth,
             };
           });
           expect(collapsed).toEqual({
@@ -778,7 +830,10 @@ describe.sequential('code-surface dogfood matrix (#630, #420, #568)', () => {
           const originalToken = (await token.elementHandle())!;
           const readGeometry = (element: HTMLElement | SVGElement) => {
             const rect = element.getBoundingClientRect();
-            const pre = element.closest('pre')!;
+            const pre =
+              element.closest<HTMLElement>(
+                '[data-code-scroll-ready] [data-code-scroll-viewport]'
+              ) ?? element.closest('pre')!;
             const box = pre.getBoundingClientRect();
             return {
               token: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
@@ -813,7 +868,10 @@ describe.sequential('code-surface dogfood matrix (#630, #420, #568)', () => {
                 originalToken.evaluate(async (element) => {
                   const sample = () => {
                     const r = element.getBoundingClientRect();
-                    const p = element.closest('pre')!;
+                    const p =
+                      element.closest<HTMLElement>(
+                        '[data-code-scroll-ready] [data-code-scroll-viewport]'
+                      ) ?? element.closest('pre')!;
                     return JSON.stringify([r.x, r.y, r.width, r.height, p.scrollLeft, p.scrollTop]);
                   };
                   const first = sample();
@@ -868,13 +926,18 @@ describe.sequential('code-surface dogfood matrix (#630, #420, #568)', () => {
           await expectNativeTokenSelection(page, token, bounds, `${width}-${theme}`, preparation);
           await originalToken.dispose();
           await page.evaluate(() => getSelection()?.removeAllRanges());
-          await pre.focus();
-          const beforeArrow = await pre.evaluate((element) => element.scrollLeft);
+          const scrollport = pre.locator('xpath=ancestor::*[@data-code-scroll-viewport][1]');
+          const keyboardTarget = (await scrollport.count()) ? scrollport : pre;
+          await keyboardTarget.focus();
+          const beforeArrow = await keyboardTarget.evaluate((element) => element.scrollLeft);
           await page.keyboard.press('ArrowRight');
-          await page.waitForFunction(
-            (before) => document.querySelector('.proto-previewer__code')!.scrollLeft > before,
-            beforeArrow
-          );
+          await page.waitForFunction((before) => {
+            const source = document.querySelector('.proto-previewer__code')!;
+            return (
+              (source.closest('[data-code-scroll-ready] [data-code-scroll-viewport]') ?? source)
+                .scrollLeft > before
+            );
+          }, beforeArrow);
           await retainEvidence(page, `${width}-${theme}-collapsed`, { facts, collapsed });
           await expectCopyControls(page);
           await retainEvidence(page, `${width}-${theme}-expanded`, await surfaceFacts(page));
@@ -921,7 +984,9 @@ describe.sequential('code-surface dogfood matrix (#630, #420, #568)', () => {
         await page.evaluate((mode) => {
           document.documentElement.dataset.theme = mode;
         }, theme);
-        await ecPage.evaluate((mode) => { document.documentElement.dataset.theme = mode; }, theme);
+        await ecPage.evaluate((mode) => {
+          document.documentElement.dataset.theme = mode;
+        }, theme);
         const facts = await expectSurfaces(page, ecPage);
         expectedInstall.set(theme, {
           ...facts.ec,

@@ -15,6 +15,8 @@ const copy =
         ready: 'Ready',
         error: 'Error',
         noScript: 'These interactive examples need JavaScript.',
+        expand: 'Open interactive demos',
+        collapse: 'Show desktop overview',
         documentation: 'Read the component documentation',
       }
     : {
@@ -24,6 +26,8 @@ const copy =
         ready: '就绪',
         error: '错误',
         noScript: '这些交互示例需要 JavaScript。',
+        expand: '打开交互演示',
+        collapse: '查看桌面缩略图',
         documentation: '阅读组件文档',
       };
 const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}`;
@@ -62,7 +66,20 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
       <a href={`/${locale}/ui-libraries/shadcn/accordion/`}>{copy.documentation}</a>
     </p>
   </noscript>
-  <div class="home-demo-previewer__host" data-home-demo-host aria-busy="true"></div>
+  <button
+    type="button"
+    class="home-demo-previewer__layout-toggle"
+    aria-controls={`${id}-demos`}
+    aria-expanded="false"
+    data-home-gallery-layout-toggle
+    data-label-expand={copy.expand}
+    data-label-collapse={copy.collapse}
+    hidden
+  >
+    {copy.expand}
+  </button>
+  <div id={`${id}-demos`} class="home-demo-previewer__host" data-home-demo-host aria-busy="true">
+  </div>
   <output
     class="home-demo-previewer__status"
     data-home-demo-status
@@ -236,11 +253,46 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     overflow-wrap: anywhere;
   }
   .home-demo-previewer :global(.home-gallery) {
-    /* App-owned rhythm only. Component paint, radii and elevation stay in Proto UI. */
     --homepage-gallery-compact-row-gap: 0.875rem;
+  }
+  .home-demo-previewer :global(.home-gallery__stage) {
+    /* App-owned rhythm only. Component paint, radii and elevation stay in Proto UI. */
     position: relative;
     columns: 18rem;
     column-gap: var(--homepage-gallery-column-gap);
+  }
+  .home-demo-previewer__layout-toggle:not([hidden]) {
+    display: block;
+    min-block-size: 2.75rem;
+    margin: 0 auto 0.875rem;
+    padding-inline: 0.75rem;
+    color: var(--sl-color-text-accent, currentColor);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  /* The page decoration is not a scrolling mask or a pointer/focus boundary.
+     Keep both the attribution and a focused card entirely outside its paint. */
+  .home-demo-previewer :global(.home-gallery__stage)::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: min(8rem, 28%);
+    z-index: 1;
+    pointer-events: none;
+    background-image: linear-gradient(
+      to top,
+      var(--sl-color-bg),
+      color-mix(in srgb, var(--sl-color-bg) 70%, transparent) 30%,
+      transparent
+    );
+  }
+  .home-demo-previewer :global(.home-gallery__stage:focus-within)::after {
+    visibility: hidden;
+  }
+  @media (forced-colors: active), (prefers-reduced-transparency: reduce) {
+    .home-demo-previewer :global(.home-gallery__stage)::after {
+      display: none;
+    }
   }
   .home-demo-previewer :global(.home-gallery__card-body),
   .home-demo-previewer :global(.home-gallery__stack) {
@@ -330,6 +382,17 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     gap: 0.25rem;
     min-width: 0;
   }
+  /* The icon-free Shadcn example keeps the 4px wrapper inset. Its native
+     editor therefore needs 4px more, not the standalone 10px, to align
+     to the 8px option text inset. The shell and option paint stay untouched. */
+  .home-demo-previewer
+    :global(
+      [data-gallery-demo='workspace-command']
+        [data-projection-prototype='shadcn-command-input-wrapper']
+        input
+    ) {
+    padding-inline-start: 0.25rem;
+  }
   .home-demo-previewer :global(.home-gallery__profile) {
     display: grid;
     justify-items: center;
@@ -340,7 +403,7 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   /* Explicit five-column composition on large displays. Narrow layouts retain
      the same authored reading order and flow cards instead of empty tracks. */
   @media (min-width: 108rem) {
-    .home-demo-previewer :global(.home-gallery) {
+    .home-demo-previewer :global(.home-gallery__stage) {
       display: grid;
       grid-template-columns: repeat(var(--homepage-gallery-wide-columns), minmax(0, 1fr));
       align-items: start;
@@ -348,9 +411,6 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     .home-demo-previewer :global(.home-gallery__column) {
       display: block;
       min-width: 0;
-    }
-    .home-demo-previewer :global(.home-gallery__attribution) {
-      grid-column: 1 / -1;
     }
   }
   .home-demo-previewer :global(.home-gallery__attribution) {
@@ -362,7 +422,6 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     justify-content: space-between;
     gap: 0.5rem 1rem;
     min-width: 0;
-    column-span: all;
     padding-block: 2rem 0.5rem;
     font-size: var(--sl-text-sm, 0.875rem);
     color: var(--sl-color-gray-3, inherit);
@@ -435,8 +494,35 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
       --homepage-gallery-compact-row-gap: 0.75rem;
     }
   }
+  @media (width < 768px) {
+    .home-demo-previewer[data-home-gallery-compact='true'] :global(.home-gallery) {
+      container-type: inline-size;
+    }
+    .home-demo-previewer[data-home-gallery-compact='true'] :global(.home-gallery__stage) {
+      /* The same five desktop columns, not five stacks of miniature controls
+         in the tab order. CSS zoom also scales layout height, unlike transform. */
+      --homepage-gallery-mini-width: 90rem;
+      display: grid;
+      width: var(--homepage-gallery-mini-width);
+      grid-template-columns: repeat(var(--homepage-gallery-wide-columns), minmax(0, 1fr));
+      align-items: start;
+      zoom: 0.19;
+    }
+    @supports (zoom: calc(1px / 1px)) {
+      .home-demo-previewer[data-home-gallery-compact='true'] :global(.home-gallery__stage) {
+        zoom: calc(100cqi / var(--homepage-gallery-mini-width));
+      }
+    }
+    .home-demo-previewer[data-home-gallery-compact='true'] :global(.home-gallery__column) {
+      display: block;
+      min-width: 0;
+    }
+    .home-demo-previewer[data-home-gallery-compact='true'] :global(.home-gallery__stage)::after {
+      height: min(14rem, 28%);
+    }
+  }
   @media (max-width: 639px) {
-    .home-demo-previewer :global(.home-gallery) {
+    .home-demo-previewer :global(.home-gallery__stage) {
       columns: 1;
     }
   }

@@ -1,0 +1,7 @@
+---
+const { limit, label } = Astro.props as { limit: 'preview' | 'file' | 'unbounded'; label: string };
+---
+
+<div data-code-scroll-root data-code-scroll-limit={limit} data-code-scroll-label={label}>
+  <slot />
+</div>

@@ -1,6 +1,6 @@
 ---
 title: 'Label'
-description: 'Independent control naming and activation through an explicit Proto UI association.'
+description: 'Pairs accessible naming and click-to-activate behavior with controls through an explicit reference.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -8,9 +8,11 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Connects accessible naming (`naming`) and pointer activation (`activation`) to a paired control using an explicit reference, without manual DOM IDs or implicit ancestor lookups. The examples on this page use the **Shadcn Rhea** style preset.
 
-This Label remains **draft**. The shadcn projection shares the independent Base Label protocol. Proto UI is an independent project; design references inform a deliberate projection rather than becoming project authority.
+## Preview
+
+The demo pairs `Label` with `Checkbox`, `Switch`, `Radio Group Item`, `Input`, and `Textarea`, covering naming-only (`activation={false}`), controlled, read-only, and disabled cases:
 
 <PrototypePreviewer
   demoId="demo-shadcn-label"
@@ -18,42 +20,30 @@ This Label remains **draft**. The shadcn projection shares the independent Base 
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-The demo pairs Shadcn Label with Shadcn Checkbox, Switch, Radio Group Item, Input and Textarea, including their Indicator and Thumb parts. Actionable labels use the public defaults; the naming-only example sets `activation={false}`. “On/Off” reads each target's exposed state. “Requests” counts the controlled Checkbox's ordinary `checkedChange` proposals while its application owner keeps `checked={false}`. Label does not forward DOM clicks or own another control value. Input and Textarea remain native text editors; their read-only examples can receive focus from the Label while retaining their text. The disabled choice keeps its name and rejects activation and focus.
-
-## Two independent effects
-
-- `naming` defaults to `true`. The target refers to the actual rendered Label using an accessibility relationship. Do not add a hidden copy of the same name.
-- `activation` defaults to `true`. Once explicitly paired, an eligible pointer or trusted non-pointer action requests the target's existing operation. Set `activation={false}` for a naming-only label; setting it back to `true` or removing the Prop restores activation. Checkbox and Switch keep their controlled/disabled behavior; Radio Item delegates to its Group; Input and Textarea request focus without editing or moving the selection themselves.
-- Label adds no button role, Tab stop or separate keyboard action. Keyboard input remains on the control. Nested links/buttons, modified pointer input, pointercancel and drag gestures are not forwarded.
-- Naming-only labels and long descriptions remain copyable. A short actionable Label declares its own selection affordance. The controlled example deliberately keeps its value off after proposals; this is the application's ownership decision.
-
-Activation stays in the originating click turn so editor focus is not delayed to a timer. Cancellation already observed by the host click listener is respected; a later listener cannot undo a committed operation. Cancelling pointerup alone is not click cancellation. This is a bounded custom Label protocol, not a claim to reproduce every native HTML label default-action detail. Actual assistive-technology behavior remains to be verified.
-
-Upgrade note: previously paired labels that omitted `activation` now activate by default. Declare `activation={false}` to retain passive naming. With `selection='policy'`, actionable labels suppress accidental text selection; use `selection='text'` when an actionable label must also be copyable. Unpaired labels never search for a parent or nearby control.
-
-## Explicit association, outside JSON Props
-
-Create one stable `createControlLabelRef()` from `@proto.ui/core` for each pair. Keep it for the row's logical lifetime. In React, Vue and Vue 2, pass `instanceAssociations: { controlLabel: ref }` as the Adapter-owned input to both components. It is removed before raw/resolved Proto Props, even with a custom `getProps` projection.
-
-In WC, call `setElementAssociations(target, { controlLabel: ref })` and the same setter for the Label from `@proto.ui/adapter-web-component`. Use normal Props only for `naming`, `activation` and the control's values. Attribute strings, JSON-cloned references and unknown association keys are rejected. DemoSpec expresses `associations: { controlLabel: 'row-key' }`; each render instance materializes an independent public reference for that key.
-
-Exactly one live Label and one live target are supported per reference. Missing/duplicate/stale endpoints fail closed. Explicitly paired siblings are allowed; Web views must also share Document and tree root. A reference does not authorize cross-document or cross-shadow-root matching, DOM lookup or arbitrary commands. A nonempty explicit `ariaLabel`/`labelledBy` keeps naming ownership and diagnoses a conflicting Label naming request; use an explicit activation-only Label when appropriate.
-
-## Consumption and limits
-
-Import from `@proto.ui/prototypes-shadcn/label`. CLI component `shadcn-label` generates WC, React, Vue and Vue 2 facades.
-
-The declared association target set is Checkbox, Switch, Radio Group Item, Input, Textarea, Button, Toggle and Toggle Group Item. Icon-only commands can use an independent Label through the same association. Button keeps its click signal; Toggle keeps activeChange; Toggle Group Item delegates selection to its Group. Each target declares its own participation and is exercised through the Prototype packages and their Adapters. Among these targets, the private Compiler admits Button, Toggle and the Label to standalone Web source and keeps an explicit unsupported diagnostic for the others, including Toggle Group Root and Item. Form submission, validation, multiple-label ordering and native-platform/assistive-technology certification are not provided by this association. Browser acceptance is tracked separately from source and synthetic host tests.
-
-- [Label contract](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-CONTROL-LABEL-0001.yaml)
-- [P-SHADCN-LABEL](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-SHADCN-LABEL.yaml)
-- [Executable evidence map](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-CONTROL-LABEL-0001.yaml)
-
-## Install
+## Installation
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-label" manager="npm" />
 
-Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+Replace `wc` with `react`, `vue`, or `vue2` to generate the local facade for your framework. You can also import directly from `@proto.ui/prototypes-shadcn/label`.
+
+## Usage
+
+### Independent naming and activation
+
+- **`naming` (default `true`)**: Associates the rendered label with its paired control so assistive technology announces it automatically. If the target already sets a non-empty `ariaLabel` or `labelledBy`, set `naming={false}` for an activation-only label.
+- **`activation` (default `true`)**: Clicking the paired label invokes the control’s action in the same click turn — toggling `Checkbox`/`Switch`, selecting a `Radio Group Item`, or focusing `Input`/`Textarea` without altering text or selection. Set `activation={false}` for a passive naming-only label.
+- **`selection` (default `'policy'`)**: Suppresses accidental text selection on actionable labels while keeping naming-only labels copyable. Set `selection="text"` if an actionable label should also allow text selection.
+- `Label` adds no extra `Tab` stop, and ignores clicks on nested links/buttons, modified clicks, cancelled pointers, and drag gestures.
+
+### Wiring an explicit association
+
+Create one stable reference per label/control pair with `createControlLabelRef()` from `@proto.ui/core` and pass it through the adapter association channel (outside JSON props):
+
+- **React / Vue / Vue 2**: Pass `instanceAssociations: { controlLabel: ref }` to both the label and its target control.
+- **Web Components**: Call `setElementAssociations(element, { controlLabel: ref })` from `@proto.ui/adapter-web-component` on both elements.
+- **DemoSpec**: Declare `associations: { controlLabel: 'row-key' }` for data-only pairing.
+
+Each reference supports one live label and one live target within the same document/shadow root; missing, duplicate, or stale endpoints are ignored. Supported targets are `Checkbox`, `Switch`, `Radio Group Item`, `Input`, `Textarea`, `Button`, `Toggle`, and `Toggle Group Item` (including icon-only buttons).
 
 ## API
 
@@ -66,7 +56,7 @@ Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
   ]}
 />
 
-These props belong to Root. `policy` suppresses accidental selection only while the label is actionable.
+These props belong to `Root`. `selection="policy"` suppresses accidental text selection only while the label is actionable.
 
 ## References
 
