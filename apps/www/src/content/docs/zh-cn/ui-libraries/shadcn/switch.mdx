@@ -30,7 +30,7 @@ Switch 用于在开启与关闭两种状态之间切换，支持键盘操作、�
 
 ### 组合模式与可选拖动
 
-Switch 默认通过点击或按 `Space` 键切换；传入 `draggable={true}` 可按需开启滑块拖动（支持 LTR 与 RTL 方向）。下方示例展示了搭配 Field `Label`、`Description` 以及 Choice Card 的完整组合用法：卡片空白区域可直接点击切换，内部的“Learn more”链接保留自身跳转行为；受控模式下卡片高亮跟随已确认的 `checked` 状态，`disabled` 与 `readOnly` 状态不会发出变更请求。
+Switch 默认通过点击或按 `Space` 键切换；传入 `draggable={true}` 可按需开启滑块拖动。两种模式均可通过 `direction="rtl"` 镜像滑块位置与移动方向；方向缺省为 `ltr`，不随外层文档方向改变。下方示例展示了搭配 Field `Label`、`Description` 以及 Choice Card 的完整组合用法：卡片空白区域可直接点击切换，内部的“Learn more”链接保留自身跳转行为；受控模式下卡片高亮跟随已确认的 `checked` 状态，`disabled` 与 `readOnly` 状态不会发出变更请求。
 
 <PrototypePreviewer demoId="demo-shadcn-switch-compositions" initialRuntime="wc" />
 

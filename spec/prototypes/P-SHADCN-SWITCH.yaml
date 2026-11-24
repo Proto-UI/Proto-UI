@@ -46,6 +46,14 @@ criteria:
       decisions:
         - id: D-WEB-STYLE-BASELINE-0001
           since: 0.2.0-rc.1
+  - id: P-SHADCN-SWITCH-DIRECTIONAL-SURFACE
+    text:
+      en: Both ordinary and draggable Switch paint use the Base Root direction, defaulting to ltr. Root fixes the Thumb layout origin to that direction independently of the surrounding document direction; explicit rtl mirrors the origin and Thumb travel once. This applies equally to standalone Root and Field Switch. Direction changes update presentation without requesting checkedChange or introducing another value, input or geometry owner.
+      zh-CN: 普通与可拖拽 Switch 的外观均使用 Base Root 的 direction，缺省为 ltr。Root 按该方向确定 Thumb 的布局起点，不受外层文档方向干扰；显式 rtl 将起点和滑块位移镜像一次。独立 Root 与 Field Switch 遵循相同规则。方向变化只更新呈现，不请求 checkedChange，也不新增值、输入或几何 owner。
+    dependsOn:
+      prototypes:
+        - id: P-BASE-SWITCH
+          anchors: [P-BASE-SWITCH-DIRECTIONAL-PREVIEW]
   - id: P-SHADCN-SWITCH-STATIC-ACQUISITION
     text:
       en: The current New York wrapper declares no pseudo-element hit inset. This family Root must not configure the historical Nova staticHitInset by default. Keep generic HitParticipation capability unchanged and preserve native border-box input, clipping, overlap, disabled, focus and cancellation ownership. Consumer activation evidence must be regenerated for this exact recipe.
@@ -204,4 +212,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: expanded
     summary: Define Shadcn-only default/sm visual sizing through actual Switch-domain Root Expose reads and Context invalidation, including mixed-family isolation and repeatable lifecycle.
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Apply canonical Root direction to ordinary as well as draggable presentation, preventing inherited RTL layout from moving the settled Thumb outside its track.
 tags: [prototype, shadcn, switch, root, upstream-derived, delta, compatibility, visual]

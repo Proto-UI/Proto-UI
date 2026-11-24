@@ -50,14 +50,27 @@ const THUMB_CHECKED_TRANSLATE: Readonly<Record<ShadcnStyleId, string>> = {
   rhea: 'translate-x-[calc(100%_-_4px)]',
 };
 
+/** Mirror each source endpoint from the RTL flex origin inside the track. */
+const THUMB_CHECKED_TRANSLATE_RTL: Readonly<Record<ShadcnStyleId, string>> = {
+  'new-york-v4': 'translate-x-[calc(2px_-_100%)]',
+  vega: 'translate-x-[calc(2px_-_100%)]',
+  nova: 'translate-x-[calc(2px_-_100%)]',
+  maia: 'translate-x-[calc(2px_-_100%)]',
+  lyra: 'translate-x-[calc(2px_-_100%)]',
+  mira: 'translate-x-[calc(2px_-_100%)]',
+  luma: 'translate-x-[calc(8px_-_100%)]',
+  sera: 'translate-x-[calc(-100%_-_2px)]',
+  rhea: 'translate-x-[calc(4px_-_100%)]',
+};
+
 /*
  * P-SHADCN-SWITCH-THUMB-DIRECTIONAL-PREVIEW: the opt-in Base draggable
  * enhancement projects the inherited percentage through the exposed
  * number.range style channel; no value, input, geometry or event ownership.
  * Travel is each recipe's checked translate expression scaled by
- * var(--pui-percentage)/100. Sera's unchecked thumb starts at translate-x-0.25
- * (1px), so its preview adds that 1px base and shrinks travel to 100% + 1px;
- * the endpoints stay continuous at both drag edges.
+ * var(--pui-percentage)/100. Sera starts at translate-x-0.25 (0.0625rem),
+ * so its preview keeps that font-relative base and subtracts it from the
+ * checked endpoint. Both drag edges stay continuous when the root font changes.
  */
 const THUMB_DRAG_PREVIEW_LTR: Readonly<Record<ShadcnStyleId, string>> = {
   'new-york-v4': 'translate-x-[calc((100%_-_2px)*var(--pui-percentage)/100)]',
@@ -67,7 +80,7 @@ const THUMB_DRAG_PREVIEW_LTR: Readonly<Record<ShadcnStyleId, string>> = {
   lyra: 'translate-x-[calc((100%_-_2px)*var(--pui-percentage)/100)]',
   mira: 'translate-x-[calc((100%_-_2px)*var(--pui-percentage)/100)]',
   luma: 'translate-x-[calc((100%_-_8px)*var(--pui-percentage)/100)]',
-  sera: 'translate-x-[calc(1px_+_(100%_+_1px)*var(--pui-percentage)/100)]',
+  sera: 'translate-x-[calc(0.0625rem_+_(100%_+_2px_-_0.0625rem)*var(--pui-percentage)/100)]',
   rhea: 'translate-x-[calc((100%_-_4px)*var(--pui-percentage)/100)]',
 };
 
@@ -80,7 +93,7 @@ const THUMB_DRAG_PREVIEW_RTL: Readonly<Record<ShadcnStyleId, string>> = {
   lyra: 'translate-x-[calc((2px_-_100%)*var(--pui-percentage)/100)]',
   mira: 'translate-x-[calc((2px_-_100%)*var(--pui-percentage)/100)]',
   luma: 'translate-x-[calc((8px_-_100%)*var(--pui-percentage)/100)]',
-  sera: 'translate-x-[calc(-1px_-_(100%_+_1px)*var(--pui-percentage)/100)]',
+  sera: 'translate-x-[calc(-0.0625rem_-_(100%_+_2px_-_0.0625rem)*var(--pui-percentage)/100)]',
   rhea: 'translate-x-[calc((4px_-_100%)*var(--pui-percentage)/100)]',
 };
 
@@ -154,13 +167,13 @@ const switchThumb = definePrototype<ShadcnSwitchThumbProps, ShadcnSwitchThumbExp
         });
       }
       def.rule({
-        // draggable=false retains the prior source-bound endpoints; the
-        // percentage preview below replaces them only for the opt-in drag path.
+        // Ordinary endpoints use the same direction and insets as drag preview.
         when: (w) =>
           w.all(
             w.state(style).eq(profile),
             w.state(checked).eq(false),
-            w.state(draggable).eq(false)
+            w.state(draggable).eq(false),
+            w.state(direction).eq('ltr')
           ),
         intent: (i) =>
           i.feedback.style.use(profile === 'sera' ? tw('translate-x-0.25') : tw('translate-x-0')),
@@ -169,10 +182,34 @@ const switchThumb = definePrototype<ShadcnSwitchThumbProps, ShadcnSwitchThumbExp
         when: (w) =>
           w.all(
             w.state(style).eq(profile),
+            w.state(checked).eq(false),
+            w.state(draggable).eq(false),
+            w.state(direction).eq('rtl')
+          ),
+        intent: (i) =>
+          i.feedback.style.use(
+            profile === 'sera' ? tw('translate-x-[-0.0625rem]') : tw('translate-x-0')
+          ),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
             w.state(checked).eq(true),
-            w.state(draggable).eq(false)
+            w.state(draggable).eq(false),
+            w.state(direction).eq('ltr')
           ),
         intent: (i) => i.feedback.style.use(tw(THUMB_CHECKED_TRANSLATE[profile])),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
+            w.state(checked).eq(true),
+            w.state(draggable).eq(false),
+            w.state(direction).eq('rtl')
+          ),
+        intent: (i) => i.feedback.style.use(tw(THUMB_CHECKED_TRANSLATE_RTL[profile])),
       });
       def.rule({
         when: (w) =>
