@@ -1,5 +1,6 @@
 import { tw, type DefHandle, type State } from '@proto.ui/core';
 import { setupShadcnStyleSelection, SHADCN_STYLE_IDS } from '../style-scope';
+import { setupCollectionHover } from '../toolbar/action-visual';
 import type { ShadcnNumberFieldPartProps } from './types';
 
 /** Proto steppers borrowing the pinned Button outline/icon face; Base still owns stepping. */
@@ -14,16 +15,16 @@ const STEP_SURFACE = {
   rhea: 'size-8 rounded-[var(--pui-radius-2xl)] border-transparent bg-input/50 text-sm',
   'new-york-v4': 'size-9 rounded-md border-border bg-background text-sm shadow-xs',
 } as const;
-const STEP_INTERACTIVE = {
-  vega: 'hover:bg-accent hover:text-accent-foreground active:translate-y-px',
-  nova: 'hover:bg-accent hover:text-accent-foreground active:translate-y-px',
-  maia: 'hover:bg-muted hover:text-foreground active:translate-y-px',
-  lyra: 'hover:bg-accent hover:text-accent-foreground active:translate-y-px',
-  mira: 'hover:bg-muted hover:text-foreground active:translate-y-px',
-  luma: 'hover:bg-muted hover:text-foreground active:translate-y-px',
-  sera: 'hover:bg-muted hover:text-foreground active:translate-y-px',
-  rhea: 'hover:bg-muted hover:text-foreground active:translate-y-px',
-  'new-york-v4': 'hover:bg-accent hover:text-accent-foreground active:bg-accent/80',
+const STEP_HOVER = {
+  vega: 'bg-accent text-accent-foreground',
+  nova: 'bg-accent text-accent-foreground',
+  maia: 'bg-muted text-foreground',
+  lyra: 'bg-accent text-accent-foreground',
+  mira: 'bg-muted text-foreground',
+  luma: 'bg-muted text-foreground',
+  sera: 'bg-muted text-foreground',
+  rhea: 'bg-muted text-foreground',
+  'new-york-v4': 'bg-accent text-accent-foreground',
 } as const;
 const STEP_FOCUS = {
   vega: 'border-ring ring-3 ring-ring/50 forced-colors-focus-outline',
@@ -41,6 +42,21 @@ export function setupNumberFieldStepVisual(
   state: { disabled: State<boolean>; focusVisible: State<boolean> }
 ) {
   const style = setupShadcnStyleSelection(def, 'nova');
+  const hovered = setupCollectionHover(def, state.disabled);
+  const pressed = def.state.bool('stepPointerPressed', false);
+  const clearPressed = () => pressed.set(false, 'reason: step pointer press ended');
+  def.event.on('pointer.down', () => {
+    if (!state.disabled.get()) pressed.set(true, 'reason: step pointer down');
+  });
+  def.event.on('pointer.up', clearPressed);
+  def.event.on('pointer.leave', clearPressed);
+  def.event.on('pointer.cancel', clearPressed);
+  def.lifecycle.onUnmounted(clearPressed);
+  if ('watch' in state.disabled) {
+    state.disabled.watch((_run, event) => {
+      if (event.type === 'next' && event.next) clearPressed();
+    });
+  }
   def.feedback.style.use(
     tw(
       'inline-flex shrink-0 items-center justify-center border p-0 text-foreground font-medium outline-none select-none cursor-pointer transition-colors'
@@ -52,8 +68,8 @@ export function setupNumberFieldStepVisual(
       intent: (i) => i.feedback.style.use(tw(STEP_SURFACE[profile])),
     });
     def.rule({
-      when: (w) => w.all(w.state(style).eq(profile), w.state(state.disabled).eq(false)),
-      intent: (i) => i.feedback.style.use(tw(STEP_INTERACTIVE[profile])),
+      when: (w) => w.all(w.state(style).eq(profile), w.state(hovered).eq(true)),
+      intent: (i) => i.feedback.style.use(tw(STEP_HOVER[profile])),
     });
   }
   for (const profile of ['vega', 'nova', 'maia', 'lyra', 'mira', 'new-york-v4'] as const) {
@@ -66,9 +82,9 @@ export function setupNumberFieldStepVisual(
         w.all(
           w.state(style).eq(profile),
           w.meta('colorScheme').eq('dark'),
-          w.state(state.disabled).eq(false)
+          w.state(hovered).eq(true)
         ),
-      intent: (i) => i.feedback.style.use(tw('hover:bg-input/50')),
+      intent: (i) => i.feedback.style.use(tw('bg-input/50')),
     });
   }
   for (const profile of ['luma', 'sera'] as const) {
@@ -81,9 +97,9 @@ export function setupNumberFieldStepVisual(
         w.all(
           w.state(style).eq(profile),
           w.meta('colorScheme').eq('dark'),
-          w.state(state.disabled).eq(false)
+          w.state(hovered).eq(true)
         ),
-      intent: (i) => i.feedback.style.use(tw('hover:bg-input/30')),
+      intent: (i) => i.feedback.style.use(tw('bg-input/30')),
     });
   }
   def.rule({
@@ -95,9 +111,17 @@ export function setupNumberFieldStepVisual(
       w.all(
         w.state(style).eq('rhea'),
         w.meta('colorScheme').eq('dark'),
-        w.state(state.disabled).eq(false)
+        w.state(hovered).eq(true)
       ),
-    intent: (i) => i.feedback.style.use(tw('hover:bg-input/50')),
+    intent: (i) => i.feedback.style.use(tw('bg-input/50')),
+  });
+  def.rule({
+    when: (w) => w.all(w.state(pressed).eq(true), w.not(w.state(style).eq('new-york-v4'))),
+    intent: (i) => i.feedback.style.use(tw('translate-y-px')),
+  });
+  def.rule({
+    when: (w) => w.all(w.state(pressed).eq(true), w.state(style).eq('new-york-v4')),
+    intent: (i) => i.feedback.style.use(tw('bg-accent/80')),
   });
   for (const profile of SHADCN_STYLE_IDS) {
     def.rule({
