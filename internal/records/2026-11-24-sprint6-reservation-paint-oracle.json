@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "kind": "sprint6-reservation-owned-paint-oracle",
+  "base": "f3548dca019aa379b10cf09bf4eb84550d04e303",
+  "file": "apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts",
+  "beforeSha256": "95e58f3cece104603564cc64467c5c2e29d37f5dfe20059087ba07bdadf817a9",
+  "afterSha256": "b8ef44b4f6cedeb2e35dcdd020eca2d6b06125300f7db15db9fb8eda188f3a9e",
+  "originalRun": {
+    "id": 45380005144,
+    "attempt": 1,
+    "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45380005144",
+    "result": "four of four original native cases failed the old host-background PNG assertion",
+    "artifact": 14912863979,
+    "zipSha256": "25a8973bf4985eac83142de4348135992d8ab73b7870cb3f53d5cd02e4e7e101"
+  },
+  "diagnosis": {
+    "originalAssertion": "getComputedStyle(trigger).backgroundImage was expected to contain PNG data.",
+    "existingContract": "Contact optics publish their decoded image on the owned contact-v1 ::before carrier and intentionally set host background-image:none.",
+    "actualFourHosts": {
+      "sourceWidth": 512,
+      "sourceHeight": 1052,
+      "sourceDpr": 1,
+      "topQuality": "self-optical",
+      "nestedReason": "source-painted-ancestor",
+      "nestedQuality": "opaque-fallback",
+      "carrier": "contact-v1",
+      "hostBackground": "none",
+      "pngWidth": 502,
+      "pngHeight": 122,
+      "pngBytes": 4229,
+      "pngSha256": "73b61a3afea55cbf208eda35f2ade8c336a2eacc5be7422d4b6afb8f62752230"
+    },
+    "oldReceiptLimit": "Original failure DOM contains marker, real PNG and geometry variables but no computed ::before snapshot. The old native run remains failed.",
+    "visualObservation": "Root inspected the original WC failed-previewer PNG: the four source stages and readable content remain visible, with blue optical paint on Content lifetime. This single rest-state image is not full journey or optical parity acceptance."
+  },
+  "repair": {
+    "helper": "apps/www/src/content/docs/zh-cn/material-paint-observation.ts",
+    "helperChanged": false,
+    "required": [
+      "actual computed carrier committed",
+      "contact-v1 owner",
+      "expanded geometry matches",
+      "original PNG regex on the observed image"
+    ],
+    "preserved": [
+      "original four case identities",
+      "all source/side/area limits",
+      "every geometry/ROI/border assertion",
+      "painted-ancestor negative control and restoration",
+      "open/reopen/controlled interactions",
+      "all deadlines, retries and tolerances",
+      "all production/helper/workflow source"
+    ]
+  },
+  "localValidation": {
+    "command": "four existing owned-paint/material-observation/Finf-evidence/workflow-selection suites, one worker",
+    "passed": 154,
+    "failed": 0,
+    "skipped": 0,
+    "todo": 0,
+    "exitCode": 0,
+    "inputHashesStable": true,
+    "perFileCounts": [17, 22, 85, 30]
+  },
+  "review": {
+    "root": "Full nine-line diff and unchanged existing helper inspected; no correctness finding.",
+    "independentAgent": "s6_merge_audit reviewed frozen b8ef44b4 source; no blocking source finding.",
+    "githubApproval": false
+  },
+  "freshNativeStatus": "unrun at this checkpoint; only new original four-host execution can establish full acceptance",
+  "archive": "internal/records/evidence/2026-11-24-sprint6-main-reconciliation/reservation-paint-oracle-repair.tar.gz",
+  "archiveSha256": "ecefd44118db785b0ec331ec7382ca75e9d6ec7209f353d352eeecc9469d7f4e",
+  "archiveBytes": 2758486
+}
