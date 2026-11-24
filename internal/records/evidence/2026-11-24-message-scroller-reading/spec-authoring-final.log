@@ -1,0 +1,45 @@
+[spec-authoring] spec/tests/T-BASE-MESSAGE-SCROLLER-READING-0001.yaml: [
+  {
+    "code": "custom",
+    "path": [
+      "cases"
+    ],
+    "message": "Test case ID T-BASE-MESSAGE-SCROLLER-READING-0001-CAPTURE must start with T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-."
+  },
+  {
+    "code": "custom",
+    "path": [
+      "cases"
+    ],
+    "message": "Test case ID T-BASE-MESSAGE-SCROLLER-READING-0001-IDENTITY must start with T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-."
+  },
+  {
+    "code": "custom",
+    "path": [
+      "cases"
+    ],
+    "message": "Test case ID T-BASE-MESSAGE-SCROLLER-READING-0001-OWNER must start with T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-."
+  },
+  {
+    "code": "custom",
+    "path": [
+      "cases"
+    ],
+    "message": "Test case ID T-BASE-MESSAGE-SCROLLER-READING-0001-LIFETIME must start with T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-."
+  },
+  {
+    "code": "custom",
+    "path": [
+      "cases"
+    ],
+    "message": "Test case ID T-BASE-MESSAGE-SCROLLER-READING-0001-EPOCH must start with T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-."
+  },
+  {
+    "code": "custom",
+    "path": [
+      "cases"
+    ],
+    "message": "Test case ID T-BASE-MESSAGE-SCROLLER-READING-0001-SELECTION must start with T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-."
+  }
+]
+[spec-authoring] spec/prototypes/P-BASE-MESSAGE-SCROLLER.yaml: P-BASE-MESSAGE-SCROLLER verifies.tests target does not exist: T-BASE-MESSAGE-SCROLLER-READING-0001.
