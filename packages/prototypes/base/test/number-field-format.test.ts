@@ -58,9 +58,12 @@ describe('Number Field locale grammar', () => {
   it.each([
     ['en-US', { style: 'currency', currency: 'USD' }],
     ['de-DE', { style: 'currency', currency: 'EUR' }],
+    ['de-AT', { style: 'currency', currency: 'EUR' }],
+    ['fr-CH', { style: 'currency', currency: 'EUR' }],
     ['fr-FR', { style: 'currency', currency: 'EUR' }],
     ['ar-EG', { style: 'currency', currency: 'EGP' }],
     ['en-US', { style: 'currency', currency: 'USD', currencySign: 'accounting' }],
+    ['en-IN', { style: 'currency', currency: 'EUR', currencySign: 'accounting' }],
     ['en-US', { style: 'currency', currency: 'USD', currencyDisplay: 'name' }],
     [
       'ru-RU',
@@ -70,17 +73,46 @@ describe('Number Field locale grammar', () => {
     const format = createNumberFieldFormat(locale, options);
     for (const value of 'maximumFractionDigits' in options && options.maximumFractionDigits === 0
       ? [0, 1, -1, 2, 5, 21, 1234]
-      : [0, 1, -1, 1234.5, -1234.5])
+      : [0, 1, -1, 1234.5, -1234.5, 1234567.75, -1234567.75])
       expect(format.parse(format.format(value)), format.format(value)).toEqual({
         kind: 'number',
         value,
       });
   });
-  it.each(['en-US', 'de-DE', 'ar-EG'])('parses %s percentages in display units', (locale) => {
-    const format = createNumberFieldFormat(locale, { style: 'percent', maximumFractionDigits: 2 });
-    expect(format.parse(format.format(0.125))).toEqual({ kind: 'number', value: 0.125 });
-    expect(format.parse('25')).toEqual({ kind: 'number', value: 0.25 });
-  });
+  it.each([
+    ['de-AT', '1.234,5', '12.34,5'],
+    ['fr-CH', "1'234.5", "12'34.5"],
+  ] as const)(
+    'retains %s currency editing symbols when display precision hides fractions',
+    (locale, input, malformed) => {
+      for (const precision of [{ maximumFractionDigits: 0 }, { maximumSignificantDigits: 2 }]) {
+        const format = createNumberFieldFormat(locale, {
+          style: 'currency',
+          currency: 'EUR',
+          ...precision,
+        });
+        expect(format.parse(input)).toEqual({ kind: 'number', value: 1234.5 });
+        expect(format.parse(`-${input}`)).toEqual({ kind: 'number', value: -1234.5 });
+        expect(format.parse(malformed)).toEqual({ kind: 'invalid' });
+        expect(format.parse(`${input} invalid currency`)).toEqual({ kind: 'invalid' });
+      }
+    }
+  );
+  it.each(['en-US', 'de-DE', 'ar-EG', 'bn-BD'])(
+    'parses %s percentages in display units',
+    (locale) => {
+      const format = createNumberFieldFormat(locale, {
+        style: 'percent',
+        maximumFractionDigits: 2,
+      });
+      expect(format.parse(format.format(0.125))).toEqual({ kind: 'number', value: 0.125 });
+      expect(format.parse('25')).toEqual({ kind: 'number', value: 0.25 });
+      expect(format.parse(format.format(1234567.875))).toEqual({
+        kind: 'number',
+        value: 1234567.875,
+      });
+    }
+  );
   it('limits rounding to presentation and returns null as empty text', () => {
     const format = createNumberFieldFormat('en-US', { maximumFractionDigits: 2 });
     expect(format.format(1234.56789)).toBe('1,234.57');

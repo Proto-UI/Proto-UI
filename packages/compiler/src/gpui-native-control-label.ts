@@ -630,6 +630,20 @@ pub fn control_label_pointer_capture(owner: &OwnerRef) {
     owner.modules.control_label.pointer = None;
     owner.modules.control_label.opaque_pointer_origin = false;
 }
+pub fn control_label_pointer_move(owner: &OwnerRef, event: &gpui::MouseMoveEvent) {
+    // A pending pointer that leaves the 6px origin, or that no longer holds
+    // the left button, is retired. The sample path re-establishes a pending
+    // pointer from the next move.
+    let cancel = {
+        let owner = owner.borrow();
+        owner.modules.control_label.pointer.as_ref().is_some_and(|pointer| {
+            let delta = event.position - pointer.origin;
+            f32::from(delta.x).abs() > 6. || f32::from(delta.y).abs() > 6.
+                || event.pressed_button != Some(gpui::MouseButton::Left)
+        })
+    };
+    if cancel { control_label_cancel(owner); }
+}
 pub fn control_label_down(owner: &OwnerRef, event: &gpui::MouseDownEvent, eligible: bool, window: &Window) {
     if !control_label_is_label(owner) { return; }
     control_label_cancel(owner);

@@ -79,11 +79,14 @@ export function emitVueSource(
   const profile = ssr ? 'vue-ssr-v1' : 'vue-source-v1';
   const admitted = checkTargetOperations(ir, TARGET_PROFILES['vue-source-v1']);
   if (!admitted.ok) return admitted;
+  const shaderPlans = admitted.value.shaderPlans;
   const supportPlan = planNativeSupport(ir, admitted.value);
   const controlLabel = admitted.value.operations.includes('hook.asControlLabel');
   const componentName = options.componentName ?? 'CompiledComponent';
   if (
     !validIdentifier(componentName) ||
+    (admitted.value.shaderScenes &&
+      ['createComponent', 'createShaderHost', 'WebShaderHostOptions'].includes(componentName)) ||
     [
       'GeneratedProps',
       'GeneratedResolvedProps',
@@ -125,7 +128,8 @@ export function emitVueSource(
     admitted.value.operations,
     prefix,
     admitted.value.ruleMetaKeys,
-    admitted.value.shaderKernels
+    admitted.value.shaderKernels,
+    admitted.value.shaderScenes
   );
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
   const publicCalls =
@@ -529,7 +533,12 @@ export function emitVueSource(
           typeName
         );
         if (optional !== undefined) return optional;
-        const atom = emitNativeHostAtom(node, (item) => expression(item, depth), prefix);
+        const atom = emitNativeHostAtom(
+          node,
+          (item) => expression(item, depth),
+          prefix,
+          shaderPlans
+        );
         if (atom !== undefined) return atom;
         if (hasAuthoredHooks && node.operation.startsWith('hook.'))
           return emitPrivilegedHookCall({
@@ -629,14 +638,23 @@ export function emitVueSource(
             return `${n('Scope')}.provide(${args.join(', ')})`;
           case 'context.subscribe':
           case 'context.trySubscribe': {
-            const key = node.arguments[0];
-            if (key.kind !== 'context-key')
-              throw new Error('Checked Context subscription requires a key declaration.');
-            const valueType = `${formatDataType(ir.contextKeys.find((entry) => entry.id === key.keyId)!.type)}${node.operation === 'context.trySubscribe' ? ' | null' : ''}`;
             const callback = node.arguments[1];
+            // Checked callbacks already carry the Context value types. Authored
+            // capture evaluates the key and callback once into references, so
+            // their lowering must not require a literal declaration node here.
             const invocation =
               callback?.kind === 'function'
-                ? `(${args[1]})(${[n('RunValue'), `next as ${valueType}`, `prev as ${valueType}`].slice(0, callback.function.parameters.length).join(', ')})`
+                ? `(${args[1]})(${[
+                    n('RunValue'),
+                    ...callback.function.parameters
+                      .slice(1, 3)
+                      .map(
+                        (parameter, index) =>
+                          `${index === 0 ? 'next' : 'prev'} as ${typeName(parameter.type)}`
+                      ),
+                  ]
+                    .slice(0, callback.function.parameters.length)
+                    .join(', ')})`
                 : `Reflect.apply(${args[1]}, undefined, [${n('RunValue')}, next, prev])`;
             return `${n('Scope')}.subscribe(${args[0]}, '${node.operation === 'context.subscribe' ? 'required' : 'optional'}'${callback ? `, (next, prev) => ${invocation}` : ''})`;
           }
@@ -890,7 +908,7 @@ const ${n('SlotView')} = ${n('Vue')}.defineComponent({
   setup(props) { return () => props.read!(); },
 });
 
-export const ${componentName} = ${n('Vue')}.defineComponent({
+${atoms.shaderScenes ? 'export function createComponent(shaderHost?: WebShaderHostOptions) {\nreturn' : `export const ${componentName} =`} ${n('Vue')}.defineComponent({
   name: ${JSON.stringify(ir.name)}, inheritAttrs: false,
   props: { instanceAssociations: { type: Object as ${n('Vue')}.PropType<Readonly<{controlLabel?: object | null}>>, default: undefined } },
   emits: ${JSON.stringify(exposes.filter((entry) => entry.kind === 'event').map((entry) => entry.name))},
@@ -1059,7 +1077,7 @@ ${
     const ${n('DefValue')}: ${n('Def')} = Object.freeze({ feedback: Object.freeze({ style: ${n('Style')} }) });`
     : ''
 }
-    ${atoms.owner({ setup: `${n('Alive')}(); if (!${n('Setup')}) throw new Error('Setup capability is closed')`, runtime: `${n('Alive')}(); if (${n('Setup')} || !${n('CallbackScope')}) throw new Error('Operation requires an owned runtime callback')`, alive: `!${n('Disposed')}`, invoke: `${n('Invoke')}('timer', callback)`, invokeRun: `${n('Invoke')}('event', () => callback(${n('RunValue')}))`, document: `${n('RootElement')}?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)`, run: n('Run'), root: `${n('RootElement')} ?? null`, prepare: usesStyle ? `${n('Style')}.refresh();` : '' })}
+    ${atoms.owner({ shaderHost: atoms.shaderScenes ? 'shaderHost' : undefined, setup: `${n('Alive')}(); if (!${n('Setup')}) throw new Error('Setup capability is closed')`, runtime: `${n('Alive')}(); if (${n('Setup')} || !${n('CallbackScope')}) throw new Error('Operation requires an owned runtime callback')`, alive: `!${n('Disposed')}`, invoke: `${n('Invoke')}('timer', callback)`, invokeRun: `${n('Invoke')}('event', () => callback(${n('RunValue')}))`, document: `${n('RootElement')}?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)`, run: n('Run'), root: `${n('RootElement')} ?? null`, prepare: usesStyle ? `${n('Style')}.refresh();` : '' })}
 ${
   hasAuthoredHooks
     ? `    const ${n('Authored')} = ${n('CreateAuthored')}({ setup() { ${n('Alive')}(); if (!${n('Setup')}) throw new Error('Setup capability is closed'); }, borrow(value) {
@@ -1685,6 +1703,7 @@ ${
     return () => ${n('Present')}.value && !${n('Disposing')} ? ${n('Vue')}.h(${n('View')}, { revision: ${n('Revision')}.value }) : null;
   },
 });
+${atoms.shaderScenes ? `}\nexport const ${componentName} = createComponent();` : ''}
 ${
   ssr
     ? `${ownerInitialDataGuard(n('InitialData'))}

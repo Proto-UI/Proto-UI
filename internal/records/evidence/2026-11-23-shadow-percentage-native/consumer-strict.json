@@ -6,8 +6,6 @@
     "incremental": false,
     "skipLibCheck": false
   },
-  "files": [
-    "../../../../apps/www/test-fixtures/shadow-percentage/consumer.ts"
-  ],
+  "files": ["../../../../apps/www/test-fixtures/shadow-percentage/consumer.ts"],
   "include": []
 }

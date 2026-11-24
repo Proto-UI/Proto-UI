@@ -81,6 +81,7 @@ export function emitReactSource(
   if (!selected.ok) return selected;
   const admitted = checkTargetOperations(ir, selected.value);
   if (!admitted.ok) return admitted;
+  const shaderPlans = admitted.value.shaderPlans;
   const supportPlan = planNativeSupport(ir, admitted.value);
   const unsupportedMethods = ir.exposes.filter(
     (value) =>
@@ -185,7 +186,12 @@ export function emitReactSource(
       renderGeneratedToString: true,
       hydrateGeneratedRoot: true,
     });
-  if (!validIdentifier(componentName) || Object.hasOwn(reservedNames, componentName)) {
+  if (
+    !validIdentifier(componentName) ||
+    Object.hasOwn(reservedNames, componentName) ||
+    (admitted.value.shaderScenes &&
+      ['createComponent', 'createShaderHost', 'WebShaderHostOptions'].includes(componentName))
+  ) {
     return {
       ok: false,
       diagnostics: [
@@ -215,7 +221,8 @@ export function emitReactSource(
     admitted.value.operations,
     p,
     admitted.value.ruleMetaKeys,
-    admitted.value.shaderKernels
+    admitted.value.shaderKernels,
+    admitted.value.shaderScenes
   );
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
   const publicCalls =
@@ -408,7 +415,7 @@ export function emitReactSource(
           typeName
         );
         if (optional !== undefined) return optional;
-        const atom = emitNativeHostAtom(value, (item) => expression(item, depth), p);
+        const atom = emitNativeHostAtom(value, (item) => expression(item, depth), p, shaderPlans);
         if (atom !== undefined) return atom;
         if (hasAuthoredHooks && value.operation.startsWith('hook.'))
           return emitPrivilegedHookCall({
@@ -731,7 +738,7 @@ function ${p}ResolveProps(
   return Object.freeze(next) as ${p}ResolvedProps;
 }
 
-function ${p}CreateOwner(initial: GeneratedComponentProps, publish: (frame: ${p}Frame) => void, getParent: () => ${p}ContextScope | null, publishHost: () => void${ssr ? ', server = false' : ''}): ${p}Owner {
+function ${p}CreateOwner(initial: GeneratedComponentProps, publish: (frame: ${p}Frame) => void, getParent: () => ${p}ContextScope | null, publishHost: () => void${ssr ? ', server = false' : ''}${atoms.shaderScenes ? ', shaderHost?: WebShaderHostOptions' : ''}): ${p}Owner {
   let phase: 'setup' | 'callback' | 'render' | 'idle' = 'setup';
   let lifetime: 'alive' | 'disposing' | 'disposed' = 'alive';
   let connected = true;
@@ -809,7 +816,7 @@ ${propSchemas}
     try { return callback(); }
     finally { phase = previous; --callbackDepth; if (!callbackDepth) schedule(); }
   }
-  ${atoms.owner({ setup: "ensurePhase('setup')", runtime: "ensurePhase('callback')", alive: "lifetime !== 'disposed'", invoke: 'invoke(callback)', invokeRun: `invoke(() => callback(${p}RunHandle))`, document: "root?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)", run: `${p}Run`, root: 'root', prepare: usesStyle ? `${p}Style.refresh();` : '' })}
+  ${atoms.owner({ shaderHost: atoms.shaderScenes ? 'shaderHost' : undefined, setup: "ensurePhase('setup')", runtime: "ensurePhase('callback')", alive: "lifetime !== 'disposed'", invoke: 'invoke(callback)', invokeRun: `invoke(() => callback(${p}RunHandle))`, document: "root?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)", run: `${p}Run`, root: 'root', prepare: usesStyle ? `${p}Style.refresh();` : '' })}
 ${
   hasAuthoredHooks
     ? `  const ${p}Authored = ${p}CreateAuthored({setup: () => ensurePhase('setup'), borrow(value) {
@@ -1441,7 +1448,7 @@ ${usesStyle ? `          ${p}Style.dispose();` : ''}
 }
 
 ${ssr ? emitReactSSRSupport(p, componentName, ir) : ''}
-export const ${componentName} = ${p}React.forwardRef<GeneratedHandle, GeneratedComponentProps>(function ${componentName}(props, ref) {
+${atoms.shaderScenes ? 'export function createComponent(shaderHost?: WebShaderHostOptions) {\nconst' : 'export const'} ${componentName} = ${p}React.forwardRef<GeneratedHandle, GeneratedComponentProps>(function ${componentName}(props, ref) {
   const ownerRef = ${p}React.useRef<${p}Owner | null>(null);
   const parentScope = ${p}React.useContext(${p}ContextTransport);
   const parentRef = ${p}React.useRef<${p}ContextScope | null>(null);
@@ -1494,9 +1501,9 @@ ${
           }
         }
         setFrame(next);
-      }, () => parentRef.current, publishHost);
+      }, () => parentRef.current, publishHost${atoms.shaderScenes ? ', false, shaderHost' : ''});
 `
-    : `      owner = ${p}CreateOwner(props, setFrame, () => parentRef.current, publishHost);
+    : `      owner = ${p}CreateOwner(props, setFrame, () => parentRef.current, publishHost${atoms.shaderScenes ? ', shaderHost' : ''});
 `
 }      ownerRef.current = owner;
       owner.start(${ssr ? 'projection' : ''});
@@ -1568,6 +1575,7 @@ ${
 }
 });
 ${componentName}.displayName = ${JSON.stringify(ir.name)};
+${atoms.shaderScenes ? `return ${componentName};\n}\nexport const ${componentName} = createComponent();` : ''}
 `;
   return {
     ok: true,

@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-23",
+  "kind": "Extend verified font acquisition to two actually blocked original Sprint3 producers",
+  "pullRequest": 1713,
+  "parent": "52fd5100dbf0eb64011fd7c05e51c27313537b9e",
+  "failures": {
+    "head": "6a2bb11a1e8abf3fffa8921d267db215bb70b10d",
+    "run": 45206446598,
+    "jobs": [
+      {
+        "id": 137806713683,
+        "logSha256": "2af778627f1d0e2caeeb1cb65f52d2a66a4d1835f3174f7aae234998265e9b32"
+      },
+      {
+        "id": 137806713175,
+        "logSha256": "decb6a85624e172a684691be9b6fd5f3fd4cde320c27fe1618f362c1355a2e55"
+      }
+    ],
+    "cause": "Both jobs hit their existing five-minute font setup deadline while fetching61.2MB fonts-noto-cjk from the EC2Ubuntu mirror. Native364 and15-stage rehearsal producers did not run.",
+    "workflowBlob": "3a50f8de15c617fed197174f748f90064dea90e2",
+    "sameSourceAt": "15963a323d9a6d8a0f61aae32942e2172128bdab"
+  },
+  "repair": "Reuse the unchanged verified official-package helper with220s aggregate deadline and5s kill grace only in these two failing original steps. Retain5minstep and65/190minjob budgets,all originalnativecase/gatecounts,sandbox anddiagnostic uploads. BaseSelect originalsetup isunchanged becauseitsactualrunpassed.",
+  "red": {
+    "command": ["node", "--test", "scripts/test/sprint3-font-preparation.test.mjs"],
+    "exitCode": 1,
+    "elapsedSeconds": 1.3292148113250732,
+    "head": "52fd5100dbf0eb64011fd7c05e51c27313537b9e",
+    "logSha256": "a19617a7a510b25cc65575a0225ec58df514142cf0b766a0ffa0a6b3eef553ee"
+  },
+  "redCounts": {
+    "tests": 17,
+    "pass": 10,
+    "fail": 7,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "green": {
+    "command": [
+      "node",
+      "--test",
+      "scripts/test/sprint3-font-preparation.test.mjs",
+      "scripts/test/sprint3-consumer-workflow.test.mjs",
+      "scripts/ci/test/ci-scheduling-policy.test.mjs"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 3.221604108810425,
+    "head": "52fd5100dbf0eb64011fd7c05e51c27313537b9e",
+    "logSha256": "844ac075a514ca687d0ea38d558f1f490f927bf21305417b71ac80f9e4da3850"
+  },
+  "greenCounts": {
+    "tests": 57,
+    "pass": 57,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "greenScope": "17 font controls exercise all five actual workflow shells in success/failure/timeout modes;9 originalconsumer-workflow and31 schedulingcontrols make57 completepasses,zero skips. No network font installation or native productpass is claimed from fixtures.",
+  "rawEvidence": {
+    "path": "internal/records/evidence/2026-11-23-sprint3-original-fonts/raw.json.gz",
+    "sha256": "4231e9f88423d2d6deaacae9fc0b13f4a9d0c59ff75edbe7059e64d51c56f25e",
+    "decodedSha256": "15a8b08b6cc0826023525dbaabdb1f4f348716df0c735a4cc82bbec43100da0f",
+    "bytes": 19717
+  },
+  "remaining": "Fresh finalheadactualfontacquisition,native364,all15releasegates,othercanonicalCIandindependentreview."
+}

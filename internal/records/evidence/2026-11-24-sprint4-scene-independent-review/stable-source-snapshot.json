@@ -1,0 +1,72 @@
+{
+  "reviewBase": "4009346439913420769db1fa777354c6479f4846",
+  "reviewCommit": "27b5429b46fdc31ae94d1f6a1bd37fb1c6a8323c",
+  "sourceTreeDirty": false,
+  "files": [
+    {
+      "path": "packages/adapters/base/src/material/shader-scene-host.ts",
+      "bytes": 15048,
+      "sha256": "ddd4bf1e5b49e7fae03768f0c009fbcff67011ff637ef24cc0158adc8d82945b"
+    },
+    {
+      "path": "packages/adapters/base/src/material/shader-webgl2-host.ts",
+      "bytes": 21848,
+      "sha256": "df6a869ee639e5aa94899c83c00ed8854d1ed0f5a7629a7b21db312868ba6496"
+    },
+    {
+      "path": "packages/adapters/base/src/material/shader-webgl2.ts",
+      "bytes": 4691,
+      "sha256": "fd2b2b31aa2cb6f19451b9666d176a91e40fb6c418f4527c593da1b6140d1024"
+    },
+    {
+      "path": "packages/core/src/shader-presentation.ts",
+      "bytes": 7962,
+      "sha256": "2934afceac6f565cb7468455fa052241efe791e5f45c9fd5c01b54f363d97815"
+    },
+    {
+      "path": "packages/compiler/src/native-shader.ts",
+      "bytes": 5637,
+      "sha256": "c311d0386519b84924746d8c500700069aa16a1ffff1af648e2a4ff4e02ae39c"
+    },
+    {
+      "path": "packages/compiler/src/native-shader-host.generated.ts",
+      "bytes": 38916,
+      "sha256": "064bc8a6b7cd9f24370398608fc358d0eadd8e8c5b5d1cbc55e5f947b52d4a4a"
+    },
+    {
+      "path": "packages/compiler/src/native-async.ts",
+      "bytes": 31756,
+      "sha256": "818979b93274fb6371bdb24964f699508f373025cd1685c3e97b0fe9a32c31b7"
+    },
+    {
+      "path": "packages/compiler/src/react-source.ts",
+      "bytes": 83590,
+      "sha256": "2a41f2bdbff63568b51015cda3dc7ec09dab8eb4dd5257ab3c2b9bbde56d9f81"
+    },
+    {
+      "path": "packages/compiler/src/vue-source.ts",
+      "bytes": 100615,
+      "sha256": "6535ddbc7478dcee2e09a1cd1e2b5c72ee3d8e3affc6ca434582002856a19e8a"
+    },
+    {
+      "path": "packages/compiler/src/vue2-source.ts",
+      "bytes": 98058,
+      "sha256": "1f1dae5b2cb48f81085502f6c12f9bbfcc18f9ff944da3a454ee122c29880688"
+    },
+    {
+      "path": "packages/compiler/src/web-component-source.ts",
+      "bytes": 94287,
+      "sha256": "d8dc8f919c6fe36df174d087738ae833611c69fdc74609c5c3c8ef14ff93a15d"
+    },
+    {
+      "path": "packages/compiler/src/shader-plan.ts",
+      "bytes": 3009,
+      "sha256": "625b890c12d1a1fcd2a96a3930ba0f2e0a7d241d442133c1ce60dda55250f0bd"
+    },
+    {
+      "path": "packages/compiler/test/fixtures/shader-scene-owner.proto.ts",
+      "bytes": 951,
+      "sha256": "6206b5ee5d1e27a8589fddfa60aaa16e9ef4d623c873c6ba95dec6663b136c20"
+    }
+  ]
+}

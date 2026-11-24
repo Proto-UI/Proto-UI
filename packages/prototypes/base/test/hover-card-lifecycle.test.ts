@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { definePrototype, type RunHandle } from '@proto.ui/core';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import type { RuntimeLifecycleEvent } from '@proto.ui/runtime';
 import {
   asHoverCardContent,
   hoverCardContent,
@@ -19,13 +20,19 @@ for (const prototype of [hoverCardContent, hoverCardRoot, hoverCardTrigger])
 
 // The authored entry exercises the same protocol through real Overlay/Transition
 // L1 epochs; the independent removal regression does not call Root.close().
+const retainedContentLifecycle: RuntimeLifecycleEvent[] = [];
 AdaptToWebComponent(
   definePrototype({
     name: 'test-hover-card-retained-content',
     setup(def) {
       asHoverCardContent();
     },
-  })
+  }),
+  {
+    diagnostics: {
+      onLifecycleEvent: (event) => retainedContentLifecycle.push(event),
+    },
+  }
 );
 AdaptToWebComponent(
   definePrototype({
@@ -173,13 +180,22 @@ describe('HoverCard transient intent lifecycle', () => {
     await enterContent(card);
     const oldOwner = card.probe.getExposes().snapshot().contentInteractionOwner;
     const oldExposes = card.content.getExposes();
+    const unmounts = () =>
+      retainedContentLifecycle.filter((event) => event.type === 'unmount.done').length;
+    const mounts = () =>
+      retainedContentLifecycle.filter(
+        (event) => event.type === 'mount.phase' && event.phase === 'mounted'
+      ).length;
+    const beforeUnmounts = unmounts();
+    const beforeMounts = mounts();
     card.root.getExposes().close('test.owner-close');
     await flush();
     expect(oldExposes.transitionState.get()).toBe('leaving');
     oldExposes.controls.complete();
     await flush();
     expect(oldExposes.transitionState.get()).toBe('closed');
-    expect(card.content.hasAttribute('data-pui-view-detached')).toBe(false);
+    expect(card.content.hasAttribute('data-pui-view-detached')).toBe(true);
+    expect(unmounts()).toBe(beforeUnmounts);
     // The WC Portal intentionally waits two host rendering opportunities before
     // actual unmount. Its early hidden attribute alone is not lifecycle evidence.
     await new Promise<void>((resolve) =>
@@ -187,6 +203,7 @@ describe('HoverCard transient intent lifecycle', () => {
     );
     await flush();
     expect(card.content.hasAttribute('data-pui-view-detached')).toBe(true);
+    expect(unmounts()).toBe(beforeUnmounts + 1);
     expect(card.probe.getExposes().snapshot().contentHovered).toBe(false);
     await advance(20);
     expect(card.requests.filter((request) => !request.open)).toEqual([
@@ -195,6 +212,7 @@ describe('HoverCard transient intent lifecycle', () => {
 
     card.root.getExposes().openHoverCard('test.owner-open');
     await flush();
+    expect(mounts()).toBe(beforeMounts + 1);
     expect(card.content.getExposes().open).toBe(oldExposes.open);
     oldExposes.controls.complete();
     expect(card.probe.getExposes().snapshot().contentHovered).toBe(false);

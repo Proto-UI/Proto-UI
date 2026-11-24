@@ -5,7 +5,7 @@ status: draft
 since: 0.3.0-alpha.2
 summary: The host owns GPU allocation, output decoding, input-transparent paint and exact cleanup.
 lifecycleRationale:
-  en: WebGL2 execution establishes only the implemented source and kernels. Hardware GPU, optical material, app backing source and non-Web backend acceptance remain separate.
+  en: WebGL2 execution establishes only the implemented source and kernels. Hardware GPU, optical material, other source providers and non-Web backend acceptance remain separate. The explicit canvas-scene binding remains draft until its own current-source evidence is accepted.
 statement:
   en: The shader presentation sink consumes a current style snapshot, physical binding generation/revision identity and one immutable shader declaration. Release permanently retires that generation; restoring a replaced capability receives a newer generation even within the same mounted view. It prepares current semantic style before physical projection, owns all GPU objects and publishes through the same root's complete fallback/output paint lease. No host object crosses into Prototype IR.
 criteria:
@@ -18,6 +18,9 @@ criteria:
   - id: HC-FEEDBACK-SHADER-PRESENTATION-0001-FAILURE
     text:
       en: Failed allocation, shader compile/link, attachment completeness, rendering, image decode or style publication yields an explicit diagnostic and retains the legal opaque fallback when physical paint capability remains. Cleanup attempts every acquired resource in reverse order even if one deletion throws. Cancellation, duplicate release and dispose are idempotent. Failed publication never discards an unrelated replacement writer.
+  - id: HC-FEEDBACK-SHADER-PRESENTATION-0001-SCENE
+    text:
+      en: Four Runtime Adapter shader options and the four owned-scene native createComponent factories consume the same host-only WebShaderHostOptions capability. The explicit createWebShaderHost constructor, emitted as createShaderHost for native consumers, binds a finite ownedScenes record; it grants no global lookup, raw author DOM handle, capture or URL authority. Missing configuration retains opaque fallback. Unselected owners do not call the factory, read a root/source or subscribe. Only validated, nonstale frames advance the shared acceptance boundary across source kinds; rejected inputs cannot retire a current publication. Factory return is fenced against release, replacement and synchronous reentry, including a newer owned-pixels request. A valid source-kind change detaches and retires its previous physical or scene publisher before preparing the replacement; cleanup reentry cannot reclaim that replacement. Source acquisition retains the returned unsubscribe exactly once even when subscribe reenters; failures preserve fallback and cannot dispose the source. Observe the current composed ancestor Documents and ShadowRoots plus slot changes; recheck current source/root/Document/revision immediately before decoded publication. Same-scope recovery can reacquire from a current immutable frame. Eight synchronous invalidation turns are the finite drain limit; a nonconvergent source is retired with fallback. Ordinary paint uses a device without diagnostic readback; the explicit diagnostic device retains its original read API and independently checked cleanup.
   - id: HC-FEEDBACK-SHADER-PRESENTATION-0001-EVIDENCE
     text:
       en: Run one actual authored declaration through Runtime and ordinary generated React, Vue, Vue2 and Web Component imports. Real Chromium executes copy and tint, orientation and nontrivial alpha controls against an independently written CPU oracle, and tests fallback, generation retirement and disposal. Mock GL calls, successful shader syntax, token projection or a fixture matrix do not establish application adoption, physical GPU performance, arbitrary shader portability, Flutter, Qt or GPUI support.
@@ -30,6 +33,9 @@ openQuestions:
     blocks:
       - activation:HC-FEEDBACK-SHADER-PRESENTATION-0001
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Bind explicit application canvas scenes through one Runtime/native host protocol, scoped source retirement and no unused diagnostic readback in ordinary paint.
   - version: 0.3.0-alpha.2
     change: introduced
     summary: Bind the finite shader declaration to actual WebGL2 resources and current root paint ownership.

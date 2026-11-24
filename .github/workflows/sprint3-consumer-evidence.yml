@@ -63,14 +63,14 @@ jobs:
           set -euo pipefail
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          export FONT_EVIDENCE_DIR="$SPRINT3_EVIDENCE_DIR/font-preparation"
           {
             git rev-parse HEAD
             node --version
             corepack pnpm@10.32.1 --version
             "$CHROME" --version
             df -h "$TMPDIR" "$SPRINT3_EVIDENCE_DIR"
-            sudo apt-get update -qq -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2
-            sudo apt-get install -y --no-install-recommends fonts-noto-cjk -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2
+            timeout --signal=TERM --kill-after=5s 220s bash apps/www/scripts/prepare-homepage-composition-fonts.sh
             dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig
           } 2>&1 | tee "$SPRINT3_EVIDENCE_DIR/environment.log"
       - name: Execute independent native suites serially and one owned production preview
@@ -234,10 +234,10 @@ jobs:
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           test -n "$CHROME"
           printf 'CHROME_PATH=%s\nPUI_CHROME_EXECUTABLE=%s\n' "$CHROME" "$CHROME" >> "$GITHUB_ENV"
+          export FONT_EVIDENCE_DIR="$REHEARSAL_EVIDENCE_DIR/font-preparation"
           {
             "$CHROME" --version &&
-            sudo apt-get update -qq -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2 &&
-            sudo apt-get install -y --no-install-recommends fonts-noto-cjk -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2 &&
+            timeout --signal=TERM --kill-after=5s 220s bash apps/www/scripts/prepare-homepage-composition-fonts.sh &&
             dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig
           } 2>&1 | tee "$REHEARSAL_EVIDENCE_DIR/environment.log"
       - name: Execute all 15 original non-publishing release gates

@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "kind": "compact original local independent-review evidence archive",
+  "reviewedCandidate": "27b5429b46fdc31ae94d1f6a1bd37fb1c6a8323c",
+  "integrationCandidate": "9fff88cf23d4e55375979bc5c68c033e3deaed38",
+  "archive": "owned-pixels-review-27b5429.tar.gz",
+  "archiveBytes": 8622,
+  "archiveSha256": "7fb2a6c24b87105160bdc8c41944226627e67f02a12533cafe97bdb86cc1c8ed",
+  "files": [
+    {
+      "path": "owned-pixels-final-review.json",
+      "bytes": 9730,
+      "sha256": "1466ac64d21db9477406415d1e82d7e618d1eca901778f1fd9cc11fe58473294"
+    },
+    {
+      "path": "owned-pixels-compatibility-probe.mjs",
+      "bytes": 3401,
+      "sha256": "dee734a3a9653d809116c7c308c6ea8a355ee2a55445089614511cd4ec58f5a6"
+    },
+    {
+      "path": "owned-pixels-compatibility-probe.json",
+      "bytes": 2661,
+      "sha256": "b32c0877e5a7dd8890ec7285571c93815b016466403a93c17a185bc5edd937c5"
+    },
+    {
+      "path": "owned-pixels-compatibility-probe-before-final-fix.json",
+      "bytes": 2529,
+      "sha256": "2db293aafbbf6f0561ae0994772b9b8b0f6d6b5e413f14a23f2d497276205b59"
+    },
+    {
+      "path": "owned-pixels-device-probe.mjs",
+      "bytes": 4922,
+      "sha256": "965def98ce4f410a1688a4130aeb84ce60f264c05551a90ebac1708bf8cfbd1b"
+    },
+    {
+      "path": "owned-pixels-device-probe.json",
+      "bytes": 13507,
+      "sha256": "249871adbf227054dffeb7068615b383ce57ff107cf4c7c90b0cf3e62a0e50cd"
+    },
+    {
+      "path": "owned-pixels-device-probe-before-final-fix.json",
+      "bytes": 13507,
+      "sha256": "ac3316d3c63eb8e6538fcacd5f789c97dedefad462200acf77af617ef7e479fd"
+    },
+    {
+      "path": "owned-pixels-final-source-closure.json",
+      "bytes": 1845,
+      "sha256": "1dac57913ec47efbd8041f69d3d0c7c98df8df6d203e648bf4cdf7009cea4e65"
+    }
+  ],
+  "preservation": [
+    "Original adverse sink observations retained alongside stable-source successful replay.",
+    "Original scripts and receipts retained byte-for-byte; historical absolute workspace paths remain factual.",
+    "No node_modules, browser binary, temporary bundle, dependency archive or unrelated full test report included."
+  ],
+  "limitations": [
+    "The adverse pre-fix observations were from an uncommitted development tree. They retain observed source fingerprints; this archive does not assert that a complete exact intermediate tree was captured.",
+    "Integration comparison establishes identical bytes only for the explicit reviewed footprint and lockfile. Tests in this archive ran at the reviewed author commit, not the integration commit."
+  ],
+  "integrationFootprint": [
+    {
+      "file": "packages/adapters/base/src/material/shader-webgl2.ts",
+      "reviewedSha256": "fd2b2b31aa2cb6f19451b9666d176a91e40fb6c418f4527c593da1b6140d1024",
+      "integratedSha256": "fd2b2b31aa2cb6f19451b9666d176a91e40fb6c418f4527c593da1b6140d1024",
+      "sameBytes": true
+    },
+    {
+      "file": "packages/adapters/base/src/material/shader-webgl2-host.ts",
+      "reviewedSha256": "df6a869ee639e5aa94899c83c00ed8854d1ed0f5a7629a7b21db312868ba6496",
+      "integratedSha256": "df6a869ee639e5aa94899c83c00ed8854d1ed0f5a7629a7b21db312868ba6496",
+      "sameBytes": true
+    },
+    {
+      "file": "packages/adapters/base/src/material/shader-scene-host.ts",
+      "reviewedSha256": "ddd4bf1e5b49e7fae03768f0c009fbcff67011ff637ef24cc0158adc8d82945b",
+      "integratedSha256": "ddd4bf1e5b49e7fae03768f0c009fbcff67011ff637ef24cc0158adc8d82945b",
+      "sameBytes": true
+    },
+    {
+      "file": "packages/adapters/base/src/index.ts",
+      "reviewedSha256": "f9cc8530256317772edfc629f094fa9f8b79e32adba0ca971fef05e8cec2681a",
+      "integratedSha256": "f9cc8530256317772edfc629f094fa9f8b79e32adba0ca971fef05e8cec2681a",
+      "sameBytes": true
+    },
+    {
+      "file": "packages/adapters/base/src/material/index.ts",
+      "reviewedSha256": "9dae5bb10f07130364c43e02cf1e77cae0cbd71f60a9a2d8efe089fb064a5118",
+      "integratedSha256": "9dae5bb10f07130364c43e02cf1e77cae0cbd71f60a9a2d8efe089fb064a5118",
+      "sameBytes": true
+    },
+    {
+      "file": "packages/adapters/base/package.json",
+      "reviewedSha256": "25d7eb0dd1ef9219296ef564cefb48c16401c841aebd783ae91b7348f4c580cb",
+      "integratedSha256": "25d7eb0dd1ef9219296ef564cefb48c16401c841aebd783ae91b7348f4c580cb",
+      "sameBytes": true
+    },
+    {
+      "file": "packages/core/src/shader-presentation.ts",
+      "reviewedSha256": "2934afceac6f565cb7468455fa052241efe791e5f45c9fd5c01b54f363d97815",
+      "integratedSha256": "2934afceac6f565cb7468455fa052241efe791e5f45c9fd5c01b54f363d97815",
+      "sameBytes": true
+    },
+    {
+      "file": "packages/compiler/src/native-shader.ts",
+      "reviewedSha256": "c311d0386519b84924746d8c500700069aa16a1ffff1af648e2a4ff4e02ae39c",
+      "integratedSha256": "c311d0386519b84924746d8c500700069aa16a1ffff1af648e2a4ff4e02ae39c",
+      "sameBytes": true
+    },
+    {
+      "file": "packages/compiler/src/native-shader-specialization.ts",
+      "reviewedSha256": "22a5a5b43fcccd6e13533e22f21e3d50e606d11a78f5930a4082a18e5c4dbd38",
+      "integratedSha256": "22a5a5b43fcccd6e13533e22f21e3d50e606d11a78f5930a4082a18e5c4dbd38",
+      "sameBytes": true
+    },
+    {
+      "file": "packages/compiler/src/native-shader-host.generated.ts",
+      "reviewedSha256": "064bc8a6b7cd9f24370398608fc358d0eadd8e8c5b5d1cbc55e5f947b52d4a4a",
+      "integratedSha256": "064bc8a6b7cd9f24370398608fc358d0eadd8e8c5b5d1cbc55e5f947b52d4a4a",
+      "sameBytes": true
+    },
+    {
+      "file": "scripts/compiler/generate-shader-host.mjs",
+      "reviewedSha256": "d01e7a0c4a9096fb7f382fb7f2fab68ced810ab271d8366e99a3d6956a73269d",
+      "integratedSha256": "d01e7a0c4a9096fb7f382fb7f2fab68ced810ab271d8366e99a3d6956a73269d",
+      "sameBytes": true
+    }
+  ],
+  "dependencyLock": {
+    "reviewedSha256": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8",
+    "integratedSha256": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8",
+    "sameBytes": true
+  }
+}

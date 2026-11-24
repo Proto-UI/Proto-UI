@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-23",
+  "pullRequest": 1713,
+  "kind": "Bounded Sprint3 CI environment regressions",
+  "parent": "fd03acbe86f57e834a80737287da64fc400e82e6",
+  "font": {
+    "scope": "pull-request:1713",
+    "task": "Bounded font preparation regression",
+    "checkoutHeadAtReceipt": "fd03acbe86f57e834a80737287da64fc400e82e6",
+    "workingTreeChanges": true,
+    "files": [
+      {
+        "path": ".github/workflows/compiler-browser-acceptance.yml",
+        "sha256": "4df8adc6608dae428ad4a4734793fe9e2119f9579d7d9f6e51f6363e37534ae3",
+        "gitBlob": "9d199f5f2208b26b01244cb6e939d5456a38846b",
+        "sharedWithSocketFix": false
+      },
+      {
+        "path": ".github/workflows/brutalist-contrast-evidence.yml",
+        "sha256": "3bb5ea4a8ce47036a9bf09fab656bd5e320482a4a70bfa1d2ef7306ee72f63b4",
+        "gitBlob": "3a7e04278284e55ce9d175d7d589c81e2e56ee3e",
+        "sharedWithSocketFix": false
+      },
+      {
+        "path": ".github/workflows/sprint3-followup-evidence.yml",
+        "sha256": "69abcff6752c8f5e04f04c34354dc4bf4eecb141605b42ba2a07d0e030205f1d",
+        "gitBlob": "c58ad3da240430c9fedbc1d3da4c5f0c78c4285f",
+        "sharedWithSocketFix": true
+      },
+      {
+        "path": "scripts/test/sprint3-followup-workflow.test.mjs",
+        "sha256": "a7ebf946cd09278e30e3bf5e17296225b7c8b1391a2b9c55169144cdbe4757b7",
+        "gitBlob": "4217459ab2504917b3b54b1d053180e060d58797",
+        "sharedWithSocketFix": true
+      },
+      {
+        "path": "scripts/test/sprint3-font-preparation.test.mjs",
+        "sha256": "75f7eeaba0680877bd21635416b45a154f81c4f3969b70abeb31c114e0524ec9",
+        "gitBlob": "a880b9db7f15756a55a6645fd20e068eb7441175",
+        "sharedWithSocketFix": false
+      }
+    ],
+    "commands": [
+      {
+        "command": "node --test --test-name-pattern='all three failed font lanes' scripts/test/sprint3-font-preparation.test.mjs",
+        "exitCode": 1,
+        "result": "intended wiring red before workflow edits",
+        "log": "wiring-red.log"
+      },
+      {
+        "command": "node --test scripts/test/sprint3-font-preparation.test.mjs",
+        "exitCode": 0,
+        "counts": {
+          "passed": 11,
+          "failed": 0,
+          "skipped": 0
+        },
+        "log": "font-controls-first.log"
+      },
+      {
+        "command": "node --test scripts/test/sprint3-font-preparation.test.mjs scripts/test/sprint3-consumer-workflow.test.mjs scripts/ci/test/ci-scheduling-policy.test.mjs",
+        "exitCode": 0,
+        "counts": {
+          "passed": 51,
+          "failed": 0,
+          "skipped": 0
+        },
+        "log": "controls-green.log"
+      },
+      {
+        "command": "node scripts/ci/check-ci-schedule.mjs",
+        "exitCode": 0,
+        "log": "scheduling-gate.log"
+      }
+    ],
+    "runtime": "v24.22.3",
+    "nativeAcceptance": "not-run-by-this-change",
+    "fontAcquisition": "uses unchanged existing helper; real download/install remains for exact final candidate CI",
+    "sourceSecurity": "Existing Ubuntu package SHA256, size, package/version/architecture and original-runner-mirror allowlist are unchanged; no APT sources or global authentication settings are changed.",
+    "bounds": "Each existing origin curl max60s, outer65s; at most2 configured origins. New helper invocation has aggregate220s TERM deadline and5s kill grace. Each font step5min; unchanged job35/45/120min.",
+    "mutationLimit": "No commit, push, dispatch, budget edits, native assertion changes or sandbox changes by this agent."
+  },
+  "socket": {
+    "canonicalHead": "1658768483ba5d81e4502a64945fe5c0a21dda1d",
+    "run": 45202101258,
+    "job": 137788020204,
+    "artifact": 14832658779,
+    "artifactSha256": "dd4160bf8bba8ec271b878f97b51cb821a355f77a2c30000933ece4dfc165cfd",
+    "rawJobLogSha256": "6d67dc00c13153906f02045913894e0b6364491335347fa886aeb99d4a15547f",
+    "observation": "Chrome FATAL process_singleton_posix.cc:315 Socket path too long at111bytes;SIGABRT beforeAll,32 cases skipped.",
+    "fix": "Only the direct job uses mktemp -d \"$RUNNER_TEMP/s3.XXXXXX\". Keep its existing owned root, long candidate/suite/run/attempt evidence path, original sandbox, all native cases and independent installed job.",
+    "pathControl": "The existing nine-case complete workflow file executes its real YAML preparation, using the observed eleven-digit run ID. It then checks the resulting relative temporary directory under the observed runner root against the Chrome socket pathname budget. Only Image fails before the fix111bytes;short unique directory yields74bytes. Installed path100bytes remains unchanged.",
+    "red": {
+      "command": ["node", "--test", "scripts/test/sprint3-followup-workflow.test.mjs"],
+      "exitCode": 1,
+      "head": "fd03acbe86f57e834a80737287da64fc400e82e6",
+      "elapsedSeconds": 0.45296669006347656,
+      "logSha256": "a10caeedece72aa29b03d7cb349df9139ee3e56ca971c24b522432eccf399c67"
+    },
+    "green": {
+      "command": ["node", "--test", "scripts/test/sprint3-followup-workflow.test.mjs"],
+      "exitCode": 0,
+      "head": "fd03acbe86f57e834a80737287da64fc400e82e6",
+      "elapsedSeconds": 0.30173516273498535,
+      "logSha256": "0768047e9d4feca7b34b0e094821bd4506dcef171e464caec06be9887027bb8c",
+      "files": {
+        ".github/workflows/sprint3-followup-evidence.yml": "69abcff6752c8f5e04f04c34354dc4bf4eecb141605b42ba2a07d0e030205f1d",
+        "scripts/test/sprint3-followup-workflow.test.mjs": "a7ebf946cd09278e30e3bf5e17296225b7c8b1391a2b9c55169144cdbe4757b7"
+      }
+    },
+    "localKernelExperiment": "Attempted AF_UNIX socket constructor returned EPERM before any bind. That environment limitation is not a path-length failure or a successful native test. No sandbox relaxation or alternate forbidden path was used."
+  },
+  "rawEvidence": {
+    "path": "internal/records/evidence/2026-11-23-sprint3-ci-environment/raw.json.gz",
+    "bytes": 67887,
+    "sha256": "0c5f29238ca1a8439464217c0c47560fb88eeb38351214110f37c2650ccaffaa",
+    "decodedSha256": "7ffb1579c09cf2f99a373e4ef259e42841f0e34ef3058470a0f934d0dfafe0be",
+    "members": 15
+  },
+  "remaining": "Fresh final-head production browser,Drawer7,Scroll1,Image32 and contrast evidence. This environment repair does not turn prior failed/unrun native cases into passes;whitepaper capture repair remains separate."
+}

@@ -1,3 +1,4 @@
+import type { WebShaderHostOptions } from '@proto.ui/adapter-base';
 import { subscribeScrollTarget } from './scroll-target';
 import { createWebPresencePresentationSink } from '@proto.ui/adapter-base';
 import { createWebShaderPresentationSink } from '@proto.ui/adapter-base';
@@ -1568,6 +1569,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   /** Optional V2 visual provider for this physical view; absence retains ordinary style. */
   visualFeedbackSink?: VisualFeedbackSink;
   residentMotion?: WebResidentMotionOptions;
+  shader?: WebShaderHostOptions;
   finalStyleSink?: FinalStyleSink;
   materialBindingFactory?: MaterialBindingFactory;
   textControlTarget: WebTextControl | null;
@@ -1742,7 +1744,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
         SHADER_PRESENTATION_SINK_CAP,
         createWebShaderPresentationSink(
           () => (args.feedbackSurfaceProjection ?? args.surfaceProjection).getSurfaceTarget(),
-          effectsPort
+          effectsPort,
+          args.shader
         ),
       ],
       [PRESENCE_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
@@ -1960,6 +1963,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 stopEntryMotionWatch =
                   null;
               let hasArea = false;
+              let hasSlottedEntryContent = false;
               const radioTrees = new Set<Document | ShadowRoot>();
               const mediaRoots = new Set<Document | ShadowRoot>([target.ownerDocument]);
               const radioNames = new Set<string>();
@@ -2047,6 +2051,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 entryObserver?.observe(root, options);
                 if (root.nodeType === 1) entryResizeObserver?.observe(root as HTMLElement);
                 hasArea ||= !!root.querySelector('area');
+                // Assigned slot content can have native state dependencies,
+                // including radio peers, outside these physical observed roots.
+                hasSlottedEntryContent ||=
+                  (root.nodeType === 1 && (root as Element).localName === 'slot') ||
+                  !!root.querySelector('slot');
                 // A portal stays logically beneath its origin marker while its
                 // physical projection lives elsewhere (normally document.body).
                 // Follow those markers so eligibility mutations in the moved
@@ -2398,7 +2407,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 if (
                   transition ||
                   ((event.type === 'input' || event.type === 'change') &&
-                    !hasInputStateStyleDependency)
+                    !hasInputStateStyleDependency &&
+                    !hasSlottedEntryContent)
                 ) {
                   const path = event.composedPath();
                   const origin = path[0];

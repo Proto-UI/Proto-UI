@@ -20,6 +20,7 @@ export interface WebShaderDevice {
   read(input: NativeShaderResource): Uint8Array;
   dispose(): void;
 }
+export type WebShaderPaintDevice = Omit<WebShaderDevice, 'read'>;
 
 // Immutable first-party kernels. Generated output records each exact UTF-8 digest.
 export const SHADER_VERTEX_V1 = `#version 300 es
@@ -61,10 +62,19 @@ void main() {
   color = vec4(clamp(encodeSrgb(straight), 0.0, 1.0), inputColor.a);
 }`;
 
-export function createWebShaderDevice(
+function createWebShaderResources(
   document: Document,
-  contextLost: () => void
-): WebShaderDevice {
+  contextLost: () => void,
+  inspect?: (
+    gl: WebGL2RenderingContext,
+    resolve: (handle: NativeShaderResource) => {
+      framebuffer: WebGLFramebuffer;
+      width: number;
+      height: number;
+    },
+    check: () => void
+  ) => void
+): WebShaderPaintDevice {
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('webgl2', {
     alpha: true,
@@ -106,12 +116,9 @@ export function createWebShaderDevice(
         throw new Error('shader-context-unavailable');
       }
     }
-    let released = false;
-    cleanup.push(() => {
-      if (released) return;
-      released = true;
-      release(value);
-    });
+    // dispose detaches the private cleanup array before any callback, and its
+    // terminal guard prevents reentry from traversing it again.
+    cleanup.push(() => release(value));
     return value;
   };
   const onLoss = (event: Event) => {
@@ -239,6 +246,7 @@ export function createWebShaderDevice(
     );
     gl.bindVertexArray(vao);
     check();
+    inspect?.(gl, requireResource, check);
   } catch (error) {
     try {
       dispose();
@@ -287,25 +295,47 @@ export function createWebShaderDevice(
       if (!url.startsWith('data:image/png;base64,')) throw new Error('shader-output-unavailable');
       return url;
     },
-    read(handle) {
-      const input = requireResource(handle),
+    dispose,
+  };
+}
+
+/** Explicit diagnostic device. Ordinary presentation retains no readback wrapper. */
+export function createWebShaderDevice(
+  document: Document,
+  contextLost: () => void
+): WebShaderDevice {
+  let read!: WebShaderDevice['read'];
+  const device = createWebShaderResources(document, contextLost, (gl, resolve, check) => {
+    read = (handle) => {
+      const input = resolve(handle),
         pixels = new Uint8Array(input.width * input.height * 4);
       gl.bindFramebuffer(gl.FRAMEBUFFER, input.framebuffer);
       gl.readPixels(0, 0, input.width, input.height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
       check();
       return pixels;
-    },
-    dispose,
-  };
+    };
+  });
+  return { ...device, read };
 }
 
-export type WebShaderProgram = (device: WebShaderDevice) => NativeShaderResource;
+export type WebShaderProgram = (device: WebShaderPaintDevice) => NativeShaderResource;
 export type WebShaderPublication = Readonly<{
   view: number;
   revision: number;
   key: string;
   fallback: readonly [number, number, number, number];
 }>;
+export function validateWebShaderPublication(
+  next: Pick<WebShaderPublication, 'view' | 'revision'>
+): void {
+  if (
+    !Number.isSafeInteger(next.view) ||
+    next.view < 0 ||
+    !Number.isSafeInteger(next.revision) ||
+    next.revision < 0
+  )
+    throw new Error('shader-invalid-frame');
+}
 
 /** Physical lease only. The caller supplies already-selected direct GPU work. */
 export function createWebShaderPresenter(options: { root(): HTMLElement | null; prepare(): void }) {
@@ -316,7 +346,7 @@ export function createWebShaderPresenter(options: { root(): HTMLElement | null; 
     document: Document;
     baseline: Map<string, Write>;
     owned: Map<string, Write>;
-    device: WebShaderDevice | null;
+    device: WebShaderPaintDevice | null;
     image: HTMLImageElement | null;
     observer: MutationObserver | null;
     retired: boolean;
@@ -360,25 +390,22 @@ export function createWebShaderPresenter(options: { root(): HTMLElement | null; 
       }
   }
   function restore(lease: Lease) {
-    const entries = [...lease.owned].map(([key, write]) => ({
-      key,
-      write,
-      baseline: lease.baseline.get(key)!,
-    }));
+    const entries = [...lease.owned],
+      originals = new Map(lease.baseline);
     lease.owned.clear();
     lease.baseline.clear();
-    for (const entry of entries) {
+    for (const [key, write] of entries) {
+      const baseline = originals.get(key)!;
       // A cleanup callback may already have published a replacement on this same root.
-      if (active && active !== lease && active.root === lease.root && active.owned.has(entry.key))
+      if (active && active !== lease && active.root === lease.root && active.owned.has(key))
         continue;
-      if (!owns(lease, entry.key, entry.write)) {
+      if (!owns(lease, key, write)) {
         loseOwnership(lease);
         continue;
       }
       try {
-        if (entry.baseline.value)
-          lease.root.style.setProperty(entry.key, entry.baseline.value, entry.baseline.priority);
-        else lease.root.style.removeProperty(entry.key);
+        if (baseline.value) lease.root.style.setProperty(key, baseline.value, baseline.priority);
+        else lease.root.style.removeProperty(key);
       } catch {
         diagnose('shader-paint-cleanup-failed');
       }
@@ -461,17 +488,13 @@ export function createWebShaderPresenter(options: { root(): HTMLElement | null; 
   }
   function commit(
     next: WebShaderPublication,
-    program: WebShaderProgram,
-    prepare = options.prepare
+    program: WebShaderProgram | null,
+    prepare = options.prepare,
+    inputCurrent: () => boolean = () => true,
+    unavailableReason?: string
   ) {
     if (disposed) return;
-    if (
-      !Number.isSafeInteger(next.view) ||
-      next.view < 0 ||
-      !Number.isSafeInteger(next.revision) ||
-      next.revision < 0
-    )
-      throw new Error('shader-invalid-frame');
+    validateWebShaderPublication(next);
     if (
       next.view <= releasedView ||
       (last &&
@@ -545,11 +568,24 @@ export function createWebShaderPresenter(options: { root(): HTMLElement | null; 
       if (Observer) {
         lease.observer = new Observer(() => {
           if (active === lease && !lease.retired && !current(lease))
-            commit(accepted, program, prepare);
+            commit(accepted, program, prepare, inputCurrent, unavailableReason);
         });
         lease.observer.observe(lease.document, { childList: true, subtree: true });
       }
-      const created = createWebShaderDevice(lease.document, () =>
+      if (!program) {
+        if (unavailableReason) diagnose(unavailableReason);
+        return;
+      }
+      const inputValid = () => {
+        let valid = false;
+        try {
+          valid = inputCurrent();
+        } catch {}
+        if (!valid) failure('shader-source-retired', lease);
+        return valid && current(lease);
+      };
+      if (!inputValid()) return;
+      const created = createWebShaderResources(lease.document, () =>
         failure('shader-context-lost', lease)
       );
       if (!current(lease)) {
@@ -578,6 +614,7 @@ export function createWebShaderPresenter(options: { root(): HTMLElement | null; 
       image.decode().then(
         () => {
           if (!current(lease) || lease.image !== image || !lease.pending) return;
+          if (!inputValid()) return;
           lease.pending = false;
           try {
             if (!write(lease, 'background-image', 'url("' + url + '")'))

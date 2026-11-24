@@ -14,7 +14,10 @@ it('an installed but undeclared shader host stays physically idle through ordina
     throw new Error('physical shader root acquired');
   });
   const effects = { queueStyle: vi.fn(), requestFlush: vi.fn() };
-  const sink = createWebShaderPresentationSink(root, effects);
+  const createScenePresenter = vi.fn(() => {
+    throw new Error('unused scene capability acquired');
+  });
+  const sink = createWebShaderPresentationSink(root, effects, { createScenePresenter });
   const caps = new CapsVault();
   caps.attachBase([
     [SYS_CAP, undefined],
@@ -51,6 +54,7 @@ it('an installed but undeclared shader host stays physically idle through ordina
   sink.release(2);
   expect(effects.queueStyle).toHaveBeenCalled();
   expect(root).not.toHaveBeenCalled();
+  expect(createScenePresenter).not.toHaveBeenCalled();
   expect(sink.diagnostics?.()).toEqual([]);
 
   // The real provider must reach the guarded physical boundary for an actual
