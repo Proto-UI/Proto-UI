@@ -23,6 +23,7 @@ The candidate is based on main `248f8270dd3458d1fcbc507e618337f98b9fde96`.
 - `contents-wheel-evidence.test.ts` and `site-contents-evidence.test.ts`: **19 passed / 0 failed** on Node 24.22.3 and pnpm 10.32.1. The eight new controls inject layout to reject zero-height/unpositioned/offscreen/replaced owners, entire dialogs and retained owners that lose readiness, resolve an open shadow hit, and distinguish synthetic or cancelled input including cancellation after a checkpoint. These are oracle checks, not native browser evidence.
 - The self-contained observer passes a TypeScript no-emit check with ES2022, DOM types, NodeNext resolution and `skipLibCheck`.
 - Local native reproduction first failed before test execution because the workspace ran out of space. A temporary external dependency-store attempt also failed during Astro setup. After those environment conditions were corrected, the website served successfully, but Chromium exited before any test because its process singleton UNIX socket was denied with `EPERM`. None of these setup failures is counted as a product failure or a pass.
+- `contents-wheel-evidence.browser.test.ts` adds two authored-viewport controls using real UA wheel input, with and without a cancelling target listener, then replaces the whole dialog to reject stale identity. It starts Chromium directly without Astro or network services and records dispatch order and final cancellation. It is registered in the existing browser phase; the runtime-plan suite passes **138 / 138**. Its local native attempt also stopped at Chromium's `EPERM` before either case ran. The controls are not public Popover acceptance.
 
 Run the existing browser test on a browser-capable runner, retaining its three-family/four-runtime/click-Enter-Space matrix and the new wheel receipts:
 
@@ -34,3 +35,11 @@ corepack pnpm@10.32.1 exec vitest run \
 ```
 
 Review the initial/pre-input geometry and actual wheel path before attributing the historical failure. A remaining native failure still requires diagnosis and repair of its owning layer; these controls do not close Issue #1178, Issue #1191, the historical CI failure or browser acceptance.
+
+Run the bounded native observation controls separately on the same browser-capable runner:
+
+```sh
+corepack pnpm@10.32.1 exec vitest run \
+  apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts \
+  --maxWorkers=1 --minWorkers=1
+```
