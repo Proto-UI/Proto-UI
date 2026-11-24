@@ -1,11 +1,13 @@
 ---
 title: 'Text'
-description: 'LiquidGlass passive Text with the complete Base typography vocabulary.'
+description: '采用 Liquid Glass 字体与色阶的被动排版文本组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
-`liquid-glass-text-root` 直接消费 `asTextRoot()`，完整保留 Base 八条独立表现轴、默认值与内容 slot。它是本体系真实文字原型，已用于预览工具栏标签，不增加 heading、link、label、button、focus、selection 或 editing owner。
+Liquid Glass Text 基于 [Base Text](/zh-cn/ui-libraries/base/text/)（通过 `asTextRoot()`），提供完整的八个独立排版控制轴与默认内容槽。它仅负责排版样式，不引入标题层级、链接、标签、按钮或编辑交互。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-text"
@@ -13,25 +15,32 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Inputs
+## 安装
 
-- `size`: xs, sm, base, lg, xl, 2xl, 3xl, 4xl, 5xl (default base)
-- `tone`: default, muted, inherit (default default)
-- `weight`: normal, medium, semibold, bold (default normal)
-- `font`: body, heading, mono (default body)
-- `leading`: tight, snug, normal, relaxed (default normal)
-- `tracking`: normal, tight (default normal)
-- `emphasis`: normal, italic (default normal)
-- `decoration`: none, underline, line-through (default none)
-
-显式 leading 优先于 size 的复合行高；移除 prop 恢复默认。`tone="inherit"` 跟随外部 owner 文字颜色。Text 不设置 user-select：文档文字保留自然选择性，control 内文字遵循真实 control 的选择策略，不用 Text 强制解锁或禁用。原生 h1、p、label、a、button 继续拥有语义、for/href 与输入行为。
-
-## Workspace source
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
 ```ts
 import { textRoot, LiquidGlassTextRoot } from '@proto.ui/prototypes-liquid-glass/text';
 ```
 
-包保留 private/unreleased，CLI 的对应 Text 项只在 workspace source mode 下生成 WC、React、Vue、Vue 2 facade。family theme 提供 body/heading/mono 字体栈和 default/muted ink；不打包第三方字体。真实四 Adapter synthetic DOM 和编译映射是独立证据，不证明 native paint 或 GPUI typography parity。GPUI CLI host 仍显式拒绝。
+## 用法
 
-[Base Text](/zh-cn/ui-libraries/base/text/) · [Source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/liquid-glass/src/text)
+- 显式传入的 `leading` 优先于 `size` 自带的默认行高；移除任意属性即可恢复默认值。
+- 当文本嵌套在带前景色的容器（如 Surface）中时，设置 `tone="inherit"` 可自动继承外层文字颜色。
+- Text 不覆盖 `user-select`：普通文档内容保持自然可选，交互控件内的文字遵循所在控件的选择策略。
+- 需要语义元素时，请在外部组合原生的 `h1`、`p`、`label`、`a` 或 `button`。
+
+Liquid Glass 主题内置 `body`、`heading` 与 `mono` 系统字体栈以及 `default`/`muted` 文本色，不额外捆绑第三方字体文件。
+
+## API
+
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `size` | `'xs' \| 'sm' \| 'base' \| 'lg' \| 'xl' \| '2xl' \| '3xl' \| '4xl' \| '5xl'` | `'base'` | 字号规格 |
+| `tone` | `'default' \| 'muted' \| 'inherit'` | `'default'` | 文本颜色语义 |
+| `weight` | `'normal' \| 'medium' \| 'semibold' \| 'bold'` | `'normal'` | 字重 |
+| `font` | `'body' \| 'heading' \| 'mono'` | `'body'` | 字体族 |
+| `leading` | `'tight' \| 'snug' \| 'normal' \| 'relaxed'` | `'normal'` | 行高，显式设置时优先于字号默认行高 |
+| `tracking` | `'normal' \| 'tight'` | `'normal'` | 字距 |
+| `emphasis` | `'normal' \| 'italic'` | `'normal'` | 倾斜样式 |
+| `decoration` | `'none' \| 'underline' \| 'line-through'` | `'none'` | 文本装饰线 |

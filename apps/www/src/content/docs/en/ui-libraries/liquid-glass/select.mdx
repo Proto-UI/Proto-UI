@@ -1,11 +1,13 @@
 ---
 title: 'Select'
-description: 'Liquid Glass Select: eleven direct Base parts, controlled selection, anchored popup and a single material Surface.'
+description: 'An eleven-part Liquid Glass single-select dropdown with controlled selection, option groups, and a glass popup surface.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Liquid Glass Select provides Root, Trigger, Value, Content, Surface, Viewport, Item, ItemText, Group, Label and Separator. Each part directly consumes its matching Base hook. These are draft workspace sources; native host acceptance remains separate from source and synthetic-DOM tests.
+Liquid Glass Select builds on [Base Select](/en/ui-libraries/base/select/) with eleven composable parts—Root, Trigger, Value, Content, Surface, Viewport, Item, ItemText, Group, Label, and Separator—providing controlled or uncontrolled single selection and a glass popup surface.
+
+## Preview
 
 <PrototypePreviewer
   class="select-content-preview"
@@ -15,27 +17,11 @@ Liquid Glass Select provides Root, Trigger, Value, Content, Surface, Viewport, I
   codePanel={false}
 />
 
-## Try it
+The preview demonstrates uncontrolled selection, a disabled trigger, controlled confirmation via **Accept selection**, and RTL long-label wrapping. The toolbar uses this family's Select to switch among WC, React, Vue, and Vue 2.
 
-The four examples show an uncontrolled value, disabled control, controlled value and RTL long label. Select an option in the controlled example, then use **Accept selection** to provide the owner value. Its popup can close while the committed value remains unchanged. The preview toolbar uses this family's actual Select parts to switch among WC, React, Vue and Vue 2.
+## Installation
 
-## Eleven parts, one owner
-
-- Root owns `open`, `value`, selected text, collection and requests. `open`/`value` opt independently into controlled mode; `defaultOpen`/`defaultValue` initialize uncontrolled state. `disabled` and `closeOnSelect` remain inherited.
-- Trigger exposes combobox relationships, effective disabled and interaction states. Pointer activation toggles; Enter/Space opens; ArrowDown/ArrowUp opens at the selected or first/last enabled option.
-- Value displays selected text, raw value, placeholder or empty content in that order. It does not own input or focus.
-- Content is the transparent portal frame only: it keeps the Base portal, collision handling, focus, dismissal and zero-duration presence. `side`, `align`, `sideOffset`, `alignOffset`, `avoidCollisions`, `collisionPadding` and Transition props remain available. Content owns no paint or material.
-- Surface is the single owner of popup paint and the material slot, with the opaque fill/foreground fallback. In the connected composition it requests explicit `liquid-glass` optics only while open.
-- Viewport is the one scrollport inside Surface; it keeps relative overflow scrolling and reserves space so item focus outlines are not clipped.
-- Item owns its option identity and derived selected/active states. Pointer, Enter or Space commits an enabled option. Navigation and hover never commit a value. Disabled options are skipped.
-- ItemText supplies the option's text identity consumed for selected-text resolution.
-- Group scopes option naming without owning selection. Label supplies the group's accessible name. Separator is a decorative, contentless divider between groups.
-
-The complete composition is Content > Surface > Viewport > Item > ItemText; Group contains its Label and Items, and Separator divides groups inside Viewport. Base defaults to `position: 'popper'`. Explicit `position: 'item-aligned'` uses this full real-parts structure, subject to Base presentation admission and actual host target/geometry support; structure alone does not prove successful alignment. Escape closes without changing the value and restores Trigger focus. Tab closes without preventing traversal. Outside press closes. Root requests remain `openChange` and `valueChange`; Item also emits `select`. Changing the selected Item's `textValue` refreshes the displayed label.
-
-Long labels wrap rather than truncate; Trigger and Value can shrink, and the popup is bounded by the host's available width/height. Text alignment and trailing indicators follow logical direction. Authors must leave space outside the Trigger for the focus ring. This is a select-only single-selection protocol; form submission, editable search, multi-select, virtualized options and scroll buttons are outside this slice. Source availability is not native positioning, accessibility or paint acceptance.
-
-## Use the workspace source
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
 ```ts
 import {
@@ -53,14 +39,30 @@ import {
 } from '@proto.ui/prototypes-liquid-glass/select';
 ```
 
-The source-only CLI component `liquid-glass-select` generates the complete part set for WC, React, Vue or Vue 2 only when workspace source mode is explicit. The package is private and has not been published to the registry. GPUI facade generation is not implemented.
+## Usage
 
-## Material boundary
+### Composition and part roles
 
-Trigger and Surface declare the shared typed `liquid-glass` optical intent, each with a complete opaque fill/foreground fallback. Trigger derives rest/pressed deformation from Base; Surface requests glass only while open. Content is a nonmaterial portal frame and no other part adds a material owner. Explicit glass is never replaced with `adaptive` native blur. Intent frames and lifecycle tests do not prove self-implemented refraction, native paint or GPUI parity. Missing material hosts retain complete opaque styling and report unavailability.
+Compose the popup as `Content > Surface > Viewport > Item > ItemText`, placing `Group` (with `Label` and `Item` children) and `Separator` inside `Viewport` when grouping options:
 
-The four examples use separate visible-canvas stages while remaining in one framework tree and the original Runtime Tabs context. Controlled status and Accept appear before that trigger so an ordinary downward popup does not cover later controls. This is an explicit website-owned source, not a capture of arbitrary page DOM. Source-overlapping or out-of-bounds collision placements, unavailable preferences and unsupported hosts still retain the honest opaque fallback. The four stages add real canvas/provider resources; their cost and exact-host optical behavior must be measured, not inferred from source. Continuous droplet expansion and retraction remain unfinished. Static stages do not support dynamicChildren or an already-owned ancestor material provider.
+- **Root**: manages `open`, `value`, selected text, and the option collection; `open` and `value` can be controlled independently.
+- **Trigger & Value**: `Trigger` provides `combobox` semantics—click toggles, Enter/Space opens, and ArrowDown/ArrowUp opens at the selected or first/last enabled item. `Value` resolves selected text, raw value, `placeholder`, or empty content in order.
+- **Content / Surface / Viewport**: `Content` handles portal mounting, collision positioning, and dismissal without painting a surface; `Surface` owns the popup paint and glass material slot; `Viewport` is the scroll container with room so item focus rings are not clipped.
+- **Item / ItemText / Group / Label / Separator**: pointer click, Enter, or Space commits an enabled item (hover and arrow navigation never commit, and disabled items are skipped). Updating the selected item's `textValue` refreshes `Value`. Escape closes and restores Trigger focus; Tab and outside press close.
 
-- [Base Select](/en/ui-libraries/base/select/)
-- [Source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/liquid-glass/src/select)
-- [Evidence map](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-SELECT-DRAFT-PROJECTIONS-0001.yaml)
+### Layout and material
+
+- Long labels wrap and shrink cleanly, popup dimensions stay within available host bounds, and text alignment and trailing indicators follow logical reading direction. Leave outer room around `Trigger` for its focus ring.
+- `Trigger` and open `Surface` request `liquid-glass` optics and automatically fall back to readable opaque styling whenever backdrop, overlap, contrast, or accessibility preferences disallow glass.
+- Select is a single-selection dropdown; for searchable options or free text, use [Combobox](/en/ui-libraries/liquid-glass/combobox/) or [Autocomplete](/en/ui-libraries/liquid-glass/autocomplete/).
+
+## API
+
+| Part | Prop / Event | Defaults and notes |
+| --- | --- | --- |
+| Root | `open`, `defaultOpen`, `value`, `defaultValue` | Independently controlled or uncontrolled visibility and selection |
+| Root | `disabled`, `closeOnSelect` | Disables interaction / closes automatically after selection |
+| Root | `openChange`, `valueChange` | Visibility and selection proposal events |
+| Value | `placeholder` | Fallback text shown when no option is selected |
+| Content | `position`, `side`, `align`, `sideOffset`, `alignOffset`, `avoidCollisions`, `collisionPadding` | Positioning mode (default `'popper'`, also supports `'item-aligned'`) and collision options |
+| Item | `value`, `textValue`, `disabled`, `select` | Option identifier, display text, disabled flag, and selection event |

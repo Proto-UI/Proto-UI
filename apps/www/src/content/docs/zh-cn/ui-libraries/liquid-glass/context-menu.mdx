@@ -1,11 +1,13 @@
 ---
-title: 'ContextMenu'
-description: '支持键盘访问的上下文命令菜单。'
+title: 'Context Menu'
+description: '支持右键、触摸长按与键盘快捷键唤起的 Liquid Glass 上下文菜单。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-支持键盘访问的上下文命令菜单。
+Liquid Glass Context Menu 在目标区域响应右键点击、触摸/触控笔长按（持续 600ms）以及 `ContextMenu` / `Shift+F10` 键盘快捷键，并阻止已处理请求的浏览器原生右键菜单。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-context-menu"
@@ -14,12 +16,25 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root 提供 open/defaultOpen、disabled、closeOnItemCommit。Trigger 在 context.menu 或 ContextMenu/Shift+F10 时打开，并阻止已处理请求的原生菜单；普通左键不打开。Content 使用真实 Overlay/Focus/Transition 导航、文字跳转与受控关闭。右键与已接受的触摸/笔长按使用输入位置锚点，ContextMenu/Shift+F10 使用触发区域锚点。共享宿主私有保存几何，只提供不透明的输入来源关联；DOM 坐标不进入可移植 props、state 或 JSON context。
+## 安装
 
-组成: Root, Trigger, Content, Item.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码。嵌套子菜单、完整 native/GPUI/编译器证据、消费/视觉验收与独立生命周期准入仍未完成。
+## 用法
 
-触摸/笔需要在宿主移动容差内持续按住 600 ms。移动、释放、取消、禁用与卸载均取消待完成长按。已接受的键盘/长按会抑制其重复原生菜单事件，长按还抑制其兼容点击；普通点击与滚动仍由宿主处理。默认 bottom/start 放置且无额外间距。
+- **部件组成**：`Root`、`Trigger`、`Content`、`Item`。
+- **触发与定位**：
+  - 右键点击或触摸/笔在移动容差内按住 600ms 时，菜单锚定在输入点（默认 `bottom`/`start`，无额外间距）；长按中途移动、松开、取消、禁用或卸载会自动取消。普通左键点击与滚动不受影响。
+  - 按下 `ContextMenu` 或 `Shift+F10`、或调用编程方法 `openContextMenu()` 时，菜单以触发区域作为后备锚点。
+- **键盘与关闭**：`Content` 支持上下方向键导航、首字母输入跳转（typeahead）、外部点击关闭以及 Escape / 选中命令后恢复触发器焦点。
+- **受控模式**：传入 `open` 时，菜单仍以请求方式通知调用方；若调用方延后打开，会自动复用最近有效的输入锚点。
 
-受控 open 仍是请求：启用的 Root 接受请求传递时才阻止原生菜单，调用方可以继续保留 open=false。之后调用方打开时使用最近仍有效的输入锚点；程序方法 openContextMenu 使用触发器后备锚点。Escape 与选择完成按现有焦点策略恢复触发器。共享源码运行时覆盖不代表 compiler/native 准入或真实设备长按验收。
+## API
+
+| 部件                     | 属性 / 方法            | 说明                                   |
+| ------------------------ | ---------------------- | -------------------------------------- |
+| Root                     | `open` / `defaultOpen` | 受控 / 非受控打开状态                  |
+| Root                     | `disabled`             | 禁用菜单唤起                           |
+| Root                     | `closeOnItemCommit`    | 选中菜单项后是否自动请求关闭           |
+| Root                     | `openContextMenu()`    | 以触发区域为锚点以编程方式请求打开菜单 |
+| Trigger / Content / Item | —                      | 触发区域、浮层菜单容器与可执行菜单项   |

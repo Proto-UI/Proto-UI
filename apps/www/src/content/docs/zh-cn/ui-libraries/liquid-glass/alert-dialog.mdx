@@ -1,11 +1,13 @@
 ---
-title: 'AlertDialog'
-description: '带主要说明、安全取消焦点与明确操作意图的模态确认窗口。'
+title: 'Alert Dialog'
+description: '带有明确取消焦点与操作确认意图的 Liquid Glass 模态确认对话框。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-带主要说明、安全取消焦点与明确操作意图的模态确认窗口。
+Liquid Glass Alert Dialog 用于需要用户显式确认的重要或破坏性操作。弹窗打开时锁定焦点、阻止点击外部关闭，并优先将焦点落到安全的 `Cancel` 按钮。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-alert-dialog"
@@ -14,10 +16,22 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root 固定 alert 语义。Mask 管理模态遮罩；Content 约束焦点、拒绝外部点击关闭并优先聚焦 Cancel。Action 先发出 action，再请求关闭，实际操作由应用处理。Escape 与 Cancel 请求关闭。
+## 安装
 
-Root 支持受控 open 和非受控 defaultOpen。禁用命令不激活。传入 open 时，最终状态仍由调用方持有，通过 openChange 接收请求后再提供新值。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-组成: Root, Trigger, Content, Title, Description, Cancel, Action, Mask.
+## 用法
 
-当前是草稿源码实现。完整 native/GPUI、编译器、打包消费、视觉及独立验收仍待完成；本页不表示 Finf 已完成。
+- **部件组成**：`Root`、`Trigger`、`Content`、`Title`、`Description`、`Cancel`、`Action`、`Mask`。
+- **交互与焦点**：`Root` 固定 `alert` 语义，`Mask` 管理模态遮罩，`Content` 约束焦点并在打开时优先聚焦 `Cancel`。按下 Escape 或点击 `Cancel` 请求关闭。
+- **操作意图**：点击 `Action` 会先触发 `action` 事件，再请求关闭弹窗；实际业务副作用由应用代码自行执行。
+- **受控模式**：传入 `open` 进入受控模式（通过 `openChange` 接收关闭/打开请求后更新值），或使用 `defaultOpen` 进行非受控初始化。禁用的命令不会触发激活。
+
+## API
+
+| 部件           | 属性 / 事件            | 说明                                       |
+| -------------- | ---------------------- | ------------------------------------------ |
+| Root           | `open` / `defaultOpen` | 受控 / 非受控打开状态                      |
+| Root           | `openChange`           | 打开或关闭请求事件                         |
+| Action         | `action`               | 确认按钮激活时在关闭请求之前发出的事件     |
+| Mask / Content | —                      | 管理模态遮罩、焦点约束与 `Cancel` 优先聚焦 |

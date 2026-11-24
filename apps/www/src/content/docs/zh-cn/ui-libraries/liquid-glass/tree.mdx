@@ -1,16 +1,35 @@
 ---
-title: 'Tree (WIP)'
-description: 'tree functional composition and current verification limits.'
+title: 'Tree'
+description: '支持显式层级、单选、展开折叠与完整键盘导航的 Liquid Glass 树形视图组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Tree 管理完整显式层级的单选与展开。nodeKey 在当前树唯一，parentKey 指向父项；重复标识、缺失父项和环路均拒绝。方向键、Home/End 与首字母移动焦点；左右键展开、折叠或定位父子项。value 与 expandedKeys 支持受控请求。
+Liquid Glass Tree 管理显式声明的层级节点树，支持单选、节点展开/折叠以及完整的方向键与首字母键盘导航。
 
-当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-tree"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+## 用法
+
+- **显式层级标识**：每个节点通过树内唯一的 `nodeKey` 标识，并用 `parentKey` 指向其父节点；重复标识、缺失父节点或循环引用都会被忽略并保持当前有效状态。
+- **键盘导航**：上下方向键、`Home` / `End` 与首字母输入在可见节点间移动焦点；左右方向键分别用于折叠/定位父节点与展开/进入首个子节点。
+- **受控状态**：`value`（选中节点）与 `expandedKeys`（展开节点集合）均支持受控请求模式。
+
+## API
+
+| 属性           | 说明                            |
+| -------------- | ------------------------------- |
+| `value`        | 受控当前选中节点的 `nodeKey`    |
+| `expandedKeys` | 受控已展开节点的 `nodeKey` 集合 |
+| `nodeKey`      | 节点在当前树中的唯一标识        |
+| `parentKey`    | 指向父节点的 `nodeKey`          |

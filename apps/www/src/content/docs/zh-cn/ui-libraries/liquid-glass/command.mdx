@@ -1,11 +1,13 @@
 ---
 title: 'Command'
-description: '可搜索并发出操作意图的内联命令列表。'
+description: '始终内联展示、支持实时过滤并触发操作事件的 Liquid Glass 命令面板。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-可搜索并发出操作意图的内联命令列表。
+Liquid Glass Command 提供始终展开的内联搜索命令列表。输入查询仅用于筛选候选命令，按下 Enter 或点击命令项时会发出携带选中项的 `execute` 事件，由应用执行对应操作。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-command"
@@ -14,10 +16,22 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-列表保持内联显示。Enter 或指针激活发出带选项的 execute；实际操作归应用处理，输入搜索不会执行操作。
+## 安装
 
-宿主管理真实单行编辑器。箭头导航保持输入焦点；IME 组合期间不选择。过滤依据 textValue 与 keywords，忽略大小写及重音。Empty 反映真实匹配数；禁用项不可提交。open、value、inputValue 分别支持受控请求；filter=false 允许调用方提供已过滤子项。重复值选项拒绝提交。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-组成: Root, Input, Content, Item, Empty.
+## 用法
 
-草稿源码；共享 Web A11y 活动后代投影、native/GPUI、编译器、消费、视觉及独立验收仍是独立要求。
+- **部件组成**：`Root`、`Input`、`Content`、`Item`、`Empty`。
+- **搜索与执行**：按 `textValue` 与 `keywords` 忽略大小写和重音过滤，也可设置 `filter={false}` 传入已过滤列表。方向键在命令间移动时焦点保持在 `Input`，IME 组合输入期间不触发执行。
+- **状态与边界**：`open`、`value` 与 `inputValue` 均支持独立受控；`Empty` 反映实际匹配数，禁用项和重复值项不会触发 `execute`。
+
+## API
+
+| 部件        | 属性 / 事件                           | 说明                                       |
+| ----------- | ------------------------------------- | ------------------------------------------ |
+| Root        | `value` / `inputValue` / `open`       | 独立受控的命令状态与查询文本               |
+| Root        | `filter`                              | 设为 `false` 时关闭内置过滤                |
+| Root / Item | `execute`                             | Enter 或点击可用命令项时发出的执行意图事件 |
+| Item        | `textValue` / `keywords` / `disabled` | 命令名称、匹配关键词与禁用开关             |
+| Empty       | —                                     | 无匹配命令时显示的空状态                   |
