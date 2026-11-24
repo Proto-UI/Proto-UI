@@ -1,0 +1,9 @@
+{
+  "ref": "fix/contents-wheel-followup-20261124",
+  "inputs": {
+    "scope": "contents-wheel",
+    "shader_presentation": "false",
+    "sprint3_acceptance": "false",
+    "sprint3_followup": "false"
+  }
+}

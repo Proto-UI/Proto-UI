@@ -1,0 +1,56 @@
+{
+  "base": "4aaac6ac60348dc99896c34cd1186abcda98ff0d",
+  "ours": "dca8f4f8f17ff1eba7198ad5aef8a018b3ac9434",
+  "main": "52e62632eede8ff094a91216f7d3373d66d77ef0",
+  "unresolvedPreviewTree": "78ef7d3be805b34fca13cd488083e12ed818fe9b",
+  "conflicts": [
+    "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts"
+  ],
+  "observerCandidate": {
+    "path": "/tmp/contents-main52-observer-resolved.ts",
+    "bytes": 11055,
+    "sha256": "c2be71f093207be7e3e588940cc9d801dae046e764a2b5b8676d0863cd308c45"
+  },
+  "matrix": {
+    "path": "/tmp/contents-main52-homepage-auto-merged.ts",
+    "bytes": 123740,
+    "sha256": "7fc2042c5955e9a2cf9fe21a0cfa4293ebb67b5abf2293e1f0141ec7c741212d"
+  },
+  "matrixChecks": {
+    "settledNonzero": true,
+    "settledDirection": true,
+    "originalPoll": true,
+    "twoRaf": true,
+    "publicCaseTimeout": true,
+    "mainOwnerNarrowing": true,
+    "separateInspect": true
+  },
+  "eventReusePatch": {
+    "path": "/tmp/contents-main52-observer-reuse-event-test.patch",
+    "bytes": 892,
+    "sha256": "9ed716fe5ea7073b3b96bd3bd2857cc0173a82d8e345368043611c57d80c076b"
+  },
+  "checks": {
+    "isolatedUnits": {
+      "exit": 0,
+      "passed": 14,
+      "log": {
+        "path": "/tmp/contents-main52-observer-check/vitest-final.log",
+        "bytes": 2580,
+        "sha256": "3955be903a654a39ae51b397faf67ff9cb9d3458f451d4ff619f1cbb355b4271"
+      }
+    },
+    "standaloneTypes": {
+      "exit": 0,
+      "log": {
+        "path": "/tmp/contents-main52-observer-check/tsc-final.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "prettierExit": 0
+  },
+  "taskWorktreeChanged": false,
+  "candidateNativeExecuted": false,
+  "formatting": "Final source uses explicit repository .prettierrc; merged original13 tests unchanged plus20-line additional control"
+}

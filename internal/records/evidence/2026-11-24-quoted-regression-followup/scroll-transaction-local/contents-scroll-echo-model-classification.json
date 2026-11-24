@@ -1,0 +1,7 @@
+{
+  "classification": "discarded overstrong synthetic model, not a native failure",
+  "source": "/tmp/contents-scroll-echo-overstrong-model.test.ts",
+  "log": "/tmp/contents-sync-scroll-echo-red.log",
+  "reason": "Model appended a fresh microtask event for every scrollTo, whereas CSSOM View scroll-event processing coalesces a same-target pending notification. No production event filter was added.",
+  "reference": "https://drafts.csswg.org/cssom-view/#scrolling-events"
+}

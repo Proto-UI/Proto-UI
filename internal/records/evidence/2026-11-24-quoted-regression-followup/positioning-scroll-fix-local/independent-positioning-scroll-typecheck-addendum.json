@@ -1,0 +1,206 @@
+{
+  "reviewer": "/root/independent_review",
+  "observedAt": "2026-11-24T12:50:38.097294+00:00",
+  "scope": "Supplement the frozen source review with final workspace-only typecheck and fresh generated-input evidence; no source edits or platform approval",
+  "base": "92d3331636ff6337c87fc557f4b0334d426398dd",
+  "frozenSourceHashesReverified": [
+    {
+      "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/packages/modules/positioning/src/web/floating-ui-host.ts",
+      "bytes": 28348,
+      "sha256": "f9fc1f2cb64e08ce452b693ae054f439430e3abb6f98d31013c59ea5d44b9715"
+    },
+    {
+      "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/packages/modules/positioning/test/floating-ui-host.test.ts",
+      "bytes": 25859,
+      "sha256": "46cbe728958f3f4e03c8b007221b0d65037d3814d57cc3bd61087a02e435d3e4"
+    }
+  ],
+  "workflowSha256Reverified": "e801829655de84593104b60fd5e0f51a5342973472b9401594927fe5d8f3f443",
+  "originalReviewPreserved": [
+    {
+      "file": "independent-positioning-scroll-fix-review.md",
+      "bytes": 7602,
+      "sha256": "8b7975d269c4941c1e1d20e03b356f236185af640ec50134b71e2b38de6e8c0f",
+      "unchanged": true
+    },
+    {
+      "file": "independent-positioning-scroll-fix-review.json",
+      "bytes": 4587,
+      "sha256": "009ad3e3b228b7269f2a735d38b2bb2dabbc187eca5b3febf37b09fec5e96bd4",
+      "unchanged": true
+    }
+  ],
+  "authorExecutionRecord": {
+    "path": "/tmp/contents-scroll-host-validation.json",
+    "bytes": 9551,
+    "sha256": "f38ff948fc9baa46546e54b01fa4c635945fa09905cf1512907ac2cd5dcb992a",
+    "results": [
+      {
+        "stage": "workspace types before memory/input preparation",
+        "command": "corepack pnpm@10.32.1 -s check:types:workspace",
+        "exitCode": 134,
+        "result": "Node default approximately 2GB heap exhausted",
+        "log": "/tmp/contents-scroll-workspace-tsc.log"
+      },
+      {
+        "stage": "workspace types with 4GB heap before fresh generated inputs",
+        "command": "NODE_OPTIONS=--max-old-space-size=4096 corepack pnpm@10.32.1 -s check:types:workspace",
+        "exitCode": 2,
+        "diagnosticCount": 2,
+        "result": "TS2307 missing apps/www/src/styles/proto-ui-shadow-style.generated.js from shadow-s3 and shadow-s4 analysis fixtures",
+        "log": "/tmp/contents-scroll-workspace-tsc-4096.log"
+      },
+      {
+        "stage": "canonical fresh style generation prerequisite",
+        "command": "corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style",
+        "exitCode": 0,
+        "tokens": 1472,
+        "log": "/tmp/contents-scroll-style-generation.log"
+      },
+      {
+        "stage": "final workspace types after canonical generation",
+        "command": "NODE_OPTIONS=--max-old-space-size=4096 corepack pnpm@10.32.1 -s check:types:workspace",
+        "exitCode": 0,
+        "sessionId": 83570,
+        "completionChunk": "da0842",
+        "log": "/tmp/contents-scroll-workspace-tsc-generated.log",
+        "boundary": "Workspace type check only; this is not the docs/Astro check or a full check:types/native result."
+      }
+    ]
+  },
+  "independentReadback": {
+    "validationLogEntriesChecked": 10,
+    "mismatches": 0,
+    "generatedFileComparisons": 5,
+    "allGeneratedBytesIdenticalTo92dNativeArtifact": true,
+    "finalTypecheckLogBytes": 0,
+    "finalExitCodeSource": "Author execution/completion record session83570 chunkda0842, not inferred merely from empty stdout"
+  },
+  "logs": [
+    {
+      "path": "/tmp/contents-scroll-host-92d-red.log",
+      "bytes": 36677,
+      "sha256": "944c3ebca8ed38b7662a8e4a38c4283e280af5ec156f285446d5e49c06502c0e"
+    },
+    {
+      "path": "/tmp/contents-scroll-host-92d-red-refined.log",
+      "bytes": 36106,
+      "sha256": "46a693da805b3c6508d870f681476cfec19af659d5d2e7949586af2be5b8dc56"
+    },
+    {
+      "path": "/tmp/contents-scroll-host-candidate-green.log",
+      "bytes": 33148,
+      "sha256": "bb43427138b193eda555083693188b4bba1dfc89e5831f8be49c45996023dbaa"
+    },
+    {
+      "path": "/tmp/contents-scroll-positioning-adapters-green.log",
+      "bytes": 295748,
+      "sha256": "c662054e1e06424542eec6e2a774849af50d57970c478b9e95fd36393a9e1784"
+    },
+    {
+      "path": "/tmp/contents-scroll-event-reuse-red.log",
+      "bytes": 30653,
+      "sha256": "89bb17c1cb54723068a0eba5f675a4e54a4ca46b173514f2adb02edbaec43c9f"
+    },
+    {
+      "path": "/tmp/contents-scroll-positioning-adapters-final.log",
+      "bytes": 295943,
+      "sha256": "493623a8dbcc99f0abb92dbf6461c6f166303efa31b8a1620e547b537d90290c"
+    },
+    {
+      "path": "/tmp/contents-scroll-workspace-tsc.log",
+      "bytes": 895,
+      "sha256": "b83c8a388a80bbea86fe57b87d76c7eb53c0cee5be9abfa078ec7eda23b76859"
+    },
+    {
+      "path": "/tmp/contents-scroll-workspace-tsc-4096.log",
+      "bytes": 394,
+      "sha256": "3ad7f6a6922fab952b6b01b13a0e241067216b143b7b7d74b5bd9418eb0355b6"
+    },
+    {
+      "path": "/tmp/contents-scroll-style-generation.log",
+      "bytes": 748,
+      "sha256": "a773e86b6231aef92d8b31f29c6bf67e123ae3a639027bfef58e29bfa08513a5"
+    },
+    {
+      "path": "/tmp/contents-scroll-workspace-tsc-generated.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "generatedComparisons": [
+    {
+      "current": {
+        "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/apps/www/src/styles/proto-ui-shadow-style.generated.d.ts",
+        "bytes": 261,
+        "sha256": "76d772bac1c5de84e6fb455683513c74c6d40b55de2744caaf3dfc4e4ead94b8"
+      },
+      "native92d": {
+        "path": "/tmp/contents-wheel-92d-native-evidence/artifact/afterTest/generated/proto-ui-shadow-style.generated.d.ts",
+        "bytes": 261,
+        "sha256": "76d772bac1c5de84e6fb455683513c74c6d40b55de2744caaf3dfc4e4ead94b8"
+      },
+      "bytesIdentical": true
+    },
+    {
+      "current": {
+        "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/apps/www/src/styles/proto-ui-shadow-style.generated.js",
+        "bytes": 629704,
+        "sha256": "08415c4d6276a790c2a5538aa8bc70279ad4a060624dc8e3e024fd36e44f7036"
+      },
+      "native92d": {
+        "path": "/tmp/contents-wheel-92d-native-evidence/artifact/afterTest/generated/proto-ui-shadow-style.generated.js",
+        "bytes": 629704,
+        "sha256": "08415c4d6276a790c2a5538aa8bc70279ad4a060624dc8e3e024fd36e44f7036"
+      },
+      "bytesIdentical": true
+    },
+    {
+      "current": {
+        "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/apps/www/src/styles/proto-ui-style.css",
+        "bytes": 294,
+        "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88"
+      },
+      "native92d": {
+        "path": "/tmp/contents-wheel-92d-native-evidence/artifact/afterTest/generated/proto-ui-style.css",
+        "bytes": 294,
+        "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88"
+      },
+      "bytesIdentical": true
+    },
+    {
+      "current": {
+        "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/apps/www/src/styles/proto-ui-tokens.generated.css",
+        "bytes": 249803,
+        "sha256": "e503f7dff500dd7894d122b808f623f971fb590bb88fba7859126ee3ca20e1d7"
+      },
+      "native92d": {
+        "path": "/tmp/contents-wheel-92d-native-evidence/artifact/afterTest/generated/proto-ui-tokens.generated.css",
+        "bytes": 249803,
+        "sha256": "e503f7dff500dd7894d122b808f623f971fb590bb88fba7859126ee3ca20e1d7"
+      },
+      "bytesIdentical": true
+    },
+    {
+      "current": {
+        "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/apps/www/src/styles/shadcn-theme.css",
+        "bytes": 6473,
+        "sha256": "3de2d4ce2a38e83086128c8863d3391eb74159adde7b1a8b7f450f93fd643f96"
+      },
+      "native92d": {
+        "path": "/tmp/contents-wheel-92d-native-evidence/artifact/afterTest/generated/shadcn-theme.css",
+        "bytes": 6473,
+        "sha256": "3de2d4ce2a38e83086128c8863d3391eb74159adde7b1a8b7f450f93fd643f96"
+      },
+      "bytesIdentical": true
+    }
+  ],
+  "reviewerReranGenerationOrTypecheck": false,
+  "finalWorkspaceTypecheckResult": "Passed with exit0 after canonical generation and a4GiB Node heap",
+  "notEstablished": [
+    "Full check:types",
+    "Docs/Astro type check",
+    "Native behavior of the changed positioning host",
+    "Complete CI or release acceptance"
+  ]
+}

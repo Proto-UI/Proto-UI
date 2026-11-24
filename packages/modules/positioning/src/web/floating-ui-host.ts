@@ -12,10 +12,13 @@ import {
   computePosition,
   flip,
   offset,
+  platform as domPlatform,
   shift,
   size,
+  type Dimensions,
   type Middleware,
   type Placement,
+  type Platform,
 } from '@floating-ui/dom';
 import type {
   AnchoredPositionAlign,
@@ -40,6 +43,90 @@ function fromPlacement(placement: Placement): {
 
 function isElement(value: unknown): value is HTMLElement {
   return typeof HTMLElement !== 'undefined' && value instanceof HTMLElement;
+}
+
+function composedParent(node: Node): Node | null {
+  if (node.nodeType === 1 && (node as Element).assignedSlot) return (node as Element).assignedSlot;
+  return node.parentNode ?? (node.nodeType === 11 ? ((node as ShadowRoot).host ?? null) : null);
+}
+
+function isStrictComposedAncestor(target: EventTarget | null, element: HTMLElement): boolean {
+  for (let node = composedParent(element); node; node = composedParent(node)) {
+    if (node === target) return true;
+  }
+  return false;
+}
+
+/** Capture newly scrollable ancestors without treating a panel's own scroll as geometry. */
+function observePositionScroll(reference: HTMLElement, floating: HTMLElement, update: () => void) {
+  const roots = new Set<Document | ShadowRoot>();
+  let disposed = false;
+  const onScroll = (event: Event) => {
+    if (disposed) return;
+    const path = event.composedPath();
+    // Only the outermost observed root handles this propagation. Do not retain
+    // Event identity: callers may legally dispatch the same Event again.
+    for (let index = path.length - 1; index >= 0; index--) {
+      if (!roots.has(path[index] as Document | ShadowRoot)) continue;
+      if (event.currentTarget !== path[index]) return;
+      break;
+    }
+    const origin = path[0] ?? event.target;
+    if (
+      !(
+        origin === reference.ownerDocument ||
+        origin === floating.ownerDocument ||
+        isStrictComposedAncestor(origin, reference) ||
+        isStrictComposedAncestor(origin, floating)
+      )
+    )
+      return;
+    update();
+  };
+  const refresh = () => {
+    if (disposed) return;
+    const next = new Set<Document | ShadowRoot>([reference.ownerDocument, floating.ownerDocument]);
+    for (const element of [reference, floating]) {
+      for (let node: Node | null = element; node; node = composedParent(node)) {
+        if (node.nodeType === 11 && 'host' in node) next.add(node as ShadowRoot);
+      }
+    }
+    for (const root of roots) {
+      if (!next.has(root)) {
+        root.removeEventListener('scroll', onScroll, true);
+        roots.delete(root);
+      }
+    }
+    for (const root of next) {
+      if (!roots.has(root)) {
+        root.addEventListener('scroll', onScroll, true);
+        roots.add(root);
+      }
+    }
+  };
+  refresh();
+  return {
+    refresh,
+    dispose() {
+      disposed = true;
+      for (const root of roots) root.removeEventListener('scroll', onScroll, true);
+      roots.clear();
+    },
+  };
+}
+
+/** Only the first rect measurement uses natural size; size() must read the real capped box. */
+function intrinsicPlatform(initial: Dimensions): Platform {
+  let first = true;
+  return {
+    ...domPlatform,
+    async getElementRects(input) {
+      const rects = await domPlatform.getElementRects.call(this, input);
+      if (!first) return rects;
+      first = false;
+      return { ...rects, floating: { ...rects.floating, ...initial } };
+    },
+  };
 }
 
 /**
@@ -317,6 +404,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
       let sizeObservers: ResizeObserver[] = [];
       let strategyPin: { target: HTMLElement; styles: ReturnType<typeof ownStyles> } | null = null;
       let projectedSize: ReturnType<typeof ownStyles> | null = null;
+      let scrollObservation: ReturnType<typeof observePositionScroll> | null = null;
       const retireProjectedSize = () => {
         const previous = projectedSize;
         projectedSize = null;
@@ -370,15 +458,10 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           }
           return;
         }
-        // Available-space variables are outputs of the last solve. Measuring
-        // through that cap can make an overflowing preferred side appear to
-        // fit forever after content/font/viewport changes. Release only our
-        // claims before measuring intrinsic geometry; authored values and any
-        // replacement owner's writes remain intact. Each solve then owns a
-        // fresh projection, guarded by the existing computation generation.
-        retireProjectedSize();
+        scrollObservation?.refresh();
+        if (sizing) retireProjectedSize();
         if (!isCurrent()) return;
-        const ownProjection = ownStyles(floating);
+        const ownProjection = projectedSize ?? ownStyles(floating);
         projectedSize = ownProjection;
         if (!strategyPin || strategyPin.target !== floating) {
           retireStrategyPin();
@@ -456,10 +539,57 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
             current.onSizeMatch?.(ownSizing.fail('invalid-geometry'));
           return;
         }
+        // Available space is an output, not the natural content size used by
+        // flip. Measure against authored styles, then restore the live viewport
+        // and its actual native offsets before the first asynchronous boundary.
+        // Keeping the style claims throughout prevents an equal-valued successor
+        // from being overwritten by this measurement's continuation.
+        const scroll = { left: floating.scrollLeft, top: floating.scrollTop };
+        const measurement = { changed: false, restored: false };
+        let naturalDimensions: Dimensions | undefined;
+        let failed = false;
+        let failure: unknown;
+        try {
+          naturalDimensions = ownProjection.withBaseline(
+            () => {
+              const measured = domPlatform.getDimensions(floating);
+              // The DOM provider is synchronous (CSS/offset dimensions). Its public
+              // Platform type also admits custom asynchronous providers; never leave
+              // a native viewport uncapped while awaiting one of those.
+              if ('then' in measured)
+                throw new TypeError('Floating UI DOM dimensions must be synchronous');
+              return measured;
+            },
+            isCurrent,
+            measurement
+          );
+        } catch (error) {
+          failed = true;
+          failure = error;
+        } finally {
+          if (
+            measurement.changed &&
+            measurement.restored &&
+            isCurrent() &&
+            (floating.scrollLeft !== scroll.left || floating.scrollTop !== scroll.top)
+          ) {
+            try {
+              floating.scrollTo({ left: scroll.left, top: scroll.top, behavior: 'instant' });
+            } catch (error) {
+              if (!failed) {
+                failed = true;
+                failure = error;
+              }
+            }
+          }
+        }
+        if (failed) throw failure;
+        if (!naturalDimensions || !isCurrent()) return;
         const result = await computePosition(reference.reference, floating, {
           placement: toPlacement(config),
           strategy: config.strategy,
           middleware: middlewareFor(config, isCurrent, ownProjection),
+          platform: intrinsicPlatform(naturalDimensions),
         });
         if (!isCurrent()) return;
         retireStrategyPin();
@@ -504,22 +634,31 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           if (connection.sizeMatch) void position();
           return;
         }
-        const stopAuto = autoUpdate(reference.reference, floating, position, {
-          animationFrame: false,
-        });
+        const stopAuto = autoUpdate(
+          reference.reference,
+          floating,
+          () => {
+            void position();
+          },
+          {
+            animationFrame: false,
+          }
+        );
         const stopRoot = observeRootSpace(reference.element.ownerDocument, () => {
           void position();
         });
         // autoUpdate records overflow ancestors only once. A scroller that
         // becomes overflow:auto after the popup opens (nested demo panes)
         // never notifies that list, so the fixed popper keeps its pre-scroll
-        // coordinates. Element scroll does not bubble, but it is observable
-        // in the capture phase on the document.
-        const ownerDocument = reference.element.ownerDocument;
-        const onCapturedScroll = () => {
+        // coordinates. Capture only scrolls that can move this reference or
+        // floating box. Re-solving for its own content scroll would briefly
+        // release the available-size cap and clamp its native scroll offset.
+        // Native scroll is not composed, so observe the relevant shadow roots
+        // as well as the document; a composed event is handled only once.
+        const ownScroll = observePositionScroll(reference.element, floating, () => {
           void position();
-        };
-        ownerDocument.addEventListener('scroll', onCapturedScroll, true);
+        });
+        scrollObservation = ownScroll;
         const stopInvalidation = resolveWebInputOriginAnchor(anchor)?.subscribeInvalidation(() => {
           generation++;
           retireSizing();
@@ -532,7 +671,8 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           stopAuto();
           stopRoot();
           stopInvalidation?.();
-          ownerDocument.removeEventListener('scroll', onCapturedScroll, true);
+          ownScroll.dispose();
+          if (scrollObservation === ownScroll) scrollObservation = null;
         };
       };
 

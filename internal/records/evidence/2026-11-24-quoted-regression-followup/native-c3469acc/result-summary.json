@@ -1,0 +1,610 @@
+{
+  "runId": 45422958374,
+  "jobId": 138547164722,
+  "workflowId": 373828512,
+  "head": "c3469acc8cc00aff5c49baef2629486d41314aff",
+  "event": "workflow_dispatch",
+  "attempt": 1,
+  "conclusion": "failure",
+  "instrumentedPositioningTrace": false,
+  "artifactId": 14934977971,
+  "artifactBytes": 144382,
+  "artifactSha256": "f9af0bbdc62f5f3bc6b53dc4b655397bebd9cf83bb0017b7061246c3b64320b7",
+  "artifactMembers": 32,
+  "sourceFilesVerifiedAgainstGitCommit": {
+    "eachPhase": 18,
+    "phaseCount": 2,
+    "all36ChecksPassed": true,
+    "expectedPaths": [
+      ".github/workflows/browser-suite-repair-evidence.yml",
+      "pnpm-lock.yaml",
+      "apps/www/package.json",
+      "apps/www/scripts/generate-website-prototype-tokens.mjs",
+      "apps/www/scripts/prepare-homepage-composition-fonts.sh",
+      "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+      "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts",
+      "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts",
+      "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+      "apps/www/src/styles/site-contents-command.css",
+      "packages/modules/positioning/src/web/floating-ui-host.ts",
+      "packages/modules/positioning/src/web/owned-style-lease.ts",
+      "packages/modules/positioning/src/web/root-space-observer.ts",
+      "packages/modules/positioning/test/floating-ui-host.test.ts",
+      "packages/modules/positioning/test/floating-ui-host-intrinsic-invalidation.test.ts",
+      "packages/modules/positioning/test/available-projection-ownership.test.ts",
+      "packages/modules/positioning/test/lease-generation.test.ts",
+      "packages/modules/positioning/test/owned-style-lease.test.ts"
+    ]
+  },
+  "phases": [
+    {
+      "phase": "beforeTest",
+      "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+      "dirty": false,
+      "sourceCount": 18,
+      "node": "v24.22.3",
+      "chrome": "Google Chrome 157.0.8103.78",
+      "observedAt": "2026-11-24T15:19:38.999Z"
+    },
+    {
+      "phase": "afterTest",
+      "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+      "dirty": false,
+      "sourceCount": 18,
+      "node": "v24.22.3",
+      "chrome": "Google Chrome 157.0.8103.78",
+      "observedAt": "2026-11-24T15:22:05.423Z"
+    }
+  ],
+  "actualAfterGenerated": [
+    {
+      "path": "apps/www/src/styles/shadcn-theme.css",
+      "bytes": 6473,
+      "sha256": "3de2d4ce2a38e83086128c8863d3391eb74159adde7b1a8b7f450f93fd643f96",
+      "matchesRecordedBytes": true,
+      "matchesPublishedMain8Inputs": true,
+      "identicalTo92dFailureInput": true
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-style.css",
+      "bytes": 294,
+      "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88",
+      "matchesRecordedBytes": true,
+      "matchesPublishedMain8Inputs": true,
+      "identicalTo92dFailureInput": true
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-tokens.generated.css",
+      "bytes": 253817,
+      "sha256": "3e37aa92568e1e4ade2d74e228627126e51aa2717824c10bbb3b25f5ea638f7a",
+      "matchesRecordedBytes": true,
+      "matchesPublishedMain8Inputs": true,
+      "identicalTo92dFailureInput": false
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.js",
+      "bytes": 642802,
+      "sha256": "67e3e6adf39453463137e6f1fb16e58af52c4098d5f5e40a40be0cddaeafb29f",
+      "matchesRecordedBytes": true,
+      "matchesPublishedMain8Inputs": true,
+      "identicalTo92dFailureInput": false
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.d.ts",
+      "bytes": 261,
+      "sha256": "76d772bac1c5de84e6fb455683513c74c6d40b55de2744caaf3dfc4e4ead94b8",
+      "matchesRecordedBytes": true,
+      "matchesPublishedMain8Inputs": true,
+      "identicalTo92dFailureInput": true
+    }
+  ],
+  "generatedInputBoundary": "All five actual afterTest outputs match the published main8 input manifest. Tokens and Shadow JS differ from old92d; theme, wrapper and declaration bytes match old92d. This run is not an identical-generated-input comparison to92d.",
+  "beforeGeneratedAbsence": [
+    {
+      "path": "apps/www/src/styles/shadcn-theme.css",
+      "error": "Error: ENOENT: no such file or directory, open 'apps/www/src/styles/shadcn-theme.css'"
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-tokens.generated.css",
+      "error": "Error: ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-tokens.generated.css'"
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.js",
+      "error": "Error: ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-shadow-style.generated.js'"
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.d.ts",
+      "error": "Error: ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-shadow-style.generated.d.ts'"
+    }
+  ],
+  "transitionAdditionalSourceChecks": [
+    {
+      "path": "apps/www/src/components/SiteContentsCommand.astro",
+      "sha256": "250ea15a4d6f238397dda64dba8df8d60eabb42ddb02979b0ad0895ee3c29a0f",
+      "matchesCandidate": true
+    },
+    {
+      "path": "apps/www/src/components/site-contents-command.ts",
+      "sha256": "b9076feb0bdf2f2a7d3887ef0a1a44f88b086c6ff33256ae4b71282e6d6b4799",
+      "matchesCandidate": true
+    },
+    {
+      "path": "apps/www/src/components/site-contents-panel.ts",
+      "sha256": "85e968cb5abb1be2a7d3645a241143578c407730a650e5c152cf522346668d2a",
+      "matchesCandidate": true
+    },
+    {
+      "path": "apps/www/src/components/site-header-surface.ts",
+      "sha256": "b1f90dcad071dc4f4bea5b6e47834c2f5464179ee8a8476653907cc11d72716a",
+      "matchesCandidate": true
+    },
+    {
+      "path": "apps/www/src/components/site-header-disclosure.ts",
+      "sha256": "0d5ded18075c11f5a478d08c2af4346ff2bfc051de7e4e545172494eb0dce904",
+      "matchesCandidate": true
+    },
+    {
+      "path": "apps/www/src/components/override/Sidebar.astro",
+      "sha256": "9cf7486a4a86e8512c9f75215cff83f0ffb0b1a3f3753c802782c08f0fb0ece5",
+      "matchesCandidate": true
+    },
+    {
+      "path": "apps/www/src/components/override/PageFrame.astro",
+      "sha256": "753f40ce6c26eafd0ea860450c60c277a7bbff6adddc83cb65c753211fad8d57",
+      "matchesCandidate": true
+    },
+    {
+      "path": "apps/www/src/styles/site-contents-command.css",
+      "sha256": "70807ef33ce6f3212fcb68735f30196dd5cf96cdf82d17d7b7c5cc4e97ba1748",
+      "matchesCandidate": true
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts",
+      "sha256": "c2be71f093207be7e3e588940cc9d801dae046e764a2b5b8676d0863cd308c45",
+      "matchesCandidate": true
+    }
+  ],
+  "controls": [
+    {
+      "file": "runtime/contents-wheel-controls/cancellation-false.json",
+      "cancel": false,
+      "beforeTop": 0,
+      "afterTop": 400,
+      "documentUnchanged": true,
+      "sameDialogAndSurface": true,
+      "trustedMatchingWheel": [
+        {
+          "trusted": true,
+          "deltaY": 400,
+          "clientX": 190,
+          "clientY": 160,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "replacementIdentityRejected": true,
+      "completionErrors": [],
+      "browser": "157.0.8103.78"
+    },
+    {
+      "file": "runtime/contents-wheel-controls/cancellation-true.json",
+      "cancel": true,
+      "beforeTop": 0,
+      "afterTop": 0,
+      "documentUnchanged": true,
+      "sameDialogAndSurface": true,
+      "trustedMatchingWheel": [
+        {
+          "trusted": true,
+          "deltaY": 400,
+          "clientX": 190,
+          "clientY": 160,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": true
+        }
+      ],
+      "replacementIdentityRejected": true,
+      "completionErrors": [],
+      "browser": "157.0.8103.78"
+    }
+  ],
+  "selection": {
+    "expectedSha": "c3469acc8cc00aff5c49baef2629486d41314aff",
+    "scope": "Two authored native oracle controls and one original public Popover matrix; not complete homepage or CI acceptance",
+    "results": [
+      {
+        "id": "controls",
+        "file": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts",
+        "titles": [
+          "preserves native cancellation=false and current dialog identity",
+          "preserves native cancellation=true and current dialog identity"
+        ],
+        "exactScope": true,
+        "passed": true,
+        "collected": 2,
+        "executed": 2,
+        "skipped": 0,
+        "selected": [
+          {
+            "title": "preserves native cancellation=false and current dialog identity",
+            "fullName": "Contents wheel observer / native event controls preserves native cancellation=false and current dialog identity",
+            "status": "passed",
+            "failureMessages": []
+          },
+          {
+            "title": "preserves native cancellation=true and current dialog identity",
+            "fullName": "Contents wheel observer / native event controls preserves native cancellation=true and current dialog identity",
+            "status": "passed",
+            "failureMessages": []
+          }
+        ]
+      },
+      {
+        "id": "popover",
+        "file": "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+        "titles": [
+          "uses real family Popover Triggers through all four Docs runtimes with keyboard and exact-source visual evidence"
+        ],
+        "exactScope": true,
+        "passed": false,
+        "collected": 10,
+        "executed": 1,
+        "skipped": 9,
+        "selected": [
+          {
+            "title": "uses real family Popover Triggers through all four Docs runtimes with keyboard and exact-source visual evidence",
+            "fullName": "Homepage end-to-end dogfood boundary uses real family Popover Triggers through all four Docs runtimes with keyboard and exact-source visual evidence",
+            "status": "failed",
+            "failureMessages": [
+              "Error: Matcher did not succeed in 1000ms\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/vi.DgezovHB.js:66:37)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts:1016:81\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+            ]
+          }
+        ]
+      }
+    ],
+    "generatedEvidence": {
+      "complete": true,
+      "files": [
+        {
+          "path": "apps/www/src/styles/shadcn-theme.css",
+          "bytes": 6473,
+          "sha256": "3de2d4ce2a38e83086128c8863d3391eb74159adde7b1a8b7f450f93fd643f96"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-style.css",
+          "bytes": 294,
+          "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-tokens.generated.css",
+          "bytes": 253817,
+          "sha256": "3e37aa92568e1e4ade2d74e228627126e51aa2717824c10bbb3b25f5ea638f7a"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-shadow-style.generated.js",
+          "bytes": 642802,
+          "sha256": "67e3e6adf39453463137e6f1fb16e58af52c4098d5f5e40a40be0cddaeafb29f"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-shadow-style.generated.d.ts",
+          "bytes": 261,
+          "sha256": "76d772bac1c5de84e6fb455683513c74c6d40b55de2744caaf3dfc4e4ead94b8"
+        }
+      ]
+    }
+  },
+  "publicMatrix": {
+    "expectedWheelCombinations": 36,
+    "observedWheelReceipts": 0,
+    "completedWheelCombinations": 0,
+    "unexecutedWheelCombinations": [
+      [
+        "bootstrap-2-3-2",
+        "react",
+        "Enter"
+      ],
+      [
+        "bootstrap-2-3-2",
+        "react",
+        "Space"
+      ],
+      [
+        "bootstrap-2-3-2",
+        "react",
+        "click"
+      ],
+      [
+        "bootstrap-2-3-2",
+        "vue",
+        "Enter"
+      ],
+      [
+        "bootstrap-2-3-2",
+        "vue",
+        "Space"
+      ],
+      [
+        "bootstrap-2-3-2",
+        "vue",
+        "click"
+      ],
+      [
+        "bootstrap-2-3-2",
+        "vue2",
+        "Enter"
+      ],
+      [
+        "bootstrap-2-3-2",
+        "vue2",
+        "Space"
+      ],
+      [
+        "bootstrap-2-3-2",
+        "vue2",
+        "click"
+      ],
+      [
+        "bootstrap-2-3-2",
+        "wc",
+        "Enter"
+      ],
+      [
+        "bootstrap-2-3-2",
+        "wc",
+        "Space"
+      ],
+      [
+        "bootstrap-2-3-2",
+        "wc",
+        "click"
+      ],
+      [
+        "brutalist",
+        "react",
+        "Enter"
+      ],
+      [
+        "brutalist",
+        "react",
+        "Space"
+      ],
+      [
+        "brutalist",
+        "react",
+        "click"
+      ],
+      [
+        "brutalist",
+        "vue",
+        "Enter"
+      ],
+      [
+        "brutalist",
+        "vue",
+        "Space"
+      ],
+      [
+        "brutalist",
+        "vue",
+        "click"
+      ],
+      [
+        "brutalist",
+        "vue2",
+        "Enter"
+      ],
+      [
+        "brutalist",
+        "vue2",
+        "Space"
+      ],
+      [
+        "brutalist",
+        "vue2",
+        "click"
+      ],
+      [
+        "brutalist",
+        "wc",
+        "Enter"
+      ],
+      [
+        "brutalist",
+        "wc",
+        "Space"
+      ],
+      [
+        "brutalist",
+        "wc",
+        "click"
+      ],
+      [
+        "shadcn",
+        "react",
+        "Enter"
+      ],
+      [
+        "shadcn",
+        "react",
+        "Space"
+      ],
+      [
+        "shadcn",
+        "react",
+        "click"
+      ],
+      [
+        "shadcn",
+        "vue",
+        "Enter"
+      ],
+      [
+        "shadcn",
+        "vue",
+        "Space"
+      ],
+      [
+        "shadcn",
+        "vue",
+        "click"
+      ],
+      [
+        "shadcn",
+        "vue2",
+        "Enter"
+      ],
+      [
+        "shadcn",
+        "vue2",
+        "Space"
+      ],
+      [
+        "shadcn",
+        "vue2",
+        "click"
+      ],
+      [
+        "shadcn",
+        "wc",
+        "Enter"
+      ],
+      [
+        "shadcn",
+        "wc",
+        "Space"
+      ],
+      [
+        "shadcn",
+        "wc",
+        "click"
+      ]
+    ],
+    "normalCloseObservations": 0,
+    "failureStage": "runtime-transition selection before the wheel action loop",
+    "family": "shadcn",
+    "runtime": "wc",
+    "action": null,
+    "exactSourceLine": 1016,
+    "exactSourceStatement": "await expect.poll(() => root.getAttribute('data-contents-runtime')).toBe(runtime);",
+    "originalDeadlineMs": 1000,
+    "error": "Error: Matcher did not succeed in 1000ms",
+    "failureMessages": [
+      "Error: Matcher did not succeed in 1000ms\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/vi.DgezovHB.js:66:37)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts:1016:81\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+    ],
+    "caseDurationMs": 46367.90191,
+    "fileDurationMs": 135005,
+    "firstObservedAfterOriginalCheckMs": 957.900146484375,
+    "first": {
+      "observedAt": 1795533724654.9001,
+      "preference": null,
+      "contents": {
+        "siteContentsCommand": "",
+        "contentsLabel": "\u9875\u9762\u76ee\u5f55",
+        "contentsRuntime": "wc",
+        "contentsFamily": "shadcn",
+        "contentsGeneration": "1"
+      },
+      "panel": {
+        "siteHeaderPanel": "",
+        "headerSurfaceRuntime": "wc",
+        "headerSurfaceFamily": "shadcn",
+        "headerSurfaceGeneration": "1"
+      },
+      "generations": [
+        {
+          "projectionGenerationHost": "1",
+          "projectionOwnerHost": "site-header-surface-1",
+          "projectionGenerationState": "active",
+          "inert": false
+        },
+        {
+          "projectionGenerationHost": "1",
+          "projectionOwnerHost": "site-contents-panel-1-docs-1",
+          "projectionGenerationState": "active",
+          "inert": false
+        },
+        {
+          "projectionGenerationHost": "1",
+          "projectionOwnerHost": "site-search-1-docs-1-open",
+          "projectionGenerationState": "active",
+          "inert": false
+        }
+      ],
+      "longTasks": [
+        {
+          "start": 1795533720415.4001,
+          "duration": 1903
+        },
+        {
+          "start": 1795533722610.3,
+          "duration": 59
+        }
+      ],
+      "changes": [],
+      "resources": []
+    },
+    "late": {
+      "observedAt": 1795533724996.3,
+      "preference": null,
+      "contents": {
+        "siteContentsCommand": "",
+        "contentsLabel": "\u9875\u9762\u76ee\u5f55",
+        "contentsRuntime": "wc",
+        "contentsFamily": "shadcn",
+        "contentsGeneration": "1"
+      },
+      "panel": {
+        "siteHeaderPanel": "",
+        "headerSurfaceRuntime": "wc",
+        "headerSurfaceFamily": "shadcn",
+        "headerSurfaceGeneration": "1"
+      },
+      "generations": [
+        {
+          "projectionGenerationHost": "1",
+          "projectionOwnerHost": "site-header-surface-1",
+          "projectionGenerationState": "active",
+          "inert": false
+        },
+        {
+          "projectionGenerationHost": "1",
+          "projectionOwnerHost": "site-contents-panel-1-docs-1",
+          "projectionGenerationState": "active",
+          "inert": false
+        },
+        {
+          "projectionGenerationHost": "1",
+          "projectionOwnerHost": "site-search-1-docs-1-open",
+          "projectionGenerationState": "active",
+          "inert": false
+        }
+      ],
+      "longTasks": [
+        {
+          "start": 1795533720415.4001,
+          "duration": 1903
+        },
+        {
+          "start": 1795533722610.3,
+          "duration": 59
+        },
+        {
+          "start": 1795533722695.8,
+          "duration": 1941
+        }
+      ],
+      "changes": [],
+      "resources": []
+    },
+    "pageErrors": []
+  },
+  "classificationBoundary": "The runtime-transition poll failed before any public wheel combination. This run neither reproduces a public-wheel +0 assertion nor establishes that the original wheel defect is fixed. Post-failure snapshots and long tasks are observations, not a proven cause.",
+  "logProvenance": {
+    "bytes": 64956,
+    "sha256": "7bd9a5eb747c65f81f08d56e2ed3775b95319dfd4175145278f676911505a9bb",
+    "boundary": "Complete connector-decoded UTF-8 workflow job log; not raw HTTP bytes"
+  },
+  "reportingCorrection": "The first watcher message expanded a truncated log data-contents-r\u2026 as data-contents-ready. Exact git source1016 shows data-contents-runtime. The earlier ready-assertion wording is withdrawn; the retained original logs and source are authoritative."
+}

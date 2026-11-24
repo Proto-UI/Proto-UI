@@ -5,8 +5,22 @@ import { createFloatingUiAnchoredPositionHost } from '../src';
 // Hold the public geometry provider boundary. The host and its style/owner
 // leases run unchanged; these cases certify ownership, not native geometry.
 const pending = vi.hoisted(() => [] as Array<{ applySize(): void; finish(x: number): void }>);
+const measurements = vi.hoisted(() => [] as Array<{ value: string; priority: string }>);
+const measuring = vi.hoisted(() => ({
+  current: undefined as ((element: HTMLElement) => void) | undefined,
+}));
 const cleanup = vi.hoisted(() => vi.fn());
 vi.mock('@floating-ui/dom', () => ({
+  platform: {
+    getDimensions: (floating: HTMLElement) => {
+      measurements.push({
+        value: floating.style.getPropertyValue('--proto-ui-available-height'),
+        priority: floating.style.getPropertyPriority('--proto-ui-available-height'),
+      });
+      measuring.current?.(floating);
+      return { width: 100, height: 1000 };
+    },
+  },
   autoUpdate: vi.fn((_anchor, _floating, update) => {
     void update();
     return cleanup;
@@ -46,11 +60,87 @@ const config: AnchoredPositionConfig = {
 
 afterEach(() => {
   pending.length = 0;
+  measurements.length = 0;
+  measuring.current = undefined;
   vi.clearAllMocks();
   document.body.replaceChildren();
 });
 
 describe('available-space projection ownership', () => {
+  it('does not restore a read-side scroll change when it had no owned cap to suspend', () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    floating.scrollTop = 80;
+    measuring.current = () => {
+      floating.scrollTop = 12;
+    };
+    const lease = createFloatingUiAnchoredPositionHost().attach({ anchor, floating, config });
+    expect(floating.scrollTop).toBe(12);
+    lease.dispose();
+  });
+
+  it('does not restore a prior offset after a successor acquires the measured projection', () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    document.body.append(anchor, floating);
+    const host = createFloatingUiAnchoredPositionHost();
+    const first = host.attach({ anchor, floating, config });
+    pending[0].applySize();
+    floating.scrollTop = 80.5;
+    let successor: ReturnType<typeof host.attach> | undefined;
+    measuring.current = () => {
+      measuring.current = undefined;
+      successor = host.attach({ anchor, floating, config });
+      pending[1].applySize();
+      floating.scrollTop = 12.25;
+    };
+    first.requestUpdate();
+    expect(successor).toBeDefined();
+    expect(pending).toHaveLength(2);
+    expect(floating.scrollTop).toBe(12.25);
+    expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe('234px');
+    first.dispose();
+    expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe('234px');
+    successor!.dispose();
+  });
+
+  it('returns from a fresh measurement with the prior viewport and native offsets before yielding', async () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    document.body.append(anchor, floating);
+    const lease = createFloatingUiAnchoredPositionHost().attach({ anchor, floating, config });
+    pending[0].applySize();
+    pending[0].finish(10);
+    await Promise.resolve();
+    floating.scrollTop = 80.5;
+    floating.scrollLeft = -3.25;
+    // Model the UA's clamp when the owned max-height disappears. This is a
+    // synchronous host-boundary control, not evidence of a native wheel.
+    const remove = floating.style.removeProperty.bind(floating.style);
+    vi.spyOn(floating.style, 'removeProperty').mockImplementation((name) => {
+      const result = remove(name);
+      if (name === '--proto-ui-available-height') {
+        floating.scrollTop = 0;
+        floating.scrollLeft = 0;
+      }
+      return result;
+    });
+    try {
+      lease.requestUpdate();
+      expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe('234px');
+      expect(floating.scrollTop).toBe(80.5);
+      expect(floating.scrollLeft).toBe(-3.25);
+      // Later user input belongs to the user, not to the suspended solve.
+      floating.scrollTop = 120.25;
+      pending[1].applySize();
+      pending[1].finish(20);
+      await Promise.resolve();
+      expect(floating.scrollTop).toBe(120.25);
+    } finally {
+      lease.dispose();
+    }
+  });
+
   it('restores author values and priorities before the next intrinsic measurement and at retirement', () => {
     const anchor = document.createElement('button');
     const floating = document.createElement('div');
@@ -59,10 +149,12 @@ describe('available-space projection ownership', () => {
     pending[0].applySize();
     expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe('234px');
     lease.requestUpdate();
-    // The provider is now suspended before the second size publication.
+    // Natural measurement sees authored styles, but the live viewport is
+    // restored before the provider's first asynchronous boundary.
     expect(pending).toHaveLength(2);
-    expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe('77px');
-    expect(floating.style.getPropertyPriority('--proto-ui-available-height')).toBe('important');
+    expect(measurements.at(-1)).toEqual({ value: '77px', priority: 'important' });
+    expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe('234px');
+    expect(floating.style.getPropertyPriority('--proto-ui-available-height')).toBe('');
     pending[1].applySize();
     lease.dispose();
     expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe('77px');

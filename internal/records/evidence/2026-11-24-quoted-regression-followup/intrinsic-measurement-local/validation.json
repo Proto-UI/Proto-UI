@@ -1,0 +1,159 @@
+{
+  "baselineSha": "b110ec92f5b1c5d256c79b831c0b86b9caaec3e3",
+  "finalFiles": [
+    {
+      "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/packages/modules/positioning/src/web/floating-ui-host.ts",
+      "bytes": 38353,
+      "sha256": "35b27b569d761dba6a251e96d8c0a34f08cbc386792678b803054f368ce4956d"
+    },
+    {
+      "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/packages/modules/positioning/test/floating-ui-host.test.ts",
+      "bytes": 33069,
+      "sha256": "3806258d0f683b2f2ef6e7b4a0f9145411025a697d7136dadc6cde7558a820ca"
+    },
+    {
+      "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/packages/modules/positioning/test/floating-ui-host-intrinsic-invalidation.test.ts",
+      "bytes": 11306,
+      "sha256": "14094c1d8ff052a599189c37f8fce24c40d3db81708fc427be44cfab2b663d7f"
+    },
+    {
+      "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/packages/modules/positioning/test/available-projection-ownership.test.ts",
+      "bytes": 8237,
+      "sha256": "8fbbbbea38985258512047983dd92b5d5795c12e1dbce8c89ef3491210eac280"
+    },
+    {
+      "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/packages/modules/positioning/test/lease-generation.test.ts",
+      "bytes": 7708,
+      "sha256": "7f1339292fbb41459fd09084f664475696fd1e473260f8a87beb54f4f39fcacf"
+    },
+    {
+      "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+      "bytes": 123669,
+      "sha256": "9b6f17dd10ab67bcc4c934cf06c6e3c5b0f0a69c1bf89094dd29a5ccad82826e"
+    },
+    {
+      "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/.github/workflows/browser-suite-repair-evidence.yml",
+      "bytes": 19254,
+      "sha256": "4ccb1376274404ef2dc5d7474fd943b898b195278e7258c683950b5d8edc5818"
+    }
+  ],
+  "checks": [
+    {
+      "name": "positioning and four Adapters, final formatted files",
+      "command": "corepack pnpm@10.32.1 exec vitest run packages/modules/positioning/test packages/adapters/react/test/positioning.integration.test.ts packages/adapters/vue/test/positioning.integration.test.ts packages/adapters/vue2/test/positioning.integration.test.ts packages/adapters/web-component/test/positioning.integration.test.ts --maxWorkers=1 --minWorkers=1 --reporter=verbose",
+      "exit": 0,
+      "filesPassed": 26,
+      "testsPassed": 337,
+      "log": {
+        "path": "/tmp/contents-intrinsic-positioning-adapters-frozen.log",
+        "bytes": 297836,
+        "sha256": "9e5fbf478765bfa00f34fd43fd7830296a1fbceca9fa75190f23a16978ffacb0"
+      },
+      "completion": {
+        "session": 1595,
+        "chunk": "ea3d8a"
+      }
+    },
+    {
+      "name": "workspace types only, final formatted files",
+      "command": "NODE_OPTIONS=--max-old-space-size=4096 corepack pnpm@10.32.1 -s check:types:workspace",
+      "exit": 0,
+      "log": {
+        "path": "/tmp/contents-intrinsic-workspace-tsc-frozen.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "completion": {
+        "session": 96470,
+        "chunk": "acadd0"
+      }
+    },
+    {
+      "name": "formatting of five implementation/test files",
+      "command": "corepack pnpm@10.32.1 exec prettier --check packages/modules/positioning/src/web/floating-ui-host.ts packages/modules/positioning/test/floating-ui-host.test.ts packages/modules/positioning/test/floating-ui-host-intrinsic-invalidation.test.ts packages/modules/positioning/test/available-projection-ownership.test.ts packages/modules/positioning/test/lease-generation.test.ts",
+      "exit": 0,
+      "log": {
+        "path": "/tmp/contents-intrinsic-prettier-frozen.log",
+        "bytes": 66,
+        "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+      },
+      "completion": {
+        "session": 73786,
+        "chunk": "1b26fc"
+      }
+    }
+  ],
+  "controls": [
+    {
+      "name": "original b110 host plus first three new core controls",
+      "hostSha256": "f9fc1f2cb64e08ce452b693ae054f439430e3abb6f98d31013c59ea5d44b9715",
+      "command": "corepack pnpm@10.32.1 exec vitest run packages/modules/positioning/test/floating-ui-host.test.ts -t 'keeps an overflowing|reconsiders the natural|uses the current viewport' --maxWorkers=1 --minWorkers=1 --reporter=verbose",
+      "exit": 1,
+      "failed": 2,
+      "passed": 1,
+      "skipped": 23,
+      "log": {
+        "path": "/tmp/contents-intrinsic-b110-core-red.log",
+        "bytes": 31940,
+        "sha256": "19de578ebfabfb87c5503b2512642dacbbd9eeeb59a10e544250955d753399fa"
+      }
+    },
+    {
+      "name": "independent b110 invalidation controls",
+      "metadata": {
+        "path": "/tmp/intrinsic-invalidation-baseline-b110/result.json",
+        "bytes": 727,
+        "sha256": "8025f2f6aaed6ab890479719faf9d24b69e60e27fb366529aac4f795cffc62b9"
+      },
+      "log": {
+        "path": "/tmp/intrinsic-invalidation-baseline-b110/vitest.log",
+        "bytes": 31222,
+        "sha256": "f3c7276360a8d183c31f125c79e2129fd4a536b1d89013c574ce7e91564a1a68"
+      },
+      "boundary": "Three-case executed source is preserved in that directory. Final four-case test additionally guards the active RO subscription and same-config update; those additions were not executed on b110."
+    },
+    {
+      "name": "post-review context control and ownership/generation controls",
+      "exit": 0,
+      "filesPassed": 4,
+      "testsPassed": 47,
+      "log": {
+        "path": "/tmp/contents-intrinsic-context-guard.log",
+        "bytes": 39738,
+        "sha256": "0187991beb776ba8a7d042c86b33bb5f1133378bd9b36e5963bd83980f0de724"
+      },
+      "boundary": "The async-context counterexample was not executed against the pre-fix ddbe source; no historical red execution is claimed for it."
+    }
+  ],
+  "formatOnlyFinalDelta": {
+    "before": {
+      "path": "/tmp/contents-intrinsic-host-test-before-final-format.ts",
+      "bytes": 33085,
+      "sha256": "d0ecddf2a95af1df49fd13c4c6af5e6c7fc668a5f86868c2abf9f2c5561c9b20"
+    },
+    "diff": {
+      "path": "/tmp/contents-intrinsic-final-format.diff",
+      "bytes": 1569,
+      "sha256": "12b25158c22a93625b2ba304f65ac6a5db9a83c3c512bd5723645a6763d3bb31"
+    },
+    "priorPrettierExit": 1,
+    "priorPrettierCompletionChunk": "60201f",
+    "scope": "Only async function/this parameter wrapping changed; final files were retested above."
+  },
+  "native": {
+    "baselineRun": 45398259913,
+    "baselineJob": 138459735307,
+    "baselineSha": "b110ec92f5b1c5d256c79b831c0b86b9caaec3e3",
+    "wheelReceiptsPassed": 12,
+    "wheelReceiptsFailed": 1,
+    "wheelCombinationsNotExecuted": 23,
+    "failedCombination": "brutalist/wc/click",
+    "candidate": "pending hosted execution; no local native retry"
+  },
+  "oracle": "Parent added positive settled displacement checks after the already-existing two animation frames. Original native wheel, public owner checks and 1000ms deadline remain.",
+  "limits": [
+    "Happy DOM box/scroll fixtures are explicit unit models, not native CSS/wheel evidence.",
+    "Workspace types do not claim the docs/Astro check or full check:types command.",
+    "New content/font listeners invalidate only; they do not schedule extra positioning solves."
+  ]
+}

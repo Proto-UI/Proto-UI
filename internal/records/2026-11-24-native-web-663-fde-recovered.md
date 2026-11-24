@@ -4,12 +4,12 @@ These original remote files survived the local workspace replacement. Both archi
 
 ## Exact observations
 
-| Execution source                           | Scope                                                                                                       | Result                                                                                                       |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `6635347b3376e90fdb7dc9618c815aa12b66341d` | Complete original markup provenance browser file                                                            | 17 passed, 0 failed, 0 skipped                                                                               |
-| `6635347b3376e90fdb7dc9618c815aa12b66341d` | Two selected original Homepage cases, with passive wheel observation and the explicit optional CPU profiler | 0 passed, 2 failed, 8 unselected                                                                             |
-| `fde59e8517b52f4c0a3fd19453a5d586e9fe7f3f` | First selected Matrix mount attempt                                                                         | Failed during module delivery observation, before the initialization phase; 3 other cases unselected         |
-| `fde59e8517b52f4c0a3fd19453a5d586e9fe7f3f` | Controlled rerun of the unchanged Matrix mount case                                                         | Delivered 342/342 modules, then failed the original 60,000 ms initialization phase; 3 other cases unselected |
+| Execution source | Scope | Result |
+| --- | --- | --- |
+| `6635347b3376e90fdb7dc9618c815aa12b66341d` | Complete original markup provenance browser file | 17 passed, 0 failed, 0 skipped |
+| `6635347b3376e90fdb7dc9618c815aa12b66341d` | Two selected original Homepage cases, with passive wheel observation and the explicit optional CPU profiler | 0 passed, 2 failed, 8 unselected |
+| `fde59e8517b52f4c0a3fd19453a5d586e9fe7f3f` | First selected Matrix mount attempt | Failed during module delivery observation, before the initialization phase; 3 other cases unselected |
+| `fde59e8517b52f4c0a3fd19453a5d586e9fe7f3f` | Controlled rerun of the unchanged Matrix mount case | Delivered 342/342 modules, then failed the original 60,000 ms initialization phase; 3 other cases unselected |
 
 The native environment used Node 24.22.3, pnpm 10.32.1 and sandboxed Chromium 156.0.8078.79. Frozen installation, the CLI build and canonical website style generation succeeded before the 663 and first fde runs. Tracked source remained clean after generation. The fde rerun and separate diagnostics checked and reused the same candidate's generated-asset hashes. Commands, UTC timestamps, generated hashes, raw verdicts and process receipts are retained in the archives and indexed by `receipt.json`.
 

@@ -1,6 +1,7 @@
 import { createWebInputOriginAnchor } from '../src/web/input-origin-anchor';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AnchoredPositionConfig } from '@proto.ui/core';
+import { platform as domPlatform } from '@floating-ui/dom';
 import { createFloatingUiAnchoredPositionHost } from '../src';
 
 const rect = (x: number, y: number, width: number, height: number): DOMRect =>
@@ -277,6 +278,468 @@ describe('module-positioning: Floating UI host', () => {
         if (descriptor) Object.defineProperty(target, key, descriptor);
         else Reflect.deleteProperty(target, key);
       }
+    }
+  });
+});
+
+describe('module-positioning: relevant scroll observation', () => {
+  let viewportDescriptors: [string, PropertyDescriptor | undefined][];
+  beforeEach(() => {
+    viewportDescriptors = ['clientWidth', 'clientHeight'].map((name) => [
+      name,
+      Object.getOwnPropertyDescriptor(document.documentElement, name),
+    ]);
+    Object.defineProperties(document.documentElement, {
+      clientWidth: { configurable: true, value: 1024 },
+      clientHeight: { configurable: true, value: 768 },
+    });
+  });
+  afterEach(() => {
+    for (const [name, descriptor] of viewportDescriptors) {
+      if (descriptor) Object.defineProperty(document.documentElement, name, descriptor);
+      else Reflect.deleteProperty(document.documentElement, name);
+    }
+  });
+
+  function attach(anchor: HTMLElement, floating: HTMLElement) {
+    setRect(anchor, rect(100, 100, 50, 20));
+    setRect(floating, rect(0, 0, 40, 10));
+    const onResolved = vi.fn();
+    const lease = createFloatingUiAnchoredPositionHost().attach({
+      anchor,
+      floating,
+      config: baseConfig,
+      onResolved,
+    });
+    return { lease, onResolved };
+  }
+
+  function overflowingPanel(anchorY: number, avoidCollisions = false) {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    document.body.append(anchor, floating);
+    setRect(anchor, rect(100, anchorY, 50, 20));
+    // Explicit host-unit layout facts. No native wheel or browser clamping is
+    // simulated: these tests observe the cap's synchronous ownership boundary.
+    const naturalHeight = 1000;
+    const height = () => {
+      const cap = Number.parseFloat(floating.style.getPropertyValue('--proto-ui-available-height'));
+      return Number.isFinite(cap) ? Math.min(naturalHeight, Math.max(0, cap)) : naturalHeight;
+    };
+    floating.getBoundingClientRect = () => rect(0, 0, 100, height());
+    Object.defineProperties(floating, {
+      offsetWidth: { configurable: true, value: 100 },
+      offsetHeight: { configurable: true, get: height },
+      clientWidth: { configurable: true, value: 100 },
+      clientHeight: { configurable: true, get: height },
+      scrollWidth: { configurable: true, value: 100 },
+      scrollHeight: { configurable: true, value: naturalHeight },
+    });
+    const lease = createFloatingUiAnchoredPositionHost().attach({
+      anchor,
+      floating,
+      config: { ...baseConfig, avoidCollisions },
+    });
+    return { anchor, floating, lease, height };
+  }
+
+  it('keeps an overflowing panel capped while its reference moves', async () => {
+    const panel = overflowingPanel(100);
+    try {
+      await flush();
+      const cap = panel.floating.style.getPropertyValue('--proto-ui-available-height');
+      expect(cap).toBe('644px');
+      setRect(panel.anchor, rect(100, 96, 50, 20));
+      window.dispatchEvent(new Event('scroll'));
+      expect(panel.floating.style.getPropertyValue('--proto-ui-available-height')).toBe(cap);
+      await flush();
+      expect(panel.floating.style.top).toBe('120px');
+      expect(panel.height()).toBe(648);
+    } finally {
+      panel.lease.dispose();
+    }
+  });
+
+  it('reconsiders the natural size and side when a capped panel reference crosses the viewport', async () => {
+    const panel = overflowingPanel(600, true);
+    try {
+      await flush();
+      expect(panel.floating.dataset.side).toBe('top');
+      expect(panel.height()).toBe(596);
+      setRect(panel.anchor, rect(100, 100, 50, 20));
+      window.dispatchEvent(new Event('scroll'));
+      expect(panel.floating.style.getPropertyValue('--proto-ui-available-height')).toBe('596px');
+      await flush();
+      expect(panel.floating.dataset.side).toBe('bottom');
+      expect(panel.floating.style.top).toBe('124px');
+      expect(panel.height()).toBe(644);
+    } finally {
+      panel.lease.dispose();
+    }
+  });
+
+  it('uses the current viewport after a capped panel resize', async () => {
+    const panel = overflowingPanel(100);
+    try {
+      await flush();
+      Object.defineProperty(document.documentElement, 'clientHeight', {
+        configurable: true,
+        value: 400,
+      });
+      window.dispatchEvent(new Event('resize'));
+      await flush();
+      expect(panel.floating.style.top).toBe('124px');
+      expect(panel.height()).toBe(276);
+      expect(panel.floating.style.getPropertyValue('--proto-ui-available-height')).toBe('276px');
+    } finally {
+      panel.lease.dispose();
+    }
+  });
+
+  it('remeasures natural dimensions when placement CSS changes the overflowing content', async () => {
+    const stylesheet = document.createElement('style');
+    stylesheet.textContent = '.placement-intrinsic-panel[data-side="top"] { padding-top: 200px; }';
+    document.head.append(stylesheet);
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    floating.className = 'placement-intrinsic-panel';
+    document.body.append(anchor, floating);
+    setRect(anchor, rect(100, 600, 50, 20));
+    const measurements: number[] = [];
+    const naturalHeight = () =>
+      1000 + (Number.parseFloat(getComputedStyle(floating).paddingTop) || 0);
+    const height = () => {
+      const natural = naturalHeight();
+      const cap = Number.parseFloat(floating.style.getPropertyValue('--proto-ui-available-height'));
+      if (Number.isFinite(cap)) return Math.min(natural, Math.max(0, cap));
+      measurements.push(natural);
+      return natural;
+    };
+    floating.getBoundingClientRect = () => rect(0, 0, 100, height());
+    Object.defineProperties(floating, {
+      offsetWidth: { configurable: true, value: 100 },
+      clientWidth: { configurable: true, value: 100 },
+      scrollWidth: { configurable: true, value: 100 },
+      offsetHeight: { configurable: true, get: height },
+      clientHeight: { configurable: true, get: height },
+      scrollHeight: { configurable: true, get: naturalHeight },
+    });
+    const lease = createFloatingUiAnchoredPositionHost().attach({
+      anchor,
+      floating,
+      config: { ...baseConfig, avoidCollisions: true },
+    });
+    try {
+      await flush();
+      expect(floating.dataset.side).toBe('top');
+      expect(getComputedStyle(floating).paddingTop).toBe('200px');
+      expect(floating.scrollHeight).toBe(1200);
+      measurements.length = 0;
+      window.dispatchEvent(new Event('scroll'));
+      // The owned data-side write changed actual layout. Measure the new 1200px
+      // content while returning with the prior viewport already restored.
+      expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe('596px');
+      await flush();
+      expect(measurements).toContain(1200);
+      expect(floating.dataset.side).toBe('top');
+    } finally {
+      lease.dispose();
+      stylesheet.remove();
+    }
+  });
+
+  it('remeasures natural size for the next solve after a reference change across a provider await', async () => {
+    let panel: ReturnType<typeof overflowingPanel> | undefined;
+    const measurements: number[] = [];
+    let changed = false;
+    const original = domPlatform.getElementRects;
+    const originalDimensions = domPlatform.getDimensions;
+    const dimensions = vi.spyOn(domPlatform, 'getDimensions').mockImplementation((element) => {
+      const result = originalDimensions(element);
+      if (!('then' in result)) measurements.push(result.height);
+      return result;
+    });
+    const measurement = vi.spyOn(domPlatform, 'getElementRects').mockImplementation(async function (
+      this: typeof domPlatform,
+      input
+    ) {
+      const result = await original.call(this, input);
+      if (!changed && panel) {
+        changed = true;
+        // An independent input changes after this real platform measurement,
+        // without a floating subtree mutation or an intervening RO delivery.
+        setRect(panel.anchor, rect(100, 100, 80, 20));
+      }
+      return result;
+    });
+    try {
+      panel = overflowingPanel(100);
+      await flush();
+      expect(changed).toBe(true);
+      expect(panel.anchor.offsetWidth).toBe(80);
+      expect(panel.height()).toBe(644);
+      measurements.length = 0;
+      window.dispatchEvent(new Event('scroll'));
+      await flush();
+      // The synchronous DOM dimension read must see the natural content,
+      // while the asynchronous provider continues with a restored viewport.
+      expect(measurements[0]).toBe(1000);
+      expect(panel.floating.style.top).toBe('124px');
+    } finally {
+      panel?.lease.dispose();
+      measurement.mockRestore();
+      dimensions.mockRestore();
+    }
+  });
+
+  it.each(['floating', 'descendant', 'unrelated', 'reference'] as const)(
+    'retains its available-space cap during %s scrolling',
+    async (target) => {
+      const anchor = document.createElement('button');
+      const floating = document.createElement('div');
+      const descendant = document.createElement('div');
+      const unrelated = document.createElement('div');
+      floating.append(descendant);
+      document.body.append(anchor, floating, unrelated);
+      const { lease, onResolved } = attach(anchor, floating);
+      try {
+        await flush();
+        const cap = floating.style.getPropertyValue('--proto-ui-available-height');
+        expect(cap).toMatch(/px$/);
+        onResolved.mockClear();
+        ({ floating, descendant, unrelated, reference: anchor })[target].dispatchEvent(
+          new Event('scroll')
+        );
+        // This checks the synchronous lease boundary, before a new async solve
+        // could restore the cap. Happy DOM does not certify native scrolling.
+        expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe(cap);
+        await flush();
+        expect(onResolved).not.toHaveBeenCalled();
+      } finally {
+        lease.dispose();
+      }
+    }
+  );
+
+  it('keeps the outer cap while a newly scrolling outer panel moves an inner anchor', async () => {
+    const outerAnchor = document.createElement('button');
+    const outerFloating = document.createElement('div');
+    const innerAnchor = document.createElement('button');
+    const innerFloating = document.createElement('div');
+    outerFloating.append(innerAnchor);
+    document.body.append(outerAnchor, outerFloating, innerFloating);
+    const outer = attach(outerAnchor, outerFloating);
+    const inner = attach(innerAnchor, innerFloating);
+    try {
+      await flush();
+      const cap = outerFloating.style.getPropertyValue('--proto-ui-available-height');
+      expect(cap).toMatch(/px$/);
+      outer.onResolved.mockClear();
+      inner.onResolved.mockClear();
+      // autoUpdate did not see an overflow ancestor at attach time.
+      outerFloating.style.overflow = 'auto';
+      setRect(innerAnchor, rect(100, 80, 50, 20));
+      outerFloating.dispatchEvent(new Event('scroll'));
+      expect(outerFloating.style.getPropertyValue('--proto-ui-available-height')).toBe(cap);
+      await flush();
+      expect(outer.onResolved).not.toHaveBeenCalled();
+      expect(inner.onResolved).toHaveBeenCalled();
+      expect(innerFloating.style.top).toBe('104px');
+    } finally {
+      inner.lease.dispose();
+      outer.lease.dispose();
+    }
+  });
+
+  it('observes a newly scrolling floating ancestor when the reference is outside it', async () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    const scroller = document.createElement('div');
+    scroller.append(floating);
+    document.body.append(anchor, scroller);
+    const { lease, onResolved } = attach(anchor, floating);
+    try {
+      await flush();
+      onResolved.mockClear();
+      scroller.style.overflow = 'auto';
+      scroller.dispatchEvent(new Event('scroll'));
+      await flush();
+      expect(onResolved).toHaveBeenCalled();
+    } finally {
+      lease.dispose();
+    }
+  });
+
+  it('still updates when a scroller inside the floating box moves its reference', async () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    const scroller = document.createElement('div');
+    scroller.append(anchor);
+    floating.append(scroller);
+    document.body.append(floating);
+    const { lease, onResolved } = attach(anchor, floating);
+    try {
+      await flush();
+      onResolved.mockClear();
+      scroller.style.overflow = 'auto';
+      setRect(anchor, rect(100, 80, 50, 20));
+      scroller.dispatchEvent(new Event('scroll'));
+      await flush();
+      expect(onResolved).toHaveBeenCalled();
+      expect(floating.style.top).toBe('104px');
+    } finally {
+      lease.dispose();
+    }
+  });
+
+  it.each(['document', 'viewport'] as const)('retains %s scroll updates', async (target) => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    document.body.append(anchor, floating);
+    const { lease, onResolved } = attach(anchor, floating);
+    try {
+      await flush();
+      setRect(anchor, rect(100, 80, 50, 20));
+      (target === 'document' ? document : window).dispatchEvent(new Event('scroll'));
+      await flush();
+      expect(floating.style.top).toBe('104px');
+      lease.dispose();
+      onResolved.mockClear();
+      setRect(anchor, rect(100, 60, 50, 20));
+      (target === 'document' ? document : window).dispatchEvent(new Event('scroll'));
+      await flush();
+      expect(onResolved).not.toHaveBeenCalled();
+    } finally {
+      lease.dispose();
+    }
+  });
+
+  it.each(['shadow', 'slot'] as const)(
+    'observes a new scroll ancestor through %s ancestry and revokes it on disposal',
+    async (kind) => {
+      const host = document.createElement('div');
+      const root = host.attachShadow({ mode: 'open' });
+      const scroller = document.createElement('div');
+      const anchor = document.createElement('button');
+      const floating = document.createElement('div');
+      root.append(scroller);
+      if (kind === 'slot') {
+        const slot = document.createElement('slot');
+        scroller.append(slot);
+        host.append(anchor);
+        // Happy DOM omits assignedSlot. Model this flattened-tree link while
+        // using a real ShadowRoot for the non-composed event boundary below.
+        Object.defineProperty(anchor, 'assignedSlot', { configurable: true, value: slot });
+      } else scroller.append(anchor);
+      document.body.append(host, floating);
+      const { lease, onResolved } = attach(anchor, floating);
+      try {
+        await flush();
+        scroller.style.overflow = 'auto';
+        setRect(anchor, rect(100, 80, 50, 20));
+        // Native element scroll does not cross its shadow boundary.
+        scroller.dispatchEvent(new Event('scroll'));
+        await flush();
+        expect(floating.style.top).toBe('104px');
+        lease.dispose();
+        onResolved.mockClear();
+        setRect(anchor, rect(100, 60, 50, 20));
+        scroller.dispatchEvent(new Event('scroll'));
+        await flush();
+        expect(onResolved).not.toHaveBeenCalled();
+      } finally {
+        lease.dispose();
+      }
+    }
+  );
+
+  it('uses the actual scroll origin rather than a retargeted shadow host', async () => {
+    const host = document.createElement('div');
+    const root = host.attachShadow({ mode: 'open' });
+    const anchor = document.createElement('button');
+    const unrelated = document.createElement('div');
+    const floating = document.createElement('div');
+    root.append(anchor, unrelated);
+    document.body.append(host, floating);
+    const { lease, onResolved } = attach(anchor, floating);
+    try {
+      await flush();
+      const cap = floating.style.getPropertyValue('--proto-ui-available-height');
+      expect(cap).toMatch(/px$/);
+      onResolved.mockClear();
+      // A composed synthetic event exercises retargeting; it does not stand
+      // in for the browser's non-composed native scroll acceptance.
+      unrelated.dispatchEvent(new Event('scroll', { composed: true }));
+      expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe(cap);
+      await flush();
+      expect(onResolved).not.toHaveBeenCalled();
+    } finally {
+      lease.dispose();
+    }
+  });
+
+  it('refreshes shadow observation after a same-target update and releases the old root', async () => {
+    const firstHost = document.createElement('div');
+    const secondHost = document.createElement('div');
+    const firstRoot = firstHost.attachShadow({ mode: 'open' });
+    const secondRoot = secondHost.attachShadow({ mode: 'open' });
+    const firstScroller = document.createElement('div');
+    const secondScroller = document.createElement('div');
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    firstScroller.append(anchor);
+    firstRoot.append(firstScroller);
+    secondRoot.append(secondScroller);
+    document.body.append(firstHost, secondHost, floating);
+    const { lease, onResolved } = attach(anchor, floating);
+    const removedFromFirst = vi.spyOn(firstRoot, 'removeEventListener');
+    const removedFromSecond = vi.spyOn(secondRoot, 'removeEventListener');
+    try {
+      await flush();
+      secondScroller.append(anchor);
+      lease.update({ anchor, floating, config: baseConfig, onResolved });
+      await flush();
+      expect(removedFromFirst).toHaveBeenCalledWith('scroll', expect.any(Function), true);
+      onResolved.mockClear();
+      secondScroller.style.overflow = 'auto';
+      setRect(anchor, rect(100, 80, 50, 20));
+      secondScroller.dispatchEvent(new Event('scroll'));
+      await flush();
+      expect(onResolved).toHaveBeenCalled();
+      expect(floating.style.top).toBe('104px');
+      lease.dispose();
+      expect(removedFromSecond).toHaveBeenCalledWith('scroll', expect.any(Function), true);
+    } finally {
+      lease.dispose();
+      removedFromFirst.mockRestore();
+      removedFromSecond.mockRestore();
+    }
+  });
+
+  it('allows the same composed scroll event to be dispatched again after propagation', async () => {
+    const host = document.createElement('div');
+    const root = host.attachShadow({ mode: 'open' });
+    const scroller = document.createElement('div');
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    scroller.append(anchor);
+    root.append(scroller);
+    document.body.append(host, floating);
+    const { lease, onResolved } = attach(anchor, floating);
+    try {
+      await flush();
+      scroller.style.overflow = 'auto';
+      const event = new Event('scroll', { composed: true });
+      for (const y of [80, 60]) {
+        onResolved.mockClear();
+        setRect(anchor, rect(100, y, 50, 20));
+        scroller.dispatchEvent(event);
+        await flush();
+        expect(floating.style.top).toBe(`${y + 24}px`);
+        expect(onResolved).toHaveBeenCalledTimes(1);
+      }
+    } finally {
+      lease.dispose();
     }
   });
 });

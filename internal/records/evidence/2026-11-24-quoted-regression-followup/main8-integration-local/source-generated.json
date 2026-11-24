@@ -1,0 +1,128 @@
+{
+  "head": "c3469acc8cc00aff5c49baef2629486d41314aff",
+  "parents": [
+    "b454d4e640e0fb857e8cfa90880b83444caed127",
+    "8fac6eeb077160f0bdcc54328d1a259b5eddc9df"
+  ],
+  "frozenSourcesUnchanged": 9,
+  "status": "",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/browser-suite-repair-evidence.yml",
+      "bytes": 19329,
+      "sha256": "541bdf1277c012d464543f0b86c197931909e2e97193e643dbd858877baf8844"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 270989,
+      "sha256": "eae18430bd967c94def36809b6d3305fa156a96548b08215a18dfe8a43923c07"
+    },
+    {
+      "path": "apps/www/package.json",
+      "bytes": 2970,
+      "sha256": "b9098c9bdfe94c513c7520ace0c63c1137b19f3b6284c1f06a157afda51b6db6"
+    },
+    {
+      "path": "apps/www/scripts/generate-website-prototype-tokens.mjs",
+      "bytes": 1646,
+      "sha256": "63e7dc2b1892fb1b7e1424a2c2e40e2b58c9c11618347bd09218b64290d8f920"
+    },
+    {
+      "path": "apps/www/scripts/prepare-homepage-composition-fonts.sh",
+      "bytes": 7109,
+      "sha256": "105ba726bdb77425ece17da47c3d5780b3733a0ec228e8e0ab4001da0fc871eb"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+      "bytes": 30579,
+      "sha256": "3033dd603ba75486310cb6f466e72e5e3b02bef111c406b1f68fcf2987247c71"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts",
+      "bytes": 11055,
+      "sha256": "c2be71f093207be7e3e588940cc9d801dae046e764a2b5b8676d0863cd308c45"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts",
+      "bytes": 7503,
+      "sha256": "bf5ae919710bf4926dc881589d4365f6ba6fbd9d0d2e51f8804733617a71dab1"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+      "bytes": 123740,
+      "sha256": "7fc2042c5955e9a2cf9fe21a0cfa4293ebb67b5abf2293e1f0141ec7c741212d"
+    },
+    {
+      "path": "apps/www/src/styles/site-contents-command.css",
+      "bytes": 784,
+      "sha256": "70807ef33ce6f3212fcb68735f30196dd5cf96cdf82d17d7b7c5cc4e97ba1748"
+    },
+    {
+      "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+      "bytes": 30557,
+      "sha256": "298087c31bba3cc7b11b0a9b73735cd065d933f935117ca5557bd0e8c30531bd"
+    },
+    {
+      "path": "packages/modules/positioning/src/web/owned-style-lease.ts",
+      "bytes": 6509,
+      "sha256": "5e3911a7d2a532ba64ce9977f5a8e683801bf6a1c11a468f2026f15e55c3faea"
+    },
+    {
+      "path": "packages/modules/positioning/src/web/root-space-observer.ts",
+      "bytes": 4042,
+      "sha256": "d26b44d0f6f1cf9102f39c7835219eedc2b0d7ea72902cfe990daef1c9d174b5"
+    },
+    {
+      "path": "packages/modules/positioning/test/floating-ui-host.test.ts",
+      "bytes": 33337,
+      "sha256": "1ea123dcba936032ab4e084b7b831419d8016624fab6081aa8a7c4a4d1139939"
+    },
+    {
+      "path": "packages/modules/positioning/test/floating-ui-host-intrinsic-invalidation.test.ts",
+      "bytes": 17259,
+      "sha256": "7c53e83f9cfd01ffdaeec2f7e915c27ccc09db4b94a05422160cf81f1c1366b2"
+    },
+    {
+      "path": "packages/modules/positioning/test/available-projection-ownership.test.ts",
+      "bytes": 12027,
+      "sha256": "5f8d015597035efbf22e7a81fce2cb71c4bfecdbc6be884c264031d061610c99"
+    },
+    {
+      "path": "packages/modules/positioning/test/lease-generation.test.ts",
+      "bytes": 7761,
+      "sha256": "64751343f10a6a15705b184d6fcad71d40e6e352be48f147c8e14dbb0af01737"
+    },
+    {
+      "path": "packages/modules/positioning/test/owned-style-lease.test.ts",
+      "bytes": 6935,
+      "sha256": "ae2557dd040d7b3f5925729add5decb32ccddc952dee7f87bfaa2628be16ca7e"
+    }
+  ],
+  "generatedFiles": [
+    {
+      "path": "apps/www/src/styles/shadcn-theme.css",
+      "bytes": 6473,
+      "sha256": "3de2d4ce2a38e83086128c8863d3391eb74159adde7b1a8b7f450f93fd643f96"
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-style.css",
+      "bytes": 294,
+      "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88"
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-tokens.generated.css",
+      "bytes": 253817,
+      "sha256": "3e37aa92568e1e4ade2d74e228627126e51aa2717824c10bbb3b25f5ea638f7a"
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.js",
+      "bytes": 642802,
+      "sha256": "67e3e6adf39453463137e6f1fb16e58af52c4098d5f5e40a40be0cddaeafb29f"
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.d.ts",
+      "bytes": 261,
+      "sha256": "76d772bac1c5de84e6fb455683513c74c6d40b55de2744caaf3dfc4e4ead94b8"
+    }
+  ]
+}

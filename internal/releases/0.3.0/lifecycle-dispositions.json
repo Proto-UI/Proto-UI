@@ -525,9 +525,7 @@
     },
     {
       "id": "0.3.0-lucide-disposition",
-      "entities": [
-        "P-LUCIDE-ICON"
-      ],
+      "entities": ["P-LUCIDE-ICON"],
       "disposition": "remain-draft",
       "rationale": "Published in the 0.3.0 release surface as part of the Lucide icon family. The catalog entity keeps draft status because independent activation evidence is still outstanding; the release identity publishes the family without promoting its catalog lifecycle.",
       "evidence": [

@@ -229,3 +229,6 @@ internal/records/evidence/2026-11-24-sprint2-hook-boundary/current-core-observat
 internal/records/evidence/2026-11-24-gpui-dependency-preparation/
 # Retained original Sprint 6 hosted archive manifest is byte-bound by its receipt.
 internal/records/evidence/2026-11-24-sprint6-main-reconciliation/hosted-041-evidence-manifest.json
+
+# Exact hosted audit artifacts, recovered receipts and hash-bound review records.
+internal/records/evidence/2026-11-24-quoted-regression-followup/

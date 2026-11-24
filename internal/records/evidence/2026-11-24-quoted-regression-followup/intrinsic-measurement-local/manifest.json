@@ -1,0 +1,174 @@
+{
+  "baseline": "b110ec92f5b1c5d256c79b831c0b86b9caaec3e3",
+  "stages": [
+    {
+      "name": "original host with three new core controls",
+      "result": "2 failed / 1 passed / 23 other cases unselected",
+      "log": "contents-intrinsic-b110-core-red.log.gz"
+    },
+    {
+      "name": "original host with first three independent invalidation controls",
+      "result": "1 failed / 2 passed; final equal-config update case was added later and is not counted in this baseline"
+    },
+    {
+      "name": "intermediate ddbe candidate",
+      "hostSha256": "ddbe809bc022c9d9a2eca8c8e3e289fa055ba17a5f90e7ce5c946bc44e8ef139",
+      "result": "26 files / 336 tests passed; 4GiB workspace typecheck exit0 reported by actual session39566 completion70c0cf",
+      "boundary": "F-INTRINSIC-002 async input certification still outstanding at this cutoff; not native acceptance"
+    },
+    {
+      "name": "final frozen source after formatting",
+      "finalFiles": [
+        {
+          "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/packages/modules/positioning/src/web/floating-ui-host.ts",
+          "bytes": 38353,
+          "sha256": "35b27b569d761dba6a251e96d8c0a34f08cbc386792678b803054f368ce4956d"
+        },
+        {
+          "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/packages/modules/positioning/test/floating-ui-host.test.ts",
+          "bytes": 33069,
+          "sha256": "3806258d0f683b2f2ef6e7b4a0f9145411025a697d7136dadc6cde7558a820ca"
+        },
+        {
+          "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/packages/modules/positioning/test/floating-ui-host-intrinsic-invalidation.test.ts",
+          "bytes": 11306,
+          "sha256": "14094c1d8ff052a599189c37f8fce24c40d3db81708fc427be44cfab2b663d7f"
+        },
+        {
+          "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/packages/modules/positioning/test/available-projection-ownership.test.ts",
+          "bytes": 8237,
+          "sha256": "8fbbbbea38985258512047983dd92b5d5795c12e1dbce8c89ef3491210eac280"
+        },
+        {
+          "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/packages/modules/positioning/test/lease-generation.test.ts",
+          "bytes": 7708,
+          "sha256": "7f1339292fbb41459fd09084f664475696fd1e473260f8a87beb54f4f39fcacf"
+        },
+        {
+          "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+          "bytes": 123669,
+          "sha256": "9b6f17dd10ab67bcc4c934cf06c6e3c5b0f0a69c1bf89094dd29a5ccad82826e"
+        },
+        {
+          "path": "/workspace/scratch/5e512bf106bf/proto-ui-recovery/.github/workflows/browser-suite-repair-evidence.yml",
+          "bytes": 19254,
+          "sha256": "4ccb1376274404ef2dc5d7474fd943b898b195278e7258c683950b5d8edc5818"
+        }
+      ],
+      "result": "26 files / 337 tests passed; 4GiB workspace typecheck exit0; Prettier exit0",
+      "native": "pending next published-source run"
+    }
+  ],
+  "entries": [
+    {
+      "path": "contents-intrinsic-b110-core-red.log.gz",
+      "bytes": 4785,
+      "sha256": "5462bda29ba90b7aa82d5f44350a512224708617dcb7368b6a91e3d744543bd3"
+    },
+    {
+      "path": "contents-intrinsic-candidate-first.log.gz",
+      "bytes": 5767,
+      "sha256": "c51e294af236ffa0e636e27d8a48c8d384e9f54f256f4fa555bb27a9b90a8010"
+    },
+    {
+      "path": "contents-intrinsic-context-guard.log.gz",
+      "bytes": 5883,
+      "sha256": "8fdc104e3d6938fa6d87e247a5d01970c44bc3d3d3aa113b6b881fae5075a6da"
+    },
+    {
+      "path": "contents-intrinsic-final-format.diff.gz",
+      "bytes": 595,
+      "sha256": "4a0205a914a0eed34dda0202dac461be4403404d2c444c75a27d1a9a902ab03a"
+    },
+    {
+      "path": "contents-intrinsic-host-test-before-final-format.ts.gz",
+      "bytes": 6287,
+      "sha256": "6be325e848eca07b4a789c97de537feb027cd6668153583dd363d5b654f6ea01"
+    },
+    {
+      "path": "contents-intrinsic-positioning-adapters-final.log.gz",
+      "bytes": 38981,
+      "sha256": "100487d83aecdea1cc4aa0fe3263974f1905bb08947ead1c643739a12dd82b44"
+    },
+    {
+      "path": "contents-intrinsic-positioning-adapters-frozen.log.gz",
+      "bytes": 38939,
+      "sha256": "ef564aadd66953431f5cf3e497de3d4822b7f7ce5c4d3e84b345f104e2a4d474"
+    },
+    {
+      "path": "contents-intrinsic-prettier-frozen.log.gz",
+      "bytes": 82,
+      "sha256": "710c63d8d40d5688a62c3b08053dd1971c4e4ee87b2297f3f20c2540d22cd94e"
+    },
+    {
+      "path": "contents-intrinsic-workspace-tsc-frozen.log.gz",
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "contents-intrinsic-workspace-tsc.log.gz",
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "independent-baseline-executed-baseline.test.ts.gz",
+      "bytes": 2869,
+      "sha256": "9ac6f938c2ba54d08431013fff332bd8b040986d86654e4fda0c645e62134b04"
+    },
+    {
+      "path": "independent-baseline-final-test-delta.diff.gz",
+      "bytes": 1074,
+      "sha256": "b856d71ea93bc643042cf0d21f9da9e3912313d471c0da2ed72ae8c5b493174f"
+    },
+    {
+      "path": "independent-baseline-final-test.json.gz",
+      "bytes": 390,
+      "sha256": "1075f58d90959995baa09c7cad23ef1a144578babd6aa6a9342bf68981ec5f5d"
+    },
+    {
+      "path": "independent-baseline-format-only.diff.gz",
+      "bytes": 305,
+      "sha256": "1d8dcc218d6d06120aa1165cac7706b8e03d1e4decb387a5a476b72453f6e4e0"
+    },
+    {
+      "path": "independent-baseline-formatting.json.gz",
+      "bytes": 278,
+      "sha256": "f75433a046e793493890958a25d9ac47a5313af1b8cac2de2b4c178bc4d50d01"
+    },
+    {
+      "path": "independent-baseline-result.json.gz",
+      "bytes": 410,
+      "sha256": "853ce77c04e9413da1b2543d3fe13fcab92a87a6618daa00a8c08a1bd7893197"
+    },
+    {
+      "path": "independent-baseline-vitest.log.gz",
+      "bytes": 4711,
+      "sha256": "3890ff818118f12d023b6fe651c589a7335d30ead5f7913889466f818c6d5338"
+    },
+    {
+      "path": "independent-intrinsic-continuity-review.json",
+      "bytes": 8551,
+      "sha256": "c42a978506c2b2dde37c19123a70cf59ee7c8a59782caf6391fc1f1ecf502b40"
+    },
+    {
+      "path": "independent-intrinsic-continuity-review.md",
+      "bytes": 10465,
+      "sha256": "fba452e01b5639616fa72671d8502c2d1077e1d4ef9e85a23692b0c2af2309f6"
+    },
+    {
+      "path": "independent-intrinsic-continuity-validation-addendum.json",
+      "bytes": 8480,
+      "sha256": "3b81a1a5c134bcb5dcbcf5bbade8b5ac98bc5b844ce8e83cb131529dae2f2e22"
+    },
+    {
+      "path": "independent-intrinsic-continuity-validation-addendum.md",
+      "bytes": 3720,
+      "sha256": "28007c7dbbf309e4abee2321196c0ce480c2165affd8886c89086255cb266594"
+    },
+    {
+      "path": "validation.json",
+      "bytes": 7252,
+      "sha256": "3892a22b7d0a5a8e31d2060437fd4acf481421e059f88d9712123c0b3f4fb08b"
+    }
+  ]
+}

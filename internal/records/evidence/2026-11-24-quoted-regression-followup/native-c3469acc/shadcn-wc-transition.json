@@ -1,0 +1,128 @@
+{
+  "source": {
+    "sha": "c3469acc8cc00aff5c49baef2629486d41314aff",
+    "dirty": false,
+    "expectedSha": "c3469acc8cc00aff5c49baef2629486d41314aff",
+    "files": {
+      "components/SiteContentsCommand.astro": "250ea15a4d6f238397dda64dba8df8d60eabb42ddb02979b0ad0895ee3c29a0f",
+      "components/site-contents-command.ts": "b9076feb0bdf2f2a7d3887ef0a1a44f88b086c6ff33256ae4b71282e6d6b4799",
+      "components/site-contents-panel.ts": "85e968cb5abb1be2a7d3645a241143578c407730a650e5c152cf522346668d2a",
+      "components/site-header-surface.ts": "b1f90dcad071dc4f4bea5b6e47834c2f5464179ee8a8476653907cc11d72716a",
+      "components/site-header-disclosure.ts": "0d5ded18075c11f5a478d08c2af4346ff2bfc051de7e4e545172494eb0dce904",
+      "components/override/Sidebar.astro": "9cf7486a4a86e8512c9f75215cff83f0ffb0b1a3f3753c802782c08f0fb0ece5",
+      "components/override/PageFrame.astro": "753f40ce6c26eafd0ea860450c60c277a7bbff6adddc83cb65c753211fad8d57",
+      "styles/site-contents-command.css": "70807ef33ce6f3212fcb68735f30196dd5cf96cdf82d17d7b7c5cc4e97ba1748",
+      "content/docs/zh-cn/contents-wheel-evidence.ts": "c2be71f093207be7e3e588940cc9d801dae046e764a2b5b8676d0863cd308c45"
+    }
+  },
+  "family": "shadcn",
+  "runtime": "wc",
+  "transitionStartedAt": 1795533720368,
+  "clickedAt": 1795533722696,
+  "originalCheckAt": 1795533723697,
+  "originalDeadlineMs": 1000,
+  "originalError": "Error: Matcher did not succeed in 1000ms",
+  "first": {
+    "observedAt": 1795533724654.9001,
+    "preference": null,
+    "contents": {
+      "siteContentsCommand": "",
+      "contentsLabel": "页面目录",
+      "contentsRuntime": "wc",
+      "contentsFamily": "shadcn",
+      "contentsGeneration": "1"
+    },
+    "panel": {
+      "siteHeaderPanel": "",
+      "headerSurfaceRuntime": "wc",
+      "headerSurfaceFamily": "shadcn",
+      "headerSurfaceGeneration": "1"
+    },
+    "generations": [
+      {
+        "projectionGenerationHost": "1",
+        "projectionOwnerHost": "site-header-surface-1",
+        "projectionGenerationState": "active",
+        "inert": false
+      },
+      {
+        "projectionGenerationHost": "1",
+        "projectionOwnerHost": "site-contents-panel-1-docs-1",
+        "projectionGenerationState": "active",
+        "inert": false
+      },
+      {
+        "projectionGenerationHost": "1",
+        "projectionOwnerHost": "site-search-1-docs-1-open",
+        "projectionGenerationState": "active",
+        "inert": false
+      }
+    ],
+    "longTasks": [
+      {
+        "start": 1795533720415.4001,
+        "duration": 1903
+      },
+      {
+        "start": 1795533722610.3,
+        "duration": 59
+      }
+    ],
+    "changes": [],
+    "resources": []
+  },
+  "late": {
+    "observedAt": 1795533724996.3,
+    "preference": null,
+    "contents": {
+      "siteContentsCommand": "",
+      "contentsLabel": "页面目录",
+      "contentsRuntime": "wc",
+      "contentsFamily": "shadcn",
+      "contentsGeneration": "1"
+    },
+    "panel": {
+      "siteHeaderPanel": "",
+      "headerSurfaceRuntime": "wc",
+      "headerSurfaceFamily": "shadcn",
+      "headerSurfaceGeneration": "1"
+    },
+    "generations": [
+      {
+        "projectionGenerationHost": "1",
+        "projectionOwnerHost": "site-header-surface-1",
+        "projectionGenerationState": "active",
+        "inert": false
+      },
+      {
+        "projectionGenerationHost": "1",
+        "projectionOwnerHost": "site-contents-panel-1-docs-1",
+        "projectionGenerationState": "active",
+        "inert": false
+      },
+      {
+        "projectionGenerationHost": "1",
+        "projectionOwnerHost": "site-search-1-docs-1-open",
+        "projectionGenerationState": "active",
+        "inert": false
+      }
+    ],
+    "longTasks": [
+      {
+        "start": 1795533720415.4001,
+        "duration": 1903
+      },
+      {
+        "start": 1795533722610.3,
+        "duration": 59
+      },
+      {
+        "start": 1795533722695.8,
+        "duration": 1941
+      }
+    ],
+    "changes": [],
+    "resources": []
+  },
+  "pageErrors": []
+}
