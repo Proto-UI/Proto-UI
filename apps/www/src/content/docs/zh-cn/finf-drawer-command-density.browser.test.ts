@@ -192,8 +192,9 @@ async function metrics(locator: Locator) {
         fontWeight: css.fontWeight,
         fontFamily: css.fontFamily,
         availableParentWidth:
-          (node.closest('[data-drawer-density-lane]') ?? node.parentElement)
-            ?.getBoundingClientRect().width ?? null,
+          (
+            node.closest('[data-drawer-density-lane]') ?? node.parentElement
+          )?.getBoundingClientRect().width ?? null,
         parentFont: node.parentElement
           ? {
               size: getComputedStyle(node.parentElement).fontSize,
@@ -457,9 +458,12 @@ async function mountLongLabel(
         ...contentRoot.attrs,
         style: 'padding: 0; min-width: 0; width: 100%',
       };
-      const { createRuntimePreviewSurface, runtimePreviewFamily } = (await browserImport(
+      const { createRuntimePreviewSurface } = (await browserImport(
         '/src/components/PrototypePreviewer/runtime-preview-surface.ts'
       )) as typeof import('../../../components/PrototypePreviewer/runtime-preview-surface');
+      const { runtimePreviewFamily } = (await browserImport(
+        '/src/components/site-library-family.ts'
+      )) as typeof import('../../../components/site-library-family');
       const { resolveProjectionThemeSurfaceStyle } = (await browserImport(
         '/src/components/PrototypePreviewer/projection-theme.ts'
       )) as typeof import('../../../components/PrototypePreviewer/projection-theme');
@@ -842,9 +846,12 @@ for (const family of families)
                 expect(structure.display).toBe('flex');
                 expect(structure.direction).toBe('column');
                 const panelPadding = Number.parseFloat(structure.rootFont);
-                expect(structure.padding.map(Number.parseFloat)).toEqual(
-                  [panelPadding, panelPadding, panelPadding, panelPadding]
-                );
+                expect(structure.padding.map(Number.parseFloat)).toEqual([
+                  panelPadding,
+                  panelPadding,
+                  panelPadding,
+                  panelPadding,
+                ]);
               }
               const close = scenario.label
                 ? panel.locator(

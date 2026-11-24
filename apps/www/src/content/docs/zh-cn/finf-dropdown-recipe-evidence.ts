@@ -41,8 +41,9 @@ export async function mountNewYorkDropdownFixture(recipe: DropdownRecipe, runtim
     await import('../../../components/PrototypePreviewer/prototype-modules');
   const { resolveProjectionThemeSurfaceStyle } =
     await import('../../../components/PrototypePreviewer/projection-theme');
-  const { createRuntimePreviewSurface, runtimePreviewFamily } =
+  const { createRuntimePreviewSurface } =
     await import('../../../components/PrototypePreviewer/runtime-preview-surface');
+  const { runtimePreviewFamily } = await import('../../../components/site-library-family');
   const previewer = document.querySelector<HTMLElement>(dropdownPreviewSelector(recipe));
   if (!previewer || runtimePreviewFamily(previewer) !== 'shadcn')
     throw new Error('Public Shadcn Dropdown preview missing.');
