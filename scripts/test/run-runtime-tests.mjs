@@ -6,7 +6,6 @@
 // content stores writing `data-store.json.tmp` race on the rename, so one dev
 // server exits and its suite fails. One server for the whole run removes that.
 
-import { spawn } from 'node:child_process';
 import { readFileSync, rmSync } from 'node:fs';
 import { createServer } from 'node:net';
 import path from 'node:path';
@@ -20,7 +19,7 @@ import {
   ciContext,
 } from './runtime-ci.mjs';
 import { waitForServerReadiness } from './server-readiness.mjs';
-import { ownProcessTree } from './runtime-process-tree.mjs';
+import { ownProcessTree, spawnOwnedProcess as spawn } from './runtime-process-tree.mjs';
 import {
   readOptionalJson,
   runtimeObservation,
@@ -107,10 +106,13 @@ const reportedSnapshots = new Set();
 const ownedProcesses = new Set();
 const cleanupReceipts = [];
 let cleanupFailed = false;
+let activeVitest = null;
+let finalExit = null;
+let exitCode = 0;
 
-function retainCleanupReceipt(receipt) {
+function retainCleanupReceipt(receipt, { log = true } = {}) {
   const { snapshots, ...summary } = receipt;
-  console.error(`[test:runtime] process cleanup ${JSON.stringify(summary)}`);
+  if (log) console.error(`[test:runtime] process cleanup ${JSON.stringify(summary)}`);
   if (selection) {
     try {
       writeJson(path.join(evidenceDirectory, `cleanup-${evidenceId}.json`), cleanupReceipts);
@@ -291,6 +293,7 @@ async function runVitest(args, baseUrl) {
       windowsHide: true,
     });
     const stop = trackChild(child, 'vitest');
+    const exited = new Promise((done) => child.once('exit', done));
     const closed = new Promise((done) => child.once('close', done));
     // A surviving worker can hold inherited stdout/stderr open after Vitest
     // exits. Begin cleanup on exit, before waiting for the close/pipe drain.
@@ -306,46 +309,79 @@ async function runVitest(args, baseUrl) {
       inspect(chunk);
     });
     child.on('error', reject);
-    const finish = async (code, signal) => {
-      const receipt = await stop();
-      if (signal || code !== 0)
-        reportServerSnapshot(`Vitest exited: code=${code}; signal=${signal}`);
-      // An observation failure must not leave a pipe-owning unknown descendant
-      // keeping this wrapper alive forever. Give close and forwarded output
-      // one bounded drain, then close only our own local read handles.
-      const drainStartedAt = new Date().toISOString();
-      const deadline = Date.now() + 2_000;
-      const childPipesClosed = await beforeDeadline(closed, deadline);
-      if (!childPipesClosed) {
-        child.stdout.destroy();
-        child.stderr.destroy();
-      }
-      const forwardedOutputDrained = await beforeDeadline(
-        Promise.all([
-          new Promise((done) => process.stdout.write('', done)),
+    let finishing;
+    const finish = () => {
+      finishing ??= (async () => {
+        const receipt = await stop();
+        const drainStartedAt = new Date().toISOString();
+        const deadline = Date.now() + 2_000;
+        // Shutdown may need to finish after cleanup failed to establish exit.
+        // Observe the real event within the same drain budget; never invent an
+        // exit code for an unknown survivor.
+        const childExitObserved = await beforeDeadline(exited, deadline);
+        const code = child.exitCode;
+        const signal = child.signalCode;
+        if (signal || code !== 0)
+          reportServerSnapshot(`Vitest exited: code=${code}; signal=${signal}`);
+        // An observation failure must not leave a pipe-owning unknown descendant
+        // keeping this wrapper alive forever. Give close and forwarded output
+        // one bounded drain, then close only our own local read handles.
+        const childPipesClosed = await beforeDeadline(closed, deadline);
+        if (!childPipesClosed) {
+          child.stdout.destroy();
+          child.stderr.destroy();
+        }
+        const forwardedOutputDrained = await beforeDeadline(
+          Promise.all([
+            new Promise((done) => process.stdout.write('', done)),
+            new Promise((done) => process.stderr.write('', done)),
+          ]),
+          deadline
+        );
+        receipt.childExitCode = code;
+        receipt.childSignal = signal;
+        receipt.childExitObserved = childExitObserved;
+        receipt.outputDrain = {
+          startedAt: drainStartedAt,
+          finishedAt: new Date().toISOString(),
+          timeoutMs: 2_000,
+          childPipesClosed,
+          forwardedOutputDrained,
+        };
+        if (!childExitObserved || !childPipesClosed || !forwardedOutputDrained) {
+          receipt.errors.push('Vitest output did not drain within the post-exit cleanup bound.');
+          receipt.verified = false;
+          cleanupFailed = true;
+        }
+        retainCleanupReceipt(receipt);
+        // The final receipt itself is output too. Share the remaining deadline
+        // instead of adding an unbounded flush or exiting while it is queued.
+        const receiptOutputDrained = await beforeDeadline(
           new Promise((done) => process.stderr.write('', done)),
-        ]),
-        deadline
+          deadline
+        );
+        if (!receiptOutputDrained) {
+          receipt.errors.push('Vitest cleanup receipt did not drain within the output bound.');
+          receipt.verified = false;
+          cleanupFailed = true;
+          retainCleanupReceipt(receipt, { log: false });
+        }
+        resolve({ exitCode: cleanupFailed && code === 0 ? 1 : code, signal });
+      })();
+      finishing.then(
+        () => {
+          if (activeVitest?.finish === finish) activeVitest = null;
+        },
+        (error) => {
+          if (activeVitest?.finish === finish) activeVitest = null;
+          reject(error);
+        }
       );
-      receipt.childExitCode = code;
-      receipt.childSignal = signal;
-      receipt.outputDrain = {
-        startedAt: drainStartedAt,
-        finishedAt: new Date().toISOString(),
-        timeoutMs: 2_000,
-        childPipesClosed,
-        forwardedOutputDrained,
-      };
-      if (!childPipesClosed || !forwardedOutputDrained) {
-        receipt.errors.push('Vitest output did not drain within the post-exit cleanup bound.');
-        receipt.verified = false;
-        cleanupFailed = true;
-      }
-      retainCleanupReceipt(receipt);
-      resolve({ exitCode: cleanupFailed && code === 0 ? 1 : code, signal });
+      return finishing;
     };
-    child.once('exit', (code, signal) => {
-      void finish(code, signal).catch(reject);
+    activeVitest = { finish };
+    child.once('exit', () => {
+      void finish();
     });
   });
 }
@@ -353,6 +389,38 @@ async function runVitest(args, baseUrl) {
 // The outer timeout may signal only this PID. Explicitly own all child groups
 // instead of assuming that Vitest received the same foreground-group signal.
 let interruption = null;
+const signalExitCode = (signal) => ({ SIGHUP: 129, SIGINT: 130, SIGTERM: 143 })[signal];
+
+function finalizeExit() {
+  finalExit ??= (async () => {
+    try {
+      await stopOwnedProcesses();
+    } catch (error) {
+      cleanupFailed = true;
+      console.error(`[test:runtime] process cleanup failed: ${error.message}`);
+    }
+    const deadline = Date.now() + 2_000;
+    try {
+      await activeVitest?.finish();
+    } catch (error) {
+      cleanupFailed = true;
+      console.error(`[test:runtime] Vitest completion failed: ${error.message}`);
+    }
+    const drained = await beforeDeadline(
+      Promise.all([
+        new Promise((done) => process.stdout.write('', done)),
+        new Promise((done) => process.stderr.write('', done)),
+      ]),
+      deadline
+    );
+    if (!drained) cleanupFailed = true;
+    process.exit(
+      interruption ? signalExitCode(interruption) : cleanupFailed && exitCode === 0 ? 1 : exitCode
+    );
+  })();
+  return finalExit;
+}
+
 for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
   process.on(signal, () => {
     if (interruption) return;
@@ -363,13 +431,10 @@ for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
     } catch (error) {
       console.error(`[test:runtime] interrupted evidence: ${error.message}`);
     }
-    void stopOwnedProcesses().finally(() => {
-      process.exit(signal === 'SIGINT' ? 130 : 143);
-    });
+    void finalizeExit();
   });
 }
 
-let exitCode = 0;
 try {
   for (const phase of testPlan) {
     const baseUrl = phase.needsServer ? await startServer() : undefined;
@@ -395,14 +460,5 @@ try {
     console.error(`[test:runtime] evidence error: ${evidenceError.message}`);
   }
 } finally {
-  await stopOwnedProcesses();
+  await finalizeExit();
 }
-process.exit(
-  interruption
-    ? interruption === 'SIGINT'
-      ? 130
-      : 143
-    : cleanupFailed && exitCode === 0
-      ? 1
-      : exitCode
-);
