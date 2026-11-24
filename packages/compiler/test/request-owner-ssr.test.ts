@@ -19,7 +19,13 @@ const floatingRequire = createRequire(
 );
 
 /** Execute the complete emitted artifact set with the real declared framework. */
-function generated(target: Target, created = '', dispose = '', extraProp = '') {
+function generated(
+  target: Target,
+  created = '',
+  dispose = '',
+  extraProp = '',
+  fixture: { template?: string; observeSerialization?: (render: Promise<string>) => void } = {}
+) {
   const source = `import {definePrototype} from '@proto.ui/core';
 export default definePrototype({name:'request-owner',setup(def){
   def.props.define({seed:{type:'number',default:3}${extraProp}});
@@ -31,7 +37,7 @@ export default definePrototype({name:'request-owner',setup(def){
   def.lifecycle.onUnmounted(()=>{throw 'request-must-not-unmount';});
   def.lifecycle.onBeforeDispose(run=>{run.expose.emit('phase','dispose');${dispose}});
   def.lifecycle.onBeforeDispose(run=>{run.expose.emit('phase','dispose-two');});
-  return r=>r.el('output',count.get());
+  return r=>${fixture.template ?? "r.el('output',count.get())"};
 }});`;
   const parsed = parsePrototype(source, { fileName: 'request-owner.proto.ts' });
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
@@ -65,6 +71,17 @@ export default definePrototype({name:'request-owner',setup(def){
       },
     }).outputText;
     new Function('exports', 'require', javascript)(exports, (specifier: string) => {
+      if (specifier === 'vue/server-renderer' && fixture.observeSerialization) {
+        const renderer = require(specifier);
+        return {
+          ...renderer,
+          renderToString(...args: unknown[]) {
+            const pending = renderer.renderToString(...args);
+            fixture.observeSerialization!(pending);
+            return pending;
+          },
+        };
+      }
       if (
         [
           'react',
@@ -163,9 +180,18 @@ export default definePrototype({name:'request-owner',setup(def){
         );
         const onPhase = Object.getOwnPropertyDescriptor(props, 'onPhase')?.value;
         delete raw.onPhase;
+        const renderer = createRenderer();
         return module.renderToString({
           Vue: Vue2,
-          renderer: createRenderer(),
+          renderer: fixture.observeSerialization
+            ? {
+                renderToString(root: any, context: object) {
+                  const pending = renderer.renderToString(root, context);
+                  fixture.observeSerialization!(pending);
+                  return pending;
+                },
+              }
+            : renderer,
           props: raw,
           ...(onPhase ? { on: { phase: onPhase } } : {}),
           ...options,
@@ -396,6 +422,99 @@ describe.each<Target>(['react', 'vue', 'vue2', 'web-component'])(
     });
   }
 );
+
+describe.each(['vue', 'vue2'] as const)('%s generated asynchronous request ownership', (target) => {
+  it.each(['resolve', 'reject'] as const)(
+    'isolates a concurrent request and retires before a held native serializer can %s late',
+    async (settlement) => {
+      const entered = Promise.withResolvers<void>();
+      const held = Promise.withResolvers<void>();
+      const serializations: Promise<string>[] = [];
+      const firstEvents: unknown[] = [];
+      const secondEvents: unknown[] = [];
+      const lateEvents: unknown[] = [];
+      let lateRenders = 0;
+      const compiled = generated(target, '', '', '', {
+        template: "r.el('output',[count.get(),r.slot()])",
+        // Observe the promise returned by the real framework renderer. The
+        // wrapper supplies no HTML, lifecycle or owner behavior of its own.
+        observeSerialization(pending) {
+          serializations.push(pending);
+          void pending.catch(() => {});
+        },
+      });
+      const Vue = require('vue');
+      const deferred =
+        target === 'vue'
+          ? Vue.defineComponent({
+              name: 'HeldNativeRequestChild',
+              async setup() {
+                entered.resolve();
+                await held.promise;
+                return () => {
+                  lateRenders++;
+                  return Vue.h(compiled.module.default, {
+                    seed: 19,
+                    onPhase: (phase: unknown) => lateEvents.push(phase),
+                  });
+                };
+              },
+            })
+          : {
+              name: 'HeldNativeRequestChild',
+              serverPrefetch() {
+                entered.resolve();
+                return held.promise;
+              },
+              render(h: any) {
+                lateRenders++;
+                return h(compiled.module.default, {
+                  props: { seed: 19 },
+                  on: { phase: (phase: unknown) => lateEvents.push(phase) },
+                });
+              },
+            };
+      const controller = new AbortController();
+      const first = outcome(() =>
+        compiled.render(
+          { seed: 7, onPhase: (phase: unknown) => firstEvents.push(phase) },
+          {
+            signal: controller.signal,
+            ...(target === 'vue'
+              ? { slots: { default: () => [Vue.h(deferred)] } }
+              : { children: (h: any) => [h(deferred)] }),
+          }
+        )
+      );
+      await entered.promise;
+      expect(firstEvents).toEqual(['created', 'created-two']);
+      const second = await compiled.render({
+        seed: 11,
+        onPhase: (phase: unknown) => secondEvents.push(phase),
+      });
+      expect(second.html).toContain('11');
+      expect(secondEvents).toEqual(['created', 'created-two', 'dispose', 'dispose-two']);
+      expect(firstEvents).toEqual(['created', 'created-two']);
+      controller.abort(false);
+      expect(await first).toEqual({ ok: false, error: false });
+      expect(firstEvents).toEqual(['created', 'created-two', 'dispose', 'dispose-two']);
+
+      if (settlement === 'resolve') held.resolve();
+      else held.reject(new Error('late-native-serializer-failure'));
+      expect(serializations).toHaveLength(2);
+      await outcome(() => serializations[0]);
+      if (settlement === 'resolve') expect(lateRenders).toBe(1);
+      expect(await first).toEqual({ ok: false, error: false });
+      expect(firstEvents).toEqual(['created', 'created-two', 'dispose', 'dispose-two']);
+      expect(lateEvents).toEqual([]);
+      expect(secondEvents).toEqual(['created', 'created-two', 'dispose', 'dispose-two']);
+      const carrier = second.carrier ?? second.handoff;
+      const owners = target === 'vue' ? Object.values(carrier.records) : carrier.projections;
+      expect(owners).toHaveLength(1);
+      expect(compiled.validateCarrier(JSON.parse(JSON.stringify(carrier)))).toEqual(carrier);
+    }
+  );
+});
 
 it('rejects React encoding node expansion before returning an unusable carrier', async () => {
   const module = generated('react');

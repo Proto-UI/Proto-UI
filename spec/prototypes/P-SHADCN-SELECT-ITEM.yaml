@@ -132,7 +132,8 @@ revisions:
     {
       version: 0.3.0-alpha.2,
       change: clarified,
-      summary: Recorded the logical inline-end check reservation the Shadcn Select Item now implements (ps-2/pe-8 and an absolute end-2 indicator), so the entity states the reserved space it governs instead of the earlier physical edges.
+      summary: Recorded the logical inline-end check reservation the Shadcn Select Item now implements (ps-2/pe-8 and an absolute end-2 indicator),
+      so the entity states the reserved space it governs instead of the earlier physical edges.,
     },
   ]
 tags: [prototype, shadcn, select, item, upstream-derived, delta, compatibility, visual]

@@ -1,0 +1,33 @@
+{
+  "exitCode": 0,
+  "timedOut": false,
+  "name": "native-tooltip-two",
+  "head": "cd684a20ba60c1f382c88eeaea5b25eb29a0f6c5",
+  "startedAt": "2026-11-24T03:15:48.499456+00:00",
+  "durationMs": 15815,
+  "command": [
+    "corepack",
+    "pnpm@10.32.1",
+    "exec",
+    "vitest",
+    "run",
+    "apps/www/test/component-consumer-repairs.browser.test.ts",
+    "--testNamePattern",
+    "shadcn.*react.*Tooltip Button has one Tab stop|base.*react.*standalone Tooltip Trigger",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile=/var/tmp/proto-ui-native-evidence-456f/attempt02/native-tooltip-two.json"
+  ],
+  "outerTimeoutSeconds": 300,
+  "headAfter": "cd684a20ba60c1f382c88eeaea5b25eb29a0f6c5",
+  "trackedStatusAfter": "",
+  "report": {
+    "success": true,
+    "numTotalTests": 84,
+    "numPassedTests": 2,
+    "numFailedTests": 0,
+    "numPendingTests": 82
+  }
+}

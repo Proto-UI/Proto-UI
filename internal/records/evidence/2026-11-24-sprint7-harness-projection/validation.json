@@ -103,10 +103,7 @@
       "status": "passed",
       "exitCode": 0,
       "log": "agent-doc-final.log.gz",
-      "retainedSetupFailures": [
-        "agent-doc.log.gz",
-        "agent-doc-corrected.log.gz"
-      ]
+      "retainedSetupFailures": ["agent-doc.log.gz", "agent-doc-corrected.log.gz"]
     },
     {
       "id": "full-coverage-scan",

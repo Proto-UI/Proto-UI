@@ -73,16 +73,38 @@ jobs:
             packages/compiler/test/browser-preview-retirement.test.ts \
             packages/compiler/test/browser-panel-retirement.test.ts \
             packages/compiler/test/browser-source-input.test.ts \
+            packages/compiler/test/capture-facade.test.ts \
+            packages/compiler/test/value-ir.test.ts \
+            packages/compiler/test/capture-lookup-integrity.test.ts \
+            packages/compiler/test/authored-hook-language.test.ts \
+            packages/compiler/test/mutable-callable-orders.test.ts \
+            packages/compiler/test/module-helper-capture-boundary.test.ts \
+            packages/compiler/test/privileged-capture-metadata.test.ts \
+            packages/compiler/test/capture-getter-presence.test.ts \
+            packages/compiler/test/capture-host-presence.test.ts \
+            packages/compiler/test/json-boundary-provenance.test.ts \
+            packages/compiler/test/json-boundary-getter-consumer.test.ts \
             packages/compiler/test/request-owner-ssr.test.ts \
+            packages/compiler/test/physical-control-ssr.test.ts \
+            packages/compiler/test/owner-hydration-retirement.test.ts \
+            packages/compiler/test/react-owner-hydration.test.ts \
+            packages/compiler/test/react-context-source.test.ts \
+            packages/compiler/test/vue-owner-hydration.test.ts \
+            packages/compiler/test/vue-context-source.test.ts \
             packages/compiler/test/button-ssr-server.test.ts \
             packages/compiler/test/gpui-a11y-value.test.ts \
             packages/compiler/test/gpui-capabilities.test.ts \
             packages/compiler/test/gpui-hook-renderer.test.ts \
             packages/compiler/test/gpui-event-notification.test.ts \
+            packages/compiler/test/scroll-axis-sync.test.ts \
+            packages/compiler/test/scroll-reveal-consumers.test.ts \
             packages/compiler/test/gpui-scalar-lowering.test.ts \
             packages/compiler/test/gpui-style-selection.test.ts \
             packages/compiler/test/gpui-control-label.test.ts \
+            packages/compiler/test/gpui-sdk-compatibility.test.ts \
+            packages/compiler/test/gpui-authored-inputs.test.ts \
             packages/compiler/test/string-coercion.test.ts \
+            packages/adapters/web-component/test/focus-entry-input-origin.test.ts \
             packages/runtime/test/contract/lifecycle.request.contract.test.ts \
             packages/runtime/test/contract/lifecycle.initial-data.contract.test.ts \
             packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts \
@@ -103,6 +125,14 @@ jobs:
           node scripts/ci/check-ci-schedule.mjs 2>&1 | tee "$EVIDENCE/ci-schedule.log"
           node --test scripts/ci/test/ci-scheduling-policy.test.mjs scripts/ci/test/cycle-job-inventory.test.mjs scripts/ci/test/cycle-report.test.mjs \
             2>&1 | tee "$EVIDENCE/ci-controls.log"
+      - name: Verify specification authoring against the actual main merge base
+        run: |
+          set -euo pipefail
+          EVIDENCE="$RUNNER_TEMP/compiler-source-regressions"
+          BASE_SHA=$(git merge-base HEAD origin/main)
+          printf '%s\n' "$BASE_SHA" > "$EVIDENCE/spec-base-sha.txt"
+          corepack pnpm@10.32.1 check:spec-authoring -- --base "$BASE_SHA" \
+            2>&1 | tee "$EVIDENCE/spec-authoring.log"
       - name: Check the complete workspace and documentation types
         run: |
           set -euo pipefail
@@ -209,7 +239,8 @@ jobs:
             scripts/test/sprint3-font-preparation.test.mjs \
             2>&1 | tee "$PUI_EVIDENCE_DIR/production-controls.log"
       - name: Install and record Chinese fonts for the bilingual captures
-        # Bound cold package acquisition before it consumes browser execution time.
+        # Reuse the bounded, byte-verified preparation from PR #1743 so cold
+        # package acquisition cannot consume browser execution time.
         timeout-minutes: 5
         run: |
           set -euo pipefail
@@ -218,6 +249,51 @@ jobs:
           dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig \
             > "$PUI_EVIDENCE_DIR/font-environment.txt"
           fc-match 'Noto Sans CJK SC' >> "$PUI_EVIDENCE_DIR/font-environment.txt"
+      - name: Verify generated SSR adoption and owner retirement in Chromium
+        run: |
+          set -euo pipefail
+          CHROME_PATH="$PUI_CHROME_EXECUTABLE" COMPILER_EVIDENCE_DIR="$PUI_EVIDENCE_DIR" \
+            corepack pnpm@10.32.1 exec vitest run \
+            packages/compiler/test/owner-hydration-retirement.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1 \
+            2>&1 | tee "$PUI_EVIDENCE_DIR/owner-retirement-browser.log"
+      - name: Verify native input direction and scope during the original trusted event
+        run: |
+          set -euo pipefail
+          CHROME_PATH="$PUI_CHROME_EXECUTABLE" corepack pnpm@10.32.1 exec vitest run \
+            packages/adapters/web-component/test/shadow-closeout.browser.test.ts \
+            --pool=forks --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
+            -t 'reprojects entry during native dir=auto (input|textarea) input without an attribute change|reprojects entry during native input in an @scope (start|end) selector' \
+            --reporter=default --reporter=json --outputFile="$PUI_EVIDENCE_DIR/wc-native-dir-auto.json" \
+            2>&1 | tee "$PUI_EVIDENCE_DIR/wc-native-dir-auto.log"
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { readFile, writeFile } from 'node:fs/promises';
+          import path from 'node:path';
+          const report = JSON.parse(await readFile(path.join(process.env.PUI_EVIDENCE_DIR, 'wc-native-dir-auto.json'), 'utf8'));
+          assert.equal(report.success, true);
+          assert.equal(report.numPassedTests, 4);
+          assert.equal(report.numFailedTests, 0);
+          assert.equal(report.testResults.length, 1);
+          const assertions = report.testResults[0].assertionResults;
+          const expected = [
+            ...['input', 'textarea'].map((kind) => `reprojects entry during native dir=auto ${kind} input without an attribute change`),
+            ...['start', 'end'].map((kind) => `reprojects entry during native input in an @scope ${kind} selector`),
+          ];
+          for (const title of expected) {
+            const matching = assertions.filter((entry) => entry.title === title);
+            assert.equal(matching.length, 1, title);
+            assert.equal(matching[0].status, 'passed', title);
+          }
+          assert.ok(assertions.filter((entry) => entry.status === 'passed').every((entry) => expected.includes(entry.title)));
+          await writeFile(path.join(process.env.PUI_EVIDENCE_DIR, 'wc-native-dir-auto-execution.json'), JSON.stringify({
+            head: process.env.CANDIDATE_SHA,
+            selected: expected,
+            passed: 4,
+            filteredOrSkipped: assertions.filter((entry) => entry.status !== 'passed').length,
+            scope: 'The two original native dir=auto cases and two native input-dependent scope cases; other Shadow cases were filtered and are not claimed as passed.'
+          }, null, 2) + '\n');
+          JS
       - name: Build once and run the cold bilingual four-target production journey
         run: |
           set -euo pipefail

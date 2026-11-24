@@ -1767,11 +1767,33 @@ export function hydrate(container: Element, handoff: GeneratedHandoff, options: 
   const app = ${n('Vue')}.createSSRApp({ render: () => ${n('Vue')}.h(${componentName}, props, options.slots) });
   app.provide(${n('SessionKey')}, session);
   const unmount = app.unmount.bind(app);
-  app.unmount = () => { try { unmount(); } finally { ${n('Close')}(session); } };
+  let mounting = true, mounted = false, retiring = false, retired = false;
+  const retire = () => {
+    if (retired) return;
+    // A native mounted hook may request terminal disposal before Vue marks
+    // its app mounted. Close logical work now and finish native retirement
+    // immediately after the framework mount stack returns.
+    if (mounting) { ${n('Close')}(session); return; }
+    retired = true; retiring = true;
+    try { if (mounted) unmount(); }
+    catch (error) { session.failure ??= { value: error }; }
+    try { ${n('Close')}(session); }
+    catch (error) { session.failure ??= { value: error }; }
+    finally { retiring = false; }
+    if (session.failure) throw session.failure.value;
+  };
+  app.unmount = retire;
   try {
     options.configureApp?.(app);
     const consumerError = app.config.errorHandler;
-    app.config.errorHandler = (error, instance, info) => { session.failure ??= { value: error }; consumerError?.(error, instance, info); throw error; };
+    app.config.errorHandler = (error, instance, info) => {
+      session.failure ??= { value: error };
+      try { consumerError?.(error, instance, info); }
+      catch { /* Preserve the initiating framework failure. */ }
+      // Complete native mounting/retirement so every acquired child scope is
+      // reachable by app.unmount, even when a mounted or cleanup hook fails.
+      if (!mounting && !retiring) throw error;
+    };
     const consumerWarning = app.config.warnHandler;
     app.config.warnHandler = (message, instance, trace) => {
       if (/hydration/i.test(message)) { session.failure ??= { value: new Error('[Vue SSR] hydration mismatch: ' + message) }; options.onMismatch?.(message); console.warn('[Vue SSR] explicit hydration recovery: ' + message); }
@@ -1779,11 +1801,16 @@ export function hydrate(container: Element, handoff: GeneratedHandoff, options: 
       if (!consumerWarning && !/hydration/i.test(message)) console.warn(message);
     };
     app.mount(container);
+    mounted = true; mounting = false;
+    // Deferred logical startup can fail after hydrate returns. Its request
+    // closure must retire the actual native subtree as well as Proto owners.
+    if (session.closed) retire();
+    else session.owners.add(retire);
     for (const saved of controls) { saved.node.value = saved.value; if (saved.start !== null && saved.end !== null) saved.node.setSelectionRange(saved.start, saved.end, saved.direction ?? undefined); }
     if (session.failure) throw session.failure.value;
     session.hydrating = false;
   }
-  catch (error) { try { ${n('Close')}(session); } catch { /* Preserve initial adoption failure. */ } throw error; }
+  catch (error) { mounting = false; try { retire(); } catch { /* Preserve initial adoption failure. */ } throw error; }
   return app;
 }`
     : ''

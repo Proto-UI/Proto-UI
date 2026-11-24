@@ -141,3 +141,23 @@ internal/records/evidence/2026-11-23-train-package-budget/candidate.json
 
 # Exact original #1453 analysis reports; the receipt binds their emitted bytes.
 internal/records/2026-11-24-props-update-analysis-evidence/
+
+# Frozen Dialog study inputs and plan retain their byte-bound historical identity.
+# See internal/records/2026-11-24-sprint5-hook-reconciliation.md.
+scripts/analysis/dialog-conformance-study/fixture.ts
+scripts/analysis/dialog-conformance-study/oracle.test.ts
+scripts/analysis/dialog-conformance-study/plan.json
+
+# Preserve original React Portal native receipts, manifests and captures.
+internal/records/evidence/2026-11-24-react-portal-origin-native/
+
+# Preserve original Scroll Reveal source-gate receipts and logs.
+internal/records/evidence/2026-11-24-scroll-reveal-source-gate/
+
+# Preserve the exact incoming Sprint 5 observations and receipt hashes.
+internal/records/2026-11-24-sprint5-native-direction-acceptance.md
+internal/records/2026-11-24-sprint5-native-integration.md
+internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.json
+internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.md
+internal/records/evidence/2026-11-24-sprint5-browser-execution/production-setup-receipt.json
+internal/records/evidence/2026-11-24-sprint5-native-direction-acceptance/receipt.md
