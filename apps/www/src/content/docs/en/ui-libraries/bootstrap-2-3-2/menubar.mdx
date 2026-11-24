@@ -1,11 +1,13 @@
 ---
 title: 'Menubar'
-description: 'A Bootstrap 2.3.2 horizontal menubar with roving keyboard focus and coordinated command panels.'
+description: 'A Bootstrap 2.3.2 horizontal menubar with classic navbar gradient styling, roving keyboard focus, and coordinated command panels.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Menubar provides a desktop-style horizontal bar of command panels with a single roving Tab stop, arrow-key switching, and typeahead navigation.
+A Bootstrap 2.3.2 desktop-style horizontal menu bar featuring the classic `.navbar-inner` gradient bar, recessed active triggers, and gradient-highlighted dropdown commands with dark-mode color pairing.
 
 ## Preview
 
@@ -13,26 +15,148 @@ Menubar provides a desktop-style horizontal bar of command panels with a single 
   demoId="demo-bootstrap-2-3-2-menubar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source and not yet included in the 0.2.0 stable release; import the prototypes from `@proto.ui/prototypes-bootstrap-2-3-2/menubar` and adapt them for your target runtime.
 
 ## Usage
 
-Compose `Root`, `Trigger`, `Content`, and `Item`:
+```tsx
+import {
+  Bootstrap232MenubarRoot,
+  Bootstrap232MenubarTrigger,
+  Bootstrap232MenubarContent,
+  Bootstrap232MenubarItem,
+} from '../proto-ui/components/react';
 
-- **Panel pairing**: `Root`'s `value` identifies the active panel, matching `Trigger.value` and `Content.value`. In controlled mode it emits change requests without mutating caller state.
-- **Keyboard navigation**: Uses a single roving Tab stop across the bar. Left/Right arrows move between triggers, Up/Down arrows open and navigate commands, and typing jumps to matching items.
-- **Dismissal and focus**: Pressing `Escape` closes the panel and restores focus to its `Trigger`; outside clicks and item selection dismiss the active panel.
+export function Example() {
+  return (
+    <Bootstrap232MenubarRoot a11yLabel="Application menu">
+      <Bootstrap232MenubarTrigger value="file">File</Bootstrap232MenubarTrigger>
+      <Bootstrap232MenubarContent value="file" a11yLabel="File menu">
+        <Bootstrap232MenubarItem value="new-tab">New Tab</Bootstrap232MenubarItem>
+        <Bootstrap232MenubarItem value="print">Print...</Bootstrap232MenubarItem>
+      </Bootstrap232MenubarContent>
+    </Bootstrap232MenubarRoot>
+  );
+}
+```
+
+### Composition
+
+```text
+MenubarRoot
+├── MenubarTrigger (value="file")
+├── MenubarContent (value="file")
+│   ├── MenubarItem
+│   └── MenubarItem
+├── MenubarTrigger (value="edit")
+└── MenubarContent (value="edit")
+    └── MenubarItem
+```
+
+- `Root`: Classic Bootstrap 2.3.2 navbar surface managing the active panel and roving focus.
+- `Trigger`: Top-level menu item paired with `Content` by `value`, showing a recessed active state when expanded.
+- `Content`: Dropdown panel with 6px radius and drop shadow (`sideOffset` defaults to `2`).
+- `Item`: Highlights with the signature `#0088cc → #0077b3` blue gradient, or a classic red danger gradient when `variant="destructive"`.
+
+### Keyboard and accessibility
+
+- Uses a single roving `Tab` stop across the bar; `ArrowLeft` and `ArrowRight` move between triggers.
+- `ArrowDown` and `ArrowUp` open panels and move through commands, with character typeahead support.
+- Pressing `Escape` closes the panel and restores focus to its `Trigger`; outside clicks and command selection dismiss the active panel by default.
+
+## Examples
+
+### Destructive Actions
+
+Set `variant="destructive"` on an `Item` for Bootstrap's classic danger highlight.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-menubar-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Inset, Disabled, and Persistent Items
+
+Use `closeOnSelect={false}` for toggleable menu options alongside `inset` alignment and disabled states.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-menubar-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled State
+
+Manage the active menu through `value` and `valueChange` with `loop={false}`.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-menubar-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part      | Props   | Description                                        |
-| --------- | ------- | -------------------------------------------------- |
-| `Root`    | `value` | Active open panel key (supports controlled mode)   |
-| `Trigger` | `value` | Menubar trigger paired with the matching `Content` |
-| `Content` | `value` | Dropdown command panel                             |
-| `Item`    | —       | Individual command inside a panel                  |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: '— (controlled when provided)' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+Events & methods: `valueChange({ value, reason })`, `requestValue(value, reason?)`, `close()`.
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'Required (pairs with Content)' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'Required (pairs with Trigger)' },
+    { name: 'sideOffset', type: 'number', default: '2' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+  ]}
+/>
+
+Events & methods: `select({ value, menuValue })`, `focusSelf(options?)`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-MENUBAR.yaml', 'P-BASE-MENUBAR.yaml']}
+/>

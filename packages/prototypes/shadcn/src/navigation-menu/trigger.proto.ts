@@ -2,6 +2,7 @@ import { definePrototype } from '@proto.ui/core';
 import { asNavigationMenuTrigger } from '@proto.ui/prototypes-base/navigation-menu';
 import type { NavigationMenuTriggerProps, NavigationMenuTriggerExposes } from './types';
 import { setupNavigationActionPaint } from './visual';
+
 export default definePrototype<NavigationMenuTriggerProps, NavigationMenuTriggerExposes>({
   name: 'shadcn-navigation-menu-trigger',
   modules: asNavigationMenuTrigger.modules,
@@ -17,5 +18,6 @@ export default definePrototype<NavigationMenuTriggerProps, NavigationMenuTrigger
       },
       'trigger'
     );
+    return behavior.render;
   },
 });

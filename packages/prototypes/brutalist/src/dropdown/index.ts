@@ -16,6 +16,7 @@ export type {
   BrutalistDropdownItemProps,
   BrutalistDropdownItemExposes,
   BrutalistDropdownItemAsHookContract,
+  BrutalistDropdownLabelProps,
 } from './types';
 
 export { dropdownRoot, dropdownTrigger, dropdownContent, dropdownItem };

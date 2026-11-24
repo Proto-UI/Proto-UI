@@ -1,11 +1,13 @@
 ---
-title: 'NavigationMenu'
-description: 'A Bootstrap 2.3.2 navigation menu combining disclosure panels with native anchor links.'
+title: 'Navigation Menu'
+description: 'A Bootstrap 2.3.2 navigation menu pairing classic nav-pills and gradient dropdown panels with native anchor links.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-NavigationMenu organizes site navigation into named disclosure panels while rendering real native links so URL previews, `Enter` navigation, and middle/modifier-click tabs work natively.
+Bootstrap 2.3.2 Navigation Menu preserves classic `.nav-pills` and `.dropdown-menu` pixel dimensions and blue gradient highlights while providing a `navigation` landmark and native browser anchor links.
 
 ## Preview
 
@@ -13,28 +15,171 @@ NavigationMenu organizes site navigation into named disclosure panels while rend
   demoId="demo-bootstrap-2-3-2-navigation-menu"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-bootstrap-2-3-2/navigation-menu`:
+
+```ts
+import {
+  navigationMenuRoot,
+  navigationMenuTrigger,
+  navigationMenuContent,
+  navigationMenuItem,
+  navigationMenuLink,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/navigation-menu';
+```
 
 ## Usage
 
-Compose `Root`, `Trigger`, `Content`, `Item`, and `Link`:
+```tsx
+import {
+  Bootstrap232NavigationMenuRoot,
+  Bootstrap232NavigationMenuTrigger,
+  Bootstrap232NavigationMenuContent,
+  Bootstrap232NavigationMenuItem,
+  Bootstrap232NavigationMenuLink,
+} from '../proto-ui/components/react';
 
-- **Landmark structure**: `Root` provides a `navigation` landmark and tracks the single open panel via `value`. `Trigger` toggles the panel and `Content` renders a labelled region.
-- **Commands and native links**: Use `Item` for menu commands and `Link` for real `<a>` destinations supporting `href`, `target`, `rel`, and `current` (`aria-current`). Disabled links clear their target and block activation.
-- **Navigation observation**: After native link activation, `Link` emits a read-only `navigate` event (`{ href, target, rel, modified }`). Normal same-window clicks close the panel unless `closeOnSelect={false}`, while modifier/middle-clicks and `_blank` links keep the panel open.
+export function ClassicSiteNav() {
+  return (
+    <Bootstrap232NavigationMenuRoot a11yLabel="Main navigation">
+      <Bootstrap232NavigationMenuTrigger value="getting-started">
+        Getting started
+      </Bootstrap232NavigationMenuTrigger>
+      <Bootstrap232NavigationMenuContent value="getting-started" a11yLabel="Getting started">
+        <Bootstrap232NavigationMenuLink href="/docs" current>
+          Introduction
+        </Bootstrap232NavigationMenuLink>
+        <Bootstrap232NavigationMenuItem value="download" textValue="Download CSS">
+          Download CSS
+        </Bootstrap232NavigationMenuItem>
+      </Bootstrap232NavigationMenuContent>
+    </Bootstrap232NavigationMenuRoot>
+  );
+}
+```
+
+### Composition
+
+```text
+NavigationMenuRoot (navigation)
+├── NavigationMenuTrigger (nav-pills toggle, paired by value)
+└── NavigationMenuContent (dropdown-menu region, paired by value)
+    ├── NavigationMenuLink (native <a>)
+    └── NavigationMenuItem (command action)
+```
+
+### Native Links & Keyboard
+
+- **Native browser semantics**: URL previews, `Enter` activation, and modifier/middle-click tabs are handled natively by the browser.
+- **Navigation observation & dismissal**: `Link` emits a read-only `navigate` event (`{ href, target, rel, modified }`). Ordinary same-window activations close the panel unless `closeOnSelect={false}`; modified clicks, middle-clicks, and `_blank` targets keep the panel open.
+- **Disabled controls**: Disabled links clear `href` and block activation; disabled triggers adopt Bootstrap's muted `#999` ink.
+
+## Examples
+
+### With Icon
+
+Combine compact icons and labels inside classic dropdown panels.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-navigation-menu-with-icons"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Links, Current Page & Disabled
+
+Demonstrates active blue-gradient highlighting (`current`), persistent panels (`closeOnSelect={false}`), `_blank` links, and disabled states.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-navigation-menu-links-and-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled & Events
+
+Manage the active panel externally via `value` and `valueChange`, while observing `select` and `navigate`.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-navigation-menu-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / Events | Description |
-| --- | --- | --- |
-| `Root` | `value` | Key of the currently open navigation panel |
-| `Trigger` | — | Disclosure button for a navigation panel |
-| `Content` | — | Labelled panel region |
-| `Item` | — | Command action inside a panel |
-| `Link` | `href` / `target` / `rel` / `current` / `disabled` / `closeOnSelect` | Native anchor props; `current={true}` marks the current page |
-| `Link` | `navigate` | Read-only event emitted with `{ href, target, rel, modified }` after activation |
+### NavigationMenuRoot
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Expose', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'undefined (uncontrolled)' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'valueChange (event)', type: '{ value: string; reason: string }', default: '—' },
+    { name: 'requestValue (method)', type: '(value: string, reason?: string) => boolean', default: '—' },
+    { name: 'close (method)', type: '() => void', default: '—' },
+  ]}
+/>
+
+### NavigationMenuTrigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### NavigationMenuContent
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'sideOffset', type: 'number', default: '2' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### NavigationMenuItem
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'select (event)', type: '{ value: string; menuValue: string }', default: '—' },
+  ]}
+/>
+
+### NavigationMenuLink
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'href', type: 'string', default: "''" },
+    { name: 'target', type: "'_self' | '_blank'", default: "'_self'" },
+    { name: 'rel', type: 'string', default: "''" },
+    { name: 'current', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'navigate (event)', type: '{ href: string; target: string; rel: string; modified: boolean }', default: '—' },
+    { name: 'select (event)', type: '{ value: string; menuValue: string }', default: '—' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-NAVIGATION-MENU.yaml', 'P-BASE-NAVIGATION-MENU.yaml']}
+/>

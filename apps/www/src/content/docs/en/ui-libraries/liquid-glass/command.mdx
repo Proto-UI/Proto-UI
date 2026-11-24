@@ -1,11 +1,13 @@
 ---
 title: 'Command'
-description: 'An inline searchable Liquid Glass command list that emits explicit execute events.'
+description: 'A Liquid Glass searchable command palette with concentric geometry and clean material layering.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Command renders an always-open searchable command list. Typing filters commands without running side effects; pressing Enter or clicking an enabled item emits `execute` for your application to handle.
+Liquid Glass Command provides a searchable command menu with concentric corner radii and clear visual hierarchy. The inline command list stays opaque so placing it inside a floating Liquid Glass `Dialog` never stacks glass on glass.
 
 ## Preview
 
@@ -13,25 +15,104 @@ Liquid Glass Command renders an always-open searchable command list. Typing filt
   demoId="demo-liquid-glass-command"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source (`@proto.ui/prototypes-liquid-glass/command`); not yet included in the 0.2.0 stable release.
 
 ## Usage
 
-- **Parts**: `Root`, `Input`, `Content`, `Item`, `Empty`.
-- **Filtering and keyboard**: matches `textValue` and `keywords` case- and diacritic-insensitively, or set `filter={false}` for caller-filtered lists. Arrow navigation keeps focus in `Input`, and IME composition never executes a command.
-- **Controlled state**: `open`, `value`, and `inputValue` can each be controlled independently. `Empty` reflects actual matches; disabled or duplicate-valued items cannot execute.
+```tsx
+import {
+  commandRoot,
+  commandInput,
+  commandContent,
+  commandItem,
+  commandEmpty,
+} from '@proto.ui/prototypes-liquid-glass/command';
+```
+
+### Composition
+
+```text
+CommandRoot
+├── CommandInput
+└── CommandContent
+    ├── CommandItem
+    └── CommandEmpty
+```
+
+- **Material layering & concentric radii**: `CommandContent` stays an ordinary opaque surface (`rounded-2xl` with `p-1`) pairing concentrically with `rounded-xl` items. Place `Command` inside `liquid-glass-dialog-content` for a floating translucent sheet without glass-on-glass stacking.
+- **Accessibility preferences**: Disabled entries use semantic muted foreground ink rather than translucent opacity, transitions respect `prefers-reduced-motion`, and reduced-transparency preferences preserve a crisp solid fallback.
+- **Filtering and keyboard**: Matches `textValue` and `keywords` case- and diacritic-insensitively, or set `filter={false}` for external filtering. Focus stays in `Input` during arrow navigation and IME composition never executes.
+
+## Examples
+
+### Floating Glass Command Dialog
+
+A floating `liquid-glass-dialog-content` owns the translucent glass surface while the inner `Command` list stays crisp and opaque.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-command-dialog"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Shortcuts & Keywords
+
+Display trailing shortcut hints inside concentric `rounded-xl` items with synonym matching via `keywords`.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-command-shortcuts"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Scrollable
+
+Browse 17 categorized commands inside the bounded scrollable list container.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-command-scrollable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop / Event | Description |
-| --- | --- | --- |
-| Root | `value`, `inputValue`, `open` | Independently controllable command and query state |
-| Root | `filter` | Set to `false` to provide pre-filtered items |
-| Root / Item | `execute` | Emitted when an enabled command is activated |
-| Item | `textValue`, `keywords`, `disabled` | Command text, search keywords, and disabled flag |
-| Empty | — | Displayed when no commands match |
+### Root
+
+Pass `value`, `inputValue`, or `open` to control each state independently.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
+    { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'true' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'filter', type: 'boolean', default: 'true' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Other Parts & Events
+
+- **Input**: `placeholder`, `a11yLabel`, and `name` default to `''`.
+- **Content**: `side="bottom"`, `align="start"`, `sideOffset={4}`, `collisionPadding={8}`.
+- **Item**: `value`, `textValue`, and `keywords` default to `''`; `disabled` defaults to `false`.
+- **Empty**: No props; shown when no commands match.
+- **Events**: `Root` emits `execute`, `valueChange`, `inputValueChange`, and `openChange`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-COMMAND.yaml', 'P-BASE-COMMAND.yaml']}
+/>

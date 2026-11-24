@@ -1,11 +1,13 @@
 ---
 title: 'Dropdown Menu'
-description: '支持操作分组、标题、分隔线与快捷键提示的 Bootstrap 2.3.2 下拉菜单。'
+description: '支持操作分组、标题、分隔线、快捷键提示、危险操作与缩进对齐的 Bootstrap 2.3.2 下拉菜单。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Dropdown Menu 通过按钮触发展开一组可操作菜单项，支持分组标签、分隔线与快捷键提示。
+Dropdown Menu 通过经典 Bootstrap 2.3.2 斜面渐变按钮触发展开一组操作菜单，支持分组标题、分隔线、快捷键提示、危险操作样式与完整键盘导航。
 
 ## 预览
 
@@ -13,24 +15,146 @@ Dropdown Menu 通过按钮触发展开一组可操作菜单项，支持分组标
   demoId="demo-bootstrap-2-3-2-dropdown-menu"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/dropdown` 导入全部部件。
 
 ## 用法
 
-- **分组与装饰部件**：使用 `Group` 和 `Label` 将相关操作分组并自动建立无障碍命名关联；使用 `Separator` 分隔区域，使用 `Shortcut` 展示快捷键提示。
-- **装饰性提示**：`Separator` 与 `Shortcut` 均为被动展示部件，不参与键盘焦点顺序；`Shortcut` 仅用于显示快捷键文字，不会自动注册全局热键。
-- 示例展示了一个宽度为 `160px` 的菜单，包含账户与资源两个分组以及禁用的 API 项。
+```tsx
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from '@/components/bootstrap-2-3-2/dropdown-menu';
+```
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger>Open</DropdownMenuTrigger>
+  <DropdownMenuContent align="start">
+    <DropdownMenuGroup>
+      <DropdownMenuLabel>My Account</DropdownMenuLabel>
+      <DropdownMenuItem value="profile">
+        Profile
+        <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+      </DropdownMenuItem>
+      <DropdownMenuItem value="billing">Billing</DropdownMenuItem>
+    </DropdownMenuGroup>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem value="logout">Log out</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+- **分组与装饰部件**：`Group` 与 `Label` 自动建立无障碍分组命名关联；`Separator` 与 `Shortcut` 均为被动展示部件，不进入键盘焦点队列，`Shortcut` 仅展示快捷键文本。
+- **经典视觉投射**：触发器保留 Bootstrap 2.3.2 渐变斜面与内嵌下拉三角；菜单项悬停与激活时呈现经典蓝色（或危险操作红色）渐变高亮。
+
+## 示例
+
+### 危险操作
+
+在不可逆操作上设置 `variant="destructive"`，在激活或悬停时呈现 Bootstrap 2.3.2 经典危险渐变高亮。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-dropdown-menu-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 缩进对齐
+
+同组菜单混用带图标与无图标项时，可在 `Item` 和 `Label` 上设置 `inset` 使文字保持对齐。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-dropdown-menu-inset"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件        | 说明                             |
-| ----------- | -------------------------------- |
-| `Group`     | 将相关菜单项归为一组并关联组标签 |
-| `Label`     | 菜单分组的只读标题               |
-| `Separator` | 分隔菜单分组的视觉分割线         |
-| `Shortcut`  | 展示在菜单项右侧的快捷键提示文本 |
+### Root
+
+传入 `open` 进入受控模式，并暴露 `openChange` 事件与 `openDropdown()` / `close()` / `toggle()` 方法。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
+    {
+      name: 'openEntry',
+      type: "'active-or-first' | 'first' | 'last' | 'value-or-first'",
+      default: "'active-or-first'",
+    },
+    { name: 'openEntryValue', type: 'string', default: "''" },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'sideOffset', type: 'number', default: '2' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnCommit', type: 'boolean', default: '继承 Root' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+  ]}
+/>
+
+### Group / Label / Separator / Shortcut
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Group.a11yLabel', type: 'string', default: "''" },
+    { name: 'Label.inset', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-DROPDOWN-MENU.yaml',
+    'P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-TRIGGER.yaml',
+    'P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-CONTENT.yaml',
+    'P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-ITEM.yaml',
+    'P-BASE-DROPDOWN-MENU.yaml',
+  ]}
+/>

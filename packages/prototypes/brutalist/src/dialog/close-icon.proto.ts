@@ -1,16 +1,21 @@
 import { asAccessible } from '@proto.ui/hooks';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asDialogClose } from '@proto.ui/prototypes-base/dialog';
+import {
+  BRUTALIST_DISABLED_TOKENS,
+  BRUTALIST_FOCUS_TOKENS,
+  BRUTALIST_PRESS_TOKENS,
+} from '../style';
 import type { BrutalistDialogCloseExposes, BrutalistDialogCloseProps } from './types';
 
 const dialogCloseIcon = definePrototype<BrutalistDialogCloseProps, BrutalistDialogCloseExposes>({
   name: 'brutalist-dialog-close-icon',
   setup(def) {
     const accessible = asAccessible();
-    // P-BRUTALIST-DIALOG-CLOSE-ICON-BASE-INHERITANCE: inherit Base Dialog Close (close/disabled/hovered/focusVisible) once, as precomposed close-icon variant.
+    // P-BRUTALIST-DIALOG-CLOSE-ICON-BASE-INHERITANCE: inherit Base Dialog Close (close/disabled/hovered/focusVisible/pressed) once, as precomposed close-icon variant.
     const state = asDialogClose().stateHandles;
     if (!state) throw new Error('[brutalist-dialog-close-icon] command states are required.');
-    const { disabled, hovered, focusVisible } = state;
+    const { disabled, hovered, focusVisible, pressed } = state;
 
     // P-BRUTALIST-DIALOG-CLOSE-ICON-A11Y-NAME: a11y accessible name 'Close'.
     accessible.name('Close');
@@ -20,19 +25,23 @@ const dialogCloseIcon = definePrototype<BrutalistDialogCloseProps, BrutalistDial
         'absolute right-4 top-4 inline-flex size-9 items-center justify-center rounded-base border-2 border-black bg-canary text-canary-foreground shadow-[4px_4px_0_0_#000] outline-none transition-none'
       )
     );
-    // P-BRUTALIST-DIALOG-CLOSE-ICON-INTERACTION: hover → bg-coral with its own paired foreground and deeper shadow; focus-visible → ring-3; disabled → opacity-50 pointer-events-none.
+    // P-BRUTALIST-DIALOG-CLOSE-ICON-INTERACTION: hover → bg-coral with its own paired foreground; press → sink into shadow; focus-visible → crisp offset ring; disabled → opacity-50 pointer-events-none.
     def.rule({
       when: (w) => w.state(hovered).eq(true),
       intent: (i) =>
         i.feedback.style.use(tw('bg-coral text-coral-foreground shadow-[4px_4px_0_0_#000]')),
     });
     def.rule({
+      when: (w) => w.state(pressed).eq(true),
+      intent: (i) => i.feedback.style.use(tw(BRUTALIST_PRESS_TOKENS)),
+    });
+    def.rule({
       when: (w) => w.state(focusVisible).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-3 ring-ring/50')),
+      intent: (i) => i.feedback.style.use(tw(BRUTALIST_FOCUS_TOKENS)),
     });
     def.rule({
       when: (w) => w.state(disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('pointer-events-none opacity-50')),
+      intent: (i) => i.feedback.style.use(tw(BRUTALIST_DISABLED_TOKENS)),
     });
 
     return (renderer) => [

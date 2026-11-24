@@ -1,13 +1,13 @@
 ---
 title: 'Command'
-description: 'An inline searchable command palette that filters items and emits execution intents.'
+description: 'Command menu for real-time filtering and quick actions, inline or inside a dialog.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-An inline searchable command list that filters as you type and emits an `execute` event when an item is activated. The examples on this page use the **Shadcn Rhea** style preset.
+A searchable command palette with real-time filtering and keyboard navigation. Clicking an item or pressing `Enter` emits an `execute` event for your application to handle. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -15,50 +15,120 @@ An inline searchable command list that filters as you type and emits an `execute
   demoId="demo-shadcn-command"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
+
+## Installation
+
+Currently available from workspace source (`@proto.ui/prototypes-shadcn/command`); not yet included in the 0.2.0 stable release.
 
 ## Usage
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+```tsx
+import {
+  commandRoot,
+  commandInputWrapper,
+  commandInput,
+  commandContent,
+  commandItem,
+  commandEmpty,
+  commandDialogContent,
+  commandDialogMask,
+} from '@proto.ui/prototypes-shadcn/command';
+import { inputShell } from '@proto.ui/prototypes-shadcn/input-shell';
+```
 
-### Anatomy
+### Composition
 
-Compose `Command` from `Root`, `Input`, `Content`, `Item`, and `Empty` (`Command` stays inline and has no `Trigger`):
+```text
+CommandRoot
+├── CommandInputWrapper
+│   └── InputShell (focusIndicator="none")
+│       └── CommandInput
+└── CommandContent
+    ├── CommandItem
+    └── CommandEmpty
+```
 
-- The list opens inline by default (`defaultOpen={true}`). Typing updates the filter without executing any command.
-- Pressing `Enter` or clicking an item emits `execute` with the selected item so your application can perform the action.
+- **Inline by default**: `defaultOpen` defaults to `true`. Typing filters matching items without executing anything; activating an item via click or `Enter` emits `execute`.
+- **Command dialog**: Compose `DialogRoot`, `DialogTrigger`, `CommandDialogMask`, and `CommandDialogContent` with matching `enterDuration` and `leaveDuration` for the selected profile (`100` for Rhea, `200` for New York).
+- **Filtering and keyboard**: Matches case- and diacritic-insensitively over `textValue` and `keywords`, or set `filter={false}` for caller-filtered children. Focus remains in the input during arrow navigation and IME composition never triggers execution.
 
-### Filtering and interaction
+## Examples
 
-- **Built-in filtering**: Matches case- and diacritic-insensitively over `textValue` and `keywords`. Set `filter={false}` to render pre-filtered children.
-- **Empty and disabled states**: `Empty` reflects the live match count; disabled items and duplicate-valued items cannot execute.
-- **Keyboard and IME**: Focus stays in the input during arrow-key navigation, and IME composition never triggers execution.
-- **Controlled state**: `open`, `value`, and `inputValue` can each be controlled independently.
+### Command Dialog
+
+Compose `Command` inside a modal `Dialog` using `CommandDialogMask` and `CommandDialogContent`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-command-dialog"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Shortcuts & Keywords
+
+Display trailing keyboard hints inside items and match synonyms via `keywords`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-command-shortcuts"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Groups & Disabled Items
+
+Organize workspace actions into sections with separators and non-executable `disabled` entries.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-command-groups"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Scrollable
+
+Browse many categorized commands inside the bounded scrollable list viewport.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-command-scrollable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-Passing `value`, `inputValue`, or `open` enables controlled mode for that state. Because the command list stays inline, `defaultOpen` defaults to `true`.
+### Root
+
+Pass `value`, `inputValue`, or `open` to control each state independently. Use `styleProfile` directly or via an outer `shadcn-style-scope` to select among all 9 built-in styles.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
     { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'true' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'filter', type: 'boolean', default: 'true' },
     { name: 'loop', type: 'boolean', default: 'true' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+    { name: 'presentation', type: "'default' | 'menu'", default: "'default'" },
   ]}
 />
 
-These props belong to `Root`. Other part defaults:
+### Other Parts & Events
 
+- **InputWrapper**: Passive input container supporting `styleProfile` and `presentation` (`'default' | 'menu'`).
 - **Input**: `placeholder`, `a11yLabel`, and `name` default to `''`.
 - **Content**: `side="bottom"`, `align="start"`, `sideOffset={4}`, `collisionPadding={8}`.
 - **Item**: `value`, `textValue`, and `keywords` default to `''`; `disabled` defaults to `false`.
+- **Empty**: No props; reflects the live match count.
+- **DialogContent / DialogMask**: Requires `enterDuration: number` and `leaveDuration: number`; `DialogContent` also accepts `styleProfile` and `presentation`.
+- **Events**: `Root` emits `execute`, `valueChange`, `inputValueChange`, and `openChange`.
 
 ## References
 

@@ -1,84 +1,103 @@
 import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
 
 export default {
-  'type': 'demo',
-  'root': {
-    'kind': 'box',
-    'className': 'flex min-w-0 flex-wrap gap-4 p-4',
-    'children': [
+  type: 'demo',
+  root: {
+    kind: 'box',
+    className:
+      'flex min-w-0 w-full flex-wrap items-center justify-center gap-4 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    children: [
       {
-        'kind': 'proto',
-        'prototypeId': 'liquid-glass-drawer-root',
-        'children': [
+        kind: 'proto',
+        prototypeId: 'liquid-glass-drawer-root',
+        ref: 'root',
+        props: {
+          a11yLabel: 'Audio output settings',
+        },
+        children: [
           {
-            'kind': 'proto',
-            'prototypeId': 'liquid-glass-drawer-trigger',
-            'children': ['Open Drawer'],
+            kind: 'proto',
+            prototypeId: 'liquid-glass-drawer-trigger',
+            props: { variant: 'prominent' },
+            children: ['Open Drawer'],
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'liquid-glass-drawer-mask',
+            kind: 'proto',
+            prototypeId: 'liquid-glass-drawer-mask',
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'liquid-glass-drawer-content',
-            'ref': 'panel',
-            'children': [
+            kind: 'proto',
+            prototypeId: 'liquid-glass-drawer-content',
+            ref: 'panel',
+            props: {
+              side: 'bottom',
+            },
+            children: [
               {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-drawer-handle',
-                'props': { 'a11yLabel': 'Resize drawer' },
+                kind: 'proto',
+                prototypeId: 'liquid-glass-drawer-handle',
+                props: { a11yLabel: 'Resize drawer' },
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-drawer-title',
-                'children': ['Drawer settings'],
-              },
-              {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-drawer-description',
-                'children': [
-                  'This panel fits its content. Drag the handle outward to dismiss, or choose Close.',
+                kind: 'box',
+                className: 'mx-auto w-full max-w-sm',
+                children: [
+                  {
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-drawer-header',
+                    children: [
+                      {
+                        kind: 'proto',
+                        prototypeId: 'liquid-glass-drawer-title',
+                        children: ['Spatial Audio'],
+                      },
+                      {
+                        kind: 'proto',
+                        prototypeId: 'liquid-glass-drawer-description',
+                        children: ['Adaptive head tracking and studio clarity for nearby devices.'],
+                      },
+                    ],
+                  },
+                  {
+                    kind: 'box',
+                    className: 'px-4 py-2 space-y-2 text-sm',
+                    children: [
+                      {
+                        kind: 'box',
+                        className: 'flex items-center justify-between rounded-xl border border-border px-3 py-2',
+                        children: [
+                          { kind: 'box', children: ['Studio Speakers'] },
+                          { kind: 'box', className: 'text-muted-foreground', children: ['Connected'] },
+                        ],
+                      },
+                      {
+                        kind: 'box',
+                        className: 'flex items-center justify-between rounded-xl border border-border px-3 py-2',
+                        children: [
+                          { kind: 'box', children: ['Noise Cancellation'] },
+                          { kind: 'box', className: 'text-muted-foreground', children: ['Adaptive'] },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-drawer-footer',
+                    children: [
+                      {
+                        kind: 'proto',
+                        prototypeId: 'liquid-glass-drawer-close',
+                        props: { variant: 'prominent' },
+                        children: ['Done'],
+                      },
+                    ],
+                  },
                 ],
               },
-              {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-drawer-close',
-                'children': ['Close'],
-              },
             ],
-            'props': {
-              'enterDuration': 0,
-              'leaveDuration': 0,
-              'side': 'bottom',
-            },
           },
         ],
-        'props': {
-          'a11yLabel': 'Drawer',
-        },
-        'ref': 'root',
-      },
-      {
-        'kind': 'box',
-        'ref': 'status',
-        'attrs': {
-          'aria-live': 'polite',
-        },
-        'children': ['Closed'],
       },
     ],
-  },
-  setup({ refs, api }) {
-    api.setProps('panel', {
-      onSnapPointChange: (detail: { snapPoint: number }) => {
-        refs.status.textContent = `Drawer extent: ${Math.round(detail.snapPoint * 100)}%`;
-      },
-    });
-    api.setProps('root', {
-      onOpenChange: (detail: { open: boolean; reason: string }) => {
-        refs.status.textContent = `${detail.open ? 'Opened' : 'Closed'}: ${detail.reason}`;
-      },
-    });
   },
 } satisfies DemoSpec;

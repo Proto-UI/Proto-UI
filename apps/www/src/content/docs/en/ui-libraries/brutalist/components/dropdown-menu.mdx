@@ -1,11 +1,13 @@
 ---
 title: 'Brutalist Dropdown Menu'
-description: 'A Brutalist dropdown menu with elevated triggers, grouped actions, shortcut hints, and destructive items.'
+description: 'A Brutalist dropdown menu with elevated hard-shadow triggers, grouped actions, shortcut hints, inset alignment, and destructive items.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
@@ -14,47 +16,178 @@ Brutalist Dropdown Menu pairs Base Dropdown keyboard navigation, focus managemen
 ## Preview
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-dropdown-menu" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-dropdown-menu"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-dropdown" manager="npm" />
 
-- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-dropdown` (generates `Root`, `Trigger`, `Content`, and `Item`)
-- **Package exports**: import all parts—including `Group`, `Label`, `Separator`, and `Shortcut`—from `@proto.ui/prototypes-brutalist/dropdown`
+Currently available from workspace source. The CLI target generates `Root`, `Trigger`, `Content`, and `Item`; import `Group`, `Label`, `Separator`, and `Shortcut` directly from `@proto.ui/prototypes-brutalist/dropdown`.
 
 ## Usage
 
-- **Groups and decorations**: `Group` and `Label` automatically wire accessible group naming, `Separator` divides sections, and `Shortcut` displays a keyboard hint (visual only; it does not register global keybindings).
-- **Item variants and trigger indicators**: Set `variant="destructive"` on `Item` for destructive actions or `inset` to align with icon items. Enable `indicator` on `Trigger` to render a chevron indicator icon.
+```tsx
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from '@/components/brutalist/dropdown-menu';
+```
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger>Open</DropdownMenuTrigger>
+  <DropdownMenuContent align="start" className="w-44">
+    <DropdownMenuGroup>
+      <DropdownMenuLabel>My Account</DropdownMenuLabel>
+      <DropdownMenuItem value="profile">
+        Profile
+        <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+      </DropdownMenuItem>
+      <DropdownMenuItem value="billing">Billing</DropdownMenuItem>
+    </DropdownMenuGroup>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem value="logout">Log out</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+- **Groups & decorative parts**: `Group` and `Label` automatically wire accessible group naming, `Separator` divides sections, and `Shortcut` displays a visual keyboard hint without registering global keybindings.
+- **Anchored alignment**: `Content` defaults `excludeAnchorTranslation` to `true` so the popup anchors cleanly to the trigger's layout box without shifting when the trigger settles into its shadow.
+
+## Examples
+
+### Destructive
+
+Set `variant="destructive"` on irreversible actions for high-contrast destructive styling at rest and when active.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-dropdown-menu-destructive"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Inset
+
+Use `inset` on iconless `Item` and `Label` rows to align labels cleanly with icon-bearing items.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-dropdown-menu-inset"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Trigger Indicator
+
+Enable `indicator` on `Trigger` with `chevron-down` or `chevrons-up-down` icons.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-dropdown-menu-indicator"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-Pass `open: boolean` to enable controlled mode.
+### Root
+
+Pass `open` to enable controlled mode. `Root` exposes the `openChange` event along with `openDropdown()`, `close()`, and `toggle()`.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
-    { name: 'openEntry', type: 'string', default: 'active-or-first' },
+    {
+      name: 'openEntry',
+      type: "'active-or-first' | 'first' | 'last' | 'value-or-first'",
+      default: "'active-or-first'",
+    },
     { name: 'openEntryValue', type: 'string', default: "''" },
-    { name: 'inset', type: 'boolean', default: 'false' },
-    { name: 'variant', type: "'default' | 'destructive'", default: 'default' },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'indicator', type: 'boolean', default: 'false' },
-    { name: 'indicatorIcon', type: "'chevron-down' | 'chevrons-up-down'", default: 'chevron-down' },
+    { name: 'indicatorIcon', type: "'chevron-down' | 'chevrons-up-down'", default: "'chevron-down'" },
     { name: 'indicatorSize', type: 'number', default: '16' },
     { name: 'indicatorStrokeWidth', type: 'number', default: '2' },
   ]}
 />
 
-The first five props belong to `Root`; `inset` and `variant` belong to `Item`; `indicator`, `indicatorIcon`, `indicatorSize`, and `indicatorStrokeWidth` belong to `Trigger`.
+### Content
 
-### Other parts
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'excludeAnchorTranslation', type: 'boolean', default: 'true' },
+    { name: 'enterDuration', type: 'number', default: '150' },
+    { name: 'leaveDuration', type: 'number', default: '100' },
+  ]}
+/>
 
-- **Content**: Supports Transition props, plus `side` (default `'bottom'`), `align` (default `'center'`), `sideOffset` (default `4`), `alignOffset` (default `0`), `collisionPadding` (default `0`), `avoidCollisions` (default `true`), and `excludeAnchorTranslation` (default `true`)
-- **Item**: `disabled?: boolean` (default `false`), `value?: string` (default `''`), `textValue?: string` (default `''`), `closeOnCommit?: boolean` (inherits Root's `closeOnItemCommit` when omitted)
-- **Group**: `a11yLabel?: string` (default `''`)
-- **Label / Separator / Shortcut**: No props
+### Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnCommit', type: 'boolean', default: 'Inherits Root' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+  ]}
+/>
+
+### Group / Label / Separator / Shortcut
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Group.a11yLabel', type: 'string', default: "''" },
+    { name: 'Label.inset', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-DROPDOWN-MENU.yaml',
+    'P-BRUTALIST-DROPDOWN-MENU-TRIGGER.yaml',
+    'P-BRUTALIST-DROPDOWN-MENU-CONTENT.yaml',
+    'P-BRUTALIST-DROPDOWN-MENU-ITEM.yaml',
+    'P-BASE-DROPDOWN-MENU.yaml',
+  ]}
+/>

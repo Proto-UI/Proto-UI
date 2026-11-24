@@ -1,0 +1,161 @@
+---
+title: 'Bootstrap 2.3.2 Dialog'
+description: '保留 Bootstrap 2.3.2 经典 .modal 下滑过渡、6px 圆角与底部内高光的模态对话框组件。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Bootstrap 2.3.2 Dialog 基于 [Base Dialog](../../base/dialog/) 构建，保留经典 `.modal` 的 560px 面板宽度、6px 圆角、300 ms 顶部滑入（`-25% → 10%`）过渡、80% 黑色遮罩与 `.modal-footer` 顶部 `1px` 白色内高光。
+
+## 预览
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-bootstrap-2-3-2-dialog"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+## 安装
+
+当前仅在源码工作区中提供（`@proto.ui/prototypes-bootstrap-2-3-2/dialog`），尚未发布为独立稳定包。在工作区中可通过 `proto-ui add <wc|react|vue|vue2> bootstrap-2-3-2-dialog` 生成各宿主包装组件。
+
+## 用法
+
+```tsx
+import {
+  BootstrapDialogClose,
+  BootstrapDialogCloseIcon,
+  BootstrapDialogContent,
+  BootstrapDialogDescription,
+  BootstrapDialogFooter,
+  BootstrapDialogHeader,
+  BootstrapDialogMask,
+  BootstrapDialogRoot,
+  BootstrapDialogTitle,
+  BootstrapDialogTrigger,
+} from '@/components/proto-ui/bootstrap-2-3-2';
+
+export function BootstrapDialogExample() {
+  return (
+    <BootstrapDialogRoot a11yLabel="Edit profile">
+      <BootstrapDialogTrigger>Open Dialog</BootstrapDialogTrigger>
+      <BootstrapDialogMask />
+      <BootstrapDialogContent>
+        <BootstrapDialogHeader>
+          <BootstrapDialogTitle>Edit profile</BootstrapDialogTitle>
+        </BootstrapDialogHeader>
+        <div className="px-[15px] py-[15px]">
+          <BootstrapDialogDescription>
+            Make changes to your profile here. Click save when you&apos;re done.
+          </BootstrapDialogDescription>
+        </div>
+        <BootstrapDialogFooter>
+          <BootstrapDialogClose>Close</BootstrapDialogClose>
+        </BootstrapDialogFooter>
+        <BootstrapDialogCloseIcon />
+      </BootstrapDialogContent>
+    </BootstrapDialogRoot>
+  );
+}
+```
+
+### 组合结构
+
+```text
+BootstrapDialogRoot
+├── BootstrapDialogTrigger
+├── BootstrapDialogMask
+└── BootstrapDialogContent
+    ├── BootstrapDialogHeader
+    │   └── BootstrapDialogTitle
+    ├── BootstrapDialogDescription
+    ├── BootstrapDialogFooter
+    │   └── BootstrapDialogClose
+    └── BootstrapDialogCloseIcon
+```
+
+### 视觉与交互特性
+
+- **经典入场动效**：`Content` 沿用 Bootstrap 2.3.2 `.modal.fade` 的 300 ms 透明度与顶部 `-25% → 10%` 平滑下滑，`Mask` 使用 150 ms 淡入至 80% 不透明度。
+- **层级与结构**：`Mask` 与 `Content` 分别声明 `z-40` 与 `z-50`；`Header` 提供 `9px 15px` 内边距与底部分割线，`Footer` 保留浅灰背景与 `inset 0 1px 0 #fff` 顶部高光。
+- **焦点与无障碍**：自动管理模态焦点陷阱、焦点归还、`Escape` / 点击外部关闭，以及 `aria-labelledby` / `aria-describedby` 关联。
+
+## 示例
+
+### 隐藏关闭图标
+
+省略右上角关闭图标，仅通过 `Escape`、点击遮罩或底部按钮关闭。
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-bootstrap-2-3-2-dialog-no-close"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### 可滚动内容
+
+在 15px 内边距主体容器内滚动长文本，同时保持顶部标题区固定。
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-bootstrap-2-3-2-dialog-scrollable"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### 固定底部操作栏
+
+长清单在主体中滚动，底部操作栏与经典内高光保持可见。
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-bootstrap-2-3-2-dialog-sticky-footer"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+## API
+
+### BootstrapDialogRoot
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined（受控模式）' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'alert', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### 其他部件属性
+
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+    { name: 'Content.focusEntry', type: "'auto' | 'manual'", default: "'auto'" },
+    { name: 'Close / CloseIcon.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-DIALOG.yaml', 'P-BASE-DIALOG.yaml']}
+/>

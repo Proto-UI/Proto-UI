@@ -7,32 +7,35 @@ import type { MenubarRootProps, MenubarTriggerProps } from './types';
  * independent new-york-v4/ui/menubar.tsx at that pin. */
 const PROFILES = {
   vega: {
-    root: 'h-9 gap-1 rounded-md border p-1 shadow-xs',
+    root: 'h-9 gap-1 rounded-md border bg-background p-1 shadow-xs',
     trigger: 'rounded-sm px-2 py-1 text-sm',
   },
   nova: {
-    root: 'h-8 gap-0.5 rounded-lg border p-[3px]',
+    root: 'h-8 gap-0.5 rounded-lg border bg-background p-[3px]',
     trigger: 'rounded-sm px-1.5 py-[2px] text-sm',
   },
   maia: {
-    root: 'h-9 rounded-[var(--pui-radius-4xl)] border p-1',
+    root: 'h-9 gap-1 rounded-[var(--pui-radius-4xl)] border bg-background p-1',
     trigger: 'rounded-[var(--pui-radius-xl)] px-2 py-0.75 text-sm',
   },
   lyra: {
-    root: 'h-8 gap-0.5 rounded-none border p-1',
+    root: 'h-8 gap-0.5 rounded-none border bg-background p-1',
     trigger: 'rounded-none px-1.5 py-[0.2rem] text-xs',
   },
   mira: {
-    root: 'h-9 rounded-lg border p-1',
-    trigger: 'rounded-[calc(var(--radius-md)-2px)] px-2 py-[0.2125rem] text-xs leading-relaxed',
+    root: 'h-9 gap-1 rounded-lg border bg-background p-1',
+    trigger: 'rounded-[calc(var(--pui-radius-md)-2px)] px-2 py-[0.2125rem] text-xs leading-relaxed',
   },
   luma: {
-    root: 'h-9 rounded-[var(--pui-radius-3xl)] border p-1',
+    root: 'h-9 gap-1 rounded-[var(--pui-radius-3xl)] border bg-background p-1',
     trigger: 'rounded-[var(--pui-radius-2xl)] px-2 py-0.75 text-sm',
   },
-  sera: { root: 'h-10 rounded-none border p-1', trigger: 'rounded-none px-2 py-0.75 text-sm' },
+  sera: {
+    root: 'h-10 gap-1 rounded-none border bg-background p-1',
+    trigger: 'rounded-none px-2 py-0.75 text-sm',
+  },
   rhea: {
-    root: 'h-8 rounded-[var(--pui-radius-2xl)] border p-[3px]',
+    root: 'h-8 gap-0.5 rounded-[var(--pui-radius-2xl)] border bg-background p-[3px]',
     trigger: 'rounded-[var(--pui-radius-2xl)] px-1.5 py-[2px] text-sm',
   },
   'new-york-v4': {
@@ -62,7 +65,9 @@ export function setupMenubarTriggerPaint(
   }
 ) {
   const style = setupMenuStyle(def);
-  def.feedback.style.use(tw('flex min-w-0 items-center font-medium outline-none select-none'));
+  def.feedback.style.use(
+    tw('flex min-w-0 cursor-default items-center font-medium outline-none select-none')
+  );
   for (const id of SHADCN_STYLE_IDS) {
     def.rule({
       when: (w) => w.state(style).eq(id),
@@ -84,9 +89,10 @@ export function setupMenubarTriggerPaint(
     intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
   });
   // Expanded paint is not a closed-trigger keyboard focus affordance.
-  // Preserve the existing Rhea fallback until exact source focus/hover closure.
+  // Provide closed focus-visible feedback across all modern profiles.
   def.rule({
-    when: (w) => w.all(w.state(style).eq('rhea'), w.state(states.focusVisible).eq(true)),
+    when: (w) =>
+      w.all(w.not(w.state(style).eq('new-york-v4')), w.state(states.focusVisible).eq(true)),
     intent: (i) =>
       i.feedback.style.use(tw('ring-2 ring-inset ring-ring forced-colors-focus-outline')),
   });

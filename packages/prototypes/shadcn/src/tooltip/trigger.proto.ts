@@ -16,8 +16,6 @@ const tooltipTrigger = definePrototype<ShadcnTooltipTriggerProps, ShadcnTooltipT
     const pressed = def.state.fromInteraction('pressed');
     setupOverlayStyle(def, 'nova');
 
-    // Existing Proto feedback extension, not Button activation or a claim that
-    // upstream's headless Trigger prescribes this appearance in any profile.
     def.feedback.style.use(tw('inline-flex cursor-pointer outline-none'));
     def.rule({
       when: (when) => when.state(hovered).eq(true),
@@ -31,6 +29,14 @@ const tooltipTrigger = definePrototype<ShadcnTooltipTriggerProps, ShadcnTooltipT
     def.rule({
       when: (when) => when.all(when.state(pressed).eq(true), when.state(disabled).eq(false)),
       intent: (intent) => intent.feedback.style.use(tw('scale-[0.98]')),
+    });
+    def.rule({
+      when: (when) => when.state(disabled).eq(true),
+      intent: (intent) => intent.feedback.style.use(tw('cursor-not-allowed opacity-50')),
+    });
+    def.rule({
+      when: (when) => when.meta('preference.reducedMotion').eq('reduce'),
+      intent: (intent) => intent.feedback.style.use(tw('transition-none')),
     });
   },
 });

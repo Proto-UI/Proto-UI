@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-菜单栏将多个独立命令面板组织在一条横向导航栏中，支持统一的键盘切换与面板协调。本页示例使用 **Shadcn Rhea** 风格。
+桌面应用风格的横向菜单栏，将多个独立命令面板组织在一条导航栏中，支持统一的键盘切换与焦点协调。本页示例使用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -15,54 +15,172 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   demoId="demo-shadcn-menubar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版；可直接从 `@proto.ui/prototypes-shadcn/menubar` 导入原型并通过对应框架 Adapter 使用。
 
 ## 用法
 
-Menubar 由 `Root`、`Trigger`、`Content` 和 `Item` 四个部分组成：
+```tsx
+import {
+  ShadcnMenubarRoot,
+  ShadcnMenubarTrigger,
+  ShadcnMenubarContent,
+  ShadcnMenubarItem,
+} from '../proto-ui/components/react';
 
-- `Root` 统一管理当前打开的面板标识（`value`）。
-- `Trigger` 与 `Content` 通过相同的 `value` 配对。
-- `Item` 表示面板中的可执行命令，支持 `inset` 缩进布局和 `variant="destructive"` 危险样式。
+export function Example() {
+  return (
+    <ShadcnMenubarRoot styleProfile="rhea" a11yLabel="Project commands">
+      <ShadcnMenubarTrigger value="file">File</ShadcnMenubarTrigger>
+      <ShadcnMenubarContent value="file" a11yLabel="File commands">
+        <ShadcnMenubarItem value="new">New Tab</ShadcnMenubarItem>
+        <ShadcnMenubarItem value="open">New Window</ShadcnMenubarItem>
+        <ShadcnMenubarItem value="delete" variant="destructive">
+          Delete
+        </ShadcnMenubarItem>
+      </ShadcnMenubarContent>
+    </ShadcnMenubarRoot>
+  );
+}
+```
+
+### 组件结构
+
+```text
+MenubarRoot
+├── MenubarTrigger (value="file")
+├── MenubarContent (value="file")
+│   ├── MenubarItem
+│   └── MenubarItem
+├── MenubarTrigger (value="edit")
+└── MenubarContent (value="edit")
+    └── MenubarItem
+```
+
+- `Root` 统一管理当前展开的面板标识（`value`）及所有触发器的游走焦点。
+- `Trigger` 与 `Content` 通过相同的 `value` 一一配对。
+- `Item` 表示面板内的可执行命令，支持 `inset` 缩进对齐、`variant="destructive"` 危险语义及 `closeOnSelect={false}` 保持面板展开。
 
 ### 受控与非受控
 
-传入 `value` 进入受控模式，状态更新由外部监听请求后决定；使用 `defaultValue` 则进入非受控模式。
+传入 `value` 并监听 `valueChange` 进入受控模式；使用 `defaultValue` 则进入非受控模式。
 
 ### 键盘与无障碍
 
-- 菜单栏提供单一 `Tab` 焦点入口，使用左右方向键在触发器之间移动。
-- 按下 `ArrowDown` 或 `ArrowUp` 打开面板并进入纵向命令导航，支持输入字符快速跳转（typeahead）。
-- 按 `Escape` 关闭当前面板并将焦点返回对应触发器；点击外部区域或选择命令后自动关闭。
+- 整条菜单栏提供一个游走 `Tab` 焦点入口，按 `ArrowLeft` / `ArrowRight` 在触发器之间移动。
+- 按 `ArrowDown` 或 `ArrowUp` 打开面板并在命令项之间纵向移动，支持输入字符快速跳转（typeahead）。
+- 按 `Escape` 关闭当前面板并将焦点交回对应 `Trigger`；点击外部区域或激活命令项后默认关闭面板。
 
-### 视觉预设
+## 示例
 
-可通过 `styleProfile` 切换风格预设，支持 `rhea`、`new-york-v4`（别名 `new-york`）、`vega`、`nova`、`maia`、`lyra`、`mira`、`luma` 和 `sera`。未识别的预设值会被忽略并保持当前状态，切换风格不会影响组件的值、事件和交互行为。
+### 危险操作与分组命令
+
+在 `Item` 上设置 `variant="destructive"` 标记高风险操作，并搭配分隔线组织常用命令。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-menubar-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 缩进、禁用与常驻选项
+
+通过 `closeOnSelect={false}` 实现点击不关闭菜单的开关型选项，结合 `inset` 缩进对齐普通命令，并支持禁用单个 `Item` 或顶层 `Trigger`。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-menubar-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式与边界停止
+
+通过 `value` 和 `valueChange` 由外部管理当前打开的菜单，同时设置 `loop={false}` 关闭左右首尾循环。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-menubar-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 风格预设
+
+通过 `styleProfile` 在 `rhea`、`new-york-v4`（别名 `new-york`）、`vega`、`nova`、`maia`、`lyra`、`mira`、`luma` 和 `sera` 九套预设之间切换，外观变化不影响语义与交互。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-menubar-profiles"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`（传入 `value` 可进入受控模式）：
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: '—（传入即进入受控模式）' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'loop', type: 'boolean', default: 'true' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    {
+      name: 'styleProfile',
+      type: "'rhea' | 'new-york-v4' | 'new-york' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera'",
+      default: "'new-york-v4'",
+    },
   ]}
 />
 
-其他部件的默认属性：
+事件与方法：`valueChange({ value, reason })`、`requestValue(value, reason?)`、`close()`。
 
-- `Trigger`：`disabled` 默认 `false`。
-- `Content`：`sideOffset` 默认 `4`。
-- `Item`：`closeOnSelect` 默认 `true`。
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '必填（与 Content 配对）' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: '继承 Root 作用域' },
+  ]}
+/>
+
+暴露状态与方法：`expanded`、`disabled`、`focused`、`focusVisible`、`focusSelf(options?)`。
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '必填（与 Trigger 配对）' },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: '继承 Root 作用域' },
+  ]}
+/>
+
+暴露状态与方法：`open`、`focusFirst()`、`focusLast()`。
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: '继承 Root 作用域' },
+  ]}
+/>
+
+事件与方法：`select({ value, menuValue })`、`focusSelf(options?)`。
 
 ## 参考
 

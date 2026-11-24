@@ -1,21 +1,90 @@
 ---
 title: 'Drawer'
-description: '支持四边缘滑出、内容自适应高度、长内容滚动与多档位吸附的 Bootstrap 2.3.2 抽屉面板。'
+description: '支持四边缘滑出、经典模态栏位、长内容滚动与多档位吸附的 Bootstrap 2.3.2 抽屉面板。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Drawer 是从视口上、下、左、右四个边缘滑出的模态面板，支持内容自适应高度、拖拽关闭以及可配置的停靠吸附档位。
+Bootstrap 2.3.2 Drawer 复用经典 6px 圆角模态框视觉语法（页眉分割线、灰底右对齐页脚与渐变按钮），支持从视口上、下、左、右四个边缘滑出、内部滚动以及拖拽吸附档位。
 
 ## 预览
-
-### 基础用法
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-drawer"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
+/>
+
+## 安装
+
+当前仅在源码工作区 `@proto.ui/prototypes-bootstrap-2-3-2/drawer` 中提供，尚未随 0.2.0 稳定版 CLI 发布。
+
+## 用法
+
+```tsx
+import {
+  BootstrapDrawerRoot,
+  BootstrapDrawerTrigger,
+  BootstrapDrawerMask,
+  BootstrapDrawerContent,
+  BootstrapDrawerHandle,
+  BootstrapDrawerHeader,
+  BootstrapDrawerTitle,
+  BootstrapDrawerDescription,
+  BootstrapDrawerFooter,
+  BootstrapDrawerClose,
+} from '../proto-ui/components/react';
+```
+
+```tsx
+<BootstrapDrawerRoot>
+  <BootstrapDrawerTrigger>Open Drawer</BootstrapDrawerTrigger>
+  <BootstrapDrawerMask />
+  <BootstrapDrawerContent side="bottom">
+    <BootstrapDrawerHandle />
+    <BootstrapDrawerHeader>
+      <BootstrapDrawerTitle>Workspace Preferences</BootstrapDrawerTitle>
+      <BootstrapDrawerDescription>
+        Review default notification and digest rules for this project.
+      </BootstrapDrawerDescription>
+    </BootstrapDrawerHeader>
+    <div className="p-[15px]">{/* Body content */}</div>
+    <BootstrapDrawerFooter>
+      <BootstrapDrawerClose>Close</BootstrapDrawerClose>
+    </BootstrapDrawerFooter>
+  </BootstrapDrawerContent>
+</BootstrapDrawerRoot>
+```
+
+### 部件结构
+
+```text
+DrawerRoot
+├── DrawerTrigger
+├── DrawerMask
+└── DrawerContent
+    ├── DrawerHandle
+    ├── DrawerHeader
+    │   ├── DrawerTitle
+    │   └── DrawerDescription
+    └── DrawerFooter
+        └── DrawerClose
+```
+
+- **尺寸与滚动**：上下方向的 `Content` 默认按内容高度展示并受视口安全区域约束；左右方向默认宽度上限为 `20` 个 `root-text` 单位。将长正文放入 `flex-1 overflow-y-auto` 容器，可保持经典 `Header` 与 `Footer` 固定在上下两端。
+- **自定义范围与吸附**：在 `Content` 上配置 `minExtent` / `maxExtent`（单位支持 `'logical'`、`'root-text'`、`'available'`、`'available-minus-root-text'`）以及 `(0, 1]` 比例数组 `snapPoints`，`Handle` 会自动在显式吸附模式下提供 `separator` 语义与方向键、`Home` / `End` 调节。
+- **关闭与动效**：`Content` 内置 300ms 滑入过渡，`Mask` 内置 150ms 淡入淡出，并自动响应系统的减少动态效果偏好。
+
+## 示例
+
+### 四个弹出方向
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-drawer-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
 ### 长内容滚动
@@ -24,37 +93,87 @@ Drawer 是从视口上、下、左、右四个边缘滑出的模态面板，支�
   demoId="demo-bootstrap-2-3-2-drawer-scroll"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-### 半开 / 全开吸附档位
+### 显式吸附档位（Snap Points）
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-drawer-snap"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-## 安装
+### 自定义尺寸与禁用拖拽关闭
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
-
-## 用法
-
-- **尺寸与滚动**：上下方向的 `Content` 默认按内容高度展示，并自动受视口安全高度约束，超出时由面板内部 `overflow-y-auto` 滚动；左右方向默认限制在 `20rem` 宽度内。
-- **自定义范围**：可通过 `Content` 的 `minExtent` 与 `maxExtent` 传入中立长度对象（`unit` 支持 `'logical'`、`'root-text'`、`'available'` 或 `'available-minus-root-text'`，`value` 为非负有限数值）；若最小高度超过安全上限，则自动钳制到安全上限。非法尺寸输入会保持上次有效配置并将 `extentValid` 置为 `false`。
-- **吸附档位（`snapPoints`）**：未设置或传入空数组时采用内容自适应模式（此时 `Handle` 仅为指针拖拽把手）。传入 `(0, 1]` 范围内的比例数组后自动排序去重并启用显式吸附模式，`Handle` 同时支持方向键与 `Home` / `End` 调整档位。
-- **关闭与受控状态**：传入 `open` 进入受控模式，若父组件拒绝关闭请求，拖拽松手后会自动弹回当前状态。设置 `dragDismissible={false}` 可禁用下滑拖拽关闭，同时保留关闭按钮、`Escape` 和遮罩点击关闭。
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-drawer-sizing"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 事件 / 状态 | 说明 |
-| --- | --- | --- |
-| `Root` | `open` / `defaultOpen` | 受控或初始打开状态 |
-| `Root` | `snapPoints` | `(0, 1]` 比例数组，启用显式吸附档位 |
-| `Root` | `snapPoint` / `defaultSnapPoint` / `snapPointChange` | 受控或初始吸附档位及变更事件 |
-| `Content` | `minExtent` / `maxExtent` | 上下抽屉的最小/最大尺寸限制对象 |
-| `Content` | `dragDismissible` | 默认 `true`；设为 `false` 禁止拖拽关闭 |
-| `Content` | `extentValid` | 指示当前尺寸配置是否合法 |
-| `Handle` | — | 拖拽把手；显式吸附模式下提供无障碍 `separator` 语义与键盘调节 |
+### Root
+
+传入 `open` 进入受控模式，通过 `openChange` 监听状态变更请求；同时暴露 `openDrawer()`、`close()` 与 `toggle()` 方法。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Content
+
+暴露 `open`、`snapPoint`、`dragging`、`dragProgress`、`offsetPercentage`、`extentValid`、`requestSnapPoint()` 及 `snapPointChange` 事件。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'snapPoints', type: 'number[]', default: '—' },
+    { name: 'snapPoint', type: 'number', default: '—' },
+    { name: 'defaultSnapPoint', type: 'number', default: '—' },
+    { name: 'minExtent', type: 'AvailableLayoutLength', default: "{ unit: 'logical', value: 0 }" },
+    {
+      name: 'maxExtent',
+      type: 'AvailableLayoutLength',
+      default: "上下 { unit: 'available', value: 1 } / 左右 { unit: 'root-text', value: 20 }",
+    },
+    { name: 'dragDismissible', type: 'boolean', default: 'true' },
+    { name: 'dragDismissThreshold', type: 'number', default: '0.25' },
+    { name: 'enterDuration', type: 'number', default: '300' },
+    { name: 'leaveDuration', type: 'number', default: '300' },
+  ]}
+/>
+
+### Mask / Handle / Trigger / Close
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+    { name: 'Mask.enterDuration / leaveDuration', type: 'number', default: '150' },
+    { name: 'Handle.disabled', type: 'boolean', default: 'false' },
+    { name: 'Handle.a11yLabel', type: 'string', default: "'Resize drawer'" },
+    { name: 'Trigger / Close.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+`Header`、`Footer`、`Title` 与 `Description` 不声明额外属性。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-DRAWER.yaml',
+    'P-BOOTSTRAP-2-3-2-DRAWER-HEADER.yaml',
+    'P-BOOTSTRAP-2-3-2-DRAWER-FOOTER.yaml',
+    'P-BASE-DRAWER.yaml',
+  ]}
+/>

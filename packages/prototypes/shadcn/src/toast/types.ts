@@ -8,7 +8,12 @@ import type {
 } from '@proto.ui/prototypes-base/toast';
 import type { ShadcnStyleProps } from '../style-scope';
 
-export type ToastRootProps = BaseRootProps & ShadcnStyleProps;
+export type ToastType = 'default' | 'success' | 'info' | 'warning' | 'error' | 'loading';
+
+export type ToastRootProps = BaseRootProps &
+  ShadcnStyleProps & {
+    type?: ToastType;
+  };
 export type ToastViewportProps = BaseViewportProps & ShadcnStyleProps;
 export type ToastTitleProps = BaseTitleProps & ShadcnStyleProps;
 export type ToastDescriptionProps = BaseDescriptionProps & ShadcnStyleProps;

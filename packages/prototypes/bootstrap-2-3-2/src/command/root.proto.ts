@@ -10,7 +10,7 @@ export default definePrototype<CommandRootProps, CommandRootExposes>({
   setup(def) {
     const behavior = asCommandRoot();
     // Command is an inline Proto extension, not the historical Typeahead plugin.
-    def.feedback.style.use(tw('relative flex min-w-0 flex-col items-start'));
+    def.feedback.style.use(tw('relative flex min-w-0 w-full flex-col items-stretch gap-[6px]'));
     return behavior.render;
   },
 });

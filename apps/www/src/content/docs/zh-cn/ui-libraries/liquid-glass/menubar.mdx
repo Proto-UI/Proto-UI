@@ -1,11 +1,13 @@
 ---
 title: 'Menubar'
-description: '支持水平键盘游走与独立命令面板的 Liquid Glass 顶部菜单栏。'
+description: '支持水平键盘游走、同心圆角几何与浮层玻璃材质的 Liquid Glass 顶部菜单栏。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Menubar 将多个独立的命令菜单组织为单一横向菜单栏，通过游走 Tab 索引和方向键在各个菜单面板之间顺畅切换。
+Liquid Glass 风格的横向菜单栏，采用同心圆角几何（外层 `rounded-2xl` 搭配 `p-1` 与内层 `rounded-xl` 控件），仅在展开的浮层命令面板上声明玻璃材质以避免玻璃叠玻璃，并在不支持材质或偏好不透明时自动保留高对比度实体回退。
 
 ## 预览
 
@@ -13,24 +15,146 @@ Liquid Glass Menubar 将多个独立的命令菜单组织为单一横向菜单�
   demoId="demo-liquid-glass-menubar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版；可直接从 `@proto.ui/prototypes-liquid-glass/menubar` 导入原型并通过对应框架 Adapter 使用。
 
 ## 用法
 
-- **部件组成**：`Root`、`Trigger`、`Content`、`Item`。
-- **面板配对**：`Root.value` 标识当前唯一展开的面板，每组 `Trigger.value` 与 `Content.value` 一一配对；受控传入 `value` 时仅发出变更请求。
-- **键盘导航**：整条菜单栏占用一个 Tab 停靠点；左右方向键在顶层菜单间切换，上下方向键进入面板并纵向浏览命令，支持首字母输入跳转。按 Escape 关闭面板并恢复对应触发器焦点，点击外部或选择命令同样关闭面板。
+```tsx
+import {
+  LiquidGlassMenubarRoot,
+  LiquidGlassMenubarTrigger,
+  LiquidGlassMenubarContent,
+  LiquidGlassMenubarItem,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <LiquidGlassMenubarRoot a11yLabel="Workspace menu">
+      <LiquidGlassMenubarTrigger value="file">File</LiquidGlassMenubarTrigger>
+      <LiquidGlassMenubarContent value="file" a11yLabel="File menu">
+        <LiquidGlassMenubarItem value="new-tab">New Tab</LiquidGlassMenubarItem>
+        <LiquidGlassMenubarItem value="print">Print...</LiquidGlassMenubarItem>
+      </LiquidGlassMenubarContent>
+    </LiquidGlassMenubarRoot>
+  );
+}
+```
+
+### 组件结构与材质层级
+
+```text
+MenubarRoot (rounded-2xl p-1)
+├── MenubarTrigger (rounded-xl, 常规/主色展开态)
+├── MenubarContent (rounded-2xl p-1, 展开时启用 liquid-glass 材质)
+│   ├── MenubarItem (rounded-xl, 同心内圆角)
+│   └── MenubarItem
+└── ...
+```
+
+- `Root` 与 `Trigger` 保持实体与清晰层级，不叠加玻璃材质；展开态 `Trigger` 使用主色填充突出当前活动菜单。
+- `Content` 在展开且 `material="auto"` 时向宿主声明 `liquid-glass` 材质候选，带内嵌边缘高光环；可通过 `material="opaque"` 显式关闭材质请求。
+- `Item` 采用同心 `rounded-xl` 圆角，禁用态通过柔和前景与去阴影表达而非整项半透明，确保在多彩背景与实体回退下均清晰可读。
+
+### 键盘与无障碍
+
+- 整条菜单栏占用一个游走 `Tab` 停靠点，按 `ArrowLeft` / `ArrowRight` 在顶层触发器之间切换。
+- 按 `ArrowDown` / `ArrowUp` 展开面板并纵向浏览命令，支持输入首字符快速跳转（typeahead）。
+- 按 `Escape` 关闭当前面板并恢复对应触发器焦点；点击外部区域或激活命令项默认关闭面板。
+
+## 示例
+
+### 危险操作
+
+使用 `variant="destructive"` 在浮层面板中区分危险命令，聚焦时切换为高对比度红色高亮。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-menubar-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 缩进、禁用与常驻选项
+
+通过 `closeOnSelect={false}` 实现点击不关闭面板的开关选项，并展示无半透明失真的禁用态与 `inset` 缩进对齐。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-menubar-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 材质与实体回退（`material`）
+
+对比默认的 `material="auto"` 与显式指定 `material="opaque"` 的命令面板表现。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-menubar-material"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件    | 属性    | 说明                            |
-| ------- | ------- | ------------------------------- |
-| Root    | `value` | 当前展开面板的标识（支持受控）  |
-| Trigger | `value` | 与对应 `Content` 配对的面板标识 |
-| Content | `value` | 与对应 `Trigger` 配对的命令面板 |
-| Item    | —       | 面板内的可执行菜单命令          |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—（传入即进入受控模式）' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+事件与方法：`valueChange({ value, reason })`、`requestValue(value, reason?)`、`close()`。
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '必填（与 Content 配对）' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '必填（与 Trigger 配对）' },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+  ]}
+/>
+
+事件与方法：`select({ value, menuValue })`、`focusSelf(options?)`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-MENUBAR.yaml', 'P-BASE-MENUBAR.yaml']}
+/>

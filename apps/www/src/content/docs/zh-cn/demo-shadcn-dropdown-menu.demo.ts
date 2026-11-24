@@ -8,7 +8,7 @@ export default withShadcnRheaDemo({
       {
         'kind': 'proto',
         'prototypeId': 'shadcn-dropdown-trigger',
-        'children': ['Open menu'],
+        'children': ['Open'],
       },
       {
         'kind': 'proto',

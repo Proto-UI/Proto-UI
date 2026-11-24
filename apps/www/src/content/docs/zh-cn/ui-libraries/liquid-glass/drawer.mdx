@@ -1,21 +1,90 @@
 ---
 title: 'Drawer'
-description: '可从四个边缘滑出的 Liquid Glass 模态抽屉面板，支持内容自适应高度与显式吸附档位。'
+description: '采用半透明液态玻璃材质与柔和遮罩的 Liquid Glass 抽屉面板，支持四边缘滑出、滚动与多档吸附。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Drawer 是可从顶部、底部、左侧或右侧边缘显示的模态面板，支持内容自适应高度、可滚动长内容以及多档位拖拽吸附。
+Liquid Glass Drawer 将功能性液态玻璃材质、微弱内描边高光与柔和遮罩应用于四边缘滑出的模态抽屉面板，支持内容自适应高度、长内容滚动、多档位吸附以及不透明材质回退。
 
 ## 预览
-
-### 基础抽屉
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-drawer"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
+/>
+
+## 安装
+
+当前仅在源码工作区 `@proto.ui/prototypes-liquid-glass/drawer` 中提供，尚未随 0.2.0 稳定版 CLI 发布。
+
+## 用法
+
+```tsx
+import {
+  LiquidGlassDrawerRoot,
+  LiquidGlassDrawerTrigger,
+  LiquidGlassDrawerMask,
+  LiquidGlassDrawerContent,
+  LiquidGlassDrawerHandle,
+  LiquidGlassDrawerHeader,
+  LiquidGlassDrawerTitle,
+  LiquidGlassDrawerDescription,
+  LiquidGlassDrawerFooter,
+  LiquidGlassDrawerClose,
+} from '../proto-ui/components/react';
+```
+
+```tsx
+<LiquidGlassDrawerRoot>
+  <LiquidGlassDrawerTrigger variant="prominent">Open Drawer</LiquidGlassDrawerTrigger>
+  <LiquidGlassDrawerMask />
+  <LiquidGlassDrawerContent side="bottom">
+    <LiquidGlassDrawerHandle />
+    <LiquidGlassDrawerHeader>
+      <LiquidGlassDrawerTitle>Spatial Audio</LiquidGlassDrawerTitle>
+      <LiquidGlassDrawerDescription>
+        Adaptive head tracking and studio clarity for nearby devices.
+      </LiquidGlassDrawerDescription>
+    </LiquidGlassDrawerHeader>
+    <div className="flex-1 overflow-y-auto px-4">{/* Content */}</div>
+    <LiquidGlassDrawerFooter>
+      <LiquidGlassDrawerClose variant="prominent">Done</LiquidGlassDrawerClose>
+    </LiquidGlassDrawerFooter>
+  </LiquidGlassDrawerContent>
+</LiquidGlassDrawerRoot>
+```
+
+### 部件结构与材质层次
+
+```text
+DrawerRoot
+├── DrawerTrigger
+├── DrawerMask
+└── DrawerContent
+    ├── DrawerHandle
+    ├── DrawerHeader
+    │   ├── DrawerTitle
+    │   └── DrawerDescription
+    └── DrawerFooter
+        └── DrawerClose
+```
+
+- **单层玻璃原则**：`Content` 与页面上的 `Trigger` 声明 v2 液态玻璃材质；位于玻璃面板内部的 `Close`、`Header`、`Footer` 均保持非玻璃表面，避免玻璃叠玻璃。
+- **层级与回退**：`Trigger` 与 `Close` 支持 `variant="regular" | "prominent"` 区分主次操作；在 `Content` 或 `Trigger` 上传入 `material="opaque"` 可显式切换为不透明回退外观，系统开启降低透明度或减少动态效果偏好时也会自动平滑降级。
+- **动效与吸附**：`Content` 采用 320ms 展开 / 240ms 收起缓动，`Mask` 使用 30% 柔和暗色遮罩保留背景通透感；传入 `(0, 1]` 比例数组 `snapPoints` 即可启用多档拖拽与键盘方向键调节。
+
+## 示例
+
+### 四个弹出方向
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-drawer-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
 ### 长内容滚动
@@ -24,36 +93,91 @@ Liquid Glass Drawer 是可从顶部、底部、左侧或右侧边缘显示的模
   demoId="demo-liquid-glass-drawer-scroll"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-### 显式半开 / 全开吸附
+### 显式吸附档位（Snap Points）
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-drawer-snap"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-## 安装
+### 不透明材质、自定义尺寸与禁用拖拽关闭
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
-
-## 用法
-
-- **尺寸与滚动**：上下抽屉默认按内容高度自适应，上限受安全可用高度约束；左右抽屉默认上限为 `20rem`。`Content` 内置 `overflow-y-auto` 滚动容器，长内容与关闭按钮可留在同一滚动区域内。
-- **自定义范围**：`Content` 的 `minExtent` 与 `maxExtent` 接受长度对象（`unit` 为 `'logical' | 'root-text' | 'available' | 'available-minus-root-text'`，`value` 为非负有限数字）。若最小高度超过安全上限，以上限为准；运行期间收到非法尺寸配置时，`extentValid` 变为 `false` 并保留上一次有效配置。
-- **拖拽吸附（`snapPoints`）**：省略、`null` 或空数组表示内容自适应模式；传入由 `(0, 1]` 比例组成的非空数组时启用显式吸附（自动排序去重，比例相对于完整安全上限计算）。在显式吸附模式下，`Handle` 提供具名 `separator` 语义、方向键与 Home / End 档位调节；内容自适应模式下 `Handle` 仅为指针拖动把手（`aria-hidden`）。
-- **受控与关闭**：`Root` 支持受控 `open` 或非受控 `defaultOpen`；`snapPoint` 搭配 `snapPointChange` 支持受控档位，`defaultSnapPoint` 用于非受控初始档位。设置 `Content.dragDismissible={false}` 可禁止拖动关闭，同时保留 Close 按钮、Escape 与点击外部关闭。若调用方拒绝关闭或手势中断，界面会恢复到当前已接受状态。
+<PrototypePreviewer
+  demoId="demo-liquid-glass-drawer-sizing"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 | 说明 |
-| --- | --- | --- |
-| Root | `open` / `defaultOpen` | 受控 / 非受控展开状态 |
-| Root | `snapPoints` | 非空 `(0, 1]` 比例数组；省略或为空时启用内容自适应高度 |
-| Root | `snapPoint` / `defaultSnapPoint` | 受控 / 非受控当前吸附比例，受控时配合 `snapPointChange` 使用 |
-| Content | `minExtent` / `maxExtent` | 中立长度约束（`unit` + 非负有限 `value`） |
-| Content | `dragDismissible` | 设为 `false` 时禁止通过拖拽关闭抽屉 |
-| Content（暴露状态） | `extentValid` | 指示当前尺寸约束是否有效 |
+### Root
+
+传入 `open` 进入受控模式，通过 `openChange` 监听状态变更请求；同时暴露 `openDrawer()`、`close()` 与 `toggle()` 方法。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Content
+
+暴露 `open`、`snapPoint`、`dragging`、`dragProgress`、`offsetPercentage`、`extentValid`、`requestSnapPoint()` 及 `snapPointChange` 事件。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'snapPoints', type: 'number[]', default: '—' },
+    { name: 'snapPoint', type: 'number', default: '—' },
+    { name: 'defaultSnapPoint', type: 'number', default: '—' },
+    { name: 'minExtent', type: 'AvailableLayoutLength', default: "{ unit: 'logical', value: 0 }" },
+    {
+      name: 'maxExtent',
+      type: 'AvailableLayoutLength',
+      default: "上下 { unit: 'available', value: 1 } / 左右 { unit: 'root-text', value: 20 }",
+    },
+    { name: 'dragDismissible', type: 'boolean', default: 'true' },
+    { name: 'dragDismissThreshold', type: 'number', default: '0.25' },
+    { name: 'enterDuration', type: 'number', default: '320' },
+    { name: 'leaveDuration', type: 'number', default: '240' },
+  ]}
+/>
+
+### Trigger / Close / Mask / Handle
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Trigger.variant', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'Trigger.material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'Trigger / Close.disabled', type: 'boolean', default: 'false' },
+    { name: 'Close.variant', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+    { name: 'Mask.enterDuration / leaveDuration', type: 'number', default: '240 / 200' },
+    { name: 'Handle.disabled', type: 'boolean', default: 'false' },
+    { name: 'Handle.a11yLabel', type: 'string', default: "'Resize drawer'" },
+  ]}
+/>
+
+`Header`、`Footer`、`Title` 与 `Description` 不声明额外属性。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-DRAWER.yaml',
+    'P-LIQUID-GLASS-DRAWER-HEADER.yaml',
+    'P-LIQUID-GLASS-DRAWER-FOOTER.yaml',
+    'P-BASE-DRAWER.yaml',
+  ]}
+/>

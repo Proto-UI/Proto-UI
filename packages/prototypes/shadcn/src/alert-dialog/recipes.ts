@@ -4,8 +4,7 @@ import type { OverlayRecipes } from '../dialog/style';
 /** .cn-alert-dialog-* in all eight retained 3d98900e9b73 style CSS files.
  * New York remains the separately adopted 02cad61166c4c20edbc8a3f71bd720eed4c1f49b
  * apps/v4/registry/new-york-v4/ui/alert-dialog.tsx, not Nova.
- * MIT; see package THIRD_PARTY_NOTICES.md. Media, size=sm and responsive
- * owner-dependent layout remain explicit gaps rather than guessed DOM facts.
+ * MIT; see package THIRD_PARTY_NOTICES.md.
  */
 export const ALERT_PANEL = {
   vega: tw(
@@ -38,14 +37,14 @@ export const ALERT_PANEL = {
 } as const satisfies OverlayRecipes;
 
 export const ALERT_HEADER = {
-  vega: tw('grid-rows-[auto_1fr] place-items-center gap-1.5 text-center'),
-  nova: tw('grid-rows-[auto_1fr] place-items-center gap-1.5 text-center'),
-  maia: tw('grid-rows-[auto_1fr] place-items-center gap-1.5 text-center'),
-  lyra: tw('grid-rows-[auto_1fr] place-items-center gap-1.5 text-center'),
-  mira: tw('grid-rows-[auto_1fr] place-items-center gap-1 text-center'),
-  luma: tw('grid-rows-[auto_1fr] place-items-center gap-1.5 text-center'),
-  sera: tw('grid-rows-[auto_1fr] place-items-center gap-2 text-center'),
-  rhea: tw('grid-rows-[auto_1fr] place-items-center gap-1.5 text-center'),
+  vega: tw('grid-rows-[auto_1fr] gap-1.5'),
+  nova: tw('grid-rows-[auto_1fr] gap-1.5'),
+  maia: tw('grid-rows-[auto_1fr] gap-1.5'),
+  lyra: tw('grid-rows-[auto_1fr] gap-1.5'),
+  mira: tw('grid-rows-[auto_1fr] gap-1'),
+  luma: tw('grid-rows-[auto_1fr] gap-1.5'),
+  sera: tw('grid-rows-[auto_1fr] gap-2'),
+  rhea: tw('grid-rows-[auto_1fr] gap-1.5'),
   'new-york-v4': tw('gap-1.5 text-left wrap-anywhere'),
 } as const satisfies OverlayRecipes;
 

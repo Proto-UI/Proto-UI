@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-可从上下左右四个边缘滑出的模态面板，支持内容自适应高度、纵向滚动以及可拖拽吸附档位。本页示例采用 **Shadcn Rhea** 风格。
+可从屏幕上下左右四个边缘滑出的模态抽屉面板，支持内容自适应高度、纵向滚动以及可拖拽吸附档位。本页示例采用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -15,81 +15,197 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   demoId="demo-shadcn-drawer"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
+/>
+
+## 安装
+
+当前仅在源码工作区 `@proto.ui/prototypes-shadcn/drawer` 中提供，尚未随 0.2.0 稳定版 CLI 发布。
+
+## 用法
+
+```tsx
+import {
+  ShadcnButton,
+  ShadcnDrawerRoot,
+  ShadcnDrawerTrigger,
+  ShadcnDrawerMask,
+  ShadcnDrawerContent,
+  ShadcnDrawerHandle,
+  ShadcnDrawerHeader,
+  ShadcnDrawerTitle,
+  ShadcnDrawerDescription,
+  ShadcnDrawerFooter,
+  ShadcnDrawerClose,
+} from '../proto-ui/components/react';
+```
+
+```tsx
+<ShadcnDrawerRoot styleProfile="rhea">
+  <ShadcnDrawerTrigger styleProfile="rhea">
+    <ShadcnButton styleProfile="rhea" variant="outline">Open Drawer</ShadcnButton>
+  </ShadcnDrawerTrigger>
+  <ShadcnDrawerMask styleProfile="rhea" />
+  <ShadcnDrawerContent styleProfile="rhea" side="bottom">
+    <ShadcnDrawerHandle styleProfile="rhea" />
+    <ShadcnDrawerHeader styleProfile="rhea">
+      <ShadcnDrawerTitle styleProfile="rhea">Move Goal</ShadcnDrawerTitle>
+      <ShadcnDrawerDescription styleProfile="rhea">
+        Set your daily activity goal.
+      </ShadcnDrawerDescription>
+    </ShadcnDrawerHeader>
+    <div className="flex-1 overflow-y-auto px-4">{/* Content */}</div>
+    <ShadcnDrawerFooter styleProfile="rhea">
+      <ShadcnButton styleProfile="rhea">Submit</ShadcnButton>
+      <ShadcnDrawerClose styleProfile="rhea">
+        <ShadcnButton styleProfile="rhea" variant="outline">Cancel</ShadcnButton>
+      </ShadcnDrawerClose>
+    </ShadcnDrawerFooter>
+  </ShadcnDrawerContent>
+</ShadcnDrawerRoot>
+```
+
+### 部件结构
+
+```text
+DrawerRoot
+├── DrawerTrigger
+├── DrawerMask
+└── DrawerContent
+    ├── DrawerHandle
+    ├── DrawerHeader
+    │   ├── DrawerTitle
+    │   └── DrawerDescription
+    └── DrawerFooter
+        └── DrawerClose
+```
+
+- **触发与关闭按钮**：在 `rhea` 等现代风格下，`Trigger` 与 `Close` 保持无样式语义封装，直接嵌套 `Button` 提供交互外观；在 `new-york-v4` 下默认自带 outline 按钮外观（长文案可启用 `wrap`）。
+- **尺寸约束**：通过 `Content` 的 `minExtent` / `maxExtent` 控制面板尺寸（支持 `'logical'`、`'root-text'`、`'available'` 与 `'available-minus-root-text'`）。上下抽屉默认自适应内容高度并受安全可用区域限制；左右抽屉默认宽度上限为 `20` 个 `root-text` 单位。
+- **吸附与无障碍**：提供 `(0, 1]` 比例数组 `snapPoints` 后，`Handle` 具备具名 `separator` 语义并支持方向键及 `Home` / `End` 调整档位；按下 `Escape` 或点击遮罩可关闭抽屉，关闭后焦点自动归还触发器。
+
+## 示例
+
+### 四个弹出方向
+
+通过 `Content` 的 `side` 属性指定 `'top'`、`'right'`、`'bottom'` 或 `'left'`：
+
+<PrototypePreviewer
+  demoId="demo-shadcn-drawer-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
 ### 长内容滚动
 
-`Content` 内置纵向滚动容器，超出高度的长内容可在面板内平滑滚动：
+将正文包裹在 `flex-1 overflow-y-auto` 容器中，即可在固定标题栏与底部操作区的同时平滑滚动：
 
 <PrototypePreviewer
   demoId="demo-shadcn-drawer-scroll"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-### 半开与全开吸附档位
+### 吸附档位（Snap Points）
 
-配置 `snapPoints` 后，用户可通过拖动把手或键盘方向键在不同高度比例之间吸附切换：
+配置 `snapPoints` 与 `defaultSnapPoint`（或受控 `snapPoint` / `snapPointChange`），用户可通过拖拽把手或键盘方向键在不同高度比例间切换：
 
 <PrototypePreviewer
   demoId="demo-shadcn-drawer-snap"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-## 用法
+### 自定义尺寸与禁用拖拽关闭
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+通过 `maxExtent` 约束侧边抽屉宽度，并设置 `dragDismissible={false}` 防止误触滑动关闭（关闭按钮、`Escape` 与点击外部仍保持可用）：
 
-### 部件组合与触发按钮
-
-- **Trigger 与 Close**：在 Rhea 风格下，`Trigger` 与 `Close` 保持无样式语义封装，直接内嵌公开的 `Button`（如 `outline` 样式，长文本可加 `wrap`）作为物理交互与焦点表面，并将暴露的有效 `disabled` 状态透传给内部按钮。
-- **网格布局兼容**：`Root` 会渲染包装节点；当直接放入 CSS Grid 时，可在 React 中设置 `hostStyle={{ display: 'contents' }}`（Web Components 中设置 `display: contents`）避免产生多余网格行。
-- **样式细节**：Rhea `Content` 在外层包裹 `p-4` 透明边距并内嵌圆角上限 24px 的弹出面板，底部 `Handle` 宽 100px、高 `0.375rem`、上间距 `1rem`。
-
-### 尺寸约束（`minExtent` / `maxExtent`）
-
-通过 `Content` 的 `minExtent` 与 `maxExtent` 控制面板尺寸（推荐使用它而非单独的 CSS `width`）：
-
-- 支持的长度单位包括 `logical`、`root-text`、`available` 与 `available-minus-root-text`（`value` 为非负有限数值），例如 `maxExtent={{ unit: 'logical', value: 480 }}`。
-- 上下抽屉默认按内容高度自适应，最大高度自动限制在安全可用区域内；左右抽屉默认按比例宽度展示，默认上限为 20 个 `root-text` 单位。
-- 运行中若传入非法尺寸配置，组件会忽略非法配置并保持最后有效的尺寸约束（`extentValid` 为 `false`）。
-
-### 吸附档位与拖动关闭
-
-- **内容自适应模式**：上下抽屉未传 `snapPoints`（或为空数组）时按内容高度展示，此时 `Handle` 作为纯指针拖拽把手使用。
-- **显式吸附模式**：传入大于 `0` 且不超过 `1` 的比例数组（如 `[0.5, 1]`，自动排序去重）即可开启多档吸附，通过 `defaultSnapPoint`（非受控）或 `snapPoint` + `snapPointChange`（受控）管理当前档位；此时 `Handle` 支持方向键及 `Home` / `End` 调整。
-- 设置 `dragDismissible={false}` 可禁止通过拖动关闭，同时保留 `Close` 按钮、`Escape` 键与点击外部关闭。受控模式下若外部拒绝关闭请求，拖动预览会自动回弹至当前已提交状态。
+<PrototypePreviewer
+  demoId="demo-shadcn-drawer-sizing"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-传入 `open` 进入受控模式。
+### Root
+
+传入 `open` 进入受控模式，并通过 `openChange` 监听状态变更请求；同时暴露 `openDrawer()`、`close()` 与 `toggle()` 方法。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
   ]}
 />
 
-以上属性属于 `Root`。其他部件属性默认值：
+### Content
 
-- **Content**：`side` 默认 `'bottom'`（可选 `'top' | 'right' | 'bottom' | 'left'`），另支持 `minExtent`、`maxExtent`、`snapPoints`、`snapPoint`、`defaultSnapPoint`、`dragDismissible`。
-- **Trigger / Close**：`disabled` 默认 `false`。
-- **Handle**：`disabled` 默认 `false`，`a11yLabel` 默认 `'Resize drawer'`。
-- **Overlay**：`passthrough` 默认 `false`。
-- **Title / Description / Header / Footer**：无额外属性。
+暴露 `open`、`snapPoint`、`dragging`、`dragProgress`、`offsetPercentage`、`extentValid` 状态、`requestSnapPoint()` 方法及 `snapPointChange` 事件。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'snapPoints', type: 'number[]', default: '—' },
+    { name: 'snapPoint', type: 'number', default: '—' },
+    { name: 'defaultSnapPoint', type: 'number', default: '—' },
+    { name: 'minExtent', type: 'AvailableLayoutLength', default: "{ unit: 'logical', value: 0 }" },
+    {
+      name: 'maxExtent',
+      type: 'AvailableLayoutLength',
+      default: "上下 { unit: 'available-minus-root-text', value: 6 } / 左右 { unit: 'root-text', value: 20 }",
+    },
+    { name: 'dragDismissible', type: 'boolean', default: 'true' },
+    { name: 'dragDismissThreshold', type: 'number', default: '0.25' },
+    { name: 'enterDuration', type: 'number', default: '500' },
+    { name: 'leaveDuration', type: 'number', default: '500' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+  ]}
+/>
+
+### Mask
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'passthrough', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '500' },
+    { name: 'leaveDuration', type: 'number', default: '500' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+  ]}
+/>
+
+### Handle / Trigger / Close
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Handle.disabled', type: 'boolean', default: 'false' },
+    { name: 'Handle.a11yLabel', type: 'string', default: "'Resize drawer'" },
+    { name: 'Trigger / Close.disabled', type: 'boolean', default: 'false' },
+    { name: 'Trigger / Close.wrap', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+  ]}
+/>
+
+`Header`、`Footer`、`Title` 与 `Description` 仅接受可选的 `styleProfile` 属性。
 
 ## 参考
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-DRAWER.yaml', 'P-BASE-DRAWER.yaml', 'P-SHADCN-BUTTON.yaml']}
+  files={[
+    'P-SHADCN-DRAWER.yaml',
+    'P-SHADCN-DRAWER-HEADER.yaml',
+    'P-SHADCN-DRAWER-FOOTER.yaml',
+    'P-SHADCN-DRAWER-MOTION.yaml',
+    'P-BASE-DRAWER.yaml',
+    'P-SHADCN-BUTTON.yaml',
+  ]}
 />
 
 <SpecEntityLinks directory="spec/contracts" files={['C-AS-TRIGGER-0001.yaml']} />

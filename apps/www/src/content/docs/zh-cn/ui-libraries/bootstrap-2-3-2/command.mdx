@@ -1,11 +1,13 @@
 ---
 title: 'Command'
-description: '支持实时搜索过滤并发出操作意图的 Bootstrap 2.3.2 内联命令列表。'
+description: '保留经典 Bootstrap 2.3.2 视觉语言的可搜索命令面板组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Command 是一个始终保持内联展开的可搜索命令面板，用于快速筛选并触发应用操作。
+Bootstrap 2.3.2 Command 在保留经典蓝色焦点光晕与渐变高亮菜单项的基础上，提供实时过滤、键盘导航与弹窗组合能力。
 
 ## 预览
 
@@ -13,28 +15,104 @@ Command 是一个始终保持内联展开的可搜索命令面板，用于快速
   demoId="demo-bootstrap-2-3-2-command"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区 `@proto.ui/prototypes-bootstrap-2-3-2/command` 提供，尚未进入 0.2.0 稳定版。
 
 ## 用法
 
-由 `Root`、`Input`、`Content`、`Item` 和 `Empty` 组成：
+```tsx
+import {
+  commandRoot,
+  commandInput,
+  commandContent,
+  commandItem,
+  commandEmpty,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/command';
+```
 
-- **命令执行**：列表保持内联显示。按下 `Enter` 或点击命令项时发出包含选中项的 `execute` 事件，由应用代码执行具体逻辑；单纯输入搜索文本不会触发命令。
-- **搜索与过滤**：内置过滤按 `textValue` 与 `keywords` 匹配（忽略大小写和重音），也可通过 `filter={false}` 接入外部过滤。无匹配命令时显示 `Empty`。
-- **键盘与输入法**：使用方向键移动高亮项时焦点保留在输入框内；IME 组合输入期间不会误执行命令。禁用项和重复值命令不可提交。
+### 部件组合结构
+
+```text
+CommandRoot
+├── CommandInput
+└── CommandContent
+    ├── CommandItem
+    └── CommandEmpty
+```
+
+- **视觉风格**：输入框延续 Bootstrap 2.3.2 30px 高度与 `#52a8ec` 聚焦光晕；列表沿用 6px 圆角、柔和阴影与经典 `#08c -> #0077b3` 渐变选中态，并限定 `300px` 最大高度支持滚动。
+- **搜索与执行**：按 `textValue` 与 `keywords` 忽略大小写和重音过滤，也可设置 `filter={false}` 接入外部过滤；按 `Enter` 或点击命令项发出 `execute` 事件。
+- **键盘与输入法**：方向键移动高亮项时焦点保留在输入框内，IME 组合输入期间不触发执行，禁用项与重复值项不可提交。
+
+## 示例
+
+### 弹窗命令面板
+
+将命令面板嵌套在 Bootstrap 2.3.2 `Dialog` 模态框中使用。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-command-dialog"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 快捷键提示与关键词搜索
+
+在经典菜单项中展示右侧等宽快捷键提示，并支持关键词检索。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-command-shortcuts"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 可滚动长列表
+
+在 `300px` 限高的经典下拉列表容器内浏览和过滤多项命令。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-command-scrollable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 事件 | 说明 |
-| --- | --- | --- |
-| `Root` | `value` / `inputValue` / `open` / `filter` | 支持受控状态管理与内置/外部过滤切换 |
-| `Root` | `execute` | 激活命令项时发出的操作意图事件 |
-| `Input` | — | 单行命令搜索框 |
-| `Content` | — | 内联命令列表容器 |
-| `Item` | `value` / `textValue` / `keywords` / `disabled` | 单个可执行命令项 |
-| `Empty` | — | 无匹配命令时显示的提示 |
+### Root
+
+传入 `value`、`inputValue` 或 `open` 可独立切换对应状态的受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
+    { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'true' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'filter', type: 'boolean', default: 'true' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### 其他部件与事件
+
+- **Input**：`placeholder`、`a11yLabel`、`name` 均默认为 `''`。
+- **Content**：`side="bottom"`、`align="start"`、`sideOffset={4}`、`collisionPadding={8}`。
+- **Item**：`value`、`textValue`、`keywords` 均默认为 `''`，`disabled` 默认为 `false`。
+- **Empty**：无独立属性，无匹配命令时自动显示。
+- **事件**：`Root` 触发 `execute`、`valueChange`、`inputValueChange` 与 `openChange`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-COMMAND.yaml', 'P-BASE-COMMAND.yaml']}
+/>

@@ -1,0 +1,162 @@
+---
+title: 'Bootstrap 2.3.2 Tooltip'
+description: '沿用经典 Bootstrap 2.3.2 黑底白字、11px 紧凑排版与 150ms 线性淡入淡出的文字提示组件。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Bootstrap 2.3.2 Tooltip 保留归档版本的经典黑底白字（`#000` / `#fff`）、`200px` 最大宽度、`4px` 圆角、`11px` 字号与 `150ms` 线性淡入淡出（`0 → 0.8` 透明度），所有延迟协调、键盘聚焦与无障碍语义由 Base Tooltip 统一提供。
+
+## 预览
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tooltip"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+Bootstrap 2.3.2 Tooltip 当前以工作区源码提供，可通过 `@proto.ui/prototypes-bootstrap-2-3-2/tooltip` 直接导入 `tooltipGroup`、`tooltipRoot`、`tooltipTrigger` 与 `tooltipContent`，配合任意宿主 Adapter 使用。
+
+## 用法
+
+```tsx
+import {
+  BootstrapTooltipGroup,
+  BootstrapTooltipRoot,
+  BootstrapTooltipTrigger,
+  BootstrapTooltipContent,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <BootstrapTooltipGroup>
+      <BootstrapTooltipRoot>
+        <BootstrapTooltipTrigger>Account</BootstrapTooltipTrigger>
+        <BootstrapTooltipContent side="top">View account settings</BootstrapTooltipContent>
+      </BootstrapTooltipRoot>
+    </BootstrapTooltipGroup>
+  );
+}
+```
+
+### 组件结构
+
+```text
+TooltipGroup (可选)
+└── TooltipRoot
+    ├── TooltipTrigger
+    └── TooltipContent
+```
+
+- `Group` 协调相邻提示的冷启动延迟（默认 `700ms`）、关闭延迟（`100ms`）与热切换窗口（`300ms`）。
+- `Trigger` 保持无多余装饰并应用经典聚焦轮廓；键盘 `Tab` 聚焦立即打开，按 `Escape` 关闭。
+- `Content` 通过 Portal 渲染并自动维护 `aria-describedby` 与 `role="tooltip"`，系统启用减弱动态效果时自动关闭过渡。
+
+## 示例
+
+### 弹出方向
+
+使用 `Content` 上的 `side` 属性切换四向定位（`left`、`top`、`bottom`、`right`）。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tooltip-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 带快捷键提示
+
+在黑底提示气泡中配合简洁文字与等宽快捷键标识。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tooltip-shortcut"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用按钮
+
+通过外层 `Trigger` 包裹禁用态按钮，让用户在悬停或聚焦时仍能看到说明原因。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tooltip-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Group
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '100' },
+    { name: 'skipDelay', type: 'number', default: '300' },
+  ]}
+/>
+
+### Root
+
+传入 `open` 进入受控模式；未单独设置延迟时沿用 `Group` 配置。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: 'undefined' },
+    { name: 'closeDelay', type: 'number', default: 'undefined' },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'top'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'enterDuration', type: 'number', default: '150' },
+    { name: 'leaveDuration', type: 'number', default: '150' },
+  ]}
+/>
+
+### 事件、状态与方法
+
+- **Root**：暴露状态 `open`，事件 `openChange`（`{ open, reason }`），方法 `openTooltip(reason?)`、`close(reason?)`、`toggle(reason?)`。
+- **Trigger**：暴露状态 `disabled`、`hovered`、`focused`、`focusVisible`，方法 `focusSelf(options?)`。
+- **Content**：暴露状态 `open` 与 Transition 状态（`transitionState`、`isPresent`、`controls`）。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-TOOLTIP.yaml',
+    'P-BOOTSTRAP-2-3-2-TOOLTIP-GROUP.yaml',
+    'P-BOOTSTRAP-2-3-2-TOOLTIP-TRIGGER.yaml',
+    'P-BOOTSTRAP-2-3-2-TOOLTIP-CONTENT.yaml',
+    'P-BASE-TOOLTIP.yaml',
+  ]}
+/>

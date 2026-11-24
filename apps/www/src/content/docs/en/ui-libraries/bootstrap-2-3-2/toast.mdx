@@ -4,8 +4,10 @@ description: 'A Bootstrap 2.3.2 timed notification with hover/focus pause, keybo
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Toast displays brief, non-blocking notifications that auto-dismiss after a configurable duration, pause on hover or focus, and support explicit actions.
+Toast displays brief, non-blocking notifications styled with Bootstrap 2.3.2 `.alert` surfaces, supporting auto-dismiss timers, hover or focus pause, a top-right `×` close control, and link actions.
 
 ## Preview
 
@@ -13,27 +15,112 @@ Toast displays brief, non-blocking notifications that auto-dismiss after a confi
   demoId="demo-bootstrap-2-3-2-toast"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-bootstrap-2-3-2/toast` and adapt them for your target runtime.
+
+```ts
+import {
+  toastViewport,
+  toastRoot,
+  toastTitle,
+  toastDescription,
+  toastAction,
+  toastClose,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/toast';
+```
 
 ## Usage
 
-Compose `Root`, `Viewport`, `Title`, `Description`, `Action`, and `Close`:
+Follow Bootstrap 2.3.2's `.alert` markup convention by placing `Close` (`×`) first inside `Root` so its float offsets align with the top-right corner:
+
+```tsx
+<Bootstrap232ToastViewport a11yLabel="Notifications">
+  <Bootstrap232ToastRoot defaultOpen={false} duration={5000}>
+    <Bootstrap232ToastClose>×</Bootstrap232ToastClose>
+    <Bootstrap232ToastTitle>Event has been created</Bootstrap232ToastTitle>
+    <Bootstrap232ToastDescription>Sunday, December 03, 2023 at 9:00 AM</Bootstrap232ToastDescription>
+    <Bootstrap232ToastAction a11yLabel="Undo event creation">Undo</Bootstrap232ToastAction>
+  </Bootstrap232ToastRoot>
+</Bootstrap232ToastViewport>
+```
 
 - **Timing and pause**: `Root` stays open for `5000ms` by default; pass `duration={0}` to keep it open indefinitely. Hovering over the toast or focusing `Action` / `Close` pauses the remaining timer.
 - **Actions and dismissal**: `Close`, pressing `Escape` while focused, and `Action` all request dismissal, while your application handles any side effects from `Action`. In controlled `open` mode, timeout emits a single dismissal request until the parent updates state.
 - **Shortcut**: `Viewport` binds `F8` to move keyboard focus to the notification region.
 
+## Examples
+
+### Alert Variants
+
+Use `variant` to switch between Bootstrap 2.3.2 `.alert` (`default`), `.alert-info` (`info`), `.alert-success` (`success`), and `.alert-error` (`error`).
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toast-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Action
+
+Use `Action` to expose an inline link command alongside the toast message.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toast-action"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled & Persistent
+
+Pass controlled `open` with `duration={0}` to keep a critical alert visible until the user or application dismisses it.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toast-persistent"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
 ## API
 
-| Part | Prop | Default | Description |
-| --- | --- | --- | --- |
-| `Root` | `open` | — | Controlled visibility state |
-| `Root` | `duration` | `5000` | Auto-dismiss duration in milliseconds (`0` disables auto-dismiss) |
-| `Viewport` | — | — | Toast container region with `F8` focus shortcut |
-| `Title` / `Description` | — | — | Notification heading and message body |
-| `Action` / `Close` | — | — | Action trigger and dismiss button |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'true' },
+    { name: 'duration', type: 'number', default: '5000' },
+    { name: 'paused', type: 'boolean', default: 'false' },
+    { name: 'politeness', type: "'polite' | 'assertive'", default: "'polite'" },
+    { name: 'variant', type: "'default' | 'info' | 'success' | 'error'", default: "'default'" },
+    { name: 'appear', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '0' },
+    { name: 'leaveDuration', type: 'number', default: '0' },
+    { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: "'reverse'" },
+  ]}
+/>
+
+### Viewport, Action & Close
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Viewport.a11yLabel', type: 'string', default: "'Notifications'" },
+    { name: 'Viewport.hotkey', type: 'string', default: "'F8'" },
+    { name: 'Action.disabled', type: 'boolean', default: 'false' },
+    { name: 'Action.a11yLabel', type: 'string', default: '—' },
+    { name: 'Close.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+Events and exposed methods:
+
+- **Events**: `Root` emits `openChange` (`{ open: boolean; reason: string }`); `Action` emits `action` (`void`).
+- **Methods**: `Root` exposes `openToast()`, `close(reason?)`, `pause()`, and `resume()`; `Viewport` exposes `focusFirst()`.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BOOTSTRAP-2-3-2-TOAST.yaml', 'P-BASE-TOAST.yaml']} />

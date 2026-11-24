@@ -11,7 +11,7 @@ export default definePrototype<AlertDialogMaskProps, AlertDialogMaskExposes>({
   setup(def) {
     const behavior = asAlertDialogMask();
     // Bootstrap 2.3.2 .modal-backdrop.fade: 150ms linear, entered opacity .8.
-    def.feedback.style.use(tw('fixed inset-0 bg-black opacity-80'));
+    def.feedback.style.use(tw('fixed inset-0 z-40 bg-black opacity-80'));
     behavior.asTransition.configure({
       enterDuration: 150,
       leaveDuration: 150,

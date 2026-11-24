@@ -1,12 +1,13 @@
 ---
 title: 'Drawer'
-description: '支持四个边缘弹出、内容自适应高度、显式吸附点与拖拽关闭的 Brutalist 抽屉面板组件。'
+description: '支持四个边缘滑出、内容自适应高度、长内容滚动与多档吸附的 Brutalist 抽屉面板组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Drawer 是可从屏幕四个边缘滑出的模态面板，支持内容自适应尺寸、拖拽关闭、多档吸附高度（snap points）以及垂直滚动长内容。
+Brutalist Drawer 是采用 2px 硬黑边框、5px 圆角与 4px 零模糊阴影的模态抽屉面板，支持四个屏幕边缘滑出、内容自适应高度、长内容滚动与多档拖拽吸附。
 
 ## 预览
 
@@ -14,60 +15,159 @@ Brutalist Drawer 是可从屏幕四个边缘滑出的模态面板，支持内容
   demoId="demo-brutalist-drawer"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区 `@proto.ui/prototypes-brutalist/drawer` 中提供，尚未随 0.2.0 稳定版 CLI 发布。
 
 ## 用法
 
-### 尺寸、边缘与滚动
+```tsx
+import {
+  BrutalistDrawerRoot,
+  BrutalistDrawerTrigger,
+  BrutalistDrawerMask,
+  BrutalistDrawerContent,
+  BrutalistDrawerHandle,
+  BrutalistDrawerHeader,
+  BrutalistDrawerTitle,
+  BrutalistDrawerDescription,
+  BrutalistDrawerFooter,
+  BrutalistDrawerClose,
+} from '../proto-ui/components/react';
+```
 
-- **尺寸策略**：`top` / `bottom` 抽屉默认按内容高度自适应（最大不超过可用高度减去 6 个根文本单位）；`left` / `right` 抽屉使用比例宽度（默认上限 20 个根文本单位）。可通过 `Content` 的 `minExtent` / `maxExtent` 传入中立长度配置尺寸（`unit` 支持 `'logical'`、`'root-text'`、`'available'` 或 `'available-minus-root-text'`），例如 `maxExtent={{ unit: 'logical', value: 480 }}`，无需额外覆盖 CSS `width`。
-- **长内容滚动**：`Content` 内置 `overflow-y-auto` 滚动容器；若直接将 `Root` 放进 CSS Grid 布局，可在 React 中设置 `hostStyle={{ display: 'contents' }}`（或在 Web Component 上设置 `display: contents`）避免产生空网格轨道。
-- **拖拽关闭**：设置 `Content` 的 `dragDismissible={false}` 可禁用拖拽关闭，同时保留 `Close` 按钮、`Escape` 键与点击外部关闭。
+```tsx
+<BrutalistDrawerRoot>
+  <BrutalistDrawerTrigger>Open Drawer</BrutalistDrawerTrigger>
+  <BrutalistDrawerMask />
+  <BrutalistDrawerContent side="bottom">
+    <BrutalistDrawerHandle />
+    <BrutalistDrawerHeader>
+      <BrutalistDrawerTitle>Are you absolutely sure?</BrutalistDrawerTitle>
+      <BrutalistDrawerDescription>
+        Publish the latest build to the staging environment.
+      </BrutalistDrawerDescription>
+    </BrutalistDrawerHeader>
+    <BrutalistDrawerFooter>
+      <BrutalistDrawerClose>Cancel</BrutalistDrawerClose>
+    </BrutalistDrawerFooter>
+  </BrutalistDrawerContent>
+</BrutalistDrawerRoot>
+```
 
-### 长内容示例
+### 部件结构与设计规则
+
+```text
+DrawerRoot
+├── DrawerTrigger
+├── DrawerMask
+└── DrawerContent
+    ├── DrawerHandle
+    ├── DrawerHeader
+    │   ├── DrawerTitle
+    │   └── DrawerDescription
+    └── DrawerFooter
+        └── DrawerClose
+```
+
+- **抬起与按压反馈**：`Trigger` 与 `Close` 均具备 `4px 4px` 硬黑阴影与按压落位（`+4px, +4px`）反馈；`Content` 在暴露边缘保持 `5px`（`rounded-base`）圆角与 200ms 滑入动效，`Mask` 采用 150ms 淡入淡出。
+- **尺寸与滚动**：`top` / `bottom` 抽屉默认按内容高度自适应（最大不超过可用高度减去 6 个根文本单位）；`left` / `right` 抽屉默认上限为 20 个根文本单位。将正文区域设为 `flex-1 overflow-y-auto` 即可在长内容时保持标题与底部按钮可见。
+- **吸附与无障碍**：提供 `(0, 1]` 比例数组 `snapPoints` 后，`Handle` 具备具名 `separator` 语义并支持方向键及 `Home` / `End` 调节，暗色模式下使用语义前景色保持高对比度。
+
+## 示例
+
+### 四个弹出方向
+
+<PrototypePreviewer
+  demoId="demo-brutalist-drawer-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 长内容滚动
 
 <PrototypePreviewer
   demoId="demo-brutalist-drawer-scroll"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-### 显式吸附点（Snap Points）
+### 显式吸附档位（Snap Points）
 
 <PrototypePreviewer
   demoId="demo-brutalist-drawer-snap"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-- 在 `top` / `bottom` 抽屉上提供非空的 `snapPoints` 数组（取值范围 `(0, 1]`，相对完整安全上限）可启用多档吸附，配合 `defaultSnapPoint`（非受控）或 `snapPoint` / `snapPointChange`（受控）管理当前档位。
-- 在内容自适应模式下，`Handle` 为纯指针拖拽把手；启用显式吸附点后，`Handle` 同时提供具名 `separator` 语义及方向键、`Home` / `End` 调整支持。
+### 自定义尺寸与禁用拖拽关闭
+
+<PrototypePreviewer
+  demoId="demo-brutalist-drawer-sizing"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 ### Root
 
+传入 `open` 进入受控模式，通过 `openChange` 监听状态变更请求；同时暴露 `openDrawer()`、`close()` 与 `toggle()` 方法。
+
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
   ]}
 />
 
-传入 `open: boolean` 进入受控模式。
+### Content
 
-### 其他部件属性
+暴露 `open`、`snapPoint`、`dragging`、`dragProgress`、`offsetPercentage`、`extentValid`、`requestSnapPoint()` 及 `snapPointChange` 事件。
 
-- **Mask**：`passthrough?: boolean`（默认 `false`）及 Transition 属性
-- **Content**：`side`（默认 `'bottom'`）、`minExtent`、`maxExtent`、`snapPoints`、`snapPoint`、`defaultSnapPoint`、`dragDismissible` 及 Transition 属性
-- **Handle**：`disabled?: boolean`（默认 `false`），`a11yLabel?: string`（默认 `'Resize drawer'`）
-- **Trigger / Title / Description / Header / Footer / Close / AcceptedSide**：无独立属性
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'snapPoints', type: 'number[]', default: '—' },
+    { name: 'snapPoint', type: 'number', default: '—' },
+    { name: 'defaultSnapPoint', type: 'number', default: '—' },
+    { name: 'minExtent', type: 'AvailableLayoutLength', default: "{ unit: 'logical', value: 0 }" },
+    {
+      name: 'maxExtent',
+      type: 'AvailableLayoutLength',
+      default: "上下 { unit: 'available-minus-root-text', value: 6 } / 左右 { unit: 'root-text', value: 20 }",
+    },
+    { name: 'dragDismissible', type: 'boolean', default: 'true' },
+    { name: 'dragDismissThreshold', type: 'number', default: '0.25' },
+    { name: 'enterDuration', type: 'number', default: '200' },
+    { name: 'leaveDuration', type: 'number', default: '200' },
+  ]}
+/>
+
+### Mask / Handle / Trigger / Close
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+    { name: 'Mask.enterDuration / leaveDuration', type: 'number', default: '150' },
+    { name: 'Handle.disabled', type: 'boolean', default: 'false' },
+    { name: 'Handle.a11yLabel', type: 'string', default: "'Resize drawer'" },
+    { name: 'Trigger / Close.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+`Header`、`Footer`、`Title` 与 `Description` 不声明额外属性。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-DRAWER.yaml', 'P-BASE-DRAWER.yaml']}
+/>

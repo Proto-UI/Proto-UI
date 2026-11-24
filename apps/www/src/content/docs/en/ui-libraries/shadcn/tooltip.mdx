@@ -4,48 +4,115 @@ description: 'A lightweight floating popup that displays supplementary labels on
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import CodeExample from '@/components/CodeExample.astro';
 import { shadcnTooltipFiles } from '@/content/docs/demo_components/tooltip-usage';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Tooltip reveals brief supplementary text when a user hovers or focuses a trigger, with shared open/close delay coordination across tooltips in the same group. The examples on this page use the **Shadcn Rhea** style preset.
+Tooltip displays brief supplementary text when a user hovers or focuses a trigger, with shared open/close delay coordination across sibling tooltips in a group. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
-<PrototypePreviewer demoId="demo-shadcn-tooltip" initialRuntime="wc" />
+<PrototypePreviewer
+  demoId="demo-shadcn-tooltip"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## Installation
 
-The complete examples below target the current workspace 0.3 source packages (including the Vue 2.6 Adapter). For the published 0.2.0 release, see [Quick Start](/en/start-here/quick-start/).
+Add Tooltip with the CLI (replace `wc` with `react`, `vue`, or `vue2` for your framework):
 
-When installing from workspace source in an existing app, install the CLI, `@proto.ui/prototypes-shadcn`, and your host Adapter (`@proto.ui/adapter-web-component`, `@proto.ui/adapter-react`, `@proto.ui/adapter-vue`, or `@proto.ui/adapter-vue2`, where Vue 2 requires Vue `>=2.6.0 <2.7`) from the same source revision. See [scripts/release/publish.mjs](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) and [scripts/release/consumer-smoke-cli.mjs](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs) for the local tarball pack and clean consumer install flow.
+<InstallCommandCard
+  manager="pnpm"
+  commands={{
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-tooltip',
+    npm: 'npx @proto.ui/cli@latest add wc shadcn-tooltip',
+    yarn: 'yarn dlx @proto.ui/cli@latest add wc shadcn-tooltip',
+    bun: 'bunx @proto.ui/cli@latest add wc shadcn-tooltip',
+  }}
+/>
 
-Once those packages are installed, run the local CLI in your app directory and keep the generated `proto-ui-style.css` (which provides the layout and positioning rules):
-
-```sh
-node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --prototypes shadcn
-node node_modules/@proto.ui/cli/bin/proto-ui.js add wc shadcn-tooltip --no-install --no-interactive
-```
-
-Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your target framework.
+Wrap sibling tooltips in `ShadcnTooltipGroup` to share delay defaults and warm handoff timing, and keep the generated `proto-ui-style.css` imported in your application entry.
 
 ## Usage
 
-Tooltip consists of `Group`, `Root`, `Trigger`, and `Content`:
+```tsx
+import {
+  ShadcnTooltipGroup,
+  ShadcnTooltipRoot,
+  ShadcnTooltipTrigger,
+  ShadcnTooltipContent,
+} from '../proto-ui/components/react';
 
-- `Group` coordinates timing across sibling tooltips: a cold hover opens after `700ms`, closes after `100ms`, and opens sibling tooltips immediately within the `300ms` skip window so at most one tooltip stays open at once.
-- Focusing a `Trigger` via `Tab` opens its tooltip immediately; pressing `Escape` closes it while keeping focus on the trigger.
-- `Content` renders in a portal and automatically links and cleans up `aria-describedby`. Keep tooltip content brief and non-interactive; use Popover or a non-modal Dialog for interactive content.
+export function Example() {
+  return (
+    <ShadcnTooltipGroup>
+      <ShadcnTooltipRoot>
+        <ShadcnTooltipTrigger styleProfile="rhea">Hover</ShadcnTooltipTrigger>
+        <ShadcnTooltipContent side="top" styleProfile="rhea">
+          Add to library
+        </ShadcnTooltipContent>
+      </ShadcnTooltipRoot>
+    </ShadcnTooltipGroup>
+  );
+}
+```
 
-### Complete host examples
+### Composition
 
-Copy the files for your target host below (one `Group` coordinating two uncontrolled `Root` instances, each with its own `Trigger` and non-interactive `Content`):
+```text
+TooltipGroup (optional)
+└── TooltipRoot
+    ├── TooltipTrigger
+    └── TooltipContent
+```
 
-<CodeExample
-  files={shadcnTooltipFiles}
-  initialHost="wc"
-  label="Shadcn Tooltip complete host Usage"
+- `Group` coordinates timing across sibling tooltips: a cold hover opens after `700ms`, closes after `100ms`, and switches immediately across siblings within the `300ms` skip window so at most one tooltip stays open at once.
+- Focusing a `Trigger` via `Tab` opens its tooltip immediately; pressing `Escape` dismisses it while keeping focus on the trigger.
+- `Content` renders in a portal and automatically manages `aria-describedby`. Keep content brief and non-interactive; use Popover or a non-modal Dialog for interactive content.
+
+## Examples
+
+### Basic
+
+Pair a single trigger with a short label. Set `openDelay={0}` for immediate feedback on hover.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tooltip-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Side
+
+Use the `side` prop on `Content` to position the tooltip on any edge (`left`, `top`, `bottom`, `right`).
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tooltip-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### With Keyboard Shortcut
+
+Place a concise label alongside a non-interactive shortcut badge inside `Content`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tooltip-shortcut"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled Button
+
+Wrap a disabled button inside `Trigger` so users can still inspect why an action is unavailable.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tooltip-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
 ### Tooltip on a Button
@@ -70,36 +137,89 @@ export const tooltipButton = definePrototype<ButtonProps, ButtonExposes>({
 - To wrap an existing styled button prototype, preserve its static `modules` declaration, call its `setup(def)` followed by `useTooltipTrigger()`, and return its render function.
 - When the button lives inside a `ShadowRoot`, use the [same-tree portal recipe](/en/ui-libraries/base/tooltip/#shadowroot) so `aria-describedby` resolves across the shadow boundary.
 
+### Complete Host Examples
+
+Copy the full multi-file setup for Web Components, React, Vue, or Vue 2:
+
+<CodeExample
+  files={shadcnTooltipFiles}
+  initialHost="wc"
+  label="Shadcn Tooltip complete host Usage"
+/>
+
 ## API
 
-Pass `open` on `Root` for controlled mode. `Root` inherits `Group` delays unless overridden:
+### Group
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'defaultOpen', type: 'boolean', default: 'false' },
-    { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'openDelay', type: 'number', default: '700' },
     { name: 'closeDelay', type: 'number', default: '100' },
     { name: 'skipDelay', type: 'number', default: '300' },
-    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: 'top' },
-    { name: 'align', type: "'start' | 'center' | 'end'", default: 'center' },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit'" },
+  ]}
+/>
+
+### Root
+
+Pass `open` for controlled mode. `Root` inherits `Group` delays unless overridden.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: 'undefined' },
+    { name: 'closeDelay', type: 'number', default: 'undefined' },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit'" },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit'" },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'top'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
     { name: 'sideOffset', type: 'number', default: '4' },
     { name: 'alignOffset', type: 'number', default: '0' },
     { name: 'avoidCollisions', type: 'boolean', default: 'true' },
     { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'enterDuration', type: 'number', default: '150' },
+    { name: 'leaveDuration', type: 'number', default: '100' },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit'" },
   ]}
 />
 
-Prop ownership:
+### Events, States & Methods
 
-- `defaultOpen` and `disabled` belong to `Root` (`Trigger` also accepts `disabled`).
-- `openDelay`, `closeDelay`, and `skipDelay` belong to `Group`.
-- `side`, `align`, `sideOffset`, `alignOffset`, `avoidCollisions`, and `collisionPadding` belong to `Content`.
+- **Root**: Exposes read-only state `open`, event `openChange` (`{ open, reason }`), and methods `openTooltip(reason?)`, `close(reason?)`, `toggle(reason?)`.
+- **Trigger**: Exposes read-only states `disabled`, `hovered`, `focused`, `focusVisible`, and method `focusSelf(options?)`.
+- **Content**: Exposes read-only state `open` and Transition handles (`transitionState`, `isPresent`, `controls`).
 
 ## References
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-TOOLTIP.yaml', 'P-BASE-TOOLTIP.yaml', 'P-BASE-TOOLTIP-CONTENT.yaml']}
+  files={[
+    'P-SHADCN-TOOLTIP.yaml',
+    'P-SHADCN-TOOLTIP-GROUP.yaml',
+    'P-SHADCN-TOOLTIP-TRIGGER.yaml',
+    'P-SHADCN-TOOLTIP-CONTENT.yaml',
+    'P-BASE-TOOLTIP.yaml',
+    'P-BASE-TOOLTIP-CONTENT.yaml',
+  ]}
 />

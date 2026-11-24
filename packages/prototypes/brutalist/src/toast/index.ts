@@ -5,8 +5,8 @@ export { default as toastDescription } from './description.proto';
 export { default as toastAction } from './action.proto';
 export { default as toastClose } from './close.proto';
 export { default } from './root.proto';
+export type { BrutalistToastType, ToastRootProps } from './root.proto';
 export type {
-  ToastRootProps,
   ToastRootExposes,
   ToastViewportProps,
   ToastViewportExposes,

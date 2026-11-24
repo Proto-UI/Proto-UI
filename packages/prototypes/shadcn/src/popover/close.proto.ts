@@ -5,6 +5,7 @@ import { setupPopoverCommandPaint } from './command-paint';
 
 export default definePrototype<PopoverCloseProps, PopoverCloseExposes>({
   name: 'shadcn-popover-close',
+  modules: asPopoverClose.modules,
   setup(def) {
     const behavior = asPopoverClose();
     const state = behavior.getState!;
@@ -18,5 +19,6 @@ export default definePrototype<PopoverCloseProps, PopoverCloseExposes>({
       },
       'close'
     );
+    return behavior.render;
   },
 });

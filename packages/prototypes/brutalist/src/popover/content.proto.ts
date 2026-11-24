@@ -5,6 +5,7 @@ import { BRUTALIST_PANEL_TOKENS } from '../style';
 
 export default definePrototype<PopoverContentProps, PopoverContentExposes>({
   name: 'brutalist-popover-content',
+  modules: asPopoverContent.modules,
   setup(def) {
     const behavior = asPopoverContent();
     def.props.define({
@@ -16,7 +17,8 @@ export default definePrototype<PopoverContentProps, PopoverContentExposes>({
       intent: (i) =>
         i.feedback.style.use(
           tw(
-            'rounded-base border-2 border-border bg-background text-foreground font-sans font-medium p-4 z-50 w-72 max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-y-auto flex flex-col gap-4'
+            BRUTALIST_PANEL_TOKENS,
+            'shadow-[3px_3px_0_0_var(--pui-foreground)] p-4 z-50 w-72 max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-y-auto flex flex-col gap-4 outline-none'
           )
         ),
     });

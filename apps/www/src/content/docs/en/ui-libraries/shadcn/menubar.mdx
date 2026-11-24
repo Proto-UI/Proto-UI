@@ -1,13 +1,13 @@
 ---
 title: 'Menubar'
-description: 'A keyboard-coordinated bar of independent command panels.'
+description: 'A visually persistent horizontal menu bar with coordinated command panels and roving keyboard navigation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Menubar organizes multiple independent command panels into a single horizontal bar with coordinated keyboard navigation. The examples on this page use the **Shadcn Rhea** style preset.
+A visually persistent desktop-style menu bar that organizes independent command panels into a single horizontal bar with coordinated keyboard navigation. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -15,54 +15,172 @@ Menubar organizes multiple independent command panels into a single horizontal b
   demoId="demo-shadcn-menubar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source and not yet included in the 0.2.0 stable release; import the prototypes from `@proto.ui/prototypes-shadcn/menubar` and adapt them for your target runtime.
 
 ## Usage
 
-Menubar consists of four parts: `Root`, `Trigger`, `Content`, and `Item`:
+```tsx
+import {
+  ShadcnMenubarRoot,
+  ShadcnMenubarTrigger,
+  ShadcnMenubarContent,
+  ShadcnMenubarItem,
+} from '../proto-ui/components/react';
 
-- `Root` manages the currently open panel identifier (`value`).
-- `Trigger` and `Content` pair via matching `value` props.
-- `Item` represents an actionable command inside a panel and supports `inset` alignment as well as `variant="destructive"` styling.
+export function Example() {
+  return (
+    <ShadcnMenubarRoot styleProfile="rhea" a11yLabel="Project commands">
+      <ShadcnMenubarTrigger value="file">File</ShadcnMenubarTrigger>
+      <ShadcnMenubarContent value="file" a11yLabel="File commands">
+        <ShadcnMenubarItem value="new">New Tab</ShadcnMenubarItem>
+        <ShadcnMenubarItem value="open">New Window</ShadcnMenubarItem>
+        <ShadcnMenubarItem value="delete" variant="destructive">
+          Delete
+        </ShadcnMenubarItem>
+      </ShadcnMenubarContent>
+    </ShadcnMenubarRoot>
+  );
+}
+```
+
+### Composition
+
+```text
+MenubarRoot
+├── MenubarTrigger (value="file")
+├── MenubarContent (value="file")
+│   ├── MenubarItem
+│   └── MenubarItem
+├── MenubarTrigger (value="edit")
+└── MenubarContent (value="edit")
+    └── MenubarItem
+```
+
+- `Root` owns the active panel identifier (`value`) and coordinates roving keyboard focus across triggers.
+- `Trigger` and `Content` pair through matching `value` props.
+- `Item` represents an actionable command with `inset` alignment, `variant="destructive"` styling, and `closeOnSelect={false}` persistence.
 
 ### Controlled and uncontrolled
 
-Pass `value` to control the open panel externally and respond to change requests, or use `defaultValue` for uncontrolled state.
+Pass `value` and listen to `valueChange` to control the open panel externally, or pass `defaultValue` for uncontrolled state.
 
 ### Keyboard and accessibility
 
 - The bar exposes a single roving `Tab` stop; use `ArrowLeft` and `ArrowRight` to move between triggers.
-- Press `ArrowDown` or `ArrowUp` to open a panel and navigate items vertically, or type characters for typeahead jump.
-- Press `Escape` to close the open panel and return focus to its trigger; outside clicks and command selection also dismiss the panel.
+- Press `ArrowDown` or `ArrowUp` to open a panel and move vertically through items, or type characters for typeahead jump.
+- Press `Escape` to close the open panel and return focus to its trigger; outside clicks and command selection also dismiss the panel by default.
 
-### Style presets
+## Examples
 
-Switch visual presets with `styleProfile`: `rhea`, `new-york-v4` (alias `new-york`), `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, and `sera`. Unknown presets are ignored so the active configuration remains intact, and changing presets preserves value, events, and behavior.
+### Destructive Actions
+
+Mark high-impact commands with `variant="destructive"` and organize groups with visual separators.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-menubar-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Inset, Disabled, and Persistent Items
+
+Set `closeOnSelect={false}` on toggleable options to keep the menu open while toggling, use `inset` to align sibling actions, and disable individual items or top-level triggers.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-menubar-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled State
+
+Control the active panel through `value` and `valueChange`, and set `loop={false}` to stop arrow navigation at the bar edges.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-menubar-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Style Presets
+
+Switch visual presets via `styleProfile` across `rhea`, `new-york-v4` (alias `new-york`), `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, and `sera` without altering menu semantics.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-menubar-profiles"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root` (pass `value` for controlled mode):
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: '— (controlled when provided)' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'loop', type: 'boolean', default: 'true' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    {
+      name: 'styleProfile',
+      type: "'rhea' | 'new-york-v4' | 'new-york' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera'",
+      default: "'new-york-v4'",
+    },
   ]}
 />
 
-Other part defaults:
+Events & methods: `valueChange({ value, reason })`, `requestValue(value, reason?)`, `close()`.
 
-- `Trigger`: `disabled` defaults to `false`.
-- `Content`: `sideOffset` defaults to `4`.
-- `Item`: `closeOnSelect` defaults to `true`.
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'Required (pairs with Content)' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: 'Inherited from Root scope' },
+  ]}
+/>
+
+Exposed states & methods: `expanded`, `disabled`, `focused`, `focusVisible`, `focusSelf(options?)`.
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'Required (pairs with Trigger)' },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: 'Inherited from Root scope' },
+  ]}
+/>
+
+Exposed states & methods: `open`, `focusFirst()`, `focusLast()`.
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: 'Inherited from Root scope' },
+  ]}
+/>
+
+Events & methods: `select({ value, menuValue })`, `focusSelf(options?)`.
 
 ## References
 

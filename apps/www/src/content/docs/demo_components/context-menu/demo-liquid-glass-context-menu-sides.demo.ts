@@ -1,0 +1,56 @@
+import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
+
+function makeSideMenu(side: 'top' | 'right' | 'bottom' | 'left') {
+  return {
+    kind: 'proto' as const,
+    prototypeId: 'liquid-glass-context-menu-root',
+    children: [
+      {
+        kind: 'proto' as const,
+        prototypeId: 'liquid-glass-context-menu-trigger',
+        className: 'h-28 w-full border-dashed bg-secondary/70',
+        children: [`Right click (${side})`],
+      },
+      {
+        kind: 'proto' as const,
+        prototypeId: 'liquid-glass-context-menu-content',
+        props: { side, sideOffset: 4 },
+        children: [
+          {
+            kind: 'proto' as const,
+            prototypeId: 'liquid-glass-context-menu-item',
+            props: { value: 'back', textValue: 'Back' },
+            children: ['Back'],
+          },
+          {
+            kind: 'proto' as const,
+            prototypeId: 'liquid-glass-context-menu-item',
+            props: { value: 'forward', textValue: 'Forward' },
+            children: ['Forward'],
+          },
+          {
+            kind: 'proto' as const,
+            prototypeId: 'liquid-glass-context-menu-item',
+            props: { value: 'reload', textValue: 'Reload' },
+            children: ['Reload'],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+export default {
+  type: 'demo',
+  root: {
+    kind: 'box',
+    className:
+      'grid w-full max-w-md grid-cols-2 gap-4 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    children: [
+      makeSideMenu('top'),
+      makeSideMenu('right'),
+      makeSideMenu('bottom'),
+      makeSideMenu('left'),
+    ],
+  },
+} satisfies DemoSpec;

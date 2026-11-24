@@ -6,6 +6,9 @@ export { default as dialogDescription } from './description.proto';
 export { default as dialogClose } from './close.proto';
 export { default as dialogMask } from './mask.proto';
 export { default } from './root.proto';
+export type { LiquidGlassDialogContentProps } from './content.proto';
+export type { LiquidGlassDialogTriggerProps } from './trigger.proto';
+export type { LiquidGlassDialogCloseProps } from './close.proto';
 export type {
   DialogRootProps,
   DialogRootExposes,

@@ -30,10 +30,12 @@ const families = {
   },
 } as const;
 
-const styles = `/* Application-owned layout and passive Trigger presentation. */
+const styledFamilyStyles = `/* Application-owned layout and passive Trigger presentation. */
 .tooltip-examples { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; padding: 3rem 1rem; }
 .tooltip-example-trigger { display: inline-flex; border: 1px solid currentColor; border-radius: 0.375rem; padding: 0.5rem 0.75rem; font: inherit; font-size: 0.875rem; }
-.tooltip-example-trigger:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.tooltip-example-trigger:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }`;
+
+const baseStyles = `${styledFamilyStyles}
 /* Base has no family paint. Presence and positioning still come from Proto UI. */
 .base-tooltip-content { max-width: 20rem; border-radius: 0.375rem; background: #111827; color: #fff; padding: 0.375rem 0.75rem; font: 0.75rem/1.5 system-ui, sans-serif; }`;
 
@@ -116,7 +118,11 @@ function template(family: TooltipFamily, host: PublicRuntimeId): string {
 
 function createTooltipFiles(family: TooltipFamily): TooltipFiles {
   const { prefix, tag, open, close, skip, offset } = families[family];
-  const stylesheet: CodeExampleFile = { name: 'src/tooltip-demo.css', lang: 'css', code: styles };
+  const stylesheet: CodeExampleFile = {
+    name: 'src/tooltip-demo.css',
+    lang: 'css',
+    code: family === 'base' ? baseStyles : styledFamilyStyles,
+  };
   const wcSetup = `const group = document.querySelector('#tooltip-example-group');
 if (!(group instanceof HTMLElement)) throw new Error('Missing Tooltip Group');
 setElementProps(group, { openDelay: ${open}, closeDelay: ${close}, skipDelay: ${skip} });

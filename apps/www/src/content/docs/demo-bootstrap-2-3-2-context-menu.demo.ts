@@ -1,78 +1,100 @@
 import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
+
 export default {
-  'type': 'demo',
-  'root': {
-    'kind': 'box',
-    'className': 'min-w-0 grid gap-4 p-4',
-    'children': [
+  type: 'demo',
+  root: {
+    kind: 'box',
+    className: 'flex min-w-0 items-center justify-center p-4',
+    children: [
       {
-        'kind': 'proto',
-        'prototypeId': 'bootstrap-2-3-2-context-menu-root',
-        'children': [
+        kind: 'proto',
+        prototypeId: 'bootstrap-2-3-2-context-menu-root',
+        children: [
           {
-            'kind': 'proto',
-            'prototypeId': 'bootstrap-2-3-2-context-menu-trigger',
-            'children': ['Right-click, hold with touch/pen, or focus and press Shift+F10.'],
+            kind: 'proto',
+            prototypeId: 'bootstrap-2-3-2-context-menu-trigger',
+            className:
+              'flex h-36 w-72 items-center justify-center rounded border border-dashed border-border bg-secondary text-sm text-foreground',
+            children: ['Right click here'],
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'bootstrap-2-3-2-context-menu-content',
-            'children': [
+            kind: 'proto',
+            prototypeId: 'bootstrap-2-3-2-context-menu-content',
+            children: [
               {
-                'kind': 'proto',
-                'prototypeId': 'bootstrap-2-3-2-context-menu-item',
-                'children': ['Copy'],
-                'props': {
-                  'value': 'copy',
-                  'textValue': 'Copy',
-                },
-                'ref': 'copy',
+                kind: 'proto',
+                prototypeId: 'bootstrap-2-3-2-context-menu-item',
+                props: { value: 'back', textValue: 'Back' },
+                children: [
+                  'Back',
+                  {
+                    kind: 'box',
+                    tag: 'span',
+                    className: 'ml-auto text-xs opacity-70',
+                    children: ['⌘['],
+                  },
+                ],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'bootstrap-2-3-2-context-menu-item',
-                'children': ['Paste'],
-                'props': {
-                  'value': 'paste',
-                  'textValue': 'Paste',
-                },
-                'ref': 'paste',
+                kind: 'proto',
+                prototypeId: 'bootstrap-2-3-2-context-menu-item',
+                props: { value: 'forward', textValue: 'Forward', disabled: true },
+                children: [
+                  'Forward',
+                  {
+                    kind: 'box',
+                    tag: 'span',
+                    className: 'ml-auto text-xs opacity-70',
+                    children: ['⌘]'],
+                  },
+                ],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'bootstrap-2-3-2-context-menu-item',
-                'children': ['Unavailable'],
-                'props': {
-                  'value': 'disabled',
-                  'disabled': true,
-                },
+                kind: 'proto',
+                prototypeId: 'bootstrap-2-3-2-context-menu-item',
+                props: { value: 'reload', textValue: 'Reload' },
+                children: [
+                  'Reload',
+                  {
+                    kind: 'box',
+                    tag: 'span',
+                    className: 'ml-auto text-xs opacity-70',
+                    children: ['⌘R'],
+                  },
+                ],
+              },
+              {
+                kind: 'box',
+                attrs: { role: 'separator' },
+                className: 'my-2 h-px bg-border',
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'bootstrap-2-3-2-context-menu-item',
+                props: { value: 'save-page', textValue: 'Save Page' },
+                children: ['Save Page...'],
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'bootstrap-2-3-2-context-menu-item',
+                props: { value: 'devtools', textValue: 'Developer Tools' },
+                children: ['Developer Tools'],
+              },
+              {
+                kind: 'box',
+                attrs: { role: 'separator' },
+                className: 'my-2 h-px bg-border',
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'bootstrap-2-3-2-context-menu-item',
+                props: { value: 'delete', textValue: 'Delete', variant: 'destructive' },
+                children: ['Delete'],
               },
             ],
           },
         ],
-        'ref': 'root',
-      },
-      {
-        'kind': 'box',
-        'ref': 'status',
-        'attrs': {
-          'aria-live': 'polite',
-        },
-        'children': ['Select a command.'],
       },
     ],
-  },
-  setup({ refs, api }) {
-    api.setProps('root', {
-      onOpenChange: (detail: { open: boolean; reason: string }) => {
-        if (detail.open) refs.status.textContent = `Context menu opened: ${detail.reason}`;
-      },
-    });
-    for (const ref of ['copy', 'paste'])
-      api.setProps(ref, {
-        onSelect: (detail: { value: string }) => {
-          refs.status.textContent = detail.value + ' selected';
-        },
-      });
   },
 } satisfies DemoSpec;

@@ -10,7 +10,7 @@ export default definePrototype<ToastDescriptionProps, ToastDescriptionExposes>({
   modules: asToastDescription.modules,
   setup(def) {
     const behavior = asToastDescription();
-    def.feedback.style.use(tw('text-[14px] leading-[20px] text-inherit'));
+    def.feedback.style.use(tw('block mt-1 text-[14px] leading-[20px] text-inherit'));
     return behavior.render;
   },
 });

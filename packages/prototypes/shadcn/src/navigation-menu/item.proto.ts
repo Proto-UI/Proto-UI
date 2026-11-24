@@ -2,6 +2,7 @@ import { definePrototype } from '@proto.ui/core';
 import { asNavigationMenuItem } from '@proto.ui/prototypes-base/navigation-menu';
 import type { NavigationMenuItemProps, NavigationMenuItemExposes } from './types';
 import { setupNavigationActionPaint } from './visual';
+
 export default definePrototype<NavigationMenuItemProps, NavigationMenuItemExposes>({
   name: 'shadcn-navigation-menu-item',
   modules: asNavigationMenuItem.modules,
@@ -18,5 +19,6 @@ export default definePrototype<NavigationMenuItemProps, NavigationMenuItemExpose
       },
       'item'
     );
+    return behavior.render;
   },
 });

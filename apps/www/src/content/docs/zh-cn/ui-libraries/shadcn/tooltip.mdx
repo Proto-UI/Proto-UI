@@ -4,6 +4,7 @@ description: '在悬停或键盘聚焦时展示补充说明的轻量提示弹层
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import CodeExample from '@/components/CodeExample.astro';
 import { shadcnTooltipFiles } from '@/content/docs/demo_components/tooltip-usage';
@@ -13,36 +14,106 @@ Tooltip 在指针悬停或键盘聚焦触发元素时展示简短的补充说明
 
 ## 预览
 
-<PrototypePreviewer demoId="demo-shadcn-tooltip" initialRuntime="wc" />
+<PrototypePreviewer
+  demoId="demo-shadcn-tooltip"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## 安装
 
-当前完整源码示例基于工作区 0.3 源码包（包含 Vue 2.6 Adapter）。如需安装已发布的 0.2.0 稳定版，请参阅 [Quick Start](/zh-cn/start-here/quick-start/)。
+使用 CLI 初始化 Shadcn 主题并添加 Tooltip 组件（将 `wc` 替换为 `react`、`vue` 或 `vue2` 即可生成对应框架的封装）：
 
-在现有宿主应用中从本地源码包安装时，请从同一源码修订安装 CLI、`@proto.ui/prototypes-shadcn` 以及对应宿主的 Adapter（`@proto.ui/adapter-web-component`、`@proto.ui/adapter-react`、`@proto.ui/adapter-vue` 或 `@proto.ui/adapter-vue2`，其中 Vue 2 要求 Vue `>=2.6.0 <2.7`）。本地打包与安装流程可参考 [scripts/release/publish.mjs](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) 和 [scripts/release/consumer-smoke-cli.mjs](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs)。
+<InstallCommandCard
+  manager="pnpm"
+  commands={{
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-tooltip',
+    npm: 'npx @proto.ui/cli@latest add wc shadcn-tooltip',
+    yarn: 'yarn dlx @proto.ui/cli@latest add wc shadcn-tooltip',
+    bun: 'bunx @proto.ui/cli@latest add wc shadcn-tooltip',
+  }}
+/>
 
-安装配套包后，在应用目录运行本地 CLI 生成组件封装（请保留生成的 `proto-ui-style.css`，其中包含定位与显隐所需的结构样式）：
-
-```sh
-node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --prototypes shadcn
-node node_modules/@proto.ui/cli/bin/proto-ui.js add wc shadcn-tooltip --no-install --no-interactive
-```
-
-将 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件文件。
+如需在多个相邻 Tooltip 之间共享延迟与预热切换窗口，请使用 `ShadcnTooltipGroup` 包裹它们，并在入口保留生成的 `proto-ui-style.css`。
 
 ## 用法
 
-Tooltip 由 `Group`、`Root`、`Trigger` 和 `Content` 组成：
+```tsx
+import {
+  ShadcnTooltipGroup,
+  ShadcnTooltipRoot,
+  ShadcnTooltipTrigger,
+  ShadcnTooltipContent,
+} from '../proto-ui/components/react';
 
-- `Group` 协调同组多个 Tooltip 的显示延迟：冷启动悬停默认 `700ms` 后打开，关闭延迟 `100ms`；在 `300ms` 跳过窗口内移动到相邻触发器时会立即切换，且同组最多保持一个提示打开。
+export function Example() {
+  return (
+    <ShadcnTooltipGroup>
+      <ShadcnTooltipRoot>
+        <ShadcnTooltipTrigger styleProfile="rhea">Hover</ShadcnTooltipTrigger>
+        <ShadcnTooltipContent side="top" styleProfile="rhea">
+          Add to library
+        </ShadcnTooltipContent>
+      </ShadcnTooltipRoot>
+    </ShadcnTooltipGroup>
+  );
+}
+```
+
+### 组件结构
+
+```text
+TooltipGroup (可选)
+└── TooltipRoot
+    ├── TooltipTrigger
+    └── TooltipContent
+```
+
+- `Group` 协调同组多个 Tooltip 的显示延迟：冷启动悬停默认 `700ms` 后打开，关闭延迟 `100ms`；在 `300ms` 跳过窗口内移动到相邻触发器时立即切换，且同组最多保持一个提示打开。
 - 通过键盘 `Tab` 聚焦 `Trigger` 时立即显示提示，按 `Escape` 关闭并保持焦点在触发器上。
 - `Content` 默认通过 Portal 渲染并自动维护 `aria-describedby` 关联，适用于不可聚焦的补充文本；需要包含交互控件时请使用 Popover 或非模态 Dialog。
 
-### 完整宿主示例
+## 示例
 
-下方展示了 Web Components、React、Vue 和 Vue 2 的完整集成代码（一个 `Group` 内包含两个非受控 `Root`，每个 `Root` 搭配独立 `Trigger` 与 `Content`）：
+### 基础用法
 
-<CodeExample files={shadcnTooltipFiles} initialHost="wc" label="Shadcn Tooltip 完整宿主用法" />
+单个触发器配对一条简短说明，设置 `openDelay={0}` 可在悬停时立即显示。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tooltip-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 弹出方向
+
+使用 `Content` 上的 `side` 属性控制提示弹出的方向（`left`、`top`、`bottom`、`right`）。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tooltip-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 带快捷键提示
+
+在 `Content` 内放置简短操作名称与非交互式快捷键标签，帮助用户快速记住键盘操作。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tooltip-shortcut"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用按钮
+
+当按钮处于禁用态时，将其包裹在 `Trigger` 内部，即可在不启用按钮点击的情况下保留悬停说明。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tooltip-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ### 在 Button 上组合 Tooltip
 
@@ -66,36 +137,85 @@ export const tooltipButton = definePrototype<ButtonProps, ButtonExposes>({
 - 如需复用已有的 Shadcn 风格按钮原型，可在 `definePrototype` 中保留其静态 `modules` 声明，在 `setup(def)` 中先调用原按钮的 `setup(def)` 再调用 `useTooltipTrigger()`，并返回原 render 函数。
 - 当触发元素位于 `ShadowRoot` 内部时，请使用 [同树 Portal 配方](/zh-cn/ui-libraries/base/tooltip/#shadowroot)，以确保 `aria-describedby` 跨 Shadow 边界正确生效。
 
+### 完整宿主示例
+
+下方提供 Web Components、React、Vue 和 Vue 2 的多文件完整集成代码：
+
+<CodeExample files={shadcnTooltipFiles} initialHost="wc" label="Shadcn Tooltip 完整宿主用法" />
+
 ## API
 
-在 `Root` 上传入 `open` 进入受控模式；`Root` 未单独设置延迟时自动沿用 `Group` 的配置：
+### Group
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
-    { name: 'defaultOpen', type: 'boolean', default: 'false' },
-    { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'openDelay', type: 'number', default: '700' },
     { name: 'closeDelay', type: 'number', default: '100' },
     { name: 'skipDelay', type: 'number', default: '300' },
-    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: 'top' },
-    { name: 'align', type: "'start' | 'center' | 'end'", default: 'center' },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit'" },
+  ]}
+/>
+
+### Root
+
+传入 `open` 进入受控模式；未设置 `openDelay` / `closeDelay` 时自动沿用 `Group` 配置。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: 'undefined' },
+    { name: 'closeDelay', type: 'number', default: 'undefined' },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit'" },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit'" },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'top'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
     { name: 'sideOffset', type: 'number', default: '4' },
     { name: 'alignOffset', type: 'number', default: '0' },
     { name: 'avoidCollisions', type: 'boolean', default: 'true' },
     { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'enterDuration', type: 'number', default: '150' },
+    { name: 'leaveDuration', type: 'number', default: '100' },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit'" },
   ]}
 />
 
-属性归属说明：
+### 事件、状态与方法
 
-- `defaultOpen`、`disabled` 属于 `Root`（`Trigger` 也支持 `disabled`）。
-- `openDelay`、`closeDelay`、`skipDelay` 属于 `Group`。
-- `side`、`align`、`sideOffset`、`alignOffset`、`avoidCollisions`、`collisionPadding` 属于 `Content`。
+- **Root**：暴露只读状态 `open`，事件 `openChange`（`{ open, reason }`），以及方法 `openTooltip(reason?)`、`close(reason?)`、`toggle(reason?)`。
+- **Trigger**：暴露只读状态 `disabled`、`hovered`、`focused`、`focusVisible`，以及方法 `focusSelf(options?)`。
+- **Content**：暴露只读状态 `open` 与 Transition 状态（`transitionState`、`isPresent`、`controls`）。
 
 ## 参考
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-TOOLTIP.yaml', 'P-BASE-TOOLTIP.yaml', 'P-BASE-TOOLTIP-CONTENT.yaml']}
+  files={[
+    'P-SHADCN-TOOLTIP.yaml',
+    'P-SHADCN-TOOLTIP-GROUP.yaml',
+    'P-SHADCN-TOOLTIP-TRIGGER.yaml',
+    'P-SHADCN-TOOLTIP-CONTENT.yaml',
+    'P-BASE-TOOLTIP.yaml',
+    'P-BASE-TOOLTIP-CONTENT.yaml',
+  ]}
 />

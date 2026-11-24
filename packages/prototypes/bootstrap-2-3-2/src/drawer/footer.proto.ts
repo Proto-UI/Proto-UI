@@ -17,7 +17,7 @@ export default definePrototype<DrawerFooterProps, DrawerFooterExposes>({
     asDrawerFooter();
     def.feedback.style.use(
       tw(
-        'mb-0 px-[15px] pt-[14px] pb-[15px] text-right bg-secondary text-secondary-foreground border-t border-border rounded-b-[6px] shadow-none'
+        'mt-[auto] mb-0 px-[15px] pt-[14px] pb-[15px] text-right bg-secondary text-secondary-foreground border-t border-border rounded-b-[6px] shadow-none'
       )
     );
     return (renderer) => renderer.r.slot();

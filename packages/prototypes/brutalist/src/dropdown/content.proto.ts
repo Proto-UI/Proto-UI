@@ -8,6 +8,7 @@ const dropdownContent = definePrototype<
   BrutalistDropdownContentExposes
 >({
   name: 'brutalist-dropdown-content',
+  modules: asDropdownContent.modules,
   setup(def) {
     // P-BRUTALIST-DROPDOWN-MENU-CONTENT-BASE-INHERITANCE
     const dropdown = asDropdownContent();

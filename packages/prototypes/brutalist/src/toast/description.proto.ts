@@ -7,8 +7,10 @@ import {
 
 export default definePrototype<ToastDescriptionProps, ToastDescriptionExposes>({
   name: 'brutalist-toast-description',
+  modules: asToastDescription.modules,
   setup(def) {
     const behavior = asToastDescription();
-    def.feedback.style.use(tw('text-sm text-muted-foreground'));
+    def.feedback.style.use(tw('font-sans font-medium text-sm leading-5 text-current opacity-80'));
+    return behavior.render;
   },
 });

@@ -12,11 +12,8 @@ A modal dialog built on [Base Dialog](../../base/dialog/) with focus trapping, d
 
 ## Preview
 
-`P-SHADCN-DIALOG` and the inherited `P-BASE-DIALOG` contracts are **early draft**. These previews use the `0.3.0-alpha.2` workspace source for Web Components, React, Vue 3, and Vue 2.6. Choose matching CLI, adapter, and prototype versions for your application; see the compatibility and accessibility coverage below for the remaining checks.
-
 <div class="dialog-demo-container">
-
-<PrototypePreviewer
+  <PrototypePreviewer
     demoId="demo-shadcn-dialog"
     initialRuntime="wc"
     runtimes={['wc', 'react', 'vue', 'vue2']}
@@ -30,60 +27,181 @@ Initialize your project and import the generated `proto-ui-style.css` once as sh
 
 <InstallCommandCard command="npx @proto.ui/cli@0.2.0 add wc shadcn-dialog" manager="npm" />
 
-The published `0.2.0` CLI supports `wc`, `react`, and `vue`; replace `wc` with `react` or `vue` for those hosts. It generates the compound parts from `@proto.ui/prototypes-shadcn/dialog`, including both the convenience `ShadcnDialogContent` (with a default close icon) and `ShadcnDialogContentRaw`.
-
-Vue 2.6 (`>=2.6.0 <2.7`), the Rhea preset, and the Mask pointer-default behavior described below require the matching `0.3.0-alpha.2` workspace CLI, adapters, and prototype source. Keep this workspace preview separate from the pinned stable installation above.
+Replace `wc` with `react`, `vue`, or `vue2` to generate wrappers for those runtimes. The command outputs both the convenience `ShadcnDialogContent` (with a default close icon) and `ShadcnDialogContentRaw`.
 
 ## Usage
 
-### Anatomy
+```tsx
+import {
+  ShadcnButton,
+  ShadcnDialogContent,
+  ShadcnDialogDescription,
+  ShadcnDialogHeader,
+  ShadcnDialogMask,
+  ShadcnDialogRoot,
+  ShadcnDialogTitle,
+  ShadcnDialogTrigger,
+} from '@/components/proto-ui/shadcn';
 
-| Export | Responsibility |
-| --- | --- |
-| `ShadcnDialogRoot` | Manages controlled or uncontrolled `open`, `disabled`, `alert` mode, fallback `a11yLabel`, and open/close/toggle methods. |
-| `ShadcnDialogTrigger` | Unstyled open-command wrapper; place a `ShadcnButton` child inside for a visible trigger. |
-| `ShadcnDialogMask` | Modal backdrop overlay with a 150 ms leave transition. |
-| `ShadcnDialogContentRaw` | Centered modal panel with a 200 ms leave transition, focus trap, and dismissal handling, without a default close button. |
-| `ShadcnDialogContent` | CLI convenience wrapper over `ContentRaw` that includes a replaceable `ShadcnDialogCloseIcon`. |
-| `ShadcnDialogHeader` / `ShadcnDialogFooter` | Optional layout groups for the header and action bar. |
-| `ShadcnDialogTitle` / `ShadcnDialogDescription` | Automatically linked to `Content` via `aria-labelledby` and `aria-describedby`. |
-| `ShadcnDialogClose` | Unstyled close-command wrapper; place a button inside for a visible action. |
-| `ShadcnDialogCloseIcon` | Accessible top-right `X` close button (`Close` accessible name). |
+export function DialogExample() {
+  return (
+    <ShadcnDialogRoot>
+      <ShadcnDialogTrigger>
+        <ShadcnButton variant="outline">Open</ShadcnButton>
+      </ShadcnDialogTrigger>
+      <ShadcnDialogMask />
+      <ShadcnDialogContent>
+        <ShadcnDialogHeader>
+          <ShadcnDialogTitle>Are you absolutely sure?</ShadcnDialogTitle>
+          <ShadcnDialogDescription>
+            This action cannot be undone. This will permanently delete your account and remove your
+            data from our servers.
+          </ShadcnDialogDescription>
+        </ShadcnDialogHeader>
+      </ShadcnDialogContent>
+    </ShadcnDialogRoot>
+  );
+}
+```
 
-### Customizing the default close button
+### Composition
 
-`ShadcnDialogContent` supports three modes for its built-in close icon:
+```text
+ShadcnDialogRoot
+├── ShadcnDialogTrigger
+├── ShadcnDialogMask
+└── ShadcnDialogContent
+    ├── ShadcnDialogHeader
+    │   ├── ShadcnDialogTitle
+    │   └── ShadcnDialogDescription
+    ├── ShadcnDialogFooter
+    │   └── ShadcnDialogClose
+    └── ShadcnDialogCloseIcon
+```
 
-- **Default**: Renders `ShadcnDialogCloseIcon` automatically.
-- **Replace**: Provide a direct `ShadcnDialogCloseIcon` child, React `close` prop, or Vue `#close` slot.
-- **Omit**: Pass React `close={null}`, an empty Vue `#close` slot, or the Web Component attribute `data-pui-no-default-close`, or use `ShadcnDialogContentRaw` directly.
+### Behavior and customization
 
-### Focus, dismissal, and alert mode
+- **Trigger & close wrappers**: `ShadcnDialogTrigger` and `ShadcnDialogClose` stay unstyled; wrap a `ShadcnButton` child inside to keep button styling and a single `Tab` stop.
+- **Customizing the close icon**: `ShadcnDialogContent` includes `ShadcnDialogCloseIcon` by default. Replace it via a direct child, React `close` prop, or Vue `#close` slot, or omit it via `close={null}`, an empty `#close` slot, `data-pui-no-default-close`, or `ShadcnDialogContentRaw`.
+- **Focus & dismissal**: Focus loops inside the panel while open and returns to the trigger when dismissed. Press `Escape` or click outside to close; set `alert={true}` on `ShadcnDialogRoot` for `role="alertdialog"` to block outside-click dismissal.
+- **Accessible naming**: `Title` and `Description` automatically wire `aria-labelledby` and `aria-describedby`. Provide `a11yLabel` on `Root` as a fallback when no `Title` is mounted.
 
-- `Content` traps and loops focus while open, then restores focus to the trigger when dismissed.
-- Standard dialogs dismiss on `Escape` or outside clicks. Set `alert={true}` on `ShadcnDialogRoot` for `role="alertdialog"`, which keeps `Escape` dismissal while blocking outside clicks (pair it with a `Description` containing the primary message).
-- Use `a11yLabel` on `Root` as a fallback accessible name when no `Title` is rendered.
-- `Mask` and `Content` remain mounted until their 150 ms and 200 ms leave transitions finish, and a participating `Mask` prevents pointer defaults from stealing restored focus.
+## Examples
 
-### Compatibility and accessibility coverage
+### Custom Close Button
 
-[Current Dialog content coverage](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-BASE-DIALOG-CONTENT-0001.yaml) records the checked behavior and remaining browser work. The complete keyboard flow across all four preview hosts, controlled refusal, responsive/theme/locale combinations, and installed-package integrations still have outstanding checks. Screen-reader behavior needs separate validation with the browser and assistive-technology combination used by your application.
+Pair custom close controls and layout alignment for workflows such as sharing a link.
 
-Compose the separate Mask and Content parts; upstream `asChild` and `modal` are not supported props. Header and Footer provide layout; the application owns validation and persistence and decides when an operation has succeeded and the dialog should close.
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-shadcn-dialog-custom-close"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### No Close Button
+
+Omit the top-right close icon and let users dismiss via `Escape`, backdrop click, or footer actions.
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-shadcn-dialog-no-close"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### Sticky Footer
+
+Keep footer actions visible while long dialog content scrolls inside the body container.
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-shadcn-dialog-sticky-footer"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### Scrollable Content
+
+Long content scrolls smoothly inside the dialog while the header stays in view.
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-shadcn-dialog-scrollable"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### RTL
+
+Modern Shadcn style presets use logical alignment utilities (`end-*`, `text-start`) that mirror naturally in `dir="rtl"` layouts.
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-shadcn-dialog-rtl"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
 
 ## API
 
-Passing `open` selects controlled mode. These props belong to `ShadcnDialogRoot`:
+### ShadcnDialogRoot
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean', default: 'undefined (controlled)' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'alert', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
   ]}
 />
+
+Exposed methods & events: `openDialog(reason?)`, `close(reason?)`, `toggle(reason?)`, and the `openChange` event (`{ open, reason, focusReason }`).
+
+### ShadcnDialogTrigger / ShadcnDialogClose / ShadcnDialogCloseIcon
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+  ]}
+/>
+
+### ShadcnDialogMask
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'passthrough', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+  ]}
+/>
+
+### ShadcnDialogContent
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'focusEntry', type: "'auto' | 'manual'", default: "'auto'" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+  ]}
+/>
+
+`ShadcnDialogHeader`, `ShadcnDialogFooter`, `ShadcnDialogTitle`, and `ShadcnDialogDescription` also accept `styleProfile` to inherit or override the active style preset.
 
 ## References
 

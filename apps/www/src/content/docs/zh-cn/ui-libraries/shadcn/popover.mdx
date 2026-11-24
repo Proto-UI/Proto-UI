@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Popover 在触发元素附近展示非模态浮层，适合放置快捷设置、表单片段或轻量级导航内容。本页示例使用 **Shadcn Rhea** 风格。
+Popover 在触发元素附近展示非模态浮层，适合放置快捷设置、表单片段或轻量级导航内容。本页示例采用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -15,62 +15,123 @@ Popover 在触发元素附近展示非模态浮层，适合放置快捷设置、
   demoId="demo-shadcn-popover"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+Popover 目前在工作区源码中提供，尚未进入 0.2.0 稳定版 CLI。可直接从 `@proto.ui/prototypes-shadcn/popover` 导入并使用对应框架适配器（Web Components、React、Vue 3 或 Vue 2）：
+
+```ts
+import {
+  popoverRoot,
+  popoverTrigger,
+  popoverContent,
+  popoverTitle,
+  popoverDescription,
+  popoverClose,
+} from '@proto.ui/prototypes-shadcn/popover';
+```
 
 ## 用法
 
-Popover 由 `Root`、`Trigger`、`Content`、`Title`、`Description` 和 `Close` 组成：
+```tsx
+<Popover styleProfile="rhea">
+  <PopoverTrigger>Open Popover</PopoverTrigger>
+  <PopoverContent align="start">
+    <PopoverTitle>Dimensions</PopoverTitle>
+    <PopoverDescription>Set the dimensions for the layer.</PopoverDescription>
+  </PopoverContent>
+</Popover>
+```
 
-- `Content` 相对 `Trigger` 定位，支持通过 `side`、`align`、`sideOffset`、`alignOffset` 和 `collisionPadding` 调整位置与防碰撞边距。
-- 非模态设计不会锁定背景滚动或限制 `Tab` 键移动。
-- 点击外部区域、焦点移出 `Trigger` 与 `Content`、按下 `Escape` 或触发 `Close` 都会请求关闭。焦点在 `Trigger` 与 Portal 中的 `Content` 之间切换仍视为内部操作；因焦点移出外部控件而关闭时，焦点保留在目标外部控件上。
+### 组件结构
 
-### 受控与非受控
+```text
+PopoverRoot
+├── PopoverTrigger
+└── PopoverContent
+    ├── PopoverTitle
+    ├── PopoverDescription
+    └── PopoverClose
+```
 
-- `Root` 支持通过 `open` 受控或通过 `defaultOpen` 非受控管理展开状态。
-- 传入 `open` 时，请监听 `openChange` 事件并在回调中更新状态。若拒绝 `focus.outside` 关闭请求，`Content` 会保持显示且不影响外部焦点。纯焦点移出触发的关闭请求中，`focusReason` 为 `'programmatic'`。
+- **定位与防碰撞**：`Content` 相对 `Trigger` 自动定位，支持 `side`、`align`、`sideOffset`、`alignOffset` 与 `collisionPadding`。
+- **非模态交互与焦点**：打开时不会锁定页面滚动或限制 `Tab` 键导航。点击外部区域、按下 `Escape`、激活 `Close` 或焦点移出 `Trigger` 与 `Content` 时均会请求关闭；因焦点移出到外部控件而关闭时，焦点保留在目标外部控件上。
+- **风格预设**：支持 `vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea` 与 `new-york-v4`；可通过最近祖先 `shadcn-style-scope` 继承，也可在各部件上传入 `styleProfile` 单独指定。
+
+## 示例
+
+### 基础用法
+
+包含标题与说明的简洁弹出面板，使用 `align="start"` 与触发器左缘对齐。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-popover-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 对齐方式
+
+使用 `Content` 的 `align` 属性控制弹层相对触发器的对齐位置（`start`、`center`、`end`）。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-popover-align"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 弹出方向
+
+使用 `side` 与 `sideOffset` 指定弹出方向（`top`、`right`、`bottom`、`left`），视口空间不足时会自动防碰撞翻转。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-popover-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控状态
+
+传入 `open` 并监听 `openChange` 事件，由外部状态控制弹层的打开与关闭。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-popover-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ### 导航呈现
 
-将 `Trigger` 和 `Content` 的 `presentation` 设为 `'navigation'`，可展示适配锚点可用空间并支持内部滚动的导航面板，内部链接保持浏览器原生交互语义：
+将 `Trigger` 和 `Content` 的 `presentation` 设为 `'navigation'`，可展示适配锚点可用空间并支持内部滚动的导航面板，内部链接保留浏览器原生导航语义。
 
 <PrototypePreviewer
   demoId="demo-shadcn-popover-navigation"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## API
 
-传入 `open` 可进入受控模式。`Root` 暴露 `open`、`openPopover`、`close`、`toggle` 和 `openChange`：
+`Root` 暴露只读状态 `open`、方法 `openPopover` / `close` / `toggle`，以及 `openChange` 事件。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
-    { name: 'open', type: 'boolean | undefined', default: '非受控' },
-    { name: 'defaultOpen', type: 'boolean', default: 'false' },
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'a11yLabel', type: 'string', default: "''" },
-    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: 'bottom' },
-    { name: 'align', type: "'start' | 'center' | 'end'", default: 'center' },
-    { name: 'sideOffset', type: 'number', default: '4' },
-    { name: 'alignOffset', type: 'number', default: '0' },
-    { name: 'collisionPadding', type: 'number', default: '8' },
-    { name: 'presentation', type: "'default' | 'navigation'", default: 'default' },
+    { name: 'open (Root)', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultOpen (Root)', type: 'boolean', default: 'false' },
+    { name: 'disabled (Root / Trigger / Close)', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel (Root)', type: 'string', default: "''" },
+    { name: 'side (Content)', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align (Content)', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset (Content)', type: 'number', default: '4' },
+    { name: 'alignOffset (Content)', type: 'number', default: '0' },
+    { name: 'collisionPadding (Content)', type: 'number', default: '8' },
+    { name: 'presentation (Trigger / Content)', type: "'default' | 'navigation'", default: "'default'" },
+    { name: 'enterDuration / leaveDuration (Content)', type: 'number', default: '0' },
+    { name: 'styleProfile (各部件)', type: "ShadcnStyleId | 'inherit'", default: "'inherit' (回退 'nova')" },
   ]}
 />
-
-属性归属说明：
-
-- `open`、`defaultOpen`、`disabled`、`a11yLabel` 属于 `Root`。
-- `side`、`align`、`sideOffset`、`alignOffset`、`collisionPadding` 属于 `Content`。
-- `presentation` 属于 `Trigger` 和 `Content`。
 
 ## 参考
 

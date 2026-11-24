@@ -1,11 +1,13 @@
 ---
 title: 'Popover'
-description: 'An anchored non-modal Liquid Glass popover for compact interactive content.'
+description: 'An anchored non-modal Liquid Glass popover with prominence hierarchy and accessibility fallbacks.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Popover displays compact interactive content anchored to a trigger without locking background scroll or trapping Tab navigation.
+Liquid Glass Popover displays a floating translucent surface anchored to a trigger with regular and prominent hierarchy, concentric corner geometry, and automatic Reduced Transparency, Forced Colors, and Reduced Motion fallbacks, without locking background scroll or trapping `Tab` navigation.
 
 ## Preview
 
@@ -13,25 +15,117 @@ Liquid Glass Popover displays compact interactive content anchored to a trigger 
   demoId="demo-liquid-glass-popover"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Liquid Glass Popover is currently available from the workspace source and not yet included in the 0.2.0 stable CLI release. Import the prototypes directly from `@proto.ui/prototypes-liquid-glass/popover` and adapt them for your target runtime:
+
+```ts
+import {
+  popoverRoot,
+  popoverTrigger,
+  popoverContent,
+  popoverTitle,
+  popoverDescription,
+  popoverClose,
+} from '@proto.ui/prototypes-liquid-glass/popover';
+```
 
 ## Usage
 
-- **Parts**: `Root`, `Trigger`, `Content`, `Title`, `Description`, `Close`.
-- **Positioning**: `Content` anchors against `Trigger` using `side`, `align`, `sideOffset`, `alignOffset`, and `collisionPadding`.
-- **Dismissal and focus**: outside press, focus leaving both `Trigger` and `Content`, Escape, and `Close` request dismissal. Moving focus between `Trigger` and portaled `Content` counts as inside; closing due to focus leaving keeps focus on the newly focused outside element (`focusReason` is `'programmatic'`).
-- **Controlled state**: supply `open` and handle `openChange` for controlled mode, or use `defaultOpen` for uncontrolled state. Refusing a close request keeps `Content` mounted without trapping focus.
+```tsx
+<LiquidGlassPopover>
+  <LiquidGlassPopoverTrigger>Open Popover</LiquidGlassPopoverTrigger>
+  <LiquidGlassPopoverContent align="start">
+    <LiquidGlassPopoverTitle>Dimensions</LiquidGlassPopoverTitle>
+    <LiquidGlassPopoverDescription>Set the dimensions for the layer.</LiquidGlassPopoverDescription>
+  </LiquidGlassPopoverContent>
+</LiquidGlassPopover>
+```
+
+### Composition
+
+```text
+LiquidGlassPopoverRoot
+├── LiquidGlassPopoverTrigger
+└── LiquidGlassPopoverContent
+    ├── LiquidGlassPopoverTitle
+    ├── LiquidGlassPopoverDescription
+    └── LiquidGlassPopoverClose
+```
+
+- **Material layering (never stack glass-on-glass)**: `Content` activates the `liquid-glass` material only while open with `material="auto"`. `Close` stays an opaque concentric control (`rounded-xl` inside the `rounded-2xl` container) so nested controls never stack glass over glass.
+- **Accessibility fallbacks**: When Reduced Transparency (`prefers-reduced-transparency: reduce`) or Forced Colors (`forced-colors: active`) is enabled, the material candidate withdraws automatically to the high-contrast opaque fallback surface. Reduced Motion (`prefers-reduced-motion: reduce`) disables enter/leave animations and transitions.
+- **Positioning & dismissal**: Supports `side`, `align`, `sideOffset`, `alignOffset`, and `collisionPadding`. Outside presses, `Escape`, `Close`, and focus moving outside both `Trigger` and `Content` request dismissal.
+
+## Examples
+
+### Basic
+
+A floating Liquid Glass popover showcased over a translucent gradient canvas.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-popover-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Material & Prominence
+
+Compare `prominence="regular"`, `prominence="prominent"`, and explicit `material="opaque"` surfaces.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-popover-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Align
+
+Use `align` on `Content` to align to `start`, `center`, or `end`.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-popover-align"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Pass `open` and handle `openChange` to synchronize open state with parent state.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-popover-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop / Event | Description |
-| --- | --- | --- |
-| Root | `open`, `defaultOpen` | Controlled / uncontrolled open state |
-| Root | `openChange` | Emitted when open state changes are requested |
-| Content | `side`, `align`, `sideOffset`, `alignOffset`, `collisionPadding` | Anchoring placement and collision padding relative to `Trigger` |
-| Trigger / Title / Description / Close | — | Trigger button, title, description, and close control |
+`Root` exposes read-only state `open`, methods `openPopover`, `close`, and `toggle`, and the `openChange` event.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open (Root)', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultOpen (Root)', type: 'boolean', default: 'false' },
+    { name: 'disabled (Root / Trigger / Close)', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel (Root)', type: 'string', default: "''" },
+    { name: 'side (Content)', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align (Content)', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset (Content)', type: 'number', default: '4' },
+    { name: 'alignOffset (Content)', type: 'number', default: '0' },
+    { name: 'collisionPadding (Content)', type: 'number', default: '8' },
+    { name: 'material (Content)', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'prominence (Trigger / Content / Close)', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'enterDuration / leaveDuration (Content)', type: 'number', default: '0' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-POPOVER.yaml', 'P-BASE-POPOVER.yaml']}
+/>

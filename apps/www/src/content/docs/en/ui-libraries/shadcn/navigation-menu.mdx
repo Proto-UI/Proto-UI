@@ -1,13 +1,13 @@
 ---
 title: 'Navigation Menu'
-description: 'Named navigation disclosures paired with native destination links.'
+description: 'A collection of expandable navigation panels paired with native destination links.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Navigation Menu combines expandable navigation panels with native destination links inside a navigation landmark. The examples on this page use the **Shadcn Rhea** style preset.
+Navigation Menu combines expandable navigation panels with native destination links inside a `navigation` landmark. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -15,50 +15,173 @@ Navigation Menu combines expandable navigation panels with native destination li
   demoId="demo-shadcn-navigation-menu"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-shadcn/navigation-menu` and adapt them for your target runtime:
+
+```ts
+import {
+  navigationMenuRoot,
+  navigationMenuTrigger,
+  navigationMenuContent,
+  navigationMenuItem,
+  navigationMenuLink,
+} from '@proto.ui/prototypes-shadcn/navigation-menu';
+```
 
 ## Usage
 
-Navigation Menu consists of `Root`, `Trigger`, `Content`, `Item`, and `Link`:
+```tsx
+import {
+  ShadcnNavigationMenuRoot,
+  ShadcnNavigationMenuTrigger,
+  ShadcnNavigationMenuContent,
+  ShadcnNavigationMenuItem,
+  ShadcnNavigationMenuLink,
+} from '../proto-ui/components/react';
 
-- `Root` acts as a `navigation` landmark and manages the currently open panel via `Root.value`.
-- `Trigger` renders the disclosure button and `Content` renders the labelled panel region.
-- `Item` triggers a menu command.
-- `Link` renders a native anchor with `href`, `target`, `rel`, and current-page semantics (`current` maps to `aria-current`).
+export function SiteNav() {
+  return (
+    <ShadcnNavigationMenuRoot styleProfile="rhea" a11yLabel="Main navigation">
+      <ShadcnNavigationMenuTrigger value="getting-started">
+        Getting started
+      </ShadcnNavigationMenuTrigger>
+      <ShadcnNavigationMenuContent value="getting-started" a11yLabel="Getting started">
+        <ShadcnNavigationMenuLink href="/docs" current>
+          Introduction
+        </ShadcnNavigationMenuLink>
+        <ShadcnNavigationMenuItem value="search" textValue="Search docs">
+          Search docs
+        </ShadcnNavigationMenuItem>
+      </ShadcnNavigationMenuContent>
+    </ShadcnNavigationMenuRoot>
+  );
+}
+```
 
-### Native links and navigation events
+### Composition
 
-- URL previews, `Enter` activation, and modifier-key or middle-click tab opening are handled natively by the browser.
-- After native activation, `Link` emits a read-only `navigate` event with `{ href, target, rel, modified }` for observation or analytics.
-- Standard same-window navigation closes the open panel unless `closeOnSelect={false}`; modifier clicks, middle-clicks, and `target="_blank"` keep the panel open on the current page.
-- Disabling a `Link` removes its destination and prevents activation.
-- React, Vue, and Vue 2 render a native anchor root; Web Components keep your children inside an owned local anchor so focus, styling, and accessibility attributes stay aligned.
+```text
+NavigationMenuRoot (navigation)
+├── NavigationMenuTrigger (button, paired by value)
+└── NavigationMenuContent (region, paired by value)
+    ├── NavigationMenuLink (native <a>)
+    └── NavigationMenuItem (command action)
+```
+
+### Native Links & Keyboard
+
+- **Native anchor semantics**: URL previews, `Enter` activation, and modifier-key or middle-click tab opening are handled natively by the browser. React, Vue, and Vue 2 render a native `<a>` root; Web Components keep children inside an owned anchor element so focus, styles, and accessibility stay aligned.
+- **Read-only `navigate` event**: After native activation, `Link` emits a read-only `navigate` event with `{ href, target, rel, modified }` for observation or analytics.
+- **Dismissal policy**: Ordinary same-window activations close the open panel unless `closeOnSelect={false}`. Modifier clicks, middle-clicks, and `target="_blank"` keep the current page's panel open. Disabling a `Link` removes its destination and blocks activation.
+- **Keyboard roving**: Arrow keys move across top-level triggers, `ArrowDown` / `ArrowUp` open the panel and focus its first or last entry, and `Escape` closes the panel and restores focus to the trigger.
+
+## Examples
+
+### With Icon
+
+Combine inline icons with navigation links inside `Content` for scannable status or view menus.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-navigation-menu-with-icons"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Links, Current Page & Disabled
+
+Demonstrates current-page state (`current` -> `aria-current="page"`), keeping a panel open (`closeOnSelect={false}`), opening in a new tab (`target="_blank"`), and disabled links or triggers.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-navigation-menu-links-and-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled & Events
+
+Manage the active panel externally with `value` and `valueChange`, while observing `Item.select` and `Link.navigate`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-navigation-menu-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root` (pass `value` for controlled mode):
+### NavigationMenuRoot
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop / Expose', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: 'undefined (uncontrolled)' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'loop', type: 'boolean', default: 'true' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+    { name: 'valueChange (event)', type: '{ value: string; reason: string }', default: '—' },
+    { name: 'requestValue (method)', type: '(value: string, reason?: string) => boolean', default: '—' },
+    { name: 'close (method)', type: '() => void', default: '—' },
   ]}
 />
 
-Other part defaults:
+### NavigationMenuTrigger
 
-- `Trigger`: `disabled` defaults to `false`.
-- `Content`: `sideOffset` defaults to `4`.
-- `Item`: `closeOnSelect` defaults to `true`.
-- `Link`: `href` and `rel` default to `''`, `current` defaults to `false`, and `target` defaults to `'_self'`.
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+  ]}
+/>
+
+### NavigationMenuContent
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+  ]}
+/>
+
+### NavigationMenuItem
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+    { name: 'select (event)', type: '{ value: string; menuValue: string }', default: '—' },
+  ]}
+/>
+
+### NavigationMenuLink
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'href', type: 'string', default: "''" },
+    { name: 'target', type: "'_self' | '_blank'", default: "'_self'" },
+    { name: 'rel', type: 'string', default: "''" },
+    { name: 'current', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+    { name: 'navigate (event)', type: '{ href: string; target: string; rel: string; modified: boolean }', default: '—' },
+    { name: 'select (event)', type: '{ value: string; menuValue: string }', default: '—' },
+  ]}
+/>
 
 ## References
 

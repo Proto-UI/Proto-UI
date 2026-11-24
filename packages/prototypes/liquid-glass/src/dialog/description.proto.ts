@@ -9,6 +9,6 @@ export default definePrototype<DialogDescriptionProps, DialogDescriptionExposes>
   name: 'liquid-glass-dialog-description',
   setup(def) {
     const behavior = asDialogDescription();
-    def.feedback.style.use(tw('text-sm text-muted-foreground'));
+    def.feedback.style.use(tw('text-sm leading-relaxed text-muted-foreground'));
   },
 });

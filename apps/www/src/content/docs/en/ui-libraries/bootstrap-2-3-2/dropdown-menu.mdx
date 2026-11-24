@@ -1,11 +1,13 @@
 ---
 title: 'Dropdown Menu'
-description: 'A Bootstrap 2.3.2 dropdown action menu with groups, labels, separators, and shortcut hints.'
+description: 'A Bootstrap 2.3.2 dropdown action menu with groups, labels, separators, shortcut hints, destructive items, and inset alignment.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Dropdown Menu displays a menu of grouped actions triggered from a button, with accessible group labels, separators, and keyboard shortcut hints.
+Dropdown Menu displays a menu of grouped actions triggered from a classic Bootstrap 2.3.2 beveled button with caret, supporting accessible group labels, separators, shortcut hints, and destructive items.
 
 ## Preview
 
@@ -13,24 +15,146 @@ Dropdown Menu displays a menu of grouped actions triggered from a button, with a
   demoId="demo-bootstrap-2-3-2-dropdown-menu"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source. Import all parts directly from `@proto.ui/prototypes-bootstrap-2-3-2/dropdown`.
 
 ## Usage
 
-- **Grouping and decoration**: Pair `Group` with `Label` to name related actions for assistive technologies. Use `Separator` to divide sections and `Shortcut` to show shortcut labels.
-- **Passive presentation**: `Separator` and `Shortcut` stay outside keyboard navigation; `Shortcut` is display-only and does not register global keybindings.
-- The demo illustrates a `160px` menu with Account and Resources groups plus a disabled API item.
+```tsx
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from '@/components/bootstrap-2-3-2/dropdown-menu';
+```
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger>Open</DropdownMenuTrigger>
+  <DropdownMenuContent align="start">
+    <DropdownMenuGroup>
+      <DropdownMenuLabel>My Account</DropdownMenuLabel>
+      <DropdownMenuItem value="profile">
+        Profile
+        <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+      </DropdownMenuItem>
+      <DropdownMenuItem value="billing">Billing</DropdownMenuItem>
+    </DropdownMenuGroup>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem value="logout">Log out</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+- **Groups & decorative parts**: Pair `Group` with `Label` to associate accessible group names automatically. `Separator` and `Shortcut` are passive presentation parts outside the keyboard focus order.
+- **Classic visual projection**: Preserves Bootstrap 2.3.2 beveled trigger gradients with an inline caret, plus classic blue (and danger red) gradient item highlights on hover and focus.
+
+## Examples
+
+### Destructive
+
+Set `variant="destructive"` for irreversible actions styled with Bootstrap 2.3.2's classic danger gradient on highlight.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-dropdown-menu-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Inset
+
+Set `inset` on iconless `Item` and `Label` rows to align labels cleanly with icon-bearing items.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-dropdown-menu-inset"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part        | Description                                                |
-| ----------- | ---------------------------------------------------------- |
-| `Group`     | Groups related menu items and associates them with a label |
-| `Label`     | Passive heading for a menu group                           |
-| `Separator` | Visual divider between menu sections                       |
-| `Shortcut`  | Trailing display hint for keyboard shortcuts               |
+### Root
+
+Pass `open` for controlled mode. `Root` exposes the `openChange` event and `openDropdown()`, `close()`, and `toggle()` methods.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
+    {
+      name: 'openEntry',
+      type: "'active-or-first' | 'first' | 'last' | 'value-or-first'",
+      default: "'active-or-first'",
+    },
+    { name: 'openEntryValue', type: 'string', default: "''" },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'sideOffset', type: 'number', default: '2' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnCommit', type: 'boolean', default: 'Inherits Root' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+  ]}
+/>
+
+### Group / Label / Separator / Shortcut
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Group.a11yLabel', type: 'string', default: "''" },
+    { name: 'Label.inset', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-DROPDOWN-MENU.yaml',
+    'P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-TRIGGER.yaml',
+    'P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-CONTENT.yaml',
+    'P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-ITEM.yaml',
+    'P-BASE-DROPDOWN-MENU.yaml',
+  ]}
+/>

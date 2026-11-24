@@ -1,11 +1,13 @@
 ---
-title: 'ContextMenu'
-description: '支持右键、长按与键盘快捷键触发的 Bootstrap 2.3.2 上下文命令菜单。'
+title: 'Context Menu'
+description: '支持右键、触摸长按与键盘快捷键触发的 Bootstrap 2.3.2 上下文命令菜单。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-ContextMenu 在右键点击、触摸/手写笔长按或按下 `ContextMenu` / `Shift+F10` 时打开上下文命令菜单，并支持完整的键盘导航与首字母快速跳转。
+Bootstrap 2.3.2 Context Menu 在右键点击、触摸/手写笔长按（600 ms）或按下 `ContextMenu` / `Shift+F10` 时打开经典 `dropdown-menu` 风格的上下文命令菜单（6px 圆角、半透明边框投影、经典蓝色渐变高亮），并内置键盘导航与首字母跳转。
 
 ## 预览
 
@@ -13,29 +15,148 @@ ContextMenu 在右键点击、触摸/手写笔长按或按下 `ContextMenu` / `S
   demoId="demo-bootstrap-2-3-2-context-menu"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+该组件目前在源码工作区提供，尚未进入 0.2.0 稳定版 CLI 注册表。
 
 ## 用法
 
-由 `Root`、`Trigger`、`Content` 和 `Item` 组成：
+```tsx
+import {
+  BootstrapContextMenuContent,
+  BootstrapContextMenuItem,
+  BootstrapContextMenuRoot,
+  BootstrapContextMenuTrigger,
+} from '@/components/proto-ui';
 
-- **触发与定位**：右键或触摸/手写笔长按（在移动容差内保持 `600ms`）会在指针位置打开菜单；`ContextMenu` / `Shift+F10` 或调用 `openContextMenu()` 时以触发区域作为锚点（默认 `bottom`/`start` 对齐）。普通左键点击与滚动仍由页面正常处理。
-- **原生菜单处理**：当启用的 `Root` 接受触发请求时，会自动阻止浏览器默认右键菜单；长按触发同时阻止后续兼容点击事件。拖动、抬起、禁用或卸载都会取消进行中的长按。
-- **受控模式**：传入 `open` 进入受控模式，由父组件决定是否打开；按 `Escape` 或选择命令项后会按焦点策略将焦点交回触发器。
+export function Example() {
+  return (
+    <BootstrapContextMenuRoot>
+      <BootstrapContextMenuTrigger className="flex h-36 w-72 items-center justify-center rounded border border-dashed border-border bg-secondary text-sm">
+        Right click here
+      </BootstrapContextMenuTrigger>
+      <BootstrapContextMenuContent>
+        <BootstrapContextMenuItem value="back">Back</BootstrapContextMenuItem>
+        <BootstrapContextMenuItem value="forward" disabled>Forward</BootstrapContextMenuItem>
+        <BootstrapContextMenuItem value="reload">Reload</BootstrapContextMenuItem>
+      </BootstrapContextMenuContent>
+    </BootstrapContextMenuRoot>
+  );
+}
+```
+
+### 部件结构
+
+```text
+ContextMenuRoot
+├── ContextMenuTrigger
+└── ContextMenuContent
+    ├── ContextMenuItem
+    └── ContextMenuItem
+```
+
+- **触发与定位**：右键与长按锚定在指针位置；`ContextMenu` / `Shift+F10` 或调用 `openContextMenu()` 时锚定在触发区域，并自动阻止原生右键菜单。
+- **经典视觉与受控模式**：保留 Bootstrap 2.3.2 的零时长即时开关与蓝色线性渐变高亮；传入 `open` 进入受控模式，按 `Escape` 或选中命令后焦点自动回到触发区域。
+
+## 示例
+
+### 基础菜单
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-context-menu-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 危险操作
+
+通过 `variant="destructive"` 使用 Bootstrap 2.3.2 经典的暗红警示色标注高风险操作。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-context-menu-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 弹出方向
+
+使用 `side` 与 `sideOffset` 控制菜单展开方向。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-context-menu-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件      | 属性 / 方法            | 说明                                                    |
-| --------- | ---------------------- | ------------------------------------------------------- |
-| `Root`    | `open` / `defaultOpen` | 受控或初始展开状态                                      |
-| `Root`    | `disabled`             | 禁用上下文菜单触发                                      |
-| `Root`    | `closeOnItemCommit`    | 激活菜单项后是否自动关闭                                |
-| `Root`    | `openContextMenu()`    | 以触发区域为锚点编程式打开菜单                          |
-| `Trigger` | —                      | 响应右键、长按与 `ContextMenu` / `Shift+F10` 的触发区域 |
-| `Content` | —                      | 悬浮菜单面板，支持方向键导航与文字跳转                  |
-| `Item`    | —                      | 单个可执行菜单命令                                      |
+### Root
+
+传入 `open` 进入受控模式；暴露 `openChange` 事件以及 `openContextMenu()`、`close()`、`toggle()` 方法。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
+    {
+      name: 'openEntry',
+      type: "'active-or-first' | 'first' | 'last' | 'value-or-first'",
+      default: "'active-or-first'",
+    },
+    { name: 'openEntryValue', type: 'string', default: "''" },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+暴露 `focusFirst()`、`focusLast()`、`focusNext()`、`focusPrev()` 方法。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'sideOffset', type: 'number', default: '0' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'excludeAnchorTranslation', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '0' },
+    { name: 'leaveDuration', type: 'number', default: '0' },
+  ]}
+/>
+
+### Item
+
+激活时触发 `select` 事件（payload：`{ value, reason }`）。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnCommit', type: 'boolean', default: '继承 Root' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-CONTEXT-MENU.yaml', 'P-BASE-CONTEXT-MENU.yaml']}
+/>

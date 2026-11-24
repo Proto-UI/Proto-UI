@@ -1,13 +1,13 @@
 ---
-title: 'ContextMenu'
-description: '支持右键、长按与键盘快捷键唤起的上下文命令菜单。'
+title: 'Context Menu'
+description: '支持右键、触摸长按与键盘快捷键唤起的上下文命令菜单。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-在触发区域通过右键、触摸/手写笔长按或键盘快捷键（`ContextMenu` / `Shift+F10`）打开的上下文菜单，内置键盘导航、首字母跳转与碰撞定位。本页示例采用 **Shadcn Rhea** 风格。
+在触发区域通过右键点击、触摸/手写笔长按（600 ms）或键盘快捷键（`ContextMenu` / `Shift+F10`）唤起的上下文命令菜单，内置键盘导航、首字母快速跳转与碰撞感知定位。本页示例采用 **Shadcn Rhea** 风格预设。
 
 ## 预览
 
@@ -15,46 +15,173 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   demoId="demo-shadcn-context-menu"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
+
+## 安装
+
+该组件目前在源码工作区提供，尚未进入 0.2.0 稳定版 CLI 注册表。
 
 ## 用法
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+```tsx
+import {
+  ShadcnContextMenuContent,
+  ShadcnContextMenuItem,
+  ShadcnContextMenuRoot,
+  ShadcnContextMenuTrigger,
+} from '@/components/proto-ui';
+
+export function Example() {
+  return (
+    <ShadcnContextMenuRoot styleProfile="rhea">
+      <ShadcnContextMenuTrigger className="flex h-36 w-72 items-center justify-center rounded-xl border border-dashed text-sm">
+        Right click here
+      </ShadcnContextMenuTrigger>
+      <ShadcnContextMenuContent>
+        <ShadcnContextMenuItem value="profile">Profile</ShadcnContextMenuItem>
+        <ShadcnContextMenuItem value="billing">Billing</ShadcnContextMenuItem>
+        <ShadcnContextMenuItem value="team">Team</ShadcnContextMenuItem>
+        <ShadcnContextMenuItem value="subscription">Subscription</ShadcnContextMenuItem>
+      </ShadcnContextMenuContent>
+    </ShadcnContextMenuRoot>
+  );
+}
+```
 
 ### 部件结构
 
-由 `Root`、`Trigger`、`Content` 与 `Item` 组合而成：
+```text
+ContextMenuRoot
+├── ContextMenuTrigger
+└── ContextMenuContent
+    ├── ContextMenuItem
+    └── ContextMenuItem
+```
 
-- **Trigger**：响应右键菜单事件、`ContextMenu` / `Shift+F10` 快捷键以及持续 600 ms 的触摸/手写笔长按（移动、抬起或取消会中止长按，普通左键点击与滚动不受影响）。
-- **Content**：通过右键或长按打开时自动定位在输入点；通过键盘快捷键或编程方式 `openContextMenu` 打开时定位在触发区域。支持方向键导航、字符快速跳转与边界碰撞翻转。
-- **Item**：菜单命令项，激活后默认自动关闭菜单（可通过 `closeOnItemCommit={false}` 保持打开）。
+- **触发与定位**：右键点击或 600 ms 触摸/手写笔长按（超过移动容差、抬起或取消时中止）会锚定在输入点；按下 `ContextMenu` / `Shift+F10` 或调用 `openContextMenu()` 时锚定在触发区域。普通左键点击与滚动不受影响。
+- **受控模式与焦点恢复**：传入 `open` 进入受控模式，启用态下的触发器会抑制浏览器原生右键菜单并将打开请求交给外部处理。按 `Escape` 或选中命令关闭菜单时，焦点自动恢复至触发区域。
 
-### 受控模式与焦点恢复
+## 示例
 
-- 传入 `open` 进入受控模式：触发区域会抑制浏览器原生右键菜单并向外部发出打开请求，外部可自行决定是否将 `open` 更新为 `true`。
-- 按 `Escape` 或选中命令关闭菜单时，焦点会自动回到触发区域。
+### 基础菜单
+
+包含可用与禁用命令项的基础上下文菜单。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-context-menu-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 快捷键与分组分隔
+
+结合视觉分隔与右对齐快捷键标签，清晰呈现多组文档编辑操作。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-context-menu-shortcuts"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 危险操作与缩进对齐
+
+通过 `variant="destructive"` 标记高风险操作，并配合 `inset` 保持菜单项左边界对齐。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-context-menu-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 弹出方向
+
+通过 `Content` 的 `side` 与 `sideOffset` 控制菜单默认展开方向，并在接近视口边缘时自动碰撞翻转。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-context-menu-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 选择后保持展开
+
+设置 `closeOnItemCommit={false}` 可在连续切换选项时保持菜单打开。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-context-menu-keep-open"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-传入 `open` 进入受控模式。
+### Root
+
+传入 `open` 进入受控模式；暴露 `openChange` 事件以及 `openContextMenu()`、`close()`、`toggle()` 方法。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
     {
       name: 'openEntry',
       type: "'active-or-first' | 'first' | 'last' | 'value-or-first'",
-      default: 'active-or-first',
+      default: "'active-or-first'",
     },
     { name: 'openEntryValue', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
   ]}
 />
 
-以上属性属于 `Root`。`Content` 默认配置为 `side="bottom"`、`align="start"`、`sideOffset={0}`、`alignOffset={0}`、`avoidCollisions={true}`、`collisionPadding={0}`、`excludeAnchorTranslation={false}`。
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+  ]}
+/>
+
+### Content
+
+暴露 `focusFirst()`、`focusLast()`、`focusNext()`、`focusPrev()` 方法。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'sideOffset', type: 'number', default: '0' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'excludeAnchorTranslation', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '0' },
+    { name: 'leaveDuration', type: 'number', default: '100' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+  ]}
+/>
+
+### Item
+
+激活时触发 `select` 事件（payload：`{ value, reason }`）。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnCommit', type: 'boolean', default: '继承 Root' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+  ]}
+/>
 
 ## 参考
 

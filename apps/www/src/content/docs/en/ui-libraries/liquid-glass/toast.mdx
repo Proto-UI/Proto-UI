@@ -4,8 +4,10 @@ description: 'A Liquid Glass timed notification with hover/focus pause, keyboard
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Toast displays timed live notifications that pause automatically on hover or focus, support a viewport focus shortcut, and emit explicit action intents.
+Liquid Glass Toast pairs a single floating `liquid-glass` banner surface and inset specular rim with concentric capsule controls—never stacking glass-on-glass—while providing opaque fallbacks, auto-dismiss pause on hover or focus, and the `F8` viewport shortcut.
 
 ## Preview
 
@@ -13,24 +15,112 @@ Liquid Glass Toast displays timed live notifications that pause automatically on
   demoId="demo-liquid-glass-toast"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-liquid-glass/toast` and adapt them for your target runtime.
+
+```ts
+import {
+  toastViewport,
+  toastRoot,
+  toastTitle,
+  toastDescription,
+  toastAction,
+  toastClose,
+} from '@proto.ui/prototypes-liquid-glass/toast';
+```
 
 ## Usage
 
-- **Parts**: `Root`, `Viewport`, `Title`, `Description`, `Action`, `Close`.
+```tsx
+<LiquidGlassToastViewport a11yLabel="Notifications">
+  <LiquidGlassToastRoot defaultOpen={false} duration={5000}>
+    <LiquidGlassToastTitle>Event has been created</LiquidGlassToastTitle>
+    <LiquidGlassToastDescription>Sunday, December 03, 2023 at 9:00 AM</LiquidGlassToastDescription>
+    <LiquidGlassToastAction a11yLabel="Undo event creation">Undo</LiquidGlassToastAction>
+    <LiquidGlassToastClose>Dismiss</LiquidGlassToastClose>
+  </LiquidGlassToastRoot>
+</LiquidGlassToastViewport>
+```
+
+- **Parts**: `Root`, `Viewport`, `Title`, `Description`, `Action`, `Close`. Only `Root` declares the `liquid-glass` material candidate; inner capsule buttons use distinct opaque fills so glass is never stacked on glass.
+- **Opaque opt-out**: Set `material="opaque"` to withdraw the glass candidate while preserving high-contrast separation between the toast banner and its inner controls.
 - **Timing and pause**: `Root` stays open for `5000ms` by default; pass `duration={0}` to disable auto-dismiss. Hovering the toast or focusing `Action` / `Close` pauses the remaining timer. In controlled mode, timeout emits one close request until you update `open`.
-- **Dismissal and shortcuts**: `Close`, focused Escape, and `Action` request dismissal while leaving action side effects to your application. `Viewport` provides the `F8` focus shortcut. Multi-toast queueing is left to your application.
+- **Dismissal and shortcuts**: `Close`, focused `Escape`, and `Action` request dismissal while leaving action side effects to your application. `Viewport` provides the `F8` focus shortcut. Multi-toast queueing stays in your application.
+
+## Examples
+
+### Prominence & Material
+
+Select `regular`, `prominent`, or `destructive` prominence tiers, or pass `material="opaque"` to render the solid fallback surface directly.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toast-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Action
+
+Inner capsule `Action` buttons use primary fill contrast over the floating banner so they remain distinct under both glass and reduced-transparency fallbacks.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toast-action"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled & Persistent
+
+Use controlled `open` with `duration={0}` for urgent notifications that remain visible until dismissed.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toast-persistent"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop | Defaults and notes |
-| --- | --- | --- |
-| Root | `open`, `duration` | Controlled open state / auto-dismiss duration in ms (default `5000`; `0` stays open) |
-| Viewport | — | Notification container with `F8` focus shortcut |
-| Title / Description | — | Notification heading and message body |
-| Action / Close | — | Action button and dismiss button |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'true' },
+    { name: 'duration', type: 'number', default: '5000' },
+    { name: 'paused', type: 'boolean', default: 'false' },
+    { name: 'politeness', type: "'polite' | 'assertive'", default: "'polite'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'prominence', type: "'regular' | 'prominent' | 'destructive'", default: "'regular'" },
+    { name: 'appear', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '0' },
+    { name: 'leaveDuration', type: 'number', default: '0' },
+    { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: "'reverse'" },
+  ]}
+/>
+
+### Viewport, Action & Close
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Viewport.a11yLabel', type: 'string', default: "'Notifications'" },
+    { name: 'Viewport.hotkey', type: 'string', default: "'F8'" },
+    { name: 'Action.disabled', type: 'boolean', default: 'false' },
+    { name: 'Action.a11yLabel', type: 'string', default: '—' },
+    { name: 'Close.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+Events and exposed methods:
+
+- **Events**: `Root` emits `openChange` (`{ open: boolean; reason: string }`); `Action` emits `action` (`void`).
+- **Methods**: `Root` exposes `openToast()`, `close(reason?)`, `pause()`, and `resume()`; `Viewport` exposes `focusFirst()`.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-LIQUID-GLASS-TOAST.yaml', 'P-BASE-TOAST.yaml']} />

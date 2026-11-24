@@ -5,28 +5,94 @@ description: 'A Brutalist hover preview card with configurable open/close delays
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Hover Card reveals rich preview content on hover with configurable open and close delays, pairing Base Hover Card timing and positioning with crisp Brutalist panels.
+Brutalist Hover Card reveals rich preview content on hover or focus with configurable delays, pairing Base Hover Card timing and collision-aware positioning with 5px rounded corners, 2px black borders, and crisp 3px foreground hard shadows.
 
 ## Preview
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-hover-card" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-hover-card"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-hover-card" manager="npm" />
 
-- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-hover-card`
+Replace `wc` with `react`, `vue`, or `vue2` to generate the local component facade for your framework.
 
 ## Usage
 
-- Configure `openDelay` (default `700ms`) and `closeDelay` (default `300ms`) on `Root`, or pass `open` for controlled mode.
-- `Trigger` wraps the hover target and `Content` supports placement, alignment, offsets, collision avoidance, and Transition props.
+```tsx
+import {
+  BrutalistHoverCardRoot,
+  BrutalistHoverCardTrigger,
+  BrutalistHoverCardContent,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <BrutalistHoverCardRoot openDelay={150} closeDelay={200}>
+      <BrutalistHoverCardTrigger>@proto-ui</BrutalistHoverCardTrigger>
+      <BrutalistHoverCardContent side="bottom" align="center">
+        Host-neutral interaction protocols with bold Neo-Brutalist borders.
+      </BrutalistHoverCardContent>
+    </BrutalistHoverCardRoot>
+  );
+}
+```
+
+### Composition
+
+```text
+BrutalistHoverCardRoot
+├── BrutalistHoverCardTrigger
+└── BrutalistHoverCardContent
+```
+
+- **Root**: Manages open state (`open` or `defaultOpen`), `openDelay` / `closeDelay` timers, and shared `disabled` state.
+- **Trigger**: Uses the `bg-main` accent fill with a 4px hard shadow and preserves its pointer hit envelope while settled on hover.
+- **Content**: Renders a 2px black-bordered panel with a 3px zero-blur foreground shadow, directional enter animation, and collision avoidance.
+
+## Examples
+
+### Sides
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-hover-card-sides"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Trigger Delays
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-hover-card-delays"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Disabled
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-hover-card-disabled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
@@ -35,6 +101,7 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean | undefined', default: 'uncontrolled' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'openDelay', type: 'number', default: '700' },
@@ -42,9 +109,42 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
   ]}
 />
 
-Pass `open: boolean` to enable controlled mode.
+- **Exposed state & methods**: `open`, `openHoverCard(reason?)`, `close(reason?)`, `toggle(reason?)`
+- **Exposed events**: `openChange` (`{ open: boolean; reason: string | null }`)
 
-### Other parts
+### Trigger
 
-- **Trigger**: `disabled?: boolean` (default `false`)
-- **Content**: Supports Transition props, plus `side` (default `'bottom'`), `align` (default `'center'`), `sideOffset` (default `4`), `alignOffset` (default `0`), `collisionPadding` (default `0`), and `avoidCollisions` (default `true`)
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'enterDuration', type: 'number', default: '200' },
+    { name: 'leaveDuration', type: 'number', default: '200' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-HOVER-CARD.yaml',
+    'P-BRUTALIST-HOVER-CARD-TRIGGER.yaml',
+    'P-BRUTALIST-HOVER-CARD-CONTENT.yaml',
+    'P-BASE-HOVER-CARD.yaml',
+    'P-BASE-HOVER-CARD-TRIGGER.yaml',
+    'P-BASE-HOVER-CARD-CONTENT.yaml',
+  ]}
+/>

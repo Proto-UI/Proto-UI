@@ -4,8 +4,10 @@ description: '相对触发元素定位、支持碰撞避让与非模态交互的
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Popover 用于在触发按钮附近展示轻量级交互内容，采用非模态设计，不锁定背景滚动也不限制 Tab 焦点移出。
+Bootstrap 2.3.2 Popover 在触发按钮旁展示带有经典标题栏分隔线与 150ms 线性淡入淡出动效的非模态浮层，不锁定背景滚动或限制 `Tab` 焦点移动。
 
 ## 预览
 
@@ -13,28 +15,106 @@ Popover 用于在触发按钮附近展示轻量级交互内容，采用非模态
   demoId="demo-bootstrap-2-3-2-popover"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+Bootstrap 2.3.2 Popover 目前在工作区源码中提供，尚未进入 0.2.0 稳定版 CLI。可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/popover` 导入原型并使用对应框架适配器：
+
+```ts
+import {
+  popoverRoot,
+  popoverTrigger,
+  popoverContent,
+  popoverTitle,
+  popoverDescription,
+  popoverClose,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/popover';
+```
 
 ## 用法
 
-由 `Root`、`Trigger`、`Content`、`Title`、`Description` 和 `Close` 组成：
+```tsx
+<BootstrapPopover>
+  <BootstrapPopoverTrigger>Open Popover</BootstrapPopoverTrigger>
+  <BootstrapPopoverContent>
+    <BootstrapPopoverTitle>Popover title</BootstrapPopoverTitle>
+    <BootstrapPopoverDescription>
+      And here is some helpful contextual information anchored to the right.
+    </BootstrapPopoverDescription>
+  </BootstrapPopoverContent>
+</BootstrapPopover>
+```
 
-- **定位与偏移**：`Content` 自动相对 `Trigger` 定位，支持通过 `side`、`align`、`sideOffset`、`alignOffset` 和 `collisionPadding` 调整方向、对齐与视口边缘留白。
-- **关闭与焦点行为**：点击外部区域、焦点移出 `Trigger` 与 `Content`、按 `Escape` 或点击 `Close` 都会请求关闭。在 `Trigger` 与弹出内容之间切换焦点视为内部交互；当因焦点移出外部控件而关闭时，焦点保留在目标外部控件上而不强行拉回 `Trigger`。
-- **受控模式**：传入 `open` 并监听 `openChange` 由父组件决定开关状态，非受控模式使用 `defaultOpen`。若受控模式拒绝外部焦点移出关闭请求，弹层保持打开且不限制外部焦点。
+### 组件结构
+
+```text
+BootstrapPopoverRoot
+├── BootstrapPopoverTrigger
+└── BootstrapPopoverContent
+    ├── BootstrapPopoverTitle
+    ├── BootstrapPopoverDescription
+    └── BootstrapPopoverClose
+```
+
+- **经典默认配置**：遵循 Bootstrap 2.3.2 历史规格，`Content` 默认弹出方向为 `side="right"`、`sideOffset={10}`，最大宽度 `276px`，圆角 `6px`，并自带 `150ms` 线性透明度淡入淡出过渡。
+- **非模态交互与关闭**：点击外部区域、焦点移出 `Trigger` 与 `Content`、按下 `Escape` 或点击 `Close` 均会请求关闭；因外部焦点移出而关闭时，焦点保留在目标外部控件上。
+
+## 示例
+
+### 基础用法
+
+默认从触发器右侧展开的经典标题与正文弹出层。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-popover-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 四方向弹出
+
+通过 `side` 指定 `top`、`right`、`bottom` 或 `left` 四个方向，保留经典 150ms 线性淡入淡出。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-popover-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控状态
+
+传入 `open` 并监听 `openChange` 事件，由外部状态控制弹层的开关。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-popover-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 事件 | 说明 |
-| --- | --- | --- |
-| `Root` | `open` / `defaultOpen` | 受控或初始打开状态 |
-| `Root` | `openChange` | 打开或关闭请求事件 |
-| `Trigger` | — | 切换弹层的锚点按钮 |
-| `Content` | `side` / `align` / `sideOffset` / `alignOffset` / `collisionPadding` | 弹层定位与碰撞边距配置 |
-| `Title` / `Description` | — | 弹层标题与说明文本 |
-| `Close` | — | 请求关闭弹层的按钮 |
+`Root` 暴露只读状态 `open`、方法 `openPopover` / `close` / `toggle` 以及 `openChange` 事件。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open (Root)', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultOpen (Root)', type: 'boolean', default: 'false' },
+    { name: 'disabled (Root / Trigger / Close)', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel (Root)', type: 'string', default: "''" },
+    { name: 'side (Content)', type: "'top' | 'right' | 'bottom' | 'left'", default: "'right'" },
+    { name: 'align (Content)', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset (Content)', type: 'number', default: '10' },
+    { name: 'alignOffset (Content)', type: 'number', default: '0' },
+    { name: 'collisionPadding (Content)', type: 'number', default: '8' },
+    { name: 'enterDuration / leaveDuration (Content)', type: 'number', default: '150' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-POPOVER.yaml', 'P-BASE-POPOVER.yaml']}
+/>

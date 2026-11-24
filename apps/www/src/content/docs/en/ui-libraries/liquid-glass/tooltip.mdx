@@ -1,0 +1,164 @@
+---
+title: 'Liquid Glass Tooltip'
+description: 'A Liquid Glass family tooltip with concentric geometry, specular edge definition, and accessible fallbacks without stacking glass on glass.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Tooltip reveals concise supplementary descriptions on hover or keyboard focus. Following Apple Liquid Glass layering guidance, non-interactive tooltip content uses a crisp opaque surface with concentric `rounded-xl` geometry and a specular hairline edge instead of stacking glass on top of Liquid Glass controls.
+
+## Preview
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tooltip"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Liquid Glass Tooltip is available from workspace source via `@proto.ui/prototypes-liquid-glass/tooltip` (`tooltipGroup`, `tooltipRoot`, `tooltipTrigger`, `tooltipContent`) for use with any Proto UI host adapter.
+
+## Usage
+
+```tsx
+import {
+  LiquidGlassTooltipGroup,
+  LiquidGlassTooltipRoot,
+  LiquidGlassTooltipTrigger,
+  LiquidGlassTooltipContent,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <LiquidGlassTooltipGroup>
+      <LiquidGlassTooltipRoot>
+        <LiquidGlassTooltipTrigger>Account</LiquidGlassTooltipTrigger>
+        <LiquidGlassTooltipContent side="top">View account settings</LiquidGlassTooltipContent>
+      </LiquidGlassTooltipRoot>
+    </LiquidGlassTooltipGroup>
+  );
+}
+```
+
+### Composition
+
+```text
+TooltipGroup (optional)
+└── TooltipRoot
+    ├── TooltipTrigger
+    └── TooltipContent
+```
+
+### Materials & Accessibility
+
+- **No Glass-on-Glass**: Optical Liquid Glass is reserved for functional navigation and action controls; non-interactive tooltip copy uses a legible standard opaque surface with a subtle inset highlight.
+- **Concentric Geometry**: `rounded-xl` corners pair cleanly with pill-shaped Liquid Glass controls across Light and Dark themes.
+- **System Fallbacks**: Respects `prefers-reduced-transparency` and `forced-colors` by switching to a high-contrast solid border without shadow, and respects `prefers-reduced-motion` by disabling enter/exit animation.
+
+## Examples
+
+### Side
+
+Use the `side` prop on `Content` to display the tooltip on `left`, `top`, `bottom`, or `right`.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tooltip-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### With Keyboard Shortcut
+
+Combine a concise label with a non-interactive keyboard shortcut badge inside `Content`.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tooltip-shortcut"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled Button
+
+Wrap a disabled control inside `Trigger` so hovering or focusing still explains why the action is unavailable.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tooltip-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Group
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '100' },
+    { name: 'skipDelay', type: 'number', default: '300' },
+  ]}
+/>
+
+### Root
+
+Pass `open` for controlled mode. `Root` inherits `Group` delays unless overridden.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: 'undefined' },
+    { name: 'closeDelay', type: 'number', default: 'undefined' },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'top'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'enterDuration', type: 'number', default: '150' },
+    { name: 'leaveDuration', type: 'number', default: '100' },
+  ]}
+/>
+
+### Events, States & Methods
+
+- **Root**: Exposes read-only state `open`, event `openChange` (`{ open, reason }`), and methods `openTooltip(reason?)`, `close(reason?)`, `toggle(reason?)`.
+- **Trigger**: Exposes read-only states `disabled`, `hovered`, `focused`, `focusVisible`, and method `focusSelf(options?)`.
+- **Content**: Exposes read-only state `open` and Transition handles (`transitionState`, `isPresent`, `controls`).
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-TOOLTIP.yaml',
+    'P-LIQUID-GLASS-TOOLTIP-GROUP.yaml',
+    'P-LIQUID-GLASS-TOOLTIP-TRIGGER.yaml',
+    'P-LIQUID-GLASS-TOOLTIP-CONTENT.yaml',
+    'P-BASE-TOOLTIP.yaml',
+  ]}
+/>

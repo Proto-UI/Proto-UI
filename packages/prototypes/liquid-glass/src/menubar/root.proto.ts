@@ -6,8 +6,14 @@ import {
 } from '@proto.ui/prototypes-base/menubar';
 export default definePrototype<MenubarRootProps, MenubarRootExposes>({
   name: 'liquid-glass-menubar-root',
+  modules: asMenubarRoot.modules,
   setup(def) {
     const behavior = asMenubarRoot();
-    def.feedback.style.use(tw('relative flex min-w-0 flex-wrap items-center gap-1'));
+    def.feedback.style.use(
+      tw(
+        'relative inline-flex min-w-0 flex-wrap items-center gap-1 rounded-2xl border border-border bg-secondary p-1 text-secondary-foreground shadow-sm'
+      )
+    );
+    return behavior.render;
   },
 });

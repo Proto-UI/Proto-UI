@@ -1,0 +1,30 @@
+id: P-BRUTALIST-DRAWER-HEADER
+type: prototype
+title: Brutalist Drawer Header passive structural part
+status: draft
+since: 0.3.0
+lifecycleRationale:
+  en: Draft structural part aligned with Base Drawer Header and Brutalist visual grammar; independent review and browser/native evidence remain separate.
+  zh-CN: 与 Base Drawer Header 及 Brutalist 视觉语法对齐的 draft 结构部件；独立审查及浏览器/native 证据另行推进。
+summary: Passive Base Drawer Header composition with Brutalist vertical spacing and alignment.
+statement:
+  en: Header composes passive Base anatomy and projects Brutalist spacing without introducing independent state or interaction ownership.
+  zh-CN: Header 组合被动 Base anatomy 并投射 Brutalist 间距，不引入独立状态或交互 owner。
+criteria:
+  - id: P-BRUTALIST-DRAWER-HEADER-STRUCTURE
+    text:
+      en: Follow C-DRAWER-STRUCTURE-0001 passive-slot, owner isolation, cleanup and bounded family recipe requirements.
+      zh-CN: 遵守 C-DRAWER-STRUCTURE-0001 的被动 slot、owner 隔离、清理与有限 family recipe 要求。
+sources:
+  - path: packages/prototypes/brutalist/src/drawer/header.proto.ts
+dependsOn:
+  contracts: [C-DRAWER-STRUCTURE-0001]
+inherits:
+  prototypes: [P-BASE-DRAWER-HEADER]
+verifies:
+  tests: [T-BRUTALIST-DRAWER-STRUCTURE-0001]
+revisions:
+  - version: 0.3.0
+    change: introduced
+    summary: Cataloged Brutalist Drawer Header passive structural part as draft.
+tags: [prototype, brutalist, drawer, header, anatomy]

@@ -20,7 +20,10 @@ export default definePrototype<DropdownShortcutProps & ShadcnStyleProps>({
     if (!state.stateHandles) throw new Error('Dropdown Shortcut capture missing');
     def.rule({
       when: (w) => w.state(state.stateHandles!.active).eq(true),
-      intent: (i) => i.feedback.style.use(tw('text-accent-foreground')),
+      // Inherit the active item's foreground so destructive items preserve
+      // destructive text contrast instead of forcing accent foreground.
+      intent: (i) => i.feedback.style.use(tw('text-inherit')),
     });
+    return state.render;
   },
 });

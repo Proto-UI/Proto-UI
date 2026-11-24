@@ -4,13 +4,16 @@ import {
   type ContextMenuTriggerProps,
   type ContextMenuTriggerExposes,
 } from '@proto.ui/prototypes-base/context-menu';
+
 export default definePrototype<ContextMenuTriggerProps, ContextMenuTriggerExposes>({
   name: 'bootstrap-2-3-2-context-menu-trigger',
   modules: asContextMenuTrigger.modules,
   setup(def) {
     const behavior = asContextMenuTrigger();
     def.feedback.style.use(
-      tw('block min-w-0 text-[14px] font-normal leading-[20px] text-foreground')
+      tw(
+        'block min-w-0 text-[14px] font-normal leading-[20px] text-foreground outline-none select-none'
+      )
     );
     def.rule({
       when: (w) => w.state(behavior.getState!('disabled')!).eq(true),

@@ -21,7 +21,7 @@ export default definePrototype<HoverCardContentProps, HoverCardContentExposes>({
     const behavior = asHoverCardContent();
     def.feedback.style.use(
       tw(
-        'z-50 max-w-[276px] p-[1px] text-left whitespace-normal bg-background bg-clip-padding border border-[rgb(0_0_0/20%)] rounded-[6px] shadow-[0_5px_10px_rgb(0_0_0/20%)] text-foreground'
+        'z-50 max-w-[276px] p-[1px] text-left text-sm leading-5 whitespace-normal bg-background bg-clip-padding border border-[rgb(0_0_0/20%)] rounded-[6px] shadow-[0_5px_10px_rgb(0_0_0/20%)] text-foreground outline-none'
       )
     );
     behavior.asTransition.configure({ enterDuration: 150, leaveDuration: 150 });

@@ -6,8 +6,10 @@ import { POPOVER_TITLE } from './recipes';
 
 export default definePrototype<PopoverTitleProps, PopoverTitleExposes>({
   name: 'shadcn-popover-title',
+  modules: asPopoverTitle.modules,
   setup(def) {
     const behavior = asPopoverTitle();
     setupOverlayPaint(def, POPOVER_TITLE, 'nova');
+    return behavior.render;
   },
 });

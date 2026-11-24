@@ -11,7 +11,7 @@ export default definePrototype<CommandEmptyProps, CommandEmptyExposes>({
     def.feedback.style.use(tw('text-center'));
     def.rule({
       when: (w) => w.prop('presentation').eq('default'),
-      intent: (i) => i.feedback.style.use(tw('py-6')),
+      intent: (i) => i.feedback.style.use(tw('py-6 text-muted-foreground')),
     });
   },
 });

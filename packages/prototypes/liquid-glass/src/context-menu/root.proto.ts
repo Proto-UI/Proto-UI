@@ -4,10 +4,13 @@ import {
   type ContextMenuRootProps,
   type ContextMenuRootExposes,
 } from '@proto.ui/prototypes-base/context-menu';
+
 export default definePrototype<ContextMenuRootProps, ContextMenuRootExposes>({
   name: 'liquid-glass-context-menu-root',
+  modules: asContextMenuRoot.modules,
   setup(def) {
     const behavior = asContextMenuRoot();
     def.feedback.style.use(tw('relative flex min-w-0 flex-wrap items-center gap-1'));
+    return behavior.render;
   },
 });

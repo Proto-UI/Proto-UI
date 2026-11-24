@@ -1,59 +1,183 @@
 ---
 title: 'Drawer'
-description: 'An edge-attached Liquid Glass modal drawer supporting content-fit sizing, scrolling content, and explicit snap points.'
+description: 'A Liquid Glass edge-attached modal drawer with translucent sheet material, vibrancy-preserving scrim, scrollable body, and snap points.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Drawer is an edge-attached modal panel with four placement sides, supporting content-fit sizing, scrollable content, and multi-stop drag snapping.
+Liquid Glass Drawer presents a translucent edge-attached sheet with specular rim highlights, vibrancy-preserving backdrop dimming, regular/prominent action hierarchy, scrollable content, and multi-stop snap points.
 
 ## Preview
-
-### Default drawer
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-drawer"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-### Long scrollable content
+## Installation
+
+Currently available from workspace source (`@proto.ui/prototypes-liquid-glass/drawer`); not yet published in the 0.2.0 stable CLI release.
+
+## Usage
+
+```tsx
+import {
+  LiquidGlassDrawerRoot,
+  LiquidGlassDrawerTrigger,
+  LiquidGlassDrawerMask,
+  LiquidGlassDrawerContent,
+  LiquidGlassDrawerHandle,
+  LiquidGlassDrawerHeader,
+  LiquidGlassDrawerTitle,
+  LiquidGlassDrawerDescription,
+  LiquidGlassDrawerFooter,
+  LiquidGlassDrawerClose,
+} from '../proto-ui/components/react';
+```
+
+```tsx
+<LiquidGlassDrawerRoot>
+  <LiquidGlassDrawerTrigger variant="prominent">Open Drawer</LiquidGlassDrawerTrigger>
+  <LiquidGlassDrawerMask />
+  <LiquidGlassDrawerContent side="bottom">
+    <LiquidGlassDrawerHandle />
+    <LiquidGlassDrawerHeader>
+      <LiquidGlassDrawerTitle>Spatial Audio</LiquidGlassDrawerTitle>
+      <LiquidGlassDrawerDescription>
+        Adaptive head tracking and studio clarity for nearby devices.
+      </LiquidGlassDrawerDescription>
+    </LiquidGlassDrawerHeader>
+    <div className="flex-1 overflow-y-auto px-4">{/* Content */}</div>
+    <LiquidGlassDrawerFooter>
+      <LiquidGlassDrawerClose variant="prominent">Done</LiquidGlassDrawerClose>
+    </LiquidGlassDrawerFooter>
+  </LiquidGlassDrawerContent>
+</LiquidGlassDrawerRoot>
+```
+
+### Composition & material hierarchy
+
+```text
+DrawerRoot
+├── DrawerTrigger
+├── DrawerMask
+└── DrawerContent
+    ├── DrawerHandle
+    ├── DrawerHeader
+    │   ├── DrawerTitle
+    │   └── DrawerDescription
+    └── DrawerFooter
+        └── DrawerClose
+```
+
+- **No glass-on-glass stacking**: `Content` and page-level `Trigger` declare v2 Liquid Glass material, while interior controls (`Close`, `Header`, `Footer`) remain clean non-glass surfaces inside the sheet.
+- **Prominence and fallbacks**: Use `variant="regular" | "prominent"` on `Trigger` and `Close` to separate primary from secondary actions. Pass `material="opaque"` on `Content` or `Trigger` to opt into the solid fallback, which also activates automatically under reduced transparency or unsupported hosts.
+- **Motion and snapping**: `Content` animates smoothly over 320ms enter / 240ms leave (respecting `prefers-reduced-motion`) over a soft `bg-black/30` scrim. Pass `(0, 1]` fractions in `snapPoints` on `Content` for multi-stop dragging and arrow-key resizing.
+
+## Examples
+
+### Position
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-drawer-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Scrollable Content
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-drawer-scroll"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-### Explicit half/full snap points
+### Snap Points
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-drawer-snap"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-## Installation
+### Opaque Material, Custom Sizes & Locked Drag
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
-
-## Usage
-
-- **Sizing and scrolling**: top and bottom drawers fit their content height by default up to the safe available region; left and right drawers use a capped `20rem` width. `Content` renders as an `overflow-y-auto` scroll container so long content and the close control stay accessible.
-- **Extent bounds**: `Content.minExtent` and `maxExtent` accept neutral length objects (`unit`: `'logical' | 'root-text' | 'available' | 'available-minus-root-text'` and a non-negative finite `value`). Minimums above the safe cap clamp to the cap; invalid runtime updates expose `extentValid={false}` and retain the last valid extent.
-- **Snap points (`snapPoints`)**: omit, pass `null`, or pass `[]` for content-fit mode; pass a non-empty array of fractions in `(0, 1]` (sorted and deduplicated against the full safe cap) for explicit snapping. In snap mode, `Handle` exposes a named `separator` with arrow-key and Home/End resizing; in content-fit mode, `Handle` is a pointer-only `aria-hidden` drag handle.
-- **Controlled state and dismissal**: `Root` supports controlled `open` or uncontrolled `defaultOpen`, plus controlled `snapPoint` / `snapPointChange` and uncontrolled `defaultSnapPoint`. Set `Content.dragDismissible={false}` to disable drag-to-close while keeping Close, Escape, and outside dismissal. Interrupted gestures and rejected controlled requests restore the committed state.
+<PrototypePreviewer
+  demoId="demo-liquid-glass-drawer-sizing"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop | Description |
-| --- | --- | --- |
-| Root | `open`, `defaultOpen` | Controlled / uncontrolled visibility |
-| Root | `snapPoints` | Non-empty array of `(0, 1]` fractions; omit or pass `[]` for content-fit mode |
-| Root | `snapPoint`, `defaultSnapPoint` | Controlled / uncontrolled snap stop; pairs with `snapPointChange` |
-| Content | `minExtent`, `maxExtent` | Neutral length bounds (`unit` + non-negative finite `value`) |
-| Content | `dragDismissible` | Set to `false` to prevent closing via drag |
-| Content (exposed) | `extentValid` | Indicates whether the active extent constraints are valid |
+### Root
+
+Pass `open` for controlled mode and subscribe to `openChange`. Exposes `openDrawer()`, `close()`, and `toggle()`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Content
+
+Exposes `open`, `snapPoint`, `dragging`, `dragProgress`, `offsetPercentage`, `extentValid`, `requestSnapPoint()`, and `snapPointChange`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'snapPoints', type: 'number[]', default: '—' },
+    { name: 'snapPoint', type: 'number', default: '—' },
+    { name: 'defaultSnapPoint', type: 'number', default: '—' },
+    { name: 'minExtent', type: 'AvailableLayoutLength', default: "{ unit: 'logical', value: 0 }" },
+    {
+      name: 'maxExtent',
+      type: 'AvailableLayoutLength',
+      default: "vertical { unit: 'available', value: 1 } / horizontal { unit: 'root-text', value: 20 }",
+    },
+    { name: 'dragDismissible', type: 'boolean', default: 'true' },
+    { name: 'dragDismissThreshold', type: 'number', default: '0.25' },
+    { name: 'enterDuration', type: 'number', default: '320' },
+    { name: 'leaveDuration', type: 'number', default: '240' },
+  ]}
+/>
+
+### Trigger / Close / Mask / Handle
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Trigger.variant', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'Trigger.material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'Trigger / Close.disabled', type: 'boolean', default: 'false' },
+    { name: 'Close.variant', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+    { name: 'Mask.enterDuration / leaveDuration', type: 'number', default: '240 / 200' },
+    { name: 'Handle.disabled', type: 'boolean', default: 'false' },
+    { name: 'Handle.a11yLabel', type: 'string', default: "'Resize drawer'" },
+  ]}
+/>
+
+`Header`, `Footer`, `Title`, and `Description` declare no additional props.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-DRAWER.yaml',
+    'P-LIQUID-GLASS-DRAWER-HEADER.yaml',
+    'P-LIQUID-GLASS-DRAWER-FOOTER.yaml',
+    'P-BASE-DRAWER.yaml',
+  ]}
+/>

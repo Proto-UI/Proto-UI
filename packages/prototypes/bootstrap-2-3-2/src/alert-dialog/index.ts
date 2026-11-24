@@ -8,11 +8,19 @@ export { default as alertDialogAction } from './action.proto';
 export { default as alertDialogMask } from './mask.proto';
 export { default } from './root.proto';
 export type {
+  BootstrapAlertDialogButtonVariant,
+  BootstrapAlertDialogSize,
+  BootstrapAlertDialogContentProps,
+  BootstrapAlertDialogContentProps as AlertDialogContentProps,
+  BootstrapAlertDialogTriggerProps,
+  BootstrapAlertDialogTriggerProps as AlertDialogTriggerProps,
+  BootstrapAlertDialogActionProps,
+  BootstrapAlertDialogActionProps as AlertDialogActionProps,
+} from './types';
+export type {
   AlertDialogRootProps,
   AlertDialogRootExposes,
-  AlertDialogTriggerProps,
   AlertDialogTriggerExposes,
-  AlertDialogContentProps,
   AlertDialogContentExposes,
   AlertDialogTitleProps,
   AlertDialogTitleExposes,
@@ -20,7 +28,6 @@ export type {
   AlertDialogDescriptionExposes,
   AlertDialogCancelProps,
   AlertDialogCancelExposes,
-  AlertDialogActionProps,
   AlertDialogActionExposes,
   AlertDialogMaskProps,
   AlertDialogMaskExposes,

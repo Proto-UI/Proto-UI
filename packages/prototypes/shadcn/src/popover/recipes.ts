@@ -33,7 +33,7 @@ export const POPOVER_PANEL = {
     'bg-popover text-popover-foreground ring-foreground/5 flex flex-col gap-4 rounded-[var(--pui-radius-3xl)] p-4 text-sm shadow-lg ring-1 duration-100'
   ),
   'new-york-v4': tw(
-    'rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-md'
+    'flex flex-col gap-4 rounded-md border border-border bg-popover p-4 text-sm text-popover-foreground shadow-md duration-100'
   ),
 } as const satisfies OverlayRecipes;
 

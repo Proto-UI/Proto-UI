@@ -1,4 +1,5 @@
 import { withShadcnRheaDemo } from '../shadcn-demo-style';
+
 export default withShadcnRheaDemo({
   type: 'demo',
   root: {
@@ -12,6 +13,7 @@ export default withShadcnRheaDemo({
           {
             kind: 'proto',
             prototypeId: 'shadcn-button',
+            props: { variant: 'outline' },
             children: ['Open Dialog'],
           },
         ],
@@ -31,7 +33,7 @@ export default withShadcnRheaDemo({
               {
                 kind: 'proto',
                 prototypeId: 'shadcn-dialog-title',
-                children: ['Edit Profile'],
+                children: ['Edit profile'],
               },
               {
                 kind: 'proto',
@@ -41,11 +43,51 @@ export default withShadcnRheaDemo({
             ],
           },
           {
+            kind: 'box',
+            className: 'grid gap-4',
+            children: [
+              {
+                kind: 'box',
+                className: 'grid gap-2',
+                children: [
+                  {
+                    kind: 'box',
+                    tag: 'span',
+                    className: 'text-sm font-medium text-foreground',
+                    children: ['Name'],
+                  },
+                  {
+                    kind: 'box',
+                    className:
+                      'rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground',
+                    children: ['Pedro Duarte'],
+                  },
+                ],
+              },
+              {
+                kind: 'box',
+                className: 'grid gap-2',
+                children: [
+                  {
+                    kind: 'box',
+                    tag: 'span',
+                    className: 'text-sm font-medium text-foreground',
+                    children: ['Username'],
+                  },
+                  {
+                    kind: 'box',
+                    className:
+                      'rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground',
+                    children: ['@peduarte'],
+                  },
+                ],
+              },
+            ],
+          },
+          {
             kind: 'proto',
             prototypeId: 'shadcn-dialog-footer',
             children: [
-              // Passive consumer layout boxes bound flex items without styling
-              // Close or interrupting the continuous Close > Button trigger group.
               {
                 kind: 'box',
                 className: 'min-w-0 max-w-full',

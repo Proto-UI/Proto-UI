@@ -6,7 +6,11 @@ export { default as toastAction } from './action.proto';
 export { default as toastClose } from './close.proto';
 export { default } from './root.proto';
 export type {
+  LiquidGlassToastMaterial,
+  LiquidGlassToastProminence,
   ToastRootProps,
+} from './root.proto';
+export type {
   ToastRootExposes,
   ToastViewportProps,
   ToastViewportExposes,

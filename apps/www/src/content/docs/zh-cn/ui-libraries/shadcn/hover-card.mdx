@@ -8,18 +8,16 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-在用户悬停或聚焦触发元素时延迟展示预览信息的浮层卡片，支持自定义开闭延迟、锚点方位与视口碰撞翻转。本页示例采用 **Shadcn Rhea** 风格。
+在用户悬停或聚焦触发元素时延迟展示预览信息的浮层卡片，适合账号名片、链接摘要等补充信息场景。本页示例采用 **Shadcn Rhea** 风格。
 
 ## 预览
 
-下方示例在悬停 `@proto-ui` 150ms 后打开浮层，移开 300ms 后关闭，内容位于触发器下方居中（`side="bottom"`、`align="center"`）：
+悬停或聚焦 `@proto-ui` 150ms 后展开浮层，指针移入卡片内部时会保持打开，移开 200ms 后自动收起。
 
 <PrototypePreviewer
   demoId="demo-shadcn-hover-card"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
 
 ## 安装
@@ -32,13 +30,82 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 ## 用法
 
-`Hover Card` 由 `Root`、`Trigger` 与 `Content` 三个部件组成：
+```tsx
+import {
+  ShadcnHoverCardRoot,
+  ShadcnHoverCardTrigger,
+  ShadcnHoverCardContent,
+} from '../proto-ui/components/react';
 
-- **Root**：统一管理打开状态（受控 `open` 或非受控 `defaultOpen`）以及 `openDelay` / `closeDelay` 延迟时间。
-- **Trigger**：悬停或聚焦时向 `Root` 发起打开请求；支持独立的 `disabled` 属性。
-- **Content**：将鼠标移入卡片内部时会保持卡片打开，支持方位、对齐、偏移及碰撞检测配置。
+export function Example() {
+  return (
+    <ShadcnHoverCardRoot openDelay={150} closeDelay={200}>
+      <ShadcnHoverCardTrigger>@proto-ui</ShadcnHoverCardTrigger>
+      <ShadcnHoverCardContent side="bottom" align="center">
+        Host-neutral interaction protocols for adaptable UI components.
+      </ShadcnHoverCardContent>
+    </ShadcnHoverCardRoot>
+  );
+}
+```
+
+### 结构组成
+
+```text
+ShadcnHoverCardRoot
+├── ShadcnHoverCardTrigger
+└── ShadcnHoverCardContent
+```
+
+- **Root**：管理打开状态（受控 `open` 或非受控 `defaultOpen`）、`openDelay` / `closeDelay` 时序以及全局 `disabled`。
+- **Trigger**：响应指针悬停与键盘聚焦并向 `Root` 发起打开请求，不抢占链接或按钮的点击激活语义。
+- **Content**：通过 Portal 渲染定位浮层，支持四个方位、对齐、偏移与视口碰撞翻转，指针移入内容区时保持展开。
+
+## 示例
+
+### 方位（Sides）
+
+通过 `Content` 的 `side` 与 `align` 属性控制浮层相对触发器的弹出方位。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-hover-card-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 开合延迟（Trigger Delays）
+
+在 `Root` 上设置 `openDelay` 与 `closeDelay` 控制展开与关闭的防抖节奏。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-hover-card-delays"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用状态（Disabled）
+
+在 `Root` 或 `Trigger` 上传入 `disabled` 即可禁用悬停与聚焦展开。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-hover-card-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式（Controlled）
+
+传入 `open` 并监听 `openChange` 事件，即可由外部状态驱动卡片展开与收起。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-hover-card-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
+
+### Root
 
 传入 `open` 进入受控模式。`openDelay` 与 `closeDelay` 须为非负有限数值，非法值会自动回退到默认值。
 
@@ -50,18 +117,57 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'openDelay', type: 'number', default: '700' },
     { name: 'closeDelay', type: 'number', default: '300' },
-    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: 'bottom' },
-    { name: 'align', type: "'start' | 'center' | 'end'", default: 'center' },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'new-york-v4'",
+    },
+  ]}
+/>
+
+- **暴露状态**：`open: boolean`
+- **暴露方法**：`openHoverCard(reason?)`、`close(reason?)`、`toggle(reason?)`
+- **暴露事件**：`openChange`（载荷 `{ open: boolean; reason: string | null }`）
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'new-york-v4'",
+    },
+  ]}
+/>
+
+- **暴露状态**：`disabled`、`hovered`、`focused`、`focusVisible`
+- **暴露方法**：`focusSelf(options?)`
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
     { name: 'sideOffset', type: 'number', default: '4' },
     { name: 'alignOffset', type: 'number', default: '0' },
     { name: 'avoidCollisions', type: 'boolean', default: 'true' },
     { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'enterDuration', type: 'number', default: '200' },
+    { name: 'leaveDuration', type: 'number', default: '200' },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'new-york-v4'",
+    },
   ]}
 />
 
-- `open`、`defaultOpen`、`disabled`、`openDelay` 与 `closeDelay` 属于 `Root`；`Root` 暴露 `open` 状态、`openHoverCard` / `close` / `toggle` 方法以及 `openChange` 事件。
-- `side` 至 `collisionPadding` 属于 `Content`。
-- `Trigger` 仅提供 `disabled` 属性（默认 `false`）。
+- **暴露状态**：`open`、`isPresent`、`transitionState`
 
 ## 参考
 

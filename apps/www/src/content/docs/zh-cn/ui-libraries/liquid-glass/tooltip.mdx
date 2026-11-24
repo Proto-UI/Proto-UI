@@ -1,0 +1,164 @@
+---
+title: 'Liquid Glass Tooltip'
+description: '遵循层级克制原则、采用同心圆角与高光细边的 Liquid Glass 风格文字提示组件。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Tooltip 在悬停或键盘聚焦时以简洁的浮层展示补充说明。遵循 Apple Liquid Glass 层级原则，提示内容属于非交互式辅助信息，采用带同心圆角（`rounded-xl`）与细边高光的标准不透明材质，避免在玻璃控件之上再次叠加玻璃层。
+
+## 预览
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tooltip"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+Liquid Glass Tooltip 当前以工作区源码提供，可通过 `@proto.ui/prototypes-liquid-glass/tooltip` 导入 `tooltipGroup`、`tooltipRoot`、`tooltipTrigger` 与 `tooltipContent`，配合任意宿主 Adapter 使用。
+
+## 用法
+
+```tsx
+import {
+  LiquidGlassTooltipGroup,
+  LiquidGlassTooltipRoot,
+  LiquidGlassTooltipTrigger,
+  LiquidGlassTooltipContent,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <LiquidGlassTooltipGroup>
+      <LiquidGlassTooltipRoot>
+        <LiquidGlassTooltipTrigger>Account</LiquidGlassTooltipTrigger>
+        <LiquidGlassTooltipContent side="top">View account settings</LiquidGlassTooltipContent>
+      </LiquidGlassTooltipRoot>
+    </LiquidGlassTooltipGroup>
+  );
+}
+```
+
+### 组件结构
+
+```text
+TooltipGroup (可选)
+└── TooltipRoot
+    ├── TooltipTrigger
+    └── TooltipContent
+```
+
+### 材质与无障碍
+
+- **不叠玻璃**：Liquid Glass 折射材质保留给按钮、工具栏等功能性控件；Tooltip 作为非交互说明采用高可读性的标准不透明表面与细微内描边高光。
+- **同心几何**：面板圆角与胶囊触发器保持协调比例，支持浅色与深色模式自动切换。
+- **系统偏好回退**：开启「减少透明度」或「强制颜色」时切换为高对比度实色边框并移除阴影；开启「减弱动态效果」时关闭淡入缩放动效。
+
+## 示例
+
+### 弹出方向
+
+使用 `side` 属性控制提示在 `left`、`top`、`bottom` 或 `right` 侧展开。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tooltip-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 带快捷键提示
+
+在提示内容内并排展示操作说明与快捷键徽章。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tooltip-shortcut"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用按钮
+
+将禁用态控件包裹在 `Trigger` 内，在不恢复点击的前提下保留悬停与键盘说明。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tooltip-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Group
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '100' },
+    { name: 'skipDelay', type: 'number', default: '300' },
+  ]}
+/>
+
+### Root
+
+传入 `open` 进入受控模式；未单独设置延迟时自动沿用 `Group` 配置。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: 'undefined' },
+    { name: 'closeDelay', type: 'number', default: 'undefined' },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'top'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'enterDuration', type: 'number', default: '150' },
+    { name: 'leaveDuration', type: 'number', default: '100' },
+  ]}
+/>
+
+### 事件、状态与方法
+
+- **Root**：暴露状态 `open`，事件 `openChange`（`{ open, reason }`），方法 `openTooltip(reason?)`、`close(reason?)`、`toggle(reason?)`。
+- **Trigger**：暴露状态 `disabled`、`hovered`、`focused`、`focusVisible`，方法 `focusSelf(options?)`。
+- **Content**：暴露状态 `open` 与 Transition 状态（`transitionState`、`isPresent`、`controls`）。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-TOOLTIP.yaml',
+    'P-LIQUID-GLASS-TOOLTIP-GROUP.yaml',
+    'P-LIQUID-GLASS-TOOLTIP-TRIGGER.yaml',
+    'P-LIQUID-GLASS-TOOLTIP-CONTENT.yaml',
+    'P-BASE-TOOLTIP.yaml',
+  ]}
+/>

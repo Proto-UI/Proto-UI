@@ -1,0 +1,145 @@
+---
+title: 'Liquid Glass Hover Card'
+description: '以分层半透明玻璃浮层、同心圆角与可读回退样式呈现预览信息的悬停卡片组件。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Hover Card 在非玻璃链接式触发器上方或下方弹出分层半透明玻璃预览面板，提供常规与强调层级、同心圆角排版，并在降低透明度、强制颜色或减弱动态效果模式下自动回退为高对比度不透明表面。
+
+## 预览
+
+下方示例在渐变背景上展示 Liquid Glass 浮层的边缘高光、层级深度与同心圆角内部内容。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-hover-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+Liquid Glass Hover Card 当前以 Proto UI 工作区源码提供，暂未通过 CLI 分发；业务应用可按目标框架直接引用工作区原型封装。
+
+## 用法
+
+```tsx
+import {
+  LiquidGlassHoverCardRoot,
+  LiquidGlassHoverCardTrigger,
+  LiquidGlassHoverCardContent,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <LiquidGlassHoverCardRoot openDelay={150} closeDelay={200}>
+      <LiquidGlassHoverCardTrigger>@proto-ui</LiquidGlassHoverCardTrigger>
+      <LiquidGlassHoverCardContent variant="regular" material="auto" side="bottom" align="center">
+        Host-neutral interaction protocols layered over translucent Liquid Glass surfaces.
+      </LiquidGlassHoverCardContent>
+    </LiquidGlassHoverCardRoot>
+  );
+}
+```
+
+### 结构组成与材质准则
+
+```text
+LiquidGlassHoverCardRoot
+├── LiquidGlassHoverCardTrigger
+└── LiquidGlassHoverCardContent
+```
+
+- **避免玻璃叠加**：`Trigger` 保持轻量的非玻璃链接外观，仅由展开态的 `Content` 承载 Liquid Glass 材质，防止玻璃叠玻璃造成对比度下降。
+- **同心圆角与层级**：`Content` 外层使用 `rounded-2xl` 与 `p-4`，内部次级信息块推荐搭配 `rounded-xl`；需要突出重点信息时可选用 `variant="prominent"`，或通过 `material="opaque"` 显式关闭光学材质。
+- **无障碍回退**：系统开启减少透明度、强制颜色模式或减弱动态效果时，组件自动使用清晰边界的不透明表面与静态呈现；禁用态保留文字可读性而非粗暴半透明淡化。
+
+## 示例
+
+### 方位（Sides）
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-hover-card-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 材质与层级（Material & Prominence）
+
+对比常规 `regular` 玻璃、染色 `prominent` 玻璃以及显式不透明回退 `material="opaque"`。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-hover-card-material"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用状态（Disabled）
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-hover-card-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '300' },
+  ]}
+/>
+
+- **暴露状态与方法**：`open`、`openHoverCard(reason?)`、`close(reason?)`、`toggle(reason?)`
+- **暴露事件**：`openChange`（`{ open: boolean; reason: string | null }`）
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'variant', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'enterDuration', type: 'number', default: '150' },
+    { name: 'leaveDuration', type: 'number', default: '150' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-HOVER-CARD.yaml',
+    'P-LIQUID-GLASS-HOVER-CARD-TRIGGER.yaml',
+    'P-LIQUID-GLASS-HOVER-CARD-CONTENT.yaml',
+    'P-BASE-HOVER-CARD.yaml',
+    'P-BASE-HOVER-CARD-TRIGGER.yaml',
+    'P-BASE-HOVER-CARD-CONTENT.yaml',
+  ]}
+/>

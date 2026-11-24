@@ -1,11 +1,13 @@
 ---
 title: 'Command'
-description: '始终内联展示、支持实时过滤并触发操作事件的 Liquid Glass 命令面板。'
+description: '遵循同心圆角与防玻璃叠层原则的 Liquid Glass 可搜索命令面板组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Command 提供始终展开的内联搜索命令列表。输入查询仅用于筛选候选命令，按下 Enter 或点击命令项时会发出携带选中项的 `execute` 事件，由应用执行对应操作。
+Liquid Glass Command 采用同心圆角与高可读表面层次提供实时过滤的命令面板；内联列表保持清晰不透明，仅由外层浮层 `Dialog` 承载液态玻璃材质，避免玻璃叠玻璃。
 
 ## 预览
 
@@ -13,25 +15,104 @@ Liquid Glass Command 提供始终展开的内联搜索命令列表。输入查�
   demoId="demo-liquid-glass-command"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区 `@proto.ui/prototypes-liquid-glass/command` 提供，尚未进入 0.2.0 稳定版。
 
 ## 用法
 
-- **部件组成**：`Root`、`Input`、`Content`、`Item`、`Empty`。
-- **搜索与执行**：按 `textValue` 与 `keywords` 忽略大小写和重音过滤，也可设置 `filter={false}` 传入已过滤列表。方向键在命令间移动时焦点保持在 `Input`，IME 组合输入期间不触发执行。
-- **状态与边界**：`open`、`value` 与 `inputValue` 均支持独立受控；`Empty` 反映实际匹配数，禁用项和重复值项不会触发 `execute`。
+```tsx
+import {
+  commandRoot,
+  commandInput,
+  commandContent,
+  commandItem,
+  commandEmpty,
+} from '@proto.ui/prototypes-liquid-glass/command';
+```
+
+### 部件组合结构
+
+```text
+CommandRoot
+├── CommandInput
+└── CommandContent
+    ├── CommandItem
+    └── CommandEmpty
+```
+
+- **材质层次与同心圆角**：`CommandContent` 作为内联内容层保持常规不透明表面（`rounded-2xl` + `p-1`），内部命令项使用同心 `rounded-xl` 圆角；需要浮层液态玻璃质感时，将其放入 `liquid-glass-dialog-content` 浮层容器中。
+- **无障碍偏好回退**：禁用项使用清晰低对比前景色而非降低整体透明度；动画受 `prefers-reduced-motion` 保护，降低透明度偏好下保持高对比实体面板。
+- **过滤与键盘**：按 `textValue` 与 `keywords` 忽略大小写和重音匹配，设置 `filter={false}` 可接入外部过滤；方向键浏览时焦点留在输入框，IME 组合输入期间不触发执行。
+
+## 示例
+
+### 浮层玻璃命令弹窗
+
+由外层 `liquid-glass-dialog-content` 承载液态玻璃浮层材质，内部 `Command` 列表保持清晰不透明，不产生玻璃叠玻璃。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-command-dialog"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 快捷键提示与关键词搜索
+
+在同心圆角命令项中展示快捷键提示并支持关键词检索。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-command-shortcuts"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 可滚动长列表
+
+在限高列表容器内使用滚轮或方向键流畅浏览多项命令。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-command-scrollable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件        | 属性 / 事件                           | 说明                                       |
-| ----------- | ------------------------------------- | ------------------------------------------ |
-| Root        | `value` / `inputValue` / `open`       | 独立受控的命令状态与查询文本               |
-| Root        | `filter`                              | 设为 `false` 时关闭内置过滤                |
-| Root / Item | `execute`                             | Enter 或点击可用命令项时发出的执行意图事件 |
-| Item        | `textValue` / `keywords` / `disabled` | 命令名称、匹配关键词与禁用开关             |
-| Empty       | —                                     | 无匹配命令时显示的空状态                   |
+### Root
+
+传入 `value`、`inputValue` 或 `open` 可独立切换对应状态的受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
+    { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'true' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'filter', type: 'boolean', default: 'true' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### 其他部件与事件
+
+- **Input**：`placeholder`、`a11yLabel`、`name` 均默认为 `''`。
+- **Content**：`side="bottom"`、`align="start"`、`sideOffset={4}`、`collisionPadding={8}`。
+- **Item**：`value`、`textValue`、`keywords` 均默认为 `''`，`disabled` 默认为 `false`。
+- **Empty**：无独立属性，无匹配命令时自动显示。
+- **事件**：`Root` 触发 `execute`、`valueChange`、`inputValueChange` 与 `openChange`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-COMMAND.yaml', 'P-BASE-COMMAND.yaml']}
+/>

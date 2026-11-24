@@ -5,6 +5,7 @@ description: 'A modal confirmation dialog with focus trapping, safe cancel focus
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Brutalist AlertDialog interrupts the user for critical or destructive confirmations. It traps focus inside a bold Brutalist panel, prevents outside-click dismissal, and focuses `Cancel` first by default.
 
@@ -14,47 +15,138 @@ Brutalist AlertDialog interrupts the user for critical or destructive confirmati
   demoId="demo-brutalist-alert-dialog"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source (`@proto.ui/prototypes-brutalist`); not yet included in the 0.2.0 stable release.
 
 ## Usage
 
+```tsx
+import {
+  BrutalistAlertDialogRoot,
+  BrutalistAlertDialogTrigger,
+  BrutalistAlertDialogMask,
+  BrutalistAlertDialogContent,
+  BrutalistAlertDialogHeader,
+  BrutalistAlertDialogTitle,
+  BrutalistAlertDialogDescription,
+  BrutalistAlertDialogFooter,
+  BrutalistAlertDialogCancel,
+  BrutalistAlertDialogAction,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <BrutalistAlertDialogRoot>
+      <BrutalistAlertDialogTrigger>Open</BrutalistAlertDialogTrigger>
+      <BrutalistAlertDialogMask />
+      <BrutalistAlertDialogContent>
+        <BrutalistAlertDialogHeader>
+          <BrutalistAlertDialogTitle>Are you absolutely sure?</BrutalistAlertDialogTitle>
+          <BrutalistAlertDialogDescription>
+            This action cannot be undone. This will permanently delete your account.
+          </BrutalistAlertDialogDescription>
+        </BrutalistAlertDialogHeader>
+        <BrutalistAlertDialogFooter>
+          <BrutalistAlertDialogCancel>Cancel</BrutalistAlertDialogCancel>
+          <BrutalistAlertDialogAction>Continue</BrutalistAlertDialogAction>
+        </BrutalistAlertDialogFooter>
+      </BrutalistAlertDialogContent>
+    </BrutalistAlertDialogRoot>
+  );
+}
+```
+
 ### Parts
 
-AlertDialog is composed of `Root`, `Trigger`, `Mask`, `Content`, `Header`, `Title`, `Description`, `Footer`, `Cancel`, and `Action`:
-
 - **Root**: Manages `alertdialog` semantics and open state via controlled `open` or uncontrolled `defaultOpen`.
-- **Mask**: Modal backdrop that blocks outside-click dismissal.
-- **Content**: Raised 5px-radius panel with 24px padding that traps focus and focuses `Cancel` when available.
+- **Mask**: Flat scrim overlay with a 150ms fade transition that blocks outside-click dismissal.
+- **Content**: Raised 5px-radius (`rounded-base`) panel with 2px border, 24px padding, and hard shadow. Supports `size="sm"`, traps focus, and focuses `Cancel` when available.
 - **Header / Footer**: Optional layout containers for the heading stack and right-aligned action buttons (which reverse-wrap cleanly when space is tight).
 - **Cancel / Action**: `Cancel` and `Escape` request dismissal; `Action` emits `action` before requesting close so your application performs the confirmed operation.
 
-### Controlled and uncontrolled state
+## Examples
 
-- **Uncontrolled**: Use `defaultOpen` to initialize the dialog state.
-- **Controlled**: Pass `open` and listen to `openChange` to commit state updates. Disabled commands do not activate.
+### Small
+
+Use `size="sm"` on `Content` to narrow the confirmation panel.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-alert-dialog-small"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Media
+
+Add a bordered Brutalist icon container inside `Header` to reinforce the confirmation context.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-alert-dialog-media"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Destructive
+
+Following Neobrutalism conventions, buttons keep the unified family palette while a warning icon badge inside `Header` highlights irreversible deletion.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-alert-dialog-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Control dialog visibility with `open`, `openChange`, and `action`.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-alert-dialog-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 ### Root
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop / Event / Method', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean', default: 'undefined (uncontrolled)' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'openChange (event)', type: '{ open: boolean; reason: string | null; focusReason: string | null }', default: '—' },
+    { name: 'openAlertDialog / close / toggle (methods)', type: '(reason?: string) => void', default: '—' },
   ]}
 />
 
-Pass `open: boolean` to enable controlled mode.
+### Content, Mask & Commands
 
-### Other parts
+<ApiPropsTable
+  headers={{ name: 'Part & Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Content.size', type: "'default' | 'sm'", default: "'default'" },
+    { name: 'Content.enterDuration / leaveDuration', type: 'number', default: '150' },
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+    { name: 'Mask.enterDuration / leaveDuration', type: 'number', default: '150' },
+    { name: 'Trigger / Cancel / Action.disabled', type: 'boolean', default: 'false' },
+    { name: 'Action.action (event)', type: '{ reason: string }', default: '—' },
+  ]}
+/>
 
-- **Mask**: `passthrough?: boolean` (default `false`) and Transition props
-- **Content**: Transition props
-- **Trigger / Header / Title / Description / Footer / Cancel / Action**: No props
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-ALERT-DIALOG.yaml',
+    'P-BRUTALIST-ALERT-DIALOG-HEADER.yaml',
+    'P-BRUTALIST-ALERT-DIALOG-FOOTER.yaml',
+    'P-BASE-ALERT-DIALOG.yaml',
+  ]}
+/>

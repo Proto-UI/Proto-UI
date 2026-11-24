@@ -1,12 +1,13 @@
 ---
-title: 'NavigationMenu'
-description: '带有原生目的地链接与可展开导航面板的 Brutalist 风格导航菜单。'
+title: 'Navigation Menu'
+description: '带有粗边框导航栏、硬阴影浮层面板与原生锚点链接的 Brutalist 导航菜单组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-NavigationMenu 用于构建站点级或应用级导航栏，将互斥展开的命名导航面板与浏览器原生链接语义结合在一起。
+Brutalist Navigation Menu 用于构建站点级或应用级导航栏，遵循 Brutalist 设计契约（5px `rounded-base` 圆角、2px 黑色描边、DM Sans 字体与 3px 零模糊浮层硬阴影），并将可展开的命名面板与原生浏览器链接结合在一起。
 
 ## 预览
 
@@ -14,50 +15,172 @@ NavigationMenu 用于构建站点级或应用级导航栏，将互斥展开的�
   demoId="demo-brutalist-navigation-menu"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-brutalist/navigation-menu` 导入组件原型并使用对应宿主 Adapter 适配。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-brutalist/navigation-menu` 导入组件原型并使用对应宿主 Adapter 适配：
+
+```ts
+import {
+  navigationMenuRoot,
+  navigationMenuTrigger,
+  navigationMenuContent,
+  navigationMenuItem,
+  navigationMenuLink,
+} from '@proto.ui/prototypes-brutalist/navigation-menu';
+```
 
 ## 用法
 
-### 组件结构
+```tsx
+import {
+  BrutalistNavigationMenuRoot,
+  BrutalistNavigationMenuTrigger,
+  BrutalistNavigationMenuContent,
+  BrutalistNavigationMenuItem,
+  BrutalistNavigationMenuLink,
+} from '../proto-ui/components/react';
 
-NavigationMenu 由 `Root`、`Trigger`、`Content`、`Item` 和 `Link` 五个部分组成：
+export function BrutalistSiteNav() {
+  return (
+    <BrutalistNavigationMenuRoot a11yLabel="Main navigation">
+      <BrutalistNavigationMenuTrigger value="getting-started">
+        Getting started
+      </BrutalistNavigationMenuTrigger>
+      <BrutalistNavigationMenuContent value="getting-started" a11yLabel="Getting started">
+        <BrutalistNavigationMenuLink href="/docs" current>
+          Introduction
+        </BrutalistNavigationMenuLink>
+        <BrutalistNavigationMenuItem value="copy-theme" textValue="Copy theme CSS">
+          Copy theme CSS
+        </BrutalistNavigationMenuItem>
+      </BrutalistNavigationMenuContent>
+    </BrutalistNavigationMenuRoot>
+  );
+}
+```
 
-- `Root`：作为 navigation 地标容器，通过 `value` 管理当前唯一展开的导航面板。
-- `Trigger`：切换对应面板展开状态的按钮，与 `Content` 通过 `value` 配对。
-- `Content`：带无障碍名称的 region 面板容器。
-- `Item`：触发普通命令操作的菜单项。
-- `Link`：渲染真实的原生锚点链接，支持 `href`、`target`、`rel` 和 `current`（设置 `aria-current` 标识当前页）。
+### 结构组成
 
-### 链接导航行为
+```text
+NavigationMenuRoot (navigation)
+├── NavigationMenuTrigger (button, paired by value)
+└── NavigationMenuContent (region, paired by value)
+    ├── NavigationMenuLink (native <a>)
+    └── NavigationMenuItem (command action)
+```
 
-- **原生浏览体验**：URL 预览、`Enter` 激活以及修饰键/中键打开新标签页均由浏览器原生处理；如需接入应用路由，可在外层监听事件或结合路由方案处理。
-- **只读 `navigate` 事件**：`Link` 在原生激活后发出只读 `navigate` 事件，载荷包含 `{ href, target, rel, modified }`，用于观察导航行为。
-- **自动关闭规则**：普通当前窗口激活默认关闭当前面板（设置 `closeOnSelect={false}` 可保持打开）；使用修饰键、中键点击或 `target="_blank"` 打开时保留当前页面的展开面板。
-- **禁用状态**：设置 `disabled` 后，`Link` 会移除跳转目标并阻止激活。
-- **跨宿主渲染**：React、Vue 与 Vue 2 直接使用原生 `<a>` 根节点；Web Components 会将自定义内容保留在内部持有的锚点元素中，焦点、样式与无障碍属性同步作用在该元素上。
+### 原生链接与键盘交互
+
+- **原生浏览体验**：URL 预览、`Enter` 激活以及修饰键/中键打开新标签页均由浏览器原生处理。React、Vue 与 Vue 2 直接渲染原生 `<a>` 根节点；Web Components 将内容托管在内部锚点元素中。
+- **只读 `navigate` 事件**：`Link` 激活后发出只读 `navigate` 事件，携带 `{ href, target, rel, modified }`。
+- **自动关闭与禁用**：普通同窗口点击默认关闭面板（设 `closeOnSelect={false}` 可保持打开）；修饰键、中键或 `target="_blank"` 保持面板展开。禁用状态的 `Link` 移除跳转目标并阻止激活。
+- **键盘导航**：顶层 `Trigger` 支持左右方向键漫游，`ArrowDown` / `ArrowUp` 展开并聚焦面板首尾项，`Escape` 关闭并返回焦点。
+
+## 示例
+
+### 带图标链接
+
+在展开面板中组合图标与链接文本，搭配 Brutalist 主色悬停与黑色边框反馈。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-navigation-menu-with-icons"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 链接状态与禁用
+
+展示当前页高亮（`current`）、点击不自动关闭（`closeOnSelect={false}`）、新标签页跳转（`target="_blank"`）及禁用状态。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-navigation-menu-links-and-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式与事件
+
+通过 `value` 与 `valueChange` 控制展开面板，并观察 `Item.select` 与 `Link.navigate`。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-navigation-menu-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`（传入 `value` 进入受控模式）：
+### NavigationMenuRoot
 
 <ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  headers={{ name: '属性 / 暴露', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: 'undefined（非受控）' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'loop', type: 'boolean', default: 'true' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'valueChange（事件）', type: '{ value: string; reason: string }', default: '—' },
+    { name: 'requestValue（方法）', type: '(value: string, reason?: string) => boolean', default: '—' },
+    { name: 'close（方法）', type: '() => void', default: '—' },
   ]}
 />
 
-其余子部件属性默认值：
+### NavigationMenuTrigger
 
-- **Trigger**：`value` 默认 `''`，`disabled` 默认 `false`。
-- **Content**：`value` 与 `a11yLabel` 默认 `''`，`sideOffset` 默认 `4`。
-- **Item**：`value` 与 `textValue` 默认 `''`，`disabled` 默认 `false`，`closeOnSelect` 默认 `true`。
-- **Link**：`href` 与 `rel` 默认 `''`，`current` 默认 `false`，`target` 默认 `'_self'`。
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### NavigationMenuContent
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### NavigationMenuItem
+
+<ApiPropsTable
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'select（事件）', type: '{ value: string; menuValue: string }', default: '—' },
+  ]}
+/>
+
+### NavigationMenuLink
+
+<ApiPropsTable
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'href', type: 'string', default: "''" },
+    { name: 'target', type: "'_self' | '_blank'", default: "'_self'" },
+    { name: 'rel', type: 'string', default: "''" },
+    { name: 'current', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'navigate（事件）', type: '{ href: string; target: string; rel: string; modified: boolean }', default: '—' },
+    { name: 'select（事件）', type: '{ value: string; menuValue: string }', default: '—' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-NAVIGATION-MENU.yaml', 'P-BASE-NAVIGATION-MENU.yaml']}
+/>

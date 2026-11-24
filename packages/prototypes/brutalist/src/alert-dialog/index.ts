@@ -10,6 +10,9 @@ export { default as alertDialogAction } from './action.proto';
 export { default as alertDialogMask } from './mask.proto';
 export { default } from './root.proto';
 export type {
+  BrutalistAlertDialogSize,
+  BrutalistAlertDialogContentProps,
+  BrutalistAlertDialogContentProps as AlertDialogContentProps,
   BrutalistAlertDialogHeaderProps,
   BrutalistAlertDialogHeaderExposes,
   BrutalistAlertDialogFooterProps,
@@ -20,7 +23,6 @@ export type {
   AlertDialogRootExposes,
   AlertDialogTriggerProps,
   AlertDialogTriggerExposes,
-  AlertDialogContentProps,
   AlertDialogContentExposes,
   AlertDialogTitleProps,
   AlertDialogTitleExposes,

@@ -5,6 +5,7 @@ import type {
   DropdownItemAsHookContract,
   DropdownItemExposes,
   DropdownItemProps,
+  DropdownLabelProps,
   DropdownRootAsHookContract,
   DropdownRootExposes,
   DropdownRootProps,
@@ -38,3 +39,7 @@ export interface BrutalistDropdownItemProps extends DropdownItemProps {
 }
 export type BrutalistDropdownItemExposes = DropdownItemExposes;
 export type BrutalistDropdownItemAsHookContract = DropdownItemAsHookContract;
+
+export interface BrutalistDropdownLabelProps extends DropdownLabelProps {
+  inset?: boolean;
+}

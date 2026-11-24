@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Popover displays a non-modal floating surface anchored to a trigger, suited for quick settings, compact forms, or lightweight navigation panels. The examples on this page use the **Shadcn Rhea** style preset.
+Popover displays rich non-modal content anchored to a trigger, suited for quick settings, compact forms, or lightweight navigation panels. Examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -15,62 +15,123 @@ Popover displays a non-modal floating surface anchored to a trigger, suited for 
   demoId="demo-shadcn-popover"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Popover is currently available from the workspace source and not yet included in the 0.2.0 stable CLI release. Import the prototypes directly from `@proto.ui/prototypes-shadcn/popover` and adapt them to Web Components, React, Vue 3, or Vue 2:
+
+```ts
+import {
+  popoverRoot,
+  popoverTrigger,
+  popoverContent,
+  popoverTitle,
+  popoverDescription,
+  popoverClose,
+} from '@proto.ui/prototypes-shadcn/popover';
+```
 
 ## Usage
 
-Popover consists of `Root`, `Trigger`, `Content`, `Title`, `Description`, and `Close`:
+```tsx
+<Popover styleProfile="rhea">
+  <PopoverTrigger>Open Popover</PopoverTrigger>
+  <PopoverContent align="start">
+    <PopoverTitle>Dimensions</PopoverTitle>
+    <PopoverDescription>Set the dimensions for the layer.</PopoverDescription>
+  </PopoverContent>
+</Popover>
+```
 
-- `Content` positions itself relative to `Trigger` using `side`, `align`, `sideOffset`, `alignOffset`, and `collisionPadding`.
-- Because Popover is non-modal, background scrolling remains unlocked and `Tab` navigation is not trapped.
-- Pressing outside, moving focus out of `Trigger` and `Content`, pressing `Escape`, or activating `Close` requests dismissal. Moving focus between `Trigger` and portalled `Content` counts as staying inside; closing due to focus moving outside leaves focus on that external element.
+### Composition
 
-### Controlled and uncontrolled
+```text
+PopoverRoot
+├── PopoverTrigger
+└── PopoverContent
+    ├── PopoverTitle
+    ├── PopoverDescription
+    └── PopoverClose
+```
 
-- `Root` supports controlled `open` and uncontrolled `defaultOpen`.
-- In controlled mode, listen to `openChange` and provide the next value. Rejecting a `focus.outside` request keeps `Content` visible without trapping external focus. Focus-only outside dismissals report `focusReason` as `'programmatic'`.
+- **Positioning & collisions**: `Content` anchors relative to `Trigger` with `side`, `align`, `sideOffset`, `alignOffset`, and `collisionPadding`.
+- **Non-modal focus & dismissal**: Background scrolling stays unlocked and `Tab` navigation is not trapped. Pressing outside, pressing `Escape`, activating `Close`, or moving focus outside both `Trigger` and `Content` requests dismissal. When dismissed by focus leaving, focus remains on the newly focused external element.
+- **Style presets**: Supports `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`, and `new-york-v4`, inherited from `shadcn-style-scope` or set per part via `styleProfile`.
 
-### Navigation presentation
+## Examples
 
-Set `presentation="navigation"` on `Trigger` and `Content` to render a scrollable anchored navigation panel where native links keep standard browser behavior:
+### Basic
+
+A simple popover with a title and description aligned to the start edge.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-popover-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Align
+
+Use the `align` prop on `PopoverContent` to control alignment (`start`, `center`, or `end`).
+
+<PrototypePreviewer
+  demoId="demo-shadcn-popover-align"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Sides
+
+Use `side` and `sideOffset` to place the popover on `top`, `right`, `bottom`, or `left` with automatic collision flipping.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-popover-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Pass `open` and handle `openChange` to synchronize open state with parent state.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-popover-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Navigation Presentation
+
+Set `presentation="navigation"` on `Trigger` and `Content` to render a scrollable anchored navigation panel where native links preserve standard browser semantics.
 
 <PrototypePreviewer
   demoId="demo-shadcn-popover-navigation"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## API
 
-Pass `open` for controlled mode. `Root` exposes `open`, `openPopover`, `close`, `toggle`, and `openChange`:
+`Root` exposes read-only state `open`, methods `openPopover`, `close`, and `toggle`, and the `openChange` event.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'open', type: 'boolean | undefined', default: 'uncontrolled' },
-    { name: 'defaultOpen', type: 'boolean', default: 'false' },
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'a11yLabel', type: 'string', default: "''" },
-    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: 'bottom' },
-    { name: 'align', type: "'start' | 'center' | 'end'", default: 'center' },
-    { name: 'sideOffset', type: 'number', default: '4' },
-    { name: 'alignOffset', type: 'number', default: '0' },
-    { name: 'collisionPadding', type: 'number', default: '8' },
-    { name: 'presentation', type: "'default' | 'navigation'", default: 'default' },
+    { name: 'open (Root)', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultOpen (Root)', type: 'boolean', default: 'false' },
+    { name: 'disabled (Root / Trigger / Close)', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel (Root)', type: 'string', default: "''" },
+    { name: 'side (Content)', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align (Content)', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset (Content)', type: 'number', default: '4' },
+    { name: 'alignOffset (Content)', type: 'number', default: '0' },
+    { name: 'collisionPadding (Content)', type: 'number', default: '8' },
+    { name: 'presentation (Trigger / Content)', type: "'default' | 'navigation'", default: "'default'" },
+    { name: 'enterDuration / leaveDuration (Content)', type: 'number', default: '0' },
+    { name: 'styleProfile (parts)', type: "ShadcnStyleId | 'inherit'", default: "'inherit' (fallback 'nova')" },
   ]}
 />
-
-Prop ownership:
-
-- `open`, `defaultOpen`, `disabled`, and `a11yLabel` belong to `Root`.
-- `side`, `align`, `sideOffset`, `alignOffset`, and `collisionPadding` belong to `Content`.
-- `presentation` belongs to `Trigger` and `Content`.
 
 ## References
 

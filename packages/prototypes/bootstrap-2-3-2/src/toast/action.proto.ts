@@ -12,13 +12,16 @@ export default definePrototype<ToastActionProps, ToastActionExposes>({
     const behavior = asToastAction();
     const state = behavior.stateHandles!;
     // The Action is a Proto command with historical link paint, not a second
-    // Button. Base exposes focus/disabled, but no hovered or pressed fact.
+    // Button. Base exposes focus/disabled; hover uses passive CSS paint.
     def.feedback.style.use(
-      tw('inline-block min-w-0 text-[14px] leading-[20px] no-underline cursor-pointer')
+      tw(
+        'inline-block min-w-0 mt-1.5 text-[14px] leading-[20px] font-bold no-underline cursor-pointer outline-none'
+      )
     );
     def.rule({
       when: (w) => w.all(w.state(state.disabled).eq(false), w.not(w.state(state.focused).eq(true))),
-      intent: (i) => i.feedback.style.use(tw('text-[#08c]')),
+      intent: (i) =>
+        i.feedback.style.use(tw('text-[#08c] hover:text-[#005580] hover:underline')),
     });
     def.rule({
       when: (w) => w.all(w.state(state.disabled).eq(false), w.state(state.focused).eq(true)),
@@ -26,11 +29,12 @@ export default definePrototype<ToastActionProps, ToastActionExposes>({
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('text-[#999] cursor-default')),
+      intent: (i) => i.feedback.style.use(tw('text-[#999] cursor-default pointer-events-none')),
     });
     def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),
-      intent: (i) => i.feedback.style.use(tw('outline-none ring-2 ring-ring ring-offset-2')),
+      intent: (i) =>
+        i.feedback.style.use(tw('outline-none ring-2 ring-ring ring-offset-2 ring-offset-background')),
     });
     return behavior.render;
   },

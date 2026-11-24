@@ -5,37 +5,136 @@ description: 'A modal dialog with bold Brutalist borders, hard offset shadows, a
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Dialog pairs [Base Dialog](/en/ui-libraries/base/dialog/) modality, focus management, and command wiring with a bold poster-style panel and high-contrast dismissal controls.
+Brutalist Dialog pairs [Base Dialog](/en/ui-libraries/base/dialog/) modality, focus management, and command wiring with 5px rounded corners, 2px black borders, a 4px hard-shadowed panel, and high-contrast dismissal controls.
 
 ## Preview
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-dialog" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-dialog"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
 </div>
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Available from workspace source; generate runtime wrappers via the CLI:
 
-- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-dialog`
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-dialog" manager="npm" />
+
+Replace `wc` with `react`, `vue`, or `vue2` for your target runtime.
 
 ## Usage
 
-- **Trigger and close controls**: The opener uses a sky-blue hard-shadow button, while the top-right close control (accessible name `Close`) is a dedicated canary-yellow rounded button that turns coral on hover and removes its shadow on press while keeping a crisp focus outline.
-- **Footer dismiss action**: `Close` provides dismissal semantics without adding its own button chrome. Wrap a `Button` child inside `Close` for footer dismiss actions while keeping a single `Tab` stop.
-- **Mask behavior**: A non-passthrough `Mask` (`passthrough={false}`) prevents pointer defaults from stealing restored focus, while `Content` governs dismissal rules.
+```tsx
+import {
+  BrutalistButton,
+  BrutalistDialogClose,
+  BrutalistDialogCloseIcon,
+  BrutalistDialogContent,
+  BrutalistDialogDescription,
+  BrutalistDialogFooter,
+  BrutalistDialogHeader,
+  BrutalistDialogMask,
+  BrutalistDialogRoot,
+  BrutalistDialogTitle,
+  BrutalistDialogTrigger,
+} from '@/components/proto-ui/brutalist';
+
+export function BrutalistDialogExample() {
+  return (
+    <BrutalistDialogRoot>
+      <BrutalistDialogTrigger>Edit Profile</BrutalistDialogTrigger>
+      <BrutalistDialogMask />
+      <BrutalistDialogContent>
+        <div className="min-w-0 pe-12">
+          <BrutalistDialogHeader>
+            <BrutalistDialogTitle>Edit profile</BrutalistDialogTitle>
+            <BrutalistDialogDescription>
+              Make changes to your profile here. Click save when you&apos;re done.
+            </BrutalistDialogDescription>
+          </BrutalistDialogHeader>
+        </div>
+        <BrutalistDialogFooter>
+          <BrutalistDialogClose>
+            <BrutalistButton variant="neutral">Cancel</BrutalistButton>
+          </BrutalistDialogClose>
+          <BrutalistDialogClose>
+            <BrutalistButton>Save changes</BrutalistButton>
+          </BrutalistDialogClose>
+        </BrutalistDialogFooter>
+        <BrutalistDialogCloseIcon />
+      </BrutalistDialogContent>
+    </BrutalistDialogRoot>
+  );
+}
+```
+
+### Composition
+
+```text
+BrutalistDialogRoot
+├── BrutalistDialogTrigger
+├── BrutalistDialogMask
+└── BrutalistDialogContent
+    ├── BrutalistDialogHeader
+    │   ├── BrutalistDialogTitle
+    │   └── BrutalistDialogDescription
+    ├── BrutalistDialogFooter
+    │   └── BrutalistDialogClose
+    └── BrutalistDialogCloseIcon
+```
+
+### Visual and interaction grammar
+
+- **Trigger and close controls**: The opener renders as a sky-blue hard-shadow button, while the top-right close button (accessible name `Close`) is a canary-yellow control that switches to coral on hover, settles into its shadow on press, and displays a crisp offset focus ring.
+- **Footer dismiss action**: `Close` provides dismissal semantics without adding its own chrome. Wrap a `BrutalistButton` child inside `Close` to keep standard button styling and a single `Tab` stop.
+- **Mask behavior**: A non-passthrough `Mask` (`passthrough={false}`) prevents pointer defaults from stealing restored focus while `Content` governs dismissal rules.
+
+## Examples
+
+### Scrollable Content
+
+Long content scrolls inside the modal body while keeping the header anchored.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-dialog-scrollable"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### Sticky Footer
+
+Keep footer actions visible below the scrolling content region.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-dialog-sticky-footer"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
 
 ## API
 
-### Root
+### BrutalistDialogRoot
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean', default: 'undefined (controlled)' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'alert', type: 'boolean', default: 'false' },
@@ -43,10 +142,24 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
   ]}
 />
 
-Pass `open: boolean` to enable controlled mode.
+Exposed methods & events: `openDialog(reason?)`, `close(reason?)`, `toggle(reason?)`, and `openChange`.
 
 ### Other parts
 
-- **Mask**: `passthrough?: boolean` (default `false`) and Transition props
+<ApiPropsTable
+  headers={{ name: 'Part / Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+    { name: 'Close / CloseIcon.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
 - **Content**: No own props. Compositions that need to choose an entry-focus policy can use [Base Dialog Content](/en/ui-libraries/base/dialog/); this does not extend the Brutalist Content prop boundary.
-- **Trigger / Title / Description / Close**: No props
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-DIALOG.yaml', 'P-BASE-DIALOG.yaml']}
+/>

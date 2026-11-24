@@ -2,13 +2,19 @@ import { definePrototype, tw, type RunHandle } from '@proto.ui/core';
 import { asToastRoot, type ToastRootExposes } from '@proto.ui/prototypes-base/toast';
 import type { ToastRootProps } from './types';
 import { SHADCN_STYLE_IDS, SHADCN_STYLE_SCOPE, setupShadcnStyleScope } from '../style-scope';
-import { TOAST_RADIUS } from './recipes';
+import { TOAST_RADIUS, TOAST_ROOT_RECIPES } from './recipes';
+
+const TOAST_TYPES = ['default', 'success', 'info', 'warning', 'error', 'loading'] as const;
 
 export default definePrototype<ToastRootProps, ToastRootExposes>({
   name: 'shadcn-toast-root',
   setup(def) {
     const behavior = asToastRoot();
     setupShadcnStyleScope(def);
+    def.props.define({
+      type: { type: 'enum', empty: 'fallback', options: [...TOAST_TYPES] },
+    });
+    def.props.setDefaults({ type: 'default' });
     // As in the existing Card scope owner, observe the already resolved scope;
     // do not declare a second choice/default resolver on the same Root.
     const style = def.state.enum('toastResolvedStyle', 'new-york-v4', {
@@ -27,7 +33,18 @@ export default definePrototype<ToastRootProps, ToastRootExposes>({
     for (const profile of SHADCN_STYLE_IDS) {
       def.rule({
         when: (w) => w.all(w.state(selected).eq(true), w.state(style).eq(profile)),
-        intent: (i) => i.feedback.style.use(TOAST_RADIUS[profile]),
+        intent: (i) => i.feedback.style.use(TOAST_RADIUS[profile], TOAST_ROOT_RECIPES[profile]),
+      });
+    }
+    for (const profile of ['luma', 'rhea'] as const) {
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(selected).eq(true),
+            w.state(style).eq(profile),
+            w.meta('colorScheme').eq('dark')
+          ),
+        intent: (i) => i.feedback.style.use(tw('ring-foreground/10')),
       });
     }
     def.rule({
@@ -35,12 +52,24 @@ export default definePrototype<ToastRootProps, ToastRootExposes>({
       intent: (i) => i.feedback.style.use(tw('bg-popover text-popover-foreground')),
     });
     // The previously unpinned Proto Toast remains the compatibility fallback;
-    // it is not presented as the separately selected New York Sonner recipe.
+    // it is not presented as the separately selected New York recipe.
     def.rule({
       when: (w) => w.state(selected).eq(false),
       intent: (i) => i.feedback.style.use(tw('rounded-md bg-background text-foreground')),
     });
-    // Structural layout is an existing Proto projection, not Sonner queue geometry.
-    def.feedback.style.use(tw('border border-border shadow-sm grid gap-2 min-w-0 w-full p-4'));
+    def.rule({
+      when: (w) => w.prop('type').eq('error'),
+      intent: (i) => i.feedback.style.use(tw('border-destructive/50')),
+    });
+    def.rule({
+      when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
+    def.feedback.style.use(
+      tw(
+        'border border-border shadow-lg grid gap-2 min-w-0 w-full p-4 text-start transition-opacity duration-150'
+      )
+    );
+    return behavior.render;
   },
 });

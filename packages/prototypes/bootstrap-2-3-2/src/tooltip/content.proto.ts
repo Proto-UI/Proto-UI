@@ -20,7 +20,7 @@ export default definePrototype<TooltipContentProps, TooltipContentExposes>({
     const behavior = asTooltipContent();
     def.feedback.style.use(
       tw(
-        'z-50 max-w-[200px] p-[8px] text-center text-[11px] leading-[15.4px] text-white bg-black rounded-[4px] whitespace-normal'
+        'z-50 inline-flex w-fit max-w-[200px] items-center gap-1.5 p-[8px] text-center font-sans text-[11px] leading-[15.4px] text-white bg-black rounded-[4px] whitespace-normal'
       )
     );
     behavior.asTransition.configure({ enterDuration: 150, leaveDuration: 150 });
@@ -29,6 +29,10 @@ export default definePrototype<TooltipContentProps, TooltipContentExposes>({
       closed: { opacity: 0 },
       entered: { opacity: 0.8 },
       easing: [0, 0, 1, 1],
+    });
+    def.rule({
+      when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
     });
     return (renderer) => [renderer.r.slot()];
   },

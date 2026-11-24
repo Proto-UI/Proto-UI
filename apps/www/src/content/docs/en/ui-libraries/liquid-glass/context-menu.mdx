@@ -1,11 +1,13 @@
 ---
 title: 'Context Menu'
-description: 'A Liquid Glass context menu triggered by right-click, touch/pen long-press, or keyboard shortcuts.'
+description: 'A Liquid Glass floating context menu triggered by right-click, touch/pen long press, or keyboard shortcuts.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Context Menu opens on right-click, a 600ms touch/pen long-press, or the `ContextMenu` / `Shift+F10` keyboard shortcuts while suppressing the browser's default context menu for handled triggers.
+Liquid Glass Context Menu places the open menu strictly in the floating control layer above content, pairing a `16px` outer radius and `4px` inset with concentric `12px` items. `Trigger` remains an ordinary non-glass surface to avoid stacking glass-on-glass, and `Content` falls back cleanly to a high-contrast opaque surface under reduced-transparency, increased-contrast, or `material="opaque"`.
 
 ## Preview
 
@@ -13,28 +15,159 @@ Liquid Glass Context Menu opens on right-click, a 600ms touch/pen long-press, or
   demoId="demo-liquid-glass-context-menu"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+This component is currently available from the workspace source and is not yet included in the 0.2.0 stable CLI registry.
 
 ## Usage
 
-- **Parts**: `Root`, `Trigger`, `Content`, `Item`.
-- **Triggers and anchoring**:
-  - Right-click and a 600ms touch/pen hold within movement tolerance anchor the menu at the input point (default `bottom`/`start`, zero offset). Moving, releasing, cancelling, disabling, or unmounting cancels a pending hold; ordinary left clicks and scrolling remain untouched.
-  - `ContextMenu`, `Shift+F10`, and programmatic `openContextMenu()` fall back to anchoring against the trigger region.
-- **Keyboard and dismissal**: `Content` supports arrow-key navigation, typeahead, outside-press dismissal, and focus restoration on Escape or item activation.
-- **Controlled mode**: with controlled `open`, an accepted request suppresses the native menu even if you keep `open={false}`; opening later reuses the latest live input anchor.
+```tsx
+import {
+  LiquidGlassContextMenuContent,
+  LiquidGlassContextMenuItem,
+  LiquidGlassContextMenuRoot,
+  LiquidGlassContextMenuTrigger,
+} from '@/components/proto-ui';
+
+export function Example() {
+  return (
+    <LiquidGlassContextMenuRoot>
+      <LiquidGlassContextMenuTrigger className="h-36 w-72 border-dashed">
+        Right click here
+      </LiquidGlassContextMenuTrigger>
+      <LiquidGlassContextMenuContent>
+        <LiquidGlassContextMenuItem value="back">Back</LiquidGlassContextMenuItem>
+        <LiquidGlassContextMenuItem value="forward" disabled>Forward</LiquidGlassContextMenuItem>
+        <LiquidGlassContextMenuItem value="reload">Reload</LiquidGlassContextMenuItem>
+      </LiquidGlassContextMenuContent>
+    </LiquidGlassContextMenuRoot>
+  );
+}
+```
+
+### Composition
+
+```text
+ContextMenuRoot
+├── ContextMenuTrigger (ordinary surface)
+└── ContextMenuContent (Liquid Glass floating layer)
+    ├── ContextMenuItem (concentric rounded-xl)
+    └── ContextMenuItem (concentric rounded-xl)
+```
+
+- **Layering and concentric geometry**: `Trigger` stays on the content layer without material intent, while `Content` requests `liquid-glass` only while open. Disabled items use muted ink rather than opacity dimming so opaque fallbacks stay legible.
+- **Motion and preference fallbacks**: Open/close transitions automatically yield to `reducedMotion`, and `material="opaque"` lets any surface opt out of translucency explicitly.
+
+## Examples
+
+### Basic
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-context-menu-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Destructive and inset
+
+Use `variant="destructive"` and `inset` to distinguish destructive actions while aligning item labels.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-context-menu-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Sides
+
+Control preferred placement with `side` and `sideOffset`, with automatic collision flipping near viewport edges.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-context-menu-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Material auto vs opaque
+
+Compare default `material="auto"` Liquid Glass against explicit `material="opaque"` fallback surfaces over a colorful backdrop.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-context-menu-opaque"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop / Method | Description |
-| --- | --- | --- |
-| Root | `open`, `defaultOpen` | Controlled / uncontrolled open state |
-| Root | `disabled` | Prevents opening the context menu |
-| Root | `closeOnItemCommit` | Controls whether committing an item requests closing |
-| Root | `openContextMenu()` | Programmatically opens the menu anchored to the trigger |
-| Trigger / Content / Item | — | Context target area, menu overlay, and actionable menu items |
+### Root
+
+Pass `open` for controlled mode. Exposes the `openChange` event and `openContextMenu()`, `close()`, and `toggle()` methods.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
+    {
+      name: 'openEntry',
+      type: "'active-or-first' | 'first' | 'last' | 'value-or-first'",
+      default: "'active-or-first'",
+    },
+    { name: 'openEntryValue', type: 'string', default: "''" },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+Exposes `focusFirst()`, `focusLast()`, `focusNext()`, and `focusPrev()` methods.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'sideOffset', type: 'number', default: '0' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'excludeAnchorTranslation', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '0' },
+    { name: 'leaveDuration', type: 'number', default: '100' },
+  ]}
+/>
+
+### Item
+
+Emits `select` with `{ value, reason }` when activated.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnCommit', type: 'boolean', default: 'Inherits Root' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-CONTEXT-MENU.yaml', 'P-BASE-CONTEXT-MENU.yaml']}
+/>

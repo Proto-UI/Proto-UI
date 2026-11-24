@@ -1,60 +1,179 @@
 ---
 title: 'Drawer'
-description: 'A Bootstrap 2.3.2 edge-attached modal drawer supporting content-fit height, scrolling, and snap points.'
+description: 'A Bootstrap 2.3.2 edge-attached modal drawer featuring classic modal chrome, scrollable content, and snap points.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Drawer presents a modal panel from any of the four viewport edges, supporting content-fit sizing, internal scrolling, drag-to-dismiss, and optional snap points.
+Bootstrap 2.3.2 Drawer brings classic 6px-rounded modal box chrome (ruled header, right-aligned muted footer, and beveled buttons) to an edge-attached drawer supporting all four sides, internal scrolling, and draggable snap points.
 
 ## Preview
-
-### Basic drawer
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-drawer"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-### Long content
+## Installation
+
+Currently available from workspace source (`@proto.ui/prototypes-bootstrap-2-3-2/drawer`); not yet published in the 0.2.0 stable CLI release.
+
+## Usage
+
+```tsx
+import {
+  BootstrapDrawerRoot,
+  BootstrapDrawerTrigger,
+  BootstrapDrawerMask,
+  BootstrapDrawerContent,
+  BootstrapDrawerHandle,
+  BootstrapDrawerHeader,
+  BootstrapDrawerTitle,
+  BootstrapDrawerDescription,
+  BootstrapDrawerFooter,
+  BootstrapDrawerClose,
+} from '../proto-ui/components/react';
+```
+
+```tsx
+<BootstrapDrawerRoot>
+  <BootstrapDrawerTrigger>Open Drawer</BootstrapDrawerTrigger>
+  <BootstrapDrawerMask />
+  <BootstrapDrawerContent side="bottom">
+    <BootstrapDrawerHandle />
+    <BootstrapDrawerHeader>
+      <BootstrapDrawerTitle>Workspace Preferences</BootstrapDrawerTitle>
+      <BootstrapDrawerDescription>
+        Review default notification and digest rules for this project.
+      </BootstrapDrawerDescription>
+    </BootstrapDrawerHeader>
+    <div className="p-[15px]">{/* Body content */}</div>
+    <BootstrapDrawerFooter>
+      <BootstrapDrawerClose>Close</BootstrapDrawerClose>
+    </BootstrapDrawerFooter>
+  </BootstrapDrawerContent>
+</BootstrapDrawerRoot>
+```
+
+### Composition
+
+```text
+DrawerRoot
+├── DrawerTrigger
+├── DrawerMask
+└── DrawerContent
+    ├── DrawerHandle
+    ├── DrawerHeader
+    │   ├── DrawerTitle
+    │   └── DrawerDescription
+    └── DrawerFooter
+        └── DrawerClose
+```
+
+- **Sizing and scrolling**: Top and bottom drawers fit their content height up to the safe viewport region; left and right drawers default to a `20` `root-text` cap. Wrap scrollable content in `flex-1 overflow-y-auto` between `Header` and `Footer`.
+- **Extent bounds and snap points**: Configure `minExtent`, `maxExtent`, and `snapPoints` directly on `Content`. Passing `(0, 1]` fractions enables explicit snap stops with keyboard arrow and `Home`/`End` support on `Handle`.
+- **Transitions**: `Content` slides over 300ms and `Mask` fades over 150ms, automatically honoring `prefers-reduced-motion`.
+
+## Examples
+
+### Position
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-drawer-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Scrollable Content
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-drawer-scroll"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-### Explicit half/full snaps
+### Snap Points
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-drawer-snap"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-## Installation
+### Custom Sizes & Locked Drag
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
-
-## Usage
-
-- **Sizing and scrolling**: Top and bottom drawers fit their content height up to the safe available viewport height and scroll internally (`overflow-y-auto`) when content overflows; left and right drawers default to a `20rem` cap.
-- **Extent bounds**: Pass `minExtent` and `maxExtent` on `Content` using neutral length objects (`unit`: `'logical'` | `'root-text'` | `'available'` | `'available-minus-root-text'`, nonnegative finite `value`). Minimums above the safe cap clamp automatically; invalid runtime updates set `extentValid={false}` and keep the last valid size.
-- **Snap points**: Omit `snapPoints` (or pass an empty array) for content-fit mode where `Handle` acts as a pointer-only drag affordance. Pass an array of fractions in `(0, 1]` to enable explicit snapping, with keyboard arrow and `Home`/`End` resizing on `Handle`.
-- **Dismissal and controlled state**: Supply `open` to control visibility externally; refused close requests spring back to the current state. Set `dragDismissible={false}` to disable drag dismissal while keeping Close buttons, `Escape`, and outside-click dismissal.
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-drawer-sizing"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / Events / States | Description |
-| --- | --- | --- |
-| `Root` | `open` / `defaultOpen` | Controlled or initial open state |
-| `Root` | `snapPoints` | Array of fractions in `(0, 1]` enabling explicit snap stops |
-| `Root` | `snapPoint` / `defaultSnapPoint` / `snapPointChange` | Controlled/initial active snap point and change event |
-| `Content` | `minExtent` / `maxExtent` | Minimum and maximum extent bounds |
-| `Content` | `dragDismissible` | Defaults to `true`; disables drag dismissal when `false` |
-| `Content` | `extentValid` | Indicates whether the active extent configuration is valid |
-| `Handle` | — | Drag handle; adds named `separator` role and keyboard resize in snap mode |
+### Root
+
+Pass `open` for controlled mode and subscribe to `openChange`. Exposes `openDrawer()`, `close()`, and `toggle()`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Content
+
+Exposes `open`, `snapPoint`, `dragging`, `dragProgress`, `offsetPercentage`, `extentValid`, `requestSnapPoint()`, and `snapPointChange`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'snapPoints', type: 'number[]', default: '—' },
+    { name: 'snapPoint', type: 'number', default: '—' },
+    { name: 'defaultSnapPoint', type: 'number', default: '—' },
+    { name: 'minExtent', type: 'AvailableLayoutLength', default: "{ unit: 'logical', value: 0 }" },
+    {
+      name: 'maxExtent',
+      type: 'AvailableLayoutLength',
+      default: "vertical { unit: 'available', value: 1 } / horizontal { unit: 'root-text', value: 20 }",
+    },
+    { name: 'dragDismissible', type: 'boolean', default: 'true' },
+    { name: 'dragDismissThreshold', type: 'number', default: '0.25' },
+    { name: 'enterDuration', type: 'number', default: '300' },
+    { name: 'leaveDuration', type: 'number', default: '300' },
+  ]}
+/>
+
+### Mask / Handle / Trigger / Close
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+    { name: 'Mask.enterDuration / leaveDuration', type: 'number', default: '150' },
+    { name: 'Handle.disabled', type: 'boolean', default: 'false' },
+    { name: 'Handle.a11yLabel', type: 'string', default: "'Resize drawer'" },
+    { name: 'Trigger / Close.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+`Header`, `Footer`, `Title`, and `Description` declare no additional props.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-DRAWER.yaml',
+    'P-BOOTSTRAP-2-3-2-DRAWER-HEADER.yaml',
+    'P-BOOTSTRAP-2-3-2-DRAWER-FOOTER.yaml',
+    'P-BASE-DRAWER.yaml',
+  ]}
+/>

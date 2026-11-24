@@ -1,11 +1,13 @@
 ---
 title: 'Dropdown Menu'
-description: 'A Liquid Glass action menu with grouped items, accessible group labels, shortcut hints, and glass surface styling.'
+description: 'A Liquid Glass action menu with concentric geometry, trigger prominence hierarchy, opaque material opt-out, and destructive items.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Dropdown Menu organizes menu actions into named groups with dividers and shortcut hints, pairing Liquid Glass material styling on the trigger and open menu panel with automatic opaque fallback.
+Liquid Glass Dropdown Menu projects grouped command menus onto a floating translucent surface with concentric corner geometry, `regular` and `prominent` trigger hierarchy, `material="opaque"` opt-out, and Base keyboard navigation.
 
 ## Preview
 
@@ -13,28 +15,162 @@ Liquid Glass Dropdown Menu organizes menu actions into named groups with divider
   demoId="demo-liquid-glass-dropdown-menu"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
-
-The preview shows a 160px menu with account and resource groups, a disabled action item, and a separate disabled trigger.
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source. Import all parts directly from `@proto.ui/prototypes-liquid-glass/dropdown`.
 
 ## Usage
 
-- **Grouping and passive parts**: `Group` and `Label` establish a live accessible naming relationship. `Separator` and `Shortcut` are passive parts excluded from keyboard action traversal; `Shortcut` displays hint text only without registering global keybindings.
-- **Trigger and panel material**: `Trigger` declares `liquid-glass` optical intent with press deformation, and `Content` requests glass optics while open. When an in-app canvas backdrop is unavailable (including for portaled menus outside the canvas), or when contrast or preferences disallow glass, both fall back cleanly to readable opaque styling.
-- Hover, focus-visible, disabled state, and menu activation are handled by Base Dropdown Menu.
+```tsx
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from '@/components/liquid-glass/dropdown-menu';
+```
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger>Open</DropdownMenuTrigger>
+  <DropdownMenuContent align="start">
+    <DropdownMenuGroup>
+      <DropdownMenuLabel>My Account</DropdownMenuLabel>
+      <DropdownMenuItem value="profile">
+        Profile
+        <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+      </DropdownMenuItem>
+      <DropdownMenuItem value="billing">Billing</DropdownMenuItem>
+    </DropdownMenuGroup>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem value="logout">Log out</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+- **Concentric geometry & layering**: The floating menu panel pairs a `rounded-2xl` outer container and `p-2` padding with `rounded-lg` items for concentric corner radii; menu items remain non-glass surfaces so glass is never stacked on glass.
+- **Optical material & fallback**: `Trigger` and `Content` request `liquid-glass` optical material when an in-app backdrop source is available and fall back automatically to readable opaque surfaces when portaled outside the canvas or when accessibility preferences restrict transparency. Use `material="opaque"` to opt out explicitly.
+
+## Examples
+
+### Destructive & Inset
+
+Combine `variant="destructive"` for irreversible actions with `inset` to align iconless items cleanly alongside icon rows.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-dropdown-menu-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Trigger Prominence & Indicator
+
+Distinguish secondary menus from primary creation menus using `prominence="regular"` vs `prominence="prominent"`, with optional pull-down chevrons via `indicator`.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-dropdown-menu-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Opaque Material Opt-out
+
+Set `material="opaque"` on `Trigger` or `Content` when embedding inside another glass layer to prevent glass-on-glass stacking; disabled triggers likewise withdraw glass while preserving legible opaque contrast.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-dropdown-menu-opaque"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part                 | Description                                                           |
-| -------------------- | --------------------------------------------------------------------- |
-| Root                 | Manages menu open state and coordination                              |
-| Trigger              | Menu trigger button supporting `disabled` and press material feedback |
-| Content              | Menu panel with open-state glass material and automatic fallback      |
-| Group / Label        | Groups related commands with an accessible group name                 |
-| Item                 | Actionable menu command with optional disabled state                  |
-| Separator / Shortcut | Passive divider and shortcut hint display                             |
+### Root
+
+Pass `open` for controlled mode. `Root` exposes the `openChange` event and `openDropdown()`, `close()`, and `toggle()` methods.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
+    {
+      name: 'openEntry',
+      type: "'active-or-first' | 'first' | 'last' | 'value-or-first'",
+      default: "'active-or-first'",
+    },
+    { name: 'openEntryValue', type: 'string', default: "''" },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'prominence', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'indicator', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnCommit', type: 'boolean', default: 'Inherits Root' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+  ]}
+/>
+
+### Group / Label / Separator / Shortcut
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Group.a11yLabel', type: 'string', default: "''" },
+    { name: 'Label.inset', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-DROPDOWN-MENU.yaml',
+    'P-LIQUID-GLASS-DROPDOWN-MENU-TRIGGER.yaml',
+    'P-LIQUID-GLASS-DROPDOWN-MENU-CONTENT.yaml',
+    'P-LIQUID-GLASS-DROPDOWN-MENU-ITEM.yaml',
+    'P-BASE-DROPDOWN-MENU.yaml',
+  ]}
+/>

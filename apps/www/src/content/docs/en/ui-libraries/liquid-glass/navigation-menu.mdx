@@ -1,11 +1,13 @@
 ---
 title: 'Navigation Menu'
-description: 'A Liquid Glass navigation bar with named disclosure panels and native anchor links.'
+description: 'A Liquid Glass navigation capsule with concentric floating glass panels and native anchor links.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Navigation Menu provides a `navigation` landmark with named disclosure panels and real native `<a>` destination links, preserving browser URL previews, Enter activation, and modifier/middle-click opening.
+Liquid Glass Navigation Menu pairs a floating capsule bar with open-gated Liquid Glass V2 panels (avoiding glass-on-glass stacking), concentric corner radii (`rounded-2xl` + `p-1` outer panel with `rounded-xl` inner items), real native `<a>` links, and complete opaque accessibility fallbacks.
 
 ## Preview
 
@@ -13,25 +15,173 @@ Liquid Glass Navigation Menu provides a `navigation` landmark with named disclos
   demoId="demo-liquid-glass-navigation-menu"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-liquid-glass/navigation-menu`:
+
+```ts
+import {
+  navigationMenuRoot,
+  navigationMenuTrigger,
+  navigationMenuContent,
+  navigationMenuItem,
+  navigationMenuLink,
+} from '@proto.ui/prototypes-liquid-glass/navigation-menu';
+```
 
 ## Usage
 
-- **Parts**: `Root`, `Trigger`, `Content`, `Item`, `Link`.
-- **Panels and commands**: `Root.value` identifies the single open named `region` panel, `Trigger` toggles it, and `Item` emits an application command.
-- **Native links**: `Link` renders a real anchor (`href`, `target`, `rel`, and `current` for `aria-current`) in React, Vue, Vue 2, and inside an owned local anchor in Web Components. Disabled links remove their destination and prevent activation.
-- **Navigation observation**: `Link` emits a read-only `navigate` event (`href`, `target`, `rel`, `modified`) after native activation. Ordinary same-window navigations close the panel unless `closeOnSelect={false}`; modifier clicks, middle clicks, and `_blank` targets leave the panel open.
+```tsx
+import {
+  LiquidGlassNavigationMenuRoot,
+  LiquidGlassNavigationMenuTrigger,
+  LiquidGlassNavigationMenuContent,
+  LiquidGlassNavigationMenuItem,
+  LiquidGlassNavigationMenuLink,
+} from '../proto-ui/components/react';
+
+export function LiquidGlassSiteNav() {
+  return (
+    <LiquidGlassNavigationMenuRoot a11yLabel="Main navigation">
+      <LiquidGlassNavigationMenuTrigger value="getting-started" prominence="prominent">
+        Getting started
+      </LiquidGlassNavigationMenuTrigger>
+      <LiquidGlassNavigationMenuContent value="getting-started" a11yLabel="Getting started">
+        <LiquidGlassNavigationMenuLink href="/docs" current>
+          Introduction
+        </LiquidGlassNavigationMenuLink>
+        <LiquidGlassNavigationMenuItem value="quick-search" textValue="Quick search">
+          Quick search
+        </LiquidGlassNavigationMenuItem>
+      </LiquidGlassNavigationMenuContent>
+    </LiquidGlassNavigationMenuRoot>
+  );
+}
+```
+
+### Composition
+
+```text
+NavigationMenuRoot (navigation capsule)
+├── NavigationMenuTrigger (regular | prominent pill, paired by value)
+└── NavigationMenuContent (liquid-glass | opaque region, paired by value)
+    ├── NavigationMenuLink (native <a>, concentric rounded-xl)
+    └── NavigationMenuItem (command action, concentric rounded-xl)
+```
+
+### Material Hierarchy & Native Links
+
+- **Single floating glass layer**: Only the open `Content` panel requests the `liquid-glass` material candidate while inner `Item` and `Link` rows use subtle semantic highlights instead of stacking glass-on-glass. Pass `material="opaque"` on `Content` to opt out into the solid fallback surface explicitly.
+- **Prominence & readability**: `Trigger` supports `prominence="regular"` and `prominence="prominent"`. Disabled controls withdraw elevation rather than fading opaque foreground contrast.
+- **Native links & dismissal**: `Link` renders a real anchor with `href`, `target`, `rel`, `current` (`aria-current="page"`), and `closeOnSelect` (owned by `Item` and `Link`, defaulting to `true`). After native activation, `Link` emits a read-only `navigate` event; modifier clicks, middle clicks, and `_blank` targets keep the current panel open.
+
+## Examples
+
+### With Icon
+
+Showcases concentric panel items with leading icons over a rich backdrop.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-navigation-menu-with-icons"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Prominence, Opaque Fallback & Link States
+
+Demonstrates `Trigger.prominence="prominent"`, `Content.material="opaque"`, current-page highlighting, persistent panels, and disabled states.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-navigation-menu-links-and-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled & Events
+
+Manage the active panel externally via `value` and `valueChange`, while observing `select` and `navigate`.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-navigation-menu-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop / Event | Description |
-| --- | --- | --- |
-| Root | `value`, `closeOnSelect` | Active panel key / whether same-window link activation closes the panel |
-| Trigger / Content | — | Disclosure button and labelled navigation `region` |
-| Item | — | Actionable navigation item |
-| Link | `href`, `target`, `rel`, `current`, `disabled` | Native link attributes and current-page state; emits read-only `navigate` |
+### NavigationMenuRoot
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Expose', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'undefined (uncontrolled)' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'valueChange (event)', type: '{ value: string; reason: string }', default: '—' },
+    { name: 'requestValue (method)', type: '(value: string, reason?: string) => boolean', default: '—' },
+    { name: 'close (method)', type: '() => void', default: '—' },
+  ]}
+/>
+
+### NavigationMenuTrigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'prominence', type: "'regular' | 'prominent'", default: "'regular'" },
+  ]}
+/>
+
+### NavigationMenuContent
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+  ]}
+/>
+
+### NavigationMenuItem
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'select (event)', type: '{ value: string; menuValue: string }', default: '—' },
+  ]}
+/>
+
+### NavigationMenuLink
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'href', type: 'string', default: "''" },
+    { name: 'target', type: "'_self' | '_blank'", default: "'_self'" },
+    { name: 'rel', type: 'string', default: "''" },
+    { name: 'current', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'navigate (event)', type: '{ href: string; target: string; rel: string; modified: boolean }', default: '—' },
+    { name: 'select (event)', type: '{ value: string; menuValue: string }', default: '—' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-NAVIGATION-MENU.yaml', 'P-BASE-NAVIGATION-MENU.yaml']}
+/>

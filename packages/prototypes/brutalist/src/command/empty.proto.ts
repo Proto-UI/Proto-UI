@@ -6,8 +6,12 @@ import {
 } from '@proto.ui/prototypes-base/command';
 export default definePrototype<CommandEmptyProps, CommandEmptyExposes>({
   name: 'brutalist-command-empty',
+  modules: asCommandEmpty.modules,
   setup(def) {
     const behavior = asCommandEmpty();
-    def.feedback.style.use(tw('px-3 py-6 text-center text-sm text-muted-foreground'));
+    def.feedback.style.use(
+      tw('px-3 py-6 text-center font-sans text-sm font-medium text-muted-foreground')
+    );
+    return behavior.render;
   },
 });

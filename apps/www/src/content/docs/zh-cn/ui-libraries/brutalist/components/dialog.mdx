@@ -5,37 +5,136 @@ description: '具备硬边框面板、高对比度关闭控件与完整焦点管
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Dialog 在完整继承 [Base Dialog](/zh-cn/ui-libraries/base/dialog/) 语义、焦点管理与遮罩行为的基础上，采用高对比度的硬边框海报式面板和独立强调色关闭按钮。
+Brutalist Dialog 在完整继承 [Base Dialog](/zh-cn/ui-libraries/base/dialog/) 语义、焦点管理与遮罩行为的基础上，采用 5px 圆角、2px 黑色硬边框、4px 实体阴影面板与独立强调色关闭按钮。
 
 ## 预览
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-dialog" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-dialog"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
 </div>
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前从源码工作区提供，可通过 CLI 生成对应运行时包装：
 
-- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-dialog`
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-dialog" manager="npm" />
+
+将 `wc` 替换为 `react`、`vue` 或 `vue2` 即可生成对应宿主组件。
 
 ## 用法
 
-- **触发器与关闭按钮**：触发按钮使用天蓝色块与硬阴影；右上角关闭按钮（可访问名称 `Close`）为独立金丝雀黄圆角控件，悬停切换为珊瑚红，按压时移除阴影并保持清晰硬焦点轮廓。
-- **底部关闭操作**：`Close` 部件仅负责关闭语义，不自带按钮外观；在弹窗底部组合 `Button` 子元素即可获得标准按钮样式并保持单一 `Tab` 停靠点。
-- **遮罩交互**：非穿透 `Mask`（默认 `passthrough={false}`）会阻止指针默认行为夺走已恢复的焦点，点击外部的关闭策略由 `Content` 统一控制。
+```tsx
+import {
+  BrutalistButton,
+  BrutalistDialogClose,
+  BrutalistDialogCloseIcon,
+  BrutalistDialogContent,
+  BrutalistDialogDescription,
+  BrutalistDialogFooter,
+  BrutalistDialogHeader,
+  BrutalistDialogMask,
+  BrutalistDialogRoot,
+  BrutalistDialogTitle,
+  BrutalistDialogTrigger,
+} from '@/components/proto-ui/brutalist';
+
+export function BrutalistDialogExample() {
+  return (
+    <BrutalistDialogRoot>
+      <BrutalistDialogTrigger>Edit Profile</BrutalistDialogTrigger>
+      <BrutalistDialogMask />
+      <BrutalistDialogContent>
+        <div className="min-w-0 pe-12">
+          <BrutalistDialogHeader>
+            <BrutalistDialogTitle>Edit profile</BrutalistDialogTitle>
+            <BrutalistDialogDescription>
+              Make changes to your profile here. Click save when you&apos;re done.
+            </BrutalistDialogDescription>
+          </BrutalistDialogHeader>
+        </div>
+        <BrutalistDialogFooter>
+          <BrutalistDialogClose>
+            <BrutalistButton variant="neutral">Cancel</BrutalistButton>
+          </BrutalistDialogClose>
+          <BrutalistDialogClose>
+            <BrutalistButton>Save changes</BrutalistButton>
+          </BrutalistDialogClose>
+        </BrutalistDialogFooter>
+        <BrutalistDialogCloseIcon />
+      </BrutalistDialogContent>
+    </BrutalistDialogRoot>
+  );
+}
+```
+
+### 组合结构
+
+```text
+BrutalistDialogRoot
+├── BrutalistDialogTrigger
+├── BrutalistDialogMask
+└── BrutalistDialogContent
+    ├── BrutalistDialogHeader
+    │   ├── BrutalistDialogTitle
+    │   └── BrutalistDialogDescription
+    ├── BrutalistDialogFooter
+    │   └── BrutalistDialogClose
+    └── BrutalistDialogCloseIcon
+```
+
+### 交互与视觉规则
+
+- **触发器与关闭按钮**：触发按钮使用天蓝色块与 4px 硬阴影；右上角关闭按钮（可访问名称 `Close`）为独立金丝雀黄圆角控件，悬停切换为珊瑚红，按压时沿阴影方向落位并收起阴影，聚焦时保持清晰外偏焦点环。
+- **底部关闭操作**：`Close` 部件仅负责关闭语义，不自带按钮外观；在底部内嵌 `BrutalistButton` 即可获得标准按钮样式并保持单一 `Tab` 停靠点。
+- **遮罩交互**：非穿透 `Mask`（默认 `passthrough={false}`）阻止指针默认行为夺走已恢复的焦点，关闭策略由 `Content` 统一控制。
+
+## 示例
+
+### 可滚动内容
+
+长列表内容在面板内部滚动，同时保持标题区域稳定。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-dialog-scrollable"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### 固定底部操作栏
+
+内容滚动期间底部按钮始终停留在可视区域下方。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-dialog-sticky-footer"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
 
 ## API
 
-### Root
+### BrutalistDialogRoot
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'open', type: 'boolean', default: 'undefined（受控模式）' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'alert', type: 'boolean', default: 'false' },
@@ -43,10 +142,24 @@ Brutalist Dialog 在完整继承 [Base Dialog](/zh-cn/ui-libraries/base/dialog/)
   ]}
 />
 
-传入 `open: boolean` 进入受控模式。
+暴露方法与事件：`openDialog(reason?)`、`close(reason?)`、`toggle(reason?)` 与 `openChange`。
 
 ### 其他部件属性
 
-- **Mask**：`passthrough?: boolean`（默认 `false`）及 Transition 属性
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+    { name: 'Close / CloseIcon.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
 - **Content**：无自有属性。需要选择初始焦点策略的组合可以使用 [Base Dialog Content](/zh-cn/ui-libraries/base/dialog/)；这不会扩展 Brutalist Content 的属性边界。
-- **Trigger / Title / Description / Close**：无独立属性
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-DIALOG.yaml', 'P-BASE-DIALOG.yaml']}
+/>

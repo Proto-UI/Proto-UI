@@ -1,12 +1,13 @@
 ---
-title: 'ContextMenu'
-description: 'A Brutalist context menu triggered by right-click, touch long-press, or keyboard shortcuts.'
+title: 'Context Menu'
+description: 'A Brutalist context menu triggered by right-click, touch/pen long press, or keyboard shortcuts.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist ContextMenu opens a floating command menu on right-click, touch/pen long-press, or `ContextMenu` / `Shift+F10`, with full keyboard navigation, typeahead, and focus restoration.
+Brutalist Context Menu opens a crisp 2px-bordered floating menu with a 3px hard foreground shadow on right-click, a 600 ms touch/pen long press, or `ContextMenu` / `Shift+F10`, with arrow-key navigation, typeahead, and focus restoration.
 
 ## Preview
 
@@ -14,48 +15,148 @@ Brutalist ContextMenu opens a floating command menu on right-click, touch/pen lo
   demoId="demo-brutalist-context-menu"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+This component is currently available from the workspace source and is not yet included in the 0.2.0 stable CLI registry.
 
 ## Usage
 
-### Parts
+```tsx
+import {
+  BrutalistContextMenuContent,
+  BrutalistContextMenuItem,
+  BrutalistContextMenuRoot,
+  BrutalistContextMenuTrigger,
+} from '@/components/proto-ui';
 
-ContextMenu consists of `Root`, `Trigger`, `Content`, and `Item`:
+export function Example() {
+  return (
+    <BrutalistContextMenuRoot>
+      <BrutalistContextMenuTrigger className="flex h-36 w-72 items-center justify-center rounded-base border-2 border-dashed border-black bg-secondary-background text-sm font-sans font-medium">
+        Right click here
+      </BrutalistContextMenuTrigger>
+      <BrutalistContextMenuContent>
+        <BrutalistContextMenuItem value="back">Back</BrutalistContextMenuItem>
+        <BrutalistContextMenuItem value="forward" disabled>Forward</BrutalistContextMenuItem>
+        <BrutalistContextMenuItem value="reload">Reload</BrutalistContextMenuItem>
+      </BrutalistContextMenuContent>
+    </BrutalistContextMenuRoot>
+  );
+}
+```
 
-- **Root**: Manages open state (`open` / `defaultOpen`), `disabled`, `closeOnItemCommit`, and initial focus entry.
-- **Trigger**: Defines the context region. Opens on right-click, 600ms touch/pen hold within movement tolerance, or `ContextMenu` / `Shift+F10` while suppressing the native context menu. Regular left-clicks and scrolling behave normally.
-- **Content**: Anchored menu panel positioned at the pointer location for right-click/long-press, or at the trigger region for keyboard triggers and programmatic `openContextMenu()`. Supports arrow navigation, typeahead, transitions, and collision avoidance.
-- **Item**: Individual menu action supporting `disabled`, `value`, `textValue`, and `closeOnCommit`.
+### Composition
 
-### Focus and controlled state
+```text
+ContextMenuRoot
+├── ContextMenuTrigger
+└── ContextMenuContent
+    ├── ContextMenuItem
+    └── ContextMenuItem
+```
 
-- Pressing `Escape` or committing an item closes the menu and restores focus to the trigger.
-- Pass `open` for controlled mode: handled context triggers still prevent the native context menu while letting your application decide when to set `open={true}`.
+- **Headless trigger**: `Trigger` stays unframed so you can wrap any target surface or dashed box. Handled context triggers automatically suppress the browser context menu while leaving ordinary clicks and scrolling untouched.
+- **Brutalist depth grammar**: `Content` uses `rounded-base`, a 2px black border, and a 3px hard foreground shadow; `Item` switches to the main accent fill and 2px border on hover, focus, or press without translation jitter.
+
+## Examples
+
+### Basic
+
+<PrototypePreviewer
+  demoId="demo-brutalist-context-menu-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Destructive and inset
+
+Use `variant="destructive"` and `inset` to highlight destructive commands while aligning item labels.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-context-menu-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Sides
+
+Control preferred placement with `side` and `sideOffset`, with automatic collision flipping near viewport edges.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-context-menu-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 ### Root
 
+Pass `open` for controlled mode. Exposes the `openChange` event and `openContextMenu()`, `close()`, and `toggle()` methods.
+
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
-    { name: 'openEntry', type: 'string', default: 'active-or-first' },
+    {
+      name: 'openEntry',
+      type: "'active-or-first' | 'first' | 'last' | 'value-or-first'",
+      default: "'active-or-first'",
+    },
     { name: 'openEntryValue', type: 'string', default: "''" },
   ]}
 />
 
-Pass `open: boolean` to enable controlled mode.
+### Trigger
 
-### Other parts
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
 
-- **Trigger**: No props
-- **Content**: Supports Transition props, plus `side` (default `'bottom'`), `align` (default `'start'`), `sideOffset` (default `0`), `alignOffset` (default `0`), `avoidCollisions` (default `true`), `collisionPadding` (default `0`), and `excludeAnchorTranslation` (default `false`)
-- **Item**: `disabled?: boolean` (default `false`), `value?: string` (default `''`), `textValue?: string` (default `''`), `closeOnCommit?: boolean` (inherits Root's `closeOnItemCommit` when omitted)
+### Content
+
+Exposes `focusFirst()`, `focusLast()`, `focusNext()`, and `focusPrev()` methods.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'sideOffset', type: 'number', default: '0' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'excludeAnchorTranslation', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '150' },
+    { name: 'leaveDuration', type: 'number', default: '100' },
+  ]}
+/>
+
+### Item
+
+Emits `select` with `{ value, reason }` when activated.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnCommit', type: 'boolean', default: 'Inherits Root' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-CONTEXT-MENU.yaml', 'P-BASE-CONTEXT-MENU.yaml']}
+/>

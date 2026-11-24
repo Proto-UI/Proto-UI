@@ -16,5 +16,6 @@ export default definePrototype<MenubarItemProps, MenubarItemExposes>({
       },
       'menubar'
     );
+    return behavior.render;
   },
 });

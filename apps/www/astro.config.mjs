@@ -1694,6 +1694,24 @@ export default defineConfig({
                   translations: { en: 'Popover', 'zh-CN': 'Popover' },
                   slug: 'ui-libraries/bootstrap-2-3-2/popover',
                 },
+                {
+                  label: 'Dialog',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Dialog', 'zh-CN': 'Dialog' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/dialog',
+                },
+                {
+                  label: 'Hover Card',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Hover Card', 'zh-CN': 'Hover Card' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/hover-card',
+                },
+                {
+                  label: 'Tooltip',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Tooltip', 'zh-CN': 'Tooltip' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/tooltip',
+                },
               ],
             },
             {
@@ -1915,6 +1933,24 @@ export default defineConfig({
                   badge: earlyDraftBadge,
                   translations: { en: 'Alert Dialog', 'zh-CN': 'Alert Dialog' },
                   slug: 'ui-libraries/liquid-glass/alert-dialog',
+                },
+                {
+                  label: 'Dialog',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Dialog', 'zh-CN': 'Dialog' },
+                  slug: 'ui-libraries/liquid-glass/dialog',
+                },
+                {
+                  label: 'Hover Card',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Hover Card', 'zh-CN': 'Hover Card' },
+                  slug: 'ui-libraries/liquid-glass/hover-card',
+                },
+                {
+                  label: 'Tooltip',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Tooltip', 'zh-CN': 'Tooltip' },
+                  slug: 'ui-libraries/liquid-glass/tooltip',
                 },
                 {
                   label: 'Drawer',

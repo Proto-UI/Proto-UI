@@ -7,6 +7,7 @@ const ITEM_BASE_TOKENS =
 
 const dropdownItem = definePrototype<BrutalistDropdownItemProps, BrutalistDropdownItemExposes>({
   name: 'brutalist-dropdown-item',
+  modules: asDropdownItem.modules,
   setup(def) {
     // P-BRUTALIST-DROPDOWN-MENU-ITEM-PROPS,
     // P-BRUTALIST-DROPDOWN-MENU-ITEM-DEFAULTS

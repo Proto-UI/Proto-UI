@@ -8,7 +8,7 @@ const dialogFooter = definePrototype({
     def.anatomy.claim(DIALOG_FAMILY, { role: 'footer' });
     def.feedback.style.use(
       tw(
-        'flex min-w-0 flex-wrap items-center justify-end gap-2 border-t border-border bg-secondary text-secondary-foreground px-[15px] pt-[14px] pb-[15px] rounded-b-[6px] shadow-none'
+        'flex min-w-0 flex-wrap items-center justify-end gap-2 border-t border-border bg-secondary text-secondary-foreground px-[15px] pt-[14px] pb-[15px] rounded-b-[6px] shadow-[inset_0_1px_0_#fff]'
       )
     );
     return (renderer) => renderer.r.slot();

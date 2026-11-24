@@ -1,12 +1,13 @@
 ---
 title: 'Drawer'
-description: 'An edge-attached modal drawer supporting four sides, content-fit sizing, drag dismissal, and snap points.'
+description: 'A Brutalist edge-attached modal drawer with four sides, hard shadows, scrollable content, and snap points.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Drawer slides a modal panel from any of the four screen edges with content-fit or fractional sizing, scrollable long content, drag dismissal, and optional snap points.
+Brutalist Drawer slides a crisp 2px black-bordered, 5px-rounded modal panel from any of the four screen edges with content-fit or fractional sizing, scrollable long content, drag dismissal, and optional snap points.
 
 ## Preview
 
@@ -14,60 +15,159 @@ Brutalist Drawer slides a modal panel from any of the four screen edges with con
   demoId="demo-brutalist-drawer"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source (`@proto.ui/prototypes-brutalist/drawer`); not yet published in the 0.2.0 stable CLI release.
 
 ## Usage
 
-### Sizing, placement, and scrolling
+```tsx
+import {
+  BrutalistDrawerRoot,
+  BrutalistDrawerTrigger,
+  BrutalistDrawerMask,
+  BrutalistDrawerContent,
+  BrutalistDrawerHandle,
+  BrutalistDrawerHeader,
+  BrutalistDrawerTitle,
+  BrutalistDrawerDescription,
+  BrutalistDrawerFooter,
+  BrutalistDrawerClose,
+} from '../proto-ui/components/react';
+```
 
-- **Sizing**: `top` and `bottom` drawers size to fit their content by default (capped at the available height minus 6 root-text units), while `left` and `right` drawers use fractional width (default cap of 20 root-text units). Customize limits with `minExtent` and `maxExtent` using neutral units (`'logical'`, `'root-text'`, `'available'`, or `'available-minus-root-text'`), such as `maxExtent={{ unit: 'logical', value: 480 }}`, instead of overriding CSS `width`.
-- **Scrolling and layout**: `Content` acts as an `overflow-y-auto` scroll container. When placing `Root` directly inside a CSS Grid, pass `hostStyle={{ display: 'contents' }}` in React (or `display: contents` on Web Components) to avoid an extra empty grid track.
-- **Drag dismissal**: Set `dragDismissible={false}` on `Content` to disable drag-to-close while keeping `Close`, `Escape`, and outside dismissal active.
+```tsx
+<BrutalistDrawerRoot>
+  <BrutalistDrawerTrigger>Open Drawer</BrutalistDrawerTrigger>
+  <BrutalistDrawerMask />
+  <BrutalistDrawerContent side="bottom">
+    <BrutalistDrawerHandle />
+    <BrutalistDrawerHeader>
+      <BrutalistDrawerTitle>Are you absolutely sure?</BrutalistDrawerTitle>
+      <BrutalistDrawerDescription>
+        Publish the latest build to the staging environment.
+      </BrutalistDrawerDescription>
+    </BrutalistDrawerHeader>
+    <BrutalistDrawerFooter>
+      <BrutalistDrawerClose>Cancel</BrutalistDrawerClose>
+    </BrutalistDrawerFooter>
+  </BrutalistDrawerContent>
+</BrutalistDrawerRoot>
+```
 
-### Long content
+### Composition & visual grammar
+
+```text
+DrawerRoot
+├── DrawerTrigger
+├── DrawerMask
+└── DrawerContent
+    ├── DrawerHandle
+    ├── DrawerHeader
+    │   ├── DrawerTitle
+    │   └── DrawerDescription
+    └── DrawerFooter
+        └── DrawerClose
+```
+
+- **Elevation and motion**: `Trigger` and `Close` render raised `4px 4px` hard shadows with `+4px, +4px` press snap. `Content` applies `5px` (`rounded-base`) rounding on its exposed edge with a 200ms slide transition, and `Mask` fades over 150ms.
+- **Sizing and scrolling**: Vertical drawers fit their content height up to available height minus 6 root-text units; horizontal drawers cap at 20 root-text units by default. Wrap scrollable body regions in `flex-1 overflow-y-auto`.
+- **Snap points and accessibility**: Supplying a non-empty `snapPoints` array in `(0, 1]` upgrades `Handle` to a named `separator` with arrow-key and `Home`/`End` resizing while preserving dark-mode contrast via semantic foreground tokens.
+
+## Examples
+
+### Position
+
+<PrototypePreviewer
+  demoId="demo-brutalist-drawer-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Scrollable Content
 
 <PrototypePreviewer
   demoId="demo-brutalist-drawer-scroll"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-### Explicit snap points
+### Snap Points
 
 <PrototypePreviewer
   demoId="demo-brutalist-drawer-snap"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-- Provide a non-empty `snapPoints` array of fractions in `(0, 1]` relative to the safe cap to enable multi-stop snapping, paired with `defaultSnapPoint` (uncontrolled) or `snapPoint` / `snapPointChange` (controlled).
-- In content-fit mode, `Handle` acts as a pointer drag affordance; with explicit snap points enabled, `Handle` also exposes a named `separator` with arrow-key and `Home` / `End` resizing.
+### Custom Sizes & Locked Drag
+
+<PrototypePreviewer
+  demoId="demo-brutalist-drawer-sizing"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 ### Root
 
+Pass `open` for controlled mode and subscribe to `openChange`. Exposes `openDrawer()`, `close()`, and `toggle()`.
+
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
   ]}
 />
 
-Pass `open: boolean` to enable controlled mode.
+### Content
 
-### Other parts
+Exposes `open`, `snapPoint`, `dragging`, `dragProgress`, `offsetPercentage`, `extentValid`, `requestSnapPoint()`, and `snapPointChange`.
 
-- **Mask**: `passthrough?: boolean` (default `false`) and Transition props
-- **Content**: `side` (default `'bottom'`), `minExtent`, `maxExtent`, `snapPoints`, `snapPoint`, `defaultSnapPoint`, `dragDismissible`, and Transition props
-- **Handle**: `disabled?: boolean` (default `false`), `a11yLabel?: string` (default `'Resize drawer'`)
-- **Trigger / Title / Description / Header / Footer / Close / AcceptedSide**: No props
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'snapPoints', type: 'number[]', default: '—' },
+    { name: 'snapPoint', type: 'number', default: '—' },
+    { name: 'defaultSnapPoint', type: 'number', default: '—' },
+    { name: 'minExtent', type: 'AvailableLayoutLength', default: "{ unit: 'logical', value: 0 }" },
+    {
+      name: 'maxExtent',
+      type: 'AvailableLayoutLength',
+      default: "vertical { unit: 'available-minus-root-text', value: 6 } / horizontal { unit: 'root-text', value: 20 }",
+    },
+    { name: 'dragDismissible', type: 'boolean', default: 'true' },
+    { name: 'dragDismissThreshold', type: 'number', default: '0.25' },
+    { name: 'enterDuration', type: 'number', default: '200' },
+    { name: 'leaveDuration', type: 'number', default: '200' },
+  ]}
+/>
+
+### Mask / Handle / Trigger / Close
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+    { name: 'Mask.enterDuration / leaveDuration', type: 'number', default: '150' },
+    { name: 'Handle.disabled', type: 'boolean', default: 'false' },
+    { name: 'Handle.a11yLabel', type: 'string', default: "'Resize drawer'" },
+    { name: 'Trigger / Close.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+`Header`, `Footer`, `Title`, and `Description` declare no additional props.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-DRAWER.yaml', 'P-BASE-DRAWER.yaml']}
+/>

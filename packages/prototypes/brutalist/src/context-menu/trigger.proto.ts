@@ -1,25 +1,28 @@
 import { definePrototype, tw } from '@proto.ui/core';
+import { BRUTALIST_DISABLED_TOKENS, BRUTALIST_FOCUS_TOKENS } from '../style';
 import {
   asContextMenuTrigger,
   type ContextMenuTriggerProps,
   type ContextMenuTriggerExposes,
 } from '@proto.ui/prototypes-base/context-menu';
+
 export default definePrototype<ContextMenuTriggerProps, ContextMenuTriggerExposes>({
   name: 'brutalist-context-menu-trigger',
+  modules: asContextMenuTrigger.modules,
   setup(def) {
     const behavior = asContextMenuTrigger();
+    // Keep Trigger headless like neobrutalism.dev so consumers own trigger box framing.
     def.feedback.style.use(
-      tw(
-        'rounded-none border-2 border-foreground inline-flex min-w-0 items-center justify-center px-3 py-2 text-sm font-medium outline-none min-h-24 border border-dashed w-64 whitespace-normal'
-      )
+      tw('min-w-0 font-sans font-medium text-foreground outline-none select-none')
     );
     def.rule({
       when: (w) => w.state(behavior.getState!('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
+      intent: (i) => i.feedback.style.use(tw(BRUTALIST_DISABLED_TOKENS)),
     });
     def.rule({
       when: (w) => w.state(behavior.getState!('focusVisible')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-2 ring-inset ring-ring')),
+      intent: (i) => i.feedback.style.use(tw(BRUTALIST_FOCUS_TOKENS)),
     });
+    return behavior.render;
   },
 });

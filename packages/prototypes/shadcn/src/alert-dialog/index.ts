@@ -21,6 +21,10 @@ export type {
 export { default as alertDialogHeader } from './header.proto';
 export { default as alertDialogFooter } from './footer.proto';
 export type {
+  ShadcnAlertDialogSize,
+  ShadcnAlertDialogHeaderAlign,
+  ShadcnAlertDialogActionVariant,
+  ShadcnAlertDialogActionSize,
   AlertDialogRootProps,
   AlertDialogTriggerProps,
   AlertDialogContentProps,

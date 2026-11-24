@@ -1,11 +1,13 @@
 ---
 title: 'Navigation Menu'
-description: '结合原生锚点链接与命名展开面板的 Liquid Glass 导航菜单组件。'
+description: '结合悬浮胶囊导航栏、同心圆角 Liquid Glass 面板与原生锚点链接的导航菜单组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Navigation Menu 提供带 `navigation` 地标语义的导航栏、可展开的命名面板以及真实原生 `<a>` 链接，完整保留浏览器原生的 URL 预览、Enter 激活与中键/修饰键新标签页浏览体验。
+Liquid Glass Navigation Menu 将悬浮胶囊导航栏、仅作用于展开浮层的 Liquid Glass V2 材质（避免玻璃叠加玻璃）、同心圆角几何（外层 `rounded-2xl` + `p-1` 搭配内层 `rounded-xl`）与真实原生 `<a>` 链接结合在一起，同时保留完整的不透明无障碍回退配色。
 
 ## 预览
 
@@ -13,25 +15,173 @@ Liquid Glass Navigation Menu 提供带 `navigation` 地标语义的导航栏、�
   demoId="demo-liquid-glass-navigation-menu"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-liquid-glass/navigation-menu` 导入组件原型：
+
+```ts
+import {
+  navigationMenuRoot,
+  navigationMenuTrigger,
+  navigationMenuContent,
+  navigationMenuItem,
+  navigationMenuLink,
+} from '@proto.ui/prototypes-liquid-glass/navigation-menu';
+```
 
 ## 用法
 
-- **部件组成**：`Root`、`Trigger`、`Content`、`Item`、`Link`。
-- **面板与命令**：`Root.value` 标识当前唯一展开的命名 `region` 面板；`Trigger` 控制面板开关；`Item` 发出应用命令。
-- **原生链接行为**：`Link` 在 React / Vue / Vue 2 中渲染为原生锚点根元素（Web Components 中托管于局部锚点内），支持 `href`、`target`、`rel` 与 `current`（自动映射 `aria-current`）。禁用 `Link` 会移除跳转目标并阻止激活。
-- **导航观察与关闭**：原生链接激活后会发出只读 `navigate` 事件（包含 `href`、`target`、`rel`、`modified` 字段）。普通的当前窗口跳转默认自动关闭面板（设 `closeOnSelect={false}` 可保持打开）；按住修饰键、中键点击或 `_blank` 打开新窗口时保持当前面板展开。
+```tsx
+import {
+  LiquidGlassNavigationMenuRoot,
+  LiquidGlassNavigationMenuTrigger,
+  LiquidGlassNavigationMenuContent,
+  LiquidGlassNavigationMenuItem,
+  LiquidGlassNavigationMenuLink,
+} from '../proto-ui/components/react';
+
+export function LiquidGlassSiteNav() {
+  return (
+    <LiquidGlassNavigationMenuRoot a11yLabel="Main navigation">
+      <LiquidGlassNavigationMenuTrigger value="getting-started" prominence="prominent">
+        Getting started
+      </LiquidGlassNavigationMenuTrigger>
+      <LiquidGlassNavigationMenuContent value="getting-started" a11yLabel="Getting started">
+        <LiquidGlassNavigationMenuLink href="/docs" current>
+          Introduction
+        </LiquidGlassNavigationMenuLink>
+        <LiquidGlassNavigationMenuItem value="quick-search" textValue="Quick search">
+          Quick search
+        </LiquidGlassNavigationMenuItem>
+      </LiquidGlassNavigationMenuContent>
+    </LiquidGlassNavigationMenuRoot>
+  );
+}
+```
+
+### 结构组成
+
+```text
+NavigationMenuRoot (navigation capsule)
+├── NavigationMenuTrigger (regular | prominent pill, paired by value)
+└── NavigationMenuContent (liquid-glass | opaque region, paired by value)
+    ├── NavigationMenuLink (native <a>, concentric rounded-xl)
+    └── NavigationMenuItem (command action, concentric rounded-xl)
+```
+
+### 材质层级与原生链接行为
+
+- **单层浮层材质**：仅展开后的 `Content` 申请 `liquid-glass` 材质候选，内部 `Item` 与 `Link` 使用高对比度柔和填充而非第二层玻璃；可通过 `Content.material="opaque"` 显式切换为纯不透明表面。
+- **层级强调**：`Trigger` 支持 `prominence="regular"` 与 `prominence="prominent"`，禁用态撤回交互阴影而不降低回退表面不透明度，确保高对比度可读性。
+- **原生链接与自动关闭**：`Link` 渲染原生 `<a>` 并支持 `href`、`target`、`rel`、`current`（`aria-current="page"`）与 `closeOnSelect`（属于 `Item` 与 `Link` 属性，默认 `true`）。原生激活后发出只读 `navigate` 事件；修饰键、中键或 `_blank` 打开时当前面板保持展开。
+
+## 示例
+
+### 带图标链接
+
+在彩色背景之上展示同心圆角浮层中的带图标链接列表。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-navigation-menu-with-icons"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 层级强调、不透明回退与链接状态
+
+展示 `Trigger.prominence="prominent"`、`Content.material="opaque"` 材质回退选项、当前页标记、保持打开与禁用状态。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-navigation-menu-links-and-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式与事件
+
+通过 `value` 与 `valueChange` 控制当前展开面板，并观察 `select` 与 `navigate` 事件。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-navigation-menu-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 事件 | 说明 |
-| --- | --- | --- |
-| Root | `value` / `closeOnSelect` | 当前展开面板标识 / 普通同窗链接激活后是否自动关闭面板 |
-| Trigger / Content | — | 展开按钮与命名导航面板（`region`） |
-| Item | — | 可触发应用命令的菜单项 |
-| Link | `href` / `target` / `rel` / `current` / `disabled` | 原生导航链接属性与当前页标记；激活后发出只读 `navigate` 事件 |
+### NavigationMenuRoot
+
+<ApiPropsTable
+  headers={{ name: '属性 / 暴露', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'undefined（非受控）' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'valueChange（事件）', type: '{ value: string; reason: string }', default: '—' },
+    { name: 'requestValue（方法）', type: '(value: string, reason?: string) => boolean', default: '—' },
+    { name: 'close（方法）', type: '() => void', default: '—' },
+  ]}
+/>
+
+### NavigationMenuTrigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'prominence', type: "'regular' | 'prominent'", default: "'regular'" },
+  ]}
+/>
+
+### NavigationMenuContent
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+  ]}
+/>
+
+### NavigationMenuItem
+
+<ApiPropsTable
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'select（事件）', type: '{ value: string; menuValue: string }', default: '—' },
+  ]}
+/>
+
+### NavigationMenuLink
+
+<ApiPropsTable
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'href', type: 'string', default: "''" },
+    { name: 'target', type: "'_self' | '_blank'", default: "'_self'" },
+    { name: 'rel', type: 'string', default: "''" },
+    { name: 'current', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'navigate（事件）', type: '{ href: string; target: string; rel: string; modified: boolean }', default: '—' },
+    { name: 'select（事件）', type: '{ value: string; menuValue: string }', default: '—' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-NAVIGATION-MENU.yaml', 'P-BASE-NAVIGATION-MENU.yaml']}
+/>

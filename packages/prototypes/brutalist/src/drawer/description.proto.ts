@@ -8,7 +8,7 @@ import {
 export default definePrototype<DrawerDescriptionProps, DrawerDescriptionExposes>({
   name: 'brutalist-drawer-description',
   setup(def) {
-    const behavior = asDrawerDescription();
-    def.feedback.style.use(tw('text-sm text-foreground'));
+    asDrawerDescription();
+    def.feedback.style.use(tw('font-sans text-sm font-medium text-muted-foreground'));
   },
 });

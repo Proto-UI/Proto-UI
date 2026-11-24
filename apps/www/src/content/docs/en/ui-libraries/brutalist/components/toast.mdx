@@ -5,8 +5,9 @@ description: 'A Brutalist-styled timed notification with pause-on-hover/focus, k
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Toast displays brief live notifications with configurable auto-dismiss timers, pause on hover or focus, keyboard shortcuts, and explicit action buttons.
+Toast displays brief live notifications styled with Brutalist 5px corners, 2px borders, and 3px hard shadows, supporting auto-dismiss timers, pause on hover or focus, keyboard shortcuts, and explicit action buttons.
 
 ## Preview
 
@@ -14,53 +15,117 @@ Toast displays brief live notifications with configurable auto-dismiss timers, p
   demoId="demo-brutalist-toast"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
 Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/toast` and adapt them for your target runtime.
 
+```ts
+import {
+  toastViewport,
+  toastRoot,
+  toastTitle,
+  toastDescription,
+  toastAction,
+  toastClose,
+} from '@proto.ui/prototypes-brutalist/toast';
+```
+
 ## Usage
 
-### Anatomy
+```tsx
+<BrutalistToastViewport a11yLabel="Notifications">
+  <BrutalistToastRoot defaultOpen={false} duration={5000}>
+    <BrutalistToastTitle>Event has been created</BrutalistToastTitle>
+    <BrutalistToastDescription>Sunday, December 03, 2023 at 9:00 AM</BrutalistToastDescription>
+    <BrutalistToastAction a11yLabel="Undo event creation">Undo</BrutalistToastAction>
+    <BrutalistToastClose>Dismiss</BrutalistToastClose>
+  </BrutalistToastRoot>
+</BrutalistToastViewport>
+```
 
 Toast is composed of `Root`, `Viewport`, `Title`, `Description`, `Action`, and `Close`:
-
-- `Root`: Manages open state, transition durations, timer lifecycle, and live-region `politeness`.
-- `Viewport`: Landmark region for notifications with a configurable `F8` focus hotkey.
-- `Title` / `Description`: Notification heading and body copy.
-- `Action`: Signals user action intent and requests dismissal (application code handles the side effect).
-- `Close`: Dismisses the notification when activated.
-
-### Timing & Dismissal
 
 - Stays open for `5000ms` by default; set `duration={0}` to keep a notification open until dismissed.
 - Hovering over the toast or focusing `Action` / `Close` pauses the remaining timer automatically.
 - Activating `Close`, pressing `Escape` while focused, or activating `Action` requests dismissal. In controlled mode (`open`), timeout emits a single dismissal request until your state updates.
-- Manage multi-toast queuing or global dispatch at the application level.
+- `Viewport` provides a configurable `F8` focus hotkey; manage multi-toast queuing at the application level.
+
+## Examples
+
+### Types
+
+Map `type` to Brutalist theme accent fills (`mint`, `sky`, `canary`, `coral`, `lavender`) with paired high-contrast ink.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-toast-types"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Action
+
+`Action` renders as a raised Brutalist command button that emits `action` before requesting dismissal.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-toast-action"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled & Persistent
+
+Combine controlled `open` with `duration={0}` for notifications that stay visible until explicitly dismissed.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-toast-persistent"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root` (pass `open` for controlled mode):
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'true' },
-    { name: 'appear', type: 'boolean', default: 'false' },
-    { name: 'enterDuration', type: 'number', default: '300' },
-    { name: 'leaveDuration', type: 'number', default: '200' },
-    { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: 'reverse' },
     { name: 'duration', type: 'number', default: '5000' },
     { name: 'paused', type: 'boolean', default: 'false' },
-    { name: 'politeness', type: "'polite' | 'assertive'", default: 'polite' },
+    { name: 'politeness', type: "'polite' | 'assertive'", default: "'polite'" },
+    {
+      name: 'type',
+      type: "'default' | 'success' | 'info' | 'warning' | 'error' | 'loading'",
+      default: "'default'",
+    },
+    { name: 'appear', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '0' },
+    { name: 'leaveDuration', type: 'number', default: '0' },
+    { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: "'reverse'" },
   ]}
 />
 
-Other part props and defaults:
+### Viewport, Action & Close
 
-- **Viewport**: `a11yLabel` defaults to `'Notifications'`; `hotkey` defaults to `'F8'`.
-- **Title**, **Description**: No props.
-- **Action**: `disabled` defaults to `false`; `a11yLabel` is optional with no default.
-- **Close**: `disabled` defaults to `false`.
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Viewport.a11yLabel', type: 'string', default: "'Notifications'" },
+    { name: 'Viewport.hotkey', type: 'string', default: "'F8'" },
+    { name: 'Action.disabled', type: 'boolean', default: 'false' },
+    { name: 'Action.a11yLabel', type: 'string', default: '—' },
+    { name: 'Close.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+Events and exposed methods:
+
+- **Events**: `Root` emits `openChange` (`{ open: boolean; reason: string }`); `Action` emits `action` (`void`).
+- **Methods**: `Root` exposes `openToast()`, `close(reason?)`, `pause()`, and `resume()`; `Viewport` exposes `focusFirst()`.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-TOAST.yaml', 'P-BASE-TOAST.yaml']} />

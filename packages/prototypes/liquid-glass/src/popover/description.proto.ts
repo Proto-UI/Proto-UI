@@ -7,8 +7,10 @@ import {
 
 export default definePrototype<PopoverDescriptionProps, PopoverDescriptionExposes>({
   name: 'liquid-glass-popover-description',
+  modules: asPopoverDescription.modules,
   setup(def) {
     const behavior = asPopoverDescription();
-    def.feedback.style.use(tw('text-sm text-muted-foreground'));
+    def.feedback.style.use(tw('font-sans text-sm leading-relaxed text-muted-foreground'));
+    return behavior.render;
   },
 });

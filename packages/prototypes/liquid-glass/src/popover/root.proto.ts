@@ -7,8 +7,10 @@ import {
 
 export default definePrototype<PopoverRootProps, PopoverRootExposes>({
   name: 'liquid-glass-popover-root',
+  modules: asPopoverRoot.modules,
   setup(def) {
     const behavior = asPopoverRoot();
     def.feedback.style.use(tw('relative inline-flex min-w-0'));
+    return behavior.render;
   },
 });

@@ -1,11 +1,13 @@
 ---
-title: 'NavigationMenu'
-description: '包含展开面板、命令项与原生锚点链接的 Bootstrap 2.3.2 导航菜单。'
+title: 'Navigation Menu'
+description: '包含经典胶囊导航项、渐变下拉面板与原生锚点链接的 Bootstrap 2.3.2 导航菜单。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-NavigationMenu 用于站点主导航，将可展开的导航面板与原生浏览器链接结合起来，保留完整的链接预览、中键/修饰键新标签页打开等浏览器原生行为。
+Bootstrap 2.3.2 Navigation Menu 保留经典 `.nav-pills` 与 `.dropdown-menu` 的像素比例和蓝色渐变高亮，同时提供完整的 `navigation` 地标语义与原生浏览器链接体验。
 
 ## 预览
 
@@ -13,28 +15,171 @@ NavigationMenu 用于站点主导航，将可展开的导航面板与原生浏�
   demoId="demo-bootstrap-2-3-2-navigation-menu"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/navigation-menu` 导入组件原型：
+
+```ts
+import {
+  navigationMenuRoot,
+  navigationMenuTrigger,
+  navigationMenuContent,
+  navigationMenuItem,
+  navigationMenuLink,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/navigation-menu';
+```
 
 ## 用法
 
-由 `Root`、`Trigger`、`Content`、`Item` 和 `Link` 组成：
+```tsx
+import {
+  Bootstrap232NavigationMenuRoot,
+  Bootstrap232NavigationMenuTrigger,
+  Bootstrap232NavigationMenuContent,
+  Bootstrap232NavigationMenuItem,
+  Bootstrap232NavigationMenuLink,
+} from '../proto-ui/components/react';
 
-- **语义结构**：`Root` 声明 `navigation` 地标并通过 `value` 控制当前展开的唯一面板；`Trigger` 负责展开/收起，`Content` 作为带名称的 `region` 区域展示导航项。
-- **原生链接与命令项**：`Item` 用于发出动作命令；`Link` 渲染真实原生 `<a>` 链接，完整支持 `href`、`target`、`rel` 及当前页标记 `current`（对应 `aria-current`）。URL 预览、`Enter` 跳转及中键/修饰键打开均由浏览器原生处理。
-- **导航观察与关闭**：`Link` 激活后会发出只读的 `navigate` 事件（载荷为 `{ href, target, rel, modified }`）。普通同窗口点击会自动关闭当前面板（设置 `closeOnSelect={false}` 可保持打开）；中键、修饰键或 `_blank` 激活则保持当前面板打开。禁用状态的 `Link` 会移除跳转目标并阻止激活。
+export function ClassicSiteNav() {
+  return (
+    <Bootstrap232NavigationMenuRoot a11yLabel="Main navigation">
+      <Bootstrap232NavigationMenuTrigger value="getting-started">
+        Getting started
+      </Bootstrap232NavigationMenuTrigger>
+      <Bootstrap232NavigationMenuContent value="getting-started" a11yLabel="Getting started">
+        <Bootstrap232NavigationMenuLink href="/docs" current>
+          Introduction
+        </Bootstrap232NavigationMenuLink>
+        <Bootstrap232NavigationMenuItem value="download" textValue="Download CSS">
+          Download CSS
+        </Bootstrap232NavigationMenuItem>
+      </Bootstrap232NavigationMenuContent>
+    </Bootstrap232NavigationMenuRoot>
+  );
+}
+```
+
+### 结构组成
+
+```text
+NavigationMenuRoot (navigation)
+├── NavigationMenuTrigger (nav-pills toggle, paired by value)
+└── NavigationMenuContent (dropdown-menu region, paired by value)
+    ├── NavigationMenuLink (native <a>)
+    └── NavigationMenuItem (command action)
+```
+
+### 原生链接与键盘交互
+
+- **原生链接行为**：URL 预览、`Enter` 激活与中键/修饰键新标签页打开均由浏览器原生处理。
+- **导航观察与关闭**：`Link` 激活后发出只读 `navigate` 事件（`{ href, target, rel, modified }`）；普通同窗激活自动关闭面板（设 `closeOnSelect={false}` 可保持打开），修饰键、中键或 `_blank` 打开则保持当前面板展开。
+- **禁用状态**：禁用 `Link` 会清除跳转目标并阻止激活；禁用 `Trigger` 使用经典 `#999` 置灰样式。
+
+## 示例
+
+### 带图标链接
+
+在经典下拉面板中展示带图标的状态与视图导航链接。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-navigation-menu-with-icons"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 链接状态与禁用
+
+展示当前页蓝色渐变高亮（`current`）、点击保持打开（`closeOnSelect={false}`）、新标签页跳转（`target="_blank"`）与禁用状态。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-navigation-menu-links-and-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式与事件
+
+通过 `value` 与 `valueChange` 控制当前展开面板，并观察 `select` 与 `navigate` 事件。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-navigation-menu-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 事件 | 说明 |
-| --- | --- | --- |
-| `Root` | `value` | 当前展开的导航面板标识 |
-| `Trigger` | — | 切换导航面板的按钮 |
-| `Content` | — | 命名导航内容区域 |
-| `Item` | — | 导航面板内的命令项 |
-| `Link` | `href` / `target` / `rel` / `current` / `disabled` / `closeOnSelect` | 原生锚点链接属性；`current={true}` 标记当前页 |
-| `Link` | `navigate` | 原生激活后发出的只读事件，载荷为 `{ href, target, rel, modified }` |
+### NavigationMenuRoot
+
+<ApiPropsTable
+  headers={{ name: '属性 / 暴露', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'undefined（非受控）' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'valueChange（事件）', type: '{ value: string; reason: string }', default: '—' },
+    { name: 'requestValue（方法）', type: '(value: string, reason?: string) => boolean', default: '—' },
+    { name: 'close（方法）', type: '() => void', default: '—' },
+  ]}
+/>
+
+### NavigationMenuTrigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### NavigationMenuContent
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'sideOffset', type: 'number', default: '2' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### NavigationMenuItem
+
+<ApiPropsTable
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'select（事件）', type: '{ value: string; menuValue: string }', default: '—' },
+  ]}
+/>
+
+### NavigationMenuLink
+
+<ApiPropsTable
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'href', type: 'string', default: "''" },
+    { name: 'target', type: "'_self' | '_blank'", default: "'_self'" },
+    { name: 'rel', type: 'string', default: "''" },
+    { name: 'current', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'navigate（事件）', type: '{ href: string; target: string; rel: string; modified: boolean }', default: '—' },
+    { name: 'select（事件）', type: '{ value: string; menuValue: string }', default: '—' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-NAVIGATION-MENU.yaml', 'P-BASE-NAVIGATION-MENU.yaml']}
+/>

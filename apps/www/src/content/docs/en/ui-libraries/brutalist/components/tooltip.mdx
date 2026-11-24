@@ -7,13 +7,15 @@ sidebar:
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import CodeExample from '@/components/CodeExample.astro';
 import { brutalistTooltipFiles } from '@/content/docs/demo_components/tooltip-usage';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Tooltip displays concise contextual descriptions on hover or keyboard focus using anchored portal positioning, `Escape` dismissal, and automatic `aria-describedby` / `role="tooltip"` wiring. Brutalist styles `Content` as a 5px rounded neutral surface that adapts live to Light and Dark themes.
+Tooltip displays concise contextual descriptions on hover or keyboard focus using anchored portal positioning, `Escape` dismissal, and automatic `aria-describedby` / `role="tooltip"` wiring. Brutalist styles `Content` as a 5px rounded neutral surface with a theme-adaptive 2px foreground border across Light and Dark modes.
 
 ## Preview
 
@@ -25,42 +27,93 @@ Tooltip displays concise contextual descriptions on hover or keyboard focus usin
   />
 </div>
 
-The preview composes two uncontrolled sibling tooltips inside one `Group` across Web Components, React, Vue, and Vue 2. While `Content` stays mounted in its portal, switching between Light and Dark repaints the surface through `--pui-foreground` and `--pui-secondary-background`.
-
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. For the published stable setup, see [Quick Start](/en/start-here/quick-start/).
+Brutalist Tooltip is exported from the workspace package `@proto.ui/prototypes-brutalist/tooltip`. Initialize Brutalist theme tokens and structural CSS with the CLI:
 
-Install the CLI, `@proto.ui/prototypes-brutalist`, and your host adapter (`@proto.ui/adapter-web-component`, `@proto.ui/adapter-react`, `@proto.ui/adapter-vue`, or `@proto.ui/adapter-vue2`) from the same workspace revision. Build local tarballs with [publish.mjs](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) and install the full `@proto.ui/*` dependency closure as shown in [consumer-smoke-cli.mjs](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs). Vue 2 requires Vue `>=2.6.0 <2.7`.
-
-After installing the matching packages, run the local CLI in your application directory and keep the generated `proto-ui-style.css` (required for Brutalist tokens as well as Base presence and positioning rules):
-
-```sh
-node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --prototypes brutalist
-```
-
-Brutalist Tooltip is imported directly from `@proto.ui/prototypes-brutalist/tooltip` and does not currently have a `proto-ui add` target.
+<InstallCommandCard
+  manager="pnpm"
+  commands={{
+    pnpm: 'pnpm dlx @proto.ui/cli@latest init --prototypes brutalist',
+    npm: 'npx @proto.ui/cli@latest init --prototypes brutalist',
+    yarn: 'yarn dlx @proto.ui/cli@latest init --prototypes brutalist',
+    bun: 'bunx @proto.ui/cli@latest init --prototypes brutalist',
+  }}
+/>
 
 ## Usage
 
-### Anatomy
+```tsx
+import {
+  BrutalistTooltipGroup,
+  BrutalistTooltipRoot,
+  BrutalistTooltipTrigger,
+  BrutalistTooltipContent,
+} from '../proto-ui/components/react';
 
-Tooltip is composed of four parts:
+export function Example() {
+  return (
+    <BrutalistTooltipGroup>
+      <BrutalistTooltipRoot>
+        <BrutalistTooltipTrigger>Hover</BrutalistTooltipTrigger>
+        <BrutalistTooltipContent side="top">Add to library</BrutalistTooltipContent>
+      </BrutalistTooltipRoot>
+    </BrutalistTooltipGroup>
+  );
+}
+```
+
+### Composition
+
+```text
+TooltipGroup (optional)
+└── TooltipRoot
+    ├── TooltipTrigger
+    └── TooltipContent
+```
 
 - `Group`: Shares delay defaults, warm-window skip timing, and active-tooltip coordination across sibling tooltips.
 - `Root`: Manages controlled or uncontrolled open state and per-tooltip delay overrides.
-- `Trigger`: Routes hover and focus events and automatically links and cleans up `aria-describedby`.
-- `Content`: Renders the 5px rounded neutral surface in a renderer-owned portal with anchored positioning, `Escape` dismissal, and `role="tooltip"`.
+- `Trigger`: Transparent trigger host that routes hover/focus events and manages `aria-describedby`.
+- `Content`: Renders the 5px rounded neutral surface in a portal with theme-adaptive foreground border, anchored positioning, and `Escape` dismissal.
 
-### Complete Host Examples
+## Examples
 
-Copy the files for your framework. For Web Components, add the HTML to your document and load `src/main.ts` once; for React or Vue, keep your existing app entry and render the `App` component below (React passes `createPortal` from `react-dom` to the Adapter; import `proto-ui-style.css` only once if your app already includes it).
+### Side
 
-<CodeExample
-  files={brutalistTooltipFiles}
-  initialHost="wc"
-  label="Brutalist Tooltip complete host Usage"
-/>
+Use the `side` prop on `Content` to place the tooltip on `left`, `top`, `bottom`, or `right`.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-tooltip-sides"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### With Keyboard Shortcut
+
+Combine concise action text with a non-interactive monospace shortcut badge inside `Content`.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-tooltip-shortcut"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Disabled Button
+
+Wrap a disabled button in `Trigger` so hovering or focusing still reveals why the action is disabled.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-tooltip-disabled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ### Composing Tooltip on a Button
 
@@ -80,18 +133,39 @@ export const tooltipButton = definePrototype<ButtonProps, ButtonExposes>({
 });
 ```
 
-- Button keeps its role, accessible name, click signal, disabled state, and single focus target; `useTooltipTrigger()` adds hover/focus intent and `aria-describedby` without adding extra exposes.
+- Button keeps its role, accessible name, click signal, disabled state, and single focus target; `useTooltipTrigger()` adds hover/focus intent and `aria-describedby`.
 - Disabling Tooltip `Root` suppresses only the tooltip while keeping the button interactive; disabling the button suppresses both.
-- When extending a styled Button prototype, preserve its static `modules` declaration, call its `setup(def)` followed by `useTooltipTrigger()`, and return its captured render function.
-- When the button lives inside a `ShadowRoot`, use the [same-tree portal recipe](/en/ui-libraries/base/tooltip/#shadowroot) so `aria-describedby` resolves within the shadow tree.
+- When the button lives inside a `ShadowRoot`, use the [same-tree portal recipe](/en/ui-libraries/base/tooltip/#shadowroot).
+
+### Complete Host Examples
+
+<CodeExample
+  files={brutalistTooltipFiles}
+  initialHost="wc"
+  label="Brutalist Tooltip complete host Usage"
+/>
 
 ## API
 
-The following props belong to `Root` (pass `open` for controlled mode):
+### Group
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '100' },
+    { name: 'skipDelay', type: 'number', default: '300' },
+  ]}
+/>
+
+### Root
+
+Pass `open` for controlled mode. `Root` inherits `Group` delays unless overridden.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'openDelay', type: 'number', default: 'undefined' },
@@ -99,8 +173,44 @@ The following props belong to `Root` (pass `open` for controlled mode):
   ]}
 />
 
-Other part props and defaults:
+### Trigger
 
-- **Group**: `openDelay` defaults to `700`; `closeDelay` defaults to `100`; `skipDelay` defaults to `300`.
-- **Trigger**: `disabled` defaults to `false`.
-- **Content**: Accepts Transition props; `side` defaults to `'top'`, `align` to `'center'`, `sideOffset` to `4`, `alignOffset` and `collisionPadding` to `0`, and `avoidCollisions` to `true`.
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'top'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'enterDuration', type: 'number', default: '150' },
+    { name: 'leaveDuration', type: 'number', default: '100' },
+  ]}
+/>
+
+### Events, States & Methods
+
+- **Root**: Exposes read-only state `open`, event `openChange` (`{ open, reason }`), and methods `openTooltip(reason?)`, `close(reason?)`, `toggle(reason?)`.
+- **Trigger**: Exposes read-only states `disabled`, `hovered`, `focused`, `focusVisible`, and method `focusSelf(options?)`.
+- **Content**: Exposes read-only state `open` and Transition handles (`transitionState`, `isPresent`, `controls`).
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-TOOLTIP.yaml',
+    'P-BRUTALIST-TOOLTIP-GROUP.yaml',
+    'P-BRUTALIST-TOOLTIP-TRIGGER.yaml',
+    'P-BRUTALIST-TOOLTIP-CONTENT.yaml',
+    'P-BASE-TOOLTIP.yaml',
+  ]}
+/>

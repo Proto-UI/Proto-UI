@@ -5,8 +5,9 @@ description: 'A Brutalist-styled non-modal floating dialog anchored to a trigger
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Popover displays a non-modal floating panel anchored to a trigger element for compact interactive content, without locking background scroll or trapping `Tab` navigation.
+Popover displays a Brutalist non-modal floating panel with crisp 2px borders and hard offset shadows anchored to a trigger, without locking background scroll or trapping `Tab` navigation.
 
 ## Preview
 
@@ -14,62 +15,115 @@ Popover displays a non-modal floating panel anchored to a trigger element for co
   demoId="demo-brutalist-popover"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/popover` and adapt them for your target runtime.
+Brutalist Popover is currently available from the workspace source and not yet included in the 0.2.0 stable CLI release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/popover` and adapt them for your target runtime:
+
+```ts
+import {
+  popoverRoot,
+  popoverTrigger,
+  popoverContent,
+  popoverTitle,
+  popoverDescription,
+  popoverClose,
+} from '@proto.ui/prototypes-brutalist/popover';
+```
 
 ## Usage
 
-### Anatomy
+```tsx
+<BrutalistPopover>
+  <BrutalistPopoverTrigger>Open Popover</BrutalistPopoverTrigger>
+  <BrutalistPopoverContent align="start">
+    <BrutalistPopoverTitle>Dimensions</BrutalistPopoverTitle>
+    <BrutalistPopoverDescription>Set the dimensions for the layer.</BrutalistPopoverDescription>
+  </BrutalistPopoverContent>
+</BrutalistPopover>
+```
 
-Popover is composed of `Root`, `Trigger`, `Content`, `Title`, `Description`, and `Close`:
+### Composition
 
-- `Root`: Manages the open state of the popover.
-- `Trigger`: Anchors and toggles the popover.
-- `Content`: Positioned relative to `Trigger` with `side`, `align`, `sideOffset`, `alignOffset`, and `collisionPadding`.
-- `Title` / `Description`: Provide accessible labelling and description for the floating dialog.
-- `Close`: Requests dismissal when activated.
+```text
+BrutalistPopoverRoot
+├── BrutalistPopoverTrigger
+└── BrutalistPopoverContent
+    ├── BrutalistPopoverTitle
+    ├── BrutalistPopoverDescription
+    └── BrutalistPopoverClose
+```
 
-### Positioning, Focus & Dismissal
+- **Brutalist visual grammar**: `Trigger` and `Close` use `rounded-base` (5px), 2px black borders, 4px zero-blur offset shadows, and instant press-only snap; `Content` uses a 3px foreground offset shadow without hover or press translation.
+- **Positioning & dismissal**: Supports `side`, `align`, `sideOffset`, `alignOffset`, and `collisionPadding`. Outside presses, `Escape`, `Close`, and focus moving outside both `Trigger` and `Content` request dismissal.
 
-- Outside presses, focus leaving both `Trigger` and `Content`, `Escape`, and `Close` all request dismissal.
-- Moving focus between `Trigger` and portalled `Content` is treated as staying inside the popover.
-- When closed due to focus moving outside, focus stays on the newly focused external element instead of returning to `Trigger`, and the request reports `focusReason` as `'programmatic'`.
+## Examples
 
-### Controlled vs. Uncontrolled
+### Basic
 
-- Use `defaultOpen` on `Root` for uncontrolled state.
-- Pass `open` and handle `openChange` for controlled mode. If your handler declines a `focus.outside` request, `Content` stays visible without trapping external focus, and later interactions can request dismissal again.
+A simple popover with a title and description aligned to the start edge.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-popover-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Align
+
+Use `align` on `Content` to control alignment (`start`, `center`, or `end`).
+
+<PrototypePreviewer
+  demoId="demo-brutalist-popover-align"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Pass `open` and handle `openChange` to control the popover externally.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-popover-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ### Navigation Presentation
 
-Set `presentation="navigation"` on `Trigger` and `Content` to use the available anchored area with internal scrolling for link lists while preserving native browser link activation.
+Set `presentation="navigation"` on `Trigger` and `Content` to render a scrollable anchored navigation panel that preserves native browser link behavior.
 
 <PrototypePreviewer
   demoId="demo-brutalist-popover-navigation"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## API
 
-The first three props (`defaultOpen`, `disabled`, `a11yLabel`) belong to `Root` (pass `open` for controlled mode). `presentation` belongs to `Content` and `Trigger`:
+`Root` exposes read-only state `open`, methods `openPopover`, `close`, and `toggle`, and the `openChange` event.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'defaultOpen', type: 'boolean', default: 'false' },
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'a11yLabel', type: 'string', default: "''" },
-    { name: 'presentation', type: "'default' | 'navigation'", default: 'default' },
+    { name: 'open (Root)', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultOpen (Root)', type: 'boolean', default: 'false' },
+    { name: 'disabled (Root / Trigger / Close)', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel (Root)', type: 'string', default: "''" },
+    { name: 'side (Content)', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align (Content)', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset (Content)', type: 'number', default: '4' },
+    { name: 'alignOffset (Content)', type: 'number', default: '0' },
+    { name: 'collisionPadding (Content)', type: 'number', default: '8' },
+    { name: 'presentation (Trigger / Content)', type: "'default' | 'navigation'", default: "'default'" },
+    { name: 'enterDuration / leaveDuration (Content)', type: 'number', default: '0' },
   ]}
 />
 
-Other part props and defaults:
+## References
 
-- **Content**: Also accepts Transition props; `side` defaults to `'bottom'`, `align` to `'center'`, `sideOffset` to `4`, `alignOffset` to `0`, and `collisionPadding` to `8`.
-- **Title**, **Description**, **Close**: No props.
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-POPOVER.yaml', 'P-BASE-POPOVER.yaml']}
+/>

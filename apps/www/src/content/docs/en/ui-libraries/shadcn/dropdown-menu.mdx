@@ -8,30 +8,15 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-A trigger-opened command menu built on Base semantics with keyboard navigation, accessible group labeling, destructive styling, and inset alignment. The examples on this page use the **Shadcn Rhea** style preset.
+Displays a menu of actions triggered by a button, built on Base semantics with keyboard navigation, accessible group labeling, destructive styling, and inset alignment. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
-The default demo shows grouped actions, labels, keyboard shortcut hints, and a disabled item:
-
-<PrototypePreviewer demoId="demo-shadcn-dropdown-menu" initialRuntime="wc" />
-
-### Destructive actions
-
-Following the `DropdownMenuWithDestructive` pattern, items pair 16px Lucide icons with `variant="destructive"` on Delete (10% tint in light mode, 20% in dark mode). The trailing **Delete (disabled)** row demonstrates focusable-disabled behavior without selecting or closing the menu.
-
-<PrototypePreviewer demoId="demo-shadcn-dropdown-destructive" initialRuntime="wc" />
-
-### Inset alignment
-
-Following `DropdownMenuWithInset`, set `inset={true}` on iconless `Item` or `Label` rows to align their text with icon-bearing siblings:
-
-- **Shadcn Rhea**: `8px` horizontal padding when `inset={false}`; `28px` left / `8px` right when `inset={true}`.
-- **New York compatibility preset**: `0.5rem` horizontal padding when `inset={false}`; physical-left `2rem` / right `0.5rem` when `inset={true}`.
-
-Use **Toggle inset** in the demo and reopen the menu to compare both states.
-
-<PrototypePreviewer demoId="demo-shadcn-dropdown-inset" initialRuntime="wc" />
+<PrototypePreviewer
+  demoId="demo-shadcn-dropdown-menu"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## Installation
 
@@ -41,38 +26,201 @@ This command uses the stable 0.2.0 CLI. Vue 2.6 requires a matching prerelease o
 
 Replace `wc` with `react` or `vue` to generate the facade for your framework. Note that the CLI registry ID is `shadcn-dropdown`.
 
-The CLI target generates facades for `Root`, `Trigger`, `Content`, and `Item`. Import `Group`, `Label`, `Separator`, and `Shortcut` directly from `@proto.ui/prototypes-shadcn/dropdown`.
+The CLI generates facades for `Root`, `Trigger`, `Content`, and `Item`. Import `Group`, `Label`, `Separator`, and `Shortcut` directly from `@proto.ui/prototypes-shadcn/dropdown`.
 
 ## Usage
 
-- **Groups and passive parts**: `Group` and `Label` maintain an accessible group-naming relation automatically; `Separator` and `Shortcut` are passive visual parts (`Shortcut` displays a text hint without registering global keybindings).
-- **Demo sources**: [My Account](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/zh-cn/demo-shadcn-dropdown-menu.demo.ts), [destructive actions](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/demo-shadcn-dropdown-destructive.demo.ts), and [inset actions](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/demo-shadcn-dropdown-inset.demo.ts).
-- **Note**: Submenus and checkbox/radio items are planned for a future update.
+```tsx
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+```
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger>Open</DropdownMenuTrigger>
+  <DropdownMenuContent align="start">
+    <DropdownMenuGroup>
+      <DropdownMenuLabel>My Account</DropdownMenuLabel>
+      <DropdownMenuItem value="profile">Profile</DropdownMenuItem>
+      <DropdownMenuItem value="billing">Billing</DropdownMenuItem>
+    </DropdownMenuGroup>
+    <DropdownMenuSeparator />
+    <DropdownMenuGroup>
+      <DropdownMenuItem value="team">Team</DropdownMenuItem>
+      <DropdownMenuItem value="subscription">Subscription</DropdownMenuItem>
+    </DropdownMenuGroup>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+### Composition
+
+```text
+DropdownMenu (Root)
+├── DropdownMenuTrigger
+└── DropdownMenuContent
+    ├── DropdownMenuGroup
+    │   ├── DropdownMenuLabel
+    │   ├── DropdownMenuItem
+    │   │   └── DropdownMenuShortcut
+    │   └── DropdownMenuItem
+    └── DropdownMenuSeparator
+```
+
+- **Keyboard & accessibility**: Supports `ArrowDown`, `ArrowUp`, `Home`, and `End` item navigation, `Enter` / `Space` activation, and `Escape` or outside-click dismissal with trigger focus restoration.
+- **Groups & decorative parts**: `Group` and `Label` maintain accessible group naming automatically; `Separator` and `Shortcut` are passive presentation parts (`Shortcut` displays hint text without registering global keybindings).
+
+## Examples
+
+### Basic
+
+A simple dropdown menu with section labels, separators, and a disabled item.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-dropdown-menu-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Shortcuts
+
+Add `Shortcut` inside menu items to display trailing keyboard hints.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-dropdown-menu-shortcuts"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Destructive
+
+Pair icons with `variant="destructive"` to distinguish irreversible actions.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-dropdown-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Inset
+
+Set `inset` on iconless `Item` or `Label` rows so text stays aligned with icon-bearing siblings.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-dropdown-inset"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Trigger Indicator & Placement
+
+Enable `indicator` on `Trigger` to render a chevron icon, and customize popup placement with `side`, `align`, and `sideOffset` on `Content`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-dropdown-menu-indicator"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-Passing `open` selects controlled mode.
+### Root
+
+Pass `open` for controlled mode. `Root` exposes the `openChange` event and `openDropdown()`, `close()`, and `toggle()` methods.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
     {
       name: 'openEntry',
       type: "'active-or-first' | 'first' | 'last' | 'value-or-first'",
-      default: 'active-or-first',
+      default: "'active-or-first'",
     },
     { name: 'openEntryValue', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: 'Inherited' },
   ]}
 />
 
-These props belong to `Root`.
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'indicator', type: 'boolean', default: 'false' },
+    { name: 'indicatorIcon', type: "'chevron-down' | 'chevrons-up-down'", default: "'chevron-down'" },
+    { name: 'indicatorSize', type: 'number', default: '16' },
+    { name: 'indicatorStrokeWidth', type: 'number', default: '2' },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'nova'" },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'excludeAnchorTranslation', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '100' },
+    { name: 'leaveDuration', type: 'number', default: '100' },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'nova'" },
+  ]}
+/>
+
+### Item
+
+Dispatches the `select` event with `{ value, reason }` when committed.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnCommit', type: 'boolean', default: 'Inherits Root' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+  ]}
+/>
+
+### Group / Label / Separator / Shortcut
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Group.a11yLabel', type: 'string', default: "''" },
+    { name: 'Label.inset', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+  ]}
+/>
 
 ## References
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-DROPDOWN-MENU.yaml', 'P-BASE-DROPDOWN-MENU.yaml']}
+  files={[
+    'P-SHADCN-DROPDOWN-MENU.yaml',
+    'P-SHADCN-DROPDOWN-MENU-TRIGGER.yaml',
+    'P-SHADCN-DROPDOWN-MENU-CONTENT.yaml',
+    'P-SHADCN-DROPDOWN-MENU-ITEM.yaml',
+    'P-BASE-DROPDOWN-MENU.yaml',
+  ]}
 />

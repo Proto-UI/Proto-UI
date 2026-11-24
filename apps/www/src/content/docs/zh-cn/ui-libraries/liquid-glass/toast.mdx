@@ -4,8 +4,10 @@ description: '支持定时自动关闭、悬停/聚焦暂停与操作按钮的 L
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Toast 提供限时实时通知，支持自动计时关闭、悬停或聚焦时自动暂停剩余时长、键盘快捷键聚焦视口以及显式操作按钮。
+Liquid Glass Toast 在浮动通知表面上应用单一 `liquid-glass` 材质层与内嵌高光边缘，内部操作控件采用同心胶囊造型且不叠加嵌套玻璃，并支持不透明回退、自动倒计时关闭、悬停或聚焦暂停以及 `F8` 快捷键聚焦。
 
 ## 预览
 
@@ -13,24 +15,112 @@ Liquid Glass Toast 提供限时实时通知，支持自动计时关闭、悬停�
   demoId="demo-liquid-glass-toast"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-liquid-glass/toast` 导入组件原型并使用对应宿主 Adapter 适配。
+
+```ts
+import {
+  toastViewport,
+  toastRoot,
+  toastTitle,
+  toastDescription,
+  toastAction,
+  toastClose,
+} from '@proto.ui/prototypes-liquid-glass/toast';
+```
 
 ## 用法
 
-- **部件组成**：`Root`、`Viewport`、`Title`、`Description`、`Action`、`Close`。
+```tsx
+<LiquidGlassToastViewport a11yLabel="Notifications">
+  <LiquidGlassToastRoot defaultOpen={false} duration={5000}>
+    <LiquidGlassToastTitle>Event has been created</LiquidGlassToastTitle>
+    <LiquidGlassToastDescription>Sunday, December 03, 2023 at 9:00 AM</LiquidGlassToastDescription>
+    <LiquidGlassToastAction a11yLabel="Undo event creation">Undo</LiquidGlassToastAction>
+    <LiquidGlassToastClose>Dismiss</LiquidGlassToastClose>
+  </LiquidGlassToastRoot>
+</LiquidGlassToastViewport>
+```
+
+- **部件组成**：`Root`、`Viewport`、`Title`、`Description`、`Action`、`Close`。仅 `Root` 声明 `liquid-glass` 材质候选，内部胶囊按钮保持高对比实色表面以避免玻璃叠玻璃。
+- **材质回退**：通过 `material="opaque"` 可主动退出半透明材质，在降低透明度或高对比度场景下保持清晰的前景与容器区分。
 - **计时与暂停**：`Root` 默认显示 `5000ms`，设置 `duration={0}` 可持续显示不自动关闭。指针悬停在通知上或焦点进入 `Action` / `Close` 时会自动暂停倒计时。受控模式下超时仅发出一次关闭请求，等待调用方更新 `open`。
-- **关闭与快捷键**：点击 `Close`、聚焦时按 Escape 或触发 `Action` 均会请求关闭（实际操作副作用由应用处理）。`Viewport` 提供 `F8` 快捷键用于快速将焦点移至通知区域。全局队列编排由应用层自行管理。
+- **关闭与快捷键**：点击 `Close`、聚焦时按 `Escape` 或触发 `Action` 均会请求关闭（实际操作副作用由应用处理）。`Viewport` 提供 `F8` 快捷键用于快速将焦点移至通知区域。
+
+## 示例
+
+### 层级与材质
+
+使用 `prominence` 区分 `regular`、`prominent` 与 `destructive` 通知层级，并可通过 `material="opaque"` 切换至不透明回退表面。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toast-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 操作按钮
+
+内部 `Action` 采用主色胶囊按钮，在透光玻璃与不透明回退模式下均与通知表面保持清晰区分。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toast-action"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控与常驻
+
+传入 `open` 与 `duration={0}` 展示需用户确认的常驻通知。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toast-persistent"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 | 默认值与说明 |
-| --- | --- | --- |
-| Root | `open` / `duration` | 受控开关状态 / 自动关闭毫秒数（默认 `5000`，`0` 为不自动关闭） |
-| Viewport | — | 通知展示区域，支持 `F8` 聚焦快捷键 |
-| Title / Description | — | 通知标题与正文内容 |
-| Action / Close | — | 通知内操作按钮与手动关闭按钮 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'true' },
+    { name: 'duration', type: 'number', default: '5000' },
+    { name: 'paused', type: 'boolean', default: 'false' },
+    { name: 'politeness', type: "'polite' | 'assertive'", default: "'polite'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'prominence', type: "'regular' | 'prominent' | 'destructive'", default: "'regular'" },
+    { name: 'appear', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '0' },
+    { name: 'leaveDuration', type: 'number', default: '0' },
+    { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: "'reverse'" },
+  ]}
+/>
+
+### Viewport、Action 与 Close
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Viewport.a11yLabel', type: 'string', default: "'Notifications'" },
+    { name: 'Viewport.hotkey', type: 'string', default: "'F8'" },
+    { name: 'Action.disabled', type: 'boolean', default: 'false' },
+    { name: 'Action.a11yLabel', type: 'string', default: '—' },
+    { name: 'Close.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+事件与暴露方法：
+
+- **事件**：`Root` 暴露 `openChange`（`{ open: boolean; reason: string }`）；`Action` 暴露 `action`（`void`）。
+- **方法**：`Root` 暴露 `openToast()`、`close(reason?)`、`pause()`、`resume()`；`Viewport` 暴露 `focusFirst()`。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-LIQUID-GLASS-TOAST.yaml', 'P-BASE-TOAST.yaml']} />

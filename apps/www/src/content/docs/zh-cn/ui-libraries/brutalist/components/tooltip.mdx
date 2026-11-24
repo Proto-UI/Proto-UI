@@ -7,13 +7,15 @@ sidebar:
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import CodeExample from '@/components/CodeExample.astro';
 import { brutalistTooltipFiles } from '@/content/docs/demo_components/tooltip-usage';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Tooltip 在悬停或键盘聚焦时展示简短的辅助说明文字，通过 Portal 锚定定位并自动维护 `aria-describedby` 与 `role="tooltip"` 无障碍关联。Brutalist 风格为 `Content` 提供 5px 圆角中性表面，并随主题在浅色与深色模式间自动重绘。
+Tooltip 在悬停或键盘聚焦时展示简短的辅助说明文字，通过 Portal 锚定定位并自动维护 `aria-describedby` 与 `role="tooltip"` 无障碍关联。Brutalist 风格为 `Content` 提供 5px 圆角中性表面与 2px 主题前景色边框，并在浅色与深色模式间自动重绘。
 
 ## 预览
 
@@ -25,42 +27,93 @@ Tooltip 在悬停或键盘聚焦时展示简短的辅助说明文字，通过 Po
   />
 </div>
 
-上方示例在一个 `Group` 中组合了两个相邻的非受控 Tooltip，支持在 Web Components、React、Vue 与 Vue 2 之间实时切换。当 `Content` 保持挂载时，切换浅色/深色主题会通过 `--pui-foreground` 与 `--pui-secondary-background` 即时更新外观。
-
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。如需使用已发布稳定版流程，请参阅 [快速开始](/zh-cn/start-here/quick-start/)。
+Brutalist Tooltip 当前通过工作区源码包 `@proto.ui/prototypes-brutalist/tooltip` 提供。初始化 Brutalist 主题变量与结构样式：
 
-在现有宿主应用中，请从同一源码修订安装 CLI、`@proto.ui/prototypes-brutalist` 以及对应宿主 Adapter（`@proto.ui/adapter-web-component`、`@proto.ui/adapter-react`、`@proto.ui/adapter-vue` 或 `@proto.ui/adapter-vue2`）。可通过仓库的 [本地打包脚本](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) 生成本地 tarball，并参考 [消费者安装脚本](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs) 安装完整 `@proto.ui/*` 依赖。Vue 2 宿主需使用 Vue `>=2.6.0 <2.7`。
-
-安装配套包后，在应用目录运行本地 CLI 生成 Brutalist 主题变量与结构样式（Base 的显隐与定位同样依赖生成的 `proto-ui-style.css`）：
-
-```sh
-node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --prototypes brutalist
-```
-
-Brutalist Tooltip 直接通过 `@proto.ui/prototypes-brutalist/tooltip` 导出，暂不提供 `proto-ui add` 目标。
+<InstallCommandCard
+  manager="pnpm"
+  commands={{
+    pnpm: 'pnpm dlx @proto.ui/cli@latest init --prototypes brutalist',
+    npm: 'npx @proto.ui/cli@latest init --prototypes brutalist',
+    yarn: 'yarn dlx @proto.ui/cli@latest init --prototypes brutalist',
+    bun: 'bunx @proto.ui/cli@latest init --prototypes brutalist',
+  }}
+/>
 
 ## 用法
 
+```tsx
+import {
+  BrutalistTooltipGroup,
+  BrutalistTooltipRoot,
+  BrutalistTooltipTrigger,
+  BrutalistTooltipContent,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <BrutalistTooltipGroup>
+      <BrutalistTooltipRoot>
+        <BrutalistTooltipTrigger>Hover</BrutalistTooltipTrigger>
+        <BrutalistTooltipContent side="top">Add to library</BrutalistTooltipContent>
+      </BrutalistTooltipRoot>
+    </BrutalistTooltipGroup>
+  );
+}
+```
+
 ### 组件结构
 
-Tooltip 由四个部分组成：
+```text
+TooltipGroup (可选)
+└── TooltipRoot
+    ├── TooltipTrigger
+    └── TooltipContent
+```
 
 - `Group`：统一协调同组相邻 Tooltip 的打开/关闭延迟、热切换窗口（`skipDelay`）与当前激活项。
 - `Root`：管理单个 Tooltip 的受控或非受控打开状态及单实例延迟覆盖。
-- `Trigger`：处理悬停与焦点触发，并自动关联和清理 `aria-describedby`。
-- `Content`：通过宿主 Portal 渲染 5px 圆角中性提示面板，负责锚定定位、`Escape` 关闭与 `role="tooltip"`。
+- `Trigger`：透明触发器，负责路由悬停与焦点事件并自动维护 `aria-describedby`。
+- `Content`：通过宿主 Portal 渲染 5px 圆角中性提示面板，支持浅色/深色主题边框自适应与 `Escape` 关闭。
 
-### 完整宿主示例
+## 示例
 
-按目标框架复制对应文件即可：Web Components 将 HTML 加入现有文档并加载一次 `src/main.ts`；React 与 Vue 保留原有入口并使用下方的 `App` 组件（React 需向 Adapter 传入 `react-dom` 的 `createPortal` 以启用原生 Portal；若项目已引入 `proto-ui-style.css`，保持单一导入即可）。
+### 弹出方向
 
-<CodeExample
-  files={brutalistTooltipFiles}
-  initialHost="wc"
-  label="Brutalist Tooltip 完整宿主用法"
-/>
+使用 `side` 属性指定提示显示在触发元素的 `left`、`top`、`bottom` 或 `right` 侧。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-tooltip-sides"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 带快捷键提示
+
+在 `Content` 内组合简短说明与等宽快捷键标识，保持非交互式只读内容。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-tooltip-shortcut"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 禁用按钮
+
+将禁用态按钮包裹在 `Trigger` 内，保留悬停或聚焦时的不可用说明。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-tooltip-disabled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ### 在 Button 上组合 Tooltip
 
@@ -80,18 +133,39 @@ export const tooltipButton = definePrototype<ButtonProps, ButtonExposes>({
 });
 ```
 
-- Button 保留自身角色、名称、点击事件、禁用态与单一焦点管理；`useTooltipTrigger()` 仅附加悬停/聚焦意图与 `aria-describedby` 关联，不额外增加对外暴露属性。
-- 禁用 Tooltip `Root` 仅关闭提示，按钮本身仍可点击；禁用按钮则同时禁用提示。
-- 如需复用到已带样式的按钮原型上，在 `definePrototype` 中保留原原型的静态 `modules` 声明，在 `setup(def)` 内先调用其 `setup(def)`，再调用 `useTooltipTrigger()`，最后返回捕获的渲染函数。
-- 若按钮位于真实 `ShadowRoot` 内，请参考 [同树 Portal 配方](/zh-cn/ui-libraries/base/tooltip/#shadowroot)，确保 `aria-describedby` 能在同一子树内正确解析。
+- Button 保留自身角色、名称、点击事件、禁用态与单一焦点管理；`useTooltipTrigger()` 仅附加悬停/聚焦意图与 `aria-describedby` 关联。
+- 禁用 Tooltip `Root` 仅关闭提示，按钮本身仍可点击；禁用按钮则同时抑制提示。
+- 若按钮位于真实 `ShadowRoot` 内，请参考 [同树 Portal 配方](/zh-cn/ui-libraries/base/tooltip/#shadowroot)。
+
+### 完整宿主示例
+
+<CodeExample
+  files={brutalistTooltipFiles}
+  initialHost="wc"
+  label="Brutalist Tooltip 完整宿主用法"
+/>
 
 ## API
 
-以下属性属于 `Root`（传入 `open` 进入受控模式）：
+### Group
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '100' },
+    { name: 'skipDelay', type: 'number', default: '300' },
+  ]}
+/>
+
+### Root
+
+传入 `open` 进入受控模式；未单独设置延迟时自动沿用 `Group` 配置。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'openDelay', type: 'number', default: 'undefined' },
@@ -99,8 +173,44 @@ export const tooltipButton = definePrototype<ButtonProps, ButtonExposes>({
   ]}
 />
 
-其余子部件属性默认值：
+### Trigger
 
-- **Group**：`openDelay` 默认 `700`，`closeDelay` 默认 `100`，`skipDelay` 默认 `300`。
-- **Trigger**：`disabled` 默认 `false`。
-- **Content**：支持 Transition 属性；`side` 默认 `'top'`，`align` 默认 `'center'`，`sideOffset` 默认 `4`，`alignOffset` 与 `collisionPadding` 默认 `0`，`avoidCollisions` 默认 `true`。
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'top'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'enterDuration', type: 'number', default: '150' },
+    { name: 'leaveDuration', type: 'number', default: '100' },
+  ]}
+/>
+
+### 事件、状态与方法
+
+- **Root**：暴露状态 `open`，事件 `openChange`（`{ open, reason }`），方法 `openTooltip(reason?)`、`close(reason?)`、`toggle(reason?)`。
+- **Trigger**：暴露状态 `disabled`、`hovered`、`focused`、`focusVisible`，方法 `focusSelf(options?)`。
+- **Content**：暴露状态 `open` 与 Transition 状态（`transitionState`、`isPresent`、`controls`）。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-TOOLTIP.yaml',
+    'P-BRUTALIST-TOOLTIP-GROUP.yaml',
+    'P-BRUTALIST-TOOLTIP-TRIGGER.yaml',
+    'P-BRUTALIST-TOOLTIP-CONTENT.yaml',
+    'P-BASE-TOOLTIP.yaml',
+  ]}
+/>

@@ -14,15 +14,12 @@ export type {
   DrawerHandleExposes,
   DrawerRootProps,
   DrawerRootExposes,
-  DrawerTriggerProps,
   DrawerTriggerExposes,
-  DrawerContentProps,
   DrawerContentExposes,
   DrawerTitleProps,
   DrawerTitleExposes,
   DrawerDescriptionProps,
   DrawerDescriptionExposes,
-  DrawerCloseProps,
   DrawerCloseExposes,
   DrawerMaskProps,
   DrawerMaskExposes,
@@ -31,3 +28,10 @@ export type {
   DrawerFooterProps,
   DrawerFooterExposes,
 } from '@proto.ui/prototypes-base/drawer';
+export type {
+  DrawerContentProps,
+  DrawerTriggerProps,
+  DrawerCloseProps,
+  LiquidGlassDrawerMaterial,
+  LiquidGlassDrawerCommandVariant,
+} from './types';
