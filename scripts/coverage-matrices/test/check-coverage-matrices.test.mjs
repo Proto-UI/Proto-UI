@@ -19551,6 +19551,18 @@ test('Calendar caption import and controller binding require reviewed source', (
 
 for (const [relative, specifier] of [
   [
+    'apps/www/src/content/docs/demo-bootstrap-2-3-2-dialog.demo.ts',
+    '@proto.ui/prototypes-bootstrap-2-3-2/surface',
+  ],
+  [
+    'apps/www/src/content/docs/demo_components/dialog/demo-bootstrap-2-3-2-dialog-no-close.demo.ts',
+    '@proto.ui/prototypes-bootstrap-2-3-2/surface',
+  ],
+  [
+    'apps/www/src/content/docs/demo_components/dialog/demo-bootstrap-2-3-2-dialog-sticky-footer.demo.ts',
+    '@proto.ui/prototypes-bootstrap-2-3-2/surface',
+  ],
+  [
     'apps/www/src/components/PrototypePreviewer/shadcn-checkbox-composition.ts',
     '@proto.ui/prototypes-shadcn/checkbox',
   ],
@@ -19571,7 +19583,7 @@ for (const [relative, specifier] of [
     '@proto.ui/prototypes-shadcn/input-shell',
   ],
 ]) {
-  test(`Shadcn public demo import requires the exact reviewed source: ${relative}`, () => {
+  test(`Public demo import requires the exact reviewed source: ${relative}`, () => {
     const root = createRoot();
     writeValidMatrices(root);
     const target = path.join(root, relative);
