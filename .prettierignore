@@ -194,3 +194,9 @@ internal/records/evidence/2026-11-24-sprint5-browser-execution/production-setup-
 internal/records/evidence/2026-11-24-sprint5-native-direction-acceptance/receipt.md
 # Preserve original Tooltip view-readiness receipts, probes and captures.
 internal/records/evidence/2026-11-24-tooltip-consumer-view-readiness/
+
+# Exact original Sprint 2 manifests and execution receipts retain their bound bytes.
+internal/records/evidence/2026-11-24-sprint2-compiler-local/manifest.json
+internal/records/evidence/2026-11-24-sprint2-distribution/manifest.json
+internal/records/evidence/2026-11-24-sprint2-distribution/receipts/pinned-cli.json
+internal/records/evidence/2026-11-24-sprint2-hook-boundary/current-core-observation.json

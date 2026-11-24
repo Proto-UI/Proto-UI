@@ -12,7 +12,10 @@
     "hasOwnModules": true,
     "array": true,
     "frozen": true,
-    "ids": ["M-S2-STATIC-Z", "M-S2-STATIC-A"],
+    "ids": [
+      "M-S2-STATIC-Z",
+      "M-S2-STATIC-A"
+    ],
     "preservedDeclarationReferences": true
   },
   "genericSetupExecuted": false,

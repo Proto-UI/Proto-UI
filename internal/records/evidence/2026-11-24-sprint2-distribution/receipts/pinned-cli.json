@@ -1118,7 +1118,9 @@
     {
       "name": "original-build",
       "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
-      "args": ["build.mjs"],
+      "args": [
+        "build.mjs"
+      ],
       "cwd": "/tmp/proto-pinned-cli-Zo9E7Y/consumer",
       "status": 0,
       "signal": null,
@@ -1128,7 +1130,10 @@
     {
       "name": "original-runtime",
       "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
-      "args": ["runtime.mjs", "section"],
+      "args": [
+        "runtime.mjs",
+        "section"
+      ],
       "cwd": "/tmp/proto-pinned-cli-Zo9E7Y/consumer",
       "status": 0,
       "signal": null,
@@ -1180,7 +1185,9 @@
     {
       "name": "edited-build",
       "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
-      "args": ["build.mjs"],
+      "args": [
+        "build.mjs"
+      ],
       "cwd": "/tmp/proto-pinned-cli-Zo9E7Y/consumer",
       "status": 0,
       "signal": null,
@@ -1190,7 +1197,10 @@
     {
       "name": "edited-runtime",
       "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
-      "args": ["runtime.mjs", "article"],
+      "args": [
+        "runtime.mjs",
+        "article"
+      ],
       "cwd": "/tmp/proto-pinned-cli-Zo9E7Y/consumer",
       "status": 0,
       "signal": null,
@@ -1230,7 +1240,9 @@
           "/tmp/proto-pinned-cli-Zo9E7Y/watch/d6c4a866-4b08-40e9-b626-6e75b64a0bdb/revision-2/provenance.json"
         ]
       },
-      "changedFiles": ["label.ts"],
+      "changedFiles": [
+        "label.ts"
+      ],
       "diagnostics": []
     },
     {
@@ -1280,7 +1292,9 @@
           "/tmp/proto-pinned-cli-Zo9E7Y/watch/d6c4a866-4b08-40e9-b626-6e75b64a0bdb/revision-3/provenance.json"
         ]
       },
-      "changedFiles": ["entry.proto.ts"],
+      "changedFiles": [
+        "entry.proto.ts"
+      ],
       "diagnostics": []
     }
   ],

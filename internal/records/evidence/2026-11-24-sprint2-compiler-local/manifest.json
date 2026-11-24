@@ -2,7 +2,11 @@
   "kind": "bounded-sprint2-compiler-evidence",
   "createdUtc": "2026-11-23T20:43:52.734831+00:00",
   "baseCommit": "f8138caf5c",
-  "sourceCommits": ["1d6c099200", "ca76c11435", "f5a2621d2f"],
+  "sourceCommits": [
+    "1d6c099200",
+    "ca76c11435",
+    "f5a2621d2f"
+  ],
   "sourceHead": "f5a2621d2f890786d13ab7ef7da7ad87e8ff345b",
   "sourceHashNote": "These are final archived source hashes. Individual independent review reports retain their own measured source hashes; earlier resource-exited attempts and isolated artifact recoveries are not represented as final whole-suite passes.",
   "successfulFinalRuns": [

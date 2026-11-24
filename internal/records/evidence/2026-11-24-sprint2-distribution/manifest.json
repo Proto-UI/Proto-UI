@@ -3,7 +3,10 @@
   "compilerRevision": "4ffc65f2c3d32bcd5d1bd897ab20d9c6f087fb3c",
   "archivePolicy": {
     "preserved": "All regular files and symlinks beneath the listed actual artifact/consumer roots, including generated sources/maps/provenance, original and edited executables, fixtures, per-command logs and npm locks.",
-    "excludedDirectories": ["node_modules", ".npm-cache"],
+    "excludedDirectories": [
+      "node_modules",
+      ".npm-cache"
+    ],
     "reason": "Installed registry package payloads and network cache are reproducible from retained npm locks; actual installed membership and payload digests are recorded by the consumers. This is a bounded execution archive, not the private historical Hook source archive."
   },
   "archives": [
@@ -77,7 +80,9 @@
           "sha256": "d67f3c40ad5de96faa9e1bb30546968bf3e3987ffbd28b5f374f8e1f2ab3c9c0"
         }
       ],
-      "excluded": ["node_modules"],
+      "excluded": [
+        "node_modules"
+      ],
       "readback": true
     },
     {
@@ -806,7 +811,10 @@
           "mode": "0o120777"
         }
       ],
-      "excluded": ["consumer/.npm-cache", "consumer/node_modules"],
+      "excluded": [
+        "consumer/.npm-cache",
+        "consumer/node_modules"
+      ],
       "readback": true
     },
     {
