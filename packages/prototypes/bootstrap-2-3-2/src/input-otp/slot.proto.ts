@@ -18,19 +18,19 @@ export default definePrototype<BootstrapInputOtpSlotProps, InputOtpSlotExposes>(
     const disabled = def.state.bool('bootstrapOtpSlotDisabled', false);
     const syncVisual = (run: RunHandle<BootstrapInputOtpSlotProps>) => {
       const visual = run.context.tryRead(BOOTSTRAP_INPUT_OTP_VISUAL);
-      const otp = run.context.tryRead(INPUT_OTP_CONTEXT);
+      const otp = run.context.read(INPUT_OTP_CONTEXT);
       const field = run.context.tryRead(FIELD_CONTEXT);
       invalid.set(
         Boolean(run.props.get().invalid || visual?.invalid || field?.invalid),
         'reason: Bootstrap OTP slot invalid'
       );
       disabled.set(
-        Boolean(otp?.disabled || visual?.disabled),
+        Boolean(otp.disabled || visual?.disabled),
         'reason: Bootstrap OTP slot disabled'
       );
     };
     def.context.trySubscribe(BOOTSTRAP_INPUT_OTP_VISUAL, syncVisual);
-    def.context.trySubscribe(INPUT_OTP_CONTEXT, syncVisual);
+    def.context.subscribe(INPUT_OTP_CONTEXT, syncVisual);
     def.context.trySubscribe(FIELD_CONTEXT, syncVisual);
     def.props.watch(['invalid'], syncVisual);
     def.lifecycle.onCreated(syncVisual);

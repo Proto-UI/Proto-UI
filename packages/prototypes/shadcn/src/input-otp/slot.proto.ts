@@ -95,9 +95,9 @@ export default definePrototype<ShadcnInputOtpSlotProps, InputOtpSlotExposes>({
       const p = run.props.get();
       const index = p.index ?? 0;
       const visual = run.context.tryRead(INPUT_OTP_VISUAL);
-      const otp = run.context.tryRead(INPUT_OTP_CONTEXT);
+      const otp = run.context.read(INPUT_OTP_CONTEXT);
       const field = run.context.tryRead(FIELD_CONTEXT);
-      const length = visual?.length ?? otp?.length;
+      const length = visual?.length ?? otp.length;
       first.set(
         run.props.isProvided('first') ? Boolean(p.first) : index === 0,
         'reason: OTP visual first slot'
@@ -112,10 +112,10 @@ export default definePrototype<ShadcnInputOtpSlotProps, InputOtpSlotExposes>({
         Boolean(p.invalid || visual?.invalid || field?.invalid),
         'reason: OTP visual invalid slot'
       );
-      disabled.set(Boolean(otp?.disabled || visual?.disabled), 'reason: OTP visual disabled slot');
+      disabled.set(Boolean(otp.disabled || visual?.disabled), 'reason: OTP visual disabled slot');
     };
     def.context.trySubscribe(INPUT_OTP_VISUAL, syncVisual);
-    def.context.trySubscribe(INPUT_OTP_CONTEXT, syncVisual);
+    def.context.subscribe(INPUT_OTP_CONTEXT, syncVisual);
     def.context.trySubscribe(FIELD_CONTEXT, syncVisual);
     def.props.watch(['index', 'first', 'last', 'invalid'], syncVisual);
     def.lifecycle.onCreated(syncVisual);
