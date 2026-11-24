@@ -1,0 +1,2431 @@
+{
+  "sourceShas": [
+    "fca048905ca8c8a97bb0cedb6311816670d3d318",
+    "cfb5724a3bdeb37b414fe4642b915b14e521f775"
+  ],
+  "fullArchive": {
+    "path": "/var/tmp/pui-40da-web-evidence/gallery-fca-cfb-review.tar.gz",
+    "bytes": 29754636,
+    "sha256": "22e88b15c361a9ec798b23148f56376e765852d69e014a5f583573a8d4b9f0ce"
+  },
+  "files": [
+    {
+      "path": "gallery-fca-baseline/astro.log",
+      "bytes": 4095,
+      "sha256": "4771e6daf7ed32d082aa5afab201548a7a8e5f0d77e31900907b2458f3288618",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-react-rhea-flow-1180-text100-reopened.json",
+      "bytes": 16625,
+      "sha256": "b486c857900b13305dba96b04003f0bbe7616b578a7e855ed2e6a4e244a66887",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-react-rhea-flow-1180-text100-reopened.png",
+      "bytes": 12165,
+      "sha256": "a94c24c8d900728797eddb1a9446e020eb1426cc10339eacef688c904f37bed2",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-react-rhea-flow-1180-text100.json",
+      "bytes": 16614,
+      "sha256": "a1b9442b3c9bcfbb7e97c08326cfd16c5446110665d37dc7df59702f00e24b8f",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-react-rhea-flow-1180-text100.png",
+      "bytes": 12316,
+      "sha256": "7c7481215cec456254a069b211490b5be81603d2b3af4a74715f67caeb511a25",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-react-rhea-flow-390-text200.json",
+      "bytes": 16612,
+      "sha256": "49559bd488ed3af86e6e257563e70288b43f485ac99c25d9595f4f7d9104de60",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-react-rhea-flow-390-text200.png",
+      "bytes": 1763,
+      "sha256": "8be87683cc660616a57dd549705b659788695143a02c19cc1153cb2a3a8b0ec7",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-vue-rhea-flow-1180-text100-reopened.json",
+      "bytes": 16516,
+      "sha256": "cabe9d2c5ecadc54405cb532718fc13097825ac4a6f90957f33fc65b667ff152",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-vue-rhea-flow-1180-text100-reopened.png",
+      "bytes": 12165,
+      "sha256": "a94c24c8d900728797eddb1a9446e020eb1426cc10339eacef688c904f37bed2",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-vue-rhea-flow-1180-text100.json",
+      "bytes": 16505,
+      "sha256": "036c2b37c4c64f901ee12e1c33b0eeff22daaeac198c151852cbf61c58b171e5",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-vue-rhea-flow-1180-text100.png",
+      "bytes": 12316,
+      "sha256": "7c7481215cec456254a069b211490b5be81603d2b3af4a74715f67caeb511a25",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-vue-rhea-flow-390-text200.json",
+      "bytes": 16536,
+      "sha256": "e58ad853c8d6f55a6d5a46d72106162c8129ae8041138519d97da1dc27716973",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-vue-rhea-flow-390-text200.png",
+      "bytes": 1763,
+      "sha256": "8be87683cc660616a57dd549705b659788695143a02c19cc1153cb2a3a8b0ec7",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-vue2-rhea-flow-1180-text100-reopened.json",
+      "bytes": 16556,
+      "sha256": "fb93a77642f794a6ec0767e922b7a05df6009c8331f8f017dd4e77d737b8f88a",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-vue2-rhea-flow-1180-text100-reopened.png",
+      "bytes": 12165,
+      "sha256": "a94c24c8d900728797eddb1a9446e020eb1426cc10339eacef688c904f37bed2",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-vue2-rhea-flow-1180-text100.json",
+      "bytes": 16545,
+      "sha256": "0f0f144e614fae712287e9853312328dd58994f0c20081e62b0f0217f82d651d",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-vue2-rhea-flow-1180-text100.png",
+      "bytes": 12316,
+      "sha256": "7c7481215cec456254a069b211490b5be81603d2b3af4a74715f67caeb511a25",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-vue2-rhea-flow-390-text200.json",
+      "bytes": 16574,
+      "sha256": "36fb8da06096a2fba7b75923610c4ac79eea7389f2fab3738b4c1d386b5e2904",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-vue2-rhea-flow-390-text200.png",
+      "bytes": 1763,
+      "sha256": "8be87683cc660616a57dd549705b659788695143a02c19cc1153cb2a3a8b0ec7",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-wc-rhea-flow-1180-text100-reopened.json",
+      "bytes": 18108,
+      "sha256": "7010056445a63a6ae8e5a7ae22efa35899281fd05077d401708dbd4b13cdc15a",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-wc-rhea-flow-1180-text100-reopened.png",
+      "bytes": 12165,
+      "sha256": "a94c24c8d900728797eddb1a9446e020eb1426cc10339eacef688c904f37bed2",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-wc-rhea-flow-1180-text100.json",
+      "bytes": 18097,
+      "sha256": "4c2ade5dbe2451847b19c55d67177ce413039d6f3252864370224939f7bdc17b",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-wc-rhea-flow-1180-text100.png",
+      "bytes": 12316,
+      "sha256": "7c7481215cec456254a069b211490b5be81603d2b3af4a74715f67caeb511a25",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-wc-rhea-flow-390-text200.json",
+      "bytes": 18924,
+      "sha256": "ff9fdaa4a11cc0c514085c6d86bfe7808a62eff2ba7ab8760633631531d9362f",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/accordion/fca048905ca8-shadcn-wc-rhea-flow-390-text200.png",
+      "bytes": 1763,
+      "sha256": "8be87683cc660616a57dd549705b659788695143a02c19cc1153cb2a3a8b0ec7",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-command-drag.png",
+      "bytes": 158952,
+      "sha256": "74d150379d0c6205a7176b604a293647ffb1dadaee76cc6fd1516d0aece05d9c",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-document-select-all.png",
+      "bytes": 156499,
+      "sha256": "d1c70b9cc5d571ad839334fbc8e4edb03fa0524ee4e575c90bee0142f37039ea",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-final.png",
+      "bytes": 31339,
+      "sha256": "a9de7b233294f9a00a745bcd8ae7501757e1be86fe9ca56afa3e5505367baaf2",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-keyboard-enter.png",
+      "bytes": 135159,
+      "sha256": "2e7e9f8a7bb5a94b2b6ba8c2fd6ac3fcfb0f4423edfdcce9db985087b54866f4",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-keyboard-space.png",
+      "bytes": 135114,
+      "sha256": "5dc75a08efd4c9aab2f172002d106868ba0070236ae5ba5eaa12a92386a82caa",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-motion-16-normal-enter.png",
+      "bytes": 127297,
+      "sha256": "939ed48ef3a4c2e5d372be85f61c009596f22bbf0ea2e333f4c9cf6177256f54",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-motion-16-normal-release.png",
+      "bytes": 127427,
+      "sha256": "f517c4fdffc6c231134fcf805bd897e2452aa78709109d175380f0ace29bcbaf",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-motion-16-reduce-enter.png",
+      "bytes": 127297,
+      "sha256": "939ed48ef3a4c2e5d372be85f61c009596f22bbf0ea2e333f4c9cf6177256f54",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-motion-16-reduce-release.png",
+      "bytes": 127427,
+      "sha256": "f517c4fdffc6c231134fcf805bd897e2452aa78709109d175380f0ace29bcbaf",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-motion-32-normal-enter.png",
+      "bytes": 28652,
+      "sha256": "3a5157e12e2f34bc3e9a30e480781a970aaed0f1dc76b0e2a3d5a747bcf0ecd3",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-motion-32-normal-release.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-motion-32-reduce-enter.png",
+      "bytes": 28652,
+      "sha256": "3a5157e12e2f34bc3e9a30e480781a970aaed0f1dc76b0e2a3d5a747bcf0ecd3",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-motion-32-reduce-release.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-native-actions-text200-0-before-assert.png",
+      "bytes": 30425,
+      "sha256": "bdcd7a554617338042c47d64fe144aedcd1094e38a450eae6630c0368fcaa692",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-native-actions-text200-1-before-assert.png",
+      "bytes": 30425,
+      "sha256": "bdcd7a554617338042c47d64fe144aedcd1094e38a450eae6630c0368fcaa692",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-native-actions.png",
+      "bytes": 151916,
+      "sha256": "60e9d32bff69ba85cad22a0286bf6941b0c2465d0835e316618bd0fc030d32ed",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-normal.png",
+      "bytes": 159106,
+      "sha256": "17678d4befea1ba1c5b9f51dbbc68f6630fbfd2b30b5544239bc79d539e15bba",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-selection-dark-editor.png",
+      "bytes": 123958,
+      "sha256": "d235cec793a0575df76c5fc252d2a533a4a398e2fe2e325706c0ccbaf9922da6",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-selection-dark-prose.png",
+      "bytes": 143061,
+      "sha256": "82fb664e3944e0f4973bf19faab15ed64d9523193b9dbf111ee0e67d9a128fe9",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-selection-light-editor.png",
+      "bytes": 133330,
+      "sha256": "03ccc505118226254c91a2634d49389e4c813c90488d811f736f7d6b4ab8c551",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-selection-light-prose.png",
+      "bytes": 151999,
+      "sha256": "a2488fb3f0298e75de94f5033c2918733e9d5f8b856794cfebeb5a94b380717a",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist-text200.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-brutalist.json",
+      "bytes": 153730,
+      "sha256": "54b47f34aaeb7d15b351a603db37d9f1c899d39923ca991fef24d77408c51c4d",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-shadcn-command-drag.png",
+      "bytes": 128895,
+      "sha256": "925b3ab773be95fcb7e3de08885bf86d3f4d71ff9f7c6a7857ee6dd3f6947472",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-shadcn-document-select-all.png",
+      "bytes": 157207,
+      "sha256": "681c2fb3d47b8d9134c6c4d1a8ebdbba482fd4dbddea8a47ca1a00f53ba45112",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-shadcn-final.png",
+      "bytes": 44414,
+      "sha256": "586f1e919f7fe8417d90ea86a128a4ea91171ba5e9584d3bb12e73f56254153f",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-shadcn-keyboard-enter.png",
+      "bytes": 129281,
+      "sha256": "49043024b8ef16de990f28ce5224541106a34d81e382f30d64cbc5c9fb4e3ebf",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-shadcn-keyboard-space.png",
+      "bytes": 129165,
+      "sha256": "f2677e8827eeda0926ee5e2533d1f07dd382c7bacdd2fc6746c5c2496045f0f2",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-shadcn-native-actions-text200-0-before-assert.png",
+      "bytes": 46983,
+      "sha256": "302af9a20e642665b574df0e5a63985c47f3e450bf2e8e20c1bec3a59b40887e",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-shadcn-native-actions-text200-1-before-assert.png",
+      "bytes": 46983,
+      "sha256": "302af9a20e642665b574df0e5a63985c47f3e450bf2e8e20c1bec3a59b40887e",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-shadcn-native-actions.png",
+      "bytes": 155569,
+      "sha256": "65a0d7585202aab086c52c80f96dff24c14553535f9538f3136c3b27af5f0f2d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-shadcn-normal.png",
+      "bytes": 129382,
+      "sha256": "ca6a1ca3ba6d322fa9ab2f2ca6695302ec8cbb5996060d5ed166f32207419107",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-shadcn-selection-dark-editor.png",
+      "bytes": 129095,
+      "sha256": "6f2cb22451e2f22133f40f40a8639c34fd929f426baa1bb5de78dc98b9d5f820",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-shadcn-selection-dark-prose.png",
+      "bytes": 160877,
+      "sha256": "7ef23f876690c4673879f7df73da924d79b6a4a0658420d711a95a6061fad15a",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-shadcn-selection-light-editor.png",
+      "bytes": 129223,
+      "sha256": "3e081c6d0745ab27c3fe6a7ba3f894205cfd9535d336e20b85d1f327e3fe3a68",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-shadcn-selection-light-prose.png",
+      "bytes": 155565,
+      "sha256": "518a2c920243e7b8821691c2caf40acc37f7d2939f2b0da9f066881cf356b49b",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/react-shadcn.json",
+      "bytes": 27061,
+      "sha256": "16973d6289edb5ecc5bb9fbabac6c1a3971262015fd855b01aa232ff8d8b03b4",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-command-drag.png",
+      "bytes": 158719,
+      "sha256": "f9afd360048324a4541e3920a322de9b93155bb9e44d1e77b0b5fd15e634ad3a",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-document-select-all.png",
+      "bytes": 156342,
+      "sha256": "2ce885dff912a8e62911fb60af41ed5cbcf70d8e505b3823f4d266eb2c469e03",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-final.png",
+      "bytes": 24433,
+      "sha256": "1e325a8302625fa960d7db3997e6c105ad17423d254898ec88d7258b164d9550",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-keyboard-enter.png",
+      "bytes": 135108,
+      "sha256": "a0c7d475e42788a6009e0625b51ac44aa6a3579e9a96cf70e71da3df15f2de48",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-keyboard-space.png",
+      "bytes": 134887,
+      "sha256": "b9eaff1bee181d0334ad69dd63bd3b64cff3b5f6ba425fe1ecf8e40cb14cf1be",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-motion-16-normal-enter.png",
+      "bytes": 127068,
+      "sha256": "add62fdc422d27cdba4c84adc8cf533786e8de198b3f21bb050ecaa14d8bc60d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-motion-16-normal-release.png",
+      "bytes": 127186,
+      "sha256": "a1716279362a6de6da5e90f05ef83dff9d470abfdfec9e2cc238e4ba73651f63",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-motion-16-reduce-enter.png",
+      "bytes": 127068,
+      "sha256": "add62fdc422d27cdba4c84adc8cf533786e8de198b3f21bb050ecaa14d8bc60d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-motion-16-reduce-release.png",
+      "bytes": 127186,
+      "sha256": "a1716279362a6de6da5e90f05ef83dff9d470abfdfec9e2cc238e4ba73651f63",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-motion-32-normal-enter.png",
+      "bytes": 28652,
+      "sha256": "3a5157e12e2f34bc3e9a30e480781a970aaed0f1dc76b0e2a3d5a747bcf0ecd3",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-motion-32-normal-release.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-motion-32-reduce-enter.png",
+      "bytes": 28652,
+      "sha256": "3a5157e12e2f34bc3e9a30e480781a970aaed0f1dc76b0e2a3d5a747bcf0ecd3",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-motion-32-reduce-release.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-native-actions-text200-0-before-assert.png",
+      "bytes": 29622,
+      "sha256": "ed4ee746c5718cc37492a152796c4410eb8b6b4b71d48b8e2c3380d85e69256f",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-native-actions-text200-1-before-assert.png",
+      "bytes": 29622,
+      "sha256": "ed4ee746c5718cc37492a152796c4410eb8b6b4b71d48b8e2c3380d85e69256f",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-native-actions.png",
+      "bytes": 151690,
+      "sha256": "08076f42a1efc130f117fdf8900e8c46b99f230caa451e0262ce5dde56b67702",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-normal.png",
+      "bytes": 158875,
+      "sha256": "6c19c09bba06bbd0243ce7babff1f91ea7d8522abfe1baeab8ec489d0cca56de",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-selection-dark-editor.png",
+      "bytes": 123812,
+      "sha256": "087d7cde69ec15f17043180f6ee844aecc5ab9946b04732009e54371176cf40d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-selection-dark-prose.png",
+      "bytes": 142603,
+      "sha256": "20d4190b727e07ba55bf41cabaeb6e52bc17bd4c49f2cb4e2d83b1c3fe9dccf5",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-selection-light-editor.png",
+      "bytes": 133100,
+      "sha256": "d4c6db10296a5620be461d1fa18803e5a3c2c6671d718cd9a8bed8035c43ced1",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-selection-light-prose.png",
+      "bytes": 151784,
+      "sha256": "138d83d20b2e99be34644888bfb21fc20929c3aecf307f39efd78156ec0c03a7",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist-text200.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-brutalist.json",
+      "bytes": 154851,
+      "sha256": "f3d03e8f91426feee8b846b30fd34356b752b856af9a65861586a0fc5a113bc0",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-shadcn-command-drag.png",
+      "bytes": 128856,
+      "sha256": "bb6ac70543fbef8d9d4f05c56f7fd6ce54dbea5d22978f72b6d057a29db82f10",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-shadcn-document-select-all.png",
+      "bytes": 157149,
+      "sha256": "908680c43bdd8226c982fb2460bc05cc1e5779132b142de3c109bbfe33721450",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-shadcn-final.png",
+      "bytes": 43730,
+      "sha256": "a06c7fee27bde890f699cb082846d47ed24a4e3a8e9d17b4e1f264cc33d7543d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-shadcn-keyboard-enter.png",
+      "bytes": 129246,
+      "sha256": "df058db65920cdaff977411150c45f2e8359040bf08acdcf8f0a989c72527c9f",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-shadcn-keyboard-space.png",
+      "bytes": 128958,
+      "sha256": "568c4e2e076bafd2c0d27bc7b0bf33c3560c3ca1fb2e69eebb711a10a6178050",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-shadcn-native-actions-text200-0-before-assert.png",
+      "bytes": 46600,
+      "sha256": "642fb464bb2436979a2fa441a7e09f058336d4ed42d1d229e878a1a5a5a0c7eb",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-shadcn-native-actions-text200-1-before-assert.png",
+      "bytes": 46983,
+      "sha256": "302af9a20e642665b574df0e5a63985c47f3e450bf2e8e20c1bec3a59b40887e",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-shadcn-native-actions.png",
+      "bytes": 155515,
+      "sha256": "e306e5d94b0ee23cb236454c42cfb0b82ca6b25f941f4824f517b52cc5b82d5f",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-shadcn-normal.png",
+      "bytes": 129342,
+      "sha256": "e640484d6437e33a19f4a786c33db4051beef05dfd8acdee1e85cf3028d59221",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-shadcn-selection-dark-editor.png",
+      "bytes": 129021,
+      "sha256": "f60f2252a4f31d15a06d9fac52834e11b52204f27aa56bf8588d1e5ecd127668",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-shadcn-selection-dark-prose.png",
+      "bytes": 160787,
+      "sha256": "4cb5b94a48cb3a7109d105e2d9ace7be000a55a1195605608a800742b02d8056",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-shadcn-selection-light-editor.png",
+      "bytes": 129078,
+      "sha256": "5f5b42caae979a4acff8190dd7adacda6a0eb54b848dd410bcc7ee6edc720054",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-shadcn-selection-light-prose.png",
+      "bytes": 155517,
+      "sha256": "ece6b32c13216a915cc73cf5eb44e37e52b32929dfaf5caff70c8dae91a85bac",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue-shadcn.json",
+      "bytes": 33825,
+      "sha256": "91a090cdd240f2e9841fb0a77eeef0a12e3da218ae39f92fdb132db75b9a55cd",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-command-drag.png",
+      "bytes": 158935,
+      "sha256": "492df3c6007c71f544d82882d333152c51ea8b3eacf173f9d312bb73b1b23b9c",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-document-select-all.png",
+      "bytes": 156535,
+      "sha256": "4d6fb3af9c9516d1343ccb02d1eeda1c4f3ac439e97c658be822d0bf9d416015",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-final.png",
+      "bytes": 25503,
+      "sha256": "b60873a9908318d1c3d08e7136f75cfbb7db3e4329aa691427037ec8dcf89cdc",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-keyboard-enter.png",
+      "bytes": 135242,
+      "sha256": "521b044fe9b2a22fdadaa8707d8ebce37137b82a2de884a57a914409906322b1",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-keyboard-space.png",
+      "bytes": 135101,
+      "sha256": "96bb3e0215a430ea41a8955505d361f45eb049887b31661fffad841ab2fc2b0b",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-motion-16-normal-enter.png",
+      "bytes": 127282,
+      "sha256": "c89409c9be55570482b0b8890218ae7048b7c6be36000b40f9ee746702c0b9f7",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-motion-16-normal-release.png",
+      "bytes": 127400,
+      "sha256": "f9606f4bf18b14d4ed1439a5f17d0acc9977125aed6594fa0a7da5b3e22b3f25",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-motion-16-reduce-enter.png",
+      "bytes": 127282,
+      "sha256": "c89409c9be55570482b0b8890218ae7048b7c6be36000b40f9ee746702c0b9f7",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-motion-16-reduce-release.png",
+      "bytes": 127400,
+      "sha256": "f9606f4bf18b14d4ed1439a5f17d0acc9977125aed6594fa0a7da5b3e22b3f25",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-motion-32-normal-enter.png",
+      "bytes": 28652,
+      "sha256": "3a5157e12e2f34bc3e9a30e480781a970aaed0f1dc76b0e2a3d5a747bcf0ecd3",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-motion-32-normal-release.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-motion-32-reduce-enter.png",
+      "bytes": 28652,
+      "sha256": "3a5157e12e2f34bc3e9a30e480781a970aaed0f1dc76b0e2a3d5a747bcf0ecd3",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-motion-32-reduce-release.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-native-actions-text200-0-before-assert.png",
+      "bytes": 29622,
+      "sha256": "ed4ee746c5718cc37492a152796c4410eb8b6b4b71d48b8e2c3380d85e69256f",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-native-actions-text200-1-before-assert.png",
+      "bytes": 29622,
+      "sha256": "ed4ee746c5718cc37492a152796c4410eb8b6b4b71d48b8e2c3380d85e69256f",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-native-actions.png",
+      "bytes": 151900,
+      "sha256": "8e5bcc511ae5e59a3630ccfec80a8bcbae868b1c6ea82647872356afb2147606",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-normal.png",
+      "bytes": 159089,
+      "sha256": "83fc55b9508e67e8e06d031f6c5bf6df967d59dceb0c9e5dfa3d71c109c4ad25",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-selection-dark-editor.png",
+      "bytes": 123997,
+      "sha256": "6a657846c5de2af13a02b9e8ced52e55edc51f4f9e1d679508bac2a01057ff8c",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-selection-dark-prose.png",
+      "bytes": 143120,
+      "sha256": "90544fe679c63d9fbe41b8e9d422b7fb9b14ff69796719c5e6305a476eceff3b",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-selection-light-editor.png",
+      "bytes": 133315,
+      "sha256": "cb5556952cedd0df12d2f8c85f137d0c1c226cf40c31eb551e85e072f7db63aa",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-selection-light-prose.png",
+      "bytes": 151994,
+      "sha256": "b14448129bf67b2d8b664a6db61e48eb554aa8bfc75d3709176052d4ae8e0d1f",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist-text200.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-brutalist.json",
+      "bytes": 154331,
+      "sha256": "4de6859eb3f9c4a53d027e01720828863a5f8f7332ce98b890d6090c7afb8550",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-shadcn-command-drag.png",
+      "bytes": 128974,
+      "sha256": "f884df0832d4b2ef1b3a57034757e8e967087b1067ccc099c929924a02d6756f",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-shadcn-document-select-all.png",
+      "bytes": 157279,
+      "sha256": "57c52f3ffaa7a1517b5e80baf461e19f71f64f00ba3ab8824bb24e018a75c7e4",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-shadcn-final.png",
+      "bytes": 43730,
+      "sha256": "a06c7fee27bde890f699cb082846d47ed24a4e3a8e9d17b4e1f264cc33d7543d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-shadcn-keyboard-enter.png",
+      "bytes": 129365,
+      "sha256": "2651f97bfa978efa27ec159be926705b80df0739c5b86eacbc8bb893c241b32b",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-shadcn-keyboard-space.png",
+      "bytes": 129211,
+      "sha256": "fe43f0dfa2bf28020f15ff4735827c8f84231a3a4246520fc8e26b87227babbd",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-shadcn-native-actions-text200-0-before-assert.png",
+      "bytes": 46983,
+      "sha256": "302af9a20e642665b574df0e5a63985c47f3e450bf2e8e20c1bec3a59b40887e",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-shadcn-native-actions-text200-1-before-assert.png",
+      "bytes": 46983,
+      "sha256": "302af9a20e642665b574df0e5a63985c47f3e450bf2e8e20c1bec3a59b40887e",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-shadcn-native-actions.png",
+      "bytes": 155669,
+      "sha256": "b45dfc33e3b4be10849979966f9913b3da5ccac842c808b8df4f987b7e0dc461",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-shadcn-normal.png",
+      "bytes": 129461,
+      "sha256": "e4d6e4a6294cea464da4c6cd5b56728766f20df10066a86b5223b2c6cfdd2a55",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-shadcn-selection-dark-editor.png",
+      "bytes": 129155,
+      "sha256": "bc56aa065f0723212e40fcf19cd46b3a9364811361ba46aca3b0cd7b687f4f1b",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-shadcn-selection-dark-prose.png",
+      "bytes": 160924,
+      "sha256": "1b5ce9d4cd85ab6099da85ce2a36393ebc19f2296206ddc67dbcc123c7e402d7",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-shadcn-selection-light-editor.png",
+      "bytes": 129576,
+      "sha256": "c00772e7386e7238b474ea6430bb9c0496cfddc095f69f9c9a01aede051a092c",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-shadcn-selection-light-prose.png",
+      "bytes": 155648,
+      "sha256": "25316fa1a79db403f71632c0e25399a871d4ed66a2b768f809fc0e38c7b9ad6f",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/vue2-shadcn.json",
+      "bytes": 33830,
+      "sha256": "2abbc4ca7285e69d8b920df6a1f1c3396f8a1e56e5b1d182043e37fa7f37e60c",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-command-drag.png",
+      "bytes": 160248,
+      "sha256": "bb5e42a55c9edfc3b1b586523b51ed2d6f227e06834285dbc9da929ea6354ebe",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-document-select-all.png",
+      "bytes": 157738,
+      "sha256": "6477a3dfe8033ea82d0cf7a9da4fd029272a2e07b31fa6c7c9ae309121ebf565",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-final.png",
+      "bytes": 32085,
+      "sha256": "9661d599749336e089c0b9bf5ba761b5be513c9a6868e8ef7c2eccb402ba1b3a",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-keyboard-enter.png",
+      "bytes": 136596,
+      "sha256": "e866d30bf31a0f6ff5f72ba565b756b9d3475126bf3cef9a6e572c6c0e78f9a8",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-keyboard-space.png",
+      "bytes": 136421,
+      "sha256": "20c31c28d29fa31d65cca2926542b14cdd652e6c5a94001cf26f9a927a5554f5",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-motion-16-normal-enter.png",
+      "bytes": 128551,
+      "sha256": "9a0e48f18835ea7fb7d661528cebbec90f621ee2161e1c0e84f545b0aac81aaf",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-motion-16-normal-release.png",
+      "bytes": 128672,
+      "sha256": "e56ca8c419f4dc9de57886b3d527699fec19438fe452b3bde7d7067d4020c831",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-motion-16-reduce-enter.png",
+      "bytes": 128551,
+      "sha256": "9a0e48f18835ea7fb7d661528cebbec90f621ee2161e1c0e84f545b0aac81aaf",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-motion-16-reduce-release.png",
+      "bytes": 128672,
+      "sha256": "e56ca8c419f4dc9de57886b3d527699fec19438fe452b3bde7d7067d4020c831",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-motion-32-normal-enter.png",
+      "bytes": 28652,
+      "sha256": "3a5157e12e2f34bc3e9a30e480781a970aaed0f1dc76b0e2a3d5a747bcf0ecd3",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-motion-32-normal-release.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-motion-32-reduce-enter.png",
+      "bytes": 28652,
+      "sha256": "3a5157e12e2f34bc3e9a30e480781a970aaed0f1dc76b0e2a3d5a747bcf0ecd3",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-motion-32-reduce-release.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-native-actions-text200-0-before-assert.png",
+      "bytes": 29622,
+      "sha256": "ed4ee746c5718cc37492a152796c4410eb8b6b4b71d48b8e2c3380d85e69256f",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-native-actions-text200-1-before-assert.png",
+      "bytes": 29622,
+      "sha256": "ed4ee746c5718cc37492a152796c4410eb8b6b4b71d48b8e2c3380d85e69256f",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-native-actions.png",
+      "bytes": 153946,
+      "sha256": "184fac6061dd584be5bbacbbc855b01ec74d1b5280d89f44e6324c3062e1e97b",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-normal.png",
+      "bytes": 160419,
+      "sha256": "53f3814f363c88b9f667bbeb62682d465589c9c2acbc5601671789104d2071cf",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-selection-dark-editor.png",
+      "bytes": 125204,
+      "sha256": "51e2d6446867ed8f4f278479720c8c0b3ef230b780a1c57110dab9043756b4ec",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-selection-dark-prose.png",
+      "bytes": 143984,
+      "sha256": "5c9c065caed45c407a3a6bd379353a92820dffe579dfb3fb414ba57eec8b16c9",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-selection-light-editor.png",
+      "bytes": 134593,
+      "sha256": "933a28ea2f6bb2226118287f8a7b4d9e48197678ab62de76a836ba643ea3e895",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-selection-light-prose.png",
+      "bytes": 153237,
+      "sha256": "38b4b719c6ebc2ea6552b29c0a2e3eb3dee00520f4d1b3d6bd56992a918366a2",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist-text200.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-brutalist.json",
+      "bytes": 157939,
+      "sha256": "c86a576956a3104d041eb498355e3e693cb2f3a05b366bc83b03d3cecf1b6f1a",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-shadcn-command-drag.png",
+      "bytes": 129648,
+      "sha256": "149dd2c2b8900fb4c395d427651091bb44267610bd0e979a6108c364f7ebee68",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-shadcn-document-select-all.png",
+      "bytes": 158067,
+      "sha256": "0f1ad889625f4d2e3fe3a8a354e325083a4d1f365134952d3e6bf9ab315a4162",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-shadcn-final.png",
+      "bytes": 43730,
+      "sha256": "a06c7fee27bde890f699cb082846d47ed24a4e3a8e9d17b4e1f264cc33d7543d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-shadcn-keyboard-enter.png",
+      "bytes": 130052,
+      "sha256": "3ec423440b296e29df735cb25f582bd26ed3b2c7458b094eb2ada7fdd007879f",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-shadcn-keyboard-space.png",
+      "bytes": 130052,
+      "sha256": "3ec423440b296e29df735cb25f582bd26ed3b2c7458b094eb2ada7fdd007879f",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-shadcn-native-actions-text200-0-before-assert.png",
+      "bytes": 47107,
+      "sha256": "6e8de414d2c883ebb72e895ce4c778e63a6a1107261512081f3ea786a5470b81",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-shadcn-native-actions-text200-1-before-assert.png",
+      "bytes": 46983,
+      "sha256": "302af9a20e642665b574df0e5a63985c47f3e450bf2e8e20c1bec3a59b40887e",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-shadcn-native-actions.png",
+      "bytes": 156279,
+      "sha256": "f6b3725a828696385541eef73caa34d2d2521c48fd9604eccc9ba6c95ceabaff",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-shadcn-normal.png",
+      "bytes": 130148,
+      "sha256": "cfc04ea6084fb31ceb69962f20551f35033098132018eecd9c1faebc898ac206",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-shadcn-selection-dark-editor.png",
+      "bytes": 130250,
+      "sha256": "0599a278c9075e4cccdd62f7ae93b2fa6813dc079da73cfa5e51786905858744",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-shadcn-selection-dark-prose.png",
+      "bytes": 161699,
+      "sha256": "1b96719ccffd69d51ba44bc38193b8fdd4c007e393453109c3e9c5324b5b2702",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-shadcn-selection-light-editor.png",
+      "bytes": 130361,
+      "sha256": "f185e67374222a35595e87adb3139d9fa6516b1e29e663fb4b1861e3b89a9ace",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-shadcn-selection-light-prose.png",
+      "bytes": 156389,
+      "sha256": "78b6b768d6149beaadda09a5fc46f89ae3ddf7dbcb6f9bd3a0d101ed06ac275d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/homepage-button-contract/wc-shadcn.json",
+      "bytes": 34613,
+      "sha256": "4d691f945cd8fb33f481baa4f13a95cf11e4c6b1ae29341b04315091298e83ac",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/runtime-loading-mask/brutalist-desktop-light-cancelled-retained.png",
+      "bytes": 111402,
+      "sha256": "192e506492d5d676f33432414fcad5231a1b10ad76a7be87831487e3428f2259",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/runtime-loading-mask/brutalist-desktop-light-loading.png",
+      "bytes": 115902,
+      "sha256": "73cb873a9dc7ac2663c6b00d3241b3e4dda824b38bb3f01be339f08dced0be45",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/runtime-loading-mask/brutalist-narrow-dark-text200-loading.png",
+      "bytes": 23844,
+      "sha256": "e01c1068e77ab29d0840cc1b7d4981e0b735a50ef542e08d1ed289a915739416",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/runtime-loading-mask/observations.json",
+      "bytes": 21265,
+      "sha256": "33269fb3c54ecf85f63c1f8720ce4352cd38783465ae82865b963c685e8fc4ff",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/browser/runtime-loading-mask/shadcn-desktop-light-cancelled-retained.png",
+      "bytes": 119284,
+      "sha256": "27684b9a45e7510c5b2377dac35b83327c53fc8f8f541a08cab25ac33a9e177d",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/runtime-loading-mask/shadcn-desktop-light-loading.png",
+      "bytes": 122899,
+      "sha256": "6b8e70412da4ef9815f27eb43e5ae2c0be7ee63591e86439233ee87f4ef79dec",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/browser/runtime-loading-mask/shadcn-narrow-dark-text200-loading.png",
+      "bytes": 24568,
+      "sha256": "4851e45bf4d542d94440c2c63c3f1f44b9af73b6c0cef9a4330e7695a68a2dbf",
+      "visual": true
+    },
+    {
+      "path": "gallery-fca-baseline/build-cli.log",
+      "bytes": 247,
+      "sha256": "ffe8bd57b08a9b6d0a667131c974dc121e919f496d6c073be1d99dd1333b81fc",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/button-gallery.json",
+      "bytes": 10308,
+      "sha256": "aa6ac6c0fc19a798bbd04436f1b2df8faa307f7edc7cf0fb83ba7185556486bb",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/button-gallery.log",
+      "bytes": 6337,
+      "sha256": "c898dbae967815f8027122ca79ec4dd89c13a251586f9f61d42334b57bc9cd1a",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/canonical-styles.log",
+      "bytes": 728,
+      "sha256": "07ae93c9941664f1ae319a2c62eb135bbce63d32b2ec71773886b1ddb236d815",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/commands.json",
+      "bytes": 3432,
+      "sha256": "5c49da00f19c577c568a0be1b23bfc2b03b9749d6e158b3377ea39bd1bc604c6",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/completed.json",
+      "bytes": 3842,
+      "sha256": "d2cf576e75f809d5c291930acdb5e1c7f869ba3fcd3f424ecd6410b64f676ba7",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/frozen-install.log",
+      "bytes": 137,
+      "sha256": "21af71a6582f92636a540e7cbcb311d433f1cf9100ee59cd7032705b3ec6726e",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/launch.json",
+      "bytes": 316,
+      "sha256": "2ada5843fed8f2cf04c5e23f1eee260c0076891966f8177886cd4468a1e40131",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/mask-gallery.json",
+      "bytes": 6069,
+      "sha256": "1acdc1071439b56cc0da8e25b591119f547d46f92c601e412493a7a5dd4fe2cb",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/mask-gallery.log",
+      "bytes": 5033,
+      "sha256": "f2a545d957f2b2d521eba106032de1ca31ddbb5fdb52ff2b28a3ef86aa86004c",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/process-cleanup.jsonl",
+      "bytes": 840,
+      "sha256": "1f5dd65f06d13613bc1c3ea290a08f9124e42e0a52d27f45fbccaf85f1376941",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/process-rss.jsonl",
+      "bytes": 64167,
+      "sha256": "a944ab8ceae73d663f5a28acef6b40c0ea50a82a782b4c8894215561f0278551",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/rhea-gallery.json",
+      "bytes": 17969,
+      "sha256": "dde307039fd39b0431aa3e455b5b43a6dfd2e66a90c1b7e045682211cfd087a1",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/rhea-gallery.log",
+      "bytes": 7422,
+      "sha256": "865c0da23b6e8f7f4ad54f39c185e0371af8a0322d4dd84b9e8c55cef3baa3c3",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/runner.log",
+      "bytes": 2592,
+      "sha256": "1ebae2ef5f39ef40d464891a9b9fae74de34cb82889c9fb344305eb32728f6d6",
+      "visual": false
+    },
+    {
+      "path": "gallery-fca-baseline/source.json",
+      "bytes": 4773,
+      "sha256": "193d254b1cc7a10ec806e2cb52e135474b2423e009a5f35c12f159e179eee198",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/astro.log",
+      "bytes": 4086,
+      "sha256": "c5e12f379977580025fd9bc463329c4f6a430529de51adefa53bb7807185e8de",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-react-rhea-flow-1180-text100-reopened.json",
+      "bytes": 16625,
+      "sha256": "305fe7e705ad04f360aeccfe8ceb38c6b2ad2d700dc9e2c21a4d1513335a64c7",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-react-rhea-flow-1180-text100-reopened.png",
+      "bytes": 12165,
+      "sha256": "a94c24c8d900728797eddb1a9446e020eb1426cc10339eacef688c904f37bed2",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-react-rhea-flow-1180-text100.json",
+      "bytes": 16614,
+      "sha256": "cf53e74beb5e5ab394625addab9a0e2d68be7e33e60ecf39137deba69e1db89c",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-react-rhea-flow-1180-text100.png",
+      "bytes": 12316,
+      "sha256": "7c7481215cec456254a069b211490b5be81603d2b3af4a74715f67caeb511a25",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-react-rhea-flow-390-text200-reopened.json",
+      "bytes": 20480,
+      "sha256": "bb03d37c152c165f438ce73fa55ab3dc6e2cba865d25b3bc4ca0a776becf9a83",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-react-rhea-flow-390-text200-reopened.png",
+      "bytes": 30592,
+      "sha256": "ac3e2d447e9a52cbe2fa71c2c966555ec27b915b75f22452cee4a165923553d5",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-react-rhea-flow-390-text200.json",
+      "bytes": 20468,
+      "sha256": "6cc34d67318f2648729cde2e9174118d946318079ea79c822139984ce1e56475",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-react-rhea-flow-390-text200.png",
+      "bytes": 31509,
+      "sha256": "b9f5e26429ad24a8edbc45426102d6b3d5b42aaeb29c7152fb23da0e93f3b23f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-vue-rhea-flow-1180-text100-reopened.json",
+      "bytes": 16549,
+      "sha256": "f60de776379d6133b3d76d77b21cb37d407faf0f383cecb8622b3b1cc18cb2ca",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-vue-rhea-flow-1180-text100-reopened.png",
+      "bytes": 12165,
+      "sha256": "a94c24c8d900728797eddb1a9446e020eb1426cc10339eacef688c904f37bed2",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-vue-rhea-flow-1180-text100.json",
+      "bytes": 16538,
+      "sha256": "35668401baff4a750114cda9fbe34a75ad219d653b29efdf973b4704161b1520",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-vue-rhea-flow-1180-text100.png",
+      "bytes": 12316,
+      "sha256": "7c7481215cec456254a069b211490b5be81603d2b3af4a74715f67caeb511a25",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-vue-rhea-flow-390-text200-reopened.json",
+      "bytes": 20356,
+      "sha256": "4ed09614b16a6c5f1dbf6a879b4cbe2fcae7d43d2b8d97b3db25c4da14e0e4e5",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-vue-rhea-flow-390-text200-reopened.png",
+      "bytes": 30592,
+      "sha256": "ac3e2d447e9a52cbe2fa71c2c966555ec27b915b75f22452cee4a165923553d5",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-vue-rhea-flow-390-text200.json",
+      "bytes": 20344,
+      "sha256": "c1f11fcaaa7c3cdcdd334a1a1ef3260d771b2fc3c1ef1eef76f17ae5abe78df0",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-vue-rhea-flow-390-text200.png",
+      "bytes": 31509,
+      "sha256": "b9f5e26429ad24a8edbc45426102d6b3d5b42aaeb29c7152fb23da0e93f3b23f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-vue2-rhea-flow-1180-text100-reopened.json",
+      "bytes": 16556,
+      "sha256": "1928889b0c867862637da03cebdfe386647f9bb9a8f007f7918866a9f752b03f",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-vue2-rhea-flow-1180-text100-reopened.png",
+      "bytes": 12165,
+      "sha256": "a94c24c8d900728797eddb1a9446e020eb1426cc10339eacef688c904f37bed2",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-vue2-rhea-flow-1180-text100.json",
+      "bytes": 16545,
+      "sha256": "dbec59de90e2556b778066a0009f2ea2817b021d0cde169c619e37782f2ad2b3",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-vue2-rhea-flow-1180-text100.png",
+      "bytes": 12316,
+      "sha256": "7c7481215cec456254a069b211490b5be81603d2b3af4a74715f67caeb511a25",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-vue2-rhea-flow-390-text200-reopened.json",
+      "bytes": 20420,
+      "sha256": "6a2a548bb8bf41ea9869024f2303660260ef8cd50ea07b1aae6ff7ecfcddb11d",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-vue2-rhea-flow-390-text200-reopened.png",
+      "bytes": 30592,
+      "sha256": "ac3e2d447e9a52cbe2fa71c2c966555ec27b915b75f22452cee4a165923553d5",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-vue2-rhea-flow-390-text200.json",
+      "bytes": 20408,
+      "sha256": "cdfc6cd18ec8e19c8fab866d6d7bf74b60e193e709c97ea2ec85d8da5c41f3f2",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-vue2-rhea-flow-390-text200.png",
+      "bytes": 31509,
+      "sha256": "b9f5e26429ad24a8edbc45426102d6b3d5b42aaeb29c7152fb23da0e93f3b23f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-wc-rhea-flow-1180-text100-reopened.json",
+      "bytes": 18174,
+      "sha256": "c6ee2dbee49e4022cb82b9356cf09b77062108bc1526c75a79c3fadc63008b0b",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-wc-rhea-flow-1180-text100-reopened.png",
+      "bytes": 12165,
+      "sha256": "a94c24c8d900728797eddb1a9446e020eb1426cc10339eacef688c904f37bed2",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-wc-rhea-flow-1180-text100.json",
+      "bytes": 18163,
+      "sha256": "8480776d367dd8dbf0f9b8f5a50cbacd6de0c9d0b447cf6d167c5909046cc287",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-wc-rhea-flow-1180-text100.png",
+      "bytes": 12316,
+      "sha256": "7c7481215cec456254a069b211490b5be81603d2b3af4a74715f67caeb511a25",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-wc-rhea-flow-390-text200-reopened.json",
+      "bytes": 22818,
+      "sha256": "eb930318a79bcf41a706a7abad51f41fe99350b07e287d04590c9b3eca5c8bdf",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-wc-rhea-flow-390-text200-reopened.png",
+      "bytes": 30592,
+      "sha256": "ac3e2d447e9a52cbe2fa71c2c966555ec27b915b75f22452cee4a165923553d5",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-wc-rhea-flow-390-text200.json",
+      "bytes": 22806,
+      "sha256": "ead1804111c12f58495ee5390d8da8d50d843edb5179418f9fd9fbc814220b98",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/accordion/cfb5724a3bde-shadcn-wc-rhea-flow-390-text200.png",
+      "bytes": 31509,
+      "sha256": "b9f5e26429ad24a8edbc45426102d6b3d5b42aaeb29c7152fb23da0e93f3b23f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-command-drag.png",
+      "bytes": 158952,
+      "sha256": "74d150379d0c6205a7176b604a293647ffb1dadaee76cc6fd1516d0aece05d9c",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-document-select-all.png",
+      "bytes": 156499,
+      "sha256": "d1c70b9cc5d571ad839334fbc8e4edb03fa0524ee4e575c90bee0142f37039ea",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-final.png",
+      "bytes": 32756,
+      "sha256": "62e2b0330d507b2e3a1fd2b62ad7a341d8e0c43591d8df7869f9a45dee4cdb6c",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-keyboard-enter.png",
+      "bytes": 135254,
+      "sha256": "413222776d22fec6ed65f21cc28565908e93995f04c5474c039112938c655160",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-keyboard-space.png",
+      "bytes": 135114,
+      "sha256": "5dc75a08efd4c9aab2f172002d106868ba0070236ae5ba5eaa12a92386a82caa",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-motion-16-normal-enter.png",
+      "bytes": 127297,
+      "sha256": "939ed48ef3a4c2e5d372be85f61c009596f22bbf0ea2e333f4c9cf6177256f54",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-motion-16-normal-release.png",
+      "bytes": 127427,
+      "sha256": "f517c4fdffc6c231134fcf805bd897e2452aa78709109d175380f0ace29bcbaf",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-motion-16-reduce-enter.png",
+      "bytes": 127297,
+      "sha256": "939ed48ef3a4c2e5d372be85f61c009596f22bbf0ea2e333f4c9cf6177256f54",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-motion-16-reduce-release.png",
+      "bytes": 127427,
+      "sha256": "f517c4fdffc6c231134fcf805bd897e2452aa78709109d175380f0ace29bcbaf",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-motion-32-normal-enter.png",
+      "bytes": 28652,
+      "sha256": "3a5157e12e2f34bc3e9a30e480781a970aaed0f1dc76b0e2a3d5a747bcf0ecd3",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-motion-32-normal-release.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-motion-32-reduce-enter.png",
+      "bytes": 28652,
+      "sha256": "3a5157e12e2f34bc3e9a30e480781a970aaed0f1dc76b0e2a3d5a747bcf0ecd3",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-motion-32-reduce-release.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-native-actions-text200-0-before-assert.png",
+      "bytes": 29622,
+      "sha256": "ed4ee746c5718cc37492a152796c4410eb8b6b4b71d48b8e2c3380d85e69256f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-native-actions-text200-1-before-assert.png",
+      "bytes": 29622,
+      "sha256": "ed4ee746c5718cc37492a152796c4410eb8b6b4b71d48b8e2c3380d85e69256f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-native-actions.png",
+      "bytes": 152675,
+      "sha256": "ab6c0fcdf32df2098b3c6acf3051334a55953f934bb7080744ba52ef5e1963fd",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-normal.png",
+      "bytes": 159106,
+      "sha256": "17678d4befea1ba1c5b9f51dbbc68f6630fbfd2b30b5544239bc79d539e15bba",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-selection-dark-editor.png",
+      "bytes": 123958,
+      "sha256": "d235cec793a0575df76c5fc252d2a533a4a398e2fe2e325706c0ccbaf9922da6",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-selection-dark-prose.png",
+      "bytes": 143061,
+      "sha256": "82fb664e3944e0f4973bf19faab15ed64d9523193b9dbf111ee0e67d9a128fe9",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-selection-light-editor.png",
+      "bytes": 133330,
+      "sha256": "03ccc505118226254c91a2634d49389e4c813c90488d811f736f7d6b4ab8c551",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-selection-light-prose.png",
+      "bytes": 151999,
+      "sha256": "a2488fb3f0298e75de94f5033c2918733e9d5f8b856794cfebeb5a94b380717a",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist-text200.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-brutalist.json",
+      "bytes": 159633,
+      "sha256": "39de80ba50d8ae297ba80a8d79320355629f8872a9372772a4e13cbdc86de95d",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-shadcn-command-drag.png",
+      "bytes": 128895,
+      "sha256": "925b3ab773be95fcb7e3de08885bf86d3f4d71ff9f7c6a7857ee6dd3f6947472",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-shadcn-document-select-all.png",
+      "bytes": 157207,
+      "sha256": "681c2fb3d47b8d9134c6c4d1a8ebdbba482fd4dbddea8a47ca1a00f53ba45112",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-shadcn-final.png",
+      "bytes": 36022,
+      "sha256": "7e41dd8d1fda29fc1033bea99d805c6b0595d54503a9d933f52e49c0083e13f8",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-shadcn-keyboard-enter.png",
+      "bytes": 129281,
+      "sha256": "49043024b8ef16de990f28ce5224541106a34d81e382f30d64cbc5c9fb4e3ebf",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-shadcn-keyboard-space.png",
+      "bytes": 129131,
+      "sha256": "38477d58faa4caaced70974fa636e513737dbe0f3e5491e1aac8160fdc6a04b9",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-shadcn-native-actions-text200-0-before-assert.png",
+      "bytes": 47517,
+      "sha256": "3055e0c290d67e79e01256b620b365d0420a0df1521ec63dced6b7e30398c009",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-shadcn-native-actions-text200-1-before-assert.png",
+      "bytes": 47517,
+      "sha256": "3055e0c290d67e79e01256b620b365d0420a0df1521ec63dced6b7e30398c009",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-shadcn-native-actions.png",
+      "bytes": 155569,
+      "sha256": "65a0d7585202aab086c52c80f96dff24c14553535f9538f3136c3b27af5f0f2d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-shadcn-normal.png",
+      "bytes": 129382,
+      "sha256": "ca6a1ca3ba6d322fa9ab2f2ca6695302ec8cbb5996060d5ed166f32207419107",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-shadcn-selection-dark-editor.png",
+      "bytes": 129236,
+      "sha256": "385395582c8b26da3a87c3be2ed826a84df52fc2448a55c9a2d02c7fd74230ee",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-shadcn-selection-dark-prose.png",
+      "bytes": 161176,
+      "sha256": "c22842c1b352cf3e1a6f95aecf0d7fae8e1d95b82bdf717bc9465652b87a8146",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-shadcn-selection-light-editor.png",
+      "bytes": 129376,
+      "sha256": "27823053bd2e8da1638d00a7546f367427256ee8b759541f8877ffa64f884ea7",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-shadcn-selection-light-prose.png",
+      "bytes": 155565,
+      "sha256": "518a2c920243e7b8821691c2caf40acc37f7d2939f2b0da9f066881cf356b49b",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-shadcn-text200.png",
+      "bytes": 35085,
+      "sha256": "12a1ab720670124c04fd8e2651fd8dbe14f2812197b0e49d3a01fdc9e9a6294a",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/react-shadcn.json",
+      "bytes": 29022,
+      "sha256": "9b445324f0b788640713abd8725eb19ba822ffbc21df7d44f278c9751a6a4f25",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-command-drag.png",
+      "bytes": 158719,
+      "sha256": "f9afd360048324a4541e3920a322de9b93155bb9e44d1e77b0b5fd15e634ad3a",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-document-select-all.png",
+      "bytes": 156342,
+      "sha256": "2ce885dff912a8e62911fb60af41ed5cbcf70d8e505b3823f4d266eb2c469e03",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-final.png",
+      "bytes": 23338,
+      "sha256": "1bcbf391a283150eb66a22164777718fff1af6d99af7eda4721644ce9632b703",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-keyboard-enter.png",
+      "bytes": 135027,
+      "sha256": "d80d8182a9b09f96d578a9e5f7e58b0c940fca67bc9d24d3319af2946ac23b1f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-keyboard-space.png",
+      "bytes": 134935,
+      "sha256": "d3e8ee3cde752129b5321b048705c02551d597f50c9f992f2237ee95453560ee",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-motion-16-normal-enter.png",
+      "bytes": 127068,
+      "sha256": "add62fdc422d27cdba4c84adc8cf533786e8de198b3f21bb050ecaa14d8bc60d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-motion-16-normal-release.png",
+      "bytes": 127186,
+      "sha256": "a1716279362a6de6da5e90f05ef83dff9d470abfdfec9e2cc238e4ba73651f63",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-motion-16-reduce-enter.png",
+      "bytes": 127068,
+      "sha256": "add62fdc422d27cdba4c84adc8cf533786e8de198b3f21bb050ecaa14d8bc60d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-motion-16-reduce-release.png",
+      "bytes": 127186,
+      "sha256": "a1716279362a6de6da5e90f05ef83dff9d470abfdfec9e2cc238e4ba73651f63",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-motion-32-normal-enter.png",
+      "bytes": 28652,
+      "sha256": "3a5157e12e2f34bc3e9a30e480781a970aaed0f1dc76b0e2a3d5a747bcf0ecd3",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-motion-32-normal-release.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-motion-32-reduce-enter.png",
+      "bytes": 28652,
+      "sha256": "3a5157e12e2f34bc3e9a30e480781a970aaed0f1dc76b0e2a3d5a747bcf0ecd3",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-motion-32-reduce-release.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-native-actions-text200-0-before-assert.png",
+      "bytes": 29692,
+      "sha256": "4179836b2912bca5aba4e3dcba1cc3e45df9a209e40e96d27413b25897631b8f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-native-actions-text200-1-before-assert.png",
+      "bytes": 29692,
+      "sha256": "4179836b2912bca5aba4e3dcba1cc3e45df9a209e40e96d27413b25897631b8f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-native-actions.png",
+      "bytes": 151698,
+      "sha256": "694728163f1ae80b80a0ee2fd7425d2c5ad3b21c52fbf026d5bb10eee6c50fe4",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-normal.png",
+      "bytes": 158875,
+      "sha256": "6c19c09bba06bbd0243ce7babff1f91ea7d8522abfe1baeab8ec489d0cca56de",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-selection-dark-editor.png",
+      "bytes": 123812,
+      "sha256": "087d7cde69ec15f17043180f6ee844aecc5ab9946b04732009e54371176cf40d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-selection-dark-prose.png",
+      "bytes": 142979,
+      "sha256": "72ae73296380e3070304d0ed7b135016f23f9851743322df4a3d4c3c159ab70d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-selection-light-editor.png",
+      "bytes": 133100,
+      "sha256": "d4c6db10296a5620be461d1fa18803e5a3c2c6671d718cd9a8bed8035c43ced1",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-selection-light-prose.png",
+      "bytes": 151784,
+      "sha256": "138d83d20b2e99be34644888bfb21fc20929c3aecf307f39efd78156ec0c03a7",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist-text200.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-brutalist.json",
+      "bytes": 155095,
+      "sha256": "6341f98da749345fb0b2c35af7a4f32296c0b073f7766b6745e123f12c866cbb",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-shadcn-command-drag.png",
+      "bytes": 128844,
+      "sha256": "df7300dbe1de8fe873d5bb0a70dd1b5e9f1510ef11912b534917d05c97c28a18",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-shadcn-document-select-all.png",
+      "bytes": 157149,
+      "sha256": "908680c43bdd8226c982fb2460bc05cc1e5779132b142de3c109bbfe33721450",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-shadcn-final.png",
+      "bytes": 36470,
+      "sha256": "382b4ac2368468f96e1fb272c083e43c7b761d8ea5d2ac7f92b96366870f69af",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-shadcn-keyboard-enter.png",
+      "bytes": 129246,
+      "sha256": "df058db65920cdaff977411150c45f2e8359040bf08acdcf8f0a989c72527c9f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-shadcn-keyboard-space.png",
+      "bytes": 129092,
+      "sha256": "169966050efb04fe36c7f69b6739ef4c8b2ea9120fb536cb4b5eb149bf1d760b",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-shadcn-native-actions-text200-0-before-assert.png",
+      "bytes": 47517,
+      "sha256": "3055e0c290d67e79e01256b620b365d0420a0df1521ec63dced6b7e30398c009",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-shadcn-native-actions-text200-1-before-assert.png",
+      "bytes": 47517,
+      "sha256": "3055e0c290d67e79e01256b620b365d0420a0df1521ec63dced6b7e30398c009",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-shadcn-native-actions.png",
+      "bytes": 155524,
+      "sha256": "8a67eedf18737bd6f2fdbe3fb6d1c97972f527f5ec9698a1c5583de58c00c074",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-shadcn-normal.png",
+      "bytes": 129342,
+      "sha256": "e640484d6437e33a19f4a786c33db4051beef05dfd8acdee1e85cf3028d59221",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-shadcn-selection-dark-editor.png",
+      "bytes": 129017,
+      "sha256": "e427abe1a2f7b33a5d386662d1f8d75aa6d072bbc2c539efb696ab9e99426199",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-shadcn-selection-dark-prose.png",
+      "bytes": 160789,
+      "sha256": "f18204cd8d5fc9f2707b63ced48698cc1fbeab96ed5f51368995a0b3d77a2004",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-shadcn-selection-light-editor.png",
+      "bytes": 129078,
+      "sha256": "5f5b42caae979a4acff8190dd7adacda6a0eb54b848dd410bcc7ee6edc720054",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-shadcn-selection-light-prose.png",
+      "bytes": 155517,
+      "sha256": "ece6b32c13216a915cc73cf5eb44e37e52b32929dfaf5caff70c8dae91a85bac",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-shadcn-text200.png",
+      "bytes": 35085,
+      "sha256": "12a1ab720670124c04fd8e2651fd8dbe14f2812197b0e49d3a01fdc9e9a6294a",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue-shadcn.json",
+      "bytes": 29016,
+      "sha256": "2bad092451c5f266dc2dbc19844179b5a63165308466645790a407a98e9c2212",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-command-drag.png",
+      "bytes": 158935,
+      "sha256": "492df3c6007c71f544d82882d333152c51ea8b3eacf173f9d312bb73b1b23b9c",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-document-select-all.png",
+      "bytes": 156535,
+      "sha256": "4d6fb3af9c9516d1343ccb02d1eeda1c4f3ac439e97c658be822d0bf9d416015",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-final.png",
+      "bytes": 25509,
+      "sha256": "e40e591de130fd407e00d8c84f5e1871d0e78bd6d04ec399401a18410c4d2c60",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-keyboard-enter.png",
+      "bytes": 135314,
+      "sha256": "579d2ff3031e25a0589c1718e36c443b9bc9716f4a436f20e6411dc0c8c0654f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-keyboard-space.png",
+      "bytes": 135101,
+      "sha256": "96bb3e0215a430ea41a8955505d361f45eb049887b31661fffad841ab2fc2b0b",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-motion-16-normal-enter.png",
+      "bytes": 127282,
+      "sha256": "c89409c9be55570482b0b8890218ae7048b7c6be36000b40f9ee746702c0b9f7",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-motion-16-normal-release.png",
+      "bytes": 127400,
+      "sha256": "f9606f4bf18b14d4ed1439a5f17d0acc9977125aed6594fa0a7da5b3e22b3f25",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-motion-16-reduce-enter.png",
+      "bytes": 127282,
+      "sha256": "c89409c9be55570482b0b8890218ae7048b7c6be36000b40f9ee746702c0b9f7",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-motion-16-reduce-release.png",
+      "bytes": 127400,
+      "sha256": "f9606f4bf18b14d4ed1439a5f17d0acc9977125aed6594fa0a7da5b3e22b3f25",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-motion-32-normal-enter.png",
+      "bytes": 28652,
+      "sha256": "3a5157e12e2f34bc3e9a30e480781a970aaed0f1dc76b0e2a3d5a747bcf0ecd3",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-motion-32-normal-release.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-motion-32-reduce-enter.png",
+      "bytes": 28652,
+      "sha256": "3a5157e12e2f34bc3e9a30e480781a970aaed0f1dc76b0e2a3d5a747bcf0ecd3",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-motion-32-reduce-release.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-native-actions-text200-0-before-assert.png",
+      "bytes": 29622,
+      "sha256": "ed4ee746c5718cc37492a152796c4410eb8b6b4b71d48b8e2c3380d85e69256f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-native-actions-text200-1-before-assert.png",
+      "bytes": 29622,
+      "sha256": "ed4ee746c5718cc37492a152796c4410eb8b6b4b71d48b8e2c3380d85e69256f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-native-actions.png",
+      "bytes": 152052,
+      "sha256": "36f9b084b1dc57a55f27177cb084ed7643c82b82d7af2d7aa181f64d48e2d0d4",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-normal.png",
+      "bytes": 159089,
+      "sha256": "83fc55b9508e67e8e06d031f6c5bf6df967d59dceb0c9e5dfa3d71c109c4ad25",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-selection-dark-editor.png",
+      "bytes": 123997,
+      "sha256": "6a657846c5de2af13a02b9e8ced52e55edc51f4f9e1d679508bac2a01057ff8c",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-selection-dark-prose.png",
+      "bytes": 143103,
+      "sha256": "95169ecaa116f6f553049f44167c906d51bde15385253443c15566eb1d473f18",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-selection-light-editor.png",
+      "bytes": 133315,
+      "sha256": "cb5556952cedd0df12d2f8c85f137d0c1c226cf40c31eb551e85e072f7db63aa",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-selection-light-prose.png",
+      "bytes": 151994,
+      "sha256": "b14448129bf67b2d8b664a6db61e48eb554aa8bfc75d3709176052d4ae8e0d1f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist-text200.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-brutalist.json",
+      "bytes": 154421,
+      "sha256": "c438d28ec18c2b4bfd6c075e18b8996c6c18c911bbf9fb8abd7b99d352d6f05d",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-shadcn-command-drag.png",
+      "bytes": 128963,
+      "sha256": "9ff70567846d061ff005a6213e1d068638c0bf36b00197c711c6f3e1b576f242",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-shadcn-document-select-all.png",
+      "bytes": 157279,
+      "sha256": "57c52f3ffaa7a1517b5e80baf461e19f71f64f00ba3ab8824bb24e018a75c7e4",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-shadcn-final.png",
+      "bytes": 31491,
+      "sha256": "879c0c404ef04901d5253bcde03737206d9abcc6cfed12b78238c87792845955",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-shadcn-keyboard-enter.png",
+      "bytes": 129360,
+      "sha256": "787309256ac1feb2f6dcd31478b461f3ec08920894cba3f9ddedba4c415d0386",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-shadcn-keyboard-space.png",
+      "bytes": 129211,
+      "sha256": "fe43f0dfa2bf28020f15ff4735827c8f84231a3a4246520fc8e26b87227babbd",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-shadcn-native-actions-text200-0-before-assert.png",
+      "bytes": 47517,
+      "sha256": "3055e0c290d67e79e01256b620b365d0420a0df1521ec63dced6b7e30398c009",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-shadcn-native-actions-text200-1-before-assert.png",
+      "bytes": 47517,
+      "sha256": "3055e0c290d67e79e01256b620b365d0420a0df1521ec63dced6b7e30398c009",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-shadcn-native-actions.png",
+      "bytes": 155641,
+      "sha256": "70fd56bec20b182e64f7d4b5e5edaa583bed63657c7f8bc8cb8534ca83276ae8",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-shadcn-normal.png",
+      "bytes": 129461,
+      "sha256": "e4d6e4a6294cea464da4c6cd5b56728766f20df10066a86b5223b2c6cfdd2a55",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-shadcn-selection-dark-editor.png",
+      "bytes": 129155,
+      "sha256": "bc56aa065f0723212e40fcf19cd46b3a9364811361ba46aca3b0cd7b687f4f1b",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-shadcn-selection-dark-prose.png",
+      "bytes": 160927,
+      "sha256": "38ffc71f05b1f20b1905789b80d3cd06b1f002f70635319028c73ab7bb2ec228",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-shadcn-selection-light-editor.png",
+      "bytes": 129301,
+      "sha256": "63bc9e0621fbd005446fba810aa0be63d9bbccc016bdc748b4af295ca8d7a0a0",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-shadcn-selection-light-prose.png",
+      "bytes": 155648,
+      "sha256": "25316fa1a79db403f71632c0e25399a871d4ed66a2b768f809fc0e38c7b9ad6f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-shadcn-text200.png",
+      "bytes": 35085,
+      "sha256": "12a1ab720670124c04fd8e2651fd8dbe14f2812197b0e49d3a01fdc9e9a6294a",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/vue2-shadcn.json",
+      "bytes": 29021,
+      "sha256": "83db4530bd6d287707007de8b799e3fb354e6d4b7821ab971805cc2ebb248085",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-command-drag.png",
+      "bytes": 160248,
+      "sha256": "bb5e42a55c9edfc3b1b586523b51ed2d6f227e06834285dbc9da929ea6354ebe",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-document-select-all.png",
+      "bytes": 157738,
+      "sha256": "6477a3dfe8033ea82d0cf7a9da4fd029272a2e07b31fa6c7c9ae309121ebf565",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-final.png",
+      "bytes": 31652,
+      "sha256": "96d35e17ff45cd9532587435cbe2cae7917943991a2900277600167136566d42",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-keyboard-enter.png",
+      "bytes": 136584,
+      "sha256": "2f61e6bdcff6e07f9ac22a43420b2d7046301e983b47a8150657dbce015f4e25",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-keyboard-space.png",
+      "bytes": 136511,
+      "sha256": "17aa19f0996214a56251e400044ace68320d8175497446e403b8a9f1dbd01e79",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-motion-16-normal-enter.png",
+      "bytes": 128551,
+      "sha256": "9a0e48f18835ea7fb7d661528cebbec90f621ee2161e1c0e84f545b0aac81aaf",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-motion-16-normal-release.png",
+      "bytes": 128672,
+      "sha256": "e56ca8c419f4dc9de57886b3d527699fec19438fe452b3bde7d7067d4020c831",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-motion-16-reduce-enter.png",
+      "bytes": 128551,
+      "sha256": "9a0e48f18835ea7fb7d661528cebbec90f621ee2161e1c0e84f545b0aac81aaf",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-motion-16-reduce-release.png",
+      "bytes": 128672,
+      "sha256": "e56ca8c419f4dc9de57886b3d527699fec19438fe452b3bde7d7067d4020c831",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-motion-32-normal-enter.png",
+      "bytes": 28652,
+      "sha256": "3a5157e12e2f34bc3e9a30e480781a970aaed0f1dc76b0e2a3d5a747bcf0ecd3",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-motion-32-normal-release.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-motion-32-reduce-enter.png",
+      "bytes": 28652,
+      "sha256": "3a5157e12e2f34bc3e9a30e480781a970aaed0f1dc76b0e2a3d5a747bcf0ecd3",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-motion-32-reduce-release.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-native-actions-text200-0-before-assert.png",
+      "bytes": 29622,
+      "sha256": "ed4ee746c5718cc37492a152796c4410eb8b6b4b71d48b8e2c3380d85e69256f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-native-actions-text200-1-before-assert.png",
+      "bytes": 29622,
+      "sha256": "ed4ee746c5718cc37492a152796c4410eb8b6b4b71d48b8e2c3380d85e69256f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-native-actions.png",
+      "bytes": 153160,
+      "sha256": "5fdfaa236dc7ef7fd2d27db41495cb1269bd765c2c92d6271c8f28f98d46d8f3",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-normal.png",
+      "bytes": 160419,
+      "sha256": "53f3814f363c88b9f667bbeb62682d465589c9c2acbc5601671789104d2071cf",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-selection-dark-editor.png",
+      "bytes": 125204,
+      "sha256": "51e2d6446867ed8f4f278479720c8c0b3ef230b780a1c57110dab9043756b4ec",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-selection-dark-prose.png",
+      "bytes": 144073,
+      "sha256": "76a9a49e7c81269ccb93d03686cac1da4eea957a931a9dfdd47ee3313a8728da",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-selection-light-editor.png",
+      "bytes": 134593,
+      "sha256": "933a28ea2f6bb2226118287f8a7b4d9e48197678ab62de76a836ba643ea3e895",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-selection-light-prose.png",
+      "bytes": 153237,
+      "sha256": "38b4b719c6ebc2ea6552b29c0a2e3eb3dee00520f4d1b3d6bd56992a918366a2",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist-text200.png",
+      "bytes": 28736,
+      "sha256": "0b4df79f42ad35bc63ae8c92942a135358caffd84430c6da1231d70dc4fea04d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-brutalist.json",
+      "bytes": 155766,
+      "sha256": "b7ad9c2e7422a3fe52917707bf849eae91d9ee3799291ef5483965008f4581e5",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-shadcn-command-drag.png",
+      "bytes": 129303,
+      "sha256": "355627c65776863765af99f8f47cc6edcb60312aef9ef8e0f6a04fb68620fbc2",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-shadcn-document-select-all.png",
+      "bytes": 158067,
+      "sha256": "0f1ad889625f4d2e3fe3a8a354e325083a4d1f365134952d3e6bf9ab315a4162",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-shadcn-final.png",
+      "bytes": 35659,
+      "sha256": "e819873479920d530a6f543fca1798b422a74265fb192142c12e21aa738b8ba1",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-shadcn-keyboard-enter.png",
+      "bytes": 130052,
+      "sha256": "3ec423440b296e29df735cb25f582bd26ed3b2c7458b094eb2ada7fdd007879f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-shadcn-keyboard-space.png",
+      "bytes": 130052,
+      "sha256": "3ec423440b296e29df735cb25f582bd26ed3b2c7458b094eb2ada7fdd007879f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-shadcn-native-actions-text200-0-before-assert.png",
+      "bytes": 47517,
+      "sha256": "3055e0c290d67e79e01256b620b365d0420a0df1521ec63dced6b7e30398c009",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-shadcn-native-actions-text200-1-before-assert.png",
+      "bytes": 47517,
+      "sha256": "3055e0c290d67e79e01256b620b365d0420a0df1521ec63dced6b7e30398c009",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-shadcn-native-actions.png",
+      "bytes": 156279,
+      "sha256": "f6b3725a828696385541eef73caa34d2d2521c48fd9604eccc9ba6c95ceabaff",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-shadcn-normal.png",
+      "bytes": 130148,
+      "sha256": "cfc04ea6084fb31ceb69962f20551f35033098132018eecd9c1faebc898ac206",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-shadcn-selection-dark-editor.png",
+      "bytes": 130006,
+      "sha256": "19a4a30f9dd7504f374c0480ee18f08c5f103c91ead6e8178af7bf10d70612fe",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-shadcn-selection-dark-prose.png",
+      "bytes": 161699,
+      "sha256": "1b96719ccffd69d51ba44bc38193b8fdd4c007e393453109c3e9c5324b5b2702",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-shadcn-selection-light-editor.png",
+      "bytes": 130262,
+      "sha256": "8f2f7912fabad6d22e909e968e9d39c9b67284cff024e66d56a075e2641dd6f7",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-shadcn-selection-light-prose.png",
+      "bytes": 156389,
+      "sha256": "78b6b768d6149beaadda09a5fc46f89ae3ddf7dbcb6f9bd3a0d101ed06ac275d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-shadcn-text200.png",
+      "bytes": 35085,
+      "sha256": "12a1ab720670124c04fd8e2651fd8dbe14f2812197b0e49d3a01fdc9e9a6294a",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/homepage-button-contract/wc-shadcn.json",
+      "bytes": 29804,
+      "sha256": "0e24b62d65edab35c45c67acf0dacbe274f8d7d64ec0f128e61e9eeedfee9364",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/runtime-loading-mask/brutalist-desktop-light-cancelled-retained.png",
+      "bytes": 111546,
+      "sha256": "390c3cac8631f90be7cc432d9c50f37ee888c2136323291658dbde1706eadd6a",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/runtime-loading-mask/brutalist-desktop-light-loading.png",
+      "bytes": 115927,
+      "sha256": "ca943e6cacb14195c43229f74bd8b0fd44db6f7b5f2e0c6385e1c8b71a97996f",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/runtime-loading-mask/brutalist-narrow-dark-text200-cancelled-retained.png",
+      "bytes": 24573,
+      "sha256": "9963bf1e1a252d896e8ace62ab361b19ab26e39ff03cfd08bb7ac267e98f50ed",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/runtime-loading-mask/brutalist-narrow-dark-text200-loading.png",
+      "bytes": 23706,
+      "sha256": "16a376e9340e9bacf5e0101c5fb479dd89a829744b4dc26106bb9510dc0cb421",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/runtime-loading-mask/observations.json",
+      "bytes": 28254,
+      "sha256": "22037b52f0d9d4c2cbc26be3017420134240ad26d8490d8b4b707be4b2e6b70f",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/runtime-loading-mask/shadcn-desktop-light-cancelled-retained.png",
+      "bytes": 119284,
+      "sha256": "27684b9a45e7510c5b2377dac35b83327c53fc8f8f541a08cab25ac33a9e177d",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/runtime-loading-mask/shadcn-desktop-light-loading.png",
+      "bytes": 122899,
+      "sha256": "6b8e70412da4ef9815f27eb43e5ae2c0be7ee63591e86439233ee87f4ef79dec",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/runtime-loading-mask/shadcn-narrow-dark-text200-cancelled-retained.png",
+      "bytes": 26215,
+      "sha256": "883a8e3ee844c20f986289b1b6041168edf6c540ec87ad6919b8d0bffb0eb766",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/browser/runtime-loading-mask/shadcn-narrow-dark-text200-loading.png",
+      "bytes": 23658,
+      "sha256": "69c0d16211b5dddbda27a7020b11a764b9e89f3d191b8a30865c037322ec13a9",
+      "visual": true
+    },
+    {
+      "path": "gallery-cfb-candidate/button-gallery.json",
+      "bytes": 3761,
+      "sha256": "0c276431455b93c92a9a6e018ee13c28214ea93389d5eb0053a81a3303889eba",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/button-gallery.log",
+      "bytes": 4578,
+      "sha256": "8d368a8b49aba09d961c142d38c8733544a89ce9c6fe326137f6005f6cfb59c4",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/commands.json",
+      "bytes": 2234,
+      "sha256": "f25cbfae4424a7404f7ffb28005d11571773ad6488c22682e7b380b0150e19d7",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/completed.json",
+      "bytes": 2542,
+      "sha256": "1b8eb8d7a915e4f4aab9f649cb2866aac01b9f6078ecfb25f5d0994b5fb61c33",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/launch.json",
+      "bytes": 318,
+      "sha256": "2a52e64e044c9f687c02c6e042834e19a2a709cb589c9a94c105e92c3169061c",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/mask-gallery.json",
+      "bytes": 2727,
+      "sha256": "d81a608e8c954ee5e5db04ed09a78fd468eebbb6894750428640c172e691d5d8",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/mask-gallery.log",
+      "bytes": 3770,
+      "sha256": "5e75f3890ae7a5083da1ea7b333193d58247ed717628e439576df8929278186e",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/process-cleanup.jsonl",
+      "bytes": 568,
+      "sha256": "2c3a09aecd21d9f2e4b42dcf1004c973c42103d56567df9c407ac85c5e11f7eb",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/process-rss.jsonl",
+      "bytes": 47255,
+      "sha256": "25b5e90a7ba853ba8e1e57b5ac9786b636c6b6659521234df1cb9b72bdb2d445",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/rhea-gallery.json",
+      "bytes": 11634,
+      "sha256": "ab7c6124e5dabcb4d6757c8370b5df10ec7e159c745c19d94d418fe03bd22fe8",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/rhea-gallery.log",
+      "bytes": 5669,
+      "sha256": "29bc2db777b63a37382cfb7a68ff7383129bbda1dec64ffcdf50769c70bea439",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/runner.log",
+      "bytes": 1697,
+      "sha256": "a175e7bf7ce5da073393702220cdf5a4854867865314f524a4539ee44578c896",
+      "visual": false
+    },
+    {
+      "path": "gallery-cfb-candidate/source.json",
+      "bytes": 4098,
+      "sha256": "79121e7321c20acf3be27d7c2de7ad2c029dfe144ce48dcd077d24f539829820",
+      "visual": false
+    }
+  ]
+}

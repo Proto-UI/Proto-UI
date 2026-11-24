@@ -1,0 +1,505 @@
+{
+  "schemaVersion": 1,
+  "baselineSourceSha": "fca048905ca8c8a97bb0cedb6311816670d3d318",
+  "candidateSourceSha": "cfb5724a3bdeb37b414fe4642b915b14e521f775",
+  "sourceChange": "39 inserted test lines only: native Enter on the existing public compact-gallery layout toggle, non-inert precondition, and immediate input-value confirmation. No product source, threshold, predicate or deadline changes.",
+  "independentSourceReviewSha256": "367dd5b062626f978b28c4c6acbc87b6e01135f747c51e8e008de68e31812965",
+  "rawArchive": {
+    "path": "gallery-fca-cfb-review.tar.gz",
+    "bytes": 29754636,
+    "sha256": "22e88b15c361a9ec798b23148f56376e765852d69e014a5f583573a8d4b9f0ce",
+    "testOutputFiles": 403,
+    "visualFiles": 326,
+    "additionalExactRunners": 2
+  },
+  "manifest": {
+    "path": "file-manifest.json",
+    "bytes": 99090,
+    "sha256": "cd929ff4b1d1f0ecb7cd9330f298a7fe7208f6eb93048050497a7b016aa3ef65"
+  },
+  "nativeHost": {
+    "node": "24.22.3",
+    "pnpm": "10.32.1",
+    "playwright": "1.58.2",
+    "chrome": "156.0.8078.79",
+    "chromiumSandbox": true,
+    "cpuProfilerEnabled": false
+  },
+  "runs": {
+    "gallery-fca-baseline": {
+      "sourceSha": "fca048905ca8c8a97bb0cedb6311816670d3d318",
+      "trackedSourceClean": true,
+      "generationRerun": true,
+      "generationReceiptSourceSha": "fca048905ca8c8a97bb0cedb6311816670d3d318",
+      "styles": [
+        {
+          "path": "apps/www/src/styles/proto-ui-style.css",
+          "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-shadow-style.generated.js",
+          "sha256": "08415c4d6276a790c2a5538aa8bc70279ad4a060624dc8e3e024fd36e44f7036"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-tokens.generated.css",
+          "sha256": "e503f7dff500dd7894d122b808f623f971fb590bb88fba7859126ee3ca20e1d7"
+        },
+        {
+          "path": "apps/www/src/styles/shadcn-theme.css",
+          "sha256": "3de2d4ce2a38e83086128c8863d3391eb74159adde7b1a8b7f450f93fd643f96"
+        }
+      ],
+      "commands": [
+        {
+          "name": "frozen-install",
+          "sourceSha": "fca048905ca8c8a97bb0cedb6311816670d3d318",
+          "command": [
+            "corepack",
+            "pnpm@10.32.1",
+            "install",
+            "--frozen-lockfile",
+            "--ignore-scripts",
+            "--store-dir",
+            "/var/tmp/pui-40da-web-pnpm-store"
+          ],
+          "startedAt": "2026-11-24T13:04:11.476Z",
+          "finishedAt": "2026-11-24T13:04:15.075Z",
+          "timedOut": false,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "name": "build-cli",
+          "sourceSha": "fca048905ca8c8a97bb0cedb6311816670d3d318",
+          "command": ["corepack", "pnpm@10.32.1", "--filter", "@proto.ui/cli", "build"],
+          "startedAt": "2026-11-24T13:04:15.076Z",
+          "finishedAt": "2026-11-24T13:04:19.677Z",
+          "timedOut": false,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "name": "canonical-styles",
+          "sourceSha": "fca048905ca8c8a97bb0cedb6311816670d3d318",
+          "command": [
+            "corepack",
+            "pnpm@10.32.1",
+            "--filter",
+            "apps-www",
+            "run",
+            "generate:proto-ui-style"
+          ],
+          "startedAt": "2026-11-24T13:04:19.677Z",
+          "finishedAt": "2026-11-24T13:06:28.648Z",
+          "timedOut": false,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "name": "button-gallery",
+          "sourceSha": "fca048905ca8c8a97bb0cedb6311816670d3d318",
+          "command": [
+            "corepack",
+            "pnpm@10.32.1",
+            "exec",
+            "vitest",
+            "run",
+            "apps/www/src/content/docs/zh-cn/homepage-button-contract.browser.test.ts",
+            "-t",
+            "preserves local selection policy, public height and editing",
+            "--maxWorkers",
+            "1",
+            "--minWorkers",
+            "1",
+            "--reporter",
+            "default",
+            "--reporter",
+            "json",
+            "--outputFile.json=/var/tmp/pui-40da-web-evidence/gallery-fca-baseline/button-gallery.json"
+          ],
+          "startedAt": "2026-11-24T13:06:51.429Z",
+          "finishedAt": "2026-11-24T13:09:28.988Z",
+          "timedOut": false,
+          "code": 1,
+          "signal": null
+        },
+        {
+          "name": "rhea-gallery",
+          "sourceSha": "fca048905ca8c8a97bb0cedb6311816670d3d318",
+          "command": [
+            "corepack",
+            "pnpm@10.32.1",
+            "exec",
+            "vitest",
+            "run",
+            "apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts",
+            "-t",
+            "Rhea homepage block child respects profile padding",
+            "--maxWorkers",
+            "1",
+            "--minWorkers",
+            "1",
+            "--reporter",
+            "default",
+            "--reporter",
+            "json",
+            "--outputFile.json=/var/tmp/pui-40da-web-evidence/gallery-fca-baseline/rhea-gallery.json"
+          ],
+          "startedAt": "2026-11-24T13:09:28.989Z",
+          "finishedAt": "2026-11-24T13:10:42.337Z",
+          "timedOut": false,
+          "code": 1,
+          "signal": null
+        },
+        {
+          "name": "mask-gallery",
+          "sourceSha": "fca048905ca8c8a97bb0cedb6311816670d3d318",
+          "command": [
+            "corepack",
+            "pnpm@10.32.1",
+            "exec",
+            "vitest",
+            "run",
+            "apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts",
+            "-t",
+            "retains the current demo after keyboard cancellation",
+            "--maxWorkers",
+            "1",
+            "--minWorkers",
+            "1",
+            "--reporter",
+            "default",
+            "--reporter",
+            "json",
+            "--outputFile.json=/var/tmp/pui-40da-web-evidence/gallery-fca-baseline/mask-gallery.json"
+          ],
+          "startedAt": "2026-11-24T13:10:42.338Z",
+          "finishedAt": "2026-11-24T13:11:15.345Z",
+          "timedOut": false,
+          "code": 1,
+          "signal": null
+        }
+      ],
+      "exitCode": 1,
+      "completedAt": "2026-11-24T13:11:16.105Z",
+      "cases": [
+        {
+          "name": "button-gallery",
+          "passed": 4,
+          "failed": 4,
+          "unselected": 0,
+          "selected": 8,
+          "testNames": [
+            "Base Button selection and family-owned homepage geometry wc/shadcn preserves local selection policy, public height and editing",
+            "Base Button selection and family-owned homepage geometry wc/brutalist preserves local selection policy, public height and editing",
+            "Base Button selection and family-owned homepage geometry react/shadcn preserves local selection policy, public height and editing",
+            "Base Button selection and family-owned homepage geometry react/brutalist preserves local selection policy, public height and editing",
+            "Base Button selection and family-owned homepage geometry vue/shadcn preserves local selection policy, public height and editing",
+            "Base Button selection and family-owned homepage geometry vue/brutalist preserves local selection policy, public height and editing",
+            "Base Button selection and family-owned homepage geometry vue2/shadcn preserves local selection policy, public height and editing",
+            "Base Button selection and family-owned homepage geometry vue2/brutalist preserves local selection policy, public height and editing"
+          ]
+        },
+        {
+          "name": "rhea-gallery",
+          "passed": 4,
+          "failed": 4,
+          "unselected": 20,
+          "selected": 8,
+          "testNames": [
+            "Accordion five families / four native Web consumers shadcn wc Rhea homepage block child respects profile padding at 1180px / 100% text",
+            "Accordion five families / four native Web consumers shadcn wc Rhea homepage block child respects profile padding at 390px / 200% text",
+            "Accordion five families / four native Web consumers shadcn react Rhea homepage block child respects profile padding at 1180px / 100% text",
+            "Accordion five families / four native Web consumers shadcn react Rhea homepage block child respects profile padding at 390px / 200% text",
+            "Accordion five families / four native Web consumers shadcn vue Rhea homepage block child respects profile padding at 1180px / 100% text",
+            "Accordion five families / four native Web consumers shadcn vue Rhea homepage block child respects profile padding at 390px / 200% text",
+            "Accordion five families / four native Web consumers shadcn vue2 Rhea homepage block child respects profile padding at 1180px / 100% text",
+            "Accordion five families / four native Web consumers shadcn vue2 Rhea homepage block child respects profile padding at 390px / 200% text"
+          ]
+        },
+        {
+          "name": "mask-gallery",
+          "passed": 2,
+          "failed": 2,
+          "unselected": 2,
+          "selected": 4,
+          "testNames": [
+            "shadcn native regional runtime mask retains the current demo after keyboard cancellation at desktop-light",
+            "shadcn native regional runtime mask retains the current demo after keyboard cancellation at narrow-dark-text200",
+            "brutalist native regional runtime mask retains the current demo after keyboard cancellation at desktop-light",
+            "brutalist native regional runtime mask retains the current demo after keyboard cancellation at narrow-dark-text200"
+          ]
+        }
+      ],
+      "cleanup": [
+        {
+          "at": "2026-11-24T13:04:15.075Z",
+          "pgid": 3748295,
+          "term": "not-present",
+          "kill": "not-needed",
+          "beforeKill": [],
+          "remaining": []
+        },
+        {
+          "at": "2026-11-24T13:04:19.677Z",
+          "pgid": 3748434,
+          "term": "not-present",
+          "kill": "not-needed",
+          "beforeKill": [],
+          "remaining": []
+        },
+        {
+          "at": "2026-11-24T13:06:28.647Z",
+          "pgid": 3748791,
+          "term": "not-present",
+          "kill": "not-needed",
+          "beforeKill": [],
+          "remaining": []
+        },
+        {
+          "at": "2026-11-24T13:09:28.988Z",
+          "pgid": 3758451,
+          "term": "not-present",
+          "kill": "not-needed",
+          "beforeKill": [],
+          "remaining": []
+        },
+        {
+          "at": "2026-11-24T13:10:42.337Z",
+          "pgid": 3767804,
+          "term": "not-present",
+          "kill": "not-needed",
+          "beforeKill": [],
+          "remaining": []
+        },
+        {
+          "at": "2026-11-24T13:11:15.344Z",
+          "pgid": 3772732,
+          "term": "not-present",
+          "kill": "not-needed",
+          "beforeKill": [],
+          "remaining": []
+        },
+        {
+          "at": "2026-11-24T13:11:16.104Z",
+          "pgid": 3757297,
+          "term": "sent",
+          "kill": "not-needed",
+          "beforeKill": [],
+          "remaining": []
+        }
+      ]
+    },
+    "gallery-cfb-candidate": {
+      "sourceSha": "cfb5724a3bdeb37b414fe4642b915b14e521f775",
+      "trackedSourceClean": true,
+      "generationRerun": false,
+      "generationReceiptSourceSha": "fca048905ca8c8a97bb0cedb6311816670d3d318",
+      "styles": [
+        {
+          "path": "apps/www/src/styles/proto-ui-style.css",
+          "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-shadow-style.generated.js",
+          "sha256": "08415c4d6276a790c2a5538aa8bc70279ad4a060624dc8e3e024fd36e44f7036"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-tokens.generated.css",
+          "sha256": "e503f7dff500dd7894d122b808f623f971fb590bb88fba7859126ee3ca20e1d7"
+        },
+        {
+          "path": "apps/www/src/styles/shadcn-theme.css",
+          "sha256": "3de2d4ce2a38e83086128c8863d3391eb74159adde7b1a8b7f450f93fd643f96"
+        }
+      ],
+      "commands": [
+        {
+          "name": "button-gallery",
+          "sourceSha": "cfb5724a3bdeb37b414fe4642b915b14e521f775",
+          "command": [
+            "corepack",
+            "pnpm@10.32.1",
+            "exec",
+            "vitest",
+            "run",
+            "apps/www/src/content/docs/zh-cn/homepage-button-contract.browser.test.ts",
+            "-t",
+            "preserves local selection policy, public height and editing",
+            "--maxWorkers",
+            "1",
+            "--minWorkers",
+            "1",
+            "--reporter",
+            "default",
+            "--reporter",
+            "json",
+            "--outputFile.json=/var/tmp/pui-40da-web-evidence/gallery-cfb-candidate/button-gallery.json"
+          ],
+          "startedAt": "2026-11-24T13:14:14.171Z",
+          "finishedAt": "2026-11-24T13:16:38.248Z",
+          "timedOut": false,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "name": "rhea-gallery",
+          "sourceSha": "cfb5724a3bdeb37b414fe4642b915b14e521f775",
+          "command": [
+            "corepack",
+            "pnpm@10.32.1",
+            "exec",
+            "vitest",
+            "run",
+            "apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts",
+            "-t",
+            "Rhea homepage block child respects profile padding",
+            "--maxWorkers",
+            "1",
+            "--minWorkers",
+            "1",
+            "--reporter",
+            "default",
+            "--reporter",
+            "json",
+            "--outputFile.json=/var/tmp/pui-40da-web-evidence/gallery-cfb-candidate/rhea-gallery.json"
+          ],
+          "startedAt": "2026-11-24T13:16:38.253Z",
+          "finishedAt": "2026-11-24T13:17:43.510Z",
+          "timedOut": false,
+          "code": 0,
+          "signal": null
+        },
+        {
+          "name": "mask-gallery",
+          "sourceSha": "cfb5724a3bdeb37b414fe4642b915b14e521f775",
+          "command": [
+            "corepack",
+            "pnpm@10.32.1",
+            "exec",
+            "vitest",
+            "run",
+            "apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts",
+            "-t",
+            "retains the current demo after keyboard cancellation",
+            "--maxWorkers",
+            "1",
+            "--minWorkers",
+            "1",
+            "--reporter",
+            "default",
+            "--reporter",
+            "json",
+            "--outputFile.json=/var/tmp/pui-40da-web-evidence/gallery-cfb-candidate/mask-gallery.json"
+          ],
+          "startedAt": "2026-11-24T13:17:43.511Z",
+          "finishedAt": "2026-11-24T13:18:18.602Z",
+          "timedOut": false,
+          "code": 0,
+          "signal": null
+        }
+      ],
+      "exitCode": 0,
+      "completedAt": "2026-11-24T13:18:18.983Z",
+      "cases": [
+        {
+          "name": "button-gallery",
+          "passed": 8,
+          "failed": 0,
+          "unselected": 0,
+          "selected": 8,
+          "testNames": [
+            "Base Button selection and family-owned homepage geometry wc/shadcn preserves local selection policy, public height and editing",
+            "Base Button selection and family-owned homepage geometry wc/brutalist preserves local selection policy, public height and editing",
+            "Base Button selection and family-owned homepage geometry react/shadcn preserves local selection policy, public height and editing",
+            "Base Button selection and family-owned homepage geometry react/brutalist preserves local selection policy, public height and editing",
+            "Base Button selection and family-owned homepage geometry vue/shadcn preserves local selection policy, public height and editing",
+            "Base Button selection and family-owned homepage geometry vue/brutalist preserves local selection policy, public height and editing",
+            "Base Button selection and family-owned homepage geometry vue2/shadcn preserves local selection policy, public height and editing",
+            "Base Button selection and family-owned homepage geometry vue2/brutalist preserves local selection policy, public height and editing"
+          ]
+        },
+        {
+          "name": "rhea-gallery",
+          "passed": 8,
+          "failed": 0,
+          "unselected": 20,
+          "selected": 8,
+          "testNames": [
+            "Accordion five families / four native Web consumers shadcn wc Rhea homepage block child respects profile padding at 1180px / 100% text",
+            "Accordion five families / four native Web consumers shadcn wc Rhea homepage block child respects profile padding at 390px / 200% text",
+            "Accordion five families / four native Web consumers shadcn react Rhea homepage block child respects profile padding at 1180px / 100% text",
+            "Accordion five families / four native Web consumers shadcn react Rhea homepage block child respects profile padding at 390px / 200% text",
+            "Accordion five families / four native Web consumers shadcn vue Rhea homepage block child respects profile padding at 1180px / 100% text",
+            "Accordion five families / four native Web consumers shadcn vue Rhea homepage block child respects profile padding at 390px / 200% text",
+            "Accordion five families / four native Web consumers shadcn vue2 Rhea homepage block child respects profile padding at 1180px / 100% text",
+            "Accordion five families / four native Web consumers shadcn vue2 Rhea homepage block child respects profile padding at 390px / 200% text"
+          ]
+        },
+        {
+          "name": "mask-gallery",
+          "passed": 4,
+          "failed": 0,
+          "unselected": 2,
+          "selected": 4,
+          "testNames": [
+            "shadcn native regional runtime mask retains the current demo after keyboard cancellation at desktop-light",
+            "shadcn native regional runtime mask retains the current demo after keyboard cancellation at narrow-dark-text200",
+            "brutalist native regional runtime mask retains the current demo after keyboard cancellation at desktop-light",
+            "brutalist native regional runtime mask retains the current demo after keyboard cancellation at narrow-dark-text200"
+          ]
+        }
+      ],
+      "cleanup": [
+        {
+          "at": "2026-11-24T13:16:38.247Z",
+          "pgid": 3785840,
+          "term": "not-present",
+          "kill": "not-needed",
+          "beforeKill": [],
+          "remaining": []
+        },
+        {
+          "at": "2026-11-24T13:17:43.510Z",
+          "pgid": 3793902,
+          "term": "not-present",
+          "kill": "not-needed",
+          "beforeKill": [],
+          "remaining": []
+        },
+        {
+          "at": "2026-11-24T13:18:18.601Z",
+          "pgid": 3798409,
+          "term": "not-present",
+          "kill": "not-needed",
+          "beforeKill": [],
+          "remaining": []
+        },
+        {
+          "at": "2026-11-24T13:18:18.983Z",
+          "pgid": 3784625,
+          "term": "sent",
+          "kill": "not-needed",
+          "beforeKill": [],
+          "remaining": [
+            {
+              "pid": 3784625,
+              "ppid": 3784486,
+              "pgid": 3784625,
+              "rssKiB": 0,
+              "stat": "Zs",
+              "command": "MainThread"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "limits": [
+    "20 selected journeys only; 22 other cases remain deliberately unselected in both runs.",
+    "Candidate generated assets reused only after producer/dependency/lockfile and four exact-hash checks.",
+    "Original Homepage runtime/preference latency, wheel diagnosis and Matrix initialization remain open.",
+    "Candidate final Astro cleanup sample contains one exited leader Zs/RSS0; no live descendants in that sample; no final reap claim.",
+    "No complete RC, browser matrix, or assistive-technology acceptance."
+  ]
+}
