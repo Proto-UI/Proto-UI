@@ -176,3 +176,24 @@ internal/records/evidence/2026-11-24-scroll-reveal-source-gate/
 
 # Preserve original Tooltip view-readiness receipts, probes and captures.
 internal/records/evidence/2026-11-24-tooltip-consumer-view-readiness/
+# Exact Sprint 7 experiment records, frozen inputs and independently reviewed
+# evidence are hash-bound; maintained analysis scripts remain formatted.
+internal/records/2026-11-24-button-projection-comparison.md
+internal/records/2026-11-24-generated-button-consumption.md
+internal/records/2026-11-24-sprint7-dcbot-production-readback.md
+internal/records/2026-11-24-sprint7-idle-batch-review.md
+internal/records/2026-11-24-sprint7-knowledge-comparison.md
+internal/records/2026-11-24-sprint7-zero-marginal-cost-study.md
+internal/records/evidence/2026-11-24-button-projection-study/
+internal/records/evidence/2026-11-24-generated-button-consumption/
+internal/records/evidence/2026-11-24-knowledge-value-study/
+internal/records/evidence/2026-11-24-sprint7-dcbot/
+internal/records/evidence/2026-11-24-sprint7-idle-batch/
+internal/records/evidence/2026-11-24-sprint7-integration/
+# Preserve exact imported Sprint 5 acceptance records and producer receipts.
+internal/records/2026-11-24-sprint5-native-direction-acceptance.md
+internal/records/2026-11-24-sprint5-native-integration.md
+internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.json
+internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.md
+internal/records/evidence/2026-11-24-sprint5-browser-execution/production-setup-receipt.json
+internal/records/evidence/2026-11-24-sprint5-native-direction-acceptance/receipt.md

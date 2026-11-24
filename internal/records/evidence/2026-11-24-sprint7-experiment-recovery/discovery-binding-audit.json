@@ -1,0 +1,682 @@
+{
+  "kind": "Independent static digest binding audit; no behavioral test execution",
+  "reviewer": "/root/s2_consumer",
+  "repository": "Proto-UI/Proto-UI",
+  "manifest": "benchmarks/interaction/discovery/study.json",
+  "revisions": [
+    {
+      "role": "originalBase",
+      "sha": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "manifestSha256": "173ac30c94ce1143f0fa80da3bd62937adb31f09c1ad98215163917b75d89fbb",
+      "declaredSourceRevision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+      "bindings": [
+        {
+          "path": "benchmarks/interaction/dataset.json",
+          "expectedSha256": "c18379045409409d6aa38539fd71e31301b4d0684f4dd942b840a6d24fec7f46",
+          "actualSha256": "c18379045409409d6aa38539fd71e31301b4d0684f4dd942b840a6d24fec7f46",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/scoring.json",
+          "expectedSha256": "dcc91c7307cbe81f3955958806bda49f1bb1da278a13258d32b2ec4df126e1b1",
+          "actualSha256": "dcc91c7307cbe81f3955958806bda49f1bb1da278a13258d32b2ec4df126e1b1",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/README.md",
+          "expectedSha256": "d1a99abfd16e772f2d3adf862ec62afebef153ae94b75ad51ed56d4dc3a28a69",
+          "actualSha256": "bd58822ceb252cfd19ff65ba92b9c3a216049a4f21ccb143be4f2629806836ab",
+          "matches": false
+        },
+        {
+          "path": "internal/records/2026-09-25-meeting-follow-up-and-compiler-plan.md",
+          "expectedSha256": "77673a29fb7017b94af2f1e42b074df59dc19cd4ac43f235e4d7f69a069baf29",
+          "actualSha256": "77673a29fb7017b94af2f1e42b074df59dc19cd4ac43f235e4d7f69a069baf29",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG.yaml",
+          "expectedSha256": "fe82a77861fd2fb0d01dc6ecf317f05d9023169ff8633777226c85d4abc0d83b",
+          "actualSha256": "fe82a77861fd2fb0d01dc6ecf317f05d9023169ff8633777226c85d4abc0d83b",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-TRIGGER.yaml",
+          "expectedSha256": "5075f0962ca4afaba0a8d25a0233ec85e30ec5dca90b6e82c2d91a4270283adb",
+          "actualSha256": "5075f0962ca4afaba0a8d25a0233ec85e30ec5dca90b6e82c2d91a4270283adb",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-MASK.yaml",
+          "expectedSha256": "8b51450ffc8a3027f530333446949f17ccf4507ee8d560ad3afe4936fd0d9d0f",
+          "actualSha256": "8b51450ffc8a3027f530333446949f17ccf4507ee8d560ad3afe4936fd0d9d0f",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-CONTENT.yaml",
+          "expectedSha256": "06fcb00c932c1c605af7a485235cb530e1923374e1a17fedd7bee471570cc22a",
+          "actualSha256": "06fcb00c932c1c605af7a485235cb530e1923374e1a17fedd7bee471570cc22a",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-TITLE.yaml",
+          "expectedSha256": "ea06a1f500b7fe0194c8bd58cbddd061eae143ade5ca031e162e75092bc561bc",
+          "actualSha256": "ea06a1f500b7fe0194c8bd58cbddd061eae143ade5ca031e162e75092bc561bc",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-DESCRIPTION.yaml",
+          "expectedSha256": "87016a8c4ca4d76b1c4c81bcceff6f369c6452d3ca7ba4804170ea7f91ecc0d3",
+          "actualSha256": "87016a8c4ca4d76b1c4c81bcceff6f369c6452d3ca7ba4804170ea7f91ecc0d3",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-CLOSE.yaml",
+          "expectedSha256": "e91c9c730d3d5370f34664fd43a4d7f97896410bfa9af762e4fc966879ed148c",
+          "actualSha256": "e91c9c730d3d5370f34664fd43a4d7f97896410bfa9af762e4fc966879ed148c",
+          "matches": true
+        },
+        {
+          "path": "spec/tests/T-BASE-DIALOG-0001.yaml",
+          "expectedSha256": "e4cba10f44ce3e4c8595bf0d575824fed29a9a05ceef31ddcb8f3954b6feed72",
+          "actualSha256": "e4cba10f44ce3e4c8595bf0d575824fed29a9a05ceef31ddcb8f3954b6feed72",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "expectedSha256": "45a157edb149abdb382333aea6860b9793c534b9e1da5068aa818d0f561b1420",
+          "actualSha256": "45a157edb149abdb382333aea6860b9793c534b9e1da5068aa818d0f561b1420",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "expectedSha256": "ce2856e08704c40ad19ce92fbbab6d7119314404a49de54f80a5b84f9d1fdd51",
+          "actualSha256": "ce2856e08704c40ad19ce92fbbab6d7119314404a49de54f80a5b84f9d1fdd51",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "expectedSha256": "1e79af05f12d575b722da0c951dd47268a0e17b27d4d3c76310f725088fc252b",
+          "actualSha256": "1e79af05f12d575b722da0c951dd47268a0e17b27d4d3c76310f725088fc252b",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "expectedSha256": "4a1d1a7e74ed60bc21bd6a6883f0e52221dcb36ae27500fdc098c340571d11a5",
+          "actualSha256": "4a1d1a7e74ed60bc21bd6a6883f0e52221dcb36ae27500fdc098c340571d11a5",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "expectedSha256": "6050ecce12177c653c245f80f24be58a95fb94fa7a58d64a21c9f94b119e421b",
+          "actualSha256": "6050ecce12177c653c245f80f24be58a95fb94fa7a58d64a21c9f94b119e421b",
+          "matches": true
+        },
+        {
+          "path": "spec/tests/T-BASE-TABS-0001.yaml",
+          "expectedSha256": "925949f0fbfa121caeed4e3a99a8b486b0215a6080a08cfbc5de0277d43b9bde",
+          "actualSha256": "925949f0fbfa121caeed4e3a99a8b486b0215a6080a08cfbc5de0277d43b9bde",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT.yaml",
+          "expectedSha256": "bf65675dbaa40ec17a3e09f13b00e00804abde7fe09313a4a7608c2c385456bc",
+          "actualSha256": "8940ef98cb3bb6b963c92466efb2b7870f46e9f0a0d7e524f32472bd80db9aba",
+          "matches": false
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-TRIGGER.yaml",
+          "expectedSha256": "263f5b3d425eb1b1a603196907d0cad33a5507ddb7e7ee1a646061ed8c9175e7",
+          "actualSha256": "263f5b3d425eb1b1a603196907d0cad33a5507ddb7e7ee1a646061ed8c9175e7",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-VALUE.yaml",
+          "expectedSha256": "1dd0690b4a2060764d99b02d6f8408880682a65dc1c445cd812b53407df7332c",
+          "actualSha256": "1dd0690b4a2060764d99b02d6f8408880682a65dc1c445cd812b53407df7332c",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-CONTENT.yaml",
+          "expectedSha256": "19143fe7cd4d05ad58cdf091fb83fa9e63b698383a6fd6a37ab680384ccebb72",
+          "actualSha256": "115c000cf55762f0bd111ccf87110ae4529f8488e50bfbc489080086b5e0e69f",
+          "matches": false
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+          "expectedSha256": "c1eb14eb497810352c05cfc58f0c35e1e7c7e058bad471fa9969d289426568cb",
+          "actualSha256": "c1eb14eb497810352c05cfc58f0c35e1e7c7e058bad471fa9969d289426568cb",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-ALIGNMENT-PARTS.yaml",
+          "expectedSha256": "6a5949b6808cb345a367139b36a520ab22506e0c021570bf614f097ec112f83e",
+          "actualSha256": "6a5949b6808cb345a367139b36a520ab22506e0c021570bf614f097ec112f83e",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-STRUCTURAL-PARTS.yaml",
+          "expectedSha256": "516b132f1cd190e7077e0afaa2d15fb33cef4b4f92d16af1e948760b47577c46",
+          "actualSha256": "516b132f1cd190e7077e0afaa2d15fb33cef4b4f92d16af1e948760b47577c46",
+          "matches": true
+        },
+        {
+          "path": "spec/tests/T-BASE-SELECT-0001.yaml",
+          "expectedSha256": "6dea41ad507a33316eef146ab1cd66cb1a8d8aee03fc66b958b27375137363da",
+          "actualSha256": "cf9d467ed51d930f3a65f6c815c2dc1f059bf5fbdae3b086936950372965720f",
+          "matches": false
+        },
+        {
+          "path": "packages/prototypes/base/test/dialog.test.ts",
+          "expectedSha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f",
+          "actualSha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f",
+          "matches": true
+        },
+        {
+          "path": "packages/prototypes/base/test/tabs.test.ts",
+          "expectedSha256": "610b9f1c7cf2f6055165d7a5e15d99d817fa1b42149f64a7ad1d79678444819d",
+          "actualSha256": "610b9f1c7cf2f6055165d7a5e15d99d817fa1b42149f64a7ad1d79678444819d",
+          "matches": true
+        },
+        {
+          "path": "packages/prototypes/base/test/select.test.ts",
+          "expectedSha256": "1601db8d8d4a9e5c344c7a71e947e2a14f7a0748a1ffab222fd1c9c9fd37f843",
+          "actualSha256": "b4fc83f695515bd529e784aec3d7561a73c8a64a08b54b1ab70b03f2da236d48",
+          "matches": false
+        },
+        {
+          "path": "benchmarks/interaction/cases/dialog-open-close.json",
+          "expectedSha256": "ef0c1bcc25e7ac60d27e5a06843057ac06d460087e51c388e878f3d75f784d81",
+          "actualSha256": "ef0c1bcc25e7ac60d27e5a06843057ac06d460087e51c388e878f3d75f784d81",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/cases/tabs-manual-activation.json",
+          "expectedSha256": "e45e574d2caf5f60b2652306f73f4df01a3c44bbeba1c1e7a6e8a937c3e6bfc6",
+          "actualSha256": "e45e574d2caf5f60b2652306f73f4df01a3c44bbeba1c1e7a6e8a937c3e6bfc6",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/cases/select-keyboard.json",
+          "expectedSha256": "07f82b11d5c0885a796c43d73f186b7cf03602d56d7384582a7f6f93df98f7e0",
+          "actualSha256": "07f82b11d5c0885a796c43d73f186b7cf03602d56d7384582a7f6f93df98f7e0",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/discovery/prompts/dialog-open-close.txt",
+          "expectedSha256": "b721285201ae00377fdb3fe0916c6c35cf1e3f91bfba6c0eb8d4202c3407acf8",
+          "actualSha256": "b721285201ae00377fdb3fe0916c6c35cf1e3f91bfba6c0eb8d4202c3407acf8",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/discovery/prompts/tabs-manual-activation.txt",
+          "expectedSha256": "3c4bb54275c1187c052d562d7fdd81b9c4c7b993f31a58a0d33a576f4f697605",
+          "actualSha256": "3c4bb54275c1187c052d562d7fdd81b9c4c7b993f31a58a0d33a576f4f697605",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/discovery/prompts/select-keyboard.txt",
+          "expectedSha256": "176d76ce654e3c0ea002c4200994a8ec856601def69c4e1b88bb393415b77589",
+          "actualSha256": "176d76ce654e3c0ea002c4200994a8ec856601def69c4e1b88bb393415b77589",
+          "matches": true
+        }
+      ],
+      "total": 35,
+      "mismatches": 5,
+      "harnessSha256": {
+        "scripts/benchmark/discovery-study.mjs": "4c205d0dc9c3bf1b4fecf6c99432cabc56f2414eb4787f1617e605225de54375",
+        "scripts/benchmark/test/discovery-study.test.mjs": "fd0caeae715b7bee36a56b6ef35be022f4b0a2ba54b950a7172fa11ccab0108e"
+      }
+    },
+    {
+      "role": "originalCandidate",
+      "sha": "4e5e50e159573a627d5e75037b23513ad8f5f164",
+      "manifestSha256": "173ac30c94ce1143f0fa80da3bd62937adb31f09c1ad98215163917b75d89fbb",
+      "declaredSourceRevision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+      "bindings": [
+        {
+          "path": "benchmarks/interaction/dataset.json",
+          "expectedSha256": "c18379045409409d6aa38539fd71e31301b4d0684f4dd942b840a6d24fec7f46",
+          "actualSha256": "c18379045409409d6aa38539fd71e31301b4d0684f4dd942b840a6d24fec7f46",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/scoring.json",
+          "expectedSha256": "dcc91c7307cbe81f3955958806bda49f1bb1da278a13258d32b2ec4df126e1b1",
+          "actualSha256": "dcc91c7307cbe81f3955958806bda49f1bb1da278a13258d32b2ec4df126e1b1",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/README.md",
+          "expectedSha256": "d1a99abfd16e772f2d3adf862ec62afebef153ae94b75ad51ed56d4dc3a28a69",
+          "actualSha256": "bd58822ceb252cfd19ff65ba92b9c3a216049a4f21ccb143be4f2629806836ab",
+          "matches": false
+        },
+        {
+          "path": "internal/records/2026-09-25-meeting-follow-up-and-compiler-plan.md",
+          "expectedSha256": "77673a29fb7017b94af2f1e42b074df59dc19cd4ac43f235e4d7f69a069baf29",
+          "actualSha256": "77673a29fb7017b94af2f1e42b074df59dc19cd4ac43f235e4d7f69a069baf29",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG.yaml",
+          "expectedSha256": "fe82a77861fd2fb0d01dc6ecf317f05d9023169ff8633777226c85d4abc0d83b",
+          "actualSha256": "fe82a77861fd2fb0d01dc6ecf317f05d9023169ff8633777226c85d4abc0d83b",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-TRIGGER.yaml",
+          "expectedSha256": "5075f0962ca4afaba0a8d25a0233ec85e30ec5dca90b6e82c2d91a4270283adb",
+          "actualSha256": "5075f0962ca4afaba0a8d25a0233ec85e30ec5dca90b6e82c2d91a4270283adb",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-MASK.yaml",
+          "expectedSha256": "8b51450ffc8a3027f530333446949f17ccf4507ee8d560ad3afe4936fd0d9d0f",
+          "actualSha256": "8b51450ffc8a3027f530333446949f17ccf4507ee8d560ad3afe4936fd0d9d0f",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-CONTENT.yaml",
+          "expectedSha256": "06fcb00c932c1c605af7a485235cb530e1923374e1a17fedd7bee471570cc22a",
+          "actualSha256": "06fcb00c932c1c605af7a485235cb530e1923374e1a17fedd7bee471570cc22a",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-TITLE.yaml",
+          "expectedSha256": "ea06a1f500b7fe0194c8bd58cbddd061eae143ade5ca031e162e75092bc561bc",
+          "actualSha256": "ea06a1f500b7fe0194c8bd58cbddd061eae143ade5ca031e162e75092bc561bc",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-DESCRIPTION.yaml",
+          "expectedSha256": "87016a8c4ca4d76b1c4c81bcceff6f369c6452d3ca7ba4804170ea7f91ecc0d3",
+          "actualSha256": "87016a8c4ca4d76b1c4c81bcceff6f369c6452d3ca7ba4804170ea7f91ecc0d3",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-CLOSE.yaml",
+          "expectedSha256": "e91c9c730d3d5370f34664fd43a4d7f97896410bfa9af762e4fc966879ed148c",
+          "actualSha256": "e91c9c730d3d5370f34664fd43a4d7f97896410bfa9af762e4fc966879ed148c",
+          "matches": true
+        },
+        {
+          "path": "spec/tests/T-BASE-DIALOG-0001.yaml",
+          "expectedSha256": "e4cba10f44ce3e4c8595bf0d575824fed29a9a05ceef31ddcb8f3954b6feed72",
+          "actualSha256": "e4cba10f44ce3e4c8595bf0d575824fed29a9a05ceef31ddcb8f3954b6feed72",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "expectedSha256": "45a157edb149abdb382333aea6860b9793c534b9e1da5068aa818d0f561b1420",
+          "actualSha256": "45a157edb149abdb382333aea6860b9793c534b9e1da5068aa818d0f561b1420",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "expectedSha256": "ce2856e08704c40ad19ce92fbbab6d7119314404a49de54f80a5b84f9d1fdd51",
+          "actualSha256": "ce2856e08704c40ad19ce92fbbab6d7119314404a49de54f80a5b84f9d1fdd51",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "expectedSha256": "1e79af05f12d575b722da0c951dd47268a0e17b27d4d3c76310f725088fc252b",
+          "actualSha256": "1e79af05f12d575b722da0c951dd47268a0e17b27d4d3c76310f725088fc252b",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "expectedSha256": "4a1d1a7e74ed60bc21bd6a6883f0e52221dcb36ae27500fdc098c340571d11a5",
+          "actualSha256": "4a1d1a7e74ed60bc21bd6a6883f0e52221dcb36ae27500fdc098c340571d11a5",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "expectedSha256": "6050ecce12177c653c245f80f24be58a95fb94fa7a58d64a21c9f94b119e421b",
+          "actualSha256": "6050ecce12177c653c245f80f24be58a95fb94fa7a58d64a21c9f94b119e421b",
+          "matches": true
+        },
+        {
+          "path": "spec/tests/T-BASE-TABS-0001.yaml",
+          "expectedSha256": "925949f0fbfa121caeed4e3a99a8b486b0215a6080a08cfbc5de0277d43b9bde",
+          "actualSha256": "925949f0fbfa121caeed4e3a99a8b486b0215a6080a08cfbc5de0277d43b9bde",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT.yaml",
+          "expectedSha256": "bf65675dbaa40ec17a3e09f13b00e00804abde7fe09313a4a7608c2c385456bc",
+          "actualSha256": "8940ef98cb3bb6b963c92466efb2b7870f46e9f0a0d7e524f32472bd80db9aba",
+          "matches": false
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-TRIGGER.yaml",
+          "expectedSha256": "263f5b3d425eb1b1a603196907d0cad33a5507ddb7e7ee1a646061ed8c9175e7",
+          "actualSha256": "263f5b3d425eb1b1a603196907d0cad33a5507ddb7e7ee1a646061ed8c9175e7",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-VALUE.yaml",
+          "expectedSha256": "1dd0690b4a2060764d99b02d6f8408880682a65dc1c445cd812b53407df7332c",
+          "actualSha256": "1dd0690b4a2060764d99b02d6f8408880682a65dc1c445cd812b53407df7332c",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-CONTENT.yaml",
+          "expectedSha256": "19143fe7cd4d05ad58cdf091fb83fa9e63b698383a6fd6a37ab680384ccebb72",
+          "actualSha256": "115c000cf55762f0bd111ccf87110ae4529f8488e50bfbc489080086b5e0e69f",
+          "matches": false
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+          "expectedSha256": "c1eb14eb497810352c05cfc58f0c35e1e7c7e058bad471fa9969d289426568cb",
+          "actualSha256": "c1eb14eb497810352c05cfc58f0c35e1e7c7e058bad471fa9969d289426568cb",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-ALIGNMENT-PARTS.yaml",
+          "expectedSha256": "6a5949b6808cb345a367139b36a520ab22506e0c021570bf614f097ec112f83e",
+          "actualSha256": "6a5949b6808cb345a367139b36a520ab22506e0c021570bf614f097ec112f83e",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-STRUCTURAL-PARTS.yaml",
+          "expectedSha256": "516b132f1cd190e7077e0afaa2d15fb33cef4b4f92d16af1e948760b47577c46",
+          "actualSha256": "516b132f1cd190e7077e0afaa2d15fb33cef4b4f92d16af1e948760b47577c46",
+          "matches": true
+        },
+        {
+          "path": "spec/tests/T-BASE-SELECT-0001.yaml",
+          "expectedSha256": "6dea41ad507a33316eef146ab1cd66cb1a8d8aee03fc66b958b27375137363da",
+          "actualSha256": "cf9d467ed51d930f3a65f6c815c2dc1f059bf5fbdae3b086936950372965720f",
+          "matches": false
+        },
+        {
+          "path": "packages/prototypes/base/test/dialog.test.ts",
+          "expectedSha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f",
+          "actualSha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f",
+          "matches": true
+        },
+        {
+          "path": "packages/prototypes/base/test/tabs.test.ts",
+          "expectedSha256": "610b9f1c7cf2f6055165d7a5e15d99d817fa1b42149f64a7ad1d79678444819d",
+          "actualSha256": "610b9f1c7cf2f6055165d7a5e15d99d817fa1b42149f64a7ad1d79678444819d",
+          "matches": true
+        },
+        {
+          "path": "packages/prototypes/base/test/select.test.ts",
+          "expectedSha256": "1601db8d8d4a9e5c344c7a71e947e2a14f7a0748a1ffab222fd1c9c9fd37f843",
+          "actualSha256": "b4fc83f695515bd529e784aec3d7561a73c8a64a08b54b1ab70b03f2da236d48",
+          "matches": false
+        },
+        {
+          "path": "benchmarks/interaction/cases/dialog-open-close.json",
+          "expectedSha256": "ef0c1bcc25e7ac60d27e5a06843057ac06d460087e51c388e878f3d75f784d81",
+          "actualSha256": "ef0c1bcc25e7ac60d27e5a06843057ac06d460087e51c388e878f3d75f784d81",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/cases/tabs-manual-activation.json",
+          "expectedSha256": "e45e574d2caf5f60b2652306f73f4df01a3c44bbeba1c1e7a6e8a937c3e6bfc6",
+          "actualSha256": "e45e574d2caf5f60b2652306f73f4df01a3c44bbeba1c1e7a6e8a937c3e6bfc6",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/cases/select-keyboard.json",
+          "expectedSha256": "07f82b11d5c0885a796c43d73f186b7cf03602d56d7384582a7f6f93df98f7e0",
+          "actualSha256": "07f82b11d5c0885a796c43d73f186b7cf03602d56d7384582a7f6f93df98f7e0",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/discovery/prompts/dialog-open-close.txt",
+          "expectedSha256": "b721285201ae00377fdb3fe0916c6c35cf1e3f91bfba6c0eb8d4202c3407acf8",
+          "actualSha256": "b721285201ae00377fdb3fe0916c6c35cf1e3f91bfba6c0eb8d4202c3407acf8",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/discovery/prompts/tabs-manual-activation.txt",
+          "expectedSha256": "3c4bb54275c1187c052d562d7fdd81b9c4c7b993f31a58a0d33a576f4f697605",
+          "actualSha256": "3c4bb54275c1187c052d562d7fdd81b9c4c7b993f31a58a0d33a576f4f697605",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/discovery/prompts/select-keyboard.txt",
+          "expectedSha256": "176d76ce654e3c0ea002c4200994a8ec856601def69c4e1b88bb393415b77589",
+          "actualSha256": "176d76ce654e3c0ea002c4200994a8ec856601def69c4e1b88bb393415b77589",
+          "matches": true
+        }
+      ],
+      "total": 35,
+      "mismatches": 5,
+      "harnessSha256": {
+        "scripts/benchmark/discovery-study.mjs": "4c205d0dc9c3bf1b4fecf6c99432cabc56f2414eb4787f1617e605225de54375",
+        "scripts/benchmark/test/discovery-study.test.mjs": "fd0caeae715b7bee36a56b6ef35be022f4b0a2ba54b950a7172fa11ccab0108e"
+      }
+    },
+    {
+      "role": "recoveryBase",
+      "sha": "8b052eb9cdb707ab7a4c8b7660c9442a7e3ee489",
+      "manifestSha256": "173ac30c94ce1143f0fa80da3bd62937adb31f09c1ad98215163917b75d89fbb",
+      "declaredSourceRevision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+      "bindings": [
+        {
+          "path": "benchmarks/interaction/dataset.json",
+          "expectedSha256": "c18379045409409d6aa38539fd71e31301b4d0684f4dd942b840a6d24fec7f46",
+          "actualSha256": "c18379045409409d6aa38539fd71e31301b4d0684f4dd942b840a6d24fec7f46",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/scoring.json",
+          "expectedSha256": "dcc91c7307cbe81f3955958806bda49f1bb1da278a13258d32b2ec4df126e1b1",
+          "actualSha256": "dcc91c7307cbe81f3955958806bda49f1bb1da278a13258d32b2ec4df126e1b1",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/README.md",
+          "expectedSha256": "d1a99abfd16e772f2d3adf862ec62afebef153ae94b75ad51ed56d4dc3a28a69",
+          "actualSha256": "bd58822ceb252cfd19ff65ba92b9c3a216049a4f21ccb143be4f2629806836ab",
+          "matches": false
+        },
+        {
+          "path": "internal/records/2026-09-25-meeting-follow-up-and-compiler-plan.md",
+          "expectedSha256": "77673a29fb7017b94af2f1e42b074df59dc19cd4ac43f235e4d7f69a069baf29",
+          "actualSha256": "77673a29fb7017b94af2f1e42b074df59dc19cd4ac43f235e4d7f69a069baf29",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG.yaml",
+          "expectedSha256": "fe82a77861fd2fb0d01dc6ecf317f05d9023169ff8633777226c85d4abc0d83b",
+          "actualSha256": "fe82a77861fd2fb0d01dc6ecf317f05d9023169ff8633777226c85d4abc0d83b",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-TRIGGER.yaml",
+          "expectedSha256": "5075f0962ca4afaba0a8d25a0233ec85e30ec5dca90b6e82c2d91a4270283adb",
+          "actualSha256": "5075f0962ca4afaba0a8d25a0233ec85e30ec5dca90b6e82c2d91a4270283adb",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-MASK.yaml",
+          "expectedSha256": "8b51450ffc8a3027f530333446949f17ccf4507ee8d560ad3afe4936fd0d9d0f",
+          "actualSha256": "8b51450ffc8a3027f530333446949f17ccf4507ee8d560ad3afe4936fd0d9d0f",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-CONTENT.yaml",
+          "expectedSha256": "06fcb00c932c1c605af7a485235cb530e1923374e1a17fedd7bee471570cc22a",
+          "actualSha256": "06fcb00c932c1c605af7a485235cb530e1923374e1a17fedd7bee471570cc22a",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-TITLE.yaml",
+          "expectedSha256": "ea06a1f500b7fe0194c8bd58cbddd061eae143ade5ca031e162e75092bc561bc",
+          "actualSha256": "ea06a1f500b7fe0194c8bd58cbddd061eae143ade5ca031e162e75092bc561bc",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-DESCRIPTION.yaml",
+          "expectedSha256": "87016a8c4ca4d76b1c4c81bcceff6f369c6452d3ca7ba4804170ea7f91ecc0d3",
+          "actualSha256": "87016a8c4ca4d76b1c4c81bcceff6f369c6452d3ca7ba4804170ea7f91ecc0d3",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-DIALOG-CLOSE.yaml",
+          "expectedSha256": "e91c9c730d3d5370f34664fd43a4d7f97896410bfa9af762e4fc966879ed148c",
+          "actualSha256": "e91c9c730d3d5370f34664fd43a4d7f97896410bfa9af762e4fc966879ed148c",
+          "matches": true
+        },
+        {
+          "path": "spec/tests/T-BASE-DIALOG-0001.yaml",
+          "expectedSha256": "e4cba10f44ce3e4c8595bf0d575824fed29a9a05ceef31ddcb8f3954b6feed72",
+          "actualSha256": "e4cba10f44ce3e4c8595bf0d575824fed29a9a05ceef31ddcb8f3954b6feed72",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "expectedSha256": "45a157edb149abdb382333aea6860b9793c534b9e1da5068aa818d0f561b1420",
+          "actualSha256": "45a157edb149abdb382333aea6860b9793c534b9e1da5068aa818d0f561b1420",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "expectedSha256": "ce2856e08704c40ad19ce92fbbab6d7119314404a49de54f80a5b84f9d1fdd51",
+          "actualSha256": "ce2856e08704c40ad19ce92fbbab6d7119314404a49de54f80a5b84f9d1fdd51",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "expectedSha256": "1e79af05f12d575b722da0c951dd47268a0e17b27d4d3c76310f725088fc252b",
+          "actualSha256": "1e79af05f12d575b722da0c951dd47268a0e17b27d4d3c76310f725088fc252b",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "expectedSha256": "4a1d1a7e74ed60bc21bd6a6883f0e52221dcb36ae27500fdc098c340571d11a5",
+          "actualSha256": "4a1d1a7e74ed60bc21bd6a6883f0e52221dcb36ae27500fdc098c340571d11a5",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "expectedSha256": "6050ecce12177c653c245f80f24be58a95fb94fa7a58d64a21c9f94b119e421b",
+          "actualSha256": "6050ecce12177c653c245f80f24be58a95fb94fa7a58d64a21c9f94b119e421b",
+          "matches": true
+        },
+        {
+          "path": "spec/tests/T-BASE-TABS-0001.yaml",
+          "expectedSha256": "925949f0fbfa121caeed4e3a99a8b486b0215a6080a08cfbc5de0277d43b9bde",
+          "actualSha256": "925949f0fbfa121caeed4e3a99a8b486b0215a6080a08cfbc5de0277d43b9bde",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT.yaml",
+          "expectedSha256": "bf65675dbaa40ec17a3e09f13b00e00804abde7fe09313a4a7608c2c385456bc",
+          "actualSha256": "8940ef98cb3bb6b963c92466efb2b7870f46e9f0a0d7e524f32472bd80db9aba",
+          "matches": false
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-TRIGGER.yaml",
+          "expectedSha256": "263f5b3d425eb1b1a603196907d0cad33a5507ddb7e7ee1a646061ed8c9175e7",
+          "actualSha256": "263f5b3d425eb1b1a603196907d0cad33a5507ddb7e7ee1a646061ed8c9175e7",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-VALUE.yaml",
+          "expectedSha256": "1dd0690b4a2060764d99b02d6f8408880682a65dc1c445cd812b53407df7332c",
+          "actualSha256": "1dd0690b4a2060764d99b02d6f8408880682a65dc1c445cd812b53407df7332c",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-CONTENT.yaml",
+          "expectedSha256": "19143fe7cd4d05ad58cdf091fb83fa9e63b698383a6fd6a37ab680384ccebb72",
+          "actualSha256": "115c000cf55762f0bd111ccf87110ae4529f8488e50bfbc489080086b5e0e69f",
+          "matches": false
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+          "expectedSha256": "c1eb14eb497810352c05cfc58f0c35e1e7c7e058bad471fa9969d289426568cb",
+          "actualSha256": "c1eb14eb497810352c05cfc58f0c35e1e7c7e058bad471fa9969d289426568cb",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-ALIGNMENT-PARTS.yaml",
+          "expectedSha256": "6a5949b6808cb345a367139b36a520ab22506e0c021570bf614f097ec112f83e",
+          "actualSha256": "6a5949b6808cb345a367139b36a520ab22506e0c021570bf614f097ec112f83e",
+          "matches": true
+        },
+        {
+          "path": "spec/prototypes/P-BASE-SELECT-STRUCTURAL-PARTS.yaml",
+          "expectedSha256": "516b132f1cd190e7077e0afaa2d15fb33cef4b4f92d16af1e948760b47577c46",
+          "actualSha256": "516b132f1cd190e7077e0afaa2d15fb33cef4b4f92d16af1e948760b47577c46",
+          "matches": true
+        },
+        {
+          "path": "spec/tests/T-BASE-SELECT-0001.yaml",
+          "expectedSha256": "6dea41ad507a33316eef146ab1cd66cb1a8d8aee03fc66b958b27375137363da",
+          "actualSha256": "cf9d467ed51d930f3a65f6c815c2dc1f059bf5fbdae3b086936950372965720f",
+          "matches": false
+        },
+        {
+          "path": "packages/prototypes/base/test/dialog.test.ts",
+          "expectedSha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f",
+          "actualSha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f",
+          "matches": true
+        },
+        {
+          "path": "packages/prototypes/base/test/tabs.test.ts",
+          "expectedSha256": "610b9f1c7cf2f6055165d7a5e15d99d817fa1b42149f64a7ad1d79678444819d",
+          "actualSha256": "610b9f1c7cf2f6055165d7a5e15d99d817fa1b42149f64a7ad1d79678444819d",
+          "matches": true
+        },
+        {
+          "path": "packages/prototypes/base/test/select.test.ts",
+          "expectedSha256": "1601db8d8d4a9e5c344c7a71e947e2a14f7a0748a1ffab222fd1c9c9fd37f843",
+          "actualSha256": "b4fc83f695515bd529e784aec3d7561a73c8a64a08b54b1ab70b03f2da236d48",
+          "matches": false
+        },
+        {
+          "path": "benchmarks/interaction/cases/dialog-open-close.json",
+          "expectedSha256": "ef0c1bcc25e7ac60d27e5a06843057ac06d460087e51c388e878f3d75f784d81",
+          "actualSha256": "ef0c1bcc25e7ac60d27e5a06843057ac06d460087e51c388e878f3d75f784d81",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/cases/tabs-manual-activation.json",
+          "expectedSha256": "e45e574d2caf5f60b2652306f73f4df01a3c44bbeba1c1e7a6e8a937c3e6bfc6",
+          "actualSha256": "e45e574d2caf5f60b2652306f73f4df01a3c44bbeba1c1e7a6e8a937c3e6bfc6",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/cases/select-keyboard.json",
+          "expectedSha256": "07f82b11d5c0885a796c43d73f186b7cf03602d56d7384582a7f6f93df98f7e0",
+          "actualSha256": "07f82b11d5c0885a796c43d73f186b7cf03602d56d7384582a7f6f93df98f7e0",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/discovery/prompts/dialog-open-close.txt",
+          "expectedSha256": "b721285201ae00377fdb3fe0916c6c35cf1e3f91bfba6c0eb8d4202c3407acf8",
+          "actualSha256": "b721285201ae00377fdb3fe0916c6c35cf1e3f91bfba6c0eb8d4202c3407acf8",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/discovery/prompts/tabs-manual-activation.txt",
+          "expectedSha256": "3c4bb54275c1187c052d562d7fdd81b9c4c7b993f31a58a0d33a576f4f697605",
+          "actualSha256": "3c4bb54275c1187c052d562d7fdd81b9c4c7b993f31a58a0d33a576f4f697605",
+          "matches": true
+        },
+        {
+          "path": "benchmarks/interaction/discovery/prompts/select-keyboard.txt",
+          "expectedSha256": "176d76ce654e3c0ea002c4200994a8ec856601def69c4e1b88bb393415b77589",
+          "actualSha256": "176d76ce654e3c0ea002c4200994a8ec856601def69c4e1b88bb393415b77589",
+          "matches": true
+        }
+      ],
+      "total": 35,
+      "mismatches": 5,
+      "harnessSha256": {
+        "scripts/benchmark/discovery-study.mjs": "4c205d0dc9c3bf1b4fecf6c99432cabc56f2414eb4787f1617e605225de54375",
+        "scripts/benchmark/test/discovery-study.test.mjs": "fd0caeae715b7bee36a56b6ef35be022f4b0a2ba54b950a7172fa11ccab0108e"
+      }
+    }
+  ],
+  "conclusion": "The same five pre-existing input digest mismatches are present at original base, original candidate and recovery base. The four executed test failures stop at the first README guard. This carrier introduces none of these changes. Keep frozen study bytes intact; do not rehash the frozen manifest to manufacture a green result.",
+  "scopeLimit": "Static full sourceFiles+participantPrompts digest comparison and source-path trace only; no test rerun, no native execution, no review approval."
+}
