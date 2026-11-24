@@ -1,0 +1,511 @@
+{
+  "schema": "proto-ui.sprint4.public-semantic-revalidation.v1",
+  "date": "2026-11-24",
+  "timezone": "Asia/Shanghai",
+  "executedSourceHead": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+  "compilerIrVersion": 7,
+  "sourceTrees": {
+    "packages/compiler/src": "6110d45703f5980efad3600e35c5041ca99094e2",
+    "packages/compiler/test": "02fe7095eee722fad9745e144b2a62a6f34b83e2",
+    "scripts/compiler": "5f74f8de5853a6a66d951a76461c679e982ea670"
+  },
+  "environment": {
+    "node": "v24.22.3",
+    "vitest": "2.1.9",
+    "typescript": "5.9.3",
+    "react": "19.2.6",
+    "dependencyMode": "reused-existing-same-lock-installation",
+    "freshInstall": false,
+    "lockSha256": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8",
+    "workspaceDependencies": "relative workspace links target this checkout"
+  },
+  "runs": [
+    {
+      "head": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "packages/compiler/test/dormant-source-admission.test.ts",
+        "packages/compiler/test/dormant-callable-consumer.test.ts",
+        "packages/compiler/test/module-callable-selection.test.ts",
+        "packages/compiler/test/module-callable-selection-consumer.test.ts",
+        "packages/compiler/test/record-getters.test.ts",
+        "packages/compiler/test/record-getter-consumer.test.ts",
+        "packages/compiler/test/record-getter-runtime.test.ts",
+        "packages/compiler/test/throw-only-return.test.ts",
+        "--pool",
+        "forks",
+        "--maxWorkers",
+        "1",
+        "--minWorkers",
+        "1",
+        "--no-file-parallelism",
+        "--no-cache",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/1494db44bb7b/ir10-semantics-evidence/public-baseline-d0eb81d3.json"
+      ],
+      "cwd": "/workspace/scratch/1494db44bb7b/sprint4-ir10",
+      "start": "2026-11-23T18:53:54.068455+00:00",
+      "end": "2026-11-23T18:54:12.006149+00:00",
+      "durationSeconds": 17.937706339000215,
+      "exitCode": 1,
+      "worktreeBefore": "?? node_modules\n",
+      "worktreeAfter": "?? node_modules\n",
+      "testFiles": {
+        "packages/compiler/test/dormant-source-admission.test.ts": "19aa87e96d7383a55f7045c66095e24521d586ec7dc70456d776978f3e635784",
+        "packages/compiler/test/dormant-callable-consumer.test.ts": "db13dbd556cf82ed10de3ca92ac65d41f55d6e6451fc9a2191bf0efd8e912a31",
+        "packages/compiler/test/module-callable-selection.test.ts": "822ed8312fd54122136ba19b2d57d14f3e1cb8e687655e40dafa45cda2cd60cc",
+        "packages/compiler/test/module-callable-selection-consumer.test.ts": "7ae256368ef4c1568f3f152ebb7299aa1be3023c2b38504d0f63516fef1c284e",
+        "packages/compiler/test/record-getters.test.ts": "0ca8f0e757f2746576074942fb3b401ced81ad092bf9ae6d0b8e3b23e8048c9e",
+        "packages/compiler/test/record-getter-consumer.test.ts": "81d90ca32be38c69c6fd197b8413e9de869c411ff0a195d5e57235baa968a174",
+        "packages/compiler/test/record-getter-runtime.test.ts": "937c17733b35eacdc48288b58a9e72776b4f1c0db3f062e8cdae637b4eb3b6b4",
+        "packages/compiler/test/throw-only-return.test.ts": "a443574d0e1132dfe3de2fee64356e5ad06a2854f55ead303ac7f449b14c63e2"
+      },
+      "logSha256": "3b9c3bef51b648ebc3a179ca80be4ea9b948ab40d6acec3cfe456609f72afb85",
+      "node": "v24.22.3",
+      "dependencyLockSha256": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8",
+      "dependencies": "Existing same-lock local installation reused; no fresh install claimed",
+      "report": {
+        "numTotalTestSuites": 13,
+        "numPassedTestSuites": 9,
+        "numFailedTestSuites": 4,
+        "numTotalTests": 110,
+        "numPassedTests": 110,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "success": false
+      },
+      "files": [
+        {
+          "path": "packages/compiler/test/dormant-callable-consumer.test.ts",
+          "status": "failed",
+          "passed": 0,
+          "failed": 0,
+          "message": "Failed to resolve import \"react\" from \"packages/compiler/test/native-owner-consumer.ts\". Does the file exist?"
+        },
+        {
+          "path": "packages/compiler/test/dormant-source-admission.test.ts",
+          "status": "passed",
+          "passed": 30,
+          "failed": 0,
+          "message": ""
+        },
+        {
+          "path": "packages/compiler/test/module-callable-selection-consumer.test.ts",
+          "status": "failed",
+          "passed": 0,
+          "failed": 0,
+          "message": "Failed to resolve import \"react\" from \"packages/compiler/test/native-owner-consumer.ts\". Does the file exist?"
+        },
+        {
+          "path": "packages/compiler/test/module-callable-selection.test.ts",
+          "status": "passed",
+          "passed": 34,
+          "failed": 0,
+          "message": ""
+        },
+        {
+          "path": "packages/compiler/test/record-getter-consumer.test.ts",
+          "status": "failed",
+          "passed": 0,
+          "failed": 0,
+          "message": "Failed to resolve import \"react\" from \"packages/compiler/test/record-getter-consumer.test.ts\". Does the file exist?"
+        },
+        {
+          "path": "packages/compiler/test/record-getter-runtime.test.ts",
+          "status": "failed",
+          "passed": 0,
+          "failed": 0,
+          "message": "Failed to resolve import \"react\" from \"packages/compiler/test/record-getter-runtime.test.ts\". Does the file exist?"
+        },
+        {
+          "path": "packages/compiler/test/record-getters.test.ts",
+          "status": "passed",
+          "passed": 34,
+          "failed": 0,
+          "message": ""
+        },
+        {
+          "path": "packages/compiler/test/throw-only-return.test.ts",
+          "status": "passed",
+          "passed": 12,
+          "failed": 0,
+          "message": ""
+        }
+      ],
+      "receiptAsset": "public-baseline-d0eb81d3.receipt.json",
+      "reportAsset": "public-baseline-d0eb81d3.json",
+      "logAsset": "public-baseline-d0eb81d3.log"
+    },
+    {
+      "head": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "packages/compiler/test/dormant-source-admission.test.ts",
+        "packages/compiler/test/dormant-callable-consumer.test.ts",
+        "packages/compiler/test/module-callable-selection.test.ts",
+        "packages/compiler/test/module-callable-selection-consumer.test.ts",
+        "packages/compiler/test/record-getters.test.ts",
+        "packages/compiler/test/record-getter-consumer.test.ts",
+        "packages/compiler/test/record-getter-runtime.test.ts",
+        "packages/compiler/test/throw-only-return.test.ts",
+        "--pool",
+        "forks",
+        "--maxWorkers",
+        "1",
+        "--minWorkers",
+        "1",
+        "--no-file-parallelism",
+        "--no-cache",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/1494db44bb7b/ir10-semantics-evidence/public-linked-d0eb81d3.json"
+      ],
+      "cwd": "/workspace/scratch/1494db44bb7b/sprint4-ir10",
+      "start": "2026-11-23T18:55:01.699877+00:00",
+      "end": "2026-11-23T18:55:25.992709+00:00",
+      "durationSeconds": 24.292837647999477,
+      "exitCode": 0,
+      "worktreeBefore": "",
+      "worktreeAfter": "",
+      "testFiles": {
+        "packages/compiler/test/dormant-source-admission.test.ts": "19aa87e96d7383a55f7045c66095e24521d586ec7dc70456d776978f3e635784",
+        "packages/compiler/test/dormant-callable-consumer.test.ts": "db13dbd556cf82ed10de3ca92ac65d41f55d6e6451fc9a2191bf0efd8e912a31",
+        "packages/compiler/test/module-callable-selection.test.ts": "822ed8312fd54122136ba19b2d57d14f3e1cb8e687655e40dafa45cda2cd60cc",
+        "packages/compiler/test/module-callable-selection-consumer.test.ts": "7ae256368ef4c1568f3f152ebb7299aa1be3023c2b38504d0f63516fef1c284e",
+        "packages/compiler/test/record-getters.test.ts": "0ca8f0e757f2746576074942fb3b401ced81ad092bf9ae6d0b8e3b23e8048c9e",
+        "packages/compiler/test/record-getter-consumer.test.ts": "81d90ca32be38c69c6fd197b8413e9de869c411ff0a195d5e57235baa968a174",
+        "packages/compiler/test/record-getter-runtime.test.ts": "937c17733b35eacdc48288b58a9e72776b4f1c0db3f062e8cdae637b4eb3b6b4",
+        "packages/compiler/test/throw-only-return.test.ts": "a443574d0e1132dfe3de2fee64356e5ad06a2854f55ead303ac7f449b14c63e2"
+      },
+      "logSha256": "a5dfeb66e536df66aa5517529e7ff729fb32194bb0f8ac665ded0821cf32be39",
+      "node": "v24.22.3",
+      "dependencyLockSha256": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8",
+      "dependencies": "Existing same-lock local installation reused; no fresh install claimed",
+      "changedCondition": "Restore all declared workspace dependency links from the same-lock installation; no source or assertion changes.",
+      "report": {
+        "numTotalTestSuites": 21,
+        "numPassedTestSuites": 21,
+        "numFailedTestSuites": 0,
+        "numTotalTests": 127,
+        "numPassedTests": 127,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "success": true
+      },
+      "files": [
+        {
+          "path": "packages/compiler/test/dormant-callable-consumer.test.ts",
+          "status": "passed",
+          "passed": 4,
+          "failed": 0,
+          "message": ""
+        },
+        {
+          "path": "packages/compiler/test/dormant-source-admission.test.ts",
+          "status": "passed",
+          "passed": 30,
+          "failed": 0,
+          "message": ""
+        },
+        {
+          "path": "packages/compiler/test/module-callable-selection-consumer.test.ts",
+          "status": "passed",
+          "passed": 8,
+          "failed": 0,
+          "message": ""
+        },
+        {
+          "path": "packages/compiler/test/module-callable-selection.test.ts",
+          "status": "passed",
+          "passed": 34,
+          "failed": 0,
+          "message": ""
+        },
+        {
+          "path": "packages/compiler/test/record-getter-consumer.test.ts",
+          "status": "passed",
+          "passed": 4,
+          "failed": 0,
+          "message": ""
+        },
+        {
+          "path": "packages/compiler/test/record-getter-runtime.test.ts",
+          "status": "passed",
+          "passed": 1,
+          "failed": 0,
+          "message": ""
+        },
+        {
+          "path": "packages/compiler/test/record-getters.test.ts",
+          "status": "passed",
+          "passed": 34,
+          "failed": 0,
+          "message": ""
+        },
+        {
+          "path": "packages/compiler/test/throw-only-return.test.ts",
+          "status": "passed",
+          "passed": 12,
+          "failed": 0,
+          "message": ""
+        }
+      ],
+      "receiptAsset": "public-linked-d0eb81d3.receipt.json",
+      "reportAsset": "public-linked-d0eb81d3.json",
+      "logAsset": "public-linked-d0eb81d3.log"
+    }
+  ],
+  "verifierRun": {
+    "head": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+    "command": [
+      "node",
+      "--test",
+      "scripts/compiler/verify-frozen-foundation.test.mjs",
+      "scripts/compiler/verify-object-rest-controls.test.mjs"
+    ],
+    "start": "2026-11-23T18:56:20.019168+00:00",
+    "durationSeconds": 1.3802849410003546,
+    "exitCode": 0,
+    "logSha256": "1863f20c94a4b77d93c8e6b6a6193d582e3e206dd7a7abd84bc1aafcab99b271",
+    "originalPrivatePacketExecuted": false,
+    "tests": {
+      "total": 9,
+      "passed": 9,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "testFiles": {
+      "scripts/compiler/verify-frozen-foundation.test.mjs": "263c5ccb5305ffa199ac050c88c10015578dc10e65e31d671e0b1a0b0eae000c",
+      "scripts/compiler/verify-object-rest-controls.test.mjs": "925e3c3426f3c3747ccbf25d3cb742fcab23366f67c3a50595596784d971501c"
+    },
+    "logAsset": "public-verifiers-d0eb81d3.log",
+    "receiptAsset": "public-verifiers-d0eb81d3.receipt.json"
+  },
+  "assets": {
+    "public-baseline-d0eb81d3.json": {
+      "path": "internal/records/evidence/2026-11-24-sprint4-public-semantics/public-baseline-d0eb81d3.json.gz",
+      "sha256": "697dd79505dae3e1e231c964b872bad4076058adb1caa0b1286eaabeb81fc44a",
+      "bytes": 42747,
+      "gzipSha256": "04a074f08e66d5d57d7eb53d7d7410b102e124e0a8e61d3a31d39d053ef103f6",
+      "gzipBytes": 4811
+    },
+    "public-baseline-d0eb81d3.log": {
+      "path": "internal/records/evidence/2026-11-24-sprint4-public-semantics/public-baseline-d0eb81d3.log.gz",
+      "sha256": "3b9c3bef51b648ebc3a179ca80be4ea9b948ab40d6acec3cfe456609f72afb85",
+      "bytes": 75863,
+      "gzipSha256": "7fde4144ba6227377c15e50517c7433ad6771c792030197909e02735ad4748bc",
+      "gzipBytes": 13164
+    },
+    "public-baseline-d0eb81d3.receipt.json": {
+      "path": "internal/records/evidence/2026-11-24-sprint4-public-semantics/public-baseline-d0eb81d3.receipt.json.gz",
+      "sha256": "d00874345a9fc0f0ae8b7e048d346bbe45e94b71ce0fe169bda54f258d2f0e60",
+      "bytes": 2530,
+      "gzipSha256": "35b1d328e5a9259ced35709346deb29562d7b3372a56b2084bea248f84262a4b",
+      "gzipBytes": 1032
+    },
+    "public-linked-d0eb81d3.json": {
+      "path": "internal/records/evidence/2026-11-24-sprint4-public-semantics/public-linked-d0eb81d3.json.gz",
+      "sha256": "8e86d5a787def8aed1b3a3c249bb7ae2d1045ea385a719f6195816739a777a83",
+      "bytes": 47598,
+      "gzipSha256": "9ba008df9576cbd3795d8323a33f4e94e2ba3083c6f5c0be607efe3d8799e123",
+      "gzipBytes": 5219
+    },
+    "public-linked-d0eb81d3.log": {
+      "path": "internal/records/evidence/2026-11-24-sprint4-public-semantics/public-linked-d0eb81d3.log.gz",
+      "sha256": "a5dfeb66e536df66aa5517529e7ff729fb32194bb0f8ac665ded0821cf32be39",
+      "bytes": 299532,
+      "gzipSha256": "568c6f9c693716d5d76d0094c5fc3bcff86288ecc1c1bf1e58ea2c5cff80c1de",
+      "gzipBytes": 41402
+    },
+    "public-linked-d0eb81d3.receipt.json": {
+      "path": "internal/records/evidence/2026-11-24-sprint4-public-semantics/public-linked-d0eb81d3.receipt.json.gz",
+      "sha256": "c49baa58e7f18d5830050d0ce7d73aae8c633d257d7179f3895391ca4de14b95",
+      "bytes": 2632,
+      "gzipSha256": "6d7e612ad734671a862af3020d662b2f0401611fe650cf4023eb7b8748e6c055",
+      "gzipBytes": 1082
+    },
+    "public-verifiers-d0eb81d3.log": {
+      "path": "internal/records/evidence/2026-11-24-sprint4-public-semantics/public-verifiers-d0eb81d3.log.gz",
+      "sha256": "1863f20c94a4b77d93c8e6b6a6193d582e3e206dd7a7abd84bc1aafcab99b271",
+      "bytes": 900,
+      "gzipSha256": "563912cc6ca8b814541849f676ea73cb11e0a7acf26856d4dfd0f9ad673f8143",
+      "gzipBytes": 535
+    },
+    "public-verifiers-d0eb81d3.receipt.json": {
+      "path": "internal/records/evidence/2026-11-24-sprint4-public-semantics/public-verifiers-d0eb81d3.receipt.json.gz",
+      "sha256": "8f83c3e8a3aff1894cabeebbe1fb023cec220972870559c7a6e7109075687b3b",
+      "bytes": 451,
+      "gzipSha256": "1bc53b63ec15551c54aa7a7bbf973ae9628e1bc903d9f3bcb1224811b6ea369d",
+      "gzipBytes": 317
+    }
+  },
+  "governanceReadback": {
+    "mergePr": 1714,
+    "mergeCommit": "3551b85049630877e8c062b4d80a56ec2133c532",
+    "mergedAtUtc": "2026-11-23T15:55:24Z",
+    "issueComments": [
+      {
+        "issue": 891,
+        "count": 3,
+        "sourceSha256": "cd7c0ee6d566d945d25235aaf1d004990c1ad8aff8d7a496515a50327c4a75ea",
+        "comments": [
+          {
+            "id": 6684427614,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/891#issuecomment-6684427614",
+            "updatedAt": "2026-11-06T12:06:32Z",
+            "bodySha256": "eb469ac5bead50c98ef93884d6ba34aca1a749ed96ffd3442cdb38e51588fd92"
+          },
+          {
+            "id": 6684476408,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/891#issuecomment-6684476408",
+            "updatedAt": "2026-11-06T12:09:18Z",
+            "bodySha256": "1eea90b42ad6ac95f7161b1de214ee6c2ddecfbac81f82acdc0876887093dff9"
+          },
+          {
+            "id": 7078832641,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/891#issuecomment-7078832641",
+            "updatedAt": "2026-11-22T12:02:22Z",
+            "bodySha256": "36cbe3c3ecee535d2dc21293ddcd518ba496333c6457840e400ed60c3347a611"
+          }
+        ],
+        "allBodiesRead": true,
+        "proposalRequiresChange": false
+      },
+      {
+        "issue": 892,
+        "count": 5,
+        "sourceSha256": "9bac50f8069b8871d4bfca451454e726dce627f09ea0137de03a2e5ac529c1e4",
+        "comments": [
+          {
+            "id": 6684422050,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/892#issuecomment-6684422050",
+            "updatedAt": "2026-11-06T12:06:13Z",
+            "bodySha256": "f719bfbecaea0691de75dda3f63e4687f5d72dab5b20692a802ffb6b8ce6c5da"
+          },
+          {
+            "id": 6684575148,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/892#issuecomment-6684575148",
+            "updatedAt": "2026-11-06T12:14:54Z",
+            "bodySha256": "5ae1195fb917dcc94f572225e5bc7fb21e9dcc9cf6e380bb2d25a1e27ab4b1b8"
+          },
+          {
+            "id": 6685067178,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/892#issuecomment-6685067178",
+            "updatedAt": "2026-11-06T12:42:04Z",
+            "bodySha256": "e8b3945ac3b27d2ae0f93dd0718678b93823aa180697f255f510f95ef346ccff"
+          },
+          {
+            "id": 7078831532,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/892#issuecomment-7078831532",
+            "updatedAt": "2026-11-22T12:02:16Z",
+            "bodySha256": "7d6353e9b34585dfae4d4b99a75d3637ae2da09190cdccb06f39bf136a9bb20d"
+          },
+          {
+            "id": 7079529089,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/892#issuecomment-7079529089",
+            "updatedAt": "2026-11-22T13:02:46Z",
+            "bodySha256": "eee1239e6a551b2c75c5f7aac6ffc8e7150bf92468259041c52628bfffd84f4d"
+          }
+        ],
+        "allBodiesRead": true,
+        "proposalRequiresChange": false
+      },
+      {
+        "issue": 893,
+        "count": 5,
+        "sourceSha256": "b9570e5ccfe7f769782e63107581e15787294b9856f61741c318ec4099d18f50",
+        "comments": [
+          {
+            "id": 6684420896,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/893#issuecomment-6684420896",
+            "updatedAt": "2026-11-06T12:06:09Z",
+            "bodySha256": "f719bfbecaea0691de75dda3f63e4687f5d72dab5b20692a802ffb6b8ce6c5da"
+          },
+          {
+            "id": 6684578755,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/893#issuecomment-6684578755",
+            "updatedAt": "2026-11-06T12:15:06Z",
+            "bodySha256": "b4586a69b283b23b81b38865267192ee278379cbdd020a175452fc662c066d16"
+          },
+          {
+            "id": 6685066215,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/893#issuecomment-6685066215",
+            "updatedAt": "2026-11-06T12:42:01Z",
+            "bodySha256": "e8b3945ac3b27d2ae0f93dd0718678b93823aa180697f255f510f95ef346ccff"
+          },
+          {
+            "id": 7078831984,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/893#issuecomment-7078831984",
+            "updatedAt": "2026-11-22T12:02:18Z",
+            "bodySha256": "4aa9d877cf6ec71eb30531a824622082f3ed0eaa56f7e151b1ffd5b5ae13765f"
+          },
+          {
+            "id": 7079529344,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/893#issuecomment-7079529344",
+            "updatedAt": "2026-11-22T13:02:47Z",
+            "bodySha256": "13c28f1156230cf3c6a8f220cbd2ce65a2e028cd034b29d0c97d671eb0aeb02f"
+          }
+        ],
+        "allBodiesRead": true,
+        "proposalRequiresChange": false
+      },
+      {
+        "issue": 894,
+        "count": 4,
+        "sourceSha256": "b3b04081a341963b903e0bcb428fc9c4a99d229bbd334b88d82a8cbdabd92b71",
+        "comments": [
+          {
+            "id": 6684420027,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/894#issuecomment-6684420027",
+            "updatedAt": "2026-11-06T12:06:06Z",
+            "bodySha256": "f719bfbecaea0691de75dda3f63e4687f5d72dab5b20692a802ffb6b8ce6c5da"
+          },
+          {
+            "id": 6684582682,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/894#issuecomment-6684582682",
+            "updatedAt": "2026-11-06T12:15:18Z",
+            "bodySha256": "daf5c334a84aa302470ee6ce96d6b8366b69264544432217317daf5df6aa5855"
+          },
+          {
+            "id": 6685065230,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/894#issuecomment-6685065230",
+            "updatedAt": "2026-11-06T12:41:58Z",
+            "bodySha256": "e8b3945ac3b27d2ae0f93dd0718678b93823aa180697f255f510f95ef346ccff"
+          },
+          {
+            "id": 7078832273,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/894#issuecomment-7078832273",
+            "updatedAt": "2026-11-22T12:02:19Z",
+            "bodySha256": "033e87879d7442e0c8a58134d5d65cb735ac31170630b99c9119d8df8681ea28"
+          }
+        ],
+        "allBodiesRead": true,
+        "proposalRequiresChange": false
+      }
+    ],
+    "oldBodiesPreserved": true,
+    "originalCriteriaRemainOpen": true,
+    "externalMutationPerformed": false
+  },
+  "acceptanceBoundaries": {
+    "publicSelectedSemantics": true,
+    "publicVerifierSyntheticControls": true,
+    "originalFrozenPacketExecuted": false,
+    "originalFrozenInputsReexecuted": false,
+    "fullCompilerSuite": false,
+    "fullWorkspaceSuite": false,
+    "physicalBrowser": false,
+    "nonWebTargets": false,
+    "sharedDefinitionDecision": false,
+    "sourceRightsOrDco": false,
+    "originalIr10Acceptance": false
+  },
+  "interpretation": "The first attempt had four collection failures caused by missing package-level dependency links, with 110 passing assertions. A same-source/same-test repeat after restoring declared same-lock links passed all eight files and 127 assertions. Nine synthetic verifier controls separately passed. No implementation or assertion was changed and no original private IR10 acceptance is claimed."
+}

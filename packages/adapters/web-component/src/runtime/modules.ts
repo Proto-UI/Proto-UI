@@ -1,3 +1,4 @@
+import type { WebShaderHostOptions } from '@proto.ui/adapter-base';
 import { subscribeScrollTarget } from './scroll-target';
 import { createWebPresencePresentationSink } from '@proto.ui/adapter-base';
 import { createWebShaderPresentationSink } from '@proto.ui/adapter-base';
@@ -1553,6 +1554,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   /** Optional V2 visual provider for this physical view; absence retains ordinary style. */
   visualFeedbackSink?: VisualFeedbackSink;
   residentMotion?: WebResidentMotionOptions;
+  shader?: WebShaderHostOptions;
   finalStyleSink?: FinalStyleSink;
   materialBindingFactory?: MaterialBindingFactory;
   textControlTarget: WebTextControl | null;
@@ -1727,7 +1729,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
         SHADER_PRESENTATION_SINK_CAP,
         createWebShaderPresentationSink(
           () => (args.feedbackSurfaceProjection ?? args.surfaceProjection).getSurfaceTarget(),
-          effectsPort
+          effectsPort,
+          args.shader
         ),
       ],
       [PRESENCE_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],

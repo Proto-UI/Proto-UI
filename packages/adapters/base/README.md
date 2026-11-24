@@ -75,3 +75,29 @@ Rule Meta exposes the new keys only with a matching active mounted lease. Source
 `retainWebPortalDirection(target, getOrigin)` is the shared Web host projection used by the four Overlay portal bridges. It leases an inherited `dir` from the actual author position, follows ancestor `dir`/class/style changes, origin reparenting and viewport resize, and releases its own attribute, observers and resize listener on detach. The resize signal refreshes viewport-dependent CSS media queries; arbitrary CSSOM edits, media-preference changes and container queries have no dedicated invalidation signal. An explicit target `dir` (`ltr`, `rtl` or `auto`) and target CSS keep their authored priority. React and Vue retain a hidden, inert renderer-owned origin marker so ordinary DOM wrappers between Proto owners are included. Minimal renderer runtimes without `Fragment` retain the logical Proto-root fallback.
 
 This is bounded Web direction preservation under draft `HC-OVERLAY-PORTAL-0001`; it is not a portable Proto direction state, a blanket copy of inherited CSS, or a native paint certification. React, Vue and Vue 2 expose `dir` as a host prop as well as retaining a Prototype's declared `dir` input when present.
+
+### Draft explicit shader scene source
+
+The draft shader graph can request an application-owned scene by a finite slot, for example `source: { kind: 'owned-scene', slot: 'mainScene' }`. Bind that slot at the application host boundary. A Prototype never receives the canvas, lease, DOM element or a capture callback.
+
+```ts
+import { createWebShaderHost } from '@proto.ui/adapter-base';
+import { createCanvasBackdropLease } from '@proto.ui/adapter-base/web-material';
+
+// scope and canvas belong to the application; canvas is a direct scope child.
+const lease = createCanvasBackdropLease(scope, canvas);
+lease.draw((context, width, height) => {
+  context.fillStyle = '#406080';
+  context.fillRect(0, 0, width, height);
+});
+const shader = createWebShaderHost({ ownedScenes: { mainScene: lease } });
+// Supply { shader } to the existing React, Vue, Vue2 or WC Adapter options.
+```
+
+The four native scene outputs export `createShaderHost` and `createComponent`. `createComponent(createShaderHost({ ownedScenes: { mainScene: lease } }))` returns the configured framework component, or a WC class for explicit `customElements.define`. The ordinary named/default export remains usable without configuration and shows the complete opaque fallback. Configuration is outside component Props, attributes and serialized state. Other native outputs do not add these exports.
+
+This provider uses the entire opaque sRGB canvas frame as a texture over the shader surface's normalized UV coordinates. It converts that independent snapshot to the shader's linear premultiplied RGBA8 input. It does not crop an in-app backdrop, capture DOM paint or relabel the existing material backdrop path. The current source must share the shader surface's Document and contain it in its composed scope, including applicable ShadowRoots and slots. Frames must meet the shader's 1024-axis, 262144-texel and 16 MiB aggregate resource limits.
+
+The application draws, revokes and finally disposes its lease. The shader only borrows `current` and `subscribe`; source change, scope loss, detach or disposal retires old decode and observation. Keep a published frame immutable and announce every change with a newer revision. Losing the source keeps the opaque fallback, and a restored current source can be accepted again. Read, subscribe, cleanup and reentrant-acquisition failures have explicit bounded handling.
+
+This remains draft under `C-FEEDBACK-SHADER-PRESENTATION-0001` and `HC-FEEDBACK-SHADER-PRESENTATION-0001`. It does not establish other source-provider families, in-app-backdrop or non-Web shader support. The original 28 browser controls and nine scene controls require a current sandboxed-browser receipt and independent acceptance.

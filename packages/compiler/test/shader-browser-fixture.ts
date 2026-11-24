@@ -48,6 +48,7 @@ export async function buildPhysicalPresentationBrowserFixture(configuration: {
   global: string;
   harness: readonly string[];
   scope: string;
+  prototypeArgument?: boolean;
 }) {
   const { entry } = configuration;
   const parent = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ?? tmpdir();
@@ -109,7 +110,10 @@ export async function buildPhysicalPresentationBrowserFixture(configuration: {
       });
     }
   }
-  const entrySource = `${imports.join('\n')}\nimport {${configuration.factory}} from ${JSON.stringify(path.join(root, configuration.consumer))};\nexport const fixture=${configuration.factory}({react,vue,vue2,wc});\n`;
+  const prototypeImport = configuration.prototypeArgument
+    ? `import prototype from ${JSON.stringify(path.join(root, entry))};\n`
+    : '';
+  const entrySource = `${imports.join('\n')}\n${prototypeImport}import {${configuration.factory}} from ${JSON.stringify(path.join(root, configuration.consumer))};\nexport const fixture=${configuration.factory}({react,vue,vue2,wc}${configuration.prototypeArgument ? ', prototype' : ''});\n`;
   const consumerRequire = createRequire(new URL('../package.json', import.meta.url));
   const positioningRequire = createRequire(
     new URL('../../modules/positioning/package.json', import.meta.url)
@@ -188,17 +192,20 @@ export async function buildPhysicalPresentationBrowserFixture(configuration: {
   return { evidenceDir, bundle, head, buildSha256: digest(buildManifest) };
 }
 
-export const buildShaderBrowserFixture = () =>
+export const buildShaderBrowserFixture = (variant: 'inline' | 'static-data' | 'scene' = 'inline') =>
   buildPhysicalPresentationBrowserFixture({
-    name: 'shader-presentation',
-    entry: 'packages/compiler/test/fixtures/shader-presentation-owner.proto.ts',
+    name: `shader-presentation-${variant}`,
+    entry: `packages/compiler/test/fixtures/shader-${variant === 'inline' ? 'presentation' : variant}-owner.proto.ts`,
     consumer: 'packages/compiler/test/shader-browser-consumer.ts',
-    factory: 'createShaderBrowserFixture',
+    factory: variant === 'scene' ? 'createShaderSceneBrowserFixture' : 'createShaderBrowserFixture',
+    prototypeArgument: true,
     global: 'shaderNative',
     harness: [
       'packages/compiler/test/shader-presentation.browser.test.ts',
       'packages/compiler/test/shader-oracle.ts',
     ],
     scope:
-      'Draft owned-pixels copy/tint graph through actual Feedback Runtime and four native Web profiles. Real Chromium WebGL2 readback and CSS background publication. This is not application backing-source admission or non-Web GPU acceptance.',
+      variant === 'scene'
+        ? 'Draft explicitly bound owned-scene canvas source through Runtime and four native factories. Whole normalized opaque sRGB scene; source revision/scope/Document retirement and borrowed subscription cleanup. No in-app-backdrop relabeling or non-Web GPU acceptance.'
+        : `Draft owned-pixels copy/tint graph (${variant} construction) through actual Feedback Runtime and four native Web profiles. Real Chromium WebGL2 readback and CSS background publication. This is not application backing-source admission or non-Web GPU acceptance.`,
   });
