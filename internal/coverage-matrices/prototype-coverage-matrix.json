@@ -8621,7 +8621,7 @@
     },
     {
       "ID": "www.shell.mobile-menu-panel",
-      "Path": "apps/www/src/components/site-header-surface.ts`, `apps/www/src/components/site-header-disclosure.ts`, `apps/www/src/components/override/Header.astro`, `apps/www/src/components/site-contents-panel.ts",
+      "Path": "apps/www/src/components/site-header-surface.ts`, `apps/www/src/components/site-header-disclosure.ts`, `apps/www/src/components/override/Header.astro`, `apps/www/src/components/site-contents-panel.ts`, `apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts",
       "User job": "Browse and dismiss mobile navigation without losing focus",
       "Current owner": "Website header/contents navigation; passive Surface and native links",
       "Target class": "site-composition",
@@ -8632,7 +8632,7 @@
       "Difficulty": "F5",
       "Milestone": "M0 / S7",
       "State": "blocked",
-      "Evidence": "Current header Surface participates in the selected runtime; application disclosure retains panel geometry, visibility, nested overlay boundaries and cleanup",
+      "Evidence": "Current header Surface participates in the selected runtime; application disclosure retains panel geometry, visibility, nested overlay boundaries and cleanup; The test-only wheel observer records actual panel/surface geometry, target identity, native event path, trust and final cancellation around the unchanged input and deadline. It supplies no control state, readiness wait or consumer acceptance.",
       "Escape or exemption": "—",
       "Re-review or removal issue": "[#1323](https://github.com/Proto-UI/Proto-UI/issues/1323) requires focus, Escape, outside-click, responsive geometry and remount proof for the current app-owned composition",
       "program": "website",
@@ -26864,20 +26864,20 @@
   "candidateSource": {
     "kind": "candidate",
     "baseMain": "25c3d0731e39003d87f541afc5e1a294a9d95568",
-    "revision": "dc2bfc7fc9115e583cc91eb28d4e60d252670514",
-    "sourceBindingsObject": "dc2bfc7fc9115e583cc91eb28d4e60d252670514",
+    "revision": "9c75da40680f20498c3ae408ef468724ecec0db0",
+    "sourceBindingsObject": "9c75da40680f20498c3ae408ef468724ecec0db0",
     "sourceObjectProof": {
       "objectType": "commit",
-      "rootTree": "1d1a15a06339100daa0060f8413192c7d784330d",
-      "commitBase64": "dHJlZSAxZDFhMTVhMDYzMzkxMDBkYWEwMDYwZjg0MTMxOTJjN2Q3ODQzMzBkCnBhcmVudCBjNzlkMmMxZTE0ZGFlY2JlY2E3OTE4ZWZmM2U4MTVmZGRiYTAyZTI0CmF1dGhvciBDb2RleCA8Y29kZXhAb3BlbmFpLmNvbT4gMTc5NTUxODYzMCArMDAwMApjb21taXR0ZXIgQ29kZXggPGNvZGV4QG9wZW5haS5jb20+IDE3OTU1MTg3NzEgKzAwMDAKCmZpeCh3d3cpOiBkaXN0aW5ndWlzaCBjb2RlIHZpZXdwb3J0IGZvY3VzIGhhbmRvdmVyIGluIG1hcmt1cCBldmlkZW5jZQoKU2lnbmVkLW9mZi1ieTogQ29kZXggPGNvZGV4QG9wZW5haS5jb20+Cg==",
+      "rootTree": "7f3592788bd1d05d0e9f7351369b09f26fc86f38",
+      "commitBase64": "dHJlZSA3ZjM1OTI3ODhiZDFkMDVkMGU5ZjczNTEzNjliMDlmMjZmYzg2ZjM4CnBhcmVudCA2NjM1MzQ3YjMzNzZlOTBmZGI3ZGM5NjE4YzgxNWFhMTJiNjYzNDFkCmF1dGhvciBDb2RleCA8Y29kZXhAb3BlbmFpLmNvbT4gMTc5NTUxOTM5OSArMDAwMApjb21taXR0ZXIgQ29kZXggPGNvZGV4QG9wZW5haS5jb20+IDE3OTU1MTk0MTEgKzAwMDAKCmNob3JlKHd3dyk6IGJpbmQgcGFzc2l2ZSB3aGVlbCBkaWFnbm9zdGljIHRvIGl0cyBwYW5lbCBvd25lcgoKU2lnbmVkLW9mZi1ieTogQ29kZXggPGNvZGV4QG9wZW5haS5jb20+Cg==",
       "trees": [
         {
-          "sha": "1d1a15a06339100daa0060f8413192c7d784330d",
-          "contentBase64": "NDAwMDAgLmFnZW50cwBQWNvdzIXzGo7Xg0J1o7yPEOguwjEwMDY0NCAuZWRpdG9yY29uZmlnABZh6UPLOKTTqQ8v5nLWTHKDN1VXMTAwNjQ0IC5lbnYucHJvZHVjdGlvbgBbYoFLp2YBaOlb+mqJhS/HIN54JzQwMDAwIC5naXRodWIAmjVmNBbS/vgVw1LzDifh3v2aIBkxMDA3NTUgLmdpdGlnbm9yZQCk3A/UWHmNwaHJNNQiN3Rv9sOpBTEwMDY0NCAuZ2l0a2VlcACLE3iReR/paSeteOZLCq173tCL3DQwMDAwIC5odXNreQAWFsxVM6BapsB0zRFp93ryDJYVzzEwMDY0NCAubnBtcmMAf5vchzLCtG6fgQSlGwpie9gZVVIxMDA2NDQgLm52bXJjAKRf1SzFiRVw1imfqzhkMQPDlVR0MTAwNjQ0IC5wcmV0dGllcmlnbm9yZQCRSlju0IliGgv/k8qMpcB8rR8AHjEwMDc1NSAucHJldHRpZXJyYwB8+DHrjez4uf2lZSErwkGhfi4m8jQwMDAwIC52c2NvZGUA0PPZml/Vr9Pl+77PwRCcB6Ar5KYxMDA2NDQgQUdFTlRTLm1kADcOH7juImzIQvD8dt0tHujxVtoEMTAwNjQ0IENPTlRSSUJVVElORy5tZAA5LMqt+N50ExTujCc98ylmtK85ITEwMDY0NCBEQ08ubWQASbjLBUkmeoF2Rnc4sXKmPYbv9DYxMDA2NDQgTElDRU5TRQBKG+1hNWpuh5hJh5/64ZJAWlDxxTEwMDY0NCBSRUFETUUubWQAHq8bhVwQYHvb5PwplqYJBUssGSgxMDA2NDQgUkVBRE1FLnpoLUNOLm1kACsfr24LODMo7JrL1MUCPUL54I6IMTAwNjQ0IFJFTEVBU0VfQ0hFQ0tMSVNULm1kABaDnHRfiy+pQ2wOzu8z+ipnHqulMTAwNjQ0IFZFUlNJT04AaQbp7SyLvzTm2RgQ7WR6GU+RwLU0MDAwMCBhcHBzAFHTh4p5U7OIkN9lGXvnVFN+xHXGNDAwMDAgYmVuY2htYXJrcwDRPYTSThUf9DvIdJua3wg+ctYS0zQwMDAwIGRvY3MAZfHk1qr/zujtvjvzyjGUSQfQBZg0MDAwMCBleHBlcmltZW50cwCOCGvSrSJ8WhUsEkMeKb2v+6dDoTQwMDAwIGludGVybmFsAN4q+20QolvLiKVCyJ44zP3IeDWBNDAwMDAgbmF0aXZlAGaMt/9BQc0bGn36vWTc0fZ/PgezMTAwNjQ0IHBhY2thZ2UuanNvbgBHHtZtHP09Rx/RWYE8FNlK6vztszQwMDAwIHBhY2thZ2VzAAGEfICPkVMXQOWNTHeY5jWPFqyrMTAwNjQ0IHBucG0tbG9jay55YW1sAM7buP3mZDmWaNugVQzRqO2lva10MTAwNjQ0IHBucG0td29ya3NwYWNlLnlhbWwAsVE80JCdxJK8CXEY9EAAGN37cd00MDAwMCBzY3JpcHRzAE6PgInGWfWx+UbN+V/kAFnvR40BNDAwMDAgc2hhcmVkAF1AfWf7tQx0ubMcwjscXjEC+lA8NDAwMDAgc3BlYwCk1hebPH+7awz2hQrHqZRs0rWaRDEwMDY0NCB0c2NvbmZpZy5qc29uAIzQNmqshOQvkVE8UQPiYySKd3OEMTAwNjQ0IHRzY29uZmlnLndvcmtzcGFjZS5qc29uAHMB5q2UGwS2HETBjTIqFvZSyUi8NDAwMDAgdHlwZXMAkivDO/aUnu94+Sa2kucbd5GTY9wxMDA2NDQgdmVyY2VsLmpzb24ACU7v5jxWHjnpFmbKDJJU0p3LwGkxMDA2NDQgdml0ZXN0LmNvbmZpZy50cwAB4Li5hYQnINEiKd8nANCCYlcP2w=="
+          "sha": "7f3592788bd1d05d0e9f7351369b09f26fc86f38",
+          "contentBase64": "NDAwMDAgLmFnZW50cwBQWNvdzIXzGo7Xg0J1o7yPEOguwjEwMDY0NCAuZWRpdG9yY29uZmlnABZh6UPLOKTTqQ8v5nLWTHKDN1VXMTAwNjQ0IC5lbnYucHJvZHVjdGlvbgBbYoFLp2YBaOlb+mqJhS/HIN54JzQwMDAwIC5naXRodWIAmjVmNBbS/vgVw1LzDifh3v2aIBkxMDA3NTUgLmdpdGlnbm9yZQCk3A/UWHmNwaHJNNQiN3Rv9sOpBTEwMDY0NCAuZ2l0a2VlcACLE3iReR/paSeteOZLCq173tCL3DQwMDAwIC5odXNreQAWFsxVM6BapsB0zRFp93ryDJYVzzEwMDY0NCAubnBtcmMAf5vchzLCtG6fgQSlGwpie9gZVVIxMDA2NDQgLm52bXJjAKRf1SzFiRVw1imfqzhkMQPDlVR0MTAwNjQ0IC5wcmV0dGllcmlnbm9yZQCRSlju0IliGgv/k8qMpcB8rR8AHjEwMDc1NSAucHJldHRpZXJyYwB8+DHrjez4uf2lZSErwkGhfi4m8jQwMDAwIC52c2NvZGUA0PPZml/Vr9Pl+77PwRCcB6Ar5KYxMDA2NDQgQUdFTlRTLm1kADcOH7juImzIQvD8dt0tHujxVtoEMTAwNjQ0IENPTlRSSUJVVElORy5tZAA5LMqt+N50ExTujCc98ylmtK85ITEwMDY0NCBEQ08ubWQASbjLBUkmeoF2Rnc4sXKmPYbv9DYxMDA2NDQgTElDRU5TRQBKG+1hNWpuh5hJh5/64ZJAWlDxxTEwMDY0NCBSRUFETUUubWQAHq8bhVwQYHvb5PwplqYJBUssGSgxMDA2NDQgUkVBRE1FLnpoLUNOLm1kACsfr24LODMo7JrL1MUCPUL54I6IMTAwNjQ0IFJFTEVBU0VfQ0hFQ0tMSVNULm1kABaDnHRfiy+pQ2wOzu8z+ipnHqulMTAwNjQ0IFZFUlNJT04AaQbp7SyLvzTm2RgQ7WR6GU+RwLU0MDAwMCBhcHBzAE2qfONTNO/tb9cNFvfxfReci8bDNDAwMDAgYmVuY2htYXJrcwDRPYTSThUf9DvIdJua3wg+ctYS0zQwMDAwIGRvY3MAZfHk1qr/zujtvjvzyjGUSQfQBZg0MDAwMCBleHBlcmltZW50cwCOCGvSrSJ8WhUsEkMeKb2v+6dDoTQwMDAwIGludGVybmFsADjBr1rUl3oZT+AgwGUJps1BPafWNDAwMDAgbmF0aXZlAGaMt/9BQc0bGn36vWTc0fZ/PgezMTAwNjQ0IHBhY2thZ2UuanNvbgBHHtZtHP09Rx/RWYE8FNlK6vztszQwMDAwIHBhY2thZ2VzAAGEfICPkVMXQOWNTHeY5jWPFqyrMTAwNjQ0IHBucG0tbG9jay55YW1sAM7buP3mZDmWaNugVQzRqO2lva10MTAwNjQ0IHBucG0td29ya3NwYWNlLnlhbWwAsVE80JCdxJK8CXEY9EAAGN37cd00MDAwMCBzY3JpcHRzAE6PgInGWfWx+UbN+V/kAFnvR40BNDAwMDAgc2hhcmVkAF1AfWf7tQx0ubMcwjscXjEC+lA8NDAwMDAgc3BlYwCk1hebPH+7awz2hQrHqZRs0rWaRDEwMDY0NCB0c2NvbmZpZy5qc29uAIzQNmqshOQvkVE8UQPiYySKd3OEMTAwNjQ0IHRzY29uZmlnLndvcmtzcGFjZS5qc29uAHMB5q2UGwS2HETBjTIqFvZSyUi8NDAwMDAgdHlwZXMAkivDO/aUnu94+Sa2kucbd5GTY9wxMDA2NDQgdmVyY2VsLmpzb24ACU7v5jxWHjnpFmbKDJJU0p3LwGkxMDA2NDQgdml0ZXN0LmNvbmZpZy50cwAB4Li5hYQnINEiKd8nANCCYlcP2w=="
         },
         {
-          "sha": "de2afb6d10a25bcb88a542c89e38ccfdc8783581",
-          "contentBase64": "MTAwNjQ0IFJFQURNRS5tZACvHjjanzoWQ2eVa/39ruAT/LtldDQwMDAwIGFnZW50LWhhcm5lc3MANmJBiY5O5hCpTNXkzz0B743wFmM0MDAwMCBhZ2VudC1vcGVyYXRpb25zAMTDnpFTZRZKStGa7G8DVFLdYMI6NDAwMDAgYXV0b25vbW91cy1tYWludGVuYW5jZQBB63B1TPKVnhR8GYZAzSqnX9zqdTQwMDAwIGJhc2VsaW5lcwDcCnamgEyJQImmmPeDZxhH2qIGPDQwMDAwIGNvbXBpbGVyAAqgyDJk7qkCd/gGKsLUcKtI+4s0NDAwMDAgY29udHJhY3RzAFxHfHOIC1hOl+6+YiryNAReH1GpNDAwMDAgY292ZXJhZ2UtbWF0cmljZXMAW05HBaqopAc2iPNHwYjtMtlevU40MDAwMCBmaXh0dXJlcwD1OgxnUCdqemygRBZkRdOBSl7tHTQwMDAwIGdvdmVybmFuY2UAsDrBPIdAqialWhRIMHAFgdz2FDc0MDAwMCBpc3N1ZXMAuE1YBuw7/U/e7wdkrqAJtFsrAPw0MDAwMCBtb2RlbHMAslv8WXJ4ULBUAHzbsu4H3bbJaUs0MDAwMCByZWNvcmRzACMS2gMpkxpc1owbD3DhltFJM/MENDAwMDAgcmVsZWFzZXMAWBkDx3jKi8h4vFYtbAAS0Pa8vTk0MDAwMCB0dXRvcmlhbAB8J2XnDXylD48vhXnq1AYkYHPX1TQwMDAwIHdlYnNpdGUARrdJ67RaG5qIk0EN7KJIfttHDn4="
+          "sha": "38c1af5ad4977a194fe020c06509a6cd413da7d6",
+          "contentBase64": "MTAwNjQ0IFJFQURNRS5tZACvHjjanzoWQ2eVa/39ruAT/LtldDQwMDAwIGFnZW50LWhhcm5lc3MANmJBiY5O5hCpTNXkzz0B743wFmM0MDAwMCBhZ2VudC1vcGVyYXRpb25zAMTDnpFTZRZKStGa7G8DVFLdYMI6NDAwMDAgYXV0b25vbW91cy1tYWludGVuYW5jZQBB63B1TPKVnhR8GYZAzSqnX9zqdTQwMDAwIGJhc2VsaW5lcwDcCnamgEyJQImmmPeDZxhH2qIGPDQwMDAwIGNvbXBpbGVyAAqgyDJk7qkCd/gGKsLUcKtI+4s0NDAwMDAgY29udHJhY3RzAFxHfHOIC1hOl+6+YiryNAReH1GpNDAwMDAgY292ZXJhZ2UtbWF0cmljZXMATN/kYIbNtcshueozEM6BS40/CZQ0MDAwMCBmaXh0dXJlcwD1OgxnUCdqemygRBZkRdOBSl7tHTQwMDAwIGdvdmVybmFuY2UAsDrBPIdAqialWhRIMHAFgdz2FDc0MDAwMCBpc3N1ZXMAuE1YBuw7/U/e7wdkrqAJtFsrAPw0MDAwMCBtb2RlbHMAslv8WXJ4ULBUAHzbsu4H3bbJaUs0MDAwMCByZWNvcmRzAHEi79cjvgsg/pC+G9dk1nuFO0ifNDAwMDAgcmVsZWFzZXMAWBkDx3jKi8h4vFYtbAAS0Pa8vTk0MDAwMCB0dXRvcmlhbAB8J2XnDXylD48vhXnq1AYkYHPX1TQwMDAwIHdlYnNpdGUAM9n3TZYr958QOK1zxr/JBbQMp5U="
         },
         {
           "sha": "366241898e4ee610a94cd5e4cf3d01ef8df01663",
@@ -26912,8 +26912,8 @@
           "contentBase64": "MTAwNjQ0IHN0eWxlLWx1bWEuY3NzAIkfu24uTOt8eGXXeCGmRyiEOTsHMTAwNjQ0IHN0eWxlLWx5cmEuY3NzAAU0LyaMhs8Z00Pmg+spulXjn9FVMTAwNjQ0IHN0eWxlLW1haWEuY3NzAO0TxocaC9YWj3FrUvChruFakD7cMTAwNjQ0IHN0eWxlLW1pcmEuY3NzAB9rnv43ALzGQXwvpcCawkEeLwlEMTAwNjQ0IHN0eWxlLW5vdmEuY3NzACkyBLK/CN39htvEm3XcR0nNITXtMTAwNjQ0IHN0eWxlLXJoZWEuY3NzAJS7yip/eIRefPvP9o+49TXjhIqYMTAwNjQ0IHN0eWxlLXNlcmEuY3NzAG+ywSiU4CZ5c/7+mixfSWpKRORPMTAwNjQ0IHN0eWxlLXZlZ2EuY3NzAJ8Ds8bcWoA9uWOoF0PUfVtfj5/g"
         },
         {
-          "sha": "46b749ebb45a1b9a8893410deca2487edb470e7e",
-          "contentBase64": "MTAwNjQ0IHNlbGYtaG9zdGluZy1jb3ZlcmFnZS1tYXRyaXgubWQAsrfztHBBM8tHYg0NpUVHoXuWwp8="
+          "sha": "33d9f74d962bf79f1038ad73c6bfc905b40ca795",
+          "contentBase64": "MTAwNjQ0IHNlbGYtaG9zdGluZy1jb3ZlcmFnZS1tYXRyaXgubWQAsAZU7KMQnut4zm2VH2DhffEP33s="
         },
         {
           "sha": "01847c808f91531740e58d4c7798e6358f16acab",
@@ -28232,7 +28232,7 @@
       },
       {
         "path": "internal/website/self-hosting-coverage-matrix.md",
-        "sha256": "8905c900471b78f280ed337a6e9c35004d3ba53d8b165e5e981ecc27098a5a59"
+        "sha256": "d8381e4ca0025da141ec7a3d6d4cf7c08742a52ea7a15b2502a1f44fd4873c3d"
       },
       {
         "path": "packages/prototypes/base/package.json",
