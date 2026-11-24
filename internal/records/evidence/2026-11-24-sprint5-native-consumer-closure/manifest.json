@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "originalRun": 45249588810,
+  "originalJob": 137955391295,
+  "originalHead": "0b7b212d3193ea5c7ae219c0501036ee1255e3f2",
+  "originalResult": {
+    "defaultNativeSdkCheck": "passed",
+    "ordinaryConsumer": "Rust E0433: missing external_scroll dependency; not executed"
+  },
+  "candidateProducer": {
+    "modules": 38,
+    "nativeConsumerExecution": "pending"
+  },
+  "evidence": [
+    {
+      "path": "0b-macos-original.log.gz",
+      "bytes": 978594,
+      "sha256": "b428a5b42f403f5bcfe89e4b100a219866da0a0eefe4362a40820701a1d8d20e",
+      "gzipSha256": "2c3de52491152be8c90858f5ece3c022a9d6a9ac9c6738b57ad77bec351f557d"
+    },
+    {
+      "path": "producer-38-modules.log.gz",
+      "bytes": 187,
+      "sha256": "e54ac627cbd346b7619cbb283a83c58e17108f88a72f38cc6b98bd33ce4e7193",
+      "gzipSha256": "9b80e12a771954f239c1bbfcacd517cbd4a834d76cf8604b9e2f0c73c1791ca7"
+    },
+    {
+      "path": "producer-source-receipt.json.gz",
+      "bytes": 49399,
+      "sha256": "b5100a8c6370d26d0da96a731b265c02873b0fc050f8b32dca805d77a45ca868",
+      "gzipSha256": "e7aa25fd077445595060478c2273888200c9b7d1e82dce7c043c9970c96af9f8"
+    },
+    {
+      "path": "producer-cargo.toml.gz",
+      "bytes": 5485,
+      "sha256": "6c6b081260677825b726bece517004c7b2bdab7cdb43f62068816c4c0581f6db",
+      "gzipSha256": "91983765b58cfee01ede48783cfe052a3de2bcc4eb62130880f922badf8bf657"
+    },
+    {
+      "path": "wiring-check.json.gz",
+      "bytes": 227,
+      "sha256": "9da0e224c73c755ccebe2d2bea748300141674e76da1d3875da6a04fdedf1708",
+      "gzipSha256": "8fc197db60d354369b44c06dbb67bb3aa9490cb0933de279040823d634d42956"
+    },
+    {
+      "path": "workflow-continuation-original-control-failure.log.gz",
+      "bytes": 6718,
+      "sha256": "951fd31c26e71e82a88bc5c785b3493b0b829da11db227e3295ca9710d87f50c",
+      "gzipSha256": "e2c208504ba4848164a1f1c848d7f24b52757636fb7043c76ce864f24db7744e"
+    },
+    {
+      "path": "workflow-continuation-controls.log.gz",
+      "bytes": 5455,
+      "sha256": "d447fa2b525ce2e63d54488c81f66f3fa63762664d0907e34ed2f78ba9e8f4d0",
+      "gzipSha256": "22bdd467361c7401a8ec36963ff53cb54be4955046fcb76d2b95caa3f993eb03"
+    }
+  ]
+}

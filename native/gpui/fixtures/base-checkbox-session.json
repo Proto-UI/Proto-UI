@@ -17,15 +17,17 @@
         "revision": 1,
         "states": {
           "checked": false,
-          "indeterminate": false,
           "disabled": false,
+          "readOnly": false,
           "hovered": false,
+          "pressed": false,
+          "indeterminate": false,
           "focused": false,
-          "focusVisible": false,
-          "pressed": false
+          "focusVisible": false
         },
         "methods": [
-          "focusSelf"
+          "focusSelf",
+          "resetValue"
         ],
         "signals": [
           "checkedChange",
@@ -87,15 +89,17 @@
         "revision": 2,
         "states": {
           "checked": false,
-          "indeterminate": false,
           "disabled": false,
+          "readOnly": false,
           "hovered": false,
+          "pressed": false,
+          "indeterminate": false,
           "focused": false,
-          "focusVisible": false,
-          "pressed": false
+          "focusVisible": false
         },
         "methods": [
-          "focusSelf"
+          "focusSelf",
+          "resetValue"
         ],
         "signals": [
           "checkedChange",
@@ -166,38 +170,38 @@
               },
               {
                 "leaseId": "checkbox-root:lease:5",
+                "scope": "root",
+                "type": "press.commit"
+              },
+              {
+                "leaseId": "checkbox-root:lease:6",
                 "scope": "global",
                 "type": "key.down"
               },
               {
-                "leaseId": "checkbox-root:lease:6",
+                "leaseId": "checkbox-root:lease:7",
                 "scope": "root",
                 "type": "pointer.enter"
               },
               {
-                "leaseId": "checkbox-root:lease:7",
+                "leaseId": "checkbox-root:lease:8",
                 "scope": "root",
                 "type": "pointer.leave"
               },
               {
-                "leaseId": "checkbox-root:lease:8",
+                "leaseId": "checkbox-root:lease:9",
                 "scope": "root",
                 "type": "pointer.cancel"
               },
               {
-                "leaseId": "checkbox-root:lease:9",
+                "leaseId": "checkbox-root:lease:10",
                 "scope": "root",
                 "type": "pointer.down"
               },
               {
-                "leaseId": "checkbox-root:lease:10",
-                "scope": "root",
-                "type": "pointer.up"
-              },
-              {
                 "leaseId": "checkbox-root:lease:11",
                 "scope": "root",
-                "type": "press.commit"
+                "type": "pointer.up"
               }
             ],
             "trigger": {
@@ -222,7 +226,8 @@
             },
             "states": {
               "checked": "false",
-              "disabled": false
+              "disabled": false,
+              "readOnly": false
             },
             "actions": {
               "activate": {
@@ -407,15 +412,17 @@
         "revision": 1,
         "states": {
           "checked": false,
-          "indeterminate": false,
           "disabled": false,
+          "readOnly": false,
           "hovered": false,
+          "pressed": false,
+          "indeterminate": false,
           "focused": false,
-          "focusVisible": false,
-          "pressed": false
+          "focusVisible": false
         },
         "methods": [
-          "focusSelf"
+          "focusSelf",
+          "resetValue"
         ],
         "signals": [
           "checkedChange",
@@ -484,15 +491,17 @@
         "revision": 2,
         "states": {
           "checked": true,
-          "indeterminate": false,
           "disabled": false,
+          "readOnly": false,
           "hovered": false,
+          "pressed": false,
+          "indeterminate": false,
           "focused": false,
-          "focusVisible": false,
-          "pressed": false
+          "focusVisible": false
         },
         "methods": [
-          "focusSelf"
+          "focusSelf",
+          "resetValue"
         ],
         "signals": [
           "checkedChange",
@@ -563,38 +572,38 @@
               },
               {
                 "leaseId": "checkbox-checked:lease:5",
+                "scope": "root",
+                "type": "press.commit"
+              },
+              {
+                "leaseId": "checkbox-checked:lease:6",
                 "scope": "global",
                 "type": "key.down"
               },
               {
-                "leaseId": "checkbox-checked:lease:6",
+                "leaseId": "checkbox-checked:lease:7",
                 "scope": "root",
                 "type": "pointer.enter"
               },
               {
-                "leaseId": "checkbox-checked:lease:7",
+                "leaseId": "checkbox-checked:lease:8",
                 "scope": "root",
                 "type": "pointer.leave"
               },
               {
-                "leaseId": "checkbox-checked:lease:8",
+                "leaseId": "checkbox-checked:lease:9",
                 "scope": "root",
                 "type": "pointer.cancel"
               },
               {
-                "leaseId": "checkbox-checked:lease:9",
+                "leaseId": "checkbox-checked:lease:10",
                 "scope": "root",
                 "type": "pointer.down"
               },
               {
-                "leaseId": "checkbox-checked:lease:10",
-                "scope": "root",
-                "type": "pointer.up"
-              },
-              {
                 "leaseId": "checkbox-checked:lease:11",
                 "scope": "root",
-                "type": "press.commit"
+                "type": "pointer.up"
               }
             ],
             "trigger": {
@@ -619,7 +628,8 @@
             },
             "states": {
               "checked": "true",
-              "disabled": false
+              "disabled": false,
+              "readOnly": false
             },
             "actions": {
               "activate": {
@@ -811,15 +821,17 @@
         "revision": 1,
         "states": {
           "checked": false,
-          "indeterminate": false,
           "disabled": false,
+          "readOnly": false,
           "hovered": false,
+          "pressed": false,
+          "indeterminate": false,
           "focused": false,
-          "focusVisible": false,
-          "pressed": false
+          "focusVisible": false
         },
         "methods": [
-          "focusSelf"
+          "focusSelf",
+          "resetValue"
         ],
         "signals": [
           "checkedChange",
@@ -888,15 +900,17 @@
         "revision": 2,
         "states": {
           "checked": false,
-          "indeterminate": true,
           "disabled": false,
+          "readOnly": false,
           "hovered": false,
+          "pressed": false,
+          "indeterminate": true,
           "focused": false,
-          "focusVisible": false,
-          "pressed": false
+          "focusVisible": false
         },
         "methods": [
-          "focusSelf"
+          "focusSelf",
+          "resetValue"
         ],
         "signals": [
           "checkedChange",
@@ -967,38 +981,38 @@
               },
               {
                 "leaseId": "checkbox-mixed:lease:5",
+                "scope": "root",
+                "type": "press.commit"
+              },
+              {
+                "leaseId": "checkbox-mixed:lease:6",
                 "scope": "global",
                 "type": "key.down"
               },
               {
-                "leaseId": "checkbox-mixed:lease:6",
+                "leaseId": "checkbox-mixed:lease:7",
                 "scope": "root",
                 "type": "pointer.enter"
               },
               {
-                "leaseId": "checkbox-mixed:lease:7",
+                "leaseId": "checkbox-mixed:lease:8",
                 "scope": "root",
                 "type": "pointer.leave"
               },
               {
-                "leaseId": "checkbox-mixed:lease:8",
+                "leaseId": "checkbox-mixed:lease:9",
                 "scope": "root",
                 "type": "pointer.cancel"
               },
               {
-                "leaseId": "checkbox-mixed:lease:9",
+                "leaseId": "checkbox-mixed:lease:10",
                 "scope": "root",
                 "type": "pointer.down"
               },
               {
-                "leaseId": "checkbox-mixed:lease:10",
-                "scope": "root",
-                "type": "pointer.up"
-              },
-              {
                 "leaseId": "checkbox-mixed:lease:11",
                 "scope": "root",
-                "type": "press.commit"
+                "type": "pointer.up"
               }
             ],
             "trigger": {
@@ -1023,7 +1037,8 @@
             },
             "states": {
               "checked": "mixed",
-              "disabled": false
+              "disabled": false,
+              "readOnly": false
             },
             "actions": {
               "activate": {

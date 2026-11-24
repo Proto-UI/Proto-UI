@@ -22,7 +22,7 @@ impl Render for Harness {
             .when(self.repeat_target,|view|view.child(gpui::div().id("second-target-parent").child(self.button.clone())))
     }
 }
-fn associations(reference:&ControlLabelRef)->NativeInstanceAssociations {NativeInstanceAssociations{control_label:Some(reference.clone())}}
+fn associations(reference:&ControlLabelRef)->InstanceAssociations {InstanceAssociations{control_label:Some(reference.clone())}}
 fn open(cx:&mut TestAppContext,reference:Option<ControlLabelRef>)->WindowHandle<Harness>{
     cx.open_window(size(px(280.),px(180.)),move|window,cx|{
         let reference=reference.unwrap_or_default();
@@ -44,6 +44,14 @@ fn projected(owner:&OwnerRef)->gpui::accesskit::Node{
 }
 fn events(host:&Harness,cx:&gpui::App)->Vec<(String,serde_json::Value)>{host.button.read(cx).handle().take_events()}
 fn click_signal()->Vec<(String,serde_json::Value)>{vec![("click".into(),json!(null))]}
+// Drive the production native action lease. An enabled label may still have
+// no authorized pair; observable events and naming decide whether it acted.
+fn request_label(owner:&OwnerRef,window:&mut Window,cx:&mut gpui::App){
+    if let Some(action)=control_label_action_lease(owner){action.request(window,cx);}
+}
+fn assert_pair_diagnostic(owner:&OwnerRef){
+    assert!(take_control_label_diagnostics(owner).iter().any(|message|message.contains("current ControlLabel pair")),"a refused current pairing must retain its diagnostic");
+}
 
 #[gpui::test]
 fn official_button_assistive_action_enters_its_disabled_guard_and_press_operation(cx:&mut TestAppContext){
@@ -64,16 +72,15 @@ fn visible_label_names_and_activates_the_actual_button_without_a_new_tab_stop(cx
     let window=open(cx,None);let mut visual=VisualTestContext::from_window(AnyWindowHandle::from(window),cx);frames(&mut visual);
     window.update(&mut visual,|host,window,cx|{
         let label=host.label.read(cx).owner.clone();let button=host.button.read(cx).owner.clone();
-        assert_eq!(control_label_diagnostic(&label),None);
         assert!(!native_tab_participation(&label));assert!(!native_key_input_needed(&label));
         assert_eq!(projected(&button).labelled_by(),&[label.borrow().modules.a11y_node.expect("real Label node")]);
         assert_eq!(projected(&button).label(),None,"content default yields to the visible Label relation");
-        assert!(control_label_accessibility_action(&label,window,cx));assert_eq!(events(host,cx),click_signal());
+        control_label_action_lease(&label).expect("enabled Label action").request(window,cx);assert_eq!(events(host,cx),click_signal());
         host.button.update(cx,|component,cx|component.set_props(json!({"disabled":true}),window,cx).unwrap_or_else(|_|panic!("disable")));
-        assert!(control_label_accessibility_action(&label,window,cx));assert!(events(host,cx).is_empty());
+        control_label_action_lease(&label).expect("enabled Label action").request(window,cx);assert!(events(host,cx).is_empty());
         assert!(!projected(&button).labelled_by().is_empty(),"disabled does not remove naming");
         host.label.update(cx,|component,cx|component.set_props(json!({"activation":false}),window,cx).unwrap_or_else(|_|panic!("passive Label")));
-        assert!(!control_label_accessibility_action(&label,window,cx));assert!(!control_label_action_available(&label));
+        request_label(&label,window,cx);assert!(control_label_action_lease(&label).is_none());assert!(events(host,cx).is_empty());
         assert!(!projected(&button).labelled_by().is_empty());
         host.label.update(cx,|component,cx|component.set_props(json!({"naming":false,"activation":true}),window,cx).unwrap_or_else(|_|panic!("activation-only Label")));
         assert!(projected(&button).labelled_by().is_empty());assert_eq!(projected(&button).label(),Some("Action"));
@@ -89,25 +96,24 @@ fn duplicate_detach_and_reference_replacement_never_choose_a_winner(cx:&mut Test
     }).unwrap();frames(&mut visual);
     window.update(&mut visual,|host,window,cx|{
         let label=host.label.read(cx).owner.clone();let button=host.button.read(cx).owner.clone();
-        assert_eq!(control_label_diagnostic(&label),Some("duplicate-binding"));
-        assert!(!control_label_accessibility_action(&label,window,cx));assert!(events(host,cx).is_empty());
+        request_label(&label,window,cx);assert_pair_diagnostic(&label);assert!(events(host,cx).is_empty());
         assert!(projected(&button).labelled_by().is_empty());
-        let duplicate=host.extra.pop().unwrap();set_instance_associations(&duplicate.read(cx).owner,NativeInstanceAssociations::default());drop(duplicate);cx.notify();
+        let duplicate=host.extra.pop().unwrap();replace_instance_associations(&duplicate.read(cx).owner,InstanceAssociations::default());drop(duplicate);cx.notify();
     }).unwrap();frames(&mut visual);
     window.update(&mut visual,|host,window,cx|{
-        let label=host.label.read(cx).owner.clone();assert!(control_label_accessibility_action(&label,window,cx));assert_eq!(events(host,cx),click_signal());
+        let label=host.label.read(cx).owner.clone();control_label_action_lease(&label).expect("enabled Label action").request(window,cx);assert_eq!(events(host,cx),click_signal());
         host.show_label=false;cx.notify();
     }).unwrap();frames(&mut visual);
     window.update(&mut visual,|host,window,cx|{
-        let label=host.label.read(cx).owner.clone();assert!(!ready(&label));assert!(!control_label_accessibility_action(&label,window,cx));
+        let label=host.label.read(cx).owner.clone();assert!(!ready(&label));request_label(&label,window,cx);assert!(events(host,cx).is_empty());
         let button=host.button.read(cx).owner.clone();assert!(projected(&button).labelled_by().is_empty());
         host.show_label=true;cx.notify();
     }).unwrap();frames(&mut visual);
     window.update(&mut visual,|host,window,cx|{
-        let label=host.label.read(cx).owner.clone();assert!(control_label_accessibility_action(&label,window,cx));assert_eq!(events(host,cx),click_signal());
-        let unrelated=ControlLabelRef::new();set_instance_associations(&label,associations(&unrelated));
-        assert!(!control_label_accessibility_action(&label,window,cx));assert!(events(host,cx).is_empty());
-        set_instance_associations(&label,associations(&host.reference));assert!(control_label_accessibility_action(&label,window,cx));assert_eq!(events(host,cx),click_signal());
+        let label=host.label.read(cx).owner.clone();control_label_action_lease(&label).expect("enabled Label action").request(window,cx);assert_eq!(events(host,cx),click_signal());
+        let unrelated=ControlLabelRef::new();replace_instance_associations(&label,associations(&unrelated));
+        request_label(&label,window,cx);assert!(events(host,cx).is_empty());
+        replace_instance_associations(&label,associations(&host.reference));control_label_action_lease(&label).expect("enabled Label action").request(window,cx);assert_eq!(events(host,cx),click_signal());
     }).unwrap();
 }
 
@@ -128,10 +134,13 @@ fn primary_click_activates_once_but_modified_dragged_and_unknown_slot_input_do_n
     window.update(&mut visual,|host,_,cx|{
         let nested=cx.new(|_|NativeChild(native_calls.clone()));host.label.update(cx,|label,cx|label.set_slot(vec![NativeSnapshot::native_view(nested.into())],cx).unwrap_or_else(|_|panic!("unknown native slot")));
     }).unwrap();frames(&mut visual);
-    let position=window.update(&mut visual,|host,_,cx|{assert_eq!(control_label_diagnostic(&host.label.read(cx).owner),Some("unsupported-pointer-content"));host.label.read(cx).owner.borrow().bounds.unwrap().center()}).unwrap();
+    let position=window.update(&mut visual,|host,_,cx|host.label.read(cx).owner.borrow().bounds.unwrap().center()).unwrap();
     visual.simulate_click(position,Modifiers::default());
     assert_eq!(native_calls.get(),1,"the native descendant keeps its own action");
-    window.update(&mut visual,|host,_,cx|assert!(events(host,cx).is_empty())).unwrap();
+    window.update(&mut visual,|host,_,cx|{
+        assert!(events(host,cx).is_empty());
+        assert!(take_control_label_diagnostics(&host.label.read(cx).owner).iter().any(|message|message.contains("opaque native_view")));
+    }).unwrap();
 }
 
 #[gpui::test]
@@ -159,14 +168,13 @@ fn window_deactivation_retires_a_label_pointer_request_without_adding_focus(cx:&
 fn a_shared_reference_does_not_authorize_different_native_windows(cx:&mut TestAppContext){
     let reference=ControlLabelRef::new();let first=open(cx,Some(reference.clone()));let second=open(cx,Some(reference.clone()));
     let mut visual=VisualTestContext::from_window(AnyWindowHandle::from(first),cx);frames(&mut visual);
-    second.update(&mut visual,|host,_,cx|{set_instance_associations(&host.label.read(cx).owner,NativeInstanceAssociations::default());}).unwrap();
-    first.update(&mut visual,|host,_,cx|{set_instance_associations(&host.button.read(cx).owner,NativeInstanceAssociations::default());}).unwrap();
+    second.update(&mut visual,|host,_,cx|{replace_instance_associations(&host.label.read(cx).owner,InstanceAssociations::default());}).unwrap();
+    first.update(&mut visual,|host,_,cx|{replace_instance_associations(&host.button.read(cx).owner,InstanceAssociations::default());}).unwrap();
     // Draw through the window context, without leasing its root Harness while
     // GPUI itself needs that same entity to render the new frame.
     let mut second_visual=VisualTestContext::from_window(AnyWindowHandle::from(second),cx);frames(&mut second_visual);
     first.update(&mut visual,|host,window,cx|{
-        let label=host.label.read(cx).owner.clone();assert_eq!(control_label_diagnostic(&label),Some("foreign-tree-scope"));
-        assert!(!control_label_accessibility_action(&label,window,cx));assert!(events(host,cx).is_empty());
+        let label=host.label.read(cx).owner.clone();request_label(&label,window,cx);assert_pair_diagnostic(&label);assert!(events(host,cx).is_empty());
     }).unwrap();
 }
 
@@ -214,10 +222,9 @@ fn one_logical_participant_with_two_physical_views_cannot_name_or_activate(cx:&m
             let label=host.label.read(cx).owner.clone();let button=host.button.read(cx).owner.clone();
             let duplicated=if target_duplicate{button.clone()}else{label.clone()};
             assert_eq!(duplicated.borrow().modules.a11y_bindings,2,"one actual Entity is laid out through two different native parents");
-            assert!(control_label_diagnostic(&label).is_some(),"ambiguous physical binding has a diagnostic");
-            assert!(!control_label_action_available(&label));
+            take_control_label_diagnostics(&label);
             assert!(projected(&button).labelled_by().is_empty(),"naming may not choose either native occurrence");
-            assert!(!control_label_accessibility_action(&label,window,cx),"direct assistive input also requires a unique current view");
+            request_label(&label,window,cx);assert_pair_diagnostic(&label);
             assert!(events(host,cx).is_empty());
             let position=label.borrow().bounds.expect("last laid-out label").center();position
         }).unwrap();
@@ -230,8 +237,8 @@ fn one_logical_participant_with_two_physical_views_cannot_name_or_activate(cx:&m
         window.update(&mut visual,|host,window,cx|{
             let label=host.label.read(cx).owner.clone();let button=host.button.read(cx).owner.clone();
             assert_eq!(label.borrow().modules.a11y_bindings,1);assert_eq!(button.borrow().modules.a11y_bindings,1);
-            assert_eq!(control_label_diagnostic(&label),None);
-            assert!(control_label_accessibility_action(&label,window,cx));assert_eq!(events(host,cx),click_signal());
+            assert_eq!(projected(&button).labelled_by(),&[label.borrow().modules.a11y_node.expect("unique current Label node")]);
+            control_label_action_lease(&label).expect("enabled Label action").request(window,cx);assert_eq!(events(host,cx),click_signal());
         }).unwrap();
         let position=window.update(&mut visual,|host,_,cx|host.label.read(cx).owner.borrow().bounds.unwrap().center()).unwrap();
         visual.simulate_mouse_down(position,MouseButton::Left,Modifiers::default());

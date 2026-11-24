@@ -254,13 +254,7 @@
         "vue2-source-v1",
         "web-component-source-v1"
       ],
-      "variantsPerProfile": [
-        "copy",
-        "tint",
-        "both",
-        "static-data",
-        "scene"
-      ],
+      "variantsPerProfile": ["copy", "tint", "both", "static-data", "scene"],
       "result": "passed",
       "execution": "local-types-final-execution.json",
       "discardedSelectors": "local-types-selection-attempt.json"

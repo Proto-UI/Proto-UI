@@ -807,23 +807,43 @@ function potentialEntryPositionSubjects(selector: string, candidates: readonly E
   return subjects;
 }
 
-function hasInputStateSelector(selector: string): boolean {
-  // A control can change selector matching without mutating an attribute.
-  // Decode CSS escapes before checking pseudo-classes, including state
-  // predicates nested in :has(), :not() and filtered sibling selectors.
-  const decoded = selector.replace(
-    /\\(?:([0-9a-f]{1,6})(?:\r\n|[ \t\n\r\f])?|([^\n\r\f]))/gi,
-    (_escape, hexadecimal: string | undefined, character: string | undefined) => {
-      if (!hexadecimal) return character ?? '';
-      const codePoint = Number.parseInt(hexadecimal, 16);
-      return codePoint > 0 && codePoint <= 0x10ffff && !(codePoint >= 0xd800 && codePoint <= 0xdfff)
-        ? String.fromCodePoint(codePoint)
-        : '\uFFFD';
+function selectorMayDependOnInputState(selector: string): boolean {
+  for (let index = 0; index < selector.length; index += 1) {
+    const character = selector[index]!;
+    const literalEnd = skipSelectorLiteral(selector, index, character);
+    if (literalEnd !== null) {
+      index = literalEnd;
+      continue;
     }
-  );
-  return /:(?:-webkit-|-moz-)?(?:autofill|blank|checked|dir|indeterminate|in-range|open|out-of-range|placeholder-shown|state|(?:user-|ui-|submit-)?(?:valid|invalid))(?=[^\w-]|$)/i.test(
-    decoded
-  );
+    // An unresolved nesting selector cannot prove that input is unrelated.
+    if (character === '&') return true;
+    if (character !== ':') continue;
+    const pseudoElement = selector[index + 1] === ':';
+    const start = index + (pseudoElement ? 2 : 1);
+    let end = start;
+    while (/[\w-]/.test(selector[end] ?? '')) end += 1;
+    const name = selector.slice(start, end).toLowerCase();
+    // Attribute/tree changes, focus/modality and URL changes already have
+    // their own observers. Native checkedness, validity, range, placeholder,
+    // dir=auto direction, autofill and unknown pseudo states may change
+    // without a DOM mutation.
+    // Keep those conservative across the stylesheet's whole scope, including
+    // form-associated controls, sibling conditions and nested :has branches.
+    // Known native part names do not themselves test the host's input state.
+    // Continue scanning host/state pseudo-classes and retain unknown names.
+    const independent = pseudoElement
+      ? /^(?:before|after|first-letter|first-line|marker|backdrop|selection|placeholder|part|slotted|file-selector-button|-webkit-(?:details-marker|search-decoration|date-and-time-value|datetime-edit(?:-(?:fields-wrapper|(?:year|month|day|hour|minute|second|millisecond|meridiem)-field))?|calendar-picker-indicator|(?:inner|outer)-spin-button))$/.test(
+          name
+        )
+      : /^(?:is|where|not|has|nth(?:-last)?-(?:child|of-type)|(?:first|last|only)-(?:child|of-type)|root|scope|host|host-context|empty|defined|lang|hover|active|focus(?:-within|-visible)?|link|any-link|visited|target(?:-within)?|enabled|disabled|required|optional|read-only|read-write|before|after|first-letter|first-line)$/.test(
+          name
+        );
+    if (!independent || selector[end] === '\\') return true;
+    // Continue through functional pseudo arguments so e.g. :not(:checked)
+    // and :nth-child(2 of :has(input:invalid)) retain their state dependency.
+    index = end - 1;
+  }
+  return false;
 }
 
 function collectEntryStyleDependencies(
@@ -834,10 +854,18 @@ function collectEntryStyleDependencies(
   observesResize: boolean,
   observedRoots: ReadonlySet<Node>
 ) {
+  const ScopeRule = (
+    view as unknown as {
+      CSSScopeRule?: new () => CSSGroupingRule & {
+        readonly start: string | null;
+        readonly end: string | null;
+      };
+    }
+  ).CSSScopeRule;
   const queries = new Set<string>();
   const visitedSheets = new Set<CSSStyleSheet>();
-  let hasExternalInputStateDependency = false;
   let relational = 0;
+  let inputState = false;
   const siblingSubjects = new Set<Element>();
   const relationalSubjects = new Set<Element>();
   const positionParents = new Set<Node>();
@@ -861,33 +889,19 @@ function collectEntryStyleDependencies(
     if (query) queries.add(query);
   };
   const visitRule = (rule: CSSRule) => {
-    if (!hasExternalInputStateDependency && rule.type !== 1 && 'cssRules' in rule) {
-      // Group conditions such as @scope can carry state selectors outside a
-      // CSSStyleRule's selectorText. Stop before declarations, respecting CSS
-      // literals rather than treating a value such as cursor:default as a selector.
-      const text = rule.cssText;
-      if (typeof text !== 'string') hasExternalInputStateDependency = true;
-      else {
-        let end = text.length;
-        for (let index = 0; index < text.length; index += 1) {
-          const literalEnd = skipSelectorLiteral(text, index, text[index]!);
-          if (literalEnd !== null) {
-            index = literalEnd;
-            continue;
-          }
-          if (text[index] === '{') {
-            end = index;
-            break;
-          }
-        }
-        hasExternalInputStateDependency = hasInputStateSelector(text.slice(0, end));
-      }
-    }
+    // A scope's start/end selectors can change entry eligibility without an
+    // attribute mutation. Read their native IDL, not a whole grouping cssText
+    // whose media features and nested declarations are not selector preludes.
+    if (!inputState && ScopeRule && rule instanceof ScopeRule)
+      inputState =
+        selectorMayDependOnInputState(rule.start ?? '') ||
+        selectorMayDependOnInputState(rule.end ?? '');
     if (rule.type === 3 || rule.type === 4)
       collectMedia((rule as CSSImportRule | CSSMediaRule).media);
     if (rule.type === 3) {
       const imported = (rule as CSSImportRule).styleSheet;
       if (imported) visitSheet(imported);
+      else inputState = true;
     }
     if (rule.type === 1) {
       let selector = (rule as CSSStyleRule).selectorText;
@@ -896,7 +910,7 @@ function collectEntryStyleDependencies(
           '&',
           `:is(${(rule.parentRule as CSSStyleRule).selectorText})`
         );
-      hasExternalInputStateDependency ||= hasInputStateSelector(selector);
+      inputState ||= selectorMayDependOnInputState(selector);
       if (/[+~](?!=)/.test(selector) && styleRuleCanAffectEntryEligibility(rule as CSSStyleRule))
         for (const subject of collectSiblingDependencySubjects(
           selector,
@@ -987,6 +1001,7 @@ function collectEntryStyleDependencies(
           // Unknown selector syntax is correctness-sensitive: retain a bounded
           // external-chain fallback rather than silently missing a change.
           relational ||= 1;
+          inputState = true;
         }
       }
     }
@@ -1002,7 +1017,7 @@ function collectEntryStyleDependencies(
     } catch {
       // Cross-origin sheets remain opaque; their owner media still applies.
       relational ||= 1;
-      hasExternalInputStateDependency = true;
+      inputState = true;
     }
   };
   for (const root of roots)
@@ -1015,7 +1030,7 @@ function collectEntryStyleDependencies(
     relationalSubjects,
     positionParents,
     filteredPositionParents,
-    hasExternalInputStateDependency,
+    inputState,
   ] as const;
 }
 
@@ -2156,7 +2171,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 relationalSubjects,
                 positionParents,
                 filteredPositionParents,
-                hasExternalInputStateDependency,
+                hasInputStateStyleDependency,
               ] = collectEntryStyleDependencies(
                 view!,
                 mediaRoots,
@@ -2261,26 +2276,17 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   attributes: true,
                 });
               }
-              const shouldProjectInputEvent = (event: Event) => {
-                if (
-                  !event.isTrusted ||
-                  hasExternalStyleInputs ||
-                  hasSlottedEntryContent ||
-                  hasExternalInputStateDependency
-                )
-                  return true;
-                const origin = event.composedPath()[0];
-                // Media-query changes and unknown origins remain conservative.
-                // Owned portals are in observedRoots; slot assignment takes
-                // the conservative path above.
-                return !(origin instanceof view!.Node) || belongsToObservedEntryTree(origin);
-              };
-              const stopEntryEnvironmentEvents = listenToEntryEvents(
-                [view!, ...mediaQueries],
-                ['resize', 'change'],
-                (event) => {
-                  if (event.type !== 'change' || shouldProjectInputEvent(event)) projectCurrent();
-                }
+              const stopEntryResizeEvents = listenToEntryEvents(
+                [view!],
+                ['resize'],
+                projectCurrent
+              );
+              // A form change bubbles through Window too. Only media query
+              // changes are environmental invalidations for every entry.
+              const stopEntryMediaEvents = listenToEntryEvents(
+                mediaQueries,
+                ['change'],
+                projectCurrent
               );
               const onFormReset = (event: Event) => {
                 const form = event.composedPath()[0];
@@ -2385,11 +2391,6 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   );
               };
               const onProjectionEvent = (event: Event) => {
-                if (
-                  (event.type === 'input' || event.type === 'change') &&
-                  !shouldProjectInputEvent(event)
-                )
-                  return;
                 // Keep the substituted fallback stable while the browser is
                 // consuming the same Tab default action. The subsequent task
                 // resamples after focus-visible/focus state settles.
@@ -2398,9 +2399,17 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   (event.type === 'focusin' || event.type === 'focusout')
                 )
                   return;
-                if (event.type.startsWith('transition')) {
+                const transition = event.type.startsWith('transition');
+                if (transition) {
                   const propertyName = (event as TransitionEvent).propertyName;
                   if (!propertyAffectsEntryEligibility(propertyName)) return;
+                }
+                if (
+                  transition ||
+                  ((event.type === 'input' || event.type === 'change') &&
+                    !hasInputStateStyleDependency &&
+                    !hasSlottedEntryContent)
+                ) {
                   const path = event.composedPath();
                   const origin = path[0];
                   if (
@@ -2469,7 +2478,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   view!.cancelAnimationFrame(eligibilityAnimationFrame);
                 eligibilityAnimationFrame = 0;
                 eligibilityAnimations.clear();
-                stopEntryEnvironmentEvents();
+                stopEntryResizeEvents();
+                stopEntryMediaEvents();
                 stopFormResetEvents();
                 stopSiblingStateEvents();
                 if (keyboardTraversalTimer) view!.clearTimeout(keyboardTraversalTimer);

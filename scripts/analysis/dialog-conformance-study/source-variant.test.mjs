@@ -12,10 +12,14 @@ const relative = 'checks/example.ts';
 const plan = {
   inputs: { [relative]: sha256(original) },
   existingSuites: { [relative]: 1 },
-  checkPreparations: [{
-    path: relative, beforeSha256: sha256(original), afterSha256: sha256(prepared),
-    replacements: [{ before: 'pressTab();', after: 'completeEntry();\npressTab();' }],
-  }],
+  checkPreparations: [
+    {
+      path: relative,
+      beforeSha256: sha256(original),
+      afterSha256: sha256(prepared),
+      replacements: [{ before: 'pressTab();', after: 'completeEntry();\npressTab();' }],
+    },
+  ],
 };
 
 test('study preparation preserves the original file and binds the actually transformed checker', (context) => {
@@ -30,7 +34,9 @@ test('study preparation preserves the original file and binds the actually trans
   assert.equal(plugin.transform(original, path.join(root, relative)).code, prepared);
   assert.equal(fs.readFileSync(path.join(root, relative), 'utf8'), original);
   const receipt = JSON.parse(fs.readFileSync(path.join(cell, 'preparations.json'), 'utf8'));
-  assert.deepEqual(receipt.files, [{ path: relative, beforeSha256: sha256(original), afterSha256: sha256(prepared) }]);
+  assert.deepEqual(receipt.files, [
+    { path: relative, beforeSha256: sha256(original), afterSha256: sha256(prepared) },
+  ]);
   assert.equal(plugin.transform('unrelated', path.join(root, 'unrelated.ts')), null);
 });
 

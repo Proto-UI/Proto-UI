@@ -171,12 +171,8 @@
       "skipped": 0,
       "firstDivergence": {
         "step": "Cancel invokes only cancel",
-        "actual": [
-          "save"
-        ],
-        "expected": [
-          "cancel"
-        ]
+        "actual": ["save"],
+        "expected": ["cancel"]
       },
       "responsibility": "application-task"
     },
@@ -320,10 +316,7 @@
     {
       "id": "D754-EARLY-ENTRY",
       "currentTracker": "https://github.com/Proto-UI/Proto-UI/issues/1178",
-      "historicalScopeSources": [
-        1161,
-        1177
-      ],
+      "historicalScopeSources": [1161, 1177],
       "excludedMisattribution": 1191,
       "nextAction": "Preserve the two raw unchanged WC first-Tab failures and rejected cancelability hypothesis; trace Focus/Portal entry ownership and native early input before deciding fixture vs product repair. Do not narrow ordinary suite."
     },

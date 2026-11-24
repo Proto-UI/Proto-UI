@@ -1,0 +1,830 @@
+{
+  "schemaVersion": 1,
+  "kind": "isolated-prepared-source-controls-typecheck-incomplete",
+  "repository": "Proto-UI/Proto-UI",
+  "createdAt": "2026-11-23T20:09:50.555027+00:00",
+  "baseCommit": "db747e1b81cbbfaf2b37dd8af3de48108f036a04",
+  "inheritedIRValidation": {
+    "sha256": "b8ef32a38d694348ffc221dff7df643110795d4918ada24f4060cc856731e535",
+    "alreadyInParentCommit": "52c87232f593d85a28cbd04ad205f0d5fe6f03a3",
+    "includedInSourcePatch": false
+  },
+  "environment": {
+    "node": "v24.22.3",
+    "pnpm": "10.32.1"
+  },
+  "sourcePatchSha256": "2a2bbd9f6471c7ed6ab94200bca2ba5c0e70578a2c6773c4962ab3ca4f9a1bbe",
+  "sources": [
+    {
+      "path": "packages/compiler/src/callable-effects.ts",
+      "sha256": "3608dbdd18ce3748cbebb67d83cf1fd113639f5f323f7a6e18f27060e367f7ca",
+      "bytes": 70818
+    },
+    {
+      "path": "packages/compiler/test/capture-getter-presence.test.ts",
+      "sha256": "401ba3ab0ace392f82388c8bcee02f512d691906ff24d09071024cee2b6c56de",
+      "bytes": 3971
+    },
+    {
+      "path": "packages/compiler/test/capture-host-presence.test.ts",
+      "sha256": "e549d60efb5e428642194d6974959cc3b05365277e2bf7735b4dab1712df5c23",
+      "bytes": 2366
+    }
+  ],
+  "unchangedOriginalTests": {
+    "capture-facade.test.ts": "8037dfff27db308580455f934e081e3790600faedf18e2941bb080b692699b3b",
+    "value-ir.test.ts": "85cae90e3bf68175ff5524ea43ee7a8851fdb4ddaaf91cae45063fdefea9d5df",
+    "capture-lookup-integrity.test.ts": "7ab51a4aec4b10e41f55dd530b71c7d7df2b6be9567e71e6cf238bc9c5661402",
+    "authored-hook-language.test.ts": "8e8bcba009970459d2d3ac54fa79c293866d24f433d4ed892ac08abe9aa1d302",
+    "mutable-callable-orders.test.ts": "85c3569e00dd02ac60384bbced029b482a4b0bde472c57018839acaa54fd1c1e",
+    "module-helper-capture-boundary.test.ts": "ce47f391732120c0d79898da65b8a16ff41727efc034a76fc78edf5ed66ea995",
+    "privileged-capture-metadata.test.ts": "4eb06fb85d78d2548a247f9b21d75aad1747eacd88a20046afdf2ec15ab52eca"
+  },
+  "finalGates": {
+    "r4c-before": {
+      "exitCode": 1,
+      "elapsedSeconds": 10.0477,
+      "passed": 14,
+      "failed": 1,
+      "pending": 0,
+      "todo": 0
+    },
+    "r4c-presence15": {
+      "exitCode": 0,
+      "elapsedSeconds": 3.270094,
+      "passed": 15,
+      "failed": 0,
+      "pending": 0,
+      "todo": 0
+    },
+    "r4c-original98": {
+      "exitCode": 0,
+      "elapsedSeconds": 103.035801,
+      "passed": 98,
+      "failed": 0,
+      "pending": 0,
+      "todo": 0
+    },
+    "r4c-workspace-types": {
+      "result": "timeout",
+      "budgetSeconds": 240,
+      "diagnosticBytes": 0,
+      "error": "TimeoutExpired(['corepack', 'pnpm@10.32.1', 'exec', 'tsc', '-p', 'tsconfig.workspace.json', '--noEmit', '--pretty', 'false'], 239.99997787800385)",
+      "passed": false
+    }
+  },
+  "artifacts": [
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/before-callable-effects.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/before-callable-effects.ts",
+      "rawBytes": 60473,
+      "rawSha256": "ff32f98da35b7181d2724001b8b1279d1c31853ee23d4057f669bd4953f64475",
+      "storedBytes": 13670,
+      "storedSha256": "558f8b14e2718eb1d449f332632d37aecebabcea4d5ccba7b516cc66c62eacdc"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/candidate-callable-effects.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/candidate-callable-effects.ts",
+      "rawBytes": 64584,
+      "rawSha256": "bd975273fe357affef39ba6add711fbe9d6a9085dd6ed75989d30f3882570cf5",
+      "storedBytes": 14775,
+      "storedSha256": "5dea3db184fe4f5cd82cac71c3370d9aac0b221ea2e8ef73212dd5faed653ed4"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/candidate.patch.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/candidate.patch",
+      "rawBytes": 12200,
+      "rawSha256": "44927e9388bc834347f48eea58eafaf0abd30428a3bdcf40aa0724f4e69a2c2a",
+      "storedBytes": 3345,
+      "storedSha256": "7508674aaa22a9d9f90fbed03fd3a02f0972a51a12376aa79bec75384a506d85"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/capture-getter-presence.test.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/capture-getter-presence.test.ts",
+      "rawBytes": 2100,
+      "rawSha256": "82f3a07c6a5066a0484c562f51bce0b2d1ea12dabd597a2375d87564126140bd",
+      "storedBytes": 901,
+      "storedSha256": "26fd8e2004755d593aa74047865bdae0803be296e095dc0cde0d61b47e7fd9b0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/final-source-and-tests.patch.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/final-source-and-tests.patch",
+      "rawBytes": 32343,
+      "rawSha256": "2a2bbd9f6471c7ed6ab94200bca2ba5c0e70578a2c6773c4962ab3ca4f9a1bbe",
+      "storedBytes": 7929,
+      "storedSha256": "17737a67a0847d8bfa16982830834586b5c9e0bb9a6311e685ddcf3a4e6ccfc8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/host-test-r4.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/host-test-r4.ts",
+      "rawBytes": 2405,
+      "rawSha256": "3d465f3010df14b3b494a72269e61ace5541cf3bf0528d8e44a34f15742ce7b9",
+      "storedBytes": 872,
+      "storedSha256": "60cf9806f297098e9030caebb9317f3aa08b045be83bfd3dd7fc104f1464bee1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/host-test-r4b.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/host-test-r4b.ts",
+      "rawBytes": 2381,
+      "rawSha256": "85ac9ab19bc66d0259526285b8601983b265504e7fda6109555f8a13b1478606",
+      "storedBytes": 869,
+      "storedSha256": "71609da1d066408fe4fea2f4e3db94a1bb1fed41835c26de8aa7567a49b2c1f0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/host-test-r4c.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/host-test-r4c.ts",
+      "rawBytes": 2330,
+      "rawSha256": "de7740d3340ca14705881af58948382087e66c4727c4f9cc71c98301ff005aac",
+      "storedBytes": 865,
+      "storedSha256": "3c4a6a786f474ea701d00dfdc1e5ef7d7650447bf9b6e5f0772490860327a67c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/isolated-actual.patch.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/isolated-actual.patch",
+      "rawBytes": 13909,
+      "rawSha256": "ceff6627dd40aaa977159737f77fcec205f5232505cd8df5e1591471caf4685e",
+      "storedBytes": 3848,
+      "storedSha256": "68dbc5eef23ed15b46a0f1e65c7ef5c7ecd4bffc8468967344108622b25fd67c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/isolated-after.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/isolated-after.json",
+      "rawBytes": 37601,
+      "rawSha256": "af8211e3449c96dc2eee61958fe962d1a7e0602f0a7650f243586f5b020bf765",
+      "storedBytes": 4757,
+      "storedSha256": "01f00693c6d477c79683090ac8d58286c8ec9ad7322224d72f81b7de0acf943e"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/isolated-after.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/isolated-after.log",
+      "rawBytes": 91976,
+      "rawSha256": "403b76406657904b0284fc7b6598f5921524f8e0ccaf9840e8a95721709acf1f",
+      "storedBytes": 14571,
+      "storedSha256": "aa6c20e105e9043aa924381770b06579d37eeb1bac75522d94c01db4a334b7c1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/isolated-before.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/isolated-before.json",
+      "rawBytes": 61339,
+      "rawSha256": "ff6e7b56857c9f8326c8ea62b090d82a8780a2061eccaeba8aebc7b139d7e758",
+      "storedBytes": 5659,
+      "storedSha256": "4a60bf0fe58682ae98bc2b3f2bc784d04872c74cb6daa7d53d66e0fa9f55de01"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/isolated-before.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/isolated-before.log",
+      "rawBytes": 91977,
+      "rawSha256": "23db375bb470afad7061f55e3113dfd9c896025df4ec405ecb699453dafb53da",
+      "storedBytes": 14590,
+      "storedSha256": "1c9ac249d9cab206ca7ac333586a8ac28cb9fae79130aca7c2405e7b94e160f0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/isolated-differential.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/isolated-differential.json",
+      "rawBytes": 2446,
+      "rawSha256": "6b6731e9bfb5702ed418f1da07a582a902769f5ec3f511b9d6752f86a9566b6f",
+      "storedBytes": 681,
+      "storedSha256": "852df7cd78125a8254c0bdca5173485a2ce923d11a407e3b856bcbd6ef2b40f9"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/isolated-driver.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/isolated-driver.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/isolated-status.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/isolated-status.json",
+      "rawBytes": 7131,
+      "rawSha256": "4141b17d7b5ea6650d5a2fcb2843d592462b75a9a8d89abe8d7fd518804fa347",
+      "storedBytes": 1719,
+      "storedSha256": "99660f45ad369d88ac5d397daca1ddaa2b70172bd0affcd5ab914313ded9667c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/isolated-worker.py.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/isolated-worker.py",
+      "rawBytes": 6521,
+      "rawSha256": "fbe53000bdf831444b03aeda4da0f4c08f02fb4db84f1b8c9af46cf250ae24bb",
+      "storedBytes": 2644,
+      "storedSha256": "27f0b59f86d0010df070b99446e8984189c75548006ba3eeb604574ade2b80ef"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/presence-r2-status.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/presence-r2-status.json",
+      "rawBytes": 995,
+      "rawSha256": "bcfb0ad30aefd6d6634d1e4b07322e2ccb7de119f6d86fd973e20dc26fb41975",
+      "storedBytes": 517,
+      "storedSha256": "00cb4c57fa5ebb8d47eb80564c6e092c6dface73e88ad0b6361a96fbecbbb7c2"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/presence-r2.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/presence-r2.json",
+      "rawBytes": 7232,
+      "rawSha256": "42bb835de712d14b905873f25c3c816dd9e28acf4c2ef3ccb4627f704c13b92c",
+      "storedBytes": 1282,
+      "storedSha256": "05772a6d6a892c0f850e93fbe3d5a16712091e5911cc7eac51550646ebd95c75"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/presence-r2.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/presence-r2.log",
+      "rawBytes": 16961,
+      "rawSha256": "9639a9677b08c57669f2cca5c3b1a1a9c8feacfdc10373f602fbeb3eb92a5a57",
+      "storedBytes": 2673,
+      "storedSha256": "10d7fb2c18e71a34bf4eace0f793a600d065962a17b2938157e32d7b3391ae55"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/presence-r2b-driver-retry.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/presence-r2b-driver-retry.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/presence-r2b-driver.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/presence-r2b-driver.log",
+      "rawBytes": 183,
+      "rawSha256": "67d8a461b46fa54ce627611775dad258af9efc79ef7788ef759cf726941a0903",
+      "storedBytes": 163,
+      "storedSha256": "2137d33e834d63e2d752e84dcecd8f159bfe7f4b0536e747be4570ec8cb5c3ed"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/presence-r2b-status.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/presence-r2b-status.json",
+      "rawBytes": 996,
+      "rawSha256": "ec17f6a9aa21d07079c36e45c0a908d32ef84073fa5af3ffa6464c71dd98af33",
+      "storedBytes": 518,
+      "storedSha256": "4eb642af37a0611f374e2c5bae548f1db8883d17486e3545e41bedc0d424a343"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/presence-r2b-worker.py.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/presence-r2b-worker.py",
+      "rawBytes": 2315,
+      "rawSha256": "384ae3a98c0c290d4bdda368c0261e80ebd98dae0fc3d8ceb918966446543deb",
+      "storedBytes": 1103,
+      "storedSha256": "5cff2ef69b52c6444e5bd565d8292ef0e11006eaf92557895db1d1f88722fb28"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/presence-r2b.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/presence-r2b.json",
+      "rawBytes": 16430,
+      "rawSha256": "5ecb0db9e10fadd08b967122e30e7113e020f32dd689e40fc81e33234a59e47a",
+      "storedBytes": 1231,
+      "storedSha256": "86431c0bed9277625456e9c2191073e83a6685f61f4a60611a3588400f505f04"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/presence-r2b.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/presence-r2b.log",
+      "rawBytes": 16962,
+      "rawSha256": "600dc18f8a0819f51eb57a67135537416a1160bd7c19dfab14e9821bba01543d",
+      "storedBytes": 2637,
+      "storedSha256": "1c3a27b2e0bc0a67d2a4121c92ce06abf9aeb313950830c2fd3e77d76965b357"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/presence-red-driver.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/presence-red-driver.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/presence-red-worker.py.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/presence-red-worker.py",
+      "rawBytes": 2309,
+      "rawSha256": "b96c11c88808dcec66e4d8e1498c2caa3289051f47844191445158710d5fe681",
+      "storedBytes": 1104,
+      "storedSha256": "a4478e8fec9c7893dce20af78ccbf92cb3d3a26d25cdcea12d73d373e8734c15"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/presence-test-r2b.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/presence-test-r2b.ts",
+      "rawBytes": 2074,
+      "rawSha256": "8aab4ca2bdaa64cf5f7dd7d83e4a0f448e5d8d8bc25ff341c8cc02ecfa471d60",
+      "storedBytes": 902,
+      "storedSha256": "5224fdacd07f11d46c2d9beeda57a61df4edeca345ab86a6f64be512810ca40b"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/presence-test-r4.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/presence-test-r4.ts",
+      "rawBytes": 3568,
+      "rawSha256": "9c2b31b2650c47c9902c06cc8a5f910ec4d1cb4f61198b944af8088700eb97bc",
+      "storedBytes": 1175,
+      "storedSha256": "c65255912289dd8c05c3f366a7e6cd7b2dd2e5ef8f236cd071a70bc3b664aa5b"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/presence-test-r4b.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/presence-test-r4b.ts",
+      "rawBytes": 3707,
+      "rawSha256": "726a5a51ace3701109815ab03ada476dc89cbd7ae13f6bb660d04c429e8fb259",
+      "storedBytes": 1206,
+      "storedSha256": "a5cb425945ef5dd2fd78c688f1ab33dbff4b5f75498178657b0b15edc787abef"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/presence-test-r4c.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/presence-test-r4c.ts",
+      "rawBytes": 3877,
+      "rawSha256": "60305e9b7348b89edeecc84c876caf116cdc6c5aff7721bbedc3c22a93dfb967",
+      "storedBytes": 1281,
+      "storedSha256": "fd5bd91a7cdb738dbdf5543181f369bd0fe31cd958168db125f5ceddf1b21bf2"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r2-callable-effects.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r2-callable-effects.ts",
+      "rawBytes": 65247,
+      "rawSha256": "dd70756fea96046f0edccf8b868f9ecf21f5f1678bf4d97306f3a98278f24f9c",
+      "storedBytes": 14927,
+      "storedSha256": "5b02e895f0dcc1041d2d86b660436487d4f7ff46e8a8e92ba8045d65381fa907"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r2-candidate.patch.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r2-candidate.patch",
+      "rawBytes": 12743,
+      "rawSha256": "479b246942c808aa075aa198464f7617689504f0b9f5775acad594c6200ac743",
+      "storedBytes": 3547,
+      "storedSha256": "5fe3811523be0a0d05c94b4c37d20124d9b94f37531027bd128a56f6626b7c9a"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r2-optional-throw-delta.patch.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r2-optional-throw-delta.patch",
+      "rawBytes": 1812,
+      "rawSha256": "0f6f380a4697052a1f02dde6cd28e9e417bc1525ebefefb2ad6e1a6419b76210",
+      "storedBytes": 755,
+      "storedSha256": "b25abcf461ac6c99ee499e38ca6dd72174c056234aad8f8fa2006aa8b9a00590"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r2-status.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r2-status.json",
+      "rawBytes": 818,
+      "rawSha256": "bba852e7128f019d0a52b86eb13ec5eca095ebc72aea9f836b5616b9696465e3",
+      "storedBytes": 505,
+      "storedSha256": "4ed5a6e2978c196a14f00c8ca8acdcb590aa3467c272f46fe792405b28a98813"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r3-callable-effects.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r3-callable-effects.ts",
+      "rawBytes": 69919,
+      "rawSha256": "9cfdb4dc226d652ba688cc6ccd3b0493e614d2254907ab0221c0ae22524a43f8",
+      "storedBytes": 15913,
+      "storedSha256": "82fdecc59b88cc2e0217264c904fa6bb85dd718fc40dbbe2136e2aecf9920366"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r3-candidate.patch.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r3-candidate.patch",
+      "rawBytes": 24004,
+      "rawSha256": "7680c97cb0b7949cffb61d2f8f1506b02792cf665300ce83414fe35c1769aa11",
+      "storedBytes": 6044,
+      "storedSha256": "10d309f360e745e1cfc0ad02983b1872a6f216176e30e5ab9fcba5da3e78d167"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r3-driver.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r3-driver.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r3-format.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r3-format.log",
+      "rawBytes": 48,
+      "rawSha256": "838e0905de2a56b2eca700bd9deb44750750dbe9d31a1330e235cbe78bb25c3b",
+      "storedBytes": 68,
+      "storedSha256": "d68608a33fd39c672ddf067654e6a1f9725e6b659898932132b670fcd0814720"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r3-formatted-callable-effects.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r3-formatted-callable-effects.ts",
+      "rawBytes": 70585,
+      "rawSha256": "8c68dd542b7e583640f605fec7f4112ba55b7fc3316cacef79d5de737bced404",
+      "storedBytes": 15990,
+      "storedSha256": "2e36a6e25dee4379309640a39d1d1f52820e1dcd87b33b0b9dc7254337e97a81"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r3-original98.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r3-original98.json",
+      "rawBytes": 37593,
+      "rawSha256": "986d99aea5f468b6b51ce29651e58e5cc3e513289c8d17457c3408158d528d26",
+      "storedBytes": 4771,
+      "storedSha256": "6561d672b00083e76d882467103b96d5823d79566eb765785c561649f2314485"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r3-original98.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r3-original98.log",
+      "rawBytes": 91975,
+      "rawSha256": "5e196d548324f52686104c78ecafce8423c99b2ec0419dd317b334d19214b104",
+      "storedBytes": 14691,
+      "storedSha256": "15e22b371806e1c77abd761928bc2e6766a2f0f8d2d18c75122f00db2121cbac"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r3-presence-delta.patch.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r3-presence-delta.patch",
+      "rawBytes": 16191,
+      "rawSha256": "10ac7c77ceb1890f69cae3de9517818e2222877e0ebfe215000461d47a660936",
+      "storedBytes": 4314,
+      "storedSha256": "428831cc600d9dd676398542841cd8eef77abbcb41620491b9bf5e92238f38f7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r3-presence.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r3-presence.json",
+      "rawBytes": 3490,
+      "rawSha256": "58c0cd3fa7b3aadaa9237671c4030e7a4288d41f54ca15e59dd871e9384292d5",
+      "storedBytes": 717,
+      "storedSha256": "cadce0b7ab8cdab3f55cd5a55eb7bb97beddc774a2c838d6657ca0b939903039"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r3-presence.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r3-presence.log",
+      "rawBytes": 16961,
+      "rawSha256": "79797224dc4cacc783a1cd5adcba85fbcea933dd492dde87d90e0faa29dc0f80",
+      "storedBytes": 2639,
+      "storedSha256": "da6699babac6cce79d8129e39e7d6db65dee9a78d7149bddb916ede2ab42b7d2"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r3-status.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r3-status.json",
+      "rawBytes": 459,
+      "rawSha256": "69d2bd8fc3f514bdc00b347186f4215036068f0a206d2e089796756dab3c9923",
+      "storedBytes": 299,
+      "storedSha256": "bc94f6e3e2f32967e75ebc0bd4776e034f85abd1ab9df47a90c56a9464c3e75c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r3-tested-candidate.patch.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r3-tested-candidate.patch",
+      "rawBytes": 25559,
+      "rawSha256": "e88dcbc16c08e3dddb2f9c26c55d4f45a3fc99ca7987c55301d7b8c468840224",
+      "storedBytes": 6257,
+      "storedSha256": "0f35a332b71f0aefdd4232304ae811af2c0c95858a970b52699efb1ea7634005"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r3-verified-status.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r3-verified-status.json",
+      "rawBytes": 3315,
+      "rawSha256": "4d84210796825ba1cadbcf9b91a6ca60dc1b392ec29d264a056877b12ce4e982",
+      "storedBytes": 1143,
+      "storedSha256": "38b603b39cca6d0fdb2ac1ab83c8427c24a56c98e6169bef418eaedf7eb39869"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r3-worker.py.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r3-worker.py",
+      "rawBytes": 3884,
+      "rawSha256": "9ff7e2f13a3ed89065980860af8856db5c842d8b0e6d687ba1392ca6b84c7b76",
+      "storedBytes": 1708,
+      "storedSha256": "3ee2c15cb22935b8082b83f38437fc4873536f2d108d2ff054361acc7cafd930"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4-before.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4-before.json",
+      "rawBytes": 14567,
+      "rawSha256": "614c7f03f7aabaaea75073b3cb50506687b53d636d3e451288064b21e29681fa",
+      "storedBytes": 1852,
+      "storedSha256": "797ee7d995b6dd9939dfba1f9eb6c5c25ac4921fa4fbbb8f3e377a4e781e6bc6"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4-before.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4-before.log",
+      "rawBytes": 17398,
+      "rawSha256": "66b78a7e0fc22016ab7d302fe17f839caeeab095213620e1401d4c052ddb97e2",
+      "storedBytes": 2630,
+      "storedSha256": "c5331289d55ceebf6046fc6986f37bf246dd7d80b35c9cc68f579afe154a8219"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4-callable-effects.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4-callable-effects.ts",
+      "rawBytes": 70114,
+      "rawSha256": "e3281a1c24a3162325bff989ce6e6ed3946eecac353f7ef0a506de94c4b6cc44",
+      "storedBytes": 15956,
+      "storedSha256": "cb64f841a96d5a5709934d711a8cbaabd528ecd0f063816f6ca0b826d80d8b53"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4-candidate.patch.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4-candidate.patch",
+      "rawBytes": 24485,
+      "rawSha256": "434f92a04ece0b80e44aa0e72b1c2164ce0a6dc18f35a9d2391c3d95844faf04",
+      "storedBytes": 6133,
+      "storedSha256": "2566d708f02462368af0280481481b10c6a45a4a3ced4e62c881e937d7d9d132"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4-driver.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4-driver.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4-format-tests.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4-format-tests.log",
+      "rawBytes": 119,
+      "rawSha256": "65d794282eaac2ed576c64bdde52a752057a97c0a6f0b174db8f47b757a3c04c",
+      "storedBytes": 90,
+      "storedSha256": "631150e4287c6d4320e4089104533d960757650c5f38b5365a26b050f79a874f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4-formatted-capture-getter-presence.test.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4-formatted-capture-getter-presence.test.ts",
+      "rawBytes": 3596,
+      "rawSha256": "e7b14ab9a60ada988dc4fd8300d5eccaf910d21b919d0390d7064bb071c2e749",
+      "storedBytes": 1193,
+      "storedSha256": "b144b731ff0a1c1793942a3a9509df52587d7941e7df585979fcc30e3a817fa9"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4-formatted-capture-host-presence.test.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4-formatted-capture-host-presence.test.ts",
+      "rawBytes": 2441,
+      "rawSha256": "8085e0988ecc35691805c29385d05945c93e67eb5398783202213e9ed60f28a9",
+      "storedBytes": 874,
+      "storedSha256": "20208dbcbe44bd2311a1a28ae7a18b6ecce1032b81b7a061fc5434e99c899d0c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4-optional-delta.patch.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4-optional-delta.patch",
+      "rawBytes": 1808,
+      "rawSha256": "de77ea4070188181100b624123dc729015dd7cff1dc9523912112f34fd36e169",
+      "storedBytes": 701,
+      "storedSha256": "9a2958e69e683c0cb3c476f6d40cb8e245f51455fd15c0e9d2946401d7ebd20d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4-status.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4-status.json",
+      "rawBytes": 293,
+      "rawSha256": "6b48c353cd3d32a2f7cdfe0d67a9b53226cb709537c8528160cc830ce74b1df6",
+      "storedBytes": 215,
+      "storedSha256": "528a64068096349057ba55e02dd76e9801b671bbd3c46a811ed9cec140f9246d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4-verified-status.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4-verified-status.json",
+      "rawBytes": 9967,
+      "rawSha256": "dd05ba5c16675db998a89b563c7e28566f759db02394a003c81b7037b90937df",
+      "storedBytes": 1602,
+      "storedSha256": "c5d02480b72dbf46e124a846d0d0c1caca407395009fd22c512210826f8e24bf"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4-worker.py.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4-worker.py",
+      "rawBytes": 6061,
+      "rawSha256": "d42c03775f8a03a38f59910ce874caf686c09ea9b1e7f3f3f7429a7f61ccded4",
+      "storedBytes": 2359,
+      "storedSha256": "875ff6b8f0b8c3ba84c84a248034fe98fcd9550f48a896c3aeb99a131f2d0661"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4b-before.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4b-before.json",
+      "rawBytes": 14734,
+      "rawSha256": "05909ca25ef0c7aeba821964f48a06c7ab1226e48c550447b289b322762de5d0",
+      "storedBytes": 1908,
+      "storedSha256": "647724f25c1d450673dba2fb2e2db74a1945758effc269819662a006dc17cf70"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4b-before.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4b-before.log",
+      "rawBytes": 17399,
+      "rawSha256": "225c1ad606d2d12eba797fc636a06a7d4af350c2b008ff47713c0ea6a9ec450c",
+      "storedBytes": 2649,
+      "storedSha256": "cd3c145bcf007a6160d8e4c28e557d89280b33c13634c77612a1f4be577c170b"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4b-driver.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4b-driver.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4b-format-tests.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4b-format-tests.log",
+      "rawBytes": 119,
+      "rawSha256": "e2e1ab6f87018ce03ae382392819986c303448494899b13e89a58399d9211b0c",
+      "storedBytes": 89,
+      "storedSha256": "c4348c598337d79c2dc7031f038484065486b2827265129895a09eaf90862079"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4b-formatted-capture-getter-presence.test.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4b-formatted-capture-getter-presence.test.ts",
+      "rawBytes": 3801,
+      "rawSha256": "5bab813c0080779f8b6dd1dbf4166fbef37c2895461143233b993f402612f2f7",
+      "storedBytes": 1241,
+      "storedSha256": "5ee8d707293998db91bf1dcc95f13a6b0a862085c0faf37524e596bb216c072a"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4b-formatted-capture-host-presence.test.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4b-formatted-capture-host-presence.test.ts",
+      "rawBytes": 2417,
+      "rawSha256": "17784e6e3ee3c7618fc05ae1ab56094b469215ed06cee8699be9107081bd01bf",
+      "storedBytes": 872,
+      "storedSha256": "a3e09e0f9dba747c4c60d08188c357d7ba935af39e8b599249dca9793d69989c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4b-verified-status.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4b-verified-status.json",
+      "rawBytes": 10138,
+      "rawSha256": "83e4c04afc880fc23b5ce42bb6bf7c10d51dd6e7dbc6274ebea07eb6a75627b3",
+      "storedBytes": 1648,
+      "storedSha256": "150e80801a4fdfb293b3efe89173a3dfc40ce516c8c0fc18042037bc50d0aba5"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4b-worker.py.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4b-worker.py",
+      "rawBytes": 6134,
+      "rawSha256": "e8266a589502b34b6b5de40e81e74deea936133df819bd5b6100a005d1e58708",
+      "storedBytes": 2404,
+      "storedSha256": "51a0deec642a0c5d7a26c31d9c22ab76db7c7b95fa6bf7e5dca0ab6642fbd1aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-before.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-before.json",
+      "rawBytes": 8352,
+      "rawSha256": "0b7d87d753470ac6a1d14df1944a488250c8038913106d5542368b2e342156e7",
+      "storedBytes": 1543,
+      "storedSha256": "f47ca0daa24f63bf21bd8edd6063d510aa8f40c0b484251d29bc8c4bb4a0c2dd"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-before.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-before.log",
+      "rawBytes": 17399,
+      "rawSha256": "4111ad980c84a05173b712d9c6908feab48b5561f14309950e282c53d01f246d",
+      "storedBytes": 2633,
+      "storedSha256": "c8ff15533b8868bc1be3bbbc4ffd686585bec248856ee058be6bef1aef7693d8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-driver.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-driver.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-final-readback.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-final-readback.json",
+      "rawBytes": 1392,
+      "rawSha256": "b0e9b8d8fd33bb3b641c098df16604f538b149388a3606303dabccaed4ff45bb",
+      "storedBytes": 813,
+      "storedSha256": "2006ebc2a1196b2e8e99ce14e25d665ad87babd457a525171c0b3320acb1e204"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-format-source.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-format-source.log",
+      "rawBytes": 48,
+      "rawSha256": "87baad3c44d8f62a6159db1e274bc9c66de98427390790661ec3be19e673069f",
+      "storedBytes": 68,
+      "storedSha256": "c138cb52b00820fc6a31161f59568c24b37c64dc527ffd3d1915d7f9b2c4e7c7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-format-tests.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-format-tests.log",
+      "rawBytes": 119,
+      "rawSha256": "f100862d8b9281e27215527dd3322faf6ad2f4fc847778bce66cc93af33e0242",
+      "storedBytes": 90,
+      "storedSha256": "542c5e8003d6127a3de59daab85cc778770ea55cac61db1a11ad5c2404e05c79"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-formatted-callable-effects.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-formatted-callable-effects.ts",
+      "rawBytes": 70818,
+      "rawSha256": "3608dbdd18ce3748cbebb67d83cf1fd113639f5f323f7a6e18f27060e367f7ca",
+      "storedBytes": 16081,
+      "storedSha256": "8f589d8a33d5427ff17490684654d05546565f8acd4ec00bc7f78f3500ecf711"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-formatted-capture-getter-presence.test.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-formatted-capture-getter-presence.test.ts",
+      "rawBytes": 3971,
+      "rawSha256": "401ba3ab0ace392f82388c8bcee02f512d691906ff24d09071024cee2b6c56de",
+      "storedBytes": 1316,
+      "storedSha256": "f49852f335939f3a62ae03b9c64407312f4d4871535e3018a9329daea844ea92"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-formatted-capture-host-presence.test.ts.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-formatted-capture-host-presence.test.ts",
+      "rawBytes": 2366,
+      "rawSha256": "e549d60efb5e428642194d6974959cc3b05365277e2bf7735b4dab1712df5c23",
+      "storedBytes": 869,
+      "storedSha256": "1a11f63b7aafff9a42405c1c029af4b8dcac95977d45f49d551f0b8d969a4420"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-original98.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-original98.json",
+      "rawBytes": 37580,
+      "rawSha256": "8b2bd08eb08a86acf4ded1a718f5c579be4c3f1220937fa87a8a9cc95a30f072",
+      "storedBytes": 4771,
+      "storedSha256": "bb68cfdc25f86fe339f9d5a2c6b1bad3a034d1c71f2e85cb408ab0693bd20dd5"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-original98.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-original98.log",
+      "rawBytes": 91976,
+      "rawSha256": "cdc6a5602d37b19601fee8ad9cc55d82c2db3a308fd05d691f57ed6a653eb21c",
+      "storedBytes": 14663,
+      "storedSha256": "d565d1f2fb8410af1734c25ed3f18cdc76438b2a777f0c911f3e07b78d3116e6"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-presence15.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-presence15.json",
+      "rawBytes": 6558,
+      "rawSha256": "7edc3abe3e34b7cf44200129b14892d87920deaababc53b5133e98dd3a57f590",
+      "storedBytes": 1154,
+      "storedSha256": "ca2588f7b374ef3597301212733d972f3627491566771408c2889dfafc95d143"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-presence15.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-presence15.log",
+      "rawBytes": 17403,
+      "rawSha256": "cf3e7b45034a08b2843af3fc27c06b6887051ba379c9dd2afd7538770fb68ea3",
+      "storedBytes": 2634,
+      "storedSha256": "f06dcd3d1b9e0f1153bef4d7487cbd6f8b5b2b95e5933025d87adebdefd61b7c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-source-peer-review-root.md.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-source-peer-review-root.md",
+      "rawBytes": 3330,
+      "rawSha256": "e95a4053ba389fe1f9e2f3dbb6ccb7bf20642cfb6d07dea83e23f854f94f6f75",
+      "storedBytes": 1701,
+      "storedSha256": "1810312b9668f85dd5255ddf77c3b688d27ac5b5a750577580124742b00b8367"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-types-process-reconciliation.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-types-process-reconciliation.json",
+      "rawBytes": 375,
+      "rawSha256": "3a0f9d9243d2c14d85c46e35f8dc0ed38d2a208f5f5d2371d2eb2be0a967b9a7",
+      "storedBytes": 280,
+      "storedSha256": "f0bf74f773635c464d0d63426e400f2cfa78b1b10ceec82558b47286c974c6aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-verified-status.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-verified-status.json",
+      "rawBytes": 4401,
+      "rawSha256": "2bb678e65aa580d230f97e3db13a4f265f8f0ea8f3450aba9e44cb2213878568",
+      "storedBytes": 1654,
+      "storedSha256": "41ca9df2890013f3dedc9064a7581c0bf7cea44b72baaa816f94e312dd5b3f5c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-worker.py.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-worker.py",
+      "rawBytes": 6134,
+      "rawSha256": "0c330cb49fe212766053612f76fba8e16240ace3809b91dcb5e00379a3abbc99",
+      "storedBytes": 2407,
+      "storedSha256": "b971008eaf7fba7a98a60572ce9ab914e96710424f02fb371e65c73164888cf9"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/r4c-workspace-types.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/r4c-workspace-types.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/parent-capture-spread-baseline-tests.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-spread-baseline/tests.json",
+      "rawBytes": 64762,
+      "rawSha256": "579075f1b73063a6054298ca1b8217ac041a76660abeff693b478767679e0ca8",
+      "storedBytes": 4688,
+      "storedSha256": "2f7647cdb3e680132079a431581b256324630c79b91201cfc76bbf62fe011b73"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/parent-capture-spread-baseline-tests.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-spread-baseline/tests.log",
+      "rawBytes": 103756,
+      "rawSha256": "e21efacabb4eb527e7fc582ed7054b56ca0c74f6988accbf0a87f809468928c5",
+      "storedBytes": 14738,
+      "storedSha256": "2f9c5fe0fc200d6ff7a06b9628b07d04d7f77177cea22c97cf758b887c32f544"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/parent-capture-spread-green-tests.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-spread-green/tests.json",
+      "rawBytes": 51426,
+      "rawSha256": "12e500f0bb63940619313121533dcd2cde25475ebd9c084170d94d2ada5acc2e",
+      "storedBytes": 4305,
+      "storedSha256": "b3bf17c3591386c100b3f6caa50e6ac56b2e0f6259bbd8296b8e28457386cbcc"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/parent-capture-spread-green-tests.log.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-spread-green/tests.log",
+      "rawBytes": 103753,
+      "rawSha256": "fafc45fbc214fe7ddb1389800427f14e8e5c69632ad5e50b67a15d6d4c627d4f",
+      "storedBytes": 14695,
+      "storedSha256": "698ee893c5213fa60901b5a9bebcb1d3e5b63e017300a58486cc744b918f10de"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-capture-getter-provenance-and-presence/parent-capture-spread-differential.json.gz",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-spread-differential.json",
+      "rawBytes": 5359,
+      "rawSha256": "d4a6eb6bf4d8d68eb52900a1fc19f9abe51c4c3b05ebe774de065f4958d53a76",
+      "storedBytes": 870,
+      "storedSha256": "945e485911d879bf6f69aaabf01633b664d7fe571816b8a23fefd79d23a60628"
+    }
+  ],
+  "scope": "Local Node/source gates on an isolated base. No Cargo, browser, CI or integrated-new-head acceptance is claimed.",
+  "commitPreparation": {
+    "parent": "52c87232f593d85a28cbd04ad205f0d5fe6f03a3",
+    "normalFastForward": true,
+    "candidateSourcesUnchanged": true,
+    "originalTestsUnchanged": true,
+    "executionReceiptsNotRebound": true
+  }
+}

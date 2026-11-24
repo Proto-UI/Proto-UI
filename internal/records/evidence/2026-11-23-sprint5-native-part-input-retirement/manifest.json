@@ -1,0 +1,1922 @@
+{
+  "schemaVersion": 1,
+  "kind": "failed-hosted-acceptance-diagnostic-causality-and-bounded-native-part-repair",
+  "hostedHead": "ea60064882924eb455e1dfc3ff7de55a32de4558",
+  "hostedRun": 45271472592,
+  "hostedOverallConclusion": "failure",
+  "candidateBaseHead": "b8800d4cef9302718d4514b1ba28508860059929",
+  "candidateBaseTree": "4dfcdb3d01bc52b0c202a9d4e05a3c7f50a01651",
+  "candidateSourceSha256": {
+    "packages/adapters/web-component/src/runtime/modules.ts": "4406d1a05d0249635250457562a843e0ed247eb2855c5abdcc4ed76bcf8c5bfa",
+    "packages/adapters/web-component/test/focus-entry-input-origin.test.ts": "63f88eb9770d99e338bb64ff6f4105bf4bad1e1f735de3eb987fd464dc16acd4"
+  },
+  "originalFormalCanonical": {
+    "passed": 17,
+    "total": 20
+  },
+  "diagnosticCanonical": {
+    "passed": 17,
+    "total": 20,
+    "acceptance": false
+  },
+  "hostModelOld": {
+    "numTotalTests": 60,
+    "numPassedTests": 26,
+    "numFailedTests": 34,
+    "numPendingTests": 0,
+    "numTodoTests": 0
+  },
+  "hostModelCandidate": {
+    "numTotalTests": 60,
+    "numPassedTests": 60,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTodoTests": 0
+  },
+  "liveCssomClassification": {
+    "sheets": 38,
+    "allRules": 3646,
+    "styleRules": 3275,
+    "oldHits": 23,
+    "candidateHits": 0,
+    "changedRules": 23
+  },
+  "archiveCount": 208,
+  "rawBytes": 65025208,
+  "gzipBytes": 29489830,
+  "uniqueOriginalHostedZipCount": 6,
+  "entries": [
+    {
+      "logicalPath": "candidate/ab/before-focus-entry-input-origin.test.ts",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/before-focus-entry-input-origin.test.ts",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/before-focus-entry-input-origin.test.ts.gz",
+      "rawBytes": 13229,
+      "rawSha256": "3b0540d3d3d29c27219e28ea162a66f940a1de894f894822ba2b1c3a8cbb5956",
+      "gzipBytes": 3595,
+      "gzipSha256": "da5775299e2ec99445bd41185a2e25557b2ff8c4130e93d37e6fbe0979ed134c"
+    },
+    {
+      "logicalPath": "candidate/ab/before-modules.ts",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/before-modules.ts",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/before-modules.ts.gz",
+      "rawBytes": 113462,
+      "rawSha256": "075436cbcf17fdcb7ef8e0983048bd2784f993f65f5579b936a7fb1b24172811",
+      "gzipBytes": 26583,
+      "gzipSha256": "65d66c3c63d60b7843d290d3bce2befbe546f7bda925aa1fe365ad4c74a34a10"
+    },
+    {
+      "logicalPath": "candidate/ab/candidate-focus-entry-input-origin.test.ts",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/candidate-focus-entry-input-origin.test.ts",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/candidate-focus-entry-input-origin.test.ts.gz",
+      "rawBytes": 16479,
+      "rawSha256": "63f88eb9770d99e338bb64ff6f4105bf4bad1e1f735de3eb987fd464dc16acd4",
+      "gzipBytes": 4286,
+      "gzipSha256": "6c8f067d5e008afa00ce4a3856fb387d34a6b497473fb070e6b2e8567a1689c5"
+    },
+    {
+      "logicalPath": "candidate/ab/candidate-modules.ts",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/candidate-modules.ts",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/candidate-modules.ts.gz",
+      "rawBytes": 113860,
+      "rawSha256": "4406d1a05d0249635250457562a843e0ed247eb2855c5abdcc4ed76bcf8c5bfa",
+      "gzipBytes": 26782,
+      "gzipSha256": "4595da5c670033bf1cefb0efebdf320d4ed381162041d7d20758a8215386b5e3"
+    },
+    {
+      "logicalPath": "candidate/ab/candidate.patch",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/candidate.patch",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/candidate.patch.gz",
+      "rawBytes": 5407,
+      "rawSha256": "a138621ba595fdafa58ca1de650c7c0d1b083157dd1c64a50f28df186ae5c740",
+      "gzipBytes": 1836,
+      "gzipSha256": "7febdb76c4370454fdd8c0c5240250ccc345a4068fc884df735c4496409270c4"
+    },
+    {
+      "logicalPath": "candidate/ab/diff-check.command.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/diff-check.command.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/diff-check.command.json.gz",
+      "rawBytes": 153,
+      "rawSha256": "8a8123e3d4a51d166849f693e319f617bae74a56aa0595ef6b172493a62b72f7",
+      "gzipBytes": 141,
+      "gzipSha256": "b4de2d7c83d80ba7bd7d2ca26aac3f1f46836d8e91796ea12d73ab166477ac84"
+    },
+    {
+      "logicalPath": "candidate/ab/diff-check.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/diff-check.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/diff-check.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "candidate/ab/fetch-public.command.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/fetch-public.command.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/fetch-public.command.json.gz",
+      "rawBytes": 274,
+      "rawSha256": "931c511eb7fbbc8b58ee1e98032e626984f7a738fae4a86c8752ef37460b14ab",
+      "gzipBytes": 197,
+      "gzipSha256": "e636798c4268162eb3d7f1b7011b19015ec2bdf7adee3f213ed310d9b3d326c4"
+    },
+    {
+      "logicalPath": "candidate/ab/fetch-public.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/fetch-public.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/fetch-public.log.gz",
+      "rawBytes": 289,
+      "rawSha256": "ba1a28d702d6f493c361c41c985e9cef3861f7589bf8d6ea5220d0fb8cca8040",
+      "gzipBytes": 178,
+      "gzipSha256": "a0bc92e4a61e40f626c70b3d50ebd8aba99e3cb5839471989061c7bfc62a2550"
+    },
+    {
+      "logicalPath": "candidate/ab/format-added-tests.command.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/format-added-tests.command.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/format-added-tests.command.json.gz",
+      "rawBytes": 271,
+      "rawSha256": "4a0a04124e9f425e0c6981ca8cb8cc9969ba93c89a15c10d751a9b162d22413e",
+      "gzipBytes": 207,
+      "gzipSha256": "e64e26cd44988da15cdd12f04018c8c6fea00aa9d058371e68b82317f7cd8c06"
+    },
+    {
+      "logicalPath": "candidate/ab/format-added-tests.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/format-added-tests.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/format-added-tests.log.gz",
+      "rawBytes": 76,
+      "rawSha256": "57be80c74710d3e0a9bceb5048fe5ce8b56c562cbd815f677bf7cbf88d6b0a76",
+      "gzipBytes": 90,
+      "gzipSha256": "41aaedd6bff0f498bb6f708c5c9745c0ba6b2754608a395c3122f98259d0b483"
+    },
+    {
+      "logicalPath": "candidate/ab/format-candidate-module.command.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/format-candidate-module.command.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/format-candidate-module.command.json.gz",
+      "rawBytes": 256,
+      "rawSha256": "315956d6da67566e1a218bae9ad65b68ab79bbe7a6e09c3c88a49ddf49bc09a9",
+      "gzipBytes": 198,
+      "gzipSha256": "10f9fe732cc95410b2ce8d3b3922d6b4c7c64e2bb9095105105bc79e93baf545"
+    },
+    {
+      "logicalPath": "candidate/ab/format-candidate-module.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/format-candidate-module.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/format-candidate-module.log.gz",
+      "rawBytes": 73,
+      "rawSha256": "1e8d0cd902329bcba32569481c8c620664b18b1e1b30d9faecc766fa630d4d21",
+      "gzipBytes": 88,
+      "gzipSha256": "9e64aabab4c026ae683616379de56f20966761be08cec8e052411eec1c09ac67"
+    },
+    {
+      "logicalPath": "candidate/ab/format-final.command.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/format-final.command.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/format-final.command.json.gz",
+      "rawBytes": 333,
+      "rawSha256": "79b3f9d47747edd42a5f24175c08346518ae0364c8e8a2491c4c5a7c550bef45",
+      "gzipBytes": 222,
+      "gzipSha256": "ae8aac24a471f99c4116ee2e070c6ce66d6c759720beee92bc9c92c953314037"
+    },
+    {
+      "logicalPath": "candidate/ab/format-final.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/format-final.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/format-final.log.gz",
+      "rawBytes": 66,
+      "rawSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "gzipBytes": 82,
+      "gzipSha256": "e3c38a48f6a61743f217e7d0ded850d18c6250b52d2b69c226b68caf260d78b6"
+    },
+    {
+      "logicalPath": "candidate/ab/new-helper-same-controls.command.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/new-helper-same-controls.command.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/new-helper-same-controls.command.json.gz",
+      "rawBytes": 527,
+      "rawSha256": "cc0b6b3038495c4d443fcbe42ffc412206837b1c18caeb2a194dbd5bee085997",
+      "gzipBytes": 303,
+      "gzipSha256": "2ca3526377e0adf88a789a52a482976cc3972cd77fdcf4a01e6a2e38b2c9b8f8"
+    },
+    {
+      "logicalPath": "candidate/ab/new-helper-same-controls.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/new-helper-same-controls.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/new-helper-same-controls.json.gz",
+      "rawBytes": 24205,
+      "rawSha256": "0d9c4458c19440504783323d9a295010d1534960a8ca6fb4fd1290c6702717c7",
+      "gzipBytes": 2335,
+      "gzipSha256": "88633ba4aa03f6d88b3e5eddcdfb57f144d220bea4c8c04813ce9bc9d61c225e"
+    },
+    {
+      "logicalPath": "candidate/ab/new-helper-same-controls.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/new-helper-same-controls.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/new-helper-same-controls.log.gz",
+      "rawBytes": 138030,
+      "rawSha256": "4b63b0ce580b26162fc27b7f45d38ab59649483438a57a93683ba5e4106b1c3d",
+      "gzipBytes": 15836,
+      "gzipSha256": "0fc087ed288a39b48701932fc4e458a24ecf926b9c4825144ecbb93bd61f6335"
+    },
+    {
+      "logicalPath": "candidate/ab/normal-fast-forward.command.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/normal-fast-forward.command.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/normal-fast-forward.command.json.gz",
+      "rawBytes": 205,
+      "rawSha256": "fcc05cdb4ddf8bb17f98578830623ff848b4489393c64d9187bc7735bb90fd56",
+      "gzipBytes": 177,
+      "gzipSha256": "188997a94235fed6a6e920128b04e053b6742cb856906fb0eee4ba020920b325"
+    },
+    {
+      "logicalPath": "candidate/ab/normal-fast-forward.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/normal-fast-forward.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/normal-fast-forward.log.gz",
+      "rawBytes": 7047,
+      "rawSha256": "04117ae1117b41b8efcecd9825f916d28fb966b9b1731495d61b3629fb6c6ff9",
+      "gzipBytes": 1243,
+      "gzipSha256": "263fb2492d41f1046d4ced458ad13a0d325c129dc92265d5ac243e66414ed934"
+    },
+    {
+      "logicalPath": "candidate/ab/old-helper-new-controls.command.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/old-helper-new-controls.command.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/old-helper-new-controls.command.json.gz",
+      "rawBytes": 526,
+      "rawSha256": "ff9a811e3c28a51bebe1ee8ae93ce7fb6ec530e3bbda5a6e274e10755187c99f",
+      "gzipBytes": 302,
+      "gzipSha256": "0cd6ab68ee554efbf68316a86905a4ee4e0b1440931ee530dc1ff41ab8bdac41"
+    },
+    {
+      "logicalPath": "candidate/ab/old-helper-new-controls.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/old-helper-new-controls.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/old-helper-new-controls.json.gz",
+      "rawBytes": 90482,
+      "rawSha256": "6922df095231701e87a821d8a1d175bec1fca021b280251c1b802c64779f4a68",
+      "gzipBytes": 3356,
+      "gzipSha256": "47d77c3766ccb39dc010c881936e4b7735060012010a1390056465e68d7fd787"
+    },
+    {
+      "logicalPath": "candidate/ab/old-helper-new-controls.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/old-helper-new-controls.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/old-helper-new-controls.log.gz",
+      "rawBytes": 153662,
+      "rawSha256": "6998c2e7595ad760f851a2f4a93fff0a825fdfa0369f86a2cf4cf7af77b55356",
+      "gzipBytes": 16806,
+      "gzipSha256": "ff3fa1095103a6f8a93ab790c77e942c442b7800925d8fcaad778f1671537390"
+    },
+    {
+      "logicalPath": "candidate/ab/public-source-diff.patch",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/public-source-diff.patch",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/public-source-diff.patch.gz",
+      "rawBytes": 20579,
+      "rawSha256": "4575dc1b8798ef67729c42c0d317a613a374cec113d420c5033e95719820dfbf",
+      "gzipBytes": 6177,
+      "gzipSha256": "bb7648718df7cbca61dd53f5f09ec43d9f79607c55a5f02a2b72664ec83878ba"
+    },
+    {
+      "logicalPath": "candidate/ab/remote-branch.command.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/remote-branch.command.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/remote-branch.command.json.gz",
+      "rawBytes": 237,
+      "rawSha256": "cf68d610c1d25bba4870efbb2a38a9704691efb59caffd8e99f1f2622d47c4a9",
+      "gzipBytes": 185,
+      "gzipSha256": "c1bec82c8d74dbbf220d1dc17b838076e27c89e45a4499c7b2f409e5cbb2d549"
+    },
+    {
+      "logicalPath": "candidate/ab/remote-branch.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/remote-branch.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/remote-branch.log.gz",
+      "rawBytes": 99,
+      "rawSha256": "4e1f91b0fddf020183a24d208113d5da1f430493e7bd081938e01fa1c621e684",
+      "gzipBytes": 106,
+      "gzipSha256": "45fd83c8c3cd71d1f15159a55c223c1bdf2e10164b5c400e25b4b2003d1856aa"
+    },
+    {
+      "logicalPath": "candidate/ab/remote-pr.command.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/remote-pr.command.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/remote-pr.command.json.gz",
+      "rawBytes": 178,
+      "rawSha256": "a65141f68061f5886995fbba199c9a1f7a47ca56dfe07e3604e5524861799f4f",
+      "gzipBytes": 159,
+      "gzipSha256": "19e12cd1f4bfc131abd2070868c297b4014647eb410f56fc9a50536e8ed91f74"
+    },
+    {
+      "logicalPath": "candidate/ab/remote-pr.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/remote-pr.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/remote-pr.log.gz",
+      "rawBytes": 44269,
+      "rawSha256": "f50f3235bffcfbafceb1c1761379666af872941bcc31ac8839fe26fcd33f66c1",
+      "gzipBytes": 14600,
+      "gzipSha256": "df370437a63d0e75743611a33790c5c3cd4e6c6206a97e1320130a11a0dbd83d"
+    },
+    {
+      "logicalPath": "candidate/ab/require-ancestor.command.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/require-ancestor.command.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/require-ancestor.command.json.gz",
+      "rawBytes": 261,
+      "rawSha256": "411ade7c72f3790717db4553dea39871b25454f07c8cddca8358066785d7fb91",
+      "gzipBytes": 210,
+      "gzipSha256": "2f854345c800d397e27b4c0c07904c843a48653b11454f1edc5d2f8a38e426a6"
+    },
+    {
+      "logicalPath": "candidate/ab/require-ancestor.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/require-ancestor.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/require-ancestor.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "candidate/ab/status.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-r1/status.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/ab/status.json.gz",
+      "rawBytes": 8251,
+      "rawSha256": "ae8851b184d0d0b9fef534c4647a0f014b407c6ad0cc6a2c3563921743d61541",
+      "gzipBytes": 1540,
+      "gzipSha256": "20910f82a498c4f7568d4eea35af5833fd00a7de0cb160384590809d42c7623f"
+    },
+    {
+      "logicalPath": "candidate/drivers/collect-ea600-native.py",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/collect-ea600-native.py",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/drivers/collect-ea600-native.py.gz",
+      "rawBytes": 4623,
+      "rawSha256": "7639516490a6d21ff71b97e86a61953f314445d623e6f983d65a001f5db67ee5",
+      "gzipBytes": 2165,
+      "gzipSha256": "f141de1964d48bc8af93ff06dc95cfb1db5f34652d6a250a00509b92de1a5b70"
+    },
+    {
+      "logicalPath": "candidate/drivers/collect-ea600-source-browser-custody-v1.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/collect-ea600-source-browser-custody-v1.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/drivers/collect-ea600-source-browser-custody-v1.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "candidate/drivers/collect-ea600-source-browser-custody-v1.py",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/collect-ea600-source-browser-custody-v1.py",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/drivers/collect-ea600-source-browser-custody-v1.py.gz",
+      "rawBytes": 4107,
+      "rawSha256": "442edcd33a104037701f6402976ba822d1162a6f76e8ba23821d3604b0916ace",
+      "gzipBytes": 2118,
+      "gzipSha256": "25d30bedbc0ff92cb333a6d19da44977b042df304c8dd31890f6412d3c15bd39"
+    },
+    {
+      "logicalPath": "candidate/drivers/pseudo-input-identity-ab-v1.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-ab-v1.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/drivers/pseudo-input-identity-ab-v1.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "candidate/drivers/pseudo-input-identity-ab-v1.py",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-ab-v1.py",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/drivers/pseudo-input-identity-ab-v1.py.gz",
+      "rawBytes": 7457,
+      "rawSha256": "72c21171b03c11571ff874e8c2f37b8a39a165a406a4e4c37fafdec539b49641",
+      "gzipBytes": 2775,
+      "gzipSha256": "58102b6395127f4ee60e899069725ea490ad4dc2dbb213a1d8010ae22820cd09"
+    },
+    {
+      "logicalPath": "candidate/drivers/pseudo-input-identity-candidate-v1.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/pseudo-input-identity-candidate-v1.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/candidate/drivers/pseudo-input-identity-candidate-v1.json.gz",
+      "rawBytes": 4599,
+      "rawSha256": "09f4e34f8dda1075c6e89d1daa5bc4633594854195f99026657ee51f67edfed4",
+      "gzipBytes": 1657,
+      "gzipSha256": "14713674ececb1e2bbacf9536220846bf0349547fb1a3bcc7c876bc2874b87cf"
+    },
+    {
+      "logicalPath": "closing/authoring.command.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/authoring.command.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/closing/authoring.command.json.gz",
+      "rawBytes": 252,
+      "rawSha256": "3454a24f589ba0859761078fe0c42fd679c7172b539f287891ba69fa29100604",
+      "gzipBytes": 201,
+      "gzipSha256": "7bd4f3724aff6728cb5b74b2a0398bf76f83aaef82799cbba048e184ba56456c"
+    },
+    {
+      "logicalPath": "closing/authoring.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/authoring.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/closing/authoring.log.gz",
+      "rawBytes": 294,
+      "rawSha256": "eeabbd82ecc0726c35115c776e52b0253ba892e0bfe4e704bab9299304c031ae",
+      "gzipBytes": 205,
+      "gzipSha256": "43cd5cbfe18db52bb99a727c89b4ca52a61cb434b28831d1014f91bb9c35e8b1"
+    },
+    {
+      "logicalPath": "closing/closing-validation.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/closing-validation.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/closing/closing-validation.json.gz",
+      "rawBytes": 1567,
+      "rawSha256": "fbb1b559177e24608e19d97674b85c3ee0cb1f915a331ab539cfbe661436892c",
+      "gzipBytes": 488,
+      "gzipSha256": "0440c6b4c74aacde42c0525b47d4adefff505ec9a787d1ff074012ab1c62b499"
+    },
+    {
+      "logicalPath": "closing/driver.py",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/close-native-part-input-r1.py",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/closing/driver.py.gz",
+      "rawBytes": 15634,
+      "rawSha256": "d12186e5d871e5e332b88344d3dfd7bf99929801dbe4ea87274196a3caba3b87",
+      "gzipBytes": 5910,
+      "gzipSha256": "db77dadf71dd048ac6479008d6c8a8b343975b811c47f8034165bc23eac1305f"
+    },
+    {
+      "logicalPath": "closing/format-source.command.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/format-source.command.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/closing/format-source.command.json.gz",
+      "rawBytes": 333,
+      "rawSha256": "79b3f9d47747edd42a5f24175c08346518ae0364c8e8a2491c4c5a7c550bef45",
+      "gzipBytes": 222,
+      "gzipSha256": "ae8aac24a471f99c4116ee2e070c6ce66d6c759720beee92bc9c92c953314037"
+    },
+    {
+      "logicalPath": "closing/format-source.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/format-source.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/closing/format-source.log.gz",
+      "rawBytes": 66,
+      "rawSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "gzipBytes": 82,
+      "gzipSha256": "e3c38a48f6a61743f217e7d0ded850d18c6250b52d2b69c226b68caf260d78b6"
+    },
+    {
+      "logicalPath": "closing/source-diff-check.command.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/source-diff-check.command.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/closing/source-diff-check.command.json.gz",
+      "rawBytes": 153,
+      "rawSha256": "8a8123e3d4a51d166849f693e319f617bae74a56aa0595ef6b172493a62b72f7",
+      "gzipBytes": 141,
+      "gzipSha256": "b4de2d7c83d80ba7bd7d2ca26aac3f1f46836d8e91796ea12d73ab166477ac84"
+    },
+    {
+      "logicalPath": "closing/source-diff-check.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/source-diff-check.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/closing/source-diff-check.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "closing/source-map.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/source-map.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/closing/source-map.json.gz",
+      "rawBytes": 3170,
+      "rawSha256": "1cede6245f9dff476db84bfac3f7d9d42a5d62287f472e01d2eac2b15275a3ed",
+      "gzipBytes": 1398,
+      "gzipSha256": "1ddd04b25d46f229e332535d87328a895f2324bd9dfca2ab56a28834d1f0568b"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/analyze-static-css-input-state-v2.py",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/analyze-static-css-input-state-v2.py",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/analyze-static-css-input-state-v2.py.gz",
+      "rawBytes": 4777,
+      "rawSha256": "09d275b00d13bb42df9d748346b448d581c13bad703d5ab32c3d7e390fbff69e",
+      "gzipBytes": 2153,
+      "gzipSha256": "ae6074bd16724d0ce25a648b7d2d43d099c181f3e67915d94126e7bfb828a2c9"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/analyze-static-css-input-state-v3.py",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/analyze-static-css-input-state-v3.py",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/analyze-static-css-input-state-v3.py.gz",
+      "rawBytes": 4730,
+      "rawSha256": "a72693609ebeb30fe4274beec8ad4401b8455614c464f7c06a99193963aa9370",
+      "gzipBytes": 2153,
+      "gzipSha256": "e4565215548c75221e55dfefecf84614b1434a7649ae80aeed804a47839d3c8e"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/analyze-static-css-input-state.py",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/analyze-static-css-input-state.py",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/analyze-static-css-input-state.py.gz",
+      "rawBytes": 4680,
+      "rawSha256": "afbade9b921afb26710cb9f03047d456d90df80937d0ef12e5215401731ae111",
+      "gzipBytes": 2134,
+      "gzipSha256": "196d04b9c5a135f20a0fb204fe774724bae61b08d22f3798673f662677810edd"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/classify-live-cssom.cjs",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/classify-live-cssom.cjs",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/classify-live-cssom.cjs.gz",
+      "rawBytes": 4658,
+      "rawSha256": "257eb0508a72ede9690a0c187d7e25de0e7dbbf985a70edd1481efadad07bfe7",
+      "gzipBytes": 2003,
+      "gzipSha256": "a964f996bf6ce0b6d7f9e9fd39a910b199e1f7710b578eeef1c53ac5c8f086cb"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/frozen-install.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/frozen-install.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/frozen-install.log.gz",
+      "rawBytes": 2644,
+      "rawSha256": "1e743cf6a3fd00af4aa1284c16236170b3a55a32e12c98d13982a799708ddc07",
+      "gzipBytes": 623,
+      "gzipSha256": "5a87a3ac8aa754ac8c1a7ddfb9b7690d04020582d020724de14f8d49ffccb228"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/listener-style-survey.mjs",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/listener-style-survey.mjs",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/listener-style-survey.mjs.gz",
+      "rawBytes": 20253,
+      "rawSha256": "fab7509c868027d15fd2b5dcb75fe875f60fdde9c3d27687c631a883dec026d7",
+      "gzipBytes": 6707,
+      "gzipSha256": "0c6310db186eeef96757c508ad9516e0221f00a9d84ce8281cce5b647ab8263c"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/listener-survey-launch.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/listener-survey-launch.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/listener-survey-launch.json.gz",
+      "rawBytes": 613,
+      "rawSha256": "77fa8818a868783c96923aa8ea65e3ff15b5f5dc17f13d20387db257528e0c80",
+      "gzipBytes": 358,
+      "gzipSha256": "23cb0b1b0e1d404eb919253f90939a87688357335e1b0d660941af82efbe8335"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/listener-survey-launch.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/listener-survey-launch.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/listener-survey-launch.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/node-version.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/node-version.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/node-version.log.gz",
+      "rawBytes": 9,
+      "rawSha256": "4409d3bfa08b82f385bd424eeda65fc63b756129f0e89e82df77f1fecafccc14",
+      "gzipBytes": 29,
+      "gzipSha256": "f87eb3c283bf9810764f95a4ce2537720dd6b657a8d1c0baa663f11a3368c67e"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/observer-ea600-profile.cjs",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/observer-ea600-profile.cjs",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/observer-ea600-profile.cjs.gz",
+      "rawBytes": 12010,
+      "rawSha256": "d7e12fad20693ce2ccddeb936b81db7ac4b717dd00e229149bd980b1d42736e6",
+      "gzipBytes": 3830,
+      "gzipSha256": "ea46da8c18840ef853d3cf2403b2fdc389f261551dd5a528551d4c139a5e5e0f"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/pnpm-version.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/pnpm-version.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/pnpm-version.log.gz",
+      "rawBytes": 8,
+      "rawSha256": "f71ff3f5176cd06dce75ef9c6a6a4ea9eacefa43f5bd92c6cc9322dd2c8216a3",
+      "gzipBytes": 28,
+      "gzipSha256": "12bc976b8a439e765fe3c6cc96e5894efab8c6629fea8816546e7901aa563cb0"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/prepare-status.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/prepare-status.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/prepare-status.json.gz",
+      "rawBytes": 68309,
+      "rawSha256": "f7b3cb5384a5471967743bbd8a61d6589c0d0f8eb62013cbadbc9c8f8a6bd5ec",
+      "gzipBytes": 27679,
+      "gzipSha256": "6a60f618251cc1f26772c2c370358c8e4775a3d1ba2411bbb547b89b8792b2b0"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/profile-launch-receipt.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-launch-receipt.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/profile-launch-receipt.json.gz",
+      "rawBytes": 443,
+      "rawSha256": "d403fedbb4c65e126bca9615405d027f30bbd2d1dcb954c35ff7117ede4168a2",
+      "gzipBytes": 305,
+      "gzipSha256": "0dffaaa65a7bb4acdadf708fa67e79b545d69b8bc4f9a0c61560a6ff953f43e9"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/profile-launch.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-launch.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/profile-launch.log.gz",
+      "rawBytes": 5134,
+      "rawSha256": "9c0535a3a16e8ab1f7509b1f2df0243918ea59612028c49834ebd7bffad7241a",
+      "gzipBytes": 2074,
+      "gzipSha256": "1a807d8f0f88ead48f8dbbe9824cdf5adacdefe7857bb7826189a672908c048a"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/run-ea600-profile.py",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/run-ea600-profile.py",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/run-ea600-profile.py.gz",
+      "rawBytes": 9061,
+      "rawSha256": "09756125b4296c8c629adcf66d120d520edb01928144d4aef4f749f3f0ba7c58",
+      "gzipBytes": 3208,
+      "gzipSha256": "a38d29f022bf911c06154833e0f54453a909910f58dfa7e7c17ce61bab64edb4"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/run-listener-style-survey.py",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/run-listener-style-survey.py",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/run-listener-style-survey.py.gz",
+      "rawBytes": 4160,
+      "rawSha256": "1ebdffb1482e3a054a3180ea9b406c2e97e2003a60a1b1854ae23e4f5c6c423d",
+      "gzipBytes": 1627,
+      "gzipSha256": "da09736fffb073cd4ff09d5e5b518d0de8c75524a93e91813f3e79f073ae7452"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/summarize-original-fill.py",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/summarize-original-fill.py",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/summarize-original-fill.py.gz",
+      "rawBytes": 7803,
+      "rawSha256": "3a767c150d3ca285d929792b5b9b3db2b585804903acb41e3f9bb1aada436796",
+      "gzipBytes": 2837,
+      "gzipSha256": "7d2915d2ad26da99fe7f7cb05cff0a60965146c89327b164929ba261456597ea"
+    },
+    {
+      "logicalPath": "diagnostic/drivers/worktree-add.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/worktree-add.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/drivers/worktree-add.log.gz",
+      "rawBytes": 4598,
+      "rawSha256": "c3f93bc0f45ae191d6fa4a6f799011674ffbbad6521b5381c4d2551afb8769d3",
+      "gzipBytes": 901,
+      "gzipSha256": "50e6540765095abe49c16fbba5012bedb4e0cea096dc5031ce8a8ebd03ddc712"
+    },
+    {
+      "logicalPath": "diagnostic/profile/browser/10-failure.png",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/browser/10-failure.png",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/browser/10-failure.png.gz",
+      "rawBytes": 118122,
+      "rawSha256": "6eba85e6cfd1c1f0f9f4e8ba740f10bf1d9ea35eb7518492b920996abb4f8d2c",
+      "gzipBytes": 108177,
+      "gzipSha256": "9d8eddb1dbcdc5379b36bfc6134d24707805c518ac461bf07287de81a83801fc"
+    },
+    {
+      "logicalPath": "diagnostic/profile/browser/11-failure.png",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/browser/11-failure.png",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/browser/11-failure.png.gz",
+      "rawBytes": 118791,
+      "rawSha256": "6e149b33664cf8c6fdf006ffeb41f42afb5c383ae0c35ccffde1513df7a9a641",
+      "gzipBytes": 108586,
+      "gzipSha256": "6f1a55709ff2affed69f0c3e689598a0d4808716c6bdfa1d7cc722cafd265fab"
+    },
+    {
+      "logicalPath": "diagnostic/profile/browser/18-failure.png",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/browser/18-failure.png",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/browser/18-failure.png.gz",
+      "rawBytes": 118937,
+      "rawSha256": "e151926734163b678961de048d37d5e4bbd8966206443e7c7dd404127ee44848",
+      "gzipBytes": 110703,
+      "gzipSha256": "de3d8098f47ace2a62f83173e28b8060a72627221714febae3133172a547869b"
+    },
+    {
+      "logicalPath": "diagnostic/profile/browser/base-button-en.png",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/browser/base-button-en.png",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/browser/base-button-en.png.gz",
+      "rawBytes": 118791,
+      "rawSha256": "6e149b33664cf8c6fdf006ffeb41f42afb5c383ae0c35ccffde1513df7a9a641",
+      "gzipBytes": 108586,
+      "gzipSha256": "6f1a55709ff2affed69f0c3e689598a0d4808716c6bdfa1d7cc722cafd265fab"
+    },
+    {
+      "logicalPath": "diagnostic/profile/browser/base-button-zh.png",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/browser/base-button-zh.png",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/browser/base-button-zh.png.gz",
+      "rawBytes": 118399,
+      "rawSha256": "71f61b6cd27a8f06bc84efb5e585192db1b4648fa5b6c8e2d672707feff87964",
+      "gzipBytes": 109587,
+      "gzipSha256": "01650a52335d720f557144f6b785589caa3fd19c14d8da74dce9518a6090397a"
+    },
+    {
+      "logicalPath": "diagnostic/profile/browser/production/build.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/browser/production/build.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/browser/production/build.log.gz",
+      "rawBytes": 763893,
+      "rawSha256": "be67960e2602f2f7bcba0270c59856caec6990178edfc8eccb296b1a3559c75d",
+      "gzipBytes": 63678,
+      "gzipSha256": "dfb759938e703db250ac22b351163b3eea5d6d83d2154f0b151112298f8611a7"
+    },
+    {
+      "logicalPath": "diagnostic/profile/browser/production/dist-files.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/browser/production/dist-files.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/browser/production/dist-files.json.gz",
+      "rawBytes": 738529,
+      "rawSha256": "0818cb7166cd03cf246e21f72b7e4001cae2f4b35ea4e11712ce83fe1cba7f72",
+      "gzipBytes": 267306,
+      "gzipSha256": "7e42b9a14d244069cee47f9c667bdbd24104fbba90eae64e04846ba6b3d7e0cd"
+    },
+    {
+      "logicalPath": "diagnostic/profile/browser/production/preview-requests.jsonl",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/browser/production/preview-requests.jsonl",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/browser/production/preview-requests.jsonl.gz",
+      "rawBytes": 59835,
+      "rawSha256": "1e22da97d5917eedd33b9e1f00b007f88612d684c39a7129c3b21573ac7c0cce",
+      "gzipBytes": 6112,
+      "gzipSha256": "e6c3445932d9afabc7c7d3949b4e2bcff1e14f25113b14b9558317415cbd1763"
+    },
+    {
+      "logicalPath": "diagnostic/profile/browser/production/production.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/browser/production/production.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/browser/production/production.json.gz",
+      "rawBytes": 778708,
+      "rawSha256": "ad75299b35337e78e5850604433fd8e436e91746cc03acd54c2b082c16a60ab9",
+      "gzipBytes": 268777,
+      "gzipSha256": "ab3023dcb0d195c9b10fbd3bd66191aaa40d144930aa274c36f805527b4e9e8f"
+    },
+    {
+      "logicalPath": "diagnostic/profile/browser/receipt.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/browser/receipt.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/browser/receipt.json.gz",
+      "rawBytes": 2423937,
+      "rawSha256": "443d491e113925a58bc87ce4f5007abdbab10265480afb3377bc3e21312e9553",
+      "gzipBytes": 806127,
+      "gzipSha256": "99df364b7c2720b71036823c84800d82b5e1bff6a5c1d717bb916317b614a7ac"
+    },
+    {
+      "logicalPath": "diagnostic/profile/browser/server.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/browser/server.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/browser/server.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "diagnostic/profile/canonical-production-profile.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/canonical-production-profile.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/canonical-production-profile.log.gz",
+      "rawBytes": 767861,
+      "rawSha256": "3dbdf4f46e60717ddd9dc32b8ae64728324c7a25bec65c9f9c36ac3e5a2fe500",
+      "gzipBytes": 65055,
+      "gzipSha256": "2b798bd57b1552cf534941dec74b86e8a34388caa8b36d29337e76eb369b0519"
+    },
+    {
+      "logicalPath": "diagnostic/profile/profile/accounting-parser-status.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/profile/accounting-parser-status.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/profile/accounting-parser-status.json.gz",
+      "rawBytes": 535,
+      "rawSha256": "6a2d0ed496889568e4adf1479e6b5ed4d5876b78a7da1ca01d62f3fbc9624fe9",
+      "gzipBytes": 314,
+      "gzipSha256": "f5f044cdf1cee9a8366f1141eb0df9e4d5f41f770617f7a159f50468f2444d43"
+    },
+    {
+      "logicalPath": "diagnostic/profile/profile/accounting-parser.lock",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/profile/accounting-parser.lock",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/profile/accounting-parser.lock.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "diagnostic/profile/profile/accounting-parser.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/profile/accounting-parser.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/profile/accounting-parser.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "diagnostic/profile/profile/accounting.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/profile/accounting.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/profile/accounting.json.gz",
+      "rawBytes": 27010,
+      "rawSha256": "58ed4965ea02424a2d30ad0bae7696b3b9a14a916867f992c8482bf9602d3d24",
+      "gzipBytes": 2927,
+      "gzipSha256": "d64470b6ba81b0db04ee3987947b25702f93f1d805a30be3b6487c96cff618c5"
+    },
+    {
+      "logicalPath": "diagnostic/profile/profile/input-window-detail.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/profile/input-window-detail.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/profile/input-window-detail.json.gz",
+      "rawBytes": 47038,
+      "rawSha256": "046acf4411c3fb02cc703d8cc89d0d5db21290443ce26ebca0f78792328d76e1",
+      "gzipBytes": 5561,
+      "gzipSha256": "494c71b9eb6e7bb67d668b9e15f14bb2e987582298663b1928b71481b2704cdd"
+    },
+    {
+      "logicalPath": "diagnostic/profile/profile/input-window-detail.lock",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/profile/input-window-detail.lock",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/profile/input-window-detail.lock.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "diagnostic/profile/profile/observer-status.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/profile/observer-status.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/profile/observer-status.json.gz",
+      "rawBytes": 66227,
+      "rawSha256": "e9729500ccb57cea8c9d569f69d07c5f2a48a65a62e9548c2a5f10a338d4ce0d",
+      "gzipBytes": 5884,
+      "gzipSha256": "83e2727d740858ecc6e9d67ae0f13180b62165ccddd3a555022824ff5b03780e"
+    },
+    {
+      "logicalPath": "diagnostic/profile/profile/original-fill-input.txt",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/profile/original-fill-input.txt",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/profile/original-fill-input.txt.gz",
+      "rawBytes": 6724,
+      "rawSha256": "31cdc45eb20475366ca7ea0162d9e72b3425273629db5e10fc5d608549ad2035",
+      "gzipBytes": 2152,
+      "gzipSha256": "62b11836c759257843b0afac6ced39b32ffae65074e58f2020e2218b52777794"
+    },
+    {
+      "logicalPath": "diagnostic/profile/profile/original-fill.cpuprofile",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/profile/original-fill.cpuprofile",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/profile/original-fill.cpuprofile.gz",
+      "rawBytes": 131075,
+      "rawSha256": "2ec46c8ae8f3e8dd8f914f412e33796be475c92c143d273c8c631d7b91083c4c",
+      "gzipBytes": 8389,
+      "gzipSha256": "cff25acfac228e2fd9d8ebc236ef463392810109ebca940b9916847fa08de73c"
+    },
+    {
+      "logicalPath": "diagnostic/profile/profile/original-fill.trace.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/profile/original-fill.trace.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/profile/original-fill.trace.json.gz",
+      "rawBytes": 8163584,
+      "rawSha256": "fb3e7b9146b84e67e82e8c86945036e3f1a5d024de60bbf22ad018449a8e88d9",
+      "gzipBytes": 474449,
+      "gzipSha256": "d27f00485c9bc764f57fb29c17ce2f25e7f2e989f5ad1acd6775636523292808"
+    },
+    {
+      "logicalPath": "diagnostic/profile/profile/original-source-before-fill.txt",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/profile/original-source-before-fill.txt",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/profile/original-source-before-fill.txt.gz",
+      "rawBytes": 6686,
+      "rawSha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8",
+      "gzipBytes": 2128,
+      "gzipSha256": "5bc0afa20813290324bf704ef5839b9e527a737473f0006b9f5a0e7a2c0402ec"
+    },
+    {
+      "logicalPath": "diagnostic/profile/status.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/profile-original-fill-r1/status.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/profile/status.json.gz",
+      "rawBytes": 9013,
+      "rawSha256": "c4ecff9b49baf4319cfea00cccea42c066bc0641f9731ab9fc044fe5b58a9ba7",
+      "gzipBytes": 3130,
+      "gzipSha256": "69455ce5feef69c1aff5fd5ea8f674786e0c85c7a2763201dfb7c05c49c65014"
+    },
+    {
+      "logicalPath": "diagnostic/static-css-input-state-v2/sources.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/static-css-input-state-v2/sources.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/static-css-input-state-v2/sources.json.gz",
+      "rawBytes": 469362,
+      "rawSha256": "b4338f08b45eaf9794a913dfd9f115a2f661dc2cfbf1d9f42c41e44e4c29aab3",
+      "gzipBytes": 57675,
+      "gzipSha256": "e8d6b442fbceab7efdd8664c8e07911953e27cd85747bb13522eba5d82d7d64b"
+    },
+    {
+      "logicalPath": "diagnostic/static-css-input-state-v2/stderr.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/static-css-input-state-v2/stderr.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/static-css-input-state-v2/stderr.log.gz",
+      "rawBytes": 1038,
+      "rawSha256": "02606743b26689aae7027158bae4abb33f6b211242eeade9653919714b8e7577",
+      "gzipBytes": 418,
+      "gzipSha256": "368753e47fd120291bb26ad784db6b8ad1209964220cb7455f0535f8d994d04b"
+    },
+    {
+      "logicalPath": "diagnostic/static-css-input-state-v3/analysis.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/static-css-input-state-v3/analysis.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/static-css-input-state-v3/analysis.json.gz",
+      "rawBytes": 22146,
+      "rawSha256": "b9a1d6b94518d6d960ca08c7a9eece4b4224e73134f96a7a7539fa641021b536",
+      "gzipBytes": 3292,
+      "gzipSha256": "52d170ea857411db119019ad5bcc64d8f5cfa6fe765795647d994cdc3bacdd57"
+    },
+    {
+      "logicalPath": "diagnostic/static-css-input-state-v3/sources.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/static-css-input-state-v3/sources.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/static-css-input-state-v3/sources.json.gz",
+      "rawBytes": 469362,
+      "rawSha256": "b4338f08b45eaf9794a913dfd9f115a2f661dc2cfbf1d9f42c41e44e4c29aab3",
+      "gzipBytes": 57675,
+      "gzipSha256": "e8d6b442fbceab7efdd8664c8e07911953e27cd85747bb13522eba5d82d7d64b"
+    },
+    {
+      "logicalPath": "diagnostic/static-css-input-state-v3/stderr.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/static-css-input-state-v3/stderr.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/static-css-input-state-v3/stderr.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "diagnostic/static-css-input-state/sources.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/static-css-input-state/sources.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/static-css-input-state/sources.json.gz",
+      "rawBytes": 469362,
+      "rawSha256": "b4338f08b45eaf9794a913dfd9f115a2f661dc2cfbf1d9f42c41e44e4c29aab3",
+      "gzipBytes": 57675,
+      "gzipSha256": "e8d6b442fbceab7efdd8664c8e07911953e27cd85747bb13522eba5d82d7d64b"
+    },
+    {
+      "logicalPath": "diagnostic/static-css-input-state/stderr.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/static-css-input-state/stderr.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/static-css-input-state/stderr.log.gz",
+      "rawBytes": 960,
+      "rawSha256": "415e605f414bb4119f06f1d8bf1e00847e3e68b296081e284ef8226ff6d8806e",
+      "gzipBytes": 411,
+      "gzipSha256": "3b487cdce2039c4214016baea37ae60c9106a9cfa8a69a10c20bf662b56796e8"
+    },
+    {
+      "logicalPath": "diagnostic/survey/cssom.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/listener-style-survey-r1/cssom.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/survey/cssom.json.gz",
+      "rawBytes": 2257229,
+      "rawSha256": "3d98fe16a5480b88b7d4d188c7991357540ed2822b8f832aa3734ff9ebce6d38",
+      "gzipBytes": 105144,
+      "gzipSha256": "b210fd82f3665357bd245d9b90030ab6a320f58aab3d5a6eacd0740ec0d8558e"
+    },
+    {
+      "logicalPath": "diagnostic/survey/helper-classification.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/listener-style-survey-r1/helper-classification.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/survey/helper-classification.json.gz",
+      "rawBytes": 27306,
+      "rawSha256": "d0d3005068d0da789c6606120bb0716fbd8f112420244cf3608aeea1e2116330",
+      "gzipBytes": 2740,
+      "gzipSha256": "c8d7adc94d8be7309b150249d2d395a9fe4ec4b937d18aca798a600de91e79fb"
+    },
+    {
+      "logicalPath": "diagnostic/survey/inventory-readback.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/listener-style-survey-r1/inventory-readback.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/survey/inventory-readback.json.gz",
+      "rawBytes": 23051,
+      "rawSha256": "863d36ee209b207de628ee3dfedcc00fc95274f41dba6fd8a930a0aac30bc4a5",
+      "gzipBytes": 4830,
+      "gzipSha256": "ebdafdd27bc100a9e575443b904c16488653c05e7016e27d66af2e2d42b4c877"
+    },
+    {
+      "logicalPath": "diagnostic/survey/listeners.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/listener-style-survey-r1/listeners.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/survey/listeners.json.gz",
+      "rawBytes": 46014,
+      "rawSha256": "c1148b5d2ce584354ec327f69bdf9d40201459678a891d79ad542e1aa7fdfa87",
+      "gzipBytes": 2256,
+      "gzipSha256": "bc9784fe05a3d2d0376f8d53fea40cf85e30e75d82013674cc67402fb2417897"
+    },
+    {
+      "logicalPath": "diagnostic/survey/requests.jsonl",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/listener-style-survey-r1/requests.jsonl",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/survey/requests.jsonl.gz",
+      "rawBytes": 18586,
+      "rawSha256": "1437c1e82e3a718b549b456069a15702643776626d6a1962cb34d757e38c224f",
+      "gzipBytes": 2869,
+      "gzipSha256": "c5d3dcbfb9afe34b6d055272b8603692317b1175c9a387983b81e00c9f5249c7"
+    },
+    {
+      "logicalPath": "diagnostic/survey/run.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/listener-style-survey-r1/run.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/survey/run.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "diagnostic/survey/status.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/listener-style-survey-r1/status.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/survey/status.json.gz",
+      "rawBytes": 5767,
+      "rawSha256": "87e32b601258b8e1122d8cbf8578710d256eae419af2675572da42aecd3a3991",
+      "gzipBytes": 1937,
+      "gzipSha256": "d0cc2c7c1a41a6ab0ae52dffdb259ef03e393fae18918f7fde28aed29a3641f3"
+    },
+    {
+      "logicalPath": "diagnostic/survey/supervisor.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-ea600-browser-diag-75d5e28a-ops/listener-style-survey-r1/supervisor.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/diagnostic/survey/supervisor.json.gz",
+      "rawBytes": 913,
+      "rawSha256": "381b3363e869c4e6387f39a86722c4e2bad1ae9df45667e22620dc687d2e85d1",
+      "gzipBytes": 519,
+      "gzipSha256": "c559aa860fa089c625d2dc7bb63a983b88d02fe894b1999ee9ac62c7bbe1690c"
+    },
+    {
+      "logicalPath": "hosted/native/artifacts.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/artifacts.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/artifacts.json.gz",
+      "rawBytes": 3159,
+      "rawSha256": "a505f3dd55a5d0b86cb7d7e44820f985e8f566fc46c1f156fb158ef367bdbbfa",
+      "gzipBytes": 787,
+      "gzipSha256": "251b006e9d3692eadfa37e7abf76dd835dafe29a85300e8467cb89381aafe959"
+    },
+    {
+      "logicalPath": "hosted/native/artifacts.json.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/artifacts.json.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/artifacts.json.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/native/flutter-job-after.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/flutter-job-after.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/flutter-job-after.json.gz",
+      "rawBytes": 3079,
+      "rawSha256": "aa82fa5c430371bde27d312ce52318d504e69d9d5e54c65389e23077e68e24b9",
+      "gzipBytes": 813,
+      "gzipSha256": "09e97626aa1c7fab4264cf34196e7b3107344461a98fa72c35082c4193de62c4"
+    },
+    {
+      "logicalPath": "hosted/native/flutter-job-after.json.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/flutter-job-after.json.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/flutter-job-after.json.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/native/flutter-job-before.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/flutter-job-before.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/flutter-job-before.json.gz",
+      "rawBytes": 3079,
+      "rawSha256": "aa82fa5c430371bde27d312ce52318d504e69d9d5e54c65389e23077e68e24b9",
+      "gzipBytes": 813,
+      "gzipSha256": "09e97626aa1c7fab4264cf34196e7b3107344461a98fa72c35082c4193de62c4"
+    },
+    {
+      "logicalPath": "hosted/native/flutter-job-before.json.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/flutter-job-before.json.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/flutter-job-before.json.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/native/flutter-job.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/flutter-job.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/flutter-job.log.gz",
+      "rawBytes": 58678,
+      "rawSha256": "7122029a31006941a999747fa7a9f5fec75954689cd9f228ecfec8d35bda53bf",
+      "gzipBytes": 13034,
+      "gzipSha256": "13c439509854ea8804d91cdd99c55fecc60991f1ee93197dacecde7329c610d9"
+    },
+    {
+      "logicalPath": "hosted/native/flutter-job.log.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/flutter-job.log.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/flutter-job.log.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/native/flutter.zip",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/flutter.zip",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/flutter.zip.gz",
+      "rawBytes": 15200337,
+      "rawSha256": "d8de6c994285019604a660186c56345f7dbc1d046aefb3d9d806c0e78df901bd",
+      "gzipBytes": 15075907,
+      "gzipSha256": "e5e381cfed595c090780f8a40482c10038a2aeb8c5a5eac31d49540c0055cb13"
+    },
+    {
+      "logicalPath": "hosted/native/flutter.zip.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/flutter.zip.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/flutter.zip.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/native/linux-job-after.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/linux-job-after.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/linux-job-after.json.gz",
+      "rawBytes": 5924,
+      "rawSha256": "253737db3c21ac8fbe39138c9cae2e9195c1b4701cf51cf67cae31f2b89b6afd",
+      "gzipBytes": 1331,
+      "gzipSha256": "2ae04edfb85b3a58fe8e313d2126dffe172704c0c1cb065de2044b03470bcb27"
+    },
+    {
+      "logicalPath": "hosted/native/linux-job-after.json.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/linux-job-after.json.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/linux-job-after.json.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/native/linux-job-before.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/linux-job-before.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/linux-job-before.json.gz",
+      "rawBytes": 5924,
+      "rawSha256": "253737db3c21ac8fbe39138c9cae2e9195c1b4701cf51cf67cae31f2b89b6afd",
+      "gzipBytes": 1331,
+      "gzipSha256": "2ae04edfb85b3a58fe8e313d2126dffe172704c0c1cb065de2044b03470bcb27"
+    },
+    {
+      "logicalPath": "hosted/native/linux-job-before.json.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/linux-job-before.json.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/linux-job-before.json.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/native/linux-job.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/linux-job.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/linux-job.log.gz",
+      "rawBytes": 5140756,
+      "rawSha256": "25755346fc69b46de73868eb501f8849e20cda0a378d1861a5837202099512f3",
+      "gzipBytes": 529733,
+      "gzipSha256": "3477ec1d666cc793dcf5b328e7974b661768c8e74fa0fd1416848338ace49fda"
+    },
+    {
+      "logicalPath": "hosted/native/linux-job.log.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/linux-job.log.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/linux-job.log.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/native/linux.zip",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/linux.zip",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/linux.zip.gz",
+      "rawBytes": 3574675,
+      "rawSha256": "2628d370297cb1fac053f57d972cae23c06a599e3d4a69f8f2f6943cb22ae664",
+      "gzipBytes": 3353734,
+      "gzipSha256": "ac8dcf6e892fa36905faf484f6b638e496b59194f9925d555f46120c28a5c3d9"
+    },
+    {
+      "logicalPath": "hosted/native/linux.zip.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/linux.zip.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/linux.zip.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/native/macos-job-after.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/macos-job-after.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/macos-job-after.json.gz",
+      "rawBytes": 5916,
+      "rawSha256": "73f1035701ad910b25016ad92776f612dfd4a74aa087284a7f327081efc09936",
+      "gzipBytes": 1334,
+      "gzipSha256": "59391c2ce8df3f8976c9a041cd07c787c2e9cc7e3fb32e9b4e71a009074565bc"
+    },
+    {
+      "logicalPath": "hosted/native/macos-job-after.json.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/macos-job-after.json.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/macos-job-after.json.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/native/macos-job-before.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/macos-job-before.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/macos-job-before.json.gz",
+      "rawBytes": 5916,
+      "rawSha256": "73f1035701ad910b25016ad92776f612dfd4a74aa087284a7f327081efc09936",
+      "gzipBytes": 1334,
+      "gzipSha256": "59391c2ce8df3f8976c9a041cd07c787c2e9cc7e3fb32e9b4e71a009074565bc"
+    },
+    {
+      "logicalPath": "hosted/native/macos-job-before.json.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/macos-job-before.json.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/macos-job-before.json.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/native/macos-job.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/macos-job.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/macos-job.log.gz",
+      "rawBytes": 5114743,
+      "rawSha256": "f880eb58f5ae17e352c53eeefa734e66e342011c785bbfcf7774f1ad6721ab50",
+      "gzipBytes": 499220,
+      "gzipSha256": "46d8d5874a8f5e3c250b36964bc2449ff41acd2557969caae22939616d666b21"
+    },
+    {
+      "logicalPath": "hosted/native/macos-job.log.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/macos-job.log.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/macos-job.log.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/native/macos.zip",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/macos.zip",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/macos.zip.gz",
+      "rawBytes": 3575040,
+      "rawSha256": "6ef201a56dd18ce12a0eabd5b6bfa86592ec92cbdf4ab33400563b88f4ecdfb6",
+      "gzipBytes": 3355436,
+      "gzipSha256": "6e62a6f153974d7bccbb05ea82461b14ecb55faf8810ade3c67760916b781958"
+    },
+    {
+      "logicalPath": "hosted/native/macos.zip.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/macos.zip.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/macos.zip.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/native/readback.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/readback.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/readback.json.gz",
+      "rawBytes": 1940,
+      "rawSha256": "5683224deabfea1d1a121f83f08c28f0f0c4cc7ba4acb656341170b4ad962f94",
+      "gzipBytes": 716,
+      "gzipSha256": "04207b3c5ecedc9e9d3c90a0c8cf9946dc37f666d0558b8554a8f99de0e9a74c"
+    },
+    {
+      "logicalPath": "hosted/native/run-before.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/run-before.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/run-before.json.gz",
+      "rawBytes": 13717,
+      "rawSha256": "82e1b07662e1023156d9c2f268bbd6c8b18436a7738501c7eed3d2d8c4997be8",
+      "gzipBytes": 2002,
+      "gzipSha256": "286528401b43fe7b288b411e477ce969ad5dec3894bd3d84ceeb0e8b6092051b"
+    },
+    {
+      "logicalPath": "hosted/native/run-before.json.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/run-before.json.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/run-before.json.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/native/status.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-native/status.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/native/status.json.gz",
+      "rawBytes": 12640,
+      "rawSha256": "05545207e0232f002bd9cd085528dc046506df4a18d1d4458c93637de089cf26",
+      "gzipBytes": 2435,
+      "gzipSha256": "89807da87561f732734989700fa26665d28e3e5af0c067f3fdb2589f3cab4d5a"
+    },
+    {
+      "logicalPath": "hosted/production/build-inputs.sha256",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/final-ea600-production/build-inputs.sha256",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/production/build-inputs.sha256.gz",
+      "rawBytes": 173,
+      "rawSha256": "640ba49ba3716b994a08569ee4a67c5bdb22d16c80509c395fd349aa2f042fd1",
+      "gzipBytes": 152,
+      "gzipSha256": "f6a9ffff9d7f650a47701f30dcc9049affa3dcb6d774adfbe520356538e948eb"
+    },
+    {
+      "logicalPath": "hosted/production/bundle-gate-controls.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/final-ea600-production/bundle-gate-controls.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/production/bundle-gate-controls.log.gz",
+      "rawBytes": 300267,
+      "rawSha256": "4a3a468378a8b78185df3a18085be092c5f17c9c44e39da9782581f3fd990fe4",
+      "gzipBytes": 25891,
+      "gzipSha256": "64c7e45a8dfe34016c9777197ef5a4e0c486fb6e5e20dcb9521240116019edff"
+    },
+    {
+      "logicalPath": "hosted/production/download-status.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/final-ea600-production/download-status.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/production/download-status.json.gz",
+      "rawBytes": 708,
+      "rawSha256": "16927f840aae95c698584c3e76f239b736cae2fe652d8ec8d4a870b3fe079e2f",
+      "gzipBytes": 382,
+      "gzipSha256": "74ac747f7c7a6675b6cc7072c9ecab1be81b8bc6d96a95804fe7380067ba4cb4"
+    },
+    {
+      "logicalPath": "hosted/production/exact-head-bundle-gate.mjs",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/final-ea600-production/exact-head-bundle-gate.mjs",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/production/exact-head-bundle-gate.mjs.gz",
+      "rawBytes": 45163,
+      "rawSha256": "5cdd0a6b574685c12051fcbe25dac13dc9925cedd746f8c38fbc0198134bcc1a",
+      "gzipBytes": 9484,
+      "gzipSha256": "5b31c43cbb0b8b847fc3f0c1f664d86a3cb8b63002e553dfa66083aa0a284a4d"
+    },
+    {
+      "logicalPath": "hosted/production/node.txt",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/final-ea600-production/node.txt",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/production/node.txt.gz",
+      "rawBytes": 9,
+      "rawSha256": "4409d3bfa08b82f385bd424eeda65fc63b756129f0e89e82df77f1fecafccc14",
+      "gzipBytes": 29,
+      "gzipSha256": "f87eb3c283bf9810764f95a4ce2537720dd6b657a8d1c0baa663f11a3368c67e"
+    },
+    {
+      "logicalPath": "hosted/production/production-artifact.zip",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/final-ea600-production/production-artifact.zip",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/production/production-artifact.zip.gz",
+      "rawBytes": 425043,
+      "rawSha256": "acee4d22c294ee1f4d5aee28601be58a659334edf24576f9b0912c6ca35d92ad",
+      "gzipBytes": 423003,
+      "gzipSha256": "bb3f3d87fd97ef2a502fe5f3fca9bd66b08f4ba6cf64b0de8411e56cc1512168"
+    },
+    {
+      "logicalPath": "hosted/production/production-build.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/final-ea600-production/production-build.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/production/production-build.log.gz",
+      "rawBytes": 763611,
+      "rawSha256": "76465fd4114c36f1032c48b76ee55240d6b3b3727f69f1cbaf8ebb20f0d6fdc0",
+      "gzipBytes": 62311,
+      "gzipSha256": "9a50552858bf1b88207d187151eebd6ebf8741a24edeaa08e365715d8144b1d9"
+    },
+    {
+      "logicalPath": "hosted/production/production-graph.sha256",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/final-ea600-production/production-graph.sha256",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/production/production-graph.sha256.gz",
+      "rawBytes": 107,
+      "rawSha256": "5eb8d8bf5ce4d1eea262f2cda81aef98c7fc17014c27200d34fb175004612ed6",
+      "gzipBytes": 113,
+      "gzipSha256": "1366ddbfb8aeb2e8f231c123db58d3e994a9d8836684ef23f12c6f19e40886e5"
+    },
+    {
+      "logicalPath": "hosted/production/production-job.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/final-ea600-production/production-job.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/production/production-job.log.gz",
+      "rawBytes": 1271587,
+      "rawSha256": "8eea2b261cb5c2bf64d05f195cff01a2ef351a49a6e67ad57d1aab023ef4181f",
+      "gzipBytes": 130127,
+      "gzipSha256": "639c76e27d5dbd9858d7ea97f0b178948c5012b7a72630736e4eb43e9e990015"
+    },
+    {
+      "logicalPath": "hosted/production/proto-ui-bundle-graph.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/final-ea600-production/proto-ui-bundle-graph.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/production/proto-ui-bundle-graph.json.gz",
+      "rawBytes": 5056274,
+      "rawSha256": "502f4716e268b740d34b8ff91de30c89722ee4ccb679676331e7e5fd169a2748",
+      "gzipBytes": 335614,
+      "gzipSha256": "368faabed2ca8c09927d95dc01b289a242e82f08d44d3f3c0e40a6a145f19c74"
+    },
+    {
+      "logicalPath": "hosted/production/replay.mjs",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/final-ea600-production/replay.mjs",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/production/replay.mjs.gz",
+      "rawBytes": 439,
+      "rawSha256": "81839f450cf9484b41e9b868ad69aba5df4dac1223293ed7e29ed41299ee09c1",
+      "gzipBytes": 253,
+      "gzipSha256": "78b2ae9240dc3d98e03aa85dcd03ae2931a50f790d2cb6f01da4442de07a81f5"
+    },
+    {
+      "logicalPath": "hosted/production/replay.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/final-ea600-production/replay.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/production/replay.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/production/replay.stdout",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/final-ea600-production/replay.stdout",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/production/replay.stdout.gz",
+      "rawBytes": 203,
+      "rawSha256": "4dc07f925b76eda15d3c79d788852bbca44f36c9f600dfa11bd34a9c3cdf9062",
+      "gzipBytes": 175,
+      "gzipSha256": "fc749eb2cba9864b83d9e9bb894308b1a2e87fb19da33a13b32785939ce19dd1"
+    },
+    {
+      "logicalPath": "hosted/production/root-readback.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/final-ea600-production/root-readback.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/production/root-readback.json.gz",
+      "rawBytes": 1249,
+      "rawSha256": "ba69281a1ba41a499a55e35032ea43f97cb0d70e98774b6e4227bb0aed775150",
+      "gzipBytes": 719,
+      "gzipSha256": "1395f0c515cb0d461f594d03ea41cf26318edc68059251a36bb1eab531c08604"
+    },
+    {
+      "logicalPath": "hosted/production/source-sha.txt",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/final-ea600-production/source-sha.txt",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/production/source-sha.txt.gz",
+      "rawBytes": 41,
+      "rawSha256": "c4f6482296849fc29af9b670b53cd0e7ca5b58099051de8cee81fa136fc2890a",
+      "gzipBytes": 60,
+      "gzipSha256": "72903b88406a6b2e5c33bcbb22ffefbc208862798473becf73ea5c8f2e8c1a2b"
+    },
+    {
+      "logicalPath": "hosted/production/source-tree.txt",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/final-ea600-production/source-tree.txt",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/production/source-tree.txt.gz",
+      "rawBytes": 41,
+      "rawSha256": "9d5038bb1481898a8d7f7d844e96f5631a41cd335475a7a0cb663768a60d46ca",
+      "gzipBytes": 59,
+      "gzipSha256": "881f11ab3eae69773a0153d4c3cca31a24f4908b66d10045746189d283d5b399"
+    },
+    {
+      "logicalPath": "hosted/source-browser/artifacts.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/artifacts.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/artifacts.json.gz",
+      "rawBytes": 4725,
+      "rawSha256": "5fcc103746be02d0d5c8c21bf9778ed4adb18c01d96df3348c6a8f6d7b84cedb",
+      "gzipBytes": 992,
+      "gzipSha256": "3f0770b0c10f17d8322904217f5a5f909c164d96a8fe5587df3249c73522c726"
+    },
+    {
+      "logicalPath": "hosted/source-browser/artifacts.json.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/artifacts.json.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/artifacts.json.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/source-browser/browser-artifact.zip",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/browser-artifact.zip",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/browser-artifact.zip.gz",
+      "rawBytes": 2126283,
+      "rawSha256": "9b56c4470458c16fb6e61f98b05d156409f676d601d3605f802a5e985fedda57",
+      "gzipBytes": 2108505,
+      "gzipSha256": "b6e24777d88af1256847fae2122f9f03944c67cc4e12269eb96b9c8cabc0759d"
+    },
+    {
+      "logicalPath": "hosted/source-browser/browser-artifact.zip.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/browser-artifact.zip.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/browser-artifact.zip.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/source-browser/browser-job-original.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/browser-job-original.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/browser-job-original.log.gz",
+      "rawBytes": 1058753,
+      "rawSha256": "cd03911852c11bf31ba28512e25799b763390f1fb1ad3023e5f5176698bd594f",
+      "gzipBytes": 122166,
+      "gzipSha256": "388dd4e5473b2252020b1fb744f89e890c1e0586c406389e759131ba8bc48dfa"
+    },
+    {
+      "logicalPath": "hosted/source-browser/browser-job-original.log.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/browser-job-original.log.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/browser-job-original.log.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/source-browser/browser-job.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/browser-job.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/browser-job.json.gz",
+      "rawBytes": 3542,
+      "rawSha256": "c26b9670779a5e678fd56a89a5534284371c0fc1ad64d3ace7e67d46d08a3d3c",
+      "gzipBytes": 969,
+      "gzipSha256": "6d9c768325742188b2801111920828cd8c4ab553fb1c9e13641bc15f4bf41071"
+    },
+    {
+      "logicalPath": "hosted/source-browser/browser-job.json.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/browser-job.json.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/browser-job.json.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/source-browser/formal-source-browser-readback.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/formal-source-browser-readback.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/formal-source-browser-readback.json.gz",
+      "rawBytes": 34634,
+      "rawSha256": "8ba6b8ba995ecf46f943fad97413325bde537793a267f6f704ddc41729f547ab",
+      "gzipBytes": 7481,
+      "gzipSha256": "cc7d22ebc11bdd78f655eebda1a1b45b3c5db98b8a20f5fb5920f2c27083496e"
+    },
+    {
+      "logicalPath": "hosted/source-browser/run.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/run.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/run.json.gz",
+      "rawBytes": 13720,
+      "rawSha256": "d9f2fd4bc71f839308aba611f758901e2dbfc2367cdf7e770b4c938b94b2d346",
+      "gzipBytes": 2007,
+      "gzipSha256": "46f3eab9c0919ef5bec0bf4ddb6833c5cf503a9745558eb1f9b3b38faa1e2c77"
+    },
+    {
+      "logicalPath": "hosted/source-browser/run.json.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/run.json.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/run.json.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/source-browser/source-artifact.zip",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/source-artifact.zip",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/source-artifact.zip.gz",
+      "rawBytes": 97620,
+      "rawSha256": "61a8b51b17c015923e6e97777394e073b71a903cc899af6b128a4f6163918bd7",
+      "gzipBytes": 97014,
+      "gzipSha256": "dc509eff67215c83b37b614fa52534b73c01a5dc493d056dcf3815b8d731d652"
+    },
+    {
+      "logicalPath": "hosted/source-browser/source-artifact.zip.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/source-artifact.zip.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/source-artifact.zip.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/source-browser/source-job-original.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/source-job-original.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/source-job-original.log.gz",
+      "rawBytes": 933322,
+      "rawSha256": "af47eea2b48af64b8d96bc076e01f7854bef8718a944aaef52d637a00974b858",
+      "gzipBytes": 147928,
+      "gzipSha256": "194cc951b54488ae6d8e72ae3878abcaa6b501f099401f08920bb267c2e8d562"
+    },
+    {
+      "logicalPath": "hosted/source-browser/source-job-original.log.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/source-job-original.log.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/source-job-original.log.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/source-browser/source-job.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/source-job.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/source-job.json.gz",
+      "rawBytes": 3095,
+      "rawSha256": "4dcf1754a83c192ff98e65febbd5428303496485b5262d9dc6e9b9726b8375c9",
+      "gzipBytes": 837,
+      "gzipSha256": "59936af2412499ef24448510ef529efd517a2f996a51519f59ba02d96a7b20da"
+    },
+    {
+      "logicalPath": "hosted/source-browser/source-job.json.stderr",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/source-job.json.stderr",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/source-job.json.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "hosted/source-browser/status.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-ea600-source-browser/status.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/hosted/source-browser/status.json.gz",
+      "rawBytes": 11617,
+      "rawSha256": "a000f61f740ff1b8558db889a3965a152bcf1752dc9085f73c126991c82961a9",
+      "gzipBytes": 3286,
+      "gzipSha256": "e3e7065556035add92e0dde3509dd2327acfe433fd9aab4d23cfb3c27e63788c"
+    },
+    {
+      "logicalPath": "peer/browser-input-review/ea600-profile-root-readback.md",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/primary/browser-input-review/ea600-profile-root-readback.md",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/peer/browser-input-review/ea600-profile-root-readback.md.gz",
+      "rawBytes": 5433,
+      "rawSha256": "91a8c6b8a409c1ac9c477497b31afa632b91f0d59be392521659566e7bad2d11",
+      "gzipBytes": 2854,
+      "gzipSha256": "a6f2dc08ab1be6b53f4ba8f6c6754a2cd4feeef5f0ca14ce87074266a679edc8"
+    },
+    {
+      "logicalPath": "peer/browser-input-review/listener-style-survey-root-review.md",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/primary/browser-input-review/listener-style-survey-root-review.md",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/peer/browser-input-review/listener-style-survey-root-review.md.gz",
+      "rawBytes": 4350,
+      "rawSha256": "3b6e2a873827a2e9acda3a182206c30b52611a11dbad29d06d8d9c292581a308",
+      "gzipBytes": 2220,
+      "gzipSha256": "372f8068286152c988c60d8df3284e68cd23501fa61dd0fb0276d3a4465616a1"
+    },
+    {
+      "logicalPath": "peer/browser-input-review/observer-ea600-profile-peer-review-s3.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/primary/browser-input-review/observer-ea600-profile-peer-review-s3.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/peer/browser-input-review/observer-ea600-profile-peer-review-s3.json.gz",
+      "rawBytes": 4240,
+      "rawSha256": "092006396cd31768b10f84ec18ab83c9b0ca0369411e482b1b2599acfb68b50f",
+      "gzipBytes": 1953,
+      "gzipSha256": "fc9b6f4e212bd444fba19cec75daa73e682a9504f56e8acd149ebbcf669cb41a"
+    },
+    {
+      "logicalPath": "peer/browser-input-review/pseudo-input-identity-root-review.md",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/primary/browser-input-review/pseudo-input-identity-root-review.md",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/peer/browser-input-review/pseudo-input-identity-root-review.md.gz",
+      "rawBytes": 3527,
+      "rawSha256": "b04b671d6ecba90a3ffc499db9daba092f720500c43a6e6b17920f6455671382",
+      "gzipBytes": 1780,
+      "gzipSha256": "005ad9ecc7367ae4843c08b597ee18d9592715bcfb9f89f152370de1b4d7dbdb"
+    },
+    {
+      "logicalPath": "peer/s5-b880-evidence-review/archive-verification.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/primary/s5-b880-evidence-review/archive-verification.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/peer/s5-b880-evidence-review/archive-verification.json.gz",
+      "rawBytes": 5808,
+      "rawSha256": "3adf36cd0fdadfd8b584812cd40711e67ae3fa0576790c3db11b5f7fba7c0775",
+      "gzipBytes": 1202,
+      "gzipSha256": "fbc3f1f432c1ef780f8912e28b1918574fa184a91379e5322b5543fda6366e2d"
+    },
+    {
+      "logicalPath": "peer/s5-b880-evidence-review/historical-browser-archive-verification.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/primary/s5-b880-evidence-review/historical-browser-archive-verification.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/peer/s5-b880-evidence-review/historical-browser-archive-verification.json.gz",
+      "rawBytes": 320,
+      "rawSha256": "b677d1ec6a1c43ff57522bba788ec1b7848c32f9240ffd094a92e1ccd4e3fc2f",
+      "gzipBytes": 214,
+      "gzipSha256": "0f245910fea0007012178124ad685427738ad5ca5e004f6c971af571eab82353"
+    },
+    {
+      "logicalPath": "peer/s5-b880-evidence-review/readback.md",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/primary/s5-b880-evidence-review/readback.md",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/peer/s5-b880-evidence-review/readback.md.gz",
+      "rawBytes": 3154,
+      "rawSha256": "d26899115b2829f561099889705a8db294b9d32522638086ffb6c81605a5eb84",
+      "gzipBytes": 1547,
+      "gzipSha256": "82a5406c7fec78f8b9dbaa3d81b309f12078094aebf45f6bc1d35e2cd8909249"
+    },
+    {
+      "logicalPath": "peer/s5-b880-evidence-review/text-reconstruction.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/primary/s5-b880-evidence-review/text-reconstruction.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/peer/s5-b880-evidence-review/text-reconstruction.json.gz",
+      "rawBytes": 3390,
+      "rawSha256": "073372b48d8689dafa59705b31e3e5528a232bad7e01d860f11bb027bcd871e1",
+      "gzipBytes": 1179,
+      "gzipSha256": "1d2ff76ec5ef9192afba66034bd4dbe6a33cc7af6e264e4fac4ff1ea3775a114"
+    },
+    {
+      "logicalPath": "peer/s5-b880-pr-body-readback.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/primary/s5-b880-pr-body-readback.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/peer/s5-b880-pr-body-readback.json.gz",
+      "rawBytes": 56597,
+      "rawSha256": "3ad3f44d0876fb9d51fc13dcc354348f69ee03907f4875f8068e0a10df063c0c",
+      "gzipBytes": 12994,
+      "gzipSha256": "35451b97cd97d4f538b3aa3204479cfd679733f832c950b22c354059282f3032"
+    },
+    {
+      "logicalPath": "peer/s5-ea600-checks-with-b880-concurrency-readback.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native-part-input-closeout-r1/primary/s5-ea600-checks-with-b880-concurrency-readback.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/peer/s5-ea600-checks-with-b880-concurrency-readback.json.gz",
+      "rawBytes": 250596,
+      "rawSha256": "47b4f786f451f868f942e8253247d3521097637b4f5e056821d19a18d139d8ce",
+      "gzipBytes": 24538,
+      "gzipSha256": "4deb027fb48f3c5adea587381cf0add1c05ddda570606d000e26a09edbb24684"
+    },
+    {
+      "logicalPath": "publication/dispatch-ea600-after-reconcile/dispatch.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/dispatch-ea600-after-reconcile/dispatch.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/dispatch-ea600-after-reconcile/dispatch.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "publication/dispatch-ea600-after-reconcile/pr-before-dispatch.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/dispatch-ea600-after-reconcile/pr-before-dispatch.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/dispatch-ea600-after-reconcile/pr-before-dispatch.log.gz",
+      "rawBytes": 37619,
+      "rawSha256": "f35a044d88b4bda93810791d864a43400972268a2693f4ec3a1314331fe6d4ae",
+      "gzipBytes": 12083,
+      "gzipSha256": "676251832db0bbb28217f30fb54821de11684c1ad2e545911ecda0da2f7fc149"
+    },
+    {
+      "logicalPath": "publication/dispatch-ea600-after-reconcile/pr-fresh.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/dispatch-ea600-after-reconcile/pr-fresh.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/dispatch-ea600-after-reconcile/pr-fresh.log.gz",
+      "rawBytes": 37619,
+      "rawSha256": "f35a044d88b4bda93810791d864a43400972268a2693f4ec3a1314331fe6d4ae",
+      "gzipBytes": 12083,
+      "gzipSha256": "676251832db0bbb28217f30fb54821de11684c1ad2e545911ecda0da2f7fc149"
+    },
+    {
+      "logicalPath": "publication/dispatch-ea600-after-reconcile/remote-fresh.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/dispatch-ea600-after-reconcile/remote-fresh.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/dispatch-ea600-after-reconcile/remote-fresh.log.gz",
+      "rawBytes": 99,
+      "rawSha256": "b9d71f5e8674ad64d1e65648f9f9e1efa10403af60e877aff9b53807ecca838a",
+      "gzipBytes": 107,
+      "gzipSha256": "a6bd0c1eb7cf72334e565e874f91233755564d974a8adec043c6b61558acdff6"
+    },
+    {
+      "logicalPath": "publication/dispatch-ea600-after-reconcile/runs-before.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/dispatch-ea600-after-reconcile/runs-before.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/dispatch-ea600-after-reconcile/runs-before.log.gz",
+      "rawBytes": 54189,
+      "rawSha256": "f211daabc8b54c74571b814d34b899b2691c8a6ec1a20b7b4cdbe9fbb89e042f",
+      "gzipBytes": 3152,
+      "gzipSha256": "c567e35d9e89a1240d85d9191b3dc5439832fabc82f8457bdf6aac37bca875a1"
+    },
+    {
+      "logicalPath": "publication/dispatch-ea600-after-reconcile/runs-readback-0.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/dispatch-ea600-after-reconcile/runs-readback-0.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/dispatch-ea600-after-reconcile/runs-readback-0.log.gz",
+      "rawBytes": 67902,
+      "rawSha256": "99d3db77cd7aaed58d8f7f18a30e8e45bec6b4771a13a7d0361a4aec70c63513",
+      "gzipBytes": 3604,
+      "gzipSha256": "fa75d9b61cc3fe15c089ef8153a909443c71b5d97e2ba29e0d60ea12a23e2ba4"
+    },
+    {
+      "logicalPath": "publication/dispatch-ea600-after-reconcile/status.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/dispatch-ea600-after-reconcile/status.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/dispatch-ea600-after-reconcile/status.json.gz",
+      "rawBytes": 2642,
+      "rawSha256": "2db5dba5675c437835b3b1116aae65dca696a79f9bbdf6ba17e15757631ed81a",
+      "gzipBytes": 766,
+      "gzipSha256": "e91a64d117f74bf7caea2dfb48e551e0d267f72325947e229816af269abf0105"
+    },
+    {
+      "logicalPath": "publication/public-12af-final/check-record.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/public-12af-final/check-record.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/public-12af-final/check-record.log.gz",
+      "rawBytes": 66,
+      "rawSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "gzipBytes": 82,
+      "gzipSha256": "e3c38a48f6a61743f217e7d0ded850d18c6250b52d2b69c226b68caf260d78b6"
+    },
+    {
+      "logicalPath": "publication/public-12af-final/commit.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/public-12af-final/commit.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/public-12af-final/commit.log.gz",
+      "rawBytes": 758,
+      "rawSha256": "e86db821be6251424938e9b7607fea7a2778180dfe72a62089ac3c840ae02fad",
+      "gzipBytes": 344,
+      "gzipSha256": "80719ddcaaa9813b9de1b91048c2eb232bdf5875bdb1028f6e5df093237af3f5"
+    },
+    {
+      "logicalPath": "publication/public-12af-final/commit.trace.jsonl",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/public-12af-final/commit.trace.jsonl",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/public-12af-final/commit.trace.jsonl.gz",
+      "rawBytes": 102471,
+      "rawSha256": "44ac6d060649aa3a663468111ec2dd8d86fcd5173f048166fc8f8fc6b3de5754",
+      "gzipBytes": 7398,
+      "gzipSha256": "652bc34fb1caf1fd0eebf5fef27a1edceeda39450abde8b6c8206edbc06380f3"
+    },
+    {
+      "logicalPath": "publication/public-12af-final/diff-check.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/public-12af-final/diff-check.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/public-12af-final/diff-check.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "publication/public-12af-final/final-diff-check.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/public-12af-final/final-diff-check.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/public-12af-final/final-diff-check.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "publication/public-12af-final/final-source-map.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/public-12af-final/final-source-map.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/public-12af-final/final-source-map.json.gz",
+      "rawBytes": 7667,
+      "rawSha256": "9ce1d8a8441cb1bae1fa52d90b5b9f77344211221d38f79989d87bec805adb0d",
+      "gzipBytes": 3468,
+      "gzipSha256": "b420611c532545bb9dcae5ee32c76cbc3d30ac0dc487bc0ee20b5c7e15534aec"
+    },
+    {
+      "logicalPath": "publication/public-12af-final/format-record.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/public-12af-final/format-record.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/public-12af-final/format-record.log.gz",
+      "rawBytes": 198,
+      "rawSha256": "bfa683bded37c5917461de148edbc1b3e99a931a8ff3267ba2fbc80551a31f6a",
+      "gzipBytes": 127,
+      "gzipSha256": "0e2782d05a63f980ed821150ba85ce65559700d01c39a42d267ec63c0973fac2"
+    },
+    {
+      "logicalPath": "publication/public-12af-final/format-source-and-public-records.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/public-12af-final/format-source-and-public-records.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/public-12af-final/format-source-and-public-records.log.gz",
+      "rawBytes": 66,
+      "rawSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "gzipBytes": 82,
+      "gzipSha256": "e3c38a48f6a61743f217e7d0ded850d18c6250b52d2b69c226b68caf260d78b6"
+    },
+    {
+      "logicalPath": "publication/public-12af-final/message.txt",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/public-12af-final/message.txt",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/public-12af-final/message.txt.gz",
+      "rawBytes": 280,
+      "rawSha256": "13a44e02452732f100a7013917d101a055de0bd4cb4d4a22a45638f7b6476af9",
+      "gzipBytes": 191,
+      "gzipSha256": "e9593b65b6e87f422b331a69313ea4b40986d94a5be8e045b9c2d5d6b58e6f03"
+    },
+    {
+      "logicalPath": "publication/public-12af-final/resolve-stage.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/public-12af-final/resolve-stage.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/public-12af-final/resolve-stage.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "publication/public-12af-final/stage-evidence.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/public-12af-final/stage-evidence.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/public-12af-final/stage-evidence.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "publication/public-12af-final/status.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/public-12af-final/status.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/public-12af-final/status.json.gz",
+      "rawBytes": 24730,
+      "rawSha256": "9f1e30470e7ea4e6d754376af1e205d6b583854f93f6f00b5a77192ef000a38b",
+      "gzipBytes": 4811,
+      "gzipSha256": "cffb8029d238973274a348acd4a37e7593c3a6e88207da932f8cb754ee70c5b9"
+    },
+    {
+      "logicalPath": "publication/public-12af-final/validation.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/public-12af-final/validation.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/public-12af-final/validation.json.gz",
+      "rawBytes": 1086,
+      "rawSha256": "351a7461178147aac2adbb6c6fbf6ef62a3fd10a521659a426806b920370331b",
+      "gzipBytes": 460,
+      "gzipSha256": "0d55ba350a7dbb267a381b9ea848d2a99ce12d3e3caeafd3faeced9b24ebec7f"
+    },
+    {
+      "logicalPath": "publication/publish-final-12af-union/main-before.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-12af-union/main-before.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/publish-final-12af-union/main-before.log.gz",
+      "rawBytes": 5234,
+      "rawSha256": "edd7b8fb6d461060088985b25e57bb87af37ad5ca64f29eb065e7155821266ab",
+      "gzipBytes": 1841,
+      "gzipSha256": "580f9c51a7cf0d3a84a7b633e27df7e58500c0e5e6350f2ccf6f050b2960eac4"
+    },
+    {
+      "logicalPath": "publication/publish-final-12af-union/native-ancestry.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-12af-union/native-ancestry.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/publish-final-12af-union/native-ancestry.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "publication/publish-final-12af-union/pr-after.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-12af-union/pr-after.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/publish-final-12af-union/pr-after.log.gz",
+      "rawBytes": 37617,
+      "rawSha256": "c43a1a39f645d6acb86c567e1f414bac2b972aad58f48e91c51ffaff4e1a1499",
+      "gzipBytes": 12088,
+      "gzipSha256": "c256e95a8edc2ad46aa198b0c375bca519814bfa3f18255f5dddcecb7c3ecc89"
+    },
+    {
+      "logicalPath": "publication/publish-final-12af-union/pr-before.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-12af-union/pr-before.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/publish-final-12af-union/pr-before.log.gz",
+      "rawBytes": 37618,
+      "rawSha256": "dbcb08b7a8982d063171978668778476fcf29443d26e0b9605434caa89e48519",
+      "gzipBytes": 12083,
+      "gzipSha256": "4014c72fed46816d517853ff2dd41e8fb9d505b1fffeb6e1f4b90e978f9d4959"
+    },
+    {
+      "logicalPath": "publication/publish-final-12af-union/push.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-12af-union/push.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/publish-final-12af-union/push.log.gz",
+      "rawBytes": 124,
+      "rawSha256": "d67eeca50d167f72254c876f727dcfffdda9087be82136452a1bf03e5dee94d3",
+      "gzipBytes": 135,
+      "gzipSha256": "e762192ad7f8b297d04200c4cfc85d6d8a81ebe2639221b5ebdc48b51d67dbfe"
+    },
+    {
+      "logicalPath": "publication/publish-final-12af-union/remote-ancestry.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-12af-union/remote-ancestry.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/publish-final-12af-union/remote-ancestry.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "logicalPath": "publication/publish-final-12af-union/remote-before.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-12af-union/remote-before.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/publish-final-12af-union/remote-before.log.gz",
+      "rawBytes": 99,
+      "rawSha256": "bcfb443bd12aa7e31de8adae0f1a528373def92634882342ced4fdbdbac90bc8",
+      "gzipBytes": 105,
+      "gzipSha256": "a9784275c1285c8704a4ffb8c618cd98f2b04bf5935f99673b69c833f2b9d3cd"
+    },
+    {
+      "logicalPath": "publication/publish-final-12af-union/repository-permission.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-12af-union/repository-permission.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/publish-final-12af-union/repository-permission.log.gz",
+      "rawBytes": 6711,
+      "rawSha256": "f03ecef4aa8ea2baee89dea3b738306f8e650f5b954afbeeb5e68e0519ffc10f",
+      "gzipBytes": 1517,
+      "gzipSha256": "ecfeb1634bc6fe521498903bee180048f2e5f83df0da0ff77d96a150c5eb44ba"
+    },
+    {
+      "logicalPath": "publication/publish-final-12af-union/status.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-12af-union/status.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/publish-final-12af-union/status.json.gz",
+      "rawBytes": 2626,
+      "rawSha256": "fcbe737144ffd3910504c94cc40740eeab4922a94e3cd5eb0baec75e454bed02",
+      "gzipBytes": 822,
+      "gzipSha256": "986bc093e91c819bac9643dc7377ddb497ed608a3df29c4208b2aafc1cfd559d"
+    },
+    {
+      "logicalPath": "publication/publish-final-public-union/pr-before.log",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-public-union/pr-before.log",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/publish-final-public-union/pr-before.log.gz",
+      "rawBytes": 37618,
+      "rawSha256": "dbcb08b7a8982d063171978668778476fcf29443d26e0b9605434caa89e48519",
+      "gzipBytes": 12083,
+      "gzipSha256": "4014c72fed46816d517853ff2dd41e8fb9d505b1fffeb6e1f4b90e978f9d4959"
+    },
+    {
+      "logicalPath": "publication/publish-final-public-union/status.json",
+      "originalPath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-public-union/status.json",
+      "path": "internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/raw/publication/publish-final-public-union/status.json.gz",
+      "rawBytes": 1283,
+      "rawSha256": "f62aa0f75f09ad2e6fc2376523918515a70ef8b189e4d3aa3c81799dcf4c1176",
+      "gzipBytes": 660,
+      "gzipSha256": "181db309595c3d61f98767304a8f3d2c680e6beaa4a7986938417592479a69cf"
+    }
+  ]
+}
