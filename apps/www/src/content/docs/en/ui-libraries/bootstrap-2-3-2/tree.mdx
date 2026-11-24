@@ -1,16 +1,35 @@
 ---
-title: 'Tree (WIP)'
-description: 'tree functional composition and current verification limits.'
+title: 'Tree'
+description: 'A Bootstrap 2.3.2 hierarchical tree view with single selection, node expansion, and keyboard navigation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Tree owns single selection and expansion of a complete authored hierarchy. nodeKey is unique, parentKey identifies its parent, and invalid cycles or missing parents fail closed. Arrow keys, Home/End and first-letter navigation move focus; Left/Right collapse, expand or navigate to parent/child. Controlled value and expandedKeys are request-only.
+Tree renders nested hierarchies with single selection, expandable branches, and full tree-view keyboard navigation.
 
-This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-tree"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+- **Explicit hierarchy**: Give every node a unique `nodeKey` and point child nodes to their parent via `parentKey`. Duplicate keys, missing parents, and cycles ignore invalid configuration and stay inactive.
+- **Keyboard navigation**: Up/Down arrows, `Home`/`End`, and first-letter typing move focus; Right arrow expands a collapsed node or moves to its first child, while Left arrow collapses an expanded node or moves to its parent.
+- **Controlled state**: Both `value` (selected key) and `expandedKeys` support controlled usage via change requests.
+
+## API
+
+| Prop           | Description                                   |
+| -------------- | --------------------------------------------- |
+| `nodeKey`      | Unique identifier for each node in the tree   |
+| `parentKey`    | Key of the node's parent                      |
+| `value`        | Selected node key (supports controlled mode)  |
+| `expandedKeys` | Expanded node keys (supports controlled mode) |

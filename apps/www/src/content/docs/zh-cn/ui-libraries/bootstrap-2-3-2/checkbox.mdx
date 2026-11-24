@@ -1,6 +1,6 @@
 ---
 title: 'Bootstrap 2.3.2 Checkbox'
-description: '基于 Base Checkbox 的自定义 Root 与 Indicator。'
+description: '基于 Base Checkbox 的 Bootstrap 2.3.2 自定义复选框组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,11 +8,11 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-自定义 Root / Indicator anatomy 将 Bootstrap 2.3.2 的视觉语言用于复选框。它不是归档版本原生 checkbox 的原样复刻，也不引入旧版 Bootstrap JavaScript 或 Glyphicons。
+Bootstrap 2.3.2 Checkbox 采用自定义 `Root` / `Indicator` 结构来呈现 Bootstrap 2.3.2 视觉语言，不是归档版本原生 checkbox 的直接复刻，也不依赖旧版 Bootstrap JavaScript 或 Glyphicons。
 
-Base Checkbox 拥有受控与非受控 `checked`、`indeterminate`、指针与 Space 激活、禁用、焦点以及带 `mixed` 状态的 `checkbox` 角色。Indicator 从最近的 Root 派生勾号或横线，不拥有第二份值或激活逻辑。mixed 的展示优先于 checked。
+## 预览
 
-通过页面运行时选择器比较 Web Components、React、Vue 3 与 Vue 2。可切换未选中、选中与 mixed 示例，并用 Tab 移到最后一个控件观察键盘焦点。
+可切换未选中、选中与半选（`mixed`）示例，并按 `Tab` 聚焦最后一个控件查看键盘焦点样式。
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-checkbox"
@@ -22,10 +22,22 @@ Base Checkbox 拥有受控与非受控 `checked`、`indeterminate`、指针与 S
   codePanel={false}
 />
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。[查看已实现的子集](../)。
+
+## 用法
+
+- **状态由 Root 统一管理**：支持受控与非受控 `checked`、`indeterminate`，处理指针与 `Space` 键激活、禁用、焦点以及带 `mixed` 状态的 `checkbox` 无障碍角色。
+- **Indicator**：放置在 `Root` 内部，自动根据所属 `Root` 状态显示勾号或横线；同时为半选和选中时优先显示半选横线。
+- **配色说明**：在深色页面中保持经典的归档 Bootstrap 2.3.2 浅色配色。
+
 ## API
 
-- Root：`checked` / `defaultChecked`、`indeterminate` / `defaultIndeterminate`、`disabled`
-- Root 继承 `checkedChange` 与 `indeterminateChange` 信号
-- Indicator：只负责派生展示，放在对应 Root 内
-
-这是 draft 状态的源码投射，源码包仍为 private、未发布。深色宿主中继续使用归档浅色配色。Web 示例不代表通用 Prototype Compiler 或 GPUI、Flutter、Qt 一致性已经通过。[查看已实现的子集](../)。
+| 部件 | 属性 / 事件 | 说明 |
+| --- | --- | --- |
+| `Root` | `checked` / `defaultChecked` | 受控或初始选中状态 |
+| `Root` | `indeterminate` / `defaultIndeterminate` | 受控或初始半选（`mixed`）状态 |
+| `Root` | `disabled` | 禁用复选框交互 |
+| `Root` | `checkedChange` / `indeterminateChange` | 选中与半选状态变更事件 |
+| `Indicator` | — | 视觉指示器，放置在 `Root` 内自动跟随状态 |
