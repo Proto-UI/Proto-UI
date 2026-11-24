@@ -1,11 +1,13 @@
 ---
 title: 'Command'
-description: 'An inline searchable list of executable commands.'
+description: 'A Bootstrap 2.3.2 inline searchable command list that emits explicit execution intents.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-An inline searchable list of executable commands.
+Command renders an inline, always-open searchable list of commands for quickly filtering and triggering application actions.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-command"
@@ -14,10 +16,25 @@ An inline searchable list of executable commands.
   codePanel={false}
 />
 
-The list stays inline and open. Enter or pointer activation emits execute with the selected command. The application owns the action; query state does not execute anything.
+## Installation
 
-The host owns the real single-line editor. Input retains focus during Arrow navigation; IME composition never selects. Filtering is case/diacritic insensitive over textValue and keywords. Empty reflects actual matches; disabled options cannot commit. open, value and inputValue are independently controlled with corresponding change requests. filter=false supports owner-filtered children. Duplicate-valued choices are rejected.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Input, Content, Item, Empty.
+## Usage
 
-Draft source; shared Web A11y active-descendant projection, native/GPUI, compiler, consumer, visual and independent acceptance remain separate requirements.
+Compose `Root`, `Input`, `Content`, `Item`, and `Empty`:
+
+- **Executing commands**: The list stays inline and open. Pressing `Enter` or clicking an item emits `execute` with the selected command so your application handles the action; typing a query never executes anything.
+- **Filtering and empty state**: Built-in filtering matches `textValue` and `keywords` case- and diacritic-insensitively, or set `filter={false}` for caller-filtered children. `Empty` renders when no commands match.
+- **Keyboard and IME**: Focus stays in `Input` during Arrow navigation, and IME composition never triggers selection. Disabled and duplicate-valued items cannot commit.
+
+## API
+
+| Part | Props / Events | Description |
+| --- | --- | --- |
+| `Root` | `value` / `inputValue` / `open` / `filter` | Controlled state inputs and built-in/external filter toggle |
+| `Root` | `execute` | Emitted when a command item is activated |
+| `Input` | — | Single-line command search input |
+| `Content` | — | Inline command list container |
+| `Item` | `value` / `textValue` / `keywords` / `disabled` | Individual command entry |
+| `Empty` | — | Displayed when no commands match |

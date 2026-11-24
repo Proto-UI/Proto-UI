@@ -1,17 +1,15 @@
 ---
-title: 'Carousel (WIP)'
-description: 'carousel functional composition and current verification limits.'
+title: 'Carousel'
+description: '支持拖动吸附、连续滚动、响应式显示数量与受控索引的轮播组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+支持指针拖动、滚轮/触控板连续滚动、边界吸附与键盘切换的等尺寸轮播组件。本页示例采用 **Shadcn Rhea** 风格。
 
-Carousel 组合等尺寸项目条、连续滚动视口与前后控制。鼠标或触摸拖动在松手前就移动内容；滚轮、触控板和滚动条使用同一个滚动表面。拖动结束或原生滚动静止后，内容吸附到最近的可达项目边界。键盘导航使用同一索引请求。
-
-当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-carousel"
@@ -19,17 +17,30 @@ Carousel 组合等尺寸项目条、连续滚动视口与前后控制。鼠标�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 响应式视口与受控索引
+## 用法
 
-Root 的 `slidesPerView` 设置最多显示的等尺寸项目数（默认 `1`），`minSlideSize` 设置项目最小逻辑宿主像素尺寸（默认 `0`）。演示请求显示两项，最小尺寸为 `180`；缩窄视口会减少实际容量，也允许部分项目露出。所有项目始终保留布局尺寸。Root 通过实际视口公开 `visibleSlides` 和 `maxIndex`，最后一个吸附位置贴齐内容末端，避免空白。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-传入 `index` 进入受控模式，`indexChange` 提出新的吸附索引。拖动预览不会改变已提交的 `index`；松手时采用所有者同步接受的值，否则回到现有索引，延迟接受则在新的输入到达时再移动。Viewport 公开 `dragging`、`scrolling` 与归一化 `scrollPosition`；Slide 的 `current` 跟随已提交吸附项，`hidden` 跟随实际屏外可见性，且不会从布局移除项目。
+### 响应式视口与吸附
 
-`orientation="vertical"` 需要消费者为视口设置明确的有界高度。水平 `direction="rtl"` 反转物理拖动与方向键，但保留逻辑项目顺序。取消、禁用、切换轴和移除视图会丢弃未完成的拖动。`loop` 在可达两端循环索引，不通过克隆项目实现无缝无限条；自动播放和不同尺寸项目不属于当前契约。
+- `Root` 的 `slidesPerView` 控制同时展示的最大等尺寸卡片数（默认 `1`），`minSlideSize` 设置每张卡片的最小逻辑像素尺寸（默认 `0`）。当容器变窄时会自动减少实际可见数量并允许边缘卡片部分露出。
+- 鼠标或触摸拖动会即时跟随移动，松手或原生滚动停止后自动吸附到最近的可达卡片边界；最后一个吸附位置会贴齐内容末端，不留多余空白。
+- 通过 `Root` 暴露的 `visibleSlides` 与 `maxIndex` 可读取当前视口实际容纳的项数与最大索引。
+
+### 受控与非受控索引
+
+- 传入 `index` 进入受控模式，交互时通过 `indexChange` 提出目标索引。拖动预览期间不会修改已提交的 `index`，松手后根据外部传入的新值更新或平滑回弹到原位置。
+- `Viewport` 暴露 `dragging`、`scrolling` 与归一化 `scrollPosition`；每个 `Slide` 暴露 `current`（是否位于当前吸附位）与 `hidden`（是否完全在视口外，仍保留布局占位）。
+
+### 方向与循环
+
+- 设置 `orientation="vertical"` 时，请为视口容器指定明确的高度。
+- 水平模式下设置 `direction="rtl"` 会反转物理拖动与左右方向键，同时保持逻辑顺序。
+- 开启 `loop={true}` 后，在首尾两端继续切换会循环跳转索引（按索引循环，不克隆额外 DOM 节点）。
 
 ## API
 
-Carousel 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `index` 进入受控模式。Viewport 没有属性。省略 Slide 的 `index` 时采用当前 anatomy 顺序，显式索引应与项目顺序对应。
+传入 `index` 进入受控模式。`Viewport` 无额外属性；省略 `Slide` 的 `index` 时按文档顺序自动分配。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -46,7 +57,7 @@ Carousel 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `in
   ]}
 />
 
-这些属性属于 Root。
+以上属性属于 `Root`。
 
 ## 参考
 

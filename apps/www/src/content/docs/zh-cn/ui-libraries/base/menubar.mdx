@@ -1,13 +1,15 @@
 ---
 title: 'Menubar'
-description: '具有键盘协调与独立命令面板的菜单栏。'
+description: '支持键盘导航与独立命令面板的菜单栏组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-具有键盘协调与独立命令面板的菜单栏。
+提供带有单焦点入口与独立下拉命令面板的横向菜单栏。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-menubar"
@@ -16,15 +18,21 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root.value 标识一个打开的面板；Trigger.value 与 Content.value 配对。菜单栏提供单一 Tab 入口、左右移动、上下箭头进入、命令纵向导航及文字跳转。Escape 恢复触发器焦点；外部点击与命令选择关闭。受控 value 只发出请求。
+## 安装
 
-组成: Root, Trigger, Content, Item.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码。嵌套子菜单、完整 native/GPUI/编译器证据、消费/视觉验收与独立生命周期准入仍未完成。
+## 用法
+
+由 `Root`、`Trigger`、`Content` 和 `Item` 组成：
+
+- **面板配对**：状态由 `Root` 统一管理，`Root` 的 `value` 标识当前打开的面板，`Trigger` 与 `Content` 通过相同的 `value` 配对。
+- **受控与非受控**：传入 `value` 进入受控模式（交互时发出变更请求，由外部决定是否更新）；使用 `defaultValue` 可设置非受控初始展开项。
+- **键盘与焦点**：菜单栏采用单 Tab 入口，支持左右方向键在触发器之间切换、上下方向键进入面板，面板内支持纵向导航和首字母跳转。按 `Escape` 关闭面板并将焦点恢复到对应触发器；点击外部或选择命令项也会关闭面板。
 
 ## API
 
-Menubar 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -36,7 +44,13 @@ Menubar 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `val
   ]}
 />
 
-这些属性属于 Root。Trigger 的 `value` 默认 `''`，`disabled` 默认 `false`。Content 的 `value` 与 `a11yLabel` 默认 `''`，`sideOffset` 默认 `4`。Item 的 `value` 与 `textValue` 默认 `''`，`disabled` 默认 `false`，`closeOnSelect` 默认 `true`。
+传入 `value` 可受控管理当前打开的面板标识。
+
+### 其他部件属性
+
+- **Trigger**：`value`（默认 `''`）、`disabled`（默认 `false`）。
+- **Content**：`value`（默认 `''`）、`a11yLabel`（默认 `''`）、`sideOffset`（默认 `4`）。
+- **Item**：`value`（默认 `''`）、`textValue`（默认 `''`）、`disabled`（默认 `false`）、`closeOnSelect`（默认 `true`）。
 
 ## 参考
 

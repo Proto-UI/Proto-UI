@@ -1,18 +1,34 @@
 ---
-title: 'Data-Table (WIP)'
-description: 'data-table composition and explicit implementation boundary.'
+title: 'Data Table'
+description: '支持稳定排序、全局过滤、分页与行选择的 Bootstrap 2.3.2 数据表格组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Data Table 将被动 Table 结构与稳定记录 ID、稳定排序、全局过滤、分页及行选择组合。行是当前页按 index 编排的显示槽；单元格按 columnKey 显示当前记录，排序会更新真实内容，不用 CSS 顺序冒充 Table 结构排序。应用 rows 的 id 必须唯一。本组合不管理请求、编辑或列重排。
+Data Table 在标准表格结构上提供稳定的记录标识、排序、全局过滤、分页与行选择能力，并采用 Bootstrap 2.3.2 表格视觉风格。
 
-当前为功能源码 WIP。完整运行时、Compiler、原生、打包、浏览器与视觉验收仍待补齐。
-
-排序表头应放在静态 `DataTableHeaderRow` 组合内。它继承被动 Table Row topology，没有 Props 或 instance exposes，不创建 selection、focus 或 Trigger owner；正文数据槽仍使用 `DataTableRow`。旧 `DataTableRow.header` prop 保留 runtime 数据槽策略，但不会移除该行 setup 期的 Trigger 身份，不能包含多个直接 Trigger 子项。示例已迁移到新静态组合，连续链规则没有放宽。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-data-table"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+## 用法
+
+- **数据与槽位**：应用传入的每条记录都需要唯一的 `id`。正文行（`DataTableRow`）按当前页 `index` 顺序呈现，每个单元格按 `columnKey` 渲染对应记录字段；排序时会直接更新单元格数据，保持真实的 DOM 表格顺序。
+- **表头排序**：将可排序表头放在 `DataTableHeaderRow` 内，以保持独立的表头语义并支持多个排序触发器；正文数据行继续使用 `DataTableRow`。
+- **职责边界**：数据请求、行内编辑和列拖拽重排由应用层自行管理。
+
+## API
+
+| 部件 / 属性          | 说明                                          |
+| -------------------- | --------------------------------------------- |
+| `DataTableHeaderRow` | 静态表头行容器，用于放置可排序列头            |
+| `DataTableRow`       | 当前页的数据行槽位，通过 `index` 绑定对应记录 |
+| `id` / `columnKey`   | 每条记录的唯一标识与单元格列键名              |

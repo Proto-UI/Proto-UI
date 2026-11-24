@@ -1,13 +1,15 @@
 ---
 title: 'Autocomplete'
-description: 'Editable suggestions with free-text completion.'
+description: 'An editable text input with filtered suggestions and free-text submission.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Editable suggestions with free-text completion.
+Base Autocomplete pairs a single-line text input with a filterable suggestion list, supporting both option selection and free-text completion.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-autocomplete"
@@ -16,23 +18,40 @@ Editable suggestions with free-text completion.
   codePanel={false}
 />
 
-Root.value is committed text, while inputValue is the query. Selecting a suggestion commits its textValue; Enter without an active match may commit free text.
+## Installation
 
-The host owns the real single-line editor. Input retains focus during Arrow navigation; IME composition never selects. Filtering is case/diacritic insensitive over textValue and keywords. Empty reflects actual matches; disabled options cannot commit. open, value and inputValue are independently controlled with corresponding change requests. filter=false supports owner-filtered children. Duplicate-valued choices are rejected.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Input, Content, Item, Empty, Trigger.
+## Usage
 
-Draft source; shared Web A11y active-descendant projection, native/GPUI, compiler, consumer, visual and independent acceptance remain separate requirements.
+### Anatomy
+
+Compose `Root`, `Input`, `Content`, `Item`, `Empty`, and `Trigger`:
+
+- `Root` tracks both the committed `value` and the live query `inputValue`.
+- Choosing a suggestion commits its `textValue`; pressing `Enter` with no active match commits the current free text.
+- Built-in filtering matches `textValue` and `keywords` case- and diacritic-insensitively. Set `filter={false}` to supply pre-filtered items from your application.
+- `Empty` reflects whether any items match; disabled and duplicate-valued items cannot be committed.
+
+### Controlled state and keyboard behavior
+
+- `value`, `inputValue`, and `open` can each be controlled independently via their matching change events.
+- `Input` keeps focus during arrow-key navigation, and active IME composition never triggers selection.
 
 ## API
 
-Autocomplete is workspace source. There is no public `proto-ui add` target. Passing `value`, `inputValue`, or `open` selects controlled mode for that fact.
+### Root Props
+
+Pass `value`, `inputValue`, or `open` to control the corresponding state.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
     { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -42,7 +61,13 @@ Autocomplete is workspace source. There is no public `proto-ui add` target. Pass
   ]}
 />
 
-These props belong to Root. Input defaults `placeholder`, `a11yLabel` and `name` to `''`. Content defaults `side` to `bottom`, `align` to `start`, `sideOffset` to `4` and `collisionPadding` to `8`. Item defaults `value`, `textValue` and `keywords` to `''` and `disabled` to `false`. Empty has no props. Trigger defaults `disabled` to `false`.
+### Other parts
+
+- **Input**: `placeholder`, `a11yLabel`, and `name` default to `''`.
+- **Content**: `side` defaults to `'bottom'`, `align` to `'start'`, `sideOffset` to `4`, and `collisionPadding` to `8`.
+- **Item**: `value`, `textValue`, and `keywords` default to `''`; `disabled` defaults to `false`.
+- **Empty**: no props.
+- **Trigger**: `disabled` defaults to `false`.
 
 ## References
 

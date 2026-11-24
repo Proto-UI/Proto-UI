@@ -1,6 +1,6 @@
 ---
 title: 'Radio Group'
-description: 'Draft Brutalist Radio Group presentation over the Base Radio Group protocol.'
+description: 'A Brutalist-styled radio group with single selection, roving focus, and crisp geometric indicators.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,35 +9,40 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-This draft family contains a Root, an Item, and an Indicator. Base Radio Group owns the single selected value, collection-ordered items, selected-or-first roving focus, effective disabled behavior, pointer and keyboard activation, and the accessible `radiogroup` object including each `radio` item's `aria-checked`.
+Radio Group lets users choose one option from a mutually exclusive set. Its Brutalist presentation lays out 16px circular 2px-bordered options in a vertical grid (`grid gap-2`), marking the checked option with a single filled inner dot and an offset focus ring.
 
-The Brutalist layer is presentation-only. Following the pinned Neo `radio-group.tsx@3306a802` source, the Root lays items out as a `grid gap-2` column, each Item is a 16px circular 2px-bordered control, and a checked Item paints exactly one `size-2` filled circular dot through its Indicator; the Item fill and border never change when checked. Focus retains the family offset ring, disabled keeps its opacity gate, and press changes no geometry or shadow. The Indicator is passive and derived: it owns no activation, focus, or checked semantics, and its SVG dot is `aria-hidden`.
-
-Import Root, Item, and Indicator from the already-public `@proto.ui/prototypes-brutalist` package or its `@proto.ui/prototypes-brutalist/radio-group` anatomy subpath. This family intentionally has no `proto-ui add brutalist-radio-group` registry entry and creates no separate publication or release promise.
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-radio-group" initialRuntime="wc" />
 </div>
 
-## Suggested acceptance path
+## Installation
 
-1. Activate the Default and Comfortable options with pointer and arrow keys; confirm roving focus and single selection.
-2. Confirm the Compact (disabled) option in the first group cannot be selected or focused.
-3. Confirm the second group starts with zero checked items and does not silently select its first option.
-4. Confirm a checked Item paints exactly one dot inside the 16px circle and the circle itself keeps its resting surface.
-5. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `Root`, `Item`, and `Indicator` from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/radio-group` (workspace CLI target: `brutalist-radio-group`).
 
-The related catalog entities are `draft`; this page records the current direction rather than a stable Radio Group guarantee.
+## Usage
 
-## Read-only and explicit Form composition
+### Anatomy
 
-Root accepts `readOnly`. It preserves focus while refusing value proposals; disabled also removes focus participation. A read-only Radio Group can still move roving focus with its supported navigation keys. Ordinary Root does not automatically register with Field or Form.
+Radio Group is composed of `Root`, `Item`, and `Indicator`:
 
-Use `fieldRadioGroup` from `@proto.ui/prototypes-brutalist/field` inside an explicit `FormField` to connect canonical values, required validation, Label/Description/Error relationships and reset. The [Form choice recipe](../../form/) demonstrates controlled refusal, accepted changes, read-only focus, disabled groups and real owner replacement. `resetValue()` requests the instance creation baseline and never forces a controlled owner to accept it.
+- `Root`: Manages the selected value, item ordering, roving focus, disabled/read-only state, and `radiogroup` accessibility semantics.
+- `Item`: Renders each `radio` option with `aria-checked`, pointer/keyboard activation, and a constant resting circle surface.
+- `Indicator`: Renders a single `size-2` filled circular dot (`aria-hidden`) when its parent `Item` is checked.
+
+### Keyboard & Read-Only Behavior
+
+- Arrow keys move roving focus across enabled items and select options; initial roving focus targets the checked item or the first enabled option.
+- Setting `readOnly` keeps roving focus active while blocking value updates, whereas `disabled` removes focus participation as well.
+
+### Form Composition
+
+A standalone `Root` does not auto-register with Field or Form. To wire up required validation, label/description/error linkage, and reset support, compose `fieldRadioGroup` from `@proto.ui/prototypes-brutalist/field` inside `FormField`. See the [Form choice recipe](../../form/) for a full example. Calling `resetValue()` restores the initial creation value (or emits a change request in controlled mode).
 
 ## API
 
-Radio Group is workspace source. For this workspace version, the CLI target is `brutalist-radio-group`. Use matching CLI and package versions; check the chosen release's availability before installing. Passing `value` selects controlled mode.
+The following props belong to `Root` (pass `value` to enter controlled mode):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -49,4 +54,7 @@ Radio Group is workspace source. For this workspace version, the CLI target is `
   ]}
 />
 
-These props belong to Root. Item defaults `value` to `''` and `disabled` to `false`. Indicator has no props.
+Other parts:
+
+- **Item**: `value` defaults to `''`; `disabled` defaults to `false`.
+- **Indicator**: No props.

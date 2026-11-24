@@ -1,6 +1,6 @@
 ---
 title: 'Checkbox'
-description: '覆盖在 Base Checkbox 协议之上的 Brutalist Checkbox 草案呈现。'
+description: '支持勾选、未选与半选（mixed）状态以及表单字段集成的 Brutalist 复选框组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -9,35 +9,35 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-这个 draft family 包含 Root 与 Indicator。controlled/uncontrolled `checked`、由 author 控制的 `indeterminate` display state、生效的 disabled behavior、pointer 与 Space activation、focus，以及包含 `aria-checked="mixed"` 的可访问 `checkbox` role 均由 Base Checkbox 所有。
+Brutalist Checkbox 提供二态勾选与半选（`indeterminate`）状态，采用方形硬边框与高对比度勾选/横线图标，支持指针点击与键盘 `Space` 切换。
 
-Brutalist 层只拥有呈现。checked 与 mixed 使用固定 Neo main/foreground 配对，glyph 为16px、2px圆笔画且 aria-hidden 的check或可区分mixed dash。暂保留既有20px Root与2px内部frame：源码16px外outline recipe需要受治理hit envelope和受支持outline-color翻译，才能在不减小命中范围前提下替换；outline paint本身不会扩大命中区域。Indicator仍从最近Root派生状态、不拥有control语义，mixed继续优先。当前真实浏览器glyph裁剪、命中与长label验证待完成。
-
-Root 与 Indicator 可从已经公开的 `@proto.ui/prototypes-brutalist` package root 或 `@proto.ui/prototypes-brutalist/checkbox` anatomy subpath 导入。该 family 刻意没有 `proto-ui add brutalist-checkbox` registry entry，也不产生单独的 publication 或 release 承诺。
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-checkbox" initialRuntime="wc" />
 </div>
 
-## 建议验收路径
+## 安装
 
-1. 分别用 pointer 与 Space 操作 Unchecked、Checked 和 Mixed 示例。
-2. 确认 Disabled 示例不能改变。
-3. 用 Tab 聚焦名为 Focus-visible target 的示例，确认硬 ring 出现在 Root 上且焦点不会移动到 Indicator。
-4. 确认 Checked and indeterminate 示例显示 mixed dash 而不是 tick。
-5. 在 Web Components、React、Vue 与 Vue 2 的 Light/Dark 模式中重复检查。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-相关 catalog entities 仍为 `draft`；本页记录当前方向，而不是稳定的 Checkbox guarantee。
+- **包导出**：从 `@proto.ui/prototypes-brutalist` 或 `@proto.ui/prototypes-brutalist/checkbox` 导入 `Root` 与 `Indicator`
 
-## 只读与显式 Form 组合
+## 用法
 
-Root 接受 `readOnly`：保留焦点并拒绝新值提案；disabled 还会退出焦点参与。普通 Root 不会自动注册到 Field 或 Form。
+### 部件组成
 
-在显式 `FormField` 中使用 `@proto.ui/prototypes-brutalist/field` 的 `fieldCheckbox`，接入 canonical 值、required 校验、Label/Description/Error 关系与重置。[Form 选择控件示例](../../form/) 展示受控拒绝、接受更新、只读焦点、禁用分组与真实 owner 更换。`resetValue()` 请求实例创建时的基线，不会强迫受控 owner 接受。
+- **Root**：管理 `checked` 与 `indeterminate` 状态、禁用/只读策略、焦点环与无障碍 `checkbox` 角色（半选态同步 `aria-checked="mixed"`）。
+- **Indicator**：从所属 `Root` 派生状态并渲染装饰性勾选或半选横线图标，不接收焦点。当 `checked` 与 `indeterminate` 同时为 `true` 时，优先显示半选横线。
+
+### 只读模式与表单集成
+
+- 设置 `readOnly={true}` 时控件保留焦点但阻止值变更；设置 `disabled={true}` 同时将其移出焦点顺序。
+- 如需接入 `Form` 的必填校验、标签关联与表单重置，请在 `FormField` 中使用 `@proto.ui/prototypes-brutalist/field` 导出的 `fieldCheckbox`（示例见 [Form 选择控件示例](../../form/)）。
 
 ## API
 
-Checkbox 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `checked` 或 `indeterminate` 会使对应事实进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -49,4 +49,4 @@ Checkbox 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `ch
   ]}
 />
 
-这些属性属于 Root。Indicator 没有属性。
+传入 `checked` 或 `indeterminate` 可分别控制对应状态；`Indicator` 不声明独立属性。

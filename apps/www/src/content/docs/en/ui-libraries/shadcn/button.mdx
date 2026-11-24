@@ -1,7 +1,7 @@
 ---
 title: 'Button'
 desp: 'Prototype: Button'
-description: 'A Shadcn-styled button projected through Proto UI adapters.'
+description: 'A Shadcn-styled button with variants, sizes, and consistent behavior across frameworks.'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -11,7 +11,9 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 import { getButtonExampleFiles as exampleFiles } from '@/content/docs/demo_components/button/button-usage';
 
-Buttons trigger actions. This is Proto UI's unofficial Shadcn projection over Base Button. The previews use current workspace source in WC, React, Vue 3 and Vue 2.6; their package-install and visual acceptance results are separate.
+Buttons trigger actions with consistent semantics across Web Components, React, Vue 3, and Vue 2. The examples on this page use the **Shadcn Rhea** style preset.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-button"
@@ -22,9 +24,9 @@ Buttons trigger actions. This is Proto UI's unofficial Shadcn projection over Ba
 />
 <CodeExample label="Button overview code" files={exampleFiles('demo-button')} />
 
-## Install
+## Installation
 
-First [initialize an existing application](/en/start-here/quick-start/). The published stable 0.2.0 baseline uses:
+First [initialize your application](/en/start-here/quick-start/), then add the button component:
 
 <InstallCommandCard
   commands={{
@@ -34,19 +36,25 @@ First [initialize an existing application](/en/start-here/quick-start/). The pub
   manager="npm"
 />
 
-Replace `wc` with `react` or `vue` for those stable hosts. The CLI installs `@proto.ui/prototypes-shadcn` and the corresponding Adapter at its own exact version and generates the local facade. Vue 2.6 (`>=2.6.0 <2.7`) and the named style profiles shown below require matching workspace 0.3 CLI/Adapter/Prototype source. Stable `@latest` does not establish that delivery; a workspace manifest version does not establish registry publication.
+Replace `wc` with `react` or `vue` for those hosts. The CLI installs the matching `@proto.ui/prototypes-shadcn` and adapter packages and generates the local facade. Vue 2.6 (`>=2.6.0 <2.7`) and the named `styleProfile` presets shown below are currently available from workspace source.
 
-## Usage and presentation
+## Usage
 
-Each Code panel includes registration/imports and the application's example stylesheet. Keep the generated `proto-ui-style.css` import in one application entry. WC uses the generated `proto-ui-shadcn-button` tag; React exports a named example to render from the existing app, and Vue examples are single-file components. Adjust relative paths to the initialized project's layout. The small layout and visually hidden-label rules are application-owned and do not require Tailwind.
+Each code example includes component registration or imports plus minimal example styles. Import the generated `proto-ui-style.css` once in your application entry point — no extra Tailwind configuration is required:
 
-The Shadcn Rhea examples request `styleProfile="rhea"` explicitly, matching the preview's public Shadcn style scope. Current source recognizes `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea` and `new-york-v4`; `new-york` is the legacy alias. Omission or `inherit` uses the nearest scope and then the Button's Rhea fallback. These examples demonstrate Rhea, not visual acceptance of every profile or component.
+- **Web Components**: Render the generated `proto-ui-shadcn-button` custom element.
+- **React**: Import and render the generated component directly.
+- **Vue**: Use the generated single-file component.
+
+### Style presets (`styleProfile`)
+
+The examples on this page explicitly set `styleProfile="rhea"`. Supported presets are `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`, and `new-york-v4` (`new-york` is accepted as an alias). When omitted or set to `inherit`, the button reads the nearest [Style Scope](../style-scope/) and falls back to `rhea`.
 
 ## Examples
 
 ### Variant matrix
 
-All six current variants are shown together. `link` is a visual command variant; it does not supply an `href` or navigation behavior.
+All six variants side by side. `link` applies link-style visual presentation to an action button; use a native `<a>` element for navigation.
 
 <PrototypePreviewer
   demoId="demo-button-variants"
@@ -114,9 +122,9 @@ All six current variants are shown together. `link` is a visual command variant;
 
 ### Sizes
 
-Use `sm`, `default`, `lg`, `icon` or the compact `icon-compact` extension. `icon-compact` is a fixed 1.75rem square, including when `wrap` is enabled.
+Choose from `sm`, `default`, `lg`, `icon`, or `icon-compact` (a fixed `1.75rem` square, even when `wrap` is enabled).
 
-Both icon-size examples keep “Add” as visually hidden content and hide the decorative plus from the accessibility tree. The Button emits its ordinary `click` signal; the consuming application owns the action. A glyph alone is not an accessible label.
+For icon-only buttons, include a visually hidden text label (such as “Add”) and hide the decorative icon from the accessibility tree so assistive technologies announce a meaningful name.
 
 <PrototypePreviewer
   demoId="demo-button-sizes"
@@ -129,7 +137,7 @@ Both icon-size examples keep “Add” as visually hidden content and hide the d
 
 ### Disabled
 
-Disabled buttons suppress activation and keep their disabled semantics across hosts.
+Disabled buttons suppress activation and preserve consistent disabled semantics across hosts.
 
 <PrototypePreviewer
   demoId="demo-button-disabled"
@@ -140,19 +148,18 @@ Disabled buttons suppress activation and keep their disabled semantics across ho
 />
 <CodeExample label="Disabled button code" files={exampleFiles('demo-button-disabled')} />
 
-## Navigation, groups and busy state
+## Common patterns
 
-Use a native anchor for navigation, preserving its actual URL and full text: [Read Quick Start](/en/start-here/quick-start/). The equivalent application composition is:
+- **Navigation**: Use a native `<a>` element with a real URL and descriptive text, such as [Read Quick Start](/en/start-here/quick-start/):
 
 ```html
 <a href="/en/start-here/quick-start/">Read Quick Start</a>
 ```
 
-Do not put an anchor inside Button or invent `asChild`, `href`, `loading` or `isLoading` props. Base remains the activation and disabled owner. For a real asynchronous action, the application owns pending state, drives `disabled`, keeps a meaningful name and reports progress/completion. A spinner alone is not a busy-state or activation guard.
+- **Asynchronous actions**: Track pending state in your application, drive `disabled` while work is in progress, and keep a clear accessible label. Pair with [Async Region](../async-region/) or [Live Region](../live-region/) when announcing progress.
+- **Grouping actions**: Use standard layout containers for independent actions, or [Toolbar](../toolbar/) when you want roving arrow-key navigation.
 
-Ordinary layout can group independent actions. Use the documented [Toolbar](../toolbar/) when its keyboard model is the intended composition. A dedicated Button Group API, loading/spinner composition, icon-and-text matrix, all-profile evidence and native-link visual comparison are still separate conditions in [#1042](https://github.com/Proto-UI/Proto-UI/issues/1042); this pilot does not claim them complete.
-
-## API Reference
+## API
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -173,9 +180,7 @@ Ordinary layout can group independent actions. Use the documented [Toolbar](../t
   ]}
 />
 
-## Lifecycle and evidence
-
-`P-SHADCN-BUTTON` and `P-BASE-BUTTON` remain draft. The existing previews and source are not fresh package, browser, focus, screen-reader or full upstream-parity evidence. Preserve the original [documentation checkpoints](/en/build/prototypes/documentation-coverage/) and [Button implementation evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/shadcn/test/button.test.ts) with their actual revisions. Runtime switching and narrow/mobile/enlarged-text acceptance still require candidate-bound observation.
+## References
 
 <SpecEntityLinks
   directory="spec/prototypes"

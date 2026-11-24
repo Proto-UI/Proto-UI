@@ -1,82 +1,73 @@
 ---
 title: 'Brutalist Design Contract'
-description: 'Source-aligned Neo-Brutalist typography, geometry, surfaces and interaction'
+description: 'Typography, geometry, depth and motion, color palette, and accessibility rules for the Brutalist family.'
 ---
 
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-# Brutalist Design Contract
-
-The current draft visual system follows [neobrutalism.dev](https://www.neobrutalism.dev/), pinned to [neobrutalism-components 3306a802](https://github.com/ekmas/neobrutalism-components/tree/3306a802724874a85f93079702b2795370a279d4). Proto UI maintains its own semantic implementation based on Base; this is not an upstream certification or component API compatibility promise.
+The Brutalist visual system follows [neobrutalism.dev](https://www.neobrutalism.dev/), pinned to [neobrutalism-components (`3306a802724874a85f93079702b2795370a279d4`)](https://github.com/ekmas/neobrutalism-components/tree/3306a802724874a85f93079702b2795370a279d4) under its MIT license. Proto UI maintains its own semantic implementation built on Base.
 
 ## Typography
 
-DM Sans is the reference default, not universal monospace or forced uppercase. The prototype owns its font role through generated style tokens:
+The reference palette uses DM Sans by default rather than universal monospace or forced uppercase. Components bind their font roles through generated style tokens:
 
-- Ordinary controls, menu items, descriptions and content: `font-sans font-medium`, DM Sans 500
-- Dialog title, Tabs triggers and Toggle: `font-heading font-bold`, DM Sans 700
-- Default labels: 14px/20px; Badge: 12px/16px; Dialog title: 18px with unit line-height and tight tracking
-- Preserve authored casing. Code and keyboard notation may use their own mono role
+- Controls, menu items, descriptions, and body copy: `font-sans font-medium` (DM Sans 500)
+- Dialog titles, Tabs triggers, and Toggle: `font-heading font-bold` (DM Sans 700)
+- Common type scale: default labels at 14px/20px, Badge at 12px/16px, and Dialog titles at 18px with unit line-height and tight tracking
+- Authored casing is preserved; code snippets and keyboard hints can use a monospace role
 
-The package theme declares `"DM Sans", ui-sans-serif, system-ui, sans-serif` through `--pui-font-sans` and `--pui-font-heading`. The docs self-host an unmodified variable DM Sans font under SIL OFL 1.1. Application consumers supply their own font loading; prototypes do not make network requests. A missing font uses the system sans fallback. Chinese glyphs use the host CJK fallback, so a Latin font-family declaration alone does not prove the actual font used for every glyph.
+The package theme sets `--pui-font-sans` and `--pui-font-heading` to `"DM Sans", ui-sans-serif, system-ui, sans-serif`. This documentation site self-hosts the unmodified variable DM Sans font under its [copyright and SIL OFL 1.1 license](/fonts/dm-sans-OFL.txt). Prototypes never make network font requests; applications load DM Sans themselves and fall back cleanly to system sans-serif and host CJK fonts when absent.
 
 ## Geometry and nested surfaces
 
-- Ordinary controls and panels: 5px `rounded-base`, 2px black structural border
-- Switch track/Thumb and Scroll Area Thumb: full-round geometry; Checkbox stays square
-- Tabs List and nested Trigger each own their radius; the inset spacing separates them
-- Card Header/Content/Footer and Tabs Content do not create mandatory nested frames
-- Scroll Area Root owns rounded overflow clipping; its viewport stays square and the host retains track/Thumb geometry
-- Spinner retains its centered circular open ring
+- Standard controls and panels: 5px `rounded-base` corners with a 2px black border
+- Switch track/thumb and Scroll Area thumb: pill or circular geometry; Checkbox remains square
+- Tabs List and nested Tabs Trigger each keep their own corner radius, separated by inset padding
+- Card Header, Content, Footer, and Tabs Content do not add extra inner borders by default
+- Scroll Area Root applies rounded overflow clipping while the viewport stays square and the host controls scrollbar geometry
+- Spinner keeps a centered circular open ring
 
-Rounded corners are part of this design language. Do not apply a blanket square-corner override or make every inner surface another bordered panel.
+Rounded corners are an intentional part of this design language. Avoid overriding everything to sharp corners or wrapping every inner region in another bordered box.
 
-## Depth and interaction
+## Depth and motion
 
-Depth and interaction motion follow the typed category grammar owned by `D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001`, not one universal shadow/lift/sink rule. Each row below names its category and traces to the owning P entity; exceptions are finite and listed in that decision.
+Brutalist assigns shadow depth and press behavior by component category rather than applying one uniform shadow or lift rule:
 
-| Category (owning P entities) | Rest depth | Hover / transient press |
+| Category (components) | Rest depth | Hover / press feedback |
 | --- | --- | --- |
-| Elevated action control — Button, raised Surface, Dialog/Dropdown/Select/Collapsible Trigger, Accordion Item | 4px 4px zero-blur black shadow | +4px,+4px along the shadow axis and no outer shadow; no extra hover-only lift |
-| Raised panel — Card, Dialog/Alert Dialog/Command Dialog/Drawer Content, Calendar | 4px 4px hard black shadow | No invented control state or motion |
-| Anchored content panel — Dropdown/Context/Menubar/Navigation Menu Content, Autocomplete/Combobox/Select/Hover Card Content, Popover | 3px 3px zero-blur foreground shadow | No interaction motion; positioned by its prototype or Adapter |
-| Flat selection control — Toggle, Tabs Trigger | No shadow, no translation | Toggle hover/press keep `border-black`; only unselected, released Tabs Trigger gains hover fill/border; selected Trigger keeps its color pair without elevation; Toggle active 2px inset frame persists through press |
-| Binary capsule control — Switch | No shadow on Root or Thumb | No hover visual; press keeps fill and geometry; only the Thumb travels 20px with its 150ms transition |
-| Editable surface — Input, Textarea, Number Field, Input OTP | Input/Textarea: no shadow; Number Field/Input OTP small controls: 2px 2px border-colored shadow | No hover lift or press sink; existing focus ring and paired states |
+| Elevated action control — Button, raised Surface, Dialog / Dropdown / Select / Collapsible Trigger, Accordion Item | 4px 4px hard black shadow | Translates `+4px, +4px` along the shadow axis and removes the outer shadow on press; no extra hover lift |
+| Raised panel — Card, Dialog / Alert Dialog / Command Dialog / Drawer Content, Calendar | 4px 4px hard black shadow | Static surface with no press displacement |
+| Anchored content panel — Dropdown / Context / Menubar / Navigation Menu Content, Autocomplete / Combobox / Select / Hover Card Content, Popover | 3px 3px hard foreground shadow | No hover or press motion; positioned by the overlay |
+| Flat selection control — Toggle, Tabs Trigger | No shadow, no offset | Toggle keeps `border-black` on hover/press and preserves its 2px inset active frame while pressed; unselected Tabs Trigger gains hover fill and border while selected triggers keep their color pair |
+| Binary capsule control — Switch | No shadow on Root or Thumb | No hover shift; press keeps fill and geometry while the Thumb slides 20px with a 150ms transition |
+| Editable surface — Input, Textarea, Number Field, Input OTP | Input / Textarea: no shadow; Number Field / Input OTP controls: 2px 2px border-colored shadow | No lift or press sink; displays focus ring and state styling |
 | Passive label — Badge, Text, Label, Kbd | No shadow | No interaction motion |
-| Loading placeholder — Skeleton | No shadow | Static; no imported pulse animation |
-| Scroll chrome and Separator — Scroll Area Root/Viewport/Scrollbar/Thumb, Separator | No shadow | No interaction motion; Root keeps its rounded overflow clip |
-| Flat overlay — Dialog Mask | No shadow | Only the governed 150ms open/close fade |
-| Flat interactive item — Dropdown/Context/Menubar/Select Item | No shadow | Background change only, no lift or press depth |
+| Loading placeholder — Skeleton | No shadow | Static placeholder with no pulse animation |
+| Scroll chrome and Separator — Scroll Area parts, Separator | No shadow | No interaction motion; Root preserves rounded overflow clipping |
+| Flat overlay — Dialog Mask | No shadow | 150ms fade on open and close |
+| Flat interactive item — Dropdown / Context / Menubar / Select Item | No shadow | Background color change only, no lift or shadow change |
 
-Grouping surfaces (Toolbar Root, Toggle Group Root, Toast Root) keep a 3px 3px foreground shadow as passive containers without control displacement. No other rest-depth, hover-depth, or press-depth exception is admitted without revising the decision.
+Grouping surfaces (Toolbar Root, Toggle Group Root, Toast Root) keep a 3px 3px foreground shadow as passive containers without press displacement.
 
-The upstream reverse Button variant is separate; the current PUI API does not claim it. Toggle keeps a 2px inset active marker through press as a non-color PUI extension. Base continues to own active versus pressed, selection, keyboard behavior, ARIA and command wiring. Existing popup transitions and Spinner reduced-motion behavior remain intact; Skeleton remains static.
+Button-like controls use an instant press snap; Switch handles its 150ms Thumb transition independently. Toggle keeps its 2px inset active marker through press so active state never relies on color alone.
 
 ## Palette and dark mode
 
-The default follows the reference's blue palette: main `#5294ff`, pale blue background `#dcebfe`, white neutral surfaces, black text and structure. Named PUI accent pairs retain canary, mint, lavender, coral and sky roles with black accent ink. Color supplements labels, position and persistent state signals.
+The default palette follows the reference blue theme: `#5294ff` primary fill, `#dcebfe` pale blue background, white neutral surfaces, and black text and borders. Built-in `canary`, `mint`, `lavender`, `coral`, and `sky` accent pairs are also available, each paired with black foreground ink.
 
-The inspected upstream style registry has no dark palette. Proto UI's dark paper/panels, light text, readable destructive ink and theme-relative focus ring are explicitly maintained extensions. The same mounted controls repaint from theme variables; a paired foreground is never replaced independently of its fill.
+Because the upstream style registry does not define a dark palette, Proto UI maintains a companion dark theme with dark surfaces, light body text, readable destructive ink, and theme-relative focus rings. Mounted components repaint directly from CSS variables; always update fill and foreground pairs together when customizing the theme.
 
 ## Delivery and accessibility
 
-`BRUTALIST_THEME` is the package-owned source for Light/Dark values, font roles and radii. CLI and docs scopes consume generated projections of the complete manifest. Start a project with `proto-ui init --prototypes brutalist`; config v1 permits one enabled style preset. With `--no-styles`, applications supply the required semantic tokens and font loading themselves.
-
-Focus retains a visible offset ring and at least 3:1 adjacent-color contrast. Tabs Content retains native fallback focus indication. Disabled controls retain geometry and Base gates; portaled surfaces retain theme/font variables. PUI uses the reference 24×48px Switch frame and single 20px Thumb movement, Checkbox mixed-state precedence and parent-owned loading semantics.
-
-Adapted component recipes retain the upstream MIT notice, copyright Samuel Breznjak; redistributed DM Sans retains its SIL OFL notice. Current styled criteria remain draft, and visual alignment does not expand native-host support or introduce a new Base subject.
-
-Select placeholders on the main blue fill retain paired black ink rather than neutral muted ink: the latter measures only 2.62:1 in Light and 2.01:1 in Dark. This deliberate readability adaptation must retain at least 4.5:1 text contrast in both modes.
-
-The full [DM Sans copyright and OFL license](/fonts/dm-sans-OFL.txt) is served alongside this site's font assets. Textarea retains a theme-foreground border so its editable boundary has at least 3:1 contrast against both adjacent surfaces, including Dark.
-
-Button-like controls currently retain PUI's instant snap; the reference's 150ms transition-all is not claimed. Switch owns the measured 150ms Thumb transition separately.
+- **Theme tokens**: `BRUTALIST_THEME` defines Light/Dark colors, font roles, and corner radii. Run `proto-ui init --prototypes brutalist` to scaffold them into a project. When using `--no-styles`, provide the semantic variables and font loading yourself.
+- **Focus and contrast**: Interactive controls render an offset focus ring with at least 3:1 contrast against adjacent colors. Tabs Content preserves native focus indication, and portaled overlays inherit theme and font variables automatically.
+- **Readability details**: Select placeholders on the primary blue fill use black foreground ink to maintain at least 4.5:1 contrast in both light and dark modes. Textarea uses a theme-foreground border so the editable boundary keeps at least 3:1 contrast against adjacent surfaces in both themes.
+- **License attribution**: Adapted visual recipes retain the upstream MIT copyright notice (Samuel Breznjak); redistributed DM Sans font files retain their SIL OFL 1.1 license.
 
 ## API
 
-The Brutalist Design Contract is family-level documentation. There is no `proto-ui add` target and no Prototype part; it declares no props of its own.
+The Brutalist Design Contract is family-level documentation. It has no `proto-ui add` target and declares no component props.
 
 <ApiPropsTable headers={{ name: 'Prop', type: 'Type', default: 'Default' }} rows={[]} />
 

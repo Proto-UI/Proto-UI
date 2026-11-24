@@ -1,5 +1,6 @@
 ---
 title: Spinner
+description: '以 2px currentColor 开口圆环呈现并响应减少动态效果偏好的 Brutalist 加载指示器。'
 sidebar:
   order: 9
 ---
@@ -9,27 +10,30 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
-> 可用状态：Spinner 是仅工作区可用的 draft。npm 中的 `@proto.ui/prototypes-brutalist@0.2.0` 和 `@proto.ui/prototypes-brutalist@0.3.0-alpha.1` 单包均不导出 `./spinner`。生态发行 [V-PROTO-UI-0010](https://github.com/Proto-UI/Proto-UI/blob/main/spec/versions/V-PROTO-UI-0010.yaml) 仍为 `draft`；单包存在不构成生态发行激活或不可变 snapshot 的证据。生命周期：[P-BRUTALIST-SPINNER](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-SPINNER.yaml) 仍为 `draft`；本页描述仓库内实现，不构成 active 协议保证。
 
-Brutalist Spinner 是一个直接定义的 styled-only 视觉指示原型：2px `currentColor` 圆形 ring，带一个开口 arc，无填充或柔和阴影。仅在未请求 reduced motion 时以 1000ms 一周线性旋转；`prefers-reduced-motion: reduce` 移除动画并保留开口 edge 作为非颜色方向提示。
+Spinner 是一个纯视觉加载指示器，采用 2px `currentColor` 开口圆环设计，无背景填充和柔和阴影，可在按钮内联或状态区域中使用。
 
-Spinner 是 passive、contentless、从 accessibility tree 隐藏的（`aria-hidden`、无 role、不可聚焦），也不拥有 loading、busy、progress、completion、announcement 或 live-region 语义。
-
-`size` 提供 `sm | md | lg` 三档（16 / 24 / 32 CSS pixel），默认 `md`，prop 移除后恢复默认值。
-
-把它放在父级 Button 内或父级 status/busy region 中时，操作状态、accessible text、placement、alignment、delay、replacement 与 focus 连续性均由父级拥有；Spinner 不创建这些语义。
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-spinner" initialRuntime="wc" />
 </div>
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-brutalist/spinner` 导入组件原型（当前工作区 CLI 目标为 `brutalist-spinner`）。
+
+## 用法
+
+- **尺寸档位**：`size` 支持 `'sm'`（16px）、`'md'`（24px，默认值）与 `'lg'`（32px）；移除该属性会恢复为 `'md'`。
+- **动态与无障碍偏好**：默认以 1000ms 为周期线性旋转；当用户开启 `prefers-reduced-motion: reduce` 时停止旋转，并保留开口弧段作为非颜色视觉提示。
+- **状态归属**：Spinner 默认设置 `aria-hidden` 且不可聚焦。将其放在按钮内或加载文案旁时，由父级按钮或状态区域统一管理加载态、`aria-busy`、可访问文本与焦点衔接。
+
 ## API
 
-Spinner 是工作区源码。当前工作区 CLI 目标为 `brutalist-spinner`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。
+以下属性属于 `Root`：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[{ name: 'size', type: "'sm' | 'md' | 'lg'", default: 'md' }]}
 />
-
-这个属性属于 Root。

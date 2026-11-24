@@ -1,5 +1,6 @@
 ---
 title: Skeleton
+description: '静态 5px 圆角黑边中性表面的 Brutalist 风格骨架屏占位组件。'
 sidebar:
   order: 8
 ---
@@ -9,20 +10,27 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
-> 可用状态：`@proto.ui/prototypes-brutalist@0.2.0` 已通过 npm `latest` 随 [v0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0) 发布。生命周期：[P-BRUTALIST-SKELETON](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-SKELETON.yaml) 仍为 `draft`；本页描述已发布并经过测试的 0.2 surface，不构成 active 协议保证。
 
-Brutalist Skeleton 是一个直接定义的 styled-only 视觉占位原型：静态 5px 圆角中性表面，带有黑色边框且无阴影。它是 passive、contentless、从 accessibility tree 隐藏的，也不拥有重复 shimmer 或 pulse。
+Skeleton 是一个纯视觉占位表面，采用静态 5px 圆角中性底色与黑色边框，不带阴影或内置闪烁动画，用于在内容加载前勾勒布局形状。
 
-当未解析布局需要视觉形状反馈时，可以把它放在父级 async/loading region 中。loading 与 `aria-busy` 状态、announcement、占位内容替换时机和焦点连续性均由父级拥有；Skeleton 不创建这些语义。若应用额外添加 motion，也必须尊重 reduced-motion 偏好。
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-skeleton" initialRuntime="wc" />
 </div>
 
+## 安装
+
+已包含在 `@proto.ui/prototypes-brutalist@0.2.0` 中。可通过 CLI 目标 `brutalist-skeleton` 添加，或从 `@proto.ui/prototypes-brutalist/skeleton` 导入。
+
+## 用法
+
+- 将 Skeleton 放在父级加载区域内，通过外层样式控制宽高与圆角形态，以匹配真实内容的布局轮廓。
+- Skeleton 默认从无障碍树中隐藏；加载态（`aria-busy`）、状态播报、内容替换时机与焦点衔接应由父级容器统一管理。
+- 如需为占位块添加自定义动画，请配合 `prefers-reduced-motion` 偏好设置。
+
 ## API
 
-Skeleton 是工作区源码。当前工作区 CLI 目标为 `brutalist-skeleton`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。Root 没有属性。
+`Root` 渲染单个样式化占位表面，不声明任何属性：
 
 <ApiPropsTable headers={{ name: '属性', type: '类型', default: '默认值' }} rows={[]} />
-
-Skeleton 渲染单个样式化 surface，不声明属性。

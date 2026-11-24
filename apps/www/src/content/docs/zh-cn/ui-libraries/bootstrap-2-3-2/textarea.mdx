@@ -1,6 +1,6 @@
 ---
 title: 'Bootstrap 2.3.2 Textarea'
-description: '将归档输入框风格投射到 Base 多行文本协议。'
+description: '沿用归档 Bootstrap 2.3.2 输入框视觉风格的多行文本输入组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,11 +8,11 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-Textarea 将 Bootstrap 2.3.2 的输入框语言投射到一个 Base Textarea Root。当前 Web profile 生成唯一的原生多行编辑器。
+Bootstrap 2.3.2 Textarea 将归档版本的经典文本框样式应用于 Base Textarea，在 Web 上渲染单一原生多行编辑器，并在深色宿主中保持经典的归档浅色配色。
 
-Base 拥有受控与非受控值、归一化 input、change 与 IME 事件、原生属性、禁用与只读行为、无障碍命名及焦点。外观投射到同一个编辑器， authored children 不会成为第二个编辑器。此增量不新增表单工作流、校验提示、自动增高或富文本。
+## 预览
 
-通过页面运行时选择器比较 Web Components、React、Vue 3 与 Vue 2。可编辑 release note，聚焦只读编辑器，并与禁用编辑器比较。
+可编辑发布说明内容、聚焦只读文本框，并与禁用状态对比。
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-textarea"
@@ -22,11 +22,21 @@ Base 拥有受控与非受控值、归一化 input、change 与 IME 事件、原
   codePanel={false}
 />
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。[查看已实现的子集](../)。
+
+## 用法
+
+- **值与输入事件**：支持受控 `value` 与非受控 `defaultValue`，统一处理 `input`、`change` 与 IME 组合输入事件。
+- **行数与换行**：通过 `rows` 和 `wrap` 控制初始显示行数与换行策略。
+- **表单字段组合**：如需标签、帮助说明与错误提示，请与 `Field` 组合使用。
+
 ## API
 
-- `value` / `defaultValue`、`disabled`、`readOnly`、`placeholder`
-- `rows`、`wrap`、`maxLength`、`minLength`、`name`、`required`、`autoComplete`
-- `ariaLabel`、`labelledBy`、`describedBy`
-- 继承 `valueChange`、`change`、composition 事件、`focusSelf`、`blurSelf`
-
-这是 draft 状态的源码投射，源码包仍为 private、未发布。深色宿主中继续使用归档浅色配色。Web 示例不代表通用 Prototype Compiler 或 GPUI、Flutter、Qt 一致性已经通过。[查看已实现的子集](../)。
+| 分类 | 成员 | 说明 |
+| --- | --- | --- |
+| 值与状态 | `value` / `defaultValue`、`disabled`、`readOnly`、`placeholder` | 多行文本值与编辑状态 |
+| 布局与约束 | `rows`、`wrap`、`minLength`、`maxLength`、`name`、`required`、`autoComplete` | 原生多行编辑属性 |
+| 无障碍 | `ariaLabel`、`labelledBy`、`describedBy` | 可访问名称与关联说明 |
+| 事件与方法 | `valueChange`、`change`、IME 组合事件、`focusSelf()`、`blurSelf()` | 变更通知与焦点控制 |

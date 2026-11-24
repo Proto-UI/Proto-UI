@@ -1,14 +1,14 @@
 ---
-title: 'Date-Picker (WIP)'
-description: 'date-picker composition and explicit implementation boundary.'
+title: 'Date Picker'
+description: '结合 Popover 与 Calendar 的 Brutalist 日期选择器，支持单选、多选与范围选择。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-Date Picker 组合真实 Popover 与 Calendar 原子。选择使用 Calendar 的单日期、多选或范围模式；只有被接受的完整单日期/范围选择才请求关闭 Popover。open、选择值与 month 保留各自受控/非受控边界。内容区可使用 Calendar 的网格、行、标题与月份导航原子。
+Brutalist Date Picker 将 `Popover` 浮层与 `Calendar` 日历组合为完整的日期选择控件，支持单日、多日和日期范围选择，并各自保持独立的受控/非受控边界。
 
-当前为功能源码 WIP。完整运行时、Compiler、原生、打包、浏览器与视觉验收仍待补齐。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-date-picker"
@@ -16,13 +16,13 @@ Date Picker 组合真实 Popover 与 Calendar 原子。选择使用 Calendar 的
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 范围与多选
+## 安装
 
-范围使用 `mode="range"` 与 `range` / `defaultRange`，多选使用 `mode="multiple"` 与 `values` / `defaultValues`。它们继承 Calendar 页描述的属性、回调、方法和日期资格规则，包括范围内部不可用日期、数量与间隔天数限制。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-范围的第一个端点保持弹层打开，第二个端点被接受并形成完整范围后才请求关闭一次。受控请求被拒绝或等待接受时不关闭；之后匹配的 owner 接受仅在同一次打开期间触发关闭。关闭后重开、卸载、模式改变、disabled/readOnly 改变或 owner 替换选择会终止过期的完成行为。单纯外部改值不关闭弹层，受控 `open` 仍可拒绝关闭请求。多选保持打开以继续增减日期，完成后使用 Popover 的正常关闭交互。
+## 用法
 
-Value 分别显示单个 ISO 民用日期、逗号分隔的有序多日期、未完成范围的 `from …` 或完整范围的 `from – to`；空值显示 `placeholder`。逐日状态与家族范围绘制直接继承 Calendar，焦点返回和关闭交互继续由 Popover 管理。
+### 单选、范围与多选模式
 
 <PrototypePreviewer
   demoId="demo-brutalist-date-picker-selection"
@@ -30,9 +30,15 @@ Value 分别显示单个 ISO 民用日期、逗号分隔的有序多日期、未
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+- 通过 `mode="single"`（默认）、`mode="range"`（`range` / `defaultRange`）或 `mode="multiple"`（`values` / `defaultValues`）切换选择模式，所有日期约束与回调均继承自 `Calendar`。
+- **自动关闭时机**：单选模式下选中有效日期后自动请求关闭弹层；范围模式下选中第一个端点时保持打开，完成第二个端点后自动请求关闭；多选模式下保持打开以便连续勾选，完成后按常规 Popover 方式关闭即可。
+- **展示文本**：`Value` 自动格式化显示单个 ISO 日期、逗号分隔的有序多日期、未完成范围（`from …`）或完整范围（`from – to`）；未选中时显示 `placeholder`。
+
 ## API
 
-Date Picker 是工作区源码，没有公开的 `proto-ui add` 目标。open 属于 Popover，mode、value/values/range、选择限制和 month 属于 Calendar。Date Picker 自己只有 Value 上的一个属性。
+开关状态由 `Popover` 管理，日期模式、选中值、日期约束与显示月份由 `Calendar` 管理；Date Picker 仅在 `Value` 上提供以下属性：
+
+### Value
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}

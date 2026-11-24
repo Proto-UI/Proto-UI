@@ -1,80 +1,76 @@
 ---
 title: 'Why You Usually Do Not Need a New Prototype'
-description: 'Distinguish maintenance, composition, design-language projection, and a new Base semantic subject.'
+description: 'Distinguish maintenance, host-level composition, design-language styling, and a genuinely new Base protocol before writing code.'
 ---
 
-Proto UI provides Prototype authoring APIs, but that does not mean contributors should frequently add new protocol identities. A safer starting point is:
+Most UI work in Proto UI builds on existing protocols rather than introducing new ones. Before creating a new Prototype, start here:
 
-> Find the applicable `P-*` and `T-*` entities first, then decide whether the work is maintenance, composition, a design-language projection, or a candidate for a genuinely new Base semantic identity.
+> Locate the relevant `P-*` and `T-*` spec entities first, then decide whether your task is **maintenance**, **host-level composition**, **design-language styling**, or a genuinely new **Base protocol**.
 
-This is a boundary guide. Existing governed subjects move directly into maintenance, projection, or implementation. For a genuinely new Base subject, the only unresolved semantic decision is whether Proto UI admits the independent identity. Research, a candidate P/T graph, draft entities, implementation probes, and executable evidence may proceed before that decision and should make it easier. Keep the candidate explicitly draft until admission, then continue through [Implementing a Governed Base Semantic Slice](/en/build/prototypes/implementing-an-approved-base-slice/).
+Existing cataloged subjects move straight into maintenance, styling, or implementation. For a genuinely new Base identity, start in `draft` mode with research, candidate specs, implementation probes, and tests, then follow [Implementing a Governed Base Semantic Slice](/en/build/prototypes/implementing-an-approved-base-slice/) once admitted.
 
-## Identify the kind of work first
+## Identify the right path first
 
-### Maintain an existing Prototype
+### 1. Maintain an existing Prototype
 
-When an applicable `P-*` already exists and behavior, tests, exports, CLI, docs, or demos disagree with it, follow [Maintaining an Existing Prototype](/en/build/prototypes/maintaining-an-existing-prototype/).
+If an applicable `P-*` entity already exists and behavior, tests, exports, CLI facades, docs, or demos diverge from it, follow [Maintaining an Existing Prototype](/en/build/prototypes/maintaining-an-existing-prototype/).
 
-### Compose existing capabilities
+### 2. Compose existing components
 
-When the goal is to compose existing components or Prototypes into a higher-level experience, that composition normally belongs to the host, framework, or compiler layer. `K-PROTOTYPE-COMPOSITION-0001` states that the core template language does not provide prototype-to-prototype composition.
+If you want to combine existing components into a higher-level UI pattern (such as a searchable modal or toolbar), keep that composition in your host framework or compiler layer. Per `K-PROTOTYPE-COMPOSITION-0001`, Proto UI's core template language models structure within a single Prototype rather than nesting one Prototype inside another.
 
-Do not create a Base identity merely to obtain a convenient directory name or composition entry point.
+Keep app-level composition out of Base—there is no need to create a new Base identity just for a convenient wrapper name.
 
-### Project a design language
+### 3. Layer a design language onto Base
 
-When Base already owns state, events, focus, accessibility, or context semantics, and the change is mainly:
+When Base already handles state, events, focus, accessibility, or context, and your changes focus on:
 
-- variants, sizes, or visual anatomy;
-- style tokens and rules;
-- an upstream design-system compatibility boundary; or
-- an explicit visual or API delta;
+- `variant`, `size`, or visual anatomy;
+- design tokens and `Rule` definitions;
+- upstream design-system API compatibility; or
+- explicit visual or API additions;
 
-the subject is more likely a Base projection or styled-only Prototype. See [Projecting Base into a Design Language](/en/build/prototypes/projecting-base-into-a-design-language/) for the complete workflow.
+build a Base-backed styled component (or a styled-only Prototype when no Base interaction protocol is needed). Follow [Projecting Base into a Design Language](/en/build/prototypes/projecting-base-into-a-design-language/) for the end-to-end workflow.
 
-### Propose a new Base semantic subject
+### 4. Propose a new Base protocol
 
-A subject merits a proposal only when it owns an independent, testable, cross-host-stable information path:
+Introduce a new Base Prototype only when a pattern owns an independent, cross-host, testable interaction model:
 
-- input facts and their owner are explicit;
-- observable outputs and synchronization rules are explicit;
-- existing Base protocols or composition cannot express it without loss;
-- visual, business, layout, Form, and announcement responsibilities outside its ownership are explicit negative boundaries; and
-- every retained criterion can map to substantive executable evidence.
+- clear input facts and state ownership;
+- explicit observable outputs and synchronization rules;
+- semantics that existing Base protocols or composition cannot express cleanly;
+- clear boundaries separating interaction logic from styling, layout, forms, or business state; and
+- criteria that map directly to executable `T-*` tests.
 
-A familiar component name, a directory in a popular design system, or a styled library's desire for an inheritance point is not Base-admission evidence.
+## When to use `asHook`
 
-## What `asHook` can solve—and what it cannot prove
+An `asHook` is a reusable authoring entry for a specific protocol, not a mandatory pair for every Prototype.
 
-An `asHook` is an authoring entry for a particular protocol. It is not a universal requirement to extract a hook whenever reuse seems possible.
+- `P-BASE-BUTTON` exposes both `base-button` and `asButton` as two entries for one Button protocol; [button.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/button/button.proto.ts) shares `setupButton` between them so behavior stays unified.
+- `P-SHADCN-BUTTON` exposes only a direct Prototype entry, with no extra `asHook`.
 
-`P-BASE-BUTTON` catalogs `base-button` and `asButton` as two authoring entries of the same Button protocol; the [Button source](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/button/button.proto.ts) makes both share `setupButton`. In contrast, `P-SHADCN-BUTTON` explicitly has a direct entry and no additional authored asHook.
+Keep three guidelines in mind:
 
-Therefore:
+- check that an existing `asHook` belongs to the `P-*` protocol you intend to reuse;
+- keep protocol-specific hooks like `asButton` scoped to their own protocol rather than using them as generic building blocks for unrelated Base protocols; and
+- add an `asHook` only when there is a real authoring reuse case, not for symmetry alone.
 
-- confirm that an existing protocol-specific asHook belongs to the applicable P entity before using it;
-- do not use a hook such as `asButton` as generic behavior substrate for another Base protocol;
-- do not add an empty asHook merely for file or API symmetry; and
-- let the entity boundary and real authoring surface decide whether direct and authored-asHook entries both exist.
+## A quick pre-coding check
 
-## A practical decision line
+Answer these five questions in order before writing code:
 
-Before writing code, answer these questions in order:
+1. Does an applicable `P-*`/`T-*` entity already exist for this behavior?
+2. Can host- or framework-level composition solve this directly?
+3. Is this a design-language layer over existing Base semantics?
+4. If it is a new Base protocol, is it clearly tracked as a `draft` candidate or already admitted?
+5. Are state ownership, public boundaries, related specs, and test plans clear?
 
-1. Is there an applicable P/T graph that makes this maintenance?
-2. Is this host- or framework-level composition?
-3. Is this only a design-language delta over existing Base semantics?
-4. If it is a new Base subject, is the admission decision recorded, or is the work clearly marked as a candidate draft?
-5. Are lifecycle, criteria, relations, sources, and evidence explicit?
+If any of the first three apply, jump straight into that workflow. Otherwise, begin with a candidate spec, minimal implementation probe, and tests.
 
-The first three answers route existing governed work immediately. When only Base admission remains unresolved, begin with the candidate graph, draft entity, implementation probe, and evidence rather than presenting the new identity as already governed.
+> Note: `P-BASE-BUTTON` and `P-SHADCN-BUTTON` referenced on this page are currently `draft` entities; check the spec files for their latest definitions.
 
-## Lifecycle note
+## Next steps
 
-`P-BASE-BUTTON` and `P-SHADCN-BUTTON`, referenced here, are currently `draft`. They describe the current cataloged direction and must not be presented as stable protocol guarantees merely because their packages were published in 0.2.0.
-
-## Next
-
-- To understand the structure of a leaf authoring entry, read [Writing a Custom Primitive Prototype](/en/build/prototypes/writing-a-custom-primitive-prototype/)
-- For a governed or candidate compound boundary, read [Writing a Compound Prototype](/en/build/prototypes/writing-a-compound-prototype/)
-- For a new design language, read [Building a Styled Library on Top of Base](/en/build/prototypes/building-a-styled-library-on-top-of-base/)
+- Learn the structure of a single-part Prototype: [Writing a Custom Primitive Prototype](/en/build/prototypes/writing-a-custom-primitive-prototype/)
+- Learn how to model multi-part families: [Writing a Compound Prototype](/en/build/prototypes/writing-a-compound-prototype/)
+- Learn how to build a styled library over Base: [Building a Styled Library on Top of Base](/en/build/prototypes/building-a-styled-library-on-top-of-base/)

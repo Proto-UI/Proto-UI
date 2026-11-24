@@ -1,90 +1,76 @@
 ---
 title: '原型作者检查清单'
-description: '在提交一个新原型或大改动之前，先过一遍这张清单。'
+description: '在动手实现或提交原型 PR 前，快速核对贡献路径、规范归属、边界、测试与 Demo。'
 ---
 
-这不是一张形式化模板。  
-它的作用是帮你在动手前或提交前，快速判断自己是否已经偏离了 Proto UI 当前更看重的方向。
+这张清单用于在动手前或提交 PR 前快速自检，帮助你的改动与 Proto UI 的协议边界和交付要求保持一致。
 
-## 一、我走的是哪条贡献路径？
+## 1. 确认贡献路径
 
-- 我是在维护已有 P、投射已有 Base，还是实现受治理或候选 Base slice？
-- Issue 是否写明当前受治理方向、candidate scope 与下一步所需证据？
-- 对已有受治理 subject，我是否直接继续 implementation/projection，而不是等待另一层普遍审批？
-- 如果是全新 Base subject，admission 决定是否已记录？如果仍未决，research、candidate graph、draft entity、实现探针和测试是否在不声称已准入的前提下继续推进？
+- 明确本次工作属于维护已有 `P-*`、基于 Base 构建风格组件，还是实现新的 Base 协议切片。
+- Issue 已说明目标范围与预期验证结果。
+- 涉及全新 Base 身份时，在准入确认前保持其为 `draft` 候选状态。
 
-## 二、我是否从适用 Spec 实体开始？
+## 2. 从适用规范实体出发
 
-- 我找到了适用的 `P-*` 和 `T-*` 实体吗？
-- 我读过 lifecycle、criteria、relations、sources、revisions 和 mapped tests 吗？
-- 我有没有把 legacy contract、旧 record 或当前实现误当成高于 P 实体的真相源？
-- 如果来源冲突，我是否明确记录了 drift？
+- 已定位对应的 `P-*` 与 `T-*` 实体。
+- 已核对实体的生命周期、核心准则、继承关系、来源与映射测试路径。
+- 遇到实现与规范冲突时，以适用 `P-*` 实体为基准记录并修复偏差。
 
-## 三、我真的需要新的原型吗？
+## 3. 确认是否真的需要新原型
 
-- 我面对的是新的交互主体，而不只是新的风格吗？
-- 现有原型和现有 `asHook` 真的都不够吗？
-- 我做的不是把已有能力重新拼一遍吗？
+- 面对的是独立的交互主体，而不仅仅是视觉风格变化。
+- 现有原型与 `asHook` 无法无损表达该交互需求。
+- 目标属于独立协议，而不是应用层组件组合。
 
-如果这里有明显的“否”，先回到 [为什么你通常不需要新写一个原型？](/zh-cn/build/prototypes/when-not-to-write-a-new-prototype/)。
+如果这里有任意一项为否，请先回到[为什么你通常不需要新写一个原型？](/zh-cn/build/prototypes/when-not-to-write-a-new-prototype/)。
 
-## 四、边界是否切对了？
+## 4. 检查组件边界
 
-- 这个对象是否真的构成独立的交互主体？
-- 我有没有把本该拆开的 part 继续塞在同一个原型里？
-- 我有没有把没有独立信息通路责任的局部结构硬拆成新原型？
+- 该原型拥有独立、清晰的输入到输出信息通路。
+- 部件拆分以职责归属为依据，而不是把视觉容器硬拆成新原型，也没有把不同职责塞进同一个原型。
 
-如果这里不确定，回到[第三章：组件的边界](/zh-cn/whitepaper/3-component-boundary/)。
+如果边界仍不明确，参考[第三章：组件的边界](/zh-cn/whitepaper/3-component-boundary/)。
 
-## 五、我写的是交互语义，还是宿主实现？
+## 5. 保持交互语义跨宿主中立
 
-- 我有没有把宿主私有行为写死在 prototype 里？
-- 我有没有过早依赖某个框架特有的组织方式？
-- 我是不是把某种 adapter 层的补全责任误写回原型了？
+- 原型内不写死宿主或框架私有行为。
+- 不把某个 Adapter 的实现细节提升为跨宿主协议，也不用原型层特判掩盖 Adapter 差异。
 
-## 六、如果这是复合原型，family 是否清楚？
+## 6. 复合原型的家族结构
 
-- anatomy family 的 role 是否明确？
-- cardinality 和 relation 是否合理？
-- root、part、shared 的职责是否分开了？
-- context 里放的是共享语义，而不是一堆杂项吗？
+- `Anatomy` 的角色、数量约束与包含关系清晰合理。
+- Root、Part 与共享逻辑的职责边界清楚，由明确 owner 持有状态。
+- `Context` 只承载跨部件协作所需的协议事实，不混入宿主对象或样式杂项。
 
-## 七、如果这是风格化投射，它是否忠实继承 Base？
+## 7. 风格组件的 Base 继承
 
-- 我是在叠加 `variant`、`size`、style token、rule 吗？
-- 我是不是重新定义了本应复用的基础交互？
-- 我有没有优先从现有 `base` 原型或 `asHook` 长出来？
-- derived P 是否只写 delta criteria，并通过 `inherits.prototypes` 连接 Base？
-- negative patch 是否在 P 实体中明确声明？
-- unsupported upstream API 和 compatibility boundary 是否明确？
-- 如果对象没有 Base 协议，是否应成为 styled-only，而不是制造空 Base identity？
+- 仅叠加 `variant`、`size`、样式 Token 与 `Rule`，交互语义继续复用 Base。
+- 风格层 `P-*` 实体通过 `inherits.prototypes` 指向 Base，并只记录增量准则。
+- 如使用 `setup` 期负向补丁（negative patch），已在规范中明确声明并配有验证测试。
+- 明确不支持的上游 API 与兼容边界已写清楚。
+- 没有底层交互协议的纯视觉组件直接采用 `styled-only`，避免制造空壳 Base 身份。
 
-## 八、Authoring entries 是否与编目协议一致？
+## 8. 核对入口形式与 `asHook`
 
-- 适用 P 实体要求 direct Prototype、authored asHook，还是两者都存在？
-- direct 与 authored-asHook entries 表达同一协议时，是否共享实现并记录在同一个 P 实体？
-- 我是否避免了仅为 API 对称增加 asHook？
-- 我是否避免了让一个 protocol-specific authored asHook 成为另一个 Base protocol 的行为 substrate？
-- configurable authored asHook 是否有明确治理契约？
+- 直接原型与 `asHook` 的导出形式与适用 `P-*` 实体一致。
+- 同时提供直接原型与 `asHook` 时，两者共享同一份核心实现并记录在同一 `P-*` 实体下。
+- 不为 API 对称而添加空 `asHook`，也不把协议专用 `asHook` 当成其他 Base 协议的底层实现。
+- 可配置 `asHook` 遵循明确的规范契约。
 
-## 九、官网 Demo 是否代表真实安装体验？
+## 9. 官网 Demo 贴近真实使用
 
-- 新增公开 Prototype identity 或 anatomy family 是否已有接入官网入口的可访问页面？
-- PR 是否提供了维护者可直接打开的本地预览路由？
-- Demo 是否消费真实 public package export，并覆盖适用的 Web Component、React、Vue 预览？
-- 自治 Prototype 是否通过自己的 anatomy、trigger、state、event 和 default behavior 工作？
-- 是否避免了仅为 Demo 成立而增加的页面 state、无关 Button callback、私有 CSS 或脚本？
-- 如果原型没有自然 trigger，或必须演示公开 controls，外部 orchestration 是否保持最小并只使用 public API？
-- 例外逻辑是否在 Demo source 与 PR 中说明不会随 package 安装，以及消费者需要自行实现什么？
-- 内部 Demo Matrix 是否只被当作补充证据，而不是官网页面的替代品？
+- 新增公开原型或复合家族在同一 PR 中提供接入导航的可访问页面，并附上本地预览路由。
+- Demo 直接消费公开包导出，覆盖适用的 Web Component、React 与 Vue 预览。
+- 自治组件通过自身的 Anatomy、Trigger、状态、事件与默认行为工作，不引入页面私有状态、无关按钮回调或私有 CSS 绕开协议。
+- 若组件天然没有触发器或专门演示外部控制方法，外部胶水代码保持最小且仅使用公开 API，并在源码注释与 PR 中写明消费者需自行实现的部分。
 
-## 十、验证是否形成闭环？
+## 10. 测试与交付形成闭环
 
-- 每个新的或变化的 P criterion 是否有 substantive `T-*` case？
-- T case 是否锚定具体 criterion，并映射真实 executable path？
-- focused test 是否验证正向结果与必要的 absence assertion？
-- package export、CLI、官网页面、Demo 和三 Adapter preview 是否形成完整交付面？
-- 生成文件是否通过 generator 更新？
-- PR 是否记录了实际运行的命令与手动验证？
+- 每条新增或调整的 `P-*` 准则都有对应的 `T-*` 用例和可执行测试路径。
+- 聚焦单元测试同时验证正向结果与必要的排除断言。
+- 包导出、CLI facade、官网文档、Demo 与三套 Adapter 预览保持一致。
+- 所有派生文件均通过对应 generator 更新。
+- PR 说明中记录了实际运行的检查命令与本地验证结果。
 
-普通文档或 Demo 改动不需要制造新的 P/T。只要改变规范语义或可观察保证，就必须在同一 coherent change 中更新适用实体、证据和受影响的投影。
+> 仅修改文档或 Demo 且不涉及公开语义变化时，无需额外增改 `P-*` / `T-*` 实体；只要改变了规范语义或可观察行为，就在同一 PR 中同步更新规范、测试与文档。

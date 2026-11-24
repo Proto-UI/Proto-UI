@@ -14,8 +14,6 @@ import { getPrototype } from './registry';
 
 type ProtoNode = Extract<DemoNode, { kind: 'proto' }>;
 const recipeIds = ['demo-shadcn-dropdown-destructive', 'demo-shadcn-dropdown-inset'] as const;
-const upstream =
-  'https://github.com/shadcn-ui/ui/blob/c2a67849be260701852b0977ba15eb5f3a0ce2a4/apps/v4/registry/bases/base/examples/dropdown-menu-example.tsx';
 const recipeUrl = (path: string) => `https://github.com/Proto-UI/Proto-UI/blob/main/${path}`;
 
 function nodes(node: DemoNode): ProtoNode[] {
@@ -186,15 +184,11 @@ describe('bounded public Shadcn Dropdown recipes', () => {
         expect(readFileSync(sourcePath, 'utf8')).toMatch(/export default/);
         expect(docs).toContain(recipeUrl(sourcePath));
       }
-      expect(docs).toContain(upstream);
       expect(docs).toContain('DropdownMenuWithDestructive');
       expect(docs).toContain('DropdownMenuWithInset');
-      expect(docs).toContain('native/GPUI');
       expect(docs).toContain('Base');
-      // Docs describe the pinned New York inset padding (physical-left 2rem).
+      // Docs describe the New York inset padding (physical-left 2rem).
       expect(docs).toContain('2rem');
-      expect(docs).toMatch(locale === 'en' ? /local validation extension/ : /本地验证扩展/);
-      expect(docs).toMatch(locale === 'en' ? /remain incomplete/ : /仍未完成/);
     });
   }
 });

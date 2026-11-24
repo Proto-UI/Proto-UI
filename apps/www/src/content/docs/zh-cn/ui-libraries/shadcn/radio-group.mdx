@@ -1,6 +1,6 @@
 ---
 title: 'Radio Group'
-description: '在 Base 单选协议之上呈现 Shadcn Radio Group。'
+description: '支持键盘漫游焦点与单选状态管理的单选框组组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,57 +8,52 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Radio Group 用于在一组互斥选项中进行单项选择，提供完整的 `radiogroup` / `radio` 无障碍语义、键盘方向键导航以及焦点环和禁用态样式。本页示例使用 **Shadcn Rhea** 风格。
 
-Radio Group 包含 Root、Item 和 Indicator。Base 拥有选中值、Item 顺序、roving focus、选值请求，以及 `radiogroup` / `radio` 无障碍对象。Shadcn 投射增加圆形控件、选中圆点、焦点环、暗色底色和禁用外观。
+## 预览
 
 <PrototypePreviewer demoId="demo-shadcn-radio-group" initialRuntime="wc" />
-
-## 组合三个部分
-
-从 `@proto.ui/prototypes-shadcn/radio-group` 导入 `shadcnRadioGroupRoot`、`shadcnRadioGroupItem` 和 `shadcnRadioGroupIndicator`，再适配到所用运行时。包根也导出这些对象及其 PascalCase 别名。`proto-ui add react shadcn-radio-group` 会生成三个 React facade；CLI 同时支持 `vue`、`vue2` 和 `wc` 目标。
-
-每个 Item 属于最近的 Root。需要显示选中圆点时，在 Item 内显式放置 Indicator。Indicator 可省略，也可重复放置；CLI 不会暗中插入默认 part。它的 SVG 仅作装饰，不增加 radio 对象或 tab stop。
-
-| 部分 | Props | 职责 |
-| --- | --- | --- |
-| Root | `value?`、`defaultValue?`、`disabled?`、`a11yLabel?` | 拥有一个选中字符串和 Item 集合。 |
-| Item | 必填 `value`、可选 `disabled?` | 请求选值，派生 checked 与 effective-disabled。 |
-| Indicator | 无 | 反映最近 Item 的 checked 状态。 |
-
-为 Root 提供有意义的 `a11yLabel`，为每个 Item 提供同组内唯一、非空的 `value`。Item 的名称来自 authored content 或宿主标注。示例将每个 Item 与旁边真实的 `labelRoot` 配对，Label 从 `@proto.ui/prototypes-shadcn/label` 导入。双方通过 `InstanceAssociations.controlLabel` 接收同一个由 `createControlLabelRef()` 创建的稳定引用；可见 Label 就是可访问名称，不再放置隐藏副本。Base Label 默认激活配对的 Item，并遵守 Item/Group 的禁用状态。Label 设为 `activation={false}` 时只提供命名；组标题不会选择某个 Item。
-
-非受控 Root 接纳选值并发送 `valueChange`。提供 `value` 后，Root 发送请求，由 App 决定后续 value prop；投射不会制造中间 checked 值。空值或无法匹配的值会保留，选中的 Item 变为禁用后也可以继续 checked。
-
-## 体验继承的交互
-
-按 Tab 进入第一组：选中且启用的 Item 是入口。方向键移动并选择，循环经过启用的 Item；Home 和 End 到达首尾启用项，禁用项被跳过。Space 选择当前聚焦项，Enter 不选择。成功的 primary pointer 释放会选择，取消的按压不会选择。
-
-比较初始未选组和整组禁用的状态，再在 Web Components、React、Vue 和 Vue 2 中重复。控件为 16px，装饰 glyph box 为 8px；键盘焦点增加 3px ring，源码 recipe 不增加 color 或 shadow 过渡。切换网站主题会改变 input 底色，不改变选中值。
-
-## 比较来源与范围
-
-未选profile时的兼容比较来源为2026-10-10抓取的[base-nova RadioGroup registry](https://ui.shadcn.com/r/styles/base-nova/radio-group.json) snapshot（SHA256 874b30662ba338d06362491b663cae9198281a4bc385b6be6425f2de442384d7）。该Nova兼容recipe使用grid/full-width/gap-2、primary选中填色与8px primary-foreground圆点。Indicator仍作为独立公开part，以host-neutral flex居中替代上游内部absolute positioning；field-label联动、扩大hit-target selectors与当前真实浏览器视觉验证仍待完成。
-
-继承的 API 不包含 `asChild`、原生表单提交或验证、`required`、invalid state、公开 `orientation` / `loop` 或通用视觉variant API；共享styleProfile是独立的外观选择，未因此引入upstream的`aria-invalid`样式。方向键循环是 Base 的固定行为，不是新增可配置 API。三个 catalog 实体保持 `draft`，此页面不声明完整 Shadcn / Radix 兼容性或稳定准入。
-
-本页显式选择Rhea：Root使用`gap-3`，Item使用`radius-2xl`和`bg-input/90`；默认根字号下仍为16px控件与8px装饰点。共享profile不会增加选择语义owner。
 
 ## 安装
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-radio-group" manager="npm" />
 
-把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件封装。
 
-## 只读与显式 Form 组合
+## 用法
 
-Root 接受 `readOnly`：保留焦点并拒绝新值提案；disabled 还会退出焦点参与。只读 Radio Group 仍可使用已有导航键漫游焦点。普通 Root 不会自动注册到 Field 或 Form。
+从 `@proto.ui/prototypes-shadcn/radio-group`（或包根）导入 `shadcnRadioGroupRoot`、`shadcnRadioGroupItem` 和 `shadcnRadioGroupIndicator`，并适配到目标运行时：
 
-在显式 `FormField` 中使用 `@proto.ui/prototypes-shadcn/field` 的 `fieldRadioGroup`，接入 canonical 值、required 校验、Label/Description/Error 关系与重置。[Form 选择控件示例](../form/) 展示受控拒绝、接受更新、只读焦点、禁用分组与真实 owner 更换。`resetValue()` 请求实例创建时的基线，不会强迫受控 owner 接受。
+| 部件 | 属性 | 职责 |
+| --- | --- | --- |
+| `Root` | `value?`、`defaultValue?`、`disabled?`、`readOnly?`、`a11yLabel?` | 统一管理当前选中值与选项集合。 |
+| `Item` | 必填 `value`、可选 `disabled?` | 表示单个选项，请求选值并派生选中与禁用状态。 |
+| `Indicator` | 无 | 放置在 `Item` 内部，用于渲染选中圆点（可省略或按需自定义）。 |
+
+### 标签关联与可访问性
+
+- 为 `Root` 设置清晰的 `a11yLabel`，为每个 `Item` 提供同组内唯一且非空的 `value`。
+- 搭配 `@proto.ui/prototypes-shadcn/label` 中的 `labelRoot` 时，可通过 `createControlLabelRef()` 创建共享引用并绑定到双方的 `InstanceAssociations.controlLabel`，让可见标签直接作为选项的无障碍名称并支持点击激活。若仅用于命名而不触发选择，可在 `Label` 上设置 `activation={false}`。
+
+### 受控与非受控
+
+- 非受控模式下，`Root` 通过 `defaultValue` 初始化，并在选值变化时触发 `valueChange`。
+- 传入 `value` 后进入受控模式，`Root` 仅发出变更请求，由外部决定下一次 `value`。空值或未匹配项的值会被保留，已选中的选项变为禁用后仍可保持选中状态。
+- 设置 `readOnly` 会保留键盘焦点漫游能力，同时阻止更改选中值；`disabled` 则会禁用交互并移出焦点序列。
+
+### 键盘交互
+
+- 按 `Tab` 进入单选组时，焦点优先落在当前已选中且启用的 `Item` 上。
+- 方向键在启用项之间循环移动并自动选中，`Home` / `End` 跳转到首尾启用项，禁用项会被自动跳过。
+- `Space` 可选中当前聚焦项，`Enter` 不触发选择。
+
+### 表单组合
+
+普通的 `Root` 不会自动注册到表单。在 `FormField` 中使用时，请使用 `@proto.ui/prototypes-shadcn/field` 导出的 `fieldRadioGroup`，即可自动衔接必填校验、Label/Description/Error 关联与重置（`resetValue()` 请求恢复实例初始值）。更多用法见 [Form 示例](../form/)。
 
 ## API
 
-传入 `value` 进入受控模式。仍然没有公开的 `orientation` 或 `loop` 属性。
+以下属性属于 `Root`（传入 `value` 可进入受控模式）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -70,7 +65,10 @@ Root 接受 `readOnly`：保留焦点并拒绝新值提案；disabled 还会退�
   ]}
 />
 
-这些属性属于 Root。Item 必须提供 `value`，`disabled` 默认 `false`。Indicator 没有属性。
+其他部件属性：
+
+- `Item`：`value`（必填），`disabled`（默认 `false`）。
+- `Indicator`：无额外属性。
 
 ## 参考
 

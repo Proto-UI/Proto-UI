@@ -1,12 +1,14 @@
 ---
 title: 'NavigationMenu'
-description: 'Named navigation disclosures with native destination links.'
+description: 'A Brutalist-styled navigation menu with named disclosure panels and native destination links.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-Named navigation disclosures with native destination links.
+NavigationMenu provides site- or app-level navigation with mutually exclusive disclosure panels and native anchor links.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-brutalist-navigation-menu"
@@ -15,19 +17,33 @@ Named navigation disclosures with native destination links.
   codePanel={false}
 />
 
-Root is a navigation landmark, Trigger is a disclosure button and Content is a labelled region. Root.value identifies one open panel. Item emits a command; Link projects a real anchor with href, target, rel and current-page semantics. The browser owns URL previews, Enter activation, modifier/middle-click browsing and navigation. Link does not synthesize Space activation or call an application router.
+## Installation
 
-Parts: Root, Trigger, Content, Item, Link.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/navigation-menu` and adapt them for your target runtime.
 
-Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.
+## Usage
 
-Link emits a read-only navigate observation containing href, target, rel and modified after native activation. It is not a cancellable routing request. A normal same-window activation closes the open panel unless closeOnSelect=false; modified/middle-button or \_blank activation keeps the current page’s panel open. Disabled Link removes its destination and prevents activation. Current=true identifies the current page with aria-current.
+### Anatomy
 
-React/Vue/Vue2 use a native anchor root. Web Components retain caller content in an owned local anchor, and focus/style/accessibility projection follows that physical surface. The demo uses a same-document destination and only observes the navigation. Real-browser/packed/compiler/native acceptance remains pending beyond source-runtime checks.
+NavigationMenu is composed of `Root`, `Trigger`, `Content`, `Item`, and `Link`:
+
+- `Root`: Renders a navigation landmark and manages the currently open panel via `value`.
+- `Trigger`: Disclosure button paired with a `Content` panel by `value`.
+- `Content`: Labelled region displaying the open panel's links and commands.
+- `Item`: Emits a command action when activated.
+- `Link`: Renders a native anchor supporting `href`, `target`, `rel`, and `current` (sets `aria-current` for the active page).
+
+### Link Behavior
+
+- **Native browser semantics**: URL previews, `Enter` activation, and modifier/middle-click browsing are handled natively by the browser.
+- **Read-only `navigate` event**: After native activation, `Link` emits a read-only `navigate` event with `{ href, target, rel, modified }` for observation.
+- **Dismissal behavior**: A standard same-window activation closes the open panel unless `closeOnSelect` is `false`. Modified clicks, middle-clicks, and `_blank` targets keep the current page's panel open.
+- **Disabled links**: Setting `disabled` removes the link destination and blocks activation.
+- **Runtime rendering**: React, Vue, and Vue 2 render a native `<a>` root element; Web Components wrap your children inside an owned anchor element so focus, styles, and accessibility attributes stay aligned.
 
 ## API
 
-Navigation Menu is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
+The following props belong to `Root` (pass `value` to enter controlled mode):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -39,5 +55,9 @@ Navigation Menu is workspace source. There is no public `proto-ui add` target. P
   ]}
 />
 
-These props belong to Root. Trigger defaults `value` to `''` and `disabled` to `false`. Content defaults `value` and `a11yLabel` to `''` and `sideOffset` to `4`. Item defaults `value` and `textValue` to `''`, `disabled` to `false` and `closeOnSelect` to `true`. Link defaults `href` and `rel` to `''`, `current` to `false` and `target` to `_self`.
+Other part props and defaults:
 
+- **Trigger**: `value` defaults to `''`; `disabled` defaults to `false`.
+- **Content**: `value` and `a11yLabel` default to `''`; `sideOffset` defaults to `4`.
+- **Item**: `value` and `textValue` default to `''`; `disabled` defaults to `false`; `closeOnSelect` defaults to `true`.
+- **Link**: `href` and `rel` default to `''`; `current` defaults to `false`; `target` defaults to `'_self'`.

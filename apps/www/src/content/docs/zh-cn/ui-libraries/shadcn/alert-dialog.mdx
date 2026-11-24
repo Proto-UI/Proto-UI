@@ -1,15 +1,15 @@
 ---
 title: 'AlertDialog'
-description: '带主要说明、安全取消焦点与明确操作意图的模态确认窗口。'
+description: '用于关键操作确认的模态对话框，默认将焦点落在安全取消按钮上并阻止点击外部关闭。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页以 **Shadcn Rhea** 为目标，支持profile的parts均显式选择Rhea；下文headless触发器/action-body缺口仍开放，尚不称整页外观统一。这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+用于重要或不可逆操作确认的模态对话框，提供明确的操作意图、安全取消焦点并阻止点击外部意外关闭。本页示例采用 **Shadcn Rhea** 风格。
 
-带主要说明、安全取消焦点与明确操作意图的模态确认窗口。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-alert-dialog"
@@ -18,19 +18,28 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root 固定 alert 语义。Mask 管理模态遮罩；Content 约束焦点、拒绝外部点击关闭并优先聚焦 Cancel。Action 先发出 action，再请求关闭，实际操作由应用处理。Escape 与 Cancel 请求关闭。
+## 用法
 
-Root 支持受控 open 和非受控 defaultOpen。禁用命令不激活。传入 open 时，最终状态仍由调用方持有，通过 openChange 接收请求后再提供新值。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-组成: Root, Trigger, Content, Header, Footer, Title, Description, Cancel, Action, Mask.
+### 部件结构
 
-当前是草稿源码实现。完整 native/GPUI、编译器、打包消费、视觉及独立验收仍待完成；本页不表示 Finf 已完成。
+`AlertDialog` 由以下部件组合而成：`Root`、`Trigger`、`Mask`、`Content`、`Header`、`Footer`、`Title`、`Description`、`Cancel`、`Action`。
 
-本页选择Rhea Content：p-6、gap-6、上限24px的家族radius-4xl、popover主题色及其ring/shadow。New York仍是未选profile时的兼容默认值，不是本页皮肤。Header/Footer是可复用被动分组。现代Trigger为headless；可复用的被动Rhea action-body组合仍是明确演示依赖，不能用页面paint猜造。响应式布局、small/media变体、原生presence及完整上游一致性仍未验收。
+- **Root**：统一管理打开状态并固定启用 alert 模态语义。
+- **Mask**：提供模态背景遮罩层。
+- **Content**：将焦点限制在对话框内，阻止点击外部关闭，打开时优先将焦点移至 `Cancel`。采用 Shadcn Rhea 面板样式（`p-6`、`gap-6`、圆角上限 24px、popover 配色及阴影）。
+- **Header / Footer / Title / Description**：组织对话框头部、底部操作区以及无障碍标题与描述。
+- **Cancel / Action**：`Cancel` 与 `Escape` 键请求关闭；点击 `Action` 会先触发 `action` 事件，再请求关闭对话框，具体的业务或破坏性操作由应用层在事件回调中执行。禁用的按钮不会触发操作。
+
+### 受控与非受控
+
+- 通过 `defaultOpen` 设置初始打开状态。
+- 传入 `open` 进入受控模式：监听 `openChange` 事件并将新值传回 `Root` 即可更新显示状态。
 
 ## API
 
-Alert Dialog 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。与 Dialog 不同，这个 Root 没有 `alert` 属性：原型 context 固定保持 alert 行为。
+传入 `open` 进入受控模式。与 `Dialog` 不同，`AlertDialog` 的 `Root` 不提供 `alert` 属性，而是始终保持 alert 确认模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -41,7 +50,7 @@ Alert Dialog 是工作区源码，没有公开的 `proto-ui add` 目标。传入
   ]}
 />
 
-这些属性属于 Root。
+以上属性均作用于 `Root`。
 
 ## 参考
 

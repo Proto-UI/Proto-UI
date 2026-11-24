@@ -1,15 +1,17 @@
 ---
 title: 'Selectable Row'
-description: '受控列表行，将选择提案与激活动作分开。'
+description: '将受控选择与行激活动作分离的可选列表行组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Base Selectable Row 负责单行的按压、键盘、焦点和辅助功能行为。所有者提供不透明的 `itemKey`，接纳选择提案，并执行激活动作。行本身不解释文件路径，也不跳转到目标位置。
+用于文件列表、表格或集合中的受控可选行，提供按压、键盘、焦点与 `row` 无障碍语义，并将选择提案与激活动作明确分离。
 
-该原型当前为 **draft**。下方 RuntimeBox 使用公开的 `selectableRow` 原型，演示所有者接纳选择并显示激活请求。切换 Adapter 会在同一个 Web host 上运行相同作者源码；本预览不代表 Compiler、原生宿主或辅助技术验收已经完成。
+## 预览
+
+按 `Tab` 聚焦可用行，按 `Space` 提出选择请求；在 **Assets** 行按 `Enter`（或在 Web 端双击）会触发激活请求。
 
 <PrototypePreviewer
   demoId="demo-base-selectable-row"
@@ -18,33 +20,29 @@ Base Selectable Row 负责单行的按压、键盘、焦点和辅助功能行为
   codePanel={false}
 />
 
-用 Tab 聚焦可用行，按空格提出选择提案。在 **Assets** 行按 Enter 会请求激活；Web 上双击该行也会请求相同动作。状态文字记录所有者已接纳的选择或收到的动作请求；本例没有文件系统路由。
+## 安装
 
-## 已接纳的选择与独立激活
-
-`selected` 是所有者控制的状态。指针按压和空格通过 `selectionChange` 发出 `{ value: itemKey }`，不会立即更改行的已接纳 `selected` 状态。消费者决定是否接纳提案，再回传得到的值。
-
-只有 `activatable` 为 true 时，Enter 才通过 `activate` 发出相同载荷，不会同时提出选择提案。`host:dblclick` 路径是明确的 Web 宿主扩展：行没有可移植的双击计时器，也不对缺少该扩展的宿主承诺双击激活。
-
-可用且已聚焦的行会阻止空格的默认滚动。可激活的聚焦行还会阻止 Enter 的默认动作。重复键盘按压提交不会重复选择或激活。
-
-## 行与集合的职责
-
-行投影 `row` 辅助功能角色，以及已接纳的 `selected` 和 `disabled` 状态。名称来自内容，默认 slot 保留作者提供的子内容。`disabled` 会阻止选择、激活和 `focusSelf()`，并移除普通焦点参与；禁用行不会丢弃已接纳的选择。
-
-外围集合应提供恰当的行与单元格组合。方向键移动、漫游 Tab 顺序、范围选择和多选属于集合所有者。本预览演示可独立聚焦的行及所有者接纳选择，不实现集合键盘导航。
-
-Base 不提供视觉设计语言。预览的排版、选择颜色和状态文字属于网站组合。
-
-## 公开作者入口
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
 ```ts
 import { selectableRow, asSelectableRow } from '@proto.ui/prototypes-base/selectable-row';
 ```
 
-该源码子路径还导出默认原型、`SelectableRowProps`、`SelectableRowExposes` 与 `SelectableRowAsHookContract`；包根导出命名入口。原型与 hook 复用同一份 setup。消费者处理语义事件，无需在宿主监听器中重复实现行的键盘或选择行为。
+该子路径同时导出默认原型、`SelectableRowProps`、`SelectableRowExposes` 与 `SelectableRowAsHookContract`，包根导出同名命名入口；原型与 Hook 共享同一套实现。
 
-Selectable Row 是工作区源码，没有公开的 `proto-ui add` 目标。
+## 用法
+
+### 受控选择与独立激活
+
+- `selected` 为受控状态：点击或按 `Space` 时通过 `selectionChange` 发出 `{ value: itemKey }`，由外部决定是否更新 `selected`。
+- 当 `activatable` 为 `true` 时，按 `Enter` 通过 `activate` 发出 `{ value: itemKey }`（不会同时触发选择）；在 Web 端，双击（`host:dblclick`）同样触发 `activate`。
+- 聚焦且可用时会阻止 `Space` 的默认页面滚动，可激活时同时阻止 `Enter` 的默认行为；长按键盘重复触发不会重复提交。
+
+### 焦点、无障碍与集合职责
+
+- 组件自动设置 `role="row"`、`selected` 与 `disabled` 无障碍状态，默认插槽保留传入的子元素。
+- 设置 `disabled` 会阻止选择、激活和 `focusSelf()`，并退出常规焦点顺序，但不会清除外部已选中的 `selected` 状态。
+- 方向键导航、漫游焦点、范围选择与多选由外层集合组件统一协调。
 
 ## API
 
@@ -58,11 +56,10 @@ Selectable Row 是工作区源码，没有公开的 `proto-ui add` 目标。
   ]}
 />
 
-公开状态为 `selected`、`disabled`、`focused` 和 `focusVisible`，公开方法为 `focusSelf()`。`selectionChange` 与 `activate` 都携带 `{ value: string }`，不传递原生元素或应用对象。
+- **暴露状态**：`selected`、`disabled`、`focused`、`focusVisible`。
+- **暴露方法**：`focusSelf()`。
+- **事件**：`selectionChange`、`activate`，载荷均为 `{ value: string }`。
 
 ## 参考
-
-- [实现与公开源码导出](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/selectable-row)
-- [事件契约](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-EVENT-TYPE-0002.yaml)
 
 <SpecEntityLinks directory="spec/prototypes" files={['P-BASE-SELECTABLE-ROW.yaml']} />

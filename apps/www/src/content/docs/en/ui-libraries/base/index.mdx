@@ -1,38 +1,32 @@
 ---
 title: 'Base'
-description: 'Choose a portable interaction protocol, then read its anatomy, inputs and Web host example.'
+description: 'Unstyled cross-framework component primitives covering state management, keyboard interaction, and accessibility.'
 ---
 
 import PrototypeDocumentationIndex from '@/components/PrototypeDocumentationIndex.astro';
 
-Base provides interaction protocols without a visual language. Start with the family that owns the action or value you need, then compose its documented parts. Shadcn and Brutalist project these protocols into a visual language.
+Base provides unstyled, cross-framework component primitives focused on interaction behavior, state management, and accessibility. Styled libraries such as Shadcn and Brutalist build their visual designs on top of Base.
 
-## Install and render
+## Installation
 
-For the published 0.2.0 Web Component baseline, initialize an existing bundler application and add Button:
+Initialize Proto UI in an existing project and add a published 0.2.0 component (for example, the Web Component Button):
 
 ```sh
 npx @proto.ui/cli@0.2.0 init
 npx @proto.ui/cli@0.2.0 add wc base-button
 ```
 
-The equivalent pnpm invocation is:
+Or with pnpm:
 
 ```sh
 pnpm dlx @proto.ui/cli@0.2.0 init
 pnpm dlx @proto.ui/cli@0.2.0 add wc base-button
 ```
 
-The CLI installs `@proto.ui/prototypes-base` and the chosen Adapter at its own exact version. Import the generated style entry and host facade as shown in [Quick Start](/en/start-here/quick-start/), then use the complete [Button example](./button/). React and Vue 3 use `react` and `vue` in place of `wc`. Vue 2.6 belongs to the workspace 0.3 line; these stable commands do not install it.
+Replace `wc` with `react` or `vue` for React or Vue 3 projects. Follow [Quick Start](/en/start-here/quick-start/) to import the generated style entry and component wrapper, then see the full [Button guide](./button/).
 
-## Find a protocol
+## Component index
 
-This is the current workspace export index. A linked family page documents its compound parts together. Read that page's API, lifecycle and host limits; a source export or a Preview selector does not establish a tested package or host combination. Newer workspace exports are not added retroactively to the 0.2.0 package.
+Browse all Base components currently available in the workspace below, and check each page for interactive previews, composition anatomy, API props, and release availability:
 
 <PrototypeDocumentationIndex library="base" />
-
-## Delivery and evidence
-
-The website previews use this repository's source. The stable npm baseline and the current workspace can differ. Base protocol entities remain subject to their recorded lifecycle; publication alone does not activate a draft protocol.
-
-[Documentation coverage and historical evidence](/en/build/prototypes/documentation-coverage/) explains the distinction between a family, its parts, an export and a generated facade. The original acceptance conditions remain tracked in [#1042](https://github.com/Proto-UI/Proto-UI/issues/1042).

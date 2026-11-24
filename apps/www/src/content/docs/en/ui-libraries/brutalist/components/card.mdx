@@ -1,5 +1,6 @@
 ---
 title: Card
+description: 'A Brutalist grouping panel with a 2px black frame, hard offset shadow, and clean unbordered sections.'
 sidebar:
   order: 4
 ---
@@ -10,25 +11,32 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Card is a direct styled-only grouping surface with no Base counterpart.
+Brutalist Card is a static grouping surface styled with 5px rounded corners, a `2px` black frame, and a 4px hard offset shadow.
 
-## Contract
-
-- The public surface is deliberately limited to Root, Header, Content, and Footer.
-- Root is a passive 5px rounded paper panel with a `2px` black frame and hard offset shadow; it has no role, focus, activation, or selection mode.
-- Header and Footer own layout and spacing, with no section borders by default; Content owns horizontal spacing. The Root owns the single 5px rounded frame and 4px black hard shadow.
-- Title and description are ordinary content. Actions compose Button or Link children, which retain their own semantics.
-
-Use Card for passive visual grouping. Selection, disclosure, navigation, and activation belong to their corresponding protocols rather than Card modes.
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-card" initialRuntime="wc" />
 </div>
 
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-card`
+
+## Usage
+
+Card provides four parts: `Root`, `Header`, `Content`, and `Footer`:
+
+- **Root**: Passive paper panel with 5px rounded corners, a `2px` black frame, and a 4px hard black shadow.
+- **Header / Footer**: Handle header and footer layout and spacing with no section borders by default.
+- **Content**: Provides horizontal padding for body content.
+
+Render titles and descriptions as ordinary text elements, and place `Button` or link elements inside the card whenever interactive actions are needed.
+
 ## API
 
-Card is workspace source. For this workspace version, the CLI target is `brutalist-card`. Use matching CLI and package versions; check the chosen release's availability before installing. Root has no props.
+`Root`, `Header`, `Content`, and `Footer` render your children and declare no props of their own.
 
 <ApiPropsTable headers={{ name: 'Prop', type: 'Type', default: 'Default' }} rows={[]} />
-
-Header, Content and Footer accept children only and add no props.

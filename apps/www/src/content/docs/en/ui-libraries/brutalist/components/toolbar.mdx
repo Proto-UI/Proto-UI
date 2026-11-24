@@ -1,12 +1,14 @@
 ---
 title: 'Toolbar'
-description: 'Keyboard-roving commands with an accessible toolbar name and separator.'
+description: 'A Brutalist-styled toolbar with roving keyboard focus, accessible naming, and cross-axis separators.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-Keyboard-roving commands with an accessible toolbar name and separator.
+Toolbar groups related action buttons into a single roving-focus landmark with horizontal or vertical layout and cross-axis separators.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-brutalist-toolbar"
@@ -15,15 +17,28 @@ Keyboard-roving commands with an accessible toolbar name and separator.
   codePanel={false}
 />
 
-Root owns disabled, orientation, loop and a11yLabel. Button emits action with its value on enabled activation. Only one enabled command participates in Tab; arrows move within the toolbar. Separator follows the cross axis.
+## Installation
 
-Parts: Root, Button, Separator.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/toolbar` and adapt them for your target runtime.
 
-Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+## Usage
+
+### Anatomy
+
+Toolbar is composed of `Root`, `Button`, and `Separator`:
+
+- `Root`: Manages toolbar-wide `disabled` state, `orientation`, `loop` navigation, and accessible naming (`a11yLabel`).
+- `Button`: Emits an `action` event carrying its `value` when activated while enabled.
+- `Separator`: Automatically aligns along the toolbar's cross axis.
+
+### Keyboard Navigation
+
+- Only one enabled button participates in the `Tab` sequence at a time.
+- Arrow keys move focus between enabled buttons inside the toolbar; `loop={true}` (default) wraps from end to start.
 
 ## API
 
-Toolbar is workspace source. There is no public `proto-ui add` target. Separator has no props.
+The following props belong to `Root`:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -35,5 +50,7 @@ Toolbar is workspace source. There is no public `proto-ui add` target. Separator
   ]}
 />
 
-These props belong to Root. Button defaults `disabled` to `false` and `value` to `''`.
+Other parts:
 
+- **Button**: `disabled` defaults to `false`; `value` defaults to `''`.
+- **Separator**: No props.

@@ -1,9 +1,13 @@
 ---
-title: bootstrap-2-3-2 Number Field
-description: 可移植输入原子草稿。
+title: 'Bootstrap 2.3.2 Number Field'
+description: '支持步进增减、本地化数字格式、可空值与标签拖拽调值的 Bootstrap 2.3.2 数值输入组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Bootstrap 2.3.2 Number Field 提供带加减步进按钮、键盘快捷调值、本地化格式化与标签拖拽（scrub）调节的数值输入框，并支持直接接入 `Field` 与 `Form`。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-number-field"
@@ -12,16 +16,29 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root 管理 `number | null` 的 value/defaultValue、min/max（0/100）、正 step（1）、disabled/readOnly、name、ariaLabel。Input 使用 TextControl 唯一编辑器与 spinbutton 语义。未完成草稿可以保留；失焦/Enter 提交合法数值或恢复已接受的规范值。加减按钮与上下箭头共享步进，Shift 十倍，Home/End 达边界；受控提案不覆盖作者值。
+## 安装
 
-`locale` 与 `formatOptions` 支持标准十进制、货币和百分比显示，以及对应的小数、分组、本地数字与符号解析。格式化只影响显示精度，无编辑的提交不会把格式舍入写回数值。非法格式配置通过 `formatInvalid` 报告，并回退无分组十进制；非法输入保留草稿并在提交时恢复。省略格式属性保持原有十进制显示。IME 组合期间不会解析、提交、步进或开始拖擦，切换 locale 也保留正在输入的组合文本。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-显式 `null` 表示空值，`value={null}` 仍然受控。`allowEmpty` 默认 `false`，启用后清空编辑器并提交会请求 `null`。Root 与 Input/Control 的 `getValue()` 返回真实 `number | null`，`empty` 标记空值；兼容数值读口 `value` 仅在 `empty=false` 时表示规范数值，空值时保留最近有限值。事件及 Field/Form 始终传递真实空值。从空值步进先初始化为边界内对齐的零。
+## 用法
 
-启用 `scrub` 后可在 Label 上连续拖动调值；`scrubSteps`（默认100）表示移动一个初始标签宽度对应多少个 step，`direction="rtl"` 反转横向。成功释放且值发生改变时提交一次；取消恢复非受控起值，受控值始终由作者决定。输入框保留普通文本选择，滚轮调整尚未实现。
+由 `Root`、`Label`、`Input`（在 `Field` / `FormField` 内替换为 `Control`）、`Increment` 和 `Decrement` 组成：
 
-在 Field/FormField 内用 Control 替代 Input，FieldLabel 命名并激活真实编辑器，联动 Field 策略、规范数值校验、IME 取消、Form 序列化及复位。独立 Input 仍使用 NumberFieldLabel。
+- **编辑与步进**：输入过程中允许保留未完成的草稿文本，失焦或按 `Enter` 时解析提交合法数值或恢复上次有效值。点击加减按钮或按上下方向键按 `step` 步进，按住 `Shift` 为 10 倍步进，`Home` / `End` 跳转到 `min` / `max`。IME 组合输入期间不会触发解析或步进。
+- **本地化格式**：传入 `locale` 与 `formatOptions` 支持十进制、货币与百分比展示及解析；显示舍入不会修改内部精确数值。若格式配置非法，会标记 `formatInvalid` 并自动回退到无分组十进制。
+- **空值支持**：默认 `allowEmpty={false}`；设为 `true` 后，清空输入框并提交会请求 `null`（`value={null}` 仍属于受控模式）。使用 `getValue()` 可读取准确的 `number | null`，`empty` 指示当前是否为空；从空值步进时先初始化为边界内对齐的 `0`。
+- **标签拖拽调值（`scrub`）**：开启 `scrub` 后可在 `Label` 上左右拖动连续调值（`scrubSteps` 默认 `100`，表示拖动一个标签宽度对应的步数，`direction="rtl"` 自动反转方向），释放且值变化时提交一次；取消拖拽会恢复起值。
+- **表单集成**：在 `Field` / `FormField` 内用 `Control` 替换 `Input`，即可与 `FieldLabel`、数值校验、`Form` 序列化与重置联动。
 
-部件: root, label, input, control, increment, decrement. 四个视觉家族继承同一 Base 行为。
+## API
 
-当前为 Draft 源码工作。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍待完成，不宣称 Finf 验收通过。
+| 部件 | 属性 / 方法 / 状态 | 说明 |
+| --- | --- | --- |
+| `Root` | `value` / `defaultValue` | `number \| null`，受控或初始数值 |
+| `Root` | `min` / `max` / `step` | 默认 `0`、`100`、`1` |
+| `Root` | `allowEmpty` | 默认 `false`；设为 `true` 允许清空提交 `null` |
+| `Root` | `locale` / `formatOptions` | 本地化十进制、货币与百分比格式配置 |
+| `Root` | `scrub` / `scrubSteps` / `direction` | 启用标签拖拽调值及灵敏度（默认 `100` 步） |
+| `Root` | `disabled` / `readOnly` / `name` / `ariaLabel` | 交互状态、表单字段名与可访问名称 |
+| `Root` | `getValue()` / `empty` / `formatInvalid` | 读取 `number \| null`、空值标记与格式校验状态 |
+| `Label` / `Input` / `Control` / `Increment` / `Decrement` | — | 标签、输入框（表单内用 `Control`）及步进按钮 |

@@ -1,13 +1,15 @@
 ---
 title: 'Label'
-description: '用显式 Proto UI 关联分别表达可访问名称与控件激活。'
+description: '通过显式实例关联将标签与目标控件绑定，独立控制无障碍命名与点击激活行为。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Label 当前仍是 **draft**。Base Label 提供独立的命名与激活关联协议；Proto UI 是独立项目，设计资料用于比较与自主采纳，不构成其他项目对 Proto UI 的权威。
+Base Label 通过显式引用与目标控件建立一对一绑定，分别提供无障碍命名（`naming`）与点击激活（`activation`）能力，无需依赖手写 DOM ID。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-label"
@@ -15,38 +17,33 @@ Label 当前仍是 **draft**。Base Label 提供独立的命名与激活关联�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-此例将 Base Label 与 Base Checkbox、Switch、Radio Group Item、Input、Textarea 配对。可操作标签使用公开默认值；仅命名的示例显式设置 `activation={false}`。On/Off 读取目标的公开状态；Requests 记录受控 Checkbox 的普通 `checkedChange` 提案次数，应用所有者仍保持 `checked={false}`。Label 不转发 DOM click，也不拥有另一套控件值。Input 与 Textarea 仍由原生编辑器承载；只读示例可以通过 Label 获得焦点，文字保持不变。禁用选项保留名称，但拒绝激活和聚焦。
+预览演示了 Base Label 与 Checkbox、Switch、Radio Group Item、Input、Textarea 的配对，包括可激活标签、仅命名标签（`activation={false}`）、只读聚焦与禁用拦截。
 
-## 分开声明名称和激活
+## 安装
 
-- `naming` 默认 `true`：目标通过可访问关系引用真实渲染的 Label，不再放置重复的隐藏名称。
-- `activation` 默认 `true`：显式配对后，符合条件的指针动作或可信的非指针激活请求目标已有操作。设为 `false` 可保留命名而关闭激活；重新设为 `true` 或移除该 Prop 会恢复默认激活。Checkbox、Switch 保持 disabled 与 controlled 规则；Radio Item 向 Group 请求选值；Input、Textarea 只请求 focus，不由 Label 改值或操纵选区。
-- Label 不增加 button role、Tab 停靠点或独立键盘激活。嵌套链接/按钮、带修饰键的输入、pointercancel 与拖拽手势不转发。
-- 仅命名的 Label 与长说明仍可复制。短操作标签在自己的原型上表达选择策略。受控示例会拒绝接受切换提案，保持关闭，这是应用的值所有权决定。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。包入口为 `@proto.ui/prototypes-base/label`，工作区 CLI 目标为 `base-label`（支持 `wc`、`react`、`vue`、`vue2`）。
 
-升级提示：已配对但省略 `activation` 的 Label 现在默认可激活；需要保留被动命名时，请显式设为 `false`。`selection='policy'` 会抑制操作标签上的误选文字；操作标签仍需可复制时可设 `selection='text'`。未配对的 Label 不会寻找父级或附近的控件。
+## 用法
 
-## 关联不进入 JSON Props
+### 独立控制命名与激活
 
-从 `@proto.ui/core` 调用 `createControlLabelRef()`，每一对控件/标签保留一个稳定引用。React、Vue、Vue 2 向双方传 Adapter-owned `instanceAssociations: { controlLabel: ref }`。这不是普通 Proto Props；即使自定义 getProps，也会在 raw/resolved Props 之前剥离。
+- **`naming`**（默认 `true`）：自动将目标控件的可访问名称关联到实际渲染的 Label（若目标已设置非空 `ariaLabel` / `labelledBy`，则保留目标自有命名）。
+- **`activation`**（默认 `true`）：点击已配对的 Label 会触发目标控件的默认操作——例如切换 Checkbox / Switch、选中 Radio Group Item、或聚焦 Input / Textarea（只读输入框仍可聚焦）。设为 `false` 可保留命名并关闭点击激活。
+- **`selection`**（默认 `'policy'`）：默认避免短操作标签在点击时误选文字；若希望操作标签文本仍可自由复制，可设置为 `'text'`。
+- Label 本身不增加 `button` 角色或额外 Tab 停靠点，且会自动忽略嵌套链接/按钮、带修饰键点击、拖拽手势与已取消的点击事件。
 
-WC 使用 `@proto.ui/adapter-web-component` 的 `setElementAssociations(target, { controlLabel: ref })`，Label 同样调用。普通 Props 只传 naming、activation 和控件值。attribute 字符串、JSON clone 后的对象、未知关联键会被拒绝。DemoSpec 用 `associations: { controlLabel: 'row-key' }` 表达纯数据意图，每个 render instance 单独物化公开引用。
+### 建立显式关联
 
-每个引用仅支持一个 live Label 和一个 live target。缺失、重复、过期时不选取 DOM 顺序上的赢家。显式配对的 siblings 可以关联，但 Web 还要求相同 Document 与 tree root；不隐式跨 document/shadow root，也不提供 DOM 查询或任意 action bus。已有非空 ariaLabel/labelledBy 保留命名所有权；与 Label 命名冲突时明确诊断，必要时显式选择 activation-only。
+通过 `@proto.ui/core` 的 `createControlLabelRef()` 为每一对标签和控件创建一个稳定引用（每个引用对应一个 Label 和一个目标控件）：
 
-## 消费与范围
+- **React / Vue / Vue 2**：向双方传入适配器属性 `instanceAssociations: { controlLabel: ref }`（不会混入普通组件 Props）。
+- **Web Components**：通过 `@proto.ui/adapter-web-component` 的 `setElementAssociations(el, { controlLabel: ref })` 分别为目标控件和 Label 绑定同一引用。
 
-入口为 `@proto.ui/prototypes-base/label`。CLI component `base-label` 可生成 WC、React、Vue、Vue 2 facade。
-
-声明的关联目标集合为 Checkbox、Switch、Radio Group Item、Input、Textarea、Button、Toggle、Toggle Group Item。仅图标命令可以通过同一关联使用独立 Label；Button 保留 click signal，Toggle 保留 activeChange，Toggle Group Item 将选择请求交给 Group。每个目标自行声明参与，并通过 Prototype 包与其 Adapter 使用。在这些目标中，私有 Compiler 只把 Button、Toggle 与 Label 降级为独立 Web 源码，其余目标（包括 Toggle Group Root 与 Item）保留明确的 unsupported 诊断。此关联不附带 Form submission、validation、多 Label 排序或原生平台/辅助技术认证。真实浏览器验收与源码、合成宿主测试分别追踪。
-
-- [关联契约](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-CONTROL-LABEL-0001.yaml)
-- [P-BASE-LABEL](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-LABEL.yaml)
-- [测试映射](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-CONTROL-LABEL-0001.yaml)
-
-Web activation 保留在原 click 调用时段，不用定时器推迟编辑器 focus。宿主监听器已观察到的 click 取消会被尊重；后续监听器不能撤回已经提交的操作。仅取消 pointerup 不等于取消 click。这是有界的自定义 Label 协议，未声称复现原生 HTML label 的全部默认动作细节；真实辅助技术行为仍待验证。
+支持配对的目标控件包括：`Checkbox`、`Switch`、`Radio Group Item`、`Input`、`Textarea`、`Button`、`Toggle` 与 `Toggle Group Item`。
 
 ## API
+
+### Root Props
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -56,8 +53,6 @@ Web activation 保留在原 click 调用时段，不用定时器推迟编辑器 
     { name: 'selection', type: "'policy' | 'auto' | 'text' | 'none'", default: 'policy' },
   ]}
 />
-
-这些属性属于 Root。
 
 ## 参考
 

@@ -1,9 +1,13 @@
 ---
-title: liquid-glass Meter
-description: A bounded numerical measurement with shared Base semantics.
+title: 'Meter'
+description: 'A Liquid Glass bounded numerical meter with optimal, suboptimal, and critical range classification.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Liquid Glass Meter displays a scalar measurement within a known range (such as disk usage or quota) and classifies readings as `optimal`, `suboptimal`, or `critical` using `low`, `high`, and `optimum` thresholds.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-meter"
@@ -12,10 +16,22 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Draft implementation. Root owns the finite range; Label names it, Track contains Indicator, and Value displays valueText or the canonical number. All styled atoms inherit the same Base protocol.
+## Installation
 
-Props: value, min (0), max (100), ariaLabel and valueText. Values clamp to ordered finite bounds; an equal min/max has zero percentage. low/high/optimum classify the measured value as optimal, suboptimal or critical; they do not change the numerical value.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `meterRoot`, `meterLabel`, `meterTrack`, `meterIndicator`, and `meterValue` from the `meter` subpath.
 
-Root and parts expose value, percentage, indeterminate and status. These are passive readouts with no keyboard stop or editing event. Updating Props updates every part. Range states use portable A11y declarations; exact native and assistive-technology mappings still need verification.
+## Usage
 
-Import meterRoot, meterLabel, meterTrack, meterIndicator and meterValue from the meter subpath after shared package registration. Source tests are incremental evidence. Full Adapter/Compiler/GPUI, native input/paint, package consumer and independent acceptance remain open; this page does not mark the Finf item complete.
+- **Parts**: `Root` manages bounds, `Label` names the meter, `Track` holds `Indicator`, and `Value` renders `valueText` or the canonical number.
+- **Clamping and thresholds**: values clamp to `[min, max]` (equal bounds yield `0%`). `low`, `high`, and `optimum` classify `status` without modifying the numeric value.
+- Meter is a passive readout with no Tab stop or editing events; updating props keeps every part synchronized.
+
+## API
+
+| Part | Prop / Exposed State | Defaults and notes |
+| --- | --- | --- |
+| Root | `value` | Measured value, clamped to `[min, max]` |
+| Root | `min`, `max` | `0`, `100` |
+| Root | `low`, `high`, `optimum` | Range thresholds classifying `status` as `optimal`, `suboptimal`, or `critical` |
+| Root | `ariaLabel`, `valueText` | Accessible label and formatted display text |
+| Root / Parts (exposed) | `value`, `percentage`, `indeterminate`, `status` | Clamped value, percentage, and derived classification |

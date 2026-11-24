@@ -1,13 +1,15 @@
 ---
-title: 'Date-Picker (WIP)'
-description: 'date-picker composition and explicit implementation boundary.'
+title: 'Date Picker'
+description: '组合 Popover 与 Calendar 的 Liquid Glass 日期选择器，支持单日期、多选与日期范围。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Date Picker 组合真实 Popover 与 Calendar 原子。选择使用 Calendar 的单日期、多选或范围模式；只有被接受的完整单日期/范围选择才请求关闭 Popover。open、选择值与 month 保留各自受控/非受控边界。内容区可使用 Calendar 的网格、行、标题与月份导航原子。
+Liquid Glass Date Picker 将 Popover 与 Calendar 组合为下拉日期选择器，支持单日期、多选与范围三种模式。`open`、选中值与当前显示月份均可独立受控。
 
-当前为功能源码 WIP。完整运行时、Compiler、原生、打包、浏览器与视觉验收仍待补齐。
+## 预览
+
+### 单日期选择
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-date-picker"
@@ -15,16 +17,39 @@ Date Picker 组合真实 Popover 与 Calendar 原子。选择使用 Calendar 的
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 范围与多选
-
-范围使用 `mode="range"` 与 `range` / `defaultRange`，多选使用 `mode="multiple"` 与 `values` / `defaultValues`。它们继承 Calendar 页描述的属性、回调、方法和日期资格规则，包括范围内部不可用日期、数量与间隔天数限制。
-
-范围的第一个端点保持弹层打开，第二个端点被接受并形成完整范围后才请求关闭一次。受控请求被拒绝或等待接受时不关闭；之后匹配的 owner 接受仅在同一次打开期间触发关闭。关闭后重开、卸载、模式改变、disabled/readOnly 改变或 owner 替换选择会终止过期的完成行为。单纯外部改值不关闭弹层，受控 `open` 仍可拒绝关闭请求。多选保持打开以继续增减日期，完成后使用 Popover 的正常关闭交互。
-
-Value 分别显示单个 ISO 民用日期、逗号分隔的有序多日期、未完成范围的 `from …` 或完整范围的 `from – to`；空值显示 `placeholder`。逐日状态与家族范围绘制直接继承 Calendar，焦点返回和关闭交互继续由 Popover 管理。
+### 范围与多选
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-date-picker-selection"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+## 用法
+
+- **模式配置**：范围模式使用 `mode="range"` 与 `range` / `defaultRange`，多选模式使用 `mode="multiple"` 与 `values` / `defaultValues`。日期边界、不可用日期、数量与间隔天数规则完全继承 [Calendar](/zh-cn/ui-libraries/liquid-glass/calendar/)。
+- **弹层关闭时机**：
+  - 单日期选择被接受后，自动请求关闭弹层。
+  - 范围模式选择第一个端点时保持打开，第二个端点被接受并形成完整范围后请求关闭一次。
+  - 多选模式持续保持打开以便连续勾选，完成后按 Popover 的常规方式（点击外部、Escape 或关闭按钮）收起。
+  - 若受控模式拒绝了选择请求，弹层会保持打开；外部单纯改值不会触发关闭。
+- **值展示格式**：`Value` 分别显示单个 `YYYY-MM-DD` 日期、逗号分隔的有序日期列表、未完成范围的 `from …` 或完整范围的 `from – to`；为空时显示 `placeholder`。焦点返回与外部关闭由 Popover 管理。
+
+## API
+
+| 属性                       | 说明                                          |
+| -------------------------- | --------------------------------------------- |
+| `open` / `defaultOpen`     | 控制弹层开关（继承 Popover）                  |
+| `mode`                     | `'single'`（默认）、`'multiple'` 或 `'range'` |
+| `value` / `defaultValue`   | 单日期选择值                                  |
+| `values` / `defaultValues` | 多选日期数组                                  |
+| `range` / `defaultRange`   | 范围选择值 `{ from?, to? }`                   |
+| `month` / `defaultMonth`   | 当前显示的日历月份（`YYYY-MM`）               |
+| `placeholder`              | 无选中日期时在 `Value` 中显示的占位文本       |
+| `disabled` / `readOnly`    | 禁用或只读控制                                |
+
+完整的日期约束、回调与网格部件请参阅 [Calendar](/zh-cn/ui-libraries/liquid-glass/calendar/)。

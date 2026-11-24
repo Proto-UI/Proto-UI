@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Select'
-description: 'Rounded, flat-by-default Select over Base Select'
+description: 'A Brutalist-styled select menu with flat or elevated triggers, keyboard navigation, and popper positioning.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,19 +9,28 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-Select keeps Base value-class presentation parts and selection semantics under a Neo-Brutalist surface language.
+Select lets users pick a single option from a positioned dropdown list, styled with 5px rounded corners, 2px black borders, and full keyboard, pointer, and touch support.
+
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-select" initialRuntime="wc" />
 </div>
 
-## Trigger appearance
+## Installation
 
-The default Trigger follows the upstream Select: a flat 5px-rounded, 2px black frame with DM Sans 500. `appearance="elevated"` is an explicit Proto UI extension for a Trigger grouped with raised commands, such as the Header Runtime and Style controls. Its hard black shadow is 4px right/down at rest; hover or press moves the Trigger 4px right/down and removes that shadow. Press does not add another offset.
+Included in `@proto.ui/prototypes-brutalist@0.2.0`. Add it via the CLI target `brutalist-select`, or import directly from `@proto.ui/prototypes-brutalist/select`.
 
-Set the prop on `brutalist-select-trigger`, not Root or Content. `appearance="flat"`, omission, or removing the prop restores the flat default. `size="sm" | "default"`, the paired fill/ink, focus ring, keyboard selection and disabled behavior are unchanged. Content stays flat in either appearance. Page CSS must not add a replacement shadow.
+## Usage
 
-## Pointer, keyboard and touch ownership
+### Trigger Appearance
+
+The default `Trigger` renders flat with a 5px radius, 2px black border, and DM Sans 500 typography. When placing a Select alongside raised buttons (such as header Runtime and Style controls), set `appearance="elevated"` on `brutalist-select-trigger`:
+
+- At rest, the trigger displays a 4px right/down hard black shadow; on hover or press, it shifts 4px right/down and flattens without adding a second press offset.
+- Set `appearance="flat"` or omit the prop to restore the flat default. `size`, color contrast, focus ring, keyboard selection, and disabled behavior stay identical, and `Content` stays flat in both appearances.
+
+### Pointer, Keyboard & Touch Interaction
 
 <PrototypePreviewer
   demoId="demo-brutalist-select-input"
@@ -30,11 +39,12 @@ Set the prop on `brutalist-select-trigger`, not Root or Content. `appearance="fl
   codePanel={false}
 />
 
-This scrollable public recipe separates focus from the committed selection. Known mouse movement without held buttons may navigate; touch, pen and dragging do not borrow that hover path. The controlled-refusal switch leaves proposals visible while the owner keeps the current value. The popup uses the public popper placement; the browser owns touch scrolling and capture.
+- The scrollable list distinguishes active focus from the committed value: mouse movement without held buttons updates highlight, while touch, pen, and drag interactions rely on native browser scrolling and capture.
+- Pass `open` or `value` on `Root` to control those states independently; declining a selection proposal keeps the committed value intact. The popup uses popper placement with collision avoidance.
 
 ## API
 
-Select is workspace source. For this workspace version, the CLI target is `brutalist-select`. Use matching CLI and package versions; check the chosen release's availability before installing. Passing `open` or `value` selects controlled mode for that fact.
+The first five props (`defaultOpen`, `defaultValue`, `disabled`, `readOnly`, `closeOnSelect`) belong to `Root` (pass `open` or `value` for controlled mode). `size` and `appearance` belong to `Trigger`:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -49,4 +59,10 @@ Select is workspace source. For this workspace version, the CLI target is `bruta
   ]}
 />
 
-The first five props belong to Root. `size` and `appearance` belong to Trigger, which also defaults `accessibleLabel` to `''`. Value defaults `placeholder` to `''`. Content accepts the Transition props and defaults `position` to `popper`, `side` to `bottom`, `align` to `center`, `sideOffset` to `4`, `alignOffset` to `0`, `avoidCollisions` to `true` and `collisionPadding` to `10`. Item defaults `disabled` to `false` and `value` and `textValue` to `''`; `closeOnSelect` has no default and falls back to the Root policy. Group, Label, Surface, ItemText, Viewport and Separator have no props.
+Other part props and defaults:
+
+- **Trigger**: Also defaults `accessibleLabel` to `''`.
+- **Value**: `placeholder` defaults to `''`.
+- **Content**: Accepts Transition props; defaults `position` to `'popper'`, `side` to `'bottom'`, `align` to `'center'`, `sideOffset` to `4`, `alignOffset` to `0`, `avoidCollisions` to `true`, and `collisionPadding` to `10`.
+- **Item**: Defaults `disabled` to `false`, `value` and `textValue` to `''`; `closeOnSelect` falls back to `Root` when omitted.
+- **Group**, **Label**, **Surface**, **ItemText**, **Viewport**, **Separator**: No props.

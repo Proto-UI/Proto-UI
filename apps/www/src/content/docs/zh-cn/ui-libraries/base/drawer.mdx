@@ -1,13 +1,15 @@
 ---
 title: 'Drawer'
-description: '可从四个边缘显示的模态面板。'
+description: '支持从上下左右四个边缘滑出的模态抽屉组件，提供尺寸约束、拖动关闭与显式吸附点。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-可从四个边缘显示的模态面板。
+Base Drawer 是贴附屏幕边缘展示的模态抽屉，支持 `top`、`bottom`、`left`、`right` 四个方向、内容自适应高度或比例宽度、拖动关闭以及多档位吸附调整。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-drawer"
@@ -16,21 +18,7 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-top/bottom Content 默认按内容高度显示，最大高度为可用高度，始终受安全可用区域约束。Content.minExtent/maxExtent 接受中立长度：unit 为 logical、root-text、available 或 available-minus-root-text，value 为非负有限数字。最小高度超过安全上限时以上限优先。left/right 使用 fraction 宽度，缺省上限为 20 个 root-text 单位。显式 maxExtent 替换该默认；宽度、边缘定位与拖动预览由同一受限尺寸计算。例如 `maxExtent={{ unit: 'logical', value: 480 }}` 在空间允许且 snap 为 1 时得到 480 逻辑单位宽度。available 单位按当前安全宽度取比例；fraction 模式忽略合法 minimum。使用 maxExtent 调整面板尺寸，不再用独立 CSS width。
-
-本项目将 Content 组合为 overflow-y-auto 滚动区域；这是项目的组合选择，不等同于固定 Shadcn/Neo 参考 wrapper 的 overflow-hidden Content 加显式滚动 body。长内容示例的 Close 仍在同一滚动区域内。
-
-Root 是逻辑 owner，仍渲染包装节点。直接放入应用 grid 时，React Root 可设置 `hostStyle={{ display: 'contents' }}`，Web Component Root 可设置 `display: contents`，避免空的 grid 行。中立 Root 没有交互 role；Content、focus scope 与命名继续拥有各自语义节点。应用 header/main 应保留在 modal Content 外。
-
-Root 支持受控 open 或非受控 defaultOpen。禁用命令不激活。调用方拒绝关闭请求时，拖动预览恢复到实际受控状态。
-
-top/bottom 的 snapPoints 缺省、null 或空数组时按内容高度显示；left/right 保留 fraction 与缺省点 one。非空有效数组启用显式吸附，点为大于 0 且不超过 1 的比例，并排序去重。单独 snapPoint 不开启吸附。显式比例的分母为完整安全上限，不再隐含乘以 85%。defaultSnapPoint 为本地状态；snapPoint 与 snapPointChange 为受控状态。任意方向的非法 points 或长度记录会被拒绝，不转成满高度。
-
-内容自适应模式的 Handle 是 aria-hidden 的专用指针把手，不提供键盘 resize，也不会因 Enter/Space 变成 Close。显式 snap 保留有名称的 separator、方向键、Home/End 和范围值。Content.dragDismissible=false 禁止拖动关闭；独立 Close、Escape 和外部关闭仍遵循既有协议。接触中断和受控请求拒绝会恢复已接受的呈现。
-
-运行中非法尺寸更新令 extentValid=false，取消 Handle 输入并保留最后有效意图，宿主仍按当前安全约束重算。初始非法输入会在呈现前被拒绝：Root 保留逻辑 open 值，Mask 等待唯一有效的 Content 声明。这些示例使用静态验证的合法输入；本草稿不宣称任意输入安全，也不代表 native、编译器、打包消费或完整 Finf 验收完成。
-
-### 长内容
+### 长内容滚动
 
 <PrototypePreviewer
   demoId="demo-base-drawer-scroll"
@@ -41,8 +29,6 @@ top/bottom 的 snapPoints 缺省、null 或空数组时按内容高度显示；l
 
 ### 显式半开/全开吸附
 
-此例保留显式 resize 交互并播报已提交的变化。
-
 <PrototypePreviewer
   demoId="demo-base-drawer-snap"
   initialRuntime="wc"
@@ -50,20 +36,48 @@ top/bottom 的 snapPoints 缺省、null 或空数组时按内容高度显示；l
   codePanel={false}
 />
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+## 用法
+
+### 尺寸与滚动布局
+
+- `top` / `bottom` 方向的 `Content` 默认按内容自适应高度，并受当前安全可用高度限制；`left` / `right` 方向默认采用比例宽度（缺省上限为 20 个 `root-text` 单位）。
+- 通过 `Content` 的 `minExtent` 与 `maxExtent` 设置尺寸（代替直接写 CSS 宽度/高度），支持的单位包括 `'logical'`、`'root-text'`、`'available'` 与 `'available-minus-root-text'`。例如 `maxExtent={{ unit: 'logical', value: 480 }}` 在空间允许且吸附比例为 `1` 时呈现 480 逻辑像素宽度。
+- `Content` 默认作为纵向滚动容器（`overflow-y-auto`），在长内容场景下可直接滚动展示全部内容与底部关闭操作。
+- 将 `Root` 直接放入 CSS Grid 容器时，可在 React 上设置 `hostStyle={{ display: 'contents' }}`（或在 Web Component 上设置 `display: contents`），避免额外占用网格行。
+
+### 拖动关闭与显式吸附点
+
+- `top` / `bottom` 未传 `snapPoints`（或传空数组）时保持内容自适应高度；传入由 `(0, 1]` 组成的非空比例数组即可启用多档位吸附（自动排序去重）。
+- 吸附位置支持非受控（`defaultSnapPoint`）和受控（`snapPoint` + `snapPointChange`）模式；在显式吸附模式下，`Handle` 提供具名 `separator` 语义及方向键、`Home` / `End` 调整；在内容自适应模式下，`Handle` 仅作为指针拖动手柄。
+- 设置 `Content` 的 `dragDismissible={false}` 可禁用拖动关闭，同时保留 `Close`、`Escape` 和外部点击关闭。
+- 传入 `open` 进入受控模式：当调用方拒绝关闭请求或拖动中断时，面板会自动恢复到当前已提交状态。
+
 ## API
 
-Drawer 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+### Root Props
+
+传入 `open` 进入受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
   ]}
 />
 
-这些属性属于 Root。Mask 接受 `passthrough`（`false`）以及 Transition 属性。Content 的 `side` 默认 `bottom`，同样接受 Transition 属性。Handle 的 `disabled` 默认 `false`，`a11yLabel` 默认 `Resize drawer`。Trigger、Title、Description、Header、Footer、Close 与 AcceptedSide 没有属性。
+### 其他组件属性
+
+- **Mask**：`passthrough` 默认为 `false`，同时支持 Transition 属性。
+- **Content**：`side` 默认为 `'bottom'`，同时支持 `minExtent`、`maxExtent`、`snapPoints`、`snapPoint`、`defaultSnapPoint`、`dragDismissible` 及 Transition 属性。
+- **Handle**：`disabled` 默认为 `false`，`a11yLabel` 默认为 `'Resize drawer'`。
+- **Trigger、Title、Description、Header、Footer、Close、AcceptedSide**：无额外属性。
 
 ## 参考
 

@@ -1,13 +1,15 @@
 ---
 title: 'Toolbar'
-description: 'Keyboard-roving commands with an accessible toolbar name and separator.'
+description: 'A toolbar container with roving keyboard focus, accessible naming, and cross-axis separators.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Keyboard-roving commands with an accessible toolbar name and separator.
+Groups related action controls into a single keyboard-roving toolbar with an accessible name and cross-axis separators.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-toolbar"
@@ -16,15 +18,20 @@ Keyboard-roving commands with an accessible toolbar name and separator.
   codePanel={false}
 />
 
-Root owns disabled, orientation, loop and a11yLabel. Button emits action with its value on enabled activation. Only one enabled command participates in Tab; arrows move within the toolbar. Separator follows the cross axis.
+## Installation
 
-Parts: Root, Button, Separator.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+## Usage
+
+Compose `Root`, `Button`, and `Separator`:
+
+- **Focus and navigation**: `Root` manages `disabled`, `orientation`, `loop`, and `a11yLabel`. Only one enabled command participates in normal `Tab` order, while arrow keys move focus across buttons inside the toolbar.
+- **Actions and separators**: Activating an enabled `Button` emits an `action` event carrying its `value`; `Separator` automatically aligns along the cross axis.
 
 ## API
 
-Toolbar is workspace source. There is no public `proto-ui add` target. Separator has no props.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -36,7 +43,10 @@ Toolbar is workspace source. There is no public `proto-ui add` target. Separator
   ]}
 />
 
-These props belong to Root. Button defaults `disabled` to `false` and `value` to `''`.
+### Part Props
+
+- **Button**: `disabled` (default `false`), `value` (default `''`).
+- **Separator**: No additional props.
 
 ## References
 

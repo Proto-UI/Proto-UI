@@ -1,14 +1,15 @@
 ---
 title: 'Select'
-desp: 'Select base prototype'
-description: 'Select base prototype'
+description: 'An unstyled single-selection dropdown following the APG select-only combobox pattern.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-`base-select` is a cataloged select-only compound prototype and the first Base family to formally define a value-class presentation part.
+An unstyled single-selection dropdown following the APG select-only combobox pattern: `Trigger` exposes `combobox`, `Content` exposes `listbox`, `Item` exposes `option`, and `Value` renders the selected label or placeholder automatically.
+
+## Preview
 
 <div>
   <PrototypePreviewer
@@ -19,84 +20,41 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   />
 </div>
 
-It follows the APG select-only combobox pattern: Trigger projects `combobox`, Content projects `listbox`, and Item projects `option`. The committed selection is persistent state; the active item while open is transient navigation state.
+## Installation
 
-## Current-source installation and Usage
+Currently available from workspace source; not yet included in the 0.2.0 stable release (workspace CLI target: `base-select`; see [Quick Start](/en/start-here/quick-start/) for published versions).
 
-The Code panels use the current workspace's public package exports. Install `@proto.ui/cli`, `@proto.ui/prototypes-base`, `@proto.ui/prototypes-lucide` and the selected Adapter from the same reviewed source revision. For a source checkout, the repository's [pack-only flow](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) and [clean consumer installation](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs) supply the local packages and their declared dependency closure. This page does not assert that the workspace version is published to npm; the [stable Quick Start](/en/start-here/quick-start/) describes the published-version route.
+The preview code panels use `@proto.ui/cli`, `@proto.ui/prototypes-base`, `@proto.ui/prototypes-lucide`, and the matching host Adapter package (Vue 2 uses Vue `>=2.6.0 <2.7`):
 
-Each panel is a complete file for an existing application with a module bundler. React and Vue retain the application's existing mount entry. Vue 2 uses Vue `>=2.6.0 <2.7`.
-
-| Host           | Adapter package                   | File to copy  |
+| Host           | Adapter package                   | Example file  |
 | -------------- | --------------------------------- | ------------- |
 | Web Components | `@proto.ui/adapter-web-component` | `index.html`  |
 | React          | `@proto.ui/adapter-react`         | `src/App.tsx` |
 | Vue            | `@proto.ui/adapter-vue`           | `src/App.vue` |
 | Vue 2          | `@proto.ui/adapter-vue2`          | `src/App.vue` |
 
-For the first Proto UI integration, run the installed matching CLI from the application directory:
+For first-time setup, run the matching CLI to generate `src/styles/proto-ui-style.css` (keep a single import if your app entry already loads it):
 
 ```sh
 node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --prototypes shadcn
 ```
 
-Keep the generated `src/styles/proto-ui-style.css`: the examples import it for Proto UI's structural rules. Import it once if the application entry already loads it. Each example also contains its own small application stylesheet for Base Select's layout and paint; the initialization preset does not change the adapted Base prototypes.
+In each host, Web Components supply `accessibleLabel`, `placeholder`, and item values via `setElementProps` before connecting elements; React passes `createPortal` from `react-dom` to `createReactAdapter` for `Content` portalling; Vue and Vue 2 register each component part. Set `accessibleLabel` on `Trigger` to keep the accessible name independent of the selected option.
 
-Copy the entire panel for the chosen host. WC registers its own `app-base-select-*` elements and supplies `accessibleLabel`, `placeholder`, icon size and item values through `setElementProps` before connecting them. React passes `createPortal` from `react-dom` into `createReactAdapter` so React owns Content's portal. Both Vue examples register all of the components they use. Trigger's `accessibleLabel` keeps the control name independent of the selected value.
+## Usage
 
-## Family Parts
+### Parts
 
-- `select-root`: owns controlled/uncontrolled `open`, `value`, and `textValue`, and arbitrates change requests
-- `select-trigger`: an independent command surface that projects combobox ARIA and handles keyboard/pointer opening
-- `select-value`: renders `displayValue` or placeholder through explicit `run.update()` without owning input behavior
-- `select-content`: composes `asOverlay`, `asTransition`, `asFocusRoving`, and anchor positioning
-- `select-item`: projects an option, separates transient `active` from persistent `selected`, and submits selection requests
+- `select-root`: Manages controlled or uncontrolled `open`, `value`, and `textValue` and arbitrates change requests.
+- `select-trigger`: Command surface providing combobox ARIA and pointer/keyboard toggle handling.
+- `select-value`: Renders `displayValue` or `placeholder` automatically via explicit updates without requiring manual text rendering.
+- `select-content`: Composes overlay, transition, roving focus, and anchor positioning.
+- `select-item`: Renders an option that keeps transient navigation focus (`active`) distinct from committed selection (`selected`).
+- **Optional grouping and layout parts**: `select-surface`, `select-viewport`, and `select-item-text` provide explicit alignment structure; `select-group` and `select-label` scope accessible group labels (missing or duplicate labels are ignored, and nested selects stay isolated); `select-separator` renders a decorative, accessibility-hidden divider (return an empty renderer when composing `asSelectSeparator`). These also export `asSelectGroup`, `asSelectLabel`, and `asSelectSeparator`.
 
-- `select-surface`, `select-viewport`, and `select-item-text`: explicit optional alignment structure
-- `select-group`: passive container with its own accessible naming scope
-- `select-label`: slot-preserving name for its nearest Group; it is not a control label or activation target
-- `select-separator`: hidden, decorative, contentless separation
+### Keyboard, pointer, and touch interaction
 
-Group/Label/Separator also expose `asSelectGroup`, `asSelectLabel`, and `asSelectSeparator`. Hooks inherit semantic declarations; a caller using `asSelectSeparator` must return an empty renderer itself. Naming fails closed for missing or duplicate labels and remains isolated across nested Select roots. These parts do not own selection, collection or focus. Native accessibility acceptance is still pending; the GPUI peer currently omits Separator hidden-tree transport.
-
-## Why It Matters
-
-This family is not only an addition to the base library. It is also a probe for Proto UI's current value-component path:
-
-- selected value text is defined by the prototype family itself
-- the host app does not have to render that text manually
-- value presentation can be refreshed through explicit update-driven re-render
-
-That makes `select-value` a concrete `render-consumed-value` sample instead of a purely exposed-state sample.
-
-## Current v0 Boundary
-
-`base-select` currently includes:
-
-- single selection
-- pointer and select-only keyboard interaction, including arrows, Home/End, and typeahead
-- Escape, Tab, outside-press dismissal, and appropriate focus restoration
-- selected-item focus entry, with boundary fallback
-- combobox/listbox/option ARIA relationships and selected state
-- controlled values that emit requests without creating temporary success state
-- a protocol-owned value presentation part
-
-It does not yet include:
-
-- form semantics
-- native `<select>` parity
-- editable combobox/search behavior
-- scroll buttons and `ItemIndicator`
-- form submission and hidden inputs
-- multi-select
-
-## References
-
-- Contract: [select.v0.md](https://github.com/Proto-UI/Proto-UI/blob/main/internal/contracts/prototype-base/select.v0.md)
-- Source: [packages/prototypes/base/src/select](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/select)
-- Test: [select.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/select.test.ts)
-
-## Pointer, keyboard and touch ownership
+Opening the listbox focuses the currently selected item (or the boundary item when unselected) and supports arrow keys, `Home`/`End`, and typeahead. `Escape`, `Tab`, and outside press dismiss the popup and restore focus as appropriate.
 
 <PrototypePreviewer
   demoId="demo-base-select-input"
@@ -105,11 +63,11 @@ It does not yet include:
   codePanel={false}
 />
 
-This scrollable public recipe separates focus from the committed selection. Known mouse movement without held buttons may navigate; touch, pen and dragging do not borrow that hover path. The controlled-refusal switch leaves proposals visible while the owner keeps the current value. The popup uses the public popper placement; the browser owns touch scrolling and capture.
+In scrollable lists, mouse movement without held buttons moves transient highlight focus while touch, pen, and drag gestures keep native browser scrolling. Pass `open` or `value` for controlled mode so interactions emit change requests while external state remains authoritative.
 
 ## API
 
-Select is workspace source. For this workspace version, the CLI target is `base-select`. Use matching CLI and package versions; check the chosen release's availability before installing. Passing `open` or `value` selects controlled mode for that fact.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -122,7 +80,15 @@ Select is workspace source. For this workspace version, the CLI target is `base-
   ]}
 />
 
-These props belong to Root. Trigger defaults `accessibleLabel` to `''`. Value defaults `placeholder` to `''`. Content accepts the Transition props and defaults `position` to `popper`, `side` to `bottom`, `align` to `center`, `sideOffset` to `4`, `alignOffset` to `0`, `avoidCollisions` to `true` and `collisionPadding` to `10`. Item defaults `disabled` to `false` and `value` and `textValue` to `''`; `closeOnSelect` has no default and falls back to the Root policy. Group, Label, Surface, ItemText, Viewport and Separator have no props.
+Pass `open` or `value` to control popup visibility or the selected value.
+
+### Part Props
+
+- **Trigger**: `accessibleLabel` (default `''`).
+- **Value**: `placeholder` (default `''`).
+- **Content**: Accepts `Transition` props plus `position` (default `'popper'`), `side` (default `'bottom'`), `align` (default `'center'`), `sideOffset` (default `4`), `alignOffset` (default `0`), `avoidCollisions` (default `true`), and `collisionPadding` (default `10`).
+- **Item**: `disabled` (default `false`), `value` (default `''`), `textValue` (default `''`), `closeOnSelect` (inherits `Root` when omitted).
+- **Group**, **Label**, **Surface**, **ItemText**, **Viewport**, **Separator**: No additional props.
 
 ## References
 

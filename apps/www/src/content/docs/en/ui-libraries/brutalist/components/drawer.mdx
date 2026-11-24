@@ -1,12 +1,14 @@
 ---
 title: 'Drawer'
-description: 'An edge-attached modal panel with four placement choices.'
+description: 'An edge-attached modal drawer supporting four sides, content-fit sizing, drag dismissal, and snap points.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-An edge-attached modal panel with four placement choices.
+Brutalist Drawer slides a modal panel from any of the four screen edges with content-fit or fractional sizing, scrollable long content, drag dismissal, and optional snap points.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-brutalist-drawer"
@@ -15,19 +17,17 @@ An edge-attached modal panel with four placement choices.
   codePanel={false}
 />
 
-Top/bottom Content fits its content by default. Its maximum is the available height minus 6 root-text units, always bounded by the safe available region. Content.minExtent and maxExtent accept neutral lengths with unit logical, root-text, available or available-minus-root-text and a nonnegative finite value. A minimum above the safe cap is clamped. Left/right use fractional width, with a default maximum of 20 root-text units. An explicit maxExtent replaces that default; width, edge attachment and drag preview all use the same capped extent. For example, `maxExtent={{ unit: 'logical', value: 480 }}` gives a full-snap width of 480 logical units when space permits. The available unit is a fraction of the current safe width; valid minimum is ignored in fractional mode. Use maxExtent to size the sheet, rather than a separate CSS width.
+## Installation
 
-The project composes Content as an overflow-y-auto scrollport. This differs from the fixed Shadcn/Neo reference wrappers' overflow-hidden Content with an explicitly authored scrolling body. The long example keeps Close inside the same scrollport.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Root is the logical owner and still renders a wrapper. When placing it directly inside an application grid, use `hostStyle={{ display: 'contents' }}` on the React Root (or `display: contents` on the Web Component Root) to avoid an empty grid row. The neutral Root has no interactive role; Content, focus scope and naming retain their own semantic nodes. Keep application header/main regions outside the modal Content.
+## Usage
 
-Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Controlled close requests can be refused; drag preview then returns to the accepted owner state.
+### Sizing, placement, and scrolling
 
-For top/bottom, omitted, null or empty snapPoints selects content-fit mode. Left/right keep fractional mode with a default point of one. A nonempty valid array selects explicit snaps: positive fractions up to one, sorted and deduplicated. snapPoint alone does not enable snapping. Explicit snap fractions use the full capped extent, not an implicit 85% multiplier. defaultSnapPoint is local; snapPoint with snapPointChange is owner-controlled. Invalid point arrays or length records on any edge are rejected, not converted to full height.
-
-In content-fit mode Handle is a pointer-only, aria-hidden drag affordance, without keyboard resizing or an Enter/Space close action. Explicit snaps retain the named separator, arrows, Home/End and range values. Content.dragDismissible=false prevents drag dismissal; independent Close, Escape and outside dismissal retain their existing protocol. Interrupted gestures and rejected controlled requests restore the accepted presentation.
-
-Runtime invalid extent updates expose extentValid=false, cancel Handle input and retain the last valid intent while current safety constraints still apply. Initial malformed input is rejected before presentation: Root keeps its logical open value, while Mask waits for one valid Content declaration. These examples use statically validated legal inputs. This draft does not claim arbitrary-input safety or native, compiler, packed-consumer or full Finf acceptance.
+- **Sizing**: `top` and `bottom` drawers size to fit their content by default (capped at the available height minus 6 root-text units), while `left` and `right` drawers use fractional width (default cap of 20 root-text units). Customize limits with `minExtent` and `maxExtent` using neutral units (`'logical'`, `'root-text'`, `'available'`, or `'available-minus-root-text'`), such as `maxExtent={{ unit: 'logical', value: 480 }}`, instead of overriding CSS `width`.
+- **Scrolling and layout**: `Content` acts as an `overflow-y-auto` scroll container. When placing `Root` directly inside a CSS Grid, pass `hostStyle={{ display: 'contents' }}` in React (or `display: contents` on Web Components) to avoid an extra empty grid track.
+- **Drag dismissal**: Set `dragDismissible={false}` on `Content` to disable drag-to-close while keeping `Close`, `Escape`, and outside dismissal active.
 
 ### Long content
 
@@ -38,9 +38,7 @@ Runtime invalid extent updates expose extentValid=false, cancel Handle input and
   codePanel={false}
 />
 
-### Explicit half/full snaps
-
-This example retains the explicit resizing interaction and announces committed changes.
+### Explicit snap points
 
 <PrototypePreviewer
   demoId="demo-brutalist-drawer-snap"
@@ -49,9 +47,12 @@ This example retains the explicit resizing interaction and announces committed c
   codePanel={false}
 />
 
+- Provide a non-empty `snapPoints` array of fractions in `(0, 1]` relative to the safe cap to enable multi-stop snapping, paired with `defaultSnapPoint` (uncontrolled) or `snapPoint` / `snapPointChange` (controlled).
+- In content-fit mode, `Handle` acts as a pointer drag affordance; with explicit snap points enabled, `Handle` also exposes a named `separator` with arrow-key and `Home` / `End` resizing.
+
 ## API
 
-Drawer is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -62,4 +63,11 @@ Drawer is workspace source. There is no public `proto-ui add` target. Passing `o
   ]}
 />
 
-These props belong to Root. Mask accepts `passthrough` (`false`) plus the Transition props. Content defaults `side` to `bottom` and also accepts the Transition props. Handle defaults `disabled` to `false` and `a11yLabel` to `Resize drawer`. Trigger, Title, Description, Header, Footer, Close and AcceptedSide have no props.
+Pass `open: boolean` to enable controlled mode.
+
+### Other parts
+
+- **Mask**: `passthrough?: boolean` (default `false`) and Transition props
+- **Content**: `side` (default `'bottom'`), `minExtent`, `maxExtent`, `snapPoints`, `snapPoint`, `defaultSnapPoint`, `dragDismissible`, and Transition props
+- **Handle**: `disabled?: boolean` (default `false`), `a11yLabel?: string` (default `'Resize drawer'`)
+- **Trigger / Title / Description / Header / Footer / Close / AcceptedSide**: No props

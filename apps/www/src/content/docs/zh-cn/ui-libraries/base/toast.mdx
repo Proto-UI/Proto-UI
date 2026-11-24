@@ -1,13 +1,15 @@
 ---
 title: 'Toast'
-description: '可暂停、关闭并发出明确操作意图的限时实时通知。'
+description: '支持限时自动关闭、悬停或聚焦暂停以及操作意图的实时通知组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-可暂停、关闭并发出明确操作意图的限时实时通知。
+用于展示临时实时反馈的通知组件，支持倒计时自动关闭、悬停与焦点暂停、快捷聚焦键及显式操作按钮。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-toast"
@@ -16,15 +18,21 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root 默认显示 5000ms，duration=0 持续显示。悬停以及 Toast Action/Close 焦点会暂停剩余时长。受控 open 只发出一次超时关闭请求，等待调用方更新。Close、有焦点时的 Escape、Action 请求关闭；实际副作用归应用处理。Viewport 提供 F8 聚焦快捷键；不包含全局队列或系统通知传输。
+## 安装
 
-组成: Root, Viewport, Title, Description, Action, Close.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码；native/GPUI、编译器、打包消费、截图及完整独立验收仍待完成。
+## 用法
+
+由 `Root`、`Viewport`、`Title`、`Description`、`Action` 和 `Close` 组成：
+
+- **计时与暂停**：`Root` 默认显示 `5000ms`（设为 `duration={0}` 则保持常驻不自动关闭）。鼠标悬停在通知上，或焦点移入 `Action`/`Close` 时会自动暂停剩余计时，离开后继续。
+- **关闭与操作**：触发 `Close`、在通知内聚焦时按 `Escape` 或点击 `Action` 都会请求关闭通知；具体业务操作由应用监听并执行。传入 `open` 进入受控模式时，超时仅发出一次关闭请求，等待外部更新 `open`。
+- **快捷键与实时区域**：`Viewport` 提供 `F8`（可通过 `hotkey` 自定义）快捷聚焦通知区域，并通过 `politeness`（`'polite'` / `'assertive'`）控制辅助技术播报级别。
 
 ## API
 
-Toast 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -40,7 +48,14 @@ Toast 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open`
   ]}
 />
 
-这些属性属于 Root。Viewport 的 `a11yLabel` 默认 `Notifications`，`hotkey` 默认 `F8`。Title 与 Description 没有属性。Action 的 `disabled` 默认 `false`，`a11yLabel` 没有默认值。Close 的 `disabled` 默认 `false`。
+传入 `open` 可受控管理通知的显示状态。
+
+### 其他部件属性
+
+- **Viewport**：`a11yLabel`（默认 `'Notifications'`）、`hotkey`（默认 `'F8'`）。
+- **Action**：`disabled`（默认 `false`）、`a11yLabel`（可选）。
+- **Close**：`disabled`（默认 `false`）。
+- **Title**、**Description**：无额外属性。
 
 ## 参考
 

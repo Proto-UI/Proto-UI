@@ -1,79 +1,75 @@
 ---
 title: 'Building a Styled Library on Top of Base'
-description: 'Understand Base projections, styled-only identities, and design-language deltas.'
+description: 'Understand Base inheritance, styled-only Prototypes, style Rules, and negative-patch boundaries.'
 ---
 
-This page is a conceptual introduction. For a complete contribution, follow [Projecting Base into a Design Language](/en/build/prototypes/projecting-base-into-a-design-language/) for P/T, provenance, tests, exports, CLI, demos, and validation.
+This page introduces the architecture behind styled Prototype libraries in Proto UI. When you are ready to ship a full styled component PR, pair it with the step-by-step workflow in [Projecting Base into a Design Language](/en/build/prototypes/projecting-base-into-a-design-language/).
 
-## Decide between projection and styled-only first
+## Choose between Base inheritance and styled-only
 
-### Base projection
+### Inheriting from Base
 
-When Base already owns state, events, focus, accessibility, context, or positioning, a derived P connects to Base through `inherits.prototypes` and consumes the corresponding asHook in implementation. The derived layer adds only cataloged design-language deltas and never creates a second semantic owner.
+When a component relies on Base for state, events, focus, accessibility, Context, or positioning, link its spec to Base via `inherits.prototypes` and call the corresponding Base `asHook` in code. The styled layer adds only design-language presentation and cataloged deltas while Base remains the single source of interaction state.
 
 ### Styled-only
 
-When a subject owns only design-language props, visual rules, a content model, or visual anatomy—and has no independent Base information path—it can be a formal styled-only P. Do not create an empty Base identity merely to obtain an inheritance entry.
+When a component consists solely of design-language props, visual rules, content layout, or visual anatomy—with no independent cross-host interaction protocol—define it directly as a `styled-only` Prototype. There is no need to create an empty Base entity just to have something to inherit from.
 
-Base admission requires an independent, cross-host, testable input-fact-to-observable-output path. A component directory or a familiar name from a popular design system is not evidence.
+## Example: Shadcn Button
 
-## The current shape of Shadcn Button
+`P-SHADCN-BUTTON` illustrates a compact styled Prototype:
 
-`P-SHADCN-BUTTON` currently declares one direct Prototype:
+- links to `P-BASE-BUTTON` through `inherits.prototypes`;
+- calls `asButton()` inside [button.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/shadcn/src/button/button.proto.ts) to reuse Base button behavior;
+- adds six `variant` values, four `size` values, and visual tokens;
+- maps inherited `hovered`, `focusVisible`, `pressed`, and `disabled` states plus `colorScheme` metadata to style `Rule`s;
+- documents that upstream `asChild` is not supported on this surface; and
+- exposes only a direct Prototype entry without an extra `asHook`.
 
-- `inherits.prototypes` points to `P-BASE-BUTTON`;
-- [button.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/shadcn/src/button/button.proto.ts) calls `asButton()`;
-- it adds six `variant` values, four `size` values, and visual tokens;
-- visual rules derive from inherited `hovered`, `focusVisible`, `pressed`, and `disabled` facts plus `colorScheme` meta;
-- upstream `asChild` is explicitly unavailable, while other parity differences remain in a compatibility open question; and
-- the Shadcn layer does not add another authored asHook.
+> Note: `P-BASE-BUTTON` and `P-SHADCN-BUTTON` are currently `draft` entities; check the spec files for their latest definitions.
 
-The former guide listed `invalid` and `expanded` as current Shadcn Button rule inputs. The current implementation and passing P criteria do not provide that guarantee.
+## What belongs in a styled `P-*` entity
 
-`P-BASE-BUTTON` and `P-SHADCN-BUTTON` are both currently `draft`. npm publication at 0.2.0 does not automatically make either entity active.
+Keep a derived `P-*` spec focused on its delta:
 
-## What a derived P should contain
+- upstream repository, path, revision, and license attribution (when adapting an existing design system);
+- `inherits.prototypes` link or `styled-only` classification;
+- added variants, sizes, tokens, visual anatomy, and compatibility scope;
+- explicit setup-time negative patches and their replacement semantics;
+- explicitly unsupported upstream APIs; and
+- linked `T-*` test cases and real source file paths.
 
-A reviewable design-language P focuses on its delta:
+Avoid duplicating Base criteria in the derived spec, and document only compatibility behaviors that are actually implemented.
 
-- exact upstream repository, path, revision, and provenance;
-- `inherits.prototypes` or styled-only classification;
-- variants, sizes, tokens, visual anatomy, and compatibility boundaries;
-- any explicit setup-time negative patch and replacement semantics;
-- unsupported upstream APIs; and
-- substantive `T-*` evidence and real source paths.
+## Reusing Base in implementation
 
-Do not copy every Base criterion or promise upstream parity that has not been implemented.
-
-## How implementation should reuse Base
-
-Implementation normally calls the owning Base asHook first, then adds:
+A typical styled Prototype calls its Base `asHook` first, then layers on:
 
 - design-language props;
 - `feedback.style` tokens;
-- rules based on Base state or meta;
-- necessary cataloged visual anatomy; and
-- derived types and public entries.
+- `Rule`s driven by Base state or metadata;
+- cataloged visual anatomy; and
+- library-specific types and public package exports.
 
-Pause and return to the issue if the implementation begins to own Base value, event requests, focus, accessibility, dismissal, or positioning again. The style layer must not become a second semantic truth.
+Keep value, event requests, focus, accessibility, dismissal, and positioning inside Base. If the styled layer starts tracking duplicate interaction state, revisit the spec boundary so ownership stays in one place.
 
 ## Negative patches and compatibility boundaries
 
-A derived Prototype may abandon or replace an inherited guarantee during setup, but its own P criterion must identify:
+A styled Prototype can opt out of or replace an inherited Base capability during `setup`. Document each negative patch in the derived `P-*` criteria:
 
-- the Base capability being abandoned;
-- the replacement semantics;
-- the public compatibility impact; and
-- absence assertions that prevent the capability from returning silently.
+- which Base capability is removed or replaced;
+- the replacement behavior;
+- any compatibility impact for consumers; and
+- tests confirming the opted-out capability remains absent.
 
-A runtime flag must not masquerade as a setup-time negative patch.
+Declare capability overrides statically during `setup` rather than toggling them with runtime flags.
 
-## Host and Adapter claims
+## Preview scope
 
-The current Web Component, React, and Vue previews provide cross-Adapter evidence for one Web host profile. A design-language page may compare those Web projections, but it must not infer non-Web host conformance or claim identical APIs across every host.
+Website previews compare Web Component, React, and Vue output under the Web host profile. For non-Web hosts, check the target host documentation for supported capabilities.
 
-## Next
+## Next steps
 
-- For the complete delivery workflow, read [Projecting Base into a Design Language](/en/build/prototypes/projecting-base-into-a-design-language/)
-- To choose sources and evidence, read [How to Read Reference Implementations](/en/build/prototypes/reference-patterns/)
-- Before opening a pull request, use the [Prototype Author Checklist](/en/build/prototypes/checklist/)
+- Full end-to-end delivery workflow: [Projecting Base into a Design Language](/en/build/prototypes/projecting-base-into-a-design-language/)
+- Navigate specs, source, and tests: [How to Read Reference Implementations](/en/build/prototypes/reference-patterns/)
+- Review before opening a PR: [Prototype Author Checklist](/en/build/prototypes/checklist/)

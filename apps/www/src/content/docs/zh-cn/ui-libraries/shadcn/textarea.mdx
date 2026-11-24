@@ -1,6 +1,6 @@
 ---
 title: 'Textarea'
-description: '从 Base Textarea 协议投影出的 Shadcn Textarea。'
+description: '支持受控状态、IME 组合事件与表单重置的多行文本输入框组件。'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -8,15 +8,11 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Textarea 封装单个原生多行文本编辑器，提供统一的受控/非受控值管理、输入法组合事件、无障碍关联以及焦点环与禁用样式。本页示例使用 **Shadcn Rhea** 风格。
 
-这个条目展示 Proto UI 中当前的 `shadcn` textarea 实现。
+## 预览
 
-协议归 Base Textarea 所有：controlled 与 uncontrolled value、归一化的 input/change/IME 事件、`rows`、`maxLength`、`readOnly` 等 native props、accessibility 投影，以及 focus 与 blur。它只物化一个 host-owned 的多行编辑器，shadcn 层只增加呈现——field 尺寸、边框、focus ring 与 disabled 处理。
-
-投射是 contentless 的。authored children 不会成为第二个编辑器，本切片也不引入 form workflow、validation message、auto-resize 或富文本行为。
-
-演示是三个编辑器：一个非受控备注（`rows` 4、`maxLength` 240）、一个禁用编辑器，以及一个仍可聚焦的只读编辑器。
+下方依次展示了非受控备注框（`rows={4}`、`maxLength={240}`）、禁用态输入框以及仍可聚焦的只读输入框。
 
 <PrototypePreviewer
   demoId="demo-shadcn-textarea"
@@ -30,15 +26,17 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-textarea" manager="npm" />
 
-把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件封装。
 
-## 复位与 Field 组合
+## 用法
 
-当前 0.3 源码公开 `resetValue()`：非受控编辑器恢复实例创建时的值，受控编辑器提出该值并等待 owner。显式复位在 readOnly 或 disabled 下仍可用，并退役组合输入。通过 `@proto.ui/prototypes-shadcn/field` 的 `fieldTextarea` 获取同一个多行编辑器的 Field 命名、描述、错误与校验组合；见[版本化 Form 配方](../form/)。
+- Textarea 不接受额外子元素，直接管理单个原生多行输入控件，支持 `rows`、`maxLength`、`minLength`、`wrap`、`placeholder`、`readOnly` 与 `disabled` 等常见属性。
+- `resetValue()` 方法可将非受控编辑器恢复为初始值，在受控模式下会发出恢复初始值的请求；即使处于 `readOnly` 或 `disabled` 状态也可显式调用，并会结束正在进行的输入法组合。
+- 在表单中使用时，可从 `@proto.ui/prototypes-shadcn/field` 导入 `fieldTextarea`，自动接入标签、描述、错误信息和表单校验；完整示例见 [Form 配方](../form/)。
 
 ## API
 
-传入 `value` 进入受控模式。未设置长度限制时，`minLength` 与 `maxLength` 为 `-1`。
+以下属性属于 `Root`（传入 `value` 可进入受控模式；未限制长度时 `minLength` 与 `maxLength` 为 `-1`）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -61,7 +59,7 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   ]}
 />
 
-Root 暴露 `value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing`，以及 `valueChange`、`change` 和 composition 事件。作者写入的 children 不是第二个编辑器。
+`Root` 暴露 `value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing` 状态以及 `resetValue()` 方法，并触发 `valueChange`、`change` 和输入法组合事件。
 
 ## 参考
 

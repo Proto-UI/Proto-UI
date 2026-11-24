@@ -1,12 +1,14 @@
 ---
 title: 'Combobox'
-description: 'Editable search with committed option identity.'
+description: 'A searchable Brutalist dropdown selector that binds to committed option values.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-Editable search with committed option identity.
+Brutalist Combobox combines a searchable text input with an anchored option list. `value` always tracks a committed option key separately from the editable `inputValue`, so unmatched query text is never silently accepted as a selection.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-brutalist-combobox"
@@ -15,17 +17,30 @@ Editable search with committed option identity.
   codePanel={false}
 />
 
-Root.value is a selected item key. inputValue is independent editable text. Unmatched text is never silently accepted as an option.
+## Installation
 
-The host owns the real single-line editor. Input retains focus during Arrow navigation; IME composition never selects. Filtering is case/diacritic insensitive over textValue and keywords. Empty reflects actual matches; disabled options cannot commit. open, value and inputValue are independently controlled with corresponding change requests. filter=false supports owner-filtered children. Duplicate-valued choices are rejected.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Input, Content, Item, Empty, Trigger.
+## Usage
 
-Draft source; shared Web A11y active-descendant projection, native/GPUI, compiler, consumer, visual and independent acceptance remain separate requirements.
+### Parts
+
+Combobox consists of `Root`, `Input`, `Content`, `Item`, `Empty`, and `Trigger`:
+
+- **Root**: Manages selected option `value`, search text `inputValue`, and popup `open` state, each independently controllable.
+- **Input**: Single-line editor that keeps focus during arrow-key navigation and avoids selecting during IME composition.
+- **Content**: Anchored option popup with configurable placement, alignment, offset, and collision padding.
+- **Item**: Selectable option matched case- and diacritic-insensitively against `textValue` and `keywords`. Disabled or duplicate-valued items cannot be selected.
+- **Empty**: Shown automatically when no options match the query.
+- **Trigger**: Button to open or close the option list.
+
+### Custom filtering
+
+Built-in filtering is enabled by default (`filter={true}`). Set `filter={false}` to filter options in your own application logic and render only matching `Item` children.
 
 ## API
 
-Combobox is workspace source. There is no public `proto-ui add` target. Passing `value`, `inputValue`, or `open` selects controlled mode for that fact.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -41,5 +56,12 @@ Combobox is workspace source. There is no public `proto-ui add` target. Passing 
   ]}
 />
 
-These props belong to Root. Input defaults `placeholder`, `a11yLabel` and `name` to `''`. Content defaults `side` to `bottom`, `align` to `start`, `sideOffset` to `4` and `collisionPadding` to `8`. Item defaults `value`, `textValue` and `keywords` to `''` and `disabled` to `false`. Empty has no props. Trigger defaults `disabled` to `false`.
+Pass `value`, `inputValue`, or `open` to control each state independently.
 
+### Other parts
+
+- **Input**: `placeholder?: string`, `a11yLabel?: string`, `name?: string` (all default to `''`)
+- **Content**: `side` (default `'bottom'`), `align` (default `'start'`), `sideOffset` (default `4`), `collisionPadding` (default `8`)
+- **Item**: `value`, `textValue`, `keywords` (all default to `''`), `disabled?: boolean` (default `false`)
+- **Empty**: No props
+- **Trigger**: `disabled?: boolean` (default `false`)

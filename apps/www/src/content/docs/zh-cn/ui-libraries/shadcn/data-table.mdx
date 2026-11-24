@@ -1,19 +1,15 @@
 ---
-title: 'Data-Table (WIP)'
-description: 'data-table composition and explicit implementation boundary.'
+title: 'Data Table'
+description: '支持排序、全局与按列筛选、列显隐、分页及行选择的数据表格组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+基于基础表格结构扩展的交互式数据表格，提供稳定排序、全局与按列筛选、列显隐、分页以及行/整页选择能力。本页示例采用 **Shadcn Rhea** 风格。
 
-Data Table 将被动 Table 结构与稳定记录 ID、稳定排序、全局过滤、分页及行选择组合。行是当前页按 index 编排的显示槽；单元格按 columnKey 显示当前记录，排序会更新真实内容，不用 CSS 顺序冒充 Table 结构排序。应用 rows 的 id 必须唯一。本组合不管理请求、编辑或列重排。
-
-当前为功能源码 WIP。完整运行时、Compiler、原生、打包、浏览器与视觉验收仍待补齐。
-
-排序表头应放在静态 `DataTableHeaderRow` 组合内。它继承被动 Table Row topology，没有 Props 或 instance exposes，不创建 selection、focus 或 Trigger owner；正文数据槽仍使用 `DataTableRow`。旧 `DataTableRow.header` prop 保留 runtime 数据槽策略，但不会移除该行 setup 期的 Trigger 身份，不能包含多个直接 Trigger 子项。示例已迁移到新静态组合，连续链规则没有放宽。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-data-table"
@@ -21,13 +17,9 @@ Data Table 将被动 Table 结构与稳定记录 ID、稳定排序、全局过�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 筛选、列显隐、页选择与格式化配方
+### 筛选、列显隐、整页选择与自定义格式化
 
-下面用公开 Input、Button 与原有 DataTable 部件组成可交互配方。名称列筛选与 Root `filter` 共同生效：每个非空 `columnFilters` 条件都匹配后，再排序和分页。`columnVisibility` 隐藏对应 Header、Cell 的物理视图，同时保留作者声明的逻辑坐标；隐藏表头退出排序焦点，Header、Cell 退出辅助技术呈现；原有部件与自定义子节点保留身份，重新显示后恢复。
-
-`requestPageSelection()` 只选择或清空当前筛选后的这一页，并保留其他页的选择；`pageSelection` 输出 `none`、`some` 或 `all`。受控 `selectedKeys` 仍只发请求；`readOnly` 拒绝行选择和整页选择，允许排序与分页。空页请求不产生变更。
-
-Cell 设置 `renderValue={false}` 后保留应用编写的子节点；公开 `displayValue` 仍跟随当前记录，同 ID 的数据替换也会更新。本配方订阅该状态来格式化状态文本，并在卸载时释放订阅。数据视图策略由组件持有，显示格式由应用持有。
+结合 `Input`、`Button` 与表格部件实现按列筛选、列显隐、当前页全选和自定义单元格格式化：
 
 <PrototypePreviewer
   demoId="demo-shadcn-data-table-recipes"
@@ -35,9 +27,25 @@ Cell 设置 `renderValue={false}` 后保留应用编写的子节点；公开 `di
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## 用法
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+### 结构与数据模型
+
+- 传入 `rows` 时，每条记录需要具备唯一的 `id`。表格按当前页索引渲染行槽位，单元格通过 `columnKey` 读取对应字段，排序会直接更新真实数据内容。
+- 表头排序单元格请放在静态 `DataTableHeaderRow` 中，正文数据行使用 `DataTableRow`。
+
+### 筛选、列显隐与分页选择
+
+- **筛选**：`columnFilters` 中的每个非空条件会与 `Root` 的全局 `filter` 共同过滤数据，随后再执行排序与分页。
+- **列显隐**：通过 `columnVisibility` 可隐藏指定列的表头与单元格（同时移出排序焦点与辅助技术树）；重新开启后原有节点与自定义内容会恢复显示。
+- **行与整页选择**：调用 `requestPageSelection()` 仅勾选或清空当前筛选页的数据，同时保留其他页的选中状态；可通过 `pageSelection` 读取 `'none'`、`'some'` 或 `'all'`。`readOnly={true}` 会阻止行选择和整页选择，但仍允许排序与翻页。
+- **自定义单元格渲染**：在 `Cell` 上设置 `renderValue={false}` 可保留传入的子元素，并通过订阅 `displayValue` 动态格式化当前记录的展示文本。
+
 ## API
 
-Data Table 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `sortKey`、`sortDirection`、`page` 或 `selectedKeys` 会使对应事实进入受控模式。
+传入 `sortKey`、`sortDirection`、`page` 或 `selectedKeys` 可分别控制对应状态。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -56,7 +64,12 @@ Data Table 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `
   ]}
 />
 
-这些属性属于 Root。Row 的 `index` 默认 `0`，`header` 默认 `false`。Cell 的 `columnKey` 默认 `''`，`renderValue` 默认 `true`。Header 的 `sortable` 默认 `true`。Previous 与 Next 接受 Button 的属性。
+以上属性属于 `Root`。其他部件属性：
+
+- **Row**：`index` 默认 `0`，`header` 默认 `false`。
+- **Cell**：`columnKey` 默认 `''`，`renderValue` 默认 `true`。
+- **Header**：`sortable` 默认 `true`。
+- **Previous / Next**：接受与 `Button` 相同的属性。
 
 ## 参考
 

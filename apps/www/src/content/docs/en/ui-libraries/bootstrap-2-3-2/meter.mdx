@@ -1,9 +1,13 @@
 ---
-title: bootstrap-2-3-2 Meter
-description: A bounded numerical measurement with shared Base semantics.
+title: 'Bootstrap 2.3.2 Meter'
+description: 'A Bootstrap 2.3.2 bounded measurement gauge with optimal, suboptimal, and critical status thresholds.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Bootstrap 2.3.2 Meter displays a scalar measurement within a known range—such as disk usage, quota, or score—and classifies readings using `low`, `high`, and `optimum` thresholds.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-meter"
@@ -12,10 +16,34 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Draft implementation. Root owns the finite range; Label names it, Track contains Indicator, and Value displays valueText or the canonical number. All styled atoms inherit the same Base protocol.
+## Installation
 
-Props: value, min (0), max (100), ariaLabel and valueText. Values clamp to ordered finite bounds; an equal min/max has zero percentage. low/high/optimum classify the measured value as optimal, suboptimal or critical; they do not change the numerical value.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Root and parts expose value, percentage, indeterminate and status. These are passive readouts with no keyboard stop or editing event. Updating Props updates every part. Range states use portable A11y declarations; exact native and assistive-technology mappings still need verification.
+```ts
+import {
+  meterRoot,
+  meterLabel,
+  meterTrack,
+  meterIndicator,
+  meterValue,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/meter';
+```
 
-Import meterRoot, meterLabel, meterTrack, meterIndicator and meterValue from the meter subpath after shared package registration. Source tests are incremental evidence. Full Adapter/Compiler/GPUI, native input/paint, package consumer and independent acceptance remain open; this page does not mark the Finf item complete.
+## Usage
+
+Compose `Root`, `Label`, `Track`, `Indicator`, and `Value`:
+
+- **Bounded values**: `Root` clamps `value` between `min` (default `0`) and `max` (default `100`). When `min` equals `max`, the computed percentage is `0`.
+- **Threshold classification**: Providing `low`, `high`, and `optimum` derives `status` as `'optimal'`, `'suboptimal'`, or `'critical'` without altering the numeric value.
+- **Read-only display**: `Label` names the gauge, `Track` and `Indicator` render the fill bar, and `Value` displays `valueText` or the formatted number. Meter is passive and adds no Tab stop.
+
+## API
+
+| Part | Props / States | Description |
+| --- | --- | --- |
+| `Root` | `value` / `min` / `max` | Numeric reading and bounds (`min=0`, `max=100` by default) |
+| `Root` | `low` / `high` / `optimum` | Thresholds classifying `status` as `optimal`, `suboptimal`, or `critical` |
+| `Root` | `ariaLabel` / `valueText` | Accessible name and custom display text |
+| All parts | `value` / `percentage` / `indeterminate` / `status` | Synchronized read-only measurement states |
+| `Label` / `Track` / `Indicator` / `Value` | — | Label, track container, fill indicator, and value readout |

@@ -1,11 +1,15 @@
 ---
-title: brutalist Number Field
-description: 可移植输入原子草稿。
+title: 'Brutalist Number Field'
+description: '支持步进控制、本地化数字格式化、空值与标签拖拽调值的 Brutalist 数值输入组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Brutalist Number Field 提供带加减步进按钮的数值输入框，支持 `Intl` 本地化格式、可选空值、标签拖拽调值以及 `Field` / `Form` 集成。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-number-field"
@@ -14,23 +18,32 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root 管理 `number | null` 的 value/defaultValue、min/max（0/100）、正 step（1）、disabled/readOnly、name、ariaLabel。Input 使用 TextControl 唯一编辑器与 spinbutton 语义。未完成草稿可以保留；失焦/Enter 提交合法数值或恢复已接受的规范值。加减按钮与上下箭头共享步进，Shift 十倍，Home/End 达边界；受控提案不覆盖作者值。
+## 安装
 
-`locale` 与 `formatOptions` 支持标准十进制、货币和百分比显示，以及对应的小数、分组、本地数字与符号解析。格式化只影响显示精度，无编辑的提交不会把格式舍入写回数值。非法格式配置通过 `formatInvalid` 报告，并回退无分组十进制；非法输入保留草稿并在提交时恢复。省略格式属性保持原有十进制显示。IME 组合期间不会解析、提交、步进或开始拖擦，切换 locale 也保留正在输入的组合文本。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-显式 `null` 表示空值，`value={null}` 仍然受控。`allowEmpty` 默认 `false`，启用后清空编辑器并提交会请求 `null`。Root 与 Input/Control 的 `getValue()` 返回真实 `number | null`，`empty` 标记空值；兼容数值读口 `value` 仅在 `empty=false` 时表示规范数值，空值时保留最近有限值。事件及 Field/Form 始终传递真实空值。从空值步进先初始化为边界内对齐的零。
+## 用法
 
-启用 `scrub` 后可在 Label 上连续拖动调值；`scrubSteps`（默认100）表示移动一个初始标签宽度对应多少个 step，`direction="rtl"` 反转横向。成功释放且值发生改变时提交一次；取消恢复非受控起值，受控值始终由作者决定。输入框保留普通文本选择，滚轮调整尚未实现。
+### 部件组成
 
-在 Field/FormField 内用 Control 替代 Input，FieldLabel 命名并激活真实编辑器，联动 Field 策略、规范数值校验、IME 取消、Form 序列化及复位。独立 Input 仍使用 NumberFieldLabel。
+Number Field 由 `Root`、`Label`、`Input`、`Control`、`Increment` 和 `Decrement` 组成：
 
-部件: root, label, input, control, increment, decrement. 四个视觉家族继承同一 Base 行为。
+- **Root**：管理 `number | null` 类型的 `value` / `defaultValue`、`min` / `max`（默认 `0` / `100`）、步长 `step`（默认 `1`）、格式化配置与禁用/只读状态。
+- **Input**：独立使用时承载带 `spinbutton` 语义的文本输入框；编辑过程中允许保留未完成草稿，失焦或按 `Enter` 时提交合法数值，非法输入则恢复上次有效值。
+- **Control**：在 `Field` 或 `FormField` 内替代 `Input` 使用，自动衔接 `FieldLabel`、数值校验、表单序列化与重置。
+- **Increment / Decrement**：步进增减按钮，与方向键共享步进规则。
+- **Label**：命名独立输入框；开启 `scrub` 后支持在标签上水平拖拽连续调值。
 
-当前为 Draft 源码工作。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍待完成，不宣称 Finf 验收通过。
+### 格式化、空值与交互
+
+- **键盘操作**：`ArrowUp` / `ArrowDown` 按步长增减，按住 `Shift` 以 10 倍步长调整，`Home` / `End` 跳至 `min` / `max` 边界。输入法合成期间自动暂停解析、提交、步进与拖拽。
+- **本地化格式**：配置 `locale` 与 `formatOptions` 可呈现十进制、货币或百分比格式并解析对应分隔符与符号。格式化仅影响展示，不改变内部数值精度；若格式配置非法，组件会设置 `formatInvalid` 并回退为无分组十进制。
+- **空值支持**：传入 `allowEmpty` 后，清空输入框并提交会请求 `null`；通过 `getValue()` 获取 `number | null`，通过 `empty` 判断当前是否为空。从空值开始步进时，首次会初始化为边界内对齐的 `0`。
+- **标签拖拽**：开启 `scrub` 后可在 `Label` 上拖动调值，`scrubSteps`（默认 `100`）控制移动一个标签宽度对应的步数，`direction="rtl"` 反转横向方向。
 
 ## API
 
-Number Field 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。Label、Input、Control、Increment、Decrement 自身没有属性。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -53,7 +66,7 @@ Number Field 是工作区源码，没有公开的 `proto-ui add` 目标。传入
   ]}
 />
 
-这些属性属于 Root。
+`Label`、`Input`、`Control`、`Increment` 与 `Decrement` 不声明独立属性。传入 `value`（包括 `null`）即进入受控模式。
 
 ## 参考
 

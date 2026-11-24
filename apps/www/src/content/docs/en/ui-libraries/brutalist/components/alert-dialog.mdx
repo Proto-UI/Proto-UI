@@ -1,12 +1,14 @@
 ---
 title: 'AlertDialog'
-description: 'A modal decision with a primary message, safe cancel target and explicit action intent.'
+description: 'A modal confirmation dialog with focus trapping, safe cancel focus, and explicit action intent.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-A modal decision with a primary message, safe cancel target and explicit action intent.
+Brutalist AlertDialog interrupts the user for critical or destructive confirmations. It traps focus inside a bold Brutalist panel, prevents outside-click dismissal, and focuses `Cancel` first by default.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-brutalist-alert-dialog"
@@ -15,19 +17,30 @@ A modal decision with a primary message, safe cancel target and explicit action 
   codePanel={false}
 />
 
-Root fixes alert semantics. Mask owns modality; Content traps focus, blocks outside dismissal and starts at Cancel when available. Action emits action before requesting close. Application code owns the effect; no destructive operation is performed by the prototype. Escape and Cancel request dismissal.
+## Installation
 
-Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Supplying open leaves the committed value with the owner; listen to openChange and provide the next value.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Trigger, Content, Header, Title, Description, Footer, Cancel, Action, Mask. Header and Footer are optional, passive layout parts with empty Props/Exposes. They preserve authored children without adding commands or state.
+## Usage
 
-The desktop composition follows the [pinned Neo-Brutalist source](https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/alert-dialog.tsx): a 5px-radius panel with 24px padding, 8px-spaced heading and description, and intrinsic-width actions aligned right with a 12px gap. Footer uses natural reverse wrapping when its contents no longer fit. This is not the upstream 640px switch to full-width reverse columns; narrow-screen text centering and the 545–639px panel width remain different. The existing zero-duration transitions, theme-relative focus offset and dark palette remain Proto UI behavior/extensions. Upstream small-size and Media parts are not exposed.
+### Parts
 
-Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.
+AlertDialog is composed of `Root`, `Trigger`, `Mask`, `Content`, `Header`, `Title`, `Description`, `Footer`, `Cancel`, and `Action`:
+
+- **Root**: Manages `alertdialog` semantics and open state via controlled `open` or uncontrolled `defaultOpen`.
+- **Mask**: Modal backdrop that blocks outside-click dismissal.
+- **Content**: Raised 5px-radius panel with 24px padding that traps focus and focuses `Cancel` when available.
+- **Header / Footer**: Optional layout containers for the heading stack and right-aligned action buttons (which reverse-wrap cleanly when space is tight).
+- **Cancel / Action**: `Cancel` and `Escape` request dismissal; `Action` emits `action` before requesting close so your application performs the confirmed operation.
+
+### Controlled and uncontrolled state
+
+- **Uncontrolled**: Use `defaultOpen` to initialize the dialog state.
+- **Controlled**: Pass `open` and listen to `openChange` to commit state updates. Disabled commands do not activate.
 
 ## API
 
-Alert Dialog is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -38,5 +51,10 @@ Alert Dialog is workspace source. There is no public `proto-ui add` target. Pass
   ]}
 />
 
-These props belong to Root. Mask accepts `passthrough` (`false`) plus the Transition props. Content also accepts the Transition props. Trigger, Title, Description, Cancel and Action have no props.
+Pass `open: boolean` to enable controlled mode.
 
+### Other parts
+
+- **Mask**: `passthrough?: boolean` (default `false`) and Transition props
+- **Content**: Transition props
+- **Trigger / Header / Title / Description / Footer / Cancel / Action**: No props

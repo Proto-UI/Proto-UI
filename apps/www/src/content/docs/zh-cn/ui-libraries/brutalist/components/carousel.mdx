@@ -1,14 +1,14 @@
 ---
-title: 'Carousel (WIP)'
-description: 'carousel functional composition and current verification limits.'
+title: 'Carousel'
+description: '支持指针拖拽、触控板/滚轮连续滚动、响应式列数与边界吸附的 Brutalist 轮播组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-Carousel 组合等尺寸项目条、连续滚动视口与前后控制。鼠标或触摸拖动在松手前就移动内容；滚轮、触控板和滚动条使用同一个滚动表面。拖动结束或原生滚动静止后，内容吸附到最近的可达项目边界。键盘导航使用同一索引请求。
+Brutalist Carousel 将等宽滑块条、连续可滚动视口与前后切换控制结合在一起，支持鼠标/触摸拖拽、滚轮/触控板滚动与键盘切换，松手或滚动停止后自动吸附至最近的项目边界。
 
-当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-carousel"
@@ -16,17 +16,27 @@ Carousel 组合等尺寸项目条、连续滚动视口与前后控制。鼠标�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 响应式视口与受控索引
+## 安装
 
-Root 的 `slidesPerView` 设置最多显示的等尺寸项目数（默认 `1`），`minSlideSize` 设置项目最小逻辑宿主像素尺寸（默认 `0`）。演示请求显示两项，最小尺寸为 `180`；缩窄视口会减少实际容量，也允许部分项目露出。所有项目始终保留布局尺寸。Root 通过实际视口公开 `visibleSlides` 和 `maxIndex`，最后一个吸附位置贴齐内容末端，避免空白。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-传入 `index` 进入受控模式，`indexChange` 提出新的吸附索引。拖动预览不会改变已提交的 `index`；松手时采用所有者同步接受的值，否则回到现有索引，延迟接受则在新的输入到达时再移动。Viewport 公开 `dragging`、`scrolling` 与归一化 `scrollPosition`；Slide 的 `current` 跟随已提交吸附项，`hidden` 跟随实际屏外可见性，且不会从布局移除项目。
+## 用法
 
-`orientation="vertical"` 需要消费者为视口设置明确的有界高度。水平 `direction="rtl"` 反转物理拖动与方向键，但保留逻辑项目顺序。取消、禁用、切换轴和移除视图会丢弃未完成的拖动。`loop` 在可达两端循环索引，不通过克隆项目实现无缝无限条；自动播放和不同尺寸项目不属于当前契约。
+### 响应式视口与布局
+
+- 通过 `slidesPerView`（默认 `1`）设置视口最多同时展示的等尺寸项数，通过 `minSlideSize`（默认 `0`）设定单项最小宽度（逻辑像素）。容器变窄时会自动缩减可见项数；最后一个吸附位置会贴齐内容末端，避免留下大片空白。
+- `Root` 根据实际视口暴露 `visibleSlides` 与 `maxIndex`；`Viewport` 暴露 `dragging`、`scrolling` 与归一化 `scrollPosition`；`Slide` 的 `current` 对应当前吸附项，`hidden` 反映屏外可见性且保留布局尺寸。
+- 使用 `orientation="vertical"` 时，请为视口设置明确的高度；水平方向下 `direction="rtl"` 会反转物理拖动与左右键方向，并保持逻辑项顺序。
+- 设置 `loop={true}` 可在首尾可达索引之间循环切换。
+
+### 受控与非受控索引
+
+- **非受控**：使用 `defaultIndex` 指定初始吸附项。
+- **受控**：传入 `index` 并监听 `indexChange` 更新外部状态。拖动过程中不会提前改写已提交索引，松手时按外部最新值落位。
 
 ## API
 
-Carousel 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `index` 进入受控模式。Viewport 没有属性。省略 Slide 的 `index` 时采用当前 anatomy 顺序，显式索引应与项目顺序对应。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -43,4 +53,7 @@ Carousel 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `in
   ]}
 />
 
-这些属性属于 Root。
+### 其他部件属性
+
+- **Viewport**：无独立属性
+- **Slide**：`index?: number`（省略时按顺序自动分配；显式指定时应与项目顺序一致）

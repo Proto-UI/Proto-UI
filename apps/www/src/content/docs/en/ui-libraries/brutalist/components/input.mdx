@@ -1,24 +1,32 @@
 ---
 title: 'Input'
-description: 'Standalone Neobrutalist single-line text input.'
+description: 'A standalone Brutalist single-line text input with font-relative sizing, IME support, and focus rings.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-This draft standalone Input inherits Base Input. It is independent of FieldControl: Base owns the one plain-text editor, controlled/uncontrolled value, normalized editing and composition events, disabled/read-only state, accessible naming and physical focus.
+Brutalist Input is a standalone single-line text input styled with `2.5rem` font-relative height, a 2px border, `rounded-base` corners, no resting shadow, and a crisp black focus ring.
 
-Its visual reference is [Neo input.tsx at 3306a802](https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/input.tsx#L5-L18). The recipe preserves 2.5rem height, 0.75rem horizontal/0.5rem vertical padding, 0.875rem text, a 2px border, rounded-base corners and no resting shadow. Inherited focus-visible adds a black ring; disabled adds cursor and opacity. Dimensions remain font-relative when root text size changes.
+## Preview
 
 <PrototypePreviewer demoId="demo-brutalist-input" initialRuntime="wc" />
 
-Import `brutalistInputRoot` from `@proto.ui/prototypes-brutalist/input` or the package root. The CLI key is `brutalist-input`. This is workspace draft source, not a claim that a published npm version includes it.
+## Installation
 
-This is an unofficial, bounded projection. Upstream arbitrary input types, file controls, caller className/DOM prop forwarding, placeholder color and forced-color outline parity remain open. It does not add form submission, validation or a second editor. Real four-runtime browser evidence, operating-system IME, Compiler and native-target acceptance remain separate and pending; source and simulated-DOM tests are not visual acceptance.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-input`
+- **Package exports**: import `brutalistInputRoot` from `@proto.ui/prototypes-brutalist/input` or the package root
+
+## Usage
+
+- Supports uncontrolled `defaultValue` and controlled `value`, normalized text editing and IME composition events, `disabled` / `readOnly` states, and accessible naming via `ariaLabel`, `labelledBy`, and `describedBy`.
+- Dimensions stay `rem`-based so the control scales cleanly with root font size. For built-in validation and error messaging, pair with `Field` and `Form`.
 
 ## API
 
-Input is workspace source. For this workspace version, the CLI target is `brutalist-input`. Use matching CLI and package versions; check the chosen release's availability before installing. Passing `value` selects controlled mode.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -48,4 +56,4 @@ Input is workspace source. For this workspace version, the CLI target is `brutal
   ]}
 />
 
-These props belong to Root.
+Pass `value: string` to enable controlled mode.

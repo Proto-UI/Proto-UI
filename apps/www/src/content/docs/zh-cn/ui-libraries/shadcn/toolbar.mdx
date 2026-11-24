@@ -1,15 +1,15 @@
 ---
 title: 'Toolbar'
-description: '带可访问名称、分隔线及键盘游走操作的工具栏。'
+description: '包含命令按钮、分隔线与键盘漫游焦点的工具栏容器组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Toolbar 将一组相关操作按钮和分隔线组织在一个无障碍工具栏容器中，通过单一 `Tab` 入口和方向键提供流畅的键盘操作。本页示例使用 **Shadcn Rhea** 风格。
 
-带可访问名称、分隔线及键盘游走操作的工具栏。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-toolbar"
@@ -18,15 +18,22 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root 管理 disabled、orientation、loop、a11yLabel。Button 激活时发出带 value 的 action。仅一个启用命令参与 Tab；箭头在工具栏内移动。Separator 沿交叉轴显示。
+## 安装
 
-组成: Root, Button, Separator.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码；native/GPUI、编译器、打包消费、截图及完整独立验收仍待完成。
+## 用法
+
+Toolbar 由 `Root`、`Button` 和 `Separator` 三个部件组成：
+
+- `Root` 统一管理禁用状态、排列方向（`orientation`）、是否循环导航（`loop`）及工具栏的无障碍名称（`a11yLabel`）。
+- 同一时刻仅有一个启用的命令按钮位于 `Tab` 序列中，使用方向键在工具栏内移动焦点。
+- `Button` 在启用状态下激活时会发出携带其 `value` 的 `action` 事件。
+- `Separator` 自动沿工具栏的交叉轴方向绘制分隔线。
 
 ## API
 
-Toolbar 是工作区源码，没有公开的 `proto-ui add` 目标。Separator 没有属性。
+以下属性属于 `Root`（`Separator` 无额外属性）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -38,7 +45,7 @@ Toolbar 是工作区源码，没有公开的 `proto-ui add` 目标。Separator �
   ]}
 />
 
-这些属性属于 Root。Button 的 `disabled` 默认 `false`，`value` 默认 `''`。
+`Button` 的默认属性：`disabled` 为 `false`，`value` 为 `''`。
 
 ## 参考
 

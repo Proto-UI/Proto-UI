@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Button'
-description: '基于 Base Button 的方角 Neo-Brutalist 投影'
+description: '具备硬边框、偏移黑影与高对比度平涂配色的 Brutalist 按钮组件。'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -11,7 +11,9 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 <BrutalistPageStyle />
 
-Button projection 继承 Base Button 语义，只增加 Neo-Brutalist 视觉差量：5px 圆角几何、硬边框、硬偏移阴影与平涂填色。
+Brutalist Button 继承 Base Button 的完整交互与无障碍行为，搭配 5px 圆角、2px 黑色边框、硬偏移黑影与按压下沉反馈。
+
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-button" initialRuntime="wc" />
@@ -33,7 +35,7 @@ Button projection 继承 Base Button 语义，只增加 Neo-Brutalist 视觉差�
 
 ## 用法
 
-Brutalist Button 携带 Neo-Brutalist 视觉语言：硬边框、偏移阴影与平涂填色。以下示例使用族系调色板（`mint`、`lavender`、`coral`、`sky`）展示支持的色域。
+Brutalist Button 支持 `solid`、`surface` 与 `destructive` 三种变体，以及 `default`、`mint`、`lavender`、`coral`、`sky` 配色。以下示例展示各变体与尺寸用法。
 
 ### 实心
 

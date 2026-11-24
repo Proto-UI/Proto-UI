@@ -1,11 +1,13 @@
 ---
 title: 'AlertDialog'
-description: 'A modal decision with a primary message, safe cancel target and explicit action intent.'
+description: 'A Bootstrap 2.3.2 modal confirmation dialog with safe cancel focus and explicit action intent.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-A modal decision with a primary message, safe cancel target and explicit action intent.
+AlertDialog interrupts the user for an important confirmation, focusing the safe cancel action by default and blocking accidental outside-click dismissal.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-alert-dialog"
@@ -14,10 +16,27 @@ A modal decision with a primary message, safe cancel target and explicit action 
   codePanel={false}
 />
 
-Root fixes alert semantics. Mask owns modality; Content traps focus, blocks outside dismissal and starts at Cancel when available. Action emits action before requesting close. Application code owns the effect; no destructive operation is performed by the prototype. Escape and Cancel request dismissal.
+## Installation
 
-Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Supplying open leaves the committed value with the owner; listen to openChange and provide the next value.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Trigger, Content, Title, Description, Cancel, Action, Mask.
+## Usage
 
-Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.
+Compose `Root`, `Trigger`, `Mask`, `Content`, `Title`, `Description`, `Cancel`, and `Action`:
+
+- **Modality and focus**: `Mask` renders the modal backdrop; `Content` traps focus, ignores outside clicks, and focuses `Cancel` first when available.
+- **Actions and dismissal**: Activating `Action` emits `action` before requesting close so application code runs the actual effect. `Escape` and `Cancel` request dismissal directly.
+- **Controlled state**: Pass `open` and listen to `openChange` for controlled usage, or use `defaultOpen` for uncontrolled state. Disabled actions do not activate.
+
+## API
+
+| Part | Props / Events | Description |
+| --- | --- | --- |
+| `Root` | `open` / `defaultOpen` | Controlled or initial open state |
+| `Root` | `openChange` | Emitted when the dialog requests an open/close change |
+| `Trigger` | — | Opens the dialog |
+| `Mask` | — | Modal overlay backdrop |
+| `Content` | — | Dialog surface with alert semantics and focus trapping |
+| `Title` / `Description` | — | Accessible dialog heading and supporting text |
+| `Cancel` | — | Dismisses the dialog; preferred initial focus target |
+| `Action` | `action` | Emits `action` and requests close |

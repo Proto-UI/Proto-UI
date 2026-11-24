@@ -1,6 +1,6 @@
 ---
 title: 'Hover Card'
-description: 'A Shadcn hover card projected from the Base hover-card protocol.'
+description: 'A floating preview card that opens with configurable hover/focus delays and collision-aware positioning.'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -8,11 +8,11 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+A floating card that previews rich content when hovering or focusing a trigger, with configurable open/close delays and collision-aware placement. The examples on this page use the **Shadcn Rhea** style preset.
 
-Base Hover Card owns open state. Root accepts controlled `open` or uncontrolled `defaultOpen`, plus `openDelay` and `closeDelay`. Trigger hover or focus, and Content hover, only submit a request; they do not bypass that owner. Content adds `side`, `align`, and the numeric offsets below. Arrow and `forceMount` are not props of this surface.
+## Preview
 
-The demo opens `@proto-ui` after 150ms and closes after 300ms. Content is `side="bottom"` and `align="center"`.
+The demo opens `@proto-ui` after 150ms and closes after 300ms, positioned at `side="bottom"` and `align="center"`:
 
 <PrototypePreviewer
   demoId="demo-shadcn-hover-card"
@@ -22,15 +22,23 @@ The demo opens `@proto-ui` after 150ms and closes after 300ms. Content is `side=
   codePanel={false}
 />
 
-## Install
+## Installation
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-hover-card" manager="npm" />
 
-Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+Replace `wc` with `react`, `vue`, or `vue2` to generate the local facade for your framework.
+
+## Usage
+
+Compose `Hover Card` from `Root`, `Trigger`, and `Content`:
+
+- **Root**: Manages open state (controlled `open` or uncontrolled `defaultOpen`) and `openDelay` / `closeDelay`.
+- **Trigger**: Requests opening on hover or focus; accepts its own `disabled` prop.
+- **Content**: Keeps the card open while hovered and supports placement, alignment, offsets, and viewport collision avoidance.
 
 ## API
 
-Passing `open` selects controlled mode. Delays must be finite and at least 0; any other number falls back to the default.
+Passing `open` selects controlled mode. Delays must be finite numbers greater than or equal to `0`; invalid values fall back to the defaults.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -49,7 +57,9 @@ Passing `open` selects controlled mode. Delays must be finite and at least 0; an
   ]}
 />
 
-`side` through `collisionPadding` belong to Content. Trigger only adds `disabled`, which defaults to false. Root exposes `open`, `openHoverCard`, `close`, `toggle`, and `openChange`.
+- `open`, `defaultOpen`, `disabled`, `openDelay`, and `closeDelay` belong to `Root`. `Root` exposes `open`, `openHoverCard`, `close`, `toggle`, and `openChange`.
+- `side` through `collisionPadding` belong to `Content`.
+- `Trigger` accepts `disabled` (default `false`).
 
 ## References
 

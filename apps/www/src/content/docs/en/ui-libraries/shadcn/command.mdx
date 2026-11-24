@@ -1,15 +1,15 @@
 ---
 title: 'Command'
-description: 'An inline searchable list of executable commands.'
+description: 'An inline searchable command palette that filters items and emits execution intents.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+An inline searchable command list that filters as you type and emits an `execute` event when an item is activated. The examples on this page use the **Shadcn Rhea** style preset.
 
-An inline searchable list of executable commands.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-command"
@@ -18,17 +18,27 @@ An inline searchable list of executable commands.
   codePanel={false}
 />
 
-The list stays inline and open. Enter or pointer activation emits execute with the selected command. The application owns the action; query state does not execute anything.
+## Usage
 
-The host owns the real single-line editor. Input retains focus during Arrow navigation; IME composition never selects. Filtering is case/diacritic insensitive over textValue and keywords. Empty reflects actual matches; disabled options cannot commit. open, value and inputValue are independently controlled with corresponding change requests. filter=false supports owner-filtered children. Duplicate-valued choices are rejected.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Input, Content, Item, Empty.
+### Anatomy
 
-Draft source; shared Web A11y active-descendant projection, native/GPUI, compiler, consumer, visual and independent acceptance remain separate requirements.
+Compose `Command` from `Root`, `Input`, `Content`, `Item`, and `Empty` (`Command` stays inline and has no `Trigger`):
+
+- The list opens inline by default (`defaultOpen={true}`). Typing updates the filter without executing any command.
+- Pressing `Enter` or clicking an item emits `execute` with the selected item so your application can perform the action.
+
+### Filtering and interaction
+
+- **Built-in filtering**: Matches case- and diacritic-insensitively over `textValue` and `keywords`. Set `filter={false}` to render pre-filtered children.
+- **Empty and disabled states**: `Empty` reflects the live match count; disabled items and duplicate-valued items cannot execute.
+- **Keyboard and IME**: Focus stays in the input during arrow-key navigation, and IME composition never triggers execution.
+- **Controlled state**: `open`, `value`, and `inputValue` can each be controlled independently.
 
 ## API
 
-Command is workspace source. There is no public `proto-ui add` target. Passing `value`, `inputValue`, or `open` selects controlled mode for that fact. It reuses the shared search-family props. Because the list is inline, `defaultOpen` is `true`. Command has no Trigger.
+Passing `value`, `inputValue`, or `open` enables controlled mode for that state. Because the command list stays inline, `defaultOpen` defaults to `true`.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -44,7 +54,11 @@ Command is workspace source. There is no public `proto-ui add` target. Passing `
   ]}
 />
 
-These props belong to Root. Input defaults `placeholder`, `a11yLabel`, and `name` to `''`. Content defaults to `side="bottom"`, `align="start"`, `sideOffset` `4`, and `collisionPadding` `8`. Item defaults `value`, `textValue`, and `keywords` to `''`, and `disabled` to `false`.
+These props belong to `Root`. Other part defaults:
+
+- **Input**: `placeholder`, `a11yLabel`, and `name` default to `''`.
+- **Content**: `side="bottom"`, `align="start"`, `sideOffset={4}`, `collisionPadding={8}`.
+- **Item**: `value`, `textValue`, and `keywords` default to `''`; `disabled` defaults to `false`.
 
 ## References
 

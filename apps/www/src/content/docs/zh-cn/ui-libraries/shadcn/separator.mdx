@@ -1,6 +1,6 @@
 ---
 title: 'Separator'
-description: '从 Base Separator 协议投影出的 Shadcn Separator。'
+description: '用于在视觉或语义上分隔内容区域的细线组件。'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -8,15 +8,11 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Separator 以 1px 细线在视觉或语义上划分相邻内容区域，支持水平和垂直两种方向。本页示例使用 **Shadcn Rhea** 风格。
 
-当前页面展示 Proto UI 中 `shadcn` 风格的 `separator` 条目。
+## 预览
 
-协议由 Base Separator 拥有：`orientation` 默认为 `horizontal`，`decorative` 默认为 `true`。decorative 分隔线隐藏于 accessibility tree 且不带 role，`decorative={false}` 则投影 `separator` role 与对应的 `aria-orientation`。shadcn 层只增加表现：border 颜色，以及跟随继承 orientation 的 1px 细线几何。
-
-Separator 是 contentless 的，不声明 focus、tab stop 或 event 通路。长度由周围布局决定，间距由组合负责。
-
-演示是同一列：一条水平线、一行垂直线，然后一条非 decorative 的水平线，它会暴露 `separator`。
+下方依次展示了水平分隔线、一组垂直分隔线以及带无障碍语义（`decorative={false}`）的水平分隔线。
 
 <PrototypePreviewer
   demoId="demo-shadcn-separator"
@@ -30,9 +26,17 @@ Separator 是 contentless 的，不声明 focus、tab stop 或 event 通路。�
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-separator" manager="npm" />
 
-把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件封装。
+
+## 用法
+
+- `orientation` 默认为 `'horizontal'`，设为 `'vertical'` 可切换为垂直分隔线。分隔线的长度由外层容器布局决定，间距由组合方式控制。
+- `decorative` 默认为 `true`，此时分隔线仅用于视觉装饰，对辅助技术隐藏；设为 `false` 时会暴露 `separator` 角色及对应的 `aria-orientation`。
+- Separator 为无内容元素，不接受子元素，也不参与键盘焦点或事件交互。
 
 ## API
+
+以下属性属于 `Root`：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -41,8 +45,6 @@ Separator 是 contentless 的，不声明 focus、tab stop 或 event 通路。�
     { name: 'decorative', type: 'boolean', default: 'true' },
   ]}
 />
-
-Root 暴露 `orientation` 与 `decorative`。它不接受作为内容的 children，也没有 focus 或 event 属性。
 
 ## 参考
 

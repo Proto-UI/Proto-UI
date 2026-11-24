@@ -1,15 +1,15 @@
 ---
 title: 'Drawer'
-description: '可从四个边缘显示的模态面板。'
+description: '支持从上下左右四个边缘滑出的模态抽屉组件，内置内容自适应、滚动与拖拽吸附控制。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页为支持 profile 的 parts 显式选择 **Shadcn Rhea**。每个 headless Trigger 和 Close 都直接组合公开 outline Button，由 Button 提供 group 的物理交互表面与 Rhea 外观。该组合的浏览器、原生宿主和视觉验收仍需实际证据。Surface/Text 等中性原子保留各自公开语义，外观主题由消费组合提供。
+可从上下左右四个边缘滑出的模态面板，支持内容自适应高度、纵向滚动以及可拖拽吸附档位。本页示例采用 **Shadcn Rhea** 风格。
 
-可从四个边缘显示的模态面板。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-drawer"
@@ -18,25 +18,9 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Rhea Content以透明外层`p-4`包围自己的inset popover表面；圆角上限24px与shadow均归公共原型。Header/Footer保留各自profile的padding。底部Handle仍是真实resize控件：共用100px宽、1rem上间距，并采用Rhea的0.375rem高，而非旧New York的0.5rem。非底部方向的resize控件仍保留；它尚不是上游仅底部的装饰条或整块Content拖动表面，既有extent/side语义及剩余交互差异保持明示。
+### 长内容滚动
 
-短示例使用上游 demo 的居中、全宽 max-w-sm 内容列，这是消费组合，不是所有 Drawer 的最大宽度。历史 New York Trigger/Close 按钮 paint（默认高 2.25rem、水平 padding 1rem、可选 wrap）仅保留在该兼容 profile。现代 Rhea Trigger/Close 保持 headless；其直接嵌套的公开 Button 采用 Rhea 默认 2rem 高度与 0.75rem 水平 padding。长标签在该 Button 上设置 `wrap`，保留 2rem 最小高度并在提供的宽度内增长。既有连续 Trigger group 使 Button 成为唯一物理激活和焦点表面，外层 Drawer member 继续拥有 open 请求（`C-AS-TRIGGER-0001-D/F/J`）。
-
-top/bottom Content 默认按内容高度显示；目前保留的兼容最大高度为可用高度减去 6 个根文本单位，始终受安全可用区域约束。它尚未实现 New York 的 viewport 相对 max-h-80vh 及独立 mt-24/mb-24 间距。Content.minExtent/maxExtent 接受中立长度：unit 为 logical、root-text、available 或 available-minus-root-text，value 为非负有限数字。最小高度超过安全上限时以上限优先。left/right 使用 fraction 宽度，缺省上限为 20 个 root-text 单位。显式 maxExtent 替换该默认；宽度、边缘定位与拖动预览由同一受限尺寸计算。例如 `maxExtent={{ unit: 'logical', value: 480 }}` 在空间允许且 snap 为 1 时得到 480 逻辑单位宽度。available 单位按当前安全宽度取比例；fraction 模式忽略合法 minimum。使用 maxExtent 调整面板尺寸，不再用独立 CSS width。
-
-本项目将 Content 组合为纵向 Scroll surface；固定 New York DrawerContent wrapper 本身未声明 overflow utility。长内容示例的 Close 仍在同一滚动区域内。
-
-Root 是逻辑 owner，仍渲染包装节点。直接放入应用 grid 时，React Root 可设置 `hostStyle={{ display: 'contents' }}`，Web Component Root 可设置 `display: contents`，避免空的 grid 行。中立 Root 没有交互 role；Content、focus scope 与命名继续拥有各自语义节点。应用 header/main 应保留在 modal Content 外。
-
-Root 支持受控 open 或非受控 defaultOpen。禁用命令不激活。每个示例将 Trigger/Close 暴露的 effective disabled 状态传给对应 Button，包括 Root 继承与命令自身的变化；Button 在绑定当前命令快照前保持禁用。调用方拒绝关闭请求时，拖动预览恢复到实际受控状态。
-
-top/bottom 的 snapPoints 缺省、null 或空数组时按内容高度显示；left/right 保留 fraction 与缺省点 one。非空有效数组启用显式吸附，点为大于 0 且不超过 1 的比例，并排序去重。单独 snapPoint 不开启吸附。显式比例的分母为完整安全上限，不再隐含乘以 85%。defaultSnapPoint 为本地状态；snapPoint 与 snapPointChange 为受控状态。任意方向的非法 points 或长度记录会被拒绝，不转成满高度。
-
-内容自适应模式的 Handle 是 aria-hidden 的专用指针把手，不提供键盘 resize，也不会因 Enter/Space 变成 Close。显式 snap 保留有名称的 separator、方向键、Home/End 和范围值。Content.dragDismissible=false 禁止拖动关闭；独立 Close、Escape 和外部关闭仍遵循既有协议。接触中断和受控请求拒绝会恢复已接受的呈现。
-
-运行中非法尺寸更新令 extentValid=false，取消 Handle 输入并保留最后有效意图，宿主仍按当前安全约束重算。初始非法输入会在呈现前被拒绝：Root 保留逻辑 open 值，Mask 等待唯一有效的 Content 声明。这些示例使用静态验证的合法输入；本草稿不宣称任意输入安全，也不代表 native、编译器、打包消费或完整 Finf 验收完成。
-
-### 长内容
+`Content` 内置纵向滚动容器，超出高度的长内容可在面板内平滑滚动：
 
 <PrototypePreviewer
   demoId="demo-shadcn-drawer-scroll"
@@ -45,9 +29,9 @@ top/bottom 的 snapPoints 缺省、null 或空数组时按内容高度显示；l
   codePanel={false}
 />
 
-### 显式半开/全开吸附
+### 半开与全开吸附档位
 
-此例保留显式 resize 交互并播报已提交的变化。
+配置 `snapPoints` 后，用户可通过拖动把手或键盘方向键在不同高度比例之间吸附切换：
 
 <PrototypePreviewer
   demoId="demo-shadcn-drawer-snap"
@@ -56,9 +40,33 @@ top/bottom 的 snapPoints 缺省、null 或空数组时按内容高度显示；l
   codePanel={false}
 />
 
+## 用法
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+### 部件组合与触发按钮
+
+- **Trigger 与 Close**：在 Rhea 风格下，`Trigger` 与 `Close` 保持无样式语义封装，直接内嵌公开的 `Button`（如 `outline` 样式，长文本可加 `wrap`）作为物理交互与焦点表面，并将暴露的有效 `disabled` 状态透传给内部按钮。
+- **网格布局兼容**：`Root` 会渲染包装节点；当直接放入 CSS Grid 时，可在 React 中设置 `hostStyle={{ display: 'contents' }}`（Web Components 中设置 `display: contents`）避免产生多余网格行。
+- **样式细节**：Rhea `Content` 在外层包裹 `p-4` 透明边距并内嵌圆角上限 24px 的弹出面板，底部 `Handle` 宽 100px、高 `0.375rem`、上间距 `1rem`。
+
+### 尺寸约束（`minExtent` / `maxExtent`）
+
+通过 `Content` 的 `minExtent` 与 `maxExtent` 控制面板尺寸（推荐使用它而非单独的 CSS `width`）：
+
+- 支持的长度单位包括 `logical`、`root-text`、`available` 与 `available-minus-root-text`（`value` 为非负有限数值），例如 `maxExtent={{ unit: 'logical', value: 480 }}`。
+- 上下抽屉默认按内容高度自适应，最大高度自动限制在安全可用区域内；左右抽屉默认按比例宽度展示，默认上限为 20 个 `root-text` 单位。
+- 运行中若传入非法尺寸配置，组件会忽略非法配置并保持最后有效的尺寸约束（`extentValid` 为 `false`）。
+
+### 吸附档位与拖动关闭
+
+- **内容自适应模式**：上下抽屉未传 `snapPoints`（或为空数组）时按内容高度展示，此时 `Handle` 作为纯指针拖拽把手使用。
+- **显式吸附模式**：传入大于 `0` 且不超过 `1` 的比例数组（如 `[0.5, 1]`，自动排序去重）即可开启多档吸附，通过 `defaultSnapPoint`（非受控）或 `snapPoint` + `snapPointChange`（受控）管理当前档位；此时 `Handle` 支持方向键及 `Home` / `End` 调整。
+- 设置 `dragDismissible={false}` 可禁止通过拖动关闭，同时保留 `Close` 按钮、`Escape` 键与点击外部关闭。受控模式下若外部拒绝关闭请求，拖动预览会自动回弹至当前已提交状态。
+
 ## API
 
-Drawer 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+传入 `open` 进入受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -69,7 +77,13 @@ Drawer 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open
   ]}
 />
 
-这些属性属于 Root。Content 的 `side` 默认 `bottom`。Trigger 与 Close 的 `disabled` 默认 `false`。Handle 的 `disabled` 默认 `false`，`a11yLabel` 默认 `Resize drawer`。Overlay 的 `passthrough` 默认 `false`。Title、Description、Header、Footer 没有属性。
+以上属性属于 `Root`。其他部件属性默认值：
+
+- **Content**：`side` 默认 `'bottom'`（可选 `'top' | 'right' | 'bottom' | 'left'`），另支持 `minExtent`、`maxExtent`、`snapPoints`、`snapPoint`、`defaultSnapPoint`、`dragDismissible`。
+- **Trigger / Close**：`disabled` 默认 `false`。
+- **Handle**：`disabled` 默认 `false`，`a11yLabel` 默认 `'Resize drawer'`。
+- **Overlay**：`passthrough` 默认 `false`。
+- **Title / Description / Header / Footer**：无额外属性。
 
 ## 参考
 
@@ -78,7 +92,4 @@ Drawer 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open
   files={['P-SHADCN-DRAWER.yaml', 'P-BASE-DRAWER.yaml', 'P-SHADCN-BUTTON.yaml']}
 />
 
-<SpecEntityLinks
-  directory="spec/contracts"
-  files={['C-AS-TRIGGER-0001.yaml']}
-/>
+<SpecEntityLinks directory="spec/contracts" files={['C-AS-TRIGGER-0001.yaml']} />

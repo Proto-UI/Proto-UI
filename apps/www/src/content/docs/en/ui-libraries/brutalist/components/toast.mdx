@@ -1,12 +1,14 @@
 ---
 title: 'Toast'
-description: 'Timed live notifications with pause, dismiss and explicit action intent.'
+description: 'A Brutalist-styled timed notification with pause-on-hover/focus, keyboard dismissal, and action controls.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-Timed live notifications with pause, dismiss and explicit action intent.
+Toast displays brief live notifications with configurable auto-dismiss timers, pause on hover or focus, keyboard shortcuts, and explicit action buttons.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-brutalist-toast"
@@ -15,15 +17,32 @@ Timed live notifications with pause, dismiss and explicit action intent.
   codePanel={false}
 />
 
-Root defaults open for 5000ms. duration=0 remains open; hover and focus in Toast Action/Close pause the remaining duration. Controlled open emits one timeout request until the owner changes state. Close, focused Escape and Action request dismissal; action side effects belong to the app. Viewport provides the F8 focus shortcut. No global queue or external notification transport is implied.
+## Installation
 
-Parts: Root, Viewport, Title, Description, Action, Close.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/toast` and adapt them for your target runtime.
 
-Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+## Usage
+
+### Anatomy
+
+Toast is composed of `Root`, `Viewport`, `Title`, `Description`, `Action`, and `Close`:
+
+- `Root`: Manages open state, transition durations, timer lifecycle, and live-region `politeness`.
+- `Viewport`: Landmark region for notifications with a configurable `F8` focus hotkey.
+- `Title` / `Description`: Notification heading and body copy.
+- `Action`: Signals user action intent and requests dismissal (application code handles the side effect).
+- `Close`: Dismisses the notification when activated.
+
+### Timing & Dismissal
+
+- Stays open for `5000ms` by default; set `duration={0}` to keep a notification open until dismissed.
+- Hovering over the toast or focusing `Action` / `Close` pauses the remaining timer automatically.
+- Activating `Close`, pressing `Escape` while focused, or activating `Action` requests dismissal. In controlled mode (`open`), timeout emits a single dismissal request until your state updates.
+- Manage multi-toast queuing or global dispatch at the application level.
 
 ## API
 
-Toast is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+The following props belong to `Root` (pass `open` for controlled mode):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -39,5 +58,9 @@ Toast is workspace source. There is no public `proto-ui add` target. Passing `op
   ]}
 />
 
-These props belong to Root. Viewport defaults `a11yLabel` to `Notifications` and `hotkey` to `F8`. Title and Description have no props. Action defaults `disabled` to `false`; `a11yLabel` has no default. Close defaults `disabled` to `false`.
+Other part props and defaults:
 
+- **Viewport**: `a11yLabel` defaults to `'Notifications'`; `hotkey` defaults to `'F8'`.
+- **Title**, **Description**: No props.
+- **Action**: `disabled` defaults to `false`; `a11yLabel` is optional with no default.
+- **Close**: `disabled` defaults to `false`.
