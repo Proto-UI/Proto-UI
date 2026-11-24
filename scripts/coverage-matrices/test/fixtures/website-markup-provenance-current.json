@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "bd2d1cf66f72532c0aa529349a40893d00f513bc",
-  "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners, the Button example producer, the extracted InstallCommandCard client and the optional BrowserCompilerPanel template/client owners. Transitive/runtime and served-source proof remain unobserved. Earlier references and their original execution results are retained separately. Sprint 2 integration retains the previous exact reference as website-markup-provenance-8d4d48d.json; only the two added documentation sidebar links change the Astro configuration source hash. The website visual source reference archives the preceding bytes as website-markup-provenance-d8dfeab.json, renews the integrated Astro configuration, CodePanel, its client and PrototypePreviewer, and adds the two direct scroll sources. This does not observe served/transitive closure or run native browser acceptance.",
+  "revision": "a54155f36de41a4fe47de6adc203d907bc117a25",
+  "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners, the Button example producer, the extracted InstallCommandCard client and the optional BrowserCompilerPanel template/client owners. Transitive/runtime and served-source proof remain unobserved. Earlier references and their original execution results are retained separately. Sprint 2 integration retains the previous exact reference as website-markup-provenance-8d4d48d.json; only the two added documentation sidebar links change the Astro configuration source hash. The website visual source reference archives the preceding bytes as website-markup-provenance-d8dfeab.json, renews the integrated Astro configuration, CodePanel, its client and PrototypePreviewer, and adds the two direct scroll sources. This does not observe served/transitive closure or run native browser acceptance. The release documentation renewal preserves that visual reference as website-markup-provenance-bd2d1cf.json and reviews the three sampled documentation rewrites, the restored Button/Dialog version and lifecycle boundaries, and the module-anatomy workspace dependency link. The 33 direct source identities and unverified admission remain unchanged; runtime, served/transitive and release acceptance require separate evidence.",
   "sourceAdmission": "unverified",
   "sources": [
     {
@@ -71,11 +71,11 @@
     },
     {
       "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/transition.mdx",
-      "sha256": "9ce21e5ae6885a62ffc038fc363a330e8411b7242fbbaf139d402d942a3b06db"
+      "sha256": "ef13d6a667bbbe8b48ea3f6599732681b88c14a5a7afb26c738219990b9d4bd1"
     },
     {
       "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/button.mdx",
-      "sha256": "d22631b1ce4efd6aedaa8ea03de1e8507ff5ce3b76d5e4dc04d8b9337a5ff54f"
+      "sha256": "bd4296cbeb5840a10923d210379b420c127b15fe3902f638f80274756fc3e429"
     },
     {
       "path": "apps/www/astro.config.mjs",
@@ -87,7 +87,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "sha256": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8"
+      "sha256": "eae18430bd967c94def36809b6d3305fa156a96548b08215a18dfe8a43923c07"
     },
     {
       "path": "apps/www/src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode.ts",
@@ -95,7 +95,7 @@
     },
     {
       "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/dialog.mdx",
-      "sha256": "0651680190b40b18a93e09103a26474b62df5d587ddad08366af720e759fee13"
+      "sha256": "7d41623f7a7b14674c6e9442980cddddbc251c931a3facd109614c838541270e"
     },
     {
       "path": "apps/www/src/utils/conversionUtils.ts",
