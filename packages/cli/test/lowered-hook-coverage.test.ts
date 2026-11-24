@@ -10,6 +10,7 @@ import { scanRuleStateReads } from '../src/services/lowered-hook-coverage';
 import type { RuleStateScan } from '../src/services/lowered-hook-coverage';
 import { createHookSourceSummaryContext } from '../src/services/hook-source-summary';
 import type { HookSourceState } from '../src/services/hook-source-summary';
+import { pendingRuleReads } from '../src/services/rule-helper-replay';
 import {
   collectProtoStyleTokens,
   collectProtoStyleTokensFromFiles,
@@ -50,6 +51,37 @@ async function prototypeSourceFiles(): Promise<string[]> {
  * TypeScript AST for every type and index module under `src`.
  */
 const RULE_CALL = /\brule\b/;
+
+/**
+ * The modules that register a rule, by their path without the extension. A
+ * file that imports one of them may call the helper that registers the rule,
+ * so the file that calls the helper is read as well.
+ */
+const ruleModulePaths = async (files: readonly string[]): Promise<Set<string>> => {
+  const modules = new Set<string>();
+  for (const absolute of files) {
+    const text = await readFile(absolute, 'utf8');
+    if (!RULE_CALL.test(text)) continue;
+    const relative = path.relative(REPO_ROOT, absolute).split(path.sep).join('/');
+    modules.add(relative.replace(/\.(ts|tsx|mts|cts|js|jsx|mjs|cjs)$/, ''));
+  }
+  return modules;
+};
+
+/** Whether a file imports a module that registers a rule. */
+const importsRuleModule = (
+  file: string,
+  text: string,
+  modules: ReadonlySet<string>
+): boolean => {
+  const directory = path.posix.dirname(file);
+  for (const match of text.matchAll(/from\s+['"](\.\.?\/[^'"]+)['"]/g)) {
+    const specifier = match[1] ?? '';
+    const base = path.posix.normalize(path.posix.join(directory, specifier));
+    if (modules.has(base) || modules.has(`${base}/index`)) return true;
+  }
+  return false;
+};
 
 /** A real intent: the variant is a prefix on tokens, so a stub yields nothing. */
 const rule = (condition: string) =>
@@ -5629,15 +5661,34 @@ describe('lowered hook coverage', () => {
       [];
 
     const sourceSummary = createHookSourceSummaryContext();
+    const shipped = await prototypeSourceFiles();
+    const ruleModules = await ruleModulePaths(shipped);
     for (const absolute of await prototypeSourceFiles()) {
       const file = path.relative(REPO_ROOT, absolute).split(path.sep).join('/');
       const text = await readFile(absolute, 'utf8');
-      if (!RULE_CALL.test(text)) continue;
+      // A file that calls a rule-registering helper registers the rule
+      // through it, so the file that calls the helper is read as well.
+      if (!RULE_CALL.test(text) && !importsRuleModule(file, text, ruleModules)) continue;
       const scan = scanRuleStateReads(text, absolute, sourceSummary);
       for (const usage of scan.usages)
-        found.push({ file, hook: usage.hook, state: usage.state, provenance: usage.provenance });
+        found.push({
+          file: usage.file
+            ? path.relative(REPO_ROOT, usage.file).split(path.sep).join('/')
+            : file,
+          hook: usage.hook,
+          state: usage.state,
+          provenance: usage.provenance,
+        });
       for (const miss of scan.unresolved) blind.push(`${file}: ${miss.reason} ${miss.expression}`);
       for (const local of scan.exposedLocals) exposed.push({ file, ...local });
+    }
+
+    // A rule a helper registers is read by the call site that binds the
+    // helper's parameters, so a read no call site resolved stays visible with
+    // the file that declares the rule.
+    for (const pending of pendingRuleReads(sourceSummary)) {
+      const owner = path.relative(REPO_ROOT, pending.file).split(path.sep).join('/');
+      blind.push(`${owner}: ${pending.read.reason} ${pending.read.expression}`);
     }
 
     // Every exposed prototype-owned state a rule reads has to name an attribute

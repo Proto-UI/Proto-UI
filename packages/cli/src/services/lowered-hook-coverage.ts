@@ -15,7 +15,18 @@ import {
   type SourceGraphVersionTracker,
 } from './hook-source-summary.js';
 import { loweredHookStates } from './prototype-style-tokens.js';
-import { closedLocalRuleHelpers, helperArgumentBeforeVisit } from './closed-rule-helpers.js';
+import {
+  closedLocalRuleHelpers,
+  helperArgumentBeforeVisit,
+  registersRule,
+} from './closed-rule-helpers.js';
+import {
+  beginHelperReplay,
+  endHelperReplay,
+  helperIdentity,
+  helperRuleState,
+  type RuleState,
+} from './rule-helper-replay.js';
 
 /**
  * Mirrors `OFFICIAL_EXPOSED_STATE_NAMES` in `@proto.ui/module-expose-state-web`,
@@ -41,6 +52,11 @@ export type HookStateUsage = {
   state: string;
   /** Non-enumerable source identity attached by the scanner for bounded gates. */
   provenance?: HookSourceState;
+  /**
+   * The file that owns the rule the read came from. A rule registered by a
+   * helper belongs to the helper's file, not to the file that called it.
+   */
+  file?: string;
 };
 
 export type UnresolvedStateRead = {
@@ -70,6 +86,18 @@ export type ExposedLocalUsage = {
    * expose key, so this is derived from the declaration, not the key.
    */
   attribute: string;
+};
+
+/** What one rule call was observed to read. */
+type RuleObservation = {
+  /** The file that owns the rule. */
+  file: string;
+  /** The rule's traced reads. */
+  usages: HookStateUsage[];
+  /** The rule's reads the scanner could not trace. */
+  unresolved: UnresolvedStateRead[];
+  /** The rule's reads of an exposed prototype-owned state. */
+  exposedLocals: ExposedLocalUsage[];
 };
 
 export type RuleStateScan = {
@@ -541,18 +569,61 @@ export function scanRuleStateReads(
   return scanRuleStateSource(source, suppliedSummary);
 }
 
+/**
+ * A helper the scan enters with the bindings its call site proved.
+ *
+ * The helper's own file is scanned as a module: its imports and module-level
+ * declarations become the scope the helper's body runs in, and the helper's
+ * parameters hold the values the call site passed. A helper's parameters are
+ * unknown to the helper's own file, so this is the only place its rule
+ * conditions can be read against the producer that supplied them.
+ */
+type SourceFunctionSeed = {
+  /** The function whose body the scan enters. */
+  helper: ts.FunctionLikeDeclaration;
+  /** The parameter bindings the call site proved, by parameter name. */
+ parameters: ReadonlyMap<string, Binding>;
+};
+
+type SeededScan = RuleStateScan & {
+  /** The binding the seeded function returned, when it returns a plain name. */
+  returned: Binding | null;
+};
+
+/**
+ * The helpers a summary already read, by the helper and the bindings its
+ * call site proved. Two call sites that proved the same values read the same
+ * helper the same way.
+ */
+const evaluationCache = new WeakMap<HookSourceSummaryContext, Map<string, SeededScan>>();
+
 function scanRuleStateSource(
   source: ts.SourceFile,
   suppliedSummary?: HookSourceSummaryContext,
   replayHelpers = true,
-  observeRule?: (call: ts.CallExpression, visit: RuleStateSiteVisit) => void
-): RuleStateScan {
+  observeRule?: (call: ts.CallExpression, visit: RuleStateSiteVisit) => void,
+  seed?: SourceFunctionSeed
+): SeededScan {
   const fileName = source.fileName;
   const sourceSummary = suppliedSummary ?? createHookSourceSummaryContext();
-  sourceSummary.registerSource(source);
+  // A seeded scan reads a file the summary already parsed, so registering it
+  // again would only replace the module the summary resolved its imports
+  // through.
+  if (!seed) sourceSummary.registerSource(source);
   const closedHelpers = replayHelpers
     ? closedLocalRuleHelpers(source, sourceSummary)
     : new Set<ts.FunctionDeclaration>();
+  // A seeded scan enters one function with the call site's bindings. Every
+  // other function body in the file belongs to the file's own scan, so it is
+  // skipped here and observed there instead.
+  const seedSkips = new Set<ts.FunctionDeclaration>();
+  if (seed) {
+    const collect = (node: ts.Node): void => {
+      if (ts.isFunctionDeclaration(node)) seedSkips.add(node);
+      ts.forEachChild(node, collect);
+    };
+    collect(source);
+  }
   const closedHelperNames = new Set([...closedHelpers].map((helper) => helper.name!.text));
   const helperScopes = new Map<ts.FunctionDeclaration, Scope>();
   const invocations: Array<RuleStateSiteVisit['invocations'][number]> = [];
@@ -2043,6 +2114,25 @@ function scanRuleStateSource(
     // those in the established token/container path unless this is a proven
     // non-literal source expression, so local maps are not replaced by a blank
     // source bag.
+    // A call to an imported helper holds what that helper returns, so the
+    // caller's name stands for the value the helper's own scope bound. The
+    // helper's parameters are unknown to its own file, so the call site is
+    // the only place the returned value can be read.
+    if (ts.isCallExpression(unwrap(initializer)) && ts.isIdentifier(name)) {
+      const call = unwrap(initializer) as ts.CallExpression;
+      const callee = unwrap(call.expression);
+      if (ts.isIdentifier(callee) && lookup(lookupScope, callee.text)?.kind === 'tokenImport') {
+        const fn = sourceSummary.resolveSourceFunction(callee, source);
+        if (fn && fn.getSourceFile() !== source) {
+          const returned = evaluateImportedHelper(fn, call, lookupScope);
+          if (returned) {
+            declare(scope, name.text, returned);
+            return;
+          }
+        }
+      }
+    }
+
     const sourceCanIntercept =
       resolved.matched &&
       sourcePathHasProvenance(initializer, lookupScope, resolved) &&
@@ -3748,9 +3838,29 @@ function scanRuleStateSource(
     /** The whole `w.state(...).eq(...)` leaf. */
     text: string;
     comparison: 'positive' | 'negative' | null;
+    /** The leaf's own offset, so a replay and a declaration scan agree on it. */
+    offset: number;
   };
 
-  const analyzeRule = (config: ts.ObjectLiteralExpression, scope: Scope): void => {
+  const analyzeRuleSpec = (
+    config: ts.ObjectLiteralExpression,
+    scope: Scope,
+    observation: RuleObservation,
+    rule: ts.CallExpression,
+    state: RuleState | null
+  ): void => {
+    /**
+     * A rule-level read that was not resolved. A helper's rule waits for a
+     * call site that binds its parameters, so the read is kept with the rule
+     * rather than reported here.
+     */
+    const reportRule = (read: UnresolvedStateRead): void => {
+      if (!state) {
+        observation.unresolved.push(read);
+        return;
+      }
+      state.rule = read;
+    };
     // `{ when, intent }` and `{ when() {} }` are valid specs the runtime calls
     // normally, while both `collectRuleVariantTokens` and this scanner read
     // plain property assignments only. Skipping them would leave no trace.
@@ -3760,7 +3870,7 @@ function scanRuleStateSource(
         (propertyName(property.name) === 'when' || propertyName(property.name) === 'intent')
     );
     if (shorthand) {
-      unresolved.push({ expression: config.getText(source), reason: 'spec' });
+      reportRule({ expression: config.getText(source), reason: 'spec' });
       return;
     }
 
@@ -3768,6 +3878,9 @@ function scanRuleStateSource(
       (property) => ts.isPropertyAssignment(property) && propertyName(property.name) === 'when'
     );
     if (!when || !ts.isPropertyAssignment(when)) return;
+    // The rule is read here, so the read a call site could not resolve is
+    // replaced by this one.
+    if (state) state.rule = null;
 
     const leaves: Leaf[] = [];
     let hasForeignDep = false;
@@ -3872,6 +3985,7 @@ function scanRuleStateSource(
               subject: receiver.arguments[0].getText(source),
               text: node.getText(source),
               comparison: comparisonOf(node.arguments[0], scope),
+              offset: node.getStart(source),
             });
           }
         }
@@ -3891,7 +4005,10 @@ function scanRuleStateSource(
     })();
 
     if (aliasedBuilder || branchedCondition || helperCondition || bodyIsHelperCall) {
-      unresolved.push({ expression: when.initializer.getText(source), reason: 'condition' });
+      reportRule({
+        expression: when.initializer.getText(source),
+        reason: 'condition',
+      });
       return;
     }
 
@@ -3928,28 +4045,344 @@ function scanRuleStateSource(
       if (nonStyleOperation) return;
 
       if (!yieldsExtractableTokens(intent.initializer, scope, intentParameter)) {
-        unresolved.push({ expression: intent.getText(source), reason: 'intent' });
+        reportRule({ expression: intent.getText(source), reason: 'intent' });
         return;
       }
     }
 
     for (const leaf of leaves) {
+      const offset = leaf.offset;
+      // A replayed call replaces the declaration-level observation of the
+      // leaf rather than adding a second one.
+      if (state && state.reported.has(offset)) continue;
+      // A rule that reads a state the prototype declares itself, but does not
+      // expose, lowers to no selector at all. There is nothing to trace, so
+      // the comparison that guards it is not a blind spot either.
+      if (leaf.usages && leaf.usages.every((read) => read === 'local')) continue;
       if (!leaf.comparison) {
-        unresolved.push({ expression: leaf.text, reason: 'comparison' });
+        const read: UnresolvedStateRead = { expression: leaf.text, reason: 'comparison' };
+        if (state) {
+          state.deferred.set(offset, read);
+          continue;
+        }
+        observation.unresolved.push(read);
         continue;
       }
       if (!leaf.usages) {
-        unresolved.push({ expression: leaf.subject, reason: 'subject' });
+        const read: UnresolvedStateRead = { expression: leaf.subject, reason: 'subject' };
+        if (state) {
+          state.deferred.set(offset, read);
+          continue;
+        }
+        observation.unresolved.push(read);
         continue;
+      }
+      if (state) {
+        state.reported.add(offset);
+        state.deferred.delete(offset);
       }
       for (const read of leaf.usages) {
         if (read === 'local') continue;
         if ('exposedLocal' in read) {
-          exposedLocals.push(read.exposedLocal);
+          observation.exposedLocals.push(read.exposedLocal);
           continue;
         }
-        usages.push(read);
+        observation.usages.push(read);
       }
+    }
+  };
+
+  /**
+   * The helper function that owns a rule, when the rule is registered inside
+   * a declared function rather than in the prototype's own setup.
+   *
+   * A helper's parameters hold whatever its call site passes, so the helper's
+   * own file cannot know them. The rule is therefore read by the call site
+   * that binds them, and the helper's own scan waits for that call site.
+   */
+  const owningHelper = (rule: ts.Node): ts.FunctionLikeDeclaration | null => {
+    for (let owner = rule.parent; owner; owner = owner.parent) {
+      if (ts.isFunctionDeclaration(owner)) {
+        // Only an exported helper can be replayed from another file, so only
+        // its rule waits for a call site. A local helper's rule is read by
+        // the file that declares it, as before.
+        const exported = owner.modifiers?.some(
+          (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword
+        );
+        return exported ? owner : null;
+      }
+      if (ts.isSourceFile(owner)) return null;
+    }
+    return null;
+  };
+
+  /**
+   * Records what one rule call was observed to read.
+   *
+   * A rule the prototype's own setup registers is reported as it is read. A
+   * rule a helper registers belongs to the helper's file: the reads the
+   * helper's own file could not trace wait for the call site that binds its
+   * parameters, and a call site that resolves them reports them instead.
+   */
+  const analyzeRule = (
+    config: ts.ObjectLiteralExpression,
+    scope: Scope,
+    rule: ts.CallExpression
+  ): void => {
+    const helper = owningHelper(rule);
+    const state = helper
+      ? helperRuleState(sourceSummary, helper, rule.getStart(source))
+      : null;
+    const observation: RuleObservation = {
+      file: fileName,
+      usages: [],
+      unresolved: [],
+      exposedLocals: [],
+    };
+    analyzeRuleSpec(config, scope, observation, rule, state);
+    if (!helper) {
+      usages.push(...observation.usages);
+      unresolved.push(...observation.unresolved);
+      exposedLocals.push(...observation.exposedLocals);
+      return;
+    }
+    const owner = helper.getSourceFile().fileName;
+    observation.file = owner;
+    for (const usage of observation.usages) usage.file = owner;
+    usages.push(...observation.usages);
+    exposedLocals.push(...observation.exposedLocals);
+  };
+
+  /**
+   * The binding a function returns, when it returns a plain name.
+   *
+   * A caller reads the value the callee returned, so the callee's own scope
+   * decides what that name holds. Only a name the body actually bound is
+   * read: a returned expression the scanner cannot name stays unknown.
+   */
+  const returnedBindingOf = (
+    helper: ts.FunctionLikeDeclaration,
+    scope: Scope
+  ): Binding | null => {
+    if (!helper.body || !ts.isBlock(helper.body)) return null;
+    const statements = helper.body.statements;
+    for (let index = statements.length - 1; index >= 0; index--) {
+      const statement = statements[index];
+      if (!ts.isReturnStatement(statement)) continue;
+      const expression = statement.expression;
+      if (!expression) return null;
+      const value = unwrap(expression);
+      if (ts.isIdentifier(value)) return lookup(scope, value.text);
+      if (ts.isCallExpression(value)) {
+        // A helper that returns another helper's value returns what that
+        // helper returned, so the call is read with the same bindings.
+        const callee = unwrap(value.expression);
+        if (ts.isIdentifier(callee)) {
+          const fn = sourceSummary.resolveSourceFunction(callee, source);
+          if (fn && fn.getSourceFile() !== source) {
+            return evaluateImportedHelper(fn, value, scope);
+          }
+        }
+      }
+      return null;
+    }
+    return null;
+  };
+
+  /**
+   * The source values an object literal's members hold, when every member
+   * resolves.
+   *
+   * A helper that receives a bag of states reads the states the call site
+   * proved, not the call site's own names. The bag is therefore carried as
+   * the source graph the call site proved, so a member read in the helper
+   * reaches the producer that supplied it.
+   */
+  const objectLiteralSourceMembers = (
+    expression: ts.Expression,
+    scope: Scope
+  ): HookSourceValue | null => {
+    const value = unwrap(expression);
+    if (!ts.isObjectLiteralExpression(value)) return null;
+    const members = new Map<string, HookSourceValue>();
+    for (const property of value.properties) {
+      if (!ts.isPropertyAssignment(property)) return null;
+      const key = propertyName(property.name);
+      if (key === null) return null;
+      const resolved = sourceResolve(property.initializer, scope);
+      // A member the call site did not prove stays unknown: the bag still
+      // carries the members it did prove, and the unreadable one keeps its
+      // own blind spot.
+      members.set(
+        key,
+        resolved.matched
+          ? resolved.value
+          : ({ kind: 'unknown', reason: 'unresolved member' } as HookSourceValue)
+      );
+    }
+    return { kind: 'object', members };
+  };
+
+  /**
+   * The identity of a source value, so two call sites that proved the same
+   * value are recognized as such.
+   */
+  const sourceValueIdentities = new WeakMap<object, number>();
+  let nextSourceValueIdentity = 0;
+  const sourceValueIdentity = (value: unknown): string => {
+    if (!value || typeof value !== 'object') return String(value);
+    let identity = sourceValueIdentities.get(value as object);
+    if (identity === undefined) {
+      identity = ++nextSourceValueIdentity;
+      sourceValueIdentities.set(value as object, identity);
+    }
+    return `v${identity}`;
+  };
+
+  /**
+   * What a binding holds, in a form two call sites can be compared by.
+   *
+   * Two call sites that proved the same values read the same helper the same
+   * way, so the helper is read once for both.
+   */
+  const bindingSignature = (binding: Binding): string => {
+    switch (binding.kind) {
+      case 'opaque':
+        return 'opaque';
+      case 'token':
+        return `token:${binding.initializer.getText()}`;
+      case 'localState':
+        return `local:${binding.declaredAs ?? ''}:${binding.exposedAs ?? ''}`;
+      case 'handle':
+        return `handle:${binding.hook}:${binding.state}:${
+          binding.sourceState
+            ? `${binding.sourceState.declaration.file}:${binding.sourceState.declaration.start}`
+            : ''
+        }`;
+      default: {
+        const value = binding.sourceValue;
+        if (value?.kind === 'object') {
+          const members = [...value.members]
+            .map(([key, member]) => `${key}=${sourceValueIdentity(member)}`)
+            .sort()
+            .join(',');
+          return `${binding.kind}:${binding.hook}:{${members}}`;
+        }
+        return `${binding.kind}:${binding.hook}:${sourceValueIdentity(value)}`;
+      }
+    }
+  };
+
+  /**
+   * The bindings a call site proves for a helper's parameters.
+   *
+   * A parameter holds the value the call site proved, never the caller's own
+   * expression: an expression names the caller's scope, and the helper's
+   * scope may bind the same name to something else. A parameter the call site
+   * omits holds undefined, and a parameter the call site passes an effectful
+   * expression holds an unknown value; both stay unreadable rather than being
+   * read as the caller's own names.
+   */
+  const parameterBindings = (
+    fn: ts.FunctionLikeDeclaration,
+    call: ts.CallExpression,
+    scope: Scope
+ ): Map<string, Binding> | null => {
+    if (call.arguments.some(ts.isSpreadElement)) return null;
+    if (call.arguments.length > fn.parameters.length) return null;
+    const bindings = new Map<string, Binding>();
+    for (const [index, parameter] of fn.parameters.entries()) {
+      if (!ts.isIdentifier(parameter.name)) return null;
+      if (parameter.dotDotDotToken) return null;
+      const name = parameter.name.text;
+      const opaque: Binding = {
+        kind: 'opaque',
+        sourceAuthority: true,
+        bindingNode: parameter,
+      };
+      const argument = call.arguments[index];
+      if (!argument) {
+        bindings.set(name, opaque);
+        continue;
+      }
+      const value = unwrap(argument) as ts.Expression;
+      if (
+        ts.isStringLiteralLike(value) ||
+        ts.isNumericLiteral(value) ||
+        value.kind === ts.SyntaxKind.TrueKeyword ||
+        value.kind === ts.SyntaxKind.FalseKeyword
+      ) {
+        // A literal carries the same value in every file.
+        bindings.set(name, { kind: 'token', initializer: value, bindingNode: parameter });
+        continue;
+      }
+      if (ts.isIdentifier(value)) {
+        // The caller's own binding is what the name holds, so the helper
+        // reads the same value under its own name.
+        const held = lookup(scope, value.text);
+        if (held && held.kind !== 'token') {
+          bindings.set(name, { ...held, bindingNode: parameter });
+          continue;
+        }
+        bindings.set(name, opaque);
+        continue;
+      }
+      const members = objectLiteralSourceMembers(value, scope);
+      if (members) {
+        bindings.set(name, {
+          kind: 'handleBag',
+          hook: sourceHookLabel(value, scope) ?? '<source-hook>',
+          sourceValue: members,
+          sourceAuthority: true,
+          bindingNode: parameter,
+        });
+        continue;
+      }
+      bindings.set(name, opaque);
+    }
+    return bindings;
+  };
+
+  /**
+   * Reads an imported helper with the bindings its call site proves.
+   *
+   * The helper's own file cannot know what its parameters hold, so this is
+   * the only place its rules and its returned value can be read. A helper
+   * that is already being replayed is not read again: the running call owns
+   * the rule it registers.
+   */
+  const evaluateImportedHelper = (
+    fn: ts.FunctionLikeDeclaration,
+    call: ts.CallExpression,
+    scope: Scope
+  ): Binding | null => {
+    if (!beginHelperReplay(sourceSummary, fn)) return null;
+    try {
+      const parameters = parameterBindings(fn, call, scope);
+      if (!parameters) return null;
+      const cacheKey = `${helperIdentity(fn)}\0${[...parameters].map(([name, binding]) => `${name}=${bindingSignature(binding)}`).join('\0')}`;
+      const cached = evaluationCache.get(sourceSummary)?.get(cacheKey);
+      if (cached) {
+        // The helper was already read with these bindings, so its rules were
+        // already reported. Only the value it returns is still needed.
+        return cached.returned;
+      }
+      const result = scanRuleStateSource(fn.getSourceFile(), sourceSummary, false, undefined, {
+        helper: fn,
+        parameters,
+      });
+      let evaluations = evaluationCache.get(sourceSummary);
+      if (!evaluations) {
+        evaluations = new Map();
+        evaluationCache.set(sourceSummary, evaluations);
+      }
+      evaluations.set(cacheKey, result);
+      usages.push(...result.usages);
+      unresolved.push(...result.unresolved);
+      exposedLocals.push(...result.exposedLocals);
+      return result.returned;
+    } finally {
+      endHelperReplay(sourceSummary, fn);
     }
   };
 
@@ -4262,7 +4695,10 @@ function scanRuleStateSource(
     // Only a helper whose complete use set is proved may replace its raw
     // declaration walk with the actual invocations below. An exported,
     // escaped, reassigned, unknown or uncalled helper keeps that raw walk.
-    if (ts.isFunctionDeclaration(node) && closedHelpers.has(node)) {
+    if (
+      ts.isFunctionDeclaration(node) &&
+      (closedHelpers.has(node) || seedSkips.has(node))
+    ) {
       helperScopes.set(node, scope);
       return;
     }
@@ -4688,7 +5124,7 @@ function scanRuleStateSource(
       // reaches the same runtime API and emits no variant. It is a blind spot
       // whatever the argument looks like.
       const viaElementAccess = ts.isElementAccessExpression(node.expression);
-      if (!viaElementAccess && ts.isObjectLiteralExpression(spec)) analyzeRule(spec, current);
+      if (!viaElementAccess && ts.isObjectLiteralExpression(spec)) analyzeRule(spec, current, node);
       // The extractor reads an object literal only. A rule handed a binding is
       // lowered by the runtime and dropped by the extractor, so it is a blind
       // spot rather than something to skip.
@@ -4722,6 +5158,23 @@ function scanRuleStateSource(
         helperScopes.has(resolvedHelper)
           ? resolvedHelper
           : null;
+      // A helper in another module registers rules with the values its call
+      // site passes, so the call site is the only place its parameters are
+      // known. The helper's own file cannot read those rules.
+      if (
+        !helper &&
+        ts.isIdentifier(target) &&
+        lookup(current, target.text)?.kind === 'tokenImport'
+      ) {
+        const imported = sourceSummary.resolveSourceFunction(target, source);
+        if (
+          imported &&
+          imported.getSourceFile() !== source &&
+          registersRule(imported)
+        ) {
+          evaluateImportedHelper(imported, node, current);
+        }
+      }
       const helperParameters: Scope | null = helper
         ? {
             parent: helperScopes.get(helper)!,
@@ -4825,7 +5278,46 @@ function scanRuleStateSource(
     versions: createSourceGraphVersionTracker(),
   };
   declareImports(rootScope);
-  visit(source, rootScope);
 
-  return { usages, unresolved, exposedLocals };
+  if (seed) {
+    // The helper's body runs with the bindings its call site proved, so the
+    // module's own declarations are all it needs beside them. The module's
+    // statements are not walked: the body is the only thing this scan reads,
+    // and walking the module would read every sibling function as well.
+    for (const statement of source.statements) {
+      if (!ts.isVariableStatement(statement)) continue;
+      for (const declaration of statement.declarationList.declarations) {
+        if (!ts.isIdentifier(declaration.name) || !declaration.initializer) continue;
+        declareValue(declaration.name, declaration.initializer, rootScope, rootScope);
+      }
+    }
+    const observed = {
+      usages: usages.length,
+      unresolved: unresolved.length,
+      exposedLocals: exposedLocals.length,
+    };
+    const helperScope: Scope = {
+      parent: rootScope,
+      bindings: new Map(seed.parameters),
+      node: seed.helper,
+      sourceSummary,
+      versions: rootScope.versions,
+    };
+    if (seed.helper.body && ts.isBlock(seed.helper.body)) {
+      // The body's own statements are read in the helper's scope, so the
+      // names they bind are the ones the helper returns.
+      for (const statement of seed.helper.body.statements) visit(statement, helperScope);
+    } else if (seed.helper.body) {
+      visit(seed.helper.body, helperScope);
+    }
+    return {
+      usages: usages.slice(observed.usages),
+      unresolved: unresolved.slice(observed.unresolved),
+      exposedLocals: exposedLocals.slice(observed.exposedLocals),
+      returned: returnedBindingOf(seed.helper, helperScope),
+    };
+  }
+
+  visit(source, rootScope);
+  return { usages, unresolved, exposedLocals, returned: null };
 }
