@@ -1,8 +1,6 @@
 {
   "sourceParent": "fe0d7a7d",
-  "sourceChanges": [
-    "packages/adapters/web-component/test/shadow-s2-admission.test.ts"
-  ],
+  "sourceChanges": ["packages/adapters/web-component/test/shadow-s2-admission.test.ts"],
   "command": "node node_modules/vitest/vitest.mjs run packages/adapters/web-component/test/shadow-s2-admission.test.ts --pool=forks --no-file-parallelism",
   "outcome": "failed",
   "passed": 14,

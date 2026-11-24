@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-23T20:20:15.294624+00:00",
+  "headAtRecord": "f14bdf350b0fed011b4817a60f691fc884436982",
+  "workingTreeBoundary": "Shared dirty tree; exact final source bytes are recorded separately, not claimed to be an unchanged entire checkout.",
+  "originalNative": {
+    "head": "0b0b861bf18a18d20aa2f0e627ba477dbab463e5",
+    "run": 45249497810,
+    "artifact": 14858665505,
+    "zipSha256": "2a4ff79729755411164b9e1e99c1a68d32dea3efd88b704909bfc37de27f942a",
+    "scope": "Original Shadcn HEAD503 Retry focus failure, original 1000ms matcher; no candidate native successor claimed."
+  },
+  "finalSourceFiles": {
+    "apps/www/src/components/site-search-composition.ts": "be005c38f2d2a231d408e68a47febf924132fb1d80f8133d2576c4a979140c15",
+    "apps/www/src/components/site-search-composition-paint-cost.test.ts": "77d863b70f96658a42695c75b1b5e3e846b612e97b150914325f06c7c617e48d",
+    "apps/www/src/components/site-search-composition.test.ts": "318981e5750b4c5207d49768fcd1afd7b609534fd821f78bbdd529ef28de3254",
+    "apps/www/src/components/site-search-commands.ts": "faa8fc22e5006ee49d3dd6e2085989023aff7d2ab1d6d82d2ae0a5681ca6b572",
+    "packages/prototypes/base/src/search-primitives/family.ts": "98ffd8a35890f8d50cc0ab167f6b6afbc4b0c53646af919dc189534870de017a"
+  },
+  "executions": {
+    "red": {
+      "exitCode": 1,
+      "reported": {
+        "numTotalTests": 40,
+        "numPassedTests": 36,
+        "numFailedTests": 4,
+        "numPendingTests": 0,
+        "success": false
+      },
+      "assertionStatuses": {
+        "failed": 4,
+        "passed": 36
+      },
+      "accepted": false
+    },
+    "green": {
+      "exitCode": 0,
+      "reported": {
+        "numTotalTests": 65,
+        "numPassedTests": 65,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "assertionStatuses": {
+        "passed": 65
+      },
+      "accepted": true
+    },
+    "final": {
+      "exitCode": 1,
+      "reported": {
+        "numTotalTests": 67,
+        "numPassedTests": 46,
+        "numFailedTests": 0,
+        "numPendingTests": 1,
+        "success": true
+      },
+      "assertionStatuses": {
+        "passed": 46,
+        "pending": 21
+      },
+      "accepted": false
+    },
+    "final-hosts": {
+      "exitCode": 0,
+      "reported": {
+        "numTotalTests": 25,
+        "numPassedTests": 25,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "assertionStatuses": {
+        "passed": 25
+      },
+      "accepted": true
+    },
+    "final-control": {
+      "exitCode": 0,
+      "reported": {
+        "numTotalTests": 42,
+        "numPassedTests": 42,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "assertionStatuses": {
+        "passed": 42
+      },
+      "accepted": true
+    }
+  },
+  "acceptedFinalCases": {
+    "paintCost": 42,
+    "fourHostComposition": 25,
+    "totalDistinct": 67,
+    "separateInvocations": true,
+    "budgetsChanged": false
+  },
+  "incompleteRunDisposition": "The 67-case combined run exited 1 after a Vitest still-running JSON warning. Its JSON success:true is not accepted; 46 actual assertions passed and 21 remained pending. No worker exception or signal cause was present in the log; root confirmed no commit/stash/process-stop interference. Subsequent independent exit-0 executions completed both full files.",
+  "archive": {
+    "path": "receipts.zip",
+    "bytes": 260352,
+    "sha256": "9cde65cd3061bb3a7849c2e4db3ed9c492cb79e7eef10446ec76e01cc66e6d02",
+    "members": {
+      "after/apps/www/src/components/site-search-commands.ts": "faa8fc22e5006ee49d3dd6e2085989023aff7d2ab1d6d82d2ae0a5681ca6b572",
+      "after/apps/www/src/components/site-search-composition-paint-cost.test.ts": "77d863b70f96658a42695c75b1b5e3e846b612e97b150914325f06c7c617e48d",
+      "after/apps/www/src/components/site-search-composition.test.ts": "318981e5750b4c5207d49768fcd1afd7b609534fd821f78bbdd529ef28de3254",
+      "after/apps/www/src/components/site-search-composition.ts": "be005c38f2d2a231d408e68a47febf924132fb1d80f8133d2576c4a979140c15",
+      "after/packages/prototypes/base/src/search-primitives/family.ts": "98ffd8a35890f8d50cc0ab167f6b6afbc4b0c53646af919dc189534870de017a",
+      "before/apps/www/src/components/site-search-composition-paint-cost.test.ts": "ca2e46bda6ea9d6b34bbd12d5fbe9f68e2044a6cda3969d8fbd9ca90c3354ad9",
+      "before/apps/www/src/components/site-search-composition.ts": "17e5059f7f5cad9f656861c042884e65cef0e77bd4d00deb02debd58463eed12",
+      "before/manifest.json": "7f8e48492ac73d84dc729aad5aceaa68fd56b061253f2b34e65ed2f666242b28",
+      "original-0b/search-production/homepage-evidence/search-production/shadcn-failure-head503.json": "1f469ac37de659c4d83976e26255e71f929e4c632e8246f59300bea70f55578e",
+      "original-0b/search-production/homepage-evidence/search-production/shadcn-failure-head503.png": "7547bf244e54c7e9ab5e907c889cb287e51707bd32097080333a9041f27d2186",
+      "original-0b/search-production/receipt.json": "1aad470df9cc1db9812fb8d17c450afcc300fcf82f66b94f748490f90691d61a",
+      "receipts/search-query-focus-final-control-source.json": "cf94be222271e179f4942a007e2869c72a30f710b5cdea1b2185e0787df9a08f",
+      "receipts/search-query-focus-final-control.json": "87637548db6456a5e5e91a6bfea36db74abbb6639858b5af6da065aa0b43e9e7",
+      "receipts/search-query-focus-final-control.log": "a927c871c085da3469699abd3ff58f2c9a6b3e42ff55e356285e3ab35d44c986",
+      "receipts/search-query-focus-final-hosts.json": "8535ac5bf9f18b994e6410e5978643a7dea7722feea14d866d4601e8708b59b3",
+      "receipts/search-query-focus-final-hosts.log": "2b9592540249cedc78be548e80ca9092dbfe88f7ac065beed47d317569921810",
+      "receipts/search-query-focus-final.json": "0fa3ee8a9b2375d45b8580b6a6acde7c425948d09c50c07bdfc1b460e9c8f035",
+      "receipts/search-query-focus-final.log": "b8afbe3d2b42fde1714b0be24af3e03213d3a7ed9bfbcd7436b1291b91d8cc79",
+      "receipts/search-query-focus-green.json": "0ea7e7fd7e2cc239bf08ac9029e366afd91499175bd9dc8c5fd9e355d496def3",
+      "receipts/search-query-focus-green.log": "486b2b85a5f02a33756311fb508cfe271b9f3068277e0bdfef1831c619739f19",
+      "receipts/search-query-focus-red.json": "103479cae58c0f607d78d5a3d550426f6afd2e6e0400e3da8d4606a7c8011002",
+      "receipts/search-query-focus-red.log": "6bd875bb79c4329e18b596815fd0c1937bf1811b0fe4a752915c251ac1765d24",
+      "red/site-search-composition-paint-cost.test.ts": "a91d61a4e5d2d3e64819d05ac12bcb798f9eac230d7d5f95ecf1ce9964768d8a"
+    }
+  },
+  "limits": [
+    "The 40-case red/first-green and 42-case final control file use deterministic public API boundaries.",
+    "The existing 25-case composition suite uses actual loaders/adapters and four frameworks under synthetic DOM, not native Chromium.",
+    "Native production and affected disposal acceptance must run on this new composition source."
+  ],
+  "independentReview": {
+    "reviewer": "parallel props_policy agent, read-only source review",
+    "compositionSha256": "be005c38f2d2a231d408e68a47febf924132fb1d80f8133d2576c4a979140c15",
+    "testSha256": "77d863b70f96658a42695c75b1b5e3e846b612e97b150914325f06c7c617e48d",
+    "result": "No blocking issue found in the bounded observer/retirement change.",
+    "readScope": [
+      "source identity reservation before subscription",
+      "old disposer and registration-time reentry",
+      "terminal disconnect tombstone",
+      "stale callback guard",
+      "single query entry signal per opening",
+      "existing paint/author-commit/presentation/user-intent guards",
+      "nine new controls including synchronous registration disposal and disconnect"
+    ],
+    "reranTests": false,
+    "githubApproval": false,
+    "nativeSuccessClaim": false
+  }
+}

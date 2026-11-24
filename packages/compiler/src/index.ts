@@ -147,3 +147,9 @@ export { migrateNativeSupport } from './native-support-migration';
 
 export { observableSemantics } from './observable-semantics';
 export type { ObservableSemantics, PropsUpdatePolicy } from './observable-semantics';
+export { analyzePropsUpdates } from './props-update-analysis';
+export type {
+  PropsUpdateRead,
+  PropsUpdateAdvisory,
+  PropsUpdateAnalysis,
+} from './props-update-analysis';

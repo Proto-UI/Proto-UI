@@ -31,6 +31,7 @@ type Atom =
   | { kind: 'literal'; value: string | number | boolean | null }
   | { kind: 'closure'; fn: FunctionIR; scope: Scope }
   | { kind: 'native'; type: Extract<ValueType, { kind: 'callable' }> }
+  | { kind: 'capture-getter'; capture: Capture; member: CaptureGetterMember }
   | { kind: 'named-state'; state: CapturedState }
   | { kind: 'cell'; initial: Known; tracked: boolean }
   | { kind: 'record'; fields: Map<string, Known>; tracked?: boolean }
@@ -38,6 +39,7 @@ type Atom =
   | ({ kind: 'capture'; hookId?: string } & CaptureContents);
 type Closure = Extract<Atom, { kind: 'closure' }>;
 type Capture = Extract<Atom, { kind: 'capture' }>;
+type CaptureGetterMember = 'getState' | 'getMethod' | 'getAsHook' | 'getAsHookHandle';
 interface CaptureContents {
   render?: Known;
   methods: Map<string, Known>;
@@ -207,6 +209,8 @@ function analyzeCallableFlow(
   const analyzedCallbacks = new Set<string>();
   const callbacks: Registration[] = [];
   const outwardRoots = new Map<string, { values: Known; execution: Execution; type?: ValueType }>();
+  const captureRecords = new WeakMap<Capture, Map<'methods' | 'artifacts', RecordValue>>();
+  const childRecords = new WeakMap<Installation, Map<string, RecordValue>>();
   const exceptionSinks: Store[][] = [];
   let reachable = true;
   interface Flow {
@@ -453,6 +457,8 @@ function analyzeCallableFlow(
           return ['literal', value.value];
         case 'native':
           return ['native', value.type];
+        case 'capture-getter':
+          return ['capture-getter', value.member, visit(value.capture, depth + 1)];
         case 'named-state':
           return ['named-state', value.state.name, value.state.type];
         case 'cell':
@@ -695,6 +701,8 @@ function analyzeCallableFlow(
       return branches(
         values.map((value) => () => {
           if (value.kind === 'closure') return call(value, args, execution);
+          if (value.kind === 'capture-getter')
+            return captureLookup(value.capture, value.member, args[0] ?? UNDEFINED);
           if (value.kind === 'native') {
             // A host-supplied callable has an explicit signature. Supplied closures
             // may be retained by that external consumer and become outward roots.
@@ -766,7 +774,20 @@ function analyzeCallableFlow(
         continue;
       }
       if (value.kind === 'closure') callbacks.push({ closure: value, execution, outward: true });
-      else if (value.kind === 'getter')
+      else if (value.kind === 'capture-getter') {
+        const contents = captureContents(value.capture);
+        if (value.member === 'getMethod')
+          for (const method of contents.methods.values())
+            pending.push(...method.map((value) => ({ value, type: undefined })));
+        else if (value.member === 'getAsHook' || value.member === 'getAsHookHandle')
+          for (const children of contents.children.values())
+            for (const child of children)
+              if (child) {
+                pending.push(...child.handle.map((value) => ({ value, type: undefined })));
+                if (value.member === 'getAsHook')
+                  pending.push({ value: child.capture, type: undefined });
+              }
+      } else if (value.kind === 'getter')
         pending.push(...value.callable.map((value) => ({ value, type: undefined })));
       else if (value.kind === 'record')
         for (const [name, field] of fields(value))
@@ -827,6 +848,136 @@ function analyzeCallableFlow(
     }
   }
 
+  function captureLookup(capture: Capture, member: CaptureGetterMember, keys: Known): Known {
+    return merge(
+      keys.map((key) => {
+        if (key.kind !== 'literal' || typeof key.value !== 'string') return UNKNOWN;
+        const name = key.value;
+        const contents = captureContents(capture);
+        if (member === 'getMethod') return contents.methods.get(name) ?? UNDEFINED;
+        if (member === 'getState') {
+          const hook = ir.hooks.find((hook) => hook.id === capture.hookId);
+          const state = hook?.capture?.states.find((state) => state.name === name);
+          // State capabilities do not manufacture a source callable. Their
+          // operations retain their own checked phase and receiver rules.
+          return state ? hostValue(state.type) : UNDEFINED;
+        }
+        return (contents.children.get(name) ?? [undefined]).flatMap((child): Known => {
+          if (!child) return UNDEFINED;
+          if (member === 'getAsHookHandle') return child.handle;
+          return childRecord(child, name);
+        });
+      })
+    );
+  }
+
+  function childRecord(child: Installation, name: string): Known {
+    let records = childRecords.get(child);
+    if (!records) childRecords.set(child, (records = new Map()));
+    let record = records.get(name);
+    if (!record) {
+      record = {
+        kind: 'record',
+        fields: new Map<string, Known>([
+          ['name', [{ kind: 'literal', value: name }]],
+          ['result', child.result ?? [child.capture]],
+          ['handle', child.handle],
+        ]),
+      };
+      records.set(name, record);
+    }
+    return [record];
+  }
+
+  function captureRecord(
+    capture: Capture,
+    member: 'methods' | 'artifacts',
+    contents: Map<string, Known>
+  ): Known {
+    let records = captureRecords.get(capture);
+    if (!records) captureRecords.set(capture, (records = new Map()));
+    let record = records.get(member);
+    if (!record) {
+      record = { kind: 'record', fields: new Map() };
+      records.set(member, record);
+    }
+    // Runtime publishes one frozen bag per installation. Repeated property
+    // reads must not allocate new provenance locations and make an ordinary
+    // alias-refresh callback look recursively unbounded. Keep current branch
+    // facts in the flow store so joins still retain every installed method.
+    store.records.set(record, contents);
+    return [record];
+  }
+
+  function captureMembers(capture: Capture): Map<string, Known> {
+    const contents = captureContents(capture);
+    const hook = ir.hooks.find((hook) => hook.id === capture.hookId);
+    const methodCertain = [...contents.methods.values()].some(
+      (values) =>
+        values.length > 0 &&
+        values.every((value) => value.kind !== 'undefined' && value.kind !== 'uninitialized')
+    );
+    const childCertain = [...contents.children.values()].some(
+      (children) => children.length > 0 && children.every((child) => child !== undefined)
+    );
+    const maybeAbsent = (value: Known, certain: boolean): Known =>
+      certain ? value : merge([value, UNDEFINED]);
+    const methods: Known = contents.methods.size
+      ? maybeAbsent(captureRecord(capture, 'methods', contents.methods), methodCertain)
+      : UNDEFINED;
+    const members = new Map<string, Known>([
+      ['render', contents.render ?? UNDEFINED],
+      ['methods', methods],
+      // These are opaque public receipts, not an inferred source-call graph.
+      ...['props', 'state', 'context', 'event', 'feedback', 'disposers', 'asHooks'].map(
+        (name): [string, Known] => [name, UNKNOWN]
+      ),
+      ['stateHandles', UNKNOWN],
+    ]);
+    for (const member of ['getState', 'getMethod', 'getAsHook', 'getAsHookHandle'] as const) {
+      const present =
+        member === 'getState'
+          ? !!hook?.capture?.states.length
+          : member === 'getMethod'
+            ? contents.methods.size > 0
+            : contents.children.size > 0;
+      const certain =
+        member === 'getMethod' ? methodCertain : member === 'getState' ? false : childCertain;
+      members.set(
+        member,
+        present ? maybeAbsent([{ kind: 'capture-getter', capture, member }], certain) : UNDEFINED
+      );
+    }
+    // Declaration metadata is a may-inventory: conditional State/Event
+    // declarations do not prove that this installation published artifacts.
+    // An empty capture has no bag, and conditional methods/children retain
+    // their absent branch instead of making a false truthiness proof.
+    const artifactsPossible =
+      contents.methods.size > 0 ||
+      contents.children.size > 0 ||
+      !!hook?.capture?.states.length ||
+      !!hook?.capture?.events?.length;
+    members.set(
+      'artifacts',
+      artifactsPossible
+        ? maybeAbsent(
+            captureRecord(
+              capture,
+              'artifacts',
+              new Map<string, Known>([
+                ['stateHandles', UNKNOWN],
+                ['eventKeys', UNKNOWN],
+                ['methods', methods],
+                ['asHooks', UNKNOWN],
+              ])
+            ),
+            methodCertain || childCertain
+          )
+        : UNDEFINED
+    );
+    return members;
+  }
+
   function property(values: Known, name: string, execution: Execution, span: SourceSpan): Known {
     if (!reachable) return [];
     return branches(
@@ -840,8 +991,7 @@ function analyzeCallableFlow(
             )
           );
         }
-        if (value.kind === 'capture' && name === 'render')
-          return captureContents(value).render ?? UNDEFINED;
+        if (value.kind === 'capture') return captureMembers(value).get(name) ?? UNDEFINED;
         if (value.kind === 'undefined' || (value.kind === 'literal' && value.value === null))
           return UNDEFINED;
         return UNKNOWN;
@@ -876,6 +1026,8 @@ function analyzeCallableFlow(
             copy.set(name, property([value], name, execution, span));
             if (!reachable) return [];
           }
+        else if (value.kind === 'capture')
+          for (const [name, field] of captureMembers(value)) copy.set(name, field);
         else if (type)
           for (const field of objectFields(type) ?? []) {
             if (field.accessor) {
@@ -1259,18 +1411,7 @@ function analyzeCallableFlow(
             return receiver.flatMap((item) =>
               item.kind === 'capture'
                 ? (captureContents(item).children.get(key) ?? [undefined]).flatMap((child) =>
-                    child
-                      ? [
-                          {
-                            kind: 'record' as const,
-                            fields: new Map<string, Known>([
-                              ['name', [{ kind: 'literal', value: key }]],
-                              ['result', child.result ?? [child.capture]],
-                              ['handle', child.handle],
-                            ]),
-                          },
-                        ]
-                      : UNDEFINED
+                    child ? childRecord(child, key) : UNDEFINED
                   )
                 : UNKNOWN
             );

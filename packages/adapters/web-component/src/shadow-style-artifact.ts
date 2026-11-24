@@ -26,7 +26,7 @@ const artifactOwners = new WeakMap<ShadowRoot, ShadowStyleArtifactOwner>();
 // fixed v1 ABI. Repeated owners may share that result, never the input artifact
 // or its accessor values. Bound both the entry count and retained UTF-16 units;
 // an oversized stylesheet is still validated without retaining it here.
-const VALIDATED_SELECTOR_LIMIT = 128;
+const VALIDATED_SELECTOR_LIMIT = 32;
 const VALIDATED_SELECTOR_CODE_UNITS = 1_048_576;
 const validatedSelectors = new Set<string>();
 let validatedSelectorCodeUnits = 0;

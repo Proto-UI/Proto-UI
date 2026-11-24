@@ -23,6 +23,23 @@ function reads(root: ts.Node) {
     .map((n) => n.arguments[0]);
 }
 
+function withModuleFiles(
+  files: Record<string, string>,
+  run: (makeSource: (text: string) => ts.SourceFile) => void
+) {
+  const directory = realpathSync(mkdtempSync(path.join(tmpdir(), 'hook-source-module-fixture-')));
+  try {
+    writeFileSync(path.join(directory, 'tsconfig.json'), '{}');
+    for (const [name, text] of Object.entries(files))
+      writeFileSync(path.join(directory, name), text);
+    run((text) =>
+      ts.createSourceFile(path.join(directory, 'entry.ts'), text, ts.ScriptTarget.Latest, true)
+    );
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+}
+
 describe('operation-owned lexical indexes', () => {
   it('preserves block shadowing, pre-declaration identity, parameters and function var hoisting', () => {
     const file = source(`const value = 'outer';
@@ -434,6 +451,24 @@ describe('indexed import bindings', () => {
   });
 
   it('does not carry import bindings into a replacement source', () => {
+    withModuleFiles({ 'a.ts': 'export const value = 1;' }, (makeSource) => {
+      const context = createHookSourceModuleContext();
+      const before = makeSource(`import { value } from './a'; read(value);`);
+      const first = context.moduleForSource(before);
+      const target = context.resolveModule(before.fileName, './a')!;
+      const exported = nodes(target.source, ts.isVariableDeclaration)[0];
+      expect(context.resolveReference(reads(before)[0], first)?.declaration).toBe(exported);
+      const after = makeSource(`const value = 'local'; read(value);`);
+      const second = context.moduleForSource(after);
+      expect(context.resolveReference(reads(after)[0], second)?.declaration).toBe(
+        nodes(after, ts.isVariableDeclaration)[0]
+      );
+      // The old immutable source retains its import and resolves the real export.
+      expect(context.resolveReference(reads(before)[0], first)?.declaration).toBe(exported);
+    });
+  });
+
+  it('does not carry Core import bindings into a replacement source', () => {
     const context = createHookSourceModuleContext();
     const before = source(
       `import { definePrototype as value } from '@proto.ui/core'; read(value);`
@@ -491,11 +526,11 @@ describe('indexed export declarations', () => {
       export const kept = 1;`);
     const context = createHookSourceModuleContext();
     const module = context.moduleForSource(file);
+    const kept = nodes(file, ts.isVariableDeclaration).find((n) => n.name.getText() === 'kept');
+    expect(kept).toBeDefined();
     expect(context.resolveExport(module, 'erased')).toBeNull();
     expect(context.resolveExport(module, 'gone')).toBeNull();
-    expect(context.resolveExport(module, 'kept')?.declaration).toBe(
-      nodes(file, ts.isVariableDeclaration).find((node) => node.name.getText() === 'kept')
-    );
+    expect(context.resolveExport(module, 'kept')?.declaration).toBe(kept);
   });
 
   it('keeps old and replacement export identities independent after either cache is populated', () => {
@@ -511,6 +546,25 @@ describe('indexed export declarations', () => {
       expect(context.resolveExport(second, 'value')?.declaration).toBe(newDeclaration);
       expect(context.resolveExport(first, 'value')?.declaration).toBe(oldDeclaration);
     }
+  });
+
+  it('enumerates forwarded exports through a different immutable source at the same path', () => {
+    const exported = 'export const value = 1;';
+    withModuleFiles({ 'entry.ts': exported }, (makeSource) => {
+      const context = createHookSourceModuleContext();
+      const before = makeSource("export * from './entry';");
+      const first = context.moduleForSource(before);
+      const after = makeSource(exported);
+      const second = context.moduleForSource(after);
+      const replacement = nodes(after, ts.isVariableDeclaration)[0];
+      expect(context.resolveExport(first, 'value')?.declaration).toBe(replacement);
+      expect(context.resolveExports(first).map((symbol) => symbol.declaration)).toEqual([
+        replacement,
+      ]);
+      expect(context.resolveExports(second).map((symbol) => symbol.declaration)).toEqual([
+        replacement,
+      ]);
+    });
   });
 
   it('keeps conflicting same-name exports ambiguous and stable across repeats', () => {
@@ -578,6 +632,39 @@ describe('indexed member-write conflict scans', () => {
       function inner() { const obj = { member: 9 }; obj.member = 10; }
       read(obj.member);`);
     expect(resolved?.declaration).toBeDefined();
+  });
+
+  it('keeps imported-member conflicts tied to the immutable origin source', () => {
+    withModuleFiles({ 'owner.ts': 'export const obj = { member: 1 };' }, (makeSource) => {
+      const context = createHookSourceModuleContext();
+      const before = makeSource(`import { obj } from './owner'; read(obj.member);`);
+      const first = context.moduleForSource(before);
+      const access = nodes(before, ts.isPropertyAccessExpression)[0];
+      const original = context.resolveReference(access, first);
+      expect(original?.declaration).toBeDefined();
+      const after = makeSource(`import { obj } from './owner'; obj.member = 2; read(obj.member);`);
+      const second = context.moduleForSource(after);
+      const replacement = nodes(after, ts.isPropertyAccessExpression).at(-1)!;
+      for (let i = 0; i < 3; i++) {
+        expect(context.resolveReference(replacement, second)).toBeNull();
+        expect(context.resolveReference(access, first)?.declaration).toBe(original?.declaration);
+      }
+    });
+  });
+
+  it('rejects writes from a different immutable source with the same module path', () => {
+    const exported = 'export const obj = { member: 1 };';
+    withModuleFiles({ 'entry.ts': exported }, (makeSource) => {
+      const context = createHookSourceModuleContext();
+      const before = makeSource(`import { obj } from './entry'; obj.member = 2; read(obj.member);`);
+      const first = context.moduleForSource(before);
+      const after = makeSource(exported);
+      context.moduleForSource(after);
+      const replacement = nodes(after, ts.isVariableDeclaration)[0];
+      const access = nodes(before, ts.isPropertyAccessExpression).at(-1)!;
+      expect(context.resolveReference(access.expression, first)?.declaration).toBe(replacement);
+      expect(context.resolveReference(access, first)).toBeNull();
+    });
   });
 
   it('keeps conflict facts per immutable source on same-path replacement', () => {

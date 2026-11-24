@@ -19733,7 +19733,16 @@ for (const scenario of ['exact', 'changed-source', 'foreign-owner', 'unlisted-im
   });
 }
 
-for (const reviewed of ['packages/core/src/internal.ts', 'packages/compiler/src/shader-plan.ts']) {
+for (const reviewed of [
+  'packages/core/src/internal.ts',
+  'packages/core/src/spec/owned-template-blueprint.ts',
+  'packages/core/src/spec/template.ts',
+  'packages/core/src/spec/svg-tags.ts',
+  'packages/compiler/src/shader-plan.ts',
+  'packages/compiler/src/gpui-source.ts',
+  'packages/compiler/src/ir-validation.ts',
+  'packages/compiler/src/targets.ts',
+]) {
   for (const scenario of [
     'exact',
     'changed-source',
@@ -19774,6 +19783,61 @@ for (const reviewed of ['packages/core/src/internal.ts', 'packages/compiler/src/
           issue.includes('raw Proto UI import') && issue.includes(`in \`${owner}\` escapes`)
       );
       assert.equal(rejected, scenario !== 'exact');
+    });
+  }
+}
+
+for (const source of [
+  'packages/compiler/src/browser/client.ts',
+  'packages/compiler/src/browser/worker.ts',
+]) {
+  for (const scenario of [
+    'exact',
+    'wrong-owner',
+    'extra-owner',
+    'changed-bytes',
+    'renewed-fingerprint',
+    'adjacent-path',
+    'symlink',
+    'ancestor-symlink',
+    'missing',
+  ]) {
+    test(`browser compiler host source binding: ${path.basename(source)} ${scenario}`, () => {
+      const root = createRoot();
+      const relative = scenario === 'adjacent-path' ? source.replace('.ts', '-foreign.ts') : source;
+      const target = path.join(root, relative);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(new URL(`../../../${source}`, import.meta.url), target);
+      if (scenario === 'renewed-fingerprint')
+        fs.appendFileSync(target, '\n// Unreviewed bytes before rebinding\n');
+      const owners =
+        scenario === 'wrong-owner'
+          ? ['www.demo.code-panel']
+          : scenario === 'extra-owner'
+            ? ['www.demo.raw-adapter-runtimes', 'www.demo.code-panel']
+            : ['www.demo.raw-adapter-runtimes'];
+      writeValidMatrices(root, {}, {}, { websiteBindings: [[relative, owners]] });
+      if (scenario === 'changed-bytes')
+        fs.appendFileSync(target, '\n// Unreviewed bytes after binding\n');
+      if (scenario === 'symlink') {
+        fs.renameSync(target, target + '.copy');
+        fs.symlinkSync(target + '.copy', target);
+      }
+      if (scenario === 'ancestor-symlink') {
+        const parent = path.dirname(target);
+        fs.renameSync(parent, parent + '-copy');
+        fs.symlinkSync(parent + '-copy', parent, 'dir');
+      }
+      if (scenario === 'missing') fs.unlinkSync(target);
+      const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+      if (scenario === 'exact') assert.equal(message, '');
+      else if (scenario === 'adjacent-path')
+        assert.match(message, /source binding must name exactly one/);
+      else
+        assert.match(
+          message,
+          /exact browser compiler host source, digest and runtime owner remain unverified/
+        );
     });
   }
 }

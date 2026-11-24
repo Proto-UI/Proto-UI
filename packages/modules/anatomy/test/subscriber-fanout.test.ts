@@ -42,6 +42,88 @@ function fixture(getRootTarget?: AnatomyRootTargetGetter) {
 }
 
 describe('Anatomy family subscriber notification', () => {
+  it('publishes versions before reentry and keeps a restored order silent for later recipients', () => {
+    const targets = new Map<
+      unknown,
+      { rank: number; compareDocumentPosition(other: unknown): number }
+    >();
+    const f = fixture((instance) => targets.get(instance) ?? null);
+    const items = [f.make('item'), f.make('item')];
+    const instances = items.map((owner) => owner.port.resolveSelfInstance());
+    for (const [rank, owner] of [f.root, ...items].entries())
+      targets.set(owner.port.resolveSelfInstance(), {
+        rank,
+        compareDocumentPosition(other) {
+          return this.rank < (other as { rank: number }).rank ? 4 : 2;
+        },
+      });
+    const first = f.make();
+    const later = f.make();
+    const seen: Array<{ version: number; order: unknown[] }> = [];
+    const laterOrder = vi.fn();
+    let restored = false;
+    first.port.subscribeOrder(f.family, () => {
+      seen.push({
+        version: first.port.order.version(f.family)!,
+        order: first.port.order.partsOf(f.family, 'item')!.map(first.port.resolvePartInstance),
+      });
+      if (restored) return;
+      restored = true;
+      targets.get(instances[0])!.rank = 1;
+      targets.get(instances[1])!.rank = 2;
+      f.notify();
+    });
+    later.port.subscribeOrder(f.family, laterOrder);
+
+    targets.get(instances[0])!.rank = 2;
+    targets.get(instances[1])!.rank = 1;
+    f.notify();
+    expect(seen).toEqual([
+      { version: 1, order: [instances[1], instances[0]] },
+      { version: 2, order: instances },
+    ]);
+    expect(laterOrder).not.toHaveBeenCalled();
+    expect(later.port.order.version(f.family)).toBe(0);
+    f.notify();
+    expect(seen).toHaveLength(2);
+    expect(first.port.order.version(f.family)).toBe(2);
+    expect(laterOrder).not.toHaveBeenCalled();
+  });
+
+  it('distinguishes retirement from the same root identity returning without duplicate events', () => {
+    const f = fixture();
+    f.make('item');
+    const observer = f.make();
+    const seen: Array<{ version: number; items: number | null }> = [];
+    observer.port.subscribeOrder(f.family, () => {
+      seen.push({
+        version: observer.port.order.version(f.family)!,
+        items: observer.port.order.tryPartsOf(f.family, 'item')?.length ?? null,
+      });
+    });
+    f.notify();
+    expect(seen).toEqual([]);
+    expect(observer.port.order.version(f.family)).toBe(0);
+
+    const added = f.make('item');
+    f.notify();
+    added.dispose();
+    f.root.dispose();
+    const replacementRoot = f.make('root');
+    replacementRoot.port.syncStructure();
+    replacementRoot.port.syncStructure();
+    expect(seen).toEqual([
+      { version: 1, items: 2 },
+      { version: 2, items: 1 },
+      { version: 3, items: null },
+      { version: 4, items: 1 },
+    ]);
+    observer.dispose();
+    f.make('item');
+    replacementRoot.port.syncStructure();
+    expect(seen).toHaveLength(4);
+  });
+
   it('observes comparator replacement during repeated host reads for a later recipient', () => {
     type Target = { rank: number; compareDocumentPosition(other: unknown): number };
     const forward = function (this: Target, other: unknown) {

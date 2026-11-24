@@ -37,6 +37,35 @@ import {
 import { waitForServerReadiness } from './server-readiness.mjs';
 import { fileURLToPath } from 'node:url';
 import { safeError, safeUrl } from './search-startup-profile.mjs';
+import { generalJobPlan } from './general-check-plan.mjs';
+
+// Synthetic complete producer controls, never execution or browser evidence.
+const generalCheckControl = (job, sha, specBase = null) => {
+  const steps = generalJobPlan(
+    JSON.parse(readFileSync(path.join(runtimeRoot, 'package.json'), 'utf8')),
+    job,
+    specBase
+  );
+  const source = cleanSourceControl(sha);
+  return {
+    job,
+    specBase,
+    steps,
+    sourceBefore: source.before,
+    sourceAfter: source.after,
+    sourceStable: true,
+    passed: true,
+    results: steps.map((step) => ({
+      ...step,
+      passed: true,
+      exitCode: 0,
+      signal: null,
+      startedAt: '2026-11-23T00:00:00.000Z',
+      finishedAt: '2026-11-23T00:00:01.000Z',
+      logFile: `${step.id.replaceAll(':', '-')}.log`,
+    })),
+  };
+};
 
 import {
   BROWSER_SUITES,
@@ -1213,6 +1242,9 @@ describe('bounded CI runtime shards (no browser or server)', () => {
       ...selection,
       source: cleanSourceControl(selection.checkoutSha),
       report: report(selection),
+      ...(selection.phase === 'general'
+        ? { generalChecks: generalCheckControl('general', selection.checkoutSha) }
+        : {}),
     }));
   it('registers standalone Neo Input once and preserves its captures in the uploaded runtime directory', () => {
     const suite = 'apps/www/src/content/docs/zh-cn/demo-brutalist-input.browser.test.ts';
@@ -1517,23 +1549,30 @@ describe('bounded CI runtime shards (no browser or server)', () => {
 
 describe('CI partial-rerun receipt protocol (no browser or server)', () => {
   const sha = 'a'.repeat(40);
+  const specBase = 'd'.repeat(40);
   const context = { runId: '123456', attempt: 2, eventSha: sha, checkoutSha: sha };
   const needs = Object.fromEntries(
-    ['test-plan', 'test-general', 'test-browser'].map((job) => [job, { result: 'success' }])
+    ['cycle-plan', 'test-plan', 'test-governance', 'test-general', 'test-browser'].map((job) => [
+      job,
+      { result: 'success', ...(job === 'cycle-plan' ? { outputs: { spec_base: specBase } } : {}) },
+    ])
   );
   const complete = (binding = context, attempt = 1) => {
     const plan = createCiPlan(binding.checkoutSha);
-    return runtimeSlots.map((slot, index) => {
+    return runtimeSlots.map((slot) => {
       const selection =
-        index === 0
+        slot === 'plan' || slot === 'governance'
           ? null
-          : index === 1
+          : slot === 'general'
             ? runtimeSelection('general', undefined, plan)
-            : runtimeSelection('browser', `${index - 1}/${BROWSER_SHARD_COUNT}`, plan);
+            : runtimeSelection('browser', slot.slice('browser-'.length).replace('-of-', '/'), plan);
       const payload = selection
         ? {
             ...selection,
             source: cleanSourceControl(selection.checkoutSha),
+            ...(selection.phase === 'general'
+              ? { generalChecks: generalCheckControl('general', selection.checkoutSha) }
+              : {}),
             report: {
               success: true,
               numFailedTests: 0,
@@ -1548,13 +1587,89 @@ describe('CI partial-rerun receipt protocol (no browser or server)', () => {
               })),
             },
           }
-        : plan;
+        : slot === 'governance'
+          ? generalCheckControl('governance', binding.checkoutSha, specBase)
+          : plan;
       const receipt = { schemaVersion: 1, ...binding, attempt, slot, outcome: 'success', payload };
       return { name: artifactName(receipt), receipt };
     });
   };
   it('accepts an aggregate-only rerun with all original successful slots', () => {
     assert.doesNotThrow(() => assertCiGate(needs, complete(), context));
+  });
+  it('requires the independent complete governance receipt and the cycle-selected spec base', () => {
+    const artifacts = complete();
+    assert.throws(
+      () =>
+        assertCiGate(
+          needs,
+          artifacts.filter(({ receipt }) => receipt.slot !== 'governance'),
+          context
+        ),
+      /Missing logical slot/
+    );
+    for (const mutate of [
+      (r) => {
+        r.payload.results.pop();
+      },
+      (r) => {
+        r.payload.results[0].exitCode = 1;
+      },
+      (r) => {
+        r.payload.specBase = sha;
+      },
+      (r) => {
+        r.payload.sourceBefore.dirty = true;
+        r.payload.sourceAfter.dirty = true;
+      },
+      (r) => {
+        r.payload.sourceAfter.checkoutSha = specBase;
+      },
+    ]) {
+      const altered = complete();
+      mutate(altered.find(({ receipt }) => receipt.slot === 'governance').receipt);
+      assert.throws(() => assertCiGate(needs, altered, context));
+    }
+    const wrongCycle = structuredClone(needs);
+    wrongCycle['cycle-plan'].outputs.spec_base = sha;
+    assert.throws(() => assertCiGate(wrongCycle, complete(), context), /Spec base drift/);
+  });
+  it('rejects a green Vitest report when general preparation is missing or failed', () => {
+    for (const mutate of [
+      (r) => {
+        delete r.payload.generalChecks;
+      },
+      (r) => {
+        r.payload.generalChecks.results[1].exitCode = 1;
+      },
+      (r) => {
+        r.payload.generalChecks.results.splice(1, 1);
+      },
+      (r) => {
+        r.payload.generalChecks.sourceAfter.worktreeSha256 = 'd'.repeat(64);
+      },
+    ]) {
+      const artifacts = complete();
+      mutate(artifacts.find(({ receipt }) => receipt.slot === 'general').receipt);
+      assert.throws(() => assertCiGate(needs, artifacts, context));
+    }
+  });
+  it('allows a successful governance-only rerun but never falls back across its later cancellation', () => {
+    const artifacts = complete();
+    artifacts.find(({ receipt }) => receipt.slot === 'governance').receipt.outcome = 'failure';
+    const later = complete(context, 2).find(({ receipt }) => receipt.slot === 'governance');
+    artifacts.push(later);
+    assert.doesNotThrow(() => assertCiGate(needs, artifacts, context));
+    later.receipt.outcome = 'cancelled';
+    assert.throws(
+      () => assertCiGate(needs, artifacts, context),
+      /Latest governance attempt did not succeed/
+    );
+    assert.throws(
+      () =>
+        assertCiGate({ ...needs, 'test-governance': { result: 'cancelled' } }, complete(), context),
+      /Required job test-governance did not succeed/
+    );
   });
   it('accepts only the failed shard rerunning while plan/general/other shards stay at attempt one', () => {
     const artifacts = complete();
@@ -1768,7 +1883,7 @@ describe('CI partial-rerun receipt protocol (no browser or server)', () => {
     assert.equal(download.with['merge-multiple'], false);
     assert.equal(download.with['github-token'], undefined);
     assert.equal(workflow.permissions, undefined);
-    for (const name of ['test-plan', 'test-general', 'test-browser']) {
+    for (const name of ['test-plan', 'test-governance', 'test-general', 'test-browser']) {
       const finish = jobs[name].steps.find((step) => step.run?.includes('runtime-ci.mjs finish'));
       assert.equal(finish.if, 'always()');
       assert.equal(finish.env.RUNTIME_CI_OUTCOME, '${{ job.status }}');
@@ -1789,7 +1904,7 @@ describe('CI partial-rerun receipt protocol (no browser or server)', () => {
 // https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability
 // This targeted source guard is not a substitute for GitHub workflow admission.
 describe('CI evidence directory context availability', () => {
-  for (const name of ['test-general', 'test-browser']) {
+  for (const name of ['test-governance', 'test-general', 'test-browser']) {
     it(`${name} resolves RUNNER_TEMP only after a runner is available`, () => {
       const job = YAML.parse(readFileSync('.github/workflows/ci.yml', 'utf8')).jobs[name];
       for (const [key, value] of Object.entries(job.env ?? {})) {
