@@ -37,6 +37,12 @@ const shaPattern = /^[0-9a-f]{64}$/;
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 const MAX_TOTAL_BYTES = 64 * 1024 * 1024;
 const CONTEXT_SCOPE_SHA256 = '12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794';
+// Exact Context ABI bytes retained by the published IR5/IR6 CLI captures at
+// ce56274971f51590c8bccb33c1a2763637a88fc5 and 08d8f9d9513003dab8b7ee2faf11609ad3ba1f84.
+// The ancestor-read extension is additive; accepting these complete hashes is
+// not permission to accept a modified helper with the same v1 filename.
+const PUBLISHED_CONTEXT_SCOPE_SHA256 =
+  '22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c';
 const LEGACY = new Map([
   [
     nativeInteractionArtifact.path,
@@ -192,7 +198,12 @@ function verifyManifest(id: string, anchor: string, snapshot: Snapshot): Verifie
     record(value) &&
       value.profile === 'vue2-source-v1' &&
       value.backend === value.profile &&
-      (value.irVersion === 5 || value.irVersion === 6 || value.irVersion === IR_VERSION) &&
+      // Emitted-artifact migration preserves historical provenance. It does
+      // not import or reinterpret any of these older serialized IR schemas.
+      (value.irVersion === 5 ||
+        value.irVersion === 6 ||
+        value.irVersion === 7 ||
+        value.irVersion === IR_VERSION) &&
       Array.isArray(value.artifacts),
     'Unknown migration provenance/profile/version'
   );
@@ -323,8 +334,7 @@ async function normalizeInteraction(input: VerifiedInput): Promise<OutputArtifac
     );
   const selected = artifacts.filter(
     (file) =>
-      file.path.startsWith('.proto-ui/interaction/') &&
-      file.path !== nativeVue2AssociationsArtifact.path
+      nativeSupportSourcePath(file.path) && file.path !== nativeVue2AssociationsArtifact.path
   );
   const metadata = input.manifest.nativeSupport;
   if (!selected.length) {
@@ -452,7 +462,12 @@ async function normalizeContext(artifacts: readonly OutputArtifact[]): Promise<O
             file.contents === legacyNativeContextScopeArtifact.contents,
           'Legacy Context migration source anchor changed'
         );
-      } else required(file.contents === current.contents, 'Unknown or modified Context scope ABI');
+      } else
+        required(
+          file.contents === current.contents ||
+            hash(file.contents) === PUBLISHED_CONTEXT_SCOPE_SHA256,
+          'Unknown or modified Context scope ABI'
+        );
       continue;
     }
     const lines = file.contents.split('\n');
@@ -535,12 +550,16 @@ function validateSharedImports(
     }
   }
 }
+function nativeSupportSourcePath(filename: string): boolean {
+  return ['.proto-ui/interaction/', '.proto-ui/host-web/', '.proto-ui/target-alignment/'].some(
+    (prefix) => filename.startsWith(prefix)
+  );
+}
 function sharedSource(file: OutputArtifact): boolean {
   return (
     file.kind === 'source' &&
     file.path.endsWith('.ts') &&
-    (file.path.startsWith('.proto-ui/interaction/') ||
-      file.path === '.proto-ui/context/scope-v1.ts')
+    (nativeSupportSourcePath(file.path) || file.path === '.proto-ui/context/scope-v1.ts')
   );
 }
 function sharedPath(original: string): string {

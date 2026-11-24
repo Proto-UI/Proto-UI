@@ -213,11 +213,8 @@ describe('prototypes/shadcn: select', () => {
       expect(lifecycle).toEqual(mounted);
       expect(await frame()).toBeGreaterThan(0);
       expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
-      expect(content.parentElement).toBe(document.body);
-      expect(lifecycle).toEqual(mounted);
-      expect(await frame()).toBeGreaterThan(0);
-      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
       expect(content.parentElement).toBe(root);
+      expect(content.querySelector('shadcn-select-item')).toBe(alpha);
       expect(lifecycle).toEqual([
         ...mounted,
         { type: 'unmount.begin', epoch },

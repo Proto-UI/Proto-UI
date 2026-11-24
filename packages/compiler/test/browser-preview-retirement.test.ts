@@ -5,6 +5,7 @@ import {
   type BrowserTargetAssets,
 } from '../../../apps/www/src/components/PrototypePreviewer/compiled-preview-sandbox';
 import type { BrowserCompileResult } from '../src/browser/protocol';
+import { IR_VERSION } from '../src/ir';
 
 /** Host protocol tests inject messages/time, not executed iframe or WASM evidence. */
 function preview(listenerReady = true) {
@@ -24,7 +25,11 @@ function preview(listenerReady = true) {
       code: '',
       profile: 'web-component-source-v1',
       dependencies: [],
-      provenance: { source: provenanceSource, irVersion: 7, backend: 'web-component-source-v1' },
+      provenance: {
+        source: provenanceSource,
+        irVersion: IR_VERSION,
+        backend: 'web-component-source-v1',
+      },
     },
     preview: {
       format: 1,

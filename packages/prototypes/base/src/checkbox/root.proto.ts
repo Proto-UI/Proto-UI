@@ -1,4 +1,5 @@
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
+import type { ProtoEventPayload } from '@proto.ui/types';
 import { asAccessible, asFocusable, asTrigger, asControlLabel } from '@proto.ui/hooks';
 import { asOptionalFieldControl } from '../field/control-binding.proto';
 import { createChoiceFieldReport } from '../field/choice-report';
@@ -21,6 +22,7 @@ export function setupCheckboxRoot(
     defaultChecked: { type: 'boolean', empty: 'fallback' },
     disabled: { type: 'boolean', empty: 'fallback' },
     readOnly: { type: 'boolean', empty: 'fallback' },
+    required: { type: 'boolean', empty: 'fallback' },
     indeterminate: { type: 'boolean', empty: 'fallback' },
     defaultIndeterminate: { type: 'boolean', empty: 'fallback' },
   });
@@ -28,11 +30,15 @@ export function setupCheckboxRoot(
     defaultChecked: false,
     disabled: false,
     readOnly: false,
+    required: false,
     defaultIndeterminate: false,
   });
   const checked = def.state.bool('checked', false);
   const disabled = def.state.bool('disabled', false);
   const readOnly = def.state.bool('readOnly', false);
+  // P-BASE-CHECKBOX-REQUIRED: one owned fact for the public control and a11y.
+  const required = def.state.bool('required', false);
+  // P-BASE-CHECKBOX-POINTER-HOVER
   const hovered = def.state.bool('hovered', false);
   const pressed = def.state.bool('pressed', false);
   const indeterminate = def.state.bool('indeterminate', false);
@@ -46,6 +52,7 @@ export function setupCheckboxRoot(
   def.expose.state('checked', checked);
   def.expose.state('disabled', disabled);
   def.expose.state('readOnly', readOnly);
+  def.expose.state('required', required);
   def.expose.state('hovered', hovered);
   def.expose.state('pressed', pressed);
   def.expose.state('indeterminate', indeterminate);
@@ -61,6 +68,7 @@ export function setupCheckboxRoot(
   accessible.state('checked', checkedA11y);
   accessible.state('disabled', disabled);
   accessible.state('readOnly', readOnly);
+  accessible.state('required', required);
   accessible.action('activate', { event: 'checkedChange' });
   def.context.provide(CHECKBOX_CONTEXT, { checked: false, indeterminate: false, disabled: false });
 
@@ -114,6 +122,11 @@ export function setupCheckboxRoot(
     disabled.set(nextDisabled, 'reason: checkbox effective disabled');
     if (!isCurrent(run, view, operation)) return;
     readOnly.set(nextReadOnly, 'reason: checkbox effective readonly');
+    if (!isCurrent(run, view, operation)) return;
+    required.set(
+      binding ? binding.state.fieldRequired.get() : !!p.required,
+      'reason: checkbox effective required'
+    );
     if (!isCurrent(run, view, operation)) return;
     focusable.setDisabled(nextDisabled);
     if (!isCurrent(run, view, operation)) return;
@@ -170,9 +183,13 @@ export function setupCheckboxRoot(
   def.lifecycle.onUnmounted(retire);
   def.lifecycle.onBeforeDispose(retire);
   def.props.watch(['checked', 'indeterminate'], syncOwner);
-  def.props.watch(['disabled', 'readOnly'], syncPolicy);
+  def.props.watch(['disabled', 'readOnly', 'required'], syncPolicy);
   if (binding) {
-    for (const state of [binding.state.fieldDisabled, binding.state.fieldReadOnly])
+    for (const state of [
+      binding.state.fieldDisabled,
+      binding.state.fieldReadOnly,
+      binding.state.fieldRequired,
+    ])
       state.watch(() => {
         if (currentRun) syncPolicy(currentRun);
       });

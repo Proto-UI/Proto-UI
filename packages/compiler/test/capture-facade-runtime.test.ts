@@ -42,6 +42,32 @@ for (const profile of nativeOwnerProfiles)
     30_000
   );
 
+for (const profile of nativeOwnerProfiles)
+  it(profile + ' keeps a renamed lookup bound to its original installation', async () => {
+    const source = `import {defineAsHook,definePrototype} from '@proto.ui/core';
+      const use=defineAsHook({name:'renamed-lookup',setup(def){
+        def.props.define({start:{type:'number',empty:'fallback'}});
+        def.props.setDefaults({start:1});
+        let value=0;
+        def.lifecycle.onCreated(run=>{value=run.props.get().start??1;});
+        def.expose.method('next',()=>{value++;return value;});
+      },projectHandle(result){return {resolve:result.getMethod};}});
+      export default definePrototype({name:'lookup-owner',setup(def){
+        const handle=use();const resolve=handle.resolve;
+        def.expose.method('invoke',()=>resolve?.('next')?.()??-1);
+        return r=>r.el('output',[]);
+      }});`;
+    const first = await mountNativeOwner(source, profile, { props: { start: 1 } });
+    const second = await mountNativeOwner(source, profile, { props: { start: 40 } });
+    cleanups.push(first.dispose, second.dispose);
+    const a = first.handle.getExposes(),
+      b = second.handle.getExposes();
+    expect(a.invoke()).toBe(2);
+    expect(b.invoke()).toBe(41);
+    expect(a.invoke()).toBe(3);
+    expect(b.invoke()).toBe(42);
+  });
+
 function evaluate(
   source: string,
   require: (id: string) => unknown = () => {

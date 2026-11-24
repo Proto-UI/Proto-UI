@@ -1,3 +1,4 @@
+import type { RunHandle } from '@proto.ui/core';
 import { defineAsHook, definePrototype, tw, type DefHandle } from '@proto.ui/core';
 import { asHitParticipation, asOverlay } from '@proto.ui/hooks';
 import { asTransition } from '../tools';
@@ -66,30 +67,16 @@ function setupDrawerMask(def: DefHandle<DrawerMaskProps, DrawerMaskExposes>): vo
   });
   const open = def.state.bool('open', false);
 
-  // and focus restoration. Do not let the participating backdrop's native
-  // pointer default steal that restored focus after Content handles the press.
-  // This is the Mask-owned root event, not a global interception policy.
-  def.event.on('pointer.down', (run, event) => {
-    if (run.props.get().passthrough) return;
-    event.control.requestDefaultActionPrevention({
-      reason: 'drawer-mask.background-pointer',
-      source: 'base-drawer-mask',
-    });
-  });
-  let hitRegionDispose: (() => void) | null = null;
+  let hitRegionDispose: ReturnType<typeof hitParticipation.registerSelfRegion> | null = null;
   let hitSyncDisposed = false;
 
-  const syncHitParticipation = (run: any) => {
+  const syncHitParticipation = (run: RunHandle<DrawerMaskProps>) => {
     if (hitSyncDisposed) return;
-
-    const target = run.host?.get?.() ?? null;
 
     hitRegionDispose?.();
     hitRegionDispose = null;
 
-    if (!target) return;
-
-    hitRegionDispose = hitParticipation.registerRegion(target, {
+    hitRegionDispose = hitParticipation.registerSelfRegion({
       role: 'mask',
       mode: run.props.get().passthrough ? 'passthrough' : 'participating',
       meta: {

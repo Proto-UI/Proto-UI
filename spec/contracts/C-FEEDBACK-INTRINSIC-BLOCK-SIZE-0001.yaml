@@ -1,0 +1,34 @@
+id: C-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001
+type: contract
+title: Presence interpolation of a semantic intrinsic block size
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: Requested Bootstrap Collapse source-host slice. Independent visual, assistive technology and Compiler or native interpretation remain separate admission work; this extension does not promote the existing presence contracts.
+summary: A named layout channel borrows the existing phase owner and measures the current semantic block-size target without a second animation clock or disclosure owner.
+criteria:
+  - id: C-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-DECLARATION
+    text:
+      en: The named presence extension admits blockSize as either a finite nonnegative layout-unit number or the intrinsic sentinel. Both endpoints must declare matching channels. The first source-Web profile accepts closed zero and entered intrinsic only. Arbitrary numeric entered endpoints remain explicit unsupported-endpoint outcomes. Accessor, unknown-key and immutable snapshot guarantees are unchanged; generic scale or unrelated layout animation is not admitted.
+  - id: C-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-MEASUREMENT
+    text:
+      en: Intrinsic means the surface's used logical block size under its current semantic layout after temporarily removing only this view's transient block-size lease. It is not the constrained scroll extent, transformed visual rectangle, an arbitrary maximum or a guessed line count. Measurement restores the current transient lease before yielding. Current semantic style is accepted before measurement. Growth and shrinkage during an attempt retarget from the last acknowledged sample without extending the original independent deadline. Padding and borders are ordinary semantic layout; a consumer requiring a zero outer extent places nonzero block padding and borders inside an authored inner box.
+  - id: C-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-OWNERSHIP
+    text:
+      en: Existing Transition owns phase, duration, interruption and completion. The host owns cancellable frames, logical block-size and overflow clipping leases. Closed-to-open starts with an acknowledged zero sample; reversal starts from the last acknowledged applied size. Settling, detach, replacement, document adoption and disposal release only still-owned writes and invalidate old callbacks. External takeover is preserved and diagnosed. Entered settlement restores semantic sizing so later content changes flow normally.
+  - id: C-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-FALLBACK
+    text:
+      en: Missing or nonfinite layout input, missing logical-size support, unknown or reduced motion, hidden surface, failed projection, lost ownership and deadline use the existing bounded settlement protocol. Reduced motion does not run a 350ms layout animation. Unsupported Compiler and native targets must diagnose the new channel; successful source-Web execution is not their acceptance.
+dependsOn:
+  contracts: [C-FEEDBACK-PRESENCE-PRESENTATION-0001, C-AS-TRANSITION-0001]
+sources:
+  - path: packages/core/src/presence-presentation.ts
+  - path: packages/modules/feedback/src/presence/projector.ts
+  - path: packages/adapters/base/src/motion/web-presence-presentation.ts
+verifies:
+  tests: [T-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Add the requested bounded intrinsic block-size extension while retaining independent backend and lifecycle admission boundaries.
+tags: [presence, motion, layout, bootstrap]

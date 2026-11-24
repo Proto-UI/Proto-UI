@@ -1,3 +1,4 @@
+import { createWebMotionStyleOwnership, webMotionAncestors } from './web-motion-style-ownership';
 import type { EffectsPort, ResidentMotionProperty } from '@proto.ui/core';
 import {
   createResidentMotionProjector,
@@ -34,68 +35,7 @@ export function createWebResidentMotionSink(
     win = doc.defaultView;
   let width: number | null = null,
     height: number | null = null;
-  function ancestors(): HTMLElement[] {
-    const result: HTMLElement[] = [];
-    let current: HTMLElement | null = el;
-    while (current) {
-      result.push(current);
-      const root = current.getRootNode();
-      current =
-        current.parentElement ??
-        ('host' in root ? ((root as ShadowRoot).host as HTMLElement) : null);
-    }
-    return result;
-  }
-  const original = new Map<string, { value: string; priority: string }>();
-  const lastWritten = new Map<string, { value: string; priority: string }>();
-  const lost = new Set<string>();
-  const stillOwned = (property: string, written: { value: string; priority: string }) =>
-    el.style.getPropertyValue(property) === written.value &&
-    el.style.getPropertyPriority(property) === written.priority;
-  function detectLoss() {
-    for (const [property, written] of lastWritten)
-      if (!stillOwned(property, written)) {
-        lost.add(property);
-        lastWritten.delete(property);
-        original.delete(property);
-      }
-  }
-  function clear() {
-    for (const [property, written] of lastWritten) {
-      if (!stillOwned(property, written)) continue;
-      const before = original.get(property)!;
-      if (before.value) el.style.setProperty(property, before.value, before.priority);
-      else el.style.removeProperty(property);
-    }
-    lastWritten.clear();
-    original.clear();
-  }
-  function write(property: string, value: string | undefined): boolean {
-    detectLoss();
-    if (lost.has(property)) return false;
-    if (value === undefined) {
-      const old = lastWritten.get(property);
-      if (old !== undefined && stillOwned(property, old)) {
-        const before = original.get(property)!;
-        if (before.value) el.style.setProperty(property, before.value, before.priority);
-        else el.style.removeProperty(property);
-      }
-      lastWritten.delete(property);
-      original.delete(property);
-      return true;
-    }
-    if (!original.has(property))
-      original.set(property, {
-        value: el.style.getPropertyValue(property),
-        priority: el.style.getPropertyPriority(property),
-      });
-    el.style.setProperty(property, value);
-    lastWritten.set(property, {
-      value: el.style.getPropertyValue(property),
-      priority: el.style.getPropertyPriority(property),
-    });
-    return true;
-  }
+  const { lost, detectLoss, clear, write } = createWebMotionStyleOwnership(el);
   const sink = createResidentMotionProjector({
     diagnostics: options.diagnostics,
     now: () => win?.performance.now() ?? 0,
@@ -107,7 +47,7 @@ export function createWebResidentMotionSink(
       const font = win
         ? Number.parseFloat(win.getComputedStyle(doc.documentElement).fontSize)
         : NaN;
-      const hidden = ancestors().some((node) =>
+      const hidden = webMotionAncestors(el).some((node) =>
         node.matches('[hidden],[data-pui-view-pending],[data-pui-view-detached]')
       );
       return {
@@ -154,7 +94,7 @@ export function createWebResidentMotionSink(
       resize?.observe(el, { box: 'border-box' });
       const observer =
         typeof win?.MutationObserver === 'function' ? new win.MutationObserver(invalidate) : null;
-      for (const node of ancestors())
+      for (const node of webMotionAncestors(el))
         observer?.observe(node, {
           attributes: true,
           attributeFilter: ['hidden', 'data-pui-view-pending', 'data-pui-view-detached'],

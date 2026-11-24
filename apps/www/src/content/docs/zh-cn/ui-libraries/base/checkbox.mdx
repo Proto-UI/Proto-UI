@@ -8,7 +8,7 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Checkbox 基础原型以单一 canonical 值所有者提供 checked、unchecked、disabled、readOnly 和 indeterminate 交互能力。
+Checkbox 基础原型以单一 canonical 值所有者提供 checked、unchecked、disabled、readOnly 和 indeterminate 交互能力，以及 required 控件事实。
 
 <div>
   <PrototypePreviewer
@@ -23,10 +23,10 @@ Checkbox 基础原型以单一 canonical 值所有者提供 checked、unchecked�
 
 Checkbox 通过 anatomy 系统拆分为 root 和 indicator 两个部分。
 
-- **Root** (`base-checkbox-root`) 拥有 canonical `checked`、发送 `checkedChange`，并管理 disabled/readOnly 策略与独立的 `indeterminate` 状态。
+- **Root** (`base-checkbox-root`) 拥有 canonical `checked`、发送 `checkedChange`，并管理 disabled/readOnly 策略与独立的 `indeterminate` 状态和 `required` 事实。
 - **Indicator** (`base-checkbox-indicator`) 通过 anatomy 运行时访问读取 root 的 `checked` 和 `indeterminate` 状态，并将这些状态反映给渲染层。它不独立拥有 checkbox 状态。
 
-`base-checkbox` anatomy family 使用 root 到 indicator 的 `contains` 关系。Checkbox 预期至少有一个 indicator；当多个视觉区域需要表达同一份 indicator 语义时，也允许存在多个 indicator。
+`base-checkbox` anatomy family 使用 root 到 indicator 的 `contains` 关系。Indicator 是可选部分；多个视觉区域可以通过各自的 indicator 读取同一份 root 状态。
 
 在 Web Components 预览运行时中，prototype ID 会注册为带 `wc-` 前缀的标签：`wc-base-checkbox-root` 和 `wc-base-checkbox-indicator`。
 
@@ -54,11 +54,16 @@ Checkbox 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `ch
     { name: 'defaultChecked', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
     { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
   ]}
 />
 
 这些属性属于 Root。Indicator 没有属性。
+
+Root 与 `asCheckboxRoot()` 暴露 `checked`、`indeterminate`、`disabled`、`required`、`hovered`、`focused`、`focusVisible`、`pressed`，以及 `checkedChange` 和 `indeterminateChange`。
+
+`required` 属性初始化并更新同一个自有状态，可访问 required 也由该状态提供。它不改变 checked 值，也不阻止取消勾选。原生表单约束校验、提交和 Field 校验仍由显式组合负责；原子 Checkbox 不会自动创建 hidden input 或安装 Field 绑定。
 
 ## 参考
 

@@ -96,6 +96,7 @@ export function createPresenceController(options: PresenceControllerOptions) {
       channels: Object.freeze([
         ...(recipe?.closed.translate ? ['translate' as const] : []),
         ...(recipe?.closed.opacity !== undefined ? ['opacity' as const] : []),
+        ...(recipe?.closed.blockSize !== undefined ? ['blockSize' as const] : []),
       ]),
       outcome,
     });
@@ -125,6 +126,7 @@ export function createPresenceController(options: PresenceControllerOptions) {
     return Object.freeze({
       ...(translate ? { translate } : {}),
       ...(endpoint.opacity !== undefined ? { opacity: endpoint.opacity } : {}),
+      ...(endpoint.blockSize !== undefined ? { blockSize: endpoint.blockSize } : {}),
     });
   };
   const release = (advance = true) => {

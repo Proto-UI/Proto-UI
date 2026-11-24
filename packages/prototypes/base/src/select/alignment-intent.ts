@@ -17,7 +17,7 @@ export type InitialSelectAlignmentInput = Readonly<{
 
 // Source profile constants are declared here by semantic policy, never hidden host defaults.
 export const INITIAL_SELECT_ALIGNMENT_CONSTRAINTS = Object.freeze({
-  boundary: 'layout-viewport',
+  boundary: 'layout-viewport' as const,
   margin: 10,
   minimumTargetSpanCount: 5,
   inlineOverflow: 'preserve-start' as const,
@@ -73,10 +73,12 @@ export function resolveInitialSelectAlignment(
   if (!candidate) return unresolved('all-disabled');
   if (!candidate.row) return unresolved('missing-row');
   if (!candidate.text) return unresolved('missing-text');
-  if (!input.reference.trigger || !input.reference.value) return unresolved('missing-reference');
+  const trigger = input.reference.trigger;
+  const value = input.reference.value;
+  if (!trigger || !value) return unresolved('missing-reference');
   return Object.freeze({
     kind: 'target-pair',
-    reference: Object.freeze({ inline: input.reference.value, block: input.reference.trigger }),
+    reference: Object.freeze({ inline: value, block: trigger }),
     floating: Object.freeze({ inline: candidate.text, block: candidate.row }),
     contentEdges: Object.freeze({
       atStart: candidate === input.records[0],

@@ -1,0 +1,47 @@
+id: T-SELECTABLE-ROW-0001
+type: test
+title: Selectable Row controlled proposals and bounded host activation
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: Records the exact acceptance obligations for the extracted row without treating successful source emission or a consumer implementation as complete native input and assistive-technology evidence.
+summary: Controlled selection, separate activation and lifecycle checks required before stable row admission.
+cases:
+  - id: T-SELECTABLE-ROW-0001-CASE-OWNERSHIP
+    title: Accepted selection remains distinct from selection and activation proposals
+    covers: [P-BASE-SELECTABLE-ROW-CONTROLLED, P-BASE-SELECTABLE-ROW-ACTIVATION]
+    expectation: Pointer and Space propose the current key; Enter and the bounded Web double-click path request activation without changing selection or interpreting the key.
+  - id: T-SELECTABLE-ROW-0001-CASE-LIFETIME
+    title: Keyboard defaults, disabled transitions and view retirement
+    covers: [P-BASE-SELECTABLE-ROW-KEYBOARD, P-BASE-SELECTABLE-ROW-AVAILABILITY]
+    expectation: Actual focused input observes prevention and repeat rules; disabling, detaching and replacement retire input without stale activation, and re-enable restores only current participation.
+  - id: T-SELECTABLE-ROW-0001-CASE-PROJECTION
+    title: One row subject preserves content and exposes accepted accessibility facts
+    covers: [P-BASE-SELECTABLE-ROW-PROJECTION, P-BASE-SELECTABLE-ROW-ENTRIES]
+    expectation: Both actual authoring entries preserve the same role, state and slot identity, without an extra button or grid owner; assistive technology reads the accepted selected and disabled state.
+implementations:
+  - id: independent-native-row-conformance
+    kind: adapter-test
+    status: missing
+    required: true
+    consumesCases:
+      - T-SELECTABLE-ROW-0001-CASE-OWNERSHIP
+      - T-SELECTABLE-ROW-0001-CASE-LIFETIME
+      - T-SELECTABLE-ROW-0001-CASE-PROJECTION
+    exercises: [P-BASE-SELECTABLE-ROW]
+verifies:
+  prototypes: [P-BASE-SELECTABLE-ROW]
+exercises:
+  prototypes: [P-BASE-SELECTABLE-ROW]
+openQuestions:
+  - id: T-SELECTABLE-ROW-0001-Q-EVIDENCE
+    question:
+      en: Has independent exact-source native input and assistive-technology evidence satisfied these cases beyond source compilation and the Shenko consumer?
+    blocks:
+      - activation:T-SELECTABLE-ROW-0001
+      - implementation:T-SELECTABLE-ROW-0001#independent-native-row-conformance
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Recorded bounded row acceptance cases and explicit missing independent native evidence without promoting the prototype.
+tags: [test, selection, row]

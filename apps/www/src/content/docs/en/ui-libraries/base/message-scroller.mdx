@@ -33,6 +33,29 @@ Message Scroller is workspace source. There is no public `proto-ui add` target. 
 
 These props belong to Root.
 
+## Stable-key reading composition
+
+`asMessageScrollerReading` is a public opt-in Hook from `@proto.ui/prototypes-base/message-scroller`. Compose it **after** the Base or Shadcn viewport in an authored prototype. It shares that viewport's Scroll Surface and disables generic `preserve-visible`, so stable-key restoration has one owner. Compiler consumers compile this authored composition; they do not import the planner into the application as a second runtime controller.
+
+The Hook accepts `readingCapture` (`first-crossing` by default, or `visible-preferred`), `readingInset` (default `0`) and `readingPredecessor` (default `true`). First-crossing selects the first row extending beyond the inset. Visible-preferred selects the first visible primary row, falling back to the first visible row. The application decides which identities and primary classifications describe its content; the Hook decides how those facts select an anchor.
+
+The host supplies `MessageReadingFrame`: a mount `epoch`, `scrollOffset`, `viewportSize`, and ordered `{ key, start, end, primary }` entries, with start/end measured relative to the viewport. Anchors contain `{ key, previousKey, index, offset, scrollOffset }`. Exact identity wins, followed by the saved predecessor when enabled, then the saved absolute offset. The index never invents a replacement identity. Movement goes through `Scroll.request({ kind: 'by', ... })`; the shared host retains clamping and execution timing.
+
+| Public method/fact | Responsibility |
+| --- | --- |
+| `beginReading(following, anchor)` | Initializes the reading session and optional restoration hint once. |
+| `syncReadingFollowing(following)`, `resumeReading()` | Receives an external reading-mode change or explicitly resumes the tail. The shared Jump part uses `resumeReading` when the Hook is present. |
+| `readingInput(input, frame)` | Receives pointer/key/wheel, content focus, selection or backfill facts and decides pause and hint retirement. |
+| `captureReading(frame)`, `observeReadingScroll(frame)` | Captures the current place and handles reader scroll reports without replacing a live initial hint. |
+| `restoreReading(frame)`, `commitReadingRestore(ticket, actualFrame)` | Issues the restore request, then receives the actual post-request offset. The returned ticket and mount epoch reject stale acknowledgments and duplicate asynchronous scroll capture. |
+| `readingAnchorForPersistence(frame)` | Returns a serializable place only when history reading can replace the saved hint. Storage and its schema stay with the application. |
+| `planSelectionRestore(facts)`, `commitSelectionRestore(ticket)` | Decides restore eligibility and deduplicates a successful host Range operation. |
+| `readingMode`, `restoringReading`, `getReadingEpoch()` | Publishes the current semantic mode, hint lifetime and measurement lease. |
+
+An initial hint remains active through empty or late content, missing-key fallbacks and zero-height exact matches. Explicit reader input retires it. The host supplies selection identity, offsets, length, endpoint availability and a prefix-equality fact; the Hook rejects stale text, an existing live selection and a repeated restored record. The application retains DOM measurement, Range operations, fingerprint encoding, durable keys and storage. Programmatic selection replay does not masquerade as reader input or repeatedly pause following.
+
+The public pure helpers `captureMessageReadingAnchor`, `resolveMessageReadingAnchor`, `planMessageReadingRestore` and `messageSelectionRestoreEligible` implement the same finite-data policy used by the Hook. Their presence and source compilation do not establish browser or native acceptance; the family remains draft.
+
 ## References
 
 <SpecEntityLinks directory="spec/prototypes" files={['P-BASE-MESSAGE-SCROLLER.yaml']} />

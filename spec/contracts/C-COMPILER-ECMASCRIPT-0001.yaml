@@ -1,0 +1,57 @@
+id: C-COMPILER-ECMASCRIPT-0001
+type: contract
+title: Checked ordinary ECMAScript computation preserves native language semantics
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: >-
+  Actual upstream NumberField authoring uses standard numeric formatting, parsing and collection computation. The private compiler admits checked ordinary source operations without replacing this behavior with a consumer-specific formatter. This draft does not claim all ECMAScript syntax or non-JavaScript target support.
+
+
+summary: Checked scalar, AggregateError, TypeError, RegExp, Intl and bounded diagnostic operations lower to their actual JavaScript operations without executing author source at compilation time.
+statement:
+  en: >-
+    Compiler admission recognizes explicitly enumerated standard ECMAScript operations only after establishing the source binding and operand types. Admitted operations preserve evaluation order, exceptions, nullish calls and ordinary object identity. Source parsing never executes author code. RegExp and Intl.NumberFormat are ordinary private values, not Proto module handles or public capabilities. Unsupported reached computation is diagnosed for the selected target before emission.
+
+
+criteria:
+  - id: C-COMPILER-ECMASCRIPT-0001-BINDINGS
+    text: Direct global admission proves that Number, Math, Object, AggregateError, TypeError, RegExp, Intl or console is not shadowed by a lexical, module or imported binding. Checked member calls require the corresponding scalar, RegExp or Intl receiver. Arbitrary property calls and host functions are not granted builtin provenance by their spelling.
+  - id: C-COMPILER-ECMASCRIPT-0001-LANGUAGE
+    text: Native JavaScript emission retains the actual Number, Math, String method, RegExp and Intl.NumberFormat behavior, including locale configuration, regex flags, rounding, thrown errors and a nullish receiver skipping argument evaluation. Number construction accepts checked scalar operands only; arbitrary objects and opaque unknown inputs cannot acquire implicit conversion-callback execution. Intl options and the other checked-data operands contain only finite ordinary data, never unknown-valued fields that can hide a callable or owner handle. The compiler does not substitute decimal-only parsing or copy a particular prototype's state machine.
+  - id: C-COMPILER-ECMASCRIPT-0001-OPTIONAL-CONTINUATION
+    text: A syntactically continuous optional chain may inherit a receiver guard after a checked builtin only when that builtin's successful result excludes null and undefined. A successful call that can itself return undefined is not silently guarded, and parentheses which terminate the original chain do not extend its short circuit. This bounded lowering preserves skipped arguments and ordinary thrown errors.
+  - id: C-COMPILER-ECMASCRIPT-0001-CONSTANTS
+    text: Enumerated non-writable finite Number and Math constants may lower to their exact numeric values only after the same unshadowed binding proof. This supplies ordinary scalar data, never a capability; nonfinite values and arbitrary global property reads are not admitted through this rule.
+  - id: C-COMPILER-ECMASCRIPT-0001-ORDINARY
+    text: Ordinary opaque values retain their checked type through helpers, lexical values and serialized IR validation without becoming public data or acquiring semantic module authority. No source module or author callback executes during parsing; regular-expression literal syntax validation never performs a pattern match.
+  - id: C-COMPILER-ECMASCRIPT-0001-AGGREGATION
+    text: AggregateError construction accepts a checked iterable of ordinary data or opaque exceptions and an optional string message. Native construction preserves operand evaluation, iterable order and exception identity. The result remains an opaque exception; the compiler does not grant callable, semantic-handle or property authority through the errors payload. ErrorOptions and unchecked custom iterables are outside this bounded admission.
+  - id: C-COMPILER-ECMASCRIPT-0001-TYPE-ERROR
+    text: TypeError construction accepts an optional checked string message and emits an actual native TypeError instance. Its identity and exception class survive throwing and catching, while its compiler type remains an opaque exception with no granted property or capability authority. ErrorOptions and other error constructors are outside this admission.
+  - id: C-COMPILER-ECMASCRIPT-0001-DIAGNOSTICS
+    text: The bounded console.warn operation accepts checked scalar data arguments and returns void. It emits the real native diagnostic call in source order, evaluates each argument once, retains thrown errors and is never classified as an inert or read-only call. Objects, opaque values, callables and semantic handles cannot escape through this diagnostic boundary. Other console methods and non-JavaScript diagnostic implementations remain unsupported.
+  - id: C-COMPILER-ECMASCRIPT-0001-PROFILES
+    text: Each selected target admits only computation it actually lowers. Non-JavaScript targets reject reached scalar intrinsics that have no declared native implementation, while existing admitted number.isFinite behavior remains unchanged. A successful Web source compilation does not establish native target equivalence.
+  - id: C-COMPILER-ECMASCRIPT-0001-CONSUMER
+    text: Validation must exercise actual official NumberField formatting source and its helper closure through generated output, retaining plain, localized, currency, percent and invalid configuration behavior. Source parser success alone is not evidence that emitted computations execute correctly.
+references:
+  contracts: [C-COMPILER-OBSERVABLES-0001]
+sources:
+  - path: packages/compiler/src/ecmascript-values.ts
+  - path: packages/compiler/src/source-ecmascript.ts
+  - path: packages/compiler/src/native-value-lowering.ts
+  - path: packages/prototypes/base/src/number-field/format.ts
+  - path: packages/prototypes/base/src/drawer/snap.ts
+  - path: packages/prototypes/base/src/drawer/content.proto.ts
+  - path: packages/compiler/test/number-format-source-consumer.ts
+  - path: packages/prototypes/base/test/number-field-format.test.ts
+openQuestions:
+  - id: C-COMPILER-ECMASCRIPT-0001-Q-EVIDENCE
+    question:
+      en: Have source, serialized-IR, generated consumer and unsupported-target checks independently established this bounded ordinary-value admission?
+    blocks: [activation:C-COMPILER-ECMASCRIPT-0001]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Record generic standard-language support needed by real upstream numerical controls with explicit binding, execution and target boundaries.
+tags: [compiler, language, intl, number-field]

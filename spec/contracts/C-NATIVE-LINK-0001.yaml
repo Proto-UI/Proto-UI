@@ -23,7 +23,7 @@ criteria:
       en: Replacement, detach and disposal retire the old lease and pending observations. Reentrant attachment, updates and disposal cannot revive a stale lease or overwrite a successor. Cleanup restores only still-owned host attributes and preserves caller content.
   - id: C-NATIVE-LINK-0001-E
     text:
-      en: Compiler-produced Web, Flutter, Qt and GPUI remain unsupported. Synthetic adapter tests do not establish native-browser context menus, URL preview, new-tab or assistive-technology acceptance.
+      en: Compiler React DOM source lowers the same static native target, replacement configuration and post-default observation to reached native host support. Other Compiler profiles, Flutter, Qt and GPUI remain unsupported. Synthetic adapter or compiler tests do not establish native-browser context menus, URL preview, new-tab or assistive-technology acceptance.
 dependsOn:
   contracts:
     - C-TEMPLATE-0003
@@ -32,10 +32,15 @@ sources:
   - path: packages/hooks/src/as-native-link.ts
   - path: packages/modules/native-link/src/create.ts
   - path: packages/modules/native-link/src/web.ts
+  - path: packages/compiler/src/native-support/dom-modules.template.ts
+  - path: packages/compiler/test/native-link-source.test.ts
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added the bounded native-link declaration, replacement and Web host ownership draft.
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Added Compiler React DOM source lowering with real anchor roots, retained slots, complete destination replacement and deferred native navigation observations; other source profiles and native-browser admission remain explicitly incomplete.
 tags:
   - navigation
   - native-link

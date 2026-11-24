@@ -1,0 +1,23 @@
+{
+  "scope": "Formatting only for maintained narrative records; byte-bound original observations and receipts are unchanged. Original narrative bytes also retained.",
+  "files": [
+    {
+      "path": "internal/records/2026-11-23-sprint2-compiler-inventory.md",
+      "originalSha256": "f1e1805cb7e75cb29afcb728bfac4ac2730bdc4067d87743ce5c308394f94c83",
+      "originalBytes": 12453,
+      "originalArchive": "internal/records/evidence/2026-11-23-sprint2-compiler-inventory/authored-record.original.md.gz",
+      "originalArchiveSha256": "b3f62e12ad435e388a6bd80cbdcb4db4ef91490bc35eb6de289efa0ad3b16288",
+      "formattedSha256": "1ef82f8a99719d302add85f437dedcfdeb7cc6e4608e191a9f7e8bce406d8156",
+      "formattedBytes": 12861
+    },
+    {
+      "path": "internal/records/2026-11-24-sprint2-final-distribution.zh-CN.md",
+      "originalSha256": "8980482387dce9a000bfb81bf0123720c5eb498421ce256772eaf2db5f72a910",
+      "originalBytes": 9080,
+      "originalArchive": "internal/records/evidence/2026-11-24-sprint2-final-distribution/authored-record.original.md.gz",
+      "originalArchiveSha256": "c1da0a59e189ca43d735642297231faa5f6f4194f2b8ca1919d80603086d1fa9",
+      "formattedSha256": "faaa3955968c19e224e2d030e4d5f5463a77f591e54cc01de98041c18a5e61f5",
+      "formattedBytes": 9461
+    }
+  ]
+}

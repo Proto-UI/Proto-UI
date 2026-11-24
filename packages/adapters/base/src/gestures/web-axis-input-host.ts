@@ -84,12 +84,8 @@ function geometryOf(
   const computed = (element: HTMLElement) =>
     element.ownerDocument.defaultView!.getComputedStyle(element);
   const read = (value: string) => (value === '' ? 0 : Number.parseFloat(value));
-  /**
-   * Untransformed border-box extent in CSS pixels, the transform-independent
-   * counterpart of the measured rect extent used only by the contact-basis
-   * cancellation below.
-   */
-  const untransformedExtent = (element: HTMLElement): number => {
+  /** Fresh untransformed border-box measurement in CSS pixels. */
+  const untransformedBox = (element: HTMLElement) => {
     const style = computed(element);
     const before =
       read(horizontal ? style.borderLeftWidth : style.borderTopWidth) +
@@ -99,6 +95,15 @@ function geometryOf(
       read(horizontal ? style.paddingRight : style.paddingBottom);
     const specified = Number.parseFloat(horizontal ? style.width : style.height);
     const extent = style.boxSizing === 'border-box' ? specified : specified + before + after;
+    return { before, after, extent };
+  };
+  /**
+   * Untransformed border-box extent in CSS pixels, the transform-independent
+   * counterpart of the measured rect extent used only by the contact-basis
+   * cancellation below.
+   */
+  const untransformedExtent = (element: HTMLElement): number => {
+    const extent = untransformedBox(element).extent;
     return Number.isFinite(extent) ? extent : NaN;
   };
   let origin = horizontal ? rect.left : rect.top;
@@ -114,17 +119,9 @@ function geometryOf(
       !axisAligned(travel)
     )
       return null;
-    const style = computed(target);
-    const before =
-      read(horizontal ? style.borderLeftWidth : style.borderTopWidth) +
-      read(horizontal ? style.paddingLeft : style.paddingTop);
-    const after =
-      read(horizontal ? style.borderRightWidth : style.borderBottomWidth) +
-      read(horizontal ? style.paddingRight : style.paddingBottom);
-    const specified = Number.parseFloat(horizontal ? style.width : style.height);
     // Computed CSS extents and border/padding are untransformed. Convert their
     // inset to the same viewport CSS-pixel space as the two measured boxes.
-    const cssBorderBox = style.boxSizing === 'border-box' ? specified : specified + before + after;
+    const { before, after, extent: cssBorderBox } = untransformedBox(target);
     if (!Number.isFinite(cssBorderBox) || cssBorderBox <= 0) return null;
     const scale = span / cssBorderBox;
     const handleRect = travel.getBoundingClientRect();

@@ -18,7 +18,7 @@ describe('independent closure provenance controls', () => {
     expect(parsed.ok, JSON.stringify(parsed)).toBe(true);
     if (parsed.ok)
       expect(parsed.value.hooks[0].capture?.states).toEqual([
-        { name: 'flag', type: 'state:boolean' },
+        { name: 'flag', type: 'state:boolean', definite: true },
       ]);
   });
 

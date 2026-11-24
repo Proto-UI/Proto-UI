@@ -1,0 +1,6 @@
+{"kind":"source-binding","head":"9ead4b70fc37250fd0c44a8105cb070ee14f2d0c","node":"v24.22.3","sources":{"packages/modules/feedback/src/presence/projector.ts":"328582bdb70d1b04f42afc6f0e6ee01c666b04affc23292f16417cbd40fe78a2","packages/compiler/src/react-source.ts":"dfba68fb9a17d55c6ddf845f83551ea60b03c620d4beb709992c2bf1ee3f166a","packages/compiler/src/native-rule-meta.ts":"0a0a9a50bb6c40088d38bf4c1972b042361693b46d82dca91b552325b7019340"}}
+{"kind":"presence-release-notification","limit":1,"releases":1,"paints":2,"notifications":1,"outcomes":["reduced-motion"]}
+{"kind":"presence-release-notification","limit":5,"releases":1,"paints":2,"notifications":1,"outcomes":["reduced-motion"]}
+{"kind":"presence-release-notification","limit":100,"releases":1,"paints":2,"notifications":1,"outcomes":["reduced-motion"]}
+{"kind":"react-root-replacement","before":"block","nestedStyle":null,"reentered":true,"old":null,"superseded":null,"replacement":"block"}
+{"kind":"rule-meta-reentrant-adoption","nestedWidth":500,"returnedWidth":500,"currentWidth":500,"obsoleteListeners":0,"currentListeners":1}

@@ -74,6 +74,14 @@ Use a native anchor with a real `href` for navigation. Do not nest it inside But
   rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
 />
 
+### Opt-in focus-retained visibility
+
+Current draft source exports `asFocusRetainedVisibility` and `FocusRetainedVisibilityProps` from `@proto.ui/prototypes-base/button`. A derived action can compose this hook with `asButton()` or the actual styled Button prototype. Its `requestedVisible?: boolean` input defaults to `false`; it does not add a prop to ordinary Button unless the composition opts in.
+
+Keep the composed control mounted and pass the application's visibility request. When the request becomes false while the control owns focus, it remains visible until focus leaves. If the request is true, blur does not hide it. The hook shares `asFocusable()` with the Button and uses Rule feedback to hide only when both facts are false. It does not request focus, override disabled/navigation policy, or replace the command callback. A “return to latest” action can therefore finish without removing the keyboard user's focused control. The parent layout wrapper may remain mounted; it must not independently hide or unmount the action from the request alone.
+
+This opt-in source capability remains under the draft `P-BASE-BUTTON` boundary. It is not an API claim for the older stable 0.2.0 package or evidence that every host's focus/visibility journey has passed.
+
 ## Delivery, lifecycle and evidence
 
 The stable 0.2.0 package exports `@proto.ui/prototypes-base/button` and its CLI exposes `base-button`. The website's four-host source preview and the older stable package are separate delivery surfaces. `P-BASE-BUTTON` remains **draft**; publication does not freeze its protocol or prove current browser/assistive-technology acceptance.

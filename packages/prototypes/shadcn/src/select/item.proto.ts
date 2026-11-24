@@ -1,10 +1,10 @@
 import { setupSelectStyle } from './style';
 import { SHADCN_STYLE_SCOPE, type ShadcnStyleId } from '../style-scope';
-import { definePrototype, delay, type RendererHandle, tw } from '@proto.ui/core';
+import { definePrototype, delay, type DelayTask, type RendererHandle, tw } from '@proto.ui/core';
 import { asSelectItem } from '@proto.ui/prototypes-base/select';
 import type { ShadcnSelectItemExposes, ShadcnSelectItemProps } from './types';
 import {
-  SELECT_ITEM_INDICATOR_SIZE,
+  SELECT_ITEM_INDICATOR_STYLE,
   SELECT_ITEM_SURFACE,
   SELECT_TRANSLUCENT_STYLES,
 } from './recipes';
@@ -15,18 +15,10 @@ function renderCheck(
   profile: ShadcnStyleId
 ) {
   const px = profile === 'mira' || profile === 'sera' ? 14 : 16;
-  const size = profile === 'new-york-v4' ? 'size-3.5' : SELECT_ITEM_INDICATOR_SIZE[profile];
   return renderer.el(
     'span',
     {
-      style: tw(
-        // The indicator owns the inline-end edge of the row. A physical edge
-        // would keep the check beside the text in an RTL row, where the text
-        // starts at the inline end and the reserved space would be measured
-        // on the wrong side of the matched Trigger width.
-        'pointer-events-none absolute end-2 flex shrink-0 items-center justify-center',
-        size ?? ''
-      ),
+      style: SELECT_ITEM_INDICATOR_STYLE[profile],
     },
     selected
       ? renderer.svg.root(
@@ -109,7 +101,7 @@ const selectItem = definePrototype<ShadcnSelectItemProps, ShadcnSelectItemExpose
       intent: (i) => i.feedback.style.use(tw('bg-foreground/10 text-accent-foreground')),
     });
     let renderedStyle = style.get();
-    let renderTask: { cancel(): void } | null = null;
+    let renderTask: DelayTask | null = null;
     // P-SHADCN-SELECT-ITEM-SELECTED-INDICATOR
     selected.watch((run, event) => {
       if (event.type !== 'next') return;

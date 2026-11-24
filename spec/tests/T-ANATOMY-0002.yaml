@@ -49,6 +49,8 @@ implementations:
     required: true
     consumesCases:
       - T-ANATOMY-0002-CASE-TERMINAL-ISOLATION
+    notes:
+      - The existing parent-first retirement scenario also checks C-ANATOMY-0009-F by verifying that its saved target PartView returns false/null for fresh Expose lookups after retirement. This module evidence does not claim native GPUI, Qt, Flutter, or browser acceptance for that boundary, and does not extend the shared terminal-isolation case's coverage to those profiles.
   - id: website-accordion-terminal-domain
     kind: adapter-test
     status: passing
@@ -105,7 +107,11 @@ verifies:
         - C-ANATOMY-0009-C
         - C-ANATOMY-0009-D
         - C-ANATOMY-0009-E
+        - C-ANATOMY-0009-F
 revisions:
+  - version: 0.3.0-alpha.2
+    change: refined
+    summary: Mapped safe fresh Expose lookups on a retired target to the existing parent-first scenario; native target acceptance remains separate evidence.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added terminal domain isolation and four-Adapter nested teardown regression mapping.

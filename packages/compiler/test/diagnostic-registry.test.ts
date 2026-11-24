@@ -21,6 +21,13 @@ const SRC = path.resolve(__dirname, '../src');
  */
 const NON_DIAGNOSTIC_PUI_LITERALS = new Set(['PUI_CONTEXT_KEY_', 'PUI_WC_HYDRATION_MISMATCH']);
 
+/** Native host attribute bindings, whose values are data-pui-* names. */
+const NON_DIAGNOSTIC_PUI_IDENTIFIERS = new Set([
+  'PUI_VIEW_PENDING_ATTR',
+  'PUI_VIEW_REVEALING_ATTR',
+  'PUI_VIEW_DETACHED_ATTR',
+]);
+
 /** Diagnostic categories declared on CompilerDiagnostic (ir.ts). */
 const CATEGORIES = [
   'invalid-input',
@@ -201,13 +208,22 @@ function categoryMismatches(observed: Map<string, Set<string>>): string[] {
   return mismatches;
 }
 
-function literalCodes(): Set<string> {
+function literalCodes(
+  inputs: Iterable<{ file: string; text: string }> = sourceTexts()
+): Set<string> {
   const codes = new Set<string>();
-  for (const file of sources(SRC)) {
+  for (const { file, text } of inputs) {
     if (file.endsWith('diagnostic-registry.ts')) continue;
-    const text = readFileSync(file, 'utf8');
     for (const match of text.matchAll(CODE)) {
       const code = match[0];
+      // These bindings also occur inside generated-source strings. Exclude
+      // only their unquoted identifier occurrences: the same name used as a
+      // diagnostic literal must still be observed and rejected as unregistered.
+      if (
+        NON_DIAGNOSTIC_PUI_IDENTIFIERS.has(code) &&
+        !["'", '"', '`'].includes(text[match.index - 1] ?? '')
+      )
+        continue;
       if (!NON_DIAGNOSTIC_PUI_LITERALS.has(code)) codes.add(code);
     }
   }
@@ -224,6 +240,36 @@ describe('diagnostic registry', () => {
     for (const placeholder of NON_DIAGNOSTIC_PUI_LITERALS)
       expect(isDiagnosticCode(placeholder), `${placeholder} must not be a diagnostic`).toBe(false);
   });
+
+  it('does not mistake native host attribute bindings for diagnostic literals', () => {
+    const text = `export const PUI_VIEW_PENDING_ATTR = 'data-pui-view-pending';
+export const PUI_VIEW_REVEALING_ATTR = 'data-pui-view-revealing';
+export const PUI_VIEW_DETACHED_ATTR = 'data-pui-view-detached';
+import { PUI_VIEW_DETACHED_ATTR } from './presentation-host';
+root.setAttribute(PUI_VIEW_PENDING_ATTR, '');`;
+    expect(literalCodes([{ file: 'host-binding-control.ts', text }])).toEqual(new Set());
+    for (const name of NON_DIAGNOSTIC_PUI_IDENTIFIERS) expect(isDiagnosticCode(name)).toBe(false);
+  });
+
+  it.each([...NON_DIAGNOSTIC_PUI_IDENTIFIERS, 'PUI_UNREGISTERED_CONTROL'])(
+    'still rejects an unregistered diagnostic literal named %s',
+    (code) => {
+      // Also cover quoted literals inside escaped generated-source strings.
+      for (const quote of ["'", '"', '`', "\\'", '\\"']) {
+        const text = `const code = ${quote}${code}${quote};`;
+        expect(literalCodes([{ file: 'literal-control.ts', text }])).toEqual(new Set([code]));
+      }
+      const observed = observedCategories([
+        {
+          file: 'emission-control.ts',
+          text: `reject('${code}', 'new diagnostic', span, 'invalid-input');`,
+        },
+      ]);
+      expect(categoryMismatches(observed)).toEqual([
+        `${code} observed (invalid-input) but not registered`,
+      ]);
+    }
+  );
 
   it('agrees with every observed call-site category', () => {
     expect(categoryMismatches(observedCategories())).toEqual([]);

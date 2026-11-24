@@ -1,3 +1,4 @@
+import type { RunHandle } from '@proto.ui/core';
 import { defineAsHook, definePrototype, tw, type DefHandle } from '@proto.ui/core';
 import { SELECT_CONTEXT, SELECT_FAMILY } from './shared';
 import type { SelectValueAsHookContract, SelectValueExposes, SelectValueProps } from './types';
@@ -17,12 +18,12 @@ function setupSelectValue(def: DefHandle<SelectValueProps, SelectValueExposes>) 
   // while the exposed state already reads the resolved one.
   let renderMissed = false;
 
-  const computeDisplayValue = (run: any) => {
+  const computeDisplayValue = (run: RunHandle<SelectValueProps>) => {
     const ctx = run.context.read(SELECT_CONTEXT);
     return ctx.textValue || ctx.value || run.props.get().placeholder || '';
   };
 
-  const syncDisplayValue = (run: any, requestRender: boolean) => {
+  const syncDisplayValue = (run: RunHandle<SelectValueProps>, requestRender: boolean) => {
     const nextValue = computeDisplayValue(run);
     if (nextValue === displayValue.get()) return;
     displayValue.set(nextValue, 'reason: select value display sync');

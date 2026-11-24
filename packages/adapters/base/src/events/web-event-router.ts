@@ -320,58 +320,58 @@ export function createWebProtoEventRouter(opt: {
     return null;
   }
 
+  function resolveAlongEventPath<T>(
+    native: Event,
+    options: { includeActiveFallback?: boolean } | undefined,
+    resolve: (target: EventTarget | null) => T | null,
+    resolveTarget?: () => T | null
+  ): T | null {
+    if (typeof native.composedPath === 'function') {
+      for (const entry of native.composedPath()) {
+        const resolved = resolve(entry);
+        if (resolved) return resolved;
+      }
+    }
+    // External resolvers retain method lookup before the native target getter.
+    const resolved = resolveTarget ? resolveTarget() : resolve(native.target);
+    if (resolved) return resolved;
+    if (options?.includeActiveFallback === false) return null;
+    return resolve(rootEl.ownerDocument.activeElement);
+  }
+
+  function semanticRouteOwner(
+    resolution: SemanticEventRouteResolution | null
+  ): object | null | typeof REJECTED_TRIGGER_ROUTE {
+    return resolution ? (resolution.accepted ? resolution.surface : REJECTED_TRIGGER_ROUTE) : null;
+  }
+
   function resolveOwningTrigger(
     native: Event,
     options?: { includeActiveFallback?: boolean }
   ): object | HTMLElement | null | typeof REJECTED_TRIGGER_ROUTE {
     if (opt.resolveSemanticEventRoute) {
       const visited = new Set<Node>();
-      if (typeof native.composedPath === 'function') {
-        for (const entry of native.composedPath()) {
-          const resolution = opt.resolveSemanticEventRoute(entry, visited);
-          if (!resolution) continue;
-          return resolution.accepted ? resolution.surface : REJECTED_TRIGGER_ROUTE;
-        }
-      }
-      const resolution = opt.resolveSemanticEventRoute(native.target, visited);
-      if (resolution) {
-        return resolution.accepted ? resolution.surface : REJECTED_TRIGGER_ROUTE;
-      }
-      if (options?.includeActiveFallback !== false) {
-        const active = rootEl.ownerDocument.activeElement;
-        const activeResolution = opt.resolveSemanticEventRoute(active, visited);
-        if (activeResolution) {
-          return activeResolution.accepted ? activeResolution.surface : REJECTED_TRIGGER_ROUTE;
-        }
-      }
+      const owner = resolveAlongEventPath(
+        native,
+        options,
+        (target) => semanticRouteOwner(opt.resolveSemanticEventRoute!(target, visited)),
+        () => semanticRouteOwner(opt.resolveSemanticEventRoute!(native.target, visited))
+      );
+      if (owner) return owner;
     }
     if (opt.resolveEventRouteOwner) {
-      if (typeof native.composedPath === 'function') {
-        for (const entry of native.composedPath()) {
-          const owner = opt.resolveEventRouteOwner(entry);
-          if (owner) return owner;
-        }
-      }
-      const targetOwner = opt.resolveEventRouteOwner(native.target);
-      if (targetOwner) return targetOwner;
-      if (options?.includeActiveFallback !== false) {
-        const active = rootEl.ownerDocument.activeElement;
-        const activeOwner = opt.resolveEventRouteOwner(active);
-        if (activeOwner) return activeOwner;
-      }
+      const owner = resolveAlongEventPath(
+        native,
+        options,
+        (target) => opt.resolveEventRouteOwner!(target),
+        () => opt.resolveEventRouteOwner!(native.target)
+      );
+      if (owner) return owner;
     }
     const visited = new Set<Node>();
-    if (typeof native.composedPath === 'function') {
-      for (const entry of native.composedPath()) {
-        const owner = getNearestTriggerOwner(entry, visited);
-        if (owner) return owner;
-      }
-    }
-    const targetOwner = getNearestTriggerOwner(native.target, visited);
-    if (targetOwner) return targetOwner;
-    if (options?.includeActiveFallback === false) return null;
-    const active = rootEl.ownerDocument.activeElement;
-    return getNearestTriggerOwner(active, visited);
+    return resolveAlongEventPath(native, options, (target) =>
+      getNearestTriggerOwner(target, visited)
+    );
   }
 
   function resolveOwningProtoInstance(
@@ -379,17 +379,9 @@ export function createWebProtoEventRouter(opt: {
     options?: { includeActiveFallback?: boolean }
   ) {
     const visited = new Set<Node>();
-    if (typeof native.composedPath === 'function') {
-      for (const entry of native.composedPath()) {
-        const owner = getNearestProtoInstance(entry, visited);
-        if (owner) return owner;
-      }
-    }
-    const targetOwner = getNearestProtoInstance(native.target, visited);
-    if (targetOwner) return targetOwner;
-    if (options?.includeActiveFallback === false) return null;
-    const active = rootEl.ownerDocument.activeElement;
-    return getNearestProtoInstance(active, visited);
+    return resolveAlongEventPath(native, options, (target) =>
+      getNearestProtoInstance(target, visited)
+    );
   }
 
   function shouldRouteToCurrentRoot(native: Event, options?: { includeActiveFallback?: boolean }) {
