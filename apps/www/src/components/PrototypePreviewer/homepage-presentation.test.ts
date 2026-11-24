@@ -53,10 +53,18 @@ describe('Homepage presentation source boundaries', () => {
     expect(preview).toContain('home-gallery__item--quiet');
     expect(preview).toContain('home-gallery__item--accent');
     expect(preview).toContain('home-gallery__media');
-    expect(preview).not.toContain('home-gallery__fade');
+    expect(preview).toContain('.home-gallery__stage)::after');
+    expect(preview).toContain('pointer-events: none;');
+    expect(preview).toContain('.home-gallery__stage:focus-within)::after');
+    expect(preview).toContain('data-home-gallery-layout-toggle');
+    expect(preview).toContain('data-home-gallery-compact');
+    expect(preview).toContain('zoom: calc(100cqi / var(--homepage-gallery-mini-width));');
     expect(preview).toContain('home-demo-previewer__backdrop');
     expect(preview).toContain('aria-hidden="true" inert');
-    expect(preview).toContain('grid-template-columns: repeat(5, minmax(0, 1fr));');
+    expect(preview).toContain('--homepage-gallery-wide-columns: 5;');
+    expect(preview).toContain(
+      'grid-template-columns: repeat(var(--homepage-gallery-wide-columns), minmax(0, 1fr));'
+    );
     expect(preview).toContain('width: min(100%, 104rem);');
     expect(preview).not.toContain('margin-inline: -1.25rem;');
     expect(preview).toContain('padding-inline: 1.25rem;');

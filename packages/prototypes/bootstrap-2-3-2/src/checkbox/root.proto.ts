@@ -16,22 +16,18 @@ export default definePrototype<CheckboxRootProps, CheckboxRootExposes>({
     if (!state) throw new Error('[bootstrap-2-3-2-checkbox-root] Base state handles required.');
     def.feedback.style.use(
       tw(
-        'inline-flex w-[20px] h-[20px] shrink-0 items-center justify-center rounded-[4px] border border-[#ccc] bg-white text-[#333] select-none cursor-pointer shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
+        'inline-flex w-[14px] h-[14px] shrink-0 items-center justify-center rounded-[2px] border border-foreground bg-[#f5f5f5_linear-gradient(#fff,#e6e6e6)_0_0_repeat-x] text-[#333] select-none cursor-pointer shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
       )
     );
-    def.rule({
-      when: (w) => w.state(state.checked).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground border-primary')),
-    });
-    def.rule({
-      when: (w) => w.state(state.indeterminate).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground border-primary')),
-    });
+    // The period form control uses the same neutral face in all states. The
+    // independent Indicator conveys checked/mixed; only focus gets blue ink.
     def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),
       intent: (i) =>
         i.feedback.style.use(
-          tw('outline-none ring-2 ring-ring ring-offset-2 ring-offset-background')
+          tw(
+            'outline-none border-[rgb(82_168_236/80%)] ring-2 ring-ring forced-colors-focus-outline'
+          )
         ),
     });
     def.rule({
