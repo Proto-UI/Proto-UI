@@ -164,3 +164,6 @@ internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.jso
 internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.md
 internal/records/evidence/2026-11-24-sprint5-browser-execution/production-setup-receipt.json
 internal/records/evidence/2026-11-24-sprint5-native-direction-acceptance/receipt.md
+
+# Preserve captured CLI source-analysis evidence bytes.
+internal/records/evidence/2026-11-24-cli-standard-runtime-root-styles/**

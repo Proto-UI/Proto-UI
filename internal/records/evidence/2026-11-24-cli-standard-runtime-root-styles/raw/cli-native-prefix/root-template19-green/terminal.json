@@ -1,0 +1,38 @@
+{
+  "head": "1dd7afa3ea4ff43c1f28306c9b035e87ed11ea62",
+  "sourceBefore": {
+    "packages/cli/src/services/hook-source-summary.ts": "3afdad254dbb5abcf7cd5b54bf74887d34536d07c2b289b30c4ff6cabb932404",
+    "packages/cli/src/services/prototype-style-tokens.ts": "60a1b319aeb525bbcf0e8fe61adbfebed4e90c0be89591d9b67227a497158089",
+    "packages/cli/test/hook-source-props-initialization.test.ts": "3951c54373013b3463ff3741c04d91e8beda2aed8676173d493c83a2b76ee49b"
+  },
+  "sourceAfter": {
+    "packages/cli/src/services/hook-source-summary.ts": "3afdad254dbb5abcf7cd5b54bf74887d34536d07c2b289b30c4ff6cabb932404",
+    "packages/cli/src/services/prototype-style-tokens.ts": "60a1b319aeb525bbcf0e8fe61adbfebed4e90c0be89591d9b67227a497158089",
+    "packages/cli/test/hook-source-props-initialization.test.ts": "3951c54373013b3463ff3741c04d91e8beda2aed8676173d493c83a2b76ee49b"
+  },
+  "startedAt": "2026-11-24T05:14:48.961058+00:00",
+  "command": [
+    "corepack",
+    "pnpm@10.32.1",
+    "exec",
+    "vitest",
+    "run",
+    "packages/cli/test/hook-source-props-initialization.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=/var/tmp/proto-ui-native-evidence-456f/cli-native-prefix/root-template19-green/report.json"
+  ],
+  "exitCode": 0,
+  "timedOut": false,
+  "elapsedMs": 4336,
+  "report": {
+    "success": true,
+    "numTotalTests": 19,
+    "numPassedTests": 19,
+    "numFailedTests": 0,
+    "numPendingTests": 0
+  },
+  "failed": []
+}

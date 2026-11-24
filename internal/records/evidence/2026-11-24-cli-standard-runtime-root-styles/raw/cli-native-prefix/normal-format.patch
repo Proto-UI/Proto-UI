@@ -1,0 +1,98 @@
+diff --git a/packages/cli/src/services/hook-source-summary.ts b/packages/cli/src/services/hook-source-summary.ts
+index 7d256a047..e5a275411 100644
+--- a/packages/cli/src/services/hook-source-summary.ts
++++ b/packages/cli/src/services/hook-source-summary.ts
+@@ -683,13 +683,11 @@ export async function projectStandardRuntimeRootStyleTokens(
+       summary: HookSourceSummaryContext;
+     }>
+   ) => Promise<readonly string[]>
+-): Promise<
+-  Readonly<{
+-    kind: 'standard-runtime-root-style-tokens';
+-    source: ts.SourceFile;
+-    tokens: readonly string[];
+-  }> | null
+-> {
++): Promise<Readonly<{
++  kind: 'standard-runtime-root-style-tokens';
++  source: ts.SourceFile;
++  tokens: readonly string[];
++}> | null> {
+   const summary = createHookSourceSummaryContextInternal(source);
+   if (!summary) return null;
+   const tokens = await collect(
+@@ -2141,7 +2139,8 @@ function createHookSourceSummaryContextInternal(
+       if (registrationLiteral(value) !== unknownRegistrationLiteral) return true;
+       if (
+         ts.isPrefixUnaryExpression(value) &&
+-        (value.operator === ts.SyntaxKind.PlusToken || value.operator === ts.SyntaxKind.MinusToken) &&
++        (value.operator === ts.SyntaxKind.PlusToken ||
++          value.operator === ts.SyntaxKind.MinusToken) &&
+         ts.isNumericLiteral(value.operand)
+       )
+         return true;
+@@ -6126,7 +6125,9 @@ function createHookSourceSummaryContextInternal(
+    * An export edge is not itself a freshness proof: freshness belongs only to
+    * the separate Runtime construction scenario and never to ordinary resolve.
+    */
+-  function selectStandardRuntimeRootSetup(source: ts.SourceFile): ts.FunctionLikeDeclaration | null {
++  function selectStandardRuntimeRootSetup(
++    source: ts.SourceFile
++  ): ts.FunctionLikeDeclaration | null {
+     const module = moduleForSource(source);
+     const exported = moduleContext.resolveExport(module, 'default');
+     if (!exported || exported.module.source !== source) return null;
+@@ -6190,7 +6191,9 @@ function createHookSourceSummaryContextInternal(
+             while (outer.parent && unwrap(outer.parent) === node) outer = outer.parent;
+             const parent = outer.parent;
+             const exportAssignment =
+-              ts.isExportAssignment(parent) && !parent.isExportEquals && parent.expression === outer;
++              ts.isExportAssignment(parent) &&
++              !parent.isExportEquals &&
++              parent.expression === outer;
+             const exportSpecifier =
+               ts.isExportSpecifier(parent) &&
+               !parent.isTypeOnly &&
+@@ -6217,10 +6220,7 @@ function createHookSourceSummaryContextInternal(
+     if (!ts.isCallExpression(firstCall)) return null;
+     const module = moduleForSource(rootStyleSource);
+     const hasClosedCapture = owner.body.statements.some((statement) => {
+-      if (
+-        !ts.isVariableStatement(statement) ||
+-        statement.declarationList.declarations.length !== 1
+-      )
++      if (!ts.isVariableStatement(statement) || statement.declarationList.declarations.length !== 1)
+         return false;
+       const initializer = statement.declarationList.declarations[0].initializer;
+       if (!initializer) return false;
+diff --git a/packages/cli/src/services/prototype-style-tokens.ts b/packages/cli/src/services/prototype-style-tokens.ts
+index 98f148fdc..15f29ef54 100644
+--- a/packages/cli/src/services/prototype-style-tokens.ts
++++ b/packages/cli/src/services/prototype-style-tokens.ts
+@@ -46,7 +46,9 @@ export async function collectProtoStyleTokensFromFiles(
+  * No module bindings, mutable graph versions or captured source values return
+  * to the ordinary collector; only the final immutable string tokens are used.
+  */
+-async function collectStandardRuntimeRootTokens(sourceFile: ts.SourceFile): Promise<readonly string[]> {
++async function collectStandardRuntimeRootTokens(
++  sourceFile: ts.SourceFile
++): Promise<readonly string[]> {
+   const projection = await projectStandardRuntimeRootStyleTokens(
+     sourceFile,
+     async ({ source, summary }) => {
+diff --git a/packages/cli/test/hook-source-props-initialization.test.ts b/packages/cli/test/hook-source-props-initialization.test.ts
+index 41d6723eb..703e55a61 100644
+--- a/packages/cli/test/hook-source-props-initialization.test.ts
++++ b/packages/cli/test/hook-source-props-initialization.test.ts
+@@ -256,7 +256,10 @@ describe('native Props initialization before authored hook capture', () => {
+         '} });',
+       ].join('\n')
+     );
+-    for (const files of [[first, second], [second, first]]) {
++    for (const files of [
++      [first, second],
++      [second, first],
++    ]) {
+       const tokens = await collectProtoStyleTokensFromFiles(files);
+       expect(tokens).toContain('data-[selected]:bg-accent');
+       expect(tokens).toContain('bg-destructive');

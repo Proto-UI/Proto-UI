@@ -1,0 +1,240 @@
+
+> proto-ui@ check:types /var/tmp/proto-ui-cli-fix-456f
+> corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style && corepack pnpm@10.32.1 -s check:types:workspace && corepack pnpm@10.32.1 -s check:types:docs
+
+
+> apps-www@0.0.1 generate:proto-ui-style /var/tmp/proto-ui-cli-fix-456f/apps/www
+> node ./scripts/generate-cli-init-docs.mjs && node ../../packages/cli/bin/proto-ui.js theme shadcn --out ./src/styles/shadcn-theme.css && node ./scripts/generate-website-prototype-tokens.mjs && node ../../packages/cli/bin/proto-ui.js style --out ./src/styles/proto-ui-style.css --theme-import ./shadcn-theme.css --tokens-import ./proto-ui-tokens.generated.css
+
+[docs] extracted real @proto.ui/cli@0.3.0-alpha.2 init: 4 files
+[proto-ui] theme(shadcn): wrote src/styles/shadcn-theme.css
+[website-prototypes] generated one style sheet and its Shadow companion from 1465 package + website tokens
+[proto-ui] style: wrote src/styles/proto-ui-style.css
+[docs] extracted real @proto.ui/cli@0.3.0-alpha.2 init: 4 files
+[proto-ui] theme(shadcn): wrote src/styles/shadcn-theme.css
+[website-prototypes] generated one style sheet and its Shadow companion from 1465 package + website tokens
+[proto-ui] style: wrote src/styles/proto-ui-style.css
+14:03:26 [content] Syncing content
+14:03:26 [content] Synced content
+14:03:26 [types] Generated 957ms
+14:03:26 [check] Getting diagnostics for Astro files in /var/tmp/proto-ui-cli-fix-456f/apps/www...
+[96mscripts/audit-brutalist-contrast.mts[0m:[93m958[0m:[93m21[0m - [93mwarning[0m[90m ts(6385): [0m'clip' is deprecated.
+
+[7m958[0m           if (style.clip !== 'auto' || style.clipPath !== 'none' || style.maskImage !== 'none')
+[7m   [0m [93m                    ~~~~[0m
+
+[96mscripts/capture-authored-diagram-evidence.mjs[0m:[93m507[0m:[93m59[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'error' may not exist on type '{ outcome: string; errors: never[]; screenshots: never[]; id: string; revision: any; asset: any; sourcePath: any; sourceSha256: any; pageSourcePath: any; pageSourceSha256: any; referenceLine: any; imageIndex: any; locale: any; route: string; theme: string; viewport: { ...; }; }'. Did you mean 'errors'?
+
+[7m507[0m         report.failures.push({ id: entry.id, error: entry.error });
+[7m   [0m [93m                                                          ~~~~~[0m
+[96mscripts/capture-authored-diagram-evidence.mjs[0m:[93m506[0m:[93m15[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'error' may not exist on type '{ outcome: string; errors: never[]; screenshots: never[]; id: string; revision: any; asset: any; sourcePath: any; sourceSha256: any; pageSourcePath: any; pageSourceSha256: any; referenceLine: any; imageIndex: any; locale: any; route: string; theme: string; viewport: { ...; }; }'. Did you mean 'errors'?
+
+[7m506[0m         entry.error = String(error);
+[7m   [0m [93m              ~~~~~[0m
+
+[96mscripts/capture-whitepaper-diagram-evidence.mjs[0m:[93m963[0m:[93m17[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'error' may not exist on type '{ theme: string; svgSha256: any; sourceSha256: any; expectedDimensions: { width: any; height: any; }; errors: any[]; screenshots: never[]; outcome: string; initialViewport?: any; id: string; figure: any; revision: string; ... 6 more ...; scenario: "standard" | ... 4 more ... | "landscape-390"; }'. Did you mean 'errors'?
+
+[7m963[0m           entry.error = String(error);
+[7m   [0m [93m                ~~~~~[0m
+[96mscripts/capture-whitepaper-diagram-evidence.mjs[0m:[93m884[0m:[93m51[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'fitViewport' may not exist on type '{ image: any; viewport: any; zoomClicks: number; wheel: never[]; keyboard: never[]; backgroundBefore: { x: number; y: number; }; }'. Did you mean 'viewport'?
+
+[7m884[0m                   reading.fitViewport.y + reading.fitViewport.clientHeight + 1,
+[7m   [0m [93m                                                  ~~~~~~~~~~~[0m
+[96mscripts/capture-whitepaper-diagram-evidence.mjs[0m:[93m884[0m:[93m27[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'fitViewport' may not exist on type '{ image: any; viewport: any; zoomClicks: number; wheel: never[]; keyboard: never[]; backgroundBefore: { x: number; y: number; }; }'. Did you mean 'viewport'?
+
+[7m884[0m                   reading.fitViewport.y + reading.fitViewport.clientHeight + 1,
+[7m   [0m [93m                          ~~~~~~~~~~~[0m
+[96mscripts/capture-whitepaper-diagram-evidence.mjs[0m:[93m882[0m:[93m51[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'fitViewport' may not exist on type '{ image: any; viewport: any; zoomClicks: number; wheel: never[]; keyboard: never[]; backgroundBefore: { x: number; y: number; }; }'. Did you mean 'viewport'?
+
+[7m882[0m                   reading.fitViewport.x + reading.fitViewport.clientWidth + 1 &&
+[7m   [0m [93m                                                  ~~~~~~~~~~~[0m
+[96mscripts/capture-whitepaper-diagram-evidence.mjs[0m:[93m882[0m:[93m27[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'fitViewport' may not exist on type '{ image: any; viewport: any; zoomClicks: number; wheel: never[]; keyboard: never[]; backgroundBefore: { x: number; y: number; }; }'. Did you mean 'viewport'?
+
+[7m882[0m                   reading.fitViewport.x + reading.fitViewport.clientWidth + 1 &&
+[7m   [0m [93m                          ~~~~~~~~~~~[0m
+[96mscripts/capture-whitepaper-diagram-evidence.mjs[0m:[93m880[0m:[93m42[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'fitViewport' may not exist on type '{ image: any; viewport: any; zoomClicks: number; wheel: never[]; keyboard: never[]; backgroundBefore: { x: number; y: number; }; }'. Did you mean 'viewport'?
+
+[7m880[0m                 measurement.y >= reading.fitViewport.y - 1 &&
+[7m   [0m [93m                                         ~~~~~~~~~~~[0m
+[96mscripts/capture-whitepaper-diagram-evidence.mjs[0m:[93m879[0m:[93m42[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'fitViewport' may not exist on type '{ image: any; viewport: any; zoomClicks: number; wheel: never[]; keyboard: never[]; backgroundBefore: { x: number; y: number; }; }'. Did you mean 'viewport'?
+
+[7m879[0m                 measurement.x >= reading.fitViewport.x - 1 &&
+[7m   [0m [93m                                         ~~~~~~~~~~~[0m
+[96mscripts/capture-whitepaper-diagram-evidence.mjs[0m:[93m878[0m:[93m61[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'fitViewport' may not exist on type '{ image: any; viewport: any; zoomClicks: number; wheel: never[]; keyboard: never[]; backgroundBefore: { x: number; y: number; }; }'. Did you mean 'viewport'?
+
+[7m878[0m                 reading.fitViewport.scrollHeight <= reading.fitViewport.clientHeight + 1 &&
+[7m   [0m [93m                                                            ~~~~~~~~~~~[0m
+[96mscripts/capture-whitepaper-diagram-evidence.mjs[0m:[93m878[0m:[93m25[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'fitViewport' may not exist on type '{ image: any; viewport: any; zoomClicks: number; wheel: never[]; keyboard: never[]; backgroundBefore: { x: number; y: number; }; }'. Did you mean 'viewport'?
+
+[7m878[0m                 reading.fitViewport.scrollHeight <= reading.fitViewport.clientHeight + 1 &&
+[7m   [0m [93m                        ~~~~~~~~~~~[0m
+[96mscripts/capture-whitepaper-diagram-evidence.mjs[0m:[93m877[0m:[93m60[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'fitViewport' may not exist on type '{ image: any; viewport: any; zoomClicks: number; wheel: never[]; keyboard: never[]; backgroundBefore: { x: number; y: number; }; }'. Did you mean 'viewport'?
+
+[7m877[0m                 reading.fitViewport.scrollWidth <= reading.fitViewport.clientWidth + 1 &&
+[7m   [0m [93m                                                           ~~~~~~~~~~~[0m
+[96mscripts/capture-whitepaper-diagram-evidence.mjs[0m:[93m877[0m:[93m25[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'fitViewport' may not exist on type '{ image: any; viewport: any; zoomClicks: number; wheel: never[]; keyboard: never[]; backgroundBefore: { x: number; y: number; }; }'. Did you mean 'viewport'?
+
+[7m877[0m                 reading.fitViewport.scrollWidth <= reading.fitViewport.clientWidth + 1 &&
+[7m   [0m [93m                        ~~~~~~~~~~~[0m
+[96mscripts/capture-whitepaper-diagram-evidence.mjs[0m:[93m876[0m:[93m25[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'fitViewport' may not exist on type '{ image: any; viewport: any; zoomClicks: number; wheel: never[]; keyboard: never[]; backgroundBefore: { x: number; y: number; }; }'. Did you mean 'viewport'?
+
+[7m876[0m                 reading.fitViewport.clientHeight > 0 &&
+[7m   [0m [93m                        ~~~~~~~~~~~[0m
+[96mscripts/capture-whitepaper-diagram-evidence.mjs[0m:[93m875[0m:[93m23[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'fitViewport' may not exist on type '{ image: any; viewport: any; zoomClicks: number; wheel: never[]; keyboard: never[]; backgroundBefore: { x: number; y: number; }; }'. Did you mean 'viewport'?
+
+[7m875[0m               reading.fitViewport.clientWidth > 0 &&
+[7m   [0m [93m                      ~~~~~~~~~~~[0m
+[96mscripts/capture-whitepaper-diagram-evidence.mjs[0m:[93m873[0m:[93m21[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'fitViewport' may not exist on type '{ image: any; viewport: any; zoomClicks: number; wheel: never[]; keyboard: never[]; backgroundBefore: { x: number; y: number; }; }'. Did you mean 'viewport'?
+
+[7m873[0m             reading.fitViewport = await readViewport();
+[7m   [0m [93m                    ~~~~~~~~~~~[0m
+
+[96mscripts/contrast-native-journeys.test.mjs[0m:[93m313[0m:[93m40[0m - [93mwarning[0m[90m ts(80007): [0m'await' has no effect on the type of this expression.
+
+[7m313[0m   assert.match(result.code, new RegExp(await sha(original)));
+[7m   [0m [93m                                       ~~~~~~~~~~~~~~~~~~~[0m
+[96mscripts/contrast-native-journeys.test.mjs[0m:[93m312[0m:[93m17[0m - [93mwarning[0m[90m ts(80007): [0m'await' has no effect on the type of this expression.
+
+[7m312[0m   assert.equal((await sha(original)).length, 64);
+[7m   [0m [93m                ~~~~~~~~~~~~~~~~~~~[0m
+[96mscripts/contrast-native-journeys.test.mjs[0m:[93m128[0m:[93m42[0m - [93mwarning[0m[90m ts(6133): [0m'y' is declared but its value is never read.
+
+[7m128[0m   window.document.elementFromPoint = (x, y) => point;
+[7m   [0m [93m                                         ~[0m
+[96mscripts/contrast-native-journeys.test.mjs[0m:[93m128[0m:[93m39[0m - [93mwarning[0m[90m ts(6133): [0m'x' is declared but its value is never read.
+
+[7m128[0m   window.document.elementFromPoint = (x, y) => point;
+[7m   [0m [93m                                      ~[0m
+
+[96mscripts/contrast-probe.browser.ts[0m:[93m650[0m:[93m15[0m - [93mwarning[0m[90m ts(6385): [0m'clip' is deprecated.
+
+[7m650[0m     if (style.clip !== 'auto') limits.push('unsupported-legacy-clip');
+[7m   [0m [93m              ~~~~[0m
+
+[96mscripts/contrast-tooltip-handoff.test.mjs[0m:[93m124[0m:[93m29[0m - [93mwarning[0m[90m ts(6133): [0m'resolve' is declared but its value is never read.
+
+[7m124[0m   const cold = new Promise((resolve, reject) => {
+[7m   [0m [93m                            ~~~~~~~[0m
+
+[96mscripts/reading-reference-collector.mjs[0m:[93m457[0m:[93m32[0m - [93mwarning[0m[90m ts(6385): [0m'platform' is deprecated.
+
+[7m457[0m       platform: navigatorInfo?.platform ?? null,
+[7m   [0m [93m                               ~~~~~~~~[0m
+
+[96msrc/components/library-liquid-scene.test.ts[0m:[93m129[0m:[93m9[0m - [93mwarning[0m[90m ts(6133): [0m'f' is declared but its value is never read.
+
+[7m129[0m   const f = fixture(),
+[7m   [0m [93m        ~[0m
+
+[96msrc/components/site-command-icons.dependencies.test.ts[0m:[93m49[0m:[93m72[0m - [93mwarning[0m[90m ts(6385): [0m'isTypeOnly' is deprecated.
+
+[7m49[0m       if (ts.isImportDeclaration(statement) && statement.importClause?.isTypeOnly) continue;
+[7m  [0m [93m                                                                       ~~~~~~~~~~[0m
+
+[96msrc/components/site-header-control-recipes.ts[0m:[93m20[0m:[93m42[0m - [93mwarning[0m[90m ts(6133): [0m'family' is declared but its value is never read.
+
+[7m20[0m export function headerSelectControlProps(family: SiteLibraryFamily) {
+[7m  [0m [93m                                         ~~~~~~[0m
+
+[96msrc/components/site-header-startup-handoff.test.ts[0m:[93m19[0m:[93m13[0m - [93mwarning[0m[90m ts(6133): [0m'root' is declared but its value is never read.
+
+[7m19[0m     const { root, summary, cell, button } = fixture();
+[7m  [0m [93m            ~~~~[0m
+
+[96msrc/components/site-search-composition.test.ts[0m:[93m669[0m:[93m42[0m - [93mwarning[0m[90m ts(80007): [0m'await' has no effect on the type of this expression.
+
+[7m669[0m       if (typeof cleanup === 'function') await cleanup();
+[7m   [0m [93m                                         ~~~~~~~~~~~~~~~[0m
+[96msrc/components/site-search-composition.test.ts[0m:[93m544[0m:[93m42[0m - [93mwarning[0m[90m ts(80007): [0m'await' has no effect on the type of this expression.
+
+[7m544[0m       if (typeof cleanup === 'function') await cleanup();
+[7m   [0m [93m                                         ~~~~~~~~~~~~~~~[0m
+[96msrc/components/site-search-composition.test.ts[0m:[93m414[0m:[93m11[0m - [93mwarning[0m[90m ts(80006): [0mThis may be converted to an async function.
+
+[7m414[0m           setChildren(ref, children) {
+[7m   [0m [93m          ~~~~~~~~~~~[0m
+
+[96msrc/components/site-sidebar-disclosure-bootstrap.js[0m:[93m54[0m:[93m44[0m - [93mwarning[0m[90m ts(6133): [0m'id' is declared but its value is never read.
+
+[7m54[0m   const known = new Set(identities.filter((id, index) => managed[index]));
+[7m  [0m [93m                                           ~~[0m
+
+[96msrc/components/PrototypePreviewer/demo-renderer.ts[0m:[93m341[0m:[93m10[0m - [93mwarning[0m[90m ts(6133): [0m'collectDemoRefs' is declared but its value is never read.
+
+[7m341[0m function collectDemoRefs(host: HTMLElement): Record<string, HTMLElement> {
+[7m   [0m [93m         ~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/PrototypePreviewer/preview-material-rebind.test.ts[0m:[93m118[0m:[93m9[0m - [93mwarning[0m[90m ts(6133): [0m'events' is declared but its value is never read.
+
+[7m118[0m   const events: string[] = [];
+[7m   [0m [93m        ~~~~~~[0m
+[96msrc/components/PrototypePreviewer/preview-material-rebind.test.ts[0m:[93m3[0m:[93m36[0m - [93mwarning[0m[90m ts(6196): [0m'VisualFeedbackSink' is declared but never used.
+
+[7m3[0m import type { VisualFeedbackFrame, VisualFeedbackSink } from '@proto.ui/module-feedback';
+[7m [0m [93m                                   ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/PrototypePreviewer/projection-composition.dynamic-children.test.ts[0m:[93m379[0m:[93m45[0m - [93mwarning[0m[90m ts(6133): [0m'refs' is declared but its value is never read.
+
+[7m379[0m     const subscribePublicInstances = vi.fn((refs, listener) => {
+[7m   [0m [93m                                            ~~~~[0m
+
+[96msrc/components/PrototypePreviewer/projection-portal-seal.ts[0m:[93m130[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'ownerId' is declared but its value is never read.
+
+[7m130[0m   ownerId: string,
+[7m   [0m [93m  ~~~~~~~[0m
+
+[96msrc/components/PrototypePreviewer/tabs-registration.test.ts[0m:[93m145[0m:[93m20[0m - [93mwarning[0m[90m ts(6133): [0m'styleProfile' is declared but its value is never read.
+
+[7m145[0m   for (const { id, styleProfile } of SHADCN_PRESET_DEMOS) {
+[7m   [0m [93m                   ~~~~~~~~~~~~[0m
+
+[96msrc/content/docs/zh-cn/code-scroll-chain.browser.test.ts[0m:[93m46[0m:[93m22[0m - [93mwarning[0m[90m ts(6133): [0m'page' is declared but its value is never read.
+
+[7m46[0m async function facts(page: Page, pre: Locator) {
+[7m  [0m [93m                     ~~~~[0m
+
+[96msrc/content/docs/zh-cn/code-surfaces.browser.test.ts[0m:[93m449[0m:[93m28[0m - [93mwarning[0m[90m ts(6387): [0mThe signature '(x: number, y: number): Range | null' of 'document.caretRangeFromPoint' is deprecated.
+
+[7m449[0m     const range = document.caretRangeFromPoint?.(point.x, point.y);
+[7m   [0m [93m                           ~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts[0m:[93m54[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'family' is declared but its value is never read.
+
+[7m54[0m   family: string,
+[7m  [0m [93m  ~~~~~~[0m
+
+[96msrc/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts[0m:[93m1903[0m:[93m17[0m - [93mwarning[0m[90m ts(80006): [0mThis may be converted to an async function.
+
+[7m1903[0m           const wrapped = function (this: HTMLImageElement) {
+[7m    [0m [93m                ~~~~~~~[0m
+
+[96msrc/content/docs/zh-cn/demo-liquid-glass-prominent-tint.browser.test.ts[0m:[93m29[0m:[93m8[0m - [93mwarning[0m[90m ts(6133): [0m'TintPair' is declared but its value is never read.
+
+[7m29[0m   type TintPair,
+[7m  [0m [93m       ~~~~~~~~[0m
+
+[96msrc/content/docs/zh-cn/finf-representative-features.browser.test.ts[0m:[93m825[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'page' is declared but its value is never read.
+
+[7m825[0m   page: Page,
+[7m   [0m [93m  ~~~~[0m
+
+[96msrc/content/docs/zh-cn/library-card-font-trace.ts[0m:[93m61[0m:[93m28[0m - [93mwarning[0m[90m ts(6385): [0m'fontStretch' is deprecated.
+
+[7m61[0m           fontStretch: css.fontStretch,
+[7m  [0m [93m                           ~~~~~~~~~~~[0m
+
+[96msrc/content/docs/zh-cn/site-native-links.browser.test.ts[0m:[93m2741[0m:[93m15[0m - [93mwarning[0m[90m ts(6133): [0m'family' is declared but its value is never read.
+
+[7m2741[0m   for (const [family, route] of [
+[7m    [0m [93m              ~~~~~~[0m
+
+[96msrc/content/docs/zh-cn/site-search-ime-evidence.ts[0m:[93m152[0m:[93m16[0m - [93mwarning[0m[90m ts(80007): [0m'await' has no effect on the type of this expression.
+
+[7m152[0m       browser: await browser.version(),
+[7m   [0m [93m               ~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+Result (1335 files): 
+- 0 errors
+- 0 warnings
+- 47 hints
+
