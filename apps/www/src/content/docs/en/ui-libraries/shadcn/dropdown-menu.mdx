@@ -1,6 +1,6 @@
 ---
 title: 'Dropdown Menu'
-description: 'Shadcn dropdown menu reconstructed on Proto UI.'
+description: 'A trigger-opened command menu supporting groups, shortcuts, destructive items, inset alignment, and full keyboard navigation.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,45 +8,44 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+A trigger-opened command menu built on Base semantics with keyboard navigation, accessible group labeling, destructive styling, and inset alignment. The examples on this page use the **Shadcn Rhea** style preset.
 
-This entry shows the current `shadcn` dropdown-menu implementation in Proto UI.
+## Preview
+
+The default demo shows grouped actions, labels, keyboard shortcut hints, and a disabled item:
 
 <PrototypePreviewer demoId="demo-shadcn-dropdown-menu" initialRuntime="wc" />
 
-## Grouped action composition (draft)
+### Destructive actions
 
-Group and Label provide a live accessible naming relationship; Separator and Shortcut are real passive parts. Shortcut only displays a hint and does not register a global binding. Decorative parts do not enter the action collection or add a press owner. The demo uses a 160px menu, grouped account/resources actions and a disabled API action. The real Invite users submenu is a separately pending protocol slice, not a simulated demo box. Checkbox/radio variants and complete native/GPUI, compiler, packed, visual and independent acceptance remain open.
-
-## Destructive actions (draft)
+Following the `DropdownMenuWithDestructive` pattern, items pair 16px Lucide icons with `variant="destructive"` on Delete (10% tint in light mode, 20% in dark mode). The trailing **Delete (disabled)** row demonstrates focusable-disabled behavior without selecting or closing the menu.
 
 <PrototypePreviewer demoId="demo-shadcn-dropdown-destructive" initialRuntime="wc" />
 
-Edit/Pencil, Share/Share, Archive/Archive, and Delete/Trash follow the pinned upstream `DropdownMenuWithDestructive` composition. Each glyph uses its real fixed Lucide prototype with `size: 16`; Delete uses `variant: 'destructive'`. The final **Delete (disabled)** row is a local validation extension, separated from the upstream actions. It keeps Base's focusable-disabled behavior and cannot select or close the menu. Destructive interactions retain the destructive foreground with a 10% tint in light mode and a 20% tint in dark mode. Keeping that palette during press is a local feedback extension over the upstream focus recipe.
+### Inset alignment
 
-## Inset actions (draft)
+Following `DropdownMenuWithInset`, set `inset={true}` on iconless `Item` or `Label` rows to align their text with icon-bearing siblings:
+
+- **Shadcn Rhea**: `8px` horizontal padding when `inset={false}`; `28px` left / `8px` right when `inset={true}`.
+- **New York compatibility preset**: `0.5rem` horizontal padding when `inset={false}`; physical-left `2rem` / right `0.5rem` when `inset={true}`.
+
+Use **Toggle inset** in the demo and reopen the menu to compare both states.
 
 <PrototypePreviewer demoId="demo-shadcn-dropdown-inset" initialRuntime="wc" />
 
-The first group uses the upstream Copy/Cut/Paste action pattern: Copy and Cut have real 16px Lucide glyphs, while Paste uses `inset: true`. Actions explicitly uses `inset: false`. The local **More actions** group adds an inset Label and ordinary Rename Item to show both Label settings without substituting ordinary actions for upstream Checkbox, Radio, or Submenu parts. Item and Label inset default to `false`, with 0.5rem padding on both sides. For comparison, the separate [fixed New York recipe](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/dropdown-menu.tsx) uses physical-left padding of 2rem and right padding of 0.5rem when `true`, including in RTL. Toggle inset changes the More actions Label, Paste and Rename through the existing prototype props; reopen the menu to compare. The selected Rhea recipe instead uses inset left/right padding of 28px/8px at a 16px root font, with 8px on either side when inset=false.
-
-These are bounded visual recipes over Base behavior. Root, Trigger, Content, Item, Group, Label, and Separator remain real prototypes; the demos add no Web-only event logic. Group/Label naming, item selection, focus navigation, and disabled behavior still belong to Base. The existing My Account example above remains separate.
-
-## Reference and evidence limits
-
-This is an unofficial Proto UI projection. The action arrangements reference the statically inspected [shadcn examples at c2a67849be260701852b0977ba15eb5f3a0ce2a4](https://github.com/shadcn-ui/ui/blob/c2a67849be260701852b0977ba15eb5f3a0ce2a4/apps/v4/registry/bases/base/examples/dropdown-menu-example.tsx), specifically `DropdownMenuWithDestructive` and the bounded action portion of `DropdownMenuWithInset`. The inset example's Checkbox, Radio, and Submenu sections are outside this implementation.
-
-Recipe loading, structure checks, and source-host renderer checks do not establish rendered visual parity. Cross-runtime browser paint, light/dark contrast on the actual Dropdown surface, real input/accessibility, native/GPUI, compiler, packed consumers, and independent acceptance remain incomplete. No screenshot or token assertion from another component supplies that evidence.
-
-Readable recipes: [My Account](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/zh-cn/demo-shadcn-dropdown-menu.demo.ts), [destructive actions](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/demo-shadcn-dropdown-destructive.demo.ts), and [inset actions](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/demo-shadcn-dropdown-inset.demo.ts).
-
-## Install
+## Installation
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-dropdown" manager="npm" />
 
-Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host. The registry id is `shadcn-dropdown`, not `shadcn-dropdown-menu`.
+Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your framework. Note that the CLI registry ID is `shadcn-dropdown`.
 
-The current source CLI target generates Root, Trigger, Content, and Item. Group, Label, Separator, and Shortcut are additional exports of `@proto.ui/prototypes-shadcn/dropdown`; this target does not generate their facades. Source registration does not establish installed-package or packed-consumer acceptance.
+The CLI target generates facades for `Root`, `Trigger`, `Content`, and `Item`. Import `Group`, `Label`, `Separator`, and `Shortcut` directly from `@proto.ui/prototypes-shadcn/dropdown`.
+
+## Usage
+
+- **Groups and passive parts**: `Group` and `Label` maintain an accessible group-naming relation automatically; `Separator` and `Shortcut` are passive visual parts (`Shortcut` displays a text hint without registering global keybindings).
+- **Demo sources**: [My Account](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/zh-cn/demo-shadcn-dropdown-menu.demo.ts), [destructive actions](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/demo-shadcn-dropdown-destructive.demo.ts), and [inset actions](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/demo-shadcn-dropdown-inset.demo.ts).
+- **Note**: Submenus and checkbox/radio items are planned for a future update.
 
 ## API
 
@@ -67,7 +66,7 @@ Passing `open` selects controlled mode.
   ]}
 />
 
-These props belong to Root.
+These props belong to `Root`.
 
 ## References
 

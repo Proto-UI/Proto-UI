@@ -1,11 +1,13 @@
 ---
 title: 'Toast'
-description: 'Timed live notifications with pause, dismiss and explicit action intent.'
+description: 'A Liquid Glass timed notification with hover/focus pause, keyboard viewport focus, and explicit actions.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Timed live notifications with pause, dismiss and explicit action intent.
+Liquid Glass Toast displays timed live notifications that pause automatically on hover or focus, support a viewport focus shortcut, and emit explicit action intents.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-toast"
@@ -14,8 +16,21 @@ Timed live notifications with pause, dismiss and explicit action intent.
   codePanel={false}
 />
 
-Root defaults open for 5000ms. duration=0 remains open; hover and focus in Toast Action/Close pause the remaining duration. Controlled open emits one timeout request until the owner changes state. Close, focused Escape and Action request dismissal; action side effects belong to the app. Viewport provides the F8 focus shortcut. No global queue or external notification transport is implied.
+## Installation
 
-Parts: Root, Viewport, Title, Description, Action, Close.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+## Usage
+
+- **Parts**: `Root`, `Viewport`, `Title`, `Description`, `Action`, `Close`.
+- **Timing and pause**: `Root` stays open for `5000ms` by default; pass `duration={0}` to disable auto-dismiss. Hovering the toast or focusing `Action` / `Close` pauses the remaining timer. In controlled mode, timeout emits one close request until you update `open`.
+- **Dismissal and shortcuts**: `Close`, focused Escape, and `Action` request dismissal while leaving action side effects to your application. `Viewport` provides the `F8` focus shortcut. Multi-toast queueing is left to your application.
+
+## API
+
+| Part | Prop | Defaults and notes |
+| --- | --- | --- |
+| Root | `open`, `duration` | Controlled open state / auto-dismiss duration in ms (default `5000`; `0` stays open) |
+| Viewport | — | Notification container with `F8` focus shortcut |
+| Title / Description | — | Notification heading and message body |
+| Action / Close | — | Action button and dismiss button |

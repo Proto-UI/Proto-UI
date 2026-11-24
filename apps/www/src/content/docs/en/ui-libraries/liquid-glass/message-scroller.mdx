@@ -1,18 +1,32 @@
 ---
-title: 'Message-Scroller (WIP)'
-description: 'message-scroller functional composition and current verification limits.'
+title: 'Message Scroller'
+description: 'A Liquid Glass message stream container with end-follow scrolling and jump-to-latest recovery.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Message Scroller composes the existing Scroll Surface end-follow policy. Appends follow only while the reader is at the end; a reader who leaves the end can explicitly resume with Jump to latest. newContentCount is supplied by the application, never inferred as unread truth. Jumping does not request focus.
+Liquid Glass Message Scroller builds on Scroll Surface end-follow behavior: new messages auto-scroll into view while the reader is at the bottom, pause when the reader scrolls up to read history, and resume on demand via Jump to latest.
 
-This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
-
-Set a11yLabel on Root to name the scrollable region; the default is Messages.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-message-scroller"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+- **New-item indicator**: pass `newContentCount` from your application state; the scroller does not infer application-level unread semantics.
+- **Focus and accessibility**: jumping to the latest message scrolls smoothly without stealing focus. Customize the scrollable region's accessible name via Root's `a11yLabel` (default `'Messages'`).
+
+## API
+
+| Part | Prop              | Default      | Description                                           |
+| ---- | ----------------- | ------------ | ----------------------------------------------------- |
+| Root | `a11yLabel`       | `'Messages'` | Accessible label for the scrollable region            |
+| Root | `newContentCount` | —            | Application-supplied count of newly appended messages |

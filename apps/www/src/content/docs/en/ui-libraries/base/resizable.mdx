@@ -1,17 +1,15 @@
 ---
-title: 'Resizable (WIP)'
-description: 'resizable functional composition and current verification limits.'
+title: 'Resizable'
+description: 'Resizable percentage-based panel groups with keyboard controls and nested layouts.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Resizable composes two or more percentage-sized panels and indexed separators. Each separator continuously resizes only its adjacent pair. A nested Root owns an independent layout and may use a different orientation. Pointer, arrow-key, Home/End, Shift acceleration and collapse use the same constrained request path.
+Splits a container into two or more percentage-sized panels separated by draggable, keyboard-accessible resize handles, supporting constraints, collapse stops, and nested panel groups.
 
-This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
-
-Panel exposes its dimensionless size through the existing exposed-state projection. Web CSS uses a static flex-basis recipe consuming --pui-size, so arbitrary ratios do not depend on runtime-generated CSS tokens.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-resizable"
@@ -19,9 +17,22 @@ Panel exposes its dimensionless size through the existing exposed-state projecti
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+Compose `Root`, `Panel`, and `Handle`:
+
+- **Indexing panels and handles**: Provide `N` panels with `index: 0..N-1` and `N-1` handles with `index: 0..N-2`. Each `Handle` adjusts only its adjacent pair of panels while preserving every other panel's size, and carries the default accessible name `Resize panels`.
+- **Sizing and layout**: `sizes` / `defaultSizes` hold the full percentage array summing to `100` (the legacy two-panel `value` / `defaultValue` props remain supported, with `sizes` taking precedence when supplied). Each `Panel` exposes a dimensionless `size` state consumed by static CSS rules via `--pui-size`; drag normalization uses total panel border-box length, excluding fixed handle widths.
+- **Constraints and interaction**: Pointer dragging, arrow keys, `Home`/`End`, `Shift` acceleration, and collapse stops share the same constraint solver. Pass per-panel `constraints` with `min` (default `0`), `max` (default `100`), `collapsible` (default `false`), and `collapsedSize` (default `0`). Infeasible layouts keep the previous valid sizes, and collapse stops respect adjacent panel maximums.
+- **Controlled mode and nesting**: Pass `sizes` for controlled layouts and listen to `sizesChange` / `sizesCommit` (payload `{ sizes }`). Update `sizes` to accept a proposal or keep the existing value to reject it; canceled gestures do not emit `sizesCommit`. Nested `Root` instances manage independent ratios, orientations, and constraints.
+
 ## API
 
-Root `sizes` / `defaultSizes` is the complete percentage vector. Supply N Panels (`index: 0..N-1`) and N−1 Handles (`index: 0..N-2`). A Handle names its preceding panel and retains the accessible name `Resize panels`. The legacy `value` / `defaultValue` API continues to create two panels; `sizes` takes precedence when supplied.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -38,16 +49,11 @@ Root `sizes` / `defaultSizes` is the complete percentage vector. Supply N Panels
   ]}
 />
 
-These props belong to Root. Panel defaults `index` to `0`.
+Multi-panel mode also accepts `sizes`, `defaultSizes`, and `constraints`. `Panel` and `Handle` accept `index` (default `0`).
+
+- **Exposed state and methods**: Read `sizes`, or call `requestResize(index, nextSize, commit)` / `requestSizes(nextSizes, commit)`.
+- **Events**: `sizesChange`, `sizesCommit` (payload `{ sizes }`).
 
 ## References
 
 <SpecEntityLinks directory="spec/prototypes" files={['P-BASE-RESIZABLE.yaml']} />
-
-### Multi-panel ownership
-
-`constraints` supplies each panel's `min`, `max`, `collapsible` and `collapsedSize`. Defaults are 0, 100, false and 0. Percentages are normalized to total 100; infeasible layouts retain the previous valid state and reject resizing. A separator preserves its pair's total and every other panel. Collapse is a discrete stop; an adjacent panel's maximum can prevent collapse.
-
-Read `sizes` or call `requestResize(index, nextSize, commit)` / `requestSizes(nextSizes, commit)`. `sizesChange` and `sizesCommit` carry `{ sizes }`. Passing `sizes` makes the layout controlled: update it from the proposal to accept, or retain it to refuse. Panels and ARIA remain at the committed owner value. Cancellation emits no commit.
-
-Nested Roots establish independent ownership, constraints and geometry. The example combines three horizontal panels with a two-panel vertical group. Panel border-box extents form the drag denominator, excluding fixed separator widths.

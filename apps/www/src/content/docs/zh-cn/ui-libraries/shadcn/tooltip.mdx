@@ -1,6 +1,6 @@
 ---
 title: 'Tooltip'
-description: '覆盖在 Base Tooltip family 之上的 shadcn 草案呈现。'
+description: '在悬停或键盘聚焦时展示补充说明的轻量提示弹层组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -9,51 +9,44 @@ import CodeExample from '@/components/CodeExample.astro';
 import { shadcnTooltipFiles } from '@/content/docs/demo_components/tooltip-usage';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页以 **Shadcn Rhea** 为目标，支持profile的parts均显式选择Rhea；下文headless触发器/action-body缺口仍开放，尚不称整页外观统一。这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Tooltip 在指针悬停或键盘聚焦触发元素时展示简短的补充说明，并支持同组内多个提示之间的延迟协调。本页示例使用 **Shadcn Rhea** 风格。
 
-这个 draft family 包含 Group、Root、Trigger 与 Content。open state、controlled ownership、disabled、pointer/focus intent、delay 与 dismissal sequencing、`aria-describedby`、presence、Escape、renderer-owned Portal projection 与 anchored positioning 继续只由 Base Tooltip 持有。shadcn 层仅增加 Group layout、Trigger feedback 与紧凑 Content surface。
-
-历史 API 比较来源为 shadcn-ui/ui `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 `apps/v4/registry/new-york-v4/ui/tooltip.tsx`，不是本页选择的外观 profile。该 Provider 默认 pointer delay 为0ms；Proto UI 保留 Base Group 的700ms open、100ms close和300ms skip。该 Content 默认 sideOffset 为0，Proto UI 保留4。Portal 仍归 renderer，Arrow 在受治理的几何通道缺失时仍不可用。
-
-Content 选择 [Rhea 样式源码](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css)：inline-flex、fit-content、20rem最大宽度、6px gap和`rounded-xl`，使用foreground/background主题色反转形成提示表面。2026-10-10 的 [base-nova snapshot](https://ui.shadcn.com/r/styles/base-nova/tooltip.json)（SHA256 `2f55867faecee2d3616cfd8c6a80b538909a21e62fdfa2788b1ead56093e5395`）只保留为未选profile时的兼容参考。Trigger是带既有Proto反馈的headless语义owner，不是Button；替换演示旧作者paint仍需公共Rhea被动action-body组合，不能再增加焦点/激活owner。Arrow、transform-origin、方向motion、kbd后代样式及原生视觉验收仍开放。
-
-从 `@proto.ui/prototypes-shadcn/tooltip` 导入该 family，或使用 `proto-ui add react shadcn-tooltip` 生成 React facade。Content 保持 supplementary、不可聚焦且非任务必要；交互式任务内容应使用 Popover 或 non-modal Dialog。
+## 预览
 
 <PrototypePreviewer demoId="demo-shadcn-tooltip" initialRuntime="wc" />
 
-## 建议验收路径
+## 安装
 
-1. hover Account，确认 cold Tooltip 约 700ms 后打开；提前离开时不得闪现。
-2. 在 300ms warm window 结束前移动到 Notifications，确认 sibling 立即打开且始终只有一个 active owner。
-3. 用 Tab 聚焦任一 Trigger，确认立即打开、focus ring 可见，且 Trigger 没有 button role。
-4. 确认 Content portal 到 preview frame 外，仍通过 `aria-describedby` 关联，且没有可聚焦 control 或 Arrow。
-5. 按 Escape，确认 Content 关闭且焦点留在 Trigger。
-6. 在 Web Components、React、Vue 与 Vue 2 的 Light/Dark 模式中重复检查。
+当前完整源码示例基于工作区 0.3 源码包（包含 Vue 2.6 Adapter）。如需安装已发布的 0.2.0 稳定版，请参阅 [Quick Start](/zh-cn/start-here/quick-start/)。
 
-相关 entities 仍为 `draft`；本页描述当前 cataloged direction，而不是稳定 compatibility guarantee。
+在现有宿主应用中从本地源码包安装时，请从同一源码修订安装 CLI、`@proto.ui/prototypes-shadcn` 以及对应宿主的 Adapter（`@proto.ui/adapter-web-component`、`@proto.ui/adapter-react`、`@proto.ui/adapter-vue` 或 `@proto.ui/adapter-vue2`，其中 Vue 2 要求 Vue `>=2.6.0 <2.7`）。本地打包与安装流程可参考 [scripts/release/publish.mjs](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) 和 [scripts/release/consumer-smoke-cli.mjs](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs)。
 
-## 当前源码安装与用法
-
-以下文件面向当前 0.3 源码包，包括 Vue 2.6 Adapter；工作区版本号不代表这些包已经发布到 npm。从已有宿主应用开始，把 CLI、`@proto.ui/prototypes-shadcn` 与对应 Adapter 从**同一个已审查源码版本**安装。仓库的 [仅打包流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) 生成本地 tarball，[干净消费者安装流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs) 从这些 tarball 安装完整声明的 `@proto.ui/*` 依赖闭包。[稳定版 Quick Start](/zh-cn/start-here/quick-start/) 仍是独立的已发布版本路线。
-
-按宿主使用 `@proto.ui/adapter-web-component`、`@proto.ui/adapter-react`、`@proto.ui/adapter-vue` 或 `@proto.ui/adapter-vue2`。React 与 Vue 保留原应用挂载入口。Vue 2 要求 Vue `>=2.6.0 <2.7`；把 CLI 版本换成 `@latest` 不能让安装结果自动等同于源码预览。
-
-安装配套包后，在应用目录运行本地 CLI。保留生成的 CSS：Base 的 presence 与 positioning 也需要其中的结构规则。下方小型 `tooltip-demo.css` 由应用拥有，不替代这些规则。
+安装配套包后，在应用目录运行本地 CLI 生成组件封装（请保留生成的 `proto-ui-style.css`，其中包含定位与显隐所需的结构样式）：
 
 ```sh
 node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --prototypes shadcn
 node node_modules/@proto.ui/cli/bin/proto-ui.js add wc shadcn-tooltip --no-install --no-interactive
 ```
 
-将 `wc` 换为 `react`、`vue` 或 `vue2`，生成对应 facade。下方使用真实生成的四个 part 导出与 WC 标签；`--no-install` 的前提是配套包已经安装。Trigger 与 Content 显式选择 Rhea，Trigger 的被动外观仍由应用拥有。
+将 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件文件。
 
-复制一个宿主的文件。WC HTML 加入已有文档，`src/main.ts` 只加载一次；React 与 Vue 保留应用原有入口并使用下方 `App` 组件。如果应用已经加载 `proto-ui-style.css`，保留一个导入入口即可。一个 Group 拥有两个非受控 Root，每个 Root 各有一个独立 Trigger 和一个不含交互控件的 Content。
+## 用法
+
+Tooltip 由 `Group`、`Root`、`Trigger` 和 `Content` 组成：
+
+- `Group` 协调同组多个 Tooltip 的显示延迟：冷启动悬停默认 `700ms` 后打开，关闭延迟 `100ms`；在 `300ms` 跳过窗口内移动到相邻触发器时会立即切换，且同组最多保持一个提示打开。
+- 通过键盘 `Tab` 聚焦 `Trigger` 时立即显示提示，按 `Escape` 关闭并保持焦点在触发器上。
+- `Content` 默认通过 Portal 渲染并自动维护 `aria-describedby` 关联，适用于不可聚焦的补充文本；需要包含交互控件时请使用 Popover 或非模态 Dialog。
+
+### 完整宿主示例
+
+下方展示了 Web Components、React、Vue 和 Vue 2 的完整集成代码（一个 `Group` 内包含两个非受控 `Root`，每个 `Root` 搭配独立 `Trigger` 与 `Content`）：
 
 <CodeExample files={shadcnTooltipFiles} initialHost="wc" label="Shadcn Tooltip 完整宿主用法" />
 
-## 在 Button 上使用 Tooltip
+### 在 Button 上组合 Tooltip
 
-可聚焦命令与 Tooltip 应共用一个 subject。将 draft authored hook `useTooltipTrigger()` 与命令行为组合，适配生成的原型，再把该组件直接放在 Tooltip Root 内与 Content 并列。不要用独立 Trigger 包裹另一个可聚焦 Button，否则会产生两个 Tab 停靠点。
+当触发元素本身是可聚焦按钮时，应让按钮与提示触发器共享同一个元素，避免嵌套产生两个 `Tab` 焦点停靠点。使用 `useTooltipTrigger()` 与 `asButton()` 组合即可：
 
 ```ts
 import { definePrototype } from '@proto.ui/core';
@@ -69,15 +62,13 @@ export const tooltipButton = definePrototype<ButtonProps, ButtonExposes>({
 });
 ```
 
-Button 保留 role、name、click signal、disabled state 与唯一焦点 owner；Tooltip 只追加 hover/focus intent 与自有 `aria-describedby` 关联。禁用 Tooltip Root 只关闭 Tooltip，命令仍可操作；禁用命令则同时抑制两者。`useTooltipTrigger` 没有 options，也不新增 outward exposes，要求同一 subject 已有焦点能力。独立 `asTooltipTrigger` 保留原焦点行为与 exposes。
-
-复用已有样式原型时，可在 `definePrototype` 中保留该原型的静态 `modules` 声明，调用其 `setup(def)`，再调用 `useTooltipTrigger()`，最后返回之前保存的 render function。这保留 family Button 呈现并只创建一个宿主；与下方独立 Trigger demo 的 passive action-body 样式工作分别追踪。
-
-命令位于真实 ShadowRoot 时，请使用 [同树 portal scene 配方](/zh-cn/ui-libraries/base/tooltip/#shadowroot)。默认 body 目标不能只靠相同 ID 字符串为 ShadowRoot 内的命令提供可访问描述。
+- 按钮保留自身角色、名称、点击事件、禁用状态与焦点管理，`useTooltipTrigger()` 仅叠加悬停/聚焦意图与 `aria-describedby` 关联。禁用 Tooltip `Root` 仅关闭提示而不禁用按钮；禁用按钮则会同时抑制提示。
+- 如需复用已有的 Shadcn 风格按钮原型，可在 `definePrototype` 中保留其静态 `modules` 声明，在 `setup(def)` 中先调用原按钮的 `setup(def)` 再调用 `useTooltipTrigger()`，并返回原 render 函数。
+- 当触发元素位于 `ShadowRoot` 内部时，请使用 [同树 Portal 配方](/zh-cn/ui-libraries/base/tooltip/#shadowroot)，以确保 `aria-describedby` 跨 Shadow 边界正确生效。
 
 ## API
 
-Root 传入 `open` 进入受控模式。Root 未自设延时时使用 Group 的延时。
+在 `Root` 上传入 `open` 进入受控模式；`Root` 未单独设置延迟时自动沿用 `Group` 的配置：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -96,7 +87,11 @@ Root 传入 `open` 进入受控模式。Root 未自设延时时使用 Group 的�
   ]}
 />
 
-`openDelay`、`closeDelay`、`skipDelay` 属于 Group。`side` 到 `collisionPadding` 属于 Content。Trigger 只增加 `disabled`。
+属性归属说明：
+
+- `defaultOpen`、`disabled` 属于 `Root`（`Trigger` 也支持 `disabled`）。
+- `openDelay`、`closeDelay`、`skipDelay` 属于 `Group`。
+- `side`、`align`、`sideOffset`、`alignOffset`、`avoidCollisions`、`collisionPadding` 属于 `Content`。
 
 ## 参考
 

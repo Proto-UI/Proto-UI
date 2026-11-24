@@ -1,29 +1,15 @@
 ---
-title: 'Calendar (WIP)'
-description: 'Gregorian date selection, localized weekdays and explicit caption composition.'
+title: 'Calendar'
+description: '支持单选、多选与日期范围的 Liquid Glass 公历选择器，提供本地化星期与可组合标题栏。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Calendar 是公历控件，支持 `single`（默认）、`multiple` 和 `range` 三种选择模式。`value` 使用 YYYY-MM-DD，权威显示月份 `month` 使用 YYYY-MM；两者可分别受控。`requestMonth` 返回成功表示已提出请求，不等于 owner 接受。跨月键盘请求被拒绝或仍在等待时保留当前有效 Tab 入口；只有月份真正接受且重新检查可用性后，才 materialize 并聚焦目标。焦点已离开日历时不抢回。
+Liquid Glass Calendar 是公历日期选择组件，支持 `single`（默认）、`multiple` 与 `range` 三种选择模式。日期使用 `YYYY-MM-DD` 字符串，显示月份使用 `YYYY-MM` 字符串，两者均可独立受控。
 
-默认按 canonical month 与 weekStartsOn 显示覆盖全月的最少 4、5 或 6 周；`fixedWeeks=true` 才显式固定六周。Root 公开 `weekCount`。应用可以保留 `index` 0–5 的六个 Row、`offset` 0–41 的 Day 作为容量；多余 Row/Day 公开 `hidden`，投影隐藏语义，多余 Day 禁用且不进入焦点或选择。未给 index 的 Row 与显式 date 仍由应用排布。
+## 预览
 
-## 范围与多选
-
-| 模式       | 受控值 / 初始值                             | 请求回调                     |
-| ---------- | ------------------------------------------- | ---------------------------- |
-| `single`   | `value` / `defaultValue`：YYYY-MM-DD 字符串 | `onValueChange({ value })`   |
-| `multiple` | `values` / `defaultValues`：日期数组        | `onValuesChange({ values })` |
-| `range`    | `range` / `defaultRange`：`{ from?, to? }`  | `onRangeChange({ range })`   |
-
-多选模式中，每次激活日期都会增加或移除该日期；数组去重、按民用日期升序排列，并在输入、输出时复制。`minSelected` 默认为 0，省略 `maxSelected` 表示不设上限。逐日增加允许从空值逐步达到最小数量；删除后必须保留最小数量。显式 `requestValues` 整组替换始终同时验证最小与最大数量。范围模式第一次选择产生 `{ from }`，第二次选择完成含两端的 `{ from, to }`；反向选择会自动按时间排序。完成后再次选择会开始新范围，`{}` 表示清空。`minNights=0`（默认）允许同一天作为完整范围。`minNights` / `maxNights` 限制起止日期之间的天数，不是选中格数；省略上限表示不限，所有限制必须是非负整数。
-
-`min`、`max` 和 Root `unavailable` 约束所有选中日期。完整范围只要跨过一个不可用日期就会被拒绝，并保留已有起点。全局日期限制应放在 Root `unavailable`；Day 局部 `disabled` 只禁用该控件。Root `disabled` / `readOnly` 会拒绝选择请求；资格变化不会暗中改写 owner 已有的选择。
-
-`requestValue(date)` 按当前模式激活日期；`requestValues(dates)`、`requestRange(range)` 只在对应模式替换选择。返回 true 表示已经发出请求；受控模式只有在 owner 接受对应属性后才更新绘制。`getValues()`、`getRange()` 返回副本。`default*` 只初始化一次，切换模式时分别保留各自的值。Root 另外公开 `mode`、`selectedCount` 和 `rangeComplete`。
-
-Day 在 `selected` 之外公开 `rangeStart`、`rangeEnd`、`rangeMiddle`、`rangePending`。未完成的起点带 start/pending，完整单日范围同时带 start/end，中间日期带 middle；完整范围中的每天都为 selected。家族配方分别绘制端点与中段，Grid 在范围/多选模式投影 `aria-multiselectable`。键盘导航不变，Enter 或 Space 激活当前日期。
+### 选择模式（单选 / 多选 / 范围）
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-calendar-selection"
@@ -31,24 +17,58 @@ Day 在 `selected` 之外公开 `rangeStart`、`rangeEnd`、`rangeMiddle`、`ran
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 组合与时钟所有权
-
-十个原子为 Root、Caption、Heading、Previous、Next、Grid、Weekdays、Weekday、Row、Day。在 Weekdays 中放置 offset 为 0–6 的七个 Weekday，再通过 offset 为 0–41 的 Day 组成最多六个带 index 的容量行，实际显示周数按上述规则同步。星期标签与日期顺序随 Root 的 `weekStartsOn`（0 为周日）和 `locale` 同步；日期格使用完整本地化民用日期作为无障碍名称。`direction="rtl"` 镜像左右键，保留上下键和周边界语义。导航原子支持 `a11yLabel`，为纯图标提供名称。
-
-host 通过民用日期字符串 `today` 提供当前日期。Base 不读取时钟或时区；未传 today 就不标记今天。today 与 selected 独立，包括不可用日期；today 映射 `aria-current="date"`。初始月份优先级为显式 `month`、显式 `defaultMonth`、当前模式的选中日期（单日期、多个日期中的最早日期或范围起点）、传入的 `today`，最后是确定性回退 1970-01。时钟后续变化不会自动翻月。`unavailable` 为字符串数组；非法输入保留上一个有效值或默认值。Root disabled 与各 Day/Previous/Next 的局部 disabled 合并；readOnly 禁止选择但允许浏览。
-
-## 显式月份/年份 caption 组合
-
-演示通过 `bindCalendarCaption(source, {month, year})`，使用 Calendar 公开的 month/disabled 状态及 `requestMonth`，组合真实的本家 Select。Caption 自身仅为语义组。月/年选择器属于应用组合，不是 Calendar 内部依赖 Select。helper 对拒绝或尚未接受的请求始终恢复权威值，订阅后续接受，并用 `dispose()` 清理。演示拥有显式有界年份选项（不是 Calendar 限制）、本地时钟 today、午夜/页面恢复更新，以及完整的受控 props 记录。Month 和 Year trigger 通过 Select 公开的 `accessibleLabel` 属性提供稳定名称；Select Value 独立显示当前月份或年份。演示不写入 Adapter 拥有的 ARIA 属性。计算后的可访问名称、选择后的名称稳定性、键盘交互及焦点返回仍需当前源码的真实浏览器证据；屏幕阅读器验收另行完成。
-
-Liquid Glass 是参考 Apple 材质原则的投影，不是一对一公开 Calendar 实现。光学材质能力和不透明 fallback 必须分别验证。
-
-## 验证边界
-
-当前仍为 WIP。Calendar 有实际 host 的局部行为测试，包含 WC、React、Vue、Vue2；公开 Props/Exposes/AsHook 的域另有独立负控。当前 CLI collector 会漏掉合法继承 Calendar / 嵌套 Button 状态的部分 token，因此状态样式的生成 CSS 与浏览器视觉保真尚未验收。Compiler 解释能力由另一 owner 负责，不能反过来约束合法 Prototype 语义。原生 GPUI/Qt、compiled/packed 一致性、绑定确切提交的浏览器证据和独立验收仍未完成。
+### 基础日历与月份/年份选择组合
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-calendar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+## 用法
+
+### 组成与网格布局
+
+Calendar 由十个部件组成：`Root`、`Caption`、`Heading`、`Previous`、`Next`、`Grid`、`Weekdays`、`Weekday`、`Row`、`Day`。
+
+- 在 `Weekdays` 中放置 `offset` 为 `0–6` 的七个 `Weekday`，再使用最多六个带 `index`（`0–5`）的 `Row` 与 `offset`（`0–41`）的 `Day` 作为网格容量。
+- 默认按当月与 `weekStartsOn` 显示最少 4、5 或 6 周；传入 `fixedWeeks={true}` 可固定显示六周。多余的行和日期格会自动暴露 `hidden` 并退出焦点与选择路径。
+- 星期标签与日期无障碍名称随 Root 的 `weekStartsOn`（`0` 为周日）与 `locale` 同步。`direction="rtl"` 会镜像左右方向键；纯图标导航按钮可通过 `a11yLabel` 提供名称。
+
+### 单选、多选与范围规则
+
+- **多选（`multiple`）**：每次激活切换该日期；数组自动去重并按日期升序排列。`minSelected` 默认 `0`，省略 `maxSelected` 表示不限上限。
+- **范围（`range`）**：首次激活设定起点 `{ from }`，第二次激活完成闭区间 `{ from, to }`（反向选择会自动排序），再次激活则开始新范围；`{}` 表示清空。`minNights`（默认 `0`，允许单日范围）与 `maxNights` 限制起止日期之间的天数间隔。
+- `min`、`max` 与 Root 的 `unavailable` 约束所有选中日期；跨越不可用日期的范围会被拒绝并保留起点。整组不可用日期请配置在 Root 的 `unavailable`，单个 `Day` 的 `disabled` 仅禁用该格。
+- `readOnly` 禁止修改选择但允许继续翻月浏览；`disabled` 同时禁用选择与导航。
+
+### 时钟与月份/年份下拉组合
+
+- 组件不主动读取系统时钟或时区：请通过 `today` 传入 `YYYY-MM-DD` 字符串以标记今天（自动映射 `aria-current="date"`）。
+- 初始显示月份优先级为：`month` → `defaultMonth` → 当前模式已有选中日期 → `today` → `1970-01`。
+- 若需要月份与年份下拉框，可通过 `bindCalendarCaption(source, { month, year })` 将本家族的 Select 与 Calendar 的公开 `month`/`disabled` 状态及 `requestMonth` 组合，卸载时调用返回的 `dispose()` 清理，并通过 Select 的 `accessibleLabel` 为触发器提供稳定名称。
+
+## API
+
+| 部件 / 模式 | 属性 | 默认值与说明 |
+| --- | --- | --- |
+| Root | `mode` | `'single' \| 'multiple' \| 'range'`，默认 `'single'` |
+| Root (`single`) | `value` / `defaultValue` | `YYYY-MM-DD` 字符串；变更回调 `onValueChange({ value })` |
+| Root (`multiple`) | `values` / `defaultValues` | 日期数组；配合 `minSelected`（默认 `0`）、`maxSelected` 与 `onValuesChange({ values })` |
+| Root (`range`) | `range` / `defaultRange` | `{ from?, to? }`；配合 `minNights`（默认 `0`）、`maxNights` 与 `onRangeChange({ range })` |
+| Root | `month` / `defaultMonth` | `YYYY-MM` 字符串，可独立受控 |
+| Root | `today` / `min` / `max` / `unavailable` | 今日标记与可选日期边界（`unavailable` 为日期字符串数组） |
+| Root | `weekStartsOn` / `locale` / `direction` / `fixedWeeks` | `weekStartsOn` 默认 `0`；`fixedWeeks` 默认 `false` |
+| Root | `disabled` / `readOnly` | 禁用或只读控制 |
+| Previous / Next | `a11yLabel` / `disabled` | 导航按钮无障碍名称与局部禁用 |
+| Row / Day | `index` / `offset` / `disabled` | 网格容量索引与单格禁用 |
+
+### 方法与暴露状态
+
+- Root 暴露方法：`requestMonth(month)`、`requestValue(date)`、`requestValues(dates)`、`requestRange(range)`、`getValues()`、`getRange()`。
+- Root 暴露状态：`mode`、`weekCount`、`selectedCount`、`rangeComplete`。
+- Day 暴露状态：`selected`、`rangeStart`、`rangeEnd`、`rangeMiddle`、`rangePending`、`hidden`。Grid 在多选与范围模式下自动设置 `aria-multiselectable`。

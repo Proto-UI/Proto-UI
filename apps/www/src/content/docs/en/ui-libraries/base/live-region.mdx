@@ -1,51 +1,36 @@
 ---
 title: 'Live Region'
-desp: 'Live Region base prototype'
-description: 'Live Region base prototype'
+description: 'An accessibility container for announcing dynamic status updates by synchronizing role, aria-live, and aria-atomic.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-`base-live-region-root` is a narrow async accessibility primitive that projects governed ARIA live-region semantics without interaction.
+`base-live-region-root` is a lightweight accessibility container that synchronizes `role`, `aria-live`, and `aria-atomic` from its `politeness` and `atomic` props.
+
+## Preview
 
 <div>
   <PrototypePreviewer demoId="demo-base-live-region" initialRuntime="wc" />
 </div>
 
-It derives `role`, `aria-live`, and `aria-atomic` from two props:
+## Installation
 
-- `politeness`: `polite` (default) projects `role=status` + `aria-live=polite`; `assertive` projects `role=alert` + `aria-live=assertive`
-- `atomic`: `true` (default) projects `aria-atomic=true`; `false` projects `aria-atomic=false`
+Currently available from workspace source; not yet included in the 0.2.0 stable release. In the workspace, the CLI target is `base-live-region`.
 
-Authored child content is the announcement payload. The prototype declares no focus, event, command, selection, or accessible-name override channel; the exposes surface is empty.
+## Usage
 
-## Current v0 Boundary
+Render your dynamic announcement text as child content inside `base-live-region-root`. The container maps its two props directly to ARIA live-region attributes:
 
-`base-live-region-root` currently includes:
+- **`politeness`**: `'polite'` (default) sets `role="status"` and `aria-live="polite"`; `'assertive'` sets `role="alert"` and `aria-live="assertive"`.
+- **`atomic`**: `true` (default) sets `aria-atomic="true"` (announcing the whole region on change); `false` sets `aria-atomic="false"`.
 
-- polite/assertive role and aria-live projection
-- atomic aria-atomic projection
-- mounted prop transitions that update all three attributes synchronously
-- authored child content preservation across prop transitions
-
-It does not include:
-
-- `aria-relevant` granularity control
-- announcement timers or replacement state machines
-- accessible-name override
-- focus, event, command, or selection channels
-
-## References
-
-- Contract: [C-ASYNC-A11Y-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-ASYNC-A11Y-0001.yaml)
-- Source: [packages/prototypes/base/src/live-region](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/live-region)
-- Test: [live-region.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/live-region.test.ts)
+When updating props, all three ARIA attributes update synchronously while preserving your child content. For async loading workflows, compose Live Region alongside [Async Region](../async-region/).
 
 ## API
 
-Live Region is workspace source. For this workspace version, the CLI target is `base-live-region`. Use matching CLI and package versions; check the chosen release's availability before installing.
+These props belong to `Root` (`base-live-region-root`).
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -54,8 +39,6 @@ Live Region is workspace source. For this workspace version, the CLI target is `
     { name: 'atomic', type: 'boolean', default: 'true' },
   ]}
 />
-
-These props belong to Root.
 
 ## References
 

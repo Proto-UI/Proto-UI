@@ -1,31 +1,15 @@
 ---
-title: 'Calendar (WIP)'
-description: 'Gregorian date selection, localized weekdays and explicit caption composition.'
+title: 'Calendar'
+description: '公历日期选择组件，支持单选、多选与日期范围选择、本地化星期标题及自定义年月导航组合。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Calendar 是公历控件，支持 `single`（默认）、`multiple` 和 `range` 三种选择模式。`value` 使用 YYYY-MM-DD，权威显示月份 `month` 使用 YYYY-MM；两者可分别受控。`requestMonth` 返回成功表示已提出请求，不等于 owner 接受。跨月键盘请求被拒绝或仍在等待时保留当前有效 Tab 入口；只有月份真正接受且重新检查可用性后，才 materialize 并聚焦目标。焦点已离开日历时不抢回。
+Base Calendar 是无样式公历组件，支持 `single`（默认）、`multiple` 和 `range` 三种日期选择模式，使用 `YYYY-MM-DD` 表示日期、`YYYY-MM` 表示显示月份，且选择状态与当前月份均可独立受控。
 
-默认按 canonical month 与 weekStartsOn 显示覆盖全月的最少 4、5 或 6 周；`fixedWeeks=true` 才显式固定六周。Root 公开 `weekCount`。应用可以保留 `index` 0–5 的六个 Row、`offset` 0–41 的 Day 作为容量；多余 Row/Day 公开 `hidden`，投影隐藏语义，多余 Day 禁用且不进入焦点或选择。未给 index 的 Row 与显式 date 仍由应用排布。
-
-## 范围与多选
-
-| 模式       | 受控值 / 初始值                             | 请求回调                     |
-| ---------- | ------------------------------------------- | ---------------------------- |
-| `single`   | `value` / `defaultValue`：YYYY-MM-DD 字符串 | `onValueChange({ value })`   |
-| `multiple` | `values` / `defaultValues`：日期数组        | `onValuesChange({ values })` |
-| `range`    | `range` / `defaultRange`：`{ from?, to? }`  | `onRangeChange({ range })`   |
-
-多选模式中，每次激活日期都会增加或移除该日期；数组去重、按民用日期升序排列，并在输入、输出时复制。`minSelected` 默认为 0，省略 `maxSelected` 表示不设上限。逐日增加允许从空值逐步达到最小数量；删除后必须保留最小数量。显式 `requestValues` 整组替换始终同时验证最小与最大数量。范围模式第一次选择产生 `{ from }`，第二次选择完成含两端的 `{ from, to }`；反向选择会自动按时间排序。完成后再次选择会开始新范围，`{}` 表示清空。`minNights=0`（默认）允许同一天作为完整范围。`minNights` / `maxNights` 限制起止日期之间的天数，不是选中格数；省略上限表示不限，所有限制必须是非负整数。
-
-`min`、`max` 和 Root `unavailable` 约束所有选中日期。完整范围只要跨过一个不可用日期就会被拒绝，并保留已有起点。全局日期限制应放在 Root `unavailable`；Day 局部 `disabled` 只禁用该控件。Root `disabled` / `readOnly` 会拒绝选择请求；资格变化不会暗中改写 owner 已有的选择。
-
-`requestValue(date)` 按当前模式激活日期；`requestValues(dates)`、`requestRange(range)` 只在对应模式替换选择。返回 true 表示已经发出请求；受控模式只有在 owner 接受对应属性后才更新绘制。`getValues()`、`getRange()` 返回副本。`default*` 只初始化一次，切换模式时分别保留各自的值。Root 另外公开 `mode`、`selectedCount` 和 `rangeComplete`。
-
-Day 在 `selected` 之外公开 `rangeStart`、`rangeEnd`、`rangeMiddle`、`rangePending`。未完成的起点带 start/pending，完整单日范围同时带 start/end，中间日期带 middle；完整范围中的每天都为 selected。家族配方分别绘制端点与中段，Grid 在范围/多选模式投影 `aria-multiselectable`。键盘导航不变，Enter 或 Space 激活当前日期。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-calendar-selection"
@@ -33,21 +17,7 @@ Day 在 `selected` 之外公开 `rangeStart`、`rangeEnd`、`rangeMiddle`、`ran
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 组合与时钟所有权
-
-十个原子为 Root、Caption、Heading、Previous、Next、Grid、Weekdays、Weekday、Row、Day。在 Weekdays 中放置 offset 为 0–6 的七个 Weekday，再通过 offset 为 0–41 的 Day 组成最多六个带 index 的容量行，实际显示周数按上述规则同步。星期标签与日期顺序随 Root 的 `weekStartsOn`（0 为周日）和 `locale` 同步；日期格使用完整本地化民用日期作为无障碍名称。`direction="rtl"` 镜像左右键，保留上下键和周边界语义。导航原子支持 `a11yLabel`，为纯图标提供名称。
-
-host 通过民用日期字符串 `today` 提供当前日期。Base 不读取时钟或时区；未传 today 就不标记今天。today 与 selected 独立，包括不可用日期；today 映射 `aria-current="date"`。初始月份优先级为显式 `month`、显式 `defaultMonth`、当前模式的选中日期（单日期、多个日期中的最早日期或范围起点）、传入的 `today`，最后是确定性回退 1970-01。时钟后续变化不会自动翻月。`unavailable` 为字符串数组；非法输入保留上一个有效值或默认值。Root disabled 与各 Day/Previous/Next 的局部 disabled 合并；readOnly 禁止选择但允许浏览。
-
-## 显式月份/年份 caption 组合
-
-演示通过 `bindCalendarCaption(source, {month, year})`，使用 Calendar 公开的 month/disabled 状态及 `requestMonth`，组合真实的本家 Select。Caption 自身仅为语义组。月/年选择器属于应用组合，不是 Calendar 内部依赖 Select。helper 对拒绝或尚未接受的请求始终恢复权威值，订阅后续接受，并用 `dispose()` 清理。演示拥有显式有界年份选项（不是 Calendar 限制）、本地时钟 today、午夜/页面恢复更新，以及完整的受控 props 记录。Month 和 Year trigger 通过 Select 公开的 `accessibleLabel` 属性提供稳定名称；Select Value 独立显示当前月份或年份。演示不写入 Adapter 拥有的 ARIA 属性。计算后的可访问名称、选择后的名称稳定性、键盘交互及焦点返回仍需当前源码的真实浏览器证据；屏幕阅读器验收另行完成。
-
-Base 拥有民用日期行为、可用性、受控值所有权和无障碍语义，不提供设计语言配方。
-
-## 验证边界
-
-当前仍为 WIP。Calendar 有实际 host 的局部行为测试，包含 WC、React、Vue、Vue2；公开 Props/Exposes/AsHook 的域另有独立负控。当前 CLI collector 会漏掉合法继承 Calendar / 嵌套 Button 状态的部分 token，因此状态样式的生成 CSS 与浏览器视觉保真尚未验收。Compiler 解释能力由另一 owner 负责，不能反过来约束合法 Prototype 语义。原生 GPUI/Qt、compiled/packed 一致性、绑定确切提交的浏览器证据和独立验收仍未完成。
+带年月下拉导航组合的基础示例：
 
 <PrototypePreviewer
   demoId="demo-base-calendar"
@@ -55,9 +25,44 @@ Base 拥有民用日期行为、可用性、受控值所有权和无障碍语义
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+## 用法
+
+### 组合结构
+
+组件由十个部分组成：`Root`、`Caption`、`Heading`、`Previous`、`Next`、`Grid`、`Weekdays`、`Weekday`、`Row` 和 `Day`。
+
+- 在 `Weekdays` 中放置 `offset` 为 `0`–`6` 的七个 `Weekday`；在 `Grid` 中可按需放置最多六个带 `index`（`0`–`5`）的 `Row` 及 `offset` 为 `0`–`41` 的 `Day`。
+- 默认仅显示覆盖当月所需的最少 4、5 或 6 周；设置 `fixedWeeks={true}` 可固定显示 6 周。未使用的行与日期格自动隐藏且不可聚焦。
+- 星期标题与日期顺序随 `weekStartsOn`（`0` 表示周日）和 `locale` 自动本地化；`direction="rtl"` 会镜像左右方向键。
+
+### 选择模式与受控状态
+
+- **单选（`single`）**：通过 `value` / `defaultValue`（`YYYY-MM-DD`）控制，变更时触发 `onValueChange({ value })`。
+- **多选（`multiple`）**：通过 `values` / `defaultValues`（去重且升序排列的日期数组）控制，变更时触发 `onValuesChange({ values })`；可用 `minSelected` / `maxSelected` 限制选中数量。
+- **范围（`range`）**：通过 `range` / `defaultRange`（`{ from?, to? }`）控制，变更时触发 `onRangeChange({ range })`。首次点击设定起点 `{ from }`，再次点击自动排序并完成 `{ from, to }`，传入 `{}` 清空；可用 `minNights` / `maxNights` 限制起止天数差（默认 `minNights=0` 允许单日范围）。
+
+`min`、`max` 和 `Root` 的 `unavailable` 会作用于所有选择模式；若范围跨越不可用日期，本次选择会被拒绝并保留起点。`readOnly` 禁止更改选择但允许翻月浏览。
+
+### 时钟与年月下拉组合
+
+- Calendar 不主动读取系统时钟或时区：如需高亮“今天”（并设置 `aria-current="date"`），请由应用通过 `today` 传入 `YYYY-MM-DD` 字符串。
+- 初始显示月份按 `month` → `defaultMonth` → 当前模式已选日期 → `today` → `1970-01` 的优先级确定。
+- 需要月份/年份下拉切换时，可在 `Caption` 中组合真实 Select 组件，并通过 `bindCalendarCaption(source, { month, year })` 与 Calendar 的公开月份状态及 `requestMonth` 同步（卸载时调用 `dispose()` 清理）。
+
+### 暴露状态与方法
+
+- `Root` 暴露 `mode`、`weekCount`、`selectedCount`、`rangeComplete`，以及 `requestMonth`、`requestValue(date)`、`requestValues(dates)`、`requestRange(range)`、`getValues()`、`getRange()`。
+- `Day` 除 `selected` 外还暴露 `rangeStart`、`rangeEnd`、`rangeMiddle`、`rangePending` 状态；多选与范围模式下 `Grid` 自动设置 `aria-multiselectable`。
+
 ## API
 
-Calendar 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 或 `month` 会使对应事实进入受控模式。
+### Root Props
+
+传入 `value`、`values`、`range` 或 `month` 可分别控制对应状态。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -86,7 +91,14 @@ Calendar 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `va
   ]}
 />
 
-这些属性属于 Root。Day 的 `date` 默认 `''`，`offset` 默认 `0`，`disabled` 默认 `false`。Grid 与 Heading 没有属性。Row 的 `index` 没有默认值。Caption 的 `a11yLabel` 默认 `Calendar navigation`。Previous 与 Next 接受 Button 属性，`a11yLabel` 分别默认 `Previous month` 与 `Next month`。Weekdays 没有属性。Weekday 的 `offset` 默认 `0`。
+### 其他组件属性
+
+- **Day**：`date` 默认 `''`，`offset` 默认 `0`，`disabled` 默认 `false`。
+- **Row**：`index`（无默认值）。
+- **Caption**：`a11yLabel` 默认 `'Calendar navigation'`。
+- **Previous / Next**：继承 Button 属性，`a11yLabel` 分别默认 `'Previous month'` 与 `'Next month'`。
+- **Weekday**：`offset` 默认 `0`。
+- **Grid、Heading、Weekdays**：无额外属性。
 
 ## 参考
 

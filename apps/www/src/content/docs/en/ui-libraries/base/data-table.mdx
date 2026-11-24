@@ -1,17 +1,15 @@
 ---
-title: 'Data-Table (WIP)'
-description: 'data-table composition and explicit implementation boundary.'
+title: 'Data Table'
+description: 'An unstyled data table supporting stable sorting, global and column filtering, column visibility, pagination, and row selection.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Data Table composes passive Table topology with stable record IDs, stable sorting, global filtering, pagination and row selection. Rows are authored presentation slots indexed within the current page; cells render their columnKey from the current record, so sort changes update actual content without pretending CSS order changed Table structure. App-owned rows must have unique id values. The composition does not own fetching, editing or column reordering.
+Base Data Table builds stable sorting, global and per-column filtering, column visibility, pagination, and row selection on top of passive table structure. Supply records with unique `id` values; row slots map each index on the active page to the underlying record.
 
-WIP functional source. Full runtime/Compiler/native, packaging, browser and visual acceptance remain pending.
-
-Sorting headers belong inside the static `DataTableHeaderRow` composition. It inherits passive Table Row topology, has no props or instance exposes, and creates no selection, focus or Trigger owner. Body rows remain `DataTableRow` record slots. The legacy `DataTableRow.header` prop still changes record-slot policy at runtime; it does not remove that row's setup-time Trigger identity and cannot contain multiple direct Trigger children. The examples use the new static composition without relaxing Trigger-chain rules.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-data-table"
@@ -19,13 +17,7 @@ Sorting headers belong inside the static `DataTableHeaderRow` composition. It in
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Filter, visibility, selection and formatting recipe
-
-The following recipe uses public Input and Button controls with the same DataTable parts. Name filtering combines with Root `filter`; each nonempty `columnFilters` entry must match before sorting and pagination. `columnVisibility` hides a column’s physical Header and Cell views while retaining their authored logical coordinates. Hidden headers cannot receive sorting focus, and hidden Header and Cell views are excluded from accessibility presentation. The authored parts and custom children retain their identity when shown again.
-
-`requestPageSelection()` selects or clears only the current filtered page, preserves selections on other pages, and reports `pageSelection` as `none`, `some` or `all`. Controlled `selectedKeys` remains request-only; `readOnly` rejects row and page selection while still allowing sorting and pagination. Empty-page requests are no-ops.
-
-A Cell with `renderValue={false}` keeps application-authored children. Its public `displayValue` still follows the current record, including replacement data with the same ID. This recipe subscribes to that state to format status text and releases subscriptions during teardown. The component owns data-view policy; the application owns this display formatting.
+Composed recipe with filtering, column visibility, page selection, and custom cell formatting:
 
 <PrototypePreviewer
   demoId="demo-base-data-table-recipes"
@@ -33,9 +25,29 @@ A Cell with `renderValue={false}` keeps application-authored children. Its publi
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+### Header and body rows
+
+- Place sortable column headers inside `DataTableHeaderRow`, and render body record slots with `DataTableRow` indexed for the current page.
+- Each `Cell` renders its `columnKey` from the active record so sorting and pagination update cell content directly.
+
+### Filtering, column visibility, page selection, and custom formatting
+
+- **Filtering**: every non-empty `columnFilters` entry combines with Root `filter` before sorting and pagination run.
+- **Column visibility**: `columnVisibility` hides matching `Header` and `Cell` views (removing them from sorting focus and accessibility output) while preserving their identity when shown again.
+- **Page selection**: `requestPageSelection()` selects or clears only the current filtered page while preserving selections on other pages, and reports `pageSelection` as `'none'`, `'some'`, or `'all'`. `readOnly` blocks row and page selection while allowing sorting and pagination.
+- **Custom cell rendering**: set `renderValue={false}` on a `Cell` to keep your own child elements while subscribing to its public `displayValue` state for custom formatting.
+
 ## API
 
-Data Table is workspace source. There is no public `proto-ui add` target. Passing `sortKey`, `sortDirection`, `page`, or `selectedKeys` selects controlled mode for that fact.
+### Root Props
+
+Pass `sortKey`, `sortDirection`, `page`, or `selectedKeys` to control the corresponding state.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -54,7 +66,12 @@ Data Table is workspace source. There is no public `proto-ui add` target. Passin
   ]}
 />
 
-These props belong to Root. Row defaults `index` to `0` and `header` to `false`. Cell defaults `columnKey` to `''` and `renderValue` to `true`. Header defaults `sortable` to `true`. Previous and Next accept the Button props.
+### Other parts
+
+- **Row**: `index` defaults to `0`, `header` to `false`.
+- **Cell**: `columnKey` defaults to `''`, `renderValue` to `true`.
+- **Header**: `sortable` defaults to `true`.
+- **Previous / Next**: accept Button props.
 
 ## References
 

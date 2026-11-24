@@ -1,11 +1,17 @@
 ---
-title: base Slider
-description: 可移植输入原子草稿。
+title: 'Slider'
+description: '支持单滑块与多滑块区间拖拽、键盘步进及表单联动的滑块组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+用于从连续或离散区间中选择单个数值或一组数值的滑动输入组件，支持指针/触摸拖拽、键盘步进、RTL 方向与表单联动。
+
+## 预览
+
+### 单滑块
 
 <PrototypePreviewer
   demoId="demo-base-slider"
@@ -14,15 +20,7 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root 管理 value/defaultValue、min/max/step、disabled/readOnly、方向。Track 通过共享 AxisInput 接入真实指针/触摸拖动；Thumb 支持箭头、Shift 十倍、PageUp/PageDown、Home/End，水平 RTL 反向。数值从 min 对齐步长并限制边界；受控请求不覆盖作者值，valueCommit 标记完成，取消恢复非受控拖动起点。当前实现单 thumb，多 thumb 约束待补。
-
-在 Field/FormField 内用 FieldThumb 替代 Thumb，桥接 FieldLabel 激活、规范数值校验、策略、Form 序列化及复位。独立 Thumb 仍使用 SliderLabel。
-
-部件: root, label, track, indicator, thumb, field-thumb, value. 四个视觉家族继承同一 Base 行为。
-
-当前为 Draft 源码工作。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍待完成，不宣称 Finf 验收通过。
-
-## 范围与多值
+### 范围与多滑块
 
 <PrototypePreviewer
   demoId="demo-base-slider-values"
@@ -31,13 +29,30 @@ Root 管理 value/defaultValue、min/max/step、disabled/readOnly、方向。Tra
   codePanel={false}
 />
 
-从 `@proto.ui/prototypes-base/slider` 导入六个 `sliderValues*` 入口。Values Root 设置 `defaultValue={[20, 80]}`，每个值配一个带 index 的 Thumb，并将 Thumb 放入 Values Track。Track 独占共享输入 lease：点击轨道选择最近的可编辑槽，偏离中心抓取 Thumb 保留偏移。`thumbCollisionBehavior` 支持 `push`、`swap`、`none`；swap 转移活动焦点而 capture 始终属于 Track。键盘编辑保留原逐槽限制。
+## 安装
 
-完整 Values Root 可作为 Field/FormField 的一个组合控件，报告 canonical 有限 `number[]`、初始基线、组焦点和关系，FieldLabel 聚焦首个可编辑 Thumb。受控拒绝保持 owner 值，不校验被拒绝的 candidate。取消只撤销提交；reset 撤销当前接触并请求初始基线，也适用于 disabled Form。原标量 Slider 部件保留独立契约。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-base/slider` 导入标量滑块部件或六个 `sliderValues*` 多值滑块入口。
+
+## 用法
+
+### 单滑块组合
+
+由 `Root`、`Label`、`Track`、`Indicator`、`Thumb`、`FieldThumb` 和 `Value` 组成：
+
+- **拖拽与键盘步进**：状态由 `Root` 统一管理。`Track` 处理指针与触摸拖拽；`Thumb` 支持方向键、`Shift` 十倍步进、`PageUp`/`PageDown`、`Home`/`End`，水平 `rtl` 模式下自动反转左右方向键。数值从 `min` 起按 `step` 对齐并限制在 `[min, max]` 内。
+- **受控与提交**：传入 `value` 进入受控模式（交互发出 `valueChange`，由外部决定是否更新）；完成拖动或按键提交时发出 `valueCommit`，取消拖动则恢复非受控起始值。
+- **表单集成**：在 `Field` / `FormField` 内使用 `FieldThumb` 替代 `Thumb`，自动联动 `FieldLabel` 聚焦、数值校验、表单序列化与复位；独立使用时配合 `Label` 与 `Thumb`。
+
+### 范围与多值组合（`sliderValues*`）
+
+从 `@proto.ui/prototypes-base/slider` 导入六个 `sliderValues*` 入口，在 `Values Root` 上传入数组值（如 `defaultValue={[20, 80]}`），并在 `Values Track` 内为每个数值放置一个带 `index` 的 `Thumb`：
+
+- **轨道与碰撞策略**：点击轨道自动定位最近的可编辑滑块，偏离中心抓取滑块时保留抓取偏移。`thumbCollisionBehavior` 支持 `'push'`、`'swap'` 和 `'none'`（`'swap'` 在交错时转移活动焦点并保持轨道捕获）。
+- **表单集成**：完整的 `Values Root` 可直接在 `Field` / `FormField` 中作为组合控件使用，上报 `number[]`、初始基线与组焦点，`FieldLabel` 会聚焦首个可编辑滑块；调用复位会取消当前拖动并请求恢复初始值。
 
 ## API
 
-Slider 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。各部件自身没有属性。
+### Root（单滑块）
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -55,7 +70,7 @@ Slider 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `valu
   ]}
 />
 
-这些属性属于 Root。
+传入 `value` 可受控管理数值。其余标量部件无额外属性；多值滑块支持数组形式的 `value` / `defaultValue` 以及 `thumbCollisionBehavior`（`'push' | 'swap' | 'none'`）。
 
 ## 参考
 

@@ -1,13 +1,15 @@
 ---
-title: 'ToggleGroup'
-description: 'Independent single or multiple pressed-value selection with roving focus.'
+title: 'Toggle Group'
+description: 'A group of toggle buttons supporting single or multiple selection with roving focus.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Independent single or multiple pressed-value selection with roving focus.
+Groups a set of pressed-state toggle buttons with single or multiple selection and orientation-aware roving focus.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-toggle-group"
@@ -16,15 +18,20 @@ Independent single or multiple pressed-value selection with roving focus.
   codePanel={false}
 />
 
-value/defaultValue are arrays. multiple=false keeps at most one value; clicking it again clears selection. Controlled valueChange requests never mutate the owner. Disabled, readOnly and duplicate-valued items do not commit. Arrow navigation changes focus without selecting.
+## Installation
 
-Parts: Root, Item.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+## Usage
+
+Compose `Root` and `Item`:
+
+- **Single and multiple selection**: `value` and `defaultValue` are always string arrays. With `multiple={false}` (default), at most one value stays active and pressing it again clears selection; set `multiple={true}` to allow multiple active items.
+- **Controlled mode and navigation**: Pass `value` for controlled mode so `valueChange` emits proposed value arrays without mutating external state. Arrow keys move focus across items without toggling selection; disabled, read-only, and duplicate-valued items do not commit changes.
 
 ## API
 
-Toggle Group is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -39,7 +46,11 @@ Toggle Group is workspace source. There is no public `proto-ui add` target. Pass
   ]}
 />
 
-These props belong to Root. Item defaults `value` to `''` and `disabled` to `false`.
+Pass `value` to control the selected values.
+
+### Part Props
+
+- **Item**: `value` (default `''`), `disabled` (default `false`).
 
 ## References
 

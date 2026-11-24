@@ -1,11 +1,13 @@
 ---
 title: 'Tabs'
-description: 'Bootstrap 2.3.2 Tabs: four real Base protocol projections.'
+description: 'A Bootstrap 2.3.2 tabbed interface with keyboard navigation, manual activation, and underline styling.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Root, List, Trigger and Content inherit the matching [Base Tabs protocol](/en/ui-libraries/base/tabs/). Root owns the selected value. Arrow keys and Home/End move through enabled triggers; Enter/Space activate a manually selected tab. Controlled requests wait for the owner's value.
+Bootstrap 2.3.2 Tabs adapts the archived Bootstrap 2.3.2 tab styling (4px upper corners and rem-scaled padding) over [Base Tabs](/en/ui-libraries/base/tabs/) for accessible keyboard navigation and controlled selection.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-tabs"
@@ -13,10 +15,33 @@ Root, List, Trigger and Content inherit the matching [Base Tabs protocol](/en/ui
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-Import `tabsRoot`, `tabsList`, `tabsTrigger`, `tabsContent` from `@proto.ui/prototypes-bootstrap-2-3-2/tabs`. These remain private draft workspace source. No public registry release or native/Compiler support is implied.
+## Installation
 
-List and Trigger accept `appearance="underline"` for the Runtime Box's transparent, text-width underline recipe. The default recipe remains this family's own presentation. Root uses `value`/`defaultValue`, `activationMode` and `orientation`; Trigger uses `value`/`disabled`; Content uses `value`/`keepMounted`. Runtime selection uses manual activation, so arrow navigation does not remount a demo.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Source and synthetic-DOM evidence are distinct from commit-bound native screenshots, narrow-screen geometry and independent visual acceptance. Those browser checks remain pending.
+```ts
+import {
+  tabsRoot,
+  tabsList,
+  tabsTrigger,
+  tabsContent,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/tabs';
+```
 
-Default recipe reference: [Bootstrap v2.3.2 navs.less](https://github.com/twbs/bootstrap/blob/v2.3.2/less/navs.less). 12px/8px padding, 2px gaps and 4px upper corners scale through rem. Base Tabs replaces the jQuery plugin; focus indication and theme colors deliberately differ. The Apache 2.0 notice remains with source.
+## Usage
+
+Compose `Root`, `List`, `Trigger`, and `Content`:
+
+- **Selection and activation**: `Root` manages the active tab via `value` or `defaultValue`. Arrow keys and `Home` / `End` move across enabled triggers; with manual activation (`activationMode="manual"`), pressing `Enter` or `Space` commits the selection so arrow browsing does not prematurely remount panels.
+- **Underline variant**: Set `appearance="underline"` on `List` and `Trigger` for a transparent, text-width underline style instead of the default Bootstrap 2.3.2 tab chrome.
+- **Content lifecycle**: Inactive panels unmount content by default; set `keepMounted` on `Content` to keep hidden panels mounted.
+
+## API
+
+| Part | Props | Description |
+| --- | --- | --- |
+| `Root` | `value` / `defaultValue` | Controlled or initial active tab key |
+| `Root` | `activationMode` / `orientation` | Automatic/manual activation and horizontal/vertical layout |
+| `List` | `appearance` | Pass `'underline'` for the underline preset |
+| `Trigger` | `value` / `disabled` / `appearance` | Tab key, disabled flag, and appearance preset |
+| `Content` | `value` / `keepMounted` | Matching panel key; retains hidden content when `keepMounted` is set |

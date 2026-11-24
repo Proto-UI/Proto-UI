@@ -1,12 +1,14 @@
 ---
 title: 'Popover'
-description: 'An anchored non-modal dialog for small interactive content.'
+description: 'A Brutalist-styled non-modal floating dialog anchored to a trigger for compact interactive content.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-An anchored non-modal dialog for small interactive content.
+Popover displays a non-modal floating panel anchored to a trigger element for compact interactive content, without locking background scroll or trapping `Tab` navigation.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-brutalist-popover"
@@ -15,17 +17,36 @@ An anchored non-modal dialog for small interactive content.
   codePanel={false}
 />
 
-Content is positioned against Trigger, with side, align, sideOffset, alignOffset and collisionPadding. It is not modal and does not lock background scrolling or trap Tab. Outside press, focus moving beyond Trigger and Content, Escape and Close request dismissal. Moving focus between Trigger and portalled content stays inside. A focus-outside close leaves focus on the outside control; it does not restore focus to Trigger.
+## Installation
 
-Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Supplying open leaves the committed value with the owner; listen to openChange and provide the next value. Refusing a focus.outside request keeps Content present and does not trap focus. A later interaction can request dismissal again. Focus-only requests report focusReason as programmatic because the neutral focus observation does not identify an input device.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/popover` and adapt them for your target runtime.
 
-Parts: Root, Trigger, Content, Title, Description, Close.
+## Usage
 
-Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.
+### Anatomy
 
-## Navigation presentation
+Popover is composed of `Root`, `Trigger`, `Content`, `Title`, `Description`, and `Close`:
 
-This separate example explicitly selects `presentation="navigation"` on Trigger and Content. Content uses the available anchored area and its own scrolling; the original default example above is unchanged.
+- `Root`: Manages the open state of the popover.
+- `Trigger`: Anchors and toggles the popover.
+- `Content`: Positioned relative to `Trigger` with `side`, `align`, `sideOffset`, `alignOffset`, and `collisionPadding`.
+- `Title` / `Description`: Provide accessible labelling and description for the floating dialog.
+- `Close`: Requests dismissal when activated.
+
+### Positioning, Focus & Dismissal
+
+- Outside presses, focus leaving both `Trigger` and `Content`, `Escape`, and `Close` all request dismissal.
+- Moving focus between `Trigger` and portalled `Content` is treated as staying inside the popover.
+- When closed due to focus moving outside, focus stays on the newly focused external element instead of returning to `Trigger`, and the request reports `focusReason` as `'programmatic'`.
+
+### Controlled vs. Uncontrolled
+
+- Use `defaultOpen` on `Root` for uncontrolled state.
+- Pass `open` and handle `openChange` for controlled mode. If your handler declines a `focus.outside` request, `Content` stays visible without trapping external focus, and later interactions can request dismissal again.
+
+### Navigation Presentation
+
+Set `presentation="navigation"` on `Trigger` and `Content` to use the available anchored area with internal scrolling for link lists while preserving native browser link activation.
 
 <PrototypePreviewer
   demoId="demo-brutalist-popover-navigation"
@@ -34,11 +55,9 @@ This separate example explicitly selects `presentation="navigation"` on Trigger 
   codePanel={false}
 />
 
-The native links keep normal browser activation. This example does not implement the website directory’s unique-tree handback or a page-specific focus owner. Trigger styling remains provisional pending design review. New navigation-mode four-runtime native evidence is still pending; ordinary Popover results do not certify this mode.
-
 ## API
 
-Popover is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+The first three props (`defaultOpen`, `disabled`, `a11yLabel`) belong to `Root` (pass `open` for controlled mode). `presentation` belongs to `Content` and `Trigger`:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -50,5 +69,7 @@ Popover is workspace source. There is no public `proto-ui add` target. Passing `
   ]}
 />
 
-The first four props belong to Root. `presentation` belongs to Content and Trigger. Content also accepts the Transition props and defaults `side` to `bottom`, `align` to `center`, `sideOffset` to `4`, `alignOffset` to `0` and `collisionPadding` to `8`. Title, Description and Close have no props.
+Other part props and defaults:
 
+- **Content**: Also accepts Transition props; `side` defaults to `'bottom'`, `align` to `'center'`, `sideOffset` to `4`, `alignOffset` to `0`, and `collisionPadding` to `8`.
+- **Title**, **Description**, **Close**: No props.

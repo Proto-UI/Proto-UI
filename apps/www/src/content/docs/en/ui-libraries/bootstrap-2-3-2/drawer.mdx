@@ -1,11 +1,15 @@
 ---
 title: 'Drawer'
-description: 'An edge-attached modal panel with four placement choices.'
+description: 'A Bootstrap 2.3.2 edge-attached modal drawer supporting content-fit height, scrolling, and snap points.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-An edge-attached modal panel with four placement choices.
+Drawer presents a modal panel from any of the four viewport edges, supporting content-fit sizing, internal scrolling, drag-to-dismiss, and optional snap points.
+
+## Preview
+
+### Basic drawer
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-drawer"
@@ -13,18 +17,6 @@ An edge-attached modal panel with four placement choices.
   runtimes={['wc', 'react', 'vue', 'vue2']}
   codePanel={false}
 />
-
-Top/bottom Content fits its content by default. Its maximum is the available height, always bounded by the safe available region. Content.minExtent and maxExtent accept neutral lengths with unit logical, root-text, available or available-minus-root-text and a nonnegative finite value. A minimum above the safe cap is clamped. Left/right retain the existing capped 20rem presentation in this vertical-only draft.
-
-The project composes Content as an overflow-y-auto scrollport. This differs from the fixed Shadcn/Neo reference wrappers' overflow-hidden Content with an explicitly authored scrolling body. The long example keeps Close inside the same scrollport.
-
-Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Controlled close requests can be refused; drag preview then returns to the accepted owner state.
-
-Omitted, null or empty snapPoints selects content-fit mode. A nonempty valid array selects explicit snaps: positive fractions up to one, sorted and deduplicated. snapPoint alone does not enable snapping. Explicit snap fractions use the full capped extent, not an implicit 85% multiplier. defaultSnapPoint is local; snapPoint with snapPointChange is owner-controlled. Invalid vertical point arrays or length records are rejected, not converted to full height.
-
-In content-fit mode Handle is a pointer-only, aria-hidden drag affordance, without keyboard resizing or an Enter/Space close action. Explicit snaps retain the named separator, arrows, Home/End and range values. Content.dragDismissible=false prevents drag dismissal; independent Close, Escape and outside dismissal retain their existing protocol. Interrupted gestures and rejected controlled requests restore the accepted presentation.
-
-Runtime invalid extent updates expose extentValid=false, cancel Handle input and retain the last valid intent while current safety constraints still apply. Initial malformed input is rejected before presentation: Root keeps its logical open value, while Mask waits for one valid Content declaration. These examples use statically validated legal inputs. This draft does not claim arbitrary-input safety or native, compiler, packed-consumer or full Finf acceptance.
 
 ### Long content
 
@@ -37,11 +29,32 @@ Runtime invalid extent updates expose extentValid=false, cancel Handle input and
 
 ### Explicit half/full snaps
 
-This example retains the explicit resizing interaction and announces committed changes.
-
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-drawer-snap"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
   codePanel={false}
 />
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+- **Sizing and scrolling**: Top and bottom drawers fit their content height up to the safe available viewport height and scroll internally (`overflow-y-auto`) when content overflows; left and right drawers default to a `20rem` cap.
+- **Extent bounds**: Pass `minExtent` and `maxExtent` on `Content` using neutral length objects (`unit`: `'logical'` | `'root-text'` | `'available'` | `'available-minus-root-text'`, nonnegative finite `value`). Minimums above the safe cap clamp automatically; invalid runtime updates set `extentValid={false}` and keep the last valid size.
+- **Snap points**: Omit `snapPoints` (or pass an empty array) for content-fit mode where `Handle` acts as a pointer-only drag affordance. Pass an array of fractions in `(0, 1]` to enable explicit snapping, with keyboard arrow and `Home`/`End` resizing on `Handle`.
+- **Dismissal and controlled state**: Supply `open` to control visibility externally; refused close requests spring back to the current state. Set `dragDismissible={false}` to disable drag dismissal while keeping Close buttons, `Escape`, and outside-click dismissal.
+
+## API
+
+| Part | Props / Events / States | Description |
+| --- | --- | --- |
+| `Root` | `open` / `defaultOpen` | Controlled or initial open state |
+| `Root` | `snapPoints` | Array of fractions in `(0, 1]` enabling explicit snap stops |
+| `Root` | `snapPoint` / `defaultSnapPoint` / `snapPointChange` | Controlled/initial active snap point and change event |
+| `Content` | `minExtent` / `maxExtent` | Minimum and maximum extent bounds |
+| `Content` | `dragDismissible` | Defaults to `true`; disables drag dismissal when `false` |
+| `Content` | `extentValid` | Indicates whether the active extent configuration is valid |
+| `Handle` | — | Drag handle; adds named `separator` role and keyboard resize in snap mode |

@@ -1,15 +1,15 @@
 ---
 title: 'Async Region'
-description: 'Governed busy semantics over authored content, without invented loading UI.'
+description: 'Marks a content region as busy with aria-busy while keeping children mounted and focus intact.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Marks a region of your UI with `aria-busy` semantics during asynchronous updates without imposing a built-in spinner or disturbing focus. The examples on this page use the **Shadcn Rhea** style preset.
 
-Governed busy semantics over authored content, without invented loading UI.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-async-region"
@@ -18,13 +18,15 @@ Governed busy semantics over authored content, without invented loading UI.
   codePanel={false}
 />
 
-The region owns one `busy` prop (default `false`) that projects `aria-busy` on the region element and exposes the same fact through `getExposes().busy`. Busy is a semantic fact, not a spinner: the projection adds no role, accessible name, loading timers, replacement state machine, announcement channel, or focus path. Authored descendants stay mounted and keep focus across prop-only transitions. For announcements, compose with Live Region at the application layer.
+## Usage
 
-Parts: Root.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source. Real assistive-technology behavior and complete native/GPUI, compiler and independent acceptance evidence remain open.
+`Async Region` consists of a single `Root` part:
 
-This entry is workspace source. It is not a public `proto-ui add` catalog id.
+- Setting `busy={true}` reflects `aria-busy` on the region element and exposes the same state through `getExposes().busy`.
+- When updating props, your children stay mounted and preserve their focus.
+- Render your own loading indicator inside or beside the region as needed. To announce status updates to assistive technology, pair it with [Live Region](../live-region/) at the application layer.
 
 ## API
 
@@ -33,7 +35,7 @@ This entry is workspace source. It is not a public `proto-ui add` catalog id.
   rows={[{ name: 'busy', type: 'boolean', default: 'false' }]}
 />
 
-Root exposes `busy` and projects `aria-busy`. Busy is not a spinner.
+`Root` exposes `busy` and reflects `aria-busy`.
 
 ## References
 

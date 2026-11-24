@@ -1,17 +1,15 @@
 ---
-title: 'Date-Picker (WIP)'
-description: 'date-picker composition and explicit implementation boundary.'
+title: 'Date Picker'
+description: '由 Popover 与 Calendar 组合而成的日期选择器，支持单选、多选与日期范围选择。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+将 `Popover` 与 `Calendar` 组合而成的日期选择器，支持单选、多选与日期范围选择，并保留独立的弹层开关、选中值与展示月份受控能力。本页示例采用 **Shadcn Rhea** 风格。
 
-Date Picker 组合真实 Popover 与 Calendar 原子。选择使用 Calendar 的单日期、多选或范围模式；只有被接受的完整单日期/范围选择才请求关闭 Popover。open、选择值与 month 保留各自受控/非受控边界。内容区可使用 Calendar 的网格、行、标题与月份导航原子。
-
-当前为功能源码 WIP。完整运行时、Compiler、原生、打包、浏览器与视觉验收仍待补齐。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-date-picker"
@@ -19,13 +17,7 @@ Date Picker 组合真实 Popover 与 Calendar 原子。选择使用 Calendar 的
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 范围与多选
-
-范围使用 `mode="range"` 与 `range` / `defaultRange`，多选使用 `mode="multiple"` 与 `values` / `defaultValues`。它们继承 Calendar 页描述的属性、回调、方法和日期资格规则，包括范围内部不可用日期、数量与间隔天数限制。
-
-范围的第一个端点保持弹层打开，第二个端点被接受并形成完整范围后才请求关闭一次。受控请求被拒绝或等待接受时不关闭；之后匹配的 owner 接受仅在同一次打开期间触发关闭。关闭后重开、卸载、模式改变、disabled/readOnly 改变或 owner 替换选择会终止过期的完成行为。单纯外部改值不关闭弹层，受控 `open` 仍可拒绝关闭请求。多选保持打开以继续增减日期，完成后使用 Popover 的正常关闭交互。
-
-Value 分别显示单个 ISO 民用日期、逗号分隔的有序多日期、未完成范围的 `from …` 或完整范围的 `from – to`；空值显示 `placeholder`。逐日状态与家族范围绘制直接继承 Calendar，焦点返回和关闭交互继续由 Popover 管理。
+### 多选与范围选择
 
 <PrototypePreviewer
   demoId="demo-shadcn-date-picker-selection"
@@ -33,9 +25,30 @@ Value 分别显示单个 ISO 民用日期、逗号分隔的有序多日期、未
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## 用法
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+### 选择模式与关闭时机
+
+- **单选与范围模式**：`mode="single"` 在接受选中日期后请求关闭弹层；`mode="range"` 在选中起点时保持弹层打开，选中第二个端点并形成完整范围后自动请求关闭。受控模式下若本次选择被拒绝或尚未采纳，弹层保持打开。
+- **多选模式**：`mode="multiple"` 每次切换日期后保持弹层打开，方便连续选择，完成后通过点击外部或按 `Escape` 关闭。
+- **日期规则继承**：范围与多选模式下的 `range` / `defaultRange`、`values` / `defaultValues`、日期范围限制（`min`、`max`、`unavailable`）及数量/间隔约束均直接复用 [Calendar](../calendar/) 的属性与回调。
+
+### 显示值（`Value`）
+
+`Value` 部件会根据当前模式自动格式化展示内容：
+
+- 单选：单个 `YYYY-MM-DD` 日期；
+- 多选：按日期排序的逗号分隔列表；
+- 范围：未完成时显示 `from …`，完成后显示 `from – to`；
+- 空值：显示 `placeholder`。
+
+弹层焦点恢复与关闭交互由 `Popover` 统一管理。
+
 ## API
 
-Date Picker 是工作区源码，没有公开的 `proto-ui add` 目标。open 属于 Popover，mode、value/values/range、选择限制和 month 属于 Calendar。Date Picker 自己只有 Value 上的一个属性。
+弹层的 `open` 状态由 `Popover` 管理，选择模式、选中值、日期限制与显示月份由 `Calendar` 管理。`Date Picker` 仅在 `Value` 上额外提供一个属性：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}

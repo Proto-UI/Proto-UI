@@ -1,15 +1,15 @@
 ---
 title: 'Live Region'
-description: 'Governed ARIA live-region semantics without interaction.'
+description: 'A semantic ARIA live region for announcing dynamic status updates and alerts to assistive technologies.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+A non-interactive ARIA live region that announces dynamic content updates to assistive technologies using `politeness` and `atomic`. The examples on this page use the **Shadcn Rhea** style preset.
 
-Governed ARIA live-region semantics without interaction.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-live-region"
@@ -18,13 +18,17 @@ Governed ARIA live-region semantics without interaction.
   codePanel={false}
 />
 
-The region derives `role`, `aria-live` and `aria-atomic` from two props: `politeness: 'polite'` (default) projects `role=status` with `aria-live=polite`, and `politeness: 'assertive'` projects `role=alert` with `aria-live=assertive`; `atomic` (default `true`) projects `aria-atomic`. Authored child content is the announcement payload — mutating it is how updates are delivered. The region itself declares no focus, event, command, selection, or accessible-name override channel, and the exposes surface is empty; there is no implicit queue or notification transport.
+## Usage
 
-Parts: Root.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source. Real screen-reader delivery and complete native/GPUI, compiler and independent acceptance evidence remain open.
+`Live Region` consists of a single `Root` part. Your children form the announcement payload — update the rendered text to deliver a new announcement:
 
-This entry is workspace source. It is not a public `proto-ui add` catalog id.
+- `politeness="polite"` (default): Applies `role="status"` and `aria-live="polite"` for non-interruptive updates.
+- `politeness="assertive"`: Applies `role="alert"` and `aria-live="assertive"` for urgent messages.
+- `atomic={true}` (default): Sets `aria-atomic="true"` so the entire region is announced together when content changes.
+
+`Live Region` adds no focus stops, events, or exposes, and pairs cleanly with [Async Region](../async-region/) or form error feedback.
 
 ## API
 
@@ -36,7 +40,7 @@ This entry is workspace source. It is not a public `proto-ui add` catalog id.
   ]}
 />
 
-`polite` projects `role="status"` and `aria-live="polite"`. `assertive` projects `role="alert"` and `aria-live="assertive"`. The exposes surface is empty.
+`Root` exposes no additional state or events.
 
 ## References
 

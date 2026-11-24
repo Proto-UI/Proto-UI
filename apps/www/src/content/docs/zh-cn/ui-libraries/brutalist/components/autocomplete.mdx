@@ -1,12 +1,14 @@
 ---
 title: 'Autocomplete'
-description: '支持自由文本提交的输入建议。'
+description: '支持输入联想过滤与自由文本提交的 Brutalist 自动补全组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-支持自由文本提交的输入建议。
+Brutalist Autocomplete 将单行文本输入与实时过滤的建议列表结合，既可从候选项中选择补全，也允许直接提交自定义自由文本。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-autocomplete"
@@ -15,17 +17,31 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
   codePanel={false}
 />
 
-Root.value 为已提交文本，inputValue 为查询。选择建议会提交 textValue；没有活动选项时 Enter 可提交自由文本。
+## 安装
 
-宿主管理真实单行编辑器。箭头导航保持输入焦点；IME 组合期间不选择。过滤依据 textValue 与 keywords，忽略大小写及重音。Empty 反映真实匹配数；禁用项不可提交。open、value、inputValue 分别支持受控请求；filter=false 允许调用方提供已过滤子项。重复值选项拒绝提交。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-组成: Root, Input, Content, Item, Empty, Trigger.
+## 用法
 
-草稿源码；共享 Web A11y 活动后代投影、native/GPUI、编译器、消费、视觉及独立验收仍是独立要求。
+### 部件组成
+
+Autocomplete 由 `Root`、`Input`、`Content`、`Item`、`Empty` 和 `Trigger` 组成：
+
+- **Root**：管理已提交值 `value`、当前查询输入 `inputValue`、弹层开关 `open` 以及内置过滤和循环导航配置。三项状态均可独立受控。
+- **Input**：承载真实单行文本编辑器，使用方向键浏览建议列表时焦点始终保留在输入框内，输入法合成期间不会误触发选择。
+- **Content**：锚定在输入框下方的浮层建议面板，支持方向、对齐与碰撞留白配置。
+- **Item**：单个建议选项，通过 `textValue` 和 `keywords` 参与忽略大小写与重音的匹配；选中时提交 `textValue`，禁用项或重复值不可提交。
+- **Empty**：当没有匹配建议时自动展示的空态提示。
+- **Trigger**：可选的展开/收起触发按钮。
+
+### 过滤与提交行为
+
+- 按 `Enter` 时，若有高亮候选项则提交该项文本；若无高亮项则可直接提交当前输入的自由文本。
+- 如需自行在外部过滤数据，将 `filter` 设为 `false` 并直接渲染已过滤的 `Item` 列表。
 
 ## API
 
-Autocomplete 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value`、`inputValue` 或 `open` 会使对应事实进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -41,5 +57,12 @@ Autocomplete 是工作区源码，没有公开的 `proto-ui add` 目标。传入
   ]}
 />
 
-这些属性属于 Root。Input 的 `placeholder`、`a11yLabel` 与 `name` 默认 `''`。Content 的 `side` 默认 `bottom`，`align` 默认 `start`，`sideOffset` 默认 `4`，`collisionPadding` 默认 `8`。Item 的 `value`、`textValue` 与 `keywords` 默认 `''`，`disabled` 默认 `false`。Empty 没有属性。Trigger 的 `disabled` 默认 `false`。
+分别传入 `value`、`inputValue` 或 `open` 可独立控制对应状态。
 
+### 其他部件属性
+
+- **Input**：`placeholder?: string`、`a11yLabel?: string`、`name?: string`（默认均为 `''`）
+- **Content**：`side`（默认 `'bottom'`）、`align`（默认 `'start'`）、`sideOffset`（默认 `4`）、`collisionPadding`（默认 `8`）
+- **Item**：`value`、`textValue`、`keywords`（默认均为 `''`）、`disabled?: boolean`（默认 `false`）
+- **Empty**：无独立属性
+- **Trigger**：`disabled?: boolean`（默认 `false`）

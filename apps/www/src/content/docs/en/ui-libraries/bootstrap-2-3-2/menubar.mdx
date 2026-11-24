@@ -1,11 +1,13 @@
 ---
 title: 'Menubar'
-description: 'A keyboard-coordinated bar of independent command panels.'
+description: 'A Bootstrap 2.3.2 horizontal menubar with roving keyboard focus and coordinated command panels.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-A keyboard-coordinated bar of independent command panels.
+Menubar provides a desktop-style horizontal bar of command panels with a single roving Tab stop, arrow-key switching, and typeahead navigation.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-menubar"
@@ -14,8 +16,23 @@ A keyboard-coordinated bar of independent command panels.
   codePanel={false}
 />
 
-Root.value identifies one open panel. Trigger.value and Content.value pair a panel. The bar uses one roving tab stop, left/right movement, ArrowDown/Up entry, vertical command navigation and typeahead. Escape restores the matching trigger; outside press and command selection dismiss. Controlled value emits requests without changing the owner.
+## Installation
 
-Parts: Root, Trigger, Content, Item.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.
+## Usage
+
+Compose `Root`, `Trigger`, `Content`, and `Item`:
+
+- **Panel pairing**: `Root`'s `value` identifies the active panel, matching `Trigger.value` and `Content.value`. In controlled mode it emits change requests without mutating caller state.
+- **Keyboard navigation**: Uses a single roving Tab stop across the bar. Left/Right arrows move between triggers, Up/Down arrows open and navigate commands, and typing jumps to matching items.
+- **Dismissal and focus**: Pressing `Escape` closes the panel and restores focus to its `Trigger`; outside clicks and item selection dismiss the active panel.
+
+## API
+
+| Part      | Props   | Description                                        |
+| --------- | ------- | -------------------------------------------------- |
+| `Root`    | `value` | Active open panel key (supports controlled mode)   |
+| `Trigger` | `value` | Menubar trigger paired with the matching `Content` |
+| `Content` | `value` | Dropdown command panel                             |
+| `Item`    | —       | Individual command inside a panel                  |

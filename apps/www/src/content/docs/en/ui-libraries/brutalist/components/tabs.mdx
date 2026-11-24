@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Tabs'
-description: 'Hard-edged Tabs projection over Base Tabs'
+description: 'A Brutalist-styled tabs component with flat rounded list surfaces, keyboard navigation, and automatic or manual activation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,15 +9,30 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-Tabs inherit Base selection, activation, and descendant-first panel focus-entry semantics while using 5px rounded flat list/trigger surfaces. The reference demo gives the Root a responsive stable width, so changing panels does not resize or recenter the widget.
+Tabs organize related views within a single region using 5px rounded flat list and trigger surfaces, supporting automatic or manual activation and descendant-first panel focus entry.
+
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-tabs" initialRuntime="wc" />
 </div>
 
+Giving `Root` a responsive fixed or bounded width (as in the preview above) prevents layout shift or recentering when switching between panels of different widths.
+
+## Installation
+
+Included in `@proto.ui/prototypes-brutalist@0.2.0`. Add it via the CLI target `brutalist-tabs`, or import directly from `@proto.ui/prototypes-brutalist/tabs`.
+
+## Usage
+
+- **Anatomy**: Compose `Root`, `List`, `Trigger`, `Content`, and `Indicator`, pairing each `Trigger` and `Content` by matching `value`.
+- **Appearance**: Set `appearance` on `List` and `Trigger` to `'default'` or `'underline'`.
+- **Activation & mounting**: `Root`'s `activationMode` supports `'automatic'` (selects on focus) and `'manual'` (selects on Enter/Space). Inactive `Content` unmounts its nodes by default; set `keepMounted={true}` to keep them mounted while hidden.
+- **Controlled mode**: Pass `value` on `Root` for controlled state, or use `defaultValue` for uncontrolled initialization.
+
 ## API
 
-Tabs is workspace source. For this workspace version, the CLI target is `brutalist-tabs`. Use matching CLI and package versions; check the chosen release's availability before installing. Passing `value` selects controlled mode.
+The first three props (`defaultValue`, `orientation`, `activationMode`) belong to `Root` (pass `value` for controlled mode). `appearance` belongs to `List` and `Trigger`:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -29,4 +44,9 @@ Tabs is workspace source. For this workspace version, the CLI target is `brutali
   ]}
 />
 
-The first three props belong to Root. `appearance` belongs to List and Trigger. List also defaults `orientation` to `horizontal`, `loop` to `false` and `a11yLabel` to `''`. Trigger also defaults `value` to `''` and `disabled` to `false`. Content defaults `value` to `''` and `keepMounted` to `false`. Indicator has no props.
+Other part props and defaults:
+
+- **List**: `orientation` defaults to `'horizontal'`; `loop` defaults to `false`; `a11yLabel` defaults to `''`.
+- **Trigger**: `value` defaults to `''`; `disabled` defaults to `false`.
+- **Content**: `value` defaults to `''`; `keepMounted` defaults to `false`.
+- **Indicator**: No props.

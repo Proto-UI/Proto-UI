@@ -1,13 +1,15 @@
 ---
-title: shadcn Slider
-description: 可移植输入原子草稿。
+title: 'Slider'
+description: '支持单值与多值范围拖动的滑块输入组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Slider 允许用户通过拖动滑块或键盘步进在连续区间内选择单个数值或多个范围值。本页示例使用 **Shadcn Rhea** 风格。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-slider"
@@ -16,21 +18,26 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root 管理 value/defaultValue、min/max/step、disabled/readOnly、方向。Track 通过共享 AxisInput 接入真实指针/触摸拖动；Thumb 支持箭头、Shift 十倍、PageUp/PageDown、Home/End，水平 RTL 反向。数值从 min 对齐步长并限制边界；受控请求不覆盖作者值，valueCommit 标记完成，取消恢复非受控拖动起点。当前实现单 thumb，多 thumb 约束待补。
+## 安装
 
-在 Field/FormField 内用 FieldThumb 替代 Thumb，桥接 FieldLabel 激活、规范数值校验、策略、Form 序列化及复位。独立 Thumb 仍使用 SliderLabel。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-部件: root, label, track, indicator, thumb, field-thumb, value. 四个视觉家族继承同一 Base 行为。
+## 用法
 
-当前为 Draft 源码工作。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍待完成，不宣称 Finf 验收通过。
+单值 Slider 包含 `Root`、`Label`、`Track`、`Indicator`、`Thumb`、`FieldThumb` 和 `Value`：
 
-本页选择Rhea scalar配方：4px轨道，16px被动白色Thumb，家族radius-2xl、shadow和静止1px ring；hover/focus使用4px ring。默认根字号下真实Thumb命中区为16px。未选profile时保留的Nova配方另为4px/12px绘制与28px命中区，不能混用。绘制仍是被动Proto Template；Track持有输入和几何，Thumb/FieldThumb仍各只有一个焦点目标。disabled降低透明度，readOnly保留focus/hover但禁止编辑；这些源码尺寸不冒称原生截图结果。
+- `Root` 统一管理数值、区间边界（`min` / `max`）、步长（`step`）、方向和交互状态。
+- `Track` 处理指针与触摸拖动；`Thumb` 是键盘聚焦目标，支持方向键、`Shift` 十倍步进、`PageUp` / `PageDown` 以及 `Home` / `End`（水平 RTL 模式下左右键自动反向）。
+- 数值会从 `min` 起按 `step` 对齐并限制在 `[min, max]` 内。受控模式下拖动发出 `valueChange` 请求，完成时触发 `valueCommit`；取消拖动时在非受控模式下恢复起始值。
+- `disabled` 会降低控件透明度并禁用交互；`readOnly` 保留聚焦与悬停状态但阻止修改数值。
 
-这还不是完整 shadcn 等价。当前数值区间仍将 Thumb 中心放在轨道端点，上游 thumbAlignment="edge" 需要先统一绘制与输入的通用几何契约，不能只挪视觉位置。范围/多 Thumb、所有原生捕获路径上的上游 active 精确行为、跨主题同态像素比较及原生宿主效果仍待完成。示例保留这些真实边界。
+### 表单集成
 
-本条目是工作区源码，不在公开的 `proto-ui add` 目录里。
+在 `Field` 或 `FormField` 中使用时，请使用 `FieldThumb` 替代 `Thumb`，以自动衔接 `FieldLabel` 激活、数值校验、表单序列化与重置。独立使用时继续搭配 `SliderLabel` 和 `Thumb`。
 
-## 范围与多值
+### 范围与多值滑块
+
+需要范围选择或多个滑块时，可从 `@proto.ui/prototypes-shadcn/slider` 导入六个 `sliderValues*` 入口：
 
 <PrototypePreviewer
   demoId="demo-shadcn-slider-values"
@@ -39,13 +46,13 @@ Root 管理 value/defaultValue、min/max/step、disabled/readOnly、方向。Tra
   codePanel={false}
 />
 
-从 `@proto.ui/prototypes-shadcn/slider` 导入六个 `sliderValues*` 入口。Values Root 设置 `defaultValue={[20, 80]}`，每个值配一个带 index 的 Thumb，并将 Thumb 放入 Values Track。Track 独占共享输入 lease：点击轨道选择最近的可编辑槽，偏离中心抓取 Thumb 保留偏移。`thumbCollisionBehavior` 支持 `push`、`swap`、`none`；swap 转移活动焦点而 capture 始终属于 Track。键盘编辑保留原逐槽限制。
-
-完整 Values Root 可作为 Field/FormField 的一个组合控件，报告 canonical 有限 `number[]`、初始基线、组焦点和关系，FieldLabel 聚焦首个可编辑 Thumb。受控拒绝保持 owner 值，不校验被拒绝的 candidate。取消只撤销提交；reset 撤销当前接触并请求初始基线，也适用于 disabled Form。原标量 Slider 部件保留独立契约。
+- 在 Values `Root` 上通过 `defaultValue={[20, 80]}`（或受控 `value`）设置数值数组，并在 Values `Track` 内为每个数值放置一个带 `index` 的 `Thumb`。
+- 点击轨道会自动移动最近的可编辑滑块，拖动滑块时保留抓取偏移。通过 `thumbCollisionBehavior` 可配置滑块碰撞行为：`push`（推动相邻滑块）、`swap`（交换顺序并跟随转移焦点）或 `none`（阻止越界）。
+- 完整的 Values `Root` 也可直接作为 `Field` / `FormField` 的组合控件使用，报告有限 `number[]` 值并在点击 `FieldLabel` 时聚焦首个可编辑滑块。
 
 ## API
 
-传入 `value` 进入受控模式。
+以下属性属于单值 Slider 的 `Root`（传入 `value` 可进入受控模式）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}

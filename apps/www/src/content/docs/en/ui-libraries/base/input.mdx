@@ -1,15 +1,15 @@
 ---
 title: 'Input'
-description: 'Base single-line text control: host-mediated editing, value ownership, and a live RuntimeBox.'
+description: 'An unstyled single-line text input wrapping a native text editor with controlled/uncontrolled state, IME events, and reset support.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Base Input remains **draft**. This page runs the actual `base-input-root` through Web Components, React, Vue 3 and Vue 2 on one Web host. It does not establish native-host or all-browser conformance.
+Base Input (`base-input-root`) renders a single native `<input type="text">` on the Web, providing controlled/uncontrolled value handling, IME composition events, focus methods, and accessibility props without built-in styling.
 
-The Root owns one single-line plain-text editor through its Text Control requirement. The current Web profile materializes exactly one native `input[type="text"]` per instance. Its renderer returns `null` rather than adding another editor or authored child surface. Base has no visual styling; demo layout, explanatory text and acceptance of controlled proposals belong to the application.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-input"
@@ -17,49 +17,37 @@ The Root owns one single-line plain-text editor through its Text Control require
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Value and editing ownership
+## Installation
 
-- `defaultValue` initializes an uncontrolled value once. Unrelated property updates do not reset an edited value to that default.
-- `value` selects controlled ownership. Editing produces a normalized proposal; it becomes authoritative only when its owner accepts and supplies `value` again. The second demo Input has an owner that accepts proposals. Ownership is chosen at instance creation, not switched during its lifetime.
-- `valueChange` carries `{ value, composing, data, inputType }` and `change` carries `{ value }`. The IME `compositionStart`, `compositionUpdate` and `compositionEnd` events carry `{ value, data }`; the host editing session maintains the composition candidate.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the default Root, `inputRoot`, or `asInputRoot` from `@proto.ui/prototypes-base/input`. For a styled version, see [Shadcn Input](../../shadcn/input/).
 
-## Reset the mounted editor
+## Usage
 
-The draft Input contract exposes `resetValue(value?: string): boolean` on the mounted adapter handle. Call it from an application callback when that editor's current editing session should be reset.
+### Value ownership and events
 
-| Ownership and argument | Resulting value | Return value |
-| --- | --- | --- |
-| Uncontrolled, with a string | The supplied string, with CR/LF line breaks removed for the single-line editor | `true` while this invocation remains current |
-| Uncontrolled, with no argument | The latest `defaultValue`, normalized in the same way | `true` while this invocation remains current |
-| Controlled | The current owner-supplied `value` is retained | `false` |
+- **Uncontrolled**: initialize with `defaultValue`; later updates to unrelated props preserve user edits.
+- **Controlled**: pass `value` so edits emit `valueChange` proposals and only commit when your application passes the new `value` back. Ownership mode is fixed at instance creation.
+- **Event payloads**: `valueChange` carries `{ value, composing, data, inputType }`, `change` carries `{ value }`, and `compositionStart` / `compositionUpdate` / `compositionEnd` carry `{ value, data }`.
 
-For example, `resetValue('New\r\nvalue')` resets an uncontrolled Input to `Newvalue`. Updating `defaultValue` alone preserves an edited value; a later no-argument reset adopts that updated default.
+### Resetting the editor (`resetValue`)
 
-In the demo, **Set latest default** updates the default without replacing the current text. **Reset to default** calls the method without an argument, and **Reset to sample** passes the newline-containing sample. **Try controlled reset** demonstrates the controlled refusal. The status reports the actual method result, public value and editing events observed during that call.
+Mounted instances expose `resetValue(value?: string): boolean` to reset the active editing and IME composition session without synthesizing `valueChange`, `change`, or `compositionEnd`:
 
-Both ownership modes reset the current editing/composition session and synchronize the public `composing` and `value` states. A controlled `false` result does not mean the composition session was left running; changing the controlled value still belongs to the owner. Reset does not synthesize `valueChange`, `change` or `compositionEnd`. Public state observers may run during the operation.
+- **Uncontrolled with a string**: resets the text to the supplied string (with CR/LF line breaks stripped) and returns `true`.
+- **Uncontrolled with no argument (or `undefined`)**: resets to the latest `defaultValue` (normalized to a single line) and returns `true`.
+- **Controlled**: clears any active IME composition session while retaining the controlled `value`, returning `false`. Calling `resetValue` on an unmounted/detached view or with a non-string value also returns `false`.
 
-An explicit `undefined` behaves like an omitted argument. A missing, uninitialized or detached view, or any other supplied non-string value, returns `false`. Terminal disposal retains the existing capability lifetime error. If a synchronous callback resets again, detaches or remounts the editor, the outer invocation becomes stale, returns `false` and cannot publish stale state over the newer session. The complete `asInputRoot` hook inherits this same protocol.
+Use **Set latest default**, **Reset to default**, **Reset to sample**, and **Try controlled reset** in the preview to inspect these behaviors.
 
-## One physical target
+### Focus and exposed state
 
-`disabled`, `readOnly`, `placeholder`, `required`, `name`, `autoComplete`, `minLength`, `maxLength`, `inputMode` and `enterKeyHint` project onto that same Input.
-
-`ariaLabel`, `labelledBy` and `describedBy` name and describe the textbox. Exposes include `focusSelf()`, `blurSelf()`, `resetValue(value?)` and the `value`, `disabled`, `readOnly`, `focused`, `focusVisible` and `composing` states.
-
-## Import and boundaries
-
-Import the default Root, `inputRoot` or `asInputRoot` from `@proto.ui/prototypes-base/input`. The authored hook uses the same frozen single-line requirement.
-
-Base does not own arbitrary `type`, submit/search/send commands, form submission, validation UI, selection APIs, system selection/edit-menu chrome or a second editor. Enter remains host/form-owned. `inputMode` and `enterKeyHint` are editing hints, not additional input types or commands. The visual projection has its own [Shadcn Input page](../../shadcn/input/).
-
-- Specification: [P-BASE-INPUT](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-INPUT.yaml)
-- Contract: [C-TEXT-CONTROL-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-TEXT-CONTROL-0001.yaml)
-- Implementation and tests: [Base Input](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/input), [input.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/input.test.ts)
+Exposed APIs include `focusSelf()`, `blurSelf()`, and `resetValue(value?)`, plus the `value`, `disabled`, `readOnly`, `focused`, `focusVisible`, and `composing` states. Use `inputMode` and `enterKeyHint` to provide virtual-keyboard hints.
 
 ## API
 
-Input is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
+### Root Props
+
+Passing `value` selects controlled mode.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -89,8 +77,6 @@ Input is workspace source. There is no public `proto-ui add` target. Passing `va
     { name: 'describedBy', type: 'string', default: "''" },
   ]}
 />
-
-These props belong to Root.
 
 ## References
 

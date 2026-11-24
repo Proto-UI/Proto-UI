@@ -1,16 +1,14 @@
 ---
-title: 'Data-Table (WIP)'
-description: 'data-table composition and explicit implementation boundary.'
+title: 'Data Table'
+description: '支持稳定排序、全局与按列筛选、列显隐、分页及行选择的 Brutalist 数据表格组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-Data Table 将被动 Table 结构与稳定记录 ID、稳定排序、全局过滤、分页及行选择组合。行是当前页按 index 编排的显示槽；单元格按 columnKey 显示当前记录，排序会更新真实内容，不用 CSS 顺序冒充 Table 结构排序。应用 rows 的 id 必须唯一。本组合不管理请求、编辑或列重排。
+Brutalist Data Table 在静态表格结构之上提供稳定排序、全局与按列筛选、列可见性控制、分页及行选择能力。表格行按当前页索引映射实际记录，每条记录需提供唯一的 `id`。
 
-当前为功能源码 WIP。完整运行时、Compiler、原生、打包、浏览器与视觉验收仍待补齐。
-
-排序表头应放在静态 `DataTableHeaderRow` 组合内。它继承被动 Table Row topology，没有 Props 或 instance exposes，不创建 selection、focus 或 Trigger owner；正文数据槽仍使用 `DataTableRow`。旧 `DataTableRow.header` prop 保留 runtime 数据槽策略，但不会移除该行 setup 期的 Trigger 身份，不能包含多个直接 Trigger 子项。示例已迁移到新静态组合，连续链规则没有放宽。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-data-table"
@@ -18,13 +16,18 @@ Data Table 将被动 Table 结构与稳定记录 ID、稳定排序、全局过�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 筛选、列显隐、页选择与格式化配方
+## 安装
 
-下面用公开 Input、Button 与原有 DataTable 部件组成可交互配方。名称列筛选与 Root `filter` 共同生效：每个非空 `columnFilters` 条件都匹配后，再排序和分页。`columnVisibility` 隐藏对应 Header、Cell 的物理视图，同时保留作者声明的逻辑坐标；隐藏表头退出排序焦点，Header、Cell 退出辅助技术呈现；原有部件与自定义子节点保留身份，重新显示后恢复。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-`requestPageSelection()` 只选择或清空当前筛选后的这一页，并保留其他页的选择；`pageSelection` 输出 `none`、`some` 或 `all`。受控 `selectedKeys` 仍只发请求；`readOnly` 拒绝行选择和整页选择，允许排序与分页。空页请求不产生变更。
+## 用法
 
-Cell 设置 `renderValue={false}` 后保留应用编写的子节点；公开 `displayValue` 仍跟随当前记录，同 ID 的数据替换也会更新。本配方订阅该状态来格式化状态文本，并在卸载时释放订阅。数据视图策略由组件持有，显示格式由应用持有。
+### 表头与数据行
+
+- 排序表头放置在 `DataTableHeaderRow` 内，正文记录槽使用 `DataTableRow`；单元格按 `columnKey` 读取当前行对应字段。
+- 排序、筛选与分页都会更新实际单元格内容，支持受控 `sortKey`、`sortDirection`、`page` 与 `selectedKeys`。
+
+### 筛选、列显隐、整页选择与自定义渲染
 
 <PrototypePreviewer
   demoId="demo-brutalist-data-table-recipes"
@@ -32,9 +35,13 @@ Cell 设置 `renderValue={false}` 后保留应用编写的子节点；公开 `di
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+- **筛选与列显隐**：`columnFilters` 与全局 `filter` 叠加生效（全部非空条件均匹配后再排序和分页）。通过 `columnVisibility` 可隐藏指定列的表头与单元格，同时保留逻辑结构与子组件状态，重新显示时自动恢复。
+- **整页选择**：调用 `requestPageSelection()` 仅勾选或清空当前筛选后的当前页，保留其他页的选择；`pageSelection` 暴露 `'none'`、`'some'` 或 `'all'`。`readOnly` 会禁止行选择与整页选择，同时保留排序和分页。
+- **自定义单元格**：在 `Cell` 上设置 `renderValue={false}` 可保留传入的子元素，并通过 `displayValue` 读取当前记录值来自定义格式化内容。
+
 ## API
 
-Data Table 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `sortKey`、`sortDirection`、`page` 或 `selectedKeys` 会使对应事实进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -53,4 +60,11 @@ Data Table 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `
   ]}
 />
 
-这些属性属于 Root。Row 的 `index` 默认 `0`，`header` 默认 `false`。Cell 的 `columnKey` 默认 `''`，`renderValue` 默认 `true`。Header 的 `sortable` 默认 `true`。Previous 与 Next 接受 Button 的属性。
+传入 `sortKey`、`sortDirection`、`page` 或 `selectedKeys` 可分别控制对应状态。
+
+### 其他部件属性
+
+- **Row**：`index?: number`（默认 `0`），`header?: boolean`（默认 `false`）
+- **Header**：`sortable?: boolean`（默认 `true`）
+- **Cell**：`columnKey?: string`（默认 `''`），`renderValue?: boolean`（默认 `true`）
+- **Previous / Next**：支持 Button 属性

@@ -1,5 +1,6 @@
 ---
 title: Tooltip
+description: '支持同组延迟协调、Portal 锚定定位与 5px 圆角中性表面的 Brutalist 风格文字提示组件。'
 sidebar:
   order: 16
 ---
@@ -12,6 +13,10 @@ import { brutalistTooltipFiles } from '@/content/docs/demo_components/tooltip-us
 
 <BrutalistPageStyle />
 
+Tooltip 在悬停或键盘聚焦时展示简短的辅助说明文字，通过 Portal 锚定定位并自动维护 `aria-describedby` 与 `role="tooltip"` 无障碍关联。Brutalist 风格为 `Content` 提供 5px 圆角中性表面，并随主题在浅色与深色模式间自动重绘。
+
+## 预览
+
 <div class="brutalist-demo-frame" data-brutalist-tooltip-theme-boundary>
   <PrototypePreviewer
     demoId="demo-brutalist-tooltip"
@@ -20,25 +25,36 @@ import { brutalistTooltipFiles } from '@/content/docs/demo_components/tooltip-us
   />
 </div>
 
-Brutalist Tooltip 公开四个 Base Tooltip 投影入口：Group 继承同域 delay defaults、warm-window 与 active Tooltip 协调；Root 负责受控或非受控 open state；Trigger 负责 hover/focus 路由和无障碍描述关联；Content 负责 presence、锚定 portal 定位、Escape dismissal 与 `role="tooltip"`。
+上方示例在一个 `Group` 中组合了两个相邻的非受控 Tooltip，支持在 Web Components、React、Vue 与 Vue 2 之间实时切换。当 `Content` 保持挂载时，切换浅色/深色主题会通过 `--pui-foreground` 与 `--pui-secondary-background` 即时更新外观。
 
-Group、Root 与 Trigger 是当前编目的 draft 透明投影，具有明确的 Brutalist package identity，且不新增第二套 props、state、timing、events、accessibility 或 visual owner。只有 Content 增加 5px 圆角的中性 surface。上方交互示例通过一个真实 Group 组合两个非受控 sibling Tooltip，并可在 Web Components、React、Vue 与 Vue 2 之间切换。Content 通过 renderer-owned portal 保持挂载时，将文档 host 从 Light 切换到 Dark 会通过 `--pui-foreground` 与 `--pui-secondary-background` 重绘同一个 surface。
+## 安装
 
-## 当前源码安装与用法
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。如需使用已发布稳定版流程，请参阅 [快速开始](/zh-cn/start-here/quick-start/)。
 
-以下文件面向当前 0.3 源码包，包括 Vue 2.6 Adapter；工作区版本号不代表这些包已经发布到 npm。从已有宿主应用开始，把 CLI、`@proto.ui/prototypes-brutalist` 与对应 Adapter 从**同一个已审查源码版本**安装。仓库的 [仅打包流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) 生成本地 tarball，[干净消费者安装流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs) 从这些 tarball 安装完整声明的 `@proto.ui/*` 依赖闭包。[稳定版 Quick Start](/zh-cn/start-here/quick-start/) 仍是独立的已发布版本路线。
+在现有宿主应用中，请从同一源码修订安装 CLI、`@proto.ui/prototypes-brutalist` 以及对应宿主 Adapter（`@proto.ui/adapter-web-component`、`@proto.ui/adapter-react`、`@proto.ui/adapter-vue` 或 `@proto.ui/adapter-vue2`）。可通过仓库的 [本地打包脚本](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) 生成本地 tarball，并参考 [消费者安装脚本](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs) 安装完整 `@proto.ui/*` 依赖。Vue 2 宿主需使用 Vue `>=2.6.0 <2.7`。
 
-按宿主使用 `@proto.ui/adapter-web-component`、`@proto.ui/adapter-react`、`@proto.ui/adapter-vue` 或 `@proto.ui/adapter-vue2`。React 与 Vue 保留原应用挂载入口。 React 示例把 `react-dom` 的 `createPortal` 传入 Adapter，使 Content 使用 renderer-owned portal。Vue 2 要求 Vue `>=2.6.0 <2.7`；把 CLI 版本换成 `@latest` 不能让安装结果自动等同于源码预览。
-
-安装配套包后，在应用目录运行本地 CLI。保留生成的 CSS：Base 的 presence 与 positioning 也需要其中的结构规则。下方小型 `tooltip-demo.css` 由应用拥有，不替代这些规则。
+安装配套包后，在应用目录运行本地 CLI 生成 Brutalist 主题变量与结构样式（Base 的显隐与定位同样依赖生成的 `proto-ui-style.css`）：
 
 ```sh
 node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --prototypes brutalist
 ```
 
-Brutalist Tooltip 提供 `@proto.ui/prototypes-brutalist/tooltip` 公共导出，但**没有 `proto-ui add` 目标**。下方直接适配这些导出；WC 示例通过公开 Adapter 注册自己的 `app-brutalist-tooltip-*` 标签，并使用 `setElementProps` 设置输入。Brutalist preset 提供该家族的 token 与生成样式规则。
+Brutalist Tooltip 直接通过 `@proto.ui/prototypes-brutalist/tooltip` 导出，暂不提供 `proto-ui add` 目标。
 
-复制一个宿主的文件。WC HTML 加入已有文档，`src/main.ts` 只加载一次；React 与 Vue 保留应用原有入口并使用下方 `App` 组件。如果应用已经加载 `proto-ui-style.css`，保留一个导入入口即可。一个 Group 拥有两个非受控 Root，每个 Root 各有一个独立 Trigger 和一个不含交互控件的 Content。
+## 用法
+
+### 组件结构
+
+Tooltip 由四个部分组成：
+
+- `Group`：统一协调同组相邻 Tooltip 的打开/关闭延迟、热切换窗口（`skipDelay`）与当前激活项。
+- `Root`：管理单个 Tooltip 的受控或非受控打开状态及单实例延迟覆盖。
+- `Trigger`：处理悬停与焦点触发，并自动关联和清理 `aria-describedby`。
+- `Content`：通过宿主 Portal 渲染 5px 圆角中性提示面板，负责锚定定位、`Escape` 关闭与 `role="tooltip"`。
+
+### 完整宿主示例
+
+按目标框架复制对应文件即可：Web Components 将 HTML 加入现有文档并加载一次 `src/main.ts`；React 与 Vue 保留原有入口并使用下方的 `App` 组件（React 需向 Adapter 传入 `react-dom` 的 `createPortal` 以启用原生 Portal；若项目已引入 `proto-ui-style.css`，保持单一导入即可）。
 
 <CodeExample
   files={brutalistTooltipFiles}
@@ -46,9 +62,9 @@ Brutalist Tooltip 提供 `@proto.ui/prototypes-brutalist/tooltip` 公共导出�
   label="Brutalist Tooltip 完整宿主用法"
 />
 
-## 在 Button 上使用 Tooltip
+### 在 Button 上组合 Tooltip
 
-可聚焦命令与 Tooltip 应共用一个 subject。将 draft authored hook `useTooltipTrigger()` 与命令行为组合，适配生成的原型，再把该组件直接放在 Tooltip Root 内与 Content 并列。不要用独立 Trigger 包裹另一个可聚焦 Button，否则会产生两个 Tab 停靠点。
+不要用独立 `Trigger` 包裹可聚焦的 Button，否则会产生两个 `Tab` 停靠点。应将 `useTooltipTrigger()` 与按钮原型组合到同一个元素上，再与 `Content` 并列放入 Tooltip `Root` 中：
 
 ```ts
 import { definePrototype } from '@proto.ui/core';
@@ -64,15 +80,14 @@ export const tooltipButton = definePrototype<ButtonProps, ButtonExposes>({
 });
 ```
 
-Button 保留 role、name、click signal、disabled state 与唯一焦点 owner；Tooltip 只追加 hover/focus intent 与自有 `aria-describedby` 关联。禁用 Tooltip Root 只关闭 Tooltip，命令仍可操作；禁用命令则同时抑制两者。`useTooltipTrigger` 没有 options，也不新增 outward exposes，要求同一 subject 已有焦点能力。独立 `asTooltipTrigger` 保留原焦点行为与 exposes。
-
-复用已有样式原型时，可在 `definePrototype` 中保留该原型的静态 `modules` 声明，调用其 `setup(def)`，再调用 `useTooltipTrigger()`，最后返回之前保存的 render function。这保留 family Button 呈现并只创建一个宿主；与下方独立 Trigger demo 的 passive action-body 样式工作分别追踪。
-
-命令位于真实 ShadowRoot 时，请使用 [同树 portal scene 配方](/zh-cn/ui-libraries/base/tooltip/#shadowroot)。默认 body 目标不能只靠相同 ID 字符串为 ShadowRoot 内的命令提供可访问描述。
+- Button 保留自身角色、名称、点击事件、禁用态与单一焦点管理；`useTooltipTrigger()` 仅附加悬停/聚焦意图与 `aria-describedby` 关联，不额外增加对外暴露属性。
+- 禁用 Tooltip `Root` 仅关闭提示，按钮本身仍可点击；禁用按钮则同时禁用提示。
+- 如需复用到已带样式的按钮原型上，在 `definePrototype` 中保留原原型的静态 `modules` 声明，在 `setup(def)` 内先调用其 `setup(def)`，再调用 `useTooltipTrigger()`，最后返回捕获的渲染函数。
+- 若按钮位于真实 `ShadowRoot` 内，请参考 [同树 Portal 配方](/zh-cn/ui-libraries/base/tooltip/#shadowroot)，确保 `aria-describedby` 能在同一子树内正确解析。
 
 ## API
 
-Brutalist Tooltip 以上述当前源码包的公共导出为依据，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+以下属性属于 `Root`（传入 `open` 进入受控模式）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -84,4 +99,8 @@ Brutalist Tooltip 以上述当前源码包的公共导出为依据，没有公�
   ]}
 />
 
-这些属性属于 Root。Trigger 的 `disabled` 默认 `false`。Content 接受 Transition 属性，`side` 默认 `top`，`align` 默认 `center`，`sideOffset` 默认 `4`，`alignOffset` 与 `collisionPadding` 默认 `0`，`avoidCollisions` 默认 `true`。Group 的 `openDelay` 默认 `700`，`closeDelay` 默认 `100`，`skipDelay` 默认 `300`。
+其余子部件属性默认值：
+
+- **Group**：`openDelay` 默认 `700`，`closeDelay` 默认 `100`，`skipDelay` 默认 `300`。
+- **Trigger**：`disabled` 默认 `false`。
+- **Content**：支持 Transition 属性；`side` 默认 `'top'`，`align` 默认 `'center'`，`sideOffset` 默认 `4`，`alignOffset` 与 `collisionPadding` 默认 `0`，`avoidCollisions` 默认 `true`。

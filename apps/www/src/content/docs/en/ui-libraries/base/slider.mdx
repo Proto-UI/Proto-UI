@@ -1,11 +1,17 @@
 ---
-title: base Slider
-description: Draft portable input atoms.
+title: 'Slider'
+description: 'A single-thumb and multi-thumb range slider with pointer drag, keyboard stepping, and form integration.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+A slider input for selecting a single numeric value or a range of values via pointer/touch dragging, keyboard stepping, and form fields.
+
+## Preview
+
+### Single thumb
 
 <PrototypePreviewer
   demoId="demo-base-slider"
@@ -14,15 +20,7 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root owns value/defaultValue, min/max/step, disabled/readOnly, orientation and direction. Track uses shared normalized AxisInput for real pointer/touch drag. Thumb is one focusable slider: arrows, Shift×10, PageUp/PageDown, Home/End; horizontal RTL reverses lateral arrows. Values clamp and snap from min. Controlled requests emit valueChange while retaining owner values; valueCommit marks completion, cancel restores an uncontrolled drag start. Label names Thumb; Value and Indicator are passive. The scalar entry retains single-thumb behavior; the additive Values composition below supplies range and multiple-thumb ownership.
-
-Use FieldThumb instead of Thumb inside Field/FormField to bridge FieldLabel activation, canonical numeric validation, policy, Form serialization and reset. Standalone Thumb continues to use SliderLabel.
-
-Parts: root, label, track, indicator, thumb, field-thumb, value. All four styled families inherit Base behavior.
-
-Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf completion is claimed.
-
-## Range and multiple values
+### Range and multiple values
 
 <PrototypePreviewer
   demoId="demo-base-slider-values"
@@ -31,13 +29,30 @@ Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, pac
   codePanel={false}
 />
 
-Import the six `sliderValues*` entries from `@proto.ui/prototypes-base/slider`. Use one Values Root with `defaultValue={[20, 80]}` and one indexed Thumb per value, nested inside Values Track. Track owns the shared input lease: a direct click seeks the nearest editable slot, and an off-center Thumb grab keeps its offset. `thumbCollisionBehavior` accepts `push`, `swap` or `none`; a swap moves active focus while capture stays on Track. Keyboard edits retain their existing same-slot limits.
+## Installation
 
-The complete Values Root is an optional grouped Field control. Inside Field/FormField it reports its canonical finite `number[]`, baseline, group focus and relations; FieldLabel focuses the first editable Thumb. Controlled refusal keeps owner values and does not validate the rejected candidate. Cancellation discards completion; reset retires the contact and requests the creation baseline, including from a disabled Form. The original scalar Slider parts retain their separate contract.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the scalar Slider parts or the six `sliderValues*` multi-value entries from `@proto.ui/prototypes-base/slider`.
+
+## Usage
+
+### Single-thumb composition
+
+Compose `Root`, `Label`, `Track`, `Indicator`, `Thumb`, `FieldThumb`, and `Value`:
+
+- **Dragging and keyboard stepping**: `Root` manages value, bounds, and orientation. `Track` handles pointer and touch dragging; `Thumb` supports arrow keys, `Shift` ×10 steps, `PageUp`/`PageDown`, and `Home`/`End`, reversing horizontal arrows in `rtl` mode. Values clamp to `[min, max]` and snap from `min` by `step`.
+- **Controlled mode and commits**: Pass `value` for controlled mode (interactions emit `valueChange` without overwriting external state). `valueCommit` fires when a drag or keyboard edit completes; canceling a drag restores the uncontrolled start value.
+- **Form integration**: Use `FieldThumb` instead of `Thumb` inside `Field`/`FormField` to bridge `FieldLabel`, numeric validation, serialization, and reset. Use `Label` with standalone `Thumb`.
+
+### Range and multiple values (`sliderValues*`)
+
+Import the six `sliderValues*` entries from `@proto.ui/prototypes-base/slider`, pass an array such as `defaultValue={[20, 80]}` on `Values Root`, and place one indexed `Thumb` per value inside `Values Track`:
+
+- **Track interaction and collisions**: Clicking the track seeks the nearest editable thumb, and off-center thumb grabs preserve the initial pointer offset. `thumbCollisionBehavior` accepts `'push'`, `'swap'`, or `'none'` (`'swap'` transfers active focus while keeping capture on the track).
+- **Form integration**: `Values Root` works directly inside `Field`/`FormField`, reporting a `number[]` value, initial baseline, and group focus (`FieldLabel` focuses the first editable thumb). Resetting cancels any active drag and requests the initial baseline.
 
 ## API
 
-Slider is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode. Parts do not add props of their own.
+### Root (Single thumb)
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -55,7 +70,7 @@ Slider is workspace source. There is no public `proto-ui add` target. Passing `v
   ]}
 />
 
-These props belong to Root.
+Pass `value` to control the slider value. Other scalar parts take no additional props. The multi-value `Values Root` accepts `number[]` for `value` / `defaultValue` and `thumbCollisionBehavior` (`'push' | 'swap' | 'none'`).
 
 ## References
 

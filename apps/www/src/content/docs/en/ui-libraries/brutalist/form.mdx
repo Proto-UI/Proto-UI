@@ -1,11 +1,15 @@
 ---
-title: brutalist Form
-description: Draft portable form atoms.
+title: 'Brutalist Form'
+description: 'Coordinate field validation, async submission, and form reset across Brutalist form controls.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Brutalist Form orchestrates explicitly registered `FormField` entries, validates all enabled fields, and emits form values keyed by field name on `submit`, with built-in support for async validation and reset.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-brutalist-form"
@@ -14,15 +18,25 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root gathers explicitly registered FormField atoms, validates their canonical Field controls and emits submit with named value snapshots only when all enabled fields are valid. Disabled fields are omitted; duplicate names fail closed. Async validation waits for current results and rejects changed values, removal, cancellation and detach. Form disabled also reaches contained Fields. FormSubmit and FormReset own keyboard/pointer activation. Focused single-line Field, Number Field and OTP editors support implicit Enter submission, excluding IME composition, modifiers and repeated keydown. requestReset restores mounted initial uncontrolled values, requests controlled-owner changes without overwriting them, cancels editing and pending validation, then emits reset. resetValidation only clears validation. No network submission, native navigation or hidden HTML inputs are created.
+## Installation
 
-All four visual families inherit Base behavior. Parts: root, field, submit, reset.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-FormSubmit and FormReset expose typed disabled, hovered, pressed, focused and focusVisible states plus focusSelf. Their single Form activation owner is independent of Button; styled projections use each family’s existing passive Button recipe for focus, hover, press and disabled feedback.
+- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-form`
 
-Draft source delivery. Native, assistive-technology, full Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf checklist item is marked complete.
+## Usage
 
-## Versioned validation and nested controls
+### Parts
+
+Form is composed of `Root`, `Field` (`FormField`), `Submit` (`FormSubmit`), and `Reset` (`FormReset`):
+
+- **Root**: Collects registered `FormField` items, runs built-in and async validation, and emits `submit` with named values when all enabled fields pass. Disabled fields are omitted, duplicate field names block serialization, and `disabled` cascades to contained fields.
+- **Field**: Connects a supported control to the form using `name` as its submission key.
+- **Submit / Reset**: Handle pointer and keyboard activation with Brutalist button styling, exposing `disabled`, `hovered`, `pressed`, `focused`, `focusVisible`, and `focusSelf()`.
+
+Pressing `Enter` in a focused single-line `Field`, `Number Field`, or `Input OTP` triggers implicit submission (ignoring IME composition, modifier keys, and key repeats). `requestReset()` restores uncontrolled initial values, requests initial values from controlled owners, cancels pending edits and validation, and emits `reset`; `resetValidation()` clears validation state only.
+
+### Async validation and nested fieldsets
 
 <PrototypePreviewer
   demoId="demo-brutalist-form-validation"
@@ -31,9 +45,9 @@ Draft source delivery. Native, assistive-technology, full Adapter/Compiler/GPUI,
   codePanel={false}
 />
 
-This public recipe holds actual external validation requests in its consumer. Submit starts validation; Return success or Return error delivers the current `requestId` through `resolveValidation`. Edit, reset or change readOnly before returning an older result to see its rejection. Cancel submit retires the Form attempt; an independent Field may still accept its current validation result without completing that canceled submission. A new submit supersedes the previous attempt. Controlled editor notifications read the canonical value after the framework commits the owner response; rejected text never becomes a Field value. The account value stays controlled by the application, and nested Fieldsets govern the Checkbox Group and multiline notes. Disabling the parent group omits its fields from submitted values without rewriting their owners. Form reset restores uncontrolled baselines and asks the controlled owner to restore its initial value. The demo owns no network request.
+When fields use external async validation, submission waits for each active `requestId` to resolve via `resolveValidation`. Stale results from edited, reset, read-only, or superseded submissions are automatically discarded. Nested `Fieldset` groups can disable sections at once and omit those fields from submitted values.
 
-## Explicit choice fields
+### Choice controls in forms
 
 <PrototypePreviewer
   demoId="demo-brutalist-field-choices"
@@ -42,17 +56,15 @@ This public recipe holds actual external validation requests in its consumer. Su
   codePanel={false}
 />
 
-The `brutalist-field` source entry exports `fieldCheckbox`, `fieldRadioGroup` and `fieldSwitch`. Place each inside an explicit `FormField` and use the same-family Checkbox Indicator, Radio Items/Indicators or Switch Thumb. Ordinary Checkbox and Radio Group remain usable without registering a form field.
+Import `fieldCheckbox`, `fieldRadioGroup`, and `fieldSwitch` from `brutalist-field`, place them inside `FormField`, and pair them with Brutalist Checkbox Indicator, Radio Items/Indicators, or Switch Thumb:
 
-The recipe keeps Checkbox and Radio values controlled by its consumer, while Switch is uncontrolled. Refuse requests to observe unchanged canonical values and dirty state; accept them to update the values used by required validation and submission. Checkbox submits its boolean `checked`; mixed display does not satisfy required when checked is false. Radio submits its canonical string, with empty meaning missing for required.
-
-Read-only is an explicit Field policy. Labels still focus the corresponding control, and Radio arrows still move roving focus without proposing another value. Fieldset separately inherits disabled policy and omits its participating fields from Form values. Reset requests the creation value from controlled owners and restores uncontrolled values; refusing that request retains canonical value and dirty. A reset does not generate change validation.
-
-Hold a consumer reply, replace the controls, then deliver it to see the stale reply rejected by its consumer revision. “Replace on next request” replaces real control instances from their outward callback. The current owner can then submit again. These examples are draft semantics shared by the four Web Adapters; native input and assistive technology acceptance is recorded separately.
+- `fieldCheckbox` submits its boolean `checked` value (mixed display does not satisfy `required` when `checked` is `false`).
+- `fieldRadioGroup` submits the selected string value (an empty string counts as missing when `required`).
+- In read-only mode, labels still focus their control and Radio arrow keys still rove focus without proposing value changes.
 
 ## API
 
-The source CLI registry provides `brutalist-form`. Use the exact source revision and matching workspace build when consuming the current 0.3 draft; this page does not claim that an older published package contains the new recipe.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -62,7 +74,10 @@ The source CLI registry provides `brutalist-form`. Use the exact source revision
   ]}
 />
 
-These props belong to Root. Field defaults `name` to `''`. Submit and Reset default `disabled` to `false`.
+### Other parts
+
+- **Field**: `name?: string` (default `''`)
+- **Submit / Reset**: `disabled?: boolean` (default `false`)
 
 ## References
 

@@ -1,11 +1,13 @@
 ---
 title: 'Tabs'
-description: 'Liquid Glass Tabs: four real Base protocol projections.'
+description: 'A Liquid Glass tabs component with segmented glass styling and an underline appearance variant.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Root, List, Trigger and Content inherit the matching [Base Tabs protocol](/en/ui-libraries/base/tabs/). Root owns the selected value. Arrow keys and Home/End move through enabled triggers; Enter/Space activate a manually selected tab. Controlled requests wait for the owner's value.
+Liquid Glass Tabs composes `Root`, `List`, `Trigger`, and `Content` over [Base Tabs](/en/ui-libraries/base/tabs/). It defaults to a rounded segmented glass appearance (with automatic opaque fallback) and includes a transparent underline variant (`appearance="underline"`).
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-tabs"
@@ -13,10 +15,30 @@ Root, List, Trigger and Content inherit the matching [Base Tabs protocol](/en/ui
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-Import `tabsRoot`, `tabsList`, `tabsTrigger`, `tabsContent` from `@proto.ui/prototypes-liquid-glass/tabs`. These remain private draft workspace source. No public registry release or native/Compiler support is implied.
+## Installation
 
-List and Trigger accept `appearance="underline"` for the Runtime Box's transparent, text-width underline recipe. The default recipe remains this family's own presentation. Root uses `value`/`defaultValue`, `activationMode` and `orientation`; Trigger uses `value`/`disabled`; Content uses `value`/`keepMounted`. Runtime selection uses manual activation, so arrow navigation does not remount a demo.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Source and synthetic-DOM evidence are distinct from commit-bound native screenshots, narrow-screen geometry and independent visual acceptance. Those browser checks remain pending.
+```ts
+import {
+  tabsRoot,
+  tabsList,
+  tabsTrigger,
+  tabsContent,
+} from '@proto.ui/prototypes-liquid-glass/tabs';
+```
 
-The rounded material segmented default is independently authored, using the existing material declaration and ordinary style fallback. It is not an official Apple Tabs reproduction.
+## Usage
+
+- **Selection and keyboard**: `Root` manages the active tab value. Arrow keys and `Home`/`End` move focus across enabled triggers; in manual activation mode, Enter or Space commits the switch so browsing does not remount panels unexpectedly. Controlled mode waits for the updated `value` prop.
+- **Appearance variants**: use the default segmented style or pass `appearance="underline"` to `List` and `Trigger` for a transparent, text-width underline look.
+
+## API
+
+| Part | Prop | Description |
+| --- | --- | --- |
+| Root | `value`, `defaultValue` | Controlled / uncontrolled active tab value |
+| Root | `activationMode`, `orientation` | Automatic or manual keyboard activation / horizontal or vertical layout |
+| List | `appearance` | Default segmented look, or `'underline'` |
+| Trigger | `value`, `disabled`, `appearance` | Tab key, disabled state, and appearance variant |
+| Content | `value`, `keepMounted` | Associated tab key; keeps hidden node mounted when `true` |

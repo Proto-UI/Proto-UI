@@ -1,11 +1,13 @@
 ---
-title: 'AlertDialog'
-description: 'A modal decision with a primary message, safe cancel target and explicit action intent.'
+title: 'Alert Dialog'
+description: 'A Liquid Glass modal confirmation dialog with safe cancel focus and explicit action intent.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-A modal decision with a primary message, safe cancel target and explicit action intent.
+Liquid Glass Alert Dialog interrupts the user for important or destructive confirmations. It traps focus, prevents outside-click dismissal, and focuses `Cancel` first when available.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-alert-dialog"
@@ -14,10 +16,22 @@ A modal decision with a primary message, safe cancel target and explicit action 
   codePanel={false}
 />
 
-Root fixes alert semantics. Mask owns modality; Content traps focus, blocks outside dismissal and starts at Cancel when available. Action emits action before requesting close. Application code owns the effect; no destructive operation is performed by the prototype. Escape and Cancel request dismissal.
+## Installation
 
-Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Supplying open leaves the committed value with the owner; listen to openChange and provide the next value.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Trigger, Content, Title, Description, Cancel, Action, Mask.
+## Usage
 
-Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.
+- **Parts**: `Root`, `Trigger`, `Content`, `Title`, `Description`, `Cancel`, `Action`, `Mask`.
+- **Modality and focus**: `Root` sets alert dialog semantics, `Mask` handles modality, and `Content` traps focus while starting on `Cancel`. Escape and `Cancel` request dismissal.
+- **Explicit action**: `Action` emits `action` before requesting close; your application performs the actual side effect.
+- **Controlled state**: pass `open` and listen to `openChange` for controlled visibility, or pass `defaultOpen` for uncontrolled usage. Disabled triggers and actions do not activate.
+
+## API
+
+| Part | Prop / Event | Description |
+| --- | --- | --- |
+| Root | `open`, `defaultOpen` | Controlled / uncontrolled open state |
+| Root | `openChange` | Emitted when opening or dismissing is requested |
+| Action | `action` | Emitted on confirmation before requesting dismissal |
+| Mask / Content | — | Provides modal backdrop, focus trap, and initial focus on `Cancel` |

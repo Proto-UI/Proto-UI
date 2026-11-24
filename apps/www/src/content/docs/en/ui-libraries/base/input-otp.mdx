@@ -1,11 +1,15 @@
 ---
-title: base Input Otp
-description: Draft portable input atoms.
+title: 'Input OTP'
+description: 'A one-time password input pairing a single native text editor with indexed display slots, paste/autofill support, and form integration.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Base Input OTP provides a one-time code input backed by a single native text editor—preserving native selection, paste, deletion, `one-time-code` autofill, and IME composition—while rendering each character in passive `Slot` readouts.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-input-otp"
@@ -14,21 +18,31 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root owns value/defaultValue, length (1–32, default 6), numeric/alphanumeric filtering, disabled/readOnly, name and ariaLabel. One real Input preserves selection, paste, deletion and composition through TextControl; it requests one-time-code autocomplete. Input commits after composition, strips disallowed characters and bounds length. Slots are passive indexed, aria-hidden readouts; they never create additional editors or tab stops. A focused, editable Input projects its actual TextControl caret or selected range to active slots. Unknown selection, blur, disabled and readOnly have no active slot; the value length is never a substitute for a caret. valueChange is a request; completed emits once for each accepted complete code, not an authentication action. Server verification, SMS retrieval and per-cell focus are outside this implementation.
+## Installation
 
-Use Control instead of Input inside Field/FormField to bridge FieldLabel, canonical string validation, IME cancellation, Form serialization and reset. Standalone Input retains its existing naming. OTP Control validates an accepted canonical change after owner callbacks. A rejected controlled candidate or a normalized no-op does not start automatic change validation; manual and configured blur validation still work. Same-turn accepted edits validate the latest snapshot once, and reset, policy interruption or unmount cancels queued work.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: root, input, control, slot, separator. All four styled families inherit Base behavior.
+## Usage
 
-Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf completion is claimed.
+### Anatomy
+
+Compose `Root`, `Input` (or `Control` inside a form), `Slot`, and `Separator`:
+
+- **`Root`**: manages `value` / `defaultValue`, code `length` (`1`–`32`, default `6`), `pattern` (`'numeric'` or `'alphanumeric'`), `disabled`, `readOnly`, `name`, and `ariaLabel`.
+- **`Input`**: single underlying text editor that strips disallowed characters and enforces `length` once composition settles. Emits `valueChange` on edits and `completed` once for each accepted full-length code.
+- **`Slot`**: passive, `aria-hidden` readout indexed by `index` without adding extra editors or Tab stops. When the editable input is focused, active slot highlights track the real caret or selected range.
+- **`Control` (form integration)**: use `Control` instead of `Input` inside `Field` / `FormField` to connect `FieldLabel`, validation, form serialization, and reset.
 
 ## API
 
-Input OTP is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode. Input `placeholder` is optional and has no default.
+### Root Props
+
+Passing `value` selects controlled mode.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'length', type: 'number', default: '6' },
     { name: 'pattern', type: "'numeric' | 'alphanumeric'", default: 'numeric' },
@@ -39,7 +53,11 @@ Input OTP is workspace source. There is no public `proto-ui add` target. Passing
   ]}
 />
 
-These props belong to Root. Slot defaults `index` to `0`.
+### Other parts
+
+- **Input**: optional `placeholder` (no default).
+- **Slot**: `index` defaults to `0`.
+- **Control, Separator**: no props.
 
 ## References
 

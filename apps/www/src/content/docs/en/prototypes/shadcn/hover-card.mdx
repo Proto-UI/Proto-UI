@@ -1,10 +1,19 @@
 ---
 title: 'Hover Card'
 desp: 'Hover Card'
-description: 'Hover Card Shadcn prototype'
+description: 'A Shadcn-styled hover card for previewing content behind a link or trigger on hover and focus.'
 ---
 
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Hover Card displays a lightweight preview panel when a user hovers over or focuses a trigger, making it useful for profile cards and link previews. The examples on this page use the **Shadcn Rhea** style preset.
+
+## Preview
+
+The demo opens `@proto-ui` after a `150ms` delay and closes after `300ms`, anchored below and centered (`side="bottom"`, `align="center"`).
 
 <div>
   <PrototypePreviewer
@@ -14,3 +23,69 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
     hasCode={true}
   />
 </div>
+
+## Installation
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-hover-card" manager="npm" />
+
+Replace `wc` with `react`, `vue`, or `vue2` to generate the component wrapper for your target host.
+
+## Usage
+
+Hover Card is composed of three cooperating parts:
+
+- **Root**: Manages open state (`open`), open/close delays, and disabled state.
+- **Trigger**: Tracks pointer hover and keyboard focus and sends open/close requests to Root.
+- **Content**: Renders the floating panel, handles placement and collision avoidance, and keeps the card open while hovered.
+
+### Controlled and Uncontrolled
+
+- **Uncontrolled**: Set `defaultOpen` for the initial state and let Root handle hover, focus, and timers automatically.
+- **Controlled**: Pass `open` and listen to the `openChange` event on Root to drive visibility from external state.
+
+### Delays and Disabled State
+
+- `openDelay` (default `700` ms) and `closeDelay` (default `300` ms) are cancellable, preventing flicker when moving quickly across the trigger or into the content panel.
+- Negative or non-finite delay values fall back to the defaults.
+- Set `disabled` on Root or Trigger to suppress hover and focus activation.
+
+## API
+
+The table below lists all props across Root, Trigger, and Content. `open`, `defaultOpen`, `openDelay`, and `closeDelay` belong to Root; `disabled` is supported on Root and Trigger; `side` through `collisionPadding` belong to Content.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '300' },
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+  ]}
+/>
+
+### Exposed State, Methods, and Events
+
+- **Root**: Exposes `open` state, `openHoverCard(reason?)`, `close(reason?)`, and `toggle(reason?)` methods, and the `openChange` event with payload `{ open: boolean; reason: string | null }`.
+- **Trigger**: Exposes `disabled`, `hovered`, `focused`, and `focusVisible` state plus `focusSelf(options?)`.
+- **Content**: Exposes `open` state.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-SHADCN-HOVER-CARD.yaml',
+    'P-SHADCN-HOVER-CARD-TRIGGER.yaml',
+    'P-SHADCN-HOVER-CARD-CONTENT.yaml',
+    'P-BASE-HOVER-CARD.yaml',
+    'P-BASE-HOVER-CARD-TRIGGER.yaml',
+    'P-BASE-HOVER-CARD-CONTENT.yaml',
+  ]}
+/>

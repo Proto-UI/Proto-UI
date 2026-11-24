@@ -1,18 +1,33 @@
 ---
-title: 'Message-Scroller (WIP)'
-description: 'message-scroller functional composition and current verification limits.'
+title: 'Message Scroller'
+description: 'A Bootstrap 2.3.2 scrollable message stream with sticky bottom-follow and explicit jump-to-latest recovery.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Message Scroller composes the existing Scroll Surface end-follow policy. Appends follow only while the reader is at the end; a reader who leaves the end can explicitly resume with Jump to latest. newContentCount is supplied by the application, never inferred as unread truth. Jumping does not request focus.
+Message Scroller keeps chat and activity feeds anchored to the bottom as new messages arrive, pauses auto-follow while reading older items, and lets users jump back to the latest entry on demand.
 
-This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
-
-Set a11yLabel on Root to name the scrollable region; the default is Messages.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-message-scroller"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+- **End-follow behavior**: Appended content stays in view only when the user is already at the bottom. Scrolling away preserves the reading position until the user explicitly triggers Jump to latest, which scrolls down without stealing keyboard focus.
+- **New content count**: Pass `newContentCount` from your application state rather than letting the scroller guess unread semantics.
+- **Accessible region**: Set `a11yLabel` on `Root` to name the scrollable region (defaults to `'Messages'`).
+
+## API
+
+| Part   | Prop              | Default      | Description                                       |
+| ------ | ----------------- | ------------ | ------------------------------------------------- |
+| `Root` | `a11yLabel`       | `'Messages'` | Accessible name for the scrollable message region |
+| `Root` | `newContentCount` | —            | Application-supplied count of new appended items  |

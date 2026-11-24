@@ -1,15 +1,15 @@
 ---
 title: 'Input'
-description: 'Base 单行文本控件：宿主协同编辑、值所有权和真实 RuntimeBox。'
+description: '基于原生单行文本编辑器的基础输入组件，支持受控与非受控值、IME 组合事件与会话重置。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Base Input 当前仍为 **draft**。本页展示真实 `base-input-root` 在同一 Web host 上的 Web Components、React、Vue 3 与 Vue 2 演示，不代表原生宿主或所有浏览器已经完成 conformance。
+Base Input（`base-input-root`）在 Web 端渲染单个原生 `<input type="text">`，统一提供受控/非受控值管理、输入法组合（IME）事件、聚焦控制与无障碍属性，外观样式由应用自定义。
 
-Root 通过 Text Control requirement 拥有一个 single-line plain-text editor。当前 Web profile 每个实例只 materialize 一个原生 `input[type="text"]`；原型 renderer 返回 `null`，不另建编辑器或 authored children surface。Base 没有视觉样式；演示中的排版、说明和受控值接纳属于应用。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-input"
@@ -17,49 +17,37 @@ Root 通过 Text Control requirement 拥有一个 single-line plain-text editor�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 值与编辑所有权
+## 安装
 
-- `defaultValue` 只初始化非受控值。用户编辑后，无关 props 更新不会把它重置为默认值。
-- `value` 选择受控模式。编辑产生归一化提案，owner 接纳并回传 `value` 后才成为权威值；演示第二个 Input 的 owner 会接纳提案。所有权模式在实例创建时确定，不在生命周期中切换。
-- `valueChange` 携带 `{ value, composing, data, inputType }`，`change` 携带 `{ value }`。IME 的 `compositionStart`、`compositionUpdate`、`compositionEnd` 携带 `{ value, data }`；组合候选由宿主编辑会话维护。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-base/input` 导入默认 Root、`inputRoot` 或组合钩子 `asInputRoot`。带预设样式的输入框请参阅 [Shadcn Input](../../shadcn/input/)。
 
-## 重置已挂载的编辑器
+## 用法
 
-Input 的 draft 契约在已挂载的 adapter handle 上公开 `resetValue(value?: string): boolean`。应用可在回调中调用它，重置该编辑器当前的编辑会话。
+### 值管理与输入事件
 
-| 所有权与参数       | 重置后的值                              | 返回值                    |
-| ------------------ | --------------------------------------- | ------------------------- |
-| 非受控，传入字符串 | 传入值移除 CR/LF 换行后的单行文本       | 本次调用仍有效时为 `true` |
-| 非受控，不传参数   | 最新的 `defaultValue`，按相同规则归一化 | 本次调用仍有效时为 `true` |
-| 受控               | 保留当前 owner 传入的 `value`           | `false`                   |
+- **非受控模式**：使用 `defaultValue` 初始化文本；后续更新其他属性不会重置用户已输入的内容。
+- **受控模式**：传入 `value` 即进入受控模式，用户输入会发出 `valueChange`，需由调用方将新值回传给 `value` 后才更新显示。所有权模式在实例创建时确定，不在运行中切换。
+- **事件数据**：`valueChange` 携带 `{ value, composing, data, inputType }`，`change` 携带 `{ value }`，`compositionStart`、`compositionUpdate`、`compositionEnd` 携带 `{ value, data }`。
 
-例如，`resetValue('New\r\nvalue')` 会把非受控 Input 重置为 `Newvalue`。单独更新 `defaultValue` 会保留用户已编辑的值；之后不传参数调用 reset，才会采用更新后的默认值。
+### 重置编辑器（`resetValue`）
 
-演示中的 **Set latest default** 更新默认值而不替换当前文本；**Reset to default** 不传参数调用该方法，**Reset to sample** 传入包含换行的示例，**Try controlled reset** 展示受控拒绝。状态区显示真实方法返回值、公开 value，以及该次调用期间观察到的编辑事件数量。
+已挂载的实例暴露 `resetValue(value?: string): boolean` 方法，用于重置当前编辑及 IME 组合会话（不会合成 `valueChange`、`change` 或 `compositionEnd` 事件）：
 
-两种所有权模式都会重置当前编辑／composition 会话，并同步公开的 `composing` 与 `value` state。受控返回 `false` 不表示 composition 仍在继续；修改受控值仍由 owner 负责。Reset 不合成 `valueChange`、`change` 或 `compositionEnd`，但操作期间可以触发公开 state observer。
+- **非受控模式传入字符串**：将文本重置为移除 CR/LF 换行后的单行字符串，返回 `true`。
+- **非受控模式不传参数（或传 `undefined`）**：重置为最新的 `defaultValue`（同样归一化为单行），返回 `true`。
+- **受控模式**：结束当前 IME 组合会话但保留调用方传入的 `value`，返回 `false`；节点未挂载、已卸载或传入非字符串参数时同样返回 `false`。
 
-显式传入 `undefined` 与省略参数相同。view 缺失、尚未初始化、已 detach，或传入其他非字符串参数时，返回 `false`；终止 dispose 后仍保留既有的 capability lifetime 错误。若同步回调再次 reset、detach 或 remount 编辑器，外层调用会失效并返回 `false`，不能把旧状态发布到新会话。完整的 `asInputRoot` hook 继承同一协议。
+在预览中，可点击 **Set latest default**、**Reset to default**、**Reset to sample** 和 **Try controlled reset** 体验上述行为。
 
-## 同一个物理目标
+### 聚焦与暴露状态
 
-`disabled`、`readOnly`、`placeholder`、`required`、`name`、`autoComplete`、`minLength`、`maxLength`、`inputMode` 与 `enterKeyHint` 投影到同一个 Input。
-
-`ariaLabel`、`labelledBy`、`describedBy` 为该 textbox 提供命名与描述。Expose 提供 `focusSelf()`、`blurSelf()`、`resetValue(value?)`，以及 `value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing` state。
-
-## 导入与边界
-
-从 `@proto.ui/prototypes-base/input` 导入默认 Root、`inputRoot` 或 `asInputRoot`；后者复用相同冻结 single-line requirement。
-
-Base 不拥有任意 `type`、submit/search/send command、表单提交、验证 UI、selection API、系统 selection/edit-menu chrome 或第二个 editor。Enter 仍归宿主／表单 owner；`inputMode` 和 `enterKeyHint` 是编辑提示，不是新增输入类型或命令。Shadcn 的视觉投影另见 [Shadcn Input](../../shadcn/input/)。
-
-- 规范：[P-BASE-INPUT](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-INPUT.yaml)
-- 契约：[C-TEXT-CONTROL-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-TEXT-CONTROL-0001.yaml)
-- 实现与测试：[Base Input](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/input)、[input.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/input.test.ts)
+组件暴露 `focusSelf()`、`blurSelf()`、`resetValue(value?)` 方法，以及 `value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing` 状态。`inputMode` 与 `enterKeyHint` 用于向软键盘提供输入提示。
 
 ## API
 
-Input 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。
+### Root Props
+
+传入 `value` 进入受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -89,8 +77,6 @@ Input 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value
     { name: 'describedBy', type: 'string', default: "''" },
   ]}
 />
-
-这些属性属于 Root。
 
 ## 参考
 

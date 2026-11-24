@@ -1,6 +1,6 @@
 ---
 title: 'Checkbox'
-description: 'Draft Brutalist Checkbox presentation over the Base Checkbox protocol.'
+description: 'A square Brutalist checkbox supporting checked, unchecked, and indeterminate states with Form integration.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -9,35 +9,35 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-This draft family contains a Root and an Indicator. Base Checkbox owns controlled and uncontrolled `checked`, the author-controlled `indeterminate` display state, effective disabled behavior, pointer and Space activation, focus, and the accessible `checkbox` role including `aria-checked="mixed"`.
+Brutalist Checkbox supports checked, unchecked, and indeterminate (`mixed`) states in a crisp square Brutalist frame with high-contrast check and dash indicators, accessible via pointer or `Space`.
 
-The Brutalist layer is presentation-only. Checked and mixed use the pinned Neo main/foreground pair, with a 16px, 2px rounded-stroke aria-hidden check or distinguishable mixed dash. The existing 20px Root and 2px internal frame are temporarily retained: the source 16px external-outline recipe needs a governed hit envelope and supported outline-color translation before it can replace the current target without reducing reach. Outline paint alone does not enlarge the hit area. Indicator derives state from the nearest Root and owns no control semantics; mixed still wins. Current browser glyph clipping, hit testing and long-label verification remain pending.
-
-Import Root and Indicator from the already-public `@proto.ui/prototypes-brutalist` package or its `@proto.ui/prototypes-brutalist/checkbox` anatomy subpath. This family intentionally has no `proto-ui add brutalist-checkbox` registry entry and creates no separate publication or release promise.
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-checkbox" initialRuntime="wc" />
 </div>
 
-## Suggested acceptance path
+## Installation
 
-1. Activate the Unchecked, Checked, and Mixed examples with pointer and Space.
-2. Confirm the Disabled example cannot change.
-3. Tab to the named Focus-visible target and confirm the hard ring appears on Root without moving focus to Indicator.
-4. Confirm the Checked and indeterminate example paints the mixed dash rather than the tick.
-5. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-The related catalog entities are `draft`; this page records the current direction rather than a stable Checkbox guarantee.
+- **Package exports**: import `Root` and `Indicator` from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/checkbox`
 
-## Read-only and explicit Form composition
+## Usage
 
-Root accepts `readOnly`. It preserves focus while refusing value proposals; disabled also removes focus participation. Ordinary Root does not automatically register with Field or Form.
+### Parts
 
-Use `fieldCheckbox` from `@proto.ui/prototypes-brutalist/field` inside an explicit `FormField` to connect canonical values, required validation, Label/Description/Error relationships and reset. The [Form choice recipe](../../form/) demonstrates controlled refusal, accepted changes, read-only focus, disabled groups and real owner replacement. `resetValue()` requests the instance creation baseline and never forces a controlled owner to accept it.
+- **Root**: Manages `checked` and `indeterminate` state, `disabled` / `readOnly` policies, keyboard focus, and `checkbox` ARIA semantics (including `aria-checked="mixed"`).
+- **Indicator**: Derives its state from the enclosing `Root` and renders the decorative check or mixed dash icon without taking focus. When both `checked` and `indeterminate` are `true`, the mixed dash takes precedence.
+
+### Read-only and Form composition
+
+- `readOnly={true}` keeps the checkbox focusable while blocking value changes; `disabled={true}` also removes it from the tab order.
+- To integrate with `Form` validation, labels, and reset, use `fieldCheckbox` from `@proto.ui/prototypes-brutalist/field` inside a `FormField` (see the [Form choice recipe](../../form/)).
 
 ## API
 
-Checkbox is workspace source. There is no public `proto-ui add` target. Passing `checked` or `indeterminate` selects controlled mode for that fact.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -49,4 +49,4 @@ Checkbox is workspace source. There is no public `proto-ui add` target. Passing 
   ]}
 />
 
-These props belong to Root. Indicator has no props.
+Pass `checked` or `indeterminate` to control each state independently. `Indicator` declares no props of its own.

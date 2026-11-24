@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Dropdown Menu'
-description: 'Hard-surface Dropdown projection over Base Dropdown'
+description: 'A Brutalist dropdown menu with elevated triggers, grouped actions, shortcut hints, and destructive items.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,23 +9,29 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-Dropdown Menu inherits Base trigger/content/item semantics and applies rounded flat panels and elevated Button-like triggers.
+Brutalist Dropdown Menu pairs Base Dropdown keyboard navigation, focus management, and dismissal with elevated hard-shadow triggers and crisp anchored menu panels.
+
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-dropdown-menu" initialRuntime="wc" />
 </div>
 
-## Grouped action composition (draft)
+## Installation
 
-Group and Label provide a live accessible naming relationship; Separator and Shortcut are real passive parts. Shortcut only displays a hint and does not register a global binding. Decorative parts do not enter the action collection or add a press owner. The demo uses a 160px menu, grouped account/resources actions, a disabled API action and a final Delete action with the destructive Item variant. The real Invite users submenu is a separately pending protocol slice, not a simulated demo box. Checkbox/radio variants and complete native/GPUI, compiler, packed, visual and independent acceptance remain open.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-## Package and generated facade
+- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-dropdown` (generates `Root`, `Trigger`, `Content`, and `Item`)
+- **Package exports**: import all parts—including `Group`, `Label`, `Separator`, and `Shortcut`—from `@proto.ui/prototypes-brutalist/dropdown`
 
-The package entry is `@proto.ui/prototypes-brutalist/dropdown`. The current source CLI registers `brutalist-dropdown` and generates Root, Trigger, Content, and Item for the selected host. Group, Label, Separator, and Shortcut are additional package exports; this CLI target does not generate their facades. Source registration does not establish installed-package or packed-consumer acceptance.
+## Usage
+
+- **Groups and decorations**: `Group` and `Label` automatically wire accessible group naming, `Separator` divides sections, and `Shortcut` displays a keyboard hint (visual only; it does not register global keybindings).
+- **Item variants and trigger indicators**: Set `variant="destructive"` on `Item` for destructive actions or `inset` to align with icon items. Enable `indicator` on `Trigger` to render a chevron indicator icon.
 
 ## API
 
-Passing `open` selects controlled mode.
+Pass `open: boolean` to enable controlled mode.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -44,4 +50,11 @@ Passing `open` selects controlled mode.
   ]}
 />
 
-The first five props belong to Root. `inset` and `variant` belong to Item; `indicator`, `indicatorIcon`, `indicatorSize` and `indicatorStrokeWidth` belong to Trigger. Content accepts the Transition props and defaults `side` to `bottom`, `align` to `center`, `sideOffset` to `4`, `alignOffset` and `collisionPadding` to `0`, `avoidCollisions` to `true` and `excludeAnchorTranslation` to `true`. Item also defaults `disabled`, `value` and `textValue` to `false`, `''` and `''`; `closeOnCommit` has no default and falls back to the Root policy. Group defaults `a11yLabel` to `''`. Label, Separator and Shortcut have no props.
+The first five props belong to `Root`; `inset` and `variant` belong to `Item`; `indicator`, `indicatorIcon`, `indicatorSize`, and `indicatorStrokeWidth` belong to `Trigger`.
+
+### Other parts
+
+- **Content**: Supports Transition props, plus `side` (default `'bottom'`), `align` (default `'center'`), `sideOffset` (default `4`), `alignOffset` (default `0`), `collisionPadding` (default `0`), `avoidCollisions` (default `true`), and `excludeAnchorTranslation` (default `true`)
+- **Item**: `disabled?: boolean` (default `false`), `value?: string` (default `''`), `textValue?: string` (default `''`), `closeOnCommit?: boolean` (inherits Root's `closeOnItemCommit` when omitted)
+- **Group**: `a11yLabel?: string` (default `''`)
+- **Label / Separator / Shortcut**: No props

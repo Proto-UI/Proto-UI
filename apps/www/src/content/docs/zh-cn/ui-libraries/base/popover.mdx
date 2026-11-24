@@ -1,13 +1,15 @@
 ---
 title: 'Popover'
-description: '用于少量交互内容的非模态锚定弹层。'
+description: '用于承载轻量交互内容的非模态锚定弹层。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-用于少量交互内容的非模态锚定弹层。
+相对触发元素定位的非模态浮层，适合放置表单片段、筛选器或轻量操作面板。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-popover"
@@ -16,17 +18,21 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Content 相对 Trigger 定位，提供 side、align、sideOffset、alignOffset、collisionPadding。非模态内容不锁定背景滚动或限制 Tab；外部点击、焦点移出 Trigger 与 Content、Escape 与 Close 请求关闭。在 Trigger 和 Portal 中的内容之间移动焦点仍属于内部操作。焦点移出后关闭会保留外部控件上的焦点，不返回 Trigger。
+## 安装
 
-Root 支持受控 open 和非受控 defaultOpen。禁用命令不激活。传入 open 时，最终状态仍由调用方持有，通过 openChange 接收请求后再提供新值。拒绝 focus.outside 请求时 Content 保持显示且不限制外部焦点，后续交互仍可再次请求关闭。中立的焦点观察无法识别输入设备，因此纯焦点移出请求的 focusReason 为 programmatic。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-组成: Root, Trigger, Content, Title, Description, Close.
+## 用法
 
-当前是草稿源码实现。完整 native/GPUI、编译器、打包消费、视觉及独立验收仍待完成；本页不表示 Finf 已完成。
+由 `Root`、`Trigger`、`Content`、`Title`、`Description` 和 `Close` 组成：
+
+- **定位与非模态行为**：`Content` 相对 `Trigger` 定位，支持 `side`、`align`、`sideOffset`、`alignOffset` 和 `collisionPadding`。作为非模态浮层，它不锁定背景滚动，也不限制页面内的 `Tab` 焦点流。
+- **关闭与焦点管理**：点击外部、焦点移出 `Trigger` 与 `Content`、按 `Escape` 或触发 `Close` 都会请求关闭。在 `Trigger` 与传送后的 `Content` 之间切换焦点视为内部交互；焦点移出外部时关闭会将焦点保留在新的外部控件上，不会强行拉回 `Trigger`。
+- **受控与非受控**：使用 `defaultOpen` 配置非受控初始状态；传入 `open` 进入受控模式，并通过监听 `openChange` 更新外部状态（纯焦点移出请求的 `focusReason` 为 `'programmatic'`）。若受控端拒绝 `focus.outside` 请求，`Content` 会保持显示且不限制外部焦点，后续交互仍可再次请求关闭。禁用状态下不会响应触发。
 
 ## API
 
-Popover 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -37,7 +43,12 @@ Popover 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `ope
   ]}
 />
 
-这些属性属于 Root。Content 接受 Transition 属性，`side` 默认 `bottom`，`align` 默认 `center`，`sideOffset` 默认 `4`，`alignOffset` 默认 `0`，`collisionPadding` 默认 `8`。Trigger、Title、Description 与 Close 没有属性。
+传入 `open` 可受控管理展开状态。
+
+### 其他部件属性
+
+- **Content**：支持 `Transition` 属性，并提供 `side`（默认 `'bottom'`）、`align`（默认 `'center'`）、`sideOffset`（默认 `4`）、`alignOffset`（默认 `0`）、`collisionPadding`（默认 `8`）。
+- **Trigger**、**Title**、**Description**、**Close**：无额外属性。
 
 ## 参考
 

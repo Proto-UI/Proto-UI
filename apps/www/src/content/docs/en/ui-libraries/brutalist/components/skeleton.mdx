@@ -1,5 +1,6 @@
 ---
 title: Skeleton
+description: 'A static 5px rounded black-bordered placeholder surface in the Brutalist family.'
 sidebar:
   order: 8
 ---
@@ -9,20 +10,27 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
-> Availability: `@proto.ui/prototypes-brutalist@0.2.0` is published under npm `latest` as part of [v0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0). Lifecycle: [P-BRUTALIST-SKELETON](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-SKELETON.yaml) remains `draft`; this page describes the released and tested 0.2 surface, not an active protocol guarantee.
 
-Brutalist Skeleton is a direct styled-only visual placeholder: a static 5px rounded neutral surface with a black border and no shadow. It is passive, contentless, excluded from the accessibility tree, and owns no repeating shimmer or pulse.
+Skeleton renders a static, 5px rounded neutral placeholder surface with a black border and no shadow or built-in shimmer, providing layout shape feedback while content loads.
 
-Use it inside a parent async/loading region when an unresolved layout benefits from visual shape feedback. The parent owns loading and `aria-busy` state, announcements, placeholder-to-content replacement timing, and focus continuity. Skeleton does not create those semantics; any added motion must also respect reduced-motion preferences.
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-skeleton" initialRuntime="wc" />
 </div>
 
+## Installation
+
+Included in `@proto.ui/prototypes-brutalist@0.2.0`. Add it via the CLI target `brutalist-skeleton`, or import directly from `@proto.ui/prototypes-brutalist/skeleton`.
+
+## Usage
+
+- Place Skeleton inside a parent loading region and size it via layout styles to match the expected content shape.
+- Skeleton is excluded from the accessibility tree; let the parent container manage `aria-busy`, status announcements, placeholder replacement timing, and focus continuity.
+- If you add custom motion, respect `prefers-reduced-motion`.
+
 ## API
 
-Skeleton is workspace source. For this workspace version, the CLI target is `brutalist-skeleton`. Use matching CLI and package versions; check the chosen release's availability before installing. Root has no props.
+`Root` renders a single styled placeholder surface and declares no props:
 
 <ApiPropsTable headers={{ name: 'Prop', type: 'Type', default: 'Default' }} rows={[]} />
-
-Skeleton renders a single styled surface and declares no props.

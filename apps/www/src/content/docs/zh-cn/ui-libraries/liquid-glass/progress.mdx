@@ -1,9 +1,13 @@
 ---
-title: liquid-glass Progress
-description: 基于 Base 共享语义的有界数值展示。
+title: 'Progress'
+description: '展示确定百分比或不确定任务状态的 Liquid Glass 进度条组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Liquid Glass Progress 用于展示任务的完成进度，支持确定数值范围以及不确定状态（`indeterminate`）。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-progress"
@@ -12,10 +16,22 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-当前为 Draft 功能实现。Root 拥有有界有限数值；Label 提供名称，Track 容纳 Indicator，Value 显示 valueText 或规范数值。四个视觉家族只投影样式。
+## 安装
 
-Props：value、min（0）、max（100）、ariaLabel、valueText。数值限制在合法范围内；上下界相等时比例为零。省略 value 或设置 indeterminate=true 表示进度未知，不声称当前进度值。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `progress` 子路径导入 `progressRoot`、`progressLabel`、`progressTrack`、`progressIndicator` 与 `progressValue`。
 
-Root 及部件暴露 value、percentage、indeterminate、status。被动显示不引入键盘停靠点，不伪造输入。更新 Props 同步所有部件。
+## 用法
 
-包入口统一注册后，可从 progress 子路径导入 progressRoot、progressLabel、progressTrack、progressIndicator、progressValue。现有源码测试仅为阶段性证据；完整 Adapter、Compiler、GPUI、原生绘制、辅助技术、包消费及独立验收尚未完成，不据此勾选 Finf。
+- **部件组成**：`Root` 管理进度范围，`Label` 提供名称，`Track` 容纳 `Indicator`，`Value` 显示 `valueText` 或规范数值。
+- **确定与不确定状态**：数值自动限制在 `[min, max]` 之间（上下界相等时比例为 `0`）。省略 `value` 或设置 `indeterminate={true}` 进入未知进度模式，并自动对辅助技术省略当前进度值。
+- Progress 为被动展示组件，不引入键盘停靠点；更新属性时所有部件同步刷新。
+
+## API
+
+| 部件 | 属性 / 暴露状态 | 默认值与说明 |
+| --- | --- | --- |
+| Root | `value` | 当前进度数值；省略时进入不确定状态 |
+| Root | `min` / `max` | `0` / `100` |
+| Root | `indeterminate` | `false`；设为 `true` 时表示进度未知 |
+| Root | `ariaLabel` / `valueText` | 可访问名称与格式化显示文本 |
+| Root / 部件（暴露状态） | `value` / `percentage` / `indeterminate` / `status` | 归一化进度值、百分比与状态 |

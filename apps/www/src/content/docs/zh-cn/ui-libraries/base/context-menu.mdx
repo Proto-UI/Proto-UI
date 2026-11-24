@@ -1,13 +1,15 @@
 ---
 title: 'ContextMenu'
-description: '支持键盘访问的上下文命令菜单。'
+description: '支持右键、触摸长按与键盘快捷键触发的上下文菜单组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-支持键盘访问的上下文命令菜单。
+Base ContextMenu 提供由鼠标右键、触摸/手写笔长按或键盘快捷键（`ContextMenu` / `Shift+F10`）唤起的上下文命令菜单，并内置键盘导航、首字跳转与焦点恢复。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-context-menu"
@@ -16,23 +18,35 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root 提供 open/defaultOpen、disabled、closeOnItemCommit。Trigger 在 context.menu 或 ContextMenu/Shift+F10 时打开，并阻止已处理请求的原生菜单；普通左键不打开。Content 使用真实 Overlay/Focus/Transition 导航、文字跳转与受控关闭。右键与已接受的触摸/笔长按使用输入位置锚点，ContextMenu/Shift+F10 使用触发区域锚点。共享宿主私有保存几何，只提供不透明的输入来源关联；DOM 坐标不进入可移植 props、state 或 JSON context。
+## 安装
 
-组成: Root, Trigger, Content, Item.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码。嵌套子菜单、完整 native/GPUI/编译器证据、消费/视觉验收与独立生命周期准入仍未完成。
+## 用法
 
-触摸/笔需要在宿主移动容差内持续按住 600 ms。移动、释放、取消、禁用与卸载均取消待完成长按。已接受的键盘/长按会抑制其重复原生菜单事件，长按还抑制其兼容点击；普通点击与滚动仍由宿主处理。默认 bottom/start 放置且无额外间距。
+### 组合结构
 
-受控 open 仍是请求：启用的 Root 接受请求传递时才阻止原生菜单，调用方可以继续保留 open=false。之后调用方打开时使用最近仍有效的输入锚点；程序方法 openContextMenu 使用触发器后备锚点。Escape 与选择完成按现有焦点策略恢复触发器。共享源码运行时覆盖不代表 compiler/native 准入或真实设备长按验收。
+组件由 `Root`、`Trigger`、`Content` 和 `Item` 组成：
+
+- `Root` 管理开关状态（`open` / `defaultOpen`）、禁用状态与菜单项提交后的关闭策略（`closeOnItemCommit`）。
+- `Trigger` 监听右键菜单、`ContextMenu` / `Shift+F10` 及触摸/手写笔长按（在移动容差内持续按住 600 ms），并自动阻止对应原生上下文菜单；普通左键点击与滚动保持默认行为。
+- `Content` 提供浮层定位、焦点管理、文字跳转和过渡动画，默认从 `bottom` / `start` 展开。右键和长按锚定在输入点，键盘快捷键或程序调用 `openContextMenu()` 锚定在触发区域。
+
+### 受控模式与焦点恢复
+
+- 传入 `open` 进入受控模式：触发请求时会阻止原生菜单并通知调用方，最终显示与否由传入的 `open` 决定。
+- 按 `Escape` 或完成菜单项选择后，焦点会自动回到原触发器。
 
 ## API
 
-Context Menu 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+### Root Props
+
+传入 `open` 进入受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
@@ -41,7 +55,11 @@ Context Menu 是工作区源码，没有公开的 `proto-ui add` 目标。传入
   ]}
 />
 
-这些属性属于 Root。Trigger 没有属性。Content 接受 Transition 属性，`side` 默认 `bottom`，`align` 默认 `start`，`sideOffset` 与 `alignOffset` 默认 `0`，`avoidCollisions` 默认 `true`，`collisionPadding` 默认 `0`，`excludeAnchorTranslation` 默认 `false`。Item 的 `disabled`、`value` 与 `textValue` 默认 `false`、`''` 与 `''`；`closeOnCommit` 没有默认值，回退到 Root 策略。
+### 其他组件属性
+
+- **Trigger**：无额外属性。
+- **Content**：支持 Transition 属性；`side` 默认 `'bottom'`，`align` 默认 `'start'`，`sideOffset` 与 `alignOffset` 默认 `0`，`avoidCollisions` 默认 `true`，`collisionPadding` 默认 `0`，`excludeAnchorTranslation` 默认 `false`。
+- **Item**：`disabled` 默认 `false`，`value` 与 `textValue` 默认 `''`；可选 `closeOnCommit`，未设置时回退到 `Root` 的 `closeOnItemCommit`。
 
 ## 参考
 

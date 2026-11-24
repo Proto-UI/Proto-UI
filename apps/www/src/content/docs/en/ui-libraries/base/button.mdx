@@ -1,6 +1,6 @@
 ---
 title: 'Button'
-description: 'Base Button command semantics, complete host usage, delivery and current boundaries.'
+description: 'A focusable unstyled command button with activation, disabled gating, focus management, and cross-framework usage.'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -10,11 +10,9 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 import { baseButtonFiles } from '@/content/docs/demo_components/button/baseButtonCode';
 
-Base Button is a focusable command control for one discrete action. It owns activation, disabled gating, focus, transient interaction facts and the outward `click` signal. The application supplies its visual presentation.
+Base Button is a focusable command control for triggering a single discrete action. It handles activation, disabled gating, focus, and press states while leaving visual presentation up to your application.
 
 ## Preview
-
-The same composition contains “Run action” and “Disabled” in each host. The website preview uses workspace source; Vue 2 is the Vue 2.6 source profile, not part of the stable 0.2.0 install below.
 
 <PrototypePreviewer
   demoId="demo-base-button"
@@ -28,9 +26,9 @@ The same composition contains “Run action” and “Disabled” in each host. 
   ]}
 />
 
-## Install
+## Installation
 
-First [initialize an existing application](/en/start-here/quick-start/). For the published 0.2.0 Web Component baseline:
+First [initialize your project](/en/start-here/quick-start/), then add Base Button using the 0.2.0 CLI:
 
 <InstallCommandCard
   commands={{
@@ -40,32 +38,27 @@ First [initialize an existing application](/en/start-here/quick-start/). For the
   manager="npm"
 />
 
-Replace `wc` with `react` or `vue` for the stable React or Vue 3 facade. The CLI installs `@proto.ui/prototypes-base` and the corresponding `@proto.ui/adapter-web-component`, `@proto.ui/adapter-react` or `@proto.ui/adapter-vue` at its own exact version. It generates the local `BaseButton` export or `proto-ui-base-button` custom element.
-
-The Vue 2 example requires the matching workspace 0.3 CLI/Adapter source and Vue `>=2.6.0 <2.7`. The published stable CLI does not accept `vue2`; do not substitute `@latest` and assume that it installs the source preview. A workspace manifest version is not proof of registry publication.
+Replace `wc` with `react` or `vue` for React or Vue 3 projects. The CLI installs matching versions of `@proto.ui/prototypes-base` and the host adapter, generating a local `BaseButton` export or `proto-ui-base-button` custom element. Vue 2 (`vue2`) support is currently available from workspace source only.
 
 ## Usage
 
-Start with the matching existing bundler application. Copy the host's files below and keep the application’s framework mount entry. For Web Components, add the HTML to the existing document and load `src/main.ts` once. The registration import uses the CLI-generated tag, rather than the website's private `wc-base-button` preview tag.
-
-Both controls match the preview composition. The small stylesheet is application-owned presentation and requires no Tailwind setup. If the application already imports `proto-ui-style.css`, keep that import in one place.
+Copy the files for your host below into an existing bundled app. For Web Components, load `src/main.ts` once and use the CLI-generated custom element tag.
 
 <CodeExample files={baseButtonFiles} initialHost="wc" label="Base Button complete host usage" />
 
-Tab to “Run action” and activate it with Enter, Space or a pointer. “Disabled” must suppress activation and active focus requests; fading it with CSS alone would not disable it. Accessible names come from the authored text.
+### Interaction and events
 
-## Protocol and events
+- Focus the button with `Tab` and activate it with `Enter`, `Space`, or a pointer. `Space` participates in the press lifecycle and prevents default page scrolling.
+- Successful activation emits the `click` signal, which each adapter exposes idiomatically (`onClick` in React, `@click` in Vue, and a custom event in Web Components).
+- Setting `disabled` blocks activation, clears transient press/hover states, and rejects focus requests. Always drive the `disabled` prop rather than relying on CSS opacity alone.
+- Exposed state includes `disabled`, `hovered`, `focused`, `focusVisible`, `pressed`, and the `focusSelf()` method. The accessible name comes from the button's text content.
+- Use a native `<a>` with a real `href` for navigation. For styled variants, see [Shadcn Button](/en/ui-libraries/shadcn/button/) and [Brutalist Button](/en/ui-libraries/brutalist/components/button/).
 
-`P-BASE-BUTTON` catalogs two authoring entries for the same protocol:
+### Authoring entries
 
-- the direct `base-button` Prototype, exported as `button` from `@proto.ui/prototypes-base/button`;
-- the authored `asButton()` hook for a derived Prototype that needs Button semantics.
+`@proto.ui/prototypes-base/button` exports both the standalone `button` prototype and the `asButton()` hook for derived components.
 
-The only current Base prop is `disabled`. Exposed facts are `disabled`, `hovered`, `focused`, `focusVisible` and held-down `pressed`; `focusSelf()` requests focus. Successful activation emits the `click` outward signal. Framework facades translate that signal to their listener syntax (`onClick` in React, `@click` in Vue); it is not an `onClick` Prototype prop. The Web Component facade projects the signal as a custom event, separately from native DOM input.
-
-Space participates in the press lifecycle and prevents its scrolling default. A disabled Button clears transient interaction state and emits no activation signal. Form submission, `type`, `name`, loading state and visual variants are outside the current Base guarantee. Application-owned busy behavior must drive the actual `disabled` input and expose meaningful progress/status; a spinner or opacity change alone is insufficient.
-
-Use a native anchor with a real `href` for navigation. Do not nest it inside Button or replace its navigation with a click handler. Styled projections are documented separately: [Shadcn Button](/en/ui-libraries/shadcn/button/) and [Brutalist Button](/en/ui-libraries/brutalist/components/button/).
+Workspace source also includes an opt-in `asFocusRetainedVisibility` hook (with `FocusRetainedVisibilityProps`). Composed with `asButton()`, it takes `requestedVisible?: boolean` (default `false`) and keeps the control visible while focused even after `requestedVisible` turns `false`—useful for floating actions such as "Jump to latest".
 
 ## API
 
@@ -74,22 +67,6 @@ Use a native anchor with a real `href` for navigation. Do not nest it inside But
   rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
 />
 
-### Opt-in focus-retained visibility
-
-Current draft source exports `asFocusRetainedVisibility` and `FocusRetainedVisibilityProps` from `@proto.ui/prototypes-base/button`. A derived action can compose this hook with `asButton()` or the actual styled Button prototype. Its `requestedVisible?: boolean` input defaults to `false`; it does not add a prop to ordinary Button unless the composition opts in.
-
-Keep the composed control mounted and pass the application's visibility request. When the request becomes false while the control owns focus, it remains visible until focus leaves. If the request is true, blur does not hide it. The hook shares `asFocusable()` with the Button and uses Rule feedback to hide only when both facts are false. It does not request focus, override disabled/navigation policy, or replace the command callback. A “return to latest” action can therefore finish without removing the keyboard user's focused control. The parent layout wrapper may remain mounted; it must not independently hide or unmount the action from the request alone.
-
-This opt-in source capability remains under the draft `P-BASE-BUTTON` boundary. It is not an API claim for the older stable 0.2.0 package or evidence that every host's focus/visibility journey has passed.
-
-## Delivery, lifecycle and evidence
-
-The stable 0.2.0 package exports `@proto.ui/prototypes-base/button` and its CLI exposes `base-button`. The website's four-host source preview and the older stable package are separate delivery surfaces. `P-BASE-BUTTON` remains **draft**; publication does not freeze its protocol or prove current browser/assistive-technology acceptance.
-
-- [Button source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/button)
-- [Protocol evidence: T-BASE-BUTTON-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-BASE-BUTTON-0001.yaml)
-- [Existing Button tests](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/as-button.test.ts)
-- [Historical documentation evidence](/en/build/prototypes/documentation-coverage/)
-- [Full documentation acceptance conditions: #1042](https://github.com/Proto-UI/Proto-UI/issues/1042)
+## References
 
 <SpecEntityLinks directory="spec/prototypes" files={['P-BASE-BUTTON.yaml']} />

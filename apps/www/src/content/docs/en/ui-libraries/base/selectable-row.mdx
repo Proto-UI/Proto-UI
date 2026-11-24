@@ -1,15 +1,17 @@
 ---
 title: 'Selectable Row'
-description: 'A controlled row that separates selection proposals from activation.'
+description: 'A controlled selectable row that separates selection proposals from activation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Base Selectable Row owns one row's press, keyboard, focus and accessibility behavior. Its owner supplies an opaque `itemKey`, accepts selection proposals and performs activation effects. The row does not interpret a file path or navigate to a destination.
+A controlled row primitive for lists, file browsers, and tables that handles press, keyboard, focus, and `row` accessibility semantics while keeping selection and activation distinct.
 
-This prototype is **draft**. The RuntimeBox below uses the public `selectableRow` prototype; its owner accepts selection and displays activation requests. Adapter switching exercises the same authoring source on the Web host. The preview does not establish Compiler, native-host or assistive-technology conformance.
+## Preview
+
+Press `Tab` to focus an enabled row and `Space` to propose selection. Press `Enter` (or double-click on Web) on the **Assets** row to trigger an activation request.
 
 <PrototypePreviewer
   demoId="demo-base-selectable-row"
@@ -18,33 +20,29 @@ This prototype is **draft**. The RuntimeBox below uses the public `selectableRow
   codePanel={false}
 />
 
-Use Tab to reach an enabled row, then Space to propose selection. Enter on **Assets** requests activation. On Web, double-clicking that row requests the same activation. The status text records the owner's accepted selection or requested action; this example has no filesystem route.
+## Installation
 
-## Accepted selection and separate activation
-
-`selected` is controlled owner state. Pointer press and Space emit `selectionChange` with `{ value: itemKey }`; they do not immediately change the row's accepted `selected` state. The consumer decides whether to accept the proposal and supplies the resulting value again.
-
-Enter emits `activate` with the same payload only when `activatable` is true. It does not also propose selection. The `host:dblclick` path is an explicit Web host extension: the row has no portable double-press timer and makes no double-activation guarantee for hosts without that extension.
-
-Enabled focused rows prevent Space's scrolling default. Activatable focused rows also prevent Enter's default. Repeated keyboard press commits do not repeat selection or activation.
-
-## Row and collection responsibilities
-
-The row projects the `row` accessibility role and the accepted `selected` and `disabled` states. Its name comes from its content, and its default slot preserves authored children. `disabled` suppresses selection, activation and `focusSelf()`, and removes normal focus participation. Disabling a row does not discard its accepted selection.
-
-The surrounding collection supplies appropriate row and cell composition. Arrow movement, roving tab order, range selection and multi-selection belong to that collection owner. The preview demonstrates independently focusable rows with owner-accepted selection; it does not implement collection keyboard navigation.
-
-Base provides no visual design language. The preview's layout, selection color and status text are website composition.
-
-## Public authoring entries
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
 ```ts
 import { selectableRow, asSelectableRow } from '@proto.ui/prototypes-base/selectable-row';
 ```
 
-The source subpath also exports the default prototype, `SelectableRowProps`, `SelectableRowExposes` and `SelectableRowAsHookContract`. The package root exports the named entries. The prototype and hook share the same setup. Consumers handle semantic events without duplicating the row's keyboard or selection implementation in host listeners.
+This subpath also exports the default prototype, `SelectableRowProps`, `SelectableRowExposes`, and `SelectableRowAsHookContract`, while the package root re-exports the named entries. The prototype and hook share the same setup.
 
-Selectable Row is workspace source and has no public `proto-ui add` target.
+## Usage
+
+### Controlled selection and separate activation
+
+- `selected` is controlled by the caller: pointer press and `Space` emit `selectionChange` with `{ value: itemKey }` without mutating `selected` locally.
+- When `activatable` is `true`, `Enter` emits `activate` with `{ value: itemKey }` without proposing selection. On Web, double-clicking (`host:dblclick`) also emits `activate`.
+- Enabled focused rows prevent default page scrolling on `Space`; activatable focused rows also prevent default behavior on `Enter`. Auto-repeated keydown events do not re-emit selection or activation.
+
+### Focus, accessibility, and collection coordination
+
+- Renders `role="row"` with the current `selected` and `disabled` states while preserving your children in the default slot.
+- `disabled` suppresses selection, activation, and `focusSelf()` and removes the row from normal focus order, while preserving any externally selected state.
+- Arrow-key navigation, roving tab order, range selection, and multi-select belong to the enclosing collection.
 
 ## API
 
@@ -58,11 +56,10 @@ Selectable Row is workspace source and has no public `proto-ui add` target.
   ]}
 />
 
-Exposed states are `selected`, `disabled`, `focused` and `focusVisible`. The public method is `focusSelf()`. Both `selectionChange` and `activate` carry `{ value: string }`, without native elements or application objects.
+- **Exposed states**: `selected`, `disabled`, `focused`, `focusVisible`.
+- **Exposed methods**: `focusSelf()`.
+- **Events**: `selectionChange`, `activate`, each carrying `{ value: string }`.
 
 ## References
-
-- [Implementation and public source exports](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/selectable-row)
-- [Event contract](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-EVENT-TYPE-0002.yaml)
 
 <SpecEntityLinks directory="spec/prototypes" files={['P-BASE-SELECTABLE-ROW.yaml']} />

@@ -1,19 +1,15 @@
 ---
-title: 'Message-Scroller (WIP)'
-description: 'message-scroller functional composition and current verification limits.'
+title: 'Message Scroller'
+description: 'A scrollable feed container with end-follow behavior and a jump-to-latest control.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Message Scroller is designed for chat feeds and live logs, automatically following newly appended messages when the reader is at the bottom and letting them jump back to the latest entry on demand. The examples on this page use the **Shadcn Rhea** style preset.
 
-Message Scroller composes the existing Scroll Surface end-follow policy. Appends follow only while the reader is at the end; a reader who leaves the end can explicitly resume with Jump to latest. newContentCount is supplied by the application, never inferred as unread truth. Jumping does not request focus.
-
-This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
-
-Set a11yLabel on Root to name the scrollable region; the default is Messages.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-message-scroller"
@@ -21,9 +17,26 @@ Set a11yLabel on Root to name the scrollable region; the default is Messages.
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+Message Scroller consists of `Root`, `Viewport`, and `Jump`:
+
+- Newly appended items scroll into view automatically while the reader stays at the end of the list.
+- When the reader scrolls up into history, auto-follow pauses; clicking `Jump` explicitly resumes at the latest item without stealing focus.
+- Pass `newContentCount` from your application state to display new-item indicators rather than inferring unread state automatically.
+- Use `a11yLabel` on `Root` to name the scrollable region (defaults to `Messages`).
+
+### Stable-key position and selection restoration
+
+To restore reading position by stable key or preserve text selection across updates, compose the public Base `asMessageScrollerReading` hook after the Shadcn `Viewport`. The hook coordinates anchor capture, exact-key or predecessor restoration, and selection restoration on the same scroll surface, while your application keeps control of content IDs, DOM/Range work, and storage. See [Base Message Scroller](/en/ui-libraries/base/message-scroller/) for details.
+
 ## API
 
-Message Scroller is workspace source. There is no public `proto-ui add` target. Viewport has no props. Jump accepts the Button props.
+The following props belong to `Root` (`Viewport` adds no props; `Jump` accepts Button props):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -32,10 +45,6 @@ Message Scroller is workspace source. There is no public `proto-ui add` target. 
     { name: 'a11yLabel', type: 'string', default: 'Messages' },
   ]}
 />
-
-These props belong to Root.
-
-For stable-key history and selection restoration, an authored composition can call the public Base `asMessageScrollerReading` Hook after this Shadcn viewport. The Hook owns capture, exact-key/predecessor restoration, initial-hint retirement and selection eligibility over the same Scroll Surface; the Shadcn layer adds no competing policy. It disables generic `preserve-visible`, consumes finite host measurements and issues shared scroll requests. Applications retain opaque content identities, DOM/Range work and storage. See the [Base Message Scroller reading API](/en/ui-libraries/base/message-scroller/#stable-key-reading-composition) for its policy props, methods and pending acceptance boundaries.
 
 ## References
 
