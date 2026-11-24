@@ -40,6 +40,14 @@ describe('Contents wheel observer / native event controls', () => {
         cancel,
       };
       let failure: unknown;
+      const completionErrors: unknown[] = [];
+      const complete = async (action: () => Promise<unknown>) => {
+        try {
+          await action();
+        } catch (error) {
+          completionErrors.push(error);
+        }
+      };
       try {
         const page = await context.newPage();
         await page.setContent(`<!doctype html><html><body style="margin:0">
@@ -120,19 +128,42 @@ describe('Contents wheel observer / native event controls', () => {
             sameSurface: true,
             ready: false,
           });
+        } catch (error) {
+          failure = error;
+          receipt.error = String(error);
         } finally {
           // Retain the final native observations even if input delivery or an
-          // assertion failed before the normal receipt assignment above.
-          receipt.final = await read();
-          receipt.dispatch = await dispatch.jsonValue();
-          await probe.evaluate((observer) => observer.dispose());
-          await probe.dispose();
-          await dispatch.dispose();
+          // assertion failed. A failed observation or disposal is supplemental
+          // and must neither replace that first failure nor skip later cleanup.
+          await complete(async () => (receipt.final = await read()));
+          await complete(async () => (receipt.dispatch = await dispatch.jsonValue()));
+          if (failure)
+            await complete(async () => {
+              await mkdir(directory, { recursive: true });
+              await page.screenshot({
+                path: path.join(directory, `cancellation-${cancel}-failure.png`),
+              });
+            });
+          await complete(() => probe.evaluate((observer) => observer.dispose()));
+          await complete(() => probe.dispose());
+          await complete(() => dispatch.dispose());
         }
       } catch (error) {
-        failure = error;
-        receipt.error = String(error);
+        if (failure) completionErrors.push(error);
+        else {
+          failure = error;
+          receipt.error = String(error);
+        }
       } finally {
+        await complete(() => context.close());
+        receipt.completionErrors = completionErrors.map(String);
+        if (!failure && completionErrors.length) {
+          failure = new AggregateError(
+            completionErrors,
+            'Contents wheel control completion failed'
+          );
+          receipt.error = String(failure);
+        }
         try {
           await mkdir(directory, { recursive: true });
           await writeFile(
@@ -141,12 +172,6 @@ describe('Contents wheel observer / native event controls', () => {
           );
         } catch (error) {
           if (failure) console.error('[Contents wheel control evidence]', error);
-          else failure = error;
-        }
-        try {
-          await context.close();
-        } catch (error) {
-          if (failure) console.error('[Contents wheel control cleanup]', error);
           else failure = error;
         }
       }
