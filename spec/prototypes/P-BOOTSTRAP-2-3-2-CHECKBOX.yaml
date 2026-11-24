@@ -6,7 +6,7 @@ since: 0.3.0-alpha.1
 lifecycleRationale: Draft all-Base coverage increment. Source/unit availability is not release, browser paint, Compiler or native conformance admission.
 summary: A genuine asCheckboxRoot projection; Base retains checkbox semantics and this part contributes only appearance.
 statement:
-  en: The authored Prototype invokes asCheckboxRoot once. A custom 20px square root with 4px corners, field inset shadow, blue checked/mixed paint and a stronger focus-visible ring. The native upstream checkbox is a visual reference, not an exact custom-parts skin.
+  en: The authored Prototype invokes asCheckboxRoot once. A custom 20px square root with 4px corners, a neutral raised face, visibly pressed checked/mixed face with dark ink and a stronger focus-visible ring. The native upstream checkbox is a visual reference, not an exact custom-parts skin.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-CHECKBOX-BASE
     text:
@@ -16,7 +16,7 @@ criteria:
       en: The root owns checked and indeterminate values, checkedChange/indeterminateChange, controlled or uncontrolled ownership, disabled suppression and focus. Indicators share its inherited anatomy domain.
   - id: P-BOOTSTRAP-2-3-2-CHECKBOX-VISUAL
     text:
-      en: A custom 20px square root with 4px corners, field inset shadow, blue checked/mixed paint and a stronger focus-visible ring. The native upstream checkbox is a visual reference, not an exact custom-parts skin.
+      en: A custom 20px square root with 4px corners, a neutral raised face, visibly pressed checked/mixed face with dark ink and a stronger focus-visible ring. The native upstream checkbox is a visual reference, not an exact custom-parts skin.
   - id: P-BOOTSTRAP-2-3-2-CHECKBOX-CLOSURE
     text:
       en: All component appearance is declared by Prototype feedback and Rules and closes through the source-derived finite physical token renderer. No website-only component CSS may supply missing default intent.

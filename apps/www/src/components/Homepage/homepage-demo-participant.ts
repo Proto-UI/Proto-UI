@@ -19,6 +19,32 @@ export function homepageDemoParticipant(
   if (!root) return null;
   const mount = root.querySelector<HTMLElement>('[data-home-demo-host]');
   if (!mount) throw new Error('[HomepageRuntime] live example mount is missing.');
+  const toggle = root.querySelector<HTMLButtonElement>('[data-home-gallery-layout-toggle]');
+  const narrow = root.ownerDocument.defaultView?.matchMedia?.('(width < 768px)');
+  let expanded = false;
+  const syncLayout = () => {
+    const stages = mount.querySelectorAll<HTMLElement>('[data-home-gallery-stage]');
+    // Resizing a desktop window must not turn a currently focused live control inert.
+    if (narrow?.matches && [...stages].some((stage) => stage.matches(':focus-within'))) {
+      expanded = true;
+    }
+    const compact = Boolean(narrow?.matches && !expanded && toggle);
+    if (compact) root.dataset.homeGalleryCompact = 'true';
+    else delete root.dataset.homeGalleryCompact;
+    for (const stage of stages) stage.inert = compact;
+    if (!toggle) return;
+    toggle.hidden = !narrow?.matches;
+    toggle.setAttribute('aria-expanded', String(!compact));
+    toggle.textContent =
+      (compact ? toggle.dataset.labelExpand : toggle.dataset.labelCollapse) ?? '';
+  };
+  const toggleLayout = () => {
+    expanded = !expanded;
+    syncLayout();
+  };
+  toggle?.addEventListener('click', toggleLayout);
+  narrow?.addEventListener('change', syncLayout);
+  syncLayout();
   const ownerId = root.dataset.projectionOwner || root.id || 'homepage-live-example';
   mount.dataset.projectionOwner = ownerId;
   const status = root.querySelector<HTMLElement>('[data-home-demo-status]');
@@ -47,7 +73,15 @@ export function homepageDemoParticipant(
     root,
     mount,
     ownerId,
-    destroy: () => mask?.destroy(),
+    destroy: () => {
+      toggle?.removeEventListener('click', toggleLayout);
+      narrow?.removeEventListener('change', syncLayout);
+      if (toggle) toggle.hidden = true;
+      delete root.dataset.homeGalleryCompact;
+      for (const stage of mount.querySelectorAll<HTMLElement>('[data-home-gallery-stage]'))
+        stage.inert = false;
+      return mask?.destroy();
+    },
     // The existing materializer requires a known lane member even when an explicit
     // app recipe supplies all content. No component picker is rendered for this task.
     initialFamily: 'shadcn' as ProjectionFamilyId,
@@ -85,6 +119,7 @@ export function homepageDemoParticipant(
           root.dataset.projectionFamily = commit.selection.projectionFamilyId;
           root.dataset.projectionComponent = HOMEPAGE_SHOWCASE_ID;
           root.dataset.projectionGeneration = String(commit.generation);
+          syncLayout();
           setStatus('ready', commit.selection.runtimeId as RuntimeId);
         },
         rollback() {
@@ -95,6 +130,7 @@ export function homepageDemoParticipant(
           if (status) status.textContent = oldStatus;
           if (oldBusy === null) mount.removeAttribute('aria-busy');
           else mount.setAttribute('aria-busy', oldBusy);
+          syncLayout();
         },
       };
     },

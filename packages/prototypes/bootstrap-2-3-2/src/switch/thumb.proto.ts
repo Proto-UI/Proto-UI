@@ -21,7 +21,7 @@ export default definePrototype<SwitchThumbProps, SwitchThumbExposes>({
     // 18px.
     def.feedback.style.use(
       tw(
-        'absolute left-[0.125rem] top-1/2 block size-5 -translate-y-1/2 shrink-0 bg-secondary border border-border pointer-events-none rounded-[4px] shadow-[inset_0_1px_0_rgb(255_255_255/20%),0_1px_2px_rgb(0_0_0/5%)] transition-transform duration-150 ease-in-out translate-x-[calc((100%_-_2px)_*_var(--pui-percentage)/100)]'
+        'absolute left-[0.125rem] top-1/2 block size-5 -translate-y-1/2 shrink-0 bg-[#f5f5f5_linear-gradient(#fff,#e6e6e6)_0_0_repeat-x] border border-[#b3b3b3] pointer-events-none rounded-[4px] shadow-[inset_0_1px_0_rgb(255_255_255/20%),0_1px_2px_rgb(0_0_0/5%)] transition-transform duration-150 ease-in-out translate-x-[calc((100%_-_2px)_*_var(--pui-percentage)/100)]'
       )
     );
     // An explicit RTL direction mirrors the whole thumb: it rests against the

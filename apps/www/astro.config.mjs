@@ -1642,7 +1642,7 @@ export default defineConfig({
                 {
                   label: 'Dropdown Menu',
                   badge: earlyDraftBadge,
-                  translations: { en: 'Dropdown Menu', 'zh-CN': '下拉菜单' },
+                  translations: { en: 'Dropdown Menu', 'zh-CN': 'Dropdown Menu' },
                   slug: 'ui-libraries/bootstrap-2-3-2/dropdown-menu',
                 },
                 {
@@ -1864,7 +1864,7 @@ export default defineConfig({
                 {
                   label: 'Dropdown Menu',
                   badge: earlyDraftBadge,
-                  translations: { en: 'Dropdown Menu', 'zh-CN': '下拉菜单' },
+                  translations: { en: 'Dropdown Menu', 'zh-CN': 'Dropdown Menu' },
                   slug: 'ui-libraries/liquid-glass/dropdown-menu',
                 },
                 {

@@ -24,7 +24,11 @@ const CONTROL_OPTION_LABELS = {
     vue: 'Vue',
     vue2: 'Vue 2',
   },
-  family: { shadcn: 'Shadcn', brutalist: 'Brutalist' },
+  family: {
+    shadcn: 'Shadcn',
+    brutalist: 'Brutalist',
+    'bootstrap-2-3-2': 'Bootstrap 2.3.2 · WIP',
+  },
 } as const;
 
 async function waitForHomeRuntime(page: Page, runtime: string): Promise<void> {
@@ -99,6 +103,72 @@ afterAll(async () => {
 }, 60_000);
 
 describe.sequential('Homepage Runtime demobox browser smoke', () => {
+  it('keeps Bootstrap editor tab labels from selecting without blocking the panel or editor', async () => {
+    // C-CONTENT-SELECTION-AFFORDANCE-0001: suppress only the action subject.
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    const page = await context.newPage();
+    const text = '可选择的预览内容';
+    const dragText = async (locator: Locator) => {
+      await locator.scrollIntoViewIfNeeded();
+      const box = await locator.evaluate((element) => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const { left, right, top, height } = range.getBoundingClientRect();
+        return { left, right, y: top + height / 2 };
+      });
+      expect(box.right - box.left).toBeGreaterThan(4);
+      await page.mouse.click(box.left + 1, box.y);
+      await page.mouse.move(box.left + 1, box.y);
+      await page.mouse.down();
+      await page.mouse.move(box.right - 1, box.y, { steps: 12 });
+      await page.mouse.up();
+      return page.evaluate(() => window.getSelection()?.toString() ?? '');
+    };
+    try {
+      await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
+      const home = page.locator(HOME_SELECTOR);
+      await chooseRuntime(page, home, 'wc');
+      await chooseProjectionControl(page, home, 'family', 'bootstrap-2-3-2');
+      const editorCard = home.locator('[data-gallery-demo="editor"]');
+      const edit = editorCard.getByRole('tab', { name: '编辑', exact: true });
+      const preview = editorCard.getByRole('tab', { name: '预览', exact: true });
+      await expect
+        .poll(() =>
+          editorCard.locator('[data-projection-prototype="bootstrap-2-3-2-tabs-trigger"]').count()
+        )
+        .toBe(2);
+
+      const editor = editorCard.getByRole('textbox', { name: '编辑示例文本', exact: true });
+      await editor.fill(text);
+      await editor.press('ControlOrMeta+A');
+      expect(
+        await editor.evaluate((node) => {
+          const input = node as HTMLTextAreaElement;
+          return input.value.slice(input.selectionStart, input.selectionEnd);
+        })
+      ).toBe(text);
+
+      await preview.click();
+      await expect.poll(() => preview.getAttribute('aria-selected')).toBe('true');
+      expect(await preview.evaluate((node) => getComputedStyle(node).userSelect)).toBe('none');
+      expect(await dragText(preview)).toBe('');
+      expect(await dragText(editorCard.getByText(text, { exact: true }))).toContain(
+        text.slice(1, -1)
+      );
+
+      await edit.click();
+      await expect.poll(() => edit.getAttribute('aria-selected')).toBe('true');
+      expect(await editor.inputValue()).toBe(text);
+      await edit.focus();
+      await page.keyboard.press('ArrowRight');
+      await expect.poll(() => preview.getAttribute('aria-selected')).toBe('true');
+      expect(await preview.evaluate((node) => document.activeElement === node)).toBe(true);
+      expect(await edit.evaluate((node) => getComputedStyle(node).userSelect)).toBe('none');
+    } finally {
+      await context.close();
+    }
+  });
+
   it('separates action-label selection from useful content and native editor selection across runtimes', async () => {
     // C-CONTENT-SELECTION-AFFORDANCE-0001: actual Chromium mouse/keyboard input;
     // source-token and happy-dom assertions alone cannot prove this behavior.
@@ -605,6 +675,85 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
     }
   }, 90_000);
 
+  it('shows an inert five-column mobile overview and reopens the same interactive gallery', async () => {
+    for (const colorScheme of ['light', 'dark'] as const) {
+      const context = await browser.newContext({
+        viewport: { width: 390, height: 900 },
+        colorScheme,
+      });
+      try {
+        const page = await context.newPage();
+        await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
+        await waitForHomeRuntime(page, 'wc');
+        const home = page.locator(HOME_SELECTOR);
+        const stage = home.locator('[data-home-gallery-stage]');
+        const toggle = home.locator('[data-home-gallery-layout-toggle]');
+        expect(await toggle.textContent()).toBe('打开交互演示');
+        const sample = () =>
+          stage.evaluate((node) => {
+            const stage = node as HTMLElement;
+            const bounds = stage.getBoundingClientRect();
+            const fade = getComputedStyle(stage, '::after');
+            const source = stage.parentElement!.querySelector('.home-gallery__attribution-link')!;
+            return {
+              inert: stage.inert,
+              columnCount: new Set(
+                [...stage.querySelectorAll('.home-gallery__column')].map(
+                  (column) => column.getBoundingClientRect().left
+                )
+              ).size,
+              cardCount: stage.querySelectorAll('[data-gallery-demo]').length,
+              noOverflow:
+                bounds.left >= -1 &&
+                bounds.right <= innerWidth + 1 &&
+                document.documentElement.scrollWidth <= innerWidth + 1,
+              fitsGallery:
+                Math.abs(bounds.width - stage.parentElement!.getBoundingClientRect().width) <= 1,
+              fade: fade.backgroundImage,
+              fadePointerEvents: fade.pointerEvents,
+              fadeVisible: fade.visibility === 'visible',
+              sourceOutsideStage: !stage.contains(source),
+            };
+          });
+        const initial = await sample();
+        expect(initial).toMatchObject({
+          inert: true,
+          columnCount: 5,
+          cardCount: 10,
+          noOverflow: true,
+          fitsGallery: true,
+          fadePointerEvents: 'none',
+          fadeVisible: true,
+          sourceOutsideStage: true,
+        });
+        expect(initial.fade).toContain('linear-gradient');
+        expect(await toggle.getAttribute('aria-expanded')).toBe('false');
+        expect(await home.getByRole('button', { name: '主要', exact: true }).count()).toBe(0);
+        await toggle.press('Enter');
+        expect(await toggle.getAttribute('aria-expanded')).toBe('true');
+        expect((await sample()).inert).toBe(false);
+        const mainButton = home.getByRole('button', { name: '主要', exact: true });
+        await mainButton.focus();
+        expect((await sample()).fadeVisible).toBe(false);
+        await mainButton.press('Enter');
+        await expect
+          .poll(() => home.locator('[data-demo-ref="gallery-controls-feedback"]').textContent())
+          .not.toBe('点击任意控件');
+        await page.setViewportSize({ width: 1440, height: 900 });
+        await expect.poll(() => toggle.isVisible()).toBe(false);
+        expect((await sample()).inert).toBe(false);
+        await page.setViewportSize({ width: 390, height: 900 });
+        await toggle.waitFor({ state: 'visible' });
+        expect((await sample()).inert).toBe(false);
+        expect(await toggle.textContent()).toBe('查看桌面缩略图');
+        await toggle.press('Enter');
+        expect((await sample()).inert).toBe(true);
+      } finally {
+        await context.close();
+      }
+    }
+  }, 90_000);
+
   it('uses unframed responsive task layout, real control feedback and four executable runtimes', async () => {
     for (const colorScheme of ['light', 'dark'] as const) {
       const context = await browser.newContext({
@@ -618,10 +767,16 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         await waitForHomeRuntime(page, 'wc');
         for (const width of [1440, 390, 320]) {
           await page.setViewportSize({ width, height: 900 });
+          if (width < 768) {
+            const layoutToggle = home.locator('[data-home-gallery-layout-toggle]');
+            await layoutToggle.waitFor({ state: 'visible' });
+            if ((await layoutToggle.getAttribute('aria-expanded')) === 'false')
+              await layoutToggle.click();
+          }
           await revealHeaderPreferences(page);
           const geometry = await home.evaluate((root) => {
             const task = root.querySelector<HTMLElement>('[data-home-settings]')!;
-            const fields = root.querySelector<HTMLElement>('.home-gallery')!;
+            const fields = root.querySelector<HTMLElement>('[data-home-gallery-stage]')!;
             const trigger = document.querySelector<HTMLElement>(
               '[data-homepage-runtime] [data-projection-generation-state="active"] [data-projection-control="family"] [role="combobox"]'
             )!;

@@ -5,8 +5,8 @@ A private, unreleased, real Base-inheriting projection source package. It is a p
 | Component | Real parts / owner | Bootstrap 2.3.2 reference and deliberate difference |
 | --- | --- | --- |
 | Button | Button / `asButton()` | [Archived buttons](https://getbootstrap.com/2.3.2/base-css.html#buttons), seven-color gradient and raised/inset grammar; stronger focus ring, fixed upstream 4px/12px padding and 14px/20px type, no jQuery |
-| Checkbox | Root + Indicator / `asCheckboxRoot()` + `asCheckboxIndicator()` | [Archived forms](https://getbootstrap.com/2.3.2/base-css.html#forms); custom square and original check/mixed glyph rather than the original native checkbox skin |
-| Switch | Root + Thumb / `asSwitchRoot()` + `asSwitchThumb()` | Design-language extension using the archived control palette and relief; core 2.3.2 has no Switch |
+| Checkbox | Root + Indicator / `asCheckboxRoot()` + `asCheckboxIndicator()` | [Archived forms](https://getbootstrap.com/2.3.2/base-css.html#forms); neutral beveled square with a pressed checked/mixed face and original dark glyph rather than the original native checkbox skin |
+| Switch | Root + Thumb / `asSwitchRoot()` + `asSwitchThumb()` | Design-language extension with a recessed gray or blue track and a raised light thumb; core 2.3.2 has no Switch |
 | Toggle | Toggle / `asToggle()` | Design-language extension using [stateful button appearance](https://getbootstrap.com/2.3.2/javascript.html#buttons); Base owns active state, not the original jQuery plugin |
 | Input | Root / `asInputRoot()` and its modules | [Archived text fields](https://getbootstrap.com/2.3.2/base-css.html#forms); one host-owned single-line editor, white field, compact spacing, 4px corner and inset shadow |
 | Textarea | Root / `asTextareaRoot()` and its modules | [Archived textarea](https://getbootstrap.com/2.3.2/base-css.html#forms); one host-owned multiline editor, inherited IME and stable controlledness, vertical resize |

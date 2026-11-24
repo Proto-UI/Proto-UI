@@ -24,6 +24,7 @@ import {
 } from './projection-families';
 import { type ProjectionThemeSurfaceStyle } from './projection-theme';
 import { resolveSiteLibraryFamily } from '../site-library-family';
+import { findPreviewMaterialProvider } from './preview-material-provider';
 
 export const RUNTIME_PREVIEW_SURFACE_ID = surfacePrototypeId;
 const SURFACE_REF = '__website_runtime_preview_surface__';
@@ -327,11 +328,18 @@ export function createRuntimePreviewSurface(
         family: currentFamily,
         theme: currentTheme,
         prototypeId: (next) => surfacePrototypeId(next as ProjectionFamilyId),
-        props: (next) => ({
-          // Use the shared flat canvas recipe, including each family's panel radius.
-          ...panelSurfaceProps('canvas'),
-          ...(next === 'liquid-glass' ? { variant: 'transparent' } : {}),
-        }),
+        props: (next) => {
+          const props = panelSurfaceProps('canvas');
+          if (next !== 'liquid-glass') return props;
+          // An enclosing material scene already owns the visible canvas. Keep
+          // the passive shell for slot/layout ownership, without a second frame.
+          const scene = mount.closest<HTMLElement>('[data-material-scene="visible-app-canvas"]');
+          const hasCanvas =
+            scene &&
+            scene.querySelector(':scope > canvas[data-material-backdrop]') &&
+            findPreviewMaterialProvider(scene);
+          return { ...props, variant: 'transparent', ...(hasCanvas ? { border: 'none' } : {}) };
+        },
         layout: {
           display: 'flex',
           alignItems: 'center',
