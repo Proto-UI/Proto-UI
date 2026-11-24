@@ -5,6 +5,10 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers Switch Thumb identity, Base indicator inheritance, context-driven checked state, current visual surface, and its bounded upstream composition claim.
 cases:
+  - id: T-SHADCN-SWITCH-THUMB-0001-CASE-DIRECTIONAL-ENDPOINTS
+    title: Settled endpoints stay inside the track and mirror canonical Root direction with or without dragging
+    covers: [P-SHADCN-SWITCH-DIRECTIONAL-SURFACE, P-SHADCN-SWITCH-THUMB-DIRECTIONAL-ENDPOINTS]
+    expectation: rendered-switch-endpoints-mirror-without-overflow-or-extra-value-requests
   - id: T-SHADCN-SWITCH-THUMB-0001-CASE-DIRECTIONAL-PREVIEW
     title: Inherited drag preview follows logical direction and rolls back controlled refusal
     covers: [P-SHADCN-SWITCH-THUMB-DIRECTIONAL-PREVIEW]
@@ -32,6 +36,24 @@ cases:
     covers: [P-SHADCN-SWITCH-THUMB-COMPATIBILITY-SUBSET]
     expectation: shadcn-switch-thumb-does-not-overclaim-upstream-parity
 implementations:
+  - id: t-shadcn-switch-thumb-directional-endpoints-browser
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/switch-motion.browser.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SWITCH-THUMB-0001-CASE-DIRECTIONAL-ENDPOINTS]
+    exercises: [P-SHADCN-SWITCH, P-SHADCN-SWITCH-THUMB]
+    notes:
+      - Real Chromium geometry for all supported profiles and both sizes checks canonical direction against opposite document direction, mirrored endpoints and stationary draggable changes using the public CLI preset CSS closure, including Sera at 16px and 32px root font; this does not establish non-Web target acceptance.
+  - id: t-shadcn-switch-thumb-public-directional-endpoints-browser
+    kind: module-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-shadcn-switch-compositions.browser.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SWITCH-THUMB-0001-CASE-DIRECTIONAL-ENDPOINTS]
+    exercises: [P-SHADCN-SWITCH, P-SHADCN-SWITCH-THUMB]
+    notes:
+      - Actual public Field Switch compositions check non-draggable LTR and RTL track containment and endpoints through native click and Space in WC, React, Vue and Vue2.
   - id: t-shadcn-switch-thumb-directional-projection
     kind: module-test
     status: planned
@@ -77,11 +99,14 @@ implementations:
       - Historical passing evidence predates the 2026-10-12 New York presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
 verifies:
   prototypes:
+    - id: P-SHADCN-SWITCH
+      anchors: [P-SHADCN-SWITCH-DIRECTIONAL-SURFACE]
     - id: P-SHADCN-SWITCH-THUMB
       anchors:
         [
           P-SHADCN-SWITCH-THUMB-VISUAL-SIZE,
           P-SHADCN-SWITCH-THUMB-DIRECTIONAL-PREVIEW,
+          P-SHADCN-SWITCH-THUMB-DIRECTIONAL-ENDPOINTS,
           P-SHADCN-SWITCH-THUMB-UPSTREAM-IDENTITY,
           P-SHADCN-SWITCH-THUMB-BASE-INHERITANCE,
           P-SHADCN-SWITCH-THUMB-CURRENT-BASE-DEVIATIONS,
@@ -108,4 +133,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: expanded
     summary: Add owner-bound default/sm size cases for initial and dynamic sizing, mixed Switch domains, composition and lifecycle; rendered evidence remains planned.
+  - version: 0.3.0-alpha.2
+    change: expanded
+    summary: Map actual settled RTL endpoint geometry and ordinary click/Space public-consumer regressions separately from directional drag preview.
 tags: [prototype, shadcn, switch, thumb, delta, compatibility, test]
