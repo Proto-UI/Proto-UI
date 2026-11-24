@@ -1718,7 +1718,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                 part.key === undefined &&
                 part.accessor === undefined
               ) {
-                const source = objectFields(value);
+                const source = checkedSpreadFields(value, captureFields);
                 if (!source) bad('Object spread requires a checked ordinary record.', location);
                 if (hasAccessorField(value)) invalidateFlow(scope, true, true);
                 for (const field of source)

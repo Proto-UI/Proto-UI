@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "kind": "executed-merge-reconciliation",
+  "parents": [
+    "0c9038ee587b9ff050b296da4d381a2dad4d6d82",
+    "6ccb36ad473b72e75b3b86ee9ea5a5989b73ac5b"
+  ],
+  "archive": {
+    "path": "raw-evidence.zip",
+    "bytes": 13016,
+    "sha256": "82ad3771b0a436cc936f9f0b474f7eca3056038e867f6c9ae41acd8ee4e1dc46",
+    "entries": [
+      {
+        "path": "search-concurrent-6ccb-union.log",
+        "bytes": 40723,
+        "sha256": "69f893b24909be625ec03b88523f8254e4c59b380f600132a687afcd90e9b145"
+      },
+      {
+        "path": "search-concurrent-6ccb-union.receipt.json",
+        "bytes": 2085,
+        "sha256": "72419ad6a7203293bc88e8fd7b0154cabc6afb8d3e46fa6e0b008d375657270a"
+      },
+      {
+        "path": "search-concurrent-6ccb-union.status.txt",
+        "bytes": 3305,
+        "sha256": "1462b9452112a39d56cbfbf762215b50a7a85da6d73cb45824970ee79626cbad"
+      },
+      {
+        "path": "search-concurrent-6ccb-union-vitest.json",
+        "bytes": 23539,
+        "sha256": "c1c0263265f8af31c054235df0a29a643f15dcb678d9561d98abca59f9a2021d"
+      },
+      {
+        "path": "native-concurrent-6ccb-reconciliation.json",
+        "bytes": 5978,
+        "sha256": "6c96f74e0bc1aba1d9d251324bf3ce75c3dafc81c7b33dd1180f47bf247c940f"
+      },
+      {
+        "path": "native-followup-concurrent-6ccb-merge-tree.txt",
+        "bytes": 577,
+        "sha256": "960b17f4ef18618828b25517c8150bc75e138b5de22fe9a90834562750050518"
+      }
+    ]
+  },
+  "search": {
+    "file": "apps/www/src/components/site-search-composition-paint-cost.test.ts",
+    "blob": "5161376a98496db0ed637697912279d6ff0d21e2",
+    "passed": 63,
+    "failed": 0,
+    "skipped": 0
+  },
+  "preservedIncomingPathCount": 40,
+  "limitations": [
+    "The 63 executed cases are Node/unit controls, not native production evidence.",
+    "The private CLI analyzer candidate remains outside this merge.",
+    "This record does not declare the PR Ready or Sprint 1 acceptance."
+  ]
+}

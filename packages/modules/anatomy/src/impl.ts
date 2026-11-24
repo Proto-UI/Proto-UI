@@ -73,6 +73,18 @@ type ClaimRecord = {
   invoke: AnatomyOrderCallbackDispatcher;
 };
 
+// Retain only role names and existing identity IDs, never claims or host tokens.
+type OrderSignature = readonly (string | number)[] | null;
+
+function sameOrderSignature(left: OrderSignature, right: OrderSignature): boolean {
+  if (left === right) return true;
+  if (!left || !right || left.length !== right.length) return false;
+  for (let index = 0; index < left.length; index++) {
+    if (left[index] !== right[index]) return false;
+  }
+  return true;
+}
+
 // Share reads only within one synchronous notification. A parent-getter identity
 // identifies one logical host tree; independent bridges must not share domains.
 // Each recipient still reads current host targets. Logical ancestry can be
@@ -319,7 +331,7 @@ export class AnatomyModuleImpl extends ModuleBase {
   private targetListeners = new Map<AnatomyFamily, Set<AnatomyOrderChangeCb>>();
   private observedOrderRoots = new Map<AnatomyFamily, AnatomyInstanceToken>();
   private orderVersionByFamily = new Map<AnatomyFamily, number>();
-  private orderSignatureByFamily = new Map<AnatomyFamily, string>();
+  private orderSignatureByFamily = new Map<AnatomyFamily, OrderSignature>();
   private objectIds = new WeakMap<object, number>();
   private primitiveIds = new Map<unknown, number>();
   private nextIdentityId = 1;
@@ -1021,7 +1033,7 @@ export class AnatomyModuleImpl extends ModuleBase {
     // Follow the current host root before the next native order mutation.
     if ((this.observedOrderRoots.get(family) ?? null) !== domain.rootInstance)
       this.ensureOrderObserver(family, domain.rootInstance, reads);
-    if (typeof prev !== 'undefined' && prev === next) return;
+    if (typeof prev !== 'undefined' && sameOrderSignature(prev, next)) return;
 
     this.orderSignatureByFamily.set(family, next);
     const nextVersion = (this.orderVersionByFamily.get(family) ?? 0) + 1;
@@ -1042,10 +1054,15 @@ export class AnatomyModuleImpl extends ModuleBase {
     }
   }
 
-  private computeOrderSignature(domain: CurrentDomain, reads?: OrderNotificationReads): string {
-    if (!domain.rootInstance) return 'missing-domain';
+  private computeOrderSignature(
+    domain: CurrentDomain,
+    reads?: OrderNotificationReads
+  ): OrderSignature {
+    if (!domain.rootInstance) return null;
     const ordered = this.sortClaims(domain.claims, reads?.comparisons);
-    return ordered.map((claim) => `${claim.role}:${this.getIdentityId(claim.instance)}`).join('|');
+    const signature: (string | number)[] = [];
+    for (const claim of ordered) signature.push(claim.role, this.getIdentityId(claim.instance));
+    return signature;
   }
 
   private getIdentityId(value: unknown): number {

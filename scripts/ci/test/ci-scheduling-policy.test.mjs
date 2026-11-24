@@ -468,9 +468,20 @@ function assertReusableCompilerInputBoundary(workflow) {
   assert.deepEqual(browser.permissions, { contents: 'read' });
 }
 
-test('compiler inputs preserve the reusable Adapter and manual browser boundaries', () => {
-  const original = readWorkflows()['compiler-gpui-source-consumers.yml'];
+function assertReusableCompilerCallers(workflows) {
+  for (const workflow of Object.values(workflows)) {
+    for (const job of Object.values(workflow.jobs ?? {})) {
+      if (job.uses === './.github/workflows/compiler-gpui-source-consumers.yml')
+        assert.equal(Object.hasOwn(job.with ?? {}, 'browser_acceptance'), false);
+    }
+  }
+}
+
+test('reusable compiler inputs preserve Adapter and manual browser acceptance boundaries', () => {
+  const workflows = readWorkflows();
+  const original = workflows['compiler-gpui-source-consumers.yml'];
   assertReusableCompilerInputBoundary(original);
+  assertReusableCompilerCallers(workflows);
   const mutations = [
     (workflow) => {
       workflow.on.workflow_call = null;
@@ -485,6 +496,13 @@ test('compiler inputs preserve the reusable Adapter and manual browser boundarie
       workflow.on.workflow_call.inputs.adapter_acceptance.type = 'string';
     },
     (workflow) => {
+      workflow.on.workflow_call.inputs.browser_acceptance = {
+        type: 'boolean',
+        required: false,
+        default: false,
+      };
+    },
+    (workflow) => {
       delete workflow.on.workflow_dispatch.inputs.browser_acceptance;
     },
     (workflow) => {
@@ -497,11 +515,16 @@ test('compiler inputs preserve the reusable Adapter and manual browser boundarie
       workflow.on.workflow_dispatch.inputs.browser_acceptance.type = 'string';
     },
     (workflow) => {
-      workflow.on.workflow_call.inputs.unreviewed_acceptance = {
-        type: 'boolean',
-        required: false,
-        default: false,
-      };
+      workflow.jobs['browser-compiler'].if = 'true';
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].uses = './.github/workflows/gpui-adapter-acceptance.yml';
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].with.source_regressions = false;
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].with.production_build = false;
     },
     (workflow) => {
       workflow.on.workflow_call.inputs.browser_acceptance = {
@@ -551,6 +574,13 @@ test('compiler inputs preserve the reusable Adapter and manual browser boundarie
     mutate(changed);
     assert.throws(() => assertReusableCompilerInputBoundary(changed));
   }
+  for (const browserAcceptance of [true, false]) {
+    const changed = structuredClone(workflows);
+    changed['ci.yml'].jobs['compiler-gpui-consumers'].with = {
+      browser_acceptance: browserAcceptance,
+    };
+    assert.throws(() => assertReusableCompilerCallers(changed));
+  }
 });
 
 test('manual compiler evidence can explicitly request the unchanged strict package gate', () => {
@@ -582,11 +612,14 @@ test('manual compiler evidence can explicitly request the unchanged strict packa
   );
 });
 
-function assertNativeScrollConsumerEvidence(workflow) {
+function assertNativeGeneratedConsumerEvidence(workflow) {
   const job = workflow.jobs['native-consumer'];
   assert.equal(job.if, undefined);
   assert.equal(job.needs, undefined);
   for (const [target, log] of [
+    ['control_label', 'control-label-consumer.log'],
+    ['style_mapping', 'style-mapping-consumer.log'],
+    ['a11y_activation', 'a11y-activation-consumer.log'],
     ['scroll_pause', 'scroll-pause-consumer.log'],
     ['scroll_reader', 'scroll-reader-consumer.log'],
   ]) {
@@ -604,52 +637,69 @@ function assertNativeScrollConsumerEvidence(workflow) {
   }
 }
 
-test('native Scroll evidence executes both complete locked targets in the existing native owner', () => {
-  assertNativeScrollConsumerEvidence(readWorkflows()['compiler-gpui-source-consumers.yml']);
+test('native generated evidence executes five complete locked targets once in the existing owner', () => {
+  assertNativeGeneratedConsumerEvidence(readWorkflows()['compiler-gpui-source-consumers.yml']);
 });
 
-test('native Scroll evidence rejects missing, duplicate, filtered, optional or swallowed native execution', () => {
+test('native generated evidence rejects missing, duplicated, filtered, optional or swallowed execution', () => {
   const original = readWorkflows()['compiler-gpui-source-consumers.yml'];
-  const targetStep = (workflow) =>
-    workflow.jobs['native-consumer'].steps.find((step) =>
-      step.run?.includes('--test scroll_reader ')
-    );
-  const mutations = [
-    (workflow) => {
-      const steps = workflow.jobs['native-consumer'].steps;
-      steps.push(structuredClone(steps.find((step) => step.run?.includes('--test scroll_pause '))));
-    },
-    (workflow) => {
-      workflow.jobs['native-consumer'].steps = workflow.jobs['native-consumer'].steps.filter(
-        (step) => !step.run?.includes('--test scroll_pause ')
-      );
-    },
-    (workflow) => {
-      workflow.jobs['native-consumer'].steps.push(structuredClone(targetStep(workflow)));
-    },
-    (workflow) => {
-      targetStep(workflow).if = 'false';
-    },
-    (workflow) => {
-      targetStep(workflow)['continue-on-error'] = true;
-    },
-    (workflow) => {
-      targetStep(workflow).run = targetStep(workflow).run.replace(
-        '-- --test-threads=1',
-        'one-case -- --test-threads=1'
-      );
-    },
-    (workflow) => {
-      targetStep(workflow).run = targetStep(workflow).run.replace('--locked ', '');
-    },
-    (workflow) => {
-      targetStep(workflow).run = targetStep(workflow).run.replace('set -euo pipefail', 'set -eu');
-    },
-  ];
-  for (const mutate of mutations) {
-    const changed = structuredClone(original);
-    mutate(changed);
-    assert.throws(() => assertNativeScrollConsumerEvidence(changed));
+  // Mutation controls must start from a valid inventory, not pass because
+  // another unchanged target was already missing or duplicated.
+  assertNativeGeneratedConsumerEvidence(original);
+  const targetStep = (workflow, target) =>
+    workflow.jobs['native-consumer'].steps.find((step) => step.run?.includes(`--test ${target} `));
+  for (const target of [
+    'control_label',
+    'style_mapping',
+    'a11y_activation',
+    'scroll_pause',
+    'scroll_reader',
+  ]) {
+    const mutations = [
+      (workflow) => {
+        const steps = workflow.jobs['native-consumer'].steps;
+        steps.push(
+          structuredClone(steps.find((step) => step.run?.includes('--test scroll_pause ')))
+        );
+      },
+      (workflow) => {
+        workflow.jobs['native-consumer'].steps = workflow.jobs['native-consumer'].steps.filter(
+          (step) => !step.run?.includes(`--test ${target} `)
+        );
+      },
+      (workflow) => {
+        workflow.jobs['native-consumer'].steps.push(structuredClone(targetStep(workflow, target)));
+      },
+      (workflow) => {
+        targetStep(workflow, target).if = 'false';
+      },
+      (workflow) => {
+        targetStep(workflow, target)['continue-on-error'] = true;
+      },
+      (workflow) => {
+        targetStep(workflow, target).run = targetStep(workflow, target).run.replace(
+          '-- --test-threads=1',
+          'one-case -- --test-threads=1'
+        );
+      },
+      (workflow) => {
+        targetStep(workflow, target).run = targetStep(workflow, target).run.replace(
+          '--locked ',
+          ''
+        );
+      },
+      (workflow) => {
+        targetStep(workflow, target).run = targetStep(workflow, target).run.replace(
+          'set -euo pipefail',
+          'set -eu'
+        );
+      },
+    ];
+    for (const mutate of mutations) {
+      const changed = structuredClone(original);
+      mutate(changed);
+      assert.throws(() => assertNativeGeneratedConsumerEvidence(changed));
+    }
   }
 });
 

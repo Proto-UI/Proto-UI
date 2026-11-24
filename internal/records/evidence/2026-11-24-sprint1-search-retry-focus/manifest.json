@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "scope": "Search public retry focus repair and unchanged-budget registration",
+  "sourceHashes": {
+    "apps/www/src/components/site-search-composition.ts": "17e5059f7f5cad9f656861c042884e65cef0e77bd4d00deb02debd58463eed12",
+    "apps/www/src/components/site-search-composition-paint-cost.test.ts": "ca2e46bda6ea9d6b34bbd12d5fbe9f68e2044a6cda3969d8fbd9ca90c3354ad9",
+    "scripts/test/runtime-test-plan.mjs": "0a88f1950a5ebb3f0fe19f7672afaf7591e21c9a36b269d38f1710a706b3c25e",
+    "scripts/test/sprint1-evidence.mjs": "bad5b66400726c7b03b5ffd393f70a8def1e94add6e5ecb9b1359e03b01e6c49",
+    "scripts/test/sprint1-evidence.test.mjs": "fd1404a5366a03cfb4474e90bafc54249d635d2d87ee505bd3cf153808163560"
+  },
+  "logs": [
+    {
+      "path": "sprint1-registration-final.log.gz",
+      "originalBytes": 16354,
+      "originalSha256": "4da977727e12099f2da11c2b8aa6977d7f134e04747a92f649c3881d98663682",
+      "storedSha256": "5bd24f9f6e3ddd7ee0b1d5fcba71b4cae082594ac1473965a46508f2e59c7234"
+    },
+    {
+      "path": "sprint1-registration-current.log.gz",
+      "originalBytes": 19874,
+      "originalSha256": "274a8d2d421c480522a9f490adea004a19855d2d87340094476b3e165aaefd8f",
+      "storedSha256": "ee57ff704b1c65a8121ae261a93846b033587f7abe6048476a86b3509c531380"
+    },
+    {
+      "path": "sprint1-registration-corrected.log.gz",
+      "originalBytes": 1524,
+      "originalSha256": "66ba865891886a6701b7d7208ad68ab49cbf7060a0a2fddb8235d57380d98d4b",
+      "storedSha256": "34ec165962c09d25ed15b95d07cda142dc944b9ee678e8dc31966b802ca6d414"
+    }
+  ]
+}

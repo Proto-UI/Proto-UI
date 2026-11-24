@@ -7,6 +7,7 @@ import {
 import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/proto-style-css';
 import {
   createShadowSplitEffectsPort,
+  hasVerifiedShadowSplitBaseRecipe,
   SHADOW_SPLIT_ROOT_STYLE_ATTR as ROOT,
   SHADOW_SPLIT_SURFACE_ATTR as SURFACE,
 } from '../src/shadow-split-effects';
@@ -54,8 +55,147 @@ function wrapMatchingRulesInFalseSupports(cssText: string, selector: string): st
   }
 }
 
+function withCommentScanCount(cssText: string, run: (count: () => number) => void) {
+  const indexOf = String.prototype.indexOf;
+  let scans = 0;
+  const spy = vi.spyOn(String.prototype, 'indexOf').mockImplementation(function (
+    this: string,
+    search: string,
+    position?: number
+  ) {
+    if (this === cssText && search === '*/' && position === 2) scans += 1;
+    return indexOf.call(this, search, position);
+  });
+  try {
+    run(() => scans);
+  } finally {
+    spy.mockRestore();
+  }
+}
+
 // D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 K: preflight is atomic; cleanup is owned.
 describe('private Shadow split effects', () => {
+  it('shares only CSS analysis between registration and independent effects owners', () => {
+    const { host, surface, effects, options } = setup(['block', 'w-full']);
+    effects.dispose();
+    const cssText = `/* shared compiled rules */${options.artifact.cssText}`;
+    let reads = 0;
+    const input = {
+      ...options.artifact,
+      get cssText() {
+        reads += 1;
+        return cssText;
+      },
+    };
+    const before = [host.outerHTML, surface.outerHTML];
+    withCommentScanCount(cssText, (scans) => {
+      expect(hasVerifiedShadowSplitBaseRecipe(input, 'motion', 'h1')).toBe(true);
+      expect(hasVerifiedShadowSplitBaseRecipe(input, 'motion', 'h2')).toBe(false);
+      expect(hasVerifiedShadowSplitBaseRecipe(input, 'missing', 'h1')).toBe(false);
+      expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+      for (let index = 0; index < 2; index += 1) {
+        const next = createShadowSplitEffectsPort({ ...options, artifact: input });
+        expect(() => createShadowSplitEffectsPort({ ...options, artifact: input })).toThrow(
+          'projection-owned'
+        );
+        surface.remove();
+        expect(() => createShadowSplitEffectsPort({ ...options, artifact: input })).toThrow(
+          'surface-parent'
+        );
+        host.shadowRoot!.append(surface);
+        next.queueStyle(effect(['block', 'w-full']));
+        next.requestFlush();
+        expect(host.getAttribute(ROOT)).toBe('block w-full');
+        next.dispose();
+        expect(host.hasAttribute(ROOT)).toBe(false);
+        expect(surface.hasAttribute(SURFACE)).toBe(false);
+        expect(surface.getAttribute('data-pui-style')).toBe('consumer');
+        expect(surface.style.cssText).toBe('');
+        expect(() => next.queueStyle(effect([]))).toThrow('disposed');
+      }
+      expect(reads).toBe(5);
+      expect(scans()).toBe(1);
+    });
+  });
+
+  it('keeps conditional receipts and current diagnostics separate from cached rules', () => {
+    const { host, surface, effects, options } = setup(['block', 'w-full']);
+    effects.dispose();
+    const before = [host.outerHTML, surface.outerHTML];
+    let cssText = wrapMatchingRulesInFalseSupports(
+      options.artifact.cssText,
+      `:host([${ROOT}~="w-full"])`
+    );
+    const input = Object.freeze({
+      ...options.artifact,
+      get cssText() {
+        return cssText;
+      },
+    });
+    expect(hasVerifiedShadowSplitBaseRecipe(input, 'motion', 'h1')).toBe(true);
+    for (const prototypeName of ['first-owner', 'next-owner']) {
+      const next = createShadowSplitEffectsPort({ ...options, prototypeName, artifact: input });
+      expect(() => next.queueStyle(effect(['block', 'w-full']))).toThrow(
+        new RegExp(`\\[${prototypeName}\\].*w-full.*missing token`)
+      );
+      expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+      next.dispose();
+    }
+    cssText = options.artifact.cssText;
+    const restored = createShadowSplitEffectsPort({ ...options, artifact: input });
+    restored.queueStyle(effect(['block', 'w-full']));
+    restored.requestFlush();
+    expect(host.getAttribute(ROOT)).toBe('block w-full');
+    restored.dispose();
+    expect(host.hasAttribute(ROOT)).toBe(false);
+    expect(surface.hasAttribute(SURFACE)).toBe(false);
+    expect(surface.getAttribute('data-pui-style')).toBe('consumer');
+  });
+
+  it('bounds compiled rule reuse by entry count', () => {
+    const generated = renderProtoShadowSplitStyleArtifact(['block']);
+    const cssText = `/* compiled entry budget first */${generated.cssText}`;
+    withCommentScanCount(cssText, (scans) => {
+      const check = (text: string) =>
+        expect(
+          hasVerifiedShadowSplitBaseRecipe({ ...generated, cssText: text }, 'motion', 'h1')
+        ).toBe(true);
+      check(cssText);
+      for (let index = 0; index < 32; index += 1)
+        check(`/* compiled entry budget ${index} */${generated.cssText}`);
+      check(cssText);
+      expect(scans()).toBe(2);
+    });
+  });
+
+  it('counts retained declaration strings as well as source toward the character budget', () => {
+    const generated = renderProtoShadowSplitStyleArtifact(['block']);
+    const declaration = `--unused: ${'x'.repeat(900000)};`;
+    const cssText = `/* compiled character budget first */${generated.cssText}.first {${declaration}}`;
+    withCommentScanCount(cssText, (scans) => {
+      const check = (text: string) =>
+        expect(
+          hasVerifiedShadowSplitBaseRecipe({ ...generated, cssText: text }, 'motion', 'h1')
+        ).toBe(true);
+      check(cssText);
+      check(`/* compiled character budget next */${generated.cssText}.next {${declaration}}`);
+      check(cssText);
+      expect(scans()).toBe(2);
+    });
+  });
+
+  it('analyzes oversized rule inputs without retaining or rejecting them', () => {
+    const generated = renderProtoShadowSplitStyleArtifact(['block']);
+    const cssText = `/* oversized compiled rules ${'x'.repeat(4 * 1024 * 1024)} */${generated.cssText}`;
+    withCommentScanCount(cssText, (scans) => {
+      for (let index = 0; index < 2; index += 1)
+        expect(hasVerifiedShadowSplitBaseRecipe({ ...generated, cssText }, 'motion', 'h1')).toBe(
+          true
+        );
+      expect(scans()).toBe(2);
+    });
+  });
+
   it('keeps the exact vertical scrollport inside the max-height boundary', () => {
     const tokens = ['max-h-[calc(100%_-_2rem)]', 'overflow-y-auto'];
     const { host, surface, effects, options } = setup(tokens);
