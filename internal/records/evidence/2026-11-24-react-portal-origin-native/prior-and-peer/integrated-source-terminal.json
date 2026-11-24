@@ -1,0 +1,29 @@
+{
+  "head": "cd684a20ba60c1f382c88eeaea5b25eb29a0f6c5",
+  "exitCode": -9,
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.s3-diagnostic.config.ts",
+    "packages/adapters/react/test/overlay-catalog.integration.test.ts",
+    "packages/adapters/react/test/overlay-focus.integration.test.ts",
+    "packages/adapters/react/test/overlay-portal-ownership.test.ts",
+    "packages/adapters/react/test/portal-destination-fake-array.test.ts",
+    "packages/adapters/react/test/portal-destination-lifetimes.integration.test.ts",
+    "packages/adapters/react/test/portal-destination-material-reentry.integration.test.ts",
+    "packages/adapters/react/test/portal-destination.integration.test.ts",
+    "packages/adapters/react/test/portal-direction.integration.test.ts",
+    "packages/adapters/react/test/portal-document-destination.integration.test.ts",
+    "packages/adapters/react/test/portal-first-content-identity.integration.test.ts",
+    "packages/adapters/react/test/tooltip-description-presence.integration.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "--reporter=json",
+    "--outputFile=/workspace/scratch/456f3c4ad3a9/s3-review/integrated-source-results.json"
+  ],
+  "durationMs": 9473,
+  "headAfter": "cd684a20ba60c1f382c88eeaea5b25eb29a0f6c5",
+  "trackedStatus": ""
+}

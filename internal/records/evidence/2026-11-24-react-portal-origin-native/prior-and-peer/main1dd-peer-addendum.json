@@ -1,0 +1,109 @@
+{
+  "kind": "Independent source integration peer addendum",
+  "reviewer": "/root/s2_consumer",
+  "oldBase": "8b052eb9cdb707ab7a4c8b7660c9442a7e3ee489",
+  "integratedBase": "1dd7afa3ea4ff43c1f28306c9b035e87ed11ea62",
+  "candidates": [
+    {
+      "pr": 1770,
+      "head": "cd684a20ba60c1f382c88eeaea5b25eb29a0f6c5",
+      "tree": "3a4e220c6c5dc5b66bcd902540cd75cdb0ba8337",
+      "pathSetMatchesReviewedCandidate": true,
+      "files": [
+        {
+          "path": "packages/adapters/react/src/adapt.ts",
+          "sha256": "19059122572fc60b056e4f500186198d09adac50ea1c85b5855c7b70501971ae",
+          "matchesPriorReview": true
+        },
+        {
+          "path": "packages/adapters/react/test/portal-first-content-identity.integration.test.ts",
+          "sha256": "8d49ba8463f1bed5bf639be013111d5d49fecf5ea89ecea1baf7d3c35c2774ee",
+          "matchesPriorReview": true
+        }
+      ]
+    },
+    {
+      "pr": 1771,
+      "head": "3edafee1ea871240015b99aaebd6cf8064db7ba3",
+      "tree": "a601f0b4b649b606aa15dfc74e540657bbafe8ec",
+      "pathSetMatchesReviewedCandidate": true,
+      "files": [
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/switch.mdx",
+          "sha256": "6daa6789982678eadfb70a18ba46fb1486d27530fdfe12e35571100af33d2189",
+          "matchesPriorReview": true
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/switch.mdx",
+          "sha256": "a98352e6f7ab7ad45175b08d5a643e35f71f22840b8aa0f5ab39a9272fef7938",
+          "matchesPriorReview": true
+        },
+        {
+          "path": "packages/adapters/web-component/README.md",
+          "sha256": "78798055b1d49fc3072c6f51b0b66329fd326724b1d687bcd87faca096d1e009",
+          "matchesPriorReview": true
+        },
+        {
+          "path": "packages/cli/src/services/codegen.ts",
+          "sha256": "fc0fdd86c6da0af91c6aa3953c8b767d686f4d80e3aaf21b4364242f268013d1",
+          "matchesPriorReview": true
+        }
+      ]
+    }
+  ],
+  "findings": [],
+  "unchangedPortalOwnerAndContractScope": {
+    "paths": [
+      "packages/adapters/base/src/host/view-epoch-owner.ts",
+      "packages/adapters/base/src/platform/portal-destination.ts",
+      "packages/adapters/react/src",
+      "packages/runtime/src",
+      "packages/modules/overlay",
+      "packages/modules/presence",
+      "packages/modules/focus",
+      "spec/host-caps/HC-OVERLAY-PORTAL-0001.yaml",
+      "spec/contracts/C-AS-OVERLAY-0001.yaml"
+    ],
+    "diffIsEmpty": true
+  },
+  "relatedBaseChangesRead": [
+    {
+      "path": "packages/adapters/base/src/host/adapter-host.ts",
+      "change": "Publishes one terminal disposal Promise before reentry and retains primary Runtime errors while still attempting adapter cleanup.",
+      "coverage": "Existing sprint1-async-disposal-precedence.test.ts covers synchronous/asynchronous reentry, completion identity and falsy primary errors."
+    },
+    {
+      "path": "packages/modules/anatomy/src/impl.ts",
+      "change": "Replaces serialized role/identity order signatures with structured value arrays; topology and ownership acquisition are unchanged."
+    },
+    {
+      "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+      "change": "Releases prior available-size projection before fresh intrinsic geometry and uses identity-bound style leases."
+    },
+    {
+      "path": "packages/modules/positioning/src/web/owned-style-lease.ts",
+      "change": "Prepublishes browser-normalized style claim before reentrant setter work, so retired or replaced owners cannot overwrite successors."
+    },
+    {
+      "path": "spec/contracts/C-PROPS-0014.yaml",
+      "change": "Clarifies existing lifecycle owner references while explicitly preserving draft lifecycle and existing active Props criteria."
+    }
+  ],
+  "conclusion": "Both PR diffs preserve the exact prior reviewed file bytes on the new main. No new Portal composition correctness finding from the bounded related-base inspection.",
+  "validationGuidance": {
+    "retain": "Run the existing 11-file/50 Portal controls at the integrated source as planned.",
+    "targetedExistingCoverage": "Include packages/adapters/base/test/sprint1-async-disposal-precedence.test.ts to cover the materially changed host-disposal path; no new authored test is requested by this review.",
+    "observedIntegratedAttempt": {
+      "head": "cd684a20ba60c1f382c88eeaea5b25eb29a0f6c5",
+      "exitCode": -9,
+      "durationMs": 9473,
+      "source": "integrated-source-terminal.json",
+      "disposition": "No passing integrated-suite result established by this attempt. Cause not inferred from SIGKILL alone."
+    }
+  },
+  "boundaries": [
+    "Source peer review only; reviewer ran no behavioral tests.",
+    "No native browser, geometry, accessibility or full workspace acceptance inferred.",
+    "No platform review/approval, merge or external publication performed."
+  ]
+}

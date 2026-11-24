@@ -1,0 +1,39 @@
+{
+  "testSource": "cd684a20ba60c1f382c88eeaea5b25eb29a0f6c5",
+  "servedPageRevision": null,
+  "sourceBinding": "The test checkout is recorded; the supervising release run must bind its separately served page to the same source.",
+  "browser": "145.0.7632.6",
+  "route": "/en/ui-libraries/base/tooltip/",
+  "runtime": "wc",
+  "outcome": "PASS",
+  "failure": null,
+  "errors": [],
+  "observations": [
+    {
+      "stage": "first focus",
+      "role": "generic",
+      "ignored": false,
+      "description": "View account settings and profile details."
+    },
+    {
+      "stage": "native Tab to sibling",
+      "role": "generic",
+      "ignored": false,
+      "description": "Review recent alerts and notification preferences."
+    },
+    {
+      "stage": "Escape retains focus without description",
+      "role": "generic",
+      "ignored": false,
+      "description": ""
+    },
+    {
+      "stage": "replacement owner",
+      "runtime": "react",
+      "role": "generic",
+      "ignored": false,
+      "description": "View account settings and profile details."
+    }
+  ],
+  "scope": "Native public documentation consumer and browser AX; not native OS assistive technology."
+}
