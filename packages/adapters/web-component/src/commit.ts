@@ -1,3 +1,4 @@
+import { createWebMaterialPaintReservationRef } from '@proto.ui/adapter-base';
 import {
   captureWebComponentCallerFocus,
   withWebComponentCallerDomMove,
@@ -87,6 +88,7 @@ function appendCommittedChild(
     slotStart?: Text;
     slotEnd?: Text;
     decorations: OwnedDecorationBinding[];
+    reservations: Array<{ node: HTMLElement; ref: (node: HTMLElement | null) => void }>;
   }
 ) {
   if (child === null) return;
@@ -105,6 +107,17 @@ function appendCommittedChild(
   }
 
   const t = child.type;
+  if (t && typeof t === 'object' && t.kind === 'paint-reservation') {
+    const node = doc.createElement('div');
+    node.setAttribute('data-pui-material-reservation', '');
+    opt.owned.add(node);
+    opt.recordStagedNode?.(parent, node);
+    for (const nested of toArray(child.children ?? null))
+      appendCommittedChild(node, nested, doc, opt, ctx);
+    parent.appendChild(node);
+    ctx.reservations.push({ node, ref: createWebMaterialPaintReservationRef(t.target) });
+    return;
+  }
   if (t && typeof t === 'object' && t.kind === 'decoration') {
     if (
       Object.keys(child).some((k) => k !== 'type') ||
@@ -196,6 +209,7 @@ function appendSvgChild(
     slotStart?: Text;
     slotEnd?: Text;
     decorations: OwnedDecorationBinding[];
+    reservations: Array<{ node: HTMLElement; ref: (node: HTMLElement | null) => void }>;
   }
 ): void {
   const el = doc.createElementNS(SVG_NS, child.tag);
@@ -246,9 +260,11 @@ export function commitChildren(
     slotStart?: Text;
     slotEnd?: Text;
     decorations: OwnedDecorationBinding[];
+    reservations: Array<{ node: HTMLElement; ref: (node: HTMLElement | null) => void }>;
   } = {
     slotUsed: false,
     decorations: [],
+    reservations: [],
   };
 
   const arr = toArray(children);
@@ -279,6 +295,23 @@ export function commitChildren(
     );
   } finally {
     focus.dispose();
+  }
+
+  // Only a successful physical commit may supersede a live reservation ref.
+  // A later staging/replace failure never binds a discarded fragment.
+  const activated: typeof ctx.reservations = [];
+  try {
+    for (const staged of ctx.reservations) {
+      activated.push(staged);
+      staged.ref(staged.node);
+    }
+  } catch (error) {
+    for (const staged of activated.reverse()) {
+      try {
+        staged.ref(null);
+      } catch {}
+    }
+    throw error;
   }
 
   return {

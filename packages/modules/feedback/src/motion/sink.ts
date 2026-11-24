@@ -4,6 +4,9 @@ export type ResidentMotionFrame = Readonly<{
   revision: number;
   style: StyleHandle;
   declarations: readonly ResidentMotionDeclaration[];
+  /** Exact exposed numeric State inputs, resolved by Feedback, never by a host CSS read. */
+  numbers?: Readonly<Record<string, number>>;
+  sourceDiagnostics?: readonly string[];
 }>;
 /** Projection owns only presentation. The frame retains the unmodified final target. */
 export interface ResidentMotionSink {

@@ -1,0 +1,884 @@
+{
+  "schemaVersion": 1,
+  "role": "immutable original hosted evidence",
+  "testedHead": "dce198cb7ba6361da8a7bb50972463d92a792ec2",
+  "testedTree": "7227b3e4215cc0071cac9f179005cca796622424",
+  "run": {
+    "id": 45272391854,
+    "html_url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45272391854",
+    "event": "workflow_dispatch",
+    "path": ".github/workflows/bootstrap-state-controls-evidence.yml",
+    "head_sha": "dce198cb7ba6361da8a7bb50972463d92a792ec2",
+    "run_attempt": 1,
+    "status": "completed",
+    "conclusion": "failure",
+    "updated_at": "2026-11-23T22:01:05Z"
+  },
+  "dispatchInputs": {
+    "validate_public_packages": "true"
+  },
+  "jobs": [
+    {
+      "id": 138035309087,
+      "name": "browser-evidence",
+      "run_id": 45272391854,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45272391854/job/138035309087"
+    },
+    {
+      "id": 138035309442,
+      "name": "Source generation, types and spec validation",
+      "run_id": 45272391854,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45272391854/job/138035309442"
+    },
+    {
+      "id": 138035309657,
+      "name": "Public packages (cli)",
+      "run_id": 45272391854,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45272391854/job/138035309657"
+    },
+    {
+      "id": 138035309669,
+      "name": "Public packages (build)",
+      "run_id": 45272391854,
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45272391854/job/138035309669"
+    },
+    {
+      "id": 138035309855,
+      "name": "Public packages (react)",
+      "run_id": 45272391854,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45272391854/job/138035309855"
+    }
+  ],
+  "motion": {
+    "total": 137,
+    "passed": 137,
+    "failed": 0,
+    "pending": 0,
+    "todo": 0,
+    "sourceCases": 124,
+    "nativePositive": 12,
+    "splitRefusal": 1,
+    "sourceClosureFiles": 455,
+    "testInputs": 11,
+    "execution": {
+      "passed": true,
+      "failures": [],
+      "suites": [
+        {
+          "file": "packages/core/test/presence-top-declaration.test.ts",
+          "cases": 10,
+          "occurrences": 1,
+          "actualCases": 10
+        },
+        {
+          "file": "packages/modules/feedback/test/presence-top-projector.test.ts",
+          "cases": 17,
+          "occurrences": 1,
+          "actualCases": 17
+        },
+        {
+          "file": "packages/adapters/base/test/web-presence-top.test.ts",
+          "cases": 13,
+          "occurrences": 1,
+          "actualCases": 13
+        },
+        {
+          "file": "packages/prototypes/bootstrap-2-3-2/test/modal-presence-presentation.test.ts",
+          "cases": 18,
+          "occurrences": 1,
+          "actualCases": 18
+        },
+        {
+          "file": "packages/adapters/web-component/test/portal-conceal.test.ts",
+          "cases": 31,
+          "occurrences": 1,
+          "actualCases": 31
+        },
+        {
+          "file": "packages/modules/feedback/test/resident-width.test.ts",
+          "cases": 9,
+          "occurrences": 1,
+          "actualCases": 9
+        },
+        {
+          "file": "packages/adapters/base/test/web-resident-width.test.ts",
+          "cases": 11,
+          "occurrences": 1,
+          "actualCases": 11
+        },
+        {
+          "file": "packages/adapters/base/test/web-resident-width-adoption.test.ts",
+          "cases": 13,
+          "occurrences": 1,
+          "actualCases": 13
+        },
+        {
+          "file": "packages/runtime/test/contract/resident-width.contract.test.ts",
+          "cases": 2,
+          "occurrences": 1,
+          "actualCases": 2
+        },
+        {
+          "file": "packages/prototypes/bootstrap-2-3-2/test/modal-presence.browser.test.ts",
+          "cases": 6,
+          "occurrences": 1,
+          "actualCases": 6
+        },
+        {
+          "file": "packages/prototypes/bootstrap-2-3-2/test/progress-width-motion.browser.test.ts",
+          "cases": 7,
+          "occurrences": 1,
+          "actualCases": 7
+        }
+      ],
+      "requiredFiles": 11,
+      "requiredAssertions": 137,
+      "hostRegressionCases": {
+        "portalAttributeReentry": 1
+      },
+      "nativePositiveCases": {
+        "modalDocument": 6,
+        "progressDocument": 3,
+        "progressDirectShadow": 3
+      },
+      "negativeAdmissionCases": {
+        "progressExperimentalSplit": 1
+      }
+    }
+  },
+  "nativeSourceClosureReadbackSha256": "7b0528345634f3134bea72c50e1bf4d814c2fc0fed58d527c15988efb1567a6a",
+  "nativeReadbackSha256": "97cee74b8252a18defd36014f4e3845d1b7cec0f04b5a6c82b884a8edc365c9c",
+  "publicReadbackSha256": "2c421b9f7a25508dcaeb2c19865a0ecaa1d7dd88ba9e14e1e6a5caf674fea851",
+  "currentBudgetFailures": [
+    {
+      "entry": "Core",
+      "gzip": 12868,
+      "cap": 12800,
+      "over": 68
+    },
+    {
+      "entry": "Runtime",
+      "gzip": 106768,
+      "cap": 104300,
+      "over": 2468
+    },
+    {
+      "entry": "React",
+      "gzip": 178328,
+      "cap": 172600,
+      "over": 5728
+    },
+    {
+      "entry": "Vue",
+      "gzip": 177109,
+      "cap": 171400,
+      "over": 5709
+    },
+    {
+      "entry": "WebComponent",
+      "gzip": 213824,
+      "cap": 207200,
+      "over": 6624
+    }
+  ],
+  "equivalenceBoundary": "This evidence-only successor does not rerun the workflow. Product, tests, dependencies, workflow, generator and budget source remain identical to tested dce; commit custody verifies the entire changed-path set.",
+  "visualInspection": {
+    "method": "Assistant viewed these three original dce PNGs using view_image; all other image bytes are integrity checked only.",
+    "findings": [
+      "Dialog entered: visible titled panel and text over a dark full-page backdrop.",
+      "AlertDialog entered: visible confirmation panel over a dark full-page backdrop.",
+      "Dialog enter-close terminal: underlying page visible with no residual dialog or backdrop."
+    ],
+    "images": [
+      {
+        "file": "dialog-entered.png",
+        "bytes": 25751,
+        "sha256": "8684f91c47f48a84d2518ba5bf21daa937de0c8f5e2d90338da9d04d8c412811"
+      },
+      {
+        "file": "alert-dialog-entered.png",
+        "bytes": 26874,
+        "sha256": "86642ae75ed62a87185a378ec55a75e93fd772af21387c3460895108546017d5"
+      },
+      {
+        "file": "dialog-enter-close-terminal.png",
+        "bytes": 18577,
+        "sha256": "63747d5b68d4dc99529ddcd8e9b207ff1ddc456b3751e64053927045ec23b915"
+      }
+    ],
+    "boundary": "No claim of exhaustive visual inspection, accessibility audit or physical display timing."
+  },
+  "preservedExistingCustody": [
+    {
+      "path": "internal/records/2026-11-23-gpui-authored-input-atoms.md",
+      "sha256": "e4567b83c3cac7dbcaa44e0b38fded5a20a849936d319625b3566d67e415e17c",
+      "bytes": 3403
+    },
+    {
+      "path": "internal/records/2026-11-23-gpui-direct-control-label.md",
+      "sha256": "b2a9c3a48ab464198a9ef9c7136d9bd72cf196e40c456143497060e20b661ad7",
+      "bytes": 2331
+    },
+    {
+      "path": "internal/records/2026-11-23-gpui-native-consumer-composition.md",
+      "sha256": "3d410f0a53260135cbbb37b0db29fa3bc2657347f8d6eb71478de00bf3edcf1c",
+      "bytes": 7012
+    },
+    {
+      "path": "internal/records/2026-11-23-shadow-s4-paint-partial.md",
+      "sha256": "df727cb011c9f875dc6b899c8644e505706713ba476fba28fc6364fa1389ea09",
+      "bytes": 3860
+    },
+    {
+      "path": "internal/records/2026-11-23-train-package-budget.json",
+      "sha256": "4a6599a3edfdd5d9fad02c53af7c746015fe23f436b5eab10bd0ba8901a7e03e",
+      "bytes": 7767
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-liquid-view-operation/strict-project.json",
+      "sha256": "a7a0dc23a6b3c4b1fda249d3c87483e32da638655d5134dd7767ba8aeca16570",
+      "bytes": 224
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-s3-intrinsic-full-width/frozen-css.json",
+      "sha256": "e3b5d5e71e0f6cc922eaac94f0339ceb7ceedaa3eec87d036047cf7cbca241f9",
+      "bytes": 10691
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-s3-intrinsic-full-width/s2-complete-gate-restored.json",
+      "sha256": "876bf17e91e8e6408886b840a018f7f59172464f30793ccf9e03acfa798fa996",
+      "bytes": 649
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-s3-intrinsic-full-width/transport-driver.mjs",
+      "sha256": "87b43ba70da2894e996a525b1c1b45c16da67fc4ac89a5beeda75fde330d45bf",
+      "bytes": 4025
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-shadow-percentage-native/consumer-strict.json",
+      "sha256": "47a8c2c3beaeb4e1b6c584119dbce2d522ae91d1b43e2e6bbedff027ba929ff8",
+      "bytes": 265
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-shadow-percentage-native/prepare-02-0-receipt.json",
+      "sha256": "add5a97b4165e422d7f4f3a885216fef242861a1edd571358987a4f4a46b9ac6",
+      "bytes": 223
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-en-light-brutalist-enhanced-group-hover.json",
+      "sha256": "df351b094bc24f921856d1101ce56493b4ad62a44d184e1be412fa668b5e8d75",
+      "bytes": 911
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-en-light-brutalist-failed-scripts-group-hover.json",
+      "sha256": "6207e9d38f0cd7e10aef1ec24157f89963343f8703a79a05c9133bb05812559f",
+      "bytes": 909
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-mobile-en-brutalist-enhanced.json",
+      "sha256": "77b1bd19c264046dd3fb1e022cd370e2c0b0e04316606bcfa8a9ba173ae3b359",
+      "bytes": 5273
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-mobile-en-brutalist-no-js.json",
+      "sha256": "3b7e8b871046be85562dbf1ecb19b7343b781623527f76fd5f5b890e546e3229",
+      "bytes": 3350
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-train-package-budget/candidate.json",
+      "sha256": "effc8565d3402699a5e487f4020e6ec265833b830822e49675fe6b094d97fdd9",
+      "bytes": 1547018
+    },
+    {
+      "path": "internal/records/2026-11-23-sprint6-current-main-reentry.md",
+      "sha256": "aeb5823e6504f0e8189443f5c039473a4c0161e9819eebdc8c3dd17b2f423692",
+      "bytes": 7411
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-sprint6-current-main-reentry/manifest.json",
+      "sha256": "f7b1dcce691a183966ff6ec880b00e98345a313df907ea3795bbf176976d1446",
+      "bytes": 114907
+    },
+    {
+      "path": "internal/records/2026-11-23-sprint6-concurrent-motion-union.md",
+      "sha256": "6792b485bc13e80ebc287a0c717184bbb84a569cd383cee53819e02ed56a9d65",
+      "bytes": 12348
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-sprint6-concurrent-motion-union/manifest.json",
+      "sha256": "6014631dc07717a80d728487caeb4568154fc3fcf6cfe572c3d9c38444538b00",
+      "bytes": 90027
+    },
+    {
+      "path": "internal/records/2026-11-23-sprint6-main-view-retirement.md",
+      "sha256": "f1428997800d8bfde7ca305b73feeb7a8799c5fec3e70f3fdb16c8b0d5272050",
+      "bytes": 14021
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-sprint6-main-view-retirement/manifest.json",
+      "sha256": "975227b6f1bdd43b1ea8d0b1d5ef481c7d2b1c76dfad3e32c943d66a4f17295c",
+      "bytes": 45090
+    }
+  ],
+  "historicalBoundaries": [
+    "Current dce source and one hosted run only; no aggregation of two older 8882 5/6 attempts.",
+    "137 consists of 124 source/DOM cases, 12 actual browser positive cases and one explicit split refusal.",
+    "Headless Chromium source-Web coverage is not physical 120 Hz, frame-budget, OS, non-Web or AT conformance.",
+    "The overall run failed because current strict package budgets failed in the separate public-build job.",
+    "The historical ee Liquid representative four-host failure and font setup timeout are separate runs; not rerun here.",
+    "Original local graph 5000 ms timeout remains a historical failure; current hosted graph has its own successful source receipt.",
+    "Source closure hashes below are from the original hosted bundle. Device file comparison is a separately recorded step."
+  ],
+  "artifacts": [
+    {
+      "file": "original-artifacts/s6-dce-motion.zip",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-ci-terminal/s6-dce-motion.zip",
+      "rawBytes": 1397713,
+      "rawSha256": "55b96e1b4021e6ad1167a8636b5c4752467aebc2be929a62f2a25f6fb9827e03",
+      "storedBytes": 1397713,
+      "storedSha256": "55b96e1b4021e6ad1167a8636b5c4752467aebc2be929a62f2a25f6fb9827e03",
+      "encoding": "identity"
+    },
+    {
+      "file": "original-artifacts/s6-dce-controls.zip",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-ci-terminal/s6-dce-controls.zip",
+      "rawBytes": 1961001,
+      "rawSha256": "a7c648bb6e771310ba4a1389c32bac08cc0c1c0eed4127e10ea93d35ad8c5c2a",
+      "storedBytes": 1961001,
+      "storedSha256": "a7c648bb6e771310ba4a1389c32bac08cc0c1c0eed4127e10ea93d35ad8c5c2a",
+      "encoding": "identity"
+    },
+    {
+      "file": "original-artifacts/s6-dce-navbar.zip",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-ci-terminal/s6-dce-navbar.zip",
+      "rawBytes": 15442505,
+      "rawSha256": "564da161dbff938218a7d890bda54e12de1234f44df39708e74c9baa4d0f395a",
+      "storedBytes": 15442505,
+      "storedSha256": "564da161dbff938218a7d890bda54e12de1234f44df39708e74c9baa4d0f395a",
+      "encoding": "identity"
+    },
+    {
+      "file": "original-artifacts/s6-dce-button.zip",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-ci-terminal/s6-dce-button.zip",
+      "rawBytes": 186154,
+      "rawSha256": "bdb6989002745b6bfde119174208f1f4d722106327a87f68fe880f6f3b9ca8c2",
+      "storedBytes": 186154,
+      "storedSha256": "bdb6989002745b6bfde119174208f1f4d722106327a87f68fe880f6f3b9ca8c2",
+      "encoding": "identity"
+    },
+    {
+      "file": "original-artifacts/s6-dce-source.zip",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-ci-initial/s6-dce-source.zip",
+      "rawBytes": 11994,
+      "rawSha256": "5d3d475eeb13017ca9ad13761f3ac38702a16d7564b05ee16b074217d1ce12ef",
+      "storedBytes": 11994,
+      "storedSha256": "5d3d475eeb13017ca9ad13761f3ac38702a16d7564b05ee16b074217d1ce12ef",
+      "encoding": "identity"
+    },
+    {
+      "file": "original-artifacts/s6-dce-cli.zip",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-ci-initial/s6-dce-cli.zip",
+      "rawBytes": 73663,
+      "rawSha256": "52493b27d0b0b44fadd470f92617e03e0922b6c97b2dae2483eff93201e8aa2f",
+      "storedBytes": 73663,
+      "storedSha256": "52493b27d0b0b44fadd470f92617e03e0922b6c97b2dae2483eff93201e8aa2f",
+      "encoding": "identity"
+    },
+    {
+      "file": "original-artifacts/s6-dce-react.zip",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-ci-initial/s6-dce-react.zip",
+      "rawBytes": 11122,
+      "rawSha256": "f98369ed40454c732974e53d435b6e841efe6052cc8f20b481f80995c98af59d",
+      "storedBytes": 11122,
+      "storedSha256": "f98369ed40454c732974e53d435b6e841efe6052cc8f20b481f80995c98af59d",
+      "encoding": "identity"
+    },
+    {
+      "file": "original-artifacts/s6-dce-public-build.zip",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-ci-initial/s6-dce-public-build.zip",
+      "rawBytes": 318023,
+      "rawSha256": "782ca2d6fd92d31e97b6fbf2f6a948b5a0d42d207a869701fdc01b2581a306e1",
+      "storedBytes": 318023,
+      "storedSha256": "782ca2d6fd92d31e97b6fbf2f6a948b5a0d42d207a869701fdc01b2581a306e1",
+      "encoding": "identity"
+    },
+    {
+      "file": "readback/s6-dce-native-terminal-readback.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-ci-terminal/s6-dce-native-terminal-readback.json",
+      "rawBytes": 223472,
+      "rawSha256": "97cee74b8252a18defd36014f4e3845d1b7cec0f04b5a6c82b884a8edc365c9c",
+      "storedBytes": 50293,
+      "storedSha256": "885f0e4f6fac793b3960287fa9586dd479c457ac7686ee7f60400fbb9660b4c7",
+      "encoding": "gzip"
+    },
+    {
+      "file": "readback/s6-dce-native-readback.py.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-ci-terminal/s6-dce-native-readback.py",
+      "rawBytes": 17256,
+      "rawSha256": "a820f2ae8ed03779e785b02c0edfb0993d6c5a6c437190a1c5c7e9c1e5531ecc",
+      "storedBytes": 5763,
+      "storedSha256": "8f242abe65e3b52d8fec9115173a1059b7983f5f5d50a13e1c821a3dca883318",
+      "encoding": "gzip"
+    },
+    {
+      "file": "readback/s6-dce-terminal-api.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-ci-terminal/s6-dce-terminal-api.json",
+      "rawBytes": 37793,
+      "rawSha256": "b1cb1a8ec2592de81af29cef2ce75e3915e019fd9b018b5b99ccf2fb15b4efc2",
+      "storedBytes": 4817,
+      "storedSha256": "3ece23dbdb7180c5a70da1cd17b72f5dc1e9cf86f8039fdf846de3cc8440525e",
+      "encoding": "gzip"
+    },
+    {
+      "file": "readback/s6-dce-motion-gate-source.mjs.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-ci-terminal/s6-dce-motion-gate-source.mjs",
+      "rawBytes": 15516,
+      "rawSha256": "b65f27a58fdb2a3d684b125819cb821a58f12427b892a8ab66cbe1b6eefc6606",
+      "storedBytes": 4697,
+      "storedSha256": "5f1e8145744d0ecbc11c6343c9668d93a384b5e97281dd7fa511db609de70189",
+      "encoding": "gzip"
+    },
+    {
+      "file": "readback/source-closure-readback.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-ci-terminal/source-closure-readback.json",
+      "rawBytes": 154373,
+      "rawSha256": "7b0528345634f3134bea72c50e1bf4d814c2fc0fed58d527c15988efb1567a6a",
+      "storedBytes": 26957,
+      "storedSha256": "456568865fc5180b78bdcfe6461c2f5558928abf9fc23f6294c62b9f4cbc676a",
+      "encoding": "gzip"
+    },
+    {
+      "file": "readback/status.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-ci-terminal/status.json",
+      "rawBytes": 4976,
+      "rawSha256": "2a4565116e53f898c2f5984752def3aa4ec480dc41dc6f77784f598b52c10eba",
+      "storedBytes": 1240,
+      "storedSha256": "894fc78a4c6839e1582bdb869901748d235ccf01274ea546cc6428d1aa66f0da",
+      "encoding": "gzip"
+    },
+    {
+      "file": "readback/s6-dce-initial-ci-readback.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-ci-initial/s6-dce-initial-ci-readback.json",
+      "rawBytes": 80626,
+      "rawSha256": "2c421b9f7a25508dcaeb2c19865a0ecaa1d7dd88ba9e14e1e6a5caf674fea851",
+      "storedBytes": 7368,
+      "storedSha256": "94ff2b628b8cd584fb5eda061124427af9a45c55d01fb341d93fc1699bc01144",
+      "encoding": "gzip"
+    },
+    {
+      "file": "readback/s6-dce-initial-ci-readback.py.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-ci-initial/s6-dce-initial-ci-readback.py",
+      "rawBytes": 5889,
+      "rawSha256": "8ba261e47de2596f3016369b56ed843cee2e6fcbfcc9ab86d28f1245d434ddc4",
+      "storedBytes": 2493,
+      "storedSha256": "7c1474ed6814050113d13690c65505d85e8dfc1310a09086c7216fd03a4f960d",
+      "encoding": "gzip"
+    },
+    {
+      "file": "original-publication/status.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/publication/status.json",
+      "rawBytes": 14182,
+      "rawSha256": "c5b815ded06051c2aa82a74cb3825b17227084e9b30218e6b1fc090b1a8b9cdc",
+      "storedBytes": 3766,
+      "storedSha256": "692a38e08f11a9c0e3d5613ed42e2a2e8ec8c381cb99e6c7881143571c528a03",
+      "encoding": "gzip"
+    },
+    {
+      "file": "original-publication/dispatch-request.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/publication/dispatch-request.json",
+      "rawBytes": 116,
+      "rawSha256": "1777e6d30a93e42e76cc39acbb7409b1e9cdd7500ff30d1da53a659f8269b77b",
+      "storedBytes": 121,
+      "storedSha256": "2254c2fe6bdbf37a50c8c6c50fdaff4e99f376585afbef1d6d2bac3c4123ce79",
+      "encoding": "gzip"
+    },
+    {
+      "file": "original-publication/commit-object.txt.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/publication/commit-object.txt",
+      "rawBytes": 1453,
+      "rawSha256": "3149e17207f45f807c9a531c702e16fc11723f86404bd2cc2b5a9bf31a2da08b",
+      "storedBytes": 830,
+      "storedSha256": "7ed3409b5f1fb4d415456b62bd1aadb6c4e44b3be771c151b6fde634c538aac3",
+      "encoding": "gzip"
+    },
+    {
+      "file": "execution/archive.py.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-archive.py",
+      "rawBytes": 23044,
+      "rawSha256": "9872b9f20393f9b7277cf4e05e80d674680c69158d35bbc38535536d6d1a5d02",
+      "storedBytes": 8627,
+      "storedSha256": "5f4088b6d571ed4564e05382d57e5466d46c29729106de8ff300285f4230647c",
+      "encoding": "gzip"
+    },
+    {
+      "file": "scope/authority-map.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-archive/authority-map.json",
+      "rawBytes": 1644,
+      "rawSha256": "c1606fbabc51a1f099b6290219f59a05461c09a7d0d9c2adb135f21214009891",
+      "storedBytes": 893,
+      "storedSha256": "c741d334d9e4a9f79068c104e16c8509021fae720975999ff7b478a5fe711ab4",
+      "encoding": "gzip"
+    },
+    {
+      "file": "scope/documentation-scope.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-archive/documentation-scope.json",
+      "rawBytes": 577,
+      "rawSha256": "c5b122496d8e01cb35d6300a625bdf425c50d6d3cf65ea8ff76204bb1f9eebd9",
+      "storedBytes": 339,
+      "storedSha256": "de9c60aaeaca8ad5cb2640bad891a262d6095aa7effb06a3a77f29ba4eb25209",
+      "encoding": "gzip"
+    },
+    {
+      "file": "scope/implementation-authorization.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-archive/implementation-authorization.json",
+      "rawBytes": 574,
+      "rawSha256": "e5f5eaf7426dfe4ca5cd0787e61c56bd1ac7b8ab7ebec5bc7913a18c4b046a68",
+      "storedBytes": 343,
+      "storedSha256": "8589f8c83e8cdbcc8d89797e40d7c69f0d6831513f9f46040aae477b7bb06172",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/original-supervisor-status.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-validation/status.json",
+      "rawBytes": 2065,
+      "rawSha256": "05354554bd6d545b4f61b263dd4761572791c70c62ea0de434012a0aa1f8d1d9",
+      "storedBytes": 820,
+      "storedSha256": "cb30e53566087d18d040bac47617bf4b17022b97bac917d944051a11450450bd",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/original-agent-operations-late-terminal.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-validation/agent-operations.log",
+      "rawBytes": 136923,
+      "rawSha256": "d3c7b1257f880fb4be107851c70f573f0e706dcdf8f9dacd1730b39966a38830",
+      "storedBytes": 35434,
+      "storedSha256": "ea59797344f2c375316092804b37936bd1076896d95527eb44de912f60a759e9",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/owned-child-natural-exit-reconciliation.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-validation/child-reconciliation-r1.json",
+      "rawBytes": 1649,
+      "rawSha256": "fa92239cc90b96487efc613979df70cb6aad35b172d0ed114c979219db88a657",
+      "storedBytes": 733,
+      "storedSha256": "0492184dbd134f395ba0db7ff550daaa2eafef54e924deaa6f08096f31294585",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/original-validator.py.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-validate.py",
+      "rawBytes": 7109,
+      "rawSha256": "1693158555527717a0d72b6ebda612f73f2f30e7e836e609f293f73337591eba",
+      "storedBytes": 2738,
+      "storedSha256": "65343d7d7daa6c1d97c0584942048633142361e77887cf4daf3c617dba756403",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/original-validator-launch.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-validate-launch.json",
+      "rawBytes": 100,
+      "rawSha256": "cb93e00fa65b71931a57b62330b8cb45b2cfce6e26139ca670d9899ebab360e6",
+      "storedBytes": 108,
+      "storedSha256": "1e4a2c7ef1029ec7e0a570116bcb03ccf00baedf53661c0ae4c82c757b3af2c8",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/original-validator-launch.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-validate-launch.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/original-evidence-format-check.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-validation/evidence-format-check.log",
+      "rawBytes": 66,
+      "rawSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "storedBytes": 82,
+      "storedSha256": "6cd316ae8e81df0ff79776205007450fac3d62e1ba8e884e169e326d7955ebe5",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/original-public-and-repository-docs.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-validation/public-and-repository-docs.log",
+      "rawBytes": 334,
+      "rawSha256": "38c6a7e067d2e0942ddd6fffcf831fe8d26d0dc25409301aebfd998226e5e603",
+      "storedBytes": 262,
+      "storedSha256": "18ae7237b665c7383903197bd5a63025c13f4e9cde69a6df320771f2bf0e8fd8",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/first-projection-completion-status.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-projection/status.json",
+      "rawBytes": 1723,
+      "rawSha256": "1ba00c433c855e82cd9d2927f2f454be2c469177c692be37dbfd92b61132214a",
+      "storedBytes": 770,
+      "storedSha256": "0e81ead79aeac4b860d2054d9250c69b4642e09294ff9c9fab8b84b39b606144",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/first-agent-projection-generate.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-projection/agent-projection-generate.log",
+      "rawBytes": 328,
+      "rawSha256": "a10286efac831cd5acfdfca10b3524299d42c8950f95b7993d45dc091be7481a",
+      "storedBytes": 270,
+      "storedSha256": "1ff9b1847b150848976a17e21492e1ed80bdb068bf35b819e9aa8f34f6a69c2a",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/first-agent-projection-check.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-projection/agent-projection-check.log",
+      "rawBytes": 257,
+      "rawSha256": "d5c2a845fb214851a7fb569744117e6c8ecdc934c527d7293f144b5026d6e1b3",
+      "storedBytes": 209,
+      "storedSha256": "8d79992b601a0e7344a94c8dff5fbb85505d2d45a8403eb17f9c8eeb98f4fc81",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/first-review-rule-route.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-projection/review-rule-route.log",
+      "rawBytes": 966,
+      "rawSha256": "5940fda591f84786822b4e1a4d03ab41a3c445feb39bb7d3af9c6028ace33a07",
+      "storedBytes": 530,
+      "storedSha256": "b49e954b1c16bdb44dc15712a0beec08cad2044e0d9fe6e07b8ccebfa85a24f5",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/first-projection-completion.py.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-projection.py",
+      "rawBytes": 4763,
+      "rawSha256": "ea6e485f1fbfd64645a5f214b3965a248e646e008e945e66cbd592f3a3758dfe",
+      "storedBytes": 2006,
+      "storedSha256": "8f9c4b36fcc2ec15eeaeb537695bc48ac41363442170468faaec83ffbfa3c1bd",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/first-projection-launch.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-projection-launch.json",
+      "rawBytes": 149,
+      "rawSha256": "5fc77dce751267d8a8d99c418d3d9e96dee9fecd0c9253bcb29b322e56fb3071",
+      "storedBytes": 139,
+      "storedSha256": "357368b1a75f339483595f5d8b2b5ef6427b2ff90ffcc7498d22b29b12b2e546",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/original-preparation-status.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-archive/status.json",
+      "rawBytes": 5556,
+      "rawSha256": "116851a79792eee62ec79ee652f69a348b56d32ecd9b4b7512689b1ba9ddd54a",
+      "storedBytes": 1287,
+      "storedSha256": "e4fd641939dfd288ef79645f322ae57c539e30da75918002266c5f4c1b8878a9",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/original-root-peer-message.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-root-review.json",
+      "rawBytes": 930,
+      "rawSha256": "b177ea35b5a8c104d89cf4a3ee33dd0da907c2d5e2c52f40bb5a2e2d2ab986ce",
+      "storedBytes": 756,
+      "storedSha256": "9375383c2ccf5c7cbe3805a356b0799f9c112fd77311305b34b0109c59382325",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/before-record.md.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-validation-closure/before-record.md",
+      "rawBytes": 8981,
+      "rawSha256": "3ece03793a053b524a588a9d6a7af99f6cc80e3b7d7f33cb33e19c7558b26a9e",
+      "storedBytes": 4086,
+      "storedSha256": "44268b2c939bcd3a96acb2fdb890c7201d406e8aeb2f830321b577eec772626e",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/before-manifest.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-validation-closure/before-manifest.json",
+      "rawBytes": 23538,
+      "rawSha256": "9ca0cf4b4e086bfa083ab310f0387c64a11a64bcfcb745de87454a409b387574",
+      "storedBytes": 6186,
+      "storedSha256": "0044dcc67fa5d05b3033f1faeb4582a26b121ab4c32d62ef527c73851598280f",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/policy-readback.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-validation-closure/policy-readback.json",
+      "rawBytes": 2860,
+      "rawSha256": "74e5cfc458dc748fea07202158c9a4e2f9f3ee5c4b5cf709299f8a28a1c85f2b",
+      "storedBytes": 1220,
+      "storedSha256": "eebc303bc3dc7981221f19f3ea71c1d09328024b1257b0b228c985c125188de5",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/root-continuation-message.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-validation-closure/root-continuation-message.json",
+      "rawBytes": 722,
+      "rawSha256": "7cd8be7df70b3f48c409501ccba8100c35dd3116f5398ba285d7d8e6a706521d",
+      "storedBytes": 606,
+      "storedSha256": "b54b606425e29b13ba3aeaa6ae085ab3bb51a4661b9d039504355344b12f4acf",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/closure.py.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-closure.py",
+      "rawBytes": 24286,
+      "rawSha256": "e1302073ef7ec333f530b7df46121d8fb28334159e35fdd443e1a184ea1f1220",
+      "storedBytes": 8166,
+      "storedSha256": "72172b5d1f5ab29c7f7338e262cd17de44c047827afe7dab7b593ddb8f793859",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/formal-review-route-rejected-status.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-validation-closure/status.json",
+      "rawBytes": 4326,
+      "rawSha256": "1039cc520ac991a62499b6564b1e6d8988613597806ae99239aec6344fa0f4bc",
+      "storedBytes": 1182,
+      "storedSha256": "38c81b37e276055ee94dd1f1fff75a77cc8a8f50cce9bffc437da7725eec9884",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/formal-review-route-rejected.log.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-validation-closure/partial-review-route.log",
+      "rawBytes": 612,
+      "rawSha256": "5b9b4181f132fe8505ac81fe4bb82799dc19a3b6cd809f0c32b60dcf4a9c4ad9",
+      "storedBytes": 301,
+      "storedSha256": "529d7ba24179b0f6c4e0d71f3e9e02a2f165892b376c212205e429db79714efe",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/formal-review-route-rejected-handoff.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-validation-closure/validation-handoff.json",
+      "rawBytes": 2718,
+      "rawSha256": "74dd7076334fe271ad8057096c2f3a99b1e8b8c9bf1447df51bd9b5c45200248",
+      "storedBytes": 982,
+      "storedSha256": "a9637d1d6a4a26aa0304f80913ea2d334c23a315492f4b6d951af590cbd3b1e1",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/partial-validation-before-terminal-route.json.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-validation-closure/evidence-report.json",
+      "rawBytes": 7950,
+      "rawSha256": "135c7925736dda9298331542c7f0c8a49ae5b3056cf12010593b0375e3256b29",
+      "storedBytes": 2447,
+      "storedSha256": "b2afbf4f9b65796f24078415927f49bde18dbc7355db818452d279e083cb296d",
+      "encoding": "gzip"
+    },
+    {
+      "file": "documentation-validation/terminal-closure.py.gz",
+      "source": "/tank/shared/projects/proto-ui-agent/sprint6-main-sync-75d5e28a-20261123-ops/final-23122/union-ee2379/dce-evidence-closure-finalize.py",
+      "rawBytes": 13619,
+      "rawSha256": "305698b1ca69edca0cb6f6e0de4d9ffdbc3d70f0128458a5e61083625a422094",
+      "storedBytes": 4570,
+      "storedSha256": "0e1088da7c38003368fce5e91205b7455c597b2cc797160d066199c1b6c0f2f5",
+      "encoding": "gzip"
+    }
+  ],
+  "documentationValidation": {
+    "result": "partial",
+    "kind": "verification",
+    "scope": "Proportional documentation checks; Node Agent-operation controls are not browser/native execution.",
+    "inputHead": "dce198cb7ba6361da8a7bb50972463d92a792ec2",
+    "inputPreparedTree": "727f6a3cdd2b24e8f8694fd950f82852fac27246",
+    "originalCommand": ["corepack", "pnpm@10.32.1", "check:agent-operations"],
+    "supervision": {
+      "result": "timeout",
+      "limitSeconds": 900,
+      "shellExitCode": null,
+      "rawStatusSha256": "05354554bd6d545b4f61b263dd4761572791c70c62ea0de434012a0aa1f8d1d9",
+      "originalStatePreserved": "pending-child"
+    },
+    "lateNodeReport": {
+      "tests": 1549,
+      "pass": 1549,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "durationMs": 900635.67921
+    },
+    "lateLogSha256": "d3c7b1257f880fb4be107851c70f573f0e706dcdf8f9dacd1730b39966a38830",
+    "naturalExitReadback": {
+      "observedAt": "2026-11-23T22:41:13.797450+00:00",
+      "ownedPids": [3494356, 3494794],
+      "processes": [],
+      "signalsSent": false,
+      "shellExitRecovered": false
+    },
+    "controlRerun": false,
+    "completedCommands": [
+      {
+        "name": "evidence-format-check",
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "prettier",
+          "--check",
+          "internal/records/2026-11-23-sprint6-hosted-motion-terminal.md",
+          "internal/records/evidence/2026-11-23-sprint6-hosted-motion-terminal/manifest.json"
+        ],
+        "exit": 0,
+        "seconds": 3.056,
+        "logSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+      },
+      {
+        "name": "public-and-repository-docs",
+        "command": ["corepack", "pnpm@10.32.1", "check:public-docs"],
+        "exit": 0,
+        "seconds": 7.961,
+        "logSha256": "38c6a7e067d2e0942ddd6fffcf831fe8d26d0dc25409301aebfd998226e5e603"
+      },
+      {
+        "name": "agent-projection-generate",
+        "command": ["corepack", "pnpm@10.32.1", "spec:docs:agent"],
+        "exit": 0,
+        "seconds": 15.883,
+        "logSha256": "a10286efac831cd5acfdfca10b3524299d42c8950f95b7993d45dc091be7481a"
+      },
+      {
+        "name": "agent-projection-check",
+        "command": ["corepack", "pnpm@10.32.1", "check:agent-doc"],
+        "exit": 0,
+        "seconds": 5.692,
+        "logSha256": "d5c2a845fb214851a7fb569744117e6c8ecdc934c527d7293f144b5026d6e1b3"
+      },
+      {
+        "name": "review-rule-route",
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "agent:skill",
+          "--",
+          "pui-review",
+          "--mode",
+          "human-assisted",
+          "--mode-source",
+          "current-user"
+        ],
+        "exit": 0,
+        "seconds": 3.374,
+        "logSha256": "5940fda591f84786822b4e1a4d03ab41a3c445feb39bb7d3af9c6028ace33a07"
+      }
+    ],
+    "remainingLimitation": "The original 900-second supervision failed before a shell exit code was collected. The late complete 1549/1549 Node summary does not change that command into an observed exit-zero result. No cause or missing exit code is inferred.",
+    "nextAction": "Retain this verification limitation in the ordinary evidence-only successor and PR disclosure; obtain a separately observed successful command if a later review/integration gate requires it. No rerun or broader timeout is performed for this archive.",
+    "ruleInterpretation": "Ordinary authorized commit/push remains distinct from review approval, merge permission and acceptance; none is manufactured.",
+    "formalReviewBoundary": {
+      "attemptedTransition": "pui-validate -> pui-review",
+      "result": "rejected",
+      "exit": 1,
+      "reason": "handoff lacks artifact required by pui-review: review-input",
+      "logSha256": "5b9b4181f132fe8505ac81fe4bb82799dc19a3b6cd809f0c32b60dcf4a9c4ad9",
+      "disposition": "No independent review input, approval packet or GitHub review was manufactured. Validation returns a terminal partial handoff with nextSkillId null; ordinary evidence publication remains separately authorized."
+    }
+  }
+}

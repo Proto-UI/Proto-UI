@@ -53,6 +53,8 @@ export type MaterialPolicyInput = Readonly<{
     excludesOwnOutput: boolean;
   }> | null;
   provider: MaterialProviderFacts | null;
+  /** Exact-target host lease fact. Absence never means a zero footprint. */
+  paintReservation?: 'ready' | 'unavailable';
 }>;
 
 export type MaterialPolicyResult = Readonly<{
@@ -256,6 +258,10 @@ export function resolveMaterialPolicy(input: MaterialPolicyInput): MaterialPolic
     pixels > provider.maxSurfacePixels
   ) {
     result.diagnostics.push('geometry-or-provider-budget-unavailable');
+    return finish();
+  }
+  if (slot.paintReservation === 'required' && input.paintReservation !== 'ready') {
+    result.diagnostics.push('paint-reservation-unavailable');
     return finish();
   }
   if (

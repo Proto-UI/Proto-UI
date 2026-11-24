@@ -1,0 +1,95 @@
+id: T-MATERIAL-PAINT-RESERVATION-0001
+type: test
+title: Bounded draft reservation transport and lifetime evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Unit geometry is injected. Real four-host optical readiness, native layout, physical input, AT and cost remain independent acceptance conditions.
+summary: Separates declaration, source safety and lifecycle checks from original-deadline native product acceptance.
+cases:
+  - id: T-MATERIAL-PAINT-RESERVATION-0001-CASE-OWNERSHIP
+    title: Strict declaration, exact domain and neutral owned template transport
+    covers:
+      [C-MATERIAL-PAINT-RESERVATION-0001-DECLARATION, C-MATERIAL-PAINT-RESERVATION-0001-PROJECTION]
+    expectation: exact-current-owner-and-part-no-input-or-accessibility-transfer
+  - id: T-MATERIAL-PAINT-RESERVATION-0001-CASE-LIFETIME
+    title: Stale same-node refs, failed staging, cleanup exceptions and reentry
+    covers: [C-MATERIAL-PAINT-RESERVATION-0001-LEASE]
+    expectation: no-old-write-or-release-on-successor-and-attempt-all-owned-cleanup
+  - id: T-MATERIAL-PAINT-RESERVATION-0001-CASE-LAYOUT
+    title: Separate target basis, independent responsive reference and exact outline clearance
+    covers:
+      [
+        C-MATERIAL-PAINT-RESERVATION-0001-LAYOUT,
+        C-MATERIAL-PAINT-RESERVATION-0001-INLINE,
+        C-MATERIAL-PAINT-RESERVATION-0001-OUTLINE,
+      ]
+    expectation: unknown-is-unavailable-no-reference-self-growth-original-profile-ROI-retained
+  - id: T-MATERIAL-PAINT-RESERVATION-0001-CASE-NATIVE
+    title: Actual Liquid Accordion four Web hosts under the original 1000ms readiness guard
+    covers: [C-MATERIAL-PAINT-RESERVATION-0001-ADMISSION, C-MATERIAL-PAINT-RESERVATION-0001-OUTLINE]
+    expectation: exact-head-self-optical-and-opaque-ancestor-negative-control-open-reopen-same-input-node-real-border-and-content-evidence
+implementations:
+  - id: reservation-core-grammar
+    kind: fixture
+    status: passing
+    path: packages/core/test/material-paint-reservation.test.ts
+    required: true
+    consumesCases: [T-MATERIAL-PAINT-RESERVATION-0001-CASE-OWNERSHIP]
+  - id: reservation-logical-owner
+    kind: module-test
+    status: passing
+    path: packages/modules/feedback/test/material-paint-reservation.test.ts
+    required: true
+    consumesCases:
+      [
+        T-MATERIAL-PAINT-RESERVATION-0001-CASE-OWNERSHIP,
+        T-MATERIAL-PAINT-RESERVATION-0001-CASE-LIFETIME,
+      ]
+  - id: reservation-cleanup
+    kind: module-test
+    status: passing
+    path: packages/modules/feedback/test/material-reservation-cleanup.test.ts
+    required: true
+    consumesCases: [T-MATERIAL-PAINT-RESERVATION-0001-CASE-LIFETIME]
+  - id: reservation-host-model
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/material-paint-reservation.test.ts
+    required: true
+    consumesCases:
+      [
+        T-MATERIAL-PAINT-RESERVATION-0001-CASE-LIFETIME,
+        T-MATERIAL-PAINT-RESERVATION-0001-CASE-LAYOUT,
+      ]
+    notes:
+      [
+        Injected geometry proves bounded ownership and layout admission only,
+        not actual browser CSS or optical output.,
+      ]
+  - id: reservation-outline-model
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/material-border-outline.test.ts
+    required: true
+    consumesCases: [T-MATERIAL-PAINT-RESERVATION-0001-CASE-LAYOUT]
+  - id: reservation-native-four-hosts
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts
+    required: true
+    consumesCases: [T-MATERIAL-PAINT-RESERVATION-0001-CASE-NATIVE]
+    notes:
+      [
+        The liquid-reservation workflow selection adds four cases while preserving the original representative inventory and original default readiness deadline.,
+      ]
+verifies:
+  contracts: [C-MATERIAL-PAINT-RESERVATION-0001]
+openQuestions:
+  - id: T-MATERIAL-PAINT-RESERVATION-0001-Q-NATIVE
+    question: Which final-source native receipts and independent visual, input and accessibility review accept the proposed size-preserving in-flow layout and remaining environments?
+    blocks: [activation:T-MATERIAL-PAINT-RESERVATION-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Retained separate unit, native and activation boundaries for the draft candidate.
+tags: [material, anatomy, template, lifecycle, test]

@@ -14,7 +14,9 @@ import {
 } from './runtime-test-plan.mjs';
 import {
   BOOTSTRAP_BROWSER_CASES,
+  BOOTSTRAP_COMPOSITION_BROWSER_CASES,
   BOOTSTRAP_EVIDENCE_SUITES,
+  BOOTSTRAP_ORIGINAL_BROWSER_CASES,
   assertBootstrapEvidence,
 } from './bootstrap-state-controls-receipt.mjs';
 
@@ -289,11 +291,19 @@ test('the full CI cycle requires the same-commit independent Bootstrap producer 
     job.steps[gateIndex].env.PROTO_UI_BOOTSTRAP_EVIDENCE_DIR,
     '${{ runner.temp }}/bootstrap-state-controls-evidence'
   );
-  const uploadIndex = job.steps.findIndex((step) =>
-    step.uses?.startsWith('actions/upload-artifact@')
-  );
+  const uploads = job.steps
+    .map((step, index) => ({ step, index }))
+    .filter(
+      ({ step }) =>
+        step.uses?.startsWith('actions/upload-artifact@') &&
+        step.with?.path === job.steps[gateIndex].env.PROTO_UI_BOOTSTRAP_EVIDENCE_DIR
+    );
+  assert.equal(uploads.length, 1, 'Exactly one uploader owns the state-controls receipt');
+  const { step: upload, index: uploadIndex } = uploads[0];
   assert.ok(uploadIndex > gateIndex);
-  assert.equal(job.steps[uploadIndex].if, 'always()');
+  assert.equal(upload.if, 'always()');
+  assert.match(upload.with.name, /^bootstrap-state-controls-/);
+  assert.equal(upload.with['if-no-files-found'], 'error');
   for (const environment of [job.env, ...job.steps.map((step) => step.env ?? {})]) {
     assert.ok(
       !Object.hasOwn(environment, 'GITHUB_ACTIONS'),
@@ -347,13 +357,41 @@ function receiptControl() {
   };
 }
 
-test('receipt gate admits exactly fifteen original journeys plus all supporting suites', () => {
-  assert.equal(BOOTSTRAP_BROWSER_CASES.length, 15);
+test('receipt gate retains fifteen original journeys and all sixteen composition combinations', () => {
+  assert.equal(BOOTSTRAP_ORIGINAL_BROWSER_CASES.length, 15);
+  assert.equal(BOOTSTRAP_COMPOSITION_BROWSER_CASES.length, 16);
+  assert.equal(BOOTSTRAP_BROWSER_CASES.length, 31);
   assert.deepEqual(assertBootstrapEvidence(receiptControl(), expectedReceipt), {
-    browserCases: 15,
-    selectedSuites: 4,
+    browserCases: 31,
+    selectedSuites: 5,
   });
 });
+
+test('the old fifteen-case green receipt cannot admit unexecuted composition journeys', () => {
+  const data = receiptControl();
+  data.manifest.results = data.manifest.results.filter((result) =>
+    BOOTSTRAP_ORIGINAL_BROWSER_CASES.includes(result.name)
+  );
+  const suite = data.report.testResults.find((result) => result.name.endsWith(browserPath));
+  suite.assertionResults = suite.assertionResults.filter((result) =>
+    BOOTSTRAP_ORIGINAL_BROWSER_CASES.includes(result.title)
+  );
+  const count = data.report.testResults.reduce(
+    (total, result) => total + result.assertionResults.length,
+    0
+  );
+  data.report.numPassedTests = count;
+  data.report.numTotalTests = count;
+  assert.throws(() => assertBootstrapEvidence(data, expectedReceipt));
+});
+
+for (const name of BOOTSTRAP_COMPOSITION_BROWSER_CASES) {
+  test(`composition receipt rejects a missing combination: ${name}`, () => {
+    const data = receiptControl();
+    data.manifest.results = data.manifest.results.filter((result) => result.name !== name);
+    assert.throws(() => assertBootstrapEvidence(data, expectedReceipt));
+  });
+}
 for (const [name, mutate] of [
   [
     'missing source receipt',

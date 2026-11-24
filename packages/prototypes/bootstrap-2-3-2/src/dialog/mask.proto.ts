@@ -13,8 +13,12 @@ export default definePrototype<DialogMaskProps, DialogMaskExposes>({
   name: 'bootstrap-2-3-2-dialog-mask',
   setup(def) {
     const behavior = asDialogMask();
-    def.feedback.style.use(tw('fixed inset-0 bg-black'));
-    behavior.asTransition.configure({ enterDuration: 150, leaveDuration: 150 });
+    def.feedback.style.use(tw('fixed inset-0 bg-black opacity-80'));
+    behavior.asTransition.configure({
+      enterDuration: 150,
+      leaveDuration: 150,
+      completion: { kind: 'presentation', timeoutMs: 1000 },
+    });
     def.feedback.style.presence({
       owner: behavior.asTransition.presentationOwner,
       closed: { opacity: 0 },

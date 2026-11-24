@@ -170,10 +170,13 @@ export function createContactCarrier(host: HTMLElement) {
 }
 
 /** Author pseudos have no DOMRect and may paint outside their originating box.
- * Only the private before carrier has a separately inspected bounded footprint. */
-export function hasAuthoredPseudoPaint(element: Element): boolean {
+ * Only the private before carrier has a separately inspected bounded footprint.
+ * Ancestor inspection includes that private paint: it belongs to another
+ * surface and must not be mistaken for the inspected target's own output. */
+export function hasAuthoredPseudoPaint(element: Element, includePrivateCarrier = false): boolean {
   return ['::before', '::after'].some((pseudo) => {
-    if (pseudo === '::before' && owners.get(element as HTMLElement)?.()) return false;
+    if (!includePrivateCarrier && pseudo === '::before' && owners.get(element as HTMLElement)?.())
+      return false;
     const css = element.ownerDocument.defaultView!.getComputedStyle(element, pseudo);
     return (
       !!css.content &&

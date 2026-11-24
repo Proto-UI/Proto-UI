@@ -1,0 +1,280 @@
+{
+  "schemaVersion": 1,
+  "scope": "Sprint6 #1053 exact decoded-image reuse and independent host-fault review repairs; injected-host evidence only",
+  "base": "34cbf089c3e5ff638a27372ab973b54fd364b54b",
+  "upstreamCommit": "e9d6a66e4c42813e42471573543573c3eb5f70b0",
+  "finalSourceSha256": "3668b4d200b2da4fbe830038d41f15060b57ab352dbbe1b8ade4279a1aa4da29",
+  "sourceFiles": [
+    {
+      "path": "packages/adapters/base/src/material/image-prepare.ts",
+      "sha256": "3668b4d200b2da4fbe830038d41f15060b57ab352dbbe1b8ade4279a1aa4da29",
+      "gitBlob": "7437890a46d475bacf8ac06c7e15c49744d09d0d"
+    },
+    {
+      "path": "packages/adapters/base/src/material/sink.ts",
+      "sha256": "7fcf17ec3ed2b2c307cfe36cd028f22cf0589fcdfcb26a29584cf3085972e97a",
+      "gitBlob": "9fcb699dddbbde3133b78cf116b5814af4d26673"
+    },
+    {
+      "path": "packages/adapters/base/test/web-material-image-cache.test.ts",
+      "sha256": "9b51fa6f65d6899e3a247a601f9870653983e45d4fca2c7bbfba7947220b702f",
+      "gitBlob": "187702d83ccb21120b35aa15724c01c83c0c8e6d"
+    },
+    {
+      "path": "packages/adapters/base/test/web-material-adoption.test.ts",
+      "sha256": "f8a703962144599e6ab388e5a0c6f3dc1c8d1f3ac6f9d7e1beb20121b762b043",
+      "gitBlob": "64b4a2ef029a9ff862d19f97cb878b66a2a5825c"
+    },
+    {
+      "path": "packages/adapters/base/test/web-material-initial-paint.test.ts",
+      "sha256": "455d2b737628d7949c249a1b9ab133e9008cfa47f602032b1569c6a68c54e598",
+      "gitBlob": "4c83f18078d2b40c7f0e915f483e71c368300927"
+    },
+    {
+      "path": "packages/adapters/base/test/web-material-preferences-sequence.test.ts",
+      "sha256": "2a73a943756074f95801e046c1d198504936b1891b7073be5dbaa76230cacf90",
+      "gitBlob": "c3fc74aa096a20f23b6cb8393f47743abc5a65a1"
+    },
+    {
+      "path": "packages/adapters/base/test/web-material-sink.test.ts",
+      "sha256": "e8318017d83ff42fbb1657469f73b096991425dc9daecf3e9451a1ee8d6419ca",
+      "gitBlob": "a669eb5a18e206025c67580d15bf3f96801182ff"
+    }
+  ],
+  "archivePolicy": "Explicit project-source/evidence allowlist. No credentials, environment files or Git configuration. Credential-shaped material scan found none. Original failures are retained.",
+  "members": [
+    {
+      "path": "candidate/packages/adapters/base/src/material/image-prepare.ts",
+      "bytes": 9867,
+      "sha256": "3668b4d200b2da4fbe830038d41f15060b57ab352dbbe1b8ade4279a1aa4da29"
+    },
+    {
+      "path": "candidate/packages/adapters/base/src/material/sink.ts",
+      "bytes": 43179,
+      "sha256": "7fcf17ec3ed2b2c307cfe36cd028f22cf0589fcdfcb26a29584cf3085972e97a"
+    },
+    {
+      "path": "candidate/packages/adapters/base/test/web-material-adoption.test.ts",
+      "bytes": 21839,
+      "sha256": "f8a703962144599e6ab388e5a0c6f3dc1c8d1f3ac6f9d7e1beb20121b762b043"
+    },
+    {
+      "path": "candidate/packages/adapters/base/test/web-material-image-cache.test.ts",
+      "bytes": 21584,
+      "sha256": "9b51fa6f65d6899e3a247a601f9870653983e45d4fca2c7bbfba7947220b702f"
+    },
+    {
+      "path": "candidate/packages/adapters/base/test/web-material-initial-paint.test.ts",
+      "bytes": 54560,
+      "sha256": "455d2b737628d7949c249a1b9ab133e9008cfa47f602032b1569c6a68c54e598"
+    },
+    {
+      "path": "candidate/packages/adapters/base/test/web-material-preferences-sequence.test.ts",
+      "bytes": 12242,
+      "sha256": "2a73a943756074f95801e046c1d198504936b1891b7073be5dbaa76230cacf90"
+    },
+    {
+      "path": "candidate/packages/adapters/base/test/web-material-sink.test.ts",
+      "bytes": 105275,
+      "sha256": "e8318017d83ff42fbb1657469f73b096991425dc9daecf3e9451a1ee8d6419ca"
+    },
+    {
+      "path": "independent-review/image-cache-callback-failure-review.green.json",
+      "bytes": 1390,
+      "sha256": "f1bd298ce21b8276a1d8bf817d6747c400a1da0e3eff4102f21723958017750a"
+    },
+    {
+      "path": "independent-review/image-cache-callback-failure-review.mjs",
+      "bytes": 2546,
+      "sha256": "814b6ce178ee664792b9ec5c83de7cdd3d79724b4eead15b5d55d6e9a89e7576"
+    },
+    {
+      "path": "independent-review/image-cache-callback-failure-review.red.json",
+      "bytes": 1531,
+      "sha256": "cd5748f25c2221a590cba77278144e9053bbe67f677051a26a688ffc47fd7571"
+    },
+    {
+      "path": "independent-review/image-cache-cold-failure-review.green.json",
+      "bytes": 2009,
+      "sha256": "d595bd69cbceeb9d6c883a18e668b5f2ce44ae03d129f33c45723093cbde8231"
+    },
+    {
+      "path": "independent-review/image-cache-cold-failure-review.mjs",
+      "bytes": 2581,
+      "sha256": "08e941205ba37080cd4e83b4769a8cea5bc9915d595c6d22fe79e83fb7896452"
+    },
+    {
+      "path": "independent-review/image-cache-cold-failure-review.red.json",
+      "bytes": 2088,
+      "sha256": "48a4f8ae3698b265c5eb52b19fdb462814896c947cde8a50fcfb465df568840d"
+    },
+    {
+      "path": "independent-review/image-cache-lifecycle-review.green.json",
+      "bytes": 3054,
+      "sha256": "c80fa9f6dc524e5a8db4fc62771bc787c2e8941f4047d589ea255a29a93d1924"
+    },
+    {
+      "path": "independent-review/image-cache-lifecycle-review.mjs",
+      "bytes": 4084,
+      "sha256": "9f7365f0a61eddd86eed8faf123accc9e736605c59a0adc0570a51395eba381b"
+    },
+    {
+      "path": "independent-review/image-cache-lifecycle-review.red.json",
+      "bytes": 3271,
+      "sha256": "a28856599e55ab7748ab242c14ca1fce2739d91c6df1054d25346475d09a44cd"
+    },
+    {
+      "path": "independent-review/image-prepare.pre-review.ts",
+      "bytes": 8949,
+      "sha256": "512ea1b8d8606b79a8be557456883606b9ec888698609788868e9f8c411525af"
+    },
+    {
+      "path": "independent-review/image-prepare.repaired.ts",
+      "bytes": 9867,
+      "sha256": "3668b4d200b2da4fbe830038d41f15060b57ab352dbbe1b8ade4279a1aa4da29"
+    },
+    {
+      "path": "initial-port/cache-E9-red.json",
+      "bytes": 6358,
+      "sha256": "44e3ff01b6881669ba9fd0315e644a4d2a1beb3b297a9a298fe2fe107c6a34ca"
+    },
+    {
+      "path": "initial-port/cache-repair-green.json",
+      "bytes": 4734,
+      "sha256": "56e7635de614a56732fb5ee3422468062f6f5950953860644697ddabb32a7c23"
+    },
+    {
+      "path": "initial-port/cache-reuse-negative.json",
+      "bytes": 5974,
+      "sha256": "4ef55640f31fac7922c411df2e57bd1782d3f0217f1f783ec9a6ac1259d0bbad"
+    },
+    {
+      "path": "initial-port/evidence-report.json",
+      "bytes": 8051,
+      "sha256": "f67e1d4d446cba5a0af5d6218b00b4c200f530319f39cd8ab0b32da77938e7bc"
+    },
+    {
+      "path": "initial-port/material-focused.json",
+      "bytes": 126576,
+      "sha256": "0ebbdef42934ecb0ae59025b3ca07f5dc22290355e3acac11e056e24f3e30e3a"
+    },
+    {
+      "path": "initial-port/real-image-sink-controls.json",
+      "bytes": 2606,
+      "sha256": "bdd728ba16453f1ebaf159ed6bc8578b22865220776717505a6c3780f429cd9e"
+    },
+    {
+      "path": "initial-port/record.md",
+      "bytes": 9248,
+      "sha256": "bf7813b7480e186dad8920dbf43c4d11c87e37443f9bb0c56b4174f709326a44"
+    },
+    {
+      "path": "patches/candidate-v1.patch",
+      "bytes": 27234,
+      "sha256": "93e68e750462cbcb73e1494d37838202cc0232aaf617babee4cf61fecc4fe26d"
+    },
+    {
+      "path": "patches/candidate-v2.patch",
+      "bytes": 37626,
+      "sha256": "348e67e12bc5bfe79169f12725ca2e6a27d3735cf2c71790e7c70b92bdc74ce4"
+    },
+    {
+      "path": "patches/review-repair.patch",
+      "bytes": 13592,
+      "sha256": "cdb1e32857fd46af88a062966edaee2486a174d972ed16d109ee0bb9d14d4cbe"
+    },
+    {
+      "path": "repair-replay/image-cache-callback-failure-review.green.json",
+      "bytes": 1411,
+      "sha256": "ed3b8f3de4c38219e177994063368c29037223bdfc90f60197d3483adf4fb16c"
+    },
+    {
+      "path": "repair-replay/image-cache-cold-failure-review.green.json",
+      "bytes": 2027,
+      "sha256": "2ca06d0421e6401a54f7c1003adf9028834f8ae821337a61f77fca50c8870fe0"
+    },
+    {
+      "path": "repair-replay/image-cache-lifecycle-review.green.json",
+      "bytes": 3075,
+      "sha256": "44d148b8757f9f5fedd8a1aa2ffd09b7dcc9ec56dd857bf9fbff825158678adb"
+    },
+    {
+      "path": "review-repair/cache-host-fault-green.json",
+      "bytes": 7171,
+      "sha256": "c5f8abaafc2db5d73ced2dcb3921dc5009b39f02177ad36d544d9cf91a9c3bb2"
+    },
+    {
+      "path": "review-repair/cache-host-fault-red-isolated.json",
+      "bytes": 16627,
+      "sha256": "83d5cb070c4f03d030b80b9769661fe611513b6285942263cd2490559593af35"
+    },
+    {
+      "path": "review-repair/cache-host-fault-red.json",
+      "bytes": 17976,
+      "sha256": "5621125a6e54930e036842291eafec92518455998a21d14796822b3809c9d512"
+    },
+    {
+      "path": "review-repair/cache-reuse-negative.json",
+      "bytes": 8797,
+      "sha256": "90773a5804121b18d11b88999a02fc5bb7bed7df0c06bcda3be5f31207e3ba92"
+    },
+    {
+      "path": "review-repair/evidence-report-v2.json",
+      "bytes": 13002,
+      "sha256": "105e19714da845e783807bd429cedd19d42ee3efe52372664bb28df0860f8c2e"
+    },
+    {
+      "path": "review-repair/image-prepare.pre-repair.ts",
+      "bytes": 8949,
+      "sha256": "512ea1b8d8606b79a8be557456883606b9ec888698609788868e9f8c411525af"
+    },
+    {
+      "path": "review-repair/material-final.json",
+      "bytes": 131788,
+      "sha256": "217268069b427701c78b16554079873f099631c09a737f95693f17987abcbaa6"
+    },
+    {
+      "path": "review-repair/record.md",
+      "bytes": 7039,
+      "sha256": "88a28d44f1bd583ad995b36c3ed7d02e5c1082b284b4300c3b1473a51402f43d"
+    },
+    {
+      "path": "review-repair/reuse-disabled-image-prepare.ts",
+      "bytes": 9860,
+      "sha256": "9246a62047c78bb1661197e6af26efd53e9ba700a877636efbc3c40b5142b01e"
+    },
+    {
+      "path": "review-repair/reuse-disabled.vitest.config.ts",
+      "bytes": 454,
+      "sha256": "ba80c7827dd985b843a6d5a5453d85c5750cbe28e1442eded7d9939832e493f7"
+    },
+    {
+      "path": "review-repair/web-material-image-cache.pre-repair.test.ts",
+      "bytes": 12870,
+      "sha256": "758f8f00096beff2b2c974c3fae3a3f4c0ed515e19886b0960f4fad8c6783900"
+    },
+    {
+      "path": "upstream-e9/image-prepare.ts",
+      "bytes": 8603,
+      "sha256": "2a40e09cc44c4c7a286456a0b2ae3ecb376297b7ca0a4e175f970c2446ad2c52"
+    },
+    {
+      "path": "upstream-e9/sink.ts",
+      "bytes": 43179,
+      "sha256": "7fcf17ec3ed2b2c307cfe36cd028f22cf0589fcdfcb26a29584cf3085972e97a"
+    },
+    {
+      "path": "upstream-e9/web-material-image-cache.test.ts",
+      "bytes": 9223,
+      "sha256": "b115b6db9186f8faa4cbe7b908b8d11d88ba4a89078e04c8696bc28922230cde"
+    }
+  ],
+  "archive": {
+    "file": "evidence.tar.gz",
+    "bytes": 138066,
+    "sha256": "64e5987bfbebfe99d99bd81147f485cc2061d263b0f4ab919b9160e0d77c9652",
+    "embeddedManifestSha256": "b28085f8ba6384a2b74d3b3a14a32745415a51b941079dbb894690379faa4ca0",
+    "membersIncludingManifest": 46,
+    "format": "gzip mtime0, tar uid/gid/mtime0, sorted explicit members"
+  }
+}

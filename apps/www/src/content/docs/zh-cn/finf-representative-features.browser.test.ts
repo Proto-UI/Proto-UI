@@ -1497,10 +1497,189 @@ async function drawerJourney({ page, previewer, capture }: Journey) {
   await capture('reopen-escape-closed', { panelVisible: await panel.isVisible() }, previewer);
 }
 
-async function accordionJourney({ page, previewer, capture, family }: Journey) {
-  await selectRealRuntime(page, previewer, 'react', '[data-demo-ref="single"]', 1);
+async function accordionJourney(
+  { page, previewer, capture, family }: Journey,
+  runtime: RuntimeId = 'react'
+) {
+  await selectRealRuntime(page, previewer, runtime, '[data-demo-ref="single"]', 1);
   const trigger = previewer.locator('[data-demo-ref="single-lifetime-trigger"]');
   const content = previewer.locator('[data-demo-ref="single-lifetime-content"]');
+  const originalTrigger = await trigger.elementHandle();
+  if (!originalTrigger) throw new Error('Missing original Accordion Trigger');
+  let initializedSize: { width: number; height: number } | null = null;
+  const assertReservation = async (state: string) => {
+    if (family !== 'liquid-glass') return;
+    // Keep the original readiness deadline. A reserved box alone never counts
+    // as paint: the exact target must pass the unmodified material/source gates.
+    await expect.poll(() => trigger.getAttribute('data-material-quality')).toBe('self-optical');
+    expect(await trigger.evaluate((target, original) => target === original, originalTrigger)).toBe(
+      true
+    );
+    const geometry = await trigger.evaluate((element) => {
+      const target = element as HTMLElement;
+      const heading = target.closest<HTMLElement>('[data-demo-ref="single-lifetime-heading"]');
+      const part =
+        heading?.querySelector<HTMLElement>('[data-pui-material-reservation]') ??
+        heading?.shadowRoot?.querySelector<HTMLElement>('[data-pui-material-reservation]');
+      const item = target.closest<HTMLElement>('[data-demo-ref="single-lifetime-item"]');
+      const content = item?.querySelector<HTMLElement>('[data-demo-ref="single-lifetime-content"]');
+      const root = target.closest<HTMLElement>('[data-demo-ref="single"]');
+      const scene = target.closest<HTMLElement>('[data-material-scene]');
+      const canvas = scene?.querySelector('canvas[data-material-backdrop]');
+      if (!part || !item || !root || !canvas)
+        throw new Error('Missing actual owned reservation/source composition');
+      const rect = (node: Element) => {
+        const r = node.getBoundingClientRect();
+        return {
+          x: r.x,
+          y: r.y,
+          width: r.width,
+          height: r.height,
+          top: r.top,
+          right: r.right,
+          bottom: r.bottom,
+          left: r.left,
+        };
+      };
+      const css = getComputedStyle(part),
+        border = getComputedStyle(item);
+      return {
+        target: rect(target),
+        part: rect(part),
+        item: rect(item),
+        source: rect(canvas),
+        root: rect(root),
+        rootContainer: getComputedStyle(root).containerType,
+        dpr: devicePixelRatio,
+        edges: {
+          top: parseFloat(css.paddingTop),
+          right: parseFloat(css.paddingRight),
+          bottom: parseFloat(css.paddingBottom),
+          left: parseFloat(css.paddingLeft),
+        },
+        border: {
+          top: parseFloat(border.borderTopWidth),
+          right: parseFloat(border.borderRightWidth),
+          bottom: parseFloat(border.borderBottomWidth),
+          left: parseFloat(border.borderLeftWidth),
+        },
+        borderPaint: {
+          colors: [
+            border.borderTopColor,
+            border.borderRightColor,
+            border.borderBottomColor,
+            border.borderLeftColor,
+          ],
+          styles: [
+            border.borderTopStyle,
+            border.borderRightStyle,
+            border.borderBottomStyle,
+            border.borderLeftStyle,
+          ],
+          radius: [
+            border.borderTopLeftRadius,
+            border.borderTopRightRadius,
+            border.borderBottomRightRadius,
+            border.borderBottomLeftRadius,
+          ],
+          image: border.borderImageSource,
+          shadow: border.boxShadow,
+          outline: border.outlineStyle,
+        },
+        content:
+          content &&
+          getComputedStyle(content).display !== 'none' &&
+          content.getBoundingClientRect().height > 0
+            ? {
+                rect: rect(content),
+                padding: [
+                  getComputedStyle(content).paddingTop,
+                  getComputedStyle(content).paddingRight,
+                  getComputedStyle(content).paddingBottom,
+                  getComputedStyle(content).paddingLeft,
+                ],
+              }
+            : null,
+        semanticRoot:
+          target.getAttribute('role') === 'button' && target.hasAttribute('aria-expanded'),
+      };
+    });
+    expect(geometry.semanticRoot).toBe(true);
+    const { target, part, item, source, border, edges } = geometry;
+    const budget = Math.ceil(Math.max(target.width, target.height) * 0.08 + 1);
+    const roi = {
+      left: target.left - budget,
+      right: target.right + budget,
+      top: target.top - budget,
+      bottom: target.bottom + budget,
+    };
+    // This oracle reads actual browser radii independently of the implementation.
+    // It refuses percentages/unknown values rather than treating them as pixels.
+    const radii = geometry.borderPaint.radius.map((value) => {
+      const values = value.split(/\s+/);
+      expect(values.every((v) => /^\d+(?:\.\d+)?px$/.test(v))).toBe(true);
+      return [parseFloat(values[0]!), parseFloat(values[1] ?? values[0]!)];
+    });
+    const factor = Math.min(
+      1,
+      item.width / (radii[0]![0]! + radii[1]![0]!),
+      item.width / (radii[3]![0]! + radii[2]![0]!),
+      item.height / (radii[0]![1]! + radii[3]![1]!),
+      item.height / (radii[1]![1]! + radii[2]![1]!)
+    );
+    const inner = radii.map(([x, y], i) => [
+      Math.max(0, x! * factor - (i === 0 || i === 3 ? border.left : border.right)),
+      Math.max(0, y! * factor - (i < 2 ? border.top : border.bottom)),
+    ]);
+    const clearance = {
+      top: Math.max(inner[0]![1]!, inner[1]![1]!) + 1 / geometry.dpr,
+      bottom: Math.max(inner[2]![1]!, inner[3]![1]!) + 1 / geometry.dpr,
+    };
+    expect(edges).toEqual({
+      top: budget + clearance.top,
+      right: budget,
+      bottom: budget + clearance.bottom,
+      left: budget,
+    });
+    expect(target.left - part.left).toBeCloseTo(edges.left, 1);
+    expect(target.top - part.top).toBeCloseTo(edges.top, 1);
+    expect(part.right - target.right).toBeCloseTo(edges.right, 1);
+    expect(part.bottom - target.bottom).toBeCloseTo(edges.bottom, 1);
+    expect(roi.left).toBeGreaterThanOrEqual(source.left);
+    expect(roi.right).toBeLessThanOrEqual(source.right);
+    expect(roi.top).toBeGreaterThanOrEqual(source.top);
+    expect(roi.bottom).toBeLessThanOrEqual(source.bottom);
+    expect(roi.left).toBeGreaterThanOrEqual(item.left + border.left - 0.02);
+    expect(roi.right).toBeLessThanOrEqual(item.right - border.right + 0.02);
+    // Full block clearance is past both actual curved corner tangents, including
+    // their AA allowance; rectangle-only side inset is insufficient evidence.
+    expect(roi.top).toBeGreaterThanOrEqual(item.top + border.top + clearance.top - 0.02);
+    expect(roi.bottom).toBeLessThanOrEqual(item.bottom - border.bottom - clearance.bottom + 0.02);
+    expect(geometry.borderPaint.styles).toEqual(['solid', 'solid', 'solid', 'solid']);
+    expect(geometry.borderPaint.image).toBe('none');
+    expect(geometry.borderPaint.shadow).toBe('none');
+    expect(geometry.rootContainer).toBe('inline-size');
+    if (initializedSize) {
+      expect(target.width).toBeCloseTo(initializedSize.width, 1);
+      expect(target.height).toBeCloseTo(initializedSize.height, 1);
+    }
+    if (geometry.content) {
+      expect(geometry.content.rect.top).toBeGreaterThanOrEqual(roi.bottom - 0.02);
+      expect(geometry.content.rect.width).toBeCloseTo(target.width, 1);
+    }
+    await capture(
+      `reservation-${state}`,
+      {
+        ...geometry,
+        profileFootprint: budget,
+        roi,
+        outlineClearance: clearance,
+        initializedSize,
+        sameInputNode: true,
+      },
+      previewer
+    );
+  };
   await capture('rest', {}, previewer);
   if (family === 'liquid-glass') {
     const item = previewer.locator('[data-demo-ref="single-lifetime-item"]');
@@ -1511,6 +1690,10 @@ async function accordionJourney({ page, previewer, capture, family }: Journey) {
       .toBe('source-painted-ancestor');
     expect(await nested.getAttribute('data-material-quality')).toBe('opaque-fallback');
     await expect.poll(() => trigger.getAttribute('data-material-quality')).toBe('self-optical');
+    initializedSize = await trigger.evaluate((el) => {
+      const rect = el.getBoundingClientRect();
+      return { width: rect.width, height: rect.height };
+    });
     expect(await trigger.evaluate((el) => getComputedStyle(el).backgroundImage)).toMatch(
       /data:image\/png/
     );
@@ -1533,10 +1716,12 @@ async function accordionJourney({ page, previewer, capture, family }: Journey) {
     }
     await expect.poll(() => trigger.getAttribute('data-material-quality')).toBe('self-optical');
     await capture('transparent-item-recovered', {}, previewer);
+    await assertReservation('recovered');
   }
   await trigger.click();
   await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('true');
   await content.waitFor({ state: 'visible' });
+  await assertReservation('opened');
   await capture(
     'opened',
     { trigger: await paint(trigger), content: await paint(content) },
@@ -1546,6 +1731,7 @@ async function accordionJourney({ page, previewer, capture, family }: Journey) {
   await expect.poll(() => content.isVisible()).toBe(false);
   await trigger.click();
   await content.waitFor({ state: 'visible' });
+  await assertReservation('reopened');
   await capture('reopened', { content: await paint(content) }, previewer);
   const controlled = previewer.locator('[data-demo-ref="controlled-a-trigger"]');
   await controlled.click();
@@ -1897,6 +2083,14 @@ const cases: Case[] = [
       run: runtimeTabsJourney,
     },
   ]),
+  ...(['wc', 'react', 'vue', 'vue2'] as const).map((runtime) => ({
+    id: `liquid-glass-accordion-${runtime}-reservation`,
+    group: 'liquid-reservation',
+    family: 'liquid-glass' as const,
+    component: 'accordion',
+    runtime,
+    run: (journey: Journey) => accordionJourney(journey, runtime),
+  })),
 ];
 const selectedCases = cases.filter(
   (testCase) => !requestedGroup || testCase.group === requestedGroup
