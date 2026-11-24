@@ -49,6 +49,17 @@ describe('Contents wheel observer / native event controls', () => {
       </body></html>`);
         const dialog = page.getByRole('dialog', { name: 'Wheel control' });
         const probe = await dialog.evaluateHandle(observeContentsWheel);
+        const read = async () => {
+          const current = await dialog.elementHandles();
+          try {
+            return await probe.evaluate(
+              (observer, dialogs) => observer.read(dialogs.length === 1 ? dialogs[0] : null),
+              current
+            );
+          } finally {
+            await Promise.all(current.map((element) => element.dispose()));
+          }
+        };
         const dispatch = await dialog.evaluateHandle((element, cancel) => {
           const trace: Array<{ phase: string; defaultPrevented: boolean }> = [];
           document.addEventListener(
@@ -72,7 +83,7 @@ describe('Contents wheel observer / native event controls', () => {
           return trace;
         }, cancel);
         try {
-          const before = await probe.evaluate((observer) => observer.read());
+          const before = await read();
           receipt.before = before;
           expect(before.ready).toBe(true);
           expect(before.max).toBeGreaterThan(0);
@@ -80,13 +91,14 @@ describe('Contents wheel observer / native event controls', () => {
           await page.mouse.wheel(0, 400);
           await vi.waitFor(
             async () => {
-              const after = await probe.evaluate((observer) => observer.read());
+              const after = await read();
               expect(after.wheels).toHaveLength(1);
+              expect(after.ready).toBe(true);
               if (!cancel) expect(after.top).toBeGreaterThan(before.top);
             },
             { timeout: 1000 }
           );
-          const after = await probe.evaluate((observer) => observer.read());
+          const after = await read();
           receipt.after = after;
           receipt.dispatch = await dispatch.jsonValue();
           expect(after.wheels[0]).toMatchObject({
@@ -95,30 +107,23 @@ describe('Contents wheel observer / native event controls', () => {
             contentInPath: true,
             defaultPrevented: cancel,
           });
+          expect(after.ready).toBe(true);
           expect(after.documentY).toBe(before.documentY);
           if (cancel) expect(after.top).toBe(before.top);
           await dialog.evaluate((element) => element.replaceWith(element.cloneNode(true)));
-          const current = await dialog.elementHandles();
-          try {
-            expect(current).toHaveLength(1);
-            const replaced = await probe.evaluate(
-              (observer, dialogs) => observer.read(dialogs[0]),
-              current
-            );
-            receipt.replaced = replaced;
-            expect(replaced).toMatchObject({
-              connected: false,
-              sameDialog: false,
-              sameSurface: true,
-              ready: false,
-            });
-          } finally {
-            await Promise.all(current.map((element) => element.dispose()));
-          }
+          expect(await dialog.count()).toBe(1);
+          const replaced = await read();
+          receipt.replaced = replaced;
+          expect(replaced).toMatchObject({
+            connected: false,
+            sameDialog: false,
+            sameSurface: true,
+            ready: false,
+          });
         } finally {
           // Retain the final native observations even if input delivery or an
           // assertion failed before the normal receipt assignment above.
-          receipt.final = await probe.evaluate((observer) => observer.read());
+          receipt.final = await read();
           receipt.dispatch = await dispatch.jsonValue();
           await probe.evaluate((observer) => observer.dispose());
           await probe.dispose();
