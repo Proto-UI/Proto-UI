@@ -282,7 +282,7 @@ The 2026-11-24 [main boundary repair](../records/2026-11-24-main-website-boundar
 | `apps/www/src/components/PrototypePreviewer/shadow-split-s3.ts` | `www.demo.authored-controllers` | `85b7c3c518e6f1ef1e72f20b975d6ac4ce317c1a046a3cc0562602c899dffc46` |
 | `apps/www/src/components/PrototypePreviewer/shadow-split-s4.ts` | `www.demo.authored-controllers` | `4492f622a7d0cd411f60ea7e3906205219cb9b4bc2d1062c0eed5703e1bfd514` |
 | `apps/www/src/components/PrototypePreviewer/shadow-split-s5.ts` | `www.demo.authored-controllers` | `fa92aa85ff8afb7a0f0233155e485dc3363ee886068015ceb979162e2ae66cbf` |
-| `apps/www/src/content/docs/accordion-demo.shared.ts` | `www.demo.authored-controllers` | `e92b1f802f1b53ca66177fc11f36eb2698ab78ee4c51c602dd7e2c0a75c25ec8` |
+| `apps/www/src/content/docs/accordion-demo.shared.ts` | `www.demo.authored-controllers` | `15ef5c53f63cc69c06dfddc457b85385196ae280e99159dfcd683c81c9d3166f` |
 | `apps/www/src/content/docs/async-region-demo.shared.ts` | `www.demo.authored-controllers` | `b635ce9d4b1fee601987ea683e8cfc158f52115459b74353e56ea7f1a20af4c2` |
 | `apps/www/src/content/docs/zh-cn/popover-public-dom-probe.ts` | `www.demo.demo-matrix` | `30d01d9c17c7824e92cb36879b99666eb89f37ccd03fcd499ce4edfeac991b63` |
 | `apps/www/src/content/docs/zh-cn/tooltip-pressed-observation.ts` | `www.demo.demo-matrix` | `ff759b29b654aabe746f9ba12cabb7bafcc08d6ae9a674d52bc8fc49d53aae65` |

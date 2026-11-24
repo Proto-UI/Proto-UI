@@ -1,0 +1,34 @@
+{
+  "sourceHead": "b57e7af30b97a087ae0c3ec9fa75e10c7ca268d8",
+  "file": "apps/www/src/content/docs/accordion-demo.shared.ts",
+  "priorSourceSha256": "e92b1f802f1b53ca66177fc11f36eb2698ab78ee4c51c602dd7e2c0a75c25ec8",
+  "currentSourceSha256": "15ef5c53f63cc69c06dfddc457b85385196ae280e99159dfcd683c81c9d3166f",
+  "priorReviewedSourceMatches": true,
+  "comparisons": [
+    {
+      "family": "base",
+      "treeIdentical": true,
+      "setupIdentical": true
+    },
+    {
+      "family": "shadcn",
+      "treeIdentical": true,
+      "setupIdentical": true
+    },
+    {
+      "family": "brutalist",
+      "treeIdentical": true,
+      "setupIdentical": true
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "treeIdentical": true,
+      "setupIdentical": true
+    }
+  ],
+  "liquid": {
+    "stages": 4,
+    "setupIdentical": true
+  },
+  "boundary": "Source/data equivalence control only; no native material/keyboard/visual acceptance."
+}
