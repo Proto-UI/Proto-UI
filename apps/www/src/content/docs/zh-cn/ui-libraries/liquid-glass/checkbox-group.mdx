@@ -1,11 +1,13 @@
 ---
 title: 'Checkbox Group'
-description: '管理多选字符串数组与全选/半选状态的 Liquid Glass 复选框组。'
+description: '管理多选字符串数组、全选/半选状态与表单校验的 Liquid Glass 复选框组。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Checkbox Group 由 `Root`、`Item`、`All` 三个部件组成，用于统一管理一组复选框的选中值数组，并提供全选/半选切换以及带勾选/横线图形的非颜色状态指示。
+Liquid Glass Checkbox Group 由 `Root`、`Item` 与 `All` 组成，采用紧凑的内容层 20×20 圆角复选框与清晰的非颜色勾选/横线状态指示，避免在表单与卡片内容中叠加玻璃材质，确保高对比度与可读回退。
 
 ## 预览
 
@@ -13,7 +15,6 @@ Liquid Glass Checkbox Group 由 `Root`、`Item`、`All` 三个部件组成，用
   demoId="demo-liquid-glass-checkbox-group"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
@@ -22,17 +23,115 @@ Liquid Glass Checkbox Group 由 `Root`、`Item`、`All` 三个部件组成，用
 
 ## 用法
 
-- **部件组成**：`Root`、`Item`、`All`。
-- **全选与禁用**：`All` 自动根据全部可用 `Item` 推导勾选、未选或混合（`mixed`）状态，切换全选时保留已禁用项的原状态。`Item` 与 `All` 均配有 `aria-hidden` 视觉图标（对勾、横线或空框），不只靠颜色区分状态。
-- **键盘交互**：每一项拥有独立 Tab 停靠点，按 Space 切换选中（Enter 不切换）。
-- **受控与表单联动**：传入 `value` 进入受控模式，交互仅发出 `valueChange` 请求；`getValue()` 返回当前值数组副本；重复值的选项会被忽略。置于 [Field](/zh-cn/ui-libraries/liquid-glass/field/) 或 [Form](/zh-cn/ui-libraries/liquid-glass/form/) 中时，自动支持标签激活、必填校验、表单序列化与重置（不创建隐藏 HTML 表单项）。
+```tsx
+import {
+  LiquidGlassCheckboxGroupRoot,
+  LiquidGlassCheckboxGroupAll,
+  LiquidGlassCheckboxGroupItem,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <LiquidGlassCheckboxGroupRoot defaultValue={['email']} ariaLabel="Notification channels">
+      <LiquidGlassCheckboxGroupAll>All notifications</LiquidGlassCheckboxGroupAll>
+      <LiquidGlassCheckboxGroupItem value="email">Email updates</LiquidGlassCheckboxGroupItem>
+      <LiquidGlassCheckboxGroupItem value="sms">SMS alerts</LiquidGlassCheckboxGroupItem>
+    </LiquidGlassCheckboxGroupRoot>
+  );
+}
+```
+
+### 部件结构与材质分层
+
+- **Root**：管理选中字符串数组（`value` / `defaultValue`）、`orientation`、`disabled`、`readOnly` 与 `ariaLabel`。
+- **Item**：单个复选框项，包含紧凑的 20×20 圆角指示框与聚焦反馈；每项独立参与 `Tab` 顺序，按 `Space` 切换（`Enter` 不切换）。
+- **All**：根据全部可用项推导勾选、未选或混合（`mixed`）状态，切换时保留已禁用项的原状态。
+- **内容层与无障碍**：复选框组作为内容层表单控件保持中性表面（不叠加玻璃卡片），禁用态采用低饱和度语义前景色而非整行透明度衰减，置于 [Field](/zh-cn/ui-libraries/liquid-glass/field/) 或 [Form](/zh-cn/ui-libraries/liquid-glass/form/) 内时自动联动标签激活、必填校验、序列化与重置。
+
+## 示例
+
+### 基础用法
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-group-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 水平排列
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-group-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-group-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 表单校验
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-group-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 方法                           | 说明                                 |
-| ---- | ------------------------------------- | ------------------------------------ |
-| Root | `value` / `defaultValue`              | 受控 / 非受控选中值字符串数组        |
-| Root | `disabled` / `readOnly` / `ariaLabel` | 整组禁用、只读与可访问名称           |
-| Root | `valueChange` / `getValue()`          | 变更请求事件与读取当前数组副本的方法 |
-| Item | `value` / `disabled`                  | 选项唯一值与单项禁用开关             |
-| All  | —                                     | 汇总可用选项状态并一键全选/取消全选  |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string[] | undefined', default: '非受控' },
+    { name: 'defaultValue', type: 'string[]', default: '[]' },
+    { name: 'orientation', type: "'vertical' | 'horizontal'", default: "'vertical'" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### All
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### 事件、方法与状态
+
+- **Root 事件**：`valueChange`（载荷 `{ value: string[] }`）。
+- **Root 方法**：`getValue(): string[]`、`resetValue(): boolean`、`focusSelf(): void`。
+- **暴露状态**：Root 暴露 `checked`、`indeterminate`、`disabled`、`readOnly`；Item 与 All 暴露 `checked`、`indeterminate`、`disabled`、`readOnly`、`focused`、`focusVisible`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-CHECKBOX-GROUP.yaml', 'P-BASE-CHECKBOX-GROUP.yaml']}
+/>

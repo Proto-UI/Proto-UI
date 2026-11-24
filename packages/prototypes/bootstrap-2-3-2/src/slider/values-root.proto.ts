@@ -16,6 +16,10 @@ export default definePrototype<SliderValuesRootProps, SliderValuesRootExposes>({
         'flex w-full min-w-0 flex-wrap items-center gap-[10px] text-foreground text-[14px] leading-[20px]'
       )
     );
+    def.rule({
+      when: (w) => w.prop('orientation').eq('vertical'),
+      intent: (i) => i.feedback.style.use(tw('h-full w-auto flex-col flex-nowrap')),
+    });
     return inherited.render;
   },
 });

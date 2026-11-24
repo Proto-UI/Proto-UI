@@ -5,48 +5,154 @@ description: '提供单选语义、漫游焦点与清晰几何轮廓的 Brutalis
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Radio Group 用于在一组互斥选项中进行单项选择。Brutalist 风格以纵向网格排布 16px 圆形 2px 黑边选项，选中时通过内部实心圆点标识状态，同时保持清晰的焦点偏移环。
+Radio Group 用于在一组互斥选项中进行单项选择。Brutalist 风格以纵向网格排布 16px 圆形 2px 边框选项，选中时通过内部实心圆点标识状态，并在亮暗模式下均保持清晰对比度与焦点偏移环。
 
 ## 预览
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-radio-group" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-radio-group"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-brutalist` 或 `@proto.ui/prototypes-brutalist/radio-group` 导入 `Root`、`Item` 与 `Indicator`（当前工作区 CLI 目标为 `brutalist-radio-group`）。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-radio-group" manager="npm" />
+
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2` 可生成对应框架封装，或从 `@proto.ui/prototypes-brutalist/radio-group` 导入 `Root`、`Item` 与 `Indicator`。
 
 ## 用法
 
-### 组件结构
+```tsx
+import {
+  BrutalistLabelRoot,
+  BrutalistRadioGroupIndicator,
+  BrutalistRadioGroupItem,
+  BrutalistRadioGroupRoot,
+} from '../proto-ui/components/react';
 
-Radio Group 由 `Root`、`Item` 和 `Indicator` 组成：
+export function RadioGroupUsage() {
+  return (
+    <BrutalistRadioGroupRoot defaultValue="comfortable" a11yLabel="Display density">
+      <div className="flex items-center gap-3">
+        <BrutalistRadioGroupItem value="default">
+          <BrutalistRadioGroupIndicator />
+        </BrutalistRadioGroupItem>
+        <BrutalistLabelRoot>Default</BrutalistLabelRoot>
+      </div>
+      <div className="flex items-center gap-3">
+        <BrutalistRadioGroupItem value="comfortable">
+          <BrutalistRadioGroupIndicator />
+        </BrutalistRadioGroupItem>
+        <BrutalistLabelRoot>Comfortable</BrutalistLabelRoot>
+      </div>
+      <div className="flex items-center gap-3">
+        <BrutalistRadioGroupItem value="compact">
+          <BrutalistRadioGroupIndicator />
+        </BrutalistRadioGroupItem>
+        <BrutalistLabelRoot>Compact</BrutalistLabelRoot>
+      </div>
+    </BrutalistRadioGroupRoot>
+  );
+}
+```
 
-- `Root`：统一管理单项选中值、选项顺序、漫游焦点、禁用/只读策略以及 `radiogroup` 无障碍语义。
-- `Item`：单个 `radio` 选项，维护 `aria-checked`、指针与键盘激活行为；选中时保持外圆底色与边框不变。
-- `Indicator`：纯视觉指示器，在选中状态下于圆内绘制一个 `size-2` 实心圆点（SVG 为 `aria-hidden`）。
+### 组件结构与交互
 
-### 键盘交互与只读状态
+```text
+BrutalistRadioGroupRoot
+├── BrutalistRadioGroupItem
+│   └── BrutalistRadioGroupIndicator
+└── BrutalistRadioGroupItem
+    └── BrutalistRadioGroupIndicator
+```
 
-- 支持使用方向键在启用选项间漫游焦点并完成单选，初始焦点落在已选中项或第一个可用项上。
-- `readOnly` 保留键盘焦点与方向键漫游能力，但阻止修改当前选中值；`disabled` 则同时阻止选中与焦点参与。
+- `Root`：统一管理单项选中值、选项顺序、方向键漫游焦点、禁用/只读策略以及 `radiogroup` 无障碍语义。
+- `Item`：单个 `radio` 选项，保持 16px 圆形 2px 边框轮廓与 DM Sans 排版体系；亮色模式使用黑色圆环与圆点，暗色模式自动切换至主题前景色确保高对比度。
+- `Indicator`：纯视觉指示器，选中时于圆内渲染 `size-2` 实心圆点（SVG 为 `aria-hidden`）。
+- **键盘与只读**：方向键循环移动并选中启用项，`Space` 选中当前聚焦项；`readOnly` 保留漫游焦点但阻止改值，`disabled` 移出焦点序列。
+- **表单集成**：如需接入必填校验、错误关联与重置能力，请在 `FormField` 中使用 `@proto.ui/prototypes-brutalist/field` 的 `fieldRadioGroup`，详见 [Form 选择控件示例](../../form/)。
 
-### 表单集成
+## 示例
 
-普通 `Root` 不会自动注册到 Field 或 Form。如需接入必填校验、标签/描述/错误关联与重置能力，请在 `FormField` 中使用 `@proto.ui/prototypes-brutalist/field` 提供的 `fieldRadioGroup`，完整示例见[Form 选择控件示例](../../form/)。调用 `resetValue()` 会恢复实例创建时的初始值（受控模式下以变更请求发出）。
+### 带说明文字
+
+搭配 `BrutalistLabelRoot` 与辅助说明文字，点击标签可直接激活对应选项。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-radio-group-description"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 选择卡片
+
+以 2px 黑色描边、5px 圆角与 4px 零模糊硬影卡片承载多层级选项，选中卡片切换主色强调。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-radio-group-choice-card"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Fieldset 分组
+
+使用 `FieldRoot`、`FieldLabel` 与 `FieldDescription` 组合订阅方案选项组。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-radio-group-fieldset"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 禁用态
+
+支持单个选项禁用或整组禁用，配套降低标签不透明度并阻止交互。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-radio-group-disabled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 校验错误
+
+通过 `FieldRoot`、`FieldRadioGroup` 与 `FieldError` 展示表单校验错误提示。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-radio-group-invalid"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-以下属性属于 `Root`（传入 `value` 进入受控模式）：
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -54,7 +160,30 @@ Radio Group 由 `Root`、`Item` 和 `Indicator` 组成：
   ]}
 />
 
-其余子部件：
+### Item
 
-- **Item**：`value` 默认 `''`，`disabled` 默认 `false`。
-- **Indicator**：无属性。
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string（必填）', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Indicator 与事件
+
+- **Indicator**：无额外属性。
+- **事件**：Root 触发 `valueChange`（`{ value: string }`）；Item 触发 `select`（`{ value: string }`）。
+- **方法**：Root 暴露 `requestValue(value)`、`resetValue()`、`focusFirst()`、`focusLast()`、`focusNext()`、`focusPrev()`、`focusSelected()`、`focusSelf()`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-RADIO-GROUP.yaml',
+    'P-BRUTALIST-RADIO-GROUP-ITEM.yaml',
+    'P-BRUTALIST-RADIO-GROUP-INDICATOR.yaml',
+    'P-BASE-RADIO-GROUP.yaml',
+  ]}
+/>

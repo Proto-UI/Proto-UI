@@ -14,7 +14,7 @@ export default definePrototype<SliderValuesPartProps, SliderValuesThumbExposes>(
     // corners, neutral border/fill and inset-light/drop shadow vocabulary.
     def.feedback.style.use(
       tw(
-        'absolute left-[calc(var(--pui-percentage)*1%)] top-1/2 block size-[20px] -translate-x-1/2 -translate-y-1/2 rounded-[4px] border border-border bg-[#f5f5f5_linear-gradient(#fff,#e6e6e6)_0_0_repeat-x] text-[#333] shadow-[inset_0_1px_0_rgb(255_255_255/20%),0_1px_2px_rgb(0_0_0/5%)] outline-none select-none'
+        'absolute left-[calc(var(--pui-percentage)*1%)] top-1/2 block size-[20px] -translate-x-1/2 -translate-y-1/2 rounded-[4px] border border-border bg-[#f5f5f5_linear-gradient(#fff,#e6e6e6)_0_0_repeat-x] text-[#333] shadow-[inset_0_1px_0_rgb(255_255_255/20%),0_1px_2px_rgb(0_0_0/5%)] cursor-pointer outline-none select-none'
       )
     );
     def.rule({
@@ -23,11 +23,18 @@ export default definePrototype<SliderValuesPartProps, SliderValuesThumbExposes>(
         i.feedback.style.use(tw('bg-[#e6e6e6_linear-gradient(#fff,#e6e6e6)_0_-15px_repeat-x]')),
     });
     def.rule({
-      when: (w) => w.state(state.focusVisible).eq(true),
+      when: (w) => w.all(w.state(state.dragging).eq(true), w.state(state.disabled).eq(false)),
       intent: (i) =>
         i.feedback.style.use(
-          tw('outline-1 outline-ring outline-offset-2 forced-colors-focus-outline')
+          tw(
+            'bg-[#e6e6e6_none_0_0_repeat-x] shadow-[inset_0_2px_4px_rgb(0_0_0/15%),0_1px_2px_rgb(0_0_0/5%)]'
+          )
         ),
+    });
+    def.rule({
+      when: (w) => w.state(state.focusVisible).eq(true),
+      intent: (i) =>
+        i.feedback.style.use(tw('ring-2 ring-ring ring-offset-2 forced-colors-focus-outline')),
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),

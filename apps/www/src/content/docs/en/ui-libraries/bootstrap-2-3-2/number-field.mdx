@@ -3,9 +3,11 @@ title: 'Bootstrap 2.3.2 Number Field'
 description: 'A Bootstrap 2.3.2 numeric input with steppers, locale formatting, nullable values, and label scrubbing.'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Number Field provides a spinbutton numeric input with increment/decrement buttons, keyboard stepping, locale-aware formatting, optional label scrubbing, and `Field` / `Form` integration.
+Bootstrap 2.3.2 Number Field projects classic `forms.less` input geometry and `buttons.less` beveled gradient steppers over the Base Number Field protocol, with keyboard stepping, locale formatting, nullable values, label scrubbing, and `Field` / `Form` integration.
 
 ## Preview
 
@@ -13,32 +15,137 @@ Bootstrap 2.3.2 Number Field provides a spinbutton numeric input with increment/
   demoId="demo-bootstrap-2-3-2-number-field"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the parts directly from `@proto.ui/prototypes-bootstrap-2-3-2/number-field`:
+
+```ts
+import {
+  numberFieldRoot,
+  numberFieldLabel,
+  numberFieldInput,
+  numberFieldControl,
+  numberFieldIncrement,
+  numberFieldDecrement,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/number-field';
+```
 
 ## Usage
 
-Compose `Root`, `Label`, `Input` (or `Control` inside `Field` / `FormField`), `Increment`, and `Decrement`:
+```tsx
+<Bootstrap232NumberFieldRoot defaultValue={12} min={0} max={100} step={1} ariaLabel="Quantity">
+  <Bootstrap232NumberFieldLabel>Quantity</Bootstrap232NumberFieldLabel>
+  <Bootstrap232NumberFieldDecrement>
+    <span aria-hidden="true">−</span>
+    <span className="sr-only">Decrease Quantity</span>
+  </Bootstrap232NumberFieldDecrement>
+  <Bootstrap232NumberFieldInput />
+  <Bootstrap232NumberFieldIncrement>
+    <span aria-hidden="true">+</span>
+    <span className="sr-only">Increase Quantity</span>
+  </Bootstrap232NumberFieldIncrement>
+</Bootstrap232NumberFieldRoot>
+```
 
-- **Editing and stepping**: Incomplete text drafts remain editable until blur or `Enter`, which commits valid numbers or restores the last accepted value. `Increment`/`Decrement` and Up/Down arrows step by `step` (`Shift` multiplies by 10), and `Home`/`End` jump to `min`/`max`. IME composition pauses parsing and stepping.
-- **Locale formatting**: Pass `locale` and `formatOptions` for decimal, currency, or percent display and parsing without rounding away underlying precision. Invalid options set `formatInvalid` and fall back to ungrouped decimals.
-- **Empty values**: Set `allowEmpty={true}` (default `false`) to allow clearing to `null` (`value={null}` stays controlled). Read exact `number | null` via `getValue()` and check `empty`; stepping from `null` starts from clamped zero.
-- **Label scrubbing**: Enable `scrub` to drag across `Label` for continuous adjustment (`scrubSteps` defaults to `100` steps per label width; `direction="rtl"` mirrors horizontal drag). Releasing commits once; cancelling restores the starting value.
-- **Form integration**: Use `Control` in place of `Input` inside `Field` or `FormField` to connect `FieldLabel`, numeric validation, `Form` serialization, and reset.
+- **Editing and stepping**: Incomplete text drafts remain editable until blur or `Enter` commits valid numbers or restores the last accepted value. Stepper buttons restore classic Bootstrap 2.3.2 hover and active inset-shadow feedback; `ArrowUp` / `ArrowDown` step by `step` (`Shift` multiplies by 10), and `Home` / `End` jump to `min` / `max`. IME composition pauses parsing and stepping.
+- **Locale formatting**: Pass `locale` and `formatOptions` for decimal, currency, or percent display and parsing without rounding away underlying precision.
+- **Empty values and forms**: Enable `allowEmpty` so clearing commits `null`; use `Control` in place of `Input` inside `Field` or `FormField` to connect `FieldLabel`, numeric validation, serialization, and reset.
+
+## Examples
+
+### Currency and Percent Formatting
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-number-field-formatting"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Label Scrubbing and Nullable Values
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-number-field-scrub-nullable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled, Read-only, and Unbounded
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-number-field-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-number-field-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL Layout and Scrubbing
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-number-field-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / Methods / States | Description |
-| --- | --- | --- |
-| `Root` | `value` / `defaultValue` | Controlled or initial `number \| null` value |
-| `Root` | `min` / `max` / `step` | Bounds and increment (`0`, `100`, `1` by default) |
-| `Root` | `allowEmpty` | Defaults to `false`; allows committing `null` when cleared |
-| `Root` | `locale` / `formatOptions` | Locale-aware decimal, currency, and percent formatting |
-| `Root` | `scrub` / `scrubSteps` / `direction` | Enables label drag scrubbing (`scrubSteps` default `100`) |
-| `Root` | `disabled` / `readOnly` / `name` / `ariaLabel` | State flags, field name, and accessible name |
-| `Root` | `getValue()` / `empty` / `formatInvalid` | Exact `number \| null` reader, emptiness flag, and format status |
-| `Label` / `Input` / `Control` / `Increment` / `Decrement` | — | Label, editor (`Control` inside forms), and stepper buttons |
+### Root Props
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'number | null', default: '—' },
+    { name: 'defaultValue', type: 'number | null', default: '0' },
+    { name: 'min', type: 'number | null', default: '0' },
+    { name: 'max', type: 'number | null', default: '100' },
+    { name: 'step', type: 'number', default: '1' },
+    { name: 'snapToStep', type: 'boolean', default: 'true' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'allowEmpty', type: 'boolean', default: 'false' },
+    { name: 'locale', type: 'string', default: '—' },
+    { name: 'formatOptions', type: 'NumberFieldFormatOptions', default: '—' },
+    { name: 'scrub', type: 'boolean', default: 'false' },
+    { name: 'scrubSteps', type: 'number', default: '100' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+  ]}
+/>
+
+### Events, Methods, and States
+
+<ApiPropsTable
+  headers={{ name: 'Member', type: 'Signature / Type', default: 'Part' }}
+  rows={[
+    { name: 'valueChange', type: 'Event<{ value: number | null }>', default: 'Root' },
+    { name: 'valueCommit', type: 'Event<{ value: number | null }>', default: 'Root' },
+    { name: 'getValue()', type: '() => number | null', default: 'Root / Input / Control' },
+    { name: 'requestValue(next)', type: '(value: number | null) => boolean', default: 'Root' },
+    { name: 'commitValue()', type: '() => void', default: 'Root' },
+    { name: 'stepBy(direction)', type: '(direction: number) => boolean', default: 'Root' },
+    { name: 'resetValue()', type: '() => boolean', default: 'Root / Input / Control' },
+    { name: 'empty / dragging / formatInvalid / draft', type: 'ExposeState', default: 'Root' },
+    {
+      name: 'disabled / focusVisible',
+      type: 'ExposeState<boolean>',
+      default: 'Increment / Decrement',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-NUMBER-FIELD.yaml', 'P-BASE-NUMBER-FIELD.yaml']}
+/>

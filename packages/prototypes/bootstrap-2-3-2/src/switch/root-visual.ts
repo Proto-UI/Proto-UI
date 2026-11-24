@@ -13,8 +13,32 @@ export function setupSwitchRootVisual(
     )
   );
   def.rule({
+    when: (w) =>
+      w.all(
+        w.state(state.checked).eq(false),
+        w.state(state.hovered).eq(true),
+        w.state(state.disabled).eq(false)
+      ),
+    intent: (i) => i.feedback.style.use(tw('bg-[#e6e6e6_none_0_0_repeat-x]')),
+  });
+  def.rule({
     when: (w) => w.state(state.checked).eq(true),
     intent: (i) => i.feedback.style.use(tw('bg-[#006dcc_linear-gradient(#08c,#04c)_0_0_repeat-x]')),
+  });
+  def.rule({
+    when: (w) =>
+      w.all(
+        w.state(state.checked).eq(true),
+        w.state(state.hovered).eq(true),
+        w.state(state.disabled).eq(false)
+      ),
+    intent: (i) =>
+      i.feedback.style.use(tw('bg-[#04c_linear-gradient(#08c,#04c)_0_-15px_repeat-x]')),
+  });
+  def.rule({
+    when: (w) => w.all(w.state(state.pressed).eq(true), w.state(state.disabled).eq(false)),
+    intent: (i) =>
+      i.feedback.style.use(tw('shadow-[inset_0_2px_4px_rgb(0_0_0/15%),0_1px_2px_rgb(0_0_0/5%)]')),
   });
   def.rule({
     when: (w) =>

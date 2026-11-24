@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Form 协调组内所有显式注册的 `FormField`，在全部启用字段通过校验后按字段名汇总数据并触发 `submit` 事件，同时提供配套的提交、重置与异步校验取消机制。
+Brutalist Form 协调组内所有显式注册的 `FormField`，在全部启用字段通过校验后按字段名汇总数据并触发 `submit` 事件，同时提供配套的 Brutalist 提交、重置与异步校验取消机制。
 
 ## 预览
 
@@ -15,56 +15,108 @@ Brutalist Form 协调组内所有显式注册的 `FormField`，在全部启用�
   demoId="demo-brutalist-form"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前组件在工作区源码中提供，尚未包含在 0.2.0 稳定版包中。
 
-- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-form`
+```bash
+proto-ui add <react|vue|vue2|wc> brutalist-form
+```
 
 ## 用法
 
-### 部件组成
+```tsx
+import {
+  BrutalistFormRoot,
+  BrutalistFormField,
+  BrutalistFormSubmit,
+  BrutalistFormReset,
+  BrutalistFieldLabel,
+  BrutalistFieldControl,
+  BrutalistFieldError,
+} from '../proto-ui/components/react';
 
-Form 由 `Root`、`Field`（`FormField`）、`Submit`（`FormSubmit`）和 `Reset`（`FormReset`）组成：
+export function ExampleBrutalistForm() {
+  return (
+    <BrutalistFormRoot ariaLabel="Profile form" onSubmit={({ values }) => console.log(values)}>
+      <BrutalistFormField name="username" required>
+        <BrutalistFieldLabel>Username</BrutalistFieldLabel>
+        <BrutalistFieldControl placeholder="ada_lovelace" />
+        <BrutalistFieldError />
+      </BrutalistFormField>
+      <div className="flex items-center gap-2">
+        <BrutalistFormSubmit>Submit</BrutalistFormSubmit>
+        <BrutalistFormReset>Reset</BrutalistFormReset>
+      </div>
+    </BrutalistFormRoot>
+  );
+}
+```
 
-- **Root**：收集所有显式注册的 `FormField`，统一执行同步与异步校验，校验通过后在 `submit` 事件中返回按字段名组织的表单数据。已禁用的字段不会出现在提交数据中，重复字段名会阻止序列化；设置 `disabled` 会级联到内部字段。
-- **Field**：将受支持的控件接入表单生命周期，通过 `name` 标识提交键名。
-- **Submit / Reset**：支持指针与键盘激活，沿用 Brutalist 按钮视觉样式，并提供 `disabled`、`hovered`、`pressed`、`focused`、`focusVisible` 状态及 `focusSelf()` 方法。
+### 部件组成与交互
 
-在聚焦的单行 `Field`、`Number Field` 或 `Input OTP` 内按 `Enter` 可触发隐式提交（自动忽略输入法合成、修饰键与按住连发）。调用 `requestReset()` 会恢复非受控字段初值、向受控字段发出重置提议、取消未完成的编辑与校验并触发 `reset` 事件；`resetValidation()` 仅清理校验状态。
+- **Root**：收集所有显式注册的 `FormField`，统一执行同步与异步校验，校验通过后通过 `submit` 事件返回按字段名组织的数据。已禁用的字段自动排除，重复字段名在序列化时抛出 `FORM_DUPLICATE_NAME`；设置 `disabled` 会级联到内部字段。
+- **Field**：继承 `FieldRoot` 能力并通过 `name` 标识提交键名，使用 DM Sans 字体与高对比度错误提示色。
+- **Submit / Reset**：采用 Brutalist 2px 黑色边框与 4px 零模糊硬阴影，支持指针与键盘激活，并响应 `prefers-reduced-motion` 偏好。
+- **隐式回车提交与重置**：在聚焦的单行 `Field`、`Number Field` 或 `Input OTP` 内按 `Enter` 可触发表单提交；`requestReset()` 还原非受控初值并向受控所有者提议重置，`resetValidation()` 仅清理校验错误。
+
+## 示例
+
+### 个人资料表单
+
+组合 `Fieldset`、输入框与多行文本框的常规表单布局：
+
+<PrototypePreviewer
+  demoId="demo-brutalist-form-profile"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 缺陷报告表单
+
+组合必填标题、多行描述与复选框组，演示提交校验与重置流程：
+
+<PrototypePreviewer
+  demoId="demo-brutalist-form-bug-report"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 嵌套 Fieldset 禁用
+
+禁用嵌套 `Fieldset` 后，组内字段会自动禁用并从提交数据中排除：
+
+<PrototypePreviewer
+  demoId="demo-brutalist-form-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ### 异步校验与嵌套字段集
+
+开启外部异步校验时，提交会等待当前 `requestId` 通过 `resolveValidation` 返回结果；编辑、重置或切换只读会自动丢弃过期结果：
 
 <PrototypePreviewer
   demoId="demo-brutalist-form-validation"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-开启外部异步校验时，提交会等待所有字段的当前校验请求通过 `resolveValidation` 返回结果。若校验期间发生编辑、重置、只读切换或发起新的提交，过期结果会被自动忽略。结合嵌套的 `Fieldset` 可以按分组整体禁用字段，并自动将其排除在提交数据之外。
-
 ### 选择类控件字段
+
+通过 `brutalist-field` 导出的 `fieldCheckbox`、`fieldRadioGroup` 与 `fieldSwitch`，将选择类控件接入表单校验与重置：
 
 <PrototypePreviewer
   demoId="demo-brutalist-field-choices"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
-
-从 `brutalist-field` 入口导入 `fieldCheckbox`、`fieldRadioGroup` 和 `fieldSwitch`，放入 `FormField` 内并搭配同系列的 Checkbox Indicator、Radio Item/Indicator 或 Switch Thumb 即可参与表单校验、提交与重置：
-
-- `fieldCheckbox` 提交布尔值 `checked`（半选态且 `checked` 为 `false` 时不满足必填约束）。
-- `fieldRadioGroup` 提交选中项字符串（空字符串在必填时视为缺值）。
-- 只读模式下点击标签仍可聚焦控件、Radio 方向键仍可移动焦点，但不会触发值变更。
 
 ## API
 
-### Root
+### FormRoot
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -74,11 +126,34 @@ Form 由 `Root`、`Field`（`FormField`）、`Submit`（`FormSubmit`）和 `Rese
   ]}
 />
 
-### 其他部件属性
+暴露状态：`disabled`、`pending`、`submitted`。暴露方法：`getValues()`、`requestSubmit()`、`requestReset()`、`resetValidation()`、`cancelSubmit()`。事件：`submit`、`invalid`、`reset`。
 
-- **Field**：`name?: string`（默认 `''`）
-- **Submit / Reset**：`disabled?: boolean`（默认 `false`）
+### FormField
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'validationMode', type: "'onSubmit' | 'onBlur' | 'onChange'", default: "'onSubmit'" },
+    { name: 'externalValidation', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### FormSubmit / FormReset
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+暴露状态：`disabled`、`hovered`、`pressed`、`focused`、`focusVisible`。暴露方法：`focusSelf(options?)`。
 
 ## 参考
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-FORM.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-FORM.yaml', 'P-BASE-FORM.yaml']}
+/>

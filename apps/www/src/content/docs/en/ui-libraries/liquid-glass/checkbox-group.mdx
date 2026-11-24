@@ -1,11 +1,13 @@
 ---
 title: 'Checkbox Group'
-description: 'A Liquid Glass multi-selection checkbox group with select-all/mixed state and Field/Form integration.'
+description: 'A Liquid Glass multi-selection checkbox group with select-all/mixed state, horizontal layout, and Field/Form validation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Checkbox Group composes `Root`, `Item`, and `All` to manage a string-array selection with tri-state select-all toggling and clear visual indicators (check, dash, or empty box) that do not rely on color alone.
+Liquid Glass Checkbox Group composes `Root`, `Item`, and `All` as compact content-layer 20×20 rounded checkboxes with clear non-color check/dash indicators, keeping form rows neutral (never stacking glass-on-glass) with readable muted disabled states.
 
 ## Preview
 
@@ -13,7 +15,6 @@ Liquid Glass Checkbox Group composes `Root`, `Item`, and `All` to manage a strin
   demoId="demo-liquid-glass-checkbox-group"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
@@ -22,17 +23,115 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
-- **Parts**: `Root`, `Item`, `All`.
-- **Select-all and disabled items**: `All` derives checked, unchecked, or mixed state across enabled items and preserves disabled selections when toggling. Visual SVG indicators are `aria-hidden` and add no extra roles or Tab stops.
-- **Keyboard**: every item has its own Tab stop and toggles with Space (Enter does not toggle).
-- **Controlled state and forms**: supply `value` and handle `valueChange` for controlled state; `getValue()` returns a copy; duplicate item values are ignored. Inside [Field](/en/ui-libraries/liquid-glass/field/) or [Form](/en/ui-libraries/liquid-glass/form/), `Root` integrates with label activation, required validation, serialization, and reset without creating hidden HTML inputs.
+```tsx
+import {
+  LiquidGlassCheckboxGroupRoot,
+  LiquidGlassCheckboxGroupAll,
+  LiquidGlassCheckboxGroupItem,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <LiquidGlassCheckboxGroupRoot defaultValue={['email']} ariaLabel="Notification channels">
+      <LiquidGlassCheckboxGroupAll>All notifications</LiquidGlassCheckboxGroupAll>
+      <LiquidGlassCheckboxGroupItem value="email">Email updates</LiquidGlassCheckboxGroupItem>
+      <LiquidGlassCheckboxGroupItem value="sms">SMS alerts</LiquidGlassCheckboxGroupItem>
+    </LiquidGlassCheckboxGroupRoot>
+  );
+}
+```
+
+### Anatomy and surface hierarchy
+
+- **Root**: Coordinates the selected `string[]` value (`value` / `defaultValue`), `orientation`, `disabled`, `readOnly`, and `ariaLabel`.
+- **Item**: Compact content-list option with a 20×20 rounded checkbox indicator, focus feedback, its own `Tab` stop, and `Space` activation (`Enter` does not toggle).
+- **All**: Derives checked, mixed (`aria-checked="mixed"`), or unchecked state across enabled items and toggles only enabled items while preserving disabled selections.
+- **Content-layer contrast and forms**: Rows stay neutral without glass-on-glass card slabs and use semantic muted colors rather than host opacity when disabled. Inside [Field](/en/ui-libraries/liquid-glass/field/) or [Form](/en/ui-libraries/liquid-glass/form/), `Root` integrates with label activation, required validation, serialization, and reset.
+
+## Examples
+
+### Basic
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-group-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Horizontal
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-group-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and Read-Only
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-group-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Form Validation
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-group-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop / Method | Description |
-| --- | --- | --- |
-| Root | `value`, `defaultValue` | Controlled / uncontrolled array of selected strings |
-| Root | `disabled`, `readOnly`, `ariaLabel` | Group-wide disabled/read-only state and accessible name |
-| Root | `valueChange`, `getValue()` | Change proposal event and defensive copy getter |
-| Item | `value`, `disabled` | Option identifier and local disabled state |
-| All | — | Toggles all enabled items and reflects checked/mixed state |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string[] | undefined', default: 'Uncontrolled' },
+    { name: 'defaultValue', type: 'string[]', default: '[]' },
+    { name: 'orientation', type: "'vertical' | 'horizontal'", default: "'vertical'" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### All
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Events, Methods, and States
+
+- **Root events**: `valueChange` (payload `{ value: string[] }`).
+- **Root methods**: `getValue(): string[]`, `resetValue(): boolean`, `focusSelf(): void`.
+- **Exposed states**: Root exposes `checked`, `indeterminate`, `disabled`, `readOnly`; Item and All expose `checked`, `indeterminate`, `disabled`, `readOnly`, `focused`, `focusVisible`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-CHECKBOX-GROUP.yaml', 'P-BASE-CHECKBOX-GROUP.yaml']}
+/>

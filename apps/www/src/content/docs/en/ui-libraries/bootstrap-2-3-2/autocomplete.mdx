@@ -3,9 +3,11 @@ title: 'Autocomplete'
 description: 'A Bootstrap 2.3.2 text input with filterable suggestions and free-text submission.'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Autocomplete pairs a single-line text input with a filterable suggestion list, letting users either pick a suggestion or submit free text with `Enter`.
+Bootstrap 2.3.2 Autocomplete pairs classic 30px form controls with a `.typeahead` suggestion menu — preserving the signature blue focus glow, gradient button states, and blue gradient active row — on top of shared Base Autocomplete semantics.
 
 ## Preview
 
@@ -13,30 +15,117 @@ Autocomplete pairs a single-line text input with a filterable suggestion list, l
   demoId="demo-bootstrap-2-3-2-autocomplete"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source (`@proto.ui/prototypes-bootstrap-2-3-2/autocomplete`); not yet included in the 0.2.0 stable release.
 
 ## Usage
 
-Compose `Root`, `Input`, `Trigger`, `Content`, `Item`, and `Empty`:
+```html
+<proto-ui-bootstrap-2-3-2-autocomplete-root a11y-label="Framework">
+  <proto-ui-bootstrap-2-3-2-autocomplete-input
+    placeholder="Search frameworks…"
+  ></proto-ui-bootstrap-2-3-2-autocomplete-input>
+  <proto-ui-bootstrap-2-3-2-autocomplete-trigger
+    >Options</proto-ui-bootstrap-2-3-2-autocomplete-trigger
+  >
+  <proto-ui-bootstrap-2-3-2-autocomplete-content>
+    <proto-ui-bootstrap-2-3-2-autocomplete-item
+      value="next"
+      text-value="Next.js"
+      keywords="react ssr"
+    >
+      Next.js
+    </proto-ui-bootstrap-2-3-2-autocomplete-item>
+    <proto-ui-bootstrap-2-3-2-autocomplete-item
+      value="astro"
+      text-value="Astro"
+      keywords="islands static"
+    >
+      Astro
+    </proto-ui-bootstrap-2-3-2-autocomplete-item>
+    <proto-ui-bootstrap-2-3-2-autocomplete-empty
+      >No matching frameworks.</proto-ui-bootstrap-2-3-2-autocomplete-empty
+    >
+  </proto-ui-bootstrap-2-3-2-autocomplete-content>
+</proto-ui-bootstrap-2-3-2-autocomplete-root>
+```
 
-- **Committed value vs. query**: `value` holds the committed text while `inputValue` holds the live query. Picking a suggestion commits its `textValue`; pressing `Enter` with no active suggestion commits the typed text.
-- **Filtering and empty state**: Built-in filtering matches `textValue` and `keywords` case- and diacritic-insensitively. Pass `filter={false}` to render pre-filtered items. `Empty` appears automatically when zero items match.
-- **Keyboard and IME**: Focus stays in `Input` while navigating with Arrow keys, and IME composition never prematurely commits an item. Disabled and duplicate-valued items cannot be committed.
-- **Independent control**: `open`, `value`, and `inputValue` can each be controlled independently via their change events.
+### Parts and behavior
+
+- **Parts**: Compose `Root`, `Input`, `Trigger`, `Content`, `Item`, and `Empty`.
+- **Committed value vs. query**: `value` holds committed text while `inputValue` holds the live query. Selecting a suggestion commits `textValue`; pressing `Enter` without an active option commits free text.
+- **Filtering, keyboard, and IME**: Built-in filtering folds case and diacritics across `textValue` and `keywords`; focus stays in `Input` during arrow navigation and IME composition never prematurely commits an item.
+
+## Examples
+
+### Keywords and diacritic-insensitive search
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-autocomplete-keywords"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Trigger-less free-text submission
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-autocomplete-free-text"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and read-only states
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-autocomplete-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props | Description |
-| --- | --- | --- |
-| `Root` | `value` / `inputValue` / `open` | Independently controlled committed text, query, and open state |
-| `Root` | `filter` | Toggle built-in filtering; set `false` for externally filtered children |
-| `Input` | — | Single-line text input that keeps keyboard focus during navigation |
-| `Trigger` | — | Toggles the suggestion list |
-| `Content` | — | Suggestion list container |
-| `Item` | `value` / `textValue` / `keywords` / `disabled` | Individual suggestion entry |
-| `Empty` | — | Displayed when no suggestions match |
+### Root
+
+Pass `value`, `inputValue`, or `open` for independent controlled state. Exposed events: `valueChange`, `inputValueChange`, `openChange`. Exposed methods: `openPopup()`, `close()`, `setInputValue()`, `select()`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
+    { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'filter', type: 'boolean', default: 'true' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Other parts
+
+<ApiPropsTable
+  headers={{ name: 'Part / Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Input · placeholder / a11yLabel / name', type: 'string', default: "''" },
+    { name: 'Trigger · disabled', type: 'boolean', default: 'false' },
+    { name: 'Content · side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content · align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'Content · sideOffset / collisionPadding', type: 'number', default: '2 / 8' },
+    { name: 'Item · value / textValue / keywords', type: 'string', default: "''" },
+    { name: 'Item · disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-AUTOCOMPLETE.yaml', 'P-BASE-AUTOCOMPLETE.yaml']}
+/>

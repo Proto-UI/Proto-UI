@@ -1,0 +1,170 @@
+---
+title: 'Bootstrap 2.3.2 Radio Group'
+description: '沿用经典 Bootstrap 2.3.2 立体渐变与蓝色焦点光晕的单选框组组件。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+
+<DraftProjectionStyle />
+
+Bootstrap 2.3.2 Radio Group 以归档 Bootstrap 2.3.2 的内凹浅灰选框、经典蓝渐变选中圆点与柔和蓝光焦点反馈呈现单选交互，同时由 Base Radio Group 统一提供 `radiogroup` / `radio` 无障碍语义、方向键漫游焦点与受控状态管理。
+
+## 预览
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-radio-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+<InstallCommandCard
+  command="npx @proto.ui/cli@latest add wc bootstrap-2-3-2-radio-group"
+  manager="npm"
+/>
+
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件代码，或从 `@proto.ui/prototypes-bootstrap-2-3-2/radio-group` 导入原型。
+
+## 用法
+
+```tsx
+import {
+  BootstrapLabelRoot,
+  BootstrapRadioGroupIndicator,
+  BootstrapRadioGroupItem,
+  BootstrapRadioGroupRoot,
+} from '../proto-ui/components/react';
+
+export function RadioGroupUsage() {
+  return (
+    <BootstrapRadioGroupRoot defaultValue="comfortable" a11yLabel="Display density">
+      <div className="flex items-center gap-2">
+        <BootstrapRadioGroupItem value="default">
+          <BootstrapRadioGroupIndicator />
+        </BootstrapRadioGroupItem>
+        <BootstrapLabelRoot>Default</BootstrapLabelRoot>
+      </div>
+      <div className="flex items-center gap-2">
+        <BootstrapRadioGroupItem value="comfortable">
+          <BootstrapRadioGroupIndicator />
+        </BootstrapRadioGroupItem>
+        <BootstrapLabelRoot>Comfortable</BootstrapLabelRoot>
+      </div>
+      <div className="flex items-center gap-2">
+        <BootstrapRadioGroupItem value="compact">
+          <BootstrapRadioGroupIndicator />
+        </BootstrapRadioGroupItem>
+        <BootstrapLabelRoot>Compact</BootstrapLabelRoot>
+      </div>
+    </BootstrapRadioGroupRoot>
+  );
+}
+```
+
+### 样式与无障碍
+
+- 未选中项呈现经典浅灰内阴影凹槽（`#f5f5f5` → `#f9f9f9`），选中后切换为 Bootstrap 2.3.2 `#0088cc` → `#0077b3` 渐变与 6px 白色中心圆点。
+- 键盘聚焦时显示 `rgba(82, 168, 236, 0.6)` 柔和蓝光阴影，并保留高对比度模式下的强制轮廓。
+- 方向键在启用项之间循环移动并选中，`Home` / `End` 跳至首尾启用项，`Space` 选中当前聚焦项。
+
+## 示例
+
+### 带说明文字
+
+配合 12px 经典辅助说明文案，清晰呈现每个单选项的含义。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-radio-group-description"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 选择卡片
+
+以 4px 圆角与内阴影面板呈现套餐选择卡片，选中时切换经典浅蓝高亮背景。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-radio-group-choice-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Fieldset 分组
+
+搭配 `FieldRoot`、`FieldLabel` 与 `FieldDescription` 组织表单选项分组。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-radio-group-fieldset"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用态
+
+支持单个选项禁用与整组禁用，统一应用 `opacity-65` 与 `cursor-not-allowed`。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-radio-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 校验错误
+
+结合 `FieldRoot` 与 `FieldError` 呈现 Bootstrap 2.3.2 经典错误态（`#b94a48`）提示。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-radio-group-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string（必填）', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Indicator、事件与方法
+
+- **Indicator**：无额外属性，自动根据所属 `Item` 的选中与禁用状态更新视觉呈现。
+- **事件**：Root 触发 `valueChange`（`{ value: string }`）；Item 触发 `select`（`{ value: string }`）。
+- **方法**：Root 暴露 `requestValue(value)`、`resetValue()`、`focusFirst()`、`focusLast()`、`focusNext()`、`focusPrev()`、`focusSelected()`、`focusSelf()`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-RADIO-GROUP.yaml',
+    'P-BOOTSTRAP-2-3-2-RADIO-GROUP-ITEM.yaml',
+    'P-BOOTSTRAP-2-3-2-RADIO-GROUP-INDICATOR.yaml',
+    'P-BASE-RADIO-GROUP.yaml',
+  ]}
+/>

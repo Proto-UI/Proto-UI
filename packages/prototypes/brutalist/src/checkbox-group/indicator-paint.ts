@@ -3,13 +3,14 @@ import {
   tw,
   type DelayTask,
   type DefHandle,
-  type BorrowedStateHandle,
+  type ObservedStateHandle,
   type RendererHandle,
 } from '@proto.ui/core';
 import type {
   CheckboxGroupItemProps,
   CheckboxGroupItemExposes,
 } from '@proto.ui/prototypes-base/checkbox-group';
+import { BRUTALIST_FOCUS_TOKENS } from '../style';
 // Passive glyph grammar from ../checkbox/indicator.proto.ts.
 // No interaction/context/focus owner; checked and mixed remain solely the Group's state.
 // The passive template box owns the visible skin, not the entire label's hit target.
@@ -17,8 +18,9 @@ import type {
 export function checkboxGroupGlyph(
   def: DefHandle<CheckboxGroupItemProps, CheckboxGroupItemExposes>,
   state: {
-    checked: BorrowedStateHandle<boolean, CheckboxGroupItemProps>;
-    indeterminate: BorrowedStateHandle<boolean, CheckboxGroupItemProps>;
+    checked: ObservedStateHandle<boolean, any>;
+    indeterminate: ObservedStateHandle<boolean, any>;
+    focusVisible: ObservedStateHandle<boolean, any>;
   }
 ) {
   let refresh: DelayTask | null = null;
@@ -32,23 +34,24 @@ export function checkboxGroupGlyph(
   };
   state.checked.watch(update);
   state.indeterminate.watch(update);
-  def.lifecycle.onUnmounted(() => {
+  state.focusVisible.watch(update);
+  const cancel = () => {
     refresh?.cancel();
     refresh = null;
-  });
+  };
+  def.lifecycle.onUnmounted(cancel);
+  def.lifecycle.onBeforeDispose(cancel);
   return (r: RendererHandle<any>) => {
     const path = state.indeterminate.get()
       ? 'M5 12h14'
       : state.checked.get()
         ? 'm20 6-11 11-5-5'
         : null;
-    const boxStyle = path
-      ? tw(
-          'pointer-events-none inline-flex size-5 shrink-0 items-center justify-center border-2 border-border bg-main text-main-foreground'
-        )
-      : tw(
-          'pointer-events-none inline-flex size-5 shrink-0 items-center justify-center border-2 border-border bg-transparent text-foreground'
-        );
+    const boxStyle = tw(
+      'pointer-events-none inline-flex size-5 shrink-0 items-center justify-center rounded-none border-2 border-border transition-none',
+      path ? 'bg-main text-main-foreground' : 'bg-transparent text-foreground',
+      state.focusVisible.get() ? BRUTALIST_FOCUS_TOKENS : ''
+    );
     return r.el(
       'span',
       { style: boxStyle },

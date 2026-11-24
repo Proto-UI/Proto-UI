@@ -1,8 +1,11 @@
-import type { InputOtpControlExposes } from '@proto.ui/prototypes-base/input-otp';
-import type { InputOtpInputProps } from '@proto.ui/prototypes-base/input-otp';
+import type {
+  InputOtpControlExposes,
+  InputOtpInputProps,
+} from '@proto.ui/prototypes-base/input-otp';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asInputOtpControl } from '@proto.ui/prototypes-base/input-otp';
 import { setupInputVisual, bootstrapLightControlInvalidPaint } from '../input/visual';
+
 export default definePrototype<InputOtpInputProps, InputOtpControlExposes>({
   name: 'bootstrap-2-3-2-input-otp-control',
   modules: asInputOtpControl.modules,
@@ -15,12 +18,16 @@ export default definePrototype<InputOtpInputProps, InputOtpControlExposes>({
       { ...inherited.stateHandles!, readOnly: binding.state.fieldReadOnly },
       binding.state.invalid
     );
-    def.feedback.style.use(tw('tabular-nums'));
+    def.feedback.style.use(tw('m-0 tabular-nums'));
     // Keep this Rule beside its existing public Field binding so the family
     // source collector can retain the emitted invalid selector.
     def.rule({
       when: (w) => w.state(binding.state.invalid).eq(true),
       intent: (i) => i.feedback.style.use(tw(bootstrapLightControlInvalidPaint)),
+    });
+    def.rule({
+      when: (w) => w.meta('reducedMotion').eq(true),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
     });
     return inherited.render;
   },

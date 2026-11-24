@@ -13,7 +13,11 @@ export default definePrototype<ShadcnInputOtpInputProps, InputOtpControlExposes>
     if (!inherited.stateHandles || !binding)
       throw new Error('[shadcn-input-otp-control] Missing Base editor or Field binding.');
     setupInputVisual(def, inherited.stateHandles, binding.state.invalid, true);
-    def.feedback.style.use(tw('block flex-1 tabular-nums'));
+    def.feedback.style.use(tw('block flex-1 mr-2 tabular-nums'));
+    def.rule({
+      when: (w) => w.meta('reducedMotion').eq(true),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
     return inherited.render;
   },
 });

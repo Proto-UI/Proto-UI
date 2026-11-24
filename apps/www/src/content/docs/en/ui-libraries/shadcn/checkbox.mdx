@@ -1,6 +1,6 @@
 ---
 title: 'Checkbox'
-description: 'A Shadcn-styled checkbox supporting checked, indeterminate, controlled state, and form integration.'
+description: 'A Shadcn-styled checkbox supporting checked, indeterminate, controlled state, validation, and form integration.'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -12,14 +12,10 @@ A checkbox supporting unchecked, checked, and `indeterminate` (`mixed`) states w
 
 ## Preview
 
-The demo below shows unchecked, checked, indeterminate, disabled-and-checked, and focusable unchecked states:
-
 <PrototypePreviewer
   demoId="demo-shadcn-checkbox"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
 
 ## Installation
@@ -32,22 +28,109 @@ Replace `wc` with `react`, `vue`, or `vue2` to generate the local facade for you
 
 ## Usage
 
-### Anatomy
+```tsx
+import {
+  ShadcnCheckboxIndicator,
+  ShadcnCheckboxRoot,
+  ShadcnLabelRoot,
+} from '../proto-ui/components/react';
 
-Compose `Checkbox` from `Root` and `Indicator`:
+export function Example() {
+  return (
+    <div className="flex items-center gap-3">
+      <ShadcnCheckboxRoot styleProfile="rhea" defaultChecked>
+        <ShadcnCheckboxIndicator styleProfile="rhea" />
+      </ShadcnCheckboxRoot>
+      <ShadcnLabelRoot styleProfile="rhea">Accept terms and conditions</ShadcnLabelRoot>
+    </div>
+  );
+}
+```
 
-- **Root**: Manages `checked`, `indeterminate`, `disabled`, `readOnly`, `required`, and focus/activation behavior.
-- **Indicator**: Derives its visual state from the nearest `Root` and renders either a checkmark or a dash. `indeterminate` takes precedence over `checked` when both are true.
+### Anatomy and keyboard behavior
 
-### Read-only and form integration
+- **Root**: Manages `checked`, `indeterminate`, `disabled`, `readOnly`, `required`, and focus/activation behavior with pointer clicks and `Space`.
+- **Indicator**: Derives its state from the nearest `Root` and renders either a checkmark or a dash. `indeterminate` takes precedence over `checked` (`aria-checked="mixed"`).
+- **Read-only and form integration**: `readOnly={true}` keeps the checkbox focusable while blocking changes; `disabled={true}` also removes it from the tab order. For form validation and error messages, use `fieldCheckbox` from `@proto.ui/prototypes-shadcn/field` inside `FormField` or `Field` (see [Form](../form/) and [Checkbox Group](../checkbox-group/)).
+- **Label association**: Pair with [Label](../label/) or `shadcnCheckboxLabelComposition` so clicking the visible label text toggles the checkbox.
 
-- `readOnly={true}` keeps the checkbox focusable while blocking value changes; `disabled={true}` also removes it from the tab order.
-- A standalone `Checkbox` does not auto-register with a form. Inside a `FormField`, use `fieldCheckbox` from `@proto.ui/prototypes-shadcn/field` to connect required validation, label/description/error links, and reset (see the [Form choice recipe](../form/)). Calling `resetValue()` proposes the initial baseline without forcing a controlled owner to accept it.
-- Provide an accessible name by pairing the checkbox with a [Label](../label/) or adjacent label text.
+## Examples
+
+### Description
+
+Pair the checkbox with a label and helper description text.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-description"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and read-only
+
+Compare `disabled` (non-focusable, non-interactive) with `readOnly` (focusable, value locked).
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid state
+
+Compose `fieldCheckbox` inside an invalid `Field` to display destructive border, ring, and error feedback.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled and indeterminate
+
+Control `checked` and `indeterminate` via `checkedChange` and `indeterminateChange`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Group
+
+Arrange multiple checkboxes in a checklist. For array-backed selection and select-all coordination, see [Checkbox Group](../checkbox-group/).
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Table
+
+Use a header checkbox with `indeterminate` state to coordinate row selection in a table.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-table"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Wrap checkboxes in a `dir="rtl"` container for right-to-left reading order.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 Passing `checked` or `indeterminate` controls that state independently while allowing the other to remain uncontrolled.
+
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -59,10 +142,19 @@ Passing `checked` or `indeterminate` controls that state independently while all
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'required', type: 'boolean', default: 'false' },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'new-york-v4' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea'",
+      default: "'new-york-v4'",
+    },
   ]}
 />
 
-`Root` exposes `checked`, `indeterminate`, `disabled`, `required`, `hovered`, `focused`, `focusVisible`, and `pressed`, plus `checkedChange` and `indeterminateChange`. Updating `required` reflects the required attribute without toggling `checked`.
+`Root` exposes `checked`, `indeterminate`, `disabled`, `readOnly`, `required`, `hovered`, `focused`, `focusVisible`, and `pressed` states, `focusSelf(options?)` and `resetValue()` methods, and `checkedChange` (`{ checked, indeterminate }`) and `indeterminateChange` (`{ indeterminate }`) events.
+
+### Indicator
+
+`Indicator` declares no props of its own. It subscribes to the nearest `Root` context and exposes `checked`, `indeterminate`, `isChecked()`, and `isIndeterminate()`.
 
 ## References
 

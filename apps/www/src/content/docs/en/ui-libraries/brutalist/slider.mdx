@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Slider lets users pick a single value or a multi-thumb range via pointer drag, touch, or keyboard stepping, with horizontal/vertical orientation and `Field` / `Form` integration.
+Brutalist Slider renders single-value and multi-thumb range selection with 5px corners (`rounded-base`), 2px black borders, and crisp hard-shadow thumb feedback, supporting pointer drag, keyboard stepping, and `Field` / `Form` integration.
 
 ## Preview
 
@@ -15,52 +15,88 @@ Brutalist Slider lets users pick a single value or a multi-thumb range via point
   demoId="demo-brutalist-slider"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
-
-- **Package exports**: import scalar slider parts and multi-value `sliderValues*` parts from `@proto.ui/prototypes-brutalist/slider`
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import scalar slider parts and multi-value `sliderValues*` parts from `@proto.ui/prototypes-brutalist/slider`.
 
 ## Usage
 
-### Single-value parts
+```tsx
+import {
+  BrutalistSliderRoot,
+  BrutalistSliderTrack,
+  BrutalistSliderIndicator,
+  BrutalistSliderThumb,
+} from '../proto-ui/components/react';
 
-The scalar slider consists of `Root`, `Label`, `Track`, `Indicator`, `Thumb`, `FieldThumb`, and `Value`:
+export function Example() {
+  return (
+    <BrutalistSliderRoot defaultValue={33} min={0} max={100} step={1}>
+      <BrutalistSliderTrack>
+        <BrutalistSliderIndicator />
+        <BrutalistSliderThumb />
+      </BrutalistSliderTrack>
+    </BrutalistSliderRoot>
+  );
+}
+```
 
-- **Root**: Manages `value` / `defaultValue`, `min`, `max`, `step`, `disabled`, `readOnly`, `orientation`, and `direction`. Values snap to `step` from `min` and clamp within bounds.
-- **Track / Indicator**: Handle pointer and touch dragging along the track and render the filled range.
-- **Thumb**: Focusable slider thumb for standalone usage. Supports arrow keys, `Shift` ×10 stepping, `PageUp` / `PageDown`, and `Home` / `End` (with lateral arrows reversed in horizontal RTL).
-- **FieldThumb**: Use instead of `Thumb` inside `Field` or `FormField` to integrate `FieldLabel` focusing, numeric validation, form serialization, and reset.
-- **Label / Value**: Name the slider and display the current value.
+- **Scalar parts**: `Root`, `Label`, `Track`, `Indicator`, `Thumb`, `FieldThumb`, and `Value`. Use `FieldThumb` instead of `Thumb` inside `Field` or `FormField`.
+- **Keyboard and controlled mode**: Supports arrow keys, `Shift` ×10 stepping, `PageUp`/`PageDown`, and `Home`/`End` (mirrored in horizontal RTL). Pass `value` for controlled mode with `valueChange` and `valueCommit` events.
+- **Range and multi-thumb**: Compose `sliderValues*` parts and configure `thumbCollisionBehavior` as `'push'`, `'swap'`, or `'none'`.
 
-Pass `value` for controlled mode. Dragging emits `valueChange`, release emits `valueCommit`, and cancelling restores the starting value in uncontrolled mode.
+## Examples
 
-### Range and multiple values
+### Two Thumbs
 
 <PrototypePreviewer
   demoId="demo-brutalist-slider-values"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-For range or multi-thumb sliders, import the `sliderValues*` parts from `@proto.ui/prototypes-brutalist/slider`:
+### Multiple Thumbs
 
-- Pass an array such as `defaultValue={[20, 80]}` on `Values Root` and place one indexed `Thumb` per value inside `Values Track`.
-- Clicking the track moves the nearest editable thumb, and grabbing a thumb preserves the pointer offset.
-- `thumbCollisionBehavior` accepts `'push'`, `'swap'`, or `'none'`; `'swap'` transfers active focus when thumbs cross.
-- `Values Root` integrates directly with `Field` / `FormField` as a grouped control reporting `number[]`, with `FieldLabel` focusing the first editable thumb.
+<PrototypePreviewer
+  demoId="demo-brutalist-slider-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Vertical
+
+<PrototypePreviewer
+  demoId="demo-brutalist-slider-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+<PrototypePreviewer
+  demoId="demo-brutalist-slider-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+<PrototypePreviewer
+  demoId="demo-brutalist-slider-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-### Root
+### Root (Scalar)
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'number | undefined', default: 'uncontrolled' },
     { name: 'defaultValue', type: 'number', default: '0' },
     { name: 'min', type: 'number', default: '0' },
     { name: 'max', type: 'number', default: '100' },
@@ -74,8 +110,30 @@ For range or multi-thumb sliders, import the `sliderValues*` parts from `@proto.
   ]}
 />
 
-Pass `value: number` to enable controlled mode. Scalar child parts declare no props of their own.
+### Values Root & Parts (Multi-Thumb)
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'number | readonly number[]', default: 'uncontrolled' },
+    { name: 'defaultValue', type: 'number | readonly number[]', default: '0' },
+    { name: 'largeStep', type: 'number', default: '10 × step' },
+    { name: 'minStepsBetweenValues', type: 'number', default: '0' },
+    { name: 'thumbCollisionBehavior', type: "'push' | 'swap' | 'none'", default: "'push'" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'index (Thumb)', type: 'number', default: '0' },
+    { name: 'startIndex / endIndex (Indicator)', type: 'number', default: 'full span' },
+  ]}
+/>
 
 ## References
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-SLIDER.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-SLIDER.yaml',
+    'P-BRUTALIST-SLIDER-VALUES.yaml',
+    'P-BASE-SLIDER.yaml',
+    'P-BASE-SLIDER-VALUES.yaml',
+  ]}
+/>

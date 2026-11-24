@@ -12,8 +12,13 @@ export default definePrototype<ShadcnNumberFieldPartProps, NumberFieldControlExp
     const binding = inherited.getAsHookHandle?.('as-field-control');
     if (!inherited.stateHandles || !binding)
       throw new Error('[shadcn-number-field-control] Missing Base editor or Field binding.');
-    setupInputVisual(def, inherited.stateHandles, binding.state.invalid, true);
+    const state = inherited.stateHandles;
+    setupInputVisual(def, state, binding.state.invalid, true);
     def.feedback.style.use(tw('block flex-1 tabular-nums'));
+    def.rule({
+      when: (w) => w.all(w.state(state.readOnly).eq(true), w.state(state.disabled).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('bg-muted/50 text-muted-foreground')),
+    });
     return inherited.render;
   },
 });

@@ -5,38 +5,124 @@ description: 'A single-line text input styled with archived Bootstrap 2.3.2 fiel
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Bootstrap 2.3.2 Input applies archived Bootstrap 2.3.2 field styling to Base Input, rendering a single native `input[type=text]` on the Web while preserving the classic light palette in dark hosts.
+Bootstrap 2.3.2 Input applies classic `forms.less` field styling (4px radius, inset shadow, blue focus glow, and `#eee` disabled/read-only fill) to [Base Input](../../base/input/), while preserving the archived light control palette in dark hosts.
 
 ## Preview
-
-Edit the project name, focus the read-only input, and compare it with the disabled input across runtimes.
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-input"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
   toolbar={true}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. [Browse the implemented subset](../).
+Currently available from workspace source and not yet included in the 0.2.0 stable release; import from `@proto.ui/prototypes-bootstrap-2-3-2/input`. [Browse the implemented subset](../).
 
 ## Usage
 
+```tsx
+import { Bootstrap232InputRoot } from '@/components/ui/bootstrap-2-3-2-input';
+
+export function Example() {
+  return <Bootstrap232InputRoot placeholder="Type something..." ariaLabel="Basic input" />;
+}
+```
+
 - **Values and events**: Supports controlled `value` and uncontrolled `defaultValue`, along with normalized editing and IME composition events.
-- **Read-only and disabled**: `readOnly` keeps the input focusable and selectable without editing; `disabled` prevents focus and edits.
-- **Field composition**: Pair with `Field` when you need labels, helper descriptions, or validation errors.
+- **Read-only and disabled**: `readOnly` keeps the input focusable and selectable without editing; `disabled` prevents focus and edits, both styled with the classic `#eee` fill.
+- **Field composition**: Pair with Bootstrap 2.3.2 `Field` when you need labels, helper descriptions, or red validation highlights.
+
+## Examples
+
+### Basic
+
+A standalone Bootstrap 2.3.2 text input.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Field
+
+Compose `Field`, `FieldLabel`, `FieldControl`, and `FieldDescription` for labeled form inputs.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid
+
+Set `invalid` and `errors` on `Field` to display the classic `#953b39` error border and focus glow.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Inline
+
+Pair `Input` with Bootstrap 2.3.2 `Button` horizontally for a classic inline search bar.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-inline"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Category | Members | Description |
-| --- | --- | --- |
-| Value & state | `value` / `defaultValue`, `disabled`, `readOnly`, `placeholder` | Controlled/uncontrolled text and editing flags |
-| Form & hints | `name`, `required`, `autoComplete`, `minLength`, `maxLength`, `inputMode`, `enterKeyHint` | Native editing hints and constraints |
-| Accessibility | `ariaLabel`, `labelledBy`, `describedBy` | Accessible naming and description links |
-| Events & methods | `valueChange`, `change`, composition events, `focusSelf()`, `blurSelf()` | Change notifications and focus methods |
+### Root Props
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'undefined' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    {
+      name: 'inputMode',
+      type: "'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'",
+      default: 'undefined',
+    },
+    {
+      name: 'enterKeyHint',
+      type: "'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'",
+      default: 'undefined',
+    },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'labelledBy', type: 'string', default: "''" },
+    { name: 'describedBy', type: 'string', default: "''" },
+  ]}
+/>
+
+### Exposed States, Methods, and Events
+
+- **States**: `value`, `disabled`, `readOnly`, `focused`, `focusVisible`, `composing`
+- **Methods**: `focusSelf(options?)`, `blurSelf()`, `resetValue(value?: string): boolean`
+- **Events**: `valueChange`, `change`, `compositionStart`, `compositionUpdate`, `compositionEnd`
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-INPUT.yaml', 'P-BASE-INPUT.yaml']}
+/>

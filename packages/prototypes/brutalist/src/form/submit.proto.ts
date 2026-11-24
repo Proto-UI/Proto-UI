@@ -12,16 +12,18 @@ import {
   BRUTALIST_FOCUS_TOKENS,
   BRUTALIST_DISABLED_TOKENS,
 } from '../style';
+
 // Passive brutalist Button paint; Base Form remains the sole action owner.
 // Keep rules in the owning setup so source lowering can resolve the actual borrowed states.
 export default definePrototype<FormActionProps, FormActionExposes>({
   name: 'brutalist-form-submit',
+  modules: asFormSubmit.modules,
   setup(def) {
     const inherited = asFormSubmit();
     const state = inherited.stateHandles!;
     def.feedback.style.use(
       tw(
-        'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap select-none font-sans font-medium h-10 px-4 text-sm'
+        'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap select-none cursor-pointer font-sans font-medium h-10 px-4 text-sm'
       )
     );
     def.feedback.style.use(tw(BRUTALIST_STRUCTURE_TOKENS));

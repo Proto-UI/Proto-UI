@@ -2,7 +2,7 @@ import type { SliderFieldThumbExposes } from '@proto.ui/prototypes-base/slider';
 import type { SliderPartProps } from '@proto.ui/prototypes-base/slider';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asSliderFieldThumb } from '@proto.ui/prototypes-base/slider';
-import { COMMAND_FOCUS, COMMAND_HOVER } from '../interactive-surface';
+import { COMMAND_BLOCKED, COMMAND_FOCUS, COMMAND_HOVER } from '../interactive-surface';
 
 export type LiquidGlassSliderFieldThumbProps = SliderPartProps & {
   material?: 'auto' | 'opaque';
@@ -20,7 +20,7 @@ export default definePrototype<LiquidGlassSliderFieldThumbProps, SliderFieldThum
     def.props.setDefaults({ material: 'auto' });
     def.feedback.style.use(
       tw(
-        'absolute left-[calc(var(--pui-display-percentage)*1%)] top-1/2 block size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-primary bg-background text-foreground outline-none shadow-sm'
+        'absolute left-[calc(var(--pui-display-percentage)*1%)] top-1/2 block h-5 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full border border-border bg-secondary text-secondary-foreground shadow-md transition-shadow cursor-pointer outline-none select-none'
       )
     );
     def.rule({
@@ -39,13 +39,15 @@ export default definePrototype<LiquidGlassSliderFieldThumbProps, SliderFieldThum
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed shadow-none')),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_BLOCKED)),
     });
     def.rule({
       when: (w) => w.state(state.orientation).eq('vertical'),
       intent: (i) =>
         i.feedback.style.use(
-          tw('left-1/2 top-auto bottom-[calc(var(--pui-display-percentage)*1%)] translate-y-1/2')
+          tw(
+            'left-1/2 top-auto bottom-[calc(var(--pui-display-percentage)*1%)] h-7 w-5 translate-y-1/2'
+          )
         ),
     });
     def.feedback.material.declare({

@@ -1,96 +1,92 @@
 import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
+
 export default {
-  'type': 'demo',
-  'root': {
-    'kind': 'box',
-    'className': 'min-w-0 grid gap-4 p-4',
-    'children': [
+  type: 'demo',
+  root: {
+    kind: 'box',
+    className:
+      'min-w-0 grid gap-3 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6 w-full max-w-md',
+    children: [
       {
-        'kind': 'proto',
-        'prototypeId': 'liquid-glass-autocomplete-root',
-        'children': [
+        kind: 'proto',
+        prototypeId: 'liquid-glass-autocomplete-root',
+        props: {
+          a11yLabel: 'Framework',
+        },
+        ref: 'root',
+        children: [
           {
-            'kind': 'proto',
-            'prototypeId': 'liquid-glass-autocomplete-input',
-            'props': {
-              'placeholder': 'Search fruit…',
-              'a11yLabel': 'Choose fruit',
+            kind: 'proto',
+            prototypeId: 'liquid-glass-autocomplete-input',
+            props: {
+              placeholder: 'Search frameworks…',
+              a11yLabel: 'Framework',
             },
-            'ref': 'input',
+            ref: 'input',
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'liquid-glass-autocomplete-trigger',
-            'children': ['Show options'],
+            kind: 'proto',
+            prototypeId: 'liquid-glass-autocomplete-trigger',
+            children: ['Options'],
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'liquid-glass-autocomplete-content',
-            'children': [
+            kind: 'proto',
+            prototypeId: 'liquid-glass-autocomplete-content',
+            children: [
               {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-autocomplete-item',
-                'children': ['Apple'],
-                'props': {
-                  'value': 'apple',
-                  'textValue': 'Apple',
-                },
+                kind: 'proto',
+                prototypeId: 'liquid-glass-autocomplete-item',
+                props: { value: 'next', textValue: 'Next.js', keywords: 'react ssr' },
+                children: ['Next.js'],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-autocomplete-item',
-                'children': ['Pear'],
-                'props': {
-                  'value': 'pear',
-                  'textValue': 'Pear',
-                },
+                kind: 'proto',
+                prototypeId: 'liquid-glass-autocomplete-item',
+                props: { value: 'astro', textValue: 'Astro', keywords: 'islands static' },
+                children: ['Astro'],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-autocomplete-item',
-                'children': ['Orange'],
-                'props': {
-                  'value': 'orange',
-                  'textValue': 'Orange',
-                },
+                kind: 'proto',
+                prototypeId: 'liquid-glass-autocomplete-item',
+                props: { value: 'nuxt', textValue: 'Nuxt', keywords: 'vue' },
+                children: ['Nuxt'],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-autocomplete-item',
-                'children': ['Unavailable'],
-                'props': {
-                  'value': 'locked',
-                  'textValue': 'Unavailable',
-                  'disabled': true,
-                },
+                kind: 'proto',
+                prototypeId: 'liquid-glass-autocomplete-item',
+                props: { value: 'sveltekit', textValue: 'SvelteKit', keywords: 'svelte' },
+                children: ['SvelteKit'],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-autocomplete-empty',
-                'children': ['No matching results'],
+                kind: 'proto',
+                prototypeId: 'liquid-glass-autocomplete-item',
+                props: { value: 'legacy', textValue: 'Legacy v1', disabled: true },
+                children: ['Legacy v1'],
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'liquid-glass-autocomplete-empty',
+                children: ['No matching frameworks.'],
               },
             ],
           },
         ],
-        'props': {
-          'a11yLabel': 'Choose fruit',
-        },
-        'ref': 'root',
       },
       {
-        'kind': 'box',
-        'ref': 'status',
-        'attrs': {
+        kind: 'box',
+        ref: 'status',
+        className: 'text-xs text-muted-foreground',
+        attrs: {
           'aria-live': 'polite',
         },
-        'children': ['Type, then use arrows and Enter or select a result.'],
+        children: ['Pick a framework or press Enter to submit custom text.'],
       },
     ],
   },
   setup({ refs, api }) {
     api.setProps('root', {
       onValueChange: (detail: { value: string; textValue: string }) => {
-        refs.status.textContent = detail.textValue + ' (' + detail.value + ')';
+        refs.status.textContent = detail.textValue ? `Committed: ${detail.textValue}` : 'Cleared';
       },
     });
   },

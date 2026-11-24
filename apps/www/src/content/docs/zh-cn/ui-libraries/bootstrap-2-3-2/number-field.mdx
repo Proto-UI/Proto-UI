@@ -3,9 +3,11 @@ title: 'Bootstrap 2.3.2 Number Field'
 description: '支持步进增减、本地化数字格式、可空值与标签拖拽调值的 Bootstrap 2.3.2 数值输入组件。'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Number Field 提供带加减步进按钮、键盘快捷调值、本地化格式化与标签拖拽（scrub）调节的数值输入框，并支持直接接入 `Field` 与 `Form`。
+Bootstrap 2.3.2 Number Field 将经典 `forms.less` 输入框与 `buttons.less` 渐变立体按钮外观投影到 Base Number Field 协议上，提供加减步进、键盘调值、本地化格式化、可空值与标签拖拽调值，并可直接接入 `Field` 与 `Form`。
 
 ## 预览
 
@@ -13,32 +15,137 @@ Bootstrap 2.3.2 Number Field 提供带加减步进按钮、键盘快捷调值、
   demoId="demo-bootstrap-2-3-2-number-field"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前从源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/number-field` 导入各部件原型：
+
+```ts
+import {
+  numberFieldRoot,
+  numberFieldLabel,
+  numberFieldInput,
+  numberFieldControl,
+  numberFieldIncrement,
+  numberFieldDecrement,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/number-field';
+```
 
 ## 用法
 
-由 `Root`、`Label`、`Input`（在 `Field` / `FormField` 内替换为 `Control`）、`Increment` 和 `Decrement` 组成：
+```tsx
+<Bootstrap232NumberFieldRoot defaultValue={12} min={0} max={100} step={1} ariaLabel="Quantity">
+  <Bootstrap232NumberFieldLabel>Quantity</Bootstrap232NumberFieldLabel>
+  <Bootstrap232NumberFieldDecrement>
+    <span aria-hidden="true">−</span>
+    <span className="sr-only">Decrease Quantity</span>
+  </Bootstrap232NumberFieldDecrement>
+  <Bootstrap232NumberFieldInput />
+  <Bootstrap232NumberFieldIncrement>
+    <span aria-hidden="true">+</span>
+    <span className="sr-only">Increase Quantity</span>
+  </Bootstrap232NumberFieldIncrement>
+</Bootstrap232NumberFieldRoot>
+```
 
-- **编辑与步进**：输入过程中允许保留未完成的草稿文本，失焦或按 `Enter` 时解析提交合法数值或恢复上次有效值。点击加减按钮或按上下方向键按 `step` 步进，按住 `Shift` 为 10 倍步进，`Home` / `End` 跳转到 `min` / `max`。IME 组合输入期间不会触发解析或步进。
-- **本地化格式**：传入 `locale` 与 `formatOptions` 支持十进制、货币与百分比展示及解析；显示舍入不会修改内部精确数值。若格式配置非法，会标记 `formatInvalid` 并自动回退到无分组十进制。
-- **空值支持**：默认 `allowEmpty={false}`；设为 `true` 后，清空输入框并提交会请求 `null`（`value={null}` 仍属于受控模式）。使用 `getValue()` 可读取准确的 `number | null`，`empty` 指示当前是否为空；从空值步进时先初始化为边界内对齐的 `0`。
-- **标签拖拽调值（`scrub`）**：开启 `scrub` 后可在 `Label` 上左右拖动连续调值（`scrubSteps` 默认 `100`，表示拖动一个标签宽度对应的步数，`direction="rtl"` 自动反转方向），释放且值变化时提交一次；取消拖拽会恢复起值。
-- **表单集成**：在 `Field` / `FormField` 内用 `Control` 替换 `Input`，即可与 `FieldLabel`、数值校验、`Form` 序列化与重置联动。
+- **编辑与步进**：输入过程中允许保留未完成的草稿文本，失焦或按 `Enter` 时提交合法数值或恢复上次有效值。步进按钮具备经典 Bootstrap 2.3.2 悬停与按压渐变内影反馈；方向键按 `step` 步进，按住 `Shift` 为 10 倍步进，`Home` / `End` 跳至 `min` / `max`。IME 组合输入期间暂停解析与步进。
+- **本地化格式**：传入 `locale` 与 `formatOptions` 支持十进制、货币与百分比展示及解析，展示舍入不改变底层数值精度。
+- **空值与表单**：开启 `allowEmpty` 允许清空提交 `null`；在 `Field` 或 `FormField` 中使用 `Control` 替代 `Input` 以自动联动标签、校验、序列化与重置。
+
+## 示例
+
+### 本地化货币与百分比
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-number-field-formatting"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 标签拖拽调值与可空值
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-number-field-scrub-nullable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用、只读与无边界自由步进
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-number-field-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-number-field-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL 布局与反向拖拽
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-number-field-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 方法 / 状态 | 说明 |
-| --- | --- | --- |
-| `Root` | `value` / `defaultValue` | `number \| null`，受控或初始数值 |
-| `Root` | `min` / `max` / `step` | 默认 `0`、`100`、`1` |
-| `Root` | `allowEmpty` | 默认 `false`；设为 `true` 允许清空提交 `null` |
-| `Root` | `locale` / `formatOptions` | 本地化十进制、货币与百分比格式配置 |
-| `Root` | `scrub` / `scrubSteps` / `direction` | 启用标签拖拽调值及灵敏度（默认 `100` 步） |
-| `Root` | `disabled` / `readOnly` / `name` / `ariaLabel` | 交互状态、表单字段名与可访问名称 |
-| `Root` | `getValue()` / `empty` / `formatInvalid` | 读取 `number \| null`、空值标记与格式校验状态 |
-| `Label` / `Input` / `Control` / `Increment` / `Decrement` | — | 标签、输入框（表单内用 `Control`）及步进按钮 |
+### Root 属性
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'number | null', default: '—' },
+    { name: 'defaultValue', type: 'number | null', default: '0' },
+    { name: 'min', type: 'number | null', default: '0' },
+    { name: 'max', type: 'number | null', default: '100' },
+    { name: 'step', type: 'number', default: '1' },
+    { name: 'snapToStep', type: 'boolean', default: 'true' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'allowEmpty', type: 'boolean', default: 'false' },
+    { name: 'locale', type: 'string', default: '—' },
+    { name: 'formatOptions', type: 'NumberFieldFormatOptions', default: '—' },
+    { name: 'scrub', type: 'boolean', default: 'false' },
+    { name: 'scrubSteps', type: 'number', default: '100' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+  ]}
+/>
+
+### 事件、方法与状态
+
+<ApiPropsTable
+  headers={{ name: '成员', type: '签名 / 类型', default: '所属部件' }}
+  rows={[
+    { name: 'valueChange', type: 'Event<{ value: number | null }>', default: 'Root' },
+    { name: 'valueCommit', type: 'Event<{ value: number | null }>', default: 'Root' },
+    { name: 'getValue()', type: '() => number | null', default: 'Root / Input / Control' },
+    { name: 'requestValue(next)', type: '(value: number | null) => boolean', default: 'Root' },
+    { name: 'commitValue()', type: '() => void', default: 'Root' },
+    { name: 'stepBy(direction)', type: '(direction: number) => boolean', default: 'Root' },
+    { name: 'resetValue()', type: '() => boolean', default: 'Root / Input / Control' },
+    { name: 'empty / dragging / formatInvalid / draft', type: 'ExposeState', default: 'Root' },
+    {
+      name: 'disabled / focusVisible',
+      type: 'ExposeState<boolean>',
+      default: 'Increment / Decrement',
+    },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-NUMBER-FIELD.yaml', 'P-BASE-NUMBER-FIELD.yaml']}
+/>

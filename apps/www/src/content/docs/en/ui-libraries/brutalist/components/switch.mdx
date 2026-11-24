@@ -1,11 +1,13 @@
 ---
 title: 'Brutalist Switch'
-description: 'A mechanical Brutalist-styled switch with a 2px-bordered capsule track and crisp circular thumb.'
+description: 'A mechanical Brutalist-styled switch with a 2px-bordered capsule track, circular thumb, size variants, and field compositions.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
@@ -14,40 +16,111 @@ Switch toggles a setting between on and off states. Its Brutalist presentation p
 ## Preview
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-switch" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-switch"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## Installation
 
-Included in `@proto.ui/prototypes-brutalist@0.2.0`. Add it via the CLI target `brutalist-switch`, or import directly from `@proto.ui/prototypes-brutalist/switch`.
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-switch" manager="npm" />
+
+Replace `wc` with `react`, `vue`, or `vue2`, or import directly from `@proto.ui/prototypes-brutalist/switch`.
 
 ## Usage
 
-### Visual & Motion Details
+```tsx
+import { switchRoot, switchThumb } from '@proto.ui/prototypes-brutalist/switch';
+```
 
-- **Geometry & colors**: At a 16px root font size, the track is `24×48px` and the white circular thumb is `16px`. The track switches from neutral (off) to main blue (on) while the thumb travels `1.25rem` (20px with symmetric 6px outer insets).
-- **State feedback**: The `150ms` thumb transition becomes instantaneous under `prefers-reduced-motion: reduce`. Pressing does not shift the track or add shadow; keyboard focus displays an offset ring; `disabled` preserves geometry and blocks activation.
-- **Labelling & layout**: Place the visible caption inside `Root` to supply the accessible name and click target (DM Sans typography with host fallback). Physical left/right thumb coordinates keep geometry bounded even inside RTL parents.
+```html
+<proto-ui-brutalist-switch-root>
+  <proto-ui-brutalist-switch-thumb></proto-ui-brutalist-switch-thumb>
+  <span class="sr-only">Airplane Mode</span>
+</proto-ui-brutalist-switch-root>
+```
 
-### Interaction Notes
+- **Geometry & colors**: The default track measures `24×48px` with a `16px` white circular thumb (`20px` travel); `size="sm"` measures `20×36px` with a `12px` thumb (`12px` travel). The track switches from neutral (off) to main blue (on).
+- **State & motion**: Transitions run for `150ms` and turn off automatically under `prefers-reduced-motion: reduce`. Pressing does not shift the track or add shadow; keyboard focus displays an offset ring.
+- **Interaction notes**: Supports click, `Space` key toggling, and controlled mode via `checked`. Pointer dragging is not yet enabled (`draggable` remains `false`).
 
-- Supports click and keyboard activation, as well as controlled mode via `checked`.
-- Pointer dragging is not enabled yet: `draggable` defaults to `false`, and passing `true` falls back to `false` while click and keyboard toggling continue to work normally.
+## Examples
+
+### Description
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-switch-description"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Choice Card
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-switch-choice-card"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Disabled
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-switch-disabled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Invalid
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-switch-invalid"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Size
+
+Use the `size` prop to switch between `sm` and `default`.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-switch-sizes"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-The following props belong to `Root` (pass `checked` for controlled mode):
+The following props and events belong to `Root` (`Thumb` has no props):
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'checked', type: 'boolean | undefined', default: 'uncontrolled' },
     { name: 'defaultChecked', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'draggable', type: 'boolean', default: 'false' },
-    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'size', type: "'default' | 'sm'", default: "'default'" },
+    { name: 'draggable', type: 'false', default: 'false' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+    { name: 'checkedChange', type: 'event ({ checked: boolean })', default: '—' },
+    { name: 'focusSelf', type: 'method (options?: FocusRequestOptions) => void', default: '—' },
   ]}
 />
 
-Other parts:
+## References
 
-- **Thumb**: No props.
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-SWITCH.yaml', 'P-BRUTALIST-SWITCH-THUMB.yaml', 'P-BASE-SWITCH.yaml']}
+/>

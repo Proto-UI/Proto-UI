@@ -1,0 +1,128 @@
+---
+title: 'Liquid Glass Input'
+description: '遵循内容层高可读性原则、与浮层玻璃操作控件清晰分层的 Liquid Glass 单行文本输入框。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Input 基于 [Base Input](../../base/input/) 构建。遵循 Apple Liquid Glass 层级分离原则，文本输入属于内容编辑层，保持清晰、不透明的高对比度矩形编辑表面与同心圆角几何，不与玻璃材质叠加，同时可与浮层玻璃按钮自然搭配。
+
+## 预览
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={true}
+/>
+
+## 安装
+
+当前以 Proto UI 工作区源码提供，尚未进入稳定版 CLI；可直接从 `@proto.ui/prototypes-liquid-glass/input` 导入。
+
+## 用法
+
+```tsx
+import { LiquidGlassInputRoot } from '@/components/ui/liquid-glass-input';
+
+export function Example() {
+  return <LiquidGlassInputRoot placeholder="Enter text" ariaLabel="Text input" />;
+}
+```
+
+- **层级与可读性**：采用 `h-11`、`rounded-2xl`、清晰边界与高对比度不透明背景，避免玻璃叠玻璃导致文字可读性下降；点击聚焦呈现柔和蓝环，键盘聚焦显示高对比度外偏焦点环与强制色彩回退。
+- **状态反馈**：`readOnly` 与 `disabled` 通过语义中性表面和对比度墨色区分，不依赖降低整体不透明度，确保回退状态依然清晰可读。
+- **表单组合**：搭配 Liquid Glass `Label`、`Field` 或浮层玻璃 `Button` 构建完整表单与搜索条。
+
+## 示例
+
+### 基础
+
+位于彩色背景舞台上的独立不透明内容层输入框，突出清晰边界与聚焦反馈。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 表单字段
+
+搭配 `Field`、`FieldLabel`、`FieldControl` 与 `FieldDescription` 组合完整的表单字段。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 校验错误
+
+通过 `Field` 声明 `invalid` 与 `errors`，呈现清晰的校验错误提示。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 行内搜索
+
+将内容层 `Input` 与浮层玻璃 `Button` 组合，呈现清晰的层级对比。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-inline"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root 属性
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'undefined' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    {
+      name: 'inputMode',
+      type: "'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'",
+      default: 'undefined',
+    },
+    {
+      name: 'enterKeyHint',
+      type: "'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'",
+      default: 'undefined',
+    },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'labelledBy', type: 'string', default: "''" },
+    { name: 'describedBy', type: 'string', default: "''" },
+  ]}
+/>
+
+### 暴露状态、方法与事件
+
+- **状态**：`value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing`
+- **方法**：`focusSelf(options?)`、`blurSelf()`、`resetValue(value?: string): boolean`
+- **事件**：`valueChange`、`change`、`compositionStart`、`compositionUpdate`、`compositionEnd`
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-INPUT.yaml', 'P-BASE-INPUT.yaml']}
+/>

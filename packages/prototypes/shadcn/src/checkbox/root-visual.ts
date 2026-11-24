@@ -5,7 +5,8 @@ import { setupShadcnStyleSelection, SHADCN_STYLE_IDS, type ShadcnStyleId } from 
 // Fixed shadcn-ui/ui 3d98900e: `.cn-checkbox` in each style-{id}.css.
 // New York retains its independently adopted compatibility surface.
 const CHECKBOX_SURFACE: Readonly<Record<ShadcnStyleId, string>> = {
-  'new-york-v4': 'size-4 rounded-[4px] border border-input bg-transparent shadow-xs',
+  'new-york-v4':
+    'flex size-4 items-center justify-center rounded-[4px] border border-input bg-transparent shadow-xs',
   vega: 'flex size-4 items-center justify-center rounded-[4px] border border-input shadow-xs transition-shadow',
   nova: 'flex size-4 items-center justify-center rounded-[4px] border border-input transition-colors',
   maia: 'flex size-4 items-center justify-center rounded-[6px] border border-input transition-shadow',
@@ -63,7 +64,7 @@ export function setupCheckboxRootVisual(
     when: (w) => w.state(disabled).eq(true),
     intent: (i) => i.feedback.style.use(tw('cursor-not-allowed opacity-50')),
   });
-  for (const profile of ['new-york-v4', 'vega', 'nova', 'maia', 'lyra', 'mira'] as const) {
+  for (const profile of ['new-york-v4', 'vega', 'nova', 'maia', 'lyra', 'mira', 'sera'] as const) {
     def.rule({
       when: (w) =>
         w.all(
@@ -75,10 +76,40 @@ export function setupCheckboxRootVisual(
       intent: (i) => i.feedback.style.use(tw('bg-input/30')),
     });
   }
+  for (const profile of ['luma', 'rhea'] as const) {
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(style).eq(profile),
+          w.meta('colorScheme').eq('dark'),
+          w.state(checked).eq(false),
+          w.state(indeterminate).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-input/50 border-input/50')),
+    });
+  }
 
-  if (invalid)
+  if (invalid) {
     def.rule({
       when: (w) => w.state(invalid).eq(true),
-      intent: (i) => i.feedback.style.use(tw('border-destructive text-destructive')),
+      intent: (i) => i.feedback.style.use(tw('border-destructive ring-destructive/20')),
     });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(invalid).eq(true),
+          w.state(checked).eq(false),
+          w.state(indeterminate).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('text-destructive')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(invalid).eq(true), w.meta('colorScheme').eq('dark')),
+      intent: (i) => i.feedback.style.use(tw('ring-destructive/40')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(invalid).eq(true), w.state(focusVisible).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('border-destructive ring-destructive/20')),
+    });
+  }
 }

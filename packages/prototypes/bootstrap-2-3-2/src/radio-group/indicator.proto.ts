@@ -7,10 +7,11 @@ import {
 
 // Independently expressed Bootstrap 2.3.2 design-language projection.
 // Base retains all semantics; source attribution: ../../THIRD_PARTY_NOTICES.md.
-// Visual reference only: the 2.3.2 native radio renders as an empty ring with a
-// filled dot when checked. Checked/disabled remain solely the Item's context.
+// Renders a beveled 16px circular well when unchecked and a classic Bootstrap
+// 2.3.2 blue vertical gradient with a crisp white center dot when checked.
 export default definePrototype<RadioGroupIndicatorProps, RadioGroupIndicatorExposes>({
   name: 'bootstrap-2-3-2-radio-group-indicator',
+  modules: asRadioGroupIndicator.modules,
   setup(def) {
     const state = asRadioGroupIndicator().stateHandles;
     if (!state)
@@ -18,12 +19,21 @@ export default definePrototype<RadioGroupIndicatorProps, RadioGroupIndicatorExpo
     // Outer radio ring; the inner dot is painted by the renderer below.
     def.feedback.style.use(
       tw(
-        'pointer-events-none inline-flex size-4 shrink-0 items-center justify-center rounded-full border border-border bg-secondary shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
+        'pointer-events-none inline-flex size-4 shrink-0 items-center justify-center rounded-full border border-[#ccc] bg-[linear-gradient(#f5f5f5,#f9f9f9)] shadow-[inset_0_1px_2px_rgb(0_0_0/10%)] transition-[border,box-shadow]'
       )
     );
     def.rule({
+      when: (w) => w.all(w.meta('colorScheme').eq('dark'), w.state(state.checked).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('border-border bg-secondary')),
+    });
+    def.rule({
       when: (w) => w.state(state.checked).eq(true),
-      intent: (i) => i.feedback.style.use(tw('border-primary bg-primary')),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw(
+            'border-primary bg-[linear-gradient(#08c,#0077b3)] shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
+          )
+        ),
     });
     let update: { cancel(): void } | null = null;
     const refresh = (run: { update(): void }, event: { type: string }) => {
@@ -44,7 +54,7 @@ export default definePrototype<RadioGroupIndicatorProps, RadioGroupIndicatorExpo
       renderer.r.slot(),
       renderer.el('span', {
         style: state.checked.get()
-          ? tw('block size-2 rounded-full bg-primary-foreground')
+          ? tw('block size-1.5 rounded-full bg-primary-foreground')
           : tw('hidden'),
       }),
     ];

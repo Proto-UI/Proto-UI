@@ -3,43 +3,110 @@ title: 'Brutalist Textarea'
 description: 'A Brutalist-styled multiline text input wrapping a native textarea with a 5px rounded neutral surface and crisp ink borders.'
 ---
 
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Textarea styles a native `<textarea>` with a 5px rounded flat neutral surface, ink text and borders, and no outer shadow while preserving native editing, IME composition, and accessibility semantics.
+Textarea styles a native `<textarea>` with a 5px rounded flat neutral surface, 2px crisp border, DM Sans 500 typography, and no outer shadow while preserving native editing, IME composition, and accessibility semantics.
 
 ## Preview
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-textarea" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-textarea"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## Installation
 
-Included in `@proto.ui/prototypes-brutalist@0.2.0`. Add it via the CLI target `brutalist-textarea`, or import directly from `@proto.ui/prototypes-brutalist/textarea`.
+<InstallCommandCard
+  commands={{
+    npm: 'npx @proto.ui/cli@latest add wc brutalist-textarea',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc brutalist-textarea',
+  }}
+  manager="npm"
+/>
+
+Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your target framework, or import directly from `@proto.ui/prototypes-brutalist/textarea`.
 
 ## Usage
 
-### Input Behavior & Styling
+```tsx
+import { BrutalistTextareaRoot } from '../proto-ui/components/react';
+```
 
-- **Native editing semantics**: Supports controlled (`value`) and uncontrolled (`defaultValue`) modes, normalized `valueChange` and `change` events, IME composition-safe controlled value restoration, `focus()` and `blur()` methods, and accessible naming via `ariaLabel`, `labelledBy`, and `describedBy`.
-- **Visual details**: Ships with an 80px minimum height, 12px horizontal / 8px vertical padding, `text-sm` line height, DM Sans 500 typography, and static accent text selection. Native resizing remains browser- or CSS-controlled without automatic height measurement.
+```tsx
+<BrutalistTextareaRoot placeholder="Type your message here." rows={4} />
+```
 
-### Reset & Form Composition
+- **Native editing semantics**: Supports controlled (`value`) and uncontrolled (`defaultValue`) modes, normalized `valueChange` and `change` events, IME composition-safe controlled value restoration, `focusSelf()`, `blurSelf()`, and `resetValue()` methods, and accessible naming via `ariaLabel`, `labelledBy`, and `describedBy`.
+- **Visual details**: Ships with an 80px minimum height, 12px horizontal / 8px vertical padding, `text-sm` line height, DM Sans 500 typography, muted placeholder text, static accent selection highlight, and high-contrast foreground border adaptation in dark mode.
+- **Form composition**: To connect labels, descriptions, error messages, and validation, import `fieldTextarea` from `@proto.ui/prototypes-brutalist/field`. See the [Form recipe](../../form/) for a complete example.
 
-- In current workspace source, `resetValue()` restores the creation-time value in uncontrolled mode (or proposes it in controlled mode), remains callable while `readOnly` or `disabled`, and retires any active IME composition.
-- To wire up Form labels, descriptions, error messages, and validation, import `fieldTextarea` from `@proto.ui/prototypes-brutalist/field`. See the [Form recipe](../../form/) for a full example.
+## Examples
+
+### Field
+
+Use `Field`, `FieldLabel`, `FieldDescription`, and `FieldTextarea` to pair a textarea with an accessible label and description.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-textarea-field"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Disabled
+
+Set `disabled` on `Field` to disable the label and textarea together.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-textarea-disabled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Invalid
+
+Pass `invalid` and `errors` to `Field` to render a coral-red destructive border and accessible error message.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-textarea-invalid"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Button
+
+Pair the flat editable textarea surface with a raised Brutalist button for clear depth contrast.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-textarea-button"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-The following props belong to `Root` (pass `value` for controlled mode):
+The following props belong to `Root` (pass `value` for controlled mode; `minLength` and `maxLength` default to `-1` when unlimited):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string | undefined', default: 'uncontrolled' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -50,9 +117,20 @@ The following props belong to `Root` (pass `value` for controlled mode):
     { name: 'autoComplete', type: 'string', default: "''" },
     { name: 'minLength', type: 'number', default: '-1' },
     { name: 'maxLength', type: 'number', default: '-1' },
-    { name: 'wrap', type: "'soft' | 'hard'", default: 'soft' },
+    { name: 'wrap', type: "'soft' | 'hard'", default: "'soft'" },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'labelledBy', type: 'string', default: "''" },
     { name: 'describedBy', type: 'string', default: "''" },
   ]}
+/>
+
+- **Exposed states**: `value`, `disabled`, `readOnly`, `focused`, `focusVisible`, `composing` (plus `invalid` and `pending` on `FieldTextarea`).
+- **Exposed methods**: `focusSelf(options?)`, `blurSelf()`, `resetValue()`.
+- **Events**: `valueChange`, `change`, `compositionStart`, `compositionUpdate`, `compositionEnd`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-TEXTAREA.yaml', 'P-BASE-TEXTAREA.yaml']}
 />

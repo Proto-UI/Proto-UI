@@ -4,6 +4,8 @@ description: '用于逻辑分组并向下传递禁用状态的 Bootstrap 2.3.2 �
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Bootstrap 2.3.2 Fieldset 为一组相关表单字段提供语义分组、标题说明与级联禁用控制，延续归档 Bootstrap 2.3.2 无外框块级分组与底边框标题样式。
 
@@ -13,7 +15,6 @@ Bootstrap 2.3.2 Fieldset 为一组相关表单字段提供语义分组、标题�
   demoId="demo-bootstrap-2-3-2-fieldset"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
@@ -22,17 +23,75 @@ Bootstrap 2.3.2 Fieldset 为一组相关表单字段提供语义分组、标题�
 
 ## 用法
 
+```tsx
+import {
+  FieldsetRoot,
+  FieldsetLegend,
+  FieldsetDescription,
+} from '@/components/bootstrap-2-3-2/fieldset';
+import { FieldRoot, FieldLabel, FieldControl } from '@/components/bootstrap-2-3-2/field';
+
+export function Example() {
+  return (
+    <FieldsetRoot>
+      <FieldsetLegend>Address Information</FieldsetLegend>
+      <FieldsetDescription>We need your address to deliver your order.</FieldsetDescription>
+      <FieldRoot required>
+        <FieldLabel>Street Address</FieldLabel>
+        <FieldControl placeholder="123 Main St" />
+      </FieldRoot>
+    </FieldsetRoot>
+  );
+}
+```
+
 由 `Root`、可选的 `Legend` 和可选的 `Description` 组成：
 
 - **级联禁用**：`Root` 的实际禁用状态等于本地 `disabled` 与所有外层 `Fieldset` 禁用状态的逻辑或。重新启用外层 `Fieldset` 时，内层已设置的本地 `disabled` 仍会被保留。内部的 `Field`（包括位于 `Legend` 内的字段）会自动继承该禁用状态。
 - **自动无障碍关联**：`Root` 声明 `group` 角色，并自动关联同一分组内的 `Legend` 与 `Description`，无需手写 DOM ID。每个分组最多包含一个 `Legend` 和一个 `Description`，重复配置时将忽略非法配置并保持当前状态。
-- **样式说明**：`Root` 为无边框无内边距的块级容器；`Legend` 为全宽 `1.3125rem` 标题并带底边框；`Description` 为小号弱化帮助文本。
+- **样式说明**：`Root` 为无边框无内边距的块级容器；`Legend` 为全宽 `21px`（行高 `40px`、下边距 `20px`）标题并带随主题适配的底边框（`border-border`）；`Description` 为 `14px`（行高 `20px`）弱化色帮助文本。
+
+## 示例
+
+### 多选组
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-fieldset-checkbox-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 嵌套禁用继承
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-fieldset-nested-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件          | 属性 / 状态 | 说明                                                    |
-| ------------- | ----------- | ------------------------------------------------------- |
-| `Root`        | `disabled`  | `boolean`，默认 `false`；向下级联禁用内部字段与嵌套分组 |
-| `Root`        | `ariaLabel` | `string`，默认 `""`；无 `Legend` 时提供分组可访问名称   |
-| `Legend`      | —           | 可选分组标题，只读暴露继承的 `disabled` 状态            |
-| `Description` | —           | 可选分组说明文本，只读暴露继承的 `disabled` 状态        |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Legend 与 Description
+
+`Legend` 与 `Description` 不声明独立属性；三个部件均只读暴露继承的有效 `disabled` 状态（`ExposeState<boolean>`）。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-FIELDSET.yaml',
+    'P-BOOTSTRAP-2-3-2-FIELDSET-LEGEND.yaml',
+    'P-BOOTSTRAP-2-3-2-FIELDSET-DESCRIPTION.yaml',
+  ]}
+/>

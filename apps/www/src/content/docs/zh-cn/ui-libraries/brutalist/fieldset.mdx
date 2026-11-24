@@ -15,7 +15,6 @@ Brutalist Fieldset 为一组关联表单字段提供语义分组、标题、说�
   demoId="demo-brutalist-fieldset"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
@@ -24,11 +23,29 @@ Brutalist Fieldset 为一组关联表单字段提供语义分组、标题、说�
 
 ## 用法
 
+```tsx
+import { FieldsetRoot, FieldsetLegend, FieldsetDescription } from '@/components/brutalist/fieldset';
+import { FieldRoot, FieldLabel, FieldControl } from '@/components/brutalist/field';
+
+export function Example() {
+  return (
+    <FieldsetRoot>
+      <FieldsetLegend>Address Information</FieldsetLegend>
+      <FieldsetDescription>We need your address to deliver your order.</FieldsetDescription>
+      <FieldRoot required>
+        <FieldLabel>Street Address</FieldLabel>
+        <FieldControl placeholder="123 Main St" />
+      </FieldRoot>
+    </FieldsetRoot>
+  );
+}
+```
+
 ### 部件组成
 
-- **Root**：定义 `group` 语义容器并管理实际禁用状态（结合自身 `disabled` 与外层 `Fieldset` 状态），采用无外框 `gap-4` 竖排布局。
-- **Legend**：可选的组标题，使用粗体正文样式并保留原文大小写，不添加 Tab 停靠点。
-- **Description**：可选的组说明文本，支持换行且保持清晰可读的前景色。
+- **Root**：定义 `group` 语义容器并管理实际禁用状态（结合自身 `disabled` 与外层 `Fieldset` 状态），采用无外框 `gap-4` 竖排布局与 `font-sans font-medium` 正文角色。
+- **Legend**：可选的组标题，使用符合 Brutalist 设计契约的 `font-heading font-bold` 标题字体角色并保留原文大小写，支持 `variant="legend"`（默认）与 `variant="label"`，不添加 Tab 停靠点。
+- **Description**：可选的组说明文本，支持换行并在启用与禁用状态下提供清晰的视觉反馈。
 
 每个分组内最多放置一个 `Legend` 和一个 `Description`。组件会自动维护 `aria-labelledby` 与 `aria-describedby` 关联并在卸载时清理，无需手写 DOM ID，嵌套分组的关联也彼此隔离。
 
@@ -42,6 +59,24 @@ Brutalist Fieldset 为一组关联表单字段提供语义分组、标题、说�
 
 组内的 `Field`（包括位于 `Legend` 内部的 `Field`）都会自动继承 `Fieldset` 的禁用状态。
 
+## 示例
+
+### 标签尺寸标题与多选组
+
+<PrototypePreviewer
+  demoId="demo-brutalist-fieldset-checkbox-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 嵌套禁用继承
+
+<PrototypePreviewer
+  demoId="demo-brutalist-fieldset-nested-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
 ## API
 
 ### Root
@@ -54,9 +89,16 @@ Brutalist Fieldset 为一组关联表单字段提供语义分组、标题、说�
   ]}
 />
 
-### 其他部件
+### Legend
 
-`Legend` 与 `Description` 不声明独立属性，三者均暴露只读的实际禁用状态。
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'variant', type: "'legend' | 'label'", default: "'legend'" }]}
+/>
+
+### Description
+
+`Description` 不声明独立属性；三个部件均暴露只读的实际 `disabled` 状态（`ExposeState<boolean>`）。
 
 ## 参考
 

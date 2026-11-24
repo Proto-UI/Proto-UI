@@ -4,8 +4,10 @@ description: '支持搜索过滤并严格区分输入文本与已选选项值的
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Combobox 将可编辑的搜索框与选项列表结合起来，严格区分当前查询文本（`inputValue`）与已提交的选项值（`value`）。
+Bootstrap 2.3.2 Combobox 将经典的 `.input-append` 拼接输入框、下拉按钮与下拉菜单视觉投影结合起来，同时严格区分当前查询文本（`inputValue`）与已提交的选项值（`value`）。
 
 ## 预览
 
@@ -13,30 +15,110 @@ Combobox 将可编辑的搜索框与选项列表结合起来，严格区分当�
   demoId="demo-bootstrap-2-3-2-combobox"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前 Combobox 仅在源码工作区（`@proto.ui/prototypes-bootstrap-2-3-2/combobox`）提供，尚未进入 `0.2.0` 稳定版 CLI 注册表。
 
 ## 用法
 
-由 `Root`、`Input`、`Trigger`、`Content`、`Item` 和 `Empty` 组成：
+```tsx
+import {
+  comboboxRoot,
+  comboboxInput,
+  comboboxTrigger,
+  comboboxContent,
+  comboboxItem,
+  comboboxEmpty,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/combobox';
+```
+
+```html
+<bootstrap-2-3-2-combobox-root a11y-label="Framework">
+  <bootstrap-2-3-2-combobox-input
+    placeholder="Select a framework..."
+  ></bootstrap-2-3-2-combobox-input>
+  <bootstrap-2-3-2-combobox-trigger>▾</bootstrap-2-3-2-combobox-trigger>
+  <bootstrap-2-3-2-combobox-content>
+    <bootstrap-2-3-2-combobox-item value="next.js" text-value="Next.js"
+      >Next.js</bootstrap-2-3-2-combobox-item
+    >
+    <bootstrap-2-3-2-combobox-item value="sveltekit" text-value="SvelteKit"
+      >SvelteKit</bootstrap-2-3-2-combobox-item
+    >
+    <bootstrap-2-3-2-combobox-item value="astro" text-value="Astro"
+      >Astro</bootstrap-2-3-2-combobox-item
+    >
+    <bootstrap-2-3-2-combobox-empty>No frameworks found.</bootstrap-2-3-2-combobox-empty>
+  </bootstrap-2-3-2-combobox-content>
+</bootstrap-2-3-2-combobox-root>
+```
 
 - **选项值与输入文本分离**：`Root` 的 `value` 始终是已选选项的键，`inputValue` 是独立的编辑文本；不匹配的输入不会自动成为选中值。
 - **搜索与过滤**：默认基于 `textValue` 和 `keywords` 进行忽略大小写与重音的过滤；如需自行过滤，传入 `filter={false}`。无匹配项时显示 `Empty`。
-- **键盘与输入法**：使用方向键切换高亮选项时输入框保持焦点；IME 组合输入期间不会误选。禁用项和重复值选项不可提交。
-- **独立受控**：`open`、`value` 和 `inputValue` 均可分别受控并通过对应事件更新。
+- **经典视觉细节**：`Input` 与 `Trigger` 等高拼接，使用经典 `#52a8ec` 聚焦蓝晕；高亮项使用经典蓝色渐变，已选项以粗体链接蓝标示。
+
+## 示例
+
+### 时区检索
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-combobox-timezones"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-combobox-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 | 说明 |
-| --- | --- | --- |
-| `Root` | `value` / `inputValue` / `open` | 分别控制已选选项键、搜索文本与弹层展开状态 |
-| `Root` | `filter` | 是否启用内置过滤；设为 `false` 时由调用方提供过滤后的选项 |
-| `Input` | — | 单行搜索输入框 |
-| `Trigger` | — | 打开或关闭下拉列表的触发按钮 |
-| `Content` | — | 选项列表弹层 |
-| `Item` | `value` / `textValue` / `keywords` / `disabled` | 单个可选项 |
-| `Empty` | — | 无匹配选项时展示的内容 |
+### Root
+
+传入 `value`、`inputValue` 或 `open` 可独立受控对应状态。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
+    { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'filter', type: 'boolean', default: 'true' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### 其他部件属性
+
+<ApiPropsTable
+  headers={{ name: '部件与属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Input.placeholder / a11yLabel / name', type: 'string', default: "''" },
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Content.side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content.align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'Content.sideOffset', type: 'number', default: '2' },
+    { name: 'Content.collisionPadding', type: 'number', default: '8' },
+    { name: 'Item.value / textValue / keywords', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-COMBOBOX.yaml', 'P-BASE-COMBOBOX.yaml']}
+/>

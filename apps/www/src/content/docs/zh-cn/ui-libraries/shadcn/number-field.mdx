@@ -1,13 +1,13 @@
 ---
 title: 'Number Field'
-description: '支持步进、本地化格式化与拖动调值的数值输入组件。'
+description: '支持步进调节、本地化格式化、空值处理与标签拖动调值的 Shadcn 数值输入组件。'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Number Field 提供符合 `spinbutton` 语义的数值输入框，支持加减按钮、键盘步进、本地化格式化、空值处理以及标签拖动调值。本页示例使用 **Shadcn Rhea** 风格。
+Number Field 提供符合 `spinbutton` 语义的数值输入框，支持加减步进按钮、键盘步进、基于 `Intl` 的本地化格式化、可空值以及标签拖动调值。本页示例使用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -15,49 +15,107 @@ Number Field 提供符合 `spinbutton` 语义的数值输入框，支持加减�
   demoId="demo-shadcn-number-field"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前从源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-shadcn/number-field` 导入各部件原型：
+
+```ts
+import {
+  numberFieldRoot,
+  numberFieldLabel,
+  numberFieldInput,
+  numberFieldControl,
+  numberFieldIncrement,
+  numberFieldDecrement,
+} from '@proto.ui/prototypes-shadcn/number-field';
+```
 
 ## 用法
 
 Number Field 由 `Root`、`Label`、`Input`、`Control`、`Increment` 和 `Decrement` 组成：
 
-- `Root` 统一管理数值（`number | null`）、上下界（默认 `0` 到 `100`）、步长（默认 `1`）及交互状态。
-- `Input` 提供独立数值编辑体验；在 `Field` 或 `FormField` 中使用时，请改用 `Control` 以自动衔接 `FieldLabel`、校验、IME 取消、表单序列化与重置。
-- `Increment` 与 `Decrement` 按钮与键盘方向键共享同一套步进逻辑。
+```tsx
+<ShadcnNumberFieldRoot defaultValue={12} min={0} max={100} step={1} ariaLabel="Quantity">
+  <ShadcnNumberFieldLabel>Quantity</ShadcnNumberFieldLabel>
+  <ShadcnNumberFieldDecrement>
+    <span aria-hidden="true">−</span>
+    <span className="sr-only">Decrease Quantity</span>
+  </ShadcnNumberFieldDecrement>
+  <ShadcnNumberFieldInput />
+  <ShadcnNumberFieldIncrement>
+    <span aria-hidden="true">+</span>
+    <span className="sr-only">Increase Quantity</span>
+  </ShadcnNumberFieldIncrement>
+</ShadcnNumberFieldRoot>
+```
 
-### 键盘与输入编辑
+在 `Field` 或 `FormField` 内使用时，请将 `Input` 替换为 `Control` 以自动联动 `FieldLabel`、校验错误状态、表单序列化与重置：
 
-- 编辑过程中允许保留尚未输完的草稿文本；按下 `Enter` 或失焦时，会提交合法数值，若输入无效则恢复为上一次有效值。
-- `ArrowUp` / `ArrowDown` 按 `step` 增减，按住 `Shift` 以 10 倍步长调整，`Home` / `End` 直接跳至最小或最大边界。
-- 传入 `value` 进入受控模式，交互操作会发出变更请求，由外部决定最终值。
-- 在输入法（IME）组合输入期间，解析、提交、步进和拖动调值会自动暂停，切换 `locale` 时也会保留当前组合文本。
+```tsx
+<ShadcnFieldRoot required>
+  <ShadcnFieldLabel>Quantity</ShadcnFieldLabel>
+  <ShadcnNumberFieldRoot defaultValue={1} min={1} max={99}>
+    <ShadcnNumberFieldDecrement>−</ShadcnNumberFieldDecrement>
+    <ShadcnNumberFieldControl />
+    <ShadcnNumberFieldIncrement>+</ShadcnNumberFieldIncrement>
+  </ShadcnNumberFieldRoot>
+  <ShadcnFieldError />
+</ShadcnFieldRoot>
+```
 
-### 本地化格式化
+- **键盘与编辑**：输入期间保留未完成草稿，按 `Enter` 或失焦时提交合法数值或恢复上次有效值；`ArrowUp` / `ArrowDown` 按 `step` 步进（按住 `Shift` 以 10 倍步长调整），`Home` / `End` 跳至 `min` / `max` 边界。IME 组合输入期间自动暂停解析、提交、步进与拖动。
+- **本地化格式化**：通过 `locale` 和 `formatOptions` 支持十进制、货币和百分比展示及解析；展示舍入不会修改底层数值精度，格式配置非法时标记 `formatInvalid` 并回退无分组十进制。
+- **空值与拖动**：开启 `allowEmpty` 允许清空输入框提交 `null`（通过 `getValue()` 读取精确的 `number | null`，通过 `empty` 判空）；开启 `scrub` 可在 `Label` 上水平拖动连续调值。
 
-通过 `locale` 和 `formatOptions` 支持十进制、货币和百分比格式展示，并能解析对应的本地数字、小数点、分组符和正负号。格式化仅影响显示，未做编辑的提交不会将显示舍入写回底层数值。如果格式配置无效，组件会标记 `formatInvalid` 并自动回退到无分组十进制显示。
+## 示例
 
-### 空值支持
+### 本地化货币与百分比
 
-- 显式传入 `null` 表示空值，`value={null}` 仍处于受控模式。
-- 默认 `allowEmpty` 为 `false`；将其设为 `true` 后，清空输入框并提交即可请求空值 `null`。
-- `Root`、`Input` 和 `Control` 的 `getValue()` 返回真实的 `number | null`，`empty` 属性标识是否为空；兼容属性 `value` 仅在非空时表示当前值，空值状态下保留最近一次有限数值。事件与 Field/Form 始终传递真实的 `null`。
-- 从空值状态首次步进时，会先初始化为处于上下界内并对齐步长的 `0`。
+<PrototypePreviewer
+  demoId="demo-shadcn-number-field-formatting"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-### 标签拖动调值（Scrub）
+### 标签拖动调值与可空值
 
-设置 `scrub` 后，可在 `Label` 上按住并水平拖动来连续调整数值：
+<PrototypePreviewer
+  demoId="demo-shadcn-number-field-scrub-nullable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-- `scrubSteps`（默认 `100`）控制拖动一个初始标签宽度所对应的步数；`direction="rtl"` 会反转水平方向。
-- 释放指针且数值发生变化时提交一次；取消拖动时在非受控模式下恢复起始值。输入框内部仍保持正常的文本选择体验。
+### 禁用、只读与无边界自由步进
+
+<PrototypePreviewer
+  demoId="demo-shadcn-number-field-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+<PrototypePreviewer
+  demoId="demo-shadcn-number-field-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL 布局与反向拖动
+
+<PrototypePreviewer
+  demoId="demo-shadcn-number-field-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`（`Label`、`Input`、`Control`、`Increment` 和 `Decrement` 无额外属性；传入 `value` 可进入受控模式）：
+### Root 属性
+
+传入 `value`（包括 `null`）进入受控模式。`Label`、`Input`、`Control`、`Increment` 和 `Decrement` 同样接受可选的 `styleProfile` 以覆盖外层 [Style Scope](../style-scope/) 预设。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -79,6 +137,28 @@ Number Field 由 `Root`、`Label`、`Input`、`Control`、`Increment` 和 `Decre
     { name: 'scrub', type: 'boolean', default: 'false' },
     { name: 'scrubSteps', type: 'number', default: '100' },
     { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "继承 Scope 或 'nova'" },
+  ]}
+/>
+
+### 事件、方法与状态
+
+<ApiPropsTable
+  headers={{ name: '成员', type: '签名 / 类型', default: '所属部件' }}
+  rows={[
+    { name: 'valueChange', type: 'Event<{ value: number | null }>', default: 'Root' },
+    { name: 'valueCommit', type: 'Event<{ value: number | null }>', default: 'Root' },
+    { name: 'getValue()', type: '() => number | null', default: 'Root / Input / Control' },
+    { name: 'requestValue(next)', type: '(value: number | null) => boolean', default: 'Root' },
+    { name: 'commitValue()', type: '() => void', default: 'Root' },
+    { name: 'stepBy(direction)', type: '(direction: number) => boolean', default: 'Root' },
+    { name: 'resetValue()', type: '() => boolean', default: 'Root / Input / Control' },
+    { name: 'empty / dragging / formatInvalid / draft', type: 'ExposeState', default: 'Root' },
+    {
+      name: 'disabled / focusVisible',
+      type: 'ExposeState<boolean>',
+      default: 'Increment / Decrement',
+    },
   ]}
 />
 

@@ -1,6 +1,6 @@
 ---
 title: Shadcn Field
-description: A field wrapper connecting labels, controls, descriptions, and synchronous or asynchronous validation errors.
+description: Combine labels, controls, help text, and validation errors into accessible form fields with synchronous and async validation.
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -8,7 +8,7 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Groups a single form control with its label, help text, and validation errors, automatically wiring accessible relationships and supporting built-in, controlled, and asynchronous validation. The examples on this page use the **Shadcn Rhea** style preset.
+Combine a label, form control, helper description, and validation errors into one accessible field unit supporting vertical and horizontal layouts, built-in constraints, controlled validity, and async validation. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -16,7 +16,6 @@ Groups a single form control with its label, help text, and validation errors, a
   demoId="demo-shadcn-field"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
@@ -31,24 +30,102 @@ You can also import `fieldRoot`, `fieldLabel`, `fieldControl`, `fieldDescription
 
 ## Usage
 
+```tsx
+import {
+  FieldRoot,
+  FieldLabel,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+} from '@/components/ui/shadcn-field';
+
+export function ProfileField() {
+  return (
+    <FieldRoot required minLength={3}>
+      <FieldLabel>Username</FieldLabel>
+      <FieldControl placeholder="Max Leiter" />
+      <FieldDescription>Choose a unique username for your account.</FieldDescription>
+      <FieldError />
+    </FieldRoot>
+  );
+}
+```
+
 ### Anatomy
 
-Place one `Control` inside `Root`, along with an optional `Label`, `Description`, `Error`, and any number of passive `Validity` readers (nested `Root` instances keep independent scopes; duplicate singleton roles are ignored):
+```text
+FieldRoot
+├── FieldLabel
+├── FieldControl | FieldTextarea | FieldSelectTrigger | FieldSwitch | FieldCheckbox | FieldRadioGroup
+├── FieldDescription
+├── FieldError
+└── FieldValidity (optional, repeatable)
+```
 
-- **Root**: Manages validation state (`invalid`, `pending`, `dirty`, `touched`, `filled`, `focused`) and `disabled`, `readOnly`, and `required` policies.
-- **Control**: Renders a single-line text editor by default. To connect custom value controls, report values via `asFieldControl` and wire label focusing with `asControlLabel().target(..., FIELD_LABEL_PAIR)`.
-- **Label**: Automatically names the field's `Control` and focuses it on click (disable with `activation={false}`).
-- **Description**: Passive help text linked via `aria-describedby`.
-- **Error**: Linked via `aria-errormessage` only while the field is invalid. It unmounts content when hidden (set `keepMounted` to keep it mounted) and automatically links and cleans up ARIA attributes. Pair with [Live Region](../live-region/) if you want automatic screen-reader announcements.
+- **Root**: Manages `invalid`, `pending`, `dirty`, `touched`, `filled`, and `focused` states along with `disabled`, `readOnly`, `required`, `orientation`, and `styleProfile`. Nested roots maintain isolated scopes.
+- **Control**: Renders a single-line text editor by default, or pair with `fieldTextarea`, `fieldSelectTrigger`, `fieldSwitch`, `fieldCheckbox`, `fieldRadioGroup`, or custom controls bridged via Base `asFieldControl`.
+- **Label**: Automatically wires `aria-labelledby` to the paired control and focuses it on click (disable with `activation={false}`).
+- **Description & Error**: Automatically wire and clean up `aria-describedby` and (while invalid) `aria-errormessage`. `Error` unmounts when hidden by default (set `keepMounted` to retain a hidden node).
 - **Validity**: Passive reader exposing `getValidity()`.
 
 ### Synchronous and asynchronous validation
 
-- **Built-in rules**: `required` treats `null`, `false`, `''`, and `[]` as empty (`0` and whitespace count as filled). `minLength` and `maxLength` count UTF-16 code units and skip optional empty strings. Built-in flags are `valueMissing`, `tooShort`, and `tooLong`; external errors use `customError`.
+- **Built-in rules**: Supports `required`, `minLength`, and `maxLength` (UTF-16 code units; optional empty strings skip length checks). Built-in flags are `valueMissing`, `tooShort`, and `tooLong`; external errors use `customError`.
 - **Triggers**: `validationMode` supports `'onBlur'` (default), `'onChange'` (waits for IME `compositionend`), and `'manual'`.
-- **Async validation**: With `externalValidation={true}`, passing built-in checks emits `validationRequest` (`{ requestId, value, reason }`). Call `resolveValidation(requestId, { invalid, errors })` once your check completes; stale replies from superseded edits, state changes, `cancelValidation()`, or `resetValidation()` are ignored automatically.
-- **Controlled validity**: Pass `invalid` and `errors` to manage validity externally; `validityChange` emits proposed updates.
-- **Form integration**: `resetValidation()` clears validation and `touched` without changing the control's value. For submission, serialization, and full form reset, compose with [Form](../form/) and [Fieldset](../fieldset/).
+- **Async validation**: With `externalValidation={true}`, passing built-in checks emits `validationRequest` (`{ requestId, value, reason }`). Call `resolveValidation(requestId, { invalid, errors })` once complete; stale replies are discarded automatically.
+- **Controlled validity**: Pass `invalid` and `errors` to manage validity externally; `validityChange` emits proposed updates. Pair with [Fieldset](../fieldset/) and [Form](../form/) for grouped disabling, submission, and form reset.
+
+## Examples
+
+### Input
+
+Compose `FieldLabel`, `FieldControl`, and `FieldDescription` with helper copy positioned below or above the input.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-field-input"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Textarea
+
+Use `FieldTextarea` so multiline editors share the same accessible labeling and validation lifecycle.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-field-textarea"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Select
+
+Replace the Select trigger with `FieldSelectTrigger` to link `Select` with `FieldLabel`, `FieldDescription`, and invalid styling.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-field-select"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Checkbox, Radio & Switch
+
+Use `orientation="horizontal"` for compact Switch and Checkbox rows, or compose `FieldRadioGroup` for single-choice plans.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-field-choice"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Validation & Async Check
+
+Demonstrates blur-triggered built-in validation alongside async availability checks (type `taken` to trigger an error).
+
+<PrototypePreviewer
+  demoId="demo-shadcn-field-validation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -59,6 +136,18 @@ Passing `invalid` enables controlled validity mode (`invalid` and `errors` have 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
   rows={[
+    {
+      name: 'orientation',
+      type: "'vertical' | 'horizontal'",
+      default: 'vertical',
+      description: 'Layout orientation for label and control',
+    },
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleId',
+      default: 'nova',
+      description: 'Optional Shadcn visual preset (or inherited from ShadcnStyleScope)',
+    },
     { name: 'invalid', type: 'boolean', description: 'Controlled invalid state' },
     { name: 'errors', type: 'string[]', description: 'Controlled error messages' },
     {
@@ -120,11 +209,11 @@ Passing `invalid` enables controlled validity mode (`invalid` and `errors` have 
 
 ### Other parts
 
-- **Control**: `value` / `defaultValue`, `disabled`, `readOnly`, `required`, `placeholder`, `name`, `autoComplete`, `inputMode`, `enterKeyHint`, `ariaLabel` (local flags cannot override an active `Root` constraint).
-- **Label**: `activation?: boolean` (default `true`).
-- **Description**: No props.
-- **Error**: `message?: string` (explicit localized override), `keepMounted?: boolean` (default `false`).
-- **Validity**: No props.
+- **Control**: `value` / `defaultValue`, `disabled`, `readOnly`, `required`, `placeholder`, `name`, `autoComplete`, `inputMode`, `enterKeyHint`, `ariaLabel`, `styleProfile` (local flags cannot override an active `Root` constraint).
+- **Bound controls**: `fieldTextarea`, `fieldSelectTrigger`, `fieldSwitch`, `fieldCheckbox`, and `fieldRadioGroup` inherit their control props and integrate with Field validation and ARIA wiring.
+- **Label**: `activation?: boolean` (default `true`), `styleProfile`.
+- **Description / Validity**: `styleProfile`.
+- **Error**: `message?: string` (explicit localized override), `keepMounted?: boolean` (default `false`), `styleProfile`.
 
 ### Methods and events (Root)
 

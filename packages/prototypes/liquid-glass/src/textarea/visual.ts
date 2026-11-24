@@ -16,7 +16,7 @@ export function setupLiquidTextareaVisual(
   // custom auto-resize, rich text or replacement physical surface.
   def.feedback.style.use(
     tw(
-      'block min-h-24 w-full min-w-0 resize-y rounded-2xl border border-border bg-background px-4 py-3 text-base text-foreground placeholder:text-muted-foreground outline-none'
+      'block min-h-24 w-full min-w-0 resize-y rounded-2xl border border-border bg-background px-4 py-3 text-base text-foreground placeholder:text-muted-foreground outline-none transition-[color,box-shadow]'
     )
   );
   def.rule({
@@ -25,14 +25,20 @@ export function setupLiquidTextareaVisual(
   });
   def.rule({
     when: (w) => w.state(state.disabled).eq(true),
-    intent: (i) => i.feedback.style.use(tw('bg-muted cursor-not-allowed')),
+    intent: (i) =>
+      i.feedback.style.use(tw('bg-muted text-muted-foreground cursor-not-allowed shadow-none')),
   });
   if (invalid) {
-    // The existing Field Control frame convention; Error supplies the textual
-    // explanation through Base Field's current anatomy relationship.
+    // Field owns the error state and textual Error relation; surface uses
+    // semantic destructive border and ring so invalid stays distinct in both themes.
     def.rule({
       when: (w) => w.state(invalid).eq(true),
-      intent: (i) => i.feedback.style.use(tw('border-2 border-foreground')),
+      intent: (i) =>
+        i.feedback.style.use(tw('border-2 border-destructive ring-2 ring-destructive/20')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(invalid).eq(true), w.state(state.focusVisible).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('border-destructive ring-destructive/40')),
     });
   }
 }

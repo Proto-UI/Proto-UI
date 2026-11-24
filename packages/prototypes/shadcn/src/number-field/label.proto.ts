@@ -1,5 +1,5 @@
 import type { NumberFieldLabelExposes } from '@proto.ui/prototypes-base/number-field';
-import { definePrototype } from '@proto.ui/core';
+import { definePrototype, tw } from '@proto.ui/core';
 import { asNumberFieldLabel } from '@proto.ui/prototypes-base/number-field';
 import { setupFieldTextVisual } from '../field/visual';
 import type { ShadcnNumberFieldPartProps } from './types';
@@ -9,6 +9,7 @@ export default definePrototype<ShadcnNumberFieldPartProps, NumberFieldLabelExpos
   setup(def) {
     const inherited = asNumberFieldLabel();
     setupFieldTextVisual(def, 'label');
+    def.feedback.style.use(tw('w-full basis-full'));
     return inherited.render;
   },
 });

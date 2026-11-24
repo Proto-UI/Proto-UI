@@ -5,64 +5,168 @@ description: '提供扁平与立体触发器外观、键盘导航与弹出定位
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Select 用于从下拉选项列表中选择单一值，采用 5px 圆角与 2px 黑色硬边边框的 Brutalist 视觉风格，并提供完整的键盘、鼠标与触摸交互支持。
+Select 用于从下拉选项列表中选择单一值，采用 5px 圆角、2px 黑色硬边边框与 DM Sans 500 排版的 Brutalist 视觉风格，并支持完整的键盘、鼠标与触摸交互。
 
 ## 预览
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-select" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-select"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## 安装
 
-已包含在 `@proto.ui/prototypes-brutalist@0.2.0` 中。可通过 CLI 目标 `brutalist-select` 添加，或从 `@proto.ui/prototypes-brutalist/select` 导入。
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-select" manager="npm" />
+
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件封装，或直接从 `@proto.ui/prototypes-brutalist/select` 导入。
 
 ## 用法
 
-### Trigger 外观
+```tsx
+import {
+  BrutalistSelectContent,
+  BrutalistSelectItem,
+  BrutalistSelectRoot,
+  BrutalistSelectTrigger,
+  BrutalistSelectValue,
+} from '../proto-ui/components/react';
 
-默认的 `Trigger` 保持扁平样式（5px 圆角、2px 黑边、DM Sans 500）。当选择器与带硬影的按钮并排放置（例如页头工具条中的 Runtime / Style 切换控件）时，可在 `brutalist-select-trigger` 上设置 `appearance="elevated"`：
+export function FruitSelect() {
+  return (
+    <BrutalistSelectRoot>
+      <BrutalistSelectTrigger className="w-48" accessibleLabel="Fruit selector">
+        <BrutalistSelectValue placeholder="Select a fruit" />
+      </BrutalistSelectTrigger>
+      <BrutalistSelectContent>
+        <BrutalistSelectItem value="apple" textValue="Apple">
+          Apple
+        </BrutalistSelectItem>
+        <BrutalistSelectItem value="banana" textValue="Banana">
+          Banana
+        </BrutalistSelectItem>
+        <BrutalistSelectItem value="blueberry" textValue="Blueberry">
+          Blueberry
+        </BrutalistSelectItem>
+      </BrutalistSelectContent>
+    </BrutalistSelectRoot>
+  );
+}
+```
 
-- 静止状态下呈现向右/下 4px 的黑色硬影；悬停或按下时向右下位移 4px 并收起阴影，按下不会叠加第二次位移。
-- 设置 `appearance="flat"`、省略或移除该属性可恢复扁平外观。两种外观下 `size`、配色、焦点环、键盘选择与禁用行为保持一致，弹层 `Content` 始终保持扁平，无需通过额外 CSS 补影。
+### 组合结构
 
-### 指针、键盘与触摸交互
+当前 Brutalist Select 导出以下五个核心部件：
 
-<PrototypePreviewer
-  demoId="demo-brutalist-select-input"
-  initialRuntime="wc"
-  runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
-/>
+```text
+BrutalistSelectRoot
+├── BrutalistSelectTrigger
+│   └── BrutalistSelectValue
+└── BrutalistSelectContent
+    └── BrutalistSelectItem
+```
 
-- 下拉列表区分当前高亮焦点项与已提交选中值；未按住鼠标键的指针移动可更新高亮项，触摸、手写笔滚动与拖拽则交由浏览器原生滚动与捕获处理。
-- 在受控模式下，传入 `open` 或 `value` 即可接管对应状态；即使拒绝选中提议，当前已提交值依然保持稳定。弹层默认采用 popper 定位并支持碰撞避让。
+- **外观与动效**：默认 `Trigger` 保持扁平外观；设置 `appearance="elevated"` 时静止呈现 4px 黑色硬影，悬停或按下时向右下位移 4px 并收起阴影（受 `prefers-reduced-motion` 控制）。弹层 `Content` 始终保持扁平，默认采用 `popper` 定位。
+- **键盘与指针**：方向键与类型预查浏览选项，`Enter` / `Space` 或点击提交选中，`Escape` 取消并将焦点返回 `Trigger`。
+
+## 示例
+
+### 触发器外观与尺寸（Appearance & Sizes）
+
+对比扁平（`flat`）、立体（`elevated`）以及 `size="sm"` / `size="default"` 的视觉表现。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-select-appearance"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 禁用态（Disabled）
+
+支持禁用整个选择器或禁用单个选项。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-select-disabled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 长列表与受控值（Large List & Controlled）
+
+结合固定最大高度与外部受控状态处理长选项列表（如时区选择）。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-select-input"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-以下前五个属性（`defaultOpen`、`defaultValue`、`disabled`、`readOnly`、`closeOnSelect`）属于 `Root`（传入 `open` 或 `value` 进入受控模式），`size` 与 `appearance` 属于 `Trigger`：
+### Root / Trigger / Value
 
 <ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
   rows={[
-    { name: 'defaultOpen', type: 'boolean', default: 'false' },
-    { name: 'defaultValue', type: 'string', default: "''" },
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'readOnly', type: 'boolean', default: 'false' },
-    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
-    { name: 'size', type: "'sm' | 'default'", default: 'default' },
-    { name: 'appearance', type: "'flat' | 'elevated'", default: 'flat' },
+    { name: 'Root.open', type: 'boolean', default: 'undefined' },
+    { name: 'Root.defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'Root.value', type: 'string', default: 'undefined' },
+    { name: 'Root.defaultValue', type: 'string', default: "''" },
+    { name: 'Root.disabled', type: 'boolean', default: 'false' },
+    { name: 'Root.readOnly', type: 'boolean', default: 'false' },
+    { name: 'Root.closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'Root.openChange', type: '(detail) => void', default: '—' },
+    { name: 'Root.valueChange', type: '(detail) => void', default: '—' },
+    { name: 'Trigger.size', type: "'sm' | 'default'", default: "'default'" },
+    { name: 'Trigger.appearance', type: "'flat' | 'elevated'", default: "'flat'" },
+    { name: 'Trigger.accessibleLabel', type: 'string', default: "''" },
+    { name: 'Value.placeholder', type: 'string', default: "''" },
   ]}
 />
 
-其余子部件属性默认值：
+### Content / Item
 
-- **Trigger**：另支持 `accessibleLabel`（默认 `''`）。
-- **Value**：`placeholder` 默认 `''`。
-- **Content**：支持 Transition 属性；`position` 默认 `'popper'`，`side` 默认 `'bottom'`，`align` 默认 `'center'`，`sideOffset` 默认 `4`，`alignOffset` 默认 `0`，`avoidCollisions` 默认 `true`，`collisionPadding` 默认 `10`。
-- **Item**：`disabled` 默认 `false`，`value` 与 `textValue` 默认 `''`；`closeOnSelect` 未设置时继承 `Root` 配置。
-- **Group**、**Label**、**Surface**、**ItemText**、**Viewport**、**Separator**：无属性。
+<ApiPropsTable
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Content.position', type: "'popper' | 'item-aligned'", default: "'popper'" },
+    { name: 'Content.side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content.align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'Content.sideOffset', type: 'number', default: '4' },
+    { name: 'Content.alignOffset', type: 'number', default: '0' },
+    { name: 'Content.avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'Content.collisionPadding', type: 'number', default: '10' },
+    { name: 'Item.value', type: 'string', default: "''" },
+    { name: 'Item.textValue', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+    { name: 'Item.closeOnSelect', type: 'boolean', default: '继承 Root' },
+    { name: 'Item.select', type: '(detail) => void', default: '—' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-SELECT.yaml',
+    'P-BRUTALIST-SELECT-TRIGGER.yaml',
+    'P-BRUTALIST-SELECT-CONTENT.yaml',
+    'P-BRUTALIST-SELECT-ITEM.yaml',
+    'P-BASE-SELECT.yaml',
+  ]}
+/>

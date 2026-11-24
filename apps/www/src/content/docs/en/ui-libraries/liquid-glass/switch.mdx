@@ -1,0 +1,110 @@
+---
+title: 'Liquid Glass Switch'
+description: 'A Liquid Glass-styled toggle switch with a capsule track, concentric circular thumb, optional dragging, and explicit material fallback controls.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Switch pairs a capsule track with a concentric sliding thumb, applying a tinted on-state fill with optional pointer dragging, RTL mirroring, and an explicit `material="opaque"` fallback mode.
+
+## Preview
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-switch"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Currently available from Proto UI workspace source via `@proto.ui/prototypes-liquid-glass/switch`.
+
+## Usage
+
+```tsx
+import { switchRoot, switchThumb } from '@proto.ui/prototypes-liquid-glass/switch';
+```
+
+```html
+<proto-ui-liquid-glass-switch-root default-checked>
+  <proto-ui-liquid-glass-switch-thumb></proto-ui-liquid-glass-switch-thumb>
+  <span class="sr-only">Enable notifications</span>
+</proto-ui-liquid-glass-switch-root>
+```
+
+- **Material & layering**: `material="auto"` requests `liquid-glass` when an in-app backdrop source is available. Set `material="opaque"` inside glass containers or dense forms to avoid stacking glass on glass.
+- **Accessibility & fallbacks**: Track and thumb transitions automatically disable under `prefers-reduced-motion: reduce`. Disabled switches withdraw optical material while preserving legible opaque contrast, and Reduced Transparency / Increased Contrast automatically fall back to the opaque surface.
+
+## Examples
+
+### Description
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-switch-description"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Material
+
+Compare the default `material="auto"` surface with an explicit `material="opaque"` opt-out.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-switch-material"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-switch-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-switch-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Draggable & RTL
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-switch-rtl-drag"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+The following props and events belong to `Root` (`Thumb` has no props):
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'checked', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'draggable', type: 'boolean', default: 'false' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'checkedChange', type: 'event ({ checked: boolean })', default: '—' },
+    { name: 'focusSelf', type: 'method (options?: FocusRequestOptions) => void', default: '—' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-SWITCH.yaml', 'P-LIQUID-GLASS-SWITCH-THUMB.yaml', 'P-BASE-SWITCH.yaml']}
+/>

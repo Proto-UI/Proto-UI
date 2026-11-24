@@ -1,29 +1,25 @@
 ---
 title: 'Input Shell'
-description: '为单个内联文本编辑器提供解耦外框、聚焦环与风格预设的 Shadcn 外壳组件。'
+description: '为单个内联文本编辑器提供解耦外框、聚焦环、校验状态与风格预设的 Shadcn 外壳组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-`Input Shell` 将输入框的外框样式（边框、背景、圆角与可选焦点环）与内部文本编辑器的交互逻辑分离：普通单行输入搭配 `inputShellControl`，命令搜索场景搭配 `Command` 的 `commandInput`。
+`Input Shell` 将输入框的外框样式（边框、背景、圆角、校验态与可选聚焦环）与内部文本编辑器的交互逻辑分离：普通单行输入搭配 `inputShellControl`，命令搜索场景搭配 [Command](/zh-cn/ui-libraries/shadcn/command/) 的 `commandInput`。本页默认示例采用 **Shadcn Rhea** 风格。
 
 ## 预览
 
-下方示例展示默认未包外层作用域（New York 预设）的 `inputShell`、`inputShellControl` 与状态绑定器。按 `Tab` 聚焦输入框或点击禁用切换按钮，即可观察外框随控件状态同步更新 `focusVisible` 与 `disabled`：
-
 <PrototypePreviewer
-  demoId="demo-shadcn-input-shell"
+  demoId="demo-shadcn-input-shell-rhea"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-## 安装与导入
+## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
-
-从 `@proto.ui/prototypes-shadcn/input-shell`（或包根入口）导入：
+当前通过工作区源码导入（尚未进入 0.2.0 稳定版 CLI 模板），从 `@proto.ui/prototypes-shadcn/input-shell` 或包根入口引入：
 
 ```ts
 import {
@@ -50,53 +46,43 @@ import type {
 
 ## 用法
 
-### 组合普通单行输入框
+使用外层 [Style Scope](/zh-cn/ui-libraries/shadcn/style-scope/) 包裹 `inputShell`，可让外框与内部编辑器自动继承同一风格预设：
 
-将外层 [Style Scope](/zh-cn/ui-libraries/shadcn/style-scope/) 包裹在 `inputShell` 之外，可让外框与内部编辑器自动保持相同风格预设（直接在 `inputShell` 上设置 `styleProfile` 仅影响外框本身）。以下为 Web Components 完整挂载与卸载示例：
+```tsx
+<ShadcnStyleScope styleProfile="rhea">
+  <ShadcnInputShell focusIndicator="ring">
+    <ShadcnInputShellControl ariaLabel="笔记标题" placeholder="未命名笔记" />
+  </ShadcnInputShell>
+</ShadcnStyleScope>
+```
+
+在真实外框与控件实例挂载后，调用 `bindInputShellControl` 同步控件的 `focusVisible` 与 `disabled` 状态，并在 `setFacts` 中保留原有外框属性：
 
 ```ts
-import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
-import { styleScope } from '@proto.ui/prototypes-shadcn/style-scope';
+import { setElementProps } from '@proto.ui/adapter-web-component';
 import {
-  inputShell,
-  inputShellControl,
   bindInputShellControl,
-  type InputShellProps,
+  type InputShellControlInstance,
   type InputShellOwner,
+  type InputShellProps,
 } from '@proto.ui/prototypes-shadcn/input-shell';
 
-const Scope = AdaptToWebComponent(styleScope);
-const Shell = AdaptToWebComponent(inputShell);
-const Control = AdaptToWebComponent(inputShellControl);
-
-export function mountTitleInput(host: HTMLElement) {
-  const scope = new Scope();
-  const shell = new Shell();
-  const control = new Control();
-  const shellProps: InputShellProps = {
-    styleProfile: 'inherit',
-    focusIndicator: 'ring',
-  };
-
-  setElementProps(scope, { styleProfile: 'rhea' });
-  setElementProps(shell, shellProps);
-  setElementProps(control, {
-    ariaLabel: '笔记标题',
-    placeholder: '未命名笔记',
-    defaultValue: '',
-  });
-  shell.append(control);
-  scope.append(shell);
-  host.append(scope);
-
+export function attachShell(
+  shell: HTMLElement,
+  control: InputShellControlInstance,
+  shellProps: InputShellProps = { styleProfile: 'inherit', focusIndicator: 'ring' }
+) {
   let current = true;
-  const disposers = new Set<() => void>();
+  const cleanups: VoidFunction[] = [];
   const owner: InputShellOwner = {
-    isCurrent: () => current,
+    isCurrent() {
+      return current;
+    },
     onDispose(dispose) {
-      disposers.add(dispose);
-      return () => {
-        disposers.delete(dispose);
+      cleanups.push(dispose);
+      return function remove() {
+        const index = cleanups.indexOf(dispose);
+        if (index >= 0) cleanups.splice(index, 1);
       };
     },
   };
@@ -112,62 +98,167 @@ export function mountTitleInput(host: HTMLElement) {
     control
   );
 
-  return () => {
+  return function detach() {
     if (!current) return;
     current = false;
-    try {
-      for (const dispose of [...disposers]) dispose();
-    } finally {
-      disposers.clear();
-      scope.remove();
-    }
+    for (const dispose of cleanups.splice(0)) dispose();
   };
 }
 ```
 
-关键使用约定：
+关键约定：
 
-- **每次同步保留已有外框属性**：因为 `setElementProps` 会整体替换属性，所以在 `setFacts` 中应合并 `shellProps` 与新状态，保留 `styleProfile` 与 `focusIndicator`。
-- **交互状态始终写在控件上**：`disabled`、`readOnly` 与无障碍名称（`ariaLabel` / `labelledBy` / `describedBy`）请直接设置在内层控件上；每个外框内只放一个编辑器。如果只需要独立输入框，可直接使用 [Input](/zh-cn/ui-libraries/shadcn/input/)。
+- **每次同步保留已有外框属性**：`setFacts` 应合并已声明的 `styleProfile`、`focusIndicator` 与 `invalid`，避免覆盖已有配置。
+- **交互状态始终写在控件上**：`disabled`、`readOnly` 与无障碍名称（`ariaLabel` / `labelledBy` / `describedBy`）直接设置在控件上；每个外框内只放置一个内联编辑器。独立输入框请直接使用 [Input](/zh-cn/ui-libraries/shadcn/input/)。
+- **绑定生命周期**：每个外框或控件同一时刻最多保持一个活跃绑定。返回的句柄提供 `sync()`、`replace(nextControl)` 与幂等的 `dispose()`；视图卸载或控件断开连接（`disconnect`）时会自动清理。
 
-### 风格预设
+## 示例
 
-两部件均默认 `styleProfile="inherit"`（优先本地显式值 → 最近的 `Style Scope` → `new-york-v4`；`new-york` 归一化为 `new-york-v4`）。切换风格预设时会保持编辑器节点、输入值、选区与焦点不变：
+### 风格预设切换
+
+两部件均默认 `styleProfile="inherit"`（优先本地显式值 → 最近的 `Style Scope` → `new-york-v4`；`new-york` 归一化为 `new-york-v4`），并完整映射全部 9 套 Shadcn 风格预设。实时切换外层作用域时，编辑器的 DOM 节点、输入值、选区与焦点均保持不变：
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-shell-profiles"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 | 预设 | 外层 `inputShell` | 内层 `inputShellControl` |
 | --- | --- | --- |
-| `new-york-v4` / `new-york` | `h-9`、`rounded-md`、`border-input`、`shadow-xs`（深色模式 `bg-input/30`），键盘焦点为 `border-ring ring-3 ring-ring/50`。 | `h-9`、`px-3 py-1`，无内层边框与焦点环。 |
-| `rhea` | `h-8`、`radius-2xl`、静止透明边框、`bg-input/50`、200ms 过渡，键盘焦点为 `border-ring ring-3 ring-ring/30`。 | `h-8`、`px-2.5 py-1`，透明无边框内层编辑面。 |
+| `rhea` | `h-8`、`radius-2xl`、静止透明边框、`bg-input/50`、200ms 过渡，键盘焦点 `border-ring ring-3 ring-ring/30`。 | `h-8`、`px-2.5 py-1`，透明无边框编辑面。 |
+| `new-york-v4` / `new-york` | `h-9`、`rounded-md`、`border-input`、`shadow-xs`（深色模式 `bg-input/30`），键盘焦点 `border-ring ring-3 ring-ring/50`。 | `h-9`、`px-3 py-1`，透明无边框编辑面。 |
+| `vega` | `h-9`、`rounded-md`、`border-input`、`shadow-xs`（深色模式 `bg-input/30`），键盘焦点 `border-ring ring-3 ring-ring/50`。 | `h-9`、`px-2.5 py-1`。 |
+| `nova` | `h-8`、`rounded-lg`、`border-input`（禁用态 `bg-input/50`，深色禁用 `bg-input/80`），键盘焦点 `border-ring ring-3 ring-ring/50`。 | `h-8`、`px-2.5 py-1`。 |
+| `maia` | `h-9`、`radius-4xl`、`border-input`、`bg-input/30`，键盘焦点 `border-ring ring-3 ring-ring/50`。 | `h-9`、`px-3 py-1`。 |
+| `lyra` | `h-8`、`rounded-none`、`border-input`（禁用态 `bg-input/50`，深色禁用 `bg-input/80`），键盘焦点 `border-ring ring-1 ring-ring/50`。 | `h-8`、`px-2.5 py-1`、`text-xs`。 |
+| `mira` | `h-7`、`rounded-md`、`border-input`、`bg-input/20`，键盘焦点 `border-ring ring-2 ring-ring/30`。 | `h-7`、`px-2 py-0.5`、`text-sm`。 |
+| `luma` | `h-9`、`radius-4xl`、静止透明边框、`bg-input/50`，键盘焦点 `border-ring ring-3 ring-ring/30`。 | `h-9`、`px-3 py-1`。 |
+| `sera` | `h-10`、`rounded-none`、底部边框 `border-b-input`，键盘焦点 `border-b-ring`。 | `h-10`、`px-0 py-1`。 |
 
-两种预设在视口宽度 `>= 768` 时都会将正文字号调整为小号字号，禁用透明度由内层控件统一控制，避免外框重复变暗。
+在视口宽度 `>= 768px` 时正文字号自动切换为紧凑尺寸；禁用透明度（`opacity-50`）由内层控件统一控制，外框仅追加 `cursor-not-allowed`（以及 `nova` / `lyra` 的禁用底色），避免重复变暗。
+
+### 禁用、只读与校验错误
+
+设置 `invalid` 可在外框上呈现各预设对应的 `border-destructive` 与 `ring-destructive` 校验态；编辑第一项输入合法邮箱地址后校验错误态自动清除：
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-shell-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ### 与 Command 组合
 
-在 [Command](/zh-cn/ui-libraries/shadcn/command/) 中，保留原有的 `commandInput`（无需替换为 `inputShellControl`），将其放入可选的 `commandInputWrapper` 与单编辑器 `inputShell` 中，通过 `bindInputShellControl` 同步状态并将 `focusIndicator` 设为 `'none'`。
+在 [Command](/zh-cn/ui-libraries/shadcn/command/) 中保留原有 `commandInput`，外层使用 `inputShell`（也可配合可选的 `commandInputWrapper`）并通过 `bindInputShellControl` 同步状态，同时将 `focusIndicator` 设为 `'none'`：
 
-### 绑定生命周期
+<PrototypePreviewer
+  demoId="demo-shadcn-input-shell-command"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-- 在真实外框与控件实例创建后再调用 `bindInputShellControl`；每个外框或控件同一时刻最多保持一个活跃绑定。
-- 返回的句柄提供 `sync()`、`replace(nextControl)` 与幂等的 `dispose()`；视图卸载或控件断开连接（`disconnect`）时会自动解绑，避免向已销毁节点写入属性。
+### 值订阅、聚焦与重置
+
+`inputShellControl` 暴露完整的 Base Input 状态与方法，包括可订阅的 `value`、编程式聚焦 `focusSelf()` 以及恢复初始值的 `resetValue(value?)`：
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-shell-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 动态切换禁用态
+
+通过 `bindInputShellControl` 将控件的 `disabled` 与 `focusVisible` 状态实时同步到外框；按 `Tab` 聚焦或点击按钮即可切换禁用状态（未包裹外层 `Style Scope` 时默认回退到 `new-york-v4` 兼容外观）：
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-shell"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-### `inputShell` 属性
+### `inputShell`
 
-| 属性             | 类型                        | 默认值      |
-| ---------------- | --------------------------- | ----------- |
-| `styleProfile`   | `ShadcnStyleChoice`         | `'inherit'` |
-| `focusVisible`   | `boolean`（由控件状态同步） | `false`     |
-| `disabled`       | `boolean`（由控件状态同步） | `false`     |
-| `focusIndicator` | `'ring' \| 'none'`          | `'ring'`    |
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: "'inherit'",
+      description: "外观预设；默认继承最近的 Style Scope，未指定时回退到 'new-york-v4'。",
+    },
+    {
+      name: 'focusVisible',
+      type: 'boolean',
+      default: 'false',
+      description: '由 bindInputShellControl 同步的内层控件键盘聚焦态。',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: '由 bindInputShellControl 同步的内层控件禁用态。',
+    },
+    {
+      name: 'invalid',
+      type: 'boolean',
+      default: 'false',
+      description: '外部校验错误态投影，按当前风格预设显示 destructive 边框与焦点环。',
+    },
+    {
+      name: 'focusIndicator',
+      type: "'ring' | 'none'",
+      default: "'ring'",
+      description: "普通输入使用 'ring'，与 Command 组合时设为 'none'。",
+    },
+  ]}
+/>
 
-### `inputShellControl` 属性、状态与事件
+### `inputShellControl`
 
-`InputShellControlProps` 为 `InputRootProps & ShadcnStyleProps`，`InputShellControlExposes` 为 `InputRootExposes`，完整保留 [Base Input](/zh-cn/ui-libraries/base/input/) 的接口：
+`InputShellControlProps` 为 `InputRootProps & ShadcnStyleProps`，传入 `value` 进入受控模式；`inputMode` 与 `enterKeyHint` 为可选属性，无默认值。
 
-- **受控与编辑属性**：`value`、`defaultValue`、`disabled`、`readOnly`、`placeholder`、`required`、`name`、`autoComplete`、`minLength`、`maxLength`、`inputMode`、`enterKeyHint`、`ariaLabel`、`labelledBy`、`describedBy`。
-- **状态与方法**：`value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing`，以及 `focusSelf()`、`blurSelf()`。
-- **事件**：`valueChange`、`change`、`compositionStart`、`compositionUpdate`、`compositionEnd`。
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit'" },
+    { name: 'value', type: 'string' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    {
+      name: 'inputMode',
+      type: "'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'",
+    },
+    {
+      name: 'enterKeyHint',
+      type: "'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'",
+    },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'labelledBy', type: 'string', default: "''" },
+    { name: 'describedBy', type: 'string', default: "''" },
+  ]}
+/>
+
+`InputShellControlExposes` 完整继承 [Base Input](/zh-cn/ui-libraries/base/input/) 的 `InputRootExposes`：
+
+- **暴露状态**：`value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing`。
+- **暴露方法**：`focusSelf(options?)`、`blurSelf()`、`resetValue(value?: string): boolean`。
+- **暴露事件**：`valueChange`、`change`、`compositionStart`、`compositionUpdate`、`compositionEnd`。
+
+### `bindInputShellControl(owner, target, control)`
+
+返回 `{ sync(), replace(nextControl), dispose() }` 句柄，用于按视图生命周期同步外框状态并在替换控件或卸载时释放所有订阅。
 
 ## 参考
 

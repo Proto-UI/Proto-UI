@@ -1,13 +1,8 @@
 import type { DemoNode, DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
 
-// Visible captions stay inside each radio item so inherited Base
-// nameFromContent derives the same accessible name across the Web runtimes.
-function option(
-  group: string,
-  value: string,
-  label: string,
-  props: Record<string, unknown> = {}
-): DemoNode {
+// Preserves exact BRUTALIST_MANIFEST recipePrototypeIds closure while matching
+// neobrutalism.dev's crisp 3-option hero preview and DM Sans medium labels.
+function option(value: string, label: string): DemoNode {
   return {
     kind: 'box',
     className: 'flex items-center gap-3',
@@ -15,31 +10,14 @@ function option(
       {
         kind: 'proto',
         prototypeId: 'brutalist-radio-group-item',
-        ref: `${group}-${value}`,
-        props: { value, ...props },
+        ref: `hero-${value}`,
+        props: { value },
         children: [
           { kind: 'proto', prototypeId: 'brutalist-radio-group-indicator' },
           { kind: 'box', className: 'sr-only', children: [label] },
         ],
       },
-      { kind: 'box', className: 'font-bold', children: [label] },
-    ],
-  };
-}
-
-function group(title: string, defaultValue: string, options: DemoNode[]): DemoNode {
-  return {
-    kind: 'box',
-    className: 'flex flex-col gap-2',
-    children: [
-      { kind: 'box', className: 'font-bold', children: [title] },
-      {
-        kind: 'proto',
-        prototypeId: 'brutalist-radio-group-root',
-        ref: title,
-        props: { a11yLabel: title, defaultValue },
-        children: options,
-      },
+      { kind: 'box', className: 'font-sans text-sm font-medium leading-none', children: [label] },
     ],
   };
 }
@@ -48,17 +26,20 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className: 'flex flex-col gap-6',
+    className: 'flex justify-center p-2',
     children: [
-      group('Density preference', 'comfortable', [
-        option('density', 'default', 'Default'),
-        option('density', 'comfortable', 'Comfortable'),
-        option('density', 'compact', 'Compact', { disabled: true }),
-      ]),
-      group('No initial selection', '', [
-        option('empty', 'default', 'Default'),
-        option('empty', 'comfortable', 'Comfortable'),
-      ]),
+      {
+        kind: 'proto',
+        prototypeId: 'brutalist-radio-group-root',
+        ref: 'brutalistHeroGroup',
+        className: 'w-fit',
+        props: { a11yLabel: 'Display density', defaultValue: 'comfortable' },
+        children: [
+          option('default', 'Default'),
+          option('comfortable', 'Comfortable'),
+          option('compact', 'Compact'),
+        ],
+      },
     ],
   },
 } as unknown as DemoSpec;

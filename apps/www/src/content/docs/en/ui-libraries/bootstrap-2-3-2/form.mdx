@@ -4,8 +4,10 @@ description: 'A Bootstrap 2.3.2 form coordinator for field validation, structure
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Form coordinates synchronous and asynchronous validation across registered fields and emits form values keyed by field name on submit.
+Bootstrap 2.3.2 Form coordinates synchronous and asynchronous validation across registered fields and emits form values keyed by field name on submit, preserving authentic Bootstrap 2.3.2 metrics, gradient buttons, and action-bar styling.
 
 ## Preview
 
@@ -13,29 +15,128 @@ Bootstrap 2.3.2 Form coordinates synchronous and asynchronous validation across 
   demoId="demo-bootstrap-2-3-2-form"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source via `@proto.ui/prototypes-bootstrap-2-3-2/form` (not yet included in the 0.2.0 stable release).
 
 ## Usage
 
-Compose `Root`, `FormField`, `FormSubmit`, and `FormReset`:
+```tsx
+import {
+  Bootstrap232FormRoot,
+  Bootstrap232FormField,
+  Bootstrap232FormSubmit,
+  Bootstrap232FormReset,
+  Bootstrap232FieldLabel,
+  Bootstrap232FieldControl,
+  Bootstrap232FieldError,
+} from '../proto-ui/components/react';
 
-- **Validation and submission**: `Root` validates all registered `FormField` controls and emits form values keyed by field name on `submit` once every enabled field passes. Disabled fields are excluded, and duplicate field names block serialization. Async validations wait for current results and cancel stale submissions on value change, removal, or unmount.
-- **Implicit Enter submit**: Pressing `Enter` inside a focused single-line `Field`, `Number Field`, or `Input OTP` submits the form (excluding IME composition, modifier keys, and repeated keydown events).
-- **Disabled state and reset**: Setting `disabled` on `Root` cascades to contained fields. `FormReset` or `requestReset()` restores initial uncontrolled values, proposes reset changes for controlled fields, cancels pending edits/validation, and emits `reset`. Call `resetValidation()` to clear errors without touching values.
-- **Action buttons**: `FormSubmit` and `FormReset` apply Bootstrap 2.3.2 button visuals and expose `disabled`, `hovered`, `pressed`, `focused`, `focusVisible`, and `focusSelf()`. Handle network requests in your `submit` listener.
+export function ExampleBootstrapForm() {
+  return (
+    <Bootstrap232FormRoot ariaLabel="Profile form" onSubmit={({ values }) => console.log(values)}>
+      <Bootstrap232FormField name="username" required>
+        <Bootstrap232FieldLabel>Username</Bootstrap232FieldLabel>
+        <Bootstrap232FieldControl placeholder="ada_lovelace" />
+        <Bootstrap232FieldError />
+      </Bootstrap232FormField>
+      <div className="flex items-center gap-2 border-t border-border pt-3">
+        <Bootstrap232FormSubmit variant="primary">Save changes</Bootstrap232FormSubmit>
+        <Bootstrap232FormReset variant="default">Cancel</Bootstrap232FormReset>
+      </div>
+    </Bootstrap232FormRoot>
+  );
+}
+```
+
+### Anatomy & Behavior
+
+- **Validation and submission**: `Root` validates all registered `FormField` controls and emits `submit` with values keyed by field name once every enabled field passes. Disabled fields are excluded, and duplicate field names throw `FORM_DUPLICATE_NAME` during serialization. Async validations wait for the latest result and cancel stale submissions on edit, cancel, or unmount.
+- **Implicit Enter submit**: Pressing `Enter` inside a focused single-line `Field`, `Number Field`, or `Input OTP` submits the form (excluding IME composition, modifier keys, and key repeats).
+- **Disabled state and reset**: Setting `disabled` on `Root` cascades to contained fields and buttons. `FormReset` or `requestReset()` restores uncontrolled initial values, proposes resets to controlled fields, cancels pending edits/validation, and emits `reset`. Call `resetValidation()` to clear errors without touching values.
+- **Action buttons**: `FormSubmit` and `FormReset` apply Bootstrap 2.3.2 4px radius, gradients, and inset shadows, supporting `variant` (`default`, `primary`, `danger`, `success`, `info`, `warning`, `inverse`).
+
+## Examples
+
+### Profile form
+
+Combines classic Bootstrap 2.3.2 field rhythm with a text input, multiline textarea, and bottom action row:
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-form-profile"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Classic action bar variants
+
+Pair `primary`, `danger`, and `default` form actions inside a `.form-actions`-style footer bar:
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-form-actions"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Async validation and nested fieldsets
+
+Demonstrates versioned external async validation requests, stale-result rejection, and nested `Fieldset` disabling:
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-form-validation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / Methods / Events | Description |
-| --- | --- | --- |
-| `Root` | `disabled` | Disables the form and all contained fields |
-| `Root` | `submit` / `reset` | Emits keyed field values on valid submit / emits on reset |
-| `Root` | `requestReset()` / `resetValidation()` | Resets values and validation / clears validation only |
-| `FormField` | — | Registers a named field with the form |
-| `FormSubmit` | `focusSelf()` | Validates and submits the form |
-| `FormReset` | `focusSelf()` | Resets the form |
+### FormRoot
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+Exposed states: `disabled`, `pending`, `submitted`. Methods: `getValues()`, `requestSubmit()`, `requestReset()`, `resetValidation()`, `cancelSubmit()`. Events: `submit`, `invalid`, `reset`.
+
+### FormField
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'validationMode', type: "'onSubmit' | 'onBlur' | 'onChange'", default: "'onSubmit'" },
+    { name: 'externalValidation', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### FormSubmit / FormReset
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'variant',
+      type: "'default' | 'primary' | 'danger' | 'success' | 'info' | 'warning' | 'inverse'",
+      default: "'primary' / 'default'",
+    },
+  ]}
+/>
+
+Exposed states: `disabled`, `hovered`, `pressed`, `focused`, `focusVisible`. Methods: `focusSelf(options?)`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-FORM.yaml', 'P-BASE-FORM.yaml']}
+/>

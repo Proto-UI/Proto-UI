@@ -3,10 +3,11 @@ title: 'Autocomplete'
 description: '支持输入联想过滤与自由文本提交的 Brutalist 自动补全组件。'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Autocomplete 将单行文本输入与实时过滤的建议列表结合，既可从候选项中选择补全，也允许直接提交自定义自由文本。
+Brutalist Autocomplete 遵循 Brutalist 设计契约（5px `rounded-base`、2px 黑色描边、DM Sans 字体与分级硬阴影），将单行文本输入与实时过滤的建议面板结合，既可选中候选项，也允许直接提交自由文本。
 
 ## 预览
 
@@ -14,40 +15,84 @@ Brutalist Autocomplete 将单行文本输入与实时过滤的建议列表结合
   demoId="demo-brutalist-autocomplete"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供（`@proto.ui/prototypes-brutalist/autocomplete`），尚未进入 0.2.0 稳定版。
 
 ## 用法
 
-### 部件组成
+```html
+<proto-ui-brutalist-autocomplete-root a11y-label="Framework">
+  <proto-ui-brutalist-autocomplete-input
+    placeholder="Search frameworks…"
+  ></proto-ui-brutalist-autocomplete-input>
+  <proto-ui-brutalist-autocomplete-trigger>Options</proto-ui-brutalist-autocomplete-trigger>
+  <proto-ui-brutalist-autocomplete-content>
+    <proto-ui-brutalist-autocomplete-item value="next" text-value="Next.js" keywords="react ssr">
+      Next.js
+    </proto-ui-brutalist-autocomplete-item>
+    <proto-ui-brutalist-autocomplete-item
+      value="astro"
+      text-value="Astro"
+      keywords="islands static"
+    >
+      Astro
+    </proto-ui-brutalist-autocomplete-item>
+    <proto-ui-brutalist-autocomplete-empty
+      >No matching frameworks.</proto-ui-brutalist-autocomplete-empty
+    >
+  </proto-ui-brutalist-autocomplete-content>
+</proto-ui-brutalist-autocomplete-root>
+```
 
-Autocomplete 由 `Root`、`Input`、`Content`、`Item`、`Empty` 和 `Trigger` 组成：
+### 部件与交互说明
 
-- **Root**：管理已提交值 `value`、当前查询输入 `inputValue`、弹层开关 `open` 以及内置过滤和循环导航配置。三项状态均可独立受控。
-- **Input**：承载真实单行文本编辑器，使用方向键浏览建议列表时焦点始终保留在输入框内，输入法合成期间不会误触发选择。
-- **Content**：锚定在输入框下方的浮层建议面板，支持方向、对齐与碰撞留白配置。
-- **Item**：单个建议选项，通过 `textValue` 和 `keywords` 参与忽略大小写与重音的匹配；选中时提交 `textValue`，禁用项或重复值不可提交。
-- **Empty**：当没有匹配建议时自动展示的空态提示。
-- **Trigger**：可选的展开/收起触发按钮。
+- **部件组成**：由 `Root`、`Input`、`Trigger`、`Content`、`Item` 与 `Empty` 组成。
+- **层级动效**：`Input` 为可编辑平面表面，`Trigger` 采用 4px 抬起黑影与按压落位反馈，`Content` 浮层面板使用 3px 前景硬阴影，`Item` 高亮时切换为 `bg-main` / `text-main-foreground`。
+- **过滤与提交**：内置过滤支持忽略大小写、重音符号与 `keywords`；设 `filter={false}` 可切换为外部过滤。无高亮候选项时按 `Enter` 提交当前自由文本，IME 合成期间不会误触选择。
 
-### 过滤与提交行为
+## 示例
 
-- 按 `Enter` 时，若有高亮候选项则提交该项文本；若无高亮项则可直接提交当前输入的自由文本。
-- 如需自行在外部过滤数据，将 `filter` 设为 `false` 并直接渲染已过滤的 `Item` 列表。
+### 关键词与忽略重音匹配
+
+<PrototypePreviewer
+  demoId="demo-brutalist-autocomplete-keywords"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 无触发器的自由文本提交
+
+<PrototypePreviewer
+  demoId="demo-brutalist-autocomplete-free-text"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读状态
+
+<PrototypePreviewer
+  demoId="demo-brutalist-autocomplete-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 ### Root
 
+分别传入 `value`、`inputValue` 或 `open` 可独立控制对应状态；通过 `valueChange`、`inputValueChange`、`openChange` 事件与 `openPopup()`、`close()`、`setInputValue()`、`select()` 方法协作。
+
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
     { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -57,12 +102,24 @@ Autocomplete 由 `Root`、`Input`、`Content`、`Item`、`Empty` 和 `Trigger` �
   ]}
 />
 
-分别传入 `value`、`inputValue` 或 `open` 可独立控制对应状态。
-
 ### 其他部件属性
 
-- **Input**：`placeholder?: string`、`a11yLabel?: string`、`name?: string`（默认均为 `''`）
-- **Content**：`side`（默认 `'bottom'`）、`align`（默认 `'start'`）、`sideOffset`（默认 `4`）、`collisionPadding`（默认 `8`）
-- **Item**：`value`、`textValue`、`keywords`（默认均为 `''`）、`disabled?: boolean`（默认 `false`）
-- **Empty**：无独立属性
-- **Trigger**：`disabled?: boolean`（默认 `false`）
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Input · placeholder / a11yLabel / name', type: 'string', default: "''" },
+    { name: 'Trigger · disabled', type: 'boolean', default: 'false' },
+    { name: 'Content · side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content · align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'Content · sideOffset / collisionPadding', type: 'number', default: '4 / 8' },
+    { name: 'Item · value / textValue / keywords', type: 'string', default: "''" },
+    { name: 'Item · disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-AUTOCOMPLETE.yaml', 'P-BASE-AUTOCOMPLETE.yaml']}
+/>

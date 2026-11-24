@@ -1,6 +1,6 @@
 ---
 title: 'Textarea'
-description: '支持受控状态、IME 组合事件与表单重置的多行文本输入框组件。'
+description: '支持受控状态、IME 组合事件与表单校验组合的多行文本输入框组件。'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -12,14 +12,10 @@ Textarea 封装单个原生多行文本编辑器，提供统一的受控/非受�
 
 ## 预览
 
-下方依次展示了非受控备注框（`rows={4}`、`maxLength={240}`）、禁用态输入框以及仍可聚焦的只读输入框。
-
 <PrototypePreviewer
   demoId="demo-shadcn-textarea"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
 
 ## 安装
@@ -32,9 +28,70 @@ Textarea 封装单个原生多行文本编辑器，提供统一的受控/非受�
 
 ## 用法
 
-- Textarea 不接受额外子元素，直接管理单个原生多行输入控件，支持 `rows`、`maxLength`、`minLength`、`wrap`、`placeholder`、`readOnly` 与 `disabled` 等常见属性。
-- `resetValue()` 方法可将非受控编辑器恢复为初始值，在受控模式下会发出恢复初始值的请求；即使处于 `readOnly` 或 `disabled` 状态也可显式调用，并会结束正在进行的输入法组合。
-- 在表单中使用时，可从 `@proto.ui/prototypes-shadcn/field` 导入 `fieldTextarea`，自动接入标签、描述、错误信息和表单校验；完整示例见 [Form 配方](../form/)。
+```tsx
+import { ShadcnTextareaRoot } from '../proto-ui/components/react';
+```
+
+```tsx
+<ShadcnTextareaRoot placeholder="Type your message here." rows={4} />
+```
+
+- **内容边界与属性**：Textarea 直接管理单个原生 `<textarea>` 控件，不接受额外子元素，支持 `rows`、`maxLength`、`minLength`、`wrap`、`placeholder`、`readOnly` 与 `disabled` 等常见属性。
+- **风格预设（`styleProfile`）**：支持 `vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea` 与 `new-york-v4`（`new-york` 作为兼容别名）；省略或设为 `inherit` 时优先继承最近的 [Style Scope](../style-scope/)，否则回退到 `new-york-v4`。
+- **重置与焦点方法**：`resetValue()` 可将非受控编辑器恢复为初始值，在受控模式下发出恢复初始值的请求，即使处于 `readOnly` 或 `disabled` 状态也可调用并结束进行中的输入法组合；`focusSelf()` 与 `blurSelf()` 用于程序化焦点管理。
+- **表单字段组合**：在表单中使用时，可从 `@proto.ui/prototypes-shadcn/field` 导入 `fieldTextarea`，与 `Field`、`FieldLabel`、`FieldDescription` 及 `FieldError` 组合以自动关联标签、说明与校验状态；完整示例见 [Form 配方](../form/)。
+
+## 示例
+
+### 表单字段
+
+使用 `Field`、`FieldLabel`、`FieldDescription` 与 `FieldTextarea` 为多行输入框关联可见标签与帮助说明。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-textarea-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用
+
+在 `Field` 上设置 `disabled` 会同时禁用标签与绑定的多行输入框，也可在独立的 `Textarea` 上直接传入 `disabled`。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-textarea-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 无效状态
+
+通过 `Field` 的 `invalid` 与 `errors` 属性呈现错误边框、焦点环以及可访问错误提示。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-textarea-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 搭配按钮
+
+与 `Button` 组合即可构建带提交操作的消息输入区域。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-textarea-button"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+在祖先容器上设置 `dir="rtl"` 即可为标签、描述与多行文本编辑器启用从右到左的排版方向。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-textarea-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -43,6 +100,11 @@ Textarea 封装单个原生多行文本编辑器，提供统一的受控/非受�
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4' | 'new-york'",
+      default: "'inherit' → 最近 scope → 'new-york-v4'",
+    },
     { name: 'value', type: 'string | undefined', default: '非受控' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
@@ -54,14 +116,16 @@ Textarea 封装单个原生多行文本编辑器，提供统一的受控/非受�
     { name: 'autoComplete', type: 'string', default: "''" },
     { name: 'minLength', type: 'number', default: '-1' },
     { name: 'maxLength', type: 'number', default: '-1' },
-    { name: 'wrap', type: "'soft' | 'hard'", default: 'soft' },
+    { name: 'wrap', type: "'soft' | 'hard'", default: "'soft'" },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'labelledBy', type: 'string', default: "''" },
     { name: 'describedBy', type: 'string', default: "''" },
   ]}
 />
 
-`Root` 暴露 `value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing` 状态以及 `resetValue()` 方法，并触发 `valueChange`、`change` 和输入法组合事件。
+- **暴露状态**：`value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing`（在 `FieldTextarea` 中额外暴露 `invalid` 与 `pending`）。
+- **暴露方法**：`focusSelf(options?)`、`blurSelf()`、`resetValue()`。
+- **事件**：`valueChange`、`change`、`compositionStart`、`compositionUpdate`、`compositionEnd`。
 
 ## 参考
 

@@ -1,2 +1,3 @@
-import { createFormPrimitivesDemo } from './form-primitives-demo.shared';
-export default createFormPrimitivesDemo('bootstrap-2-3-2', 'fieldset');
+import { createFieldsetAddressDemo } from './demo_components/fieldset/fieldset-demo.shared';
+
+export default createFieldsetAddressDemo('bootstrap-2-3-2');

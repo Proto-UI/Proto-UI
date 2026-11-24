@@ -15,7 +15,6 @@ Brutalist Fieldset groups related form fields with a semantic legend, optional d
   demoId="demo-brutalist-fieldset"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
@@ -24,11 +23,29 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
+```tsx
+import { FieldsetRoot, FieldsetLegend, FieldsetDescription } from '@/components/brutalist/fieldset';
+import { FieldRoot, FieldLabel, FieldControl } from '@/components/brutalist/field';
+
+export function Example() {
+  return (
+    <FieldsetRoot>
+      <FieldsetLegend>Address Information</FieldsetLegend>
+      <FieldsetDescription>We need your address to deliver your order.</FieldsetDescription>
+      <FieldRoot required>
+        <FieldLabel>Street Address</FieldLabel>
+        <FieldControl placeholder="123 Main St" />
+      </FieldRoot>
+    </FieldsetRoot>
+  );
+}
+```
+
 ### Parts
 
-- **Root**: Establishes the `group` role and computes the effective disabled state from its own `disabled` prop and any enclosing `Fieldset`, arranged as an unboxed `gap-4` vertical stack.
-- **Legend**: Optional bold group heading that preserves authored casing and adds no tab stop.
-- **Description**: Optional wrappable help copy rendered in crisp foreground text.
+- **Root**: Establishes the `group` role and computes the effective disabled state from its own `disabled` prop and any enclosing `Fieldset`, arranged as an unboxed `gap-4` vertical stack using `font-sans font-medium`.
+- **Legend**: Optional heading using `font-heading font-bold` per the Brutalist design contract, preserving authored casing, supporting `variant="legend"` (default) and `variant="label"`, and adding no tab stop.
+- **Description**: Optional wrappable help copy rendered in crisp foreground text with disabled state feedback.
 
 Each group accepts at most one `Legend` and one `Description`. ARIA labelling and description attributes are automatically linked and cleaned up on unmount without manual DOM IDs, and nested groups never leak targets across scopes.
 
@@ -42,6 +59,24 @@ Effective disabled state cascades through nested `Fieldset` roots without cleari
 
 Every participating `Field` inside the group—including fields placed inside `Legend`—inherits the group's disabled state.
 
+## Examples
+
+### Label-scale legend and checkbox group
+
+<PrototypePreviewer
+  demoId="demo-brutalist-fieldset-checkbox-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Nested disabled inheritance
+
+<PrototypePreviewer
+  demoId="demo-brutalist-fieldset-nested-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
 ## API
 
 ### Root
@@ -54,9 +89,16 @@ Every participating `Field` inside the group—including fields placed inside `L
   ]}
 />
 
-### Other parts
+### Legend
 
-`Legend` and `Description` declare no props of their own; all three parts expose read-only effective disabled state.
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'variant', type: "'legend' | 'label'", default: "'legend'" }]}
+/>
+
+### Description
+
+`Description` declares no props of its own; all three parts expose read-only effective `disabled` state (`ExposeState<boolean>`).
 
 ## References
 

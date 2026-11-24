@@ -1,11 +1,13 @@
 ---
 title: 'Input OTP'
-description: '单输入框驱动、支持自动填充与多格展示的 Liquid Glass 一次性验证码输入组件。'
+description: '单输入框驱动、遵循内容层同心圆角与高可读性规范的 Liquid Glass 一次性验证码输入组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Input OTP 通过单一真实文本框管理粘贴、选区、删除、IME 组合输入与 `one-time-code` 自动填充，并将每一位字符同步渲染到被动展示槽（`Slot`）中。
+Liquid Glass Input OTP 通过单一真实文本框管理粘贴、选区、删除、IME 组合输入与 `one-time-code` 自动填充。遵循内容层不叠玻璃（no glass-on-glass）原则，输入框与槽位采用高对比度次级表面、细腻内描边高光与同心圆角，并保持禁用态的可读不透明回退。
 
 ## 预览
 
@@ -13,7 +15,6 @@ Liquid Glass Input OTP 通过单一真实文本框管理粘贴、选区、删除
   demoId="demo-liquid-glass-input-otp"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
@@ -22,18 +23,126 @@ Liquid Glass Input OTP 通过单一真实文本框管理粘贴、选区、删除
 
 ## 用法
 
-- **部件组成**：`Root`、`Input`、`Control`、`Slot`、`Separator`。
-- **单输入框与光标高亮**：所有文本编辑都发生在同一个可访问的 `Input` 中，`Slot` 仅为 `aria-hidden` 被动格子，不会产生多余 Tab 停靠点。当可编辑的输入框处于聚焦状态时，高亮槽位严格跟随真实光标或选区位置；失焦、禁用或只读时不显示活动槽。
-- **字符过滤与完成事件**：支持 `numeric` 或 `alphanumeric` 过滤以及 `1–32` 位长度（默认 `6`），在 IME 组合结束后自动过滤非法字符并截断长度。每次接受完整验证码时触发一次 `completed` 事件（受控模式下 `valueChange` 仅发出提议）。
-- **与 Field / Form 集成**：在 [Field](/zh-cn/ui-libraries/liquid-glass/field/) 或 [Form](/zh-cn/ui-libraries/liquid-glass/form/) 中使用 `Control` 替代 `Input`，即可自动桥接 `FieldLabel`、校验、IME 取消、表单序列化与重置；单独使用时继续使用 `Input`。
+```tsx
+import {
+  LiquidGlassInputOtpRoot,
+  LiquidGlassInputOtpInput,
+  LiquidGlassInputOtpSlot,
+  LiquidGlassInputOtpSeparator,
+} from '../proto-ui/components/react';
+
+export function LiquidGlassVerificationCode() {
+  return (
+    <LiquidGlassInputOtpRoot length={6}>
+      <LiquidGlassInputOtpInput placeholder="123456" />
+      <div className="inline-flex items-center gap-1.5">
+        <LiquidGlassInputOtpSlot index={0} />
+        <LiquidGlassInputOtpSlot index={1} />
+        <LiquidGlassInputOtpSlot index={2} />
+      </div>
+      <LiquidGlassInputOtpSeparator>–</LiquidGlassInputOtpSeparator>
+      <div className="inline-flex items-center gap-1.5">
+        <LiquidGlassInputOtpSlot index={3} />
+        <LiquidGlassInputOtpSlot index={4} />
+        <LiquidGlassInputOtpSlot index={5} />
+      </div>
+    </LiquidGlassInputOtpRoot>
+  );
+}
+```
+
+- **内容层层次与同心圆角**：槽位与单行输入框作为表单内容表面保持光学中性，不在浮层玻璃卡片上二次叠加玻璃材质；内层槽位采用 `rounded-xl` 与外层 `rounded-2xl` 容器形成同心圆角关系，并在聚焦时抬升阴影与焦点环。
+- **单输入框与光标高亮**：所有编辑均在同一个可访问的 `Input` 中完成；`Slot` 为 `aria-hidden` 被动展示格，聚焦且可编辑时随真实光标与选区位置高亮。
+- **与 Field / Form 集成**：在 [Field](/zh-cn/ui-libraries/liquid-glass/field/) 或 [Form](/zh-cn/ui-libraries/liquid-glass/form/) 中使用 `Control` 替代 `Input`，自动桥接 `FieldLabel`、校验错误状态、表单序列化与重置。
+
+## 示例
+
+### 分隔符
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-otp-separator"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 字母数字模式
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-otp-alphanumeric"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用态
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-otp-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 错误态
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-otp-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-otp-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 表单与四位 PIN 校验
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-otp-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 事件 | 默认值与说明 |
-| --- | --- | --- |
-| Root | `value` / `defaultValue` | 受控 / 非受控验证码字符串 |
-| Root | `length` | `6`（支持 `1–32`） |
-| Root | `disabled` / `readOnly` / `name` / `ariaLabel` | 禁用、只读、字段名与可访问名称 |
-| Root | `valueChange` / `completed` | 值变更请求事件 / 每次接受完整验证码后触发 |
-| Input / Control | — | 独立使用的真实编辑器 / 用于 Field 与 Form 内的桥接控件 |
-| Slot / Separator | — | 被动字符展示槽与视觉分隔符 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'length', type: 'number', default: '6' },
+    { name: 'pattern', type: "'numeric' | 'alphanumeric'", default: "'numeric'" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'invalid', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'ariaLabel', type: 'string', default: "'One-time code'" },
+  ]}
+/>
+
+### Input / Control 与 Slot
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Input / Control: placeholder', type: 'string', default: "''" },
+    { name: 'Slot: index', type: 'number', default: '0' },
+    { name: 'Slot: invalid', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### 事件与暴露方法
+
+- **Root 事件**：`valueChange`（`{ value: string }`）、`completed`（`{ value: string }`）。
+- **Root 暴露状态与方法**：状态 `value`、`complete`、`disabled`、`readOnly`、`focused`；方法 `requestValue(value)`、`clear()`、`resetValue()`、`focusInput()`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-INPUT-OTP.yaml', 'P-BASE-INPUT-OTP.yaml']}
+/>

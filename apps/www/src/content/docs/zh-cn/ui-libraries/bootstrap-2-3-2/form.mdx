@@ -4,8 +4,10 @@ description: '汇总字段校验、按字段名提交数据并支持重置的 Bo
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Form 协调表单内所有已注册字段的同步与异步校验，并在全部有效时通过 `submit` 事件输出按字段名组织的表单数据。
+Bootstrap 2.3.2 Form 协调表单内所有已注册字段的同步与异步校验，并在全部有效时通过 `submit` 事件输出按字段名组织的表单数据，同时保留经典 Bootstrap 2.3.2 像素节奏、按钮渐变与操作栏层次。
 
 ## 预览
 
@@ -13,29 +15,128 @@ Bootstrap 2.3.2 Form 协调表单内所有已注册字段的同步与异步校�
   demoId="demo-bootstrap-2-3-2-form"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前组件在工作区源码中提供，尚未包含在 0.2.0 稳定版包中；可从 `@proto.ui/prototypes-bootstrap-2-3-2/form` 引入。
 
 ## 用法
 
-由 `Root`、`FormField`、`FormSubmit` 和 `FormReset` 组成：
+```tsx
+import {
+  Bootstrap232FormRoot,
+  Bootstrap232FormField,
+  Bootstrap232FormSubmit,
+  Bootstrap232FormReset,
+  Bootstrap232FieldLabel,
+  Bootstrap232FieldControl,
+  Bootstrap232FieldError,
+} from '../proto-ui/components/react';
 
-- **校验与提交**：`Root` 汇总内部显式注册的 `FormField`，校验通过后在 `submit` 事件中返回按字段名组织的表单数据。禁用的字段不参与序列化；存在重复字段名时忽略非法配置并阻止提交。若包含异步校验，会等待最新校验完成，期间值变更、取消或卸载会自动作废旧提交。
-- **快捷提交**：焦点位于单行 `Field`、`Number Field` 或 `Input OTP` 内时，按 `Enter` 可直接触发表单提交（IME 组合输入、修饰键及长按重复触发除外）。
-- **整表禁用与重置**：设置 `Form` 的 `disabled` 会自动传递到内部 `Field`。调用 `requestReset()` 或点击 `FormReset` 会将非受控字段恢复为挂载初值，向受控字段发送重置请求，取消进行中的编辑与校验并触发 `reset` 事件；若仅需清空错误提示，调用 `resetValidation()`。
-- **按钮反馈**：`FormSubmit` 与 `FormReset` 复用 Bootstrap 2.3.2 按钮样式，并暴露 `disabled`、`hovered`、`pressed`、`focused`、`focusVisible` 状态及 `focusSelf()` 方法。表单本身不发起网络请求或页面跳转，由应用监听 `submit` 事件处理提交逻辑。
+export function ExampleBootstrapForm() {
+  return (
+    <Bootstrap232FormRoot ariaLabel="Profile form" onSubmit={({ values }) => console.log(values)}>
+      <Bootstrap232FormField name="username" required>
+        <Bootstrap232FieldLabel>Username</Bootstrap232FieldLabel>
+        <Bootstrap232FieldControl placeholder="ada_lovelace" />
+        <Bootstrap232FieldError />
+      </Bootstrap232FormField>
+      <div className="flex items-center gap-2 border-t border-border pt-3">
+        <Bootstrap232FormSubmit variant="primary">Save changes</Bootstrap232FormSubmit>
+        <Bootstrap232FormReset variant="default">Cancel</Bootstrap232FormReset>
+      </div>
+    </Bootstrap232FormRoot>
+  );
+}
+```
+
+### 部件结构与行为
+
+- **校验与提交**：`Root` 汇总内部显式注册的 `FormField`，校验通过后在 `submit` 事件中返回按字段名组织的表单数据。禁用的字段不参与序列化；重复字段名会在序列化时抛出 `FORM_DUPLICATE_NAME` 错误。包含异步校验时，会等待当前版本的校验结果，并在编辑、取消或卸载时自动废弃旧提交。
+- **快捷提交**：焦点位于单行 `Field`、`Number Field` 或 `Input OTP` 内时，按 `Enter` 可直接触发表单提交（IME 组合输入、修饰键与长按连发除外）。
+- **整表禁用与重置**：设置 `Form` 的 `disabled` 会自动传递到内部字段与按钮。调用 `requestReset()` 或点击 `FormReset` 会恢复非受控字段初值、向受控字段发出重置提议并触发 `reset` 事件；调用 `resetValidation()` 仅清理校验状态。
+- **按钮样式**：`FormSubmit` 与 `FormReset` 采用经典 Bootstrap 2.3.2 4px 圆角、线性渐变与内阴影反馈，支持 `variant`（`default`、`primary`、`danger`、`success`、`info`、`warning`、`inverse`）。
+
+## 示例
+
+### 个人资料表单
+
+使用经典 Bootstrap 2.3.2 字段间距与底部操作栏组合输入框与多行文本域：
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-form-profile"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 经典操作栏变体
+
+在 `.form-actions` 风格的底部操作栏中组合 `primary`、`danger` 与 `default` 表单操作按钮：
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-form-actions"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 异步校验与嵌套字段集
+
+演示外部异步校验请求的审批、拒绝、过期结果丢弃与嵌套 `Fieldset` 禁用联动：
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-form-validation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 方法 / 事件 | 说明 |
-| --- | --- | --- |
-| `Root` | `disabled` | 禁用整张表单及内部字段 |
-| `Root` | `submit` / `reset` | 校验通过后提交表单数据事件 / 重置完成事件 |
-| `Root` | `requestReset()` / `resetValidation()` | 重置表单值与状态 / 仅清除校验状态 |
-| `FormField` | — | 向 `Form` 注册单个字段及其字段名 |
-| `FormSubmit` | `focusSelf()` | 触发表单校验与提交的按钮 |
-| `FormReset` | `focusSelf()` | 触发表单重置的按钮 |
+### FormRoot
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+暴露状态：`disabled`、`pending`、`submitted`。暴露方法：`getValues()`、`requestSubmit()`、`requestReset()`、`resetValidation()`、`cancelSubmit()`。事件：`submit`、`invalid`、`reset`。
+
+### FormField
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'validationMode', type: "'onSubmit' | 'onBlur' | 'onChange'", default: "'onSubmit'" },
+    { name: 'externalValidation', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### FormSubmit / FormReset
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'variant',
+      type: "'default' | 'primary' | 'danger' | 'success' | 'info' | 'warning' | 'inverse'",
+      default: "'primary' / 'default'",
+    },
+  ]}
+/>
+
+暴露状态：`disabled`、`hovered`、`pressed`、`focused`、`focusVisible`。暴露方法：`focusSelf(options?)`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-FORM.yaml', 'P-BASE-FORM.yaml']}
+/>

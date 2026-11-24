@@ -1,27 +1,8 @@
 import { withShadcnRheaDemo } from '../shadcn-demo-style';
-import type { DemoSetupContext, DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
-
-function setup({ host }: DemoSetupContext) {
-  const trigger = host.querySelector<HTMLElement>('[role="combobox"]');
-  if (!trigger) return;
-
-  const label = 'Adapter selector';
-  const restoreLabel = () => {
-    if (trigger.getAttribute('aria-label') !== label) trigger.setAttribute('aria-label', label);
-  };
-  restoreLabel();
-
-  // Select's protocol intentionally derives its name from content. A native
-  // combobox needs an explicit label, so keep this demo-only label in place
-  // when the protocol refreshes aria-expanded or other state attributes.
-  const observer = new MutationObserver(restoreLabel);
-  observer.observe(trigger, { attributes: true, attributeFilter: ['aria-label'] });
-  return () => observer.disconnect();
-}
+import type { DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
 
 export default withShadcnRheaDemo({
   type: 'demo',
-  setup,
   root: {
     kind: 'proto',
     prototypeId: 'shadcn-select-root',
@@ -29,12 +10,13 @@ export default withShadcnRheaDemo({
       {
         kind: 'proto',
         prototypeId: 'shadcn-select-trigger',
-        className: 'w-56',
+        className: 'w-48',
+        props: { accessibleLabel: 'Fruit selector' },
         children: [
           {
             kind: 'proto',
             prototypeId: 'shadcn-select-value',
-            props: { placeholder: 'Select an adapter' },
+            props: { placeholder: 'Select a fruit' },
           },
         ],
       },
@@ -57,29 +39,41 @@ export default withShadcnRheaDemo({
                       {
                         kind: 'proto',
                         prototypeId: 'shadcn-select-label',
-                        children: ['Framework adapters'],
+                        children: ['Fruits'],
                       },
                       {
                         kind: 'proto',
                         prototypeId: 'shadcn-select-item',
-                        props: { value: 'react', textValue: 'React' },
+                        props: { value: 'apple', textValue: 'Apple' },
                         children: [
                           {
                             kind: 'proto',
                             prototypeId: 'shadcn-select-item-text',
-                            children: ['React'],
+                            children: ['Apple'],
                           },
                         ],
                       },
                       {
                         kind: 'proto',
                         prototypeId: 'shadcn-select-item',
-                        props: { value: 'vue', textValue: 'Vue' },
+                        props: { value: 'banana', textValue: 'Banana' },
                         children: [
                           {
                             kind: 'proto',
                             prototypeId: 'shadcn-select-item-text',
-                            children: ['Vue'],
+                            children: ['Banana'],
+                          },
+                        ],
+                      },
+                      {
+                        kind: 'proto',
+                        prototypeId: 'shadcn-select-item',
+                        props: { value: 'blueberry', textValue: 'Blueberry' },
+                        children: [
+                          {
+                            kind: 'proto',
+                            prototypeId: 'shadcn-select-item-text',
+                            children: ['Blueberry'],
                           },
                         ],
                       },
@@ -93,29 +87,41 @@ export default withShadcnRheaDemo({
                       {
                         kind: 'proto',
                         prototypeId: 'shadcn-select-label',
-                        children: ['Web platform'],
+                        children: ['Vegetables'],
                       },
                       {
                         kind: 'proto',
                         prototypeId: 'shadcn-select-item',
-                        props: { value: 'wc', textValue: 'Web Components' },
+                        props: { value: 'carrot', textValue: 'Carrot' },
                         children: [
                           {
                             kind: 'proto',
                             prototypeId: 'shadcn-select-item-text',
-                            children: ['Web Components'],
+                            children: ['Carrot'],
                           },
                         ],
                       },
                       {
                         kind: 'proto',
                         prototypeId: 'shadcn-select-item',
-                        props: { value: 'solid', textValue: 'Solid', disabled: true },
+                        props: { value: 'broccoli', textValue: 'Broccoli' },
                         children: [
                           {
                             kind: 'proto',
                             prototypeId: 'shadcn-select-item-text',
-                            children: ['Solid (Soon)'],
+                            children: ['Broccoli'],
+                          },
+                        ],
+                      },
+                      {
+                        kind: 'proto',
+                        prototypeId: 'shadcn-select-item',
+                        props: { value: 'spinach', textValue: 'Spinach' },
+                        children: [
+                          {
+                            kind: 'proto',
+                            prototypeId: 'shadcn-select-item-text',
+                            children: ['Spinach'],
                           },
                         ],
                       },

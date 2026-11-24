@@ -8,7 +8,7 @@ export default {
     children: [
       {
         kind: 'box',
-        className: 'flex flex-col gap-2',
+        className: 'flex flex-col gap-1',
         children: [
           { kind: 'box', className: 'text-sm font-medium', children: ['Project name'] },
           {
@@ -25,20 +25,20 @@ export default {
           {
             kind: 'box',
             className: 'text-xs text-muted-foreground',
-            children: ['Value, editing, and IME stay with Base Input.'],
+            children: ['Shown in navigation headers and workspace links.'],
           },
         ],
       },
       {
         kind: 'box',
-        className: 'flex flex-col gap-2',
+        className: 'flex flex-col gap-1',
         children: [
           { kind: 'box', className: 'text-sm font-medium', children: ['Disabled'] },
           {
             kind: 'proto',
             prototypeId: 'bootstrap-2-3-2-input-root',
             props: {
-              defaultValue: 'This field is disabled.',
+              defaultValue: 'Archived workspace',
               disabled: true,
               ariaLabel: 'Disabled project name',
             },
@@ -47,16 +47,17 @@ export default {
       },
       {
         kind: 'box',
-        className: 'flex flex-col gap-2',
+        className: 'flex flex-col gap-1',
         children: [
           { kind: 'box', className: 'text-sm font-medium', children: ['Read only'] },
           {
             kind: 'proto',
             prototypeId: 'bootstrap-2-3-2-input-root',
             props: {
-              defaultValue: 'This field is read only.',
+              defaultValue: 'https://example.com/proto-ui',
               readOnly: true,
-              ariaLabel: 'Read-only project name',
+              inputMode: 'url',
+              ariaLabel: 'Read-only workspace URL',
             },
           },
         ],

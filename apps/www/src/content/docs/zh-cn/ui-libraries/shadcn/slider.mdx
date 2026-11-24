@@ -15,44 +15,104 @@ Slider 允许用户通过拖动滑块或键盘步进在连续区间内选择单�
   demoId="demo-shadcn-slider"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-shadcn/slider` 导入单值滑块与多值滑块 `sliderValues*` 部件。
 
 ## 用法
 
-单值 Slider 包含 `Root`、`Label`、`Track`、`Indicator`、`Thumb`、`FieldThumb` 和 `Value`：
+```tsx
+import {
+  ShadcnSliderRoot,
+  ShadcnSliderTrack,
+  ShadcnSliderIndicator,
+  ShadcnSliderThumb,
+} from '../proto-ui/components/react';
 
-- `Root` 统一管理数值、区间边界（`min` / `max`）、步长（`step`）、方向和交互状态。
-- `Track` 处理指针与触摸拖动；`Thumb` 是键盘聚焦目标，支持方向键、`Shift` 十倍步进、`PageUp` / `PageDown` 以及 `Home` / `End`（水平 RTL 模式下左右键自动反向）。
-- 数值会从 `min` 起按 `step` 对齐并限制在 `[min, max]` 内。受控模式下拖动发出 `valueChange` 请求，完成时触发 `valueCommit`；取消拖动时在非受控模式下恢复起始值。
-- `disabled` 会降低控件透明度并禁用交互；`readOnly` 保留聚焦与悬停状态但阻止修改数值。
+export function Example() {
+  return (
+    <ShadcnSliderRoot defaultValue={33} min={0} max={100} step={1}>
+      <ShadcnSliderTrack>
+        <ShadcnSliderIndicator />
+        <ShadcnSliderThumb />
+      </ShadcnSliderTrack>
+    </ShadcnSliderRoot>
+  );
+}
+```
 
-### 表单集成
+- **部件组成**：单值滑块包含 `Root`、`Label`、`Track`、`Indicator`、`Thumb`、`FieldThumb` 和 `Value`；多值滑块提供对应的六个 `sliderValues*` 入口。
+- **指针与键盘交互**：`Track` 响应指针与触摸拖动；`Thumb` 支持方向键、`Shift` 十倍步进、`PageUp` / `PageDown` 与 `Home` / `End`（水平 RTL 模式下左右键自动反向）。
+- **受控与提交**：传入 `value` 进入受控模式，交互过程中发出 `valueChange`，操作完成时触发 `valueCommit`；取消拖动时非受控滑块自动恢复起始值。
+- **表单集成**：在 `Field` 或 `FormField` 内请使用 `FieldThumb` 替代 `Thumb`，自动衔接 `FieldLabel` 聚焦、数值校验、序列化与重置；多值 `Values Root` 可直接作为组合控件汇报 `number[]`。
 
-在 `Field` 或 `FormField` 中使用时，请使用 `FieldThumb` 替代 `Thumb`，以自动衔接 `FieldLabel` 激活、数值校验、表单序列化与重置。独立使用时继续搭配 `SliderLabel` 和 `Thumb`。
+## 示例
 
-### 范围与多值滑块
+### 范围选择
 
-需要范围选择或多个滑块时，可从 `@proto.ui/prototypes-shadcn/slider` 导入六个 `sliderValues*` 入口：
+使用双值数组创建范围滑块，点击轨道自动移动最近的可编辑滑块，拖动滑块时保持抓取偏移量。
 
 <PrototypePreviewer
   demoId="demo-shadcn-slider-values"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-- 在 Values `Root` 上通过 `defaultValue={[20, 80]}`（或受控 `value`）设置数值数组，并在 Values `Track` 内为每个数值放置一个带 `index` 的 `Thumb`。
-- 点击轨道会自动移动最近的可编辑滑块，拖动滑块时保留抓取偏移。通过 `thumbCollisionBehavior` 可配置滑块碰撞行为：`push`（推动相邻滑块）、`swap`（交换顺序并跟随转移焦点）或 `none`（阻止越界）。
-- 完整的 Values `Root` 也可直接作为 `Field` / `FormField` 的组合控件使用，报告有限 `number[]` 值并在点击 `FieldLabel` 时聚焦首个可编辑滑块。
+### 多滑块
+
+在 `Values Root` 上传入包含多个数值的数组，并为每个槽位放置带对应 `index` 的 `Thumb`。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-slider-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 垂直方向
+
+设置 `orientation="vertical"` 创建垂直滑块。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-slider-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+通过 `value` 与 `onValueChange` 受控管理小数步长范围，实时同步外部数值显示。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-slider-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用状态
+
+设置 `disabled` 禁用滑块交互并降低视觉强调。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-slider-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL 方向
+
+设置 `direction="rtl"` 启用从右向左布局并自动镜像水平方向键与进度填充。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-slider-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于单值 Slider 的 `Root`（传入 `value` 可进入受控模式）：
+### Slider Root（单值）
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -68,12 +128,40 @@ Slider 允许用户通过拖动滑块或键盘步进在连续区间内选择单�
     { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'valueText', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'nova'" },
   ]}
 />
+
+### Slider Values Root 与子部件（多值）
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'number | readonly number[]', default: '非受控' },
+    { name: 'defaultValue', type: 'number | readonly number[]', default: '0' },
+    { name: 'min / max / step', type: 'number', default: '0 / 100 / 1' },
+    { name: 'largeStep', type: 'number', default: '10 × step' },
+    { name: 'minStepsBetweenValues', type: 'number', default: '0' },
+    { name: 'thumbCollisionBehavior', type: "'push' | 'swap' | 'none'", default: "'push'" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'index (Thumb)', type: 'number', default: '0' },
+    { name: 'startIndex / endIndex (Indicator)', type: 'number', default: '首尾范围' },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'nova'" },
+  ]}
+/>
+
+事件：`Root` 与 `Values Root` 均触发 `valueChange`（拖动或键盘提议）与 `valueCommit`（操作完成）。
 
 ## 参考
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-SLIDER.yaml', 'P-BASE-SLIDER.yaml']}
+  files={[
+    'P-SHADCN-SLIDER.yaml',
+    'P-SHADCN-SLIDER-THUMB.yaml',
+    'P-SHADCN-SLIDER-FIELD-THUMB.yaml',
+    'P-SHADCN-SLIDER-VALUES.yaml',
+    'P-BASE-SLIDER.yaml',
+    'P-BASE-SLIDER-VALUES.yaml',
+  ]}
 />

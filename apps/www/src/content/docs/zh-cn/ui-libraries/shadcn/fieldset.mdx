@@ -15,19 +15,38 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   demoId="demo-shadcn-fieldset"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
 ## 用法
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+```tsx
+import { FieldsetRoot, FieldsetLegend, FieldsetDescription } from '@/components/shadcn/fieldset';
+import { FieldRoot, FieldLabel, FieldControl } from '@/components/shadcn/field';
+
+export function Example() {
+  return (
+    <FieldsetRoot>
+      <FieldsetLegend>Address Information</FieldsetLegend>
+      <FieldsetDescription>We need your address to deliver your order.</FieldsetDescription>
+      <FieldRoot required>
+        <FieldLabel>Street Address</FieldLabel>
+        <FieldControl placeholder="123 Main St" />
+      </FieldRoot>
+    </FieldsetRoot>
+  );
+}
+```
 
 ### 部件结构
 
 `Fieldset` 由 `Root`、`Legend` 与 `Description` 三个部件组成：
 
-- **Root**：无外框竖排分组容器（`gap-4`），声明 `group` 角色并管理有效禁用状态。
-- **Legend**：可选的分组标题，自动关联为组的 `aria-labelledby`。
+- **Root**：无外框竖排分组容器（`rhea` / `vega` / `maia` / `luma` / `sera` / `new-york-v4` 预设使用 `gap-6`，`nova` / `lyra` / `mira` 预设使用 `gap-4`），声明 `group` 角色并管理有效禁用状态。
+- **Legend**：可选的分组标题，支持 `variant="legend"`（默认）与 `variant="label"` 两种字号层级，自动关联为组的 `aria-labelledby`。
 - **Description**：可选的弱化色帮助说明，自动关联为组的 `aria-describedby`。
 
 `Legend` 与 `Description` 均为纯展示部件，不增加焦点顺序；每组最多放置一个 `Legend` 与一个 `Description`（重复声明时忽略重复配置并保持当前状态），且嵌套分组不会借用彼此的标题或描述。
@@ -42,23 +61,102 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 组内所有参与的 [Field](../field/)（包括放在 `Legend` 内的字段）都会自动继承有效禁用状态并据此更新校验；表单提交与重置由 [Form](../form/) 负责。
 
+## 示例
+
+### 标签尺寸标题与多选组
+
+在 `Legend` 上传入 `variant="label"`，适合为复选框列表或紧凑选项组提供与字段标签一致的标题字号。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-fieldset-legend-label"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 单选组
+
+将 `RadioGroup` 组合在 `Fieldset` 内，共享分组标题、说明与无障碍语义。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-fieldset-radio-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 嵌套禁用继承
+
+切换外层与中层的 `disabled` 状态，验证级联禁用及重新启用外层时保留内层显式禁用的规则。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-fieldset-nested-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 无可见标题与多区块分隔
+
+省略 `Legend` 时可通过 `Root` 的 `ariaLabel` 提供可访问名称，并配合 [Separator](../separator/) 分隔多个表单区块。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-fieldset-aria-label"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
 ## API
 
-`Legend` 与 `Description` 无额外属性；三者均暴露只读的有效 `disabled` 状态，状态变更统一通过 `Root` 的属性驱动。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
+    {
+      name: 'styleProfile',
+      type: "'nova' | 'rhea' | 'vega' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'new-york-v4'",
+      default: "'nova'",
+    },
   ]}
 />
 
-以上属性属于 `Root`。
+### Legend
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'variant', type: "'legend' | 'label'", default: "'legend'" },
+    {
+      name: 'styleProfile',
+      type: "'nova' | 'rhea' | 'vega' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'new-york-v4'",
+      default: "'nova'",
+    },
+  ]}
+/>
+
+### Description
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: "'nova' | 'rhea' | 'vega' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'new-york-v4'",
+      default: "'nova'",
+    },
+  ]}
+/>
+
+三个部件均暴露只读的有效 `disabled` 状态（`ExposeState<boolean>`），状态变更统一通过 `Root` 的 `disabled` 属性驱动。
 
 ## 参考
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-FIELDSET.yaml', 'P-BASE-FIELDSET.yaml']}
+  files={[
+    'P-SHADCN-FIELDSET.yaml',
+    'P-SHADCN-FIELDSET-LEGEND.yaml',
+    'P-SHADCN-FIELDSET-DESCRIPTION.yaml',
+    'P-BASE-FIELDSET.yaml',
+  ]}
 />

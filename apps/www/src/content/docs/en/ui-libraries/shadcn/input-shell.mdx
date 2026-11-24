@@ -1,29 +1,25 @@
 ---
 title: 'Input Shell'
-description: 'A passive Shadcn frame that decouples outer border and focus-ring styling from a single inline text editor.'
+description: 'A passive Shadcn frame that decouples outer border, focus-ring, validation, and style-preset styling from a single inline text editor.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-`Input Shell` separates an input’s outer frame (border, background, radius, and optional focus ring) from the editing control inside it. Pair `inputShell` with `inputShellControl` for ordinary single-line text inputs, or with `commandInput` inside `Command`.
+`Input Shell` separates an input's outer frame (border, background, corner radius, invalid feedback, and optional focus ring) from the editing control inside it. Pair `inputShell` with `inputShellControl` for single-line text inputs, or with `commandInput` inside [Command](/en/ui-libraries/shadcn/command/). Examples on this page use the **Shadcn Rhea** style unless demonstrating another preset.
 
 ## Preview
 
-The demo below pairs `inputShell`, `inputShellControl`, and `bindInputShellControl` using the default unscoped New York preset. Press `Tab` into the editor or toggle disabled to see `focusVisible` and `disabled` sync to the shell:
-
 <PrototypePreviewer
-  demoId="demo-shadcn-input-shell"
+  demoId="demo-shadcn-input-shell-rhea"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-## Installation and imports
+## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
-
-Import from `@proto.ui/prototypes-shadcn/input-shell` (or the package root):
+Currently available from workspace source (not yet included in the 0.2.0 stable CLI registry). Import from `@proto.ui/prototypes-shadcn/input-shell` or the package root:
 
 ```ts
 import {
@@ -46,57 +42,47 @@ import type {
 | --- | --- |
 | `inputShell` (`shadcn-input-shell`) | Passive frame container with a single content slot and no editor or tab stop of its own. |
 | `inputShellControl` (`shadcn-input-shell-control`) | Borderless single-line editor inheriting the full [Base Input](/en/ui-libraries/base/input/) protocol. |
-| `bindInputShellControl(owner, target, control)` | Syncs the control’s `focusVisible` and `disabled` states to the shell with explicit view-lifetime cleanup. |
+| `bindInputShellControl(owner, target, control)` | Syncs the control's `focusVisible` and `disabled` states to the shell with explicit view-lifetime cleanup. |
 
 ## Usage
 
-### Composing a standard text input
+Wrap `inputShell` in an outer [Style Scope](/en/ui-libraries/shadcn/style-scope/) so both the shell and the inner editor inherit the same style preset:
 
-Wrap `inputShell` in an outer [Style Scope](/en/ui-libraries/shadcn/style-scope/) so both the shell and the editor inherit the same preset (setting `styleProfile` directly on `inputShell` only styles the shell itself). Example in Web Components:
+```tsx
+<ShadcnStyleScope styleProfile="rhea">
+  <ShadcnInputShell focusIndicator="ring">
+    <ShadcnInputShellControl ariaLabel="Note title" placeholder="Untitled note" />
+  </ShadcnInputShell>
+</ShadcnStyleScope>
+```
+
+Once the real shell and control instances are mounted, call `bindInputShellControl` to project `focusVisible` and `disabled` onto the shell while preserving authored shell props inside `setFacts`:
 
 ```ts
-import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
-import { styleScope } from '@proto.ui/prototypes-shadcn/style-scope';
+import { setElementProps } from '@proto.ui/adapter-web-component';
 import {
-  inputShell,
-  inputShellControl,
   bindInputShellControl,
-  type InputShellProps,
+  type InputShellControlInstance,
   type InputShellOwner,
+  type InputShellProps,
 } from '@proto.ui/prototypes-shadcn/input-shell';
 
-const Scope = AdaptToWebComponent(styleScope);
-const Shell = AdaptToWebComponent(inputShell);
-const Control = AdaptToWebComponent(inputShellControl);
-
-export function mountTitleInput(host: HTMLElement) {
-  const scope = new Scope();
-  const shell = new Shell();
-  const control = new Control();
-  const shellProps: InputShellProps = {
-    styleProfile: 'inherit',
-    focusIndicator: 'ring',
-  };
-
-  setElementProps(scope, { styleProfile: 'rhea' });
-  setElementProps(shell, shellProps);
-  setElementProps(control, {
-    ariaLabel: 'Note title',
-    placeholder: 'Untitled note',
-    defaultValue: '',
-  });
-  shell.append(control);
-  scope.append(shell);
-  host.append(scope);
-
+export function attachShell(
+  shell: HTMLElement,
+  control: InputShellControlInstance,
+  shellProps: InputShellProps = { styleProfile: 'inherit', focusIndicator: 'ring' }
+) {
   let current = true;
-  const disposers = new Set<() => void>();
+  const cleanups: VoidFunction[] = [];
   const owner: InputShellOwner = {
-    isCurrent: () => current,
+    isCurrent() {
+      return current;
+    },
     onDispose(dispose) {
-      disposers.add(dispose);
-      return () => {
-        disposers.delete(dispose);
+      cleanups.push(dispose);
+      return function remove() {
+        const index = cleanups.indexOf(dispose);
+        if (index >= 0) cleanups.splice(index, 1);
       };
     },
   };
@@ -112,62 +98,167 @@ export function mountTitleInput(host: HTMLElement) {
     control
   );
 
-  return () => {
+  return function detach() {
     if (!current) return;
     current = false;
-    try {
-      for (const dispose of [...disposers]) dispose();
-    } finally {
-      disposers.clear();
-      scope.remove();
-    }
+    for (const dispose of cleanups.splice(0)) dispose();
   };
 }
 ```
 
 Key guidelines:
 
-- **Merge existing shell props on every update**: Because `setElementProps` replaces the full prop object, merge `shellProps` inside `setFacts` to preserve `styleProfile` and `focusIndicator`.
+- **Merge authored shell props on every update**: Keep `styleProfile`, `focusIndicator`, and `invalid` inside `setFacts` so prop writes never clear them.
 - **Keep interaction props on the control**: Set `disabled`, `readOnly`, and accessible naming (`ariaLabel` / `labelledBy` / `describedBy`) on the inner control, and place exactly one inline editor inside each shell. For a standalone input, use [Input](/en/ui-libraries/shadcn/input/).
+- **Binding lifecycle**: At most one active binding may reserve a shell or control at a time. The returned handle exposes `sync()`, `replace(nextControl)`, and an idempotent `dispose()`; unmounting or a control `disconnect` event retires the binding automatically.
 
-### Style presets
+## Examples
 
-Both parts default to `styleProfile="inherit"` (local override → nearest `Style Scope` → `new-york-v4`; `new-york` normalizes to `new-york-v4`). Switching presets preserves the editor element, value, selection, and focus:
+### Switching style presets
+
+Both parts default to `styleProfile="inherit"` (local override → nearest `Style Scope` → `new-york-v4`; `new-york` normalizes to `new-york-v4`) and map all 9 Shadcn style presets. Switching the outer scope preserves the editor node, value, selection, and focus:
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-shell-profiles"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 | Preset | Outer `inputShell` | Inner `inputShellControl` |
 | --- | --- | --- |
-| `new-york-v4` / `new-york` | `h-9`, `rounded-md`, `border-input`, `shadow-xs` (`bg-input/30` in dark mode); keyboard focus uses `border-ring ring-3 ring-ring/50`. | `h-9`, `px-3 py-1`, borderless and ringless inner surface. |
-| `rhea` | `h-8`, theme `radius-2xl`, transparent resting border, `bg-input/50`, 200ms transition; keyboard focus uses `border-ring ring-3 ring-ring/30`. | `h-8`, `px-2.5 py-1`, transparent borderless inner surface. |
+| `rhea` | `h-8`, theme `radius-2xl`, transparent resting border, `bg-input/50`, 200ms transition; focus `border-ring ring-3 ring-ring/30`. | `h-8`, `px-2.5 py-1`, transparent borderless editor. |
+| `new-york-v4` / `new-york` | `h-9`, `rounded-md`, `border-input`, `shadow-xs` (`bg-input/30` in dark mode); focus `border-ring ring-3 ring-ring/50`. | `h-9`, `px-3 py-1`, transparent borderless editor. |
+| `vega` | `h-9`, `rounded-md`, `border-input`, `shadow-xs` (`bg-input/30` in dark mode); focus `border-ring ring-3 ring-ring/50`. | `h-9`, `px-2.5 py-1`. |
+| `nova` | `h-8`, `rounded-lg`, `border-input` (disabled `bg-input/50`, dark `bg-input/80`); focus `border-ring ring-3 ring-ring/50`. | `h-8`, `px-2.5 py-1`. |
+| `maia` | `h-9`, theme `radius-4xl`, `border-input`, `bg-input/30`; focus `border-ring ring-3 ring-ring/50`. | `h-9`, `px-3 py-1`. |
+| `lyra` | `h-8`, `rounded-none`, `border-input` (disabled `bg-input/50`, dark `bg-input/80`); focus `border-ring ring-1 ring-ring/50`. | `h-8`, `px-2.5 py-1`, `text-xs`. |
+| `mira` | `h-7`, `rounded-md`, `border-input`, `bg-input/20`; focus `border-ring ring-2 ring-ring/30`. | `h-7`, `px-2 py-0.5`, `text-sm`. |
+| `luma` | `h-9`, theme `radius-4xl`, transparent resting border, `bg-input/50`; focus `border-ring ring-3 ring-ring/30`. | `h-9`, `px-3 py-1`. |
+| `sera` | `h-10`, `rounded-none`, bottom border `border-b-input`; focus `border-b-ring`. | `h-10`, `px-0 py-1`. |
 
-Both presets switch body text to small at `viewport.width >= 768`, and disabled opacity is applied solely by the editor so the shell does not double-dim it.
+Body text tightens automatically at `viewport.width >= 768`. Disabled opacity (`opacity-50`) is applied solely by the inner control so the shell never double-dims, while the shell applies `cursor-not-allowed` (plus disabled surface tinting on `nova` and `lyra`).
+
+### Disabled, read-only, and invalid
+
+Set `invalid` on `inputShell` to project preset-matched destructive border and ring styles. Typing a valid email in the first field clears the invalid presentation automatically:
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-shell-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ### Composing with Command
 
-Inside [Command](/en/ui-libraries/shadcn/command/), keep `commandInput` rather than switching to `inputShellControl`. Place the shell inside `commandInputWrapper`, bind `commandInput` with `bindInputShellControl`, and set `focusIndicator="none"`.
+Inside [Command](/en/ui-libraries/shadcn/command/), keep `commandInput` inside `inputShell` (optionally enclosed by `commandInputWrapper`), bind it with `bindInputShellControl`, and set `focusIndicator="none"`:
 
-### Binding lifecycle
+<PrototypePreviewer
+  demoId="demo-shadcn-input-shell-command"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-- Call `bindInputShellControl` only after the real shell and control instances exist, with at most one active binding per shell or control.
-- The returned handle exposes `sync()`, `replace(nextControl)`, and an idempotent `dispose()`. Unmounting or a control `disconnect` event retires the binding automatically so stale writes never occur.
+### Value tracking, focus, and reset
+
+`inputShellControl` exposes the full Base Input state and methods, including subscribable `value`, programmatic `focusSelf()`, and `resetValue(value?)`:
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-shell-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Toggling disabled state
+
+Sync `disabled` and `focusVisible` from the editor to the shell with `bindInputShellControl`. Press `Tab` or toggle the button to observe live updates (without an enclosing `Style Scope`, both parts fall back to `new-york-v4`):
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-shell"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-### `inputShell` props
+### `inputShell`
 
-| Prop             | Type                            | Default     |
-| ---------------- | ------------------------------- | ----------- |
-| `styleProfile`   | `ShadcnStyleChoice`             | `'inherit'` |
-| `focusVisible`   | `boolean` (synced from control) | `false`     |
-| `disabled`       | `boolean` (synced from control) | `false`     |
-| `focusIndicator` | `'ring' \| 'none'`              | `'ring'`    |
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: "'inherit'",
+      description: "Style preset; inherits the nearest Style Scope or falls back to 'new-york-v4'.",
+    },
+    {
+      name: 'focusVisible',
+      type: 'boolean',
+      default: 'false',
+      description: 'Keyboard focus-visible state synced from the inner control.',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disabled state synced from the inner control.',
+    },
+    {
+      name: 'invalid',
+      type: 'boolean',
+      default: 'false',
+      description: 'Optional validation error state projecting destructive border and ring styles.',
+    },
+    {
+      name: 'focusIndicator',
+      type: "'ring' | 'none'",
+      default: "'ring'",
+      description: "Use 'ring' for standard inputs and 'none' when composing with Command.",
+    },
+  ]}
+/>
 
-### `inputShellControl` props, state, and events
+### `inputShellControl`
 
-`InputShellControlProps` is `InputRootProps & ShadcnStyleProps` and `InputShellControlExposes` is `InputRootExposes`, preserving the full [Base Input](/en/ui-libraries/base/input/) surface:
+`InputShellControlProps` is `InputRootProps & ShadcnStyleProps`. Pass `value` for controlled mode; `inputMode` and `enterKeyHint` are optional with no default.
 
-- **Props**: `value`, `defaultValue`, `disabled`, `readOnly`, `placeholder`, `required`, `name`, `autoComplete`, `minLength`, `maxLength`, `inputMode`, `enterKeyHint`, `ariaLabel`, `labelledBy`, `describedBy`.
-- **State and methods**: `value`, `disabled`, `readOnly`, `focused`, `focusVisible`, `composing`, plus `focusSelf()` and `blurSelf()`.
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit'" },
+    { name: 'value', type: 'string' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    {
+      name: 'inputMode',
+      type: "'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'",
+    },
+    {
+      name: 'enterKeyHint',
+      type: "'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'",
+    },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'labelledBy', type: 'string', default: "''" },
+    { name: 'describedBy', type: 'string', default: "''" },
+  ]}
+/>
+
+`InputShellControlExposes` preserves the full `InputRootExposes` surface from [Base Input](/en/ui-libraries/base/input/):
+
+- **State**: `value`, `disabled`, `readOnly`, `focused`, `focusVisible`, `composing`.
+- **Methods**: `focusSelf(options?)`, `blurSelf()`, `resetValue(value?: string): boolean`.
 - **Events**: `valueChange`, `change`, `compositionStart`, `compositionUpdate`, `compositionEnd`.
+
+### `bindInputShellControl(owner, target, control)`
+
+Returns `{ sync(), replace(nextControl), dispose() }` to project control facts onto the passive shell across the view lifetime and cleanly release all subscriptions on replacement or unmount.
 
 ## References
 

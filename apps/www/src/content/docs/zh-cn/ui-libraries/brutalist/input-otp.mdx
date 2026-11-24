@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Input OTP 使用单个真实输入框搭配按索引渲染的槽位显示，完整支持粘贴、选区编辑、输入法合成与 `one-time-code` 自动填充，并以高对比度边框突出当前激活槽位。
+Brutalist Input OTP 使用单个真实输入框搭配 5px 圆角（`rounded-base`）、2px 实线边框与硬阴影槽位，完整支持粘贴、选区编辑、输入法合成与 `one-time-code` 自动填充，并以主色填充和高对比度焦点环突出当前激活槽位。
 
 ## 预览
 
@@ -15,7 +15,6 @@ Brutalist Input OTP 使用单个真实输入框搭配按索引渲染的槽位显
   demoId="demo-brutalist-input-otp"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
@@ -24,20 +23,89 @@ Brutalist Input OTP 使用单个真实输入框搭配按索引渲染的槽位显
 
 ## 用法
 
-### 部件组成
+```tsx
+import {
+  BrutalistInputOtpRoot,
+  BrutalistInputOtpInput,
+  BrutalistInputOtpSlot,
+  BrutalistInputOtpSeparator,
+} from '../proto-ui/components/react';
 
-Input OTP 由 `Root`、`Input`、`Control`、`Slot` 和 `Separator` 组成：
+export function BrutalistVerificationCode() {
+  return (
+    <BrutalistInputOtpRoot length={6}>
+      <BrutalistInputOtpInput placeholder="123456" />
+      <div className="inline-flex items-center gap-1.5">
+        <BrutalistInputOtpSlot index={0} />
+        <BrutalistInputOtpSlot index={1} />
+        <BrutalistInputOtpSlot index={2} />
+      </div>
+      <BrutalistInputOtpSeparator>–</BrutalistInputOtpSeparator>
+      <div className="inline-flex items-center gap-1.5">
+        <BrutalistInputOtpSlot index={3} />
+        <BrutalistInputOtpSlot index={4} />
+        <BrutalistInputOtpSlot index={5} />
+      </div>
+    </BrutalistInputOtpRoot>
+  );
+}
+```
 
-- **Root**：管理 `value` / `defaultValue`、位数 `length`（1–32，默认 `6`）、字符过滤模式 `pattern`（`'numeric'` 或 `'alphanumeric'`）、`disabled`、`readOnly`、`name` 与 `ariaLabel`。
-- **Input**：独立使用时承载真实文本输入，自动处理粘贴、删除、选区与输入法合成，并启用 `one-time-code` 自动填充；合成结束后过滤非法字符并截断至设定长度。
-- **Control**：在 `Field` 或 `FormField` 内替代 `Input` 使用，自动衔接标签点击聚焦、表单校验、序列化与重置。
-- **Slot**：按 `index` 展示对应字符的只读视觉格，对辅助技术隐藏，不增加额外的 Tab 停靠点。输入框聚焦且可编辑时，根据真实光标或选区高亮当前活动槽位。
-- **Separator**：可选的视觉分隔符。
+### 部件组成与交互
 
-### 事件与校验
+- **Root**：管理 `value` / `defaultValue`、位数 `length`（`1`–`32`，默认 `6`）、字符过滤模式 `pattern`（`'numeric'` 或 `'alphanumeric'`）、`disabled`、`readOnly`、`invalid`、`name` 与 `ariaLabel`。
+- **Input / Control**：独立场景使用 `Input` 承载真实文本输入；在 `Field` 或 `FormField` 内用 `Control` 替代 `Input`，自动衔接标签聚焦、校验、序列化与重置。
+- **Slot / Separator**：`Slot` 按 `index` 渲染被动字符格（`aria-hidden`），不增加额外 Tab 焦点，遵循 DM Sans 排版与 2px 边框硬阴影规范。
 
-- 传入 `value` 进入受控模式，输入变更通过 `valueChange` 发出提议；每次填满并接受完整验证码时触发一次 `completed` 事件。
-- 在 `Field` 内使用 `Control` 时，仅在外部接受了有效的值变化后触发自动变更校验，被拒绝或过滤后未变化的输入不会重复触发校验。
+## 示例
+
+### 分隔符
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-otp-separator"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 字母数字模式
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-otp-alphanumeric"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用态
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-otp-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 错误态
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-otp-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-otp-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 表单与四位 PIN 校验
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-otp-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -46,24 +114,37 @@ Input OTP 由 `Root`、`Input`、`Control`、`Slot` 和 `Separator` 组成：
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'length', type: 'number', default: '6' },
-    { name: 'pattern', type: "'numeric' | 'alphanumeric'", default: 'numeric' },
+    { name: 'pattern', type: "'numeric' | 'alphanumeric'", default: "'numeric'" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'invalid', type: 'boolean', default: 'false' },
     { name: 'name', type: 'string', default: "''" },
-    { name: 'ariaLabel', type: 'string', default: 'One-time code' },
+    { name: 'ariaLabel', type: 'string', default: "'One-time code'" },
   ]}
 />
 
-传入 `value: string` 可切换为受控模式。
+### Input / Control 与 Slot
 
-### 其他部件属性
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Input / Control: placeholder', type: 'string', default: "''" },
+    { name: 'Slot: index', type: 'number', default: '0' },
+    { name: 'Slot: invalid', type: 'boolean', default: 'false' },
+  ]}
+/>
 
-- **Input**：`placeholder?: string`（可选）
-- **Slot**：`index?: number`（默认 `0`）
-- **Control / Separator**：无独立属性
+### 事件与暴露方法
+
+- **Root 事件**：`valueChange`（`{ value: string }`）、`completed`（`{ value: string }`）。
+- **Root 暴露状态与方法**：状态 `value`、`complete`、`disabled`、`readOnly`、`focused`；方法 `requestValue(value)`、`clear()`、`resetValue()`、`focusInput()`。
 
 ## 参考
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-INPUT-OTP.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-INPUT-OTP.yaml', 'P-BASE-INPUT-OTP.yaml']}
+/>

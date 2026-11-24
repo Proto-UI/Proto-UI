@@ -8,7 +8,7 @@ export default definePrototype<SliderPartProps, SliderPartExposes>({
     const inherited = asSliderIndicator();
     def.feedback.style.use(
       tw(
-        'absolute left-0 top-0 h-full w-[calc(var(--pui-display-percentage)*1%)] rounded-none bg-primary'
+        'pointer-events-none absolute left-0 top-0 h-full w-[calc(var(--pui-display-percentage)*1%)] rounded-sm bg-primary'
       )
     );
     def.rule({

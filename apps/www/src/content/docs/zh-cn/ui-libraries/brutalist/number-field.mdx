@@ -3,11 +3,11 @@ title: 'Brutalist Number Field'
 description: '支持步进控制、本地化数字格式化、空值与标签拖拽调值的 Brutalist 数值输入组件。'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Number Field 提供带加减步进按钮的数值输入框，支持 `Intl` 本地化格式、可选空值、标签拖拽调值以及 `Field` / `Form` 集成。
+Brutalist Number Field 遵循 Brutalist 设计契约（DM Sans 字体、`5px` `rounded-base` 圆角、`2px` 边框、无影编辑框搭配 `2px` 边框色阴影步进按钮），完整继承 Base Number Field 的步进、本地化格式化、空值与标签拖拽调值能力。
 
 ## 预览
 
@@ -15,46 +15,102 @@ Brutalist Number Field 提供带加减步进按钮的数值输入框，支持 `I
   demoId="demo-brutalist-number-field"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前从源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-brutalist/number-field` 导入各部件原型：
+
+```ts
+import {
+  numberFieldRoot,
+  numberFieldLabel,
+  numberFieldInput,
+  numberFieldControl,
+  numberFieldIncrement,
+  numberFieldDecrement,
+} from '@proto.ui/prototypes-brutalist/number-field';
+```
 
 ## 用法
 
-### 部件组成
+```tsx
+<BrutalistNumberFieldRoot defaultValue={12} min={0} max={100} step={1} ariaLabel="Quantity">
+  <BrutalistNumberFieldLabel>Quantity</BrutalistNumberFieldLabel>
+  <BrutalistNumberFieldDecrement>
+    <span aria-hidden="true">−</span>
+    <span className="sr-only">Decrease Quantity</span>
+  </BrutalistNumberFieldDecrement>
+  <BrutalistNumberFieldInput />
+  <BrutalistNumberFieldIncrement>
+    <span aria-hidden="true">+</span>
+    <span className="sr-only">Increase Quantity</span>
+  </BrutalistNumberFieldIncrement>
+</BrutalistNumberFieldRoot>
+```
 
-Number Field 由 `Root`、`Label`、`Input`、`Control`、`Increment` 和 `Decrement` 组成：
+- **部件组成**：`Root` 管理数值与格式化配置，`Input` 承载独立编辑（在 `Field` 或 `FormField` 内替换为 `Control` 以联动 `FieldLabel`、校验错误边框与表单重置），`Label` 命名控件并在 `scrub` 模式下支持水平拖拽，`Increment` / `Decrement` 与键盘方向键共享步进规则。
+- **键盘与输入法**：`ArrowUp` / `ArrowDown` 按 `step` 增减，按住 `Shift` 以 10 倍步长调整，`Home` / `End` 跳至 `min` / `max` 边界。IME 合成期间自动暂停解析、提交、步进与拖拽。
+- **本地化与空值**：传入 `locale` 与 `formatOptions` 支持十进制、货币与百分比格式；开启 `allowEmpty` 后清空并提交可请求 `null`。
 
-- **Root**：管理 `number | null` 类型的 `value` / `defaultValue`、`min` / `max`（默认 `0` / `100`）、步长 `step`（默认 `1`）、格式化配置与禁用/只读状态。
-- **Input**：独立使用时承载带 `spinbutton` 语义的文本输入框；编辑过程中允许保留未完成草稿，失焦或按 `Enter` 时提交合法数值，非法输入则恢复上次有效值。
-- **Control**：在 `Field` 或 `FormField` 内替代 `Input` 使用，自动衔接 `FieldLabel`、数值校验、表单序列化与重置。
-- **Increment / Decrement**：步进增减按钮，与方向键共享步进规则。
-- **Label**：命名独立输入框；开启 `scrub` 后支持在标签上水平拖拽连续调值。
+## 示例
 
-### 格式化、空值与交互
+### 本地化货币与百分比
 
-- **键盘操作**：`ArrowUp` / `ArrowDown` 按步长增减，按住 `Shift` 以 10 倍步长调整，`Home` / `End` 跳至 `min` / `max` 边界。输入法合成期间自动暂停解析、提交、步进与拖拽。
-- **本地化格式**：配置 `locale` 与 `formatOptions` 可呈现十进制、货币或百分比格式并解析对应分隔符与符号。格式化仅影响展示，不改变内部数值精度；若格式配置非法，组件会设置 `formatInvalid` 并回退为无分组十进制。
-- **空值支持**：传入 `allowEmpty` 后，清空输入框并提交会请求 `null`；通过 `getValue()` 获取 `number | null`，通过 `empty` 判断当前是否为空。从空值开始步进时，首次会初始化为边界内对齐的 `0`。
-- **标签拖拽**：开启 `scrub` 后可在 `Label` 上拖动调值，`scrubSteps`（默认 `100`）控制移动一个标签宽度对应的步数，`direction="rtl"` 反转横向方向。
+<PrototypePreviewer
+  demoId="demo-brutalist-number-field-formatting"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 标签拖拽调值与可空值
+
+<PrototypePreviewer
+  demoId="demo-brutalist-number-field-scrub-nullable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用、只读与无边界自由步进
+
+<PrototypePreviewer
+  demoId="demo-brutalist-number-field-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+<PrototypePreviewer
+  demoId="demo-brutalist-number-field-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL 布局与反向拖拽
+
+<PrototypePreviewer
+  demoId="demo-brutalist-number-field-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-### Root
+### Root 属性
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
     { name: 'value', type: 'number | null', default: '—' },
     { name: 'defaultValue', type: 'number | null', default: '0' },
-    { name: 'min', type: 'number', default: '0' },
-    { name: 'max', type: 'number', default: '100' },
+    { name: 'min', type: 'number | null', default: '0' },
+    { name: 'max', type: 'number | null', default: '100' },
     { name: 'step', type: 'number', default: '1' },
+    { name: 'snapToStep', type: 'boolean', default: 'true' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'name', type: 'string', default: "''" },
     { name: 'allowEmpty', type: 'boolean', default: 'false' },
@@ -66,8 +122,30 @@ Number Field 由 `Root`、`Label`、`Input`、`Control`、`Increment` 和 `Decre
   ]}
 />
 
-`Label`、`Input`、`Control`、`Increment` 与 `Decrement` 不声明独立属性。传入 `value`（包括 `null`）即进入受控模式。
+### 事件、方法与状态
+
+<ApiPropsTable
+  headers={{ name: '成员', type: '签名 / 类型', default: '所属部件' }}
+  rows={[
+    { name: 'valueChange', type: 'Event<{ value: number | null }>', default: 'Root' },
+    { name: 'valueCommit', type: 'Event<{ value: number | null }>', default: 'Root' },
+    { name: 'getValue()', type: '() => number | null', default: 'Root / Input / Control' },
+    { name: 'requestValue(next)', type: '(value: number | null) => boolean', default: 'Root' },
+    { name: 'commitValue()', type: '() => void', default: 'Root' },
+    { name: 'stepBy(direction)', type: '(direction: number) => boolean', default: 'Root' },
+    { name: 'resetValue()', type: '() => boolean', default: 'Root / Input / Control' },
+    { name: 'empty / dragging / formatInvalid / draft', type: 'ExposeState', default: 'Root' },
+    {
+      name: 'disabled / focusVisible',
+      type: 'ExposeState<boolean>',
+      default: 'Increment / Decrement',
+    },
+  ]}
+/>
 
 ## 参考
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-NUMBER-FIELD.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-NUMBER-FIELD.yaml', 'P-BASE-NUMBER-FIELD.yaml']}
+/>

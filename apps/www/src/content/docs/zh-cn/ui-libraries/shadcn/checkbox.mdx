@@ -1,6 +1,6 @@
 ---
 title: 'Checkbox'
-description: '支持选中、半选、受控状态与表单组合的 Shadcn 风格复选框组件。'
+description: '支持选中、半选、受控状态、校验与表单组合的 Shadcn 风格复选框组件。'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -12,14 +12,10 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 ## 预览
 
-下面依次展示未选、已选、半选、禁用已选以及可聚焦未选状态：
-
 <PrototypePreviewer
   demoId="demo-shadcn-checkbox"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
 
 ## 安装
@@ -32,22 +28,109 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 ## 用法
 
-### 部件结构
+```tsx
+import {
+  ShadcnCheckboxIndicator,
+  ShadcnCheckboxRoot,
+  ShadcnLabelRoot,
+} from '../proto-ui/components/react';
 
-`Checkbox` 由 `Root` 与 `Indicator` 组成：
+export function Example() {
+  return (
+    <div className="flex items-center gap-3">
+      <ShadcnCheckboxRoot styleProfile="rhea" defaultChecked>
+        <ShadcnCheckboxIndicator styleProfile="rhea" />
+      </ShadcnCheckboxRoot>
+      <ShadcnLabelRoot styleProfile="rhea">Accept terms and conditions</ShadcnLabelRoot>
+    </div>
+  );
+}
+```
 
-- **Root**：管理 `checked`、`indeterminate`、`disabled`、`readOnly`、`required` 与焦点交互。
-- **Indicator**：自动从最近的 `Root` 读取状态并绘制对勾或横线；当 `indeterminate` 与 `checked` 同时为 `true` 时，优先显示横线（`mixed`）。
+### 部件结构与键盘交互
 
-### 只读与表单集成
+- **Root**：管理 `checked`、`indeterminate`、`disabled`、`readOnly`、`required` 与焦点状态，支持点击与 `Space` 键切换。
+- **Indicator**：自动从最近的 `Root` 读取状态并绘制对勾或横线；当 `indeterminate` 与 `checked` 同时为 `true` 时，优先显示横线（`aria-checked="mixed"`）。
+- **只读与表单集成**：`readOnly={true}` 保留键盘聚焦但阻止修改值；`disabled={true}` 同时移出焦点顺序。需要表单校验与错误提示时，请在 `FormField` / `Field` 中组合 `@proto.ui/prototypes-shadcn/field` 导出的 `fieldCheckbox`（完整表单示例见 [Form](../form/)；多选分组见 [Checkbox Group](../checkbox-group/)）。
+- **标签关联**：通过 [Label](../label/) 或 `shadcnCheckboxLabelComposition` 将可见标签与复选框关联，使点击标签文本也可切换状态。
 
-- `readOnly={true}` 保留键盘聚焦能力但阻止修改值；`disabled={true}` 同时移出焦点顺序。
-- 单独的 `Checkbox` 不会自动注册到表单。如需在表单中使用，请在 `FormField` 内组合 `@proto.ui/prototypes-shadcn/field` 导出的 `fieldCheckbox`，以接入必填校验、标签/错误关联与重置行为（完整示例见 [Form 选择控件示例](../form/)）。调用 `resetValue()` 会请求恢复初始值，受控模式下仍由外部状态决定是否采纳。
-- 复选框的名称通过组合外部标签（如 [Label](../label/)）或文本内容提供。
+## 示例
+
+### 带说明文字
+
+在复选框旁组合标题标签与辅助说明文字。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-description"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读
+
+对比 `disabled`（移出焦点顺序且禁止交互）与 `readOnly`（保留键盘焦点但阻止修改）。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 无效状态
+
+在 `Field` 中使用 `fieldCheckbox` 呈现无效边框、焦点环与错误提示信息。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控状态与半选
+
+传入 `checked` 与 `indeterminate` 并监听 `checkedChange` / `indeterminateChange`，由外部状态统一管理选中与半选切换。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多选列表
+
+使用多个复选框组合配置项列表。如需统一管理选中数组与全选联动，可参阅 [Checkbox Group](../checkbox-group/)。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 表格行选择
+
+在表格表头中使用 `indeterminate` 表达部分选中状态，并联动各行复选框。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-table"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL 布局
+
+在 `dir="rtl"` 容器中自动翻转复选框与标签文本的排列方向。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 传入 `checked` 或 `indeterminate` 会使对应状态进入受控模式，二者可独立选择受控或非受控。
+
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -59,10 +142,19 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'required', type: 'boolean', default: 'false' },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'new-york-v4' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea'",
+      default: "'new-york-v4'",
+    },
   ]}
 />
 
-`Root` 暴露 `checked`、`indeterminate`、`disabled`、`required`、`hovered`、`focused`、`focusVisible`、`pressed` 状态，以及 `checkedChange` 与 `indeterminateChange` 事件。更新 `required` 仅同步必填状态，不会改变当前勾选值。
+`Root` 暴露 `checked`、`indeterminate`、`disabled`、`readOnly`、`required`、`hovered`、`focused`、`focusVisible`、`pressed` 状态，`focusSelf(options?)` 与 `resetValue()` 方法，以及 `checkedChange`（载荷 `{ checked, indeterminate }`）与 `indeterminateChange`（载荷 `{ indeterminate }`）事件。
+
+### Indicator
+
+`Indicator` 不声明额外属性，自动订阅最近 `Root` 的状态，并暴露 `checked`、`indeterminate` 状态以及 `isChecked()`、`isIndeterminate()` 方法。
 
 ## 参考
 

@@ -3,9 +3,13 @@ title: 'Number Field'
 description: '支持步进调节、本地化格式、可空数值与标签拖拽调值的 Liquid Glass 数值输入框。'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Number Field 提供符合 `spinbutton` 语义的数值编辑体验，支持加减按钮与键盘步进、基于 `locale` / `formatOptions` 的本地化显示与解析、可选空值 `null` 以及在标签上拖拽调值（scrub）。
+Liquid Glass Number Field 提供符合 `spinbutton` 语义的数值编辑体验，支持加减按钮与键盘步进、基于 `locale` / `formatOptions` 的本地化显示与解析、可选空值 `null` 以及标签拖拽调值。
+
+按照 Apple Liquid Glass 设计层次，普通内容层数值编辑器与内嵌步进按钮保持高对比度不透明表面（避免在内容层叠放玻璃材质），同时采用 `44×44` 最小触控尺寸、清晰的悬停/按压阴影反馈、高可读性的静音禁用填充以及 Forced Colors 焦点外框。
 
 ## 预览
 
@@ -13,30 +17,137 @@ Liquid Glass Number Field 提供符合 `spinbutton` 语义的数值编辑体验�
   demoId="demo-liquid-glass-number-field"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前从源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-liquid-glass/number-field` 导入各部件原型：
+
+```ts
+import {
+  numberFieldRoot,
+  numberFieldLabel,
+  numberFieldInput,
+  numberFieldControl,
+  numberFieldIncrement,
+  numberFieldDecrement,
+} from '@proto.ui/prototypes-liquid-glass/number-field';
+```
 
 ## 用法
 
-- **部件组成**：`Root`、`Label`、`Input`、`Control`、`Increment`、`Decrement`。
-- **编辑与步进**：输入过程中允许保留未完成草稿，失焦或按 Enter 时提交有效数值或恢复原已接受值。加减按钮与上下方向键共享步进规则，按住 `Shift` 步进 10 倍，`Home` / `End` 跳至最小/最大边界。受控模式下变更仅作为提议发出，不提前覆盖调用方值。
-- **格式化与解析**：传入 `locale` 与 `formatOptions` 可支持十进制、货币与百分比展示及本地化数字/符号解析；展示舍入不会改写内部精确值。配置非法时通过 `formatInvalid` 提示并回退到无分组十进制。IME 组合输入期间不会触发解析、提交、步进或拖拽。
-- **空值支持**：开启 `allowEmpty={true}` 后，清空内容并提交会请求 `null`；`getValue()` 返回真实的 `number | null`，`empty` 标记是否为空。从空值首次步进会初始化为边界内对齐的 `0`。
-- **标签拖拽调值（`scrub`）**：开启 `scrub` 后可在 `Label` 上横向拖动连续调值（`scrubSteps` 默认 `100`，`direction="rtl"` 反转方向）；松手且值变化时提交一次，取消拖动恢复原值。输入框内文本保持正常可选。
-- **与 Field / Form 集成**：置于 [Field](/zh-cn/ui-libraries/liquid-glass/field/) 或 [Form](/zh-cn/ui-libraries/liquid-glass/form/) 内时，使用 `Control` 替代 `Input` 以自动联动 `FieldLabel`、校验、表单序列化与重置；独立使用时继续搭配 `NumberFieldLabel`。
+```tsx
+<LiquidGlassNumberFieldRoot defaultValue={12} min={0} max={100} step={1} ariaLabel="Quantity">
+  <LiquidGlassNumberFieldLabel>Quantity</LiquidGlassNumberFieldLabel>
+  <LiquidGlassNumberFieldDecrement>
+    <span aria-hidden="true">−</span>
+    <span className="sr-only">Decrease Quantity</span>
+  </LiquidGlassNumberFieldDecrement>
+  <LiquidGlassNumberFieldInput />
+  <LiquidGlassNumberFieldIncrement>
+    <span aria-hidden="true">+</span>
+    <span className="sr-only">Increase Quantity</span>
+  </LiquidGlassNumberFieldIncrement>
+</LiquidGlassNumberFieldRoot>
+```
+
+- **层次与无障碍**：编辑器与步进按钮保持不透明内容层表面；禁用态通过 `bg-muted` 与柔和前景色清晰区分（不使用低透明度降低对比度），焦点态提供带偏移环与 Forced Colors 回退外框。
+- **编辑与步进**：输入过程中保留未完成草稿，失焦或按 `Enter` 时提交合法数值或恢复上次有效值。加减按钮与上下方向键共享步进规则，按住 `Shift` 步进 10 倍，`Home` / `End` 跳至最小/最大边界。IME 组合输入期间自动暂停解析、提交、步进与拖拽。
+- **与 Field / Form 集成**：置于 [Field](/zh-cn/ui-libraries/liquid-glass/field/) 或 [Form](/zh-cn/ui-libraries/liquid-glass/form/) 内时，使用 `Control` 替代 `Input` 以自动联动 `FieldLabel`、校验错误态、表单序列化与重置。
+
+## 示例
+
+### 本地化货币与百分比
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-number-field-formatting"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 标签拖拽调值与可空值
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-number-field-scrub-nullable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用、只读与无边界自由步进
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-number-field-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-number-field-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL 布局与反向拖拽
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-number-field-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 方法 / 状态 | 默认值与说明 |
-| --- | --- | --- |
-| Root | `value` / `defaultValue` | `number \| null`；`value={null}` 仍为受控空值 |
-| Root | `min` / `max` / `step` | `0` / `100` / `1`（正数步长） |
-| Root | `allowEmpty` | `false`；设为 `true` 允许清空提交 `null` |
-| Root | `locale` / `formatOptions` | 本地化十进制、货币或百分比格式配置 |
-| Root | `scrub` / `scrubSteps` / `direction` | 启用标签拖拽调值、`scrubSteps` 默认 `100` |
-| Root | `disabled` / `readOnly` / `name` / `ariaLabel` | 交互控制、字段名与可访问名称 |
-| Root / Input / Control | `getValue()` / `empty` / `formatInvalid` | 获取真实 `number \| null`、空值标记与格式配置诊断 |
+### Root 属性
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'number | null', default: '—' },
+    { name: 'defaultValue', type: 'number | null', default: '0' },
+    { name: 'min', type: 'number | null', default: '0' },
+    { name: 'max', type: 'number | null', default: '100' },
+    { name: 'step', type: 'number', default: '1' },
+    { name: 'snapToStep', type: 'boolean', default: 'true' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'allowEmpty', type: 'boolean', default: 'false' },
+    { name: 'locale', type: 'string', default: '—' },
+    { name: 'formatOptions', type: 'NumberFieldFormatOptions', default: '—' },
+    { name: 'scrub', type: 'boolean', default: 'false' },
+    { name: 'scrubSteps', type: 'number', default: '100' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+  ]}
+/>
+
+### 事件、方法与状态
+
+<ApiPropsTable
+  headers={{ name: '成员', type: '签名 / 类型', default: '所属部件' }}
+  rows={[
+    { name: 'valueChange', type: 'Event<{ value: number | null }>', default: 'Root' },
+    { name: 'valueCommit', type: 'Event<{ value: number | null }>', default: 'Root' },
+    { name: 'getValue()', type: '() => number | null', default: 'Root / Input / Control' },
+    { name: 'requestValue(next)', type: '(value: number | null) => boolean', default: 'Root' },
+    { name: 'commitValue()', type: '() => void', default: 'Root' },
+    { name: 'stepBy(direction)', type: '(direction: number) => boolean', default: 'Root' },
+    { name: 'resetValue()', type: '() => boolean', default: 'Root / Input / Control' },
+    { name: 'empty / dragging / formatInvalid / draft', type: 'ExposeState', default: 'Root' },
+    {
+      name: 'disabled / focusVisible',
+      type: 'ExposeState<boolean>',
+      default: 'Increment / Decrement',
+    },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-NUMBER-FIELD.yaml', 'P-BASE-NUMBER-FIELD.yaml']}
+/>

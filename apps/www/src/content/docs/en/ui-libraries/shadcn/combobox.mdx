@@ -15,51 +15,172 @@ A searchable dropdown that separates the committed option key (`value`) from the
   demoId="demo-shadcn-combobox"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
+
+## Installation
+
+Combobox is currently available from workspace source (`@proto.ui/prototypes-shadcn/combobox`) and is not yet included in the `0.2.0` stable CLI registry.
 
 ## Usage
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+```tsx
+import {
+  comboboxRoot,
+  comboboxInput,
+  comboboxTrigger,
+  comboboxContent,
+  comboboxItem,
+  comboboxEmpty,
+} from '@proto.ui/prototypes-shadcn/combobox';
+```
+
+```html
+<shadcn-combobox-root a11y-label="Framework">
+  <shadcn-combobox-input placeholder="Select a framework..."></shadcn-combobox-input>
+  <shadcn-combobox-trigger>▾</shadcn-combobox-trigger>
+  <shadcn-combobox-content>
+    <shadcn-combobox-item value="next.js" text-value="Next.js">Next.js</shadcn-combobox-item>
+    <shadcn-combobox-item value="sveltekit" text-value="SvelteKit">SvelteKit</shadcn-combobox-item>
+    <shadcn-combobox-item value="astro" text-value="Astro">Astro</shadcn-combobox-item>
+    <shadcn-combobox-empty>No frameworks found.</shadcn-combobox-empty>
+  </shadcn-combobox-content>
+</shadcn-combobox-root>
+```
 
 ### Anatomy
 
-Compose `Combobox` from `Root`, `Input`, `Content`, `Item`, `Empty`, and `Trigger`:
+```text
+ComboboxRoot
+├── ComboboxInput
+├── ComboboxTrigger (optional)
+└── ComboboxContent
+    ├── ComboboxItem
+    └── ComboboxEmpty (optional)
+```
 
 - `Root`'s `value` stores the selected option key, while `inputValue` tracks the live search text. Unmatched input text is never silently accepted as an option.
 - If you want users to submit arbitrary free text, use [Autocomplete](../autocomplete/) instead.
-
-### Filtering and interaction
-
 - **Built-in filtering**: Matches case- and diacritic-insensitively against `textValue` and `keywords`. Set `filter={false}` to supply your own pre-filtered items.
-- **Empty and disabled states**: `Empty` reflects the real match count; disabled items and duplicate-valued options cannot be committed.
 - **Keyboard and IME**: Focus stays in the single-line input during arrow-key navigation, and IME composition never selects an option.
-- **Controlled state**: `open`, `value`, and `inputValue` can each be controlled independently with their corresponding change events.
+
+## Examples
+
+### Keyword Matching
+
+Provide `keywords` on each `Item` so users can match options by city, region, or abbreviation (such as `Europe`, `NYC`, or `JST`).
+
+<PrototypePreviewer
+  demoId="demo-shadcn-combobox-keywords"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid
+
+Pass `invalid` to `Input` to highlight validation errors.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-combobox-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and Read-Only
+
+Set `disabled` or `readOnly` on `Root` to disable interaction or lock a pre-selected value.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-combobox-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled State
+
+Control `value`, `inputValue`, and `open` independently with `valueChange`, `inputValueChange`, and `openChange` events.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-combobox-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
+
+### Root
 
 Passing `value`, `inputValue`, or `open` enables controlled mode for that state.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
     { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'filter', type: 'boolean', default: 'true' },
     { name: 'loop', type: 'boolean', default: 'true' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleId | "inherit"', default: "'inherit'" },
   ]}
 />
 
-These props belong to `Root`. Other part defaults:
+**Events and methods**: `valueChange`, `inputValueChange`, `openChange`, `execute`; methods `select(value, reason?)`, `setInputValue(value, composing?)`, `openPopup()`, `close()`.
 
-- **Input**: `placeholder`, `a11yLabel`, and `name` default to `''`.
-- **Content**: `side="bottom"`, `align="start"`, `sideOffset={4}`, `collisionPadding={8}`.
-- **Item**: `value`, `textValue`, and `keywords` default to `''`; `disabled` defaults to `false`.
-- **Trigger**: `disabled` defaults to `false`.
+### Input
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'invalid', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleId | "inherit"', default: "'inherit'" },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleId | "inherit"', default: "'inherit'" },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'collisionPadding', type: 'number', default: '8' },
+    { name: 'enterDuration', type: 'number', default: '0' },
+    { name: 'leaveDuration', type: 'number', default: '0' },
+    { name: 'styleProfile', type: 'ShadcnStyleId | "inherit"', default: "'inherit'" },
+  ]}
+/>
+
+### Item and Empty
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Item.value', type: 'string', default: "''" },
+    { name: 'Item.textValue', type: 'string', default: "''" },
+    { name: 'Item.keywords', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleId | "inherit"', default: "'inherit'" },
+  ]}
+/>
 
 ## References
 

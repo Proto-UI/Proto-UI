@@ -4,6 +4,7 @@ import {
   type AutocompleteInputProps,
   type AutocompleteInputExposes,
 } from '@proto.ui/prototypes-base/autocomplete';
+
 export default definePrototype<AutocompleteInputProps, AutocompleteInputExposes>({
   name: 'bootstrap-2-3-2-autocomplete-input',
   modules: asAutocompleteInput.modules,
@@ -11,7 +12,7 @@ export default definePrototype<AutocompleteInputProps, AutocompleteInputExposes>
     const behavior = asAutocompleteInput();
     def.feedback.style.use(
       tw(
-        'inline-block box-border h-[30px] w-[220px] min-w-0 mb-[10px] rounded-[4px] border border-border px-[6px] py-[4px] text-[14px] font-normal leading-[20px] shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
+        'inline-block box-border h-[30px] w-[220px] min-w-0 rounded-[4px] border border-border px-[6px] py-[4px] text-[14px] font-normal leading-[20px] shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
       )
     );
     // forms.less uses a 206px content box plus 12px padding and 2px border.
@@ -34,7 +35,7 @@ export default definePrototype<AutocompleteInputProps, AutocompleteInputExposes>
     });
     def.rule({
       when: (w) => w.state(behavior.getState!('focusVisible')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring ring-offset-2')),
+      intent: (i) => i.feedback.style.use(tw('ring-1 ring-ring')),
     });
     def.rule({
       when: (w) => w.state(behavior.getState!('disabled')!).eq(true),

@@ -11,9 +11,15 @@ export const inputShell = definePrototype<InputShellProps>({
     def.props.define({
       focusVisible: { type: 'boolean' },
       disabled: { type: 'boolean' },
+      invalid: { type: 'boolean' },
       focusIndicator: { type: 'enum', options: ['ring', 'none'], empty: 'fallback' },
     });
-    def.props.setDefaults({ focusVisible: false, disabled: false, focusIndicator: 'ring' });
+    def.props.setDefaults({
+      focusVisible: false,
+      disabled: false,
+      invalid: false,
+      focusIndicator: 'ring',
+    });
     setupInputShellPaint(def);
     return (r) => [r.r.slot()];
   },

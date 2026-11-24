@@ -1,0 +1,110 @@
+---
+title: 'Liquid Glass Switch'
+description: '带有玻璃质感轨道、平滑圆形滑块与可降级材质控制的 Liquid Glass 风格开关组件。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Switch 采用圆角胶囊轨道与同心圆形滑块，在开启状态下以主色染色突出当前选中状态，并支持可选的指针拖动、RTL 方向镜像与 `material="opaque"` 不透明降级模式。
+
+## 预览
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-switch"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+当前以 Proto UI 工作区源码提供，可从 `@proto.ui/prototypes-liquid-glass/switch` 导入。
+
+## 用法
+
+```tsx
+import { switchRoot, switchThumb } from '@proto.ui/prototypes-liquid-glass/switch';
+```
+
+```html
+<proto-ui-liquid-glass-switch-root default-checked>
+  <proto-ui-liquid-glass-switch-thumb></proto-ui-liquid-glass-switch-thumb>
+  <span class="sr-only">Enable notifications</span>
+</proto-ui-liquid-glass-switch-root>
+```
+
+- **材质与层级**：默认 `material="auto"` 在宿主提供可见背景源时请求 `liquid-glass` 材质；位于玻璃浮层容器内或密集表单中时，建议显式设置 `material="opaque"` 以避免玻璃叠玻璃并保持清晰对比度。
+- **无障碍与回退**：开启系统减弱动态效果（`prefers-reduced-motion: reduce`）后自动关闭轨道颜色与滑块位移动画；开启减少透明度、增强对比度或处于禁用状态时，自动回退至可读的不透明表面且不降低对比度。
+
+## 示例
+
+### 带说明文字
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-switch-description"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 材质控制
+
+对比默认 `material="auto"` 与显式关闭透明折射的 `material="opaque"` 模式。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-switch-material"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用状态
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-switch-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 校验失败状态
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-switch-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 拖动与 RTL 方向
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-switch-rtl-drag"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+以下属性与事件属于 `Root`（`Thumb` 无额外属性）：
+
+<ApiPropsTable
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'checked', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'draggable', type: 'boolean', default: 'false' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'checkedChange', type: 'event ({ checked: boolean })', default: '—' },
+    { name: 'focusSelf', type: 'method (options?: FocusRequestOptions) => void', default: '—' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-SWITCH.yaml', 'P-LIQUID-GLASS-SWITCH-THUMB.yaml', 'P-BASE-SWITCH.yaml']}
+/>

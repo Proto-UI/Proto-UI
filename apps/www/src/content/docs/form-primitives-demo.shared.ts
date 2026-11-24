@@ -37,14 +37,14 @@ export function createFormPrimitivesDemo(
         }
       : {}),
   });
-  const field = (name: string, form = false) =>
+  const field = (name: string, label: string, placeholder: string, form = false) =>
     atom(
       form ? 'form' : 'field',
       form ? 'field' : 'root',
       form ? { name, required: true } : { required: true },
       [
-        atom('field', 'label', {}, [name]),
-        atom('field', 'control', { placeholder: 'Type here · 在此输入' }),
+        atom('field', 'label', {}, [label]),
+        atom('field', 'control', { placeholder }),
         atom('field', 'error'),
       ]
     );
@@ -73,18 +73,23 @@ export function createFormPrimitivesDemo(
               atom(component, 'description', {}, [
                 'Related fields share one policy · 相关字段共享策略',
               ]),
-              field('Display name · 显示名'),
+              field(
+                'Display name · 显示名',
+                'Display name · 显示名',
+                'Type here · 在此输入',
+                false
+              ),
             ],
             'group'
           )
         : atom(
             component,
             'root',
-            { ariaLabel: 'Profile form · 资料表单' },
+            { ariaLabel: 'Account preferences form' },
             [
-              field('displayName', true),
+              field('displayName', 'Display name', 'Ada Lovelace', true),
               atom('form', 'field', { name: 'quantity' }, [
-                atom('field', 'label', {}, ['Quantity · 数量']),
+                atom('field', 'label', {}, ['Team seats']),
                 atom('number-field', 'root', { defaultValue: 2 }, [
                   atom('number-field', 'decrement', {}, ['−']),
                   atom('number-field', 'control'),
@@ -92,11 +97,11 @@ export function createFormPrimitivesDemo(
                 ]),
               ]),
               atom('form', 'field', { name: 'code' }, [
-                atom('field', 'label', {}, ['Code · 验证码']),
+                atom('field', 'label', {}, ['Verification code']),
                 atom('input-otp', 'root', { defaultValue: '12' }, [atom('input-otp', 'control')]),
               ]),
               atom('form', 'field', { name: 'level' }, [
-                atom('field', 'label', {}, ['Level · 等级']),
+                atom('field', 'label', {}, ['Alert threshold']),
                 atom('slider', 'root', { defaultValue: 25 }, [
                   atom('slider', 'track', {}, [
                     atom('slider', 'indicator'),
@@ -106,37 +111,77 @@ export function createFormPrimitivesDemo(
                 ]),
               ]),
               atom('form', 'field', { name: 'channels' }, [
-                atom('field', 'label', {}, ['Channels · 通知方式']),
+                atom('field', 'label', {}, ['Notification channels']),
                 atom('checkbox-group', 'root', { defaultValue: ['email'] }, [
-                  atom('checkbox-group', 'item', { value: 'email' }, ['Email · 邮件']),
-                  atom('checkbox-group', 'item', { value: 'sms' }, ['SMS · 短信']),
+                  atom('checkbox-group', 'item', { value: 'email' }, ['Email']),
+                  atom('checkbox-group', 'item', { value: 'sms' }, ['SMS']),
                 ]),
               ]),
-              atom(component, 'submit', {}, ['Validate and submit · 校验并提交']),
-              atom(component, 'reset', {}, ['Reset values · 复位值']),
+              {
+                kind: 'box',
+                className:
+                  family === 'bootstrap-2-3-2'
+                    ? 'flex flex-wrap items-center gap-2 border-t border-border pt-3 mt-2'
+                    : 'flex flex-wrap items-center gap-2 pt-1',
+                children: [
+                  atom(component, 'submit', {}, ['Save changes']),
+                  atom(component, 'reset', family === 'shadcn' ? { variant: 'outline' } : {}, [
+                    'Reset',
+                  ]),
+                ],
+              },
             ],
             'form'
           );
+
+  const formContent: DemoNode = {
+    kind: 'box',
+    className:
+      component === 'form' && family === 'liquid-glass'
+        ? 'grid w-full max-w-md min-w-0 gap-4 rounded-2xl border border-border bg-background/85 p-5'
+        : component === 'form'
+          ? 'grid w-full max-w-md min-w-0 gap-4 p-4'
+          : 'grid w-full min-w-0 gap-4 p-4',
+    children: [
+      root,
+      {
+        kind: 'box',
+        ref: 'status',
+        className: 'text-xs text-muted-foreground',
+        children: [
+          component === 'form'
+            ? 'Fill in the required fields and submit to inspect the serialized payload.'
+            : 'Use the real controls above · 操作上方真实控件',
+        ],
+      },
+    ],
+  };
+
   return {
     type: 'demo',
-    root: {
-      kind: 'box',
-      className: 'grid w-full min-w-0 gap-4 p-4',
-      children: [
-        root,
-        {
-          kind: 'box',
-          ref: 'status',
-          children: ['Use the real controls above · 操作上方真实控件'],
-        },
-      ],
-    },
+    root:
+      component === 'form' && family === 'liquid-glass'
+        ? {
+            kind: 'box',
+            className:
+              'flex w-full justify-center rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+            children: [formContent],
+          }
+        : formContent,
     setup({ api, refs }) {
       if (component !== 'form') return;
-      const report = (detail: { values: unknown }) => {
-        refs.status.textContent = JSON.stringify(detail.values);
-      };
-      api.setProps('form', { ariaLabel: 'Profile form · 资料表单', onSubmit: report });
+      api.setProps('form', {
+        ariaLabel: 'Account preferences form',
+        onSubmit: (detail: { values: unknown }) => {
+          refs.status.textContent = `Submitted: ${JSON.stringify(detail.values)}`;
+        },
+        onInvalid: (detail: { names: string[] }) => {
+          refs.status.textContent = `Please review required fields: ${detail.names.join(', ')}`;
+        },
+        onReset: () => {
+          refs.status.textContent = 'Form reset to initial values.';
+        },
+      });
     },
   };
 }

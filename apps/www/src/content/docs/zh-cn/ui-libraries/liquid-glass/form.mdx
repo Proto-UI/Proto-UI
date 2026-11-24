@@ -4,8 +4,10 @@ description: '汇总字段校验、序列化提交数据并支持重置的 Liqui
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Form 由 `Root`、`Field`、`Submit`、`Reset` 四个部件组成，负责协调组内所有已注册字段的同步/异步校验、按字段名汇总提交数据以及表单重置。
+Liquid Glass Form 由 `Root`、`Field`、`Submit`、`Reset` 四个部件组成，负责协调组内所有已注册字段的同步与异步校验、按字段名汇总提交数据以及表单重置；表单内容保留在清晰可读的内容层，玻璃材质集中在浮动操作控件上。
 
 ## 预览
 
@@ -13,26 +15,135 @@ Liquid Glass Form 由 `Root`、`Field`、`Submit`、`Reset` 四个部件组成�
   demoId="demo-liquid-glass-form"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前组件在工作区源码中提供，尚未包含在 0.2.0 稳定版包中；可从 `@proto.ui/prototypes-liquid-glass/form` 引入。
 
 ## 用法
 
-- **部件组成**：`Root`、`Field`、`Submit`、`Reset`。
-- **校验与提交**：激活 `Submit`（或在聚焦的单行 Field、Number Field、Input OTP 中按 Enter，自动忽略 IME 组合与修饰键）会校验所有启用的注册字段；全部通过后，在 `submit` 事件中返回按字段名组织的表单数据。禁用字段不参与提交，重复字段名会被忽略；异步校验等待当前结果并在值变更、取消或卸载时自动废弃旧提交。Form 不自动发起网络请求或页面跳转，也不创建隐藏 HTML 表单项。
-- **重置**：调用 `requestReset()` 或点击 `Reset` 会恢复非受控字段的初始值、向受控字段发送恢复提议、取消未完成编辑与异步校验，并发出 `reset` 事件；`resetValidation()` 仅清理校验结果。
-- **按钮材质**：`FormSubmit` 与 `FormReset` 复用 Liquid Glass Button 的视觉反馈，支持 `material="auto"` 与 `"opaque"`；禁用态自动关闭光学效果。
+```tsx
+import {
+  LiquidGlassFormRoot,
+  LiquidGlassFormField,
+  LiquidGlassFormSubmit,
+  LiquidGlassFormReset,
+  LiquidGlassFieldLabel,
+  LiquidGlassFieldControl,
+  LiquidGlassFieldError,
+} from '../proto-ui/components/react';
+
+export function ExampleLiquidGlassForm() {
+  return (
+    <LiquidGlassFormRoot
+      ariaLabel="Workspace settings"
+      onSubmit={({ values }) => console.log(values)}
+    >
+      <LiquidGlassFormField name="workspace" required>
+        <LiquidGlassFieldLabel>Workspace name</LiquidGlassFieldLabel>
+        <LiquidGlassFieldControl placeholder="Design Systems" />
+        <LiquidGlassFieldError />
+      </LiquidGlassFormField>
+      <div className="flex items-center gap-2">
+        <LiquidGlassFormSubmit variant="prominent" material="auto">
+          Save workspace
+        </LiquidGlassFormSubmit>
+        <LiquidGlassFormReset variant="regular" material="auto">
+          Reset
+        </LiquidGlassFormReset>
+      </div>
+    </LiquidGlassFormRoot>
+  );
+}
+```
+
+### 材质层次与无障碍回退
+
+- **避免玻璃叠玻璃**：表单字段与说明文本保持在中性可读内容层；浮动操作按钮默认使用 `material="auto"`（`Submit` 为 `prominent` 着色玻璃，`Reset` 为 `regular` 常规玻璃）。当表单嵌套在半透明面板或卡片内时，可将按钮设为 `material="opaque"` 避免多层玻璃叠加。
+- **系统偏好回退**：当系统开启「降低透明度」（`reducedTransparency`）或「提高对比度」（`increasedContrast`）时，操作按钮自动回退为高对比度不透明填充；开启「减弱动态效果」（`reducedMotion`）时自动取消按压形变；禁用态自动撤回光学材质并保持清晰可读的前景/背景对比度。
+- **校验与提交**：激活 `Submit` 或在聚焦的单行输入框中按 `Enter` 会校验所有启用的注册字段，全部通过后通过 `submit` 事件输出按字段名组织的数据；禁用字段自动排除，重复字段名在序列化时抛出 `FORM_DUPLICATE_NAME`。`FormField` 在无效态自动切换为 `text-destructive`。
+
+## 示例
+
+### 个人资料表单
+
+在多彩背景上展示内容层与浮动玻璃操作栏的清晰分层：
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-form-profile"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 材质层级与不透明回退
+
+对比 `material="auto"`（`prominent` 与 `regular` 玻璃层级）与 `material="opaque"`（适用于半透明浮层内部，避免玻璃叠加，并展示 `destructive` 强调色）：
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-form-material"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 异步校验与嵌套字段集
+
+演示外部异步校验请求的完整生命周期、过期结果自动丢弃与嵌套 `Fieldset` 禁用联动：
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-form-validation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 方法 / 事件 | 说明 |
-| --- | --- | --- |
-| Root | `disabled` | 禁用表单并自动向下传递到内部字段 |
-| Root | `requestReset()` / `resetValidation()` | 重置表单值与校验 / 仅清除校验状态 |
-| Root | `submit` / `reset` | 校验通过后按字段名返回数据 / 重置完成后触发 |
-| Field | — | 注册参与表单校验与序列化的字段 |
-| Submit / Reset | `material` | `'auto' \| 'opaque'`；同时暴露 `disabled`、`hovered`、`pressed`、`focused`、`focusVisible` 与 `focusSelf()` |
+### FormRoot
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+暴露状态：`disabled`、`pending`、`submitted`。暴露方法：`getValues()`、`requestSubmit()`、`requestReset()`、`resetValidation()`、`cancelSubmit()`。事件：`submit`、`invalid`、`reset`。
+
+### FormField
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'validationMode', type: "'onSubmit' | 'onBlur' | 'onChange'", default: "'onSubmit'" },
+    { name: 'externalValidation', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### FormSubmit / FormReset
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'variant',
+      type: "'regular' | 'prominent' | 'destructive'",
+      default: "'prominent' / 'regular'",
+    },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+  ]}
+/>
+
+暴露状态：`disabled`、`hovered`、`pressed`、`focused`、`focusVisible`。暴露方法：`focusSelf(options?)`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-FORM.yaml', 'P-BASE-FORM.yaml']}
+/>

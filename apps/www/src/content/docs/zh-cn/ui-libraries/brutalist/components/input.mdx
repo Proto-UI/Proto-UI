@@ -1,36 +1,92 @@
 ---
 title: 'Input 输入框'
-description: '支持受控/非受控值、输入法合成与高对比度焦点环的 Brutalist 单行文本输入框。'
+description: '支持受控/非受控值、输入法合成与主题自适应高对比度焦点环的 Brutalist 单行文本输入框。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Input 是独立的单行纯文本输入框组件，采用 `2.5rem` 相对字号高度、2px 边框、5px 圆角与无静止阴影设计，聚焦时显示清晰的黑色焦点环。
+Brutalist Input 是基于 [Base Input](../../../base/input/) 的单行文本输入框，采用 `2.5rem` 相对字号高度、2px 粗边框、`rounded-base`（5px）圆角与无静止阴影设计，并在亮暗模式下提供随主题自适应的高对比度焦点环。
 
 ## 预览
 
-<PrototypePreviewer demoId="demo-brutalist-input" initialRuntime="wc" />
+<PrototypePreviewer
+  demoId="demo-brutalist-input"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-input" manager="npm" />
 
-- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-input`
-- **包导出**：从 `@proto.ui/prototypes-brutalist/input` 或包根导入 `brutalistInputRoot`
+当前在工作区源码中提供；将 `wc` 替换为 `react`、`vue` 或 `vue2` 可生成对应框架封装，也可直接从 `@proto.ui/prototypes-brutalist/input` 导入 `brutalistInputRoot`。
 
 ## 用法
 
-- 支持非受控 `defaultValue` 与受控 `value`，完整保留原生单行编辑、输入法合成事件、`disabled` / `readOnly` 状态以及无障碍命名属性（`ariaLabel`、`labelledBy`、`describedBy`）。
-- 高度与内边距基于 `rem` 定义，可随根字号自适应缩放。需要内置校验与错误提示时，可配合 `Field` 与 `Form` 使用。
+```tsx
+import { BrutalistInputRoot } from '@/components/ui/brutalist-input';
+
+export function Example() {
+  return <BrutalistInputRoot placeholder="Email" inputMode="email" ariaLabel="Email" />;
+}
+```
+
+- **受控与编辑状态**：支持非受控 `defaultValue` 与受控 `value`，保留原生单行编辑、输入法组合事件、`disabled` / `readOnly` 状态以及无障碍命名属性。
+- **对比度与排版**：采用 DM Sans（`font-sans font-medium`）、柔和占位符配色（`placeholder:text-muted-foreground`）与 `rem` 相对尺寸；在暗色模式下焦点环自动切换为浅色 `ring-ring` 以维持清晰边界。
+
+## 示例
+
+### 默认
+
+独立的基础单行输入框。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用状态
+
+禁用输入框阻止聚焦与输入。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 搭配标签
+
+与 Brutalist `Label` 组合，点击标签即可将焦点移至输入框。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-with-label"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 搭配按钮
+
+将输入框与 Brutalist `Button` 组合为行内订阅或提交表单。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-with-button"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-### Root
+### Root 属性
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: 'undefined' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -56,4 +112,15 @@ Brutalist Input 是独立的单行纯文本输入框组件，采用 `2.5rem` 相
   ]}
 />
 
-传入 `value: string` 进入受控模式。
+### 暴露状态、方法与事件
+
+- **状态**：`value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing`
+- **方法**：`focusSelf(options?)`、`blurSelf()`、`resetValue(value?: string): boolean`
+- **事件**：`valueChange`、`change`、`compositionStart`、`compositionUpdate`、`compositionEnd`
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-INPUT.yaml', 'P-BASE-INPUT.yaml']}
+/>

@@ -13,12 +13,12 @@ export default definePrototype<LiquidGlassSwitchThumbProps, LiquidGlassSwitchThu
     const state = inherited.stateHandles;
     if (!state)
       throw new Error('[liquid-glass-switch-thumb] Base Switch Thumb states are required.');
-    const { direction } = state;
+    const { direction, dragging } = state;
     // size-6 (1.5rem) thumb inside the h-7 (1.75rem) track with p-0.5 (0.125rem)
     // track padding: offset = padding + (track width - 2*padding - thumb) * p/100.
     def.feedback.style.use(
       tw(
-        'absolute left-[calc(0.125rem_+_(100%_-_1.75rem)_*_var(--pui-percentage)_/_100)] top-1/2 block size-6 -translate-y-1/2 rounded-full border border-border bg-primary-foreground shadow-sm pointer-events-none'
+        'absolute left-[calc(0.125rem_+_(100%_-_1.75rem)_*_var(--pui-percentage)_/_100)] top-1/2 block size-6 -translate-y-1/2 rounded-full border border-border bg-primary-foreground shadow-sm pointer-events-none transition-all duration-150 ease-in-out'
       )
     );
     def.rule({
@@ -27,6 +27,14 @@ export default definePrototype<LiquidGlassSwitchThumbProps, LiquidGlassSwitchThu
         i.feedback.style.use(
           tw('left-auto right-[calc(0.125rem_+_(100%_-_1.75rem)_*_var(--pui-percentage)_/_100)]')
         ),
+    });
+    def.rule({
+      when: (w) => w.state(dragging).eq(true),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
+    def.rule({
+      when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
     });
     return inherited.render;
   },

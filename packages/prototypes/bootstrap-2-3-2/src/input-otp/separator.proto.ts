@@ -1,11 +1,17 @@
 import type { InputOtpSeparatorExposes } from '@proto.ui/prototypes-base/input-otp';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asInputOtpSeparator } from '@proto.ui/prototypes-base/input-otp';
+
 export default definePrototype<{}, InputOtpSeparatorExposes>({
   name: 'bootstrap-2-3-2-input-otp-separator',
+  modules: asInputOtpSeparator.modules,
   setup(def) {
     const inherited = asInputOtpSeparator();
-    def.feedback.style.use(tw('px-[5px] text-[14px] leading-[20px] text-muted-foreground'));
+    def.feedback.style.use(
+      tw(
+        'inline-flex shrink-0 items-center justify-center px-[5px] font-sans text-[14px] leading-[20px] text-muted-foreground select-none'
+      )
+    );
     return inherited.render;
   },
 });

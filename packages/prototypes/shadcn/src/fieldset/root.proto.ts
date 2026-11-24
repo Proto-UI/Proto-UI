@@ -3,6 +3,7 @@ import { definePrototype, tw } from '@proto.ui/core';
 import { asFieldsetRoot } from '@proto.ui/prototypes-base/fieldset';
 import { setupShadcnStyleSelection, SHADCN_STYLE_IDS } from '../style-scope';
 import type { ShadcnFieldsetRootProps } from './types';
+
 export default definePrototype<ShadcnFieldsetRootProps, FieldsetRootExposes>({
   name: 'shadcn-fieldset-root',
   modules: asFieldsetRoot.modules,
@@ -19,6 +20,10 @@ export default definePrototype<ShadcnFieldsetRootProps, FieldsetRootExposes>({
           ),
       });
     }
+    def.rule({
+      when: (w) => w.state(inherited.stateHandles!.disabled).eq(true),
+      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed')),
+    });
     return inherited.render;
   },
 });

@@ -8,11 +8,15 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-A single-line text input built on [Base Input](../../base/input/) with controlled and uncontrolled values, normalized IME composition events, disabled/read-only handling, and accessible naming, rendered as a native `input[type="text"]` on Web. The examples on this page use the **Shadcn Rhea** style preset.
+A single-line text input for forms and user data entry built on [Base Input](../../base/input/), providing controlled and uncontrolled value management, normalized IME composition events, disabled and read-only handling, and accessible naming. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
-<PrototypePreviewer demoId="demo-shadcn-input" initialRuntime="wc" />
+<PrototypePreviewer
+  demoId="demo-shadcn-input"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## Installation
 
@@ -24,17 +28,88 @@ Replace `wc` with `react`, `vue`, or `vue2` to generate the local facade for you
 
 ## Usage
 
-- **Style preset**: Under **Shadcn Rhea**, the input uses `h-8` (32px height), `radius-2xl`, `bg-input/50`, `px-2.5 py-1`, and a `border-ring ring-3 ring-ring/30` focus ring, scaling text down to small at viewports `>= 768px`. Without an enclosing [Style Scope](../style-scope/), it retains its default compatibility styling.
-- **Validation and labels**: Standalone `Input` handles text editing without built-in validation state; pair with [Field](../field/) for validation errors, descriptions, and label wiring.
-- **Resetting values**: `Root` exposes `resetValue(value?: string): boolean` from [Base Input](../../base/input/) to reset the editor to its initial or supplied value.
+```tsx
+import { ShadcnInputRoot } from '@/components/ui/shadcn-input';
+
+export function Example() {
+  return <ShadcnInputRoot placeholder="Enter text" ariaLabel="Text input" />;
+}
+```
+
+- **Style presets**: Switch presets via an enclosing [Style Scope](../style-scope/) or `styleProfile`. Under **Shadcn Rhea**, the input uses `h-8` (32px), `radius-2xl`, `bg-input/50` (`bg-input/30` in dark mode), and a `border-ring ring-3 ring-ring/30` focus ring, scaling text to small at viewports `>= 768px`.
+- **Validation and labels**: Standalone `Input` focuses on text editing; pair with [Field](../field/) for label focus forwarding, helper descriptions, and validation error styling.
+- **Accessibility and methods**: `Root` exposes `focusSelf()`, `blurSelf()`, and `resetValue(value?: string)`, along with `ariaLabel`, `labelledBy`, and `describedBy`.
+
+## Examples
+
+### Basic
+
+A standalone text input with placeholder guidance.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Field
+
+Compose `Field`, `FieldLabel`, `FieldControl`, and `FieldDescription` for labeled form inputs.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Use `disabled` to prevent focus and editing with muted surface feedback.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid
+
+Pass `invalid` and `errors` to `Field` to highlight validation errors with destructive borders and accessible messages.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Inline
+
+Pair `Input` with `Button` horizontally and use `inputMode="search"` and `enterKeyHint="search"` for search bars.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-inline"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Grid and Form
+
+Combine multi-column grid inputs, `Label`, `Field`, and action buttons into a complete form layout.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-Passing `value` selects controlled mode. `inputMode` and `enterKeyHint` are optional with no default.
+### Root Props
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: 'undefined' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -44,13 +119,32 @@ Passing `value` selects controlled mode. `inputMode` and `enterKeyHint` are opti
     { name: 'autoComplete', type: 'string', default: "''" },
     { name: 'minLength', type: 'number', default: '-1' },
     { name: 'maxLength', type: 'number', default: '-1' },
+    {
+      name: 'inputMode',
+      type: "'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'",
+      default: 'undefined',
+    },
+    {
+      name: 'enterKeyHint',
+      type: "'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'",
+      default: 'undefined',
+    },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'labelledBy', type: 'string', default: "''" },
     { name: 'describedBy', type: 'string', default: "''" },
+    {
+      name: 'styleProfile',
+      type: "'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'nova'",
+    },
   ]}
 />
 
-These props belong to `Root`.
+### Exposed States, Methods, and Events
+
+- **States**: `value`, `disabled`, `readOnly`, `focused`, `focusVisible`, `composing`
+- **Methods**: `focusSelf(options?)`, `blurSelf()`, `resetValue(value?: string): boolean`
+- **Events**: `valueChange`, `change`, `compositionStart`, `compositionUpdate`, `compositionEnd`
 
 ## References
 

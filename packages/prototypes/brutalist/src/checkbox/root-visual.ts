@@ -49,9 +49,23 @@ export function setupCheckboxRootVisual(
     intent: (intent) =>
       intent.feedback.style.use(tw(`${BRUTALIST_DISABLED_TOKENS} cursor-not-allowed`)),
   });
-  if (invalid)
+  if (invalid) {
     def.rule({
       when: (w) => w.state(invalid).eq(true),
-      intent: (i) => i.feedback.style.use(tw('border-destructive text-destructive')),
+      intent: (i) => i.feedback.style.use(tw('border-destructive')),
     });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(invalid).eq(true),
+          w.state(checked).eq(false),
+          w.state(indeterminate).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('text-destructive')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(invalid).eq(true), w.state(focusVisible).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('border-destructive ring-destructive')),
+    });
+  }
 }

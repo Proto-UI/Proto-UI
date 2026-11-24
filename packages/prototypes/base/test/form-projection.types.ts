@@ -179,7 +179,11 @@ type f3formSurface = Assert<
     Surface<Omit<typeof baseform, 'formSubmit' | 'formReset'>>
   >
 >;
-type LiquidActionProps = { disabled?: boolean; material?: 'auto' | 'opaque' };
+type LiquidActionProps = {
+  disabled?: boolean;
+  variant?: 'regular' | 'prominent' | 'destructive';
+  material?: 'auto' | 'opaque';
+};
 type LiquidSubmitProps = Assert<Equal<PropsOf<typeof f3form.formSubmit>, LiquidActionProps>>;
 type LiquidResetProps = Assert<Equal<PropsOf<typeof f3form.formReset>, LiquidActionProps>>;
 type LiquidSubmitExposes = Assert<

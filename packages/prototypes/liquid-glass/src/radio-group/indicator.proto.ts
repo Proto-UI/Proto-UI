@@ -5,14 +5,15 @@ import type {
   LiquidGlassRadioGroupIndicatorProps,
 } from './types';
 
-// Passive indicator: paints the Item-published checked fact as a dot only.
-// No value, focus, event, input or material owner; the Item root already
-// carries the radio role and checked state.
+// Passive indicator: paints the Item-published checked fact as a concentric
+// 8px dot inside the 20px circular Item control (~40% Apple HIG ratio).
+// No value, focus, event, input or material owner.
 export default definePrototype<
   LiquidGlassRadioGroupIndicatorProps,
   LiquidGlassRadioGroupIndicatorExposes
 >({
   name: 'liquid-glass-radio-group-indicator',
+  modules: asRadioGroupIndicator.modules,
   setup(def) {
     const inherited = asRadioGroupIndicator();
     const state = inherited.stateHandles;
@@ -23,7 +24,7 @@ export default definePrototype<
     const { checked } = state;
     // currentColor inherits the Item's state-owned foreground (primary-foreground
     // while filled), so the dot stays readable in every governed state pair.
-    def.feedback.style.use(tw('flex size-3 shrink-0 items-center justify-center opacity-0'));
+    def.feedback.style.use(tw('flex size-2 shrink-0 items-center justify-center opacity-0'));
     def.rule({
       when: (w) => w.state(checked).eq(true),
       intent: (i) => i.feedback.style.use(tw('opacity-100')),

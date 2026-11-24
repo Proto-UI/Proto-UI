@@ -1,42 +1,117 @@
 ---
 title: 'Bootstrap 2.3.2 Textarea'
-description: 'A multiline text input styled with archived Bootstrap 2.3.2 field visuals over Base Textarea.'
+description: 'A multiline text input styled with archived Bootstrap 2.3.2 field visuals and classic validation states over Base Textarea.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Bootstrap 2.3.2 Textarea applies archived Bootstrap 2.3.2 field styling to Base Textarea, rendering a single native multiline editor on the Web while preserving the classic light palette in dark hosts.
+Bootstrap 2.3.2 Textarea applies archived Bootstrap 2.3.2 field styling (4px radius, inset shadow, `#52a8ec` focus glow, and `#eee` disabled fill) to Base Textarea, rendering a single native multiline editor on the Web while preserving the classic light palette in dark hosts.
 
 ## Preview
-
-Edit the release note, focus the read-only editor, and compare it with the disabled state across runtimes.
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-textarea"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={true}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. [Browse the implemented subset](../).
+Available from workspace source via `@proto.ui/prototypes-bootstrap-2-3-2/textarea` (and `@proto.ui/prototypes-bootstrap-2-3-2/field` for form composition). [Browse the implemented subset](../).
 
 ## Usage
 
-- **Values and events**: Supports controlled `value` and uncontrolled `defaultValue`, along with normalized `input`, `change`, and IME composition events.
-- **Rows and wrapping**: Configure `rows` and `wrap` to control visible lines and wrapping behavior.
-- **Field composition**: Pair with `Field` when you need labels, helper descriptions, or validation errors.
+```tsx
+import { Bootstrap232TextareaRoot } from '../proto-ui/components/react';
+```
+
+```tsx
+<Bootstrap232TextareaRoot placeholder="Type your message here." rows={4} />
+```
+
+- **Values and events**: Supports controlled `value` and uncontrolled `defaultValue`, normalized `valueChange`, `change`, and IME composition events, plus `resetValue()`, `focusSelf()`, and `blurSelf()`.
+- **Rows and wrapping**: Configure `rows` and `wrap` to control visible lines and wrapping behavior; ships with a 64px minimum height and vertical resize (`resize-y`).
+- **Field composition**: Pair `FieldTextarea` with `Field`, `FieldLabel`, `FieldDescription`, and `FieldError` for accessible associations and classic `#953b39` / `#d59392` error styling.
+
+## Examples
+
+### Field
+
+Compose `Field`, `FieldLabel`, `FieldTextarea`, and `FieldDescription` for a classic Bootstrap form block.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-textarea-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Disabled textareas display the classic `#eee` background fill and `not-allowed` cursor.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-textarea-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid
+
+Pass `invalid` and `errors` to `Field` to activate Bootstrap 2.3.2's `#953b39` error border and `#d59392` focus glow.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-textarea-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Button
+
+Pair with a classic Bootstrap 2.3.2 submit button.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-textarea-button"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Category | Members | Description |
-| --- | --- | --- |
-| Value & state | `value` / `defaultValue`, `disabled`, `readOnly`, `placeholder` | Controlled/uncontrolled multiline text and state flags |
-| Layout & constraints | `rows`, `wrap`, `minLength`, `maxLength`, `name`, `required`, `autoComplete` | Native multiline attributes |
-| Accessibility | `ariaLabel`, `labelledBy`, `describedBy` | Accessible naming and description links |
-| Events & methods | `valueChange`, `change`, composition events, `focusSelf()`, `blurSelf()` | Change notifications and focus methods |
+The following props belong to `Root` (pass `value` for controlled mode; `minLength` and `maxLength` default to `-1` when unlimited):
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string | undefined', default: 'uncontrolled' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'rows', type: 'number', default: '2' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    { name: 'wrap', type: "'soft' | 'hard'", default: "'soft'" },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'labelledBy', type: 'string', default: "''" },
+    { name: 'describedBy', type: 'string', default: "''" },
+  ]}
+/>
+
+- **Exposed states**: `value`, `disabled`, `readOnly`, `focused`, `focusVisible`, `composing` (plus `invalid` and `pending` on `FieldTextarea`).
+- **Exposed methods**: `focusSelf(options?)`, `blurSelf()`, `resetValue()`.
+- **Events**: `valueChange`, `change`, `compositionStart`, `compositionUpdate`, `compositionEnd`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-TEXTAREA.yaml', 'P-BASE-TEXTAREA.yaml']}
+/>

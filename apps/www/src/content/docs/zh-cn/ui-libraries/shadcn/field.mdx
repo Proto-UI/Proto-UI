@@ -8,7 +8,7 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-用于组合单个输入控件及其标签、帮助文本与错误信息的字段容器，自动维护无障碍关联，并支持内置约束、受控校验与消费者驱动的异步校验。本页示例采用 **Shadcn Rhea** 风格。
+用于将标签、表单控件、帮助说明与校验错误组合为可访问的字段单元，支持垂直与水平布局、内置约束、受控校验以及异步外部校验。本页示例采用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -16,7 +16,6 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   demoId="demo-shadcn-field"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
@@ -31,24 +30,102 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 ## 用法
 
+```tsx
+import {
+  FieldRoot,
+  FieldLabel,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+} from '@/components/ui/shadcn-field';
+
+export function ProfileField() {
+  return (
+    <FieldRoot required minLength={3}>
+      <FieldLabel>Username</FieldLabel>
+      <FieldControl placeholder="Max Leiter" />
+      <FieldDescription>Choose a unique username for your account.</FieldDescription>
+      <FieldError />
+    </FieldRoot>
+  );
+}
+```
+
 ### 部件结构
 
-每个 `Root` 内放置一个 `Control`，并按需组合 `Label`、`Description`、`Error` 以及一个或多个只读的 `Validity`（嵌套 `Root` 拥有独立作用域，重复的唯一角色会被忽略）：
+```text
+FieldRoot
+├── FieldLabel
+├── FieldControl | FieldTextarea | FieldSelectTrigger | FieldSwitch | FieldCheckbox | FieldRadioGroup
+├── FieldDescription
+├── FieldError
+└── FieldValidity (可选，可多个)
+```
 
-- **Root**：统一管理字段校验状态（`invalid`、`pending`、`dirty`、`touched`、`filled`、`focused`）以及 `disabled`、`readOnly`、`required` 策略。
-- **Control**：默认提供单行文本输入控件；若接入自定义值控件（如复选框、单选组等），可通过 `asFieldControl` 桥接上报字段值，并通过 `asControlLabel().target(..., FIELD_LABEL_PAIR)` 接入标签点击聚焦。
-- **Label**：自动命名同字段下的 `Control`，点击时默认聚焦控件（可通过 `activation={false}` 关闭）。
-- **Description**：自动关联 `aria-describedby` 的可选帮助文本。
-- **Error**：仅在字段处于无效状态时通过 `aria-errormessage` 关联到控件；关闭时默认卸载内容节点（设置 `keepMounted` 可保留隐藏节点），自动维护 `aria-describedby` / `aria-errormessage` 关联并在卸载时清理。如需自动向屏幕阅读器播报错误，可搭配 [Live Region](../live-region/) 使用。
-- **Validity**：只读状态展示部件，可通过 `getValidity()` 读取当前校验快照。
+- **Root**：管理 `invalid`、`pending`、`dirty`、`touched`、`filled`、`focused` 状态以及 `disabled`、`readOnly`、`required`、`orientation` 与 `styleProfile`。嵌套 `Root` 保持独立作用域。
+- **Control**：默认提供单行文本输入控件；也可直接使用同包导出的 `fieldTextarea`、`fieldSelectTrigger`、`fieldSwitch`、`fieldCheckbox`、`fieldRadioGroup`，或通过 Base 的 `asFieldControl` 接入自定义控件。
+- **Label**：自动通过 `aria-labelledby` 命名同字段下的控件，点击时默认聚焦控件（可通过 `activation={false}` 关闭）。
+- **Description / Error**：自动维护 `aria-describedby` 与（仅在 `invalid` 时）`aria-errormessage` 关联，并在卸载时清理。`Error` 默认在有效状态下卸载节点（设置 `keepMounted` 可保留隐藏节点）。
+- **Validity**：只读状态观察部件，可通过 `getValidity()` 读取当前校验快照。
 
 ### 同步与异步校验
 
-- **内置规则**：`required` 将 `null`、`false`、`''` 与 `[]` 视为空值（`0` 与空白字符视为有效）；`minLength` / `maxLength` 按 UTF-16 码元计数，非必填的空字符串会跳过长度检查。内置标记为 `valueMissing`、`tooShort`、`tooLong`，外部错误使用 `customError`。
-- **触发时机**：`validationMode` 支持 `'onBlur'`（默认）、`'onChange'`（等待输入法组合结束后触发）与 `'manual'`。
-- **异步校验**：设置 `externalValidation={true}` 后，内置规则通过时会发出 `validationRequest`（负载为 `{ requestId, value, reason }`）。应用层完成请求后调用 `resolveValidation(requestId, { invalid, errors })` 提交结果；若请求期间值发生变化、状态切换或调用了 `cancelValidation()` / `resetValidation()`，过期结果会被自动丢弃。
-- **受控校验**：传入 `invalid` 与 `errors` 将校验结果交由外部状态控制，校验完成时通过 `validityChange` 提出更新建议。
-- **与表单协作**：`resetValidation()` 仅清除校验状态与 `touched`，不重置控件值。若需要多字段提交、序列化与整表重置，请配合 [Form](../form/) 与 [Fieldset](../fieldset/) 使用。
+- **内置规则**：支持 `required`、`minLength` 与 `maxLength`（按 UTF-16 码元计数；非必填的空字符串跳过长度检查）。内置标记为 `valueMissing`、`tooShort`、`tooLong`，外部错误使用 `customError`。
+- **触发时机**：`validationMode` 支持 `'onBlur'`（默认）、`'onChange'`（等待输入法组合结束）与 `'manual'`。
+- **异步校验**：设置 `externalValidation={true}` 后，内置规则通过时会发出 `validationRequest`（负载 `{ requestId, value, reason }`），完成后调用 `resolveValidation(requestId, { invalid, errors })`；过期结果自动丢弃。
+- **受控校验**：传入 `invalid` 与 `errors` 由外部管理校验状态，校验完成时通过 `validityChange` 发出更新建议。如需整组禁用或表单提交与重置，请配合 [Fieldset](../fieldset/) 与 [Form](../form/) 使用。
+
+## 示例
+
+### 文本输入
+
+通过组合 `FieldLabel`、`FieldControl` 与 `FieldDescription`，可将帮助说明放置在输入框上方或下方。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-field-input"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多行文本
+
+使用 `FieldTextarea` 让多行输入直接接入同一字段的标签关联与长度校验。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-field-textarea"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 下拉选择
+
+将 `SelectRoot` 内的触发器替换为 `FieldSelectTrigger`，即可与 `FieldLabel`、`FieldDescription` 及错误状态联动。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-field-select"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 复选框、单选组与开关
+
+搭配 `orientation="horizontal"` 呈现紧凑的开关与复选框行，或使用 `FieldRadioGroup` 组合单选方案。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-field-choice"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 同步与异步校验
+
+演示失焦校验与输入时异步可用性检查（输入 `taken` 触发异步错误）。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-field-validation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -59,6 +136,18 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
   rows={[
+    {
+      name: 'orientation',
+      type: "'vertical' | 'horizontal'",
+      default: 'vertical',
+      description: '字段标签与控件的排列方向',
+    },
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleId',
+      default: 'nova',
+      description: '可选 Shadcn 视觉预设（可由 ShadcnStyleScope 继承）',
+    },
     { name: 'invalid', type: 'boolean', description: '受控的无效状态' },
     { name: 'errors', type: 'string[]', description: '受控错误消息列表' },
     {
@@ -110,11 +199,11 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 ### 其他部件属性
 
-- **Control**：`value` / `defaultValue`、`disabled`、`readOnly`、`required`、`placeholder`、`name`、`autoComplete`、`inputMode`、`enterKeyHint`、`ariaLabel`（本地策略不能覆盖 `Root` 已启用的约束）。
-- **Label**：`activation?: boolean`（默认 `true`，控制点击是否聚焦控件）。
-- **Description**：无额外属性。
-- **Error**：`message?: string`（显式本地化覆盖文案）、`keepMounted?: boolean`（默认 `false`）。
-- **Validity**：无额外属性。
+- **Control**：`value` / `defaultValue`、`disabled`、`readOnly`、`required`、`placeholder`、`name`、`autoComplete`、`inputMode`、`enterKeyHint`、`ariaLabel`、`styleProfile`（本地策略不能覆盖 `Root` 已启用的约束）。
+- **已绑定控件**：`fieldTextarea`、`fieldSelectTrigger`、`fieldSwitch`、`fieldCheckbox`、`fieldRadioGroup` 均复用对应组件属性并接入字段策略与无障碍关联。
+- **Label**：`activation?: boolean`（默认 `true`，控制点击是否聚焦控件）、`styleProfile`。
+- **Description / Validity**：`styleProfile`。
+- **Error**：`message?: string`（显式本地化覆盖文案）、`keepMounted?: boolean`（默认 `false`）、`styleProfile`。
 
 ### 方法与事件（Root）
 

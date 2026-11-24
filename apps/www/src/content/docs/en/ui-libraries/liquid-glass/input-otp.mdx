@@ -1,11 +1,13 @@
 ---
 title: 'Input OTP'
-description: 'A Liquid Glass one-time passcode input backed by a single real text input with passive visual slots.'
+description: 'A Liquid Glass one-time passcode input with concentric radii, crisp content-layer contrast, and single-editor paste support.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Input OTP uses one real text input to preserve native selection, paste, deletion, IME composition, and `one-time-code` autofill while projecting each character into passive visual `Slot` cells.
+Liquid Glass Input OTP uses one real text input to preserve native selection, paste, deletion, IME composition, and `one-time-code` autofill while projecting characters into passive visual `Slot` cells. Designed for the content layer so slots never stack glass-on-glass inside surrounding glass sheets, cells pair concentric radii, specular inset hairlines, and readable non-opacity disabled states.
 
 ## Preview
 
@@ -13,7 +15,6 @@ Liquid Glass Input OTP uses one real text input to preserve native selection, pa
   demoId="demo-liquid-glass-input-otp"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
@@ -22,18 +23,126 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
-- **Parts**: `Root`, `Input`, `Control`, `Slot`, `Separator`.
-- **Single input and active slot**: editing lives in a single accessible `Input`; `Slot` elements are passive `aria-hidden` readouts that add no extra Tab stops. Active slot highlighting tracks the actual caret or selection range while focused and editable, clearing on blur, disable, or read-only.
-- **Filtering and completion**: supports `numeric` and `alphanumeric` filtering for lengths `1–32` (default `6`), sanitizing and clamping length after IME composition completes. `valueChange` proposes updates in controlled mode, and `completed` emits once per accepted complete code.
-- **Field and Form integration**: swap `Input` for `Control` inside [Field](/en/ui-libraries/liquid-glass/field/) or [Form](/en/ui-libraries/liquid-glass/form/) to connect `FieldLabel`, validation, IME cancellation, serialization, and reset.
+```tsx
+import {
+  LiquidGlassInputOtpRoot,
+  LiquidGlassInputOtpInput,
+  LiquidGlassInputOtpSlot,
+  LiquidGlassInputOtpSeparator,
+} from '../proto-ui/components/react';
+
+export function LiquidGlassVerificationCode() {
+  return (
+    <LiquidGlassInputOtpRoot length={6}>
+      <LiquidGlassInputOtpInput placeholder="123456" />
+      <div className="inline-flex items-center gap-1.5">
+        <LiquidGlassInputOtpSlot index={0} />
+        <LiquidGlassInputOtpSlot index={1} />
+        <LiquidGlassInputOtpSlot index={2} />
+      </div>
+      <LiquidGlassInputOtpSeparator>–</LiquidGlassInputOtpSeparator>
+      <div className="inline-flex items-center gap-1.5">
+        <LiquidGlassInputOtpSlot index={3} />
+        <LiquidGlassInputOtpSlot index={4} />
+        <LiquidGlassInputOtpSlot index={5} />
+      </div>
+    </LiquidGlassInputOtpRoot>
+  );
+}
+```
+
+- **Content-layer clarity & concentric radii**: Input and slots stay optically neutral so they never stack glass-on-glass on floating sheets. Slots use concentric `rounded-xl` corners inside `rounded-2xl` surfaces with specular inset hairlines and elevated active focus rings.
+- **Single input and active slot**: Editing lives in one accessible `Input`; `Slot` cells are passive `aria-hidden` readouts that track the real caret or selection range while focused and editable.
+- **Field and Form integration**: Swap `Input` for `Control` inside [Field](/en/ui-libraries/liquid-glass/field/) or [Form](/en/ui-libraries/liquid-glass/form/) to bridge `FieldLabel`, validation error state, serialization, and reset.
+
+## Examples
+
+### Separator
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-otp-separator"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Alphanumeric
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-otp-alphanumeric"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-otp-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-otp-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-otp-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Form & Four-Digit PIN
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-otp-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop / Event | Defaults and notes |
-| --- | --- | --- |
-| Root | `value`, `defaultValue` | Controlled / uncontrolled code string |
-| Root | `length` | `6` (range `1–32`) |
-| Root | `disabled`, `readOnly`, `name`, `ariaLabel` | Interaction state, field name, and accessible label |
-| Root | `valueChange`, `completed` | Value proposal event / emitted once per accepted complete code |
-| Input / Control | — | Standalone text editor / Field- and Form-integrated control |
-| Slot / Separator | — | Passive character display cell and visual separator |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'length', type: 'number', default: '6' },
+    { name: 'pattern', type: "'numeric' | 'alphanumeric'", default: "'numeric'" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'invalid', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'ariaLabel', type: 'string', default: "'One-time code'" },
+  ]}
+/>
+
+### Input / Control & Slot
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Input / Control: placeholder', type: 'string', default: "''" },
+    { name: 'Slot: index', type: 'number', default: '0' },
+    { name: 'Slot: invalid', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Events & Methods
+
+- **Root events**: `valueChange` (`{ value: string }`), `completed` (`{ value: string }`).
+- **Root states & methods**: states `value`, `complete`, `disabled`, `readOnly`, `focused`; methods `requestValue(value)`, `clear()`, `resetValue()`, `focusInput()`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-INPUT-OTP.yaml', 'P-BASE-INPUT-OTP.yaml']}
+/>

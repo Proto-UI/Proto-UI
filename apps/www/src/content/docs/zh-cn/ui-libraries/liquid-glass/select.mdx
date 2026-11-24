@@ -1,11 +1,13 @@
 ---
 title: 'Select'
-description: '由十一个组件构成的 Liquid Glass 单选下拉框，支持受控选择、分组与玻璃材质弹层。'
+description: '由十一个部件构成的 Liquid Glass 单选下拉框，支持受控选择、分组与玻璃材质弹层。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Select 基于 [Base Select](/zh-cn/ui-libraries/base/select/)，由 Root、Trigger、Value、Content、Surface、Viewport、Item、ItemText、Group、Label、Separator 十一个部件组成，提供受控/非受控单选、锚定弹层与玻璃材质表面。
+Liquid Glass Select 基于 [Base Select](/zh-cn/ui-libraries/base/select/)，由十一个可组合部件构成，将玻璃材质集中在 `Trigger` 与展开态 `Surface` 上，采用同心圆角几何与高对比度不透明回退，避免嵌套叠层玻璃。
 
 ## 预览
 
@@ -14,14 +16,11 @@ Liquid Glass Select 基于 [Base Select](/zh-cn/ui-libraries/base/select/)，由
   demoId="demo-liquid-glass-select"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
-
-示例展示了非受控选择、禁用态、需点击 **Accept selection** 确认的受控选择以及 RTL 长标签折行。预览工具栏同样使用本体系的 Select 切换 WC、React、Vue 与 Vue 2。
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，可直接从 `@proto.ui/prototypes-liquid-glass/select` 导入全部十一个部件：
 
 ```ts
 import {
@@ -41,28 +40,151 @@ import {
 
 ## 用法
 
-### 部件职责与组合结构
+```tsx
+import {
+  LiquidGlassSelectContent,
+  LiquidGlassSelectGroup,
+  LiquidGlassSelectItem,
+  LiquidGlassSelectItemText,
+  LiquidGlassSelectLabel,
+  LiquidGlassSelectRoot,
+  LiquidGlassSelectSurface,
+  LiquidGlassSelectTrigger,
+  LiquidGlassSelectValue,
+  LiquidGlassSelectViewport,
+} from '../proto-ui/components/react';
 
-推荐组合结构为 `Content > Surface > Viewport > Item > ItemText`；需要分组时在 `Viewport` 内放置 `Group`（内含 `Label` 与多个 `Item`）与 `Separator`：
+export function FruitSelect() {
+  return (
+    <LiquidGlassSelectRoot defaultValue="apple">
+      <LiquidGlassSelectTrigger className="w-48" accessibleLabel="Fruit selector">
+        <LiquidGlassSelectValue placeholder="Select a fruit" />
+      </LiquidGlassSelectTrigger>
+      <LiquidGlassSelectContent>
+        <LiquidGlassSelectSurface>
+          <LiquidGlassSelectViewport>
+            <LiquidGlassSelectGroup>
+              <LiquidGlassSelectLabel>Fruits</LiquidGlassSelectLabel>
+              <LiquidGlassSelectItem value="apple" textValue="Apple">
+                <LiquidGlassSelectItemText>Apple</LiquidGlassSelectItemText>
+              </LiquidGlassSelectItem>
+              <LiquidGlassSelectItem value="banana" textValue="Banana">
+                <LiquidGlassSelectItemText>Banana</LiquidGlassSelectItemText>
+              </LiquidGlassSelectItem>
+            </LiquidGlassSelectGroup>
+          </LiquidGlassSelectViewport>
+        </LiquidGlassSelectSurface>
+      </LiquidGlassSelectContent>
+    </LiquidGlassSelectRoot>
+  );
+}
+```
 
-- **Root**：统一管理 `open`、`value`、已选文本与选项集合；`open` 与 `value` 可独立受控。
-- **Trigger & Value**：`Trigger` 提供 `combobox` 语义，点击切换开关、Enter / Space 打开、上下方向键定位到已选项或首/末可用项。`Value` 依次按已选文本、`value`、`placeholder` 回退展示。
-- **Content / Surface / Viewport**：`Content` 负责 Portal、碰撞定位与关闭逻辑（不含背景绘制）；`Surface` 是弹层外观与玻璃材质的唯一载体；`Viewport` 作为唯一滚动视口并预留空间防止焦点轮廓被裁剪。
-- **Item / ItemText / Group / Label / Separator**：点击、Enter 或 Space 提交可用选项（键盘导航与悬停不直接提交，禁用项自动跳过）；更新已选 `Item` 的 `textValue` 会自动刷新 `Value` 显示。Escape 取消并将焦点返回 `Trigger`，Tab 与外部点击关闭弹层。
+### 组合与材质原则
 
-### 布局与材质
+```text
+SelectRoot
+├── SelectTrigger (liquid-glass slot)
+│   └── SelectValue
+└── SelectContent (portal & placement frame)
+    └── SelectSurface (sole popup liquid-glass slot, rounded-2xl)
+        └── SelectViewport (p-2 scrollport)
+            ├── SelectGroup
+            │   ├── SelectLabel
+            │   └── SelectItem (rounded-lg concentric radius)
+            │       └── SelectItemText
+            └── SelectSeparator
+```
 
-- 长标签自动换行并支持容器收缩，弹层尺寸受可用视口边界约束，文本对齐和尾部指示符遵循书写方向；请为 `Trigger` 外部预留焦点环空间。
-- `Trigger` 与展开态的 `Surface` 请求 `liquid-glass` 光学材质，缺少可见 canvas 源、发生重叠或系统偏好不允许时自动回退到高对比度不透明样式。
-- Select 专注单选列表；如需搜索输入或自由文本请使用 [Combobox](/zh-cn/ui-libraries/liquid-glass/combobox/) 或 [Autocomplete](/zh-cn/ui-libraries/liquid-glass/autocomplete/)。
+- **单一玻璃层与同心圆角**：`Content` 仅负责 Portal 与定位，不叠加材质；`Surface` 作为弹层唯一玻璃载体使用 `rounded-2xl` 搭配 `Viewport` `p-2` 与 `Item` `rounded-lg` 形成同心圆角，并附加微妙内圈高光边界。
+- **无障碍与偏好回退**：开启系统减弱动态效果（`prefers-reduced-motion`）时自动取消按压形变；禁用态撤回光学材质并保持高对比度可读文字，而非整体降低不透明度。
+- 如需搜索过滤或自由输入，请使用 [Combobox](/zh-cn/ui-libraries/liquid-glass/combobox/) 或 [Autocomplete](/zh-cn/ui-libraries/liquid-glass/autocomplete/)。
+
+## 示例
+
+### 可滚动长列表（Scrollable）
+
+在彩色背景上展示玻璃材质弹层与可滚动的分组时区列表。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-select-scrollable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用态（Disabled）
+
+禁用选择器与禁用选项均撤回光学材质并保留清晰可读的不透明配色。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-select-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 从右到左排版（RTL）
+
+在 `dir="rtl"` 容器中，文本对齐与尾部指示器随书写方向自动适配。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-select-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 事件 | 默认值与说明 |
-| --- | --- | --- |
-| Root | `open` / `defaultOpen` / `value` / `defaultValue` | 独立受控或非受控的弹层与选中值 |
-| Root | `disabled` / `closeOnSelect` | 禁用控件 / 选中选项后是否自动关闭 |
-| Root | `openChange` / `valueChange` | 弹层开关与选中值变更请求事件 |
-| Value | `placeholder` | 无选中值时的占位文本 |
-| Content | `position` / `side` / `align` / `sideOffset` / `alignOffset` / `avoidCollisions` / `collisionPadding` | 定位模式（默认 `'popper'`，也支持 `'item-aligned'`）与避障参数 |
-| Item | `value` / `textValue` / `disabled` / `select` | 选项值、显示文本、禁用态与选中事件 |
+### Root / Trigger / Value
+
+<ApiPropsTable
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Root.open', type: 'boolean', default: 'undefined' },
+    { name: 'Root.defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'Root.value', type: 'string', default: 'undefined' },
+    { name: 'Root.defaultValue', type: 'string', default: "''" },
+    { name: 'Root.disabled', type: 'boolean', default: 'false' },
+    { name: 'Root.readOnly', type: 'boolean', default: 'false' },
+    { name: 'Root.closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'Root.openChange', type: '(detail) => void', default: '—' },
+    { name: 'Root.valueChange', type: '(detail) => void', default: '—' },
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Trigger.accessibleLabel', type: 'string', default: "''" },
+    { name: 'Value.placeholder', type: 'string', default: "''" },
+  ]}
+/>
+
+### Content / Item
+
+<ApiPropsTable
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Content.position', type: "'popper' | 'item-aligned'", default: "'popper'" },
+    { name: 'Content.side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content.align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'Content.sideOffset', type: 'number', default: '8' },
+    { name: 'Content.alignOffset', type: 'number', default: '0' },
+    { name: 'Content.avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'Content.collisionPadding', type: 'number', default: '10' },
+    { name: 'Item.value', type: 'string', default: "''" },
+    { name: 'Item.textValue', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+    { name: 'Item.closeOnSelect', type: 'boolean', default: '继承 Root' },
+    { name: 'Item.select', type: '(detail) => void', default: '—' },
+  ]}
+/>
+
+`Surface`、`Viewport`、`ItemText`、`Group`、`Label` 与 `Separator` 为结构与分组部件，不额外声明组件属性。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-SELECT.yaml',
+    'P-LIQUID-GLASS-SELECT-TRIGGER.yaml',
+    'P-LIQUID-GLASS-SELECT-CONTENT.yaml',
+    'P-LIQUID-GLASS-SELECT-ITEM.yaml',
+    'P-BASE-SELECT.yaml',
+  ]}
+/>

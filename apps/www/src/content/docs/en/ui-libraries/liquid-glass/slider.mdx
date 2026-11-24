@@ -1,11 +1,13 @@
 ---
 title: 'Slider'
-description: 'A Liquid Glass single-thumb slider with pointer/touch dragging, keyboard stepping, and Field/Form integration.'
+description: 'A Liquid Glass slider supporting single-value and multi-thumb selection, transient glass material, and Field/Form integration.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Slider provides single-thumb numeric selection over a continuous or stepped track, supporting pointer/touch dragging and keyboard stepping.
+Liquid Glass Slider pairs a slim continuous track with an elevated capsule thumb for single-value and multi-thumb range selection, offering transient Liquid Glass refraction during active drag plus `Field` / `Form` integration.
 
 ## Preview
 
@@ -13,27 +15,141 @@ Liquid Glass Slider provides single-thumb numeric selection over a continuous or
   demoId="demo-liquid-glass-slider"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import scalar slider parts and multi-value `sliderValues*` parts from `@proto.ui/prototypes-liquid-glass/slider`.
 
 ## Usage
 
-- **Parts**: `Root`, `Label`, `Track`, `Indicator`, `Thumb`, `FieldThumb`, `Value`.
-- **Dragging and keyboard**: `Track` handles pointer and touch dragging, while `Thumb` provides a focusable slider supporting arrow keys (mirrored in horizontal RTL), `Shift` ×10 stepping, `PageUp`/`PageDown`, and `Home`/`End`. Values snap from `min` by `step` and clamp to `[min, max]`.
-- **Controlled state**: pass `value` and handle `valueChange` for controlled mode; `valueCommit` fires when an interaction finishes, and cancelling an uncontrolled drag restores its starting value.
-- **Field and Form integration**: replace `Thumb` with `FieldThumb` inside [Field](/en/ui-libraries/liquid-glass/field/) or [Form](/en/ui-libraries/liquid-glass/form/) to bridge `FieldLabel`, numeric validation, serialization, and reset.
+```tsx
+import {
+  LiquidGlassSliderRoot,
+  LiquidGlassSliderTrack,
+  LiquidGlassSliderIndicator,
+  LiquidGlassSliderThumb,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <LiquidGlassSliderRoot defaultValue={33} min={0} max={100} step={1}>
+      <LiquidGlassSliderTrack>
+        <LiquidGlassSliderIndicator />
+        <LiquidGlassSliderThumb />
+      </LiquidGlassSliderTrack>
+    </LiquidGlassSliderRoot>
+  );
+}
+```
+
+- **Material layering**: Scalar `Thumb` and `FieldThumb` stay crisp opaque capsules at rest and request transient `liquid-glass` material only during active press/drag. Set `material="opaque"` when embedding a slider inside an already-glass toolbar or sheet to avoid stacking glass on glass, and disabled or reduced-transparency states keep a readable opaque fallback.
+- **Pointer and keyboard**: `Track` handles mouse and touch dragging; `Thumb` supports arrow keys (mirrored in horizontal RTL), `Shift` ×10 stepping, `PageUp`/`PageDown`, and `Home`/`End`.
+- **Field and Form integration**: Replace `Thumb` with `FieldThumb` inside [Field](/en/ui-libraries/liquid-glass/field/) or [Form](/en/ui-libraries/liquid-glass/form/), or mount a grouped `Values Root` reporting `number[]`.
+
+## Examples
+
+### Range
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-slider-values"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Multiple Thumbs
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-slider-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Vertical
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-slider-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-slider-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled & Opaque Material
+
+Shows disabled state alongside `material="opaque"` for sliders placed inside glass surfaces.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-slider-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop / Event | Description |
-| --- | --- | --- |
-| Root | `value`, `defaultValue` | Controlled / uncontrolled numeric value |
-| Root | `min`, `max`, `step` | Numeric bounds and step increment |
-| Root | `disabled`, `readOnly`, `orientation`, `direction` | Interaction state, axis, and reading direction |
-| Root | `valueChange`, `valueCommit` | Live change proposal / interaction completion event |
-| Track / Indicator / Label / Value | — | Interactive track, filled range, label, and passive readout |
-| Thumb / FieldThumb | — | Standalone focusable thumb / Field- and Form-integrated thumb |
+### Root (Scalar)
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'number | undefined', default: 'uncontrolled' },
+    { name: 'defaultValue', type: 'number', default: '0' },
+    { name: 'min', type: 'number', default: '0' },
+    { name: 'max', type: 'number', default: '100' },
+    { name: 'step', type: 'number', default: '1' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'valueText', type: 'string', default: "''" },
+  ]}
+/>
+
+### Thumb / FieldThumb & Values Parts
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    {
+      name: 'material (Thumb / FieldThumb / ValuesThumb)',
+      type: "'auto' | 'opaque'",
+      default: "'auto'",
+    },
+    {
+      name: 'value / defaultValue (Values Root)',
+      type: 'number | readonly number[]',
+      default: '0',
+    },
+    { name: 'largeStep (Values Root)', type: 'number', default: '10 × step' },
+    { name: 'minStepsBetweenValues (Values Root)', type: 'number', default: '0' },
+    {
+      name: 'thumbCollisionBehavior (Values Root)',
+      type: "'push' | 'swap' | 'none'",
+      default: "'push'",
+    },
+    { name: 'required (Values Root)', type: 'boolean', default: 'false' },
+    { name: 'index (Values Thumb)', type: 'number', default: '0' },
+    { name: 'startIndex / endIndex (Values Indicator)', type: 'number', default: 'full span' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-SLIDER.yaml',
+    'P-LIQUID-GLASS-SLIDER-THUMB.yaml',
+    'P-LIQUID-GLASS-SLIDER-FIELD-THUMB.yaml',
+    'P-LIQUID-GLASS-SLIDER-VALUES.yaml',
+    'P-BASE-SLIDER.yaml',
+    'P-BASE-SLIDER-VALUES.yaml',
+  ]}
+/>

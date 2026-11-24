@@ -1,42 +1,117 @@
 ---
 title: 'Bootstrap 2.3.2 Textarea'
-description: '沿用归档 Bootstrap 2.3.2 输入框视觉风格的多行文本输入组件。'
+description: '沿用归档 Bootstrap 2.3.2 输入框视觉风格与经典表单校验配色的多行文本输入组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Bootstrap 2.3.2 Textarea 将归档版本的经典文本框样式应用于 Base Textarea，在 Web 上渲染单一原生多行编辑器，并在深色宿主中保持经典的归档浅色配色。
+Bootstrap 2.3.2 Textarea 将归档版本的经典文本框样式（4px 圆角、内阴影、`#52a8ec` 聚焦光晕与 `#eee` 禁用底色）应用于 Base Textarea，在 Web 上渲染单一原生多行编辑器，并在深色宿主中保持经典的归档浅色配色。
 
 ## 预览
-
-可编辑发布说明内容、聚焦只读文本框，并与禁用状态对比。
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-textarea"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={true}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。[查看已实现的子集](../)。
+当前以工作区源码提供，可从 `@proto.ui/prototypes-bootstrap-2-3-2/textarea`（以及表单组合入口 `@proto.ui/prototypes-bootstrap-2-3-2/field`）导入。[查看已实现的子集](../)。
 
 ## 用法
 
-- **值与输入事件**：支持受控 `value` 与非受控 `defaultValue`，统一处理 `input`、`change` 与 IME 组合输入事件。
-- **行数与换行**：通过 `rows` 和 `wrap` 控制初始显示行数与换行策略。
-- **表单字段组合**：如需标签、帮助说明与错误提示，请与 `Field` 组合使用。
+```tsx
+import { Bootstrap232TextareaRoot } from '../proto-ui/components/react';
+```
+
+```tsx
+<Bootstrap232TextareaRoot placeholder="Type your message here." rows={4} />
+```
+
+- **值与输入事件**：支持受控 `value` 与非受控 `defaultValue`，统一处理 `valueChange`、`change` 与 IME 组合输入事件，并提供 `resetValue()`、`focusSelf()` 与 `blurSelf()` 方法。
+- **行数与换行**：通过 `rows` 和 `wrap` 控制初始显示行数与换行策略，默认支持垂直拉伸（`resize-y`）与 64px 最小高度。
+- **表单字段组合**：搭配 `Field`、`FieldLabel`、`FieldDescription`、`FieldError` 与 `FieldTextarea` 使用，可自动接入标签关联及经典 `#953b39` / `#d59392` 错误态样式。
+
+## 示例
+
+### 表单字段
+
+组合 `Field`、`FieldLabel`、`FieldTextarea` 与 `FieldDescription` 呈现经典的 Bootstrap 表单块。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-textarea-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用
+
+禁用状态下文本框呈现经典的 `#eee` 浅灰底色与 `not-allowed` 光标。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-textarea-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 无效状态
+
+通过 `Field` 的 `invalid` 与 `errors` 属性触发 Bootstrap 2.3.2 经典的 `#953b39` 边框与 `#d59392` 聚焦光晕。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-textarea-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 搭配按钮
+
+与经典 Bootstrap 2.3.2 按钮组合构建提交表单。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-textarea-button"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 分类 | 成员 | 说明 |
-| --- | --- | --- |
-| 值与状态 | `value` / `defaultValue`、`disabled`、`readOnly`、`placeholder` | 多行文本值与编辑状态 |
-| 布局与约束 | `rows`、`wrap`、`minLength`、`maxLength`、`name`、`required`、`autoComplete` | 原生多行编辑属性 |
-| 无障碍 | `ariaLabel`、`labelledBy`、`describedBy` | 可访问名称与关联说明 |
-| 事件与方法 | `valueChange`、`change`、IME 组合事件、`focusSelf()`、`blurSelf()` | 变更通知与焦点控制 |
+以下属性属于 `Root`（传入 `value` 可进入受控模式；未限制长度时 `minLength` 与 `maxLength` 为 `-1`）：
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string | undefined', default: '非受控' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'rows', type: 'number', default: '2' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    { name: 'wrap', type: "'soft' | 'hard'", default: "'soft'" },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'labelledBy', type: 'string', default: "''" },
+    { name: 'describedBy', type: 'string', default: "''" },
+  ]}
+/>
+
+- **暴露状态**：`value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing`（在 `FieldTextarea` 中额外暴露 `invalid` 与 `pending`）。
+- **暴露方法**：`focusSelf(options?)`、`blurSelf()`、`resetValue()`。
+- **事件**：`valueChange`、`change`、`compositionStart`、`compositionUpdate`、`compositionEnd`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-TEXTAREA.yaml', 'P-BASE-TEXTAREA.yaml']}
+/>

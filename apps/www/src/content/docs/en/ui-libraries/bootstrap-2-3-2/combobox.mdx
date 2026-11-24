@@ -4,8 +4,10 @@ description: 'A Bootstrap 2.3.2 searchable select that keeps query text separate
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Combobox combines an editable search input with a dropdown list of options, keeping the committed option key (`value`) distinct from the live query (`inputValue`).
+Bootstrap 2.3.2 Combobox pairs the classic `.input-append` joined text field and button trigger with an anchored dropdown menu while keeping the committed option key (`value`) distinct from the live query (`inputValue`).
 
 ## Preview
 
@@ -13,30 +15,110 @@ Combobox combines an editable search input with a dropdown list of options, keep
   demoId="demo-bootstrap-2-3-2-combobox"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Combobox is currently available from workspace source (`@proto.ui/prototypes-bootstrap-2-3-2/combobox`) and is not yet included in the `0.2.0` stable CLI registry.
 
 ## Usage
 
-Compose `Root`, `Input`, `Trigger`, `Content`, `Item`, and `Empty`:
+```tsx
+import {
+  comboboxRoot,
+  comboboxInput,
+  comboboxTrigger,
+  comboboxContent,
+  comboboxItem,
+  comboboxEmpty,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/combobox';
+```
+
+```html
+<bootstrap-2-3-2-combobox-root a11y-label="Framework">
+  <bootstrap-2-3-2-combobox-input
+    placeholder="Select a framework..."
+  ></bootstrap-2-3-2-combobox-input>
+  <bootstrap-2-3-2-combobox-trigger>▾</bootstrap-2-3-2-combobox-trigger>
+  <bootstrap-2-3-2-combobox-content>
+    <bootstrap-2-3-2-combobox-item value="next.js" text-value="Next.js"
+      >Next.js</bootstrap-2-3-2-combobox-item
+    >
+    <bootstrap-2-3-2-combobox-item value="sveltekit" text-value="SvelteKit"
+      >SvelteKit</bootstrap-2-3-2-combobox-item
+    >
+    <bootstrap-2-3-2-combobox-item value="astro" text-value="Astro"
+      >Astro</bootstrap-2-3-2-combobox-item
+    >
+    <bootstrap-2-3-2-combobox-empty>No frameworks found.</bootstrap-2-3-2-combobox-empty>
+  </bootstrap-2-3-2-combobox-content>
+</bootstrap-2-3-2-combobox-root>
+```
 
 - **Separate value and query**: `value` represents the selected option key while `inputValue` holds editable search text. Unmatched text is never silently committed as an option.
-- **Filtering and empty state**: Built-in filtering matches `textValue` and `keywords` case- and diacritic-insensitively. Pass `filter={false}` to supply pre-filtered items. `Empty` displays when nothing matches.
-- **Keyboard and IME**: Focus remains in `Input` while navigating with Arrow keys, and IME composition never selects an option. Disabled and duplicate-valued items cannot commit.
-- **Independent control**: `open`, `value`, and `inputValue` can each be controlled independently through their change requests.
+- **Filtering and empty state**: Built-in filtering matches `textValue` and `keywords` case- and diacritic-insensitively. Pass `filter={false}` to supply pre-filtered items.
+- **Classic Bootstrap 2.3.2 styling**: Joined 30px `.input-append` bar with `#52a8ec` focus glow, gradient active highlight, and bold blue selected-option state.
+
+## Examples
+
+### Timezones
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-combobox-timezones"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and Read-Only
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-combobox-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props | Description |
-| --- | --- | --- |
-| `Root` | `value` / `inputValue` / `open` | Independently controlled option value, query text, and open state |
-| `Root` | `filter` | Toggle built-in filtering; set `false` for externally filtered items |
-| `Input` | — | Single-line search input |
-| `Trigger` | — | Toggles the option list |
-| `Content` | — | Option list container |
-| `Item` | `value` / `textValue` / `keywords` / `disabled` | Individual selectable option |
-| `Empty` | — | Rendered when no items match the query |
+### Root
+
+Pass `value`, `inputValue`, or `open` to control each state independently.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
+    { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'filter', type: 'boolean', default: 'true' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Other parts
+
+<ApiPropsTable
+  headers={{ name: 'Part & Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Input.placeholder / a11yLabel / name', type: 'string', default: "''" },
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Content.side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content.align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'Content.sideOffset', type: 'number', default: '2' },
+    { name: 'Content.collisionPadding', type: 'number', default: '8' },
+    { name: 'Item.value / textValue / keywords', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-COMBOBOX.yaml', 'P-BASE-COMBOBOX.yaml']}
+/>

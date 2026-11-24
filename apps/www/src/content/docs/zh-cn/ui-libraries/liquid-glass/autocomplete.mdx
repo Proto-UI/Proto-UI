@@ -3,9 +3,11 @@ title: 'Autocomplete'
 description: '支持实时过滤建议与自由文本提交的 Liquid Glass 自动补全输入框。'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Autocomplete 在单行文本输入框的基础上提供可过滤的建议列表，既支持选中建议项提交其 `textValue`，也支持在无高亮建议时直接按 Enter 提交自由文本。
+Liquid Glass Autocomplete 将清晰可读的单行输入表面与悬浮于内容层之上的同心圆角 Liquid Glass 建议弹层结合，支持 `regular` / `prominent` 触发器层级与 `material="opaque"` 显式回退，同时提供完整的实时过滤与自由文本提交语义。
 
 ## 预览
 
@@ -13,25 +15,118 @@ Liquid Glass Autocomplete 在单行文本输入框的基础上提供可过滤的
   demoId="demo-liquid-glass-autocomplete"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供（`@proto.ui/prototypes-liquid-glass/autocomplete`），尚未进入 0.2.0 稳定版。
 
 ## 用法
 
-- **部件组成**：`Root`、`Input`、`Content`、`Item`、`Empty`、`Trigger`。
-- **值与查询分离**：`Root` 分别管理已提交文本 `value` 与当前输入查询 `inputValue`，两者以及弹层开关 `open` 均可独立受控并通过对应变更事件接收请求。
-- **过滤与键盘**：内置过滤基于 `textValue` 与 `keywords` 并忽略大小写及重音；传入 `filter={false}` 时可由应用自行过滤选项。方向键浏览建议时焦点始终留在输入框内，IME 组合输入期间不会误触发选择。
-- **边界处理**：`Empty` 根据实际匹配数量显示；禁用项与重复值的选项不会提交。
+```html
+<proto-ui-liquid-glass-autocomplete-root a11y-label="Framework">
+  <proto-ui-liquid-glass-autocomplete-input
+    placeholder="Search frameworks…"
+  ></proto-ui-liquid-glass-autocomplete-input>
+  <proto-ui-liquid-glass-autocomplete-trigger variant="regular" material="auto">
+    Options
+  </proto-ui-liquid-glass-autocomplete-trigger>
+  <proto-ui-liquid-glass-autocomplete-content material="auto">
+    <proto-ui-liquid-glass-autocomplete-item value="next" text-value="Next.js" keywords="react ssr">
+      Next.js
+    </proto-ui-liquid-glass-autocomplete-item>
+    <proto-ui-liquid-glass-autocomplete-item
+      value="astro"
+      text-value="Astro"
+      keywords="islands static"
+    >
+      Astro
+    </proto-ui-liquid-glass-autocomplete-item>
+    <proto-ui-liquid-glass-autocomplete-empty
+      >No matching frameworks.</proto-ui-liquid-glass-autocomplete-empty
+    >
+  </proto-ui-liquid-glass-autocomplete-content>
+</proto-ui-liquid-glass-autocomplete-root>
+```
+
+### 材质分层与交互说明
+
+- **分层与同心圆角**：`Input` 保持不透明编辑表面以确保文本可读；`Trigger` 与 `Content` 作为悬浮功能层声明 `liquid-glass` 材质，`Content`（`rounded-2xl` + `p-1`）与内部 `Item`（`rounded-xl`）保持严格同心几何，避免玻璃叠玻璃。
+- **材质回退与层级**：`Trigger` 支持 `variant="regular" | "prominent"`，`Trigger` 与 `Content` 均支持 `material="auto" | "opaque"`；禁用态撤回光学材质并使用高可读性的语义回退配色。
+- **过滤与键盘**：内置过滤匹配 `textValue` 与 `keywords` 并忽略大小写和重音；无高亮建议时按 `Enter` 提交自由文本，IME 合成期间不会误触发选择。
+
+## 示例
+
+### 显著层级与不透明回退
+
+对比 `variant="prominent"` 材质触发器与 `material="opaque"` 实色回退模式。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-autocomplete-prominent"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 关键词与忽略重音匹配
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-autocomplete-keywords"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读状态
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-autocomplete-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 | 说明 |
-| --- | --- | --- |
-| Root | `value` / `inputValue` / `open` | 已提交文本、当前查询文本与下拉开关，均支持独立受控 |
-| Root | `filter` | 默认内置过滤；设为 `false` 时使用应用预先过滤的子项 |
-| Item | `textValue` / `keywords` / `disabled` | 建议项展示与匹配文本、扩展关键词及禁用开关 |
-| Empty | — | 当无匹配建议时展示空状态内容 |
+### Root
+
+传入 `value`、`inputValue` 或 `open` 可独立进入受控模式；暴露 `valueChange`、`inputValueChange`、`openChange` 事件与 `openPopup()`、`close()`、`setInputValue()`、`select()` 方法。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
+    { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'filter', type: 'boolean', default: 'true' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### 其他部件属性
+
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Input · placeholder / a11yLabel / name', type: 'string', default: "''" },
+    { name: 'Trigger · disabled', type: 'boolean', default: 'false' },
+    { name: 'Trigger · variant', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'Trigger · material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'Content · material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'Content · side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content · align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'Content · sideOffset / collisionPadding', type: 'number', default: '4 / 8' },
+    { name: 'Item · value / textValue / keywords', type: 'string', default: "''" },
+    { name: 'Item · disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-AUTOCOMPLETE.yaml', 'P-BASE-AUTOCOMPLETE.yaml']}
+/>

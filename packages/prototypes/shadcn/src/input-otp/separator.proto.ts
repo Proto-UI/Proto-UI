@@ -10,8 +10,10 @@ export default definePrototype<ShadcnInputOtpSeparatorProps, InputOtpSeparatorEx
   setup(def) {
     const inherited = asInputOtpSeparator();
     setupShadcnStyleSelection(def, 'nova');
-    // Upstream sizes its supplied icon, not arbitrary authored children. Retain the Base slot.
-    def.feedback.style.use(tw('flex items-center'));
+    // Retain the Base slot while giving dividers balanced spacing and muted tone.
+    def.feedback.style.use(
+      tw('inline-flex shrink-0 items-center justify-center px-2 text-muted-foreground select-none')
+    );
     return inherited.render;
   },
 });

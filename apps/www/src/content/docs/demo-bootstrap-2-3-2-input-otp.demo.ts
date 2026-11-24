@@ -1,2 +1,3 @@
-import { createNumericInputDemo } from './numeric-input-demo.shared';
-export default createNumericInputDemo('bootstrap-2-3-2', 'input-otp');
+import { createInputOtpHeroDemo } from './demo_components/input-otp/input-otp-demo.shared';
+
+export default createInputOtpHeroDemo('bootstrap-2-3-2');

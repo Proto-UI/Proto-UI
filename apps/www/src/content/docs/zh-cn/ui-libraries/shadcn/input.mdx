@@ -1,6 +1,6 @@
 ---
 title: 'Input'
-description: '支持受控/非受控值、输入法组合事件与无障碍命名的 Shadcn 风格单行文本输入框。'
+description: '支持受控与非受控值、输入法组合事件及无障碍命名的 Shadcn 风格单行文本输入框。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,11 +8,15 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-单行文本输入框，基于 [Base Input](../../base/input/) 提供受控/非受控值管理、规范化的输入法（IME）事件、禁用/只读状态与无障碍属性，并在 Web 端渲染为原生 `input[type="text"]`。本页示例采用 **Shadcn Rhea** 风格。
+用于表单与用户数据录入的单行文本输入框，基于 [Base Input](../../base/input/) 提供受控/非受控值管理、规范化的输入法（IME）事件、禁用与只读状态以及无障碍命名属性。本页示例采用 **Shadcn Rhea** 风格。
 
 ## 预览
 
-<PrototypePreviewer demoId="demo-shadcn-input" initialRuntime="wc" />
+<PrototypePreviewer
+  demoId="demo-shadcn-input"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## 安装
 
@@ -24,17 +28,88 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 ## 用法
 
-- **外观预设**：在 **Shadcn Rhea** 风格下采用 `h-8`（32px 高）、`radius-2xl`、`bg-input/50`、`px-2.5 py-1` 与 `border-ring ring-3 ring-ring/30` 焦点环，在视口宽度 `>= 768px` 时自动切换为小号字号；未设置外层 [Style Scope](../style-scope/) 时保留默认兼容外观。
-- **表单校验与标签**：独立的 `Input` 专注于文本输入；如需校验错误状态、帮助文本与标签点击聚焦，请搭配 [Field](../field/) 使用。
-- **重置值**：`Root` 暴露继承自 Base Input 的 `resetValue(value?: string): boolean` 方法，用于将编辑器恢复到初始值或指定值（受控与 IME 生命周期细节见 [Base Input](../../base/input/)）。
+```tsx
+import { ShadcnInputRoot } from '@/components/ui/shadcn-input';
+
+export function Example() {
+  return <ShadcnInputRoot placeholder="Enter text" ariaLabel="Text input" />;
+}
+```
+
+- **外观预设**：通过外层 [Style Scope](../style-scope/) 或 `styleProfile` 切换预设；在 **Shadcn Rhea** 风格下采用 `h-8`（32px）、`radius-2xl`、`bg-input/50`（暗色模式 `bg-input/30`）与 `border-ring ring-3 ring-ring/30` 焦点环，在视口宽度 `>= 768px` 时自动切换为小号字号。
+- **表单校验与标签**：独立的 `Input` 专注于单行文本编辑；如需标签点击聚焦、帮助说明与校验错误状态，请搭配 [Field](../field/) 使用。
+- **无障碍与控制方法**：`Root` 暴露 `focusSelf()`、`blurSelf()` 与 `resetValue(value?: string)`，并支持 `ariaLabel`、`labelledBy` 与 `describedBy`。
+
+## 示例
+
+### 基础
+
+最简独立文本输入框，通过 `placeholder` 提供输入提示。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 表单字段
+
+搭配 `Field`、`FieldLabel`、`FieldControl` 与 `FieldDescription` 组合完整的表单字段。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用状态
+
+设置 `disabled` 阻止聚焦与编辑，并同步呈现禁用底色与指针反馈。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 校验错误
+
+在 `Field` 中设置 `invalid` 与 `errors`，自动呈现错误边框、焦点环与无障碍错误说明。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 行内搜索
+
+将 `Input` 与 `Button` 水平排列，并配合 `inputMode="search"` 与 `enterKeyHint="search"` 优化软键盘体验。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-inline"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 网格与表单
+
+结合网格布局、`Label`、`Field` 与提交/取消按钮构建多字段表单。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-传入 `value` 进入受控模式。`inputMode` 与 `enterKeyHint` 为可选属性，无默认值。
+### Root 属性
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: 'undefined' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -44,13 +119,32 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
     { name: 'autoComplete', type: 'string', default: "''" },
     { name: 'minLength', type: 'number', default: '-1' },
     { name: 'maxLength', type: 'number', default: '-1' },
+    {
+      name: 'inputMode',
+      type: "'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'",
+      default: 'undefined',
+    },
+    {
+      name: 'enterKeyHint',
+      type: "'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'",
+      default: 'undefined',
+    },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'labelledBy', type: 'string', default: "''" },
     { name: 'describedBy', type: 'string', default: "''" },
+    {
+      name: 'styleProfile',
+      type: "'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'nova'",
+    },
   ]}
 />
 
-以上属性属于 `Root`。
+### 暴露状态、方法与事件
+
+- **状态**：`value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing`
+- **方法**：`focusSelf(options?)`、`blurSelf()`、`resetValue(value?: string): boolean`
+- **事件**：`valueChange`、`change`、`compositionStart`、`compositionUpdate`、`compositionEnd`
 
 ## 参考
 

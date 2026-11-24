@@ -1,39 +1,109 @@
 ---
 title: 'Checkbox'
-description: 'A square Brutalist checkbox supporting checked, unchecked, and indeterminate states with Form integration.'
+description: 'A square Brutalist checkbox supporting checked, unchecked, indeterminate states, and Form integration.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Checkbox supports checked, unchecked, and indeterminate (`mixed`) states in a crisp square Brutalist frame with high-contrast check and dash indicators, accessible via pointer or `Space`.
+Brutalist Checkbox supports unchecked, checked, and indeterminate (`mixed`) states in a crisp square 2px Brutalist frame with high-contrast check and dash indicators, accessible via pointer or `Space`.
 
 ## Preview
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-checkbox" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-checkbox"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
-
-- **Package exports**: import `Root` and `Indicator` from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/checkbox`
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `BrutalistCheckboxRoot` and `BrutalistCheckboxIndicator` from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/checkbox`.
 
 ## Usage
 
-### Parts
+```tsx
+import {
+  BrutalistCheckboxIndicator,
+  BrutalistCheckboxRoot,
+  BrutalistLabelRoot,
+} from '@proto.ui/prototypes-brutalist';
+
+export function Example() {
+  return (
+    <div className="flex items-center gap-3">
+      <BrutalistCheckboxRoot defaultChecked>
+        <BrutalistCheckboxIndicator />
+      </BrutalistCheckboxRoot>
+      <BrutalistLabelRoot>Accept terms and conditions</BrutalistLabelRoot>
+    </div>
+  );
+}
+```
+
+### Parts and Form composition
 
 - **Root**: Manages `checked` and `indeterminate` state, `disabled` / `readOnly` policies, keyboard focus, and `checkbox` ARIA semantics (including `aria-checked="mixed"`).
 - **Indicator**: Derives its state from the enclosing `Root` and renders the decorative check or mixed dash icon without taking focus. When both `checked` and `indeterminate` are `true`, the mixed dash takes precedence.
+- **Read-only and Form**: `readOnly={true}` keeps the checkbox focusable while blocking value changes; `disabled={true}` also removes it from the tab order. For `Form` validation, labels, and reset, use `fieldCheckbox` from `@proto.ui/prototypes-brutalist/field` inside a `FormField` (see the [Form choice recipe](../../form/)).
 
-### Read-only and Form composition
+## Examples
 
-- `readOnly={true}` keeps the checkbox focusable while blocking value changes; `disabled={true}` also removes it from the tab order.
-- To integrate with `Form` validation, labels, and reset, use `fieldCheckbox` from `@proto.ui/prototypes-brutalist/field` inside a `FormField` (see the [Form choice recipe](../../form/)).
+### Description
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-checkbox-description"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Disabled and read-only
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-checkbox-disabled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Invalid state
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-checkbox-invalid"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Group
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-checkbox-group"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Table
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-checkbox-table"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
@@ -42,11 +112,30 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'checked', type: 'boolean | undefined', default: 'uncontrolled' },
     { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'indeterminate', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
-    { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
   ]}
 />
 
-Pass `checked` or `indeterminate` to control each state independently. `Indicator` declares no props of its own.
+`Root` exposes `checked`, `indeterminate`, `disabled`, `readOnly`, `required`, `hovered`, `focused`, `focusVisible`, and `pressed` states, `focusSelf(options?)` and `resetValue()` methods, and `checkedChange` (`{ checked, indeterminate }`) and `indeterminateChange` (`{ indeterminate }`) events.
+
+### Indicator
+
+`Indicator` declares no props of its own. It follows the enclosing `Root` context and exposes `checked`, `indeterminate`, `isChecked()`, and `isIndeterminate()`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-CHECKBOX.yaml',
+    'P-BRUTALIST-CHECKBOX-INDICATOR.yaml',
+    'P-BASE-CHECKBOX.yaml',
+    'P-BASE-CHECKBOX-INDICATOR.yaml',
+  ]}
+/>

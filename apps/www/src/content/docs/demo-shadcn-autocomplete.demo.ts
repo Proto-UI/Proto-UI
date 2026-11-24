@@ -1,97 +1,101 @@
 import { withShadcnRheaDemo } from './shadcn-demo-style';
 import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
+
 export default withShadcnRheaDemo({
-  'type': 'demo',
-  'root': {
-    'kind': 'box',
-    'className': 'min-w-0 grid gap-4 p-4',
-    'children': [
+  type: 'demo',
+  root: {
+    kind: 'box',
+    className: 'min-w-0 grid gap-3 p-4 w-full max-w-md',
+    children: [
       {
-        'kind': 'proto',
-        'prototypeId': 'shadcn-autocomplete-root',
-        'children': [
+        kind: 'proto',
+        prototypeId: 'shadcn-autocomplete-root',
+        props: {
+          a11yLabel: 'Framework',
+        },
+        ref: 'root',
+        children: [
           {
-            'kind': 'proto',
-            'prototypeId': 'shadcn-autocomplete-input',
-            'props': {
-              'placeholder': 'Search fruit…',
-              'a11yLabel': 'Choose fruit',
+            kind: 'proto',
+            prototypeId: 'shadcn-autocomplete-input',
+            props: {
+              placeholder: 'Search frameworks…',
+              a11yLabel: 'Framework',
             },
-            'ref': 'input',
+            ref: 'input',
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'shadcn-autocomplete-trigger',
-            'children': ['Show options'],
+            kind: 'proto',
+            prototypeId: 'shadcn-autocomplete-trigger',
+            props: {
+              size: 'icon',
+            },
+            children: [
+              {
+                kind: 'box',
+                className: 'sr-only',
+                children: ['Toggle framework suggestions'],
+              },
+            ],
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'shadcn-autocomplete-content',
-            'children': [
+            kind: 'proto',
+            prototypeId: 'shadcn-autocomplete-content',
+            children: [
               {
-                'kind': 'proto',
-                'prototypeId': 'shadcn-autocomplete-item',
-                'children': ['Apple'],
-                'props': {
-                  'value': 'apple',
-                  'textValue': 'Apple',
-                },
+                kind: 'proto',
+                prototypeId: 'shadcn-autocomplete-item',
+                props: { value: 'next', textValue: 'Next.js', keywords: 'react ssr vercel' },
+                children: ['Next.js'],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'shadcn-autocomplete-item',
-                'children': ['Pear'],
-                'props': {
-                  'value': 'pear',
-                  'textValue': 'Pear',
-                },
+                kind: 'proto',
+                prototypeId: 'shadcn-autocomplete-item',
+                props: { value: 'astro', textValue: 'Astro', keywords: 'islands static' },
+                children: ['Astro'],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'shadcn-autocomplete-item',
-                'children': ['Orange'],
-                'props': {
-                  'value': 'orange',
-                  'textValue': 'Orange',
-                },
+                kind: 'proto',
+                prototypeId: 'shadcn-autocomplete-item',
+                props: { value: 'nuxt', textValue: 'Nuxt', keywords: 'vue nitro' },
+                children: ['Nuxt'],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'shadcn-autocomplete-item',
-                'children': ['Unavailable'],
-                'props': {
-                  'value': 'locked',
-                  'textValue': 'Unavailable',
-                  'disabled': true,
-                },
+                kind: 'proto',
+                prototypeId: 'shadcn-autocomplete-item',
+                props: { value: 'sveltekit', textValue: 'SvelteKit', keywords: 'svelte vite' },
+                children: ['SvelteKit'],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'shadcn-autocomplete-empty',
-                'children': ['No matching results'],
+                kind: 'proto',
+                prototypeId: 'shadcn-autocomplete-item',
+                props: { value: 'legacy', textValue: 'Legacy v1', disabled: true },
+                children: ['Legacy v1'],
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-autocomplete-empty',
+                children: ['No matching frameworks. Press Enter to use custom input.'],
               },
             ],
           },
         ],
-        'props': {
-          'a11yLabel': 'Choose fruit',
-        },
-        'ref': 'root',
       },
       {
-        'kind': 'box',
-        'ref': 'status',
-        'attrs': {
+        kind: 'box',
+        ref: 'status',
+        className: 'text-xs text-muted-foreground',
+        attrs: {
           'aria-live': 'polite',
         },
-        'children': ['Type, then use arrows and Enter or select a result.'],
+        children: ['Pick a framework or press Enter to submit custom text.'],
       },
     ],
   },
   setup({ refs, api }) {
     api.setProps('root', {
       onValueChange: (detail: { value: string; textValue: string }) => {
-        refs.status.textContent = detail.textValue + ' (' + detail.value + ')';
+        refs.status.textContent = detail.textValue ? `Committed: ${detail.textValue}` : 'Cleared';
       },
     });
   },

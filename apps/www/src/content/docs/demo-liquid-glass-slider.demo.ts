@@ -1,2 +1,3 @@
-import { createNumericInputDemo } from './numeric-input-demo.shared';
-export default createNumericInputDemo('liquid-glass', 'slider');
+import { createSliderBasicDemo } from './demo_components/slider/slider-demo-helpers';
+
+export default createSliderBasicDemo('liquid-glass');

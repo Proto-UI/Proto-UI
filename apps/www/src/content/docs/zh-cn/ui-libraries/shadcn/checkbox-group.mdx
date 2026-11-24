@@ -1,13 +1,13 @@
 ---
 title: 'Checkbox Group'
-description: '管理多选复选框集合、全选/半选汇总以及表单集成的分组组件。'
+description: '管理多选复选框集合、全选/半选汇总、水平排列与表单校验的 Shadcn 复选框组组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-用于管理一组关联复选框的分组组件，内置字符串数组值管理、全选/半选控制以及与 `Field` / `Form` 的无缝集成。本页示例采用 **Shadcn Rhea** 风格。
+用于管理一组关联复选框的分组组件，内置字符串数组值管理、全选/半选联动、垂直与水平排布，以及与 `Field` / `Form` 的无缝集成。本页示例采用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -15,42 +15,139 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   demoId="demo-shadcn-checkbox-group"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-## 用法
+## 安装
 
 当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-### 部件结构
+## 用法
 
-`Checkbox Group` 由 `Root`、`Item` 与 `All` 三个部件组成：
+```tsx
+import {
+  ShadcnCheckboxGroupRoot,
+  ShadcnCheckboxGroupAll,
+  ShadcnCheckboxGroupItem,
+} from '../proto-ui/components/react';
 
-- **Root**：统一管理选中值数组（`value` / `defaultValue`）、禁用、只读与无障碍名称（`ariaLabel`）。
-- **Item**：单个复选框项，接收 `value` 与 `disabled`；每个选项独立参与 `Tab` 顺序，按 `Space` 切换（`Enter` 不切换）。
-- **All**：汇总全部可用项的选中状态（勾选、横线半选或未选），点击时批量切换可用项并保持禁用项的原有状态。
+export function Example() {
+  return (
+    <ShadcnCheckboxGroupRoot
+      styleProfile="rhea"
+      defaultValue={['email']}
+      ariaLabel="Notification channels"
+    >
+      <ShadcnCheckboxGroupAll>All notifications</ShadcnCheckboxGroupAll>
+      <ShadcnCheckboxGroupItem value="email">Email updates</ShadcnCheckboxGroupItem>
+      <ShadcnCheckboxGroupItem value="sms">SMS alerts</ShadcnCheckboxGroupItem>
+    </ShadcnCheckboxGroupRoot>
+  );
+}
+```
 
-### 受控与表单集成
+### 部件结构与键盘交互
 
-- 传入 `value` 进入受控模式：切换操作触发 `valueChange` 事件，由外部决定是否更新；`getValue()` 返回当前值数组的副本，重复 `value` 的项会被忽略。
-- 置于 `Field` 或 `FormField` 内时，`Root` 会自动上报数组值、组焦点与校验状态，支持标签点击激活、必填校验、表单提交序列化与重置。
-- 样式部件内置 `aria-hidden` 视觉指示图标（勾选为对勾、混合为横线、未选为空框），不依赖单一颜色区分状态。
+- **Root**：管理选中字符串数组（`value` / `defaultValue`）、排列方向（`orientation`）、禁用、只读与组级无障碍名称（`ariaLabel`）。
+- **Item**：单个复选框项，接收唯一的 `value` 与可选 `disabled`；每个可用项独立参与 `Tab` 顺序，按 `Space` 切换选中（`Enter` 不切换）。
+- **All**：根据所有可用项自动推导勾选、横线半选（`aria-checked="mixed"`）或未选状态，点击时仅批量切换可用项并保留已禁用项的原状态。
+- **表单与无障碍**：内置 `aria-hidden` 视觉指示图标（对勾、横线与空框），焦点环直接作用在复选框本体上，并自动接入 `Field` / `FormField` 的标签点击聚焦、必填校验、提交序列化与重置。
+
+## 示例
+
+### 基础用法
+
+不含 `All` 汇总项的标准多选复选框组。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-group-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 水平排列
+
+通过 `orientation="horizontal"` 将选项水平折行排布。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-group-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读
+
+`disabled` 会将整组移出交互与焦点顺序；`readOnly` 保留聚焦浏览能力但阻止修改选中值。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+传入 `value` 后由外部持有状态，用户点击或按键切换会触发 `valueChange` 请求事件，由外部决定是否更新。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-group-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 表单校验
+
+放入 `FormField` 并开启 `required` 后，取消全部选项并提交会触发必填校验错误，支持一键重置恢复初始选中项。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-group-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-传入 `value` 进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string[] | undefined', default: '非受控' },
     { name: 'defaultValue', type: 'string[]', default: '[]' },
+    { name: 'orientation', type: "'vertical' | 'horizontal'", default: "'vertical'" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'new-york-v4'" },
   ]}
 />
 
-以上属性属于 `Root`。`Item` 接受 `value` 与 `disabled`。
+### Item
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: '继承自 Root / Scope' },
+  ]}
+/>
+
+### All
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: '继承自 Root / Scope' },
+  ]}
+/>
+
+### 事件、方法与状态
+
+- **Root 事件**：`valueChange`（载荷 `{ value: string[] }`）。
+- **Root 方法**：`getValue(): string[]`（返回当前选中数组副本）、`resetValue(): boolean`、`focusSelf(): void`。
+- **Root 状态**：`checked`、`indeterminate`、`disabled`、`readOnly`（及来自 `Field` 绑定的 `invalid`、`fieldRequired`、`fieldDisabled`、`fieldReadOnly`）。
+- **Item / All 状态**：`checked`、`indeterminate`、`disabled`、`readOnly`、`focused`、`focusVisible`。
 
 ## 参考
 

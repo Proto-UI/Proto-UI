@@ -1,11 +1,13 @@
 ---
 title: 'Slider'
-description: '支持指针/触摸拖拽、精细键盘步进与 Field/Form 联动的 Liquid Glass 滑块组件。'
+description: '支持单值与多值范围拖拽、瞬态玻璃材质与 Field/Form 联动的 Liquid Glass 滑块组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Slider 提供单滑块（single-thumb）连续或步进数值调节，支持在轨道上直接指针/触摸拖动，以及在滑块手柄上进行精细的键盘调节。
+Liquid Glass Slider 采用纤细连续轨道与高对比度胶囊滑块，支持单值与多值范围选择、键盘微调及 `Field` / `Form` 联动，并在按下拖拽时呈现瞬态 Liquid Glass 折射反馈。
 
 ## 预览
 
@@ -13,27 +15,141 @@ Liquid Glass Slider 提供单滑块（single-thumb）连续或步进数值调节
   demoId="demo-liquid-glass-slider"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-liquid-glass/slider` 导入单值滑块与多值滑块 `sliderValues*` 部件。
 
 ## 用法
 
-- **部件组成**：`Root`、`Label`、`Track`、`Indicator`、`Thumb`、`FieldThumb`、`Value`。
-- **拖拽与键盘交互**：`Track` 响应指针与触摸拖动；`Thumb` 作为单一可聚焦滑块支持方向键（水平 RTL 自动反向）、`Shift` 十倍步进、`PageUp` / `PageDown` 与 `Home` / `End`。数值自动从 `min` 对齐 `step` 并限制在 `[min, max]` 之间。
-- **受控与提交事件**：传入 `value` 进入受控模式，交互发出 `valueChange` 提议并在拖拽结束时发出 `valueCommit`；取消拖动时非受控滑块自动恢复拖动前的值。
-- **与 Field / Form 集成**：在 [Field](/zh-cn/ui-libraries/liquid-glass/field/) 或 [Form](/zh-cn/ui-libraries/liquid-glass/form/) 中使用 `FieldThumb` 替代 `Thumb`，即可桥接 `FieldLabel` 激活、数值校验、表单序列化与重置；独立使用时搭配 `SliderLabel`。
+```tsx
+import {
+  LiquidGlassSliderRoot,
+  LiquidGlassSliderTrack,
+  LiquidGlassSliderIndicator,
+  LiquidGlassSliderThumb,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <LiquidGlassSliderRoot defaultValue={33} min={0} max={100} step={1}>
+      <LiquidGlassSliderTrack>
+        <LiquidGlassSliderIndicator />
+        <LiquidGlassSliderThumb />
+      </LiquidGlassSliderTrack>
+    </LiquidGlassSliderRoot>
+  );
+}
+```
+
+- **材质层级与安全**：单值 `Thumb` / `FieldThumb` 静止时保持清晰不透明胶囊形态，仅在按下拖拽期间请求瞬态 `liquid-glass` 材质。当滑块放置在已是玻璃材质的工具栏或浮层面板内时，可显式设置 `material="opaque"` 以避免玻璃叠玻璃，并在禁用态或系统降低透明度时自动回退至可读的不透明表面。
+- **拖拽与键盘**：`Track` 响应指针与触摸拖动；`Thumb` 支持方向键（水平 RTL 自动反向）、`Shift` 十倍步进、`PageUp` / `PageDown` 与 `Home` / `End`。
+- **表单集成**：在 [Field](/zh-cn/ui-libraries/liquid-glass/field/) 或 [Form](/zh-cn/ui-libraries/liquid-glass/form/) 中使用 `FieldThumb` 替代 `Thumb`，或直接使用多值 `Values Root` 汇报 `number[]`。
+
+## 示例
+
+### 范围选择
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-slider-values"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多滑块
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-slider-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 垂直方向
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-slider-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-slider-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与不透明材质
+
+展示禁用状态与 `material="opaque"`（用于嵌套在玻璃容器内避免玻璃叠玻璃）。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-slider-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 事件 | 说明 |
-| --- | --- | --- |
-| Root | `value` / `defaultValue` | 受控 / 非受控当前数值 |
-| Root | `min` / `max` / `step` | 数值上下界与对齐步长 |
-| Root | `disabled` / `readOnly` / `orientation` / `direction` | 禁用、只读、方向与 RTL 镜像 |
-| Root | `valueChange` / `valueCommit` | 调节过程中的变更提议 / 操作完成事件 |
-| Track / Indicator / Label / Value | — | 拖拽轨道、进度填充、标签与被动数值展示 |
-| Thumb / FieldThumb | — | 独立使用的可聚焦滑块手柄 / 用于 Field 与 Form 的桥接手柄 |
+### Root（单值）
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'number | undefined', default: '非受控' },
+    { name: 'defaultValue', type: 'number', default: '0' },
+    { name: 'min', type: 'number', default: '0' },
+    { name: 'max', type: 'number', default: '100' },
+    { name: 'step', type: 'number', default: '1' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'valueText', type: 'string', default: "''" },
+  ]}
+/>
+
+### Thumb / FieldThumb 与 Values 部件
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    {
+      name: 'material (Thumb / FieldThumb / ValuesThumb)',
+      type: "'auto' | 'opaque'",
+      default: "'auto'",
+    },
+    {
+      name: 'value / defaultValue (Values Root)',
+      type: 'number | readonly number[]',
+      default: '0',
+    },
+    { name: 'largeStep (Values Root)', type: 'number', default: '10 × step' },
+    { name: 'minStepsBetweenValues (Values Root)', type: 'number', default: '0' },
+    {
+      name: 'thumbCollisionBehavior (Values Root)',
+      type: "'push' | 'swap' | 'none'",
+      default: "'push'",
+    },
+    { name: 'required (Values Root)', type: 'boolean', default: 'false' },
+    { name: 'index (Values Thumb)', type: 'number', default: '0' },
+    { name: 'startIndex / endIndex (Values Indicator)', type: 'number', default: '首尾范围' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-SLIDER.yaml',
+    'P-LIQUID-GLASS-SLIDER-THUMB.yaml',
+    'P-LIQUID-GLASS-SLIDER-FIELD-THUMB.yaml',
+    'P-LIQUID-GLASS-SLIDER-VALUES.yaml',
+    'P-BASE-SLIDER.yaml',
+    'P-BASE-SLIDER-VALUES.yaml',
+  ]}
+/>

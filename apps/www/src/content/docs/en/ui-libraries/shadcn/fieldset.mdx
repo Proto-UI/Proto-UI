@@ -15,19 +15,38 @@ Groups related form fields under one accessible `group` container, propagates `d
   demoId="demo-shadcn-fieldset"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
 ## Usage
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+```tsx
+import { FieldsetRoot, FieldsetLegend, FieldsetDescription } from '@/components/shadcn/fieldset';
+import { FieldRoot, FieldLabel, FieldControl } from '@/components/shadcn/field';
+
+export function Example() {
+  return (
+    <FieldsetRoot>
+      <FieldsetLegend>Address Information</FieldsetLegend>
+      <FieldsetDescription>We need your address to deliver your order.</FieldsetDescription>
+      <FieldRoot required>
+        <FieldLabel>Street Address</FieldLabel>
+        <FieldControl placeholder="123 Main St" />
+      </FieldRoot>
+    </FieldsetRoot>
+  );
+}
+```
 
 ### Anatomy
 
 Compose `Fieldset` from `Root`, `Legend`, and `Description`:
 
-- **Root**: Unboxed vertical flex container (`gap-4`) declaring the `group` role and effective `disabled` policy.
-- **Legend**: Optional medium-weight group title automatically linked via `aria-labelledby`.
+- **Root**: Unboxed vertical flex container (`gap-6` on `rhea`, `vega`, `maia`, `luma`, `sera`, and `new-york-v4`; `gap-4` on `nova`, `lyra`, and `mira`) declaring the `group` role and effective `disabled` policy.
+- **Legend**: Optional medium-weight group title supporting `variant="legend"` (default) and `variant="label"`, automatically linked via `aria-labelledby`.
 - **Description**: Optional muted help text automatically linked via `aria-describedby`.
 
 Both `Legend` and `Description` are passive and add no tab stops. Provide at most one `Legend` and one `Description` per group (duplicate parts are ignored), and nested groups never borrow each other's labels or descriptions.
@@ -42,23 +61,102 @@ Effective `disabled` combines a `Root`'s own `disabled` prop with any enclosing 
 
 Participating [Field](../field/) components inside the group (including any placed inside `Legend`) inherit the effective disabled state automatically. Form submission and reset belong to [Form](../form/).
 
+## Examples
+
+### Label-scale legend and checkbox group
+
+Pass `variant="label"` to `Legend` when pairing a fieldset with compact checkbox lists or option controls.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-fieldset-legend-label"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Radio group
+
+Combine `RadioGroup` with `Fieldset` to share a group heading, helper text, and accessible naming.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-fieldset-radio-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Nested disabled inheritance
+
+Toggle the outer and middle groups independently to inspect cascading disabled propagation and local flag retention.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-fieldset-nested-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Accessible label and multiple sections
+
+Provide `ariaLabel` on `Root` when omitting a visible `Legend`, and pair multiple fieldsets with [Separator](../separator/).
+
+<PrototypePreviewer
+  demoId="demo-shadcn-fieldset-aria-label"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
 ## API
 
-`Legend` and `Description` take no props; all three parts expose read-only effective `disabled` state controlled via `Root` props.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
+    {
+      name: 'styleProfile',
+      type: "'nova' | 'rhea' | 'vega' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'new-york-v4'",
+      default: "'nova'",
+    },
   ]}
 />
 
-These props belong to `Root`.
+### Legend
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'variant', type: "'legend' | 'label'", default: "'legend'" },
+    {
+      name: 'styleProfile',
+      type: "'nova' | 'rhea' | 'vega' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'new-york-v4'",
+      default: "'nova'",
+    },
+  ]}
+/>
+
+### Description
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: "'nova' | 'rhea' | 'vega' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'new-york-v4'",
+      default: "'nova'",
+    },
+  ]}
+/>
+
+All three parts expose read-only effective `disabled` state (`ExposeState<boolean>`) controlled via `Root`'s `disabled` prop.
 
 ## References
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-FIELDSET.yaml', 'P-BASE-FIELDSET.yaml']}
+  files={[
+    'P-SHADCN-FIELDSET.yaml',
+    'P-SHADCN-FIELDSET-LEGEND.yaml',
+    'P-SHADCN-FIELDSET-DESCRIPTION.yaml',
+    'P-BASE-FIELDSET.yaml',
+  ]}
 />

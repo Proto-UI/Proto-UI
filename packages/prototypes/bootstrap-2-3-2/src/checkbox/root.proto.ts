@@ -20,19 +20,47 @@ export default definePrototype<CheckboxRootProps, CheckboxRootExposes>({
       )
     );
     // The period form control uses the same neutral face in all states. The
-    // independent Indicator conveys checked/mixed; only focus gets blue ink.
+    // independent Indicator conveys checked/mixed; hover/press follow the
+    // Bootstrap 2.3.2 beveled gradient response and focus adds the blue glow.
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(state.hovered).eq(true),
+          w.state(state.pressed).eq(false),
+          w.state(state.disabled).eq(false)
+        ),
+      intent: (i) =>
+        i.feedback.style.use(tw('bg-[#e6e6e6_linear-gradient(#fff,#e6e6e6)_0_-15px_repeat-x]')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(state.pressed).eq(true),
+          w.state(state.disabled).eq(false),
+          w.state(state.readOnly).eq(false)
+        ),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw(
+            'bg-[#e6e6e6_none_0_0_repeat-x] shadow-[inset_0_2px_4px_rgb(0_0_0/15%),0_1px_2px_rgb(0_0_0/5%)]'
+          )
+        ),
+    });
     def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),
       intent: (i) =>
         i.feedback.style.use(
           tw(
-            'outline-none border-[rgb(82_168_236/80%)] ring-2 ring-ring forced-colors-focus-outline'
+            'outline-none border-[rgb(82_168_236/80%)] shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%),0_0_8px_rgb(82_168_236/60%)] ring-2 ring-ring forced-colors-focus-outline'
           )
         ),
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-65 cursor-not-allowed')),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('bg-[#e6e6e6_none_0_0_repeat-x] opacity-65 cursor-not-allowed shadow-none')
+        ),
     });
     return inherited.render;
   },

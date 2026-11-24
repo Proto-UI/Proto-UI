@@ -11,7 +11,8 @@ import {
 export default definePrototype<SwitchThumbProps, SwitchThumbExposes>({
   name: 'bootstrap-2-3-2-switch-thumb',
   setup(def) {
-    const state = asSwitchThumb().stateHandles;
+    const inherited = asSwitchThumb();
+    const state = inherited.stateHandles;
     if (!state) throw new Error('[bootstrap-2-3-2-switch-thumb] Base state handles required.');
     // A full-height rigid face meets the housing edge rather than floating.
     // The 40px box has 38px inside its two borders. A 20px face leaves the
@@ -35,5 +36,10 @@ export default definePrototype<SwitchThumbProps, SwitchThumbExposes>({
       when: (w) => w.state(state.dragging).eq(true),
       intent: (i) => i.feedback.style.use(tw('transition-none')),
     });
+    def.rule({
+      when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
+    return inherited.render;
   },
 });

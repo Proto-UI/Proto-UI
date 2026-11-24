@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Field 将表单控件与其标签、帮助说明、错误提示和校验状态组合为一体，支持同步内置校验与外部异步校验，并采用粗边框与清晰排版层级呈现。
+Brutalist Field 将表单控件与其标签、帮助说明、错误提示与校验状态组合为一体，支持垂直与水平布局、同步内置校验与外部异步校验，并遵循 5px 圆角（`rounded-base`）、2px 边框与 DM Sans 排版规范。
 
 ## 预览
 
@@ -15,60 +15,138 @@ Brutalist Field 将表单控件与其标签、帮助说明、错误提示和校�
   demoId="demo-brutalist-field"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，可从 `@proto.ui/prototypes-brutalist/field` 导入核心部件与已绑定控件：
 
-- **包导出**：从 `@proto.ui/prototypes-brutalist/field` 导入 `fieldRoot`、`fieldLabel`、`fieldControl`、`fieldDescription`、`fieldError`、`fieldValidity`
+```ts
+import {
+  fieldRoot,
+  fieldLabel,
+  fieldControl,
+  fieldDescription,
+  fieldError,
+  fieldValidity,
+  fieldTextarea,
+  fieldCheckbox,
+  fieldRadioGroup,
+  fieldSwitch,
+} from '@proto.ui/prototypes-brutalist/field';
+```
 
 ## 用法
 
-### 部件组成
+```tsx
+import {
+  FieldRoot,
+  FieldLabel,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+} from '@proto.ui/prototypes-brutalist/field';
 
-- **Root**：统一管理校验结果（`invalid`、`errors`）、`dirty`、`touched` 以及禁用/只读/必填策略。每个 `Root` 内包含一个 `Control`，可选配一个 `Label`、`Description`、`Error` 以及多个只读 `Validity` 展示节点。嵌套 `Root` 彼此独立。
-- **Control**：承载实际值与输入编辑器，默认复用单行文本输入能力；也可以通过 Base 的 `asFieldControl` 桥接自定义值控件，并配合 `asControlLabel().target(..., FIELD_LABEL_PAIR)` 支持标签点击聚焦。
-- **Label**：为控件命名，默认开启 `activation`，点击标签时自动聚焦同一可用控件（自动过滤拖拽、辅助键点击及嵌套交互元素）。
-- **Description**：可选的被动帮助文本，支持文本选中。
-- **Error**：优先显示 `message` 属性，其次显示当前 `errors` 列表或内置英文兜底提示；关闭时默认卸载内容节点（设置 `keepMounted` 可保留隐藏节点）。
-- **Validity**：只读状态观察节点，可通过 `getValidity()` 读取当前校验快照。
+export function ProfileField() {
+  return (
+    <FieldRoot required>
+      <FieldLabel>Name</FieldLabel>
+      <FieldControl placeholder="Jane Doe" />
+      <FieldDescription>Displayed on your public profile.</FieldDescription>
+      <FieldError />
+    </FieldRoot>
+  );
+}
+```
 
-### 内置校验与受控结果
+### 部件组成与校验
 
-- `validationMode` 支持 `'onBlur'`（默认）、`'onChange'`（输入法合成期间等待 `compositionend`）和 `'manual'`。
-- 内置约束检查支持 `required`、`minLength` 与 `maxLength`（按 UTF-16 code units 计算；可选的空字符串跳过长度检查）。`required` 将 `null`、`false`、`""` 与空数组视为空值，`0` 和空白字符串视为已填写且不自动裁剪。内置标志位为 `valueMissing`、`tooShort`、`tooLong`，外部校验错误使用 `customError`。
-- 传入 `invalid` 进入受控校验模式：校验完成时触发 `validityChange`，由外部决定是否更新 `invalid` 与 `errors`。
-- `resetValidation()` 仅重置校验结果与 `touched` 标记，不会清空输入值或修改 `dirty` 基线；如需整表提交或重置，请配合 `Form` 使用。
+- **Root**：管理校验状态（`invalid`、`errors`）、`dirty`、`touched`、`orientation`（`vertical` / `horizontal`）以及禁用/只读/必填策略。嵌套 `Root` 彼此独立。
+- **Control 与绑定控件**：默认 `Control` 为单行文本输入；也可组合 `fieldTextarea`、`fieldCheckbox`、`fieldRadioGroup` 与 `fieldSwitch`，或通过 Base 的 `asFieldControl` 桥接自定义控件。
+- **自动无障碍关联**：自动维护 `aria-labelledby`、`aria-describedby` 与（仅在 `invalid` 为 `true` 时）`aria-errormessage`，并在卸载时自动清理。
+- **内置与异步校验**：支持 `required`、`minLength`、`maxLength`、`validationMode`（`'onBlur'` / `'onChange'` / `'manual'`）、受控 `invalid` 与 `externalValidation`。
 
-### 外部异步校验
+## 示例
 
-开启 `externalValidation` 后，内置约束通过时会触发 `validationRequest` 事件（负载为 `{ requestId, value, reason }`）。应用在异步检查完成后调用 `resolveValidation(requestId, { invalid, errors })` 提交结果。若期间输入值变化、控件替换、策略变更或发起了新请求，过期结果会自动被忽略。
+### 联系表单
 
-### 无障碍关联
+组合输入框、帮助说明与多行文本，构建经典的 Brutalist 表单布局。
 
-- 组件自动维护 `Control` 与 `Label`、`Description` 的无障碍命名与描述关联，并仅在 `invalid` 为 `true` 时关联 `Error`（`aria-errormessage`），在卸载时自动清理，无需手写 DOM ID。
-- Web 宿主同步输出 `aria-required`、`aria-invalid`、`aria-busy` 与 `aria-readonly`。`Error` 不会自动创建 live region；如需屏幕阅读器即时播报，可结合 `LiveRegion` 使用。
+<PrototypePreviewer
+  demoId="demo-brutalist-field-contact"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 水平布局
+
+通过 `orientation="horizontal"` 将开关或复选框与其标签并排对齐。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-field-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 选项与开关组合
+
+将 `FieldRadioGroup`、`FieldCheckbox` 与 `FieldSwitch` 接入同一套字段标签与校验机制。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-field-choice"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 错误状态
+
+当字段校验失败时，输入框边框与错误提示同步切换为语义化错误强调色。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-field-error"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 ### Root
 
 <ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
   rows={[
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'readOnly', type: 'boolean', default: 'false' },
-    { name: 'required', type: 'boolean', default: 'false' },
-    { name: 'minLength', type: 'number', default: '-1' },
-    { name: 'maxLength', type: 'number', default: '-1' },
-    { name: 'invalid', type: 'boolean', default: 'undefined' },
-    { name: 'errors', type: 'string[]', default: 'undefined' },
-    { name: 'defaultInvalid', type: 'boolean', default: 'false' },
-    { name: 'defaultErrors', type: 'string[]', default: '[]' },
-    { name: 'validationMode', type: "'onBlur' | 'onChange' | 'manual'", default: 'onBlur' },
-    { name: 'externalValidation', type: 'boolean', default: 'false' },
+    {
+      name: 'orientation',
+      type: "'vertical' | 'horizontal'",
+      default: 'vertical',
+      description: '标签与控件的排列方向',
+    },
+    { name: 'disabled', type: 'boolean', default: 'false', description: '禁用字段与控件' },
+    { name: 'readOnly', type: 'boolean', default: 'false', description: '禁止编辑但保留焦点' },
+    { name: 'required', type: 'boolean', default: 'false', description: '声明必填约束' },
+    { name: 'minLength', type: 'number', default: '-1', description: '最小 UTF-16 长度' },
+    { name: 'maxLength', type: 'number', default: '-1', description: '最大 UTF-16 长度' },
+    { name: 'invalid', type: 'boolean', default: 'undefined', description: '受控无效状态' },
+    { name: 'errors', type: 'string[]', default: 'undefined', description: '受控错误消息列表' },
+    {
+      name: 'defaultInvalid',
+      type: 'boolean',
+      default: 'false',
+      description: '非受控初始无效状态',
+    },
+    { name: 'defaultErrors', type: 'string[]', default: '[]', description: '非受控初始错误消息' },
+    {
+      name: 'validationMode',
+      type: "'onBlur' | 'onChange' | 'manual'",
+      default: 'onBlur',
+      description: '校验触发时机',
+    },
+    {
+      name: 'externalValidation',
+      type: 'boolean',
+      default: 'false',
+      description: '内置校验通过后触发异步校验请求',
+    },
   ]}
 />
 
@@ -99,17 +177,13 @@ Brutalist Field 将表单控件与其标签、帮助说明、错误提示和校�
   ]}
 />
 
-### 其他部件属性
+### 其他部件与方法事件
 
 - **Label**：`activation?: boolean`（默认 `true`）
-- **Description**：无独立属性
 - **Error**：`message?: string`（默认 `''`），`keepMounted?: boolean`（默认 `false`）
-- **Validity**：无独立属性
-
-### 方法与事件
-
+- **Description / Validity**：无独立属性
 - **Root 方法**：`validate(reason?)`、`resolveValidation(requestId, result)`、`cancelValidation()`、`resetValidation()`、`focusControl(options?)`、`getValidity()`
-- **事件**：`validityChange`（返回校验状态与快照）、`validationRequest`（负载为 `{ requestId, value, reason }`）
+- **事件**：`validityChange`、`validationRequest`（`{ requestId, value, reason }`）
 
 ## 参考
 

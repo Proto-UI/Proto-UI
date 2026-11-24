@@ -1,27 +1,26 @@
 ---
 title: 'Select'
-description: 'A Bootstrap 2.3.2 five-part single-selection dropdown with controlled state and anchored popup.'
+description: 'An eleven-part Bootstrap 2.3.2 single-selection dropdown with groups, controlled state, and an anchored popup.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Select is a design-language extension over Base Select inspired by Bootstrap 2.3.2's button-dropdown visuals, offering controlled single selection, keyboard navigation, and collision-aware positioning.
+Bootstrap 2.3.2 Select builds on [Base Select](/en/ui-libraries/base/select/) with eleven composable parts styled after Bootstrap 2.3.2's `.btn` and `.dropdown-menu` gradients, borders, shadows, and spacing.
 
 ## Preview
-
-Try the uncontrolled, disabled, controlled (click **Accept selection** to commit), and RTL wrapping examples across runtimes.
 
 <PrototypePreviewer
   class="select-content-preview"
   demoId="demo-bootstrap-2-3-2-select"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source. Import all eleven parts from `@proto.ui/prototypes-bootstrap-2-3-2/select`:
 
 ```ts
 import {
@@ -29,31 +28,162 @@ import {
   selectTrigger,
   selectValue,
   selectContent,
+  selectSurface,
+  selectViewport,
   selectItem,
+  selectItemText,
+  selectGroup,
+  selectLabel,
+  selectSeparator,
 } from '@proto.ui/prototypes-bootstrap-2-3-2/select';
 ```
 
 ## Usage
 
-### Composition and interaction
+```tsx
+import {
+  Bootstrap232SelectContent,
+  Bootstrap232SelectGroup,
+  Bootstrap232SelectItem,
+  Bootstrap232SelectItemText,
+  Bootstrap232SelectLabel,
+  Bootstrap232SelectRoot,
+  Bootstrap232SelectSurface,
+  Bootstrap232SelectTrigger,
+  Bootstrap232SelectValue,
+  Bootstrap232SelectViewport,
+} from '../proto-ui/components/react';
 
-Compose `Root`, `Trigger`, `Value`, `Content`, and `Item`:
+export function FruitSelect() {
+  return (
+    <Bootstrap232SelectRoot defaultValue="apple">
+      <Bootstrap232SelectTrigger className="w-48" accessibleLabel="Fruit selector">
+        <Bootstrap232SelectValue placeholder="Select a fruit" />
+      </Bootstrap232SelectTrigger>
+      <Bootstrap232SelectContent>
+        <Bootstrap232SelectSurface>
+          <Bootstrap232SelectViewport>
+            <Bootstrap232SelectGroup>
+              <Bootstrap232SelectLabel>Fruits</Bootstrap232SelectLabel>
+              <Bootstrap232SelectItem value="apple" textValue="Apple">
+                <Bootstrap232SelectItemText>Apple</Bootstrap232SelectItemText>
+              </Bootstrap232SelectItem>
+              <Bootstrap232SelectItem value="banana" textValue="Banana">
+                <Bootstrap232SelectItemText>Banana</Bootstrap232SelectItemText>
+              </Bootstrap232SelectItem>
+            </Bootstrap232SelectGroup>
+          </Bootstrap232SelectViewport>
+        </Bootstrap232SelectSurface>
+      </Bootstrap232SelectContent>
+    </Bootstrap232SelectRoot>
+  );
+}
+```
 
-- **Root manages the state**: Control `open` and `value` independently, or initialize uncontrolled state with `defaultOpen` and `defaultValue`.
-- **Keyboard and pointer**: Click `Trigger` to toggle, press `Enter`/`Space` to open, or press `ArrowDown`/`ArrowUp` to open at the selected or first/last enabled option. Highlighting items never commits; pointer click, `Enter`, or `Space` commits an enabled `Item`. `Escape` cancels and restores focus to `Trigger`; `Tab` and outside clicks close the list.
-- **Label display and wrapping**: `Value` falls back from selected text → raw `value` → `placeholder` → empty, updating automatically when the selected item's `textValue` changes. Long labels wrap cleanly and the popup stays bounded by the viewport.
-- **Visual styling**: Because archived Bootstrap 2.3.2 relied on native HTML `<select>`, this component adapts its button-dropdown styling (4px trigger corners, 6px panel corners, rem-scaled padding, and a darkened blue highlight for crisp white text contrast).
+### Composition
 
-See [Base Select](/en/ui-libraries/base/select/) for shared single-selection details.
+```text
+SelectRoot
+├── SelectTrigger
+│   └── SelectValue
+└── SelectContent
+    └── SelectSurface
+        └── SelectViewport
+            ├── SelectGroup
+            │   ├── SelectLabel
+            │   └── SelectItem
+            │       └── SelectItemText
+            └── SelectSeparator
+```
+
+- **Classic Bootstrap 2.3.2 styling**: Trigger pairs `.btn` gradients with an 8×4 caret; the popup reproduces `.dropdown-menu` 6px corners, drop shadow, 11px uppercase `.nav-header` labels, two-tone `.divider` separators, and blue gradient active rows.
+- **Keyboard & accessibility**: Supports `Enter`, `Space`, arrow navigation, typeahead, and `Escape` dismissal with focus restoration. Long labels wrap cleanly and follow logical text direction.
+
+## Examples
+
+### Scrollable
+
+Constrain `Viewport` height to browse long grouped lists such as timezones.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-select-scrollable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Disable the whole select or disable individual options inside the popup.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-select-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Inside a `dir="rtl"` container, text alignment and trailing selection indicators mirror automatically.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-select-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / Events | Description |
-| --- | --- | --- |
-| `Root` | `open` / `defaultOpen`, `value` / `defaultValue` | Independently controlled open state and selected value |
-| `Root` | `disabled` / `closeOnSelect` | Disables the select / closes automatically after selection |
-| `Root` | `openChange` / `valueChange` | Open state and value change request events |
-| `Trigger` | — | Combobox trigger button |
-| `Value` | `placeholder` | Displays selected text or placeholder fallback |
-| `Content` | `side` / `align` / `sideOffset` / `alignOffset` / `avoidCollisions` / `collisionPadding` | Anchored listbox positioning and collision handling |
-| `Item` | `value` / `textValue` / `disabled` / `select` | Option entry and selection event |
+### Root / Trigger / Value
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Root.open', type: 'boolean', default: 'undefined' },
+    { name: 'Root.defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'Root.value', type: 'string', default: 'undefined' },
+    { name: 'Root.defaultValue', type: 'string', default: "''" },
+    { name: 'Root.disabled', type: 'boolean', default: 'false' },
+    { name: 'Root.readOnly', type: 'boolean', default: 'false' },
+    { name: 'Root.closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'Root.openChange', type: '(detail) => void', default: '—' },
+    { name: 'Root.valueChange', type: '(detail) => void', default: '—' },
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Trigger.accessibleLabel', type: 'string', default: "''" },
+    { name: 'Value.placeholder', type: 'string', default: "''" },
+  ]}
+/>
+
+### Content / Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Content.position', type: "'popper' | 'item-aligned'", default: "'popper'" },
+    { name: 'Content.side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content.align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'Content.sideOffset', type: 'number', default: '2' },
+    { name: 'Content.alignOffset', type: 'number', default: '0' },
+    { name: 'Content.avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'Content.collisionPadding', type: 'number', default: '10' },
+    { name: 'Item.value', type: 'string', default: "''" },
+    { name: 'Item.textValue', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+    { name: 'Item.closeOnSelect', type: 'boolean', default: 'Inherits Root' },
+    { name: 'Item.select', type: '(detail) => void', default: '—' },
+  ]}
+/>
+
+`Surface`, `Viewport`, `ItemText`, `Group`, `Label`, and `Separator` are structural parts with no additional props.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-SELECT.yaml',
+    'P-BOOTSTRAP-2-3-2-SELECT-TRIGGER.yaml',
+    'P-BOOTSTRAP-2-3-2-SELECT-CONTENT.yaml',
+    'P-BOOTSTRAP-2-3-2-SELECT-ITEM.yaml',
+    'P-BASE-SELECT.yaml',
+  ]}
+/>

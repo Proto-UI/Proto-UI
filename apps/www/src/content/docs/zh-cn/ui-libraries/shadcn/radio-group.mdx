@@ -1,6 +1,6 @@
 ---
 title: 'Radio Group'
-description: '支持键盘漫游焦点与单选状态管理的单选框组组件。'
+description: '支持键盘漫游焦点与单选状态管理的 Shadcn 风格单选框组组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,11 +8,15 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Radio Group 用于在一组互斥选项中进行单项选择，提供完整的 `radiogroup` / `radio` 无障碍语义、键盘方向键导航以及焦点环和禁用态样式。本页示例使用 **Shadcn Rhea** 风格。
+Radio Group 用于在一组互斥选项中进行单项选择，提供完整的 `radiogroup` / `radio` 无障碍语义、方向键漫游焦点以及焦点环和禁用态样式。本页示例使用 **Shadcn Rhea** 风格。
 
 ## 预览
 
-<PrototypePreviewer demoId="demo-shadcn-radio-group" initialRuntime="wc" />
+<PrototypePreviewer
+  demoId="demo-shadcn-radio-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## 安装
 
@@ -24,57 +28,156 @@ Radio Group 用于在一组互斥选项中进行单项选择，提供完整的 `
 
 ## 用法
 
-从 `@proto.ui/prototypes-shadcn/radio-group`（或包根）导入 `shadcnRadioGroupRoot`、`shadcnRadioGroupItem` 和 `shadcnRadioGroupIndicator`，并适配到目标运行时：
+```tsx
+import {
+  ShadcnLabelRoot,
+  ShadcnRadioGroupIndicator,
+  ShadcnRadioGroupItem,
+  ShadcnRadioGroupRoot,
+} from '../proto-ui/components/react';
 
-| 部件 | 属性 | 职责 |
-| --- | --- | --- |
-| `Root` | `value?`、`defaultValue?`、`disabled?`、`readOnly?`、`a11yLabel?` | 统一管理当前选中值与选项集合。 |
-| `Item` | 必填 `value`、可选 `disabled?` | 表示单个选项，请求选值并派生选中与禁用状态。 |
-| `Indicator` | 无 | 放置在 `Item` 内部，用于渲染选中圆点（可省略或按需自定义）。 |
+export function RadioGroupUsage() {
+  return (
+    <ShadcnRadioGroupRoot styleProfile="rhea" defaultValue="option-one" a11yLabel="Options">
+      <div className="flex items-center gap-3">
+        <ShadcnRadioGroupItem styleProfile="rhea" value="option-one">
+          <ShadcnRadioGroupIndicator styleProfile="rhea" />
+        </ShadcnRadioGroupItem>
+        <ShadcnLabelRoot styleProfile="rhea">Option One</ShadcnLabelRoot>
+      </div>
+      <div className="flex items-center gap-3">
+        <ShadcnRadioGroupItem styleProfile="rhea" value="option-two">
+          <ShadcnRadioGroupIndicator styleProfile="rhea" />
+        </ShadcnRadioGroupItem>
+        <ShadcnLabelRoot styleProfile="rhea">Option Two</ShadcnLabelRoot>
+      </div>
+    </ShadcnRadioGroupRoot>
+  );
+}
+```
 
-### 标签关联与可访问性
+### 组件结构
 
-- 为 `Root` 设置清晰的 `a11yLabel`，为每个 `Item` 提供同组内唯一且非空的 `value`。
-- 搭配 `@proto.ui/prototypes-shadcn/label` 中的 `labelRoot` 时，可通过 `createControlLabelRef()` 创建共享引用并绑定到双方的 `InstanceAssociations.controlLabel`，让可见标签直接作为选项的无障碍名称并支持点击激活。若仅用于命名而不触发选择，可在 `Label` 上设置 `activation={false}`。
+```text
+RadioGroupRoot
+├── RadioGroupItem
+│   └── RadioGroupIndicator
+└── RadioGroupItem
+    └── RadioGroupIndicator
+```
 
-### 受控与非受控
+- **标签关联**：为 `Root` 设置 `a11yLabel`，为每个 `Item` 提供同组内唯一且非空的 `value`。搭配 `shadcn-label-root` 时通过 `createControlLabelRef()` 绑定 `InstanceAssociations.controlLabel`，即可让可见标签直接命名选项并支持点击选中（仅命名而不激活时在 `Label` 上设 `activation={false}`）。
+- **受控与非受控**：传入 `defaultValue` 为非受控模式；传入 `value` 进入受控模式，`Root` 仅发出 `valueChange` 变更请求。`readOnly` 保留方向键漫游但阻止修改选值，`disabled` 则同时移出焦点序列。
+- **键盘交互**：`Tab` 优先聚焦当前已选中且启用的 `Item`；方向键在启用项间循环移动并自动选中；`Home` / `End` 跳到首尾启用项；`Space` 选中当前聚焦项，`Enter` 不触发选择。
+- **表单组合**：在 `FormField` 中请使用 `@proto.ui/prototypes-shadcn/field` 导出的 `fieldRadioGroup`，自动衔接必填校验、Label / Description / Error 关联与 `resetValue()`。详见 [Form 示例](../form/)。
 
-- 非受控模式下，`Root` 通过 `defaultValue` 初始化，并在选值变化时触发 `valueChange`。
-- 传入 `value` 后进入受控模式，`Root` 仅发出变更请求，由外部决定下一次 `value`。空值或未匹配项的值会被保留，已选中的选项变为禁用后仍可保持选中状态。
-- 设置 `readOnly` 会保留键盘焦点漫游能力，同时阻止更改选中值；`disabled` 则会禁用交互并移出焦点序列。
+## 示例
 
-### 键盘交互
+### 带说明文字
 
-- 按 `Tab` 进入单选组时，焦点优先落在当前已选中且启用的 `Item` 上。
-- 方向键在启用项之间循环移动并自动选中，`Home` / `End` 跳转到首尾启用项，禁用项会被自动跳过。
-- `Space` 可选中当前聚焦项，`Enter` 不触发选择。
+结合标签与辅助说明文字呈现各选项的适用场景。
 
-### 表单组合
+<PrototypePreviewer
+  demoId="demo-shadcn-radio-group-description"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-普通的 `Root` 不会自动注册到表单。在 `FormField` 中使用时，请使用 `@proto.ui/prototypes-shadcn/field` 导出的 `fieldRadioGroup`，即可自动衔接必填校验、Label/Description/Error 关联与重置（`resetValue()` 请求恢复实例初始值）。更多用法见 [Form 示例](../form/)。
+### 选择卡片
+
+将选项标题、说明与单选指示器组合为卡片式布局，适合套餐或方案选择。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-radio-group-choice-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Fieldset 分组
+
+使用 `FieldsetRoot` 与 `FieldsetLegend` 为单选组提供语义化的标题和整体说明。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-radio-group-fieldset"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用态
+
+在单个 `Item` 上设置 `disabled` 可禁用该项，在 `Root` 上设置 `disabled` 则禁用整组。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-radio-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 校验错误
+
+通过 `FieldRoot`、`FieldRadioGroup` 与 `FieldError` 组合展示表单校验错误与无障碍错误信息关联。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-radio-group-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL 从右到左布局
+
+在 `dir="rtl"` 容器中自动适配从右到左的选项排布与逻辑文本对齐。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-radio-group-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`（传入 `value` 可进入受控模式）：
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
   ]}
 />
 
-其他部件属性：
+### Item
 
-- `Item`：`value`（必填），`disabled`（默认 `false`）。
-- `Indicator`：无额外属性。
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string（必填）', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+  ]}
+/>
+
+### Indicator
+
+`Indicator` 无额外属性，从最近的 `Item` 派生 `checked` 与 `disabled` 状态并呈现选中圆点。
+
+### 事件与暴露方法
+
+- **Root 事件**：`valueChange`（`{ value: string }`）
+- **Item 事件**：`select`（`{ value: string }`）
+- **Root 方法**：`requestValue(value)`、`resetValue()`、`focusFirst()`、`focusLast()`、`focusNext()`、`focusPrev()`、`focusSelected()`、`focusSelf()`
 
 ## 参考
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-RADIO-GROUP.yaml', 'P-BASE-RADIO-GROUP.yaml']}
+  files={[
+    'P-SHADCN-RADIO-GROUP.yaml',
+    'P-SHADCN-RADIO-GROUP-ITEM.yaml',
+    'P-SHADCN-RADIO-GROUP-INDICATOR.yaml',
+    'P-BASE-RADIO-GROUP.yaml',
+  ]}
 />

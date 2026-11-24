@@ -1,126 +1,68 @@
-import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
+import type { DemoNode, DemoSpec } from '@/components/PrototypePreviewer/demo-types';
+
+function checkboxRow(
+  label: string,
+  props: Record<string, unknown>,
+  description?: string
+): DemoNode {
+  return {
+    kind: 'box',
+    className: 'flex items-start gap-2.5',
+    children: [
+      {
+        kind: 'proto',
+        prototypeId: 'bootstrap-2-3-2-checkbox-root',
+        props,
+        children: [
+          {
+            kind: 'proto',
+            prototypeId: 'bootstrap-2-3-2-checkbox-indicator',
+          },
+          { kind: 'box', className: 'sr-only', children: [label] },
+        ],
+      },
+      {
+        kind: 'box',
+        className: 'grid gap-0.5 leading-snug',
+        children: [
+          {
+            kind: 'box',
+            className: 'text-sm',
+            children: [label],
+          },
+          ...(description
+            ? [
+                {
+                  kind: 'box' as const,
+                  className: 'text-xs text-muted-foreground',
+                  children: [description],
+                },
+              ]
+            : []),
+        ],
+      },
+    ],
+  };
+}
 
 export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className: 'flex flex-col gap-3',
+    className: 'flex w-full max-w-sm flex-col gap-3.5',
     children: [
-      {
-        kind: 'box',
-        className: 'flex items-center gap-2',
-        children: [
-          {
-            kind: 'proto',
-            prototypeId: 'bootstrap-2-3-2-checkbox-root',
-            props: { defaultChecked: false },
-            children: [
-              {
-                kind: 'proto',
-                prototypeId: 'bootstrap-2-3-2-checkbox-indicator',
-              },
-              { kind: 'box', className: 'sr-only', children: ['Unchecked'] },
-            ],
-          },
-          {
-            kind: 'box',
-            className: 'text-sm',
-            children: ['Unchecked'],
-          },
-        ],
-      },
-      {
-        kind: 'box',
-        className: 'flex items-center gap-2',
-        children: [
-          {
-            kind: 'proto',
-            prototypeId: 'bootstrap-2-3-2-checkbox-root',
-            props: { defaultChecked: true },
-            children: [
-              {
-                kind: 'proto',
-                prototypeId: 'bootstrap-2-3-2-checkbox-indicator',
-              },
-              { kind: 'box', className: 'sr-only', children: ['Checked'] },
-            ],
-          },
-          {
-            kind: 'box',
-            className: 'text-sm',
-            children: ['Checked'],
-          },
-        ],
-      },
-      {
-        kind: 'box',
-        className: 'flex items-center gap-2',
-        children: [
-          {
-            kind: 'proto',
-            prototypeId: 'bootstrap-2-3-2-checkbox-root',
-            props: { defaultIndeterminate: true },
-            children: [
-              {
-                kind: 'proto',
-                prototypeId: 'bootstrap-2-3-2-checkbox-indicator',
-              },
-              { kind: 'box', className: 'sr-only', children: ['Mixed'] },
-            ],
-          },
-          {
-            kind: 'box',
-            className: 'text-sm',
-            children: ['Mixed'],
-          },
-        ],
-      },
-      {
-        kind: 'box',
-        className: 'flex items-center gap-2',
-        children: [
-          {
-            kind: 'proto',
-            prototypeId: 'bootstrap-2-3-2-checkbox-root',
-            props: { disabled: true, defaultChecked: true },
-            children: [
-              {
-                kind: 'proto',
-                prototypeId: 'bootstrap-2-3-2-checkbox-indicator',
-              },
-              { kind: 'box', className: 'sr-only', children: ['Disabled'] },
-            ],
-          },
-          {
-            kind: 'box',
-            className: 'text-sm',
-            children: ['Disabled'],
-          },
-        ],
-      },
-      {
-        kind: 'box',
-        className: 'flex items-center gap-2',
-        children: [
-          {
-            kind: 'proto',
-            prototypeId: 'bootstrap-2-3-2-checkbox-root',
-            props: { defaultChecked: false },
-            children: [
-              {
-                kind: 'proto',
-                prototypeId: 'bootstrap-2-3-2-checkbox-indicator',
-              },
-              { kind: 'box', className: 'sr-only', children: ['Focus ring'] },
-            ],
-          },
-          {
-            kind: 'box',
-            className: 'text-sm',
-            children: ['Tab here for the focus ring'],
-          },
-        ],
-      },
+      checkboxRow('Accept terms and conditions', { defaultChecked: false }),
+      checkboxRow(
+        'Subscribe to release notes',
+        { defaultChecked: true },
+        'By checking this box, you agree to receive release summaries.'
+      ),
+      checkboxRow(
+        'Select all notification channels',
+        { defaultIndeterminate: true },
+        'Email is active; digest alerts are currently unchecked.'
+      ),
+      checkboxRow('Enable notifications', { disabled: true, defaultChecked: true }),
     ],
   },
 } satisfies DemoSpec;

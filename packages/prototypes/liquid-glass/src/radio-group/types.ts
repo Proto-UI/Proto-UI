@@ -21,6 +21,7 @@ export type LiquidGlassRadioGroupRootAsHookContract = RadioGroupRootAsHookContra
 // The Item is the one governable functional owner in this family; Root is a
 // structural collection container and Indicator is a passive context part.
 export type LiquidGlassRadioGroupItemProps = RadioGroupItemProps & {
+  variant?: 'regular' | 'prominent';
   material?: 'auto' | 'opaque';
 };
 export type LiquidGlassRadioGroupItemExposes = RadioGroupItemExposes;

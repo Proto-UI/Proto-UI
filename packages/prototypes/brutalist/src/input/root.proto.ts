@@ -10,22 +10,36 @@ export const BrutalistInputRoot = definePrototype<
   name: 'brutalist-input-root',
   modules: asInputRoot.modules,
   setup(def) {
-    const state = asInputRoot().stateHandles;
+    const inherited = asInputRoot();
+    const state = inherited.stateHandles;
     if (!state) throw new Error('[brutalist-input] Base Input state handles are required.');
     def.feedback.style.use(
       tw(
-        'flex h-10 w-full rounded-base border-2 border-border bg-secondary-background px-3 py-2 text-sm font-sans font-medium text-foreground selection:bg-main selection:text-main-foreground'
+        'flex h-10 w-full rounded-base border-2 border-border bg-secondary-background px-3 py-2 text-sm font-sans font-medium text-foreground placeholder:text-muted-foreground selection:bg-main selection:text-main-foreground'
       )
     );
     def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),
-      intent: (i) => i.feedback.style.use(tw('outline-none ring-2 ring-black ring-offset-2')),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw(
+            'outline-none forced-colors-focus-outline ring-2 ring-black ring-offset-2 ring-offset-background'
+          )
+        ),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(state.focusVisible).eq(true), w.meta('colorScheme').eq('dark')),
+      intent: (i) => i.feedback.style.use(tw('ring-ring')),
+    });
+    def.rule({
+      when: (w) => w.state(state.readOnly).eq(true),
+      intent: (i) => i.feedback.style.use(tw('bg-muted')),
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
       intent: (i) => i.feedback.style.use(tw('cursor-not-allowed opacity-50')),
     });
-    return () => null;
+    return inherited.render;
   },
 });
 export default BrutalistInputRoot;

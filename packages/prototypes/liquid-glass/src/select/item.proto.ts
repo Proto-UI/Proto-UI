@@ -1,5 +1,6 @@
 import { definePrototype, tw, delay } from '@proto.ui/core';
 import { asSelectItem } from '@proto.ui/prototypes-base/select';
+import { COMMAND_DISABLED } from '../interactive-surface';
 import type { LiquidGlassSelectItemProps, LiquidGlassSelectItemExposes } from './types';
 
 export default definePrototype<LiquidGlassSelectItemProps, LiquidGlassSelectItemExposes>({
@@ -8,7 +9,7 @@ export default definePrototype<LiquidGlassSelectItemProps, LiquidGlassSelectItem
     const state = asSelectItem().stateHandles;
     if (!state)
       throw new Error('[liquid-glass-select-item] Required Base state handles are missing.');
-    const { active, selected, focusVisible, disabled } = state;
+    const { active, hovered, selected, focusVisible, disabled } = state;
     def.feedback.style.use(
       tw(
         'relative flex min-w-0 w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm whitespace-normal wrap-anywhere text-start cursor-default select-none outline-none'
@@ -19,7 +20,12 @@ export default definePrototype<LiquidGlassSelectItemProps, LiquidGlassSelectItem
       intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
     });
     def.rule({
-      when: (w) => w.all(w.state(active).eq(true), w.state(selected).eq(false)),
+      when: (w) =>
+        w.all(
+          w.any(w.state(active).eq(true), w.state(hovered).eq(true)),
+          w.state(selected).eq(false),
+          w.state(disabled).eq(false)
+        ),
       intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
     });
     def.rule({
@@ -29,7 +35,7 @@ export default definePrototype<LiquidGlassSelectItemProps, LiquidGlassSelectItem
     });
     def.rule({
       when: (w) => w.state(disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 pointer-events-none cursor-default')),
+      intent: (i) => i.feedback.style.use(tw(`${COMMAND_DISABLED} text-muted-foreground`)),
     });
     // A trailing non-interactive indicator follows logical direction without
     // physical left/right offsets; changing selection retains the slotted label.
@@ -59,6 +65,7 @@ export default definePrototype<LiquidGlassSelectItemProps, LiquidGlassSelectItem
           ? renderer.svg.root(
               {
                 viewBox: '0 0 24 24',
+                'aria-hidden': 'true',
                 width: 16,
                 height: 16,
                 fill: 'none',

@@ -1,2 +1,3 @@
-import { createNumericInputDemo } from './numeric-input-demo.shared';
-export default createNumericInputDemo('bootstrap-2-3-2', 'slider');
+import { createSliderBasicDemo } from './demo_components/slider/slider-demo-helpers';
+
+export default createSliderBasicDemo('bootstrap-2-3-2');

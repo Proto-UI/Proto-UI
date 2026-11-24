@@ -15,44 +15,104 @@ Slider lets users select a single value or multiple range values along a continu
   demoId="demo-shadcn-slider"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import scalar slider parts and multi-value `sliderValues*` parts from `@proto.ui/prototypes-shadcn/slider`.
 
 ## Usage
 
-Single-value Slider consists of `Root`, `Label`, `Track`, `Indicator`, `Thumb`, `FieldThumb`, and `Value`:
+```tsx
+import {
+  ShadcnSliderRoot,
+  ShadcnSliderTrack,
+  ShadcnSliderIndicator,
+  ShadcnSliderThumb,
+} from '../proto-ui/components/react';
 
-- `Root` manages the numeric value, bounds (`min`/`max`), `step`, orientation, direction, and interactive state.
-- `Track` handles pointer and touch dragging; `Thumb` is the focusable slider control supporting arrow keys, `Shift` (10× step), `PageUp`/`PageDown`, and `Home`/`End` (horizontal `rtl` reverses left/right keys).
-- Values clamp to `[min, max]` and snap to `step` from `min`. In controlled mode, interactions emit `valueChange` without overwriting your value directly; `valueCommit` fires on completion, and canceling restores the starting value in uncontrolled mode.
-- `disabled` dims the control and disables interaction; `readOnly` keeps focus and hover feedback while preventing value edits.
+export function Example() {
+  return (
+    <ShadcnSliderRoot defaultValue={33} min={0} max={100} step={1}>
+      <ShadcnSliderTrack>
+        <ShadcnSliderIndicator />
+        <ShadcnSliderThumb />
+      </ShadcnSliderTrack>
+    </ShadcnSliderRoot>
+  );
+}
+```
 
-### Form integration
+- **Anatomy**: Single-value Slider composes `Root`, `Label`, `Track`, `Indicator`, `Thumb`, `FieldThumb`, and `Value`; multi-thumb range sliders use the six `sliderValues*` entries.
+- **Pointer and keyboard**: `Track` handles mouse and touch dragging; `Thumb` supports arrow keys, `Shift` (10× step), `PageUp`/`PageDown`, and `Home`/`End` (horizontal `rtl` mirrors Left/Right).
+- **Controlled state**: Pass `value` for controlled mode. Interactions emit `valueChange` proposals and fire `valueCommit` on completion; cancelling restores the starting value in uncontrolled mode.
+- **Form integration**: Inside `Field` or `FormField`, replace `Thumb` with `FieldThumb` to connect `FieldLabel` focusing, numeric validation, serialization, and reset. A complete `Values Root` integrates directly as a grouped `number[]` control.
 
-Inside `Field` or `FormField`, use `FieldThumb` instead of `Thumb` to wire up `FieldLabel` activation, numeric validation, serialization, and reset. Use `SliderLabel` with standalone `Thumb`.
+## Examples
 
-### Range and multiple values
+### Range
 
-For range selection or multiple thumbs, import the six `sliderValues*` entries from `@proto.ui/prototypes-shadcn/slider`:
+Use a two-element array for range selection. Clicking the track moves the nearest editable thumb, while dragging preserves the grab offset.
 
 <PrototypePreviewer
   demoId="demo-shadcn-slider-values"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-- Pass an array via `defaultValue={[20, 80]}` (or controlled `value`) on Values `Root`, and render one indexed `Thumb` per value inside Values `Track`.
-- Clicking the track moves the nearest editable thumb, while grabbing a thumb off-center preserves the grab offset. Configure `thumbCollisionBehavior` as `push`, `swap` (which moves focus along with the swapped thumb), or `none`.
-- A complete Values `Root` also works as a grouped `Field`/`FormField` control reporting `number[]`, with `FieldLabel` focusing the first editable thumb.
+### Multiple Thumbs
+
+Pass an array with three or more values on `Values Root` and render one indexed `Thumb` per value inside `Values Track`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-slider-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Vertical
+
+Use `orientation="vertical"` for vertical sliders.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-slider-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Combine `value` and `onValueChange` with fractional steps to keep external state in sync.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-slider-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Use `disabled` to disable pointer and keyboard interactions.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-slider-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Use `direction="rtl"` to mirror horizontal layout, fill direction, and arrow key behavior.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-slider-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to the scalar Slider `Root` (pass `value` for controlled mode):
+### Slider Root (Scalar)
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -68,12 +128,40 @@ The following props belong to the scalar Slider `Root` (pass `value` for control
     { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'valueText', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'nova'" },
   ]}
 />
+
+### Slider Values Root & Parts (Multi-Thumb)
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'number | readonly number[]', default: 'uncontrolled' },
+    { name: 'defaultValue', type: 'number | readonly number[]', default: '0' },
+    { name: 'min / max / step', type: 'number', default: '0 / 100 / 1' },
+    { name: 'largeStep', type: 'number', default: '10 × step' },
+    { name: 'minStepsBetweenValues', type: 'number', default: '0' },
+    { name: 'thumbCollisionBehavior', type: "'push' | 'swap' | 'none'", default: "'push'" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'index (Thumb)', type: 'number', default: '0' },
+    { name: 'startIndex / endIndex (Indicator)', type: 'number', default: 'full span' },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'nova'" },
+  ]}
+/>
+
+Events: both `Root` and `Values Root` emit `valueChange` during adjustment and `valueCommit` on completion.
 
 ## References
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-SLIDER.yaml', 'P-BASE-SLIDER.yaml']}
+  files={[
+    'P-SHADCN-SLIDER.yaml',
+    'P-SHADCN-SLIDER-THUMB.yaml',
+    'P-SHADCN-SLIDER-FIELD-THUMB.yaml',
+    'P-SHADCN-SLIDER-VALUES.yaml',
+    'P-BASE-SLIDER.yaml',
+    'P-BASE-SLIDER-VALUES.yaml',
+  ]}
 />

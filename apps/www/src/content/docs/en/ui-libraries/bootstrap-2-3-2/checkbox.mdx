@@ -5,21 +5,19 @@ description: 'A custom Bootstrap 2.3.2 checkbox built from Root and Indicator ov
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Bootstrap 2.3.2 Checkbox adapts the archived visual language with a custom `Root` and `Indicator` anatomy—it is not the archived native checkbox, and requires no legacy Bootstrap JavaScript or Glyphicons.
+Bootstrap 2.3.2 Checkbox adapts the classic 14px beveled gradient control and blue focus glow with a custom `Root` and `Indicator` anatomy—requiring no legacy Bootstrap JavaScript or Glyphicons.
 
 ## Preview
-
-Toggle the unchecked, checked, and mixed examples, or press `Tab` to inspect keyboard focus across Web Components, React, Vue 3, and Vue 2.
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-checkbox"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={true}
-  codePanel={false}
 />
 
 ## Installation
@@ -28,16 +26,102 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
-- **Root manages the state**: Supports controlled and uncontrolled `checked` and `indeterminate`, pointer and `Space` activation, disabled handling, focus, and the `checkbox` role with `mixed` state.
-- **Indicator**: Place inside `Root` to render the tick or dash automatically; `indeterminate` takes visual precedence over `checked`.
-- **Palette**: Keeps the archived Bootstrap 2.3.2 light palette even in dark hosts.
+```tsx
+import {
+  Bootstrap232CheckboxIndicator,
+  Bootstrap232CheckboxRoot,
+  Bootstrap232LabelRoot,
+} from '@proto.ui/prototypes-bootstrap-2-3-2';
+
+export function Example() {
+  return (
+    <div className="flex items-center gap-2.5">
+      <Bootstrap232CheckboxRoot defaultChecked>
+        <Bootstrap232CheckboxIndicator />
+      </Bootstrap232CheckboxRoot>
+      <Bootstrap232LabelRoot>Accept terms and conditions</Bootstrap232LabelRoot>
+    </div>
+  );
+}
+```
+
+- **Root manages the state**: Supports controlled and uncontrolled `checked` and `indeterminate`, pointer and `Space` activation, disabled and read-only policies, focus, and the `checkbox` role with `mixed` state.
+- **Indicator**: Place inside `Root` to render the dark tick or dash automatically; `indeterminate` takes visual precedence over `checked`.
+- **Classic feedback and palette**: Hover and press use Bootstrap 2.3.2 beveled gradients, keyboard focus displays the `#52a8ec` glow, and the control keeps its classic light face even in dark hosts.
+
+## Examples
+
+### Description
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-description"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and read-only
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled and indeterminate
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Group
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Table
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-table"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / Events | Description |
-| --- | --- | --- |
-| `Root` | `checked` / `defaultChecked` | Controlled or initial checked state |
-| `Root` | `indeterminate` / `defaultIndeterminate` | Controlled or initial mixed state |
-| `Root` | `disabled` | Prevents interaction when enabled |
-| `Root` | `checkedChange` / `indeterminateChange` | Change events for checked and indeterminate state |
-| `Indicator` | — | Derived tick/dash indicator placed inside `Root` |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'checked', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'indeterminate', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+`Root` exposes `checked`, `indeterminate`, `disabled`, `readOnly`, `required`, `hovered`, `focused`, `focusVisible`, and `pressed` states, `focusSelf(options?)` and `resetValue()` methods, and `checkedChange` (`{ checked, indeterminate }`) and `indeterminateChange` (`{ indeterminate }`) events.
+
+### Indicator
+
+`Indicator` declares no props of its own. Place it inside `Root` to sync checked and mixed marks automatically; it exposes `checked`, `indeterminate`, `isChecked()`, and `isIndeterminate()`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-CHECKBOX.yaml',
+    'P-BOOTSTRAP-2-3-2-CHECKBOX-INDICATOR.yaml',
+    'P-BASE-CHECKBOX.yaml',
+    'P-BASE-CHECKBOX-INDICATOR.yaml',
+  ]}
+/>

@@ -120,21 +120,37 @@ export function setupInputVisual<Props extends ShadcnStyleProps, Exposes = Recor
     when: (w) => w.state(state.disabled).eq(true),
     intent: (i) => i.feedback.style.use(tw('pointer-events-none cursor-not-allowed opacity-50')),
   });
-  if (fieldControl) {
-    def.rule({
-      when: (w) => w.state(state.focusVisible).eq(true),
-      intent: (i) => i.feedback.style.use(tw('forced-colors-focus-outline')),
-    });
-  }
+  def.rule({
+    when: (w) => w.state(state.focusVisible).eq(true),
+    intent: (i) => i.feedback.style.use(tw('forced-colors-focus-outline')),
+  });
   // Modern base Input gained placeholder presentation; it never reads host attributes as state.
   def.feedback.style.use(tw('placeholder:text-muted-foreground'));
-  for (const profile of ['vega', 'nova', 'lyra', 'mira', 'new-york-v4'] as const) {
+  for (const profile of [
+    'vega',
+    'nova',
+    'maia',
+    'lyra',
+    'mira',
+    'luma',
+    'rhea',
+    'new-york-v4',
+  ] as const) {
     def.rule({
       when: (w) => w.all(w.state(style).eq(profile), w.meta('colorScheme').eq('dark')),
       intent: (i) => i.feedback.style.use(tw('bg-input/30')),
     });
   }
-  for (const profile of ['nova', 'lyra'] as const) {
+  for (const profile of [
+    'vega',
+    'nova',
+    'maia',
+    'lyra',
+    'mira',
+    'luma',
+    'rhea',
+    'new-york-v4',
+  ] as const) {
     def.rule({
       when: (w) => w.all(w.state(style).eq(profile), w.state(state.disabled).eq(true)),
       intent: (i) => i.feedback.style.use(tw('bg-input/50')),

@@ -1,0 +1,164 @@
+---
+title: 'Liquid Glass Radio Group'
+description: 'A layered translucent radio group with concentric circular proportions, regular vs. prominent hierarchy, and opaque fallbacks over Base Radio Group.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Radio Group pairs translucent material boundaries, crisp edge elevation, and concentric circular dot proportions (`size-2` indicator inside a `size-5` item) with `regular` / `prominent` hierarchy and explicit `material="opaque"` opt-out, while Base Radio Group owns all selection and roving focus semantics.
+
+## Preview
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-radio-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Liquid Glass Radio Group is currently provided from workspace source. Import `radioGroupRoot`, `radioGroupItem`, and `radioGroupIndicator` from `@proto.ui/prototypes-liquid-glass/radio-group` and adapt them to your target runtime.
+
+## Usage
+
+```tsx
+import {
+  LiquidGlassLabelRoot,
+  LiquidGlassRadioGroupIndicator,
+  LiquidGlassRadioGroupItem,
+  LiquidGlassRadioGroupRoot,
+} from '../proto-ui/components/react';
+
+export function RadioGroupUsage() {
+  return (
+    <LiquidGlassRadioGroupRoot defaultValue="comfortable" a11yLabel="Display density">
+      <div className="flex items-center gap-3">
+        <LiquidGlassRadioGroupItem value="default">
+          <LiquidGlassRadioGroupIndicator />
+        </LiquidGlassRadioGroupItem>
+        <LiquidGlassLabelRoot>Default</LiquidGlassLabelRoot>
+      </div>
+      <div className="flex items-center gap-3">
+        <LiquidGlassRadioGroupItem value="comfortable">
+          <LiquidGlassRadioGroupIndicator />
+        </LiquidGlassRadioGroupItem>
+        <LiquidGlassLabelRoot>Comfortable</LiquidGlassLabelRoot>
+      </div>
+      <div className="flex items-center gap-3">
+        <LiquidGlassRadioGroupItem value="compact">
+          <LiquidGlassRadioGroupIndicator />
+        </LiquidGlassRadioGroupItem>
+        <LiquidGlassLabelRoot>Compact</LiquidGlassLabelRoot>
+      </div>
+    </LiquidGlassRadioGroupRoot>
+  );
+}
+```
+
+### Material Hierarchy & Accessibility
+
+- **Never stack glass on glass**: Only individual `Item` controls declare Liquid Glass material; `Root` and `Indicator` remain passive without material layers. When placing radio options inside an elevated glass sheet or card, pass `material="opaque"` on `Item` to keep surface layering legible.
+- **Prominence hierarchy**: Use `variant="regular"` for standard choices and `variant="prominent"` to accentuate primary options with tinted styling.
+- **Adaptive fallbacks**: Reduced transparency, reduced motion, increased contrast, forced colors, or missing backdrop providers automatically fall back to high-contrast opaque fills and foregrounds. Disabled items withdraw optical material without dimming via `opacity-50`, preserving crisp readability.
+
+## Examples
+
+### Description
+
+Pair translucent radio controls with descriptions over a layered color backdrop.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-radio-group-description"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Choice Card
+
+Uses concentric corner radii (`rounded-2xl` + `p-1` outer shell wrapping `rounded-xl` cards) and `material="opaque"` on card items to avoid stacking glass on glass.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-radio-group-choice-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Prominence & Material
+
+Compare `variant="regular"`, `variant="prominent"`, and `material="opaque"` side by side on a shared gradient backdrop.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-radio-group-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Disabled controls withdraw material candidates while keeping opaque contrast intact for both selected and unselected options.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-radio-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid
+
+Combine `FieldRoot` and `FieldError` to present validation messages clearly over a layered backdrop.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-radio-group-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string (required)', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+  ]}
+/>
+
+### Indicator, Events & Methods
+
+- **Indicator**: No props; inherits `currentColor` from its parent `Item` to draw the concentric dot.
+- **Events**: `valueChange` (`{ value: string }`) on Root; `select` (`{ value: string }`) on Item.
+- **Methods**: `requestValue(value)`, `resetValue()`, `focusFirst()`, `focusLast()`, `focusNext()`, `focusPrev()`, `focusSelected()`, `focusSelf()` on Root.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-RADIO-GROUP.yaml',
+    'P-LIQUID-GLASS-RADIO-GROUP-ITEM.yaml',
+    'P-LIQUID-GLASS-RADIO-GROUP-INDICATOR.yaml',
+    'P-BASE-RADIO-GROUP.yaml',
+  ]}
+/>

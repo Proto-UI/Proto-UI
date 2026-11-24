@@ -34,7 +34,6 @@ export function sliderThumbPaint<Exposes>(
 ) {
   const paint = def.feedback.style.declareDecoration();
   for (const profile of SHADCN_STYLE_IDS) {
-    const pressedPaint = profile === 'nova' || profile === 'lyra' || profile === 'mira';
     for (const axis of ['horizontal', 'vertical'] as const) {
       const recipe =
         profile === 'luma' && axis === 'vertical'
@@ -50,7 +49,7 @@ export function sliderThumbPaint<Exposes>(
               w.all(
                 w.state(state.focusVisible).eq(false),
                 w.state(state.hovered).eq(false),
-                pressedPaint ? w.state(state.pressed).eq(false) : w.t()
+                w.state(state.pressed).eq(false)
               )
             )
           ),
@@ -63,9 +62,7 @@ export function sliderThumbPaint<Exposes>(
             w.state(state.orientation).eq(axis),
             w.state(state.disabled).eq(false),
             w.state(state.focusVisible).eq(false),
-            pressedPaint
-              ? w.any(w.state(state.hovered).eq(true), w.state(state.pressed).eq(true))
-              : w.state(state.hovered).eq(true)
+            w.any(w.state(state.hovered).eq(true), w.state(state.pressed).eq(true))
           ),
         intent: (i) => i.feedback.style.to(paint).use(recipe.hover),
       });
@@ -84,6 +81,22 @@ export function sliderThumbPaint<Exposes>(
       def.rule({
         when: (w) => w.all(w.state(style).eq(profile), w.not(w.meta('colorScheme').eq('dark'))),
         intent: (i) => i.feedback.style.to(paint).use(tw('bg-clip-padding')),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
+            w.meta('colorScheme').eq('dark'),
+            w.any(
+              w.state(state.disabled).eq(true),
+              w.all(
+                w.state(state.focusVisible).eq(false),
+                w.state(state.hovered).eq(false),
+                w.state(state.pressed).eq(false)
+              )
+            )
+          ),
+        intent: (i) => i.feedback.style.to(paint).use(tw('ring-border')),
       });
     }
   }

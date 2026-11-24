@@ -15,6 +15,7 @@ function renderCheck(renderer: Pick<RendererHandle<any>, 'svg' | 'el'>, selected
           renderer.svg.root(
             {
               viewBox: '0 0 24 24',
+              'aria-hidden': 'true',
               width: 16,
               height: 16,
               fill: 'none',

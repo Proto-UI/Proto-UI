@@ -4,8 +4,10 @@ description: A Bootstrap 2.3.2 form field providing automatic labeling, help tex
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Field groups a label, input control, helper description, error message, and validity reader into one cohesive unit with Bootstrap 2.3.2 compact spacing, 4px corners, inset shadows, and a clear focus ring.
+Bootstrap 2.3.2 Field groups a label, input control, muted helper description, error message, and validity reader into one cohesive unit with classic 4px corners, inset shadows, blue focus glow, and optional horizontal row alignment.
 
 ## Preview
 
@@ -13,12 +15,11 @@ Bootstrap 2.3.2 Field groups a label, input control, helper description, error m
   demoId="demo-bootstrap-2-3-2-field"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source. Import core parts and bound controls from `@proto.ui/prototypes-bootstrap-2-3-2/field`:
 
 ```ts
 import {
@@ -28,46 +29,160 @@ import {
   fieldDescription,
   fieldError,
   fieldValidity,
+  fieldTextarea,
+  fieldSelectTrigger,
+  fieldSwitch,
 } from '@proto.ui/prototypes-bootstrap-2-3-2/field';
 ```
 
 ## Usage
 
-### Composition
+```tsx
+import {
+  FieldRoot,
+  FieldLabel,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/field';
 
-Place one `Control` inside `Root`, optionally paired with one `Label`, one `Description`, one `Error`, and any number of `Validity` readers:
+export function AccountField() {
+  return (
+    <FieldRoot required minLength={3}>
+      <FieldLabel>Username</FieldLabel>
+      <FieldControl placeholder="Max Leiter" />
+      <FieldDescription>Choose a unique username for your account.</FieldDescription>
+      <FieldError />
+    </FieldRoot>
+  );
+}
+```
 
-- **Automatic ARIA wiring**: Automatically links and cleans up `aria-labelledby`, `aria-describedby`, and `aria-errormessage` (only while invalid) without manual DOM IDs.
-- **Custom controls**: The default `Control` is a single-line text input. To connect other value-bearing controls, bridge them with `asFieldControl` or `asFieldTextControl` from Base.
-- **State management**: `Root` manages `invalid`, `pending`, `dirty`, `touched`, `filled`, and `focused`, while `Control` manages its value and editor. Duplicate singleton parts ignore invalid configuration and stay inactive.
+### Composition and validation
 
-### Validation and async checks
+- **Automatic ARIA wiring**: Links and cleans up `aria-labelledby`, `aria-describedby`, and (only while invalid) `aria-errormessage` without manual DOM IDs.
+- **Bound controls**: Alongside the default single-line `Control`, compose with `fieldTextarea`, `fieldSelectTrigger`, and `fieldSwitch`, or bridge custom controls via Base `asFieldControl`.
+- **Built-in and async checks**: Supports `required`, `minLength`, `maxLength` (UTF-16 code units), `validationMode` (`'onBlur'` / `'onChange'` / `'manual'`), controlled `invalid`, and `externalValidation`. Compose with [Fieldset](../fieldset/) or [Form](../form/) for group disabling or form submission.
 
-- **Built-in constraints**: Supports `required`, `minLength`, and `maxLength` (measured in UTF-16 code units; optional empty strings skip length checks). `required` treats `null`, `false`, `""`, and `[]` as empty while treating `0` and whitespace as filled without trimming. Built-in flags are `valueMissing`, `tooShort`, and `tooLong`.
-- **Validation timing**: Set `validationMode` to `'onBlur'` (default), `'onChange'` (waits until IME composition ends), or `'manual'`.
-- **Controlled validity**: Supply `invalid` to control validity externally. Completed checks emit `validityChange` and take effect when the parent updates `invalid`.
-- **Asynchronous checks**: Enable `externalValidation={true}` to emit `validationRequest` (`{ requestId, value, reason }`) after built-in checks pass, then call `resolveValidation(requestId, { invalid, errors })`. Value changes, newer requests, disable/readOnly transitions, cancellation, or resets automatically invalidate stale requests.
-- **Error display**: `Error` renders explicit `message`, then current `errors`, then a built-in English fallback (pass localized messages for other locales). It unmounts content when closed; set `keepMounted` to keep it mounted while hidden. Pair with `LiveRegion` if you want live announcements.
+## Examples
 
-> For group disabling or form-wide submission and reset, compose Field inside `Fieldset` or `Form`.
+### Input
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-field-input"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Textarea
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-field-textarea"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Select
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-field-select"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Validation & Async Check
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-field-validation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props | Defaults and behavior |
-| --- | --- | --- |
-| `Root` | `invalid` / `errors` | Supplying `invalid` enables controlled validity; `errors` holds messages |
-| `Root` | `defaultInvalid` / `defaultErrors` | Initial uncontrolled validity and error messages |
-| `Root` | `disabled` / `readOnly` / `required` | Default `false`; combines with local `Control` policy |
-| `Root` | `minLength` / `maxLength` | Default `-1` (unbounded); UTF-16 code-unit length bounds |
-| `Root` | `validationMode` | `'onBlur'` (default), `'onChange'`, or `'manual'` |
-| `Root` | `externalValidation` | Default `false`; emits `validationRequest` after built-in checks pass |
-| `Control` | `value` / `defaultValue` | Controlled or uncontrolled value (fixed on initialization) |
-| `Control` | `disabled` / `readOnly` / `required` | Local flags; cannot relax an enabled `Root` restriction |
-| `Control` | `placeholder` / `name` / `autoComplete` / `inputMode` / `enterKeyHint` / `ariaLabel` | Text input hints and accessible naming |
-| `Label` | `activation` | Default `true`; clicking focuses the associated control |
-| `Description` | — | Passive, selectable help text |
-| `Error` | `message` / `keepMounted` | Custom message override; `keepMounted` defaults to `false` |
-| `Validity` | — | Passive validity display and `getValidity()` reader |
+### Root props
 
-- **Methods**: `Root` exposes `validate(reason?)`, `resolveValidation(requestId, result)`, `cancelValidation()`, `resetValidation()` (clears validation and `touched` without altering the value or `dirty` baseline), `focusControl(options?)`, and `getValidity()`.
-- **Events**: `validityChange`, `validationRequest` (`{ requestId, value, reason }`).
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'orientation',
+      type: "'vertical' | 'horizontal'",
+      default: 'vertical',
+      description: 'Layout orientation for label and control',
+    },
+    { name: 'invalid', type: 'boolean', description: 'Controlled invalid state' },
+    { name: 'errors', type: 'string[]', description: 'Controlled error messages' },
+    {
+      name: 'defaultInvalid',
+      type: 'boolean',
+      default: 'false',
+      description: 'Initial uncontrolled invalid state',
+    },
+    {
+      name: 'defaultErrors',
+      type: 'string[]',
+      default: '[]',
+      description: 'Initial uncontrolled error messages',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disables field and control',
+    },
+    {
+      name: 'readOnly',
+      type: 'boolean',
+      default: 'false',
+      description: 'Blocks edits while keeping focus',
+    },
+    { name: 'required', type: 'boolean', default: 'false', description: 'Marks field as required' },
+    {
+      name: 'minLength',
+      type: 'number',
+      default: '-1',
+      description: 'Minimum UTF-16 length (-1 disables)',
+    },
+    {
+      name: 'maxLength',
+      type: 'number',
+      default: '-1',
+      description: 'Maximum UTF-16 length (-1 disables)',
+    },
+    {
+      name: 'validationMode',
+      type: "'onBlur' | 'onChange' | 'manual'",
+      default: 'onBlur',
+      description: 'When validation runs',
+    },
+    {
+      name: 'externalValidation',
+      type: 'boolean',
+      default: 'false',
+      description: 'Emits validationRequest after built-in checks pass',
+    },
+  ]}
+/>
+
+### Control & other parts
+
+- **Control**: `value` / `defaultValue`, `disabled`, `readOnly`, `required`, `placeholder`, `name`, `autoComplete`, `inputMode`, `enterKeyHint`, `ariaLabel`.
+- **Bound controls**: `fieldTextarea`, `fieldSelectTrigger`, `fieldSwitch`.
+- **Label**: `activation?: boolean` (default `true`).
+- **Error**: `message?: string`, `keepMounted?: boolean` (default `false`).
+- **Methods & events (Root)**: `validate(reason?)`, `resolveValidation(requestId, result)`, `cancelValidation()`, `resetValidation()`, `focusControl(options?)`, `getValidity()`; events `validityChange`, `validationRequest`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-FIELD.yaml',
+    'P-BOOTSTRAP-2-3-2-FIELD-LABEL.yaml',
+    'P-BOOTSTRAP-2-3-2-FIELD-CONTROL.yaml',
+    'P-BOOTSTRAP-2-3-2-FIELD-DESCRIPTION.yaml',
+    'P-BOOTSTRAP-2-3-2-FIELD-ERROR.yaml',
+    'P-BOOTSTRAP-2-3-2-FIELD-VALIDITY.yaml',
+  ]}
+/>

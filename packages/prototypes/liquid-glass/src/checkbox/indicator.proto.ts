@@ -23,7 +23,7 @@ export default definePrototype<
     const { checked, indeterminate } = state;
     // currentColor inherits the Root's state-owned foreground (primary-foreground
     // while filled), so the mark stays readable in every governed state pair.
-    def.feedback.style.use(tw('flex size-4 shrink-0 items-center justify-center'));
+    def.feedback.style.use(tw('flex size-3.5 shrink-0 items-center justify-center'));
     const glyph = checkboxGlyph(def, { checked, indeterminate });
     return (renderer) => [renderer.r.slot(), glyph(renderer)];
   },

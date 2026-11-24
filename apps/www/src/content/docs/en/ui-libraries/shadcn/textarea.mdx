@@ -1,6 +1,6 @@
 ---
 title: 'Textarea'
-description: 'A multiline text input with controlled state, IME composition events, and form reset support.'
+description: 'Displays a form textarea with controlled state, IME composition events, and Field validation support.'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -12,14 +12,10 @@ Textarea wraps a native multiline text editor with controlled and uncontrolled v
 
 ## Preview
 
-The preview below shows an uncontrolled note field (`rows={4}`, `maxLength={240}`), a disabled editor, and a focusable read-only editor.
-
 <PrototypePreviewer
   demoId="demo-shadcn-textarea"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
 
 ## Installation
@@ -32,9 +28,70 @@ Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your targ
 
 ## Usage
 
-- Textarea manages a single native multiline editor without child content, supporting standard attributes such as `rows`, `maxLength`, `minLength`, `wrap`, `placeholder`, `readOnly`, and `disabled`.
-- Call `resetValue()` to restore the initial value in uncontrolled mode or request a reset in controlled mode. Reset remains callable while `readOnly` or `disabled` and ends any active IME composition.
-- Inside a form, import `fieldTextarea` from `@proto.ui/prototypes-shadcn/field` to connect labels, descriptions, error messages, and validation; see the [Form recipe](../form/).
+```tsx
+import { ShadcnTextareaRoot } from '../proto-ui/components/react';
+```
+
+```tsx
+<ShadcnTextareaRoot placeholder="Type your message here." rows={4} />
+```
+
+- **Native editing semantics**: Textarea manages a single native `<textarea>` without child content, supporting standard attributes such as `rows`, `maxLength`, `minLength`, `wrap`, `placeholder`, `readOnly`, and `disabled`.
+- **Style presets (`styleProfile`)**: Supports `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`, and `new-york-v4` (`new-york` alias). When omitted or set to `inherit`, it resolves from the nearest [Style Scope](../style-scope/) or falls back to `new-york-v4`.
+- **Reset and focus methods**: Call `resetValue()` to restore the initial value in uncontrolled mode or request a reset in controlled mode (callable even while `readOnly` or `disabled`, retiring any active IME composition). Use `focusSelf()` and `blurSelf()` for programmatic focus control.
+- **Form field composition**: Inside a form, import `fieldTextarea` from `@proto.ui/prototypes-shadcn/field` and compose it with `Field`, `FieldLabel`, `FieldDescription`, and `FieldError` for automatic labeling and validation; see the [Form recipe](../form/).
+
+## Examples
+
+### Field
+
+Use `Field`, `FieldLabel`, `FieldDescription`, and `FieldTextarea` to pair a textarea with an accessible label and helper description.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-textarea-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Set `disabled` on `Field` to disable the label and textarea together, or pass `disabled` directly to a standalone `Textarea`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-textarea-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid
+
+Pass `invalid` and `errors` to `Field` to display destructive border/ring styling and an accessible error message.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-textarea-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Button
+
+Pair with `Button` to create a message composer with a submit action.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-textarea-button"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Set `dir="rtl"` on an ancestor container to apply right-to-left text direction to the label, editor, and helper description.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-textarea-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -43,6 +100,11 @@ The following props belong to `Root` (pass `value` for controlled mode; `minLeng
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4' | 'new-york'",
+      default: "'inherit' → nearest scope → 'new-york-v4'",
+    },
     { name: 'value', type: 'string | undefined', default: 'uncontrolled' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
@@ -54,14 +116,16 @@ The following props belong to `Root` (pass `value` for controlled mode; `minLeng
     { name: 'autoComplete', type: 'string', default: "''" },
     { name: 'minLength', type: 'number', default: '-1' },
     { name: 'maxLength', type: 'number', default: '-1' },
-    { name: 'wrap', type: "'soft' | 'hard'", default: 'soft' },
+    { name: 'wrap', type: "'soft' | 'hard'", default: "'soft'" },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'labelledBy', type: 'string', default: "''" },
     { name: 'describedBy', type: 'string', default: "''" },
   ]}
 />
 
-`Root` exposes `value`, `disabled`, `readOnly`, `focused`, `focusVisible`, `composing`, and `resetValue()`, and emits `valueChange`, `change`, and IME composition events.
+- **Exposed states**: `value`, `disabled`, `readOnly`, `focused`, `focusVisible`, `composing` (plus `invalid` and `pending` on `FieldTextarea`).
+- **Exposed methods**: `focusSelf(options?)`, `blurSelf()`, `resetValue()`.
+- **Events**: `valueChange`, `change`, `compositionStart`, `compositionUpdate`, `compositionEnd`.
 
 ## References
 

@@ -5,64 +5,168 @@ description: 'A Brutalist-styled select menu with flat or elevated triggers, key
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Select lets users pick a single option from a positioned dropdown list, styled with 5px rounded corners, 2px black borders, and full keyboard, pointer, and touch support.
+Select lets users pick a single option from a positioned dropdown list, styled with 5px rounded corners, 2px black borders, DM Sans 500 typography, and full keyboard, pointer, and touch support.
 
 ## Preview
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-select" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-select"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## Installation
 
-Included in `@proto.ui/prototypes-brutalist@0.2.0`. Add it via the CLI target `brutalist-select`, or import directly from `@proto.ui/prototypes-brutalist/select`.
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-select" manager="npm" />
+
+Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your target framework, or import directly from `@proto.ui/prototypes-brutalist/select`.
 
 ## Usage
 
-### Trigger Appearance
+```tsx
+import {
+  BrutalistSelectContent,
+  BrutalistSelectItem,
+  BrutalistSelectRoot,
+  BrutalistSelectTrigger,
+  BrutalistSelectValue,
+} from '../proto-ui/components/react';
 
-The default `Trigger` renders flat with a 5px radius, 2px black border, and DM Sans 500 typography. When placing a Select alongside raised buttons (such as header Runtime and Style controls), set `appearance="elevated"` on `brutalist-select-trigger`:
+export function FruitSelect() {
+  return (
+    <BrutalistSelectRoot>
+      <BrutalistSelectTrigger className="w-48" accessibleLabel="Fruit selector">
+        <BrutalistSelectValue placeholder="Select a fruit" />
+      </BrutalistSelectTrigger>
+      <BrutalistSelectContent>
+        <BrutalistSelectItem value="apple" textValue="Apple">
+          Apple
+        </BrutalistSelectItem>
+        <BrutalistSelectItem value="banana" textValue="Banana">
+          Banana
+        </BrutalistSelectItem>
+        <BrutalistSelectItem value="blueberry" textValue="Blueberry">
+          Blueberry
+        </BrutalistSelectItem>
+      </BrutalistSelectContent>
+    </BrutalistSelectRoot>
+  );
+}
+```
 
-- At rest, the trigger displays a 4px right/down hard black shadow; on hover or press, it shifts 4px right/down and flattens without adding a second press offset.
-- Set `appearance="flat"` or omit the prop to restore the flat default. `size`, color contrast, focus ring, keyboard selection, and disabled behavior stay identical, and `Content` stays flat in both appearances.
+### Composition
 
-### Pointer, Keyboard & Touch Interaction
+Brutalist Select currently exports five core parts:
 
-<PrototypePreviewer
-  demoId="demo-brutalist-select-input"
-  initialRuntime="wc"
-  runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
-/>
+```text
+BrutalistSelectRoot
+├── BrutalistSelectTrigger
+│   └── BrutalistSelectValue
+└── BrutalistSelectContent
+    └── BrutalistSelectItem
+```
 
-- The scrollable list distinguishes active focus from the committed value: mouse movement without held buttons updates highlight, while touch, pen, and drag interactions rely on native browser scrolling and capture.
-- Pass `open` or `value` on `Root` to control those states independently; declining a selection proposal keeps the committed value intact. The popup uses popper placement with collision avoidance.
+- **Appearance & motion**: The default `Trigger` renders flat. Setting `appearance="elevated"` adds a resting 4px hard black shadow that shifts +4px/+4px and flattens on hover or press (respecting `prefers-reduced-motion`). `Content` always stays flat with `popper` placement by default.
+- **Keyboard & pointer**: Navigate with arrow keys or typeahead, commit with `Enter`, `Space`, or click, and press `Escape` to cancel and return focus to `Trigger`.
+
+## Examples
+
+### Trigger Appearance & Sizes
+
+Compare `flat` vs `elevated` triggers alongside `size="sm"` and `size="default"`.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-select-appearance"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Disabled
+
+Disable the entire select or disable individual options inside the popup.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-select-disabled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Large List & Controlled
+
+Combine a bounded scrollable popup with external controlled state for long option lists such as timezones.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-select-input"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-The first five props (`defaultOpen`, `defaultValue`, `disabled`, `readOnly`, `closeOnSelect`) belong to `Root` (pass `open` or `value` for controlled mode). `size` and `appearance` belong to `Trigger`:
+### Root / Trigger / Value
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'defaultOpen', type: 'boolean', default: 'false' },
-    { name: 'defaultValue', type: 'string', default: "''" },
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'readOnly', type: 'boolean', default: 'false' },
-    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
-    { name: 'size', type: "'sm' | 'default'", default: 'default' },
-    { name: 'appearance', type: "'flat' | 'elevated'", default: 'flat' },
+    { name: 'Root.open', type: 'boolean', default: 'undefined' },
+    { name: 'Root.defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'Root.value', type: 'string', default: 'undefined' },
+    { name: 'Root.defaultValue', type: 'string', default: "''" },
+    { name: 'Root.disabled', type: 'boolean', default: 'false' },
+    { name: 'Root.readOnly', type: 'boolean', default: 'false' },
+    { name: 'Root.closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'Root.openChange', type: '(detail) => void', default: '—' },
+    { name: 'Root.valueChange', type: '(detail) => void', default: '—' },
+    { name: 'Trigger.size', type: "'sm' | 'default'", default: "'default'" },
+    { name: 'Trigger.appearance', type: "'flat' | 'elevated'", default: "'flat'" },
+    { name: 'Trigger.accessibleLabel', type: 'string', default: "''" },
+    { name: 'Value.placeholder', type: 'string', default: "''" },
   ]}
 />
 
-Other part props and defaults:
+### Content / Item
 
-- **Trigger**: Also defaults `accessibleLabel` to `''`.
-- **Value**: `placeholder` defaults to `''`.
-- **Content**: Accepts Transition props; defaults `position` to `'popper'`, `side` to `'bottom'`, `align` to `'center'`, `sideOffset` to `4`, `alignOffset` to `0`, `avoidCollisions` to `true`, and `collisionPadding` to `10`.
-- **Item**: Defaults `disabled` to `false`, `value` and `textValue` to `''`; `closeOnSelect` falls back to `Root` when omitted.
-- **Group**, **Label**, **Surface**, **ItemText**, **Viewport**, **Separator**: No props.
+<ApiPropsTable
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Content.position', type: "'popper' | 'item-aligned'", default: "'popper'" },
+    { name: 'Content.side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content.align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'Content.sideOffset', type: 'number', default: '4' },
+    { name: 'Content.alignOffset', type: 'number', default: '0' },
+    { name: 'Content.avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'Content.collisionPadding', type: 'number', default: '10' },
+    { name: 'Item.value', type: 'string', default: "''" },
+    { name: 'Item.textValue', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+    { name: 'Item.closeOnSelect', type: 'boolean', default: 'Inherits Root' },
+    { name: 'Item.select', type: '(detail) => void', default: '—' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-SELECT.yaml',
+    'P-BRUTALIST-SELECT-TRIGGER.yaml',
+    'P-BRUTALIST-SELECT-CONTENT.yaml',
+    'P-BRUTALIST-SELECT-ITEM.yaml',
+    'P-BASE-SELECT.yaml',
+  ]}
+/>

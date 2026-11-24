@@ -27,7 +27,12 @@ export function setupSelectTriggerVisual(
   });
   for (const isPressed of [false, true]) {
     def.rule({
-      when: (w) => w.all(w.state(pressed).eq(isPressed), w.state(disabled).eq(false)),
+      when: (w) =>
+        w.all(
+          w.state(pressed).eq(isPressed),
+          w.state(disabled).eq(false),
+          w.not(w.meta('preference.reducedMotion').eq('reduce'))
+        ),
       intent: (i) =>
         i.feedback.material.use({
           intent: 'liquid-glass',
@@ -39,6 +44,11 @@ export function setupSelectTriggerVisual(
         }),
     });
   }
+  def.rule({
+    when: (w) =>
+      w.all(w.state(disabled).eq(false), w.meta('preference.reducedMotion').eq('reduce')),
+    intent: (i) => i.feedback.material.use({ intent: 'liquid-glass' }),
+  });
 
   def.feedback.style.use(
     tw(
@@ -74,7 +84,7 @@ export function setupSelectTriggerVisual(
   if (invalid) {
     def.rule({
       when: (w) => w.state(invalid).eq(true),
-      intent: (i) => i.feedback.style.use(tw('border-2 border-foreground')),
+      intent: (i) => i.feedback.style.use(tw('border-2 border-destructive')),
     });
   }
   return (renderer) => [
@@ -85,6 +95,7 @@ export function setupSelectTriggerVisual(
       renderer.svg.root(
         {
           viewBox: '0 0 24 24',
+          'aria-hidden': 'true',
           width: 16,
           height: 16,
           fill: 'none',

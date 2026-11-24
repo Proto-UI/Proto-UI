@@ -4,6 +4,8 @@ import {
   type FieldControlProps,
   type FieldControlExposes,
 } from '@proto.ui/prototypes-base/field';
+import { COMMAND_BLOCKED, COMMAND_FOCUS } from '../interactive-surface';
+
 export default definePrototype<FieldControlProps, FieldControlExposes>({
   name: 'liquid-glass-field-control',
   modules: asFieldTextControl.modules,
@@ -11,7 +13,7 @@ export default definePrototype<FieldControlProps, FieldControlExposes>({
     const inherited = asFieldTextControl();
     def.feedback.style.use(
       tw(
-        'h-11 w-full min-w-0 rounded-2xl border border-border bg-background px-4 py-2 text-base text-foreground outline-none'
+        'h-11 w-full min-w-0 rounded-2xl border border-border bg-background px-4 py-2 text-base text-foreground placeholder:text-muted-foreground transition-colors outline-none'
       )
     );
     const state = inherited.stateHandles!;
@@ -19,18 +21,19 @@ export default definePrototype<FieldControlProps, FieldControlExposes>({
     if (!binding) throw new Error('[field-control] Base Field binding handle required.');
     def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(
-          tw('forced-colors-focus-outline ring-2 ring-ring ring-offset-2 ring-offset-background')
-        ),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_FOCUS)),
+    });
+    def.rule({
+      when: (w) => w.state(state.readOnly).eq(true),
+      intent: (i) => i.feedback.style.use(tw('bg-muted')),
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed')),
+      intent: (i) => i.feedback.style.use(tw(`${COMMAND_BLOCKED} bg-muted text-muted-foreground`)),
     });
     def.rule({
       when: (w) => w.state(binding.state.invalid).eq(true),
-      intent: (i) => i.feedback.style.use(tw('border-2 border-foreground')),
+      intent: (i) => i.feedback.style.use(tw('border-2 border-destructive')),
     });
     // A static editing surface, never a button deformation or native adaptive blur.
     def.feedback.material.declare({

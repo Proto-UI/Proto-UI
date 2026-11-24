@@ -1,6 +1,7 @@
-import { definePrototype, tw } from '@proto.ui/core';
-import { asSwitchThumb } from '@proto.ui/prototypes-base/switch';
+import { definePrototype, tw, type AnatomyPartView, type RunHandle } from '@proto.ui/core';
+import { asSwitchThumb, SWITCH_FAMILY } from '@proto.ui/prototypes-base/switch';
 import type { BrutalistSwitchThumbExposes, BrutalistSwitchThumbProps } from './types';
+import { BRUTALIST_SWITCH_VISUAL, normalizeBrutalistSwitchSize } from './visual';
 
 // Source: switch.tsx@3306a802, 16px white disc and 20px checked travel.
 // Physical placement keeps identical 6px end insets even in an RTL parent;
@@ -25,7 +26,8 @@ const switchThumb = definePrototype<BrutalistSwitchThumbProps, BrutalistSwitchTh
   name: 'brutalist-switch-thumb',
   setup(def) {
     // P-BRUTALIST-SWITCH-THUMB-BASE-INHERITANCE
-    const switchState = asSwitchThumb().stateHandles;
+    const inherited = asSwitchThumb();
+    const switchState = inherited.stateHandles;
     if (!switchState) {
       throw new Error(
         '[brutalist-switch-thumb] asSwitchThumb must project Switch thumb state handles.'
@@ -33,6 +35,35 @@ const switchThumb = definePrototype<BrutalistSwitchThumbProps, BrutalistSwitchTh
     }
     // Base Switch thumb only projects checked/disabled. Press feedback remains on Root.
     const { checked } = switchState;
+    const size = def.state.enum('switchVisualSize', 'default', { options: ['default', 'sm'] });
+    let mounted = false;
+    let rootAvailable = false;
+    const syncParts = (parts: readonly AnatomyPartView[]) => {
+      rootAvailable = parts.length === 1;
+      const readSize = parts[0]?.getExpose('getVisualSize');
+      size.set(
+        normalizeBrutalistSwitchSize(typeof readSize === 'function' ? readSize() : undefined),
+        'reason: brutalist switch Thumb actual Root visual size'
+      );
+    };
+    const syncCurrentRoot = (run: RunHandle<BrutalistSwitchThumbProps>) => {
+      if (mounted && rootAvailable) syncParts(run.anatomy.partsOf(SWITCH_FAMILY, 'root'));
+    };
+    def.anatomy.subscribeParts(SWITCH_FAMILY, 'root', (_run, parts) => {
+      if (mounted) syncParts(parts);
+    });
+    def.context.trySubscribe(BRUTALIST_SWITCH_VISUAL, syncCurrentRoot);
+    def.lifecycle.onMounted((run) => {
+      mounted = true;
+      syncParts(run.anatomy.partsOf(SWITCH_FAMILY, 'root'));
+    });
+    def.lifecycle.onUpdated(syncCurrentRoot);
+    def.lifecycle.onUnmounted(() => {
+      mounted = false;
+      rootAvailable = false;
+      size.set('default', 'reason: brutalist switch Thumb visual detach');
+    });
+
     // P-BRUTALIST-SWITCH-THUMB-RESIDENT-MOTION: the draft family timing,
     // not an explicit duration in the upstream switch.tsx source.
     def.feedback.style.transition({
@@ -41,11 +72,20 @@ const switchThumb = definePrototype<BrutalistSwitchThumbProps, BrutalistSwitchTh
       easing: [0.4, 0, 0.2, 1],
     });
     def.feedback.style.use(tw(THUMB_TOKENS));
-    // P-BRUTALIST-SWITCH-THUMB-SINGLE-MOVEMENT — checked: one 20px transform delta.
+    def.rule({
+      when: (w) => w.state(size).eq('sm'),
+      intent: (i) => i.feedback.style.use(tw('size-3')),
+    });
+    // P-BRUTALIST-SWITCH-THUMB-SINGLE-MOVEMENT — checked: one 20px transform delta (12px for sm).
     def.rule({
       when: (w) => w.state(checked).eq(true),
       intent: (i) => i.feedback.style.use(tw('translate-x-5')),
     });
+    def.rule({
+      when: (w) => w.all(w.state(checked).eq(true), w.state(size).eq('sm')),
+      intent: (i) => i.feedback.style.use(tw('translate-x-3')),
+    });
+    return inherited.render;
   },
 });
 

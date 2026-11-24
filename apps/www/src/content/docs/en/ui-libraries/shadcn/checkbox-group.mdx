@@ -1,13 +1,13 @@
 ---
 title: 'Checkbox Group'
-description: 'A grouped checkbox control with array value management, select-all support, and form integration.'
+description: 'A grouped checkbox control with array value management, select-all support, orientation, and form validation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Manages a related set of checkboxes as a string array, with a built-in select-all/indeterminate control and direct `Field`/`Form` integration. The examples on this page use the **Shadcn Rhea** style preset.
+Manages a related set of checkboxes as a string array, with built-in select-all/indeterminate state, vertical or horizontal layout, and direct `Field` / `Form` integration. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -15,42 +15,139 @@ Manages a related set of checkboxes as a string array, with a built-in select-al
   demoId="demo-shadcn-checkbox-group"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-## Usage
+## Installation
 
 Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-### Anatomy
+## Usage
 
-Compose `Checkbox Group` from `Root`, `Item`, and `All`:
+```tsx
+import {
+  ShadcnCheckboxGroupRoot,
+  ShadcnCheckboxGroupAll,
+  ShadcnCheckboxGroupItem,
+} from '../proto-ui/components/react';
 
-- **Root**: Manages the selected `string[]` value (`value` / `defaultValue`), `disabled`, `readOnly`, and `ariaLabel`.
-- **Item**: Individual option with `value` and `disabled`. Each item has its own `Tab` stop and toggles on `Space` (`Enter` does not toggle).
-- **All**: Summarizes enabled items as checked, mixed, or unchecked, and toggles all enabled items while preserving disabled selections.
+export function Example() {
+  return (
+    <ShadcnCheckboxGroupRoot
+      styleProfile="rhea"
+      defaultValue={['email']}
+      ariaLabel="Notification channels"
+    >
+      <ShadcnCheckboxGroupAll>All notifications</ShadcnCheckboxGroupAll>
+      <ShadcnCheckboxGroupItem value="email">Email updates</ShadcnCheckboxGroupItem>
+      <ShadcnCheckboxGroupItem value="sms">SMS alerts</ShadcnCheckboxGroupItem>
+    </ShadcnCheckboxGroupRoot>
+  );
+}
+```
 
-### Controlled state and form integration
+### Anatomy and keyboard
 
-- Pass `value` to control the selection externally: user changes emit `valueChange` without mutating external state. `getValue()` returns a copy of the array, and duplicate item values are rejected.
-- Inside a `Field` or `FormField`, `Root` automatically connects to label activation, required validation, form serialization, and reset.
-- Styled `Item` and `All` render decorative `aria-hidden` state icons (checkmark, dash for mixed, or empty box) so state is never conveyed by color alone.
+- **Root**: Coordinates the selected `string[]` value (`value` / `defaultValue`), `orientation`, `disabled`, `readOnly`, and `ariaLabel`.
+- **Item**: Individual option with a unique `value` and optional `disabled` flag. Each enabled item has its own `Tab` stop and toggles on `Space` (`Enter` does not toggle).
+- **All**: Derives checked, mixed (`aria-checked="mixed"`), or unchecked state across enabled items and toggles only enabled items while preserving disabled selections.
+- **Forms and accessibility**: Decorative `aria-hidden` SVG indicators render check, dash, or empty states, focus rings target the checkbox indicator directly, and `Field` / `FormField` automatically connect label activation, required validation, serialization, and reset.
+
+## Examples
+
+### Basic
+
+Standard multi-select group without a select-all control.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-group-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Horizontal
+
+Set `orientation="horizontal"` for an inline wrapping row.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-group-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and Read-Only
+
+`disabled` removes items from interaction and tab order; `readOnly` keeps focus navigation while preventing mutations.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Pass `value` and handle `valueChange` to own the selection externally.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-group-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Form Validation
+
+Inside a required `FormField`, clearing all options and submitting triggers required validation errors and supports form reset.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox-group-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-Passing `value` selects controlled mode.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string[] | undefined', default: 'Uncontrolled' },
     { name: 'defaultValue', type: 'string[]', default: '[]' },
+    { name: 'orientation', type: "'vertical' | 'horizontal'", default: "'vertical'" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'new-york-v4'" },
   ]}
 />
 
-These props belong to `Root`. `Item` accepts `value` and `disabled`.
+### Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: 'Inherited from Root / Scope' },
+  ]}
+/>
+
+### All
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: 'Inherited from Root / Scope' },
+  ]}
+/>
+
+### Events, Methods, and States
+
+- **Root events**: `valueChange` (payload `{ value: string[] }`).
+- **Root methods**: `getValue(): string[]` (defensive copy), `resetValue(): boolean`, `focusSelf(): void`.
+- **Root states**: `checked`, `indeterminate`, `disabled`, `readOnly` (plus `invalid`, `fieldRequired`, `fieldDisabled`, `fieldReadOnly` from `Field` binding).
+- **Item / All states**: `checked`, `indeterminate`, `disabled`, `readOnly`, `focused`, `focusVisible`.
 
 ## References
 

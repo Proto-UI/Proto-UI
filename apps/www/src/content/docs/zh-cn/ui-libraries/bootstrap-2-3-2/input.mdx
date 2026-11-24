@@ -1,42 +1,128 @@
 ---
 title: 'Bootstrap 2.3.2 Input'
-description: '沿用归档 Bootstrap 2.3.2 输入框视觉风格的单行文本输入组件。'
+description: '沿用经典 Bootstrap 2.3.2 表单视觉风格的受控/非受控单行文本输入框。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Bootstrap 2.3.2 Input 将归档版本的经典输入框样式应用于 Base Input，在 Web 上渲染单一原生 `input[type=text]` 编辑器，并在深色宿主中保持经典的归档浅色配色。
+Bootstrap 2.3.2 Input 将经典 `forms.less` 视觉样式（4px 圆角、内阴影、蓝色焦点光晕与 `#eee` 禁用/只读填充）应用于 [Base Input](../../base/input/)，并在深色宿主中保持经典的归档浅色表单表面。
 
 ## 预览
-
-可编辑输入框内容、聚焦只读输入框，并与禁用状态对比。
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-input"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
   toolbar={true}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。[查看已实现的子集](../)。
+当前以工作区源码提供，尚未进入 0.2.0 稳定版；可从 `@proto.ui/prototypes-bootstrap-2-3-2/input` 导入。[查看已实现的子集](../)。
 
 ## 用法
 
-- **值与输入事件**：支持受控 `value` 与非受控 `defaultValue`，统一处理输入、失焦提交与 IME 组合输入事件。
-- **只读与禁用**：`readOnly` 允许聚焦和复制但禁止编辑；`disabled` 阻止聚焦与输入。
-- **表单字段组合**：如需标签、帮助说明与错误提示，请与 `Field` 组合使用。
+```tsx
+import { Bootstrap232InputRoot } from '@/components/ui/bootstrap-2-3-2-input';
+
+export function Example() {
+  return <Bootstrap232InputRoot placeholder="Type something..." ariaLabel="Basic input" />;
+}
+```
+
+- **值与输入事件**：支持受控 `value` 与非受控 `defaultValue`，统一处理输入、提交与 IME 组合事件。
+- **只读与禁用**：`readOnly` 保持可聚焦与文本选中，`disabled` 阻止聚焦与编辑，两者均呈现经典的 `#eee` 背景与禁选光标。
+- **表单字段组合**：如需标签、帮助说明与红色校验反馈，请与 Bootstrap 2.3.2 `Field` 组合使用。
+
+## 示例
+
+### 基础
+
+独立的基础 Bootstrap 2.3.2 文本输入框。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 表单字段
+
+搭配 `Field`、`FieldLabel`、`FieldControl` 与 `FieldDescription` 组合标准表单项。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 校验错误
+
+通过 `Field` 的 `invalid` 与 `errors` 属性触发经典的 `#953b39` 红色错误边框与焦点光晕。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 行内搜索
+
+将输入框与 Bootstrap 2.3.2 `Button` 水平排列，构建经典的行内搜索条。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-inline"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 分类 | 成员 | 说明 |
-| --- | --- | --- |
-| 值与状态 | `value` / `defaultValue`、`disabled`、`readOnly`、`placeholder` | 文本值与编辑状态 |
-| 表单与输入提示 | `name`、`required`、`autoComplete`、`minLength`、`maxLength`、`inputMode`、`enterKeyHint` | 原生输入行为与软键盘提示 |
-| 无障碍 | `ariaLabel`、`labelledBy`、`describedBy` | 可访问名称与关联说明 |
-| 事件与方法 | `valueChange`、`change`、IME 组合事件、`focusSelf()`、`blurSelf()` | 变更通知与焦点控制 |
+### Root 属性
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'undefined' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    {
+      name: 'inputMode',
+      type: "'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'",
+      default: 'undefined',
+    },
+    {
+      name: 'enterKeyHint',
+      type: "'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'",
+      default: 'undefined',
+    },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'labelledBy', type: 'string', default: "''" },
+    { name: 'describedBy', type: 'string', default: "''" },
+  ]}
+/>
+
+### 暴露状态、方法与事件
+
+- **状态**：`value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing`
+- **方法**：`focusSelf(options?)`、`blurSelf()`、`resetValue(value?: string): boolean`
+- **事件**：`valueChange`、`change`、`compositionStart`、`compositionUpdate`、`compositionEnd`
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-INPUT.yaml', 'P-BASE-INPUT.yaml']}
+/>

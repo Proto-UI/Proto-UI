@@ -4,6 +4,8 @@ description: 'A Bootstrap 2.3.2 form grouping container with semantic legend, de
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Bootstrap 2.3.2 Fieldset groups related form fields with a semantic heading, helper text, and cascading disabled state using Bootstrap 2.3.2's borderless block container and bottom-bordered legend styling.
 
@@ -13,7 +15,6 @@ Bootstrap 2.3.2 Fieldset groups related form fields with a semantic heading, hel
   demoId="demo-bootstrap-2-3-2-fieldset"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
@@ -22,17 +23,75 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
+```tsx
+import {
+  FieldsetRoot,
+  FieldsetLegend,
+  FieldsetDescription,
+} from '@/components/bootstrap-2-3-2/fieldset';
+import { FieldRoot, FieldLabel, FieldControl } from '@/components/bootstrap-2-3-2/field';
+
+export function Example() {
+  return (
+    <FieldsetRoot>
+      <FieldsetLegend>Address Information</FieldsetLegend>
+      <FieldsetDescription>We need your address to deliver your order.</FieldsetDescription>
+      <FieldRoot required>
+        <FieldLabel>Street Address</FieldLabel>
+        <FieldControl placeholder="123 Main St" />
+      </FieldRoot>
+    </FieldsetRoot>
+  );
+}
+```
+
 Compose `Root` with an optional `Legend` and `Description`:
 
 - **Cascading disabled state**: A group is disabled whenever its own `disabled` prop or any enclosing `Fieldset` is disabled. Re-enabling an outer group preserves any local `disabled` flags on inner groups. Contained `Field` controls—including fields inside `Legend`—automatically inherit the disabled state.
 - **Automatic ARIA wiring**: `Root` exposes the `group` role and automatically links its scoped `Legend` and `Description` without manual DOM IDs. Include at most one `Legend` and one `Description` per group; duplicate targets ignore invalid configuration and stay inactive.
-- **Visual styling**: `Root` renders as a borderless block group; `Legend` uses a full-width `1.3125rem` heading with a `2.5rem` line height and bottom border; `Description` renders muted, wrapping helper text.
+- **Visual styling**: `Root` renders as a borderless block group; `Legend` uses a full-width `21px` heading (`40px` line height, `20px` bottom margin) with a theme-aware `border-border` bottom rule; `Description` renders `14px` (`20px` line height) muted, wrapping helper text.
+
+## Examples
+
+### Checkbox group
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-fieldset-checkbox-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Nested disabled inheritance
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-fieldset-nested-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / States | Description |
-| --- | --- | --- |
-| `Root` | `disabled` | `boolean`, default `false`; cascades disabled state to nested groups and fields |
-| `Root` | `ariaLabel` | `string`, default `""`; accessible group name when `Legend` is omitted |
-| `Legend` | — | Optional passive heading; exposes read-only effective `disabled` state |
-| `Description` | — | Optional passive help text; exposes read-only effective `disabled` state |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Legend and Description
+
+`Legend` and `Description` declare no props of their own; all three parts expose read-only effective `disabled` state (`ExposeState<boolean>`).
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-FIELDSET.yaml',
+    'P-BOOTSTRAP-2-3-2-FIELDSET-LEGEND.yaml',
+    'P-BOOTSTRAP-2-3-2-FIELDSET-DESCRIPTION.yaml',
+  ]}
+/>

@@ -4,8 +4,10 @@ import {
   type FieldErrorProps,
   type FieldErrorExposes,
 } from '@proto.ui/prototypes-base/field';
+
 export default definePrototype<FieldErrorProps, FieldErrorExposes>({
   name: 'bootstrap-2-3-2-field-error',
+  modules: asFieldError.modules,
   setup(def) {
     const inherited = asFieldError();
     def.feedback.style.use(

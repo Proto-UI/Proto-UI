@@ -9,7 +9,9 @@ export default definePrototype<ComboboxTriggerProps, ComboboxTriggerExposes>({
     const behavior = asComboboxTrigger();
     setupSearchTriggerPaint(def, {
       disabled: behavior.getState!('disabled')!,
+      focused: behavior.getState!('focused')!,
       focusVisible: behavior.getState!('focusVisible')!,
     });
+    return behavior.render;
   },
 });

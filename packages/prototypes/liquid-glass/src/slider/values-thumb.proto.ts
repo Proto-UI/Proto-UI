@@ -4,7 +4,7 @@ import {
   type SliderValuesPartProps,
   type SliderValuesThumbExposes,
 } from '@proto.ui/prototypes-base/slider';
-import { COMMAND_FOCUS, COMMAND_HOVER } from '../interactive-surface';
+import { COMMAND_BLOCKED, COMMAND_FOCUS, COMMAND_HOVER } from '../interactive-surface';
 
 export type LiquidGlassSliderValuesThumbProps = SliderValuesPartProps & {
   material?: 'auto' | 'opaque';
@@ -23,13 +23,13 @@ export default definePrototype<LiquidGlassSliderValuesThumbProps, SliderValuesTh
     // neither track content nor every decorative child receives material.
     def.feedback.style.use(
       tw(
-        'absolute left-[calc(var(--pui-percentage)*1%)] top-1/2 block size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-primary bg-background text-foreground shadow-sm outline-none select-none'
+        'absolute left-[calc(var(--pui-percentage)*1%)] top-1/2 block h-5 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full border border-border bg-secondary text-secondary-foreground shadow-md transition-shadow cursor-pointer outline-none select-none'
       )
     );
     def.rule({
       when: (w) =>
         w.all(
-          w.state(state.hovered).eq(true),
+          w.any(w.state(state.hovered).eq(true), w.state(state.dragging).eq(true)),
           w.state(state.disabled).eq(false),
           w.state(state.focusVisible).eq(false)
         ),
@@ -41,7 +41,7 @@ export default definePrototype<LiquidGlassSliderValuesThumbProps, SliderValuesTh
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed shadow-none')),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_BLOCKED)),
     });
     def.feedback.material.declare({
       version: 2,
@@ -59,7 +59,7 @@ export default definePrototype<LiquidGlassSliderValuesThumbProps, SliderValuesTh
       when: (w) => w.state(state.orientation).eq('vertical'),
       intent: (i) =>
         i.feedback.style.use(
-          tw('left-1/2 top-auto bottom-[calc(var(--pui-percentage)*1%)] translate-y-1/2')
+          tw('left-1/2 top-auto bottom-[calc(var(--pui-percentage)*1%)] h-7 w-5 translate-y-1/2')
         ),
     });
     def.rule({

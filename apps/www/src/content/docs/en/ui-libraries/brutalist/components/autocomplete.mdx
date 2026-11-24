@@ -1,12 +1,13 @@
 ---
 title: 'Autocomplete'
-description: 'A text input with live-filtered suggestions and free-text submission.'
+description: 'A Brutalist text input with live-filtered suggestions and free-text submission.'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Autocomplete pairs a single-line text input with a filtered suggestion popup, letting users pick a suggested item or submit arbitrary free text.
+Brutalist Autocomplete follows the Brutalist design contract (5px `rounded-base`, 2px black borders, DM Sans typography, and role-based hard shadows), pairing a single-line text input with a filtered suggestion popup and free-text submission.
 
 ## Preview
 
@@ -14,40 +15,84 @@ Brutalist Autocomplete pairs a single-line text input with a filtered suggestion
   demoId="demo-brutalist-autocomplete"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source (`@proto.ui/prototypes-brutalist/autocomplete`); not yet included in the 0.2.0 stable release.
 
 ## Usage
 
-### Parts
+```html
+<proto-ui-brutalist-autocomplete-root a11y-label="Framework">
+  <proto-ui-brutalist-autocomplete-input
+    placeholder="Search frameworks…"
+  ></proto-ui-brutalist-autocomplete-input>
+  <proto-ui-brutalist-autocomplete-trigger>Options</proto-ui-brutalist-autocomplete-trigger>
+  <proto-ui-brutalist-autocomplete-content>
+    <proto-ui-brutalist-autocomplete-item value="next" text-value="Next.js" keywords="react ssr">
+      Next.js
+    </proto-ui-brutalist-autocomplete-item>
+    <proto-ui-brutalist-autocomplete-item
+      value="astro"
+      text-value="Astro"
+      keywords="islands static"
+    >
+      Astro
+    </proto-ui-brutalist-autocomplete-item>
+    <proto-ui-brutalist-autocomplete-empty
+      >No matching frameworks.</proto-ui-brutalist-autocomplete-empty
+    >
+  </proto-ui-brutalist-autocomplete-content>
+</proto-ui-brutalist-autocomplete-root>
+```
 
-Autocomplete is composed of `Root`, `Input`, `Content`, `Item`, `Empty`, and `Trigger`:
+### Parts and behavior
 
-- **Root**: Manages committed `value`, query `inputValue`, popup `open` state, built-in filtering, and keyboard looping. Each of `value`, `inputValue`, and `open` can be controlled independently.
-- **Input**: Single-line editor that keeps focus during arrow-key navigation and skips selection during IME composition.
-- **Content**: Anchored suggestion popup supporting placement, alignment, offset, and collision padding.
-- **Item**: Individual suggestion matched case- and diacritic-insensitively across `textValue` and `keywords`. Selecting commits `textValue`; disabled or duplicate-valued items cannot be committed.
-- **Empty**: Displayed when no items match the current query.
-- **Trigger**: Optional toggle button for opening or closing the suggestion popup.
+- **Parts**: Compose `Root`, `Input`, `Trigger`, `Content`, `Item`, and `Empty`.
+- **Depth and motion**: `Input` stays flat as an editable surface, `Trigger` uses a 4px raised shadow with press-settle feedback, `Content` uses a 3px foreground shadow, and active `Item` rows highlight with `bg-main` / `text-main-foreground`.
+- **Filtering and submission**: Built-in filtering folds case and diacritics across `textValue` and `keywords`; set `filter={false}` for external filtering. Pressing `Enter` without an active match commits custom text while IME composition stays safe.
 
-### Filtering and submission
+## Examples
 
-- Pressing `Enter` commits the highlighted suggestion, or commits the current free text when no option is active.
-- Set `filter={false}` to perform custom filtering in your application and render only matching `Item` elements.
+### Keywords and diacritic-insensitive search
+
+<PrototypePreviewer
+  demoId="demo-brutalist-autocomplete-keywords"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Trigger-less free-text submission
+
+<PrototypePreviewer
+  demoId="demo-brutalist-autocomplete-free-text"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and read-only states
+
+<PrototypePreviewer
+  demoId="demo-brutalist-autocomplete-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 ### Root
 
+Pass `value`, `inputValue`, or `open` to control each state independently. Exposed events: `valueChange`, `inputValueChange`, `openChange`. Exposed methods: `openPopup()`, `close()`, `setInputValue()`, `select()`.
+
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
     { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -57,12 +102,24 @@ Autocomplete is composed of `Root`, `Input`, `Content`, `Item`, `Empty`, and `Tr
   ]}
 />
 
-Pass `value`, `inputValue`, or `open` to control each state independently.
-
 ### Other parts
 
-- **Input**: `placeholder?: string`, `a11yLabel?: string`, `name?: string` (all default to `''`)
-- **Content**: `side` (default `'bottom'`), `align` (default `'start'`), `sideOffset` (default `4`), `collisionPadding` (default `8`)
-- **Item**: `value`, `textValue`, `keywords` (all default to `''`), `disabled?: boolean` (default `false`)
-- **Empty**: No props
-- **Trigger**: `disabled?: boolean` (default `false`)
+<ApiPropsTable
+  headers={{ name: 'Part / Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Input · placeholder / a11yLabel / name', type: 'string', default: "''" },
+    { name: 'Trigger · disabled', type: 'boolean', default: 'false' },
+    { name: 'Content · side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content · align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'Content · sideOffset / collisionPadding', type: 'number', default: '4 / 8' },
+    { name: 'Item · value / textValue / keywords', type: 'string', default: "''" },
+    { name: 'Item · disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-AUTOCOMPLETE.yaml', 'P-BASE-AUTOCOMPLETE.yaml']}
+/>

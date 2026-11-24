@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Field pairs a form control with its label, description, error message, and validation state, supporting built-in constraints and async external validation with bold Brutalist typography and crisp borders.
+Brutalist Field pairs a form control with its label, description, error message, and validation state, supporting vertical and horizontal layouts, built-in constraints, and async external validation with 5px corners (`rounded-base`), 2px borders, and DM Sans typography.
 
 ## Preview
 
@@ -15,60 +15,163 @@ Brutalist Field pairs a form control with its label, description, error message,
   demoId="demo-brutalist-field"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source. Import core parts and bound controls from `@proto.ui/prototypes-brutalist/field`:
 
-- **Package exports**: import `fieldRoot`, `fieldLabel`, `fieldControl`, `fieldDescription`, `fieldError`, and `fieldValidity` from `@proto.ui/prototypes-brutalist/field`
+```ts
+import {
+  fieldRoot,
+  fieldLabel,
+  fieldControl,
+  fieldDescription,
+  fieldError,
+  fieldValidity,
+  fieldTextarea,
+  fieldCheckbox,
+  fieldRadioGroup,
+  fieldSwitch,
+} from '@proto.ui/prototypes-brutalist/field';
+```
 
 ## Usage
 
-### Parts
+```tsx
+import {
+  FieldRoot,
+  FieldLabel,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+} from '@proto.ui/prototypes-brutalist/field';
 
-- **Root**: Manages validation state (`invalid`, `errors`), `dirty`, `touched`, and effective `disabled`/`readOnly`/`required` policy. Contains one `Control`, optional `Label`, `Description`, and `Error`, plus any number of read-only `Validity` readers. Nested roots operate independently.
-- **Control**: Hosts the value and text input. Custom value-bearing controls can integrate via Base's `asFieldControl` bridge and `asControlLabel().target(..., FIELD_LABEL_PAIR)` for label click focusing.
-- **Label**: Names the control and focuses it on pointer activation when `activation` is enabled, ignoring drags, modified clicks, and nested interactive elements.
-- **Description**: Optional selectable help text.
-- **Error**: Displays `message` when provided, otherwise the active `errors` strings or a built-in English fallback. Unmounts content when closed by default (set `keepMounted` to keep it mounted while hidden).
-- **Validity**: Passive status reader exposing `getValidity()`.
+export function ProfileField() {
+  return (
+    <FieldRoot required>
+      <FieldLabel>Name</FieldLabel>
+      <FieldControl placeholder="Jane Doe" />
+      <FieldDescription>Displayed on your public profile.</FieldDescription>
+      <FieldError />
+    </FieldRoot>
+  );
+}
+```
 
-### Built-in validation and controlled state
+### Parts and validation
 
-- `validationMode` supports `'onBlur'` (default), `'onChange'` (waits until `compositionend` during IME input), and `'manual'`.
-- Built-in checks cover `required`, `minLength`, and `maxLength` (measured in UTF-16 code units; optional empty strings skip length checks). `required` treats `null`, `false`, `""`, and empty arrays as empty, while `0` and whitespace strings count as filled without implicit trimming. Built-in flags are `valueMissing`, `tooShort`, and `tooLong`; external errors set `customError`.
-- Pass `invalid` to control validation externally: completed checks emit `validityChange` so the owner can update `invalid` and `errors`.
-- `resetValidation()` clears validation state and `touched` without resetting the field value or dirty baseline. Pair with `Form` when you need submission or full form reset.
+- **Root**: Manages validation state (`invalid`, `errors`), `dirty`, `touched`, `orientation` (`vertical` / `horizontal`), and effective `disabled`/`readOnly`/`required` policy. Nested roots operate independently.
+- **Control & bound controls**: Defaults to a single-line text editor, or compose with `fieldTextarea`, `fieldCheckbox`, `fieldRadioGroup`, `fieldSwitch`, or custom controls bridged through Base `asFieldControl`.
+- **Automatic accessibility**: Automatically links and cleans up `aria-labelledby`, `aria-describedby`, and (while invalid) `aria-errormessage` without manual DOM IDs.
+- **Validation**: Supports `required`, `minLength`, `maxLength`, `validationMode` (`'onBlur'` / `'onChange'` / `'manual'`), controlled `invalid`, and `externalValidation`.
 
-### Async external validation
+## Examples
 
-When `externalValidation` is `true`, passing built-in checks emits `validationRequest` with `{ requestId, value, reason }`. Resolve it by calling `resolveValidation(requestId, { invalid, errors })`. Stale results are automatically ignored if the value, control, or policy changes or a newer request starts.
+### Contact Form
 
-### Accessibility
+Compose text inputs, helper copy, and a multiline textarea into a classic Brutalist form layout.
 
-- Label, description, and error associations are wired automatically and cleaned up on unmount without manual DOM IDs; `aria-errormessage` is linked only while `invalid` is `true`.
-- Web hosts sync `aria-required`, `aria-invalid`, `aria-busy`, and `aria-readonly`. `Error` does not create an implicit live region; combine with `LiveRegion` when live announcements are needed.
+<PrototypePreviewer
+  demoId="demo-brutalist-field-contact"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Horizontal
+
+Use `orientation="horizontal"` to align switches and checkboxes beside their labels.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-field-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Radio & Choice Controls
+
+Combine `FieldRadioGroup`, `FieldCheckbox`, and `FieldSwitch` under one consistent labeling and validation contract.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-field-choice"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### With Error
+
+Invalid fields highlight the control border and display the error message in high-contrast destructive ink.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-field-error"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 ### Root
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
   rows={[
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'readOnly', type: 'boolean', default: 'false' },
-    { name: 'required', type: 'boolean', default: 'false' },
-    { name: 'minLength', type: 'number', default: '-1' },
-    { name: 'maxLength', type: 'number', default: '-1' },
-    { name: 'invalid', type: 'boolean', default: 'undefined' },
-    { name: 'errors', type: 'string[]', default: 'undefined' },
-    { name: 'defaultInvalid', type: 'boolean', default: 'false' },
-    { name: 'defaultErrors', type: 'string[]', default: '[]' },
-    { name: 'validationMode', type: "'onBlur' | 'onChange' | 'manual'", default: 'onBlur' },
-    { name: 'externalValidation', type: 'boolean', default: 'false' },
+    {
+      name: 'orientation',
+      type: "'vertical' | 'horizontal'",
+      default: 'vertical',
+      description: 'Layout orientation for label and control',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disables field and control',
+    },
+    {
+      name: 'readOnly',
+      type: 'boolean',
+      default: 'false',
+      description: 'Blocks edits while keeping focus',
+    },
+    { name: 'required', type: 'boolean', default: 'false', description: 'Marks field as required' },
+    { name: 'minLength', type: 'number', default: '-1', description: 'Minimum UTF-16 code units' },
+    { name: 'maxLength', type: 'number', default: '-1', description: 'Maximum UTF-16 code units' },
+    {
+      name: 'invalid',
+      type: 'boolean',
+      default: 'undefined',
+      description: 'Controlled invalid state',
+    },
+    {
+      name: 'errors',
+      type: 'string[]',
+      default: 'undefined',
+      description: 'Controlled error messages',
+    },
+    {
+      name: 'defaultInvalid',
+      type: 'boolean',
+      default: 'false',
+      description: 'Initial uncontrolled invalid state',
+    },
+    {
+      name: 'defaultErrors',
+      type: 'string[]',
+      default: '[]',
+      description: 'Initial uncontrolled error messages',
+    },
+    {
+      name: 'validationMode',
+      type: "'onBlur' | 'onChange' | 'manual'",
+      default: 'onBlur',
+      description: 'When validation runs',
+    },
+    {
+      name: 'externalValidation',
+      type: 'boolean',
+      default: 'false',
+      description: 'Emits validationRequest after built-in checks pass',
+    },
   ]}
 />
 
@@ -99,17 +202,13 @@ When `externalValidation` is `true`, passing built-in checks emits `validationRe
   ]}
 />
 
-### Other parts
+### Other parts, methods & events
 
 - **Label**: `activation?: boolean` (default `true`)
-- **Description**: No props
 - **Error**: `message?: string` (default `''`), `keepMounted?: boolean` (default `false`)
-- **Validity**: No props
-
-### Methods and events
-
+- **Description / Validity**: No additional props
 - **Root methods**: `validate(reason?)`, `resolveValidation(requestId, result)`, `cancelValidation()`, `resetValidation()`, `focusControl(options?)`, `getValidity()`
-- **Events**: `validityChange` (emits validation status and snapshot), `validationRequest` (payload `{ requestId, value, reason }`)
+- **Events**: `validityChange`, `validationRequest` (`{ requestId, value, reason }`)
 
 ## References
 

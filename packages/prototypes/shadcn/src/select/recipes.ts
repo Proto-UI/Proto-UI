@@ -29,10 +29,10 @@ export type SelectTranslucentStyle = (typeof SELECT_TRANSLUCENT_STYLES)[number];
  * transition differ per pinned recipe.
  */
 export const SELECT_TRIGGER_SURFACE: Record<SelectTranslucentStyle, string> = {
-  vega: 'gap-1.5 rounded-md border border-input bg-transparent py-2 pr-2 pl-2.5 text-sm shadow-xs transition-[color,box-shadow]',
-  nova: 'gap-1.5 rounded-lg border border-input bg-transparent py-2 pr-2 pl-2.5 text-sm transition-colors',
+  vega: 'gap-1.5 rounded-md border border-input bg-transparent py-2 pe-2 ps-2.5 text-sm shadow-xs transition-[color,box-shadow]',
+  nova: 'gap-1.5 rounded-lg border border-input bg-transparent py-2 pe-2 ps-2.5 text-sm transition-colors',
   maia: 'gap-1.5 rounded-[var(--pui-radius-4xl)] border border-input bg-input/30 px-3 py-2 text-sm transition-colors',
-  lyra: 'gap-1.5 rounded-none border border-input bg-transparent py-2 pr-2 pl-2.5 text-xs transition-colors',
+  lyra: 'gap-1.5 rounded-none border border-input bg-transparent py-2 pe-2 ps-2.5 text-xs transition-colors',
   mira: 'gap-1.5 rounded-md border border-input bg-input/20 px-2 py-1.5 text-xs leading-relaxed transition-colors',
   luma: 'gap-1.5 rounded-[var(--pui-radius-3xl)] border border-transparent bg-input/50 px-3 py-2 text-sm transition-[color,box-shadow,background-color]',
   sera: 'gap-1.5 rounded-none border border-transparent border-b-input bg-transparent px-0 py-2 text-sm transition-[color,border-color]',
@@ -163,7 +163,7 @@ export const SELECT_ITEM_SURFACE: Record<SelectTranslucentStyle, string> = {
   nova: 'gap-1.5 rounded-md py-1 pe-8 ps-1.5 text-sm',
   maia: 'gap-2.5 rounded-xl py-2 pe-8 ps-3 text-sm',
   lyra: 'gap-2 rounded-none py-2 pe-8 ps-2 text-xs',
-  mira: 'min-h-7 gap-2 rounded-md px-2 py-1 text-xs leading-relaxed',
+  mira: 'min-h-7 gap-2 rounded-md py-1 pe-8 ps-2 text-xs leading-relaxed',
   luma: 'gap-2.5 rounded-[var(--pui-radius-2xl)] py-2 pe-8 ps-3 text-sm font-medium',
   sera: 'gap-2.5 rounded-none py-2 pe-8 ps-3 text-sm',
   rhea: 'min-h-7 gap-2 rounded-[var(--pui-radius-xl)] py-1.5 pe-8 ps-2 text-sm',

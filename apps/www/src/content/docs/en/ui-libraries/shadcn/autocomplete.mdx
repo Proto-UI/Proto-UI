@@ -3,7 +3,7 @@ title: 'Autocomplete'
 description: 'An editable text input with filtered suggestions and free-text completion.'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
@@ -15,51 +15,133 @@ An editable text input with filtered suggestions that supports both picking a su
   demoId="demo-shadcn-autocomplete"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
+
+## Installation
+
+Autocomplete is currently available from workspace source (`@proto.ui/prototypes-shadcn/autocomplete`) and is not yet included in the 0.2.0 stable release.
 
 ## Usage
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+```html
+<proto-ui-shadcn-autocomplete-root a11y-label="Framework">
+  <proto-ui-shadcn-autocomplete-input
+    placeholder="Search frameworks…"
+  ></proto-ui-shadcn-autocomplete-input>
+  <proto-ui-shadcn-autocomplete-trigger size="icon">
+    <span class="sr-only">Toggle suggestions</span>
+  </proto-ui-shadcn-autocomplete-trigger>
+  <proto-ui-shadcn-autocomplete-content>
+    <proto-ui-shadcn-autocomplete-item value="next" text-value="Next.js" keywords="react ssr">
+      Next.js
+    </proto-ui-shadcn-autocomplete-item>
+    <proto-ui-shadcn-autocomplete-item value="astro" text-value="Astro" keywords="islands static">
+      Astro
+    </proto-ui-shadcn-autocomplete-item>
+    <proto-ui-shadcn-autocomplete-empty>No matching frameworks.</proto-ui-shadcn-autocomplete-empty>
+  </proto-ui-shadcn-autocomplete-content>
+</proto-ui-shadcn-autocomplete-root>
+```
 
-### Anatomy
+### Anatomy and interaction
 
-Compose `Autocomplete` from `Root`, `Input`, `Content`, `Item`, `Empty`, and `Trigger`:
+- **Parts**: Compose `Root`, `Input`, `Trigger`, `Content`, `Item`, and `Empty`. All parts inherit `styleProfile` from `Root` or an enclosing [Style Scope](../style-scope/).
+- **Committed value vs. query**: `value` holds the committed text while `inputValue` holds the live query. Selecting a suggestion commits its `textValue`; pressing `Enter` without an active match commits the typed free text.
+- **Built-in filtering and empty state**: Matches case- and diacritic-insensitively across `textValue` and `keywords`. Set `filter={false}` to render pre-filtered items. `Empty` reflects real match counts; disabled and duplicate-valued items cannot be committed.
+- **Keyboard and IME**: Focus stays inside the single-line input during arrow navigation, and IME composition never prematurely commits an item.
 
-- `Root`'s `value` holds the committed text, while `inputValue` holds the live query string.
-- Selecting a suggestion commits its `textValue`. Pressing `Enter` without an active match commits the current free text.
+## Examples
 
-### Filtering and interaction
+### Keywords and diacritic-insensitive search
 
-- **Built-in filtering**: Filters case- and diacritic-insensitively across `textValue` and `keywords`. Set `filter={false}` to supply your own pre-filtered items.
-- **Empty and disabled states**: `Empty` reflects the real match count; disabled items and duplicate-valued options cannot be committed.
-- **Keyboard and IME**: Focus stays in the single-line input during arrow-key navigation, and IME composition never triggers selection.
-- **Controlled state**: `open`, `value`, and `inputValue` can each be controlled independently with their corresponding change events.
+Built-in filtering matches both `textValue` and `keywords` with accent folding (typing `cafe`, `coffee`, or `brazil` finds the corresponding item).
+
+<PrototypePreviewer
+  demoId="demo-shadcn-autocomplete-keywords"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Trigger-less free-text submission
+
+Omit `Trigger` for an inline search-and-create input. Pressing `Enter` when no suggestion is active commits custom free text.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-autocomplete-free-text"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and read-only states
+
+`disabled` blocks editing and popup interaction; `readOnly` preserves readable text while preventing edits or suggestion selection.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-autocomplete-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### State tracking and popup placement
+
+Observe `valueChange`, `inputValueChange`, and `openChange` — or pass `value`, `inputValue`, and `open` for independent controlled state — alongside placement and loop configuration.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-autocomplete-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
+
+### Root
 
 Passing `value`, `inputValue`, or `open` enables controlled mode for that state.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
     { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'filter', type: 'boolean', default: 'true' },
     { name: 'loop', type: 'boolean', default: 'true' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'inherit'",
+    },
   ]}
 />
 
-These props belong to `Root`. Other part defaults:
+### Root events and methods
 
-- **Input**: `placeholder`, `a11yLabel`, and `name` default to `''`.
-- **Content**: `side="bottom"`, `align="start"`, `sideOffset={4}`, `collisionPadding={8}`.
-- **Item**: `value`, `textValue`, and `keywords` default to `''`; `disabled` defaults to `false`.
-- **Trigger**: `disabled` defaults to `false`.
+- **Events**: `valueChange` (`{ value, textValue, reason }`), `inputValueChange` (`{ value, composing }`), `openChange` (`{ open, reason }`).
+- **Methods**: `openPopup()`, `close()`, `setInputValue(value, composing?)`, `select(value, reason?)`.
+
+### Other parts
+
+<ApiPropsTable
+  headers={{ name: 'Part / Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Input · placeholder / a11yLabel / name', type: 'string', default: "''" },
+    { name: 'Input · size', type: "'sm' | 'default' | 'lg'", default: "'default'" },
+    { name: 'Input · invalid', type: 'boolean', default: 'false' },
+    { name: 'Trigger · disabled', type: 'boolean', default: 'false' },
+    { name: 'Trigger · size', type: "'default' | 'icon'", default: "'default'" },
+    { name: 'Content · side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content · align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'Content · sideOffset / collisionPadding', type: 'number', default: '4 / 8' },
+    { name: 'Item · value / textValue / keywords', type: 'string', default: "''" },
+    { name: 'Item · disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
 
 ## References
 

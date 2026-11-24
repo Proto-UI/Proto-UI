@@ -1,41 +1,104 @@
 ---
 title: 'Bootstrap 2.3.2 Switch'
-description: 'A Bootstrap 2.3.2 design-language extension switch built over Base Switch.'
+description: 'A Bootstrap 2.3.2 design-language extension switch built over Base Switch, supporting field compositions, RTL, and dragging.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Bootstrap 2.3.2 Switch is a design-language extension, not an original Bootstrap 2.3.2 component. It adapts the archived raised-control look into a `Root` / `Thumb` anatomy while inheriting Base Switch semantics and keeping the classic light palette.
+Bootstrap 2.3.2 Switch is a design-language extension that adapts classic beveled gradients and inset track depth into a `Root` / `Thumb` anatomy while inheriting Base Switch keyboard semantics, RTL mirroring, and optional pointer dragging.
 
 ## Preview
-
-Toggle the first two switches and verify the disabled switch stays unchanged across runtimes.
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-switch"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
   toolbar={true}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. [Browse the implemented subset](../).
+Currently available from workspace source via `@proto.ui/prototypes-bootstrap-2-3-2/switch`. [Browse the implemented subset](../).
 
 ## Usage
 
-- **Root manages the state**: Supports controlled `checked` and uncontrolled `defaultChecked`, activation, disabled state, and keyboard focus.
-- **Thumb**: Place inside `Root` to automatically reflect the current on/off state.
+```tsx
+import { switchRoot, switchThumb } from '@proto.ui/prototypes-bootstrap-2-3-2/switch';
+```
+
+```html
+<proto-ui-bootstrap-2-3-2-switch-root default-checked>
+  <proto-ui-bootstrap-2-3-2-switch-thumb></proto-ui-bootstrap-2-3-2-switch-thumb>
+  <span class="sr-only">Release alerts</span>
+</proto-ui-bootstrap-2-3-2-switch-root>
+```
+
+- **Root manages the state**: Supports controlled `checked` and uncontrolled `defaultChecked`, click and keyboard activation, beveled hover/active feedback, focus, and disabled state.
+- **Derived Thumb**: Place inside `Root` to track on/off state, live drag percentage, and `direction`, with automatic `prefers-reduced-motion: reduce` suppression.
+
+## Examples
+
+### Description
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-switch-description"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-switch-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-switch-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Draggable & RTL
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-switch-rtl-drag"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part    | Props / Events               | Description                                     |
-| ------- | ---------------------------- | ----------------------------------------------- |
-| `Root`  | `checked` / `defaultChecked` | Controlled or initial on/off state              |
-| `Root`  | `disabled`                   | Prevents toggling when enabled                  |
-| `Root`  | `checkedChange`              | Emitted when the switch requests a state change |
-| `Thumb` | —                            | Derived visual thumb placed inside `Root`       |
+The following props and events belong to `Root` (`Thumb` has no props):
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'checked', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'draggable', type: 'boolean', default: 'false' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+    { name: 'checkedChange', type: 'event ({ checked: boolean })', default: '—' },
+    { name: 'focusSelf', type: 'method (options?: FocusRequestOptions) => void', default: '—' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-SWITCH.yaml',
+    'P-BOOTSTRAP-2-3-2-SWITCH-THUMB.yaml',
+    'P-BASE-SWITCH.yaml',
+  ]}
+/>

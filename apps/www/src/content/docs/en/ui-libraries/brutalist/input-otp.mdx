@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Input OTP pairs a single real text input with indexed Brutalist character slots, preserving native paste, text selection, IME composition, and `one-time-code` autofill while highlighting active caret slots.
+Brutalist Input OTP pairs a single real text input with `rounded-base` (5px), 2px-bordered hard-shadow slots, preserving native paste, text selection, IME composition, and `one-time-code` autofill while highlighting active caret slots with Brutalist accent contrast.
 
 ## Preview
 
@@ -15,7 +15,6 @@ Brutalist Input OTP pairs a single real text input with indexed Brutalist charac
   demoId="demo-brutalist-input-otp"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
@@ -24,20 +23,89 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
-### Parts
+```tsx
+import {
+  BrutalistInputOtpRoot,
+  BrutalistInputOtpInput,
+  BrutalistInputOtpSlot,
+  BrutalistInputOtpSeparator,
+} from '../proto-ui/components/react';
 
-Input OTP consists of `Root`, `Input`, `Control`, `Slot`, and `Separator`:
+export function BrutalistVerificationCode() {
+  return (
+    <BrutalistInputOtpRoot length={6}>
+      <BrutalistInputOtpInput placeholder="123456" />
+      <div className="inline-flex items-center gap-1.5">
+        <BrutalistInputOtpSlot index={0} />
+        <BrutalistInputOtpSlot index={1} />
+        <BrutalistInputOtpSlot index={2} />
+      </div>
+      <BrutalistInputOtpSeparator>–</BrutalistInputOtpSeparator>
+      <div className="inline-flex items-center gap-1.5">
+        <BrutalistInputOtpSlot index={3} />
+        <BrutalistInputOtpSlot index={4} />
+        <BrutalistInputOtpSlot index={5} />
+      </div>
+    </BrutalistInputOtpRoot>
+  );
+}
+```
 
-- **Root**: Manages `value` / `defaultValue`, `length` (1–32, default `6`), `pattern` (`'numeric'` or `'alphanumeric'`), `disabled`, `readOnly`, `name`, and `ariaLabel`.
-- **Input**: Handles actual text entry for standalone usage, supporting selection, paste, deletion, IME composition, and `one-time-code` autofill. Disallowed characters are stripped and length is clamped after composition ends.
-- **Control**: Use instead of `Input` inside `Field` or `FormField` to integrate label focusing, validation, form serialization, and reset.
-- **Slot**: Renders the character at `index` as an `aria-hidden` display box without creating extra tab stops. Active slots reflect the real caret or selection range while the editable input is focused.
-- **Separator**: Optional visual divider between slot groups.
+### Parts and interaction
 
-### Events and validation
+- **Root**: Manages `value` / `defaultValue`, `length` (`1`–`32`, default `6`), `pattern` (`'numeric'` or `'alphanumeric'`), `disabled`, `readOnly`, `invalid`, `name`, and `ariaLabel`.
+- **Input / Control**: Use `Input` standalone for text entry, or `Control` inside `Field` / `FormField` for label focus, validation, serialization, and reset.
+- **Slot / Separator**: Passive `aria-hidden` character slots styled with DM Sans typography, 2px borders, and 2px hard shadows without adding extra tab stops.
 
-- Pass `value` for controlled mode; edits emit `valueChange`, and `completed` fires once for each accepted full-length code.
-- Inside `Field`, `Control` triggers automatic change validation only after an accepted value actually changes; rejected or no-op filtered edits do not re-trigger change validation.
+## Examples
+
+### Separator
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-otp-separator"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Alphanumeric
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-otp-alphanumeric"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-otp-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-otp-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-otp-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Form & Four-Digit PIN
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-otp-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -46,24 +114,37 @@ Input OTP consists of `Root`, `Input`, `Control`, `Slot`, and `Separator`:
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'length', type: 'number', default: '6' },
-    { name: 'pattern', type: "'numeric' | 'alphanumeric'", default: 'numeric' },
+    { name: 'pattern', type: "'numeric' | 'alphanumeric'", default: "'numeric'" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'invalid', type: 'boolean', default: 'false' },
     { name: 'name', type: 'string', default: "''" },
-    { name: 'ariaLabel', type: 'string', default: 'One-time code' },
+    { name: 'ariaLabel', type: 'string', default: "'One-time code'" },
   ]}
 />
 
-Pass `value: string` to enable controlled mode.
+### Input / Control & Slot
 
-### Other parts
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Input / Control: placeholder', type: 'string', default: "''" },
+    { name: 'Slot: index', type: 'number', default: '0' },
+    { name: 'Slot: invalid', type: 'boolean', default: 'false' },
+  ]}
+/>
 
-- **Input**: `placeholder?: string` (optional)
-- **Slot**: `index?: number` (default `0`)
-- **Control / Separator**: No props
+### Events & Methods
+
+- **Root events**: `valueChange` (`{ value: string }`), `completed` (`{ value: string }`).
+- **Root states & methods**: states `value`, `complete`, `disabled`, `readOnly`, `focused`; methods `requestValue(value)`, `clear()`, `resetValue()`, `focusInput()`.
 
 ## References
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-INPUT-OTP.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-INPUT-OTP.yaml', 'P-BASE-INPUT-OTP.yaml']}
+/>
