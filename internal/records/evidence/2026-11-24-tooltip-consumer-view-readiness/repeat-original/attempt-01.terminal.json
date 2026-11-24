@@ -1,0 +1,42 @@
+{
+  "head": "4f8c56486825afbb563c3aa159c7ad76a1d3d82a",
+  "attempt": 1,
+  "startedAt": "2026-11-24T04:37:50.307155+00:00",
+  "command": [
+    "corepack",
+    "pnpm@10.32.1",
+    "exec",
+    "vitest",
+    "run",
+    "apps/www/test/component-consumer-repairs.browser.test.ts",
+    "--testNamePattern",
+    "base.*react.*Tooltip Button has one Tab stop",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=/var/tmp/proto-ui-native-evidence-456f/portal-current-union/tooltip-repeat-diagnostic/attempt-01.json"
+  ],
+  "exitCode": 1,
+  "timedOut": false,
+  "outerTimeoutSeconds": 180,
+  "elapsedMs": 9283,
+  "scope": "One unchanged original case, five separate processes to diagnose the observed union failure; 83 unselected cases are not passes. The failed complete 84-case attempt remains intact.",
+  "headAfter": "4f8c56486825afbb563c3aa159c7ad76a1d3d82a",
+  "statusAfter": "",
+  "report": {
+    "success": false,
+    "numTotalTests": 84,
+    "numPassedTests": 0,
+    "numFailedTests": 1,
+    "numPendingTests": 83
+  },
+  "failed": [
+    {
+      "name": "'base' 'react' Tooltip Button has one Tab stop, one activation and an owned description",
+      "messages": [
+        "AssertionError: expected null to be truthy\n    at /var/tmp/proto-ui-portal-evidence-456f/apps/www/test/component-consumer-repairs.browser.test.ts:211:25\n    at file:///var/tmp/proto-ui-portal-evidence-456f/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///var/tmp/proto-ui-portal-evidence-456f/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///var/tmp/proto-ui-portal-evidence-456f/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///var/tmp/proto-ui-portal-evidence-456f/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///var/tmp/proto-ui-portal-evidence-456f/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///var/tmp/proto-ui-portal-evidence-456f/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///var/tmp/proto-ui-portal-evidence-456f/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///var/tmp/proto-ui-portal-evidence-456f/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (file:///var/tmp/proto-ui-portal-evidence-456f/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "head": "4f8c56486825afbb563c3aa159c7ad76a1d3d82a",
+  "attempt": 3,
+  "startedAt": "2026-11-24T04:38:09.067129+00:00",
+  "command": [
+    "corepack",
+    "pnpm@10.32.1",
+    "exec",
+    "vitest",
+    "run",
+    "apps/www/test/component-consumer-repairs.browser.test.ts",
+    "--testNamePattern",
+    "base.*react.*Tooltip Button has one Tab stop",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=/var/tmp/proto-ui-native-evidence-456f/portal-current-union/tooltip-repeat-diagnostic/attempt-03.json"
+  ],
+  "exitCode": 0,
+  "timedOut": false,
+  "outerTimeoutSeconds": 180,
+  "elapsedMs": 9434,
+  "scope": "One unchanged original case, five separate processes to diagnose the observed union failure; 83 unselected cases are not passes. The failed complete 84-case attempt remains intact.",
+  "headAfter": "4f8c56486825afbb563c3aa159c7ad76a1d3d82a",
+  "statusAfter": "",
+  "report": {
+    "success": true,
+    "numTotalTests": 84,
+    "numPassedTests": 1,
+    "numFailedTests": 0,
+    "numPendingTests": 83
+  },
+  "failed": []
+}
