@@ -158,6 +158,8 @@ const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/base/src/host/adapter-host.ts',
   'packages/adapters/base/src/host/exposes.ts',
   'packages/adapters/base/src/host/surface-projection.ts',
+  // Synchronous teardown steps reached by the reviewed view/Presence owners.
+  'packages/adapters/base/src/host/synchronous-steps.ts',
   'packages/adapters/base/src/host/view-epoch-owner.ts',
   'packages/adapters/base/src/host/view-visibility.ts',
   'packages/adapters/base/src/index.ts',
@@ -224,10 +226,14 @@ const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/base/src/gestures/web-move-click-arbitration.ts',
   'packages/adapters/base/src/motion/web-presence-presentation.ts',
   'packages/adapters/base/src/motion/web-resident-motion.ts',
+  // Value ownership and physical ancestry shared by those two motion hosts.
+  'packages/adapters/base/src/motion/web-motion-style-ownership.ts',
   'packages/adapters/base/src/platform/portal-destination.ts',
   'packages/adapters/base/src/platform/portal-inline-size.ts',
   'packages/adapters/base/src/platform/web-owned-decoration-portal.ts',
   'packages/adapters/base/src/platform/web-owned-decoration.ts',
+  // Physical first-view staging imported by that exact decoration entry.
+  'packages/adapters/base/src/platform/web-owned-decoration-stage.ts',
   'packages/adapters/base/src/platform/web-viewport-source.ts',
   'packages/adapters/web-component/src/native-text-layout.ts',
   'packages/adapters/web-component/src/owned-decoration.ts',
@@ -459,7 +465,66 @@ function validateChunkRecord(chunk, index, issues) {
   if (typeof chunk.isEntry !== 'boolean' || typeof chunk.isDynamicEntry !== 'boolean') {
     issues.push(`${context} \`${chunk.fileName}\` must record boolean entry flags`);
   }
+  if (Object.hasOwn(chunk, 'moduleRenderInfo')) {
+    const info = chunk.moduleRenderInfo;
+    if (!info || typeof info !== 'object' || Array.isArray(info)) {
+      issues.push(`${context} \`${chunk.fileName}\` has invalid moduleRenderInfo`);
+    } else {
+      const ids = Array.isArray(chunk.moduleIds) ? chunk.moduleIds : [];
+      const keys = Object.keys(info);
+      if (keys.length !== ids.length || keys.some((id) => !ids.includes(id))) {
+        issues.push(
+          `${context} \`${chunk.fileName}\` moduleRenderInfo must cover its exact moduleIds`
+        );
+      }
+      for (const id of ids) {
+        if (!Object.hasOwn(info, id) || !validModuleRenderInfo(info[id])) {
+          issues.push(
+            `${context} \`${chunk.fileName}\` has invalid moduleRenderInfo for \`${id}\``
+          );
+        }
+      }
+    }
+  }
   return true;
+}
+
+function validModuleRenderInfo(info) {
+  if (!info || typeof info !== 'object' || Array.isArray(info)) return false;
+  const keys = Object.keys(info);
+  if (
+    keys.length !== 3 ||
+    !['renderedLength', 'renderedExports', 'removedExports'].every((key) =>
+      Object.hasOwn(info, key)
+    ) ||
+    !Number.isSafeInteger(info.renderedLength) ||
+    info.renderedLength < 0
+  )
+    return false;
+  for (const key of ['renderedExports', 'removedExports']) {
+    if (
+      !Array.isArray(info[key]) ||
+      info[key].some((name) => typeof name !== 'string') ||
+      new Set(info[key]).size !== info[key].length
+    )
+      return false;
+  }
+  return !info.renderedExports.some((name) => info.removedExports.includes(name));
+}
+
+// Rollup retains tree-shaken barrel dependencies in chunk.modules. Only the
+// exact producer record for this chunk can establish that no code/export was
+// retained. Absent or malformed evidence keeps the module in the emitted check.
+// Keep moduleIds and all source edges intact for owner/provenance validation.
+function emittedModuleIds(chunk) {
+  if (!Array.isArray(chunk?.moduleIds)) return [];
+  const records = chunk.moduleRenderInfo;
+  return chunk.moduleIds.filter((id) => {
+    const info = records && Object.hasOwn(records, id) ? records[id] : undefined;
+    return (
+      !validModuleRenderInfo(info) || info.renderedLength !== 0 || info.renderedExports.length > 0
+    );
+  });
 }
 
 function closure(chunksByFileName, rootFileName, edgeFields) {
@@ -516,10 +581,13 @@ function collectMaterialDiagnosticIssues(
   const staticChunks = closure(chunksByFileName, root.fileName, ['imports']);
   const reachedChunks = closure(chunksByFileName, root.fileName, ['imports', 'dynamicImports']);
   const emittedModules = new Set(
+    [...reachedChunks].flatMap((file) => emittedModuleIds(chunksByFileName.get(file)))
+  );
+  const sourceModules = new Set(
     [...reachedChunks].flatMap((file) => chunksByFileName.get(file)?.moduleIds ?? [])
   );
   if (
-    [...emittedModules].some((id) => !modulesById.has(id)) ||
+    [...sourceModules].some((id) => !modulesById.has(id)) ||
     !modulesById.has(identity) ||
     !modulesById.has(owner)
   )
@@ -539,7 +607,7 @@ function collectMaterialDiagnosticIssues(
   // delivery and the same Adapter identity in another chunk remain forbidden.
   // Check emitted bytes even when the claimed module graph is invalid.
   for (const fileName of reachedChunks) {
-    for (const id of chunksByFileName.get(fileName)?.moduleIds ?? []) {
+    for (const id of emittedModuleIds(chunksByFileName.get(fileName))) {
       const existingStaticBridge =
         staticChunks.has(fileName) &&
         reviewedWebsiteControlChunks.has(fileName) &&
@@ -917,7 +985,7 @@ export function collectWebsiteProductionBundleIssues({
     const leakedModules = new Set();
     for (const fileName of shellClosure) {
       const chunk = chunksByFileName.get(fileName);
-      for (const moduleId of chunk?.moduleIds ?? []) {
+      for (const moduleId of emittedModuleIds(chunk)) {
         const isFrameworkModule = forbiddenFrameworkFamily(moduleId) !== null;
         const isUnapprovedAdapter =
           isProtoUiAdapterModule(moduleId) &&
@@ -945,7 +1013,7 @@ export function collectWebsiteProductionBundleIssues({
     for (const fileName of completeClosure) {
       if (staticClosure.has(fileName)) continue;
       const chunk = chunksByFileName.get(fileName);
-      for (const moduleId of chunk?.moduleIds ?? []) {
+      for (const moduleId of emittedModuleIds(chunk)) {
         if (forbiddenFrameworkFamily(moduleId) !== null || isProtoUiAdapterModule(moduleId)) {
           dynamicallyReachedModules.add(moduleId);
         }
@@ -1009,7 +1077,7 @@ export function collectWebsiteProductionBundleIssues({
         );
         const pending = [];
         for (const fileName of completeClosure) {
-          for (const id of chunksByFileName.get(fileName)?.moduleIds ?? []) {
+          for (const id of emittedModuleIds(chunksByFileName.get(fileName))) {
             if (
               (forbiddenFrameworkFamily(id) !== null || isProtoUiAdapterModule(id)) &&
               !reviewedBridgeModules.has(id)
@@ -1047,7 +1115,7 @@ export function collectWebsiteProductionBundleIssues({
         const bridgeBypassTargets = new Map();
         const bridgePending = [];
         for (const fileName of completeClosure) {
-          for (const id of chunksByFileName.get(fileName)?.moduleIds ?? []) {
+          for (const id of emittedModuleIds(chunksByFileName.get(fileName))) {
             if (reviewedBridgeModules.has(id)) {
               bridgeBypassTargets.set(id, id);
               bridgePending.push(id);
@@ -1083,7 +1151,7 @@ export function collectWebsiteProductionBundleIssues({
       }
       for (const fileName of completeClosure) {
         if (staticClosure.has(fileName)) continue;
-        for (const moduleId of chunksByFileName.get(fileName)?.moduleIds ?? []) {
+        for (const moduleId of emittedModuleIds(chunksByFileName.get(fileName))) {
           if (
             (forbiddenFrameworkFamily(moduleId) !== null || isProtoUiAdapterModule(moduleId)) &&
             !rendererModules.has(moduleId)
