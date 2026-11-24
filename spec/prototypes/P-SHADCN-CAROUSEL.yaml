@@ -11,6 +11,10 @@ statement:
   zh-CN: 独立编写的 Proto UI 协议，复用 Base 共享能力和 L1 lifecycle。
   en: An independently authored Proto UI protocol reusing Base shared capabilities and L1 lifecycle.
 criteria:
+  - id: P-SHADCN-CAROUSEL-PRESENTATION
+    text:
+      zh-CN: Shadcn Viewport 通过既有 Scroll composed projection 隐藏系统滚动条，保留宿主滚动引擎与 Base 的拖动、滚轮、键盘和吸附语义。文档示例的前后导航采用有可访问名称的图标按钮，并为外置导航预留空间，用独立 Card 组合项内容。Carousel 不声明 Scrollbar 或 Thumb，也不拥有 Card 外观。
+      en: The Shadcn Viewport omits system scrollbar chrome through the existing Scroll composed projection while retaining the host scrolling engine and Base drag, wheel, keyboard and snap semantics. Documentation examples use named icon controls, reserve room for external navigation and compose item contents with separate Cards. Carousel declares no Scrollbar or Thumb and does not own Card appearance.
   - id: P-SHADCN-CAROUSEL-ADMISSION
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
@@ -19,6 +23,7 @@ dependsOn:
   contracts:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
+    - C-AS-SCROLL-SURFACE-0001
 inherits:
   prototypes:
     - P-BASE-CAROUSEL
@@ -35,6 +40,9 @@ openQuestions:
     blocks:
       - activation:P-SHADCN-CAROUSEL
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Clarified native-engine preservation without system chrome and the separate icon-navigation and Card example composition.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the shadcn carousel family as draft.

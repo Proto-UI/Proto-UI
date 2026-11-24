@@ -10,6 +10,7 @@ import type {
   CarouselNextExposes,
 } from '@proto.ui/prototypes-base/carousel';
 import { definePrototype, tw } from '@proto.ui/core';
+import { asScrollSurface } from '@proto.ui/hooks';
 import {
   asCarouselRoot,
   asCarouselViewport,
@@ -53,6 +54,9 @@ export const carouselViewport = definePrototype<
   setup(def) {
     const inherited = asCarouselViewport();
     setupShadcnStyleSelection(def, 'new-york-v4');
+    // Keep the host's native scrolling/input engine without system scrollbar chrome.
+    // Carousel navigation is authored separately; this does not add Scrollbar/Thumb parts.
+    asScrollSurface().configure({ projection: 'composed' });
     def.feedback.style.use(tw('min-w-0 min-h-0 overflow-hidden'));
     def.rule({
       when: (w) => w.state(inherited.stateHandles!.focusVisible).eq(true),
