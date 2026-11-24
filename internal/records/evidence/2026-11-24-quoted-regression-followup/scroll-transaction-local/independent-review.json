@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-local-technical-review",
+  "reviewClass": "review-bounded-regression",
+  "executionMode": "human-assisted",
+  "modeSource": "current-user",
+  "reviewer": "/root/independent_review",
+  "reviewedAtUtc": "2026-11-24T15:06:36.151158+00:00",
+  "baseHead": "9b6a7e54a82cf0758cb0eb94a9befa69a0516a5e",
+  "candidateBinding": "Frozen working-tree bytes, not a future commit SHA",
+  "scope": "Synchronous intrinsic measurement transaction, owned-style helper, five changed/new tests, removal of temporary browser decision trace, and one added workflow source-recording path.",
+  "sourceAuthorIsSeparateAgent": true,
+  "repositorySourceModifiedByReviewer": false,
+  "files": [
+    {
+      "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+      "bytes": 30557,
+      "sha256": "298087c31bba3cc7b11b0a9b73735cd065d933f935117ca5557bd0e8c30531bd"
+    },
+    {
+      "path": "packages/modules/positioning/src/web/owned-style-lease.ts",
+      "bytes": 6509,
+      "sha256": "5e3911a7d2a532ba64ce9977f5a8e683801bf6a1c11a468f2026f15e55c3faea"
+    },
+    {
+      "path": "packages/modules/positioning/test/floating-ui-host.test.ts",
+      "bytes": 33337,
+      "sha256": "1ea123dcba936032ab4e084b7b831419d8016624fab6081aa8a7c4a4d1139939"
+    },
+    {
+      "path": "packages/modules/positioning/test/available-projection-ownership.test.ts",
+      "bytes": 12027,
+      "sha256": "5f8d015597035efbf22e7a81fce2cb71c4bfecdbc6be884c264031d061610c99"
+    },
+    {
+      "path": "packages/modules/positioning/test/lease-generation.test.ts",
+      "bytes": 7761,
+      "sha256": "64751343f10a6a15705b184d6fcad71d40e6e352be48f147c8e14dbb0af01737"
+    },
+    {
+      "path": "packages/modules/positioning/test/floating-ui-host-intrinsic-invalidation.test.ts",
+      "bytes": 17259,
+      "sha256": "7c53e83f9cfd01ffdaeec2f7e915c27ccc09db4b94a05422160cf81f1c1366b2"
+    },
+    {
+      "path": "packages/modules/positioning/test/owned-style-lease.test.ts",
+      "bytes": 6935,
+      "sha256": "ae2557dd040d7b3f5925729add5decb32ccddc952dee7f87bfaa2628be16ca7e"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+      "bytes": 123740,
+      "sha256": "7fc2042c5955e9a2cf9fe21a0cfa4293ebb67b5abf2293e1f0141ec7c741212d"
+    },
+    {
+      "path": ".github/workflows/browser-suite-repair-evidence.yml",
+      "bytes": 19329,
+      "sha256": "541bdf1277c012d464543f0b86c197931909e2e97193e643dbd858877baf8844"
+    }
+  ],
+  "authority": {
+    "M-POSITIONING-0001": "draft",
+    "C-ANCHORED-POSITIONING-0001": "draft",
+    "HC-ANCHORED-POSITION-0001": "draft",
+    "T-ANCHORED-POSITIONING-0001": "draft"
+  },
+  "sourceAssessment": "No unresolved substantive source finding identified in the specified frozen files; this is not native acceptance or platform approval.",
+  "findings": [
+    {
+      "id": "F-SYNC-001",
+      "severity": "P2",
+      "status": "resolved",
+      "title": "Offset restoration needed positive proof of an owned, uninterrupted cap suspension",
+      "locations": [
+        "packages/modules/positioning/src/web/floating-ui-host.ts:547",
+        "packages/modules/positioning/src/web/floating-ui-host.ts:571",
+        "packages/modules/positioning/src/web/owned-style-lease.ts:75"
+      ],
+      "failure": "Empty claims leave isCurrent() true; a same-claim write can change revision while remaining current. The earlier host finally could restore an old offset even when no owned cap was suspended or the transaction was interrupted.",
+      "resolution": "Require measurement.changed and measurement.restored plus current generation/ownership and an actual offset difference. The style helper preserves claim identity and revision; changed requires a field different from its authored baseline.",
+      "evidence": "Static review plus final public empty-claim/successor controls and same-claim, full/partial-handoff controls in the 351-pass run. No separate historical red execution is claimed for this finding."
+    },
+    {
+      "id": "F-SYNC-002",
+      "severity": "P2",
+      "status": "resolved",
+      "title": "A throwing restoration setter could falsely certify a partially restored snapshot",
+      "locations": [
+        "packages/modules/positioning/src/web/owned-style-lease.ts:103",
+        "packages/modules/positioning/src/web/owned-style-lease.ts:151",
+        "packages/modules/positioning/test/owned-style-lease.test.ts:7"
+      ],
+      "counterexampleSourceSha256": "219182ff9924d9864d7913d37ed26aabfe3ebba70c7bf946262076e32e9e5045",
+      "failure": "With projected width/height300/400 and authored100/200, the width restoration setter wrote300 then threw. The old loop stopped with height200 yet completion.restored=true and isCurrent=true.",
+      "resolution": "Continue only while original ownership/revision/current guards remain valid, preserve the first error, and certify every final value and priority against the original projection snapshot.",
+      "evidence": "The reviewer directly executed the old helper counterexample and both repaired helper controls with actual Happy DOM style operations and an instrumented throwing setter; these are local ownership controls, not native-browser evidence."
+    }
+  ],
+  "independentControls": [
+    {
+      "sourceSha256": "219182ff9924d9864d7913d37ed26aabfe3ebba70c7bf946262076e32e9e5045",
+      "case": "Old helper: first restore setter writes then throws",
+      "width": "300px",
+      "height": "200px",
+      "completion": {
+        "changed": true,
+        "restored": true
+      },
+      "ownerCurrent": true,
+      "firstErrorPreserved": true,
+      "observation": "Incorrect all-restored certificate observed directly; tool chunk4bac6f."
+    },
+    {
+      "sourceSha256": "5e3911a7d2a532ba64ce9977f5a8e683801bf6a1c11a468f2026f15e55c3faea",
+      "case": "Fixed helper: first restore setter writes then throws; second succeeds",
+      "width": "300px",
+      "height": "400px",
+      "completion": {
+        "changed": true,
+        "restored": true
+      },
+      "ownerCurrent": true,
+      "firstErrorPreserved": true,
+      "observation": "Direct independent execution; tool chunke2835d."
+    },
+    {
+      "sourceSha256": "5e3911a7d2a532ba64ce9977f5a8e683801bf6a1c11a468f2026f15e55c3faea",
+      "case": "Fixed helper: first restore setter writes then throws; second throws before writing",
+      "width": "300px",
+      "height": "200px",
+      "completion": {
+        "changed": true,
+        "restored": false
+      },
+      "ownerCurrent": false,
+      "firstErrorPreserved": true,
+      "observation": "Direct independent execution; tool chunke2835d. Partial restoration does not authorize offset compensation."
+    }
+  ],
+  "validatedBoundaries": [
+    "Natural dimensions use installed Floating UI DOM1.8.0 getDimensions synchronously; thenables are rejected after synchronous restoration. Initial natural dimensions are supplied once; size-middleware resets read the actual capped box with fresh reference and offset-parent geometry.",
+    "Only continuously owned fields are temporarily suspended; authored values/priorities, equal-valued successors, same-claim revision changes, disposal and partial ownership handoff are guarded.",
+    "Only actual native offset snapshots are conditionally restored, with instant behavior, before the first await. No wheel delta is used and no late asynchronous restoration exists.",
+    "The previous intrinsic cache, mutation/font invalidation heuristics and temporary decision trace are removed. No new scroll-event filter was added. Existing composed-ancestor, ShadowRoot, reused-Event, sizeMatch and target-alignment paths remain.",
+    "The browser matrix retains1000ms progress assertion, both settled displacement assertions after the existing two animation frames, owner/ready checks, native wheel/cancellation checks and180000ms outer limit.",
+    "The workflow change adds only owned-style-lease.test.ts to source recording:18 source files and the same5 generated files; no selection/execution/timeout/security change."
+  ],
+  "validation": {
+    "report": "/tmp/contents-sync-transaction-validation.json",
+    "sha256": "1321a21c6ab1d80ef50df642a0dfb57265cfffbdb8d43a8e5fa278fd99b2489f",
+    "provenance": "Implementer actual execution receipts inspected; all9 source hashes and3 final raw-log hashes independently matched. The reviewer directly executed the helper controls and git diff --check; did not rerun the entire suite.",
+    "checks": [
+      {
+        "name": "positioning-and-four-adapters",
+        "cwd": "/workspace/scratch/5e512bf106bf/proto-ui-recovery",
+        "command": "corepack pnpm@10.32.1 exec vitest run packages/modules/positioning/test packages/adapters/react/test/positioning.integration.test.ts packages/adapters/vue/test/positioning.integration.test.ts packages/adapters/vue2/test/positioning.integration.test.ts packages/adapters/web-component/test/positioning.integration.test.ts --maxWorkers=1 --minWorkers=1 --reporter=verbose",
+        "exitCode": 0,
+        "log": "/tmp/contents-sync-transaction-regression-final.log",
+        "logSha256": "ae13217643d5346ef5e289e048a214164d2371b8de650d0e31fa474381736e2b",
+        "testFilesPassed": 27,
+        "testsPassed": 351,
+        "durationSeconds": 24.82,
+        "session": 99769,
+        "completionChunk": "85d8f2"
+      },
+      {
+        "name": "workspace-typecheck",
+        "cwd": "/workspace/scratch/5e512bf106bf/proto-ui-recovery",
+        "command": "NODE_OPTIONS=--max-old-space-size=4096 corepack pnpm@10.32.1 -s check:types:workspace",
+        "exitCode": 0,
+        "log": "/tmp/contents-sync-transaction-tsc-final.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "session": 98406,
+        "completionChunk": "b5bdcf",
+        "scope": "workspace only; not full docs/Astro typecheck"
+      },
+      {
+        "name": "prettier",
+        "cwd": "/workspace/scratch/5e512bf106bf/proto-ui-recovery",
+        "command": "corepack pnpm@10.32.1 exec prettier --check packages/modules/positioning/src/web/floating-ui-host.ts packages/modules/positioning/src/web/owned-style-lease.ts packages/modules/positioning/test/floating-ui-host.test.ts packages/modules/positioning/test/available-projection-ownership.test.ts packages/modules/positioning/test/lease-generation.test.ts packages/modules/positioning/test/floating-ui-host-intrinsic-invalidation.test.ts packages/modules/positioning/test/owned-style-lease.test.ts apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+        "exitCode": 0,
+        "log": "/tmp/contents-sync-transaction-prettier-final.log",
+        "logSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+        "session": 9006,
+        "completionChunk": "269c27"
+      }
+    ],
+    "reviewerDiffCheckExitCode": 0
+  },
+  "baselineControl": {
+    "directory": "/tmp/contents-transaction-baseline-7642",
+    "productionSource": "7642f1376b08ee3d4930f596da6a77ca74db9dda",
+    "productionFilesComparedToGitBlob": 18,
+    "loadedSourceRecordsHashChecked": 17,
+    "newTestSha256": "7c53e83f9cfd01ffdaeec2f7e915c27ccc09db4b94a05422160cf81f1c1366b2",
+    "exitCode": 1,
+    "passed": 4,
+    "failed": 4,
+    "skipped": 0,
+    "boundaries": "Isolated historical positioning source with the current installed dependencies/shared aliases, not a full historical checkout. The paint case fails in its first iteration; later ARIA/childList assertions are not reached. Growth fails before shrink assertions. Both smooth cases fail viewport restoration before later-input assertions. New tests intentionally differ from historical source."
+  },
+  "limitations": [
+    "No native run of these frozen B bytes is available at this review cutoff. Previous92d/b110/dca8/7642 failures remain failures; the last7642 run passes12 Shadcn combinations, then fails Brutalist/WC/click and leaves23 combinations unexecuted.",
+    "Happy DOM geometry, scroll clamp and smooth-scroll tests are explicit models; they do not prove native wheel delivery, browser animation, event coalescing or complete36-combination behavior.",
+    "Main52 is now integrated. Its richer observer and newly generated CSS require fresh source-bound native evidence; historical artifacts cannot establish the new closure.",
+    "Workspace typecheck passed; full check:types/docs/Astro, full CI, release acceptance, DCO/platform review and publication are outside this review.",
+    "No new independent acceptance claim is made for the reviewer-authored earlier temporary observer merge resolution; this review covers the separately authored B delta.",
+    "The earlier speculative compensation-event loop was not established as a UA regression. The overstrong synthetic model was withdrawn and no new event suppression was introduced."
+  ],
+  "platformApproval": "not requested and not issued",
+  "nativeAcceptance": "pending"
+}

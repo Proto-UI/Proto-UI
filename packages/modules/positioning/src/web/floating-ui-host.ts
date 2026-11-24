@@ -45,51 +45,6 @@ function isElement(value: unknown): value is HTMLElement {
   return typeof HTMLElement !== 'undefined' && value instanceof HTMLElement;
 }
 
-// Temporary native diagnosis. No values are collected without the test-installed
-// sink; factories let that sink reject unrelated leases before reading details.
-const decisionTraceKey = Symbol.for('proto.ui.positioning.decision-trace');
-type DecisionTrace = (details: () => Record<string, unknown>) => void;
-function decisionSink(element: HTMLElement): unknown {
-  try {
-    return Reflect.get(element.ownerDocument.defaultView!, decisionTraceKey);
-  } catch {
-    return undefined;
-  }
-}
-function basisDifferences(previous: string | undefined, current: string) {
-  if (!previous) return null;
-  const names = [
-    'anchor.width',
-    'anchor.height',
-    'reference.offsetWidth',
-    'reference.offsetHeight',
-    'floating.offsetWidth',
-    'floating.offsetHeight',
-    'floating.clientWidth',
-    'floating.clientHeight',
-    'floating.scrollWidth',
-    'floating.scrollHeight',
-    'root.clientWidth',
-    'root.clientHeight',
-    'body.clientWidth',
-    'viewport.width',
-    'viewport.height',
-    'viewport.scale',
-    'viewport.offsetLeft',
-    'viewport.offsetTop',
-    'authoredStyle',
-    'ancestors',
-    'intrinsicStyle',
-  ];
-  const before = JSON.parse(previous) as unknown[];
-  const after = JSON.parse(current) as unknown[];
-  return names.flatMap((name, index) =>
-    JSON.stringify(before[index]) === JSON.stringify(after[index])
-      ? []
-      : [{ name, before: before[index], after: after[index] }]
-  );
-}
-
 function composedParent(node: Node): Node | null {
   if (node.nodeType === 1 && (node as Element).assignedSlot) return (node as Element).assignedSlot;
   return node.parentNode ?? (node.nodeType === 11 ? ((node as ShadowRoot).host ?? null) : null);
@@ -160,322 +115,16 @@ function observePositionScroll(reference: HTMLElement, floating: HTMLElement, up
   };
 }
 
-const positioningStyleOutputs = new Set([
-  'position',
-  'left',
-  'top',
-  '--proto-ui-anchor-width',
-  '--proto-ui-anchor-height',
-  '--proto-ui-available-width',
-  '--proto-ui-available-height',
-]);
-
-function authoredPositionStyle(element: HTMLElement): string {
-  const values: string[] = [];
-  for (let index = 0; index < element.style.length; index++) {
-    const name = element.style.item(index);
-    if (!positioningStyleOutputs.has(name))
-      values.push(
-        `${name}:${element.style.getPropertyValue(name)}!${element.style.getPropertyPriority(name)}`
-      );
-  }
-  return values.sort().join(';');
-}
-
-/** Reuse measured natural dimensions only while their bounded input facts stay current. */
-function observeIntrinsicSize(reference: HTMLElement, floating: HTMLElement, trace: DecisionTrace) {
-  const document = floating.ownerDocument;
-  const view = document.defaultView;
-  let revision = 0;
-  let disposed = false;
-  let authored = authoredPositionStyle(floating);
-  let projectedSide = floating.dataset.side;
-  let projectedAlign = floating.dataset.align;
-  const invalidate = () => {
-    revision++;
-    cache = null;
-  };
-  const mutations = (records: MutationRecord[]) => {
-    const beforeRevision = revision;
-    const invalidations: MutationRecord[] | null =
-      typeof decisionSink(floating) === 'function' ? [] : null;
-    for (const record of records) {
-      if (record.target === floating && record.type === 'attributes') {
-        if (record.attributeName === 'style') {
-          const next = authoredPositionStyle(floating);
-          if (next === authored) continue;
-          authored = next;
-        } else if (record.attributeName === 'data-side' && floating.dataset.side === projectedSide)
-          continue;
-        else if (record.attributeName === 'data-align' && floating.dataset.align === projectedAlign)
-          continue;
-      }
-      invalidate();
-      invalidations?.push(record);
-    }
-    if (invalidations?.length)
-      trace(() => ({
-        phase: 'intrinsic-mutation',
-        beforeRevision,
-        revision,
-        records: invalidations.slice(0, 32).map((record) => ({
-          type: record.type,
-          targetIsFloating: record.target === floating,
-          target:
-            record.target instanceof Element
-              ? { tag: record.target.localName, id: record.target.id }
-              : { nodeType: record.target.nodeType },
-          attribute: record.attributeName,
-          oldValue: record.oldValue,
-          valueAtDelivery:
-            record.target instanceof Element && record.attributeName
-              ? record.target.getAttribute(record.attributeName)
-              : null,
-          addedNodes: record.addedNodes.length,
-          removedNodes: record.removedNodes.length,
-        })),
-        droppedMutationRecords: Math.max(0, invalidations.length - 32),
-      }));
-  };
-  const observer =
-    typeof view?.MutationObserver === 'function' ? new view.MutationObserver(mutations) : null;
-  observer?.observe(floating, {
-    subtree: true,
-    childList: true,
-    characterData: true,
-    attributes: true,
-    attributeOldValue: typeof decisionSink(floating) === 'function',
-  });
-  const externalInvalidation = (event: Event) => {
-    invalidate();
-    trace(() => ({ phase: 'intrinsic-invalidation', reason: event.type, revision }));
-  };
-  floating.addEventListener('load', externalInvalidation, true);
-  document.fonts?.addEventListener('loadingdone', externalInvalidation);
-  document.fonts?.addEventListener('loadingerror', externalInvalidation);
-  const basis = () => {
-    const anchor = reference.getBoundingClientRect();
-    const root = document.documentElement;
-    const viewport = view?.visualViewport;
-    const style = view?.getComputedStyle(floating);
-    const intrinsicStyle = JSON.stringify([
-      style?.font,
-      style?.fontFamily,
-      style?.fontSize,
-      style?.fontWeight,
-      style?.lineHeight,
-      style?.letterSpacing,
-      style?.whiteSpace,
-      style?.boxSizing,
-      style?.padding,
-      style?.borderWidth,
-      style?.display,
-      style?.minWidth,
-      style?.minHeight,
-      style?.direction,
-      style?.writingMode,
-    ]);
-    const ancestors: string[] = [];
-    for (let node = composedParent(floating); node; node = composedParent(node)) {
-      if (node.nodeType !== 1) continue;
-      const element = node as Element;
-      ancestors.push(
-        JSON.stringify([
-          element
-            .getAttributeNames()
-            .sort()
-            .map((name) => `${name}=${element.getAttribute(name)}`),
-          element.clientWidth,
-          element.clientHeight,
-          view?.getComputedStyle(element).transform,
-        ])
-      );
-    }
-    const context = JSON.stringify([
-      anchor.width,
-      anchor.height,
-      reference.offsetWidth,
-      reference.offsetHeight,
-      root.clientWidth,
-      root.clientHeight,
-      document.body?.clientWidth,
-      viewport?.width,
-      viewport?.height,
-      viewport?.scale,
-      viewport?.offsetLeft,
-      viewport?.offsetTop,
-      authoredPositionStyle(floating),
-      ancestors,
-      intrinsicStyle,
-    ]);
-    return {
-      offsetParent: floating.offsetParent,
-      context,
-      intrinsicStyle,
-      scrollWidth: floating.scrollWidth,
-      scrollHeight: floating.scrollHeight,
-      values: JSON.stringify([
-        anchor.width,
-        anchor.height,
-        reference.offsetWidth,
-        reference.offsetHeight,
-        floating.offsetWidth,
-        floating.offsetHeight,
-        floating.clientWidth,
-        floating.clientHeight,
-        floating.scrollWidth,
-        floating.scrollHeight,
-        root.clientWidth,
-        root.clientHeight,
-        document.body?.clientWidth,
-        viewport?.width,
-        viewport?.height,
-        viewport?.scale,
-        viewport?.offsetLeft,
-        viewport?.offsetTop,
-        authoredPositionStyle(floating),
-        ancestors,
-        intrinsicStyle,
-      ]),
-      overflowing:
-        floating.scrollHeight > floating.clientHeight ||
-        floating.scrollWidth > floating.clientWidth,
-    };
-  };
-  let cache: { dimensions: Dimensions; revision: number; basis: ReturnType<typeof basis> } | null =
-    null;
-  return {
-    begin(reuse: boolean) {
-      mutations(observer?.takeRecords() ?? []);
-      const current = basis();
-      const previous = cache;
-      const dimensions =
-        reuse &&
-        observer &&
-        !disposed &&
-        document.fonts?.status !== 'loading' &&
-        previous?.revision === revision &&
-        previous.basis.overflowing &&
-        current.overflowing &&
-        previous.basis.offsetParent === current.offsetParent &&
-        previous.basis.values === current.values
-          ? previous.dimensions
-          : undefined;
-      if (!dimensions) cache = null;
-      trace(() => {
-        const checks = {
-          reuseRequested: reuse,
-          mutationObserver: !!observer,
-          active: !disposed,
-          fontsReady: document.fonts?.status !== 'loading',
-          cached: !!previous,
-          sameRevision: previous?.revision === revision,
-          previouslyOverflowing: previous?.basis.overflowing === true,
-          currentlyOverflowing: current.overflowing,
-          sameOffsetParent: previous?.basis.offsetParent === current.offsetParent,
-          sameBasis: previous?.basis.values === current.values,
-        };
-        return {
-          phase: 'intrinsic-begin',
-          reused: !!dimensions,
-          revision,
-          cachedRevision: previous?.revision ?? null,
-          checks,
-          rejected: Object.entries(checks)
-            .filter(([, passed]) => !passed)
-            .map(([name]) => name),
-          differences: basisDifferences(previous?.basis.values, current.values),
-          dimensions: dimensions ?? null,
-        };
-      });
-      return { dimensions, revision, authored: authoredPositionStyle(floating), basis: current };
-    },
-    measurementContext() {
-      const current = basis();
-      return { context: current.context, offsetParent: current.offsetParent };
-    },
-    projected(side: string, align: string) {
-      projectedSide = side;
-      projectedAlign = align;
-    },
-    commit(
-      dimensions: Dimensions | undefined,
-      input: { revision: number; authored: string; basis: ReturnType<typeof basis> },
-      measuredUnder: { context: string; offsetParent: Element | null } | undefined
-    ) {
-      mutations(observer?.takeRecords() ?? []);
-      const current = basis();
-      if (
-        !disposed &&
-        dimensions &&
-        measuredUnder &&
-        measuredUnder.context === current.context &&
-        measuredUnder.offsetParent === current.offsetParent &&
-        input.revision === revision &&
-        input.authored === authoredPositionStyle(floating) &&
-        input.basis.intrinsicStyle === current.intrinsicStyle &&
-        input.basis.scrollWidth === current.scrollWidth &&
-        input.basis.scrollHeight === current.scrollHeight
-      )
-        cache = { dimensions, revision, basis: current };
-      else cache = null;
-      trace(() => {
-        const checks = {
-          active: !disposed,
-          measuredDimensions: !!dimensions,
-          measuredContext: !!measuredUnder,
-          sameMeasurementContext: measuredUnder?.context === current.context,
-          sameOffsetParent: measuredUnder?.offsetParent === current.offsetParent,
-          sameRevision: input.revision === revision,
-          sameAuthoredStyle: input.authored === authoredPositionStyle(floating),
-          sameIntrinsicStyle: input.basis.intrinsicStyle === current.intrinsicStyle,
-          sameScrollWidth: input.basis.scrollWidth === current.scrollWidth,
-          sameScrollHeight: input.basis.scrollHeight === current.scrollHeight,
-        };
-        return {
-          phase: 'intrinsic-commit',
-          certified: !!cache,
-          revision,
-          inputRevision: input.revision,
-          checks,
-          rejected: Object.entries(checks)
-            .filter(([, passed]) => !passed)
-            .map(([name]) => name),
-          differences: basisDifferences(input.basis.values, current.values),
-          measurementContext: measuredUnder?.context ?? null,
-          currentContext: current.context,
-          dimensions: dimensions ?? null,
-        };
-      });
-    },
-    dispose() {
-      disposed = true;
-      cache = null;
-      observer?.disconnect();
-      floating.removeEventListener('load', externalInvalidation, true);
-      document.fonts?.removeEventListener('loadingdone', externalInvalidation);
-      document.fonts?.removeEventListener('loadingerror', externalInvalidation);
-    },
-  };
-}
-
 /** Only the first rect measurement uses natural size; size() must read the real capped box. */
-function intrinsicPlatform(
-  initial: Dimensions | undefined,
-  beforeMeasurement: () => void,
-  measured: (size: Dimensions) => void
-): Platform {
+function intrinsicPlatform(initial: Dimensions): Platform {
   let first = true;
   return {
     ...domPlatform,
     async getElementRects(input) {
-      if (first) beforeMeasurement();
       const rects = await domPlatform.getElementRects.call(this, input);
       if (!first) return rects;
       first = false;
-      const dimensions = initial ?? { width: rects.floating.width, height: rects.floating.height };
-      measured(dimensions);
-      return { ...rects, floating: { ...rects.floating, ...dimensions } };
+      return { ...rects, floating: { ...rects.floating, ...initial } };
     },
   };
 }
@@ -755,35 +404,10 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
       let sizeObservers: ResizeObserver[] = [];
       let strategyPin: { target: HTMLElement; styles: ReturnType<typeof ownStyles> } | null = null;
       let projectedSize: ReturnType<typeof ownStyles> | null = null;
-      let projectedSizeTarget: HTMLElement | null = null;
       let scrollObservation: ReturnType<typeof observePositionScroll> | null = null;
-      let intrinsicObservation: ReturnType<typeof observeIntrinsicSize> | null = null;
-      const traceLease = {};
-      let traceClosed = false;
-      const trace = (target: unknown, details: () => Record<string, unknown>) => {
-        if (traceClosed || !isElement(target)) return;
-        try {
-          const sink = decisionSink(target);
-          if (typeof sink === 'function')
-            sink(target, traceLease, () => ({ generation, ...details() }));
-        } catch {
-          // A diagnostic consumer must never change the lease's control flow.
-        }
-      };
-      const retireProjectedSize = (reason: string) => {
+      const retireProjectedSize = () => {
         const previous = projectedSize;
-        const target = projectedSizeTarget;
-        if (previous && target)
-          trace(target, () => ({
-            phase: 'retire-projected-size',
-            reason,
-            availableWidth: target.style.getPropertyValue('--proto-ui-available-width'),
-            availableHeight: target.style.getPropertyValue('--proto-ui-available-height'),
-            currentOwner: previous.isCurrent(),
-            stack: new Error('Positioning cap retirement').stack,
-          }));
         projectedSize = null;
-        projectedSizeTarget = null;
         previous?.restore();
       };
       const retireStrategyPin = () => {
@@ -809,7 +433,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         return resolveWebInputOriginAnchor(anchor);
       };
 
-      const position = async (reuseIntrinsic = false, reason = 'internal') => {
+      const position = async () => {
         const current = connection;
         const { anchor, floating, config } = current;
         const version = ++generation;
@@ -820,16 +444,6 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           !!reference?.isLive() &&
           (!projectedSize || projectedSize.isCurrent()) &&
           (!strategyPin || strategyPin.styles.isCurrent());
-        trace(floating, () => ({
-          phase: 'position',
-          reason,
-          reuseRequested: reuseIntrinsic,
-          hasProjection: !!projectedSize,
-          currentProjection: projectedSize?.isCurrent() ?? null,
-          hasIntrinsicObservation: !!intrinsicObservation,
-          sizeMatch: !!current.sizeMatch,
-          config: { ...config },
-        }));
         if (disposed) return;
         if (!reference || !isElement(floating)) {
           if (current.sizeMatch && version === generation) {
@@ -845,29 +459,10 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           return;
         }
         scrollObservation?.refresh();
-        const ownIntrinsic = intrinsicObservation;
-        const intrinsicInput = ownIntrinsic?.begin(
-          reuseIntrinsic && !!projectedSize?.isCurrent() && !current.sizeMatch
-        );
-        let naturalDimensions = intrinsicInput?.dimensions;
-        let measurementContext:
-          | ReturnType<NonNullable<typeof ownIntrinsic>['measurementContext']>
-          | undefined;
-        // Available-space variables are outputs of the last solve. Measuring
-        // through that cap can make an overflowing preferred side appear to
-        // fit forever after content/font/viewport changes. Release only our
-        // claims before measuring intrinsic geometry; authored values and any
-        // replacement owner's writes remain intact. Each solve then owns a
-        // fresh projection, guarded by the existing computation generation.
-        // Geometry-only refreshes may reuse independently measured natural
-        // dimensions. Keeping the live cap avoids clamping native scrolling;
-        // the first Floating UI rect read still sees the natural size for flip.
-        if (!naturalDimensions) retireProjectedSize(`fresh:${reason}`);
+        if (sizing) retireProjectedSize();
         if (!isCurrent()) return;
-        const ownProjection =
-          naturalDimensions && projectedSize ? projectedSize : ownStyles(floating);
+        const ownProjection = projectedSize ?? ownStyles(floating);
         projectedSize = ownProjection;
-        projectedSizeTarget = floating;
         if (!strategyPin || strategyPin.target !== floating) {
           retireStrategyPin();
           if (!isCurrent()) return;
@@ -944,28 +539,59 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
             current.onSizeMatch?.(ownSizing.fail('invalid-geometry'));
           return;
         }
+        // Available space is an output, not the natural content size used by
+        // flip. Measure against authored styles, then restore the live viewport
+        // and its actual native offsets before the first asynchronous boundary.
+        // Keeping the style claims throughout prevents an equal-valued successor
+        // from being overwritten by this measurement's continuation.
+        const scroll = { left: floating.scrollLeft, top: floating.scrollTop };
+        const measurement = { changed: false, restored: false };
+        let naturalDimensions: Dimensions | undefined;
+        let failed = false;
+        let failure: unknown;
+        try {
+          naturalDimensions = ownProjection.withBaseline(
+            () => {
+              const measured = domPlatform.getDimensions(floating);
+              // The DOM provider is synchronous (CSS/offset dimensions). Its public
+              // Platform type also admits custom asynchronous providers; never leave
+              // a native viewport uncapped while awaiting one of those.
+              if ('then' in measured)
+                throw new TypeError('Floating UI DOM dimensions must be synchronous');
+              return measured;
+            },
+            isCurrent,
+            measurement
+          );
+        } catch (error) {
+          failed = true;
+          failure = error;
+        } finally {
+          if (
+            measurement.changed &&
+            measurement.restored &&
+            isCurrent() &&
+            (floating.scrollLeft !== scroll.left || floating.scrollTop !== scroll.top)
+          ) {
+            try {
+              floating.scrollTo({ left: scroll.left, top: scroll.top, behavior: 'instant' });
+            } catch (error) {
+              if (!failed) {
+                failed = true;
+                failure = error;
+              }
+            }
+          }
+        }
+        if (failed) throw failure;
+        if (!naturalDimensions || !isCurrent()) return;
         const result = await computePosition(reference.reference, floating, {
           placement: toPlacement(config),
           strategy: config.strategy,
           middleware: middlewareFor(config, isCurrent, ownProjection),
-          ...(ownIntrinsic
-            ? {
-                platform: intrinsicPlatform(
-                  naturalDimensions,
-                  () => {
-                    measurementContext = ownIntrinsic.measurementContext();
-                  },
-                  (measured) => {
-                    naturalDimensions = measured;
-                  }
-                ),
-              }
-            : {}),
+          platform: intrinsicPlatform(naturalDimensions),
         });
-        if (!isCurrent()) {
-          trace(floating, () => ({ phase: 'position-stale', solve: version, reason }));
-          return;
-        }
+        if (!isCurrent()) return;
         retireStrategyPin();
         if (!isCurrent()) return;
         Object.assign(floating.style, {
@@ -974,11 +600,8 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           top: `${result.y}px`,
         });
         const resolved = fromPlacement(result.placement);
-        ownIntrinsic?.projected(resolved.side, resolved.align);
         floating.dataset.side = resolved.side;
         floating.dataset.align = resolved.align;
-        if (isCurrent() && ownIntrinsic === intrinsicObservation && intrinsicInput)
-          ownIntrinsic?.commit(naturalDimensions, intrinsicInput, measurementContext);
         current.onResolved?.({ ...resolved, strategy: result.strategy });
       };
 
@@ -987,7 +610,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         cleanup = null;
         retireSizing();
         retireStrategyPin();
-        retireProjectedSize('restart');
+        retireProjectedSize();
         if (connection.sizeMatch) {
           const epoch = sizingEpoch;
           sizing = createEdgeSizeLease(connection, () => !disposed && epoch === sizingEpoch);
@@ -998,7 +621,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
             // A target retains one box registration per observer, not two.
             sizeObservers = (['content-box', 'border-box'] as const).map((box) => {
               const observer = new view.ResizeObserver(() => {
-                if (!disposed && epoch === sizingEpoch) void position(false, 'size-observer');
+                if (!disposed && epoch === sizingEpoch) void position();
               });
               for (const target of sizing!.observed) observer.observe(target, { box });
               return observer;
@@ -1008,27 +631,21 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         const { anchor, floating } = connection;
         const reference = referenceFor(anchor, connection.config);
         if (!reference || !isElement(floating)) {
-          if (connection.sizeMatch) void position(false, 'restart-missing-target');
+          if (connection.sizeMatch) void position();
           return;
         }
-        const ownIntrinsic = connection.sizeMatch
-          ? null
-          : observeIntrinsicSize(reference.element, floating, (details) =>
-              trace(floating, details)
-            );
-        intrinsicObservation = ownIntrinsic;
         const stopAuto = autoUpdate(
           reference.reference,
           floating,
           () => {
-            void position(true, 'autoUpdate');
+            void position();
           },
           {
             animationFrame: false,
           }
         );
         const stopRoot = observeRootSpace(reference.element.ownerDocument, () => {
-          void position(false, 'root-space');
+          void position();
         });
         // autoUpdate records overflow ancestors only once. A scroller that
         // becomes overflow:auto after the popup opens (nested demo panes)
@@ -1039,14 +656,14 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         // Native scroll is not composed, so observe the relevant shadow roots
         // as well as the document; a composed event is handled only once.
         const ownScroll = observePositionScroll(reference.element, floating, () => {
-          void position(true, 'captured-scroll');
+          void position();
         });
         scrollObservation = ownScroll;
         const stopInvalidation = resolveWebInputOriginAnchor(anchor)?.subscribeInvalidation(() => {
           generation++;
           retireSizing();
           retireStrategyPin();
-          retireProjectedSize('input-origin-invalidation');
+          retireProjectedSize();
           cleanup?.();
           cleanup = null;
         });
@@ -1056,8 +673,6 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           stopInvalidation?.();
           ownScroll.dispose();
           if (scrollObservation === ownScroll) scrollObservation = null;
-          ownIntrinsic?.dispose();
-          if (intrinsicObservation === ownIntrinsic) intrinsicObservation = null;
         };
       };
 
@@ -1067,15 +682,6 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         update(next) {
           if (disposed) return;
           generation += 1;
-          const sameConfig = (
-            Object.keys({ ...connection.config, ...next.config }) as Array<
-              keyof AnchoredPositionConfig
-            >
-          ).every((key) =>
-            key === 'excludeAnchorTranslation'
-              ? (connection.config[key] === true) === (next.config[key] === true)
-              : Object.is(connection.config[key], next.config[key])
-          );
           const targetsChanged =
             !Object.is(connection.anchor, next.anchor) ||
             !Object.is(connection.floating, next.floating) ||
@@ -1093,22 +699,19 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           // when its element identities stay equal. Reentrant config/status
           // handoffs must not leave the prior synchronous size writer current.
           if (targetsChanged || next.sizeMatch) restart();
-          else
-            void position(sameConfig, sameConfig ? 'equivalent-update' : 'changed-config-update');
+          else void position();
         },
         requestUpdate() {
-          void position(false, 'requestUpdate');
+          void position();
         },
         dispose() {
           disposed = true;
           generation += 1;
-          trace(connection.floating, () => ({ phase: 'dispose' }));
           retireSizing();
           retireStrategyPin();
-          retireProjectedSize('dispose');
+          retireProjectedSize();
           cleanup?.();
           cleanup = null;
-          traceClosed = true;
         },
       };
     },

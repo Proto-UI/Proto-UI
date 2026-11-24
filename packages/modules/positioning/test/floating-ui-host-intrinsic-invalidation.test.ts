@@ -84,8 +84,11 @@ function fixture(characters: number) {
   const anchor = document.createElement('button');
   const floating = document.createElement('div');
   floating.className = 'intrinsic-invalidation-panel';
+  const content = document.createElement('span');
+  content.setAttribute('aria-selected', 'true');
   const text = document.createTextNode('x'.repeat(characters));
-  floating.append(text);
+  content.append(text);
+  floating.append(content);
   document.body.append(anchor, floating);
   anchor.getBoundingClientRect = () => rect(100, 600, 100, 40);
   Object.defineProperties(anchor, {
@@ -104,6 +107,37 @@ function fixture(characters: number) {
     scroll = Math.max(0, Math.min(scroll, natural - height));
     return height;
   };
+  const smoothScrolls = new Set<ReturnType<typeof setTimeout>>();
+  const cancelSmoothScrolls = () => {
+    for (const timer of smoothScrolls) clearTimeout(timer);
+    smoothScrolls.clear();
+  };
+  const setScrollTop = (value: number) => {
+    scroll = Math.max(0, Math.min(value, naturalHeight() - usedHeight()));
+  };
+  // Happy DOM implements explicit smooth scrolling, but does not consult CSS
+  // scroll-behavior for auto/property writes. Model that missing boundary here:
+  // instant restores synchronously, while a smooth operation takes a later turn.
+  // This models ordering, not a native animation or trusted wheel event.
+  const programmaticScroll = (top: number, behavior: ScrollBehavior = 'auto') => {
+    cancelSmoothScrolls();
+    if (
+      behavior === 'smooth' ||
+      (behavior === 'auto' && getComputedStyle(floating).scrollBehavior === 'smooth')
+    ) {
+      const timer = setTimeout(() => {
+        smoothScrolls.delete(timer);
+        setScrollTop(top);
+      }, 0);
+      smoothScrolls.add(timer);
+    } else {
+      setScrollTop(top);
+    }
+  };
+  floating.scrollTo = ((options: ScrollToOptions | number, top?: number) => {
+    if (typeof options === 'number') programmaticScroll(top ?? scroll);
+    else programmaticScroll(options.top ?? scroll, options.behavior);
+  }) as typeof floating.scrollTo;
   floating.getBoundingClientRect = () =>
     rect(
       Number.parseFloat(floating.style.left) || 0,
@@ -124,7 +158,7 @@ function fixture(characters: number) {
         return scroll;
       },
       set: (value: number) => {
-        scroll = Math.max(0, Math.min(value, naturalHeight() - usedHeight()));
+        programmaticScroll(value);
       },
     },
   });
@@ -134,17 +168,25 @@ function fixture(characters: number) {
     attributes: true,
     attributeOldValue: true,
     characterData: true,
+    childList: true,
     subtree: true,
   });
   const lease = createFloatingUiAnchoredPositionHost().attach({ anchor, floating, config });
   return {
     anchor,
     floating,
+    content,
     text,
     lease,
     mutations,
     setFontMetric(value: number) {
       fontMetric = value;
+    },
+    inputScrollTop(value: number) {
+      // Inject an already-delivered scroll input without using CSSOM smooth
+      // scrolling. This does not synthesize or claim a trusted wheel event.
+      cancelSmoothScrolls();
+      setScrollTop(value);
     },
     resizeFloating() {
       const contentRect = floating.getBoundingClientRect();
@@ -168,6 +210,7 @@ function fixture(characters: number) {
     },
     dispose() {
       lease.dispose();
+      cancelSmoothScrolls();
       mutation.disconnect();
       stylesheet.remove();
       anchor.remove();
@@ -237,6 +280,124 @@ describe('anchored positioning: intrinsic invalidation through the public lease'
       f.dispose();
     }
   });
+
+  it('preserves scroll through child paint, ARIA and DOM changes while refreshing anchor geometry', async () => {
+    const f = fixture(50);
+    try {
+      await vi.waitFor(() => expect(f.floating.dataset.side).toBe('top'));
+      await observerTurn();
+      f.inputScrollTop(80);
+      const mutations = [
+        () => f.content.style.setProperty('--contents-paint-tone', 'rebeccapurple'),
+        () => {
+          f.content.removeAttribute('aria-selected');
+          f.content.setAttribute('aria-selected', 'true');
+        },
+        () => f.content.append(document.createElement('span')),
+      ];
+      for (const [index, mutate] of mutations.entries()) {
+        mutate();
+        await observerTurn();
+        const left = 140 + index * 20;
+        f.anchor.getBoundingClientRect = () => rect(left, 600, 100, 40);
+        window.dispatchEvent(new Event('scroll'));
+        await observerTurn();
+        expect(f.floating.style.left).toBe(`${left}px`);
+        expect(f.floating.dataset.side).toBe('top');
+        expect(f.floating.clientHeight).toBe(592);
+        expect(f.floating.scrollHeight - f.floating.clientHeight).toBe(408);
+        expect(f.floating.scrollTop).toBe(80);
+      }
+      expect(
+        f.mutations.some(
+          (record) => record.target === f.content && record.attributeName === 'style'
+        )
+      ).toBe(true);
+      expect(
+        f.mutations.filter(
+          (record) => record.target === f.content && record.attributeName === 'aria-selected'
+        )
+      ).toHaveLength(2);
+      expect(
+        f.mutations.some((record) => record.target === f.content && record.type === 'childList')
+      ).toBe(true);
+    } finally {
+      f.dispose();
+    }
+  });
+
+  it('retains scroll on content growth and clamps only to the real shrunken range', async () => {
+    const f = fixture(50);
+    const refresh = async () => {
+      await observerTurn();
+      window.dispatchEvent(new Event('scroll'));
+      await observerTurn();
+    };
+    try {
+      await vi.waitFor(() => expect(f.floating.dataset.side).toBe('top'));
+      await observerTurn();
+      f.inputScrollTop(80);
+
+      f.text.data = 'x'.repeat(70);
+      await refresh();
+      expect(f.floating.dataset.side).toBe('top');
+      expect(f.floating.scrollHeight).toBe(1400);
+      expect(f.floating.clientHeight).toBe(592);
+      expect(f.floating.scrollTop).toBe(80);
+
+      f.text.data = 'x'.repeat(30);
+      await refresh();
+      expect(f.floating.dataset.side).toBe('top');
+      expect(f.floating.scrollHeight - f.floating.clientHeight).toBe(8);
+      expect(f.floating.scrollTop).toBe(8);
+
+      f.text.data = 'x';
+      await refresh();
+      expect(f.floating.dataset.side).toBe('bottom');
+      expect(f.floating.clientHeight).toBe(20);
+      expect(f.floating.scrollTop).toBe(0);
+
+      f.text.data = 'x'.repeat(50);
+      await refresh();
+      expect(f.floating.dataset.side).toBe('top');
+      expect(f.floating.clientHeight).toBe(592);
+      expect(f.floating.scrollTop).toBe(0);
+    } finally {
+      f.dispose();
+    }
+  });
+
+  it.each([0, 80])(
+    'finishes a fresh measurement at scroll %s under smooth CSS before accepting later input',
+    async (initial) => {
+      const f = fixture(50);
+      try {
+        await vi.waitFor(() => expect(f.floating.dataset.side).toBe('top'));
+        await observerTurn();
+        f.floating.style.scrollBehavior = 'smooth';
+        await observerTurn();
+        f.inputScrollTop(initial);
+        expect(f.floating.scrollTop).toBe(initial);
+        f.anchor.getBoundingClientRect = () => rect(140, 600, 100, 40);
+
+        f.lease.requestUpdate();
+        // The caller observes the same viewport and offset before the async
+        // position solve can resume. A zero starting offset must stay zero.
+        expect(f.floating.clientHeight).toBe(592);
+        expect(f.floating.scrollTop).toBe(initial);
+
+        await Promise.resolve();
+        expect(f.floating.scrollTop).toBe(initial);
+        f.inputScrollTop(120);
+        await observerTurn();
+        expect(f.floating.style.left).toBe('140px');
+        expect(f.floating.clientHeight).toBe(592);
+        expect(f.floating.scrollTop).toBe(120);
+      } finally {
+        f.dispose();
+      }
+    }
+  );
 
   it('reconsiders root class, authored style and text changes before the next reference refresh', async () => {
     const f = fixture(1);

@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "kind": "synchronous-measurement-local-evidence",
+  "baseHead": "9b6a7e54a82cf0758cb0eb94a9befa69a0516a5e",
+  "files": [
+    {
+      "path": "archive-index.json",
+      "bytes": 4520,
+      "sha256": "a6aad018b8b48c10b940c27e807a902cab75694b240d432ba9e5f0b3d9f4ff50"
+    },
+    {
+      "path": "baseline-7642-capsule.tar.gz",
+      "bytes": 52663,
+      "sha256": "fceb509826dea6196c3c86f07084389c40f13bd41cb6f60c13604224e0314cad"
+    },
+    {
+      "path": "baseline-execution.json",
+      "bytes": 1268,
+      "sha256": "29d3d730ad63441015f3bd60d6e70c94377d11a64f900e49448b40fcdced74bc"
+    },
+    {
+      "path": "baseline-manifest.json",
+      "bytes": 5256,
+      "sha256": "5ade77690c751fc2b897c3a25a6c92594e7b855f9b2dc898b0ac6924dc91867d"
+    },
+    {
+      "path": "baseline-report.md",
+      "bytes": 4265,
+      "sha256": "352f12213a1bc387280f1d4f506a92cce9bd0510cd0f7cca28d136c9775b1e61"
+    },
+    {
+      "path": "contents-scroll-echo-model-classification.json",
+      "bytes": 475,
+      "sha256": "a81225e78895cda89dccf057d1a43a941c19fbcc8b342763d58307306d2029a5"
+    },
+    {
+      "path": "contents-scroll-echo-overstrong-model.test.ts.gz",
+      "bytes": 6732,
+      "sha256": "0211b8f6e7f7857f658d04ce269579788e8321d3b1c84bbe4e3043292d6fb55e"
+    },
+    {
+      "path": "contents-sync-restoration-proof.log.gz",
+      "bytes": 816,
+      "sha256": "69de0009bbd3e76466c76765b9e4d656cbddf0e0925f5662c2452035e11a1ce2"
+    },
+    {
+      "path": "contents-sync-scroll-echo-red.log.gz",
+      "bytes": 4556,
+      "sha256": "5741510ac909db6652b3ad548ef41bea91fa283e6122898ad3d667881b489f82"
+    },
+    {
+      "path": "contents-sync-transaction-controls.log.gz",
+      "bytes": 4747,
+      "sha256": "b0749b0aef666da77077dfd2229ab722e7006c7837f799053fad64913101d9a2"
+    },
+    {
+      "path": "contents-sync-transaction-first.log.gz",
+      "bytes": 5712,
+      "sha256": "a471090b738bbf2d884b8da19b2c67b87b2ab9a83c78010d0ef5d3924872014c"
+    },
+    {
+      "path": "contents-sync-transaction-prettier-final.log.gz",
+      "bytes": 82,
+      "sha256": "710c63d8d40d5688a62c3b08053dd1971c4e4ee87b2297f3f20c2540d22cd94e"
+    },
+    {
+      "path": "contents-sync-transaction-prettier.log.gz",
+      "bytes": 82,
+      "sha256": "710c63d8d40d5688a62c3b08053dd1971c4e4ee87b2297f3f20c2540d22cd94e"
+    },
+    {
+      "path": "contents-sync-transaction-red.log.gz",
+      "bytes": 4594,
+      "sha256": "3f32890e4b644412b060693502b5a42dfe98bd6a0212b728df6b6dae47994114"
+    },
+    {
+      "path": "contents-sync-transaction-regression-final.log.gz",
+      "bytes": 39362,
+      "sha256": "543133f6d4b6a6e186baa9772368baa9e8bbb966982969e6dbc851a12e112625"
+    },
+    {
+      "path": "contents-sync-transaction-regression.log.gz",
+      "bytes": 39334,
+      "sha256": "81ef92f5c3a4bc39aa471108b6579a86bdca276935f5c29685664f8514165428"
+    },
+    {
+      "path": "contents-sync-transaction-tsc-final.log.gz",
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "contents-sync-transaction-tsc.log.gz",
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "independent-review-original.json.gz",
+      "bytes": 4645,
+      "sha256": "c980c09cd76eecf5ffff881a43e7618c4cb6d3b71bbb088ebad7b8115d1b475c"
+    },
+    {
+      "path": "independent-review-original.md.gz",
+      "bytes": 3777,
+      "sha256": "d561f0dc81150e016dde57578306158165406bbc627c1fa9acea95410de6ff1d"
+    },
+    {
+      "path": "independent-review.json",
+      "bytes": 12932,
+      "sha256": "63536b2b3fbbc3f23a4c5f311e0659c4c5826b3f6c1716839f5c3ec1fda8e7e3"
+    },
+    {
+      "path": "independent-review.md",
+      "bytes": 7796,
+      "sha256": "3f11c1ad3d01fbabf0aab379884d0713c3f86e0b6b5b8de7aaced5d35ad37538"
+    },
+    {
+      "path": "intermediate-349-source.tar.gz",
+      "bytes": 53049,
+      "sha256": "74805e06ea1efcd3192e80ab811c8b80ba25aaa3809fad3931a18a1ef634c5d8"
+    },
+    {
+      "path": "validation.json",
+      "bytes": 6105,
+      "sha256": "1321a21c6ab1d80ef50df642a0dfb57265cfffbdb8d43a8e5fa278fd99b2489f"
+    }
+  ],
+  "nativeAcceptance": "pending new exact-source untraced run",
+  "notes": [
+    "Historical red and intermediate passing logs remain separately labeled.",
+    "Review originals are preserved losslessly in gzip files; readable copies have no stronger authority.",
+    "Final source and command/exit bindings are in validation.json."
+  ]
+}

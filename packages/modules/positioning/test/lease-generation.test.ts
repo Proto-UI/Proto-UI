@@ -12,7 +12,7 @@ const pending = vi.hoisted(
 );
 const cleanup = vi.hoisted(() => vi.fn());
 vi.mock('@floating-ui/dom', () => ({
-  platform: {},
+  platform: { getDimensions: () => ({ width: 100, height: 1000 }) },
   autoUpdate: vi.fn((_a, _f, update) => {
     void update();
     return cleanup;

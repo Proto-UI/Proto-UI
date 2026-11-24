@@ -1,0 +1,531 @@
+{
+  "source": "7642f1376b08ee3d4930f596da6a77ca74db9dda",
+  "purpose": "Selected fields for inspection; complete original receipt is in original artifact and lossless gzip. This excerpt omits fields and entries outside4800..5050ms.",
+  "traceLimit": 256,
+  "traceDropped": 0,
+  "scrolls": [
+    {
+      "at": 4937.299999999988,
+      "eventTimeStamp": 4933.5,
+      "trusted": true,
+      "top": 500,
+      "left": 0
+    },
+    {
+      "at": 5009.399999999965,
+      "eventTimeStamp": 5005.200000000012,
+      "trusted": true,
+      "top": 0,
+      "left": 0
+    }
+  ],
+  "entries": [
+    {
+      "at": 4809.099999999977,
+      "sequence": 76,
+      "lease": 1,
+      "generation": 23,
+      "phase": "intrinsic-mutation",
+      "recordCountInEntry": 10,
+      "droppedMutationRecords": 0,
+      "attributeChanges": [
+        {
+          "target": {
+            "tag": "wc-site-brutalist-surface",
+            "id": ""
+          },
+          "attribute": "data-pui-style",
+          "oldValue": "rounded-base border-b-2 border-black bg-transparent text-foreground",
+          "valueAtDelivery": "rounded-base border-b-2 border-black bg-muted text-foreground"
+        }
+      ],
+      "childListRecordCount": 0
+    },
+    {
+      "at": 4827.399999999965,
+      "sequence": 77,
+      "lease": 1,
+      "generation": 23,
+      "phase": "intrinsic-mutation",
+      "recordCountInEntry": 32,
+      "droppedMutationRecords": 8,
+      "attributeChanges": [
+        {
+          "target": {
+            "tag": "a",
+            "id": ""
+          },
+          "attribute": "class",
+          "oldValue": "astro-gse2by3g",
+          "valueAtDelivery": "astro-gse2by3g site-native-link"
+        },
+        {
+          "target": {
+            "tag": "a",
+            "id": ""
+          },
+          "attribute": "data-site-link-enhanced",
+          "oldValue": null,
+          "valueAtDelivery": "true"
+        },
+        {
+          "target": {
+            "tag": "a",
+            "id": ""
+          },
+          "attribute": "data-site-native-link",
+          "oldValue": null,
+          "valueAtDelivery": ""
+        },
+        {
+          "target": {
+            "tag": "wc-site-brutalist-surface",
+            "id": ""
+          },
+          "attribute": "data-pui-root",
+          "oldValue": null,
+          "valueAtDelivery": ""
+        },
+        {
+          "target": {
+            "tag": "wc-site-brutalist-surface",
+            "id": ""
+          },
+          "attribute": "class",
+          "oldValue": null,
+          "valueAtDelivery": "pui-host-root"
+        },
+        {
+          "target": {
+            "tag": "wc-site-brutalist-surface",
+            "id": ""
+          },
+          "attribute": "data-pui-style",
+          "oldValue": null,
+          "valueAtDelivery": "rounded-base border-0 bg-transparent text-foreground"
+        },
+        {
+          "target": {
+            "tag": "wc-site-brutalist-text",
+            "id": ""
+          },
+          "attribute": "data-pui-root",
+          "oldValue": null,
+          "valueAtDelivery": ""
+        },
+        {
+          "target": {
+            "tag": "wc-site-brutalist-text",
+            "id": ""
+          },
+          "attribute": "class",
+          "oldValue": null,
+          "valueAtDelivery": "pui-host-root"
+        },
+        {
+          "target": {
+            "tag": "wc-site-brutalist-text",
+            "id": ""
+          },
+          "attribute": "data-pui-style",
+          "oldValue": null,
+          "valueAtDelivery": "text-sm text-inherit font-medium font-sans tracking-normal not-italic no-underline"
+        },
+        {
+          "target": {
+            "tag": "wc-site-brutalist-text",
+            "id": ""
+          },
+          "attribute": "data-pui-root",
+          "oldValue": null,
+          "valueAtDelivery": ""
+        },
+        {
+          "target": {
+            "tag": "wc-site-brutalist-text",
+            "id": ""
+          },
+          "attribute": "class",
+          "oldValue": null,
+          "valueAtDelivery": "pui-host-root"
+        },
+        {
+          "target": {
+            "tag": "wc-site-brutalist-text",
+            "id": ""
+          },
+          "attribute": "data-pui-style",
+          "oldValue": null,
+          "valueAtDelivery": "text-sm text-inherit font-medium font-sans tracking-normal not-italic no-underline"
+        }
+      ],
+      "childListRecordCount": 6
+    },
+    {
+      "at": 4831.099999999977,
+      "sequence": 78,
+      "lease": 1,
+      "generation": 24,
+      "phase": "position",
+      "reason": "autoUpdate"
+    },
+    {
+      "at": 4831.399999999965,
+      "sequence": 79,
+      "lease": 1,
+      "generation": 24,
+      "phase": "intrinsic-begin",
+      "reused": false,
+      "rejected": [
+        "cached",
+        "sameRevision",
+        "previouslyOverflowing",
+        "sameOffsetParent",
+        "sameBasis"
+      ],
+      "dimensions": null
+    },
+    {
+      "at": 4831.399999999965,
+      "sequence": 80,
+      "lease": 1,
+      "generation": 24,
+      "phase": "retire-projected-size",
+      "reason": "fresh:autoUpdate",
+      "availableHeight": "772px",
+      "stack": "Error: Positioning cap retirement\n    at http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:611:20\n    at http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:597:62\n    at <anonymous>:50:18\n    at trace (http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:597:13)\n    at retireProjectedSize (http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:605:11)\n    at position (http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:674:33)\n    at autoUpdate.animationFrame (http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:820:18)\n    at refresh (http://127.0.0.1:39695/node_modules/.vite/deps/@floating-ui_dom.js?v=ca722961:1657:7)\n    at IntersectionObserver.handleObserve (http://127.0.0.1:39695/node_modules/.vite/deps/@floating-ui_dom.js?v=ca722961:1675:16)"
+    },
+    {
+      "at": 4872.399999999965,
+      "sequence": 81,
+      "lease": 1,
+      "generation": 24,
+      "phase": "intrinsic-commit",
+      "certified": true,
+      "rejected": [],
+      "dimensions": {
+        "width": 297.016,
+        "height": 6326
+      }
+    },
+    {
+      "at": 4880.200000000012,
+      "sequence": 82,
+      "lease": 1,
+      "generation": 25,
+      "phase": "position",
+      "reason": "autoUpdate"
+    },
+    {
+      "at": 4880.599999999977,
+      "sequence": 83,
+      "lease": 1,
+      "generation": 25,
+      "phase": "intrinsic-begin",
+      "reused": false,
+      "rejected": [
+        "sameBasis"
+      ],
+      "dimensions": null,
+      "differenceNames": [
+        "anchor.width"
+      ]
+    },
+    {
+      "at": 4880.700000000012,
+      "sequence": 84,
+      "lease": 1,
+      "generation": 25,
+      "phase": "retire-projected-size",
+      "reason": "fresh:autoUpdate",
+      "availableHeight": "772.132158279419px",
+      "stack": "Error: Positioning cap retirement\n    at http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:611:20\n    at http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:597:62\n    at <anonymous>:50:18\n    at trace (http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:597:13)\n    at retireProjectedSize (http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:605:11)\n    at position (http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:674:33)\n    at autoUpdate.animationFrame (http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:820:18)\n    at ResizeObserver.<anonymous> (http://127.0.0.1:39695/node_modules/.vite/deps/@floating-ui_dom.js?v=ca722961:1742:7)"
+    },
+    {
+      "at": 4919.200000000012,
+      "sequence": 85,
+      "lease": 1,
+      "generation": 25,
+      "phase": "intrinsic-commit",
+      "certified": true,
+      "rejected": [],
+      "dimensions": {
+        "width": 297.016,
+        "height": 6326
+      },
+      "differenceNames": [
+        "floating.offsetHeight",
+        "floating.clientHeight"
+      ]
+    },
+    {
+      "at": 4926.200000000012,
+      "sequence": 86,
+      "lease": 1,
+      "generation": 26,
+      "phase": "position",
+      "reason": "autoUpdate"
+    },
+    {
+      "at": 4926.399999999965,
+      "sequence": 87,
+      "lease": 1,
+      "generation": 26,
+      "phase": "intrinsic-begin",
+      "reused": true,
+      "rejected": [],
+      "dimensions": {
+        "width": 297.016,
+        "height": 6326
+      }
+    },
+    {
+      "at": 4927.399999999965,
+      "sequence": 88,
+      "lease": 1,
+      "generation": 26,
+      "phase": "intrinsic-commit",
+      "certified": true,
+      "rejected": [],
+      "dimensions": {
+        "width": 297.016,
+        "height": 6326
+      }
+    },
+    {
+      "at": 4935.299999999988,
+      "sequence": 89,
+      "lease": 1,
+      "generation": 26,
+      "phase": "intrinsic-mutation",
+      "recordCountInEntry": 10,
+      "droppedMutationRecords": 0,
+      "attributeChanges": [
+        {
+          "target": {
+            "tag": "wc-site-brutalist-surface",
+            "id": ""
+          },
+          "attribute": "data-pui-style",
+          "oldValue": "rounded-base border-b-2 border-black bg-muted text-foreground",
+          "valueAtDelivery": "rounded-base border-b-2 border-black bg-transparent text-foreground"
+        }
+      ],
+      "childListRecordCount": 0
+    },
+    {
+      "at": 4937.099999999977,
+      "sequence": 90,
+      "lease": 1,
+      "generation": 26,
+      "phase": "intrinsic-mutation",
+      "recordCountInEntry": 12,
+      "droppedMutationRecords": 0,
+      "attributeChanges": [
+        {
+          "target": {
+            "tag": "wc-site-brutalist-surface",
+            "id": ""
+          },
+          "attribute": "data-pui-style",
+          "oldValue": "rounded-base border-b-2 border-black bg-transparent text-foreground",
+          "valueAtDelivery": "rounded-base border-b-2 border-black bg-muted text-foreground"
+        },
+        {
+          "target": {
+            "tag": "wc-site-brutalist-text",
+            "id": ""
+          },
+          "attribute": "data-pui-style",
+          "oldValue": "text-xs text-muted-foreground font-semibold font-sans tracking-normal not-italic no-underline",
+          "valueAtDelivery": "text-xs text-inherit font-semibold font-sans tracking-normal not-italic no-underline"
+        }
+      ],
+      "childListRecordCount": 0
+    },
+    {
+      "at": 4949.700000000012,
+      "sequence": 91,
+      "lease": 1,
+      "generation": 26,
+      "phase": "intrinsic-mutation",
+      "recordCountInEntry": 8,
+      "droppedMutationRecords": 0,
+      "attributeChanges": [
+        {
+          "target": {
+            "tag": "wc-brutalist-popover-content",
+            "id": "pui-popover-1-content"
+          },
+          "attribute": "id",
+          "oldValue": null,
+          "valueAtDelivery": "pui-popover-1-content"
+        },
+        {
+          "target": {
+            "tag": "wc-brutalist-popover-content",
+            "id": "pui-popover-1-content"
+          },
+          "attribute": "role",
+          "oldValue": null,
+          "valueAtDelivery": "dialog"
+        },
+        {
+          "target": {
+            "tag": "wc-brutalist-popover-content",
+            "id": "pui-popover-1-content"
+          },
+          "attribute": "aria-modal",
+          "oldValue": null,
+          "valueAtDelivery": "false"
+        },
+        {
+          "target": {
+            "tag": "wc-brutalist-popover-content",
+            "id": "pui-popover-1-content"
+          },
+          "attribute": "aria-labelledby",
+          "oldValue": null,
+          "valueAtDelivery": "pui-popover-1-title"
+        }
+      ],
+      "childListRecordCount": 0
+    },
+    {
+      "at": 4951.700000000012,
+      "sequence": 92,
+      "lease": 1,
+      "generation": 27,
+      "phase": "position",
+      "reason": "autoUpdate"
+    },
+    {
+      "at": 4952.099999999977,
+      "sequence": 93,
+      "lease": 1,
+      "generation": 27,
+      "phase": "intrinsic-begin",
+      "reused": false,
+      "rejected": [
+        "cached",
+        "sameRevision",
+        "previouslyOverflowing",
+        "sameOffsetParent",
+        "sameBasis"
+      ],
+      "dimensions": null
+    },
+    {
+      "at": 4952.099999999977,
+      "sequence": 94,
+      "lease": 1,
+      "generation": 27,
+      "phase": "retire-projected-size",
+      "reason": "fresh:autoUpdate",
+      "availableHeight": "774.7831935882568px",
+      "stack": "Error: Positioning cap retirement\n    at http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:611:20\n    at http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:597:62\n    at <anonymous>:50:18\n    at trace (http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:597:13)\n    at retireProjectedSize (http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:605:11)\n    at position (http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:674:33)\n    at autoUpdate.animationFrame (http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:820:18)\n    at refresh (http://127.0.0.1:39695/node_modules/.vite/deps/@floating-ui_dom.js?v=ca722961:1657:7)\n    at IntersectionObserver.handleObserve (http://127.0.0.1:39695/node_modules/.vite/deps/@floating-ui_dom.js?v=ca722961:1675:16)"
+    },
+    {
+      "at": 4998.899999999965,
+      "sequence": 95,
+      "lease": 1,
+      "generation": 27,
+      "phase": "intrinsic-commit",
+      "certified": true,
+      "rejected": [],
+      "dimensions": {
+        "width": 297.016,
+        "height": 6326
+      },
+      "differenceNames": [
+        "floating.offsetHeight",
+        "floating.clientHeight"
+      ]
+    },
+    {
+      "at": 5007.599999999977,
+      "sequence": 96,
+      "lease": 1,
+      "generation": 27,
+      "phase": "intrinsic-mutation",
+      "recordCountInEntry": 12,
+      "droppedMutationRecords": 0,
+      "attributeChanges": [
+        {
+          "target": {
+            "tag": "wc-site-brutalist-surface",
+            "id": ""
+          },
+          "attribute": "data-pui-style",
+          "oldValue": "rounded-base border-b-2 border-black bg-muted text-foreground",
+          "valueAtDelivery": "rounded-base border-b-2 border-black bg-transparent text-foreground"
+        },
+        {
+          "target": {
+            "tag": "wc-site-brutalist-text",
+            "id": ""
+          },
+          "attribute": "data-pui-style",
+          "oldValue": "text-xs text-inherit font-semibold font-sans tracking-normal not-italic no-underline",
+          "valueAtDelivery": "text-xs text-muted-foreground font-semibold font-sans tracking-normal not-italic no-underline"
+        }
+      ],
+      "childListRecordCount": 0
+    },
+    {
+      "at": 5009.299999999988,
+      "sequence": 97,
+      "lease": 1,
+      "generation": 27,
+      "phase": "intrinsic-mutation",
+      "recordCountInEntry": 10,
+      "droppedMutationRecords": 0,
+      "attributeChanges": [
+        {
+          "target": {
+            "tag": "wc-site-brutalist-surface",
+            "id": ""
+          },
+          "attribute": "data-pui-style",
+          "oldValue": "rounded-base border-b-2 border-black bg-transparent text-foreground",
+          "valueAtDelivery": "rounded-base border-b-2 border-black bg-muted text-foreground"
+        }
+      ],
+      "childListRecordCount": 0
+    },
+    {
+      "at": 5010.399999999965,
+      "sequence": 98,
+      "lease": 1,
+      "generation": 28,
+      "phase": "position",
+      "reason": "autoUpdate"
+    },
+    {
+      "at": 5010.599999999977,
+      "sequence": 99,
+      "lease": 1,
+      "generation": 28,
+      "phase": "intrinsic-begin",
+      "reused": false,
+      "rejected": [
+        "cached",
+        "sameRevision",
+        "previouslyOverflowing",
+        "sameOffsetParent",
+        "sameBasis"
+      ],
+      "dimensions": null
+    },
+    {
+      "at": 5010.700000000012,
+      "sequence": 100,
+      "lease": 1,
+      "generation": 28,
+      "phase": "retire-projected-size",
+      "reason": "fresh:autoUpdate",
+      "availableHeight": "775.9720230102539px",
+      "stack": "Error: Positioning cap retirement\n    at http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:611:20\n    at http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:597:62\n    at <anonymous>:50:18\n    at trace (http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:597:13)\n    at retireProjectedSize (http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:605:11)\n    at position (http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:674:33)\n    at autoUpdate.animationFrame (http://127.0.0.1:39695/@fs/home/runner/work/Proto-UI/Proto-UI/packages/modules/positioning/src/web/floating-ui-host.ts:820:18)\n    at ResizeObserver.<anonymous> (http://127.0.0.1:39695/node_modules/.vite/deps/@floating-ui_dom.js?v=ca722961:1742:7)"
+    }
+  ]
+}

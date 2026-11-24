@@ -396,7 +396,7 @@ describe('module-positioning: relevant scroll observation', () => {
     }
   });
 
-  it('does not certify old natural dimensions when placement CSS changes the overflowing content', async () => {
+  it('remeasures natural dimensions when placement CSS changes the overflowing content', async () => {
     const stylesheet = document.createElement('style');
     stylesheet.textContent = '.placement-intrinsic-panel[data-side="top"] { padding-top: 200px; }';
     document.head.append(stylesheet);
@@ -436,9 +436,9 @@ describe('module-positioning: relevant scroll observation', () => {
       expect(floating.scrollHeight).toBe(1200);
       measurements.length = 0;
       window.dispatchEvent(new Event('scroll'));
-      // The owned data-side write changed actual layout. It must not bind the
-      // old 1000px measurement to the new 1200px content's cache certificate.
-      expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe('');
+      // The owned data-side write changed actual layout. Measure the new 1200px
+      // content while returning with the prior viewport already restored.
+      expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe('596px');
       await flush();
       expect(measurements).toContain(1200);
       expect(floating.dataset.side).toBe('top');
@@ -448,17 +448,22 @@ describe('module-positioning: relevant scroll observation', () => {
     }
   });
 
-  it('rejects a natural-size certificate when its reference size changes across a measurement await', async () => {
+  it('remeasures natural size for the next solve after a reference change across a provider await', async () => {
     let panel: ReturnType<typeof overflowingPanel> | undefined;
     const measurements: number[] = [];
     let changed = false;
     const original = domPlatform.getElementRects;
+    const originalDimensions = domPlatform.getDimensions;
+    const dimensions = vi.spyOn(domPlatform, 'getDimensions').mockImplementation((element) => {
+      const result = originalDimensions(element);
+      if (!('then' in result)) measurements.push(result.height);
+      return result;
+    });
     const measurement = vi.spyOn(domPlatform, 'getElementRects').mockImplementation(async function (
       this: typeof domPlatform,
       input
     ) {
       const result = await original.call(this, input);
-      measurements.push(result.floating.height);
       if (!changed && panel) {
         changed = true;
         // An independent input changes after this real platform measurement,
@@ -476,13 +481,14 @@ describe('module-positioning: relevant scroll observation', () => {
       measurements.length = 0;
       window.dispatchEvent(new Event('scroll'));
       await flush();
-      // Re-read natural layout under the new input; do not bind the prior
-      // 50px-reference measurement to an end-of-solve 80px-reference snapshot.
+      // The synchronous DOM dimension read must see the natural content,
+      // while the asynchronous provider continues with a restored viewport.
       expect(measurements[0]).toBe(1000);
       expect(panel.floating.style.top).toBe('124px');
     } finally {
       panel?.lease.dispose();
       measurement.mockRestore();
+      dimensions.mockRestore();
     }
   });
 

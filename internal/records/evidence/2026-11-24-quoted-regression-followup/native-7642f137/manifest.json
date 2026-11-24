@@ -1,0 +1,63 @@
+{
+  "source": "7642f1376b08ee3d4930f596da6a77ca74db9dda",
+  "run": 45413327043,
+  "job": 138512737583,
+  "result": "Diagnostic failure, no final product acceptance. Two controls pass;12 Shadcn completed;Brutalist/WC/click reset500to0;23 unexecuted.",
+  "entries": [
+    {
+      "path": "afterTest.json",
+      "bytes": 4948,
+      "sha256": "f453faef801f3ed4e5c20f7e337a404576c4146a3ac249191fafef4eb2a4432f"
+    },
+    {
+      "path": "beforeTest.json",
+      "bytes": 4993,
+      "sha256": "0533162edd357b45337ad9fbea6da53cce6836436ac8458941ab015140837ab9"
+    },
+    {
+      "path": "brutalist-wc-click-wheel-failure.png",
+      "bytes": 30127,
+      "sha256": "392fbd6a1a2a3816f6fa171913cc47dafcf3f38ad84d70cfba4788a1270a1225"
+    },
+    {
+      "path": "brutalist-wc-click-wheel.json.gz",
+      "bytes": 18673,
+      "sha256": "2b9f7699d22de7ea9d0043fce3df2afba24c09dcb7679400b614be4aa42406b7"
+    },
+    {
+      "path": "bundle-manifest.json",
+      "bytes": 2269,
+      "sha256": "b81be31efb4ed777071cc6976c6ff8ffec02f28971b818e1f11b08bfc70d7f8e"
+    },
+    {
+      "path": "critical-window-excerpt.json",
+      "bytes": 18145,
+      "sha256": "1231acd61a2c43a9c3805732e783c044074497855a9874f708334c8a6a586c06"
+    },
+    {
+      "path": "evidence-bundle.tar.gz",
+      "bytes": 856603,
+      "sha256": "172132969e284ad8b180682f761894673801a6fdff9ee30f64224454b2d49e2b"
+    },
+    {
+      "path": "result-report.md",
+      "bytes": 4973,
+      "sha256": "9c5fcc544bcb280e448d137cd9ae531ffc47d9496f9471dfc047628b7d7b3967"
+    },
+    {
+      "path": "result-summary.json",
+      "bytes": 24992,
+      "sha256": "30849ae9931fb9c23b8b3cb8a8bec61030f2934b63e9122cc503ac0ac15476e0"
+    },
+    {
+      "path": "root-observation.json",
+      "bytes": 13797,
+      "sha256": "9a16c477ca720b09cc33f32def2e5ffc71ec1f1c01e0f8d094ccbced2b118fec"
+    },
+    {
+      "path": "trace-index.json",
+      "bytes": 30669,
+      "sha256": "39cd87d618e05ac79018d9b4dc01a7de7d9246f99a5234c6d81680013ed89a40"
+    }
+  ]
+}
