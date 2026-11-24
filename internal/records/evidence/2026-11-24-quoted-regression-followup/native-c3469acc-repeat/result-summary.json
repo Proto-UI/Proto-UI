@@ -1,0 +1,763 @@
+{
+  "runId": 45425876105,
+  "jobId": 138557613678,
+  "workflowId": 373828512,
+  "head": "c3469acc8cc00aff5c49baef2629486d41314aff",
+  "event": "workflow_dispatch",
+  "attempt": 1,
+  "conclusion": "success",
+  "previousSameHeadRun": {
+    "runId": 45422958374,
+    "conclusion": "failure",
+    "boundary": "Original runtime-transition poll failed before any public wheel; retained separately and not erased by this passing run."
+  },
+  "runnerComparison": {
+    "thisRunnerId": 1000120830,
+    "previousRunnerId": 1000120816,
+    "sameMachineEstablished": false
+  },
+  "instrumentedPositioningTrace": false,
+  "artifactId": 14936737832,
+  "artifactBytes": 1699009,
+  "artifactSha256": "25d4638caf094827be04796da75545aab447be63000907305a5e67bfb87f7ef0",
+  "artifactMembers": 126,
+  "sourceFilesVerifiedAgainstGitCommit": {
+    "eachPhase": 18,
+    "phaseCount": 2,
+    "all36ChecksPassed": true,
+    "expectedPaths": [
+      ".github/workflows/browser-suite-repair-evidence.yml",
+      "pnpm-lock.yaml",
+      "apps/www/package.json",
+      "apps/www/scripts/generate-website-prototype-tokens.mjs",
+      "apps/www/scripts/prepare-homepage-composition-fonts.sh",
+      "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+      "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts",
+      "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts",
+      "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+      "apps/www/src/styles/site-contents-command.css",
+      "packages/modules/positioning/src/web/floating-ui-host.ts",
+      "packages/modules/positioning/src/web/owned-style-lease.ts",
+      "packages/modules/positioning/src/web/root-space-observer.ts",
+      "packages/modules/positioning/test/floating-ui-host.test.ts",
+      "packages/modules/positioning/test/floating-ui-host-intrinsic-invalidation.test.ts",
+      "packages/modules/positioning/test/available-projection-ownership.test.ts",
+      "packages/modules/positioning/test/lease-generation.test.ts",
+      "packages/modules/positioning/test/owned-style-lease.test.ts"
+    ]
+  },
+  "phases": [
+    {
+      "phase": "beforeTest",
+      "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+      "dirty": false,
+      "sourceCount": 18,
+      "node": "v24.22.3",
+      "platform": "linux",
+      "arch": "x64",
+      "os": "7.0.0-1014-aws",
+      "chromePath": "/usr/bin/google-chrome",
+      "chrome": "Google Chrome 157.0.8103.78",
+      "observedAt": "2026-11-24T15:29:11.635Z"
+    },
+    {
+      "phase": "afterTest",
+      "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+      "dirty": false,
+      "sourceCount": 18,
+      "node": "v24.22.3",
+      "platform": "linux",
+      "arch": "x64",
+      "os": "7.0.0-1014-aws",
+      "chromePath": "/usr/bin/google-chrome",
+      "chrome": "Google Chrome 157.0.8103.78",
+      "observedAt": "2026-11-24T15:32:38.613Z"
+    }
+  ],
+  "actualAfterGenerated": [
+    {
+      "path": "apps/www/src/styles/shadcn-theme.css",
+      "bytes": 6473,
+      "sha256": "3de2d4ce2a38e83086128c8863d3391eb74159adde7b1a8b7f450f93fd643f96",
+      "matchesRecordedBytes": true,
+      "matchesPublishedMain8Inputs": true,
+      "identicalToFirstC346Run": true,
+      "identicalTo92dFailureInput": true
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-style.css",
+      "bytes": 294,
+      "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88",
+      "matchesRecordedBytes": true,
+      "matchesPublishedMain8Inputs": true,
+      "identicalToFirstC346Run": true,
+      "identicalTo92dFailureInput": true
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-tokens.generated.css",
+      "bytes": 253817,
+      "sha256": "3e37aa92568e1e4ade2d74e228627126e51aa2717824c10bbb3b25f5ea638f7a",
+      "matchesRecordedBytes": true,
+      "matchesPublishedMain8Inputs": true,
+      "identicalToFirstC346Run": true,
+      "identicalTo92dFailureInput": false
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.js",
+      "bytes": 642802,
+      "sha256": "67e3e6adf39453463137e6f1fb16e58af52c4098d5f5e40a40be0cddaeafb29f",
+      "matchesRecordedBytes": true,
+      "matchesPublishedMain8Inputs": true,
+      "identicalToFirstC346Run": true,
+      "identicalTo92dFailureInput": false
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.d.ts",
+      "bytes": 261,
+      "sha256": "76d772bac1c5de84e6fb455683513c74c6d40b55de2744caaf3dfc4e4ead94b8",
+      "matchesRecordedBytes": true,
+      "matchesPublishedMain8Inputs": true,
+      "identicalToFirstC346Run": true,
+      "identicalTo92dFailureInput": true
+    }
+  ],
+  "generatedInputBoundary": "All five actual outputs match the published main8 inputs and first c346 run byte-for-byte. Tokens and Shadow JS differ from old92d. This is not an identical-generated-input comparison to92d or a same-machine trial.",
+  "beforeGeneratedAbsence": [
+    {
+      "path": "apps/www/src/styles/shadcn-theme.css",
+      "error": "Error: ENOENT: no such file or directory, open 'apps/www/src/styles/shadcn-theme.css'"
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-tokens.generated.css",
+      "error": "Error: ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-tokens.generated.css'"
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.js",
+      "error": "Error: ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-shadow-style.generated.js'"
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.d.ts",
+      "error": "Error: ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-shadow-style.generated.d.ts'"
+    }
+  ],
+  "publicReceiptSourceBindings": {
+    "records": 73,
+    "distinctComponentSourceHashes": 9,
+    "allMatchCandidate": true,
+    "recordsChecked": [
+      {
+        "file": "bootstrap-2-3-2-react-Enter-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-react-Space-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-react-click-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-react-keyboard-focus.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-react-public-popover-open.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-react-transition.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-vue-Enter-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-vue-Space-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-vue-click-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-vue-keyboard-focus.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-vue-public-popover-open.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-vue-transition.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-vue2-Enter-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-vue2-Space-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-vue2-click-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-vue2-keyboard-focus.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-vue2-public-popover-open.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-vue2-transition.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-wc-Enter-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-wc-Space-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-wc-click-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-wc-keyboard-focus.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-wc-public-popover-open.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "bootstrap-2-3-2-wc-transition.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-react-Enter-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-react-Space-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-react-click-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-react-keyboard-focus.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-react-public-popover-open.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-react-transition.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-vue-Enter-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-vue-Space-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-vue-click-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-vue-keyboard-focus.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-vue-public-popover-open.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-vue-transition.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-vue2-Enter-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-vue2-Space-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-vue2-click-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-vue2-keyboard-focus.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-vue2-public-popover-open.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-vue2-transition.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-wc-Enter-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-wc-Space-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-wc-click-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-wc-keyboard-focus.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-wc-public-popover-open.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "brutalist-wc-transition.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "normal-close-mutations.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-react-Enter-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-react-Space-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-react-click-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-react-keyboard-focus.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-react-public-popover-open.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-react-transition.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-vue-Enter-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-vue-Space-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-vue-click-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-vue-keyboard-focus.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-vue-public-popover-open.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-vue-transition.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-vue2-Enter-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-vue2-Space-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-vue2-click-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-vue2-keyboard-focus.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-vue2-public-popover-open.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-vue2-transition.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-wc-Enter-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-wc-Space-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-wc-click-wheel.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-wc-keyboard-focus.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-wc-public-popover-open.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      },
+      {
+        "file": "shadcn-wc-transition.json",
+        "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+        "dirty": false,
+        "filesVerified": 9
+      }
+    ],
+    "hashes": {
+      "apps/www/src/components/SiteContentsCommand.astro": "250ea15a4d6f238397dda64dba8df8d60eabb42ddb02979b0ad0895ee3c29a0f",
+      "apps/www/src/components/site-contents-command.ts": "b9076feb0bdf2f2a7d3887ef0a1a44f88b086c6ff33256ae4b71282e6d6b4799",
+      "apps/www/src/components/site-contents-panel.ts": "85e968cb5abb1be2a7d3645a241143578c407730a650e5c152cf522346668d2a",
+      "apps/www/src/components/site-header-surface.ts": "b1f90dcad071dc4f4bea5b6e47834c2f5464179ee8a8476653907cc11d72716a",
+      "apps/www/src/components/site-header-disclosure.ts": "0d5ded18075c11f5a478d08c2af4346ff2bfc051de7e4e545172494eb0dce904",
+      "apps/www/src/components/override/Sidebar.astro": "9cf7486a4a86e8512c9f75215cff83f0ffb0b1a3f3753c802782c08f0fb0ece5",
+      "apps/www/src/components/override/PageFrame.astro": "753f40ce6c26eafd0ea860450c60c277a7bbff6adddc83cb65c753211fad8d57",
+      "apps/www/src/styles/site-contents-command.css": "70807ef33ce6f3212fcb68735f30196dd5cf96cdf82d17d7b7c5cc4e97ba1748",
+      "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts": "c2be71f093207be7e3e588940cc9d801dae046e764a2b5b8676d0863cd308c45"
+    }
+  },
+  "controls": [
+    {
+      "file": "runtime/contents-wheel-controls/cancellation-false.json",
+      "cancel": false,
+      "beforeTop": 0,
+      "afterTop": 400,
+      "documentUnchanged": true,
+      "sameDialogAndSurface": true,
+      "trustedMatchingWheel": [
+        {
+          "trusted": true,
+          "deltaY": 400,
+          "clientX": 190,
+          "clientY": 160,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "replacementIdentityRejected": true,
+      "completionErrors": [],
+      "browser": "157.0.8103.78"
+    },
+    {
+      "file": "runtime/contents-wheel-controls/cancellation-true.json",
+      "cancel": true,
+      "beforeTop": 0,
+      "afterTop": 0,
+      "documentUnchanged": true,
+      "sameDialogAndSurface": true,
+      "trustedMatchingWheel": [
+        {
+          "trusted": true,
+          "deltaY": 400,
+          "clientX": 190,
+          "clientY": 160,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": true
+        }
+      ],
+      "replacementIdentityRejected": true,
+      "completionErrors": [],
+      "browser": "157.0.8103.78"
+    }
+  ],
+  "selection": {
+    "expectedSha": "c3469acc8cc00aff5c49baef2629486d41314aff",
+    "scope": "Two authored native oracle controls and one original public Popover matrix; not complete homepage or CI acceptance",
+    "results": [
+      {
+        "id": "controls",
+        "file": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts",
+        "titles": [
+          "preserves native cancellation=false and current dialog identity",
+          "preserves native cancellation=true and current dialog identity"
+        ],
+        "exactScope": true,
+        "passed": true,
+        "collected": 2,
+        "executed": 2,
+        "skipped": 0,
+        "selected": [
+          {
+            "title": "preserves native cancellation=false and current dialog identity",
+            "fullName": "Contents wheel observer / native event controls preserves native cancellation=false and current dialog identity",
+            "status": "passed",
+            "failureMessages": []
+          },
+          {
+            "title": "preserves native cancellation=true and current dialog identity",
+            "fullName": "Contents wheel observer / native event controls preserves native cancellation=true and current dialog identity",
+            "status": "passed",
+            "failureMessages": []
+          }
+        ]
+      },
+      {
+        "id": "popover",
+        "file": "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+        "titles": [
+          "uses real family Popover Triggers through all four Docs runtimes with keyboard and exact-source visual evidence"
+        ],
+        "exactScope": true,
+        "passed": true,
+        "collected": 10,
+        "executed": 1,
+        "skipped": 9,
+        "selected": [
+          {
+            "title": "uses real family Popover Triggers through all four Docs runtimes with keyboard and exact-source visual evidence",
+            "fullName": "Homepage end-to-end dogfood boundary uses real family Popover Triggers through all four Docs runtimes with keyboard and exact-source visual evidence",
+            "status": "passed",
+            "failureMessages": []
+          }
+        ]
+      }
+    ],
+    "generatedEvidence": {
+      "complete": true,
+      "files": [
+        {
+          "path": "apps/www/src/styles/shadcn-theme.css",
+          "bytes": 6473,
+          "sha256": "3de2d4ce2a38e83086128c8863d3391eb74159adde7b1a8b7f450f93fd643f96"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-style.css",
+          "bytes": 294,
+          "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-tokens.generated.css",
+          "bytes": 253817,
+          "sha256": "3e37aa92568e1e4ade2d74e228627126e51aa2717824c10bbb3b25f5ea638f7a"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-shadow-style.generated.js",
+          "bytes": 642802,
+          "sha256": "67e3e6adf39453463137e6f1fb16e58af52c4098d5f5e40a40be0cddaeafb29f"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-shadow-style.generated.d.ts",
+          "bytes": 261,
+          "sha256": "76d772bac1c5de84e6fb455683513c74c6d40b55de2744caaf3dfc4e4ead94b8"
+        }
+      ]
+    }
+  },
+  "publicMatrix": {
+    "expectedWheelCombinations": 36,
+    "observedWheelReceipts": 36,
+    "completedWheelCombinations": 36,
+    "missingCombinations": [],
+    "unexpectedCombinations": [],
+    "allFinalOffsetsRetainInputDirection": true,
+    "strictReceiptProblems": [],
+    "normalCloseCount": 36,
+    "allNormalCloseEventsMatchOriginalAssertions": true,
+    "keyboardFocusCount": 12,
+    "publicOpenRecords": 12,
+    "runtimeTransitionRecords": 12,
+    "caseDurationMs": 127604.029711,
+    "fileDurationMs": 195573,
+    "vitestInvocationDurationSeconds": 196.21,
+    "originalWheelDeadlineMs": 1000,
+    "originalCaseDeadlineMs": 180000,
+    "instrumentedTracePresent": false
+  },
+  "logProvenance": {
+    "bytes": 63024,
+    "sha256": "2d33d5dca3d8620e51d8aec3f60c7a283e95e8d4995f5184b45a01e4dfac2d0d",
+    "boundary": "Complete connector-decoded UTF-8 workflow job log; not raw HTTP bytes"
+  },
+  "acceptanceBoundary": "The exact focused lane completed two authored native controls and all36 combinations inside the original public Popover matrix on this repeat. This is not complete homepage/full CI acceptance, does not erase the first c346 runtime-transition failure, and is not platform approval.",
+  "detailedObservations": {
+    "originalSummary": "result-summary-original.json.gz",
+    "rawBytes": 1609863,
+    "rawSha256": "fde50c195e14e25a0f5b5681f827c72139733a6030c198691c5b5b8a7bcb0cce",
+    "wheelRows": 36,
+    "keyboardFocusRows": 12,
+    "publicOpenRows": 12,
+    "runtimeTransitionRows": 12
+  }
+}

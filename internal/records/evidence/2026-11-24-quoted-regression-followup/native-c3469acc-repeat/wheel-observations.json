@@ -1,0 +1,3103 @@
+{
+  "observed": [
+    {
+      "combination": [
+        "bootstrap-2-3-2",
+        "react",
+        "Enter"
+      ],
+      "file": "bootstrap-2-3-2-react-Enter-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 773,
+      "afterClientHeight": 773,
+      "beforeAvailableHeight": 775,
+      "afterAvailableHeight": 775,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 146,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 14204,
+          "observedAt": 14206.200000000012,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_3",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 773,
+            "clientWidth": 274,
+            "scrollHeight": 5238,
+            "scrollWidth": 274,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "auto",
+            "overscrollY": "auto",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 14206.200000000012,
+          "eventTimeStamp": 14204,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-18",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "bootstrap-2-3-2",
+        "react",
+        "Space"
+      ],
+      "file": "bootstrap-2-3-2-react-Space-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 773,
+      "afterClientHeight": 773,
+      "beforeAvailableHeight": 775,
+      "afterAvailableHeight": 775,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 146,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 15403.799999999988,
+          "observedAt": 15406.100000000035,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_3",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 773,
+            "clientWidth": 274,
+            "scrollHeight": 5238,
+            "scrollWidth": 274,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "auto",
+            "overscrollY": "auto",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 15406.100000000035,
+          "eventTimeStamp": 15403.799999999988,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-18",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "bootstrap-2-3-2",
+        "react",
+        "click"
+      ],
+      "file": "bootstrap-2-3-2-react-click-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 773,
+      "afterClientHeight": 773,
+      "beforeAvailableHeight": 775,
+      "afterAvailableHeight": 775,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 146,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 12970.400000000023,
+          "observedAt": 12972.5,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_3",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 773,
+            "clientWidth": 274,
+            "scrollHeight": 5238,
+            "scrollWidth": 274,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "auto",
+            "overscrollY": "auto",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 12972.5,
+          "eventTimeStamp": 12970.400000000023,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-18",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "bootstrap-2-3-2",
+        "vue",
+        "Enter"
+      ],
+      "file": "bootstrap-2-3-2-vue-Enter-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 773,
+      "afterClientHeight": 773,
+      "beforeAvailableHeight": 775,
+      "afterAvailableHeight": 775,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 146,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 19670.20000000001,
+          "observedAt": 19672.20000000001,
+          "top": 500,
+          "left": 0,
+          "node": 13,
+          "current": {
+            "node": 13,
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_3",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 773,
+            "clientWidth": 274,
+            "scrollHeight": 5420,
+            "scrollWidth": 274,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "auto",
+            "overscrollY": "auto",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 19672.20000000001,
+          "eventTimeStamp": 19670.20000000001,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-34",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "bootstrap-2-3-2",
+        "vue",
+        "Space"
+      ],
+      "file": "bootstrap-2-3-2-vue-Space-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 773,
+      "afterClientHeight": 773,
+      "beforeAvailableHeight": 775,
+      "afterAvailableHeight": 775,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 146,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 20989.79999999999,
+          "observedAt": 20992.100000000035,
+          "top": 500,
+          "left": 0,
+          "node": 13,
+          "current": {
+            "node": 13,
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_3",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 773,
+            "clientWidth": 274,
+            "scrollHeight": 5420,
+            "scrollWidth": 274,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "auto",
+            "overscrollY": "auto",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 20992.100000000035,
+          "eventTimeStamp": 20989.79999999999,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-34",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "bootstrap-2-3-2",
+        "vue",
+        "click"
+      ],
+      "file": "bootstrap-2-3-2-vue-click-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 773,
+      "afterClientHeight": 773,
+      "beforeAvailableHeight": 775,
+      "afterAvailableHeight": 775,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 146,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 18336.900000000023,
+          "observedAt": 18338.79999999999,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_3",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 773,
+            "clientWidth": 274,
+            "scrollHeight": 5238,
+            "scrollWidth": 274,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "auto",
+            "overscrollY": "auto",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 18338.79999999999,
+          "eventTimeStamp": 18336.900000000023,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-34",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "bootstrap-2-3-2",
+        "vue2",
+        "Enter"
+      ],
+      "file": "bootstrap-2-3-2-vue2-Enter-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 773,
+      "afterClientHeight": 773,
+      "beforeAvailableHeight": 775,
+      "afterAvailableHeight": 775,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 146,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 25503.5,
+          "observedAt": 25505.900000000023,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 773,
+            "clientWidth": 274,
+            "scrollHeight": 5238,
+            "scrollWidth": 274,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "auto",
+            "overscrollY": "auto",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 25505.900000000023,
+          "eventTimeStamp": 25503.5,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-50",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "bootstrap-2-3-2",
+        "vue2",
+        "Space"
+      ],
+      "file": "bootstrap-2-3-2-vue2-Space-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 773,
+      "afterClientHeight": 773,
+      "beforeAvailableHeight": 775,
+      "afterAvailableHeight": 775,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 146,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 26753.29999999999,
+          "observedAt": 26755.400000000023,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 773,
+            "clientWidth": 274,
+            "scrollHeight": 5238,
+            "scrollWidth": 274,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "auto",
+            "overscrollY": "auto",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 26755.400000000023,
+          "eventTimeStamp": 26753.29999999999,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-50",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "bootstrap-2-3-2",
+        "vue2",
+        "click"
+      ],
+      "file": "bootstrap-2-3-2-vue2-click-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 773,
+      "afterClientHeight": 773,
+      "beforeAvailableHeight": 775,
+      "afterAvailableHeight": 775,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 146,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 24186.79999999999,
+          "observedAt": 24188.600000000035,
+          "top": 500,
+          "left": 0,
+          "node": 13,
+          "current": {
+            "node": 13,
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 773,
+            "clientWidth": 274,
+            "scrollHeight": 5420,
+            "scrollWidth": 274,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "auto",
+            "overscrollY": "auto",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 24188.600000000035,
+          "eventTimeStamp": 24186.79999999999,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-50",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "bootstrap-2-3-2",
+        "wc",
+        "Enter"
+      ],
+      "file": "bootstrap-2-3-2-wc-Enter-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 773,
+      "afterClientHeight": 773,
+      "beforeAvailableHeight": 775,
+      "afterAvailableHeight": 775,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 146,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 9454,
+          "observedAt": 9457.100000000035,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "wc-bootstrap-2-3-2-popover-content",
+            "id": "pui-popover-1-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 773,
+            "clientWidth": 274,
+            "scrollHeight": 5238,
+            "scrollWidth": 274,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "auto",
+            "overscrollY": "auto",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 9457.100000000035,
+          "eventTimeStamp": 9454,
+          "trusted": true,
+          "target": {
+            "tag": "wc-bootstrap-2-3-2-popover-content",
+            "id": "pui-popover-1-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-host-root",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "bootstrap-2-3-2",
+        "wc",
+        "Space"
+      ],
+      "file": "bootstrap-2-3-2-wc-Space-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 773,
+      "afterClientHeight": 773,
+      "beforeAvailableHeight": 775,
+      "afterAvailableHeight": 775,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 146,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 10770.799999999988,
+          "observedAt": 10774.700000000012,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "wc-bootstrap-2-3-2-popover-content",
+            "id": "pui-popover-1-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 773,
+            "clientWidth": 274,
+            "scrollHeight": 5238,
+            "scrollWidth": 274,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "auto",
+            "overscrollY": "auto",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 10774.700000000012,
+          "eventTimeStamp": 10770.799999999988,
+          "trusted": true,
+          "target": {
+            "tag": "wc-bootstrap-2-3-2-popover-content",
+            "id": "pui-popover-1-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-host-root",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "bootstrap-2-3-2",
+        "wc",
+        "click"
+      ],
+      "file": "bootstrap-2-3-2-wc-click-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 773,
+      "afterClientHeight": 773,
+      "beforeAvailableHeight": 775,
+      "afterAvailableHeight": 775,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 146,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 8137.5,
+          "observedAt": 8140.400000000023,
+          "top": 500,
+          "left": 0,
+          "node": 13,
+          "current": {
+            "node": 13,
+            "tag": "wc-bootstrap-2-3-2-popover-content",
+            "id": "pui-popover-1-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 773,
+            "clientWidth": 274,
+            "scrollHeight": 5420,
+            "scrollWidth": 274,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "auto",
+            "overscrollY": "auto",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 8140.400000000023,
+          "eventTimeStamp": 8137.5,
+          "trusted": true,
+          "target": {
+            "tag": "wc-bootstrap-2-3-2-popover-content",
+            "id": "pui-popover-1-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32 pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-62_6f_6f_74_73_74_72_61_70_2d_32_2d_33_2d_32_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-host-root",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "brutalist",
+        "react",
+        "Enter"
+      ],
+      "file": "brutalist-react-Enter-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 772,
+      "afterClientHeight": 772,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 9482.900000000023,
+          "observedAt": 9484.700000000012,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_7",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 772,
+            "clientWidth": 370,
+            "scrollHeight": 6140,
+            "scrollWidth": 370,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 9484.700000000012,
+          "eventTimeStamp": 9482.900000000023,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-26",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "brutalist",
+        "react",
+        "Space"
+      ],
+      "file": "brutalist-react-Space-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 772,
+      "afterClientHeight": 772,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 10349.599999999977,
+          "observedAt": 10351.299999999988,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_7",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 772,
+            "clientWidth": 370,
+            "scrollHeight": 6140,
+            "scrollWidth": 370,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 10351.299999999988,
+          "eventTimeStamp": 10349.599999999977,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-26",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "brutalist",
+        "react",
+        "click"
+      ],
+      "file": "brutalist-react-click-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 768,
+      "afterClientHeight": 772,
+      "beforeAvailableHeight": 772,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 450,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 8484.700000000012,
+          "observedAt": 8486.700000000012,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_7",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 772,
+            "clientWidth": 370,
+            "scrollHeight": 6140,
+            "scrollWidth": 370,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 8486.700000000012,
+          "eventTimeStamp": 8484.700000000012,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-26",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "brutalist",
+        "vue",
+        "Enter"
+      ],
+      "file": "brutalist-vue-Enter-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 772,
+      "afterClientHeight": 772,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 15082.799999999988,
+          "observedAt": 15084.900000000023,
+          "top": 500,
+          "left": 0,
+          "node": 13,
+          "current": {
+            "node": 13,
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_6",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 772,
+            "clientWidth": 370,
+            "scrollHeight": 6322,
+            "scrollWidth": 370,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 15084.900000000023,
+          "eventTimeStamp": 15082.799999999988,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-48",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "brutalist",
+        "vue",
+        "Space"
+      ],
+      "file": "brutalist-vue-Space-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 772,
+      "afterClientHeight": 772,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 16402.20000000001,
+          "observedAt": 16404.099999999977,
+          "top": 500,
+          "left": 0,
+          "node": 13,
+          "current": {
+            "node": 13,
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_6",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 772,
+            "clientWidth": 370,
+            "scrollHeight": 6322,
+            "scrollWidth": 370,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 16404.099999999977,
+          "eventTimeStamp": 16402.20000000001,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-48",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "brutalist",
+        "vue",
+        "click"
+      ],
+      "file": "brutalist-vue-click-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 768,
+      "afterClientHeight": 772,
+      "beforeAvailableHeight": 772,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 450,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 13699.599999999977,
+          "observedAt": 13702.200000000012,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_6",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 772,
+            "clientWidth": 370,
+            "scrollHeight": 6140,
+            "scrollWidth": 370,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 13702.200000000012,
+          "eventTimeStamp": 13699.599999999977,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-48",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "brutalist",
+        "vue2",
+        "Enter"
+      ],
+      "file": "brutalist-vue2-Enter-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 772,
+      "afterClientHeight": 772,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 21399.5,
+          "observedAt": 21401.900000000023,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 772,
+            "clientWidth": 370,
+            "scrollHeight": 6140,
+            "scrollWidth": 370,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 21401.900000000023,
+          "eventTimeStamp": 21399.5,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-68",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "brutalist",
+        "vue2",
+        "Space"
+      ],
+      "file": "brutalist-vue2-Space-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 772,
+      "afterClientHeight": 772,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 22449.099999999977,
+          "observedAt": 22451.20000000001,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 772,
+            "clientWidth": 370,
+            "scrollHeight": 6140,
+            "scrollWidth": 370,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 22451.20000000001,
+          "eventTimeStamp": 22449.099999999977,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-68",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "brutalist",
+        "vue2",
+        "click"
+      ],
+      "file": "brutalist-vue2-click-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 768,
+      "afterClientHeight": 772,
+      "beforeAvailableHeight": 772,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 450,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 20065.900000000023,
+          "observedAt": 20068.099999999977,
+          "top": 500,
+          "left": 0,
+          "node": 13,
+          "current": {
+            "node": 13,
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 772,
+            "clientWidth": 370,
+            "scrollHeight": 6322,
+            "scrollWidth": 370,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 20068.099999999977,
+          "eventTimeStamp": 20065.900000000023,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-68",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "brutalist",
+        "wc",
+        "Enter"
+      ],
+      "file": "brutalist-wc-Enter-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 772,
+      "afterClientHeight": 772,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 5283.599999999977,
+          "observedAt": 5290.700000000012,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "wc-brutalist-popover-content",
+            "id": "pui-popover-1-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 772,
+            "clientWidth": 370,
+            "scrollHeight": 6140,
+            "scrollWidth": 370,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 5290.700000000012,
+          "eventTimeStamp": 5283.599999999977,
+          "trusted": true,
+          "target": {
+            "tag": "wc-brutalist-popover-content",
+            "id": "pui-popover-1-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-host-root",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "brutalist",
+        "wc",
+        "Space"
+      ],
+      "file": "brutalist-wc-Space-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 772,
+      "afterClientHeight": 772,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 6133.700000000012,
+          "observedAt": 6140.700000000012,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "wc-brutalist-popover-content",
+            "id": "pui-popover-1-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 772,
+            "clientWidth": 370,
+            "scrollHeight": 6140,
+            "scrollWidth": 370,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 6140.700000000012,
+          "eventTimeStamp": 6133.700000000012,
+          "trusted": true,
+          "target": {
+            "tag": "wc-brutalist-popover-content",
+            "id": "pui-popover-1-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-host-root",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "brutalist",
+        "wc",
+        "click"
+      ],
+      "file": "brutalist-wc-click-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 768,
+      "afterClientHeight": 772,
+      "beforeAvailableHeight": 772,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 450,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 4250.799999999988,
+          "observedAt": 4254,
+          "top": 500,
+          "left": 0,
+          "node": 13,
+          "current": {
+            "node": 13,
+            "tag": "wc-brutalist-popover-content",
+            "id": "pui-popover-1-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 772,
+            "clientWidth": 370,
+            "scrollHeight": 6322,
+            "scrollWidth": 370,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 4254,
+          "eventTimeStamp": 4250.799999999988,
+          "trusted": true,
+          "target": {
+            "tag": "wc-brutalist-popover-content",
+            "id": "pui-popover-1-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-host-root",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "react",
+        "Enter"
+      ],
+      "file": "shadcn-react-Enter-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 776,
+      "afterClientHeight": 776,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 54726.79999999999,
+          "observedAt": 54732.09999999998,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_6",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 776,
+            "clientWidth": 374,
+            "scrollHeight": 6048,
+            "scrollWidth": 374,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 54732.09999999998,
+          "eventTimeStamp": 54726.79999999999,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-56",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "react",
+        "Space"
+      ],
+      "file": "shadcn-react-Space-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 776,
+      "afterClientHeight": 776,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 56169,
+          "observedAt": 56175.20000000001,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_6",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 776,
+            "clientWidth": 374,
+            "scrollHeight": 6048,
+            "scrollWidth": 374,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 56175.20000000001,
+          "eventTimeStamp": 56169,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-56",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "react",
+        "click"
+      ],
+      "file": "shadcn-react-click-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 776,
+      "afterClientHeight": 776,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 53285.5,
+          "observedAt": 53291,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_6",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 776,
+            "clientWidth": 374,
+            "scrollHeight": 6048,
+            "scrollWidth": 374,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 53291,
+          "eventTimeStamp": 53285.5,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-2-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-72_65_61_63_74 pui-projection-generation-32 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-56",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "vue",
+        "Enter"
+      ],
+      "file": "shadcn-vue-Enter-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 776,
+      "afterClientHeight": 776,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 64192,
+          "observedAt": 64197.5,
+          "top": 500,
+          "left": 0,
+          "node": 13,
+          "current": {
+            "node": 13,
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_7",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 776,
+            "clientWidth": 374,
+            "scrollHeight": 6230,
+            "scrollWidth": 374,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 64197.5,
+          "eventTimeStamp": 64192,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-119",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "vue",
+        "Space"
+      ],
+      "file": "shadcn-vue-Space-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 776,
+      "afterClientHeight": 776,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 65937.5,
+          "observedAt": 65942.59999999998,
+          "top": 500,
+          "left": 0,
+          "node": 13,
+          "current": {
+            "node": 13,
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_7",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 776,
+            "clientWidth": 374,
+            "scrollHeight": 6230,
+            "scrollWidth": 374,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 65942.59999999998,
+          "eventTimeStamp": 65937.5,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-119",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "vue",
+        "click"
+      ],
+      "file": "shadcn-vue-click-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 776,
+      "afterClientHeight": 776,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 62138.59999999998,
+          "observedAt": 62143.5,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_7",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 776,
+            "clientWidth": 374,
+            "scrollHeight": 6048,
+            "scrollWidth": 374,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 62143.5,
+          "eventTimeStamp": 62138.59999999998,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-3-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-76_75_65 pui-projection-generation-33 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-119",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "vue2",
+        "Enter"
+      ],
+      "file": "shadcn-vue2-Enter-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 776,
+      "afterClientHeight": 776,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 74716.89999999997,
+          "observedAt": 74722.29999999999,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 776,
+            "clientWidth": 374,
+            "scrollHeight": 6048,
+            "scrollWidth": 374,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 74722.29999999999,
+          "eventTimeStamp": 74716.89999999997,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-200",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "vue2",
+        "Space"
+      ],
+      "file": "shadcn-vue2-Space-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 776,
+      "afterClientHeight": 776,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 76316.79999999999,
+          "observedAt": 76324.5,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 776,
+            "clientWidth": 374,
+            "scrollHeight": 6048,
+            "scrollWidth": 374,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 76324.5,
+          "eventTimeStamp": 76316.79999999999,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-200",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "vue2",
+        "click"
+      ],
+      "file": "shadcn-vue2-click-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 776,
+      "afterClientHeight": 776,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 72983.59999999998,
+          "observedAt": 72991.09999999998,
+          "top": 500,
+          "left": 0,
+          "node": 13,
+          "current": {
+            "node": 13,
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 776,
+            "clientWidth": 374,
+            "scrollHeight": 6230,
+            "scrollWidth": 374,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 72991.09999999998,
+          "eventTimeStamp": 72983.59999999998,
+          "trusted": true,
+          "target": {
+            "tag": "div",
+            "id": "pui-popover-4-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-76_75_65_32 pui-projection-generation-34 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-owner-demo-200",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "wc",
+        "Enter"
+      ],
+      "file": "shadcn-wc-Enter-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 776,
+      "afterClientHeight": 776,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 47506.5,
+          "observedAt": 47510.399999999965,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "wc-shadcn-popover-content",
+            "id": "pui-popover-1-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 p",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 776,
+            "clientWidth": 374,
+            "scrollHeight": 6048,
+            "scrollWidth": 374,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 47510.399999999965,
+          "eventTimeStamp": 47506.5,
+          "trusted": true,
+          "target": {
+            "tag": "wc-shadcn-popover-content",
+            "id": "pui-popover-1-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-host-root",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "wc",
+        "Space"
+      ],
+      "file": "shadcn-wc-Space-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 776,
+      "afterClientHeight": 776,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 48884.59999999998,
+          "observedAt": 48889.70000000001,
+          "top": 500,
+          "left": 0,
+          "node": 15,
+          "current": {
+            "node": 15,
+            "tag": "wc-shadcn-popover-content",
+            "id": "pui-popover-1-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 p",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 776,
+            "clientWidth": 374,
+            "scrollHeight": 6048,
+            "scrollWidth": 374,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 48889.70000000001,
+          "eventTimeStamp": 48884.59999999998,
+          "trusted": true,
+          "target": {
+            "tag": "wc-shadcn-popover-content",
+            "id": "pui-popover-1-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-host-root",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "wc",
+        "click"
+      ],
+      "file": "shadcn-wc-click-wheel.json",
+      "originalDeadlineMs": 1000,
+      "beforeTop": 0,
+      "finalTop": 500,
+      "beforeClientHeight": 776,
+      "afterClientHeight": 776,
+      "beforeAvailableHeight": 776,
+      "afterAvailableHeight": 776,
+      "documentBefore": 0,
+      "documentAfter": 0,
+      "trustedMatchingWheels": [
+        {
+          "trusted": true,
+          "deltaY": 500,
+          "clientX": 195,
+          "clientY": 448,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "observerScrolls": [
+        {
+          "trusted": true,
+          "timeStamp": 45969.399999999965,
+          "observedAt": 45986.899999999965,
+          "top": 500,
+          "left": 0,
+          "node": 13,
+          "current": {
+            "node": 13,
+            "tag": "wc-shadcn-popover-content",
+            "id": "pui-popover-1-content",
+            "class": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 p",
+            "part": null,
+            "slot": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true,
+            "scrollTop": 500,
+            "scrollLeft": 0,
+            "clientHeight": 776,
+            "clientWidth": 374,
+            "scrollHeight": 6230,
+            "scrollWidth": 374,
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "overscrollX": "contain",
+            "overscrollY": "contain",
+            "display": "block",
+            "position": "fixed",
+            "contain": "none",
+            "scrollSnapType": "none",
+            "scrollBehavior": "auto"
+          }
+        }
+      ],
+      "chainScrolls": [
+        {
+          "at": 45986.899999999965,
+          "eventTimeStamp": 45969.399999999965,
+          "trusted": true,
+          "target": {
+            "tag": "wc-shadcn-popover-content",
+            "id": "pui-popover-1-content",
+            "role": "dialog",
+            "classes": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-73_68_61_64_63_6e pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-73_68_61_64_63_6e_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-host-root",
+            "splitSurface": false,
+            "hasShadowRoot": false,
+            "rootHost": null,
+            "isContent": true,
+            "isSurface": true,
+            "connected": true
+          },
+          "top": 500,
+          "left": 0
+        }
+      ],
+      "strictProblems": []
+    }
+  ],
+  "missing": [],
+  "expected": 36,
+  "allChecked": true
+}

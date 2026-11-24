@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+  "branch": "fix/contents-wheel-followup-20261124",
+  "expectedPreviousHead": "7642f1376b08ee3d4930f596da6a77ca74db9dda",
+  "runId": 45422958374,
+  "jobId": 138547164722,
+  "runAttempt": 1,
+  "bundle": {
+    "head": "c3469acc8cc00aff5c49baef2629486d41314aff",
+    "base": "7642f1376b08ee3d4930f596da6a77ca74db9dda",
+    "knownMainPrerequisite": "52e62632eede8ff094a91216f7d3373d66d77ef0",
+    "mergedMain": "8fac6eeb077160f0bdcc54328d1a259b5eddc9df",
+    "path": "/tmp/contents-sync-c3469acc.bundle",
+    "bytes": 1370628,
+    "sha256": "179a09e7ee9287bb7b910f15f771d44fbb420c9a017b6befb0f019ead85022ea"
+  },
+  "gitBlob": "f3a51328804675a73052d34a461070389e620738",
+  "prepare": {
+    "content": [
+      {
+        "type": "text",
+        "text": "exit_code: 0\nstdout:\n{\"actor\":\"cyjin-yl\",\"permissions\":{\"admin\":false,\"maintain\":true,\"push\":true,\"triage\":true,\"pull\":true},\"bundleBytes\":1370628,\"rules\":[]}\nThe bundle contains this ref:\nc3469acc8cc00aff5c49baef2629486d41314aff HEAD\nThe bundle requires these 3 refs:\n9c8b8b07070dad92f19f3242a812414200ea2c03 \n7642f1376b08ee3d4930f596da6a77ca74db9dda \n52e62632eede8ff094a91216f7d3373d66d77ef0 \nThe bundle uses this hash algorithm: sha1\n\nstderr:\n/workspace/proto-audit-contents-c3469acc-publish/source.bundle is okay\nFrom /workspace/proto-audit-contents-c3469acc-publish/source.bundle\n   7642f1376..c3469acc8             -> fix/contents-wheel-followup-20261124\n"
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "push": {
+    "content": [
+      {
+        "type": "text",
+        "text": "exit_code: 0\nstdout:\n{\"push\":{\"exit\":0,\"signal\":null,\"error\":null,\"at\":\"2026-11-24T15:13:09.000Z\"},\"observedHead\":\"c3469acc8cc00aff5c49baef2629486d41314aff\"}\n\nstderr:\n"
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "dispatch": {
+    "content": [
+      {
+        "type": "text",
+        "text": "exit_code: 0\nstdout:\n{\"transport\":\"curl with existing gh credentials in child stdin only\",\"exit\":0,\"signal\":null,\"http\":\"204\",\"stderr\":\"\",\"completedAt\":\"2026-11-24T15:13:19.339Z\"}\n\nstderr:\n"
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "sourceOperation": "Normal Codex-authored DCO-signed Git commits and fast-forward publication with exact expected-head lease; credentials remain in the established authenticated container and are never copied to scratch.",
+  "boundaries": [
+    "Current-user request authorizes the bounded repair and draft publication; no review/CI/thread waiver or self-approval is inferred.",
+    "The connector receipts establish these actual service operations; no unused repository writer CLI is claimed as executed or validated.",
+    "Branch rules and authenticated account/permissions were fetched at preparation; branch was re-read before and after push and immediately before the single dispatch.",
+    "Empty push.stdout and HTTP204 response-body.txt are confirmed by directory listings; no empty-file read result is represented as content."
+  ],
+  "readback": "Matching workflow_dispatch run45422958374, headc3469acc, attempt1, created2026-11-24T15:13:18Z. Initial state queued; not represented as native success.",
+  "receiptRecovery": "Eleven concurrent direct-file reads returned device-busy; all eleven were subsequently read successfully, with original failures retained. This was read-only recovery and no write or dispatch was repeated.",
+  "rawRecord": {
+    "path": "publication-c3469acc-original.json.gz",
+    "rawBytes": 161707,
+    "rawSha256": "7cb6dda1fe9eed3e69e511f98a2a7df999fd5a7e376470a8c89e06dfe73631e0",
+    "archiveBytes": 8964,
+    "archiveSha256": "6c15043d5340895102790efd55e230fb789c8be50949ad61983014efc93ca1d2"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+  "files": [
+    {
+      "path": "contents-main8-generation.log.gz",
+      "bytes": 354,
+      "sha256": "3f3350c57021d1a1a54084fef853c61154dbba64d6436caf5d7c3496972167b0"
+    },
+    {
+      "path": "contents-main8-positioning-regression.log.gz",
+      "bytes": 39352,
+      "sha256": "14bd817078ad7fa9b3a31f636c25f5c59d8a01ff838fe09a3e27e877b4326e86"
+    },
+    {
+      "path": "contents-main8-workspace-typecheck.log.gz",
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "proto-ui-shadow-style.generated.d.ts.gz",
+      "bytes": 211,
+      "sha256": "76646e6841e917874edd4b9bac46de6993f9e4ffdd35d9964cf301e627a8e461"
+    },
+    {
+      "path": "proto-ui-shadow-style.generated.js.gz",
+      "bytes": 55130,
+      "sha256": "e132bf94659254aca83c28f696e9f9aacf4c145cbc5a7c2e0f7d033b8e0c19db"
+    },
+    {
+      "path": "proto-ui-style.css.gz",
+      "bytes": 212,
+      "sha256": "fe9a6be6b3f8c3427ef7dc439f909fb24d8c4e700c68fe8768d5c7692e2cab52"
+    },
+    {
+      "path": "proto-ui-tokens.generated.css.gz",
+      "bytes": 20134,
+      "sha256": "d1d5a8c93e6fe1e250e0daed3ddcd537652079e6918abb3bdd5b4fdd92bc5108"
+    },
+    {
+      "path": "shadcn-theme.css.gz",
+      "bytes": 953,
+      "sha256": "14e9c0ef4c62e072606f4728e8f2b2ba828f49539d1fd0e552ac06d69b6a2235"
+    },
+    {
+      "path": "source-generated.json",
+      "bytes": 4600,
+      "sha256": "aa2ecab8b1f2c293f717c15d363342838a42a54428d3dae60680cef29a46ce4b"
+    },
+    {
+      "path": "validation.json",
+      "bytes": 2647,
+      "sha256": "db4121553ca0f46baff0725dba6569c38aa7bf47f645446d5c432708842958b6"
+    }
+  ]
+}
