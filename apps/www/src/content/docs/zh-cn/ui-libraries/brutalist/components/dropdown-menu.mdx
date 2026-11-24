@@ -25,9 +25,9 @@ Brutalist Dropdown Menu 继承 Base Dropdown 的完整触发、键盘导航与�
 
 ## 安装
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-dropdown" manager="npm" />
+<InstallCommandCard command="npx @proto.ui/cli@0.2.0 add wc brutalist-dropdown" manager="npm" />
 
-当前在源码工作区提供。CLI 默认生成 `Root`、`Trigger`、`Content` 与 `Item` 的封装；`Group`、`Label`、`Separator` 与 `Shortcut` 可直接从 `@proto.ui/prototypes-brutalist/dropdown` 导入使用。
+已发布的 `0.2.0` CLI 支持 `wc`、`react` 和 `vue`。使用 Vue 2.6 或下方工作区示例时，请安装同一工作区版本构建的 CLI、Brutalist 原型和适配器。 CLI 会生成 Root、Trigger、Content 和 Item。工作区还通过 `@proto.ui/prototypes-brutalist/dropdown` 导出 Group、Label、Separator 和 Shortcut 原型。
 
 ## 用法
 
@@ -132,7 +132,11 @@ import {
   rows={[
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'indicator', type: 'boolean', default: 'false' },
-    { name: 'indicatorIcon', type: "'chevron-down' | 'chevrons-up-down'", default: "'chevron-down'" },
+    {
+      name: 'indicatorIcon',
+      type: "'chevron-down' | 'chevrons-up-down'",
+      default: "'chevron-down'",
+    },
     { name: 'indicatorSize', type: 'number', default: '16' },
     { name: 'indicatorStrokeWidth', type: 'number', default: '2' },
   ]}

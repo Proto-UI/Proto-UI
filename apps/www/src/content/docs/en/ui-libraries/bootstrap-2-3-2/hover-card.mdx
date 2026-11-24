@@ -3,7 +3,6 @@ title: 'Bootstrap 2.3.2 Hover Card'
 description: 'A hover preview card styled with archived Bootstrap 2.3.2 link ink and popover chrome over Base Hover Card.'
 ---
 
-import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
@@ -25,21 +24,19 @@ Hover or focus `@proto-ui` for 150ms to open the Bootstrap 2.3.2 popover card. M
 
 ## Installation
 
-<InstallCommandCard
-  command="npx @proto.ui/cli@latest add wc bootstrap-2-3-2-hover-card"
-  manager="npm"
-/>
-
-Replace `wc` with `react`, `vue`, or `vue2` to generate the local facade for your framework.
+Use `@proto.ui/prototypes-bootstrap-2-3-2/hover-card` and your host adapter from the same workspace revision. The React example adapts the exported prototypes directly with `@proto.ui/adapter-react`.
 
 ## Usage
 
 ```tsx
-import {
-  BootstrapHoverCardRoot,
-  BootstrapHoverCardTrigger,
-  BootstrapHoverCardContent,
-} from '../proto-ui/components/react';
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import * as proto from '@proto.ui/prototypes-bootstrap-2-3-2/hover-card';
+
+const adapt = createReactAdapter(React);
+const BootstrapHoverCardRoot = adapt(proto.hoverCardRoot);
+const BootstrapHoverCardTrigger = adapt(proto.hoverCardTrigger);
+const BootstrapHoverCardContent = adapt(proto.hoverCardContent);
 
 export function Example() {
   return (

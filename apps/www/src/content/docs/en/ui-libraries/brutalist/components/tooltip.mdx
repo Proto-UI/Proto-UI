@@ -29,27 +29,24 @@ Tooltip displays concise contextual descriptions on hover or keyboard focus usin
 
 ## Installation
 
-Brutalist Tooltip is exported from the workspace package `@proto.ui/prototypes-brutalist/tooltip`. Initialize Brutalist theme tokens and structural CSS with the CLI:
+Use `@proto.ui/prototypes-brutalist/tooltip` and your host adapter from the same workspace revision. The React example adapts the exported prototypes directly with `@proto.ui/adapter-react`.
 
-<InstallCommandCard
-  manager="pnpm"
-  commands={{
-    pnpm: 'pnpm dlx @proto.ui/cli@latest init --prototypes brutalist',
-    npm: 'npx @proto.ui/cli@latest init --prototypes brutalist',
-    yarn: 'yarn dlx @proto.ui/cli@latest init --prototypes brutalist',
-    bun: 'bunx @proto.ui/cli@latest init --prototypes brutalist',
-  }}
-/>
+Initialize the Brutalist style sheet with the matching local CLI and import the generated `proto-ui-style.css` in the application entry.
+
+<InstallCommandCard command="npm exec -- proto-ui init --prototypes brutalist" manager="npm" />
 
 ## Usage
 
 ```tsx
-import {
-  BrutalistTooltipGroup,
-  BrutalistTooltipRoot,
-  BrutalistTooltipTrigger,
-  BrutalistTooltipContent,
-} from '../proto-ui/components/react';
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import * as proto from '@proto.ui/prototypes-brutalist/tooltip';
+
+const adapt = createReactAdapter(React);
+const BrutalistTooltipGroup = adapt(proto.BrutalistTooltipGroup);
+const BrutalistTooltipRoot = adapt(proto.BrutalistTooltipRoot);
+const BrutalistTooltipTrigger = adapt(proto.BrutalistTooltipTrigger);
+const BrutalistTooltipContent = adapt(proto.BrutalistTooltipContent);
 
 export function Example() {
   return (

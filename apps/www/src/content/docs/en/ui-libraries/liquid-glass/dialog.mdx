@@ -22,20 +22,23 @@ Liquid Glass Dialog builds on [Base Dialog](../../base/dialog/) with a floating 
 
 ## Installation
 
-Currently available from workspace source (`@proto.ui/prototypes-liquid-glass/dialog`). Generate runtime facades inside the workspace with `proto-ui add <wc|react|vue|vue2> liquid-glass-dialog`.
+Use `@proto.ui/prototypes-liquid-glass/dialog` and your host adapter from the same workspace revision. The React example adapts the exported prototypes directly with `@proto.ui/adapter-react`.
 
 ## Usage
 
 ```tsx
-import {
-  LiquidGlassDialogClose,
-  LiquidGlassDialogContent,
-  LiquidGlassDialogDescription,
-  LiquidGlassDialogMask,
-  LiquidGlassDialogRoot,
-  LiquidGlassDialogTitle,
-  LiquidGlassDialogTrigger,
-} from '@/components/proto-ui/liquid-glass';
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import * as proto from '@proto.ui/prototypes-liquid-glass/dialog';
+
+const adapt = createReactAdapter(React);
+const LiquidGlassDialogClose = adapt(proto.dialogClose);
+const LiquidGlassDialogContent = adapt(proto.dialogContent);
+const LiquidGlassDialogDescription = adapt(proto.dialogDescription);
+const LiquidGlassDialogMask = adapt(proto.dialogMask);
+const LiquidGlassDialogRoot = adapt(proto.dialogRoot);
+const LiquidGlassDialogTitle = adapt(proto.dialogTitle);
+const LiquidGlassDialogTrigger = adapt(proto.dialogTrigger);
 
 export function LiquidGlassDialogExample() {
   return (
@@ -148,7 +151,11 @@ Opt out to an opaque secondary surface when dense text or busy backdrops call fo
   rows={[
     { name: 'Trigger.prominence', type: "'regular' | 'prominent'", default: "'regular'" },
     { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
-    { name: 'Close.prominence', type: "'regular' | 'prominent' | 'destructive'", default: "'regular'" },
+    {
+      name: 'Close.prominence',
+      type: "'regular' | 'prominent' | 'destructive'",
+      default: "'regular'",
+    },
     { name: 'Close.disabled', type: 'boolean', default: 'false' },
     { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
   ]}

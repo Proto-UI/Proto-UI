@@ -22,23 +22,26 @@ Bootstrap 2.3.2 Dialog builds on [Base Dialog](../../base/dialog/) while preserv
 
 ## Installation
 
-Currently available from workspace source (`@proto.ui/prototypes-bootstrap-2-3-2/dialog`). Generate runtime facades inside the workspace with `proto-ui add <wc|react|vue|vue2> bootstrap-2-3-2-dialog`.
+Use `@proto.ui/prototypes-bootstrap-2-3-2/dialog` and your host adapter from the same workspace revision. The React example adapts the exported prototypes directly with `@proto.ui/adapter-react`.
 
 ## Usage
 
 ```tsx
-import {
-  BootstrapDialogClose,
-  BootstrapDialogCloseIcon,
-  BootstrapDialogContent,
-  BootstrapDialogDescription,
-  BootstrapDialogFooter,
-  BootstrapDialogHeader,
-  BootstrapDialogMask,
-  BootstrapDialogRoot,
-  BootstrapDialogTitle,
-  BootstrapDialogTrigger,
-} from '@/components/proto-ui/bootstrap-2-3-2';
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import * as proto from '@proto.ui/prototypes-bootstrap-2-3-2/dialog';
+
+const adapt = createReactAdapter(React);
+const BootstrapDialogClose = adapt(proto.dialogClose);
+const BootstrapDialogCloseIcon = adapt(proto.dialogCloseIcon);
+const BootstrapDialogContent = adapt(proto.dialogContent);
+const BootstrapDialogDescription = adapt(proto.dialogDescription);
+const BootstrapDialogFooter = adapt(proto.dialogFooter);
+const BootstrapDialogHeader = adapt(proto.dialogHeader);
+const BootstrapDialogMask = adapt(proto.dialogMask);
+const BootstrapDialogRoot = adapt(proto.dialogRoot);
+const BootstrapDialogTitle = adapt(proto.dialogTitle);
+const BootstrapDialogTrigger = adapt(proto.dialogTrigger);
 
 export function BootstrapDialogExample() {
   return (

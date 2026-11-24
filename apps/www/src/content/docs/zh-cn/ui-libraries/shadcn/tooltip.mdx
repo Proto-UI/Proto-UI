@@ -22,19 +22,11 @@ Tooltip 在指针悬停或键盘聚焦触发元素时展示简短的补充说明
 
 ## 安装
 
-使用 CLI 初始化 Shadcn 主题并添加 Tooltip 组件（将 `wc` 替换为 `react`、`vue` 或 `vue2` 即可生成对应框架的封装）：
+在应用中安装由同一工作区版本构建的 CLI、Shadcn 原型和目标适配器。完成初始化后，使用应用内的 CLI。
 
-<InstallCommandCard
-  manager="pnpm"
-  commands={{
-    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-tooltip',
-    npm: 'npx @proto.ui/cli@latest add wc shadcn-tooltip',
-    yarn: 'yarn dlx @proto.ui/cli@latest add wc shadcn-tooltip',
-    bun: 'bunx @proto.ui/cli@latest add wc shadcn-tooltip',
-  }}
-/>
+<InstallCommandCard command="npm exec -- proto-ui add wc shadcn-tooltip" manager="npm" />
 
-如需在多个相邻 Tooltip 之间共享延迟与预热切换窗口，请使用 `ShadcnTooltipGroup` 包裹它们，并在入口保留生成的 `proto-ui-style.css`。
+目标宿主也可以使用 `react`、`vue` 或 `vue2`。请在应用入口引入一次生成的 `proto-ui-style.css`。
 
 ## 用法
 

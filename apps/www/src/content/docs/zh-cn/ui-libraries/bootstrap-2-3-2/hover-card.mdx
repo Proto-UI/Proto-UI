@@ -3,7 +3,6 @@ title: 'Bootstrap 2.3.2 Hover Card'
 description: '沿用归档 Bootstrap 2.3.2 链接配色与 Popover 浮层样式的悬停预览卡片组件。'
 ---
 
-import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
@@ -25,21 +24,19 @@ Bootstrap 2.3.2 Hover Card 在 Base Hover Card 的延迟触发与防碰撞定位
 
 ## 安装
 
-<InstallCommandCard
-  command="npx @proto.ui/cli@latest add wc bootstrap-2-3-2-hover-card"
-  manager="npm"
-/>
-
-将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件封装。
+请使用同一工作区版本的 `@proto.ui/prototypes-bootstrap-2-3-2/hover-card` 和目标宿主适配器。下方 React 示例通过 `@proto.ui/adapter-react` 直接适配导出的原型。
 
 ## 用法
 
 ```tsx
-import {
-  BootstrapHoverCardRoot,
-  BootstrapHoverCardTrigger,
-  BootstrapHoverCardContent,
-} from '../proto-ui/components/react';
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import * as proto from '@proto.ui/prototypes-bootstrap-2-3-2/hover-card';
+
+const adapt = createReactAdapter(React);
+const BootstrapHoverCardRoot = adapt(proto.hoverCardRoot);
+const BootstrapHoverCardTrigger = adapt(proto.hoverCardTrigger);
+const BootstrapHoverCardContent = adapt(proto.hoverCardContent);
 
 export function Example() {
   return (
