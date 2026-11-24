@@ -950,6 +950,66 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         if (message.type() === 'error') pageErrors.push(`console: ${message.text()}`);
       });
       await page.addInitScript(() => {
+        const positioningTrace = {
+          enabled: true,
+          started: false,
+          limit: 256,
+          entries: [] as unknown[],
+          dropped: 0,
+          sequence: 0,
+          start() {
+            this.enabled = true;
+            // Keep startup decisions for the first open, then give each later
+            // action its own bounded window. Every entry carries native time.
+            if (this.started) {
+              this.entries = [];
+              this.dropped = 0;
+              this.sequence = 0;
+            }
+            this.started = true;
+          },
+          finish() {
+            this.enabled = false;
+            return { limit: this.limit, entries: this.entries, dropped: this.dropped };
+          },
+        };
+        const leaseIds = new WeakMap<object, number>();
+        let nextLeaseId = 0;
+        Object.assign(window, { __contentsPositioningTrace: positioningTrace });
+        Reflect.set(
+          window,
+          Symbol.for('proto.ui.positioning.decision-trace'),
+          (floating: HTMLElement, lease: object, details: () => Record<string, unknown>) => {
+            if (!positioningTrace.enabled) return;
+            const slot = floating.querySelector('[data-site-contents-slot]');
+            if (!slot?.getAttribute('data-site-contents-slot')?.includes('-docs-')) return;
+            const contentId = document
+              .querySelector(
+                '[data-site-contents-command] [data-projection-generation-state="active"] [data-site-contents-button]'
+              )
+              ?.getAttribute('aria-controls');
+            if (contentId && floating.id && contentId !== floating.id) return;
+            let leaseId = leaseIds.get(lease);
+            if (leaseId === undefined) {
+              leaseId = ++nextLeaseId;
+              leaseIds.set(lease, leaseId);
+            }
+            const entry = {
+              at: performance.now(),
+              sequence: ++positioningTrace.sequence,
+              lease: leaseId,
+              tag: floating.localName,
+              id: floating.id,
+              connected: floating.isConnected,
+              ...details(),
+            };
+            if (positioningTrace.entries.length === positioningTrace.limit) {
+              positioningTrace.entries.shift();
+              positioningTrace.dropped++;
+            }
+            positioningTrace.entries.push(entry);
+          }
+        );
         const evidence = {
           longTasks: [] as Array<{ start: number; duration: number }>,
           changes: [] as Array<{ at: number; adapter: unknown }>,
@@ -1119,6 +1179,13 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
           expect(contentId).not.toBe('starlight__sidebar');
           for (const action of ['click', 'Enter', 'Space']) {
             expect(await command.getAttribute('aria-expanded')).toBe('false');
+            await page.evaluate(() =>
+              (
+                window as typeof window & {
+                  __contentsPositioningTrace: { start(): void };
+                }
+              ).__contentsPositioningTrace.start()
+            );
             if (action === 'click') await command.click();
             else {
               await command.focus();
@@ -1307,6 +1374,15 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
                         before: wheelChainBefore,
                         after: await wheel.evaluate((probe) => probe.inspect()),
                       },
+                      positioningDecisions: await page.evaluate(() =>
+                        (
+                          window as typeof window & {
+                            __contentsPositioningTrace: {
+                              finish(): { limit: number; entries: unknown[]; dropped: number };
+                            };
+                          }
+                        ).__contentsPositioningTrace.finish()
+                      ),
                       error: wheelError ? String(wheelError) : null,
                     },
                     null,

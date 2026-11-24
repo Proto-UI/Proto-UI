@@ -45,6 +45,51 @@ function isElement(value: unknown): value is HTMLElement {
   return typeof HTMLElement !== 'undefined' && value instanceof HTMLElement;
 }
 
+// Temporary native diagnosis. No values are collected without the test-installed
+// sink; factories let that sink reject unrelated leases before reading details.
+const decisionTraceKey = Symbol.for('proto.ui.positioning.decision-trace');
+type DecisionTrace = (details: () => Record<string, unknown>) => void;
+function decisionSink(element: HTMLElement): unknown {
+  try {
+    return Reflect.get(element.ownerDocument.defaultView!, decisionTraceKey);
+  } catch {
+    return undefined;
+  }
+}
+function basisDifferences(previous: string | undefined, current: string) {
+  if (!previous) return null;
+  const names = [
+    'anchor.width',
+    'anchor.height',
+    'reference.offsetWidth',
+    'reference.offsetHeight',
+    'floating.offsetWidth',
+    'floating.offsetHeight',
+    'floating.clientWidth',
+    'floating.clientHeight',
+    'floating.scrollWidth',
+    'floating.scrollHeight',
+    'root.clientWidth',
+    'root.clientHeight',
+    'body.clientWidth',
+    'viewport.width',
+    'viewport.height',
+    'viewport.scale',
+    'viewport.offsetLeft',
+    'viewport.offsetTop',
+    'authoredStyle',
+    'ancestors',
+    'intrinsicStyle',
+  ];
+  const before = JSON.parse(previous) as unknown[];
+  const after = JSON.parse(current) as unknown[];
+  return names.flatMap((name, index) =>
+    JSON.stringify(before[index]) === JSON.stringify(after[index])
+      ? []
+      : [{ name, before: before[index], after: after[index] }]
+  );
+}
+
 function composedParent(node: Node): Node | null {
   if (node.nodeType === 1 && (node as Element).assignedSlot) return (node as Element).assignedSlot;
   return node.parentNode ?? (node.nodeType === 11 ? ((node as ShadowRoot).host ?? null) : null);
@@ -138,7 +183,7 @@ function authoredPositionStyle(element: HTMLElement): string {
 }
 
 /** Reuse measured natural dimensions only while their bounded input facts stay current. */
-function observeIntrinsicSize(reference: HTMLElement, floating: HTMLElement) {
+function observeIntrinsicSize(reference: HTMLElement, floating: HTMLElement, trace: DecisionTrace) {
   const document = floating.ownerDocument;
   const view = document.defaultView;
   let revision = 0;
@@ -151,6 +196,9 @@ function observeIntrinsicSize(reference: HTMLElement, floating: HTMLElement) {
     cache = null;
   };
   const mutations = (records: MutationRecord[]) => {
+    const beforeRevision = revision;
+    const invalidations: MutationRecord[] | null =
+      typeof decisionSink(floating) === 'function' ? [] : null;
     for (const record of records) {
       if (record.target === floating && record.type === 'attributes') {
         if (record.attributeName === 'style') {
@@ -163,7 +211,31 @@ function observeIntrinsicSize(reference: HTMLElement, floating: HTMLElement) {
           continue;
       }
       invalidate();
+      invalidations?.push(record);
     }
+    if (invalidations?.length)
+      trace(() => ({
+        phase: 'intrinsic-mutation',
+        beforeRevision,
+        revision,
+        records: invalidations.slice(0, 32).map((record) => ({
+          type: record.type,
+          targetIsFloating: record.target === floating,
+          target:
+            record.target instanceof Element
+              ? { tag: record.target.localName, id: record.target.id }
+              : { nodeType: record.target.nodeType },
+          attribute: record.attributeName,
+          oldValue: record.oldValue,
+          valueAtDelivery:
+            record.target instanceof Element && record.attributeName
+              ? record.target.getAttribute(record.attributeName)
+              : null,
+          addedNodes: record.addedNodes.length,
+          removedNodes: record.removedNodes.length,
+        })),
+        droppedMutationRecords: Math.max(0, invalidations.length - 32),
+      }));
   };
   const observer =
     typeof view?.MutationObserver === 'function' ? new view.MutationObserver(mutations) : null;
@@ -172,10 +244,15 @@ function observeIntrinsicSize(reference: HTMLElement, floating: HTMLElement) {
     childList: true,
     characterData: true,
     attributes: true,
+    attributeOldValue: typeof decisionSink(floating) === 'function',
   });
-  floating.addEventListener('load', invalidate, true);
-  document.fonts?.addEventListener('loadingdone', invalidate);
-  document.fonts?.addEventListener('loadingerror', invalidate);
+  const externalInvalidation = (event: Event) => {
+    invalidate();
+    trace(() => ({ phase: 'intrinsic-invalidation', reason: event.type, revision }));
+  };
+  floating.addEventListener('load', externalInvalidation, true);
+  document.fonts?.addEventListener('loadingdone', externalInvalidation);
+  document.fonts?.addEventListener('loadingerror', externalInvalidation);
   const basis = () => {
     const anchor = reference.getBoundingClientRect();
     const root = document.documentElement;
@@ -285,6 +362,32 @@ function observeIntrinsicSize(reference: HTMLElement, floating: HTMLElement) {
           ? previous.dimensions
           : undefined;
       if (!dimensions) cache = null;
+      trace(() => {
+        const checks = {
+          reuseRequested: reuse,
+          mutationObserver: !!observer,
+          active: !disposed,
+          fontsReady: document.fonts?.status !== 'loading',
+          cached: !!previous,
+          sameRevision: previous?.revision === revision,
+          previouslyOverflowing: previous?.basis.overflowing === true,
+          currentlyOverflowing: current.overflowing,
+          sameOffsetParent: previous?.basis.offsetParent === current.offsetParent,
+          sameBasis: previous?.basis.values === current.values,
+        };
+        return {
+          phase: 'intrinsic-begin',
+          reused: !!dimensions,
+          revision,
+          cachedRevision: previous?.revision ?? null,
+          checks,
+          rejected: Object.entries(checks)
+            .filter(([, passed]) => !passed)
+            .map(([name]) => name),
+          differences: basisDifferences(previous?.basis.values, current.values),
+          dimensions: dimensions ?? null,
+        };
+      });
       return { dimensions, revision, authored: authoredPositionStyle(floating), basis: current };
     },
     measurementContext() {
@@ -316,14 +419,42 @@ function observeIntrinsicSize(reference: HTMLElement, floating: HTMLElement) {
       )
         cache = { dimensions, revision, basis: current };
       else cache = null;
+      trace(() => {
+        const checks = {
+          active: !disposed,
+          measuredDimensions: !!dimensions,
+          measuredContext: !!measuredUnder,
+          sameMeasurementContext: measuredUnder?.context === current.context,
+          sameOffsetParent: measuredUnder?.offsetParent === current.offsetParent,
+          sameRevision: input.revision === revision,
+          sameAuthoredStyle: input.authored === authoredPositionStyle(floating),
+          sameIntrinsicStyle: input.basis.intrinsicStyle === current.intrinsicStyle,
+          sameScrollWidth: input.basis.scrollWidth === current.scrollWidth,
+          sameScrollHeight: input.basis.scrollHeight === current.scrollHeight,
+        };
+        return {
+          phase: 'intrinsic-commit',
+          certified: !!cache,
+          revision,
+          inputRevision: input.revision,
+          checks,
+          rejected: Object.entries(checks)
+            .filter(([, passed]) => !passed)
+            .map(([name]) => name),
+          differences: basisDifferences(input.basis.values, current.values),
+          measurementContext: measuredUnder?.context ?? null,
+          currentContext: current.context,
+          dimensions: dimensions ?? null,
+        };
+      });
     },
     dispose() {
       disposed = true;
       cache = null;
       observer?.disconnect();
-      floating.removeEventListener('load', invalidate, true);
-      document.fonts?.removeEventListener('loadingdone', invalidate);
-      document.fonts?.removeEventListener('loadingerror', invalidate);
+      floating.removeEventListener('load', externalInvalidation, true);
+      document.fonts?.removeEventListener('loadingdone', externalInvalidation);
+      document.fonts?.removeEventListener('loadingerror', externalInvalidation);
     },
   };
 }
@@ -624,11 +755,35 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
       let sizeObservers: ResizeObserver[] = [];
       let strategyPin: { target: HTMLElement; styles: ReturnType<typeof ownStyles> } | null = null;
       let projectedSize: ReturnType<typeof ownStyles> | null = null;
+      let projectedSizeTarget: HTMLElement | null = null;
       let scrollObservation: ReturnType<typeof observePositionScroll> | null = null;
       let intrinsicObservation: ReturnType<typeof observeIntrinsicSize> | null = null;
-      const retireProjectedSize = () => {
+      const traceLease = {};
+      let traceClosed = false;
+      const trace = (target: unknown, details: () => Record<string, unknown>) => {
+        if (traceClosed || !isElement(target)) return;
+        try {
+          const sink = decisionSink(target);
+          if (typeof sink === 'function')
+            sink(target, traceLease, () => ({ generation, ...details() }));
+        } catch {
+          // A diagnostic consumer must never change the lease's control flow.
+        }
+      };
+      const retireProjectedSize = (reason: string) => {
         const previous = projectedSize;
+        const target = projectedSizeTarget;
+        if (previous && target)
+          trace(target, () => ({
+            phase: 'retire-projected-size',
+            reason,
+            availableWidth: target.style.getPropertyValue('--proto-ui-available-width'),
+            availableHeight: target.style.getPropertyValue('--proto-ui-available-height'),
+            currentOwner: previous.isCurrent(),
+            stack: new Error('Positioning cap retirement').stack,
+          }));
         projectedSize = null;
+        projectedSizeTarget = null;
         previous?.restore();
       };
       const retireStrategyPin = () => {
@@ -654,7 +809,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         return resolveWebInputOriginAnchor(anchor);
       };
 
-      const position = async (reuseIntrinsic = false) => {
+      const position = async (reuseIntrinsic = false, reason = 'internal') => {
         const current = connection;
         const { anchor, floating, config } = current;
         const version = ++generation;
@@ -665,6 +820,16 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           !!reference?.isLive() &&
           (!projectedSize || projectedSize.isCurrent()) &&
           (!strategyPin || strategyPin.styles.isCurrent());
+        trace(floating, () => ({
+          phase: 'position',
+          reason,
+          reuseRequested: reuseIntrinsic,
+          hasProjection: !!projectedSize,
+          currentProjection: projectedSize?.isCurrent() ?? null,
+          hasIntrinsicObservation: !!intrinsicObservation,
+          sizeMatch: !!current.sizeMatch,
+          config: { ...config },
+        }));
         if (disposed) return;
         if (!reference || !isElement(floating)) {
           if (current.sizeMatch && version === generation) {
@@ -697,11 +862,12 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         // Geometry-only refreshes may reuse independently measured natural
         // dimensions. Keeping the live cap avoids clamping native scrolling;
         // the first Floating UI rect read still sees the natural size for flip.
-        if (!naturalDimensions) retireProjectedSize();
+        if (!naturalDimensions) retireProjectedSize(`fresh:${reason}`);
         if (!isCurrent()) return;
         const ownProjection =
           naturalDimensions && projectedSize ? projectedSize : ownStyles(floating);
         projectedSize = ownProjection;
+        projectedSizeTarget = floating;
         if (!strategyPin || strategyPin.target !== floating) {
           retireStrategyPin();
           if (!isCurrent()) return;
@@ -796,7 +962,10 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
               }
             : {}),
         });
-        if (!isCurrent()) return;
+        if (!isCurrent()) {
+          trace(floating, () => ({ phase: 'position-stale', solve: version, reason }));
+          return;
+        }
         retireStrategyPin();
         if (!isCurrent()) return;
         Object.assign(floating.style, {
@@ -818,7 +987,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         cleanup = null;
         retireSizing();
         retireStrategyPin();
-        retireProjectedSize();
+        retireProjectedSize('restart');
         if (connection.sizeMatch) {
           const epoch = sizingEpoch;
           sizing = createEdgeSizeLease(connection, () => !disposed && epoch === sizingEpoch);
@@ -829,7 +998,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
             // A target retains one box registration per observer, not two.
             sizeObservers = (['content-box', 'border-box'] as const).map((box) => {
               const observer = new view.ResizeObserver(() => {
-                if (!disposed && epoch === sizingEpoch) void position();
+                if (!disposed && epoch === sizingEpoch) void position(false, 'size-observer');
               });
               for (const target of sizing!.observed) observer.observe(target, { box });
               return observer;
@@ -839,25 +1008,27 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         const { anchor, floating } = connection;
         const reference = referenceFor(anchor, connection.config);
         if (!reference || !isElement(floating)) {
-          if (connection.sizeMatch) void position();
+          if (connection.sizeMatch) void position(false, 'restart-missing-target');
           return;
         }
         const ownIntrinsic = connection.sizeMatch
           ? null
-          : observeIntrinsicSize(reference.element, floating);
+          : observeIntrinsicSize(reference.element, floating, (details) =>
+              trace(floating, details)
+            );
         intrinsicObservation = ownIntrinsic;
         const stopAuto = autoUpdate(
           reference.reference,
           floating,
           () => {
-            void position(true);
+            void position(true, 'autoUpdate');
           },
           {
             animationFrame: false,
           }
         );
         const stopRoot = observeRootSpace(reference.element.ownerDocument, () => {
-          void position();
+          void position(false, 'root-space');
         });
         // autoUpdate records overflow ancestors only once. A scroller that
         // becomes overflow:auto after the popup opens (nested demo panes)
@@ -868,14 +1039,14 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         // Native scroll is not composed, so observe the relevant shadow roots
         // as well as the document; a composed event is handled only once.
         const ownScroll = observePositionScroll(reference.element, floating, () => {
-          void position(true);
+          void position(true, 'captured-scroll');
         });
         scrollObservation = ownScroll;
         const stopInvalidation = resolveWebInputOriginAnchor(anchor)?.subscribeInvalidation(() => {
           generation++;
           retireSizing();
           retireStrategyPin();
-          retireProjectedSize();
+          retireProjectedSize('input-origin-invalidation');
           cleanup?.();
           cleanup = null;
         });
@@ -922,19 +1093,22 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           // when its element identities stay equal. Reentrant config/status
           // handoffs must not leave the prior synchronous size writer current.
           if (targetsChanged || next.sizeMatch) restart();
-          else void position(sameConfig);
+          else
+            void position(sameConfig, sameConfig ? 'equivalent-update' : 'changed-config-update');
         },
         requestUpdate() {
-          void position();
+          void position(false, 'requestUpdate');
         },
         dispose() {
           disposed = true;
           generation += 1;
+          trace(connection.floating, () => ({ phase: 'dispose' }));
           retireSizing();
           retireStrategyPin();
-          retireProjectedSize();
+          retireProjectedSize('dispose');
           cleanup?.();
           cleanup = null;
+          traceClosed = true;
         },
       };
     },

@@ -1,0 +1,582 @@
+{
+  "candidate": "dca8f4f8f17ff1eba7198ad5aef8a018b3ac9434",
+  "receiptCount": 13,
+  "uniqueCombinations": 13,
+  "expectedCount": 36,
+  "missingCombinations": [
+    [
+      "bootstrap-2-3-2",
+      "react",
+      "Enter"
+    ],
+    [
+      "bootstrap-2-3-2",
+      "react",
+      "Space"
+    ],
+    [
+      "bootstrap-2-3-2",
+      "react",
+      "click"
+    ],
+    [
+      "bootstrap-2-3-2",
+      "vue",
+      "Enter"
+    ],
+    [
+      "bootstrap-2-3-2",
+      "vue",
+      "Space"
+    ],
+    [
+      "bootstrap-2-3-2",
+      "vue",
+      "click"
+    ],
+    [
+      "bootstrap-2-3-2",
+      "vue2",
+      "Enter"
+    ],
+    [
+      "bootstrap-2-3-2",
+      "vue2",
+      "Space"
+    ],
+    [
+      "bootstrap-2-3-2",
+      "vue2",
+      "click"
+    ],
+    [
+      "bootstrap-2-3-2",
+      "wc",
+      "Enter"
+    ],
+    [
+      "bootstrap-2-3-2",
+      "wc",
+      "Space"
+    ],
+    [
+      "bootstrap-2-3-2",
+      "wc",
+      "click"
+    ],
+    [
+      "brutalist",
+      "react",
+      "Enter"
+    ],
+    [
+      "brutalist",
+      "react",
+      "Space"
+    ],
+    [
+      "brutalist",
+      "react",
+      "click"
+    ],
+    [
+      "brutalist",
+      "vue",
+      "Enter"
+    ],
+    [
+      "brutalist",
+      "vue",
+      "Space"
+    ],
+    [
+      "brutalist",
+      "vue",
+      "click"
+    ],
+    [
+      "brutalist",
+      "vue2",
+      "Enter"
+    ],
+    [
+      "brutalist",
+      "vue2",
+      "Space"
+    ],
+    [
+      "brutalist",
+      "vue2",
+      "click"
+    ],
+    [
+      "brutalist",
+      "wc",
+      "Enter"
+    ],
+    [
+      "brutalist",
+      "wc",
+      "Space"
+    ]
+  ],
+  "unexpectedCombinations": [],
+  "rows": [
+    {
+      "combination": [
+        "brutalist",
+        "wc",
+        "click"
+      ],
+      "beforeTop": 0,
+      "afterTop": 0,
+      "heightBefore": 768,
+      "heightAfter": 772,
+      "error": "AssertionError: expected +0 not to be +0 // Object.is equality",
+      "observedScrollCount": 2,
+      "evidenceProblems": [
+        "AssertionError: expected +0 not to be +0 // Object.is equality",
+        "final recorded offset did not retain movement in input direction"
+      ]
+    },
+    {
+      "combination": [
+        "shadcn",
+        "react",
+        "Enter"
+      ],
+      "beforeTop": 0,
+      "afterTop": 500,
+      "heightBefore": 776,
+      "heightAfter": 776,
+      "error": null,
+      "observedScrollCount": 1,
+      "evidenceProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "react",
+        "Space"
+      ],
+      "beforeTop": 0,
+      "afterTop": 500,
+      "heightBefore": 776,
+      "heightAfter": 776,
+      "error": null,
+      "observedScrollCount": 1,
+      "evidenceProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "react",
+        "click"
+      ],
+      "beforeTop": 0,
+      "afterTop": 500,
+      "heightBefore": 776,
+      "heightAfter": 776,
+      "error": null,
+      "observedScrollCount": 1,
+      "evidenceProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "vue",
+        "Enter"
+      ],
+      "beforeTop": 0,
+      "afterTop": 500,
+      "heightBefore": 776,
+      "heightAfter": 776,
+      "error": null,
+      "observedScrollCount": 1,
+      "evidenceProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "vue",
+        "Space"
+      ],
+      "beforeTop": 0,
+      "afterTop": 500,
+      "heightBefore": 776,
+      "heightAfter": 776,
+      "error": null,
+      "observedScrollCount": 1,
+      "evidenceProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "vue",
+        "click"
+      ],
+      "beforeTop": 0,
+      "afterTop": 500,
+      "heightBefore": 776,
+      "heightAfter": 776,
+      "error": null,
+      "observedScrollCount": 1,
+      "evidenceProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "vue2",
+        "Enter"
+      ],
+      "beforeTop": 0,
+      "afterTop": 500,
+      "heightBefore": 776,
+      "heightAfter": 776,
+      "error": null,
+      "observedScrollCount": 1,
+      "evidenceProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "vue2",
+        "Space"
+      ],
+      "beforeTop": 0,
+      "afterTop": 500,
+      "heightBefore": 776,
+      "heightAfter": 776,
+      "error": null,
+      "observedScrollCount": 1,
+      "evidenceProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "vue2",
+        "click"
+      ],
+      "beforeTop": 0,
+      "afterTop": 500,
+      "heightBefore": 776,
+      "heightAfter": 776,
+      "error": null,
+      "observedScrollCount": 1,
+      "evidenceProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "wc",
+        "Enter"
+      ],
+      "beforeTop": 0,
+      "afterTop": 500,
+      "heightBefore": 776,
+      "heightAfter": 776,
+      "error": null,
+      "observedScrollCount": 1,
+      "evidenceProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "wc",
+        "Space"
+      ],
+      "beforeTop": 0,
+      "afterTop": 500,
+      "heightBefore": 776,
+      "heightAfter": 776,
+      "error": null,
+      "observedScrollCount": 1,
+      "evidenceProblems": []
+    },
+    {
+      "combination": [
+        "shadcn",
+        "wc",
+        "click"
+      ],
+      "beforeTop": 0,
+      "afterTop": 500,
+      "heightBefore": 776,
+      "heightAfter": 776,
+      "error": null,
+      "observedScrollCount": 1,
+      "evidenceProblems": []
+    }
+  ],
+  "sourceChecks": [
+    {
+      "phase": "beforeTest",
+      "path": ".github/workflows/browser-suite-repair-evidence.yml",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "beforeTest",
+      "path": "pnpm-lock.yaml",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/package.json",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/scripts/generate-website-prototype-tokens.mjs",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/scripts/prepare-homepage-composition-fonts.sh",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/src/styles/site-contents-command.css",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "beforeTest",
+      "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "beforeTest",
+      "path": "packages/modules/positioning/src/web/owned-style-lease.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "beforeTest",
+      "path": "packages/modules/positioning/src/web/root-space-observer.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "beforeTest",
+      "path": "packages/modules/positioning/test/floating-ui-host.test.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "beforeTest",
+      "path": "packages/modules/positioning/test/floating-ui-host-intrinsic-invalidation.test.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "beforeTest",
+      "path": "packages/modules/positioning/test/available-projection-ownership.test.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "beforeTest",
+      "path": "packages/modules/positioning/test/lease-generation.test.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "afterTest",
+      "path": ".github/workflows/browser-suite-repair-evidence.yml",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "pnpm-lock.yaml",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/package.json",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/scripts/generate-website-prototype-tokens.mjs",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/scripts/prepare-homepage-composition-fonts.sh",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/styles/site-contents-command.css",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "packages/modules/positioning/src/web/owned-style-lease.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "packages/modules/positioning/src/web/root-space-observer.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "packages/modules/positioning/test/floating-ui-host.test.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "packages/modules/positioning/test/floating-ui-host-intrinsic-invalidation.test.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "packages/modules/positioning/test/available-projection-ownership.test.ts",
+      "matchesCandidate": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "packages/modules/positioning/test/lease-generation.test.ts",
+      "matchesCandidate": true
+    }
+  ],
+  "generatedChecks": [
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/src/styles/shadcn-theme.css",
+      "recordedPreparationError": "Error: ENOENT: no such file or directory, open 'apps/www/src/styles/shadcn-theme.css'",
+      "boundary": "Absent at this recorded phase; no byte comparison or pass inferred."
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/src/styles/proto-ui-style.css",
+      "matchesRecordedHash": true,
+      "identicalTo92dFailureInput": true
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/src/styles/proto-ui-tokens.generated.css",
+      "recordedPreparationError": "Error: ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-tokens.generated.css'",
+      "boundary": "Absent at this recorded phase; no byte comparison or pass inferred."
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.js",
+      "recordedPreparationError": "Error: ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-shadow-style.generated.js'",
+      "boundary": "Absent at this recorded phase; no byte comparison or pass inferred."
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.d.ts",
+      "recordedPreparationError": "Error: ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-shadow-style.generated.d.ts'",
+      "boundary": "Absent at this recorded phase; no byte comparison or pass inferred."
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/styles/shadcn-theme.css",
+      "matchesRecordedHash": true,
+      "identicalTo92dFailureInput": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/styles/proto-ui-style.css",
+      "matchesRecordedHash": true,
+      "identicalTo92dFailureInput": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/styles/proto-ui-tokens.generated.css",
+      "matchesRecordedHash": true,
+      "identicalTo92dFailureInput": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.js",
+      "matchesRecordedHash": true,
+      "identicalTo92dFailureInput": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.d.ts",
+      "matchesRecordedHash": true,
+      "identicalTo92dFailureInput": true
+    }
+  ],
+  "phaseChecks": [
+    {
+      "phase": "beforeTest",
+      "expectedSha": "dca8f4f8f17ff1eba7198ad5aef8a018b3ac9434",
+      "source": {
+        "status": 0,
+        "stdout": "dca8f4f8f17ff1eba7198ad5aef8a018b3ac9434\n",
+        "stderr": "",
+        "error": null
+      },
+      "dirty": false,
+      "status": {
+        "status": 0,
+        "stdout": "",
+        "stderr": "",
+        "error": null
+      }
+    },
+    {
+      "phase": "afterTest",
+      "expectedSha": "dca8f4f8f17ff1eba7198ad5aef8a018b3ac9434",
+      "source": {
+        "status": 0,
+        "stdout": "dca8f4f8f17ff1eba7198ad5aef8a018b3ac9434\n",
+        "stderr": "",
+        "error": null
+      },
+      "dirty": false,
+      "status": {
+        "status": 0,
+        "stdout": "",
+        "stderr": "",
+        "error": null
+      }
+    }
+  ],
+  "boundary": "Read-only verification of saved observations; does not infer unrecorded combinations or convert a partial matrix into suite acceptance."
+}

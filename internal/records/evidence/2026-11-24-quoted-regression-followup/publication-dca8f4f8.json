@@ -1,0 +1,200 @@
+{
+  "source": {
+    "head": "dca8f4f8f17ff1eba7198ad5aef8a018b3ac9434",
+    "base": "b110ec92f5b1c5d256c79b831c0b86b9caaec3e3",
+    "path": "/tmp/contents-intrinsic-dca8f4f8.bundle",
+    "bytes": 957403,
+    "sha256": "022367ba68ccdd413dc242b209d2745f22d49f384149c21d1b22dd7c49216fde"
+  },
+  "transportBlob": {
+    "sha": "59ae9c0a1cc16906f05ff421b4adcaf217e2f64c"
+  },
+  "interpretation": {
+    "push": "Local push timed out with exit124, but the independent service readback proves the branch advanced to the intended Codex-authored source. No repeated push was made.",
+    "dispatch": "The gh attempts failed during read-only preflight, before any request.json/started marker existed. A curl request using the same authenticated container context returned HTTP204 once, matched by run45408980428. Credentials stayed in process memory/child stdin and were not written or exported.",
+    "native": "Pending run45408980428; publication is not acceptance."
+  },
+  "nativeRun": {
+    "id": 45408980428,
+    "head_sha": "dca8f4f8f17ff1eba7198ad5aef8a018b3ac9434",
+    "event": "workflow_dispatch",
+    "status": "queued",
+    "conclusion": null,
+    "html_url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45408980428",
+    "created_at": "2026-11-24T13:58:31Z",
+    "run_attempt": 1
+  },
+  "rawReceipt": {
+    "path": "publication-dca8f4f8-raw.json.gz",
+    "bytes": 8854,
+    "sha256": "f95df1c9eb7776472c7e3f23d8767bb01b23ce8558a0254795711806fffe79ae",
+    "uncompressedBytes": 180192,
+    "uncompressedSha256": "ffb6ebf92bb8d64c2ce09872c5df68538527e1977741ab367ab4b3db6b6b92ad"
+  },
+  "dispatchFiles": [
+    {
+      "path": "head-before.txt",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "content": [
+            {
+              "type": "text",
+              "text": "offset 1 is beyond the end of the file (0 lines)"
+            }
+          ],
+          "structuredContent": {
+            "error_code": "INVALID_ARGUMENT"
+          },
+          "isError": true
+        }
+      }
+    },
+    {
+      "path": "curl-preflight.json",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"exit\": 0,\n  \"signal\": null,\n  \"http\": \"200\",\n  \"stderr\": \"\"\n}"
+            }
+          ],
+          "structuredContent": null,
+          "isError": false
+        }
+      }
+    },
+    {
+      "path": "head-curl.json",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"ref\": \"refs/heads/fix/contents-wheel-followup-20261124\",\n  \"node_id\": \"REF_kwDOMhQZjdoAL3JlZnMvaGVhZHMvZml4L2NvbnRlbnRzLXdoZWVsLWZvbGxvd3VwLTIwMjYxMTI0\",\n  \"url\": \"https://api.github.com/repos/Proto-UI/Proto-UI/git/refs/heads/fix/contents-wheel-followup-20261124\",\n  \"object\": {\n    \"sha\": \"dca8f4f8f17ff1eba7198ad5aef8a018b3ac9434\",\n    \"type\": \"commit\",\n    \"url\": \"https://api.github.com/repos/Proto-UI/Proto-UI/git/commits/dca8f4f8f17ff1eba7198ad5aef8a018b3ac9434\"\n  }\n}"
+            }
+          ],
+          "structuredContent": null,
+          "isError": false
+        }
+      }
+    },
+    {
+      "path": "curl-final-preflight.json",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"exit\": 0,\n  \"signal\": null,\n  \"http\": \"200\",\n  \"stderr\": \"\"\n}"
+            }
+          ],
+          "structuredContent": null,
+          "isError": false
+        }
+      }
+    },
+    {
+      "path": "head-curl-final.json",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"ref\": \"refs/heads/fix/contents-wheel-followup-20261124\",\n  \"node_id\": \"REF_kwDOMhQZjdoAL3JlZnMvaGVhZHMvZml4L2NvbnRlbnRzLXdoZWVsLWZvbGxvd3VwLTIwMjYxMTI0\",\n  \"url\": \"https://api.github.com/repos/Proto-UI/Proto-UI/git/refs/heads/fix/contents-wheel-followup-20261124\",\n  \"object\": {\n    \"sha\": \"dca8f4f8f17ff1eba7198ad5aef8a018b3ac9434\",\n    \"type\": \"commit\",\n    \"url\": \"https://api.github.com/repos/Proto-UI/Proto-UI/git/commits/dca8f4f8f17ff1eba7198ad5aef8a018b3ac9434\"\n  }\n}"
+            }
+          ],
+          "structuredContent": null,
+          "isError": false
+        }
+      }
+    },
+    {
+      "path": "request.json",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"ref\":\"fix/contents-wheel-followup-20261124\",\"inputs\":{\"scope\":\"contents-wheel\",\"shader_presentation\":\"false\",\"sprint3_acceptance\":\"false\",\"sprint3_followup\":\"false\"}}"
+            }
+          ],
+          "structuredContent": null,
+          "isError": false
+        }
+      }
+    },
+    {
+      "path": "started.txt",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "content": [
+            {
+              "type": "text",
+              "text": "2026-11-24T13:58:26.172Z"
+            }
+          ],
+          "structuredContent": null,
+          "isError": false
+        }
+      }
+    },
+    {
+      "path": "response-headers.txt",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "content": [
+            {
+              "type": "text",
+              "text": "HTTP/2 204 \r\ndate: Tue, 24 Nov 2026 13:58:31 GMT\r\nx-oauth-scopes: gist, read:org, repo, workflow\r\nx-accepted-oauth-scopes: \r\nx-oauth-client-id: 178c6fc778ccc68e1d6a\r\nx-github-media-type: github.v3; format=json\r\ndeprecation: Tue, 10 Mar 2026 00:00:00 GMT\r\nsunset: Fri, 10 Mar 2028 00:00:00 GMT\r\nlink: <https://docs.github.com/en/rest/about-the-rest-api/api-versions>; rel=\"deprecation\"; type=\"text/html\"\r\nx-github-api-version-selected: 2022-11-28\r\naccess-control-expose-headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning\r\naccess-control-allow-origin: *\r\nstrict-transport-security: max-age=31536000; includeSubdomains; preload\r\nx-frame-options: deny\r\nx-content-type-options: nosniff\r\nx-xss-protection: 0\r\nreferrer-policy: origin-when-cross-origin, strict-origin-when-cross-origin\r\ncontent-security-policy: default-src 'none'\r\nvary: Accept-Encoding, Accept, X-Requested-With\r\nx-github-request-id: 936C:2BB5B6:297AB8:83777E:6B059805\r\nx-github-edge-region: iad\r\nserver: github.com\r\nx-ratelimit-limit: 5000\r\nx-ratelimit-remaining: 4871\r\nx-ratelimit-reset: 1795530083\r\nx-ratelimit-used: 129\r\nx-ratelimit-resource: core\r\n\r"
+            }
+          ],
+          "structuredContent": null,
+          "isError": false
+        }
+      }
+    },
+    {
+      "path": "response-body.txt",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "content": [
+            {
+              "type": "text",
+              "text": "offset 1 is beyond the end of the file (0 lines)"
+            }
+          ],
+          "structuredContent": {
+            "error_code": "INVALID_ARGUMENT"
+          },
+          "isError": true
+        }
+      }
+    },
+    {
+      "path": "curl-dispatch-result.json",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"transport\": \"curl with existing gh credentials in child stdin only\",\n  \"exit\": 0,\n  \"signal\": null,\n  \"http\": \"204\",\n  \"stderr\": \"\",\n  \"completedAt\": \"2026-11-24T13:58:31.481Z\"\n}"
+            }
+          ],
+          "structuredContent": null,
+          "isError": false
+        }
+      }
+    }
+  ]
+}
