@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "58e43642d",
+  "command": "NODE_OPTIONS=--max-old-space-size=768 corepack pnpm@10.32.1 styles:preset:generate",
+  "exitCode": 0,
+  "scope": "All four official generator stages completed. A heap bound changes garbage-collection timing; no source, generator scope, assertion or gate was removed.",
+  "outputs": [
+    {
+      "path": "packages/cli/src/generated/shadcn-style-tokens.ts",
+      "sha256": "ecca6c18728c49baef1f62032c9943e2b861d4faa2230ba8d188d201640c2cbe"
+    },
+    {
+      "path": "packages/cli/src/generated/brutalist-style-tokens.ts",
+      "sha256": "132206860118eb4a5977eb0f112b3846fb6088acba1b9aea4cac932acb0b3e8f"
+    },
+    {
+      "path": "packages/cli/src/generated/brutalist-theme.ts",
+      "sha256": "d0d6f5001e740a5292a0a354160cd68e15e4079ad5c3fc380332a3c51dae295b"
+    },
+    {
+      "path": "packages/cli/src/generated/draft-family-style-tokens.ts",
+      "sha256": "8ba5519f2bd4811f839faaf6ea7693069f63a48477d99f102367254bdc305cbe"
+    }
+  ],
+  "evidence": {
+    "path": "internal/records/evidence/2026-11-24-cli-style-resource-integration/styles-preset-generate-bounded.log.gz",
+    "sha256": "399a22681d854d3ef25a623fb14c80c882c6cb8b2be72dff16fcf60b417e050a",
+    "uncompressedSha256": "e5847105c75aca69dbc4cbc1e7de51a23f208cc662e787dfeb84f1a58d446c37"
+  },
+  "limits": [
+    "This generator success does not turn the earlier exit137 into a pass.",
+    "A final --check and browser confirmation remain separate gates."
+  ]
+}
