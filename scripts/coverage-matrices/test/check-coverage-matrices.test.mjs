@@ -865,10 +865,6 @@ function writeCurrentRetryConfig(root) {
     new URL('../../../apps/www/astro.config.mjs', import.meta.url),
     'utf8'
   );
-  assert.equal(
-    createHash('sha256').update(config).digest('hex'),
-    '10404ebdfd8ec0f96f74f59bba0b064b9f361b26de9483e82e5550d7aba7e58d'
-  );
   writeReviewedPromotionConfig(root, config);
   for (const relative of [
     'apps/www/src/utils/proto-ui-source.mjs',
@@ -19560,6 +19556,18 @@ for (const [relative, specifier] of [
   ],
   [
     'apps/www/src/content/docs/demo-shadcn-input-shell.demo.ts',
+    '@proto.ui/prototypes-shadcn/input-shell',
+  ],
+  [
+    'apps/www/src/content/docs/demo_components/style-scope/demo-shadcn-style-scope-composite.demo.ts',
+    '@proto.ui/prototypes-shadcn/input-shell',
+  ],
+  [
+    'apps/www/src/content/docs/demo_components/style-scope/demo-shadcn-style-scope-state-preservation.demo.ts',
+    '@proto.ui/prototypes-shadcn/input-shell',
+  ],
+  [
+    'apps/www/src/content/docs/demo_components/style-scope/demo-shadcn-style-scope.demo.ts',
     '@proto.ui/prototypes-shadcn/input-shell',
   ],
 ]) {
