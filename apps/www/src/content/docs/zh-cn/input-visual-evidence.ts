@@ -8,6 +8,11 @@ import type { Browser, Locator } from 'playwright-core';
 
 const sha256 = (bytes: string | Buffer) => createHash('sha256').update(bytes).digest('hex');
 
+// The complete tracked and untracked path inventory grows with the repository.
+// Node's default 1 MiB child-process buffer rejects that listing with ENOBUFS
+// once the paths exceed it, so this read states its own bounded limit.
+const MAX_GIT_OUTPUT_BYTES = 64 * 1024 * 1024;
+
 export interface InputSourceSnapshot {
   sourceSha: string;
   sourceGitTree: string;
@@ -35,10 +40,11 @@ export interface InputEvidenceSession {
 // Preserve symlink identity without following it into a dependency tree.
 export function inputEvidenceSource(root = process.cwd()): InputSourceSnapshot {
   const git = (...args: string[]) =>
-    execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
+    execFileSync('git', args, { cwd: root, encoding: 'utf8', maxBuffer: MAX_GIT_OUTPUT_BYTES }).trim();
   const paths = execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], {
     cwd: root,
     encoding: 'utf8',
+    maxBuffer: MAX_GIT_OUTPUT_BYTES,
   }).split('\0').filter(Boolean);
   const files = [...new Set(paths)].sort().map((path) => {
     const absolute = join(root, path);
