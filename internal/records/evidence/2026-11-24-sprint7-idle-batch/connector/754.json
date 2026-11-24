@@ -1,0 +1,135 @@
+{
+  "collectionTimeNote": "Connector calls ran after the recorded 2026-11-23 20:45:30 UTC clock and before the separate native 20:46:24 UTC read; exact per-call clocks were not captured.",
+  "issue": {
+    "id": 5609238266,
+    "url": "https://github.com/Proto-UI/Proto-UI/issues/754",
+    "title": "[experiment][conformance] Measure which Dialog regressions our checks actually catch",
+    "issue_number": 754,
+    "body": "<!-- proto-ui:issue-governance:20261122:754:v1 -->\n\n## 2026-11-22 当前代码核对\n\nAgent: ChatGPT，按当前用户授权核对与治理。审计截止 [`a8bf56087`](https://github.com/Proto-UI/Proto-UI/commit/a8bf56087e5836e3c14c153cafbd796bd98bff37)；各项执行证据保留其实际 SHA。\n\n核对基线：[`2c7eae25357d`](https://github.com/Proto-UI/Proto-UI/commit/2c7eae25357d0c5bae29bd5e92caae3a4ea39730)。\n\n- [x] **公开校准准备已交付**：[需求映射、公开 fixture 与定向负控](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/benchmarks/interaction/README.md)已经存在。其手写 HTML controls 只验证测量管道，尚未成为本 Issue 的 Proto Dialog 实验结果。\n- [ ] 绑定真实 Dialog baseline、原检查集合与独立审过的预期；执行 valid/broken/legal-customization 和真正 held-out 变体，保留首次分歧。\n- [ ] 分开报告漏报、误报、无效 mutation、规则争议、未测环境及已有/新增检查；每个可行动缺口回归既有 owner。公开开发样例不得改名为盲测证据。\n\n主线增量核对截止 [`a8bf56087e58`](https://github.com/Proto-UI/Proto-UI/commit/a8bf56087e5836e3c14c153cafbd796bd98bff37)；本段已执行的测试仍绑定 `2c7eae25357d`，不重标为新 main 运行。\n\n---\n\n## Question\n\nCan a small set of checks distinguish a working Dialog, a plausible but behaviorally broken edit, and a legal customization?\n\nWe already have Dialog criteria and tests. This experiment measures the checks themselves: what they catch, what they miss, and what they reject incorrectly. It is not a proposal for a general UI linter, another component registry, or a new Dialog protocol.\n\n## Why investigate this\n\nA few concrete reports are more useful here than a list of AI design-system products:\n\n- [OpenHands #17480](https://github.com/OpenHands/OpenHands/issues/17480), opened September 16, reports agent-authored styling drift. Its trial was completed by [#17435](https://github.com/OpenHands/OpenHands/pull/17435), merged September 21. The PR also reports many initial false positives from existing tokens written in bracket syntax. This is evidence for scoped feedback, not proof of complete design-system validation.\n- [shadcn-ui/lint #5](https://github.com/shadcn-ui/lint/issues/5), opened September 14 and still open when checked, describes a documented descendant-selector ownership blind spot. Passing configured rules need not mean the intended contract is preserved. This is a reported limitation, not a reproduction performed here.\n- [VS Code #336427](https://github.com/microsoft/vscode/issues/336427), opened September 16 and still open when checked, reports Enter activating the default dialog action after Tab moved focus elsewhere. It suggests checking the action actually invoked, not merely whether the dialog closed. It does not establish an AI cause or a Proto UI defect.\n\nThese are different failure classes. A token rule cannot stand in for a focus or activation check, and a behavioral check cannot certify a styling policy.\n\n## Existing starting point\n\nSource inspection baseline: `3d9ab9f56dbabbf386162145778ea1de546db825` on September 28, 2026.\n\n- [P-BASE-DIALOG-CONTENT](https://github.com/Proto-UI/Proto-UI/blob/3d9ab9f56dbabbf386162145778ea1de546db825/spec/prototypes/P-BASE-DIALOG-CONTENT.yaml) is **draft**. Its criteria cover focus, dismissal, controlled ownership, presence and live naming relationships.\n- [T-BASE-DIALOG-CONTENT-0001](https://github.com/Proto-UI/Proto-UI/blob/3d9ab9f56dbabbf386162145778ea1de546db825/spec/tests/T-BASE-DIALOG-CONTENT-0001.yaml) maps module, Adapter and a bounded native-browser case. Its stored `passing` values are not a fresh run of this experiment.\n- [dialog-overlay.test.ts](https://github.com/Proto-UI/Proto-UI/blob/3d9ab9f56dbabbf386162145778ea1de546db825/packages/adapters/web-component/test/dialog-overlay.test.ts) already exercises wrapped content, Tab looping, naming relations and nested Button/Close composition. Its synthetic events are not a substitute for native browser input.\n\nStart with the existing Web Component Adapter path. A generated Dialog may be added only when a real supported compiler path exists; do not wait for it or claim that Button compilation supplies it. Reuse existing runners before adding infrastructure.\n\n## Proposed experiment\n\n```text\nreviewed criterion + task expectation\n  -> valid control / intentionally broken variant / legal customization\n  -> existing checks\n  -> independent behavioral observation\n  -> caught / missed / false alarm / ineffective mutation / unresolved\n```\n\nFreeze the baseline, applicable criteria and candidate checks before evaluating held-out variants. Keep the expected behavior independent of the implementation and of the Agent making the edit. Review disagreements rather than assuming the current catalog or test suite is infallible; use the [APG Dialog guidance](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/) as an external reference without turning every recommendation into a universal requirement.\n\nCandidate cases, subject to that mapping:\n\n| Criterion in P-BASE-DIALOG-CONTENT | Deliberately broken variant | Paired control |\n| --- | --- | --- |\n| `FOCUS` | Tab escapes the active surface, or close restores the wrong owner for the recorded request reason | Wrapped controls retain the expected focus journey |\n| `CONTROLLED` / `DISMISS` | A close request mutates logical open before the controlling owner accepts it | Owner delays or rejects the request and the dialog remains logically open |\n| `A11Y-RELATIONS` | Removing Title or Description leaves a dangling relationship | Live removal clears the relationship and uses the documented label fallback where applicable |\n| `PRESENCE` | View detaches before the leaving transition completes | Leaving view is retained, then detached at the specified boundary |\n\nMutations must execute in an isolated test fixture or worktree. A compilation failure, an unexercised branch, or a mutation repaired automatically by the runtime is not a successfully detected behavioral regression. Legal controls should include supported content/wrapper variations; do not invent a blanket ban on styling overrides.\n\nRecord the first observable divergence, action identity where relevant, source/criterion references and diagnostic. Report detection and false alarms separately, with actual denominators and excluded/equivalent mutations. Record baseline failures and disputes rather than counting them as wins. Native-input claims need real browser input; screen-reader claims need the named assistive-technology environment, not just ARIA attributes.\n\nOnce the checks are calibrated, a small repair comparison can give an Agent either ordinary failure feedback or criterion-linked diagnostics under the same task/model/budget. Re-run independent checks after repair and retain regressions, failed repairs and cost. No favorable improvement or fixed run-count threshold is required.\n\n## Completion and boundaries\n\n- [ ] A reproducible fixture, criterion-to-case mapping and independently reviewed expected outcomes are available.\n- [ ] Valid controls, broken variants and legal customizations have recorded outcomes; held-out variants challenge the checks rather than only their authors' examples.\n- [ ] Misses, false alarms, ineffective mutations, disputed rules and untested environments are reported separately.\n- [ ] The report distinguishes existing-check coverage from checks added during the experiment; any repair comparison preserves failed and neutral results.\n- [ ] Each actionable gap links to its existing owner or one bounded follow-up. A negative result can complete the experiment.\n\n#505 owns the metadata audit; #734 and #748 own knowledge-access and blind-discovery experiments. Do not expose this case set to a blind discovery run. #732/#749 own compiler comparisons; this issue does not duplicate their parity harness or become their prerequisite. #533 is Harness-specific enforcement. New generic Overlay policies remain with #640. CSS-cascade analysis, a production validator, automatic repair service, release gates and stable conformance claims are outside this experiment.\n\nThe immediate discussion is which existing checks give useful consumer-level feedback, not whether to build an all-purpose validator. Keep protocol failures, host limitations, design-language rules and application requirements distinguishable.\n\n## Agent evidence\n\nAgent's sanitized request paraphrase: investigate supplied opportunity notes against public evidence and the repository, then establish focused issue directions without duplicating existing work.\n\nThis is a source-reviewed experiment proposal. Public reports, the pinned catalog and the linked test source were inspected; no external defect was independently reproduced and no Proto UI test, mutation or repair run was executed. The sequence and case table above describe proposed work, not observed results. Evidence disposition: **partial**. Executed traces, independently reviewed outcomes and actual component captures remain for the experiment; no uploaded visual or passing result is claimed. AI-assisted research and drafting; no private conversation or third-party implementation code is included.\n",
+    "state": "open",
+    "user": {
+      "login": "cyjin-yl",
+      "name": "cyjin-yl",
+      "email": null,
+      "avatar_url": "https://avatars.githubusercontent.com/u/19223209?v=4",
+      "id": 19223209
+    },
+    "assignees": null,
+    "labels": [
+      {
+        "name": "spike",
+        "color": "fef2c0",
+        "description": "Research or feasibility spike"
+      },
+      {
+        "name": "area: spec",
+        "color": "6c180a",
+        "description": "Changes related to the Proto UI specification and knowledge entities."
+      },
+      {
+        "name": "needs evidence",
+        "color": "fbca04",
+        "description": "Collect or strengthen source-grounded executable evidence; work may continue."
+      }
+    ],
+    "milestone": null,
+    "state_reason": "reopened",
+    "comments": 4,
+    "created_at": "2026-09-28T04:17:44Z",
+    "updated_at": "2026-11-21T17:55:23Z",
+    "closed_at": null,
+    "display_url": "https://github.com/Proto-UI/Proto-UI/issues/754",
+    "display_title": "[experiment][conformance] Measure which Dialog regressions our checks actually catch"
+  },
+  "comments": [
+    {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/754#issuecomment-5909766413",
+      "body": "## Suggested extension — measure regressions created by a real maintenance task\n\nThe current mutation/conformance design measures whether existing checks can distinguish valid, broken, and legally customized Dialog variants. That is useful, but one adjacent question should be measured separately rather than inferred from mutation detection:\n\n> When an Agent performs a realistic feature change on an existing primitive, does access to Proto UI criteria/diagnostics reduce the number of *new semantic regressions it introduces*?\n\nA small follow-on can reuse this Issue's calibrated checks after the baseline case set is frozen.\n\n### Proposed paired maintenance task\n\nUse one bounded, realistic Dialog modification whose intended product change is explicit and whose protected semantics remain unchanged. For example, add or alter one supported composition/behavioral feature without expanding the protocol itself.\n\nRun two matched conditions with the same model/version, repository snapshot, task, budget, host, and independent validation oracle:\n\n1. **ordinary maintenance feedback** — source + ordinary task requirements + normal test failures;\n2. **criterion-linked maintenance feedback** — same inputs plus applicable Proto UI criteria / source-mapped diagnostics.\n\nDo not expose the held-out regression cases or finished repair to either condition.\n\n### Additional measurements\n\nRecord, separately from repair success:\n\n- semantic regressions introduced by the initial edit;\n- regression classes (focus, activation, dismissal, controlled ownership, presence, A11y relationships, cleanup, etc. where applicable);\n- first-pass correctness before repair;\n- number of repair cycles and residual regressions;\n- false-positive constraints that block legal customization;\n- whether the criterion-linked condition changes the implementation strategy rather than merely shortening debugging;\n- token/compute/time cost only as secondary measures.\n\nA null result is useful: if calibrated checks catch the same failures but Proto UI knowledge does not reduce regression creation or repair burden, report that distinction explicitly.\n\n### Boundary\n\nThis should remain a follow-on to the current conformance experiment, not a prerequisite for calibrating the checks and not a general Agent benchmark. The key distinction is **\"can checks detect a regression?\"** versus **\"does protocol knowledge make an Agent less likely to create one during maintenance?\"**.",
+      "user": {
+        "login": "guangliang2019",
+        "name": "guangliang2019",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/52768321?v=4",
+        "id": 52768321
+      },
+      "id": 5909766413,
+      "pull_request_review_id": null,
+      "in_reply_to_id": null,
+      "created_at": null,
+      "updated_at": null,
+      "review": null,
+      "side": null,
+      "line": null,
+      "start_line": null,
+      "path": null,
+      "body_html": "<h2 dir=\"auto\">Suggested extension — measure regressions created by a real maintenance task</h2>\n<p dir=\"auto\">The current mutation/conformance design measures whether existing checks can distinguish valid, broken, and legally customized Dialog variants. That is useful, but one adjacent question should be measured separately rather than inferred from mutation detection:</p>\n<blockquote>\n<p dir=\"auto\">When an Agent performs a realistic feature change on an existing primitive, does access to Proto UI criteria/diagnostics reduce the number of <em>new semantic regressions it introduces</em>?</p>\n</blockquote>\n<p dir=\"auto\">A small follow-on can reuse this Issue's calibrated checks after the baseline case set is frozen.</p>\n<h3 dir=\"auto\">Proposed paired maintenance task</h3>\n<p dir=\"auto\">Use one bounded, realistic Dialog modification whose intended product change is explicit and whose protected semantics remain unchanged. For example, add or alter one supported composition/behavioral feature without expanding the protocol itself.</p>\n<p dir=\"auto\">Run two matched conditions with the same model/version, repository snapshot, task, budget, host, and independent validation oracle:</p>\n<ol dir=\"auto\">\n<li><strong>ordinary maintenance feedback</strong> — source + ordinary task requirements + normal test failures;</li>\n<li><strong>criterion-linked maintenance feedback</strong> — same inputs plus applicable Proto UI criteria / source-mapped diagnostics.</li>\n</ol>\n<p dir=\"auto\">Do not expose the held-out regression cases or finished repair to either condition.</p>\n<h3 dir=\"auto\">Additional measurements</h3>\n<p dir=\"auto\">Record, separately from repair success:</p>\n<ul dir=\"auto\">\n<li>semantic regressions introduced by the initial edit;</li>\n<li>regression classes (focus, activation, dismissal, controlled ownership, presence, A11y relationships, cleanup, etc. where applicable);</li>\n<li>first-pass correctness before repair;</li>\n<li>number of repair cycles and residual regressions;</li>\n<li>false-positive constraints that block legal customization;</li>\n<li>whether the criterion-linked condition changes the implementation strategy rather than merely shortening debugging;</li>\n<li>token/compute/time cost only as secondary measures.</li>\n</ul>\n<p dir=\"auto\">A null result is useful: if calibrated checks catch the same failures but Proto UI knowledge does not reduce regression creation or repair burden, report that distinction explicitly.</p>\n<h3 dir=\"auto\">Boundary</h3>\n<p dir=\"auto\">This should remain a follow-on to the current conformance experiment, not a prerequisite for calibrating the checks and not a general Agent benchmark. The key distinction is <strong>\"can checks detect a regression?\"</strong> versus <strong>\"does protocol knowledge make an Agent less likely to create one during maintenance?\"</strong>.</p>"
+    },
+    {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/754#issuecomment-5909881394",
+      "body": "## Benchmark-methodology follow-up — turn maintenance/regression work into a reusable task class\n\nIn addition to the calibrated mutation/check study already proposed here, maintenance should become a first-class benchmark task type shared with #734 rather than an ad hoc follow-up.\n\n### Maintenance task shape\n\nFor a selected component, freeze:\n\n`existing implementation + requested semantic/product change + visibility boundary + hidden independent oracle`\n\nExamples should be realistic changes such as adding searchability, delayed/controlled dismissal, wrapper/content customization, or lifecycle behavior—not only synthetic one-line mutations. The Agent should modify the component under controlled conditions, after which the same independent oracle checks both the requested new behavior and preservation of existing guarantees.\n\n### Paired conditions\n\nWhere supported, compare at least:\n\n1. ordinary implementation context / generic failure feedback;\n2. Proto UI knowledge or criterion-linked context/diagnostics.\n\nKeep task, model, environment, budget, starting implementation and oracle identical. Do not expose the hidden held-out regression inventory to the Agent.\n\n### Model and repetition requirements\n\nRecord exact model/provider snapshot, reasoning mode, tool/harness version, retrieval boundary and run date. Formal cells should be repeated independently where resources allow (a small fixed count such as 3 is enough initially) so the experiment can separate average regression rate from variance.\n\n### Measurements\n\nReport separately:\n\n- requested-change completion;\n- new regressions introduced;\n- regression severity/class;\n- regressions detected by existing checks;\n- regressions detected only by the independent oracle;\n- false alarms against legal customization;\n- repair cycles after diagnostics;\n- final correctness;\n- token/compute/time and evaluator intervention;\n- repeated-run variance.\n\nThis lets #754 answer two different questions without conflating them: **can the checks detect regressions?** and **does Proto UI knowledge/diagnostics cause an Agent to create fewer regressions during real maintenance?**\n\nUse stable benchmark case IDs and versioned oracle changes so future stronger models can rerun the same maintenance tasks longitudinally.",
+      "user": {
+        "login": "guangliang2019",
+        "name": "guangliang2019",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/52768321?v=4",
+        "id": 52768321
+      },
+      "id": 5909881394,
+      "pull_request_review_id": null,
+      "in_reply_to_id": null,
+      "created_at": null,
+      "updated_at": null,
+      "review": null,
+      "side": null,
+      "line": null,
+      "start_line": null,
+      "path": null,
+      "body_html": "<h2 dir=\"auto\">Benchmark-methodology follow-up — turn maintenance/regression work into a reusable task class</h2>\n<p dir=\"auto\">In addition to the calibrated mutation/check study already proposed here, maintenance should become a first-class benchmark task type shared with <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5582685317\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/734\" data-hovercard-type=\"issue\" data-hovercard-url=\"/Proto-UI/Proto-UI/issues/734/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/issues/734\">#734</a> rather than an ad hoc follow-up.</p>\n<h3 dir=\"auto\">Maintenance task shape</h3>\n<p dir=\"auto\">For a selected component, freeze:</p>\n<p dir=\"auto\"><code class=\"notranslate\">existing implementation + requested semantic/product change + visibility boundary + hidden independent oracle</code></p>\n<p dir=\"auto\">Examples should be realistic changes such as adding searchability, delayed/controlled dismissal, wrapper/content customization, or lifecycle behavior—not only synthetic one-line mutations. The Agent should modify the component under controlled conditions, after which the same independent oracle checks both the requested new behavior and preservation of existing guarantees.</p>\n<h3 dir=\"auto\">Paired conditions</h3>\n<p dir=\"auto\">Where supported, compare at least:</p>\n<ol dir=\"auto\">\n<li>ordinary implementation context / generic failure feedback;</li>\n<li>Proto UI knowledge or criterion-linked context/diagnostics.</li>\n</ol>\n<p dir=\"auto\">Keep task, model, environment, budget, starting implementation and oracle identical. Do not expose the hidden held-out regression inventory to the Agent.</p>\n<h3 dir=\"auto\">Model and repetition requirements</h3>\n<p dir=\"auto\">Record exact model/provider snapshot, reasoning mode, tool/harness version, retrieval boundary and run date. Formal cells should be repeated independently where resources allow (a small fixed count such as 3 is enough initially) so the experiment can separate average regression rate from variance.</p>\n<h3 dir=\"auto\">Measurements</h3>\n<p dir=\"auto\">Report separately:</p>\n<ul dir=\"auto\">\n<li>requested-change completion;</li>\n<li>new regressions introduced;</li>\n<li>regression severity/class;</li>\n<li>regressions detected by existing checks;</li>\n<li>regressions detected only by the independent oracle;</li>\n<li>false alarms against legal customization;</li>\n<li>repair cycles after diagnostics;</li>\n<li>final correctness;</li>\n<li>token/compute/time and evaluator intervention;</li>\n<li>repeated-run variance.</li>\n</ul>\n<p dir=\"auto\">This lets <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5609238266\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/754\" data-hovercard-type=\"issue\" data-hovercard-url=\"/Proto-UI/Proto-UI/issues/754/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/issues/754\">#754</a> answer two different questions without conflating them: <strong>can the checks detect regressions?</strong> and <strong>does Proto UI knowledge/diagnostics cause an Agent to create fewer regressions during real maintenance?</strong></p>\n<p dir=\"auto\">Use stable benchmark case IDs and versioned oracle changes so future stronger models can rerun the same maintenance tasks longitudinally.</p>"
+    },
+    {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/754#issuecomment-6684442645",
+      "body": "Deferred to 0.4. Dialog check-quality measurement experiment; the research-experiment track is outside 0.3 scope.",
+      "user": {
+        "login": "cyjin-yl",
+        "name": "cyjin-yl",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19223209?v=4",
+        "id": 19223209
+      },
+      "id": 6684442645,
+      "pull_request_review_id": null,
+      "in_reply_to_id": null,
+      "created_at": null,
+      "updated_at": null,
+      "review": null,
+      "side": null,
+      "line": null,
+      "start_line": null,
+      "path": null,
+      "body_html": "<p dir=\"auto\">Deferred to 0.4. Dialog check-quality measurement experiment; the research-experiment track is outside 0.3 scope.</p>"
+    },
+    {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/754#issuecomment-6684470159",
+      "body": "Determination detail: this measures which Dialog regressions existing checks catch/miss/falsely reject — an experiment on the checks themselves, explicitly not a linter or new Dialog protocol. Research-spike scope; deferred to 0.4.",
+      "user": {
+        "login": "cyjin-yl",
+        "name": "cyjin-yl",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19223209?v=4",
+        "id": 19223209
+      },
+      "id": 6684470159,
+      "pull_request_review_id": null,
+      "in_reply_to_id": null,
+      "created_at": null,
+      "updated_at": null,
+      "review": null,
+      "side": null,
+      "line": null,
+      "start_line": null,
+      "path": null,
+      "body_html": "<p dir=\"auto\">Determination detail: this measures which Dialog regressions existing checks catch/miss/falsely reject — an experiment on the checks themselves, explicitly not a linter or new Dialog protocol. Research-spike scope; deferred to 0.4.</p>"
+    }
+  ],
+  "serializedAt": "2026-11-23T20:47:45.834974+00:00"
+}

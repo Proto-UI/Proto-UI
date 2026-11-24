@@ -1,0 +1,101 @@
+{
+  "collectionTimeNote": "Connector calls ran after the recorded 2026-11-23 20:45:30 UTC clock and before the separate native 20:46:24 UTC read; exact per-call clocks were not captured.",
+  "issue": {
+    "id": 5601378826,
+    "url": "https://github.com/Proto-UI/Proto-UI/issues/746",
+    "title": "[implementation][agent-harness] Compose follow-tail over Scroll end-follow",
+    "issue_number": 746,
+    "body": "<!-- proto-ui:issue-governance:20261122:746:v1 -->\n\n## 当前主线核对 · 2026-11-22\n\nAgent: ChatGPT，按当前用户授权核对与治理。审计截止 [`a8bf56087`](https://github.com/Proto-UI/Proto-UI/commit/a8bf56087e5836e3c14c153cafbd796bd98bff37)；各项执行证据保留其实际 SHA。\n\n核对基线：[`2c7eae253`](https://github.com/Proto-UI/Proto-UI/commit/2c7eae25357d0c5bae29bd5e92caae3a4ea39730)。以下将已交付的源码与尚未完成的验收分开，原始范围和历史记录保留。\n\n- [x] **可复用组件前置已具备**：[Message Scroller](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/packages/prototypes/base/src/message-scroller/message-scroller.proto.ts)复用真实 ScrollArea endFollow 与 Button，公开 following/atEnd/requestStatus/jumpToEnd 等路径；[组合回归](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/packages/prototypes/base/test/message-scroller.test.ts)与[句柄回归](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/packages/prototypes/base/test/message-scroller-capture.test.ts)在主线。\n- [ ] 在 #515 / #533 的真实 Harness React 宿主中完成 transcript append/depart/resume、session/replay 置换、用户滚动优先、键盘/焦点和 disposal/stale 旅程；通用组件不等于此 App 已交付。\n- [ ] 为[harness.transcript.follow-tail 矩阵行](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/internal/coverage-matrices/prototype-coverage-matrix.json)和 #513 子索引补齐已接受消费者、真实截图、source/lease 观察及适用审查记录；0.4 #1323 范围保留。\n\n---\n\nAgent: dot\n\n### Current Harness direction — 2026-10-27\n\nApplication-facing planning/source baseline: Proto UI main `2ecb2a0248af55384f048cacb3256c1f4a4deb0a`. This is not a passing-test or new implementation receipt. New receipts must bind their actual current main base and candidate head separately.\n\nThe current user-directed scope supersedes incompatible historical Brutalist-only presentation, mandatory persistent three-column workspace, mandatory always-expanded activity and mandatory parallel Agent lanes. Use the latest **repository-owned Proto shadcn at the pinned source**; no upstream shadcn/Radix UI stack is imported. Keep React19 as the current host unless separately changed. Historical decisions, contributions, screenshots, failures and completed slices remain below at their original source bindings.\n\nTarget a reusable Harness reference consumer: one continuous subject/mainline; legitimate public activity is nonblocking; explicit waits distinguish input/authorization/external completion. Tool progress/ack/result receipts/failure/authorization, recovery/node/attempt identity and time are App facts, never inferred success. Artifacts open an on-demand desktop nonmodal/mobile modal Inspector. Plugin capability presentation does not move execution/security/transport into Proto. Shenko is a downstream validation application, not the sole domain model. Low-noise Claude/Linear/Apple-HIG references are design aims, not conformance claims.\n\nCurrent shadcn manifest0.3.0-alpha.1 declares input/label/collapsible/accordion/field/card/drawer/popover/tree/message-scroller/resizable/virtual-list/style-scope/input-shell exports. Old proposals alone do not establish missing current implementation; inspect authored source, generated facade, built/installed artifact and actual consumer separately. Private Message requires Header(1)+Content(1); low-noise presentation must preserve that anatomy or coordinate a compatible owner delta.\n\n#### This item: Follow-tail in the actual continuous mainline\n\nConsume completed#519/#623 for thought/tool/receipt/wait updates; paused reader must never be pulled away.\n\n| Relationship | Current bounded meaning |\n| --- | --- |\n| Hard prerequisites | The #515 foundation, #533 consumer wall and completed #519/#623 end-follow; integrate deterministic thought/tool/receipt/wait fixtures without waiting for all real services. |\n| Collaboration / later consumption (not hard gates) | Consumes eventual #518/#524/#525 updates through their shared fixtures/events; final #515 acceptance consumes follow-tail. No #515-final → #746 cycle. |\n| Retained exclusions | do not duplicate anchor/windowing owners. |\n\nNew acceptance to verify (not completed): Append/leave/resume/replay/user-scroll priority/session epochs; React consumer evidence, other hosts only for reusable extraction.\n\nExisting implementation owners and accepted generic contracts remain. Empty assignees/expired leases do not transfer ownership; Project custom owner fields are unknown. This scope update does not claim implementation, new tests, admission, lifecycle promotion or completion, and does not replace actual owner coordination.\n\nAI assistance: OpenAI Dots\n<!-- proto-harness-retarget-2ecb-746-20261027 -->\n\n<details>\n<summary>Historical scope and evidence — retained verbatim; superseded presentation is identified above</summary>\n\nParent: #513. Downstream of the completed generic Scroll end-follow proposal/implementation in [#519](https://github.com/Proto-UI/Proto-UI/issues/519) and [PR #623](https://github.com/Proto-UI/Proto-UI/pull/623). This is **not** a claim that #519 was closed prematurely; it completed the portable Scroll owner. The Agent Harness follow-tail consumer is still absent.\n\n## Goal\n\nAfter the fixed-layout Harness foundation #515 is usable, compose the M2 transcript follow-tail control through `C-SCROLL-END-FOLLOW-0001` / `M-SCROLL-0001` / `HC-SCROLL-SURFACE-0001` and an admitted Button for an explicit Jump to latest action. App code owns transcript records and unread business state, while Scroll owns the `atEnd`, following/paused lease and `to-end` result. Do not create a second App-owned geometry, wheel/input or scrollTop state machine.\n\n## Exact boundary\n\n- Retain the draft lifecycle and host/profile limitations of the Scroll end-follow entities; this Issue does not promote them or claim native/non-Web parity.\n- The composition opts in to `while-at-end`, renders a named Jump control, and forwards its semantic action to the existing request; it does not infer follow state from raw DOM geometry.\n- Append while following, deliberate departure, append while paused, natural arrival and explicit resume must be distinct. Session replacement, stale layout work and disposal must not move the new transcript or focus.\n- #520 owns away-from-end visual-anchor preservation; #521 owns windowing. Neither is implemented or silently absorbed here. #533 owns the Harness consumer wall.\n- No Messenger/Agent unread semantics enter the generic Scroll Module; no third-party follow-tail hook owns interaction state.\n\n## Acceptance and evidence\n\n- [ ] A bounded Harness composition consumes the real public/private Proto UI Scroll and Button paths after #515 establishes the app host; no raw Adapter or DOM escape outside a reviewed integration boundary.\n- [ ] Deterministic transition tests distinguish following, paused and resumed states, replacement/disposal and stale callback effects, with the existing end-follow `T-SCROLL-END-FOLLOW-0001` as authority.\n- [ ] A real React production-host transcript journey covers append/depart/resume, keyboard access and focus; reusable claims require separate Web Component/Vue evidence. Retain actual component captures and source-bound state/lease observations.\n- [ ] #514's single Harness matrix row `harness.transcript.follow-tail` and #513 child index link the accepted implementation/evidence; exact-head CI, DCO and independent review precede merge.\n\n## Agent evidence\n\nAgent's sanitized paraphrase of the maintainer direction: route unfinished downstream work from old closed Issues into bounded, labeled carriers without undoing accepted generic work. Source: public #519/#623 and current #513/#514 matrix. As of 2026-09-27, #519 is closed after #623 merged, while the matrix still calls end-follow uncataloged and its Harness control is absent. This is a downstream composition plan, not a reproduced UI defect or a claim of a running Harness. Evidence is partial until #515, actual implementation, browser observations and uploaded captures are available; those are Agent-owned next actions.\n\n</details>\n",
+    "state": "open",
+    "user": {
+      "login": "cyjin-yl",
+      "name": "cyjin-yl",
+      "email": null,
+      "avatar_url": "https://avatars.githubusercontent.com/u/19223209?v=4",
+      "id": 19223209
+    },
+    "assignees": null,
+    "labels": [
+      {
+        "name": "enhancement",
+        "color": "a2eeef",
+        "description": "New feature or request"
+      },
+      {
+        "name": "F5 - Large",
+        "color": "f9d0c4",
+        "description": "Noticeable effort. May involve non-trivial refactoring or multiple iterations. Estimate 1-2 weeks."
+      },
+      {
+        "name": "area: prototypes",
+        "color": "c5def5",
+        "description": "Changes related to component prototypes and prototype libraries."
+      },
+      {
+        "name": "area: adapters",
+        "color": "28d9c8",
+        "description": "Changes related to adapters and host integrations."
+      },
+      {
+        "name": "advanced contribution",
+        "color": "5319e7",
+        "description": "Agent-led bounded slices requiring Proto UI domain evidence and independent review."
+      }
+    ],
+    "milestone": null,
+    "state_reason": "reopened",
+    "comments": 2,
+    "created_at": "2026-09-27T09:05:49Z",
+    "updated_at": "2026-11-21T17:56:45Z",
+    "closed_at": null,
+    "display_url": "https://github.com/Proto-UI/Proto-UI/issues/746",
+    "display_title": "[implementation][agent-harness] Compose follow-tail over Scroll end-follow"
+  },
+  "comments": [
+    {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/746#issuecomment-6684449419",
+      "body": "Deferred to 0.4. Harness follow-tail composition is a large application-facing tracker outside the 0.3 scope (Base/Shadcn/Brutalist/Lucide prototypes, www fixes, CLI fixes, bounded compiler atomic-lowering). Its prerequisite chain and retained evidence remain recorded in the issue body for 0.4 planning.",
+      "user": {
+        "login": "cyjin-yl",
+        "name": "cyjin-yl",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19223209?v=4",
+        "id": 19223209
+      },
+      "id": 6684449419,
+      "pull_request_review_id": null,
+      "in_reply_to_id": null,
+      "created_at": null,
+      "updated_at": null,
+      "review": null,
+      "side": null,
+      "line": null,
+      "start_line": null,
+      "path": null,
+      "body_html": "<p dir=\"auto\">Deferred to 0.4. Harness follow-tail composition is a large application-facing tracker outside the 0.3 scope (Base/Shadcn/Brutalist/Lucide prototypes, www fixes, CLI fixes, bounded compiler atomic-lowering). Its prerequisite chain and retained evidence remain recorded in the issue body for 0.4 planning.</p>"
+    },
+    {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/746#issuecomment-6684475210",
+      "body": "Determination detail: verified at main `2ed17a80` — generic Scroll end-follow exists in `packages/modules/scroll` (with end-follow tests), but the follow-tail composition over it in the continuous-mainline Harness consumer does not; the issue's own table lists #515 foundation, #533 consumer wall and #519/#623 consumption as hard prerequisites. This is a large app-facing composition tracker, not a bounded 0.3 fix; deferred to 0.4.",
+      "user": {
+        "login": "cyjin-yl",
+        "name": "cyjin-yl",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19223209?v=4",
+        "id": 19223209
+      },
+      "id": 6684475210,
+      "pull_request_review_id": null,
+      "in_reply_to_id": null,
+      "created_at": null,
+      "updated_at": null,
+      "review": null,
+      "side": null,
+      "line": null,
+      "start_line": null,
+      "path": null,
+      "body_html": "<p dir=\"auto\">Determination detail: verified at main <code class=\"notranslate\">2ed17a80</code> — generic Scroll end-follow exists in <code class=\"notranslate\">packages/modules/scroll</code> (with end-follow tests), but the follow-tail composition over it in the continuous-mainline Harness consumer does not; the issue's own table lists <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5245359290\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/515\" data-hovercard-type=\"issue\" data-hovercard-url=\"/Proto-UI/Proto-UI/issues/515/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/issues/515\">#515</a> foundation, <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5245468218\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/533\" data-hovercard-type=\"issue\" data-hovercard-url=\"/Proto-UI/Proto-UI/issues/533/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/issues/533\">#533</a> consumer wall and <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5245381818\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/519\" data-hovercard-type=\"issue\" data-hovercard-url=\"/Proto-UI/Proto-UI/issues/519/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/issues/519\">#519</a>/<a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5353787973\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/623\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/Proto-UI/Proto-UI/pull/623/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/pull/623\">#623</a> consumption as hard prerequisites. This is a large app-facing composition tracker, not a bounded 0.3 fix; deferred to 0.4.</p>"
+    }
+  ],
+  "serializedAt": "2026-11-23T20:47:45.835523+00:00"
+}

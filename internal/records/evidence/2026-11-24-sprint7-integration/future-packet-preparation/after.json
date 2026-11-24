@@ -1,0 +1,68 @@
+{
+  "kind": "future-packet-preparation-control",
+  "sourceAfterSha256": "6f67891db6c7d3e906fd112a5c75a41d2ee215bed704de0ca1e4c73d9baf930e",
+  "argv": [
+    "node",
+    "/workspace/scratch/0d7d81e85daf/proto-ui-s7/scripts/analysis/knowledge-value-study/prepare.mjs",
+    "/workspace/scratch/0d7d81e85daf/s7-future-packets-corrected-01",
+    "/workspace/scratch/0d7d81e85daf/s7-tabs-calibration/package-lock.json"
+  ],
+  "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+  "startedAt": "2026-11-23T21:24:40.579825+00:00",
+  "participantRun": false,
+  "finishedAt": "2026-11-23T21:24:40.684590+00:00",
+  "exitCode": 0,
+  "stdout": "{\"packets\":9,\"root\":\"/workspace/scratch/0d7d81e85daf/s7-future-packets-corrected-01\",\"taskSha256\":\"4aee6df56c7ee6a2e998e867ecbf1b507e9f4f8989c986415415fed8fe9fa155\",\"lockSha256\":\"ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66\"}\n",
+  "stderr": "",
+  "verifiedPackets": [
+    {
+      "id": "library-1",
+      "filesVerified": 8,
+      "knowledgeIncluded": false
+    },
+    {
+      "id": "unassisted-1",
+      "filesVerified": 8,
+      "knowledgeIncluded": false
+    },
+    {
+      "id": "knowledge-1",
+      "filesVerified": 9,
+      "knowledgeIncluded": true
+    },
+    {
+      "id": "unassisted-2",
+      "filesVerified": 8,
+      "knowledgeIncluded": false
+    },
+    {
+      "id": "knowledge-2",
+      "filesVerified": 9,
+      "knowledgeIncluded": true
+    },
+    {
+      "id": "library-2",
+      "filesVerified": 8,
+      "knowledgeIncluded": false
+    },
+    {
+      "id": "knowledge-3",
+      "filesVerified": 9,
+      "knowledgeIncluded": true
+    },
+    {
+      "id": "library-3",
+      "filesVerified": 8,
+      "knowledgeIncluded": false
+    },
+    {
+      "id": "unassisted-3",
+      "filesVerified": 8,
+      "knowledgeIncluded": false
+    }
+  ],
+  "historicalExperimentChanged": false,
+  "historicalKnowledgeSha256": "b45c258a5f6407aa8943d4dde6bec100a2feca704b68ce334a074fa70461cc16",
+  "maintainedKnowledgeSha256": "8c22907544c0ee34d6523fbc1a45f772fd538f01ef4e6f7b0505fdb7e072814f",
+  "assertionChange": "Bind only future task preparation to corrected criterion anchor. Historical packet bytes and observed results remain unchanged."
+}

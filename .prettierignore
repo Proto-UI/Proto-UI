@@ -127,3 +127,18 @@ internal/records/evidence/2026-11-22-sprint7-history-continuation/
 internal/records/evidence/2026-11-22-sprint7-history-source-binding/
 internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/
 internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/
+
+# Exact Sprint 7 experiment records, frozen inputs and independently reviewed
+# evidence are hash-bound; maintained analysis scripts remain formatted.
+internal/records/2026-11-24-button-projection-comparison.md
+internal/records/2026-11-24-generated-button-consumption.md
+internal/records/2026-11-24-sprint7-dcbot-production-readback.md
+internal/records/2026-11-24-sprint7-idle-batch-review.md
+internal/records/2026-11-24-sprint7-knowledge-comparison.md
+internal/records/2026-11-24-sprint7-zero-marginal-cost-study.md
+internal/records/evidence/2026-11-24-button-projection-study/
+internal/records/evidence/2026-11-24-generated-button-consumption/
+internal/records/evidence/2026-11-24-knowledge-value-study/
+internal/records/evidence/2026-11-24-sprint7-dcbot/
+internal/records/evidence/2026-11-24-sprint7-idle-batch/
+internal/records/evidence/2026-11-24-sprint7-integration/

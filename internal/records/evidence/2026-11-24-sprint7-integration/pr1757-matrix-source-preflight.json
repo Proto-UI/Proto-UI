@@ -1,0 +1,30 @@
+{
+  "head": "49d8102da5421cade92de85afec6aa68d46ec85c",
+  "trackedStatus": "",
+  "untrackedRelevant": "apps/www/node_modules",
+  "node": "v24.22.3",
+  "dependencyLink": {
+    "path": "/tank/shared/projects/proto-ui-agent/s7-complete-20261124-0d7d/apps/www/node_modules",
+    "isSymlink": true,
+    "target": "/home/ezra/proto-ui-sprint1-postmerge-20261124-56f6684/apps/www/node_modules",
+    "comparisons": {
+      "pnpm-lock.yaml": {
+        "candidateSha256": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8",
+        "providerSha256": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8",
+        "same": true
+      },
+      "package.json": {
+        "candidateSha256": "d026b1c052fd938af98c09c06436bc2efdc60da34c87fda0bfd358735b47332b",
+        "providerSha256": "d026b1c052fd938af98c09c06436bc2efdc60da34c87fda0bfd358735b47332b",
+        "same": true
+      },
+      "apps/www/package.json": {
+        "candidateSha256": "b9098c9bdfe94c513c7520ace0c63c1137b19f3b6284c1f06a157afda51b6db6",
+        "providerSha256": "b9098c9bdfe94c513c7520ace0c63c1137b19f3b6284c1f06a157afda51b6db6",
+        "same": true
+      }
+    }
+  },
+  "unknownUntrackedRelevant": [],
+  "knownDependencyLinkVerified": true
+}
