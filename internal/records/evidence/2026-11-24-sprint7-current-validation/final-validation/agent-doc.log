@@ -1,0 +1,5 @@
+
+> proto-ui@ check:agent-doc /var/tmp/proto-ui-s7-456f
+> tsx scripts/spec/generate-agent-project-understanding.mjs --check
+
+Agent project understanding is renderable; local projection is absent as expected: internal/agent/PROJECT-UNDERSTANDING.zh-CN.md

@@ -1,0 +1,23 @@
+{
+  "root": "/var/tmp/proto-ui-s7-delivery-456f",
+  "head": "422a02294325556d986fcc002ac60187f535af21",
+  "out": "/var/tmp/proto-ui-s7-transfer-456f/current-main-delivery/preflight",
+  "tmp": "/var/tmp/pui456f-s7d",
+  "nodeOptions": "--max-old-space-size=1536",
+  "cpuAffinity": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "jobs": [
+    {
+      "name": "prototype-coverage",
+      "command": [
+        "node",
+        "scripts/coverage-matrices/prototype-coverage.mjs"
+      ],
+      "timeout": 300
+    }
+  ]
+}

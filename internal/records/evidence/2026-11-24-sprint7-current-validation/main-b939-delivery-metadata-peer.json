@@ -1,0 +1,843 @@
+{
+  "schema": "proto-ui.sprint7-b939-terminal-metadata-peer.v1",
+  "reviewer": "/root/s7_acceptance",
+  "reviewKind": "Independent exact supplied-text hashes, source/terminal distinctions and count arithmetic; no execution, tree checkout or full-log reread.",
+  "transfer": {
+    "path": "main-b939-delivery.actual.json",
+    "bytes": 103193,
+    "sha256": "ab5a08755249309f66f936f9689e32e31caf9b98ac13b2a171b6d9c11d7fa102"
+  },
+  "source": {
+    "head": "b0fbb3d8d294da6b5568b0f88451cc0df1e75788",
+    "tree": "c6eca232384edc7a9e7bb2915a9047ecbb6d7f38",
+    "status": ""
+  },
+  "fullTextFilesChecked": [
+    {
+      "path": "bounded-resolution.actual.json",
+      "bytes": 20307,
+      "sha256": "56bc3d9cd9763fd8a52fbd8eea06b7aed9f730645fb1dfce8bbcc05f585e0aba"
+    },
+    {
+      "path": "candidate-refresh/agent-operations/agent-operations.terminal.json",
+      "bytes": 516,
+      "sha256": "5c27587e55f89e6d49209f497ba23f06a1962bdee86b24e5036f742c4d2f2010"
+    },
+    {
+      "path": "candidate-refresh/agent-operations/current-job.json",
+      "bytes": 190,
+      "sha256": "7b408515493ff2940fb2364109d457e44d39c35889795abb5a9326b31ac43d2d"
+    },
+    {
+      "path": "candidate-refresh/agent-operations/terminal.json",
+      "bytes": 655,
+      "sha256": "d3819d2c5dd9e4e6a94a7bee425c8e82eb67fabe933330dee7876f8ea2ebe609"
+    },
+    {
+      "path": "candidate-refresh/agent-operations.config.json",
+      "bytes": 547,
+      "sha256": "386a160713dd2dcdfc8df52a2e2535c459fc357d8c2961dd7f6a2387a86078ef"
+    },
+    {
+      "path": "candidate-refresh/commit-terminal.json",
+      "bytes": 295,
+      "sha256": "e901093e0ffd85232cdd0e3e336f1e052ae5c9851442d8cdb56fc3bdfec73b9c"
+    },
+    {
+      "path": "candidate-refresh/coverage-matrices/coverage-matrices.terminal.json",
+      "bytes": 517,
+      "sha256": "ba19d0f76fc816c882eb6e62bb5e1e7f7f9d819b8aa41717da1ba22f6437f16e"
+    },
+    {
+      "path": "candidate-refresh/coverage-matrices/current-job.json",
+      "bytes": 192,
+      "sha256": "fb7dd0160a2673e415f87d546d046130fa31b7f42303d0c8133e489fb7478aec"
+    },
+    {
+      "path": "candidate-refresh/coverage-matrices/terminal.json",
+      "bytes": 657,
+      "sha256": "e74514b34afb563f181c0eb3cc006f783de170cf1b71f5acbcc2f78df880ab60"
+    },
+    {
+      "path": "candidate-refresh/coverage-matrices.config.json",
+      "bytes": 549,
+      "sha256": "087552114c3bcea53e01eabf4bebbb543601bb3b1cd19e297f34b5b97ff9c21b"
+    },
+    {
+      "path": "candidate-refresh/fast-gates/agent-doc.terminal.json",
+      "bytes": 501,
+      "sha256": "9378175051cff1f16560eb3d74dbaefdd4faa466fe7977ef0c0166944c0d0419"
+    },
+    {
+      "path": "candidate-refresh/fast-gates/current-job.json",
+      "bytes": 175,
+      "sha256": "e60a5fb316c7964997a63fdf52e798d2add6a078373c1605552089907628b494"
+    },
+    {
+      "path": "candidate-refresh/fast-gates/prototype-coverage.terminal.json",
+      "bytes": 519,
+      "sha256": "42be111813792367d730c228872377a37e8d6fd15cd9a4e7255f5a96370c8f1c"
+    },
+    {
+      "path": "candidate-refresh/fast-gates/public-docs.terminal.json",
+      "bytes": 505,
+      "sha256": "04b56f8bee2d3ad1de4dc6f5525c4f3964adc7aa8901527369d3f5aae125d5d2"
+    },
+    {
+      "path": "candidate-refresh/fast-gates/terminal.json",
+      "bytes": 1854,
+      "sha256": "ad5b3881732968ca9cc4116071f60fe725cf75fb55b75198458d294e9b1923b5"
+    },
+    {
+      "path": "candidate-refresh/fast-gates.config.json",
+      "bytes": 851,
+      "sha256": "bee58ee2b25ea8b7a019511f00b77969beb9144b0e27fa1b3e11d82cbe0a9d34"
+    },
+    {
+      "path": "candidate-refresh/launched.json",
+      "bytes": 641,
+      "sha256": "e3e6ac5acebafd16bae5c8cb533bf80024f4759a6eed0a36079ffb7feb7b7321"
+    },
+    {
+      "path": "candidate-refresh/producer-terminal.json",
+      "bytes": 479,
+      "sha256": "e153d944b33e63fd28883a23ccbdf764f3a3bf3213b8c738ba48b6030752592c"
+    },
+    {
+      "path": "candidate-refresh/semantic-audit.json",
+      "bytes": 2800,
+      "sha256": "178627fd7a54519364ccffcdb5dcabd72de53181fe7dfcb5cdd00039d6d16bde"
+    },
+    {
+      "path": "exact-source-repair/commits.json",
+      "bytes": 1358,
+      "sha256": "0ff13b4df794c3f9ba8f8ffe79b662ff3c946673a7c2cd373f29fc1798feace7"
+    },
+    {
+      "path": "exact-source-repair/driver-terminal.json",
+      "bytes": 1500,
+      "sha256": "6ee1637cd37cccf693a17fe619175f9fa93465b3693da197f50210bf888ad924"
+    },
+    {
+      "path": "exact-source-repair/validation/bounded-original-admission-controls.terminal.json",
+      "bytes": 848,
+      "sha256": "c21eaff4331be0f4af2a22fddcf541db29c7a639c30a64a7a6489030d39708c1"
+    },
+    {
+      "path": "exact-source-repair/validation/current-job.json",
+      "bytes": 208,
+      "sha256": "16106fff82ec6036af41775eccecea1a3b63a59c66d6cfd88d83210f450c59a4"
+    },
+    {
+      "path": "exact-source-repair/validation/original-source-coverage.terminal.json",
+      "bytes": 528,
+      "sha256": "577ad906e6795c998be453070fe73a34737a9cd83db2420ac42adf912e0654e2"
+    },
+    {
+      "path": "exact-source-repair/validation/terminal.json",
+      "bytes": 1612,
+      "sha256": "ca4a455a19152c92464702a26034d85ef2e6a96fcd0a75b67b2f8c4aac2ff746"
+    },
+    {
+      "path": "exact-source-repair/validation.config.json",
+      "bytes": 1048,
+      "sha256": "2998605b1423205ec51d58cc78f8ddb4156ecc26f9bd1c0aa62d9d884c801ee3"
+    },
+    {
+      "path": "finf-fixture-repair/commit-terminal.json",
+      "bytes": 433,
+      "sha256": "857bcfde1dbb0d12948bb0c380032cead90c92d2e68b103940767c5ae45c3462"
+    },
+    {
+      "path": "finf-fixture-repair/gates/coverage-matrices-full.terminal.json",
+      "bytes": 522,
+      "sha256": "24d8e78bd60b06bd90ee990cefb7935f5bbb33aaf58c2b0c5acb1769d1ab07ff"
+    },
+    {
+      "path": "finf-fixture-repair/gates/current-job.json",
+      "bytes": 197,
+      "sha256": "20fae536c12a51076876f0e8e71eea9f6285d2f2d7970f7174b84427cd98992a"
+    },
+    {
+      "path": "finf-fixture-repair/gates/finf-optical-closure-original-four.terminal.json",
+      "bytes": 622,
+      "sha256": "e3f8c6d6198d53f63b650f6205570f13883f33ef72ff9f157292f10ce9745d87"
+    },
+    {
+      "path": "finf-fixture-repair/gates/terminal.json",
+      "bytes": 1384,
+      "sha256": "c59d9a6265aee0f3c444c9353eb23fbe675ed19ffee88c655cad3afaef09c5f0"
+    },
+    {
+      "path": "finf-fixture-repair/gates.config.json",
+      "bytes": 840,
+      "sha256": "a85bd509b533555046024924b7cdd1260cdc8ad04af809ea63c82c4766120b60"
+    },
+    {
+      "path": "finf-fixture-repair/launched.json",
+      "bytes": 177,
+      "sha256": "6d8a44674e4754241dc5a3ada6371c34d73e0086b4d77831763a15c22e82dd97"
+    },
+    {
+      "path": "first-checkers/current-job.json",
+      "bytes": 197,
+      "sha256": "4012dd4b3fe3635896f5cd844f80745f0fed1824058066e0345ea96eca516bbc"
+    },
+    {
+      "path": "first-checkers/prototype-coverage.terminal.json",
+      "bytes": 515,
+      "sha256": "c94d70a50218f1a73a8cdb06ed4f202d62cb3ff19c69138bcecae60a67db4b17"
+    },
+    {
+      "path": "first-checkers/source-coverage.terminal.json",
+      "bytes": 520,
+      "sha256": "e88114cafd54dd07cb6d9acfee87f35ea390d42402b74722aba145981f795f0c"
+    },
+    {
+      "path": "first-checkers/terminal.json",
+      "bytes": 1264,
+      "sha256": "bcf4d6eae9233afbb01afc3de806ab9cb214dfc728cd963af2bcb41afc02fd90"
+    },
+    {
+      "path": "first-checkers.config.json",
+      "bytes": 683,
+      "sha256": "9dfe1bdd801b118e6214929391ec6f764140fe3596f05e4e4b09eda53f5e23be"
+    },
+    {
+      "path": "merge-source-binding.json",
+      "bytes": 1235,
+      "sha256": "f0d6432caf1730ce9a2c8174e5675c96c62fae6cb875c1e2461b9692a09e390a"
+    },
+    {
+      "path": "merge-terminal.json",
+      "bytes": 368,
+      "sha256": "8921ae8087ae7b89f15ba3e91d3db9b87f85b8c1d361af009baaf8166b5a472b"
+    },
+    {
+      "path": "resolved-scope.actual.json",
+      "bytes": 853,
+      "sha256": "66db8d300f380a028182c74ceb9c8b5ac9df03240aedc42b52ffe4e3fe915357"
+    },
+    {
+      "path": "source-checker-continued/current-job.json",
+      "bytes": 199,
+      "sha256": "1d57c4c9ba43f93032d1f1a8c0c76abcab93951d2d70e9368000fffc315d1982"
+    },
+    {
+      "path": "source-checker-continued/source-coverage.terminal.json",
+      "bytes": 519,
+      "sha256": "8aac1cbfb763ad98cee42a67766a8a65b01695dc014eef5d07bf225efd1eab94"
+    },
+    {
+      "path": "source-checker-continued/terminal.json",
+      "bytes": 655,
+      "sha256": "340b35f37cf24dc4cb6a73254489c3a8a6933c27edf352b67ca7d637745e515d"
+    },
+    {
+      "path": "source-checker-continued.config.json",
+      "bytes": 520,
+      "sha256": "3d9fa0317244e6c66c8bc9fe44029f781f06588348f034b1faa69c79aa92c56c"
+    }
+  ],
+  "logExcerptChecks": [
+    {
+      "path": "candidate-refresh/agent-operations/agent-operations.log",
+      "bytes": 136706,
+      "sha256": "5c3a227f3c22438644fa9e8571bbb1615866ce44e266239c7aafe9e115c241e9",
+      "providedExcerptBytes": 6640,
+      "excerptIsFullOriginal": false,
+      "counts": {
+        "tests": 1549,
+        "pass": 1549,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      }
+    },
+    {
+      "path": "candidate-refresh/agent-operations.driver.log",
+      "bytes": 452,
+      "sha256": "dcc7c348525d86730a163359cd2e48215e7cc406052a644a0973ae7136973da6",
+      "providedExcerptBytes": 452,
+      "excerptIsFullOriginal": true,
+      "counts": {}
+    },
+    {
+      "path": "candidate-refresh/coverage-matrices/coverage-matrices.log",
+      "bytes": 535545,
+      "sha256": "d4d35a71ce344fddfd2b2b36ff1f7418f18700b3bf80b651aa0d7512d7ad3096",
+      "providedExcerptBytes": 6646,
+      "excerptIsFullOriginal": false,
+      "counts": {
+        "tests": 4872,
+        "pass": 4870,
+        "fail": 1,
+        "cancelled": 0,
+        "skipped": 1,
+        "todo": 0
+      }
+    },
+    {
+      "path": "candidate-refresh/coverage-matrices.driver.log",
+      "bytes": 453,
+      "sha256": "5c3ae33a58c28591f73dfe41a73be4503d706b073c7c2e3f98f75ce123a6f039",
+      "providedExcerptBytes": 453,
+      "excerptIsFullOriginal": true,
+      "counts": {}
+    },
+    {
+      "path": "candidate-refresh/producer.log",
+      "bytes": 113,
+      "sha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca",
+      "providedExcerptBytes": 113,
+      "excerptIsFullOriginal": true,
+      "counts": {}
+    },
+    {
+      "path": "finf-fixture-repair/gates/coverage-matrices-full.log",
+      "bytes": 534144,
+      "sha256": "54a4b38b5b2addbb037ca32fa4831058030dba9f4ff040aee3a6fdef6625b299",
+      "providedExcerptBytes": 6670,
+      "excerptIsFullOriginal": false,
+      "counts": {
+        "tests": 4872,
+        "pass": 4871,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 1,
+        "todo": 0
+      }
+    }
+  ],
+  "rawManifest": {
+    "entries": 91,
+    "sumBytes": 1745749,
+    "uniquePaths": true,
+    "unsafePaths": [],
+    "fullRawFilesRead": false
+  },
+  "sourceBindings": {
+    "merge": {
+      "head": "39b21268f66bd4d16d95aecd1de14c475fc9a29c",
+      "tree": "4d431346c7477f08ed9e288ee80b5af8c39b6779",
+      "parents": [
+        "b939afe35d30a1a436766d80beea7093a46e4fb2",
+        "422a02294325556d986fcc002ac60187f535af21"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 4017,
+      "reviewedTree": "4d431346c7477f08ed9e288ee80b5af8c39b6779",
+      "hookChangedPaths": [],
+      "status": ""
+    },
+    "candidateRefresh": {
+      "head": "42a01a0a68e668db75bfe6cdcf495bc9b446ca84",
+      "tree": "d008011559d36fd8d0cd6ae045c8b2dc4a79cecf",
+      "exitCode": 0,
+      "elapsedMs": 1324,
+      "reviewedTree": "d008011559d36fd8d0cd6ae045c8b2dc4a79cecf",
+      "hookChangedPaths": [],
+      "matrixSemanticsUnchangedByHook": true,
+      "status": ""
+    },
+    "finfFollowup": {
+      "before": "42a01a0a68e668db75bfe6cdcf495bc9b446ca84",
+      "exitCode": 0,
+      "elapsedMs": 2577,
+      "head": "b0fbb3d8d294da6b5568b0f88451cc0df1e75788",
+      "tree": "c6eca232384edc7a9e7bb2915a9047ecbb6d7f38",
+      "indexBefore": "c6eca232384edc7a9e7bb2915a9047ecbb6d7f38",
+      "indexAfter": "c6eca232384edc7a9e7bb2915a9047ecbb6d7f38",
+      "statusAfter": "",
+      "sourceSha256": "f360834e99da2c6d78ea3803ceaf070b4a8d5ffaec4594d6a61d44bac3191101"
+    }
+  },
+  "selectedOriginalTerminals": {
+    "candidate-refresh/fast-gates/terminal.json": {
+      "jobs": [
+        {
+          "head": "42a01a0a68e668db75bfe6cdcf495bc9b446ca84",
+          "name": "prototype-coverage",
+          "command": [
+            "node",
+            "scripts/coverage-matrices/prototype-coverage.mjs"
+          ],
+          "startedAt": "2026-11-24T07:20:31.362307+00:00",
+          "exitCode": 0,
+          "timedOut": false,
+          "outerTimeoutSeconds": 180,
+          "elapsedMs": 2743,
+          "headAfter": "42a01a0a68e668db75bfe6cdcf495bc9b446ca84",
+          "statusBefore": "",
+          "statusAfter": "",
+          "nodeOptions": "--max-old-space-size=2048",
+          "cpuAffinity": [
+            12,
+            13,
+            14,
+            15
+          ]
+        },
+        {
+          "head": "42a01a0a68e668db75bfe6cdcf495bc9b446ca84",
+          "name": "public-docs",
+          "command": [
+            "corepack",
+            "pnpm@10.32.1",
+            "check:public-docs"
+          ],
+          "startedAt": "2026-11-24T07:20:34.215844+00:00",
+          "exitCode": 0,
+          "timedOut": false,
+          "outerTimeoutSeconds": 180,
+          "elapsedMs": 4137,
+          "headAfter": "42a01a0a68e668db75bfe6cdcf495bc9b446ca84",
+          "statusBefore": "",
+          "statusAfter": "",
+          "nodeOptions": "--max-old-space-size=2048",
+          "cpuAffinity": [
+            12,
+            13,
+            14,
+            15
+          ]
+        },
+        {
+          "head": "42a01a0a68e668db75bfe6cdcf495bc9b446ca84",
+          "name": "agent-doc",
+          "command": [
+            "corepack",
+            "pnpm@10.32.1",
+            "check:agent-doc"
+          ],
+          "startedAt": "2026-11-24T07:20:38.476025+00:00",
+          "exitCode": 0,
+          "timedOut": false,
+          "outerTimeoutSeconds": 180,
+          "elapsedMs": 5717,
+          "headAfter": "42a01a0a68e668db75bfe6cdcf495bc9b446ca84",
+          "statusBefore": "",
+          "statusAfter": "",
+          "nodeOptions": "--max-old-space-size=2048",
+          "cpuAffinity": [
+            12,
+            13,
+            14,
+            15
+          ]
+        }
+      ],
+      "allExitZero": true
+    },
+    "candidate-refresh/agent-operations/terminal.json": {
+      "jobs": [
+        {
+          "head": "42a01a0a68e668db75bfe6cdcf495bc9b446ca84",
+          "name": "agent-operations",
+          "command": [
+            "corepack",
+            "pnpm@10.32.1",
+            "check:agent-operations"
+          ],
+          "startedAt": "2026-11-24T07:20:31.360120+00:00",
+          "exitCode": 0,
+          "timedOut": false,
+          "outerTimeoutSeconds": 3000,
+          "elapsedMs": 874825,
+          "headAfter": "42a01a0a68e668db75bfe6cdcf495bc9b446ca84",
+          "statusBefore": "",
+          "statusAfter": "",
+          "nodeOptions": "--max-old-space-size=1536",
+          "cpuAffinity": [
+            8,
+            9,
+            10,
+            11
+          ]
+        }
+      ],
+      "allExitZero": true
+    },
+    "candidate-refresh/coverage-matrices/terminal.json": {
+      "jobs": [
+        {
+          "head": "42a01a0a68e668db75bfe6cdcf495bc9b446ca84",
+          "name": "coverage-matrices",
+          "command": [
+            "corepack",
+            "pnpm@10.32.1",
+            "check:coverage-matrices"
+          ],
+          "startedAt": "2026-11-24T07:20:31.358025+00:00",
+          "exitCode": 1,
+          "timedOut": false,
+          "outerTimeoutSeconds": 3600,
+          "elapsedMs": 1529526,
+          "headAfter": "42a01a0a68e668db75bfe6cdcf495bc9b446ca84",
+          "statusBefore": "",
+          "statusAfter": "",
+          "nodeOptions": "--max-old-space-size=1536",
+          "cpuAffinity": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "allExitZero": false
+    },
+    "finf-fixture-repair/gates/terminal.json": {
+      "jobs": [
+        {
+          "head": "b0fbb3d8d294da6b5568b0f88451cc0df1e75788",
+          "name": "finf-optical-closure-original-four",
+          "command": [
+            "node",
+            "--test",
+            "--test-name-pattern=^Finf continuous optical closure: ",
+            "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs"
+          ],
+          "startedAt": "2026-11-24T07:59:27.904292+00:00",
+          "exitCode": 0,
+          "timedOut": false,
+          "outerTimeoutSeconds": 900,
+          "elapsedMs": 4379,
+          "headAfter": "b0fbb3d8d294da6b5568b0f88451cc0df1e75788",
+          "statusBefore": "",
+          "statusAfter": "",
+          "nodeOptions": "--max-old-space-size=1536",
+          "cpuAffinity": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "head": "b0fbb3d8d294da6b5568b0f88451cc0df1e75788",
+          "name": "coverage-matrices-full",
+          "command": [
+            "corepack",
+            "pnpm@10.32.1",
+            "check:coverage-matrices"
+          ],
+          "startedAt": "2026-11-24T07:59:32.446398+00:00",
+          "exitCode": 0,
+          "timedOut": false,
+          "outerTimeoutSeconds": 3600,
+          "elapsedMs": 1612985,
+          "headAfter": "b0fbb3d8d294da6b5568b0f88451cc0df1e75788",
+          "statusBefore": "",
+          "statusAfter": "",
+          "nodeOptions": "--max-old-space-size=1536",
+          "cpuAffinity": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "allExitZero": true
+    }
+  },
+  "semanticsAuditBoundary": "The complete producer semantic-audit text was independently hash-checked and read; its source-tree comparison is the execution owner's audit, not a new independent matrix reconstruction here.",
+  "preservationBoundary": "Original frozen-payload-preservation.json now supplies all164 modes/blobs bound to b0; the owner's actual equality audit is available, while this reviewer independently verifies its supplied text and inventory metadata rather than re-reading b0 Git objects.",
+  "findings": [],
+  "limits": [
+    "42a agent-operations1549/1549 and its three fast gates are not labelled as b0 executions.",
+    "42a full coverage remains4872 collected/4870passed/1failed/1skipped; b0 full coverage is4872 collected/4871passed/0failed/1skipped.",
+    "Large logs are supplied as explicit tails with full-file SHA and byte metadata; their complete bodies remain with the delivery owner.",
+    "All historical research observations, exclusions and earlier unsuccessful runs remain bound to their original sources.",
+    "This is not independent platform approval, current-main whole-CI completion, post-merge acceptance, physical accessibility or completion of all seven Sprints."
+  ],
+  "actions": {
+    "testsRun": 0,
+    "deviceCalls": 0,
+    "externalWrites": 0
+  },
+  "legacyReceiptsRestored": {
+    "transfer": {
+      "path": "legacy-final-gates.actual.json",
+      "bytes": 75338,
+      "sha256": "4c1d65c04eb113b753269cdd0c8c4bd12882ea685c90054dc30ed32d0e64b554"
+    },
+    "originalFullTextsVerified": [
+      {
+        "path": "current-main-integration/final-validation-b17/agent-operations.terminal.json",
+        "bytes": 515,
+        "sha256": "6119106fb7c033c7ffffe577f330067c7c78a3866e0ac2daac24a8d7a4ece76e"
+      },
+      {
+        "path": "current-main-integration/final-validation-b17/public-docs.terminal.json",
+        "bytes": 501,
+        "sha256": "2451184903679794b55736c794ed6d5389314ba33131037eee2b127ca4d034cd"
+      },
+      {
+        "path": "current-main-integration/final-validation-b17/agent-doc.terminal.json",
+        "bytes": 497,
+        "sha256": "b6fb13bb5b0f348f4d39db5751860d12e303f9559302d3e53e26fb0ae4b2d5a4"
+      },
+      {
+        "path": "current-main-integration/final-validation-b17/current-job.json",
+        "bytes": 175,
+        "sha256": "ead4b0122a89c09f475e7173ea0e87124a7656657985ce28b325f6a97aaa1cc7"
+      },
+      {
+        "path": "current-main-integration/final-validation-b17/prototype-coverage.terminal.json",
+        "bytes": 516,
+        "sha256": "60260a04bcce813670d0524ae43d4d508b0cd5aa02b9380150ea475b45a54ab0"
+      },
+      {
+        "path": "current-main-integration/final-validation-b17/coverage-matrices.terminal.json",
+        "bytes": 517,
+        "sha256": "10d7a6f4c35f729842871352432bd30d9fb00d6a68f4e8b1c17fd4a6e883b031"
+      },
+      {
+        "path": "current-main-integration/final-validation-b17/terminal.json",
+        "bytes": 3069,
+        "sha256": "6779f5d153393dead1bc0342d539299b2f0a9aa8115dd20bcb94170e24a80264"
+      },
+      {
+        "path": "current-main-delivery/preflight.config.json",
+        "bytes": 503,
+        "sha256": "1d2aa12419143d1ea74c96d794de15ff816f9d7b057370162e6b2c200aaf3e7e"
+      },
+      {
+        "path": "current-main-delivery/install-terminal.json",
+        "bytes": 41,
+        "sha256": "dd12489b4fb90e0c423242c4242f9178998b2f173d1c8d36f08c62afbac17129"
+      },
+      {
+        "path": "current-main-delivery/precommit-binding.json",
+        "bytes": 18244,
+        "sha256": "9836b465501e41692788b8427e80cea9e84c35733ee5caf0c7a1f3d6903cc6ff"
+      },
+      {
+        "path": "current-main-delivery/merge-terminal.json",
+        "bytes": 368,
+        "sha256": "c3cb9a68dfd40204413d1901b908e96c9ff7433a17fb9f52ae58627727995729"
+      },
+      {
+        "path": "current-main-delivery/preflight/prototype-coverage.terminal.json",
+        "bytes": 515,
+        "sha256": "59e4f75f6baaa3e6c072be7f5e20cea81172dc1e70b3039da89f77c8d2e83d88"
+      },
+      {
+        "path": "current-main-delivery/preflight/terminal.json",
+        "bytes": 650,
+        "sha256": "41a1646316d59170f3386efbf29943da8504a8a8ee3b842350d83909455c83ce"
+      },
+      {
+        "path": "current-main-delivery/preflight/current-job.json",
+        "bytes": 197,
+        "sha256": "8217cd125dcfda3b0476bd8c5e1a2b9b5428ae41790d7062d4897902fb06d824"
+      },
+      {
+        "path": "frozen-payload-preservation.json",
+        "bytes": 36466,
+        "sha256": "0fa74de4dd997fdf881373be86edf768a8f26f8d36b15b99c2ef156513dfb118"
+      }
+    ],
+    "sourceBindings": {
+      "0aCompleteTerminal": {
+        "jobs": [
+          {
+            "head": "0a0e8f1768c86768804741d2b607231b150fbad3",
+            "name": "prototype-coverage",
+            "command": [
+              "node",
+              "scripts/coverage-matrices/prototype-coverage.mjs"
+            ],
+            "startedAt": "2026-11-24T05:23:59.775997+00:00",
+            "exitCode": 0,
+            "timedOut": false,
+            "outerTimeoutSeconds": 240,
+            "elapsedMs": 18168,
+            "headAfter": "0a0e8f1768c86768804741d2b607231b150fbad3",
+            "statusBefore": "",
+            "statusAfter": "",
+            "nodeOptions": "--max-old-space-size=1536",
+            "cpuAffinity": [
+              0,
+              1,
+              2,
+              3
+            ]
+          },
+          {
+            "head": "0a0e8f1768c86768804741d2b607231b150fbad3",
+            "name": "coverage-matrices",
+            "command": [
+              "corepack",
+              "pnpm@10.32.1",
+              "check:coverage-matrices"
+            ],
+            "startedAt": "2026-11-24T05:24:18.152536+00:00",
+            "exitCode": 0,
+            "timedOut": false,
+            "outerTimeoutSeconds": 3600,
+            "elapsedMs": 1774899,
+            "headAfter": "0a0e8f1768c86768804741d2b607231b150fbad3",
+            "statusBefore": "",
+            "statusAfter": "",
+            "nodeOptions": "--max-old-space-size=1536",
+            "cpuAffinity": [
+              0,
+              1,
+              2,
+              3
+            ]
+          },
+          {
+            "head": "0a0e8f1768c86768804741d2b607231b150fbad3",
+            "name": "agent-operations",
+            "command": [
+              "corepack",
+              "pnpm@10.32.1",
+              "check:agent-operations"
+            ],
+            "startedAt": "2026-11-24T05:53:53.578374+00:00",
+            "exitCode": 0,
+            "timedOut": false,
+            "outerTimeoutSeconds": 3600,
+            "elapsedMs": 1205538,
+            "headAfter": "0a0e8f1768c86768804741d2b607231b150fbad3",
+            "statusBefore": "",
+            "statusAfter": "",
+            "nodeOptions": "--max-old-space-size=1536",
+            "cpuAffinity": [
+              0,
+              1,
+              2,
+              3
+            ]
+          },
+          {
+            "head": "0a0e8f1768c86768804741d2b607231b150fbad3",
+            "name": "public-docs",
+            "command": [
+              "corepack",
+              "pnpm@10.32.1",
+              "check:public-docs"
+            ],
+            "startedAt": "2026-11-24T06:13:59.768747+00:00",
+            "exitCode": 0,
+            "timedOut": false,
+            "outerTimeoutSeconds": 180,
+            "elapsedMs": 7025,
+            "headAfter": "0a0e8f1768c86768804741d2b607231b150fbad3",
+            "statusBefore": "",
+            "statusAfter": "",
+            "nodeOptions": "--max-old-space-size=1536",
+            "cpuAffinity": [
+              0,
+              1,
+              2,
+              3
+            ]
+          },
+          {
+            "head": "0a0e8f1768c86768804741d2b607231b150fbad3",
+            "name": "agent-doc",
+            "command": [
+              "corepack",
+              "pnpm@10.32.1",
+              "check:agent-doc"
+            ],
+            "startedAt": "2026-11-24T06:14:06.987617+00:00",
+            "exitCode": 0,
+            "timedOut": false,
+            "outerTimeoutSeconds": 180,
+            "elapsedMs": 9490,
+            "headAfter": "0a0e8f1768c86768804741d2b607231b150fbad3",
+            "statusBefore": "",
+            "statusAfter": "",
+            "nodeOptions": "--max-old-space-size=1536",
+            "cpuAffinity": [
+              0,
+              1,
+              2,
+              3
+            ]
+          }
+        ],
+        "allExitZero": true
+      },
+      "422Merge": {
+        "head": "422a02294325556d986fcc002ac60187f535af21",
+        "tree": "a966337900491b5df124f7b5e28f46df530feadf",
+        "parents": [
+          "6dd674545c8d388c6f5cc54ec868c88ec0d60cce",
+          "0a0e8f1768c86768804741d2b607231b150fbad3"
+        ],
+        "exitCode": 0,
+        "elapsedMs": 5363,
+        "reviewedTree": "a966337900491b5df124f7b5e28f46df530feadf",
+        "hookChangedPaths": [],
+        "status": ""
+      },
+      "422Preflight": {
+        "jobs": [
+          {
+            "head": "422a02294325556d986fcc002ac60187f535af21",
+            "name": "prototype-coverage",
+            "command": [
+              "node",
+              "scripts/coverage-matrices/prototype-coverage.mjs"
+            ],
+            "startedAt": "2026-11-24T06:15:19.241865+00:00",
+            "exitCode": 0,
+            "timedOut": false,
+            "outerTimeoutSeconds": 300,
+            "elapsedMs": 3653,
+            "headAfter": "422a02294325556d986fcc002ac60187f535af21",
+            "statusBefore": "",
+            "statusAfter": "",
+            "nodeOptions": "--max-old-space-size=1536",
+            "cpuAffinity": [
+              4,
+              5,
+              6,
+              7
+            ]
+          }
+        ],
+        "allExitZero": true
+      }
+    },
+    "frozenPayloadMetadata": {
+      "checkedHead": "b0fbb3d8d294da6b5568b0f88451cc0df1e75788",
+      "exception": ".prettierignore literal union",
+      "groups": [
+        {
+          "originalRevision": "4e5e50e159573a627d5e75037b23513ad8f5f164",
+          "entries": 115,
+          "uniquePaths": 115,
+          "modes": [
+            "100644"
+          ],
+          "allBlobFieldsValid": true
+        },
+        {
+          "originalRevision": "8f6dbb6b3fea5af0031bb0560af7c74a21d2ca96",
+          "entries": 49,
+          "uniquePaths": 49,
+          "modes": [
+            "100644"
+          ],
+          "allBlobFieldsValid": true
+        }
+      ],
+      "totalUniquePaths": 164,
+      "receiptSha256": "0fa74de4dd997fdf881373be86edf768a8f26f8d36b15b99c2ef156513dfb118",
+      "boundary": "The complete original owner receipt is hash-verified. The owner performed Git mode/blob equality; this reviewer did not independently re-check the164 Git objects at b0."
+    }
+  },
+  "legacyReceiptUpdateLineage": {
+    "previousPeerSha256": "230606b99c9096bf739432f89d1ec9cf82dc142f715cc639c30d7c6f5dca187a",
+    "change": "Restored15 exact original JSON receipts, replacing dependence on a lost13KB derived transcription. Bound original0a terminals,422 merge/preflight and b0 complete frozen payload inventory."
+  }
+}

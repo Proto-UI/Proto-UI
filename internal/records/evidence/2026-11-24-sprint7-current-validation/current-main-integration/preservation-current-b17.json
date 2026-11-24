@@ -1,0 +1,17 @@
+{
+  "head": "0a0e8f1768c86768804741d2b607231b150fbad3",
+  "groups": [
+    {
+      "label": "original",
+      "ref": "4e5e50e159573a627d5e75037b23513ad8f5f164",
+      "checkedCount": 115,
+      "differences": []
+    },
+    {
+      "label": "recovery",
+      "ref": "8f6dbb6b3fea5af0031bb0560af7c74a21d2ca96",
+      "checkedCount": 49,
+      "differences": []
+    }
+  ]
+}

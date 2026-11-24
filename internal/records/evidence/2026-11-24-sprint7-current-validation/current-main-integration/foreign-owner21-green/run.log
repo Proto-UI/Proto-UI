@@ -1,0 +1,29 @@
+✔ compiler browser source binding: exact (328.15894ms)
+✔ compiler browser source binding: foreign-owner (128.863289ms)
+✔ compiler browser source binding: unlisted-compiler-source (108.175067ms)
+✔ browser compiler host source binding: client.ts exact (83.173301ms)
+✔ browser compiler host source binding: client.ts wrong-owner (59.670282ms)
+✔ browser compiler host source binding: client.ts extra-owner (61.74279ms)
+✔ browser compiler host source binding: client.ts changed-bytes (77.723208ms)
+✔ browser compiler host source binding: client.ts renewed-fingerprint (59.085683ms)
+✔ browser compiler host source binding: client.ts adjacent-path (57.570374ms)
+✔ browser compiler host source binding: client.ts symlink (73.813846ms)
+✔ browser compiler host source binding: client.ts ancestor-symlink (55.356139ms)
+✔ browser compiler host source binding: client.ts missing (54.074083ms)
+✔ browser compiler host source binding: worker.ts exact (57.621766ms)
+✔ browser compiler host source binding: worker.ts wrong-owner (53.533624ms)
+✔ browser compiler host source binding: worker.ts extra-owner (54.98325ms)
+✔ browser compiler host source binding: worker.ts changed-bytes (56.7277ms)
+✔ browser compiler host source binding: worker.ts renewed-fingerprint (53.919925ms)
+✔ browser compiler host source binding: worker.ts adjacent-path (52.262379ms)
+✔ browser compiler host source binding: worker.ts symlink (57.440238ms)
+✔ browser compiler host source binding: worker.ts ancestor-symlink (56.800614ms)
+✔ browser compiler host source binding: worker.ts missing (52.753625ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2990.493257

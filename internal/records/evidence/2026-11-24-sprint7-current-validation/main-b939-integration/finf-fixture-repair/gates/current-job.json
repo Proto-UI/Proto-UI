@@ -1,0 +1,1 @@
+{"name": "coverage-matrices-full", "pid": 2369391, "startedAt": "2026-11-24T07:59:32.446398+00:00", "command": ["corepack", "pnpm@10.32.1", "check:coverage-matrices"], "outerTimeoutSeconds": 3600}
