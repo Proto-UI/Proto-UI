@@ -311,7 +311,7 @@ function createDocumentPresenceSink(
         !preparing && channels.includes('top') ? fixedContainingBlockHeight() : null;
       // A current preparing view has no measurable profile yet. Defer that
       // judgment until ready; known ownership loss still refuses the channel.
-      const topProfilePending = preparing && live() && channels.includes('top');
+      const topProfilePending = preparing && live() && channels.includes('top') && !lost.has('top');
       return {
         preference:
           preference === 'no-preference' || preference === 'reduce' ? preference : 'unknown',
@@ -322,6 +322,7 @@ function createDocumentPresenceSink(
             node.matches('[hidden],[data-pui-view-pending],[data-pui-view-detached]')
           ),
         preparing,
+        topProfilePending,
         width: dimension('width'),
         height: dimension('height'),
         rootFontPx: px(win?.getComputedStyle(doc.documentElement).fontSize),
@@ -332,7 +333,7 @@ function createDocumentPresenceSink(
           (name) =>
             !lost.has(name) &&
             (name !== 'translate' || !!win?.CSS?.supports?.('translate', '1px')) &&
-            (name !== 'top' || topProfilePending || containingBlockHeight !== null) &&
+            (name !== 'top' || containingBlockHeight !== null) &&
             (name !== 'blockSize' ||
               (!lost.has('block-size') &&
                 !lost.has('overflow') &&

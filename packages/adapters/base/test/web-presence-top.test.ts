@@ -238,9 +238,15 @@ it.each([
         ({
           matches: query.includes('no-preference'),
           media: query,
+          onchange: null,
+          addListener() {},
+          removeListener() {},
           addEventListener() {},
           removeEventListener() {},
-        }) as MediaQueryList
+          dispatchEvent() {
+            return true;
+          },
+        }) satisfies MediaQueryList
     );
     const queue = new Map<number, FrameRequestCallback>();
     let ticket = 0;
