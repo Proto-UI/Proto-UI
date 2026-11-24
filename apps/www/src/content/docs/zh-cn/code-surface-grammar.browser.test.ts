@@ -864,6 +864,7 @@ it('keeps every authored source reachable without JavaScript and does not fake a
     expect(await generated.locator('[role="tree"], [role="treeitem"]').count()).toBe(0);
     expect(await generated.locator('[data-code-file-panel]:visible').count()).toBe(4);
     const files = cliInitOutput.entries.filter((entry) => entry.kind === 'file');
+    const sourceGeometry = [];
     for (const file of files) {
       const link = generated.locator(`[data-code-file-path="${file.path}"]`);
       const id = await link.getAttribute('aria-controls');
@@ -872,7 +873,35 @@ it('keeps every authored source reachable without JavaScript and does not fake a
       expect(await panel.locator('code').getAttribute('data-raw-code')).toBe(file.content);
       await link.click();
       expect(await panel.isVisible()).toBe(true);
+      const sourceBounds = await panel.evaluate((node) => {
+        const frame = node.closest('[data-code-file-browser]')!.getBoundingClientRect();
+        const source = node.getBoundingClientRect();
+        const pre = node.querySelector('pre')!;
+        const code = pre.querySelector('code')!;
+        return {
+          sourceBottom: source.bottom,
+          frameBottom: frame.bottom,
+          preBottom: pre.getBoundingClientRect().bottom,
+          codeBottom: code.getBoundingClientRect().bottom,
+          preClientHeight: pre.clientHeight,
+          preScrollHeight: pre.scrollHeight,
+        };
+      });
+      sourceGeometry.push({ path: file.path, ...sourceBounds });
+      expect(sourceBounds.sourceBottom).toBeLessThanOrEqual(sourceBounds.frameBottom + 1);
+      expect(sourceBounds.codeBottom).toBeLessThanOrEqual(sourceBounds.preBottom + 1);
+      expect(sourceBounds.preBottom).toBeLessThanOrEqual(sourceBounds.sourceBottom + 1);
+      expect(sourceBounds.preScrollHeight).toBeLessThanOrEqual(sourceBounds.preClientHeight + 1);
     }
+    const sourceHeight = await generated.locator('[data-code-file-source]').evaluate((node) => ({
+      clientHeight: node.clientHeight,
+      scrollHeight: node.scrollHeight,
+    }));
+    expect(sourceHeight.scrollHeight).toBeLessThanOrEqual(sourceHeight.clientHeight + 1);
+    await evidence(page, generated.locator('[data-code-file-panel]').last(), 'file-browser-no-js', {
+      sourceGeometry,
+      sourceHeight,
+    });
     expect(await generated.locator('[data-code-directory-path]').count()).toBe(6);
     expect(await example.locator('[data-code-file-panel]:visible').count()).toBe(4);
     const htmlLink = example.locator('[data-code-file-tabs] a').filter({ hasText: /^index.html$/ });
@@ -1368,3 +1397,235 @@ it('keeps the generated-file browser accessible in forced colors and enlarged te
     await closeGrammarContext(context);
   }
 }, 90_000);
+
+it('keeps early-focused native file navigation visible at 390px', async ({ task }) => {
+  const context = await newGrammarContext(task, { viewport: { width: 390, height: 1000 } });
+  const page = await context.newPage();
+  try {
+    // Focus the authored link before progressive enhancement is admitted. This
+    // exercises the real focus guard and native keyboard controller together.
+    await page.addInitScript(() => {
+      localStorage.setItem('preferred-prototypes-adapter', 'wc');
+      const observer = new MutationObserver(() => {
+        const link = document.querySelector<HTMLElement>(
+          '[data-code-host-panel][data-code-host="wc"] [data-code-file-path="src/main.ts"]'
+        );
+        if (!link) return;
+        link.focus({ preventScroll: true });
+        if (document.activeElement === link) observer.disconnect();
+      });
+      observer.observe(document, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['hidden'],
+      });
+    });
+    await navigate(page, `${baseUrl}${SOURCE_ROUTE}`);
+    const example = page.locator('[data-code-example][data-code-example-init="1"]');
+    await example.waitFor();
+    const frame = example.locator(
+      '[data-code-host="wc"][data-code-host-panel] [data-code-file-browser]'
+    );
+    const nativeFiles = frame.locator('[data-code-file-tabs]');
+    expect(await nativeFiles.isVisible()).toBe(true);
+    expect(await frame.locator('[role="tree"]').count()).toBe(0);
+    expect(
+      await nativeFiles
+        .locator('[data-code-file-path="src/main.ts"]')
+        .evaluate((node) => document.activeElement === node)
+    ).toBe(true);
+    await frame.scrollIntoViewIfNeeded();
+    const initialHeight = await frame.evaluate((node) => node.getBoundingClientRect().height);
+    const documentTop = await page.evaluate(() => scrollY);
+    const samples = [];
+    for (const [key, path] of [
+      ['End', 'index.html'],
+      ['Home', 'src/main.ts'],
+      ['ArrowDown', 'index.html'],
+    ]) {
+      await page.keyboard.press(key);
+      const link = nativeFiles.locator(`[data-code-file-path="${path}"]`);
+      expect(await link.evaluate((node) => node === document.activeElement)).toBe(true);
+      expect(await link.getAttribute('aria-selected')).toBe('true');
+      expect(await frame.locator('[data-code-file-panel]:visible').count()).toBe(1);
+      expect(
+        await frame.locator('[data-code-file-panel]:visible [data-code-file-title]').textContent()
+      ).toBe(path);
+      const focusBounds = await link.evaluate((node) => {
+        const viewport = node.closest<HTMLElement>('[data-code-tree-scroll]')!;
+        const port = viewport.getBoundingClientRect();
+        const target = node.getBoundingClientRect();
+        return {
+          targetTop: target.top,
+          targetBottom: target.bottom,
+          viewportTop: port.top + viewport.clientTop,
+          viewportBottom: port.top + viewport.clientTop + viewport.clientHeight,
+          scrollTop: viewport.scrollTop,
+        };
+      });
+      samples.push({ key, path, ...focusBounds });
+      expect(focusBounds.targetTop).toBeGreaterThanOrEqual(focusBounds.viewportTop - 1);
+      expect(focusBounds.targetBottom).toBeLessThanOrEqual(focusBounds.viewportBottom + 1);
+      expect(await page.evaluate(() => scrollY)).toBe(documentTop);
+      expect(
+        Math.abs(
+          (await frame.evaluate((node) => node.getBoundingClientRect().height)) - initialHeight
+        )
+      ).toBeLessThanOrEqual(1);
+    }
+    expect(await frame.locator('[role="tree"]').count()).toBe(0);
+    await evidence(page, frame, 'file-browser-native-focus-390', { initialHeight, samples });
+  } finally {
+    await closeGrammarContext(context);
+  }
+}, 90_000);
+
+for (const width of [1280, 390]) {
+  it(`keeps both file-browser panels bounded while files and directories change (${width}px)`, async ({
+    task,
+  }) => {
+    const context = await newGrammarContext(task, {
+      viewport: { width, height: 1000 },
+      colorScheme: width === 1280 ? 'light' : 'dark',
+    });
+    const page = await context.newPage();
+    try {
+      await navigate(page, `${baseUrl}${SOURCE_ROUTE}`);
+      const generated = page.locator('[data-standalone-file-browser][data-file-browser-init="1"]');
+      await generated.waitFor();
+      const tree = generated.locator('[role="tree"]');
+      const treeViewport = generated.locator('[data-code-files] [data-code-tree-scroll]');
+      await expect
+        .poll(() =>
+          treeViewport.evaluate((node) => {
+            const facts = node as HTMLElement & {
+              getExposes?(): { scrollProjection?: { get(): string } };
+            };
+            return facts.getExposes?.().scrollProjection?.get();
+          })
+        )
+        .toBe('composed');
+      expect(await treeViewport.evaluate((node) => getComputedStyle(node).scrollbarWidth)).toBe(
+        'none'
+      );
+      expect(await treeViewport.locator('[role="tree"]').count()).toBe(1);
+      const treeAnatomy = generated.locator('[data-code-files] [data-code-scroll-anatomy]');
+      expect(await treeAnatomy.locator('[data-code-scroll-track="vertical"]').count()).toBe(1);
+      expect(await treeAnatomy.locator('[data-code-scroll-track="horizontal"]').count()).toBe(1);
+
+      const geometry = () =>
+        generated.evaluate((root) => {
+          const files = root.querySelector('[data-code-files]')!.getBoundingClientRect();
+          const source = root.querySelector('[data-code-file-source]')!.getBoundingClientRect();
+          const frame = root.getBoundingClientRect();
+          return {
+            frameHeight: frame.height,
+            filesHeight: files.height,
+            sourceHeight: source.height,
+            filesBottom: files.bottom,
+            sourceTop: source.top,
+          };
+        });
+      const initial = await geometry();
+      const samples: Array<{ state: string; geometry: Awaited<ReturnType<typeof geometry>> }> = [];
+      const assertStable = async (state: string) => {
+        const next = await geometry();
+        samples.push({ state, geometry: next });
+        expect(Math.abs(next.frameHeight - initial.frameHeight)).toBeLessThanOrEqual(1);
+        expect(Math.abs(next.filesHeight - initial.filesHeight)).toBeLessThanOrEqual(1);
+        expect(Math.abs(next.sourceHeight - initial.sourceHeight)).toBeLessThanOrEqual(1);
+      };
+      if (width > 768) {
+        expect(Math.abs(initial.filesHeight - initial.sourceHeight)).toBeLessThanOrEqual(1);
+      } else {
+        expect(initial.filesBottom).toBeLessThanOrEqual(initial.sourceTop + 1);
+        expect(initial.filesHeight).toBeLessThan(initial.sourceHeight);
+      }
+      for (const path of [
+        'proto-ui/config.json',
+        'src/styles/shadcn-theme.css',
+        'proto-ui/config.json',
+      ]) {
+        await tree.locator(`[data-code-tree-path="${path}"]`).click();
+        const panel = generated.locator('[data-code-file-panel]:visible');
+        expect(await panel.locator('[data-code-file-title]').textContent()).toBe(path);
+        await panel.locator('[data-code-scroll-ready] [data-code-scroll-viewport]').waitFor();
+        await assertStable(path);
+      }
+      const folder = tree.locator('[data-code-tree-path="proto-ui"]');
+      await folder.click();
+      expect(await folder.getAttribute('aria-expanded')).toBe('false');
+      await assertStable('directory collapsed');
+      await folder.press('ArrowRight');
+      expect(await folder.getAttribute('aria-expanded')).toBe('true');
+      await assertStable('directory expanded');
+
+      await tree.locator('[data-code-tree-path="src/styles/shadcn-theme.css"]').click();
+      const codeViewport = generated.locator(
+        '[data-code-file-panel]:visible [data-code-scroll-ready] [data-code-scroll-viewport]'
+      );
+      const initialTreeTop = await treeViewport.evaluate((node) => node.scrollTop);
+      await codeViewport.focus();
+      await page.keyboard.press('PageDown');
+      await expect.poll(() => codeViewport.evaluate((node) => node.scrollTop)).toBeGreaterThan(0);
+      // Reach a known settled offset before observing the other scrollport;
+      // an in-flight native PageDown animation must not look like coupling.
+      await page.keyboard.press('End');
+      await expect
+        .poll(() =>
+          codeViewport.evaluate((node) => node.scrollHeight - node.clientHeight - node.scrollTop)
+        )
+        .toBeLessThanOrEqual(1);
+      expect(await treeViewport.evaluate((node) => node.scrollTop)).toBe(initialTreeTop);
+      if (width === 390) {
+        const initialCodeTop = await codeViewport.evaluate((node) => node.scrollTop);
+        await treeViewport.focus();
+        await page.keyboard.press('Home');
+        await expect.poll(() => treeViewport.evaluate((node) => node.scrollTop)).toBe(0);
+        await page.keyboard.press('PageDown');
+        await expect.poll(() => treeViewport.evaluate((node) => node.scrollTop)).toBeGreaterThan(0);
+        expect(await codeViewport.evaluate((node) => node.scrollTop)).toBe(initialCodeTop);
+      }
+      await assertStable('independent keyboard scrolling');
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)
+      ).toBeLessThanOrEqual(1);
+      await evidence(page, generated, `file-browser-bounded-${width}`, {
+        initial,
+        samples,
+        input: 'native keyboard PageDown and End; no injected scroll offsets',
+      });
+
+      // The ordinary application example shares the same browser, rather than
+      // receiving the stable layout only for generated CLI files.
+      const example = page.locator('[data-code-example]');
+      await example.getByRole('tab', { name: 'Web Components', exact: true }).click();
+      const embedded = example.locator('[data-code-host-panel]:visible [data-code-file-browser]');
+      const embeddedTree = embedded.locator('[role="tree"]');
+      await embeddedTree.waitFor();
+      const embeddedViewport = embedded.locator('[data-code-files] [data-code-tree-scroll]');
+      await expect
+        .poll(() => embeddedViewport.evaluate((node) => getComputedStyle(node).scrollbarWidth))
+        .toBe('none');
+      const embeddedHeight = await embedded.evaluate((node) => node.getBoundingClientRect().height);
+      for (const path of ['src/main.ts', 'index.html', 'src/main.ts']) {
+        await embeddedTree.locator(`[data-code-tree-path="${path}"]`).click();
+        expect(
+          await embedded
+            .locator('[data-code-file-panel]:visible [data-code-file-title]')
+            .textContent()
+        ).toBe(path);
+        expect(
+          Math.abs(
+            (await embedded.evaluate((node) => node.getBoundingClientRect().height)) -
+              embeddedHeight
+          )
+        ).toBeLessThanOrEqual(1);
+      }
+      await evidence(page, embedded, `file-browser-embedded-bounded-${width}`, { embeddedHeight });
+    } finally {
+      await closeGrammarContext(context);
+    }
+  }, 90_000);
+}
