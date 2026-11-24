@@ -43,6 +43,10 @@ The complete original local `check:types` command on `b57e7af30b97a087ae0c3ec9fa
 
 ## Retention and open acceptance
 
+A separate reviewer found no blocking source issue in the Surface props change and both dialog guards at `b57e7af30b97a087ae0c3ec9fa75e10c7ca268d8`. The [source review archive](evidence/2026-11-24-release-followup/2026-11-24-surface-callback-independent-review.tar.gz) is 3,416 bytes, SHA-256 `827ea3c94ba46591c96f1f0acb1a7b3611a0a74a106a8614b8b5cf2f5131088c`. It adds no browser execution claim.
+
+The same reviewer independently ran four adversarial Anatomy controls on `a6f77761a1130dd1170af028d1c9f5ec191d59f8`: all four passed, with no pending or skipped cases and unchanged production source. They cover target replacement, current comparator getter reads, unavailable-to-live comparator changes and getter exceptions across notification deliveries. The [fresh independent review archive](evidence/2026-11-24-release-followup/2026-11-24-anatomy-independent-fresh-review.tar.gz) is 10,767 bytes, SHA-256 `025056791739fd6b94adb4d334c08f617db9265192bd244666c6c139e0129a78`. These are independent bounded source reviews and controls, not GitHub approval or native performance acceptance. Integration preserves the reviewed source bytes in `07f7187e53bf7698dcc816ca471cf6fd591f7393`.
+
 The [raw hosted and local receipts](evidence/2026-11-24-release-followup/hosted-and-type-receipts.tar.gz) are 378,345 bytes, SHA-256 `e3faea01d8e2818b751fa53f4af891d95ec9c07ed180440a14348e539d595a72`. The [manifest](evidence/2026-11-24-release-followup/manifest.json) records each member's bytes and digest. The retained budget report is the original hosted artifact; an unavailable earlier local report was not synthesized.
 
 Native Homepage wheel/preference, the original Demo Matrix startup assertions, complete current CI, the complete release rehearsal and two evidenced complete green regression cycles remain open. Unsupported or unimplemented native profiles remain separate from named 0.3 generated Web consumers. No draft entity or blocked consumer row is promoted by this record.
