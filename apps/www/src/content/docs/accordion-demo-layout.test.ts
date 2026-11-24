@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderDemo } from '../../components/PrototypePreviewer/demo-renderer';
+import { planMaterialStages } from '../../components/PrototypePreviewer/demo-material-stages';
 import { loadPrototypes } from '../../components/PrototypePreviewer/prototype-modules';
 import { createAccordionDemo } from './accordion-demo.shared';
-import type { DemoChild } from '../../components/PrototypePreviewer/demo-types';
+import type { DemoChild, DemoNode } from '../../components/PrototypePreviewer/demo-types';
 
 vi.mock('../../components/PrototypePreviewer/runtimes/react-runtime', async () => {
   const { createRequire } = await import('node:module');
@@ -160,4 +161,80 @@ describe('Accordion demo narrow-width ownership', () => {
       );
     });
   }
+});
+
+describe('Liquid Accordion bounded source ownership', () => {
+  const nodes = (node: DemoChild): DemoNode[] =>
+    typeof node === 'string'
+      ? []
+      : node.kind === 'text'
+        ? [node]
+        : [node, ...(node.children ?? []).flatMap(nodes)];
+  const byRef = (root: DemoChild, ref: string) => {
+    const node = nodes(root).find((node) => node.kind !== 'text' && node.ref === ref);
+    if (!node || node.kind === 'text') throw new Error(`Missing authored ref ${ref}`);
+    return node;
+  };
+
+  it('bounds the four complete examples without splitting nested or controlled ownership', () => {
+    const demo = createAccordionDemo('liquid-glass');
+    const plans = planMaterialStages(demo.root);
+    expect(plans).toHaveLength(4);
+    const flows = plans.map((plan) => {
+      const scope = byRef(demo.root, plan.scopeRef);
+      const flow = byRef(scope, plan.mountRef);
+      const overlay = byRef(scope, plan.overlayRef);
+      expect(scope.kind).toBe('box');
+      expect(flow.kind).toBe('box');
+      expect(overlay.kind).toBe('box');
+      expect(overlay.children).toEqual([]);
+      expect(nodes(flow)).not.toContain(overlay);
+      // The source's own 2rem padding is smaller than the Trigger footprint at
+      // its maximum width. Preserve the recipe's inner gutter in every source.
+      expect(flow.className?.split(' ')).toEqual(
+        expect.arrayContaining(['grid-cols-1', 'min-w-0', 'p-2'])
+      );
+      expect(`${scope.className ?? ''} ${flow.className ?? ''}`).not.toMatch(
+        /\b(?:overflow(?:-[xy])?-(?:auto|hidden|scroll)|max-h-\S+|h-\S+)\b/
+      );
+      return flow;
+    });
+    expect(
+      flows.map((flow) =>
+        nodes(flow).flatMap((node) =>
+          node.kind === 'proto' && node.prototypeId === 'liquid-glass-accordion-root'
+            ? [node.ref]
+            : []
+        )
+      )
+    ).toEqual([['single', 'nested'], ['multiple'], ['rtl'], ['controlled']]);
+
+    const overview = byRef(flows[0], 'single-overview-content');
+    const nested = byRef(flows[0], 'nested');
+    expect(nodes(overview)).toContain(nested);
+    expect(byRef(nested, 'nested-overview-trigger')).toBe(
+      byRef(demo.root, 'nested-overview-trigger')
+    );
+    expect(byRef(flows[0], 'single-lifetime-item')).toBe(byRef(demo.root, 'single-lifetime-item'));
+    expect(
+      nodes(flows[3]).flatMap((node) =>
+        node.kind !== 'text' && ['controlled', 'requestStatus', 'accept'].includes(node.ref ?? '')
+          ? [node.ref]
+          : []
+      )
+    ).toEqual(['controlled', 'requestStatus', 'accept']);
+  });
+
+  it('keeps other families in their original unsegmented example order', () => {
+    for (const family of ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2']) {
+      const root = createAccordionDemo(family).root;
+      expect(planMaterialStages(root)).toEqual([]);
+      if (root.kind !== 'box') throw new Error('Expected recipe layout box');
+      expect(
+        root.children?.map((node) =>
+          typeof node === 'string' || node.kind === 'text' ? null : (node.ref ?? null)
+        )
+      ).toEqual(['single', null, 'multiple', null, 'rtl', 'controlled', 'requestStatus', 'accept']);
+    }
+  });
 });

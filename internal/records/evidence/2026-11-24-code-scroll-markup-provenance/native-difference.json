@@ -1,0 +1,29 @@
+{
+  "captureRevision": "24dfb9f112b11c2f0c6789dfab3aa86b528656ee",
+  "issues": [
+    "native output differs from recorded producer output"
+  ],
+  "native": {
+    "runtime": "wc",
+    "connected": true,
+    "receiverTag": "div",
+    "receiverCount": 1,
+    "ownerPreviewerId": "pp-48qgvj2hkbc",
+    "previewerId": "pp-48qgvj2hkbc"
+  },
+  "producerTabindex": {
+    "name": "tabindex",
+    "value": "0"
+  },
+  "direct": {
+    "matches": false,
+    "expectedDigest": "6c2388d8ad544f8b557df84c5198e7776e92a8b5b8c079ed435f7605d5e5f264",
+    "observedDigest": "3b4511db8ffe623d438018810cde351b5c09ac39ad242715318ebe4a5ceaa751"
+  },
+  "afterDeclaredAttributeRemoval": {
+    "matches": true,
+    "expectedDigest": "3b4511db8ffe623d438018810cde351b5c09ac39ad242715318ebe4a5ceaa751",
+    "observedDigest": "3b4511db8ffe623d438018810cde351b5c09ac39ad242715318ebe4a5ceaa751"
+  },
+  "artifactSha256": "03d3e1d6c35fecd3df9e3f9c5ff6b47765006e82003a53e25c1bfc9cf3f33c78"
+}

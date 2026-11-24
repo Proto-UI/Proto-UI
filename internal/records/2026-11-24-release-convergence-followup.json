@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-11-24T11:18:15.281963+00:00",
+  "sourceHead": "dc2bfc7fc9115e583cc91eb28d4e60d252670514",
+  "includedMain": "4144eb94e5dc5fc7065599a6bf1a1613a5bf2c48",
+  "result": "partial",
+  "portfolio": {
+    "generator": "scripts/coverage-matrices/prototype-coverage.mjs",
+    "explicitMigration": [
+      "www.docs.code-panel-scroll"
+    ],
+    "addedState": "blocked",
+    "lifecycle": "draft",
+    "removedIdentities": [],
+    "historicalIssueIndexes": "retained",
+    "candidateRevision": "dc2bfc7fc9115e583cc91eb28d4e60d252670514",
+    "consumerRows": 142,
+    "validation": "pass",
+    "historicalMainSnapshot": "unchanged"
+  },
+  "coverageMatrices": {
+    "command": "node --max-old-space-size=768 scripts/coverage-matrices/check-coverage-matrices.mjs",
+    "exitCode": 0,
+    "matrices": 2,
+    "correctedIntegrationDefect": "Two byte-identical DemoMatrix binding rows were introduced by this integration. c79d2c1e1 removes the second, preserving the original owner and actual source digest.",
+    "broadExemptionsAdded": false
+  },
+  "cli": {
+    "allCliSourceAndTestsTypes": {
+      "command": "node --max-old-space-size=768 node_modules/typescript/bin/tsc -p /tmp/pui-40da-evidence/cli-tsconfig.json --noEmit",
+      "exitCode": 0,
+      "scope": "CLI source and tests plus reachable dependencies, not full workspace/docs"
+    },
+    "frozenFamilyReplay": {
+      "originalSelectedCases": 4,
+      "passed": 4,
+      "failed": 0,
+      "filteredUnselectedCases": 4,
+      "changedCliPrototypeStylePathsSince24df": []
+    },
+    "wholeInventory": {
+      "status": "open",
+      "unprovedReads": 1081,
+      "acceptanceAssertion": "unchanged; remains red",
+      "analysis": "See 2026-11-24-release-integration-controls.json and its actual Runtime counterexample; no universal Props relaxation."
+    }
+  },
+  "markup": {
+    "candidate": "ce113714cb0bacdba84d4149674b281cb570a019",
+    "integration": "dc2bfc7fc9115e583cc91eb28d4e60d252670514",
+    "rootReview": "Reviewed against the actual enhancement client; original SSR equality, named owned focus transfer and expected native output remain separate.",
+    "parserControlsPassed": 67,
+    "native17CaseReplay": "pending; old observations are not upgraded"
+  },
+  "governance": {
+    "sourceAtCapture": "24dfb9f112b11c2f0c6789dfab3aa86b528656ee",
+    "liveCheckExitCode": 0,
+    "snapshotSha256": "650269e977a957a366e0fa24319fae59d9686d1439ddb54952d3a88b1750be67",
+    "newSnapshotDiff": false,
+    "auditedDrift": "Issue522/523 bodySha256 and updatedAt; already repaired by integrated eec2fd20d85235f3cb8f18d9fc2689afeb956e72",
+    "scope": "Seven named issues and PR580 only; not Issue1673 approval policy or platform review"
+  },
+  "production": {
+    "source": "78af4d4c9dc822e66a525b1ddc2794d618b1afc3",
+    "local768MiB": "Explicit V8 heap exhaustion, exit134; no successful production graph",
+    "local1536MiB": "No terminal receipt accessible at capture; original running receipt retained without inventing outcome or cause",
+    "rootResumeAttempt": "write_stdin session16105 returned Unknown process id",
+    "canonicalCI": "pending; canonical heap is6144MiB",
+    "acceptance": "not passed"
+  },
+  "artifacts": [
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/portfolio-migration-receipt.json.gz",
+      "sha256": "f10b9d2a5240e72be42c018f5b9ebcc546573a01543d3884cfc7da6b912ac117",
+      "uncompressedSha256": "46d6fbbf8a508ee317c37864cd54922b88443218f046b3da704914d97f149c10"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/explicit-portfolio-migration.mjs.gz",
+      "sha256": "2a117fd045e201c96d3a817f160c80fa055f576ec829da147e1674a959bb6706",
+      "uncompressedSha256": "2bc5f9c8680cca5fe24f68e9beeab46869a166edea719b8883fee2bf0d926363"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/portfolio-refresh.log.gz",
+      "sha256": "38b07d5c1c63caae307cfdeeb29e61a26c1f2dcb3f76682f0e2b28b874191ae9",
+      "uncompressedSha256": "7d57342cce864601c4ee5ff8d506e5ce9aafca298b1ff7557009f797eb44e4b8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/coverage-duplicate-failure.log.gz",
+      "sha256": "f8e775ace674e4d4f9030ca0d0e5773eed43a4300a36059943c79bd66bd1cf54",
+      "uncompressedSha256": "0030ef59aeeb7015d99e21dde3a1da3876526f1a33a90105dc9ad53cd6d5638a"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/coverage-final.log.gz",
+      "sha256": "1a1e40812e2955c175bcaf96b3cd8914a205a398f13a90ecc6a07c1ebd1eacf2",
+      "uncompressedSha256": "ca10fa4dfc2b0a4cbf64685d8f103240a45be832ebe16355f5eb17dca16361f4"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/markup-review-controls.log.gz",
+      "sha256": "bf4a8d9ab685ed47ff7e0d2a3d7ccc98fb70f3fd5dcd79ba1be692e29a909d6e",
+      "uncompressedSha256": "011737cfa2443b3b08df64bb8bc02e2b4181121d32b09b9a01bf9ab0c84537ce"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/family-closure-final.json.gz",
+      "sha256": "89f89ffe28f578b4f0028d624624f8db0b87c34c179f498b9f3096c299e407c4",
+      "uncompressedSha256": "2102c8e29a395e54e099070672f8136b43e3c443ccc29d08ab994c76917e82b0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/family-closure-final.log.gz",
+      "sha256": "fa727dff0284eeebd1f07932b19179f02af875f4ec103bbe3b79a1435904988e",
+      "uncompressedSha256": "ff5c765fd8e7961be1bec7a11b24cbc284f85701cc6630a22033768a6c5b268b"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/cli-tsconfig.json.gz",
+      "sha256": "08bc5f1f5125a78cbc54f2e40e2b293965ab8efc50091f03dd487cf0b949dbae",
+      "uncompressedSha256": "9e8f3a6d16eb5fe71fcdabf54dc89d99df7f3d80be7bd4d8667fdd372b4b4935"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/cli-types-final.log.gz",
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "uncompressedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/governance-report.json.gz",
+      "sha256": "8e5f14b239c08deeadc90ea1b86db821f4bf92f1c5e389d454247c286b89c893",
+      "uncompressedSha256": "f7ff927d556fad448d2cced40b473e71cc89c64ed61717701b5da29971580b55"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/governance-capture-receipt.json.gz",
+      "sha256": "25fdc950d842ce96b09328e9b6d3ae2276fd181ebd3646bd324edf3e73cbd989",
+      "uncompressedSha256": "3d9735fed0fa37b8b60745e0ef237cde1cd6c0461b285922059038d3f24c85a5"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/governance-audited-snapshot.json.gz",
+      "sha256": "9fb221066bd2dc03945f8d68715e2736cd771d83072c4bd0906fb603d788f6a8",
+      "uncompressedSha256": "a1985e3a03e92c26bfdea47faeea5dcb39ed393529b7551274b4afe459215854"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/governance-captured-snapshot.json.gz",
+      "sha256": "7dfb65df4d8739ce7a38a5d2e773b2b02303527a0a5d4585731fc8833527fe25",
+      "uncompressedSha256": "650269e977a957a366e0fa24319fae59d9686d1439ddb54952d3a88b1750be67"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/governance-check.log.gz",
+      "sha256": "2d01b6cce8d66b4088243b8c36ff6a2ac0edf0897ccfb356252bc07486c83a06",
+      "uncompressedSha256": "0daafc34a6e8e89fa0e8dfa5e960b3b5f7fdea46753c436bffc54a0761cf7799"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/production-768-build.receipt.json.gz",
+      "sha256": "461ce61b9b14a40cbed037ad6021a77755e7bf1f7a89a3df7943e85995937471",
+      "uncompressedSha256": "eb08b4924768e590beb7c3c2134f7d2ed11e5421f9927b8daee09c18480cb074"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/production-768-build.log.gz",
+      "sha256": "3a48ea3a9c398605c0a2e4e31249772a9ac9b10e013ec439bb0d9f7d47e250a5",
+      "uncompressedSha256": "7be14aca9b4463a4efeb976ab7b242c23c94c447f798579c2c9c9052ebfba223"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/production-1536-nonterminal.receipt.json.gz",
+      "sha256": "78273eefc3e518419eab4445e782cccc80c7bb7b5faaf9781b5284f5b3b2c338",
+      "uncompressedSha256": "a9248fa5e8a73b03addf2b96df51347563d5d1e31d4716cd14470590c4436859"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-release-convergence-followup/production-1536-nonterminal.log.gz",
+      "sha256": "df24a296b31e1ef3891f406b12c286e2371293e7d5a7c680036db8cbb2679a41",
+      "uncompressedSha256": "ebcc5a1bda257c30c74aea05e45f723ceea9f4fce408dda3c3a359c21d5cb95b"
+    }
+  ],
+  "releaseAcceptance": "No current strict budget, complete regression, packed consumer, native/AT, final rehearsal or independent platform approval is established by this record."
+}

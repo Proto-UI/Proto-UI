@@ -21,6 +21,28 @@ export interface MarkupObservation {
   highlightsAttribute: string;
   codeMapAttribute: string;
   contentHtml: string | null;
+  codeScrollFocus?: {
+    kind: 'public-scroll-area-viewport';
+    ready: boolean;
+    anatomyCount: number;
+    anatomyTag: string | null;
+    viewportCount: number;
+    viewportTag: string | null;
+    anatomyIsContainerChild: boolean;
+    viewportIsAnatomyChild: boolean;
+    receiverIsViewportChild: boolean;
+    connected: boolean;
+    ownerPreviewerId: string | null;
+    tabindex: string | null;
+    role: string | null;
+    label: string | null;
+    projection: string | null;
+  } | null;
+}
+export interface MarkupComparison {
+  matches: boolean;
+  expectedDigest: string | null;
+  observedDigest: string | null;
 }
 export interface OriginalCodePanel {
   id: string;
@@ -40,17 +62,22 @@ export interface MarkupReport {
   sourceReferenceRevision: string | null;
   captureRevision: string | null;
   originalHTML: { responseDigest: string | null; navigationId: string | null; receiver: OriginalCodePanel | null };
-  nativeRuntime: { kind: 'native-runtime-output'; observation: MarkupObservation };
+  nativeRuntime: {
+    kind: 'native-runtime-output';
+    observation: MarkupObservation;
+    comparison: {
+      producer: MarkupComparison;
+      expected: MarkupComparison;
+      transformation: 'code-scroll-viewport-focus-handover' | null;
+    } | null;
+  };
   matchesRecordedProducer: boolean;
+  matchesExpectedNativeOutput: boolean;
   issues: string[];
   limits: string[];
 }
 export function markupDigest(bytes: string | Uint8Array): string;
-export function markupComparison(expected: unknown, observed: unknown): {
-  matches: boolean;
-  expectedDigest: string | null;
-  observedDigest: string | null;
-};
+export function markupComparison(expected: unknown, observed: unknown): MarkupComparison;
 export function sourceBindingIssues(profile: unknown, binding: unknown): string[];
 export function originalCodePanels(html: string): OriginalCodePanel[];
 export function originalInstallCommands(html: string): Array<{

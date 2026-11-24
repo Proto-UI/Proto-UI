@@ -108,6 +108,8 @@ for (const scenario of ['exact', 'foreign-owner', 'unlisted-compiler-source']) {
       path.join(root, panel),
       `import { createBrowserCompilerClient } from '../../../../../packages/compiler/src/browser/client';\nexport const panel = createBrowserCompilerClient;\n`
     );
+    // A positive owner fixture must first satisfy the independent source gate.
+    // Synthetic client bytes made the old "exact" case pass while still denied.
     fs.copyFileSync(new URL(`../../../${client}`, import.meta.url), path.join(root, client));
     let boundSource = client;
     let boundOwners = ['www.demo.raw-adapter-runtimes'];
@@ -128,12 +130,16 @@ for (const scenario of ['exact', 'foreign-owner', 'unlisted-compiler-source']) {
       assert.doesNotMatch(message, /is not bound to a matrix row/);
       assert.doesNotMatch(
         message,
+        /exact browser compiler host source, digest and runtime owner remain unverified/
+      );
+      assert.doesNotMatch(
+        message,
         /compiler browser source .* must name exactly the matrix Path owner/
       );
     } else if (scenario === 'foreign-owner') {
       assert.match(
         message,
-        /compiler browser source `packages\/compiler\/src\/browser\/client\.ts` must name exactly the matrix Path owner `www\.demo\.raw-adapter-runtimes`/
+        /exact browser compiler host source, digest and runtime owner remain unverified/
       );
     } else {
       assert.match(message, /source binding must name exactly one/);
@@ -861,12 +867,13 @@ function writeCurrentRetryConfig(root) {
   );
   assert.equal(
     createHash('sha256').update(config).digest('hex'),
-    'c0a7f33cceaf8b66e31592b7d266b6cd63d28c032467f6b833eb0e989577f1ee'
+    '10404ebdfd8ec0f96f74f59bba0b064b9f361b26de9483e82e5550d7aba7e58d'
   );
   writeReviewedPromotionConfig(root, config);
   for (const relative of [
     'apps/www/src/utils/proto-ui-source.mjs',
     'apps/www/scripts/accordion-activation-probe.mjs',
+    'apps/www/scripts/client-chunk-isolation.mjs',
   ]) {
     const target = path.join(root, relative);
     fs.mkdirSync(path.dirname(target), { recursive: true });
@@ -18709,6 +18716,7 @@ for (const relative of [
   'apps/www/scripts/contrast-provenance.mjs',
   'apps/www/src/utils/proto-ui-source.mjs',
   'apps/www/scripts/accordion-activation-probe.mjs',
+  'apps/www/scripts/client-chunk-isolation.mjs',
 ]) {
   for (const defect of ['missing', 'changed', 'symlink', 'parent-symlink', 'directory']) {
     test(`current retry virtual boundary: rejects ${defect} ${relative}`, () => {
@@ -18988,8 +18996,19 @@ for (const [relative, allowed] of [
   ['packages/modules/feedback/src/types.ts', '@proto.ui/core'],
   ['packages/modules/feedback/src/shader/sink.ts', '@proto.ui/core'],
   ['packages/runtime/src/kernel/handles/def.ts', '@proto.ui/core/internal'],
+  ['packages/runtime/src/kernel/kernel.ts', '@proto.ui/module-feedback'],
+  ['packages/modules/feedback/src/material/paint-reservation.ts', '@proto.ui/module-anatomy'],
+  ['packages/modules/feedback/src/motion/numeric-sources.ts', '@proto.ui/module-state'],
+  ['packages/modules/feedback/src/motion/projector.ts', '@proto.ui/core/internal'],
+  ['packages/modules/feedback/src/motion/sink.ts', '@proto.ui/core'],
+  ['packages/modules/feedback/src/motion/targets.ts', '@proto.ui/core'],
+  ['packages/modules/feedback/src/presence/controller.ts', '@proto.ui/core'],
+  ['packages/modules/feedback/src/presence/projector.ts', './top-target'],
+  ['packages/modules/feedback/src/presence/sampler.ts', '../motion/sampler'],
+  ['packages/modules/feedback/src/presence/sink.ts', '@proto.ui/core'],
+  ['packages/modules/feedback/src/presence/top-target.ts', '@proto.ui/core'],
 ]) {
-  test(`startup shader closure remains source-bound: ${relative}`, () => {
+  test(`startup Feedback closure remains source-bound: ${relative}`, () => {
     const root = createRoot();
     writeValidMatrices(root);
     const target = path.join(root, relative);
@@ -19359,6 +19378,14 @@ for (const [relative, allowed] of [
   ['apps/www/src/components/library-liquid-scene.ts', '@proto.ui/adapter-base/web-material'],
   ['packages/adapters/base/src/material/initial-paint-experiment.ts', './sink'],
   ['packages/adapters/base/src/material/sink.ts', './geometry-watch'],
+  [
+    'packages/adapters/base/src/material/paint-reservation.ts',
+    '../platform/web-material-paint-reservation',
+  ],
+  [
+    'packages/adapters/base/src/platform/web-material-paint-reservation.ts',
+    '@proto.ui/module-feedback',
+  ],
   ['packages/adapters/base/src/material/source.ts', '../host/synchronous-steps'],
   ['packages/adapters/base/src/material/contact-motion.ts', '../events/pointer-contact'],
   ['packages/adapters/base/src/material/program-inputs.ts', './style-tint-profile'],
@@ -19758,12 +19785,22 @@ for (const scenario of ['exact', 'changed-source', 'foreign-owner', 'unlisted-im
 
 for (const reviewed of [
   'packages/core/src/internal.ts',
+  'packages/core/src/handles.ts',
+  'packages/core/src/material-paint-reservation.ts',
+  'packages/core/src/presence-presentation.ts',
   'packages/core/src/spec/owned-template-blueprint.ts',
   'packages/core/src/spec/template.ts',
   'packages/core/src/spec/svg-tags.ts',
   'packages/compiler/src/shader-plan.ts',
+  'packages/compiler/src/core-value-types.ts',
+  'packages/compiler/src/flutter-source.ts',
   'packages/compiler/src/gpui-source.ts',
   'packages/compiler/src/ir-validation.ts',
+  'packages/compiler/src/native-async.ts',
+  'packages/compiler/src/native-style.ts',
+  'packages/compiler/src/rule-declarations.ts',
+  'packages/compiler/src/rule-plan.ts',
+  'packages/compiler/src/static-declarations.ts',
   'packages/compiler/src/targets.ts',
 ]) {
   for (const scenario of [

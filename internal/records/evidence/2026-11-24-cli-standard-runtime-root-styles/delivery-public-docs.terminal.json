@@ -1,0 +1,11 @@
+{
+  "head": "28037549e478bc76f95a7192d7ff643330044a03",
+  "command": [
+    "corepack",
+    "pnpm@10.32.1",
+    "check:public-docs"
+  ],
+  "exitCode": 0,
+  "elapsedMs": 3985,
+  "sourceStatus": "Only the new evidence, technical record and exact evidence ignore are pending; all seven CLI payload paths match the clean final validation head."
+}

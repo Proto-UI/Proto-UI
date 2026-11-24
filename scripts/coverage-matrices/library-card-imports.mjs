@@ -2,6 +2,8 @@
 // strings only; no family/directory exemption or stable lifecycle promotion.
 // Owner: www.gallery.ui-library-cards. Shared server closure is separately
 // owned by www.build.style-generation through startup-prerender-imports.mjs.
+// Source/edge reconciliation at main 248f8270d is recorded in
+// internal/records/2026-11-24-main-website-boundary-repair.json.
 export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
   'packages/adapters/base/src/material/geometry-watch.ts': Object.freeze({
     sourceSha256: '258a99fb6f4f40aaa0276bef7c633126fb1c295af83f19a2bb3b55d20a8a6966',
@@ -24,7 +26,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/module-feedback/internal/shared-policy']),
   }),
   'packages/adapters/base/src/material/sink.ts': Object.freeze({
-    sourceSha256: '9a6baba692797469bc88ec6351399d10712d08373e0a81e97d9bf7304280c6e4',
+    sourceSha256: '6ad0b1c37967d3ac6aff3de80fc9492f99b727887fd1987e0f013e819931f2fe',
     companionSource: Object.freeze({
       path: 'packages/adapters/base/src/host/synchronous-steps.ts',
       sha256: '1fc559c9ad68a7a03e2d5511362e41b95e492f245d0eb4a7f1cc16e3b3f5734b',
@@ -37,6 +39,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
       './contact-motion',
       './contact-carrier',
       './contact-profile',
+      './paint-reservation',
       './style-tint-profile',
       './image-prepare',
       './geometry-watch',
@@ -50,6 +53,32 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
       './source-refresh-task',
       './program-pool',
       './style',
+    ]),
+  }),
+  // Exact lazy geometry consumer of the shared physical lease owner.
+  // Its source admission does not permit geometry in a public shell bundle.
+  'packages/adapters/base/src/material/paint-reservation.ts': Object.freeze({
+    sourceSha256: '09845878f6672da933ac8a1cf4bc529962ea6cbfe7ed4e010737a283ba382622',
+    specifiers: Object.freeze(['../platform/web-material-paint-reservation', './border-outline']),
+  }),
+  // The reviewed synchronous ref/lease owner keeps the original public callback
+  // and one private registry. No optical geometry or additional raw API is admitted.
+  'packages/adapters/base/src/platform/web-material-paint-reservation.ts': Object.freeze({
+    sourceSha256: 'dc3e8851ed9ed863b59072d4ae21122710dc09e13d3d389774d0b52cd595f7c8',
+    specifiers: Object.freeze(['@proto.ui/core', '@proto.ui/module-feedback']),
+  }),
+  // Promote the existing contact-carrier edge to a complete source binding.
+  // The two new helpers preserve bounded canvas admission and all-step cleanup.
+  'packages/adapters/base/src/material/source.ts': Object.freeze({
+    sourceSha256: '6ff1e20429691dcfcff2be4685ceb685321df7e0156e6c8dada2c4c1d05aed1d',
+    companionSource: Object.freeze({
+      path: 'packages/adapters/base/src/host/synchronous-steps.ts',
+      sha256: '1fc559c9ad68a7a03e2d5511362e41b95e492f245d0eb4a7f1cc16e3b3f5734b',
+    }),
+    specifiers: Object.freeze([
+      '../host/synchronous-steps',
+      './border-outline',
+      './contact-carrier',
     ]),
   }),
   'packages/adapters/base/src/material/initial-paint-experiment.ts': Object.freeze({

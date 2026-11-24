@@ -847,6 +847,22 @@ function selectorMayDependOnInputState(selector: string): boolean {
   return false;
 }
 
+// This is lexical work over a string, not a snapshot of CSS applicability or
+// DOM state. Read the current (including expanded nesting) selector on every
+// graph build. A changed selector replaces the entry; the table does not retain rules.
+const entryInputStateByRule = new WeakMap<
+  CSSStyleRule,
+  { selector: string; inputState: boolean }
+>();
+
+function ruleMayDependOnInputState(rule: CSSStyleRule, selector: string): boolean {
+  const cached = entryInputStateByRule.get(rule);
+  if (cached?.selector === selector) return cached.inputState;
+  const inputState = selectorMayDependOnInputState(selector);
+  entryInputStateByRule.set(rule, { selector, inputState });
+  return inputState;
+}
+
 function collectEntryStyleDependencies(
   view: Window & typeof globalThis,
   roots: Iterable<Document | ShadowRoot>,
@@ -911,7 +927,7 @@ function collectEntryStyleDependencies(
           '&',
           `:is(${(rule.parentRule as CSSStyleRule).selectorText})`
         );
-      inputState ||= selectorMayDependOnInputState(selector);
+      inputState ||= ruleMayDependOnInputState(rule as CSSStyleRule, selector);
       if (/[+~](?!=)/.test(selector) && styleRuleCanAffectEntryEligibility(rule as CSSStyleRule))
         for (const subject of collectSiblingDependencySubjects(
           selector,

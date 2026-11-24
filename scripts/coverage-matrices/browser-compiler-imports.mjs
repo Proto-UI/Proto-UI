@@ -14,6 +14,9 @@
 // is recorded with its single Core edge. Every added edge stays inside the
 // reviewed compiler and Core source graph. No new website consumer, path
 // prefix or import category is admitted.
+// Main 248f8270d reconciliation is backed by recovered previous bodies and
+// complete diffs in internal/records/2026-11-24-main-website-boundary-repair.json.
+// The compiler owner's fingerprint and UI owner set are independent gates.
 const BROWSER_COMPILER_OWNER = Object.freeze({
   path: 'apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts',
   sha256: '13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9',
@@ -31,7 +34,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['../../core/src/spec/feedback/semantic-merge']),
   }),
   'packages/compiler/src/gpui-source.ts': Object.freeze({
-    sourceSha256: '1b0e0cd2566a56fe83528ff0907b4f91a01b2c1bf0ae7ca1876eaf34d7cc3aa1',
+    sourceSha256: '897cd8622b7bd9353e6bf8cd28e43a6a2e556e080ad15ac8e115fc408adb5089',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/spec/feedback/semantic-merge']),
   }),
@@ -101,7 +104,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'packages/compiler/src/targets.ts': Object.freeze({
-    sourceSha256: '1a27cff8afab099f8e123a127e117a5577e1086dbc7f3393ce61b715fbe0d8fa',
+    sourceSha256: 'c2dc909977e3968f884cf170bf491e7d961b37f5b13ae9ad975a143f52c85e1c',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/shader-presentation']),
   }),
@@ -111,17 +114,24 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['./anatomy', './handles']),
   }),
   'packages/core/src/handles.ts': Object.freeze({
-    sourceSha256: 'da54a619755e23fee1c4d4ab9b23af130f75e78510b27a96125e356896f48f14',
+    sourceSha256: '25b7d940e4fbe8c12d9ae1f244c0346cc9a1adfc06af05c7cbcc8e53c8ef1032',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze([
       './anatomy',
       './material',
+      './material-paint-reservation',
       './presence-presentation',
       './resident-motion',
       './shader-presentation',
       './spec',
       './state',
     ]),
+  }),
+  // Opaque declaration types only; the compiler owner gains no physical host.
+  'packages/core/src/material-paint-reservation.ts': Object.freeze({
+    sourceSha256: '288d506b2df7d30f54ccac480a70136533abfa037475072e46ce7080af20d95e',
+    companionSource: BROWSER_COMPILER_OWNER,
+    specifiers: Object.freeze(['./anatomy']),
   }),
   'packages/core/src/internal.ts': Object.freeze({
     sourceSha256: '2b16d692f539b0addc652c8fb9cc03b51064d3eba8424fbf836161b289a9eda7',
@@ -134,7 +144,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'packages/core/src/presence-presentation.ts': Object.freeze({
-    sourceSha256: '10c8d6f29617c1cbd02d891d340880e281ac072a0ba90494c3f57842ff09ed6d',
+    sourceSha256: 'edb67aa4b338842825d2640db1b1754f79e692596ea7ec15885a38153f5fc473',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['./handles', './state']),
   }),
@@ -179,9 +189,14 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['./feedback', './owned-template-blueprint', './template']),
   }),
   'packages/core/src/spec/owned-template-blueprint.ts': Object.freeze({
-    sourceSha256: '99fc68f49987facedd31c01c0121f92b188d6f2c20769202d47657464a055a75',
+    sourceSha256: 'fcfe513cdb1a6533c164fdedc25ae3e085d97f209953c149e8c867df899cb3b2',
     companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze(['./feedback/style', './svg-tags', './template']),
+    specifiers: Object.freeze([
+      '../material-paint-reservation',
+      './feedback/style',
+      './svg-tags',
+      './template',
+    ]),
   }),
   'packages/core/src/spec/svg-tags.ts': Object.freeze({
     sourceSha256: '816196bcb9d6899d9185a4dfd11ebe07398a7717afccdb9b5e56e46f95e30bf0',
@@ -189,9 +204,15 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['./template']),
   }),
   'packages/core/src/spec/template.ts': Object.freeze({
-    sourceSha256: 'b1d9800a9bb71907c85e8de6923048839b4144d8f00898362221b2f7483cb522',
+    sourceSha256: '6e63757bad33a6b6a23ea94b95fb34b44e5a4f78d97aca8d8938d9089bb42c6f',
     companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze(['../handles', '../prototype', './feedback/style', './svg-tags']),
+    specifiers: Object.freeze([
+      '../handles',
+      '../material-paint-reservation',
+      '../prototype',
+      './feedback/style',
+      './svg-tags',
+    ]),
   }),
   'packages/core/src/state.ts': Object.freeze({
     sourceSha256: '234bd9923e31a60d9872c46fda137b49d63de9e9df1dca6225ed28ebee53978f',

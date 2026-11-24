@@ -118,7 +118,20 @@ describe('collectProtoStyleTokens', () => {
       true,
     ],
     ['capture with an extra value', 'return { ...result, extra: external };', true, true],
-    ['capture after an opaque spread', 'return { ...external, ...result };', true, true],
+    // Core caches the raw Result before projectHandle. An opaque getter can
+    // reenter the same hook and replace its fields before the final spread.
+    [
+      'capture after an opaque spread remains unproved',
+      'return { ...external, ...result };',
+      false,
+      false,
+    ],
+    [
+      'capture after an inline closed data spread',
+      'return { ...{ stateHandles: null, getState: null }, ...result };',
+      true,
+      true,
+    ],
     ['opaque spread after capture', 'return { ...result, ...external };', false, false],
     ['state bag overwritten', 'return { ...result, stateHandles: external };', false, true],
     [

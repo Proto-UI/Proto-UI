@@ -175,12 +175,6 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   ...LIBRARY_CARD_IMPORT_ALLOWLIST,
   ...DIAGNOSTIC_IMPORT_ALLOWLIST,
   ...BROWSER_COMPILER_IMPORT_ALLOWLIST,
-  // The feedback presence projector is reached by the website's presence
-  // projection. Its imports stay inside Core and the motion sampler it owns.
-  'packages/modules/feedback/src/presence/projector.ts': Object.freeze({
-    sourceSha256: '1f9ca6863c9973cebde1dfd27a1bdbe3dbcb320326a0a938c5720cd25c8b0025',
-    specifiers: Object.freeze(['@proto.ui/core', '../motion/sampler', './sink']),
-  }),
   // The authored Form demo consumes only the public Field request type.
   // Its interactive controller remains owned by the existing blocked demo row.
   'apps/www/src/content/docs/form-validation-demo.shared.ts': Object.freeze({
@@ -346,15 +340,6 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // These reviewed edges admit neither sibling modules nor foreign consumers.
   'packages/adapters/base/src/material/contact-profile.ts': Object.freeze({
     resolvedPaths: Object.freeze(['packages/adapters/base/src/material/liquidgl-kernel.generated']),
-  }),
-  'packages/adapters/base/src/material/source.ts': Object.freeze({
-    sourceSha256: '0da5ec24126268949824ee048ecf8e9ed2da3d9ffff767c2f1a86f5e60a05450',
-    companionSource: Object.freeze({
-      path: 'packages/adapters/base/src/host/synchronous-steps.ts',
-      sha256: '1fc559c9ad68a7a03e2d5511362e41b95e492f245d0eb4a7f1cc16e3b3f5734b',
-    }),
-    specifiers: Object.freeze(['../host/synchronous-steps']),
-    resolvedPaths: Object.freeze(['packages/adapters/base/src/material/contact-carrier']),
   }),
   'packages/adapters/base/src/material/contact-carrier.ts': Object.freeze({
     resolvedPaths: Object.freeze(['packages/adapters/base/src/material/paint-mutations']),
@@ -8938,9 +8923,13 @@ function isReviewedBuildTimeModuleSpecifier(sourcePath, specifier, rootDir, meta
           WEBSITE_MERGED_RETRY_VIRTUAL_CONFIG_SHA256,
           WEBSITE_SPRINT2_RETRY_VIRTUAL_CONFIG_SHA256,
           WEBSITE_VISUAL_LABELS_RETRY_VIRTUAL_CONFIG_SHA256,
+          WEBSITE_EXPLICIT_CHUNKS_RETRY_VIRTUAL_CONFIG_SHA256,
+          WEBSITE_CLIENT_CHUNKS_RETRY_VIRTUAL_CONFIG_SHA256,
         ].includes(configSha)
       ) {
         inputs.push(...WEBSITE_RETRY_VIRTUAL_HELPERS);
+        if (configSha === WEBSITE_CLIENT_CHUNKS_RETRY_VIRTUAL_CONFIG_SHA256)
+          inputs.push(WEBSITE_CLIENT_CHUNKS_HELPER);
       } else if (
         ![
           PROMOTION_FINF_RETRY_AUDIT_CONFIG_SHA256,
@@ -9812,6 +9801,20 @@ const WEBSITE_SPRINT2_RETRY_VIRTUAL_CONFIG_SHA256 =
 // Keep the same four Retry import owners and exact helper digests.
 const WEBSITE_VISUAL_LABELS_RETRY_VIRTUAL_CONFIG_SHA256 =
   'c0a7f33cceaf8b66e31592b7d266b6cd63d28c032467f6b833eb0e989577f1ee';
+// Header isolation makes manual chunk dependency grouping explicit. The four
+// Retry import owners and exact helpers stay unchanged; general package
+// promotion still requires one of its separately reviewed resolver profiles.
+const WEBSITE_EXPLICIT_CHUNKS_RETRY_VIRTUAL_CONFIG_SHA256 =
+  'e3331ef0b79cdd7d35392ec12c61384b625104c3ead6ca78a6bbb86b76903949';
+// Scope explicit grouping to the client and keep the existing concept data with
+// its bootstrap. Bind the new build hook alongside the existing exact helpers;
+// the four Retry import owners and historical profile requirements stay fixed.
+const WEBSITE_CLIENT_CHUNKS_RETRY_VIRTUAL_CONFIG_SHA256 =
+  '10404ebdfd8ec0f96f74f59bba0b064b9f361b26de9483e82e5550d7aba7e58d';
+const WEBSITE_CLIENT_CHUNKS_HELPER = [
+  'apps/www/scripts/client-chunk-isolation.mjs',
+  'ab1b90b6ab049058595d686ae23b835cdec6d3b96058bd4055982c8a73c57e69',
+];
 const WEBSITE_RETRY_VIRTUAL_HELPERS = [
   [
     'apps/www/src/utils/proto-ui-source.mjs',

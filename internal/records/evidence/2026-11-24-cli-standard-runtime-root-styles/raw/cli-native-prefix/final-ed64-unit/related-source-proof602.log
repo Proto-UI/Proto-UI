@@ -1,0 +1,293 @@
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+
+ RUN  v2.1.9 /var/tmp/proto-ui-cli-fix-456f
+
+13:37:06 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { spawnSync } from 'node:child_process';
+   |                                                 ^
+2  |  import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+3  |  import { tmpdir } from 'node:os';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/prototype-style-tokens.test.ts
+13:37:06 [vite] warning: Unrecognized target environment "ES2024"
+1  |  /**
+2  |   * Semantics the Web projection names directly instead of normalizing. Exported
+   |                                             ^
+3  |   * so a static analyzer can reproduce the same attribute without depending on
+4  |   * this module at runtime; `packages/cli/test/prototype-style-tokens.test.ts`
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/modules/expose-state-web/src/utils.ts
+13:37:06 [vite] warning: Unrecognized target environment "ES2024"
+1  |  // @ts-nocheck
+2  |  // Recursive ts.Node AST walking extracted from the legacy CLI so source-token
+   |                                  ^
+3  |  // collection is shared by both user commands and generated preset manifests.
+4  |  import fs from 'node:fs/promises';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/src/services/prototype-style-tokens.ts
+13:37:07 [vite] warning: Unrecognized target environment "ES2024"
+1  |  /**
+2  |   * Generated from scripts/styles/lowered-variant-order.canonical.ts by
+   |                                             ^
+3  |   * scripts/styles/generate-lowered-variant-order.ts.
+4  |   * Do not edit by hand.
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/src/generated/lowered-variant-order.ts
+13:37:07 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import {
+3  |    createHookSourceModuleContext,
+   |           ^
+4  |    type HookSourceModule as Module,
+5  |    type HookSourceSymbol as SymbolRef,
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/src/services/hook-source-summary.ts
+13:37:07 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { readFileSync, realpathSync, statSync } from 'node:fs';
+   |                                                 ^
+2  |  import path from 'node:path';
+3  |  import ts from 'typescript';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/src/services/hook-source-module.ts
+ ✓ packages/cli/test/prototype-style-tokens.test.ts (119 tests) 3237ms
+   ✓ collectProtoStyleTokens > closes the isolated Shadcn Radio Group state and theme rules 1124ms
+   ✓ collectProtoStyleTokens > delivers conditional CSS after a closed finite mutual callback graph 954ms
+13:37:11 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { describe, expect, it } from 'vitest';
+2  |  
+   |  ^
+3  |  import {
+4  |    PROTO_SHADOW_STYLE_ARTIFACT_KIND,
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/proto-style-css.test.ts
+13:37:11 [vite] warning: Unrecognized target environment "ES2024"
+1  |  const PUI_STYLE_ATTR = 'data-pui-style';
+2  |  const PUI_COLOR_SCHEME_ATTR = 'data-pui-color-scheme';
+   |        ^
+3  |  const SYSTEM_DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)';
+4  |  const SYSTEM_REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/src/services/proto-style-css.ts
+13:37:11 [vite] warning: Unrecognized target environment "ES2024"
+1  |  /**
+2  |   * Generated from packages/prototypes/brutalist/src by
+   |                                             ^
+3  |   * scripts/styles/generate-brutalist-style-tokens.ts.
+4  |   * Do not edit by hand.
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/src/generated/brutalist-style-tokens.ts
+13:37:11 [vite] warning: Unrecognized target environment "ES2024"
+1  |  export const ADAPTER_PACKAGES = {
+2  |    vue: '@proto.ui/adapter-vue',
+   |               ^
+3  |    react: '@proto.ui/adapter-react',
+4  |    'web-component': '@proto.ui/adapter-web-component',
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/src/legacy/type.ts
+13:37:11 [vite] warning: Unrecognized target environment "ES2024"
+1  |  /**
+2  |   * Generated from packages/prototypes/shadcn/src by
+   |                                             ^
+3  |   * scripts/styles/generate-shadcn-style-tokens.ts.
+4  |   * Do not edit by hand.
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/src/generated/shadcn-style-tokens.ts
+13:37:11 [vite] warning: Unrecognized target environment "ES2024"
+1  |  /**
+2  |   * Generated from packages/prototypes/brutalist/src/theme.ts by
+   |                                             ^
+3  |   * scripts/styles/generate-brutalist-style-tokens.ts.
+4  |   * Do not edit by hand.
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/src/generated/brutalist-theme.ts
+ ✓ packages/cli/test/proto-style-css.test.ts (82 tests) 179ms
+13:37:12 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+   |                                                 ^
+2  |  import { tmpdir } from 'node:os';
+3  |  import path from 'node:path';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/hook-source-collision-order.test.ts
+13:37:12 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { readFileSync, statSync } from 'node:fs';
+   |                                                 ^
+2  |  import path from 'node:path';
+3  |  import ts from 'typescript';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/src/services/lowered-hook-coverage.ts
+13:37:12 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import {
+3  |    sourceMembersProven,
+   |           ^
+4  |    type HookSourceSummaryContext,
+5  |    type HookSourceValue,
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/src/services/closed-rule-helpers.ts
+ ✓ packages/cli/test/hook-source-collision-order.test.ts (42 tests) 602ms
+13:37:13 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+   |                                                 ^
+2  |  import { tmpdir } from 'node:os';
+3  |  import path from 'node:path';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/hook-source-receiver-mutation.test.ts
+ ✓ packages/cli/test/hook-source-receiver-mutation.test.ts (31 tests) 1641ms
+13:37:16 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import path from 'node:path';
+2  |  import { mkdtempSync, realpathSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs';
+   |                   ^
+3  |  import { tmpdir } from 'node:os';
+4  |  import ts from 'typescript';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/hook-source-lexical-index.test.ts
+ ✓ packages/cli/test/hook-source-lexical-index.test.ts (34 tests) 85ms
+13:37:17 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
+   |                                                 ^
+2  |  import { tmpdir } from 'node:os';
+3  |  import path from 'node:path';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/hook-source-rule-input-preservation.test.ts
+ ✓ packages/cli/test/hook-source-rule-input-preservation.test.ts (33 tests) 274ms
+13:37:18 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+   |                                                 ^
+2  |  import { tmpdir } from 'node:os';
+3  |  import path from 'node:path';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/prototype-style-token-tables.test.ts
+ ✓ packages/cli/test/prototype-style-token-tables.test.ts (83 tests) 1072ms
+   ✓ finite nested token inventories without semantic proof laundering > nested opaque template 626ms
+13:37:19 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { execFileSync } from 'node:child_process';
+   |                                                 ^
+2  |  import { realpathSync } from 'node:fs';
+3  |  import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/hook-source-resolution-mode.test.ts
+ ✓ packages/cli/test/hook-source-resolution-mode.test.ts (8 tests) 511ms
+13:37:21 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+   |                                                 ^
+2  |  import { tmpdir } from 'node:os';
+3  |  import path from 'node:path';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/hook-source-projection-accessors.test.ts
+ ✓ packages/cli/test/hook-source-projection-accessors.test.ts (42 tests) 1053ms
+   ✓ hook source projection accessors > closes the actual Brutalist Input focus ring through its authored Input handle 641ms
+13:37:23 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+   |                                                 ^
+2  |  import { tmpdir } from 'node:os';
+3  |  import path from 'node:path';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/hook-source-inline-record-registration.test.ts
+ ✓ packages/cli/test/hook-source-inline-record-registration.test.ts (24 tests) 1780ms
+   ✓ source-proven inline record arguments in child registration > resolves the shipped Field Textarea optional-control invalid source 1200ms
+13:37:25 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
+   |                                                 ^
+2  |  import { tmpdir } from 'node:os';
+3  |  import path from 'node:path';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/prototype-style-tokens-local-container-effects.test.ts
+ ✓ packages/cli/test/prototype-style-tokens-local-container-effects.test.ts (24 tests) 535ms
+13:37:27 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+   |                                                 ^
+2  |  import { tmpdir } from 'node:os';
+3  |  import path from 'node:path';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/hook-source-setup-capability.test.ts
+ ✓ packages/cli/test/hook-source-setup-capability.test.ts (26 tests) 959ms
+13:37:28 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { execFileSync } from 'node:child_process';
+   |                                                 ^
+2  |  import { realpathSync } from 'node:fs';
+3  |  import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/hook-source-export-patterns.test.ts
+(node:1303970) [DEP0155] DeprecationWarning: Use of deprecated trailing slash pattern mapping "./empty/" in the "exports" field module resolution of the package at /var/tmp/pui456f-cli-final/hook-export-patterns-GL4bxR/node_modules/pattern-hooks/package.json imported from /var/tmp/pui456f-cli-final/hook-export-patterns-GL4bxR/[eval1]. Mapping specifiers ending in "/" is no longer supported.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ ✓ packages/cli/test/hook-source-export-patterns.test.ts (7 tests) 478ms
+13:37:30 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+   |                                                 ^
+2  |  import { tmpdir } from 'node:os';
+3  |  import path from 'node:path';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/hook-source-helper-registration-context.test.ts
+ ✓ packages/cli/test/hook-source-helper-registration-context.test.ts (16 tests) 786ms
+13:37:31 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+   |                                                 ^
+2  |  import { tmpdir } from 'node:os';
+3  |  import path from 'node:path';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/hook-source-projector-scope.test.ts
+ ✓ packages/cli/test/hook-source-projector-scope.test.ts (1 test) 221ms
+13:37:32 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import path from 'node:path';
+2  |  import ts from 'typescript';
+   |                   ^
+3  |  import { describe, expect, it } from 'vitest';
+4  |  import { createHookSourceSummaryContext } from '../src/services/hook-source-summary';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/hook-source-write-index.test.ts
+ ✓ packages/cli/test/hook-source-write-index.test.ts (22 tests) 50ms
+13:37:33 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+   |                                                 ^
+2  |  import { tmpdir } from 'node:os';
+3  |  import path from 'node:path';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/lowered-authored-setup-rows.test.ts
+ ✓ packages/cli/test/lowered-authored-setup-rows.test.ts (8 tests) 226ms
+
+ Test Files  17 passed (17)
+      Tests  602 passed (602)
+   Start at  13:37:05
+   Duration  28.31s (transform 936ms, setup 0ms, collect 6.38s, tests 13.69s, environment 4.19s, prepare 1.05s)
+
+JSON report written to /var/tmp/proto-ui-native-evidence-456f/cli-native-prefix/final-ed64-unit/related-source-proof602.json

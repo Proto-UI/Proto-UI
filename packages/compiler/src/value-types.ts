@@ -591,10 +591,42 @@ export function callableValue(type: ValueType, optional = false): CallableType {
     !first ||
     typeof first === 'string' ||
     first.kind !== 'callable' ||
-    !members.every((member) => valueTypeEqual(member, first))
+    !members.every(
+      (member) =>
+        typeof member !== 'string' &&
+        member.kind === 'callable' &&
+        member.parameters.length === first.parameters.length &&
+        member.parameters.every(
+          (parameter, index) =>
+            !!parameter.optional === !!first.parameters[index].optional &&
+            !!parameter.rest === !!first.parameters[index].rest &&
+            valueTypeEqual(parameter.type, first.parameters[index].type)
+        )
+    )
   )
     throw new TypeError('Call requires a statically typed callable value.');
-  return first;
+  const callables = members as CallableType[];
+  if (callables.every((member) => valueTypeEqual(member, first))) return first;
+  // Every possible target accepts the same checked arguments. Preserve all
+  // return alternatives; a mixed ordinary/lookup union cannot promise a lookup.
+  const lookup = callables.every((member) => member.lookup !== undefined)
+    ? [...new Set(callables.flatMap((member) => member.lookup!.map(({ key }) => key)))].map(
+        (key) => ({
+          key,
+          type: joinValueTypes(
+            callables.map(
+              (member) => member.lookup!.find((entry) => entry.key === key)?.type ?? 'void'
+            )
+          ),
+        })
+      )
+    : undefined;
+  return {
+    kind: 'callable',
+    parameters: first.parameters,
+    returnType: joinValueTypes(callables.map((member) => member.returnType)),
+    ...(lookup ? { lookup } : {}),
+  };
 }
 
 export function checkedCall(

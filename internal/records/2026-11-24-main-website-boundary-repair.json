@@ -1,0 +1,1021 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-24",
+  "scope": "Repair Website exact source/import and owner projection regressions at current main; no product source mutation.",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "sourceRevision": "248f8270dd3458d1fcbc507e618337f98b9fde96",
+  "reproduction": {
+    "command": "node scripts/coverage-matrices/check-coverage-matrices.mjs",
+    "exitCode": 1,
+    "issueCount": 157,
+    "rawImportOccurrences": 154,
+    "rawImportSourceFiles": 33,
+    "sourceBindingIssues": 3
+  },
+  "priorPRChecked": {
+    "number": 1787,
+    "head": "f1032cb0f144c208fc3e23cfafdfd055e7c79a97",
+    "overlap": false,
+    "scope": "GPUI fixtures/projection tests and governance snapshot; no Website admission files"
+  },
+  "authority": [
+    "internal/website/self-hosting-coverage-matrix.md#source-scan-bindings",
+    "scripts/coverage-matrices/README.md",
+    "spec/contracts/C-MATERIAL-PAINT-RESERVATION-0001.yaml",
+    "spec/contracts/C-FEEDBACK-PRESENCE-PRESENTATION-0001.yaml",
+    "spec/contracts/C-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001.yaml",
+    "spec/contracts/C-FEEDBACK-RESIDENT-MOTION-0001.yaml"
+  ],
+  "reviewMethod": "Recovered every previously hash-bound body and checked its SHA-256 before reviewing the full historical-to-current delta. New admissions were reviewed as complete finite sources and restricted to exact literal specifiers. The duplicate Presence projector override is removed; the old source.ts edge-only exception is strengthened to full source binding.",
+  "sourceDeltaEvidence": {
+    "path": "internal/records/evidence/2026-11-24-main-website-boundary-repair/recovered-source-deltas.patch.gz",
+    "sha256": "5dce6e94e032cec3f5c05ded3f6c569c135d748a4e9a695144ab6788baefcf41",
+    "uncompressedSHA256": "f6b41c4b26c094c77a28582f5f4eeabbb77f8b47771099c8e5924a7710034e1a",
+    "previousHashBindingsRecovered": 27,
+    "previousHashBoundFiles": 26,
+    "diffLines": 5802
+  },
+  "reviewedImports": [
+    {
+      "path": "packages/adapters/base/src/material/paint-reservation.ts",
+      "ownerScope": "www.gallery.ui-library-cards",
+      "previousAdmissions": [],
+      "sourceSHA256": "531a999fa3ff7683ae7d940809447b9306018ad889b5c297b373426c119e8e2d",
+      "exactSpecifiers": ["./border-outline", "@proto.ui/core", "@proto.ui/module-feedback"],
+      "addedSpecifiers": ["./border-outline", "@proto.ui/core", "@proto.ui/module-feedback"],
+      "removedSpecifiers": [],
+      "boundaryReview": "Host bridge accepts only the logical registry association; measures and writes its own reservation part, detects ambiguous/stale/conflicting leases, restores owned styles and adds no input/focus/phase authority.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/adapters/base/src/material/sink.ts",
+      "ownerScope": "www.gallery.ui-library-cards",
+      "previousAdmissions": [
+        {
+          "group": "card",
+          "oldSHA256": "6e7d8dd7c421a8a3cd6d10be55dd6a4fe83b50d68feecb538981071dc7e62159",
+          "previousRevision": "a2a09d8173799388d8ccd687daec4c8429a9ff41",
+          "previousGitBlob": "63437883997b1abb4bd1896b16454c1c133756b2",
+          "diffFile": "11-card-sink.diff",
+          "diffLines": 159
+        }
+      ],
+      "sourceSHA256": "6ad0b1c37967d3ac6aff3de80fc9492f99b727887fd1987e0f013e819931f2fe",
+      "exactSpecifiers": [
+        "../host/synchronous-steps",
+        "./initial-paint-bridge",
+        "./paint-mutations",
+        "../events/pointer-contact",
+        "./contact-motion",
+        "./contact-carrier",
+        "./contact-profile",
+        "./paint-reservation",
+        "./style-tint-profile",
+        "./image-prepare",
+        "./geometry-watch",
+        "@proto.ui/core",
+        "@proto.ui/module-feedback",
+        "@proto.ui/module-feedback/internal/shared-policy",
+        "./source",
+        "./preferences",
+        "./program",
+        "./program-inputs",
+        "./source-refresh-task",
+        "./program-pool",
+        "./style"
+      ],
+      "addedSpecifiers": ["../host/synchronous-steps", "./paint-reservation"],
+      "removedSpecifiers": [],
+      "boundaryReview": "Adds bounded reservation footprint checks and all-step cleanup, retaining the existing optical image cache/lease and current-generation checks. The two new literal imports are synchronous-steps and paint-reservation.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/adapters/base/src/material/source.ts",
+      "ownerScope": "www.gallery.ui-library-cards",
+      "previousAdmissions": [
+        {
+          "group": "inline",
+          "resolvedPaths": ["packages/adapters/base/src/material/contact-carrier"],
+          "sourceHashPreviouslyAbsent": true
+        }
+      ],
+      "sourceSHA256": "6ff1e20429691dcfcff2be4685ceb685321df7e0156e6c8dada2c4c1d05aed1d",
+      "exactSpecifiers": ["../host/synchronous-steps", "./border-outline", "./contact-carrier"],
+      "addedSpecifiers": ["../host/synchronous-steps", "./border-outline"],
+      "removedSpecifiers": [],
+      "boundaryReview": "Complete current source reviewed: bounded opaque application canvas only, conservative ancestry/border/pseudo/overlap admission, no screenshot/external fetch or self-output sampling. Tightens its former contact-carrier resolved-path exception into a full hash and three literal imports.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/compiler/src/core-value-types.ts",
+      "ownerScope": "www.demo.raw-adapter-runtimes (compiler host source/type graph only)",
+      "previousAdmissions": [
+        {
+          "group": "compiler",
+          "oldSHA256": "43627a45555d5eb33a1265a761509d2de6518f0f4dd7aba6c03ada0a47e97716",
+          "previousRevision": "9fff88cf23d4e55375979bc5c68c033e3deaed38",
+          "diffFile": "12-compiler-core-value-types.diff",
+          "diffLines": 284
+        }
+      ],
+      "sourceSHA256": "95d2852d40d97b570e75a3f095b25a7ce633e81606f21148557266795ff2842e",
+      "exactSpecifiers": ["../../core/src/control-label"],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "companionSource": {
+        "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+        "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
+      },
+      "boundaryReview": "Extends checked portable type descriptions for existing host atoms, SVG and layout/overlay contracts. Its only cross-package edge remains the same Core control-label declaration.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/compiler/src/flutter-source.ts",
+      "ownerScope": "www.demo.raw-adapter-runtimes (compiler host source/type graph only)",
+      "previousAdmissions": [
+        {
+          "group": "compiler",
+          "oldSHA256": "d95212b29e54d052b5583096ad2b465ea8fd77d44cac93f548afd567a1205354",
+          "previousRevision": "66ebd33e0dfc3465c6547d552095d0d4a104f12f",
+          "previousGitBlob": "f9ca949f85e6db8e26946135eb429906a414c102",
+          "diffFile": "13-compiler-flutter-source.diff",
+          "diffLines": 214
+        }
+      ],
+      "sourceSHA256": "c01bb42e8dd1becbd1ce5a565388a5420a4e88f13862e335aca98a77765d6ddd",
+      "exactSpecifiers": ["../../core/src/spec/feedback/semantic-merge"],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "companionSource": {
+        "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+        "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
+      },
+      "boundaryReview": "Checked ordinary-value lowering and early rejection of unsupported lifecycle/validator/loop/spread features retain target admission. Its only admitted raw edge remains Core semantic-merge.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/compiler/src/gpui-source.ts",
+      "ownerScope": "www.demo.raw-adapter-runtimes (compiler host source/type graph only)",
+      "previousAdmissions": [
+        {
+          "group": "compiler",
+          "oldSHA256": "290a26176c307f7b81bec4379daef5a22926b23d8e1831eefe2fe15331a1283f",
+          "previousRevision": "5e0895e54375bb63291ba670cd2202f815c94d19",
+          "previousGitBlob": "0d196804f5774e87c0c33d06db6d9c84025cb9a9",
+          "diffFile": "14-compiler-gpui-source.diff",
+          "diffLines": 231
+        }
+      ],
+      "sourceSHA256": "1b0e0cd2566a56fe83528ff0907b4f91a01b2c1bf0ae7ca1876eaf34d7cc3aa1",
+      "exactSpecifiers": ["../../core/src/spec/feedback/semantic-merge"],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "companionSource": {
+        "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+        "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
+      },
+      "boundaryReview": "Retains checked native ABI boundaries for ordinary values, explicit unsupported loop/spread diagnostics and first-class style target admission. Its only admitted raw edge remains Core semantic-merge.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/compiler/src/ir-validation.ts",
+      "ownerScope": "www.demo.raw-adapter-runtimes (compiler host source/type graph only)",
+      "previousAdmissions": [
+        {
+          "group": "compiler",
+          "oldSHA256": "b8ef32a38d694348ffc221dff7df643110795d4918ada24f4060cc856731e535",
+          "recoveredEvidence": "internal/records/evidence/2026-11-24-compiler-props-capture-review/packages__compiler__src__ir-validation.ts.gz",
+          "diffFile": "15-compiler-ir-validation.diff",
+          "diffLines": 1057
+        }
+      ],
+      "sourceSHA256": "5ac930b76ee1e7275ff39950fd4639f7351e5f8672479a0efe7d632b814c4b09",
+      "exactSpecifiers": ["../../core/src/spec/feedback/tokens"],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "companionSource": {
+        "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+        "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
+      },
+      "boundaryReview": "Validates expanded ordinary containers/rest/iteration, finite Rule bindings and flow/state provenance as plain IR data; rejects unsupported schema and accessors. New imports stay inside Compiler; the sole admitted raw Core tokens edge is unchanged.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/compiler/src/native-async.ts",
+      "ownerScope": "www.demo.raw-adapter-runtimes (compiler host source/type graph only)",
+      "previousAdmissions": [
+        {
+          "group": "compiler",
+          "oldSHA256": "818979b93274fb6371bdb24964f699508f373025cd1685c3e97b0fe9a32c31b7",
+          "previousRevision": "9fff88cf23d4e55375979bc5c68c033e3deaed38",
+          "diffFile": "16-compiler-native-async.diff",
+          "diffLines": 194
+        }
+      ],
+      "sourceSHA256": "0b9c33c233a6fc648befeaad36ab7b7fdfe56804cd3261055ef3b0da1997c211",
+      "exactSpecifiers": ["../../core/src/shader-presentation"],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "companionSource": {
+        "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+        "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
+      },
+      "boundaryReview": "Uses canonical Presence artifact delivery and reentrant all-step cleanup in emitted support; no new raw package edge. Its Core shader declaration edge remains exact and browser-compiler companion-bound.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/compiler/src/native-style.ts",
+      "ownerScope": "www.demo.raw-adapter-runtimes (compiler host source/type graph only)",
+      "previousAdmissions": [
+        {
+          "group": "compiler",
+          "oldSHA256": "d515ebc9c56a7311cd1448ece1158f1e454ac1db0284d10c28771e74f48dde26",
+          "previousRevision": "f5a8e18dc0a72afd40d41eba7ca3ef59eb71541e",
+          "previousGitBlob": "e09ea3598b8bd3e7bef30cc347f422d4822bca05",
+          "diffFile": "17-compiler-native-style.diff",
+          "diffLines": 317
+        }
+      ],
+      "sourceSHA256": "0e2f301a1109446b51954e05ab9a5d8dd376d109adb4ef03c16564b86799a007",
+      "exactSpecifiers": ["../../core/src/spec/feedback/semantic-merge"],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "companionSource": {
+        "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+        "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
+      },
+      "boundaryReview": "Emitted style support owns decoration leases, captures Rule inputs once, pairs reached meta subscriptions and fences cleanup reentry; source import remains the same Core semantic-merge edge.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/compiler/src/rule-declarations.ts",
+      "ownerScope": "www.demo.raw-adapter-runtimes (compiler host source/type graph only)",
+      "previousAdmissions": [
+        {
+          "group": "compiler",
+          "oldSHA256": "20b3f5c12bcbbb22b57df8d89b82da1304d46affa4c01cf2bef3ebe2a2f0c9c9",
+          "previousRevision": "f5a8e18dc0a72afd40d41eba7ca3ef59eb71541e",
+          "previousGitBlob": "08d5eb5fdf35fd2c0a75bc00601c25fcabc6654f",
+          "diffFile": "18-compiler-rule-declarations.diff",
+          "diffLines": 508
+        }
+      ],
+      "sourceSHA256": "e6841f7531d59aff8ff4082907f98f49e82c533750254188c27eda9b97a574ab",
+      "exactSpecifiers": [
+        "../../core/src/handles",
+        "../../core/src/spec/feedback/style",
+        "../../core/src/spec/feedback/tokens"
+      ],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "companionSource": {
+        "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+        "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
+      },
+      "boundaryReview": "Lowers finite captured conditional/spread syntax, checked gte and owned style targets while rejecting callback-local capture and mutable static lookup. Three Core declaration/token imports remain unchanged.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/compiler/src/rule-plan.ts",
+      "ownerScope": "www.demo.raw-adapter-runtimes (compiler host source/type graph only)",
+      "previousAdmissions": [
+        {
+          "group": "compiler",
+          "oldSHA256": "f4d0921ed90994017d979e43181594af71896de85ca2343fe23e44ed6075b3d5",
+          "previousRevision": "f5a8e18dc0a72afd40d41eba7ca3ef59eb71541e",
+          "previousGitBlob": "9c8fae5baf60289c40fabb86d61a2333ea21e886",
+          "diffFile": "19-compiler-rule-plan.diff",
+          "diffLines": 124
+        }
+      ],
+      "sourceSHA256": "b728641be54fc2a329a177c037a8f828ee55019de2e7e0500c1e71f36ec4540d",
+      "exactSpecifiers": [
+        "../../core/src/spec/feedback/semantic-merge",
+        "../../core/src/spec/feedback/tokens"
+      ],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "companionSource": {
+        "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+        "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
+      },
+      "boundaryReview": "Validates finite gte thresholds and explicit style/target identities; resolves checked style bindings without arbitrary imports. The two Core semantic/token edges remain unchanged.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/compiler/src/static-declarations.ts",
+      "ownerScope": "www.demo.raw-adapter-runtimes (compiler host source/type graph only)",
+      "previousAdmissions": [
+        {
+          "group": "compiler",
+          "oldSHA256": "e76b738d2a9f27e00cac09679052b176e7611ee7e8e0150f410ab7000ac651f2",
+          "previousRevision": "06842612290860afe0871a6fe1795387f1e2f3ec",
+          "previousGitBlob": "5b7af0257d7e8266455665924baa564b78ad6767",
+          "diffFile": "20-compiler-static-declarations.diff",
+          "diffLines": 100
+        }
+      ],
+      "sourceSHA256": "304f4b27ac6b701547a8b4683ab70a230b5953f85a3de9a64efde989b429654f",
+      "exactSpecifiers": ["../../core/src/control-label"],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "companionSource": {
+        "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+        "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
+      },
+      "boundaryReview": "Decodes finite literal-map declarations and fixed Native Link configuration from syntax without importing or executing author factories. Existing Core control-label edge is unchanged.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/compiler/src/targets.ts",
+      "ownerScope": "www.demo.raw-adapter-runtimes (compiler host source/type graph only)",
+      "previousAdmissions": [
+        {
+          "group": "compiler",
+          "oldSHA256": "95b6996a6136ba531a553ec64739e2933e22628541b14309dec75964eeea7e51",
+          "previousRevision": "9fff88cf23d4e55375979bc5c68c033e3deaed38",
+          "diffFile": "21-compiler-targets.diff",
+          "diffLines": 366
+        }
+      ],
+      "sourceSHA256": "1a27cff8afab099f8e123a127e117a5577e1086dbc7f3393ce61b715fbe0d8fa",
+      "exactSpecifiers": ["../../core/src/shader-presentation"],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "companionSource": {
+        "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+        "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
+      },
+      "boundaryReview": "Target capability projection adds explicit web/native acceptance and rejection cases, including unsupported native collections/loops; alpha package versions align with main. This admission certifies source/import scope only, not any target runtime acceptance.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/core/src/handles.ts",
+      "ownerScope": "www.demo.raw-adapter-runtimes (compiler host source/type graph only)",
+      "previousAdmissions": [
+        {
+          "group": "compiler",
+          "oldSHA256": "da54a619755e23fee1c4d4ab9b23af130f75e78510b27a96125e356896f48f14",
+          "previousRevision": "c857471f7897fad58479d0b5a976fc88fc1e26fd",
+          "previousGitBlob": "f71e3339de785247dc2a831105875a31b06cc84b",
+          "diffFile": "22-compiler-handles.diff",
+          "diffLines": 30
+        }
+      ],
+      "sourceSHA256": "25b7d940e4fbe8c12d9ae1f244c0346cc9a1adfc06af05c7cbcc8e53c8ef1032",
+      "exactSpecifiers": [
+        "./anatomy",
+        "./material",
+        "./material-paint-reservation",
+        "./presence-presentation",
+        "./resident-motion",
+        "./shader-presentation",
+        "./spec",
+        "./state"
+      ],
+      "addedSpecifiers": ["./material-paint-reservation"],
+      "removedSpecifiers": [],
+      "companionSource": {
+        "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+        "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
+      },
+      "boundaryReview": "Adds type-only reservation declarations to existing Feedback/Renderer handles; the new exact edge is the opaque material-paint-reservation type.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/core/src/material-paint-reservation.ts",
+      "ownerScope": "www.demo.raw-adapter-runtimes (compiler host source/type graph only)",
+      "previousAdmissions": [],
+      "sourceSHA256": "288d506b2df7d30f54ccac480a70136533abfa037475072e46ce7080af20d95e",
+      "exactSpecifiers": ["./anatomy"],
+      "addedSpecifiers": ["./anatomy"],
+      "removedSpecifiers": [],
+      "companionSource": {
+        "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+        "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
+      },
+      "boundaryReview": "Opaque declaration types with one type-only Anatomy import, still bound to the exact browser-compiler companion source.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/core/src/presence-presentation.ts",
+      "ownerScope": "www.demo.raw-adapter-runtimes (compiler host source/type graph only)",
+      "previousAdmissions": [
+        {
+          "group": "compiler",
+          "oldSHA256": "8ff886ee4aa10048241308b4dda81998fd9c0f954eb247e884087ead3cf25398",
+          "previousRevision": "991cc33ac38421dfba2a4a800a886ec275bc4c71",
+          "previousGitBlob": "befcce3e43ec967f3358d3c7c89feaadab0daa05",
+          "diffFile": "23-compiler-presence-presentation.diff",
+          "diffLines": 126
+        }
+      ],
+      "sourceSHA256": "edb67aa4b338842825d2640db1b1754f79e692596ea7ec15885a38153f5fc473",
+      "exactSpecifiers": ["./handles", "./state"],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "companionSource": {
+        "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+        "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
+      },
+      "boundaryReview": "Typed top, intrinsic blockSize and channel easing remain detached own-data snapshots, reject unknown keys/accessors and retain phase ownership.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/core/src/spec/owned-template-blueprint.ts",
+      "ownerScope": "www.demo.raw-adapter-runtimes (compiler host source/type graph only)",
+      "previousAdmissions": [
+        {
+          "group": "compiler",
+          "oldSHA256": "99fc68f49987facedd31c01c0121f92b188d6f2c20769202d47657464a055a75",
+          "previousRevision": "378b1d05121860d9caa031f181f172ca6b77c2d1",
+          "previousGitBlob": "4f0fdd215318c05a61ac97e70e8e79688f76a3cd",
+          "diffFile": "24-compiler-owned-template-blueprint.diff",
+          "diffLines": 46
+        }
+      ],
+      "sourceSHA256": "fcfe513cdb1a6533c164fdedc25ae3e085d97f209953c149e8c867df899cb3b2",
+      "exactSpecifiers": [
+        "../material-paint-reservation",
+        "./feedback/style",
+        "./svg-tags",
+        "./template"
+      ],
+      "addedSpecifiers": ["../material-paint-reservation"],
+      "removedSpecifiers": [],
+      "companionSource": {
+        "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+        "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
+      },
+      "boundaryReview": "Retains the opaque reservation identity only on the owned unstyled template part and preserves children; adds its exact type edge.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/core/src/spec/template.ts",
+      "ownerScope": "www.demo.raw-adapter-runtimes (compiler host source/type graph only)",
+      "previousAdmissions": [
+        {
+          "group": "compiler",
+          "oldSHA256": "b1d9800a9bb71907c85e8de6923048839b4144d8f00898362221b2f7483cb522",
+          "previousRevision": "378b1d05121860d9caa031f181f172ca6b77c2d1",
+          "previousGitBlob": "e43c3f59767088e59e1b7aff37a05c6ba4bbaa17",
+          "diffFile": "25-compiler-template.diff",
+          "diffLines": 42
+        }
+      ],
+      "sourceSHA256": "6e63757bad33a6b6a23ea94b95fb34b44e5a4f78d97aca8d8938d9089bb42c6f",
+      "exactSpecifiers": [
+        "../handles",
+        "../material-paint-reservation",
+        "../prototype",
+        "./feedback/style",
+        "./svg-tags"
+      ],
+      "addedSpecifiers": ["../material-paint-reservation"],
+      "removedSpecifiers": [],
+      "companionSource": {
+        "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+        "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
+      },
+      "boundaryReview": "Adds the explicit paintReservation renderer primitive and owned target type; no generic host or interaction authority is introduced.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/modules/feedback/src/create.ts",
+      "ownerScope": "www.build.style-generation",
+      "previousAdmissions": [
+        {
+          "group": "startup",
+          "oldSHA256": "d3b7aa151bb0b354552c5105ab4073836006be2a91a8cdcbea221e5ea390098b",
+          "previousRevision": "9ef3bfa2562dd469b5ff5ac9e26150445e02c840",
+          "previousGitBlob": "f6eb580a76a2adbd068854566eac746220af8eec",
+          "diffFile": "00-startup-create.diff",
+          "diffLines": 243
+        }
+      ],
+      "sourceSHA256": "7faa1043eebc7e6874623de07ff2fc0c761b7eb2b15de9c57fcbc18b6b2f72b9",
+      "exactSpecifiers": [
+        "./caps",
+        "./material/declaration-id",
+        "./material/final-style-sink",
+        "./material/paint-reservation",
+        "./material/runtime-cap",
+        "./material/shared-sink",
+        "./motion/numeric-sources",
+        "./motion/sink",
+        "./presence/controller",
+        "./presence/sink",
+        "./shader/sink",
+        "./style/owned-decoration-cap",
+        "./style/owned-decoration-registry",
+        "./types",
+        "@proto.ui/core",
+        "@proto.ui/module-anatomy",
+        "@proto.ui/module-base",
+        "@proto.ui/module-state"
+      ],
+      "addedSpecifiers": [
+        "./material/paint-reservation",
+        "./motion/numeric-sources",
+        "@proto.ui/module-anatomy"
+      ],
+      "removedSpecifiers": [],
+      "boundaryReview": "Instance-owned paint reservations and registered numeric motion sources are installed through existing Feedback setup/capability and Anatomy dependencies. Cleanup runs every release, preserves the first error and fences reentrant successor generations. No Website controller is introduced.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/modules/feedback/src/index.ts",
+      "ownerScope": "www.build.style-generation",
+      "previousAdmissions": [
+        {
+          "group": "startup",
+          "oldSHA256": "1834c32e84d8def9a5f2c111c2c17f06d69ab24e28f55a1cb3624df8e1d14fad",
+          "previousRevision": "c857471f7897fad58479d0b5a976fc88fc1e26fd",
+          "previousGitBlob": "17b6c74045d84ceef97e55eac1237d97f1e9c250",
+          "diffFile": "01-startup-index.diff",
+          "diffLines": 10
+        }
+      ],
+      "sourceSHA256": "7f53f752e2f67a1e2eaacaffcb66c09fb570799d5183cd58debd6bed73304ae8",
+      "exactSpecifiers": [
+        "./caps",
+        "./create",
+        "./material/deferred-view-sink",
+        "./material/paint-reservation",
+        "./material/shared-sink",
+        "./motion/color",
+        "./motion/projector",
+        "./motion/sampler",
+        "./motion/sink",
+        "./motion/targets",
+        "./presence/projector",
+        "./presence/sink",
+        "./shader/sink",
+        "./style/owned-decoration-cap",
+        "./types"
+      ],
+      "addedSpecifiers": ["./material/paint-reservation"],
+      "removedSpecifiers": [],
+      "boundaryReview": "The existing Feedback export surface adds only its owned material reservation transport; Website ownership remains at the existing consumer.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/modules/feedback/src/material/paint-reservation.ts",
+      "ownerScope": "www.build.style-generation",
+      "previousAdmissions": [],
+      "sourceSHA256": "80ddbe82bafed66ccce9dfb78b3a250836a5b5a57855aaaa6a68e80af9daaf92",
+      "exactSpecifiers": ["@proto.ui/core", "@proto.ui/module-anatomy"],
+      "addedSpecifiers": ["@proto.ui/core", "@proto.ui/module-anatomy"],
+      "removedSpecifiers": [],
+      "boundaryReview": "Exact instance-local Anatomy association and opaque reservation registry; validates complete unique owned template placement, revokes stale bindings and releases every subscription. Draft transport does not assert optical support.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/modules/feedback/src/motion/numeric-sources.ts",
+      "ownerScope": "www.build.style-generation",
+      "previousAdmissions": [],
+      "sourceSHA256": "8377945b473d29ed2dca61fb739370a047561a9a6062fa0188d38ffbe0809cdf",
+      "exactSpecifiers": ["./targets", "@proto.ui/core", "@proto.ui/module-state"],
+      "addedSpecifiers": ["./targets", "@proto.ui/core", "@proto.ui/module-state"],
+      "removedSpecifiers": [],
+      "boundaryReview": "Instance-local registered state identity and semantic-key lookup; source reads come only from registered own-data handles and the State port. No arbitrary exposed-object getter or global lookup.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/modules/feedback/src/motion/projector.ts",
+      "ownerScope": "www.build.style-generation",
+      "previousAdmissions": [
+        {
+          "group": "startup",
+          "oldSHA256": "17f055f39d0df0395e621fbfdc59c912ad60ba00e4374807702f6d81c5091aab",
+          "previousRevision": "991cc33ac38421dfba2a4a800a886ec275bc4c71",
+          "previousGitBlob": "62e959e067fa103737b762bc41eb290905785714",
+          "diffFile": "02-startup-projector.diff",
+          "diffLines": 156
+        }
+      ],
+      "sourceSHA256": "2408989649ea882ad3ff9ba735e88839798312eaaf66e6ed96d5d36459702359",
+      "exactSpecifiers": [
+        "./color",
+        "./sampler",
+        "./sink",
+        "./targets",
+        "@proto.ui/core",
+        "@proto.ui/core/internal"
+      ],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "boundaryReview": "Width sampling uses declared finite numeric source snapshots; generation is rechecked after host environment/clock calls and accepted physical width is nonnegative. Imports remain the same six exact edges.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/modules/feedback/src/motion/sink.ts",
+      "ownerScope": "www.build.style-generation",
+      "previousAdmissions": [
+        {
+          "group": "startup",
+          "oldSHA256": "09db7c8830988669b593c980fe788ed0f2f9d18b0c09665e9774afaca189898c",
+          "previousRevision": "991cc33ac38421dfba2a4a800a886ec275bc4c71",
+          "previousGitBlob": "b64bc7e726967327f7e821562faf547271279887",
+          "diffFile": "03-startup-sink.diff",
+          "diffLines": 12
+        }
+      ],
+      "sourceSHA256": "348bd4660089361305c26628b3b3f0489e977ffdd5dc4755e673e1c7074e37b8",
+      "exactSpecifiers": ["@proto.ui/core"],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "boundaryReview": "Frames add readonly numeric source values and diagnostics to the existing Core-owned transport.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/modules/feedback/src/motion/targets.ts",
+      "ownerScope": "www.build.style-generation",
+      "previousAdmissions": [
+        {
+          "group": "startup",
+          "oldSHA256": "22577a87737f05377274832a7bd4a82b2400313cf5b60412ce46361b7369d69a",
+          "previousRevision": "991cc33ac38421dfba2a4a800a886ec275bc4c71",
+          "previousGitBlob": "5593ddc92c3616b813303379f8de46e069b20215",
+          "diffFile": "04-startup-targets.diff",
+          "diffLines": 81
+        }
+      ],
+      "sourceSHA256": "a43c7ab5a0ea83f6497884dd595de0931ca7b8c8a6691fc6385a627b4bcd2ea2",
+      "exactSpecifiers": ["@proto.ui/core"],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "boundaryReview": "Admits the governed numeric-state width token and containing-block width resolution without arbitrary exposed getters or component-name inference.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/modules/feedback/src/presence/controller.ts",
+      "ownerScope": "www.build.style-generation",
+      "previousAdmissions": [
+        {
+          "group": "startup",
+          "oldSHA256": "8594e2fea1a9cb140974adba6e3abe8450e2b4314d51bc2256c3e2e075e6a02d",
+          "previousRevision": "991cc33ac38421dfba2a4a800a886ec275bc4c71",
+          "previousGitBlob": "36cbf25d28dc46a056790a8f917ba3f6b1dd7d6c",
+          "diffFile": "05-startup-controller.diff",
+          "diffLines": 37
+        }
+      ],
+      "sourceSHA256": "6b0a20182e495e2113f13aa21d74a4bcb7ef7ea358044241d7c4d20f66072ab1",
+      "exactSpecifiers": ["./sink", "@proto.ui/core"],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "boundaryReview": "Carries typed top/blockSize and per-channel easing while preserving the existing phase-owner identity and target revision.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/modules/feedback/src/presence/projector.ts",
+      "ownerScope": "www.build.style-generation and the existing Website presence projection; one exact shared dependency binding",
+      "previousAdmissions": [
+        {
+          "group": "startup",
+          "oldSHA256": "e704d451ae2f3aeab7c5fb26f49b90aebac49191784a051059bfdd1a04b22e90",
+          "previousRevision": "991cc33ac38421dfba2a4a800a886ec275bc4c71",
+          "previousGitBlob": "f3860be5f04683bbcd4453a8a5fb8cdd7e0c1f74",
+          "diffFile": "06-startup-projector.diff",
+          "diffLines": 657
+        },
+        {
+          "group": "overrides",
+          "oldSHA256": "3a5c3749050071ad5308800c2619c36e37ac56462a5ee34c718971655531e87c",
+          "previousRevision": "1cc4ad159da621d58e2b668d0d2ef0a22be6ed1b",
+          "diffFile": "26-overrides-projector.diff",
+          "diffLines": 648
+        }
+      ],
+      "sourceSHA256": "d9a0ccfd12053e193e2c0a2ff0cd8a435a083c23aa04ae466ae28625ead2b2a4",
+      "exactSpecifiers": ["./sampler", "./sink", "./top-target", "@proto.ui/core"],
+      "addedSpecifiers": ["./sampler", "./top-target"],
+      "removedSpecifiers": ["../motion/sampler"],
+      "boundaryReview": "Uses the two finite Presence helpers for top/blockSize and per-channel easing. Completion/release reentry, semantic baseline restoration and cold/warm view ownership remain guarded. The inline override is removed so this importer has one exact source binding; its obsolete direct motion sampler edge is removed.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/modules/feedback/src/presence/sampler.ts",
+      "ownerScope": "www.build.style-generation",
+      "previousAdmissions": [],
+      "sourceSHA256": "180dff0c4c9df44567037abf2c1d5544bd510c76198644a9f96b1ba5c6c2b561",
+      "exactSpecifiers": ["../motion/sampler", "./sink", "@proto.ui/core"],
+      "addedSpecifiers": ["../motion/sampler", "./sink", "@proto.ui/core"],
+      "removedSpecifiers": [],
+      "boundaryReview": "Pure finite channel grouping over the existing motion sampler, with independent easing/reversal and the same owner duration.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/modules/feedback/src/presence/sink.ts",
+      "ownerScope": "www.build.style-generation",
+      "previousAdmissions": [
+        {
+          "group": "startup",
+          "oldSHA256": "00302081dcb0087aa1d56f73c24e5e2dcb1d411d423b7147867a4699965906e5",
+          "previousRevision": "991cc33ac38421dfba2a4a800a886ec275bc4c71",
+          "previousGitBlob": "45a886c278b25e5bc28effba23a7495c9227e150",
+          "diffFile": "07-startup-sink.diff",
+          "diffLines": 18
+        }
+      ],
+      "sourceSHA256": "90a4fe14536cd8c5708a19fa5a87843f35597391be7381b3d68239e36a2ce053",
+      "exactSpecifiers": ["@proto.ui/core"],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "boundaryReview": "Adds channel-easing transport only; its sole Core import remains exact.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/modules/feedback/src/presence/top-target.ts",
+      "ownerScope": "www.build.style-generation",
+      "previousAdmissions": [],
+      "sourceSHA256": "692ade0587b30a71d4348d350881ef4e8eb8ee04c89134f032f8d7961de3993f",
+      "exactSpecifiers": ["@proto.ui/core"],
+      "addedSpecifiers": ["@proto.ui/core"],
+      "removedSpecifiers": [],
+      "boundaryReview": "Pure finite top/opacity semantic-baseline checks; rejects competing/scoped intent and unresolved geometry. Imports only Core types.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/modules/feedback/src/types.ts",
+      "ownerScope": "www.build.style-generation",
+      "previousAdmissions": [
+        {
+          "group": "startup",
+          "oldSHA256": "f7df696c2cbc06ad392f4a35b44f527432f381c4c7ee82b6e4261cb11cbeba34",
+          "previousRevision": "c857471f7897fad58479d0b5a976fc88fc1e26fd",
+          "previousGitBlob": "96620007fa48b952a4d0cbb9b8e63cf9016855e7",
+          "diffFile": "08-startup-types.diff",
+          "diffLines": 29
+        }
+      ],
+      "sourceSHA256": "206f99186501ec20175be19041a1783f45294ee7398983444cd19efbf7f5dafe",
+      "exactSpecifiers": ["@proto.ui/core"],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "boundaryReview": "Adds typed setup reservation and internal numeric source registration to the existing Feedback facade, not a Website host capability.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/runtime/src/kernel/handles/def.ts",
+      "ownerScope": "www.build.style-generation",
+      "previousAdmissions": [
+        {
+          "group": "startup",
+          "oldSHA256": "8ababe703c072d71c6b8529efe4c4249ddd34d952744213fc93df661db12d4c1",
+          "previousRevision": "c857471f7897fad58479d0b5a976fc88fc1e26fd",
+          "previousGitBlob": "52589ca12600cc52a1a48b89432727055f1ed331",
+          "diffFile": "09-startup-def.diff",
+          "diffLines": 21
+        }
+      ],
+      "sourceSHA256": "1655ee15904f3f8bc11848a31b869f00d7449c61b7c0355e0d6ea91a331b8c0b",
+      "exactSpecifiers": [
+        "../../orchestrator/module-orchestrator/types",
+        "../event",
+        "../guard",
+        "@proto.ui/core",
+        "@proto.ui/core/internal",
+        "@proto.ui/module-anatomy",
+        "@proto.ui/module-context",
+        "@proto.ui/module-event",
+        "@proto.ui/module-expose",
+        "@proto.ui/module-expose-event",
+        "@proto.ui/module-feedback",
+        "@proto.ui/module-props",
+        "@proto.ui/module-rule",
+        "@proto.ui/module-state",
+        "@proto.ui/module-state-accessibility",
+        "@proto.ui/module-state-interaction"
+      ],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "boundaryReview": "Wires setup-owned reservation declaration and numeric source registration to Feedback; all prior package edges stay exact.",
+      "disposition": "exact source/import admission only"
+    },
+    {
+      "path": "packages/runtime/src/kernel/kernel.ts",
+      "ownerScope": "www.build.style-generation",
+      "previousAdmissions": [
+        {
+          "group": "startup",
+          "oldSHA256": "714d6eaf8d150254cde88bc9e1c72cca7870ef000e7756e5224dd9d04ee38122",
+          "previousRevision": "4ea7e8ffe5f83c08ef38e2fa73775554bbfec0b2",
+          "previousGitBlob": "e1b8421c35a0b43942b50edee69ac086a539a664",
+          "diffFile": "10-startup-kernel.diff",
+          "diffLines": 51
+        }
+      ],
+      "sourceSHA256": "4d1953ef05d507714b1d25a6a4d167d8e00e96d5816f8bc83ec79fc7757b4a39",
+      "exactSpecifiers": [
+        "../orchestrator/module-orchestrator/types",
+        "./as-hook",
+        "./handles",
+        "./view-intent",
+        "./view-operation",
+        "@proto.ui/core",
+        "@proto.ui/module-anatomy",
+        "@proto.ui/module-base",
+        "@proto.ui/module-context",
+        "@proto.ui/module-feedback",
+        "@proto.ui/module-props",
+        "@proto.ui/module-rule"
+      ],
+      "addedSpecifiers": [],
+      "removedSpecifiers": [],
+      "boundaryReview": "Carries the reservation primitive through the existing owned blueprint snapshot and validates the complete unique reservation identity set.",
+      "disposition": "exact source/import admission only"
+    }
+  ],
+  "sourceBindings": [
+    {
+      "path": "apps/www/src/pages/en/test/bootstrap-state-controls.astro",
+      "previousRevision": "49fc3ac3a5df6f6850795f25503940c5a2d0f2e8",
+      "previousSHA256": "674d45c03594182e46eb2a79e6b7a5c0facd29eb84eef20612a05b40210a2d97",
+      "sourceSHA256": "e1b429683a78b52b10ab3c24efb411d10097da439167fe9288003b130fe3425a",
+      "owners": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "review": "Only adds compositionStart/Update/End observation to the four existing Input/Textarea demo variants. Existing controller and matrix ownership stays exact; native IME acceptance is not supplied by this binding."
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/DemoMatrix.astro",
+      "sourceSHA256": "aafe95f305b3125ec7eea7b388612e847567d6efc8e0adc5243b105dcac6d43e",
+      "owners": ["www.demo.demo-matrix"],
+      "review": "Adds the missing source binding for the existing page-only module delivery hook. It publishes warmDemoModules/demoModuleCount for the Matrix harness and does not initialize previews or synthesize readiness. Exact existing matrix owner only."
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+      "sourceSHA256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9",
+      "owners": ["www.demo.runtime-select", "www.demo.code-panel", "www.demo.authored-controllers"],
+      "removedOwner": "www.demo.raw-adapter-runtimes",
+      "review": "Removes an extra owner not declared by the matrix Path. The optional compiler host exemption does not cover source editing, selection, Run/Cancel or status UI. Source bytes and companion fingerprint remain unchanged."
+    }
+  ],
+  "checks": [
+    {
+      "name": "focused baseline",
+      "command": "node --test --test-name-pattern='integrated source import boundary: compiler closure .* exact$|private Liquid Card import stays source-bound: packages/adapters/base/src/material/sink.ts' scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+      "exitCode": 1,
+      "tests": 9,
+      "passed": 3,
+      "failed": 6
+    },
+    {
+      "name": "focused candidate source/import negatives",
+      "command": "node --test --test-name-pattern='startup Feedback closure remains source-bound|integrated source import boundary: compiler closure|private Liquid Card import stays source-bound' scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+      "exitCode": 0,
+      "tests": 115,
+      "passed": 115,
+      "failed": 0
+    },
+    {
+      "name": "candidate full scanner concurrent attempt",
+      "command": "node scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "exitCode": 137,
+      "classification": "killed externally with no checker diagnostics; resource contention suspected, not a semantic result",
+      "nextAction": "serialize with no guard-suite sibling and a 240-second bound"
+    },
+    {
+      "name": "candidate default-concurrency guard suite attempt",
+      "command": "node --test scripts/coverage-matrices/test/*.test.mjs",
+      "exitCode": 130,
+      "classification": "explicitly interrupted after concurrent scanner was killed; no completed runner summary, not counted as passing",
+      "nextAction": "same assertions with --test-concurrency=1 after scanner completes"
+    },
+    {
+      "name": "candidate full scanner serialized default heap",
+      "command": "node scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "exitCode": 137,
+      "seconds": 69.44,
+      "maxRSSKiB": 1275248,
+      "classification": "SIGKILL with no checker diagnostic; not counted as a semantic failure or a pass"
+    },
+    {
+      "name": "candidate full scanner serialized bounded heap",
+      "command": "node --max-old-space-size=768 scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "exitCode": 0,
+      "seconds": 81.194,
+      "maxRSSKiB": 923840,
+      "result": "OK (2 matrices)",
+      "changedCondition": "Same source, scope and assertions; earlier garbage collection keeps peak process memory below the killed default-heap attempt. This controlled run does not establish health of the unmodified CI resource configuration."
+    },
+    {
+      "name": "initial candidate full guards with source tree uncommitted",
+      "command": "node --max-old-space-size=768 --test --test-concurrency=1 scripts/coverage-matrices/test/*.test.mjs",
+      "exitCode": 1,
+      "tests": 4940,
+      "passed": 4881,
+      "failed": 58,
+      "skipped": 1,
+      "seconds": 288.737,
+      "classification": {
+        "staleFixtures": 2,
+        "uncommittedMatrixVsGitObjectOrStoredCandidateSourceBindings": 56
+      },
+      "nextAction": "Commit the source repair; regenerate the prototype portfolio with --refresh-candidate at the final combined source commit, then rerun the same full guard suite. No generated source-binding file was edited by hand."
+    },
+    {
+      "name": "compiler foreign-owner fixture exact baseline",
+      "command": "git archive 248f8270dd3458d1fcbc507e618337f98b9fde96 scripts/coverage-matrices (isolated extraction); node --max-old-space-size=768 --test --test-name-pattern='compiler browser source binding: foreign-owner' <extracted>/scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+      "exitCode": 1,
+      "tests": 1,
+      "failed": 1,
+      "result": "The original test expects an obsolete diagnostic although the unchanged source/owner guard rejects the foreign owner."
+    },
+    {
+      "name": "repaired exact/foreign-owner and optical closure fixtures",
+      "command": "node --max-old-space-size=768 --test --test-name-pattern='compiler browser source binding|Finf continuous optical closure' scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+      "exitCode": 0,
+      "tests": 7,
+      "passed": 7,
+      "failed": 0,
+      "fixtureRepairs": [
+        "The compiler positive fixture now copies the reviewed client and explicitly requires its source/digest/owner gate to admit it; the foreign owner must still be rejected by that gate.",
+        "The optical closure copies the reviewed source.ts instead of a synthetic edge-only stub; unreviewed sibling, foreign consumer and dynamic CSS rejections stay unchanged."
+      ]
+    }
+  ],
+  "unchangedBoundaries": [
+    "No raw import category or directory wildcard",
+    "Changed bytes and copied importer paths still reject",
+    "Browser compiler companion remains exact",
+    "Extra Adapter imports remain rejected",
+    "All matrix row states and entity lifecycles are unchanged",
+    "No package budget or workflow changes",
+    "Search source already matched its exact admission and was not changed"
+  ],
+  "limits": [
+    "Source/import review is not product, browser, native host, optical, accessibility or release acceptance.",
+    "Complete main CI and RC readiness remain separately owned by the parent integration task.",
+    "The two targeted Search browser tests and S6 Portal work in other sessions remain untouched."
+  ],
+  "commandEvidence": [
+    {
+      "path": "internal/records/evidence/2026-11-24-main-website-boundary-repair/coverage-baseline.log.gz",
+      "sha256": "890293eb219f5f38951399717dc90a450077709eb4cf9232c677e76228436f9f",
+      "uncompressedSHA256": "88fe0a6bfe03a39cc8e9b43dd971528a554a2f9b1e52fcef66a3c48cb71b14bc"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-main-website-boundary-repair/focused-baseline.log.gz",
+      "sha256": "5fa4b19c987a73d58fe47a281fc994e01ec0ab88d53e46e9bf83c911ba8712af",
+      "uncompressedSHA256": "42b366b600d653983b01978a4655c9a9bcd6b2eaf9d843f4bb97a013040a135e"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-main-website-boundary-repair/focused-candidate.log.gz",
+      "sha256": "33f05b2c3ab53965a757553c86271e2073da1505ec11a3a4de4daa42653299d6",
+      "uncompressedSHA256": "57a1ea770da7ec89469b814bc0e4af710584549f13d6cd76442e4787dd84363d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-main-website-boundary-repair/coverage-serial-killed.log.gz",
+      "sha256": "675efa79ffb934f5a2b017440233c5835a24a0aa8743db9de0ef9f9470f694ae",
+      "uncompressedSHA256": "89e26b0480d935e39f6ca2194c25753e76c31dffabe20152230d224a3d7db15f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-main-website-boundary-repair/coverage-bounded-heap.log.gz",
+      "sha256": "6feccb5a869993f88e696c001c697833734e8540e91543b9c4eca62dd62d2cb8",
+      "uncompressedSHA256": "f5ccba16008c3a24c54b9f3e70b739fc5a0ef429bcfe10f81cfa3793c4b73a33"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-main-website-boundary-repair/guards-initial-serial.log.gz",
+      "sha256": "e09f11b197d07d2be824ba814ebc02b6c2b0779b8d0c1d3cf59c7889a69cf3fc",
+      "uncompressedSHA256": "93cd6e70904672cc43aee583e8f695af510223abc7dc52fb948ed0f96e0af550"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-main-website-boundary-repair/fixtures-before.log.gz",
+      "sha256": "25f88c636f7dc167d6d880900c503e9eaf599c4ddf43a06baca7a0b76555dc48",
+      "uncompressedSHA256": "36d567707212a7f9bc30946cc79eeb487e0f0afa0df7e21d718aeb8f86a5b57c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-main-website-boundary-repair/fixtures-after.log.gz",
+      "sha256": "098b7fdd5327836068168208f6d7b159e88165094506e38929bf0acf403d370a",
+      "uncompressedSHA256": "560b9ff5380e974f7deb2916a01734e5eaa506eae5db3cd50811b7b2d77c4ae9"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-main-website-boundary-repair/compiler-owner-fixture-at-base.log.gz",
+      "sha256": "711325a52855474208fa69963a32cc25de81d4ccfca9b3c246cd299f913d995e",
+      "uncompressedSHA256": "962fb9e1eecba65eb646594b98215a46a49de48f19d9b7e848f988fe450f7b4b"
+    }
+  ],
+  "environment": {
+    "node": "v24.22.3",
+    "pnpm": "10.32.1",
+    "workspaceDependencySource": "shared pnpm workspace installation; static guard code/source resolved from this exact candidate",
+    "platform": "linux"
+  },
+  "notes": [
+    "A timing wrapper attempted /usr/bin/time, unavailable in this environment (127 before Node started); actual elapsed/RSS receipts use Python subprocess/resource instead."
+  ],
+  "integrationStatus": {
+    "result": "partial",
+    "sourceBaseline": "248f8270dd3458d1fcbc507e618337f98b9fde96",
+    "nextKnownMain": "952722e5b619c60ddf797543fba11eea6c06d812",
+    "nextAction": "Parent integrates current main and this bounded repair, reviews overlapping source/hash deltas, regenerates the prototype portfolio at the combined committed source, and validates the final combination. Old-head evidence is not a final-main pass."
+  },
+  "provenance": {
+    "tool": "Codex AI assistant",
+    "work": "Recovered repository-owned historical sources; reviewed import deltas; authored exact admission records, regression controls and this audit report.",
+    "thirdPartyMaterial": "No external implementation copied. Retained diffs are from Proto-UI repository revisions identified above.",
+    "humanReview": "No human review claimed; independent technical agent review is separately bound by the parent integration task."
+  }
+}
