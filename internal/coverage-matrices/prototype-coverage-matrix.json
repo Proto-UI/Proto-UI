@@ -9311,7 +9311,7 @@
     },
     {
       "ID": "www.docs.whitepaper-diagram-viewer",
-      "Path": "apps/www/src/components/DocumentationImagePreview.astro`, `apps/www/src/components/documentation-image-controls.ts`, `apps/www/src/components/documentation-image-preview.ts",
+      "Path": "apps/www/src/components/DocumentationImagePreview.astro`, `apps/www/src/components/documentation-image-controls.ts`, `apps/www/src/components/documentation-image-preview.ts`, `apps/www/src/components/documentation-image-zoom.css",
       "User job": "Inspect documentation images and whitepaper diagrams through the shared source-to-contain zoom, then return to the source",
       "Current owner": "Website documentation media; stable legacy viewer row now binds the shared site-wide implementation",
       "Target class": "site-composition",
@@ -9322,8 +9322,8 @@
       "Difficulty": "F4",
       "Milestone": "M0 / S11",
       "State": "blocked",
-      "Evidence": "Current documentation-image-controls replaces the deleted private zoom prototype with public Surface/Text driven by the existing semantic owner; `apps/www/src/components/documentation-image-preview.browser.test.ts`; original #787/#797 evidence remains bound to those PR heads, not this repair; historical reading-mode observations remain in `internal/records/2026-11-23-whitepaper-reading-mobile-source.md`; the renewed user request restores the shared buttonless contain presentation; current source-bound validation is recorded in `internal/records/2026-11-24-image-preview-buttonless-zoom.md`; initial focus now selects the public Base Dialog Content surface through its draft content-entry policy, with repeated-pointer evidence and remaining native acceptance in `internal/records/2026-11-24-image-preview-content-focus.md",
-      "Escape or exemption": "Reason: Application owns source selection, media request policy, geometry, load/error and route disposal; limit: bounded passive static SVG-to-Blob image profile, no active-document SVG admission or generic sanitizer",
+      "Evidence": "Current documentation-image-controls replaces the deleted private zoom prototype with public Surface/Text driven by the existing semantic owner; `apps/www/src/components/documentation-image-preview.browser.test.ts`; original #787/#797 evidence remains bound to those PR heads, not this repair; historical reading-mode observations remain in `internal/records/2026-11-23-whitepaper-reading-mobile-source.md`; the renewed user request restores the shared buttonless contain presentation; current source-bound validation is recorded in `internal/records/2026-11-24-image-preview-buttonless-zoom.md`; initial focus now selects the public Base Dialog Content surface through its draft content-entry policy, with repeated-pointer evidence in `internal/records/2026-11-24-image-preview-content-focus.md`; the later actual Content outline finding and bounded media-host reset are recorded in `internal/records/2026-11-24-image-preview-outline.md",
+      "Escape or exemption": "Reason: Application owns source selection, media request policy, geometry, load/error and route disposal, plus the media-only static Content-entry host outline reset required by #796; native focus facts and descendant/thumbnail feedback remain owned by the public controls; limit: bounded passive static SVG-to-Blob image profile, no active-document SVG admission or generic sanitizer",
       "Re-review or removal issue": "Re-review in [#1323](https://github.com/Proto-UI/Proto-UI/issues/1323) when media admission, Base ownership, source naming, runtime/family integration or consumer geometry changes",
       "program": "website",
       "source": "internal/website/self-hosting-coverage-matrix.md",
@@ -26864,19 +26864,19 @@
   "candidateSource": {
     "kind": "candidate",
     "baseMain": "25c3d0731e39003d87f541afc5e1a294a9d95568",
-    "tree": "b6ac7ed210c6edda0e287db9965d189d808c38d3",
-    "sourceBindingsObject": "b6ac7ed210c6edda0e287db9965d189d808c38d3",
+    "tree": "4512242013e90dbaf6ffc39a00ef553fc1489537",
+    "sourceBindingsObject": "4512242013e90dbaf6ffc39a00ef553fc1489537",
     "sourceObjectProof": {
       "objectType": "tree",
-      "rootTree": "b6ac7ed210c6edda0e287db9965d189d808c38d3",
+      "rootTree": "4512242013e90dbaf6ffc39a00ef553fc1489537",
       "trees": [
         {
-          "sha": "b6ac7ed210c6edda0e287db9965d189d808c38d3",
-          "contentBase64": "NDAwMDAgLmFnZW50cwBQWNvdzIXzGo7Xg0J1o7yPEOguwjEwMDY0NCAuZWRpdG9yY29uZmlnABZh6UPLOKTTqQ8v5nLWTHKDN1VXMTAwNjQ0IC5lbnYucHJvZHVjdGlvbgBbYoFLp2YBaOlb+mqJhS/HIN54JzQwMDAwIC5naXRodWIAauAtYv44+mB6S5eoecj9zC4Ou+IxMDA3NTUgLmdpdGlnbm9yZQCk3A/UWHmNwaHJNNQiN3Rv9sOpBTEwMDY0NCAuZ2l0a2VlcACLE3iReR/paSeteOZLCq173tCL3DQwMDAwIC5odXNreQAWFsxVM6BapsB0zRFp93ryDJYVzzEwMDY0NCAubnBtcmMAf5vchzLCtG6fgQSlGwpie9gZVVIxMDA2NDQgLm52bXJjAKRf1SzFiRVw1imfqzhkMQPDlVR0MTAwNjQ0IC5wcmV0dGllcmlnbm9yZQBMLPrhzlCq7k3AE92hTeMg5E9f0zEwMDc1NSAucHJldHRpZXJyYwB8+DHrjez4uf2lZSErwkGhfi4m8jQwMDAwIC52c2NvZGUA0PPZml/Vr9Pl+77PwRCcB6Ar5KYxMDA2NDQgQUdFTlRTLm1kADcOH7juImzIQvD8dt0tHujxVtoEMTAwNjQ0IENPTlRSSUJVVElORy5tZAA5LMqt+N50ExTujCc98ylmtK85ITEwMDY0NCBEQ08ubWQASbjLBUkmeoF2Rnc4sXKmPYbv9DYxMDA2NDQgTElDRU5TRQBKG+1hNWpuh5hJh5/64ZJAWlDxxTEwMDY0NCBSRUFETUUubWQAHq8bhVwQYHvb5PwplqYJBUssGSgxMDA2NDQgUkVBRE1FLnpoLUNOLm1kACsfr24LODMo7JrL1MUCPUL54I6IMTAwNjQ0IFJFTEVBU0VfQ0hFQ0tMSVNULm1kABaDnHRfiy+pQ2wOzu8z+ipnHqulMTAwNjQ0IFZFUlNJT04ADZGlTH1DnoTj3RfTWU8bK2c39DA0MDAwMCBhcHBzACCeJ44Lf8mk7ixYwDo9VqC+pdcNNDAwMDAgYmVuY2htYXJrcwDRPYTSThUf9DvIdJua3wg+ctYS0zQwMDAwIGRvY3MAZfHk1qr/zujtvjvzyjGUSQfQBZg0MDAwMCBleHBlcmltZW50cwCOCGvSrSJ8WhUsEkMeKb2v+6dDoTQwMDAwIGludGVybmFsAPn76je17POH806OoYO6rm7sdbecNDAwMDAgbmF0aXZlAFx/J+aAgk2/ZSYorBYfd4USO+lRMTAwNjQ0IHBhY2thZ2UuanNvbgBGb8ltEaxsx/3CBONbP++MfeJd8jQwMDAwIHBhY2thZ2VzADE8gcURcdv8AH6PTa6+2QiRP/yeMTAwNjQ0IHBucG0tbG9jay55YW1sAM7buP3mZDmWaNugVQzRqO2lva10MTAwNjQ0IHBucG0td29ya3NwYWNlLnlhbWwAsVE80JCdxJK8CXEY9EAAGN37cd00MDAwMCBzY3JpcHRzAOD5B/xrOC9wZFh63PBqc3B0qlbeNDAwMDAgc2hhcmVkAF1AfWf7tQx0ubMcwjscXjEC+lA8NDAwMDAgc3BlYwADQys28r4Mt6gdyQ8eCrZCATWg8TEwMDY0NCB0c2NvbmZpZy5qc29uAIzQNmqshOQvkVE8UQPiYySKd3OEMTAwNjQ0IHRzY29uZmlnLndvcmtzcGFjZS5qc29uAHMB5q2UGwS2HETBjTIqFvZSyUi8NDAwMDAgdHlwZXMAkivDO/aUnu94+Sa2kucbd5GTY9wxMDA2NDQgdmVyY2VsLmpzb24ACU7v5jxWHjnpFmbKDJJU0p3LwGkxMDA2NDQgdml0ZXN0LmNvbmZpZy50cwAB4Li5hYQnINEiKd8nANCCYlcP2w=="
+          "sha": "4512242013e90dbaf6ffc39a00ef553fc1489537",
+          "contentBase64": "NDAwMDAgLmFnZW50cwBQWNvdzIXzGo7Xg0J1o7yPEOguwjEwMDY0NCAuZWRpdG9yY29uZmlnABZh6UPLOKTTqQ8v5nLWTHKDN1VXMTAwNjQ0IC5lbnYucHJvZHVjdGlvbgBbYoFLp2YBaOlb+mqJhS/HIN54JzQwMDAwIC5naXRodWIAauAtYv44+mB6S5eoecj9zC4Ou+IxMDA3NTUgLmdpdGlnbm9yZQCk3A/UWHmNwaHJNNQiN3Rv9sOpBTEwMDY0NCAuZ2l0a2VlcACLE3iReR/paSeteOZLCq173tCL3DQwMDAwIC5odXNreQAWFsxVM6BapsB0zRFp93ryDJYVzzEwMDY0NCAubnBtcmMAf5vchzLCtG6fgQSlGwpie9gZVVIxMDA2NDQgLm52bXJjAKRf1SzFiRVw1imfqzhkMQPDlVR0MTAwNjQ0IC5wcmV0dGllcmlnbm9yZQBMLPrhzlCq7k3AE92hTeMg5E9f0zEwMDc1NSAucHJldHRpZXJyYwB8+DHrjez4uf2lZSErwkGhfi4m8jQwMDAwIC52c2NvZGUA0PPZml/Vr9Pl+77PwRCcB6Ar5KYxMDA2NDQgQUdFTlRTLm1kADcOH7juImzIQvD8dt0tHujxVtoEMTAwNjQ0IENPTlRSSUJVVElORy5tZAA5LMqt+N50ExTujCc98ylmtK85ITEwMDY0NCBEQ08ubWQASbjLBUkmeoF2Rnc4sXKmPYbv9DYxMDA2NDQgTElDRU5TRQBKG+1hNWpuh5hJh5/64ZJAWlDxxTEwMDY0NCBSRUFETUUubWQAHq8bhVwQYHvb5PwplqYJBUssGSgxMDA2NDQgUkVBRE1FLnpoLUNOLm1kACsfr24LODMo7JrL1MUCPUL54I6IMTAwNjQ0IFJFTEVBU0VfQ0hFQ0tMSVNULm1kABaDnHRfiy+pQ2wOzu8z+ipnHqulMTAwNjQ0IFZFUlNJT04ADZGlTH1DnoTj3RfTWU8bK2c39DA0MDAwMCBhcHBzAAfkGBCi4K3godE8SHp8tNCJunGsNDAwMDAgYmVuY2htYXJrcwDRPYTSThUf9DvIdJua3wg+ctYS0zQwMDAwIGRvY3MAZfHk1qr/zujtvjvzyjGUSQfQBZg0MDAwMCBleHBlcmltZW50cwCOCGvSrSJ8WhUsEkMeKb2v+6dDoTQwMDAwIGludGVybmFsADlVoxxkB9obJ0vHUZgtOdrxzPIMNDAwMDAgbmF0aXZlAFx/J+aAgk2/ZSYorBYfd4USO+lRMTAwNjQ0IHBhY2thZ2UuanNvbgBGb8ltEaxsx/3CBONbP++MfeJd8jQwMDAwIHBhY2thZ2VzADE8gcURcdv8AH6PTa6+2QiRP/yeMTAwNjQ0IHBucG0tbG9jay55YW1sAM7buP3mZDmWaNugVQzRqO2lva10MTAwNjQ0IHBucG0td29ya3NwYWNlLnlhbWwAsVE80JCdxJK8CXEY9EAAGN37cd00MDAwMCBzY3JpcHRzAOD5B/xrOC9wZFh63PBqc3B0qlbeNDAwMDAgc2hhcmVkAF1AfWf7tQx0ubMcwjscXjEC+lA8NDAwMDAgc3BlYwADQys28r4Mt6gdyQ8eCrZCATWg8TEwMDY0NCB0c2NvbmZpZy5qc29uAIzQNmqshOQvkVE8UQPiYySKd3OEMTAwNjQ0IHRzY29uZmlnLndvcmtzcGFjZS5qc29uAHMB5q2UGwS2HETBjTIqFvZSyUi8NDAwMDAgdHlwZXMAkivDO/aUnu94+Sa2kucbd5GTY9wxMDA2NDQgdmVyY2VsLmpzb24ACU7v5jxWHjnpFmbKDJJU0p3LwGkxMDA2NDQgdml0ZXN0LmNvbmZpZy50cwAB4Li5hYQnINEiKd8nANCCYlcP2w=="
         },
         {
-          "sha": "f9fbea37b5ecf387f34e8ea183baae6eec75b79c",
-          "contentBase64": "MTAwNjQ0IFJFQURNRS5tZACvHjjanzoWQ2eVa/39ruAT/LtldDQwMDAwIGFnZW50LWhhcm5lc3MANmJBiY5O5hCpTNXkzz0B743wFmM0MDAwMCBhZ2VudC1vcGVyYXRpb25zAMTDnpFTZRZKStGa7G8DVFLdYMI6NDAwMDAgYXV0b25vbW91cy1tYWludGVuYW5jZQBB63B1TPKVnhR8GYZAzSqnX9zqdTQwMDAwIGJhc2VsaW5lcwDcCnamgEyJQImmmPeDZxhH2qIGPDQwMDAwIGNvbXBpbGVyAHanWbkSDJ/hfJyogOU667v9sLr5NDAwMDAgY29udHJhY3RzAFxHfHOIC1hOl+6+YiryNAReH1GpNDAwMDAgY292ZXJhZ2UtbWF0cmljZXMAoeNwWGfbEWv6A2Jjt1DLL6HNZZU0MDAwMCBmaXh0dXJlcwD1OgxnUCdqemygRBZkRdOBSl7tHTQwMDAwIGdvdmVybmFuY2UAsDrBPIdAqialWhRIMHAFgdz2FDc0MDAwMCBpc3N1ZXMAuE1YBuw7/U/e7wdkrqAJtFsrAPw0MDAwMCBtb2RlbHMAslv8WXJ4ULBUAHzbsu4H3bbJaUs0MDAwMCByZWNvcmRzAOvAq8naPA7oDW6kQKv7MzUqpgamNDAwMDAgcmVsZWFzZXMAUBGy4WJH5cjPIS2tCptnQw3X+Zo0MDAwMCB0dXRvcmlhbAB8J2XnDXylD48vhXnq1AYkYHPX1TQwMDAwIHdlYnNpdGUA0+v15+fBAFDBAmy0gAV9L491H4I="
+          "sha": "3955a31c6407da1b274bc751982d39daf1ccf20c",
+          "contentBase64": "MTAwNjQ0IFJFQURNRS5tZACvHjjanzoWQ2eVa/39ruAT/LtldDQwMDAwIGFnZW50LWhhcm5lc3MANmJBiY5O5hCpTNXkzz0B743wFmM0MDAwMCBhZ2VudC1vcGVyYXRpb25zAMTDnpFTZRZKStGa7G8DVFLdYMI6NDAwMDAgYXV0b25vbW91cy1tYWludGVuYW5jZQBB63B1TPKVnhR8GYZAzSqnX9zqdTQwMDAwIGJhc2VsaW5lcwDcCnamgEyJQImmmPeDZxhH2qIGPDQwMDAwIGNvbXBpbGVyAHanWbkSDJ/hfJyogOU667v9sLr5NDAwMDAgY29udHJhY3RzAFxHfHOIC1hOl+6+YiryNAReH1GpNDAwMDAgY292ZXJhZ2UtbWF0cmljZXMA1DaXPT6KDrL7eXYxSSVOFHPEvo00MDAwMCBmaXh0dXJlcwD1OgxnUCdqemygRBZkRdOBSl7tHTQwMDAwIGdvdmVybmFuY2UAsDrBPIdAqialWhRIMHAFgdz2FDc0MDAwMCBpc3N1ZXMAuE1YBuw7/U/e7wdkrqAJtFsrAPw0MDAwMCBtb2RlbHMAslv8WXJ4ULBUAHzbsu4H3bbJaUs0MDAwMCByZWNvcmRzAPqJRXXjrd192cmFYDPpZVupmwVUNDAwMDAgcmVsZWFzZXMAUBGy4WJH5cjPIS2tCptnQw3X+Zo0MDAwMCB0dXRvcmlhbAB8J2XnDXylD48vhXnq1AYkYHPX1TQwMDAwIHdlYnNpdGUAnNmGku/ti+hMxnUssgRZS0e7FIw="
         },
         {
           "sha": "366241898e4ee610a94cd5e4cf3d01ef8df01663",
@@ -26911,8 +26911,8 @@
           "contentBase64": "MTAwNjQ0IHN0eWxlLWx1bWEuY3NzAIkfu24uTOt8eGXXeCGmRyiEOTsHMTAwNjQ0IHN0eWxlLWx5cmEuY3NzAAU0LyaMhs8Z00Pmg+spulXjn9FVMTAwNjQ0IHN0eWxlLW1haWEuY3NzAO0TxocaC9YWj3FrUvChruFakD7cMTAwNjQ0IHN0eWxlLW1pcmEuY3NzAB9rnv43ALzGQXwvpcCawkEeLwlEMTAwNjQ0IHN0eWxlLW5vdmEuY3NzACkyBLK/CN39htvEm3XcR0nNITXtMTAwNjQ0IHN0eWxlLXJoZWEuY3NzAJS7yip/eIRefPvP9o+49TXjhIqYMTAwNjQ0IHN0eWxlLXNlcmEuY3NzAG+ywSiU4CZ5c/7+mixfSWpKRORPMTAwNjQ0IHN0eWxlLXZlZ2EuY3NzAJ8Ds8bcWoA9uWOoF0PUfVtfj5/g"
         },
         {
-          "sha": "d3ebf5e7e7c10050c1026cb480057d2f8f751f82",
-          "contentBase64": "MTAwNjQ0IHNlbGYtaG9zdGluZy1jb3ZlcmFnZS1tYXRyaXgubWQAinKhQfJyH2qQNtZlPvaBKzR/5PM="
+          "sha": "9cd98692efed8be84cc6752cb204594b47bb148c",
+          "contentBase64": "MTAwNjQ0IHNlbGYtaG9zdGluZy1jb3ZlcmFnZS1tYXRyaXgubWQACz5hQFZ/zj4sUh18pqYqBv1vXKo="
         },
         {
           "sha": "313c81c51171dbfc007e8f4daebed908913ffc9e",
@@ -28231,7 +28231,7 @@
       },
       {
         "path": "internal/website/self-hosting-coverage-matrix.md",
-        "sha256": "3b9a35155d48ebc78e77a72c059a501f5cd0832b2cbdf79a253ae60ca6016cd7"
+        "sha256": "6c740a8d2d9490960172be154b32eadfe5b5bc4ed1fe5aa4416b44d3968b3f96"
       },
       {
         "path": "packages/prototypes/base/package.json",

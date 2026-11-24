@@ -268,6 +268,8 @@ async function contentInitialFocus(page: Page) {
   expect(facts.tabIndex).toBe(-1);
   expect(facts.closeActive).toBe(false);
   expect(facts.closeClip).toBe('inset(50%)');
+  expect(facts.outline.style).toBe('none');
+  expect(facts.outline.width).toBe('0px');
   return facts;
 }
 async function containedWhitepaper(page: Page) {
@@ -1358,6 +1360,8 @@ describe('automatic documentation image preview in real Chromium', () => {
         await capture(page, `${name}-repeated-pointer`);
         expect(repeatedPointer.modal.contentActive).toBe(true);
         expect(repeatedPointer.modal.contentTabIndex).toBe(-1);
+        expect(repeatedPointer.modal.contentOutline.style).toBe('none');
+        expect(repeatedPointer.modal.contentOutline.width).toBe('0px');
         expect(repeatedPointer.closeButton?.active).toBe(false);
         expect(repeatedPointer.closeButton?.clipPath).toBe('inset(50%)');
         await page.keyboard.press('Escape');
@@ -1836,6 +1840,8 @@ describe('automatic documentation image preview in real Chromium', () => {
       expect(repeatedPointer.reducedMotion).toBe(true);
       expect(repeatedPointer.modal.contentActive).toBe(true);
       expect(repeatedPointer.modal.contentTabIndex).toBe(-1);
+      expect(repeatedPointer.modal.contentOutline.style).toBe('none');
+      expect(repeatedPointer.modal.contentOutline.width).toBe('0px');
       expect(repeatedPointer.closeButton?.active).toBe(false);
       expect(repeatedPointer.closeButton?.clipPath).toBe('inset(50%)');
       records.push({ reducedMotionRepeatedPointer: repeatedPointer });
