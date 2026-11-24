@@ -307,7 +307,11 @@ function createDocumentPresenceSink(
         return Number.isFinite(value) && value >= 0 ? value : null;
       };
       const preference = readWebPreference(doc, 'preference.reducedMotion');
-      const containingBlockHeight = channels.includes('top') ? fixedContainingBlockHeight() : null;
+      const containingBlockHeight =
+        !preparing && channels.includes('top') ? fixedContainingBlockHeight() : null;
+      // A current preparing view has no measurable profile yet. Defer that
+      // judgment until ready; known ownership loss still refuses the channel.
+      const topProfilePending = preparing && live() && channels.includes('top');
       return {
         preference:
           preference === 'no-preference' || preference === 'reduce' ? preference : 'unknown',
@@ -328,7 +332,7 @@ function createDocumentPresenceSink(
           (name) =>
             !lost.has(name) &&
             (name !== 'translate' || !!win?.CSS?.supports?.('translate', '1px')) &&
-            (name !== 'top' || containingBlockHeight !== null) &&
+            (name !== 'top' || topProfilePending || containingBlockHeight !== null) &&
             (name !== 'blockSize' ||
               (!lost.has('block-size') &&
                 !lost.has('overflow') &&
