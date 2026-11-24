@@ -12,6 +12,7 @@ import { isEcmaIntrinsic } from './ecmascript-values';
 import { hasPropsValidatorDeclaration } from './pointer-facts-admission';
 import { arrayElementType, serializableDataType } from './value-types';
 import { GPUI_NATIVE_SDK_VERSION } from './gpui-native-sdk';
+import { GPUI_PROFILE_VERSION } from './gpui-dependency';
 import {
   GPUI_UNAVAILABLE_OPERATIONS,
   GPUI_MISSING_FOCUS_TREE,
@@ -502,7 +503,7 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
   'gpui-source-v1': freezeProfile({
     id: 'gpui-source-v1',
     framework: 'gpui',
-    version: 'git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8',
+    version: GPUI_PROFILE_VERSION,
     mode: 'source',
     implemented: true,
     operations: (
@@ -520,7 +521,7 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     ).filter((operation) => !GPUI_UNAVAILABLE_OPERATIONS.has(operation)),
     hostCapabilities: nativeHostCapabilities,
     dependencies: [
-      { name: 'gpui', version: 'git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8', role: 'target' },
+      { name: 'gpui', version: GPUI_PROFILE_VERSION, role: 'target' },
       { name: 'serde', version: '1.0', role: 'target' },
       { name: 'serde_json', version: '1.0', role: 'target' },
       { name: 'proto-ui-gpui-native', version: GPUI_NATIVE_SDK_VERSION, role: 'host-bridge' },

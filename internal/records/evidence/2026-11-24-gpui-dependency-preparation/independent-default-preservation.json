@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "baseSha": "b939afe35d30a1a436766d80beea7093a46e4fb2",
+  "checked": [
+    "literal old Cargo pin",
+    "workspace Cargo declaration",
+    "complete target profile",
+    "focus diagnostic",
+    "both complete SDK file-hash inventories and identities"
+  ],
+  "scope": "Independent execution compared current code with retained pre-change baseline; no new native compilation claim.",
+  "harnessNote": "Initial assertion compared the public inventory path shape to emitted file shape; normalized known .proto-ui/gpui-native prefix and ordering without changing hashes."
+}

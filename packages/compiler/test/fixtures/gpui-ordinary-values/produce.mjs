@@ -46,6 +46,8 @@ function emit(name, source, files = {}, exportName = 'default', options = {}) {
   return retainModule(name, source, parsed.value, module.value);
 }
 function retainModule(name, source, ir, module) {
+  if (receipt.modules.some((entry) => entry.name === name))
+    throw new Error(`Duplicate native consumer module: ${name}`);
   const directory = path.join(output, name);
   const artifacts = [
     { path: 'Component.rs', contents: module.code },
