@@ -15,7 +15,7 @@ Shadcn Button 在 Base Button 的基础上提供视觉变体与尺寸。本页�
 
 ## 预览
 
-`P-SHADCN-BUTTON` 与 `P-BASE-BUTTON` 仍处于 **early draft**，协议仍在演进。预览使用 Web Components、React、Vue 3 与 Vue 2.6 的工作区源码；接入应用时，请按安装部分选择匹配的包和宿主版本。[当前 Button 测试覆盖](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-BASE-BUTTON-0001.yaml)记录了已覆盖的行为与待完成的浏览器验证。
+`P-SHADCN-BUTTON` 与 `P-BASE-BUTTON` 仍处于 **early draft**，协议仍在演进。预览使用 Web Components、React、Vue 3 与 Vue 2.6 的工作区源码；接入应用时，请按安装部分选择匹配的包和宿主版本。[Base 行为测试覆盖](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-BASE-BUTTON-0001.yaml)与 [Shadcn 视觉测试覆盖](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-SHADCN-BUTTON-0001.yaml)分别记录了各自的结果与待完成的浏览器验证。
 
 <PrototypePreviewer
   demoId="demo-button"
@@ -38,7 +38,7 @@ Shadcn Button 在 Base Button 的基础上提供视觉变体与尺寸。本页�
   manager="npm"
 />
 
-将 `wc` 替换为 `react` 或 `vue` 可生成对应宿主的组件。CLI 会安装匹配的 `@proto.ui/prototypes-shadcn` 与适配器包，并生成本地组件入口。Vue 2.6（`>=2.6.0 <2.7`）及下方的 `styleProfile` 预设需要匹配的工作区 CLI、适配器和原型源码；已发布的 0.2.0 CLI 支持 `wc`、`react` 和 `vue`。
+将 `wc` 替换为 `react` 或 `vue` 可生成对应宿主的组件。CLI 会安装匹配的 `@proto.ui/prototypes-shadcn` 与适配器包，并生成本地组件入口。Vue 2.6（`>=2.6.0 <2.7`）、下方的 `styleProfile` 预设、`icon-compact` 尺寸与 `wrap` 属性需要匹配的工作区 CLI、适配器和原型源码；已发布的 0.2.0 CLI 支持 `wc`、`react` 和 `vue`。
 
 ## 用法
 
