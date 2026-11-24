@@ -22,23 +22,26 @@ Bootstrap 2.3.2 Dialog 基于 [Base Dialog](../../base/dialog/) 构建，保留�
 
 ## 安装
 
-当前仅在源码工作区中提供（`@proto.ui/prototypes-bootstrap-2-3-2/dialog`），尚未发布为独立稳定包。在工作区中可通过 `proto-ui add <wc|react|vue|vue2> bootstrap-2-3-2-dialog` 生成各宿主包装组件。
+请使用同一工作区版本的 `@proto.ui/prototypes-bootstrap-2-3-2/dialog` 和目标宿主适配器。下方 React 示例通过 `@proto.ui/adapter-react` 直接适配导出的原型。
 
 ## 用法
 
 ```tsx
-import {
-  BootstrapDialogClose,
-  BootstrapDialogCloseIcon,
-  BootstrapDialogContent,
-  BootstrapDialogDescription,
-  BootstrapDialogFooter,
-  BootstrapDialogHeader,
-  BootstrapDialogMask,
-  BootstrapDialogRoot,
-  BootstrapDialogTitle,
-  BootstrapDialogTrigger,
-} from '@/components/proto-ui/bootstrap-2-3-2';
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import * as proto from '@proto.ui/prototypes-bootstrap-2-3-2/dialog';
+
+const adapt = createReactAdapter(React);
+const BootstrapDialogClose = adapt(proto.dialogClose);
+const BootstrapDialogCloseIcon = adapt(proto.dialogCloseIcon);
+const BootstrapDialogContent = adapt(proto.dialogContent);
+const BootstrapDialogDescription = adapt(proto.dialogDescription);
+const BootstrapDialogFooter = adapt(proto.dialogFooter);
+const BootstrapDialogHeader = adapt(proto.dialogHeader);
+const BootstrapDialogMask = adapt(proto.dialogMask);
+const BootstrapDialogRoot = adapt(proto.dialogRoot);
+const BootstrapDialogTitle = adapt(proto.dialogTitle);
+const BootstrapDialogTrigger = adapt(proto.dialogTrigger);
 
 export function BootstrapDialogExample() {
   return (

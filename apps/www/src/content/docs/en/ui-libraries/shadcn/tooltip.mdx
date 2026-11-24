@@ -22,19 +22,11 @@ Tooltip displays brief supplementary text when a user hovers or focuses a trigge
 
 ## Installation
 
-Add Tooltip with the CLI (replace `wc` with `react`, `vue`, or `vue2` for your framework):
+Install the CLI, Shadcn prototypes and target adapter from the same workspace revision. In the initialized application, use the locally installed CLI.
 
-<InstallCommandCard
-  manager="pnpm"
-  commands={{
-    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-tooltip',
-    npm: 'npx @proto.ui/cli@latest add wc shadcn-tooltip',
-    yarn: 'yarn dlx @proto.ui/cli@latest add wc shadcn-tooltip',
-    bun: 'bunx @proto.ui/cli@latest add wc shadcn-tooltip',
-  }}
-/>
+<InstallCommandCard command="npm exec -- proto-ui add wc shadcn-tooltip" manager="npm" />
 
-Wrap sibling tooltips in `ShadcnTooltipGroup` to share delay defaults and warm handoff timing, and keep the generated `proto-ui-style.css` imported in your application entry.
+Replace `wc` with `react`, `vue`, or `vue2` for those hosts. Import the generated `proto-ui-style.css` once in your application entry.
 
 ## Usage
 

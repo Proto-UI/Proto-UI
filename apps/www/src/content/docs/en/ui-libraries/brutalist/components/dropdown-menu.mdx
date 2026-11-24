@@ -25,9 +25,9 @@ Brutalist Dropdown Menu pairs Base Dropdown keyboard navigation, focus managemen
 
 ## Installation
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-dropdown" manager="npm" />
+<InstallCommandCard command="npx @proto.ui/cli@0.2.0 add wc brutalist-dropdown" manager="npm" />
 
-Currently available from workspace source. The CLI target generates `Root`, `Trigger`, `Content`, and `Item`; import `Group`, `Label`, `Separator`, and `Shortcut` directly from `@proto.ui/prototypes-brutalist/dropdown`.
+The published `0.2.0` CLI supports `wc`, `react`, and `vue`. For Vue 2.6 or the workspace examples below, install the CLI, Brutalist prototypes and adapter built from the same workspace revision. The CLI generates Root, Trigger, Content and Item. The workspace exports the additional Group, Label, Separator and Shortcut prototypes from `@proto.ui/prototypes-brutalist/dropdown`.
 
 ## Usage
 
@@ -132,7 +132,11 @@ Pass `open` to enable controlled mode. `Root` exposes the `openChange` event alo
   rows={[
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'indicator', type: 'boolean', default: 'false' },
-    { name: 'indicatorIcon', type: "'chevron-down' | 'chevrons-up-down'", default: "'chevron-down'" },
+    {
+      name: 'indicatorIcon',
+      type: "'chevron-down' | 'chevrons-up-down'",
+      default: "'chevron-down'",
+    },
     { name: 'indicatorSize', type: 'number', default: '16' },
     { name: 'indicatorStrokeWidth', type: 'number', default: '2' },
   ]}

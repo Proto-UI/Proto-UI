@@ -27,7 +27,9 @@ Initialize your project and import the generated `proto-ui-style.css` once as sh
 
 <InstallCommandCard command="npx @proto.ui/cli@0.2.0 add wc shadcn-dialog" manager="npm" />
 
-Replace `wc` with `react`, `vue`, or `vue2` to generate wrappers for those runtimes. The command outputs both the convenience `ShadcnDialogContent` (with a default close icon) and `ShadcnDialogContentRaw`.
+The published `0.2.0` CLI supports `wc`, `react`, and `vue`; replace `wc` with `react` or `vue` for those hosts. It generates the compound parts from `@proto.ui/prototypes-shadcn/dialog`, including both the convenience `ShadcnDialogContent` (with a default close icon) and `ShadcnDialogContentRaw`.
+
+Vue 2.6 (`>=2.6.0 <2.7`), the Rhea preset, and the Mask pointer-default behavior described below require the matching `0.3.0` workspace CLI, adapters, and prototype source. Keep this workspace preview separate from the pinned stable installation above.
 
 ## Usage
 
@@ -196,7 +198,7 @@ Exposed methods & events: `openDialog(reason?)`, `close(reason?)`, `toggle(reaso
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'focusEntry', type: "'auto' | 'manual'", default: "'auto'" },
+    { name: 'focusEntry', type: "'auto' | 'manual' | 'content'", default: "'auto'" },
     { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
   ]}
 />

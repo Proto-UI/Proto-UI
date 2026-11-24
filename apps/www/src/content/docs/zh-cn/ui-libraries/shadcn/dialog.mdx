@@ -27,7 +27,9 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <InstallCommandCard command="npx @proto.ui/cli@0.2.0 add wc shadcn-dialog" manager="npm" />
 
-将 `wc` 替换为 `react`、`vue` 或 `vue2` 即可生成对应框架的包装组件；命令会同时生成带默认关闭图标的 `ShadcnDialogContent` 与无默认关闭图标的 `ShadcnDialogContentRaw`。
+已发布的 `0.2.0` CLI 支持 `wc`、`react` 和 `vue`；把 `wc` 替换为 `react` 或 `vue` 可生成对应宿主的组件。命令从 `@proto.ui/prototypes-shadcn/dialog` 生成复合部件，同时提供带默认关闭图标的 `ShadcnDialogContent` 与无默认关闭图标的 `ShadcnDialogContentRaw`。
+
+Vue 2.6（`>=2.6.0 <2.7`）、Rhea 预设以及下文的 Mask 指针默认行为，需要匹配的 `0.3.0` 工作区 CLI、适配器和原型源码。请将这部分工作区预览与上方固定版本的稳定版安装区分开。
 
 ## 用法
 
@@ -196,7 +198,7 @@ ShadcnDialogRoot
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
-    { name: 'focusEntry', type: "'auto' | 'manual'", default: "'auto'" },
+    { name: 'focusEntry', type: "'auto' | 'manual' | 'content'", default: "'auto'" },
     { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
   ]}
 />
