@@ -404,7 +404,7 @@ export default defineConfig({
               items: [
                 {
                   label: 'Overview',
-                  translations: { en: 'Overview', 'zh-CN': '概览' },
+                  translations: { en: 'Overview', 'zh-CN': 'Overview' },
                   slug: 'ui-libraries/base',
                 },
                 {
@@ -499,13 +499,13 @@ export default defineConfig({
                 {
                   label: 'Native File Input',
                   badge: earlyDraftBadge,
-                  translations: { en: 'Native File Input', 'zh-CN': '原生文件输入' },
+                  translations: { en: 'Native File Input', 'zh-CN': 'Native File Input' },
                   slug: 'ui-libraries/base/native-file-input',
                 },
                 {
                   label: 'Selectable Row',
                   badge: earlyDraftBadge,
-                  translations: { en: 'Selectable Row', 'zh-CN': '可选列表行' },
+                  translations: { en: 'Selectable Row', 'zh-CN': 'Selectable Row' },
                   slug: 'ui-libraries/base/selectable-row',
                 },
                 {
@@ -737,7 +737,7 @@ export default defineConfig({
               items: [
                 {
                   label: 'Overview',
-                  translations: { en: 'Overview', 'zh-CN': '概览' },
+                  translations: { en: 'Overview', 'zh-CN': 'Overview' },
                   slug: 'ui-libraries/shadcn',
                 },
                 {
@@ -1082,7 +1082,7 @@ export default defineConfig({
               items: [
                 {
                   label: 'Icon Library',
-                  translations: { en: 'Icon Library', 'zh-CN': '图标库' },
+                  translations: { en: 'Icon Library', 'zh-CN': 'Icon Library' },
                   slug: 'ui-libraries/lucide',
                 },
               ],
@@ -1093,12 +1093,12 @@ export default defineConfig({
               items: [
                 {
                   label: 'Overview',
-                  translations: { en: 'Overview', 'zh-CN': '概览' },
+                  translations: { en: 'Overview', 'zh-CN': 'Overview' },
                   slug: 'ui-libraries/brutalist',
                 },
                 {
                   label: 'Design Contract',
-                  translations: { en: 'Design Contract', 'zh-CN': '设计合约' },
+                  translations: { en: 'Design Contract', 'zh-CN': 'Design Contract' },
                   slug: 'ui-libraries/brutalist/design-contract',
                 },
                 {
@@ -1447,7 +1447,7 @@ export default defineConfig({
             {
               label: 'Bootstrap 2.3.2',
               badge: {
-                text: { en: 'WIP / Experimental', 'zh-CN': 'WIP / 实验性' },
+                text: { en: 'WIP / Experimental', 'zh-CN': 'WIP / Experimental' },
                 class: 'docs-wip-badge',
               },
               translations: { en: 'Bootstrap 2.3.2', 'zh-CN': 'Bootstrap 2.3.2' },
@@ -1753,7 +1753,7 @@ export default defineConfig({
             {
               label: 'Liquid Glass',
               badge: {
-                text: { en: 'WIP / Experimental', 'zh-CN': 'WIP / 实验性' },
+                text: { en: 'WIP / Experimental', 'zh-CN': 'WIP / Experimental' },
                 class: 'docs-wip-badge',
               },
               translations: { en: 'Liquid Glass', 'zh-CN': 'Liquid Glass' },
