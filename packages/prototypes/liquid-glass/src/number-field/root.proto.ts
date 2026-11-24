@@ -9,9 +9,7 @@ export default definePrototype<NumberFieldRootProps, NumberFieldRootExposes>({
   modules: asNumberFieldRoot.modules,
   setup(def) {
     const inherited = asNumberFieldRoot();
-    def.feedback.style.use(
-      tw('flex w-full min-w-0 flex-wrap items-center gap-2 font-sans text-foreground')
-    );
+    def.feedback.style.use(tw('flex w-full min-w-0 items-center gap-2 font-sans text-foreground'));
     return inherited.render;
   },
 });
