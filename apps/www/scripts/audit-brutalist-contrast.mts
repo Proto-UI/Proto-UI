@@ -2130,8 +2130,11 @@ async function popupItemPointerJourneys(page: Page, item: Case, trigger: Locator
     // focus on the OTHER authored row, rather than merely hoping the key ran.
     const role = isSelect ? 'option' : 'menuitem';
     const otherRow = rows.find((candidate) => candidate !== row)!;
+    // The current public fruit menu has five options. End reaches Pineapple;
+    // Banana is still the unselected pointer target, but is no longer an edge.
+    const otherName = isSelect && row === rows[0] ? 'Pineapple' : otherRow.name;
     const other = isSelect
-      ? popup.getByRole(role, { name: otherRow.name, exact: true })
+      ? popup.getByRole(role, { name: otherName, exact: true })
       : await dropdownPointerTarget(
           popup,
           otherRow as ReturnType<typeof dropdownPointerRows>[number]
@@ -2139,7 +2142,7 @@ async function popupItemPointerJourneys(page: Page, item: Case, trigger: Locator
     const baselineRecord: Record<string, unknown> = {
       identity: row.identity,
       targetName: row.name,
-      expectedOtherName: otherRow.name,
+      expectedOtherName: otherName,
       expectedSelection: row.selected,
       stage: 'popup-visible',
       achieved: false,
