@@ -31,6 +31,10 @@ cases:
     title: A closing message remains present outside normal and flex flow for a 500ms leave interval without displacing a new Toast
     covers: [P-SHADCN-TOAST-STACK-ORDER]
     expectation: controlled-and-uncontrolled-out-of-flow-presence-until-500ms-with-unblocked-new-anchor-and-reopen
+  - id: T-TOAST-STACK-0001-CASE-HOVER-STABILITY
+    title: Holding the pointer over collapsed peeking edges or inter-card expanded gaps does not oscillate expanded state
+    covers: [P-BASE-TOAST-HOVER-STABILITY, P-SHADCN-TOAST-HOVER-STABILITY]
+    expectation: continuous-expanded-viewport-hit-area-without-leave-enter-jitter-and-empty-reset
 implementations:
   - id: toast-opening-chronology
     kind: adapter-test
@@ -71,16 +75,22 @@ implementations:
     status: passing
     path: packages/prototypes/shadcn/test/toast-stack.browser.test.ts
     required: true
-    consumesCases: [T-TOAST-STACK-0001-CASE-PAINT, T-TOAST-STACK-0001-CASE-LEAVE]
+    consumesCases:
+      [
+        T-TOAST-STACK-0001-CASE-PAINT,
+        T-TOAST-STACK-0001-CASE-LEAVE,
+        T-TOAST-STACK-0001-CASE-HOVER-STABILITY,
+      ]
     exercises: [P-BASE-TOAST, P-SHADCN-TOAST]
     notes:
       - Four leave-presence cases cover top-right and bottom-right in collapsed and expanded layouts. The public close-then-create sequence retains the outgoing surface for its configured 500ms leave duration and samples every requestAnimationFrame through Presence withdrawal to check the new Toast's document-edge anchor, highest z-index and center hit target.
+      - Hover-stability checks move the pointer onto collapsed peeking edges and inter-toast gap coordinates in bottom-right and top-right placements, confirming sustained expanded state without enter/leave oscillation and immediate pointer-events withdrawal once all toasts close.
   - id: toast-presence-stack
     kind: adapter-test
     status: passing
     path: packages/prototypes/shadcn/test/toast-presence-stack.test.ts
     required: true
-    consumesCases: [T-TOAST-STACK-0001-CASE-LEAVE]
+    consumesCases: [T-TOAST-STACK-0001-CASE-LEAVE, T-TOAST-STACK-0001-CASE-HOVER-STABILITY]
     exercises: [P-BASE-TOAST, P-SHADCN-TOAST]
     notes:
       - Controlled and uncontrolled Shadcn consumer cases use public Transition observations and computed CLI CSS to verify an absolute, noninteractive retained surface at 499ms, withdrawal at 500ms and reopening with the same presentation owner. These simulated-DOM checks do not prove native layout or hit testing.
@@ -97,12 +107,20 @@ verifies:
   prototypes:
     - id: P-BASE-TOAST
       anchors:
-        [P-BASE-TOAST-OPENING-ORDER, P-BASE-TOAST-VISIBLE-WINDOW, P-BASE-TOAST-PASSIVE-PORTAL]
+        [
+          P-BASE-TOAST-OPENING-ORDER,
+          P-BASE-TOAST-VISIBLE-WINDOW,
+          P-BASE-TOAST-PASSIVE-PORTAL,
+          P-BASE-TOAST-HOVER-STABILITY,
+        ]
     - id: P-SHADCN-TOAST
-      anchors: [P-SHADCN-TOAST-STACK-ORDER, P-SHADCN-TOAST-VIEWPORT]
+      anchors: [P-SHADCN-TOAST-STACK-ORDER, P-SHADCN-TOAST-VIEWPORT, P-SHADCN-TOAST-HOVER-STABILITY]
 references:
   tests: [T-AS-OVERLAY-0001]
 revisions:
+  - version: 0.3.0
+    change: refined
+    summary: Add hover-stability gap-coordinate coverage and empty-viewport pointer-events reset checks.
   - version: 0.3.0
     change: introduced
     summary: Map reproducible repeated-Toast defects to state, runtime demo, portal, style delivery, retained leave presence and native browser checks without promoting prototype lifecycle.

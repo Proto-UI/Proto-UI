@@ -21,6 +21,10 @@ criteria:
   - id: P-LIQUID-GLASS-TABS-LIST-APPEARANCE
     text:
       en: 'Accept appearance=default|underline with default as the omission behavior. Default preserves the family surface. Underline is a horizontal Runtime consumer opt-in: full-width transparent, borderless, non-wrapping text row, 24px label gap and horizontal overflow on narrow hosts. It must retain Base roving, orientation and naming semantics; it is not a claim of upstream line-variant or vertical visual parity. Each change withdraws the previous appearance contribution and restores the default surface when reversed.'
+  - id: P-LIQUID-GLASS-TABS-LIST-VARIANT
+    text:
+      en: 'With appearance=default, accept variant=default|line and propagate the selected list variant through private family context to descendant Triggers. variant=line renders an unframed transparent Liquid Glass line strip and withdraws the segmented-container glass material contribution while retaining Base roving, orientation and naming semantics for dogfood consumers such as RuntimeBox.'
+      zh-CN: '在 appearance=default 下支持 variant=default|line，并通过家族内部 context 向后代 Trigger 传递当前 variant。variant=line 呈现无外壳透明的 Liquid Glass 线条标签条并撤回容器级毛玻璃材质声明，在 RuntimeBox 等自举场景中保持 Base 语义不变。'
 openQuestions:
   - id: P-LIQUID-GLASS-TABS-LIST-Q-ADMISSION
     question:
@@ -42,6 +46,9 @@ verifies:
   tests:
     - T-RUNTIME-TABS-APPEARANCE-0001
 revisions:
+  - version: 0.3.0
+    change: refined
+    summary: Add variant=default|line with private family list-to-trigger context for dogfood RuntimeBox Tabs while keeping appearance=underline compatibility.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Catalog inherited Base responsibilities and family appearance independently from source realization; retain draft evidence gates.

@@ -44,6 +44,7 @@ criteria:
       zh-CN: >-
         appearance=default 时，未选中且未 pressed 的 Trigger hover 使用 bg-secondary-background 与 border-black；press 保持 border-black，无位移或阴影；focus-visible 与 disabled 保留 ring/gate 规则。这属于 D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 的 flat selection control category；selected 状态是其命名的 hover-gated exception，绝不获得 Button 位移语法。
 
+
     dependsOn:
       decisions: [{ id: D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001, since: 0.3.0-alpha.1 }]
 
@@ -60,6 +61,10 @@ criteria:
   - id: P-BRUTALIST-TABS-TRIGGER-APPEARANCE
     text:
       en: 'Accept appearance=default|underline with default as the omission behavior. Underline is a Runtime consumer opt-in: transparent unframed medium-weight 16px label, muted inactive text, foreground selected/hover text and a reserved 2px selected underline spanning the label. Focus-visible remains perceivable and disabled remains gated/dimmed. Selection, hover, press, focus-visible and disabled truth stay Base-owned. Default-to-underline-to-default must withdraw obsolete paint and reproduce the original current-state default contribution; no static-selector representation or upstream line/vertical parity is mandated.'
+  - id: P-BRUTALIST-TABS-TRIGGER-VARIANT
+    text:
+      en: 'When appearance=default and the owning List selects variant=line, render a flat square transparent Neo-Brutalist line trigger (`font-heading font-bold`, transparent resting fill, bottom black indicator bar on selected, secondary-background hover tint when unselected, and preserved Brutalist focus-visible ring and disabled gating) without altering Base selection or interaction ownership.'
+      zh-CN: '当 appearance=default 且所属 List 选择 variant=line 时，呈现平直方角透明的 Neo-Brutalist 线条标签项（`font-heading font-bold`、默认透明背景、选中态底部黑色粗下划线、未选中悬停态 `bg-secondary-background` 以及既有 Brutalist 焦点环与禁用门控），不改变 Base 选中与交互归属。'
 
 sources:
   - path: docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md
@@ -78,6 +83,9 @@ inherits:
 verifies:
   { tests: [T-BRUTALIST-TABS-0001, { id: T-RUNTIME-TABS-APPEARANCE-0001, since: 0.3.0-alpha.1 }] }
 revisions:
+  - version: 0.3.0
+    change: refined
+    summary: Project family-native variant=line paint from owning List context while preserving Base ownership and appearance=underline compatibility.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Named the flat-selection category of D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 and its selected hover-gated exception without changing interaction behavior.
