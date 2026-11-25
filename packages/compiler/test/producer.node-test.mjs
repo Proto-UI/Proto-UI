@@ -37,12 +37,12 @@ async function project(t) {
       });
       return produceComponentIR(program, { fileName: 'entry.ts', publicName: 'Panel' });
     },
-    async render(result, name, value) {
+    async render(result, name, props) {
       assert.equal(result.status, 'produced', JSON.stringify(result.diagnostics));
       const target = path.join(root, name);
       await writeFile(target, emitReact(result.component));
       const { Panel } = await import(pathToFileURL(target).href);
-      return renderToStaticMarkup(createElement(Panel, { value }));
+      return renderToStaticMarkup(createElement(Panel, props));
     },
   };
 }
@@ -61,10 +61,10 @@ test('re-exported prototype and imported helper follow the actual source across 
   );
   await p.write('helper.ts', `export function decorate(text: string) { return 'first ' + text; }`);
   const first = p.produce();
-  assert.equal(await p.render(first, 'first.ts', 'α'), '<span>first α</span>');
+  assert.equal(await p.render(first, 'first.ts', { value: 'α' }), '<span>first α</span>');
   await p.write('helper.ts', `export function decorate(text: string) { return text + ' 🙂'; }`);
   const next = p.produce();
-  assert.equal(await p.render(next, 'next.ts', 'β'), '<span>β 🙂</span>');
+  assert.equal(await p.render(next, 'next.ts', { value: 'β' }), '<span>β 🙂</span>');
   assert.equal(first.sourceClosure.configurationHash, next.sourceClosure.configurationHash);
   assert.notEqual(first.sourceClosure.digest, next.sourceClosure.digest);
   assert.ok(next.component.behaviors.some((fn) => fn.binding.source.file === 'helper.ts'));
@@ -85,8 +85,50 @@ test('one immutable helper reads each bound handle independently', async (t) => 
     } });`
   );
   const compiled = p.produce();
-  assert.equal(await p.render(compiled, 'pair.ts', 'left'), '<span>1:left|2:right</span>');
-  assert.equal(await p.render(compiled, 'updated.ts', 'changed'), '<span>1:changed|2:right</span>');
+  assert.equal(await p.render(compiled, 'pair.ts', { value: 'left' }), '<span>1:left|2:right</span>');
+  assert.equal(await p.render(compiled, 'updated.ts', { value: 'changed' }), '<span>1:changed|2:right</span>');
+});
+
+test('immutable discriminator aliases retain the payload of each matched argument', async (t) => {
+  const p = await project(t);
+  await p.write('entry.ts', `
+    import { definePrototype } from '@proto.ui/core/authoring';
+    type Result = { kind: 'ok'; value: string } | { kind: 'err'; error: string };
+
+    function describe(first: Result, second: Result): string {
+      const tag = first.kind;
+      if (tag === 'err') {
+        const other = second.kind;
+        switch (other) {
+          case 'ok': return first.error + second.value;
+          case 'err': return first.error + second.error;
+        }
+      }
+      return first.value;
+    }
+
+    export default definePrototype({ name: 'result-pair', setup(def) {
+      const flags = def.props.define({
+        left: { type: 'boolean', default: false },
+        right: { type: 'boolean', default: false },
+      });
+      const first = def.state.define<Result>('first', { initialize: read => read.get(flags.left)
+        ? { kind: 'ok', value: 'left-ok' } : { kind: 'err', error: 'left-error/' } });
+      const second = def.state.define<Result>('second', { initialize: read => read.get(flags.right)
+        ? { kind: 'ok', value: 'right-ok' } : { kind: 'err', error: 'right-error' } });
+      const label = def.derive('label', read => describe(read.get(first), read.get(second)));
+      return view => view.el('span', {}, [view.get(label)]);
+    } });`);
+  const compiled = p.produce();
+  for (const [left, right, expected] of [
+    [false, true, 'left-error/right-ok'],
+    [false, false, 'left-error/right-error'],
+    [true, false, 'left-ok'],
+    [true, true, 'left-ok'],
+  ]) {
+    const markup = await p.render(compiled, 'result-pair.ts', { left, right });
+    assert.equal(markup, `<span>${expected}</span>`);
+  }
 });
 
 test('an eager imported constant must be initialized when the module reads it', async (t) => {

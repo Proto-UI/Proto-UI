@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import type { Behavior, Binding, DataRef, ExternIR, Value, ValueType } from '../targets/component-ir.ts';
-import { BehaviorFlow, knownText, type Condition, type MatchTest, type Operand, type SwitchDispatch } from './behavior-flow.ts';
+import { BehaviorFlow, knownText, type Condition, type MatchTest, type Operand, type SwitchDispatch, type TagTest } from './behavior-flow.ts';
 import { memberValue, objectMembers } from './component-syntax.ts';
 import {
   behaviorValueType, checkParameters, literalValue, moduleConstant, moduleLiteral, numberLiteral, requireArity, requireDomain,
@@ -86,6 +86,7 @@ export class BehaviorBody {
   private readonly locals = new Map<ts.Symbol, Operand>();
   private readonly lexical = new Map<ts.Symbol, LexicalBinding>();
   private readonly tests = new WeakMap<Operand, MatchTest>();
+  private readonly tagAliases = new Map<ts.Symbol, Pick<TagTest, 'subject' | 'cases'>>();
   readonly params: Binding[] = [];
   readonly captures: ts.Symbol[] = [];
   readonly facts: Facts = { reads: new Set(), calls: new Set(), ordered: false };
@@ -273,9 +274,33 @@ export class BehaviorBody {
     const value = this.expression(initializer, annotated);
     const binding = this.flow.binding(declaration, 'local', name.text, annotated ?? value.type);
     const local = this.flow.define(declaration, binding, value);
-    this.locals.set(this.source.symbol(name), local);
-    const test = this.tests.get(value);
-    if (test && declaration.parent.flags & ts.NodeFlags.Const) this.tests.set(local, test);
+    const symbol = this.source.symbol(name);
+    this.locals.set(symbol, local);
+    if (declaration.parent.flags & ts.NodeFlags.Const) {
+      const test = this.tests.get(value);
+      if (test) this.tests.set(local, test);
+      const alias = this.immutableTag(initializer);
+      if (alias) this.tagAliases.set(symbol, alias);
+    }
+  }
+
+  private immutableTag(expression: ts.Expression): Pick<TagTest, 'subject' | 'cases'> | undefined {
+    const node = unparenthesize(expression);
+    if (ts.isIdentifier(node)) return this.tagAliases.get(this.source.symbol(node));
+    const access = projection(node);
+    if (!access) return undefined;
+    const receiver = unparenthesize(access.object);
+    if (!ts.isIdentifier(receiver)) return undefined;
+    const symbol = this.source.symbol(receiver);
+    const declaration = symbol.valueDeclaration;
+    // The producer admits formal arguments as SSA values. A let location or a
+    // fresh capability read cannot identify the snapshot that supplied an alias.
+    if (!declaration || !(ts.isParameter(declaration) || (ts.isVariableDeclaration(declaration) &&
+        ts.isVariableDeclarationList(declaration.parent) && declaration.parent.flags & ts.NodeFlags.Const))) return undefined;
+    const subject = this.locals.get(symbol);
+    const domain = subject && this.source.data.get(subject.type);
+    return subject && domain?.kind === 'tagged' && access.field === domain.discriminant
+      ? { subject, cases: domain.cases } : undefined;
   }
 
   private condition(node: ts.Expression): Condition {
@@ -285,10 +310,13 @@ export class BehaviorBody {
 
   private switchStatement(node: ts.SwitchStatement): void {
     const clauses = node.caseBlock.clauses;
-    const access = projection(node.expression);
+    const discriminant = unparenthesize(node.expression);
+    const access = projection(discriminant);
     const subject = access && this.expression(access.object);
     const data = subject && this.source.data.get(subject.type);
-    const tagged = data?.kind === 'tagged' && access?.field === data.discriminant ? data : undefined;
+    const tagged = subject && data?.kind === 'tagged' && access?.field === data.discriminant
+      ? { subject, cases: data.cases }
+      : ts.isIdentifier(discriminant) ? this.tagAliases.get(this.source.symbol(discriminant)) : undefined;
     const selected = access && subject ? this.member(node.expression, subject, access.field) : this.expression(node.expression);
     const scalar = this.widen(selected);
     const selector = tagged ? scalar : this.flow.retain(node.expression, scalar);
@@ -302,7 +330,7 @@ export class BehaviorBody {
       tests.push({ index, node: clause, value: label });
       if (label.kind === 'text' && !labels.has(label.value)) labels.set(label.value, index);
     }
-    this.flow.switchStatement(node, { selector, fallback, tests, ...(tagged && subject ? { tagged: { subject, cases: tagged.cases, labels } } : {}) }, clause => {
+    this.flow.switchStatement(node, { selector, fallback, tests, ...(tagged ? { tagged: { ...tagged, labels } } : {}) }, clause => {
       for (const statement of clause.statements) {
         if (this.flow.terminated) break;
         this.statement(statement);
@@ -477,31 +505,35 @@ export class BehaviorBody {
     const textValue = leftText ?? this.caseText(right);
     if (textValue === undefined) return undefined;
     const other = leftText !== undefined ? right : left;
-    const access = projection(other);
-    if (!access || !this.source.checker.getTypeAtLocation(access.object).isUnion()) return undefined;
-    const subject = this.expression(access.object);
-    const domain = this.source.data.get(subject.type);
-    const object = unparenthesize(access.object);
-    const stable = ts.isIdentifier(object) && this.locals.get(this.source.symbol(object)) === subject;
-    if (domain?.kind !== 'presence' || access.field !== 'kind' || (textValue !== 'present' && textValue !== 'omitted')) {
-      const tag = this.widen(this.member(other, subject, access.field));
-      requireDomain(this.source, other, tag.type, 'text');
-      const field = this.flow.value(tag);
-      const text: Value = { kind: 'text', value: textValue };
-      const equal: Value = { kind: 'binary', op: 'equal', left: leftText !== undefined ? text : field, right: leftText !== undefined ? field : text };
-      const result: Operand = { type: 'bool', value: inequality ? { kind: 'not', value: equal } : equal };
-      if (stable && domain?.kind === 'tagged' && access.field === domain.discriminant && domain.cases.length > 1 && domain.cases.some(arm => arm.tag === textValue)) {
-        this.tests.set(result, { subject, cases: domain.cases, tag: textValue, presentOnTrue: !inequality });
+    let tagged = ts.isIdentifier(other) ? this.tagAliases.get(this.source.symbol(other)) : undefined;
+    let value: Operand;
+    if (tagged) {
+      value = this.expression(other);
+    } else {
+      const access = projection(other);
+      if (!access || !this.source.checker.getTypeAtLocation(access.object).isUnion()) return undefined;
+      const subject = this.expression(access.object);
+      const domain = this.source.data.get(subject.type);
+      const object = unparenthesize(access.object);
+      const stable = ts.isIdentifier(object) && this.locals.get(this.source.symbol(object)) === subject;
+      if (domain?.kind === 'presence' && access.field === 'kind' && (textValue === 'present' || textValue === 'omitted')) {
+        const hasValue: Value = { kind: 'has-value', value: this.flow.value(subject) };
+        const presentOnTrue = (textValue === 'present') !== inequality;
+        const result: Operand = { type: 'bool', value: presentOnTrue ? hasValue : { kind: 'not', value: hasValue } };
+        if (stable) this.tests.set(result, { subject, payloadType: domain.value, presentOnTrue });
+        return result;
       }
-      return result;
+      value = this.member(other, subject, access.field);
+      if (stable && domain?.kind === 'tagged' && access.field === domain.discriminant) tagged = { subject, cases: domain.cases };
     }
-    const hasValue: Value = { kind: 'has-value', value: this.flow.value(subject) };
-    const presentOnTrue = (textValue === 'present') !== inequality;
-    const result: Operand = { type: 'bool', value: presentOnTrue ? hasValue : { kind: 'not', value: hasValue } };
-    // A repeated get(...) is a fresh read. Only a bound immutable SSA value
-    // can carry the matched payload to a subsequent .value expression.
-    if (stable) {
-      this.tests.set(result, { subject, payloadType: domain.value, presentOnTrue });
+    const tag = this.widen(value);
+    requireDomain(this.source, other, tag.type, 'text');
+    const field = this.flow.value(tag);
+    const text: Value = { kind: 'text', value: textValue };
+    const equal: Value = { kind: 'binary', op: 'equal', left: leftText !== undefined ? text : field, right: leftText !== undefined ? field : text };
+    const result: Operand = { type: 'bool', value: inequality ? { kind: 'not', value: equal } : equal };
+    if (tagged && tagged.cases.length > 1 && tagged.cases.some(arm => arm.tag === textValue)) {
+      this.tests.set(result, { ...tagged, tag: textValue, presentOnTrue: !inequality });
     }
     return result;
   }

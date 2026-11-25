@@ -50,6 +50,8 @@ node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/cont
 
 The React function takes the selected `string` and an `AbortSignal` and returns `LoadTabResult` or a `PromiseLike<LoadTabResult>`. The Rust function takes the selected `String` and `&mut gpui::AsyncApp` and returns `TaskOperation<LoadTabResult>` using the selected generated module's result type. Missing registration on the selected target reports `extern-unbound` at the actual await and includes the reached binding chain. The output file is replaced only after successful emission.
 
+An immutable alias such as `const tag = result.kind` can select a tagged result in an `if` or `switch`. The selected payload belongs to that particular `result`, including when a helper receives two results of the same type.
+
 ## Native-source targets
 
 Import `ComponentIR` from `@proto.ui/compiler/targets/ir`. `emitReact(ir)` from `@proto.ui/compiler/targets/react` returns TypeScript. `await emitGpui(ir)` from `@proto.ui/compiler/targets/gpui` returns Rust. The GPUI entry invokes its locked Cargo generator by default and accepts `{ generator: pathToBinary }`. Generated components import reached support from `@proto.ui/compiler/support/react` or the crate in `support/gpui`.
