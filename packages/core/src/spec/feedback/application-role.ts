@@ -43,11 +43,16 @@ const ROOT_GEOMETRY_TOKENS = new Set([
   // D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-RESIDENT-SPACING: exact 1.25rem only.
   'translate-x-5',
   'translate-x-0.25',
+  'translate-x-[-0.0625rem]',
   'translate-x-[calc(100%_-_2px)]',
   // Draft bounded percentage-translation slice: this operand stays static.
   'translate-x-[calc(100%_-_4px)]',
   'translate-x-[calc(100%_+_2px)]',
   'translate-x-[calc(100%_-_8px)]',
+  'translate-x-[calc(-100%_-_2px)]',
+  'translate-x-[calc(2px_-_100%)]',
+  'translate-x-[calc(4px_-_100%)]',
+  'translate-x-[calc(8px_-_100%)]',
   'scale-[0.98]',
   'will-change-transform',
   // K1 exact additions retain the independent Root geometry domain.
@@ -67,6 +72,8 @@ const PERCENTAGE_ROOT_TRANSLATIONS = new Set([
   'translate-x-[calc((8px_-_100%)*var(--pui-percentage)/100)]',
   'translate-x-[calc(1px_+_(100%_+_1px)*var(--pui-percentage)/100)]',
   'translate-x-[calc(-1px_-_(100%_+_1px)*var(--pui-percentage)/100)]',
+  'translate-x-[calc(0.0625rem_+_(100%_+_2px_-_0.0625rem)*var(--pui-percentage)/100)]',
+  'translate-x-[calc(-0.0625rem_-_(100%_+_2px_-_0.0625rem)*var(--pui-percentage)/100)]',
 ]);
 
 /** Internal finite operand classification, not a general CSS expression parser. */
