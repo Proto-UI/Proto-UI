@@ -412,6 +412,41 @@ async function waitForWorkspaceSettings(page: Page, expected: Partial<WorkspaceS
   }
 }
 
+async function enterMobileWorkspaceSettings(page: Page, route: string) {
+  // Runtime selection retains the compact Header disclosure. Dismiss it
+  // through its real Button before entering the gallery beneath it.
+  activeProbeStage = 'workspace-settings-header-close';
+  const menu = page.locator(
+    '[data-homepage-runtime] [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
+  );
+  if ((await menu.getAttribute('aria-expanded')) === 'true') await menu.click();
+  await page.waitForFunction(
+    () =>
+      document.querySelector<HTMLElement>('[data-homepage-runtime]')?.dataset.siteMenuOpen ===
+      'false'
+  );
+  const stage = page.locator(HOME).locator('[data-home-gallery-stage]');
+  if (await stage.evaluate((element) => (element as HTMLElement).inert)) {
+    // The public Hero link enters the same gallery at full size through
+    // native fragment navigation.
+    activeProbeStage = 'workspace-settings-hero-entry';
+    await page
+      .getByRole('link', {
+        name: route === '/en/' ? 'Try the components' : '试试 Demo',
+        exact: true,
+      })
+      .click();
+  }
+  await page.waitForFunction(
+    (home) => {
+      const root = document.querySelector<HTMLElement>(home);
+      const stage = root?.querySelector<HTMLElement>('[data-home-gallery-stage]');
+      return !!stage && !stage.inert && root?.dataset.homeGalleryCompact !== 'true';
+    },
+    HOME
+  );
+}
+
 async function exerciseWorkspaceSettings(
   page: Page,
   route: string,
@@ -1180,14 +1215,16 @@ try {
                   pageErrorDetails,
                   runtime,
                   index,
-                  () =>
-                    exerciseWorkspaceSettings(page, route, async (state) => {
+                  async () => {
+                    if (viewport.name === 'mobile') await enterMobileWorkspaceSettings(page, route);
+                    return exerciseWorkspaceSettings(page, route, async (state) => {
                       if (index < 4) {
                         const filename = `${id}-${runtime}-settings-${state}.png`;
                         await page.locator(HOME).screenshot({ path: path.join(out, filename) });
                         screenshots.push(filename);
                       }
-                    })
+                    });
+                  }
                 ),
               };
             } else {
@@ -1308,6 +1345,7 @@ try {
             for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
               await chooseRuntime(page, runtime, false);
               const owners = await ownership(page, runtime);
+              if (viewport.name === 'mobile') await enterMobileWorkspaceSettings(page, route);
               const task = await exerciseWorkspaceSettings(page, route, async (state) => {
                 await page.evaluate(() => scrollTo(0, 0));
                 await screenshot(`brutalist-${runtime}-${state}-viewport`);
