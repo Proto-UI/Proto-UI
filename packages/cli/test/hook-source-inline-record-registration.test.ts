@@ -262,6 +262,6 @@ describe('source-proven inline record arguments in child registration', () => {
     }
     const tokens = await collectProtoStyleTokensFromFiles([file]);
     expect(tokens).toContain('data-[invalid]:border-2');
-    expect(tokens).toContain('data-[invalid]:border-foreground');
+    expect(tokens).toContain('data-[invalid]:border-destructive');
   });
 });
