@@ -219,3 +219,5 @@ Range#createContextualFragment and CSS Modules/ICSS composition imports are not 
 The first compiler analysis increment renews only the sampled lockfile identity; [its source-reference record](../../internal/records/2026-11-26-compiler-analysis-markup-reference.md) preserves the previous 32-owner reference and the independent browser evidence boundary.
 
 The frontend integration of current main preserves both parent source references and renews the lockfile binding at its real source merge; see the [frontend integration source record](../../internal/records/2026-11-26-compiler-frontend-main-c8-source-bindings.md). Browser and lifecycle admission remain independent.
+
+The [native compiler source renewal](../../internal/records/2026-11-26-compiler-native-source-markup-reference.md) retains all 32 sampled owners, renews only the reviewed lockfile digest, and archives the preceding `3ed63ef` profile byte-for-byte. Browser assertions and unverified source admission remain unchanged.
