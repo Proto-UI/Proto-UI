@@ -1,9 +1,10 @@
+import { EventEmitter } from 'node:events';
 import { describe, expect, it, vi } from 'vitest';
 import type { HostToPeerMessage, PeerToHostMessage } from '@proto.ui/host-protocol';
 
 import { createBaseBundle } from '../src/bundle';
 import { createPeerProcess, PEER_NAME } from '../src/stdio';
-import { createFrameDecoder, encodeFrame } from '../src/transport';
+import { createFrameDecoder, createStreamTransport, encodeFrame } from '../src/transport';
 
 /** The process entry, driven in-process through its byte interface. */
 function harness() {
@@ -287,5 +288,49 @@ describe('gpui peer: stdio process', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('detaches stream listeners and clears buffered bytes on close() and EOF', () => {
+    const input = new EventEmitter();
+    const writes: Uint8Array[] = [];
+    const output = { write: (chunk: Uint8Array) => writes.push(chunk) };
+
+    for (let cycle = 0; cycle < 5; cycle++) {
+      const received: HostToPeerMessage[] = [];
+      const transport = createStreamTransport(input, output);
+      transport.onMessage((msg) => received.push(msg));
+      expect(input.listenerCount('data')).toBe(1);
+      expect(input.listenerCount('end')).toBe(1);
+      expect(input.listenerCount('close')).toBe(1);
+
+      const frame = encodeFrame(OPEN);
+      // Feed only a partial frame before closing so buffered bytes must not linger.
+      input.emit('data', frame.subarray(0, 6));
+      expect(received).toHaveLength(0);
+
+      transport.close();
+      expect(input.listenerCount('data')).toBe(0);
+      expect(input.listenerCount('end')).toBe(0);
+      expect(input.listenerCount('close')).toBe(0);
+
+      // Post-close writes and remaining bytes are ignored.
+      input.emit('data', frame.subarray(6));
+      transport.send({
+        kind: 'diagnostic',
+        sessionId: 's-1',
+        diagnostic: { code: 'unknown-session', message: 'ignored' },
+      });
+      expect(received).toHaveLength(0);
+      expect(writes).toHaveLength(0);
+    }
+
+    // Stream EOF also detaches all transport listeners automatically.
+    const transport = createStreamTransport(input, output);
+    expect(input.listenerCount('data')).toBe(1);
+    input.emit('end');
+    expect(input.listenerCount('data')).toBe(0);
+    expect(input.listenerCount('end')).toBe(0);
+    expect(input.listenerCount('close')).toBe(0);
+    transport.close();
   });
 });

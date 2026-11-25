@@ -36,8 +36,7 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'grid w-full gap-6 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6 sm:grid-cols-3',
+    className: 'grid w-full gap-6 sm:grid-cols-3',
     children: [
       {
         kind: 'box',

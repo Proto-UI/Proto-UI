@@ -20,7 +20,7 @@ export default definePrototype<ContextMenuContentProps, ContextMenuContentExpose
     def.props.setDefaults({ material: 'auto' });
 
     const behavior = asContextMenuContent();
-    behavior.asTransition.configure({ enterDuration: 0, leaveDuration: 100 });
+    behavior.asTransition.configure({ enterDuration: 150, leaveDuration: 100 });
     const { open } = behavior.stateHandles;
 
     // Outer 16px (rounded-2xl) + 4px inset (p-1) pairs concentrically with 12px (rounded-xl) items.
@@ -30,15 +30,25 @@ export default definePrototype<ContextMenuContentProps, ContextMenuContentExpose
       )
     );
     def.rule({
-      when: (w) => w.all(w.state(open).eq(true), w.not(w.meta('reducedMotion').eq(true))),
+      when: (w) =>
+        w.all(
+          w.state(open).eq(true),
+          w.state(behavior.asTransition.transitionState).eq('entering'),
+          w.meta('preference.reducedMotion').eq('no-preference')
+        ),
       intent: (i) => i.feedback.style.use(tw('animate-in fade-in-0 zoom-in-95 duration-150')),
     });
     def.rule({
-      when: (w) => w.all(w.state(open).eq(false), w.not(w.meta('reducedMotion').eq(true))),
+      when: (w) =>
+        w.all(
+          w.state(open).eq(false),
+          w.state(behavior.asTransition.transitionState).eq('leaving'),
+          w.meta('preference.reducedMotion').eq('no-preference')
+        ),
       intent: (i) => i.feedback.style.use(tw('animate-out fade-out-0 zoom-out-95 duration-100')),
     });
     def.rule({
-      when: (w) => w.meta('reducedMotion').eq(true),
+      when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
       intent: (i) => i.feedback.style.use(tw('transition-none')),
     });
     def.feedback.material.declare({

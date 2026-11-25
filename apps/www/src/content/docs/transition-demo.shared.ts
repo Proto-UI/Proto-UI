@@ -142,8 +142,7 @@ const FAMILY_THEMES: Record<TransitionDemoFamily, FamilyTheme> = {
     },
   },
   'liquid-glass': {
-    outerClass:
-      'flex w-full min-w-0 max-w-full flex-col items-center gap-5 rounded-2xl bg-gradient-to-br from-sky-500/25 via-indigo-500/20 to-fuchsia-500/25 p-5 sm:p-6',
+    outerClass: 'flex w-full min-w-0 max-w-full flex-col items-center gap-5',
     stageClass:
       'relative flex min-h-44 w-full max-w-md items-center justify-center overflow-hidden rounded-2xl border border-white/35 bg-gradient-to-br from-sky-400/35 via-indigo-500/25 to-rose-400/35 p-4 dark:border-white/15',
     emptyHintClass:

@@ -2819,7 +2819,13 @@ impl __PuiNativeRecordValue {
     .join('\n');
   const setupCallable = functionValue(ir.setup, new Set(), 2);
   const nativeRecords = nativeRecordTypes();
+  // Only lints reproduced as pure lowering noise are allowed: conservative
+  // grouping parentheses, uniform callback signatures whose parameters a body
+  // may not read, and hex-encoded lexical names for module constants.
+  // dead_code, unreachable_code and the rest stay visible because they can
+  // reveal a lowering defect.
   const code = `// Direct checked-source GPUI component. Supporting files are ordinary editable Rust.
+  #![allow(unused_parens, unused_variables, non_upper_case_globals)]
   ${emitsExceptions ? '#[cfg(panic = "abort")] compile_error!("Authored exception lowering requires panic=unwind");' : ''}
   pub use proto_ui_gpui_native as native;
   pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};

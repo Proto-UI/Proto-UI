@@ -34,7 +34,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['../../core/src/spec/feedback/semantic-merge']),
   }),
   'packages/compiler/src/gpui-source.ts': Object.freeze({
-    sourceSha256: '897cd8622b7bd9353e6bf8cd28e43a6a2e556e080ad15ac8e115fc408adb5089',
+    sourceSha256: '99f3d5fb720a685846b2deb32af5ab0ae54193a098be79ac1e5fb9cf96b34195',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/spec/feedback/semantic-merge']),
   }),

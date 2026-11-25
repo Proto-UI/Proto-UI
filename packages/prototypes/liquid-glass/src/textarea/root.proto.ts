@@ -1,12 +1,10 @@
 import { definePrototype } from '@proto.ui/core';
-import {
-  asTextareaRoot,
-  type TextareaRootExposes,
-  type TextareaRootProps,
-} from '@proto.ui/prototypes-base/textarea';
-import { setupLiquidTextareaVisual } from './visual';
+import { asTextareaRoot, type TextareaRootExposes } from '@proto.ui/prototypes-base/textarea';
+import { setupLiquidTextareaVisual, type LiquidGlassTextareaMaterialProps } from './visual';
 
-export default definePrototype<TextareaRootProps, TextareaRootExposes>({
+export type LiquidGlassTextareaRootProps = LiquidGlassTextareaMaterialProps;
+
+export default definePrototype<LiquidGlassTextareaRootProps, TextareaRootExposes>({
   name: 'liquid-glass-textarea-root',
   modules: asTextareaRoot.modules,
   setup(def) {

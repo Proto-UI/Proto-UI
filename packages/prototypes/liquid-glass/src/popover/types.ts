@@ -13,6 +13,7 @@ export type PopoverContentProps = BasePopoverContentProps & {
 };
 
 export type PopoverTriggerProps = BasePopoverTriggerProps & {
+  material?: LiquidGlassMaterialMode;
   prominence?: LiquidGlassProminence;
 };
 

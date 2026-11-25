@@ -88,8 +88,7 @@ const FAMILY_CHROME: Record<AsyncRegionFamily, FamilyChrome> = {
   'liquid-glass': {
     // Colorful gradient backdrop behind the ordinary content card and floating glass controls
     // so translucency and layering are visible without stacking glass-on-glass.
-    outerClass:
-      'grid w-full min-w-0 max-w-lg gap-4 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    outerClass: 'grid w-full min-w-0 max-w-lg gap-4',
     cardClass: 'rounded-2xl border border-border/60 bg-background/95 text-foreground shadow-sm',
     innerSurfaceClass: 'rounded-xl border border-border/50 bg-secondary/70 p-3 text-foreground',
     headerTitleClass: 'text-sm font-semibold text-foreground',

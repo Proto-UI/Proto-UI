@@ -4,12 +4,11 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'w-full max-w-xl rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    className: 'w-full max-w-xl',
     children: [
       {
         kind: 'box',
-        className: 'grid min-w-0 gap-4 rounded-2xl bg-background/95 p-5 shadow-sm',
+        className: 'grid min-w-0 gap-4',
         children: [
           {
             kind: 'box',

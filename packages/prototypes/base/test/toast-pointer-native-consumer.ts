@@ -29,7 +29,10 @@ export async function mount() {
   const copy = document.createElement('p');
   copy.textContent = 'A notification with independent commands.';
   root.append(copy, action, close);
-  viewport.append(root);
+  const scrollport = document.querySelector('#scrollport')!;
+  // Native scrolling follows the physical ancestor carried with the portaled viewport.
+  viewport.append(scrollport);
+  scrollport.prepend(root);
   setElementProps(viewport, { swipeDirection: 'right' });
   setElementProps(root, { defaultOpen: true, duration: 0 });
   setElementProps(action, { keepOpen: true });
@@ -42,7 +45,7 @@ export async function mount() {
   root.addEventListener('openChange', (event) => {
     openChanges.push((event as CustomEvent<{ open: boolean; reason: string }>).detail);
   });
-  document.querySelector('#scrollport')!.prepend(viewport);
+  document.querySelector('#fixture-origin')!.append(viewport);
   await settle();
 }
 

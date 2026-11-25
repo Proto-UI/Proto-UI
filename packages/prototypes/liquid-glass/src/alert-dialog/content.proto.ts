@@ -20,7 +20,7 @@ export default definePrototype<LiquidGlassAlertDialogContentProps, AlertDialogCo
     // inner rounded-full pill controls; fallback fill/foreground stay readable when opaque.
     def.feedback.style.use(
       tw(
-        'rounded-3xl border border-border ring-1 ring-inset ring-border bg-secondary text-secondary-foreground shadow-xl p-6 fixed z-50 left-[var(--proto-ui-available-region-center-x,50%)] top-[var(--proto-ui-available-region-center-y,50%)] -translate-x-1/2 -translate-y-1/2 w-full max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)] overflow-y-auto grid gap-5 outline-none'
+        'rounded-3xl border border-border ring-1 ring-inset ring-border bg-secondary text-secondary-foreground shadow-xl p-6 fixed z-50 left-[calc(var(--proto-ui-available-region-center-x,50%)_-_var(--proto-ui-available-region-width,100%)/2)] right-[calc(100%_-_var(--proto-ui-available-region-center-x,50%)_-_var(--proto-ui-available-region-width,100%)/2)] top-[calc(var(--proto-ui-available-region-center-y,50%)_-_var(--proto-ui-available-region-height,100%)/2)] bottom-[calc(100%_-_var(--proto-ui-available-region-center-y,50%)_-_var(--proto-ui-available-region-height,100%)/2)] mx-auto my-auto h-fit w-full max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)] overflow-y-auto grid gap-5 outline-none'
       )
     );
     def.rule({
@@ -38,11 +38,21 @@ export default definePrototype<LiquidGlassAlertDialogContentProps, AlertDialogCo
         ),
     });
     def.rule({
-      when: (w) => w.state(open).eq(true),
+      when: (w) =>
+        w.all(
+          w.state(open).eq(true),
+          w.state(behavior.asTransition.transitionState).eq('entering'),
+          w.meta('preference.reducedMotion').eq('no-preference')
+        ),
       intent: (i) => i.feedback.style.use(tw('animate-in fade-in-0 zoom-in-95 duration-200')),
     });
     def.rule({
-      when: (w) => w.state(open).eq(false),
+      when: (w) =>
+        w.all(
+          w.state(open).eq(false),
+          w.state(behavior.asTransition.transitionState).eq('leaving'),
+          w.meta('preference.reducedMotion').eq('no-preference')
+        ),
       intent: (i) => i.feedback.style.use(tw('animate-out fade-out-0 zoom-out-95 duration-150')),
     });
     behavior.asTransition.configure({ enterDuration: 200, leaveDuration: 150 });

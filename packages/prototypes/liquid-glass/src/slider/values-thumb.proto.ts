@@ -23,7 +23,7 @@ export default definePrototype<LiquidGlassSliderValuesThumbProps, SliderValuesTh
     // neither track content nor every decorative child receives material.
     def.feedback.style.use(
       tw(
-        'absolute left-[calc(var(--pui-percentage)*1%)] top-1/2 block h-5 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full border border-border bg-secondary text-secondary-foreground shadow-md transition-shadow cursor-pointer outline-none select-none'
+        'absolute left-[calc(var(--pui-percentage)*1%_-_0.875rem)] top-[calc(50%_-_0.625rem)] block h-5 w-7 rounded-full border border-border bg-secondary text-secondary-foreground shadow-md transition-shadow cursor-pointer outline-none select-none'
       )
     );
     def.rule({
@@ -59,16 +59,16 @@ export default definePrototype<LiquidGlassSliderValuesThumbProps, SliderValuesTh
       when: (w) => w.state(state.orientation).eq('vertical'),
       intent: (i) =>
         i.feedback.style.use(
-          tw('left-1/2 top-auto bottom-[calc(var(--pui-percentage)*1%)] h-7 w-5 translate-y-1/2')
+          tw(
+            'left-[calc(50%_-_0.625rem)] top-auto bottom-[calc(var(--pui-percentage)*1%_-_0.875rem)] h-7 w-5'
+          )
         ),
     });
     def.rule({
       when: (w) =>
         w.all(w.state(state.direction).eq('rtl'), w.state(state.orientation).eq('horizontal')),
       intent: (i) =>
-        i.feedback.style.use(
-          tw('left-auto right-[calc(var(--pui-percentage)*1%)] translate-x-1/2')
-        ),
+        i.feedback.style.use(tw('left-auto right-[calc(var(--pui-percentage)*1%_-_0.875rem)]')),
     });
     return inherited.render;
   },

@@ -359,7 +359,6 @@ export function createRuntimeSession<P extends PropsBaseType>(
     const epoch = ++mountEpoch;
     updateState = { inFlight: false, queued: false };
     const version = ++transitionVersion;
-    setMountPhase('mounting', epoch);
 
     let resolveMount!: () => void;
     let rejectMount!: (error: unknown) => void;
@@ -367,15 +366,20 @@ export function createRuntimeSession<P extends PropsBaseType>(
       resolveMount = resolve;
       rejectMount = reject;
     });
-    mountPending = { promise, resolve: resolveMount, reject: rejectMount };
+    const pending = { promise, resolve: resolveMount, reject: rejectMount };
+    mountPending = pending;
+    let mountReturned = false;
+    const isStale = (phase?: MountPhase) =>
+      transitionVersion !== version ||
+      instancePhase !== 'alive' ||
+      mountEpoch !== epoch ||
+      (phase !== undefined && mountPhase !== phase);
+    const clearPending = () => {
+      if (mountPending === pending) mountPending = undefined;
+    };
 
     const finishMount = () => {
-      if (
-        transitionVersion !== version ||
-        instancePhase !== 'alive' ||
-        mountPhase !== 'mounted' ||
-        mountEpoch !== epoch
-      ) {
+      if (isStale('mounted')) {
         resolveMount();
         return;
       }
@@ -385,15 +389,23 @@ export function createRuntimeSession<P extends PropsBaseType>(
         for (const cb of lifecycle.mounted) cb(run);
       });
       dirty = false;
-      mountPending = undefined;
+      clearPending();
       resolveMount();
     };
 
     try {
+      setMountPhase('mounting', epoch);
+      if (isStale('mounting')) {
+        clearPending();
+        resolveMount();
+        mountReturned = true;
+        return promise;
+      }
       renderCommit('mount', epoch, 0, () => {
         const presence = moduleHub.getPort<PresencePort>('presence')?.awaitMount();
         const scheduleFinish = () => {
-          if (transitionVersion !== version) {
+          if (isStale()) {
+            clearPending();
             resolveMount();
             return;
           }
@@ -402,24 +414,42 @@ export function createRuntimeSession<P extends PropsBaseType>(
           // invalidated by an intervening unmount.
           moduleHub.setProtoPhase('mounted');
           setMountPhase('mounted', epoch);
+          if (isStale()) {
+            clearPending();
+            resolveMount();
+            return;
+          }
           let scheduleReturned = false;
-          host.schedule(() => {
-            try {
-              finishMount();
-            } catch (error) {
-              mountPending = undefined;
-              if (!scheduleReturned) throw error;
-              rejectMount(error);
-            }
-          });
+          try {
+            host.schedule(() => {
+              try {
+                finishMount();
+              } catch (error) {
+                clearPending();
+                if (!scheduleReturned) throw error;
+                rejectMount(error);
+              }
+            });
+          } catch (error) {
+            clearPending();
+            if (!mountReturned) throw error;
+            rejectMount(error);
+            return;
+          }
           scheduleReturned = true;
         };
         if (presence) presence.then(scheduleFinish, scheduleFinish);
         else scheduleFinish();
       });
     } catch (error) {
-      mountPending = undefined;
-      setMountPhase('detached', epoch);
+      clearPending();
+      if (transitionVersion === version && mountEpoch === epoch && mountPhase === 'mounting') {
+        try {
+          setMountPhase('detached', epoch);
+        } catch {
+          // Retain the initiating mount error even if a phase observer throws during rollback.
+        }
+      }
       // Preserve fail-fast behavior for synchronous setup/render/commit
       // violations. The promise was not returned yet, so rejecting it here
       // would create an unhandled rejection in legacy eager callers.
@@ -427,6 +457,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
       throw error;
     }
 
+    mountReturned = true;
     return promise;
   };
 
