@@ -199,6 +199,22 @@ try {
           if (v.family === 'brutalist') await switchFamily(page);
           await page.evaluate(() => window.scrollTo(0, 0));
           await shot('initial');
+          const stage = page.locator('[data-home-gallery-stage]');
+          const stageCount = await stage.count();
+          assert.ok(stageCount <= 1, 'At most one physical gallery stage');
+          if (kind === 'candidate') assert.equal(stageCount, 1, 'One current gallery stage');
+          if (v.width < 768 && stageCount === 1) {
+            if (await stage.evaluate((node) => (node as HTMLElement).inert))
+              await page
+                .locator(
+                  '.homepage-hero [data-projection-generation-state="active"] a[href="#home-demo-previewer"]'
+                )
+                .press('Enter');
+            await page.waitForFunction(() => {
+              const stage = document.querySelector<HTMLElement>('[data-home-gallery-stage]');
+              return stage && !stage.inert;
+            });
+          }
           await shot('full', true);
           const facts = await page.evaluate(() => {
             const [slogan, title, caption] = [
@@ -218,7 +234,10 @@ try {
                 fontWeight: c.fontWeight,
                 lineHeight: c.lineHeight,
                 text: e.textContent?.trim(),
-                visible: rect.width > 0 && rect.height > 0 && c.visibility === 'visible' &&
+                visible:
+                  rect.width > 0 &&
+                  rect.height > 0 &&
+                  c.visibility === 'visible' &&
                   Number(c.opacity) > 0,
               };
             });
@@ -228,6 +247,12 @@ try {
             const primary = document.querySelector<HTMLElement>(
               '[data-demo-ref="gallery-primary"]'
             )!;
+            // The pinned historical baseline flows on the gallery itself;
+            // current pages give the same content a distinct physical stage.
+            const gallery =
+              document.querySelector('[data-home-gallery-stage]') ??
+              document.querySelector('.home-gallery');
+            if (!gallery) throw new Error('Missing physical gallery flow owner');
             return {
               slogan,
               title,
@@ -247,9 +272,9 @@ try {
                 );
                 return content ? getComputedStyle(content).padding : null;
               })(),
-              gridGap: getComputedStyle(document.querySelector('.home-gallery')!).gap,
+              gridGap: getComputedStyle(gallery).gap,
               gallerySpacing: {
-                columnGap: getComputedStyle(document.querySelector('.home-gallery')!).columnGap,
+                columnGap: getComputedStyle(gallery).columnGap,
                 cards: [...document.querySelectorAll('[data-gallery-demo]')].map((card) => {
                   const rect = card.getBoundingClientRect();
                   return {
@@ -274,8 +299,10 @@ try {
           assert.ok(facts.overflow <= 1);
           assert.ok(facts.primary.width > 0 && facts.primary.height > 0);
           for (const leaf of [facts.slogan, facts.title, facts.caption])
-            assert.ok(leaf.visible && leaf.text && leaf.fontSize > 0,
-              'Actual public Text content remains readable');
+            assert.ok(
+              leaf.visible && leaf.text && leaf.fontSize > 0,
+              'Actual public Text content remains readable'
+            );
           if (kind === 'candidate') {
             if (v.family === 'shadcn') {
               assert.equal(facts.cardPrototype, 'shadcn-card-root');
@@ -295,7 +322,9 @@ try {
               nodes
                 .filter((e) => (e as HTMLElement).checkVisibility())
                 .map((e) => ({
-                  control: e.closest('[data-projection-control]')?.getAttribute('data-projection-control'),
+                  control: e
+                    .closest('[data-projection-control]')
+                    ?.getAttribute('data-projection-control'),
                   height: e.getBoundingClientRect().height,
                   overflow: e.scrollWidth - e.clientWidth,
                 }))
@@ -303,8 +332,11 @@ try {
           entry.headerSelects = selects;
           if (kind === 'candidate')
             for (const control of ['runtime', 'family'])
-              assert.equal(selects.filter((select) => select.control === control).length, 1,
-                `One visible ${control} preference`);
+              assert.equal(
+                selects.filter((select) => select.control === control).length,
+                1,
+                `One visible ${control} preference`
+              );
           for (const select of selects) {
             assert.ok(select.overflow <= 1);
             if (kind === 'candidate') assert.ok(select.height >= 44);
@@ -486,7 +518,10 @@ try {
             }));
             await shot('desktop-restored');
             if (kind === 'candidate') {
-              assert.ok(await trigger.isVisible(), 'The retained desktop preference remains usable');
+              assert.ok(
+                await trigger.isVisible(),
+                'The retained desktop preference remains usable'
+              );
               assert.equal(await trigger.getAttribute('aria-expanded'), 'false');
             }
           }
@@ -494,9 +529,10 @@ try {
           assert.ok(rhythm.overflow <= 1);
           if (kind === 'candidate') {
             for (const heading of rhythm.headings) {
-              assert.ok(heading.label && heading.size > 0 &&
-                parseFloat(heading.lineHeight) >= heading.size,
-                'Actual heading Text has a readable line box');
+              assert.ok(
+                heading.label && heading.size > 0 && parseFloat(heading.lineHeight) >= heading.size,
+                'Actual heading Text has a readable line box'
+              );
             }
             for (const size of rhythm.bodies) assert.ok(size > 0);
           }
@@ -532,13 +568,27 @@ try {
             await page.waitForSelector('[data-site-contents-button]');
             await page.locator('[data-site-contents-button]').click();
           }
-          await page.waitForFunction(() =>
-            [
+          await page.waitForFunction(() => {
+            const rows = [
               ...document.querySelectorAll<HTMLElement>(
-                '.sidebar-pane a[data-site-link-appearance="sidebar"]'
+                '.sidebar-pane a[data-site-link-appearance="sidebar"],.right-sidebar a[data-site-link-appearance="toc"]'
               ),
-            ].some((e) => e.checkVisibility() && e.querySelector('[data-pui-root]'))
-          );
+            ].filter((link) => link.checkVisibility());
+            // Native link owners initialize in bounded batches. One completed
+            // row does not make the remaining physical Text/Surface leaves ready.
+            return (
+              rows.some((link) => link.dataset.siteLinkAppearance === 'sidebar') &&
+              rows.every(
+                (link) =>
+                  link.querySelector(
+                    '[data-projection-prototype$="-surface-root"],wc-site-shadcn-surface,wc-site-brutalist-surface'
+                  ) &&
+                  link.querySelector(
+                    'wc-site-shadcn-text,wc-site-brutalist-text,[data-projection-prototype$="-text-root"]'
+                  )
+              )
+            );
+          });
           const read = () =>
             page.evaluate(() => {
               const [left, right] = [
@@ -599,10 +649,14 @@ try {
             for (const row of [...facts.left, ...facts.right]) {
               const minimum = row.appearance === 'toc' ? 24 : v.width === 390 ? 44 : 32;
               assert.ok(row.surfaceHeight >= minimum - 1);
-              assert.ok(row.label && row.href && row.fontSize > 0 && row.textHeight > 0,
-                'Navigation retains readable named native destinations');
-              assert.ok(row.hitHeight >= row.surfaceHeight - 1,
-                'The native anchor covers its painted target');
+              assert.ok(
+                row.label && row.href && row.fontSize > 0 && row.textHeight > 0,
+                'Navigation retains readable named native destinations'
+              );
+              assert.ok(
+                row.hitHeight >= row.surfaceHeight - 1,
+                'The native anchor covers its painted target'
+              );
             }
           if (kind === 'candidate') assert.ok(facts.bodySize > 0);
           if (v.width === 1440) {
