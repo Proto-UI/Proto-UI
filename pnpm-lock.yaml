@@ -732,7 +732,30 @@ importers:
         specifier: ^2.4.9
         version: 2.4.9
 
-  packages/compiler: {}
+  packages/compiler:
+    dependencies:
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      esbuild:
+        specifier: 0.25.12
+        version: 0.25.12
+      playwright-core:
+        specifier: 1.58.2
+        version: 1.58.2
+      react:
+        specifier: 19.2.6
+        version: 19.2.6
+      react-dom:
+        specifier: 19.2.6
+        version: 19.2.6(react@19.2.6)
 
   packages/compositions/chatui:
     dependencies:

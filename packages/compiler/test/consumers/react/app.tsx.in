@@ -1,0 +1,66 @@
+import { createRef, StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { flushSync } from 'react-dom';
+import { DeliveryBadge } from './DeliveryBadge';
+import { SelectionControl, type SelectionControlHandle } from './SelectionControl';
+
+const root = createRoot(document.getElementById('app')!);
+const primary = createRef<SelectionControlHandle>();
+const secondary = createRef<SelectionControlHandle>();
+const requests: Array<[string, string, number]> = [];
+const nested: Array<[string, number]> = [];
+let reenter = false;
+let connected = true;
+let caption = 'Connected';
+let accepted = 'A';
+let disabled = false;
+let prefix = 'Old: ';
+
+function render() {
+  flushSync(() => root.render(
+    <StrictMode>
+      <section id="badge"><DeliveryBadge connected={connected} caption={caption}
+        appearance={({ available }) => ({ color: available ? 'green' : 'gray' })} /></section>
+      <section id="primary"><SelectionControl ref={primary} controlled={true}
+        accepted={accepted} candidate="B" initial="unused" disabled={disabled} prefix={prefix}
+        appearance={({ selection }) => ({ borderTopWidth: selection === 'C' ? 7 : 2, borderTopStyle: 'solid' })}
+        onRequested={(value) => {
+          const handle = primary.current!;
+          requests.push([value, handle.selection, handle.attempts]);
+          if (reenter) {
+            reenter = false;
+            const result = handle.choose();
+            nested.push([result.status, handle.attempts]);
+          }
+        }} /></section>
+      <section id="secondary"><SelectionControl ref={secondary} controlled={false}
+        accepted="unused" candidate="U2" initial="U1" disabled={false} prefix="Local: " /></section>
+    </StrictMode>
+  ));
+}
+
+const trace = {
+  badge(online: boolean, label: string) { connected = online; caption = label; render(); },
+  publish(value: string, locked = false) { accepted = value; disabled = locked; prefix = 'New: '; render(); },
+  enableReentry() { reenter = true; },
+  snapshot() {
+    return {
+      primary: [primary.current!.selection, primary.current!.attempts],
+      secondary: [secondary.current!.selection, secondary.current!.attempts],
+      requests: [...requests], nested: [...nested],
+    };
+  },
+  discard() {
+    const result = primary.current!.discard();
+    return result.status === 'failed' ? [result.status, result.reason] : [result.status];
+  },
+  dispose() {
+    const saved = primary.current!;
+    flushSync(() => root.unmount());
+    return saved.choose().status;
+  },
+};
+
+declare global { interface Window { selectionTrace: typeof trace } }
+window.selectionTrace = trace;
+render();

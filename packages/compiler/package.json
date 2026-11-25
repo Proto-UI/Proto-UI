@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "sideEffects": false,
-  "description": "Proto language compiler foundation; the legacy compiler is retired and all replacement targets are not implemented.",
+  "description": "Proto language compiler and typed native-source targets.",
   "engines": {
     "node": ">=24"
   },
@@ -20,10 +20,33 @@
     "./browser": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
-    }
+    },
+    "./targets/ir": "./src/targets/component-ir.ts",
+    "./targets/react": "./src/targets/react.ts",
+    "./targets/gpui": "./src/targets/gpui.ts",
+    "./support/react": "./src/support/react/index.ts"
   },
   "scripts": {
     "test": "node --test test/retirement.node-test.mjs",
+    "test:targets:react": "node --test test/react-target.node-test.mjs",
+    "test:targets:gpui": "node --test test/gpui-target.node-test.mjs",
     "status": "node src/cli-entry.mjs --status"
+  },
+  "dependencies": {
+    "typescript": "5.9.3"
+  },
+  "peerDependencies": {
+    "react": "^18.3.0 || ^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": true }
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "esbuild": "0.25.12",
+    "playwright-core": "1.58.2",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
   }
 }
