@@ -126,6 +126,59 @@ fn the_recorded_checkbox_is_a_checkbox_unchecked_checked_or_mixed() {
 }
 
 #[test]
+fn required_preserves_boolean_facts_without_changing_actions_or_check_state() {
+    for value in [true, false] {
+        let (projection, issues) = project(&snapshot(json!({
+            "semanticObjectId": "checkbox",
+            "role": "checkbox",
+            "states": { "required": value, "checked": "mixed", "disabled": false },
+            "actions": { "activate": { "event": "click" } },
+            "relations": {},
+        })));
+        let projection = projection.expect("the checkbox projects");
+        assert!(issues.is_empty(), "{issues:?}");
+        assert_eq!(projection.required, Some(value));
+        assert_eq!(projection.toggled, Some(Toggled::Mixed));
+        assert!(!projection.disabled);
+        assert!(projection.activatable);
+    }
+}
+
+#[test]
+fn required_absence_and_invalid_values_do_not_invent_a_boolean_fact() {
+    for value in [
+        None,
+        Some(json!("false")),
+        Some(Value::Null),
+        Some(json!(0)),
+    ] {
+        let mut snapshot = snapshot(json!({
+            "semanticObjectId": "checkbox",
+            "role": "checkbox",
+            "states": {},
+            "actions": {},
+            "relations": {},
+        }));
+        if let Some(value) = &value {
+            snapshot.states.insert("required".into(), value.clone());
+        }
+        let (projection, issues) = project(&snapshot);
+        assert_eq!(
+            projection.expect("the checkbox still projects").required,
+            None
+        );
+        let expected: Vec<_> = value
+            .into_iter()
+            .map(|value| A11yIssue::State {
+                name: "required".into(),
+                value,
+            })
+            .collect();
+        assert_eq!(issues, expected);
+    }
+}
+
+#[test]
 fn readonly_preserves_boolean_facts_without_changing_actions_or_check_state() {
     for value in [true, false] {
         let (projection, issues) = project(&snapshot(json!({

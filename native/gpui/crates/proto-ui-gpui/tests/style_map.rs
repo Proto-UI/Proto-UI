@@ -393,7 +393,7 @@ fn reports_a_property_it_cannot_express() {
 ///
 /// Every entry here is deliberate, not an oversight: each needs work beyond a
 /// property assignment, and each is named in the plan as its own slice.
-const EXPECTED_UNMAPPED: [&str; 87] = [
+const EXPECTED_UNMAPPED: [&str; 86] = [
     // Composed paint that needs BoxShadow construction from the ring/shadow
     // custom properties rather than a single declaration.
     "box-shadow",
@@ -468,7 +468,6 @@ const EXPECTED_UNMAPPED: [&str; 87] = [
     "font-variant-numeric",
     "grid-template-columns",
     "inset-inline-end",
-    "inset-inline-start",
     "isolation",
     "list-style-type",
     "margin-block",
@@ -566,7 +565,12 @@ fn selectable_text_affordances_remain_explicitly_unmapped() {
 /// This is a separate list from the property inventory on purpose. `width` is
 /// mapped; `width: fit-content` is not. Recording the pair keeps the property
 /// inventory from claiming that `width` never reaches a surface.
-const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 43] = [
+const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 44] = [
+    (
+        "border-color",
+        "inherit",
+        "The Collapsible inner border inherits its parent's exact light/dark border colour; this mapper has no parent border context.",
+    ),
     (
         "overflow-x",
         "auto",
@@ -799,6 +803,111 @@ const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 43] = [
         "GPUI exposes one border color; distinct CSS edge colors cannot be represented by that field.",
     ),
 ];
+
+#[test]
+fn uniform_border_color_shorthands_reach_the_native_refinement() {
+    let reference = map(
+        &declared(&[("position", "relative"), ("border-color", "#000")]),
+        LengthContext::default(),
+    );
+    assert!(reference.is_complete());
+    for value in [
+        "#000 #000",
+        "#000 #000 #000",
+        "#000 #000 #000 #000",
+        "#000 rgb(0 0 0)",
+    ] {
+        let mapped = map(
+            &declared(&[("position", "relative"), ("border-color", value)]),
+            LengthContext::default(),
+        );
+        assert!(mapped.is_complete(), "{value}: {:?}", mapped.unmapped);
+        assert_eq!(
+            mapped.refinement.border_color,
+            reference.refinement.border_color
+        );
+    }
+}
+
+#[test]
+fn different_edge_colours_remain_explicit_and_never_paint_a_partial_border() {
+    for value in [
+        "#000 #fff",
+        "#e5e5e5 #e5e5e5 #fff #e5e5e5",
+        "#eee #eee #ddd",
+        "#eee #eee #fff #eee",
+        "#eee #fff #eee #eee",
+        "#000 #12345",
+        "#000 #000 #000 #000 #000",
+    ] {
+        let mapped = map(
+            &declared(&[("position", "relative"), ("border-color", value)]),
+            LengthContext::default(),
+        );
+        assert_eq!(mapped.refinement.border_color, None);
+        assert_eq!(
+            mapped.unmapped,
+            [(
+                "border-color".into(),
+                value.into(),
+                Unmapped::UnsupportedValue
+            )]
+        );
+        assert!(!mapped.is_complete());
+    }
+    let inherited = map(
+        &declared(&[
+            ("position", "relative"),
+            ("border-color", "currentColor currentColor"),
+        ]),
+        LengthContext::default(),
+    );
+    assert_eq!(inherited.refinement.border_color, None);
+    assert_eq!(
+        inherited.unmapped,
+        [(
+            "border-color".into(),
+            "currentColor currentColor".into(),
+            Unmapped::NeedsInheritedColor,
+        )]
+    );
+}
+
+#[test]
+fn inherited_border_colour_is_diagnostic_without_a_parent_border() {
+    let mapped = map(
+        &declared(&[("position", "relative"), ("border-color", "inherit")]),
+        LengthContext::default(),
+    );
+    assert_eq!(mapped.refinement.border_color, None);
+    assert_eq!(
+        mapped.unmapped,
+        vec![(
+            "border-color".into(),
+            "inherit".into(),
+            Unmapped::UnsupportedValue
+        )]
+    );
+}
+
+#[test]
+fn viewport_and_query_container_lengths_remain_diagnostic_without_host_bases() {
+    let resolved = declared(&[
+        ("position", "relative"),
+        ("max-height", "calc(100vh - 2rem)"),
+        ("max-width", "calc(100vw - 2rem)"),
+        ("width", "calc(100cqw - 2px)"),
+    ]);
+    let absent = map(&resolved, LengthContext::default());
+    assert_eq!(absent.refinement.max_size.height, None);
+    assert_eq!(absent.refinement.max_size.width, None);
+    assert_eq!(absent.refinement.size.width, None);
+    assert_eq!(absent.unmapped.len(), 3);
+    assert!(absent
+        .unmapped
+        .iter()
+        .all(|(_, _, reason)| *reason == Unmapped::UnsupportedValue));
+}
 
 #[test]
 fn prefixed_none_selection_matches_the_existing_native_text_policy() {
