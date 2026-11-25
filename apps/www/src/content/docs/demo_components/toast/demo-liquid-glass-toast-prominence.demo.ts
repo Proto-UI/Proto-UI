@@ -55,6 +55,8 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'liquid-glass-toast-viewport',
+        previewTheme: 'portal',
+        ref: 'viewport',
         props: {
           a11yLabel: 'Liquid Glass notifications',
         },

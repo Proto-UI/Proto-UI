@@ -211,6 +211,7 @@ export const OVERLAY_CONFIG_PATCH_TYPE = objectValueType([
     'closeOnFocusOutside',
     'closeOnAnchorPress',
     'closeOnTriggerPress',
+    'boundaryStack',
     'anchored',
     'availableSpace',
     'avoidCollisions',

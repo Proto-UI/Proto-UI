@@ -174,7 +174,8 @@ export function createNativeBrowserPort<InteractionFactory>(host:HTMLElement,sha
 export function createNativeBrowserPort<InteractionFactory>(host:HTMLElement,shadow:boolean,createInteraction?:InteractionFactory,markExposeEvent:<T extends Event>(event:T)=>T = event=>event):NativeBrowserPort<InteractionFactory | undefined> {
   const document=host.ownerDocument,range=createNativeRangeOwner(host,shadow);
   let disposed=false,accepted=false,control:HTMLElement|null=null;
-  let portalAnchor:Comment|null=null,portalParent:ContextScope|null=null;
+  let portalAnchor:Comment|null=null,portalParent:ContextScope|null=null,portalObserver:MutationObserver|null=null;
+  const releasePortalObserver=()=>{portalObserver?.disconnect();portalObserver=null;};
   let display:{value:string;priority:string}|null=null;
   const attributes=new Map<string,{baseline:string|null;projected:string|null}>();
   const emissions:{key:string;payload:unknown;options?:CustomEventInit}[]=[];
@@ -190,8 +191,20 @@ export function createNativeBrowserPort<InteractionFactory>(host:HTMLElement,sha
         if(name==='value'){if(!accepted)(control as HTMLInputElement).value=String(value??'');continue;}
         if(value===null||value===false)control.removeAttribute(name);else control.setAttribute(name,value===true?'':String(value));
       }
-      if(portal){if(!portalAnchor){portalParent=nativeParent(host);portalAnchor=document.createComment('pui-portal');host.parentNode?.insertBefore(portalAnchor,host);}if(host.parentNode!==portal)portal.appendChild(host);}
-      else if(portalAnchor){portalAnchor.parentNode?.insertBefore(host,portalAnchor);portalAnchor.remove();portalAnchor=null;portalParent=null;}
+      if(portal){
+        if(!portalAnchor){
+          portalParent=nativeParent(host);portalAnchor=document.createComment('pui-portal');host.parentNode?.insertBefore(portalAnchor,host);
+          portalObserver=new document.defaultView!.MutationObserver(()=>{
+            if(disposed||!portalAnchor||portalAnchor.isConnected||!host.isConnected)return;
+            releasePortalObserver();
+            // Rejoin the disconnected origin so native lifecycle retires this owner.
+            if(portalAnchor.parentNode)portalAnchor.parentNode.insertBefore(host,portalAnchor);else host.remove();
+          });
+          portalObserver.observe(document,{childList:true,subtree:true});
+        }
+        if(host.parentNode!==portal)portal.appendChild(host);
+      }
+      else if(portalAnchor){releasePortalObserver();portalAnchor.parentNode?.insertBefore(host,portalAnchor);portalAnchor.remove();portalAnchor=null;portalParent=null;}
     },
     projectInteraction(snapshot){for(const [name,value]of Object.entries(snapshot))port.attribute(name,value);},
     attribute(name,value){
@@ -214,7 +227,7 @@ export function createNativeBrowserPort<InteractionFactory>(host:HTMLElement,sha
     bindContext(scope){if(scope)ownerScopes.set(host,scope);else ownerScopes.delete(host);},
     accept(){accepted=true;for(const emission of emissions.splice(0)){if(disposed)break;port.emit(emission.key,emission.payload,emission.options);}},
     dispose(){
-      if(disposed)return;disposed=true;emissions.length=0;range.dispose();if(control?.parentNode===(host.shadowRoot??host))control.remove();
+      if(disposed)return;disposed=true;releasePortalObserver();emissions.length=0;range.dispose();if(control?.parentNode===(host.shadowRoot??host))control.remove();
       const target=control??host;for(const[name,entry]of attributes)if(target.getAttribute(name)===entry.projected){if(entry.baseline===null)target.removeAttribute(name);else target.setAttribute(name,entry.baseline);}attributes.clear();ownerScopes.delete(host);
       if(portalAnchor){portalAnchor.parentNode?.insertBefore(host,portalAnchor);portalAnchor.remove();portalAnchor=null;}
       if(display){if(display.value)host.style.setProperty('display',display.value,display.priority);else host.style.removeProperty('display');display=null;}

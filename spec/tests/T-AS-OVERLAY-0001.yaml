@@ -41,6 +41,18 @@ cases:
     covers:
       - C-AS-OVERLAY-0001-G
     expectation: independent-boundary-hit-composition
+  - id: T-AS-OVERLAY-0001-CASE-BOUNDARY-PARTICIPATION
+    title: Passive Overlay presentation does not occupy Boundary stack arbitration
+    covers: [C-AS-OVERLAY-0001-F]
+    expectation: default-topmost-order-with-explicit-opt-out-and-idempotent-configuration-open-reentry
+  - id: T-AS-OVERLAY-0001-CASE-PASSIVE-PORTAL
+    title: Default Toast portal retains context and cleanup without capturing another Overlay's dismissal
+    covers: [C-AS-OVERLAY-0001-F, C-AS-OVERLAY-0001-I, C-AS-OVERLAY-0001-K]
+    expectation: body-projection-with-live-context-origin-cleanup-and-preserved-popover-pointer-focus-escape
+  - id: T-AS-OVERLAY-0001-CASE-COMPILED-PASSIVE-PORTAL
+    title: Admitted Web source consumers retain passive Overlay participation and portal lifetime
+    covers: [C-AS-OVERLAY-0001-F, C-AS-OVERLAY-0001-I, C-AS-OVERLAY-0001-K]
+    expectation: generated-boundary-opt-out-with-native-framework-updates-reentry-and-origin-cleanup
   - id: T-AS-OVERLAY-0001-CASE-DISMISS
     title: opted-in outside press and Escape policies use Boundary and Event transport
     covers:
@@ -80,6 +92,30 @@ cases:
     expectation: after-transaction-once-only-current-view-no-stale-revival
 
 implementations:
+  - id: overlay-boundary-stack-participation
+    kind: module-test
+    status: passing
+    path: packages/modules/overlay/test/boundary-stack.test.ts
+    required: true
+    consumesCases: [T-AS-OVERLAY-0001-CASE-BOUNDARY-PARTICIPATION]
+    notes:
+      - Real Boundary and Overlay modules arbitrate injected outside classifications; no native hit-testing claim.
+  - id: base-toast-passive-portal
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/base/test/toast-portal.test.ts
+    required: true
+    consumesCases: [T-AS-OVERLAY-0001-CASE-PASSIVE-PORTAL]
+    notes:
+      - Actual WC adapters in simulated DOM preserve context and origin-owned cleanup. Pointer and Escape are synthetic events; keyboard focus departure explicitly supplies the resulting native-focus state because Happy DOM has no sequential keyboard navigation.
+  - id: compiled-passive-overlay
+    kind: workspace-check
+    status: passing
+    path: packages/compiler/test/overlay-passive-native.test.ts
+    required: true
+    consumesCases: [T-AS-OVERLAY-0001-CASE-COMPILED-PASSIVE-PORTAL]
+    notes:
+      - Four Web source profiles execute actual generated framework consumers for portal updates, close/reentry and disposal. Shared emitted host support covers Boundary arbitration with synthetic input in Happy DOM; this is not native browser or GPUI acceptance.
   - id: overlay-resource-reconciliation-barrier
     kind: module-test
     status: planned
@@ -233,6 +269,9 @@ revisions:
   - version: 0.2.0-rc.0
     change: refined
     summary: Added resolved Anatomy anchor sharing between Positioning and Boundary classification.
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Added passive Boundary stack opt-out and default Toast portal controls for context, teardown, focus retention, and other Overlay dismissal.
 tags:
   - overlay
   - presence

@@ -16,8 +16,13 @@ const TOAST_STACK_TOKENS = [
   'pointer-events-auto',
   'shadow-[0_4px_12px_rgb(0_0_0/10%)]',
   'z-0',
-  'z-20',
-  'z-30',
+  'pointer-events-none',
+  'order-[var(--pui-stack-index)]',
+  'z-[calc(1000_-_var(--pui-stack-index))]',
+  'w-[max(50%,calc(100%_-_var(--pui-stack-index)*18px))]',
+  'top-[calc(var(--pui-stack-index)*14px)]',
+  'bottom-[calc(var(--pui-stack-index)*14px)]',
+  'transition-[width,top,bottom,opacity]',
 ];
 const TARGETS = [
   ['document', renderProtoStyleTokenCss],
@@ -41,8 +46,14 @@ describe('official Shadcn Toast style closure', () => {
       const css = render(tokens);
       expect(css).not.toContain('Unsupported Proto UI style tokens');
       expect(css).toContain('z-index: 0;');
-      expect(css).toContain('z-index: 20;');
-      expect(css).toContain('z-index: 30;');
+      expect(css).toContain('order: var(--pui-stack-index);');
+      expect(css).toContain('z-index: calc(1000 - var(--pui-stack-index));');
+      expect(css).toContain('width: max(50%,calc(100% - var(--pui-stack-index)*18px));');
+      expect(css).toContain('top: calc(var(--pui-stack-index)*14px);');
+      expect(css).toContain('bottom: calc(var(--pui-stack-index)*14px);');
+      expect(css).toContain('pointer-events: none;');
+      expect(css).toContain('transition-property: width, top, bottom, opacity;');
+      expect(css).not.toMatch(/transition-property: (?:all|[^;]*\b(?:z-index|order)\b)/);
       expect(css).toContain('opacity: 0.95;');
       expect(css).toContain('pointer-events: auto;');
       expect(css).toContain('line-height: 1.4;');

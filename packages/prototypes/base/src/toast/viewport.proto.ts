@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
-import { asAccessible, asFocusRoving } from '@proto.ui/hooks';
+import { asAccessible, asFocusRoving, asOverlay } from '@proto.ui/hooks';
 import {
   TOAST_POSITIONS,
   TOAST_SWIPE_DIRECTIONS,
@@ -60,6 +60,21 @@ function setup(def: DefHandle<ToastViewportProps, ToastViewportExposes>) {
   });
   const expanded = def.state.bool('expanded', false);
   const paused = def.state.bool('paused', false);
+
+  const overlay = asOverlay<ToastViewportProps>();
+  overlay.configure({
+    defaultOpen: true,
+    portal: true,
+    boundaryStack: false,
+    modal: false,
+    entry: 'manual',
+    restore: 'none',
+    closeOnEscape: false,
+    closeOnOutsidePress: false,
+    closeOnFocusOutside: false,
+    closeOnAnchorPress: false,
+    closeOnTriggerPress: false,
+  });
 
   const a11y = asAccessible();
   a11y.role('region');

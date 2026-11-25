@@ -1831,8 +1831,18 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     disconnect() { alive(); stopPosition(); positionConnection = null; positionSnapshot = null; },
     getSnapshot() { alive(); return positionSnapshot; },
   };
-  let overlayConfig: NativeConfig = { defaultOpen: false, closeOnEscape: false, closeOnOutsidePress: false, closeOnFocusOutside: false, closeOnAnchorPress: false, closeOnTriggerPress: false, placement: 'bottom', align: 'start', sideOffset: 4, alignOffset: 0, anchored: false, availableSpace: false, strategy: 'absolute', avoidCollisions: true, collisionBoundary: 'clippingAncestors', collisionPadding: 0, entry: 'content', restore: 'trigger', portal: false, modal: false, layerOffset: 0 };
+  let overlayConfig: NativeConfig = { defaultOpen: false, closeOnEscape: false, closeOnOutsidePress: false, closeOnFocusOutside: false, closeOnAnchorPress: false, closeOnTriggerPress: false, boundaryStack: true, placement: 'bottom', align: 'start', sideOffset: 4, alignOffset: 0, anchored: false, availableSpace: false, strategy: 'absolute', avoidCollisions: true, collisionBoundary: 'clippingAncestors', collisionPadding: 0, entry: 'content', restore: 'trigger', portal: false, modal: false, layerOffset: 0 };
   const overlayOpen = observed<boolean>(false, true);
+  let overlayBoundaryActive = false;
+  function syncOverlayBoundaryStack(newActivation = false) {
+    const active = !disposed && options.isAlive() && overlayOpen.handle.get() && overlayConfig.boundaryStack !== false;
+    if (active !== overlayBoundaryActive || active && newActivation) {
+      overlayBoundaryActive = active;
+      if (active) retireBoundaryStack();
+      stackActive = active;
+    }
+    reconcileStack();
+  }
   let overlayTrigger: unknown = null, overlayAnchor: unknown = null, overlayContent: unknown = null, overlayKeepMounted = false;
   let overlayPresence: NativeConfig | null = null, modalBody: HTMLElement | null = null, previousOverlayFocus: HTMLElement | null = null;
   let overlayRevision = 0;
@@ -1955,7 +1965,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (!ready() || !hooks.has('asOverlay')) return;
     const epoch = generation, revision = overlayRevision, alignmentRevision = overlayAlignmentRevision;
     const open = overlayOpen.handle.get();
-    reconcileStack();
+    syncOverlayBoundaryStack();
     if (__nativeFeature('available-space')) reconcileAvailable(targetOf(overlayContent) ?? root);
     // Presence owns the physical view lifetime, including its leaving interval.
     // Semantic open owns dismissal and focus; it cannot retire geometry or modal
@@ -1979,7 +1989,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (!ready() || epoch !== generation || revision !== overlayRevision || alignmentRevision !== overlayAlignmentRevision) return;
     // Leaving retains its already committed layer after the semantic candidate
     // has left the dismissal stack.
-    if (open) styleProperty(content, 'z-index', String(1000 + (boundaryStacks.get(root!.ownerDocument)?.indexOf(owner) ?? 0) * 2 + Number(overlayConfig.layerOffset ?? 0)));
+    if (open) styleProperty(content, 'z-index', String(1000 + Math.max(0, boundaryStacks.get(root!.ownerDocument)?.indexOf(owner) ?? 0) * 2 + Number(overlayConfig.layerOffset ?? 0)));
     if (!open) { restoreOverlayFocus(); return; }
     if (!overlayMaterialized) {
       overlayMaterialized = true;
@@ -2001,8 +2011,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     // A controlled owner can synchronously refuse dismissal or replace its view
     // from an open observation. The superseded request owns no later effects.
     if (revision !== overlayRevision || disposed || !options.isAlive()) return;
-    if (value) retireBoundaryStack();
-    stackActive = value; reconcileStack();
+    syncOverlayBoundaryStack(value);
     if (!value && !overlayMaterialized) overlayFocusCaptured = false;
     if (overlayPresence) {
       const callback = value ? overlayPresence.enter : overlayPresence.leave;
@@ -2024,7 +2033,8 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
         availableBinding = binding;
       }
       overlayConfig = { ...overlayConfig, ...config };
-      if (config.defaultOpen !== undefined) { overlayOpen.set(Boolean(config.defaultOpen)); stackActive = Boolean(config.defaultOpen); }
+      if (config.defaultOpen !== undefined) overlayOpen.set(Boolean(config.defaultOpen));
+      syncOverlayBoundaryStack();
     },
     isOpen() { alive(); return overlayOpen.handle.get(); },
     openOverlay(reason) { runtime('overlay.openOverlay'); setOverlayOpen(true, reason); },

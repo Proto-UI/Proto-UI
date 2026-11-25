@@ -57,6 +57,31 @@ it('ships every Toast viewport anchor in each family preset', () => {
 
 describe('Toast stack style delivery', () => {
   for (const { target, render } of STYLE_CSS_LANES) {
+    it(`${target} delivers unbounded chronological layers without animating their order`, () => {
+      const tokens = [
+        'order-[var(--pui-stack-index)]',
+        'z-[calc(1000_-_var(--pui-stack-index))]',
+        'w-[max(50%,calc(100%_-_var(--pui-stack-index)*18px))]',
+        'top-[calc(var(--pui-stack-index)*14px)]',
+        'bottom-[calc(var(--pui-stack-index)*14px)]',
+        'transition-[width,top,bottom,opacity]',
+      ];
+      const css = render(tokens);
+      expect(css).toContain('order: var(--pui-stack-index);');
+      expect(css).toContain('z-index: calc(1000 - var(--pui-stack-index));');
+      expect(css).toContain('width: max(50%,calc(100% - var(--pui-stack-index)*18px));');
+      expect(css).toContain('top: calc(var(--pui-stack-index)*14px);');
+      expect(css).toContain('bottom: calc(var(--pui-stack-index)*14px);');
+      expect(css).toContain('transition-property: width, top, bottom, opacity;');
+      expect(css).not.toMatch(/transition-property: (?:all|[^;]*(?:z-index|order))/);
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      for (const token of tokens) {
+        expect(
+          SHADCN_STYLE_TOKENS.some((item) => item === token || item.endsWith(`:${token}`))
+        ).toBe(true);
+      }
+    });
+
     it(`${target} emits the card layers and restores pointer input`, () => {
       const css = render([
         'pointer-events-auto',

@@ -8,6 +8,7 @@ export default {
       {
         'kind': 'proto',
         'prototypeId': 'base-toast-viewport',
+        previewTheme: 'portal',
         'children': [
           {
             'kind': 'proto',

@@ -155,92 +155,104 @@ export default definePrototype<ToastRootProps, ToastRootExposes>({
       when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
       intent: (i) => i.feedback.style.use(tw('transition-none')),
     });
-    // Sonner-style 3D collapsed deck vs expanded vertical stack
+    // The same full opening index owns live flex order and paint order. Layer
+    // changes are immediate; interpolating z-index can put an older card in front
+    // while new messages arrive before the preceding transition has finished.
     def.rule({
-      when: (w) =>
-        w.any(
-          w.state(toastState.stackTier).eq('front'),
-          w.all(
-            w.state(toastState.expanded).eq(true),
-            w.not(w.state(toastState.stackTier).eq('overflow'))
+      when: (w) => w.state(toastState.open).eq(true),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw(
+            'pointer-events-auto order-[var(--pui-stack-index)] z-[calc(1000_-_var(--pui-stack-index))]'
           )
         ),
-      intent: (i) => i.feedback.style.use(tw('relative z-30 w-full opacity-100')),
     });
     def.rule({
       when: (w) =>
         w.all(
+          w.state(toastState.open).eq(true),
+          w.any(w.not(w.state(toastState.stackIndex).gte(1)), w.state(toastState.expanded).eq(true))
+        ),
+      intent: (i) => i.feedback.style.use(tw('relative w-full opacity-100')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(toastState.open).eq(true),
           w.state(toastState.expanded).eq(false),
-          w.state(toastState.stackTier).eq('second'),
+          w.state(toastState.stackIndex).gte(1)
+        ),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw(
+            'absolute left-0 right-0 mx-auto w-[max(50%,calc(100%_-_var(--pui-stack-index)*18px))] opacity-95'
+          )
+        ),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(toastState.open).eq(true),
+          w.state(toastState.expanded).eq(false),
+          w.state(toastState.stackIndex).gte(1),
           w.any(
             w.state(toastState.position).eq('bottom-left'),
             w.state(toastState.position).eq('bottom-center'),
             w.state(toastState.position).eq('bottom-right')
           )
         ),
-      intent: (i) =>
-        i.feedback.style.use(
-          tw('absolute left-0 right-0 mx-auto w-[338px] bottom-[14px] z-20 opacity-95')
-        ),
+      intent: (i) => i.feedback.style.use(tw('bottom-[calc(var(--pui-stack-index)*14px)]')),
     });
     def.rule({
       when: (w) =>
         w.all(
+          w.state(toastState.open).eq(true),
           w.state(toastState.expanded).eq(false),
-          w.state(toastState.stackTier).eq('second'),
+          w.state(toastState.stackIndex).gte(1),
           w.any(
             w.state(toastState.position).eq('top-left'),
             w.state(toastState.position).eq('top-center'),
             w.state(toastState.position).eq('top-right')
           )
         ),
+      intent: (i) => i.feedback.style.use(tw('top-[calc(var(--pui-stack-index)*14px)]')),
+    });
+    // Presence may retain a closed view through its leave interval. Keep that
+    // view painted below live messages without reserving their viewport anchor.
+    def.rule({
+      when: (w) => w.state(toastState.open).eq(false),
       intent: (i) =>
         i.feedback.style.use(
-          tw('absolute left-0 right-0 mx-auto w-[338px] top-[14px] z-20 opacity-95')
+          tw('absolute left-0 right-0 mx-auto w-full opacity-100 z-0 pointer-events-none')
         ),
     });
     def.rule({
       when: (w) =>
         w.all(
-          w.state(toastState.expanded).eq(false),
-          w.state(toastState.stackTier).eq('third'),
+          w.state(toastState.open).eq(false),
           w.any(
             w.state(toastState.position).eq('bottom-left'),
             w.state(toastState.position).eq('bottom-center'),
             w.state(toastState.position).eq('bottom-right')
           )
         ),
-      intent: (i) =>
-        i.feedback.style.use(
-          tw('absolute left-0 right-0 mx-auto w-[320px] bottom-[28px] z-10 opacity-90')
-        ),
+      intent: (i) => i.feedback.style.use(tw('bottom-0')),
     });
     def.rule({
       when: (w) =>
         w.all(
-          w.state(toastState.expanded).eq(false),
-          w.state(toastState.stackTier).eq('third'),
+          w.state(toastState.open).eq(false),
           w.any(
             w.state(toastState.position).eq('top-left'),
             w.state(toastState.position).eq('top-center'),
             w.state(toastState.position).eq('top-right')
           )
         ),
-      intent: (i) =>
-        i.feedback.style.use(
-          tw('absolute left-0 right-0 mx-auto w-[320px] top-[28px] z-10 opacity-90')
-        ),
-    });
-    def.rule({
-      when: (w) => w.state(toastState.stackTier).eq('overflow'),
-      intent: (i) =>
-        i.feedback.style.use(
-          tw('absolute left-0 right-0 mx-auto w-[320px] z-0 opacity-0 pointer-events-none')
-        ),
+      intent: (i) => i.feedback.style.use(tw('top-0')),
     });
     def.feedback.style.use(
       tw(
-        'pointer-events-auto border border-border shadow-[0_4px_12px_rgb(0_0_0/10%)] flex items-center gap-2.5 min-w-0 max-w-full p-4 text-start transition-all duration-300 ease-out'
+        'border border-border shadow-[0_4px_12px_rgb(0_0_0/10%)] flex items-center gap-2.5 min-w-0 max-w-full p-4 text-start transition-[width,top,bottom,opacity] duration-300 ease-out'
       )
     );
     return (r) => {

@@ -28,6 +28,8 @@ export default withShadcnRheaDemo({
       {
         kind: 'proto',
         prototypeId: 'shadcn-toast-viewport',
+        previewTheme: 'portal',
+        ref: 'viewport',
         props: {
           a11yLabel: 'Persistent notifications',
         },
@@ -59,7 +61,9 @@ export default withShadcnRheaDemo({
                       {
                         kind: 'proto',
                         prototypeId: 'shadcn-toast-description',
-                        children: ['Changes are paused until you reconnect or dismiss this notice.'],
+                        children: [
+                          'Changes are paused until you reconnect or dismiss this notice.',
+                        ],
                       },
                     ],
                   },

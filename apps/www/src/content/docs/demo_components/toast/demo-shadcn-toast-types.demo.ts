@@ -62,6 +62,8 @@ export default withShadcnRheaDemo({
       {
         kind: 'proto',
         prototypeId: 'shadcn-toast-viewport',
+        previewTheme: 'portal',
+        ref: 'viewport',
         props: {
           a11yLabel: 'Status notifications',
         },
