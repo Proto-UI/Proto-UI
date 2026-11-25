@@ -192,7 +192,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Exact legacy runtime-selection composition; its owning row stays blocked.
   'apps/www/src/components/PrototypePreviewer/runtime-tabs.ts': Object.freeze({
-    sourceSha256: 'f4d21125f8019fcf35e75580a77b1950e8a6b69f877a39ef868c07943cfe2178',
+    sourceSha256: '474e5be107742102059b663053f8c6d30c9482731d8d82bde40c514f4083e54b',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-shadcn/tabs',
@@ -908,11 +908,12 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
   'apps/www/src/components/site-shadcn-controls.ts': Object.freeze({
-    sourceSha256: 'fc2006315ebca2293380cc1402eafac4b9064f48e5951ad263162a8d2a5e67f4',
+    sourceSha256: '087311d17d74329b1e58345672da46e1767f97de9ed03fb721fe8af0f51596b5',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-bootstrap-2-3-2/button',
       '@proto.ui/prototypes-bootstrap-2-3-2/select',
+      '@proto.ui/prototypes-liquid-glass/button',
       '@proto.ui/prototypes-shadcn/button',
       '@proto.ui/prototypes-shadcn/select',
       '@proto.ui/prototypes-brutalist/button',

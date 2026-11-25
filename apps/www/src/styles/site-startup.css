@@ -59,14 +59,25 @@
 }
 
 /* Legacy renderer preparation may clear its mount. The application status and
-   real, not-yet-published mount share one reserved cell until publication. */
+   real, not-yet-published mount share one full-width reserved cell until publication. */
 [data-previewer-startup-shell] {
   display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  justify-content: stretch;
+  width: 100%;
+  min-width: 0;
 }
 [data-previewer-startup-shell] > .proto-previewer__skeleton,
 [data-previewer-startup-shell] > .host {
   grid-area: 1 / 1;
+  width: 100%;
+  min-width: 0;
+}
+[data-previewer-startup-shell] > .proto-previewer__skeleton {
+  z-index: 1;
 }
 [data-previewer-startup-pending] {
   visibility: hidden;
+  pointer-events: none;
 }

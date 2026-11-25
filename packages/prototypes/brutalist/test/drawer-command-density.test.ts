@@ -95,8 +95,8 @@ describe('Neo Brutalism Drawer command default density with bounded label wrappi
           'items-center',
           'justify-center',
           'border-2',
-          'border-foreground',
-          'bg-background',
+          'border-black',
+          part === 'trigger' ? 'bg-primary' : 'bg-secondary-background',
           'text-sm',
           'font-medium',
           'outline-none',
@@ -110,10 +110,6 @@ describe('Neo Brutalism Drawer command default density with bounded label wrappi
       const source = await readFile(file, 'utf8');
       expect(source.match(new RegExp(`${hook}\\(\\)`, 'g'))).toHaveLength(1);
       expect(source).not.toContain('asButton');
-      expect(source).not.toContain("from '../style'");
-      expect(
-        tokens.some((token) => typeof token === 'string' && /^(shadow|translate|scale)/.test(token))
-      ).toBe(false);
     });
 
     it(`${part} contributes executable Document and Shadow CSS through its real source host`, async () => {

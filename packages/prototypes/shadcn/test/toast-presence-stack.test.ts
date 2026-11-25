@@ -97,4 +97,55 @@ describe('Shadcn Toast retained leaving presentation', () => {
       expect(getComputedStyle(root).pointerEvents).toBe('auto');
     });
   }
+
+  it('T-TOAST-STACK-0001-CASE-HOVER-STABILITY: switches viewport pointer-events only while expanded with open toasts and clears hover when stack empties', async () => {
+    const viewport = new Viewport();
+    const first = new Root();
+    const second = new Root();
+    setElementProps(viewport, { position: 'bottom-right', duration: 0 });
+    setElementProps(first, { defaultOpen: false, duration: 0 });
+    setElementProps(second, { defaultOpen: false, duration: 0 });
+    first.textContent = 'First toast';
+    second.textContent = 'Second toast';
+    viewport.append(first, second);
+    document.body.append(viewport);
+    owned.push(viewport);
+    await flush();
+
+    const vp = viewport.getExposes();
+    expect(vp.hasOpen.get()).toBe(false);
+    expect(vp.expanded.get()).toBe(false);
+    expect(getComputedStyle(viewport).pointerEvents).toBe('none');
+
+    // Empty viewport must not enter hovered/expanded state on stray pointerenter.
+    viewport.dispatchEvent(new PointerEvent('pointerenter', { bubbles: false }));
+    await flush();
+    expect(vp.expanded.get()).toBe(false);
+    expect(getComputedStyle(viewport).pointerEvents).toBe('none');
+
+    // Open two toasts: collapsed viewport stays click-through while cards receive hits.
+    first.getExposes().openToast();
+    second.getExposes().openToast();
+    await flush();
+    expect(vp.hasOpen.get()).toBe(true);
+    expect(vp.expanded.get()).toBe(false);
+    expect(getComputedStyle(viewport).pointerEvents).toBe('none');
+    expect(getComputedStyle(second).pointerEvents).toBe('auto');
+
+    // Hovering expands the stack and activates viewport pointer-events so inter-card gaps stay hovered.
+    viewport.dispatchEvent(new PointerEvent('pointerenter', { bubbles: false }));
+    await flush();
+    expect(vp.expanded.get()).toBe(true);
+    expect(vp.paused.get()).toBe(true);
+    expect(getComputedStyle(viewport).pointerEvents).toBe('auto');
+
+    // Closing all toasts while hovered resets hover, expanded, and pointer-events-none.
+    first.getExposes().close('programmatic');
+    second.getExposes().close('programmatic');
+    await flush();
+    expect(vp.hasOpen.get()).toBe(false);
+    expect(vp.expanded.get()).toBe(false);
+    expect(vp.paused.get()).toBe(false);
+    expect(getComputedStyle(viewport).pointerEvents).toBe('none');
+  });
 });

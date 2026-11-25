@@ -38,6 +38,10 @@ criteria:
   - id: P-BRUTALIST-TABS-LIST-APPEARANCE
     text:
       en: 'Accept appearance=default|underline with default as the omission behavior. Default preserves the family surface. Underline is a horizontal Runtime consumer opt-in: full-width transparent, borderless, non-wrapping text row, 24px label gap and horizontal overflow on narrow hosts. It must retain Base roving, orientation and naming semantics; it is not a claim of upstream line-variant or vertical visual parity. Each change withdraws the previous appearance contribution and restores the default surface when reversed.'
+  - id: P-BRUTALIST-TABS-LIST-VARIANT
+    text:
+      en: 'With appearance=default, accept variant=default|line and propagate the selected list variant through private family context to descendant Triggers without prop drilling. variant=line renders an unframed transparent Neo-Brutalist line strip with a bottom rule (`border-b-2 border-black`), keeping Base roving, orientation and naming semantics intact for dogfood consumers such as RuntimeBox.'
+      zh-CN: '在 appearance=default 下支持 variant=default|line，并通过家族内部 context 向后代 Trigger 传递当前 variant（无需逐个透传 prop）。variant=line 呈现无外壳透明的 Neo-Brutalist 线条标签条（带底部 `border-b-2 border-black` 基线），在 RuntimeBox 等自举消费场景中完整保留 Base 的 roving、方向与命名语义。'
 
 sources:
   - path: docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md
@@ -55,6 +59,9 @@ inherits:
 verifies:
   { tests: [T-BRUTALIST-TABS-0001, { id: T-RUNTIME-TABS-APPEARANCE-0001, since: 0.3.0-alpha.1 }] }
 revisions:
+  - version: 0.3.0
+    change: refined
+    summary: Add variant=default|line with private family list-to-trigger context for dogfood RuntimeBox Tabs while keeping appearance=underline compatibility.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Bound the opt-in Runtime underline appearance while preserving family default behavior, Base ownership and existing upstream parity gaps.

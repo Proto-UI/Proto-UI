@@ -726,3 +726,164 @@ describe('Shadcn Toast nonzero leave presence', () => {
     }
   }
 });
+
+describe('Shadcn Toast hover stability across peeking edges and inter-card gaps', () => {
+  for (const position of ['bottom-right', 'top-right'] as const) {
+    it(`T-TOAST-STACK-0001-CASE-HOVER-STABILITY (${position}): stays expanded without oscillation across peeking edge and gap coordinates`, async () => {
+      const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+      const errors: string[] = [];
+      page.on('pageerror', (error) => errors.push(String(error)));
+      try {
+        await page.route('**/*', (route) => route.abort());
+        await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'no-preference' });
+        await page.setContent('<!doctype html><h1>Toast hover stability</h1>');
+        await page.addStyleTag({ content: css });
+        await page.addStyleTag({
+          content: '*{box-sizing:border-box}body{margin:0;font:16px Arial,sans-serif}',
+        });
+        await page.addScriptTag({ content: script });
+        await page.evaluate(
+          ({ position }) => {
+            const consumer = (window as any).ToastConsumer;
+            const Viewport = consumer.adapt(consumer.toastViewport);
+            const Root = consumer.adapt(consumer.toastRoot);
+            const Title = consumer.adapt(consumer.toastTitle);
+            const Description = consumer.adapt(consumer.toastDescription);
+            const viewport = new Viewport();
+            consumer.setElementProps(viewport, {
+              position,
+              visibleToasts: 3,
+              duration: 0,
+              styleProfile: 'new-york-v4',
+            });
+            document.body.append(viewport);
+            const roots: any[] = [];
+            for (let i = 1; i <= 3; i++) {
+              const root = new Root();
+              const title = new Title();
+              const desc = new Description();
+              title.textContent = `Toast ${i}`;
+              desc.textContent = `Body for notification ${i}`;
+              consumer.setElementProps(root, {
+                defaultOpen: true,
+                duration: 0,
+                styleProfile: 'new-york-v4',
+              });
+              root.append(title, desc);
+              roots.push(root);
+              viewport.append(root);
+            }
+            (window as any).hoverFixture = { viewport, roots };
+          },
+          { position }
+        );
+        await settle(page);
+
+        // Locate the exact peeking strip of the second-newest toast (stackIndex=1):
+        // in collapsed mode it peeks out above (bottom-right) or below (top-right)
+        // the newest card, at the exact y-band that becomes the 14px gap-3.5 once expanded.
+        const probePoint = await page.evaluate((position) => {
+          const { viewport, roots } = (window as any).hoverFixture;
+          const newest = roots[2].getBoundingClientRect();
+          const second = roots[1].getBoundingClientRect();
+          const x = second.x + second.width / 2;
+          const y =
+            position === 'bottom-right'
+              ? (second.top + newest.top) / 2
+              : (newest.bottom + second.bottom) / 2;
+          return {
+            x,
+            y,
+            initialPointerEvents: getComputedStyle(viewport).pointerEvents,
+            initialExpanded: viewport.getExposes().expanded.get(),
+          };
+        }, position);
+
+        expect(probePoint.initialExpanded).toBe(false);
+        expect(probePoint.initialPointerEvents).toBe('none');
+
+        await page.mouse.move(probePoint.x, probePoint.y);
+
+        // Observe 24 animation frames while pointer remains stationary on the peeking/gap coordinate.
+        const hoverSample = await page.evaluate(async () => {
+          const { viewport, roots } = (window as any).hoverFixture;
+          const states: boolean[] = [];
+          const pointerEvents: string[] = [];
+          const frame = () =>
+            new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+          await frame();
+          for (let i = 0; i < 24; i++) {
+            await frame();
+            states.push(viewport.getExposes().expanded.get());
+            pointerEvents.push(getComputedStyle(viewport).pointerEvents);
+          }
+          const r0 = roots[2].getBoundingClientRect();
+          const r1 = roots[1].getBoundingClientRect();
+          const r2 = roots[0].getBoundingClientRect();
+          return {
+            states,
+            pointerEvents,
+            gapY: r0.top > r1.bottom ? (r1.bottom + r0.top) / 2 : (r0.bottom + r1.top) / 2,
+            gap2Y: r1.top > r2.bottom ? (r2.bottom + r1.top) / 2 : (r1.bottom + r2.top) / 2,
+            midX: r1.x + r1.width / 2,
+          };
+        });
+
+        expect(hoverSample.states.every((v) => v === true)).toBe(true);
+        expect(hoverSample.pointerEvents.every((v) => v === 'auto')).toBe(true);
+
+        // Move explicitly into both inter-card gaps and confirm zero collapse/oscillation.
+        for (const y of [hoverSample.gapY, hoverSample.gap2Y]) {
+          await page.mouse.move(hoverSample.midX, y);
+          const gapStates = await page.evaluate(async () => {
+            const { viewport } = (window as any).hoverFixture;
+            const states: boolean[] = [];
+            const frame = () =>
+              new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+            for (let i = 0; i < 12; i++) {
+              await frame();
+              states.push(viewport.getExposes().expanded.get());
+            }
+            return states;
+          });
+          expect(gapStates.every((v) => v === true)).toBe(true);
+        }
+
+        // Leaving viewport collapses cleanly and restores pointer-events: none.
+        await page.mouse.move(10, 10);
+        await settle(page);
+        const afterLeave = await page.evaluate(() => {
+          const { viewport } = (window as any).hoverFixture;
+          return {
+            expanded: viewport.getExposes().expanded.get(),
+            pointerEvents: getComputedStyle(viewport).pointerEvents,
+          };
+        });
+        expect(afterLeave).toEqual({ expanded: false, pointerEvents: 'none' });
+
+        // Re-hover then dismiss all toasts: viewport must reset hasOpen/expanded/pointer-events.
+        await page.mouse.move(probePoint.x, probePoint.y);
+        await settle(page);
+        const afterDismissAll = await page.evaluate(async () => {
+          const { viewport } = (window as any).hoverFixture;
+          viewport.getExposes().dismissAll('programmatic');
+          await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+          await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+          return {
+            hasOpen: viewport.getExposes().hasOpen.get(),
+            expanded: viewport.getExposes().expanded.get(),
+            pointerEvents: getComputedStyle(viewport).pointerEvents,
+          };
+        });
+        expect(afterDismissAll).toEqual({
+          hasOpen: false,
+          expanded: false,
+          pointerEvents: 'none',
+        });
+        expect(errors).toEqual([]);
+      } finally {
+        await page.close();
+      }
+    }, 20000);
+  }
+});

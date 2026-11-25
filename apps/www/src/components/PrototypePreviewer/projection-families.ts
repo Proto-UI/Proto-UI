@@ -576,6 +576,8 @@ const SHADCN_MANIFEST = {
       recipePrototypeIds: [
         'shadcn-style-scope',
         'shadcn-button',
+        'shadcn-input-root',
+        'shadcn-label-root',
         'shadcn-popover-root',
         'shadcn-popover-trigger',
         'shadcn-popover-content',
@@ -586,6 +588,8 @@ const SHADCN_MANIFEST = {
       auxiliaryPrototypes: [
         { basePrototypeId: null, prototypeId: 'shadcn-style-scope' },
         { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' },
+        { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'shadcn-input-root' },
+        { basePrototypeId: 'P-BASE-LABEL', prototypeId: 'shadcn-label-root' },
       ],
       parts: {
         root: { basePrototypeId: 'P-BASE-POPOVER', prototypeId: 'shadcn-popover-root' },
@@ -1031,6 +1035,8 @@ const BRUTALIST_MANIFEST = {
       recipeId: 'demo-brutalist-popover',
       recipePrototypeIds: [
         'brutalist-button',
+        'brutalist-input-root',
+        'brutalist-label-root',
         'brutalist-popover-root',
         'brutalist-popover-trigger',
         'brutalist-popover-content',
@@ -1038,7 +1044,11 @@ const BRUTALIST_MANIFEST = {
         'brutalist-popover-description',
         'brutalist-popover-close',
       ],
-      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' }],
+      auxiliaryPrototypes: [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' },
+        { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'brutalist-input-root' },
+        { basePrototypeId: 'P-BASE-LABEL', prototypeId: 'brutalist-label-root' },
+      ],
       parts: {
         root: { basePrototypeId: 'P-BASE-POPOVER', prototypeId: 'brutalist-popover-root' },
         trigger: {
@@ -1446,6 +1456,8 @@ const BOOTSTRAP_232_MANIFEST = {
       recipeId: 'demo-bootstrap-2-3-2-popover',
       recipePrototypeIds: [
         'bootstrap-2-3-2-button',
+        'bootstrap-2-3-2-input-root',
+        'bootstrap-2-3-2-label-root',
         'bootstrap-2-3-2-popover-root',
         'bootstrap-2-3-2-popover-trigger',
         'bootstrap-2-3-2-popover-content',
@@ -1455,6 +1467,8 @@ const BOOTSTRAP_232_MANIFEST = {
       ],
       auxiliaryPrototypes: [
         { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'bootstrap-2-3-2-button' },
+        { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'bootstrap-2-3-2-input-root' },
+        { basePrototypeId: 'P-BASE-LABEL', prototypeId: 'bootstrap-2-3-2-label-root' },
       ],
       parts: {
         root: { basePrototypeId: 'P-BASE-POPOVER', prototypeId: 'bootstrap-2-3-2-popover-root' },

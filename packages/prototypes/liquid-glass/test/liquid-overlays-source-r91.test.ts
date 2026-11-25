@@ -26,7 +26,12 @@ import {
   FOCUS_PARENT_CAP,
   FOCUS_ROOT_TARGET_CAP,
 } from '@proto.ui/module-focus';
-import { VISUAL_FEEDBACK_SINK_CAP, type VisualFeedbackFrame } from '@proto.ui/module-feedback';
+import {
+  VISUAL_FEEDBACK_SINK_CAP,
+  PRESENCE_RUN_IN_CALLBACK_CAP,
+  type FeedbackPort,
+  type VisualFeedbackFrame,
+} from '@proto.ui/module-feedback';
 import { resolveMaterialStyle, colorContrast } from '../../../adapters/base/src/material/style';
 import { activationTurn } from '../../../modules/native-link/test/no-network';
 import { THEME } from '../src/theme';
@@ -156,6 +161,12 @@ function runtimeHarness() {
           ],
         ]);
         wiring.attach('feedback', [
+          // A missing presentation sink settles through the actual Runtime
+          // callback boundary, just as every supported Web Adapter provides.
+          [
+            PRESENCE_RUN_IN_CALLBACK_CAP,
+            (callback: () => void) => session.invokeInCallbackScope(callback),
+          ],
           [
             VISUAL_FEEDBACK_SINK_CAP,
             {
@@ -328,13 +339,53 @@ describe.each(overlays)('Liquid $name functional popup ownership', (parts) => {
       const description = await mount(parts.description, content.target);
       const close = await mount(parts.close, content.target);
       const extra = parts.extra ? await mount(parts.extra, content.target) : null;
-      for (const unit of [root, trigger, title, description, close, mask, extra])
-        if (unit) expectOrdinary(unit);
+      for (const unit of [root, title, description, close, extra]) if (unit) expectOrdinary(unit);
+      if (mask && parts.name === 'Drawer') {
+        // The mask uses the presence channel; this material-only host observes
+        // its real neutral intent without fabricating a visual projection frame.
+        expect(
+          mask.session.caps.getPort<FeedbackPort>('feedback')?.exportMaterialFrame?.()
+        ).toEqual({
+          slot: null,
+          candidates: [],
+        });
+        expect(mask.frames).toEqual([]);
+      } else if (mask) expectOrdinary(mask);
+      if (parts.name === 'AlertDialog' || parts.name === 'Drawer') {
+        const triggerCandidate = {
+          intent: 'liquid-glass',
+          variant: 'regular',
+          deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+        };
+        expect(trigger.material()).toEqual({ slot, candidates: [triggerCandidate] });
+        trigger.set({ material: 'opaque' });
+        expect(trigger.material()).toEqual({ slot, candidates: [] });
+        expectOpaqueFallback(trigger);
+        trigger.set({});
+        expect(trigger.material()).toEqual({ slot, candidates: [triggerCandidate] });
+      } else expectOrdinary(trigger);
       expect(content.material()).toEqual({ slot, candidates: [] });
+      if (parts.name === 'Drawer') {
+        await vi.advanceTimersByTimeAsync(0);
+        expect(content.exposes.transitionState.get()).toBe('closed');
+      }
       root.set({ open: true });
       expect(root.exposes.open.get()).toBe(true);
       expect(content.exposes.open.get()).toBe(true);
       expect(content.material()).toEqual({ slot, candidates: [candidate] });
+      if (parts.name === 'Drawer') {
+        // Drive the actual zero-duration Base scheduler; combined animated
+        // presence/material remains outside this source fixture's acceptance.
+        expect(content.exposes.transitionState.get()).toBe('entering');
+        await vi.advanceTimersByTimeAsync(0);
+        expect(content.exposes.transitionState.get()).toBe('entered');
+        content.set({ material: 'opaque' });
+        expect(content.material()).toEqual({ slot, candidates: [] });
+        expect(content.exposes.transitionState.get()).toBe('entered');
+        expectOpaqueFallback(content);
+        content.set({});
+        expect(content.material()).toEqual({ slot, candidates: [candidate] });
+      }
       expectOpaqueFallback(content);
       close.set({ disabled: true });
       close.input('press.commit');
@@ -349,8 +400,13 @@ describe.each(overlays)('Liquid $name functional popup ownership', (parts) => {
       ]);
       expect(root.exposes.open.get()).toBe(true);
       expect(content.material().candidates).toEqual([candidate]);
+      if (parts.name === 'Drawer') expect(content.exposes.transitionState.get()).toBe('entered');
       root.set({ open: false });
       expect(content.material().candidates).toEqual([]);
+      if (parts.name === 'Drawer') {
+        await vi.advanceTimersByTimeAsync(0);
+        expect(content.exposes.transitionState.get()).toBe('closed');
+      }
       root.set({ open: true });
       expect(content.material().candidates).toEqual([candidate]);
       if (parts.name === 'AlertDialog' && extra) {
@@ -377,6 +433,13 @@ describe.each(overlays)('Liquid $name functional popup ownership', (parts) => {
       expect(trigger.exposes.disabled.get()).toBe(true);
       trigger.input('press.commit');
       expect(root.exposes.open.get()).toBe(false);
+      if (parts.name === 'AlertDialog' || parts.name === 'Drawer')
+        expect(trigger.material().candidates).toEqual([]);
+      if (parts.name === 'Drawer') {
+        await vi.advanceTimersByTimeAsync(0);
+        expect(content.exposes.transitionState.get()).toBe('closed');
+        expect(content.material().candidates).toEqual([]);
+      }
       expectOpaqueFallback(trigger);
       const view = content.frame().view;
       await content.session.unmount();

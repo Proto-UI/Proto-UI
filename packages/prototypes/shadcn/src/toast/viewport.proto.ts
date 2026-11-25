@@ -18,9 +18,19 @@ export default definePrototype<ToastViewportProps, ToastViewportExposes>({
     const behavior = asToastViewport();
     const state = behavior.stateHandles!;
     setupShadcnStyleScope(def);
-    def.feedback.style.use(
-      tw('fixed z-50 w-[356px] max-w-[calc(100vw_-_2rem)] pointer-events-none')
-    );
+    def.feedback.style.use(tw('fixed z-50 w-[356px] max-w-[calc(100vw_-_2rem)]'));
+    // While collapsed or empty, keep the viewport click-through so only open
+    // cards receive pointer hits. Once expanded with open messages, switch the
+    // viewport itself to pointer-events-auto so inter-card gaps stay inside the
+    // hover region and cannot oscillate between expanded and collapsed states.
+    def.rule({
+      when: (w) => w.any(w.state(state.hasOpen).eq(false), w.state(state.expanded).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('pointer-events-none')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(state.hasOpen).eq(true), w.state(state.expanded).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('pointer-events-auto')),
+    });
     for (const [position, placement] of VIEWPORT_PLACEMENTS) {
       def.rule({
         when: (w) => w.state(state.position).eq(position),

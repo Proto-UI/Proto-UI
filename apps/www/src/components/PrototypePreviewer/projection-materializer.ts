@@ -52,6 +52,8 @@ export type ProjectionMaterializerOptions = Readonly<{
   controlIds?: readonly ProjectionControlId[];
   /** Website-owned host composition, checked against an explicit recipe. */
   content?: Readonly<{ demo: DemoSpec; recipe: ProjectionContentRecipe }>;
+  /** Opt out of automatic Liquid Glass backdrop scenes for chrome controls/surfaces. */
+  automaticMaterialScene?: boolean;
   /** Let independent consumers finish preparation in a task after the frame. */
   yieldAfterPaint?: boolean;
   /** First-view preparation can yield while another consumer is preparing. */
@@ -468,6 +470,7 @@ async function prepareProjectionCandidate(
       runtime: runtimeId,
       demo: composition.demo,
       host,
+      ...(options.automaticMaterialScene === false ? { automaticMaterialScene: false } : {}),
     });
     const scope = Array.from(host.querySelectorAll<HTMLElement>('[data-projection-scope]')).find(
       (element) => element.dataset.projectionScope === options.ownerId

@@ -21,6 +21,10 @@ criteria:
   - id: P-BOOTSTRAP-2-3-2-TABS-TRIGGER-APPEARANCE
     text:
       en: 'Accept appearance=default|underline with default as the omission behavior. Underline is a Runtime consumer opt-in: transparent unframed medium-weight 16px label, muted inactive text, foreground selected/hover text and a reserved 2px selected underline spanning the label. Focus-visible remains perceivable and disabled remains gated/dimmed. Selection, hover, press, focus-visible and disabled truth stay Base-owned. Default-to-underline-to-default must withdraw obsolete paint and reproduce the original current-state default contribution; no static-selector representation or upstream line/vertical parity is mandated.'
+  - id: P-BOOTSTRAP-2-3-2-TABS-TRIGGER-VARIANT
+    text:
+      en: 'When appearance=default and the owning List selects variant=line, render a transparent Bootstrap line trigger with Bootstrap label proportions, muted/link inactive ink, primary-accented bottom indicator bar on selected (`border-b-2 border-primary`), and preserved Bootstrap focus-visible and disabled semantics.'
+      zh-CN: '当 appearance=default 且所属 List 选择 variant=line 时，呈现透明的 Bootstrap 线条标签项（遵循 Bootstrap 标签比例、未选中弱化文字色、选中态 `border-b-2 border-primary` 底部指示线及既有焦点与禁用语义）。'
 openQuestions:
   - id: P-BOOTSTRAP-2-3-2-TABS-TRIGGER-Q-ADMISSION
     question:
@@ -44,6 +48,9 @@ verifies:
   tests:
     - T-RUNTIME-TABS-APPEARANCE-0001
 revisions:
+  - version: 0.3.0
+    change: refined
+    summary: Project family-native variant=line paint from owning List context while preserving Base ownership and appearance=underline compatibility.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Catalog inherited Base responsibilities and family appearance independently from source realization; retain draft evidence gates.

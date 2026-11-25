@@ -98,7 +98,7 @@ export function initPreviewer(options: PreviewerOptions) {
     '[data-adapter-select-root], wc-shadcn-select-root'
   );
   // Legacy embeds may provide a native runtime selector. Controls owned by a
-  // mounted demo is an independent consumer.
+  // mounted demo are independent consumers.
   const nativeSelect =
     [...root.querySelectorAll<HTMLSelectElement>('select')].find(
       (select) => !select.closest('.host')
@@ -306,6 +306,7 @@ export function initPreviewer(options: PreviewerOptions) {
     pre.style.overflow = 'auto';
     container.appendChild(pre);
     host.appendChild(container);
+    host.style.removeProperty('min-height');
     finishStartup();
     console.error(err);
     dispatch('error', { error: err });
@@ -348,8 +349,11 @@ export function initPreviewer(options: PreviewerOptions) {
       activeSurface = null;
       const previous = currentDemo;
       currentDemo = null;
-      if (previous) await previous.destroy();
-      else host.replaceChildren();
+      if (previous) {
+        const previousHeight = host.getBoundingClientRect().height;
+        if (previousHeight > 0) host.style.minHeight = `${Math.ceil(previousHeight)}px`;
+        await previous.destroy();
+      } else host.replaceChildren();
       if (destroyed || myVersion !== version) return;
       runtimeTabs?.select(runtime);
 
@@ -412,6 +416,7 @@ export function initPreviewer(options: PreviewerOptions) {
         return;
       }
       finishStartup();
+      host.style.removeProperty('min-height');
       currentDemo = { id, destroy: result.destroy };
       activeSurface = surface;
       const watchTheme = () =>
@@ -434,7 +439,12 @@ export function initPreviewer(options: PreviewerOptions) {
       for (let scope: HTMLElement | null = root; scope; scope = scope.parentElement) {
         familyObserver.observe(scope, {
           attributes: true,
-          attributeFilter: ['data-site-library-family', 'data-projection-family', 'class'],
+          attributeFilter: [
+            'data-site-library-family',
+            'data-projection-family',
+            'data-preview-control-family',
+            'class',
+          ],
         });
       }
       stopFamilyObserver = () => familyObserver.disconnect();
@@ -554,6 +564,7 @@ export function initPreviewer(options: PreviewerOptions) {
         try {
           await previous?.destroy();
         } finally {
+          host.style.removeProperty('min-height');
           host.replaceChildren();
           finishStartup();
           runtimeTabs?.dispose();

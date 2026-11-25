@@ -19,6 +19,10 @@ criteria:
     text:
       zh-CN: 默认 placement 为 bottom-right，固定于页面视口而非 RuntimeBox 的文档流；六种现有位置均使用同一个页面级 portal。作者容器的 transform、overflow 或页面滚动不得把 Toast 限制回该容器。主题由预览的 portal owner 投射并随 owner 销毁而释放。
       en: The default bottom-right placement is fixed to the page viewport, outside RuntimeBox document flow. All six existing placements share the page-level portal. An authored container's transform, overflow or page scroll must not confine Toasts to that container. Preview portal ownership projects the theme and releases it on owner disposal.
+  - id: P-SHADCN-TOAST-HOVER-STABILITY
+    text:
+      zh-CN: 折叠态下 Viewport 保持 `pointer-events-none`，仅已打开卡片响应指针命中；当存在打开消息且处于展开态时，Viewport 切换为 `pointer-events-auto`，使整个展开后的堆叠矩形（含卡片之间的 `gap-3.5` 间距）构成连续命中区域。指针停留在折叠边缘、间距坐标或卡片缝隙时不得触发 `pointer.leave`/`pointer.enter` 反复震荡；消息全部关闭后 Viewport 立即恢复 `pointer-events-none`。
+      en: While collapsed, the Viewport stays `pointer-events-none` so only open Toast cards capture pointer events. While expanded with open messages, the Viewport switches to `pointer-events-auto` so the full expanded stack rectangle—including inter-card `gap-3.5` spacing—forms a continuous hit region. Holding the pointer over collapsed peeking edges or inter-card gap coordinates must not trigger `pointer.leave`/`pointer.enter` oscillation; once all messages close, the Viewport immediately returns to `pointer-events-none`.
   - id: P-SHADCN-TOAST-ADMISSION
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
@@ -48,6 +52,9 @@ openQuestions:
     blocks:
       - activation:P-SHADCN-TOAST
 revisions:
+  - version: 0.3.0
+    change: refined
+    summary: Require a continuous `pointer-events-auto` Viewport hit region while expanded with open messages (and `pointer-events-none` when collapsed or empty) to eliminate hover expand/collapse oscillation over inter-card gaps.
   - version: 0.3.0
     change: refined
     summary: Bind geometry and paint to complete opening order, exclude layers from animation, keep retained closing cards outside layout and hit testing, and require a fixed page-level viewport outside preview containers.
