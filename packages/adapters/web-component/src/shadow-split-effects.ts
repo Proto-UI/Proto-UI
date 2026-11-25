@@ -62,31 +62,34 @@ function splitCompiledReceipt(selector: string, declarations: string): string {
   return (hash >>> 0).toString(36);
 }
 
+const SPLIT_COMPILED_RECEIPT_RE = new RegExp(
+  `(?:^|;)\\s*${SPLIT_COMPILED_RECEIPT}\\s*:\\s*([a-z0-9]+)\\s*;\\s*$`
+);
+const escapeCssAttr = (value: string) => value.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+
+function splitReceiptMatch(rule: CompiledStyleRule): { hash: string; declarations: string } | null {
+  const marker = SPLIT_COMPILED_RECEIPT_RE.exec(rule.declarations);
+  if (!marker || marker.index === undefined) return null;
+  return {
+    hash: marker[1]!,
+    declarations: rule.declarations.slice(0, marker.index + (marker[0]!.startsWith(';') ? 1 : 0)),
+  };
+}
+
 // The v1 artifact is a plain value, so this is an integrity receipt for the
 // generated companion rather than authentication of adversarial CSS.
 function hasValidDeclarationReceipt(rule: CompiledStyleRule): boolean {
-  const marker = new RegExp(
-    `(?:^|;)\\s*${SPLIT_COMPILED_RECEIPT}\\s*:\\s*([a-z0-9]+)\\s*;\\s*$`
-  ).exec(rule.declarations);
-  if (!marker || marker.index === undefined) return false;
-  const declarations = rule.declarations.slice(
-    0,
-    marker.index + (marker[0]!.startsWith(';') ? 1 : 0)
-  );
+  const parsed = splitReceiptMatch(rule);
   return (
-    !declarations.includes(SPLIT_COMPILED_RECEIPT) &&
-    marker[1] === splitCompiledReceipt(rule.selector, declarations)
+    !!parsed &&
+    !parsed.declarations.includes(SPLIT_COMPILED_RECEIPT) &&
+    parsed.hash === splitCompiledReceipt(rule.selector, parsed.declarations)
   );
 }
 
 function declarationsBeforeReceipt(rule: CompiledStyleRule): string | null {
-  const marker = new RegExp(
-    `(?:^|;)\\s*${SPLIT_COMPILED_RECEIPT}\\s*:\\s*[a-z0-9]+\\s*;\\s*$`
-  ).exec(rule.declarations);
-  if (!marker || marker.index === undefined) return null;
-  return rule.declarations
-    .slice(0, marker.index + (marker[0]!.startsWith(';') ? 1 : 0))
-    .replace(/\s/g, '');
+  const parsed = splitReceiptMatch(rule);
+  return parsed ? parsed.declarations.replace(/\s/g, '') : null;
 }
 
 // Canonical recipes affecting boundary sizing or scrolling are Adapter trust
@@ -95,7 +98,7 @@ function hasCanonicalProjectionRecipe(rule: CompiledStyleRule, entry: RootStyleE
   if (needsPercentageTranslationRecipe(entry.authorToken)) {
     const host = compiledReceiptSelector(entry.token);
     const selector = rule.selector.replace(/\s/g, '');
-    const escaped = entry.token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+    const escaped = escapeCssAttr(entry.token);
     const surface = `${host}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]`;
     if (selector !== host && selector !== surface) return false;
     const operand = entry.authorToken.slice('translate-x-['.length, -1).replaceAll('_', '');
@@ -304,7 +307,7 @@ function compiledReceiptSelector(
   token: string,
   target: 'host' | 'element' = 'host'
 ): string | null {
-  const escaped = token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+  const escaped = escapeCssAttr(token);
   let selector = `[${SHADOW_SPLIT_ROOT_STYLE_ATTR}~="${escaped}"]`;
   let dark = false;
   const variants = splitReceiptVariants(token).slice(0, -1);
@@ -333,11 +336,7 @@ function compiledReceiptSelector(
         if (equal < 0) selector += `[data-${body}]`;
         else {
           const name = body.slice(0, equal);
-          const value = body
-            .slice(equal + 1)
-            .replace(/^['"]|['"]$/g, '')
-            .replaceAll('\\', '\\\\')
-            .replaceAll('"', '\\"');
+          const value = escapeCssAttr(body.slice(equal + 1).replace(/^['"]|['"]$/g, ''));
           selector += `[data-${name}='${value}']`;
         }
       } else return null;
@@ -387,7 +386,7 @@ function hasExactCompiledReceipt(
   const token = entry.token;
   const receipt = compiledReceiptSelector(token);
   if (!receipt) return false;
-  const escaped = token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+  const escaped = escapeCssAttr(token);
   const selection = token.startsWith('selection:');
   const placeholder = token.startsWith('placeholder:');
   const surface = `${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]`;
@@ -395,9 +394,9 @@ function hasExactCompiledReceipt(
     entry.authorToken === 'overflow-y-auto'
       ? [surface]
       : selection
-        ? [`${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]::selection`]
+        ? [`${surface}::selection`]
         : placeholder
-          ? [`${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]::placeholder`]
+          ? [`${surface}::placeholder`]
           : [
               receipt,
               `${receipt}:host([data-pui-split-text-control])`,
