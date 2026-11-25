@@ -1,5 +1,13 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync, lstatSync } from 'node:fs';
+import {
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+  lstatSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -26,7 +34,7 @@ function assertInstalledExportSeparation(manifest, installed) {
 }
 
 test('installed exports separate real compiler sources from runtime and declaration targets', (t) => {
-  const installed = mkdtempSync(join(tmpdir(), 'proto-ui-draft-export-'));
+  const installed = realpathSync(mkdtempSync(join(tmpdir(), 'proto-ui-draft-export-')));
   t.after(() => rmSync(installed, { recursive: true, force: true }));
   mkdirSync(join(installed, 'src'));
   writeFileSync(join(installed, 'src/index.ts'), 'export const value = 1;\n');
