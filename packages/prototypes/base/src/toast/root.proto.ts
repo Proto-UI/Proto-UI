@@ -253,6 +253,8 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
   };
 
   const syncViewport = (run: RunHandle<ToastRootProps>) => {
+    const view = viewEpoch;
+    const previousDuration = duration();
     const vp = run.context.tryRead(TOAST_VIEWPORT_CONTEXT);
     const vpPos = vp?.position ?? 'bottom-right';
     const nextPos = run.props.isProvided('position')
@@ -275,7 +277,16 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     stackTier.set(nextTier, 'reason: toast stack tier');
     viewportPaused = !!vp?.paused;
     viewportDuration = vp?.duration ?? null;
+    const nextDuration = duration();
+    const durationChanged = nextDuration !== previousDuration;
+    if (durationChanged) {
+      cancel();
+      remaining = nextDuration;
+      expired = false;
+    }
     syncPaused();
+    if (currentRun !== run || viewEpoch !== view) return;
+    if (durationChanged && !task) schedule();
     if (vp && vp.dismissEpoch > seenDismissEpoch) {
       seenDismissEpoch = vp.dismissEpoch;
       if (open.get()) request(false, vp.dismissReason || 'viewport-dismiss');
