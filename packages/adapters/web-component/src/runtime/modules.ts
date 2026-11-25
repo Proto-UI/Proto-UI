@@ -847,20 +847,41 @@ function selectorMayDependOnInputState(selector: string): boolean {
   return false;
 }
 
-// This is lexical work over a string, not a snapshot of CSS applicability or
-// DOM state. Read the current (including expanded nesting) selector on every
-// graph build. A changed selector replaces the entry; the table does not retain rules.
-const entryInputStateByRule = new WeakMap<
-  CSSStyleRule,
-  { selector: string; inputState: boolean }
->();
+type EntrySelectorSyntax = {
+  selector: string;
+  sibling: boolean;
+  relational: boolean;
+  positional: boolean;
+  inputState?: boolean;
+  documentRoot?: boolean;
+  scoped?: ReturnType<typeof scopedNegatedEntrySubject>;
+  probe?: string;
+};
 
-function ruleMayDependOnInputState(rule: CSSStyleRule, selector: string): boolean {
-  const cached = entryInputStateByRule.get(rule);
-  if (cached?.selector === selector) return cached.inputState;
-  const inputState = selectorMayDependOnInputState(selector);
-  entryInputStateByRule.set(rule, { selector, inputState });
-  return inputState;
+const entrySelectorSyntax = new WeakMap<CSSStyleRule, EntrySelectorSyntax>();
+
+function readEntrySelectorSyntax(rule: CSSStyleRule): EntrySelectorSyntax {
+  // Keep CSSOM reads live, including the current parent of a nested rule.
+  // Only selector syntax is shared between entries; declarations and matches
+  // still depend on the current stylesheet and DOM.
+  const source = rule.selectorText;
+  const parent = source.includes('&') ? rule.parentRule : null;
+  const parentSelector = parent?.type === 1 ? (parent as CSSStyleRule).selectorText : undefined;
+  const selector =
+    parentSelector === undefined ? source : source.replaceAll('&', `:is(${parentSelector})`);
+  const cached = entrySelectorSyntax.get(rule);
+  if (cached?.selector === selector) return cached;
+
+  const relational = selector.includes(':has(');
+  const positional = relational && entryPositionCondition.test(selector);
+  const syntax = {
+    selector,
+    sibling: /[+~](?!=)/.test(selector),
+    relational,
+    positional,
+  };
+  entrySelectorSyntax.set(rule, syntax);
+  return syntax;
 }
 
 function collectEntryStyleDependencies(
@@ -921,14 +942,10 @@ function collectEntryStyleDependencies(
       else inputState = true;
     }
     if (rule.type === 1) {
-      let selector = (rule as CSSStyleRule).selectorText;
-      if (rule.parentRule?.type === 1)
-        selector = selector.replaceAll(
-          '&',
-          `:is(${(rule.parentRule as CSSStyleRule).selectorText})`
-        );
-      inputState ||= ruleMayDependOnInputState(rule as CSSStyleRule, selector);
-      if (/[+~](?!=)/.test(selector) && styleRuleCanAffectEntryEligibility(rule as CSSStyleRule))
+      const syntax = readEntrySelectorSyntax(rule as CSSStyleRule);
+      const { selector, positional } = syntax;
+      inputState ||= syntax.inputState ??= selectorMayDependOnInputState(selector);
+      if (syntax.sibling && styleRuleCanAffectEntryEligibility(rule as CSSStyleRule))
         for (const subject of collectSiblingDependencySubjects(
           selector,
           externalSubjects,
@@ -938,19 +955,24 @@ function collectEntryStyleDependencies(
       // Paint and anchor offsets do not change eligibility. Grid track sizes
       // are covered by the entry's resize observer, including container-query
       // changes. Keep watching mixed declarations and nested rules.
-      const relationalSelector = selector.includes(':has(');
-      const positional = relationalSelector && entryPositionCondition.test(selector);
       if (
         (relational !== 2 || positional) &&
-        relationalSelector &&
+        syntax.relational &&
         !canSkipEntryRelationalRule(rule as CSSStyleRule, observesResize)
       ) {
         try {
           let foundPositionParent = false;
-          if (relational !== 2 && hasDocumentRootRelationalSubject(selector)) relational = 2;
+          if (
+            relational !== 2 &&
+            (syntax.documentRoot ??= hasDocumentRootRelationalSubject(selector))
+          )
+            relational = 2;
           if (relational !== 2) {
-            const scoped = scopedNegatedEntrySubject(selector);
-            const probe = scoped?.probe ?? relaxEntryHasConditions(selector);
+            if (syntax.probe === undefined) {
+              syntax.scoped = scopedNegatedEntrySubject(selector);
+              syntax.probe = syntax.scoped?.probe ?? relaxEntryHasConditions(selector);
+            }
+            const { scoped, probe } = syntax;
             // The bounded ancestor fallback skips body and html. A known
             // sibling-position dependency still needs its direct parent.
             if (
