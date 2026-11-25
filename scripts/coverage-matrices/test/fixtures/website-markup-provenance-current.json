@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "524365a3b1f97dbf9dd6a3408ce231fbb4ee4af3",
-  "scope": "Direct source inventory for the sampled website routes after integrating main c8e700ff into the compiler-foundation candidate. All 32 owners remain; three reviewed Previewer scheduling/removal changes renew their hashes and 29 hashes are unchanged. The preceding 8635852 reference is byte-preserved in website-markup-provenance-8635852.json. The two retired optional compiler-panel owners remain absent. This records source identity only; source admission, browser execution, served/transitive closure and lifecycle/release acceptance remain independently unverified.",
+  "revision": "3ed63ef546891e518e3ba237c5e9f53acc63b77b",
+  "scope": "Direct source inventory for the same sampled website routes after merging main c8e700ff and the current compiler foundation into shared frontend analysis. All 32 reviewed owners remain. Relative to the foundation source 524365a3, only pnpm-lock.yaml changes for the already locked TypeScript dependency; the three reviewed Previewer updates are retained. Both parent references are byte-preserved in website-markup-provenance-524365a.json and website-markup-provenance-4583e08.json. No retired compiler owner is restored. Source identity does not certify browser execution, complete served/transitive closure or lifecycle acceptance.",
   "sourceAdmission": "unverified",
   "sources": [
     {
@@ -91,7 +91,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "sha256": "50cb2a3862c7875afd270b10567e9202baa2223e00016a13242041381eb8e56b"
+      "sha256": "833a3ddcceceb8321ff8afb78003a0f6ef5a61da5e759e7356cae158e92820b6"
     },
     {
       "path": "apps/www/src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode.ts",
