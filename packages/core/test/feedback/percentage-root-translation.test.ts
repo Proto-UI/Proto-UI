@@ -15,6 +15,13 @@ const translations = [
   'translate-x-[calc((8px_-_100%)*var(--pui-percentage)/100)]',
   'translate-x-[calc(1px_+_(100%_+_1px)*var(--pui-percentage)/100)]',
   'translate-x-[calc(-1px_-_(100%_+_1px)*var(--pui-percentage)/100)]',
+  'translate-x-[calc(0.0625rem_+_(100%_+_2px_-_0.0625rem)*var(--pui-percentage)/100)]',
+  'translate-x-[calc(-0.0625rem_-_(100%_+_2px_-_0.0625rem)*var(--pui-percentage)/100)]',
+  'translate-x-[-0.0625rem]',
+  'translate-x-[calc(-100%_-_2px)]',
+  'translate-x-[calc(2px_-_100%)]',
+  'translate-x-[calc(4px_-_100%)]',
+  'translate-x-[calc(8px_-_100%)]',
 ];
 
 describe('draft finite percentage Root translation provenance', () => {

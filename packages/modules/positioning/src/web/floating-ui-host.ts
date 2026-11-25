@@ -392,6 +392,28 @@ function pinAnchoredStrategy(
   }
 }
 
+function publishPlacement(
+  floating: HTMLElement,
+  result: Awaited<ReturnType<typeof computePosition>>,
+  isCurrent: () => boolean
+) {
+  // A custom element can retire its positioning lease from any setter.
+  for (const [name, value] of [
+    ['position', result.strategy],
+    ['left', `${result.x}px`],
+    ['top', `${result.y}px`],
+  ]) {
+    if (!isCurrent()) return;
+    floating.style.setProperty(name, value);
+  }
+  const resolved = fromPlacement(result.placement);
+  if (!isCurrent()) return;
+  floating.dataset.side = resolved.side;
+  if (!isCurrent()) return;
+  floating.dataset.align = resolved.align;
+  if (isCurrent()) return { ...resolved, strategy: result.strategy };
+}
+
 function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
   return {
     attach(initial): AnchoredPositionHostLease {
@@ -472,8 +494,9 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         if (!isCurrent()) return;
         if (sizing) {
           const ownSizing = sizing;
+          const ownsSizing = () => isCurrent() && ownSizing === sizing;
           for (let pass = 0; pass < 4; pass++) {
-            if (!isCurrent() || ownSizing !== sizing) return;
+            if (!ownsSizing()) return;
             const prepared = ownSizing.prepare();
             if ('status' in prepared) {
               if (isCurrent()) current.onSizeMatch?.(prepared);
@@ -490,11 +513,10 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
                 }),
               });
             } catch (error) {
-              if (isCurrent() && ownSizing === sizing)
-                current.onSizeMatch?.(ownSizing.fail('invalid-geometry'));
+              if (ownsSizing()) current.onSizeMatch?.(ownSizing.fail('invalid-geometry'));
               return;
             }
-            if (!isCurrent() || ownSizing !== sizing) return;
+            if (!ownsSizing()) return;
             const verified = ownSizing.verify(available);
             if (verified.status === 'reference-changed') continue;
             if (verified.status !== 'applied') {
@@ -505,20 +527,8 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
             // its original fields before publishing coordinates synchronously;
             // later disposal must not undo an already resolved placement.
             retireStrategyPin();
-            for (const [name, value] of [
-              ['position', result.strategy],
-              ['left', `${result.x}px`],
-              ['top', `${result.y}px`],
-            ]) {
-              if (!isCurrent() || ownSizing !== sizing) return;
-              floating.style.setProperty(name, value);
-            }
-            const resolved = fromPlacement(result.placement);
-            if (!isCurrent() || ownSizing !== sizing) return;
-            floating.dataset.side = resolved.side;
-            if (!isCurrent() || ownSizing !== sizing) return;
-            floating.dataset.align = resolved.align;
-            if (!isCurrent() || ownSizing !== sizing) return;
+            const resolved = publishPlacement(floating, result, ownsSizing);
+            if (!resolved) return;
             // Installing fixed/absolute placement may itself alter containing
             // layout. Certify the resulting used boxes, not only the solve input.
             const placed = ownSizing.verify(available);
@@ -527,16 +537,16 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
               if (isCurrent()) current.onSizeMatch?.(placed);
               return;
             }
-            current.onResolved?.({ ...resolved, strategy: result.strategy });
-            if (!isCurrent() || ownSizing !== sizing) return;
+            if (!ownsSizing()) return;
+            current.onResolved?.(resolved);
+            if (!ownsSizing()) return;
             // The resolved callback is a reentrant owner boundary too.
             const delivered = ownSizing.verify(available);
             if (delivered.status === 'reference-changed') continue;
-            if (isCurrent() && ownSizing === sizing) current.onSizeMatch?.(delivered);
+            if (ownsSizing()) current.onSizeMatch?.(delivered);
             return;
           }
-          if (isCurrent() && ownSizing === sizing)
-            current.onSizeMatch?.(ownSizing.fail('invalid-geometry'));
+          if (ownsSizing()) current.onSizeMatch?.(ownSizing.fail('invalid-geometry'));
           return;
         }
         // Available space is an output, not the natural content size used by
@@ -594,15 +604,8 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         if (!isCurrent()) return;
         retireStrategyPin();
         if (!isCurrent()) return;
-        Object.assign(floating.style, {
-          position: result.strategy,
-          left: `${result.x}px`,
-          top: `${result.y}px`,
-        });
-        const resolved = fromPlacement(result.placement);
-        floating.dataset.side = resolved.side;
-        floating.dataset.align = resolved.align;
-        current.onResolved?.({ ...resolved, strategy: result.strategy });
+        const resolved = publishPlacement(floating, result, isCurrent);
+        if (resolved) current.onResolved?.(resolved);
       };
 
       const restart = () => {

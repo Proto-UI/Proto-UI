@@ -92,7 +92,7 @@ export const DIALOG_CLOSE_ICON = {
     'absolute top-4 end-4 size-8 rounded-[min(var(--pui-radius-md),10px)] text-sm font-medium border border-transparent bg-clip-padding outline-none transition-all'
   ),
   nova: tw(
-    'absolute top-2 end-2 size-7 rounded-[min(var(--radius-md),12px)] text-sm font-medium border border-transparent bg-clip-padding outline-none transition-all'
+    'absolute top-2 end-2 size-7 rounded-[min(var(--pui-radius-md),12px)] text-sm font-medium border border-transparent bg-clip-padding outline-none transition-all'
   ),
   maia: tw(
     'absolute top-4 end-4 size-8 rounded-[var(--pui-radius-4xl)] text-sm font-medium border border-transparent bg-clip-padding outline-none transition-all'

@@ -120,12 +120,10 @@ const cases = [
   // Subsequent bounded request/owner-release repair measured as an actual union:
   // internal/records/2026-10-06-focus-request-release-budget.json
   // internal/records/2026-10-06-template-scroll-focus-budget.json
-  // The merged 0.3 integration train and the Select target-alignment repair
-  // changed the three adapter closures. Each ceiling is the canonical
-  // node-24 measurement at the reviewed head with its own bounded headroom:
-  // internal/records/2026-11-24-adapter-closure-package-budget.json
-  ['adapter-react root', 'packages/adapters/react/src/index.ts', 180_900],
-  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 179_700],
+  // The integrated scroll-preserving intrinsic measurement is shared by all three Web adapters.
+  // internal/records/2026-11-25-positioning-scroll-package-budget.json
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 181_800],
+  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 180_600],
   // The earlier #652 shadow split baseline proposal measured 84,683 gzip at
   // head dd820b30 (main at ddac15da: 75,664 with the same toolchain). Its
   // prior 97,000 ceiling rationale is retained here; current proposal:
@@ -133,7 +131,7 @@ const cases = [
   // The same exact merge-ref measured 95,936 gzip after three accepted
   // capability slices. Current proposal evidence and headroom are in the
   // dated record above.
-  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 217_400],
+  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 218_100],
   ['prototypes-base/button', 'packages/prototypes/base/src/button/index.ts', 6_000],
   ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_900],
 ];

@@ -10,7 +10,7 @@ const tooltipContent = definePrototype<ShadcnTooltipContentProps, ShadcnTooltipC
   setup(def) {
     const behavior = asTooltipContent();
     setupOverlayPaint(def, TOOLTIP_PANEL, 'nova');
-    def.feedback.style.use(tw('z-50 px-3 py-1.5 text-xs duration-150'));
+    def.feedback.style.use(tw('z-50 px-3 py-1.5 text-xs'));
     behavior.asTransition.configure({ enterDuration: 150, leaveDuration: 100 });
     const { open } = behavior.stateHandles;
     setupPopupMotion(def, open);

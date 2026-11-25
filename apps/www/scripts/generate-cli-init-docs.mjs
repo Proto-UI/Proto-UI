@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
+import { realpathSync } from 'node:fs';
 import { mkdtemp, mkdir, readFile, readdir, rm, writeFile, rename } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -163,5 +164,14 @@ export async function generateCliInitDocs() {
     await rm(temporary, { recursive: true, force: true });
   }
 }
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url))
-  await generateCliInitDocs();
+function isEntryPoint() {
+  if (!process.argv[1]) return false;
+  try {
+    return (
+      realpathSync(path.resolve(process.argv[1])) === realpathSync(fileURLToPath(import.meta.url))
+    );
+  } catch {
+    return false;
+  }
+}
+if (isEntryPoint()) await generateCliInitDocs();

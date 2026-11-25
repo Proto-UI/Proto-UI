@@ -27,13 +27,13 @@ Total: **63 library-family instances; 27 distinct subjects; 159 P identities; 15
 
 ## Separate candidate source inventory
 
-Candidate local tree 728ee01d52c693e608f9126bb6ce20aa3dce4224; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
+Candidate commit 55a9b990608ecff0b359fc4a5f272e0a5f0c8994; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
 
 | Library | Historical main families / identities | Candidate families / identities | Release scope |
 | --- | --- | --- | --- |
 | base | 22 / 55 | 57 / 117 | 0.3 committed scope; acceptance separate |
 | shadcn | 17 / 48 | 57 / 127 | 0.3 committed scope; acceptance separate |
-| brutalist | 19 / 51 | 58 / 118 | 0.3 committed scope; acceptance separate |
+| brutalist | 19 / 51 | 58 / 120 | 0.3 committed scope; acceptance separate |
 | bootstrap-2-3-2 | 2 / 2 | 54 / 116 | WIP / Experimental; 0.4 |
 | liquid-glass | 2 / 2 | 54 / 112 | WIP / Experimental; 0.4 |
 | lucide | 1 / 1 | 1 / 1 | 0.3 committed scope; acceptance separate |
@@ -62,7 +62,7 @@ Candidate source definitions include regular .proto.ts files and concrete TypeSc
 | data-table / 2 | implemented-draft / 2 P identities | implemented-draft / 2 P identities | implemented-draft / 2 P identities | implemented-draft / 2 P identities |
 | date-picker / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
 | dialog / 7 | implemented-draft / 10 P identities | implemented-draft / 10 P identities | implemented-draft / 10 P identities | implemented-draft / 7 P identities |
-| drawer / 5 | implemented-draft / 4 P identities | implemented-draft / 1 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities |
+| drawer / 5 | implemented-draft / 4 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities |
 | dropdown / 8 | implemented-draft / 8 P identities | implemented-draft / 8 P identities | implemented-draft / 8 P identities | implemented-draft / 8 P identities |
 | field / 7 | implemented-draft / 7 P identities | implemented-draft / 7 P identities | implemented-draft / 6 P identities | implemented-draft / 6 P identities |
 | fieldset / 3 | implemented-draft / 3 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities |

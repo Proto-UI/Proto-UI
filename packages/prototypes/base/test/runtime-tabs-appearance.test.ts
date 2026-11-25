@@ -82,7 +82,11 @@ for (const [family, parts] of [
         expect(tokens(list)).toContain('overflow-x-auto');
         expect(tokens(list)).toContain('bg-transparent');
         expect(tokens(a)).toContain('border-b-2');
-        expect(tokens(a)).toContain('border-foreground');
+        expect(tokens(a)).toContain(
+          family === 'bootstrap-2-3-2' || family === 'liquid-glass'
+            ? 'border-primary'
+            : 'border-foreground'
+        );
         expect(tokens(a)).toContain('text-foreground');
         expect(tokens(a)).toContain('bg-transparent');
         expect(tokens(b)).toContain('bg-transparent');
@@ -97,8 +101,14 @@ for (const [family, parts] of [
           'rounded-xl',
         ])
           expect(tokens(a), `${state}: no default ${token}`).not.toContain(token);
-        if (previous.focusVisible) expect(tokens(b)).toContain('outline-ring');
-        if (disabled) expect(tokens(b)).toContain('opacity-50');
+        if (previous.focusVisible)
+          expect(tokens(b)).toContain(
+            family === 'brutalist' || family === 'liquid-glass' ? 'ring-ring' : 'outline-ring'
+          );
+        if (disabled)
+          expect(tokens(b)).toContain(
+            family === 'liquid-glass' ? 'pointer-events-none' : 'opacity-50'
+          );
         if (!previous.hovered && !previous.selectedB)
           expect(tokens(b)).toContain('text-muted-foreground');
         await setAppearance('default', disabled);

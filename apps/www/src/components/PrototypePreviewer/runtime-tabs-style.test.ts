@@ -17,13 +17,15 @@ describe('Runtime Tabs complete source CSS closure', () => {
       const tokens = raw;
       for (const token of [
         'border-b-2',
-        'border-foreground',
+        family === 'bootstrap-2-3-2' || family === 'liquid-glass'
+          ? 'border-primary'
+          : 'border-foreground',
         'bg-transparent',
         'text-muted-foreground',
         'overflow-x-auto',
         'flex-none',
         'gap-6',
-        'outline-ring',
+        family === 'brutalist' || family === 'liquid-glass' ? 'ring-ring' : 'outline-ring',
       ])
         expect(tokens).toContain(token);
       for (const css of [

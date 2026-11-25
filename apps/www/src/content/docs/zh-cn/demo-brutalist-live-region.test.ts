@@ -42,9 +42,10 @@ describe('Brutalist Live Region demo contract', () => {
       // Each region carries a real authored payload box as its announcement
       // content; nothing simulates an announcement engine or event channel.
       expect(region.props?.atomic).toBe(true);
-      const payloads = (region.children ?? []).filter(
-        (child): child is DemoRefNode =>
-          typeof child !== 'string' && child.kind !== 'text' && child.ref === `${region.ref}Payload`
+      const expectedPayloadRef =
+        region.props?.politeness === 'polite' ? 'politePayload' : 'assertivePayload';
+      const payloads = collectNodes(region).filter(
+        (child): child is DemoRefNode => child.kind !== 'text' && child.ref === expectedPayloadRef
       );
       expect(payloads).toHaveLength(1);
     }
@@ -70,12 +71,12 @@ describe('Brutalist Live Region demo contract', () => {
       api,
     });
 
-    expect([...clicks.keys()].sort()).toEqual(['announceAssertive', 'announcePolite']);
-    (clicks.get('announcePolite')!.onClick as () => void)();
-    expect(politePayload.textContent).toContain('1 new notification');
-    (clicks.get('announceAssertive')!.onClick as () => void)();
-    expect(assertivePayload.textContent).toContain('Service degraded');
-    (clicks.get('announceAssertive')!.onClick as () => void)();
-    expect(assertivePayload.textContent).toContain('Service normal');
+    expect([...clicks.keys()].sort()).toEqual(['checkInbox', 'toggleIncident']);
+    (clicks.get('checkInbox')!.onClick as () => void)();
+    expect(politePayload.textContent).toContain('1 unread message');
+    (clicks.get('toggleIncident')!.onClick as () => void)();
+    expect(assertivePayload.textContent).toContain('API latency elevated');
+    (clicks.get('toggleIncident')!.onClick as () => void)();
+    expect(assertivePayload.textContent).toContain('All systems operational');
   });
 });

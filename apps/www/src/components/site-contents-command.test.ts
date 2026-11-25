@@ -491,7 +491,7 @@ it.each(
         expect(node.getAttribute('tabindex')).toBeNull();
       });
       const paint = leafSurface.getAttribute('data-pui-style')?.split(/\s+/);
-      expect(paint).toContain(family === 'shadcn' ? 'bg-accent' : 'bg-main');
+      expect(paint).toContain(family === 'shadcn' ? 'bg-accent' : 'bg-canary');
       expect(paint).toContain(family === 'shadcn' ? 'rounded-md' : 'rounded-base');
       expect(leafText.getAttribute('data-pui-style')?.split(/\s+/)).toContain(
         family === 'shadcn' ? 'font-medium' : 'font-semibold'

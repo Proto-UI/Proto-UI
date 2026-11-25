@@ -42,7 +42,12 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2']) {
       expect(svg(el)!.getAttribute('aria-hidden')).toBe('true');
       expect(el.getAttribute('role')).toBe('checkbox');
     }
-    const selected = family === 'brutalist' ? 'bg-main' : 'bg-primary';
+    const selected =
+      family === 'brutalist'
+        ? 'bg-main'
+        : family === 'bootstrap-2-3-2'
+          ? 'bg-[linear-gradient(#08c,#0077b3)]'
+          : 'bg-primary';
     expect(tokens(box(a))).toContain(selected);
     expect(tokens(box(all))).toContain(selected);
     expect(tokens(box(b))).not.toContain(selected);

@@ -37,7 +37,7 @@ const collapsibleContent = definePrototype<
       renderer.el(
         'div',
         {
-          style: tw('border-t border-border px-[15px] py-[9px]'),
+          style: tw('border-t border-[#e5e5e5] dark:border-border px-[15px] py-[9px]'),
         },
         renderer.slot()
       );

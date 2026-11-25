@@ -96,6 +96,47 @@ describe('Base Toast viewport, stacking, semantic type, dismissible, and action 
     expect(loadingToast.getExposes().open.get()).toBe(false);
   });
 
+  it('rearms the inherited duration while preserving an explicit duration and viewport pause', async () => {
+    vi.useFakeTimers();
+    const { Viewport, Root } = registerSet();
+    const viewport = new Viewport();
+    const inherited = new Root();
+    const explicit = new Root();
+    const requests: unknown[] = [];
+    inherited.addEventListener('openChange', (event) =>
+      requests.push((event as CustomEvent).detail)
+    );
+    setElementProps(viewport, { duration: 100 });
+    setElementProps(inherited, { defaultOpen: true });
+    setElementProps(explicit, { defaultOpen: true, duration: 80 });
+    viewport.append(inherited, explicit);
+    document.body.append(viewport);
+    mounted.push(viewport);
+    await flush();
+
+    await vi.advanceTimersByTimeAsync(30);
+    setElementProps(viewport, { duration: 0 });
+    await flush();
+    await vi.advanceTimersByTimeAsync(100);
+    expect(inherited.getExposes().open.get()).toBe(true);
+    expect(explicit.getExposes().open.get()).toBe(false);
+    expect(requests).toEqual([]);
+
+    viewport.getExposes().pauseAll();
+    setElementProps(viewport, { duration: 40 });
+    await flush();
+    await vi.advanceTimersByTimeAsync(100);
+    expect(inherited.getExposes().open.get()).toBe(true);
+
+    viewport.getExposes().resumeAll();
+    await flush();
+    await vi.advanceTimersByTimeAsync(39);
+    expect(inherited.getExposes().open.get()).toBe(true);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(inherited.getExposes().open.get()).toBe(false);
+    expect(requests).toEqual([{ open: false, reason: 'timeout' }]);
+  });
+
   it('enforces dismissible=false for user-initiated dismiss while allowing programmatic close', async () => {
     const { Root, Close } = registerSet();
     const root = new Root();
