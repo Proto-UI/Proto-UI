@@ -95,8 +95,13 @@ impl<F: Fn(&str, TokenStream) -> TokenStream> Tree<'_, '_, F> {
         if !inside_button { label.truncate(label_start); }
         let token_styles = style.as_ref().map(|id| {
             let tokens = (self.pure)(id, quote!(self));
-            let resolve = if self.checked.links.scoped { quote!(self.scope.resolve_token) } else { quote!(self.resolve_token) };
-            quote!(for token in (#tokens).iter() { (#resolve)(token.as_str(), node.style()); })
+            if self.checked.links.scoped {
+                quote! {
+                    if let ::core::option::Option::Some(resolve) = &self.scope.resolve_token {
+                        for token in (#tokens).iter() { resolve(token.as_str(), node.style()); }
+                    }
+                }
+            } else { quote!(for token in (#tokens).iter() { (self.resolve_token)(token.as_str(), node.style()); }) }
         });
         let appearance = (index == 0).then(|| quote! {
             if let ::core::option::Option::Some(appearance) = &self.appearance {

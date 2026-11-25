@@ -17,20 +17,6 @@ impl Component<'_, '_> {
         }
     }
 
-    pub(super) fn has_owned_scope(&self, root: usize) -> bool {
-        let mut seen = BTreeSet::new();
-        let mut pending = vec![root];
-        while let Some(i) = pending.pop() {
-            if !seen.insert(i) { continue; }
-            let body = &self.checked.unit.bodies[i];
-            if !body.tasks.is_empty() || !body.created.is_empty() { return true; }
-            for site in &self.checked.links.children[i] {
-                if let View::Child { component, .. } = site { pending.push(self.checked.links.components[component.as_str()]); }
-            }
-        }
-        false
-    }
-
     pub(super) fn logical_type(&mut self, fields: &mut Vec<TokenStream>, initialized: &mut Vec<TokenStream>, initializers: &[TokenStream], appearance: &TokenStream) -> Result<TokenStream> {
         let mut bind = Vec::new();
         let mut rebind = Vec::new();
@@ -39,9 +25,9 @@ impl Component<'_, '_> {
         let mut provided = BTreeSet::new();
         fields.push(quote!(scope: ContextScope));
         initialized.push(quote!(scope: scope.clone()));
+        fields.push(quote!(retired: ::core::primitive::bool));
+        initialized.push(quote!(retired: false));
         let transactional = super::transactional(self.checked);
-        let terminal = self.has_owned_scope(self.checked.index);
-        let retired = terminal.then(|| quote!(if self.retired { return; }));
         let mut retire = self.task_storage(fields, initialized);
         let mut subscriptions = BTreeSet::new();
         for (i, read) in self.checked.ir.consumes.iter().enumerate() {
@@ -61,7 +47,7 @@ impl Component<'_, '_> {
             initialized.push(quote!(#slot));
             bind.push(quote!(let #slot = #subscription;));
             rebind.push(quote! {
-                if ::core::option::Option::Some(&self.#slot.provider) != scope.#source.as_ref() { self.#slot = #subscription; }
+                if self.#slot.provider() != scope.#source.as_ref() { self.#slot = #subscription; }
             });
         }
         for projection in &self.checked.ir.provides {
@@ -71,49 +57,42 @@ impl Component<'_, '_> {
             let f = self.checked.functions[projection.function.as_str()];
             let first = behavior::entry_call(self.checked, f, vec![], |p| self.initial_input(p), |_| unreachable!("pure provider"), TokenStream::new());
             let next = self.pure(&projection.function, quote!(self));
-            fields.push(quote!(#slot: ::gpui::Entity<::proto_ui_gpui_support::context::Provider<#tag>>));
+            fields.push(quote!(#slot: ::core::option::Option<::gpui::Entity<::proto_ui_gpui_support::context::Provider<#tag>>>));
             creation.push(quote! { let #slot = { let first = #first; cx.new(|_| #tag::KEY.provider(first)) }; });
             if !self.checked.bodies[f].facts.reads.is_empty() {
-                publish.push(quote! { { let next = #next; self.#slot.update(cx, |provider, cx| provider.publish(next, cx)); } });
+                publish.push(quote! { { let next = #next; self.#slot.as_ref().expect("live logical Context provider").update(cx, |provider, cx| provider.publish(next, cx)); } });
             }
             provided.insert(k);
-            initialized.push(quote!(#slot));
+            initialized.push(quote!(#slot: ::core::option::Option::Some(#slot)));
+            retire.push(quote!(self.#slot.take();));
         }
         let scope_fields = (0..self.checked.unit.keys.len()).map(|k| {
             let slot = context::channel(k);
-            if provided.contains(&k) { quote!(#slot: ::core::option::Option::Some(self.#slot.clone())) }
+            if provided.contains(&k) { quote!(#slot: self.#slot.clone()) }
             else { quote!(#slot: self.scope.#slot.clone()) }
         });
         let resolver = self.checked.links.styled.then(|| quote!(resolve_token: self.scope.resolve_token.clone(),));
         let children = self.logical_children(fields, initialized)?;
         let sites = &self.checked.links.children[self.checked.index];
-        if terminal {
-            fields.push(quote!(retired: ::core::primitive::bool));
-            initialized.push(quote!(retired: false));
-            let mut children_owned = Vec::new();
-            for (i, site) in sites.iter().enumerate() {
-                let View::Child { component, .. } = site else { unreachable!("linked child site") };
-                if self.has_owned_scope(self.checked.links.components[component.as_str()]) {
-                    let slot = context::child(i);
-                    children_owned.push(quote! {
-                        if let ::core::option::Option::Some((_, child)) = self.#slot.take() {
-                            child.update(app, |owner,cx| owner.__pui_retire(cx));
-                        }
-                    });
-                }
-            }
-            if !children_owned.is_empty() {
-                fields.push(quote!(_retirement: ::gpui::Subscription));
-                initialized.push(quote!(_retirement: cx.on_release(|owner: &mut Self, app| owner.__pui_retire(app))));
-            }
-            let clear = transactional.then(|| quote!(self.publication.retire();));
-            self.methods.push(quote! {
-                #[allow(unused_variables)] fn __pui_retire(&mut self, app: &mut ::gpui::App) {
-                    if ::core::mem::replace(&mut self.retired, true) { return; }
-                    #clear #(#retire)* #(#children_owned)*
-                }
-            });
+        if !sites.is_empty() {
+            fields.push(quote!(_retirement: ::gpui::Subscription));
+            initialized.push(quote!(_retirement: cx.on_release(|owner: &mut Self, app| owner.__pui_retire(app))));
         }
+        let children_owned = (0..sites.len()).map(context::child).map(|slot| quote! {
+            if let ::core::option::Option::Some((_, child)) = self.#slot.take() {
+                child.update(app, |owner, cx| owner.__pui_retire(cx));
+            }
+        });
+        let clear = transactional.then(|| quote!(self.publication.retire();));
+        self.methods.push(quote! {
+            #[allow(unused_variables)] fn __pui_retire(&mut self, app: &mut ::gpui::App) {
+                if ::core::mem::replace(&mut self.retired, true) { return; }
+                #clear #(#retire)*
+                self.scope.withdraw();
+                self.appearance.take();
+                #(#children_owned)*
+            }
+        });
         let reactive = sites.iter().any(|site| match site {
             View::Child { key, props, .. } => std::iter::once(key).chain(props.iter().map(|p| &p.function)).any(|id| {
                 !self.checked.bodies[self.checked.functions[id.as_str()]].facts.reads.is_empty()
@@ -135,22 +114,24 @@ impl Component<'_, '_> {
         self.methods.push(quote! {
             pub fn child_scope(&self) -> ContextScope { ContextScope { #resolver #(#scope_fields),* } }
             pub fn rebind(&mut self, scope: &ContextScope, cx: &mut ::gpui::Context<Self>) -> ::core::result::Result<(), MissingContext> {
-                #needs #move_scope ::core::result::Result::Ok(())
+                #needs
+                if self.retired { return ::core::result::Result::Ok(()); }
+                #move_scope ::core::result::Result::Ok(())
             }
             fn __pui_swap_scope(&mut self, scope: &ContextScope, cx: &mut ::gpui::Context<Self>) -> ::core::primitive::bool {
                 if self.scope.same(scope) { return false; }
                 #(#rebind)* self.scope = scope.clone(); true
             }
             fn __pui_move(&mut self, scope: &ContextScope, cx: &mut ::gpui::Context<Self>) {
-                #retired
+                if self.retired { return; }
                 if self.__pui_swap_scope(scope, cx) { self.__pui_context_changed(true, cx); }
             }
             fn __pui_context_changed(&mut self, scope_changed: ::core::primitive::bool, cx: &mut ::gpui::Context<Self>) {
-                #retired
+                if self.retired { return; }
                 self.__pui_refresh(scope_changed, cx); cx.notify(); #enqueue
             }
-            #[allow(unused_variables)] fn __pui_refresh(&mut self, scope_changed: ::core::primitive::bool, cx: &mut ::gpui::Context<Self>) { #retired #(#publish)* #sync_children }
-            #[allow(unused_variables)] fn __pui_children(&mut self, cx: &mut ::gpui::Context<Self>) { #retired #children }
+            #[allow(unused_variables)] fn __pui_refresh(&mut self, scope_changed: ::core::primitive::bool, cx: &mut ::gpui::Context<Self>) { if self.retired { return; } #(#publish)* #sync_children }
+            #[allow(unused_variables)] fn __pui_children(&mut self, cx: &mut ::gpui::Context<Self>) { if self.retired { return; } #children }
         });
         Ok(quote! {
             pub fn mount(props: #props, scope: &ContextScope, app: &mut ::gpui::App) -> ::core::result::Result<::gpui::Entity<#owner>, MissingContext> {
@@ -210,9 +191,7 @@ impl Component<'_, '_> {
             let local = format_ident!("previous_{target}");
             let source = sites.into_iter().map(context::child);
             previous.push(quote!(let mut #local = [#(self.#source.take()),*];));
-            if self.has_owned_scope(target) {
-                removed.push(quote! { for (_, child) in #local.into_iter().flatten() { child.update(cx, |owner,cx| owner.__pui_retire(cx)); } });
-            }
+            removed.push(quote! { for (_, child) in #local.into_iter().flatten() { child.update(cx, |owner,cx| owner.__pui_retire(cx)); } });
         }
         let duplicates = if resolved.len() > 1 {
             let owner = &self.names.component;

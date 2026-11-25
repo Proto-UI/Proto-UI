@@ -62,6 +62,12 @@ Import `ComponentIR` from `@proto.ui/compiler/targets/ir`. `emitReact(ir)` from 
 
 The host suites compile the versioned sources and import the generated components. They exercise Badge's text and nested styles, Toggle's native press and public requests, fixed-mode input rejection and owner updates. Additional direct-IR controls exercise instance captures, rollback, queued reentry and disposal. `PUI_CHROMIUM_EXECUTABLE` selects a system Chromium. `PROTO_UI_REACT_CONSUMER_DIR` and `PROTO_UI_GPUI_CONSUMER_DIR` retain generated modules and their source closure. The native crate also retains its SDK lockfile.
 
+In GPUI, a host may retain a child's `Entity` while its view is hidden or physically detached. Its public actions and Context subscriptions remain active until the logical parent releases it or removes its key. An action on the retired entity returns `ActionOutcome::Disposed`. Creating a new child with the same key gives it its own state and subscriptions.
+
+For a component whose view or descendants use style tokens, supply a `ContextScope` with a live style resolver. If the scope was obtained from a retired entity, restoring its nominal Context values alone cannot restore that resolver. `mount` and `rebind` report `MissingContext::GPUI_STYLE_RESOLVER` in the error's `key` and identify the authored style expression. A rejected rebind preserves the live component's existing scope.
+
+When updating the GPUI support crate, regenerate older Rust modules that access the former `BoundContext.provider` field. The generator now uses `BoundContext::provider()`, which can represent a withdrawn connection.
+
 ```sh
 node --test packages/compiler/test/react-target.node-test.mjs
 node --test packages/compiler/test/controlled-source-react.node-test.mjs

@@ -15,6 +15,7 @@ pub fn scope(checked: &Checked<'_>) -> Result<Vec<syn::Item>> {
     let mut fields = Vec::new();
     let mut identities = Vec::new();
     let mut empty = Vec::new();
+    let mut withdraw = Vec::new();
     for (i, key) in checked.unit.keys.iter().enumerate() {
         let tag = marker(i);
         let slot = channel(i);
@@ -45,11 +46,17 @@ pub fn scope(checked: &Checked<'_>) -> Result<Vec<syn::Item>> {
         fields.push(quote!(#slot: ::core::option::Option<::gpui::Entity<::proto_ui_gpui_support::context::Provider<#tag>>>));
         empty.push(quote!(#slot: ::core::option::Option::None));
         identities.push(quote!(self.#slot == other.#slot));
+        withdraw.push(quote!(self.#slot.take();));
     }
     let construction = if checked.links.styled {
-        fields.push(quote!(resolve_token: ::std::rc::Rc<dyn ::core::ops::Fn(&::core::primitive::str, &mut ::gpui::StyleRefinement)>));
-        identities.push(quote!(::std::rc::Rc::ptr_eq(&self.resolve_token, &other.resolve_token)));
-        quote! { impl ContextScope { pub fn new(resolve: impl ::core::ops::Fn(&::core::primitive::str, &mut ::gpui::StyleRefinement) + 'static) -> Self { Self { #(#empty,)* resolve_token: ::std::rc::Rc::new(resolve) } } } }
+        fields.push(quote!(resolve_token: ::core::option::Option<::std::rc::Rc<dyn ::core::ops::Fn(&::core::primitive::str, &mut ::gpui::StyleRefinement)>>));
+        identities.push(quote!((match (&self.resolve_token, &other.resolve_token) {
+            (::core::option::Option::Some(a), ::core::option::Option::Some(b)) => ::std::rc::Rc::ptr_eq(a, b),
+            (::core::option::Option::None, ::core::option::Option::None) => true,
+            _ => false,
+        })));
+        withdraw.push(quote!(self.resolve_token.take();));
+        quote! { impl ContextScope { pub fn new(resolve: impl ::core::ops::Fn(&::core::primitive::str, &mut ::gpui::StyleRefinement) + 'static) -> Self { Self { #(#empty,)* resolve_token: ::core::option::Option::Some(::std::rc::Rc::new(resolve)) } } } }
     } else { quote! { impl ::core::default::Default for ContextScope { fn default() -> Self { Self { #(#empty),* } } } } };
     let same = if identities.is_empty() { quote!(true) } else { quote!(#(#identities)&&*) };
     let keyed = (!checked.unit.keys.is_empty()).then(|| quote! {
@@ -65,13 +72,22 @@ pub fn scope(checked: &Checked<'_>) -> Result<Vec<syn::Item>> {
             pub key: ::gpui::SharedString, pub file: &'static ::core::primitive::str, pub start: ::core::primitive::u64, pub end: ::core::primitive::u64,
         }
     ));
+    let style_binding = checked.links.styled.then(|| {
+        let mut id = String::from("gpui:host/style-resolver");
+        while checked.links.keys.contains_key(id.as_str()) { id.push('#'); }
+        quote! { impl MissingContext { pub const GPUI_STYLE_RESOLVER: &'static ::core::primitive::str = #id; } }
+    });
     let file = syn::parse2::<syn::File>(quote! {
         #[derive(Clone, Copy, Debug, PartialEq, Eq)] pub struct MissingContext {
             pub key: &'static ::core::primitive::str, pub file: &'static ::core::primitive::str, pub start: ::core::primitive::u64, pub end: ::core::primitive::u64,
         }
         #[derive(Clone)] pub struct ContextScope { #(#fields),* }
+        #style_binding
         #construction #keyed #collision
-        impl ContextScope { fn same(&self, other: &Self) -> ::core::primitive::bool { #same } }
+        impl ContextScope {
+            fn same(&self, other: &Self) -> ::core::primitive::bool { #same }
+            fn withdraw(&mut self) { #(#withdraw)* }
+        }
         #(#declarations)*
     }).map_err(|e| format!("{}: GPUI Context AST: {e}", checked.ir.source))?;
     Ok(file.items)
@@ -102,7 +118,13 @@ pub fn preflight(checked: &Checked<'_>) -> TokenStream {
         let crate::ir::Source { file, start, end } = source;
         quote! { if scope.#slot.is_none() { return ::core::result::Result::Err(MissingContext { key: #id, file: #file, start: #start, end: #end }); } }
     });
-    quote!(#(#tests)*)
+    let style = checked.links.required_style[checked.index].map(|at| {
+        let crate::ir::Source { file, start, end } = at;
+        quote! { if scope.resolve_token.is_none() { return ::core::result::Result::Err(MissingContext {
+            key: MissingContext::GPUI_STYLE_RESOLVER, file: #file, start: #start, end: #end,
+        }); } }
+    });
+    quote!(#(#tests)* #style)
 }
 
 pub fn subscription(slot: &Ident, source: &Ident, dispatch: TokenStream) -> TokenStream {
@@ -110,7 +132,7 @@ pub fn subscription(slot: &Ident, source: &Ident, dispatch: TokenStream) -> Toke
         ::proto_ui_gpui_support::context::BoundContext::bind(
             scope.#source.as_ref().expect("validated required Context"), cx,
             |owner: &mut Self, provider, cx| {
-                if owner.#slot.provider == provider { #dispatch }
+                if owner.#slot.provider() == ::core::option::Option::Some(&provider) { #dispatch }
             },
         )
     }

@@ -37,6 +37,10 @@ export function authoredKeyedTaskSource() {
   return compileSource(new URL('./authoring-keyed-tasks/owner.proto.ts.txt', import.meta.url), 'KeyedTaskOwner', 'default');
 }
 
+export function authoredSyncRetirementSource() {
+  return compileSource(new URL('./authoring-sync-retirement/owner.proto.ts.txt', import.meta.url), 'SyncTree', 'default');
+}
+
 export function authoredBadgeSource() {
   const result = authoredSource('readonly-badge.proto.ts.txt', 'AuthoringBadge');
   assert.equal(result.status, 'produced', JSON.stringify(result.diagnostics));

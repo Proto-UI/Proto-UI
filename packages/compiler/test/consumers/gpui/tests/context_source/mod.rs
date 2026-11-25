@@ -91,6 +91,13 @@ fn assert_reader(reader: &Entity<LevelReader>, cx: &TestAppContext, initial: &st
     });
 }
 
+fn count_notifications(reader: &Entity<LevelReader>, cx: &TestAppContext) -> (Rc<Cell<usize>>, gpui::Subscription) {
+    let count = Rc::new(Cell::new(0));
+    let observed = count.clone();
+    let subscription = cx.update(|app| app.observe(reader, move |_, _| observed.set(observed.get() + 1)));
+    (count, subscription)
+}
+
 fn select(owner: &Entity<LevelOwner>, app: &mut App, next: &str) {
     let outcome = owner.update(app, |owner, cx| owner.actions(cx).select(next.to_owned()));
     assert_eq!(outcome, ActionOutcome::Committed);
@@ -184,9 +191,7 @@ fn equal_replacement_withdraws_the_old_provider_and_a_physical_move_retains_the_
     assert_reader(&reader, &cx, "seed", "aligned");
     assert_text(first_window, &mut cx, &text, "seed / aligned");
 
-    let notifications = Rc::new(Cell::new(0));
-    let count = notifications.clone();
-    let subscription = cx.update(|app| app.observe(&reader, move |_, _| count.set(count.get() + 1)));
+    let (notifications, subscription) = count_notifications(&reader, &cx);
     original.update(&mut cx, |provider, cx| provider.publish("retired provider".to_owned(), cx));
     assert_reader(&reader, &cx, "seed", "aligned");
     assert_text(first_window, &mut cx, &text, "seed / aligned");
@@ -215,4 +220,39 @@ fn equal_replacement_withdraws_the_old_provider_and_a_physical_move_retains_the_
     assert!(weak.upgrade().is_none(), "a logical provider retained the released reader");
     drop((nearer, original, replacement));
     cx.quit();
+}
+
+#[gpui::test]
+fn releasing_the_logical_parent_unsubscribes_its_host_retained_reader(cx: &mut TestAppContext) {
+    let captured = Rc::new(Cell::new(None));
+    let first_reader = captured.clone();
+    let births = cx.update(|app| app.observe_new::<LevelReader>(move |_, _, cx| {
+        assert!(first_reader.replace(Some(cx.entity())).is_none());
+    }));
+    let owner = cx.update(|app| LevelOwner::mount(LevelOwnerProps::default(), &ContextScope::default(), app)).unwrap();
+    let child = captured.take().expect("the generated parent created its reader");
+    drop(births);
+
+    let provider = cx.new(|_| LEVEL.provider("shared".to_owned()));
+    let scope = ContextScope::default().with(LEVEL, provider.clone());
+    child.update(cx, |reader, cx| reader.rebind(&scope, cx)).unwrap();
+    let independent = mount_reader(cx, &scope);
+    let (child_events, _child_observer) = count_notifications(&child, cx);
+    let (independent_events, _independent_observer) = count_notifications(&independent, cx);
+    provider.update(cx, |provider, cx| provider.publish("both live".to_owned(), cx));
+    cx.run_until_parked();
+    assert!(child_events.get() > 0 && independent_events.get() > 0);
+
+    let parent = owner.downgrade();
+    drop(owner);
+    cx.update(|_| {});
+    cx.run_until_parked();
+    assert!(parent.upgrade().is_none(), "the logical parent was released");
+    let child_before = child_events.get();
+    let independent_before = independent_events.get();
+    provider.update(cx, |provider, cx| provider.publish("independent only".to_owned(), cx));
+    cx.run_until_parked();
+    assert!(independent_events.get() > independent_before);
+    assert_reader(&independent, cx, "shared", "independent only");
+    assert_eq!(child_events.get(), child_before, "the retained child still observes its provider after parent release");
 }

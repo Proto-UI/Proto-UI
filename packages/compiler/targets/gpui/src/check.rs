@@ -98,6 +98,7 @@ pub struct Links<'a> {
     pub externs: HashMap<&'a str, usize>,
     pub children: Vec<Vec<&'a View>>,
     pub required: Vec<BTreeMap<usize, &'a Source>>,
+    pub required_style: Vec<Option<&'a Source>>,
     pub scoped: bool,
     pub styled: bool,
     members: Vec<HashMap<&'a str, usize>>,
@@ -269,7 +270,7 @@ impl<'a> Links<'a> {
         let mut edges = Vec::new();
         let mut required = Vec::new();
         let mut provided = Vec::new();
-        let mut styled = false;
+        let mut required_style = Vec::new();
         let mut scoped = unit.bodies.len() > 1 || !unit.keys.is_empty();
         for b in &unit.bodies {
             scoped |= !b.tasks.is_empty() || !b.created.is_empty();
@@ -287,15 +288,23 @@ impl<'a> Links<'a> {
             }
             let mut sites = Vec::new();
             let mut targets = Vec::new();
+            let mut style_source = None;
             let mut nodes = vec![&b.view];
             while let Some(node) = nodes.pop() {
                 match node {
                     View::Child { component, source: at, .. } => { targets.push(lookup(&components, component, at, "child component")?); sites.push(node); }
-                    View::Element { children, style, .. } => { styled |= style.is_some(); nodes.extend(children.iter().rev()); }
+                    View::Element { children, style, source: at, .. } => {
+                        if let (None, Some(id)) = (style_source, style) {
+                            let binding = b.behaviors.iter().find(|f| f.binding.id == *id);
+                            style_source = Some(binding.map_or(at, |f| &f.binding.source));
+                        }
+                        nodes.extend(children.iter().rev());
+                    }
                     View::Text { .. } => {}
                 }
             }
             children.push(sites); edges.push(targets); required.push(needs); provided.push(own);
+            required_style.push(style_source);
         }
         let walk = postorder(0..unit.bodies.len(), &edges);
         if let Some(cycle) = walk.cycle {
@@ -305,9 +314,11 @@ impl<'a> Links<'a> {
             for &child in &edges[i] {
                 let inherited: Vec<_> = required[child].iter().filter(|(key, _)| !provided[i].contains(*key)).map(|(&k, &at)| (k, at)).collect();
                 required[i].extend(inherited);
+                if required_style[i].is_none() { required_style[i] = required_style[child]; }
             }
         }
-        Ok(Self { components, keys, externs, children, required, scoped, styled, members })
+        let styled = required_style.iter().any(Option::is_some);
+        Ok(Self { components, keys, externs, children, required, required_style, scoped, styled, members })
     }
 }
 

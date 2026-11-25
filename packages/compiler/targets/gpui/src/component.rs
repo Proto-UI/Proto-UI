@@ -176,7 +176,10 @@ impl Component<'_, '_> {
         let style = quote!(impl ::core::ops::Fn(&#projection, &mut ::gpui::StyleRefinement) + 'static);
         let set = quote!(self.appearance = ::core::option::Option::Some(::std::boxed::Box::new(style)););
         self.methods.push(if self.checked.links.scoped {
-            quote!(pub fn set_appearance(&mut self, style: #style, cx: &mut ::gpui::Context<Self>) { #set cx.notify(); })
+            quote!(pub fn set_appearance(&mut self, style: #style, cx: &mut ::gpui::Context<Self>) {
+                if self.retired { return; }
+                #set cx.notify();
+            })
         } else {
             quote!(pub fn with_appearance(mut self, style: #style) -> Self { #set self })
         });
@@ -249,8 +252,11 @@ impl Component<'_, '_> {
         if !transactional(self.checked) {
             let ret = fixed.then(|| quote!(-> ::core::result::Result<#outcome, #input_error>));
             let success = fixed.then(|| quote!(::core::result::Result::Ok(#outcome::Committed)));
+            let disposed_result = fixed.then(|| quote!(::core::result::Result::Ok(#outcome::Disposed)));
+            let disposed = self.checked.links.scoped.then(|| quote!(if self.retired { return #disposed_result; }));
             self.methods.push(quote! {
                 pub fn set_props(&mut self, props: #props, cx: &mut ::gpui::Context<Self>) #ret {
+                    #disposed
                     #guards
                     let changed = #changed;
                     self.props = props;
@@ -326,7 +332,7 @@ impl Component<'_, '_> {
                 let variant = crate::context::notification(k);
                 variants.push(quote!(#variant(::gpui::Entity<::proto_ui_gpui_support::context::Provider<#tag>>)));
                 arms.push(quote!(#command::#variant(provider) => {
-                    if self.#slot.provider == provider { self.__pui_context_changed(false, cx); }
+                    if self.#slot.provider() == ::core::option::Option::Some(&provider) { self.__pui_context_changed(false, cx); }
                     #outcome::Committed
                 }));
             }
@@ -376,7 +382,7 @@ impl Component<'_, '_> {
                 }
             }
         } else { quote!(self.__pui_run(command, cx);) };
-        let disposed = self.has_owned_scope(self.checked.index).then(|| quote!(if self.retired { return #outcome::Disposed; }));
+        let disposed = self.checked.links.scoped.then(|| quote!(if self.retired { return #outcome::Disposed; }));
         self.methods.push(quote! {
             fn __pui_submit(&mut self, command: #command, cx: &mut ::gpui::Context<Self>) -> #outcome {
                 #disposed

@@ -8,7 +8,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { emitGpui } from '@proto.ui/compiler/targets/gpui';
 import { controlledSelection, readonlyBadge } from './fixtures/backend-programs.ts';
-import { authoredBadgeSource, authoredContextSource, authoredKeyedTaskSource, authoredSource } from './fixtures/authoring-source.mjs';
+import { authoredBadgeSource, authoredContextSource, authoredKeyedTaskSource, authoredSource, authoredSyncRetirementSource } from './fixtures/authoring-source.mjs';
 
 const sdkRepository = 'https://github.com/zed-industries/zed';
 const sdkRevision = '62e5991dd0f0c8a3af8d5e7e9c4652490d468db8';
@@ -80,6 +80,7 @@ test('external Rust consumer renders and interacts with generated views in headl
   t.diagnostic(`Generated consumer: ${crate}`);
 
   cpSync(consumerSource, crate, { recursive: true });
+  cpSync(new URL('./fixtures/authoring-sync-retirement/owner.proto.ts.txt', import.meta.url), join(crate, 'sync-retirement.proto.ts.txt'));
   const cargoToml = join(crate, 'Cargo.toml');
   const cargoLock = join(crate, 'Cargo.lock');
   writeFileSync(cargoToml, manifest(packageName), { flag: 'wx' });
@@ -99,6 +100,8 @@ test('external Rust consumer renders and interacts with generated views in headl
   assert.equal(contextOwner.status, 'produced', JSON.stringify(contextOwner.diagnostics));
   const keyedOwner = authoredKeyedTaskSource();
   assert.equal(keyedOwner.status, 'produced', JSON.stringify(keyedOwner.diagnostics));
+  const syncTree = authoredSyncRetirementSource();
+  assert.equal(syncTree.status, 'produced', JSON.stringify(syncTree.diagnostics));
   const tabsFile = 'context-owned-async-tabs.proto.ts.txt';
   const tabsOwner = authoredSource(tabsFile, 'AsyncTabsOwner', 'default');
   const tabsPanel = authoredSource(tabsFile, 'AsyncTabPanel', 'AsyncTabPanel');
@@ -124,6 +127,7 @@ test('external Rust consumer renders and interacts with generated views in headl
     writeFileSync(join(crate, 'controlled-source.json'), JSON.stringify(toggle));
     writeFileSync(join(crate, 'context-source.json'), JSON.stringify(contextOwner));
     writeFileSync(join(crate, 'keyed-task-source.json'), JSON.stringify(keyedOwner));
+    writeFileSync(join(crate, 'sync-retirement-source.json'), JSON.stringify(syncTree));
     writeFileSync(join(crate, 'tabs-owner-source.json'), JSON.stringify(tabsOwner));
     writeFileSync(join(crate, 'tabs-panel-source.json'), JSON.stringify(tabsPanel));
   }
@@ -134,6 +138,7 @@ test('external Rust consumer renders and interacts with generated views in headl
     ['controlled_toggle', toggle.component],
     ['context_owner', contextOwner.component],
     ['keyed_task_owner', keyedOwner.component, { 'fixture.load-keyed-item': { path: 'crate::keyed_loader::load_keyed_item' } }],
+    ['sync_tree', syncTree.component],
     ['tabs_owner', tabsOwner.component, { 'authoring.load-tab': { path: 'crate::tabs_loader::load_owner_tab' } }],
     ['async_tab_panel', tabsPanel.component, { 'authoring.load-tab': { path: 'crate::tabs_loader::load_panel_tab' } }],
   ];
@@ -180,6 +185,8 @@ test('external Rust consumer renders and interacts with generated views in headl
     /^test authoring_badge::retained_authoring_badge_paints_its_label_chip_and_nested_dot_as_inputs_change \.\.\. ok\r?$/m
   );
   for (const passedCase of [
+    /^test sync_retirement::removing_a_synchronous_keyed_branch_retires_actions_and_descendant_observers \.\.\. ok\r?$/m,
+    /^test sync_retirement::withdrawn_style_binding_rejects_mount_and_rebind_before_mutation \.\.\. ok\r?$/m,
     /^test keyed_task_source::reorder_removal_and_physical_move_preserve_the_correct_owned_task \.\.\. ok\r?$/m,
     /^test context_source::authored_owner_keeps_the_keyed_reader_and_supplies_a_reader_in_another_window \.\.\. ok\r?$/m,
     /^test context_source::required_reader_rejects_absence_and_the_other_key_with_the_same_label \.\.\. ok\r?$/m,

@@ -27,9 +27,8 @@ impl<K: NominalKey> Provider<K> {
 /// Reads consult the live committed cell even before a batched native observation is delivered.
 /// Dropping this binding cancels its observation when an owner moves or is released.
 pub struct BoundContext<K: NominalKey> {
-    pub provider: Entity<Provider<K>>,
     value: Rc<RefCell<K::Value>>,
-    subscription: Option<Subscription>,
+    connection: Option<(Entity<Provider<K>>, Subscription)>,
 }
 
 impl<K: NominalKey> BoundContext<K> {
@@ -39,8 +38,9 @@ impl<K: NominalKey> BoundContext<K> {
     ) -> Self {
         let value = provider.read(cx).value.clone();
         let subscription = cx.observe(provider, changed);
-        Self { provider: provider.clone(), value, subscription: Some(subscription) }
+        Self { value, connection: Some((provider.clone(), subscription)) }
     }
+    pub fn provider(&self) -> Option<&Entity<Provider<K>>> { self.connection.as_ref().map(|(provider, _)| provider) }
     pub fn read(&self) -> Ref<'_, K::Value> { self.value.borrow() }
-    pub fn retire(&mut self) { self.subscription.take(); }
+    pub fn retire(&mut self) { self.connection.take(); }
 }
