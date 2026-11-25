@@ -15,6 +15,13 @@ The catalog is the sole normative source:
   defines the language, execution model and lowering obligations.
 - [Independent conformance cases](../../spec/tests/T-COMPILER-FOUNDATION-0001.yaml)
   give concrete expected traces and record the absent implementations.
+- [Shared-source and lint contract](../../spec/contracts/C-COMPILER-LINT-0001.yaml)
+  separates source validity, analysis completeness and target compilability;
+  [its implementation notes](source-compatibility-and-lint.md) explain migration
+  and the complete consumer inventory.
+- [Authoring contract](../../spec/contracts/C-COMPILER-AUTHORING-0001.yaml) and
+  [three complete design inputs](authoring-surface.md) select explicit 0.4 APIs
+  without pretending their declarations implement the Adapter or compiler.
 
 These entities are draft because implementation and execution evidence are
 missing. The accepted direction is settled; draft does not request another round
