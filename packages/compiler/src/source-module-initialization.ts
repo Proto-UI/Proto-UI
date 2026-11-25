@@ -184,6 +184,20 @@ export function validateStaticModuleInitialization(graph: SourceGraph): void {
       return;
     }
     if (
+      ts.isNewExpression(value) &&
+      ts.isIdentifier(value.expression) &&
+      value.expression.text === 'Set' &&
+      !module.declarations.has('Set') &&
+      !module.imports.has('Set') &&
+      (value.arguments?.length ?? 0) <= 1
+    ) {
+      // Finite Set data is already admitted by staticDataDeclaration. Its
+      // unshadowed constructor is a builtin, while its arguments still read
+      // authored bindings in order and must retain their ESM TDZ checks.
+      for (const argument of value.arguments ?? []) read(module, argument);
+      return;
+    }
+    if (
       ts.isCallExpression(value) &&
       !value.questionDotToken &&
       !value.typeArguments?.length &&

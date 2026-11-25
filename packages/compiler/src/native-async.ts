@@ -526,7 +526,7 @@ export interface NativePresentationReceipt {
   readonly viewBinding: object;
   readonly ownerRevision: number;
   readonly targetRevision: number;
-  readonly channels: readonly ('opacity' | 'translate' | 'blockSize')[];
+  readonly channels: readonly ('opacity' | 'translate' | 'top' | 'blockSize')[];
   readonly outcome: NativePresentationOutcome;
 }
 export interface NativePresenceOwner<Run> {
