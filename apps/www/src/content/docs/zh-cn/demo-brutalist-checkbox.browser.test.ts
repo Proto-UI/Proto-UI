@@ -240,7 +240,7 @@ describe.sequential('Brutalist Checkbox browser acceptance', () => {
           facts.map((fact) => fact.glyphCount),
           `${runtime}/glyph-count`
         ).toEqual([0, 1, 1, 1, 1]);
-        expect(facts[2].glyphPath, `${runtime}/mixed-precedence`).toBe('M5 12h14');
+        expect(facts[2].glyphPath, `${runtime}/mixed-glyph`).toBe('M5 12h14');
 
         const checkbox = checkboxes.first();
         const row = checkbox.locator('xpath=..');
@@ -379,4 +379,75 @@ describe.sequential('Brutalist Checkbox browser acceptance', () => {
       await context.close();
     }
   }, 240_000);
+
+  it('renders mixed dash precedence when both defaultChecked and defaultIndeterminate are true across all public runtimes', async () => {
+    const context = await browser.newContext({ viewport: { width: NARROW_WIDTH, height: 844 } });
+    const page = await context.newPage();
+    await page.goto(`${baseUrl}${ROUTE}`, { waitUntil: 'domcontentloaded', timeout: 120_000 });
+    const previewer = page.locator('[data-previewer-id]').first();
+    await previewer.waitFor({ state: 'visible', timeout: 120_000 });
+    await previewer.scrollIntoViewIfNeeded();
+    await previewer
+      .locator('[role="checkbox"]')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30_000 });
+
+    try {
+      for (const runtime of TEST_RUNTIMES) {
+        const result = await page.evaluate(async (targetRuntime) => {
+          const { renderDemo } = await new Function('url', 'return import(url)')(
+            '/src/components/PrototypePreviewer/demo-renderer.ts'
+          );
+          const host = document.createElement('div');
+          host.dataset.mixedPrecedenceHost = targetRuntime;
+          document.body.appendChild(host);
+          const rendered = await renderDemo({
+            runtime: targetRuntime,
+            host,
+            demo: {
+              type: 'demo',
+              root: {
+                kind: 'proto',
+                prototypeId: 'brutalist-checkbox-root',
+                props: { defaultChecked: true, defaultIndeterminate: true },
+                children: [
+                  { kind: 'proto', prototypeId: 'brutalist-checkbox-indicator' },
+                  { kind: 'box', className: 'sr-only', children: ['Mixed precedence'] },
+                ],
+              },
+            },
+          });
+          try {
+            const deadline = Date.now() + 10_000;
+            let root: HTMLElement | null = null;
+            let indicator: HTMLElement | null = null;
+            while (Date.now() < deadline) {
+              root = host.querySelector<HTMLElement>('[role="checkbox"]');
+              indicator = root?.querySelector<HTMLElement>(':scope > [data-pui-root]') ?? null;
+              if (root && indicator && indicator.querySelectorAll('svg path').length > 0) break;
+              await new Promise((resolve) => setTimeout(resolve, 25));
+            }
+            return {
+              checked: root?.hasAttribute('data-checked') ?? false,
+              indeterminate: root?.hasAttribute('data-indeterminate') ?? false,
+              ariaChecked: root?.getAttribute('aria-checked') ?? null,
+              glyphPaths: [...(indicator?.querySelectorAll('svg path') ?? [])].map(
+                (path) => path.getAttribute('d') ?? ''
+              ),
+            };
+          } finally {
+            await rendered.destroy();
+            host.remove();
+          }
+        }, runtime);
+
+        expect(result.checked, `${runtime}/both-defaults-checked`).toBe(true);
+        expect(result.indeterminate, `${runtime}/both-defaults-indeterminate`).toBe(true);
+        expect(result.ariaChecked, `${runtime}/both-defaults-aria-checked`).toBe('mixed');
+        expect(result.glyphPaths, `${runtime}/mixed-precedence`).toEqual(['M5 12h14']);
+      }
+    } finally {
+      await context.close();
+    }
+  }, 120_000);
 });
