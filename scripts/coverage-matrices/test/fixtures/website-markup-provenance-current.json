@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "0b436b388882d73b916ede97c73a1bf304dcf6f6",
-  "scope": "Direct source inventory for the sampled website routes. The Chinese Button install card now uses the stable 0.2.0 CLI and names its supported hosts. This is the only changed body among the 33 direct inputs. The preceding inventory is archived in website-markup-provenance-a8636eb.json. Served content and transitive dependencies require separate evidence.",
+  "revision": "862870f53b96ba7012c8bcd16832d05554a23171",
+  "scope": "Direct source inventory for the sampled website routes at the compiler-foundation candidate. The two retired optional compiler-panel owners are removed; all 31 remaining direct owners are retained. Four compiler-retirement changes and the separately reviewed pre-existing Dialog page change renew five hashes. The complete previous 33-source reference is preserved byte-for-byte in website-markup-provenance-0b436b3.json. This records source identity only: lifecycle/release prose, browser execution, served content and transitive dependencies remain independently unverified.",
   "sourceAdmission": "unverified",
   "sources": [
     {
       "path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
-      "sha256": "4fd03809c049a6a70e774dd6a5402edad258b08e16fdd43648cc6e4159f73460"
+      "sha256": "e9ea7cde70cb7bffa9ed1c7dcb764d214fb3423e625e38ade7cb8899418e87eb"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/CodePanel.astro",
@@ -23,7 +23,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
-      "sha256": "90e29929723d05768bf7c21688b8303737097807ca4f66ec1e75fbb198455a8c"
+      "sha256": "8cd9f286f2d1bc8bc48ea7e6687dacf6e01e04df20c800d6bda7711615c9ad45"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
@@ -79,7 +79,7 @@
     },
     {
       "path": "apps/www/astro.config.mjs",
-      "sha256": "2d9b2f28c7435754064aaa15e15a18ff0823f46a4081b11e1e89f302b8725177"
+      "sha256": "75e6a226b6038f4d6936ac876596bee90ee9b97e78e783feb5664d9452e5fe07"
     },
     {
       "path": "apps/www/package.json",
@@ -87,7 +87,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "sha256": "eae18430bd967c94def36809b6d3305fa156a96548b08215a18dfe8a43923c07"
+      "sha256": "50cb2a3862c7875afd270b10567e9202baa2223e00016a13242041381eb8e56b"
     },
     {
       "path": "apps/www/src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode.ts",
@@ -95,7 +95,7 @@
     },
     {
       "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/dialog.mdx",
-      "sha256": "7d41623f7a7b14674c6e9442980cddddbc251c931a3facd109614c838541270e"
+      "sha256": "202a03164a8a4599d686b502c87f474b381bf453f0ee7ef47b9807da7c81bc0a"
     },
     {
       "path": "apps/www/src/utils/conversionUtils.ts",
@@ -120,14 +120,6 @@
     {
       "path": "apps/www/src/components/install-command-card-client.ts",
       "sha256": "dd644892e2650c8c6978c8b5707692ace5cc68d680acf940ef65d3483aa8fb64"
-    },
-    {
-      "path": "apps/www/src/components/PrototypePreviewer/BrowserCompilerPanel.astro",
-      "sha256": "f92cfa3023ca6f53b5b8f1f292c951fe73cf37fa180f448845cb61b7656cfb5a"
-    },
-    {
-      "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
-      "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/CodeScrollArea.astro",
