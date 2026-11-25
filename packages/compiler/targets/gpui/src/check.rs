@@ -9,8 +9,13 @@ fn source(at: &Source) -> Result<()> {
         Err(error(at, "a source span needs a file and ordered safe-integer offsets"))
     } else { Ok(()) }
 }
-fn binding(b: &Binding) -> Result<()> {
+fn type_bound(ty: Type, limit: usize, at: &Source) -> Result<()> {
+    if let Type::Data(i) = ty { if i >= limit { return Err(error(at, format_args!("data:{i} must reference an earlier declared type (limit {limit})"))); } }
+    Ok(())
+}
+fn binding(b: &Binding, type_count: usize) -> Result<()> {
     source(&b.source)?;
+    type_bound(b.ty, type_count, &b.source)?;
     if b.id.is_empty() || b.name.is_empty() { Err(error(&b.source, "binding ID and name must be nonempty")) } else { Ok(()) }
 }
 fn expect(actual: Type, expected: Type, at: &Source, label: &str) -> Result<()> {
@@ -77,6 +82,7 @@ pub struct Checked<'a> {
     pub derived: BTreeSet<usize>,
     pub actions: BTreeSet<usize>,
     pub has_styles: bool,
+    pub members: Vec<HashMap<&'a str, usize>>,
 }
 
 struct Walk {
@@ -151,15 +157,36 @@ fn cycle_through(root: usize, edges: &[Vec<usize>]) -> Option<Vec<usize>> {
 impl<'a> Checked<'a> {
     pub fn new(ir: &'a Component) -> Result<Self> {
         source(&ir.source)?;
-        if ir.version != 2 || ir.name.is_empty() { return Err(error(&ir.source, "expected a named ComponentIR version 2")); }
-        let mut checked = Self { ir, places: HashMap::new(), signals: HashMap::new(), functions: HashMap::new(), bodies: Vec::new(), reached: Vec::new(), derived: BTreeSet::new(), actions: BTreeSet::new(), has_styles: false };
+        if ir.version != 3 || ir.name.is_empty() { return Err(error(&ir.source, "expected a named ComponentIR version 3")); }
+        let mut members = Vec::with_capacity(ir.types.len());
+        for (i, data) in ir.types.iter().enumerate() {
+            let mut fields_by_name = HashMap::new();
+            match data {
+                Data::Presence { value, source: at } => { source(at)?; type_bound(*value, i, at)?; }
+                Data::Record { fields, source: at } => {
+                    source(at)?;
+                    for (j, field) in fields.iter().enumerate() {
+                        source(&field.source)?;
+                        type_bound(field.ty, i, &field.source)?;
+                        // Record keys are strings. Exact public Rust spelling is
+                        // checked separately from record identity and uniqueness.
+                        if fields_by_name.insert(field.name.as_str(), j).is_some() {
+                            return Err(error(&field.source, format_args!("duplicate record field {:?}", field.name)));
+                        }
+                    }
+                }
+            }
+            members.push(fields_by_name);
+        }
+        let mut checked = Self { ir, places: HashMap::new(), signals: HashMap::new(), functions: HashMap::new(), bodies: Vec::new(), reached: Vec::new(), derived: BTreeSet::new(), actions: BTreeSet::new(), has_styles: false, members };
         let mut global = HashSet::new();
         for b in ir.props.iter().map(|p| &p.binding).chain(ir.fields.iter().map(|f| &f.binding)).chain(&ir.signals).chain(ir.behaviors.iter().map(|f| &f.binding)) {
-            binding(b)?;
+            binding(b, ir.types.len())?;
             if !global.insert(&b.id) { return Err(error(&b.source, format_args!("duplicate component binding {:?}", b.id))); }
         }
         for (i, prop) in ir.props.iter().enumerate() {
             let b = &prop.binding;
+            if prop.control_mode.is_some() && checked.payload(b.ty).is_none() { return Err(error(&b.source, format_args!("fixed-instance input {:?} requires a presence type", b.id))); }
             if let Some(v) = &prop.default {
                 let actual = literal_type(v, &b.source)?.ok_or_else(|| error(&b.source, "an input default must be a literal"))?;
                 expect(actual, b.ty, &b.source, "input default")?;
@@ -259,6 +286,16 @@ impl<'a> Checked<'a> {
         match p { Place::Prop(i) => &self.ir.props[i].binding, Place::Field(i) => &self.ir.fields[i].binding }
     }
 
+    pub fn payload(&self, ty: Type) -> Option<Type> {
+        let Type::Data(i) = ty else { return None; };
+        match self.ir.types.get(i)? { Data::Presence { value, .. } => Some(*value), _ => None }
+    }
+
+    pub fn record(&self, ty: Type, at: &Source) -> Result<(usize, &'a [DataField])> {
+        if let Type::Data(i) = ty { if let Some(Data::Record { fields, .. }) = self.ir.types.get(i) { return Ok((i, fields)); } }
+        Err(error(at, format_args!("expected a declared record, received {ty:?}")))
+    }
+
     fn view(&mut self, root: &View) -> Result<()> {
         if let View::Text { source: at, .. } = root { return Err(error(at, "the component view root must be an element")); }
         let mut nodes = vec![root];
@@ -298,7 +335,7 @@ impl<'a> Checked<'a> {
             if !deps.insert(id) { return Err(error(at, format_args!("duplicate dependency {id:?}"))); }
         }
         let mut params = HashMap::new();
-        for p in &f.params { binding(p)?; insert(&mut params, &p.id, p.ty, &p.source, "parameter")?; }
+        for p in &f.params { binding(p, self.ir.types.len())?; insert(&mut params, &p.id, p.ty, &p.source, "parameter")?; }
         let mut blocks = HashMap::new();
         for (i, b) in f.blocks.iter().enumerate() { insert(&mut blocks, &b.id, i, b.end.source(), "block")?; }
         let entry = lookup(&blocks, &f.entry, at, "entry block")?;
@@ -307,7 +344,7 @@ impl<'a> Checked<'a> {
         let mut per_block = Vec::new();
         for b in &f.blocks {
             let mut block = BlockCheck { checked: self, function: f, locals: params.clone(), facts: Facts::default() };
-            for p in &b.params { binding(p)?; insert(&mut block.locals, &p.id, p.ty, &p.source, "block parameter")?; }
+            for p in &b.params { binding(p, self.ir.types.len())?; insert(&mut block.locals, &p.id, p.ty, &p.source, "block parameter")?; }
             for instruction in &b.instructions { block.instruction(instruction)?; }
             let at = b.end.source();
             source(at)?;
@@ -319,12 +356,23 @@ impl<'a> Checked<'a> {
                     vec![]
                 }
                 End::Fail { .. } => { block.facts.fallible = true; vec![] }
-                End::Jump { to, .. } => vec![to],
-                End::Branch { condition, yes, no, .. } => { expect(block.value(condition, at)?, Type::Bool, at, "branch condition")?; vec![yes, no] }
+                End::Jump { to, .. } => vec![(to, None)],
+                End::Branch { condition, yes, no, .. } => { expect(block.value(condition, at)?, Type::Bool, at, "branch condition")?; vec![(yes, None), (no, None)] }
+                End::Presence { value, present, omitted, .. } => {
+                    let ty = block.value(value, at)?;
+                    let payload = self.payload(ty).ok_or_else(|| error(at, "presence terminator requires a presence value"))?;
+                    vec![(present, Some(payload)), (omitted, None)]
+                }
             };
-            for edge in targets {
+            for (edge, payload) in targets {
                 let dest = lookup(&blocks, &edge.block, at, "successor block")?;
-                block.arguments(&edge.args, &f.blocks[dest].params, at, &edge.block)?;
+                let mut params = f.blocks[dest].params.as_slice();
+                if let Some(payload) = payload {
+                    let (first, rest) = params.split_first().ok_or_else(|| error(at, "the present successor must declare a first payload parameter"))?;
+                    expect(payload, first.ty, at, &first.name)?;
+                    params = rest;
+                }
+                block.arguments(&edge.args, params, at, &edge.block)?;
                 edges.push(dest);
             }
             graph.push(edges);
@@ -374,6 +422,27 @@ impl<'a> BlockCheck<'_, 'a> {
     fn value(&mut self, v: &Value, at: &Source) -> Result<Type> {
         Ok(match v {
             Value::Bool { .. } | Value::Number { .. } | Value::Text { .. } | Value::Tokens { .. } => literal_type(v, at)?.expect("literal variant"),
+            Value::Record { ty, fields } => {
+                let (i, declared) = self.checked.record(*ty, at)?;
+                if fields.len() != declared.len() { return Err(error(at, format_args!("data:{i} requires exactly its declared fields"))); }
+                let mut seen = HashSet::new();
+                for field in fields {
+                    let j = lookup(&self.checked.members[i], &field.name, at, "record field")?;
+                    if !seen.insert(j) { return Err(error(at, format_args!("duplicate record field {:?}", field.name))); }
+                    expect(self.value(&field.value, at)?, declared[j].ty, at, &field.name)?;
+                }
+                *ty
+            }
+            Value::Member { value, field } => {
+                let ty = self.value(value, at)?;
+                let (i, fields) = self.checked.record(ty, at)?;
+                fields[lookup(&self.checked.members[i], field, at, "record field")?].ty
+            }
+            Value::HasValue { value } => {
+                let ty = self.value(value, at)?;
+                self.checked.payload(ty).ok_or_else(|| error(at, "has-value requires a presence value"))?;
+                Type::Bool
+            }
             Value::Local { id } => lookup(&self.locals, id, at, "local in this block")?,
             Value::Prop { id } | Value::State { id } | Value::Capture { id } => {
                 let p = lookup(&self.checked.places, id, at, "value")?;
@@ -407,7 +476,7 @@ impl<'a> BlockCheck<'_, 'a> {
         source(at)?;
         match op {
             Instruction::Let { binding: b, value, .. } => {
-                binding(b)?;
+                binding(b, self.checked.ir.types.len())?;
                 expect(self.value(value, at)?, b.ty, at, &b.name)?;
                 insert(&mut self.locals, &b.id, b.ty, &b.source, "local")?;
             }

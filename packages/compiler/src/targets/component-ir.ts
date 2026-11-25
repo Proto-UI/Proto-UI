@@ -1,11 +1,45 @@
 /** The compile-time input shared by source targets. IDs identify resolved bindings.
  * Names identify their source or host spelling. Neither is an operation selector. */
-export type ValueType = 'bool' | 'number' | 'text' | 'unit' | 'tokens';
+export type ScalarType = 'bool' | 'number' | 'text' | 'unit' | 'tokens';
+export type DataRef = `data:${number}`;
+export type ValueType = ScalarType | DataRef;
 
 export interface SourceSpan {
   readonly file: string;
   readonly start: number;
   readonly end: number;
+}
+
+export interface DataField {
+  readonly name: string;
+  readonly type: ValueType;
+  readonly source: SourceSpan;
+}
+
+export type DataType =
+  | { readonly kind: 'presence'; readonly value: ValueType; readonly source: SourceSpan }
+  | { readonly kind: 'record'; readonly fields: readonly DataField[]; readonly source: SourceSpan };
+
+/** Resolve a canonical data reference below the exclusive declaration bound. */
+export function lookupDataType(
+  types: readonly DataType[],
+  type: ValueType,
+  before = types.length
+): DataType | undefined {
+  const prefix = 'data:';
+  if (typeof type !== 'string' || !type.startsWith(prefix) || type.length === prefix.length)
+    return undefined;
+  if (type[prefix.length] === '0' && type.length !== prefix.length + 1) return undefined;
+  if (!Number.isSafeInteger(before) || before <= 0) return undefined;
+  const bound = Math.min(types.length, before);
+  let index = 0;
+  for (let i = prefix.length; i < type.length; i++) {
+    const digit = type.charCodeAt(i) - 48;
+    if (digit < 0 || digit > 9) return undefined;
+    index = index * 10 + digit;
+    if (index >= bound) return undefined;
+  }
+  return types[index];
 }
 
 export interface Binding {
@@ -25,11 +59,21 @@ export type LiteralValue =
 export interface InputBinding extends Binding {
   /** A schema default applies when the host omits this input. */
   readonly default?: LiteralValue;
+  /** A fixed optional input keeps its initial presence for this instance. */
+  readonly controlMode?: 'fixed-instance';
 }
 
 export type Value =
   | LiteralValue
   | { readonly kind: 'prop' | 'state' | 'capture' | 'local'; readonly id: string }
+  | {
+      readonly kind: 'record';
+      readonly type: DataRef;
+      /** Evaluate in source order. Each name selects its own declared field type. */
+      readonly fields: readonly { readonly name: string; readonly value: Value }[];
+    }
+  | { readonly kind: 'member'; readonly value: Value; readonly field: string }
+  | { readonly kind: 'has-value'; readonly value: Value }
   | { readonly kind: 'not'; readonly value: Value }
   | {
       readonly kind: 'binary';
@@ -54,6 +98,13 @@ export type Terminator = { readonly source: SourceSpan } & (
   | { readonly kind: 'return'; readonly value?: Value }
   | { readonly kind: 'jump'; readonly to: Edge }
   | { readonly kind: 'branch'; readonly condition: Value; readonly yes: Edge; readonly no: Edge }
+  /** The present edge supplies the proven payload before its explicit arguments. */
+  | {
+      readonly kind: 'presence';
+      readonly value: Value;
+      readonly present: Edge;
+      readonly omitted: Edge;
+    }
   | { readonly kind: 'fail'; readonly reason: string }
 );
 
@@ -107,12 +158,14 @@ export interface ElementView {
 }
 
 export interface ComponentIR {
-  readonly version: 2;
+  readonly version: 3;
   /** Public component binding selected from the resolved module export. */
   readonly name: string;
   /** Authored definePrototype metadata, independent of the host binding. */
   readonly prototypeName?: string;
   readonly source: SourceSpan;
+  /** A declaration's own fields and payloads can reference only earlier entries. */
+  readonly types: readonly DataType[];
   readonly props: readonly InputBinding[];
   readonly fields: readonly InitialField[];
   readonly signals: readonly Binding[];

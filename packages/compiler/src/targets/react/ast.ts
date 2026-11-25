@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import type { SourceSpan, ValueType } from '../component-ir.ts';
+import type { ScalarType, SourceSpan } from '../component-ir.ts';
 
 export const f = ts.factory;
 export const id = (name: string) => f.createIdentifier(name);
@@ -9,7 +9,7 @@ export const typeRef = (name: string, ...args: ts.TypeNode[]) =>
 export const readonly = () => f.createModifier(ts.SyntaxKind.ReadonlyKeyword);
 export const block = (statements: readonly ts.Statement[]) => f.createBlock(statements, true);
 
-export function valueType(type: ValueType): ts.TypeNode {
+export function valueType(type: ScalarType): ts.TypeNode {
   if (type === 'tokens') {
     return f.createTypeOperatorNode(
       ts.SyntaxKind.ReadonlyKeyword,

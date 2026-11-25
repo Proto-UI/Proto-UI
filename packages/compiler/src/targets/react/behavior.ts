@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import type { Binding, Edge, Value } from '../component-ir.ts';
+import type { Binding, Edge, Value, ValueType } from '../component-ir.ts';
 import {
   atSource,
   block,
@@ -9,14 +9,16 @@ import {
   f,
   id,
   member,
+  object,
   param,
+  property,
   quotedCommentText,
   sourceObject,
   str,
   typeRef,
-  valueType,
   type Names,
 } from './ast.ts';
+import { isData } from './data.ts';
 import type { FunctionPlan, ReactProgram } from './program.ts';
 
 export interface Environment {
@@ -77,7 +79,7 @@ export function emitBehavior(program: ReactProgram, plan: FunctionPlan): ts.Func
   const parameters = fn.params.map((binding) => {
     const name = scope.take(binding.name);
     argumentsById.set(binding.id, { binding, name });
-    return param(name, valueType(binding.type));
+    return param(name, program.data.type(binding.type));
   });
   let environment: Environment;
   if (fn.phase === 'action') {
@@ -104,7 +106,7 @@ export function emitBehavior(program: ReactProgram, plan: FunctionPlan): ts.Func
       const binding = program.props.get(dep) ?? program.fields.get(dep)!;
       const name = scope.take(binding.name);
       captures.set(dep, name);
-      parameters.push(param(name, valueType(binding.type)));
+      parameters.push(param(name, program.data.type(binding.type)));
     }
     environment = { read: (dep) => id(captures.get(dep)!) };
   }
@@ -122,7 +124,7 @@ export function emitBehavior(program: ReactProgram, plan: FunctionPlan): ts.Func
           f.createVariableDeclaration(
             name,
             f.createToken(ts.SyntaxKind.ExclamationToken),
-            valueType(binding.type)
+            program.data.type(binding.type)
           )
         );
         return { binding, name };
@@ -155,21 +157,36 @@ export function emitBehavior(program: ReactProgram, plan: FunctionPlan): ts.Func
     function localBinding(key: string): LocalBinding {
       return locals?.get(key) ?? argumentsById.get(key)!;
     }
-    function producesTokens(expr: Value): boolean {
+    function typeOf(expr: Value): ValueType {
       switch (expr.kind) {
+        case 'bool':
+        case 'number':
+        case 'text':
         case 'tokens':
-          return true;
+          return expr.kind;
+        case 'not':
+        case 'has-value':
+          return 'bool';
+        case 'record':
+          return expr.type;
         case 'prop':
-          return program.props.get(expr.id)!.type === 'tokens';
+          return program.props.get(expr.id)!.type;
         case 'state':
         case 'capture':
-          return program.fields.get(expr.id)!.type === 'tokens';
+          return program.fields.get(expr.id)!.type;
         case 'local':
-          return localBinding(expr.id).binding.type === 'tokens';
+          return localBinding(expr.id).binding.type;
         case 'call':
-          return program.functions.get(expr.fn)!.fn.binding.type === 'tokens';
-        default:
-          return false;
+          return program.functions.get(expr.fn)!.fn.binding.type;
+        case 'binary':
+          return expr.op === 'equal' ? 'bool' : expr.op === 'concat' ? 'text' : 'number';
+        case 'member': {
+          const type = typeOf(expr.value);
+          const record = isData(type) && program.data.definition(type);
+          if (!record || record.kind !== 'record')
+            throw new Error('Expected validated record member.');
+          return record.fields.find((field) => field.name === expr.field)!.type;
+        }
       }
     }
     function value(expr: Value): ts.Expression {
@@ -179,6 +196,19 @@ export function emitBehavior(program: ReactProgram, plan: FunctionPlan): ts.Func
         case 'text':
         case 'tokens':
           return program.literal(expr);
+        case 'record':
+          return call(
+            member(id('Object'), 'freeze'),
+            object(expr.fields.map((field) => property(field.name, value(field.value))))
+          );
+        case 'member':
+          return member(value(expr.value), expr.field);
+        case 'has-value':
+          return f.createBinaryExpression(
+            member(value(expr.value), 'kind'),
+            ts.SyntaxKind.EqualsEqualsEqualsToken,
+            str('present')
+          );
         case 'prop':
         case 'state':
         case 'capture':
@@ -190,8 +220,8 @@ export function emitBehavior(program: ReactProgram, plan: FunctionPlan): ts.Func
         case 'binary': {
           const left = value(expr.left);
           let right = value(expr.right);
-          if (expr.op === 'equal' && producesTokens(expr.left))
-            return call(program.use('sameTokens'), left, right);
+          if (expr.op === 'equal')
+            return program.data.compare(typeOf(expr.left), left, right, false);
           // Floating-point addition and multiplication cannot be reassociated by a printer.
           if (expr.right.kind === 'binary') right = f.createParenthesizedExpression(right);
           return f.createBinaryExpression(left, binaryOperators[expr.op], right);
@@ -200,10 +230,12 @@ export function emitBehavior(program: ReactProgram, plan: FunctionPlan): ts.Func
           return invoke(program.functions.get(expr.fn)!, expr.args.map(value), environment);
       }
     }
-    function transfer(edge: Edge): ts.Statement[] {
+    function transfer(edge: Edge, payload?: ts.Expression): ts.Statement[] {
       const params = blockParameters.get(edge.block)!;
-      const moves: ts.Statement[] = edge.args.map((arg, i) =>
-        f.createExpressionStatement(f.createAssignment(id(params[i].name), value(arg)))
+      const values = edge.args.map(value);
+      if (payload) values.unshift(payload);
+      const moves: ts.Statement[] = values.map((arg, i) =>
+        f.createExpressionStatement(f.createAssignment(id(params[i].name), arg))
       );
       if (edge.block !== plan.blocks[index + 1]?.id) {
         let label = labels.get(edge.block);
@@ -280,6 +312,23 @@ export function emitBehavior(program: ReactProgram, plan: FunctionPlan): ts.Func
         statements.push(atSource(branch, end.source));
         break;
       }
+      case 'presence': {
+        const test = (localsScope ??= scope.scope()).take('matched');
+        const condition = f.createBinaryExpression(
+          member(id(test), 'kind'),
+          ts.SyntaxKind.EqualsEqualsEqualsToken,
+          str('present')
+        );
+        const present = transfer(end.present, member(id(test), 'value'));
+        const omitted = transfer(end.omitted);
+        const branch = f.createIfStatement(
+          condition,
+          block(present),
+          omitted.length ? block(omitted) : undefined
+        );
+        statements.push(atSource(block([constDecl(test, value(end.value)), branch]), end.source));
+        break;
+      }
       case 'fail': {
         const error = f.createNewExpression(program.use('ActionFailure'), undefined, [
           str(end.reason),
@@ -311,7 +360,7 @@ export function emitBehavior(program: ReactProgram, plan: FunctionPlan): ts.Func
       )
     );
   return atSource(
-    declaration(plan.name, parameters, valueType(fn.binding.type), statements),
+    declaration(plan.name, parameters, program.data.type(fn.binding.type), statements),
     fn.binding.source
   );
 }

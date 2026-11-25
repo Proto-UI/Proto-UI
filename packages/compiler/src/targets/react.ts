@@ -19,8 +19,9 @@ export function emitReact(ir: ComponentIR): string {
     ...dispatchers(program),
     ...component(program),
   ];
+  const data = program.data.declarations();
   const source = ts.factory.createSourceFile(
-    [...program.imports(), ...declarations],
+    [...program.imports(), ...data, ...declarations],
     ts.factory.createToken(ts.SyntaxKind.EndOfFileToken),
     ts.NodeFlags.None
   );

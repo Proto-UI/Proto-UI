@@ -63,7 +63,7 @@ macro_rules! object_only {
     )+ };
 }
 
-object_only!(Source, Binding, InputFields, Value, Instruction, Edge, End, Block, Behavior, Named, Field, View, Component);
+object_only!(Source, DataField, Data, RecordValue, Binding, InputFields, Value, Instruction, Edge, End, Block, Behavior, Named, Field, View, Component);
 
 // An externally tagged Serde unit variant normally also accepts {"tag":null}.
 // The IR spells types, phases, operators and element tags exclusively as strings.
@@ -89,11 +89,43 @@ macro_rules! string_only {
     )+ };
 }
 
-string_only!(Type, Op, Phase, FieldKind, Tag);
+string_only!(Op, Phase, FieldKind, Tag, ControlMode);
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq)]
-#[serde(remote = "Self", rename_all = "lowercase")]
-pub enum Type { Bool, Number, Text, Unit, Tokens }
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Type { Bool, Number, Text, Unit, Tokens, Data(usize) }
+
+impl<'de> Deserialize<'de> for Type {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        struct TypeName;
+        impl<'de> Visitor<'de> for TypeName {
+            type Value = Type;
+            fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { f.write_str("a scalar name or a canonical data:<index> reference") }
+            fn visit_str<E: serde::de::Error>(self, name: &str) -> Result<Type, E> {
+                Ok(match name {
+                    "bool" => Type::Bool, "number" => Type::Number, "text" => Type::Text, "unit" => Type::Unit, "tokens" => Type::Tokens,
+                    _ => {
+                        let index = name.strip_prefix("data:").filter(|s| !s.is_empty() && s.bytes().all(|b| b.is_ascii_digit()) && (!s.starts_with('0') || *s == "0"))
+                            .and_then(|s| s.parse::<usize>().ok()).ok_or_else(|| E::invalid_value(serde::de::Unexpected::Str(name), &self))?;
+                        Type::Data(index)
+                    }
+                })
+            }
+        }
+        d.deserialize_str(TypeName)
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(remote = "Self", tag = "kind", rename_all = "lowercase", deny_unknown_fields)]
+pub enum Data { Presence { value: Type, source: Source }, Record { fields: Vec<DataField>, source: Source } }
+
+#[derive(Deserialize)]
+#[serde(remote = "Self", deny_unknown_fields)]
+pub struct DataField { pub name: String, #[serde(rename = "type")] pub ty: Type, pub source: Source }
+
+#[derive(Deserialize)]
+#[serde(remote = "Self", deny_unknown_fields)]
+pub struct RecordValue { pub name: String, pub value: Value }
 
 #[derive(Debug, Deserialize)]
 #[serde(remote = "Self", deny_unknown_fields)]
@@ -119,7 +151,11 @@ pub struct Binding {
     pub source: Source,
 }
 
-pub struct Input { pub binding: Binding, pub default: Option<Value> }
+#[derive(Clone, Copy, Deserialize)]
+#[serde(remote = "Self", rename_all = "kebab-case")]
+pub enum ControlMode { FixedInstance }
+
+pub struct Input { pub binding: Binding, pub default: Option<Value>, pub control_mode: Option<ControlMode> }
 
 // The public wire places `default` beside the ordinary binding members. Keep
 // other binding roles strict and preserve duplicate-key checks on every input.
@@ -133,12 +169,14 @@ struct InputFields {
     source: Source,
     #[serde(default, deserialize_with = "present")]
     default: Option<Value>,
+    #[serde(default, rename = "controlMode", deserialize_with = "present")]
+    control_mode: Option<ControlMode>,
 }
 
 impl<'de> Deserialize<'de> for Input {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        let InputFields { id, name, ty, source, default } = <InputFields as Deserialize>::deserialize(d)?;
-        Ok(Self { binding: Binding { id, name, ty, source }, default })
+        let InputFields { id, name, ty, source, default, control_mode } = <InputFields as Deserialize>::deserialize(d)?;
+        Ok(Self { binding: Binding { id, name, ty, source }, default, control_mode })
     }
 }
 
@@ -153,6 +191,10 @@ pub enum Value {
     Number { bits: String },
     Text { value: String },
     Tokens { values: Vec<String> },
+    Record { #[serde(rename = "type")] ty: Type, fields: Vec<RecordValue> },
+    Member { value: Box<Value>, field: String },
+    #[serde(rename = "has-value")]
+    HasValue { value: Box<Value> },
     Prop { id: String },
     State { id: String },
     Capture { id: String },
@@ -195,6 +237,7 @@ pub enum End {
     Return { #[serde(default, deserialize_with = "present")] value: Option<Value>, source: Source },
     Jump { to: Edge, source: Source },
     Branch { condition: Value, yes: Edge, no: Edge, source: Source },
+    Presence { value: Value, present: Edge, omitted: Edge, source: Source },
     Fail { reason: String, source: Source },
 }
 
@@ -202,7 +245,7 @@ impl End {
     pub fn source(&self) -> &Source {
         match self {
             Self::Return { source, .. } | Self::Jump { source, .. } | Self::Branch { source, .. }
-            | Self::Fail { source, .. } => source,
+            | Self::Presence { source, .. } | Self::Fail { source, .. } => source,
         }
     }
 }
@@ -276,6 +319,7 @@ pub struct Component {
     #[serde(default, rename = "prototypeName", deserialize_with = "present")]
     pub prototype_name: Option<String>,
     pub source: Source,
+    pub types: Vec<Data>,
     pub props: Vec<Input>,
     pub fields: Vec<Field>,
     pub signals: Vec<Binding>,

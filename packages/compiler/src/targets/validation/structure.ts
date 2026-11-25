@@ -1,4 +1,13 @@
-import type { Binding, LiteralValue, SourceSpan, ValueType } from '../component-ir.ts';
+import {
+  lookupDataType,
+  type Binding,
+  type DataField,
+  type DataType,
+  type LiteralValue,
+  type ScalarType,
+  type SourceSpan,
+  type ValueType,
+} from '../component-ir.ts';
 import { reject } from './diagnostic.ts';
 
 // In Unicode mode a paired surrogate is one astral scalar and cannot match this range.
@@ -9,6 +18,20 @@ export function member(record: unknown, key: string): unknown {
   if (record === null || typeof record !== 'object') return undefined;
   const descriptor = Object.getOwnPropertyDescriptor(record, key);
   return descriptor && Object.hasOwn(descriptor, 'value') ? descriptor.value : undefined;
+}
+
+/** Recognize the intrinsic prototype in another realm without calling its constructor or a getter. */
+function intrinsicPrototype(
+  prototype: object | null,
+  intrinsic: typeof Object | typeof Array
+): boolean {
+  if (prototype === intrinsic.prototype) return true;
+  const constructor = member(prototype, 'constructor');
+  return (
+    typeof constructor === 'function' &&
+    Object.getOwnPropertyDescriptor(constructor, 'prototype')?.value === prototype &&
+    Function.prototype.toString.call(constructor) === Function.prototype.toString.call(intrinsic)
+  );
 }
 
 /** The GPUI generator receives these records through JSON. A serialization
@@ -72,6 +95,10 @@ export function shape(
       reject('ir-shape', source, `${label}.${key} must be an own data member.`, bindings);
     }
   }
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== null && !intrinsicPrototype(prototype, Object)) {
+    reject('ir-shape', source, `${label} must be a plain data record.`, bindings);
+  }
 }
 
 export function variant(
@@ -97,16 +124,8 @@ export function variant(
 
 export function list(value: unknown, label: string, source: SourceSpan): void {
   if (!Array.isArray(value)) reject('ir-shape', source, `${label} must be an array.`);
-  // Target walkers use native array iteration and map. A subclass can run a
-  // custom iterator or species constructor instead of traversing these slots.
-  // Array.prototype is itself an array, including in another JS realm.
-  const prototype = Object.getPrototypeOf(value);
-  if (
-    prototype !== Array.prototype &&
-    (!Array.isArray(prototype) ||
-      !Object.hasOwn(prototype, Symbol.iterator) ||
-      !Object.hasOwn(prototype, 'map'))
-  ) {
+  // Target walkers rely on standard iteration, map and element order.
+  if (!intrinsicPrototype(Object.getPrototypeOf(value), Array)) {
     reject(
       'ir-shape',
       source,
@@ -203,14 +222,83 @@ export function location(record: unknown, label: string, parent?: SourceSpan): S
   return source;
 }
 
-export function checkBinding(binding: Binding, parent: SourceSpan, input = false): void {
+const scalars = { bool: true, number: true, text: true, unit: true, tokens: true } satisfies Record<
+  ScalarType,
+  true
+>;
+
+function checkValueType(
+  type: ValueType,
+  types: readonly DataType[],
+  label: string,
+  source: SourceSpan,
+  bindings?: readonly string[],
+  before = types.length
+): void {
+  if (
+    typeof type !== 'string' ||
+    (!Object.hasOwn(scalars, type) && !lookupDataType(types, type, before))
+  ) {
+    reject(
+      'ir-shape',
+      source,
+      `${label} needs a scalar type or a canonical data index referring to an available declaration.`,
+      bindings
+    );
+  }
+}
+
+const dataFields = {
+  presence: ['kind', 'value', 'source'],
+  record: ['kind', 'fields', 'source'],
+} satisfies Record<DataType['kind'], readonly string[]>;
+
+export type RecordFields = ReadonlyMap<DataType, ReadonlyMap<string, DataField>>;
+
+export function checkDataTypes(types: readonly DataType[], parent: SourceSpan): RecordFields {
+  list(types, 'component types', parent);
+  const records = new Map<DataType, ReadonlyMap<string, DataField>>();
+  for (const [index, data] of types.entries()) {
+    const label = `Type data:${index}`;
+    const source = location(data, label, parent);
+    variant(data, label, source, dataFields, []);
+    if (data.kind === 'presence') {
+      checkValueType(data.value, types, `${label} payload`, source, undefined, index);
+      continue;
+    }
+    list(data.fields, `${label} fields`, source);
+    const fields = new Map<string, DataField>();
+    for (const field of data.fields) {
+      const at = location(field, 'record field', source);
+      shape(field, 'record field', at, ['name', 'type', 'source']);
+      text(field.name, 'record field name', at);
+      const fieldLabel = `${label} field ${JSON.stringify(field.name)}`;
+      if (fields.has(field.name)) reject('duplicate-name', at, `${fieldLabel} is declared twice.`);
+      checkValueType(field.type, types, fieldLabel, at, undefined, index);
+      fields.set(field.name, field);
+    }
+    records.set(data, fields);
+  }
+  return records;
+}
+
+export function checkBinding(
+  binding: Binding,
+  parent: SourceSpan,
+  types: readonly DataType[],
+  input = false
+): void {
   const source = location(binding, 'binding', parent);
-  shape(binding, 'binding', source, ['id', 'name', 'type', 'source'], input ? ['default'] : []);
+  shape(
+    binding,
+    'binding',
+    source,
+    ['id', 'name', 'type', 'source'],
+    input ? ['default', 'controlMode'] : []
+  );
   id(binding.id, 'binding.id', source);
   name(binding.name, 'binding.name', source, [binding.id]);
-  if (!['bool', 'number', 'text', 'unit', 'tokens'].includes(binding.type)) {
-    reject('ir-shape', source, 'The binding needs a declared IR value type.', [binding.id]);
-  }
+  checkValueType(binding.type, types, 'The binding', source, [binding.id]);
 }
 
 export const literalFields = {

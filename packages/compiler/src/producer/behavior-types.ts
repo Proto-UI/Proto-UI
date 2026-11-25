@@ -12,43 +12,8 @@ export type Readable = { kind: 'prop' | 'state' | 'capture' | 'derive'; binding:
 export type Reference = Readable | { kind: 'signal'; binding: Binding };
 export type ResolveRead = (expression: ts.Expression) => Reference | undefined;
 
-function scalarDomain(source: SourceContext, type: ts.Type): ValueType | undefined {
-  if (type.flags & ts.TypeFlags.BooleanLike) return 'bool';
-  if (type.flags & ts.TypeFlags.NumberLike) return 'number';
-  if (type.flags & ts.TypeFlags.StringLike) return 'text';
-  if (type.flags & ts.TypeFlags.Void) return 'unit';
-  if (type.isUnion()) {
-    const first = scalarDomain(source, type.types[0]!);
-    return first && type.types.slice(1).every((part) => scalarDomain(source, part) === first)
-      ? first
-      : undefined;
-  }
-  for (const symbol of [type.getSymbol(), type.aliasSymbol]) {
-    if (
-      symbol?.declarations?.some(
-        (decl) =>
-          (ts.isInterfaceDeclaration(decl) || ts.isTypeAliasDeclaration(decl)) &&
-          source.intrinsic(decl.name, 'StyleTokens')
-      )
-    )
-      return 'tokens';
-  }
-  return undefined;
-}
-
-export function behaviorValueType(
-  source: SourceContext,
-  node: ts.Node,
-  type = source.checker.getTypeAtLocation(node)
-): ValueType {
-  return (
-    scalarDomain(source, type) ??
-    source.missing(
-      node,
-      'producer/value-type',
-      `The behavior receiver cannot yet represent the checked value type ${source.checker.typeToString(type)}.`
-    )
-  );
+export function behaviorValueType(source: SourceContext, node: ts.Node, type?: ts.Type): ValueType {
+  return source.data.type(node, type);
 }
 
 export function behaviorReturnType(source: SourceContext, node: BehaviorCallback): ValueType {

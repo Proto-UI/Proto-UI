@@ -30,7 +30,7 @@ TypeScript factory/printer facilities serve the JavaScript-family AST paths. Rus
 
 The analysis API, `proto-compiler lint`, Node editor integration and source producer share the controlled TypeScript Program and checker. General lint records raw source bytes, module resolution and configuration and diagnoses implemented boolean, conversion and text-domain violations. `analysisComplete` remains `false`. `sourceValid` is `false` for a proven violation and `null` otherwise. Complete phase, effect and ownership analysis is still missing.
 
-The frontend reads all three versioned authoring inputs from disk. For the readonly Badge it resolves compiler-owned typed intrinsic declarations and lowers the reached helper, props, derivation, public projections and view to checked component IR. The private CLI accepts `compile <path> --target react|gpui [--name ...] [--out ...]`. Both emitters consume the same IR and source closure. The public Core runtime has yet to export `@proto.ui/core/authoring`, and common-source execution through an Adapter remains unverified. See the [authoring inputs](authoring-surface.md) and [package entry](../../packages/compiler/README.md).
+The frontend reads all three versioned authoring inputs from disk and resolves compiler-owned typed intrinsic declarations. Use `createProtoProgram` from `@proto.ui/compiler/frontend`, then `produceComponentIR(program, { fileName, publicName })` from `@proto.ui/compiler/producer` to select the default source export. On `status: 'produced'`, the result carries `component` and `sourceClosure`. Pass the same component to `emitReact(component)` or `await emitGpui(component)` from the respective `@proto.ui/compiler/targets/react` and `@proto.ui/compiler/targets/gpui` entries. The private CLI exposes this source path as `compile <path> --target react|gpui [--name ...] [--out ...]`. The public Core runtime has yet to export `@proto.ui/core/authoring`, and common-source execution through an Adapter remains unverified. See the [authoring inputs](authoring-surface.md) and [package entry](../../packages/compiler/README.md).
 
 The [consumer intake](consumers/README.md) records exact revisions, source hashes, explicit entrypoints and unresolved inventory. Its verifier reuses that shared frontend closure; matching input bytes does not establish language validity, compilation or behavioral conformance.
 
@@ -42,6 +42,16 @@ The [consumer intake](consumers/README.md) records exact revisions, source hashe
 | Vue 3          | Source backend still missing. |
 | Web Components | Source backend still missing. |
 
-The foundation PR supplied definitions and retired the former implementation. The other backend cases start at checked IR and exercise the emitters and host behavior independently. Source lowering still lacks other primitives, including the optional prop and typed event payload used by Toggle and the composition of Context, extern bindings and owned tasks used by Tabs. Each requires its own source-to-consumer evidence. An extern's real target boundary is explicit; no platform-specific extern obstacle is currently known for the existing prototype inventory.
+The foundation PR supplied definitions and retired the former implementation. Direct IR fixtures exercise the emitters independently of source lowering. The version 3 IR represents optional presence, the `fixed-instance` policy and closed records. In the authored Toggle, `active` has a boolean payload when present, and `activeChange` carries the readonly record `{ active: boolean }`.
+
+React and GPUI consumed the same Toggle source, checked IR and source closure. Four Chromium cases passed, covering trusted clicks, same-key rejection, retained initialization and invalid first input. Three `controlled_source` Rust cases passed, covering pointer requests awaiting owner publication, retained local state and a subscriber queuing owner acceptance. The focused run reported 17 Node tests and 22 tests in its native Rust suite, all passing with no skips. To repeat the checks from the repository root, run the following commands.
+
+```sh
+node --test packages/compiler/test/composite-ir.node-test.mjs
+node --test packages/compiler/test/controlled-source-react.node-test.mjs
+node --test packages/compiler/test/gpui-target.node-test.mjs
+```
+
+The Tabs owner still reports `compiler-missing` with capability `logical-context` at its `def.context.provide` call on line 107. It also requires keyed child identity, owned task segments and a real target binding for `authoring.load-tab`. Its panel starts the loader on creation, so completing Context and child identity in M2 covers only part of the source. The full example reaches M3.
 
 Use [the implementation checklist](atomic-lowering-completion.md) to connect work to exact contract criteria, and [application consumers](application-consumers.md) to select meaningful interactions. Collect comparable cost baselines before assigning budgets; source lines, support size, retained output and runtime cost are separate measurements.

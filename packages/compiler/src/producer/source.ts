@@ -4,6 +4,7 @@ import ts from 'typescript';
 import { PRELUDE_PATH } from '../frontend/program.ts';
 import type { ProtoDiagnostic } from '../frontend/types.ts';
 import type { Binding, SourceSpan, ValueType } from '../targets/component-ir.ts';
+import { createSourceData, type SourceData } from './data-types.ts';
 
 export const AUTHORING_DECLARATIONS = fileURLToPath(
   new URL('../../prelude/authoring.d.ts', import.meta.url)
@@ -11,6 +12,7 @@ export const AUTHORING_DECLARATIONS = fileURLToPath(
 
 export interface SourceContext {
   readonly checker: ts.TypeChecker;
+  readonly data: SourceData;
   span(node: ts.Node): SourceSpan;
   binding(node: ts.Node, role: string, name: string, type: ValueType): Binding;
   symbol(node: ts.Node): ts.Symbol;
@@ -103,6 +105,7 @@ export function createSourceContext(program: ts.Program): SourceContext {
     checker,
     span,
     missing,
+    data: createSourceData(checker, exports, primitives, span, missing),
     binding(node, role, name, type) {
       const source = span(node);
       return {

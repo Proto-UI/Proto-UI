@@ -1,12 +1,13 @@
-import type {
-  Behavior,
-  Binding,
-  ComponentIR,
-  ElementView,
-  NamedBehavior,
-  SourceSpan,
-  TextRegion,
-  ValueType,
+import {
+  lookupDataType,
+  type Behavior,
+  type Binding,
+  type ComponentIR,
+  type ElementView,
+  type NamedBehavior,
+  type SourceSpan,
+  type TextRegion,
+  type ValueType,
 } from './component-ir.ts';
 import { viewBindings } from './view.ts';
 import { checkBehavior, checkSignature, type BehaviorFacts } from './validation/behavior.ts';
@@ -14,6 +15,7 @@ import { checkDependencies } from './validation/dependencies.ts';
 import { ComponentIRDiagnostic, reject, requireType } from './validation/diagnostic.ts';
 import {
   checkBinding,
+  checkDataTypes,
   declarePublicName,
   id,
   list,
@@ -176,6 +178,7 @@ export function validateComponent(ir: ComponentIR): void {
       'version',
       'name',
       'source',
+      'types',
       'props',
       'fields',
       'signals',
@@ -186,10 +189,11 @@ export function validateComponent(ir: ComponentIR): void {
     ],
     ['prototypeName']
   );
-  if (ir.version !== 2)
-    reject('ir-shape', source, 'This component IR receiver requires version 2.');
+  if (ir.version !== 3)
+    reject('ir-shape', source, 'This component IR receiver requires version 3.');
   name(ir.name, 'component name', source);
   if (Object.hasOwn(ir, 'prototypeName')) name(ir.prototypeName, 'prototype metadata name', source);
+  const recordFields = checkDataTypes(ir.types, source);
   for (const key of ['props', 'fields', 'signals', 'behaviors', 'projections', 'actions'] as const)
     list(ir[key], key, source);
 
@@ -204,8 +208,27 @@ export function validateComponent(ir: ComponentIR): void {
     unique(ids, binding.id, 'Component binding', binding.source);
   }
   for (const prop of ir.props) {
-    checkBinding(prop, source, true);
+    checkBinding(prop, source, ir.types, true);
+    const optional = lookupDataType(ir.types, prop.type)?.kind === 'presence';
+    if (
+      Object.hasOwn(prop, 'controlMode') &&
+      (prop.controlMode !== 'fixed-instance' || !optional)
+    ) {
+      reject(
+        'ir-shape',
+        prop.source,
+        'Only an optional presence input can declare the fixed-instance control mode.',
+        [prop.id]
+      );
+    }
     if (Object.hasOwn(prop, 'default')) {
+      if (optional)
+        reject(
+          'ir-shape',
+          prop.source,
+          'An optional presence input cannot declare a schema default.',
+          [prop.id]
+        );
       requireType(
         literalType(prop.default!, prop.source, [prop.id]),
         prop.type,
@@ -220,7 +243,7 @@ export function validateComponent(ir: ComponentIR): void {
   }
   for (const field of ir.fields) {
     const binding = member(field, 'binding') as Binding;
-    checkBinding(binding, source);
+    checkBinding(binding, source, ir.types);
     shape(field, 'instance field', binding.source, ['kind', 'binding', 'init']);
     if (field.kind !== 'state' && field.kind !== 'capture') {
       reject(
@@ -235,17 +258,23 @@ export function validateComponent(ir: ComponentIR): void {
     values.set(binding.id, { kind: field.kind, binding });
   }
   for (const signal of ir.signals) {
-    checkBinding(signal, source);
+    checkBinding(signal, source, ir.types);
     declare(signal);
     declarePublicName(signalNames, signal.name, signal, 'Public signal');
     signals.set(signal.id, signal);
   }
   for (const fn of ir.behaviors) {
-    checkSignature(fn, source);
+    checkSignature(fn, source, ir.types);
     declare(fn.binding);
     functions.set(fn.binding.id, fn);
   }
-  const declarations = { values, signals, functions } satisfies Declarations;
+  const declarations = {
+    types: ir.types,
+    recordFields,
+    values,
+    signals,
+    functions,
+  } satisfies Declarations;
   for (const field of ir.fields) {
     const fn = resolve(
       functions,

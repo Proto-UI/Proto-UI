@@ -1,5 +1,5 @@
 use crate::check::Checked;
-use crate::ir::{Binding, Source, Type};
+use crate::ir::{Binding, Data, Source, Type};
 use icu_normalizer::ComposingNormalizer;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
@@ -61,6 +61,9 @@ pub struct Names {
     pub actions_type: Ident,
     pub signal: Ident,
     pub command: Ident,
+    pub input_error: Ident,
+    pub data: Vec<Ident>,
+    pub members: Vec<Vec<Ident>>,
     pub props: Vec<Ident>,
     pub projections: Vec<Ident>,
     pub actions: Vec<Ident>,
@@ -73,40 +76,52 @@ impl Names {
         let component = public(&ir.name, &ir.name, &ir.source)?;
         let projections = group(ir.projections.iter().map(|p| (p.name.as_str(), p.function.as_str(), &ir.behaviors[checked.functions[p.function.as_str()]].binding.source)))?;
         let actions = group(ir.actions.iter().map(|a| (a.name.as_str(), a.function.as_str(), &ir.behaviors[checked.functions[a.function.as_str()]].binding.source)))?;
+        let mut members = Vec::with_capacity(ir.types.len());
+        for (index, data) in ir.types.iter().enumerate() {
+            let mut native_fields = Vec::new();
+            if let Data::Record { fields, .. } = data {
+                for field in fields { native_fields.push(public(&field.name, &format!("data:{index}.{}", field.name), &field.source)?); }
+            }
+            members.push(native_fields);
+        }
         Ok(Self {
             props_type: format_ident!("{}Props", component),
             projection: format_ident!("{}Projection", component),
             actions_type: format_ident!("{}Actions", component),
             signal: format_ident!("{}Signal", component),
             command: format_ident!("{}Command", component),
+            input_error: format_ident!("{}InputError", component),
+            data: (0..ir.types.len()).map(|i| format_ident!("{}Data{i}", component)).collect(),
+            members,
             props: group(ir.props.iter().map(|p| { let b = &p.binding; (b.name.as_str(), b.id.as_str(), &b.source) }))?,
             signals: group(ir.signals.iter().map(|b| (b.name.as_str(), b.id.as_str(), &b.source)))?,
             projections, actions, component,
         })
     }
-}
 
-pub fn ty(t: Type) -> TokenStream {
-    match t {
-        Type::Bool => quote!(::core::primitive::bool), Type::Number => quote!(::core::primitive::f64),
-        Type::Text => quote!(::std::string::String), Type::Unit => quote!(()),
-        Type::Tokens => quote!(::gpui::ArcCow<'static, [::gpui::SharedString]>),
+    pub fn ty(&self, t: Type) -> TokenStream {
+        match t {
+            Type::Bool => quote!(::core::primitive::bool), Type::Number => quote!(::core::primitive::f64),
+            Type::Text => quote!(::std::string::String), Type::Unit => quote!(()),
+            Type::Tokens => quote!(::gpui::ArcCow<'static, [::gpui::SharedString]>),
+            Type::Data(i) => { let n = &self.data[i]; quote!(#n) }
+        }
     }
-}
 
-pub fn input_ty(t: Type) -> TokenStream {
-    let native = ty(t);
-    match t {
-        Type::Text => quote!(&::core::primitive::str),
-        Type::Tokens => quote!(&#native),
-        _ => native,
+    pub fn input_ty(&self, t: Type) -> TokenStream {
+        let native = self.ty(t);
+        match t {
+            Type::Text => quote!(&::core::primitive::str),
+            Type::Tokens | Type::Data(_) => quote!(&#native),
+            _ => native,
+        }
     }
 }
 
 pub fn as_input(t: Type, value: TokenStream) -> TokenStream {
     match t {
         Type::Text => quote!((#value).as_str()),
-        Type::Tokens => quote!(&(#value)),
+        Type::Tokens | Type::Data(_) => quote!(&(#value)),
         _ => value,
     }
 }

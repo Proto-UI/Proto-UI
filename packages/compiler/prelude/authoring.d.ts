@@ -142,6 +142,11 @@ export interface PropsDefinition {
 }
 
 export interface ReadContext {
+  // Optional schema inputs already carry an immutable scalar Presence. Preserve
+  // its declared domain when reading a prop through any of the phase contexts.
+  get<Value extends PropValues[keyof PropValues]>(
+    handle: PropHandle<Presence<Value>>
+  ): Presence<Value>;
   get<Value>(handle: ReadHandle<Value>): ReadValue<Value>;
 }
 

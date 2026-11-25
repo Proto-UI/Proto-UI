@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import type { ElementView, TextRegion, ValueType } from '../targets/component-ir.ts';
-import { BehaviorProducer, behaviorValueType } from './behavior.ts';
+import type { BehaviorProducer } from './behavior.ts';
 import {
   argumentsIn,
   capabilityParameter,
@@ -83,7 +83,7 @@ export function componentView(
       local.used = true;
       return local.fn;
     }
-    if (behaviorValueType(source, expression) !== type) {
+    if (source.data.type(expression) !== type) {
       return source.missing(
         expression,
         `view-${role}`,
@@ -243,7 +243,7 @@ export function componentView(
             );
           } else {
             // A render-local scalar is evaluated against the current render view. It can never become an instance capture.
-            const type = behaviorValueType(source, declaration.initializer);
+            const type = source.data.type(declaration.initializer);
             const binding = source.binding(
               declaration,
               'renderer-local-value',

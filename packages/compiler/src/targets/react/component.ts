@@ -20,8 +20,9 @@ import {
   typeRef,
 } from './ast.ts';
 import { fieldsAndProps, invoke, type Environment } from './behavior.ts';
+import { needsSnapshot } from './data.ts';
 import type { ReactProgram } from './program.ts';
-import { hasInputs, initializerProps, publicParameters } from './surface.ts';
+import { appearanceInput, hasInputs, initializerProps, publicParameters } from './surface.ts';
 
 function snapshot(): ts.CallExpression {
   return call(member(id('$store'), 'snapshot'));
@@ -52,13 +53,13 @@ export function dispatchers(program: ReactProgram): ts.Statement[] {
     const plan = program.functions.get(fn)!;
     const params = publicParameters(program, plan.fn.params);
     const args = argumentNames(params);
-    // A reentrant caller can mutate its list as soon as this dispatch returns.
+    // A reentrant caller can mutate its host argument as soon as this dispatch returns.
     // Retain the checked snapshot before placing the action on the queue.
     const checks = args.map((arg, i) => {
       const binding = plan.fn.params[i];
       const checked = program.guard(binding, arg);
       return f.createExpressionStatement(
-        binding.type === 'tokens' ? f.createAssignment(arg, checked) : checked
+        needsSnapshot(binding.type) ? f.createAssignment(arg, checked) : checked
       );
     });
     params.push(param('$lease', program.useType('InputLease', typeRef(program.inputsType))));
@@ -204,12 +205,9 @@ function output(program: ReactProgram, view: ElementView, env: Environment): ts.
     attributes.push(property('disabled', invoke(program.functions.get(view.disabled)!, [], env)));
   if (view.activate !== undefined) attributes.push(property('onClick', nativeClick(program, view)));
   if (view === program.ir.view && program.ir.projections.length) {
-    const { file, start, end } = program.ir.source;
-    const callback = call(
-      program.use('readCallback'),
-      member(id('$props'), 'appearance'),
-      str(`${file}:${start}-${end} (appearance)`)
-    );
+    const callback = program.fixed.length
+      ? member(id('$inputs'), 'appearance')
+      : appearanceInput(program);
     const projection = object(
       program.ir.projections.map(({ name, fn }) =>
         property(name, invoke(program.functions.get(fn)!, [], env))
@@ -249,16 +247,26 @@ export function component(program: ReactProgram): ts.Statement[] {
   const { ir } = program;
   const statements: ts.Statement[] = [];
   let environment: Environment;
-  if (program.hasOwner) {
+  if (program.hasOwner || program.fixed.length) {
     const inputs = hasInputs(program) ? id('$inputs') : id('undefined');
-    if (hasInputs(program))
-      statements.push(constDecl('$inputs', call(id(program.readInputs), id('$props'))));
-    statements.push(
-      constDecl(
-        '$owner',
-        call(program.use(program.hasHandle ? 'useRetainedInputs' : 'usePublishedInputs'), inputs)
-      )
-    );
+    if (hasInputs(program)) {
+      const candidate = program.fixed.length
+        ? call(
+            program.use('useFixedInputs'),
+            id('$props'),
+            id(program.readInputs),
+            id(program.checkFixed)
+          )
+        : call(id(program.readInputs), id('$props'));
+      statements.push(constDecl('$inputs', candidate));
+    }
+    if (program.hasOwner)
+      statements.push(
+        constDecl(
+          '$owner',
+          call(program.use(program.hasHandle ? 'useRetainedInputs' : 'usePublishedInputs'), inputs)
+        )
+      );
     environment = fieldsAndProps(program, inputs, id('$fields'));
   } else {
     const names = program.names.scope();

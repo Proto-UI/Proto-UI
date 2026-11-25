@@ -1,6 +1,6 @@
 use crate::behavior::{self, entry_call};
 use crate::check::{Checked, Place, Result};
-use crate::ir::Type;
+use crate::ir::{Data, Type};
 use crate::names::{self, Names};
 use proc_macro2::TokenStream;
 use quote::quote;
@@ -19,10 +19,11 @@ pub fn generate(checked: &Checked<'_>) -> Result<syn::File> {
     let observed = checked.derived.iter().flat_map(|&f| checked.bodies[f].facts.reads.iter().copied()).collect();
     let methods = behavior::methods(checked, &names);
     let mut builder = Component { checked, names, observed, items: Vec::new(), methods };
+    builder.composites()?;
     builder.data_types()?;
     builder.view_type()?;
     builder.public_projection();
-    builder.props_update();
+    builder.props_update()?;
     builder.signal_type()?;
     if !checked.actions.is_empty() { builder.actions()?; }
     let owner = &builder.names.component;
@@ -51,6 +52,43 @@ impl Component<'_, '_> {
         entry_call(self.checked, f, vec![], |p| self.published(p, &receiver), |_| unreachable!("checked pure behavior"), TokenStream::new())
     }
 
+    fn composites(&mut self) -> Result<()> {
+        for (i, data) in self.checked.ir.types.iter().enumerate() {
+            let n = &self.names.data[i];
+            let compare = comparison(i);
+            let (decl, changed) = match data {
+                Data::Presence { value, source } => {
+                    let payload = self.names.ty(*value);
+                    let doc = names::source_doc("presence", source);
+                    let inner = differs(*value, quote!(*left), quote!(*right));
+                    (quote!(#[doc = #doc] #[allow(non_camel_case_types)] pub type #n = ::core::option::Option<#payload>;), quote! {
+                        match (left, right) {
+                            (::core::option::Option::Some(left), ::core::option::Option::Some(right)) => #inner,
+                            (::core::option::Option::None, ::core::option::Option::None) => false,
+                            _ => true,
+                        }
+                    })
+                }
+                Data::Record { fields, source } => {
+                    let doc = names::source_doc("record", source);
+                    let mut members = Vec::new();
+                    let mut checks = Vec::new();
+                    for (f, member) in fields.iter().zip(&self.names.members[i]) {
+                        let ty = self.names.ty(f.ty);
+                        let doc = names::source_doc(&f.name, &f.source);
+                        members.push(quote!(#[doc = #doc] pub #member: #ty));
+                        checks.push(differs(f.ty, quote!(left.#member), quote!(right.#member)));
+                    }
+                    let changed = if checks.is_empty() { quote!(false) } else { quote!(#(#checks)||*) };
+                    (quote!(#[doc = #doc] #[allow(non_camel_case_types, non_snake_case)] #[derive(Clone, Debug, PartialEq)] pub struct #n { #(#members),* }), changed)
+                }
+            };
+            self.methods.push(quote!(#[allow(dead_code, unused_variables)] fn #compare(left: &#n, right: &#n) -> bool { #changed }));
+            self.item(decl)?;
+        }
+        Ok(())
+    }
+
     fn data_types(&mut self) -> Result<()> {
         let ir = self.checked.ir;
         let props = &self.names.props_type;
@@ -60,11 +98,12 @@ impl Component<'_, '_> {
         let args = names::formal_names(ir.props.iter().map(|p| &p.binding));
         for ((prop, n), arg) in ir.props.iter().zip(&self.names.props).zip(args) {
             let b = &prop.binding;
-            let ty = names::ty(b.ty);
+            let ty = self.names.ty(b.ty);
             let doc = names::source_doc(&b.name, &b.source);
             fields.push(quote!(#[doc = #doc] pub #n: #ty));
             let value = match &prop.default {
                 Some(v) => behavior::schema_default(v),
+                None if self.checked.payload(b.ty).is_some() => quote!(::core::option::Option::None),
                 None => { required.push(quote!(#arg: #ty)); quote!(#arg) }
             };
             values.push(quote!(#n: #value));
@@ -90,10 +129,11 @@ impl Component<'_, '_> {
         let mut getters = Vec::new();
         for (p, n) in ir.projections.iter().zip(&self.names.projections) {
             let b = &ir.behaviors[self.checked.functions[p.function.as_str()]].binding;
-            let ty = names::ty(b.ty);
+            let ty = self.names.ty(b.ty);
             let (result, value) = match b.ty {
-                Type::Text => (names::input_ty(b.ty), quote!(self.#n.as_str())),
+                Type::Text => (self.names.input_ty(b.ty), quote!(self.#n.as_str())),
                 Type::Tokens => (quote!(&[::gpui::SharedString]), quote!(self.#n.as_ref())),
+                Type::Data(_) => (quote!(&#ty), quote!(&self.#n)),
                 _ => (ty.clone(), quote!(self.#n)),
             };
             let doc = names::source_doc(&p.name, &b.source);
@@ -121,7 +161,7 @@ impl Component<'_, '_> {
         let mut initialized = Vec::new();
         for (i, field) in ir.fields.iter().enumerate() {
             let n = names::field(i);
-            let ty = names::ty(field.binding.ty);
+            let ty = self.names.ty(field.binding.ty);
             fields.push(quote!(#n: #ty));
             let f = self.checked.functions[field.init.as_str()];
             let init = entry_call(self.checked, f, vec![], |p| match p {
@@ -180,7 +220,21 @@ impl Component<'_, '_> {
         self.methods.push(method);
     }
 
-    fn props_update(&mut self) {
+    fn props_update(&mut self) -> Result<()> {
+        let input_error = &self.names.input_error;
+        let guards: Vec<_> = self.checked.ir.props.iter().zip(&self.names.props).filter(|(p, _)| p.control_mode.is_some()).map(|(p, n)| {
+            let field = &p.binding.name;
+            quote! {
+                if self.props.#n.is_some() != props.#n.is_some() {
+                    return ::core::result::Result::Err(#input_error { field: #field, was_present: self.props.#n.is_some(), requested_present: props.#n.is_some() });
+                }
+            }
+        }).collect();
+        let fixed = !guards.is_empty();
+        let rejection = fixed.then(|| quote! {
+            #[allow(non_camel_case_types)] #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+            pub struct #input_error { pub field: &'static str, pub was_present: bool, pub requested_present: bool }
+        });
         let props = &self.names.props_type;
         let command = &self.names.command;
         let tests: Vec<_> = self.observed.iter().filter_map(|p| match *p {
@@ -193,19 +247,26 @@ impl Component<'_, '_> {
         // Store all inputs. An action-only input must still be current even when
         // its replacement has no dependency in the host view or public projection.
         let changed = if tests.is_empty() { quote!(false) } else { quote!(#(#tests)||*) };
+        let outcome = quote!(::proto_ui_gpui_support::ActionOutcome);
         if self.checked.actions.is_empty() {
+            let ret = fixed.then(|| quote!(-> ::core::result::Result<#outcome, #input_error>));
+            let success = fixed.then(|| quote!(::core::result::Result::Ok(#outcome::Committed)));
             self.methods.push(quote! {
-                pub fn set_props(&mut self, props: #props, cx: &mut ::gpui::Context<Self>) {
+                pub fn set_props(&mut self, props: #props, cx: &mut ::gpui::Context<Self>) #ret {
+                    #(#guards)*
                     let changed = #changed;
                     self.props = props;
                     if changed { cx.notify(); }
+                    #success
                 }
             });
         } else {
+            let dispatch = quote!(self.__pui_submit(#command::Props(props), cx));
+            let (ret, body) = if fixed {
+                (quote!(::core::result::Result<#outcome, #input_error>), quote!(#(#guards)* ::core::result::Result::Ok(#dispatch)))
+            } else { (outcome, dispatch) };
             self.methods.push(quote! {
-                pub fn set_props(&mut self, props: #props, cx: &mut ::gpui::Context<Self>) -> ::proto_ui_gpui_support::ActionOutcome {
-                    self.__pui_submit(#command::Props(props), cx)
-                }
+                pub fn set_props(&mut self, props: #props, cx: &mut ::gpui::Context<Self>) -> #ret { #body }
             });
             self.methods.push(quote! {
                 fn __pui_props(&mut self, props: #props, cx: &mut ::gpui::Context<Self>) {
@@ -218,6 +279,8 @@ impl Component<'_, '_> {
                 }
             });
         }
+        if let Some(item) = rejection { self.item(item)?; }
+        Ok(())
     }
 
     fn signal_type(&mut self) -> Result<()> {
@@ -226,7 +289,7 @@ impl Component<'_, '_> {
             let signal = &self.names.signal;
             let owner = &self.names.component;
             let variants = ir.signals.iter().zip(&self.names.signals).map(|(b, n)| {
-                let ty = names::ty(b.ty);
+                let ty = self.names.ty(b.ty);
                 let doc = names::source_doc(&b.name, &b.source);
                 quote!(#[doc = #doc] #n(#ty))
             });
@@ -253,7 +316,7 @@ impl Component<'_, '_> {
         for &f in &self.checked.actions {
             let variant = names::command(f);
             let b = &self.checked.ir.behaviors[f];
-            let params: Vec<_> = b.params.iter().map(|p| names::ty(p.ty)).collect();
+            let params: Vec<_> = b.params.iter().map(|p| self.names.ty(p.ty)).collect();
             let args: Vec<_> = (0..params.len()).map(names::argument).collect();
             variants.push(quote!(#variant(#(#params),*)));
             let body = self.action_body(f);
@@ -268,7 +331,7 @@ impl Component<'_, '_> {
                 let b = &self.checked.ir.behaviors[f];
                 let variant = names::command(f);
                 let args = names::formal_names(b.params.iter());
-                let params = b.params.iter().zip(&args).map(|(p, n)| { let ty = names::ty(p.ty); quote!(#n: #ty) });
+                let params = b.params.iter().zip(&args).map(|(p, n)| { let ty = self.names.ty(p.ty); quote!(#n: #ty) });
                 let doc = names::source_doc(&a.name, &b.binding.source);
                 entries.push(quote! {
                     #[doc = #doc]
@@ -364,8 +427,12 @@ impl Component<'_, '_> {
 
 }
 
+fn comparison(i: usize) -> proc_macro2::Ident { quote::format_ident!("__pui_data_changed_{i}") }
+
 fn differs(ty: Type, a: TokenStream, b: TokenStream) -> TokenStream {
-    if ty == Type::Number {
-        quote!(((#a).to_bits() != (#b).to_bits()) && !((#a).is_nan() && (#b).is_nan()))
-    } else { quote!((#a) != (#b)) }
+    match ty {
+        Type::Number => quote!(((#a).to_bits() != (#b).to_bits()) && !((#a).is_nan() && (#b).is_nan())),
+        Type::Data(i) => { let compare = comparison(i); quote!(Self::#compare(&(#a), &(#b))) }
+        _ => quote!((#a) != (#b)),
+    }
 }

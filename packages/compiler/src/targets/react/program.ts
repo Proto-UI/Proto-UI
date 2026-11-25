@@ -8,11 +8,11 @@ import type {
   InputBinding,
   LiteralValue,
   Value,
-  ValueType,
 } from '../component-ir.ts';
 import { unsupportedHostName } from '../validate.ts';
 import { viewBindings, type ViewBinding } from '../view.ts';
 import { Names, call, constDecl, f, id, member, str, typeRef } from './ast.ts';
+import { ReactData } from './data.ts';
 
 const react = 'react';
 const support = '@proto.ui/compiler/support/react';
@@ -31,20 +31,27 @@ const supportImports = [
   'ActionFailure',
   'FieldDraft',
   'FieldStore',
+  'HostValueError',
   'InputLease',
+  'InputPresence',
   'SignalQueue',
   'dispatchAction',
   'finishAction',
   'missingInput',
   'numberFromBits',
   'observeNativeAction',
+  'omittedInput',
+  'ownMember',
+  'presentInput',
   'readBool',
   'readCallback',
   'readNumber',
+  'readObject',
   'readText',
   'readTokens',
   'readUnit',
   'sameTokens',
+  'useFixedInputs',
   'usePublishedInputs',
 ];
 const retainedImports = ['useRetainedHandle', 'useRetainedInputs'];
@@ -62,15 +69,7 @@ const hostLocals = [
   '$before',
   '$after',
 ];
-const guards: Record<ValueType, string> = {
-  bool: 'readBool',
-  number: 'readNumber',
-  text: 'readText',
-  unit: 'readUnit',
-  tokens: 'readTokens',
-};
-
-function origin(binding: Binding): ts.StringLiteral {
+export function origin(binding: Binding): ts.StringLiteral {
   const { file, start, end } = binding.source;
   return str(`${file}:${start}-${end} (${binding.name})`);
 }
@@ -81,6 +80,8 @@ function successors(block: Block): readonly Edge[] {
       return [block.end.to];
     case 'branch':
       return [block.end.yes, block.end.no];
+    case 'presence':
+      return [block.end.present, block.end.omitted];
     default:
       return [];
   }
@@ -112,7 +113,12 @@ function visitValue(value: Value, visit: (value: Value) => void): void {
   visit(value);
   switch (value.kind) {
     case 'not':
+    case 'has-value':
+    case 'member':
       visitValue(value.value, visit);
+      break;
+    case 'record':
+      for (const field of value.fields) visitValue(field.value, visit);
       break;
     case 'binary':
       visitValue(value.left, visit);
@@ -159,6 +165,9 @@ export class ReactProgram {
   readonly handleType: string;
   readonly inputsType: string;
   readonly readInputs: string;
+  readonly checkFixed: string;
+  readonly fixed: readonly InputBinding[];
+  readonly data: ReactData;
   readonly fieldsType: string;
   readonly initFields: string;
   readonly sameFields: string;
@@ -184,6 +193,9 @@ export class ReactProgram {
     this.handleType = this.names.take(`${ir.name}Handle`);
     this.inputsType = this.names.take('Inputs');
     this.readInputs = this.names.take('readInputs');
+    this.checkFixed = this.names.take('checkFixedInputs');
+    this.fixed = ir.props.filter((prop) => prop.controlMode === 'fixed-instance');
+    this.data = new ReactData(this);
     this.fieldsType = this.names.take('Fields');
     this.initFields = this.names.take('initializeFields');
     this.sameFields = this.names.take('sameFields');
@@ -282,6 +294,7 @@ export class ReactProgram {
           }
         }
         if (b.end.kind === 'branch') visitValue(b.end.condition, inspect);
+        if (b.end.kind === 'presence') visitValue(b.end.value, inspect);
         if (b.end.kind === 'return' && b.end.value) visitValue(b.end.value, inspect);
         for (const edge of successors(b)) for (const arg of edge.args) visitValue(arg, inspect);
       }
@@ -370,12 +383,23 @@ export class ReactProgram {
   }
 
   guard(binding: Binding, value: ts.Expression): ts.Expression {
-    return call(this.use(guards[binding.type]), value, origin(binding));
+    return this.data.read(binding.type, value, origin(binding));
   }
 
   readProp(binding: InputBinding, props: ts.Expression): ts.Expression {
     const present = call(member(id('Object'), 'hasOwn'), props, str(binding.name));
-    const whenPresent = this.guard(binding, member(props, binding.name));
+    const raw = member(props, binding.name);
+    const payload = this.data.presence(binding.type);
+    if (payload !== undefined) {
+      return f.createConditionalExpression(
+        present,
+        undefined,
+        call(this.use('presentInput'), this.data.read(payload, raw, origin(binding))),
+        undefined,
+        this.use('omittedInput')
+      );
+    }
+    const whenPresent = this.guard(binding, raw);
     const whenOmitted = binding.default
       ? this.literal(binding.default)
       : call(this.use('missingInput'), origin(binding));

@@ -4,7 +4,7 @@ desp: 'The 0.4 Proto language compiler foundation and implementation status'
 description: 'The 0.4 Proto language compiler foundation and implementation status'
 ---
 
-The old private compiler has been retired. Its **0.4** replacement compiles the versioned readonly Badge source into a TypeScript React component and a native Rust GPUI component. Both start from the same TypeScript Program and checked component IR. The [compiler foundation](https://github.com/Proto-UI/Proto-UI/blob/main/internal/compiler/README.md) is the implementation entry point.
+The old private compiler has been retired. Its **0.4** replacement compiles the versioned readonly Badge and controlled Toggle into TypeScript React components and native Rust GPUI components. Both targets consume the same checked component IR from the shared TypeScript Program. The [compiler foundation](https://github.com/Proto-UI/Proto-UI/blob/main/internal/compiler/README.md) is the implementation entry point.
 
 Existing applications continue to use [Runtime](/en/build/runtime-architecture/) and [Adapters](/en/build/adapter-guide/). Their working examples, component facades and style tooling remain supported within their own release boundaries. The compiler rebuild does not add an acceptance condition to the 0.3 release.
 
@@ -44,13 +44,13 @@ Generated components must integrate with ordinary host applications. Executing t
 
 | Source target  | Evidence from authored source |
 | -------------- | ----------------------------- |
-| React          | Chromium mounted the generated Badge and observed its DOM text, computed color, nested dot width and readonly `label` and `tone`. |
-| GPUI           | A native headless GPUI host observed the generated Badge paint its label, chip and nested dot and publish the readonly `label` and `tone`. |
+| React          | Chromium observed the Badge's DOM text, computed color, nested dot width and readonly projections. Four Toggle cases exercised trusted clicks, fixed-mode input rejection, retained local state and invalid initial input. |
+| GPUI           | A native headless host observed the Badge's painted label, chip, nested dot and readonly projections. Three Toggle cases exercised pointer requests, local state across reattachment and queued acceptance by a signal subscriber. |
 | Vue 2          | Source backend still missing. |
 | Vue 3          | Source backend still missing. |
 | Web Components | Source backend still missing. |
 
-Both hosts observed the online appearance and the common chip appearance for an unknown tone. Other backend cases start directly from checked IR. Those cases exercise target behavior independently of the authoring frontend.
+Both Badge hosts observed the online appearance and the common chip appearance for an unknown tone. Separate fixtures start directly from checked IR to exercise target behavior independently of the authoring frontend.
 
 Application-specific externs may declare a limited target set and must fail clearly when a binding is missing. This does not waive any of the five backend obligations for the official portable library.
 
@@ -58,17 +58,21 @@ Application-specific externs may declare a limited target set and must fail clea
 
 The repository now records the new contract, independent semantic test scenarios, implementation order and the retirement boundary. The old compiler, generated fixtures, compiler-specific runners and browser compilation panel are removed. Git history retains the old implementation and dated observations; they are not evidence for the replacement.
 
-The private package accepts `compile <path> --target react|gpui [--name ...] [--out ...]`. By default, `compile` finds the nearest `tsconfig.json` starting at the input file's directory. For the Badge below, `internal/compiler/examples/tsconfig.json` maps the authoring import to the compiler's typed declarations. Use `--project <path>` to select a project explicitly. The `lint` command starts its default project search in the working directory.
+The private package accepts `compile <path> --target react|gpui [--name ...] [--out ...]`. By default, `compile` finds the nearest `tsconfig.json` starting at the input file's directory. For both examples below, `internal/compiler/examples/tsconfig.json` maps the authoring import to the compiler's typed declarations. Use `--project <path>` to select a project explicitly. The `lint` command starts its default project search in the working directory.
 
 ```sh
 node packages/compiler/src/cli-entry.mjs --status
 node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/readonly-badge.proto.ts.txt --target react --name AuthoringBadge --out AuthoringBadge.ts
 node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/readonly-badge.proto.ts.txt --target gpui --name AuthoringBadge --out authoring_badge.rs
+node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/controlled-toggle.proto.ts.txt --target react --name ControlledToggle --out ControlledToggle.ts
+node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/controlled-toggle.proto.ts.txt --target gpui --name ControlledToggle --out controlled_toggle.rs
 ```
 
-The frontend reads all three versioned authoring examples from disk. Compiler-owned typed intrinsic declarations let it resolve the authoring operations and lower the Badge. The public Core runtime has yet to export `@proto.ui/core/authoring`. Adapter execution and migration of a consumer to common source remain unverified.
+The frontend reads all three versioned authoring examples from disk. Compiler-owned typed intrinsic declarations resolve the authoring operations. The public Core runtime has yet to export `@proto.ui/core/authoring`. Adapter execution and migration of a consumer to common source remain unverified.
 
-General lint and the editor use the shared TypeScript Program and checker to check implemented boolean, coercion and text rules without executing author modules. To analyze a component in your project, run `node packages/compiler/src/cli-entry.mjs lint path/to/component.proto.ts --target react --json`. Reports bind source and dependency bytes and configuration. `analysisComplete` remains `false`. `sourceValid` is `false` for a proven violation and `null` otherwise. Lint exits with status `1` for invalid source or `2` for incomplete analysis or an unavailable target. Source lowering still lacks other language primitives, Toggle's optional prop and typed event payload, and Tabs' composition of Context, extern bindings and owned tasks.
+With `active: false`, two enabled presses each requested `{ active: true }` while the button stayed `Off`. When the host published `active: true`, the public value became `true` and the button displayed `On`. Omitting `active` selected local ownership and initialized it once from `defaultActive`. Disabled input produced no request. A same-instance change in the presence of `active` was rejected as a whole, and a new instance could select a different mode. Both hosts ran components generated from the same Toggle source and checked IR.
+
+General lint and the editor use the shared TypeScript Program and checker to check implemented boolean, coercion and text rules without executing author modules. To analyze a component in your project, run `node packages/compiler/src/cli-entry.mjs lint path/to/component.proto.ts --target react --json`. Reports bind source and dependency bytes and configuration. `analysisComplete` remains `false`. `sourceValid` is `false` for a proven violation and `null` otherwise. Lint exits with status `1` for invalid source or `2` for incomplete analysis or an unavailable target. The Tabs source still needs a keyed child, a logical Context provider and consumer, and an owned task with a real loader binding.
 
 Each implementation batch must demonstrate its complete scenario through ordinary target builds and observed behavior. Unsupported language features, missing compiler work, missing backend lowering and unbound externs must remain distinguishable. Performance work starts with reproducible cold, warm, incremental, shared and per-component measurements before adopting hard budgets.
 

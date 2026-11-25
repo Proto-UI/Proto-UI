@@ -1,9 +1,11 @@
 export class HostValueError extends TypeError {
   readonly code = 'invalid-host-value';
+  readonly origin: string;
 
   constructor(expected: string, origin: string) {
     super(`${origin} requires ${expected}.`);
     this.name = 'HostValueError';
+    this.origin = origin;
   }
 }
 
@@ -13,6 +15,22 @@ const invalidTokenCharacter = /[\t\n\f\r \uD800-\uDFFF]/u;
 
 export function missingInput(origin: string): never {
   throw new HostValueError('an explicitly supplied input', origin);
+}
+
+export function readObject(value: unknown, origin: string): Readonly<Record<string, unknown>> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value))
+    throw new HostValueError('a record', origin);
+  return value as Readonly<Record<string, unknown>>;
+}
+
+export function ownMember(
+  value: Readonly<Record<string, unknown>>,
+  name: string,
+  origin: string
+): unknown {
+  if (!Object.hasOwn(value, name))
+    throw new HostValueError(`an own field ${JSON.stringify(name)}`, origin);
+  return value[name];
 }
 
 export function readText(value: unknown, origin: string): string {

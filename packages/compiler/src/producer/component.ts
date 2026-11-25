@@ -5,9 +5,10 @@ import type {
   InitialField,
   InputBinding,
   NamedBehavior,
+  ScalarType,
   ValueType,
 } from '../targets/component-ir.ts';
-import { BehaviorProducer, behaviorReturnType, behaviorValueType } from './behavior.ts';
+import { BehaviorProducer } from './behavior.ts';
 import type { Readable } from './behavior-types.ts';
 import {
   argumentsIn,
@@ -36,6 +37,7 @@ const definitionParts = {
 } as const;
 
 type DefinitionOwner = 'Definition' | (typeof definitionParts)[keyof typeof definitionParts];
+type HandleExport = 'PropHandle' | 'StateHandle' | 'DerivedHandle' | 'EventHandle' | 'ActionHandle';
 type Signal = { kind: 'signal'; binding: Binding };
 type Action = { kind: 'action'; binding: Binding; parameters: number };
 type SetupReference =
@@ -65,6 +67,7 @@ class ComponentProducer {
   private readonly references = new Map<ts.Symbol, SetupReference>();
   private readonly setupFrames = new Set<SourceFunction>();
   private readonly pendingCallbacks: (() => void)[] = [];
+  private readonly unusedActionParameters = new Map<string, readonly Binding[]>();
   private readonly props: InputBinding[] = [];
   private readonly fields: InitialField[] = [];
   private readonly signals: Binding[] = [];
@@ -111,6 +114,7 @@ class ComponentProducer {
     };
     this.source = {
       checker: source.checker,
+      data: source.data,
       symbol: bindingAt,
       span: source.span.bind(source),
       binding: source.binding.bind(source),
@@ -199,15 +203,24 @@ class ComponentProducer {
       }
       view = { ...view, activate: this.press.target.binding.id };
     }
+    const lowered = this.behaviors.finish();
+    const behaviors = this.unusedActionParameters.size
+      ? lowered.map((behavior) => {
+          const unused = this.unusedActionParameters.get(behavior.binding.id);
+          return unused ? { ...behavior, params: [...behavior.params, ...unused] } : behavior;
+        })
+      : lowered;
     return {
-      version: 2,
+      // Later interning on the source context must not change a component already handed to a target.
+      version: 3,
       name: publicName,
       prototypeName,
       source: source.span(call),
+      types: source.data.entries.slice(),
       props: this.props,
       fields: this.fields,
       signals: this.signals,
-      behaviors: this.behaviors.finish(),
+      behaviors,
       projections: this.projections,
       actions: this.actions,
       view,
@@ -436,7 +449,7 @@ class ComponentProducer {
         'This capture needs destructuring and an owned environment.'
       );
     const name = local?.text ?? 'setup value';
-    const type = behaviorValueType(source, node);
+    const type = source.data.type(node);
     const binding = source.binding(local ?? expression, 'capture', name, type);
     const init = source.binding(expression, 'capture-initializer', name, type);
     this.behaviors.expression(init, 'init', expression, undefined);
@@ -538,6 +551,17 @@ class ComponentProducer {
   private propDeclaration(call: ts.CallExpression): SetupReference {
     const source = this.source;
     argumentsIn(source, call, 1, 1, 'prop-schema');
+    const handles = source.checker.getTypeAtLocation(call);
+    if (
+      !(handles.flags & ts.TypeFlags.Object) ||
+      source.checker.getIndexInfosOfType(handles).length
+    ) {
+      return source.missing(
+        call.arguments[0]!,
+        'prop-schema-domain',
+        'The resolved schema needs a concrete record with a closed set of prop handles.'
+      );
+    }
     const members = new Map<string, Readable>();
     for (const [name, member] of objectMembers(source, call.arguments[0]!, 'prop-schema')) {
       this.declarePublic('prop', name, member.name);
@@ -547,39 +571,21 @@ class ComponentProducer {
         'prop-field',
         ['type', 'default', 'optional', 'controlMode']
       );
-      const optional = schema.get('optional');
-      if (optional) {
-        const flag = sourceLiteral(source, memberValue(source, optional, 'prop-presence'));
-        if (flag?.kind !== 'bool' || flag.value) {
-          return source.missing(
-            optional,
-            'prop-presence',
-            'An optional prop needs distinct omitted and present values and any declared instance control policy in the receiving schema.'
-          );
-        }
-      }
-      const control = schema.get('controlMode');
-      if (control)
-        return source.missing(
-          control,
-          'prop-control-mode',
-          'The declared control policy needs its owner and permitted presence transitions in the receiving schema.'
-        );
       const typeMember = schema.get('type');
       if (!typeMember)
         return source.missing(member, 'prop-type', 'The prop needs its declared value domain.');
       const typeNode = memberValue(source, typeMember, 'prop-type');
       const schemaType = sourceName(source, typeNode, 'prop-type');
-      let type: ValueType;
+      let scalar: ScalarType;
       switch (schemaType) {
         case 'boolean':
-          type = 'bool';
+          scalar = 'bool';
           break;
         case 'number':
-          type = 'number';
+          scalar = 'number';
           break;
         case 'string':
-          type = 'text';
+          scalar = 'text';
           break;
         default:
           return source.missing(
@@ -588,10 +594,67 @@ class ComponentProducer {
             `The prop domain ${JSON.stringify(schemaType)} needs a receiving value representation.`
           );
       }
-      const binding = source.binding(member, 'prop', name, type);
-      let input: InputBinding = binding;
+      let optional = false;
+      const presence = schema.get('optional');
+      if (presence) {
+        const flag = sourceLiteral(source, memberValue(source, presence, 'prop-presence'));
+        if (flag?.kind !== 'bool')
+          return source.missing(
+            presence,
+            'prop-presence',
+            'The input schema needs the resolved boolean value of optional.'
+          );
+        optional = flag.value;
+      }
+      let controlMode: InputBinding['controlMode'];
+      const control = schema.get('controlMode');
+      if (control) {
+        const policy = sourceLiteral(source, memberValue(source, control, 'prop-control-mode'));
+        if (policy?.kind !== 'text' || policy.value !== 'fixed-instance') {
+          return source.missing(
+            control,
+            'prop-control-mode',
+            'The declared input control policy needs its permitted presence transitions represented.'
+          );
+        }
+        if (!optional)
+          return source.invalid(
+            control,
+            'PUI_PROP_CONTROL_PRESENCE',
+            'A fixed-instance control policy requires an optional input whose presence selects its initial mode.'
+          );
+        controlMode = policy.value;
+      }
+      const domain = optional ? source.data.presence(scalar, member) : scalar;
+      const property = handles.getProperty(name);
+      if (!property)
+        return source.missing(
+          member.name,
+          'prop-schema-domain',
+          'The resolved schema result has no handle for this authored prop.'
+        );
+      const [payload] = this.handleArguments(
+        source.checker.getTypeOfSymbolAtLocation(property, call),
+        member,
+        'PropHandle'
+      );
+      const checked = source.data.type(member, payload!);
+      if (domain !== checked)
+        return source.missing(
+          member,
+          'prop-schema-domain',
+          'The authored prop domain and the checked handle payload need the same value and presence type.'
+        );
+      const binding = source.binding(member, 'prop', name, domain);
+      let input: InputBinding = controlMode ? { ...binding, controlMode } : binding;
       const fallback = schema.get('default');
       if (fallback) {
+        if (optional)
+          return source.invalid(
+            fallback,
+            'PUI_OPTIONAL_PROP_DEFAULT',
+            'An optional input preserves omission and cannot declare a schema default.'
+          );
         const valueNode = memberValue(source, fallback, 'prop-default');
         const literal = sourceLiteral(source, valueNode);
         if (!literal)
@@ -600,43 +663,137 @@ class ComponentProducer {
             'prop-default',
             'This default needs its checked computation represented in the prop schema.'
           );
-        if (literal.kind !== type)
+        if (literal.kind !== scalar)
           return source.invalid(
             valueNode,
             'PUI_PROP_DEFAULT_TYPE',
-            `The ${name} default has domain ${literal.kind}; its schema declares ${type}.`
+            `The ${name} default has domain ${literal.kind}; its schema declares ${scalar}.`
           );
         input = { ...binding, default: literal };
       }
       this.props.push(input);
       members.set(name, { kind: 'prop', binding });
     }
+    if (handles.getProperties().some((property) => !members.has(property.name))) {
+      return source.missing(
+        call.arguments[0]!,
+        'prop-schema-domain',
+        'The resolved schema declares a prop without a corresponding authored field.'
+      );
+    }
     return { kind: 'props', members };
   }
 
   /** The trusted declaration returns a handle parameterized by its value. An explicit or inferred widened
    * state/event domain cannot be reconstructed from the narrower first value used in an initializer. */
-  private handleType(call: ts.CallExpression): ValueType {
+  private handleArguments(
+    type: ts.Type,
+    node: ts.Node,
+    expected: HandleExport
+  ): readonly ts.Type[] {
     const source = this.source;
-    const explicit = call.typeArguments?.[0];
-    if (explicit)
-      return behaviorValueType(source, explicit, source.checker.getTypeFromTypeNode(explicit));
-    const signature = source.checker.getResolvedSignature(call);
-    if (signature) {
-      const type = source.checker.getReturnTypeOfSignature(signature);
-      const isReference =
-        (type.flags & ts.TypeFlags.Object) !== 0 &&
-        ((type as ts.ObjectType).objectFlags & ts.ObjectFlags.Reference) !== 0;
-      const args =
-        type.aliasTypeArguments ??
-        (isReference ? source.checker.getTypeArguments(type as ts.TypeReference) : undefined);
-      if (args?.length === 1) return behaviorValueType(source, call, args[0]);
+    if (
+      type.flags & ts.TypeFlags.Object &&
+      (type as ts.ObjectType).objectFlags & ts.ObjectFlags.Reference
+    ) {
+      const handle = type as ts.TypeReference;
+      const declared = handle.target
+        .getSymbol()
+        ?.declarations?.some(
+          (decl) => ts.isInterfaceDeclaration(decl) && source.intrinsic(decl.name, expected)
+        );
+      if (!declared)
+        return source.missing(
+          node,
+          'handle-origin',
+          `The operation needs the resolved authoring ${expected} declaration.`
+        );
+      // An authored alias can rearrange its own type arguments. The handle target's instantiated arguments
+      // are authoritative even when the call was written with explicit source type arguments.
+      const args = source.checker.getTypeArguments(handle);
+      if (args.length === (expected === 'ActionHandle' ? 2 : 1)) return args;
     }
     return source.missing(
-      call,
+      node,
       'handle-value-type',
       'The checked handle needs its concrete payload domain in the receiving IR.'
     );
+  }
+
+  private declaredHandle(call: ts.CallExpression, expected: HandleExport): readonly ts.Type[] {
+    const source = this.source;
+    const signature = source.checker.getResolvedSignature(call);
+    if (!signature)
+      return source.missing(
+        call,
+        'handle-value-type',
+        'The handle declaration needs a resolved source signature.'
+      );
+    return this.handleArguments(source.checker.getReturnTypeOfSignature(signature), call, expected);
+  }
+
+  private handleType(
+    call: ts.CallExpression,
+    expected: 'StateHandle' | 'DerivedHandle' | 'EventHandle'
+  ): ValueType {
+    const [payload] = this.declaredHandle(call, expected);
+    return this.source.data.type(call.typeArguments?.[0] ?? call, payload!);
+  }
+
+  private actionArity(
+    call: ts.CallExpression,
+    callback: SourceFunction,
+    args: ts.Type,
+    binding: Binding
+  ): number {
+    const source = this.source;
+    const origin = call.typeArguments?.[0] ?? call.arguments[1]!;
+    if (!source.checker.isTupleType(args))
+      return source.missing(
+        origin,
+        'action-arguments',
+        'The action handle needs a finite typed argument tuple.'
+      );
+    const tuple = args as ts.TupleTypeReference;
+    if (tuple.target.elementFlags.some((flag) => flag !== ts.ElementFlags.Required)) {
+      return source.missing(
+        origin,
+        'action-arguments',
+        'Optional, rest or variadic action arguments need their own host dispatch representation.'
+      );
+    }
+    const elements = source.checker.getTypeArguments(tuple);
+    const actual = callback.parameters.slice(1);
+    if (actual.length > elements.length)
+      return source.missing(
+        actual[elements.length]!,
+        'action-arguments',
+        'This callback parameter has no supplied argument in the declared action tuple.'
+      );
+    const unused: Binding[] = [];
+    for (const [index, element] of elements.entries()) {
+      const named = tuple.target.labeledElementDeclarations?.[index];
+      const node =
+        named ?? (ts.isTupleTypeNode(origin) ? origin.elements[index] : undefined) ?? origin;
+      const type = source.data.type(node, element);
+      const parameter = actual[index];
+      if (parameter) {
+        if (source.data.type(parameter) !== type)
+          return source.missing(
+            parameter,
+            'action-parameter-domain',
+            'The callback argument needs the same represented domain as the declared action tuple.'
+          );
+      } else {
+        // A shorter callback ignores these values; the public action still accepts the full declared tuple.
+        const name = named && ts.isIdentifier(named.name) ? named.name.text : `arg${index + 1}`;
+        unused.push(
+          source.binding(node, JSON.stringify(['action-parameter', binding.id, index]), name, type)
+        );
+      }
+    }
+    if (unused.length) this.unusedActionParameters.set(binding.id, unused);
+    return elements.length;
   }
 
   private stateDeclaration(call: ts.CallExpression): Readable {
@@ -652,7 +809,7 @@ class ComponentProducer {
         'The state location needs its per-instance initializer.'
       );
     const callback = this.propertyFunction(member, 'state-initializer');
-    const type = this.handleType(call);
+    const type = this.handleType(call, 'StateHandle');
     const binding = source.binding(call, 'state', name, type);
     const init = source.binding(member, 'state-initializer', name, type);
     this.pendingCallbacks.push(() => {
@@ -675,13 +832,20 @@ class ComponentProducer {
       this.functionValue(argument) ?? argument,
       `${kind}-callback`
     );
-    const type = kind === 'derive' ? this.handleType(call) : behaviorReturnType(source, callback);
-    const binding = source.binding(call, kind, name, type);
+    if (kind === 'action') {
+      const [args, outcome] = this.declaredHandle(call, 'ActionHandle');
+      const type = source.data.type(call.typeArguments?.[1] ?? callback.type ?? callback, outcome!);
+      const binding = source.binding(call, kind, name, type);
+      const parameters = this.actionArity(call, callback, args!, binding);
+      this.pendingCallbacks.push(() => {
+        this.behaviors.callback(binding, 'action', callback, true);
+      });
+      return { kind, binding, parameters };
+    }
+    const binding = source.binding(call, kind, name, this.handleType(call, 'DerivedHandle'));
     this.pendingCallbacks.push(() => {
-      this.behaviors.callback(binding, kind === 'derive' ? 'pure' : 'action', callback, true);
+      this.behaviors.callback(binding, 'pure', callback, true);
     });
-    if (kind === 'action')
-      return { kind, binding, parameters: Math.max(0, callback.parameters.length - 1) };
     return { kind, binding };
   }
 
@@ -690,7 +854,7 @@ class ComponentProducer {
     argumentsIn(source, call, 1, 1, 'event-declaration');
     const name = sourceName(source, call.arguments[0]!, 'event-name');
     this.declarePublic('signal', name, call.arguments[0]!);
-    const binding = source.binding(call, 'signal', name, this.handleType(call));
+    const binding = source.binding(call, 'signal', name, this.handleType(call, 'EventHandle'));
     this.signals.push(binding);
     return { kind: 'signal', binding };
   }

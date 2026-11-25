@@ -1,11 +1,11 @@
 # Proto language compiler foundation
 
-The package compiles a bounded 0.4 authoring surface through a shared TypeScript Program and checked component and behavior IR. The versioned readonly Badge runs in ordinary React and GPUI applications. The package also provides partial Proto lint and an editor analysis API.
+The package compiles a bounded 0.4 authoring surface through a shared TypeScript Program and checked component and behavior IR. The versioned readonly Badge and fixed-mode controlled Toggle run in ordinary React and GPUI applications. The package also provides partial Proto lint and an editor analysis API.
 
 | Target         | Replacement implementation |
 | -------------- | -------------------------- |
-| React          | Authored readonly props, derivations, helpers and nested styles rendered in Chromium |
-| GPUI           | The same source and IR rendered and painted in a native GPUI window |
+| React          | Authored Badge and Toggle with typed public state and requests in Chromium |
+| GPUI           | The same authored inputs and IR with native paint and pointer input |
 | Vue 2          | Not implemented            |
 | Vue 3          | Not implemented            |
 | Web Components | Not implemented            |
@@ -23,22 +23,25 @@ With Node.js 24 and workspace dependencies installed, emit the checked-in Badge 
 ```sh
 node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/readonly-badge.proto.ts.txt --target react --name AuthoringBadge
 node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/readonly-badge.proto.ts.txt --target gpui --name AuthoringBadge
+node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/controlled-toggle.proto.ts.txt --target react --name ControlledToggle
+node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/controlled-toggle.proto.ts.txt --target gpui --name ControlledToggle
 ```
 
 `produceComponentIR(program, { fileName, exportName, publicName })` is available through `@proto.ui/compiler/producer`. It uses the Program from `@proto.ui/compiler/frontend` and returns the target-neutral source closure with either checked IR or located diagnostics. Source spans use UTF-16 offsets. `exportName` defaults to `default`. `publicName` chooses the target binding independently of the prototype's debug name.
 
 For direct API use, the producer exports `AUTHORING_DECLARATIONS` for the project’s TypeScript `paths` mapping of `@proto.ui/core/authoring`. The CLI supplies this controlled language declaration when the project has no matching mapping. The producer checks actual resolved symbol identities and reachable helper bodies. This compiler entry implements its admitted operations through native lowering. The shared public Core/Adapter authoring runtime and application-source migrations have separate coverage requirements.
 
-The controlled Toggle currently reports missing optional-prop presence. The Tabs owner reports missing logical Context lowering. Owned scheduler support has independent native tests. Source-to-consumer coverage of those two components remains open.
+The Toggle's optional boolean input selects its mode at creation. A controlled click delivers a typed, immutable `{ active: boolean }` request. The committed public value follows the owner's accepted input. An uncontrolled instance initializes from `defaultActive` once and commits local changes. Both hosts reject a mode change on the same instance and retain its last accepted inputs. The Tabs owner and panel still require logical Context, keyed composition and owned async source lowering. Scheduler support has independent native tests.
 
 ## Native-source targets
 
 Import `ComponentIR` from `@proto.ui/compiler/targets/ir`. `emitReact(ir)` from `@proto.ui/compiler/targets/react` returns TypeScript. `await emitGpui(ir)` from `@proto.ui/compiler/targets/gpui` returns Rust. The GPUI entry invokes its locked Cargo generator by default and accepts `{ generator: pathToBinary }`. Generated components import reached support from `@proto.ui/compiler/support/react` or the crate in `support/gpui`.
 
-Both host suites compile the versioned Badge, import its generated component and observe its public props, text and nested styles. Additional direct-IR controls exercise controlled requests and owner publication, uncontrolled selection, instance captures, rollback, queued reentry and disposal. `PUI_CHROMIUM_EXECUTABLE` selects a system Chromium. `PROTO_UI_REACT_CONSUMER_DIR` and `PROTO_UI_GPUI_CONSUMER_DIR` retain generated modules and their source closure. The native crate also retains its SDK lockfile.
+The host suites compile the versioned sources and import the generated components. They exercise Badge's text and nested styles, Toggle's native press and public requests, fixed-mode input rejection and owner updates. Additional direct-IR controls exercise instance captures, rollback, queued reentry and disposal. `PUI_CHROMIUM_EXECUTABLE` selects a system Chromium. `PROTO_UI_REACT_CONSUMER_DIR` and `PROTO_UI_GPUI_CONSUMER_DIR` retain generated modules and their source closure. The native crate also retains its SDK lockfile.
 
 ```sh
 node --test packages/compiler/test/react-target.node-test.mjs
+node --test packages/compiler/test/controlled-source-react.node-test.mjs
 node --test packages/compiler/test/gpui-target.node-test.mjs
 ```
 

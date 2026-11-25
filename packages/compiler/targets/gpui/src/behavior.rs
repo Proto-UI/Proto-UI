@@ -39,7 +39,7 @@ impl Expression {
         let code = self.code;
         match (self.ty, self.owns_value) {
             (Type::Text, false) => quote!(::std::string::String::from(#code)),
-            (Type::Tokens, false) => quote!(::core::clone::Clone::clone(#code)),
+            (Type::Tokens | Type::Data(_), false) => quote!(::core::clone::Clone::clone(#code)),
             _ => code,
         }
     }
@@ -83,11 +83,13 @@ fn count_uses<'a>(block: &'a Block) -> HashMap<&'a str, usize> {
         End::Fail { .. } => {},
         End::Jump { to, .. } => values.extend(&to.args),
         End::Branch { condition, yes, no, .. } => { values.push(condition); values.extend(&yes.args); values.extend(&no.args); }
+        End::Presence { value, present, omitted, .. } => { values.push(value); values.extend(&present.args); values.extend(&omitted.args); }
     }
     while let Some(v) = values.pop() {
         match v {
             Value::Local { id } => *counts.entry(id.as_str()).or_insert(0) += 1,
-            Value::Not { value } => values.push(value),
+            Value::Not { value } | Value::HasValue { value } | Value::Member { value, .. } => values.push(value),
+            Value::Record { fields, .. } => values.extend(fields.iter().map(|f| &f.value)),
             Value::Binary { left, right, .. } => { values.push(left); values.push(right); }
             Value::Call { args, .. } => values.extend(args),
             _ => {},
@@ -117,13 +119,39 @@ impl<'c, 'a> Lower<'c, 'a> {
     fn value(&mut self, value: &Value) -> Expression {
         let (code, ty, owns_value) = match value {
             Value::Bool { .. } | Value::Number { .. } | Value::Text { .. } | Value::Tokens { .. } => return literal(value),
+            Value::Record { ty: Type::Data(i), fields } => {
+                let mut values = Vec::with_capacity(fields.len());
+                for field in fields {
+                    let v = self.value(&field.value).owned();
+                    let n = &self.names.members[*i][self.checked.members[*i][field.name.as_str()]];
+                    values.push(quote!(#n: #v));
+                }
+                let record = &self.names.data[*i];
+                (quote!(#record { #(#values),* }), Type::Data(*i), true)
+            }
+            Value::Record { .. } => unreachable!("checked record"),
+            Value::Member { value, field } => {
+                let base = self.value(value);
+                let Type::Data(i) = base.ty else { unreachable!("checked record") };
+                let Data::Record { fields, .. } = &self.checked.ir.types[i] else { unreachable!("checked record") };
+                let j = self.checked.members[i][field.as_str()];
+                let n = &self.names.members[i][j];
+                let ty = fields[j].ty;
+                let code = base.code;
+                let selected = quote!((#code).#n);
+                if base.owns_value { (selected, ty, true) } else { (names::as_input(ty, selected), ty, false) }
+            }
+            Value::HasValue { value } => {
+                let value = self.value(value).code;
+                (quote!((#value).is_some()), Type::Bool, false)
+            }
             Value::Prop { id } | Value::Capture { id } | Value::State { id } => {
                 let p = self.checked.places[id.as_str()];
                 let ty = self.checked.binding(p).ty;
                 let read = self.read(p);
                 let value = match ty {
                     Type::Text => quote!((#read).as_str()),
-                    Type::Tokens => read,
+                    Type::Tokens | Type::Data(_) => read,
                     _ => quote!(*#read),
                 };
                 (value, ty, false)
@@ -132,7 +160,7 @@ impl<'c, 'a> Lower<'c, 'a> {
                 let (&key, (name, ty, owned)) = self.locals.get_key_value(id.as_str()).expect("validated local");
                 let last = self.uses.get(key) == Some(&1);
                 self.consumed.push(key);
-                if matches!(ty, Type::Text | Type::Tokens) && *owned && !last { (names::as_input(*ty, quote!(#name)), *ty, false) }
+                if matches!(ty, Type::Text | Type::Tokens | Type::Data(_)) && *owned && !last { (names::as_input(*ty, quote!(#name)), *ty, false) }
                 else { (quote!(#name), *ty, *owned) }
             }
             Value::Not { value } => {
@@ -167,7 +195,7 @@ impl<'c, 'a> Lower<'c, 'a> {
                 let args = args.iter().map(|v| self.value(v).argument()).collect();
                 let code = self.call(f, args);
                 let ty = self.checked.ir.behaviors[f].binding.ty;
-                (code, ty, matches!(ty, Type::Text | Type::Tokens))
+                (code, ty, matches!(ty, Type::Text | Type::Tokens | Type::Data(_)))
             }
         };
         Expression { code, ty, owns_value }
@@ -177,12 +205,12 @@ impl<'c, 'a> Lower<'c, 'a> {
         entry_call(self.checked, target, args, |p| self.read(p), |i| { let n = names::pending(i); quote!(#n) }, quote!(signals))
     }
 
-    fn edge(&mut self, to: &Edge) -> TokenStream {
+    fn edge(&mut self, to: &Edge, payload: Option<TokenStream>) -> TokenStream {
         let body = &self.checked.bodies[self.f];
         let dst = names::block(self.f, body.blocks[to.block.as_str()]);
         let args: Vec<_> = (0..self.checked.ir.behaviors[self.f].params.len()).map(names::argument).collect();
         // Edge values are evaluated in their original scope before the successor can write.
-        let transferred: Vec<_> = to.args.iter().map(|v| self.value(v).owned()).collect();
+        let transferred: Vec<_> = payload.into_iter().chain(to.args.iter().map(|v| self.value(v).owned())).collect();
         let facts = &self.checked.bodies[self.f].facts;
         let env = environment(facts, |p| { let n = data(p); quote!(#n) }, |i| { let n = names::pending(i); quote!(#n) }, quote!(signals));
         quote!(Self::#dst(#(#args,)* #(#transferred,)* #(#env),*))
@@ -193,7 +221,7 @@ impl<'c, 'a> Lower<'c, 'a> {
             Instruction::Let { binding, value, .. } => {
                 let expr = self.value(value).owned();
                 let n = names::local(index);
-                let ty = names::ty(binding.ty);
+                let ty = self.names.ty(binding.ty);
                 self.locals.insert(&binding.id, (n.clone(), binding.ty, true));
                 quote!(let #n: #ty = #expr;)
             }
@@ -217,8 +245,10 @@ impl<'c, 'a> Lower<'c, 'a> {
                     let value = self.value(arg);
                     // A borrowed value in a location writable by the callee must keep its
                     // argument-time value while the helper runs on the same pending write.
-                    let aliases_write = matches!(arg, Value::State { id } if matches!(self.checked.places[id.as_str()], Place::Field(j) if self.checked.bodies[callee].facts.writes.contains(&j)));
-                    if matches!(value.ty, Type::Text | Type::Tokens) && aliases_write {
+                    let mut origin = arg;
+                    while let Value::Member { value, .. } = origin { origin = value; }
+                    let aliases_write = matches!(origin, Value::State { id } if matches!(self.checked.places[id.as_str()], Place::Field(j) if self.checked.bodies[callee].facts.writes.contains(&j)));
+                    if matches!(value.ty, Type::Text | Type::Tokens | Type::Data(_)) && aliases_write {
                         let snapshot = format_ident!("snapshot_{i}");
                         let ty = value.ty;
                         let value = value.owned();
@@ -243,12 +273,20 @@ impl<'c, 'a> Lower<'c, 'a> {
                 let Source { file, start, end } = source;
                 quote!(::core::result::Result::Err(::proto_ui_gpui_support::SegmentFailure { reason: #reason, file: #file, start: #start, end: #end }))
             }
-            End::Jump { to, .. } => self.edge(to),
+            End::Jump { to, .. } => self.edge(to, None),
             End::Branch { condition, yes, no, .. } => {
                 let cond = self.value(condition).code;
-                let yes = self.edge(yes);
-                let no = self.edge(no);
+                let yes = self.edge(yes, None);
+                let no = self.edge(no, None);
                 quote!(if #cond { #yes } else { #no })
+            }
+            End::Presence { value, present, omitted, .. } => {
+                let input = self.value(value);
+                let code = input.code;
+                let payload = if input.owns_value { quote!(payload) } else { quote!(::core::clone::Clone::clone(payload)) };
+                let some = self.edge(present, Some(payload));
+                let none = self.edge(omitted, None);
+                quote!(match #code { ::core::option::Option::Some(payload) => #some, ::core::option::Option::None => #none })
             }
         }
     }
@@ -267,19 +305,19 @@ pub fn methods(checked: &Checked<'_>, names: &Names) -> Vec<TokenStream> {
             let mut params = Vec::new();
             for (i, p) in behavior.params.iter().enumerate() {
                 let n = names::argument(i);
-                let ty = names::input_ty(p.ty);
+                let ty = names.input_ty(p.ty);
                 params.push(quote!(#n: #ty));
                 lower.locals.insert(&p.id, (n, p.ty, false));
             }
             for (i, p) in block.params.iter().enumerate() {
                 let n = names::parameter(i);
-                let ty = names::ty(p.ty);
+                let ty = names.ty(p.ty);
                 params.push(quote!(#n: #ty));
                 lower.locals.insert(&p.id, (n, p.ty, true));
             }
             let signal = &names.signal;
-            params.extend(environment(facts, |p| { let n = data(p); let ty = names::ty(checked.binding(p).ty); quote!(#n: &#ty) },
-                |i| { let n = names::pending(i); let ty = names::ty(checked.ir.fields[i].binding.ty); quote!(#n: &mut ::proto_ui_gpui_support::PendingWrite<'_, #ty>) },
+            params.extend(environment(facts, |p| { let n = data(p); let ty = names.ty(checked.binding(p).ty); quote!(#n: &#ty) },
+                |i| { let n = names::pending(i); let ty = names.ty(checked.ir.fields[i].binding.ty); quote!(#n: &mut ::proto_ui_gpui_support::PendingWrite<'_, #ty>) },
                 quote!(signals: &mut ::std::vec::Vec<#signal>)));
             let mut steps = Vec::new();
             for (index, instruction) in block.instructions.iter().enumerate() {
@@ -289,7 +327,7 @@ pub fn methods(checked: &Checked<'_>, names: &Names) -> Vec<TokenStream> {
                 }
             }
             let end = lower.end(&block.end);
-            let ty = names::ty(behavior.binding.ty);
+            let ty = names.ty(behavior.binding.ty);
             let result = if facts.fallible { quote!(::core::result::Result<#ty, ::proto_ui_gpui_support::SegmentFailure>) } else { ty };
             let doc = names::source_doc(&behavior.binding.name, block.end.source());
             methods.push(quote! {

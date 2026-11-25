@@ -1,7 +1,25 @@
-import type { Behavior, Binding, SourceSpan, Value, ValueType } from '../component-ir.ts';
+import {
+  lookupDataType,
+  type Behavior,
+  type Binding,
+  type DataType,
+  type SourceSpan,
+  type Value,
+  type ValueType,
+} from '../component-ir.ts';
 import { reject, requireType } from './diagnostic.ts';
 import type { References } from './graph.ts';
-import { id, list, literalFields, literalType, resolve, variant } from './structure.ts';
+import {
+  id,
+  list,
+  literalFields,
+  literalType,
+  resolve,
+  shape,
+  text,
+  variant,
+  type RecordFields,
+} from './structure.ts';
 
 export interface ReadableField {
   readonly kind: 'prop' | 'state' | 'capture';
@@ -9,6 +27,8 @@ export interface ReadableField {
 }
 
 export interface Declarations {
+  readonly types: readonly DataType[];
+  readonly recordFields: RecordFields;
   readonly values: ReadonlyMap<string, ReadableField>;
   readonly signals: ReadonlyMap<string, Binding>;
   readonly functions: ReadonlyMap<string, Behavior>;
@@ -25,6 +45,9 @@ const valueFields = {
   state: ['kind', 'id'],
   capture: ['kind', 'id'],
   local: ['kind', 'id'],
+  record: ['kind', 'type', 'fields'],
+  member: ['kind', 'value', 'field'],
+  'has-value': ['kind', 'value'],
   not: ['kind', 'value'],
   binary: ['kind', 'op', 'left', 'right'],
   call: ['kind', 'fn', 'args'],
@@ -46,24 +69,35 @@ export function expressions(
     formals: readonly Binding[],
     role: string,
     key: string,
-    source: SourceSpan
+    source: SourceSpan,
+    payload?: ValueType
   ): void {
     const use = `${role} ${JSON.stringify(key)}`;
     list(args, `${use} arguments`, source);
-    if (args.length !== formals.length) {
+    const firstExplicit = payload === undefined ? 0 : 1;
+    const supplied = args.length + firstExplicit;
+    if (supplied !== formals.length) {
+      const implicit = payload === undefined ? '' : ' including the implicit presence payload';
       reject(
         'wrong-arity',
         source,
-        `${use} expects ${formals.length} arguments, received ${args.length}. Transfer one value per parameter.`,
+        `${use} expects ${formals.length} arguments, received ${supplied}${implicit}. Transfer one value per parameter.`,
         [owner, key]
       );
     }
+    if (payload !== undefined) {
+      const first = formals[0]!;
+      requireType(payload, first.type, `${use} presence payload`, source, [owner, first.id]);
+    }
     for (const [index, arg] of args.entries()) {
-      const formal = formals[index]!;
-      requireType(typeOf(arg, source), formal.type, `${use} argument ${index + 1}`, source, [
-        owner,
-        formal.id,
-      ]);
+      const formal = formals[firstExplicit + index]!;
+      requireType(
+        typeOf(arg, source),
+        formal.type,
+        `${use} argument ${firstExplicit + index + 1}`,
+        source,
+        [owner, formal.id]
+      );
     }
   }
 
@@ -89,6 +123,20 @@ export function expressions(
     return result;
   }
 
+  function presencePayload(value: Value, source: SourceSpan): ValueType {
+    const type = typeOf(value, source);
+    const data = lookupDataType(declarations.types, type);
+    if (data?.kind !== 'presence') {
+      reject(
+        'type-mismatch',
+        source,
+        `A presence test requires a presence value, received ${type}.`,
+        bindings
+      );
+    }
+    return data.value;
+  }
+
   function valueType(value: Value, source: SourceSpan): ValueType {
     switch (value.kind) {
       case 'bool':
@@ -96,6 +144,86 @@ export function expressions(
       case 'text':
       case 'tokens':
         return literalType(value, source, bindings);
+      case 'record': {
+        const data = lookupDataType(declarations.types, value.type);
+        if (!data)
+          reject(
+            'ir-shape',
+            source,
+            'A record constructor needs a canonical index of a declared record type.',
+            bindings
+          );
+        if (data.kind !== 'record')
+          reject(
+            'type-mismatch',
+            source,
+            `Record construction requires a record type, received ${value.type} (presence).`,
+            bindings
+          );
+        list(value.fields, 'record value fields', source);
+        if (value.fields.length !== data.fields.length) {
+          reject(
+            'ir-shape',
+            source,
+            `Record ${value.type} declares ${data.fields.length} fields, received ${value.fields.length}. Supply each declared field once.`,
+            bindings
+          );
+        }
+        const declared = declarations.recordFields.get(data)!;
+        const seen = new Set<string>();
+        for (const field of value.fields) {
+          shape(field, 'record value field', source, ['name', 'value'], [], bindings);
+          text(field.name, 'record value field name', source, bindings);
+          const expected = declared.get(field.name);
+          if (!expected)
+            reject(
+              'ir-shape',
+              source,
+              `Record ${value.type} has no field ${JSON.stringify(field.name)}.`,
+              bindings
+            );
+          if (seen.has(field.name))
+            reject(
+              'duplicate-name',
+              source,
+              `Record construction supplies ${JSON.stringify(field.name)} twice.`,
+              bindings
+            );
+          seen.add(field.name);
+          requireType(
+            typeOf(field.value, source),
+            expected.type,
+            `Record field ${JSON.stringify(field.name)}`,
+            source,
+            bindings
+          );
+        }
+        return value.type;
+      }
+      case 'member': {
+        text(value.field, 'record member name', source, bindings);
+        const type = typeOf(value.value, source);
+        const data = lookupDataType(declarations.types, type);
+        if (data?.kind !== 'record')
+          reject(
+            'type-mismatch',
+            source,
+            `Member access requires a record value, received ${type}.`,
+            bindings
+          );
+        const field = declarations.recordFields.get(data)!.get(value.field);
+        if (!field)
+          reject(
+            'type-mismatch',
+            source,
+            `Record ${type} has no field ${JSON.stringify(value.field)}.`,
+            bindings
+          );
+        return field.type;
+      }
+      case 'has-value':
+        presencePayload(value.value, source);
+        return 'bool';
       case 'local': {
         id(value.id, 'local reference', source);
         const binding = locals.get(value.id) ?? params.get(value.id);
@@ -190,5 +318,5 @@ export function expressions(
     }
   }
 
-  return { typeOf, argumentsOf, callee };
+  return { typeOf, argumentsOf, callee, presencePayload };
 }

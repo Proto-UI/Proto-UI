@@ -22,6 +22,8 @@ interface DraftBlock {
   readonly instructions: Instruction[];
   readonly incoming: Incoming[];
   readonly imports: Map<Slot, Binding>;
+  /** Presence payloads dominated by a match on this exact immutable operand. */
+  readonly payloads: Map<Operand, Operand>;
   end?: Terminator;
 }
 interface Slot {
@@ -30,6 +32,14 @@ interface Slot {
   readonly literalText?: string;
 }
 export type Operand = { type: ValueType; value: Value } | { type: ValueType; slot: Slot };
+
+export interface PresenceTest {
+  readonly subject: Operand;
+  readonly payloadType: ValueType;
+  readonly presentOnTrue: boolean;
+}
+
+export type Condition = Operand | PresenceTest;
 
 export function knownText(operand: Operand): string | undefined {
   return 'slot' in operand
@@ -59,7 +69,7 @@ export class BehaviorFlow {
     return this.source.binding(node, JSON.stringify(['behavior', this.owner.id, role]), name, type);
   }
 
-  private block(node: ts.Node, role: string): DraftBlock {
+  private block(node: ts.Node, role: string, payloads?: ReadonlyMap<Operand, Operand>): DraftBlock {
     const block: DraftBlock = {
       id: this.binding(node, `block/${role}`, role, 'unit').id,
       origin: node,
@@ -67,6 +77,7 @@ export class BehaviorFlow {
       instructions: [],
       incoming: [],
       imports: new Map(),
+      payloads: new Map(payloads),
     };
     this.blocks.push(block);
     return block;
@@ -103,6 +114,10 @@ export class BehaviorFlow {
 
   value(operand: Operand): Value {
     return 'slot' in operand ? this.readIn(operand.slot, this.current) : operand.value;
+  }
+
+  payload(subject: Operand): Operand | undefined {
+    return this.current.payloads.get(subject);
   }
 
   define(node: ts.Node, binding: Binding, operand: Operand): Operand {
@@ -146,18 +161,47 @@ export class BehaviorFlow {
     return this.current.end !== undefined;
   }
 
-  private fork(node: ts.Node, condition: Operand): [DraftBlock, DraftBlock] {
-    requireDomain(this.source, node, condition.type, 'bool');
-    const yes = this.block(node, 'yes');
-    const no = this.block(node, 'no');
-    this.terminate({
-      kind: 'branch',
-      source: this.source.span(node),
-      condition: this.value(condition),
-      yes: this.edge(this.current, yes),
-      no: this.edge(this.current, no),
-    });
+  private fork(node: ts.Node, condition: Condition): [DraftBlock, DraftBlock] {
+    const yes = this.block(node, 'yes', this.current.payloads);
+    const no = this.block(node, 'no', this.current.payloads);
+    const source = this.source.span(node);
+    if ('subject' in condition) {
+      const present = condition.presentOnTrue ? yes : no;
+      const omitted = condition.presentOnTrue ? no : yes;
+      const binding = this.binding(node, 'present-value', 'presentValue', condition.payloadType);
+      present.params.push(binding);
+      present.payloads.set(condition.subject, {
+        type: binding.type,
+        slot: { block: present, binding },
+      });
+      // The receiver supplies the payload as the first present parameter. Only
+      // normal SSA transfers are added to this edge's explicit argument list.
+      this.terminate({
+        kind: 'presence',
+        source,
+        value: this.value(condition.subject),
+        present: this.edge(this.current, present),
+        omitted: this.edge(this.current, omitted),
+      });
+    } else {
+      requireDomain(this.source, node, condition.type, 'bool');
+      this.terminate({
+        kind: 'branch',
+        source,
+        condition: this.value(condition),
+        yes: this.edge(this.current, yes),
+        no: this.edge(this.current, no),
+      });
+    }
     return [yes, no];
+  }
+
+  private join(node: ts.Node, role: string, left: DraftBlock, right: DraftBlock): DraftBlock {
+    const block = this.block(node, role);
+    for (const [subject, payload] of left.payloads) {
+      if (right.payloads.get(subject) === payload) block.payloads.set(subject, payload);
+    }
+    return block;
   }
 
   private jump(from: DraftBlock, to: DraftBlock, origin: ts.Node, args?: Value[]): void {
@@ -166,7 +210,7 @@ export class BehaviorFlow {
 
   branch(
     node: ts.IfStatement | ts.ConditionalExpression,
-    condition: Operand,
+    condition: Condition,
     thenBody: () => void,
     elseBody: () => void
   ): void {
@@ -181,7 +225,7 @@ export class BehaviorFlow {
       this.current = yesExit;
       return;
     }
-    const join = this.block(node, 'continue');
+    const join = this.join(node, 'continue', yesExit, this.current);
     this.jump(yesExit, join, ts.isIfStatement(node) ? node.thenStatement : node.whenTrue);
     this.jump(
       this.current,
@@ -193,7 +237,7 @@ export class BehaviorFlow {
 
   choose(
     node: ts.ConditionalExpression,
-    condition: Operand,
+    condition: Condition,
     arm: (expression: ts.Expression) => Operand
   ): Operand {
     const [yes, no] = this.fork(node, condition);
@@ -205,7 +249,7 @@ export class BehaviorFlow {
     const right = arm(node.whenFalse);
     requireDomain(this.source, node.whenFalse, right.type, left.type);
     const rightValue = this.value(right);
-    const join = this.block(node, 'result');
+    const join = this.join(node, 'result', leftExit, this.current);
     const binding = this.binding(node, 'result-value', 'result', left.type);
     join.params.push(binding);
     this.jump(leftExit, join, node.whenTrue, [leftValue]);

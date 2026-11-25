@@ -8,7 +8,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { emitGpui } from '@proto.ui/compiler/targets/gpui';
 import { controlledSelection, readonlyBadge } from './fixtures/backend-programs.ts';
-import { authoredBadgeSource } from './fixtures/authoring-source.mjs';
+import { authoredBadgeSource, authoredSource } from './fixtures/authoring-source.mjs';
 
 const sdkRepository = 'https://github.com/zed-industries/zed';
 const sdkRevision = '62e5991dd0f0c8a3af8d5e7e9c4652490d468db8';
@@ -92,12 +92,17 @@ test('external Rust consumer renders and interacts with generated views in headl
   const generator = process.env.PROTO_UI_GPUI_GENERATOR;
   const options = generator ? { generator } : undefined;
   const authoredInput = authoredBadgeSource();
-  if (retainedRoot)
+  const toggle = authoredSource('controlled-toggle.proto.ts.txt', 'ControlledToggle');
+  assert.equal(toggle.status, 'produced', JSON.stringify(toggle.diagnostics));
+  if (retainedRoot) {
     writeFileSync(join(crate, 'authored-source.json'), JSON.stringify(authoredInput));
+    writeFileSync(join(crate, 'controlled-source.json'), JSON.stringify(toggle));
+  }
   const programs = [
     ['delivery_badge', readonlyBadge()],
     ['selection_control', controlledSelection()],
     ['authoring_badge', authoredInput.component],
+    ['controlled_toggle', toggle.component],
   ];
   for (const [module, program] of programs) {
     const rust = await emitGpui(program, options);
@@ -136,9 +141,9 @@ test('external Rust consumer renders and interacts with generated views in headl
       result.stdout
     );
   assert.ok(summary, 'Cargo must execute the native tests without ignored or filtered cases');
-  assert.ok(
-    Number(summary[1]) >= 7,
-    'the six foundation cases and the authoring Badge case must all run'
+  assert.match(
+    result.stdout,
+    /^test controlled_source::uncontrolled_pointer_commit_survives_default_changes_and_reattachment \.\.\. ok\r?$/m
   );
   assert.match(
     result.stdout,
