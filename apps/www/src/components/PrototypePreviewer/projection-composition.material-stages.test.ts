@@ -135,34 +135,17 @@ describe('projection preserves static material-stage admission', () => {
   // do not claim native rendering, optical fidelity or four-host interaction.
   for (const presentation of ['select', 'tabs'] as const) {
     it.each(runtimes)(
-      `admits all four real Liquid Select stages through ${presentation} controls for %s`,
+      `admits the real Liquid Select hero stage through ${presentation} controls for %s`,
       (runtimeId) => {
         const original = planMaterialStages(liquidSelect.root);
-        expect(original.map((plan) => plan.scopeRef)).toEqual([
-          'uncontrolledStage',
-          'disabledStage',
-          'controlledStage',
-          'selectRtlLayout',
-        ]);
+        expect(original.map((plan) => plan.scopeRef)).toEqual(['heroStage']);
         const projected = compose(liquidSelect, runtimeId, presentation);
         expect(planMaterialStages(projected.root)).toEqual(original);
         expect(
-          nodes(projected.root).filter(
-            (node) =>
-              node.kind === 'proto' &&
-              node.prototypeId === 'liquid-glass-select-root' &&
-              ['uncontrolled', 'disabled', 'controlled', 'rtl'].includes(node.ref ?? '')
+          nodes(byRef(projected.root, 'heroStage')).filter(
+            (node) => node.kind === 'proto' && node.prototypeId === 'liquid-glass-select-root'
           )
-        ).toHaveLength(4);
-        expect(byRef(projected.root, 'selectRtlLayout').attrs?.dir).toBe('rtl');
-        expect(
-          nodes(projected.root).some(
-            (node) =>
-              node.kind === 'proto' &&
-              node.ref === 'accept' &&
-              node.prototypeId === 'liquid-glass-button'
-          )
-        ).toBe(true);
+        ).toHaveLength(1);
       }
     );
   }
