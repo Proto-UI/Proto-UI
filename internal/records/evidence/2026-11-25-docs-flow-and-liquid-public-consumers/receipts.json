@@ -1,0 +1,172 @@
+{
+  "baseRevision": "5f0844907895a4ae0db506fe6a5d0bf162318329",
+  "worktree": "/home/ezra/proto-ui-browser-gate-cb5d",
+  "checkoutState": "isolated dirty candidate; not official clean-head CI",
+  "candidateFiles": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/runtime-layout-parity.browser.test.ts",
+      "sha256": "f8208409cfe38c086d2e0002c6fa74aaead764146fd3f1ab0b7cba1aa926e36a"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
+      "sha256": "819d463468aeac7592c42d377cfd194085e375b6ca578a4eef450131506369d9"
+    }
+  ],
+  "runs": [
+    {
+      "label": "layout-brutalist-original",
+      "archive": "layout-brutalist-original.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/layout-brutalist-original.json",
+      "rawSha256": "e6c4f7c6067e52126a6096cb71ea5f3996eae4939f938f6029e426dd8b9bf586",
+      "passed": 0,
+      "failed": 1,
+      "filtered": 5,
+      "cases": [
+        {
+          "ancestorTitles": ["Runtime-only vertical layout parity"],
+          "fullName": "Runtime-only vertical layout parity docs brutalist: keeps the passive RuntimeBox's canvas and vertical insets",
+          "status": "failed",
+          "title": "docs brutalist: keeps the passive RuntimeBox's canvas and vertical insets",
+          "duration": 8912.689701,
+          "failureMessages": [
+            "AssertionError: react/document/h3/危险操作（Destructive）.y: expected 48 to be less than or equal to 1\n    at pairedBox (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/runtime-layout-parity.browser.test.ts:155:70)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/runtime-layout-parity.browser.test.ts:419:13\n    at Array.forEach (<anonymous>)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/runtime-layout-parity.browser.test.ts:412:28\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)"
+          ],
+          "meta": {}
+        }
+      ]
+    },
+    {
+      "label": "layout-docs-exact-order",
+      "archive": "layout-docs-exact-order.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/layout-docs-exact-order.json",
+      "rawSha256": "96cec00f779a4faa37ed098e435140d94331e822593e915f0e31920224cf4004",
+      "passed": 2,
+      "failed": 0,
+      "filtered": 4,
+      "cases": [
+        {
+          "ancestorTitles": ["Runtime-only vertical layout parity"],
+          "fullName": "Runtime-only vertical layout parity docs shadcn: keeps the passive RuntimeBox's canvas and vertical insets",
+          "status": "passed",
+          "title": "docs shadcn: keeps the passive RuntimeBox's canvas and vertical insets",
+          "duration": 8866.89179,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Runtime-only vertical layout parity"],
+          "fullName": "Runtime-only vertical layout parity docs brutalist: keeps the passive RuntimeBox's canvas and vertical insets",
+          "status": "passed",
+          "title": "docs brutalist: keeps the passive RuntimeBox's canvas and vertical insets",
+          "duration": 15135.481022999998,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ]
+    },
+    {
+      "label": "liquid-button-current-baseline",
+      "archive": "liquid-button-current-baseline.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/liquid-button-current-baseline.json",
+      "rawSha256": "0e6cfa200aea21233b5b8006454948ee4492958327aeb81dfd7241726079fa6f",
+      "passed": 0,
+      "failed": 1,
+      "filtered": 0,
+      "cases": [
+        {
+          "ancestorTitles": ["V2 optical paint through four real Web Adapter runtimes"],
+          "fullName": "V2 optical paint through four real Web Adapter runtimes the actual public Button documentation uses the same optical path on all four runtime panels",
+          "status": "failed",
+          "title": "the actual public Button documentation uses the same optical path on all four runtime panels",
+          "duration": 35984.654765,
+          "failureMessages": [
+            "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-adapter-panel=\"wc\"]').filter({ has: locator('.proto-previewer[data-demo-id=\"demo-liquid-glass-button\"][data-projection-toolbar=\"true\"]') }) to be visible\n\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts:724:21\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)"
+          ],
+          "meta": {}
+        }
+      ]
+    },
+    {
+      "label": "liquid-button-native-roles",
+      "archive": "liquid-button-native-roles.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/liquid-button-native-roles.json",
+      "rawSha256": "c311caa3c71fa63247c6280df3922983ec102a5dc6dec865806a65fe5e04d5da",
+      "passed": 1,
+      "failed": 0,
+      "filtered": 0,
+      "cases": [
+        {
+          "ancestorTitles": ["V2 optical paint through four real Web Adapter runtimes"],
+          "fullName": "V2 optical paint through four real Web Adapter runtimes the actual public Button documentation uses the same optical path on all four runtime panels",
+          "status": "passed",
+          "title": "the actual public Button documentation uses the same optical path on all four runtime panels",
+          "duration": 67381.330472,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ]
+    }
+  ],
+  "observations": [
+    {
+      "archive": "negative-docs-brutalist-0-wc.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-twelfth-5f084490/tmp/homepage-evidence/runtime-layout/docs-brutalist-0-wc.json",
+      "rawSha256": "99bfc9a6744bbd4fad76c0a4a75b5e70d931b2dbed6765709681faae35fb985f"
+    },
+    {
+      "archive": "negative-docs-brutalist-1-react.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-twelfth-5f084490/tmp/homepage-evidence/runtime-layout/docs-brutalist-1-react.json",
+      "rawSha256": "cbe1154a33513808697ed194a4d577b679db41ae0b6188831ef4d00c1698f06a"
+    },
+    {
+      "archive": "candidate-docs-brutalist-0-wc.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-fifteenth-5f084490/tmp/homepage-evidence/runtime-layout/docs-brutalist-0-wc.json",
+      "rawSha256": "ce7d4f702d444b42769b613ad7a38608642cc7e25026ef3769aa26a86e1ea8a0"
+    },
+    {
+      "archive": "candidate-docs-brutalist-1-react.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-fifteenth-5f084490/tmp/homepage-evidence/runtime-layout/docs-brutalist-1-react.json",
+      "rawSha256": "162d41ae9c1e2c3ba1bf9765ee422e9ecfe1dff7a28a46878522a2be9276c359"
+    },
+    {
+      "archive": "candidate-docs-brutalist-2-vue.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-fifteenth-5f084490/tmp/homepage-evidence/runtime-layout/docs-brutalist-2-vue.json",
+      "rawSha256": "387236b22046dbe067843971365bee5b117105806d1ea7b75d4e01dbaac60a96"
+    },
+    {
+      "archive": "candidate-docs-brutalist-3-vue2.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-fifteenth-5f084490/tmp/homepage-evidence/runtime-layout/docs-brutalist-3-vue2.json",
+      "rawSha256": "0912651f5ebefaf55b45a4bb3b22917759c6fa65194410f405161de4bea4903a"
+    },
+    {
+      "archive": "candidate-docs-brutalist-4-wc.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-fifteenth-5f084490/tmp/homepage-evidence/runtime-layout/docs-brutalist-4-wc.json",
+      "rawSha256": "423230f8ca3f733f7e10a5fb670b95a016edd0ec63b1e38ebcf0f6f877eac276"
+    },
+    {
+      "archive": "candidate-docs-shadcn-0-wc.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-fifteenth-5f084490/tmp/homepage-evidence/runtime-layout/docs-shadcn-0-wc.json",
+      "rawSha256": "b9c7bef51415e9f773402667a967db71b72a5cde46f0dab94324cf1e8773fda4"
+    },
+    {
+      "archive": "candidate-docs-shadcn-1-react.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-fifteenth-5f084490/tmp/homepage-evidence/runtime-layout/docs-shadcn-1-react.json",
+      "rawSha256": "33fc54ac67af67fa6e251b44f7456b3f801fa5e943dcbdc74389361da0a36fb1"
+    },
+    {
+      "archive": "candidate-docs-shadcn-2-vue.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-fifteenth-5f084490/tmp/homepage-evidence/runtime-layout/docs-shadcn-2-vue.json",
+      "rawSha256": "3ba145cac97755dc5ac4f5b658f281c5f123126b7e185ec6951e2ebe6e32b145"
+    },
+    {
+      "archive": "candidate-docs-shadcn-3-vue2.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-fifteenth-5f084490/tmp/homepage-evidence/runtime-layout/docs-shadcn-3-vue2.json",
+      "rawSha256": "ba286f8f84eaaf0014f17cfb14b6292f7d122d5dcf5b9b795c8bcb4fc7d774dc"
+    },
+    {
+      "archive": "candidate-docs-shadcn-4-wc.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-fifteenth-5f084490/tmp/homepage-evidence/runtime-layout/docs-shadcn-4-wc.json",
+      "rawSha256": "c70e3f3b14f4cc517d1208d01ff491ad05b252d73645f3047b0b599d84bdd5eb"
+    }
+  ]
+}
