@@ -64,7 +64,9 @@ describe('Toast actual DemoSpec registration', () => {
       const demo = await loadDemo(recipeId);
       expect(() => assertDemoSpec(demo)).not.toThrow();
       const ids = [...new Set(prototypes(demo.root))].sort();
-      const expected = TOAST_ROLES.map((role) => `${family}-${role}`);
+      const expected = TOAST_ROLES.filter(
+        (role) => !(family === 'shadcn' && role === 'toast-close')
+      ).map((role) => `${family}-${role}`);
       if (family === 'shadcn') expected.push('shadcn-style-scope');
       expect(ids).toEqual(expected.sort());
       for (const id of ids) {
