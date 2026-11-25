@@ -2,6 +2,11 @@
 export const COMPILER_STATUS = Object.freeze({
   implementation: 'not-implemented',
   legacyImplementation: 'retired',
+  frontend: Object.freeze({
+    implementation: 'partial',
+    analysisComplete: false,
+    languageVersion: '0.4',
+  }),
   targets: Object.freeze({
     react: 'not-implemented',
     gpui: 'not-implemented',
