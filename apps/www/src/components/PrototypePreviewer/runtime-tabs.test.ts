@@ -59,9 +59,24 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'] 
       );
       expect(p.shell.textContent?.match(/One real runtime host/g)).toHaveLength(1);
       expect(p.shell.querySelectorAll('[role=tabpanel]:not([hidden])')).toHaveLength(1);
-      expect(styleContains(triggers[1]!, 'border-b-2')).toBe(true);
+      const tablist = p.shell.querySelector<HTMLElement>('[role=tablist]')!;
+      expect(styleContains(tablist, 'bg-transparent')).toBe(true);
       expect(styleContains(triggers[1]!, 'bg-transparent')).toBe(true);
-      expect(styleContains(p.shell.querySelector('[role=tablist]')!, 'overflow-x-auto')).toBe(true);
+      expect(styleContains(triggers[1]!, 'text-foreground')).toBe(true);
+      if (family === 'shadcn') {
+        const decoration = triggers[1]!.querySelector<HTMLElement>('[data-pui-owned-decoration]');
+        expect(decoration).not.toBeNull();
+        expect(styleContains(decoration!, 'opacity-100')).toBe(true);
+        expect(styleContains(decoration!, 'bg-foreground')).toBe(true);
+      } else {
+        expect(styleContains(triggers[1]!, 'border-b-2')).toBe(true);
+        expect(
+          styleContains(
+            triggers[1]!,
+            family === 'brutalist' ? 'border-foreground' : 'border-primary'
+          )
+        ).toBe(true);
+      }
       p.tabs.dispose();
       triggers[2]!.click();
       expect(p.onValueChange).toHaveBeenCalledTimes(1);

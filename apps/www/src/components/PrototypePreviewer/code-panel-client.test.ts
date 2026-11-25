@@ -10,7 +10,11 @@ function panelMarkup(id: string, raw = 'const exact = "<&";', projected = false)
     <div data-code-inner>
       <${buttonTag} type="button" data-copy aria-label="Copy code"><span data-copy-text>copy</span></${buttonTag}>
       <div data-code-content><pre class="proto-previewer__code" tabindex="0"><code data-raw-code="${escaped}">${raw}</code></pre></div>
+      <div class="code-panel__collapsed-guard" data-code-expand-guard hidden aria-hidden="true"></div>
       <${buttonTag} type="button" data-code-toggle aria-expanded="false">View code</${buttonTag}>
+    </div>
+    <div class="code-panel__collapse-bar" data-code-collapse-bar hidden>
+      <${buttonTag} type="button" data-code-collapse aria-expanded="true">Collapse code</${buttonTag}>
     </div>
   </figure>`;
 }
@@ -158,6 +162,78 @@ describe('CodePanel client', () => {
     shell.querySelector<HTMLButtonElement>('[data-code-toggle]')!.click();
     expect(shell.dataset.codePanelInit).toBe('1');
     expect(shell.dataset.codeExpanded).toBe('true');
+  });
+
+  it('guards the entire collapsed area, disables code interaction while collapsed, and collapses back cleanly', () => {
+    const shell = document.querySelector<HTMLElement>('[data-code-shell]')!;
+    const content = shell.querySelector<HTMLElement>('[data-code-content]')!;
+    const pre = shell.querySelector<HTMLElement>('pre')!;
+    const guard = shell.querySelector<HTMLElement>('[data-code-expand-guard]')!;
+    const toggle = shell.querySelector<HTMLButtonElement>('[data-code-toggle]')!;
+    const collapseBar = shell.querySelector<HTMLElement>('[data-code-collapse-bar]')!;
+    const collapse = shell.querySelector<HTMLButtonElement>('[data-code-collapse]')!;
+    const copy = shell.querySelector<HTMLElement>('[data-copy]')!;
+    setMeasurements(shell, { fullHeight: 400 });
+    initCodePanels(document);
+    refreshCodePanel(shell, { reset: true });
+
+    expect(shell.dataset.codeExpanded).toBe('false');
+    expect(content.inert).toBe(true);
+    expect(guard.hidden).toBe(false);
+    expect(toggle.hidden).toBe(false);
+    expect(copy.hidden).toBe(true);
+    expect(collapseBar.hidden).toBe(true);
+
+    guard.click();
+    expect(shell.dataset.codeExpanded).toBe('true');
+    expect(content.inert).toBe(false);
+    expect(guard.hidden).toBe(true);
+    expect(toggle.hidden).toBe(true);
+    expect(copy.hidden).toBe(false);
+    expect(collapseBar.hidden).toBe(false);
+
+    pre.scrollTop = 120;
+    pre.scrollLeft = 40;
+    collapse.focus();
+    collapse.click();
+    expect(shell.dataset.codeExpanded).toBe('false');
+    expect(content.inert).toBe(true);
+    expect(guard.hidden).toBe(false);
+    expect(toggle.hidden).toBe(false);
+    expect(copy.hidden).toBe(true);
+    expect(collapseBar.hidden).toBe(true);
+    expect(pre.scrollTop).toBe(0);
+    expect(pre.scrollLeft).toBe(0);
+    expect(document.activeElement).toBe(toggle);
+  });
+
+  it('never shows collapse bar or expand guard for short auto-expanded snippets', () => {
+    const shell = document.querySelector<HTMLElement>('[data-code-shell]')!;
+    setMeasurements(shell, { fullHeight: 48 });
+    initCodePanels(document);
+    refreshCodePanel(shell, { reset: true });
+    expect(shell.dataset.codeExpanded).toBe('true');
+    expect(shell.querySelector<HTMLElement>('[data-code-toggle]')!.hidden).toBe(true);
+    expect(shell.querySelector<HTMLElement>('[data-code-expand-guard]')!.hidden).toBe(true);
+    expect(shell.querySelector<HTMLElement>('[data-code-collapse-bar]')!.hidden).toBe(true);
+    expect(shell.querySelector<HTMLElement>('[data-code-content]')!.inert).toBe(false);
+  });
+
+  it('filters duplicate native clicks on projected collapse buttons across families', () => {
+    document.body.innerHTML = panelMarkup('projected-collapse', 'line\n'.repeat(80), true);
+    const shell = document.querySelector<HTMLElement>('[data-code-shell]')!;
+    const toggle = shell.querySelector<HTMLElement>('[data-code-toggle]')!;
+    const collapse = shell.querySelector<HTMLElement>('[data-code-collapse]')!;
+    setMeasurements(shell, { fullHeight: 400 });
+    initCodePanels(document);
+    refreshCodePanel(shell, { reset: true });
+
+    toggle.dispatchEvent(new CustomEvent('click', { bubbles: true }));
+    expect(shell.dataset.codeExpanded).toBe('true');
+    collapse.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(shell.dataset.codeExpanded).toBe('true');
+    collapse.dispatchEvent(new CustomEvent('click', { bubbles: true }));
+    expect(shell.dataset.codeExpanded).toBe('false');
   });
 });
 

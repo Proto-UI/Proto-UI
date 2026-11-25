@@ -155,7 +155,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['./handles', './internal', './spec', './state']),
   }),
   'packages/core/src/spec/feedback/application-role.ts': Object.freeze({
-    sourceSha256: '2f95669717b5b7e5521cfdd8eb0711f2615f2afeb001b62b8b6fea993a548cab',
+    sourceSha256: '038d2b3b8ceb22078101be158eb06720c1658e76d0e636ddc3be1b705146d7d0',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['./placeholder']),
   }),

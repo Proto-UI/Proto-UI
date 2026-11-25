@@ -207,6 +207,17 @@ RuntimeBox 的 canvas 由对应 family 的公开 Surface 绘制；运行时工�
 
 [`runtime-preview-evidence.ts`](../../content/docs/zh-cn/runtime-preview-evidence.ts) 同时检查实际圆角、边框、底色、间距和重复祖先绘制；token 断言不能替代真实浏览器截图与视觉检查。
 
+### RuntimeBox、Runtime Tabs 与 CodePanel 交互约定
+
+1. **启动与切换无布局跳动**：`[data-previewer-startup-shell]` 使用 `grid-template-columns: minmax(0, 1fr)` 与 `align-items: stretch; justify-content: stretch`，保证加载占位与真实 `.host` 始终占据完整预览宽度；固定家族与通用预览均在 SSR 阶段保留等价的 Runtime Tabs 行高，避免挂载后横向缩窄或纵向跳动。
+2. **Runtime Tabs 自举 `variant="line"`**：`runtime-tabs.ts` 与 `projection-composition.ts` 在四个家族（`shadcn`、`brutalist`、`bootstrap-2-3-2`、`liquid-glass`）统一消费对应家族的公开 Tabs 原型 `variant="line"`（不再依赖旧版兼容 `appearance="underline"`），同时在外层保留水平溢出安全边距避免激活指示线被裁切。
+3. **预览源码 Prettier 宽度折叠**：`PrototypePreviewer.astro` 在构建期通过 `code-format.ts` 调用 Prettier（默认 `printWidth: 68`，解析失败时安全回退原文），在保持 `code.textContent === code.dataset.rawCode` 与完整合法语法的前提下使预览源码在预览器宽度内自动换行折叠。
+4. **折叠态全安全区与展开后收起**：
+   - 折叠态（`data-code-expanded="false"`）隐藏滚动条与 ScrollArea 轨道、将底部被裁切的源码子树设为 `inert`，并铺满全区域 `[data-code-expand-guard]`，点击折叠区内任意位置均可直接展开，避免误选文字或误滚被裁切片段。
+   - 展开态（对存在高度溢出的长示例）在源码区底部呈现对应家族的 dogfood `Button`（`[data-code-collapse]`，「收起代码」/「Collapse code」），收起时自动复位滚动偏移并将键盘焦点归还到展开按钮。
+5. **复制按钮表面适配**：位于独立标题栏/工具栏内的复制按钮（如 `CodeFileBrowser`、`CodeExample`、`docs` header）保持透明 `ghost` 按钮；直接悬浮在源码右上角的 `.site-code-copy-overlay` 按钮使用单一 owner 的不透明带边框家族按钮（Shadcn `outline`、Brutalist `surface`、Bootstrap `default`、Liquid Glass `regular`），避免图标与高亮代码重叠透字，且不引入双层底板白边。
+6. **四家族样式适配**：`CodePanel` 的展开/收起按钮与 `SiteCopy` 复制按钮同步识别当前预览或页面所属家族（`shadcn` / `brutalist` / `bootstrap-2-3-2` / `liquid-glass`），在浅色与深色模式下使用对应家族原生按钮配方与主题变量。
+
 ### Proto UI Style Token 同步
 
 `PrototypePreviewer` 里的 prototype style token 来自运行时原型，并通过 `data-pui-style` 挂到宿主节点上。
@@ -255,6 +266,7 @@ content/docs/zh-cn/
 
 ## 🔄 更新日志
 
+- **2026-11-26**：修复 RuntimeBox 加载期横向缩窄与跳动、引入预览代码 Prettier 宽度折叠（`code-format.ts`）、实现折叠态全区域点击安全区与展开后收起按钮、为悬浮复制按钮补齐四家族不透明表面、将 Runtime Tabs 统一切换为四家族自举 `variant="line"`，并同步完善四家族样式适配。
 - **2026-11-10**：私有[解剖回放模型](../../../scripts/contrast-anatomy.mjs) 对已匹配关系目标补充物理身份校验：在同一文档、当前 owner/generation 的一次观测中，另一个物理 `uid` 复用该目标 ID 时拒绝回放，同时保留既有 anatomy/extras 计数。同一物理目标的关系别名、独立文档和不同观测不因此增加限制；这不是全局 DOM ID 禁令，也不构成原生或完整组件验收。
 - **v3.0**: 🎉 按需动态加载，支持代码分割和并行加载
 - **v2.0**: 添加环境感知和自动重试机制

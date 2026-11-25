@@ -275,6 +275,7 @@ export const SHADCN_STYLE_TOKENS: string[] = [
   'data-[dragging]:cursor-move',
   'data-[dragging]:select-none',
   'data-[dragging]:transition-none',
+  'data-[expanded]:data-[has-open]:pointer-events-auto',
   'data-[expanded]:not-[data-disabled]:not-[data-focused]:bg-accent/50',
   'data-[expanded]:not-[data-disabled]:not-[data-focused]:text-accent-foreground',
   'data-[expanded]:not-[data-pressed]:bg-muted',

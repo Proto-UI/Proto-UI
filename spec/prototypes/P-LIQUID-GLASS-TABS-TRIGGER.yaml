@@ -21,6 +21,10 @@ criteria:
   - id: P-LIQUID-GLASS-TABS-TRIGGER-APPEARANCE
     text:
       en: 'Accept appearance=default|underline with default as the omission behavior. Underline is a Runtime consumer opt-in: transparent unframed medium-weight 16px label, muted inactive text, foreground selected/hover text and a reserved 2px selected underline spanning the label. Focus-visible remains perceivable and disabled remains gated/dimmed. Selection, hover, press, focus-visible and disabled truth stay Base-owned. Default-to-underline-to-default must withdraw obsolete paint and reproduce the original current-state default contribution; no static-selector representation or upstream line/vertical parity is mandated.'
+  - id: P-LIQUID-GLASS-TABS-TRIGGER-VARIANT
+    text:
+      en: 'When appearance=default and the owning List selects variant=line, render a transparent Liquid Glass line trigger without segment fill or shadow, using primary-accented bottom selection underline (`border-b-2 border-primary`), soft foreground hover emphasis, and preserved Liquid Glass focus ring and disabled gating.'
+      zh-CN: '当 appearance=default 且所属 List 选择 variant=line 时，呈现无胶囊底色和阴影的透明 Liquid Glass 线条标签项，选中态采用 `border-b-2 border-primary` 底部指示线，悬停提升文字对比度，保留 Liquid Glass 焦点环与禁用门控。'
 openQuestions:
   - id: P-LIQUID-GLASS-TABS-TRIGGER-Q-ADMISSION
     question:
@@ -42,6 +46,9 @@ verifies:
   tests:
     - T-RUNTIME-TABS-APPEARANCE-0001
 revisions:
+  - version: 0.3.0
+    change: refined
+    summary: Project family-native variant=line paint from owning List context while preserving Base ownership and appearance=underline compatibility.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Catalog inherited Base responsibilities and family appearance independently from source realization; retain draft evidence gates.

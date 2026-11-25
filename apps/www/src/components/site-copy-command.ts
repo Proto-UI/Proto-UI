@@ -17,7 +17,7 @@ import {
 } from './PrototypePreviewer/projection-materializer';
 import type { ProjectionCompositionControls } from './PrototypePreviewer/projection-composition';
 import type { DemoSpec, DemoNode } from './PrototypePreviewer/demo-types';
-import type { SiteLibraryFamily } from './site-library-family';
+import { resolvePreviewControlFamily, type PreviewControlFamily } from './site-library-family';
 import {
   deferUntilDocsHeaderPrepared,
   hasPendingDocsHeaderPreparation,
@@ -47,27 +47,82 @@ export function copyLabels(root: HTMLElement) {
   };
 }
 
+function copyButtonRecipe(
+  root: HTMLElement,
+  family: PreviewControlFamily
+): {
+  props: Record<string, unknown>;
+  className?: string;
+  surfaceStyle?: Record<string, string>;
+  glyphSize: number;
+} {
+  const codeExample = Boolean(
+    root.closest('[data-code-example], [data-code-file-browser], [data-code-presentation="docs"]')
+  );
+  const inHeaderOrToolbar = Boolean(
+    root.closest('[data-code-file-header], [data-code-toolbar]') ||
+    root.closest('[data-code-collapsible="false"]')
+  );
+  // A Copy control floating directly over syntax-highlighted code needs an
+  // opaque single-owner family surface so the glyph never collides with text.
+  // Dedicated header/toolbar/docs slots keep the transparent ghost recipe.
+  const floatingOverlay =
+    !codeExample &&
+    !inHeaderOrToolbar &&
+    (root.classList.contains('site-code-copy-overlay') || root.classList.contains('site-ec-copy'));
+
+  if (family === 'brutalist') {
+    return {
+      props: { variant: 'surface', size: 'icon' },
+      glyphSize: 18,
+    };
+  }
+  if (family === 'bootstrap-2-3-2') {
+    return {
+      props: { variant: 'default', size: 'small' },
+      surfaceStyle: {
+        width: '2rem',
+        height: '2rem',
+        minWidth: '2rem',
+        padding: '0',
+      },
+      glyphSize: 16,
+    };
+  }
+  if (family === 'liquid-glass') {
+    return {
+      props: { variant: 'regular', size: 'icon', material: 'opaque' },
+      glyphSize: 18,
+    };
+  }
+  return {
+    props: {
+      variant: floatingOverlay ? 'outline' : 'ghost',
+      size: codeExample ? 'icon-compact' : 'icon',
+    },
+    ...(floatingOverlay ? { className: 'site-copy-floating-overlay' } : {}),
+    glyphSize: codeExample ? 16 : 18,
+  };
+}
+
 /** Explicit Website recipe: actual Button, decorative Lucide glyph and Base live-region. */
 export function createCopyCommandDemo(
   root: HTMLElement,
   owner: CopyController,
   runtime: RuntimeId,
-  family: SiteLibraryFamily,
+  family: PreviewControlFamily,
   isActive: () => boolean
 ): DemoSpec {
   const labels = copyLabels(root);
-  const codeExample = Boolean(
-    root.closest('[data-code-example], [data-code-file-browser], [data-code-presentation="docs"]')
-  );
-  const buttonProps = {
-    variant: family === 'brutalist' ? 'surface' : 'ghost',
-    size: codeExample && family === 'shadcn' ? 'icon-compact' : 'icon',
-  };
+  const recipe = copyButtonRecipe(root, family);
+  const buttonProps = recipe.props;
   const copyButton: DemoNode = {
     kind: 'proto',
     prototypeId: `${family}-button`,
     ref: 'copy-button',
+    ...(recipe.className ? { className: recipe.className } : {}),
     props: { ...buttonProps, disabled: false },
+    ...(recipe.surfaceStyle ? { surfaceStyle: recipe.surfaceStyle } : {}),
     children: [
       {
         kind: 'box',
@@ -83,7 +138,7 @@ export function createCopyCommandDemo(
             {
               kind: 'proto' as const,
               prototypeId: `lucide-${icon}-icon`,
-              props: { size: codeExample && family === 'shadcn' ? 16 : 18 },
+              props: { size: recipe.glyphSize },
               surfaceStyle: { pointerEvents: 'none' },
             },
           ],
@@ -205,14 +260,17 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
   const selection = () => {
     const committed = previewer?.__previewer__?.getCurrentRuntime();
     const runtimeId = isRuntimeId(committed) ? committed : previewer ? 'wc' : preferred;
-    const scope = root.closest<HTMLElement>('[data-projection-family], [data-site-library-family]');
-    const family =
+    const scope = root.closest<HTMLElement>(
+      '[data-projection-family], [data-preview-control-family], [data-site-library-family]'
+    );
+    const explicit =
       scope?.dataset.projectionFamily ??
+      scope?.dataset.previewControlFamily ??
       scope?.dataset.siteLibraryFamily ??
       doc.documentElement.dataset.siteLibraryFamily;
     return {
       runtimeId,
-      projectionFamilyId: family === 'brutalist' ? ('brutalist' as const) : ('shadcn' as const),
+      projectionFamilyId: resolvePreviewControlFamily(view.location.pathname ?? '/', explicit),
     };
   };
   const createController = (initialSelection: ProjectionScopeSelection) => {
@@ -225,7 +283,7 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
       initialSelection,
       async materialize(request) {
         const runtime = request.selection.runtimeId as RuntimeId;
-        const family = request.selection.projectionFamilyId as SiteLibraryFamily;
+        const family = request.selection.projectionFamilyId as PreviewControlFamily;
         let candidate: MaterializedProjectionCandidate | null = null;
         const demo = createCopyCommandDemo(
           root,
@@ -239,6 +297,7 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
         );
         candidate = await materializeProjectionCandidate(request, {
           mount,
+          automaticMaterialScene: false,
           yieldAfterPaint: true,
           backgroundPreparation:
             preparation &&
@@ -398,6 +457,7 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
       attributeFilter: [
         'data-site-library-family',
         'data-projection-family',
+        'data-preview-control-family',
         'data-projection-runtime',
         'data-runner-runtime',
       ],
