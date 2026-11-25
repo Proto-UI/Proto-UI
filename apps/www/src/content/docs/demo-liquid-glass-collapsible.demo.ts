@@ -34,8 +34,7 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'grid grid-cols-1 w-full min-w-0 max-w-lg gap-4 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-5',
+    className: 'grid grid-cols-1 w-full min-w-0 max-w-lg gap-4',
     children: [
       disclosure(
         'uncontrolled',

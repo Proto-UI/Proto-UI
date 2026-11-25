@@ -67,8 +67,7 @@ function wrapStage(family: DataTableDemoFamily, children: DemoChild[]): DemoNode
   if (family === 'liquid-glass') {
     return {
       kind: 'box',
-      className:
-        'w-full max-w-2xl rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+      className: 'w-full max-w-2xl',
       children: [
         {
           kind: 'box',

@@ -53,15 +53,14 @@ function wrapStage(family: InputOtpDemoFamily, children: DemoChild[]): DemoNode 
     kind: 'box',
     className:
       family === 'liquid-glass'
-        ? 'grid w-full min-w-0 max-w-md gap-3 rounded-2xl border border-border bg-background/80 p-4 backdrop-blur-md'
+        ? 'grid w-full min-w-0 max-w-md gap-3'
         : 'grid w-full min-w-0 max-w-md gap-3 p-4',
     children,
   };
   if (family !== 'liquid-glass') return inner;
   return {
     kind: 'box',
-    className:
-      'flex w-full min-w-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    className: 'flex w-full min-w-0 items-center justify-center',
     children: [inner],
   };
 }

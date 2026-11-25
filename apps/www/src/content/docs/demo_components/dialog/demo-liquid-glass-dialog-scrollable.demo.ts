@@ -13,8 +13,7 @@ const demo: DemoSpec = {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6 flex min-w-0 items-start',
+    className: 'flex min-w-0 items-start',
     children: [
       {
         kind: 'proto',
@@ -54,13 +53,16 @@ const demo: DemoSpec = {
                     kind: 'proto',
                     prototypeId: 'liquid-glass-dialog-description',
                     ref: 'description',
-                    children: ['Scrollable content stays readable while footer controls remain fixed below.'],
+                    children: [
+                      'Scrollable content stays readable while footer controls remain fixed below.',
+                    ],
                   },
                 ],
               },
               {
                 kind: 'box',
-                className: 'max-h-[42vh] overflow-y-auto pr-2 grid gap-2.5 text-sm leading-relaxed text-muted-foreground',
+                className:
+                  'max-h-[42vh] overflow-y-auto pr-2 grid gap-2.5 text-sm leading-relaxed text-muted-foreground',
                 children: NOTES.map((item) => ({ kind: 'box' as const, children: [item] })),
               },
               {

@@ -6,8 +6,7 @@ const demo: DemoSpec = {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'flex justify-center rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    className: 'flex justify-center',
     children: [
       {
         kind: 'proto',

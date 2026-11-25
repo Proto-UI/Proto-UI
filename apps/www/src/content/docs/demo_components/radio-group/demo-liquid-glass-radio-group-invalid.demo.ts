@@ -31,8 +31,7 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'flex w-full justify-center rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    className: 'flex w-full justify-center',
     children: [
       {
         kind: 'box',

@@ -4,8 +4,7 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'min-w-0 w-full rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6 flex items-center justify-center',
+    className: 'min-w-0 w-full flex items-center justify-center',
     children: [
       {
         kind: 'proto',
@@ -82,7 +81,11 @@ export default {
           {
             kind: 'proto',
             prototypeId: 'liquid-glass-navigation-menu-content',
-            props: { value: 'opaque-panel', material: 'opaque', a11yLabel: 'Opaque fallback links' },
+            props: {
+              value: 'opaque-panel',
+              material: 'opaque',
+              a11yLabel: 'Opaque fallback links',
+            },
             children: [
               {
                 kind: 'box',

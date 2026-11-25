@@ -32,12 +32,11 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'w-full max-w-md rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    className: 'w-full max-w-md',
     children: [
       {
         kind: 'box',
-        className: 'grid gap-3.5 rounded-xl bg-background/70 p-4 shadow-sm',
+        className: 'grid gap-3.5',
         children: [
           row('lgDisabledOff', 'Enable notifications', { disabled: true, defaultChecked: false }),
           row('lgDisabledOn', 'Audit logging enabled (locked)', {

@@ -150,7 +150,7 @@ export function createCalendarSelectionDemo(family: CalendarFamily, picker = fal
       kind: 'box',
       className:
         family === 'liquid-glass' && !picker
-          ? 'flex max-w-full flex-wrap items-start gap-8 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6'
+          ? 'flex max-w-full flex-wrap items-start gap-8'
           : 'flex max-w-full flex-wrap items-start gap-8',
       children: [example('range'), example('multiple')],
     },
