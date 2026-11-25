@@ -185,6 +185,10 @@ test('external Rust consumer renders and interacts with generated views in headl
     /^test authoring_badge::retained_authoring_badge_paints_its_label_chip_and_nested_dot_as_inputs_change \.\.\. ok\r?$/m
   );
   for (const passedCase of [
+    /^test sync_retirement::host_drop::independent_leaf_release_drops_host_resources_while_another_owner_is_live \.\.\. ok\r?$/m,
+    /^test sync_retirement::host_drop::host_appearance_on_an_unstyled_reader_releases_after_the_window_drops_it \.\.\. ok\r?$/m,
+    /^test sync_retirement::host_drop::key_removal_releases_host_captures_after_logical_withdrawal \.\.\. ok\r?$/m,
+    /^test sync_retirement::host_drop::live_replacement_releases_old_appearance_and_resolver_captures \.\.\. ok\r?$/m,
     /^test sync_retirement::removing_a_synchronous_keyed_branch_retires_actions_and_descendant_observers \.\.\. ok\r?$/m,
     /^test sync_retirement::withdrawn_style_binding_rejects_mount_and_rebind_before_mutation \.\.\. ok\r?$/m,
     /^test keyed_task_source::reorder_removal_and_physical_move_preserve_the_correct_owned_task \.\.\. ok\r?$/m,

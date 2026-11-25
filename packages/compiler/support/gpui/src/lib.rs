@@ -7,6 +7,17 @@ pub use disabled::button_availability;
 use gpui::{App, Context, WeakEntity};
 use std::collections::VecDeque;
 
+/// A host closure can own native resources whose destructors read another entity
+/// through AsyncApp. GPUI runs deferred effects with the App still borrowed.
+/// Unlink the resource at the call site, then drop it on the foreground executor.
+pub fn release_after_update<T: 'static>(cx: &mut App, value: T) {
+    if std::mem::needs_drop::<T>() {
+        cx.defer(move |app| {
+            app.foreground_executor().spawn(async move { drop(value); }).detach();
+        });
+    }
+}
+
 /// One reached writable location. Reading an untouched String borrows its original storage.
 pub struct PendingWrite<'a, T> {
     published: &'a T,
@@ -75,6 +86,13 @@ impl<A> Default for PublicationQueue<A> {
 
 impl<A> PublicationQueue<A> {
     pub fn retire(&mut self) { self.waiting.clear(); }
+
+    /// A queued scope can be the final owner of a native host callback.
+    pub fn retire_after_update(&mut self, cx: &mut App) where A: 'static {
+        if !self.waiting.is_empty() {
+            release_after_update(cx, std::mem::take(&mut self.waiting));
+        }
+    }
 
     pub fn admit(&mut self, action: A) -> Option<A> {
         if self.publishing {

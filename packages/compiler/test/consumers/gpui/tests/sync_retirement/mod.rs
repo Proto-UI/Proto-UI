@@ -5,6 +5,8 @@ use gpui::{div, prelude::*, px, rgb, AnyView, Entity, Hsla, StyleRefinement, Sub
 use proto_ui_gpui_support::{context::{NominalKey, Provider}, ActionOutcome};
 use std::{cell::{Cell, RefCell}, rc::Rc};
 
+mod host_drop;
+
 const LEAF_FILL: u32 = 0x394f6a;
 
 fn theme(token: &str, style: &mut StyleRefinement) {
@@ -189,6 +191,7 @@ fn removing_a_synchronous_keyed_branch_retires_actions_and_descendant_observers(
     a_leaf.update(cx, |leaf, cx| leaf.set_appearance(move |_, _| { let _keep = &late_appearance; }, cx));
     attempted.update(cx, |provider, cx| provider.publish("late".into(), cx));
     assert_eq!((a_notices.take(), leaf_notices.take()), (0, 0));
+    cx.run_until_parked();
     assert!(late_weak.upgrade().is_none());
     assert_eq!(a_leaf.read_with(cx, |leaf, _| leaf.projection().id().to_owned()), "A");
     drop(former);

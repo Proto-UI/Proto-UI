@@ -174,14 +174,25 @@ impl Component<'_, '_> {
         };
         self.methods.push(create);
         let style = quote!(impl ::core::ops::Fn(&#projection, &mut ::gpui::StyleRefinement) + 'static);
-        let set = quote!(self.appearance = ::core::option::Option::Some(::std::boxed::Box::new(style)););
         self.methods.push(if self.checked.links.scoped {
+            let register = (self.checked.links.children[self.checked.index].is_empty() && !self.checked.links.styled).then(|| quote! {
+                if self.appearance.is_none() { Self::__pui_observe_release(cx); }
+            });
             quote!(pub fn set_appearance(&mut self, style: #style, cx: &mut ::gpui::Context<Self>) {
-                if self.retired { return; }
-                #set cx.notify();
+                if self.retired {
+                    ::proto_ui_gpui_support::release_after_update(cx, style);
+                    return;
+                }
+                #register
+                if let ::core::option::Option::Some(previous) = self.appearance.replace(::std::boxed::Box::new(style)) {
+                    ::proto_ui_gpui_support::release_after_update(cx, previous);
+                }
+                cx.notify();
             })
         } else {
-            quote!(pub fn with_appearance(mut self, style: #style) -> Self { #set self })
+            quote!(pub fn with_appearance(mut self, style: #style) -> Self {
+                self.appearance = ::core::option::Option::Some(::std::boxed::Box::new(style)); self
+            })
         });
         self.item(decl)
     }

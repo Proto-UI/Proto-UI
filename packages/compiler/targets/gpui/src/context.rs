@@ -55,7 +55,13 @@ pub fn scope(checked: &Checked<'_>) -> Result<Vec<syn::Item>> {
             (::core::option::Option::None, ::core::option::Option::None) => true,
             _ => false,
         })));
-        withdraw.push(quote!(self.resolve_token.take();));
+        withdraw.push(quote! {
+            if let ::core::option::Option::Some(resolve) = self.resolve_token.take() {
+                if ::std::rc::Rc::strong_count(&resolve) == 1 {
+                    ::proto_ui_gpui_support::release_after_update(cx, resolve);
+                }
+            }
+        });
         quote! { impl ContextScope { pub fn new(resolve: impl ::core::ops::Fn(&::core::primitive::str, &mut ::gpui::StyleRefinement) + 'static) -> Self { Self { #(#empty,)* resolve_token: ::core::option::Option::Some(::std::rc::Rc::new(resolve)) } } } }
     } else { quote! { impl ::core::default::Default for ContextScope { fn default() -> Self { Self { #(#empty),* } } } } };
     let same = if identities.is_empty() { quote!(true) } else { quote!(#(#identities)&&*) };
@@ -86,7 +92,7 @@ pub fn scope(checked: &Checked<'_>) -> Result<Vec<syn::Item>> {
         #construction #keyed #collision
         impl ContextScope {
             fn same(&self, other: &Self) -> ::core::primitive::bool { #same }
-            fn withdraw(&mut self) { #(#withdraw)* }
+            #[allow(unused_variables)] fn withdraw(&mut self, cx: &mut ::gpui::App) { #(#withdraw)* }
         }
         #(#declarations)*
     }).map_err(|e| format!("{}: GPUI Context AST: {e}", checked.ir.source))?;

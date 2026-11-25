@@ -74,22 +74,30 @@ impl Component<'_, '_> {
         let resolver = self.checked.links.styled.then(|| quote!(resolve_token: self.scope.resolve_token.clone(),));
         let children = self.logical_children(fields, initialized)?;
         let sites = &self.checked.links.children[self.checked.index];
-        if !sites.is_empty() {
-            fields.push(quote!(_retirement: ::gpui::Subscription));
-            initialized.push(quote!(_retirement: cx.on_release(|owner: &mut Self, app| owner.__pui_retire(app))));
-        }
+        // Even a leaf may hold the last native style resolver. An unstyled leaf
+        // installs its release hook only when the host supplies an appearance.
+        let observe_release = (!sites.is_empty() || self.checked.links.styled)
+            .then(|| quote!(Self::__pui_observe_release(cx);));
         let children_owned = (0..sites.len()).map(context::child).map(|slot| quote! {
             if let ::core::option::Option::Some((_, child)) = self.#slot.take() {
                 child.update(app, |owner, cx| owner.__pui_retire(cx));
             }
         });
-        let clear = transactional.then(|| quote!(self.publication.retire();));
+        let clear = transactional.then(|| {
+            if self.checked.links.styled { quote!(self.publication.retire_after_update(app);) }
+            else { quote!(self.publication.retire();) }
+        });
         self.methods.push(quote! {
+            fn __pui_observe_release(cx: &::gpui::Context<Self>) {
+                cx.on_release(|owner: &mut Self, app| owner.__pui_retire(app)).detach();
+            }
             #[allow(unused_variables)] fn __pui_retire(&mut self, app: &mut ::gpui::App) {
                 if ::core::mem::replace(&mut self.retired, true) { return; }
                 #clear #(#retire)*
-                self.scope.withdraw();
-                self.appearance.take();
+                self.scope.withdraw(app);
+                if let ::core::option::Option::Some(appearance) = self.appearance.take() {
+                    ::proto_ui_gpui_support::release_after_update(app, appearance);
+                }
                 #(#children_owned)*
             }
         });
@@ -120,7 +128,7 @@ impl Component<'_, '_> {
             }
             fn __pui_swap_scope(&mut self, scope: &ContextScope, cx: &mut ::gpui::Context<Self>) -> ::core::primitive::bool {
                 if self.scope.same(scope) { return false; }
-                #(#rebind)* self.scope = scope.clone(); true
+                #(#rebind)* self.scope.withdraw(cx); self.scope = scope.clone(); true
             }
             fn __pui_move(&mut self, scope: &ContextScope, cx: &mut ::gpui::Context<Self>) {
                 if self.retired { return; }
@@ -141,6 +149,7 @@ impl Component<'_, '_> {
                 use ::gpui::AppContext as _;
                 app.new(|cx| {
                     #(#bind)* #(#initializers)* #(#creation)*
+                    #observe_release
                     let mut owner = Self { props, #appearance, #(#initialized,)* };
                     owner.__pui_children(cx);
                     #created
