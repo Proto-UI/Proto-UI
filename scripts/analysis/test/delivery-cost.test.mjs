@@ -1,12 +1,26 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { admitDeliveryPlan, analyzeDeliveryRun, buildDeliveryRun, prepareNativeConsumerPlan, sampleStatistics } from '../delivery-cost.mjs';
+import {
+  admitDeliveryPlan,
+  analyzeDeliveryRun,
+  buildDeliveryRun,
+  prepareNativeConsumerPlan,
+  sampleStatistics,
+} from '../delivery-cost.mjs';
 
 const script = fileURLToPath(new URL('../delivery-cost.mjs', import.meta.url));
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -25,44 +39,109 @@ function fixture(t, { css = false, invalid = false } = {}) {
     writeFileSync(path.join(root, name), contents);
   };
   put('package.json', '{"name":"injected-accounting-control","version":"1.0.0","type":"module"}\n');
-  put('package-lock.json', '{"name":"injected-accounting-control","lockfileVersion":3,"packages":{}}\n');
+  put(
+    'package-lock.json',
+    '{"name":"injected-accounting-control","lockfileVersion":3,"packages":{}}\n'
+  );
   put('shared.ts', 'export function shared(n) { return n + Math.random(); }\n');
   put('unused.ts', 'export function unused() { return "unreached-control"; }\n');
-  put('first.ts', invalid ? 'const = ;\n' : `import {shared} from './shared'; import {unused} from './unused'; ${css ? "import './style.css';" : ''} console.log(shared(10));\n`);
-  put('second.ts', `import {shared} from './shared'; ${css ? "import './style.css';" : ''} console.log(shared(20));\n`);
+  put(
+    'first.ts',
+    invalid
+      ? 'const = ;\n'
+      : `import {shared} from './shared'; import {unused} from './unused'; ${css ? "import './style.css';" : ''} console.log(shared(10));\n`
+  );
+  put(
+    'second.ts',
+    `import {shared} from './shared'; ${css ? "import './style.css';" : ''} console.log(shared(20));\n`
+  );
   if (css) {
     put('style.css', 'body { color: #123; background-image: url(./control.svg); }\n');
-    put('control.svg', '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><path d="M0 0h1v1H0z"/></svg>\n');
+    put(
+      'control.svg',
+      '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><path d="M0 0h1v1H0z"/></svg>\n'
+    );
   }
   const ref = (name) => ({ path: name, sha256: hash(readFileSync(path.join(root, name))) });
   const plan = {
     schemaVersion: 1,
-    scope: { id: 'injected-accounting-control', requirements: ['control:shared-chunk-and-real-output-accounting'], sourceRevision: '0'.repeat(40), review: null },
-    environment: { host: 'web', framework: 'plain-js-accounting-control', frameworkVersion: '1', buildMode: 'production' },
+    scope: {
+      id: 'injected-accounting-control',
+      requirements: ['control:shared-chunk-and-real-output-accounting'],
+      sourceRevision: '0'.repeat(40),
+      review: null,
+    },
+    environment: {
+      host: 'web',
+      framework: 'plain-js-accounting-control',
+      frameworkVersion: '1',
+      buildMode: 'production',
+    },
     repetitions: 2,
     arms: [
-      { id: 'runtime-adapter', status: 'unavailable', reason: 'No Proto Adapter is exercised by this injected tool control.' },
-      { id: 'generated', status: 'unavailable', reason: 'No Proto Compiler is exercised by this injected tool control.' },
-      { id: 'host-native', status: 'available', root, profile: 'injected-accounting-control', entryPoints: ['first.ts', 'second.ts'],
-        lockfile: ref('package-lock.json'), portableSources: [], correctness: { status: 'untested', evidence: null, differences: ['These controls do not establish common primitive semantics.'] } },
+      {
+        id: 'runtime-adapter',
+        status: 'unavailable',
+        reason: 'No Proto Adapter is exercised by this injected tool control.',
+      },
+      {
+        id: 'generated',
+        status: 'unavailable',
+        reason: 'No Proto Compiler is exercised by this injected tool control.',
+      },
+      {
+        id: 'host-native',
+        status: 'available',
+        root,
+        profile: 'injected-accounting-control',
+        entryPoints: ['first.ts', 'second.ts'],
+        lockfile: ref('package-lock.json'),
+        portableSources: [],
+        correctness: {
+          status: 'untested',
+          evidence: null,
+          differences: ['These controls do not establish common primitive semantics.'],
+        },
+      },
     ],
   };
   const planFile = path.join(directory, 'plan.json');
   const evidence = path.join(directory, 'evidence');
-  return { directory, root, put, ref, plan, planFile, evidence,
-    async build() { save(planFile, plan); return buildDeliveryRun(planFile, evidence); } };
+  return {
+    directory,
+    root,
+    put,
+    ref,
+    plan,
+    planFile,
+    evidence,
+    async build() {
+      save(planFile, plan);
+      return buildDeliveryRun(planFile, evidence);
+    },
+  };
 }
 
 function injectedGenerated(f) {
   f.put('source/subject.proto.ts', 'INJECTED ACCOUNTING CONTROL; NOT A PROTO PROGRAM\n');
-  f.put('generated/Component.ts', 'export const value = 42;\n');
-  f.put('generated/provenance.json', JSON.stringify({ profile: 'injected-accounting-control', artifacts: [
-    { kind: 'source', path: 'Component.ts', sha256: f.ref('generated/Component.ts').sha256 },
-  ] }));
+  f.put('generated/Component.ts', 'export const value = 42 + Math.random();\n');
+  f.put(
+    'generated/provenance.json',
+    JSON.stringify({
+      profile: 'injected-accounting-control',
+      artifacts: [
+        { kind: 'source', path: 'Component.ts', sha256: f.ref('generated/Component.ts').sha256 },
+      ],
+    })
+  );
   f.put('generated-entry.ts', "import {value} from './generated/Component'; console.log(value);\n");
-  const arm = { ...structuredClone(f.plan.arms[2]), id: 'generated',
-    entryPoints: ['generated-entry.ts'], portableSources: [{ key: 'subject', ...f.ref('source/subject.proto.ts') }],
-    provenance: f.ref('generated/provenance.json') };
+  const arm = {
+    ...structuredClone(f.plan.arms[2]),
+    id: 'generated',
+    entryPoints: ['generated-entry.ts'],
+    portableSources: [{ key: 'subject', ...f.ref('source/subject.proto.ts') }],
+    provenance: f.ref('generated/provenance.json'),
+  };
   f.plan.arms[1] = arm;
   return arm;
 }
@@ -81,19 +160,34 @@ test('real production builds count shared chunks once, follow CSS/assets, and se
     assert.ok(accounting.delivered.files.some((file) => file.path.endsWith('.svg')));
     assert.ok(accounting.delivered.files.some((file) => file.path.endsWith('.css')));
     assert.ok(accounting.debugMaps.bytes > 0);
-    assert.equal(accounting.delivered.files.some((file) => file.path.endsWith('.map')), false);
-    assert.equal(accounting.retainedInputs.some((input) => input.input === 'unused.ts'), false);
+    assert.equal(
+      accounting.delivered.files.some((file) => file.path.endsWith('.map')),
+      false
+    );
+    assert.equal(
+      accounting.retainedInputs.some((input) => input.input === 'unused.ts'),
+      false
+    );
     assert.equal(accounting.deliveryClosureComplete, true);
     const fileBytes = new Map(accounting.delivered.files.map((file) => [file.key, file.bytes]));
-    const separatelySummedEntries = accounting.entries.reduce((total, entry) => total + entry.files.reduce((sum, key) => sum + fileBytes.get(key), 0), 0);
-    assert.ok(separatelySummedEntries > accounting.delivered.bytes, 'Shared chunk must be counted once in the union, rather than once per entry.');
+    const separatelySummedEntries = accounting.entries.reduce(
+      (total, entry) => total + entry.files.reduce((sum, key) => sum + fileBytes.get(key), 0),
+      0
+    );
+    assert.ok(
+      separatelySummedEntries > accounting.delivered.bytes,
+      'Shared chunk must be counted once in the union, rather than once per entry.'
+    );
     assert.equal(accounting.perInstanceCost, null);
   }
   assert.equal(arm.buildTime.minified.successful, 2);
   assert.ok(Number.isFinite(arm.buildTime.minified.sampleVarianceMs2));
   assert.equal(arm.startup, null);
   assert.equal(arm.memory, null);
-  assert.equal(report.originalCriteria.some((criterion) => criterion.completed), false);
+  assert.equal(
+    report.originalCriteria.some((criterion) => criterion.completed),
+    false
+  );
   const restored = analyzeDeliveryRun(load(path.join(f.evidence, 'run.json')), f.evidence);
   assert.deepEqual(restored, report);
 });
@@ -116,19 +210,38 @@ test('stale lock/source bindings and escaping inputs reject before a bundler or 
 
 test('retained dependency accounting identifies two actual installed package instances', async (t) => {
   const f = fixture(t);
-  f.put('node_modules/duplicate/package.json', '{"name":"duplicate","version":"1.0.0","type":"module","main":"index.js"}');
+  f.put(
+    'node_modules/duplicate/package.json',
+    '{"name":"duplicate","version":"1.0.0","type":"module","main":"index.js"}'
+  );
   f.put('node_modules/duplicate/index.js', 'export const value = Math.random();');
-  f.put('node_modules/bridge/package.json', '{"name":"bridge","version":"1.0.0","type":"module","main":"index.js"}');
+  f.put(
+    'node_modules/bridge/package.json',
+    '{"name":"bridge","version":"1.0.0","type":"module","main":"index.js"}'
+  );
   f.put('node_modules/bridge/index.js', "export {value as nested} from 'duplicate';");
-  f.put('node_modules/bridge/node_modules/duplicate/package.json', '{"name":"duplicate","version":"2.0.0","type":"module","main":"index.js"}');
-  f.put('node_modules/bridge/node_modules/duplicate/index.js', 'export const value = Math.random();');
-  f.put('first.ts', "import {value} from 'duplicate'; import {nested} from 'bridge'; console.log(value, nested);");
+  f.put(
+    'node_modules/bridge/node_modules/duplicate/package.json',
+    '{"name":"duplicate","version":"2.0.0","type":"module","main":"index.js"}'
+  );
+  f.put(
+    'node_modules/bridge/node_modules/duplicate/index.js',
+    'export const value = Math.random();'
+  );
+  f.put(
+    'first.ts',
+    "import {value} from 'duplicate'; import {nested} from 'bridge'; console.log(value, nested);"
+  );
   const report = await f.build();
   const sample = report.arms.find((arm) => arm.id === 'host-native').samples[0].accounting;
-  const duplicate = sample.multiplePhysicalPackageInstances.find((item) => item.name === 'duplicate');
+  const duplicate = sample.multiplePhysicalPackageInstances.find(
+    (item) => item.name === 'duplicate'
+  );
   assert.equal(duplicate.instances.length, 2);
   assert.deepEqual(duplicate.instances.map((item) => item.version).sort(), ['1.0.0', '2.0.0']);
-  assert.ok(duplicate.instances.every((item) => item.retainedInputBytes > 0 && item.manifest.sha256));
+  assert.ok(
+    duplicate.instances.every((item) => item.retainedInputBytes > 0 && item.manifest.sha256)
+  );
 });
 
 test('real generated-consumer import reachability is required, with immutable provenance bytes', async (t) => {
@@ -136,10 +249,17 @@ test('real generated-consumer import reachability is required, with immutable pr
   injectedGenerated(f);
   const report = await f.build();
   const generated = report.arms.find((arm) => arm.id === 'generated');
-  assert.ok(generated.samples.every((sample) => sample.accounting.retainedInputs.some((input) => input.input === 'generated/Component.ts')));
+  assert.ok(
+    generated.samples.every((sample) =>
+      sample.accounting.retainedInputs.some((input) => input.input === 'generated/Component.ts')
+    )
+  );
   assert.equal(report.comparison.status, 'withheld');
   f.put('generated/Component.ts', 'export const value = 43;\n');
-  assert.throws(() => analyzeDeliveryRun(load(path.join(f.evidence, 'run.json')), f.evidence), /digest mismatch: Component.ts/);
+  assert.throws(
+    () => analyzeDeliveryRun(load(path.join(f.evidence, 'run.json')), f.evidence),
+    /digest mismatch: Component.ts/
+  );
 });
 
 test('a generated label cannot turn an unrelated host-native bundle into generated evidence', async (t) => {
@@ -147,7 +267,10 @@ test('a generated label cannot turn an unrelated host-native bundle into generat
   const generated = injectedGenerated(f);
   generated.entryPoints = ['first.ts'];
   await assert.rejects(f.build(), /retains no declared generated source/);
-  assert.ok(existsSync(path.join(f.evidence, 'run.json')), 'Keep actual completed build attempts when analysis rejects their scope.');
+  assert.ok(
+    existsSync(path.join(f.evidence, 'run.json')),
+    'Keep actual completed build attempts when analysis rejects their scope.'
+  );
   assert.equal(existsSync(path.join(f.evidence, 'report.json')), false);
 });
 
@@ -155,9 +278,15 @@ test('Runtime+Adapter and generated portable identities must match before produc
   const f = fixture(t);
   const generated = injectedGenerated(f);
   f.put('source/other.proto.ts', 'DIFFERENT INJECTED ACCOUNTING CONTROL\n');
-  f.plan.arms[0] = { ...structuredClone(generated), id: 'runtime-adapter',
-    portableSources: [{ key: 'subject', ...f.ref('source/other.proto.ts') }] };
-  assert.throws(() => admitDeliveryPlan(f.plan, f.directory), /different portable source identities/);
+  f.plan.arms[0] = {
+    ...structuredClone(generated),
+    id: 'runtime-adapter',
+    portableSources: [{ key: 'subject', ...f.ref('source/other.proto.ts') }],
+  };
+  assert.throws(
+    () => admitDeliveryPlan(f.plan, f.directory),
+    /different portable source identities/
+  );
   assert.equal(existsSync(f.evidence), false);
 });
 
@@ -171,45 +300,87 @@ test('native preparation preserves edited source and old provenance while restor
   mkdirSync(path.join(profileEvidence, 'compiler-input'));
   const source = 'INJECTED RECEIPT GRAMMAR CONTROL; NOT A PROTO PROGRAM\n';
   writeFileSync(path.join(profileEvidence, 'compiler-input/entry.proto.ts'), source);
-  const provenance = { profile: 'react-dom-source-v1', dependencies: [{ name: 'react', version: '19.2.6', role: 'target' }],
+  const provenance = {
+    profile: 'react-dom-source-v1',
+    dependencies: [{ name: 'react', version: '19.2.6', role: 'target' }],
     sourceFiles: [{ file: 'entry.proto.ts', sha256: hash(source) }],
-    artifacts: [{ path: 'Component.ts', kind: 'source', sha256: hash(original) }] };
+    artifacts: [{ path: 'Component.ts', kind: 'source', sha256: hash(original) }],
+  };
   const provenanceBytes = JSON.stringify(provenance, null, 2) + '\n';
   f.put('generated/provenance.json', provenanceBytes);
   writeFileSync(path.join(profileEvidence, 'Component.before-edit.txt'), original);
-  save(path.join(profileEvidence, 'source-ownership.json'), { source: 'Component.ts', beforeSha256: hash(original), afterSha256: hash(edited) });
-  save(path.join(profileEvidence, 'runtime-original.json'), { profile: 'react-dom-source-v1', ok: true, scope: 'Injected grammar control, not a run.' });
-  for (const filename of ['timing.json', 'costs.json', 'closure-result.json', 'installed-tree-integrity.json'])
-    save(path.join(profileEvidence, filename), { scope: 'Injected receipt grammar control; no product result.' });
+  save(path.join(profileEvidence, 'source-ownership.json'), {
+    source: 'Component.ts',
+    beforeSha256: hash(original),
+    afterSha256: hash(edited),
+  });
+  save(path.join(profileEvidence, 'runtime-original.json'), {
+    profile: 'react-dom-source-v1',
+    ok: true,
+    scope: 'Injected grammar control, not a run.',
+  });
+  for (const filename of [
+    'timing.json',
+    'costs.json',
+    'closure-result.json',
+    'installed-tree-integrity.json',
+  ])
+    save(path.join(profileEvidence, filename), {
+      scope: 'Injected receipt grammar control; no product result.',
+    });
   const planFile = path.join(profileEvidence, 'native-plan.json');
   writeFileSync(path.join(profileEvidence, 'Component.before-edit.txt'), 'wrong original bytes');
-  assert.throws(() => prepareNativeConsumerPlan(profileEvidence, '0'.repeat(40), planFile), /retained original or edited consumer/);
+  assert.throws(
+    () => prepareNativeConsumerPlan(profileEvidence, '0'.repeat(40), planFile),
+    /retained original or edited consumer/
+  );
   assert.equal(existsSync(path.join(f.root, 'delivery-original')), false);
   writeFileSync(path.join(profileEvidence, 'Component.before-edit.txt'), original);
   const plan = prepareNativeConsumerPlan(profileEvidence, '0'.repeat(40), planFile);
   assert.equal(readFileSync(path.join(f.root, 'generated/Component.ts'), 'utf8'), edited);
-  assert.equal(readFileSync(path.join(f.root, 'generated/provenance.json'), 'utf8'), provenanceBytes);
-  assert.equal(readFileSync(path.join(f.root, 'delivery-original/generated/Component.ts'), 'utf8'), original);
-  assert.equal(readFileSync(path.join(f.root, 'delivery-original/generated/provenance.json'), 'utf8'), provenanceBytes);
+  assert.equal(
+    readFileSync(path.join(f.root, 'generated/provenance.json'), 'utf8'),
+    provenanceBytes
+  );
+  assert.equal(
+    readFileSync(path.join(f.root, 'delivery-original/generated/Component.ts'), 'utf8'),
+    original
+  );
+  assert.equal(
+    readFileSync(path.join(f.root, 'delivery-original/generated/provenance.json'), 'utf8'),
+    provenanceBytes
+  );
   assert.equal(plan.arms[0].status, 'unavailable');
   assert.equal(plan.arms[2].status, 'unavailable');
   assert.equal(plan.arms[1].correctness.status, 'untested');
   const report = await buildDeliveryRun(planFile, f.evidence);
   assert.equal(report.ok, true);
   assert.equal(report.comparison.status, 'withheld');
-  assert.throws(() => prepareNativeConsumerPlan(profileEvidence, '0'.repeat(40), planFile), /plan already exists/);
+  assert.throws(
+    () => prepareNativeConsumerPlan(profileEvidence, '0'.repeat(40), planFile),
+    /plan already exists/
+  );
 });
 
 test('failed production attempts and declared correctness differences remain beside null statistics', async (t) => {
   const f = fixture(t, { invalid: true });
-  f.plan.arms[2].correctness = { status: 'failed', evidence: null, differences: ['Injected source is invalid; no runtime correctness result.'] };
+  f.plan.arms[2].correctness = {
+    status: 'failed',
+    evidence: null,
+    differences: ['Injected source is invalid; no runtime correctness result.'],
+  };
   const report = await f.build();
   const arm = report.arms.find((item) => item.id === 'host-native');
   assert.equal(report.ok, false);
   assert.equal(arm.correctness.status, 'failed');
   assert.equal(arm.correctness.differences.length, 1);
   assert.equal(arm.samples.length, 4);
-  assert.ok(arm.samples.every((sample) => sample.status === 'failed' && sample.failure.errors.length > 0 && sample.wallMs >= 0));
+  assert.ok(
+    arm.samples.every(
+      (sample) =>
+        sample.status === 'failed' && sample.failure.errors.length > 0 && sample.wallMs >= 0
+    )
+  );
   assert.equal(arm.buildTime.minified.unsuccessful, 2);
   assert.equal(arm.buildTime.minified.meanMs, null);
   assert.equal(arm.buildTime.minified.sampleVarianceMs2, null);
@@ -223,18 +394,27 @@ test('external asset cost remains unresolved, and corrupted retained bytes never
   const report = await f.build();
   const accounting = report.arms.find((arm) => arm.id === 'host-native').samples[0].accounting;
   assert.equal(accounting.deliveryClosureComplete, false);
-  assert.ok(accounting.external.some((edge) => edge.path === 'https://example.invalid/unmeasured.png'));
+  assert.ok(
+    accounting.external.some((edge) => edge.path === 'https://example.invalid/unmeasured.png')
+  );
   const file = accounting.delivered.files.find((item) => item.path.endsWith('.js'));
   const filename = path.join(f.evidence, accounting.outputDirectory, file.path);
   const bytes = readFileSync(filename);
   bytes[0] ^= 1;
   writeFileSync(filename, bytes);
-  assert.throws(() => analyzeDeliveryRun(load(path.join(f.evidence, 'run.json')), f.evidence), /inventory drift/);
+  assert.throws(
+    () => analyzeDeliveryRun(load(path.join(f.evidence, 'run.json')), f.evidence),
+    /inventory drift/
+  );
 });
 
 test('empty availability, incomplete attempts and duplicate output ownership cannot produce successful receipts', async (t) => {
   const f = fixture(t);
-  f.plan.arms = f.plan.arms.map((arm) => ({ id: arm.id, status: 'unavailable', reason: 'Injected control has no available path.' }));
+  f.plan.arms = f.plan.arms.map((arm) => ({
+    id: arm.id,
+    status: 'unavailable',
+    reason: 'Injected control has no available path.',
+  }));
   const report = await f.build();
   assert.equal(report.ok, false);
   assert.deepEqual(load(path.join(f.evidence, 'run.json')).samples, []);
@@ -250,12 +430,29 @@ test('CLI retains failing build receipts and returns nonzero; summary never trea
   const f = fixture(t, { invalid: true });
   f.plan.repetitions = 1;
   save(f.planFile, f.plan);
-  const result = spawnSync(process.execPath, [script, 'build', f.planFile, f.evidence], { encoding: 'utf8' });
+  const result = spawnSync(process.execPath, [script, 'build', f.planFile, f.evidence], {
+    encoding: 'utf8',
+  });
   assert.equal(result.status, 1);
   assert.equal(load(path.join(f.evidence, 'report.json')).ok, false);
-  assert.equal(JSON.parse(result.stdout).arms.find((arm) => arm.id === 'host-native').samples.length, 2);
+  assert.equal(
+    JSON.parse(result.stdout).arms.find((arm) => arm.id === 'host-native').samples.length,
+    2
+  );
   assert.deepEqual(sampleStatistics([{ status: 'passed', wallMs: 7 }]), {
-    successful: 1, unsuccessful: 0, meanMs: 7, minMs: 7, maxMs: 7, sampleVarianceMs2: null,
+    successful: 1,
+    unsuccessful: 0,
+    meanMs: 7,
+    minMs: 7,
+    maxMs: 7,
+    sampleVarianceMs2: null,
   });
-  assert.equal(sampleStatistics([{ status: 'passed', wallMs: 10 }, { status: 'failed', wallMs: 100 }, { status: 'passed', wallMs: 30 }]).sampleVarianceMs2, 200);
+  assert.equal(
+    sampleStatistics([
+      { status: 'passed', wallMs: 10 },
+      { status: 'failed', wallMs: 100 },
+      { status: 'passed', wallMs: 30 },
+    ]).sampleVarianceMs2,
+    200
+  );
 });

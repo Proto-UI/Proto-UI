@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
@@ -12,7 +12,7 @@ const astroRequire = createRequire(require.resolve('astro/package.json'));
 const { build, createServer } = await import(pathToFileURL(astroRequire.resolve('vite')).href);
 
 async function fixture(t) {
-  const root = await mkdtemp(path.join(os.tmpdir(), 'runtime-retry-urls-'));
+  const root = await realpath(await mkdtemp(path.join(os.tmpdir(), 'runtime-retry-urls-')));
   t.after(() => rm(root, { recursive: true, force: true }));
   const importer = path.join(root, 'src/components/PrototypePreviewer/demo-renderer.ts');
   await mkdir(path.dirname(importer), { recursive: true });
