@@ -5,159 +5,230 @@ status: draft
 since: 0.4.0
 lifecycleRationale:
   zh-CN: >-
-    这些期望来自新合同，不来自旧实现或 Adapter 快照。六条实现路线目前均缺失，尚无新编译器执行结果；
-    保留独立 case 和 missing 记录以指导实现，不把文档或历史通过当作运行成功。
+    这些期望来自新合同，不来自旧实现或 Adapter 快照。所列必需实现路线目前均缺失，尚无新编译器执行结果； 保留独立 case 和 missing 记录以指导实现，不把文档或历史通过当作运行成功。
+
+
   en: >-
-    Expectations derive from the new contract rather than old implementation or Adapter snapshots. All six implementation routes are missing and no new compiler execution result exists.
-    Addressable cases and missing records guide implementation without treating documentation or historical passes as execution success.
+    Expectations derive from the new contract rather than old implementation or Adapter snapshots. The required implementation routes below are missing and no new compiler execution result exists. Addressable cases and missing records guide implementation without treating documentation or historical passes as execution success.
+
+
 summary: Source-defined cases for language, lowering, transaction traces, owned async, Context and five native-source targets.
 cases:
   - id: T-COMPILER-FOUNDATION-0001-CASE-LANGUAGE
     title: Resolve real bindings and all reached bodies without executing author modules
-    covers: [C-COMPILER-FOUNDATION-0001-LANGUAGE, C-COMPILER-FOUNDATION-0001-IR, C-COMPILER-FOUNDATION-0001-COMPLETE, C-COMPILER-FOUNDATION-0001-DIAGNOSTICS]
+    covers:
+      [
+        C-COMPILER-FOUNDATION-0001-LANGUAGE,
+        C-COMPILER-FOUNDATION-0001-IR,
+        C-COMPILER-FOUNDATION-0001-COMPLETE,
+        C-COMPILER-FOUNDATION-0001-DIAGNOSTICS,
+      ]
     expectation: >-
-      Renamed declarations, local shadowing, imported aliases and re-exports preserve their actual binding semantics.
-      A dynamic bool branch has both reachable bodies checked; a missing helper body with only a .d.ts signature requires an explicit extern implementation.
-      Compilation does not execute a module initializer or choose a branch by substituting a Proxy/default value. Invalid input and unimplemented legal behavior receive distinct source-bound diagnostics.
-      The report also distinguishes missing backend lowering, an unbound extern and a runtime-unavailable host capability instead of reporting all five as invalid source.
+      Renamed declarations, local shadowing, imported aliases and re-exports preserve their actual binding semantics. A dynamic bool branch has both reachable bodies checked; a missing helper body with only a .d.ts signature requires an explicit extern implementation. Compilation does not execute a module initializer or choose a branch by substituting a Proxy/default value. Invalid input and unimplemented legal behavior receive distinct source-bound diagnostics. The report also distinguishes missing backend lowering, an unbound extern and a runtime-unavailable host capability instead of reporting all five as invalid source.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-VALUES
     title: Preserve the Proto value model across state and host boundaries
-    covers: [C-COMPILER-FOUNDATION-0001-VALUES, C-COMPILER-FOUNDATION-0001-EQUALITY, C-COMPILER-FOUNDATION-0001-RESULTS]
+    covers:
+      [
+        C-COMPILER-FOUNDATION-0001-VALUES,
+        C-COMPILER-FOUNDATION-0001-EQUALITY,
+        C-COMPILER-FOUNDATION-0001-RESULTS,
+      ]
     expectation: >-
-      Binary64 calculations retain their specified values; fractional, out-of-range and unrepresentable integer-boundary inputs fail instead of truncating.
-      A number cannot act as a bool or become text through implicit coercion. A captured list/record state value remains unchanged after a later state replacement;
-      sharing its storage does not create observable mutable aliasing. Explicit handles retain identity. Omitted props and business none remain distinguishable where declared.
-      Language numeric equality considers positive and negative zero equal and NaN unequal to itself. Reactive sameness treats repeated NaN as unchanged,
-      but replacing positive zero with negative zero invalidates a reciprocal derivation from positive infinity to negative infinity.
-      These respective comparison rules recurse through equatable composite values without relying on shared storage identity.
+      Binary64 calculations retain their specified values; fractional, out-of-range and unrepresentable integer-boundary inputs fail instead of truncating. A number cannot act as a bool or become text through implicit coercion. A captured list/record state value remains unchanged after a later state replacement; sharing its storage does not create observable mutable aliasing. Explicit handles retain identity. Omitted props and business none remain distinguishable where declared. Language numeric equality considers positive and negative zero equal and NaN unequal to itself. Reactive sameness treats repeated NaN as unchanged, but replacing positive zero with negative zero invalidates a reciprocal derivation from positive infinity to negative infinity. These respective comparison rules recurse through equatable composite values without relying on shared storage identity.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-TEXT
     title: Unicode text differs deliberately from ECMAScript code-unit strings
     covers: [C-COMPILER-FOUNDATION-0001-TEXT]
     expectation: >-
-      The text A followed by U+1F642, e and U+0301 iterates as four Unicode scalars. Grapheme operations use the explicit API.
-      The sequence e plus U+0301 is not silently normalized to U+00E9. UTF-16/UTF-8 host conversion rejects invalid data unless an explicit replacement conversion was selected;
-      an unpaired surrogate never becomes a valid Proto String. Every target observes the same logical text.
+      The text A followed by U+1F642, e and U+0301 iterates as four Unicode scalars. Grapheme operations use the explicit API. The sequence e plus U+0301 is not silently normalized to U+00E9. UTF-16/UTF-8 host conversion rejects invalid data unless an explicit replacement conversion was selected; an unpaired surrogate never becomes a valid Proto String. Every target observes the same logical text.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-PHASES
     title: Separate declarations, pure derivation, action and lifecycle effects
     covers: [C-COMPILER-FOUNDATION-0001-PHASES, C-COMPILER-FOUNDATION-0001-DIAGNOSTICS]
     expectation: >-
-      A prop-dependent condition changes generated output for both input values without rerunning declaration construction.
-      A state write or host command reached from a pure derivation is diagnosed through its helper call chain.
-      Instance initialization occurs at its defined phase, not once in the build process and not by interpreting the author builder in the shipped program.
+      A prop-dependent condition changes generated output for both input values without rerunning declaration construction. A state write or host command reached from a pure derivation is diagnosed through its helper call chain. Instance initialization occurs at its defined phase, not once in the build process and not by interpreting the author builder in the shipped program.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-CAPTURES
     title: Lower capture environments without losing instance or binding identity
-    covers: [C-COMPILER-FOUNDATION-0001-CAPTURES, C-COMPILER-FOUNDATION-0001-COMPLETE, C-COMPILER-FOUNDATION-0001-TRANSACTIONS, C-COMPILER-FOUNDATION-0001-FAILURE, C-COMPILER-FOUNDATION-0001-DEPENDENCIES]
+    covers:
+      [
+        C-COMPILER-FOUNDATION-0001-CAPTURES,
+        C-COMPILER-FOUNDATION-0001-COMPLETE,
+        C-COMPILER-FOUNDATION-0001-TRANSACTIONS,
+        C-COMPILER-FOUNDATION-0001-FAILURE,
+        C-COMPILER-FOUNDATION-0001-DEPENDENCIES,
+      ]
     expectation: >-
-      Two closures capturing one mutable local observe the same binding, while two component instances keep independent bindings.
-      An immutable capture remains its captured value. A callback reached through two ordinary helper imports is compiled transitively,
-      and its environment remains valid for its declared lifetime without source-text callbacks, JSON-erased state or a dynamic JS VM.
-      With persistent captured x=0 and state y=0, one action writes x=1,y=1 and then fails unhandled; a later closure still reads x=0,y=0.
-      A successful write of x participates in invalidating a derivation that reads it. No persistent captured cell silently escapes transaction rollback or dependency analysis.
+      Two closures capturing one mutable local observe the same binding, while two component instances keep independent bindings. An immutable capture remains its captured value. A callback reached through two ordinary helper imports is compiled transitively, and its environment remains valid for its declared lifetime without source-text callbacks, JSON-erased state or a dynamic JS VM. With persistent captured x=0 and state y=0, one action writes x=1,y=1 and then fails unhandled; a later closure still reads x=0,y=0. A successful write of x participates in invalidating a derivation that reads it. No persistent captured cell silently escapes transaction rollback or dependency analysis.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-REACTIVITY
     title: Derive complete dependencies and recompute from working state
     covers: [C-COMPILER-FOUNDATION-0001-DEPENDENCIES, C-COMPILER-FOUNDATION-0001-TRANSACTIONS]
     expectation: >-
-      Props, state and Context changes update dependent output without explicit watch/update calls. Switching a conditional dependency cannot leave a stale value.
-      Conservative dependencies may recompute additional pure expressions without additional effects. Immediately after a local state write,
-      a derived read sees that write rather than a committed cache. A pure dependency cycle is diagnosed with the relevant bindings.
+      Props, state and Context changes update dependent output without explicit watch/update calls. Switching a conditional dependency cannot leave a stale value. Conservative dependencies may recompute additional pure expressions without additional effects. Immediately after a local state write, a derived read sees that write rather than a committed cache. A pure dependency cycle is diagnosed with the relevant bindings.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-CONTROLLED
     title: Separate a controlled-value request from its owner's accepted state
     covers: [C-COMPILER-FOUNDATION-0001-CONTROLLED, C-COMPILER-FOUNDATION-0001-PUBLIC]
     expectation: >-
-      With controlled selected=A, requesting B emits a request while the actual selected value remains A.
-      A rejecting or delayed parent does not produce a committed-B success; a parent accepting C publishes C as actual input.
-      The uncontrolled variant instead commits its own valid action update. Request, acceptance and visible state remain separately observable.
+      With controlled selected=A, requesting B emits a request while the actual selected value remains A. A rejecting or delayed parent does not produce a committed-B success; a parent accepting C publishes C as actual input. The uncontrolled variant instead commits its own valid action update. Request, acceptance and visible state remain separately observable.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-COMMIT
     title: Publish a synchronous segment atomically and discard its unhandled failure
-    covers: [C-COMPILER-FOUNDATION-0001-TRANSACTIONS, C-COMPILER-FOUNDATION-0001-FAILURE, C-COMPILER-FOUNDATION-0001-RESULTS]
+    covers:
+      [
+        C-COMPILER-FOUNDATION-0001-TRANSACTIONS,
+        C-COMPILER-FOUNDATION-0001-FAILURE,
+        C-COMPILER-FOUNDATION-0001-RESULTS,
+      ]
     expectation: >-
-      Writes to two Proto instances in one synchronous UI domain are visible inside the segment but publish together; observers never see only the first write.
-      An unhandled failure discards both unpublished writes and unexecuted effects. Inspecting and handling an Err can still lead to a successful commit;
-      merely constructing Err does not abort. Cross-domain messages start destination actions rather than claiming one global transaction.
-      An explicitly captured snapshot may retain old values; an ordinary later read sees the current segment view instead of being silently converted to that snapshot.
+      Writes to two Proto instances in one synchronous UI domain are visible inside the segment but publish together; observers never see only the first write. An unhandled failure discards both unpublished writes and unexecuted effects. Inspecting and handling an Err can still lead to a successful commit; merely constructing Err does not abort. Cross-domain messages start destination actions rather than claiming one global transaction. An explicitly captured snapshot may retain old values; an ordinary later read sees the current segment view instead of being silently converted to that snapshot.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-REENTRY
     title: Queue implicit reentry without making ordinary helpers asynchronous
     covers: [C-COMPILER-FOUNDATION-0001-REENTRY, C-COMPILER-FOUNDATION-0001-TRANSACTIONS]
     expectation: >-
-      An ordinary helper reads the caller segment's new value synchronously. An observer or host callback that dispatches an action during publication
-      runs that action in the next cycle, after the current segment, rather than recursively entering its unfinished stack or seeing unpublished state.
+      An ordinary helper reads the caller segment's new value synchronously. An observer or host callback that dispatches an action during publication runs that action in the next cycle, after the current segment, rather than recursively entering its unfinished stack or seeing unpublished state.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-AWAIT-TRACE
     title: Await commits before suspension and a resumed failure cannot roll it back
-    covers: [C-COMPILER-FOUNDATION-0001-ASYNC, C-COMPILER-FOUNDATION-0001-FAILURE, C-COMPILER-FOUNDATION-0001-CONTEXT, C-COMPILER-FOUNDATION-0001-TRANSACTIONS]
+    covers:
+      [
+        C-COMPILER-FOUNDATION-0001-ASYNC,
+        C-COMPILER-FOUNDATION-0001-FAILURE,
+        C-COMPILER-FOUNDATION-0001-CONTEXT,
+        C-COMPILER-FOUNDATION-0001-TRANSACTIONS,
+      ]
     expectation: >-
-      Initially count=1, Context.factor=10 and derived total=10. The first segment writes count=2 and reads total=20 while outsiders still see total=10.
-      Await publishes count=2,total=20. During suspension another action publishes factor=3,total=6. Resumption receives 5, writes count=5 and reads total=15,
-      then propagates failure. Outsiders remain at count=2,factor=3,total=6. A ready await still preserves its logical commit and observation order rather than merging segments.
+      Initially count=1, Context.factor=10 and derived total=10. The first segment writes count=2 and reads total=20 while outsiders still see total=10. Await publishes count=2,total=20. During suspension another action publishes factor=3,total=6. Resumption receives 5, writes count=5 and reads total=15, then propagates failure. Outsiders remain at count=2,factor=3,total=6. A ready await still preserves its logical commit and observation order rather than merging segments.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-TASKS
     title: Own task lifetime and implement explicit concurrency policy
     covers: [C-COMPILER-FOUNDATION-0001-ASYNC, C-COMPILER-FOUNDATION-0001-CAPTURES]
     expectation: >-
-      Latest prevents a superseded task from committing a late result, parallel preserves independent submissions, and serial starts tasks in order.
-      Disposing the owning instance withdraws submission eligibility and cancels cancellable work; an uncancellable late completion cannot mutate a disposed or replacement instance.
-      Captured locals retain their values while new state/Context reads use the resumed segment's current state.
-      A writable transaction reference cannot escape across await or mutate the earlier committed write set.
+      Latest prevents a superseded task from committing a late result, parallel preserves independent submissions, and serial starts tasks in order. Disposing the owning instance withdraws submission eligibility and cancels cancellable work; an uncancellable late completion cannot mutate a disposed or replacement instance. Captured locals retain their values while new state/Context reads use the resumed segment's current state. A writable transaction reference cannot escape across await or mutate the earlier committed write set.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-EFFECTS
     title: Honor host timing and report post-commit failures without fictitious rollback
-    covers: [C-COMPILER-FOUNDATION-0001-EFFECTS, C-COMPILER-FOUNDATION-0001-VIEW-COMMIT, C-COMPILER-FOUNDATION-0001-FAILURE, C-COMPILER-FOUNDATION-0001-EXTERNS]
+    covers:
+      [
+        C-COMPILER-FOUNDATION-0001-EFFECTS,
+        C-COMPILER-FOUNDATION-0001-VIEW-COMMIT,
+        C-COMPILER-FOUNDATION-0001-FAILURE,
+        C-COMPILER-FOUNDATION-0001-EXTERNS,
+      ]
     expectation: >-
-      A default-action response executes before the native input callback expires, not on an arbitrary later frame.
-      Post-commit commands follow state publication and retain authored order. Failure of an already-started external effect produces its declared failure result,
-      without undoing committed local state by assertion. An immediate externally effective extern exposes its commit boundary.
-      An after-state-commit effect cannot assume the host has committed its view. An after-view-commit effect waits for the real corresponding host acknowledgement;
-      an absent view produces its declared wait or host-unavailable result rather than fabricated readiness.
+      A default-action response executes before the native input callback expires, not on an arbitrary later frame. Post-commit commands follow state publication and retain authored order. Failure of an already-started external effect produces its declared failure result, without undoing committed local state by assertion. An immediate externally effective extern exposes its commit boundary. An after-state-commit effect cannot assume the host has committed its view. An after-view-commit effect waits for the real corresponding host acknowledgement; an absent view produces its declared wait or host-unavailable result rather than fabricated readiness.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-NESTED-INPUT-DEADLINE
     title: Satisfy a nested native input deadline while its state action remains queued
-    covers: [C-COMPILER-FOUNDATION-0001-EFFECTS, C-COMPILER-FOUNDATION-0001-REENTRY, C-COMPILER-FOUNDATION-0001-PHASES]
+    covers:
+      [
+        C-COMPILER-FOUNDATION-0001-EFFECTS,
+        C-COMPILER-FOUNDATION-0001-REENTRY,
+        C-COMPILER-FOUNDATION-0001-PHASES,
+      ]
     expectation: >-
-      Action A publishes count=1 and its post-commit command synchronously dispatches a cancelable native input before A's effect stack has exited.
-      The restricted input response reads committed count=1 and cancels the native default before dispatch returns. Its state action B remains queued,
-      so count stays 1 throughout A's effect stack and becomes 2 only when B runs in the next cycle.
-      Await, a Proto state write or an arbitrary host command inside the deadline response is a phase violation rather than silently delayed work.
+      Action A publishes count=1 and its post-commit command synchronously dispatches a cancelable native input before A's effect stack has exited. The restricted input response reads committed count=1 and cancels the native default before dispatch returns. Its state action B remains queued, so count stays 1 throughout A's effect stack and becomes 2 only when B runs in the next cycle. Await, a Proto state write or an arbitrary host command inside the deadline response is a phase violation rather than silently delayed work.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-VIEW-REVISION
     title: Distinguish actual view commits, coalesced revisions and retired owners
-    covers: [C-COMPILER-FOUNDATION-0001-VIEW-COMMIT, C-COMPILER-FOUNDATION-0001-LIFETIME, C-COMPILER-FOUNDATION-0001-TRANSACTIONS]
+    covers:
+      [
+        C-COMPILER-FOUNDATION-0001-VIEW-COMMIT,
+        C-COMPILER-FOUNDATION-0001-LIFETIME,
+        C-COMPILER-FOUNDATION-0001-TRANSACTIONS,
+      ]
     expectation: >-
-      State revisions v1 and v2 publish before the host commits only v2. A wait requiring the exact v1 view completes as superseded;
-      an explicitly at-least-v1 wait can acknowledge actual v2 without reporting a displayed v1. Neither waits forever for a commit already known to be skipped.
-      Disposal cancels pending view effects; a late acknowledgement cannot focus or measure a replacement instance with the same key.
-      A hidden but actually committed view may acknowledge its revision while a specific measurement or focus operation still reports its own availability.
+      State revisions v1 and v2 publish before the host commits only v2. A wait requiring the exact v1 view completes as superseded; an explicitly at-least-v1 wait can acknowledge actual v2 without reporting a displayed v1. Neither waits forever for a commit already known to be skipped. Disposal cancels pending view effects; a late acknowledgement cannot focus or measure a replacement instance with the same key. A hidden but actually committed view may acknowledge its revision while a specific measurement or focus operation still reports its own availability.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-CONTEXT
     title: Track logical provider replacement through portals and async resumption
     covers: [C-COMPILER-FOUNDATION-0001-CONTEXT, C-COMPILER-FOUNDATION-0001-ASYNC]
     expectation: >-
-      A portal consumer resolves the nearest logical provider despite a different physical parent. Replacing a provider with an equal-valued provider retires the old subscription;
-      later old-provider writes cannot affect the consumer. Topology and value changes publish consistently. Fresh reads after await see the current provider,
-      while explicit captured values remain captured. A plain value change does not silently cancel an otherwise owned task.
-      Two keys with equal labels and equal structural payload types remain distinct nominal Context identities.
+      A portal consumer resolves the nearest logical provider despite a different physical parent. Replacing a provider with an equal-valued provider retires the old subscription; later old-provider writes cannot affect the consumer. Topology and value changes publish consistently. Fresh reads after await see the current provider, while explicit captured values remain captured. A plain value change does not silently cancel an otherwise owned task. Two keys with equal labels and equal structural payload types remain distinct nominal Context identities.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-KEYED-LIFETIME
     title: Preserve keyed identity through reorder and terminate only the actual removed instance
-    covers: [C-COMPILER-FOUNDATION-0001-LIFETIME, C-COMPILER-FOUNDATION-0001-CONTEXT, C-COMPILER-FOUNDATION-0001-ASYNC]
+    covers:
+      [
+        C-COMPILER-FOUNDATION-0001-LIFETIME,
+        C-COMPILER-FOUNDATION-0001-CONTEXT,
+        C-COMPILER-FOUNDATION-0001-ASYNC,
+      ]
     expectation: >-
-      Reordering children keyed A and B retains each child's state, captures and owned tasks. Removing A disposes that instance and prevents a late completion from writing to a newly created A.
-      Hiding or temporarily detaching B does not become terminal disposal. Moving retained B updates logical Context and host bindings without duplicating initialization or resources.
+      Reordering children keyed A and B retains each child's state, captures and owned tasks. Removing A disposes that instance and prevents a late completion from writing to a newly created A. Hiding or temporarily detaching B does not become terminal disposal. Moving retained B updates logical Context and host bindings without duplicating initialization or resources.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-HOST-API
     title: Expose typed readonly state and shared interaction-driven appearance
     covers: [C-COMPILER-FOUNDATION-0001-PUBLIC, C-COMPILER-FOUNDATION-0001-STYLE]
     expectation: >-
-      Only explicit public names appear in the generated interface. A host observes pressed/selected through named typed readonly projections,
-      applies style through those projections and changes behavior through declared actions. Private state is not available by a positional or string-lookup escape hatch.
-      Styling neither polls JSON state nor creates an independent interaction owner.
+      Only explicit public names appear in the generated interface. A host observes pressed/selected through named typed readonly projections, applies style through those projections and changes behavior through declared actions. Private state is not available by a positional or string-lookup escape hatch. Styling neither polls JSON state nor creates an independent interaction owner.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-OUTPUT
     title: Generate ordinary components from semantic IR and mature AST tooling
-    covers: [C-COMPILER-FOUNDATION-0001-IR, C-COMPILER-FOUNDATION-0001-COMPLETE, C-COMPILER-FOUNDATION-0001-EMISSION, C-COMPILER-FOUNDATION-0001-SUPPORT, C-COMPILER-FOUNDATION-0001-EXTERNS]
+    covers:
+      [
+        C-COMPILER-FOUNDATION-0001-IR,
+        C-COMPILER-FOUNDATION-0001-COMPLETE,
+        C-COMPILER-FOUNDATION-0001-EMISSION,
+        C-COMPILER-FOUNDATION-0001-SUPPORT,
+        C-COMPILER-FOUNDATION-0001-EXTERNS,
+      ]
     expectation: >-
-      Ordinary target imports mount generated components and native children, update inputs and release resources.
-      Outputs type-check and format through the target toolchain and contain only reached support imports, not per-component runtime source or an IR interpreter.
-      Changing a component/export/source name does not select different behavior. A declared target-specific extern missing on the selected target produces a useful diagnostic,
-      while the delivery inventory retains all five target obligations instead of treating the diagnostic as success.
+      Ordinary target imports mount generated components and native children, update inputs and release resources. Outputs type-check and format through the target toolchain and contain only reached support imports, not per-component runtime source or an IR interpreter. Changing a component/export/source name does not select different behavior. A declared target-specific extern missing on the selected target produces a useful diagnostic, while the delivery inventory retains all five target obligations instead of treating the diagnostic as success.
+
+
   - id: T-COMPILER-FOUNDATION-0001-CASE-EVIDENCE
     title: Report independent execution and comparable cost measurements
     covers: [C-COMPILER-FOUNDATION-0001-CONFORMANCE, C-COMPILER-FOUNDATION-0001-MEASUREMENT]
     expectation: >-
-      Reports separate implemented, rejected, missing and unrun cases for the actual capability denominator and each selected target.
-      Expected traces come from this contract, not old implementation or Adapter output. Measurements identify cold, warm and post-edit incremental inputs and distinguish generated source,
-      shared support, retained output, initialization and interaction work. No budget is met by moving hidden cost or dropping behavior.
-      Handwritten-host comparisons use equivalent observable semantics and the same build configuration, including required transaction and lifetime work.
+      Reports separate implemented, rejected, missing and unrun cases for the actual capability denominator and each selected target. Expected traces come from this contract, not old implementation or Adapter output. Measurements identify cold, warm and post-edit incremental inputs and distinguish generated source, shared support, retained output, initialization and interaction work. No budget is met by moving hidden cost or dropping behavior. Handwritten-host comparisons use equivalent observable semantics and the same build configuration, including required transaction and lifetime work.
+
+
+  - id: T-COMPILER-FOUNDATION-0001-CASE-SOURCE-COMPATIBILITY
+    title: Execute and compile one migrated source closure without backend-specific prototypes
+    covers:
+      [
+        C-COMPILER-FOUNDATION-0001-SOURCE-COMPATIBILITY,
+        C-COMPILER-FOUNDATION-0001-COMPLETE,
+        C-COMPILER-FOUNDATION-0001-DIAGNOSTICS,
+      ]
+    expectation: >-
+      A registered component and its imported helpers have identical source bytes and resolution inputs in the Adapter and compiler runs after a declared migration. Changing only a transitive helper changes the bound closure digest. Substituting a compiler-only helper or quietly rewriting an input invalidates the compatibility claim even if an entrypoint hash is unchanged. Declared atomic extern implementations may differ by target, but cannot execute the whole original prototype instead of lowering it. A source violating the selected language is not admitted merely because JavaScript executed it through an Adapter. A legal source with an unimplemented operation remains in the inventory with its missing capability and target rather than being rewritten to erase the behavior.
+
+
+  - id: T-COMPILER-FOUNDATION-0001-CASE-SOURCE-ORACLE
+    title: Compare both source execution paths with an independent expected trace
+    covers:
+      [
+        C-COMPILER-FOUNDATION-0001-SOURCE-COMPATIBILITY,
+        C-COMPILER-FOUNDATION-0001-CONFORMANCE,
+        C-COMPILER-FOUNDATION-0001-DEPENDENCIES,
+        C-COMPILER-FOUNDATION-0001-TEXT,
+      ]
+    expectation: >-
+      For a common source whose derived label follows a changed prop, both Adapter and generated consumers produce the independently specified new label without author-written watch/update plumbing. Explicit scalar traversal of A followed by U+1F642 produces two values in both paths. An Adapter incorrectly counting three UTF-16 code units fails the normative expectation rather than changing the compiler golden. Matching stale labels or matching wrong text results in both implementations still fail. Differential traces compare declared semantic observations, not unrelated host pixel layouts or historical Adapter snapshots.
+
+
 implementations:
   - id: frontend-ir
     kind: runtime-test
@@ -173,7 +244,11 @@ implementations:
       - T-COMPILER-FOUNDATION-0001-CASE-CONTROLLED
       - T-COMPILER-FOUNDATION-0001-CASE-OUTPUT
       - T-COMPILER-FOUNDATION-0001-CASE-EVIDENCE
-    notes: [No new frontend, semantic lowering or executable conformance implementation exists in the foundation PR.]
+    notes:
+      [
+        No new frontend,
+        semantic lowering or executable conformance implementation exists in the foundation PR.,
+      ]
   - id: react-generated-consumer
     kind: runtime-test
     status: missing
@@ -202,7 +277,10 @@ implementations:
     status: missing
     required: true
     consumesCases: *targetCases
-    notes: [First delivery target; no generated Rust or native window conformance has been implemented or run.]
+    notes:
+      [
+        First delivery target; no generated Rust or native window conformance has been implemented or run.,
+      ]
   - id: vue2-generated-consumer
     kind: runtime-test
     status: missing
@@ -221,14 +299,27 @@ implementations:
     required: true
     consumesCases: *targetCases
     notes: [Required final target; not implemented or executed.]
+  - id: shared-source-consumers
+    kind: workspace-check
+    status: missing
+    required: true
+    consumesCases:
+      - T-COMPILER-FOUNDATION-0001-CASE-SOURCE-COMPATIBILITY
+      - T-COMPILER-FOUNDATION-0001-CASE-SOURCE-ORACLE
+    notes:
+      - Source manifests, verified migrations and Adapter/generated-consumer comparisons have not been executed for the replacement language; the registered full target inventory remains required.
 verifies:
   contracts: [C-COMPILER-FOUNDATION-0001]
 references:
   decisions: [D-COMPILER-FOUNDATION-0001]
+  tests: [T-COMPILER-LINT-0001]
 sources:
   - path: spec/contracts/C-COMPILER-FOUNDATION-0001.yaml
 revisions:
   - version: 0.4.0
     change: introduced
     summary: Define independent new-language cases and record all executable implementation routes as missing.
+  - version: 0.4.0
+    change: revised
+    summary: Add identical-source-closure and independent-oracle cases with an explicitly missing shared-source consumer implementation.
 tags: [compiler, language, foundation, conformance, transaction, async, context]
