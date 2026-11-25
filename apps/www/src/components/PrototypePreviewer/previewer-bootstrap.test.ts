@@ -2,21 +2,26 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initPreviewerBootstrap } from './previewer-bootstrap';
 
 let dispose: (() => void) | undefined;
-let callbacks: Array<(entries: Array<{ isIntersecting: boolean }>) => void>;
+type Intersection = Pick<IntersectionObserverEntry, 'isIntersecting' | 'target' | 'time'>;
+let callbacks: Array<(entries: Intersection[]) => void>;
 let disconnects: Array<ReturnType<typeof vi.fn>>;
+let unobserves: Array<ReturnType<typeof vi.fn>>;
 beforeEach(() => {
   document.body.replaceChildren();
   localStorage.clear();
   callbacks = [];
   disconnects = [];
+  unobserves = [];
   vi.stubGlobal(
     'IntersectionObserver',
     class {
       disconnect = vi.fn();
       observe = vi.fn();
-      constructor(callback: (entries: Array<{ isIntersecting: boolean }>) => void) {
-        callbacks.push(callback);
+      unobserve = vi.fn();
+      constructor(callback: (entries: Intersection[], observer: unknown) => void) {
+        callbacks.push((entries) => callback(entries, this));
         disconnects.push(this.disconnect);
+        unobserves.push(this.unobserve);
       }
     }
   );
@@ -36,13 +41,31 @@ function root() {
   document.body.append(element);
   return element;
 }
+const deliver = (target: Element, isIntersecting: boolean, observer = 0) => {
+  callbacks[observer]!([{ target, isIntersecting, time: performance.now() }]);
+};
 const flush = async () => {
   for (let i = 0; i < 15; i++) await Promise.resolve();
 };
 
 describe('RuntimeBox lazy bootstrap lifetime', () => {
+  it('revokes the Matrix delivery callback when Astro swaps the page', async () => {
+    const matrix = document.createElement('section') as HTMLElement & {
+      warmDemoModules?: () => Promise<{ delivered: number; registered: number } | null>;
+    };
+    matrix.dataset.demoMatrix = '';
+    document.body.append(matrix);
+    dispose = initPreviewerBootstrap(document);
+    document.dispatchEvent(new Event('astro:page-load'));
+    const deliver = matrix.warmDemoModules;
+    expect(deliver).toBeTypeOf('function');
+    document.dispatchEvent(new Event('astro:before-swap'));
+    expect(matrix.warmDemoModules).toBeUndefined();
+    await expect(deliver!()).resolves.toBeNull();
+  });
+
   it('defers the client and sees the latest preference when the lazy card really mounts', async () => {
-    root();
+    const element = root();
     const seen: Array<string | null> = [];
     const initPreviewer = vi.fn(() => {
       seen.push(localStorage.getItem('preferred-prototypes-adapter'));
@@ -52,10 +75,10 @@ describe('RuntimeBox lazy bootstrap lifetime', () => {
     document.dispatchEvent(new Event('astro:page-load'));
     expect(load).not.toHaveBeenCalled();
     localStorage.setItem('preferred-prototypes-adapter', 'vue2');
-    callbacks[0]!([{ isIntersecting: true }]);
+    deliver(element, true);
     await flush();
     expect(seen).toEqual(['vue2']);
-    expect(disconnects[0]).toHaveBeenCalledTimes(1);
+    expect(unobserves[0]).toHaveBeenCalledWith(element);
   });
 
   it('does not duplicate observers or mounts on repeated bootstrap/page-load', async () => {
@@ -69,10 +92,48 @@ describe('RuntimeBox lazy bootstrap lifetime', () => {
     document.dispatchEvent(new Event('astro:page-load'));
     document.dispatchEvent(new Event('astro:page-load'));
     expect(callbacks).toHaveLength(1);
-    callbacks[0]!([{ isIntersecting: true }]);
-    callbacks[0]!([{ isIntersecting: true }]);
+    deliver(element, true);
+    deliver(element, true);
     await flush();
     expect(initPreviewer).toHaveBeenCalledTimes(1);
+  });
+
+  it('shares one viewport observer without activating a different preview', async () => {
+    root();
+    const visible = root();
+    const initPreviewer = vi.fn();
+    const load = vi.fn(async () => ({ initPreviewer }));
+    dispose = initPreviewerBootstrap(document, load);
+    document.dispatchEvent(new Event('astro:page-load'));
+
+    expect(callbacks).toHaveLength(1);
+    deliver(visible, true);
+    await flush();
+    expect(initPreviewer).toHaveBeenCalledTimes(1);
+    expect(initPreviewer).toHaveBeenCalledWith(expect.objectContaining({ root: visible }));
+  });
+
+  it('ignores records from the released observer when Astro observes the same root again', async () => {
+    const element = root();
+    const initPreviewer = vi.fn();
+    const load = vi.fn(async () => ({ initPreviewer }));
+    dispose = initPreviewerBootstrap(document, load);
+    document.dispatchEvent(new Event('astro:page-load'));
+
+    document.dispatchEvent(new Event('astro:before-swap'));
+    expect(disconnects[0]).toHaveBeenCalledTimes(1);
+    expect(element.isConnected).toBe(true);
+    document.dispatchEvent(new Event('astro:page-load'));
+    expect(callbacks).toHaveLength(2);
+
+    deliver(element, true, 0);
+    await flush();
+    expect(load).not.toHaveBeenCalled();
+
+    deliver(element, true, 1);
+    await flush();
+    expect(initPreviewer).toHaveBeenCalledTimes(1);
+    expect(initPreviewer).toHaveBeenCalledWith(expect.objectContaining({ root: element }));
   });
 
   it('revokes an import completion on Astro swap even while the old root is still connected', async () => {
@@ -87,7 +148,7 @@ describe('RuntimeBox lazy bootstrap lifetime', () => {
     );
     dispose = initPreviewerBootstrap(document, load);
     document.dispatchEvent(new Event('astro:page-load'));
-    callbacks[0]!([{ isIntersecting: true }]);
+    deliver(element, true);
     document.dispatchEvent(new Event('astro:before-swap'));
     expect(element.isConnected).toBe(true);
     resolve({ initPreviewer });
@@ -96,7 +157,7 @@ describe('RuntimeBox lazy bootstrap lifetime', () => {
     expect(element.dataset.mounting).toBeUndefined();
   });
 
-  it('disconnects a never-visible removed card and calls a mounted owner cleanup only once', async () => {
+  it('unobserves a never-visible removed card and calls a mounted owner cleanup only once', async () => {
     const element = root();
     const destroy = vi.fn();
     const initPreviewer = vi.fn();
@@ -104,13 +165,14 @@ describe('RuntimeBox lazy bootstrap lifetime', () => {
     document.dispatchEvent(new Event('astro:page-load'));
     (element as HTMLElement & { __previewer__: unknown }).__previewer__ = { destroy };
     element.remove();
-    await vi.waitFor(() => expect(disconnects[0]).toHaveBeenCalledTimes(1));
-    callbacks[0]!([{ isIntersecting: true }]);
+    await vi.waitFor(() => expect(unobserves[0]).toHaveBeenCalledWith(element));
+    deliver(element, true);
     await flush();
     expect(initPreviewer).not.toHaveBeenCalled();
     dispose();
     dispose();
     expect(destroy).toHaveBeenCalledTimes(1);
+    expect(disconnects[0]).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -180,19 +242,19 @@ describe('adapter panel first activation', () => {
   });
 
   it('keeps lazy intersection gating when a hidden panel becomes visible', async () => {
-    const { container } = panel('react', false, true);
+    const { container, element } = panel('react', false, true);
     const initPreviewer = vi.fn();
     const load = vi.fn(async () => ({ initPreviewer }));
     dispose = initPreviewerBootstrap(document, load);
     document.dispatchEvent(new Event('astro:page-load'));
-    callbacks[0]!([{ isIntersecting: true }]);
+    deliver(element, true);
     await flush();
     expect(load).not.toHaveBeenCalled();
-    callbacks[0]!([{ isIntersecting: false }]);
+    deliver(element, false);
     container.style.display = '';
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(load).not.toHaveBeenCalled();
-    callbacks[0]!([{ isIntersecting: true }]);
+    deliver(element, true);
     await flush();
     expect(initPreviewer).toHaveBeenCalledTimes(1);
   });
