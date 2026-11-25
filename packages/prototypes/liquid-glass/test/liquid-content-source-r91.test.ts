@@ -787,8 +787,8 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     document.body.append(root);
     await flush();
     expect(all.getAttribute('aria-checked')).toBe('mixed');
-    expect(all.querySelector('svg path')?.getAttribute('d')).toBe('M5 12h14');
-    expect(a.querySelector('svg path')?.getAttribute('d')).toBe('m20 6-11 11-5-5');
+    expect(all.querySelector('svg path')?.getAttribute('d')).toBe('M6 8h4');
+    expect(a.querySelector('svg path')?.getAttribute('d')).toBe('M4.5 8 7 11 11.5 5');
     expect(b.querySelector('svg path')).toBeNull();
     const proposals: unknown[] = [];
     root.addEventListener('valueChange', (event) => proposals.push((event as CustomEvent).detail));
@@ -799,7 +799,7 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     setElementProps(root, { value: ['a', 'b'] });
     await flush();
     expect(all.getAttribute('aria-checked')).toBe('true');
-    expect(b.querySelector('svg path')?.getAttribute('d')).toBe('m20 6-11 11-5-5');
+    expect(b.querySelector('svg path')?.getAttribute('d')).toBe('M4.5 8 7 11 11.5 5');
     expect(b.textContent).toBe('Messages');
     expectNeutral(root, all, a, b);
   });

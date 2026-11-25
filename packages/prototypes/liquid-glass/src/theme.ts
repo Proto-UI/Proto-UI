@@ -12,6 +12,8 @@ export const THEME = {
     'background': '#f5f5f7',
     'foreground': '#1d1d1f',
     'secondary': '#ffffff',
+    // Opaque sRGB composite of 5% black over the family background.
+    'secondary-background': '#e9e9eb',
     'secondary-foreground': '#1d1d1f',
     'accent': '#ffffff',
     'accent-foreground': '#1d1d1f',
@@ -36,6 +38,8 @@ export const THEME = {
     'background': '#1c1c1e',
     'foreground': '#f5f5f7',
     'secondary': '#2c2c2e',
+    // Opaque sRGB composite of 10% white over the family background.
+    'secondary-background': '#333335',
     'secondary-foreground': '#f5f5f7',
     'accent': '#2c2c2e',
     'accent-foreground': '#f5f5f7',

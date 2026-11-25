@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Prototype, TemplateChildren } from '@proto.ui/core';
-import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import { createControlLabelRef, type Prototype, type TemplateChildren } from '@proto.ui/core';
+import { AdaptToWebComponent, setElementAssociations, setElementProps } from '@proto.ui/adapter-web-component';
 import { createRuntimeSession, type RuntimeSession } from '@proto.ui/runtime';
 import {
   ANATOMY_GET_PROTO_CAP,
@@ -29,6 +29,7 @@ import { asTextareaRoot } from '@proto.ui/prototypes-base/textarea';
 import { asFieldTextarea } from '@proto.ui/prototypes-base/field';
 import { resolveMaterialStyle, colorContrast } from '../../../adapters/base/src/material/style';
 import { checkboxRoot, checkboxIndicator } from '../src/checkbox';
+import labelRoot from '../src/label';
 import { switchRoot, switchThumb } from '../src/switch';
 import { radioGroupRoot, radioGroupItem, radioGroupIndicator } from '../src/radio-group';
 import inputRoot from '../src/input';
@@ -70,6 +71,7 @@ const composition = (type: string, data: string) => {
 const projectionPrototypes: Prototype<any, any>[] = [
   checkboxRoot,
   checkboxIndicator,
+  labelRoot,
   switchRoot,
   switchThumb,
   radioGroupRoot,
@@ -268,7 +270,7 @@ describe('Liquid Glass draft control projections through the real Web Component 
     const checked = root.getExposes().checked;
     expect(root.getAttribute('role')).toBe('checkbox');
     expect(root.getAttribute('aria-checked')).toBe('mixed');
-    expect(indicator.querySelector('path')?.getAttribute('d')).toBe('M5 12h14');
+    expect(indicator.querySelector('path')?.getAttribute('d')).toBe('M6 8h4');
     expect(indicator.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
     expect(indicator.querySelector('svg')?.getAttribute('stroke')).toBe('currentColor');
     expect(indicator.getExposes().focusSelf).toBeUndefined();
@@ -286,7 +288,7 @@ describe('Liquid Glass draft control projections through the real Web Component 
     click(root);
     await flush();
     expect(indicator.getExposes().isChecked()).toBe(true);
-    expect(indicator.querySelector('path')?.getAttribute('d')).toBe('m20 6-11 11-5-5');
+    expect(indicator.querySelector('path')?.getAttribute('d')).toBe('M4.5 8 7 11 11.5 5');
     expect(root.querySelector('input, button')).toBeNull();
   });
 
@@ -311,6 +313,35 @@ describe('Liquid Glass draft control projections through the real Web Component 
     click(root);
     expect(requests).toHaveLength(1);
     expect(root.getExposes().checked.get()).toBe(true);
+  });
+
+  it('keeps the external Label associated with the standalone Checkbox owner', async () => {
+    const root = make(checkboxRoot);
+    const indicator = make(checkboxIndicator);
+    const label = make(labelRoot, { naming: true, activation: true });
+    const associations = { controlLabel: createControlLabelRef() };
+    setElementAssociations(root, associations);
+    setElementAssociations(label, associations);
+    label.textContent = 'Receive updates';
+    root.append(indicator);
+    const requests = vi.fn();
+    root.addEventListener('checkedChange', requests);
+    document.body.append(root, label);
+    await flush();
+    expect(label.id).not.toBe('');
+    expect(root.getAttribute('aria-labelledby')).toBe(label.id);
+    expect(label.tabIndex).toBe(-1);
+    labelClick(label);
+    await flush();
+    expect(root.getAttribute('aria-checked')).toBe('true');
+    expect(indicator.getExposes().isChecked()).toBe(true);
+    expect(requests).toHaveBeenCalledTimes(1);
+    setElementProps(root, { disabled: true });
+    await flush();
+    labelClick(label);
+    await flush();
+    expect(root.getAttribute('aria-checked')).toBe('true');
+    expect(requests).toHaveBeenCalledTimes(1);
   });
 
   it('retains Radio Group selection, roving focus and passive checked indicators', async () => {
