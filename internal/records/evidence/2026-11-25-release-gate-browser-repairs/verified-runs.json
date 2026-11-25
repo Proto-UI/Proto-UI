@@ -1003,6 +1003,138 @@
           "failureMessages": []
         }
       ]
+    },
+    {
+      "label": "accordion-bootstrap-presence",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/accordion-bootstrap-presence.json",
+      "rawSha256": "69d108c651097d0266990baa3d8134c98ea274fe011fb246ff45431a4244e057",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "filtered": 24,
+      "startTime": 1795572389486,
+      "cases": [
+        {
+          "fullName": "Accordion five families / four native Web consumers bootstrap-2-3-2 wc preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "duration": 18560.954134,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Accordion five families / four native Web consumers bootstrap-2-3-2 react preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "duration": 16760.095353,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Accordion five families / four native Web consumers bootstrap-2-3-2 vue preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "duration": 15877.677622000003,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Accordion five families / four native Web consumers bootstrap-2-3-2 vue2 preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "duration": 16298.94917,
+          "failureMessages": []
+        }
+      ]
+    },
+    {
+      "label": "dialog-wrap-current",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/dialog-wrap-current.json",
+      "rawSha256": "f82e332f1e746131553484de12fd9beba64d44608427ed6231274b860a95189e",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "filtered": 4,
+      "startTime": 1795573148692,
+      "cases": [
+        {
+          "fullName": "brutalist/wc: live available region bounds content, leaves Mask full-size, scrolls long text and restores on close",
+          "status": "passed",
+          "duration": 15862.393161,
+          "failureMessages": []
+        },
+        {
+          "fullName": "brutalist/react: live available region bounds content, leaves Mask full-size, scrolls long text and restores on close",
+          "status": "passed",
+          "duration": 12369.755191999997,
+          "failureMessages": []
+        },
+        {
+          "fullName": "brutalist/vue: live available region bounds content, leaves Mask full-size, scrolls long text and restores on close",
+          "status": "passed",
+          "duration": 12470.73846,
+          "failureMessages": []
+        },
+        {
+          "fullName": "brutalist/vue2: live available region bounds content, leaves Mask full-size, scrolls long text and restores on close",
+          "status": "passed",
+          "duration": 12930.145666000004,
+          "failureMessages": []
+        }
+      ]
+    },
+    {
+      "label": "select-first-paint-owner",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/select-first-paint-owner.json",
+      "rawSha256": "02c03be4a782a5e9117fe561d08195eec98fb63514506e97873a72e25c6e55af",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "filtered": 0,
+      "startTime": 1795573215296,
+      "cases": [
+        {
+          "fullName": "Select first paint with the popup never opened shows the authored label in every runtime",
+          "status": "passed",
+          "duration": 11634.063495999999,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Select first paint with the popup never opened keeps the closed content mounted and marked detached in every runtime",
+          "status": "passed",
+          "duration": 11866.115286,
+          "failureMessages": []
+        },
+        {
+          "fullName": "React Select retained native entry focus observes selected entry and native End/Home without committing selection",
+          "status": "passed",
+          "duration": 7821.957172999999,
+          "failureMessages": []
+        }
+      ]
+    },
+    {
+      "label": "code-grammar-initial-snapshot",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/code-grammar-initial-snapshot.json",
+      "rawSha256": "6c429e12f9d08af001b149ecfb4136ca51007a5212fbc10ac4eddecf51740e82",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "filtered": 26,
+      "startTime": 1795574314852,
+      "cases": [
+        {
+          "fullName": "keeps every authored source reachable without JavaScript and does not fake an interactive tree",
+          "status": "passed",
+          "duration": 12002.466889,
+          "failureMessages": []
+        },
+        {
+          "fullName": "keeps both file-browser panels bounded while files and directories change (1280px)",
+          "status": "passed",
+          "duration": 16785.522576,
+          "failureMessages": []
+        },
+        {
+          "fullName": "keeps both file-browser panels bounded while files and directories change (390px)",
+          "status": "passed",
+          "duration": 19637.581797,
+          "failureMessages": []
+        }
+      ]
     }
   ]
 }
