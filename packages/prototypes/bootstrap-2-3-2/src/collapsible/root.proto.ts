@@ -14,9 +14,13 @@ const collapsibleRoot = definePrototype<
     // P-BOOTSTRAP-2-3-2-COLLAPSIBLE-VISUAL-SAFETY: no fixed width/height or clipped long label.
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full bg-background text-foreground text-[14px] leading-[20px] block mb-[2px] rounded-[4px] border border-[#e5e5e5] dark:border-border'
+        'min-w-0 max-w-full bg-background text-foreground text-[14px] leading-[20px] block mb-[2px] rounded-[4px] border border-[#e5e5e5]'
       )
     );
+    def.rule({
+      when: (w) => w.meta('colorScheme').eq('dark'),
+      intent: (i) => i.feedback.style.use(tw('border-border')),
+    });
     return inherited.render;
   },
 });
