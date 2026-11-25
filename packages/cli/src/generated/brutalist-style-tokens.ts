@@ -142,7 +142,6 @@ export const BRUTALIST_STYLE_TOKENS: string[] = [
   'data-[dragging]:select-none',
   'data-[expanded]:border-b-2',
   'data-[expanded]:gap-3',
-  'data-[focus-visible]:border-destructive',
   'data-[focus-visible]:data-[invalid]:border-destructive',
   'data-[focus-visible]:data-[invalid]:forced-colors-focus-outline',
   'data-[focus-visible]:data-[invalid]:ring-2',

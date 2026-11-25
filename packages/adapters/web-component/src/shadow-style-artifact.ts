@@ -136,9 +136,13 @@ function validateSharedShadowSelectorAbi(cssText: string): void {
   validatedSelectorCodeUnits += cssText.length;
 }
 
+function maskShadowCssStrings(value: string): string {
+  return value.replace(/(["'])(?:\\.|(?!\1)[^\\])*\1/g, '$1$1');
+}
+
 function validateShadowSelectorAbi(cssText: string): void {
   const selectors = stripShadowCssComments(cssText);
-  const structuralCss = selectors.replace(/(["'])(?:\\.|(?!\1)[^\\])*\1/g, '$1$1');
+  const structuralCss = maskShadowCssStrings(selectors);
   const documentRule = structuralCss.match(
     /(?:^|[;{}])(?:(?!\s*@)[^;{}]*(:where\(\.dark\)|:where\(\[data-theme=|:root))[^;{}]*\{/
   );
@@ -186,7 +190,7 @@ function validateShadowSelectorAbi(cssText: string): void {
 // not impose a second theme gate on the host. Keep quoted text and escaped
 // delimiters out of the scan, and preserve whitespace consumed by CSS escapes.
 function hasShadowHostThemeGate(selector: string): boolean {
-  const structuralSelector = selector.trimStart().replace(/(["'])(?:\\.|(?!\1)[^\\])*\1/g, '$1$1');
+  const structuralSelector = maskShadowCssStrings(selector.trimStart());
   const tokens = structuralSelector.matchAll(
     /\\(?:[0-9a-f]{1,6}\s?|.)|([.[])\s*((?:[-\w\u0080-\uFFFF]|\\(?:[0-9a-f]{1,6}\s?|.))+)|([()[\]])|([\s>+~]+)/gi
   );

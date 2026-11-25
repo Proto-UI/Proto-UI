@@ -4,6 +4,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import ts from 'typescript';
+import {
+  canKeepOmittedParameter,
+  omittedParameterConditionOutcome,
+} from './closed-rule-helpers.js';
 
 import { canonicalizeLoweredVariants } from '../generated/lowered-variant-order.js';
 import {
@@ -974,6 +978,14 @@ function collectSourceFunctionCall(node, helper, captured, scope, tokens, rootIn
         value = resolveBinding(parameter.initializer, nextScope);
         walk(parameter.initializer, nextScope, tokens, helper.exposures, rootInventory);
       }
+      if (
+        !argument &&
+        !node.arguments.some(ts.isSpreadElement) &&
+        canKeepOmittedParameter(parameter, scope.sourceSummary)
+      )
+        value = { ...emptyValue(), kind: 'absent' };
+      if (value?.kind === 'absent' && !canKeepOmittedParameter(parameter, scope.sourceSummary))
+        value = undefined;
       if (!value) continue;
       const sources = sourceValueCandidates(value);
       const currentSources = [
@@ -3596,7 +3608,16 @@ function sourceMemberPresence(node, scope) {
   return null;
 }
 
+function capturedOmissionOutcome(node, scope) {
+  return omittedParameterConditionOutcome(node, scope.sourceSummary, (name) => {
+    const held = lookup(name, scope);
+    return held?.kind === 'absent' ? held.bindingNode : undefined;
+  });
+}
+
 function sourceConditionOutcome(node, scope) {
+  const omission = capturedOmissionOutcome(node, scope);
+  if (omission !== null) return omission;
   const value = unwrapTransparent(node);
   if (ts.isPrefixUnaryExpression(value) && value.operator === ts.SyntaxKind.ExclamationToken) {
     const presence = sourceMemberPresence(value.operand, scope);
@@ -5162,6 +5183,13 @@ function analyzeWhenVariants(node, scope) {
     .filter((chain) => chain.length > 0 && !chain.every(isNegativeDataVariant));
 
   function visit(current) {
+    if (ts.isConditionalExpression(current)) {
+      const outcome = capturedOmissionOutcome(current.condition, scope);
+      if (outcome !== null) {
+        visit(outcome ? current.whenTrue : current.whenFalse);
+        return;
+      }
+    }
     if (ts.isArrowFunction(current) || ts.isFunctionExpression(current)) {
       visit(current.body);
       return;

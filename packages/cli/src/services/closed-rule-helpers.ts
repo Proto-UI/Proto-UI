@@ -15,6 +15,69 @@ const unwrap = (node: ts.Node): ts.Node =>
     : node;
 
 const ruleRegistrationCache = new WeakMap<ts.FunctionLikeDeclaration, boolean>();
+const dynamicParameterSources = new WeakMap<ts.SourceFile, boolean>();
+
+/** Only an actual missing call argument can introduce this fact. A default,
+ * rest/destructured binding or a write in any deferred closure can change it;
+ * direct eval can write the lexical binding without an authored assignment.
+ * External modules also exclude sloppy-mode arguments/parameter aliasing. */
+export function canKeepOmittedParameter(
+  parameter: ts.ParameterDeclaration,
+  summary: HookSourceSummaryContext
+): boolean {
+  if (
+    !ts.isIdentifier(parameter.name) ||
+    parameter.initializer ||
+    parameter.dotDotDotToken ||
+    !ts.isExternalModule(parameter.getSourceFile()) ||
+    summary.resolveStableSourceBinding(parameter.name) !== parameter
+  )
+    return false;
+  const source = parameter.getSourceFile();
+  let dynamic = dynamicParameterSources.get(source);
+  if (dynamic === undefined) {
+    dynamic = false;
+    const visit = (node: ts.Node): void => {
+      if (dynamic || ts.isTypeNode(node)) return;
+      if (
+        ts.isWithStatement(node) ||
+        (ts.isCallExpression(node) &&
+          ts.isIdentifier(unwrap(node.expression)) &&
+          (unwrap(node.expression) as ts.Identifier).text === 'eval')
+      ) {
+        dynamic = true;
+        return;
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+    dynamicParameterSources.set(source, dynamic);
+  }
+  return !dynamic;
+}
+
+/** Truthiness of a captured omission, bound to this exact lexical parameter.
+ * A same-spelled callback parameter must not borrow its caller's absence. */
+export function omittedParameterConditionOutcome(
+  node: ts.Node,
+  summary: HookSourceSummaryContext,
+  captured: (name: string) => ts.Node | undefined
+): boolean | null {
+  const value = unwrap(node);
+  if (ts.isIdentifier(value)) {
+    const parameter = captured(value.text);
+    return parameter &&
+      ts.isParameter(parameter) &&
+      summary.resolveStableSourceBinding(value) === parameter
+      ? false
+      : null;
+  }
+  if (ts.isPrefixUnaryExpression(value) && value.operator === ts.SyntaxKind.ExclamationToken) {
+    const result = omittedParameterConditionOutcome(value.operand, summary, captured);
+    return result === null ? null : !result;
+  }
+  return null;
+}
 
 /**
  * Whether a function registers a rule. Only such a function carries rule

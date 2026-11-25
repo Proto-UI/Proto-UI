@@ -1024,7 +1024,6 @@ export const DRAFT_FAMILY_STYLE_TOKENS = {
     'data-[focus-visible]:outline-none',
     'data-[focus-visible]:ring-2',
     'data-[focus-visible]:ring-destructive',
-    'data-[focus-visible]:ring-destructive/40',
     'data-[focus-visible]:ring-inset',
     'data-[focus-visible]:ring-offset-2',
     'data-[focus-visible]:ring-offset-background',

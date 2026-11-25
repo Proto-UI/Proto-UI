@@ -16,7 +16,12 @@ import {
   type SourceGraphVersionTracker,
 } from './hook-source-summary.js';
 import { loweredHookStates } from './prototype-style-tokens.js';
-import { closedLocalRuleHelpers, helperArgumentBeforeVisit } from './closed-rule-helpers.js';
+import {
+  canKeepOmittedParameter,
+  closedLocalRuleHelpers,
+  helperArgumentBeforeVisit,
+  omittedParameterConditionOutcome,
+} from './closed-rule-helpers.js';
 
 /**
  * Mirrors `OFFICIAL_EXPOSED_STATE_NAMES` in `@proto.ui/module-expose-state-web`,
@@ -199,7 +204,12 @@ type RuleClosureContext = {
   callPath: HookSourceRef[];
   activeFunctions: Set<string>;
   ruleFunctions: Map<string, boolean>;
-  invocation?: { start: number; parameters: Binding[]; versions: SourceGraphVersionTracker };
+  invocation?: {
+    start: number;
+    parameters: Binding[];
+    versions: SourceGraphVersionTracker;
+    canOmitArguments: boolean;
+  };
 };
 
 /** Every source remains in the denominator. A helper declaration is assessed
@@ -3396,12 +3406,17 @@ function scanRuleStateSource(
     return null;
   };
 
+  const capturedOmissionOutcome = (node: ts.Node, scope: Scope): boolean | null =>
+    omittedParameterConditionOutcome(node, sourceSummary, (name) => {
+      const held = lookup(scope, name);
+      return held?.kind === 'absent' ? held.bindingNode : undefined;
+    });
+
   const sourceConditionOutcome = (node: ts.Node, scope: Scope): boolean | null => {
+    const omission = capturedOmissionOutcome(node, scope);
+    if (omission !== null) return omission;
     const value = unwrap(node);
-    if (ts.isIdentifier(value) && lookup(scope, value.text)?.kind === 'absent') return false;
     if (ts.isPrefixUnaryExpression(value) && value.operator === ts.SyntaxKind.ExclamationToken) {
-      const operand = unwrap(value.operand);
-      if (ts.isIdentifier(operand) && lookup(scope, operand.text)?.kind === 'absent') return true;
       const presence = sourceMemberPresence(value.operand, scope);
       return presence === null ? null : !presence;
     }
@@ -3971,6 +3986,13 @@ function scanRuleStateSource(
     const LOWERABLE_MEMBERS = new Set(['all', 'any', 'eq', 'state', 'meta']);
 
     const visitCondition = (node: ts.Node): void => {
+      if (ts.isConditionalExpression(node)) {
+        const outcome = capturedOmissionOutcome(node.condition, scope);
+        if (outcome !== null) {
+          visitCondition(outcome ? node.whenTrue : node.whenFalse);
+          return;
+        }
+      }
       // Only one branch reaches the returned expression at runtime, so the
       // runtime lowers one condition while a walk over the source sees both and
       // the extractor combines them into a selector nothing matches.
@@ -4554,7 +4576,12 @@ function scanRuleStateSource(
       ...closure,
       callPath: [...closure.callPath, ref],
       activeFunctions: new Set(closure.activeFunctions).add(key),
-      invocation: { start: helper.getStart(), parameters: current, versions: scope.versions },
+      invocation: {
+        start: helper.getStart(),
+        parameters: current,
+        versions: scope.versions,
+        canOmitArguments: !call.arguments.some(ts.isSpreadElement),
+      },
     });
     usages.push(...scanned.usages);
     unresolved.push(...scanned.unresolved);
@@ -5170,7 +5197,14 @@ function scanRuleStateSource(
       for (const statement of source.statements) {
         if (ts.isVariableStatement(statement)) {
           for (const declaration of statement.declarationList.declarations) {
-            shadowBindingPattern(rootScope, declaration.name);
+            // Keep the declaration identity so sourceResolve can distinguish this
+            // module's producer from a same-name binding inside the replayed helper.
+            if (ts.isIdentifier(declaration.name))
+              declare(rootScope, declaration.name.text, {
+                kind: 'opaque',
+                bindingNode: declaration,
+              });
+            else shadowBindingPattern(rootScope, declaration.name);
             const value = declaration.initializer && unwrap(declaration.initializer);
             if (
               ts.isIdentifier(declaration.name) &&
@@ -5194,8 +5228,19 @@ function scanRuleStateSource(
         shadowBindingPattern(scope, parameter.name);
         if (!ts.isIdentifier(parameter.name) || parameter.dotDotDotToken) continue;
         const binding = closure.invocation.parameters[index];
-        if (binding) declare(scope, parameter.name.text, { ...binding, bindingNode: parameter });
-        else if (!parameter.initializer) declare(scope, parameter.name.text, { kind: 'absent' });
+        if (
+          binding &&
+          (binding.kind !== 'absent' ||
+            (closure.invocation.canOmitArguments &&
+              canKeepOmittedParameter(parameter, sourceSummary)))
+        )
+          declare(scope, parameter.name.text, { ...binding, bindingNode: parameter });
+        else if (
+          !binding &&
+          closure.invocation.canOmitArguments &&
+          canKeepOmittedParameter(parameter, sourceSummary)
+        )
+          declare(scope, parameter.name.text, { kind: 'absent', bindingNode: parameter });
       }
       visit(target.body, scope);
     } else {

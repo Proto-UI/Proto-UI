@@ -545,6 +545,12 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       sourceSha256: '3f4d16509a55b811796454428b796f3a52c81503da5b267b97a9f6746d023c18',
       specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
     }),
+  // Exact authored Dialog recipe: the single public Button edge is type-only.
+  // Full importer bytes remain required; no controller acceptance is promoted.
+  'apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.demo.ts': Object.freeze({
+    sourceSha256: '457cfc4e34819d47a852590307b443fa28c062e0d8c91ddb296fc6b9562668b4',
+    specifiers: Object.freeze(['@proto.ui/prototypes-brutalist/button']),
+  }),
   'apps/www/src/content/docs/demo-bootstrap-2-3-2-dialog.demo.ts': Object.freeze({
     sourceSha256: 'bed828050a2f4b8157678f4d903eade26184762b97c42dd181c7e2fdcd836668',
     specifiers: Object.freeze(['@proto.ui/prototypes-bootstrap-2-3-2/surface']),
@@ -597,7 +603,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/site-native-controls.ts': Object.freeze({
-    sourceSha256: 'c2096d99a4c81aecafbd92607e797bef66ece8b93bf01d465f66a7f8fb2320a9',
+    sourceSha256: 'b3adf001ead0e1cdbf5748a7f8e6a0b2e0d4f10b0c273e5a8d2751708b714451',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-shadcn/surface',
@@ -913,7 +919,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
   'apps/www/src/components/site-shadcn-controls.ts': Object.freeze({
-    sourceSha256: 'fc2006315ebca2293380cc1402eafac4b9064f48e5951ad263162a8d2a5e67f4',
+    sourceSha256: '53ec9878f07024aef14dae9d519035a05e4c22032206374899b6aa940d5a2f2a',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-bootstrap-2-3-2/button',

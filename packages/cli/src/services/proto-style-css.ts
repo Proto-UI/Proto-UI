@@ -657,7 +657,6 @@ const staticUtilities: Record<string, string[]> = {
   'opacity-60': ['opacity: 0.6;'],
   'opacity-65': ['opacity: 0.65;'],
   'opacity-70': ['opacity: 0.7;'],
-  'opacity-95': ['opacity: 0.95;'],
   'opacity-0': ['opacity: 0;'],
   'opacity-100': ['opacity: 1;'],
   'opacity-50': ['opacity: 0.5;'],
