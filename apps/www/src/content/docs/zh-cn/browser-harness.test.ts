@@ -591,9 +591,11 @@ describe('shared Runtime selector compatibility boundaries', () => {
     expect(surface).toContain(".getByRole('tab', { name: 'React', exact: true })");
     expect(surface).toContain("await trigger.press('Enter')");
     expect(surface).toContain(
-      "await demoPopup.getByRole('option', { name: 'Ink', exact: true }).click()"
+      "await demoPopup.getByRole('option', { name: 'Banana', exact: true }).click()"
     );
-    expect(surface).toContain("connected: true, text: 'Ink', expanded: 'false', popupHidden: true");
+    expect(surface).toContain(
+      "connected: true, text: 'Banana', expanded: 'false', popupHidden: true"
+    );
     expect(surface).toContain(').toBe(generation)');
     expect(surface).toContain('runtimePreviewEvidenceIssues(await measure(root');
     expect(surface).toContain('timeout: 45000');
