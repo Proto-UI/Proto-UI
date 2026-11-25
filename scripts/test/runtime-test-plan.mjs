@@ -478,6 +478,7 @@ const observedCosts = {};
 for (const file of [
   './fixtures/browser-suite-costs-44876125495.json',
   './fixtures/browser-suite-costs-45029016292.json',
+  './fixtures/browser-suite-costs-45537881490.json',
 ]) {
   const evidence = validateBrowserCostEvidence(
     JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8'))
