@@ -6,8 +6,7 @@ import type {
 
 export type CalendarExampleFamily = 'shadcn' | 'brutalist' | 'bootstrap-2-3-2' | 'liquid-glass';
 
-const LIQUID_GLASS_BACKDROP =
-  'inline-flex max-w-full items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6';
+const LIQUID_GLASS_BACKDROP = 'inline-flex max-w-full items-center justify-center';
 
 function wrapSurface(family: CalendarExampleFamily, node: DemoNode): DemoNode {
   if (family !== 'liquid-glass') return node;

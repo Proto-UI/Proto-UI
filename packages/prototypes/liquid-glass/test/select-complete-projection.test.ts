@@ -431,7 +431,7 @@ describe('Liquid Field Select Trigger (intent only)', () => {
       expect(trigger.target.getAttribute('aria-describedby')).toBe(description.target.id);
       expect(trigger.target.getAttribute('aria-errormessage')).toBe(error.target.id);
       expect(trigger.frames.at(-1)?.style.tokens).toEqual(
-        expect.arrayContaining(['border-2', 'border-foreground'])
+        expect.arrayContaining(['border-2', 'border-destructive'])
       );
       // Disabled through Field suppresses the press candidates.
       field.set({ invalid: true, errors: ['Required'], disabled: true });

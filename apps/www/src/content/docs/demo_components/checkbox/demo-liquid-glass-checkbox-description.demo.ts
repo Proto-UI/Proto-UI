@@ -7,12 +7,11 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'w-full max-w-md rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    className: 'w-full max-w-md',
     children: [
       {
         kind: 'box',
-        className: 'grid gap-4 rounded-xl bg-background/70 p-4 shadow-sm',
+        className: 'grid gap-4',
         children: [
           {
             kind: 'box',
@@ -55,7 +54,7 @@ export default {
           },
           {
             kind: 'box',
-            className: 'flex items-start gap-3 rounded-xl border border-border bg-secondary/80 p-3',
+            className: 'flex items-start gap-3',
             children: [
               {
                 kind: 'proto',

@@ -3,10 +3,13 @@ import type { ProjectionComponentId, ProjectionFamilyId } from './projection-fam
 import { PREVIEW_ERROR_MARKER } from './preview-error-surface';
 type PreviewerRoot = HTMLElement & { __previewer__?: { destroy(): unknown } };
 type Client = typeof import('./previewer-client');
+type Matrix = HTMLElement & {
+  warmDemoModules?: () => Promise<{ delivered: number; registered: number } | null>;
+};
 type PendingPreview = {
   ready: boolean;
   owner: AbortController;
-  observer?: IntersectionObserver;
+  observedAt?: number;
 };
 const documents = new WeakMap<Document, () => void>();
 
@@ -22,6 +25,8 @@ export function initPreviewerBootstrap(
   if (!view) return () => {};
   const pending = new Map<PreviewerRoot, PendingPreview>();
   let disposed = false;
+  let matrix: Matrix | null = null;
+  let intersection: IntersectionObserver | undefined;
   // One eager init per macrotask. A background postTask per matrix cell never
   // drains inside the Shadow split budgets, and running every init in one turn
   // starves the settings controls those tests actually exercise.
@@ -52,11 +57,16 @@ export function initPreviewerBootstrap(
     );
     return turn;
   };
+  const stopObserving = (root: PreviewerRoot, entry: PendingPreview) => {
+    if (entry.observedAt === undefined) return;
+    intersection?.unobserve(root);
+    entry.observedAt = undefined;
+  };
   const release = (root: PreviewerRoot) => {
     const entry = pending.get(root);
     if (!entry) return;
     entry.owner.abort();
-    entry.observer?.disconnect();
+    stopObserving(root, entry);
     pending.delete(root);
     delete root.dataset.mounting;
     delete root.dataset.lazyObserved;
@@ -96,8 +106,7 @@ export function initPreviewerBootstrap(
         !panelVisible(root)
       )
         return;
-      entry.observer?.disconnect();
-      entry.observer = undefined;
+      stopObserving(root, entry);
       // Read at activation time, after the lazy/import boundary. initPreviewer
       // resolves the current page preference rather than an SSR/runtime snapshot.
       initPreviewer({
@@ -128,8 +137,40 @@ export function initPreviewerBootstrap(
       if (pending.get(root) === entry) delete root.dataset.mounting;
     }
   };
+  const onIntersection: IntersectionObserverCallback = (records, observer) => {
+    if (observer !== intersection) return;
+    const readiness = new Map<PreviewerRoot, boolean>();
+    for (const record of records) {
+      const root = record.target as PreviewerRoot;
+      const observedAt = pending.get(root)?.observedAt;
+      // A detached target can be observed again before its old records arrive.
+      if (observedAt === undefined || record.time < observedAt) continue;
+      readiness.set(root, record.isIntersecting || readiness.get(root) === true);
+    }
+    for (const [root, ready] of readiness) {
+      const entry = pending.get(root);
+      if (entry?.observedAt === undefined) continue;
+      entry.ready = ready;
+      if (ready) void mount(root);
+    }
+  };
   const scan = () => {
     if (disposed) return;
+    const nextMatrix = document.querySelector<Matrix>('[data-demo-matrix]');
+    if (matrix !== nextMatrix) {
+      if (matrix) delete matrix.warmDemoModules;
+      matrix = nextMatrix;
+      if (nextMatrix) {
+        // The Matrix asks the existing Previewer client to deliver its modules
+        // before initialization is measured.
+        nextMatrix.warmDemoModules = async () => {
+          if (matrix !== nextMatrix || !nextMatrix.isConnected) return null;
+          const { demoModuleCount, warmDemoModules } = await import('./previewer-client');
+          if (matrix !== nextMatrix || !nextMatrix.isConnected) return null;
+          return { delivered: await warmDemoModules(), registered: demoModuleCount() };
+        };
+      }
+    }
     for (const panel of document.querySelectorAll('[data-adapter-panel]')) {
       visibility.observe(panel, {
         attributes: true,
@@ -149,14 +190,9 @@ export function initPreviewerBootstrap(
         void mount(root);
       } else {
         root.dataset.lazyObserved = '1';
-        entry.observer = new view.IntersectionObserver(
-          (entries) => {
-            entry.ready = entries.some((item) => item.isIntersecting);
-            if (entry.ready) void mount(root);
-          },
-          { rootMargin: '360px 0px' }
-        );
-        entry.observer.observe(root);
+        intersection ??= new view.IntersectionObserver(onIntersection, { rootMargin: '360px 0px' });
+        entry.observedAt = view.performance.now();
+        intersection.observe(root);
       }
     }
   };
@@ -165,7 +201,11 @@ export function initPreviewerBootstrap(
     for (const root of pending.keys()) void mount(root);
   });
   const clear = () => {
+    if (matrix) delete matrix.warmDemoModules;
+    matrix = null;
     visibility.disconnect();
+    intersection?.disconnect();
+    intersection = undefined;
     for (const root of pending.keys()) release(root);
   };
   const removal = new view.MutationObserver((records) => {

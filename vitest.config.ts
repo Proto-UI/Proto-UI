@@ -70,6 +70,14 @@ function resolveProtoUiImport(id: string): string | null {
 }
 
 export default defineConfig({
+  esbuild: {
+    target: 'es2022',
+    tsconfigRaw: {
+      compilerOptions: {
+        target: 'ES2022',
+      },
+    },
+  },
   plugins: [
     runtimeRetryUrlsPlugin(path.resolve(__dirname, 'apps/www')),
     {

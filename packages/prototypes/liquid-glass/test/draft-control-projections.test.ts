@@ -815,18 +815,21 @@ describe('Liquid draft controls: exact functional material ownership and complet
       const textarea = await f.create(textareaRoot);
       const field = await f.create(fieldRoot);
       const multiline = await f.create(fieldTextarea, {}, field.target);
-      for (const part of [
-        indicator,
-        thumb,
-        group,
-        dot,
-        separator,
-        input,
-        textarea,
-        field,
-        multiline,
-      ])
+      for (const part of [indicator, thumb, group, dot, separator, field])
         expect(part.frame().material).toEqual({ slot: null, candidates: [] });
+      for (const editor of [input, textarea, multiline]) {
+        expect(editor.frame().material.slot).toEqual({
+          version: 2,
+          shape: { kind: 'rounded-rect', geometry: 'style' },
+          source: { kind: 'in-app-backdrop' },
+          fallback: { fill: 'style', foreground: 'style' },
+        });
+        expect(editor.frame().material.candidates).toEqual([{ intent: 'liquid-glass' }]);
+        editor.set({ material: 'opaque' });
+        expect(editor.frame().material.candidates).toEqual([]);
+        editor.set({});
+        expect(editor.frame().material.candidates).toEqual([{ intent: 'liquid-glass' }]);
+      }
       for (const contentless of [separator, input, textarea, multiline])
         expect(contentless.commits.at(-1)).toBeNull();
       checkbox.fire('press.commit');

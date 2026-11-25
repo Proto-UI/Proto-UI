@@ -13,7 +13,7 @@ export default definePrototype<FieldControlProps, FieldControlExposes>({
     const inherited = asFieldTextControl();
     def.feedback.style.use(
       tw(
-        'h-11 w-full min-w-0 rounded-2xl border border-border bg-background px-4 py-2 text-base text-foreground placeholder:text-muted-foreground transition-colors outline-none'
+        'h-11 w-full min-w-0 rounded-2xl border border-border bg-background px-4 py-2 text-base text-foreground placeholder:text-muted-foreground transition-shadow outline-none'
       )
     );
     const state = inherited.stateHandles!;

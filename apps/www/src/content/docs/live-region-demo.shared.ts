@@ -76,8 +76,7 @@ const FAMILY_THEMES: Readonly<Record<LiveRegionDemoFamily, FamilyTheme>> = {
   'liquid-glass': {
     // Rich backdrop showcases floating Liquid Glass triggers while the live
     // region stays in an opaque content surface (never glass-on-glass).
-    stage:
-      'grid w-full min-w-0 max-w-xl gap-4 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    stage: 'grid w-full min-w-0 max-w-xl gap-4',
     card: 'grid gap-2 rounded-xl border border-border/60 bg-background/95 p-4 text-foreground shadow-sm',
     alertCard:
       'grid gap-2 rounded-xl border border-destructive/40 bg-background/95 p-4 text-foreground shadow-sm',

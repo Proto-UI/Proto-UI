@@ -31,11 +31,15 @@ export default definePrototype<PopoverContentProps, PopoverContentExposes>({
       intent: (i) => i.feedback.style.use(tw('shadow-lg ring-1 ring-inset ring-border')),
     });
     const { open } = behavior.stateHandles;
+    // Keep the entry animation within Base's finite perceptual phase so a
+    // forwards-filled transform never survives into optical rest.
+    behavior.asTransition.configure({ enterDuration: 150, leaveDuration: 0 });
     def.rule({
       when: (w) =>
         w.all(
           w.state(open).eq(true),
-          w.not(w.meta('preference.reducedMotion').eq('reduce'))
+          w.state(behavior.asTransition.transitionState).eq('entering'),
+          w.meta('preference.reducedMotion').eq('no-preference')
         ),
       intent: (i) => i.feedback.style.use(tw('animate-in fade-in-0 zoom-in-95 duration-150')),
     });
@@ -43,7 +47,8 @@ export default definePrototype<PopoverContentProps, PopoverContentExposes>({
       when: (w) =>
         w.all(
           w.state(open).eq(false),
-          w.not(w.meta('preference.reducedMotion').eq('reduce'))
+          w.state(behavior.asTransition.transitionState).eq('leaving'),
+          w.meta('preference.reducedMotion').eq('no-preference')
         ),
       intent: (i) => i.feedback.style.use(tw('animate-out fade-out-0 zoom-out-95 duration-150')),
     });
@@ -51,7 +56,6 @@ export default definePrototype<PopoverContentProps, PopoverContentExposes>({
       when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
       intent: (i) => i.feedback.style.use(tw('animate-none transition-none')),
     });
-    behavior.asTransition.configure({ enterDuration: 0, leaveDuration: 0 });
     def.feedback.material.declare({
       version: 2,
       shape: { kind: 'rounded-rect', geometry: 'style' },

@@ -80,7 +80,7 @@ describe('Liquid Surface explicit material request, not blanket content glass', 
     expect(latest(surface).material).toEqual({ slot, candidates: [] });
     expect(latest(surface).style.tokens).toEqual(
       expect.arrayContaining([
-        'rounded-none',
+        'rounded-xl',
         'border',
         'border-border',
         'bg-background',
