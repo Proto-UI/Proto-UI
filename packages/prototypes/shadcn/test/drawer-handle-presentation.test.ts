@@ -109,20 +109,27 @@ describe('Drawer Handle behavior and optional family presentation', () => {
   );
 
   for (const family of [base, brutalist, bootstrap, glass])
-    it(`${family.drawerHandle.name} retains its original edge placement`, async () => {
+    it(`${family.drawerHandle.name} retains its governed bottom placement`, async () => {
       const { handle } = await fixture(family);
-      expect(tokensOf(handle)).toEqual(
-        expect.arrayContaining([
-          'absolute',
-          'z-10',
-          'top-1',
-          'left-1/2',
-          '-translate-x-1/2',
-          'h-2',
-          'w-12',
-        ])
-      );
-      expect(tokensOf(handle)).not.toContain('w-[100px]');
-      expect(tokensOf(handle)).not.toContain('mt-4');
+      if (family === brutalist) {
+        expect(tokensOf(handle)).toEqual(
+          expect.arrayContaining(['relative', 'mx-[auto]', 'mt-1', 'h-2', 'w-[100px]', 'shrink-0'])
+        );
+        expect(tokensOf(handle)).not.toContain('absolute');
+      } else {
+        expect(tokensOf(handle)).toEqual(
+          expect.arrayContaining([
+            'absolute',
+            'z-10',
+            'top-1',
+            'left-1/2',
+            '-translate-x-1/2',
+            'h-2',
+            'w-12',
+          ])
+        );
+        expect(tokensOf(handle)).not.toContain('w-[100px]');
+        expect(tokensOf(handle)).not.toContain('mt-4');
+      }
     });
 });
