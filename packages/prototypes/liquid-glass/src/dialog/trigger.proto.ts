@@ -5,7 +5,7 @@ import {
   type DialogTriggerExposes,
 } from '@proto.ui/prototypes-base/dialog';
 import {
-  COMMAND_DISABLED,
+  COMMAND_BLOCKED,
   COMMAND_FOCUS,
   COMMAND_HOVER,
   COMMAND_PRESS,
@@ -52,7 +52,7 @@ export default definePrototype<LiquidGlassDialogTriggerProps, DialogTriggerExpos
     });
     def.rule({
       when: (w) => w.state(state('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw(COMMAND_DISABLED)),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_BLOCKED)),
     });
   },
 });
