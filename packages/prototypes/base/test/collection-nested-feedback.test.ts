@@ -71,8 +71,7 @@ const disabledTokens = (family: string, component: string): string[] => {
 };
 const focusVisibleToken = (family: string, component: string, part: string): string | null => {
   if (family !== 'shadcn') return 'data-[focus-visible]:ring-2';
-  if (part === 'day') return 'data-[focused]:ring-3';
-  if (component === 'carousel' || component === 'message-scroller')
+  if (component === 'carousel' || component === 'message-scroller' || part === 'day')
     // Profile-gated ring paints dynamically; asserted in the focused phase.
     return null;
   return 'data-[focus-visible]:forced-colors-focus-outline';
@@ -80,6 +79,9 @@ const focusVisibleToken = (family: string, component: string, part: string): str
 const pressedToken = (family: string, component: string, part: string): string | null => {
   if (family === 'shadcn')
     // Multi-profile press paint is dynamic; asserted in the pressed phase.
+    return null;
+  if (family === 'brutalist' && part === 'day')
+    // Flat grid day cell aligned with brutalist-calendar-day; no raised press translation.
     return null;
   const token = `data-[pressed]:not-[data-disabled]:${pressToken[family as keyof typeof pressToken]}`;
   if (family === 'bootstrap-2-3-2') {
@@ -153,7 +155,7 @@ for (const [family, modules] of Object.entries(families)) {
       await flush();
       expect(exposed.focusVisible.get()).toBe(true);
       expect(control.hasAttribute('data-focus-visible')).toBe(true);
-      if (family === 'shadcn' && part !== 'day') {
+      if (family === 'shadcn') {
         // Profile-driven focus paint applies dynamically while focusVisible.
         expect(tokens()).toContain('ring-3');
         expect(tokens()).toContain('ring-ring/50');
@@ -196,13 +198,10 @@ for (const [family, modules] of Object.entries(families)) {
           // shared primary text/border recipe while the fill applies live.
           expect(tokens().some((token: string) => token.startsWith('data-[selected]:'))).toBe(true);
           expect(tokens().some((token: string) => token.startsWith('bg-[#006dcc_'))).toBe(true);
-        } else {
-          // C-CALENDAR-SELECTION-0001-DAYS distinguishes range middles from
-          // selected endpoints. Both exposed conditions lower to one selector;
-          // the same recipe must match only the currently selected endpoint.
-          expect(tokens()).toContain('data-[selected]:not-[data-range-middle]:bg-primary');
+        } else if (family === 'brutalist') {
+          expect(tokens()).toContain('data-[selected]:not-[data-range-middle]:bg-main');
           expect(tokens()).toContain(
-            'data-[selected]:not-[data-range-middle]:text-primary-foreground'
+            'data-[selected]:not-[data-range-middle]:text-main-foreground'
           );
           expect(control.hasAttribute('data-selected')).toBe(true);
           expect(exposed.rangeMiddle.get()).toBe(false);
@@ -213,7 +212,31 @@ for (const [family, modules] of Object.entries(families)) {
           expect(control.getExposes().selected).toBe(exposed.selected);
           expect(exposed.selected.get()).toBe(false);
           expect(control.hasAttribute('data-selected')).toBe(false);
-          expect(tokens()).toContain('data-[selected]:not-[data-range-middle]:bg-primary');
+          expect(tokens()).toContain('data-[selected]:not-[data-range-middle]:bg-main');
+        } else {
+          // C-CALENDAR-SELECTION-0001-DAYS distinguishes range middles from
+          // selected endpoints. Both exposed conditions lower to one selector;
+          // the same recipe must match only the currently selected endpoint.
+          const selectedBg =
+            family === 'shadcn'
+              ? 'data-[selected]:not-[data-range-middle]:not-[data-range-pending]:bg-primary'
+              : 'data-[selected]:not-[data-range-middle]:bg-primary';
+          const selectedFg =
+            family === 'shadcn'
+              ? 'data-[selected]:not-[data-range-middle]:not-[data-range-pending]:text-primary-foreground'
+              : 'data-[selected]:not-[data-range-middle]:text-primary-foreground';
+          expect(tokens()).toContain(selectedBg);
+          expect(tokens()).toContain(selectedFg);
+          expect(control.hasAttribute('data-selected')).toBe(true);
+          expect(exposed.rangeMiddle.get()).toBe(false);
+          expect(control.hasAttribute('data-range-middle')).toBe(false);
+          root.getExposes().requestValue('2026-10-01');
+          await flush();
+          expect(root.getExposes().value.get()).toBe('2026-10-01');
+          expect(control.getExposes().selected).toBe(exposed.selected);
+          expect(exposed.selected.get()).toBe(false);
+          expect(control.hasAttribute('data-selected')).toBe(false);
+          expect(tokens()).toContain(selectedBg);
         }
       }
     });
@@ -227,11 +250,19 @@ for (const family of Object.keys(families))
     roots.push(root);
     document.body.append(root);
     await flush();
-    expect(viewport.getAttribute('data-pui-style')).toContain('data-[focus-visible]:ring-2');
+    if (family !== 'shadcn')
+      expect(viewport.getAttribute('data-pui-style')).toContain('data-[focus-visible]:ring-2');
     viewport.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
     viewport.focus();
     await flush();
     expect(viewport.getExposes().focused.get()).toBe(true);
     expect(viewport.getExposes().focusVisible.get()).toBe(true);
     expect(viewport.hasAttribute('data-focus-visible')).toBe(true);
+    if (family === 'shadcn') {
+      const tokens = (viewport.getAttribute('data-pui-style') ?? '').split(/\s+/);
+      expect(tokens).toContain('ring-2');
+      expect(tokens).toContain('ring-ring');
+      expect(tokens).toContain('ring-inset');
+      expect(tokens).toContain('forced-colors-focus-outline');
+    }
   });
