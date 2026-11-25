@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "kind": "wc-empty-focus-region-guard",
+  "baseSource": "df11ec12454f3614bfa44d01a8446fb6db83c3c7",
+  "productionFile": "packages/adapters/web-component/src/focus-scope-targets.ts",
+  "beforeSha256": "f3387264327678e03f7526d5ac759e39bc243ba4da9135421b5b7ee926888854",
+  "afterSha256": "8a167d77ec86f25ea3e0b8067c85ce38fd22d4fda6bb626c5bf5b7aec9b94e8f",
+  "controlsFile": "packages/adapters/web-component/test/focus-scope-empty-region.test.ts",
+  "controlsSha256": "1853396aa5d186730c40dedd6e7001bb2071c5624259d9e49ff40a87d3364fc3",
+  "reason": "The actual H3 Matrix CPU profile locates repeated ancestor style sampling under external entry reprojection. A fresh structural proof can avoid all sampling when no traversable descendant can exist. This bounded predicate optimization does not change invalidation or claim that Matrix or Search deadlines are solved.",
+  "semantics": [
+    "Use the same accessible shadowRoot-or-light child branch as the original sampler.",
+    "HTML slots always use the original assigned/fallback/logical-slot traversal.",
+    "Every Element, including SVG, preserves the full path; registered portal-origin comments also preserve it.",
+    "No cache: insertion, movement and reprojection are rechecked each time.",
+    "Container itself was already excluded from the descendant predicate; self-fallback and observer registration remain in their original caller.",
+    "No change to focus predicate, full traversal, mutation observation, original assertions or timeout ceilings."
+  ],
+  "independentCodeReview": "Root and website_governance reviewed the seven-line guard and all boundaries; this is not a GitHub APPROVED review.",
+  "localValidation": {
+    "scope": "Isolated scratch source snapshot with all executing inputs bound to H3; not represented as a complete clean Git checkout.",
+    "sourceIdentitySha256": "bebfd04cbe9c4b7bc788601f9cc463a225e167b08086401a1209f4969099ec3b",
+    "reports": [
+      {
+        "name": "original.report.json",
+        "sha256": "0992a80027b0eab1eaefc6f2d5fbddf76e948f4d4c27109b3856d428e96a0505",
+        "numTotalTests": 111,
+        "numPassedTests": 111,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "success": true
+      },
+      {
+        "name": "candidate.report.json",
+        "sha256": "2145bcdd7c2d66fb776902f82df7d5ef463fd374e94d2cb11bb339dd0ec5ea82",
+        "numTotalTests": 124,
+        "numPassedTests": 124,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "success": true
+      },
+      {
+        "name": "old-source-control.report.json",
+        "sha256": "4ec9a541e058fbd606ef244fa773218818fdd768bd1e278b2694331d36578a7d",
+        "numTotalTests": 13,
+        "numPassedTests": 8,
+        "numFailedTests": 5,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "success": false
+      },
+      {
+        "name": "unsafe-child-count-control.report.json",
+        "sha256": "6895dd9cc2ca1587087b2100a2561ca8f0bd7b6409246b640c1e5782df8bcb81",
+        "numTotalTests": 13,
+        "numPassedTests": 8,
+        "numFailedTests": 5,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "success": false
+      }
+    ],
+    "packageDiagnostic": {
+      "sourceInputs": 380,
+      "beforeGzipBytes": 217973,
+      "afterGzipBytes": 218025,
+      "deltaBytes": 52,
+      "originalCeilingBytes": 218100,
+      "headroomBytes": 75,
+      "notTheOriginalNineGate": true,
+      "sha256": "a4212c898c572418874d346b04bd493462f6219434b37c71b9bc1f3dae9baa32"
+    }
+  },
+  "pendingValidation": {
+    "cleanFrozenOriginalStrict9": true,
+    "cleanFrozenOriginal111Plus13": true,
+    "unprofiledNativeMatrix": true,
+    "completeCurrentSourceAcceptance": true
+  },
+  "retainedH3Results": {
+    "originalMatrix": {
+      "passed": 0,
+      "failed": 4,
+      "initializationBudgetMs": 60000,
+      "modulesDelivered": 1189,
+      "modulesExpected": 1189,
+      "viewport390FinalInitialized": 166,
+      "viewport390FinalTotal": 4756
+    },
+    "cli": {
+      "source": "e4c33b234978390e967aeb7db337122a88a8b7ca",
+      "registered": 823,
+      "passed": 822,
+      "failed": 1,
+      "unresolved": 3266
+    },
+    "header": {
+      "run": 45680634710,
+      "familyPassed": 22,
+      "focusChecksPassed": 64,
+      "popupTextChecksPassed": 32
+    },
+    "navbar": {
+      "run": 45680647889,
+      "browserPassed": 12,
+      "cellsPassed": 38
+    },
+    "homepage": {
+      "run": 45680640801,
+      "candidateCapturePassed": 20,
+      "productionSearchPassed": 4,
+      "productionOriginalReadyBudgetMs": 1000,
+      "isolatedSearchOuterExit": 124,
+      "isolatedSearchBudgetSeconds": 600,
+      "isolatedSearchLastEntered": 63,
+      "isolatedSearchRegistered": 84,
+      "focusedPassed": 31,
+      "focusedFailed": 1,
+      "focusedWithoutTerminal": 7
+    },
+    "governance": {
+      "registered": 5188,
+      "passed": 5187,
+      "failed": 0,
+      "portableOnlySkipped": 1,
+      "separateLinuxDecoderPassed": 15,
+      "publicDocsPassed": true,
+      "cleanBeforeAfter": true
+    }
+  },
+  "acceptanceBoundary": "The current 0.3 CLI proof gap remains an actual blocker, separate from the existing 0.4 deferred issues. No self-approval, rule bypass, release or final-main checkbox acceptance is claimed."
+}

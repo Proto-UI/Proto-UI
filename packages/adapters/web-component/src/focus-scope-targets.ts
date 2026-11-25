@@ -366,6 +366,15 @@ export function hasWebComponentScopeDescendant(
   container: HTMLElement,
   isNativelyFocusable: (target: HTMLElement) => boolean
 ): boolean {
+  // Slots can receive nodes from elsewhere; portal origin comments also
+  // represent descendants. Recheck the current traversal branch on every call.
+  if (
+    !isHtmlTag(container, 'slot') &&
+    ![...(container.shadowRoot ?? container).childNodes].some(
+      (node) => isElementNode(node) || getWebComponentPortalProjectionForOrigin(node)
+    )
+  )
+    return false;
   return sampleWebComponentScopeTargets(
     container,
     isNativelyFocusable,
