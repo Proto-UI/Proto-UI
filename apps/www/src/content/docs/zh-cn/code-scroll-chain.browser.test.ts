@@ -1063,4 +1063,7 @@ it('compares fresh static auto and original contain policy without prior wheel i
   }
   pair.productAcceptance = true;
   await save();
-}, 24_000);
+  // Two independent cold navigations, font readiness, real paint captures and
+  // wheel-quiet boundaries are required for this pair. Keep those observations
+  // intact while giving both contexts time to reach their terminal assertions.
+}, 60_000);

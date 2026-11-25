@@ -73,6 +73,16 @@ RadioGroupRoot
 
 ## 示例
 
+### 无初始选中项
+
+省略 `value` 和 `defaultValue`，让读者主动选择。Tab 进入第一个可用选项，但不会改变选值；Space 选中当前聚焦项，方向键移动焦点并选中下一个可用项。空组中的 Enter 不触发选择。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-radio-group-empty"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
 ### 带说明文字
 
 结合标签与辅助说明文字呈现各选项的适用场景。

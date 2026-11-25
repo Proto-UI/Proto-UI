@@ -480,7 +480,11 @@ for (const family of FAMILIES) {
           await expanded(trigger(retained), false);
           expect(await content(retained).count()).toBe(1);
           expect(await controls(retained)).toBe(retainedIdentity);
-          expect(await content(retained).getAttribute('aria-hidden')).toBe('true');
+          // A typed exit keeps Content exposed until the real presentation
+          // completion. keepMounted then preserves its node with hidden paint.
+          await expect
+            .poll(() => content(retained).getAttribute('aria-hidden'), { timeout: 2000 })
+            .toBe('true');
           await expect.poll(() => content(retained).isVisible()).toBe(false);
           expect(
             await content(retained).evaluate((element) => getComputedStyle(element).display)
@@ -792,12 +796,33 @@ for (const family of FAMILIES) {
               expect(line.left).toBeGreaterThanOrEqual(textBounds.contentLeft - 1);
               expect(line.right).toBeLessThanOrEqual(textBounds.contentRight + 1);
             }
-            for (const target of [trigger(root), content(root)]) {
+            const contentHost = content(root);
+            // Bootstrap animates a zero-padding Content host; the authored
+            // inner body owns its 15px inset and 1px divider throughout motion.
+            const contentBody =
+              family === 'bootstrap-2-3-2' ? contentHost.locator(':scope > div') : contentHost;
+            if (family === 'bootstrap-2-3-2') {
+              expect(await contentBody.count()).toBe(1);
+              expect(await contentHost.evaluate((node) => getComputedStyle(node).padding)).toBe(
+                '0px'
+              );
+              expect(
+                await contentBody.evaluate((node) => getComputedStyle(node).borderTopWidth)
+              ).toBe('1px');
+            }
+            for (const target of [trigger(root), contentBody]) {
               const padding = await target.evaluate((node) => {
                 const s = getComputedStyle(node);
                 return [parseFloat(s.paddingLeft), parseFloat(s.paddingRight)];
               });
               expect(Math.min(...padding)).toBeGreaterThanOrEqual(12);
+            }
+            if (family === 'shadcn') {
+              const padding = await contentHost.evaluate((node) => ({
+                actual: parseFloat(getComputedStyle(node).paddingLeft),
+                expected: 0.875 * parseFloat(getComputedStyle(document.documentElement).fontSize),
+              }));
+              expect(padding.actual).toBeCloseTo(padding.expected, 1);
             }
             await capture(previewer, `${family}-${runtime}-320-text200-${theme}-open`);
           }
