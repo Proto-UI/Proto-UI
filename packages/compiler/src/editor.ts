@@ -10,6 +10,7 @@ export interface ProtoEditorInput {
   text: string;
   rootNames?: readonly string[];
   sourceOverrides?: Readonly<Record<string, string>>;
+  project?: string;
   compilerOptions?: ts.CompilerOptions;
   currentDirectory?: string;
   target?: CompilerTarget;
@@ -44,6 +45,7 @@ export function analyzeProtoDocument(input: ProtoEditorInput) {
   const sourceOverrides = { ...input.sourceOverrides, [fileName]: input.text };
   const program = createProtoProgram({
     rootNames: [...new Set([...(input.rootNames ?? []), fileName])],
+    project: input.project,
     compilerOptions: input.compilerOptions,
     currentDirectory: cwd,
     sourceOverrides,

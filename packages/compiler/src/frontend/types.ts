@@ -35,6 +35,8 @@ export interface ProtoDiagnostic {
 export interface ProtoProgramOptions {
   rootNames: readonly string[];
   currentDirectory?: string;
+  /** Relative to currentDirectory. Otherwise all entries must share their nearest project. */
+  project?: string;
   compilerOptions?: ts.CompilerOptions;
   /** Unsaved editor snapshots; keys must be absolute file paths. */
   sourceOverrides?: Readonly<Record<string, string>>;
@@ -100,6 +102,8 @@ export interface ProtoTargetAnalysis {
 
 export interface ProtoAnalysis {
   schemaVersion: 1;
+  /** Includes the selected target in addition to the common source configuration. */
+  analysisConfigurationHash: string;
   languageVersion: '0.4';
   ruleSetVersion: string;
   compilerVersion: string;

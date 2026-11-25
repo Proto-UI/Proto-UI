@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+import { prepareProtoOptions } from './input-profile.ts';
 import type {
   ProtoClosureFile,
   ProtoMissingSource,
@@ -84,7 +85,7 @@ export function createProtoProgram(input: ProtoProgramOptions): ts.Program {
     target: ts.ScriptTarget.ESNext,
     module: ts.ModuleKind.ESNext,
     moduleResolution: ts.ModuleResolutionKind.Bundler,
-    ...input.compilerOptions,
+    ...prepareProtoOptions(input, roots, currentDirectory),
     // These are invariants, not defaults a client/editor may replace.
     noLib: true,
     types: [],
@@ -108,6 +109,7 @@ export function createProtoProgram(input: ProtoProgramOptions): ts.Program {
     skipDefaultLibCheck: false,
     allowJs: false,
     checkJs: false,
+    allowNonTsExtensions: true,
     allowImportingTsExtensions: true,
     incremental: false,
     composite: false,
@@ -317,10 +319,7 @@ export function createProtoProgram(input: ProtoProgramOptions): ts.Program {
 }
 
 /** Only factory-created Programs have trustworthy snapshot/configuration metadata. */
-export function getProtoSourceClosure(
-  program: ts.Program,
-  selectedTarget?: ProtoTarget
-): ProtoSourceClosure {
+export function getProtoSourceClosure(program: ts.Program): ProtoSourceClosure {
   const data = snapshots.get(program);
   if (!data) {
     throw new TypeError(
@@ -371,7 +370,7 @@ export function getProtoSourceClosure(
     compilerVersion: COMPILER_VERSION,
     typescriptVersion: ts.version,
     requiredTargets: [...PROTO_TARGETS],
-    selectedTarget: selectedTarget ?? null,
+    selectedTarget: null,
   };
   const configurationHash = sha256(canonicalJson(configuration));
   const rootNames = [...data.roots].sort();
@@ -404,4 +403,13 @@ export function getProtoSourceClosure(
     compilerOptions,
     configuration,
   };
+}
+
+/** Target selection identifies an analysis result. Both emitters consume the same source input. */
+export function analysisConfigurationHash(
+  closure: ProtoSourceClosure,
+  target?: ProtoTarget
+): string {
+  if (target === undefined) return closure.configurationHash;
+  return sha256(canonicalJson({ ...closure.configuration, selectedTarget: target }));
 }

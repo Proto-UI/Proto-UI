@@ -1,10 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { open, rename, rm } from 'node:fs/promises';
 import path from 'node:path';
-import ts from 'typescript';
 import { createProtoProgram, PROTO_TARGETS } from './frontend/index.ts';
-import { projectOptions } from './lint-cli.mjs';
-import { AUTHORING_DECLARATIONS, produceComponentIR } from './producer/index.ts';
+import { ProtoProjectError } from './frontend/input-profile.ts';
+import { produceComponentIR } from './producer/index.ts';
 import { ComponentIRDiagnostic } from './targets/validation/diagnostic.ts';
 
 const usage = `Usage: proto-compiler compile <file> --target TARGET [--project tsconfig.json] [--export name] [--name PublicBinding] [--out file]
@@ -22,15 +21,6 @@ const emitters = {
   react: async (component) => (await import('./targets/react.ts')).emitReact(component),
   gpui: async (component) => (await import('./targets/gpui.ts')).emitGpui(component),
 };
-
-function authoringPaths(paths) {
-  const specifier = '@proto.ui/core/authoring';
-  // An exact default would otherwise take precedence over a project wildcard.
-  // Use the same pattern selection as the pinned TypeScript module resolver.
-  if (paths && ts.matchPatternOrExact(ts.tryParsePatterns(paths), specifier) !== undefined)
-    return paths;
-  return { ...paths, [specifier]: [AUTHORING_DECLARATIONS] };
-}
 
 function parseArguments(args) {
   const options = {};
@@ -90,30 +80,25 @@ export async function runCompileCli(args, io = process) {
 
   const cwd = process.cwd();
   let options;
-  let project;
   try {
     options = parseArguments(args);
-    project = projectOptions(options.project, path.dirname(options.file));
   } catch (error) {
     io.stderr.write(`${error instanceof Error ? error.message : String(error)}\n${usage}`);
     return 64;
   }
 
   const emit = emitters[options.target];
-  if (!emit)
-    io.stderr.write(
-      `[PUI_BACKEND_MISSING] (backend-missing) No source emitter for ${options.target}.\n`
-    );
   try {
     const program = createProtoProgram({
       rootNames: [options.file],
       currentDirectory: cwd,
-      compilerOptions: {
-        ...project,
-        allowNonTsExtensions: true,
-        paths: authoringPaths(project.paths),
-      },
+      project: options.project,
     });
+    if (!emit) {
+      io.stderr.write(
+        `[PUI_BACKEND_MISSING] (backend-missing) No source emitter for ${options.target}.\n`
+      );
+    }
     const result = produceComponentIR(program, {
       fileName: options.file,
       exportName: options.export,
@@ -130,6 +115,10 @@ export async function runCompileCli(args, io = process) {
     else io.stdout.write(source);
     return 0;
   } catch (error) {
+    if (error instanceof ProtoProjectError) {
+      io.stderr.write(`${error.message}\n${usage}`);
+      return 64;
+    }
     if (error instanceof ComponentIRDiagnostic) {
       io.stderr.write(`[${error.code}] (${error.category}) ${error.message}\n`);
       return error.category === 'backend-missing' ? 2 : 1;

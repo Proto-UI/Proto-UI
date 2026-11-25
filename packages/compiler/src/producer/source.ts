@@ -1,14 +1,12 @@
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+import { AUTHORING_DECLARATIONS } from '../frontend/input-profile.ts';
 import { PRELUDE_PATH } from '../frontend/program.ts';
 import type { ProtoDiagnostic } from '../frontend/types.ts';
 import type { Binding, SourceSpan, ValueType } from '../targets/component-ir.ts';
 import { createSourceData, type SourceData } from './data-types.ts';
 
-export const AUTHORING_DECLARATIONS = fileURLToPath(
-  new URL('../../prelude/authoring.d.ts', import.meta.url)
-);
+export { AUTHORING_DECLARATIONS };
 
 export interface SourceContext {
   readonly checker: ts.TypeChecker;

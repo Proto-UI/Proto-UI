@@ -4,6 +4,7 @@ import {
   LANGUAGE_VERSION,
   PRELUDE_PATH,
   RULE_SET_VERSION,
+  analysisConfigurationHash,
   createProtoProgram,
   getProtoSourceClosure,
 } from './program.ts';
@@ -178,7 +179,7 @@ export function analyzeProtoProgram(
   if (input.target !== undefined && !PROTO_TARGETS.includes(input.target)) {
     throw new TypeError(`Unknown Proto target: ${String(input.target)}`);
   }
-  const sourceClosure = getProtoSourceClosure(program, input.target);
+  const sourceClosure = getProtoSourceClosure(program);
   const checker = program.getTypeChecker();
   const diagnostics: ProtoDiagnostic[] = [];
   const specializedAccesses = new Set<ts.Node>();
@@ -588,6 +589,7 @@ export function analyzeProtoProgram(
   );
   return {
     schemaVersion: 1,
+    analysisConfigurationHash: analysisConfigurationHash(sourceClosure, input.target),
     languageVersion: LANGUAGE_VERSION,
     ruleSetVersion: RULE_SET_VERSION,
     compilerVersion: COMPILER_VERSION,

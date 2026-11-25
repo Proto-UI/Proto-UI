@@ -4,7 +4,6 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { createProtoProgram } from '@proto.ui/compiler/frontend';
 import { produceComponentIR } from '@proto.ui/compiler/producer';
-import { projectOptions } from '../../src/lint-cli.mjs';
 
 const examples = new URL('../../../../internal/compiler/examples/', import.meta.url);
 const root = fileURLToPath(new URL('../../../../', import.meta.url));
@@ -15,7 +14,7 @@ export function authoredSource(fileName, publicName, exportName = 'default') {
   const program = createProtoProgram({
     rootNames: [file],
     currentDirectory: root,
-    compilerOptions: { ...projectOptions(config, root), allowNonTsExtensions: true },
+    project: config,
   });
   return {
     ...produceComponentIR(program, { fileName: file, publicName, exportName }),

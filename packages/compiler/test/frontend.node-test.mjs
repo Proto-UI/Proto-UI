@@ -296,13 +296,20 @@ test('known user type violations are errors; absent authoring APIs and prelude m
   assert.equal(broken.sourceValid, false);
   assert.ok(errors(broken).some((item) => item.code === 'PUI_TYPESCRIPT_2322'));
   assert.ok(errors(broken).some((item) => item.code === 'PUI_TYPESCRIPT_2339'));
-  const absent = fixture(t, {
+  const author = fixture(t, {
     'entry.ts': `
     import { definePrototype } from '@proto.ui/core/authoring';
     export const sample = definePrototype({ setup(def) { return def.derive('label', read => read.get('name')); } });
     declare const text: string; text.someFutureScalarOperation();
   `,
-  }).analyze();
+  });
+  const bound = author.analyze();
+  assert.equal(bound.sourceClosure.complete, true);
+  assert.equal(bound.sourceValid, false);
+  assert.ok(errors(bound).some((item) => item.code === 'PUI_TYPESCRIPT_2322'));
+  const absent = author.analyze({
+    compilerOptions: { paths: { '@proto.ui/core/authoring': ['./unavailable.d.ts'] } },
+  });
   assert.deepEqual(errors(absent), []);
   assert.equal(absent.sourceValid, null);
   assert.equal(absent.sourceClosure.complete, false);
@@ -519,7 +526,10 @@ test('a Program snapshots nested resolution options instead of accepting later c
   paths['@helper'][0] = 'other.ts';
   const after = analyzeProtoProgram(program);
   assert.equal(after.sourceClosure.digest, before.sourceClosure.digest);
-  assert.deepEqual(after.sourceClosure.compilerOptions.paths, { '@helper': ['good.ts'] });
+  assert.equal(
+    after.sourceClosure.resolutions.find((entry) => entry.specifier === '@helper').resolvedPath,
+    f.file('good.ts')
+  );
 });
 
 test('source hashes bind original bytes and identical disk/editor snapshots share the semantic digest', (t) => {
@@ -533,10 +543,10 @@ test('source hashes bind original bytes and identical disk/editor snapshots shar
   const changed = f.analyze({ sourceOverrides: { [f.file()]: source.replace('\r\n', '\n') } });
   assert.notEqual(changed.sourceClosure.digest, disk.sourceClosure.digest);
   assert.equal(changed.sourceClosure.configurationHash, disk.sourceClosure.configurationHash);
-  assert.notEqual(
-    f.analyze({ target: 'react' }).sourceClosure.configurationHash,
-    f.analyze({ target: 'gpui' }).sourceClosure.configurationHash
-  );
+  const react = f.analyze({ target: 'react' });
+  const gpui = f.analyze({ target: 'gpui' });
+  assert.equal(react.sourceClosure.digest, gpui.sourceClosure.digest);
+  assert.notEqual(react.analysisConfigurationHash, gpui.analysisConfigurationHash);
 });
 
 test('resolution probes preserve virtual editor files and directories without changing identical saved input', (t) => {
