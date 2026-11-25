@@ -29,9 +29,10 @@ export const BrutalistBadgeRoot = definePrototype<
     });
     def.props.setDefaults({ tone: 'accent' });
     // P-BRUTALIST-BADGE-VISUAL-GRAMMAR
+    // Retain the passive S1 recipe: this Badge has no admitted Root clipping owner.
     def.feedback.style.use(
       tw(
-        'inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-base border-2 border-black px-2.5 py-0.5 font-sans font-medium text-xs'
+        'inline-flex w-fit shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-base border-2 border-black px-2.5 py-0.5 font-sans font-medium text-xs'
       )
     );
     // P-BRUTALIST-BADGE-TONES
