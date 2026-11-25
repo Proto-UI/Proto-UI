@@ -50,7 +50,7 @@ describe('documentation native-navigation visual bridge', () => {
       expect(sidebar.getAttribute('target')).toBe('_blank');
       expect(sidebar.getAttribute('rel')).toBe('noreferrer');
       expect(sidebar.querySelector('[data-pui-root]')?.getAttribute('data-pui-style')).toContain(
-        family === 'brutalist' ? 'bg-main' : 'bg-accent'
+        family === 'brutalist' ? 'bg-canary' : 'bg-accent'
       );
       expect(pagination.querySelector('.link-title')).toBe(title);
       expect(pagination.querySelector('br')).toBe(lineBreak);
@@ -194,12 +194,9 @@ it('keeps the native summary, caret and browser-owned disclosure through family 
     summary.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
     await settle();
     expect(getElementProps(summary.firstElementChild as HTMLElement)?.pressed).toBe(true);
-    if (family === 'shadcn')
-      expect(summary.firstElementChild!.getAttribute('data-pui-style')).not.toContain(
-        'translate-y-px'
-      );
-    else
-      expect(summary.firstElementChild!.getAttribute('data-pui-style')).toContain('translate-y-px');
+    expect(summary.firstElementChild!.getAttribute('data-pui-style')).not.toContain(
+      'translate-y-px'
+    );
     summary.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
     await settle();
     expect(getElementProps(summary.firstElementChild as HTMLElement)?.pressed).toBe(false);

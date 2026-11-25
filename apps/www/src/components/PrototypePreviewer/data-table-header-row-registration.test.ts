@@ -72,11 +72,15 @@ describe('DataTable HeaderRow actual website and static entry closure', () => {
       }
       const host = document.createElement('div');
       document.body.append(host);
+      const isBase = family === 'base';
+      const expectedColumns = isBase ? 2 : 3;
+      const expectedRowCount = isBase ? 4 : 5;
+      const expectedDataCount = isBase ? 3 : 4;
       for (let mount = 0; mount < 2; mount++) {
         const view = await renderDemo({ runtime: 'wc', host, demo });
         cleanup.push(() => view.destroy());
         await vi.waitFor(() =>
-          expect(host.querySelectorAll('[role="columnheader"]')).toHaveLength(2)
+          expect(host.querySelectorAll('[role="columnheader"]')).toHaveLength(expectedColumns)
         );
         const table = host.querySelector<TableElement>('[role="table"]')!;
         const headers = [...table.querySelectorAll<HTMLElement>('[role="columnheader"]')];
@@ -87,10 +91,10 @@ describe('DataTable HeaderRow actual website and static entry closure', () => {
         expect(row.getAttribute('aria-selected')).toBeNull();
         expect(table.getExposes().getStructure()).toMatchObject({
           valid: true,
-          rowCount: 4,
-          columnCount: 2,
+          rowCount: expectedRowCount,
+          columnCount: expectedColumns,
         });
-        expect(table.getExposes().count.get()).toBe(3);
+        expect(table.getExposes().count.get()).toBe(expectedDataCount);
         const sorts: unknown[] = [];
         const selections: unknown[] = [];
         table.addEventListener('sortChange', (event) => sorts.push((event as CustomEvent).detail));
@@ -99,25 +103,58 @@ describe('DataTable HeaderRow actual website and static entry closure', () => {
         );
         headers[0]!.click();
         await vi.waitFor(() =>
-          expect(sorts).toEqual([{ sortKey: 'name', sortDirection: 'ascending' }])
+          expect(sorts).toEqual([
+            { sortKey: isBase ? 'name' : 'status', sortDirection: 'ascending' },
+          ])
         );
-        expect(
-          table
-            .getExposes()
-            .getRows()
-            .map((record) => record.id)
-        ).toEqual(['api', 'docs', 'web']);
+        if (isBase) {
+          expect(
+            table
+              .getExposes()
+              .getRows()
+              .map((record) => record.id)
+          ).toEqual(['api', 'docs', 'web']);
+        } else {
+          expect(
+            table
+              .getExposes()
+              .getRows()
+              .map((record) => record.email)
+          ).toEqual([
+            'carmella@example.com',
+            'monserrat44@example.com',
+            'ken99@example.com',
+            'abe45@example.com',
+          ]);
+        }
         headers[1]!.focus();
         headers[1]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
         headers[1]!.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
         await vi.waitFor(() => expect(sorts).toHaveLength(2));
-        expect(sorts[1]).toEqual({ sortKey: 'requests', sortDirection: 'ascending' });
-        expect(
-          table
-            .getExposes()
-            .getRows()
-            .map((record) => record.id)
-        ).toEqual(['docs', 'api', 'web']);
+        expect(sorts[1]).toEqual({
+          sortKey: isBase ? 'requests' : 'email',
+          sortDirection: 'ascending',
+        });
+        if (isBase) {
+          expect(
+            table
+              .getExposes()
+              .getRows()
+              .map((record) => record.id)
+          ).toEqual(['docs', 'api', 'web']);
+        } else {
+          expect(
+            table
+              .getExposes()
+              .getRows()
+              .map((record) => record.email)
+          ).toEqual([
+            'abe45@example.com',
+            'carmella@example.com',
+            'ken99@example.com',
+            'monserrat44@example.com',
+          ]);
+        }
         expect(selections).toEqual([]);
         await view.destroy();
         cleanup.pop();
