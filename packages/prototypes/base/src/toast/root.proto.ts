@@ -249,6 +249,8 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     const enabled = mounted && open.get() && dismissible.get() && swipeDirection !== 'none';
     const horizontal = swipeDirection === 'left' || swipeDirection === 'right';
     swipeInput.sync({
+      // A tap belongs to nested Action/Close controls until a directional drag wins.
+      activation: 'directional',
       axis: horizontal ? 'horizontal' : 'vertical',
       direction: 'ltr',
       disabled: !enabled,
