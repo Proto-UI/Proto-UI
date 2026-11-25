@@ -2,7 +2,6 @@
 
 // Issue #758: production artifact accounting, never semantic or target admission.
 // build <plan.json> <new-evidence-directory> | analyze <run.json>
-// prepare-native <react-profile-evidence> <source-revision> <new-plan.json>
 import { createHash } from 'node:crypto';
 import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { arch, cpus, platform, release, totalmem } from 'node:os';
@@ -348,97 +347,13 @@ export async function buildDeliveryRun(planFile, evidenceDirectory) {
   return report;
 }
 
-/** Reuse real native-consumer-smoke output, including its retained pre-edit bytes.
- * The original edited consumer and its historical provenance remain untouched.
- * This produces a one-sided exported-module bundle plan, not a browser benchmark.
- */
-export function prepareNativeConsumerPlan(profileEvidence, sourceRevision, planFile) {
-  requireThat(/^[a-f0-9]{40}$/.test(sourceRevision), 'preparation requires the actual compiler/source revision');
-  requireThat(!existsSync(planFile), 'plan already exists');
-  const root = realpathSync(profileEvidence);
-  const provenancePath = 'consumer/generated/provenance.json';
-  const provenanceBytes = readFile(root, provenancePath);
-  const provenance = JSON.parse(provenanceBytes);
-  requireThat(provenance.profile === 'react-dom-source-v1' && Array.isArray(provenance.sourceFiles) &&
-    provenance.sourceFiles.length > 0 && Array.isArray(provenance.artifacts) && provenance.artifacts.length > 0,
-  'preparation requires actual react-dom-source-v1 native-consumer artifacts');
-  const trace = JSON.parse(readFile(root, 'runtime-original.json'));
-  const ownership = JSON.parse(readFile(root, 'source-ownership.json'));
-  requireThat(trace.ok === true && trace.profile === provenance.profile, 'missing successful original one-sided consumer trace');
-  relativeFile(ownership.source);
-  const before = readFile(root, 'Component.before-edit.txt');
-  requireThat(sha256(before) === ownership.beforeSha256 &&
-    sha256(readFile(root, `consumer/generated/${ownership.source}`)) === ownership.afterSha256,
-  'retained original or edited consumer no longer matches its source-ownership receipt');
-  const portableSources = provenance.sourceFiles.map((source) => {
-    requireThat(text(source.file), 'missing compiler source identity');
-    const filename = path.resolve(root, 'compiler-input', source.file);
-    requireThat(within(path.join(root, 'compiler-input'), filename), 'compiler source is outside its retained input closure');
-    const filenameInRoot = slash(path.relative(root, filename));
-    return { key: slash(path.relative(path.join(root, 'compiler-input'), filename)), ...verifyFile(root, { path: filenameInRoot, sha256: source.sha256 }) };
-  });
-  requireThat(provenance.artifacts.some((artifact) => artifact.path === ownership.source && artifact.kind === 'source' &&
-    artifact.sha256 === ownership.beforeSha256), 'retained pre-edit source is not the original compiler artifact');
-  const artifacts = provenance.artifacts.map((artifact) => {
-    relativeFile(artifact.path);
-    const bytes = artifact.path === ownership.source ? before : readFile(root, `consumer/generated/${artifact.path}`);
-    requireThat(digest(artifact.sha256) && sha256(bytes) === artifact.sha256, `original generated artifact mismatch: ${artifact.path}`);
-    return { ...artifact, bytes };
-  });
-  requireThat(new Set(artifacts.map((artifact) => artifact.path)).size === artifacts.length, 'duplicate original generated artifact');
-  const dependency = provenance.dependencies?.find((item) => item.name === 'react');
-  requireThat(text(dependency?.version), 'original generated dependency receipt lacks React version');
-  const lockfile = inventory(root, 'consumer/package-lock.json');
-  const retainedEvidence = ['timing.json', 'costs.json', 'closure-result.json', 'installed-tree-integrity.json']
-    .map((filename) => inventory(root, filename));
-  const originalRelative = 'consumer/delivery-original/generated';
-  const plan = { schemaVersion: 1,
-    scope: { id: 'issue-758-one-sided-retained-native-module', sourceRevision,
-      requirements: ['C-LIFECYCLE-0001-A', 'C-LIFECYCLE-0001-C'], review: null,
-      limitation: 'Original source-generated numeric/context module exports only. No common Button/native reference scope, reviewed compiler successor, browser journey or public target admission is established.' },
-    environment: { host: 'web', framework: 'react', frameworkVersion: dependency.version, buildMode: 'production' },
-    repetitions: 3,
-    arms: [
-      { id: 'runtime-adapter', status: 'unavailable', reason: 'No independent Runtime+Adapter production consumer of this exact source/semantics was supplied.' },
-      { id: 'generated', status: 'available', root, profile: provenance.profile,
-        entryPoints: [`${originalRelative}/${ownership.source}`], lockfile, portableSources, retainedEvidence,
-        provenance: { path: `${originalRelative}/provenance.json`, bytes: provenanceBytes.length, sha256: sha256(provenanceBytes) },
-        correctness: { status: 'untested', evidence: inventory(root, 'runtime-original.json'), differences: [
-          'Retained original trace is one-sided Happy DOM evidence; it establishes neither native-browser correctness nor common-path equivalence.',
-          'This production export bundle does not execute a mount or prove that all retained module exports are needed by an application.',
-        ] } },
-      { id: 'host-native', status: 'unavailable', reason: 'No independently reviewed host-native implementation of this exact semantic subset was supplied.' },
-    ] };
-  // All historical files above are admitted before the first new output is written.
-  const originalRoot = path.join(root, 'consumer/delivery-original');
-  mkdirSync(originalRoot);
-  for (const artifact of artifacts) {
-    const filename = path.join(root, originalRelative, artifact.path);
-    mkdirSync(path.dirname(filename), { recursive: true });
-    writeFileSync(filename, artifact.bytes, { flag: 'wx' });
-  }
-  writeFileSync(path.join(root, originalRelative, 'provenance.json'), provenanceBytes, { flag: 'wx' });
-  writeJson(path.join(originalRoot, 'restoration.json'), { source: ownership.source, beforeSha256: ownership.beforeSha256,
-    afterSha256: ownership.afterSha256, provenanceSha256: sha256(provenanceBytes),
-    scope: 'Byte-identical original artifacts in a separate ordinary-import subtree. Edited consumer and historical provenance are unchanged.' });
-  // Resolve and hash the newly materialized closure without changing its old receipt.
-  admitDeliveryPlan(plan, path.dirname(path.resolve(planFile)));
-  writeJson(planFile, plan);
-  return plan;
-}
-
 if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
   try {
     const [action, input, output, ...extra] = process.argv.slice(2);
-    if (action === 'prepare-native') {
-      requireThat(text(input) && text(output) && extra.length === 1 && text(extra[0]), 'use prepare-native <react-profile-evidence> <source-revision> <new-plan.json>');
-      process.stdout.write(JSON.stringify(prepareNativeConsumerPlan(input, output, path.resolve(extra[0])), null, 2) + '\n');
-    } else {
-      requireThat(!extra.length && text(input) && ((action === 'build' && text(output)) || (action === 'analyze' && output === undefined)), 'use build <plan.json> <new-directory> or analyze <run.json>');
-      const report = action === 'build' ? await buildDeliveryRun(input, output) : analyzeDeliveryRun(json(path.resolve(input)), path.dirname(path.resolve(input)));
-      process.stdout.write(JSON.stringify(report, null, 2) + '\n');
-      if (!report.ok) process.exitCode = 1;
-    }
+    requireThat(!extra.length && text(input) && ((action === 'build' && text(output)) || (action === 'analyze' && output === undefined)), 'use build <plan.json> <new-directory> or analyze <run.json>');
+    const report = action === 'build' ? await buildDeliveryRun(input, output) : analyzeDeliveryRun(json(path.resolve(input)), path.dirname(path.resolve(input)));
+    process.stdout.write(JSON.stringify(report, null, 2) + '\n');
+    if (!report.ok) process.exitCode = 1;
   } catch (error) {
     process.stderr.write(String(error) + '\n');
     process.exitCode = 1;

@@ -111,7 +111,7 @@ test('interruption preserves earlier failures and marks every untouched suite bl
   assert.equal(ledger.suites[3].reason, 'cancelled before next suite');
   assert.equal(
     SPRINT3_SUITES.reduce((total, suite) => total + suite.cases, 0),
-    364
+    278
   );
 });
 

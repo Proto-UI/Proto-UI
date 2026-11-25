@@ -85,16 +85,6 @@
       "logSha256": "81be4749ad675d9ac8212d0a54325a3cf42fb386ca21745efc4e5467226b6f0f"
     },
     {
-      "suite": "packages/compiler/test/control-label-native.browser.test.ts",
-      "durationMs": 26176,
-      "summary": "24 tests",
-      "fileOutcome": "passed",
-      "jobId": 136761144905,
-      "jobCompletedVitest": true,
-      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144905",
-      "logSha256": "81be4749ad675d9ac8212d0a54325a3cf42fb386ca21745efc4e5467226b6f0f"
-    },
-    {
       "suite": "apps/www/test/message-composition.browser.test.ts",
       "durationMs": 6349,
       "summary": "6 tests",
@@ -359,16 +349,6 @@
       "durationMs": 693099,
       "summary": "84 tests | 2 failed",
       "fileOutcome": "failed",
-      "jobId": 136761144947,
-      "jobCompletedVitest": false,
-      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144947",
-      "logSha256": "a265496385cf4077e7d294479d44ad86417864522319dfa0a62b53086956ab9e"
-    },
-    {
-      "suite": "packages/compiler/test/focus-scope-native.browser.test.ts",
-      "durationMs": 17433,
-      "summary": "22 tests",
-      "fileOutcome": "passed",
       "jobId": 136761144947,
       "jobCompletedVitest": false,
       "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144947",

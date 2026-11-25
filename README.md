@@ -20,13 +20,13 @@ The prototype owns portable behavior and semantic identity. The Adapter owns tra
 
 This is deliberately different from inventing another application framework: Proto UI is intended to work with the stack you already have.
 
-The repository also develops a [private compiler](packages/compiler/README.md) that emits host-native source:
+The [0.4 compiler foundation](internal/compiler/README.md) defines a future source compilation route:
 
 ```text
 Prototype protocol -> Compiler -> Host component code
 ```
 
-The stable `0.2.0` onboarding path is Adapter-based. The compiler has implemented profiles and explicit unsupported boundaries, but it is not a published compiler package or a general zero-runtime delivery guarantee.
+The stable `0.2.0` onboarding path is Adapter-based. The old private compiler is retired. The replacement specification targets React, GPUI, Vue 2, Vue 3 and Web Components; all five backends are currently unimplemented.
 
 ## Start with stable 0.2.0
 
@@ -57,7 +57,7 @@ Follow the complete [Quick Start](https://proto-ui.com/en/start-here/quick-start
 - `0.2.0` is stable on the npm `latest` channel, but v0 APIs, generated structure, and protocol details may continue to evolve in later releases.
 - The current CLI installs official Prototype packages and generates local component facades; it does not yet vendor styled prototype source into the application for direct editing.
 - Shadcn compatibility is intentional but incomplete. Proto UI deliberately does not expose Radix-style `asChild` in the current model.
-- The stable Adapter architecture carries a runtime. Private compiler implementation and its profile-specific evidence are documented separately from the published package surface.
+- The stable Adapter architecture carries a runtime. The compiler rebuild belongs to 0.4 scope and does not block 0.3 delivery.
 - Documentation, real-project trial evidence, SSR coverage, accessibility validation, and bundle analysis are still being expanded.
 - Most catalog entities are still `draft`; catalog presence should not be confused with a stable public guarantee.
 
@@ -88,7 +88,7 @@ For contributors and Agents:
 - [`packages/modules/`](packages/modules/): reusable semantic modules.
 - [`packages/adapters/`](packages/adapters/): React, Vue 3, Vue 2, Web Component, and shared Adapter implementations. Vue 2 belongs to the 0.3 prerelease line, not stable 0.2.0.
 - [`packages/prototypes/`](packages/prototypes/): Base, Shadcn, Brutalist, and Lucide libraries, plus separately labeled experimental families.
-- [`packages/compiler/`](packages/compiler/README.md): private source compiler, target profiles, and conformance tooling.
+- [`packages/compiler/`](packages/compiler/README.md): private compiler availability boundary; the replacement contract and work sequence live in [`internal/compiler/`](internal/compiler/README.md).
 - [`packages/cli/`](packages/cli/): project initialization, facade generation, and style tooling.
 - [`apps/www/`](apps/www/): public documentation and demos.
 - [`apps/workspace/`](apps/workspace/): internal spec workspace UI.
@@ -115,7 +115,7 @@ corepack pnpm@10.32.1 test
 
 Repository development follows the [0.3 delivery plan](internal/governance/release-0.3-plan.md) and [source-bound delivery list](internal/governance/release-0.3-list.md). The committed libraries are Base, Shadcn, Brutalist and Lucide, together with their required website, CLI and shared implementation work. Other families remain WIP / Experimental. The plan owns dates, dependencies and acceptance boundaries.
 
-The workspace currently prepares `0.3.0` under [draft `V-PROTO-UI-0012`](spec/versions/V-PROTO-UI-0012.yaml); this does not change the stable `0.2.0` install path or prove 0.3.0 publication. Private compiler and native-host development have their own documented implementation and evidence boundaries.
+The workspace currently prepares `0.3.0` under [draft `V-PROTO-UI-0012`](spec/versions/V-PROTO-UI-0012.yaml); this does not change the stable `0.2.0` install path or prove 0.3.0 publication. Compiler rebuilding and native-host development have their own documented scope and implementation boundaries.
 
 Relevant dated records under [`internal/records/**`](internal/records/) explain engineering history and remaining work. Release commitments come from the governed plan, and stable guarantees from applicable spec entities and release evidence.
 

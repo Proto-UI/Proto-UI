@@ -1,0 +1,55 @@
+id: D-COMPILER-FOUNDATION-0001
+type: decision
+title: Build the Proto language compiler from independently defined semantics
+status: draft
+since: 0.4.0
+lifecycleRationale:
+  zh-CN: >-
+    维护者已确定新语言、编译架构及执行模型，并授权在同一起始 PR 中清除旧实现和旧实现导向测试。
+    draft 记录新编译器及其独立可执行证据尚未交付，不表示这些方向需要再次批准。
+  en: >-
+    The maintainer has selected the language, architecture and execution model and authorized removal of the old implementation and implementation-shaped tests in the same foundation PR.
+    Draft records missing implementation and independent executable evidence, not an unsettled decision or a request for renewed approval.
+summary: Establish a new compiler with an independent Proto language, existing TypeScript tooling, domain and behavior IR, target ASTs and real host capabilities.
+statement:
+  zh-CN: >-
+    C-COMPILER-FOUNDATION-0001 是新编译器的规范来源。旧私有实现、旧生成物、旧 API 和旧测试不构成兼容义务或行为真值；
+    新测试从新语言及适用的独立组件行为定义建立，历史结果不转记为新实现的通过。
+    输入采用合法 TypeScript 语法并复用其解析、绑定、类型和模块设施，但 Proto 自行定义适合静态目标的语言语义。
+    编译必须完成从作者程序到有类型的组件 HIR、行为 IR 和目标 AST 的降低；不接受运行时解释、Adapter 回退或按组件身份选择业务行为。
+    首批打通 React 与 GPUI，完整目标集合为 React、GPUI、Vue 2、Vue 3、Web Components。能力可以分批交付，完整目标不因此缩小。
+  en: >-
+    C-COMPILER-FOUNDATION-0001 owns the new compiler specification. The old private implementation, generated artifacts, APIs and tests are neither compatibility obligations nor semantic oracles.
+    New tests derive expectations from the new language and applicable independently defined component behavior; historical results do not become new implementation passes.
+    Authoring uses valid TypeScript syntax and reuses its parsing, binding, type and module facilities, while Proto defines its own semantics suitable for static targets.
+    Compilation lowers authored programs through typed component HIR and behavior IR into target ASTs, without runtime interpretation, Adapter fallback or component-identity business dispatch.
+    React and GPUI are the first complete paths; the full target set remains React, GPUI, Vue 2, Vue 3 and Web Components. Incremental capability delivery does not shrink that destination.
+criteria:
+  - id: D-COMPILER-FOUNDATION-0001-AUTHORITY
+    text: >-
+      Keep language and compilation rules in C-COMPILER-FOUNDATION-0001 and independently derived cases in T-COMPILER-FOUNDATION-0001.
+      Internal documents project these entities rather than creating another specification. Retain retired catalog identities and historical records without treating them as obligations of the new compiler.
+  - id: D-COMPILER-FOUNDATION-0001-INFRASTRUCTURE
+    text: >-
+      Reuse mature TypeScript frontend and target-language AST/printing infrastructure. Do not rebuild those facilities, generate complete source units by string templates,
+      or require LLVM in the first source-compilation milestone. High-level typed or SSA representations do not require LLVM.
+  - id: D-COMPILER-FOUNDATION-0001-DELIVERY
+    text: >-
+      Deliver named semantic capabilities through real generated consumers, beginning with React and GPUI and completing all five selected targets.
+      A target-specific extern is an explicit engineering obligation, not a generic reason to stop existing prototype work; no known platform-specific extern obstruction has been established for the existing prototype inventory.
+  - id: D-COMPILER-FOUNDATION-0001-EVIDENCE
+    text: >-
+      Report missing, failed and executed evidence directly. Define measurement inputs and collect baselines before setting budgets.
+      Do not introduce arbitrary line-count thresholds, review rituals or additional user approval steps as substitutes for implementing the accepted semantics.
+explains:
+  contracts: [C-COMPILER-FOUNDATION-0001]
+  tests: [T-COMPILER-FOUNDATION-0001]
+sources:
+  - path: internal/compiler/README.md
+  - path: https://github.com/Proto-UI/Proto-UI/issues/1809
+revisions:
+  - version: 0.4.0
+    change: introduced
+    breaking: true
+    summary: Record the maintainer-selected new-language foundation and retirement of the old implementation as a compatibility or correctness authority.
+tags: [compiler, language, foundation, architecture]

@@ -54,7 +54,7 @@ sources:
   - path: packages/modules/boundary/src/impl.ts
     sections:
       - BoundaryModuleImpl
-  - path: packages/compiler/src/native-support/dom-modules.template.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/native-support/dom-modules.template.ts
 dependsOn:
   contracts:
     - C-LIFECYCLE-0008
@@ -71,6 +71,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: extended
     summary: Added host-proven current-focus observation and scope-local pointer/focus intent deduplication; unsupported hosts remain unknown.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags:
   - boundary
   - event

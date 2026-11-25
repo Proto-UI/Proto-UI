@@ -10,9 +10,9 @@
 | [`gpui/crates/proto-ui-style/`](gpui/crates/proto-ui-style/) | Token/theme data and native color/length resolution. |
 | [`gpui/crates/proto-ui-gpui/`](gpui/crates/proto-ui-gpui/) | GPUI host layout, composition, input, focus and bounded accessibility projection. |
 | [`packages/adapters/gpui-peer/`](../packages/adapters/gpui-peer/README.md) | Companion private TypeScript peer using the existing Runtime semantics. |
-| [`packages/compiler/`](../packages/compiler/README.md) | Compiler target generation, including its separate GPUI source profile and native SDK. |
+| [`packages/compiler/`](../packages/compiler/README.md) | 0.4 compiler availability boundary. The old GPUI source emitter and native SDK are retired; replacement lowering is not implemented. |
 
-The peer-driven host workspace and compiler-produced native components have different execution paths and evidence. Read their own profiles and tests before making a support claim; one path's result does not certify the other or a downstream application's complete integration.
+The peer-driven host workspace remains a Runtime/Adapter product. The future compiler-generated native components follow the [0.4 compiler foundation](../internal/compiler/README.md); existing Adapter evidence does not establish replacement compiler support.
 
 ## Fixtures and verification
 

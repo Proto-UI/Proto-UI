@@ -6,8 +6,6 @@
     "dist",
     "internal/records/evidence",
     "scripts/analysis/declarative-agent-ui",
-    "scripts/analysis/invisible-consumption/starter",
-    "scripts/release/consumer-smoke",
-    "packages/compiler/test/fixtures/differential-browser"
+    "scripts/release/consumer-smoke"
   ]
 }

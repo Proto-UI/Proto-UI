@@ -18,7 +18,6 @@ import {
   admitDeliveryPlan,
   analyzeDeliveryRun,
   buildDeliveryRun,
-  prepareNativeConsumerPlan,
   sampleStatistics,
 } from '../delivery-cost.mjs';
 
@@ -288,78 +287,6 @@ test('Runtime+Adapter and generated portable identities must match before produc
     /different portable source identities/
   );
   assert.equal(existsSync(f.evidence), false);
-});
-
-test('native preparation preserves edited source and old provenance while restoring only authenticated pre-edit bytes', async (t) => {
-  const f = fixture(t);
-  // Injected receipt grammar control, not an actual Compiler/Happy DOM result.
-  const original = 'export const value = 42;\n';
-  const edited = 'export const value = 43;\n';
-  f.put('generated/Component.ts', edited);
-  const profileEvidence = f.directory;
-  mkdirSync(path.join(profileEvidence, 'compiler-input'));
-  const source = 'INJECTED RECEIPT GRAMMAR CONTROL; NOT A PROTO PROGRAM\n';
-  writeFileSync(path.join(profileEvidence, 'compiler-input/entry.proto.ts'), source);
-  const provenance = {
-    profile: 'react-dom-source-v1',
-    dependencies: [{ name: 'react', version: '19.2.6', role: 'target' }],
-    sourceFiles: [{ file: 'entry.proto.ts', sha256: hash(source) }],
-    artifacts: [{ path: 'Component.ts', kind: 'source', sha256: hash(original) }],
-  };
-  const provenanceBytes = JSON.stringify(provenance, null, 2) + '\n';
-  f.put('generated/provenance.json', provenanceBytes);
-  writeFileSync(path.join(profileEvidence, 'Component.before-edit.txt'), original);
-  save(path.join(profileEvidence, 'source-ownership.json'), {
-    source: 'Component.ts',
-    beforeSha256: hash(original),
-    afterSha256: hash(edited),
-  });
-  save(path.join(profileEvidence, 'runtime-original.json'), {
-    profile: 'react-dom-source-v1',
-    ok: true,
-    scope: 'Injected grammar control, not a run.',
-  });
-  for (const filename of [
-    'timing.json',
-    'costs.json',
-    'closure-result.json',
-    'installed-tree-integrity.json',
-  ])
-    save(path.join(profileEvidence, filename), {
-      scope: 'Injected receipt grammar control; no product result.',
-    });
-  const planFile = path.join(profileEvidence, 'native-plan.json');
-  writeFileSync(path.join(profileEvidence, 'Component.before-edit.txt'), 'wrong original bytes');
-  assert.throws(
-    () => prepareNativeConsumerPlan(profileEvidence, '0'.repeat(40), planFile),
-    /retained original or edited consumer/
-  );
-  assert.equal(existsSync(path.join(f.root, 'delivery-original')), false);
-  writeFileSync(path.join(profileEvidence, 'Component.before-edit.txt'), original);
-  const plan = prepareNativeConsumerPlan(profileEvidence, '0'.repeat(40), planFile);
-  assert.equal(readFileSync(path.join(f.root, 'generated/Component.ts'), 'utf8'), edited);
-  assert.equal(
-    readFileSync(path.join(f.root, 'generated/provenance.json'), 'utf8'),
-    provenanceBytes
-  );
-  assert.equal(
-    readFileSync(path.join(f.root, 'delivery-original/generated/Component.ts'), 'utf8'),
-    original
-  );
-  assert.equal(
-    readFileSync(path.join(f.root, 'delivery-original/generated/provenance.json'), 'utf8'),
-    provenanceBytes
-  );
-  assert.equal(plan.arms[0].status, 'unavailable');
-  assert.equal(plan.arms[2].status, 'unavailable');
-  assert.equal(plan.arms[1].correctness.status, 'untested');
-  const report = await buildDeliveryRun(planFile, f.evidence);
-  assert.equal(report.ok, true);
-  assert.equal(report.comparison.status, 'withheld');
-  assert.throws(
-    () => prepareNativeConsumerPlan(profileEvidence, '0'.repeat(40), planFile),
-    /plan already exists/
-  );
 });
 
 test('failed production attempts and declared correctness differences remain beside null statistics', async (t) => {

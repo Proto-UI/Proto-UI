@@ -153,21 +153,21 @@ cases:
 implementations:
   - id: compiler-runtime-control-label-consumer-naming
     kind: runtime-test
-    status: passing
-    path: packages/compiler/test/control-label-consumer-source.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-A11Y-0001-CASE-CONTROL-LABEL-CONSUMER
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/control-label-consumer-source.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - The executed 55-case happy-dom consumer suite contains the actual generated/Runtime naming, disabled-name retention, reference replacement and source-lifetime assertions across React, Vue, Vue2 and Web Component, including normal Vue2 observed wrappers. It is separate from the 29 compiler-admission and strict-type cases, which do not themselves establish host A11y behavior.
   - id: compiler-runtime-control-label-native-naming
     kind: adapter-test
-    status: passing
-    path: packages/compiler/test/control-label-native.browser.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-A11Y-0001-CASE-CONTROL-LABEL-NATIVE-NAME
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/control-label-native.browser.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Twenty-four bounded Chromium cases passed with actual generated and Runtime consumers in a normal uid-1000 process with chromiumSandbox enabled. Browser-computed role/name, disabled-name retention and reference/physical-source withdrawal were asserted with source-bound captures; final verification must rerun the frozen integrated candidate. This remains distinct from OS assistive-technology evidence.
   - id: module-a11y-control-label-source
     kind: module-test
@@ -345,6 +345,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: refined
     summary: Added addressable retained React Activity replay evidence for generated referenced-heading identity and source IDREF continuity, distinct from the shared file's heading-level case and bounded to the executed fixture.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags:
   - a11y
   - accessibility

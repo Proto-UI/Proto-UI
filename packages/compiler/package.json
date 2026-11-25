@@ -3,6 +3,10 @@
   "private": true,
   "type": "module",
   "sideEffects": false,
+  "description": "Proto language compiler foundation; the legacy compiler is retired and all replacement targets are not implemented.",
+  "engines": {
+    "node": ">=24"
+  },
   "protoUi": {
     "release": {
       "scan": false
@@ -14,28 +18,12 @@
       "default": "./src/index.ts"
     },
     "./browser": {
-      "types": "./src/browser/index.ts",
-      "default": "./src/browser/index.ts"
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
     }
   },
-  "dependencies": {
-    "typescript": "^5.0.0",
-    "@jitl/quickjs-wasmfile-release-sync": "0.32.0",
-    "@noble/hashes": "2.4.0",
-    "path-browserify": "1.0.1",
-    "quickjs-emscripten-core": "0.32.0"
-  },
-  "devDependencies": {
-    "@proto.ui/core": "workspace:*",
-    "@proto.ui/hooks": "workspace:*",
-    "@proto.ui/adapter-react": "workspace:*",
-    "@proto.ui/prototypes-base": "workspace:*",
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "vite": "6.4.1",
-    "vue": "3.5.31"
-  },
-  "description": "Private restricted-TypeScript compiler and differential conformance tooling; no published compiler profile."
+  "scripts": {
+    "test": "node --test test/retirement.node-test.mjs",
+    "status": "node src/cli-entry.mjs --status"
+  }
 }

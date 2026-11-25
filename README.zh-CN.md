@@ -20,13 +20,13 @@ Prototype 负责可移植行为和语义身份，Adapter 负责将它翻译到�
 
 因此，Proto UI 并不是要再发明一个应用框架，而是希望与现有技术栈协作。
 
-仓库也在开发将原型输出为宿主原生源码的[私有 Compiler](packages/compiler/README.md)：
+[0.4 编译器基础文档](internal/compiler/README.md)定义后续源码编译路线：
 
 ```text
 Prototype protocol -> Compiler -> Host component code
 ```
 
-稳定版 `0.2.0` 的上手路径采用 Adapter 架构。Compiler 已有具体 profile 实现和明确的未支持边界，但尚不是已发布的 Compiler package，也不构成通用零运行时交付保证。
+稳定版 `0.2.0` 的接入路线基于 Adapter。旧的私有编译器已经退役；新规范要求 React、GPUI、Vue 2、Vue 3 与 Web Components 五个目标，目前均尚未实现。
 
 ## 从稳定版 0.2.0 开始
 
@@ -57,7 +57,7 @@ npx @proto.ui/cli@latest add react shadcn-button
 - `0.2.0` 已稳定发布到 npm `latest` channel，但 v0 API、生成结构与协议细节仍可能在后续版本中继续演进。
 - 当前 CLI 会安装官方 Prototype package 并生成本地 component facade；暂时还不会把 styled prototype 源码写入应用项目供直接编辑。
 - Shadcn 兼容是明确目标，但尚不完整；当前模型有意不提供 Radix 风格的 `asChild`。
-- 稳定版 Adapter 架构仍然携带 runtime。私有 Compiler 的实现与各 profile 证据需要和已发布 package surface 分别判断。
+- 稳定版 Adapter 架构带有 Runtime。编译器重建属于 0.4 scope，不作为 0.3 交付的新增阻塞项。
 - 文档、真实项目试用证据、SSR 覆盖、可访问性验证和 bundle 分析仍在补充。
 - 当前大部分 catalog 实体仍为 `draft`；进入 catalog 不等于已经成为稳定公共保证。
 
@@ -88,7 +88,7 @@ Proto UI 以 [`spec/**`](spec/) 下的版本化实体作为机器治理的真理
 - [`packages/modules/`](packages/modules/)：可复用语义 Module。
 - [`packages/adapters/`](packages/adapters/)：React、Vue 3、Vue 2、Web Component 及共享 Adapter 实现。Vue 2 属于 0.3 预发布线，不属于稳定版 0.2.0。
 - [`packages/prototypes/`](packages/prototypes/)：Base、Shadcn、Brutalist 与 Lucide library，以及单独标记的实验家族。
-- [`packages/compiler/`](packages/compiler/README.md)：私有源码编译器、目标 profile 与一致性验证工具。
+- [`packages/compiler/`](packages/compiler/README.md)：私有编译器可用性边界；新合同与工作顺序见 [`internal/compiler/`](internal/compiler/README.md)。
 - [`packages/cli/`](packages/cli/)：项目初始化、facade 生成与样式工具。
 - [`apps/www/`](apps/www/)：公开文档与 Demo。
 - [`apps/workspace/`](apps/workspace/)：内部 spec workspace UI。

@@ -54,7 +54,6 @@ export const repositoryDocPolicy = {
     })),
     ...[
       'internal/fixtures/',
-      'packages/compiler/test/fixtures/',
       'scripts/coverage-matrices/test/fixtures/',
       'scripts/docs/test/fixtures/',
     ].map((prefix) => ({

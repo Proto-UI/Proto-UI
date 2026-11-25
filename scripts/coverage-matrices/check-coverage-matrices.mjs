@@ -1,10 +1,6 @@
 import { STARTUP_PRERENDER_IMPORT_ALLOWLIST } from './startup-prerender-imports.mjs';
 import { DIAGNOSTIC_IMPORT_ALLOWLIST } from './diagnostic-imports.mjs';
 import {
-  BROWSER_COMPILER_IMPORT_ALLOWLIST,
-  BROWSER_COMPILER_INTERACTIVE_SOURCES,
-} from './browser-compiler-imports.mjs';
-import {
   LIBRARY_CARD_IMPORT_ALLOWLIST,
   LIBRARY_CARD_INTERACTIVE_MATERIAL_SOURCES,
 } from './library-card-imports.mjs';
@@ -174,7 +170,6 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   ...STARTUP_PRERENDER_IMPORT_ALLOWLIST,
   ...LIBRARY_CARD_IMPORT_ALLOWLIST,
   ...DIAGNOSTIC_IMPORT_ALLOWLIST,
-  ...BROWSER_COMPILER_IMPORT_ALLOWLIST,
   // The authored Form demo consumes only the public Field request type.
   // Its interactive controller remains owned by the existing blocked demo row.
   'apps/www/src/content/docs/form-validation-demo.shared.ts': Object.freeze({
@@ -9957,6 +9952,9 @@ const WEBSITE_CLIENT_CHUNKS_RETRY_CONFIGS = Object.freeze([
   // Adds the Wave 3–5 sidebar links and English UI Library labels only.
   // Retry imports, resolver, client chunk hook and exact helper bytes are unchanged.
   '36a90352d9b22089abfde1318c29cd9e920dda2e79f088f259eec9c2de10be70',
+  // Compiler retirement removes the module Worker and three QuickJS optimizer exclusions.
+  // The four Runtime Retry owners and all five exact helper bindings remain unchanged.
+  '75e6a226b6038f4d6936ac876596bee90ee9b97e78e783feb5664d9452e5fe07',
 ]);
 const WEBSITE_CLIENT_CHUNKS_HELPER = [
   'apps/www/scripts/client-chunk-isolation.mjs',
@@ -12989,17 +12987,6 @@ const WEBSITE_STARTUP_EVENT_SHA256 =
 const WEBSITE_OPTICAL_HOST_SOURCE = 'packages/adapters/base/src/material/program-pool.ts';
 const WEBSITE_OPTICAL_HOST_SHA256 =
   '921fd75bf4f74cdbc8a2add54a0a27e380c8b5855b92cb1db9d6ec3a8756f854';
-// The Website's own reviewed compiler panel loads these compiler browser
-// sources in the browser, so the interactive-source discovery reaches them
-// outside `apps/www/src/**`. They need a reviewed Source-scan binding. This
-// exact list is the only compiler source category: no other `packages/**`
-// path is admitted by it, and each row keeps the runtime-infrastructure owner
-// that already names the source in its Path cell.
-const WEBSITE_COMPILER_BROWSER_SOURCES = Object.freeze([
-  'packages/compiler/src/browser/client.ts',
-  'packages/compiler/src/browser/worker.ts',
-]);
-const WEBSITE_COMPILER_BROWSER_OWNER = 'www.demo.raw-adapter-runtimes';
 function parseSourceBindings(lines, afterIndex, relativePath, issues) {
   const headingIndexes = findExactLineIndexes(lines, '## Source-scan bindings').filter(
     (index) => index > afterIndex
@@ -13038,19 +13025,16 @@ function parseSourceBindings(lines, afterIndex, relativePath, issues) {
       sourcePath?.startsWith('apps/www/public/') &&
       /\.(?:cjs|html?|js|mjs|svg)$/iu.test(sourcePath);
     const isReviewedOpticalHost = sourcePath === WEBSITE_OPTICAL_HOST_SOURCE;
-    const isReviewedCompilerBrowserSource = WEBSITE_COMPILER_BROWSER_SOURCES.includes(sourcePath);
     if (
       sourcePaths.length !== 1 ||
       (!isWebsiteSource &&
         !isPublicExecutable &&
         !isReviewedOpticalHost &&
-        !isReviewedCompilerBrowserSource &&
         !Object.hasOwn(LIBRARY_CARD_INTERACTIVE_MATERIAL_SOURCES, sourcePath) &&
-        !Object.hasOwn(BROWSER_COMPILER_INTERACTIVE_SOURCES, sourcePath) &&
         sourcePath !== WEBSITE_STARTUP_EVENT_SOURCE)
     ) {
       issues.push(
-        `${context}: source binding must name exactly one \`apps/www/src/**\` path, executable \`apps/www/public/**/*.{html,js,mjs,cjs,svg}\` path, or an exact reviewed optical/build-time event/compiler browser source`
+        `${context}: source binding must name exactly one \`apps/www/src/**\` path, executable \`apps/www/public/**/*.{html,js,mjs,cjs,svg}\` path, or an exact reviewed optical/build-time event/material source`
       );
       continue;
     }
@@ -13100,36 +13084,6 @@ function validateWebsiteSourceBindings(
       } catch {
         issues.push(
           `${relativePath}:${binding.line}: exact startup event source, digest and build owner remain unverified`
-        );
-        continue;
-      }
-    }
-    if (WEBSITE_COMPILER_BROWSER_SOURCES.includes(sourcePath)) {
-      // The compiler browser sources are not derived from a Website Path cell,
-      // so their reviewed owner is asserted here instead of by the grouped
-      // binding rule. Keep the exact host validation below independent so
-      // a wrong owner retains both diagnostics without bypassing source checks.
-      if (binding.ownerIds.length !== 1 || binding.ownerIds[0] !== WEBSITE_COMPILER_BROWSER_OWNER) {
-        issues.push(
-          `${relativePath}:${binding.line}: compiler browser source \`${sourcePath}\` must name exactly the matrix Path owner \`${WEBSITE_COMPILER_BROWSER_OWNER}\``
-        );
-      }
-    }
-    if (Object.hasOwn(BROWSER_COMPILER_INTERACTIVE_SOURCES, sourcePath)) {
-      const expected = BROWSER_COMPILER_INTERACTIVE_SOURCES[sourcePath];
-      try {
-        assertPromotionModulePath(rootDir, absolutePath);
-        if (
-          !fs.lstatSync(absolutePath).isFile() ||
-          sourceScanDigest(absolutePath) !== expected ||
-          binding.digest !== expected ||
-          binding.ownerIds.length !== 1 ||
-          binding.ownerIds[0] !== 'www.demo.raw-adapter-runtimes'
-        )
-          throw new Error('unexpected browser compiler host bytes or owner');
-      } catch {
-        issues.push(
-          `${relativePath}:${binding.line}: exact browser compiler host source, digest and runtime owner remain unverified`
         );
         continue;
       }

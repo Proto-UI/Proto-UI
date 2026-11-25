@@ -1,10 +1,15 @@
 id: C-COMPILER-OBSERVABLES-0001
 type: contract
 title: Compiler profiles declare observable policy and comparison configuration
-status: draft
+status: removed
 since: 0.3.0-alpha.1
+removedSince: 0.4.0
+replacedBy: C-COMPILER-FOUNDATION-0001
 lifecycleRationale: >-
-  Human-directed compiler repair defines explicit source profile policy without promoting the private compiler or claiming universal Adapter equivalence.
+  Retired for the new 0.4 compiler by the maintainer-selected foundation decision.
+  This identity and prior criteria remain historical; old implementation, source
+  admission, artifacts and results impose no compatibility or correctness
+  obligation on the new language. The replacement has no executed evidence yet.
 
 summary: Versioned artifact metadata separates channel behavior from host update policy and support ABI.
 statement:
@@ -41,11 +46,14 @@ relates:
   decisions:
     - D-ADAPTER-PROFILE-0001
 sources:
-  - path: packages/compiler/src/observable-semantics.ts
-  - path: packages/compiler/src/targets.ts
-  - path: packages/compiler/test/observable-consumer.test.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/observable-semantics.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/targets.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/test/observable-consumer.test.ts
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Make compiler observations and exact props-policy comparison explicit without changing existing profile defaults.
+  - version: 0.4.0
+    change: removed
+    summary: Retire the old compiler-specific identity; preserve history and use the independent foundation.
 tags: [compiler, profile, lifecycle, props, conformance]

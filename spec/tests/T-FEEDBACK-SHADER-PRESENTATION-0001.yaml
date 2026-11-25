@@ -42,14 +42,15 @@ cases:
 implementations:
   - id: shader-data-and-native-admission
     kind: module-test
-    status: passing
-    path: packages/compiler/test/shader-native.test.ts
+    status: missing
     required: true
     consumesCases:
       [
         T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-SNAPSHOT,
         T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-CONSUMER,
       ]
+    notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/shader-native.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
   - id: shader-feedback-owner
     kind: module-test
     status: passing
@@ -62,18 +63,19 @@ implementations:
       ]
   - id: shader-static-construction
     kind: module-test
-    status: passing
-    path: packages/compiler/test/shader-static-data.test.ts
+    status: missing
     required: true
     consumesCases: [T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-CONSUMER]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/shader-static-data.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Finite-data proof is checked through each native Web target, cold serialized IR, renamed/re-exported helpers and independent escape, mutation, effect and unknown-input controls. It adds no application source lease or runtime graph interpreter.
   - id: shader-scene-data-and-native
     kind: module-test
-    status: passing
-    path: packages/compiler/test/shader-scene.test.ts
+    status: missing
     required: true
     consumesCases: [T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-SCENE]
+    notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/shader-scene.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
   - id: shader-scene-source-owner
     kind: module-test
     status: passing
@@ -84,29 +86,30 @@ implementations:
       - Source lifecycle is observed at a controlled physical presenter boundary. These cases do not claim GPU pixels or real browser acceptance.
   - id: shader-scene-capability-acquisition
     kind: module-test
-    status: passing
-    path: packages/compiler/test/shader-scene-capability.test.ts
+    status: missing
     required: true
     consumesCases:
       [
         T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-SCENE,
         T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-RETIREMENT,
       ]
+    notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/shader-scene-capability.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
   - id: shader-native-consumer-types
     kind: module-test
-    status: passing
-    path: packages/compiler/test/shader-native-types.test.ts
+    status: missing
     required: true
     consumesCases: [T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-CONSUMER]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/shader-native-types.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Strict complete native graphs separately check copy-only, tint-only, combined, pure-factory and configured-scene capability interfaces in every Web profile, including Vue2 checkJs.
   - id: shader-native-project-closure
     kind: module-test
-    status: passing
-    path: packages/compiler/test/shader-native-project.test.ts
+    status: missing
     required: true
     consumesCases: [T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-CONSUMER]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/shader-native-project.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Independent copy/tint/scene entries share only the project's reached kernel union. Each original entry's support bytes must match its canonical closure before union; modified or missing host, owner and kernel identity artifacts reject.
   - id: shader-runtime-owner
     kind: module-test
@@ -120,8 +123,7 @@ implementations:
       ]
   - id: shader-webgl2-browser-consumers
     kind: workspace-check
-    status: planned
-    path: packages/compiler/test/shader-presentation.browser.test.ts
+    status: missing
     required: true
     consumesCases:
       [
@@ -131,6 +133,7 @@ implementations:
         T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-RETIREMENT,
       ]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/shader-presentation.browser.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - The suite retains the original 28 cases and adds eight real canvas-source Runtime/native journeys plus one unconfigured-default case, with three independently source-bound build manifests.
       - The executable suite requires sandboxed Chromium. Its local launch failure is not a passed GPU or consumer result; actual supported-executor receipts remain required.
 verifies:
@@ -152,3 +155,6 @@ revisions:
   - version: 0.3.0-alpha.2
     change: introduced
     summary: Freeze the executable validation obligations before Runtime and Compiler shader implementation.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.

@@ -44,8 +44,6 @@ test('the full browser inventory fits the unchanged deadline with a setup reserv
       (cost) => cost.estimatedSeconds + cost.setupReserveSeconds <= cost.executionBudgetSeconds
     )
   );
-  // The old ten-worker allocation demonstrably cannot admit the measured work.
-  assert.throws(() => assertBrowserShardCapacity(browserShards(BROWSER_SUITES, 10)), /beyond/);
 });
 
 test('malformed or duplicated timing observations cannot bypass capacity admission', () => {

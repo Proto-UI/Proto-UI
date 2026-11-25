@@ -62,33 +62,33 @@ cases:
 implementations:
   - id: compiler-a11y-part-admission
     kind: runtime-test
-    status: planned
-    path: packages/compiler/test/a11y-part-admission.test.ts
+    status: missing
     required: false
     consumesCases:
       - T-A11Y-PART-RELATIONSHIP-0001-CASE-STRUCTURED-CARRIER
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/a11y-part-admission.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Candidate source and serialized-IR regression; not executed in this preparation and not evidence of stable admission.
   - id: compiler-a11y-part-native
     kind: adapter-test
-    status: planned
-    path: packages/compiler/test/a11y-part-native.test.ts
+    status: missing
     required: false
     consumesCases:
       - T-A11Y-PART-RELATIONSHIP-0001-CASE-VIEW-EPOCH-LIFECYCLE
       - T-A11Y-PART-RELATIONSHIP-0001-CASE-TERMINAL-CLEANUP
       - T-A11Y-PART-RELATIONSHIP-0001-CASE-HOST-ID-OWNERSHIP
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/a11y-part-native.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Candidate generated React, Vue, Vue2 and Web Component DOM regressions; unexecuted. Browser pre-visibility ordering remains outstanding.
   - id: compiler-a11y-part-linked-consumer
     kind: adapter-test
-    status: planned
-    path: packages/compiler/test/artifact-linking-consumer.test.ts
+    status: missing
     required: false
     consumesCases:
       - T-A11Y-PART-RELATIONSHIP-0001-CASE-FAIL-CLOSED-RESOLUTION
       - T-A11Y-PART-RELATIONSHIP-0001-CASE-TERMINAL-CLEANUP
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/artifact-linking-consumer.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Candidate independently compiled React endpoints with explicit family linking; no fresh execution or full Collapsible conformance claim.
   - id: runtime-a11y-part-relationship-contract
     kind: runtime-test
@@ -187,6 +187,9 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Added the planned cross-layer conformance map for the accepted Issue #549 relationship implementation slice without claiming the mapped paths already pass it.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags:
   - a11y
   - anatomy

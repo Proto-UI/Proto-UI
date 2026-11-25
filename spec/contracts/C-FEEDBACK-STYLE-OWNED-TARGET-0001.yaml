@@ -63,9 +63,9 @@ sources:
   - path: packages/modules/a11y/src/web.ts
   - path: packages/adapters/web-component/src/commit.ts
   - path: packages/adapters/base/src/platform/web-owned-decoration-stage.ts
-  - path: packages/compiler/src/native-support/web-decoration.ts
-  - path: packages/compiler/src/native-style.ts
-  - path: packages/compiler/src/react-source.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/native-support/web-decoration.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/native-style.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/react-source.ts
 dependsOn:
   contracts:
     - C-FEEDBACK-STYLE-0001
@@ -81,6 +81,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: 'Defined a draft-only generic dependency boundary for #935; no implementation or acceptance claim.'
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags:
   - feedback
   - style

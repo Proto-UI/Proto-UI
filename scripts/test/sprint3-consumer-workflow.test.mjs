@@ -104,11 +104,11 @@ test('registered carrier opts in manually without changing ordinary or reusable 
   assert.equal(carrier.on.workflow_dispatch.inputs.scope.default, 'repair');
   assert.equal(
     carrier.jobs['focused-browser'].if,
-    "${{ inputs.scope != 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true && inputs.shader_presentation != true }}"
+    "${{ inputs.scope != 'sprint1' && inputs.scope != 'contents-wheel' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
   );
   assert.equal(
     carrier.jobs.sprint1.if,
-    "${{ inputs.scope == 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true && inputs.shader_presentation != true }}"
+    "${{ inputs.scope == 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
   );
   const call = carrier.jobs['sprint3-acceptance'];
   assert.equal(
@@ -122,11 +122,10 @@ test('registered carrier opts in manually without changing ordinary or reusable 
   assert.equal(carrier.on.pull_request, undefined);
 });
 
-test('default consumers, Base Select, release, strict budget and compiler fail independently', () => {
+test('default consumers, Base Select, release and strict budget fail independently', () => {
   assert.deepEqual(Object.keys(workflow.jobs).sort(), [
     'base-select-consumers',
     'native-consumers',
-    'production-compiler',
     'release-rehearsal',
     'strict-package-budgets',
   ]);
@@ -138,10 +137,6 @@ test('default consumers, Base Select, release, strict budget and compiler fail i
   assert.equal(
     workflow.jobs['strict-package-budgets'].uses,
     './.github/workflows/package-budget-evidence.yml'
-  );
-  assert.equal(
-    workflow.jobs['production-compiler'].uses,
-    './.github/workflows/compiler-browser-acceptance.yml'
   );
   const release = workflow.jobs['release-rehearsal'];
   assert.equal(

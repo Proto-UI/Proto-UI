@@ -58,19 +58,19 @@ cases:
 implementations:
   - id: compiler-public-capture-projection
     kind: module-test
-    status: needs-review
-    path: packages/compiler/test/capture-facade.test.ts
+    status: missing
     required: true
     consumesCases: [T-AS-HOOK-0001-CASE-CUSTOM-HANDLE, T-AS-HOOK-0001-CASE-PROTOTYPE-COMPATIBLE]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/capture-facade.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Closed capture projections and checked renderer provenance are verified independently of source component names. Native emission alone is not native execution.
   - id: generated-native-capture-projection
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/fixtures/gpui-ordinary-values/capture_facade.rs
+    status: missing
     required: true
     consumesCases: [T-AS-HOOK-0001-CASE-CUSTOM-HANDLE, T-AS-HOOK-0001-CASE-ONCE-DEFAULT]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/fixtures/gpui-ordinary-values/capture_facade.rs (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - The ordinary producer compiles the exact shared source. Execute the capture_facade integration test after a fresh compile; authored fixtures and syntax parsing do not establish native acceptance.
   - id: runtime-as-hook-core-contract
     kind: runtime-test
@@ -150,6 +150,9 @@ revisions:
   - version: 0.1.1
     change: refined
     summary: Added type coverage for contract-declared child handle lookup inference.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags:
   - as-hook
   - setup

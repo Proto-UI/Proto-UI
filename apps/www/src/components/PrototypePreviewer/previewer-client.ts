@@ -98,10 +98,10 @@ export function initPreviewer(options: PreviewerOptions) {
     '[data-adapter-select-root], wc-shadcn-select-root'
   );
   // Legacy embeds may provide a native runtime selector. Controls owned by a
-  // mounted demo or the optional compiler panel are independent consumers.
+  // mounted demo is an independent consumer.
   const nativeSelect =
     [...root.querySelectorAll<HTMLSelectElement>('select')].find(
-      (select) => !select.closest('pui-browser-compiler, .host')
+      (select) => !select.closest('.host')
     ) ?? null;
 
   const readSelectValue = () =>

@@ -54,6 +54,7 @@ relates:
       since: 0.3.0-alpha.2
     - id: C-COMPILER-OBSERVABLES-0001
       since: 0.3.0-alpha.2
+      until: 0.4.0
 revisions:
   - version: 0.1.0
     change: introduced
@@ -64,6 +65,9 @@ revisions:
   - version: 0.3.0-alpha.2
     change: revised
     summary: Resolved C-PROPS-0014-Q-CORE-UPDATE-OWNER by binding positive update-flow ownership to the existing C-LIFECYCLE-0003 and its C-LIFECYCLE-0002 ordering dependency. Retained all five active criteria, lifecycle draft statuses and existing host/profile compatibility; this ownership resolution is not lifecycle promotion.
+  - version: 0.4.0
+    change: revised
+    summary: End the relation to the retired compiler observables contract; the existing runtime/controller criteria remain in their original scope.
 tags:
   - props
   - runtime

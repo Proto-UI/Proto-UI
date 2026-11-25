@@ -770,29 +770,6 @@ async function runInside() {
           '/work/consumer'
         );
       });
-      for (const profile of ['web-component-source-v1', 'gpui-source-v1']) {
-        await phase(`unchanged-source-canonical-compiler-${profile}`, () => {
-          command(
-            `compiler-${profile}`,
-            process.execPath,
-            [
-              '--import',
-              'tsx',
-              join(repository, 'packages/compiler/src/cli-entry.ts'),
-              'compile',
-              '/work/consumer/hook-closeout.proto.ts',
-              '--root',
-              '/work/consumer',
-              '--output',
-              `/evidence/compiler-${profile}`,
-              '--profile',
-              profile,
-              '--json',
-            ],
-            repository
-          );
-        });
-      }
     }
     // Keep outcomes independent: a failed generic probe cannot hide projection debt.
     await phase('disposable-agent-projection-generation', () => pnpm('-s', 'spec:docs:agent'));

@@ -1,0 +1,339 @@
+id: C-COMPILER-FOUNDATION-0001
+type: contract
+title: Proto language and native-source compiler foundation
+status: draft
+since: 0.4.0
+lifecycleRationale:
+  zh-CN: >-
+    本合同记录维护者已接受的新编译器语义。前端、中端、后端和独立规范轨迹尚未实现并验收，因此保持 draft；
+    不将旧实现或旧测试的通过迁移为本合同证据，也不据此重新请求语义决定。
+  en: >-
+    This contract records the maintainer-accepted new compiler semantics. The frontend, middle end, backends and independent conformance traces remain unimplemented and unverified,
+    so it stays draft. Old implementation results do not provide evidence for this contract and the status does not reopen the accepted direction.
+summary: Define an independent Proto language authored in valid TS, real semantic lowering, automatic reactivity, synchronous-segment transactions, owned async and five-target delivery.
+statement:
+  zh-CN: >-
+    本合同适用于 0.4 新语言及其编译产物，不把旧 runtime/controller API 的显式 update 策略带入新语言，
+    也不改写这些 API 在既有 Runtime/Adapter 中的历史含义。共享组件行为要求须独立核对；旧 parser 接受或拒绝、旧生成代码和旧测试均不定义新语言。
+    一个程序编译完成，意味着其全部可达声明与行为都具有已验证的类型、阶段、绑定、效果、捕获和目标实现，
+    并已降低为目标语言结构或明确的宿主原语。声明构造和编译 IR 不留给最终运行时重新解释。
+    动态数据、回调、状态、事务、异步任务和资源释放所需的运行时代码仍然存在，并由真实模块或 crate 提供有界原语。
+    外部可观察行为由以下 criteria 决定；具体 API 拼写、内部数据布局和目标实现属于不改变这些行为的工程选择。
+  en: >-
+    This contract governs the new 0.4 language and its generated programs. It does not import the old runtime/controller explicit-update policy,
+    nor rewrite those APIs' historical Runtime/Adapter meaning. Shared component behavior must be checked independently; old parser admission, generated output and tests do not define the new language.
+    Compilation is complete only when every reachable declaration and behavior has checked types, phases, bindings, effects, captures and target realizations,
+    lowered into target-language constructs or explicit host primitives. Declaration construction and compiler IR are not left for the final runtime to interpret.
+    Runtime code necessary for dynamic data, callbacks, state, transactions, owned tasks and cleanup remains legitimate and uses bounded primitives in real modules or crates.
+    The following criteria define observable behavior; API spelling, internal layouts and target implementation are engineering choices that preserve it.
+criteria:
+  - id: C-COMPILER-FOUNDATION-0001-LANGUAGE
+    text:
+      zh-CN: >-
+        Proto 是以合法 TypeScript 语法书写的独立语言，不承诺接受任意 TypeScript 或完整 ECMAScript。
+        复用 TypeScript 的解析、符号绑定、模块解析与类型信息，补充 Proto 自己的阶段、效果、所有权和目标检查；不另造并行 TS 类型系统。
+        语义按解析后的绑定身份决定，类型断言不能创造能力来源、静态可求值性或目标支持。编译不导入或执行作者模块，也不以 Proxy 试运行代替分支分析。
+      en: >-
+        Proto is an independent language using valid TypeScript syntax, not a promise to accept arbitrary TypeScript or all ECMAScript.
+        Reuse TypeScript parsing, symbols, module resolution and type information, adding Proto phase, effect, ownership and target checks rather than another TS type system.
+        Semantics follows resolved binding identity; assertions cannot establish capability origin, static evaluability or target support. Compilation neither imports nor executes author modules and does not replace branch analysis with Proxy trial execution.
+  - id: C-COMPILER-FOUNDATION-0001-VALUES
+    text:
+      zh-CN: >-
+        普通 number 是 IEEE 754 binary64；整数索引、长度和 SDK 边界使用显式检查的整数类型，越界、非整数或无法表示的转换给出类型化失败，不截断猜测。
+        运算没有隐式类型 coercion，条件必须是 bool。record/list 等复合状态采用不可变值语义，允许写时复制和结构共享；身份仅由显式有类型 handle 表达。
+        相等与变化判断依照声明的值或 handle 身份语义，不借目标对象地址决定。TypeScript 的 as 或 readonly 不构成运行时值域、不可变性或所有权证明。
+      en: >-
+        Ordinary number is IEEE 754 binary64. Integer indices, lengths and SDK boundaries use explicitly checked integer types; out-of-range, nonintegral or unrepresentable conversion produces typed failure rather than guessed truncation.
+        Operations have no implicit coercion and conditions require bool. Composite state such as records/lists has immutable value semantics, permitting copy-on-write and structural sharing; identity is expressed only by explicit typed handles.
+        Equality and change detection follow declared value or handle-identity semantics rather than target object addresses. TypeScript as and readonly do not prove runtime domains, immutability or ownership.
+  - id: C-COMPILER-FOUNDATION-0001-EQUALITY
+    text:
+      zh-CN: >-
+        语言数值相等遵循 IEEE 比较：正零与负零相等，NaN 与包括自身在内的数值均不相等；这不启用类型 coercion。
+        响应变化抑制使用另一种明确的值同一性：两个 NaN 视为相同，正零与负零不同。不得因数值相等而漏掉符号零变化及其可观察派生结果。
+        可比较的 record/list/Option/Result 以对应比较规则递归比较结构和值；handle 比较其显式身份，不能用结构共享或宿主对象地址替代。
+        保守失效仍可多做纯重算，不能把相等比较、变化抑制或额外重算变成额外的可观察效果。
+      en: >-
+        Language numeric equality uses IEEE comparison: positive and negative zero compare equal, while NaN compares unequal to every number including itself, without enabling coercion.
+        Reactive change suppression uses separate value sameness: two NaNs are the same and positive and negative zero differ. Numeric equality cannot hide a signed-zero change or its observable derived result.
+        Equatable records, lists, Options and Results compare structure and values recursively with the corresponding rule; handles compare explicit identity, not storage sharing or host object addresses.
+        Conservative invalidation may still perform extra pure recomputation, without turning comparison, suppression or recomputation into additional observable effects.
+  - id: C-COMPILER-FOUNDATION-0001-TEXT
+    text:
+      zh-CN: >-
+        String 必须是 well-formed Unicode；默认文本遍历单位为 Unicode scalar，grapheme 操作通过显式 API 表达，不自动做 Unicode normalization。
+        宿主边界负责 UTF-16/UTF-8 编解码，未配对代理项和非法编码不能静默进入语言值域；失败或显式替换策略须由该转换 API 表达。
+        不继承 JavaScript 的 UTF-16 code-unit 索引与孤立代理项行为，不以运行时模拟完整 JS 字符串对象实现跨目标一致。
+      en: >-
+        String contains well-formed Unicode. Default text iteration uses Unicode scalars, grapheme operations use explicit APIs, and no automatic Unicode normalization occurs.
+        Host boundaries perform UTF-16/UTF-8 conversion; unpaired surrogates and invalid encodings cannot silently enter language values, and the conversion API specifies failure or an explicit replacement policy.
+        Proto does not inherit JavaScript UTF-16 code-unit indexing or isolated-surrogate behavior and does not simulate a complete JS string object to obtain target consistency.
+  - id: C-COMPILER-FOUNDATION-0001-RESULTS
+    text:
+      zh-CN: >-
+        缺值与失败通过 Option 和 Result 显式表达，按 schema 需要区分未传入 prop 与业务 none。
+        Err 是可检查和组合的普通结果，不因其存在自动中止事务；只有失败被传播到动作段边界且未被处理时才丢弃该段。
+        宿主异常在声明的边界转换为类型化失败，实现不变量缺陷保留为缺陷；不得使用 panic/unwind 模拟通用 JS throw。
+      en: >-
+        Option and Result explicitly represent absence and failure, distinguishing omitted props from business none when the schema requires it.
+        Err is an inspectable, composable result and does not itself abort a transaction; an unhandled failure propagated to the action-segment boundary discards that segment.
+        Declared host boundaries convert host exceptions into typed failures while implementation invariant defects remain defects; panic/unwind does not simulate general JS throw.
+  - id: C-COMPILER-FOUNDATION-0001-PHASES
+    text:
+      zh-CN: >-
+        作者显式区分声明、纯派生计算、动作及生命周期。声明定义 schema、状态位置、模板和连接关系；实例初值与运行时条件保留到其规定执行阶段。
+        派生计算不写状态、不执行宿主命令；动作承担状态变化和效果；生命周期建立和释放实例资源。
+        未知 props 上的条件降低为残余条件和依赖，不能用默认值或构建期一次执行把它当成常量。
+      en: >-
+        Authoring explicitly separates declarations, pure derivations, actions and lifecycle work. Declarations define schemas, state locations, templates and connections;
+        instance initializers and runtime conditions remain in their specified execution phase. Derivations neither write state nor execute host commands, actions perform changes and effects, and lifecycle work acquires and releases instance resources.
+        A condition on unknown props becomes a residual condition and dependency, never a constant chosen from defaults or one build-time execution.
+  - id: C-COMPILER-FOUNDATION-0001-IR
+    text:
+      zh-CN: >-
+        组件 HIR 保留 props/state schema、模板与动态区域、响应依赖、事件、Context、anatomy 和生命周期。
+        行为 IR 以有类型 CFG 表达值、控制流、函数、捕获环境、状态访问和有顺序的效果；目标 AST 表达实际目标语言的声明、表达式、控制流与组件调用。
+        层间验证引用、类型、阶段、效果顺序、捕获和目标实现等局部不变量；不重复运行一套前端类型系统。后端不得重新扫描作者文本猜测语义。
+      en: >-
+        Component HIR retains props/state schemas, templates and dynamic regions, reactive dependencies, events, Context, anatomy and lifecycle.
+        Behavior IR uses typed CFGs for values, control flow, functions, capture environments, state access and ordered effects; target ASTs represent actual target declarations, expressions, control flow and component calls.
+        Lowering validates local reference, type, phase, effect-order, capture and target invariants without repeating the frontend type system. Backends do not rediscover semantics by scanning author text.
+  - id: C-COMPILER-FOUNDATION-0001-COMPLETE
+    text:
+      zh-CN: >-
+        每个可达调用必须解析为已编译函数、独立定义的 Proto 原语或显式 extern，且所选目标具有实现。
+        不保留待解释的 setup、通用操作分派器、模板解释器、动态 JS VM 或 Adapter 回退；不能用包裹整个原型的 extern 绕过降低。
+        禁止按组件名、导出名、源路径或包身份选择组件业务协议。重命名、别名与重导出不改变语义。
+        原样 callback 文本、仅通过 parser、仅构建 AST 或仅发射 IR 均不构成编译完成。
+      en: >-
+        Every reachable call resolves to a compiled function, independently defined Proto primitive or explicit extern implemented for the selected target.
+        No residual setup interpreter, universal operation dispatcher, template interpreter, dynamic JS VM or Adapter fallback remains; a whole-prototype extern cannot bypass lowering.
+        Component names, export names, source paths and package identities cannot select component business protocols. Renames, aliases and re-exports preserve semantics.
+        Copied callback text, parsing, AST construction or IR emission alone is not completed compilation.
+  - id: C-COMPILER-FOUNDATION-0001-CAPTURES
+    text:
+      zh-CN: >-
+        闭包降低为已编译函数及显式有类型环境。不可变捕获保留创建时的值；可变局部绑定由共享的绑定位置承载，同一实例内捕获该绑定的多个闭包共享它，实例之间不串用。
+        状态与 Context 能力保留其明确身份和生命周期，不能通过 JSON、未知值或源文本隐藏捕获。
+        异步状态机保存局部值与绑定环境；无需复制完整 JS 对象模型或构建一台 JS VM。
+        每个可达 helper 的函数体须传递编译或显式声明 extern；仅有 .d.ts 声明不能冒充可执行实现。
+        跨同步段存活且可被其他回调或派生读取的可写捕获位置属于有归属的事务状态：写入参与提交或回滚，读取进入响应依赖。
+        不允许借闭包留下绕过事务的隐形持久可变状态；未逃逸的段内临时变量仍是普通局部值。
+      en: >-
+        Closures lower to compiled functions and explicit typed environments. Immutable captures retain their creation-time values; mutable local bindings use shared binding locations,
+        shared by closures capturing that binding within an instance and isolated between instances. State and Context capabilities retain explicit identity and lifetime rather than hiding captures in JSON, unknown values or source text.
+        Async state machines retain local values and binding environments without a complete JS object model or a JS VM.
+        Every reached helper body is transitively compiled or explicitly declared extern; a declaration-only .d.ts signature is not an executable implementation.
+        Writable captured locations that survive a segment and are observable by another callback or derivation are owned transactional state: writes commit or roll back and reads contribute reactive dependencies.
+        Closures cannot create hidden persistent mutable state outside transactions; nonescaping segment-local temporaries remain ordinary local values.
+  - id: C-COMPILER-FOUNDATION-0001-DEPENDENCIES
+    text:
+      zh-CN: >-
+        自动响应的依赖由编译期分析产生；无法精确证明时保守扩大，不能漏掉合法变化。props、state 和响应式 Context 的相关变化自动使计算与输出失效，无需作者手写 watch 加 update。
+        保守扩大可以增加重算，不能增加可观察副作用或改变结果。纯派生环必须给出涉及绑定的诊断；有意反馈通过动作周期表达。
+      en: >-
+        Compile-time analysis derives automatic reactive dependencies and conservatively enlarges them when precision cannot be proved, without omitting valid changes.
+        Relevant props, state and reactive Context changes invalidate computations and output without author-written watch-plus-update plumbing.
+        Conservative dependencies may cause extra pure recomputation, not additional observable effects or changed results. Diagnose pure derivation cycles with their bindings; intentional feedback uses action cycles.
+  - id: C-COMPILER-FOUNDATION-0001-CONTROLLED
+    text:
+      zh-CN: >-
+        受控值由声明的外部 owner 提供，组件动作表达变更请求，只有 owner 接受并发布的新输入才成为实际状态。
+        owner 拒绝、延迟或修正请求时，不得把请求值伪装成已提交成功；请求事件与实际值变化分别可观察。
+        非受控状态由实例自己依照动作事务更新。两种模式及其切换由 schema 明确表达，不通过是否存在某个临时 JS 属性猜测。
+      en: >-
+        A declared external owner supplies a controlled value. Component actions express change requests, and only new input accepted and published by that owner becomes actual state.
+        Rejection, delay or correction cannot masquerade as a successfully committed requested value; requests and actual value changes are separately observable.
+        Uncontrolled state is updated by the instance through action transactions. Schemas explicitly identify the modes and transitions rather than guessing from an incidental JS property.
+  - id: C-COMPILER-FOUNDATION-0001-TRANSACTIONS
+    text:
+      zh-CN: >-
+        一个同步执行段是本地事务：状态写入进入待发布写集，读取先见本段写集再见已发布值。
+        派生值也读取同一视图，相关写入后不得返回旧缓存。正常到达提交边界才发布写集；外部观察者看不到半完成状态。
+        未提交写入不触发观察者或绘制；提交后统一使受影响输出失效，宿主绘制可以合并，但不得改变约定的效果次序。
+        同一同步 UI 执行域内触及多个 Proto 实例的写入属于同一原子提交；跨执行域的通信作为消息在目标域产生新动作。
+        显式 snapshot 可冻结当时的值；普通读取不能被优化成永久保留的旧快照。
+      en: >-
+        A synchronous execution segment is a local transaction: writes enter an unpublished write set and reads consult that set before committed values.
+        Derived values use the same view and cannot return stale caches after relevant writes. The write set publishes only at successful commit boundaries; external observers do not see partial state.
+        Uncommitted writes do not notify observers or render. Commit invalidates affected output together; host rendering may coalesce without changing specified effect order.
+        Writes touching multiple Proto instances within one synchronous UI execution domain share one atomic commit; cross-domain messages create new actions in the destination domain.
+        An explicit snapshot may retain values from its capture point; ordinary reads cannot be optimized into a permanently retained old snapshot.
+  - id: C-COMPILER-FOUNDATION-0001-FAILURE
+    text:
+      zh-CN: >-
+        同步段中未处理的失败丢弃该段未发布状态和未执行效果；已发布段和已经发生的外部效果不被假装回滚。
+        本段明确处理的错误可继续执行并正常提交，普通错误处理不暗中创建回滚子事务。提交后效果失败以明确结果交给后续处理；补偿是新的行为。
+        业务失败、任务取消、实例销毁与实现不变量缺陷须保留区别，不能一概吞成成功或空值。
+      en: >-
+        An unhandled segment failure discards its unpublished state and unexecuted effects, without pretending to undo earlier published segments or external effects.
+        Explicitly handled errors may continue and commit; ordinary error handling does not create a hidden rollback subtransaction. Post-commit effect failures produce explicit results for subsequent handling; compensation is another behavior.
+        Preserve the distinction between business failure, cancellation, disposal and implementation invariant defects instead of swallowing them into success or empty values.
+  - id: C-COMPILER-FOUNDATION-0001-REENTRY
+    text:
+      zh-CN: >-
+        普通同步辅助函数调用在当前段执行；由订阅、状态发布或宿主回调引发的隐式动作重入排到下一周期。
+        调度器不得在当前未发布写集之上执行其观察者，也不得在提交效果引出回调时递归进入尚未退出的动作栈。
+        排队顺序须保持同一实例可观察的提交顺序，不承诺跨独立宿主线程的任意全局顺序。
+        有宿主期限的输入响应采用 EFFECTS 规定的受限同步路径；它不执行排队动作，也不观察被打断段的未发布写集。
+      en: >-
+        Ordinary synchronous helper calls remain in the current segment; implicit action reentry through subscriptions, publication or host callbacks queues for the next cycle.
+        Observers do not execute over the current unpublished write set and callbacks caused by commit effects do not recursively reenter an unfinished action stack.
+        Queues preserve observable commit order within an instance without promising arbitrary global ordering across independent host threads.
+        Input-deadline responses use the restricted synchronous path defined by EFFECTS; they neither execute the queued action nor observe an interrupted segment's unpublished write set.
+  - id: C-COMPILER-FOUNDATION-0001-ASYNC
+    text:
+      zh-CN: >-
+        首期支持有实例或明确作用域归属的异步任务。每个 await 都是逻辑提交边界；完成结果经调度器在新同步段恢复，即使结果已经 ready 也必须保持相同的可观察提交与顺序。
+        恢复后的失败只丢弃恢复段，不能回滚 await 前已发布状态。局部捕获值按语言规则保留，重新读取 state/Context 则看到恢复段的当前值。
+        所属实例或作用域结束后撤销任务提交资格；可取消的外部操作被取消，不可取消的迟到结果不得写入已销毁实例。
+        任务不得跨 await 持有可写事务引用；恢复必须获得新段的工作视图，不能向已经提交的写集继续写入。
+        并发采用显式 latest、parallel 或 serial 策略：latest 撤销被替代任务的后续提交资格，parallel 保持独立任务，serial 依序启动；重试和跨段补偿由明确的应用行为表达，不由编译器猜测。
+      en: >-
+        The first implementation includes async tasks owned by an instance or explicit scope. Every await is a logical commit boundary; completion resumes through the scheduler in a new segment, preserving the same observable commits and order even when the result is already ready.
+        A resumed failure discards only that segment, not pre-await published state. Captured locals retain their language-defined values; fresh state/Context reads observe the resumed segment's current values.
+        Ending the owner withdraws submission eligibility, cancels cancellable external work and prevents uncancellable late results from writing to disposed instances.
+        Tasks cannot retain writable transaction references across await; resumption obtains a new segment view rather than continuing writes into a committed write set.
+        An explicit latest, parallel or serial policy governs concurrency: latest withdraws superseded tasks' future submission eligibility, parallel keeps independent tasks, and serial starts them in order. Retries and cross-segment compensation remain explicit application behavior rather than compiler guesses.
+  - id: C-COMPILER-FOUNDATION-0001-EFFECTS
+    text:
+      zh-CN: >-
+        原语和 extern 必须区分纯计算、本地读写、宿主观察、提交后命令和受输入时机约束的宿主响应。
+        宿主观察说明其读取已提交宿主状态；提交后命令在本地提交后执行；preventDefault 等输入响应须在宿主回调有效期内完成，不能统一拖到下一微任务或帧。
+        不可推迟、对外生效且需要立即结果的调用须具有明确提交边界。效果分类与调用顺序进入行为 IR，不由目标语言默认行为补齐。
+        包括嵌套宿主回调在内，输入期限响应同步读取事件事实与回调进入时的已发布状态，并只操作该次输入的受限响应能力。
+        这条路径不得 await、写 Proto 状态或调用任意宿主命令；相应状态动作遵守排队重入规则，不能把同步取消默认行为延迟到该动作执行时。
+      en: >-
+        Primitives and externs distinguish pure computation, local access, host observation, post-commit commands and input-deadline host responses.
+        Observations identify committed host state, commands run after local commit, and responses such as preventDefault complete within the host callback's valid interval rather than uniformly waiting for another microtask or frame.
+        An immediate externally effective call requiring a synchronous result has an explicit commit boundary. Effect classification and call order belong to behavior IR, not target-language defaults.
+        Including nested host callbacks, an input-deadline response synchronously reads event facts and the committed state at callback entry, using only that input's restricted response capability.
+        This path cannot await, write Proto state or invoke arbitrary host commands. The corresponding state action follows queued-reentry rules without delaying synchronous default-action cancellation until that action runs.
+  - id: C-COMPILER-FOUNDATION-0001-VIEW-COMMIT
+    text:
+      zh-CN: >-
+        after-state-commit 与 after-view-commit 是不同的效果时机。前者只保证本地状态已发布，不保证宿主视图已经绘制或可测量；
+        后者绑定实例 generation 与请求的状态 revision；只有真实宿主提交确认后才能读取对应视图或执行依赖其存在的操作，确认包含实际提交的 revision。
+        宿主合并并跳过某个 revision 时，要求该精确视图的操作以 superseded 结束；显式接受不早于请求 revision 的操作可以使用较新确认，但不能声称旧视图曾被呈现。
+        owner 销毁取消其尚未完成的等待和效果，迟到确认不能作用于替代实例。缺少或尚未挂载的视图不能生成假确认；操作按声明等待有效视图或返回 host-unavailable。
+        隐藏不等于未提交或销毁；真实确认与测量、焦点等具体宿主操作的可用性分别判断。视图提交本身也不承诺像素已经显示到屏幕。
+      en: >-
+        After-state-commit and after-view-commit are distinct effect phases. The former guarantees published local state, not a rendered or measurable host view.
+        The latter binds an instance generation and requested state revision, waiting for a real host commit acknowledgement before observing the corresponding view or operating on it; acknowledgement identifies the actual committed revision.
+        If host coalescing skips a revision, an operation requiring that exact view completes as superseded. An operation explicitly accepting a revision at least as new may use a later acknowledgement without claiming the old view was presented.
+        Owner disposal cancels pending waits and effects, and late acknowledgements cannot target replacement instances. Absent or not-yet-mounted views cannot fabricate acknowledgement; declared operations wait for availability or return host-unavailable.
+        Hiding is neither absence of commit nor disposal; actual acknowledgement and availability for specific operations such as measurement or focus are separate facts. View commit alone does not promise pixels have reached the display.
+  - id: C-COMPILER-FOUNDATION-0001-CONTEXT
+    text:
+      zh-CN: >-
+        Context 是有类型的响应式值。消费者沿逻辑组件树解析到当前有效的最近 provider，订阅其值并跟随 provider 身份和组合拓扑变化；portal 的物理挂载位置不改变逻辑祖先关系。
+        Context key 具有 nominal typed identity；相同标签、结构类型或值不能替代同一个 key 的身份。
+        同次提交的 provider、拓扑和值作为一致状态发布；更换 provider 必须释放旧订阅并建立新归属，即使值相同也不能保留失效订阅。
+        异步恢复后的新读取重新解析当前 provider，明确捕获的旧值仍保留。普通 Context 值变化不自动取消任务；结束任务归属作用域才撤销其提交资格。
+      en: >-
+        Context carries typed reactive values. Consumers resolve the nearest currently valid provider in the logical component tree, subscribe to its value and follow provider identity and composition-topology changes; a portal's physical mount location does not change logical ancestry.
+        Context keys have nominal typed identity; equal labels, structural types or values cannot substitute for the same key identity.
+        Provider, topology and value changes in one commit publish consistently; replacement retires old subscriptions and establishes new ownership even when values compare equal.
+        Fresh reads after async resumption resolve the current provider while explicitly captured values remain captured. Ordinary Context value changes do not cancel tasks; ending a task's owning scope withdraws its submission eligibility.
+  - id: C-COMPILER-FOUNDATION-0001-LIFETIME
+    text:
+      zh-CN: >-
+        稳定 keyed child 在同一逻辑身份下重排时保留实例、状态和有归属任务；真正移除该 child 则终结实例生命周期并撤销其资源与提交资格。
+        hide、临时物理 detach、逻辑 move 与 terminal dispose 是不同操作，不得用一个通用 unmount 混淆。
+        移动保持实例身份时必须重新计算适用的逻辑 Context 与宿主绑定；物理重挂载不自动重新执行实例初始化或重复建立资源。
+      en: >-
+        Reordering a stable keyed child under the same logical identity retains its instance, state and owned tasks; actual removal terminates the instance and withdraws resources and submission eligibility.
+        Hide, temporary physical detach, logical move and terminal disposal are distinct operations rather than one undifferentiated unmount.
+        Identity-preserving moves recompute applicable logical Context and host bindings; physical remount does not automatically rerun instance initialization or duplicate resources.
+  - id: C-COMPILER-FOUNDATION-0001-EXTERNS
+    text:
+      zh-CN: >-
+        extern 声明参数、结果、效果类别、生命周期和目标集合；选择缺少实现的目标时在编译期给出调用链与缺失实现诊断，不静默回退。
+        target-specific extern 允许表达真实平台能力，但最终官方原型目标仍包含 React、GPUI、Vue 2、Vue 3、Web Components。
+        现有原型尚无已确认的平台 extern 阻碍，不能用假设的外部依赖把正常实现工作标为阻塞或豁免。
+      en: >-
+        Externs declare parameter/result types, effect category, lifetime and target set. A selected target lacking an implementation receives a compile-time call-chain and missing-implementation diagnostic, never silent fallback.
+        Target-specific externs represent real host capabilities while the final official-prototype destination still includes React, GPUI, Vue 2, Vue 3 and Web Components.
+        No platform-extern obstruction has been established for the existing prototype inventory; hypothetical dependencies cannot block or waive ordinary implementation work.
+  - id: C-COMPILER-FOUNDATION-0001-PUBLIC
+    text:
+      zh-CN: >-
+        仅显式公开的 props、状态投影与动作形成宿主接口，使用稳定的语义名称和具体类型；位置编号、字符串查找和通用 JSON 不作为默认组件 API。
+        对外状态投影只读，改变状态通过已声明动作和约束。确有动态数据边界时可以声明相应数据类型，但不能把内部状态整体擦成 Json。
+      en: >-
+        Only explicitly public props, state projections and actions form the host interface, using stable semantic names and concrete types rather than positional numbering, string lookup or universal JSON.
+        Public state projections are readonly; changes go through declared actions and constraints. Explicit dynamic data boundaries may use appropriate data types without erasing all internal state to Json.
+  - id: C-COMPILER-FOUNDATION-0001-STYLE
+    text:
+      zh-CN: >-
+        组件保持交互状态与转换的语义所有权，宿主通过类型化只读状态投影组合外观；pressed、hover、focus、selected 等不靠轮询内部 Json 或重造交互 owner 获得。
+        样式计算参与响应依赖但不修改组件状态，不因宿主外观定制产生第二条事件语义实现。
+      en: >-
+        Components own interaction states and transitions while hosts compose appearance through typed readonly state projections; pressed, hover, focus and selected do not require polling internal Json or creating another interaction owner.
+        Style computation participates in reactive dependencies without mutating state or creating a second event-semantic implementation.
+  - id: C-COMPILER-FOUNDATION-0001-EMISSION
+    text:
+      zh-CN: >-
+        生成目标 AST 并使用成熟目标语言 printer/formatter，不以整段字符串模板、字符串源码切片或自制平行打印器构造程序。
+        产物是可正常导入、类型检查、格式化和调试的宿主组件，保留源位置与语义名称。React 和 GPUI 首先形成完整路径，Vue 2、Vue 3 和 Web Components 按同一语义完成。
+        首期源码路径不依赖 LLVM；组件 HIR 不先丢失为低层机器操作再反推框架源码。
+      en: >-
+        Build target ASTs and use mature target-language printers/formatters rather than whole-program string templates, source-text slices or duplicate printer infrastructure.
+        Outputs are ordinary importable, type-checkable, formatted and debuggable host components with source positions and semantic names. React and GPUI form the first complete paths; Vue 2, Vue 3 and Web Components implement the same semantics.
+        The first source paths do not require LLVM or destroy component HIR into low-level machine operations before reconstructing framework source.
+  - id: C-COMPILER-FOUNDATION-0001-SUPPORT
+    text:
+      zh-CN: >-
+        调度、事务、异步、资源管理和宿主操作所需支持作为真实模块或 crate 存在，组件只使用可达闭包中的能力。
+        支持代码不解释原型声明或编译 IR，不复制完整框架，也不把运行时源码倾倒进每个组件。
+        静态可消除的管理成本应消除；有事务、异步或资源语义的程序可以承担实现这些语义所必需的成本，不用删除语义换取零开销名义。
+      en: >-
+        Necessary scheduling, transaction, async, resource and host support resides in real modules or crates and is selected from the reached capability closure.
+        Support does not interpret prototype declarations or compiler IR, duplicate a framework or dump runtime source into each component.
+        Eliminate statically unnecessary management costs; programs with transaction, async or resource semantics may pay their necessary implementation costs rather than deleting semantics to claim zero overhead.
+  - id: C-COMPILER-FOUNDATION-0001-DIAGNOSTICS
+    text:
+      zh-CN: >-
+        未支持语法、无法降低的操作、非法阶段、依赖环和缺少目标实现均给出源码位置、相关绑定或调用链、实际约束及可采取的修改。
+        诊断区分输入违反已定义语言与编译器尚未实现合法能力；后者是实现工作，不自动变成语言禁令。所有可达路径必须检查，不能只检查一次试执行经过的分支。
+        至少区分 source-invalid、compiler-missing、backend-missing、extern-unbound 和运行时 host-unavailable；代码名称可以演进，分类含义不能混同。
+      en: >-
+        Unsupported syntax, unlowered operations, invalid phases, dependency cycles and missing target implementations identify source positions, relevant bindings or call chains, the actual constraint and actionable changes.
+        Distinguish input violating the defined language from missing implementation of a legal capability; the latter is implementation work, not an implicit language prohibition. Check all reachable paths rather than only a trial execution's branch.
+        Distinguish at least source-invalid, compiler-missing, backend-missing, extern-unbound and runtime host-unavailable; code names may evolve without conflating these meanings.
+  - id: C-COMPILER-FOUNDATION-0001-CONFORMANCE
+    text:
+      zh-CN: >-
+        从本合同和适用的独立行为定义建立输入、状态、输出、效果顺序与释放轨迹，再实际执行生成消费者。
+        旧实现、旧生成物、旧测试与现有 Adapter 均不作为 golden；多个新后端一致也不能单独证明正确。
+        能力分批交付时公布实际分母、已实现与未实现范围；未执行和拒绝不算通过，也不凭空增加独立审批或仪式化验收门禁。
+      en: >-
+        Derive input, state, output, effect-order and cleanup traces from this contract and applicable independent behavior definitions, then execute generated consumers.
+        The old implementation, artifacts, tests and existing Adapters are not goldens; agreement between new backends alone is not correctness.
+        Incremental delivery reports actual denominators and implemented/missing scope. Unrun and rejected cases are not passes, and no invented approval or ceremonial gate replaces substantive verification.
+  - id: C-COMPILER-FOUNDATION-0001-MEASUREMENT
+    text:
+      zh-CN: >-
+        先分别定义冷启动、共享程序热编译、编辑后的增量编译，以及单组件与整库、生成源码、共享支持、最终保留产物、初始化和交互成本的测量口径并取得基线，再制定预算。
+        产物和运行成本以实现等价语义、使用相同构建配置的手写宿主组件作为对照；不能拿省略事务、生命周期或其他必需行为的程序作零开销基准。
+        行数和源码字节不等于最终 bundle/binary 或运行成本。不能把成本藏入支持包、压成一行或省略语义来满足预算。
+      en: >-
+        Separately define and baseline cold compilation, shared-program warm compilation and post-edit incremental compilation, together with component and whole-library workloads, generated source, shared support, retained artifacts, initialization and interaction costs before assigning budgets.
+        Compare artifact and runtime costs with handwritten host components providing equivalent semantics under the same build configuration; omitting transactions, lifetime or other required behavior does not establish a zero-overhead baseline.
+        Source lines and bytes are not final bundle/binary size or execution cost. Do not hide costs in support packages, compress programs onto one line or omit semantics to meet budgets.
+dependsOn:
+  decisions: [D-COMPILER-FOUNDATION-0001]
+references:
+  contracts:
+    - id: C-PROPS-0014
+      note: The existing runtime/controller API keeps its own scope; its explicit-update rule is not imported into the new language.
+  tests: [T-COMPILER-FOUNDATION-0001]
+sources:
+  - path: internal/compiler/README.md
+revisions:
+  - version: 0.4.0
+    change: introduced
+    breaking: true
+    summary: Define the accepted new-language compiler and execution semantics without inheriting the old implementation or its tests.
+tags: [compiler, language, foundation, reactivity, transaction, async, context, native-source]

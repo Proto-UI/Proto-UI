@@ -87,21 +87,12 @@ export const READY_ROUTES = Object.freeze([
 export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-matrix-accessibility.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-search-recovery.browser.test.ts',
-  'packages/compiler/test/sprint1-ownership.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-search-disposal.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts',
-  'packages/compiler/test/sprint2-native.browser.test.ts',
   'apps/www/test/release-docs-reading.browser.test.ts',
   'apps/www/test/component-consumer-repairs.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-tooltip.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-select.browser.test.ts',
-  'packages/compiler/test/control-label-native.browser.test.ts',
-  'packages/compiler/test/transition-native.browser.test.ts',
-  'packages/compiler/test/owner-hydration-retirement.browser.test.ts',
-  'packages/compiler/test/vue2-native-editor.browser.test.ts',
-  'packages/compiler/test/focus-scope-native.browser.test.ts',
-  'packages/compiler/test/shader-presentation.browser.test.ts',
-  'packages/compiler/test/presence-presentation.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-switch-compositions.browser.test.ts',
   'packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts',
@@ -201,6 +192,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-portal.browser.test.ts',
   'packages/adapters/web-component/test/shadow-closeout.browser.test.ts',
+  'packages/web-conformance/test/number-field-stepper-feedback.browser.test.ts',
 ]);
 
 // Dedicated evidence uses its existing owner, never the ordinary shared-dev phase.
@@ -217,7 +209,6 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-carousel.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts',
-  'packages/compiler/test/web-component-native.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/language-select-navigation.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/homepage-composition.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts',
@@ -271,8 +262,6 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
     '.github/workflows/carousel-preview-evidence.yml',
   'apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts':
     '.github/workflows/homepage-visual-evidence.yml',
-  'packages/compiler/test/web-component-native.browser.test.ts':
-    'scripts/test/wc-native-isolation.mjs',
   'apps/www/src/content/docs/zh-cn/language-select-navigation.browser.test.ts':
     '.github/workflows/language-select-navigation-evidence.yml',
   'apps/www/src/content/docs/zh-cn/homepage-composition.browser.test.ts':
@@ -442,7 +431,6 @@ export const BROWSER_SUITE_WEIGHT_SECONDS = Object.freeze({
   'apps/www/test/radio-group-entry.browser.test.ts': 8,
   'apps/www/test/virtual-list-resize.browser.test.ts': 1,
   'packages/adapters/web-component/test/shadow-closeout.browser.test.ts': 63,
-  'packages/compiler/test/focus-scope-native.browser.test.ts': 0,
   'packages/prototypes/base/test/async-region.browser.test.ts': 3,
 });
 

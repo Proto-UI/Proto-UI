@@ -10,7 +10,7 @@ This tree contains contributor guidance, readable contract explanations, enginee
 | [records/](records/README.md) | Dated investigations, decisions in progress, audits, and implementation observations. |
 | [releases/](releases/README.md) | Version-specific preparation and source-bound publication evidence. |
 | [coverage-matrices/](coverage-matrices/README.md) | Source inventories, current portfolio navigation, and generated coverage views. |
-| [compiler/](compiler/) | Compiler implementation and completion guidance, including the [atomic lowering standard](compiler/atomic-lowering-completion.md). |
+| [compiler/](compiler/README.md) | 0.4 compiler foundation, normative spec links, retirement scope and implementation sequence. |
 | [website/](website/) | Website ownership, design and consumer-delivery records; public content lives in `apps/www/`. |
 | [agent-harness/](agent-harness/) | Harness consumer coverage and development material. Internal fixtures do not replace acceptance in a real application. |
 | [autonomous-maintenance/](autonomous-maintenance/README.md) | Governed maintenance runs and their retained evidence. |
