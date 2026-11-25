@@ -1679,7 +1679,29 @@ describe.sequential('Independent Label public documentation', () => {
           // creates selection. No page-local CSS or Selection writer is used.
           for (const ref of ['label-passive', 'description']) {
             const description = content.locator(`[data-demo-ref="${ref}"]`);
-            await description.scrollIntoViewIfNeeded();
+            await description.evaluate(async (element) => {
+              const win = element.ownerDocument.defaultView!;
+              // Merely visible text can sit in Chromium's edge-autoscroll zone.
+              // Center before measuring so native dragging stays on the glyphs.
+              element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+              let previous = element.getBoundingClientRect();
+              let stableFrames = 0;
+              for (let frame = 0; frame < 120; frame++) {
+                const { promise, resolve } = Promise.withResolvers<void>();
+                win.requestAnimationFrame(() => resolve());
+                await promise;
+                const current = element.getBoundingClientRect();
+                const stable =
+                  current.x === previous.x &&
+                  current.y === previous.y &&
+                  current.width === previous.width &&
+                  current.height === previous.height;
+                stableFrames = stable ? stableFrames + 1 : 0;
+                if (stableFrames === 2) return;
+                previous = current;
+              }
+              throw new Error('Copyable text did not settle before native dragging.');
+            });
             const drag = await description.evaluate(measureLabelTextDrag);
             const geometry = { ...drag.bounds, start: drag.start, end: drag.end };
             const recorder = await description.evaluateHandle(recordLabelPointerTrace);

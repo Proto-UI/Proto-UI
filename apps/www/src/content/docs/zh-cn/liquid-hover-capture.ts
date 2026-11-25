@@ -84,18 +84,46 @@ export async function observeLiquidHoverIdle<T>(
         baseline ??= copy(frame);
         evidence.before ??= copy(baseline);
         assertFramingPreserves(baseline, frame);
+        return frame;
+      };
+      const readEligibleFrame = async () => {
+        let frame = await readFrame();
+        const initial = eligibility(frame, evidence.boundary);
+        if (
+          number === 1 &&
+          attempt!.reads.length === 1 &&
+          (initial.boundary === 'reenabled-item' ||
+            initial.boundary === 'reenabled-owner' ||
+            initial.boundary === 'reenabled-subject') &&
+          frame.states.disabled === false &&
+          initial.hovered === false &&
+          initial.pressed === false &&
+          initial.focused === false &&
+          initial.focusVisible === false &&
+          initial.quality === 'opaque-fallback' &&
+          initial.contact === 'held' &&
+          initial.carrier === null
+        ) {
+          // The Base owner has re-enabled, but the provider has not yet rebound
+          // the optical receipt. Observe recovery before any viewport action.
+          await io.settleMaterial(remaining());
+          frame = await readFrame();
+        }
         assertLiquidHoverContextReframeEligibility(eligibility(frame, evidence.boundary));
         return frame;
       };
       let prepared: LiquidHoverFrame;
       try {
-        prepared = await prepareLiquidHoverFrame({ ...io, readFrame }, attempt.setup);
+        prepared = await prepareLiquidHoverFrame(
+          { ...io, readFrame: readEligibleFrame },
+          attempt.setup
+        );
       } finally {
         evidence.actions.push(...attempt.setup.actions);
       }
       await io.settleMaterial(remaining());
       remaining();
-      attempt.ready = await readFrame();
+      attempt.ready = await readEligibleFrame();
       const sameGeometry = (left: ScreenshotFrame, right: ScreenshotFrame) =>
         equal(left.subject, right.subject) &&
         equal(left.viewport, right.viewport) &&
@@ -108,7 +136,7 @@ export async function observeLiquidHoverIdle<T>(
       remaining();
       attempt.materialGeometry = copy(material.geometry);
       attempt.materialPaintOutset = material.paintOutset;
-      attempt.observed = await readFrame();
+      attempt.observed = await readEligibleFrame();
       if (
         !sameGeometry(attempt.ready, attempt.observed) ||
         !equal(material.geometry, attempt.observed.subject)

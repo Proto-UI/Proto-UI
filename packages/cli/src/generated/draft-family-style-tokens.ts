@@ -977,6 +977,7 @@ export const DRAFT_FAMILY_STYLE_TOKENS = {
     'data-[disabled]:text-foreground',
     'data-[disabled]:text-muted-foreground',
     'data-[disabled]:text-muted-foreground/50',
+    'data-[disabled]:transition-none',
     'data-[dragging]:cursor-move',
     'data-[dragging]:select-none',
     'data-[dragging]:transition-none',

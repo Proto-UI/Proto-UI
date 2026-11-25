@@ -142,7 +142,9 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
     });
     def.rule({
       when: (w) => w.state(disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw(COMMAND_DISABLED)),
+      // Disabling withdraws interactive elevation immediately, including an
+      // in-flight enabled shadow transition.
+      intent: (i) => i.feedback.style.use(tw(COMMAND_DISABLED, 'transition-none')),
     });
     return inherited.render;
   },
