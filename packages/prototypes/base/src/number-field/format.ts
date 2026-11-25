@@ -21,7 +21,7 @@ const plain = (invalid = false): NumberFieldFormat => ({
     return Number.isFinite(value) ? { kind: 'number', value } : INVALID;
   },
 });
-const optionKeys = new Set([
+const optionKeys: readonly string[] = [
   'style',
   'currency',
   'currencyDisplay',
@@ -33,7 +33,7 @@ const optionKeys = new Set([
   'minimumSignificantDigits',
   'maximumSignificantDigits',
   'signDisplay',
-]);
+];
 // Direction marks are presentation, not number syntax. Space grouping has the
 // same meaning when copied from narrow/no-break-space formatted output.
 const clean = (text: string) =>
@@ -50,7 +50,7 @@ export function createNumberFieldFormat(
       options &&
       (typeof options !== 'object' ||
         Array.isArray(options) ||
-        Object.keys(options).some((key) => !optionKeys.has(key)) ||
+        Object.keys(options).some((key) => !optionKeys.includes(key)) ||
         (options.style !== undefined &&
           !['decimal', 'currency', 'percent'].includes(options.style)))
     )
