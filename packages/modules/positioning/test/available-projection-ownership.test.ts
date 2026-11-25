@@ -162,6 +162,133 @@ describe('available-space projection ownership', () => {
     expect(floating.style.getPropertyValue('--proto-ui-anchor-width')).toBe('');
   });
 
+  it('keeps a scrolled viewport bounded while measuring its author size', async () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    floating.style.setProperty('--proto-ui-available-height', '770px', 'important');
+    const lease = createFloatingUiAnchoredPositionHost().attach({ anchor, floating, config });
+    pending[0].applySize();
+    pending[0].finish(10);
+    await Promise.resolve();
+    floating.scrollTop = 500;
+
+    measuring.current = (element) => {
+      if (element.style.getPropertyValue('--proto-ui-available-height') === '770px')
+        element.scrollTop = 0;
+    };
+    lease.requestUpdate();
+    expect(pending).toHaveLength(2);
+    expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe('234px');
+    expect(measurements.at(-1)).toEqual({ value: '770px', priority: 'important' });
+    expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe('234px');
+    expect(floating.scrollTop).toBe(500);
+
+    pending[1].applySize();
+    pending[1].finish(20);
+    await Promise.resolve();
+    expect(floating.style.left).toBe('20px');
+    expect(floating.scrollTop).toBe(500);
+    lease.dispose();
+    expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe('770px');
+    expect(floating.style.getPropertyPriority('--proto-ui-available-height')).toBe('important');
+  });
+
+  it.each(['dispose', 'author write'])(
+    'leaves a scrolled projection retired after a synchronous %s during measurement',
+    async (action) => {
+      class ReentrantViewport extends HTMLElement {
+        static observedAttributes = ['style'];
+        changed?: () => void;
+        attributeChangedCallback() {
+          this.changed?.();
+        }
+      }
+      const tag = 'positioning-scrolled-measurement';
+      if (!customElements.get(tag)) customElements.define(tag, ReentrantViewport);
+      const anchor = document.createElement('button');
+      const floating = document.createElement(tag) as ReentrantViewport;
+      floating.style.setProperty('--proto-ui-available-height', '770px', 'important');
+      document.body.append(anchor, floating);
+      const resolved = vi.fn();
+      const lease = createFloatingUiAnchoredPositionHost().attach({
+        anchor,
+        floating,
+        config,
+        onResolved: resolved,
+      });
+      pending[0].applySize();
+      pending[0].finish(10);
+      await Promise.resolve();
+      floating.scrollTop = 500;
+
+      let changed = false;
+      floating.changed = () => {
+        if (changed || floating.style.getPropertyValue('--proto-ui-available-height') !== '770px')
+          return;
+        changed = true;
+        if (action === 'dispose') lease.dispose();
+        else floating.style.setProperty('--proto-ui-available-height', '900px', 'important');
+      };
+      lease.requestUpdate();
+      expect(pending).toHaveLength(1);
+      await Promise.resolve();
+      expect(changed).toBe(true);
+      expect(floating.style.left).toBe('10px');
+      expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe(
+        action === 'dispose' ? '770px' : '900px'
+      );
+      expect(floating.style.getPropertyPriority('--proto-ui-available-height')).toBe('important');
+      expect(floating.style.getPropertyValue('--proto-ui-anchor-width')).toBe('');
+      expect(resolved).toHaveBeenCalledOnce();
+      lease.dispose();
+    }
+  );
+
+  it.each(['left', 'side'] as const)(
+    'unsized placement stops publishing after disposal from %s',
+    async (field) => {
+      class RetiringFloat extends HTMLElement {
+        static observedAttributes = ['style', 'data-side'];
+        changed?: () => void;
+        attributeChangedCallback() {
+          this.changed?.();
+        }
+      }
+      const tag = 'positioning-retire-in-placement';
+      if (!customElements.get(tag)) customElements.define(tag, RetiringFloat);
+      const anchor = document.createElement('button');
+      const floating = document.createElement(tag) as RetiringFloat;
+      floating.style.top = '7px';
+      floating.dataset.align = 'authored';
+      document.body.append(anchor, floating);
+      const resolved = vi.fn();
+      const lease = createFloatingUiAnchoredPositionHost().attach({
+        anchor,
+        floating,
+        config,
+        onResolved: resolved,
+      });
+      let retired = false;
+      floating.changed = () => {
+        const reached =
+          field === 'left' ? floating.style.left === '20px' : floating.dataset.side === 'bottom';
+        if (retired || !reached) return;
+        retired = true;
+        lease.dispose();
+      };
+
+      pending[0].applySize();
+      pending[0].finish(20);
+      await Promise.resolve();
+
+      expect(retired).toBe(true);
+      expect(floating.style.top).toBe(field === 'left' ? '7px' : '20px');
+      expect(floating.dataset.align).toBe('authored');
+      expect(resolved).not.toHaveBeenCalled();
+      expect(cleanup).toHaveBeenCalledOnce();
+    }
+  );
+
   it('preserves a newer authored override through disposal and late middleware delivery', async () => {
     const anchor = document.createElement('button');
     const floating = document.createElement('div');

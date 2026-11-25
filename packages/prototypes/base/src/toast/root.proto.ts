@@ -7,7 +7,7 @@ import {
   type RunHandle,
   type DelayTask,
 } from '@proto.ui/core';
-import { asAccessible } from '@proto.ui/hooks';
+import { asAccessible, asAxisInput } from '@proto.ui/hooks';
 import { asTransition } from '../tools';
 import {
   TOAST_CONTEXT,
@@ -21,6 +21,7 @@ import {
 import type {
   ToastPosition,
   ToastStackTier,
+  ToastSwipeDirection,
   ToastType,
   ToastRootProps,
   ToastRootExposes,
@@ -100,6 +101,9 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
   a11y.state('atomic', atomic);
   a11y.tree({ hidden: limited });
 
+  const swipeInput = asAxisInput<ToastRootProps>();
+  swipeInput.configure({ anatomy: TOAST_FAMILY, inputRole: 'root', geometryRole: 'root' });
+
   const id = createToastId();
   def.context.provide(TOAST_CONTEXT, { id, open: true, type: 'default', dismissible: true });
   def.context.subscribe(TOAST_CONTEXT);
@@ -126,9 +130,11 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     remaining = 5000,
     mounted = false,
     hovered = false,
+    swiping = false,
     manualPause = false,
     viewportPaused = false,
     viewportDuration: number | null = null,
+    swipeDirection: ToastSwipeDirection = 'right',
     seenDismissEpoch = 0,
     expired = false;
   let epoch = 0;
@@ -235,17 +241,34 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     } else {
       cancel();
       hovered = false;
+      swiping = false;
       focusedItems.clear();
       syncPaused();
       if (currentRun !== run || viewEpoch !== view) return;
       transition.controls.leave();
     }
+    syncSwipeInput();
+  };
+
+  const syncSwipeInput = () => {
+    const enabled = mounted && open.get() && dismissible.get() && swipeDirection !== 'none';
+    const horizontal = swipeDirection === 'left' || swipeDirection === 'right';
+    swipeInput.sync({
+      // A tap belongs to nested Action/Close controls until a directional drag wins.
+      activation: 'directional',
+      axis: horizontal ? 'horizontal' : 'vertical',
+      direction: 'ltr',
+      disabled: !enabled,
+      readOnly: false,
+      reverse: swipeDirection === 'left' || swipeDirection === 'up',
+    });
   };
 
   const syncPaused = () => {
     const next =
       manualPause ||
       hovered ||
+      swiping ||
       viewportPaused ||
       focusedItems.size > 0 ||
       !!currentRun?.props.get().paused;
@@ -292,6 +315,8 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
       remaining = nextDuration;
       expired = false;
     }
+    swipeDirection = vp?.swipeDirection ?? 'right';
+    syncSwipeInput();
     syncPaused();
     if (currentRun !== run || viewEpoch !== view) return;
     if (durationChanged && !task) schedule();
@@ -359,8 +384,10 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     viewEpoch++;
     mounted = false;
     hovered = false;
+    swiping = false;
     viewportPaused = false;
     focusedItems.clear();
+    syncSwipeInput();
     cancel();
   });
 
@@ -391,6 +418,7 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
         schedule();
       }
       syncPoliteness(run);
+      syncSwipeInput();
       syncPaused();
     }
   );
@@ -400,6 +428,34 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     if (focused) focusedItems.add(itemId);
     else focusedItems.delete(itemId);
     syncPaused();
+  });
+
+  swipeInput.on((run, sample) => {
+    currentRun = run;
+    if (!mounted || !open.get()) return;
+    if (sample.phase === 'start') {
+      swiping = true;
+      syncPaused();
+      return;
+    }
+    if (sample.phase === 'cancel') {
+      swiping = false;
+      syncPaused();
+      return;
+    }
+    if (sample.phase === 'end') {
+      const active = swiping;
+      swiping = false;
+      syncPaused();
+      if (
+        active &&
+        currentRun === run &&
+        Number.isFinite(sample.totalDelta) &&
+        sample.totalDelta >= 0.3
+      ) {
+        request(false, 'swipe');
+      }
+    }
   });
 
   def.event.on('pointer.enter', () => {

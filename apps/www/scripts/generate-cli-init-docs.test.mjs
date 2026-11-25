@@ -99,3 +99,38 @@ test('failed real build deletes stale documentation and never executes init', as
     await rm(fixture, { recursive: true, force: true });
   }
 });
+
+test('entry guard ignores nonexistent argv paths on import and still runs via a symlink', async () => {
+  const fixture = await mkdtemp(path.join(tmpdir(), 'init-entry-guard-'));
+  try {
+    const scripts = path.join(fixture, 'apps/www/scripts');
+    await mkdir(scripts, { recursive: true });
+    await mkdir(path.join(fixture, 'scripts/build'), { recursive: true });
+    const entry = path.join(scripts, 'generate-cli-init-docs.mjs');
+    await writeFile(
+      entry,
+      await readFile(new URL('./generate-cli-init-docs.mjs', import.meta.url))
+    );
+    await writeFile(path.join(fixture, 'scripts/build/public-packages.mjs'), 'process.exit(17);');
+
+    const imported = spawnSync(
+      process.execPath,
+      [
+        '--input-type=module',
+        '-e',
+        `await import(${JSON.stringify(entry)});`,
+        path.join(fixture, 'missing-argv-entry.mjs'),
+      ],
+      { encoding: 'utf8' }
+    );
+    assert.equal(imported.status, 0, imported.stderr);
+
+    const alias = path.join(fixture, 'alias.mjs');
+    await symlink(entry, alias);
+    const viaSymlink = spawnSync(process.execPath, [alias], { encoding: 'utf8' });
+    assert.notEqual(viaSymlink.status, 0);
+    assert.match(viaSymlink.stderr, /CLI build failed: 17/);
+  } finally {
+    await rm(fixture, { recursive: true, force: true });
+  }
+});

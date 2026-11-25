@@ -103,6 +103,73 @@ describe('module-positioning: Floating UI host', () => {
     lease.dispose();
   });
 
+  it('keeps the available height during floating content scroll and tracks a newly scrollable anchor pane', async () => {
+    const pane = document.createElement('div');
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    const contents = document.createElement('div');
+    pane.append(anchor);
+    floating.append(contents);
+    document.body.append(pane, floating);
+    setRect(anchor, rect(100, 100, 50, 20));
+    setRect(floating, rect(0, 0, 80, 40));
+    const availableHeight = '--proto-ui-available-height';
+    const onResolved = vi.fn();
+    const lease = createFloatingUiAnchoredPositionHost().attach({
+      anchor,
+      floating,
+      config: baseConfig,
+      onResolved,
+    });
+    try {
+      await flush();
+      const cap = floating.style.getPropertyValue(availableHeight);
+      expect(cap).toMatch(/px$/);
+      onResolved.mockClear();
+      floating.dispatchEvent(new Event('scroll'));
+      expect(floating.style.getPropertyValue(availableHeight)).toBe(cap);
+      contents.dispatchEvent(new Event('scroll'));
+      expect(floating.style.getPropertyValue(availableHeight)).toBe(cap);
+      await flush();
+      expect(onResolved).not.toHaveBeenCalled();
+
+      pane.style.overflow = 'auto';
+      setRect(anchor, rect(100, 75, 50, 20));
+      pane.dispatchEvent(new Event('scroll'));
+      await flush();
+      expect(floating.style.top).toBe('99px');
+      expect(onResolved).toHaveBeenCalled();
+    } finally {
+      lease.dispose();
+    }
+  });
+
+  it('repositions when scrolling the floating container moves its shadow reference', async () => {
+    const floating = document.createElement('div');
+    const host = document.createElement('div');
+    const anchor = document.createElement('button');
+    host.attachShadow({ mode: 'open' }).append(anchor);
+    floating.append(host);
+    document.body.append(floating);
+    setRect(anchor, rect(100, 100, 50, 20));
+    setRect(floating, rect(0, 0, 80, 40));
+    const lease = createFloatingUiAnchoredPositionHost().attach({
+      anchor,
+      floating,
+      config: baseConfig,
+    });
+    try {
+      await flush();
+      expect(floating.style.top).toBe('124px');
+      setRect(anchor, rect(100, 75, 50, 20));
+      floating.dispatchEvent(new Event('scroll'));
+      await flush();
+      expect(floating.style.top).toBe('99px');
+    } finally {
+      lease.dispose();
+    }
+  });
+
   it('positions against rendered anchor geometry by default even when the anchor carries a translation', async () => {
     // Reviewer counterexample: a legitimate layout translation (e.g. translate(-50%)
     // centering or an application animation) must keep the floating element where

@@ -274,7 +274,7 @@ describe('Shadcn Dialog native lifecycle', () => {
               })
             );
             expect(relations).toEqual([
-              [{ presentInside: true, text: 'Edit Profile' }],
+              [{ presentInside: true, text: 'Edit profile' }],
               [
                 {
                   presentInside: true,
@@ -288,7 +288,7 @@ describe('Shadcn Dialog native lifecycle', () => {
             expect(observation.dialogs).toEqual([
               expect.objectContaining({
                 role: 'dialog',
-                name: 'Edit Profile',
+                name: 'Edit profile',
                 description: "Make changes to your profile here. Click save when you're done.",
               }),
             ]);
@@ -419,6 +419,15 @@ describe('Shadcn Dialog native lifecycle', () => {
     try {
       const trigger = page.locator('[data-previewer-id] [aria-haspopup="dialog"]').first();
       await trigger.waitFor();
+      const contentId = await trigger.getAttribute('aria-controls');
+      if (!contentId) throw new Error('Dialog trigger has no aria-controls target.');
+      const owner = await trigger.evaluate(
+        (element) =>
+          element.closest('[data-projection-owner]')?.getAttribute('data-projection-owner') ?? ''
+      );
+      if (!owner) throw new Error('Dialog trigger has no projection owner.');
+      const contentSelector = `wc-shadcn-dialog-content[id=${JSON.stringify(contentId)}]`;
+      const maskSelector = `wc-shadcn-dialog-mask[data-projection-owner=${JSON.stringify(owner)}]`;
       await trigger.evaluate((element) => {
         element.scrollIntoView({ block: 'start' });
         window.scrollBy(0, -160);
@@ -431,10 +440,9 @@ describe('Shadcn Dialog native lifecycle', () => {
       for (let attempt = 0; attempt < 5 && !hitPartialWindow; attempt++) {
         await page.mouse.click(point.x, point.y);
         await page.waitForFunction(
-          () =>
-            document
-              .querySelector('wc-shadcn-dialog-content')
-              ?.getAttribute('data-transition-state') === 'entered'
+          (selector) =>
+            document.querySelector(selector)?.getAttribute('data-transition-state') === 'entered',
+          contentSelector
         );
         expect(await page.evaluate(() => document.elementFromPoint(5, 5)?.tagName)).toBe(
           'WC-SHADCN-DIALOG-MASK'
@@ -444,44 +452,47 @@ describe('Shadcn Dialog native lifecycle', () => {
         // Arm the passive native-input observer before waiting for the 50ms
         // partial-detachment window. Installing it inside that window adds a
         // protocol round trip before the actual click and can miss the subject.
-        await page.evaluate(() => {
-          const probe = window as PointerSampleWindow;
-          const controller = new AbortController();
-          probe.__cancelPointerSample = () => controller.abort();
-          probe.__nextPointerSample = new Promise((resolve) => {
-            document.addEventListener(
-              'pointerdown',
-              (event) => {
-                const mask = document.querySelector('wc-shadcn-dialog-mask');
-                const content = document.querySelector('wc-shadcn-dialog-content');
-                resolve({
-                  trusted: event.isTrusted,
-                  partial: Boolean(
-                    mask?.hasAttribute('data-pui-view-detached') &&
-                    content &&
-                    !content.hasAttribute('data-pui-view-detached') &&
-                    content.getAttribute('data-transition-state') === 'leaving'
-                  ),
-                });
-              },
-              { once: true, capture: true, passive: true, signal: controller.signal }
-            );
-          });
-        });
+        await page.evaluate(
+          ({ maskSelector: maskSel, contentSelector: contentSel }) => {
+            const probe = window as PointerSampleWindow;
+            const controller = new AbortController();
+            probe.__cancelPointerSample = () => controller.abort();
+            probe.__nextPointerSample = new Promise((resolve) => {
+              document.addEventListener(
+                'pointerdown',
+                (event) => {
+                  const mask = document.querySelector(maskSel);
+                  const content = document.querySelector(contentSel);
+                  resolve({
+                    trusted: event.isTrusted,
+                    partial: Boolean(
+                      mask?.hasAttribute('data-pui-view-detached') &&
+                      content &&
+                      !content.hasAttribute('data-pui-view-detached') &&
+                      content.getAttribute('data-transition-state') === 'leaving'
+                    ),
+                  });
+                },
+                { once: true, capture: true, passive: true, signal: controller.signal }
+              );
+            });
+          },
+          { maskSelector, contentSelector }
+        );
         // The normal 150ms/200ms leave clocks stay intact. A missed window is
         // not evidence of repair: observe the actual next native pointer sample.
         try {
           await page.waitForFunction(
-            () => {
-              const mask = document.querySelector('wc-shadcn-dialog-mask');
-              const content = document.querySelector('wc-shadcn-dialog-content');
+            ({ maskSelector: maskSel, contentSelector: contentSel }) => {
+              const mask = document.querySelector(maskSel);
+              const content = document.querySelector(contentSel);
               return (
                 mask?.hasAttribute('data-pui-view-detached') &&
                 content &&
                 !content.hasAttribute('data-pui-view-detached')
               );
             },
-            undefined,
+            { maskSelector, contentSelector },
             { polling: 1, timeout: 1000 }
           );
         } catch {
@@ -491,10 +502,9 @@ describe('Shadcn Dialog native lifecycle', () => {
             delete probe.__cancelPointerSample;
             delete probe.__nextPointerSample;
           });
-          await page.waitForFunction(() =>
-            document
-              .querySelector('wc-shadcn-dialog-content')
-              ?.hasAttribute('data-pui-view-detached')
+          await page.waitForFunction(
+            (selector) => document.querySelector(selector)?.hasAttribute('data-pui-view-detached'),
+            contentSelector
           );
           continue;
         }
@@ -510,17 +520,15 @@ describe('Shadcn Dialog native lifecycle', () => {
         expect(sample.trusted).toBe(true);
         hitPartialWindow = sample.partial;
         await page.waitForFunction(
-          () =>
-            document
-              .querySelector('wc-shadcn-dialog-content')
-              ?.getAttribute('data-transition-state') === 'entered'
+          (selector) =>
+            document.querySelector(selector)?.getAttribute('data-transition-state') === 'entered',
+          contentSelector
         );
         if (!hitPartialWindow) {
           await page.keyboard.press('Escape');
-          await page.waitForFunction(() =>
-            document
-              .querySelector('wc-shadcn-dialog-content')
-              ?.hasAttribute('data-pui-view-detached')
+          await page.waitForFunction(
+            (selector) => document.querySelector(selector)?.hasAttribute('data-pui-view-detached'),
+            contentSelector
           );
         }
       }
@@ -533,26 +541,23 @@ describe('Shadcn Dialog native lifecycle', () => {
       );
       await page.mouse.click(5, 5);
       await page.waitForFunction(
-        () =>
-          document
-            .querySelector('wc-shadcn-dialog-content')
-            ?.hasAttribute('data-pui-view-detached'),
-        undefined,
+        (selector) => document.querySelector(selector)?.hasAttribute('data-pui-view-detached'),
+        contentSelector,
         { timeout: 2000 }
       );
-      expect(await page.locator('wc-shadcn-dialog-content').getAttribute('data-open')).toBeNull();
+      expect(await page.locator(contentSelector).getAttribute('data-open')).toBeNull();
       expect(await page.evaluate(() => document.body.style.overflow)).toBe('');
 
       await page.mouse.click(point.x, point.y);
       await page.waitForFunction(
-        () =>
-          document
-            .querySelector('wc-shadcn-dialog-content')
-            ?.getAttribute('data-transition-state') === 'entered'
+        (selector) =>
+          document.querySelector(selector)?.getAttribute('data-transition-state') === 'entered',
+        contentSelector
       );
       await page.keyboard.press('Escape');
-      await page.waitForFunction(() =>
-        document.querySelector('wc-shadcn-dialog-content')?.hasAttribute('data-pui-view-detached')
+      await page.waitForFunction(
+        (selector) => document.querySelector(selector)?.hasAttribute('data-pui-view-detached'),
+        contentSelector
       );
     } finally {
       await context.close();

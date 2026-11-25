@@ -109,6 +109,7 @@ export const BROWSER_SUITES = Object.freeze([
   'packages/prototypes/shadcn/test/drawer-presence.browser.test.ts',
   'packages/prototypes/shadcn/test/toast-stack.browser.test.ts',
   'packages/prototypes/base/test/async-region.browser.test.ts',
+  'packages/prototypes/base/test/toast-pointer.browser.test.ts',
   'packages/adapters/base/test/focus-intent-retries.browser.test.ts',
   'packages/adapters/react/test/focus-entry-readiness.browser.test.ts',
   'packages/adapters/vue/test/focus-request-readiness.browser.test.ts',

@@ -2,7 +2,15 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { EventEmitter } from 'node:events';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import {
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { createServer, request } from 'node:http';
 import os from 'node:os';
 import { createRequire } from 'node:module';
@@ -36,7 +44,7 @@ function put(root, relative, contents) {
 }
 
 function repository(t, theme = 'export const color = "black";\n') {
-  const root = mkdtempSync(path.join(os.tmpdir(), 'contrast-provenance-'));
+  const root = realpathSync(mkdtempSync(path.join(os.tmpdir(), 'contrast-provenance-')));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   git(root, 'init', '--quiet');
   git(root, 'config', 'user.email', 'contrast-test@example.invalid');
@@ -192,18 +200,22 @@ describe('contrast source provenance', () => {
     try {
       process.env[key] = inherited;
       const disabled = configuredPlugins(root, '1');
-      assert.equal(disabled.some((plugin) => plugin.name === 'proto-ui-accordion-activation-probe'), false);
+      assert.equal(
+        disabled.some((plugin) => plugin.name === 'proto-ui-accordion-activation-probe'),
+        false
+      );
       assert.equal(process.env[key], inherited);
       const enabled = configuredPlugins(root, '1', path.join(root, 'explicit-probe'));
-      const probes = enabled.filter((plugin) => plugin.name === 'proto-ui-accordion-activation-probe');
+      const probes = enabled.filter(
+        (plugin) => plugin.name === 'proto-ui-accordion-activation-probe'
+      );
       assert.equal(probes.length, 1);
       assert.equal(probes[0].apply, 'serve');
       assert.equal(probes[0].enforce, 'pre');
       assert.equal(process.env[key], inherited);
-      assert.throws(
-        () => configuredPlugins(null, '0', path.join(root, 'invalid-root-probe')),
-        { code: 'ERR_INVALID_ARG_TYPE' }
-      );
+      assert.throws(() => configuredPlugins(null, '0', path.join(root, 'invalid-root-probe')), {
+        code: 'ERR_INVALID_ARG_TYPE',
+      });
       assert.equal(process.env[key], inherited);
     } finally {
       if (previous === undefined) delete process.env[key];

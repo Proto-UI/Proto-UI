@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { AdapterPrototype } from '@proto.ui/adapter-base';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { afterTwoHostFrames } from '../../test-utils/host-rendering';
+import { installModalPresentationHost } from './modal-presentation-host';
 import { createRuntimeSession } from '@proto.ui/runtime';
 import {
   ANATOMY_GET_PROTO_CAP,
@@ -28,6 +29,8 @@ import * as progress from '../src/progress';
 import * as meter from '../src/meter';
 import * as tree from '../src/tree';
 import * as toast from '../src/toast';
+
+const useModalPresentationHost = installModalPresentationHost();
 
 type Host = HTMLElement & { getExposes(): Record<string, unknown> };
 
@@ -176,7 +179,10 @@ function alertFixture(props: Record<string, unknown> = {}) {
 }
 
 describe('Bootstrap historical modal and popup consumers', () => {
-  it('keeps disabled AlertDialog commands, cancel entry, relations and leaving retention', async () => {
+  it('keeps disabled AlertDialog commands, cancel entry, relations and leaving retention', async ({
+    onTestFinished,
+  }) => {
+    onTestFinished(useModalPresentationHost());
     const f = alertFixture({ disabled: true });
     const requests = details(f.root, 'openChange');
     await flush();
