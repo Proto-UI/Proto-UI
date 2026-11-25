@@ -102,6 +102,7 @@ export const BROWSER_SUITES = Object.freeze([
   'packages/compiler/test/focus-scope-native.browser.test.ts',
   'packages/compiler/test/shader-presentation.browser.test.ts',
   'packages/compiler/test/presence-presentation.browser.test.ts',
+  'packages/web-conformance/test/number-field-stepper-feedback.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-switch-compositions.browser.test.ts',
   'packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts',
@@ -480,6 +481,7 @@ const observedCosts = {};
 for (const file of [
   './fixtures/browser-suite-costs-44876125495.json',
   './fixtures/browser-suite-costs-45029016292.json',
+  './fixtures/browser-suite-costs-45537881490.json',
 ]) {
   const evidence = validateBrowserCostEvidence(
     JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8'))
