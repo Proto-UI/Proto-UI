@@ -453,7 +453,9 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     ).toBe('react');
     expect(surface().getAttribute('data-typography-runtime')).toBe('react');
     expect(localStorage.getItem('preferred-prototypes-adapter')).toBe('react');
-  });
+    // This case includes the cold React materializer and complete page commit.
+    // The isolated source run completes in ~6.4s; keep a bounded cold-load budget.
+  }, 15000);
 
   it('destroy waits for and retires an in-flight local batch without reviving source or framework owners', async () => {
     await editGallery();

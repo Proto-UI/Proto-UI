@@ -838,7 +838,7 @@ describe('Website projection composition', () => {
   });
 
   it.each(['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const)(
-    'composes the real %s Popover demo and rejects an undeclared outside-focus Button',
+    'composes the real %s Popover reset command and rejects its undeclared Button',
     async (projectionFamilyId) => {
       const componentFamily = PROJECTION_FAMILY_MANIFESTS[projectionFamilyId].families.popover;
       const childDemo = await loadDemo(componentFamily.recipeId);
@@ -858,12 +858,12 @@ describe('Website projection composition', () => {
       const runtimeComposition = createProjectionComposition({ ...options, contentRecipe });
 
       for (const composition of [defaultComposition, runtimeComposition]) {
-        expect(
-          findNode(
-            composition.demo,
-            (node) => node.kind === 'proto' && node.prototypeId === buttonPrototypeId
-          )
-        ).toMatchObject({ children: ['Outside focus target'] });
+        const commands: DemoNode[] = [];
+        walk(composition.demo.root, (node) => {
+          if (node.kind === 'proto' && node.prototypeId === buttonPrototypeId) commands.push(node);
+        });
+        expect(commands).toHaveLength(1);
+        expect(commands[0]).toMatchObject({ ref: 'reset', children: ['Reset'] });
       }
       expect(() =>
         createProjectionComposition({

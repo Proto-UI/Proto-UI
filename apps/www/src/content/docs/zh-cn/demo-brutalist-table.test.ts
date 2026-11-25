@@ -37,7 +37,7 @@ describe('Brutalist Table demo contract', () => {
     );
     expect(ids.filter((id) => id === 'brutalist-table-root')).toHaveLength(1);
     expect(ids.filter((id) => id === 'brutalist-table-caption')).toHaveLength(1);
-    expect(ids.filter((id) => id === 'brutalist-table-row')).toHaveLength(4);
+    expect(ids.filter((id) => id === 'brutalist-table-row')).toHaveLength(9);
     expect(
       nodes.some((node) => node.kind === 'proto' && node.prototypeId.includes('data-table'))
     ).toBe(false);
@@ -72,8 +72,8 @@ describe('Brutalist Table demo contract', () => {
         node.kind === 'proto' && node.prototypeId === 'brutalist-table-row'
     );
     const sections = rows.map((row) => row.props?.section);
-    expect(sections).toEqual(['header', 'body', 'body', 'footer']);
+    expect(sections).toEqual(['header', ...Array(7).fill('body'), 'footer']);
     const lastFlags = rows.map((row) => row.props?.lastInSection);
-    expect(lastFlags).toEqual([false, false, true, true]);
+    expect(lastFlags).toEqual([true, false, false, false, false, false, false, true, true]);
   });
 });

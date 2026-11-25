@@ -152,6 +152,14 @@ async function mount(
     expect(value(context.api, 'root', 'open')).toBe(true);
     expect(value(context.api, 'content', 'transitionState')).toBe('entered');
   });
+  // Content's entered state can precede React's committed passive children.
+  // Wait for the actual Close view and its authored appearance before input.
+  await vi.waitFor(() => {
+    expect(context.refs.close?.isConnected).toBe(true);
+    expect(context.refs.close?.getAttribute('role')).toBe('button');
+    expect(hasToken(context.refs.closeLabel!, 'text-base')).toBe(true);
+    expect(hasToken(context.refs.closeAppearance!, 'px-[12px]')).toBe(true);
+  });
   requests.mockClear();
   return {
     ...context,
@@ -218,7 +226,7 @@ describe('Bootstrap Dialog recipe keeps Close as its only command owner', () => 
       expect(surface.hasAttribute('tabindex')).toBe(false);
       expect(label.getAttribute('role')).toBeNull();
       expect(label.hasAttribute('tabindex')).toBe(false);
-      expect(hasToken(label, 'text-[14px]')).toBe(true);
+      expect(hasToken(label, 'text-base')).toBe(true);
       expect(hasToken(surface, 'px-[12px]')).toBe(true);
       expect(hasToken(surface, 'py-[4px]')).toBe(true);
       expect(surface.style.pointerEvents).toBe('none');

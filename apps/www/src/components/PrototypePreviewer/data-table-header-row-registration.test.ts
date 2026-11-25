@@ -57,7 +57,7 @@ describe('DataTable HeaderRow actual website and static entry closure', () => {
       expect(getPrototype(id)).toBe(subpath.dataTableHeaderRow);
     });
 
-    it(`${family}: real DemoSpec loads two sorting headers, retains table structure and remounts`, async () => {
+    it(`${family}: real DemoSpec loads its current sorting headers, retains table structure and remounts`, async () => {
       const demoId = `demo-${family}-data-table`;
       const declared = headerRowIntegration.families.find((item) => item.family === family);
       expect(declared).toBeDefined();
@@ -72,25 +72,45 @@ describe('DataTable HeaderRow actual website and static entry closure', () => {
       }
       const host = document.createElement('div');
       document.body.append(host);
+      const current =
+        family === 'base'
+          ? {
+              columns: 2,
+              rows: 4,
+              count: 3,
+              firstKey: 'name',
+              firstRows: ['api', 'docs', 'web'],
+              secondKey: 'requests',
+              secondRows: ['docs', 'api', 'web'],
+            }
+          : {
+              columns: 3,
+              rows: 5,
+              count: 4,
+              firstKey: 'status',
+              firstRows: ['bhqecj4p', 'derv1ws0', 'm5gr84i9', '3u1reuv4'],
+              secondKey: 'email',
+              secondRows: ['3u1reuv4', 'bhqecj4p', 'm5gr84i9', 'derv1ws0'],
+            };
       for (let mount = 0; mount < 2; mount++) {
         const view = await renderDemo({ runtime: 'wc', host, demo });
         cleanup.push(() => view.destroy());
         await vi.waitFor(() =>
-          expect(host.querySelectorAll('[role="columnheader"]')).toHaveLength(2)
+          expect(host.querySelectorAll('[role="columnheader"]')).toHaveLength(current.columns)
         );
         const table = host.querySelector<TableElement>('[role="table"]')!;
         const headers = [...table.querySelectorAll<HTMLElement>('[role="columnheader"]')];
         const row = headers[0]!.parentElement!;
-        expect(headers[1]!.parentElement).toBe(row);
+        for (const header of headers) expect(header.parentElement).toBe(row);
         expect(row.getAttribute('role')).toBe('row');
         expect(row.tabIndex).toBe(-1);
         expect(row.getAttribute('aria-selected')).toBeNull();
         expect(table.getExposes().getStructure()).toMatchObject({
           valid: true,
-          rowCount: 4,
-          columnCount: 2,
+          rowCount: current.rows,
+          columnCount: current.columns,
         });
-        expect(table.getExposes().count.get()).toBe(3);
+        expect(table.getExposes().count.get()).toBe(current.count);
         const sorts: unknown[] = [];
         const selections: unknown[] = [];
         table.addEventListener('sortChange', (event) => sorts.push((event as CustomEvent).detail));
@@ -99,25 +119,36 @@ describe('DataTable HeaderRow actual website and static entry closure', () => {
         );
         headers[0]!.click();
         await vi.waitFor(() =>
-          expect(sorts).toEqual([{ sortKey: 'name', sortDirection: 'ascending' }])
+          expect(sorts).toEqual([{ sortKey: current.firstKey, sortDirection: 'ascending' }])
         );
         expect(
           table
             .getExposes()
             .getRows()
             .map((record) => record.id)
-        ).toEqual(['api', 'docs', 'web']);
+        ).toEqual(current.firstRows);
         headers[1]!.focus();
         headers[1]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
         headers[1]!.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
         await vi.waitFor(() => expect(sorts).toHaveLength(2));
-        expect(sorts[1]).toEqual({ sortKey: 'requests', sortDirection: 'ascending' });
+        expect(sorts[1]).toEqual({ sortKey: current.secondKey, sortDirection: 'ascending' });
         expect(
           table
             .getExposes()
             .getRows()
             .map((record) => record.id)
-        ).toEqual(['docs', 'api', 'web']);
+        ).toEqual(current.secondRows);
+        if (family !== 'base') {
+          headers[2]!.click();
+          await vi.waitFor(() => expect(sorts).toHaveLength(3));
+          expect(sorts[2]).toEqual({ sortKey: 'amount', sortDirection: 'ascending' });
+          expect(
+            table
+              .getExposes()
+              .getRows()
+              .map((record) => record.id)
+          ).toEqual(['3u1reuv4', 'm5gr84i9', 'bhqecj4p', 'derv1ws0']);
+        }
         expect(selections).toEqual([]);
         await view.destroy();
         cleanup.pop();

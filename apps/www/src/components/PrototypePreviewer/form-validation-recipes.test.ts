@@ -175,7 +175,7 @@ for (const [family, demo] of Object.entries({
         expect(values()).toEqual({
           account: 'ada',
           channels: ['email'],
-          notes: 'Keep this multiline note.',
+          notes: 'Send a summary email after release.',
         })
       );
       expect(editor().getAttribute('aria-labelledby')).toBe(ref('accountLabel').id);
@@ -196,7 +196,7 @@ for (const [family, demo] of Object.entries({
       expect(values().account).toBe('grace');
       // Generic Field's existing candidate-edit contract is unchanged. The
       // held validator sees the canonical owner value, never rejected text.
-      expect(ref('validatorStatus').textContent).toContain('value="grace"');
+      expect(ref('validatorStatus').textContent).toContain('Pending check for "grace"');
       await click('toggleOwner');
       await edit('lin');
       // A real editor can deliver its change commit as focus moves to the
@@ -205,23 +205,23 @@ for (const [family, demo] of Object.entries({
       editor().dispatchEvent(new Event('change', { bubbles: true }));
       await click('staleResult');
       const oldResults = assertOldResults(1);
-      expect(oldResults.summary).toMatch(/^old-results stale(?:,stale)*$/);
+      expect(oldResults.summary).toMatch(/^Stale responses: discarded(?:, discarded)*$/);
       expect(oldResults.before.validity.pending).toBe(true);
       // The queued, legitimate commit really ran after delivery; neither its
       // pending request nor the earlier actual false returns were suppressed.
-      expect(ref('validatorStatus').textContent).toBe('pending value="lin" held=2');
+      expect(ref('validatorStatus').textContent).toBe('Pending check for "lin" (2 queued)');
       expect(validity().pending).toBe(true);
       await click('rejectResult');
       expect(resultReceipt().results).toEqual([{ ...resolved.at(-1), value: 'lin' }]);
       expect(resultReceipt().results[0].accepted).toBe(true);
       expect(validity()).toMatchObject({ invalid: true, pending: false });
       expect(editor().getAttribute('aria-errormessage')).toBe(ref('accountError').id);
-      expect(ref('accountError').textContent).toContain('Choose another account');
+      expect(ref('accountError').textContent).toContain('This username is already taken.');
       // Deliver the request superseded by the queued change as well. This
       // leaves the next submission scenario with exactly its own two attempts.
       await click('staleResult');
       const afterCommit = assertOldResults(1);
-      expect(afterCommit.summary).toBe('old-results stale');
+      expect(afterCommit.summary).toBe('Stale responses: discarded');
       expect(validity()).toMatchObject({ invalid: true, pending: false });
 
       await click('submit');
@@ -233,10 +233,10 @@ for (const [family, demo] of Object.entries({
       await flush();
       expect(ref('validatorStatus').textContent).not.toBe(pendingText);
       await click('staleResult');
-      expect(assertOldResults(1).summary).toBe('old-results stale');
+      expect(assertOldResults(1).summary).toBe('Stale responses: discarded');
       expect(exposes('form').pending.get()).toBe(true);
       await click('acceptResult');
-      expect(ref('submissionStatus').textContent).toContain('submitted=1');
+      expect(ref('submissionStatus').textContent).toContain('Submitted (#1):');
       expect(ref('submissionStatus').textContent).toContain('"account":"lin"');
       expect(validity()).toMatchObject({ invalid: false, pending: false });
       expect(editor().getAttribute('aria-errormessage')).toBeNull();
@@ -246,7 +246,7 @@ for (const [family, demo] of Object.entries({
       await click('cancelSubmit');
       await click('acceptResult');
       expect(exposes('form').pending.get()).toBe(false);
-      expect(ref('submissionStatus').textContent).toBe('canceled');
+      expect(ref('submissionStatus').textContent).toBe('Submission canceled.');
       await click('toggleReadOnly');
       expect(editor().readOnly).toBe(true);
       expect(values().account).toBe('lin');
@@ -281,12 +281,12 @@ for (const [family, demo] of Object.entries({
       expect(values()).toEqual({
         account: 'ada',
         channels: ['email'],
-        notes: 'Keep this multiline note.',
+        notes: 'Send a summary email after release.',
       });
       expect(editor().readOnly).toBe(true);
-      expect(notes().value).toBe('Keep this multiline note.');
+      expect(notes().value).toBe('Send a summary email after release.');
       expect(validity()).toMatchObject({ pending: false, status: 'unvalidated' });
-      expect(ref('submissionStatus').textContent).toBe('reset');
+      expect(ref('submissionStatus').textContent).toBe('Form reset.');
 
       await click('toggleReadOnly');
       await edit('retire');

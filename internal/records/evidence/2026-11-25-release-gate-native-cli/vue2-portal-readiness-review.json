@@ -1,0 +1,37 @@
+{
+  "reviewer": "ci_failure_inventory (independent static review, not GitHub APPROVED)",
+  "patch": "/workspace/scratch/cb5dda7822a3/vue2-portal-readiness-candidate.patch",
+  "patchSHA256": "82e81ab7483635c16e50c787a70dd662b54a96030b669d7c923ffbf00d68484e",
+  "scope": [
+    "packages/adapters/vue2/src/adapt.ts",
+    "packages/adapters/vue2/src/runtime/modules.ts",
+    "packages/adapters/vue2/src/platform/portal-readiness.ts"
+  ],
+  "files": [
+    {
+      "path": "packages/adapters/vue2/src/adapt.ts",
+      "sha256": "bf472dc5823a2e710af102749d59dfad43c7f2428acdb66c0bd5da3256305a3b"
+    },
+    {
+      "path": "packages/adapters/vue2/src/runtime/modules.ts",
+      "sha256": "cce3329db520e0b74b7f3f1e16d299aa846186c5a1639ad9a9939e52e4c49c8b"
+    },
+    {
+      "path": "packages/adapters/vue2/src/platform/portal-readiness.ts",
+      "sha256": "6b065b1897fe6ae5707cdb48298e486b16aa2870ff7b13c0b3a879a966ac6254"
+    }
+  ],
+  "conclusion": "No blocking findings in the three-file bounded candidate.",
+  "reasoning": [
+    "Notification follows selection and commit of the actual destination; current Portal epoch and actual parent are checked before each descendant callback and again before successful public projection.",
+    "Current physical view callbacks are fenced by disposal/terminal/host activity, generation, bound root, event gate identity and current vm root. They invoke the existing readiness notification rather than setting ready or focusing directly.",
+    "WeakMap release checks callback identity; the snapshot traversal rechecks current registration, subtree membership and actual connection. A reentrant replacement or retired Portal cannot publish stale remaining descendants.",
+    "Existing native readiness still decides viewReady, focusIngressReady, shouldExist, enabled event gate and detached-marker eligibility.",
+    "New tests were inspected for replacement-lease release and synchronous retirement at the first child; first thrown listener error remains surfaced."
+  ],
+  "limitations": [
+    "Static review does not supply the browser agent real-browser six-case result.",
+    "This review does not approve broader Vue2 lifecycle or new capability admission.",
+    "No GitHub review or mutation was performed."
+  ]
+}
