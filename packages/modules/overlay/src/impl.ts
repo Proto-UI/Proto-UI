@@ -43,6 +43,7 @@ const DEFAULT_CONFIG: OverlayConfig = Object.freeze({
   closeOnFocusOutside: false,
   closeOnAnchorPress: false,
   closeOnTriggerPress: false,
+  boundaryStack: true,
   placement: 'bottom',
   align: 'start',
   sideOffset: 4,
@@ -69,6 +70,7 @@ const CONFIG_PATCH_FIELDS = [
   'closeOnFocusOutside',
   'closeOnAnchorPress',
   'closeOnTriggerPress',
+  'boundaryStack',
   'placement',
   'align',
   'sideOffset',
@@ -277,6 +279,7 @@ export class OverlayModuleImpl extends ModuleBase {
   });
 
   private readonly openState = createObservedHandle(false);
+  private boundaryStackActive = false;
   private viewActive = false;
   private globalMount: OverlayGlobalMount | null = null;
   private modalLock: OverlayModal | null = null;
@@ -304,6 +307,14 @@ export class OverlayModuleImpl extends ModuleBase {
   private escapeScope: object | null = null;
   private leaveEscapeScope: (() => void) | null = null;
   private readonly escapeOwner = {};
+
+  private syncBoundaryStack(newActivation = false): void {
+    const active = this.protoPhase !== 'unmounted' && this.isOpen() && this.config.boundaryStack;
+    // A controlled close may synchronously reopen before the old activation retires.
+    if (active === this.boundaryStackActive && !(active && newActivation)) return;
+    this.boundaryStackActive = active;
+    this.boundary.setStackActive(active);
+  }
 
   private syncEscapeCandidate(): void {
     const scope =
@@ -388,6 +399,7 @@ export class OverlayModuleImpl extends ModuleBase {
     this.leaveEscapeScope = null;
     this.escapeScope = null;
     completeOverlayResourceWork([
+      () => this.syncBoundaryStack(),
       () => this.teardownMountedViewSideEffects(),
       () => this.clearBoundaryRegistrations(),
       () => this.offBoundaryOutside?.(),
@@ -715,6 +727,7 @@ export class OverlayModuleImpl extends ModuleBase {
 
     const wasOpen = this.openState.handle.get();
     if (Object.is(wasOpen, next)) {
+      this.syncBoundaryStack();
       if (next && this.viewActive) this.syncViewSideEffects();
       return;
     }
@@ -729,13 +742,7 @@ export class OverlayModuleImpl extends ModuleBase {
     this.openState.set(next, reason);
     if (revision !== this.openRevision) return;
     this.syncEscapeCandidate();
-
-    if (next) {
-      this.boundary.setStackActive(true);
-      return;
-    }
-
-    this.boundary.setStackActive(false);
+    this.syncBoundaryStack(next);
   }
 
   markPresenceBound(): void {
@@ -857,6 +864,7 @@ export class OverlayModuleImpl extends ModuleBase {
     if (this.config.defaultOpen) {
       this.setOpen(true, 'programmatic');
     }
+    this.syncBoundaryStack();
   }
 
   updatePosition(patch: OverlayPositionPatch): void {

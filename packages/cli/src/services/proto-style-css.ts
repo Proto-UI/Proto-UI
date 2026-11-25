@@ -250,6 +250,8 @@ const staticUtilities: Record<string, string[]> = {
     'transition-duration: 150ms;',
   ],
   'z-[1000]': ['z-index: 1000;'],
+  'z-[calc(1000_-_var(--pui-stack-index))]': ['z-index: calc(1000 - var(--pui-stack-index));'],
+  'order-[var(--pui-stack-index)]': ['order: var(--pui-stack-index);'],
   'z-[1051]': ['z-index: 1051;'],
   'z-[2]': ['z-index: 2;'],
   '-z-10': ['z-index: -10;'],
@@ -504,6 +506,11 @@ const staticUtilities: Record<string, string[]> = {
     'transition-property: color, box-shadow;',
     'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
     'transition-duration: 150ms;',
+  ],
+  'transition-[width,top,bottom,opacity]': [
+    'transition-property: width, top, bottom, opacity;',
+    'transition-duration: 150ms;',
+    'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
   ],
   'transition-[color,border-color]': [
     'transition-property: color, border-color;',

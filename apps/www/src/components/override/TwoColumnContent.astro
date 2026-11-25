@@ -109,3 +109,19 @@ const mainPaneClass = isSplash
     }
   }
 </style>
+
+<style is:global>
+  /* Website-owned preview portals leave the reading canvas for document.body.
+     Select the opted-in surface itself, including an empty dynamic Toast list. */
+  body:has(.docs-reading-columns[data-layout='docs'])
+    .pui-runtime-preview-owned-surface[role='region'][data-position] {
+    --header-height: var(--docs-preview-header-height, 4.5rem);
+    max-height: max(0px, calc(100dvh - var(--header-height) - 3rem));
+    z-index: 31;
+  }
+
+  body:has(.docs-reading-columns[data-layout='docs'])
+    .pui-runtime-preview-owned-surface[role='region'][data-position^='top-'] {
+    top: calc(var(--header-height) + 1.5rem);
+  }
+</style>

@@ -24,6 +24,8 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'brutalist-toast-viewport',
+        previewTheme: 'portal',
+        ref: 'viewport',
         props: {
           a11yLabel: 'Persistent notifications',
         },
@@ -55,7 +57,9 @@ export default {
                       {
                         kind: 'proto',
                         prototypeId: 'brutalist-toast-description',
-                        children: ['Changes are paused until you reconnect or dismiss this notice.'],
+                        children: [
+                          'Changes are paused until you reconnect or dismiss this notice.',
+                        ],
                       },
                     ],
                   },

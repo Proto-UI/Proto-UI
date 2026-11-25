@@ -21,6 +21,8 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'bootstrap-2-3-2-toast-viewport',
+        previewTheme: 'portal',
+        ref: 'viewport',
         props: {
           a11yLabel: 'Persistent notifications',
         },

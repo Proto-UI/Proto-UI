@@ -58,6 +58,8 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'brutalist-toast-viewport',
+        previewTheme: 'portal',
+        ref: 'viewport',
         props: {
           a11yLabel: 'Status notifications',
         },
