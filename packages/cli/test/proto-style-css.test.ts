@@ -12,6 +12,8 @@ import {
   renderProtoStyleTokenCss,
 } from '../src/services/proto-style-css';
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
+import { DRAFT_FAMILY_STYLE_TOKENS } from '../src/generated/draft-family-style-tokens';
+import { SHADCN_STYLE_TOKENS } from '../src/generated/shadcn-style-tokens';
 import { SHADCN_THEME_PAINT_CSS, SHADCN_THEME_VARIABLES_CSS } from '../src/legacy/type';
 
 const SPLIT_RECEIPT_PREFIX = '--pui-split-compiled-receipt: ';
@@ -29,6 +31,57 @@ const STYLE_CSS_LANES: ReadonlyArray<{
     render: (tokens: string[]) => renderProtoShadowSplitStyleArtifact(tokens).cssText,
   },
 ];
+
+it('ships every Toast viewport anchor in each family preset', () => {
+  const placements = [
+    ['top-left', 'top-6', 'left-6'],
+    ['top-center', 'top-6', 'left-1/2', '-translate-x-1/2'],
+    ['top-right', 'top-6', 'right-6'],
+    ['bottom-left', 'bottom-6', 'left-6'],
+    ['bottom-center', 'bottom-6', 'left-1/2', '-translate-x-1/2'],
+    ['bottom-right', 'bottom-6', 'right-6'],
+  ];
+  const presets = {
+    shadcn: SHADCN_STYLE_TOKENS,
+    brutalist: BRUTALIST_STYLE_TOKENS,
+    ...DRAFT_FAMILY_STYLE_TOKENS,
+  };
+  for (const [family, tokens] of Object.entries(presets)) {
+    for (const [position, ...utilities] of placements) {
+      for (const utility of utilities) {
+        expect(tokens, `${family}/${position}`).toContain(`data-[position=${position}]:${utility}`);
+      }
+    }
+  }
+});
+
+describe('Toast stack style delivery', () => {
+  for (const { target, render } of STYLE_CSS_LANES) {
+    it(`${target} emits the card layers and restores pointer input`, () => {
+      const css = render([
+        'pointer-events-auto',
+        'z-30',
+        'z-20',
+        'data-[stack-tier=overflow]:z-0',
+        'opacity-95',
+        'duration-300',
+        'ease-out',
+        'leading-[1.4]',
+        'shadow-[0_4px_12px_rgb(0_0_0/10%)]',
+      ]);
+      expect(css).toContain('pointer-events: auto;');
+      expect(css).toContain('z-index: 30;');
+      expect(css).toContain('z-index: 20;');
+      expect(css).toContain('z-index: 0;');
+      expect(css).toContain('opacity: 0.95;');
+      expect(css).toContain('transition-duration: 300ms;');
+      expect(css).toContain('transition-timing-function: cubic-bezier(0, 0, 0.2, 1);');
+      expect(css).toContain('line-height: 1.4;');
+      expect(css).toContain('--pui-shadow: 0 4px 12px rgb(0 0 0 / 10%);');
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+    });
+  }
+});
 
 describe('Bootstrap light-control error ink closure', () => {
   for (const { target, render } of STYLE_CSS_LANES) {
@@ -160,6 +213,27 @@ describe('proto style css renderer', () => {
         expect(rejected).not.toMatch(/(?:^|\n)\s*(?:border-radius|box-shadow):/);
         expect(rejected).not.toMatch(/(?:^|\n)\s*--pui-shadow:\s*(?!initial;)[^\s]/);
       }
+    }
+  });
+
+  it('lowers joined control seam margins in light, shadow and split CSS', () => {
+    for (const { target, render } of STYLE_CSS_LANES) {
+      const css = render(['-ml-px', '-mt-px']);
+      expectExactStyleUtility(css, target, '-ml-px', ['margin-left: -1px;']);
+      expectExactStyleUtility(css, target, '-mt-px', ['margin-top: -1px;']);
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+    }
+  });
+
+  it('composes the pressed Toolbar inset with rings in every CSS lane', () => {
+    const token = 'shadow-[inset_2px_2px_0_0_#000]';
+    for (const { target, render } of STYLE_CSS_LANES) {
+      const css = render([token]);
+      expectExactStyleUtility(css, target, token, [
+        '--pui-shadow: inset 2px 2px 0 0 #000000;',
+        'box-shadow: var(--pui-ring-offset-shadow, 0 0 #0000), var(--pui-ring-shadow, 0 0 #0000), var(--pui-shadow, 0 0 #0000);',
+      ]);
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
     }
   });
 

@@ -56,60 +56,42 @@ export const TOAST_DESCRIPTION_RECIPES = {
 
 export const TOAST_ACTION_RECIPES = {
   vega: tw(
-    'rounded-md h-6 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
+    'rounded-md h-6 px-2.5 text-xs font-medium text-primary-foreground border border-transparent'
   ),
   nova: tw(
-    'rounded-md h-6 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
+    'rounded-md h-6 px-2.5 text-xs font-medium text-primary-foreground border border-transparent'
   ),
   maia: tw(
-    'rounded-md h-6 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
+    'rounded-md h-6 px-2.5 text-xs font-medium text-primary-foreground border border-transparent'
   ),
   lyra: tw(
-    'rounded-none h-6 px-2 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
+    'rounded-none h-6 px-2 text-xs font-medium text-primary-foreground border border-transparent'
   ),
   mira: tw(
-    'rounded-md h-6 px-2 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
+    'rounded-md h-6 px-2 text-xs font-medium text-primary-foreground border border-transparent'
   ),
   luma: tw(
-    'rounded-md h-6 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
+    'rounded-md h-6 px-2.5 text-xs font-medium text-primary-foreground border border-transparent'
   ),
   sera: tw(
-    'rounded-none h-6 px-2 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
+    'rounded-none h-6 px-2 text-xs font-medium text-primary-foreground border border-transparent'
   ),
   rhea: tw(
-    'rounded-md h-6 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
+    'rounded-md h-6 px-2.5 text-xs font-medium text-primary-foreground border border-transparent'
   ),
   'new-york-v4': tw(
-    'rounded-md h-6 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
+    'rounded-md h-6 px-2.5 text-xs font-medium text-primary-foreground border border-transparent'
   ),
 } as const satisfies OverlayRecipes;
 
 export const TOAST_CLOSE_RECIPES = {
-  vega: tw(
-    'rounded-md h-6 px-2 text-xs font-medium border border-border bg-transparent text-muted-foreground'
-  ),
-  nova: tw(
-    'rounded-md h-6 px-2 text-xs font-medium border border-border bg-transparent text-muted-foreground'
-  ),
-  maia: tw(
-    'rounded-md h-6 px-2 text-xs font-medium border border-border bg-transparent text-muted-foreground'
-  ),
-  lyra: tw(
-    'rounded-none h-6 px-2 text-xs font-medium border border-border bg-transparent text-muted-foreground'
-  ),
-  mira: tw(
-    'rounded-md h-6 px-2 text-xs font-medium border border-border bg-transparent text-muted-foreground'
-  ),
-  luma: tw(
-    'rounded-md h-6 px-2 text-xs font-medium border border-border bg-transparent text-muted-foreground'
-  ),
-  sera: tw(
-    'rounded-none h-6 px-2 text-xs font-medium border border-border bg-transparent text-muted-foreground'
-  ),
-  rhea: tw(
-    'rounded-md h-6 px-2 text-xs font-medium border border-border bg-transparent text-muted-foreground'
-  ),
-  'new-york-v4': tw(
-    'rounded-md h-6 px-2 text-xs font-medium border border-border bg-transparent text-muted-foreground'
-  ),
+  vega: tw('rounded-md h-6 px-2 text-xs font-medium border border-border'),
+  nova: tw('rounded-md h-6 px-2 text-xs font-medium border border-border'),
+  maia: tw('rounded-md h-6 px-2 text-xs font-medium border border-border'),
+  lyra: tw('rounded-none h-6 px-2 text-xs font-medium border border-border'),
+  mira: tw('rounded-md h-6 px-2 text-xs font-medium border border-border'),
+  luma: tw('rounded-md h-6 px-2 text-xs font-medium border border-border'),
+  sera: tw('rounded-none h-6 px-2 text-xs font-medium border border-border'),
+  rhea: tw('rounded-md h-6 px-2 text-xs font-medium border border-border'),
+  'new-york-v4': tw('rounded-md h-6 px-2 text-xs font-medium border border-border'),
 } as const satisfies OverlayRecipes;
