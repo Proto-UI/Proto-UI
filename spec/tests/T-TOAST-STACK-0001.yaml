@@ -1,0 +1,109 @@
+id: T-TOAST-STACK-0001
+type: test
+title: Toast opening chronology, visible window and page viewport
+status: draft
+since: 0.3.0
+lifecycleRationale:
+  en: Focused Web regressions do not establish all native hosts, screen readers or complete upstream visual equivalence. Prototype lifecycle remains draft.
+summary: Repeated message creation retains independent identities and one order across state, paint and layout, while a passive portal escapes preview containers.
+cases:
+  - id: T-TOAST-STACK-0001-CASE-ORDER
+    title: Ordinary controlled updates and repeated open preserve chronology; accepted reopen advances it
+    covers: [P-BASE-TOAST-OPENING-ORDER]
+    expectation: immutable-existing-position-with-new-position-only-for-a-new-opening
+  - id: T-TOAST-STACK-0001-CASE-LIMIT
+    title: Twelve messages retain complete indices and configurable three or five visible messages
+    covers: [P-BASE-TOAST-OPENING-ORDER, P-BASE-TOAST-VISIBLE-WINDOW]
+    expectation: independent-identities-and-hidden-overflow-with-window-restoration
+  - id: T-TOAST-STACK-0001-CASE-PORTAL
+    title: Passive viewport preserves logical ancestry without stealing focus or dismissal
+    covers: [P-BASE-TOAST-PASSIVE-PORTAL]
+    expectation: page-host-context-and-owner-cleanup-with-earlier-overlay-dismissal-preserved
+  - id: T-TOAST-STACK-0001-CASE-PAINT
+    title: Native browser geometry, paint and hit testing agree throughout rapid arrivals and expansion
+    covers: [P-SHADCN-TOAST-STACK-ORDER, P-SHADCN-TOAST-VIEWPORT, P-BASE-TOAST-VISIBLE-WINDOW]
+    expectation: newest-nearest-selected-edge-and-highest-layer-with-no-order-interpolation
+  - id: T-TOAST-STACK-0001-CASE-CONSUMER
+    title: The actual demo creates twelve messages through each Web renderer and retains portal theme and cleanup
+    covers: [P-BASE-TOAST-OPENING-ORDER, P-BASE-TOAST-PASSIVE-PORTAL, P-SHADCN-TOAST-VIEWPORT]
+    expectation: every-trigger-creates-one-new-key-and-retired-owner-leaves-no-notifications
+  - id: T-TOAST-STACK-0001-CASE-LEAVE
+    title: A closing message remains present outside normal and flex flow for a 500ms leave interval without displacing a new Toast
+    covers: [P-SHADCN-TOAST-STACK-ORDER]
+    expectation: controlled-and-uncontrolled-out-of-flow-presence-until-500ms-with-unblocked-new-anchor-and-reopen
+implementations:
+  - id: toast-opening-chronology
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/base/test/toast-stack-chronology.test.ts
+    required: true
+    consumesCases: [T-TOAST-STACK-0001-CASE-ORDER]
+    exercises: [P-BASE-TOAST]
+    notes:
+      - Six actual WC consumer cases; four controlled-update cases fail before the membership repair and all six pass after it.
+  - id: toast-visible-window
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/base/test/toast-visible-stack.test.ts
+    required: true
+    consumesCases: [T-TOAST-STACK-0001-CASE-LIMIT]
+    exercises: [P-BASE-TOAST]
+    notes:
+      - Four cases failed before the numeric index and limited projection, then passed with configurable limits and restoration. Happy DOM does not prove native focus traversal or layout.
+  - id: toast-passive-portal
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/base/test/toast-portal.test.ts
+    required: true
+    consumesCases: [T-TOAST-STACK-0001-CASE-PORTAL]
+    exercises: [P-BASE-TOAST, C-AS-OVERLAY-0001]
+  - id: toast-demo-four-renderers
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/toast-dynamic-consumer.test.ts
+    required: true
+    consumesCases: [T-TOAST-STACK-0001-CASE-CONSUMER]
+    exercises: [P-BASE-TOAST, P-SHADCN-TOAST]
+    notes:
+      - The original three-instance demo fails all four renderer cases. React, Vue, Vue 2 and Web Component pass after keyed creation and pre-connection ownership tracking.
+  - id: toast-browser-stack
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/shadcn/test/toast-stack.browser.test.ts
+    required: true
+    consumesCases: [T-TOAST-STACK-0001-CASE-PAINT, T-TOAST-STACK-0001-CASE-LEAVE]
+    exercises: [P-BASE-TOAST, P-SHADCN-TOAST]
+    notes:
+      - Four leave-presence cases cover top-right and bottom-right in collapsed and expanded layouts. The public close-then-create sequence retains the outgoing surface for its configured 500ms leave duration and samples every requestAnimationFrame through Presence withdrawal to check the new Toast's document-edge anchor, highest z-index and center hit target.
+  - id: toast-presence-stack
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/shadcn/test/toast-presence-stack.test.ts
+    required: true
+    consumesCases: [T-TOAST-STACK-0001-CASE-LEAVE]
+    exercises: [P-BASE-TOAST, P-SHADCN-TOAST]
+    notes:
+      - Controlled and uncontrolled Shadcn consumer cases use public Transition observations and computed CLI CSS to verify an absolute, noninteractive retained surface at 499ms, withdrawal at 500ms and reopening with the same presentation owner. These simulated-DOM checks do not prove native layout or hit testing.
+  - id: toast-css-delivery
+    kind: module-test
+    status: passing
+    path: packages/cli/test/proto-style-css.test.ts
+    required: true
+    consumesCases: [T-TOAST-STACK-0001-CASE-PAINT]
+    exercises: [P-SHADCN-TOAST]
+    notes:
+      - Document, shadow and shadow-split CSS deliver numeric order, layers and offsets. Finite transition properties exclude paint and flex order; generated preset closure contains the required tokens.
+verifies:
+  prototypes:
+    - id: P-BASE-TOAST
+      anchors:
+        [P-BASE-TOAST-OPENING-ORDER, P-BASE-TOAST-VISIBLE-WINDOW, P-BASE-TOAST-PASSIVE-PORTAL]
+    - id: P-SHADCN-TOAST
+      anchors: [P-SHADCN-TOAST-STACK-ORDER, P-SHADCN-TOAST-VIEWPORT]
+references:
+  tests: [T-AS-OVERLAY-0001]
+revisions:
+  - version: 0.3.0
+    change: introduced
+    summary: Map reproducible repeated-Toast defects to state, runtime demo, portal, style delivery, retained leave presence and native browser checks without promoting prototype lifecycle.
+tags: [toast, chronology, portal, regression, test]

@@ -88,6 +88,8 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     }),
     expanded = def.state.bool('expanded', false),
     stackTier = def.state.enum('stackTier', 'front', { options: TOAST_STACK_TIERS }),
+    stackIndex = def.state.numberDiscrete('stackIndex', 0),
+    limited = def.state.bool('limited', false),
     role = def.state.string('role', 'status'),
     live = def.state.string('live', 'polite'),
     atomic = def.state.bool('atomic', true);
@@ -96,6 +98,7 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
   a11y.role(role);
   a11y.state('live', live);
   a11y.state('atomic', atomic);
+  a11y.tree({ hidden: limited });
 
   const id = createToastId();
   def.context.provide(TOAST_CONTEXT, { id, open: true, type: 'default', dismissible: true });
@@ -113,6 +116,8 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
   def.expose.state('position', position);
   def.expose.state('expanded', expanded);
   def.expose.state('stackTier', stackTier);
+  def.expose.state('stackIndex', stackIndex);
+  def.expose.state('limited', limited);
   def.expose.event('openChange', { payload: 'json' });
 
   let currentRun: RunHandle<ToastRootProps> | null = null,
@@ -189,11 +194,11 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     const vp = run.context.tryRead(TOAST_VIEWPORT_CONTEXT);
     if (!vp) return;
     if (isOpen) {
-      if (vp.openIds[0] === id) return;
+      // Membership synchronization is not a new opening. In particular,
+      // controlled prop updates must preserve the existing notification order.
+      if (vp.openIds.includes(id)) return;
       run.context.tryUpdate(TOAST_VIEWPORT_CONTEXT, (prev) =>
-        prev.openIds[0] === id
-          ? prev
-          : { ...prev, openIds: [id, ...prev.openIds.filter((item) => item !== id)] }
+        prev.openIds.includes(id) ? prev : { ...prev, openIds: [id, ...prev.openIds] }
       );
       return;
     }
@@ -265,6 +270,8 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     expanded.set(!!vp?.expanded, 'reason: toast viewport expanded');
     const idx = vp ? vp.openIds.indexOf(id) : 0;
     const limit = vp?.visibleToasts ?? 3;
+    stackIndex.set(idx, 'reason: toast opening chronology');
+    limited.set(idx >= limit, 'reason: toast visible window');
     const nextTier: ToastStackTier =
       idx <= 0
         ? 'front'
@@ -274,7 +281,7 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
             ? 'second'
             : idx === 2
               ? 'third'
-              : 'overflow';
+              : 'back';
     stackTier.set(nextTier, 'reason: toast stack tier');
     viewportPaused = !!vp?.paused;
     viewportDuration = vp?.duration ?? null;
@@ -414,7 +421,7 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     }
   });
   def.rule({
-    when: (w) => w.state(transition.isPresent).eq(false),
+    when: (w) => w.any(w.state(transition.isPresent).eq(false), w.state(limited).eq(true)),
     intent: (i) => i.feedback.style.use(tw('hidden')),
   });
 }

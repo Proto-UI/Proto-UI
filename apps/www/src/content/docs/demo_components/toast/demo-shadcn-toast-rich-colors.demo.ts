@@ -34,6 +34,7 @@ export default withShadcnRheaDemo({
       {
         kind: 'proto',
         prototypeId: 'shadcn-toast-viewport',
+        previewTheme: 'portal',
         ref: 'viewport',
         props: { a11yLabel: 'Rich color notifications', position: 'bottom-right', expand: true },
         children: [

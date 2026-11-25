@@ -24,7 +24,7 @@ const BROWSER_COMPILER_OWNER = Object.freeze({
 
 export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
   'packages/compiler/src/core-value-types.ts': Object.freeze({
-    sourceSha256: '95d2852d40d97b570e75a3f095b25a7ce633e81606f21148557266795ff2842e',
+    sourceSha256: 'f94e6acaea151b7046c57ec4a537202ef903f79264df1e437d749cb502ab8b8d',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/control-label']),
   }),
@@ -105,7 +105,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
   }),
   'packages/compiler/src/targets.ts': Object.freeze({
     // The 0.3.0 release stamp updates the six React runtime dependency and helper versions.
-    sourceSha256: 'f008f1b302f0d45adeedeeb8c4163b18c92c89057302f773e237c4c247be6843',
+    sourceSha256: 'f4d2699fdfe005c9f1781250651f6f06bc4af3383750cf228ab219de9e849b15',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/shader-presentation']),
   }),
