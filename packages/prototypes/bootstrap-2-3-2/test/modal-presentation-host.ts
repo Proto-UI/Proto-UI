@@ -41,15 +41,14 @@ export function installModalPresentationHost() {
     const root = document.documentElement;
     const height = Object.getOwnPropertyDescriptor(root, 'clientHeight');
     Object.defineProperty(root, 'clientHeight', { configurable: true, value: 1000 });
-    const preference = vi.spyOn(window, 'matchMedia').mockImplementation(
-      (query: string) =>
-        ({
-          matches: query.includes(': no-preference)'),
-          media: query,
-          addEventListener() {},
-          removeEventListener() {},
-        }) as MediaQueryList
-    );
+    const matchMedia = window.matchMedia.bind(window);
+    const preference = vi.spyOn(window, 'matchMedia').mockImplementation((query) => {
+      const media = matchMedia(query);
+      if (query === '(prefers-reduced-motion: no-preference)') {
+        Object.defineProperty(media, 'matches', { configurable: true, value: true });
+      }
+      return media;
+    });
     return () => {
       stylesheet.remove();
       preference.mockRestore();

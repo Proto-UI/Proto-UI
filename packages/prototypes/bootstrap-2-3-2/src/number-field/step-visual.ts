@@ -27,9 +27,11 @@ export function setupNumberFieldStepVisual<Props extends object, Exposes>(
   def.event.on('press.commit', () => {
     pressed.set(false, 'reason: Bootstrap number step activation finished');
   });
-  state.disabled.watch((_run, event) => {
-    if (event.type === 'next' && event.next) clear();
-  });
+  if ('watch' in state.disabled) {
+    state.disabled.watch((_run, event) => {
+      if (event.type === 'next' && event.next) clear();
+    });
+  }
   def.lifecycle.onUnmounted(clear);
 
   setupButtonVisual(def, state);
