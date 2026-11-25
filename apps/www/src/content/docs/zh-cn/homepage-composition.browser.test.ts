@@ -376,7 +376,9 @@ async function layoutFacts(page: Page) {
       width: box.width,
       height: box.height,
     });
-    const galleries = [...document.querySelectorAll<HTMLElement>(`${active} .home-gallery`)];
+    const galleries = [
+      ...document.querySelectorAll<HTMLElement>(`${active} [data-home-gallery-stage]`),
+    ];
     const gallery: GalleryFlowFacts = {
       containerCount: galleries.length,
       viewportWidth: innerWidth,

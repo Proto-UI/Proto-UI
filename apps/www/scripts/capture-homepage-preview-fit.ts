@@ -120,41 +120,46 @@ async function measure(page: Page) {
       throw new Error('Missing real homepage gallery layout');
     const viewport = host.querySelector<HTMLElement>('[data-home-gallery-viewport]');
     const fadeOwner = viewport ?? stage;
-    const number = (value: string) => Number.parseFloat(value) || 0;
-    const geometry = (element: HTMLElement) => {
-      const style = getComputedStyle(element);
-      const bounds = element.getBoundingClientRect();
-      const borderX = number(style.borderLeftWidth) + number(style.borderRightWidth);
-      const paddingX = number(style.paddingLeft) + number(style.paddingRight);
-      const cssBorderWidth =
-        number(style.width) + (style.boxSizing === 'border-box' ? 0 : borderX + paddingX);
-      const physicalScaleX = cssBorderWidth > 0 ? bounds.width / cssBorderWidth : null;
-      return {
-        rect: bounds.toJSON(),
-        offsetWidth: element.offsetWidth,
-        offsetHeight: element.offsetHeight,
-        clientWidth: element.clientWidth,
-        clientHeight: element.clientHeight,
-        cssWidth: style.width,
-        cssHeight: style.height,
-        cssZoom: style.zoom,
-        transform: style.transform,
-        boxSizing: style.boxSizing,
-        physicalScaleX,
-        physicalContentWidth:
-          physicalScaleX === null ? null : bounds.width - (borderX + paddingX) * physicalScaleX,
-      };
-    };
-    const isVisible = (element: HTMLElement) => {
-      const style = getComputedStyle(element),
-        rect = element.getBoundingClientRect();
-      return (
-        rect.width > 0 &&
-        rect.height > 0 &&
-        style.display !== 'none' &&
-        style.visibility !== 'hidden' &&
-        !element.closest('[hidden]')
-      );
+    // Object methods avoid host-only name helpers in the serialized browser callback.
+    const { number, geometry, isVisible } = {
+      number(value: string) {
+        return Number.parseFloat(value) || 0;
+      },
+      geometry(element: HTMLElement) {
+        const style = getComputedStyle(element);
+        const bounds = element.getBoundingClientRect();
+        const borderX = number(style.borderLeftWidth) + number(style.borderRightWidth);
+        const paddingX = number(style.paddingLeft) + number(style.paddingRight);
+        const cssBorderWidth =
+          number(style.width) + (style.boxSizing === 'border-box' ? 0 : borderX + paddingX);
+        const physicalScaleX = cssBorderWidth > 0 ? bounds.width / cssBorderWidth : null;
+        return {
+          rect: bounds.toJSON(),
+          offsetWidth: element.offsetWidth,
+          offsetHeight: element.offsetHeight,
+          clientWidth: element.clientWidth,
+          clientHeight: element.clientHeight,
+          cssWidth: style.width,
+          cssHeight: style.height,
+          cssZoom: style.zoom,
+          transform: style.transform,
+          boxSizing: style.boxSizing,
+          physicalScaleX,
+          physicalContentWidth:
+            physicalScaleX === null ? null : bounds.width - (borderX + paddingX) * physicalScaleX,
+        };
+      },
+      isVisible(element: HTMLElement) {
+        const style = getComputedStyle(element),
+          rect = element.getBoundingClientRect();
+        return (
+          rect.width > 0 &&
+          rect.height > 0 &&
+          style.display !== 'none' &&
+          style.visibility !== 'hidden' &&
+          !element.closest('[hidden]')
+        );
+      },
     };
     const cards = [...stage.querySelectorAll<HTMLElement>('[data-gallery-demo]')];
     const toggles = [...root.querySelectorAll<HTMLElement>('[data-home-gallery-layout-toggle]')];
@@ -173,6 +178,7 @@ async function measure(page: Page) {
     return {
       viewport: { width: innerWidth, height: innerHeight, deviceScaleFactor: devicePixelRatio },
       documentWidth: document.documentElement.scrollWidth,
+      bodyBackgroundColor: getComputedStyle(document.body).backgroundColor,
       rootFontSize: number(getComputedStyle(document.documentElement).fontSize),
       theme: document.documentElement.dataset.theme,
       scroll: { x: scrollX, y: scrollY },

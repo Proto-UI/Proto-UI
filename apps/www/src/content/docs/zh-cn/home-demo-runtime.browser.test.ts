@@ -105,6 +105,79 @@ async function createHomeGalleryObservation(
       const gallery = stage.closest<HTMLElement>('.home-gallery')!;
       const viewport = stage.closest<HTMLElement>('[data-home-gallery-viewport]')!;
       const fade = getComputedStyle(viewport, '::after');
+      const bodyBackgroundColor = getComputedStyle(document.body).backgroundColor;
+      // Split only top-level commas: CSS color functions may contain their own
+      // commas or spaces. Do not depend on rgb(), lab() or color() serialization.
+      const gradientParts: string[] = [];
+      if (
+        fade.backgroundImage.startsWith('linear-gradient(') &&
+        fade.backgroundImage.endsWith(')')
+      ) {
+        const argumentsText = fade.backgroundImage.slice('linear-gradient('.length, -1);
+        let depth = 0;
+        let start = 0;
+        for (let index = 0; index < argumentsText.length; index += 1) {
+          const character = argumentsText[index];
+          if (character === '(') depth += 1;
+          else if (character === ')') depth -= 1;
+          else if (character === ',' && depth === 0) {
+            gradientParts.push(argumentsText.slice(start, index).trim());
+            start = index + 1;
+          }
+        }
+        if (depth === 0) gradientParts.push(argumentsText.slice(start).trim());
+        else gradientParts.length = 0;
+      }
+      let fadeFirstStopColor: string | null = null;
+      // The optional first argument is a direction; never skip a parsed color
+      // for a later, more convenient stop (its alpha must independently be 255).
+      for (const stop of gradientParts.slice(0, 2)) {
+        if (CSS.supports('color', stop)) {
+          fadeFirstStopColor = stop;
+          break;
+        }
+        let depth = 0;
+        for (let index = 0; index < stop.length; index += 1) {
+          const character = stop[index];
+          if (character === '(') depth += 1;
+          else if (character === ')') depth -= 1;
+          else if (/\s/.test(character) && depth === 0) {
+            const color = stop.slice(0, index).trim();
+            if (CSS.supports('color', color)) {
+              fadeFirstStopColor = color;
+              break;
+            }
+          }
+        }
+        if (fadeFirstStopColor) break;
+      }
+      // This canvas is never attached to the document. Its sRGB pixel provides
+      // one color space for both computed values without changing page styles.
+      const colorContext =
+        typeof OffscreenCanvas === 'function'
+          ? new OffscreenCanvas(1, 1).getContext('2d', { colorSpace: 'srgb' })
+          : null;
+      const normalizedColors: Array<number[] | null> = [];
+      for (const color of [fadeFirstStopColor, bodyBackgroundColor]) {
+        if (!colorContext || !color || !CSS.supports('color', color)) {
+          normalizedColors.push(null);
+          continue;
+        }
+        colorContext.clearRect(0, 0, 1, 1);
+        // Unsupported canvas colors stay transparent and fail the opaque check.
+        colorContext.fillStyle = 'rgba(0, 0, 0, 0)';
+        colorContext.fillStyle = color;
+        colorContext.fillRect(0, 0, 1, 1);
+        normalizedColors.push([...colorContext.getImageData(0, 0, 1, 1).data]);
+      }
+      const [fadeFirstStopRgba, bodyBackgroundRgba] = normalizedColors;
+      const fadeColorMeasurementError = !fadeFirstStopColor
+        ? 'Cannot parse the first computed linear-gradient color stop'
+        : !colorContext
+          ? 'OffscreenCanvas sRGB 2D context is unavailable'
+          : !fadeFirstStopRgba || !bodyBackgroundRgba
+            ? 'Cannot normalize the computed gradient stop and body colors'
+            : null;
       const source = gallery.querySelector('.home-gallery__attribution-link')!;
       const card = stage.querySelector<HTMLElement>(
         '[data-gallery-demo="controls"] [data-projection-prototype="shadcn-card-root"]'
@@ -138,6 +211,11 @@ async function createHomeGalleryObservation(
         galleryWidth: gallery.getBoundingClientRect().width,
         fadeViewportWidth: viewport.getBoundingClientRect().width,
         fade: fade.backgroundImage,
+        fadeFirstStopColor,
+        fadeFirstStopRgba,
+        bodyBackgroundColor,
+        bodyBackgroundRgba,
+        fadeColorMeasurementError,
         fadeHeight: Number.parseFloat(fade.height),
         fadeViewportHeight: Number.parseFloat(getComputedStyle(viewport).height),
         rootFontSize: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
@@ -197,6 +275,12 @@ async function createHomeGalleryObservation(
       Math.min(8 * facts.rootFontSize, facts.fadeViewportHeight * 0.28),
       1
     );
+    expect(facts.fadeColorMeasurementError).toBeNull();
+    expect(facts.fadeFirstStopRgba).not.toBeNull();
+    expect(facts.bodyBackgroundRgba).not.toBeNull();
+    expect(facts.fadeFirstStopRgba?.[3]).toBe(255);
+    expect(facts.bodyBackgroundRgba?.[3]).toBe(255);
+    expect(facts.fadeFirstStopRgba).toEqual(facts.bodyBackgroundRgba);
   };
   return { home, stage, errors, sample, capture, expectCompactPreview };
 }
