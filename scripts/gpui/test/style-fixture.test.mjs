@@ -146,8 +146,9 @@ test('a stale theme fixture fails the check', () => {
 });
 
 // Source palettes and the common renderer own this finite key contract, including
-// all seven derived radius variants. Family-only navbar and destructive-foreground
-// keys stay explicit so omissions and unknown entries are both rejected.
+// all seven derived radius variants. Family-only navbar, destructive-foreground
+// and secondary-background keys stay explicit so omissions and unknown entries
+// are both rejected.
 const sharedDraftVariables = [
   'accent',
   'accent-foreground',
@@ -186,6 +187,7 @@ const requiredDraftVariables = {
     ...sharedDraftVariables,
     '--pui-destructive',
     '--pui-destructive-foreground',
+    '--pui-secondary-background',
   ].sort(),
 };
 function assertDraftPaletteKeys(keys, family, label = family) {
@@ -229,6 +231,8 @@ test('both draft family palettes come from source with exactly one variable pref
   assert.equal(themes['bootstrap-2-3-2'].dark['--pui-navbar-top'], '#0055aa');
   assert.equal(themes['liquid-glass'].light['--pui-secondary'], '#ffffff');
   assert.equal(themes['liquid-glass'].dark['--pui-secondary'], '#2c2c2e');
+  assert.equal(themes['liquid-glass'].light['--pui-secondary-background'], '#e9e9eb');
+  assert.equal(themes['liquid-glass'].dark['--pui-secondary-background'], '#333335');
   for (const name of ['bootstrap-2-3-2', 'liquid-glass']) {
     for (const mode of ['light', 'dark']) {
       const keys = Object.keys(themes[name][mode]);
