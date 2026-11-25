@@ -7,6 +7,7 @@
 //! Other spaces, hue strategies, nested mixes and non-literal inputs are
 //! reported rather than approximated, and `parses_every_colour_a_theme_can_produce`
 //! fails if a new form appears.
+//! `border-color` declarations may contain up to four of these colour values.
 //!
 //! Lab input lightness is clamped to CSS Color 4's 0..100 range. For intermediate
 //! Lab lightness that converts outside sRGB, this parser uses CSS Color 4
@@ -79,6 +80,48 @@ pub fn parse(value: &str) -> Result<ColorValue, ColorError> {
         return Ok(ColorValue::CurrentColor);
     }
     parse_rgba(text).map(ColorValue::Rgba)
+}
+
+/// Parses `border-color` into top, right, bottom and left colours.
+///
+/// CSS accepts one to four components here, while [`parse`] still accepts
+/// exactly one colour. Whitespace inside a function belongs to that component.
+/// Variables must already be substituted. Every component is validated before
+/// expansion; this does not establish a host's ability to paint distinct edges.
+pub fn parse_border_colors(value: &str) -> Result<[ColorValue; 4], ColorError> {
+    let text = value.trim();
+    let malformed = || ColorError::Malformed(text.to_string());
+    let mut colors = [ColorValue::CurrentColor; 4];
+    let mut count = 0usize;
+    let mut depth = 0usize;
+    let mut start = 0;
+    // As in color-mix, only separators outside balanced functions delimit
+    // components. Nested rgb()/lab() arguments must remain intact.
+    for (index, character) in text.char_indices().chain([(text.len(), ' ')]) {
+        if character.is_ascii_whitespace() && depth == 0 {
+            if start < index {
+                let color = colors.get_mut(count).ok_or_else(malformed)?;
+                *color = parse(&text[start..index])?;
+                count += 1;
+            }
+            start = index + 1;
+            continue;
+        }
+        match character {
+            '(' => depth += 1,
+            ')' => depth = depth.checked_sub(1).ok_or_else(malformed)?,
+            _ => {}
+        }
+    }
+    if depth != 0 || count == 0 {
+        return Err(malformed());
+    }
+    Ok(match count {
+        1 => [colors[0]; 4],
+        2 => [colors[0], colors[1], colors[0], colors[1]],
+        3 => [colors[0], colors[1], colors[2], colors[1]],
+        _ => colors,
+    })
 }
 
 /// Parses a value that must resolve to a concrete colour.

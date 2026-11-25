@@ -52,6 +52,7 @@ fn the_recorded_button_is_a_button_named_by_its_content() {
             name_from_content: true,
             disabled: false,
             read_only: None,
+            required: None,
             toggled: None,
             selected: None,
             orientation: None,
@@ -110,6 +111,7 @@ fn the_recorded_checkbox_is_a_checkbox_unchecked_checked_or_mixed() {
         assert!(issues.is_empty(), "{session}: {issues:?}");
         let projection = projection.expect("a projection");
         assert_eq!(projection.read_only, Some(false));
+        assert_eq!(projection.required, Some(false));
         projection
     };
     let unchecked = checkbox("root");

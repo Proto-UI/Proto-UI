@@ -146,9 +146,12 @@ fn resolves_the_composed_shadow_a_ring_token_produces() {
 #[test]
 fn new_family_variables_preserve_the_source_policies() {
     let catalog = themes();
-    for scheme in [ColorScheme::Light, ColorScheme::Dark] {
+    for (scheme, background) in [
+        (ColorScheme::Light, "#ffffff"),
+        (ColorScheme::Dark, "#161616"),
+    ] {
         let bootstrap = catalog.get("bootstrap-2-3-2", scheme).unwrap();
-        assert_eq!(bootstrap.variable("--pui-background"), Some("#ffffff"));
+        assert_eq!(bootstrap.variable("--pui-background"), Some(background));
         assert_eq!(bootstrap.variable("--pui-primary"), Some("#0044cc"));
         assert_eq!(bootstrap.variable("--pui-radius"), Some("4px"));
         assert_eq!(

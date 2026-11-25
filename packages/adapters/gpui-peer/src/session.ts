@@ -37,7 +37,7 @@ import {
   EVENT_ROOT_TARGET_CAP,
 } from '@proto.ui/module-event';
 import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
-import { EFFECTS_CAP } from '@proto.ui/module-feedback';
+import { EFFECTS_CAP, PRESENCE_RUN_IN_CALLBACK_CAP } from '@proto.ui/module-feedback';
 import {
   EXPOSES_RECORD_SINK_CAP,
   isExposeStateExternalHandle,
@@ -617,7 +617,12 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
           (fn: () => void) => hostSession?.invokeInCallbackScope(fn),
         ],
       ]);
-    wiring.attach('feedback', [[EFFECTS_CAP, effects]]);
+    wiring.attach('feedback', [
+      [EFFECTS_CAP, effects],
+      // Manual first mount publishes the session before presentation can complete.
+      // Even without a native presentation sink, semantic settlement needs its run handle.
+      [PRESENCE_RUN_IN_CALLBACK_CAP, (fn: () => void) => hostSession!.invokeInCallbackScope(fn)],
+    ]);
     if (args.getMeta) wiring.attach('rule-meta', [[RULE_META_GET_CAP, args.getMeta]]);
     wiring.attach('as-trigger', [
       [AS_TRIGGER_INSTANCE_CAP, instanceToken],
