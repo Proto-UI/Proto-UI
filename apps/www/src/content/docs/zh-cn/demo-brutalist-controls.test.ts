@@ -88,10 +88,25 @@ describe('Brutalist documentation demo state contracts', () => {
       }
       expect(textContent(accessibleLabel)).toBe(example.label);
 
-      const visibleLabel = nodes.find(
-        (node) => node.kind === 'box' && node.tag === 'span' && textContent(node) === example.label
+      const wrapper = nodes.find(
+        (node) => node.kind === 'box' && node.children?.includes(switchNode)
+      );
+      expect(wrapper).toBeDefined();
+      if (!wrapper || wrapper.kind !== 'box') {
+        throw new Error(`Missing Switch row wrapper: ${example.switchRef}`);
+      }
+      const visibleLabel = wrapper.children?.find(
+        (child) =>
+          typeof child !== 'string' &&
+          child.kind === 'box' &&
+          child.tag === 'span' &&
+          !(child.className ?? '').split(/\s+/).includes('sr-only')
       );
       expect(visibleLabel).toBeDefined();
+      if (!visibleLabel || typeof visibleLabel === 'string' || visibleLabel.kind !== 'box') {
+        throw new Error(`Missing visible Switch sibling label: ${example.switchRef}`);
+      }
+      expect(textContent(visibleLabel)).toBe(example.label);
     }
   });
 
