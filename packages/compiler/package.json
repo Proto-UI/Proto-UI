@@ -21,13 +21,26 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./frontend": {
+      "types": "./src/frontend/index.ts",
+      "default": "./src/frontend/index.ts"
+    },
+    "./editor": {
+      "types": "./src/editor.ts",
+      "default": "./src/editor.ts"
+    },
+    "./source-manifest": {
+      "types": "./src/source-manifest.ts",
+      "default": "./src/source-manifest.ts"
+    },
     "./targets/ir": "./src/targets/component-ir.ts",
     "./targets/react": "./src/targets/react.ts",
     "./targets/gpui": "./src/targets/gpui.ts",
     "./support/react": "./src/support/react/index.ts"
   },
   "scripts": {
-    "test": "node --test test/retirement.node-test.mjs",
+    "test": "node --test test/*.node-test.mjs",
+    "lint": "node src/cli-entry.mjs lint",
     "test:targets:react": "node --test test/react-target.node-test.mjs",
     "test:targets:gpui": "node --test test/gpui-target.node-test.mjs",
     "status": "node src/cli-entry.mjs --status"

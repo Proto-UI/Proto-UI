@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "8635852ffdba3eecd8b03259deb93d81b33301c9",
-  "scope": "Direct source inventory for the sampled website routes after integrating main f7d5b846 into the compiler-foundation candidate. All 31 existing owners remain: seven reviewed main-integration changes renew their hashes and 24 hashes are unchanged. The new code-format.ts snippet producer is an explicit 32nd owner. The preceding 862870 reference is byte-preserved in website-markup-provenance-862870f.json. This records source identity only; source admission, browser execution, served/transitive closure and lifecycle/release acceptance remain independently unverified.",
+  "revision": "4583e080e9cc3d46cf023da8a208f9ce01c7bace",
+  "scope": "Direct source inventory for the same sampled website routes after the partial shared compiler frontend. All 32 reviewed owners remain; only pnpm-lock.yaml changes to declare the compiler package dependency on the already locked TypeScript 5.9.3. The prior reference is preserved byte-for-byte in website-markup-provenance-8635852.json. No browser compiler UI, Worker or engine is restored. Source identity alone does not verify browser execution, served content, complete transitive closure or lifecycle admission.",
   "sourceAdmission": "unverified",
   "sources": [
     {
@@ -91,7 +91,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "sha256": "50cb2a3862c7875afd270b10567e9202baa2223e00016a13242041381eb8e56b"
+      "sha256": "833a3ddcceceb8321ff8afb78003a0f6ef5a61da5e759e7356cae158e92820b6"
     },
     {
       "path": "apps/www/src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode.ts",
