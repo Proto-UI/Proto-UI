@@ -27,6 +27,8 @@ import type { ProjectionComponentId, ProjectionFamilyId } from './projection-fam
 import { describeLazyChunkFailure, isLazyChunkFailure } from './lazy-chunk-recovery';
 import { PREVIEW_ERROR_MARKER, PREVIEW_RECOVERY_ATTRIBUTE } from './preview-error-surface';
 
+export { demoModuleCount, warmDemoModules } from './demo-modules';
+
 const PREFERRED_ADAPTER_KEY = 'preferred-prototypes-adapter';
 // Bind our one public preference event to its initiating logical request. A
 // synchronous newer request can invalidate the remaining outer event delivery.

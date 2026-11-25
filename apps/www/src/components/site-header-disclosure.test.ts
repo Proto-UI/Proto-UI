@@ -66,6 +66,19 @@ describe('shared website navigation disclosure', () => {
     expect(document.activeElement).toBe(button);
   });
 
+  it('returns focus when Escape bubbles from a text node in the Header', async () => {
+    const { button, navigation } = fixture();
+    disclosure!.enhance();
+    disclosure!.toggle();
+    await Promise.resolve();
+    const text = navigation.querySelector('a')!.firstChild!;
+    const escape = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+    text.dispatchEvent(escape);
+    expect(escape.defaultPrevented).toBe(true);
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+    expect(document.activeElement).toBe(button);
+  });
+
   it('moves the same preferences owner into the compact panel only after enhancement', () => {
     const { root, panel } = fixture();
     const context = root.querySelector('[data-site-header-context]')!;
