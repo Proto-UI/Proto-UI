@@ -89,6 +89,118 @@ async function chooseRuntime(page: Page, root: Locator, runtime: string) {
   await waitForHomeRuntime(page, runtime);
 }
 
+async function createHomeGalleryObservation(
+  page: Page,
+  evidenceLabel: string,
+  initialColorScheme: 'light' | 'dark'
+) {
+  const home = page.locator(HOME_SELECTOR);
+  const stage = home.locator('[data-home-gallery-stage]');
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  const sample = () =>
+    stage.evaluate((node) => {
+      const stage = node as HTMLElement;
+      const bounds = stage.getBoundingClientRect();
+      const gallery = stage.closest<HTMLElement>('.home-gallery')!;
+      const viewport = stage.closest<HTMLElement>('[data-home-gallery-viewport]')!;
+      const fade = getComputedStyle(viewport, '::after');
+      const source = gallery.querySelector('.home-gallery__attribution-link')!;
+      const card = stage.querySelector<HTMLElement>(
+        '[data-gallery-demo="controls"] [data-projection-prototype="shadcn-card-root"]'
+      )!;
+      const home = stage.closest<HTMLElement>('[data-home-showcase]')!;
+      return {
+        viewportWidth: innerWidth,
+        theme: document.documentElement.dataset.theme,
+        runtime: home.dataset.runnerRuntime,
+        generation: home.dataset.projectionGeneration,
+        liveRoots: stage.querySelectorAll('[data-pui-root]').length,
+        cardPaint: {
+          background: getComputedStyle(card).backgroundColor,
+          color: getComputedStyle(card).color,
+        },
+        inert: stage.inert,
+        columnCount: new Set(
+          [...stage.querySelectorAll('.home-gallery__column')].map(
+            (column) => column.getBoundingClientRect().left
+          )
+        ).size,
+        cardCount: stage.querySelectorAll('[data-gallery-demo]').length,
+        noOverflow:
+          bounds.left >= -1 &&
+          bounds.right <= innerWidth + 1 &&
+          document.documentElement.scrollWidth <= innerWidth + 1,
+        fitsGallery:
+          Math.abs(bounds.width - gallery.getBoundingClientRect().width) <= 1 &&
+          Math.abs(bounds.width - viewport.getBoundingClientRect().width) <= 1,
+        stageWidth: bounds.width,
+        galleryWidth: gallery.getBoundingClientRect().width,
+        fadeViewportWidth: viewport.getBoundingClientRect().width,
+        fade: fade.backgroundImage,
+        fadeHeight: Number.parseFloat(fade.height),
+        fadeViewportHeight: Number.parseFloat(getComputedStyle(viewport).height),
+        rootFontSize: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
+        fadePointerEvents: fade.pointerEvents,
+        fadeVisible: fade.visibility === 'visible',
+        sourceOutsideStage: !stage.contains(source),
+        sourceOutsideViewport: !viewport.contains(source),
+      };
+    });
+  const evidenceDirectory = path.join(
+    process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ||
+      path.join(process.env.RUNNER_TEMP ?? os.tmpdir(), 'homepage-evidence'),
+    'mobile-live-preview'
+  );
+  await mkdir(evidenceDirectory, { recursive: true });
+  const source = {
+    revision: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+    dirty: execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim() !== '',
+  };
+  const capture = async (name: string) => {
+    // Native layout and ResizeObserver delivery settle across real frames;
+    // neither this observer nor the capture changes component state.
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        )
+    );
+    const facts = await sample();
+    const id = `${evidenceLabel}-${name}`;
+    await writeFile(
+      path.join(evidenceDirectory, `${id}.json`),
+      JSON.stringify(
+        { source, initialColorScheme, facts, errors, url: safeUrl(page.url(), baseUrl) },
+        null,
+        2
+      )
+    );
+    await page.screenshot({ path: path.join(evidenceDirectory, `${id}.png`), fullPage: true });
+    return facts;
+  };
+  const expectCompactPreview = (facts: Awaited<ReturnType<typeof sample>>) => {
+    expect(facts).toMatchObject({
+      inert: true,
+      columnCount: 5,
+      cardCount: 10,
+      noOverflow: true,
+      fitsGallery: true,
+      fadePointerEvents: 'none',
+      fadeVisible: true,
+      sourceOutsideStage: true,
+      sourceOutsideViewport: true,
+    });
+    expect(facts.liveRoots).toBeGreaterThan(0);
+    expect(facts.fade).toContain('linear-gradient');
+    expect(facts.fadeHeight).toBeCloseTo(
+      Math.min(8 * facts.rootFontSize, facts.fadeViewportHeight * 0.28),
+      1
+    );
+  };
+  return { home, stage, errors, sample, capture, expectCompactPreview };
+}
+
 let browser: Browser;
 let baseUrl = '';
 
@@ -702,7 +814,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
     }
   }, 90_000);
 
-  it('shows an inert five-column mobile overview and reopens the same interactive gallery', async () => {
+  it('fills the mobile preview with live components and enters the same gallery through the Hero Demo link', async () => {
     for (const colorScheme of ['light', 'dark'] as const) {
       const context = await browser.newContext({
         viewport: { width: 390, height: 900 },
@@ -710,11 +822,10 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
       });
       try {
         const page = await context.newPage();
+        const { home, stage, errors, sample, capture, expectCompactPreview } =
+          await createHomeGalleryObservation(page, `entry-${colorScheme}`, colorScheme);
         await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
         await waitForHomeRuntime(page, 'wc');
-        const home = page.locator(HOME_SELECTOR);
-        const stage = home.locator('[data-home-gallery-stage]');
-        const toggle = home.locator('[data-home-gallery-layout-toggle]');
         const mainButton = home.getByRole('button', {
           name: '主要',
           exact: true,
@@ -730,34 +841,11 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
             (node) => !node.ignored && node.role?.value === 'button' && node.name?.value === '主要'
           );
         };
-        expect(await toggle.textContent()).toBe('打开交互演示');
-        const sample = () =>
-          stage.evaluate((node) => {
-            const stage = node as HTMLElement;
-            const bounds = stage.getBoundingClientRect();
-            const fade = getComputedStyle(stage, '::after');
-            const source = stage.parentElement!.querySelector('.home-gallery__attribution-link')!;
-            return {
-              inert: stage.inert,
-              columnCount: new Set(
-                [...stage.querySelectorAll('.home-gallery__column')].map(
-                  (column) => column.getBoundingClientRect().left
-                )
-              ).size,
-              cardCount: stage.querySelectorAll('[data-gallery-demo]').length,
-              noOverflow:
-                bounds.left >= -1 &&
-                bounds.right <= innerWidth + 1 &&
-                document.documentElement.scrollWidth <= innerWidth + 1,
-              fitsGallery:
-                Math.abs(bounds.width - stage.parentElement!.getBoundingClientRect().width) <= 1,
-              fade: fade.backgroundImage,
-              fadePointerEvents: fade.pointerEvents,
-              fadeVisible: fade.visibility === 'visible',
-              sourceOutsideStage: !stage.contains(source),
-            };
-          });
-        const initial = await sample();
+        const initial = await capture('initial');
+        expect(await home.locator('[data-home-gallery-layout-toggle]').count()).toBe(0);
+        expect(await home.textContent()).not.toMatch(
+          /打开交互演示|关闭交互演示|查看桌面缩略图|Open interactive demos|Show desktop overview/
+        );
         expect(initial).toMatchObject({
           inert: true,
           columnCount: 5,
@@ -769,7 +857,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
           sourceOutsideStage: true,
         });
         expect(initial.fade).toContain('linear-gradient');
-        expect(await toggle.getAttribute('aria-expanded')).toBe('false');
+        expectCompactPreview(initial);
         // Playwright 1.58's role selector does not implement inert ancestry.
         // The native AX tree and actual focus behavior establish this boundary.
         expect(await nativeMainButtons()).toHaveLength(0);
@@ -778,9 +866,11 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
           button.focus();
         });
         expect(await stage.evaluate((node) => node.matches(':focus-within'))).toBe(false);
-        await toggle.press('Enter');
-        expect(await toggle.getAttribute('aria-expanded')).toBe('true');
-        expect((await sample()).inert).toBe(false);
+        const demoLink = page.getByRole('link', { name: '试试 Demo', exact: true });
+        expect(await demoLink.getAttribute('href')).toBe('#home-demo-previewer');
+        await demoLink.press('Enter');
+        await expect.poll(() => new URL(page.url()).hash).toBe('#home-demo-previewer');
+        await expect.poll(async () => (await sample()).inert).toBe(false);
         expect(await nativeMainButtons()).toHaveLength(1);
         expect(
           await mainButton.evaluate((button, retained) => button === retained, retainedButton)
@@ -793,20 +883,190 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
           .poll(() => home.locator('[data-demo-ref="gallery-controls-feedback"]').textContent())
           .not.toBe('点击任意控件');
         await page.setViewportSize({ width: 1440, height: 900 });
-        await expect.poll(() => toggle.isVisible()).toBe(false);
-        expect((await sample()).inert).toBe(false);
+        const desktop = await capture('desktop-after-entry');
+        expect(desktop.inert).toBe(false);
+        expect(desktop.fade).toBe(initial.fade);
+        expect(desktop.fadeHeight).toBeCloseTo(
+          Math.min(8 * desktop.rootFontSize, desktop.fadeViewportHeight * 0.28),
+          1
+        );
         await page.setViewportSize({ width: 390, height: 900 });
-        await toggle.waitFor({ state: 'visible' });
-        expect((await sample()).inert).toBe(false);
-        expect(await toggle.textContent()).toBe('查看桌面缩略图');
-        await toggle.press('Enter');
-        expect((await sample()).inert).toBe(true);
-        expect(await nativeMainButtons()).toHaveLength(0);
+        const returned = await capture('mobile-after-entry');
+        expect(returned.inert).toBe(false);
+        expect(returned.noOverflow).toBe(true);
+        expect(await mainButton.evaluate((button) => document.activeElement === button)).toBe(true);
+        expect(await nativeMainButtons()).toHaveLength(1);
         await retainedButton?.dispose();
+        // A desktop user need not have followed the hash link: resizing must
+        // still preserve a control that already owns native focus.
+        await page.setViewportSize({ width: 1440, height: 900 });
+        await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
+        await waitForHomeRuntime(page, 'wc');
+        await mainButton.focus();
+        await page.setViewportSize({ width: 390, height: 900 });
+        const focusedResize = await capture('focused-desktop-to-mobile');
+        expect(focusedResize.inert).toBe(false);
+        expect(focusedResize.noOverflow).toBe(true);
+        expect(await mainButton.evaluate((button) => document.activeElement === button)).toBe(true);
+        expect(await nativeMainButtons()).toHaveLength(1);
+        expect(errors).toEqual([]);
         await accessibility.detach();
       } finally {
         await context.close();
       }
+    }
+  }, 90_000);
+
+  it('keeps the compact preview full width through viewport, root-font, theme and Runtime changes', async () => {
+    const context = await browser.newContext({
+      viewport: { width: 390, height: 900 },
+      colorScheme: 'light',
+    });
+    try {
+      const page = await context.newPage();
+      const { home, errors, sample, capture, expectCompactPreview } =
+        await createHomeGalleryObservation(page, 'responsive', 'light');
+      await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
+      await waitForHomeRuntime(page, 'wc');
+      for (const width of [320, 390, 430, 767]) {
+        await page.setViewportSize({ width, height: 900 });
+        expectCompactPreview(await capture(`compact-${width}`));
+      }
+      await page.setViewportSize({ width: 390, height: 900 });
+      const beforeFont = await page.evaluate(() => ({
+        value: document.documentElement.style.getPropertyValue('font-size'),
+        priority: document.documentElement.style.getPropertyPriority('font-size'),
+        computed: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
+      }));
+      try {
+        // Explicit root-font environment input, not browser zoom and not a
+        // substitute for the existing full-size 200% content-reading journey.
+        await page.evaluate((value) => {
+          document.documentElement.style.setProperty('font-size', `${value}px`);
+        }, beforeFont.computed * 2);
+        const enlarged = await capture('root-font-200');
+        expect(enlarged.rootFontSize).toBeCloseTo(beforeFont.computed * 2, 3);
+        expectCompactPreview(enlarged);
+      } finally {
+        await page.evaluate(({ value, priority }) => {
+          if (value) document.documentElement.style.setProperty('font-size', value, priority);
+          else document.documentElement.style.removeProperty('font-size');
+        }, beforeFont);
+      }
+      const restored = await capture('root-font-restored');
+      expect(restored.rootFontSize).toBeCloseTo(beforeFont.computed, 3);
+      expectCompactPreview(restored);
+      await page
+        .locator('[data-homepage-runtime]')
+        .getByRole('button', { name: '切换主题', exact: true })
+        .click();
+      await expect
+        .poll(() => page.locator('html').getAttribute('data-theme'))
+        .toBe(restored.theme === 'dark' ? 'light' : 'dark');
+      await expect.poll(async () => (await sample()).cardPaint).not.toEqual(restored.cardPaint);
+      const afterTheme = await capture('after-theme');
+      expectCompactPreview(afterTheme);
+      expect(afterTheme.fade).not.toBe(restored.fade);
+      const closeHeaderMenu = async () => {
+        const menu = page.locator(
+          '[data-site-header] .site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
+        );
+        if ((await menu.getAttribute('aria-expanded')) === 'true') await menu.click();
+      };
+      const beforeRuntime = afterTheme.generation;
+      await chooseRuntime(page, home, 'react');
+      await closeHeaderMenu();
+      const afterRuntime = await capture('react');
+      expectCompactPreview(afterRuntime);
+      expect(afterRuntime.runtime).toBe('react');
+      expect(afterRuntime.generation).not.toBe(beforeRuntime);
+      await chooseRuntime(page, home, 'wc');
+      await closeHeaderMenu();
+      const returnedRuntime = await capture('wc-return');
+      expectCompactPreview(returnedRuntime);
+      expect(returnedRuntime.runtime).toBe('wc');
+      expect(returnedRuntime.generation).not.toBe(afterRuntime.generation);
+      expect(errors).toEqual([]);
+    } finally {
+      await context.close();
+    }
+  }, 90_000);
+
+  it('honors direct and repeated Hero hash entry with native Back and Forward', async () => {
+    const context = await browser.newContext({
+      viewport: { width: 390, height: 900 },
+      colorScheme: 'light',
+    });
+    try {
+      const page = await context.newPage();
+      const { home, sample, capture, errors, expectCompactPreview } =
+        await createHomeGalleryObservation(page, 'history', 'light');
+      await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
+      await waitForHomeRuntime(page, 'wc');
+      const initial = await capture('initial');
+      expectCompactPreview(initial);
+      const mainButton = home.getByRole('button', {
+        name: '主要',
+        exact: true,
+        includeHidden: true,
+      });
+      const retainedButton = await mainButton.elementHandle();
+      expect(retainedButton).not.toBeNull();
+      const demoLink = page.getByRole('link', { name: '试试 Demo', exact: true });
+      await demoLink.press('Enter');
+      await expect.poll(() => new URL(page.url()).hash).toBe('#home-demo-previewer');
+      await expect.poll(async () => (await sample()).inert).toBe(false);
+      await mainButton.press('Enter');
+      const feedback = home.locator('[data-demo-ref="gallery-controls-feedback"]');
+      await expect.poll(() => feedback.textContent()).not.toBe('点击任意控件');
+      const retainedFeedback = await feedback.textContent();
+      await demoLink.press('Enter');
+      const repeated = await capture('repeated-hash');
+      expect(repeated.inert).toBe(false);
+      expect(repeated.generation).toBe(initial.generation);
+      expect(await feedback.textContent()).toBe(retainedFeedback);
+      expect(
+        await mainButton.evaluate((button, retained) => button === retained, retainedButton)
+      ).toBe(true);
+      // Hero entry leaves focus outside the stage here, so this history case
+      // does not conflate returning to the overview with focused-control protection.
+      await page.goBack();
+      await expect.poll(() => new URL(page.url()).hash).toBe('');
+      const back = await capture('back');
+      expectCompactPreview(back);
+      expect(back.generation).toBe(initial.generation);
+      await page.goForward();
+      await expect.poll(() => new URL(page.url()).hash).toBe('#home-demo-previewer');
+      const forward = await capture('forward');
+      expect(forward.inert).toBe(false);
+      expect(forward.noOverflow).toBe(true);
+      expect(forward.generation).toBe(initial.generation);
+      expect(await feedback.textContent()).toBe(retainedFeedback);
+      expect(
+        await mainButton.evaluate((button, retained) => button === retained, retainedButton)
+      ).toBe(true);
+      await retainedButton?.dispose();
+      expect(errors).toEqual([]);
+
+      const directPage = await context.newPage();
+      const direct = await createHomeGalleryObservation(directPage, 'direct-hash', 'light');
+      await directPage.goto(`${baseUrl}${HOME_ROUTE}#home-demo-previewer`, {
+        waitUntil: 'networkidle',
+      });
+      await waitForHomeRuntime(directPage, 'wc');
+      const directFacts = await direct.capture('initial');
+      expect(directFacts.inert).toBe(false);
+      expect(directFacts.noOverflow).toBe(true);
+      expect(await direct.home.locator('[data-home-gallery-layout-toggle]').count()).toBe(0);
+      await direct.home.getByRole('button', { name: '主要', exact: true }).press('Enter');
+      await expect
+        .poll(() =>
+          direct.home.locator('[data-demo-ref="gallery-controls-feedback"]').textContent()
+        )
+        .not.toBe('点击任意控件');
+      expect(direct.errors).toEqual([]);
+    } finally {
+      await context.close();
     }
   }, 90_000);
 
@@ -824,10 +1084,12 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         for (const width of [1440, 390, 320]) {
           await page.setViewportSize({ width, height: 900 });
           if (width < 768) {
-            const layoutToggle = home.locator('[data-home-gallery-layout-toggle]');
-            await layoutToggle.waitFor({ state: 'visible' });
-            if ((await layoutToggle.getAttribute('aria-expanded')) === 'false')
-              await layoutToggle.click();
+            const gallery = home.locator('[data-home-gallery-stage]');
+            if (await gallery.evaluate((node) => (node as HTMLElement).inert))
+              await page.getByRole('link', { name: '试试 Demo', exact: true }).press('Enter');
+            await expect
+              .poll(() => gallery.evaluate((node) => (node as HTMLElement).inert))
+              .toBe(false);
           }
           await revealHeaderPreferences(page);
           const geometry = await home.evaluate((root) => {

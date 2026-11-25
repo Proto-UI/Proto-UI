@@ -1278,10 +1278,16 @@ describe.sequential(
               await stage(`layout-${layout.name}`);
               await page.setViewportSize({ width: layout.width, height: 1000 });
               if (layout.width < 768) {
-                const layoutToggle = page.locator('[data-home-gallery-layout-toggle]');
-                await layoutToggle.waitFor({ state: 'visible' });
-                if ((await layoutToggle.getAttribute('aria-expanded')) === 'false')
-                  await layoutToggle.click();
+                const gallery = page.locator(`${ACTIVE} [data-home-gallery-stage]`);
+                if (await gallery.evaluate((node) => (node as HTMLElement).inert))
+                  await page
+                    .locator(
+                      '.homepage-hero [data-projection-generation-state="active"] a[href="#home-demo-previewer"]'
+                    )
+                    .press('Enter');
+                await expect
+                  .poll(() => gallery.evaluate((node) => (node as HTMLElement).inert))
+                  .toBe(false);
               }
               if (layout.textScale === 200) {
                 record.textResize = await resizeText200(page);
