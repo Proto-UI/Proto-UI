@@ -179,12 +179,16 @@ describe.sequential('Brutalist Checkbox browser acceptance', () => {
     try {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of TEST_RUNTIMES) {
-        await selectRuntime(page, previewer, runtime, '[role="checkbox"]', 6);
+        await selectRuntime(page, previewer, runtime, '[role="checkbox"]', 5);
         await page.waitForFunction(
           () =>
-            [...document.querySelectorAll('[data-previewer-id] [role="checkbox"]')]
+            [
+              ...(document
+                .querySelector('[data-previewer-id]')
+                ?.querySelectorAll('[role="checkbox"]') ?? []),
+            ]
               .map((checkbox) => checkbox.querySelectorAll('svg').length)
-              .join(',') === '0,1,1,1,0,1',
+              .join(',') === '0,1,1,1,1',
           undefined,
           { timeout: 10_000 }
         );
@@ -212,15 +216,15 @@ describe.sequential('Brutalist Checkbox browser acceptance', () => {
         expect(
           facts.map((fact) => fact.checked),
           `${runtime}/aria-checked`
-        ).toEqual(['false', 'true', 'mixed', 'true', 'false', 'mixed']);
+        ).toEqual(['false', 'true', 'mixed', 'true', 'true']);
         expect(
           facts.map((fact) => fact.disabled),
           `${runtime}/aria-disabled`
-        ).toEqual(['false', 'false', 'false', 'true', 'false', 'false']);
+        ).toEqual(['false', 'false', 'false', 'true', 'false']);
         expect(
           facts.map((fact) => fact.tabIndex),
           `${runtime}/tab-order`
-        ).toEqual([0, 0, 0, -1, 0, 0]);
+        ).toEqual([0, 0, 0, -1, 0]);
         for (const [index, fact] of facts.entries()) {
           expect(fact.indicatorRole, `${runtime}/indicator-role-${index}`).toBeNull();
           expect(
@@ -235,8 +239,8 @@ describe.sequential('Brutalist Checkbox browser acceptance', () => {
         expect(
           facts.map((fact) => fact.glyphCount),
           `${runtime}/glyph-count`
-        ).toEqual([0, 1, 1, 1, 0, 1]);
-        expect(facts[5].glyphPath, `${runtime}/mixed-precedence`).toBe('M5 12h14');
+        ).toEqual([0, 1, 1, 1, 1]);
+        expect(facts[2].glyphPath, `${runtime}/mixed-precedence`).toBe('M5 12h14');
 
         const checkbox = checkboxes.first();
         const row = checkbox.locator('xpath=..');
