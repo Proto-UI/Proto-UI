@@ -11,15 +11,54 @@ export default definePrototype<NumberFieldPartProps, NumberFieldStepExposes>({
   setup(def) {
     const inherited = asNumberFieldIncrement();
     const state = inherited.stateHandles!;
+    const hovered = def.state.bool('stepPointerHovered', false);
+    const pressed = def.state.bool('stepPointerPressed', false);
+    const clearHovered = () => hovered.set(false, 'reason: step pointer hover ended');
+    const clearPressed = () => pressed.set(false, 'reason: step pointer press ended');
+    def.event.on('pointer.enter', () => {
+      if (!state.disabled.get()) hovered.set(true, 'reason: step pointer enter');
+    });
+    def.event.on('pointer.leave', () => {
+      clearHovered();
+      clearPressed();
+    });
+    def.event.on('pointer.cancel', () => {
+      clearHovered();
+      clearPressed();
+    });
+    def.event.on('pointer.down', () => {
+      if (!state.disabled.get()) pressed.set(true, 'reason: step pointer down');
+    });
+    def.event.on('pointer.up', clearPressed);
+    def.lifecycle.onUnmounted(() => {
+      clearHovered();
+      clearPressed();
+    });
+    if ('watch' in state.disabled) {
+      state.disabled.watch((_run, event) => {
+        if (event.type === 'next' && event.next) {
+          clearHovered();
+          clearPressed();
+        }
+      });
+    }
     def.feedback.style.use(
       tw(
         'inline-flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-base border-2 border-border bg-secondary-background shadow-[2px_2px_0_0_var(--pui-border)] p-2 font-sans text-sm font-medium text-foreground select-none cursor-pointer outline-none'
       )
     );
     def.rule({
-      when: (w) => w.state(state.disabled).eq(false),
-      intent: (i) =>
-        i.feedback.style.use(tw('hover:bg-main hover:text-main-foreground active:bg-main/80')),
+      when: (w) =>
+        w.all(
+          w.state(state.disabled).eq(false),
+          w.state(hovered).eq(true),
+          w.state(pressed).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(state.disabled).eq(false), w.state(pressed).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('bg-main/80 text-main-foreground')),
     });
     def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),
