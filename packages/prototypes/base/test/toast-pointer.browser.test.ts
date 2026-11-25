@@ -50,7 +50,7 @@ async function openFixture(touch = false) {
         border: 1px solid; cursor: pointer; }
       #spacer { height: 800px; }
     </style>
-    <section id="scrollport"><div id="spacer"></div></section>`);
+    <div id="fixture-origin"><section id="scrollport"><div id="spacer"></div></section></div>`);
   await page.addScriptTag({ content: bundle });
   await page.evaluate(() => window.ToastPointerFixture.mount());
   return { context, page, errors };
@@ -137,6 +137,33 @@ describe('Toast native pointer arbitration', () => {
   it('yields an orthogonal native touch drag to the scrolling container', async () => {
     const { context, page, errors } = await openFixture(true);
     try {
+      const scrolling = await page.evaluate(() => {
+        const viewport = document.querySelector('#viewport')!;
+        const scrollport = document.querySelector('#scrollport')!;
+        const toast = document.querySelector('#toast')!;
+        return {
+          viewportPortaledToBody: viewport.parentElement === document.body,
+          scrollportInsideViewport: scrollport.parentElement === viewport,
+          toastInsideScrollport: toast.parentElement === scrollport,
+          spacerInsideScrollport: document.querySelector('#spacer')!.parentElement === scrollport,
+          overflowY: getComputedStyle(scrollport).overflowY,
+          touchAction: getComputedStyle(toast).touchAction,
+          scrollTop: scrollport.scrollTop,
+          clientHeight: scrollport.clientHeight,
+          scrollHeight: scrollport.scrollHeight,
+        };
+      });
+      expect(scrolling).toMatchObject({
+        viewportPortaledToBody: true,
+        scrollportInsideViewport: true,
+        toastInsideScrollport: true,
+        spacerInsideScrollport: true,
+        overflowY: 'auto',
+        touchAction: 'pan-y',
+        scrollTop: 0,
+      });
+      expect(scrolling.clientHeight).toBeGreaterThan(0);
+      expect(scrolling.scrollHeight - scrolling.clientHeight).toBeGreaterThan(20);
       const box = await page.locator('#toast').boundingBox();
       if (!box) throw new Error('The Toast root must have a native input box.');
       const session = await context.newCDPSession(page);
