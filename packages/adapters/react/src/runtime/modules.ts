@@ -253,7 +253,7 @@ export function createReactOwnerModules<Props extends PropsBaseType>(
       [ANATOMY_INSTANCE_TOKEN_CAP, instanceToken],
       [ANATOMY_PARENT_CAP, getLogicalParent],
       [ANATOMY_GET_PROTO_CAP, (inst: unknown) => getLogicalPrototype(inst as LogicalInstanceToken)],
-      [ANATOMY_ROOT_TARGET_CAP, (inst: unknown) => getLogicalRoot(inst as LogicalInstanceToken)],
+      [ANATOMY_ROOT_TARGET_CAP, getLogicalRoot],
     ])
     .use('as-trigger', [
       [AS_TRIGGER_INSTANCE_CAP, instanceToken],
@@ -560,7 +560,7 @@ export function createReactModules<Props extends PropsBaseType>(args: {
       [ANATOMY_INSTANCE_TOKEN_CAP, instanceToken],
       [ANATOMY_PARENT_CAP, getLogicalParent],
       [ANATOMY_GET_PROTO_CAP, (inst: unknown) => getLogicalPrototype(inst as LogicalInstanceToken)],
-      [ANATOMY_ROOT_TARGET_CAP, (inst: unknown) => getLogicalRoot(inst as LogicalInstanceToken)],
+      [ANATOMY_ROOT_TARGET_CAP, getLogicalRoot],
       [ANATOMY_ORDER_OBSERVER_CAP, createDomOrderObserver],
     ])
     .use('as-trigger', [

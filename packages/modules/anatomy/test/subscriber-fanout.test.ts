@@ -15,11 +15,15 @@ function fixture(getRootTarget?: AnatomyRootTargetGetter) {
     roles: {
       root: { cardinality: { min: 1, max: 1 } },
       item: { cardinality: { min: 0, max: '*' } },
+      decoration: { cardinality: { min: 0, max: '*' } },
     },
   });
   const rootToken = {};
   const getParent = (instance: unknown) => (instance === rootToken ? null : rootToken);
-  const make = (role?: 'root' | 'item', parentGetter: AnatomyParentGetter = getParent) => {
+  const make = (
+    role?: 'root' | 'item' | 'decoration',
+    parentGetter: AnatomyParentGetter = getParent
+  ) => {
     const token = role === 'root' ? rootToken : {};
     const caps = makeCaps({
       instance: token,
@@ -190,6 +194,156 @@ describe('Anatomy family subscriber notification', () => {
     f.make('item');
     replacementRoot.port.syncStructure();
     expect(seen).toHaveLength(4);
+  });
+
+  it('reuses the live comparator for each sort in a single notification', () => {
+    const f = fixture();
+    f.make('item');
+    f.make('item');
+    for (let index = 0; index < 4; index++) f.make().port.subscribeOrder(f.family, vi.fn());
+
+    const sorts = vi.spyOn(Array.prototype, 'sort');
+    try {
+      f.notify();
+      const comparators = sorts.mock.calls.flatMap(([compare], index) => {
+        const claims = sorts.mock.contexts[index];
+        return compare &&
+          Array.isArray(claims) &&
+          claims.every((claim) => claim?.family === f.family)
+          ? [compare]
+          : [];
+      });
+      expect(comparators).toHaveLength(4);
+      expect(new Set(comparators).size).toBe(1);
+    } finally {
+      sorts.mockRestore();
+    }
+  });
+
+  it('reuses unchanged whole and role order signatures after reading live targets', () => {
+    const readTarget = vi.fn(() => null);
+    const f = fixture(readTarget);
+    f.make('item');
+    f.make('item');
+    f.make('decoration');
+    const notified = vi.fn();
+    for (let index = 0; index < 4; index++) {
+      const owner = f.make();
+      owner.port.subscribeOrder(f.family, () => notified());
+      owner.port.subscribeOrder(f.family, () => notified(), 'item');
+    }
+
+    readTarget.mockClear();
+    const joins = vi.spyOn(Array.prototype, 'join');
+    let signatureJoins: number;
+    try {
+      f.notify();
+      signatureJoins = joins.mock.calls.filter(([separator]) => separator === '|').length;
+    } finally {
+      joins.mockRestore();
+    }
+    expect(readTarget).toHaveBeenCalled();
+    expect(notified).not.toHaveBeenCalled();
+    expect(signatureJoins).toBe(0);
+  });
+
+  it('does not look up host identity again for each stable order recipient', () => {
+    const readTarget = vi.fn(() => null);
+    const f = fixture(readTarget);
+    const claims = [f.root, f.make('item'), f.make('item')];
+    const tokens = new Set(claims.map((claim) => claim.port.resolveSelfInstance()));
+    const notified = vi.fn();
+    for (let index = 0; index < 4; index++) {
+      f.make().port.subscribeOrder(f.family, notified);
+    }
+
+    readTarget.mockClear();
+    const get = vi.spyOn(WeakMap.prototype, 'get');
+    let identityReads: number;
+    try {
+      f.notify();
+      identityReads = get.mock.calls.filter(([token]) => tokens.has(token)).length;
+    } finally {
+      get.mockRestore();
+    }
+    expect(readTarget).toHaveBeenCalled();
+    expect(notified).not.toHaveBeenCalled();
+    expect(identityReads).toBe(0);
+  });
+
+  it('sorts the already filtered role members without copying that array again', () => {
+    const f = fixture();
+    f.make('item');
+    f.make('item');
+    f.make('decoration');
+    const order = vi.fn();
+    f.root.port.subscribeOrder(f.family, order, 'item');
+
+    const slice = vi.spyOn(Array.prototype, 'slice');
+    let roleCopies: number;
+    try {
+      f.notify();
+      roleCopies = slice.mock.contexts.filter(
+        (claims) =>
+          Array.isArray(claims) &&
+          claims.length === 2 &&
+          claims.every((claim) => claim.family === f.family && claim.role === 'item')
+      ).length;
+    } finally {
+      slice.mockRestore();
+    }
+    expect(roleCopies).toBe(0);
+    expect(order).not.toHaveBeenCalled();
+  });
+
+  it('checks only the subscribed role while retaining whole-family notifications on the same owner', () => {
+    const targets = new Map<
+      unknown,
+      { rank: number; compareDocumentPosition(other: unknown): number }
+    >();
+    const getRootTarget = vi.fn((instance: unknown) => targets.get(instance) ?? null);
+    const f = fixture(getRootTarget);
+    const items = [f.make('item'), f.make('item')];
+    const position = (owner: AnatomyModuleImpl, rank: number) => {
+      targets.set(owner.port.resolveSelfInstance(), {
+        rank,
+        compareDocumentPosition(other) {
+          return this.rank < (other as { rank: number }).rank ? 4 : 2;
+        },
+      });
+    };
+    position(f.root, 0);
+    position(items[0]!, 1);
+    position(items[1]!, 2);
+    const owner = f.make();
+    const roleOrder = vi.fn();
+    const wholeOrder = vi.fn();
+    const offRole = owner.port.subscribeOrder(f.family, roleOrder, 'item');
+
+    const decoration = f.make('decoration');
+    position(decoration, 3);
+    getRootTarget.mockClear();
+    f.notify();
+    const decorationInstance = decoration.port.resolveSelfInstance();
+    expect(getRootTarget.mock.calls.some(([instance]) => instance === decorationInstance)).toBe(
+      false
+    );
+    expect(roleOrder).not.toHaveBeenCalled();
+
+    owner.port.subscribeOrder(f.family, wholeOrder);
+    position(decoration, -1);
+    f.notify();
+    expect(wholeOrder).toHaveBeenCalledOnce();
+    expect(roleOrder).not.toHaveBeenCalled();
+
+    position(items[1]!, 0.5);
+    f.notify();
+    expect(roleOrder).toHaveBeenCalledOnce();
+    expect(wholeOrder).toHaveBeenCalledTimes(2);
+    offRole();
+    items[1]!.dispose();
+    expect(roleOrder).toHaveBeenCalledOnce();
+    expect(wholeOrder).toHaveBeenCalledTimes(3);
   });
 
   it('observes comparator replacement during repeated host reads for a later recipient', () => {

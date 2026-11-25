@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createAnatomyFamily, type AnatomyFamily } from '@proto.ui/core';
 import { AnatomyModuleImpl } from '../src/impl';
 import { makeCaps } from './utils/fake-caps';
@@ -42,6 +42,30 @@ const names = (impl: AnatomyModuleImpl, family: AnatomyFamily) =>
   (impl.port.parts(family, { missing: 'empty' }) ?? []).map((part) => part.getExpose('name'));
 
 describe('terminal Anatomy domains do not adopt their retiring descendants', () => {
+  it('skips retired-boundary lookup for live claims and still stops at a retired ancestor', () => {
+    const a = family('live-then-retired');
+    const { node, parents } = fixture();
+    const root = node('root', null, [[a, 'root']]);
+    const item = node('item', root.token, [[a, 'item']]);
+    const trigger = node('trigger', item.token, [[a, 'trigger']]);
+    const get = vi.spyOn(Map.prototype, 'get');
+    let scope: unknown;
+    let familyReads: number;
+    try {
+      scope = trigger.impl.port.resolveDomainScope(a);
+      familyReads = get.mock.calls.filter(([key]) => key === a).length;
+    } finally {
+      get.mockRestore();
+    }
+
+    expect(scope).toBe(root.token);
+    expect(familyReads).toBe(3);
+    item.impl.dispose();
+    expect(trigger.impl.port.resolveDomainScope(a)).toBeNull();
+    parents.set(trigger.token, root.token);
+    expect(trigger.impl.port.resolveDomainScope(a)).toBe(root.token);
+  });
+
   it('keeps nested root descendants out of the outer domain between parent and child disposal', () => {
     const a = family('terminal-nested');
     const { node } = fixture();

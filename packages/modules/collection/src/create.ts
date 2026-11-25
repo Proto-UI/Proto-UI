@@ -136,13 +136,13 @@ class CollectionModuleImpl extends ModuleBase {
   private subscribeProvider(cb: () => void): Unsubscribe {
     const config = this.providerConfig;
     if (!config) return () => {};
-    return this.anatomy.subscribeOrder(config.family as AnatomyFamily, cb);
+    return this.anatomy.subscribeOrder(config.family as AnatomyFamily, cb, config.itemRole);
   }
 
   private subscribeItem(cb: () => void): Unsubscribe {
     const config = this.itemConfig;
     if (!config) return () => {};
-    return this.anatomy.subscribeOrder(config.family as AnatomyFamily, cb);
+    return this.anatomy.subscribeOrder(config.family as AnatomyFamily, cb, config.role);
   }
 }
 
