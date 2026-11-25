@@ -88,10 +88,10 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     } else {
       expect(tokens).toContain(
         family === 'liquid-glass'
-          ? 'border-foreground'
+          ? 'border-destructive'
           : family === 'bootstrap-2-3-2'
             ? 'data-[invalid]:border-[#953b39]'
-            : 'data-[invalid]:border-foreground'
+            : 'data-[invalid]:border-destructive'
       );
     }
     if (family === 'bootstrap-2-3-2') {
@@ -111,7 +111,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     if (family === 'liquid-glass') {
       expect(editor.getAttribute('data-pui-style')).toContain('border-border');
       expect((editor.getAttribute('data-pui-style') ?? '').split(/\s+/)).not.toContain(
-        'border-foreground'
+        'border-destructive'
       );
     }
     expect(editor.value).toBe('Owned');
