@@ -275,16 +275,18 @@ const entryStyleWatches = new WeakMap<
   }
 >();
 
+const XHTML_NS = 'http://www.w3.org/1999/xhtml';
+const ENTRY_STYLESHEET_SELECTOR = 'style,link[rel~="stylesheet"]';
+const ENTRY_STYLESHEET_ATTRS = ['href', 'rel', 'media', 'disabled', 'type'];
+
 function isEntryStylesheetElement(node: Node | null): node is Element {
-  return (
-    !!node && node.nodeType === 1 && (node as Element).matches('style,link[rel~="stylesheet"]')
-  );
+  return !!node && node.nodeType === 1 && (node as Element).matches(ENTRY_STYLESHEET_SELECTOR);
 }
 
 function containsEntryStylesheetElement(node: Node): boolean {
   return (
     isEntryStylesheetElement(node) ||
-    (node.nodeType === 1 && !!(node as Element).querySelector('style,link[rel~="stylesheet"]'))
+    (node.nodeType === 1 && !!(node as Element).querySelector(ENTRY_STYLESHEET_SELECTOR))
   );
 }
 
@@ -302,7 +304,7 @@ function invalidatesEntryStyles(record: MutationRecord): boolean {
 function isNamedRadioForEntry(node: Node, names: ReadonlySet<string>): boolean {
   if (node.nodeType !== 1) return false;
   const element = node as Element;
-  if (element.namespaceURI === 'http://www.w3.org/1999/xhtml' && element.localName === 'input') {
+  if (element.namespaceURI === XHTML_NS && element.localName === 'input') {
     const input = element as HTMLInputElement;
     if (input.type === 'radio' && names.has(input.name)) return true;
   }
@@ -315,7 +317,7 @@ function containsReferencedRadioForm(node: Node, formIds: ReadonlySet<string>): 
   if (node.nodeType !== 1 || formIds.size === 0) return false;
   const element = node as Element;
   if (
-    element.namespaceURI === 'http://www.w3.org/1999/xhtml' &&
+    element.namespaceURI === XHTML_NS &&
     element.localName === 'form' &&
     formIds.has(element.id)
   ) {
@@ -338,13 +340,13 @@ function invalidatesEntryRadioGroup(
   }
   if (record.target.nodeType !== 1) return false;
   const element = record.target as Element;
-  if (element.namespaceURI === 'http://www.w3.org/1999/xhtml' && element.localName === 'form') {
+  if (element.namespaceURI === XHTML_NS && element.localName === 'form') {
     return (
       record.attributeName === 'id' &&
       (formIds.has(element.id) || formIds.has(record.oldValue ?? ''))
     );
   }
-  if (element.namespaceURI !== 'http://www.w3.org/1999/xhtml' || element.localName !== 'input') {
+  if (element.namespaceURI !== XHTML_NS || element.localName !== 'input') {
     return false;
   }
   const input = element as HTMLInputElement;
@@ -398,7 +400,12 @@ function animationAffectsEntryEligibility(animation: Animation): boolean {
   }
 }
 
-function matchingSelectorParen(selector: string, open: number): number {
+function matchingSelectorDelimiter(
+  selector: string,
+  open: number,
+  openChar: string,
+  closeChar: string
+): number {
   let depth = 1;
   let quote = '';
   for (let index = open + 1; index < selector.length; index += 1) {
@@ -415,10 +422,14 @@ function matchingSelectorParen(selector: string, open: number): number {
       quote = character;
       continue;
     }
-    if (character === '(') depth += 1;
-    else if (character === ')' && --depth === 0) return index;
+    if (character === openChar) depth += 1;
+    else if (character === closeChar && --depth === 0) return index;
   }
   return -1;
+}
+
+function matchingSelectorParen(selector: string, open: number): number {
+  return matchingSelectorDelimiter(selector, open, '(', ')');
 }
 
 // These scans ignore the same escaped, quoted and attribute-selector input.
@@ -434,18 +445,8 @@ function skipSelectorLiteral(selector: string, index: number, character: string)
   }
   if (character === ']') return index;
   if (character !== '[') return null;
-  let depth = 1;
-  let quote = '';
-  for (let end = index + 1; end < selector.length; end += 1) {
-    const next = selector[end]!;
-    if (next === '\\') end += 1;
-    else if (quote) {
-      if (next === quote) quote = '';
-    } else if (next === '"' || next === "'") quote = next;
-    else if (next === '[') depth += 1;
-    else if (next === ']' && --depth === 0) return end;
-  }
-  return selector.length;
+  const close = matchingSelectorDelimiter(selector, index, '[', ']');
+  return close < 0 ? selector.length : close;
 }
 
 function containsDocumentRootSelectorList(selector: string): boolean {
@@ -465,10 +466,7 @@ function containsDocumentRootSelectorList(selector: string): boolean {
     else if (!depth && character === ',') {
       if (matchesLastCompound(index)) return true;
       compoundStart = index + 1;
-    } else if (
-      !depth &&
-      (character === '>' || character === '+' || character === '~' || /\s/.test(character))
-    ) {
+    } else if (!depth && /[>+~\s]/.test(character)) {
       compoundStart = index + 1;
     }
   }
@@ -547,9 +545,7 @@ function hasDocumentRootRelationalSubject(selector: string): boolean {
     } else if (character === ')') {
       compoundStarts.length = depth;
       depth = Math.max(0, depth - 1);
-    } else if (character === ',' || character === '>' || character === '+' || character === '~') {
-      compoundStarts[depth] = index + 1;
-    } else if (/\s/.test(character)) {
+    } else if (/[,>+~\s]/.test(character)) {
       compoundStarts[depth] = index + 1;
     }
   }
@@ -575,11 +571,7 @@ function collectSiblingDependencySubjects(
       }
       if (character === '(') innerDepth += 1;
       else if (character === ')') innerDepth = Math.max(0, innerDepth - 1);
-      else if (
-        !innerDepth &&
-        (character === '>' || character === '+' || character === '~' || /\s/.test(character))
-      )
-        return suffix.slice(0, index);
+      else if (!innerDepth && /[>+~\s]/.test(character)) return suffix.slice(0, index);
     }
     return suffix;
   };
@@ -1175,12 +1167,19 @@ function watchEntryStyleInvalidation(
         });
       }
     };
+    const ElementInternalsCtor = (
+      view as unknown as {
+        ElementInternals?: { prototype: Record<string, unknown> };
+      }
+    ).ElementInternals;
     for (const [target, keys] of [
       [Sheet.prototype, ['insertRule', 'deleteRule', 'replaceSync', 'replace']],
       [Grouping, ['insertRule', 'deleteRule']],
       [Declaration.prototype, ['setProperty', 'removeProperty']],
       [view.MediaList?.prototype, ['appendMedium', 'deleteMedium']],
       [CustomStateSetCtor?.prototype, ['add', 'delete', 'clear']],
+      [view.HTMLInputElement?.prototype, ['stepUp', 'stepDown']],
+      [ElementInternalsCtor?.prototype, ['setValidity']],
     ] as const) {
       if (target) patchMethods(target as unknown as Record<string, unknown>, keys);
     }
@@ -1198,17 +1197,6 @@ function watchEntryStyleInvalidation(
           'setCustomValidity',
         ]);
     }
-    if (view.HTMLInputElement)
-      patchMethods(view.HTMLInputElement.prototype as unknown as Record<string, unknown>, [
-        'stepUp',
-        'stepDown',
-      ]);
-    const ElementInternalsCtor = (
-      view as unknown as {
-        ElementInternals?: { prototype: Record<string, unknown> };
-      }
-    ).ElementInternals;
-    if (ElementInternalsCtor) patchMethods(ElementInternalsCtor.prototype, ['setValidity']);
 
     const setterPatches: EntryStyleSetterPatch[] = [];
     const patchSetter = (target: object, key: string, cssName?: string) => {
@@ -1235,10 +1223,10 @@ function watchEntryStyleInvalidation(
     patchSetter(Declaration.prototype, 'display', 'display');
     patchSetter(Declaration.prototype, 'contentVisibility', 'content-visibility');
     patchSetter(Declaration.prototype, 'cssText');
-    if (StyleSheetCtor) patchSetter(StyleSheetCtor.prototype, 'disabled');
-    if (DocumentCtor) patchSetter(DocumentCtor.prototype, 'adoptedStyleSheets');
-    if (ShadowRootCtor) patchSetter(ShadowRootCtor.prototype, 'adoptedStyleSheets');
     for (const [Ctor, keys] of [
+      [StyleSheetCtor, ['disabled']],
+      [DocumentCtor, ['adoptedStyleSheets']],
+      [ShadowRootCtor, ['adoptedStyleSheets']],
       [view.CSSStyleRule, ['selectorText']],
       [view.MediaList, ['mediaText']],
       [view.HTMLInputElement, ['checked', 'indeterminate', 'value']],
@@ -1257,7 +1245,7 @@ function watchEntryStyleInvalidation(
       childList: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ['href', 'rel', 'media', 'disabled', 'type'],
+      attributeFilter: ENTRY_STYLESHEET_ATTRS,
     });
     const onLoad = (event: Event) => {
       if (isEntryStylesheetElement(event.target as Node | null)) notify();
@@ -1527,9 +1515,6 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
   const physicalControl = () => args.textControlTarget;
   const physicalImage = () => args.imageViewTarget;
 
-  let presenceSink: PresencePresentationSink | null = null;
-  let presenceSurface: HTMLElement | null = null;
-  let presenceView: number | null = null;
   const wiring = createControlWiring(
     args,
     rawPropsSource,
@@ -1641,9 +1626,6 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   overlayLayerScheduler?: OverlayLayerScheduler;
   overlayModal?: OverlayModal;
 }) {
-  let motionSurface: HTMLElement | null = null;
-  let motionSink: import('@proto.ui/module-feedback').ResidentMotionSink | null = null;
-  let motionView: number | null = null;
   const {
     el,
     instanceToken,
@@ -1685,34 +1667,36 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   let stopEntryUpgradeWatch: (() => void) | null = null;
   let entryObserverGeneration = 0;
   let radioFocusHistory: ReturnType<typeof observeWebComponentRadioFocus> | null = null;
-  const stopEntryObserver = () => {
-    entryObserverGeneration += 1;
+  const disconnectEntryTreeObservers = () => {
     entryObserver?.disconnect();
     entryImageObserver?.disconnect();
     entryExternalStyleObserver?.disconnect();
     entryRadioGroupObserver?.disconnect();
+    entryResizeObserver?.disconnect();
+    stopEntryRadioStateWatch?.();
+    stopEntryImageStateWatch?.();
+    stopEntrySlotWatch?.();
+    stopEntryMotionWatch?.();
+    stopEntryRadioStateWatch =
+      stopEntryImageStateWatch =
+      stopEntrySlotWatch =
+      stopEntryMotionWatch =
+        null;
+  };
+  const stopEntryObserver = () => {
+    entryObserverGeneration += 1;
+    disconnectEntryTreeObservers();
     entryObserver =
       entryImageObserver =
       entryExternalStyleObserver =
       entryRadioGroupObserver =
         null;
-    entryResizeObserver?.disconnect();
     entryResizeObserver = null;
-    stopEntryRadioStateWatch?.();
-    stopEntryImageStateWatch?.();
     stopEntryAttachShadowWatch?.();
     entryStyleWatch?.dispose();
     entryStyleWatch = null;
-    stopEntryMotionWatch?.();
-    stopEntrySlotWatch?.();
     stopEntryUpgradeWatch?.();
-    stopEntryRadioStateWatch =
-      stopEntryImageStateWatch =
-      stopEntryAttachShadowWatch =
-      stopEntryMotionWatch =
-      stopEntrySlotWatch =
-      stopEntryUpgradeWatch =
-        null;
+    stopEntryAttachShadowWatch = stopEntryUpgradeWatch = null;
   };
   const subscribeFocusTarget = (listener: () => void) => {
     const history = observeWebComponentRadioFocus(el);
@@ -1761,9 +1745,57 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   const portalMount = createWebComponentPortalMount();
   let releasePortalDirection: (() => void) | null = null;
 
-  let presenceSink: PresencePresentationSink | null = null;
-  let presenceSurface: HTMLElement | null = null;
-  let presenceView: number | null = null;
+  const getFeedbackSurface = () =>
+    (args.feedbackSurfaceProjection ?? args.surfaceProjection).getSurfaceTarget();
+  const createSurfaceRebindSink = <
+    Frame extends { style: import('@proto.ui/core').StyleHandle; view: number },
+    Sink extends {
+      commit(frame: Frame): void;
+      release(view: number): void;
+      diagnostics?: () => readonly string[];
+    },
+  >(
+    create: (surface: HTMLElement) => Sink
+  ) => {
+    let sink: Sink | null = null;
+    let surface: HTMLElement | null = null;
+    let view: number | null = null;
+    return {
+      get: () => sink,
+      commit(frame: Frame) {
+        const nextSurface = getFeedbackSurface();
+        if (!nextSurface) {
+          effectsPort.queueStyle(frame.style);
+          effectsPort.requestFlush();
+          return;
+        }
+        if (surface !== nextSurface) {
+          if (sink && view !== null) sink.release(view);
+          surface = nextSurface;
+          sink = create(nextSurface);
+        }
+        view = frame.view;
+        sink!.commit(frame);
+      },
+      release(nextView: number) {
+        sink?.release(nextView);
+        sink = surface = view = null;
+      },
+      diagnostics: () => sink?.diagnostics?.() ?? [],
+    };
+  };
+  const presence = createSurfaceRebindSink<
+    import('@proto.ui/module-feedback').PresencePresentationFrame,
+    PresencePresentationSink
+  >((surface) =>
+    createWebPresencePresentationSink(surface, effectsPort, {
+      subscribeDocumentChange: args.subscribeDocumentChange,
+    })
+  );
+  const motion = createSurfaceRebindSink<
+    import('@proto.ui/module-feedback').ResidentMotionFrame,
+    import('@proto.ui/module-feedback').ResidentMotionSink
+  >((surface) => createWebResidentMotionSink(surface, effectsPort, args.residentMotion));
   const wiring = createControlWiring(
     args,
     rawPropsSource,
@@ -1783,77 +1815,29 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       [EFFECTS_CAP, effectsPort],
       [
         SHADER_PRESENTATION_SINK_CAP,
-        createWebShaderPresentationSink(
-          () => (args.feedbackSurfaceProjection ?? args.surfaceProjection).getSurfaceTarget(),
-          effectsPort,
-          args.shader
-        ),
+        createWebShaderPresentationSink(getFeedbackSurface, effectsPort, args.shader),
       ],
       [PRESENCE_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
       [
         PRESENCE_PRESENTATION_SINK_CAP,
         {
-          commit(frame: import('@proto.ui/module-feedback').PresencePresentationFrame) {
-            const surface = (
-              args.feedbackSurfaceProjection ?? args.surfaceProjection
-            ).getSurfaceTarget();
-            if (!surface) {
-              effectsPort.queueStyle(frame.style);
-              effectsPort.requestFlush();
-              return;
-            }
-            if (presenceSurface !== surface) {
-              if (presenceSink && presenceView !== null) presenceSink.release(presenceView);
-              presenceSurface = surface;
-              presenceSink = createWebPresencePresentationSink(surface, effectsPort, {
-                subscribeDocumentChange: args.subscribeDocumentChange,
-              });
-            }
-            presenceView = frame.view;
-            presenceSink!.commit(frame);
-          },
+          commit: presence.commit,
           cancel() {
-            presenceSink?.cancel();
+            presence.get()?.cancel();
           },
           settle(outcome: import('@proto.ui/core').PresentationOutcome) {
-            return presenceSink?.settle(outcome) ?? false;
+            return presence.get()?.settle(outcome) ?? false;
           },
-          release(view: number) {
-            presenceSink?.release(view);
-            presenceSink = null;
-            presenceSurface = null;
-            presenceView = null;
-          },
-          diagnostics: () => presenceSink?.diagnostics?.() ?? [],
+          release: presence.release,
+          diagnostics: presence.diagnostics,
         },
       ],
       [
         RESIDENT_MOTION_SINK_CAP,
         {
-          diagnostics: () => motionSink?.diagnostics?.() ?? [],
-          commit(frame: import('@proto.ui/module-feedback').ResidentMotionFrame) {
-            const surface = (
-              args.feedbackSurfaceProjection ?? args.surfaceProjection
-            ).getSurfaceTarget();
-            if (!surface) {
-              effectsPort.queueStyle(frame.style);
-              effectsPort.requestFlush();
-              return;
-            }
-            if (motionSurface !== surface) {
-              if (motionSink && motionView !== null) motionSink.release(motionView);
-              motionSurface = surface;
-              motionSink = createWebResidentMotionSink(surface, effectsPort, args.residentMotion);
-            }
-            motionView = frame.view;
-            motionSink!.commit(frame);
-          },
-          release(view: number) {
-            motionSink?.release(view);
-            motionSink = null;
-            motionSurface = null;
-            motionView = null;
-          },
+          diagnostics: motion.diagnostics,
+          commit: motion.commit,
+          release: motion.release,
         },
       ],
       ...(args.visualFeedbackSink
@@ -1989,20 +1973,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             };
             const observeTree = () => {
               if (!isCurrentEntryObservation()) return;
-              entryObserver?.disconnect();
-              entryImageObserver?.disconnect();
-              entryExternalStyleObserver?.disconnect();
-              entryRadioGroupObserver?.disconnect();
-              entryResizeObserver?.disconnect();
-              stopEntryRadioStateWatch?.();
-              stopEntryImageStateWatch?.();
-              stopEntrySlotWatch?.();
-              stopEntryMotionWatch?.();
-              stopEntryRadioStateWatch =
-                stopEntryImageStateWatch =
-                stopEntrySlotWatch =
-                stopEntryMotionWatch =
-                  null;
+              disconnectEntryTreeObservers();
               let hasArea = false;
               let hasSlottedEntryContent = false;
               const radioTrees = new Set<Document | ShadowRoot>();
@@ -2538,7 +2509,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                     childList: true,
                     characterData: true,
                     attributes: true,
-                    attributeFilter: ['href', 'rel', 'media', 'disabled', 'type'],
+                    attributeFilter: ENTRY_STYLESHEET_ATTRS,
                   });
                 }
               }
