@@ -67,6 +67,8 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
     );
     def.rule({
       when: (w) => w.meta('preference.reducedMotion').eq('no-preference'),
+      // Material withdrawal must restore opaque fallback without interpolating
+      // the provider-owned transparent background through unreadable alpha.
       intent: (i) => i.feedback.style.use(tw('transition-shadow duration-150')),
     });
     def.rule({
