@@ -90,20 +90,6 @@
       ]
     },
     {
-      "number": 745,
-      "nodeId": "I_kwDOMhQZjc8AAAABTdsjMA",
-      "url": "https://github.com/Proto-UI/Proto-UI/issues/745",
-      "title": "[follow-up][agent-harness] Project #531 editor boundary into the coverage matrix",
-      "bodySha256": "223f1d49b7b8ba5b5a4da18ea9922815115c130151d596858a4e685a86986ad9",
-      "state": "CLOSED",
-      "stateReason": "COMPLETED",
-      "updatedAt": "2026-11-24T16:48:03Z",
-      "labels": ["F2 – Small", "advanced contribution", "docs", "enhancement"],
-      "assignees": [],
-      "milestone": null,
-      "owners": ["app editor infrastructure owner", "text document projection maintainer"]
-    },
-    {
       "number": 746,
       "nodeId": "I_kwDOMhQZjc8AAAABTd5CCg",
       "url": "https://github.com/Proto-UI/Proto-UI/issues/746",
@@ -143,6 +129,7 @@
         "app content infrastructure owner",
         "app content renderer",
         "app diff infrastructure owner",
+        "app editor infrastructure owner",
         "app highlighting infrastructure owner",
         "app security/preview infrastructure owner",
         "app-local and disclosure maintainers",
@@ -204,6 +191,7 @@
         "tabs/disclosure domains plus website demos",
         "tabs/toggle group domains plus website docs",
         "terminal research maintainer",
+        "text document projection maintainer",
         "toggle domain plus website theming",
         "tree, workspace, and brutalist checkbox maintainers",
         "website accessibility and starlight integration",
