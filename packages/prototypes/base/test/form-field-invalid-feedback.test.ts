@@ -62,9 +62,8 @@ afterEach(async () => {
 for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']) {
   // Bootstrap projects the pinned 2.3.2 error-group recipe: the theme maps
   // `text-destructive` to the historical #b94a48 help/error ink.
-  const ink =
-    family === 'brutalist' ? 'text-destructive-ink' : 'text-destructive';
-  const projectsInk = family !== 'liquid-glass';
+  const ink = family === 'brutalist' ? 'text-destructive-ink' : 'text-destructive';
+  const projectsInk = true;
   it(`${family} FormField keeps validation, error relations and reset under the inherited owner`, async () => {
     const { form, field, control, error, editor } = mount(family);
     const invalid: unknown[] = [],
