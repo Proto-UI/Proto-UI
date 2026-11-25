@@ -558,7 +558,6 @@ const staticUtilities: Record<string, string[]> = {
   'duration-200': ['transition-duration: 200ms;', '--pui-animation-duration: 200ms;'],
   'duration-300': ['transition-duration: 300ms;', '--pui-animation-duration: 300ms;'],
   'ease-in-out': ['transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);'],
-  'ease-out': ['transition-timing-function: cubic-bezier(0, 0, 0.2, 1);'],
   'font-normal': ['font-weight: 400;'],
   'font-medium': ['font-weight: 500;'],
   'font-black': ['font-weight: 900;'],
@@ -921,10 +920,6 @@ const staticUtilities: Record<string, string[]> = {
   'rounded-l-none': ['border-top-left-radius: 0px;', 'border-bottom-left-radius: 0px;'],
   'rounded-r-none': ['border-top-right-radius: 0px;', 'border-bottom-right-radius: 0px;'],
   'shadow-[2px_2px_0_0_#000]': ['--pui-shadow: 2px 2px 0 0 #000;', ...composedShadow()],
-  'shadow-[0_4px_12px_rgb(0_0_0/10%)]': [
-    '--pui-shadow: 0 4px 12px rgb(0 0 0 / 10%);',
-    ...composedShadow(),
-  ],
   'shadow-[3px_3px_0_0_#000]': ['--pui-shadow: 3px 3px 0 0 #000;', ...composedShadow()],
   'shadow-[4px_4px_0_0_#000]': ['--pui-shadow: 4px 4px 0 0 #000;', ...composedShadow()],
   'shadow-[6px_6px_0_0_#000]': ['--pui-shadow: 6px 6px 0 0 #000;', ...composedShadow()],
