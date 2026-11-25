@@ -48,11 +48,11 @@ function setupCarouselLayoutState<Props extends Record<string, any>, Exposes>(
   const axis = def.state.string('liquidGlassCarouselAxis', 'horizontal');
   const direction = def.state.string('liquidGlassCarouselDirection', 'ltr');
   const sync = (run: RunHandle<Props>) => {
-    const context = run.context.tryRead(CAROUSEL_CONTEXT);
-    axis.set(context?.orientation ?? 'horizontal', 'liquid glass carousel axis');
-    direction.set(context?.direction ?? 'ltr', 'liquid glass carousel direction');
+    const context = run.context.read(CAROUSEL_CONTEXT);
+    axis.set(context.orientation, 'liquid glass carousel axis');
+    direction.set(context.direction, 'liquid glass carousel direction');
   };
-  def.context.trySubscribe(CAROUSEL_CONTEXT, sync);
+  def.context.subscribe(CAROUSEL_CONTEXT, sync);
   def.lifecycle.onCreated(sync);
   return { axis, direction };
 }

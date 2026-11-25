@@ -28,11 +28,12 @@ function setupCarouselLayoutState<Props extends Record<string, any>, Exposes>(
   const axis = def.state.string('bootstrapCarouselAxis', 'horizontal');
   const direction = def.state.string('bootstrapCarouselDirection', 'ltr');
   const sync = (run: RunHandle<Props>) => {
-    const context = run.context.tryRead(CAROUSEL_CONTEXT);
-    axis.set(context?.orientation ?? 'horizontal', 'bootstrap carousel axis');
-    direction.set(context?.direction ?? 'ltr', 'bootstrap carousel direction');
+    const context = run.context.read(CAROUSEL_CONTEXT);
+    axis.set(context.orientation, 'bootstrap carousel axis');
+    direction.set(context.direction, 'bootstrap carousel direction');
   };
-  def.context.trySubscribe(CAROUSEL_CONTEXT, sync);
+  // The inherited navigation hook requires this owner on the same component.
+  def.context.subscribe(CAROUSEL_CONTEXT, sync);
   def.lifecycle.onCreated(sync);
   return { axis, direction };
 }

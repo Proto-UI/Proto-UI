@@ -22,11 +22,8 @@ export function setupCarouselAxis<
 >(def: DefHandle<Props, Exposes>) {
   const axis = def.state.string('shadcnCarouselAxis', 'horizontal');
   const sync = (run: RunHandle<Props>) =>
-    axis.set(
-      run.context.tryRead(CAROUSEL_CONTEXT)?.orientation ?? 'horizontal',
-      'carousel owner axis'
-    );
-  def.context.trySubscribe(CAROUSEL_CONTEXT, sync);
+    axis.set(run.context.read(CAROUSEL_CONTEXT).orientation, 'carousel owner axis');
+  def.context.subscribe(CAROUSEL_CONTEXT, sync);
   def.lifecycle.onCreated(sync);
   return axis;
 }
@@ -36,11 +33,8 @@ function setupCarouselDirection<Props extends ShadcnStyleProps, Exposes = Record
 ) {
   const direction = def.state.string('shadcnCarouselDirection', 'ltr');
   const sync = (run: RunHandle<Props>) =>
-    direction.set(
-      run.context.tryRead(CAROUSEL_CONTEXT)?.direction ?? 'ltr',
-      'carousel owner direction'
-    );
-  def.context.trySubscribe(CAROUSEL_CONTEXT, sync);
+    direction.set(run.context.read(CAROUSEL_CONTEXT).direction, 'carousel owner direction');
+  def.context.subscribe(CAROUSEL_CONTEXT, sync);
   def.lifecycle.onCreated(sync);
   return direction;
 }

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { afterTwoHostFrames } from '../../test-utils/host-rendering';
+import { installModalPresentationHost } from './modal-presentation-host';
 import {
   dialogClose,
   dialogCloseIcon,
@@ -16,6 +17,8 @@ import {
 import { hoverCardContent, hoverCardRoot, hoverCardTrigger } from '../src/hover-card';
 import { tooltipContent, tooltipGroup, tooltipRoot, tooltipTrigger } from '../src/tooltip';
 import { drawerContent, drawerFooter, drawerHeader, drawerRoot, drawerTitle } from '../src/drawer';
+
+const useModalPresentationHost = installModalPresentationHost();
 
 type Host = HTMLElement & { getExposes(): Record<string, unknown> };
 
@@ -148,7 +151,10 @@ describe('prototypes/bootstrap-2-3-2: dialog projection', () => {
     expect(stateValue<boolean>(root, 'open')).toBe(false);
   });
 
-  it('inherits open/close ownership, presence, and title/description relations', async () => {
+  it('inherits open/close ownership, presence, and title/description relations', async ({
+    onTestFinished,
+  }) => {
+    onTestFinished(useModalPresentationHost());
     const { root, trigger, mask, content, title, description, close } = appendDialog(
       document.body,
       { a11yLabel: 'Session preferences' }
