@@ -116,22 +116,29 @@ describe('one owner for migrated demo callbacks', () => {
     bootstrap: bootstrapSelect,
     liquid: liquidSelect,
   })) {
-    it(`${family} Select applies one proposal and resets once`, async () => {
+    it(`${family} Select applies one proposal, resets once, and preserves accessibleLabel`, async () => {
       const f = await mount(demo);
+      const trigger = f.refs.fruitSelect!.querySelector<HTMLElement>('[role="combobox"]')!;
+      expect(trigger).toBeTruthy();
+      expect(trigger.getAttribute('aria-label')).toBe('Produce selector');
       signal(f.refs.fruitSelect!, 'valueChange', {
         value: 'banana',
         textValue: 'Banana',
         reason: 'selection',
       });
+      await flush();
       expect(f.props.mock.calls.filter(([ref]) => ref === 'fruitSelect')).toHaveLength(1);
       expect(f.props.mock.calls.find(([ref]) => ref === 'fruitSelect')?.[1]).toMatchObject({
         value: 'banana',
       });
+      expect(trigger.getAttribute('aria-label')).toBe('Produce selector');
       f.refs.resetProduce!.click();
+      await flush();
       expect(f.props.mock.calls.filter(([ref]) => ref === 'fruitSelect')).toHaveLength(2);
       expect(f.props.mock.calls.filter(([ref]) => ref === 'fruitSelect')[1]?.[1]).toMatchObject({
         value: 'apple',
       });
+      expect(trigger.getAttribute('aria-label')).toBe('Produce selector');
     });
   }
   for (const [family, demo] of Object.entries({
