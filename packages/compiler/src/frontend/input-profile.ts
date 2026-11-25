@@ -13,12 +13,13 @@ export class ProtoProjectError extends Error {}
 function selectProject(
   roots: readonly string[],
   cwd: string,
+  host: ts.ParseConfigHost,
   project?: string
 ): string | undefined {
   if (project !== undefined) return path.resolve(cwd, project);
   const directories = new Set(roots.map((file) => path.dirname(file)));
   const projects = new Set(
-    [...directories].map((directory) => ts.findConfigFile(directory, ts.sys.fileExists))
+    [...directories].map((directory) => ts.findConfigFile(directory, host.fileExists))
   );
   if (projects.size > 1) {
     throw new ProtoProjectError(
@@ -28,8 +29,8 @@ function selectProject(
   return projects.values().next().value;
 }
 
-function readProject(config: string): ts.CompilerOptions {
-  const read = ts.readConfigFile(config, ts.sys.readFile);
+function readProject(config: string, host: ts.ParseConfigHost): ts.CompilerOptions {
+  const read = ts.readConfigFile(config, host.readFile);
   if (read.error) {
     throw new ProtoProjectError(ts.flattenDiagnosticMessageText(read.error.messageText, '\n'));
   }
@@ -37,7 +38,7 @@ function readProject(config: string): ts.CompilerOptions {
   // resolution settings, is needed from tsconfig's project-file selection.
   const parsed = ts.parseJsonConfigFileContent(
     read.config,
-    ts.sys,
+    host,
     path.dirname(config),
     {},
     config
@@ -68,10 +69,11 @@ function mapsAuthoring(pattern: string): boolean {
 export function prepareProtoOptions(
   input: ProtoProgramOptions,
   roots: readonly string[],
-  cwd: string
-): ts.CompilerOptions {
-  const config = selectProject(roots, cwd, input.project);
-  const options = { ...(config ? readProject(config) : {}), ...input.compilerOptions };
+  cwd: string,
+  host: ts.ParseConfigHost
+): { options: ts.CompilerOptions; projectFile: string | null } {
+  const config = selectProject(roots, cwd, host, input.project);
+  const options = { ...(config ? readProject(config, host) : {}), ...input.compilerOptions };
   if (input.compilerOptions?.paths && input.compilerOptions.pathsBasePath === undefined) {
     // Caller-supplied paths follow the caller's cwd in the absence of a baseUrl.
     // Inherited project paths retain TypeScript's own pathsBasePath.
@@ -80,5 +82,5 @@ export function prepareProtoOptions(
   if (!Object.keys(options.paths ?? {}).some(mapsAuthoring)) {
     options.paths = { ...options.paths, [authoring]: [AUTHORING_DECLARATIONS] };
   }
-  return options;
+  return { options, projectFile: config ?? null };
 }

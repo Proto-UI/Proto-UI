@@ -673,6 +673,18 @@ export function verifySourceManifest(
       ...analysis.sourceClosure.files.filter((file) => file.role !== 'prelude'),
       ...analysis.sourceClosure.resolutionFiles,
     ];
+    const { projectFile } = analysis.sourceClosure;
+    if (
+      projectFile !== null &&
+      (typeof projectFile !== 'string' ||
+        !path.isAbsolute(projectFile) ||
+        !reached.some((file) => file.path === projectFile))
+    )
+      add(
+        'ANALYSIS_PROJECT_INPUT_MISSING',
+        'missing',
+        'The closure lacks recorded project discovery or selected configuration bytes. Regenerate it through the shared frontend.'
+      );
     for (const file of reached) {
       const reference = locate(file.path);
       const recorded = reference ? fileResults.get(fileKey(reference)) : undefined;

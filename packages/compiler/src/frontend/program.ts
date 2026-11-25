@@ -26,6 +26,7 @@ interface Snapshot extends Omit<ProtoClosureFile, 'role'> {
 interface ProgramSnapshot {
   currentDirectory: string;
   roots: string[];
+  projectFile: string | null;
   files: Map<string, Snapshot>;
   missing: ProtoMissingSource[];
   resolutions: ProtoSourceClosure['resolutions'];
@@ -65,6 +66,86 @@ function decode(bytes: Buffer): { text: string; encoding: Snapshot['encoding'] }
   return { text: new TextDecoder(encoding, { fatal: true }).decode(bytes), encoding };
 }
 
+/** The project parser and module resolver share original bytes and existence evidence. */
+function snapshotAccess(currentDirectory: string, overrides: ReadonlyMap<string, string>) {
+  const absolute = (name: string) => path.resolve(currentDirectory, name);
+  const files = new Map<string, Snapshot>();
+  const missing: ProtoMissingSource[] = [];
+  const resolutionProbes = new Map<string, ProtoResolutionProbe>();
+  const recordProbe = (kind: ProtoResolutionProbe['kind'], fileName: string, exists: boolean) => {
+    const name = absolute(fileName);
+    const key = `${kind}\0${name}`;
+    const previous = resolutionProbes.get(key);
+    if (previous && previous.exists !== exists) {
+      missing.push({
+        path: name,
+        reason: `The ${kind} lookup changed during source snapshot construction.`,
+      });
+    } else resolutionProbes.set(key, { path: name, kind, exists });
+    return exists;
+  };
+  const failedReads = new Set<string>();
+  const read = (fileName: string): string | undefined => {
+    const name = absolute(fileName);
+    const cached = files.get(name);
+    if (cached) return cached.text;
+    if (failedReads.has(name)) return undefined;
+    try {
+      const replacement = overrides.get(name);
+      // An editor string with an unpaired raw surrogate cannot be encoded as
+      // UTF-8 without altering the input. Preserve that as an unavailable input.
+      if (replacement !== undefined && !replacement.isWellFormed()) {
+        throw new Error(
+          'Editor snapshot contains an unpaired raw surrogate; no lossless UTF-8 snapshot exists.'
+        );
+      }
+      const bytes =
+        replacement === undefined ? readFileSync(name) : Buffer.from(replacement, 'utf8');
+      const decoded = decode(bytes);
+      files.set(name, {
+        path: name,
+        sha256: sha256(bytes),
+        byteLength: bytes.length,
+        sourceKind: replacement === undefined ? 'disk' : 'override',
+        ...decoded,
+      });
+      return decoded.text;
+    } catch (error) {
+      failedReads.add(name);
+      // Package/configuration lookups can use readFile without fileExists.
+      // Preserve failed reads too, so a newly appearing package.json invalidates
+      // the earlier resolution instead of making a stale closure reusable.
+      const exists = recordProbe('file', name, overrides.has(name) || ts.sys.fileExists(name));
+      if (exists) {
+        missing.push({
+          path: name,
+          reason: `Cannot decode/read source snapshot: ${String(error)}`,
+        });
+      }
+      return undefined;
+    }
+  };
+
+  const host = {
+    ...ts.sys,
+    getCurrentDirectory: () => currentDirectory,
+    readFile: read,
+    fileExists(fileName: string) {
+      const name = absolute(fileName);
+      return recordProbe('file', name, overrides.has(name) || ts.sys.fileExists(name));
+    },
+    directoryExists(directory: string) {
+      const name = absolute(directory);
+      const prefix = name.endsWith(path.sep) ? name : `${name}${path.sep}`;
+      for (const file of overrides.keys()) {
+        if (file.startsWith(prefix)) return recordProbe('directory', name, true);
+      }
+      return recordProbe('directory', name, ts.sys.directoryExists(name));
+    },
+  };
+  return { host, files, missing, resolutionProbes };
+}
+
 /**
  * Build one controlled, non-executing TS Program. Inputs are read as immutable
  * snapshots; no author module is imported, evaluated or passed to a JS VM.
@@ -81,11 +162,13 @@ export function createProtoProgram(input: ProtoProgramOptions): ts.Program {
   if (overrides.has(PRELUDE_PATH)) {
     throw new TypeError('The controlled Proto prelude cannot be replaced by a source override.');
   }
+  const access = snapshotAccess(currentDirectory, overrides);
+  const project = prepareProtoOptions(input, roots, currentDirectory, access.host);
   let options: ts.CompilerOptions = {
     target: ts.ScriptTarget.ESNext,
     module: ts.ModuleKind.ESNext,
     moduleResolution: ts.ModuleResolutionKind.Bundler,
-    ...prepareProtoOptions(input, roots, currentDirectory),
+    ...project.options,
     // These are invariants, not defaults a client/editor may replace.
     noLib: true,
     types: [],
@@ -137,79 +220,18 @@ export function createProtoProgram(input: ProtoProgramOptions): ts.Program {
     currentDirectory,
     roots,
     options,
-    files: new Map(),
-    missing: [],
+    projectFile: project.projectFile,
+    files: access.files,
+    missing: access.missing,
     resolutions: [],
-    resolutionProbes: new Map(),
+    resolutionProbes: access.resolutionProbes,
   };
-  const recordProbe = (kind: ProtoResolutionProbe['kind'], fileName: string, exists: boolean) => {
-    const name = absolute(fileName);
-    const key = `${kind}\0${name}`;
-    const previous = data.resolutionProbes.get(key);
-    if (previous && previous.exists !== exists) {
-      data.missing.push({
-        path: name,
-        reason: `The ${kind} lookup changed during source snapshot construction.`,
-      });
-    } else data.resolutionProbes.set(key, { path: name, kind, exists });
-    return exists;
-  };
-  const failedReads = new Set<string>();
-  const read = (fileName: string): string | undefined => {
-    const name = absolute(fileName);
-    const cached = data.files.get(name);
-    if (cached) return cached.text;
-    if (failedReads.has(name)) return undefined;
-    try {
-      const replacement = overrides.get(name);
-      // An editor string with an unpaired raw surrogate cannot be encoded as
-      // UTF-8 without altering the input. Preserve that as an unavailable input.
-      if (replacement !== undefined && !replacement.isWellFormed()) {
-        throw new Error(
-          'Editor snapshot contains an unpaired raw surrogate; no lossless UTF-8 snapshot exists.'
-        );
-      }
-      const bytes =
-        replacement === undefined ? readFileSync(name) : Buffer.from(replacement, 'utf8');
-      const decoded = decode(bytes);
-      data.files.set(name, {
-        path: name,
-        sha256: sha256(bytes),
-        byteLength: bytes.length,
-        sourceKind: replacement === undefined ? 'disk' : 'override',
-        ...decoded,
-      });
-      return decoded.text;
-    } catch (error) {
-      failedReads.add(name);
-      // Package/configuration lookups can use readFile without fileExists.
-      // Preserve failed reads too, so a newly appearing package.json invalidates
-      // the earlier resolution instead of making a stale closure reusable.
-      const exists = recordProbe('file', name, overrides.has(name) || ts.sys.fileExists(name));
-      if (exists) {
-        data.missing.push({
-          path: name,
-          reason: `Cannot decode/read source snapshot: ${String(error)}`,
-        });
-      }
-      return undefined;
-    }
-  };
-
   const host = ts.createCompilerHost(options, true);
-  host.getCurrentDirectory = () => currentDirectory;
+  host.getCurrentDirectory = access.host.getCurrentDirectory;
   host.getDefaultLibFileName = () => PRELUDE_PATH;
-  host.fileExists = (name) =>
-    recordProbe('file', name, overrides.has(absolute(name)) || ts.sys.fileExists(absolute(name)));
-  host.readFile = read;
-  const originalDirectoryExists = host.directoryExists;
-  host.directoryExists = (name) =>
-    recordProbe(
-      'directory',
-      name,
-      [...overrides.keys()].some((file) => file.startsWith(`${absolute(name)}${path.sep}`)) ||
-        originalDirectoryExists?.(absolute(name)) === true
-    );
+  host.fileExists = access.host.fileExists;
+  host.directoryExists = access.host.directoryExists;
+  host.readFile = access.host.readFile;
   host.getSourceFile = (name, languageVersion, onError) => {
     if (isAmbientLibrary(name)) {
       data.missing.push({
@@ -218,7 +240,7 @@ export function createProtoProgram(input: ProtoProgramOptions): ts.Program {
       });
       return undefined;
     }
-    const text = read(name);
+    const text = access.host.readFile(name);
     if (text === undefined) {
       onError?.(`Cannot read ${name}`);
       return undefined;
@@ -381,6 +403,7 @@ export function getProtoSourceClosure(program: ts.Program): ProtoSourceClosure {
   const digest = sha256(
     canonicalJson({
       configurationHash,
+      projectFile: data.projectFile,
       rootNames,
       files: digestFiles,
       resolutionFiles: digestResolutionFiles,
@@ -395,6 +418,7 @@ export function getProtoSourceClosure(program: ts.Program): ProtoSourceClosure {
     configurationHash,
     complete: uniqueMissing.length === 0,
     rootNames,
+    projectFile: data.projectFile,
     files,
     resolutionFiles,
     resolutions,

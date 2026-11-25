@@ -57,6 +57,8 @@ The frontend resolves imports, reexports and project `paths` using the nearest `
 
 `sourceClosure.configurationHash` identifies the effective source configuration. `sourceClosure.digest` also binds the roots, file bytes, module resolutions and positive and negative probes. These values can be compared across compile, lint and editor inputs, including a saved editor buffer with identical bytes. A target-specific analysis additionally has `analysisConfigurationHash`, which includes the selected target. Pair it with the source digest when identifying that analysis.
 
+The closure records the selected configuration in `projectFile` and the original bytes of each configuration TypeScript reads, including inherited files. Project discovery records each candidate it checks. A nearer `tsconfig.json` appearing later invalidates saved evidence even when all previously listed files still match. Include the reached configuration files in the source inventory and provide snapshot coverage for the lookup paths. Regenerate older analyses that lack project evidence before reusing them.
+
 Implemented checks cover boolean conditions, proven implicit numeric/text conversions, explicitly undeclared JavaScript code-unit operations and well-formed Unicode literals. Operations requiring unimplemented union correlation, phase/effect or capability analysis remain `compiler-missing`; they do not become new language bans. There is no automatic source rewrite.
 
 The JSON report identifies language, rule-set and compiler versions, resolved source/dependency byte digests, configuration and all five targets. Its three status fields remain distinct:
