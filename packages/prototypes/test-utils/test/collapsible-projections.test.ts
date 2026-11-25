@@ -136,3 +136,61 @@ for (const [family, entries, visualToken] of families) {
     });
   });
 }
+
+it.each(['bootstrap-2-3-2', 'brutalist'])(
+  '%s keeps the disclosure open while its painted parts follow the live theme',
+  async (family) => {
+    const html = document.documentElement;
+    const previousTheme = html.getAttribute('data-theme');
+    try {
+      html.dataset.theme = 'light';
+      const root = document.createElement(`${family}-collapsible-root`);
+      const trigger = document.createElement(`${family}-collapsible-trigger`);
+      const content = document.createElement(`${family}-collapsible-content`);
+      setElementProps(root, { defaultOpen: true });
+      content.textContent = 'Disclosure body';
+      root.append(trigger, content);
+      document.body.append(root);
+      await flush();
+      expect(trigger.getAttribute('aria-expanded')).toBe('true');
+
+      if (family === 'bootstrap-2-3-2') {
+        const body = content.querySelector('div')!;
+        expect(body).not.toBeNull();
+        expect(styleContains(root, 'border-[#e5e5e5]')).toBe(true);
+        expect(styleContains(body, 'border-[#e5e5e5]')).toBe(true);
+        expect(styleContains(body, 'dark:border-border')).toBe(true);
+        expect(styleContains(trigger, 'text-[#08c]')).toBe(true);
+        html.dataset.theme = 'dark';
+        expect(styleContains(root, 'dark:border-border')).toBe(true);
+        trigger.dispatchEvent(new Event('pointerenter'));
+        await expect.poll(() => styleContains(trigger, 'text-foreground')).toBe(true);
+        expect(styleContains(trigger, 'text-[#005580]')).toBe(false);
+      } else {
+        expect(styleContains(content, 'border-border')).toBe(true);
+        expect(styleContains(trigger, 'shadow-[4px_4px_0_0_#000]')).toBe(true);
+        html.dataset.theme = 'dark';
+        expect(styleContains(content, 'dark:border-foreground')).toBe(true);
+        expect(styleContains(trigger, 'dark:border-foreground')).toBe(true);
+        await expect
+          .poll(() => styleContains(trigger, 'shadow-[4px_4px_0_0_var(--pui-foreground)]'))
+          .toBe(true);
+        trigger.dispatchEvent(new Event('pointerdown'));
+        await flush();
+        expect(styleContains(trigger, 'shadow-none')).toBe(true);
+        trigger.dispatchEvent(new Event('pointercancel'));
+        await flush();
+        expect(styleContains(trigger, 'shadow-[4px_4px_0_0_var(--pui-foreground)]')).toBe(true);
+        setElementProps(trigger, { variant: 'noShadow' });
+        await flush();
+        expect(styleContains(trigger, 'shadow-none')).toBe(true);
+        expect(styleContains(trigger, 'shadow-[4px_4px_0_0_var(--pui-foreground)]')).toBe(false);
+      }
+      expect(trigger.getAttribute('aria-expanded')).toBe('true');
+      expect(content.textContent).toBe('Disclosure body');
+    } finally {
+      if (previousTheme === null) html.removeAttribute('data-theme');
+      else html.setAttribute('data-theme', previousTheme);
+    }
+  }
+);
