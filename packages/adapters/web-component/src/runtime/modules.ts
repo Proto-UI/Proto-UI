@@ -1416,32 +1416,44 @@ function createExposeEventSink(el: HTMLElement) {
   };
 }
 
-function addExposeStateModule(
+function addExposeStateModules(
   wiring: ReturnType<typeof createCapsWiring>,
-  setExposes: (record: Record<string, unknown>) => void
+  args: WebComponentOwnerModulesArgs<PropsBaseType>,
+  mirrorTargets?: () => HTMLElement[]
 ) {
-  return wiring.use('expose-state', [
-    [
-      EXPOSES_RECORD_SINK_CAP,
-      (record: Record<string, unknown>) => {
-        setExposes(record ?? {});
-      },
-    ],
-  ]);
+  const { el, setExposes, exposeStateWebMode } = args;
+  return wiring
+    .use('expose-state', [
+      [
+        EXPOSES_RECORD_SINK_CAP,
+        (record: Record<string, unknown>) => {
+          setExposes(record ?? {});
+        },
+      ],
+    ])
+    .use('expose-state-web', () => [
+      [HOST_ELEMENT_CAP, el],
+      [EXPOSE_STATE_WEB_MAP_CAP, createExposeStateWebNameMap],
+      ...(mirrorTargets ? [[EXPOSE_STATE_WEB_MIRROR_TARGETS_CAP, mirrorTargets] as const] : []),
+      ...(exposeStateWebMode ? [[EXPOSE_STATE_WEB_MODE_CAP, exposeStateWebMode] as const] : []),
+    ]);
 }
 
 // Owner and view wiring share these logical capabilities. Only materialized
 // views install native Anatomy order observation; preserve that distinction.
 function addLogicalModules(
   wiring: ReturnType<typeof createCapsWiring>,
-  instanceToken: LogicalInstanceToken,
-  getMeta: (key: string) => unknown,
-  colorSchemeSource: ColorSchemeInvalidationSource | undefined,
-  preferenceSource: PreferenceInvalidationSource | undefined,
-  styleSupportSource: StyleSupportInvalidationSource | undefined,
-  viewportSource: ViewportInvalidationSource | undefined,
+  args: WebComponentOwnerModulesArgs<PropsBaseType>,
   orderObserver?: typeof createDomOrderObserver
 ) {
+  const {
+    instanceToken,
+    getMeta,
+    colorSchemeSource,
+    preferenceSource,
+    styleSupportSource,
+    viewportSource,
+  } = args;
   const anatomy: CapEntries[number][] = [
     [ANATOMY_INSTANCE_TOKEN_CAP, instanceToken],
     [ANATOMY_PARENT_CAP, getLogicalParent],
@@ -1483,17 +1495,7 @@ function addLogicalModules(
 export function createWebComponentOwnerModules<Props extends PropsBaseType>(
   args: WebComponentOwnerModulesArgs<Props>
 ) {
-  const {
-    el,
-    instanceToken,
-    rawPropsSource,
-    getMeta,
-    colorSchemeSource,
-    preferenceSource,
-    styleSupportSource,
-    viewportSource,
-    setExposes,
-  } = args;
+  const { el, instanceToken, rawPropsSource } = args;
   const getControlLabelSurface = () => {
     if (args.textControlTarget) return args.textControlTarget;
     if (args.imageViewTarget) return args.imageViewTarget;
@@ -1547,23 +1549,9 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
       [FOCUS_PARENT_CAP, getLogicalParent],
       [FOCUS_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ]);
-  addExposeStateModule(wiring, setExposes).use('expose-state-web', () => [
-    [HOST_ELEMENT_CAP, el],
-    [EXPOSE_STATE_WEB_MAP_CAP, createExposeStateWebNameMap],
-    ...(args.exposeStateWebMode
-      ? [[EXPOSE_STATE_WEB_MODE_CAP, args.exposeStateWebMode] as const]
-      : []),
-  ]);
+  addExposeStateModules(wiring, args);
 
-  return addLogicalModules(
-    wiring,
-    instanceToken,
-    getMeta,
-    colorSchemeSource,
-    preferenceSource,
-    styleSupportSource,
-    viewportSource
-  )
+  return addLogicalModules(wiring, args)
     .use('overlay', () => [
       ...(args.overlayLayerScheduler
         ? [[OVERLAY_LAYER_SCHEDULER_CAP, args.overlayLayerScheduler] as const]
@@ -1632,14 +1620,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     router,
     rawPropsSource,
     effectsPort,
-    getMeta,
-    colorSchemeSource,
-    preferenceSource,
-    styleSupportSource,
-    viewportSource,
-    exposeStateWebMode,
     scrollProjection,
-    setExposes,
   } = args;
 
   const getPhysicalTriggerSurface = () =>
@@ -2780,26 +2761,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
         },
       ],
     ]);
-  addExposeStateModule(wiring, setExposes).use('expose-state-web', () => [
-    [HOST_ELEMENT_CAP, el],
-    [EXPOSE_STATE_WEB_MAP_CAP, createExposeStateWebNameMap],
-    [
-      EXPOSE_STATE_WEB_MIRROR_TARGETS_CAP,
-      () => (presentationSurface === el ? [] : [presentationSurface]),
-    ],
-    ...(exposeStateWebMode ? [[EXPOSE_STATE_WEB_MODE_CAP, exposeStateWebMode] as const] : []),
-  ]);
+  addExposeStateModules(wiring, args, () =>
+    presentationSurface === el ? [] : [presentationSurface]
+  );
 
-  return addLogicalModules(
-    wiring,
-    instanceToken,
-    getMeta,
-    colorSchemeSource,
-    preferenceSource,
-    styleSupportSource,
-    viewportSource,
-    createDomOrderObserver
-  )
+  return addLogicalModules(wiring, args, createDomOrderObserver)
     .use('hit-participation', [
       [HOST_ELEMENT_CAP, el],
       [HIT_PARTICIPATION_HOST_BRIDGE_CAP, createWebHitParticipationHostBridge()],
