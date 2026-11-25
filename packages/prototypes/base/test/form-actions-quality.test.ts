@@ -239,7 +239,8 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     // on the parameter state and emit unprefixed runtime tokens instead
     // (forced-colors-focus-outline proven below). Checked and mixed paint is
     // renderer-driven through watched-state glyph updates in every family;
-    // the controlled acceptance, refusal and disabled DOM paint is checked above.
+    // the collector emits unprefixed indicator tokens rather than checked/mixed
+    // variants. Controlled acceptance, refusal and disabled DOM paint are checked above.
     expect(
       tokens.some((x) => x.includes('data-[disabled]:')),
       tokens.join('\n')
@@ -255,6 +256,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     if (family === 'liquid-glass') {
       expect(tokens).toEqual(
         expect.arrayContaining([
+          'border-primary',
           'bg-primary',
           'text-primary-foreground',
           'bg-muted',

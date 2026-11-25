@@ -331,16 +331,17 @@ for (const [index, family] of Object.values(families).entries())
         : rendered.querySelector(tags.get(family.dataTableRoot)!)!
     ) as HTMLElement & { getExposes(): any };
     await flush();
+    const isBaseDemo = index === 0;
     expect(root.getExposes().getStructure()).toMatchObject({
       valid: true,
-      rowCount: index === 0 ? 4 : 5,
-      columnCount: index === 0 ? 2 : 3,
+      rowCount: isBaseDemo ? 4 : 5,
+      columnCount: isBaseDemo ? 2 : 3,
     });
-    expect(root.getExposes().count.get()).toBe(index === 0 ? 3 : 4);
+    expect(root.getExposes().count.get()).toBe(isBaseDemo ? 3 : 4);
     const headerRow = root.querySelector(tags.get(family.dataTableHeaderRow)!)!;
     expect(headerRow.getAttribute('role')).toBe('row');
     expect(headerRow.querySelectorAll(tags.get(family.dataTableHeader)!)).toHaveLength(
-      index === 0 ? 2 : 3
+      isBaseDemo ? 2 : 3
     );
     expect(Object.keys((headerRow as HTMLElement & { getExposes(): object }).getExposes())).toEqual(
       []

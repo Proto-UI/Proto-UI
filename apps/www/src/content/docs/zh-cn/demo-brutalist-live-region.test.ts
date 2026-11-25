@@ -42,11 +42,10 @@ describe('Brutalist Live Region demo contract', () => {
       // Each region carries a real authored payload box as its announcement
       // content; nothing simulates an announcement engine or event channel.
       expect(region.props?.atomic).toBe(true);
+      const expectedPayloadRef =
+        region.props?.politeness === 'polite' ? 'politePayload' : 'assertivePayload';
       const payloads = collectNodes(region).filter(
-        (child): child is DemoRefNode =>
-          typeof child !== 'string' &&
-          child.kind !== 'text' &&
-          child.ref === `${region.ref?.replace(/Region$/, '')}Payload`
+        (child): child is DemoRefNode => child.kind !== 'text' && child.ref === expectedPayloadRef
       );
       expect(payloads).toHaveLength(1);
     }

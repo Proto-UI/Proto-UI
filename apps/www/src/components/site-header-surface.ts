@@ -39,10 +39,21 @@ export function headerSurfaceParticipant(header: HTMLElement) {
     'data-header-surface-family',
     'data-header-surface-generation',
   ];
-  const moveContent = (parent: HTMLElement, before: ChildNode | null = null) => {
+  const moveContent = (
+    parent: HTMLElement,
+    before: ChildNode | null = null,
+    fallbackFocus: HTMLElement | null = null
+  ) => {
     if (content.parentNode === parent && content.nextSibling === before) return;
     const focused = document.activeElement as HTMLElement | null;
-    const restoreFocus = !!focused && content.contains(focused);
+    const targetFocus =
+      focused && content.contains(focused)
+        ? focused
+        : fallbackFocus &&
+            content.contains(fallbackFocus) &&
+            (!focused || focused === document.body || focused === document.documentElement)
+          ? fallbackFocus
+          : null;
     // The same native subtree, link destinations and control state survive.
     const move = (
       parent as HTMLElement & { moveBefore?: (node: Node, before: Node | null) => void }
@@ -51,12 +62,12 @@ export function headerSurfaceParticipant(header: HTMLElement) {
       move.call(parent, content, before);
     else parent.insertBefore(content, before);
     if (
-      restoreFocus &&
-      document.activeElement !== focused &&
-      focused?.isConnected &&
-      !focused.closest('[hidden], [inert]')
+      targetFocus &&
+      document.activeElement !== targetFocus &&
+      targetFocus.isConnected &&
+      !targetFocus.closest('[hidden], [inert]')
     )
-      focused.focus();
+      targetFocus.focus();
   };
   return {
     root,
@@ -113,6 +124,9 @@ export function headerSurfaceParticipant(header: HTMLElement) {
       const dispose = candidate.dispose.bind(candidate);
       return {
         ...candidate,
+        // Passive surface owns no interactive controls; do not mark the slotted
+        // native navigation/preferences subtree inert while the next generation prepares.
+        setLocked() {},
         async dispose() {
           const slot = ownedSlot;
           // Detach app content before its retired renderer tears down. A stale
@@ -128,15 +142,17 @@ export function headerSurfaceParticipant(header: HTMLElement) {
       const previousParent = content.parentElement!;
       const previousNext = content.nextSibling;
       const previous = names.map((name) => [name, root.getAttribute(name)] as const);
+      const active = document.activeElement as HTMLElement | null;
+      const capturedFocus = active && content.contains(active) ? active : null;
       return {
         publish() {
-          moveContent(slot);
+          moveContent(slot, null, capturedFocus);
           root.dataset.headerSurfaceRuntime = commit.selection.runtimeId;
           root.dataset.headerSurfaceFamily = commit.selection.projectionFamilyId;
           root.dataset.headerSurfaceGeneration = String(commit.generation);
         },
         rollback() {
-          if (slot.contains(content)) moveContent(previousParent, previousNext);
+          if (slot.contains(content)) moveContent(previousParent, previousNext, capturedFocus);
           for (const [name, value] of previous) {
             if (value === null) root.removeAttribute(name);
             else root.setAttribute(name, value);

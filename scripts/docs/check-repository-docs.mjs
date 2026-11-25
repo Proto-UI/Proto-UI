@@ -416,6 +416,7 @@ export async function runRepositoryDocsCheck({
   let checkedLinks = 0;
   let checkedCommands = 0;
   let omittedLinks = 0;
+  let physicalRoot;
   for (const file of inventory.filter((file) => /\.mdx?$/.test(file))) {
     const classification = classifyRepositoryDocument(file, policy, publishedVersions);
     documents.push({ file, ...classification });
@@ -465,7 +466,10 @@ export async function runRepositoryDocsCheck({
         errors.push(`${location}: local link ${target} does not exist.`);
         continue;
       }
-      if (!inside(root, await fs.realpath(destination)))
+      // Resolve both sides for the symlink check. The checkout path can also
+      // contain symlinks, including aliases in the system temporary directory.
+      physicalRoot ??= await fs.realpath(root);
+      if (!inside(physicalRoot, await fs.realpath(destination)))
         errors.push(`${location}: local link ${target} resolves outside the repository.`);
     }
     checkedCommands += checkCommands({

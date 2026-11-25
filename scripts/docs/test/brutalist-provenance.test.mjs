@@ -100,25 +100,44 @@ test('the visual source retains its author and complete MIT notice separately fr
 });
 
 for (const locale of ['en', 'zh-cn']) {
-  test(`${locale} Card docs describe the current black outer frame and unbordered sections`, () => {
+  test(`${locale} Card docs explain the black frame and opt-in section dividers`, () => {
     const source = read(
       `apps/www/src/content/docs/${locale}/ui-libraries/brutalist/components/card.mdx`
     );
     assert.doesNotMatch(source, /ink frame|方向性 ink 分隔线|foreground.*重绘/);
-    assert.match(source, locale === 'en' ? /2px.*black frame/ : /2px.*黑色外框/);
-    assert.match(
-      source,
-      locale === 'en' ? /Header.*Footer.*render without borders by default/ : /默认不加分段边框/
-    );
     for (const part of ['header', 'footer']) {
       const implementation = read(`packages/prototypes/brutalist/src/card/${part}.proto.ts`);
       assertOptionalDivider(implementation, part);
       const catalog = read(`spec/prototypes/P-BRUTALIST-CARD-${part.toUpperCase()}.yaml`);
       assert.match(catalog, /^summary:.*without mandatory section borders/m);
     }
+    const prose = source.split('\n---\n').at(-1);
+    assert.match(
+      prose,
+      locale === 'en' ? /2px[^\n.]*black (?:frame|border)/i : /2px[^\n。]*黑色(?:外框|边框)/
+    );
+    assert.match(
+      source,
+      locale === 'en'
+        ? /Header[^\n.]*Footer[^\n.]*\b(?:without|no)\b[^\n.]*borders?[^\n.]*\bdefault\b/i
+        : /Header[^\n。]*Footer[^\n。]*默认[^\n。]*(?:不加|没有|无)[^\n。]*边框/
+    );
+    assert.match(
+      prose,
+      locale === 'en'
+        ? /divider=\{true\}[^\n.]*2px[^\n.]*dividers?/i
+        : /divider=\{true\}[^\n。]*2px[^\n。]*分隔线/
+    );
+    for (const part of ['Header', 'Footer']) {
+      const api = source.split(`### BrutalistCard${part}\n`)[1]?.split('\n##')[0];
+      assert.ok(api, `${locale} documents the ${part} API`);
+      assert.match(api, /name:\s*'divider',\s*type:\s*'boolean',\s*default:\s*'false'/);
+    }
     assert.match(
       read('packages/prototypes/brutalist/src/card/root.proto.ts'),
       /border-2 border-black/
     );
+    // The Web Component adapter tests in packages/prototypes/brutalist/test/card.test.ts
+    // cover the Root frame and both section dividers before, during, and after opt-in.
   });
 }

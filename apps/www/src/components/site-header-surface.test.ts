@@ -628,3 +628,58 @@ it('preserves a focused native language destination when the first homepage proj
   expect(header.dataset.siteMenuOpen).toBe('true');
   expect(projected.closest('[hidden], [inert]')).toBeNull();
 }, 30000);
+
+it('restores native control focus when runtime switch activation blurs the outgoing inert host', async () => {
+  const { header, content, input } = fixture();
+  const outside = document.createElement('button');
+  outside.textContent = 'Outside';
+  document.body.append(outside);
+  const participant = headerSurfaceParticipant(header)!;
+  const first = {
+    generation: 1,
+    selection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' },
+  };
+  const a = await participant.materialize(first);
+  candidates.push(a);
+  a.activate();
+  participant.prepareCommit(first).publish();
+
+  // Locking during runtime switch must not make the slotted native subtree inert.
+  a.setLocked?.(true);
+  expect(input.closest('[inert]')).toBeNull();
+  input.focus();
+  expect(document.activeElement).toBe(input);
+
+  const second = {
+    generation: 2,
+    selection: { runtimeId: 'react', projectionFamilyId: 'shadcn' },
+  };
+  const b = await participant.materialize(second);
+  candidates.push(b);
+  const publication = participant.prepareCommit(second);
+  b.activate();
+  // Real browsers blur activeElement to body when activate() marks the outgoing host inert.
+  if (input.closest('[inert]')) input.blur();
+  expect(document.activeElement).toBe(document.body);
+  publication.publish();
+  expect(document.activeElement).toBe(input);
+  expect(input.closest('[inert]')).toBeNull();
+
+  // Do not steal focus if focus intentionally moved outside content before publish.
+  const third = {
+    generation: 3,
+    selection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' },
+  };
+  const c = await participant.materialize(third);
+  candidates.push(c);
+  const thirdPub = participant.prepareCommit(third);
+  c.activate();
+  outside.focus();
+  thirdPub.publish();
+  expect(document.activeElement).toBe(outside);
+
+  await a.dispose();
+  await b.dispose();
+  await c.dispose();
+  candidates.length = 0;
+}, 15000);

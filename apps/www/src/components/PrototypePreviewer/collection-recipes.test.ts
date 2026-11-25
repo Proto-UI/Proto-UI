@@ -91,15 +91,14 @@ for (const [family, demo] of Object.entries({
       });
       cleanups.push(() => view.destroy());
       const ref = (name: string) => host.querySelector<HTMLElement>(`[data-demo-ref="${name}"]`)!;
-      const branchKey = family === 'base' ? 'project' : 'src';
-      const groupRef = family === 'base' ? 'branch' : 'group-src';
-      const childRef = family === 'base' ? 'readme' : 'components';
-      const selectedValue = family === 'base' ? '' : 'button';
-      await vi.waitFor(() =>
-        expect(api.call('tree', 'getTree')).toHaveLength(family === 'base' ? 4 : 7)
-      );
+      const isBase = family === 'base';
+      const branchRef = isBase ? 'project' : 'src';
+      const groupRef = isBase ? 'branch' : 'group-src';
+      const childRef = isBase ? 'readme' : 'components';
+      const initialValue = isBase ? '' : 'button';
+      await vi.waitFor(() => expect(api.call('tree', 'getTree')).toHaveLength(isBase ? 4 : 7));
       expect(api.call('tree', 'invalid.get')).toBe(false);
-      const project = ref(branchKey),
+      const project = ref(branchRef),
         group = ref(groupRef);
       expect(project.getAttribute('aria-controls')).toBe(group.id);
       expect(group.getAttribute('aria-labelledby')).toBe(project.id);
@@ -107,10 +106,10 @@ for (const [family, demo] of Object.entries({
       await vi.waitFor(() =>
         expect(ref('tree').getAttribute('data-pui-style')).toContain('direction-rtl')
       );
-      api.call(branchKey, 'focusSelf', { reason: 'keyboard' });
+      api.call(branchRef, 'focusSelf', { reason: 'keyboard' });
       await vi.waitFor(() => {
         expect(document.activeElement).toBe(project);
-        expect(api.call(branchKey, 'focused.get')).toBe(true);
+        expect(api.call(branchRef, 'focused.get')).toBe(true);
       });
       const key = (value: string) =>
         document.activeElement!.dispatchEvent(
@@ -126,16 +125,16 @@ for (const [family, demo] of Object.entries({
       await vi.waitFor(() => expect(group.getAttribute('aria-hidden')).toBe('false'));
       key('ArrowLeft');
       await vi.waitFor(() => expect(document.activeElement).toBe(ref(childRef)));
-      expect(api.call('tree', 'value.get')).toBe(selectedValue);
-      api.call('tree', 'requestExpanded', branchKey, false);
+      expect(api.call('tree', 'value.get')).toBe(initialValue);
+      api.call('tree', 'requestExpanded', branchRef, false);
       await vi.waitFor(() => {
         expect(document.activeElement).toBe(project);
-        expect(api.call(branchKey, 'focused.get')).toBe(true);
+        expect(api.call(branchRef, 'focused.get')).toBe(true);
       });
-      api.setProps('tree', { expandedKeys: [branchKey] });
+      api.setProps('tree', { expandedKeys: [branchRef] });
       await vi.waitFor(() => expect(group.getAttribute('aria-hidden')).toBe('false'));
-      api.call('tree', 'requestExpanded', branchKey, false);
-      expect(api.call('tree', 'getExpandedKeys')).toEqual([branchKey]);
+      api.call('tree', 'requestExpanded', branchRef, false);
+      expect(api.call('tree', 'getExpandedKeys')).toEqual([branchRef]);
       expect(group.getAttribute('aria-hidden')).toBe('false');
     }, 30_000);
 }

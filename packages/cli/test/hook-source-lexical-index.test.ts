@@ -214,7 +214,7 @@ describe('source registration canonicalization', () => {
 
 describe('public module query canonicalization', () => {
   it('resolves repeated paths once per query but observes later symlink targets', () => {
-    const directory = mkdtempSync(path.join(tmpdir(), 'proto-module-query-'));
+    const directory = realpathSync(mkdtempSync(path.join(tmpdir(), 'proto-module-query-')));
     const from = path.join(directory, 'entry.ts');
     const link = path.join(directory, 'dependency.ts');
     const first = path.join(directory, 'first.ts');
@@ -243,7 +243,9 @@ describe('public module query canonicalization', () => {
     }
   });
   it('drops query-local paths after an exception and isolates a nested lookup', () => {
-    const directory = mkdtempSync(path.join(tmpdir(), 'proto-module-query-lifetime-'));
+    const directory = realpathSync(
+      mkdtempSync(path.join(tmpdir(), 'proto-module-query-lifetime-'))
+    );
     const from = path.join(directory, 'entry.ts');
     const dependency = path.join(directory, 'dependency.ts');
     writeFileSync(from, `import { value } from './dependency';`);
@@ -284,7 +286,7 @@ describe('public module query canonicalization', () => {
   });
 
   it('shares repeated successful observations only within one recursive export query', () => {
-    const directory = mkdtempSync(path.join(tmpdir(), 'proto-export-query-'));
+    const directory = realpathSync(mkdtempSync(path.join(tmpdir(), 'proto-export-query-')));
     const from = path.join(directory, 'entry.ts');
     const config = path.join(directory, 'tsconfig.json');
     const text = `export * from './first'; export * from './second';`;
@@ -351,7 +353,7 @@ describe('immutable AST lexical query identities', () => {
     expect(context.resolveReference(reads(before)[0], first)).toBeNull();
   });
   it('still resolves the imported target afresh for the same identifier AST', () => {
-    const directory = mkdtempSync(path.join(tmpdir(), 'proto-lexical-import-'));
+    const directory = realpathSync(mkdtempSync(path.join(tmpdir(), 'proto-lexical-import-')));
     const first = path.join(directory, 'first.ts'),
       second = path.join(directory, 'second.ts');
     const link = path.join(directory, 'linked.ts'),
