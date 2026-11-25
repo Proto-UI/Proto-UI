@@ -36,7 +36,9 @@ export function initDocumentationTypography(doc: Document = document) {
   let alive = true;
   const family = () => {
     const committed = root.dataset.siteLibraryFamily;
-    return committed === 'shadcn' || committed === 'brutalist'
+    return committed === 'shadcn' ||
+      committed === 'brutalist' ||
+      committed === 'bootstrap-2-3-2'
       ? committed
       : resolveSiteLibraryFamily(view.location.pathname);
   };
@@ -44,7 +46,11 @@ export function initDocumentationTypography(doc: Document = document) {
     initialSelection: { runtimeId: runtime, projectionFamilyId: family() },
     async materialize(request) {
       const selectedFamily = request.selection.projectionFamilyId;
-      if (selectedFamily !== 'shadcn' && selectedFamily !== 'brutalist')
+      if (
+        selectedFamily !== 'shadcn' &&
+        selectedFamily !== 'brutalist' &&
+        selectedFamily !== 'bootstrap-2-3-2'
+      )
         throw new Error('[SiteTypography] Unsupported documentation typography family.');
       const candidate = await participant.materialize(request);
       let stop: () => void;
