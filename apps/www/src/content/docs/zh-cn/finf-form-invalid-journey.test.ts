@@ -92,13 +92,15 @@ function fixture(family: string, fault?: Fault) {
     locator: (selector: string) => (selector === 'input' ? { first: () => editor } : error),
     getByText: () => label,
     getByRole: (role: string, options: { name: string | RegExp }) =>
-      role === 'checkbox'
-        ? String(options.name).startsWith('Email')
-          ? email
-          : sms
-        : String(options.name).includes('Reset values')
-          ? reset
-          : submit,
+      role === 'textbox' && options.name === 'Display name'
+        ? editor
+        : role === 'checkbox'
+          ? String(options.name).startsWith('Email')
+            ? email
+            : sms
+          : options.name === 'Reset'
+            ? reset
+            : submit,
   };
   const previewer = {
     locator: (selector: string) =>
