@@ -942,8 +942,8 @@ describe('contrast probe / real Chromium instrument calibration', () => {
   it('collects exact current-lease anatomy and rejects omitted real-recipe Thumb and Indicator instances', async () => {
     for (const [family, demo, rootRef] of [
       ['switch', switchDemo, 'releaseAlertsSwitch'],
-      ['checkbox', checkboxDemo, 'checkedCheckbox'],
-      ['checkbox', checkboxDemo, 'mixedCheckbox'],
+      ['checkbox', checkboxDemo, 'updatesCheckbox'],
+      ['checkbox', checkboxDemo, 'channelsCheckbox'],
     ] as const) {
       const plan = compileContrastAnatomy(
         demo,
