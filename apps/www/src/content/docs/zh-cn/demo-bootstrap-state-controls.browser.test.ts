@@ -723,7 +723,9 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
             return Math.abs(housing.x + housing.width - checkedThumb.x - checkedThumb.width - 1);
           })
           .toBeLessThan(0.5);
-        expect((await paint(switchRoot)).background).toBe('rgb(0, 109, 204)');
+        await expect.poll(async () => (await paint(switchRoot)).background).toBe('rgb(0, 68, 204)');
+        await page.mouse.move(0, 0);
+        await expect.poll(async () => (await paint(switchRoot)).background).toBe('rgb(0, 109, 204)');
         expect((await paint(switchRoot)).image).not.toBe(beforeSwitch.image);
         await switchRoot.press('Space');
         await expect.poll(() => switchRoot.getAttribute('aria-checked')).toBe('false');
