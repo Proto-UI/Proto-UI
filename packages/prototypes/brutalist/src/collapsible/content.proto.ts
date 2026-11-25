@@ -15,9 +15,13 @@ const collapsibleContent = definePrototype<
     // P-BRUTALIST-COLLAPSIBLE-CONTENT-VISUAL-SAFETY: no fixed width/height or clipped long label.
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full font-sans font-medium text-foreground wrap-anywhere rounded-base border-2 border-border dark:border-foreground bg-secondary-background p-4 text-sm'
+        'min-w-0 max-w-full font-sans font-medium text-foreground wrap-anywhere rounded-base border-2 border-border bg-secondary-background p-4 text-sm'
       )
     );
+    def.rule({
+      when: (w) => w.meta('colorScheme').eq('dark'),
+      intent: (i) => i.feedback.style.use(tw('border-foreground')),
+    });
     return inherited.render;
   },
 });
