@@ -463,9 +463,13 @@ export function analyzeProtoProgram(
     if ((diagnostic.code === 2339 || diagnostic.code === 2551) && access) {
       const type = checker.getTypeAtLocation(access.expression);
       const domain = domains(type, checker);
-      const isPreludeType = type.symbol?.declarations?.some(
-        (declaration) => declaration.getSourceFile().fileName === PRELUDE_PATH
-      );
+      // Tuple types inherit Array/ReadonlyArray members without an owning
+      // declaration symbol, so their missing prelude members remain unresolved.
+      const isPreludeType =
+        checker.isTupleType(type) ||
+        type.symbol?.declarations?.some(
+          (declaration) => declaration.getSourceFile().fileName === PRELUDE_PATH
+        );
       // A typo on an actually declared user record is different from an absent
       // API in today's intentionally incomplete primitive/host prelude.
       authorError = only(domain, 'object') && !isPreludeType;

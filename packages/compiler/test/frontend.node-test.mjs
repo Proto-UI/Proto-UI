@@ -308,6 +308,46 @@ test('known user type violations are errors; absent authoring APIs and prelude m
   assert.equal(absent.sourceClosure.complete, false);
 });
 
+for (const type of [
+  'number[]',
+  'readonly number[]',
+  '[number, number]',
+  'readonly [number, number]',
+]) {
+  test(`array and tuple prelude members remain capability debt: ${type}`, (t) => {
+    const result = fixture(t, {
+      'entry.ts': `declare const values: ${type}; values.slice(0, 1);`,
+    }).analyze();
+    const diagnostics = result.diagnostics.filter((item) => item.code === 'PUI_TYPESCRIPT_2339');
+    assert.equal(diagnostics.length, 1);
+    assert.equal(diagnostics[0].category, 'compiler-missing');
+    assert.equal(diagnostics[0].ruleId, 'proto/typescript-capability');
+    assert.equal(diagnostics[0].severity, 'info');
+    assert.deepEqual(errors(result), []);
+    assert.equal(result.sourceValid, null);
+    assert.equal(result.analysisComplete, false);
+  });
+}
+
+test('declared record member typos remain source-invalid with and without a spelling suggestion', (t) => {
+  const result = fixture(t, {
+    'entry.ts': `
+      declare const value: { known: number };
+      const present: number = value.known;
+      value.typo;
+      value.knwon;
+    `,
+  }).analyze();
+  assert.deepEqual(
+    errors(result)
+      .map((item) => item.code)
+      .sort(),
+    ['PUI_TYPESCRIPT_2339', 'PUI_TYPESCRIPT_2551']
+  );
+  assert.ok(errors(result).every((item) => item.ruleId === 'proto/typescript-type'));
+  assert.equal(result.sourceValid, false);
+});
+
 test('missing source checks and all five target obligations stay explicit after local checks pass', (t) => {
   const result = fixture(t).analyze({ target: 'gpui' });
   assert.equal(result.analysisComplete, false);
