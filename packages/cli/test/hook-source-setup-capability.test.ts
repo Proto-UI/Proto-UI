@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -42,7 +42,7 @@ async function withSource(
   run: (folder: string, files: string[], source: ts.SourceFile) => void | Promise<void>,
   canonicalImport = true
 ): Promise<void> {
-  const folder = await mkdtemp(path.join(tmpdir(), 'pui-setup-capability-'));
+  const folder = await realpath(await mkdtemp(path.join(tmpdir(), 'pui-setup-capability-')));
   try {
     await writeFile(
       path.join(folder, 'tsconfig.json'),
