@@ -1,13 +1,4 @@
-import {
-  lookupDataType,
-  type Binding,
-  type DataField,
-  type DataType,
-  type LiteralValue,
-  type ScalarType,
-  type SourceSpan,
-  type ValueType,
-} from '../component-ir.ts';
+import { lookupDataType, type Binding, type DataField, type DataType, type LiteralValue, type ScalarType, type SourceSpan, type ValueType } from '../component-ir.ts';
 import { reject } from './diagnostic.ts';
 
 // In Unicode mode a paired surrogate is one astral scalar and cannot match this range.
@@ -21,39 +12,24 @@ export function member(record: unknown, key: string): unknown {
 }
 
 /** Recognize the intrinsic prototype in another realm without calling its constructor or a getter. */
-function intrinsicPrototype(
-  prototype: object | null,
-  intrinsic: typeof Object | typeof Array
-): boolean {
+function intrinsicPrototype(prototype: object | null, intrinsic: typeof Object | typeof Array): boolean {
   if (prototype === intrinsic.prototype) return true;
   const constructor = member(prototype, 'constructor');
-  return (
-    typeof constructor === 'function' &&
+  return typeof constructor === 'function' &&
     Object.getOwnPropertyDescriptor(constructor, 'prototype')?.value === prototype &&
-    Function.prototype.toString.call(constructor) === Function.prototype.toString.call(intrinsic)
-  );
+    Function.prototype.toString.call(constructor) === Function.prototype.toString.call(intrinsic);
 }
 
 /** The GPUI generator receives these records through JSON. A serialization
  * hook could replace a checked record or array after admission. Inspect the
  * descriptor without reading a getter or running the hook. */
-function checkTransport(
-  value: object,
-  label: string,
-  source: SourceSpan | undefined,
-  bindings?: readonly string[]
-): void {
+function checkTransport(value: object, label: string, source: SourceSpan | undefined, bindings?: readonly string[]): void {
   if (!('toJSON' in value)) return;
   for (let current: object | null = value; current; current = Object.getPrototypeOf(current)) {
     const property = Object.getOwnPropertyDescriptor(current, 'toJSON');
     if (!property) continue;
     if (!Object.hasOwn(property, 'value') || typeof property.value === 'function') {
-      reject(
-        'ir-shape',
-        source,
-        `${label} must serialize its checked data directly. Remove the toJSON hook.`,
-        bindings
-      );
+      reject('ir-shape', source, `${label} must serialize its checked data directly. Remove the toJSON hook.`, bindings);
     }
     return;
   }
@@ -73,12 +49,7 @@ export function shape(
   checkTransport(value, label, source, bindings);
   for (const key of Reflect.ownKeys(value)) {
     if (typeof key !== 'string' || (!required.includes(key) && !optional.includes(key))) {
-      reject(
-        'ir-shape',
-        source,
-        `${label} has an undeclared member ${String(key)}. Use the fields of its IR variant.`,
-        bindings
-      );
+      reject('ir-shape', source, `${label} has an undeclared member ${String(key)}. Use the fields of its IR variant.`, bindings);
     }
     const property = Object.getOwnPropertyDescriptor(value, key)!;
     if (!property.enumerable || !Object.hasOwn(property, 'value')) {
@@ -112,12 +83,7 @@ export function variant(
   const kind = member(value, 'kind');
   if (typeof kind !== 'string' || !Object.hasOwn(variants, kind)) {
     const detail = typeof kind === 'string' ? JSON.stringify(kind) : typeof kind;
-    reject(
-      'ir-shape',
-      source,
-      `${label} has an unknown or missing kind (${detail}). Supply a defined IR variant.`,
-      bindings
-    );
+    reject('ir-shape', source, `${label} has an unknown or missing kind (${detail}). Supply a defined IR variant.`, bindings);
   }
   shape(value, `${label} (${kind})`, source, variants[kind]!, optional, bindings);
 }
@@ -126,11 +92,7 @@ export function list(value: unknown, label: string, source: SourceSpan): void {
   if (!Array.isArray(value)) reject('ir-shape', source, `${label} must be an array.`);
   // Target walkers rely on standard iteration, map and element order.
   if (!intrinsicPrototype(Object.getPrototypeOf(value), Array)) {
-    reject(
-      'ir-shape',
-      source,
-      `${label} needs an ordinary data array with standard iteration and element order.`
-    );
+    reject('ir-shape', source, `${label} needs an ordinary data array with standard iteration and element order.`);
   }
   checkTransport(value, label, source);
   if (Reflect.ownKeys(value).length !== value.length + 1) {
@@ -144,29 +106,14 @@ export function list(value: unknown, label: string, source: SourceSpan): void {
   }
 }
 
-export function text(
-  value: unknown,
-  label: string,
-  source: SourceSpan,
-  bindings?: readonly string[]
-): void {
+export function text(value: unknown, label: string, source: SourceSpan, bindings?: readonly string[]): void {
   if (typeof value !== 'string') reject('ir-shape', source, `${label} must be a string.`, bindings);
   if (unpairedSurrogate.test(value)) {
-    reject(
-      'invalid-text',
-      source,
-      `${label} contains an unpaired surrogate. Supply well-formed Unicode text.`,
-      bindings
-    );
+    reject('invalid-text', source, `${label} contains an unpaired surrogate. Supply well-formed Unicode text.`, bindings);
   }
 }
 
-export function name(
-  value: unknown,
-  label: string,
-  source: SourceSpan,
-  bindings?: readonly string[]
-): void {
+export function name(value: unknown, label: string, source: SourceSpan, bindings?: readonly string[]): void {
   text(value, label, source, bindings);
   if (value === '') reject('ir-shape', source, `${label} must have a nonempty name.`, bindings);
 }
@@ -179,22 +126,13 @@ export function id(value: unknown, label: string, source: SourceSpan): void {
 }
 
 export function resolve<T>(
-  table: ReadonlyMap<string, T>,
-  key: string,
-  label: string,
-  source: SourceSpan,
-  owner?: string
+  table: ReadonlyMap<string, T>, key: string, label: string, source: SourceSpan, owner?: string
 ): T {
   id(key, label, source);
   const result = table.get(key);
   if (result === undefined) {
     const bindings = owner === undefined ? [key] : [owner, key];
-    reject(
-      'unknown-binding',
-      source,
-      `${label} ${JSON.stringify(key)} is not declared in this scope. Use a resolved ID.`,
-      bindings
-    );
+    reject('unknown-binding', source, `${label} ${JSON.stringify(key)} is not declared in this scope. Use a resolved ID.`, bindings);
   }
   return result;
 }
@@ -205,52 +143,27 @@ export function location(record: unknown, label: string, parent?: SourceSpan): S
   const source = span as SourceSpan;
   const { file, start, end } = source;
   if (
-    typeof file !== 'string' ||
-    !file.length ||
-    unpairedSurrogate.test(file) ||
-    !Number.isSafeInteger(start) ||
-    start < 0 ||
-    !Number.isSafeInteger(end) ||
-    end < start
+    typeof file !== 'string' || !file.length || unpairedSurrogate.test(file) ||
+    !Number.isSafeInteger(start) || start < 0 || !Number.isSafeInteger(end) || end < start
   ) {
-    reject(
-      'ir-shape',
-      parent,
-      `${label} requires a source file and ordered nonnegative integer offsets.`
-    );
+    reject('ir-shape', parent, `${label} requires a source file and ordered nonnegative integer offsets.`);
   }
   return source;
 }
 
-const scalars = { bool: true, number: true, text: true, unit: true, tokens: true } satisfies Record<
-  ScalarType,
-  true
->;
+const scalars = { bool: true, number: true, text: true, unit: true, tokens: true } satisfies Record<ScalarType, true>;
 
 function checkValueType(
-  type: ValueType,
-  types: readonly DataType[],
-  label: string,
-  source: SourceSpan,
-  bindings?: readonly string[],
-  before = types.length
+  type: ValueType, types: readonly DataType[], label: string, source: SourceSpan,
+  bindings?: readonly string[], before = types.length
 ): void {
-  if (
-    typeof type !== 'string' ||
-    (!Object.hasOwn(scalars, type) && !lookupDataType(types, type, before))
-  ) {
-    reject(
-      'ir-shape',
-      source,
-      `${label} needs a scalar type or a canonical data index referring to an available declaration.`,
-      bindings
-    );
+  if (typeof type !== 'string' || (!Object.hasOwn(scalars, type) && !lookupDataType(types, type, before))) {
+    reject('ir-shape', source, `${label} needs a scalar type or a canonical data index referring to an available declaration.`, bindings);
   }
 }
 
 const dataFields = {
-  presence: ['kind', 'value', 'source'],
-  record: ['kind', 'fields', 'source'],
+  presence: ['kind', 'value', 'source'], record: ['kind', 'fields', 'source'],
 } satisfies Record<DataType['kind'], readonly string[]>;
 
 export type RecordFields = ReadonlyMap<DataType, ReadonlyMap<string, DataField>>;
@@ -282,56 +195,28 @@ export function checkDataTypes(types: readonly DataType[], parent: SourceSpan): 
   return records;
 }
 
-export function checkBinding(
-  binding: Binding,
-  parent: SourceSpan,
-  types: readonly DataType[],
-  input = false
-): void {
+export function checkBinding(binding: Binding, parent: SourceSpan, types: readonly DataType[], input = false): void {
   const source = location(binding, 'binding', parent);
-  shape(
-    binding,
-    'binding',
-    source,
-    ['id', 'name', 'type', 'source'],
-    input ? ['default', 'controlMode'] : []
-  );
+  shape(binding, 'binding', source, ['id', 'name', 'type', 'source'], input ? ['default', 'controlMode'] : []);
   id(binding.id, 'binding.id', source);
   name(binding.name, 'binding.name', source, [binding.id]);
   checkValueType(binding.type, types, 'The binding', source, [binding.id]);
 }
 
 export const literalFields = {
-  bool: ['kind', 'value'],
-  number: ['kind', 'bits'],
-  text: ['kind', 'value'],
-  tokens: ['kind', 'values'],
+  bool: ['kind', 'value'], number: ['kind', 'bits'], text: ['kind', 'value'], tokens: ['kind', 'values'],
 } satisfies Record<LiteralValue['kind'], readonly string[]>;
 
 /** Both schema defaults and behavior literals cross the same transport. */
-export function literalType(
-  value: LiteralValue,
-  source: SourceSpan,
-  bindings: string[]
-): ValueType {
+export function literalType(value: LiteralValue, source: SourceSpan, bindings: string[]): ValueType {
   variant(value, 'literal', source, literalFields, bindings);
   switch (value.kind) {
     case 'bool':
-      if (typeof value.value !== 'boolean')
-        reject('ir-shape', source, 'A bool literal requires true or false.', bindings);
+      if (typeof value.value !== 'boolean') reject('ir-shape', source, 'A bool literal requires true or false.', bindings);
       break;
     case 'number':
-      if (
-        typeof value.bits !== 'string' ||
-        value.bits.length !== 16 ||
-        !/^[\da-f]{16}$/iu.test(value.bits)
-      ) {
-        reject(
-          'ir-shape',
-          source,
-          'A number literal requires exactly sixteen hexadecimal binary64 digits.',
-          bindings
-        );
+      if (typeof value.bits !== 'string' || value.bits.length !== 16 || !/^[\da-f]{16}$/iu.test(value.bits)) {
+        reject('ir-shape', source, 'A number literal requires exactly sixteen hexadecimal binary64 digits.', bindings);
       }
       break;
     case 'text':
@@ -341,13 +226,7 @@ export function literalType(
       list(value.values, 'style token list', source);
       for (const token of value.values) {
         name(token, 'style token', source, bindings);
-        if (/[\t\n\f\r ]/u.test(token))
-          reject(
-            'ir-shape',
-            source,
-            'A style token cannot contain ASCII whitespace. Supply each token separately.',
-            bindings
-          );
+        if (/[\t\n\f\r ]/u.test(token)) reject('ir-shape', source, 'A style token cannot contain ASCII whitespace. Supply each token separately.', bindings);
       }
       break;
   }
@@ -356,30 +235,23 @@ export function literalType(
 
 export function unique(seen: Set<string>, key: string, label: string, source: SourceSpan): void {
   if (seen.has(key)) {
-    reject(
-      'duplicate-binding',
-      source,
-      `${label} ${JSON.stringify(key)} is declared twice in the same scope. Give each declaration its own ID.`,
-      [key]
-    );
+    reject('duplicate-binding', source,
+      `${label} ${JSON.stringify(key)} is declared twice in the same scope. Give each declaration its own ID.`, [key]);
   }
   seen.add(key);
 }
 
-export function declarePublicName(
-  names: Map<string, string>,
+export function declarePublicName<T extends Pick<Binding, 'id' | 'source'>>(
+  names: Map<string, T>,
   spelling: string,
-  binding: Binding,
+  binding: T,
   label: string
 ): void {
   const previous = names.get(spelling);
   if (previous !== undefined) {
-    reject(
-      'duplicate-name',
-      binding.source,
+    reject('duplicate-name', binding.source,
       `${label} ${JSON.stringify(spelling)} is exposed twice. Give the declarations distinct public names.`,
-      [previous, binding.id]
-    );
+      [previous.id, binding.id]);
   }
-  names.set(spelling, binding.id);
+  names.set(spelling, binding);
 }

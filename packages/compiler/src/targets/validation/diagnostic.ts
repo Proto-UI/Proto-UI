@@ -9,6 +9,7 @@ const categories = {
   'wrong-arity': 'invalid-ir',
   'invalid-phase': 'invalid-ir',
   'dependency-missing': 'invalid-ir',
+  'child-input': 'source-invalid',
   'invalid-text': 'source-invalid',
   'illegal-effect': 'source-invalid',
   'derived-cycle': 'source-invalid',
@@ -18,6 +19,8 @@ const categories = {
   'failing-value': 'backend-missing',
   'action-result': 'backend-missing',
   'interactive-text': 'backend-missing',
+  'component-cycle': 'compiler-missing',
+  'numeric-child-key': 'compiler-missing',
   'host-name': 'backend-missing',
 } as const;
 

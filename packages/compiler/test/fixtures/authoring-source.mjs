@@ -8,9 +8,9 @@ import { produceComponentIR } from '@proto.ui/compiler/producer';
 const examples = new URL('../../../../internal/compiler/examples/', import.meta.url);
 const root = fileURLToPath(new URL('../../../../', import.meta.url));
 
-export function authoredSource(fileName, publicName, exportName = 'default') {
-  const file = fileURLToPath(new URL(fileName, examples));
-  const config = fileURLToPath(new URL('tsconfig.json', examples));
+function compileSource(entry, publicName, exportName) {
+  const file = fileURLToPath(entry);
+  const config = fileURLToPath(new URL('tsconfig.json', entry));
   const program = createProtoProgram({
     rootNames: [file],
     currentDirectory: root,
@@ -23,6 +23,14 @@ export function authoredSource(fileName, publicName, exportName = 'default') {
       sha256: createHash('sha256').update(readFileSync(config)).digest('hex'),
     },
   };
+}
+
+export function authoredSource(fileName, publicName, exportName = 'default') {
+  return compileSource(new URL(fileName, examples), publicName, exportName);
+}
+
+export function authoredContextSource() {
+  return compileSource(new URL('./authoring-context/owner.proto.ts.txt', import.meta.url), 'LevelOwner', 'default');
 }
 
 export function authoredBadgeSource() {

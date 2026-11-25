@@ -95,7 +95,7 @@ The created panel explicitly starts loading through `def.lifecycle.onCreated(rel
 
 The example's visible `cancelled` value is written by the explicit cancel action. Disposal does not write another value into a dead component. Scheduler evidence separately distinguishes completion, explicit cancellation, supersession and owner termination. The task's local `requested` value crosses suspension; its writable transaction view does not.
 
-Compiling this Tabs source still requires nominal Context and keyed child identity in M2, then creation-triggered task scheduling, fresh reads after `await` and an actual loader binding in M3. Each target needs typed argument/result conversion for `authoring.load-tab`. The contract calls for `extern-unbound` when a reached extern lacks a binding on the selected target. Existing native task-support checks use a separate host owner. The authored panel still needs its own source-to-consumer run.
+The synchronous Context fixture exercises nominal provider identity, required reads and stable keyed composition through React and GPUI. Compiling either original Tabs export now reaches `PanelState` at the panel's state declaration. Its tagged value, creation-triggered task, fresh reads after `await` and typed `authoring.load-tab` binding belong to the owned async increment. The contract calls for `extern-unbound` when the selected target lacks a reached binding. [Synchronous authored fixture](../../packages/compiler/test/fixtures/authoring-context/owner.proto.ts.txt)
 
 ## Migration and executable completion
 

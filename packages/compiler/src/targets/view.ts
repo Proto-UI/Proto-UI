@@ -1,7 +1,7 @@
 import type { ElementView, SourceSpan } from './component-ir.ts';
 
 export interface ViewBinding {
-  readonly role: 'text' | 'style' | 'disabled' | 'activate';
+  readonly role: 'text' | 'style' | 'disabled' | 'activate' | 'child-key' | 'child-prop';
   readonly fn: string;
   readonly source: SourceSpan;
 }
@@ -16,9 +16,14 @@ export function viewBindings(view: ElementView): ViewBinding[] {
       if (fn !== undefined) bindings.push({ role, fn, source: element.source });
     }
     for (const child of element.children) {
-      if (child.kind === 'text')
+      if (child.kind === 'text') {
         bindings.push({ role: 'text', fn: child.value, source: child.source });
-      else visit(child);
+      } else if (child.kind === 'child') {
+        bindings.push({ role: 'child-key', fn: child.key, source: child.source });
+        for (const prop of child.props) bindings.push({ role: 'child-prop', fn: prop.fn, source: prop.source });
+      } else {
+        visit(child);
+      }
     }
   }
   visit(view);

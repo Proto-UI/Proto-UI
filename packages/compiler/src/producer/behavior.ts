@@ -158,8 +158,8 @@ export class BehaviorProducer {
       inherited.some(({ value }) => value.kind === 'reader') ||
       [...symbolicArgs.values()].some((value) => value.kind === 'reader');
     const phase = result === 'unit' && actionScope && hasReader ? 'action' : 'pure';
-    // The actual owned field or signal is a specialization input. Calls using
-    // different handles cannot share a body with a baked-in read or write ID.
+    // Specialize on the handle binding. A context read keeps its consumed
+    // binding ID so each invocation reads through the current logical provider.
     const role = JSON.stringify([
       'behavior-helper',
       phase,

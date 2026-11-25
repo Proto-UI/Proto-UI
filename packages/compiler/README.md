@@ -31,7 +31,9 @@ node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/cont
 
 Compilation, lint and editor analysis prepare their inputs through `createProtoProgram({ rootNames, currentDirectory, project })`. The factory supplies the controlled `@proto.ui/core/authoring` declaration when no project mapping matches. An exact or wildcard mapping keeps TypeScript’s resolution precedence, including the base directory of an inherited `paths` setting. An unresolved project mapping stays visible in the closure. The producer exports `AUTHORING_DECLARATIONS` for callers that need the declaration path and checks the identity of resolved symbols and reachable helper bodies. The public Core/Adapter authoring runtime and application-source migrations have separate coverage requirements.
 
-The Toggle's optional boolean input selects its mode at creation. A controlled click delivers a typed, immutable `{ active: boolean }` request. The committed public value follows the owner's accepted input. An uncontrolled instance initializes from `defaultActive` once and commits local changes. Both hosts reject a mode change on the same instance and retain its last accepted inputs. The Tabs owner and panel still require logical Context, keyed composition and owned async source lowering. Scheduler support has independent native tests.
+The Toggle's optional boolean input selects its mode at creation. A controlled click delivers a typed, immutable `{ active: boolean }` request. The committed public value follows the owner's accepted input. An uncontrolled instance initializes from `defaultActive` once and commits local changes. Both hosts reject a mode change on the same instance and retain its last accepted inputs.
+
+The source producer also links nominal Context keys, pure provider values, required reads and stable text-keyed children in one compilation unit. The authored `LevelOwner` and `LevelReader` fixture exercises live provider updates, same-label key identity, replacement by an equal-valued provider and retained child initialization. Chromium observes a portal and GPUI observes physical detachment and reattachment. Both exports in the versioned async Tabs example still reach an unsupported tagged state type at the `def.state` declaration.
 
 ## Native-source targets
 
@@ -42,6 +44,7 @@ The host suites compile the versioned sources and import the generated component
 ```sh
 node --test packages/compiler/test/react-target.node-test.mjs
 node --test packages/compiler/test/controlled-source-react.node-test.mjs
+node --test packages/compiler/test/context-source-react.node-test.mjs
 node --test packages/compiler/test/gpui-target.node-test.mjs
 ```
 

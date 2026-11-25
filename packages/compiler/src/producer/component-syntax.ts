@@ -173,6 +173,23 @@ function namespaceMember(source: SourceContext, expression: ts.Expression): ts.S
     : exported;
 }
 
+export type LinkedType = 'ContextKey' | 'Prototype';
+
+/** The nominal type identifies which resolver must prove the value's creation site. */
+export function linkedType(source: SourceContext, expression: ts.Expression): LinkedType | undefined {
+  const node = operand(expression);
+  if (!ts.isIdentifier(node) && !ts.isCallExpression(node) && !namespaceMember(source, node)) return undefined;
+  const type = source.checker.getTypeAtLocation(node);
+  const target = type.flags & ts.TypeFlags.Object && (type as ts.ObjectType).objectFlags & ts.ObjectFlags.Reference
+    ? (type as ts.TypeReference).target : type;
+  for (const declaration of target.getSymbol()?.declarations ?? []) {
+    if (!ts.isInterfaceDeclaration(declaration)) continue;
+    const name = declaration.name.text;
+    if ((name === 'ContextKey' || name === 'Prototype') && source.intrinsic(declaration.name, name)) return name;
+  }
+  return undefined;
+}
+
 /** Resolve actual source callables, including imports and immutable aliases. A property of an arbitrary
  * object could invoke a getter or depend on its receiver, even when the checker gives it the same signature. */
 export function sourceFunction(

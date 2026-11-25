@@ -7,7 +7,7 @@ use quote::{format_ident, quote};
 pub fn render(
     checked: &Checked<'_>, names: &Names, pure: impl Fn(&str, TokenStream) -> TokenStream,
 ) -> TokenStream {
-    let mut tree = Tree { checked, names, pure, next_node: 0, texts: Vec::new() };
+    let mut tree = Tree { checked, names, pure, next_node: 0, next_child: 0, texts: Vec::new() };
     let mut label = Vec::new();
     let root = tree.node(&checked.ir.view, false, &mut label);
     let texts = tree.texts;
@@ -29,6 +29,7 @@ struct Tree<'c, 'ir, F> {
     names: &'c Names,
     pure: F,
     next_node: usize,
+    next_child: usize,
     texts: Vec<TokenStream>,
 }
 
@@ -43,6 +44,11 @@ impl<F: Fn(&str, TokenStream) -> TokenStream> Tree<'_, '_, F> {
         self.next_node += 1;
         let (tag, source, children, style, disabled, activate) = match view {
             View::Element { tag, source, children, style, disabled, activate } => (tag, source, children, style, disabled, activate),
+            View::Child { .. } => {
+                let slot = crate::context::child(self.next_child);
+                self.next_child += 1;
+                return quote!(self.#slot.as_ref().map(|(_, child)| child.clone()));
+            }
             View::Text { value, source } => {
                 let name = format_ident!("text_{index}");
                 let value = (self.pure)(value, quote!(self));
@@ -63,7 +69,8 @@ impl<F: Fn(&str, TokenStream) -> TokenStream> Tree<'_, '_, F> {
         let label_start = label.len();
         let mut elements = Vec::with_capacity(children.len());
         for child in children {
-            elements.push(self.node(child, button || inside_button, label));
+            let element = self.node(child, button || inside_button, label);
+            elements.push(if matches!(child, View::Child { .. }) { quote!(node = node.children(#element);) } else { quote!(node = node.child(#element);) });
         }
         let (tag_name, mut base) = match tag {
             Tag::Div => ("div", quote!(::gpui::div())),
@@ -88,7 +95,8 @@ impl<F: Fn(&str, TokenStream) -> TokenStream> Tree<'_, '_, F> {
         if !inside_button { label.truncate(label_start); }
         let token_styles = style.as_ref().map(|id| {
             let tokens = (self.pure)(id, quote!(self));
-            quote!(for token in (#tokens).iter() { (self.resolve_token)(token.as_str(), node.style()); })
+            let resolve = if self.checked.links.scoped { quote!(self.scope.resolve_token) } else { quote!(self.resolve_token) };
+            quote!(for token in (#tokens).iter() { (#resolve)(token.as_str(), node.style()); })
         });
         let appearance = (index == 0).then(|| quote! {
             if let ::core::option::Option::Some(appearance) = &self.appearance {
@@ -114,7 +122,7 @@ impl<F: Fn(&str, TokenStream) -> TokenStream> Tree<'_, '_, F> {
             #appearance
             #availability
             #input
-            #(node = node.child(#elements);)*
+            #(#elements)*
             #end
         })
     }

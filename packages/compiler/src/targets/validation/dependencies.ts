@@ -1,7 +1,7 @@
-import type { ComponentIR, SourceSpan } from '../component-ir.ts';
-import { viewBindings } from '../view.ts';
+import type { ComponentBody, SourceSpan } from '../component-ir.ts';
+import type { ViewBinding } from '../view.ts';
 import type { BehaviorFacts } from './behavior.ts';
-import { reject } from './diagnostic.ts';
+import { ComponentIRDiagnostic, reject } from './diagnostic.ts';
 import { findCycle, type Cycle, type References } from './graph.ts';
 import { resolve } from './structure.ts';
 import type { Declarations } from './value.ts';
@@ -94,11 +94,12 @@ function describePath(path: readonly string[], declarations: Declarations): stri
 }
 
 export function checkDependencies(
-  ir: ComponentIR,
+  ir: ComponentBody,
   declarations: Declarations,
   facts: ReadonlyMap<string, BehaviorFacts>,
-  reached: Iterable<string>
-): void {
+  reached: Iterable<string>,
+  view: readonly ViewBinding[]
+): ComponentIRDiagnostic | undefined {
   const declared = new Map<string, Set<string>>();
   const calls = new Map<string, References>();
   for (const fn of ir.behaviors) {
@@ -127,7 +128,8 @@ export function checkDependencies(
   const recursion = findCycle(calls, reached);
   if (recursion) {
     const derived = new Set(ir.projections.map((projection) => projection.fn));
-    for (const binding of viewBindings(ir.view)) {
+    for (const provider of ir.provides) derived.add(provider.fn);
+    for (const binding of view) {
       if (binding.role !== 'activate') derived.add(binding.fn);
     }
     // The usual acyclic path requires only the linear graph walk above. For an
@@ -151,6 +153,7 @@ export function checkDependencies(
 
   const reads = actualReads(facts);
   const available = new Set(ir.props.map((prop) => prop.id));
+  for (const read of ir.consumes) available.add(read.binding.id);
   for (const field of ir.fields) {
     for (const [key, site] of reads.get(field.init)!) {
       if (available.has(key)) continue;
@@ -178,11 +181,12 @@ export function checkDependencies(
     }
   }
   if (recursion) {
-    reject(
+    return new ComponentIRDiagnostic(
       'recursive-helper',
       recursion.source,
       `Lowering the ordinary recursive helper chain ${describePath(recursion.path, declarations)} requires recursive-call support in this target slice.`,
       recursion.path
     );
   }
+  return undefined;
 }

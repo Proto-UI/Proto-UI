@@ -18,12 +18,39 @@ fn identifier(name: &str) -> Option<Ident> {
     syn::parse_str::<Ident>(&raw).ok().filter(|id| id.to_string() == raw)
 }
 
-fn public(name: &str, id: &str, source: &Source) -> Result<Ident, String> {
-    identifier(name).ok_or_else(|| serde_json::json!({
+pub fn public(name: &str, id: &str, source: &Source) -> Result<Ident, String> {
+    identifier(name).ok_or_else(|| host_name_error(id, source, format!("GPUI cannot expose {name:?} with its exact spelling as a Rust identifier. Use an NFC Rust identifier.")))
+}
+
+fn host_name_error(id: &str, source: &Source, message: String) -> String {
+    serde_json::json!({
         "category": "backend-missing", "code": "host-name", "bindings": [id],
         "source": { "file": source.file, "start": source.start, "end": source.end },
-        "message": format!("GPUI cannot expose {name:?} with its exact spelling as a Rust identifier. Use an NFC Rust identifier."),
-    }).to_string())
+        "message": message,
+    }).to_string()
+}
+
+pub fn check_linked_names(bodies: &[Checked<'_>]) -> Result<(), String> {
+    let root = &bodies[0];
+    let mut generated = HashSet::from(["ContextScope".to_owned(), "MissingContext".to_owned()]);
+    if !root.unit.keys.is_empty() { generated.insert("ScopeKey".to_owned()); }
+    if root.links.children.iter().any(|sites| sites.len() > 1) { generated.insert("ChildKeyConflict".to_owned()); }
+    for i in 0..root.unit.keys.len() { generated.insert(crate::context::marker(i).to_string()); }
+    for i in 0..root.unit.types.len() { generated.insert(format!("{}Data{i}", root.ir.name)); }
+    for b in bodies {
+        let n = &b.ir.name;
+        generated.extend([format!("{n}Props"), format!("{n}Projection")]);
+        if !b.ir.signals.is_empty() { generated.insert(format!("{n}Signal")); }
+        if !b.ir.actions.is_empty() { generated.insert(format!("{n}Actions")); }
+        if !b.actions.is_empty() { generated.insert(format!("{n}Command")); }
+        if b.ir.props.iter().any(|p| p.control_mode.is_some()) { generated.insert(format!("{n}InputError")); }
+    }
+    for b in bodies {
+        if generated.contains(&b.ir.name) {
+            return Err(host_name_error(&b.ir.id, &b.ir.source, format!("The linked component {:?} and a generated GPUI type need the same Rust identifier. Give the component a distinct export name.", b.ir.name)));
+        }
+    }
+    Ok(())
 }
 
 /// Rust callers pass arguments by position. Preserve source names in the public
@@ -73,11 +100,13 @@ pub struct Names {
 impl Names {
     pub fn new(checked: &Checked<'_>) -> Result<Self, String> {
         let ir = checked.ir;
-        let component = public(&ir.name, &ir.name, &ir.source)?;
+        let component = public(&ir.name, &ir.id, &ir.source)?;
         let projections = group(ir.projections.iter().map(|p| (p.name.as_str(), p.function.as_str(), &ir.behaviors[checked.functions[p.function.as_str()]].binding.source)))?;
         let actions = group(ir.actions.iter().map(|a| (a.name.as_str(), a.function.as_str(), &ir.behaviors[checked.functions[a.function.as_str()]].binding.source)))?;
-        let mut members = Vec::with_capacity(ir.types.len());
-        for (index, data) in ir.types.iter().enumerate() {
+        let mut members = Vec::with_capacity(checked.unit.types.len());
+        let root = &checked.unit.bodies[0];
+        let shared_owner = public(&root.name, &root.id, &root.source)?;
+        for (index, data) in checked.unit.types.iter().enumerate() {
             let mut native_fields = Vec::new();
             if let Data::Record { fields, .. } = data {
                 for field in fields { native_fields.push(public(&field.name, &format!("data:{index}.{}", field.name), &field.source)?); }
@@ -91,7 +120,7 @@ impl Names {
             signal: format_ident!("{}Signal", component),
             command: format_ident!("{}Command", component),
             input_error: format_ident!("{}InputError", component),
-            data: (0..ir.types.len()).map(|i| format_ident!("{}Data{i}", component)).collect(),
+            data: (0..checked.unit.types.len()).map(|i| format_ident!("{}Data{i}", shared_owner)).collect(),
             members,
             props: group(ir.props.iter().map(|p| { let b = &p.binding; (b.name.as_str(), b.id.as_str(), &b.source) }))?,
             signals: group(ir.signals.iter().map(|b| (b.name.as_str(), b.id.as_str(), &b.source)))?,
@@ -132,6 +161,7 @@ pub fn source_doc(name: &str, source: &Source) -> String {
     format!("Proto {name:?} at {:?}:{}-{}.", source.file, source.start, source.end)
 }
 pub fn field(n: usize) -> Ident { format_ident!("field_{n}") }
+pub fn context(n: usize) -> Ident { format_ident!("context_{n}") }
 pub fn argument(n: usize) -> Ident { format_ident!("argument_{n}") }
 pub fn parameter(n: usize) -> Ident { format_ident!("parameter_{n}") }
 pub fn local(n: usize) -> Ident { format_ident!("local_{n}") }

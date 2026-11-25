@@ -1,24 +1,6 @@
-export {
-  HostValueError,
-  missingInput,
-  numberFromBits,
-  ownMember,
-  readBool,
-  readCallback,
-  readNumber,
-  readObject,
-  readText,
-  readTokens,
-  readUnit,
-  sameTokens,
-} from './values.ts';
-export {
-  InputRejectionContext,
-  omittedInput,
-  presentInput,
-  useFixedInputs,
-  type InputPresence,
-} from './inputs.ts';
+export { HostValueError, missingInput, numberFromBits, ownMember, readBool, readCallback, readNumber, readObject, readText, readTokens, readUnit, sameTokens } from './values.ts';
+export { InputRejectionContext, omittedInput, presentInput, useFixedInputs, type InputPresence } from './inputs.ts';
+export { MissingProviderError, createNativeContext, useContextSnapshot, useProvidedContext, useRequiredContext, type ContextValue, type NativeContext } from './context.ts';
 export { DisposedInstanceError, usePublishedInputs, type InputLease } from './lifetime.ts';
 export {
   ActionFailure,

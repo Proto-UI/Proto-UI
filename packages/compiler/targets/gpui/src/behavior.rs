@@ -6,7 +6,7 @@ use quote::{format_ident, quote};
 use std::collections::HashMap;
 
 pub fn data(p: Place) -> Ident {
-    match p { Place::Prop(i) => format_ident!("input_p{i}"), Place::Field(i) => format_ident!("input_f{i}") }
+    match p { Place::Prop(i) => format_ident!("input_p{i}"), Place::Field(i) => format_ident!("input_f{i}"), Place::Context(i) => format_ident!("input_c{i}") }
 }
 
 /// The immutable parameters are exactly the reached reads. A writable location is
@@ -133,7 +133,7 @@ impl<'c, 'a> Lower<'c, 'a> {
             Value::Member { value, field } => {
                 let base = self.value(value);
                 let Type::Data(i) = base.ty else { unreachable!("checked record") };
-                let Data::Record { fields, .. } = &self.checked.ir.types[i] else { unreachable!("checked record") };
+                let Data::Record { fields, .. } = &self.checked.unit.types[i] else { unreachable!("checked record") };
                 let j = self.checked.members[i][field.as_str()];
                 let n = &self.names.members[i][j];
                 let ty = fields[j].ty;
@@ -145,7 +145,7 @@ impl<'c, 'a> Lower<'c, 'a> {
                 let value = self.value(value).code;
                 (quote!((#value).is_some()), Type::Bool, false)
             }
-            Value::Prop { id } | Value::Capture { id } | Value::State { id } => {
+            Value::Prop { id } | Value::Capture { id } | Value::State { id } | Value::Context { id } => {
                 let p = self.checked.places[id.as_str()];
                 let ty = self.checked.binding(p).ty;
                 let read = self.read(p);

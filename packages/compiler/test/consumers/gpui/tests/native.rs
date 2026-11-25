@@ -2,6 +2,7 @@
 //! layout, scene construction and pointer dispatch on its headless test platform.
 
 mod authoring_badge;
+mod context_source;
 mod controlled_source;
 mod support;
 

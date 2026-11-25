@@ -1,48 +1,17 @@
 import ts from 'typescript';
 import type { ElementView } from '../component-ir.ts';
-import {
-  arrow,
-  atSource,
-  atViewSource,
-  block,
-  call,
-  constDecl,
-  declaration,
-  f,
-  id,
-  key,
-  member,
-  object,
-  param,
-  property,
-  semanticExport,
-  str,
-  typeRef,
-} from './ast.ts';
+import { arrow, atSource, atViewSource, block, call, constDecl, declaration, f, id, key, member, object, param, property, semanticExport, str, typeRef } from './ast.ts';
 import { fieldsAndProps, invoke, type Environment } from './behavior.ts';
 import { needsSnapshot } from './data.ts';
-import type { ReactProgram } from './program.ts';
-import { appearanceInput, hasInputs, initializerProps, publicParameters } from './surface.ts';
+import { origin, type ReactProgram } from './program.ts';
+import { appearanceInput, hasInputs, initializerInputs, publicParameters } from './surface.ts';
 
-function snapshot(): ts.CallExpression {
-  return call(member(id('$store'), 'snapshot'));
-}
-function publishedInputs(): ts.CallExpression {
-  return call(member(id('$lease'), 'read'));
-}
-function fieldArgument(program: ReactProgram): ts.Identifier {
-  return id(program.written.size ? '$store' : '$fields');
-}
-function argumentNames(params: ts.ParameterDeclaration[]): ts.Identifier[] {
-  return params.map((p) => p.name as ts.Identifier);
-}
+function snapshot(): ts.CallExpression { return call(member(id('$store'), 'snapshot')); }
+function publishedInputs(): ts.CallExpression { return call(member(id('$lease'), 'read')); }
+function fieldArgument(program: ReactProgram): ts.Identifier { return id(program.written.size ? '$store' : '$fields'); }
+function argumentNames(params: ts.ParameterDeclaration[]): ts.Identifier[] { return params.map((p) => p.name as ts.Identifier); }
 
-function dispatchCall(
-  program: ReactProgram,
-  fn: string,
-  args: ts.Expression[],
-  inputLease: ts.Expression
-): ts.CallExpression {
+function dispatchCall(program: ReactProgram, fn: string, args: ts.Expression[], inputLease: ts.Expression): ts.CallExpression {
   args.push(inputLease);
   if (program.functions.get(fn)!.fields) args.push(fieldArgument(program));
   return call(id(program.dispatchers.get(fn)!), ...args);
@@ -58,9 +27,7 @@ export function dispatchers(program: ReactProgram): ts.Statement[] {
     const checks = args.map((arg, i) => {
       const binding = plan.fn.params[i];
       const checked = program.guard(binding, arg);
-      return f.createExpressionStatement(
-        needsSnapshot(binding.type) ? f.createAssignment(arg, checked) : checked
-      );
+      return f.createExpressionStatement(needsSnapshot(binding.type) ? f.createAssignment(arg, checked) : checked);
     });
     params.push(param('$lease', program.useType('InputLease', typeRef(program.inputsType))));
     const body: ts.Statement[] = [];
@@ -69,12 +36,7 @@ export function dispatchers(program: ReactProgram): ts.Statement[] {
       if (program.written.size) {
         params.push(param('$store', program.useType('FieldStore', typeRef(program.fieldsType))));
         if (plan.writes) {
-          body.push(
-            constDecl(
-              '$draft',
-              f.createNewExpression(program.use('FieldDraft'), undefined, [snapshot()])
-            )
-          );
+          body.push(constDecl('$draft', f.createNewExpression(program.use('FieldDraft'), undefined, [snapshot()])));
           fields = member(id('$draft'), 'current');
         } else {
           fields = snapshot();
@@ -84,34 +46,21 @@ export function dispatchers(program: ReactProgram): ts.Statement[] {
       }
     }
     if (plan.emits) {
-      const queue = f.createNewExpression(
-        program.use('SignalQueue'),
-        [typeRef(program.inputsType)],
-        []
-      );
+      const queue = f.createNewExpression(program.use('SignalQueue'), [typeRef(program.inputsType)], []);
       body.push(constDecl('$signals', queue));
     }
-    const env = {
-      ...fieldsAndProps(program, id('$inputs'), fields),
-      draft: id('$draft'),
-      signals: id('$signals'),
-    };
+    const env = { ...fieldsAndProps(program, id('$inputs'), fields), draft: id('$draft'), signals: id('$signals') };
     body.push(f.createExpressionStatement(invoke(plan, args, env)));
     if (plan.writes || plan.emits) {
       const finish = [id('$lease'), id(plan.emits ? '$signals' : 'undefined')] as ts.Expression[];
-      if (plan.writes)
-        finish.push(id('$store'), member(id('$draft'), 'current'), id(program.sameFields));
+      if (plan.writes) finish.push(id('$store'), member(id('$draft'), 'current'), id(program.sameFields));
       body.push(f.createReturnStatement(call(program.use('finishAction'), ...finish)));
     }
     const action = arrow(plan.inputs ? [param('$inputs')] : [], block(body));
     const entry: ts.Statement[] = [];
-    if (checks.length)
-      entry.push(f.createIfStatement(call(member(id('$lease'), 'active')), block(checks)));
+    if (checks.length) entry.push(f.createIfStatement(call(member(id('$lease'), 'active')), block(checks)));
     entry.push(f.createReturnStatement(call(program.use('dispatchAction'), id('$lease'), action)));
-    return atSource(
-      declaration(name, params, program.useType('ActionDispatch'), entry),
-      plan.fn.binding.source
-    );
+    return atSource(declaration(name, params, program.useType('ActionDispatch'), entry), plan.fn.binding.source);
   });
 }
 
@@ -121,18 +70,10 @@ function retainedView(program: ReactProgram, view: ts.Expression): ts.Statement[
   let readsFields = false;
   for (const { name, fn } of program.ir.projections) {
     const plan = program.functions.get(fn)!;
-    const body: ts.Statement[] = [
-      plan.inputs
-        ? constDecl('$inputs', publishedInputs())
-        : f.createExpressionStatement(publishedInputs()),
-    ];
+    const body: ts.Statement[] = [plan.inputs ? constDecl('$inputs', publishedInputs()) : f.createExpressionStatement(publishedInputs())];
     if (plan.fields && program.written.size) body.push(constDecl('$fields', snapshot()));
     readsFields ||= plan.fields;
-    body.push(
-      f.createReturnStatement(
-        invoke(plan, [], fieldsAndProps(program, id('$inputs'), id('$fields')))
-      )
-    );
+    body.push(f.createReturnStatement(invoke(plan, [], fieldsAndProps(program, id('$inputs'), id('$fields')))));
     members.push(f.createGetAccessorDeclaration(undefined, key(name), [], undefined, block(body)));
   }
   for (const { name, fn } of program.ir.actions) {
@@ -140,40 +81,15 @@ function retainedView(program: ReactProgram, view: ts.Expression): ts.Statement[
     readsFields ||= plan.fields;
     const params = publicParameters(program, plan.fn.params);
     const dispatch = dispatchCall(program, fn, argumentNames(params), id('$lease'));
-    members.push(
-      f.createMethodDeclaration(
-        undefined,
-        undefined,
-        key(name),
-        undefined,
-        undefined,
-        params,
-        undefined,
-        block([f.createReturnStatement(dispatch)])
-      )
-    );
+    members.push(f.createMethodDeclaration(undefined, undefined, key(name), undefined, undefined, params, undefined, block([f.createReturnStatement(dispatch)])));
   }
   if (readsFields) dependencies.push(fieldArgument(program));
-  const handleType = f.createUnionTypeNode([
-    typeRef(program.handleType),
-    f.createLiteralTypeNode(f.createNull()),
-  ]);
+  const handleType = f.createUnionTypeNode([typeRef(program.handleType), f.createLiteralTypeNode(f.createNull())]);
   const handle = f.createCallExpression(program.use('useRef'), [handleType], [f.createNull()]);
   const frozen = call(member(id('Object'), 'freeze'), object(members));
-  const once = f.createBinaryExpression(
-    member(id('$handle'), 'current'),
-    ts.SyntaxKind.QuestionQuestionEqualsToken,
-    frozen
-  );
+  const once = f.createBinaryExpression(member(id('$handle'), 'current'), ts.SyntaxKind.QuestionQuestionEqualsToken, frozen);
   const make = arrow([], block([constDecl('$lease', id('$owner')), f.createReturnStatement(once)]));
-  const retained = call(
-    program.use('useRetainedHandle'),
-    id('$owner'),
-    id('$ref'),
-    make,
-    f.createArrayLiteralExpression(dependencies),
-    view
-  );
+  const retained = call(program.use('useRetainedHandle'), id('$owner'), id('$ref'), make, f.createArrayLiteralExpression(dependencies), view);
   return [constDecl('$handle', handle), f.createReturnStatement(retained)];
 }
 
@@ -186,11 +102,7 @@ function nativeClick(program: ReactProgram, { activate, disabled }: ElementView)
     const locked = invoke(plan, [], fieldsAndProps(program, id('$inputs'), id('$fields')));
     body.push(f.createIfStatement(locked, f.createReturnStatement()));
   }
-  body.push(
-    f.createExpressionStatement(
-      call(program.use('observeNativeAction'), dispatchCall(program, activate!, [], id('$lease')))
-    )
-  );
+  body.push(f.createExpressionStatement(call(program.use('observeNativeAction'), dispatchCall(program, activate!, [], id('$lease')))));
   return arrow([], block(body));
 }
 
@@ -201,44 +113,27 @@ function output(program: ReactProgram, view: ElementView, env: Environment): ts.
     const tokens = invoke(program.functions.get(view.style)!, [], env);
     attributes.push(property('className', call(member(tokens, 'join'), str(' '))));
   }
-  if (view.disabled !== undefined)
-    attributes.push(property('disabled', invoke(program.functions.get(view.disabled)!, [], env)));
+  if (view.disabled !== undefined) attributes.push(property('disabled', invoke(program.functions.get(view.disabled)!, [], env)));
   if (view.activate !== undefined) attributes.push(property('onClick', nativeClick(program, view)));
   if (view === program.ir.view && program.ir.projections.length) {
-    const callback = program.fixed.length
-      ? member(id('$inputs'), 'appearance')
-      : appearanceInput(program);
-    const projection = object(
-      program.ir.projections.map(({ name, fn }) =>
-        property(name, invoke(program.functions.get(fn)!, [], env))
-      )
-    );
-    const appearance = f.createCallChain(
-      callback,
-      f.createToken(ts.SyntaxKind.QuestionDotToken),
-      undefined,
-      [call(member(id('Object'), 'freeze'), projection)]
-    );
+    const callback = program.fixed.length ? member(program.hostInputs(id('$inputs')), 'appearance') : appearanceInput(program);
+    const projection = object(program.ir.projections.map(({ name, fn }) => property(name, invoke(program.functions.get(fn)!, [], env))));
+    const appearance = f.createCallChain(callback, f.createToken(ts.SyntaxKind.QuestionDotToken), undefined, [call(member(id('Object'), 'freeze'), projection)]);
     attributes.push(property('style', appearance));
   }
-  const children = view.children.map((child) =>
-    child.kind === 'element'
-      ? output(program, child, env)
-      : atViewSource(invoke(program.functions.get(child.value)!, [], env), child.source)
-  );
-  const element = f.createCallExpression(program.use('createElement'), undefined, [
-    str(view.tag),
-    attributes.length ? object(attributes) : f.createNull(),
-    ...children,
-  ]);
+  const children = view.children.map(child => {
+    if (child.kind === 'element') return output(program, child, env);
+    if (child.kind === 'text') return atViewSource(invoke(program.functions.get(child.value)!, [], env), child.source);
+    const attributes = [property('key', invoke(program.functions.get(child.key)!, [], env))];
+    for (const prop of child.props) attributes.push(atSource(property(prop.name, invoke(program.functions.get(prop.fn)!, [], env)), prop.source));
+    const linked = id(program.unit.bodies.get(child.component)!.component);
+    return atViewSource(call(program.use('createElement'), linked, object(attributes)), child.source);
+  });
+  const element = f.createCallExpression(program.use('createElement'), undefined, [str(view.tag), attributes.length ? object(attributes) : f.createNull(), ...children]);
   return atViewSource(element, view.source);
 }
 
-function firstState(
-  name: string,
-  program: ReactProgram,
-  initializer: ts.Expression
-): ts.VariableStatement {
+function firstState(name: string, program: ReactProgram, initializer: ts.Expression): ts.VariableStatement {
   const first = f.createArrayBindingPattern([f.createBindingElement(undefined, undefined, name)]);
   return constDecl(first, call(program.use('useState'), arrow([], initializer)));
 }
@@ -246,34 +141,40 @@ function firstState(
 export function component(program: ReactProgram): ts.Statement[] {
   const { ir } = program;
   const statements: ts.Statement[] = [];
+  const renderRoots = [...program.viewBindings.filter(b => b.role !== 'activate').map(b => b.fn), ...ir.projections.map(p => p.fn), ...ir.provides.map(p => p.fn)];
+  if (program.contexts.size) {
+    const read = new Set<string>();
+    for (const fn of [...renderRoots, ...ir.fields.map(f => f.init)]) {
+      for (const dep of program.functions.get(fn)!.captures) read.add(dep);
+    }
+    for (const { binding, key, sourceName, valueName } of program.contexts.values()) {
+      const source = call(program.use('useRequiredContext'), id(key), origin(binding));
+      statements.push(atSource(constDecl(sourceName, source), binding.source));
+      const snapshot = call(program.use('useContextSnapshot'), id(sourceName));
+      statements.push(read.has(binding.id) ? constDecl(valueName, snapshot) : f.createExpressionStatement(snapshot));
+    }
+  }
   let environment: Environment;
-  if (program.hasOwner || program.fixed.length) {
-    const inputs = hasInputs(program) ? id('$inputs') : id('undefined');
+  const inputs = hasInputs(program) || program.contexts.size ? id('$inputs') : id('undefined');
+  if (program.groupsInputs) {
     if (hasInputs(program)) {
       const candidate = program.fixed.length
-        ? call(
-            program.use('useFixedInputs'),
-            id('$props'),
-            id(program.readInputs),
-            id(program.checkFixed)
-          )
+        ? call(program.use('useFixedInputs'), id('$props'), id(program.readInputs), id(program.checkFixed))
         : call(id(program.readInputs), id('$props'));
-      statements.push(constDecl('$inputs', candidate));
+      statements.push(constDecl(program.contexts.size ? '$checked' : '$inputs', candidate));
     }
-    if (program.hasOwner)
-      statements.push(
-        constDecl(
-          '$owner',
-          call(program.use(program.hasHandle ? 'useRetainedInputs' : 'usePublishedInputs'), inputs)
-        )
-      );
-    environment = fieldsAndProps(program, inputs, id('$fields'));
+    if (program.contexts.size) {
+      const members = hasInputs(program) ? [property('host', id('$checked'))] : [];
+      for (const { sourceName } of program.contexts.values()) members.push(property(sourceName, id(sourceName)));
+      statements.push(constDecl('$inputs', object(members)));
+    }
+    if (program.hasOwner) statements.push(constDecl('$owner', call(program.use(program.hasHandle ? 'useRetainedInputs' : 'usePublishedInputs'), inputs)));
+    environment = fieldsAndProps(program, inputs, id('$fields'), true);
   } else {
     const names = program.names.scope();
     const locals = new Map<string, string>();
     const reads = new Set<string>();
-    for (const plan of program.functions.values())
-      for (const capture of plan.captures) reads.add(capture);
+    for (const plan of program.functions.values()) for (const capture of plan.captures) reads.add(capture);
     for (const binding of ir.props) {
       const checked = program.readProp(binding, id('$props'));
       if (reads.has(binding.id)) {
@@ -284,91 +185,68 @@ export function component(program: ReactProgram): ts.Statement[] {
         statements.push(f.createExpressionStatement(checked));
       }
     }
-    environment = {
-      read: (dep) =>
-        program.props.has(dep)
-          ? id(locals.get(dep)!)
-          : member(id('$fields'), program.fieldKeys.get(dep)!),
-    };
+    environment = { read(dep) {
+      if (program.props.has(dep)) return id(locals.get(dep)!);
+      const context = program.contexts.get(dep);
+      return context ? id(context.valueName) : member(id('$fields'), program.fieldKeys.get(dep)!);
+    } };
   }
   if (ir.fields.length) {
-    const init = call(
-      id(program.initFields),
-      ...initializerProps(program).map((binding) => environment.read(binding.id))
-    );
+    const init = call(id(program.initFields), ...initializerInputs(program).map(binding => environment.read(binding.id)));
     const readsFields = (fn: string) => program.functions.get(fn)!.fields;
-    const renderReadsFields =
-      program.viewBindings.some((b) => b.role !== 'activate' && readsFields(b.fn)) ||
-      ir.projections.some((p) => readsFields(p.fn));
+    const renderReadsFields = renderRoots.some(readsFields);
     if (program.written.size) {
-      statements.push(
-        firstState(
-          '$store',
-          program,
-          f.createNewExpression(program.use('FieldStore'), undefined, [init])
-        )
-      );
+      statements.push(firstState('$store', program, f.createNewExpression(program.use('FieldStore'), undefined, [init])));
       if (renderReadsFields) {
         const storeSnapshot = member(id('$store'), 'snapshot');
-        const fromStore = call(
-          program.use('useSyncExternalStore'),
-          member(id('$store'), 'subscribe'),
-          storeSnapshot,
-          storeSnapshot
-        );
+        const fromStore = call(program.use('useSyncExternalStore'), member(id('$store'), 'subscribe'), storeSnapshot, storeSnapshot);
         statements.push(constDecl('$fields', fromStore));
       }
-    } else if (
-      renderReadsFields ||
-      Array.from(program.dispatchers.keys()).some((fn) => program.functions.get(fn)!.fields)
-    ) {
+    } else if (renderReadsFields || Array.from(program.dispatchers.keys()).some((fn) => program.functions.get(fn)!.fields)) {
       statements.push(firstState('$fields', program, init));
     } else {
       statements.push(f.createExpressionStatement(call(program.use('useState'), arrow([], init))));
     }
   }
-  const view = output(program, ir.view, environment);
+  let view = output(program, ir.view, environment);
+  if (ir.provides.length) {
+    const live = fieldsAndProps(program, inputs, id('$fields'));
+    const providers = ir.provides.map(provider => {
+      const channel = program.unit.keys.get(provider.key)!;
+      const source = program.names.take(`provide_${channel.name}`);
+      const projection = program.functions.get(provider.fn)!;
+      const current = invoke(projection, [], live);
+      const read = projection.fields && program.written.size
+        ? arrow([], block([constDecl('$fields', snapshot()), f.createReturnStatement(current)]))
+        : arrow([], current);
+      const frame = call(program.use('useProvidedContext'), id(channel.name), invoke(projection, [], environment), read);
+      statements.push(atSource(constDecl(source, frame), provider.source));
+      return { key: id(channel.name), source: id(source) };
+    });
+    for (const provider of providers.reverse()) {
+      view = call(program.use('createElement'), member(provider.key, 'Provider'), object([property('value', provider.source)]), view);
+    }
+  }
   if (program.hasHandle) statements.push(...retainedView(program, view));
   else statements.push(f.createReturnStatement(view));
 
   let component: ts.Statement;
   if (program.hasHandle) {
-    const render = f.createFunctionExpression(
-      undefined,
-      undefined,
-      program.component,
-      undefined,
-      [param('$props'), param('$ref')],
-      undefined,
-      block(statements)
-    );
-    const forwarded = f.createCallExpression(
-      program.use('forwardRef'),
-      [typeRef(program.handleType), typeRef(program.propsType)],
-      [render]
-    );
+    const render = f.createFunctionExpression(undefined, undefined, program.component, undefined, [param('$props'), param('$ref')], undefined, block(statements));
+    const forwarded = f.createCallExpression(program.use('forwardRef'), [typeRef(program.handleType), typeRef(program.propsType)], [render]);
     component = constDecl(program.component, forwarded);
   } else {
-    component = declaration(
-      program.component,
-      [param('$props', typeRef(program.propsType))],
-      undefined,
-      statements
-    );
+    component = declaration(program.component, [param('$props', typeRef(program.propsType))], undefined, statements);
   }
   const exports = [
     semanticExport(program.component, ir.name),
     semanticExport(program.propsType, `${ir.name}Props`, true),
   ];
-  if (ir.projections.length)
-    exports.push(semanticExport(program.projectionType, `${ir.name}Projection`, true));
+  if (ir.projections.length) exports.push(semanticExport(program.projectionType, `${ir.name}Projection`, true));
   if (program.hasHandle) exports.push(semanticExport(program.handleType, `${ir.name}Handle`, true));
   const declarations: ts.Statement[] = [atSource(component, ir.source)];
   if (program.component !== ir.name) {
-    const displayName = f.createAssignment(
-      member(id(program.component), 'displayName'),
-      str(ir.name)
-    );
+    const displayName = f.createAssignment(member(id(program.component), 'displayName'), str(ir.name));
     declarations.push(f.createExpressionStatement(displayName));
   }
   declarations.push(f.createExportDeclaration(undefined, false, f.createNamedExports(exports)));

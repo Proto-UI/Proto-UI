@@ -52,6 +52,8 @@ node --test packages/compiler/test/controlled-source-react.node-test.mjs
 node --test packages/compiler/test/gpui-target.node-test.mjs
 ```
 
-The Tabs owner still reports `compiler-missing` with capability `logical-context` at its `def.context.provide` call on line 107. It also requires keyed child identity, owned task segments and a real target binding for `authoring.load-tab`. Its panel starts the loader on creation, so completing Context and child identity in M2 covers only part of the source. The full example reaches M3.
+The version 4 compilation unit links the actual child definitions and nominal keys reached from the selected export. An authored `LevelOwner` provides a reactive value to a keyed `LevelReader`. Chromium and GPUI consume the same source and checked IR. Their independent cases exercise provider updates, equal-valued provider replacement, same-label key rejection and retained initialization across a React portal or GPUI physical detachment. Run `node --test packages/compiler/test/context-source-react.node-test.mjs` and the GPUI module above. [Authored Context fixture](../../packages/compiler/test/fixtures/authoring-context/owner.proto.ts.txt)
+
+Both original Tabs exports now reach the panel's tagged state declaration on line 49, where this increment reports `compiler-missing` with capability `producer/value-type`. The panel also requires a creation action, owned task segments and a typed native loader for `authoring.load-tab`.
 
 Use [the implementation checklist](atomic-lowering-completion.md) to connect work to exact contract criteria, and [application consumers](application-consumers.md) to select meaningful interactions. Collect comparable cost baselines before assigning budgets; source lines, support size, retained output and runtime cost are separate measurements.

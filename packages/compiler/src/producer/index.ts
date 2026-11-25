@@ -4,11 +4,11 @@ import { analyzeProtoProgram } from '../frontend/index.ts';
 import type { ProtoDiagnostic, ProtoSourceClosure } from '../frontend/types.ts';
 import type { ComponentIR } from '../targets/component-ir.ts';
 import { ComponentIRDiagnostic, validateComponent } from '../targets/validate.ts';
-import { lowerComponent } from './component.ts';
-import { checkModuleClosure, componentExport } from './modules.ts';
+import { lowerSourceUnit } from './links.ts';
 import { AUTHORING_DECLARATIONS, createSourceContext, SourceIssue } from './source.ts';
 
 export { AUTHORING_DECLARATIONS };
+export type { SourceLinks } from './links.ts';
 
 export interface ComponentEntry {
   fileName: string;
@@ -64,7 +64,7 @@ export function produceComponentIR(
       ],
     };
   }
-  const context = createSourceContext(program);
+  const context = createSourceContext(program, file);
   try {
     const authority = sourceClosure.files.find((item) => item.path === AUTHORING_DECLARATIONS);
     const declarations = program.getSourceFile(AUTHORING_DECLARATIONS);
@@ -75,10 +75,9 @@ export function produceComponentIR(
         'The source closure must contain the resolved, package-owned authoring declarations.'
       );
     }
-    checkModuleClosure(context, file, declarations);
     const name = entry.exportName ?? 'default';
-    const call = componentExport(context, file, name);
-    const component = lowerComponent(
+    const call = context.modules.componentExport(name);
+    const component = lowerSourceUnit(
       context,
       call,
       entry.publicName ?? (name === 'default' ? defaultBinding(file.fileName) : name)
@@ -104,6 +103,7 @@ export function produceComponentIR(
           category: error.category,
           severity: error.category === 'source-invalid' ? 'error' : 'info',
           message: error.message,
+          ...(error.category === 'compiler-missing' ? { capabilityKey: error.code } : {}),
           ...(target && at && span
             ? {
                 location: {

@@ -21,14 +21,9 @@ export type DataType =
   | { readonly kind: 'record'; readonly fields: readonly DataField[]; readonly source: SourceSpan };
 
 /** Resolve a canonical data reference below the exclusive declaration bound. */
-export function lookupDataType(
-  types: readonly DataType[],
-  type: ValueType,
-  before = types.length
-): DataType | undefined {
+export function lookupDataType(types: readonly DataType[], type: ValueType, before = types.length): DataType | undefined {
   const prefix = 'data:';
-  if (typeof type !== 'string' || !type.startsWith(prefix) || type.length === prefix.length)
-    return undefined;
+  if (typeof type !== 'string' || !type.startsWith(prefix) || type.length === prefix.length) return undefined;
   if (type[prefix.length] === '0' && type.length !== prefix.length + 1) return undefined;
   if (!Number.isSafeInteger(before) || before <= 0) return undefined;
   const bound = Math.min(types.length, before);
@@ -63,9 +58,27 @@ export interface InputBinding extends Binding {
   readonly controlMode?: 'fixed-instance';
 }
 
+export interface ContextKeyIR {
+  readonly binding: Binding;
+  readonly debugName: string;
+  readonly exportName?: string;
+}
+
+export interface ContextRead {
+  readonly key: string;
+  readonly binding: Binding;
+}
+
+export interface ContextProvide {
+  readonly key: string;
+  readonly fn: string;
+  readonly source: SourceSpan;
+}
+
 export type Value =
   | LiteralValue
   | { readonly kind: 'prop' | 'state' | 'capture' | 'local'; readonly id: string }
+  | { readonly kind: 'context'; readonly id: string }
   | {
       readonly kind: 'record';
       readonly type: DataRef;
@@ -99,12 +112,7 @@ export type Terminator = { readonly source: SourceSpan } & (
   | { readonly kind: 'jump'; readonly to: Edge }
   | { readonly kind: 'branch'; readonly condition: Value; readonly yes: Edge; readonly no: Edge }
   /** The present edge supplies the proven payload before its explicit arguments. */
-  | {
-      readonly kind: 'presence';
-      readonly value: Value;
-      readonly present: Edge;
-      readonly omitted: Edge;
-    }
+  | { readonly kind: 'presence'; readonly value: Value; readonly present: Edge; readonly omitted: Edge }
   | { readonly kind: 'fail'; readonly reason: string }
 );
 
@@ -119,7 +127,7 @@ export interface Behavior {
   readonly binding: Binding;
   readonly phase: 'init' | 'pure' | 'action';
   readonly params: readonly Binding[];
-  /** Resolved prop, capture and state bindings read by this function, transitively. */
+  /** Resolved prop, capture, state and consumed Context bindings read transitively. */
   readonly dependencies: readonly string[];
   readonly entry: string;
   readonly blocks: readonly Block[];
@@ -145,11 +153,28 @@ export interface TextRegion {
   readonly source: SourceSpan;
 }
 
+export interface ChildProp {
+  readonly name: string;
+  readonly fn: string;
+  readonly source: SourceSpan;
+}
+
+export interface ChildView {
+  readonly kind: 'child';
+  readonly component: string;
+  /** A zero-argument pure behavior in the parent that returns the stable text key. */
+  readonly key: string;
+  readonly props: readonly ChildProp[];
+  readonly source: SourceSpan;
+}
+
+export type ViewNode = TextRegion | ElementView | ChildView;
+
 export interface ElementView {
   readonly kind: 'element';
   readonly tag: 'span' | 'i' | 'section' | 'div' | 'button';
   readonly source: SourceSpan;
-  readonly children: readonly (TextRegion | ElementView)[];
+  readonly children: readonly ViewNode[];
   /** Pure token-list behavior, in authored order. */
   readonly style?: string;
   readonly disabled?: string;
@@ -157,20 +182,30 @@ export interface ElementView {
   readonly activate?: string;
 }
 
-export interface ComponentIR {
-  readonly version: 3;
+export interface ComponentBody {
+  /** Resolved definition ID in the compilation unit. */
+  readonly id: string;
   /** Public component binding selected from the resolved module export. */
   readonly name: string;
   /** Authored definePrototype metadata, independent of the host binding. */
   readonly prototypeName?: string;
   readonly source: SourceSpan;
-  /** A declaration's own fields and payloads can reference only earlier entries. */
-  readonly types: readonly DataType[];
   readonly props: readonly InputBinding[];
+  readonly consumes: readonly ContextRead[];
+  readonly provides: readonly ContextProvide[];
   readonly fields: readonly InitialField[];
   readonly signals: readonly Binding[];
   readonly behaviors: readonly Behavior[];
   readonly projections: readonly NamedBehavior[];
   readonly actions: readonly NamedBehavior[];
   readonly view: ElementView;
+}
+
+export interface ComponentIR extends ComponentBody {
+  readonly version: 4;
+  /** A declaration's own fields and payloads can reference only earlier entries. */
+  readonly types: readonly DataType[];
+  readonly keys: readonly ContextKeyIR[];
+  /** Linked bodies share this root's data and nominal Context key tables. */
+  readonly components: readonly ComponentBody[];
 }

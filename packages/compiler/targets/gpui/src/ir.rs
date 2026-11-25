@@ -63,7 +63,7 @@ macro_rules! object_only {
     )+ };
 }
 
-object_only!(Source, DataField, Data, RecordValue, Binding, InputFields, Value, Instruction, Edge, End, Block, Behavior, Named, Field, View, Component);
+object_only!(Source, DataField, Data, RecordValue, Binding, InputFields, Value, Instruction, Edge, End, Block, Behavior, Named, Field, View, ChildProp, Component, RootFields, Key, Consume, Provide);
 
 // An externally tagged Serde unit variant normally also accepts {"tag":null}.
 // The IR spells types, phases, operators and element tags exclusively as strings.
@@ -196,6 +196,7 @@ pub enum Value {
     #[serde(rename = "has-value")]
     HasValue { value: Box<Value> },
     Prop { id: String },
+    Context { id: String },
     State { id: String },
     Capture { id: String },
     Local { id: String },
@@ -298,6 +299,7 @@ pub enum Tag { Span, I, Section, Div, Button }
 #[serde(remote = "Self", tag = "kind", rename_all = "lowercase", deny_unknown_fields)]
 pub enum View {
     Text { value: String, source: Source },
+    Child { component: String, key: String, props: Vec<ChildProp>, source: Source },
     Element {
         tag: Tag,
         source: Source,
@@ -311,20 +313,44 @@ pub enum View {
     },
 }
 
-#[derive(Deserialize)]
-#[serde(remote = "Self", deny_unknown_fields)]
-pub struct Component {
-    pub version: u32,
-    pub name: String,
-    #[serde(default, rename = "prototypeName", deserialize_with = "present")]
-    pub prototype_name: Option<String>,
-    pub source: Source,
-    pub types: Vec<Data>,
-    pub props: Vec<Input>,
-    pub fields: Vec<Field>,
-    pub signals: Vec<Binding>,
-    pub behaviors: Vec<Behavior>,
-    pub projections: Vec<Named>,
-    pub actions: Vec<Named>,
-    pub view: View,
+#[derive(Deserialize)] #[serde(remote = "Self", deny_unknown_fields)]
+pub struct ChildProp { pub name: String, #[serde(rename = "fn")] pub function: String, pub source: Source }
+#[derive(Deserialize)] #[serde(remote = "Self", deny_unknown_fields)]
+pub struct Key {
+    pub binding: Binding, #[serde(rename = "debugName")] pub debug_name: String,
+    #[serde(default, rename = "exportName", deserialize_with = "present")] pub export_name: Option<String>,
+}
+#[derive(Deserialize)] #[serde(remote = "Self", deny_unknown_fields)]
+pub struct Consume { pub key: String, pub binding: Binding }
+#[derive(Deserialize)] #[serde(remote = "Self", deny_unknown_fields)]
+pub struct Provide { pub key: String, #[serde(rename = "fn")] pub function: String, pub source: Source }
+
+// Flattening through a generic JSON map would lose duplicate-field diagnostics.
+// Both legal record shapes use the same strict, map-only wire decoder.
+macro_rules! component_record {
+    ($name:ident { $($extra:tt)* }) => {
+        #[derive(Deserialize)] #[serde(remote = "Self", deny_unknown_fields)]
+        pub struct $name {
+            $($extra)*
+            pub id: String, pub name: String,
+            #[serde(default, rename = "prototypeName", deserialize_with = "present")]
+            pub prototype_name: Option<String>,
+            pub source: Source, pub props: Vec<Input>, pub fields: Vec<Field>, pub signals: Vec<Binding>,
+            pub behaviors: Vec<Behavior>, pub projections: Vec<Named>, pub actions: Vec<Named>,
+            pub consumes: Vec<Consume>, pub provides: Vec<Provide>, pub view: View,
+        }
+    };
+}
+component_record!(Component {});
+component_record!(RootFields { pub version: u32, pub types: Vec<Data>, pub keys: Vec<Key>, pub components: Vec<Component>, });
+
+pub struct Unit { pub version: u32, pub types: Vec<Data>, pub keys: Vec<Key>, pub bodies: Vec<Component> }
+impl<'de> Deserialize<'de> for Unit {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        let RootFields { version, types, keys, components, id, name, prototype_name, source, props, fields, signals, behaviors, projections, actions, consumes, provides, view } = <RootFields as Deserialize>::deserialize(d)?;
+        let mut bodies = Vec::with_capacity(components.len() + 1);
+        bodies.push(Component { id, name, prototype_name, source, props, fields, signals, behaviors, projections, actions, consumes, provides, view });
+        bodies.extend(components);
+        Ok(Self { version, types, keys, bodies })
+    }
 }

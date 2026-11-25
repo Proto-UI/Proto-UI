@@ -1,6 +1,7 @@
 mod behavior;
 mod check;
 mod component;
+mod context;
 mod ir;
 mod names;
 mod view;
@@ -10,10 +11,20 @@ use std::io::{self, Read, Write};
 use std::process::ExitCode;
 
 fn compile(input: &[u8]) -> Result<String, String> {
-    let program: ir::Component = serde_json::from_slice(input)
+    let program: ir::Unit = serde_json::from_slice(input)
         .map_err(|error| wire_error::diagnostic(input, error))?;
-    let checked = check::Checked::new(&program)?;
-    let ast = component::generate(&checked)?;
+    let links = check::Links::new(&program)?;
+    let bodies = (0..program.bodies.len()).map(|i| check::Checked::new(&program, &links, i))
+        .collect::<Result<Vec<_>, _>>()?;
+    let mut ast = syn::File { shebang: None, attrs: Vec::new(), items: Vec::new() };
+    if links.scoped {
+        names::check_linked_names(&bodies)?;
+        ast.items.extend(context::scope(&bodies[0])?);
+    }
+    for body in &bodies {
+        ast.items.extend(component::generate(body)?.items);
+    }
+    if links.scoped { ast = context::publish(&bodies[0], ast.items)?; }
     Ok(prettyplease::unparse(&ast))
 }
 

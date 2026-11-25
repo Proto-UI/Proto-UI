@@ -8,7 +8,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { emitGpui } from '@proto.ui/compiler/targets/gpui';
 import { controlledSelection, readonlyBadge } from './fixtures/backend-programs.ts';
-import { authoredBadgeSource, authoredSource } from './fixtures/authoring-source.mjs';
+import { authoredBadgeSource, authoredContextSource, authoredSource } from './fixtures/authoring-source.mjs';
 
 const sdkRepository = 'https://github.com/zed-industries/zed';
 const sdkRevision = '62e5991dd0f0c8a3af8d5e7e9c4652490d468db8';
@@ -61,7 +61,8 @@ test('Rust host name diagnostics preserve the source binding for a target caller
     assert.equal(error.category, 'backend-missing');
     assert.equal(error.code, 'host-name');
     assert.deepEqual(error.source, ir.source);
-    assert.deepEqual(error.bindings, [ir.name]);
+    assert.deepEqual(error.bindings, [ir.id]);
+    assert.ok(error.message.includes(ir.name), 'the diagnostic must identify the rejected public spelling');
     return true;
   });
 });
@@ -94,15 +95,19 @@ test('external Rust consumer renders and interacts with generated views in headl
   const authoredInput = authoredBadgeSource();
   const toggle = authoredSource('controlled-toggle.proto.ts.txt', 'ControlledToggle');
   assert.equal(toggle.status, 'produced', JSON.stringify(toggle.diagnostics));
+  const contextOwner = authoredContextSource();
+  assert.equal(contextOwner.status, 'produced', JSON.stringify(contextOwner.diagnostics));
   if (retainedRoot) {
     writeFileSync(join(crate, 'authored-source.json'), JSON.stringify(authoredInput));
     writeFileSync(join(crate, 'controlled-source.json'), JSON.stringify(toggle));
+    writeFileSync(join(crate, 'context-source.json'), JSON.stringify(contextOwner));
   }
   const programs = [
     ['delivery_badge', readonlyBadge()],
     ['selection_control', controlledSelection()],
     ['authoring_badge', authoredInput.component],
     ['controlled_toggle', toggle.component],
+    ['context_owner', contextOwner.component],
   ];
   for (const [module, program] of programs) {
     const rust = await emitGpui(program, options);
@@ -141,14 +146,18 @@ test('external Rust consumer renders and interacts with generated views in headl
       result.stdout
     );
   assert.ok(summary, 'Cargo must execute the native tests without ignored or filtered cases');
-  assert.match(
-    result.stdout,
-    /^test controlled_source::uncontrolled_pointer_commit_survives_default_changes_and_reattachment \.\.\. ok\r?$/m
-  );
+  assert.match(result.stdout, /^test controlled_source::uncontrolled_pointer_commit_survives_default_changes_and_reattachment \.\.\. ok\r?$/m);
   assert.match(
     result.stdout,
     /^test authoring_badge::retained_authoring_badge_paints_its_label_chip_and_nested_dot_as_inputs_change \.\.\. ok\r?$/m
   );
+  for (const passedCase of [
+    /^test context_source::authored_owner_keeps_the_keyed_reader_and_supplies_a_reader_in_another_window \.\.\. ok\r?$/m,
+    /^test context_source::required_reader_rejects_absence_and_the_other_key_with_the_same_label \.\.\. ok\r?$/m,
+    /^test context_source::equal_replacement_withdraws_the_old_provider_and_a_physical_move_retains_the_reader \.\.\. ok\r?$/m,
+  ]) {
+    assert.match(result.stdout, passedCase);
+  }
   const resolved = packageTables(readFileSync(cargoLock, 'utf8'));
   assert.deepEqual(
     packageSources(resolved, packageName),

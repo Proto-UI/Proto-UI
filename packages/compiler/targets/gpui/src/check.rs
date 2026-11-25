@@ -1,5 +1,5 @@
 use crate::ir::*;
-use std::collections::{BTreeSet, HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 
 pub type Result<T, E = String> = std::result::Result<T, E>;
 
@@ -41,7 +41,7 @@ fn insert<'a, T>(map: &mut HashMap<&'a str, T>, id: &'a str, item: T, at: &Sourc
 }
 
 #[derive(Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Debug)]
-pub enum Place { Prop(usize), Field(usize) }
+pub enum Place { Prop(usize), Field(usize), Context(usize) }
 
 #[derive(Default)]
 pub struct Facts {
@@ -74,6 +74,9 @@ pub struct Function<'a> {
 
 pub struct Checked<'a> {
     pub ir: &'a Component,
+    pub unit: &'a Unit,
+    pub links: &'a Links<'a>,
+    pub index: usize,
     pub places: HashMap<&'a str, Place>,
     pub signals: HashMap<&'a str, usize>,
     pub functions: HashMap<&'a str, usize>,
@@ -82,7 +85,17 @@ pub struct Checked<'a> {
     pub derived: BTreeSet<usize>,
     pub actions: BTreeSet<usize>,
     pub has_styles: bool,
-    pub members: Vec<HashMap<&'a str, usize>>,
+    pub members: &'a [HashMap<&'a str, usize>],
+}
+
+pub struct Links<'a> {
+    pub components: HashMap<&'a str, usize>,
+    pub keys: HashMap<&'a str, usize>,
+    pub children: Vec<Vec<&'a View>>,
+    pub required: Vec<BTreeMap<usize, &'a Source>>,
+    pub scoped: bool,
+    pub styled: bool,
+    members: Vec<HashMap<&'a str, usize>>,
 }
 
 struct Walk {
@@ -154,12 +167,11 @@ fn cycle_through(root: usize, edges: &[Vec<usize>]) -> Option<Vec<usize>> {
     None
 }
 
-impl<'a> Checked<'a> {
-    pub fn new(ir: &'a Component) -> Result<Self> {
-        source(&ir.source)?;
-        if ir.version != 3 || ir.name.is_empty() { return Err(error(&ir.source, "expected a named ComponentIR version 3")); }
-        let mut members = Vec::with_capacity(ir.types.len());
-        for (i, data) in ir.types.iter().enumerate() {
+impl<'a> Links<'a> {
+    pub fn new(unit: &'a Unit) -> Result<Self> {
+        if unit.version != 4 { return Err(error(&unit.bodies[0].source, "expected ComponentIR version 4")); }
+        let mut members = Vec::with_capacity(unit.types.len());
+        for (i, data) in unit.types.iter().enumerate() {
             let mut fields_by_name = HashMap::new();
             match data {
                 Data::Presence { value, source: at } => { source(at)?; type_bound(*value, i, at)?; }
@@ -178,10 +190,73 @@ impl<'a> Checked<'a> {
             }
             members.push(fields_by_name);
         }
-        let mut checked = Self { ir, places: HashMap::new(), signals: HashMap::new(), functions: HashMap::new(), bodies: Vec::new(), reached: Vec::new(), derived: BTreeSet::new(), actions: BTreeSet::new(), has_styles: false, members };
+        let mut keys = HashMap::new();
+        let mut exports = HashSet::new();
+        for (i, k) in unit.keys.iter().enumerate() {
+            binding(&k.binding, unit.types.len())?;
+            insert(&mut keys, &k.binding.id, i, &k.binding.source, "nominal key")?;
+            if let Some(n) = &k.export_name {
+                if n.is_empty() || !exports.insert(n) { return Err(error(&k.binding.source, format_args!("empty or duplicate export {n:?}"))); }
+            }
+        }
+        let mut components = HashMap::new();
+        for (i, b) in unit.bodies.iter().enumerate() {
+            source(&b.source)?;
+            insert(&mut components, &b.id, i, &b.source, "component")?;
+            if b.name.is_empty() || !exports.insert(&b.name) { return Err(error(&b.source, format_args!("empty or duplicate exported component {:?}", b.name))); }
+            if b.prototype_name.as_deref() == Some("") { return Err(error(&b.source, "prototype metadata name must be nonempty")); }
+        }
+        let mut children = Vec::new();
+        let mut edges = Vec::new();
+        let mut required = Vec::new();
+        let mut provided = Vec::new();
+        let mut styled = false;
+        for b in &unit.bodies {
+            let mut needs = BTreeMap::new();
+            for c in &b.consumes {
+                let k = lookup(&keys, &c.key, &c.binding.source, "Context key")?;
+                expect(c.binding.ty, unit.keys[k].binding.ty, &c.binding.source, "consumed Context")?;
+                needs.insert(k, &c.binding.source);
+            }
+            let mut own = BTreeSet::new();
+            for p in &b.provides {
+                source(&p.source)?;
+                let k = lookup(&keys, &p.key, &p.source, "Context key")?;
+                if !own.insert(k) { return Err(error(&p.source, format_args!("duplicate provider for {:?}", p.key))); }
+            }
+            let mut sites = Vec::new();
+            let mut targets = Vec::new();
+            let mut nodes = vec![&b.view];
+            while let Some(node) = nodes.pop() {
+                match node {
+                    View::Child { component, source: at, .. } => { targets.push(lookup(&components, component, at, "child component")?); sites.push(node); }
+                    View::Element { children, style, .. } => { styled |= style.is_some(); nodes.extend(children.iter().rev()); }
+                    View::Text { .. } => {}
+                }
+            }
+            children.push(sites); edges.push(targets); required.push(needs); provided.push(own);
+        }
+        let walk = postorder(0..unit.bodies.len(), &edges);
+        if let Some(cycle) = walk.cycle {
+            return Err(error(&unit.bodies[cycle[0]].source, format_args!("cyclic component composition: {}", cycle.iter().map(|&i| unit.bodies[i].id.as_str()).collect::<Vec<_>>().join(" -> "))));
+        }
+        for i in walk.order {
+            for &child in &edges[i] {
+                let inherited: Vec<_> = required[child].iter().filter(|(key, _)| !provided[i].contains(*key)).map(|(&k, &at)| (k, at)).collect();
+                required[i].extend(inherited);
+            }
+        }
+        Ok(Self { components, keys, children, required, scoped: unit.bodies.len() > 1 || !unit.keys.is_empty(), styled, members })
+    }
+}
+
+impl<'a> Checked<'a> {
+    pub fn new(unit: &'a Unit, links: &'a Links<'a>, index: usize) -> Result<Self> {
+        let ir = &unit.bodies[index];
+        let mut checked = Self { ir, unit, links, index, places: HashMap::new(), signals: HashMap::new(), functions: HashMap::new(), bodies: Vec::new(), reached: Vec::new(), derived: BTreeSet::new(), actions: BTreeSet::new(), has_styles: false, members: &links.members };
         let mut global = HashSet::new();
-        for b in ir.props.iter().map(|p| &p.binding).chain(ir.fields.iter().map(|f| &f.binding)).chain(&ir.signals).chain(ir.behaviors.iter().map(|f| &f.binding)) {
-            binding(b, ir.types.len())?;
+        for b in ir.props.iter().map(|p| &p.binding).chain(ir.fields.iter().map(|f| &f.binding)).chain(ir.consumes.iter().map(|c| &c.binding)).chain(&ir.signals).chain(ir.behaviors.iter().map(|f| &f.binding)) {
+            binding(b, unit.types.len())?;
             if !global.insert(&b.id) { return Err(error(&b.source, format_args!("duplicate component binding {:?}", b.id))); }
         }
         for (i, prop) in ir.props.iter().enumerate() {
@@ -194,10 +269,15 @@ impl<'a> Checked<'a> {
             checked.places.insert(&b.id, Place::Prop(i));
         }
         for (i, f) in ir.fields.iter().enumerate() { checked.places.insert(&f.binding.id, Place::Field(i)); }
+        for (i, c) in ir.consumes.iter().enumerate() { checked.places.insert(&c.binding.id, Place::Context(i)); }
         for (i, b) in ir.signals.iter().enumerate() { checked.signals.insert(&b.id, i); }
         for (i, f) in ir.behaviors.iter().enumerate() { checked.functions.insert(&f.binding.id, i); }
         for f in &ir.behaviors { let body = checked.body(f)?; checked.bodies.push(body); }
         let mut roots = Vec::new();
+        for p in &ir.provides {
+            let ty = unit.keys[links.keys[p.key.as_str()]].binding.ty;
+            checked.derived.insert(checked.endpoint(&p.function, Phase::Pure, Some(ty), true, &p.source)?);
+        }
         for field in &ir.fields {
             roots.push(checked.endpoint(&field.init, Phase::Init, Some(field.binding.ty), true, &field.binding.source)?);
         }
@@ -283,30 +363,55 @@ impl<'a> Checked<'a> {
     }
 
     pub fn binding(&self, p: Place) -> &'a Binding {
-        match p { Place::Prop(i) => &self.ir.props[i].binding, Place::Field(i) => &self.ir.fields[i].binding }
+        match p { Place::Prop(i) => &self.ir.props[i].binding, Place::Field(i) => &self.ir.fields[i].binding, Place::Context(i) => &self.ir.consumes[i].binding }
     }
 
     pub fn payload(&self, ty: Type) -> Option<Type> {
         let Type::Data(i) = ty else { return None; };
-        match self.ir.types.get(i)? { Data::Presence { value, .. } => Some(*value), _ => None }
+        match self.unit.types.get(i)? { Data::Presence { value, .. } => Some(*value), _ => None }
     }
 
     pub fn record(&self, ty: Type, at: &Source) -> Result<(usize, &'a [DataField])> {
-        if let Type::Data(i) = ty { if let Some(Data::Record { fields, .. }) = self.ir.types.get(i) { return Ok((i, fields)); } }
+        if let Type::Data(i) = ty { if let Some(Data::Record { fields, .. }) = self.unit.types.get(i) { return Ok((i, fields)); } }
         Err(error(at, format_args!("expected a declared record, received {ty:?}")))
     }
 
     fn view(&mut self, root: &View) -> Result<()> {
-        if let View::Text { source: at, .. } = root { return Err(error(at, "the component view root must be an element")); }
+        if !matches!(root, View::Element { .. }) { return Err(error(&self.ir.source, "the component view root must be an element")); }
         let mut nodes = vec![root];
         while let Some(node) = nodes.pop() {
             match node {
+                View::Child { component, key, props, source: at } => {
+                    source(at)?;
+                    let f = self.endpoint(key, Phase::Pure, None, true, at)?;
+                    let ty = self.ir.behaviors[f].binding.ty;
+                    if ty == Type::Number {
+                        return Err(format!("{at}: backend-missing [numeric-child-key]: child {component:?} key {key:?} requires numeric identity lowering"));
+                    }
+                    expect(ty, Type::Text, at, "child key")?;
+                    self.derived.insert(f);
+                    let child = &self.unit.bodies[self.links.components[component.as_str()]];
+                    let mut supplied = HashSet::new();
+                    for prop in props {
+                        source(&prop.source)?;
+                        let field = child.props.iter().find(|p| p.binding.name == prop.name).ok_or_else(|| error(&prop.source, format_args!("unknown child prop {:?} on {component:?}", prop.name)))?;
+                        if !supplied.insert(prop.name.as_str()) { return Err(error(&prop.source, format_args!("duplicate child prop {:?}", prop.name))); }
+                        let ty = self.payload(field.binding.ty).unwrap_or(field.binding.ty);
+                        self.derived.insert(self.endpoint(&prop.function, Phase::Pure, Some(ty), true, &prop.source)?);
+                    }
+                    for field in &child.props {
+                        if field.default.is_none() && self.payload(field.binding.ty).is_none() && !supplied.contains(field.binding.name.as_str()) { return Err(error(at, format_args!("missing required child prop {:?}", field.binding.name))); }
+                    }
+                }
                 View::Text { value, source: at } => {
                     source(at)?;
                     self.derived.insert(self.endpoint(value, Phase::Pure, Some(Type::Text), true, at)?);
                 }
-                View::Element { source: at, style, disabled, activate, children, .. } => {
+                View::Element { tag, source: at, style, disabled, activate, children } => {
                     source(at)?;
+                    if *tag != Tag::Button && (disabled.is_some() || activate.is_some()) {
+                        return Err(format!("{at}: backend-missing [interactive-text]: non-button press or disabled lowering is unavailable"));
+                    }
                     self.has_styles |= style.is_some();
                     for (id, ty) in [(style, Type::Tokens), (disabled, Type::Bool)] {
                         if let Some(id) = id { self.derived.insert(self.endpoint(id, Phase::Pure, Some(ty), true, at)?); }
@@ -335,7 +440,7 @@ impl<'a> Checked<'a> {
             if !deps.insert(id) { return Err(error(at, format_args!("duplicate dependency {id:?}"))); }
         }
         let mut params = HashMap::new();
-        for p in &f.params { binding(p, self.ir.types.len())?; insert(&mut params, &p.id, p.ty, &p.source, "parameter")?; }
+        for p in &f.params { binding(p, self.unit.types.len())?; insert(&mut params, &p.id, p.ty, &p.source, "parameter")?; }
         let mut blocks = HashMap::new();
         for (i, b) in f.blocks.iter().enumerate() { insert(&mut blocks, &b.id, i, b.end.source(), "block")?; }
         let entry = lookup(&blocks, &f.entry, at, "entry block")?;
@@ -344,7 +449,7 @@ impl<'a> Checked<'a> {
         let mut per_block = Vec::new();
         for b in &f.blocks {
             let mut block = BlockCheck { checked: self, function: f, locals: params.clone(), facts: Facts::default() };
-            for p in &b.params { binding(p, self.ir.types.len())?; insert(&mut block.locals, &p.id, p.ty, &p.source, "block parameter")?; }
+            for p in &b.params { binding(p, self.unit.types.len())?; insert(&mut block.locals, &p.id, p.ty, &p.source, "block parameter")?; }
             for instruction in &b.instructions { block.instruction(instruction)?; }
             let at = b.end.source();
             source(at)?;
@@ -444,10 +549,11 @@ impl<'a> BlockCheck<'_, 'a> {
                 Type::Bool
             }
             Value::Local { id } => lookup(&self.locals, id, at, "local in this block")?,
-            Value::Prop { id } | Value::State { id } | Value::Capture { id } => {
+            Value::Prop { id } | Value::State { id } | Value::Capture { id } | Value::Context { id } => {
                 let p = lookup(&self.checked.places, id, at, "value")?;
                 let correct = match (p, v) {
                     (Place::Prop(_), Value::Prop { .. }) => true,
+                    (Place::Context(_), Value::Context { .. }) => true,
                     (Place::Field(i), Value::State { .. }) => self.checked.ir.fields[i].kind == FieldKind::State,
                     (Place::Field(i), Value::Capture { .. }) => self.checked.ir.fields[i].kind == FieldKind::Capture,
                     _ => false,
@@ -476,13 +582,13 @@ impl<'a> BlockCheck<'_, 'a> {
         source(at)?;
         match op {
             Instruction::Let { binding: b, value, .. } => {
-                binding(b, self.checked.ir.types.len())?;
+                binding(b, self.checked.unit.types.len())?;
                 expect(self.value(value, at)?, b.ty, at, &b.name)?;
                 insert(&mut self.locals, &b.id, b.ty, &b.source, "local")?;
             }
             Instruction::Write { target, value, .. } => {
                 let p = lookup(&self.checked.places, target, at, "write target")?;
-                let Place::Field(i) = p else { return Err(error(at, "a prop cannot be written by an action")); };
+                let Place::Field(i) = p else { return Err(error(at, format_args!("only state can be written by an action: {target:?}"))); };
                 if self.function.phase != Phase::Action || self.checked.ir.fields[i].kind != FieldKind::State { return Err(error(at, format_args!("only actions can write mutable state: {target:?}"))); }
                 expect(self.value(value, at)?, self.checked.binding(p).ty, at, target)?;
                 self.facts.writes.insert(i);
