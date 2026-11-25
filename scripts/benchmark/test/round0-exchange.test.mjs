@@ -28,7 +28,7 @@ const entry = (name, content) => ({
   sha256: sha256(content),
 });
 function fixture(t, outcome = 'completed') {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'round0-exchange-test-'));
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'round0-exchange-test-')));
   // Tests keep failed artifacts in their temporary directory for inspection.
   t.diagnostic(root);
   if (process.env.RUNNER_TEMP) t.after(() => retainPublicTestEvidence(t.name, root));
