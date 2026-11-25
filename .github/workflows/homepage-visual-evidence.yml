@@ -567,11 +567,12 @@ jobs:
       PREVIEW_BASELINE_SHA: 5f0844907895a4ae0db506fe6a5d0bf162318329
       # Dispatch binds github.sha; a reusable PR caller must use the real head.
       CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      PREVIEW_FIT_EVIDENCE_DIR: ${{ runner.temp }}/homepage-preview-fit
       ASTRO_TELEMETRY_DISABLED: '1'
     steps:
       - name: Retain the exact requested comparison before setup
         run: |
+          PREVIEW_FIT_EVIDENCE_DIR="$RUNNER_TEMP/homepage-preview-fit"
+          printf '%s\n' "PREVIEW_FIT_EVIDENCE_DIR=$PREVIEW_FIT_EVIDENCE_DIR" >> "$GITHUB_ENV"
           mkdir -p "$PREVIEW_FIT_EVIDENCE_DIR"
           printf '%s\n' "$PREVIEW_BASELINE_SHA" > "$PREVIEW_FIT_EVIDENCE_DIR/requested-baseline.txt"
           printf '%s\n' "$CANDIDATE_SHA" > "$PREVIEW_FIT_EVIDENCE_DIR/requested-candidate.txt"
