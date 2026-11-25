@@ -8,6 +8,7 @@ import {
   type Facts,
   type Helper,
   type HelperCall,
+  type HelperResult,
 } from './behavior-body.ts';
 import {
   behaviorReturnType,
@@ -109,7 +110,7 @@ export class BehaviorProducer {
     return behavior.binding.id;
   }
 
-  private helper(call: ts.CallExpression, environment: HelperCall): Helper {
+  private helper(call: ts.CallExpression, environment: HelperCall): HelperResult {
     const source = this.source;
     const callee = unparenthesize(call.expression);
     let symbol = source.symbol(callee);
@@ -159,6 +160,17 @@ export class BehaviorProducer {
     const hasReader =
       inherited.some(({ value }) => value.kind === 'reader') ||
       [...symbolicArgs.values()].some((value) => value.kind === 'reader');
+    const name = fn.name?.text ?? symbol.getName();
+    const canCapture = (symbol: ts.Symbol): boolean => {
+      const declaration = symbol.valueDeclaration;
+      return !!declaration && (ts.isParameter(declaration) ||
+        (ts.isVariableDeclaration(declaration) && ts.isVariableDeclarationList(declaration.parent) &&
+         !!(declaration.parent.flags & ts.NodeFlags.Const))) && inLexicalScope(declaration, fn);
+    };
+    if (environment.inline && hasReader) {
+      const lowered = environment.inline({ fn, name, result, lexical: inherited, canCapture });
+      if (lowered) return lowered;
+    }
     const phase = result === 'unit' && actionScope && hasReader ? 'action' : 'pure';
     // Specialize on the handle binding. A context read keeps its consumed
     // binding ID so each invocation reads through the current logical provider.
@@ -177,7 +189,7 @@ export class BehaviorProducer {
           value.kind === 'reader' ? [index, value.kind] : [index, value.kind, value.binding.id]
         ),
     ]);
-    const binding = source.binding(fn, role, fn.name?.text ?? symbol.getName(), result);
+    const binding = source.binding(fn, role, name, result);
     const prior = this.records.get(binding.id);
     if (prior) return prior;
     this.constructing.add(fn);
@@ -185,20 +197,7 @@ export class BehaviorProducer {
       const body = new BehaviorBody(this.host, binding, phase, fn, {
         lexical: inherited,
         actionScope,
-        capturedType(symbol) {
-          const declaration = symbol.valueDeclaration;
-          if (
-            !declaration ||
-            !(
-              ts.isParameter(declaration) ||
-              (ts.isVariableDeclaration(declaration) &&
-                ts.isVariableDeclarationList(declaration.parent) &&
-                declaration.parent.flags & ts.NodeFlags.Const)
-            )
-          )
-            return undefined;
-          return inLexicalScope(declaration, fn) ? environment.capture(symbol) : undefined;
-        },
+        capturedType: (symbol) => canCapture(symbol) ? environment.capture(symbol) : undefined,
       });
       body.callback(fn, false, symbolicArgs);
       const emitted = body.finish();

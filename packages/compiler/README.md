@@ -52,6 +52,8 @@ The React function takes the selected `string` and an `AbortSignal` and returns 
 
 An immutable alias such as `const tag = result.kind` can select a tagged result in an `if` or `switch`. The selected payload belongs to that particular `result`, including when a helper receives two results of the same type.
 
+Calling an ordinary synchronous helper from an owned task shares the current transaction segment. The caller can read a state write staged by the helper before publication. An early return resumes execution at the helper's call site.
+
 ## Native-source targets
 
 Import `ComponentIR` from `@proto.ui/compiler/targets/ir`. `emitReact(ir)` from `@proto.ui/compiler/targets/react` returns TypeScript. `await emitGpui(ir)` from `@proto.ui/compiler/targets/gpui` returns Rust. The GPUI entry invokes its locked Cargo generator by default and accepts `{ generator: pathToBinary }`. Generated components import reached support from `@proto.ui/compiler/support/react` or the crate in `support/gpui`.

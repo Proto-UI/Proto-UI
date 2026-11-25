@@ -73,7 +73,9 @@ export function knownText(operand: Operand): string | undefined {
  * along its actual predecessor edges only when a later block references it. */
 export class BehaviorFlow {
   private readonly source: SourceContext;
-  private readonly owner: Binding;
+  private readonly rootId: string;
+  private nextActivation = 0;
+  private owner: Binding;
   private readonly blocks: DraftBlock[] = [];
   private current: DraftBlock;
   private readonly switches: ((node: ts.BreakStatement) => void)[] = [];
@@ -81,6 +83,7 @@ export class BehaviorFlow {
 
   constructor(source: SourceContext, owner: Binding, origin: ts.Node) {
     this.source = source;
+    this.rootId = owner.id;
     this.owner = owner;
     this.current = this.block(origin, 'entry');
     this.entry = this.current.id;
@@ -88,6 +91,16 @@ export class BehaviorFlow {
 
   binding(node: ts.Node, role: string, name: string, type: ValueType): Binding {
     return this.source.binding(node, JSON.stringify(['behavior', this.owner.id, role]), name, type);
+  }
+
+  activationBinding(call: ts.CallExpression, name: string, type: ValueType): Binding {
+    if (!Number.isSafeInteger(this.nextActivation)) {
+      return this.source.missing(call, 'producer/helper-activation-count', 'This behavior exceeds the representable number of inlined helper calls.');
+    }
+    // The span identifies the authored call. Its ordinal distinguishes repeated
+    // expansion in this root without serializing any enclosing activation ID.
+    const role = JSON.stringify(['task-helper-activation', this.rootId, this.nextActivation++]);
+    return this.source.binding(call, role, name, type);
   }
 
   private block(node: ts.Node, role: string, payloads?: ReadonlyMap<Operand, Refinement>): DraftBlock {
@@ -139,6 +152,45 @@ export class BehaviorFlow {
 
   parameter(binding: Binding): Operand {
     return { type: binding.type, slot: { block: this.blocks[0]!, binding } };
+  }
+
+  inlineCall(call: ts.CallExpression, owner: Binding, lower: (complete: (origin: ts.Node, value?: Operand) => void) => void): Operand | undefined {
+    const caller = this.owner;
+    const callerProofs = this.current.payloads;
+    const exits: { block: DraftBlock; origin: ts.Node; operand?: Operand }[] = [];
+    this.owner = owner;
+    try {
+      lower((origin, operand) => {
+        // A return stops traversal of this authored path. Replace only these
+        // returns with transfers after collecting every reachable helper exit.
+        if (operand && owner.type === 'unit') {
+          this.retain(origin, operand);
+          operand = undefined;
+        }
+        const source = this.source.span(origin);
+        this.terminate(operand ? { kind: 'return', source, value: this.value(operand) } : { kind: 'return', source });
+        exits.push(operand ? { block: this.current, origin, operand } : { block: this.current, origin });
+      });
+    } finally {
+      this.owner = caller;
+    }
+    if (!exits.length) return this.source.missing(call, 'producer/helper-exit', 'This synchronous call has no represented return path.');
+    if (exits.length === 1) {
+      const exit = exits[0]!;
+      this.current = exit.block;
+      delete this.current.end;
+      return exit.operand && this.retain(call, exit.operand);
+    }
+    const next = this.block(call, 'helper-continuation', callerProofs);
+    const result = owner.type === 'unit' ? undefined : this.binding(call, 'helper-result', owner.name, owner.type);
+    if (result) next.params.push(result);
+    for (const { block, origin } of exits) {
+      const end = block.end!;
+      const args = end.kind === 'return' && end.value && result ? [end.value] : [];
+      this.jump(block, next, origin, args);
+    }
+    this.current = next;
+    return result && { type: result.type, slot: { block: next, binding: result } };
   }
 
   suspend(node: ts.AwaitExpression, external: Binding, args: readonly Value[]): Operand {

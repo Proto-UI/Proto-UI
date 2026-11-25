@@ -19,6 +19,8 @@ export interface Helper {
   readonly behavior: Behavior;
   readonly captures: readonly ts.Symbol[];
 }
+interface InlinedHelper { readonly inlined: true; readonly value: Operand | undefined }
+export type HelperResult = Helper | InlinedHelper;
 export type Capability = ts.ParameterDeclaration | ts.VariableDeclaration;
 export type OwnedBinding = { readonly kind: 'reader' } |
   TaskReference | { readonly kind: 'extern'; readonly binding: Binding; readonly external: ExternIR } |
@@ -29,22 +31,38 @@ export interface LexicalBinding {
   readonly value: OwnedBinding;
 }
 export type CaptureType = (symbol: ts.Symbol) => ValueType | undefined;
+interface InlineDefinition {
+  readonly fn: BehaviorCallback;
+  readonly name: string;
+  readonly result: ValueType;
+  readonly lexical: readonly LexicalBinding[];
+  readonly canCapture: (symbol: ts.Symbol) => boolean;
+}
 export interface HelperCall {
   readonly actionScope: boolean;
   readonly symbolicArgs: ReadonlyMap<number, OwnedBinding>;
   readonly lexical: Iterable<LexicalBinding>;
   readonly capture: CaptureType;
+  readonly inline?: (definition: InlineDefinition) => InlinedHelper | undefined;
 }
 export interface HelperEnvironment {
   readonly lexical: readonly LexicalBinding[];
   readonly actionScope: boolean;
-  readonly capturedType: CaptureType;
+  readonly capturedType?: CaptureType;
 }
 export interface BehaviorHost {
   readonly source: SourceContext;
   readonly resolveRead: ResolveRead;
   readonly resolveExtern: SourceLinks['resolveExtern'];
-  ordinaryHelper(call: ts.CallExpression, environment: HelperCall): Helper;
+  ordinaryHelper(call: ts.CallExpression, environment: HelperCall): HelperResult;
+}
+
+interface InlineActivation {
+  readonly caller: BehaviorBody;
+  readonly fn: BehaviorCallback;
+  readonly args: ReadonlyMap<number, Operand>;
+  readonly canCapture: (symbol: ts.Symbol) => boolean;
+  readonly complete: (origin: ts.Node, value?: Operand) => void;
 }
 
 export function referenceValue(reference: Readable, facts: Facts): { type: ValueType; value: Value } {
@@ -82,23 +100,27 @@ export class BehaviorBody {
   private readonly phase: Phase;
   private readonly actionScope: boolean;
   private readonly capturedType: CaptureType | undefined;
+  private readonly inline: InlineActivation | undefined;
   private readonly flow: BehaviorFlow;
   private readonly locals = new Map<ts.Symbol, Operand>();
   private readonly lexical = new Map<ts.Symbol, LexicalBinding>();
-  private readonly tests = new WeakMap<Operand, MatchTest>();
+  private readonly tests: WeakMap<Operand, MatchTest>;
   private readonly tagAliases = new Map<ts.Symbol, Pick<TagTest, 'subject' | 'cases'>>();
   readonly params: Binding[] = [];
   readonly captures: ts.Symbol[] = [];
-  readonly facts: Facts = { reads: new Set(), calls: new Set(), ordered: false };
+  readonly facts: Facts;
 
-  constructor(host: BehaviorHost, binding: Binding, phase: Phase, origin: ts.Node, environment?: HelperEnvironment) {
+  constructor(host: BehaviorHost, binding: Binding, phase: Phase, origin: ts.Node, environment?: HelperEnvironment, inline?: InlineActivation) {
     this.host = host;
     this.source = host.source;
     this.binding = binding;
     this.phase = phase;
     this.actionScope = environment?.actionScope ?? (phase === 'action' || phase === 'task');
     this.capturedType = environment?.capturedType;
-    this.flow = new BehaviorFlow(this.source, binding, origin);
+    this.inline = inline;
+    this.flow = inline?.caller.flow ?? new BehaviorFlow(this.source, binding, origin);
+    this.tests = inline?.caller.tests ?? new WeakMap();
+    this.facts = inline?.caller.facts ?? { reads: new Set(), calls: new Set(), ordered: false };
     for (const { declaration, value } of environment?.lexical ?? []) this.bind(declaration, value);
   }
 
@@ -142,6 +164,12 @@ export class BehaviorBody {
   private local(symbol: ts.Symbol): Operand | undefined {
     const own = this.locals.get(symbol);
     if (own) return own;
+    if (this.inline) {
+      if (!this.inline.canCapture(symbol)) return undefined;
+      const captured = this.inline.caller.local(symbol);
+      if (captured) this.locals.set(symbol, captured);
+      return captured;
+    }
     const type = this.capturedType?.(symbol);
     if (!type) return undefined;
     // Only an enclosing activation's proved lexical value reaches this point.
@@ -163,6 +191,8 @@ export class BehaviorBody {
       const reference = symbolicArgs?.get(index);
       if (reference) {
         this.bind(parameter, reference);
+      } else if (this.inline) {
+        this.locals.set(this.source.symbol(parameter.name), this.inline.args.get(index)!);
       } else if (index === 0 && reader) {
         this.bindCapability(parameter);
       } else {
@@ -202,6 +232,7 @@ export class BehaviorBody {
       else result = this.expression(value, this.binding.type);
     }
     requireDomain(this.source, origin, result?.type ?? 'unit', this.binding.type);
+    if (this.inline) return this.inline.complete(origin, result);
     const source = this.source.span(origin);
     this.flow.terminate(result === undefined
       ? { kind: 'return', source }
@@ -284,9 +315,13 @@ export class BehaviorBody {
     }
   }
 
+  private tagAlias(symbol: ts.Symbol): Pick<TagTest, 'subject' | 'cases'> | undefined {
+    return this.tagAliases.get(symbol) ?? (this.inline?.canCapture(symbol) ? this.inline.caller.tagAlias(symbol) : undefined);
+  }
+
   private immutableTag(expression: ts.Expression): Pick<TagTest, 'subject' | 'cases'> | undefined {
     const node = unparenthesize(expression);
-    if (ts.isIdentifier(node)) return this.tagAliases.get(this.source.symbol(node));
+    if (ts.isIdentifier(node)) return this.tagAlias(this.source.symbol(node));
     const access = projection(node);
     if (!access) return undefined;
     const receiver = unparenthesize(access.object);
@@ -316,7 +351,7 @@ export class BehaviorBody {
     const data = subject && this.source.data.get(subject.type);
     const tagged = subject && data?.kind === 'tagged' && access?.field === data.discriminant
       ? { subject, cases: data.cases }
-      : ts.isIdentifier(discriminant) ? this.tagAliases.get(this.source.symbol(discriminant)) : undefined;
+      : ts.isIdentifier(discriminant) ? this.tagAlias(this.source.symbol(discriminant)) : undefined;
     const selected = access && subject ? this.member(node.expression, subject, access.field) : this.expression(node.expression);
     const scalar = this.widen(selected);
     const selector = tagged ? scalar : this.flow.retain(node.expression, scalar);
@@ -505,7 +540,7 @@ export class BehaviorBody {
     const textValue = leftText ?? this.caseText(right);
     if (textValue === undefined) return undefined;
     const other = leftText !== undefined ? right : left;
-    let tagged = ts.isIdentifier(other) ? this.tagAliases.get(this.source.symbol(other)) : undefined;
+    let tagged = ts.isIdentifier(other) ? this.tagAlias(this.source.symbol(other)) : undefined;
     let value: Operand;
     if (tagged) {
       value = this.expression(other);
@@ -601,6 +636,29 @@ export class BehaviorBody {
     return this.flow.suspend(node, external.binding, args);
   }
 
+  private inlineHelper(node: ts.CallExpression, definition: InlineDefinition, symbolic: ReadonlyMap<number, OwnedBinding>): Operand | undefined {
+    const { fn, name, result, lexical, canCapture } = definition;
+    for (let frame = this.inline; frame; frame = frame.caller.inline) {
+      if (frame.fn === fn) return this.source.missing(node, 'producer/recursive-helper', 'This reached source helper cycle needs recursive-call support in the receiver.');
+    }
+    // Evaluate all ordinary actuals in the caller before entering the helper.
+    // A later argument or the helper itself can write the location read here.
+    const args = new Map<number, Operand>();
+    for (const [index, argument] of node.arguments.entries()) {
+      if (symbolic.has(index)) continue;
+      const formal = fn.parameters[index]!;
+      const type = behaviorValueType(this.source, formal, this.source.checker.getTypeAtLocation(formal));
+      args.set(index, this.flow.retain(argument, this.expression(argument, type)));
+    }
+    const owner = this.flow.activationBinding(node, name, result);
+    return this.flow.inlineCall(node, owner, complete => {
+      const body = new BehaviorBody(this.host, owner, 'action', fn, { lexical, actionScope: true }, {
+        caller: this, fn, args, canCapture, complete,
+      });
+      body.callback(fn, false, symbolic);
+    });
+  }
+
   private call(node: ts.CallExpression, allowUnitEffect: boolean): Operand | undefined {
     if (node.flags & ts.NodeFlags.OptionalChain || node.questionDotToken) {
       return this.source.missing(node, 'producer/optional-call', 'A conditional call needs its own evaluation and presence proof.');
@@ -680,8 +738,14 @@ export class BehaviorBody {
       if (reference) symbolicArgs.set(index, reference);
       else actuals.push(argument);
     }
-    const { behavior: helper, captures } = this.host.ordinaryHelper(node, { actionScope: this.actionScope,
-      symbolicArgs, lexical: this.lexical.values(), capture: (symbol) => this.local(symbol)?.type });
+    const inline: HelperCall['inline'] = this.phase === 'task' || this.inline
+      ? (definition) => definition.result === 'unit' && !allowUnitEffect ? undefined
+        : { inlined: true, value: this.inlineHelper(node, definition, symbolicArgs) }
+      : undefined;
+    const target = this.host.ordinaryHelper(node, { actionScope: this.actionScope,
+      symbolicArgs, lexical: this.lexical.values(), capture: (symbol) => this.local(symbol)?.type, ...(inline && { inline }) });
+    if ('inlined' in target) return target.value;
+    const { behavior: helper, captures } = target;
     const operands = actuals.map((argument, index) => {
       const formal = helper.params[index]!;
       const operand = this.expression(argument, formal.type);
