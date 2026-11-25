@@ -10,8 +10,7 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'flex min-w-0 w-full flex-wrap items-center justify-center gap-4 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    className: 'flex min-w-0 w-full flex-wrap items-center justify-center gap-4',
     children: [
       {
         kind: 'proto',
@@ -61,7 +60,9 @@ export default {
                       {
                         kind: 'proto',
                         prototypeId: 'liquid-glass-drawer-description',
-                        children: ['Drag the grabber or press Arrow Up / Down to expand the sheet.'],
+                        children: [
+                          'Drag the grabber or press Arrow Up / Down to expand the sheet.',
+                        ],
                       },
                     ],
                   },

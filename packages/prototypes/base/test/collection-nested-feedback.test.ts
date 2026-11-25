@@ -58,12 +58,22 @@ const pressToken = {
 // Registered feedback vocabularies differ per family and consumer: web-exposed
 // states project as data-[state] variants, while profile-gated paint is dynamic.
 // Declaring material keeps all feedback Rules live for these nested controls.
-const hasDynamicLiquidFeedback = (family: string, component: string) =>
-  family === 'liquid-glass' && (component === 'carousel' || component === 'data-table');
-const disabledTokens = (family: string, component: string): string[] => {
-  if (hasDynamicLiquidFeedback(family, component))
-    return component === 'carousel'
-      ? ['pointer-events-none', 'cursor-default', 'shadow-none', 'bg-muted', 'text-muted-foreground']
+const hasDynamicLiquidFeedback = (family: string, component: string, part: string) =>
+  family === 'liquid-glass' &&
+  (component === 'carousel' ||
+    component === 'data-table' ||
+    component === 'message-scroller' ||
+    (component === 'date-picker' && part === 'trigger'));
+const disabledTokens = (family: string, component: string, part: string): string[] => {
+  if (hasDynamicLiquidFeedback(family, component, part))
+    return component === 'carousel' || component === 'date-picker'
+      ? [
+          'pointer-events-none',
+          'cursor-default',
+          'shadow-none',
+          'bg-muted',
+          'text-muted-foreground',
+        ]
       : ['pointer-events-none', 'cursor-default', 'shadow-none'];
   if (family === 'liquid-glass')
     // Liquid disabled commands withdraw optional material without whole-control
@@ -77,7 +87,7 @@ const disabledTokens = (family: string, component: string): string[] => {
   return ['data-[disabled]:opacity-50'];
 };
 const focusVisibleToken = (family: string, component: string, part: string): string | null => {
-  if (hasDynamicLiquidFeedback(family, component)) return null;
+  if (hasDynamicLiquidFeedback(family, component, part)) return null;
   if (family !== 'shadcn') return 'data-[focus-visible]:ring-2';
   if (component === 'carousel' || component === 'message-scroller' || part === 'day')
     // Profile-gated ring paints dynamically; asserted in the focused phase.
@@ -85,7 +95,7 @@ const focusVisibleToken = (family: string, component: string, part: string): str
   return 'data-[focus-visible]:forced-colors-focus-outline';
 };
 const pressedTokens = (family: string, component: string, part: string): string[] => {
-  if (hasDynamicLiquidFeedback(family, component)) return [];
+  if (hasDynamicLiquidFeedback(family, component, part)) return [];
   if (family === 'liquid-glass' && (component === 'tree' || part === 'day')) {
     const selector =
       part === 'day'
@@ -105,7 +115,9 @@ const pressedTokens = (family: string, component: string, part: string): string[
       // Jump consumes the shared Button recipe whose press paint is unguarded.
       return [`data-[pressed]:${pressToken['bootstrap-2-3-2']}`];
     if (part === 'day')
-      return [`data-[pressed]:not-[data-disabled]:not-[data-selected]:${pressToken['bootstrap-2-3-2']}`];
+      return [
+        `data-[pressed]:not-[data-disabled]:not-[data-selected]:${pressToken['bootstrap-2-3-2']}`,
+      ];
   }
   return [token];
 };
@@ -162,9 +174,10 @@ for (const [family, modules] of Object.entries(families)) {
       expect(exposed.disabled.get()).toBe(true);
       expect(control.getAttribute('aria-disabled')).toBe('true');
       const tokens = () => (control.getAttribute('data-pui-style') ?? '').split(/\s+/);
-      const dynamicLiquid = hasDynamicLiquidFeedback(family, component);
+      const dynamicLiquid = hasDynamicLiquidFeedback(family, component, part);
       const expectLiquidDisabled = () => {
-        for (const token of disabledTokens(family, component)) expect(tokens()).toContain(token);
+        for (const token of disabledTokens(family, component, part))
+          expect(tokens()).toContain(token);
         // Carousel keeps its authored base cursor token; cursor utilities
         // occupy independent semantic groups. Pagination registers it only enabled.
         if (component === 'data-table') expect(tokens()).not.toContain('cursor-pointer');
@@ -176,7 +189,7 @@ for (const [family, modules] of Object.entries(families)) {
         expect(tokens()).toContain('shadow-sm');
         for (const token of ['pointer-events-none', 'cursor-default', 'shadow-none', 'shadow-xs'])
           expect(tokens()).not.toContain(token);
-        if (component === 'carousel') {
+        if (component === 'carousel' || component === 'date-picker') {
           expect(tokens()).not.toContain('bg-muted');
           expect(tokens()).not.toContain('text-muted-foreground');
         }
@@ -189,7 +202,8 @@ for (const [family, modules] of Object.entries(families)) {
         expect(control.hasAttribute('data-focus-visible')).toBe(false);
         for (const token of liquidFocusTokens) expect(tokens()).not.toContain(token);
       }
-      for (const token of disabledTokens(family, component)) expect(tokens()).toContain(token);
+      for (const token of disabledTokens(family, component, part))
+        expect(tokens()).toContain(token);
       if (family === 'liquid-glass') expect(tokens()).not.toContain('data-[disabled]:opacity-50');
       const staticFocus = focusVisibleToken(family, component, part);
       if (staticFocus) expect(tokens()).toContain(staticFocus);
@@ -207,8 +221,7 @@ for (const [family, modules] of Object.entries(families)) {
       await flush();
       expect(exposed.focusVisible.get()).toBe(true);
       expect(control.hasAttribute('data-focus-visible')).toBe(true);
-      if (dynamicLiquid)
-        for (const token of liquidFocusTokens) expect(tokens()).toContain(token);
+      if (dynamicLiquid) for (const token of liquidFocusTokens) expect(tokens()).toContain(token);
       if (family === 'shadcn') {
         // Profile-driven focus paint applies dynamically while focusVisible.
         expect(tokens()).toContain('ring-3');

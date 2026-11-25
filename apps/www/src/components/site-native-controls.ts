@@ -521,8 +521,9 @@ export function initSiteNativeControls(
   };
   const scheduleNext = () => {
     if (!batchAlive || cursor === targets.length) return;
+    // A quiet page can stop issuing idle periods before the queue drains.
     pendingTask = usesIdle
-      ? view.requestIdleCallback(continueInitialization)
+      ? view.requestIdleCallback(continueInitialization, { timeout: 50 })
       : view.setTimeout(continueInitialization, 0);
   };
   const continueInitialization = () => {

@@ -40,33 +40,36 @@ export type * from '@proto.ui/prototypes-base/calendar';
 // Calendar is ordinary date content. A containing DatePicker popup, when used,
 // owns its own single material surface; these parts do not create nested glass.
 
-export const calendarRoot = definePrototype<CalendarRootProps, CalendarRootExposes>({
+export interface LiquidGlassCalendarRootProps extends CalendarRootProps {
+  /** Auto enhances standalone calendar surfaces; pass opaque when nested inside another glass popup. */
+  material?: 'auto' | 'opaque';
+}
+
+export const calendarRoot = definePrototype<LiquidGlassCalendarRootProps, CalendarRootExposes>({
   name: 'liquid-glass-calendar-root',
   modules: asCalendarRoot.modules,
   setup(def) {
+    def.props.define({
+      material: { type: 'enum', options: ['auto', 'opaque'], empty: 'fallback' },
+    });
+    def.props.setDefaults({ material: 'auto' });
     const behavior = asCalendarRoot();
     const state = behavior.stateHandles;
     if (!state) throw new Error('Calendar root state unavailable');
     def.feedback.style.use(
       tw(
-        'inline-grid w-fit min-w-0 max-w-full gap-3 rounded-2xl border border-border/70 p-3 font-sans text-foreground shadow-md ring-1 ring-inset ring-foreground/10'
+        'inline-grid w-fit min-w-0 max-w-full gap-3 rounded-2xl border border-border bg-secondary p-3 font-sans text-secondary-foreground shadow-md ring-1 ring-inset ring-foreground/10'
       )
     );
-    def.rule({
-      when: (w) =>
-        w.all(
-          w.meta('preference.reducedTransparency').eq('no-preference'),
-          w.meta('preference.forcedColors').eq('none')
-        ),
-      intent: (i) => i.feedback.style.use(tw('bg-secondary/90')),
+    def.feedback.material.declare({
+      version: 2,
+      shape: { kind: 'rounded-rect', geometry: 'style' },
+      source: { kind: 'in-app-backdrop' },
+      fallback: { fill: 'style', foreground: 'style' },
     });
     def.rule({
-      when: (w) =>
-        w.any(
-          w.not(w.meta('preference.reducedTransparency').eq('no-preference')),
-          w.not(w.meta('preference.forcedColors').eq('none'))
-        ),
-      intent: (i) => i.feedback.style.use(tw('bg-secondary')),
+      when: (w) => w.prop('material').eq('auto'),
+      intent: (i) => i.feedback.material.use({ intent: 'liquid-glass', variant: 'regular' }),
     });
     def.rule({
       when: (w) => w.state(state.direction).eq('ltr'),

@@ -14,8 +14,9 @@ export default definePrototype<LiquidGlassInputOtpSlotProps, InputOtpSlotExposes
     const inherited = asInputOtpSlot();
     def.props.define({
       invalid: { type: 'boolean', empty: 'fallback' },
+      material: { type: 'enum', options: ['auto', 'opaque'], empty: 'fallback' },
     });
-    def.props.setDefaults({ invalid: false });
+    def.props.setDefaults({ invalid: false, material: 'auto' });
     const invalid = def.state.bool('liquidGlassOtpSlotInvalid', false);
     const disabled = def.state.bool('liquidGlassOtpSlotDisabled', false);
     const syncVisual = (run: RunHandle<LiquidGlassInputOtpSlotProps>) => {
@@ -40,9 +41,19 @@ export default definePrototype<LiquidGlassInputOtpSlotProps, InputOtpSlotExposes
     def.lifecycle.onUpdated(syncVisual);
     def.feedback.style.use(
       tw(
-        'relative inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-border bg-secondary font-sans text-lg font-medium tabular-nums text-foreground shadow-xs ring-1 ring-inset ring-foreground/10 outline-none transition-[color,box-shadow] duration-200'
+        'relative inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-border bg-secondary font-sans text-lg font-medium tabular-nums text-foreground shadow-xs ring-1 ring-inset ring-foreground/10 outline-none transition-shadow duration-200'
       )
     );
+    def.feedback.material.declare({
+      version: 2,
+      shape: { kind: 'rounded-rect', geometry: 'style' },
+      source: { kind: 'in-app-backdrop' },
+      fallback: { fill: 'style', foreground: 'style' },
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('material').eq('auto'), w.state(disabled).eq(false)),
+      intent: (i) => i.feedback.material.use({ intent: 'liquid-glass' }),
+    });
     def.rule({
       when: (w) =>
         w.all(w.state(inherited.stateHandles!.active).eq(true), w.state(invalid).eq(false)),

@@ -14,6 +14,7 @@ export type LiquidGlassProgressRootProps = ProgressRootProps & {
 
 export type LiquidGlassProgressPartProps = ProgressPartProps & {
   prominence?: LiquidGlassProgressProminenceChoice;
+  material?: 'auto' | 'opaque';
 };
 
 export type LiquidGlassProgressContext = {

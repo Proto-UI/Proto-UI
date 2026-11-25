@@ -544,18 +544,12 @@ async function capture(
   return { facts, raw, states, requests };
 }
 type Capture = Awaited<ReturnType<typeof capture>>;
-function optical({ facts, raw }: Capture) {
-  // Observe real flow rather than claiming outer canvas padding proves separation.
-  expect(raw.portalDestination).not.toBeNull();
-  expect(raw.portalDestination!.gapBelowSubject).toBeGreaterThan(facts.paint.paintOutset);
+function opticalPaint(facts: Capture['facts']) {
   expect(facts.quality).toBe('self-optical');
   expect(facts.source).toBe('visible-app-canvas');
   expect(facts.backdropFilter).toBe('none');
   expect(facts.childCanvases).toBe(0);
-  expect(facts.carrier.marker).toBe('contact-v1');
-  expect(facts.carrier.pointerEvents).toBe('none');
   expect(facts.paint.committed).toBe(true);
-  expect(facts.paint.geometryMatches).toBe(true);
   expect(facts.snapshot.verifiedAfterDecode).toBe(true);
   expect(facts.receipt.frame).toMatch(/^\d+$/);
   expect(facts.receipt.sourceRevision).toMatch(/^\d+$/);
@@ -565,6 +559,15 @@ function optical({ facts, raw }: Capture) {
   expect(facts.pixels!.content.partialAlphaPixels).toBe(0);
   expect(facts.pixels!.content.transparentPixels).toBe(0);
   expect(facts.pixels!.content.minForegroundContrast).toBeGreaterThanOrEqual(4.5);
+}
+function optical({ facts, raw }: Capture) {
+  // Observe real flow rather than claiming outer canvas padding proves separation.
+  expect(raw.portalDestination).not.toBeNull();
+  expect(raw.portalDestination!.gapBelowSubject).toBeGreaterThan(facts.paint.paintOutset);
+  expect(facts.carrier.marker).toBe('contact-v1');
+  expect(facts.carrier.pointerEvents).toBe('none');
+  expect(facts.paint.geometryMatches).toBe(true);
+  opticalPaint(facts);
 }
 function fallback({ facts }: Capture) {
   expect(facts.quality).toBe('opaque-fallback');
@@ -992,6 +995,10 @@ describe.sequential('Liquid command static hover and existing self-contact nativ
                     await fixture(page, runtime, part, 'source', false);
                     const lost = await sample('source-lost', { quality: 'opaque-fallback' });
                     fallback(lost);
+                    if (part === 'button') {
+                      expect(lost.facts.background).toEqual(lost.facts.palette.secondary);
+                      expect(lost.facts.foreground).toEqual(lost.facts.palette.secondaryForeground);
+                    }
                     await target.hover();
                     const lostHover = await sample('source-lost-hover');
                     fallback(lostHover);
@@ -1096,7 +1103,16 @@ describe.sequential('Liquid command static hover and existing self-contact nativ
                     await preferences(cdp, theme, { 'prefers-reduced-motion': 'reduce' });
                     const reduced = await sample('reduced-motion', { quality: 'self-optical' });
                     expect(reduced.facts.motion).toBe('static');
-                    expect(reduced.facts.receipt.contact).toBe('rest');
+                    if (part === 'submit' || part === 'reset') {
+                      // Reduced-motion Form candidates omit deformation and paint on the host.
+                      expect(reduced.facts.phase).toBe('rest');
+                      expect(reduced.facts.receipt.contact).toBeNull();
+                      expect(reduced.facts.receipt.contactSession).toBeNull();
+                      expect(reduced.facts.carrier.marker).toBeNull();
+                      opticalPaint(reduced.facts);
+                    } else {
+                      expect(reduced.facts.receipt.contact).toBe('rest');
+                    }
                     await preferences(cdp, theme, { 'prefers-reduced-transparency': 'reduce' });
                     fallback(await sample('reduced-transparency', { quality: 'opaque-fallback' }));
                     await preferences(cdp, theme);

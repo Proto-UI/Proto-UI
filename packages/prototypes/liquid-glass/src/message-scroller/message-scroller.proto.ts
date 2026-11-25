@@ -23,6 +23,8 @@ export type * from '@proto.ui/prototypes-base/message-scroller';
 
 export interface LiquidGlassMessageScrollerJumpProps extends MessageScrollerJumpProps {
   variant?: 'regular' | 'prominent';
+  /** Auto enhances the floating jump button; pass opaque to opt out. */
+  material?: 'auto' | 'opaque';
 }
 
 const JUMP_FILLS = {
@@ -90,8 +92,9 @@ export const messageScrollerJump = definePrototype<
     const behavior = asMessageScrollerJump();
     def.props.define({
       variant: { type: 'enum', options: ['regular', 'prominent'], empty: 'fallback' },
+      material: { type: 'enum', options: ['auto', 'opaque'], empty: 'fallback' },
     });
-    def.props.setDefaults({ variant: 'regular' });
+    def.props.setDefaults({ variant: 'regular', material: 'auto' });
     const states = behavior.getAsHookHandle?.('as-button')?.stateHandles;
     if (!states)
       throw new Error('[liquid-glass-message-scroller] Required inherited state is unavailable.');
@@ -99,7 +102,7 @@ export const messageScrollerJump = definePrototype<
 
     def.feedback.style.use(
       tw(
-        'absolute bottom-4 left-1/2 -translate-x-1/2 z-10 inline-flex shrink-0 min-h-9 items-center justify-center gap-1.5 rounded-full border border-border px-4 py-1.5 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm'
+        'absolute bottom-4 left-0 right-0 mx-auto w-fit z-10 inline-flex shrink-0 min-h-9 items-center justify-center gap-1.5 rounded-full border border-border px-4 py-1.5 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm transition-shadow'
       )
     );
     (Object.keys(JUMP_FILLS) as Array<keyof typeof JUMP_FILLS>).forEach((variant) => {
@@ -108,6 +111,36 @@ export const messageScrollerJump = definePrototype<
         intent: (i) => i.feedback.style.use(tw(JUMP_FILLS[variant])),
       });
     });
+    def.feedback.material.declare({
+      version: 2,
+      shape: { kind: 'rounded-rect', geometry: 'style' },
+      source: { kind: 'in-app-backdrop' },
+      fallback: { fill: 'style', foreground: 'style' },
+    });
+    for (const variant of ['regular', 'prominent'] as const) {
+      for (const phase of [false, true]) {
+        def.rule({
+          when: (w) =>
+            w.all(
+              w.prop('variant').eq(variant),
+              w.prop('material').eq('auto'),
+              w.state(disabled).eq(false),
+              w.state(pressed).eq(phase)
+            ),
+          intent: (i) =>
+            i.feedback.material.use({
+              intent: 'liquid-glass',
+              variant: 'regular',
+              ...(variant === 'prominent' ? { tint: 'style-fill' as const } : {}),
+              deformation: {
+                kind: 'press',
+                phase: phase ? 'pressed' : 'rest',
+                contact: 'pointer',
+              },
+            }),
+        });
+      }
+    }
     def.rule({
       when: (w) =>
         w.all(

@@ -1,3 +1,4 @@
+import { observePreviewerRemoval } from './previewer-removal';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const runtimeSpies = vi.hoisted(() => ({
@@ -122,10 +123,69 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
     document.body.innerHTML = '';
   });
 
+  it('skips owner checks on add-only deliveries and still checks removal and reinsertion', async () => {
+    const container = document.body.appendChild(document.createElement('section'));
+    const preview = container.appendChild(document.createElement('div'));
+    const destroy = vi.fn();
+    const check = vi.fn(() => {
+      if (!document.body.contains(preview)) destroy();
+    });
+    const stop = observePreviewerRemoval(document.body, check);
+    try {
+      container.appendChild(document.createElement('span'));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(check).not.toHaveBeenCalled();
+
+      preview.remove();
+      container.appendChild(preview);
+      await vi.waitFor(() => expect(check).toHaveBeenCalledTimes(1));
+      expect(destroy).not.toHaveBeenCalled();
+
+      container.remove();
+      await vi.waitFor(() => expect(destroy).toHaveBeenCalledTimes(1));
+      expect(check).toHaveBeenCalledTimes(2);
+    } finally {
+      stop();
+      container.remove();
+    }
+  });
+
   it('shares body removal observation and retires only the detached preview', async () => {
     const first = createPreviewerRoot();
     const second = createPreviewerRoot();
-    const observe = vi.spyOn(MutationObserver.prototype, 'observe');
+    const NativeObserver = MutationObserver;
+    const observeBody = vi.fn();
+    let deliverRemoval!: () => void;
+    vi.stubGlobal(
+      'MutationObserver',
+      class extends NativeObserver {
+        constructor(callback: MutationCallback) {
+          super(callback);
+          const observe = this.observe.bind(this);
+          this.observe = (target, options) => {
+            if (target !== document.body || !options?.childList || !options.subtree) {
+              observe(target, options);
+              return;
+            }
+            // Happy DOM can collect the weak mutation listener before delivery.
+            // Control the body batch while retaining the actual DOM changes.
+            observeBody(target, options);
+            deliverRemoval = () =>
+              callback(
+                [first, second].map(
+                  (root) =>
+                    ({
+                      type: 'childList',
+                      target,
+                      removedNodes: [root],
+                    }) as unknown as MutationRecord
+                ),
+                this
+              );
+          };
+        }
+      }
+    );
     try {
       for (const root of [first, second]) {
         initPreviewer({
@@ -137,19 +197,21 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
         });
       }
       await vi.waitFor(() => expect(runtimeSpies.mount).toHaveBeenCalledTimes(2));
-      const bodyObservers = observe.mock.calls.filter(
-        ([target, options]) => target === document.body && options?.childList && options.subtree
-      );
-      expect(bodyObservers).toHaveLength(1);
+      expect(observeBody).toHaveBeenCalledTimes(1);
+      expect(observeBody).toHaveBeenCalledWith(document.body, {
+        childList: true,
+        subtree: true,
+      });
 
       first.remove();
       second.remove();
       document.body.appendChild(second);
+      deliverRemoval();
       await vi.waitFor(() => expect(runtimeSpies.unmount).toHaveBeenCalledTimes(1));
       expect(runtimeSpies.unmount.mock.lastCall?.[0]).toBe('wc');
       expect(runtimeSpies.unmount.mock.lastCall?.[1]).toBe(first.querySelector('.host'));
     } finally {
-      observe.mockRestore();
+      vi.unstubAllGlobals();
       await (first as any).__previewer__?.destroy();
       await (second as any).__previewer__?.destroy();
       first.remove();

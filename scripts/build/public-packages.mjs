@@ -5,10 +5,12 @@ import {
   mkdirSync,
   readFileSync,
   readdirSync,
+  renameSync,
   rmSync,
   statSync,
   writeFileSync,
 } from 'node:fs';
+import { randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -203,8 +205,11 @@ export function buildPublicPackage(pkg, options = {}) {
   const sourceEntries = publicPackageSourceEntries(pkg);
   // Validate the source/type closure that will accompany explicit proto exports.
   protoSourceFiles(pkg);
-  rmSync(distDir, { recursive: true, force: true });
-  mkdirSync(distDir, { recursive: true });
+  mkdirSync(dirname(distDir), { recursive: true });
+  const stageSuffix = `.staging-${process.pid}-${randomUUID().slice(0, 8)}`;
+  const stagingDir = `${distDir}${stageSuffix}`;
+  const backupDir = `${distDir}.previous-${process.pid}-${randomUUID().slice(0, 8)}`;
+  mkdirSync(stagingDir, { recursive: true });
 
   const tscBin = join(ROOT_DIR, 'node_modules', 'typescript', 'bin', 'tsc');
   const args = [
@@ -223,7 +228,7 @@ export function buildPublicPackage(pkg, options = {}) {
     '--rootDir',
     join(pkg.dir, 'src'),
     '--outDir',
-    distDir,
+    stagingDir,
     '--module',
     'ES2022',
     '--moduleResolution',
@@ -237,16 +242,38 @@ export function buildPublicPackage(pkg, options = {}) {
     ...sourceEntries,
   ];
   const started = performance.now();
-  const result = spawnSync(process.execPath, args, {
-    cwd: ROOT_DIR,
-    encoding: 'utf8',
-    timeout: 180000,
-  });
-  if (result.status !== 0) {
-    throw new Error(`${pkg.name}: TypeScript build failed\n${result.stdout}\n${result.stderr}`);
+  try {
+    const result = spawnSync(process.execPath, args, {
+      cwd: ROOT_DIR,
+      encoding: 'utf8',
+      timeout: 180000,
+    });
+    if (result.status !== 0) {
+      throw new Error(`${pkg.name}: TypeScript build failed\n${result.stdout}\n${result.stderr}`);
+    }
+    rewriteRelativeRuntimeSpecifiers(stagingDir);
+    if (options.validate !== false) validateBuiltPackage(pkg, stagingDir);
+
+    let movedExisting = false;
+    if (existsSync(distDir)) {
+      renameSync(distDir, backupDir);
+      movedExisting = true;
+    }
+    try {
+      renameSync(stagingDir, distDir);
+    } catch (swapError) {
+      if (movedExisting && !existsSync(distDir) && existsSync(backupDir)) {
+        try {
+          renameSync(backupDir, distDir);
+        } catch {}
+      }
+      throw swapError;
+    }
+    if (movedExisting) rmSync(backupDir, { recursive: true, force: true });
+  } finally {
+    rmSync(stagingDir, { recursive: true, force: true });
+    rmSync(backupDir, { recursive: true, force: true });
   }
-  rewriteRelativeRuntimeSpecifiers(distDir);
-  if (options.validate !== false) validateBuiltPackage(pkg, distDir);
   return {
     name: pkg.name,
     durationMs: Math.round(performance.now() - started),

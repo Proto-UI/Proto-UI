@@ -18,15 +18,15 @@ export function parseContrastRuntimeOptions(serialized, supported) {
 }
 
 // These are the current authored reference controls, not a new state model.
-// Mixed and checked+indeterminate are separate authored Checkbox cases.
+// Enabled checked and mixed Checkbox controls from demo-brutalist-checkbox.
 export function contrastHeldBinaryTargets(family) {
   if (family === 'switch')
     return [{ ref: 'releaseAlertsSwitch', state: 'checked', ariaChecked: 'true' }];
   if (family === 'checkbox')
     return [
-      { ref: 'checkedCheckbox', state: 'checked', ariaChecked: 'true' },
-      { ref: 'mixedCheckbox', state: 'mixed', ariaChecked: 'mixed' },
-      { ref: 'checkedIndeterminateCheckbox', state: 'checked-indeterminate', ariaChecked: 'mixed' },
+      { ref: 'updatesCheckbox', state: 'checked', ariaChecked: 'true' },
+      { ref: 'channelsCheckbox', state: 'mixed', ariaChecked: 'mixed' },
+      { ref: 'cardCheckbox', state: 'checked-card', ariaChecked: 'true' },
     ];
   return [];
 }

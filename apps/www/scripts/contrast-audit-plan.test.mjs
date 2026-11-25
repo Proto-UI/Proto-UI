@@ -29,9 +29,9 @@ test('non-default Switch and all authored checked/mixed Checkbox controls receiv
     { ref: 'releaseAlertsSwitch', state: 'checked', ariaChecked: 'true' },
   ]);
   assert.deepEqual(contrastHeldBinaryTargets('checkbox'), [
-    { ref: 'checkedCheckbox', state: 'checked', ariaChecked: 'true' },
-    { ref: 'mixedCheckbox', state: 'mixed', ariaChecked: 'mixed' },
-    { ref: 'checkedIndeterminateCheckbox', state: 'checked-indeterminate', ariaChecked: 'mixed' },
+    { ref: 'updatesCheckbox', state: 'checked', ariaChecked: 'true' },
+    { ref: 'channelsCheckbox', state: 'mixed', ariaChecked: 'mixed' },
+    { ref: 'cardCheckbox', state: 'checked-card', ariaChecked: 'true' },
   ]);
   assert.deepEqual(contrastHeldBinaryTargets('button'), []);
 });
