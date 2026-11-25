@@ -15,6 +15,7 @@ export default withShadcnRheaDemo({
   type: 'demo',
   root: {
     kind: 'box',
+    ref: 'toast-demo',
     className: 'min-w-0 grid gap-3 p-4',
     children: [
       {
