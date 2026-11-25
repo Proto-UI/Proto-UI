@@ -4,6 +4,7 @@ import {
   type ToastActionProps,
   type ToastActionExposes,
 } from '@proto.ui/prototypes-base/toast';
+import { setupToastHover } from './visual';
 
 export default definePrototype<ToastActionProps, ToastActionExposes>({
   name: 'bootstrap-2-3-2-toast-action',
@@ -11,19 +12,28 @@ export default definePrototype<ToastActionProps, ToastActionExposes>({
   setup(def) {
     const behavior = asToastAction();
     const state = behavior.stateHandles!;
-    // The Action is a Proto command with historical link paint, not a second
-    // Button. Base exposes focus/disabled; hover uses passive CSS paint.
+    const hovered = setupToastHover(def, state.disabled);
+    // The Action keeps historical link paint and borrows Base command state.
     def.feedback.style.use(
       tw(
         'inline-block min-w-0 mt-1.5 text-[14px] leading-[20px] font-bold no-underline cursor-pointer outline-none'
       )
     );
     def.rule({
-      when: (w) => w.all(w.state(state.disabled).eq(false), w.not(w.state(state.focused).eq(true))),
+      when: (w) =>
+        w.all(
+          w.state(state.disabled).eq(false),
+          w.state(hovered).eq(false),
+          w.state(state.focused).eq(false)
+        ),
       intent: (i) => i.feedback.style.use(tw('text-[#08c]')),
     });
     def.rule({
-      when: (w) => w.all(w.state(state.disabled).eq(false), w.state(state.focused).eq(true)),
+      when: (w) =>
+        w.all(
+          w.state(state.disabled).eq(false),
+          w.any(w.state(hovered).eq(true), w.state(state.focused).eq(true))
+        ),
       intent: (i) => i.feedback.style.use(tw('text-[#005580] underline')),
     });
     def.rule({

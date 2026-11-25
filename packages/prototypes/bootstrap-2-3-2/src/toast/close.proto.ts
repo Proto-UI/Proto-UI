@@ -4,6 +4,7 @@ import {
   type ToastCloseProps,
   type ToastCloseExposes,
 } from '@proto.ui/prototypes-base/toast';
+import { setupToastHover } from './visual';
 
 export default definePrototype<ToastCloseProps, ToastCloseExposes>({
   name: 'bootstrap-2-3-2-toast-close',
@@ -11,6 +12,7 @@ export default definePrototype<ToastCloseProps, ToastCloseExposes>({
   setup(def) {
     const behavior = asToastClose();
     const state = behavior.stateHandles!;
+    const hovered = setupToastHover(def, state.disabled);
     // less/close.less plus .alert .close offsets; authored slots put this
     // command first with '×', as in upstream Bootstrap 2.3.2 alert markup.
     def.feedback.style.use(
@@ -19,11 +21,11 @@ export default definePrototype<ToastCloseProps, ToastCloseExposes>({
       )
     );
     def.rule({
-      when: (w) => w.state(state.disabled).eq(false),
-      intent: (i) => i.feedback.style.use(tw('opacity-40')),
-    });
-    def.rule({
-      when: (w) => w.all(w.state(state.disabled).eq(false), w.state(state.focused).eq(true)),
+      when: (w) =>
+        w.all(
+          w.state(state.disabled).eq(false),
+          w.any(w.state(hovered).eq(true), w.state(state.focused).eq(true))
+        ),
       intent: (i) => i.feedback.style.use(tw('opacity-40')),
     });
     def.rule({

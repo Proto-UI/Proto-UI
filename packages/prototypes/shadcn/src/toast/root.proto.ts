@@ -240,7 +240,7 @@ export default definePrototype<ToastRootProps, ToastRootExposes>({
     });
     def.feedback.style.use(
       tw(
-        'pointer-events-auto border border-border shadow-[0_4px_12px_rgb(0_0_0/10%)] flex items-center gap-2.5 min-w-0 p-4 text-start transition-all duration-300 ease-out'
+        'pointer-events-auto border border-border shadow-[0_4px_12px_rgb(0_0_0/10%)] flex items-center gap-2.5 min-w-0 max-w-full p-4 text-start transition-all duration-300 ease-out'
       )
     );
     return (r) => {
