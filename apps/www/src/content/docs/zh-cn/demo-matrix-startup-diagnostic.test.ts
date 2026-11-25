@@ -543,6 +543,7 @@ it.each([
       (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'openMatrixRoute'
     )!;
     const { page } = fixture();
+    page.evaluate.mockResolvedValue({ delivered: 1, registered: 1 });
     const waitFor = vi.fn(async () => {});
     Object.assign(page, { locator: () => ({ first: () => ({ waitFor }) }) });
     const context = { newPage: async () => page, close: vi.fn(async () => {}) };
@@ -554,9 +555,9 @@ it.each([
         .code,
       {
         browser,
-        expect: {
+        expect: Object.assign((value: unknown) => expect(value), {
           getState: () => ({ currentTestName: `Website Demo Matrix browser smoke > ${name}` }),
-        },
+        }),
         matrixDiagnostics: new WeakMap(),
         diagnosticSourceSha: options().sourceSha,
         console,
