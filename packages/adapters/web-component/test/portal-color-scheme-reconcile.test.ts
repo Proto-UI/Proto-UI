@@ -55,7 +55,6 @@ it.each(['default', 'custom'] as const)(
       }),
       {
         shadow: false,
-        autoUpdateOnPropsChange: false,
         ...(reader === 'custom' ? { getMeta: () => 'light' } : {}),
       }
     );
