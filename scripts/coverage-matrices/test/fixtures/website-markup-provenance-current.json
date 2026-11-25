@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "8635852ffdba3eecd8b03259deb93d81b33301c9",
-  "scope": "Direct source inventory for the sampled website routes after integrating main f7d5b846 into the compiler-foundation candidate. All 31 existing owners remain: seven reviewed main-integration changes renew their hashes and 24 hashes are unchanged. The new code-format.ts snippet producer is an explicit 32nd owner. The preceding 862870 reference is byte-preserved in website-markup-provenance-862870f.json. This records source identity only; source admission, browser execution, served/transitive closure and lifecycle/release acceptance remain independently unverified.",
+  "revision": "524365a3b1f97dbf9dd6a3408ce231fbb4ee4af3",
+  "scope": "Direct source inventory for the sampled website routes after integrating main c8e700ff into the compiler-foundation candidate. All 32 owners remain; three reviewed Previewer scheduling/removal changes renew their hashes and 29 hashes are unchanged. The preceding 8635852 reference is byte-preserved in website-markup-provenance-8635852.json. The two retired optional compiler-panel owners remain absent. This records source identity only; source admission, browser execution, served/transitive closure and lifecycle/release acceptance remain independently unverified.",
   "sourceAdmission": "unverified",
   "sources": [
     {
@@ -27,7 +27,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
-      "sha256": "2bde8093f8e1a0e1028882b1379170181555499133f0bacc1878b6069c497957"
+      "sha256": "60b55efb6c15b2deccc95a736f8a3aaf8ea1fdc0e2b851db19fe4a1192f1970c"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
@@ -35,7 +35,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
-      "sha256": "96cf7ed08aad2aec25fc1d9a5ed5b543e48ffc22d35da172fac24b61a23fbe25"
+      "sha256": "b73271d7c754a27567d3b0fc1f50bb95d48b08d51337dc443aa447a0f36ab825"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-panel-client.ts",
@@ -111,7 +111,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-removal.ts",
-      "sha256": "468d3b8fe0563caffd66bbde02caf933bec6b81bcf088847e88b5df7907a5f19"
+      "sha256": "547aa146738b442dfc17c25c01db979ae4711ea9ff226c76dbc56857f32f3a89"
     },
     {
       "path": "apps/www/src/components/docs-header-preparation.ts",
