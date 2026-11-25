@@ -83,7 +83,7 @@ beforeEach(() => {
   vi.stubGlobal(
     'IntersectionObserver',
     class {
-      readonly entries = new Map<Element, { root: Element; deliver(visible: boolean): void }>();
+      entries = new Map<Element, { root: Element; deliver(visible: boolean): void }>();
       constructor(readonly callback: IntersectionObserverCallback) {}
       observe(root: Element) {
         if (this.entries.has(root)) return;
@@ -95,7 +95,7 @@ beforeEach(() => {
                 {
                   isIntersecting,
                   target: root,
-                  time: performance.now(),
+                  time: window.performance.now(),
                 } as IntersectionObserverEntry,
               ],
               this as any
@@ -106,12 +106,12 @@ beforeEach(() => {
       }
       unobserve(root: Element) {
         const entry = this.entries.get(root);
-        if (!entry) return;
-        intersections.delete(entry);
+        if (entry) intersections.delete(entry);
         this.entries.delete(root);
       }
       disconnect() {
-        for (const root of this.entries.keys()) this.unobserve(root);
+        for (const entry of this.entries.values()) intersections.delete(entry);
+        this.entries.clear();
       }
     }
   );

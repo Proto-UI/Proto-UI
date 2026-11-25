@@ -424,6 +424,40 @@ describe('idle observation across awaited material readiness (offline IO)', () =
     expect(test.evidence.actions).toEqual([]);
   });
 
+  it.each(['reenabled-item', 'reenabled-owner'])(
+    'waits for the initial receipt to recover at %s within the existing deadline',
+    async (boundary) => {
+      const test = observation();
+      test.evidence.boundary = boundary;
+      const current = test.current();
+      const restored = { ...current.material };
+      current.states.disabled = false;
+      current.material = {
+        ...restored,
+        quality: 'opaque-fallback',
+        contact: 'held',
+        carrier: null,
+      };
+      let clock = 0;
+      const budgets: number[] = [];
+      const io = {
+        ...test.io,
+        now: () => clock,
+        settleMaterial: async (budget: number) => {
+          expect(test.moves).toEqual([]);
+          budgets.push(budget);
+          clock += 2500;
+          current.material = { ...restored };
+        },
+      };
+      expect(await observeLiquidHoverIdle(io, test.evidence)).toBe('fresh-material-1');
+      expect(budgets).toEqual([8000, 5500]);
+      expect(test.evidence.attempts![0].reads[0].material.contact).toBe('held');
+      expect(test.evidence.attempts![0].reads[1].material.contact).toBe('rest');
+      expect(test.moves).toEqual([]);
+    }
+  );
+
   it('shares the existing eight-second readiness budget across repeated attempts', async () => {
     const test = observation();
     let clock = 0;

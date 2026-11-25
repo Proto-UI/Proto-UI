@@ -108,8 +108,7 @@ describe('WC entry dependency refresh coalescing', () => {
       button.className = 'entry-refresh-button';
       target.append(button);
       ancestor.className = 'unrelated-while-inert';
-      const rule = style.sheet!.cssRules[0] as CSSStyleRule;
-      rule.style.setProperty('display', 'none');
+      style.textContent = '.entry-refresh-button { display: none; }';
       await settle();
       expect(fixture.rebuilds()).toBe(0);
       expect(target.tabIndex).toBe(0);
@@ -119,7 +118,7 @@ describe('WC entry dependency refresh coalescing', () => {
       expect(fixture.rebuilds()).toBe(1);
       expect(target.tabIndex).toBe(0);
 
-      rule.style.removeProperty('display');
+      style.textContent = '.entry-refresh-button { display: inline-block; }';
       await settle();
       expect(target.hasAttribute('tabindex')).toBe(false);
 
@@ -142,7 +141,12 @@ describe('WC entry dependency refresh coalescing', () => {
       await settle();
       fixture.observations.length = 0;
 
+      target.remove();
       document.body.append(target);
+      fixture.deliver();
+      expect(
+        fixture.delivered.some((record) => Array.from(record.removedNodes).includes(target))
+      ).toBe(true);
       await settle();
       expect(fixture.rebuilds()).toBe(1);
       expect(target.hasAttribute('tabindex')).toBe(false);

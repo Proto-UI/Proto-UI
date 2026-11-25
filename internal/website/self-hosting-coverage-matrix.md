@@ -256,7 +256,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/content/docs/demo_components/radio-group/demo-brutalist-radio-group-choice-card.demo.ts` | `www.demo.authored-controllers` | `d027dce38765cc619b6dd254fb9b00e8419b55c7bca816ab7d78a198fe1dce83` |
 | `apps/www/src/content/docs/demo_components/radio-group/demo-liquid-glass-radio-group-choice-card.demo.ts` | `www.demo.authored-controllers` | `600348462574dd580816e7e7d069df36f4d103facfac1bf0210b5e6d96013b72` |
 | `apps/www/src/content/docs/demo_components/radio-group/demo-shadcn-radio-group-choice-card.demo.ts` | `www.demo.authored-controllers` | `8f77996baa8e3c03279ba5069a6d69bfd74136bbb79caa58fe10cd649f4c0a1a` |
-| `apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-position.demo.ts` | `www.demo.authored-controllers` | `2576709ceb69f3f98dcbd4bd8d7a140cb009dd98bd89bd48b47b753135ff1048` |
+| `apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-position.demo.ts` | `www.demo.authored-controllers` | `27d71426fc8a7707d446efd9724cacd713d4de36b77b8331404fc7c7642f411c` |
 | `apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-rich-colors.demo.ts` | `www.demo.authored-controllers` | `4fbee37fba745ffa10acb2a3476b3ae662c346695200c40f90efd961645e72cb` |
 | `apps/www/src/content/docs/demo_components/virtual-list/demo-bootstrap-2-3-2-virtual-list-filter.demo.ts` | `www.demo.authored-controllers` | `adde61f6ee9055e4acfd7606971f78c3b3bf67b2a6b2c2030465de1b8765f4b4` |
 | `apps/www/src/content/docs/demo_components/virtual-list/demo-bootstrap-2-3-2-virtual-list-jump.demo.ts` | `www.demo.authored-controllers` | `757c24e39695b5834e131536d900df6e8b0bbf2e8740bfc92d84cb37dee6441b` |
@@ -399,7 +399,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/PrototypePreviewer/passive-shell-composition.ts` | `www.demo.preview-surface`, `www.shell.mobile-menu-panel` | `e991371e00c8aeced8fbe6ed0989efd2d46a581ee33e9a7212af5a9ed1336603` |
 | `apps/www/src/components/PrototypePreviewer/lazy-chunk-recovery.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `8bbcce8ef3feb1c0475fba7627624e373e57749e13007fbff01092024ab77376` |
 | `apps/www/src/components/PrototypePreviewer/preview-error-surface.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `2e87c9b3070858d025dc741cd7815c1c97e8c207ff1d681bd8149daed19e1d93` |
-| `apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `b73271d7c754a27567d3b0fc1f50bb95d48b08d51337dc443aa447a0f36ab825` |
+| `apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `f8a053d9f8800d6ed158fd4ac8cbec1fae433775811ce93569eb019544ce8750` |
 | `apps/www/src/components/PrototypePreviewer/previewer-startup-task.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `50f0fec29776cfaa282d655614d7ce4639c5be833e5cdefb9a4f8042e6686f65` |
 | `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `f7ff3708827d6c832882a3db9579a8bd5d1709018b25e6b8bf1111f4950dcebc` |
 | `apps/www/src/components/PrototypePreviewer/previewer-removal.ts` | `www.demo.prototype-previewer` | `547aa146738b442dfc17c25c01db979ae4711ea9ff226c76dbc56857f32f3a89` |
@@ -439,12 +439,12 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/site-copy-client.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `b4cdf3ccd25e466ae152c1b31b8e82e8010442f1b828a4b575c290ca67cbcb0d` |
 | `apps/www/src/components/site-copy-command.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `a538f0f194489fd86386e8e53701cab265ac077f14edb8dfaa216e13aec0700b` |
 | `apps/www/src/components/site-copy-controller.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `1a39475db2f52b420beec1b26d853d38e05f82d51864e8f50996c769861e59ba` |
-| `apps/www/src/components/site-header-disclosure.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `0d5ded18075c11f5a478d08c2af4346ff2bfc051de7e4e545172494eb0dce904` |
-| `apps/www/src/components/site-header-surface.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `b11e5dbb0a5f4d4a9a1fbce5e2575fd6c45b0d7c461dee44291e991234879abb` |
+| `apps/www/src/components/site-header-disclosure.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `d784ea0ba41797e8540f4f582b85e1c04bac1a9995f9b4b01a6807a029f361dd` |
+| `apps/www/src/components/site-header-surface.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `13490829881f28b23df9b9ecde8a1725adc3b860861c7a08a01a36599d3e450e` |
 | `apps/www/src/components/site-link-recipes.ts` | `www.shell.native-link-presentation` | `34d8b45ee47007e73ce6008ae58c1b9a06691bb26e856b91051c2ebb72458adc` |
 | `apps/www/src/components/site-native-controls.ts` | `www.shell.native-link-presentation`, `www.shell.table-of-contents` | `b3adf001ead0e1cdbf5748a7f8e6a0b2e0d4f10b0c273e5a8d2751708b714451` |
 | `apps/www/src/components/site-native-link-facts.ts` | `www.shell.native-link-presentation` | `b1abc0626005f00d0f2298b2fe0d964e733f2df60a1141e158c52331486451cf` |
-| `apps/www/src/components/site-search-commands.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.launcher` | `faa8fc22e5006ee49d3dd6e2085989023aff7d2ab1d6d82d2ae0a5681ca6b572` |
+| `apps/www/src/components/site-search-commands.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.launcher` | `7d255f171bcf8d2ac8f5de89f559bfa1bdb6e36509e938a56ad1f6720b257c17` |
 | `apps/www/src/components/site-search-composition.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.loading-failure` | `50828c387006e09d4440ae2027c0824750db76f5f896bc46d056f93fc42cdcd3` |
 | `apps/www/src/components/site-search-owner.ts` | `www.search.input-results`, `www.search.loading-failure`, `www.search.pagefind-engine` | `aa4d3cc13174e2e9d62b557d81a8cf192483b669217af733332d22d42842f580` |
 | `apps/www/src/components/site-search-session.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.loading-failure` | `7e3aea951b4d101f80a560ea482df9082f82289dd8b7f47840eb18c78ce55a4f` |
@@ -454,7 +454,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/site-shadcn-controls.ts` | `www.demo.runtime-select`, `www.docs.code-panel-expand`, `www.docs.install-manager-tabs`, `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-toggle`, `www.shell.theme-toggle` | `53ec9878f07024aef14dae9d519035a05e4c22032206374899b6aa940d5a2f2a` |
 | `apps/www/src/components/site-sidebar-current-visibility.ts` | `www.shell.sidebar-navigation` | `0c82ae36d1fa9d81efbceaad25c2e153a52333d3da0087abae9f3aac16315b6b` |
 | `apps/www/src/components/site-text-recipes.ts` | `www.content.typography-presentation` | `e035ff8d22dcff7af4e7df6b21ef4938f23884e98a6d362c0167180bf9dcce8d` |
-| `apps/www/src/components/site-typography-client.ts` | `www.content.typography-presentation` | `b5cdff226ccb3d4591190a0a851d3dd49b70e3c157fbe22ee98b46e7fff021d8` |
+| `apps/www/src/components/site-typography-client.ts` | `www.content.typography-presentation` | `bc20c8d2bd5afa816fa76f03fe588057000b1fb1f6d05f20e00722e9a582ef49` |
 | `apps/www/src/components/site-typography.ts` | `www.content.typography-presentation` | `9da41374b7379af51514477115d210076eb54fea9555c300be33bd1b61ba4b74` |
 | `apps/www/src/content/docs/demo-base-radio-group.demo.ts` | `www.demo.authored-controllers` | `a70429e2c53f24b0bd216aed456446ab91dbcf803c74638f8d06588bc253ebc3` |
 | `apps/www/src/content/docs/demo_components/bootstrap-2-3-2/demo-bootstrap-2-3-2-button.demo.ts` | `www.demo.authored-controllers` | `55f59f12bdab2528f0aa65422010b168d5e6cb5aa3a1e60a614df4ab02e1c7bf` |
