@@ -2122,6 +2122,18 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 if (!isCurrentEntryObservation()) return;
                 if (
                   records.some((record) => {
+                    // A same-valued external attribute cannot change selector
+                    // eligibility. Keep each record's old value so A -> B -> A
+                    // and author-callback mutations still invalidate the entry.
+                    if (
+                      record.type === 'attributes' &&
+                      record.oldValue ===
+                        (record.target as Element).getAttributeNS(
+                          record.attributeNamespace,
+                          record.attributeName!
+                        )
+                    )
+                      return false;
                     if (
                       !belongsToObservedEntryTree(record.target) ||
                       invalidatesEntryStyles(record)
@@ -2233,13 +2245,14 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                     );
                 }
               }
-              for (const subject of entryRelationalSubjects) {
-                entryExternalStyleObserver.observe(subject, {
-                  childList: true,
-                  subtree: true,
-                  attributes: true,
-                });
-              }
+              const externalStyleOptions = {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeOldValue: true,
+              };
+              for (const subject of entryRelationalSubjects)
+                entryExternalStyleObserver.observe(subject, externalStyleOptions);
               const siblingStateTargets = new Set<EventTarget>();
               const observeSibling = (sibling: Element) => {
                 if (siblingStateTargets.has(sibling)) return;
@@ -2281,19 +2294,14 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                     ancestor === target.ownerDocument.documentElement
                   )
                     continue;
-                  entryExternalStyleObserver.observe(ancestor, {
-                    childList: true,
-                    subtree: true,
-                    attributes: true,
-                  });
+                  entryExternalStyleObserver.observe(ancestor, externalStyleOptions);
                 }
               }
               if (relationalDependency === 2) {
-                entryExternalStyleObserver.observe(target.ownerDocument.documentElement, {
-                  childList: true,
-                  subtree: true,
-                  attributes: true,
-                });
+                entryExternalStyleObserver.observe(
+                  target.ownerDocument.documentElement,
+                  externalStyleOptions
+                );
               }
               const stopEntryResizeEvents = listenToEntryEvents(
                 [view!],
@@ -2512,10 +2520,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               if (externalStyleRoots.size > 0) {
                 for (const root of externalStyleRoots) {
                   entryExternalStyleObserver.observe(root, {
-                    subtree: true,
-                    childList: true,
+                    ...externalStyleOptions,
                     characterData: true,
-                    attributes: true,
                     attributeFilter: ENTRY_STYLESHEET_ATTRS,
                   });
                 }

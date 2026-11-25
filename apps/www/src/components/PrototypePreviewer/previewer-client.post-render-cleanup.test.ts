@@ -50,11 +50,13 @@ vi.mock('./projection-theme', async (original) => {
   const current = await original<typeof import('./projection-theme')>();
   return {
     ...current,
-    resolveProjectionThemeSurfaceStyle: (
-      ...args: Parameters<typeof current.resolveProjectionThemeSurfaceStyle>
+    // Post-render preparation now reads through the watcher's initial emission.
+    // Intercept that public boundary; its private resolver bypasses export mocks.
+    watchProjectionThemeSurfaceStyle: (
+      ...args: Parameters<typeof current.watchProjectionThemeSurfaceStyle>
     ) => {
       if (control.failTheme && args[0] === 'brutalist') throw new Error('post-render theme failed');
-      return current.resolveProjectionThemeSurfaceStyle(...args);
+      return current.watchProjectionThemeSurfaceStyle(...args);
     },
   };
 });
