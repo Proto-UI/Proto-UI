@@ -1,4 +1,5 @@
 import type { ComponentIR, SourceSpan } from '../component-ir.ts';
+import { viewBindings } from '../view.ts';
 import type { BehaviorFacts } from './behavior.ts';
 import { reject } from './diagnostic.ts';
 import { findCycle, type Cycle, type References } from './graph.ts';
@@ -81,12 +82,15 @@ function cycleThrough(graph: ReadonlyMap<string, References>, root: string): Cyc
 }
 
 function describePath(path: readonly string[], declarations: Declarations): string {
-  return path.map((key) => {
-    const binding = declarations.functions.get(key)?.binding ?? declarations.values.get(key)?.binding;
-    return binding && binding.name !== key
-      ? `${JSON.stringify(binding.name)} (${JSON.stringify(key)})`
-      : JSON.stringify(key);
-  }).join(' -> ');
+  return path
+    .map((key) => {
+      const binding =
+        declarations.functions.get(key)?.binding ?? declarations.values.get(key)?.binding;
+      return binding && binding.name !== key
+        ? `${JSON.stringify(binding.name)} (${JSON.stringify(key)})`
+        : JSON.stringify(key);
+    })
+    .join(' -> ');
 }
 
 export function checkDependencies(
@@ -100,10 +104,20 @@ export function checkDependencies(
   for (const fn of ir.behaviors) {
     const dependencies = new Set<string>();
     for (const dep of fn.dependencies) {
-      resolve(declarations.values, dep, 'Declared read dependency', fn.binding.source, fn.binding.id);
+      resolve(
+        declarations.values,
+        dep,
+        'Declared read dependency',
+        fn.binding.source,
+        fn.binding.id
+      );
       if (dependencies.has(dep)) {
-        reject('duplicate-binding', fn.binding.source,
-          `The dependency summary repeats ${JSON.stringify(dep)}. List each read binding once.`, [fn.binding.id, dep]);
+        reject(
+          'duplicate-binding',
+          fn.binding.source,
+          `The dependency summary repeats ${JSON.stringify(dep)}. List each read binding once.`,
+          [fn.binding.id, dep]
+        );
       }
       dependencies.add(dep);
     }
@@ -113,8 +127,9 @@ export function checkDependencies(
   const recursion = findCycle(calls, reached);
   if (recursion) {
     const derived = new Set(ir.projections.map((projection) => projection.fn));
-    derived.add(ir.view.text);
-    if (ir.view.disabled !== undefined) derived.add(ir.view.disabled);
+    for (const binding of viewBindings(ir.view)) {
+      if (binding.role !== 'activate') derived.add(binding.fn);
+    }
     // The usual acyclic path requires only the linear graph walk above. For an
     // error, prefer the cycle through a known derivation even when the first
     // DFS back edge belongs to some other ordinary recursive helper.
@@ -125,9 +140,12 @@ export function checkDependencies(
       cycle = cycleThrough(calls, root);
     }
     if (cycle) {
-      reject('derived-cycle', cycle.source,
+      reject(
+        'derived-cycle',
+        cycle.source,
         `Pure derivation dependency cycle ${describePath(cycle.path, declarations)}. Remove the circular read or express intentional feedback through an action.`,
-        cycle.path);
+        cycle.path
+      );
     }
   }
 
@@ -137,8 +155,12 @@ export function checkDependencies(
     for (const [key, site] of reads.get(field.init)!) {
       if (available.has(key)) continue;
       const path = [field.binding.id, ...readPath(reads, field.init, key)];
-      reject('initialization-order', site.source,
-        `Initializer reads a field before it is initialized (${describePath(path, declarations)}). Initialize its source field first.`, path);
+      reject(
+        'initialization-order',
+        site.source,
+        `Initializer reads a field before it is initialized (${describePath(path, declarations)}). Initialize its source field first.`,
+        path
+      );
     }
     available.add(field.binding.id);
   }
@@ -147,12 +169,20 @@ export function checkDependencies(
     for (const [field, site] of fields) {
       if (dependencies.has(field)) continue;
       const path = readPath(reads, fn, field);
-      reject('dependency-missing', site.source,
-        `The dependency summary for ${JSON.stringify(fn)} omits the read ${describePath(path, declarations)}. Include ${JSON.stringify(field)} in its declared dependencies.`, path);
+      reject(
+        'dependency-missing',
+        site.source,
+        `The dependency summary for ${JSON.stringify(fn)} omits the read ${describePath(path, declarations)}. Include ${JSON.stringify(field)} in its declared dependencies.`,
+        path
+      );
     }
   }
   if (recursion) {
-    reject('recursive-helper', recursion.source,
-      `Lowering the ordinary recursive helper chain ${describePath(recursion.path, declarations)} requires recursive-call support in this target slice.`, recursion.path);
+    reject(
+      'recursive-helper',
+      recursion.source,
+      `Lowering the ordinary recursive helper chain ${describePath(recursion.path, declarations)} requires recursive-call support in this target slice.`,
+      recursion.path
+    );
   }
 }

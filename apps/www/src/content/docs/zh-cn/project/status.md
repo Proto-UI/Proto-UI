@@ -13,7 +13,7 @@ npm 稳定版可用性与项目成熟度描述的是不同边界。0.2 package r
 
 当前开发遵循 [0.3 交付计划](https://github.com/Proto-UI/Proto-UI/blob/main/internal/governance/release-0.3-plan.md)，承诺范围、目标日期与验收阶段均以该计划为准。计划交付与完成发行验收需要分别判断。
 
-工作区版本由 [`VERSION`](https://github.com/Proto-UI/Proto-UI/blob/main/VERSION) 和对应[版本实体](https://github.com/Proto-UI/Proto-UI/tree/main/spec/versions)标识；开发计划不代表已经发布。旧的私有编译器已经退役。[0.4 新编译器基础文档](https://github.com/Proto-UI/Proto-UI/blob/main/internal/compiler/README.md)定义后续合同；初步共享前端与 lint 分析已可使用，完整语义分析和五个后端均待实现，重建不作为 0.3 交付的新增阻塞项。
+工作区版本由 [`VERSION`](https://github.com/Proto-UI/Proto-UI/blob/main/VERSION) 和对应[版本实体](https://github.com/Proto-UI/Proto-UI/tree/main/spec/versions)标识；开发计划不代表已经发布。旧的私有编译器已经退役。0.4 新编译器可以将仓库中的只读 Badge 源码编译成 React 的 TypeScript 组件和 GPUI 的原生 Rust 组件。Chromium 消费方验证了 DOM，原生 GPUI 消费方验证了绘制结果。两个宿主也都在输入更新后读到了相应的公开标签和 tone。其他后端用例直接使用经过检查的 IR。完整语义分析、另外两个作者示例的编译，以及 Vue 2、Vue 3 和 Web Components 后端仍属于 0.4 的待办工作。详见 [Compiler 指南](/zh-cn/build/compiler-guide/)。
 
 已有编译器消费方更新 pin 前应先阅读[退役与迁移说明](/zh-cn/build/compiler-guide/#已有编译器消费方如何迁移)。[`67fd94f58372cf35fa929f24ef731416b5817e31`](https://github.com/Proto-UI/Proto-UI/tree/67fd94f58372cf35fa929f24ef731416b5817e31) 是本次改动的退役前基线。可以保留已经验证过的较早 pin，或主动把受影响的组件迁到 Runtime / Adapter；重建后的包不再提供旧编译器导出。
 

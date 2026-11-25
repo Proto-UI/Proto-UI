@@ -28,11 +28,11 @@ fn public(name: &str, id: &str, source: &Source) -> Result<Ident, String> {
 
 /// Rust callers pass arguments by position. Preserve source names in the public
 /// signature wherever possible, including when a private ID is not Rust syntax.
-pub fn formal_names(params: &[Binding]) -> Vec<Ident> {
-    let reserved: HashSet<_> = params.iter().map(|p| p.name.as_str()).collect();
+pub fn formal_names<'a>(params: impl Iterator<Item = &'a Binding> + Clone) -> Vec<Ident> {
+    let reserved: HashSet<_> = params.clone().map(|p| p.name.as_str()).collect();
     let mut used = HashSet::new();
     let mut serial = 0;
-    params.iter().map(|p| {
+    params.map(|p| {
         // These constructors are already in Rust's pattern namespace. A formal
         // with the same spelling would be interpreted as a pattern or rejected.
         if used.insert(&p.name) && !matches!(p.name.as_str(), "Some" | "None" | "Ok" | "Err") {
@@ -79,7 +79,7 @@ impl Names {
             actions_type: format_ident!("{}Actions", component),
             signal: format_ident!("{}Signal", component),
             command: format_ident!("{}Command", component),
-            props: group(ir.props.iter().map(|b| (b.name.as_str(), b.id.as_str(), &b.source)))?,
+            props: group(ir.props.iter().map(|p| { let b = &p.binding; (b.name.as_str(), b.id.as_str(), &b.source) }))?,
             signals: group(ir.signals.iter().map(|b| (b.name.as_str(), b.id.as_str(), &b.source)))?,
             projections, actions, component,
         })
@@ -90,11 +90,25 @@ pub fn ty(t: Type) -> TokenStream {
     match t {
         Type::Bool => quote!(::core::primitive::bool), Type::Number => quote!(::core::primitive::f64),
         Type::Text => quote!(::std::string::String), Type::Unit => quote!(()),
+        Type::Tokens => quote!(::gpui::ArcCow<'static, [::gpui::SharedString]>),
     }
 }
 
 pub fn input_ty(t: Type) -> TokenStream {
-    if t == Type::Text { quote!(&::core::primitive::str) } else { ty(t) }
+    let native = ty(t);
+    match t {
+        Type::Text => quote!(&::core::primitive::str),
+        Type::Tokens => quote!(&#native),
+        _ => native,
+    }
+}
+
+pub fn as_input(t: Type, value: TokenStream) -> TokenStream {
+    match t {
+        Type::Text => quote!((#value).as_str()),
+        Type::Tokens => quote!(&(#value)),
+        _ => value,
+    }
 }
 
 pub fn source_doc(name: &str, source: &Source) -> String {

@@ -5,26 +5,67 @@ import { text } from 'node:stream/consumers';
 import { pipeline } from 'node:stream/promises';
 import { fileURLToPath } from 'node:url';
 import type { ComponentIR } from './component-ir.ts';
-import { validateComponent } from './validate.ts';
+import { ComponentIRDiagnostic, validateComponent } from './validate.ts';
 
 const manifest = fileURLToPath(new URL('../../targets/gpui/Cargo.toml', import.meta.url));
 
+function generatorError(status: number | string | null, diagnostic: string): Error {
+  const raw = diagnostic.trim();
+  const failure = new Error(`GPUI generation failed (${status}): ${raw}`);
+  if (!raw.startsWith('{')) return failure;
+  let record;
+  try {
+    record = JSON.parse(raw);
+  } catch (error) {
+    if (error instanceof SyntaxError) return failure;
+    throw error;
+  }
+  if (
+    record?.code !== 'host-name' ||
+    record.category !== 'backend-missing' ||
+    typeof record.message !== 'string'
+  )
+    return failure;
+  const { source, bindings } = record;
+  if (
+    !source ||
+    typeof source.file !== 'string' ||
+    !Number.isSafeInteger(source.start) ||
+    source.start < 0 ||
+    !Number.isSafeInteger(source.end) ||
+    source.end < source.start ||
+    !Array.isArray(bindings) ||
+    !bindings.every((binding: unknown) => typeof binding === 'string')
+  )
+    return failure;
+  return new ComponentIRDiagnostic('host-name', source, record.message, bindings);
+}
+
 /** Emit an ordinary Rust module. The generator binary belongs to the compiler
  * machine; generated applications never link the generator or receive its IR. */
-export async function emitGpui(ir: ComponentIR, options: { generator?: string } = {}): Promise<string> {
+export async function emitGpui(
+  ir: ComponentIR,
+  options: { generator?: string } = {}
+): Promise<string> {
   validateComponent(ir);
   const command = options.generator ?? 'cargo';
-  const args = options.generator === undefined ? ['run', '--quiet', '--locked', '--manifest-path', manifest] : [];
+  const args =
+    options.generator === undefined
+      ? ['run', '--quiet', '--locked', '--manifest-path', manifest]
+      : [];
   const child = spawn(command, args, { stdio: ['pipe', 'pipe', 'pipe'] });
   const input = pipeline(Readable.from([JSON.stringify(ir)]), child.stdin);
   const [completion, output, diagnostic, written] = await Promise.allSettled([
-    once(child, 'close'), text(child.stdout), text(child.stderr), input,
+    once(child, 'close'),
+    text(child.stdout),
+    text(child.stderr),
+    input,
   ]);
   if (completion.status === 'rejected') throw completion.reason;
   if (diagnostic.status === 'rejected') throw diagnostic.reason;
   const [status, signal] = completion.value;
   if (status !== 0) {
-    throw new Error(`GPUI generation failed (${signal ?? status}): ${diagnostic.value.trim()}`);
+    throw generatorError(signal ?? status, diagnostic.value);
   }
   if (written.status === 'rejected') throw written.reason;
   if (output.status === 'rejected') throw output.reason;

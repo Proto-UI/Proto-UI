@@ -554,7 +554,7 @@ export function analyzeProtoProgram(
   );
   missing(
     'frontend/typed-ir',
-    'Typed component/behavior IR and complete reached-call lowering are not implemented.',
+    'General lint does not produce a selected component. The source producer separately checks the reached component and behavior operations.',
     undefined,
     'proto/complete-analysis',
     ['IR', 'COMPLETE'].map(foundation)
@@ -566,7 +566,10 @@ export function analyzeProtoProgram(
       criterion: [foundation('EMISSION'), foundation('COMPLETE')],
       category: 'backend-missing',
       severity: 'info',
-      message: `The ${target} backend is not implemented; no artifact was generated.`,
+      message:
+        target === 'react' || target === 'gpui'
+          ? `Lint did not compile a selected export for ${target}. The bounded source compiler checks its reached operations separately.`
+          : `The ${target} backend is not implemented; no artifact was generated.`,
       capabilityKey: `backend/${target}`,
       trackingRef: TRACKING_REF,
       targetProfile: target,

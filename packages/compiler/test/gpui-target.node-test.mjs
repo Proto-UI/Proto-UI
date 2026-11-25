@@ -8,6 +8,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { emitGpui } from '@proto.ui/compiler/targets/gpui';
 import { controlledSelection, readonlyBadge } from './fixtures/backend-programs.ts';
+import { authoredBadgeSource } from './fixtures/authoring-source.mjs';
 
 const sdkRepository = 'https://github.com/zed-industries/zed';
 const sdkRevision = '62e5991dd0f0c8a3af8d5e7e9c4652490d468db8';
@@ -52,6 +53,19 @@ function packageSources(tables, name) {
     .map((table) => /^source = "([^"\r\n]+)"\r?$/m.exec(table)?.[1] ?? '(path)');
 }
 
+test('Rust host name diagnostics preserve the source binding for a target caller', async () => {
+  const ir = readonlyBadge();
+  ir.name = 'not-a-rust-identifier';
+  const generator = process.env.PROTO_UI_GPUI_GENERATOR;
+  await assert.rejects(emitGpui(ir, generator ? { generator } : undefined), (error) => {
+    assert.equal(error.category, 'backend-missing');
+    assert.equal(error.code, 'host-name');
+    assert.deepEqual(error.source, ir.source);
+    assert.deepEqual(error.bindings, [ir.name]);
+    return true;
+  });
+});
+
 // Node 24: node --test packages/compiler/test/gpui-target.node-test.mjs
 // Set PROTO_UI_GPUI_GENERATOR to use a prebuilt generator. Set PROTO_UI_GPUI_CONSUMER_DIR
 // to retain the generated crate after success. Cargo inherits the caller's cache and network policy.
@@ -71,33 +85,71 @@ test('external Rust consumer renders and interacts with generated views in headl
   if (existsSync(seedLock)) {
     const lock = readFileSync(seedLock, 'utf8');
     const sources = packageSources(packageTables(lock), 'gpui');
-    if (sources.length === 1 && sources[0] === sdkSource) writeFileSync(cargoLock, lock, { flag: 'wx' });
+    if (sources.length === 1 && sources[0] === sdkSource)
+      writeFileSync(cargoLock, lock, { flag: 'wx' });
   }
 
   const generator = process.env.PROTO_UI_GPUI_GENERATOR;
   const options = generator ? { generator } : undefined;
+  const authoredInput = authoredBadgeSource();
+  if (retainedRoot)
+    writeFileSync(join(crate, 'authored-source.json'), JSON.stringify(authoredInput));
   const programs = [
     ['delivery_badge', readonlyBadge()],
     ['selection_control', controlledSelection()],
+    ['authoring_badge', authoredInput.component],
   ];
   for (const [module, program] of programs) {
     const rust = await emitGpui(program, options);
     writeFileSync(join(crate, 'src', `${module}.rs`), rust, { flag: 'wx' });
   }
 
-  const result = spawnSync('cargo', ['test', '--manifest-path', cargoToml, '--test', 'native'], {
-    cwd: crate,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'inherit'],
-  });
+  const result = spawnSync(
+    'cargo',
+    [
+      'test',
+      '--manifest-path',
+      cargoToml,
+      '--test',
+      'native',
+      '--',
+      '--format',
+      'pretty',
+      '--color',
+      'never',
+    ],
+    {
+      cwd: crate,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'inherit'],
+    }
+  );
   if (result.stdout) t.diagnostic(result.stdout.trimEnd());
   assert.ifError(result.error);
-  assert.equal(result.status, 0, `cargo test failed (${result.signal ?? result.status}) in ${crate}`);
-  const summary = /^test result: ok\. (\d+) passed; 0 failed; 0 ignored; 0 measured; 0 filtered out;/m.exec(result.stdout);
+  assert.equal(
+    result.status,
+    0,
+    `cargo test failed (${result.signal ?? result.status}) in ${crate}`
+  );
+  const summary =
+    /^test result: ok\. (\d+) passed; 0 failed; 0 ignored; 0 measured; 0 filtered out;/m.exec(
+      result.stdout
+    );
   assert.ok(summary, 'Cargo must execute the native tests without ignored or filtered cases');
-  assert.ok(Number(summary[1]) >= 6, 'the six external consumer cases must all run');
+  assert.ok(
+    Number(summary[1]) >= 7,
+    'the six foundation cases and the authoring Badge case must all run'
+  );
+  assert.match(
+    result.stdout,
+    /^test authoring_badge::retained_authoring_badge_paints_its_label_chip_and_nested_dot_as_inputs_change \.\.\. ok\r?$/m
+  );
   const resolved = packageTables(readFileSync(cargoLock, 'utf8'));
-  assert.deepEqual(packageSources(resolved, packageName), ['(path)'], 'Cargo must resolve this unique consumer');
+  assert.deepEqual(
+    packageSources(resolved, packageName),
+    ['(path)'],
+    'Cargo must resolve this unique consumer'
+  );
   assert.deepEqual(packageSources(resolved, 'gpui'), [sdkSource]);
   t.diagnostic(`Resolved GPUI: ${sdkSource}`);
   if (!retainedRoot) rmSync(crate, { recursive: true });

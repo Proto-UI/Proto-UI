@@ -2,9 +2,9 @@
 
 The [authoring contract](../../spec/contracts/C-COMPILER-AUTHORING-0001.yaml) chooses the API spellings below for the already accepted [foundation semantics](../../spec/contracts/C-COMPILER-FOUNDATION-0001.yaml). Its [independent cases](../../spec/tests/T-COMPILER-AUTHORING-0001.yaml) define observable expectations. This page explains those choices and the complete example sources; it does not add a language rule.
 
-**Implementation status:** `@proto.ui/core/authoring` is a planned 0.4 export, not an available package subpath. The examples are complete design inputs. They do not currently execute through an Adapter or compile to a target. The initial executable frontend provides a partial binding/type and value-diagnostic pass, not complete phase, ownership, task or native-output support. Use its explicit analysis result rather than treating no displayed error as admission. No declaration-only shim or mock runtime accompanies these examples.
+**Implementation status.** The shared TypeScript Program reads all three versioned authoring inputs from disk. Compiler-owned typed intrinsic declarations bind `@proto.ui/core/authoring` for source lowering. The historical public Core package has yet to provide that runtime export. The readonly Badge compiles into ordinary TypeScript for React and native Rust for GPUI. The Toggle and Tabs source paths remain incomplete, and Adapter execution and common-source consumer migration remain unverified.
 
-The inputs are stored as `.proto.ts.txt` text fixtures: their contents are complete TypeScript source for future compiler/Adapter harnesses. This keeps a planned import from becoming a current workspace compilation unit. Syntax validation uses the TypeScript parser on those exact bytes; it does not supply a fake authoring declaration or suppress type errors to claim an executable example.
+The `.proto.ts.txt` files contain complete TypeScript examples outside the ordinary workspace build. The source producer resolves their imports and analyzes reached declarations without executing author modules. General lint still reports `analysisComplete: false`. `sourceValid` is `false` when a violation is proven and `null` otherwise.
 
 ## Author-facing operations
 
@@ -45,11 +45,13 @@ The table is not a complete implementation inventory. The foundation also requir
 | Existing author intent | 0.4 input | Independent observation |
 | --- | --- | --- |
 | Read caller label and tone | Readonly prop handles | New input updates both public projections and the view |
-| Request a render after label changes | Automatic dependency from `renderer.get(props.label)` | No author `watch` + `update` plumbing is necessary once that capability is implemented |
+| Request a render after label changes | Automatic dependency from `renderer.get(props.label)` | Updating the input updates the generated view without an author `watch` or `update` |
 | Choose appearance from tone | Pure `badgeStyle` helper and derived style handle | Known tone adds its token; unknown tone retains the common token |
 | Keep transport logic in the caller | No transport task, timer or network access | Pure recomputation produces no effects |
 
-Start with `Offline`/`offline`, then publish `Connected`/`online`. The displayed label and the online token must both change. Renaming or extracting the helper does not change meaning, and the extracted helper becomes part of the same Adapter/compiler source closure. Actual migration of the registered Shenko source still requires its source-bound manifest, safe transformation and both execution routes; this design file is not that receipt.
+The Chromium consumer mounts the generated TypeScript component and reads the DOM label, computed color, nested dot width and public `label` and `tone`. The native headless GPUI consumer reads the same projections and observes the painted label, chip and nested dot on one mounted Rust component. Both cover `Offline`/`offline`, `Connected`/`online` and an unknown tone that retains the common chip appearance. Other backend cases take checked IR directly. See the [React consumer](../../packages/compiler/test/react-target.node-test.mjs) and [GPUI consumer](../../packages/compiler/test/gpui-target.node-test.mjs).
+
+The authoring contract also requires equivalent behavior when a reached helper is renamed or extracted into shared source. Migrating the registered Shenko source still requires its source manifest, safe transformation and both Adapter and compiler execution.
 
 ## Complete input 2: controlled Toggle
 
@@ -68,7 +70,7 @@ The `active` prop explicitly declares `optional: true, controlMode: 'fixed-insta
 
 The local initializer executes once. Changing `defaultActive`, hiding or physically remounting that same instance does not reset it. The action's derived reads use its current transaction view, public emission occurs after successful publication, and implicit callbacks queue rather than reentering a partially completed action. Owned input connections and captured handles retire on terminal disposal.
 
-These dependencies belong in M1 with the controlled example. Calling the example “reactivity” does not defer its controlled-value, transaction, capture, reentry or disposal requirements to M2.
+The source producer still lacks the optional `active` prop and typed `activeChange` payload needed to compile this example end to end. These dependencies belong in M1 with the controlled example. Calling the example “reactivity” does not defer its controlled-value, transaction, capture, reentry or disposal requirements to M2.
 
 ## Complete input 3: Context and owned async Tabs
 
@@ -91,7 +93,7 @@ The created panel explicitly starts loading through `def.lifecycle.onCreated(rel
 
 The example's visible `cancelled` value is written by the explicit cancel action. Disposal does not write another value into a dead component. Scheduler evidence separately distinguishes completion, explicit cancellation, supersession and owner termination. The task's local `requested` value crosses suspension; its writable transaction view does not.
 
-The loader's signature and listed targets do not implement it. Each target needs a real atomic binding with typed argument/result conversion. Until then that selected-target compilation reports `extern-unbound`. This declaration cannot be used to package an entire prototype as an external implementation.
+Compiling this Tabs source still requires Context, extern bindings and owned tasks to work together. Each target needs a real atomic loader binding with typed argument/result conversion. The contract calls for `extern-unbound` when a reached extern lacks a binding on the selected target. This declaration cannot be used to package an entire prototype as an external implementation.
 
 ## Migration and executable completion
 
@@ -99,4 +101,4 @@ Implement the authoring exports and their Adapter path together with the shared 
 
 Upstream owns delivering and verifying necessary official and registered-consumer migrations. Where a general autofix is not yet safe, upstream must finish the concrete migration and establish verified tooling/preconditions instead of transferring a permanent source fork to consumers. The safety boundary prohibits a guessed edit or an unsupported claim of semantic preservation; it does not waive the migration obligation.
 
-The [source/lint projection](source-compatibility-and-lint.md) defines how to report undetermined source, missing implementation, safe migration and the full inventory. The [implementation sequence](atomic-lowering-completion.md) maps all 28 foundation criteria into M1–M3 and the remaining three targets. A syntax check of these three files is useful authoring hygiene; it does not establish language admission, native compilation, Adapter compatibility or full component conformance. Those routes remain explicitly missing in the catalog.
+The [source/lint projection](source-compatibility-and-lint.md) defines how to report undetermined source, missing implementation, safe migration and the full inventory. The [implementation sequence](atomic-lowering-completion.md) maps all 28 foundation criteria into M1–M3 and the remaining three targets. The Badge observations cover the two named compiler targets. Other primitives, Vue 2, Vue 3, Web Components and Adapter execution of the common source still require implementation and consumer evidence.

@@ -3,6 +3,7 @@ mod check;
 mod component;
 mod ir;
 mod names;
+mod view;
 mod wire_error;
 
 use std::io::{self, Read, Write};

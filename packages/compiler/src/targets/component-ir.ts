@@ -1,6 +1,6 @@
 /** The compile-time input shared by source targets. IDs identify resolved bindings.
  * Names identify their source or host spelling. Neither is an operation selector. */
-export type ValueType = 'bool' | 'number' | 'text' | 'unit';
+export type ValueType = 'bool' | 'number' | 'text' | 'unit' | 'tokens';
 
 export interface SourceSpan {
   readonly file: string;
@@ -15,11 +15,20 @@ export interface Binding {
   readonly source: SourceSpan;
 }
 
-export type Value =
+export type LiteralValue =
   | { readonly kind: 'bool'; readonly value: boolean }
   /** Sixteen hexadecimal digits preserve signed zero and non-finite literals across IPC. */
   | { readonly kind: 'number'; readonly bits: string }
   | { readonly kind: 'text'; readonly value: string }
+  | { readonly kind: 'tokens'; readonly values: readonly string[] };
+
+export interface InputBinding extends Binding {
+  /** A schema default applies when the host omits this input. */
+  readonly default?: LiteralValue;
+}
+
+export type Value =
+  | LiteralValue
   | { readonly kind: 'prop' | 'state' | 'capture' | 'local'; readonly id: string }
   | { readonly kind: 'not'; readonly value: Value }
   | {
@@ -78,20 +87,37 @@ export interface InitialField {
   readonly init: string;
 }
 
-export interface ComponentIR {
-  readonly version: 1;
-  readonly name: string;
+export interface TextRegion {
+  readonly kind: 'text';
+  /** A zero-argument pure behavior returning text. */
+  readonly value: string;
   readonly source: SourceSpan;
-  readonly props: readonly Binding[];
+}
+
+export interface ElementView {
+  readonly kind: 'element';
+  readonly tag: 'span' | 'i' | 'section' | 'div' | 'button';
+  readonly source: SourceSpan;
+  readonly children: readonly (TextRegion | ElementView)[];
+  /** Pure token-list behavior, in authored order. */
+  readonly style?: string;
+  readonly disabled?: string;
+  /** An action connected to semantic press completion. */
+  readonly activate?: string;
+}
+
+export interface ComponentIR {
+  readonly version: 2;
+  /** Public component binding selected from the resolved module export. */
+  readonly name: string;
+  /** Authored definePrototype metadata, independent of the host binding. */
+  readonly prototypeName?: string;
+  readonly source: SourceSpan;
+  readonly props: readonly InputBinding[];
   readonly fields: readonly InitialField[];
   readonly signals: readonly Binding[];
   readonly behaviors: readonly Behavior[];
   readonly projections: readonly NamedBehavior[];
   readonly actions: readonly NamedBehavior[];
-  readonly view: {
-    readonly role: 'text' | 'button';
-    readonly text: string;
-    readonly disabled?: string;
-    readonly activate?: string;
-  };
+  readonly view: ElementView;
 }

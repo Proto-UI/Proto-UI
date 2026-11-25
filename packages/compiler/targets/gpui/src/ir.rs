@@ -63,35 +63,37 @@ macro_rules! object_only {
     )+ };
 }
 
-object_only!(Source, Binding, Value, Instruction, Edge, End, Block, Behavior, Named, Field, View, Component);
+object_only!(Source, Binding, InputFields, Value, Instruction, Edge, End, Block, Behavior, Named, Field, View, Component);
 
 // An externally tagged Serde unit variant normally also accepts {"tag":null}.
-// The IR spells types, phases, operators and roles exclusively as strings.
+// The IR spells types, phases, operators and element tags exclusively as strings.
 macro_rules! string_only {
     ($($ty:ident),+ $(,)?) => { $(
         impl<'de> Deserialize<'de> for $ty {
             fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-                struct Tag;
-                impl<'de> serde::de::Visitor<'de> for Tag {
-                    type Value = $ty;
+                // Bind the module's enum explicitly. A generated visitor name
+                // must never capture the wire type, including the `Tag` enum.
+                struct StringVisitor;
+                impl<'de> serde::de::Visitor<'de> for StringVisitor {
+                    type Value = self::$ty;
                     fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                         write!(f, "a {} string", stringify!($ty))
                     }
-                    fn visit_str<E: serde::de::Error>(self, text: &str) -> Result<$ty, E> {
-                        $ty::deserialize(serde::de::value::StrDeserializer::new(text))
+                    fn visit_str<E: serde::de::Error>(self, text: &str) -> Result<Self::Value, E> {
+                        self::$ty::deserialize(serde::de::value::StrDeserializer::new(text))
                     }
                 }
-                d.deserialize_str(Tag)
+                d.deserialize_str(StringVisitor)
             }
         }
     )+ };
 }
 
-string_only!(Type, Op, Phase, FieldKind, Role);
+string_only!(Type, Op, Phase, FieldKind, Tag);
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq)]
 #[serde(remote = "Self", rename_all = "lowercase")]
-pub enum Type { Bool, Number, Text, Unit }
+pub enum Type { Bool, Number, Text, Unit, Tokens }
 
 #[derive(Debug, Deserialize)]
 #[serde(remote = "Self", deny_unknown_fields)]
@@ -117,6 +119,29 @@ pub struct Binding {
     pub source: Source,
 }
 
+pub struct Input { pub binding: Binding, pub default: Option<Value> }
+
+// The public wire places `default` beside the ordinary binding members. Keep
+// other binding roles strict and preserve duplicate-key checks on every input.
+#[derive(Deserialize)]
+#[serde(remote = "Self", deny_unknown_fields)]
+struct InputFields {
+    id: String,
+    name: String,
+    #[serde(rename = "type")]
+    ty: Type,
+    source: Source,
+    #[serde(default, deserialize_with = "present")]
+    default: Option<Value>,
+}
+
+impl<'de> Deserialize<'de> for Input {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        let InputFields { id, name, ty, source, default } = <InputFields as Deserialize>::deserialize(d)?;
+        Ok(Self { binding: Binding { id, name, ty, source }, default })
+    }
+}
+
 #[derive(Clone, Copy, Deserialize)]
 #[serde(remote = "Self", rename_all = "lowercase")]
 pub enum Op { Add, Multiply, Equal, Concat }
@@ -127,6 +152,7 @@ pub enum Value {
     Bool { value: bool },
     Number { bits: String },
     Text { value: String },
+    Tokens { values: Vec<String> },
     Prop { id: String },
     State { id: String },
     Capture { id: String },
@@ -223,17 +249,23 @@ pub struct Field { pub kind: FieldKind, pub binding: Binding, pub init: String }
 
 #[derive(Clone, Copy, Deserialize, Eq, PartialEq)]
 #[serde(remote = "Self", rename_all = "lowercase")]
-pub enum Role { Text, Button }
+pub enum Tag { Span, I, Section, Div, Button }
 
 #[derive(Deserialize)]
-#[serde(remote = "Self", deny_unknown_fields)]
-pub struct View {
-    pub role: Role,
-    pub text: String,
-    #[serde(default, deserialize_with = "present")]
-    pub disabled: Option<String>,
-    #[serde(default, deserialize_with = "present")]
-    pub activate: Option<String>,
+#[serde(remote = "Self", tag = "kind", rename_all = "lowercase", deny_unknown_fields)]
+pub enum View {
+    Text { value: String, source: Source },
+    Element {
+        tag: Tag,
+        source: Source,
+        children: Vec<View>,
+        #[serde(default, deserialize_with = "present")]
+        style: Option<String>,
+        #[serde(default, deserialize_with = "present")]
+        disabled: Option<String>,
+        #[serde(default, deserialize_with = "present")]
+        activate: Option<String>,
+    },
 }
 
 #[derive(Deserialize)]
@@ -241,8 +273,10 @@ pub struct View {
 pub struct Component {
     pub version: u32,
     pub name: String,
+    #[serde(default, rename = "prototypeName", deserialize_with = "present")]
+    pub prototype_name: Option<String>,
     pub source: Source,
-    pub props: Vec<Binding>,
+    pub props: Vec<Input>,
     pub fields: Vec<Field>,
     pub signals: Vec<Binding>,
     pub behaviors: Vec<Behavior>,

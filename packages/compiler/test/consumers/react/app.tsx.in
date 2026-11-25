@@ -1,12 +1,17 @@
-import { createRef, StrictMode } from 'react';
+import { Activity, createRef, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import { DeliveryBadge } from './DeliveryBadge';
+import { AuthoringBadge, type AuthoringBadgeHandle } from './AuthoringBadge';
 import { SelectionControl, type SelectionControlHandle } from './SelectionControl';
 
 const root = createRoot(document.getElementById('app')!);
 const primary = createRef<SelectionControlHandle>();
 const secondary = createRef<SelectionControlHandle>();
+const authored = createRef<AuthoringBadgeHandle>();
+let authoredProps: { label?: string; tone?: string } = {};
+let secondaryHidden = false;
+let savedSecondary: SelectionControlHandle;
 const requests: Array<[string, string, number]> = [];
 const nested: Array<[string, number]> = [];
 let reenter = false;
@@ -21,6 +26,7 @@ function render() {
     <StrictMode>
       <section id="badge"><DeliveryBadge connected={connected} caption={caption}
         appearance={({ available }) => ({ color: available ? 'green' : 'gray' })} /></section>
+      <section id="authored"><AuthoringBadge ref={authored} {...authoredProps} /></section>
       <section id="primary"><SelectionControl ref={primary} controlled={true}
         accepted={accepted} candidate="B" initial="unused" disabled={disabled} prefix={prefix}
         appearance={({ selection }) => ({ borderTopWidth: selection === 'C' ? 7 : 2, borderTopStyle: 'solid' })}
@@ -33,13 +39,21 @@ function render() {
             nested.push([result.status, handle.attempts]);
           }
         }} /></section>
+      <Activity mode={secondaryHidden ? 'hidden' : 'visible'}>
       <section id="secondary"><SelectionControl ref={secondary} controlled={false}
         accepted="unused" candidate="U2" initial="U1" disabled={false} prefix="Local: " /></section>
+      </Activity>
     </StrictMode>
   ));
 }
 
 const trace = {
+  authored(label: string, tone: string) { authoredProps = { label, tone }; render(); },
+  authoredProjection() { return [authored.current!.label, authored.current!.tone]; },
+  hideSecondary() { savedSecondary = secondary.current!; secondaryHidden = true; render(); },
+  revealSecondary() { secondaryHidden = false; render(); },
+  savedSecondaryAction() { return savedSecondary.choose().status; },
+  savedSecondaryState() { return [savedSecondary.selection, savedSecondary.attempts]; },
   badge(online: boolean, label: string) { connected = online; caption = label; render(); },
   publish(value: string, locked = false) { accepted = value; disabled = locked; prefix = 'New: '; render(); },
   enableReentry() { reenter = true; },
@@ -57,7 +71,7 @@ const trace = {
   dispose() {
     const saved = primary.current!;
     flushSync(() => root.unmount());
-    return saved.choose().status;
+    return [saved.choose().status, savedSecondary.choose().status];
   },
 };
 

@@ -1,24 +1,88 @@
 import ts from 'typescript';
-import type { Behavior, Binding, Block, ComponentIR, Edge, Value, ValueType } from '../component-ir.ts';
+import type {
+  Behavior,
+  Binding,
+  Block,
+  ComponentIR,
+  Edge,
+  InputBinding,
+  LiteralValue,
+  Value,
+  ValueType,
+} from '../component-ir.ts';
 import { unsupportedHostName } from '../validate.ts';
-import { Names, call, constDecl, f, id, member, typeRef } from './ast.ts';
+import { viewBindings, type ViewBinding } from '../view.ts';
+import { Names, call, constDecl, f, id, member, str, typeRef } from './ast.ts';
 
 const react = 'react';
 const support = '@proto.ui/compiler/support/react';
-const reactImports = ['CSSProperties', 'Ref', 'createElement', 'forwardRef', 'useImperativeHandle', 'useState', 'useSyncExternalStore'];
-const supportImports = [
-  'ActionDispatch', 'ActionFailure', 'FieldDraft', 'FieldStore', 'InputLease', 'SignalQueue',
-  'dispatchAction', 'finishAction', 'numberFromBits', 'observeNativeAction', 'readBool',
-  'readCallback', 'readNumber', 'readText', 'readUnit', 'usePublishedInputs',
+const retainedSupport = '@proto.ui/compiler/support/react/retained';
+const reactImports = [
+  'CSSProperties',
+  'Ref',
+  'createElement',
+  'forwardRef',
+  'useRef',
+  'useState',
+  'useSyncExternalStore',
 ];
-const hostLocals = ['$props', '$inputs', '$fields', '$draft', '$signals', '$owner', '$lease', '$store', '$ref', '$before', '$after'];
-const guards: Record<ValueType, string> = { bool: 'readBool', number: 'readNumber', text: 'readText', unit: 'readUnit' };
+const supportImports = [
+  'ActionDispatch',
+  'ActionFailure',
+  'FieldDraft',
+  'FieldStore',
+  'InputLease',
+  'SignalQueue',
+  'dispatchAction',
+  'finishAction',
+  'missingInput',
+  'numberFromBits',
+  'observeNativeAction',
+  'readBool',
+  'readCallback',
+  'readNumber',
+  'readText',
+  'readTokens',
+  'readUnit',
+  'sameTokens',
+  'usePublishedInputs',
+];
+const retainedImports = ['useRetainedHandle', 'useRetainedInputs'];
+const hostLocals = [
+  '$props',
+  '$inputs',
+  '$fields',
+  '$draft',
+  '$signals',
+  '$owner',
+  '$lease',
+  '$store',
+  '$ref',
+  '$handle',
+  '$before',
+  '$after',
+];
+const guards: Record<ValueType, string> = {
+  bool: 'readBool',
+  number: 'readNumber',
+  text: 'readText',
+  unit: 'readUnit',
+  tokens: 'readTokens',
+};
+
+function origin(binding: Binding): ts.StringLiteral {
+  const { file, start, end } = binding.source;
+  return str(`${file}:${start}-${end} (${binding.name})`);
+}
 
 function successors(block: Block): readonly Edge[] {
   switch (block.end.kind) {
-    case 'jump': return [block.end.to];
-    case 'branch': return [block.end.yes, block.end.no];
-    default: return [];
+    case 'jump':
+      return [block.end.to];
+    case 'branch':
+      return [block.end.yes, block.end.no];
+    default:
+      return [];
   }
 }
 
@@ -47,9 +111,16 @@ function orderedBlocks(fn: Behavior): Block[] {
 function visitValue(value: Value, visit: (value: Value) => void): void {
   visit(value);
   switch (value.kind) {
-    case 'not': visitValue(value.value, visit); break;
-    case 'binary': visitValue(value.left, visit); visitValue(value.right, visit); break;
-    case 'call': for (const arg of value.args) visitValue(arg, visit); break;
+    case 'not':
+      visitValue(value.value, visit);
+      break;
+    case 'binary':
+      visitValue(value.left, visit);
+      visitValue(value.right, visit);
+      break;
+    case 'call':
+      for (const arg of value.args) visitValue(arg, visit);
+      break;
   }
 }
 
@@ -67,7 +138,21 @@ export interface FunctionPlan {
 
 export class ReactProgram {
   readonly ir: ComponentIR;
-  readonly names = new Names([...reactImports, ...supportImports, ...hostLocals, 'Object', 'Number', 'ReturnType', 'undefined', 'exports', 'module', 'require', '__filename', '__dirname']);
+  readonly names = new Names([
+    ...reactImports,
+    ...supportImports,
+    ...retainedImports,
+    ...hostLocals,
+    'Object',
+    'Number',
+    'ReturnType',
+    'undefined',
+    'exports',
+    'module',
+    'require',
+    '__filename',
+    '__dirname',
+  ]);
   readonly component: string;
   readonly propsType: string;
   readonly projectionType: string;
@@ -77,7 +162,8 @@ export class ReactProgram {
   readonly fieldsType: string;
   readonly initFields: string;
   readonly sameFields: string;
-  readonly props: Map<string, Binding>;
+  readonly props: Map<string, InputBinding>;
+  readonly viewBindings: readonly ViewBinding[];
   readonly fields = new Map<string, Binding>();
   readonly fieldKeys = new Map<string, string>();
   readonly callbacks = new Map<string, string>();
@@ -87,6 +173,7 @@ export class ReactProgram {
   readonly written = new Set<string>();
   readonly #imports = new Map<string, boolean>(); // true for type-only imports
   readonly #numbers = new Map<string, { value: number; constant?: string }>();
+  readonly #tokens = new Map<string, { name: string; values: readonly string[] }>();
   readonly #bits = new DataView(new ArrayBuffer(8));
 
   constructor(ir: ComponentIR) {
@@ -101,22 +188,34 @@ export class ReactProgram {
     this.initFields = this.names.take('initializeFields');
     this.sameFields = this.names.take('sameFields');
     this.props = new Map(ir.props.map((b) => [b.id, b]));
+    this.viewBindings = viewBindings(ir.view);
     const fieldNames = new Names();
     for (const { binding } of ir.fields) {
       this.fields.set(binding.id, binding);
       this.fieldKeys.set(binding.id, fieldNames.take(binding.name));
     }
     const byId = new Map(ir.behaviors.map((fn) => [fn.binding.id, fn]));
-    const propNames = new Map<string, string | null>(['key', 'ref', '__self', '__source', '__proto__'].map((key) => [key, null]));
+    const propNames = new Map<string, string | null>(
+      ['key', 'ref', '__self', '__source', '__proto__'].map((key) => [key, null])
+    );
     if (ir.projections.length) propNames.set('appearance', null);
     const claimProp = (name: string, binding: Binding) => {
       if (propNames.has(name)) {
         const other = propNames.get(name);
-        unsupportedHostName('react', name, binding.source, 'This spelling collides with another prop, a React carrier, or the projected appearance callback. Give the public binding a distinct name.', other == null ? [binding.id] : [other, binding.id]);
+        unsupportedHostName(
+          'react',
+          name,
+          binding.source,
+          'This spelling collides with another prop, a React carrier, or the projected appearance callback. Give the public binding a distinct name.',
+          other == null ? [binding.id] : [other, binding.id]
+        );
       }
       propNames.set(name, binding.id);
     };
-    for (const prop of ir.props) claimProp(prop.name, prop);
+    for (const prop of ir.props) {
+      claimProp(prop.name, prop);
+      if (prop.default) this.reserveLiteral(prop.default);
+    }
     for (const signal of ir.signals) {
       const first = String.fromCodePoint(signal.name.codePointAt(0)!);
       const callback = `on${first.toUpperCase()}${signal.name.slice(first.length)}`;
@@ -125,22 +224,39 @@ export class ReactProgram {
     }
     const handleNames = new Map(ir.projections.map((p) => [p.name, p.fn]));
     for (const action of ir.actions) {
-      if (handleNames.has(action.name)) unsupportedHostName('react', action.name, byId.get(action.fn)!.binding.source, 'A projection already uses this handle member. Choose a distinct public action name.', [handleNames.get(action.name)!, action.fn]);
+      if (handleNames.has(action.name))
+        unsupportedHostName(
+          'react',
+          action.name,
+          byId.get(action.fn)!.binding.source,
+          'A projection already uses this handle member. Choose a distinct public action name.',
+          [handleNames.get(action.name)!, action.fn]
+        );
     }
 
     const emitted = new Set<string>();
-    const reached = new Set([ir.view.text, ...ir.fields.map((field) => field.init), ...ir.projections.map((p) => p.fn), ...ir.actions.map((a) => a.fn)]);
-    if (ir.view.disabled !== undefined) reached.add(ir.view.disabled);
-    if (ir.view.activate !== undefined) reached.add(ir.view.activate);
+    const reached = new Set([
+      ...this.viewBindings.map((b) => b.fn),
+      ...ir.fields.map((field) => field.init),
+      ...ir.projections.map((p) => p.fn),
+      ...ir.actions.map((a) => a.fn),
+    ]);
     for (const fnId of reached) {
       const fn = byId.get(fnId)!;
       const plan: FunctionPlan = {
-        fn, name: this.names.take(fn.binding.name), blocks: orderedBlocks(fn),
-        calls: new Set(), captures: new Set(), inputs: false, fields: false, writes: false, emits: false,
+        fn,
+        name: this.names.take(fn.binding.name),
+        blocks: orderedBlocks(fn),
+        calls: new Set(),
+        captures: new Set(),
+        inputs: false,
+        fields: false,
+        writes: false,
+        emits: false,
       };
       const inspect = (value: Value) => {
         if (value.kind === 'call') plan.calls.add(value.fn);
-        if (value.kind === 'number') this.reserveNumber(value.bits);
+        if (value.kind === 'number' || value.kind === 'tokens') this.reserveLiteral(value);
         if (value.kind === 'prop' || value.kind === 'state' || value.kind === 'capture') {
           plan.captures.add(value.id);
           if (value.kind === 'prop') plan.inputs = true;
@@ -201,15 +317,24 @@ export class ReactProgram {
       }
     }
     const publicEntries = new Set(ir.actions.map((action) => action.fn));
-    if (ir.view.activate !== undefined) publicEntries.add(ir.view.activate);
-    for (const fn of publicEntries) this.dispatchers.set(fn, this.names.take(`dispatch_${this.functions.get(fn)!.fn.binding.name}`));
+    for (const binding of this.viewBindings)
+      if (binding.role === 'activate') publicEntries.add(binding.fn);
+    for (const fn of publicEntries)
+      this.dispatchers.set(
+        fn,
+        this.names.take(`dispatch_${this.functions.get(fn)!.fn.binding.name}`)
+      );
     for (const signal of emitted) {
       this.listeners.set(signal, this.names.take(`listener_${this.callbacks.get(signal)!}`));
     }
   }
 
-  get hasHandle(): boolean { return this.ir.projections.length + this.ir.actions.length !== 0; }
-  get hasOwner(): boolean { return this.hasHandle || this.ir.view.activate !== undefined; }
+  get hasHandle(): boolean {
+    return this.ir.projections.length + this.ir.actions.length !== 0;
+  }
+  get hasOwner(): boolean {
+    return this.hasHandle || this.dispatchers.size !== 0;
+  }
 
   use(name: string): ts.Identifier {
     this.#imports.set(name, false);
@@ -223,47 +348,92 @@ export class ReactProgram {
 
   imports(): ts.ImportDeclaration[] {
     const result: ts.ImportDeclaration[] = [];
-    for (const [module, choices] of [[react, reactImports], [support, supportImports]] as const) {
+    for (const [module, choices] of [
+      [react, reactImports],
+      [support, supportImports],
+      [retainedSupport, retainedImports],
+    ] as const) {
       const names = choices.filter((name) => this.#imports.has(name));
       if (!names.length) continue;
-      const items = names.map((name) => f.createImportSpecifier(this.#imports.get(name)!, undefined, id(name)));
-      result.push(f.createImportDeclaration(undefined, f.createImportClause(false, undefined, f.createNamedImports(items)), f.createStringLiteral(module)));
+      const items = names.map((name) =>
+        f.createImportSpecifier(this.#imports.get(name)!, undefined, id(name))
+      );
+      result.push(
+        f.createImportDeclaration(
+          undefined,
+          f.createImportClause(false, undefined, f.createNamedImports(items)),
+          f.createStringLiteral(module)
+        )
+      );
     }
     return result;
   }
 
   guard(binding: Binding, value: ts.Expression): ts.Expression {
-    const { file, start, end } = binding.source;
-    return call(this.use(guards[binding.type]), value, f.createStringLiteral(`${file}:${start}-${end} (${binding.name})`));
+    return call(this.use(guards[binding.type]), value, origin(binding));
   }
 
-  private reserveNumber(bits: string): void {
-    const hex = bits.toLowerCase();
+  readProp(binding: InputBinding, props: ts.Expression): ts.Expression {
+    const present = call(member(id('Object'), 'hasOwn'), props, str(binding.name));
+    const whenPresent = this.guard(binding, member(props, binding.name));
+    const whenOmitted = binding.default
+      ? this.literal(binding.default)
+      : call(this.use('missingInput'), origin(binding));
+    return f.createConditionalExpression(present, undefined, whenPresent, undefined, whenOmitted);
+  }
+
+  private reserveLiteral(literal: LiteralValue): void {
+    if (literal.kind === 'tokens') {
+      // The receiver rejects empty names and spaces inside names, so this key
+      // distinguishes all ordered sequences, including duplicates and [].
+      const key = literal.values.join(' ');
+      if (!this.#tokens.has(key))
+        this.#tokens.set(key, { name: this.names.take('styleTokens'), values: literal.values });
+      return;
+    }
+    if (literal.kind !== 'number') return;
+    const hex = literal.bits.toLowerCase();
     if (this.#numbers.has(hex)) return;
     this.#bits.setBigUint64(0, BigInt(`0x${hex}`));
     const value = this.#bits.getFloat64(0);
-    const literal = Number.isNaN(value) && hex !== '7ff8000000000000'
-      ? { value, constant: this.names.take(`nan_${hex}`) }
-      : { value };
-    this.#numbers.set(hex, literal);
+    const entry =
+      Number.isNaN(value) && hex !== '7ff8000000000000'
+        ? { value, constant: this.names.take(`nan_${hex}`) }
+        : { value };
+    this.#numbers.set(hex, entry);
   }
 
-  number(bits: string): ts.Expression {
-    const { value, constant } = this.#numbers.get(bits.toLowerCase())!;
+  literal(literal: LiteralValue): ts.Expression {
+    switch (literal.kind) {
+      case 'bool':
+        return literal.value ? f.createTrue() : f.createFalse();
+      case 'text':
+        return str(literal.value);
+      case 'tokens':
+        return id(this.#tokens.get(literal.values.join(' '))!.name);
+    }
+    const { value, constant } = this.#numbers.get(literal.bits.toLowerCase())!;
     if (constant) return id(constant);
     if (Number.isNaN(value)) return member(id('Number'), 'NaN');
-    if (!Number.isFinite(value)) return member(id('Number'), value < 0 ? 'NEGATIVE_INFINITY' : 'POSITIVE_INFINITY');
+    if (!Number.isFinite(value))
+      return member(id('Number'), value < 0 ? 'NEGATIVE_INFINITY' : 'POSITIVE_INFINITY');
     const magnitude = f.createNumericLiteral(Math.abs(value));
-    return value < 0 || Object.is(value, -0) ? f.createPrefixUnaryExpression(ts.SyntaxKind.MinusToken, magnitude) : magnitude;
+    return value < 0 || Object.is(value, -0)
+      ? f.createPrefixUnaryExpression(ts.SyntaxKind.MinusToken, magnitude)
+      : magnitude;
   }
 
-  numbers(): ts.Statement[] {
+  constants(): ts.Statement[] {
     const statements: ts.Statement[] = [];
     for (const [hex, { constant }] of this.#numbers) {
       if (!constant) continue;
       const high = f.createNumericLiteral(`0x${hex.slice(0, 8)}`);
       const low = f.createNumericLiteral(`0x${hex.slice(8)}`);
       statements.push(constDecl(constant, call(this.use('numberFromBits'), high, low)));
+    }
+    for (const { name, values } of this.#tokens.values()) {
+      const array = f.createArrayLiteralExpression(values.map(str));
+      statements.push(constDecl(name, call(member(id('Object'), 'freeze'), array)));
     }
     return statements;
   }

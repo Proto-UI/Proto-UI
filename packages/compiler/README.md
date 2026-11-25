@@ -1,11 +1,11 @@
 # Proto language compiler foundation
 
-The package provides a shared TypeScript frontend, partial Proto semantic lint and two native-source emitters for checked component and behavior IR. The previous private compiler is retired.
+The package compiles a bounded 0.4 authoring surface through a shared TypeScript Program and checked component and behavior IR. The versioned readonly Badge runs in ordinary React and GPUI applications. The package also provides partial Proto lint and an editor analysis API.
 
 | Target         | Replacement implementation |
 | -------------- | -------------------------- |
-| React          | Checked IR to TypeScript, exercised by a Chromium consumer |
-| GPUI           | Checked IR to Rust, exercised by a native GPUI consumer |
+| React          | Authored readonly props, derivations, helpers and nested styles rendered in Chromium |
+| GPUI           | The same source and IR rendered and painted in a native GPUI window |
 | Vue 2          | Not implemented            |
 | Vue 3          | Not implemented            |
 | Web Components | Not implemented            |
@@ -14,13 +14,28 @@ The package provides a shared TypeScript frontend, partial Proto semantic lint a
 
 The replacement is a Proto language based on TypeScript syntax and compiler infrastructure. Its explicit `schema`, `init`, `derive`, `action` and `lifecycle` declarations lower through a typed semantic IR into target ASTs. React and GPUI are the first implementation targets; Vue 2, Vue 3 and Web Components remain required targets. LLVM is outside the initial implementation.
 
-The [compiler design entry](../../internal/compiler/README.md), [foundation contract](../../spec/contracts/C-COMPILER-FOUNDATION-0001.yaml) and [lint contract](../../spec/contracts/C-COMPILER-LINT-0001.yaml) define the replacement. The author-source entry requires a canonical checked IR producer. Complete phase, effect, capture and ownership coverage remains in development.
+The [compiler design entry](../../internal/compiler/README.md), [foundation contract](../../spec/contracts/C-COMPILER-FOUNDATION-0001.yaml) and [lint contract](../../spec/contracts/C-COMPILER-LINT-0001.yaml) define the replacement. Complete phase, effect, capture and ownership coverage remains in development.
+
+## Compiling an author source
+
+With Node.js 24 and workspace dependencies installed, emit the checked-in Badge from its original source and helper. The GPUI command also requires Cargo. The CLI prints generated source by default and accepts `--out path` for atomic file output.
+
+```sh
+node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/readonly-badge.proto.ts.txt --target react --name AuthoringBadge
+node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/readonly-badge.proto.ts.txt --target gpui --name AuthoringBadge
+```
+
+`produceComponentIR(program, { fileName, exportName, publicName })` is available through `@proto.ui/compiler/producer`. It uses the Program from `@proto.ui/compiler/frontend` and returns the target-neutral source closure with either checked IR or located diagnostics. Source spans use UTF-16 offsets. `exportName` defaults to `default`. `publicName` chooses the target binding independently of the prototype's debug name.
+
+For direct API use, the producer exports `AUTHORING_DECLARATIONS` for the project’s TypeScript `paths` mapping of `@proto.ui/core/authoring`. The CLI supplies this controlled language declaration when the project has no matching mapping. The producer checks actual resolved symbol identities and reachable helper bodies. This compiler entry implements its admitted operations through native lowering. The shared public Core/Adapter authoring runtime and application-source migrations have separate coverage requirements.
+
+The controlled Toggle currently reports missing optional-prop presence. The Tabs owner reports missing logical Context lowering. Owned scheduler support has independent native tests. Source-to-consumer coverage of those two components remains open.
 
 ## Native-source targets
 
 Import `ComponentIR` from `@proto.ui/compiler/targets/ir`. `emitReact(ir)` from `@proto.ui/compiler/targets/react` returns TypeScript. `await emitGpui(ir)` from `@proto.ui/compiler/targets/gpui` returns Rust. The GPUI entry invokes its locked Cargo generator by default and accepts `{ generator: pathToBinary }`. Generated components import reached support from `@proto.ui/compiler/support/react` or the crate in `support/gpui`.
 
-The independent IR fixtures exercise readonly props, controlled requests and owner publication, uncontrolled selection, instance captures, rollback, queued reentry, appearance and disposal. Each suite imports generated components into a host application. `PUI_CHROMIUM_EXECUTABLE` selects a system Chromium. `PROTO_UI_GPUI_CONSUMER_DIR` retains the generated crate and SDK lockfile.
+Both host suites compile the versioned Badge, import its generated component and observe its public props, text and nested styles. Additional direct-IR controls exercise controlled requests and owner publication, uncontrolled selection, instance captures, rollback, queued reentry and disposal. `PUI_CHROMIUM_EXECUTABLE` selects a system Chromium. `PROTO_UI_REACT_CONSUMER_DIR` and `PROTO_UI_GPUI_CONSUMER_DIR` retain generated modules and their source closure. The native crate also retains its SDK lockfile.
 
 ```sh
 node --test packages/compiler/test/react-target.node-test.mjs
@@ -45,7 +60,7 @@ The JSON report identifies language, rule-set and compiler versions, resolved so
 | --- | --- |
 | `sourceValid` | `false` when a defined violation is established; otherwise `null`, because full analysis is incomplete. |
 | `analysisComplete` | Always `false`; missing analysis obligations are reported explicitly. |
-| `targets[target].compilable` | Always `false`; none of the source backends is implemented. |
+| `targets[target].compilable` | `false` in this partial lint report. Compilation of a selected export runs its own source and target checks. |
 
 Exit status `1` means invalid source, `2` means analysis or the requested target is incomplete, and `64` means an invalid command invocation. Status `0` is reserved for a future complete requested analysis. A missing dependency is recorded in the closure and cannot produce a complete-input claim. An informational missing-capability diagnostic is not a compile success.
 
@@ -77,7 +92,7 @@ With Node.js 24, inspect the status from the repository root:
 node packages/compiler/src/cli-entry.mjs --status
 ```
 
-Compilation invocations exit with status 1 and the explicit unavailable diagnostic before inspecting input files or writing outputs. The separate `lint` command reads source for analysis only. The browser export has no Worker, network or WASM dependency.
+The Node `compile` command returns 0 after emission, 1 for invalid source or a compilation error, 2 for unavailable compilation and 64 for an invalid invocation. The `lint` command reads source for analysis only. The browser export has no Worker, network or WASM dependency.
 
 Run the frontend, editor, CLI and retirement checks:
 

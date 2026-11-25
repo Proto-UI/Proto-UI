@@ -33,17 +33,39 @@ pub fn entry_call(
     quote!(Self::#name(#(#args,)* #(#env),*))
 }
 
-struct Expression { code: TokenStream, ty: Type, owns_text: bool }
+struct Expression { code: TokenStream, ty: Type, owns_value: bool }
 impl Expression {
     fn owned(self) -> TokenStream {
         let code = self.code;
-        if self.ty == Type::Text && !self.owns_text { quote!(::std::string::String::from(#code)) } else { code }
+        match (self.ty, self.owns_value) {
+            (Type::Text, false) => quote!(::std::string::String::from(#code)),
+            (Type::Tokens, false) => quote!(::core::clone::Clone::clone(#code)),
+            _ => code,
+        }
     }
     fn argument(self) -> TokenStream {
-        let code = self.code;
-        if self.ty == Type::Text && self.owns_text { quote!((#code).as_str()) } else { code }
+        if self.owns_value { names::as_input(self.ty, self.code) } else { self.code }
     }
 }
+
+fn literal(v: &Value) -> Expression {
+    let (code, ty, owns_value) = match v {
+        Value::Bool { value } => (quote!(#value), Type::Bool, false),
+        Value::Number { bits } => {
+            let number = syn::LitInt::new(&format!("0x{bits}_u64"), Span::call_site());
+            (quote!(::core::primitive::f64::from_bits(#number)), Type::Number, false)
+        }
+        Value::Text { value } => (quote!(#value), Type::Text, false),
+        Value::Tokens { values } => (quote!({
+            static TOKENS: &[::gpui::SharedString] = &[#(::gpui::SharedString::new_static(#values)),*];
+            ::gpui::ArcCow::Borrowed(TOKENS)
+        }), Type::Tokens, true),
+        _ => unreachable!("validated literal"),
+    };
+    Expression { code, ty, owns_value }
+}
+
+pub fn schema_default(v: &Value) -> TokenStream { literal(v).owned() }
 
 // A move is valid when this entire instruction is the last, single use. Multiple
 // operands of one call may hold a borrow until the last argument has evaluated.
@@ -93,25 +115,24 @@ impl<'c, 'a> Lower<'c, 'a> {
     }
 
     fn value(&mut self, value: &Value) -> Expression {
-        let (code, ty, owns_text) = match value {
-            Value::Bool { value } => (quote!(#value), Type::Bool, false),
-            Value::Number { bits } => {
-                let literal = syn::LitInt::new(&format!("0x{bits}_u64"), Span::call_site());
-                (quote!(::core::primitive::f64::from_bits(#literal)), Type::Number, false)
-            }
-            Value::Text { value } => (quote!(#value), Type::Text, false),
+        let (code, ty, owns_value) = match value {
+            Value::Bool { .. } | Value::Number { .. } | Value::Text { .. } | Value::Tokens { .. } => return literal(value),
             Value::Prop { id } | Value::Capture { id } | Value::State { id } => {
                 let p = self.checked.places[id.as_str()];
                 let ty = self.checked.binding(p).ty;
                 let read = self.read(p);
-                let value = if ty == Type::Text { quote!((#read).as_str()) } else { quote!(*#read) };
+                let value = match ty {
+                    Type::Text => quote!((#read).as_str()),
+                    Type::Tokens => read,
+                    _ => quote!(*#read),
+                };
                 (value, ty, false)
             }
             Value::Local { id } => {
                 let (&key, (name, ty, owned)) = self.locals.get_key_value(id.as_str()).expect("validated local");
                 let last = self.uses.get(key) == Some(&1);
                 self.consumed.push(key);
-                if *ty == Type::Text && *owned && !last { (quote!(#name.as_str()), *ty, false) }
+                if matches!(ty, Type::Text | Type::Tokens) && *owned && !last { (names::as_input(*ty, quote!(#name)), *ty, false) }
                 else { (quote!(#name), *ty, *owned) }
             }
             Value::Not { value } => {
@@ -123,7 +144,7 @@ impl<'c, 'a> Lower<'c, 'a> {
                 let b = self.value(right);
                 if matches!(op, Op::Concat) {
                     let rhs = b.argument();
-                    if a.owns_text {
+                    if a.owns_value {
                         let lhs = a.code;
                         (quote!((#lhs) + (#rhs)), Type::Text, true)
                     } else {
@@ -146,10 +167,10 @@ impl<'c, 'a> Lower<'c, 'a> {
                 let args = args.iter().map(|v| self.value(v).argument()).collect();
                 let code = self.call(f, args);
                 let ty = self.checked.ir.behaviors[f].binding.ty;
-                (code, ty, ty == Type::Text)
+                (code, ty, matches!(ty, Type::Text | Type::Tokens))
             }
         };
-        Expression { code, ty, owns_text }
+        Expression { code, ty, owns_value }
     }
 
     fn call(&self, target: usize, args: Vec<TokenStream>) -> TokenStream {
@@ -194,14 +215,15 @@ impl<'c, 'a> Lower<'c, 'a> {
                 let mut actuals = Vec::new();
                 for (i, arg) in args.iter().enumerate() {
                     let value = self.value(arg);
-                    // A borrowed String in a location writable by the callee must keep its
+                    // A borrowed value in a location writable by the callee must keep its
                     // argument-time value while the helper runs on the same pending write.
                     let aliases_write = matches!(arg, Value::State { id } if matches!(self.checked.places[id.as_str()], Place::Field(j) if self.checked.bodies[callee].facts.writes.contains(&j)));
-                    if value.ty == Type::Text && aliases_write {
+                    if matches!(value.ty, Type::Text | Type::Tokens) && aliases_write {
                         let snapshot = format_ident!("snapshot_{i}");
+                        let ty = value.ty;
                         let value = value.owned();
                         snapshots.push(quote!(let #snapshot = #value;));
-                        actuals.push(quote!(#snapshot.as_str()));
+                        actuals.push(names::as_input(ty, quote!(#snapshot)));
                     } else { actuals.push(value.argument()); }
                 }
                 let call = self.call(callee, actuals);

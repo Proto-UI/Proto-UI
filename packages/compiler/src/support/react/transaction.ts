@@ -24,15 +24,17 @@ export type ActionResult =
   | { readonly status: 'disposed' }
   | { readonly status: 'effect-failed'; readonly errors: readonly unknown[] };
 
-export type ActionDispatch = ActionResult | {
-  readonly status: 'queued';
-  readonly completion: Promise<ActionResult>;
-};
+export type ActionDispatch =
+  | ActionResult
+  | {
+      readonly status: 'queued';
+      readonly completion: Promise<ActionResult>;
+    };
 
 const committed = Object.freeze({ status: 'committed' } as const);
 const disposed = Object.freeze({ status: 'disposed' } as const);
 
-/** All fields in the scalar IR are immutable values. Copy on the first write. */
+/** Field values are immutable, including token sequences. Copy on the first write. */
 export class FieldDraft<Fields extends object> {
   readonly #base: Fields;
   current: Fields;
@@ -60,7 +62,9 @@ export class FieldStore<Fields extends object> {
 
   readonly subscribe = (listener: () => void): (() => void) => {
     this.#listeners.add(listener);
-    return () => { this.#listeners.delete(listener); };
+    return () => {
+      this.#listeners.delete(listener);
+    };
   };
 
   publish(next: Fields, same: (before: Fields, after: Fields) => boolean): unknown[] | undefined {
@@ -105,7 +109,10 @@ export class SignalQueue<Inputs> {
 }
 
 /** Publication precedes every signal. A callback failure cannot roll back publication. */
-export function finishAction<Inputs>(lease: InputLease<Inputs>, signals: SignalQueue<Inputs>): ActionResult;
+export function finishAction<Inputs>(
+  lease: InputLease<Inputs>,
+  signals: SignalQueue<Inputs>
+): ActionResult;
 export function finishAction<Inputs, Fields extends object>(
   lease: InputLease<Inputs>,
   signals: SignalQueue<Inputs> | undefined,
@@ -187,13 +194,19 @@ export function dispatchAction<Inputs>(
 /** Native clicks have no return channel. Surface failures through the host error path. */
 export function observeNativeAction(outcome: ActionDispatch): void {
   switch (outcome.status) {
-    case 'committed': return;
-    case 'disposed': throw new DisposedInstanceError();
-    case 'failed': throw new ActionFailure(outcome.reason, outcome.source);
-    case 'effect-failed': throw new AggregateError(outcome.errors, 'Post-commit delivery failed.');
+    case 'committed':
+      return;
+    case 'disposed':
+      throw new DisposedInstanceError();
+    case 'failed':
+      throw new ActionFailure(outcome.reason, outcome.source);
+    case 'effect-failed':
+      throw new AggregateError(outcome.errors, 'Post-commit delivery failed.');
     case 'queued':
       void outcome.completion.then(observeNativeAction).catch((error: unknown) => {
-        queueMicrotask(() => { throw error; });
+        queueMicrotask(() => {
+          throw error;
+        });
       });
   }
 }

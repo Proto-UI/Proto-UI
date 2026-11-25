@@ -16,6 +16,18 @@ fn binding(b: &Binding) -> Result<()> {
 fn expect(actual: Type, expected: Type, at: &Source, label: &str) -> Result<()> {
     if actual == expected { Ok(()) } else { Err(error(at, format_args!("{label}: expected {expected:?}, received {actual:?}"))) }
 }
+fn literal_type(v: &Value, at: &Source) -> Result<Option<Type>> {
+    Ok(Some(match v {
+        Value::Bool { .. } => Type::Bool,
+        Value::Number { bits } => {
+            if bits.len() != 16 || !bits.bytes().all(|b| b.is_ascii_hexdigit()) { return Err(error(at, "number bits must contain exactly sixteen hexadecimal digits")); }
+            Type::Number
+        }
+        Value::Text { .. } => Type::Text,
+        Value::Tokens { .. } => Type::Tokens,
+        _ => return Ok(None),
+    }))
+}
 fn lookup<T: Copy>(map: &HashMap<&str, T>, id: &str, at: &Source, kind: &str) -> Result<T> {
     map.get(id).copied().ok_or_else(|| error(at, format_args!("unknown {kind} {id:?}; supply a resolved {kind} binding")))
 }
@@ -62,7 +74,9 @@ pub struct Checked<'a> {
     pub functions: HashMap<&'a str, usize>,
     pub bodies: Vec<Function<'a>>,
     pub reached: Vec<usize>,
+    pub derived: BTreeSet<usize>,
     pub actions: BTreeSet<usize>,
+    pub has_styles: bool,
 }
 
 struct Walk {
@@ -137,14 +151,21 @@ fn cycle_through(root: usize, edges: &[Vec<usize>]) -> Option<Vec<usize>> {
 impl<'a> Checked<'a> {
     pub fn new(ir: &'a Component) -> Result<Self> {
         source(&ir.source)?;
-        if ir.version != 1 || ir.name.is_empty() { return Err(error(&ir.source, "expected a named ComponentIR version 1")); }
-        let mut checked = Self { ir, places: HashMap::new(), signals: HashMap::new(), functions: HashMap::new(), bodies: Vec::new(), reached: Vec::new(), actions: BTreeSet::new() };
+        if ir.version != 2 || ir.name.is_empty() { return Err(error(&ir.source, "expected a named ComponentIR version 2")); }
+        let mut checked = Self { ir, places: HashMap::new(), signals: HashMap::new(), functions: HashMap::new(), bodies: Vec::new(), reached: Vec::new(), derived: BTreeSet::new(), actions: BTreeSet::new(), has_styles: false };
         let mut global = HashSet::new();
-        for b in ir.props.iter().chain(ir.fields.iter().map(|f| &f.binding)).chain(&ir.signals).chain(ir.behaviors.iter().map(|f| &f.binding)) {
+        for b in ir.props.iter().map(|p| &p.binding).chain(ir.fields.iter().map(|f| &f.binding)).chain(&ir.signals).chain(ir.behaviors.iter().map(|f| &f.binding)) {
             binding(b)?;
             if !global.insert(&b.id) { return Err(error(&b.source, format_args!("duplicate component binding {:?}", b.id))); }
         }
-        for (i, b) in ir.props.iter().enumerate() { checked.places.insert(&b.id, Place::Prop(i)); }
+        for (i, prop) in ir.props.iter().enumerate() {
+            let b = &prop.binding;
+            if let Some(v) = &prop.default {
+                let actual = literal_type(v, &b.source)?.ok_or_else(|| error(&b.source, "an input default must be a literal"))?;
+                expect(actual, b.ty, &b.source, "input default")?;
+            }
+            checked.places.insert(&b.id, Place::Prop(i));
+        }
         for (i, f) in ir.fields.iter().enumerate() { checked.places.insert(&f.binding.id, Place::Field(i)); }
         for (i, b) in ir.signals.iter().enumerate() { checked.signals.insert(&b.id, i); }
         for (i, f) in ir.behaviors.iter().enumerate() { checked.functions.insert(&f.binding.id, i); }
@@ -153,32 +174,26 @@ impl<'a> Checked<'a> {
         for field in &ir.fields {
             roots.push(checked.endpoint(&field.init, Phase::Init, Some(field.binding.ty), true, &field.binding.source)?);
         }
-        for projection in &ir.projections { roots.push(checked.endpoint(&projection.function, Phase::Pure, None, true, &ir.source)?); }
+        for projection in &ir.projections {
+            let f = checked.endpoint(&projection.function, Phase::Pure, None, true, &ir.source)?;
+            checked.derived.insert(f);
+        }
         for action in &ir.actions {
             let f = checked.endpoint(&action.function, Phase::Action, None, false, &ir.source)?;
             if ir.behaviors[f].binding.ty != Type::Unit { return Err(format!("{}: backend-missing [action-result]: exposed action {:?} needs a queued result transport for its non-unit return", ir.behaviors[f].binding.source, action.name)); }
             checked.actions.insert(f);
         }
-        roots.push(checked.endpoint(&ir.view.text, Phase::Pure, Some(Type::Text), true, &ir.source)?);
-        if let Some(id) = &ir.view.disabled { roots.push(checked.endpoint(id, Phase::Pure, Some(Type::Bool), true, &ir.source)?); }
-        if let Some(id) = &ir.view.activate { checked.actions.insert(checked.endpoint(id, Phase::Action, Some(Type::Unit), true, &ir.source)?); }
-        if ir.view.role == Role::Text {
-            if let Some(id) = ir.view.disabled.as_ref().or(ir.view.activate.as_ref()) {
-                return Err(format!("{}: backend-missing [interactive-text]: the native text carrier cannot realize interactive behavior {id:?}", ir.behaviors[checked.functions[id.as_str()]].binding.source));
-            }
-        }
+        checked.view(&ir.view)?;
+        roots.extend(&checked.derived);
         roots.extend(&checked.actions);
         let graph: Vec<_> = checked.bodies.iter().map(|f| f.facts.calls.iter().copied().collect()).collect();
         let Walk { order, cycle } = postorder(roots, &graph);
         let mut recursive_helper = None;
         if let Some(first) = cycle {
-            let derived: BTreeSet<_> = ir.projections.iter().map(|p| &p.function)
-                .chain([&ir.view.text]).chain(&ir.view.disabled)
-                .map(|key| checked.functions[key.as_str()]).collect();
-            if first.iter().any(|node| derived.contains(node)) {
+            if first.iter().any(|node| checked.derived.contains(node)) {
                 return Err(checked.cycle_error(&first, "source-invalid [derived-cycle]"));
             }
-            if let Some(witness) = derived.into_iter().find_map(|root| cycle_through(root, &graph)) {
+            if let Some(witness) = checked.derived.iter().find_map(|&root| cycle_through(root, &graph)) {
                 return Err(checked.cycle_error(&witness, "source-invalid [derived-cycle]"));
             }
             recursive_helper = Some(first);
@@ -241,7 +256,30 @@ impl<'a> Checked<'a> {
     }
 
     pub fn binding(&self, p: Place) -> &'a Binding {
-        match p { Place::Prop(i) => &self.ir.props[i], Place::Field(i) => &self.ir.fields[i].binding }
+        match p { Place::Prop(i) => &self.ir.props[i].binding, Place::Field(i) => &self.ir.fields[i].binding }
+    }
+
+    fn view(&mut self, root: &View) -> Result<()> {
+        if let View::Text { source: at, .. } = root { return Err(error(at, "the component view root must be an element")); }
+        let mut nodes = vec![root];
+        while let Some(node) = nodes.pop() {
+            match node {
+                View::Text { value, source: at } => {
+                    source(at)?;
+                    self.derived.insert(self.endpoint(value, Phase::Pure, Some(Type::Text), true, at)?);
+                }
+                View::Element { source: at, style, disabled, activate, children, .. } => {
+                    source(at)?;
+                    self.has_styles |= style.is_some();
+                    for (id, ty) in [(style, Type::Tokens), (disabled, Type::Bool)] {
+                        if let Some(id) = id { self.derived.insert(self.endpoint(id, Phase::Pure, Some(ty), true, at)?); }
+                    }
+                    if let Some(id) = activate { self.actions.insert(self.endpoint(id, Phase::Action, Some(Type::Unit), true, at)?); }
+                    nodes.extend(children.iter().rev());
+                }
+            }
+        }
+        Ok(())
     }
 
     fn endpoint(&self, id: &str, phase: Phase, ty: Option<Type>, no_args: bool, at: &Source) -> Result<usize> {
@@ -335,12 +373,7 @@ impl<'a> BlockCheck<'_, 'a> {
 
     fn value(&mut self, v: &Value, at: &Source) -> Result<Type> {
         Ok(match v {
-            Value::Bool { .. } => Type::Bool,
-            Value::Number { bits } => {
-                if bits.len() != 16 || !bits.bytes().all(|b| b.is_ascii_hexdigit()) { return Err(error(at, "number bits must contain exactly sixteen hexadecimal digits")); }
-                Type::Number
-            }
-            Value::Text { .. } => Type::Text,
+            Value::Bool { .. } | Value::Number { .. } | Value::Text { .. } | Value::Tokens { .. } => literal_type(v, at)?.expect("literal variant"),
             Value::Local { id } => lookup(&self.locals, id, at, "local in this block")?,
             Value::Prop { id } | Value::State { id } | Value::Capture { id } => {
                 let p = lookup(&self.checked.places, id, at, "value")?;

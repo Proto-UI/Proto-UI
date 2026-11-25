@@ -4,7 +4,7 @@ desp: 'The 0.4 Proto language compiler foundation and implementation status'
 description: 'The 0.4 Proto language compiler foundation and implementation status'
 ---
 
-The old private compiler has been retired. The replacement belongs to **0.4 scope** and now includes an initial shared frontend and partial semantic lint; none of its five source backends is implemented yet. The [compiler foundation](https://github.com/Proto-UI/Proto-UI/blob/main/internal/compiler/README.md) is the implementation entry point.
+The old private compiler has been retired. Its **0.4** replacement compiles the versioned readonly Badge source into a TypeScript React component and a native Rust GPUI component. Both start from the same TypeScript Program and checked component IR. The [compiler foundation](https://github.com/Proto-UI/Proto-UI/blob/main/internal/compiler/README.md) is the implementation entry point.
 
 Existing applications continue to use [Runtime](/en/build/runtime-architecture/) and [Adapters](/en/build/adapter-guide/). Their working examples, component facades and style tooling remain supported within their own release boundaries. The compiler rebuild does not add an acceptance condition to the 0.3 release.
 
@@ -42,13 +42,15 @@ The compiler must analyze authored behavior and lower it through typed semantic 
 
 Generated components must integrate with ordinary host applications. Executing the original prototype, embedding a dynamic JavaScript VM, interpreting Proto IR at runtime, or wrapping the existing Runtime/Adapter is not a successful compilation fallback. Component names and source paths must not select bespoke lowering behavior.
 
-| Source target  | Replacement status | Delivery plan             |
-| -------------- | ------------------ | ------------------------- |
-| React          | Not implemented    | First implementation pair |
-| GPUI           | Not implemented    | First implementation pair |
-| Vue 2          | Not implemented    | Required source backend   |
-| Vue 3          | Not implemented    | Required source backend   |
-| Web Components | Not implemented    | Required source backend   |
+| Source target  | Evidence from authored source |
+| -------------- | ----------------------------- |
+| React          | Chromium mounted the generated Badge and observed its DOM text, computed color, nested dot width and readonly `label` and `tone`. |
+| GPUI           | A native headless GPUI host observed the generated Badge paint its label, chip and nested dot and publish the readonly `label` and `tone`. |
+| Vue 2          | Source backend still missing. |
+| Vue 3          | Source backend still missing. |
+| Web Components | Source backend still missing. |
+
+Both hosts observed the online appearance and the common chip appearance for an unknown tone. Other backend cases start directly from checked IR. Those cases exercise target behavior independently of the authoring frontend.
 
 Application-specific externs may declare a limited target set and must fail clearly when a binding is missing. This does not waive any of the five backend obligations for the official portable library.
 
@@ -56,16 +58,17 @@ Application-specific externs may declare a limited target set and must fail clea
 
 The repository now records the new contract, independent semantic test scenarios, implementation order and the retirement boundary. The old compiler, generated fixtures, compiler-specific runners and browser compilation panel are removed. Git history retains the old implementation and dated observations; they are not evidence for the replacement.
 
-The private package exposes availability and an initial source-analysis command:
+The private package accepts `compile <path> --target react|gpui [--name ...] [--out ...]`. By default, `compile` finds the nearest `tsconfig.json` starting at the input file's directory. For the Badge below, `internal/compiler/examples/tsconfig.json` maps the authoring import to the compiler's typed declarations. Use `--project <path>` to select a project explicitly. The `lint` command starts its default project search in the working directory.
 
 ```sh
 node packages/compiler/src/cli-entry.mjs --status
-node packages/compiler/src/cli-entry.mjs lint path/to/component.proto.ts --target react --json
+node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/readonly-badge.proto.ts.txt --target react --name AuthoringBadge --out AuthoringBadge.ts
+node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/readonly-badge.proto.ts.txt --target gpui --name AuthoringBadge --out authoring_badge.rs
 ```
 
-The temporary CLI rejects compilation requests with `PUI_COMPILER_NOT_IMPLEMENTED`; the `requireCompilerImplementation()` availability guard raises the same code. Imports of removed APIs can instead fail at module loading or a consumer's export check. There is no supported replacement compile command yet. The package remains private; this status boundary is not a promised compiler API.
+The frontend reads all three versioned authoring examples from disk. Compiler-owned typed intrinsic declarations let it resolve the authoring operations and lower the Badge. The public Core runtime has yet to export `@proto.ui/core/authoring`. Adapter execution and migration of a consumer to common source remain unverified.
 
-The new lint command shares its TypeScript Program/checker analysis with an editor integration API. It checks implemented boolean, coercion and text rules without executing author modules. Reports bind source/dependency bytes and configuration, and distinguish invalid source, incomplete analysis and unavailable targets. Full phase, effect, ownership and backend analysis remains missing: `analysisComplete` is currently false, an otherwise undiagnosed source remains `sourceValid: null`, and all targets remain non-compilable. Exit status 1 indicates invalid source; 2 indicates incomplete analysis or an unavailable requested target. The command does not rewrite source or generate components.
+General lint and the editor use the shared TypeScript Program and checker to check implemented boolean, coercion and text rules without executing author modules. To analyze a component in your project, run `node packages/compiler/src/cli-entry.mjs lint path/to/component.proto.ts --target react --json`. Reports bind source and dependency bytes and configuration. `analysisComplete` remains `false`. `sourceValid` is `false` for a proven violation and `null` otherwise. Lint exits with status `1` for invalid source or `2` for incomplete analysis or an unavailable target. Source lowering still lacks other language primitives, Toggle's optional prop and typed event payload, and Tabs' composition of Context, extern bindings and owned tasks.
 
 Each implementation batch must demonstrate its complete scenario through ordinary target builds and observed behavior. Unsupported language features, missing compiler work, missing backend lowering and unbound externs must remain distinguishable. Performance work starts with reproducible cold, warm, incremental, shared and per-component measurements before adopting hard budgets.
 

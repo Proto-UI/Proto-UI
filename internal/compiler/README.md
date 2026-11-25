@@ -8,11 +8,11 @@ The catalog is the sole normative source:
 
 - [Decision: the new compiler foundation](../../spec/decisions/D-COMPILER-FOUNDATION-0001.yaml) records the maintainer's accepted direction and alternatives.
 - [Compiler and language contract](../../spec/contracts/C-COMPILER-FOUNDATION-0001.yaml) defines the language, execution model and lowering obligations.
-- [Independent conformance cases](../../spec/tests/T-COMPILER-FOUNDATION-0001.yaml) give concrete expected traces and record the absent implementations.
+- [Independent conformance cases](../../spec/tests/T-COMPILER-FOUNDATION-0001.yaml) define the expected traces for each implementation.
 - [Shared-source and lint contract](../../spec/contracts/C-COMPILER-LINT-0001.yaml) separates source validity, analysis completeness and target compilability; [its implementation notes](source-compatibility-and-lint.md) explain migration and the complete consumer inventory.
 - [Authoring contract](../../spec/contracts/C-COMPILER-AUTHORING-0001.yaml) and [three complete design inputs](authoring-surface.md) select explicit 0.4 APIs without pretending their declarations implement the Adapter or compiler.
 
-These entities are draft because implementation and execution evidence are missing. The accepted direction is settled; draft does not request another round of approval. This page explains how to implement that direction and cannot add another set of language rules.
+These entities are draft because implementation and execution evidence are incomplete. The accepted direction is settled; draft does not request another round of approval. This page explains how to implement that direction and cannot add another set of language rules.
 
 ## Implementation map
 
@@ -28,18 +28,20 @@ TypeScript factory/printer facilities serve the JavaScript-family AST paths. Rus
 
 ## Current delivery state
 
-The first implementation increment provides one controlled TypeScript Program and checker shared by the analysis API, `proto-compiler lint`, and a Node editor diagnostic adapter. It records raw source bytes, module-resolution choices and configuration, and diagnoses a bounded set of explicit boolean, conversion and text-domain violations. This partial pass reports `analysisComplete: false` and `sourceValid: false | null`; a quiet report does not admit the source. Authoring bindings, phase/effect/ownership analysis, canonical IR and executable target lowering remain missing. See the [package entry](../../packages/compiler/README.md).
+The analysis API, `proto-compiler lint`, Node editor integration and source producer share the controlled TypeScript Program and checker. General lint records raw source bytes, module resolution and configuration and diagnoses implemented boolean, conversion and text-domain violations. `analysisComplete` remains `false`. `sourceValid` is `false` for a proven violation and `null` otherwise. Complete phase, effect and ownership analysis is still missing.
+
+The frontend reads all three versioned authoring inputs from disk. For the readonly Badge it resolves compiler-owned typed intrinsic declarations and lowers the reached helper, props, derivation, public projections and view to checked component IR. The private CLI accepts `compile <path> --target react|gpui [--name ...] [--out ...]`. Both emitters consume the same IR and source closure. The public Core runtime has yet to export `@proto.ui/core/authoring`, and common-source execution through an Adapter remains unverified. See the [authoring inputs](authoring-surface.md) and [package entry](../../packages/compiler/README.md).
 
 The [consumer intake](consumers/README.md) records exact revisions, source hashes, explicit entrypoints and unresolved inventory. Its verifier reuses that shared frontend closure; matching input bytes does not establish language validity, compilation or behavioral conformance.
 
-| Target         | Sequence            | New implementation and conformance |
-| -------------- | ------------------- | ---------------------------------- |
-| React          | First complete path | Missing                            |
-| GPUI           | First complete path | Missing                            |
-| Vue 2          | Required final path | Missing                            |
-| Vue 3          | Required final path | Missing                            |
-| Web Components | Required final path | Missing                            |
+| Target         | Evidence for the versioned readonly Badge |
+| -------------- | ----------------------------------------- |
+| React          | Chromium mounts the generated TypeScript component. It observes DOM text, computed color, nested dot width and public `label` and `tone` values after prop updates. |
+| GPUI           | A native headless host mounts the generated Rust component. It observes painted text, chip and nested dot and reads `label` and `tone` as each input changes. |
+| Vue 2          | Source backend still missing. |
+| Vue 3          | Source backend still missing. |
+| Web Components | Source backend still missing. |
 
-The foundation PR supplies definitions and removes the former implementation; it does not supply a working replacement. Subsequent increments implement coherent language capabilities through actual generated consumers. Unsupported targets or operations remain visible work, not passed cases. An extern's real target boundary is explicit; no platform-specific extern obstacle is currently known for the existing prototype inventory.
+The foundation PR supplied definitions and retired the former implementation. The other backend cases start at checked IR and exercise the emitters and host behavior independently. Source lowering still lacks other primitives, including the optional prop and typed event payload used by Toggle and the composition of Context, extern bindings and owned tasks used by Tabs. Each requires its own source-to-consumer evidence. An extern's real target boundary is explicit; no platform-specific extern obstacle is currently known for the existing prototype inventory.
 
 Use [the implementation checklist](atomic-lowering-completion.md) to connect work to exact contract criteria, and [application consumers](application-consumers.md) to select meaningful interactions. Collect comparable cost baselines before assigning budgets; source lines, support size, retained output and runtime cost are separate measurements.

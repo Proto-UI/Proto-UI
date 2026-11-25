@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from 'react';
+import { useEffect, useInsertionEffect, useLayoutEffect, useState, version } from 'react';
 
 export class DisposedInstanceError extends Error {
   readonly code = 'disposed';
@@ -14,23 +14,16 @@ export interface InputLease<Inputs> {
   read(): Inputs;
 }
 
-class PublishedInputs<Inputs> {
-  #snapshot: { inputs: Inputs; lease?: InputLease<Inputs> } | undefined;
+export class PublishedInputs<Inputs> implements InputLease<Inputs> {
+  #snapshot: { inputs: Inputs } | undefined;
 
-  attach(): () => void {
-    if (!this.#snapshot) throw new Error('React input lease attached before the first input commit.');
-    const lease: InputLease<Inputs> = {
-      active: () => this.#snapshot?.lease === lease,
-      read: () => {
-        const snapshot = this.#snapshot;
-        if (!snapshot || snapshot.lease !== lease) throw new DisposedInstanceError();
-        return snapshot.inputs;
-      },
-    };
-    this.#snapshot.lease = lease;
-    return () => {
-      if (this.#snapshot?.lease === lease) this.#snapshot = undefined;
-    };
+  active(): boolean {
+    return this.#snapshot !== undefined;
+  }
+
+  read(): Inputs {
+    if (!this.#snapshot) throw new DisposedInstanceError();
+    return this.#snapshot.inputs;
   }
 
   publish(inputs: Inputs): void {
@@ -38,18 +31,44 @@ class PublishedInputs<Inputs> {
     else this.#snapshot = { inputs };
   }
 
-  lease(): InputLease<Inputs> {
-    const lease = this.#snapshot?.lease;
-    if (!lease) throw new DisposedInstanceError();
-    return lease;
+  release(): void {
+    this.#snapshot = undefined;
   }
 }
 
-/** A speculative or abandoned render must never publish props to an existing handle. */
-export function usePublishedInputs<Inputs>(inputs: Inputs): PublishedInputs<Inputs> {
-  const [owner] = useState(() => new PublishedInputs<Inputs>());
-  // These effects also run in this order when React reconnects layout effects.
-  useLayoutEffect(() => owner.publish(inputs), [owner, inputs]);
-  useLayoutEffect(() => owner.attach(), [owner]);
+function useCommittedInputs<Inputs, Owner extends PublishedInputs<Inputs>>(
+  inputs: Inputs,
+  create: () => Owner
+): Owner {
+  const [owner] = useState(create);
+  // The mutation phase commits inputs even in a retained hidden subtree. These
+  // hooks neither update React state nor read the DOM or uncommitted render data.
+  useInsertionEffect(() => owner.publish(inputs), [owner, inputs]);
+  useInsertionEffect(() => () => owner.release(), [owner]);
   return owner;
+}
+
+export function useEarlierReactInputs<Inputs, Owner extends PublishedInputs<Inputs>>(
+  inputs: Inputs,
+  create: () => Owner
+): Owner {
+  const owner = useCommittedInputs(inputs, create);
+  // Earlier React DOM releases skip insertion cleanup when deleting an already
+  // hidden Suspense tree (react/react#30954). Its passive cleanup still runs.
+  // StrictMode replays that cleanup and then reconnects the same logical owner.
+  useEffect(() => () => owner.release(), [owner]);
+  useLayoutEffect(() => {
+    if (!owner.active()) owner.publish(inputs);
+  }, [owner, inputs]);
+  return owner;
+}
+
+const useInputs = /^(?:18\.|19\.[01]\.)/.test(version) ? useEarlierReactInputs : useCommittedInputs;
+
+function createInputs<Inputs>() {
+  return new PublishedInputs<Inputs>();
+}
+
+export function usePublishedInputs<Inputs>(inputs: Inputs): InputLease<Inputs> {
+  return useInputs(inputs, createInputs<Inputs>);
 }

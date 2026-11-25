@@ -1,4 +1,5 @@
 mod disabled;
+pub mod owned_tasks;
 pub use disabled::button_availability;
 
 use gpui::{App, Context, WeakEntity};

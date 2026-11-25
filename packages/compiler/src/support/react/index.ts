@@ -1,4 +1,15 @@
-export { HostValueError, numberFromBits, readBool, readCallback, readNumber, readText, readUnit } from './values.ts';
+export {
+  HostValueError,
+  missingInput,
+  numberFromBits,
+  readBool,
+  readCallback,
+  readNumber,
+  readText,
+  readTokens,
+  readUnit,
+  sameTokens,
+} from './values.ts';
 export { DisposedInstanceError, usePublishedInputs, type InputLease } from './lifetime.ts';
 export {
   ActionFailure,

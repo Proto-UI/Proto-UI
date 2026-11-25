@@ -1,6 +1,7 @@
 //! External consumer of checked-IR output. GPUI TestAppContext supplies native
 //! layout, scene construction and pointer dispatch on its headless test platform.
 
+mod authoring_badge;
 mod support;
 
 use generated_gpui_consumer::{

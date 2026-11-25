@@ -12,7 +12,7 @@ export function emitReact(ir: ComponentIR): string {
   const program = new ReactProgram(ir);
   const declarations = [
     ...publicSurface(program),
-    ...program.numbers(),
+    ...program.constants(),
     ...inputReader(program),
     ...fieldStorage(program),
     ...Array.from(program.functions.values(), (fn) => emitBehavior(program, fn)),

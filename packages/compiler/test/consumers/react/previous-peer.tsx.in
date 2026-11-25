@@ -1,0 +1,97 @@
+import { createRef, StrictMode, Suspense, useLayoutEffect, version as reactVersion } from 'react';
+import { flushSync, version as domVersion } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import { SelectionControl, type SelectionControlHandle } from './SelectionControl';
+
+const container = document.getElementById('app')!;
+const root = createRoot(container);
+const ref = createRef<SelectionControlHandle>();
+const requests: string[] = [];
+const deletionLayouts: ReturnType<typeof sampleDeletion>[] = [];
+let pending: Promise<void>;
+let resolvePending: () => void;
+
+type Phase = 'visible' | 'hidden' | 'removed';
+
+function Suspend({ hidden }: { hidden: boolean }) {
+  if (hidden) throw pending;
+  return null;
+}
+
+function Sibling({ removed }: { removed: boolean }) {
+  useLayoutEffect(() => {
+    // On an update, layout setup follows the whole tree's mutation phase.
+    if (removed) deletionLayouts.push(sampleDeletion());
+  }, [removed]);
+  return <output id="sibling">Visible sibling</output>;
+}
+
+function render(phase: Phase) {
+  flushSync(() => root.render(
+    <StrictMode>
+      {phase !== 'removed' && <Suspense key="selection-boundary" fallback={<span id="fallback">Loading</span>}>
+        <section><SelectionControl key="selection" ref={ref} controlled={false} accepted="unused"
+          initial="A" candidate="B" disabled={false} prefix="Local: " onRequested={value => requests.push(value)} /></section>
+        <Suspend hidden={phase === 'hidden'} />
+      </Suspense>}
+      <Sibling key="observer" removed={phase === 'removed'} />
+    </StrictMode>
+  ));
+}
+
+render('visible');
+const saved = ref.current!;
+const button = container.querySelector('button')!;
+const sibling = container.querySelector('#sibling')!;
+if (!saved || !button || !sibling) throw new Error('The initial synchronous commit did not publish the selection and its sibling.');
+
+function hostState() {
+  return {
+    buttonAttached: container.contains(button),
+    buttonVisible: button.getClientRects().length > 0,
+    fallbackPresent: container.querySelector('#fallback') !== null,
+    sameVisibleSibling: container.querySelector('#sibling') === sibling && sibling.getClientRects().length > 0,
+    sameHandle: ref.current === saved,
+    refCleared: ref.current === null,
+  };
+}
+
+function readSaved() {
+  try {
+    return { selection: saved.selection, attempts: saved.attempts };
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && error.code === 'disposed') return 'disposed';
+    throw error;
+  }
+}
+
+function callSaved() {
+  const start = requests.length;
+  const before = readSaved();
+  const action = saved.choose().status;
+  return { before, action, after: readSaved(), requests: requests.slice(start) };
+}
+
+function sampleDeletion() {
+  return { host: hostState(), call: callSaved() };
+}
+
+const trace = {
+  versions: { react: reactVersion, 'react-dom': domVersion },
+  snapshot() { return { host: hostState(), value: readSaved(), text: button.textContent }; },
+  hide() {
+    pending = new Promise<void>(resolve => { resolvePending = resolve; });
+    render('hidden');
+  },
+  whileHidden() { return { host: hostState(), call: callSaved() }; },
+  reveal() { resolvePending(); render('visible'); },
+  removeHidden() {
+    render('removed');
+    // No intervening microtask, timer, browser-driver call or second flush.
+    return { afterFlush: sampleDeletion(), layout: [...deletionLayouts] };
+  },
+  unmount() { flushSync(() => root.unmount()); return callSaved(); },
+};
+
+declare global { interface Window { previousPeer: typeof trace } }
+window.previousPeer = trace;

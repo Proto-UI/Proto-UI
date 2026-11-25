@@ -33,7 +33,7 @@ function parseArguments(args) {
   return result;
 }
 
-function projectOptions(project, cwd) {
+export function projectOptions(project, cwd) {
   const config = project ? path.resolve(project) : ts.findConfigFile(cwd, ts.sys.fileExists);
   if (!config) return {};
   const read = ts.readConfigFile(config, ts.sys.readFile);

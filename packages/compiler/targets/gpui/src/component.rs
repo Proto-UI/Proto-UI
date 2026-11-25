@@ -1,6 +1,6 @@
 use crate::behavior::{self, entry_call};
 use crate::check::{Checked, Place, Result};
-use crate::ir::{Role, Type};
+use crate::ir::Type;
 use crate::names::{self, Names};
 use proc_macro2::TokenStream;
 use quote::quote;
@@ -15,10 +15,8 @@ struct Component<'c, 'a> {
 }
 
 pub fn generate(checked: &Checked<'_>) -> Result<syn::File> {
-    let ir = checked.ir;
     let names = Names::new(checked)?;
-    let observed = ir.projections.iter().map(|p| &p.function).chain([&ir.view.text]).chain(&ir.view.disabled)
-        .flat_map(|id| checked.bodies[checked.functions[id.as_str()]].facts.reads.iter().copied()).collect();
+    let observed = checked.derived.iter().flat_map(|&f| checked.bodies[f].facts.reads.iter().copied()).collect();
     let methods = behavior::methods(checked, &names);
     let mut builder = Component { checked, names, observed, items: Vec::new(), methods };
     builder.data_types()?;
@@ -30,7 +28,8 @@ pub fn generate(checked: &Checked<'_>) -> Result<syn::File> {
     let owner = &builder.names.component;
     let methods = &builder.methods;
     builder.item(quote!(#[allow(non_snake_case)] impl #owner { #(#methods)* }))?;
-    builder.render()?;
+    let render = crate::view::render(checked, &builder.names, |id, receiver| builder.pure(id, receiver));
+    builder.item(render)?;
     Ok(syn::File { shebang: None, attrs: vec![], items: builder.items })
 }
 
@@ -55,24 +54,48 @@ impl Component<'_, '_> {
     fn data_types(&mut self) -> Result<()> {
         let ir = self.checked.ir;
         let props = &self.names.props_type;
-        let fields = ir.props.iter().zip(&self.names.props).map(|(b, n)| {
+        let mut fields = Vec::new();
+        let mut required = Vec::new();
+        let mut values = Vec::new();
+        let args = names::formal_names(ir.props.iter().map(|p| &p.binding));
+        for ((prop, n), arg) in ir.props.iter().zip(&self.names.props).zip(args) {
+            let b = &prop.binding;
             let ty = names::ty(b.ty);
             let doc = names::source_doc(&b.name, &b.source);
-            quote!(#[doc = #doc] pub #n: #ty)
-        });
-        self.item(quote! {
+            fields.push(quote!(#[doc = #doc] pub #n: #ty));
+            let value = match &prop.default {
+                Some(v) => behavior::schema_default(v),
+                None => { required.push(quote!(#arg: #ty)); quote!(#arg) }
+            };
+            values.push(quote!(#n: #value));
+        }
+        let decl = quote! {
             #[derive(Clone, Debug)]
             #[allow(non_snake_case, non_camel_case_types)]
             pub struct #props { #(#fields),* }
-        })?;
+        };
+        let constructor = quote! {
+            #[allow(non_snake_case)] impl #props {
+                pub fn new(#(#required),*) -> Self { Self { #(#values),* } }
+            }
+        };
+        let default = required.is_empty().then(|| quote! {
+            impl ::core::default::Default for #props { fn default() -> Self { Self::new() } }
+        });
+        self.item(decl)?;
+        self.item(constructor)?;
+        if let Some(default) = default { self.item(default)?; }
         let proj = &self.names.projection;
         let mut fields = Vec::new();
         let mut getters = Vec::new();
         for (p, n) in ir.projections.iter().zip(&self.names.projections) {
             let b = &ir.behaviors[self.checked.functions[p.function.as_str()]].binding;
             let ty = names::ty(b.ty);
-            let result = names::input_ty(b.ty);
-            let value = if b.ty == Type::Text { quote!(self.#n.as_str()) } else { quote!(self.#n) };
+            let (result, value) = match b.ty {
+                Type::Text => (names::input_ty(b.ty), quote!(self.#n.as_str())),
+                Type::Tokens => (quote!(&[::gpui::SharedString]), quote!(self.#n.as_ref())),
+                _ => (ty.clone(), quote!(self.#n)),
+            };
             let doc = names::source_doc(&p.name, &b.source);
             fields.push(quote!(#n: #ty));
             getters.push(quote!(#[doc = #doc] pub fn #n(&self) -> #result { #value }));
@@ -112,7 +135,17 @@ impl Component<'_, '_> {
             fields.push(quote!(publication: ::proto_ui_gpui_support::PublicationQueue<#command>));
             initialized.push(quote!(publication: ::core::default::Default::default()));
         }
-        let doc = names::source_doc(&ir.name, &ir.source);
+        let resolver = self.checked.has_styles.then(|| {
+            let signature = quote!(::core::ops::Fn(&::core::primitive::str, &mut ::gpui::StyleRefinement));
+            fields.push(quote!(resolve_token: ::std::boxed::Box<dyn #signature>));
+            initialized.push(quote!(resolve_token: ::std::boxed::Box::new(resolve_token)));
+            quote!(, resolve_token: impl #signature + 'static)
+        });
+        let mut doc = names::source_doc(&ir.name, &ir.source);
+        if let Some(authored) = &ir.prototype_name {
+            use std::fmt::Write as _;
+            write!(&mut doc, " Authored prototype {authored:?}.").expect("writing to String");
+        }
         let decl = quote! {
             #[doc = #doc]
             #[allow(non_camel_case_types)]
@@ -123,7 +156,7 @@ impl Component<'_, '_> {
             }
         };
         self.methods.push(quote! {
-            pub fn new(props: #props) -> Self {
+            pub fn new(props: #props #resolver) -> Self {
                 #(#initializers)*
                 Self { props, appearance: ::core::option::Option::None, #(#initialized,)* }
             }
@@ -153,7 +186,7 @@ impl Component<'_, '_> {
         let tests: Vec<_> = self.observed.iter().filter_map(|p| match *p {
             Place::Prop(i) => {
                 let n = &self.names.props[i];
-                Some(differs(self.checked.ir.props[i].ty, quote!(self.props.#n), quote!(props.#n)))
+                Some(differs(self.checked.ir.props[i].binding.ty, quote!(self.props.#n), quote!(props.#n)))
             }
             Place::Field(_) => None,
         }).collect();
@@ -234,7 +267,7 @@ impl Component<'_, '_> {
                 let f = self.checked.functions[a.function.as_str()];
                 let b = &self.checked.ir.behaviors[f];
                 let variant = names::command(f);
-                let args = names::formal_names(&b.params);
+                let args = names::formal_names(b.params.iter());
                 let params = b.params.iter().zip(&args).map(|(p, n)| { let ty = names::ty(p.ty); quote!(#n: #ty) });
                 let doc = names::source_doc(&a.name, &b.binding.source);
                 entries.push(quote! {
@@ -292,7 +325,7 @@ impl Component<'_, '_> {
         let outcome = quote!(::proto_ui_gpui_support::ActionOutcome);
         let args = ir.behaviors[f].params.iter().enumerate().map(|(i, p)| {
             let n = names::argument(i);
-            if p.ty == Type::Text { quote!(#n.as_str()) } else { quote!(#n) }
+            names::as_input(p.ty, quote!(#n))
         }).collect();
         let mut stage = Vec::new();
         let mut commit = Vec::new();
@@ -329,60 +362,6 @@ impl Component<'_, '_> {
         quote! { #(#stage)* #run #track #(#commit)* #publish #outcome::Committed }
     }
 
-    fn render(&mut self) -> Result<()> {
-        let owner = &self.names.component;
-        let ir = self.checked.ir;
-        let text = self.pure(&ir.view.text, quote!(self));
-        let root = if ir.view.role == Role::Button {
-            let name = &ir.name;
-            quote! {
-                use ::gpui::{InteractiveElement as _, StatefulInteractiveElement as _};
-                let label = ::gpui::SharedString::from(#text);
-                let mut root = ::gpui::div().id((#name, cx.entity_id())).role(::gpui::Role::Button)
-                    .aria_label(label.clone()).child(label);
-            }
-        } else { quote!(let mut root = ::gpui::div().child(#text);) };
-        let availability = ir.view.disabled.as_ref().map(|id| {
-            let value = self.pure(id, quote!(self));
-            quote!(let disabled = #value;)
-        });
-        let element = if availability.is_some() { quote!(::proto_ui_gpui_support::button_availability(root, disabled)) } else { quote!(root) };
-        let attachment = ir.view.activate.as_ref().map(|id| {
-            let f = self.checked.functions[id.as_str()];
-            let cmd = &self.names.command;
-            let activate = names::command(f);
-            let dispatch = quote!(view.__pui_submit(#cmd::#activate(), cx));
-            let effect = if self.checked.bodies[f].facts.fallible {
-                quote! {
-                    if let ::proto_ui_gpui_support::ActionOutcome::Failed(failure) = #dispatch {
-                        cx.emit(failure);
-                        view.publication.after_effects(cx, Self::__pui_resume);
-                    }
-                }
-            } else { quote!(#dispatch;) };
-            let disabled = ir.view.disabled.as_ref();
-            let guard = disabled.map(|id| { let value = self.pure(id, quote!(view)); quote!(if #value { return; }) });
-            let listener = quote! {
-                root = root.on_click(cx.listener(|view, _: &::gpui::ClickEvent, _, cx| { #guard #effect }));
-            };
-            if disabled.is_some() {
-                quote!(if !disabled { #listener })
-            } else { listener }
-        });
-        self.item(quote! {
-            impl ::gpui::Render for #owner {
-                #[allow(unused_variables)]
-                fn render(&mut self, _window: &mut ::gpui::Window, cx: &mut ::gpui::Context<Self>) -> impl ::gpui::IntoElement {
-                    use ::gpui::{ParentElement as _, Styled as _};
-                    #root
-                    #availability
-                    if let ::core::option::Option::Some(style) = &self.appearance { style(&self.projection(), root.style()); }
-                    #attachment
-                    #element
-                }
-            }
-        })
-    }
 }
 
 fn differs(ty: Type, a: TokenStream, b: TokenStream) -> TokenStream {

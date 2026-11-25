@@ -1,3 +1,5 @@
+mod owned_tasks_case;
+
 use gpui::{
     Bounds, DevicePixels, Font, FontId, FontMetrics, FontRun, GlyphId, LineLayout, NoopTextSystem,
     Pixels, PlatformTextSystem, RenderGlyphParams, Size, TextRenderingMode,
@@ -8,16 +10,26 @@ use std::{borrow::Cow, sync::Mutex};
 /// font operation, including shaping, uses GPUI's standard headless text system.
 #[derive(Default)]
 pub struct ObservedText {
-    lines: Mutex<Vec<String>>,
+    lines: Mutex<Vec<(String, Pixels)>>,
 }
 
 impl ObservedText {
     pub fn expect_layout(&self, expected: &str) {
         let lines = std::mem::take(&mut *self.lines.lock().unwrap());
-        assert!(
-            lines.iter().any(|line| line == expected),
-            "expected layout of {expected:?}, got {lines:?}"
-        );
+        assert!(lines.iter().any(|(line, _)| line == expected), "expected layout of {expected:?}, got {lines:?}");
+    }
+
+    // Keep the complete shaping history for a window whose glyph runs may be cached.
+    pub fn expect_label_at_width(&self, expected: &str, matches: impl Fn(Pixels) -> bool) {
+        let lines = self.lines.lock().unwrap();
+        let mut found = false;
+        for (line, advance) in lines.iter() {
+            if matches(*advance) {
+                assert_eq!(line, expected, "another shaped label matches the painted width");
+                found = true;
+            }
+        }
+        assert!(found, "no layout for {expected:?} matches the painted width; observed {lines:?}");
     }
 }
 
@@ -63,8 +75,9 @@ impl PlatformTextSystem for ObservedText {
     }
 
     fn layout_line(&self, text: &str, size: Pixels, runs: &[FontRun]) -> LineLayout {
-        self.lines.lock().unwrap().push(text.to_owned());
-        NoopTextSystem.layout_line(text, size, runs)
+        let line = NoopTextSystem.layout_line(text, size, runs);
+        self.lines.lock().unwrap().push((text.to_owned(), line.width));
+        line
     }
 
     fn recommended_rendering_mode(&self, font: FontId, size: Pixels) -> TextRenderingMode {
