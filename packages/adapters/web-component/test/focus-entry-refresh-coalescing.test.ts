@@ -109,6 +109,21 @@ describe('WC entry dependency refresh coalescing', () => {
       target.append(button);
       ancestor.className = 'unrelated-while-inert';
       const rule = style.sheet!.cssRules[0] as CSSStyleRule;
+      // Happy DOM's computed style reads the parsed rule text rather than
+      // later CSSStyleRule.style mutations. Supply that native CSSOM input at
+      // the platform boundary; the Adapter still owns every refresh and write.
+      const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+      vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+        const computed = nativeGetComputedStyle(element, pseudoElement);
+        if (element !== button) return computed;
+        return new Proxy(computed, {
+          get(target, property) {
+            if (property === 'display')
+              return rule.style.getPropertyValue('display') || Reflect.get(target, property, target);
+            return Reflect.get(target, property, target);
+          },
+        });
+      });
       rule.style.setProperty('display', 'none');
       await settle();
       expect(fixture.rebuilds()).toBe(0);

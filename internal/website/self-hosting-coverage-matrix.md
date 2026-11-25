@@ -256,7 +256,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/content/docs/demo_components/radio-group/demo-brutalist-radio-group-choice-card.demo.ts` | `www.demo.authored-controllers` | `d027dce38765cc619b6dd254fb9b00e8419b55c7bca816ab7d78a198fe1dce83` |
 | `apps/www/src/content/docs/demo_components/radio-group/demo-liquid-glass-radio-group-choice-card.demo.ts` | `www.demo.authored-controllers` | `600348462574dd580816e7e7d069df36f4d103facfac1bf0210b5e6d96013b72` |
 | `apps/www/src/content/docs/demo_components/radio-group/demo-shadcn-radio-group-choice-card.demo.ts` | `www.demo.authored-controllers` | `8f77996baa8e3c03279ba5069a6d69bfd74136bbb79caa58fe10cd649f4c0a1a` |
-| `apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-position.demo.ts` | `www.demo.authored-controllers` | `2576709ceb69f3f98dcbd4bd8d7a140cb009dd98bd89bd48b47b753135ff1048` |
+| `apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-position.demo.ts` | `www.demo.authored-controllers` | `27d71426fc8a7707d446efd9724cacd713d4de36b77b8331404fc7c7642f411c` |
 | `apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-rich-colors.demo.ts` | `www.demo.authored-controllers` | `4fbee37fba745ffa10acb2a3476b3ae662c346695200c40f90efd961645e72cb` |
 | `apps/www/src/content/docs/demo_components/virtual-list/demo-bootstrap-2-3-2-virtual-list-filter.demo.ts` | `www.demo.authored-controllers` | `adde61f6ee9055e4acfd7606971f78c3b3bf67b2a6b2c2030465de1b8765f4b4` |
 | `apps/www/src/content/docs/demo_components/virtual-list/demo-bootstrap-2-3-2-virtual-list-jump.demo.ts` | `www.demo.authored-controllers` | `757c24e39695b5834e131536d900df6e8b0bbf2e8740bfc92d84cb37dee6441b` |
@@ -439,7 +439,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/site-copy-client.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `b4cdf3ccd25e466ae152c1b31b8e82e8010442f1b828a4b575c290ca67cbcb0d` |
 | `apps/www/src/components/site-copy-command.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `a538f0f194489fd86386e8e53701cab265ac077f14edb8dfaa216e13aec0700b` |
 | `apps/www/src/components/site-copy-controller.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `1a39475db2f52b420beec1b26d853d38e05f82d51864e8f50996c769861e59ba` |
-| `apps/www/src/components/site-header-disclosure.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `0d5ded18075c11f5a478d08c2af4346ff2bfc051de7e4e545172494eb0dce904` |
+| `apps/www/src/components/site-header-disclosure.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `d784ea0ba41797e8540f4f582b85e1c04bac1a9995f9b4b01a6807a029f361dd` |
 | `apps/www/src/components/site-header-surface.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `b11e5dbb0a5f4d4a9a1fbce5e2575fd6c45b0d7c461dee44291e991234879abb` |
 | `apps/www/src/components/site-link-recipes.ts` | `www.shell.native-link-presentation` | `34d8b45ee47007e73ce6008ae58c1b9a06691bb26e856b91051c2ebb72458adc` |
 | `apps/www/src/components/site-native-controls.ts` | `www.shell.native-link-presentation`, `www.shell.table-of-contents` | `b3adf001ead0e1cdbf5748a7f8e6a0b2e0d4f10b0c273e5a8d2751708b714451` |

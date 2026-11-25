@@ -249,27 +249,12 @@ function watchLateAttachShadow(
   };
 }
 
-type EntryStyleMethodPatch = {
-  target: Record<string, unknown>;
-  key: string;
-  original: (...args: unknown[]) => unknown;
-  patched: (...args: unknown[]) => unknown;
-};
-
-type EntryStyleSetterPatch = {
-  target: object;
-  key: string;
-  original?: PropertyDescriptor;
-  patched: NonNullable<PropertyDescriptor['set']>;
-};
-
 const entryStyleWatches = new WeakMap<
   Window,
   {
     subscribers: Set<(inlineOnly: boolean) => void>;
     inlineSubscribers: Set<(inlineOnly: boolean) => void>;
-    methodPatches: EntryStyleMethodPatch[];
-    setterPatches: EntryStyleSetterPatch[];
+    restorePatches: Array<() => void>;
     observer: MutationObserver;
     stopEvents: () => void;
   }
@@ -1107,7 +1092,7 @@ function watchEntryStyleInvalidation(
       });
     };
     const notify = () => schedule(false);
-    const methodPatches: EntryStyleMethodPatch[] = [];
+    const restorePatches: Array<() => void> = [];
     const customStateSize = CustomStateSetCtor
       ? Object.getOwnPropertyDescriptor(CustomStateSetCtor.prototype, 'size')?.get
       : undefined;
@@ -1159,11 +1144,8 @@ function watchEntryStyleInvalidation(
           return result;
         };
         target[key] = patched;
-        methodPatches.push({
-          target,
-          key,
-          original: original as (...args: unknown[]) => unknown,
-          patched,
+        restorePatches.push(() => {
+          if (target[key] === patched) target[key] = original;
         });
       }
     };
@@ -1198,7 +1180,6 @@ function watchEntryStyleInvalidation(
         ]);
     }
 
-    const setterPatches: EntryStyleSetterPatch[] = [];
     const patchSetter = (target: object, key: string, cssName?: string) => {
       const original = Object.getOwnPropertyDescriptor(target, key);
       if (original ? !original.configurable || !original.set : !cssName) return;
@@ -1217,7 +1198,13 @@ function watchEntryStyleInvalidation(
           },
         set: patched,
       });
-      setterPatches.push({ target, key, original, patched });
+      restorePatches.push(() => {
+        const descriptor = Object.getOwnPropertyDescriptor(target, key);
+        if (descriptor?.set === patched) {
+          if (original) Object.defineProperty(target, key, original);
+          else delete (target as Record<string, unknown>)[key];
+        }
+      });
     };
     patchSetter(Declaration.prototype, 'visibility', 'visibility');
     patchSetter(Declaration.prototype, 'display', 'display');
@@ -1259,8 +1246,7 @@ function watchEntryStyleInvalidation(
     watch = {
       subscribers,
       inlineSubscribers,
-      methodPatches,
-      setterPatches,
+      restorePatches,
       observer,
       stopEvents,
     };
@@ -1273,16 +1259,7 @@ function watchEntryStyleInvalidation(
     if (!current.subscribers.delete(onInvalidate) || current.subscribers.size > 0) return;
     current.observer.disconnect();
     current.stopEvents();
-    for (const patch of current.methodPatches) {
-      if (patch.target[patch.key] === patch.patched) patch.target[patch.key] = patch.original;
-    }
-    for (const patch of current.setterPatches) {
-      const descriptor = Object.getOwnPropertyDescriptor(patch.target, patch.key);
-      if (descriptor?.set === patch.patched) {
-        if (patch.original) Object.defineProperty(patch.target, patch.key, patch.original);
-        else delete (patch.target as Record<string, unknown>)[patch.key];
-      }
-    }
+    for (const restore of current.restorePatches) restore();
     entryStyleWatches.delete(view as Window);
   };
   return {
@@ -1980,11 +1957,15 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               // mutate extensively while inert; none of those descendants or
               // stylesheet rules can make this region eligible. Retain only
               // the live composed chain until its native barrier is removed.
-              let inertAncestor: Element | null = target;
-              while (inertAncestor && !inertAncestor.hasAttribute('inert'))
-                inertAncestor = composedParentElement(inertAncestor);
-              dormant = inertAncestor !== null;
-              if (inertAncestor) {
+              const ancestors: Element[] = [];
+              for (
+                let ancestor: Element | null = target;
+                ancestor;
+                ancestor = composedParentElement(ancestor)
+              )
+                ancestors.push(ancestor);
+              dormant = ancestors.some((ancestor) => ancestor.hasAttribute('inert'));
+              if (dormant) {
                 observedRoots.clear();
                 entryRelationalSubjects.clear();
                 hasExternalStyleInputs = false;
@@ -1994,34 +1975,25 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 stopEntryAttachShadowWatch = null;
                 stopEntryUpgradeWatch?.();
                 const slotRoots = new Set<EventTarget>();
-                for (
-                  let ancestor: Element | null = target;
-                  ancestor;
-                  ancestor = composedParentElement(ancestor)
-                ) {
+                const observations = new Map<Node, MutationObserverInit>();
+                for (const ancestor of ancestors) {
                   observedRoots.add(ancestor);
-                  entryObserver?.observe(ancestor, {
-                    attributes: true,
+                  observations.set(ancestor, {
                     attributeFilter: ['inert', 'slot', 'name'],
                     attributeOldValue: true,
+                    ...observations.get(ancestor),
                   });
                   // A slotted node's physical parent can differ from the
                   // composed one. Observe both movement and reassignment.
                   const parent = ancestor.parentNode;
+                  if (parent)
+                    observations.set(parent, { ...observations.get(parent), childList: true });
                   if (parent?.nodeType === 11) slotRoots.add(parent);
                   if (ancestor.parentElement?.shadowRoot)
                     slotRoots.add(ancestor.parentElement.shadowRoot);
                 }
-                for (const ancestor of observedRoots) {
-                  const parent = ancestor.parentNode;
-                  if (!parent) continue;
-                  entryObserver?.observe(parent, {
-                    ...(observedRoots.has(parent)
-                      ? { attributeFilter: ['inert', 'slot', 'name'], attributeOldValue: true }
-                      : {}),
-                    childList: true,
-                  });
-                }
+                // Register each node once with both ancestry and movement inputs.
+                for (const [node, options] of observations) entryObserver?.observe(node, options);
                 stopEntrySlotWatch = listenToEntryEvents(slotRoots, ['slotchange'], refreshTree);
                 return;
               }
@@ -2186,11 +2158,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               // Arbitrary author attributes can participate in descendant
               // selectors, so observe every attribute on only this bounded
               // composed chain instead of guessing a global allowlist.
-              let externalAncestor = composedParentElement(target);
-              const externalAncestors: Element[] = [];
+              const externalAncestors = ancestors.slice(1);
               const externalSlots = new Set<HTMLSlotElement>();
               const externalStyleRoots = new Set<ShadowRoot>();
-              const motionTargets = new Set<Element>([target]);
+              const motionTargets = new Set(ancestors);
               const shadowAnimationTargets = new Set<EventTarget>(
                 [...observedRoots].filter((root) => root.nodeType === 11)
               );
@@ -2207,9 +2178,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   mediaRoots.add(physicalRoot as ShadowRoot);
                 }
               }
-              while (externalAncestor) {
-                externalAncestors.push(externalAncestor);
-                motionTargets.add(externalAncestor);
+              for (const externalAncestor of externalAncestors) {
                 // Container-query eligibility can change solely because a
                 // composed ancestor crosses a size threshold. Reuse the
                 // view-epoch observer over this already bounded chain.
@@ -2232,7 +2201,6 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   externalAncestor.localName === 'slot'
                 )
                   externalSlots.add(externalAncestor as HTMLSlotElement);
-                externalAncestor = composedParentElement(externalAncestor);
               }
               const [
                 mediaQueries,
