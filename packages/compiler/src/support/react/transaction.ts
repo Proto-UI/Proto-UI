@@ -85,6 +85,10 @@ export class FieldStore<Fields extends object> {
 export class SignalQueue<Inputs> {
   #effects?: Array<(inputs: Inputs) => void>;
 
+  readonly afterCommit = (effect: () => void): void => {
+    (this.#effects ??= []).push(effect);
+  };
+
   send<T>(listener: (inputs: Inputs) => ((value: T) => void) | undefined, value: T): void {
     // The instruction captures its payload. Each published event resolves the
     // active host listener, including changes committed by a preceding listener.
@@ -109,6 +113,7 @@ export class SignalQueue<Inputs> {
 }
 
 /** Publication precedes every signal. A callback failure cannot roll back publication. */
+export function finishAction<Inputs>(lease: InputLease<Inputs>): ActionResult;
 export function finishAction<Inputs>(
   lease: InputLease<Inputs>,
   signals: SignalQueue<Inputs>

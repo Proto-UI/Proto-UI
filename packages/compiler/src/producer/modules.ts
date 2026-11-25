@@ -2,12 +2,12 @@ import ts from 'typescript';
 import { argumentsIn, capabilityParameter, declarationOnly, isConstDeclaration, memberAccess, operand } from './component-syntax.ts';
 import type { SourceContext } from './source.ts';
 
-type Factory = 'definePrototype' | 'createContextKey';
+type Factory = 'definePrototype' | 'createContextKey' | 'declareExtern';
 type Allocation = { readonly kind: Factory; readonly call: ts.CallExpression };
+type DataLiteral = ts.ObjectLiteralExpression | ts.ArrayLiteralExpression;
 type Helper = ts.FunctionDeclaration | ts.FunctionExpression | ts.ArrowFunction;
 type Callable = { readonly kind: 'function'; readonly fn: Helper; readonly scope: Frame };
-type Known = Allocation | { readonly kind: 'namespace'; readonly symbol: ts.Symbol }
-  | { readonly kind: 'extern' } | Callable | undefined;
+type Known = Allocation | DataLiteral | { readonly kind: 'namespace'; readonly symbol: ts.Symbol } | Callable | undefined;
 export type LinkOrigin = (identifier: ts.Identifier) => ts.Expression | undefined;
 interface Frame {
   readonly values: ReadonlyMap<ts.Symbol, Known>;
@@ -17,7 +17,12 @@ interface Frame {
 export interface SourceModules {
   componentExport(name: string): ts.CallExpression;
   allocation(node: ts.Expression, factory: Factory, origin?: LinkOrigin): ts.CallExpression;
+  dataLiteral(node: ts.Expression): DataLiteral | undefined;
   publicName(call: ts.CallExpression): string | undefined;
+}
+
+function isAllocation(value: Known): value is Allocation {
+  return value?.kind === 'definePrototype' || value?.kind === 'createContextKey' || value?.kind === 'declareExtern';
 }
 
 function moduleDeclaration(declaration: ts.Declaration): boolean {
@@ -183,23 +188,22 @@ export function checkModuleClosure(source: SourceContext, entry: ts.SourceFile, 
         else if (ts.isPropertyAssignment(member) && !ts.isComputedPropertyName(member.name)) value(member.initializer, frame);
         else return source.missing(member, 'producer/module-member', 'Module initialization needs a proof for this object member.');
       }
-      return undefined;
+      return node;
     }
     if (ts.isArrayLiteralExpression(node)) {
       for (const element of node.elements) value(element, frame);
-      return undefined;
+      return node;
     }
     if (ts.isCallExpression(node)) {
       const callee = value(node.expression, frame);
       const factory = (['definePrototype', 'createContextKey', 'declareExtern', 'tw'] as const).find(name => source.intrinsic(node.expression, name));
       if (factory) {
         for (const argument of node.arguments) value(argument, frame);
-        if (factory === 'declareExtern') return { kind: 'extern' };
-        return factory === 'definePrototype' || factory === 'createContextKey' ? { kind: factory, call: node } : undefined;
+        return factory === 'tw' ? undefined : { kind: factory, call: node };
       }
       if (callee?.kind === 'function') {
         const result = callHelper(node, callee, frame);
-        if (result?.kind === 'definePrototype' || result?.kind === 'createContextKey') return result;
+        if (isAllocation(result)) return result;
       }
     }
     return source.missing(node, 'producer/module-initializer', 'The producer needs the evaluation effects and origin of this expression before it can emit the component.');
@@ -239,8 +243,8 @@ export function checkModuleClosure(source: SourceContext, entry: ts.SourceFile, 
   visit(entry);
 
   function requireSite(result: Known, kind: Factory, node: ts.Node): ts.CallExpression {
-    const role = kind === 'createContextKey' ? 'context-key' : 'component';
-    if (result?.kind === 'extern') return source.missing(node, `producer/external-${role}`, `The external ${role} needs its bound runtime identity and cross-unit linkage.`);
+    const role = { createContextKey: 'context-key', definePrototype: 'component', declareExtern: 'extern' }[kind];
+    if (result?.kind === 'declareExtern' && kind !== 'declareExtern') return source.missing(node, `producer/external-${role}`, `The external ${role} needs its bound runtime identity and cross-unit linkage.`);
     if (result?.kind !== kind) return source.missing(node, `producer/${role}-origin`, `The ${role} needs a source binding to the resolved authoring ${kind} allocation in this unit.`);
     const owner = allocationOwner(result.call);
     const allocated = owner && initialized.get(owner);
@@ -284,12 +288,18 @@ export function checkModuleClosure(source: SourceContext, entry: ts.SourceFile, 
       if (ts.isCallExpression(expression)) {
         const owner = allocationOwner(expression);
         const known = owner && initialized.get(owner);
-        if ((known?.kind === 'definePrototype' || known?.kind === 'createContextKey') && known.call === expression) {
+        if (isAllocation(known) && known.call === expression) {
           return requireSite(known, factory, node);
         }
       }
       const frame = origin ? { values: empty.values, uses: { origin, resolving: new Set<ts.Symbol>() } } : empty;
       return requireSite(value(node, frame), factory, node);
+    },
+    dataLiteral(node) {
+      const expression = operand(node);
+      if (ts.isArrayLiteralExpression(expression) || ts.isObjectLiteralExpression(expression)) return expression;
+      const known = value(expression, empty);
+      return known?.kind === ts.SyntaxKind.ArrayLiteralExpression || known?.kind === ts.SyntaxKind.ObjectLiteralExpression ? known : undefined;
     },
     publicName(call) {
       const origins = publicBindings().get(call);

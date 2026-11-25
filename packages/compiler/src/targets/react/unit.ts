@@ -1,19 +1,21 @@
 import ts from 'typescript';
-import type { ComponentBody, ComponentIR, ContextKeyIR, LiteralValue, SourceSpan } from '../component-ir.ts';
-import { unsupportedHostName } from '../validate.ts';
-import { Names, arrow, atSource, call, constDecl, f, id, member, param, semanticExport, str, typeRef } from './ast.ts';
+import type { ComponentBody, ComponentIR, ContextKeyIR, ExternIR, LiteralValue, SourceSpan } from '../component-ir.ts';
+import { requireExternBinding, type ReactExternBindings } from '../extern-bindings.ts';
+import { unsupportedHostName, type ReachedExtern } from '../validate.ts';
+import { Names, arrow, atSource, call, constDecl, f, id, identifierText, member, param, semanticExport, str, typeRef } from './ast.ts';
 import { ReactData } from './data.ts';
 
 const modules = {
   react: ['CSSProperties', 'Ref', 'createElement', 'forwardRef', 'useRef', 'useState', 'useSyncExternalStore'],
   '@proto.ui/compiler/support/react': [
     'ActionDispatch', 'ActionFailure', 'ContextValue', 'FieldDraft', 'FieldStore', 'HostValueError', 'InputLease', 'InputPresence', 'SignalQueue',
-    'createNativeContext', 'dispatchAction', 'finishAction', 'missingInput', 'numberFromBits', 'observeNativeAction', 'omittedInput', 'ownMember', 'presentInput', 'readBool',
+    'checkTaskResult', 'createNativeContext', 'dispatchAction', 'finishAction', 'missingInput', 'numberFromBits', 'observeNativeAction', 'observeNativeTask', 'omittedInput', 'ownMember', 'presentInput', 'readBool',
     'readCallback', 'readNumber', 'readObject', 'readText', 'readTokens', 'readUnit', 'sameTokens', 'useContextSnapshot', 'useFixedInputs', 'useProvidedContext', 'usePublishedInputs', 'useRequiredContext',
   ],
-  '@proto.ui/compiler/support/react/retained': ['useRetainedHandle', 'useRetainedInputs'],
+  '@proto.ui/compiler/support/react/retained': ['useRetainedHandle', 'useRetainedInputs', 'useRetainedView', 'useCreatedActions', 'useTaskLifetime'],
+  '@proto.ui/compiler/support/owned-tasks': ['OwnedTaskGroup', 'PostCommit', 'TaskControl', 'TaskExit'],
 };
-const hostLocals = ['$props', '$inputs', '$checked', '$fields', '$draft', '$signals', '$owner', '$lease', '$store', '$ref', '$handle', '$before', '$after'];
+const hostLocals = ['$props', '$inputs', '$checked', '$fields', '$draft', '$signals', '$owner', '$lease', '$store', '$ref', '$handle', '$before', '$after', '$view', '$task', '$tasks', '$enter', '$body', '$retireTasks', '$signal', '$outcome', '$group', '$afterCommit'];
 
 interface BodyNames { component: string; propsType: string; projectionType: string; handleType: string }
 
@@ -21,16 +23,17 @@ interface BodyNames { component: string; propsType: string; projectionType: stri
  * pool of constants, native type table and set of nominal React contexts. */
 export class ReactUnit {
   readonly ir: ComponentIR;
-  readonly names = new Names([...Object.values(modules).flat(), ...hostLocals, 'Object', 'Number', 'ReturnType', 'Symbol', 'undefined', 'exports', 'module', 'require', '__filename', '__dirname']);
+  readonly names = new Names([...Object.values(modules).flat(), ...hostLocals, 'AbortSignal', 'Error', 'Object', 'Number', 'Promise', 'PromiseLike', 'ReturnType', 'Symbol', 'undefined', 'exports', 'module', 'require', '__filename', '__dirname']);
   readonly bodies = new Map<string, BodyNames>();
   readonly keys = new Map<string, { key: ContextKeyIR; name: string; identity: string }>();
   readonly data: ReactData;
+  readonly externs = new Map<string, { extern: ExternIR; name: string; result: string; localResult: string; module: string; exportName: string }>();
   readonly #imports = new Map<string, boolean>();
   readonly #numbers = new Map<string, { value: number; constant?: string }>();
   readonly #tokens = new Map<string, { name: string; values: readonly string[] }>();
   readonly #bits = new DataView(new ArrayBuffer(8));
 
-  constructor(ir: ComponentIR) {
+  constructor(ir: ComponentIR, reached: readonly ReachedExtern[], bindings: ReactExternBindings | undefined) {
     this.ir = ir;
     const exports = new Map<string, string>();
     const usedKeys = new Set<string>();
@@ -60,6 +63,19 @@ export class ReactUnit {
       const name = this.names.take(key.exportName ?? key.binding.name);
       this.keys.set(key.binding.id, { key, name, identity: this.names.take(`${name}Identity`) });
     }
+    for (const { extern, source, callPath } of reached) {
+      const binding = requireExternBinding(extern, 'react', bindings, source, callPath);
+      if (typeof binding.export !== 'string' || !identifierText(binding.export) || typeof binding.module !== 'string' || !binding.module.trim() || /[\u0000-\u001f\u007f]/u.test(binding.module)) {
+        unsupportedHostName('react', extern.name, source, 'Use a nonempty module specifier and a native export identifier.', callPath);
+      }
+      const first = String.fromCodePoint(extern.binding.name.codePointAt(0)!);
+      const result = `${first.toUpperCase()}${extern.binding.name.slice(first.length)}Result`;
+      claim(result, extern.binding.id, extern.binding.source);
+      this.externs.set(extern.binding.id, {
+        extern, name: this.names.take(`${extern.binding.name}Extern`), result,
+        localResult: this.names.take(result), module: binding.module, exportName: binding.export,
+      });
+    }
     this.data = new ReactData(this);
   }
 
@@ -77,7 +93,26 @@ export class ReactUnit {
       const items = names.map(name => f.createImportSpecifier(this.#imports.get(name)!, undefined, id(name)));
       result.push(f.createImportDeclaration(undefined, f.createImportClause(false, undefined, f.createNamedImports(items)), str(module)));
     }
+    const native = new Map<string, ts.ImportSpecifier[]>();
+    for (const { module, exportName, name } of this.externs.values()) {
+      const specifier = f.createImportSpecifier(false, exportName === name ? undefined : id(exportName), id(name));
+      const group = native.get(module);
+      if (group) group.push(specifier);
+      else native.set(module, [specifier]);
+    }
+    for (const [module, imports] of native) {
+      result.push(f.createImportDeclaration(undefined, f.createImportClause(false, undefined, f.createNamedImports(imports)), str(module)));
+    }
     return result;
+  }
+
+  externResults(): ts.Statement[] {
+    const declarations: ts.Statement[] = [];
+    for (const { extern, result, localResult } of this.externs.values()) {
+      declarations.push(atSource(f.createTypeAliasDeclaration(undefined, localResult, undefined, this.data.type(extern.binding.type)), extern.binding.source));
+      declarations.push(f.createExportDeclaration(undefined, false, f.createNamedExports([semanticExport(localResult, result, true)])));
+    }
+    return declarations;
   }
 
   channels(): ts.Statement[] {

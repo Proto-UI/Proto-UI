@@ -1,12 +1,13 @@
 import ts from 'typescript';
-import type { Behavior, Binding, Value, ValueType } from '../targets/component-ir.ts';
-import { BehaviorFlow, knownText, type Condition, type Operand, type PresenceTest } from './behavior-flow.ts';
+import type { Behavior, Binding, DataRef, ExternIR, Value, ValueType } from '../targets/component-ir.ts';
+import { BehaviorFlow, knownText, type Condition, type MatchTest, type Operand, type SwitchDispatch } from './behavior-flow.ts';
 import { memberValue, objectMembers } from './component-syntax.ts';
 import {
   behaviorValueType, checkParameters, literalValue, moduleConstant, moduleLiteral, numberLiteral, requireArity, requireDomain,
   staticCallee, staticReference, unparenthesize,
-  type BehaviorCallback, type Phase, type Readable, type ResolveRead,
+  type BehaviorCallback, type Phase, type Readable, type ResolveRead, type TaskReference,
 } from './behavior-types.ts';
+import type { SourceLinks } from './links.ts';
 import type { SourceContext } from './source.ts';
 
 export interface Facts {
@@ -20,6 +21,7 @@ export interface Helper {
 }
 export type Capability = ts.ParameterDeclaration | ts.VariableDeclaration;
 export type OwnedBinding = { readonly kind: 'reader' } |
+  TaskReference | { readonly kind: 'extern'; readonly binding: Binding; readonly external: ExternIR } |
   { readonly kind: 'signal'; readonly binding: Binding } |
   { readonly kind: Exclude<Readable['kind'], 'capture'>; readonly binding: Binding };
 export interface LexicalBinding {
@@ -41,6 +43,7 @@ export interface HelperEnvironment {
 export interface BehaviorHost {
   readonly source: SourceContext;
   readonly resolveRead: ResolveRead;
+  readonly resolveExtern: SourceLinks['resolveExtern'];
   ordinaryHelper(call: ts.CallExpression, environment: HelperCall): Helper;
 }
 
@@ -82,7 +85,7 @@ export class BehaviorBody {
   private readonly flow: BehaviorFlow;
   private readonly locals = new Map<ts.Symbol, Operand>();
   private readonly lexical = new Map<ts.Symbol, LexicalBinding>();
-  private readonly tests = new WeakMap<Operand, PresenceTest>();
+  private readonly tests = new WeakMap<Operand, MatchTest>();
   readonly params: Binding[] = [];
   readonly captures: ts.Symbol[] = [];
   readonly facts: Facts = { reads: new Set(), calls: new Set(), ordered: false };
@@ -92,7 +95,7 @@ export class BehaviorBody {
     this.source = host.source;
     this.binding = binding;
     this.phase = phase;
-    this.actionScope = environment?.actionScope ?? phase === 'action';
+    this.actionScope = environment?.actionScope ?? (phase === 'action' || phase === 'task');
     this.capturedType = environment?.capturedType;
     this.flow = new BehaviorFlow(this.source, binding, origin);
     for (const { declaration, value } of environment?.lexical ?? []) this.bind(declaration, value);
@@ -117,8 +120,14 @@ export class BehaviorBody {
       if (local) return local.value;
     }
     const ref = this.host.resolveRead(node);
-    if (!ref || ref.kind === 'capture') return undefined;
-    return { kind: ref.kind, binding: ref.binding };
+    if (ref?.kind === 'task') return ref;
+    if (ref && ref.kind !== 'capture') return { kind: ref.kind, binding: ref.binding };
+    const type = this.source.checker.getTypeAtLocation(node);
+    if (type.getSymbol()?.declarations?.some(decl => ts.isInterfaceDeclaration(decl) && this.source.intrinsic(decl.name, 'TaskExtern'))) {
+      const external = this.host.resolveExtern(node);
+      return { kind: 'extern', binding: external.binding, external };
+    }
+    return undefined;
   }
 
   bindAlias(declaration: ts.VariableDeclaration): void {
@@ -144,9 +153,9 @@ export class BehaviorBody {
     return operand;
   }
 
-  callback(node: BehaviorCallback, reader: boolean, symbolicArgs?: ReadonlyMap<number, OwnedBinding>): void {
-    if (!node.body || node.asteriskToken || node.typeParameters?.length || node.modifiers?.some((m) => m.kind === ts.SyntaxKind.AsyncKeyword)) {
-      return this.source.missing(node, 'producer/function-body', 'This behavior needs a concrete synchronous, monomorphic source body.');
+  callback(node: BehaviorCallback, reader: boolean, symbolicArgs?: ReadonlyMap<number, OwnedBinding>, declaredParams?: readonly ValueType[]): void {
+    if (!node.body || node.asteriskToken || node.typeParameters?.length || (this.phase !== 'task' && node.modifiers?.some((m) => m.kind === ts.SyntaxKind.AsyncKeyword))) {
+      return this.source.missing(node, 'producer/function-body', 'This behavior needs a concrete monomorphic body with suspension owned by a task.');
     }
     checkParameters(this.source, node.parameters);
     for (const [index, parameter] of node.parameters.entries()) {
@@ -157,9 +166,17 @@ export class BehaviorBody {
         this.bindCapability(parameter);
       } else {
         const name = (parameter.name as ts.Identifier).text;
-        const binding = this.flow.binding(parameter, 'parameter', name, behaviorValueType(this.source, parameter));
+        const type = behaviorValueType(this.source, parameter, this.source.checker.getTypeAtLocation(parameter));
+        const domain = declaredParams?.[reader ? index - 1 : index] ?? type;
+        const binding = this.flow.binding(parameter, 'parameter', name, domain);
         this.params.push(binding);
-        this.locals.set(this.source.symbol(parameter.name), { type: binding.type, value: { kind: 'local', id: binding.id } });
+        let operand: Operand = this.phase === 'task' ? this.flow.parameter(binding) : { type: domain, value: { kind: 'local', id: binding.id } };
+        if (type !== domain) {
+          const viewed = this.widen(operand);
+          requireDomain(this.source, parameter, viewed.type, type);
+          operand = this.flow.define(parameter, this.flow.binding(parameter, 'parameter-view', name, type), viewed);
+        }
+        this.locals.set(this.source.symbol(parameter.name), operand);
       }
     }
     if (ts.isBlock(node.body)) {
@@ -180,7 +197,8 @@ export class BehaviorBody {
         return;
       }
       if (ts.isVoidExpression(value)) this.discard(value.expression, value.expression);
-      else result = ts.isCallExpression(value) ? this.call(value, this.binding.type === 'unit') : this.expression(value, this.binding.type);
+      else if (ts.isCallExpression(value) && this.binding.type === 'unit') result = this.call(value, true);
+      else result = this.expression(value, this.binding.type);
     }
     requireDomain(this.source, origin, result?.type ?? 'unit', this.binding.type);
     const source = this.source.span(origin);
@@ -206,6 +224,10 @@ export class BehaviorBody {
       });
     } else if (ts.isReturnStatement(node)) {
       this.result(node, node.expression);
+    } else if (ts.isSwitchStatement(node)) {
+      this.switchStatement(node);
+    } else if (ts.isBreakStatement(node)) {
+      this.flow.breakSwitch(node);
     } else if (ts.isVariableStatement(node)) {
       if (!(node.declarationList.flags & (ts.NodeFlags.Const | ts.NodeFlags.Let)) || node.declarationList.flags & ts.NodeFlags.Using) {
         this.source.missing(node, 'producer/local-storage', 'This declaration requires hoisting, mutable storage, or resource disposal lowering.');
@@ -261,7 +283,54 @@ export class BehaviorBody {
     return this.tests.get(value) ?? value;
   }
 
+  private switchStatement(node: ts.SwitchStatement): void {
+    const clauses = node.caseBlock.clauses;
+    const access = projection(node.expression);
+    const subject = access && this.expression(access.object);
+    const data = subject && this.source.data.get(subject.type);
+    const tagged = data?.kind === 'tagged' && access?.field === data.discriminant ? data : undefined;
+    const selected = access && subject ? this.member(node.expression, subject, access.field) : this.expression(node.expression);
+    const scalar = this.widen(selected);
+    const selector = tagged ? scalar : this.flow.retain(node.expression, scalar);
+    const labels = new Map<string, number>();
+    const tests: Array<SwitchDispatch['tests'][number]> = [];
+    let fallback = clauses.length;
+    for (const [index, clause] of clauses.entries()) {
+      if (ts.isDefaultClause(clause)) { fallback = index; continue; }
+      const label = moduleLiteral(this.source, clause.expression);
+      if (!label || label.kind !== selector.type) return this.source.missing(clause.expression, 'producer/switch-label', 'This switch label needs a checked literal of the selector domain or ordered runtime evaluation.');
+      tests.push({ index, node: clause, value: label });
+      if (label.kind === 'text' && !labels.has(label.value)) labels.set(label.value, index);
+    }
+    this.flow.switchStatement(node, { selector, fallback, tests, ...(tagged && subject ? { tagged: { subject, cases: tagged.cases, labels } } : {}) }, clause => {
+      for (const statement of clause.statements) {
+        if (this.flow.terminated) break;
+        this.statement(statement);
+      }
+    });
+  }
+
+  private widen(operand: Operand): Operand {
+    return this.source.data.get(operand.type)?.kind === 'text-literal'
+      ? { type: 'text', value: { kind: 'widen-text', value: this.flow.value(operand) } } : operand;
+  }
+
   private expression(input: ts.Expression, expected?: ValueType): Operand {
+    const value = this.operand(input, expected);
+    if (expected === undefined || value.type === expected) return value;
+    if (expected === 'text') {
+      const widened = this.widen(value);
+      requireDomain(this.source, input, widened.type, expected);
+      return widened;
+    }
+    const domain = this.source.data.get(expected);
+    if (domain?.kind === 'text-literal' && knownText(value) === domain.value) {
+      return { type: expected, value: { kind: 'literal-text', type: expected as DataRef } };
+    }
+    return this.source.missing(input, 'producer/value-domain', `The checked operation needs ${expected}, but its source value lowers as ${value.type}.`);
+  }
+
+  private operand(input: ts.Expression, expected?: ValueType): Operand {
     const node = unparenthesize(input);
     if (ts.isIdentifier(node)) {
       const symbol = this.source.symbol(node);
@@ -275,6 +344,7 @@ export class BehaviorBody {
     }
     const literal = literalValue(this.source, node);
     if (literal) return { type: literal.kind, value: literal };
+    if (ts.isAwaitExpression(node)) return this.awaited(node);
     if (ts.isCallExpression(node)) return this.call(node, false)!;
     if (ts.isObjectLiteralExpression(node)) return this.record(node, expected);
     if (ts.isConditionalExpression(node)) {
@@ -304,9 +374,7 @@ export class BehaviorBody {
       if (!this.source.checker.isTypeAssignableTo(from, to)) {
         return this.source.missing(node, 'producer/assertion-proof', 'The assertion requires a source proof of the asserted value domain.');
       }
-      const result = this.expression(node.expression, expected);
-      requireDomain(this.source, node, result.type, behaviorValueType(this.source, node, to));
-      return result;
+      return this.expression(node.expression, behaviorValueType(this.source, node, to));
     }
     if (staticReference(node)) {
       const reference = this.host.resolveRead(node);
@@ -324,13 +392,24 @@ export class BehaviorBody {
 
   private member(node: ts.Expression, subject: Operand, field: string): Operand {
     const domain = this.source.data.get(subject.type);
+    if (domain?.kind === 'tagged') {
+      if (field === domain.discriminant) {
+        const known = this.flow.refinement(subject)?.tag;
+        if (known === undefined) return { type: 'text', value: { kind: 'tag', value: this.flow.value(subject) } };
+        const type = this.source.data.textLiteral(known, node);
+        return { type, value: { kind: 'literal-text', type } };
+      }
+      const payload = this.flow.refinement(subject)?.payload;
+      if (!payload) return this.source.missing(node, 'producer/tag-proof', 'The field requires a matching case of this same immutable tagged value.');
+      return this.member(node, payload, field);
+    }
     if (domain?.kind === 'record') {
       const member = domain.fields.find((entry) => entry.name === field);
       if (!member) return this.source.missing(node, 'producer/record-member', 'The checked closed record does not supply this field.');
       return { type: member.type, value: { kind: 'member', value: this.flow.value(subject), field } };
     }
     if (domain?.kind === 'presence' && field === 'value') {
-      const payload = this.flow.payload(subject);
+      const payload = this.flow.refinement(subject)?.payload;
       if (!payload) return this.source.missing(node, 'producer/presence-proof', 'This presence payload needs a matching present edge for the same immutable value.');
       requireDomain(this.source, node, behaviorValueType(this.source, node), payload.type);
       return payload;
@@ -340,53 +419,88 @@ export class BehaviorBody {
 
   private record(node: ts.ObjectLiteralExpression, expected?: ValueType): Operand {
     const members = objectMembers(this.source, node, 'producer/record-fields');
-    const checked = behaviorValueType(this.source, node);
-    if (expected !== undefined) requireDomain(this.source, node, checked, expected);
-    const domain = this.source.data.get(checked);
-    if (domain?.kind !== 'record') return this.source.missing(node, 'producer/record-domain', 'This construction needs a concrete checked record layout.');
-    const expectedFields = new Map(domain.fields.map((field) => [field.name, field.type]));
-    const fields = [...members].map(([name, member], index) => {
+    const contextual = this.source.checker.getContextualType(node);
+    const type = expected ?? behaviorValueType(this.source, node, contextual?.isUnion() ? contextual : undefined);
+    const domain = this.source.data.get(type);
+    let layout = type;
+    let tag: string | undefined;
+    if (domain?.kind === 'tagged') {
+      const member = members.get(domain.discriminant);
+      if (!member) return this.source.missing(node, 'producer/tagged-constructor', 'The tagged construction needs its checked discriminator field.');
+      const expression = memberValue(this.source, member, 'producer/tagged-constructor');
+      const checked = this.source.checker.getTypeAtLocation(expression);
+      const arm = checked.isStringLiteral() && domain.cases.find(entry => entry.tag === checked.value);
+      if (!arm) return this.source.missing(expression, 'producer/tagged-constructor', 'This construction needs one proven case of its declared tagged domain.');
+      tag = arm.tag;
+      layout = arm.payload;
+    }
+    const record = this.source.data.get(layout);
+    if (record?.kind !== 'record') return this.source.missing(node, 'producer/record-domain', 'This construction needs a concrete checked record layout.');
+    const expectedFields = new Map(record.fields.map((field) => [field.name, field.type]));
+    const fields: { name: string; value: Operand }[] = [];
+    let remaining = members.size;
+    for (const [name, member] of members) {
+      remaining--;
+      const expression = memberValue(this.source, member, 'producer/record-fields');
+      if (domain?.kind === 'tagged' && name === domain.discriminant) {
+        // A call or read delivering a singleton still executes at its authored position.
+        const discriminator = this.source.data.textLiteral(tag!, expression);
+        this.flow.retain(expression, this.expression(expression, discriminator));
+        continue;
+      }
       const fieldType = expectedFields.get(name);
       if (fieldType === undefined) return this.source.missing(member, 'producer/record-fields', 'This field is outside the expected closed record.');
-      const expression = memberValue(this.source, member, 'producer/record-fields');
       const operand = this.expression(expression, fieldType);
-      requireDomain(this.source, expression, operand.type, fieldType);
-      const value = index + 1 === members.size ? operand : this.flow.retain(expression, operand);
-      return { name, value, source: this.source.span(member) };
-    });
+      fields.push({ name, value: remaining ? this.flow.retain(expression, operand) : operand });
+    }
     if (fields.length !== expectedFields.size) return this.source.missing(node, 'producer/record-fields', 'The value must initialize all fields of its checked closed record.');
-    const type = this.source.data.record(fields.map(({ name, value, source }) => ({ name, type: value.type, source })), node);
-    requireDomain(this.source, node, type, checked);
-    return { type, value: { kind: 'record', type, fields: fields.map(({ name, value }) => ({ name, value: this.flow.value(value) })) } };
+    const payload: Value = { kind: 'record', type: layout as DataRef, fields: fields.map(({ name, value }) => ({ name, value: this.flow.value(value) })) };
+    return { type, value: tag === undefined ? payload : { kind: 'tagged', type: type as DataRef, tag, payload } };
+  }
+
+  private caseText(node: ts.Expression): string | undefined {
+    if (ts.isIdentifier(node)) {
+      const local = this.locals.get(this.source.symbol(node));
+      if (local) {
+        const domain = this.source.data.get(local.type);
+        return domain?.kind === 'text-literal' ? domain.value : knownText(local);
+      }
+    }
+    const literal = moduleLiteral(this.source, node);
+    return literal?.kind === 'text' ? literal.value : undefined;
   }
 
   private tagComparison(node: ts.BinaryExpression, inequality: boolean): Operand | undefined {
     const left = unparenthesize(node.left);
     const right = unparenthesize(node.right);
-    const literal = ts.isStringLiteralLike(left) ? left : ts.isStringLiteralLike(right) ? right : undefined;
-    if (!literal || (literal.text !== 'present' && literal.text !== 'omitted')) return undefined;
-    const other = literal === left ? right : left;
+    const leftText = this.caseText(left);
+    const textValue = leftText ?? this.caseText(right);
+    if (textValue === undefined) return undefined;
+    const other = leftText !== undefined ? right : left;
     const access = projection(other);
-    if (access?.field !== 'kind') return undefined;
+    if (!access || !this.source.checker.getTypeAtLocation(access.object).isUnion()) return undefined;
     const subject = this.expression(access.object);
     const domain = this.source.data.get(subject.type);
-    if (domain?.kind !== 'presence') {
-      // Ordinary authored records can use the same field and text spellings.
-      // Their checked field is compared normally, without binding a payload.
-      const tag = this.member(other, subject, access.field);
+    const object = unparenthesize(access.object);
+    const stable = ts.isIdentifier(object) && this.locals.get(this.source.symbol(object)) === subject;
+    if (domain?.kind !== 'presence' || access.field !== 'kind' || (textValue !== 'present' && textValue !== 'omitted')) {
+      const tag = this.widen(this.member(other, subject, access.field));
       requireDomain(this.source, other, tag.type, 'text');
       const field = this.flow.value(tag);
-      const text: Value = { kind: 'text', value: literal.text };
-      const equal: Value = { kind: 'binary', op: 'equal', left: literal === left ? text : field, right: literal === left ? field : text };
-      return { type: 'bool', value: inequality ? { kind: 'not', value: equal } : equal };
+      const text: Value = { kind: 'text', value: textValue };
+      const equal: Value = { kind: 'binary', op: 'equal', left: leftText !== undefined ? text : field, right: leftText !== undefined ? field : text };
+      const result: Operand = { type: 'bool', value: inequality ? { kind: 'not', value: equal } : equal };
+      if (stable && domain?.kind === 'tagged' && access.field === domain.discriminant && domain.cases.length > 1 && domain.cases.some(arm => arm.tag === textValue)) {
+        this.tests.set(result, { subject, cases: domain.cases, tag: textValue, presentOnTrue: !inequality });
+      }
+      return result;
     }
     const hasValue: Value = { kind: 'has-value', value: this.flow.value(subject) };
-    const presentOnTrue = (literal.text === 'present') !== inequality;
+    const presentOnTrue = (textValue === 'present') !== inequality;
     const result: Operand = { type: 'bool', value: presentOnTrue ? hasValue : { kind: 'not', value: hasValue } };
-    const object = unparenthesize(access.object);
     // A repeated get(...) is a fresh read. Only a bound immutable SSA value
     // can carry the matched payload to a subsequent .value expression.
-    if (ts.isIdentifier(object) && this.locals.get(this.source.symbol(object)) === subject) {
+    if (stable) {
       this.tests.set(result, { subject, payloadType: domain.value, presentOnTrue });
     }
     return result;
@@ -403,9 +517,9 @@ export class BehaviorBody {
       const tag = this.tagComparison(node, inequality);
       if (tag) return tag;
     }
-    const first = this.expression(node.left);
+    const first = this.widen(this.expression(node.left));
     const left = immediate(node.right) ? first : this.flow.retain(node.left, first);
-    const right = this.expression(node.right);
+    const right = this.widen(this.expression(node.right));
     let op: Extract<Value, { kind: 'binary' }>['op'];
     let type: ValueType;
     if (equality) {
@@ -426,6 +540,35 @@ export class BehaviorBody {
     return { type, value: inequality ? { kind: 'not', value } : value };
   }
 
+  private actualArguments(call: ts.CallExpression, offset: number, params: readonly ValueType[]): Value[] {
+    requireArity(this.source, call, params.length + offset);
+    const operands = params.map((type, i) => {
+      const argument = call.arguments[offset + i]!;
+      const value = this.expression(argument, type);
+      return i + 1 < params.length ? this.flow.retain(argument, value) : value;
+    });
+    return operands.map(operand => this.flow.value(operand));
+  }
+
+  private awaited(node: ts.AwaitExpression): Operand {
+    const call = unparenthesize(node.expression);
+    if (this.phase !== 'task' || !ts.isCallExpression(call) || call.questionDotToken || call.flags & ts.NodeFlags.OptionalChain) {
+      return this.source.missing(node, 'producer/owned-await', 'This suspension needs a checked operation owned by the executing task.');
+    }
+    const access = projection(call.expression);
+    if (!access || access.field !== 'await' || this.owned(access.object)?.kind !== 'reader' || !this.source.method(call, 'TaskContext', 'await')) {
+      return this.source.missing(node, 'producer/owned-await', 'This await needs its actual task capability and a resolved atomic command.');
+    }
+    const target = call.arguments[0];
+    if (!target) return this.source.missing(call, 'producer/extern-argument', 'The suspension needs its typed external operation.');
+    const reference = this.owned(target);
+    const external = reference?.kind === 'extern' ? reference.external : this.host.resolveExtern(target);
+    const args = this.actualArguments(call, 1, external.params.map(param => param.type));
+    requireDomain(this.source, node, behaviorValueType(this.source, node, this.source.checker.getTypeAtLocation(node)), external.binding.type);
+    this.facts.ordered = true;
+    return this.flow.suspend(node, external.binding, args);
+  }
+
   private call(node: ts.CallExpression, allowUnitEffect: boolean): Operand | undefined {
     if (node.flags & ts.NodeFlags.OptionalChain || node.questionDotToken) {
       return this.source.missing(node, 'producer/optional-call', 'A conditional call needs its own evaluation and presence proof.');
@@ -438,18 +581,33 @@ export class BehaviorBody {
         requireArity(this.source, node, 1);
         const argument = unparenthesize(node.arguments[0]!);
         const ref = this.owned(argument);
-        if (!ref || ref.kind === 'signal' || ref.kind === 'reader') {
+        if (!ref || ref.kind === 'signal' || ref.kind === 'reader' || ref.kind === 'task' || ref.kind === 'extern') {
           return this.source.missing(argument, 'producer/read-location', 'A capability read needs a resolved readable handle belonging to this instance.');
         }
-        requireDomain(this.source, node, ref.binding.type, behaviorValueType(this.source, node));
+        requireDomain(this.source, node, ref.binding.type, behaviorValueType(this.source, node, this.source.checker.getTypeAtLocation(node)));
         return referenceValue(ref, this.facts);
       }
       const set = key === 'set';
-      if ((set || key === 'emit') && this.source.method(node, 'ActionContext', key)) {
-        requireArity(this.source, node, 2);
+      if ((set || key === 'emit' || key === 'start' || key === 'cancel') && this.source.method(node, 'ActionContext', key)) {
         if (!this.actionScope) return this.source.invalid(node, 'PUI_ILLEGAL_EFFECT', 'A pure computation or initializer cannot stage action effects.');
-        if (this.phase !== 'action') return this.source.missing(node, 'producer/effectful-result', 'Returning a computed value from this effectful helper needs a value-producing ordered invocation.');
+        if (this.phase !== 'action' && this.phase !== 'task') return this.source.missing(node, 'producer/effectful-result', 'Returning a computed value from this effectful helper needs a value-producing ordered invocation.');
         if (!allowUnitEffect) return this.source.missing(node, 'producer/effect-value', 'This ordered effect needs a unit-valued continuation at this position.');
+        if (key === 'start' || key === 'cancel') {
+          const argument = node.arguments[0];
+          const task = argument && this.owned(argument);
+          if (task?.kind !== 'task') return this.source.missing(argument ?? node, 'producer/task-target', 'This task operation needs its resolved instance-owned task handle.');
+          const source = this.source.span(node);
+          if (key === 'start') {
+            const args = this.actualArguments(node, 1, task.params);
+            this.flow.instruction({ kind: 'start', task: task.binding.id, args, source });
+          } else {
+            requireArity(this.source, node, 1);
+            this.flow.instruction({ kind: 'cancel', task: task.binding.id, source });
+          }
+          this.facts.ordered = true;
+          return undefined;
+        }
+        requireArity(this.source, node, 2);
         const target = unparenthesize(node.arguments[0]!);
         const reference = this.owned(target);
         if (!reference || reference.kind === 'reader' || reference.kind !== (set ? 'state' : 'signal')) {
@@ -475,8 +633,10 @@ export class BehaviorBody {
       }
       const argument = unparenthesize(node.arguments[0]!);
       const input = this.expression(argument);
-      requireDomain(this.source, argument, input.type, 'text');
-      const text = knownText(input);
+      const domain = this.source.data.get(input.type);
+      if (domain?.kind !== 'text-literal') requireDomain(this.source, argument, input.type, 'text');
+      else this.flow.retain(argument, input);
+      const text = domain?.kind === 'text-literal' ? domain.value : knownText(input);
       if (text === undefined) return this.source.missing(argument, 'producer/dynamic-style-tokens', 'This tw argument needs dynamic token construction.');
       requireDomain(this.source, node, behaviorValueType(this.source, node), 'tokens');
       return { type: 'tokens', value: { kind: 'tokens', values: text.split(/[\t\n\f\r ]+/u).filter(Boolean) } };
@@ -504,7 +664,7 @@ export class BehaviorBody {
     }
     this.facts.calls.add(helper.binding.id);
     if (helper.phase === 'action') {
-      if (!allowUnitEffect || this.phase !== 'action') return this.source.missing(node, 'producer/action-call-value', 'An ordered action invocation needs a unit-valued continuation in an action behavior.');
+      if (!allowUnitEffect || (this.phase !== 'action' && this.phase !== 'task')) return this.source.missing(node, 'producer/action-call-value', 'An ordered action invocation needs a unit-valued continuation in an action or task behavior.');
       this.flow.instruction({ kind: 'invoke', fn: helper.binding.id, args, source: this.source.span(node) });
       this.facts.ordered = true;
       return undefined;

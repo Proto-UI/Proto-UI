@@ -3,7 +3,7 @@
 //! after committing, or propagates the action's failure. Only owned values and
 //! callbacks can leave the segment. No transaction or entity borrow is stored.
 
-use gpui::{AsyncApp, Context, Subscription, Task, WeakEntity};
+use gpui::{App, AsyncApp, Context, Subscription, Task, WeakEntity};
 use std::{
     cell::{Cell, OnceCell, RefCell},
     collections::BTreeMap,
@@ -255,6 +255,15 @@ impl<T: 'static, V: 'static, E: 'static> OwnedTaskGroup<T, V, E> {
     pub fn dispose(&self) {
         self.inner.withdraw_all(Stop::OwnerEnded);
     }
+
+    /// A retained child can be removed inside another entity's update. Make every
+    /// receipt terminal now, then release native work once both entities are readable.
+    pub(crate) fn dispose_after_update(&self, app: &mut App) {
+        let tasks = self.inner.take_all(Stop::OwnerEnded);
+        if tasks.is_empty() { return; }
+        settle(&tasks, Stop::OwnerEnded);
+        app.defer(move |_| release(tasks));
+    }
 }
 
 impl<T: 'static, V: 'static, E: 'static> Drop for OwnedTaskGroup<T, V, E> {
@@ -290,6 +299,13 @@ enum WaitEnd { Delivered, Withdrawn }
 enum Stop { Cancelled, Superseded, OwnerEnded }
 
 fn retire<T, V, E>(tasks: BTreeMap<u64, Entry<T, V, E>>, reason: Stop) -> usize {
+    let count = tasks.len();
+    settle(&tasks, reason);
+    release(tasks);
+    count
+}
+
+fn settle<T, V, E>(tasks: &BTreeMap<u64, Entry<T, V, E>>, reason: Stop) {
     // A cancel hook can inspect another receipt or reenter this group. Publish
     // every withdrawal before releasing a single closure or calling host code.
     for entry in tasks.values() {
@@ -300,13 +316,14 @@ fn retire<T, V, E>(tasks: BTreeMap<u64, Entry<T, V, E>>, reason: Stop) -> usize 
         };
         assert!(entry.terminal.set(outcome).is_ok());
     }
-    let count = tasks.len();
+}
+
+fn release<T, V, E>(tasks: BTreeMap<u64, Entry<T, V, E>>) {
     for mut entry in tasks.into_values() {
         if let Some(wait) = entry.waiting.take() {
             wait(WaitEnd::Withdrawn);
         }
     }
-    count
 }
 
 impl<T: 'static, V: 'static, E: 'static> Group<T, V, E> {
@@ -327,15 +344,14 @@ impl<T: 'static, V: 'static, E: 'static> Group<T, V, E> {
         self.state.borrow().tasks.contains_key(&id)
     }
 
+    fn take_all(&self, reason: Stop) -> BTreeMap<u64, Entry<T, V, E>> {
+        let mut state = self.state.borrow_mut();
+        if matches!(reason, Stop::OwnerEnded) { state.ended = true; }
+        mem::take(&mut state.tasks)
+    }
+
     fn withdraw_all(&self, reason: Stop) -> usize {
-        let tasks = {
-            let mut state = self.state.borrow_mut();
-            if matches!(reason, Stop::OwnerEnded) {
-                state.ended = true;
-            }
-            mem::take(&mut state.tasks)
-        };
-        retire(tasks, reason)
+        retire(self.take_all(reason), reason)
     }
 
     fn enqueue(self: &Rc<Self>, id: u64) {

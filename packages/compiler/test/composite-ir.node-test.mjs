@@ -75,8 +75,11 @@ function compositeFixture() {
     [block('build', [], returns(outer))]
   );
   const program = {
-    version: 4,
+    version: 5,
     id: 'selection-summary',
+    externs: [],
+    created: [],
+    tasks: [],
     keys: [],
     consumes: [],
     provides: [],

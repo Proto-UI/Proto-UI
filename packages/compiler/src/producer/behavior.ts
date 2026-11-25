@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import type { Behavior, Binding } from '../targets/component-ir.ts';
+import type { Behavior, Binding, ValueType } from '../targets/component-ir.ts';
 import {
   BehaviorBody,
   referenceValue,
@@ -22,6 +22,7 @@ import {
   type ResolveRead,
 } from './behavior-types.ts';
 import type { SourceContext } from './source.ts';
+import type { SourceLinks } from './links.ts';
 
 export { behaviorReturnType, behaviorValueType, type BehaviorCallback } from './behavior-types.ts';
 
@@ -44,18 +45,19 @@ export class BehaviorProducer {
   private readonly constructing = new Set<BehaviorCallback>();
   private readonly host: BehaviorHost;
 
-  constructor(source: SourceContext, resolveRead: ResolveRead) {
+  constructor(source: SourceContext, resolveRead: ResolveRead, resolveExtern: SourceLinks['resolveExtern']) {
     this.source = source;
     this.host = {
       source,
       resolveRead,
+      resolveExtern,
       ordinaryHelper: (call, environment) => this.helper(call, environment),
     };
   }
 
-  callback(binding: Binding, phase: Phase, node: BehaviorCallback, reader: boolean): string {
+  callback(binding: Binding, phase: Phase, node: BehaviorCallback, reader: boolean, declaredParams?: readonly ValueType[]): string {
     const body = new BehaviorBody(this.host, binding, phase, node);
-    body.callback(node, reader);
+    body.callback(node, reader, undefined, declaredParams);
     return this.addRoot(body);
   }
 

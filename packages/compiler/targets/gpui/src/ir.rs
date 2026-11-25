@@ -63,7 +63,7 @@ macro_rules! object_only {
     )+ };
 }
 
-object_only!(Source, DataField, Data, RecordValue, Binding, InputFields, Value, Instruction, Edge, End, Block, Behavior, Named, Field, View, ChildProp, Component, RootFields, Key, Consume, Provide);
+object_only!(Source, DataField, Data, TagCase, RecordValue, Binding, InputFields, Value, Instruction, Edge, MatchCase, End, Block, Behavior, Named, Field, View, ChildProp, Component, RootFields, Key, Consume, Provide, Extern, TaskDef);
 
 // An externally tagged Serde unit variant normally also accepts {"tag":null}.
 // The IR spells types, phases, operators and element tags exclusively as strings.
@@ -89,7 +89,7 @@ macro_rules! string_only {
     )+ };
 }
 
-string_only!(Op, Phase, FieldKind, Tag, ControlMode);
+string_only!(Op, Phase, FieldKind, Tag, ControlMode, Policy);
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Type { Bool, Number, Text, Unit, Tokens, Data(usize) }
@@ -117,7 +117,15 @@ impl<'de> Deserialize<'de> for Type {
 
 #[derive(Deserialize)]
 #[serde(remote = "Self", tag = "kind", rename_all = "lowercase", deny_unknown_fields)]
-pub enum Data { Presence { value: Type, source: Source }, Record { fields: Vec<DataField>, source: Source } }
+pub enum Data {
+    Presence { value: Type, source: Source },
+    Record { fields: Vec<DataField>, source: Source },
+    #[serde(rename = "text-literal")] TextLiteral { value: String, source: Source },
+    Tagged { discriminant: String, cases: Vec<TagCase>, source: Source },
+}
+
+#[derive(Deserialize)] #[serde(remote = "Self", deny_unknown_fields)]
+pub struct TagCase { pub tag: String, pub payload: Type, pub source: Source }
 
 #[derive(Deserialize)]
 #[serde(remote = "Self", deny_unknown_fields)]
@@ -190,6 +198,10 @@ pub enum Value {
     Bool { value: bool },
     Number { bits: String },
     Text { value: String },
+    #[serde(rename = "literal-text")] LiteralText { #[serde(rename = "type")] ty: Type },
+    #[serde(rename = "widen-text")] WidenText { value: Box<Value> },
+    Tagged { #[serde(rename = "type")] ty: Type, tag: String, payload: Box<Value> },
+    Tag { value: Box<Value> },
     Tokens { values: Vec<String> },
     Record { #[serde(rename = "type")] ty: Type, fields: Vec<RecordValue> },
     Member { value: Box<Value>, field: String },
@@ -212,13 +224,15 @@ pub enum Instruction {
     Write { target: String, value: Value, source: Source },
     Emit { target: String, value: Value, source: Source },
     Invoke { #[serde(rename = "fn")] function: String, args: Vec<Value>, source: Source },
+    Start { task: String, args: Vec<Value>, source: Source },
+    Cancel { task: String, source: Source },
 }
 
 impl Instruction {
     pub fn source(&self) -> &Source {
         match self {
             Self::Let { source, .. } | Self::Write { source, .. } | Self::Emit { source, .. }
-            | Self::Invoke { source, .. } => source,
+            | Self::Invoke { source, .. } | Self::Start { source, .. } | Self::Cancel { source, .. } => source,
         }
     }
 }
@@ -226,6 +240,9 @@ impl Instruction {
 #[derive(Deserialize)]
 #[serde(remote = "Self", deny_unknown_fields)]
 pub struct Edge { pub block: String, pub args: Vec<Value> }
+
+#[derive(Deserialize)] #[serde(remote = "Self", deny_unknown_fields)]
+pub struct MatchCase { pub tag: String, pub to: Edge }
 
 // Missing optional properties are distinct from JSON null on this wire.
 fn present<'de, D: Deserializer<'de>, T: Deserialize<'de>>(d: D) -> Result<Option<T>, D::Error> {
@@ -239,6 +256,8 @@ pub enum End {
     Jump { to: Edge, source: Source },
     Branch { condition: Value, yes: Edge, no: Edge, source: Source },
     Presence { value: Value, present: Edge, omitted: Edge, source: Source },
+    Match { value: Value, cases: Vec<MatchCase>, source: Source },
+    Await { #[serde(rename = "extern")] external: String, args: Vec<Value>, resume: Edge, source: Source },
     Fail { reason: String, source: Source },
 }
 
@@ -246,7 +265,7 @@ impl End {
     pub fn source(&self) -> &Source {
         match self {
             Self::Return { source, .. } | Self::Jump { source, .. } | Self::Branch { source, .. }
-            | Self::Presence { source, .. } | Self::Fail { source, .. } => source,
+            | Self::Presence { source, .. } | Self::Fail { source, .. } | Self::Match { source, .. } | Self::Await { source, .. } => source,
         }
     }
 }
@@ -262,7 +281,7 @@ pub struct Block {
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq)]
 #[serde(remote = "Self", rename_all = "lowercase")]
-pub enum Phase { Init, Pure, Action }
+pub enum Phase { Init, Pure, Action, Task }
 
 #[derive(Deserialize)]
 #[serde(remote = "Self", deny_unknown_fields)]
@@ -325,6 +344,18 @@ pub struct Consume { pub key: String, pub binding: Binding }
 #[derive(Deserialize)] #[serde(remote = "Self", deny_unknown_fields)]
 pub struct Provide { pub key: String, #[serde(rename = "fn")] pub function: String, pub source: Source }
 
+#[derive(Clone, Copy, Deserialize)] #[serde(remote = "Self", rename_all = "lowercase")]
+pub enum Policy { Latest, Parallel, Serial }
+
+#[derive(Deserialize)] #[serde(remote = "Self", deny_unknown_fields)]
+pub struct TaskDef { #[serde(rename = "fn")] pub function: String, pub policy: Policy, pub source: Source }
+
+#[derive(Deserialize)] #[serde(remote = "Self", deny_unknown_fields)]
+pub struct Extern {
+    pub binding: Binding, pub name: String, pub params: Vec<Binding>, pub effect: String,
+    pub lifetime: String, #[serde(rename = "async")] pub asynchronous: bool, pub targets: Vec<String>,
+}
+
 // Flattening through a generic JSON map would lose duplicate-field diagnostics.
 // Both legal record shapes use the same strict, map-only wire decoder.
 macro_rules! component_record {
@@ -338,19 +369,20 @@ macro_rules! component_record {
             pub source: Source, pub props: Vec<Input>, pub fields: Vec<Field>, pub signals: Vec<Binding>,
             pub behaviors: Vec<Behavior>, pub projections: Vec<Named>, pub actions: Vec<Named>,
             pub consumes: Vec<Consume>, pub provides: Vec<Provide>, pub view: View,
+            pub tasks: Vec<TaskDef>, pub created: Vec<String>,
         }
     };
 }
 component_record!(Component {});
-component_record!(RootFields { pub version: u32, pub types: Vec<Data>, pub keys: Vec<Key>, pub components: Vec<Component>, });
+component_record!(RootFields { pub version: u32, pub types: Vec<Data>, pub keys: Vec<Key>, pub externs: Vec<Extern>, pub components: Vec<Component>, });
 
-pub struct Unit { pub version: u32, pub types: Vec<Data>, pub keys: Vec<Key>, pub bodies: Vec<Component> }
+pub struct Unit { pub version: u32, pub types: Vec<Data>, pub keys: Vec<Key>, pub externs: Vec<Extern>, pub bodies: Vec<Component> }
 impl<'de> Deserialize<'de> for Unit {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        let RootFields { version, types, keys, components, id, name, prototype_name, source, props, fields, signals, behaviors, projections, actions, consumes, provides, view } = <RootFields as Deserialize>::deserialize(d)?;
+        let RootFields { version, types, keys, externs, components, id, name, prototype_name, source, props, fields, signals, behaviors, projections, actions, consumes, provides, tasks, created, view } = <RootFields as Deserialize>::deserialize(d)?;
         let mut bodies = Vec::with_capacity(components.len() + 1);
-        bodies.push(Component { id, name, prototype_name, source, props, fields, signals, behaviors, projections, actions, consumes, provides, view });
+        bodies.push(Component { id, name, prototype_name, source, props, fields, signals, behaviors, projections, actions, consumes, provides, tasks, created, view });
         bodies.extend(components);
-        Ok(Self { version, types, keys, bodies })
+        Ok(Self { version, types, keys, externs, bodies })
     }
 }

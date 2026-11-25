@@ -122,6 +122,8 @@ export const property = (name: string, value: ts.Expression) =>
   f.createPropertyAssignment(key(name), value);
 export const object = (fields: readonly ts.ObjectLiteralElementLike[]) =>
   f.createObjectLiteralExpression(fields, fields.length > 1);
+export const frozenRecord = (fields: readonly ts.ObjectLiteralElementLike[]) =>
+  call(member(id('Object'), 'freeze'), f.createAsExpression(object(fields), typeRef('const')));
 export const arrow = (params: readonly ts.ParameterDeclaration[], body: ts.ConciseBody) =>
   f.createArrowFunction(
     undefined,

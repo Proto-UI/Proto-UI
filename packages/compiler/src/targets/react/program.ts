@@ -15,6 +15,8 @@ function successors(block: Block): readonly Edge[] {
     case 'jump': return [block.end.to];
     case 'branch': return [block.end.yes, block.end.no];
     case 'presence': return [block.end.present, block.end.omitted];
+    case 'match': return block.end.cases.map(c => c.to);
+    case 'await': return [block.end.resume];
     default: return [];
   }
 }
@@ -44,7 +46,8 @@ function orderedBlocks(fn: Behavior): Block[] {
 function visitValue(value: Value, visit: (value: Value) => void): void {
   visit(value);
   switch (value.kind) {
-    case 'not': case 'has-value': case 'member': visitValue(value.value, visit); break;
+    case 'not': case 'has-value': case 'member': case 'widen-text': case 'tag': visitValue(value.value, visit); break;
+    case 'tagged': visitValue(value.payload, visit); break;
     case 'record': for (const field of value.fields) visitValue(field.value, visit); break;
     case 'binary': visitValue(value.left, visit); visitValue(value.right, visit); break;
     case 'call': for (const arg of value.args) visitValue(arg, visit); break;
@@ -61,6 +64,9 @@ export interface FunctionPlan {
   fields: boolean;
   writes: boolean;
   emits: boolean;
+  tasks: boolean;
+  taskBlocks?: ReadonlyMap<string, string>;
+  taskView?: string;
 }
 
 export class ReactProgram {
@@ -88,6 +94,8 @@ export class ReactProgram {
   readonly listeners = new Map<string, string>();
   readonly functions = new Map<string, FunctionPlan>();
   readonly dispatchers = new Map<string, string>();
+  readonly taskKeys = new Map<string, string>();
+  readonly tasksType: string;
   readonly written = new Set<string>();
   constructor(unit: ReactUnit, ir: ComponentBody) {
     this.unit = unit;
@@ -106,6 +114,9 @@ export class ReactProgram {
     this.fieldsType = this.names.take('Fields');
     this.initFields = this.names.take('initializeFields');
     this.sameFields = this.names.take('sameFields');
+    this.tasksType = this.names.take('Tasks');
+    const taskNames = new Names();
+    for (const task of ir.tasks) this.taskKeys.set(task.fn, taskNames.take(task.fn));
     this.props = new Map(ir.props.map((b) => [b.id, b]));
     this.viewBindings = viewBindings(ir.view);
     for (const { binding, key } of ir.consumes) {
@@ -142,13 +153,17 @@ export class ReactProgram {
     }
 
     const emitted = new Set<string>();
-    const reached = new Set([...this.viewBindings.map((b) => b.fn), ...ir.fields.map((field) => field.init), ...ir.projections.map((p) => p.fn), ...ir.actions.map((a) => a.fn), ...ir.provides.map((p) => p.fn)]);
+    const reached = new Set([...this.viewBindings.map((b) => b.fn), ...ir.fields.map((field) => field.init), ...ir.projections.map((p) => p.fn), ...ir.actions.map((a) => a.fn), ...ir.provides.map((p) => p.fn), ...ir.created]);
     for (const fnId of reached) {
       const fn = byId.get(fnId)!;
       const plan: FunctionPlan = {
         fn, name: this.names.take(fn.binding.name), blocks: orderedBlocks(fn),
-        calls: new Set(), captures: new Set(), inputs: false, fields: false, writes: false, emits: false,
+        calls: new Set(), captures: new Set(), inputs: false, fields: false, writes: false, emits: false, tasks: false,
       };
+      if (fn.phase === 'task') {
+        plan.taskView = this.names.take(`${plan.name}View`);
+        plan.taskBlocks = new Map(plan.blocks.map((b, i) => [b.id, i ? this.names.take(`${plan.name}Block`) : plan.name]));
+      }
       const inspect = (value: Value) => {
         if (value.kind === 'call') plan.calls.add(value.fn);
         if (value.kind === 'number' || value.kind === 'tokens') unit.reserveLiteral(value);
@@ -163,6 +178,12 @@ export class ReactProgram {
           if (op.kind === 'invoke') {
             plan.calls.add(op.fn);
             for (const arg of op.args) visitValue(arg, inspect);
+          } else if (op.kind === 'start' || op.kind === 'cancel') {
+            plan.tasks = true;
+            if (op.kind === 'start') {
+              reached.add(op.task);
+              for (const arg of op.args) visitValue(arg, inspect);
+            }
           } else {
             visitValue(op.value, inspect);
             if (op.kind === 'write') {
@@ -177,7 +198,8 @@ export class ReactProgram {
           }
         }
         if (b.end.kind === 'branch') visitValue(b.end.condition, inspect);
-        if (b.end.kind === 'presence') visitValue(b.end.value, inspect);
+        if (b.end.kind === 'presence' || b.end.kind === 'match') visitValue(b.end.value, inspect);
+        if (b.end.kind === 'await') for (const arg of b.end.args) visitValue(arg, inspect);
         if (b.end.kind === 'return' && b.end.value) visitValue(b.end.value, inspect);
         for (const edge of successors(b)) for (const arg of edge.args) visitValue(arg, inspect);
       }
@@ -207,12 +229,16 @@ export class ReactProgram {
         caller.fields ||= callee.fields;
         caller.writes ||= callee.writes;
         caller.emits ||= callee.emits;
+        caller.tasks ||= callee.tasks;
         const refs = remaining.get(caller.fn.binding.id)! - 1;
         remaining.set(caller.fn.binding.id, refs);
         if (!refs) ready.push(caller);
       }
     }
-    const publicEntries = new Set(ir.actions.map((action) => action.fn));
+    // A reachable cancel of a declaration that can never start has no work to
+    // withdraw. Its instruction still remains legal and in the authored CFG.
+    for (const fn of this.taskKeys.keys()) if (!this.functions.has(fn)) this.taskKeys.delete(fn);
+    const publicEntries = new Set([...ir.actions.map((action) => action.fn), ...ir.created]);
     for (const binding of this.viewBindings) if (binding.role === 'activate') publicEntries.add(binding.fn);
     for (const fn of publicEntries) this.dispatchers.set(fn, this.names.take(`dispatch_${this.functions.get(fn)!.fn.binding.name}`));
     for (const signal of emitted) {
@@ -221,7 +247,7 @@ export class ReactProgram {
   }
 
   get hasHandle(): boolean { return this.ir.projections.length + this.ir.actions.length !== 0; }
-  get hasOwner(): boolean { return this.hasHandle || this.dispatchers.size !== 0; }
+  get hasOwner(): boolean { return this.hasHandle || this.dispatchers.size !== 0 || this.taskKeys.size !== 0; }
   get groupsInputs(): boolean { return this.hasOwner || this.fixed.length !== 0 || this.ir.provides.length !== 0; }
 
   use(name: string): ts.Identifier { return this.unit.use(name); }

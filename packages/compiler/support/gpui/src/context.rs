@@ -29,7 +29,7 @@ impl<K: NominalKey> Provider<K> {
 pub struct BoundContext<K: NominalKey> {
     pub provider: Entity<Provider<K>>,
     value: Rc<RefCell<K::Value>>,
-    _subscription: Subscription,
+    subscription: Option<Subscription>,
 }
 
 impl<K: NominalKey> BoundContext<K> {
@@ -39,7 +39,8 @@ impl<K: NominalKey> BoundContext<K> {
     ) -> Self {
         let value = provider.read(cx).value.clone();
         let subscription = cx.observe(provider, changed);
-        Self { provider: provider.clone(), value, _subscription: subscription }
+        Self { provider: provider.clone(), value, subscription: Some(subscription) }
     }
     pub fn read(&self) -> Ref<'_, K::Value> { self.value.borrow() }
+    pub fn retire(&mut self) { self.subscription.take(); }
 }

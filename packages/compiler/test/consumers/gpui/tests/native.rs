@@ -5,6 +5,7 @@ mod authoring_badge;
 mod context_source;
 mod controlled_source;
 mod support;
+mod tabs_source;
 
 use generated_gpui_consumer::{
     delivery_badge::{DeliveryBadge, DeliveryBadgeProps},

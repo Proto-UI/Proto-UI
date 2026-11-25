@@ -5,7 +5,8 @@ import type { SourceContext } from './source.ts';
 export type BehaviorCallback = ts.ArrowFunction | ts.FunctionExpression | ts.MethodDeclaration | ts.FunctionDeclaration;
 export type Phase = Behavior['phase'];
 export type Readable = { kind: 'prop' | 'state' | 'capture' | 'derive' | 'context'; binding: Binding };
-export type Reference = Readable | { kind: 'signal'; binding: Binding };
+export type TaskReference = { kind: 'task'; binding: Binding; params: readonly ValueType[] };
+export type Reference = Readable | TaskReference | { kind: 'signal'; binding: Binding };
 export type ResolveRead = (expression: ts.Expression) => Reference | undefined;
 
 export function behaviorValueType(source: SourceContext, node: ts.Node, type?: ts.Type): ValueType {

@@ -1,8 +1,11 @@
 import {
   Fragment,
   createElement,
+  useEffect,
   useImperativeHandle,
+  useInsertionEffect,
   useMemo,
+  useRef,
   useSyncExternalStore,
   type DependencyList,
   type ReactElement,
@@ -74,6 +77,29 @@ function useEarlierRetainedInputs<Inputs>(inputs: Inputs): InputLease<Inputs> {
 
 export const useRetainedInputs = earlierDOM ? useEarlierRetainedInputs : usePublishedInputs;
 
+export function useCreatedActions<Inputs>(owner: InputLease<Inputs>, created: () => void): void {
+  const ran = useRef(false);
+  useEffect(() => {
+    if (ran.current || !owner.active()) return;
+    ran.current = true;
+    created();
+  }, [owner, created]);
+}
+
+export function useTaskLifetime(dispose: () => void): void {
+  const epoch = useRef(0);
+  useInsertionEffect(() => dispose, [dispose]);
+  useEffect(() => {
+    if (!earlierDOM) return;
+    const current = ++epoch.current;
+    // Older DOM renderers can omit hidden-tree insertion cleanup. A replay
+    // in development reconnects the same lifetime before this microtask.
+    return () => {
+      queueMicrotask(() => { if (epoch.current === current) dispose(); });
+    };
+  }, [dispose]);
+}
+
 function clientSnapshot(): boolean {
   return true;
 }
@@ -85,20 +111,18 @@ function subscribeToHydration() {
   return unsubscribe;
 }
 
-function useEarlierHandle<Inputs, Handle>(
+function useEarlierView<Inputs>(
   owner: InputLease<Inputs>,
-  ref: Ref<Handle> | undefined,
-  make: () => Handle,
-  deps: DependencyList,
-  view: ReactElement
-): ReactElement {
+  observe: boolean,
+  view: ReactElement,
+): { ready: boolean; view: ReactElement } {
   if (!(owner instanceof EarlierHostInputs))
     throw new TypeError('The retained React DOM handle requires its own input lease.');
   // The server (even with a global document) and initial hydration produce the
   // authored markup. First expose a hydrated ref in the commit that can protect
   // it. Ordinary client roots use the client snapshot on their very first render.
   const ready = useSyncExternalStore(subscribeToHydration, clientSnapshot, serverSnapshot);
-  const needsMarker = ready && (ref != null || owner.hasMarker);
+  const needsMarker = ready && (observe || owner.hasMarker);
   const portal = useMemo(
     () =>
       needsMarker
@@ -111,16 +135,29 @@ function useEarlierHandle<Inputs, Handle>(
         : null,
     [needsMarker, owner]
   );
-  useImperativeHandle(ready ? ref : null, make, deps);
-  return portal ? createElement(Fragment, null, view, portal) : view;
+  return { ready, view: portal ? createElement(Fragment, null, view, portal) : view };
 }
+
+function useEarlierHandle<Inputs, Handle>(
+  owner: InputLease<Inputs>, ref: Ref<Handle> | undefined, make: () => Handle,
+  deps: DependencyList, view: ReactElement, tasks = false,
+): ReactElement {
+  const retained = useEarlierView(owner, tasks || ref != null, view);
+  useImperativeHandle(retained.ready ? ref : null, make, deps);
+  return retained.view;
+}
+
+export const useRetainedView = earlierDOM
+  ? <Inputs>(owner: InputLease<Inputs>, view: ReactElement) => useEarlierView(owner, true, view).view
+  : <Inputs>(_owner: InputLease<Inputs>, view: ReactElement) => view;
 
 function useCurrentHandle<Inputs, Handle>(
   _owner: InputLease<Inputs>,
   ref: Ref<Handle> | undefined,
   make: () => Handle,
   deps: DependencyList,
-  view: ReactElement
+  view: ReactElement,
+  _tasks?: boolean,
 ): ReactElement {
   useImperativeHandle(ref, make, deps);
   return view;

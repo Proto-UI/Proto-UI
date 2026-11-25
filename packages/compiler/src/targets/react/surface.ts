@@ -68,7 +68,7 @@ export function inputReader(program: ReactProgram): ts.Statement[] {
     statements.push(declaration(program.readInputs, [param('$props', typeRef(program.propsType))], undefined, [f.createReturnStatement(object(items))]));
     hostType = typeRef('ReturnType', f.createTypeQueryNode(id(program.readInputs)));
   }
-  if (program.dispatchers.size || (program.fixed.length && !program.contexts.size)) {
+  if (program.dispatchers.size || program.taskKeys.size || (program.fixed.length && !program.contexts.size)) {
     let inputType: ts.TypeNode = hostType;
     if (program.contexts.size) {
       const members = hasInputs(program) ? [signature('host', hostType)] : [];

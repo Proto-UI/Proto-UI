@@ -1,5 +1,6 @@
 mod disabled;
 pub mod context;
+pub mod declared_task;
 pub mod owned_tasks;
 pub use disabled::button_availability;
 
@@ -73,6 +74,8 @@ impl<A> Default for PublicationQueue<A> {
 }
 
 impl<A> PublicationQueue<A> {
+    pub fn retire(&mut self) { self.waiting.clear(); }
+
     pub fn admit(&mut self, action: A) -> Option<A> {
         if self.publishing {
             self.waiting.push_back(action);

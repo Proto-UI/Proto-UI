@@ -1,11 +1,11 @@
 import ts from 'typescript';
 import type {
-  Binding, ComponentBody, ContextProvide, ContextRead, InitialField, InputBinding, NamedBehavior, ScalarType, ValueType,
+  Binding, ComponentBody, ContextProvide, ContextRead, InitialField, InputBinding, NamedBehavior, ScalarType, TaskIR, ValueType,
 } from '../targets/component-ir.ts';
 import { BehaviorProducer } from './behavior.ts';
-import type { Readable } from './behavior-types.ts';
+import type { Readable, TaskReference } from './behavior-types.ts';
 import {
-  argumentsIn, checkedFunction, declarationOnly, linkedType, memberAccess, memberValue,
+  argumentsIn, checkedFunction, declarationOnly, linkedFactory, linkedType, memberAccess, memberValue,
   objectMembers, operand, sourceFunction, sourceLiteral, sourceName, type LinkedType, type Member, type SourceFunction,
 } from './component-syntax.ts';
 import { componentView } from './component-view.ts';
@@ -18,10 +18,10 @@ const definitionParts = {
 } as const;
 
 type DefinitionOwner = 'Definition' | (typeof definitionParts)[keyof typeof definitionParts];
-type HandleExport = 'PropHandle' | 'StateHandle' | 'DerivedHandle' | 'EventHandle' | 'ActionHandle' | 'ConsumedContext';
+type HandleExport = 'PropHandle' | 'StateHandle' | 'DerivedHandle' | 'EventHandle' | 'ActionHandle' | 'TaskHandle' | 'ConsumedContext';
 type Signal = { kind: 'signal'; binding: Binding };
-type Action = { kind: 'action'; binding: Binding; parameters: number };
-type SetupReference = Readable | Signal | Action |
+type Action = { kind: 'action'; binding: Binding; params: readonly ValueType[] };
+type SetupReference = Readable | Signal | Action | TaskReference |
   { kind: 'owner'; owner: DefinitionOwner } | { kind: 'props'; members: Map<string, Readable> } |
   { kind: 'function'; fn: SourceFunction } | { kind: 'link'; type: LinkedType; origin: ts.Expression };
 type FrameResult = { site: ts.Node; value: SetupReference | null };
@@ -41,7 +41,7 @@ class ComponentProducer {
   private readonly references = new Map<ts.Symbol, SetupReference>();
   private readonly setupFrames = new Set<SourceFunction>();
   private readonly pendingCallbacks: (() => void)[] = [];
-  private readonly unusedActionParameters = new Map<string, readonly Binding[]>();
+  private readonly ignoredParameters = new Map<string, readonly Binding[]>();
   private readonly props: InputBinding[] = [];
   private readonly fields: InitialField[] = [];
   private readonly signals: Binding[] = [];
@@ -49,6 +49,8 @@ class ComponentProducer {
   private readonly provides: ContextProvide[] = [];
   private readonly projections: NamedBehavior[] = [];
   private readonly actions: NamedBehavior[] = [];
+  private readonly tasks: TaskIR[] = [];
+  private readonly created: string[] = [];
   private readonly publicNames = { prop: new Set<string>(), signal: new Set<string>(), projection: new Set<string>(), action: new Set<string>() };
   private press?: { call: ts.CallExpression; target: Action };
 
@@ -83,11 +85,15 @@ class ComponentProducer {
         return source.intrinsic(expression, exportedName);
       },
     };
-    this.behaviors = new BehaviorProducer(this.source, (expression) => {
-      const ref = this.reference(expression);
-      if (ref && 'binding' in ref && ref.kind !== 'action') return ref;
-      return undefined;
-    });
+    this.behaviors = new BehaviorProducer(
+      this.source,
+      (expression) => {
+        const ref = this.reference(expression);
+        if (ref && 'binding' in ref && ref.kind !== 'action') return ref;
+        return undefined;
+      },
+      (node, origin) => links.resolveExtern(node, (identifier) => origin?.(identifier) ?? this.frameLink(identifier)),
+    );
   }
 
   lower(call: ts.CallExpression, publicName: string, id: string): ComponentBody {
@@ -120,14 +126,14 @@ class ComponentProducer {
       view = { ...view, activate: this.press.target.binding.id };
     }
     const lowered = this.behaviors.finish();
-    const behaviors = this.unusedActionParameters.size ? lowered.map((behavior) => {
-      const unused = this.unusedActionParameters.get(behavior.binding.id);
+    const behaviors = this.ignoredParameters.size ? lowered.map((behavior) => {
+      const unused = this.ignoredParameters.get(behavior.binding.id);
       return unused ? { ...behavior, params: [...behavior.params, ...unused] } : behavior;
     }) : lowered;
     return {
       id, name: publicName, prototypeName, source: source.span(call),
       props: this.props, fields: this.fields, signals: this.signals, consumes: this.consumes, provides: this.provides, behaviors,
-      projections: this.projections, actions: this.actions, view,
+      projections: this.projections, actions: this.actions, tasks: this.tasks, created: this.created, view,
     };
   }
 
@@ -262,7 +268,7 @@ class ComponentProducer {
       const declared = this.setupOperation(node, local);
       if (declared !== undefined) return { site: node, value: declared };
       const link = linkedType(source, node);
-      if (link && source.intrinsic(node.expression, link === 'ContextKey' ? 'createContextKey' : 'definePrototype')) {
+      if (link && source.intrinsic(node.expression, linkedFactory[link])) {
         return source.missing(node, 'setup-link-lifetime', `Creating a ${link} in setup needs an instance-owned identity in the compiled unit.`);
       }
       const passesDeclaration = node.arguments.some((arg) => {
@@ -317,8 +323,7 @@ class ComponentProducer {
     }
     switch (owner.owner) {
       case 'Definition':
-        if (member.key === 'derive' || member.key === 'action') return this.behaviorDeclaration(call, member.key);
-        if (member.key === 'task') return source.missing(call, 'owned-task', 'An owned task needs a scheduling policy, suspension segments and owner retirement in the receiving IR.');
+        if (member.key === 'derive' || member.key === 'action' || member.key === 'task') return this.behaviorDeclaration(call, member.key);
         break;
       case 'PropsDefinition':
         if (member.key === 'define') return this.propDeclaration(call);
@@ -337,7 +342,8 @@ class ComponentProducer {
         if (member.key === 'consume' || member.key === 'provide') return this.contextDeclaration(call, member.key, local);
         break;
       case 'LifecycleDefinition':
-        return source.missing(call, 'lifecycle-connection', `The lifecycle connection ${member.key} needs a represented owner and creation or retirement boundary.`);
+        if (member.key === 'onCreated') return this.creation(call);
+        break;
     }
     return source.missing(call, 'setup-operation', `The checked ${owner.owner}.${member.key} operation has no declaration lowering yet.`);
   }
@@ -419,7 +425,7 @@ class ComponentProducer {
       // An authored alias can rearrange its own type arguments. The handle target's instantiated arguments
       // are authoritative even when the call was written with explicit source type arguments.
       const args = source.checker.getTypeArguments(handle);
-      if (args.length === (expected === 'ActionHandle' ? 2 : 1)) return args;
+      if (args.length === (expected === 'ActionHandle' || expected === 'TaskHandle' ? 2 : 1)) return args;
     }
     return source.missing(node, 'handle-value-type', 'The checked handle needs its concrete payload domain in the receiving IR.');
   }
@@ -436,33 +442,40 @@ class ComponentProducer {
     return this.source.data.type(call.typeArguments?.[0] ?? call, payload!);
   }
 
-  private actionArity(call: ts.CallExpression, callback: SourceFunction, args: ts.Type, binding: Binding): number {
+  private operationParameters(
+    kind: 'action' | 'task', call: ts.CallExpression, callback: SourceFunction, args: ts.Type, binding: Binding,
+  ): readonly ValueType[] {
     const source = this.source;
-    const origin = call.typeArguments?.[0] ?? call.arguments[1]!;
-    if (!source.checker.isTupleType(args)) return source.missing(origin, 'action-arguments', 'The action handle needs a finite typed argument tuple.');
+    const origin = call.typeArguments?.[0] ?? call.arguments[call.arguments.length - 1]!;
+    if (!source.checker.isTupleType(args)) return source.missing(origin, `${kind}-arguments`, `The ${kind} handle needs a finite typed argument tuple.`);
     const tuple = args as ts.TupleTypeReference;
     if (tuple.target.elementFlags.some((flag) => flag !== ts.ElementFlags.Required)) {
-      return source.missing(origin, 'action-arguments', 'Optional, rest or variadic action arguments need their own host dispatch representation.');
+      return source.missing(origin, `${kind}-arguments`, `Optional, rest or variadic ${kind} arguments need their own dispatch representation.`);
     }
     const elements = source.checker.getTypeArguments(tuple);
     const actual = callback.parameters.slice(1);
-    if (actual.length > elements.length) return source.missing(actual[elements.length]!, 'action-arguments', 'This callback parameter has no supplied argument in the declared action tuple.');
+    if (actual.length > elements.length) return source.missing(actual[elements.length]!, `${kind}-arguments`, `This callback parameter has no supplied argument in the declared ${kind} tuple.`);
+    const params: ValueType[] = [];
     const unused: Binding[] = [];
     for (const [index, element] of elements.entries()) {
       const named = tuple.target.labeledElementDeclarations?.[index];
       const node = named ?? (ts.isTupleTypeNode(origin) ? origin.elements[index] : undefined) ?? origin;
       const type = source.data.type(node, element);
+      params.push(type);
       const parameter = actual[index];
       if (parameter) {
-        if (source.data.type(parameter) !== type) return source.missing(parameter, 'action-parameter-domain', 'The callback argument needs the same represented domain as the declared action tuple.');
+        const accepted = source.data.type(parameter, source.checker.getTypeAtLocation(parameter));
+        if (accepted !== type && !(accepted === 'text' && source.data.get(type)?.kind === 'text-literal')) {
+          return source.missing(parameter, `${kind}-parameter-domain`, `The callback argument needs a represented conversion from the declared ${kind} domain ${type} to ${accepted}.`);
+        }
       } else {
-        // A shorter callback ignores these values; the public action still accepts the full declared tuple.
+        // The native dispatch still accepts every declared argument when the callback ignores trailing values.
         const name = named && ts.isIdentifier(named.name) ? named.name.text : `arg${index + 1}`;
-        unused.push(source.binding(node, JSON.stringify(['action-parameter', binding.id, index]), name, type));
+        unused.push(source.binding(node, JSON.stringify([`${kind}-parameter`, binding.id, index]), name, type));
       }
     }
-    if (unused.length) this.unusedActionParameters.set(binding.id, unused);
-    return elements.length;
+    if (unused.length) this.ignoredParameters.set(binding.id, unused);
+    return params;
   }
 
   private contextDeclaration(call: ts.CallExpression, operation: 'consume' | 'provide', local?: ts.BindingName): Readable | null {
@@ -510,23 +523,41 @@ class ComponentProducer {
     return { kind: 'state', binding };
   }
 
-  private behaviorDeclaration(call: ts.CallExpression, kind: 'derive' | 'action'): Readable | Action {
+  private taskPolicy(options: ts.Expression): TaskIR['policy'] {
     const source = this.source;
-    argumentsIn(source, call, 2, 2, kind);
-    const name = sourceName(source, call.arguments[0]!, `${kind}-name`);
-    const argument = call.arguments[1]!;
-    const callback = checkedFunction(source, this.functionValue(argument) ?? argument, `${kind}-callback`);
-    if (kind === 'action') {
-      const [args, outcome] = this.declaredHandle(call, 'ActionHandle');
-      const type = source.data.type(call.typeArguments?.[1] ?? callback.type ?? callback, outcome!);
-      const binding = source.binding(call, kind, name, type);
-      const parameters = this.actionArity(call, callback, args!, binding);
-      this.pendingCallbacks.push(() => { this.behaviors.callback(binding, 'action', callback, true); });
-      return { kind, binding, parameters };
+    const member = objectMembers(source, options, 'task-options', ['policy']).get('policy');
+    if (!member) return source.missing(options, 'task-policy', 'The owned task needs its declared invocation policy.');
+    const value = memberValue(source, member, 'task-policy');
+    const policy = sourceLiteral(source, value);
+    if (policy?.kind === 'text' && (policy.value === 'latest' || policy.value === 'parallel' || policy.value === 'serial')) {
+      return policy.value;
     }
-    const binding = source.binding(call, kind, name, this.handleType(call, 'DerivedHandle'));
-    this.pendingCallbacks.push(() => { this.behaviors.callback(binding, 'pure', callback, true); });
-    return { kind, binding };
+    return source.missing(value, 'task-policy', 'The owned task needs a resolved scheduling policy with represented concurrency semantics.');
+  }
+
+  private behaviorDeclaration(call: ts.CallExpression, kind: 'derive' | 'action' | 'task'): Readable | Action | TaskReference {
+    const source = this.source;
+    const arity = kind === 'task' ? 3 : 2;
+    argumentsIn(source, call, arity, arity, kind);
+    const name = sourceName(source, call.arguments[0]!, `${kind}-name`);
+    const argument = call.arguments[arity - 1]!;
+    const callback = checkedFunction(
+      source, this.functionValue(argument) ?? argument, `${kind}-callback`, kind === 'task' ? 'task' : 'synchronous',
+    );
+    if (kind === 'derive') {
+      const binding = source.binding(call, kind, name, this.handleType(call, 'DerivedHandle'));
+      this.pendingCallbacks.push(() => { this.behaviors.callback(binding, 'pure', callback, true); });
+      return { kind, binding };
+    }
+    const [args, outcome] = this.declaredHandle(call, kind === 'task' ? 'TaskHandle' : 'ActionHandle');
+    const type = source.data.type(call.typeArguments?.[1] ?? callback.type ?? callback, outcome!);
+    const binding = source.binding(call, kind, name, type);
+    const params = this.operationParameters(kind, call, callback, args!, binding);
+    if (kind === 'task') {
+      this.tasks.push({ fn: binding.id, policy: this.taskPolicy(call.arguments[1]!), source: source.span(call) });
+    }
+    this.pendingCallbacks.push(() => { this.behaviors.callback(binding, kind, callback, true, params); });
+    return { kind, binding, params };
   }
 
   private eventDeclaration(call: ts.CallExpression): Signal {
@@ -566,9 +597,24 @@ class ComponentProducer {
     if (event !== 'press.commit') return source.missing(call.arguments[0]!, 'semantic-event', `The receiving IR needs a connection for semantic event ${JSON.stringify(event)}.`);
     const target = this.setupResult(call.arguments[1]!, false).value;
     if (target?.kind !== 'action') return source.missing(call.arguments[1]!, 'event-action-origin', 'The press connection needs its resolved owned action.');
-    if (target.parameters || target.binding.type !== 'unit') return source.missing(call, 'press-signature', 'The receiving press connection dispatches a zero-argument action with unit outcome.');
+    if (target.params.length || target.binding.type !== 'unit') return source.missing(call, 'press-signature', 'The receiving press connection dispatches a zero-argument action with unit outcome.');
     if (this.press) return source.missing(call, 'press-connections', 'Multiple owned press subscriptions need ordered connection storage.');
     this.press = { target, call };
+    return null;
+  }
+
+  private creation(call: ts.CallExpression): null {
+    const source = this.source;
+    argumentsIn(source, call, 1, 1, 'lifecycle-created');
+    const target = call.arguments[0]!;
+    const handle = this.setupResult(target, false).value;
+    if (handle?.kind !== 'action') {
+      return source.missing(target, 'lifecycle-action-origin', 'Creation needs an action declared on this logical instance.');
+    }
+    if (handle.params.length) {
+      return source.missing(target, 'lifecycle-action-signature', 'The creation registration dispatches its action without arguments.');
+    }
+    this.created.push(handle.binding.id);
     return null;
   }
 }

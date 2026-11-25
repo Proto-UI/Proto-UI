@@ -6,14 +6,18 @@ import {
   type DataType,
   type ScalarType,
   type SourceSpan,
+  type TaggedCase,
   type ValueType,
 } from '../targets/component-ir.ts';
 
 export interface SourceData {
   readonly entries: readonly DataType[];
+  /** Explicit checked types retain their declarations. Expressions can widen in a primitive text context. */
   type(node: ts.Node, type?: ts.Type): ValueType;
+  textLiteral(value: string, node: ts.Node): DataRef;
   presence(value: ValueType, node: ts.Node): DataRef;
   record(fields: readonly DataField[], node: ts.Node): DataRef;
+  tagged(discriminant: string, cases: readonly TaggedCase[], node: ts.Node): DataRef;
   get(type: ValueType): DataType | undefined;
 }
 
@@ -58,6 +62,7 @@ export function createSourceData(
   const tokenSymbol = authoring.get('StyleTokens');
   const presenceSymbol = authoring.get('Presence');
   const presenceDeclaration = presenceSymbol?.declarations?.find(ts.isTypeAliasDeclaration);
+  const resultDeclaration = authoring.get('Result')?.declarations?.find(ts.isTypeAliasDeclaration);
   const prelude = presenceDeclaration?.getSourceFile();
   const readValue = prelude?.statements.find(
     (statement): statement is ts.TypeAliasDeclaration =>
@@ -97,6 +102,10 @@ export function createSourceData(
     });
   }
 
+  function textLiteral(value: string, node: ts.Node): DataRef {
+    return intern(JSON.stringify(['text-literal', value]), { kind: 'text-literal', value, source: span(node) });
+  }
+
   function record(fields: readonly DataField[], node: ts.Node): DataRef {
     const sorted = [...fields].sort(compareNames);
     for (const [index, field] of sorted.entries()) {
@@ -117,11 +126,32 @@ export function createSourceData(
     });
   }
 
+  function internTagged(discriminant: string, cases: TaggedCase[], node: ts.Node): DataRef {
+    if (!cases.length) return missing(node, 'producer/tagged-cases', 'A tagged domain needs its concrete cases.');
+    for (const [index, item] of cases.entries()) {
+      const payload = lookupDataType(entries, item.payload);
+      if (payload?.kind !== 'record' || payload.fields.some(field => field.name === discriminant)) {
+        return missing(node, 'producer/tagged-payload', 'Each case needs a closed record containing only its payload fields.');
+      }
+      if (index && item.tag === cases[index - 1]!.tag) {
+        return missing(node, 'producer/tagged-cases', `The discriminator does not distinguish every ${JSON.stringify(item.tag)} case.`);
+      }
+    }
+    return intern(JSON.stringify(['tagged', discriminant, cases.map(({ tag, payload }) => [tag, payload])]), {
+      kind: 'tagged', discriminant, cases, source: span(node),
+    });
+  }
+
+  function tagged(discriminant: string, cases: readonly TaggedCase[], node: ts.Node): DataRef {
+    const sorted = [...cases].sort((a, b) => a.tag < b.tag ? -1 : a.tag > b.tag ? 1 : 0);
+    return internTagged(discriminant, sorted, node);
+  }
+
   function scalar(type: ts.Type): ScalarType | undefined {
     if (type.flags & ts.TypeFlags.EnumLike) return undefined;
     if (type.flags & ts.TypeFlags.BooleanLike) return 'bool';
     if (type.flags & ts.TypeFlags.NumberLike) return 'number';
-    if (type.flags & ts.TypeFlags.StringLike) return 'text';
+    if (type.flags & ts.TypeFlags.String) return 'text';
     if (type.flags & ts.TypeFlags.Void) return 'unit';
     if (tokenSymbol && (type.getSymbol() === tokenSymbol || type.aliasSymbol === tokenSymbol))
       return 'tokens';
@@ -193,7 +223,7 @@ export function createSourceData(
           !dataField(decl) ||
           !staticName(decl.name) ||
           (ts.isPropertySignature(decl) && decl.questionToken !== undefined) ||
-          decl.getSourceFile() === prelude ||
+          (decl.getSourceFile() === prelude && !isResultArm(decl.parent)) ||
           decl.getSourceFile() === primitives
       )
     ) {
@@ -206,7 +236,13 @@ export function createSourceData(
     return declaration;
   }
 
-  function recordType(type: ts.Type, node: ts.Node): DataRef {
+  // Only the actual Result arms contribute prelude-owned data fields. Other authoring
+  // declarations may carry capabilities that a structural record cannot transport.
+  function isResultArm(node: ts.Node): boolean {
+    return ts.isTypeLiteralNode(node) && ts.isUnionTypeNode(node.parent) && node.parent.parent === resultDeclaration;
+  }
+
+  function recordType(type: ts.Type, node: ts.Node, exclude?: string): DataRef {
     const declarations = type.getSymbol()?.declarations;
     if (
       !(type.flags & ts.TypeFlags.Object) ||
@@ -227,7 +263,7 @@ export function createSourceData(
     for (const declaration of declarations) {
       if (declaration === readonlyProjection) continue;
       if (
-        declaration.getSourceFile() === prelude ||
+        (declaration.getSourceFile() === prelude && !isResultArm(declaration)) ||
         declaration.getSourceFile() === primitives ||
         !(
           ts.isTypeLiteralNode(declaration) ||
@@ -278,13 +314,41 @@ export function createSourceData(
         'An empty readonly projection needs its original source record layout.'
       );
     }
-    const fields = properties.map((property): DataField => {
+    const fields: DataField[] = [];
+    for (const property of properties) {
       const field = fieldDeclaration(property, node);
+      if (property.name === exclude) continue;
       const fieldType = checker.getTypeOfSymbolAtLocation(property, node);
       const fieldNode = ts.isPropertySignature(field) && field.type ? field.type : field;
-      return { name: property.name, type: lower(fieldNode, fieldType), source: span(field) };
-    });
+      fields.push({ name: property.name, type: lower(fieldNode, fieldType), source: span(field) });
+    }
     return record(fields, node);
+  }
+
+  function taggedType(type: ts.UnionType, node: ts.Node): DataRef {
+    if (type.types.every(arm => (arm.flags & ts.TypeFlags.Object) !== 0)) {
+      // A shared singleton-valued property is a discriminator only when its values uniquely
+      // select all arms. Multiple valid choices are ordered by their actual property names.
+      for (const property of [...type.getProperties()].sort(compareNames)) {
+        const arms = new Map<string, { type: ts.Type; property: ts.Symbol }>();
+        for (const arm of type.types) {
+          const field = arm.getProperty(property.name);
+          if (!field || field.flags & ts.SymbolFlags.Optional) break;
+          const tag = checker.getTypeOfSymbolAtLocation(field, node);
+          if (!tag.isStringLiteral() || tag.flags & ts.TypeFlags.EnumLike || arms.has(tag.value)) break;
+          arms.set(tag.value, { type: arm, property: field });
+        }
+        if (arms.size !== type.types.length) continue;
+        const cases: TaggedCase[] = [];
+        for (const tag of [...arms.keys()].sort()) {
+          const arm = arms.get(tag)!;
+          const field = fieldDeclaration(arm.property, node);
+          cases.push({ tag, payload: recordType(arm.type, field, property.name), source: span(field) });
+        }
+        return internTagged(property.name, cases, node);
+      }
+    }
+    return missing(node, 'producer/value-type', `The checked union ${checker.typeToString(type)} needs a data representation for its alternatives.`);
   }
 
   function argumentsOf(type: ts.Type): readonly ts.Type[] {
@@ -316,11 +380,16 @@ export function createSourceData(
 
   function lower(
     node: ts.Node,
-    type = checker.getTypeAtLocation(node),
+    type: ts.Type,
     presenceParent?: ts.Type
   ): ValueType {
     const cached = checked.get(type);
     if (cached !== undefined) return cached;
+    if (type.isStringLiteral() && !(type.flags & ts.TypeFlags.EnumLike)) {
+      const exact = textLiteral(type.value, node);
+      checked.set(type, exact);
+      return exact;
+    }
     const simple = scalar(type);
     if (simple !== undefined) return simple;
     const prior = expanding.get(node);
@@ -340,18 +409,14 @@ export function createSourceData(
       let result: ValueType;
       if (type.isUnion()) {
         const payload = presencePayload(type, node);
-        if (!payload) {
-          return missing(
-            node,
-            'producer/value-type',
-            `The checked union ${checker.typeToString(type)} needs a declared data representation.`
-          );
-        }
-        const argument =
-          ts.isTypeReferenceNode(node) && node.typeArguments?.length === 1
+        if (payload) {
+          const argument = ts.isTypeReferenceNode(node) && node.typeArguments?.length === 1
             ? node.typeArguments[0]!
             : node;
-        result = presence(lower(argument, payload, type), node);
+          result = presence(lower(argument, payload, type), node);
+        } else {
+          result = taggedType(type, node);
+        }
       } else {
         result = recordType(type, node);
       }
@@ -364,5 +429,20 @@ export function createSourceData(
     }
   }
 
-  return { entries, type: lower, presence, record, get: (type) => lookupDataType(entries, type) };
+  function valueType(node: ts.Node, declared?: ts.Type): ValueType {
+    if (declared !== undefined) return lower(node, declared);
+    const type = checker.getTypeAtLocation(node);
+    const textLiterals = type.isUnion()
+      ? type.types.every(arm => arm.isStringLiteral() && !(arm.flags & ts.TypeFlags.EnumLike))
+      : type.isStringLiteral() && !(type.flags & ts.TypeFlags.EnumLike);
+    if (textLiterals && ts.isExpression(node)) {
+      const context = checker.getContextualType(node);
+      if (context ? checker.isTypeAssignableTo(checker.getStringType(), context) : ts.isStringLiteralLike(node)) {
+        return 'text';
+      }
+    }
+    return lower(node, type);
+  }
+
+  return { entries, type: valueType, textLiteral, presence, record, tagged, get: (type) => lookupDataType(entries, type) };
 }

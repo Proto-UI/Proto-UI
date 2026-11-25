@@ -1,4 +1,4 @@
-import { lookupDataType, type Binding, type DataField, type DataType, type LiteralValue, type ScalarType, type SourceSpan, type ValueType } from '../component-ir.ts';
+import { lookupDataType, type Binding, type DataField, type DataType, type LiteralValue, type ScalarType, type SourceSpan, type TaggedCase, type ValueType } from '../component-ir.ts';
 import { reject } from './diagnostic.ts';
 
 // In Unicode mode a paired surrogate is one astral scalar and cannot match this range.
@@ -164,19 +164,48 @@ function checkValueType(
 
 const dataFields = {
   presence: ['kind', 'value', 'source'], record: ['kind', 'fields', 'source'],
+  'text-literal': ['kind', 'value', 'source'], tagged: ['kind', 'discriminant', 'cases', 'source'],
 } satisfies Record<DataType['kind'], readonly string[]>;
 
-export type RecordFields = ReadonlyMap<DataType, ReadonlyMap<string, DataField>>;
+export interface DataDeclarations {
+  readonly recordFields: ReadonlyMap<DataType, ReadonlyMap<string, DataField>>;
+  readonly taggedCases: ReadonlyMap<DataType, ReadonlyMap<string, TaggedCase>>;
+}
 
-export function checkDataTypes(types: readonly DataType[], parent: SourceSpan): RecordFields {
+export function checkDataTypes(types: readonly DataType[], parent: SourceSpan): DataDeclarations {
   list(types, 'component types', parent);
   const records = new Map<DataType, ReadonlyMap<string, DataField>>();
+  const variants = new Map<DataType, ReadonlyMap<string, TaggedCase>>();
   for (const [index, data] of types.entries()) {
     const label = `Type data:${index}`;
     const source = location(data, label, parent);
     variant(data, label, source, dataFields, []);
+    if (data.kind === 'text-literal') {
+      text(data.value, `${label} literal`, source);
+      continue;
+    }
     if (data.kind === 'presence') {
       checkValueType(data.value, types, `${label} payload`, source, undefined, index);
+      continue;
+    }
+    if (data.kind === 'tagged') {
+      text(data.discriminant, `${label} discriminant`, source);
+      list(data.cases, `${label} cases`, source);
+      if (!data.cases.length) reject('ir-shape', source, `${label} needs at least one tagged case.`);
+      const cases = new Map<string, TaggedCase>();
+      for (const item of data.cases) {
+        const at = location(item, 'tagged case', source);
+        shape(item, 'tagged case', at, ['tag', 'payload', 'source']);
+        text(item.tag, 'case tag', at);
+        if (cases.has(item.tag)) reject('duplicate-name', at, `${label} repeats tag ${JSON.stringify(item.tag)}.`);
+        const payload = lookupDataType(types, item.payload, index);
+        if (payload?.kind !== 'record') reject('ir-shape', at, `${label} case ${JSON.stringify(item.tag)} needs an earlier closed record as its payload.`);
+        if (records.get(payload)!.has(data.discriminant)) {
+          reject('ir-shape', at, `${label} payload already contains its discriminant field ${JSON.stringify(data.discriminant)}.`);
+        }
+        cases.set(item.tag, item);
+      }
+      variants.set(data, cases);
       continue;
     }
     list(data.fields, `${label} fields`, source);
@@ -192,7 +221,7 @@ export function checkDataTypes(types: readonly DataType[], parent: SourceSpan): 
     }
     records.set(data, fields);
   }
-  return records;
+  return { recordFields: records, taggedCases: variants };
 }
 
 export function checkBinding(binding: Binding, parent: SourceSpan, types: readonly DataType[], input = false): void {

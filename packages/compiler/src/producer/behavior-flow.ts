@@ -4,6 +4,7 @@ import type {
   Block,
   Edge,
   Instruction,
+  TaggedCase,
   Terminator,
   Value,
   ValueType,
@@ -15,6 +16,10 @@ interface Incoming {
   readonly from: DraftBlock;
   readonly args: Value[];
 }
+interface Refinement {
+  readonly payload: Operand;
+  readonly tag?: string;
+}
 interface DraftBlock {
   readonly id: string;
   readonly origin: ts.Node;
@@ -22,8 +27,8 @@ interface DraftBlock {
   readonly instructions: Instruction[];
   readonly incoming: Incoming[];
   readonly imports: Map<Slot, Binding>;
-  /** Presence payloads dominated by a match on this exact immutable operand. */
-  readonly payloads: Map<Operand, Operand>;
+  /** Only a match on this exact immutable operand establishes a payload proof. */
+  readonly payloads: Map<Operand, Refinement>;
   end?: Terminator;
 }
 interface Slot {
@@ -39,7 +44,22 @@ export interface PresenceTest {
   readonly presentOnTrue: boolean;
 }
 
-export type Condition = Operand | PresenceTest;
+export interface TagTest {
+  readonly subject: Operand;
+  readonly cases: readonly TaggedCase[];
+  readonly tag: string;
+  readonly presentOnTrue: boolean;
+}
+
+export type MatchTest = PresenceTest | TagTest;
+export type Condition = Operand | MatchTest;
+
+export interface SwitchDispatch {
+  readonly tagged?: { readonly subject: Operand; readonly cases: readonly TaggedCase[]; readonly labels: ReadonlyMap<string, number> };
+  readonly selector: Operand;
+  readonly fallback: number;
+  readonly tests: readonly { readonly index: number; readonly node: ts.CaseClause; readonly value: Value }[];
+}
 
 export function knownText(operand: Operand): string | undefined {
   return 'slot' in operand
@@ -56,6 +76,7 @@ export class BehaviorFlow {
   private readonly owner: Binding;
   private readonly blocks: DraftBlock[] = [];
   private current: DraftBlock;
+  private readonly switches: ((node: ts.BreakStatement) => void)[] = [];
   readonly entry: string;
 
   constructor(source: SourceContext, owner: Binding, origin: ts.Node) {
@@ -69,7 +90,7 @@ export class BehaviorFlow {
     return this.source.binding(node, JSON.stringify(['behavior', this.owner.id, role]), name, type);
   }
 
-  private block(node: ts.Node, role: string, payloads?: ReadonlyMap<Operand, Operand>): DraftBlock {
+  private block(node: ts.Node, role: string, payloads?: ReadonlyMap<Operand, Refinement>): DraftBlock {
     const block: DraftBlock = {
       id: this.binding(node, `block/${role}`, role, 'unit').id,
       origin: node,
@@ -116,7 +137,20 @@ export class BehaviorFlow {
     return 'slot' in operand ? this.readIn(operand.slot, this.current) : operand.value;
   }
 
-  payload(subject: Operand): Operand | undefined {
+  parameter(binding: Binding): Operand {
+    return { type: binding.type, slot: { block: this.blocks[0]!, binding } };
+  }
+
+  suspend(node: ts.AwaitExpression, external: Binding, args: readonly Value[]): Operand {
+    const next = this.block(node, 'resume', this.current.payloads);
+    const result = this.binding(node, 'await-result', 'result', external.type);
+    next.params.push(result);
+    this.terminate({ kind: 'await', extern: external.id, args, resume: this.edge(this.current, next), source: this.source.span(node) });
+    this.current = next;
+    return { type: result.type, slot: { block: next, binding: result } };
+  }
+
+  refinement(subject: Operand): Refinement | undefined {
     return this.current.payloads.get(subject);
   }
 
@@ -143,6 +177,7 @@ export class BehaviorFlow {
       case 'bool':
       case 'number':
       case 'text':
+      case 'literal-text':
       case 'tokens':
       case 'local':
         return operand;
@@ -161,7 +196,80 @@ export class BehaviorFlow {
     return this.current.end !== undefined;
   }
 
+  private match(node: ts.Node, subject: Operand, cases: readonly TaggedCase[]): DraftBlock[] {
+    const blocks = cases.map(({ tag, payload }) => {
+      const block = this.block(node, JSON.stringify(['case', tag]), this.current.payloads);
+      const binding = this.binding(node, JSON.stringify(['case-payload', tag]), 'payload', payload);
+      block.params.push(binding);
+      block.payloads.set(subject, { tag, payload: { type: payload, slot: { block, binding } } });
+      return block;
+    });
+    this.terminate({ kind: 'match', value: this.value(subject), source: this.source.span(node),
+      cases: cases.map(({ tag }, i) => ({ tag, to: this.edge(this.current, blocks[i]!) })) });
+    return blocks;
+  }
+
+  private merge(node: ts.Node, role: string, blocks: readonly DraftBlock[]): DraftBlock {
+    if (blocks.length === 1) return blocks[0]!;
+    const merged = this.block(node, role, blocks[0]?.payloads);
+    for (const [subject, payload] of merged.payloads) {
+      if (blocks.some(block => block.payloads.get(subject) !== payload)) merged.payloads.delete(subject);
+    }
+    for (const block of blocks) this.jump(block, merged, node);
+    return merged;
+  }
+
+  breakSwitch(node: ts.BreakStatement): void {
+    const leave = this.switches.at(-1);
+    if (node.label || !leave) return this.source.missing(node, 'producer/break-target', 'This break needs its resolved enclosing control target.');
+    leave(node);
+  }
+
+  switchStatement(node: ts.SwitchStatement, dispatch: SwitchDispatch, lower: (clause: ts.CaseOrDefaultClause) => void): void {
+    const clauses = node.caseBlock.clauses;
+    const incoming: DraftBlock[][] = Array.from({ length: clauses.length + 1 }, () => []);
+    if (dispatch.tagged) {
+      const { subject, cases, labels } = dispatch.tagged;
+      const blocks = this.match(node, subject, cases);
+      cases.forEach(({ tag }, index) => incoming[labels.get(tag) ?? dispatch.fallback]!.push(blocks[index]!));
+    } else {
+      for (const test of dispatch.tests) {
+        const condition: Operand = { type: 'bool', value: { kind: 'binary', op: 'equal', left: this.value(dispatch.selector), right: test.value } };
+        const [yes, no] = this.fork(test.node, condition);
+        incoming[test.index]!.push(yes);
+        this.current = no;
+      }
+      incoming[dispatch.fallback]!.push(this.current);
+    }
+    const exits = incoming[clauses.length]!;
+    this.switches.push(at => {
+      // End this branch immediately; the fresh block carries its facts to the common exit.
+      const exit = this.block(at, 'break', this.current.payloads);
+      this.jump(this.current, exit, at);
+      exits.push(exit);
+    });
+    try {
+      for (const [index, clause] of clauses.entries()) {
+        const entries = incoming[index]!;
+        if (!entries.length) continue;
+        this.current = this.merge(clause, 'case-entry', entries);
+        lower(clause);
+        if (!this.terminated) incoming[index + 1]!.push(this.current);
+      }
+    } finally {
+      this.switches.pop();
+    }
+    if (exits.length) this.current = this.merge(node, 'switch-exit', exits);
+  }
+
   private fork(node: ts.Node, condition: Condition): [DraftBlock, DraftBlock] {
+    if ('cases' in condition) {
+      const blocks = this.match(node, condition.subject, condition.cases);
+      const index = condition.cases.findIndex(arm => arm.tag === condition.tag);
+      const selected = blocks[index]!;
+      const other = this.merge(node, 'other-tags', blocks.filter((_, i) => i !== index));
+      return condition.presentOnTrue ? [selected, other] : [other, selected];
+    }
     const yes = this.block(node, 'yes', this.current.payloads);
     const no = this.block(node, 'no', this.current.payloads);
     const source = this.source.span(node);
@@ -170,10 +278,7 @@ export class BehaviorFlow {
       const omitted = condition.presentOnTrue ? no : yes;
       const binding = this.binding(node, 'present-value', 'presentValue', condition.payloadType);
       present.params.push(binding);
-      present.payloads.set(condition.subject, {
-        type: binding.type,
-        slot: { block: present, binding },
-      });
+      present.payloads.set(condition.subject, { payload: { type: binding.type, slot: { block: present, binding } } });
       // The receiver supplies the payload as the first present parameter. Only
       // normal SSA transfers are added to this edge's explicit argument list.
       this.terminate({

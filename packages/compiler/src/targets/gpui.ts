@@ -6,6 +6,8 @@ import { pipeline } from 'node:stream/promises';
 import { fileURLToPath } from 'node:url';
 import type { ComponentIR } from './component-ir.ts';
 import { ComponentIRDiagnostic, validateComponent } from './validate.ts';
+import { requireExternBinding, type GpuiExternBindings } from './extern-bindings.ts';
+export type { GpuiExternBindings } from './extern-bindings.ts';
 
 const manifest = fileURLToPath(new URL('../../targets/gpui/Cargo.toml', import.meta.url));
 
@@ -21,8 +23,8 @@ function generatorError(status: number | string | null, diagnostic: string): Err
     throw error;
   }
   if (
-    record?.code !== 'host-name' ||
-    record.category !== 'backend-missing' ||
+    (record?.code !== 'host-name' && record?.code !== 'extern-unbound') ||
+    record.category !== (record.code === 'extern-unbound' ? 'extern-unbound' : 'backend-missing') ||
     typeof record.message !== 'string'
   )
     return failure;
@@ -38,21 +40,33 @@ function generatorError(status: number | string | null, diagnostic: string): Err
     !bindings.every((binding: unknown) => typeof binding === 'string')
   )
     return failure;
-  return new ComponentIRDiagnostic('host-name', source, record.message, bindings);
+  return new ComponentIRDiagnostic(record.code, source, record.message, bindings);
 }
 
 /** Emit an ordinary Rust module. The generator binary belongs to the compiler
  * machine; generated applications never link the generator or receive its IR. */
 export async function emitGpui(
   ir: ComponentIR,
-  options: { generator?: string } = {}
+  options: { generator?: string; bindings?: GpuiExternBindings } = {}
 ): Promise<string> {
-  validateComponent(ir);
+  const reached = validateComponent(ir);
+  const registrations: string[] = [];
+  const registered = new Set<string>();
+  for (const { extern, source, callPath } of reached) {
+    const binding = requireExternBinding(extern, 'gpui', options.bindings, source, callPath);
+    if (binding.path.includes('\0') || extern.name.includes('\0')) {
+      throw new ComponentIRDiagnostic('host-name', source, 'A Rust generator argument cannot contain a null character.', callPath);
+    }
+    if (!registered.has(extern.name)) {
+      registrations.push('--extern', extern.name, binding.path);
+      registered.add(extern.name);
+    }
+  }
   const command = options.generator ?? 'cargo';
   const args =
     options.generator === undefined
-      ? ['run', '--quiet', '--locked', '--manifest-path', manifest]
-      : [];
+      ? ['run', '--quiet', '--locked', '--manifest-path', manifest, ...(registrations.length ? ['--', ...registrations] : [])]
+      : registrations;
   const child = spawn(command, args, { stdio: ['pipe', 'pipe', 'pipe'] });
   const input = pipeline(Readable.from([JSON.stringify(ir)]), child.stdin);
   const [completion, output, diagnostic, written] = await Promise.allSettled([

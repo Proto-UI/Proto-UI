@@ -34,6 +34,8 @@ const instructionFields = {
   write: ['kind', 'source', 'target', 'value'],
   emit: ['kind', 'source', 'target', 'value'],
   invoke: ['kind', 'source', 'fn', 'args'],
+  start: ['kind', 'source', 'task', 'args'],
+  cancel: ['kind', 'source', 'task'],
 } satisfies Record<Instruction['kind'], readonly string[]>;
 
 const terminatorFields = {
@@ -42,6 +44,8 @@ const terminatorFields = {
   jump: ['kind', 'source', 'to'],
   branch: ['kind', 'source', 'condition', 'yes', 'no'],
   presence: ['kind', 'source', 'value', 'present', 'omitted'],
+  match: ['kind', 'source', 'value', 'cases'],
+  await: ['kind', 'source', 'extern', 'args', 'resume'],
 } satisfies Record<Terminator['kind'], readonly string[]>;
 
 export function checkSignature(fn: Behavior, parent: SourceSpan, types: readonly DataType[]): void {
@@ -49,8 +53,8 @@ export function checkSignature(fn: Behavior, parent: SourceSpan, types: readonly
   checkBinding(binding, parent, types);
   const source = binding.source;
   shape(fn, 'behavior', source, ['binding', 'phase', 'params', 'dependencies', 'entry', 'blocks']);
-  if (fn.phase !== 'action' && fn.phase !== 'init' && fn.phase !== 'pure') {
-    reject('ir-shape', source, 'Behavior phase must be init, pure or action.', [binding.id]);
+  if (fn.phase !== 'action' && fn.phase !== 'init' && fn.phase !== 'pure' && fn.phase !== 'task') {
+    reject('ir-shape', source, 'Behavior phase must be init, pure, action or task.', [binding.id]);
   }
   list(fn.params, 'behavior parameters', source);
   for (const param of fn.params) {
@@ -125,11 +129,11 @@ function checkBlock(
           at,
           [owner, target.id]
         );
-        if (fn.phase !== 'action') {
+        if (fn.phase !== 'action' && !(fn.phase === 'task' && instruction.kind === 'write')) {
           reject(
             'illegal-effect',
             at,
-            `${fn.phase} behavior ${JSON.stringify(owner)} cannot ${instruction.kind} ${JSON.stringify(target.id)}. Move this ordered effect to an action.`,
+            `${fn.phase} behavior ${JSON.stringify(owner)} cannot ${instruction.kind} ${JSON.stringify(target.id)}. ${instruction.kind === 'emit' ? 'Emit the signal from an action.' : 'Write state from an action or owned task segment.'}`,
             [owner, target.id]
           );
         }
@@ -142,7 +146,7 @@ function checkBlock(
           reject(
             'invalid-phase',
             at,
-            `An invoke instruction requires an action helper. Use a value call for ${JSON.stringify(instruction.fn)}.`,
+            `An invoke instruction requires an action helper. Use ${target.phase === 'task' ? 'a task start' : 'a value call'} for ${JSON.stringify(instruction.fn)}.`,
             [owner, instruction.fn]
           );
         }
@@ -153,6 +157,18 @@ function checkBlock(
             `${fn.phase} behavior ${JSON.stringify(owner)} cannot invoke action ${JSON.stringify(instruction.fn)}. Move the call to an action segment.`,
             [owner, instruction.fn]
           );
+        }
+        break;
+      }
+      case 'start':
+      case 'cancel': {
+        const task = resolve(declarations.tasks, instruction.task, 'Owned task', at, owner);
+        if (fn.phase !== 'action' && fn.phase !== 'task') {
+          reject('illegal-effect', at, `${fn.phase} behavior ${JSON.stringify(owner)} cannot ${instruction.kind} a task. Stage the command from an action or task segment.`, [owner, instruction.task]);
+        }
+        if (instruction.kind === 'start') {
+          values.argumentsOf(instruction.args, task.params, 'Start of task', instruction.task, at);
+          if (!uses.starts.has(instruction.task)) uses.starts.set(instruction.task, at);
         }
         break;
       }
@@ -202,6 +218,33 @@ function checkBlock(
       const payload = values.presencePayload(end.value, at);
       edge(end.present, payload);
       edge(end.omitted);
+      break;
+    }
+    case 'match': {
+      const cases = values.casesOf(values.typeOf(end.value, at), at);
+      list(end.cases, 'match cases', at);
+      const covered = new Set<string>();
+      for (const arm of end.cases) {
+        shape(arm, 'match arm', at, ['tag', 'to'], [], blockBindings);
+        text(arm.tag, 'match arm tag', at, blockBindings);
+        const item = cases.get(arm.tag);
+        if (!item) reject('type-mismatch', at, `The matched type has no tag ${JSON.stringify(arm.tag)}.`, blockBindings);
+        if (covered.has(arm.tag)) reject('duplicate-name', at, `Match repeats tag ${JSON.stringify(arm.tag)}.`, blockBindings);
+        covered.add(arm.tag);
+        edge(arm.to, item.payload);
+      }
+      if (covered.size !== cases.size) {
+        const missing = [...cases.keys()].filter(tag => !covered.has(tag));
+        reject('ir-shape', at, `Match must cover each declared tag. Missing ${missing.map(tag => JSON.stringify(tag)).join(', ')}.`, blockBindings);
+      }
+      break;
+    }
+    case 'await': {
+      if (fn.phase !== 'task') reject('illegal-effect', at, `A ${fn.phase} behavior cannot await an external operation. Await it in an owned task.`, blockBindings);
+      const operation = resolve(declarations.externs, end.extern, 'Awaited extern', at, owner);
+      values.argumentsOf(end.args, operation.params, 'Await of', end.extern, at);
+      edge(end.resume, operation.binding.type);
+      if (!uses.awaits.has(end.extern)) uses.awaits.set(end.extern, at);
       break;
     }
   }
@@ -259,7 +302,7 @@ export function checkBehavior(fn: Behavior, declarations: Declarations): Behavio
       [owner, entry.id]
     );
   }
-  const uses: Uses = { reads: new Map(), calls: new Map() };
+  const uses: Uses = { reads: new Map(), calls: new Map(), starts: new Map(), awaits: new Map() };
   const graph = new Map<string, References>();
   let missing: ComponentIRDiagnostic | undefined;
   // Check both arms of every branch. Dead blocks must still be well-formed, but
@@ -271,7 +314,7 @@ export function checkBehavior(fn: Behavior, declarations: Declarations): Behavio
     checkBlock(fn, block, blocks, declarations, params, uses, successors);
     graph.set(key, successors);
     for (const next of successors.keys()) reachable.add(next);
-    if (block.end.kind === 'fail' && fn.phase !== 'action' && !missing) {
+    if (block.end.kind === 'fail' && fn.phase !== 'action' && fn.phase !== 'task' && !missing) {
       missing = new ComponentIRDiagnostic(
         'failing-value',
         block.end.source,
@@ -288,7 +331,7 @@ export function checkBehavior(fn: Behavior, declarations: Declarations): Behavio
         blocks,
         declarations,
         params,
-        { reads: new Map(), calls: new Map() },
+        { reads: new Map(), calls: new Map(), starts: new Map(), awaits: new Map() },
         new Map()
       );
   }

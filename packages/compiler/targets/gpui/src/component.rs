@@ -1,11 +1,12 @@
 use crate::behavior::{self, entry_call};
 use crate::check::{Checked, Place, Result};
-use crate::ir::{Data, Type};
+use crate::ir::{Phase, Type};
 use crate::names::{self, Names};
 use proc_macro2::TokenStream;
 use quote::quote;
 use std::collections::BTreeSet;
 #[path = "logical.rs"] mod logical;
+#[path = "tasks.rs"] mod tasks;
 
 struct Component<'c, 'a> {
     checked: &'c Checked<'a>,
@@ -15,18 +16,21 @@ struct Component<'c, 'a> {
     methods: Vec<TokenStream>,
 }
 
+pub fn transactional(c: &Checked<'_>) -> bool { !c.actions.is_empty() || !c.tasks.is_empty() }
+
 pub fn generate(checked: &Checked<'_>) -> Result<syn::File> {
     let names = Names::new(checked)?;
     let observed = checked.derived.iter().flat_map(|&f| checked.bodies[f].facts.reads.iter().copied()).collect();
     let methods = behavior::methods(checked, &names);
     let mut builder = Component { checked, names, observed, items: Vec::new(), methods };
-    builder.composites()?;
+    if checked.index == 0 { builder.items.extend(crate::native_data::declarations(checked, &builder.names)?); }
     builder.data_types()?;
     builder.view_type()?;
     builder.public_projection();
     builder.props_update()?;
     builder.signal_type()?;
-    if !checked.actions.is_empty() { builder.actions()?; }
+    builder.task_api()?;
+    if transactional(checked) { builder.actions()?; }
     let owner = &builder.names.component;
     let methods = &builder.methods;
     builder.item(quote!(#[allow(non_snake_case)] impl #owner { #(#methods)* }))?;
@@ -52,47 +56,6 @@ impl Component<'_, '_> {
     fn pure(&self, id: &str, receiver: TokenStream) -> TokenStream {
         let f = self.checked.functions[id];
         entry_call(self.checked, f, vec![], |p| self.published(p, &receiver), |_| unreachable!("checked pure behavior"), TokenStream::new())
-    }
-
-    fn composites(&mut self) -> Result<()> {
-        if self.checked.index != 0 { return Ok(()); }
-        for (i, data) in self.checked.unit.types.iter().enumerate() {
-            let n = &self.names.data[i];
-            let compare = comparison(i);
-            let (decl, changed) = match data {
-                Data::Presence { value, source } => {
-                    let payload = self.names.ty(*value);
-                    let doc = names::source_doc("presence", source);
-                    let inner = differs(*value, quote!(*left), quote!(*right));
-                    (quote!(#[doc = #doc] #[allow(non_camel_case_types)] pub type #n = ::core::option::Option<#payload>;), quote! {
-                        match (left, right) {
-                            (::core::option::Option::Some(left), ::core::option::Option::Some(right)) => #inner,
-                            (::core::option::Option::None, ::core::option::Option::None) => false,
-                            _ => true,
-                        }
-                    })
-                }
-                Data::Record { fields, source } => {
-                    let doc = names::source_doc("record", source);
-                    let mut members = Vec::new();
-                    let mut checks = Vec::new();
-                    for (f, member) in fields.iter().zip(&self.names.members[i]) {
-                        let ty = self.names.ty(f.ty);
-                        let doc = names::source_doc(&f.name, &f.source);
-                        members.push(quote!(#[doc = #doc] pub #member: #ty));
-                        checks.push(differs(f.ty, quote!(left.#member), quote!(right.#member)));
-                    }
-                    let changed = if checks.is_empty() { quote!(false) } else { quote!(#(#checks)||*) };
-                    (quote!(#[doc = #doc] #[allow(non_camel_case_types, non_snake_case)] #[derive(Clone, Debug, PartialEq)] pub struct #n { #(#members),* }), changed)
-                }
-            };
-            // Rust PartialEq implements language equality. Publication recurses through
-            // this separate comparison so NaN and signed zero retain their reactive rules.
-            let comparison = quote!(#[allow(dead_code, unused_variables)] fn #compare(left: &#n, right: &#n) -> ::core::primitive::bool { #changed });
-            self.item(decl)?;
-            self.item(comparison)?;
-        }
-        Ok(())
     }
 
     fn data_types(&mut self) -> Result<()> {
@@ -171,7 +134,7 @@ impl Component<'_, '_> {
             initializers.push(quote!(let #n = #init;));
             initialized.push(quote!(#n));
         }
-        if !self.checked.actions.is_empty() {
+        if transactional(self.checked) {
             fields.push(quote!(publication: ::proto_ui_gpui_support::PublicationQueue<#command>));
             initialized.push(quote!(publication: ::core::default::Default::default()));
         }
@@ -267,7 +230,7 @@ impl Component<'_, '_> {
         let mut linked_input_error = None;
         if self.checked.links.scoped {
             let reject = fixed.then(|| quote!(if let ::core::result::Result::Err(error) = self.__pui_check_input(&props) { cx.emit(error); return; }));
-            let transactional = !self.checked.actions.is_empty();
+            let transactional = transactional(self.checked);
             let enqueue = transactional.then(|| quote!(self.publication.after_effects(cx, Self::__pui_resume);));
             let submit = if transactional { quote!(self.__pui_submit(#command::Link(props, scope.clone()), cx);) } else { quote!(self.__pui_link_now(props, scope, cx);) };
             self.methods.push(quote! {
@@ -283,7 +246,7 @@ impl Component<'_, '_> {
             if fixed { linked_input_error = Some(quote!(impl ::gpui::EventEmitter<#input_error> for #owner {})); }
         }
         let outcome = quote!(::proto_ui_gpui_support::ActionOutcome);
-        if self.checked.actions.is_empty() {
+        if !transactional(self.checked) {
             let ret = fixed.then(|| quote!(-> ::core::result::Result<#outcome, #input_error>));
             let success = fixed.then(|| quote!(::core::result::Result::Ok(#outcome::Committed)));
             self.methods.push(quote! {
@@ -413,8 +376,10 @@ impl Component<'_, '_> {
                 }
             }
         } else { quote!(self.__pui_run(command, cx);) };
+        let disposed = self.has_owned_scope(self.checked.index).then(|| quote!(if self.retired { return #outcome::Disposed; }));
         self.methods.push(quote! {
             fn __pui_submit(&mut self, command: #command, cx: &mut ::gpui::Context<Self>) -> #outcome {
+                #disposed
                 match self.publication.admit(command) {
                     ::core::option::Option::Some(command) => self.__pui_run(command, cx),
                     ::core::option::Option::None => #outcome::Queued,
@@ -438,13 +403,18 @@ impl Component<'_, '_> {
     }
 
     fn action_body(&self, f: usize) -> TokenStream {
-        let ir = self.checked.ir;
-        let facts = &self.checked.bodies[f].facts;
-        let outcome = quote!(::proto_ui_gpui_support::ActionOutcome);
-        let args = ir.behaviors[f].params.iter().enumerate().map(|(i, p)| {
+        let args = self.checked.ir.behaviors[f].params.iter().enumerate().map(|(i, p)| {
             let n = names::argument(i);
             names::as_input(p.ty, quote!(#n))
         }).collect();
+        self.transaction(f, self.checked.bodies[f].entry, args)
+    }
+
+    fn transaction(&self, f: usize, b: usize, args: Vec<TokenStream>) -> TokenStream {
+        let ir = self.checked.ir;
+        let facts = &self.checked.bodies[f].facts;
+        let is_task = ir.behaviors[f].phase == Phase::Task;
+        let outcome = quote!(::proto_ui_gpui_support::ActionOutcome);
         let mut stage = Vec::new();
         let mut commit = Vec::new();
         let mut changes_view = false;
@@ -462,14 +432,16 @@ impl Component<'_, '_> {
                 if let ::core::option::Option::Some(next) = #slot.finish() { #check self.#field = next; }
             });
         }
-        let signals = !facts.signals.is_empty();
+        let signals = behavior::effects(self.checked, facts);
         if signals { stage.push(quote!(let mut signals = ::std::vec::Vec::new();)); }
-        let call = entry_call(self.checked, f, args, |p| self.published(p, &quote!(self)), |i| { let n = names::pending(i); quote!(&mut #n) }, quote!(&mut signals));
-        let run = if facts.fallible { quote!(if let ::core::result::Result::Err(failure) = #call { return #outcome::Failed(failure); }) } else { quote!(#call;) };
+        let call = behavior::block_call(self.checked, f, b, args, |p| self.published(p, &quote!(self)), |i| { let n = names::pending(i); quote!(&mut #n) }, quote!(&mut signals));
+        let run = if is_task { quote!(let next_step = #call?;) }
+            else if facts.fallible { quote!(if let ::core::result::Result::Err(failure) = #call { return #outcome::Failed(failure); }) } else { quote!(#call;) };
         let track = changes_view.then(|| quote!(let mut changed = false;));
         let sync = self.checked.links.scoped.then(|| quote!(self.__pui_refresh(false, cx);));
         let notify = changes_view.then(|| quote!(if changed { #sync cx.notify(); }));
-        let emit = signals.then(|| quote!(for signal in signals { cx.emit(signal); }));
+        let emit = signals.then(|| if self.checked.tasks.is_empty() { quote!(for signal in signals { cx.emit(signal); }) }
+            else { quote!(for effect in signals { self.__pui_effect(effect, cx); }) });
         let effects = match (changes_view, signals) {
             (true, true) => Some(quote!(changed || !signals.is_empty())),
             (true, false) => Some(quote!(changed)), (false, true) => Some(quote!(!signals.is_empty())),
@@ -478,7 +450,8 @@ impl Component<'_, '_> {
         let publish = effects.map(|active| quote! {
             if #active { #notify #emit self.publication.after_effects(cx, Self::__pui_resume); }
         });
-        quote! { #(#stage)* #run #track #(#commit)* #publish #outcome::Committed }
+        let done = if is_task { quote!(::core::result::Result::Ok(next_step)) } else { quote!(#outcome::Committed) };
+        quote! { #(#stage)* #run #track #(#commit)* #publish #done }
     }
 
 }

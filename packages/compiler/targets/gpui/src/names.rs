@@ -5,7 +5,7 @@ use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 use std::collections::HashSet;
 
-fn identifier(name: &str) -> Option<Ident> {
+pub fn identifier(name: &str) -> Option<Ident> {
     if name.starts_with("r#") || (!name.is_ascii() && !ComposingNormalizer::new_nfc().is_normalized(name)) {
         return None;
     }
@@ -22,7 +22,7 @@ pub fn public(name: &str, id: &str, source: &Source) -> Result<Ident, String> {
     identifier(name).ok_or_else(|| host_name_error(id, source, format!("GPUI cannot expose {name:?} with its exact spelling as a Rust identifier. Use an NFC Rust identifier.")))
 }
 
-fn host_name_error(id: &str, source: &Source, message: String) -> String {
+pub fn host_name_error(id: &str, source: &Source, message: String) -> String {
     serde_json::json!({
         "category": "backend-missing", "code": "host-name", "bindings": [id],
         "source": { "file": source.file, "start": source.start, "end": source.end },
@@ -30,9 +30,10 @@ fn host_name_error(id: &str, source: &Source, message: String) -> String {
     }).to_string()
 }
 
-pub fn check_linked_names(bodies: &[Checked<'_>]) -> Result<(), String> {
+pub fn generated_types(bodies: &[Checked<'_>]) -> HashSet<String> {
     let root = &bodies[0];
-    let mut generated = HashSet::from(["ContextScope".to_owned(), "MissingContext".to_owned()]);
+    let mut generated = HashSet::new();
+    if root.links.scoped { generated.extend(["ContextScope".to_owned(), "MissingContext".to_owned()]); }
     if !root.unit.keys.is_empty() { generated.insert("ScopeKey".to_owned()); }
     if root.links.children.iter().any(|sites| sites.len() > 1) { generated.insert("ChildKeyConflict".to_owned()); }
     for i in 0..root.unit.keys.len() { generated.insert(crate::context::marker(i).to_string()); }
@@ -42,9 +43,15 @@ pub fn check_linked_names(bodies: &[Checked<'_>]) -> Result<(), String> {
         generated.extend([format!("{n}Props"), format!("{n}Projection")]);
         if !b.ir.signals.is_empty() { generated.insert(format!("{n}Signal")); }
         if !b.ir.actions.is_empty() { generated.insert(format!("{n}Actions")); }
-        if !b.actions.is_empty() { generated.insert(format!("{n}Command")); }
+        if crate::component::transactional(b) { generated.insert(format!("{n}Command")); }
+        if !b.tasks.is_empty() { generated.extend([format!("{n}Tasks"), format!("{n}CommittedEffect")]); }
         if b.ir.props.iter().any(|p| p.control_mode.is_some()) { generated.insert(format!("{n}InputError")); }
     }
+    generated
+}
+
+pub fn check_linked_names(bodies: &[Checked<'_>]) -> Result<(), String> {
+    let generated = generated_types(bodies);
     for b in bodies {
         if generated.contains(&b.ir.name) {
             return Err(host_name_error(&b.ir.id, &b.ir.source, format!("The linked component {:?} and a generated GPUI type need the same Rust identifier. Give the component a distinct export name.", b.ir.name)));

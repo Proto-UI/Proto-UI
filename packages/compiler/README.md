@@ -1,11 +1,11 @@
 # Proto language compiler foundation
 
-The package compiles a bounded 0.4 authoring surface through a shared TypeScript Program and checked component and behavior IR. The versioned readonly Badge and fixed-mode controlled Toggle run in ordinary React and GPUI applications. The package also provides partial Proto lint and an editor analysis API.
+The package compiles a bounded 0.4 authoring surface through a shared TypeScript Program and checked component and behavior IR. The versioned Badge, controlled Toggle and owned async Tabs run in ordinary React and GPUI applications. The package also provides partial Proto lint and an editor analysis API.
 
 | Target         | Replacement implementation |
 | -------------- | -------------------------- |
-| React          | Authored Badge and Toggle with typed public state and requests in Chromium |
-| GPUI           | The same authored inputs and IR with native paint and pointer input |
+| React          | Authored Badge, Toggle and Tabs with typed public state, requests and a loopback loader in Chromium |
+| GPUI           | The same authored inputs and IR with native paint, pointer input and a file-backed Tabs loader |
 | Vue 2          | Not implemented            |
 | Vue 3          | Not implemented            |
 | Web Components | Not implemented            |
@@ -33,7 +33,22 @@ Compilation, lint and editor analysis prepare their inputs through `createProtoP
 
 The Toggle's optional boolean input selects its mode at creation. A controlled click delivers a typed, immutable `{ active: boolean }` request. The committed public value follows the owner's accepted input. An uncontrolled instance initializes from `defaultActive` once and commits local changes. Both hosts reject a mode change on the same instance and retain its last accepted inputs.
 
-The source producer also links nominal Context keys, pure provider values, required reads and stable text-keyed children in one compilation unit. The authored `LevelOwner` and `LevelReader` fixture exercises live provider updates, same-label key identity, replacement by an equal-valued provider and retained child initialization. Chromium observes a portal and GPUI observes physical detachment and reattachment. Both exports in the versioned async Tabs example still reach an unsupported tagged state type at the `def.state` declaration.
+The source producer also links nominal Context keys, pure provider values, required reads and stable text-keyed children in one compilation unit. The authored `LevelOwner` and `LevelReader` fixture exercises live provider updates, same-label key identity, replacement by an equal-valued provider and retained child initialization. Chromium observes a portal and GPUI observes physical detachment and reattachment.
+
+The versioned Tabs owner and `AsyncTabPanel` both reach the declared extern `authoring.load-tab`. Pass `--bindings host-bindings.json` to `compile` when emitting either export. The path is relative to the working directory. In this example the React entry names an ESM export and the GPUI entry names a Rust function in the consuming crate.
+
+```json
+{
+  "react": { "authoring.load-tab": { "module": "./tabs-loader", "export": "loadTab" } },
+  "gpui": { "authoring.load-tab": { "path": "crate::tabs_loader::load_panel_tab" } }
+}
+```
+
+```sh
+node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/context-owned-async-tabs.proto.ts.txt --export AsyncTabPanel --target react --bindings host-bindings.json
+```
+
+The React function takes the selected `string` and an `AbortSignal` and returns `LoadTabResult` or a `PromiseLike<LoadTabResult>`. The Rust function takes the selected `String` and `&mut gpui::AsyncApp` and returns `TaskOperation<LoadTabResult>` using the selected generated module's result type. Missing registration on the selected target reports `extern-unbound` at the actual await and includes the reached binding chain. The output file is replaced only after successful emission.
 
 ## Native-source targets
 
@@ -45,6 +60,8 @@ The host suites compile the versioned sources and import the generated component
 node --test packages/compiler/test/react-target.node-test.mjs
 node --test packages/compiler/test/controlled-source-react.node-test.mjs
 node --test packages/compiler/test/context-source-react.node-test.mjs
+node --test packages/compiler/test/tabs-source-react.node-test.mjs
+node --test packages/compiler/test/extern-bindings-cli.node-test.mjs
 node --test packages/compiler/test/gpui-target.node-test.mjs
 ```
 

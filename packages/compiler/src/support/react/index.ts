@@ -2,6 +2,7 @@ export { HostValueError, missingInput, numberFromBits, ownMember, readBool, read
 export { InputRejectionContext, omittedInput, presentInput, useFixedInputs, type InputPresence } from './inputs.ts';
 export { MissingProviderError, createNativeContext, useContextSnapshot, useProvidedContext, useRequiredContext, type ContextValue, type NativeContext } from './context.ts';
 export { DisposedInstanceError, usePublishedInputs, type InputLease } from './lifetime.ts';
+export { checkTaskResult, observeNativeTask } from './task.ts';
 export {
   ActionFailure,
   FieldDraft,

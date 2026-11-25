@@ -49,6 +49,8 @@ pub struct Facts {
     pub writes: BTreeSet<usize>,
     pub signals: BTreeSet<usize>,
     pub calls: BTreeSet<usize>,
+    starts: BTreeSet<usize>,
+    pub task_effects: bool,
     pub fallible: bool,
 }
 
@@ -56,6 +58,7 @@ impl Facts {
     fn include_effects(&mut self, other: &Facts) {
         self.writes.extend(&other.writes);
         self.signals.extend(&other.signals);
+        self.task_effects |= other.task_effects;
         self.fallible |= other.fallible;
     }
 
@@ -84,6 +87,7 @@ pub struct Checked<'a> {
     pub reached: Vec<usize>,
     pub derived: BTreeSet<usize>,
     pub actions: BTreeSet<usize>,
+    pub tasks: BTreeSet<usize>,
     pub has_styles: bool,
     pub members: &'a [HashMap<&'a str, usize>],
 }
@@ -91,6 +95,7 @@ pub struct Checked<'a> {
 pub struct Links<'a> {
     pub components: HashMap<&'a str, usize>,
     pub keys: HashMap<&'a str, usize>,
+    pub externs: HashMap<&'a str, usize>,
     pub children: Vec<Vec<&'a View>>,
     pub required: Vec<BTreeMap<usize, &'a Source>>,
     pub scoped: bool,
@@ -106,10 +111,21 @@ struct Walk {
 // Visit the whole closure even for an unsupported loop. Its read dependencies
 // are still part of the wire contract, including on an unused behavior.
 fn postorder(roots: impl IntoIterator<Item = usize>, edges: &[Vec<usize>]) -> Walk {
+    scheduled_postorder(roots, edges, |_, _| {})
+}
+
+// A committed start adds another root. It does not put the task on the caller's
+// synchronous stack or propagate its reads, writes, or failures into the caller.
+fn scheduled_postorder(
+    roots: impl IntoIterator<Item = usize>, edges: &[Vec<usize>],
+    mut schedule: impl FnMut(usize, &mut Vec<usize>),
+) -> Walk {
     let mut marks = vec![0; edges.len()];
     let mut order = Vec::new();
     let mut cycle = None;
-    for root in roots {
+    let mut roots = roots.into_iter();
+    let mut scheduled = Vec::new();
+    while let Some(root) = roots.next().or_else(|| scheduled.pop()) {
         if marks[root] != 0 { continue; }
         marks[root] = 1;
         let mut path = vec![(root, 0)];
@@ -127,6 +143,7 @@ fn postorder(roots: impl IntoIterator<Item = usize>, edges: &[Vec<usize>]) -> Wa
                 }
             } else {
                 marks[*id] = 2;
+                schedule(*id, &mut scheduled);
                 order.push(*id);
                 path.pop();
             }
@@ -169,12 +186,31 @@ fn cycle_through(root: usize, edges: &[Vec<usize>]) -> Option<Vec<usize>> {
 
 impl<'a> Links<'a> {
     pub fn new(unit: &'a Unit) -> Result<Self> {
-        if unit.version != 4 { return Err(error(&unit.bodies[0].source, "expected ComponentIR version 4")); }
-        let mut members = Vec::with_capacity(unit.types.len());
+        if unit.version != 5 { return Err(error(&unit.bodies[0].source, "expected ComponentIR version 5")); }
+        // Record fields and tagged cases both have exact string names local to their type.
+        let mut members: Vec<HashMap<&str, usize>> = Vec::with_capacity(unit.types.len());
         for (i, data) in unit.types.iter().enumerate() {
-            let mut fields_by_name = HashMap::new();
+            let mut by_name = HashMap::new();
             match data {
+                Data::TextLiteral { source: at, .. } => source(at)?,
                 Data::Presence { value, source: at } => { source(at)?; type_bound(*value, i, at)?; }
+                Data::Tagged { discriminant, cases, source: at } => {
+                    source(at)?;
+                    if cases.is_empty() { return Err(error(at, format_args!("data:{i} requires at least one tagged case"))); }
+                    for (j, case) in cases.iter().enumerate() {
+                        source(&case.source)?;
+                        if by_name.insert(case.tag.as_str(), j).is_some() {
+                            return Err(error(&case.source, format_args!("duplicate tag {:?} in data:{i}", case.tag)));
+                        }
+                        let p = match case.payload {
+                            Type::Data(p) if p < i && matches!(&unit.types[p], Data::Record { .. }) => p,
+                            _ => return Err(error(&case.source, "a tagged payload must be an earlier closed record")),
+                        };
+                        if members[p].contains_key(discriminant.as_str()) {
+                            return Err(error(&case.source, format_args!("payload for {:?} already contains the discriminant {discriminant:?}", case.tag)));
+                        }
+                    }
+                }
                 Data::Record { fields, source: at } => {
                     source(at)?;
                     for (j, field) in fields.iter().enumerate() {
@@ -182,13 +218,36 @@ impl<'a> Links<'a> {
                         type_bound(field.ty, i, &field.source)?;
                         // Record keys are strings. Exact public Rust spelling is
                         // checked separately from record identity and uniqueness.
-                        if fields_by_name.insert(field.name.as_str(), j).is_some() {
+                        if by_name.insert(field.name.as_str(), j).is_some() {
                             return Err(error(&field.source, format_args!("duplicate record field {:?}", field.name)));
                         }
                     }
                 }
             }
-            members.push(fields_by_name);
+            members.push(by_name);
+        }
+        let mut externs = HashMap::with_capacity(unit.externs.len());
+        for (i, external) in unit.externs.iter().enumerate() {
+            let at = &external.binding.source;
+            binding(&external.binding, unit.types.len())?;
+            insert(&mut externs, &external.binding.id, i, at, "extern")?;
+            if external.name.is_empty() { return Err(error(at, "an extern needs a registration name")); }
+            if external.effect != "after-state-commit" || external.lifetime != "task" || !external.asynchronous {
+                return Err(error(at, "an async extern requires the after-state-commit effect and task lifetime"));
+            }
+            let mut targets = [false; 5];
+            for target in &external.targets {
+                let index = match target.as_str() {
+                    "react" => 0, "gpui" => 1, "vue2" => 2, "vue3" => 3, "web-components" => 4,
+                    _ => return Err(error(at, format_args!("unknown extern target {target:?}"))),
+                };
+                if std::mem::replace(&mut targets[index], true) { return Err(error(at, format_args!("duplicate extern target {target:?}"))); }
+            }
+            let mut params = HashSet::with_capacity(external.params.len());
+            for p in &external.params {
+                binding(p, unit.types.len())?;
+                if !params.insert(p.id.as_str()) { return Err(error(&p.source, format_args!("duplicate extern parameter {:?}", p.id))); }
+            }
         }
         let mut keys = HashMap::new();
         let mut exports = HashSet::new();
@@ -211,7 +270,9 @@ impl<'a> Links<'a> {
         let mut required = Vec::new();
         let mut provided = Vec::new();
         let mut styled = false;
+        let mut scoped = unit.bodies.len() > 1 || !unit.keys.is_empty();
         for b in &unit.bodies {
+            scoped |= !b.tasks.is_empty() || !b.created.is_empty();
             let mut needs = BTreeMap::new();
             for c in &b.consumes {
                 let k = lookup(&keys, &c.key, &c.binding.source, "Context key")?;
@@ -246,14 +307,14 @@ impl<'a> Links<'a> {
                 required[i].extend(inherited);
             }
         }
-        Ok(Self { components, keys, children, required, scoped: unit.bodies.len() > 1 || !unit.keys.is_empty(), styled, members })
+        Ok(Self { components, keys, externs, children, required, scoped, styled, members })
     }
 }
 
 impl<'a> Checked<'a> {
     pub fn new(unit: &'a Unit, links: &'a Links<'a>, index: usize) -> Result<Self> {
         let ir = &unit.bodies[index];
-        let mut checked = Self { ir, unit, links, index, places: HashMap::new(), signals: HashMap::new(), functions: HashMap::new(), bodies: Vec::new(), reached: Vec::new(), derived: BTreeSet::new(), actions: BTreeSet::new(), has_styles: false, members: &links.members };
+        let mut checked = Self { ir, unit, links, index, places: HashMap::new(), signals: HashMap::new(), functions: HashMap::new(), bodies: Vec::new(), reached: Vec::new(), derived: BTreeSet::new(), actions: BTreeSet::new(), tasks: BTreeSet::new(), has_styles: false, members: &links.members };
         let mut global = HashSet::new();
         for b in ir.props.iter().map(|p| &p.binding).chain(ir.fields.iter().map(|f| &f.binding)).chain(ir.consumes.iter().map(|c| &c.binding)).chain(&ir.signals).chain(ir.behaviors.iter().map(|f| &f.binding)) {
             binding(b, unit.types.len())?;
@@ -272,7 +333,19 @@ impl<'a> Checked<'a> {
         for (i, c) in ir.consumes.iter().enumerate() { checked.places.insert(&c.binding.id, Place::Context(i)); }
         for (i, b) in ir.signals.iter().enumerate() { checked.signals.insert(&b.id, i); }
         for (i, f) in ir.behaviors.iter().enumerate() { checked.functions.insert(&f.binding.id, i); }
-        for f in &ir.behaviors { let body = checked.body(f)?; checked.bodies.push(body); }
+        let mut declared_tasks = HashSet::with_capacity(ir.tasks.len());
+        for task in &ir.tasks {
+            source(&task.source)?;
+            let f = checked.endpoint(&task.function, Phase::Task, None, false, &task.source)?;
+            if !declared_tasks.insert(f) { return Err(error(&task.source, format_args!("duplicate registration for task {:?}", task.function))); }
+        }
+        for (i, f) in ir.behaviors.iter().enumerate() {
+            if f.phase == Phase::Task && !declared_tasks.contains(&i) {
+                return Err(error(&f.binding.source, format_args!("task {:?} needs an owned declaration and scheduling policy", f.binding.id)));
+            }
+            let body = checked.body(f)?;
+            checked.bodies.push(body);
+        }
         let mut roots = Vec::new();
         for p in &ir.provides {
             let ty = unit.keys[links.keys[p.key.as_str()]].binding.ty;
@@ -290,11 +363,23 @@ impl<'a> Checked<'a> {
             if ir.behaviors[f].binding.ty != Type::Unit { return Err(format!("{}: backend-missing [action-result]: exposed action {:?} needs a queued result transport for its non-unit return", ir.behaviors[f].binding.source, action.name)); }
             checked.actions.insert(f);
         }
+        for created in &ir.created {
+            let f = lookup(&checked.functions, created, &ir.source, "created action")?;
+            let action = &ir.behaviors[f];
+            if action.phase != Phase::Action || !action.params.is_empty() {
+                return Err(error(&action.binding.source, format_args!("created behavior {created:?} must be an action with zero arguments")));
+            }
+            checked.actions.insert(f);
+        }
         checked.view(&ir.view)?;
         roots.extend(&checked.derived);
         roots.extend(&checked.actions);
         let graph: Vec<_> = checked.bodies.iter().map(|f| f.facts.calls.iter().copied().collect()).collect();
-        let Walk { order, cycle } = postorder(roots, &graph);
+        let Walk { order, cycle } = scheduled_postorder(roots, &graph, |f, pending| {
+            for &task in &checked.bodies[f].facts.starts {
+                if checked.tasks.insert(task) { pending.push(task); }
+            }
+        });
         let mut recursive_helper = None;
         if let Some(first) = cycle {
             if first.iter().any(|node| checked.derived.contains(node)) {
@@ -376,6 +461,16 @@ impl<'a> Checked<'a> {
         Err(error(at, format_args!("expected a declared record, received {ty:?}")))
     }
 
+    fn tagged(&self, ty: Type, at: &Source) -> Result<(usize, &'a [TagCase])> {
+        if let Type::Data(i) = ty { if let Some(Data::Tagged { cases, .. }) = self.unit.types.get(i) { return Ok((i, cases)); } }
+        Err(error(at, format_args!("expected a declared tagged type, received {ty:?}")))
+    }
+
+    fn text_literal(&self, ty: Type, at: &Source) -> Result<()> {
+        if let Type::Data(i) = ty { if matches!(self.unit.types.get(i), Some(Data::TextLiteral { .. })) { return Ok(()); } }
+        Err(error(at, format_args!("expected a declared singleton text type, received {ty:?}")))
+    }
+
     fn view(&mut self, root: &View) -> Result<()> {
         if !matches!(root, View::Element { .. }) { return Err(error(&self.ir.source, "the component view root must be an element")); }
         let mut nodes = vec![root];
@@ -454,31 +549,44 @@ impl<'a> Checked<'a> {
             let at = b.end.source();
             source(at)?;
             let mut edges = Vec::new();
-            let targets = match &b.end {
+            match &b.end {
                 End::Return { value, .. } => {
                     let ty = match value { Some(v) => block.value(v, at)?, None => Type::Unit };
                     expect(ty, f.binding.ty, at, "return")?;
-                    vec![]
                 }
-                End::Fail { .. } => { block.facts.fallible = true; vec![] }
-                End::Jump { to, .. } => vec![(to, None)],
-                End::Branch { condition, yes, no, .. } => { expect(block.value(condition, at)?, Type::Bool, at, "branch condition")?; vec![(yes, None), (no, None)] }
+                End::Fail { .. } => block.facts.fallible = true,
+                End::Jump { to, .. } => edges.push(block.edge(to, None, &blocks, at)?),
+                End::Branch { condition, yes, no, .. } => {
+                    expect(block.value(condition, at)?, Type::Bool, at, "branch condition")?;
+                    edges.push(block.edge(yes, None, &blocks, at)?);
+                    edges.push(block.edge(no, None, &blocks, at)?);
+                }
                 End::Presence { value, present, omitted, .. } => {
                     let ty = block.value(value, at)?;
                     let payload = self.payload(ty).ok_or_else(|| error(at, "presence terminator requires a presence value"))?;
-                    vec![(present, Some(payload)), (omitted, None)]
+                    edges.push(block.edge(present, Some((payload, "present")), &blocks, at)?);
+                    edges.push(block.edge(omitted, None, &blocks, at)?);
                 }
-            };
-            for (edge, payload) in targets {
-                let dest = lookup(&blocks, &edge.block, at, "successor block")?;
-                let mut params = f.blocks[dest].params.as_slice();
-                if let Some(payload) = payload {
-                    let (first, rest) = params.split_first().ok_or_else(|| error(at, "the present successor must declare a first payload parameter"))?;
-                    expect(payload, first.ty, at, &first.name)?;
-                    params = rest;
+                End::Match { value, cases, .. } => {
+                    let ty = block.value(value, at)?;
+                    let (i, declared) = self.tagged(ty, at)?;
+                    let mut covered = vec![false; declared.len()];
+                    for arm in cases {
+                        let j = lookup(&self.members[i], &arm.tag, at, "match tag")?;
+                        if std::mem::replace(&mut covered[j], true) { return Err(error(at, format_args!("match repeats tag {:?}", arm.tag))); }
+                        edges.push(block.edge(&arm.to, Some((declared[j].payload, "matched")), &blocks, at)?);
+                    }
+                    if let Some(j) = covered.iter().position(|&present| !present) {
+                        return Err(error(at, format_args!("match omits declared tag {:?}", declared[j].tag)));
+                    }
                 }
-                block.arguments(&edge.args, params, at, &edge.block)?;
-                edges.push(dest);
+                End::Await { external, args, resume, .. } => {
+                    if f.phase != Phase::Task { return Err(error(at, "only an owned task can await an extern")); }
+                    let i = lookup(&self.links.externs, external, at, "awaited extern")?;
+                    let operation = &self.unit.externs[i];
+                    block.arguments(args, &operation.params, at, external)?;
+                    edges.push(block.edge(resume, Some((operation.binding.ty, "resume")), &blocks, at)?);
+                }
             }
             graph.push(edges);
             per_block.push(block.facts);
@@ -490,12 +598,13 @@ impl<'a> Checked<'a> {
         });
         let mut facts = Facts::default();
         for &i in &live_blocks {
-            if per_block[i].fallible && f.phase != Phase::Action {
+            if per_block[i].fallible && !matches!(f.phase, Phase::Action | Phase::Task) {
                 missing = Some(format!("{}: backend-missing [failing-value]: {:?} needs a typed failure transport for its {:?} result", f.blocks[i].end.source(), f.binding.id, f.phase));
             }
             facts.reads.extend(&per_block[i].reads);
             facts.include_effects(&per_block[i]);
             facts.calls.extend(&per_block[i].calls);
+            facts.starts.extend(&per_block[i].starts);
         }
         Ok(Function { blocks, entry, live_blocks, facts, missing })
     }
@@ -507,6 +616,18 @@ struct BlockCheck<'c, 'a> {
 }
 
 impl<'a> BlockCheck<'_, 'a> {
+    fn edge(&mut self, edge: &Edge, implicit: Option<(Type, &str)>, blocks: &HashMap<&str, usize>, at: &Source) -> Result<usize> {
+        let dest = lookup(blocks, &edge.block, at, "successor block")?;
+        let mut params = self.function.blocks[dest].params.as_slice();
+        if let Some((payload, role)) = implicit {
+            let (first, rest) = params.split_first().ok_or_else(|| error(at, format_args!("the {role} successor must declare a first payload parameter")))?;
+            expect(payload, first.ty, at, &first.name)?;
+            params = rest;
+        }
+        self.arguments(&edge.args, params, at, &edge.block)?;
+        Ok(dest)
+    }
+
     fn arguments(&mut self, args: &[Value], params: &[Binding], at: &Source, target: &str) -> Result<()> {
         if args.len() != params.len() { return Err(error(at, format_args!("{target:?} expects {} arguments, received {}", params.len(), args.len()))); }
         for (arg, p) in args.iter().zip(params) { expect(self.value(arg, at)?, p.ty, at, &p.name)?; }
@@ -516,6 +637,7 @@ impl<'a> BlockCheck<'_, 'a> {
     fn call(&mut self, id: &str, args: &[Value], at: &Source, invoke: bool) -> Result<Type> {
         let i = lookup(&self.checked.functions, id, at, "behavior")?;
         let f = &self.checked.ir.behaviors[i];
+        if f.phase == Phase::Task { return Err(error(at, format_args!("task {id:?} cannot be called synchronously; use a start instruction"))); }
         if invoke != (f.phase == Phase::Action) || (f.phase == Phase::Action && self.function.phase != Phase::Action) || (f.phase == Phase::Init && self.function.phase != Phase::Init) {
             return Err(error(at, format_args!("{:?} cannot call {id:?} ({:?}) in this position", self.function.binding.id, f.phase)));
         }
@@ -527,6 +649,23 @@ impl<'a> BlockCheck<'_, 'a> {
     fn value(&mut self, v: &Value, at: &Source) -> Result<Type> {
         Ok(match v {
             Value::Bool { .. } | Value::Number { .. } | Value::Text { .. } | Value::Tokens { .. } => literal_type(v, at)?.expect("literal variant"),
+            Value::LiteralText { ty } => { self.checked.text_literal(*ty, at)?; *ty }
+            Value::WidenText { value } => {
+                let ty = self.value(value, at)?;
+                self.checked.text_literal(ty, at)?;
+                Type::Text
+            }
+            Value::Tagged { ty, tag, payload } => {
+                let (i, cases) = self.checked.tagged(*ty, at)?;
+                let j = lookup(&self.checked.members[i], tag, at, "constructed tag")?;
+                expect(self.value(payload, at)?, cases[j].payload, at, tag)?;
+                *ty
+            }
+            Value::Tag { value } => {
+                let ty = self.value(value, at)?;
+                self.checked.tagged(ty, at)?;
+                Type::Text
+            }
             Value::Record { ty, fields } => {
                 let (i, declared) = self.checked.record(*ty, at)?;
                 if fields.len() != declared.len() { return Err(error(at, format_args!("data:{i} requires exactly its declared fields"))); }
@@ -588,8 +727,8 @@ impl<'a> BlockCheck<'_, 'a> {
             }
             Instruction::Write { target, value, .. } => {
                 let p = lookup(&self.checked.places, target, at, "write target")?;
-                let Place::Field(i) = p else { return Err(error(at, format_args!("only state can be written by an action: {target:?}"))); };
-                if self.function.phase != Phase::Action || self.checked.ir.fields[i].kind != FieldKind::State { return Err(error(at, format_args!("only actions can write mutable state: {target:?}"))); }
+                let Place::Field(i) = p else { return Err(error(at, format_args!("only owned state can be written: {target:?}"))); };
+                if !matches!(self.function.phase, Phase::Action | Phase::Task) || self.checked.ir.fields[i].kind != FieldKind::State { return Err(error(at, format_args!("only action and task segments can write mutable state: {target:?}"))); }
                 expect(self.value(value, at)?, self.checked.binding(p).ty, at, target)?;
                 self.facts.writes.insert(i);
             }
@@ -600,6 +739,15 @@ impl<'a> BlockCheck<'_, 'a> {
                 self.facts.signals.insert(i);
             }
             Instruction::Invoke { function, args, .. } => { self.call(function, args, at, true)?; }
+            Instruction::Start { task, .. } | Instruction::Cancel { task, .. } => {
+                if !matches!(self.function.phase, Phase::Action | Phase::Task) { return Err(error(at, "task commands require an action or task segment")); }
+                let f = self.checked.endpoint(task, Phase::Task, None, false, at)?;
+                if let Instruction::Start { args, .. } = op {
+                    self.arguments(args, &self.checked.ir.behaviors[f].params, at, task)?;
+                    self.facts.starts.insert(f);
+                }
+                self.facts.task_effects = true;
+            }
         }
         Ok(())
     }

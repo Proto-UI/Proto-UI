@@ -1,3 +1,5 @@
+import type { ProtoTarget } from '../frontend/types.ts';
+
 /** The compile-time input shared by source targets. IDs identify resolved bindings.
  * Names identify their source or host spelling. Neither is an operation selector. */
 export type ScalarType = 'bool' | 'number' | 'text' | 'unit' | 'tokens';
@@ -16,9 +18,17 @@ export interface DataField {
   readonly source: SourceSpan;
 }
 
+export interface TaggedCase {
+  readonly tag: string;
+  readonly payload: DataRef;
+  readonly source: SourceSpan;
+}
+
 export type DataType =
   | { readonly kind: 'presence'; readonly value: ValueType; readonly source: SourceSpan }
-  | { readonly kind: 'record'; readonly fields: readonly DataField[]; readonly source: SourceSpan };
+  | { readonly kind: 'record'; readonly fields: readonly DataField[]; readonly source: SourceSpan }
+  | { readonly kind: 'text-literal'; readonly value: string; readonly source: SourceSpan }
+  | { readonly kind: 'tagged'; readonly discriminant: string; readonly cases: readonly TaggedCase[]; readonly source: SourceSpan };
 
 /** Resolve a canonical data reference below the exclusive declaration bound. */
 export function lookupDataType(types: readonly DataType[], type: ValueType, before = types.length): DataType | undefined {
@@ -79,6 +89,10 @@ export type Value =
   | LiteralValue
   | { readonly kind: 'prop' | 'state' | 'capture' | 'local'; readonly id: string }
   | { readonly kind: 'context'; readonly id: string }
+  | { readonly kind: 'literal-text'; readonly type: DataRef }
+  | { readonly kind: 'widen-text'; readonly value: Value }
+  | { readonly kind: 'tagged'; readonly type: DataRef; readonly tag: string; readonly payload: Value }
+  | { readonly kind: 'tag'; readonly value: Value }
   | {
       readonly kind: 'record';
       readonly type: DataRef;
@@ -100,11 +114,18 @@ export type Instruction = { readonly source: SourceSpan } & (
   | { readonly kind: 'let'; readonly binding: Binding; readonly value: Value }
   | { readonly kind: 'write' | 'emit'; readonly target: string; readonly value: Value }
   | { readonly kind: 'invoke'; readonly fn: string; readonly args: readonly Value[] }
+  | { readonly kind: 'start'; readonly task: string; readonly args: readonly Value[] }
+  | { readonly kind: 'cancel'; readonly task: string }
 );
 
 export interface Edge {
   readonly block: string;
   readonly args: readonly Value[];
+}
+
+export interface MatchCase {
+  readonly tag: string;
+  readonly to: Edge;
 }
 
 export type Terminator = { readonly source: SourceSpan } & (
@@ -113,6 +134,8 @@ export type Terminator = { readonly source: SourceSpan } & (
   | { readonly kind: 'branch'; readonly condition: Value; readonly yes: Edge; readonly no: Edge }
   /** The present edge supplies the proven payload before its explicit arguments. */
   | { readonly kind: 'presence'; readonly value: Value; readonly present: Edge; readonly omitted: Edge }
+  | { readonly kind: 'match'; readonly value: Value; readonly cases: readonly MatchCase[] }
+  | { readonly kind: 'await'; readonly extern: string; readonly args: readonly Value[]; readonly resume: Edge }
   | { readonly kind: 'fail'; readonly reason: string }
 );
 
@@ -125,7 +148,7 @@ export interface Block {
 
 export interface Behavior {
   readonly binding: Binding;
-  readonly phase: 'init' | 'pure' | 'action';
+  readonly phase: 'init' | 'pure' | 'action' | 'task';
   readonly params: readonly Binding[];
   /** Resolved prop, capture, state and consumed Context bindings read transitively. */
   readonly dependencies: readonly string[];
@@ -136,6 +159,22 @@ export interface Behavior {
 export interface NamedBehavior {
   readonly name: string;
   readonly fn: string;
+}
+
+export interface ExternIR {
+  readonly binding: Binding;
+  readonly name: string;
+  readonly params: readonly Binding[];
+  readonly effect: 'after-state-commit';
+  readonly lifetime: 'task';
+  readonly async: true;
+  readonly targets: readonly ProtoTarget[];
+}
+
+export interface TaskIR {
+  readonly fn: string;
+  readonly policy: 'latest' | 'parallel' | 'serial';
+  readonly source: SourceSpan;
 }
 
 /** Instance initializers read current props and earlier initialized fields. Capture
@@ -196,16 +235,19 @@ export interface ComponentBody {
   readonly fields: readonly InitialField[];
   readonly signals: readonly Binding[];
   readonly behaviors: readonly Behavior[];
+  readonly tasks: readonly TaskIR[];
+  readonly created: readonly string[];
   readonly projections: readonly NamedBehavior[];
   readonly actions: readonly NamedBehavior[];
   readonly view: ElementView;
 }
 
 export interface ComponentIR extends ComponentBody {
-  readonly version: 4;
+  readonly version: 5;
   /** A declaration's own fields and payloads can reference only earlier entries. */
   readonly types: readonly DataType[];
   readonly keys: readonly ContextKeyIR[];
+  readonly externs: readonly ExternIR[];
   /** Linked bodies share this root's data and nominal Context key tables. */
   readonly components: readonly ComponentBody[];
 }

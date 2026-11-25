@@ -52,12 +52,18 @@ export function componentView(
     return local;
   }
 
+  function viewValueType(expression: ts.Expression): ValueType {
+    const type = source.data.type(expression);
+    // Text regions, text keys and the authoring schema's scalar string inputs all receive ordinary text.
+    return source.data.get(type)?.kind === 'text-literal' ? 'text' : type;
+  }
+
   function value(expression: ts.Expression, role: ValueRegion, expected?: ValueType, name: string = role): string {
     const local = localOf(expression);
     if (local && local.kind !== 'value') {
       return source.missing(expression, `view-${role}`, `The ${role} region needs a data value from this renderer local.`);
     }
-    const type = local?.type ?? source.data.type(expression);
+    const type = local?.type ?? viewValueType(expression);
     if (expected !== undefined && type !== expected) {
       if (role === 'child-key' && type === 'number') {
         return source.missing(expression, 'numeric-child-key', 'A numeric child key needs native numeric identity support.');
@@ -203,7 +209,7 @@ export function componentView(
             locals.set(symbol, { kind: 'prototype', origin: init, used: false });
           } else {
             // A render-local scalar is evaluated against the current render view. It can never become an instance capture.
-            const type = source.data.type(declaration.initializer);
+            const type = viewValueType(declaration.initializer);
             const binding = source.binding(declaration, 'renderer-local-value', declaration.name.text, type);
             const fn = behaviors.expression(binding, 'pure', declaration.initializer, parameter, aliasDeclarations);
             locals.set(symbol, { kind: 'value', type, fn, origin: init, used: false });

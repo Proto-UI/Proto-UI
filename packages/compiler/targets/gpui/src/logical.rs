@@ -17,6 +17,20 @@ impl Component<'_, '_> {
         }
     }
 
+    pub(super) fn has_owned_scope(&self, root: usize) -> bool {
+        let mut seen = BTreeSet::new();
+        let mut pending = vec![root];
+        while let Some(i) = pending.pop() {
+            if !seen.insert(i) { continue; }
+            let body = &self.checked.unit.bodies[i];
+            if !body.tasks.is_empty() || !body.created.is_empty() { return true; }
+            for site in &self.checked.links.children[i] {
+                if let View::Child { component, .. } = site { pending.push(self.checked.links.components[component.as_str()]); }
+            }
+        }
+        false
+    }
+
     pub(super) fn logical_type(&mut self, fields: &mut Vec<TokenStream>, initialized: &mut Vec<TokenStream>, initializers: &[TokenStream], appearance: &TokenStream) -> Result<TokenStream> {
         let mut bind = Vec::new();
         let mut rebind = Vec::new();
@@ -25,7 +39,10 @@ impl Component<'_, '_> {
         let mut provided = BTreeSet::new();
         fields.push(quote!(scope: ContextScope));
         initialized.push(quote!(scope: scope.clone()));
-        let transactional = !self.checked.actions.is_empty();
+        let transactional = super::transactional(self.checked);
+        let terminal = self.has_owned_scope(self.checked.index);
+        let retired = terminal.then(|| quote!(if self.retired { return; }));
+        let mut retire = self.task_storage(fields, initialized);
         let mut subscriptions = BTreeSet::new();
         for (i, read) in self.checked.ir.consumes.iter().enumerate() {
             let k = self.checked.links.keys[read.key.as_str()];
@@ -40,6 +57,7 @@ impl Component<'_, '_> {
             } else { quote!(owner.__pui_context_changed(false, cx);) };
             let subscription = context::subscription(&slot, &source, dispatch);
             fields.push(quote!(#slot: ::proto_ui_gpui_support::context::BoundContext<#tag>));
+            retire.push(quote!(self.#slot.retire();));
             initialized.push(quote!(#slot));
             bind.push(quote!(let #slot = #subscription;));
             rebind.push(quote! {
@@ -69,6 +87,33 @@ impl Component<'_, '_> {
         let resolver = self.checked.links.styled.then(|| quote!(resolve_token: self.scope.resolve_token.clone(),));
         let children = self.logical_children(fields, initialized)?;
         let sites = &self.checked.links.children[self.checked.index];
+        if terminal {
+            fields.push(quote!(retired: ::core::primitive::bool));
+            initialized.push(quote!(retired: false));
+            let mut children_owned = Vec::new();
+            for (i, site) in sites.iter().enumerate() {
+                let View::Child { component, .. } = site else { unreachable!("linked child site") };
+                if self.has_owned_scope(self.checked.links.components[component.as_str()]) {
+                    let slot = context::child(i);
+                    children_owned.push(quote! {
+                        if let ::core::option::Option::Some((_, child)) = self.#slot.take() {
+                            child.update(app, |owner,cx| owner.__pui_retire(cx));
+                        }
+                    });
+                }
+            }
+            if !children_owned.is_empty() {
+                fields.push(quote!(_retirement: ::gpui::Subscription));
+                initialized.push(quote!(_retirement: cx.on_release(|owner: &mut Self, app| owner.__pui_retire(app))));
+            }
+            let clear = transactional.then(|| quote!(self.publication.retire();));
+            self.methods.push(quote! {
+                #[allow(unused_variables)] fn __pui_retire(&mut self, app: &mut ::gpui::App) {
+                    if ::core::mem::replace(&mut self.retired, true) { return; }
+                    #clear #(#retire)* #(#children_owned)*
+                }
+            });
+        }
         let reactive = sites.iter().any(|site| match site {
             View::Child { key, props, .. } => std::iter::once(key).chain(props.iter().map(|p| &p.function)).any(|id| {
                 !self.checked.bodies[self.checked.functions[id.as_str()]].facts.reads.is_empty()
@@ -81,6 +126,7 @@ impl Component<'_, '_> {
         let owner = &self.names.component;
         let props = &self.names.props_type;
         let needs = context::preflight(self.checked);
+        let created = self.created();
         let enqueue = transactional.then(|| quote!(self.publication.after_effects(cx, Self::__pui_resume);));
         let move_scope = if transactional {
             let cmd = &self.names.command;
@@ -96,13 +142,15 @@ impl Component<'_, '_> {
                 #(#rebind)* self.scope = scope.clone(); true
             }
             fn __pui_move(&mut self, scope: &ContextScope, cx: &mut ::gpui::Context<Self>) {
+                #retired
                 if self.__pui_swap_scope(scope, cx) { self.__pui_context_changed(true, cx); }
             }
             fn __pui_context_changed(&mut self, scope_changed: ::core::primitive::bool, cx: &mut ::gpui::Context<Self>) {
+                #retired
                 self.__pui_refresh(scope_changed, cx); cx.notify(); #enqueue
             }
-            #[allow(unused_variables)] fn __pui_refresh(&mut self, scope_changed: ::core::primitive::bool, cx: &mut ::gpui::Context<Self>) { #(#publish)* #sync_children }
-            fn __pui_children(&mut self, cx: &mut ::gpui::Context<Self>) { #children }
+            #[allow(unused_variables)] fn __pui_refresh(&mut self, scope_changed: ::core::primitive::bool, cx: &mut ::gpui::Context<Self>) { #retired #(#publish)* #sync_children }
+            #[allow(unused_variables)] fn __pui_children(&mut self, cx: &mut ::gpui::Context<Self>) { #retired #children }
         });
         Ok(quote! {
             pub fn mount(props: #props, scope: &ContextScope, app: &mut ::gpui::App) -> ::core::result::Result<::gpui::Entity<#owner>, MissingContext> {
@@ -114,6 +162,7 @@ impl Component<'_, '_> {
                     #(#bind)* #(#initializers)* #(#creation)*
                     let mut owner = Self { props, #appearance, #(#initialized,)* };
                     owner.__pui_children(cx);
+                    #created
                     owner
                 })
             }
@@ -156,10 +205,14 @@ impl Component<'_, '_> {
             });
         }
         let mut previous = Vec::new();
+        let mut removed = Vec::new();
         for (target, sites) in by_type {
             let local = format_ident!("previous_{target}");
             let source = sites.into_iter().map(context::child);
             previous.push(quote!(let mut #local = [#(self.#source.take()),*];));
+            if self.has_owned_scope(target) {
+                removed.push(quote! { for (_, child) in #local.into_iter().flatten() { child.update(cx, |owner,cx| owner.__pui_retire(cx)); } });
+            }
         }
         let duplicates = if resolved.len() > 1 {
             let owner = &self.names.component;
@@ -173,7 +226,7 @@ impl Component<'_, '_> {
                 }
             })
         } else { None };
-        Ok(quote!(#(#keys)* #duplicates let scope = self.child_scope(); #(#previous)* #(#attach)*))
+        Ok(quote!(#(#keys)* #duplicates let scope = self.child_scope(); #(#previous)* #(#attach)* #(#removed)*))
     }
 
     fn child_props(&self, child: &Body, inputs: &[crate::ir::ChildProp]) -> Result<TokenStream> {

@@ -97,10 +97,32 @@ test('external Rust consumer renders and interacts with generated views in headl
   assert.equal(toggle.status, 'produced', JSON.stringify(toggle.diagnostics));
   const contextOwner = authoredContextSource();
   assert.equal(contextOwner.status, 'produced', JSON.stringify(contextOwner.diagnostics));
+  const tabsFile = 'context-owned-async-tabs.proto.ts.txt';
+  const tabsOwner = authoredSource(tabsFile, 'AsyncTabsOwner', 'default');
+  const tabsPanel = authoredSource(tabsFile, 'AsyncTabPanel', 'AsyncTabPanel');
+  for (const input of [tabsOwner, tabsPanel]) {
+    assert.equal(input.status, 'produced', JSON.stringify(input.diagnostics));
+    const unit = input.component;
+    const declaration = unit.externs.find((item) => item.name === 'authoring.load-tab');
+    const panel = [unit, ...unit.components].find((body) => body.name === 'AsyncTabPanel');
+    const load = panel.behaviors.find((fn) => panel.tasks.some((task) => task.fn === fn.binding.id));
+    const boundary = load.blocks.map((block) => block.end).find((end) => end.kind === 'await' && end.extern === declaration.binding.id);
+    assert.ok(boundary, 'the original task must reach the declared loader');
+    await assert.rejects(emitGpui(unit, options), (error) => {
+      assert.equal(error.code, 'extern-unbound');
+      assert.ok(error.bindings.includes(panel.id));
+      assert.ok(error.bindings.includes(load.binding.id));
+      assert.equal(error.bindings.at(-1), declaration.binding.id);
+      assert.deepEqual(error.source, boundary.source);
+      return true;
+    });
+  }
   if (retainedRoot) {
     writeFileSync(join(crate, 'authored-source.json'), JSON.stringify(authoredInput));
     writeFileSync(join(crate, 'controlled-source.json'), JSON.stringify(toggle));
     writeFileSync(join(crate, 'context-source.json'), JSON.stringify(contextOwner));
+    writeFileSync(join(crate, 'tabs-owner-source.json'), JSON.stringify(tabsOwner));
+    writeFileSync(join(crate, 'tabs-panel-source.json'), JSON.stringify(tabsPanel));
   }
   const programs = [
     ['delivery_badge', readonlyBadge()],
@@ -108,9 +130,11 @@ test('external Rust consumer renders and interacts with generated views in headl
     ['authoring_badge', authoredInput.component],
     ['controlled_toggle', toggle.component],
     ['context_owner', contextOwner.component],
+    ['tabs_owner', tabsOwner.component, { 'authoring.load-tab': { path: 'crate::tabs_loader::load_owner_tab' } }],
+    ['async_tab_panel', tabsPanel.component, { 'authoring.load-tab': { path: 'crate::tabs_loader::load_panel_tab' } }],
   ];
-  for (const [module, program] of programs) {
-    const rust = await emitGpui(program, options);
+  for (const [module, program, bindings] of programs) {
+    const rust = await emitGpui(program, { generator, bindings });
     writeFileSync(join(crate, 'src', `${module}.rs`), rust, { flag: 'wx' });
   }
 
@@ -155,6 +179,11 @@ test('external Rust consumer renders and interacts with generated views in headl
     /^test context_source::authored_owner_keeps_the_keyed_reader_and_supplies_a_reader_in_another_window \.\.\. ok\r?$/m,
     /^test context_source::required_reader_rejects_absence_and_the_other_key_with_the_same_label \.\.\. ok\r?$/m,
     /^test context_source::equal_replacement_withdraws_the_old_provider_and_a_physical_move_retains_the_reader \.\.\. ok\r?$/m,
+    /^test tabs_source::default_owner_keeps_its_pending_panel_through_select_and_physical_reattachment \.\.\. ok\r?$/m,
+    /^test tabs_source::ready_file_and_business_error_publish_after_the_loading_commit \.\.\. ok\r?$/m,
+    /^test tabs_source::pending_panel_reads_the_current_provider_after_an_equal_rebind \.\.\. ok\r?$/m,
+    /^test tabs_source::latest_reload_and_explicit_cancel_have_distinct_terminal_outcomes \.\.\. ok\r?$/m,
+    /^test tabs_source::released_panel_cannot_submit_a_late_file_result_to_its_replacement \.\.\. ok\r?$/m,
   ]) {
     assert.match(result.stdout, passedCase);
   }

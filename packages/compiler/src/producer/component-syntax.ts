@@ -173,7 +173,11 @@ function namespaceMember(source: SourceContext, expression: ts.Expression): ts.S
     : exported;
 }
 
-export type LinkedType = 'ContextKey' | 'Prototype';
+export type LinkedType = 'ContextKey' | 'Prototype' | 'TaskExtern' | 'ExternHandle';
+
+export const linkedFactory = {
+  ContextKey: 'createContextKey', Prototype: 'definePrototype', TaskExtern: 'declareExtern', ExternHandle: 'declareExtern',
+} as const satisfies Record<LinkedType, string>;
 
 /** The nominal type identifies which resolver must prove the value's creation site. */
 export function linkedType(source: SourceContext, expression: ts.Expression): LinkedType | undefined {
@@ -185,7 +189,8 @@ export function linkedType(source: SourceContext, expression: ts.Expression): Li
   for (const declaration of target.getSymbol()?.declarations ?? []) {
     if (!ts.isInterfaceDeclaration(declaration)) continue;
     const name = declaration.name.text;
-    if ((name === 'ContextKey' || name === 'Prototype') && source.intrinsic(declaration.name, name)) return name;
+    if ((name === 'ContextKey' || name === 'Prototype' || name === 'TaskExtern' || name === 'ExternHandle') &&
+        source.intrinsic(declaration.name, name)) return name;
   }
   return undefined;
 }
@@ -226,14 +231,15 @@ export function sourceFunction(
 export function checkedFunction(
   source: SourceContext,
   value: ts.Expression | SourceFunction,
-  role: string
+  role: string,
+  mode: 'synchronous' | 'task' = 'synchronous',
 ): SourceFunction {
   const fn = ts.isFunctionDeclaration(value) ? value : sourceFunction(source, value);
   if (!fn?.body)
     return source.missing(value, role, `The ${role} needs its resolved authored function body.`);
   if (
     fn.asteriskToken ||
-    fn.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword)
+    (mode === 'synchronous' && fn.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword))
   ) {
     return source.missing(
       fn,

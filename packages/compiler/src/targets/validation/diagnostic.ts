@@ -1,6 +1,7 @@
 import type { SourceSpan, ValueType } from '../component-ir.ts';
 
 const categories = {
+  'extern-unbound': 'extern-unbound',
   'ir-shape': 'invalid-ir',
   'duplicate-binding': 'invalid-ir',
   'duplicate-name': 'invalid-ir',

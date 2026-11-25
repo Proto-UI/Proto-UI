@@ -74,8 +74,11 @@ function textView(tag: ElementView['tag'], value: string): ElementView {
 /** Residual branch on current props, plus a pure helper with a parameter. */
 export function readonlyBadge(): ComponentIR {
   return {
-    version: 4,
+    version: 5,
     id: 'delivery-badge',
+    externs: [],
+    created: [],
+    tasks: [],
     keys: [],
     consumes: [],
     provides: [],
@@ -140,8 +143,11 @@ export function controlledSelection(): ComponentIR {
     source,
   });
   return {
-    version: 4,
+    version: 5,
     id: 'selection-control',
+    externs: [],
+    created: [],
+    tasks: [],
     keys: [],
     consumes: [],
     provides: [],

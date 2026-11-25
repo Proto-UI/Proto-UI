@@ -1,4 +1,4 @@
-import type { Behavior, ComponentIR } from './component-ir.ts';
+import type { Behavior, ComponentIR, ExternIR, SourceSpan } from './component-ir.ts';
 import { checkBehavior, type BehaviorFacts } from './validation/behavior.ts';
 import { checkDependencies } from './validation/dependencies.ts';
 import { ComponentIRDiagnostic, reject } from './validation/diagnostic.ts';
@@ -9,19 +9,28 @@ import type { Declarations } from './validation/value.ts';
 
 export { ComponentIRDiagnostic, unsupportedHostName } from './validation/diagnostic.ts';
 
+export interface ReachedExtern {
+  readonly extern: ExternIR;
+  readonly source: SourceSpan;
+  readonly callPath: readonly string[];
+}
+
+function callPath(owner: string, callers: ReadonlyMap<string, string | undefined>): string[] {
+  const path = [owner];
+  let caller = callers.get(owner);
+  while (caller !== undefined) {
+    path.push(caller);
+    caller = callers.get(caller);
+  }
+  return path.reverse();
+}
+
 function fromCallSite(
   diagnostic: ComponentIRDiagnostic,
   owner: string,
   callers: ReadonlyMap<string, string | undefined>
 ): ComponentIRDiagnostic {
-  let caller = callers.get(owner);
-  if (caller === undefined) return diagnostic;
-  const path = [owner];
-  while (caller !== undefined) {
-    path.push(caller);
-    caller = callers.get(caller);
-  }
-  return diagnostic.withCallPath(path.reverse());
+  return callers.get(owner) === undefined ? diagnostic : diagnostic.withCallPath(callPath(owner, callers));
 }
 
 function checkReachedBehavior(
@@ -38,11 +47,12 @@ function checkReachedBehavior(
 }
 
 function checkBody(
-  declarations: BodyDeclarations, unit: UnitDeclarations, children: References
+  declarations: BodyDeclarations, unit: UnitDeclarations, children: References, reached: Map<string, ReachedExtern>
 ): ComponentIRDiagnostic | undefined {
   const { body, functions } = declarations;
   const surface = checkSurface(declarations, unit, children);
   const callers = new Map<string, string | undefined>();
+  for (const created of body.created) callers.set(created, undefined);
   for (const binding of surface.view) callers.set(binding.fn, undefined);
   for (const field of body.fields) callers.set(field.init, undefined);
   for (const provider of body.provides) callers.set(provider.fn, undefined);
@@ -57,6 +67,15 @@ function checkBody(
     for (const callee of result.calls.keys()) {
       if (!callers.has(callee)) callers.set(callee, key);
     }
+    // A start reaches the owned task without adding its future reads to this segment.
+    for (const task of result.starts.keys()) {
+      if (!callers.has(task)) callers.set(task, key);
+    }
+    for (const [id, source] of result.awaits) {
+      if (!reached.has(id)) {
+        reached.set(id, { extern: declarations.externs.get(id)!, source, callPath: [body.id, ...callPath(key, callers), id] });
+      }
+    }
   }
   for (const fn of body.behaviors) {
     if (!facts.has(fn.binding.id)) facts.set(fn.binding.id, checkBehavior(fn, declarations));
@@ -70,15 +89,16 @@ function checkBody(
   return undefined;
 }
 
-/** Admit the entire linked wire before either target constructs or writes an artifact. */
-export function validateComponent(ir: ComponentIR): void {
+/** Admit the entire linked wire and identify the target bindings required by its public roots. */
+export function validateComponent(ir: ComponentIR): readonly ReachedExtern[] {
   const unit = indexUnit(ir);
   const graph = new Map<string, References>();
+  const reached = new Map<string, ReachedExtern>();
   let missing: ComponentIRDiagnostic | undefined;
   // Every linked body has a public native binding and can be mounted independently.
   for (const [id, declarations] of unit.bodies) {
     const children: References = new Map();
-    const unsupported = checkBody(declarations, unit, children);
+    const unsupported = checkBody(declarations, unit, children, reached);
     missing ??= unsupported;
     graph.set(id, children);
   }
@@ -91,4 +111,5 @@ export function validateComponent(ir: ComponentIR): void {
       cycle.path);
   }
   if (missing) throw missing;
+  return [...reached.values()];
 }

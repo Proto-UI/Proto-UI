@@ -3,7 +3,7 @@ use crate::ir::*;
 use crate::names::{self, Names};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote};
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 
 pub fn data(p: Place) -> Ident {
     match p { Place::Prop(i) => format_ident!("input_p{i}"), Place::Field(i) => format_ident!("input_f{i}"), Place::Context(i) => format_ident!("input_c{i}") }
@@ -12,14 +12,14 @@ pub fn data(p: Place) -> Ident {
 /// The immutable parameters are exactly the reached reads. A writable location is
 /// passed once as a typed pending write, shared by every ordinary action helper.
 fn environment(
-    facts: &Facts,
+    checked: &Checked<'_>, facts: &Facts,
     read: impl Fn(Place) -> TokenStream,
     write: impl Fn(usize) -> TokenStream,
     signals: TokenStream,
 ) -> Vec<TokenStream> {
     let mut args: Vec<_> = facts.inputs().map(read).collect();
     args.extend(facts.writes.iter().copied().map(write));
-    if !facts.signals.is_empty() { args.push(signals); }
+    if effects(checked, facts) { args.push(signals); }
     args
 }
 
@@ -27,14 +27,29 @@ pub fn entry_call(
     checked: &Checked<'_>, f: usize, args: Vec<TokenStream>, read: impl Fn(Place) -> TokenStream,
     write: impl Fn(usize) -> TokenStream, signals: TokenStream,
 ) -> TokenStream {
+    block_call(checked, f, checked.bodies[f].entry, args, read, write, signals)
+}
+
+pub fn block_call(
+    checked: &Checked<'_>, f: usize, b: usize, args: Vec<TokenStream>, read: impl Fn(Place) -> TokenStream,
+    write: impl Fn(usize) -> TokenStream, signals: TokenStream,
+) -> TokenStream {
     let body = &checked.bodies[f];
-    let name = names::block(f, body.entry);
-    let env = environment(&body.facts, read, write, signals);
+    let name = names::block(f, b);
+    let env = environment(checked, &body.facts, read, write, signals);
     quote!(Self::#name(#(#args,)* #(#env),*))
 }
 
 struct Expression { code: TokenStream, ty: Type, owns_value: bool }
 impl Expression {
+    fn borrowed(ty: Type, reference: TokenStream) -> Self {
+        let code = match ty {
+            Type::Text => quote!((#reference).as_str()),
+            Type::Tokens | Type::Data(_) => reference,
+            _ => quote!(*#reference),
+        };
+        Self { code, ty, owns_value: false }
+    }
     fn owned(self) -> TokenStream {
         let code = self.code;
         match (self.ty, self.owns_value) {
@@ -75,7 +90,8 @@ fn count_uses<'a>(block: &'a Block) -> HashMap<&'a str, usize> {
     for step in &block.instructions {
         match step {
             Instruction::Let { value, .. } | Instruction::Write { value, .. } | Instruction::Emit { value, .. } => values.push(value),
-            Instruction::Invoke { args, .. } => values.extend(args),
+            Instruction::Invoke { args, .. } | Instruction::Start { args, .. } => values.extend(args),
+            Instruction::Cancel { .. } => {},
         }
     }
     match &block.end {
@@ -84,11 +100,13 @@ fn count_uses<'a>(block: &'a Block) -> HashMap<&'a str, usize> {
         End::Jump { to, .. } => values.extend(&to.args),
         End::Branch { condition, yes, no, .. } => { values.push(condition); values.extend(&yes.args); values.extend(&no.args); }
         End::Presence { value, present, omitted, .. } => { values.push(value); values.extend(&present.args); values.extend(&omitted.args); }
+        End::Match { value, cases, .. } => { values.push(value); for case in cases { values.extend(&case.to.args); } }
+        End::Await { args, resume, .. } => { values.extend(args); values.extend(&resume.args); }
     }
     while let Some(v) = values.pop() {
         match v {
             Value::Local { id } => *counts.entry(id.as_str()).or_insert(0) += 1,
-            Value::Not { value } | Value::HasValue { value } | Value::Member { value, .. } => values.push(value),
+            Value::Not { value } | Value::HasValue { value } | Value::Member { value, .. } | Value::WidenText { value } | Value::Tag { value } | Value::Tagged { payload: value, .. } => values.push(value),
             Value::Record { fields, .. } => values.extend(fields.iter().map(|f| &f.value)),
             Value::Binary { left, right, .. } => { values.push(left); values.push(right); }
             Value::Call { args, .. } => values.extend(args),
@@ -100,6 +118,7 @@ fn count_uses<'a>(block: &'a Block) -> HashMap<&'a str, usize> {
 
 struct Lower<'c, 'a> {
     checked: &'c Checked<'a>, names: &'c Names, f: usize,
+    layout: &'c [Vec<usize>],
     locals: HashMap<&'a str, (Ident, Type, bool)>, uses: HashMap<&'a str, usize>,
     consumed: Vec<&'a str>,
 }
@@ -119,6 +138,16 @@ impl<'c, 'a> Lower<'c, 'a> {
     fn value(&mut self, value: &Value) -> Expression {
         let (code, ty, owns_value) = match value {
             Value::Bool { .. } | Value::Number { .. } | Value::Text { .. } | Value::Tokens { .. } => return literal(value),
+            Value::LiteralText { ty } => { let t = self.names.ty(*ty); (quote!(<#t as ::core::default::Default>::default()), *ty, true) }
+            Value::WidenText { value } => { let v = self.value(value).code; (quote!((#v).as_str()), Type::Text, false) }
+            Value::Tag { value } => { let v = self.value(value).code; (quote!((#v).kind()), Type::Text, false) }
+            Value::Tagged { ty: Type::Data(i), tag, payload } => {
+                let v = self.value(payload).owned();
+                let name = &self.names.data[*i];
+                let variant = self.case(*i, tag);
+                (quote!(#name::#variant(#v)), Type::Data(*i), true)
+            }
+            Value::Tagged { .. } => unreachable!("checked tagged type"),
             Value::Record { ty: Type::Data(i), fields } => {
                 let mut values = Vec::with_capacity(fields.len());
                 for field in fields {
@@ -148,13 +177,7 @@ impl<'c, 'a> Lower<'c, 'a> {
             Value::Prop { id } | Value::Capture { id } | Value::State { id } | Value::Context { id } => {
                 let p = self.checked.places[id.as_str()];
                 let ty = self.checked.binding(p).ty;
-                let read = self.read(p);
-                let value = match ty {
-                    Type::Text => quote!((#read).as_str()),
-                    Type::Tokens | Type::Data(_) => read,
-                    _ => quote!(*#read),
-                };
-                (value, ty, false)
+                return Expression::borrowed(ty, self.read(p));
             }
             Value::Local { id } => {
                 let (&key, (name, ty, owned)) = self.locals.get_key_value(id.as_str()).expect("validated local");
@@ -205,15 +228,28 @@ impl<'c, 'a> Lower<'c, 'a> {
         entry_call(self.checked, target, args, |p| self.read(p), |i| { let n = names::pending(i); quote!(#n) }, quote!(signals))
     }
 
-    fn edge(&mut self, to: &Edge, payload: Option<TokenStream>) -> TokenStream {
+    fn case(&self, i: usize, name: &str) -> Ident {
+        let Data::Tagged { cases, .. } = &self.checked.unit.types[i] else { unreachable!("checked tagged value") };
+        crate::native_data::case(cases.iter().position(|c| c.tag == name).expect("checked tag"))
+    }
+
+    fn edge(&mut self, to: &Edge, payload: Option<Expression>) -> TokenStream {
         let body = &self.checked.bodies[self.f];
         let dst = names::block(self.f, body.blocks[to.block.as_str()]);
-        let args: Vec<_> = (0..self.checked.ir.behaviors[self.f].params.len()).map(names::argument).collect();
+        let args: Vec<_> = self.layout[body.blocks[to.block.as_str()]].iter().copied().map(names::argument).collect();
         // Edge values are evaluated in their original scope before the successor can write.
-        let transferred: Vec<_> = payload.into_iter().chain(to.args.iter().map(|v| self.value(v).owned())).collect();
+        let phase = self.checked.ir.behaviors[self.f].phase;
+        let pure = matches!(phase, Phase::Pure | Phase::Init);
+        let transferred: Vec<_> = payload.into_iter().chain(to.args.iter().map(|v| self.value(v)))
+            .map(|v| if pure { v.argument() } else { v.owned() }).collect();
         let facts = &self.checked.bodies[self.f].facts;
-        let env = environment(facts, |p| { let n = data(p); quote!(#n) }, |i| { let n = names::pending(i); quote!(#n) }, quote!(signals));
-        quote!(Self::#dst(#(#args,)* #(#transferred,)* #(#env),*))
+        let env = environment(self.checked, facts, |p| { let n = data(p); quote!(#n) }, |i| { let n = names::pending(i); quote!(#n) }, quote!(signals));
+        if phase != Phase::Task || args.is_empty() || transferred.is_empty() {
+            return quote!(Self::#dst(#(#args,)* #(#transferred,)* #(#env),*));
+        }
+        // Explicit edge operands can read an owned formal transferred by the same edge.
+        let values: Vec<_> = (0..transferred.len()).map(|i| format_ident!("edge_value_{i}")).collect();
+        quote!({ #(let #values = #transferred;)* Self::#dst(#(#args,)* #(#values,)* #(#env),*) })
     }
 
     fn instruction(&mut self, index: usize, step: &'a Instruction) -> TokenStream {
@@ -235,7 +271,22 @@ impl<'c, 'a> Lower<'c, 'a> {
                 let value = self.value(value).owned();
                 let ty = &self.names.signal;
                 let member = &self.names.signals[self.checked.signals[target.as_str()]];
-                quote!(signals.push(#ty::#member(#value));)
+                let value = quote!(#ty::#member(#value));
+                if self.checked.tasks.is_empty() { quote!(signals.push(#value);) }
+                else { let effect = effect_type(self.names); quote!(signals.push(#effect::Signal(#value));) }
+            }
+            Instruction::Start { task, args, .. } => {
+                let effect = effect_type(self.names);
+                let start = start(self.checked.functions[task.as_str()]);
+                let args: Vec<_> = args.iter().map(|v| self.value(v).owned()).collect();
+                quote!(signals.push(#effect::#start(#(#args),*));)
+            }
+            Instruction::Cancel { task, .. } => {
+                let target = self.checked.functions[task.as_str()];
+                if !self.checked.tasks.contains(&target) { return TokenStream::new(); }
+                let effect = effect_type(self.names);
+                let variant = cancel(target);
+                quote!(signals.push(#effect::#variant);)
             }
             Instruction::Invoke { function, args, .. } => {
                 let callee = self.checked.functions[function.as_str()];
@@ -267,7 +318,9 @@ impl<'c, 'a> Lower<'c, 'a> {
         match end {
             End::Return { value, .. } => {
                 let value = value.as_ref().map(|v| self.value(v).owned()).unwrap_or_else(|| quote!(()));
-                if self.checked.bodies[self.f].facts.fallible { quote!(::core::result::Result::Ok(#value)) } else { value }
+                if self.checked.ir.behaviors[self.f].phase == Phase::Task {
+                    quote!(::core::result::Result::Ok(::proto_ui_gpui_support::owned_tasks::TaskStep::complete(#value)))
+                } else if self.checked.bodies[self.f].facts.fallible { quote!(::core::result::Result::Ok(#value)) } else { value }
             }
             End::Fail { reason, source } => {
                 let Source { file, start, end } = source;
@@ -283,13 +336,92 @@ impl<'c, 'a> Lower<'c, 'a> {
             End::Presence { value, present, omitted, .. } => {
                 let input = self.value(value);
                 let code = input.code;
-                let payload = if input.owns_value { quote!(payload) } else { quote!(::core::clone::Clone::clone(payload)) };
+                let ty = self.checked.payload(input.ty).expect("checked presence");
+                let payload = if input.owns_value { Expression { code: quote!(payload), ty, owns_value: true } } else { Expression::borrowed(ty, quote!(payload)) };
                 let some = self.edge(present, Some(payload));
                 let none = self.edge(omitted, None);
                 quote!(match #code { ::core::option::Option::Some(payload) => #some, ::core::option::Option::None => #none })
             }
+            End::Match { value, cases, .. } => {
+                let input = self.value(value);
+                let Type::Data(i) = input.ty else { unreachable!("checked match domain") };
+                let name = &self.names.data[i];
+                let code = input.code;
+                let mut arms = Vec::new();
+                for c in cases {
+                    let variant = self.case(i, &c.tag);
+                    let destination = self.checked.bodies[self.f].blocks[c.to.block.as_str()];
+                    let ty = self.checked.ir.behaviors[self.f].blocks[destination].params[0].ty;
+                    let payload = if input.owns_value { Expression { code: quote!(payload), ty, owns_value: true } } else { Expression::borrowed(ty, quote!(payload)) };
+                    let target = self.edge(&c.to, Some(payload));
+                    arms.push(quote!(#name::#variant(payload) => #target));
+                }
+                quote!(match #code { #(#arms),* })
+            }
+            End::Await { external, args, resume, .. } => self.suspend(external, args, resume),
         }
     }
+
+    fn suspend(&mut self, external: &str, args: &[Value], resume: &Edge) -> TokenStream {
+        let host = crate::externs::ident(self.checked.unit, self.checked.links.externs[external]);
+        let b = self.checked.bodies[self.f].blocks[resume.block.as_str()];
+        let entry = segment(self.f, b);
+        let mut snapshots = Vec::new();
+        let mut call = Vec::new();
+        for (i, arg) in args.iter().enumerate() {
+            let name = format_ident!("host_arg_{i}");
+            let value = self.value(arg).owned();
+            snapshots.push(quote!(let #name = #value;)); call.push(name);
+        }
+        let retained: Vec<_> = self.layout[b].iter().copied().map(names::argument).collect();
+        let mut edge = Vec::new();
+        for (i, arg) in resume.args.iter().enumerate() {
+            let name = format_ident!("across_await_{i}");
+            let value = self.value(arg).owned();
+            snapshots.push(quote!(let #name = #value;)); edge.push(name);
+        }
+        quote!({
+            #(#snapshots)*
+            ::core::result::Result::Ok(::proto_ui_gpui_support::owned_tasks::TaskStep::awaiting(
+                move |app| super::#host(#(#call,)* app),
+                move |owner: &mut Self, cx, result| owner.#entry(cx, #(#retained,)* result, #(#edge),*),
+            ))
+        })
+    }
+}
+
+pub fn effect_type(n: &Names) -> Ident { format_ident!("{}CommittedEffect", n.component) }
+pub fn effects(c: &Checked<'_>, facts: &Facts) -> bool { !facts.signals.is_empty() || (facts.task_effects && !c.tasks.is_empty()) }
+pub fn start(f: usize) -> Ident { format_ident!("Start{f}") }
+pub fn cancel(f: usize) -> Ident { format_ident!("Cancel{f}") }
+pub fn segment(f: usize, b: usize) -> Ident { format_ident!("__pui_segment_{f}_{b}") }
+pub fn task_result(ty: TokenStream) -> TokenStream {
+    quote!(::core::result::Result<::proto_ui_gpui_support::owned_tasks::TaskStep<Self, #ty, ::proto_ui_gpui_support::SegmentFailure>, ::proto_ui_gpui_support::SegmentFailure>)
+}
+
+fn successors(end: &End, mut visit: impl FnMut(&Edge)) {
+    match end {
+        End::Jump { to, .. } => visit(to), End::Branch { yes, no, .. } => { visit(yes); visit(no); },
+        End::Presence { present, omitted, .. } => { visit(present); visit(omitted); },
+        End::Match { cases, .. } => { for c in cases { visit(&c.to); } }, End::Await { resume, .. } => visit(resume),
+        End::Return { .. } | End::Fail { .. } => {},
+    }
+}
+
+/// A resumed block owns only the behavior parameters its successor closure reads.
+pub fn formals(checked: &Checked<'_>, f: usize) -> Vec<Vec<usize>> {
+    let fun = &checked.ir.behaviors[f];
+    if fun.phase != Phase::Task { return vec![(0..fun.params.len()).collect(); fun.blocks.len()]; }
+    let mut layout = vec![Vec::new(); fun.blocks.len()];
+    let facts = &checked.bodies[f];
+    for &b in &facts.live_blocks {
+        let block = &fun.blocks[b];
+        let reads = count_uses(block);
+        let mut live: BTreeSet<_> = fun.params.iter().enumerate().filter_map(|(i,p)| reads.contains_key(p.id.as_str()).then_some(i)).collect();
+        successors(&block.end, |edge| live.extend(layout[facts.blocks[edge.block.as_str()]].iter().copied()));
+        layout[b] = live.into_iter().collect();
+    }
+    layout
 }
 
 pub fn methods(checked: &Checked<'_>, names: &Names) -> Vec<TokenStream> {
@@ -298,25 +430,35 @@ pub fn methods(checked: &Checked<'_>, names: &Names) -> Vec<TokenStream> {
         let behavior = &checked.ir.behaviors[f];
         let body = &checked.bodies[f];
         let facts = &body.facts;
+        let layout = formals(checked, f);
         for &b in &body.live_blocks {
             let block = &behavior.blocks[b];
             let name = names::block(f, b);
-            let mut lower = Lower { checked, names, f, locals: HashMap::new(), uses: count_uses(block), consumed: Vec::new() };
+            let task = behavior.phase == Phase::Task;
+            let mut uses = count_uses(block);
+            if task {
+                successors(&block.end, |edge| {
+                    for &i in &layout[body.blocks[edge.block.as_str()]] { *uses.entry(behavior.params[i].id.as_str()).or_insert(0) += 1; }
+                });
+            }
+            let mut lower = Lower { checked, names, f, layout: &layout, locals: HashMap::new(), uses, consumed: Vec::new() };
             let mut params = Vec::new();
-            for (i, p) in behavior.params.iter().enumerate() {
+            for &i in &layout[b] {
+                let p = &behavior.params[i];
                 let n = names::argument(i);
-                let ty = names.input_ty(p.ty);
+                let ty = if task { names.ty(p.ty) } else { names.input_ty(p.ty) };
                 params.push(quote!(#n: #ty));
-                lower.locals.insert(&p.id, (n, p.ty, false));
+                lower.locals.insert(&p.id, (n, p.ty, task));
             }
             for (i, p) in block.params.iter().enumerate() {
                 let n = names::parameter(i);
-                let ty = names.ty(p.ty);
+                let pure = matches!(behavior.phase, Phase::Pure | Phase::Init);
+                let ty = if pure { names.input_ty(p.ty) } else { names.ty(p.ty) };
                 params.push(quote!(#n: #ty));
-                lower.locals.insert(&p.id, (n, p.ty, true));
+                lower.locals.insert(&p.id, (n, p.ty, !pure));
             }
-            let signal = &names.signal;
-            params.extend(environment(facts, |p| { let n = data(p); let ty = names.ty(checked.binding(p).ty); quote!(#n: &#ty) },
+            let signal = if checked.tasks.is_empty() { names.signal.clone() } else { effect_type(names) };
+            params.extend(environment(checked, facts, |p| { let n = data(p); let ty = names.ty(checked.binding(p).ty); quote!(#n: &#ty) },
                 |i| { let n = names::pending(i); let ty = names.ty(checked.ir.fields[i].binding.ty); quote!(#n: &mut ::proto_ui_gpui_support::PendingWrite<'_, #ty>) },
                 quote!(signals: &mut ::std::vec::Vec<#signal>)));
             let mut steps = Vec::new();
@@ -328,7 +470,7 @@ pub fn methods(checked: &Checked<'_>, names: &Names) -> Vec<TokenStream> {
             }
             let end = lower.end(&block.end);
             let ty = names.ty(behavior.binding.ty);
-            let result = if facts.fallible { quote!(::core::result::Result<#ty, ::proto_ui_gpui_support::SegmentFailure>) } else { ty };
+            let result = if behavior.phase == Phase::Task { task_result(ty) } else if facts.fallible { quote!(::core::result::Result<#ty, ::proto_ui_gpui_support::SegmentFailure>) } else { ty };
             let doc = names::source_doc(&behavior.binding.name, block.end.source());
             methods.push(quote! {
                 #[doc = #doc]

@@ -1,16 +1,17 @@
-import { lookupDataType, type Behavior, type Binding, type DataType, type SourceSpan, type Value, type ValueType } from '../component-ir.ts';
+import { lookupDataType, type Behavior, type Binding, type DataType, type ExternIR, type SourceSpan, type Value, type ValueType } from '../component-ir.ts';
 import { reject, requireType } from './diagnostic.ts';
 import type { References } from './graph.ts';
-import { id, list, literalFields, literalType, resolve, shape, text, variant, type RecordFields } from './structure.ts';
+import { id, list, literalFields, literalType, resolve, shape, text, variant, type DataDeclarations } from './structure.ts';
 
 export interface ReadableField {
   readonly kind: 'prop' | 'state' | 'capture' | 'context';
   readonly binding: Binding;
 }
 
-export interface Declarations {
+export interface Declarations extends DataDeclarations {
   readonly types: readonly DataType[];
-  readonly recordFields: RecordFields;
+  readonly externs: ReadonlyMap<string, ExternIR>;
+  readonly tasks: ReadonlyMap<string, Behavior>;
   readonly values: ReadonlyMap<string, ReadableField>;
   readonly signals: ReadonlyMap<string, Binding>;
   readonly functions: ReadonlyMap<string, Behavior>;
@@ -19,12 +20,16 @@ export interface Declarations {
 export interface Uses {
   readonly reads: References;
   readonly calls: References;
+  readonly starts: References;
+  readonly awaits: References;
 }
 
 const valueFields = {
   ...literalFields,
   prop: ['kind', 'id'], state: ['kind', 'id'], capture: ['kind', 'id'], local: ['kind', 'id'],
   context: ['kind', 'id'],
+  'literal-text': ['kind', 'type'], 'widen-text': ['kind', 'value'],
+  tagged: ['kind', 'type', 'tag', 'payload'], tag: ['kind', 'value'],
   record: ['kind', 'type', 'fields'], member: ['kind', 'value', 'field'], 'has-value': ['kind', 'value'],
   not: ['kind', 'value'], binary: ['kind', 'op', 'left', 'right'], call: ['kind', 'fn', 'args'],
 } satisfies Record<Value['kind'], readonly string[]>;
@@ -48,13 +53,13 @@ export function expressions(
     const firstExplicit = payload === undefined ? 0 : 1;
     const supplied = args.length + firstExplicit;
     if (supplied !== formals.length) {
-      const implicit = payload === undefined ? '' : ' including the implicit presence payload';
+      const implicit = payload === undefined ? '' : ' including the implicit edge value';
       reject('wrong-arity', source,
         `${use} expects ${formals.length} arguments, received ${supplied}${implicit}. Transfer one value per parameter.`, [owner, key]);
     }
     if (payload !== undefined) {
       const first = formals[0]!;
-      requireType(payload, first.type, `${use} presence payload`, source, [owner, first.id]);
+      requireType(payload, first.type, `${use} implicit edge value`, source, [owner, first.id]);
     }
     for (const [index, arg] of args.entries()) {
       const formal = formals[firstExplicit + index]!;
@@ -88,6 +93,12 @@ export function expressions(
     return data.value;
   }
 
+  function casesOf(type: ValueType, source: SourceSpan) {
+    const data = lookupDataType(declarations.types, type);
+    if (data?.kind !== 'tagged') reject('type-mismatch', source, 'This operation requires a declared tagged type.', bindings);
+    return declarations.taggedCases.get(data)!;
+  }
+
   function valueType(value: Value, source: SourceSpan): ValueType {
     switch (value.kind) {
       case 'bool':
@@ -95,10 +106,32 @@ export function expressions(
       case 'text':
       case 'tokens':
         return literalType(value, source, bindings);
+      case 'literal-text':
+        if (lookupDataType(declarations.types, value.type)?.kind !== 'text-literal') {
+          reject('type-mismatch', source, 'A singleton text expression requires a declared text-literal type.', bindings);
+        }
+        return value.type;
+      case 'widen-text': {
+        const type = typeOf(value.value, source);
+        if (lookupDataType(declarations.types, type)?.kind !== 'text-literal') {
+          reject('type-mismatch', source, `Text widening requires a singleton text domain, received ${type}.`, bindings);
+        }
+        return 'text';
+      }
+      case 'tagged': {
+        text(value.tag, 'constructed tag', source, bindings);
+        const item = casesOf(value.type, source).get(value.tag);
+        if (!item) reject('type-mismatch', source, `Tagged type ${value.type} has no tag ${JSON.stringify(value.tag)}.`, bindings);
+        requireType(typeOf(value.payload, source), item.payload, `Payload of tag ${JSON.stringify(value.tag)}`, source, bindings);
+        return value.type;
+      }
+      case 'tag':
+        casesOf(typeOf(value.value, source), source);
+        return 'text';
       case 'record': {
         const data = lookupDataType(declarations.types, value.type);
         if (!data) reject('ir-shape', source, 'A record constructor needs a canonical index of a declared record type.', bindings);
-        if (data.kind !== 'record') reject('type-mismatch', source, `Record construction requires a record type, received ${value.type} (presence).`, bindings);
+        if (data.kind !== 'record') reject('type-mismatch', source, `Record construction requires a record type, received ${value.type} (${data.kind}).`, bindings);
         list(value.fields, 'record value fields', source);
         if (value.fields.length !== data.fields.length) {
           reject('ir-shape', source, `Record ${value.type} declares ${data.fields.length} fields, received ${value.fields.length}. Supply each declared field once.`, bindings);
@@ -175,6 +208,9 @@ export function expressions(
       case 'call': {
         const target = callee(value.fn, source);
         argumentsOf(value.args, target.params, 'Call to', value.fn, source);
+        if (target.phase === 'task') {
+          reject('invalid-phase', source, 'A task cannot be called as a synchronous value. Start its owned invocation with a start instruction.', [owner, value.fn]);
+        }
         if (target.phase === 'action') {
           if (fn.phase !== 'action') {
             reject('illegal-effect', source,
@@ -193,5 +229,5 @@ export function expressions(
     }
   }
 
-  return { typeOf, argumentsOf, callee, presencePayload };
+  return { typeOf, argumentsOf, callee, presencePayload, casesOf };
 }
