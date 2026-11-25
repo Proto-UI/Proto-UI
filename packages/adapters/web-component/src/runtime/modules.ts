@@ -1943,6 +1943,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             const observedRoots = new Set<Node>();
             let entryRelationalSubjects = new Set<Element>();
             let hasExternalStyleInputs = false;
+            let dormant = false;
             let pendingEntryRefresh: boolean | undefined;
             const scheduleEntrySample = (refresh: boolean) => {
               if (pendingEntryRefresh !== undefined) {
@@ -1974,6 +1975,63 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             const observeTree = () => {
               if (!isCurrentEntryObservation()) return;
               disconnectEntryTreeObservers();
+              // Native inert ancestry already makes this entry unavailable to
+              // the resolver. Framework staging and modal backgrounds can
+              // mutate extensively while inert; none of those descendants or
+              // stylesheet rules can make this region eligible. Retain only
+              // the live composed chain until its native barrier is removed.
+              let inertAncestor: Element | null = target;
+              while (inertAncestor && !inertAncestor.hasAttribute('inert'))
+                inertAncestor = composedParentElement(inertAncestor);
+              dormant = inertAncestor !== null;
+              if (inertAncestor) {
+                observedRoots.clear();
+                entryRelationalSubjects.clear();
+                hasExternalStyleInputs = false;
+                entryStyleWatch?.dispose();
+                entryStyleWatch = null;
+                stopEntryAttachShadowWatch?.();
+                stopEntryAttachShadowWatch = null;
+                stopEntryUpgradeWatch?.();
+                const slotRoots = new Set<EventTarget>();
+                for (
+                  let ancestor: Element | null = target;
+                  ancestor;
+                  ancestor = composedParentElement(ancestor)
+                ) {
+                  observedRoots.add(ancestor);
+                  entryObserver?.observe(ancestor, {
+                    attributes: true,
+                    attributeFilter: ['inert', 'slot', 'name'],
+                    attributeOldValue: true,
+                  });
+                  // A slotted node's physical parent can differ from the
+                  // composed one. Observe both movement and reassignment.
+                  const parent = ancestor.parentNode;
+                  if (parent?.nodeType === 11) slotRoots.add(parent);
+                  if (ancestor.parentElement?.shadowRoot)
+                    slotRoots.add(ancestor.parentElement.shadowRoot);
+                }
+                for (const ancestor of observedRoots) {
+                  const parent = ancestor.parentNode;
+                  if (!parent) continue;
+                  entryObserver?.observe(parent, {
+                    ...(observedRoots.has(parent)
+                      ? { attributeFilter: ['inert', 'slot', 'name'], attributeOldValue: true }
+                      : {}),
+                    childList: true,
+                  });
+                }
+                stopEntrySlotWatch = listenToEntryEvents(slotRoots, ['slotchange'], refreshTree);
+                return;
+              }
+              if (view && !entryStyleWatch)
+                entryStyleWatch = watchEntryStyleInvalidation(view, (inlineOnly) => {
+                  // DOM and stylesheet invalidation can share one observer
+                  // checkpoint. Keep the graph rebuild coalesced.
+                  if (!inlineOnly) scheduleEntrySample(true);
+                  else projectCurrent();
+                });
               let hasArea = false;
               let hasSlottedEntryContent = false;
               const radioTrees = new Set<Document | ShadowRoot>();
@@ -2648,7 +2706,14 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               if (!isCurrentEntryObservation()) return;
               if (
                 records.some((record) => {
-                  if (record.type !== 'attributes') return true;
+                  if (record.type !== 'attributes') {
+                    if (!dormant) return true;
+                    for (const node of record.addedNodes)
+                      if (observedRoots.has(node)) return true;
+                    for (const node of record.removedNodes)
+                      if (observedRoots.has(node)) return true;
+                    return false;
+                  }
                   const current = (record.target as Element).getAttributeNS(
                     record.attributeNamespace,
                     record.attributeName!
@@ -2673,14 +2738,6 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 scheduleEntrySample(true);
               }
             });
-            if (view)
-              entryStyleWatch = watchEntryStyleInvalidation(view, (inlineOnly) => {
-                // DOM and stylesheet invalidation can share one observer
-                // checkpoint. Use the same pending sample instead of rebuilding
-                // the dependency graph once here and again for the DOM signal.
-                if (!inlineOnly) scheduleEntrySample(true);
-                else projectCurrent();
-              });
             observeTree();
           }
         },
