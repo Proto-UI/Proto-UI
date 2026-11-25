@@ -1,4 +1,4 @@
-import { afterEach, expect, it } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import {
   AdaptToWebComponent,
   setElementProps,
@@ -27,7 +27,27 @@ const Texts = {
 const settle = async () => {
   for (let i = 0; i < 12; i++) await Promise.resolve();
 };
-afterEach(() => document.body.replaceChildren());
+function motionPreference(preference: 'no-preference' | 'reduce' | 'unknown') {
+  vi.spyOn(window, 'matchMedia').mockImplementation(
+    (query) =>
+      ({
+        matches: preference !== 'unknown' && query === `(prefers-reduced-motion: ${preference})`,
+        media: query,
+        onchange: null,
+        addListener() {},
+        removeListener() {},
+        addEventListener() {},
+        removeEventListener() {},
+        dispatchEvent: () => true,
+      }) as MediaQueryList
+  );
+}
+// Preference is an explicit fixture input. Unknown must not enable motion.
+beforeEach(() => motionPreference('no-preference'));
+afterEach(() => {
+  document.body.replaceChildren();
+  vi.restoreAllMocks();
+});
 
 // The accepted website target remains 44px, not upstream Rhea's size-8.
 // Paint/focus/press literals follow the public passive Rhea contract; no
@@ -201,17 +221,26 @@ for (const family of ['shadcn', 'brutalist'] as const)
             expect(tokens).toContain('bg-secondary-background');
             expect(tokens).not.toContain('bg-muted');
           }
-          expect(getElementProps(surface)?.pressed).toBe(facts.pressed);
-          // P-SHADCN-SURFACE-ACTION-APPEARANCE: the Shadcn navigation row is a
-          // public Rhea action profile, so it shares the action press envelope.
-          // Only the Brutalist family authors the raised shadow treatment.
+          expect(getElementProps(surface)?.pressed).toBe(
+            family === 'shadcn' && appearance === 'nav' ? false : facts.pressed
+          );
+          // Explicit action bodies own pressed motion. Ordinary navigation
+          // keeps native text selection and the website's stationary policy.
+          // Brutalist motion belongs only to the raised category.
           const shadcnAction =
             family === 'shadcn' && ['action', 'icon', 'nav'].includes(appearance);
           if (family === 'shadcn') {
-            if (shadcnAction && facts.pressed) expect(tokens).toContain('translate-y-px');
+            if (['action', 'icon'].includes(appearance) && facts.pressed)
+              expect(tokens).toContain('translate-y-px');
             else expect(tokens).not.toContain('translate-y-px');
             expect(tokens).not.toContain('shadow-none');
-          } else if (!raised && facts.pressed) expect(tokens).toContain('translate-y-px');
+          } else {
+            expect(tokens).not.toContain('translate-y-px');
+            if (!raised) {
+              expect(tokens).not.toContain('translate-x-1');
+              expect(tokens).not.toContain('translate-y-1');
+            }
+          }
           const focusToken = shadcnAction ? 'ring-3' : 'ring-2';
           expect(tokens.includes(focusToken)).toBe(facts.focusVisible);
           if (raised)
@@ -264,8 +293,7 @@ it('rejects a navigation current projection built without the current fact', asy
     document.body.append(link);
     const idle = { hovered: false, pressed: false, focusVisible: false, current: false };
     const current = { ...idle, current: true };
-    const textTokens = () =>
-      new Set((text.getAttribute('data-pui-style') ?? '').split(/\s+/));
+    const textTokens = () => new Set((text.getAttribute('data-pui-style') ?? '').split(/\s+/));
     // The wrong-fact projection: the current cue without the current fact.
     setElementProps(surface, {
       ...linkSurfaceProps(family, 'nav', 'minimal', idle),
@@ -315,3 +343,37 @@ it('keeps brand glyph content stable across public Surface feedback changes', as
     expect(svg?.querySelector('path')?.getAttribute('d')).toBeTruthy();
   }
 });
+
+for (const preference of ['reduce', 'unknown'] as const) {
+  it(`suppresses action interpolation for ${preference} preference without losing ownership`, async () => {
+    motionPreference(preference);
+    for (const family of ['shadcn', 'brutalist'] as const) {
+      const link = document.createElement('a');
+      link.href = '/native-destination/';
+      const surface = new Constructors[family]();
+      link.append(surface);
+      document.body.append(link);
+      setElementProps(
+        surface,
+        linkSurfaceProps(family, 'icon', 'primary', {
+          hovered: true,
+          pressed: true,
+          focusVisible: true,
+          current: false,
+        })
+      );
+      surface.update();
+      await settle();
+      const tokens = new Set((surface.getAttribute('data-pui-style') ?? '').split(/\s+/));
+      expect(tokens.has('transition-none')).toBe(true);
+      expect(tokens.has('transition-all')).toBe(false);
+      expect(surface.hasAttribute('role')).toBe(false);
+      expect(surface.hasAttribute('tabindex')).toBe(false);
+      expect(surface.getExposes()).toEqual({});
+      link.focus();
+      expect(document.activeElement).toBe(link);
+      expect(link.getAttribute('href')).toBe('/native-destination/');
+      link.remove();
+    }
+  });
+}
