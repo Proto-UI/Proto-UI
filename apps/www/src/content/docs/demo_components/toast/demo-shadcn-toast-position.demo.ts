@@ -1,5 +1,6 @@
 import { withShadcnRheaDemo } from '../../shadcn-demo-style';
 import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
+import { setToastCopy } from './toast-copy';
 
 const POSITIONS = [
   ['top-left', 'Top Left'],
@@ -52,14 +53,26 @@ export default withShadcnRheaDemo({
               {
                 kind: 'proto',
                 prototypeId: 'shadcn-toast-title',
-                ref: 'title',
-                children: ['Event has been created'],
+                children: [
+                  {
+                    kind: 'box',
+                    tag: 'span',
+                    ref: 'title-copy',
+                    dynamicChildren: { prototypeIds: [] },
+                  },
+                ],
               },
               {
                 kind: 'proto',
                 prototypeId: 'shadcn-toast-description',
-                ref: 'desc',
-                children: ['Positioned at bottom-right'],
+                children: [
+                  {
+                    kind: 'box',
+                    tag: 'span',
+                    ref: 'description-copy',
+                    dynamicChildren: { prototypeIds: [] },
+                  },
+                ],
               },
               {
                 kind: 'box',
@@ -78,28 +91,31 @@ export default withShadcnRheaDemo({
       },
     ],
   },
-  setup({ refs, api }) {
-    const cleanups: Array<() => void> = [];
+  setup({ api }) {
+    let revision = 0;
     for (const [pos, label] of POSITIONS) {
-      const btn = refs[`btn-${pos}`];
-      const onClick = () => {
-        api.setProps('viewport', { position: pos });
-        refs.title.textContent = `Toast (${label})`;
-        refs.desc.textContent = `Viewport position set to "${pos}".`;
-        const toastExposes = api.getExposes('toast') as { openToast?: () => void } | null;
-        toastExposes?.openToast?.();
-      };
-      btn.addEventListener('click', onClick);
-      cleanups.push(() => btn.removeEventListener('click', onClick));
+      api.setProps(`btn-${pos}`, {
+        async onClick() {
+          const request = ++revision;
+          const committed = await setToastCopy(
+            api,
+            `Toast (${label})`,
+            `Viewport position set to "${pos}".`
+          );
+          if (!committed || request !== revision) return;
+          api.setProps('viewport', { position: pos });
+          api.call('toast', 'openToast');
+        },
+      });
     }
-    const onDismissAll = () => {
-      const vpExposes = api.getExposes('viewport') as { dismissAll?: () => void } | null;
-      vpExposes?.dismissAll?.();
-    };
-    refs.dismissAll.addEventListener('click', onDismissAll);
-    cleanups.push(() => refs.dismissAll.removeEventListener('click', onDismissAll));
+    api.setProps('dismissAll', {
+      onClick() {
+        revision++;
+        api.call('viewport', 'dismissAll');
+      },
+    });
     return () => {
-      for (const fn of cleanups) fn();
+      revision++;
     };
   },
 } satisfies DemoSpec);

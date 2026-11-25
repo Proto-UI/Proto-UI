@@ -109,3 +109,33 @@ const mainPaneClass = isSplash
     }
   }
 </style>
+
+<style is:global>
+  /* The preview viewport shares the reading canvas below the measured header. */
+  .docs-reading-columns[data-layout='docs']
+    .proto-previewer
+    [role='region'][data-position]:has(:is([role='status'], [role='alert'])[data-is-present]) {
+    max-height: max(0px, calc(100dvh - var(--header-height) - 3rem));
+  }
+
+  .docs-reading-columns[data-layout='docs']
+    .proto-previewer
+    [role='region'][data-position^='top-']:has(
+      :is([role='status'], [role='alert'])[data-is-present]
+    ) {
+    top: calc(var(--header-height) + 1.5rem);
+  }
+
+  @media (min-width: 64rem) {
+    /* Keep preview Toasts above both navigation rails and below the site header. */
+    .docs-reading-columns[data-layout='docs']
+      > .main-pane:has(
+        .proto-previewer
+          [role='region'][data-position]
+          :is([role='status'], [role='alert'])[data-is-present]
+      ) {
+      position: relative;
+      z-index: 31;
+    }
+  }
+</style>
