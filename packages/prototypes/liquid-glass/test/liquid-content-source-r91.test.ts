@@ -362,27 +362,155 @@ describe('Liquid content: data and collection ownership survives neutral paint',
     const viewport = make(carousel.carouselViewport);
     const first = make(carousel.carouselSlide, { index: 0 });
     const second = make(carousel.carouselSlide, { index: 1 });
+    const previous = make(carousel.carouselPrevious);
     const next = make(carousel.carouselNext);
     first.textContent = 'First scene';
     second.textContent = 'Second scene';
+    previous.textContent = 'Previous';
     next.textContent = 'Next';
     viewport.append(first, second);
-    root.append(viewport, next);
+    root.append(viewport, previous, next);
     const requests: unknown[] = [];
     root.addEventListener('indexChange', (event) => requests.push((event as CustomEvent).detail));
     document.body.append(root);
     await flush();
+
+    const navigationCandidate = {
+      intent: 'liquid-glass',
+      variant: 'regular',
+      deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+    };
+    const expectNavigation = (
+      element: Subject,
+      disabled: boolean,
+      material: 'auto' | 'opaque' = 'auto'
+    ) => {
+      expect(element.getExposes().disabled.get()).toBe(disabled);
+      // Controls retain their declared slot when an endpoint, disabled owner or
+      // explicit opaque prop withdraws the candidate. Only slide content is neutral.
+      expect(latest(element).material).toEqual({
+        slot: {
+          version: 2,
+          paintReservation: 'required',
+          shape: { kind: 'rounded-rect', geometry: 'style' },
+          source: { kind: 'in-app-backdrop' },
+          fallback: { fill: 'style', foreground: 'style' },
+        },
+        candidates: !disabled && material === 'auto' ? [navigationCandidate] : [],
+      });
+      const tokens = latest(element).style.tokens;
+      expect(tokens).toEqual(
+        expect.arrayContaining(
+          disabled
+            ? ['bg-muted', 'text-muted-foreground']
+            : ['bg-secondary', 'text-secondary-foreground']
+        )
+      );
+      for (const token of disabled
+        ? ['bg-secondary', 'text-secondary-foreground']
+        : ['bg-muted', 'text-muted-foreground'])
+        expect(tokens).not.toContain(token);
+    };
+    const expectOwner = (index: 0 | 1) => {
+      expect(root.getExposes().index.get()).toBe(index);
+      expect(root.getExposes().slideCount.get()).toBe(2);
+      expect(first.getExposes().current.get()).toBe(index === 0);
+      expect(second.getExposes().current.get()).toBe(index === 1);
+      expect(first.getExposes().hidden.get()).toBe(index !== 0);
+      expect(second.getExposes().hidden.get()).toBe(index !== 1);
+      expect(first.parentElement).toBe(viewport);
+      expect(second.parentElement).toBe(viewport);
+      expect(first.textContent).toBe('First scene');
+      expect(second.textContent).toBe('Second scene');
+      expectNeutral(root, viewport, first, second);
+    };
+    expectOwner(0);
+    expectNavigation(previous, true);
+    expectNavigation(next, false);
+    expect(latest(first).style.tokens).toContain('px-2');
+    expect(latest(first).style.tokens).not.toContain('py-2');
+    expect(latest(previous).style.tokens).toContain('left-3');
+    expect(latest(next).style.tokens).toContain('right-3');
+    click(previous);
+    await flush();
+    expect(requests).toEqual([]);
     click(next);
     await flush();
     expect(requests).toEqual([{ index: 1 }]);
-    expect(root.getExposes().index.get()).toBe(0);
-    expect(second.getExposes().hidden.get()).toBe(true);
+    expectOwner(0);
+    expectNavigation(previous, true);
+    expectNavigation(next, false);
+
+    setElementProps(root, { index: 1, orientation: 'vertical', direction: 'rtl' });
+    await flush();
+    expectOwner(1);
+    expectNavigation(previous, false);
+    expectNavigation(next, true);
+    expect(latest(first).style.tokens).toContain('py-2');
+    expect(latest(first).style.tokens).not.toContain('px-2');
+    expect(latest(previous).style.tokens).toContain('top-3');
+    expect(latest(previous).style.tokens).not.toContain('left-3');
+    expect(latest(next).style.tokens).toContain('bottom-3');
+    expect(latest(next).style.tokens).not.toContain('right-3');
+    click(next);
+    await flush();
+    expect(requests).toEqual([{ index: 1 }]);
+
+    setElementProps(root, { index: 1, direction: 'rtl' });
+    await flush();
+    expectOwner(1);
+    expect(latest(first).style.tokens).toContain('px-2');
+    expect(latest(first).style.tokens).not.toContain('py-2');
+    expect(latest(previous).style.tokens).toContain('right-3');
+    expect(latest(previous).style.tokens).not.toContain('top-3');
+    expect(latest(next).style.tokens).toContain('left-3');
+    expect(latest(next).style.tokens).not.toContain('bottom-3');
+    click(previous);
+    await flush();
+    expect(requests).toEqual([{ index: 1 }, { index: 0 }]);
+    expectOwner(1);
+    expectNavigation(previous, false);
+    expectNavigation(next, true);
+
+    setElementProps(root, { index: 0, direction: 'rtl' });
+    await flush();
+    expectOwner(0);
+    expectNavigation(previous, true);
+    expectNavigation(next, false);
+    setElementProps(root, { index: 0, direction: 'rtl', disabled: true });
+    await flush();
+    expectNavigation(previous, true);
+    expectNavigation(next, true);
+    click(previous);
+    click(next);
+    await flush();
+    expect(requests).toEqual([{ index: 1 }, { index: 0 }]);
+    expectOwner(0);
+
+    setElementProps(root, { index: 0, direction: 'rtl' });
+    await flush();
+    expectNavigation(next, false);
+    setElementProps(next, { material: 'opaque' });
+    await flush();
+    expectNavigation(next, false, 'opaque');
+    click(next);
+    await flush();
+    expect(requests).toEqual([{ index: 1 }, { index: 0 }, { index: 1 }]);
+    expectOwner(0);
+    setElementProps(next, {});
+    await flush();
+    expectNavigation(next, false);
+
     setElementProps(root, { index: 1 });
     await flush();
-    expect(first.getExposes().hidden.get()).toBe(true);
-    expect(second.getExposes().hidden.get()).toBe(false);
-    expect(second.textContent).toBe('Second scene');
-    expectNeutral(root, viewport, first, second, next);
+    expectOwner(1);
+    expectNavigation(previous, false);
+    expectNavigation(next, true);
+    expect(latest(previous).style.tokens).toContain('left-3');
+    expect(latest(previous).style.tokens).not.toContain('right-3');
+    expect(latest(next).style.tokens).toContain('right-3');
+    expect(latest(next).style.tokens).not.toContain('left-3');
+    expect(requests).toEqual([{ index: 1 }, { index: 0 }, { index: 1 }]);
   });
 
   it('retains the complete Virtual List collection and rejects stale bounded work after owner changes', async () => {

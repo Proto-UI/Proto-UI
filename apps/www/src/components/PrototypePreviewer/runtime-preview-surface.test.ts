@@ -113,6 +113,8 @@ describe('RuntimeBox canvas composition', () => {
         const tokens = frame.getAttribute('data-pui-style')?.split(/\s+/);
         expect(tokens).toContain('border');
         expect(tokens).not.toContain('border-0');
+        expect(tokens).toContain('rounded-xl');
+        expect(tokens).not.toContain('rounded-none');
       } finally {
         await result.destroy();
       }

@@ -1466,20 +1466,6 @@ export class AnatomyModuleImpl extends ModuleBase {
     }
   }
 
-  private ensureCallback(op: string) {
-    if (this.sys) {
-      try {
-        this.sys.ensureCallback(op);
-        return;
-      } catch {
-        throw anatomyError(ANATOMY_ERROR.PHASE, `[Anatomy] callback-only: ${op}`);
-      }
-    }
-    if (this.protoPhase === 'setup') {
-      throw illegalPhase(op, this.protoPhase, { prototypeName: this.prototypeName });
-    }
-  }
-
   private getSelfToken(): AnatomyInstanceToken {
     if (!this.caps.has(ANATOMY_INSTANCE_TOKEN_CAP)) {
       throw anatomyError(ANATOMY_ERROR.CAP, `[Anatomy] host caps missing: instance token`);

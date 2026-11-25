@@ -333,7 +333,6 @@ export function createRuntimePreviewSurface(
           return {
             ...props,
             variant: 'transparent',
-            radius: 'none',
             ...(hasCanvas ? { border: 'none' } : {}),
           };
         },
