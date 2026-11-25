@@ -1,9 +1,7 @@
-import { fileURLToPath } from 'node:url';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { isWebComponentPortaled } from '../../../adapters/web-component/src/portal-mount';
-import { collectProtoStyleTokensFromFiles } from '../../../cli/src/services/prototype-style-tokens';
-import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
+import { collectModalPresentationCss } from './modal-presentation-host';
 import { dialogRoot, dialogContent, dialogMask } from '../src/dialog';
 import { alertDialogRoot, alertDialogContent, alertDialogMask } from '../src/alert-dialog';
 
@@ -30,25 +28,7 @@ let now = 0,
 let preference: 'reduce' | 'no-preference' | 'unknown' = 'no-preference';
 const frames = new Map<number, FrameRequestCallback>();
 beforeAll(async () => {
-  const tokens = await collectProtoStyleTokensFromFiles(
-    [
-      '../src/dialog/content.proto.ts',
-      '../src/dialog/mask.proto.ts',
-      '../src/alert-dialog/content.proto.ts',
-      '../src/alert-dialog/mask.proto.ts',
-    ].map((path) => fileURLToPath(new URL(path, import.meta.url)))
-  );
-  // Happy DOM does not implement cascade layers, and its attribute-selector
-  // parser needs brackets escaped even inside quoted values. CSS string escapes
-  // preserve the exact token selectors; the generated declarations stay intact.
-  // This is source-composition evidence, not native browser cascade evidence.
-  tokenCss = renderProtoStyleTokenCss(tokens)
-    .replace(/@layer proto-ui \{\n([\s\S]*)\n\}\n$/, '$1')
-    .replace(
-      /(\[data-pui-style~=")([^"]+)("\])/g,
-      (_match, prefix: string, token: string, suffix: string) =>
-        prefix + token.replace(/[\[\]]/g, '\\$&') + suffix
-    );
+  tokenCss = await collectModalPresentationCss();
 }, 30_000);
 function installStyles(target: Document | ShadowRoot) {
   const stylesheet = document.createElement('style');
