@@ -89,7 +89,7 @@ for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
       await vi.waitFor(() =>
         expect(tab.getAttribute('data-pui-style')?.split(/\s+/)).toContain(radius)
       );
-      expect(refs.profileStatus.textContent).toBe(`Profile: ${profile}`);
+      expect(refs.profileStatus.textContent).toBe(`Active preset: ${profile}`);
       expect(api.call('tabs', 'value.get')).toBe('password');
       expect(api.call('passwordTab', 'selected.get')).toBe(true);
       expect(api.getExposes('tabs')!.value).toBe(value);
@@ -107,7 +107,7 @@ for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
     refs.accountTab.click();
     await vi.waitFor(() => expect(api.call('tabs', 'value.get')).toBe('account'));
     refs['profile-rhea'].click();
-    await vi.waitFor(() => expect(refs.profileStatus.textContent).toBe('Profile: rhea'));
+    await vi.waitFor(() => expect(refs.profileStatus.textContent).toBe('Active preset: rhea'));
     // A retired demo removes its shortcut and cannot publish a late profile change.
     const statusNode = refs.profileStatus;
     const status = statusNode.textContent;
