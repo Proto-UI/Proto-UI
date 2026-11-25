@@ -102,7 +102,7 @@ describe('Toast stack style delivery', () => {
       expect(css).toContain('transition-duration: 300ms;');
       expect(css).toContain('transition-timing-function: cubic-bezier(0, 0, 0.2, 1);');
       expect(css).toContain('line-height: 1.4;');
-      expect(css).toContain('--pui-shadow: 0 4px 12px rgb(0 0 0 / 10%);');
+      expect(css).toContain('--pui-shadow: 0 4px 12px rgb(0 0 0 / 0.1);');
       expect(css).not.toContain('Unsupported Proto UI style tokens');
     });
   }
