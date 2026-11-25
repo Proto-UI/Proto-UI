@@ -105,10 +105,26 @@ describe('prototypes/brutalist: card', () => {
     expect(styleContains(footer, 'border-t-2')).toBe(false);
     expect(styleContains(footer, 'border-black')).toBe(false);
 
-    // Section separators resolve the same ink as the Root frame, so a theme
-    // change repaints them with the Card instead of leaving fixed black.
-    expect(styleContains(header, 'brutalist-border-bottom-black')).toBe(false);
-    expect(styleContains(footer, 'brutalist-border-top-black')).toBe(false);
+    updateProps(header, { divider: true });
+    updateProps(footer, { divider: true });
+    await flush();
+
+    expect(styleContains(header, 'border-b-2')).toBe(true);
+    expect(styleContains(header, 'border-t-2')).toBe(false);
+    expect(styleContains(header, 'border-foreground')).toBe(true);
+    expect(styleContains(footer, 'border-t-2')).toBe(true);
+    expect(styleContains(footer, 'border-b-2')).toBe(false);
+    expect(styleContains(footer, 'border-foreground')).toBe(true);
+    expect(styleContains(root, 'border-black')).toBe(true);
+
+    updateProps(header, { divider: false });
+    updateProps(footer, { divider: false });
+    await flush();
+
+    expect(styleContains(header, 'border-b-2')).toBe(false);
+    expect(styleContains(header, 'border-foreground')).toBe(false);
+    expect(styleContains(footer, 'border-t-2')).toBe(false);
+    expect(styleContains(footer, 'border-foreground')).toBe(false);
 
     root.remove();
   });

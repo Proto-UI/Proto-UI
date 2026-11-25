@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -27,7 +27,7 @@ async function observe({
   factory?: string;
   declarations?: string;
 } = {}) {
-  const directory = await mkdtemp(path.join(tmpdir(), 'lowered-local-helper-'));
+  const directory = await realpath(await mkdtemp(path.join(tmpdir(), 'lowered-local-helper-')));
   try {
     const producer = path.join(directory, 'producer.ts');
     await writeFile(

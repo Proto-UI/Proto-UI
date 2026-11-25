@@ -220,13 +220,6 @@ export function createWebComponentPortalMount() {
       let materialEpoch: WebPortalMaterialEpoch | null = null;
       const ownsProjection = () => projected && el.parentNode === projectionBody;
       let cancelReveal: (() => void) | null = null;
-      // A newly acquired surface is published before the first host reads its
-      // geometry. The display guard defers the surface's first style
-      // computation, so a surface that is still guarded has no box at all: the
-      // anchored position solve reads it synchronously after this projection
-      // returns, and the presence projector samples it before the next
-      // animation frame. Both would observe an empty surface.
-      let revealIsFirstRender = false;
       const endReveal = () => {
         const cancel = cancelReveal;
         cancelReveal = null;
@@ -243,7 +236,6 @@ export function createWebComponentPortalMount() {
         // An already presented retained view never acquires this concealment.
         const firstRender = acquiringViews.has(el) || el.hasAttribute(PUI_PORTAL_PREPARING_ATTR);
         endReveal();
-        revealIsFirstRender = false;
         if (!isCurrent()) return;
         const doc = el.ownerDocument;
         if (doc.visibilityState !== 'visible') return;
@@ -264,32 +256,23 @@ export function createWebComponentPortalMount() {
         // Descendant theme reconciliation must settle before transitions resume.
         if (firstRender) el.setAttribute(PUI_PORTAL_PREPARING_ATTR, '');
         el.setAttribute(PUI_VIEW_REVEALING_ATTR, 'portal');
-        revealIsFirstRender = firstRender;
         if (cancelReveal === cancel)
           cancelLayout = scheduleAfterWebLayout(el, finish, queueMicrotask);
-      };
-      // Publish a newly acquired surface as soon as it is projected into its
-      // destination. The transition guard is withdrawn before the display
-      // suppression, so the browser still applies authored @starting-style to
-      // that first render, and the surface already carries a rendered,
-      // correctly sized box for every host measurement that follows the
-      // projection. A relocated, already presented surface keeps the reveal
-      // barrier as its only release path: it never acquires display
-      // suppression, and its theme guard still settles for two layouts.
-      const presentFirstRender = () => {
-        if (!revealIsFirstRender) return;
-        revealIsFirstRender = false;
-        const reveal = cancelReveal;
-        // A parent's mounted callback can change the document theme after its
-        // children mounted. Reconcile their existing active leases before the
-        // first style is published, without extending the transition guard or
-        // suppressing authored @starting-style entrances.
-        for (const target of [el, ...el.querySelectorAll('*')]) {
-          if (!isCurrent() || cancelReveal !== reveal) return;
-          if (target === el || el.contains(target)) reconcileViewColorScheme.get(target)?.();
-        }
-        if (!isCurrent() || cancelReveal !== reveal) return;
-        endReveal();
+        // First measurement needs the published box. A retained surface uses
+        // the two-layout barrier above; a fresh one is revealed after the move.
+        if (!firstRender) return;
+        return () => {
+          // A parent's mounted callback can change the document theme after its
+          // children mounted. Reconcile existing reader leases before the first
+          // style is published. Keep this callback bound to this exact reveal:
+          // a reader may synchronously replace or retire the projection.
+          for (const target of [el, ...el.querySelectorAll('*')]) {
+            if (!isCurrent() || cancelReveal !== cancel) return;
+            if (target === el || el.contains(target)) reconcileViewColorScheme.get(target)?.();
+          }
+          if (!isCurrent() || cancelReveal !== cancel) return;
+          finish();
+        };
       };
       let unbindAdoption: (() => void) | null = null;
       let observer: MutationObserver | null = null;
@@ -343,9 +326,9 @@ export function createWebComponentPortalMount() {
         binding = resolveWebPortalDestinationBinding(marker, el);
         if (!isCurrent()) return false;
         projectionBody = binding.destination;
-        beginReveal();
+        const present = beginReveal();
         projectionBody.appendChild(el);
-        presentFirstRender();
+        present?.();
         if (isCurrent() && ownsProjection()) notifyWebPortalProjection(el);
         return isCurrent() && ownsProjection();
       };
@@ -502,10 +485,10 @@ export function createWebComponentPortalMount() {
           return;
         }
         materialEpoch = acquiredMaterial;
-        beginReveal();
+        const present = beginReveal();
         if (el.parentNode !== projectionBody)
           relocate(el, projectionBody!, () => projectionBody!.appendChild(el));
-        presentFirstRender();
+        present?.();
         if (isCurrent() && ownsProjection()) {
           refreshDestination();
           if (isCurrent() && ownsProjection()) materialEpoch.commitProjection();

@@ -123,6 +123,16 @@ describe('Anatomy catalog boundaries', () => {
     };
     const rootOwner = make('root', root);
     const readNames = () => rootOwner.port.parts(family)?.map((part) => part.getExpose('name'));
+    const readsInRegistrationOrder = () => {
+      const sort = vi.spyOn(Array.prototype, 'sort');
+      try {
+        const names = readNames();
+        expect(sort).not.toHaveBeenCalled();
+        return names;
+      } finally {
+        sort.mockRestore();
+      }
+    };
     try {
       rootOwner.claim(family, { role: 'root' });
       const sharedToken = {};
@@ -130,13 +140,13 @@ describe('Anatomy catalog boundaries', () => {
       shared.claim(unrelated, { role: 'item' });
       make('family-only').claim(family, { role: 'item' });
       for (let i = 0; i < 24; i++) make('unrelated').claim(unrelated, { role: 'item' });
-      expect(readNames()).toEqual(['root', 'family-only']);
+      expect(readsInRegistrationOrder()).toEqual(['root', 'family-only']);
 
       shared.claim(family, { role: 'item' });
       const get = vi.spyOn(Map.prototype, 'get');
       let unrelatedReads = 0;
       try {
-        expect(readNames()).toEqual(['root', 'shared', 'family-only']);
+        expect(readsInRegistrationOrder()).toEqual(['root', 'shared', 'family-only']);
         unrelatedReads = get.mock.calls.filter(([key], index) => {
           const bucket = get.mock.contexts[index];
           return (
@@ -148,9 +158,9 @@ describe('Anatomy catalog boundaries', () => {
       }
 
       shared.dispose();
-      expect(readNames()).toEqual(['root', 'family-only']);
+      expect(readsInRegistrationOrder()).toEqual(['root', 'family-only']);
       make('renewed', sharedToken).claim(family, { role: 'item' });
-      expect(readNames()).toEqual(['root', 'family-only', 'renewed']);
+      expect(readsInRegistrationOrder()).toEqual(['root', 'family-only', 'renewed']);
       expect(unrelatedReads).toBe(0);
     } finally {
       modules.reverse().forEach((owner) => owner.dispose());

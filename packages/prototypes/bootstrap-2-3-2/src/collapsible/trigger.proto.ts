@@ -21,11 +21,25 @@ const collapsibleTrigger = definePrototype<
     // P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY: no fixed width/height or clipped long label.
     def.feedback.style.use(
       tw(
-        'block w-full min-w-0 max-w-full wrap-anywhere whitespace-break-spaces text-left cursor-pointer select-none px-[15px] py-[8px] text-[14px] leading-[20px] font-normal text-[#08c]'
+        'block w-full min-w-0 max-w-full wrap-anywhere whitespace-break-spaces text-left cursor-pointer select-none px-[15px] py-[8px] text-[14px] leading-[20px] font-normal'
       )
     );
     def.rule({
-      when: (w) => w.meta('colorScheme').eq('dark'),
+      when: (w) =>
+        w.all(
+          w.not(w.meta('colorScheme').eq('dark')),
+          w.state(hovered).eq(false),
+          w.state(pressed).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('text-[#08c]')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.meta('colorScheme').eq('dark'),
+          w.state(hovered).eq(false),
+          w.state(pressed).eq(false)
+        ),
       intent: (i) => i.feedback.style.use(tw('text-ring')),
     });
     def.rule({

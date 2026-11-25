@@ -670,29 +670,30 @@ describe('source-bound collection consumers', () => {
 
   it('withdraws default ToggleGroup hover paint on disable, cancellation and remount without selecting the hovered item', async () => {
     const f = groupFixture({ styleProfile: 'mira' });
+    const hoverPaint = 'bg-muted/70';
     document.body.append(f.root);
     await flush();
     f.italic.dispatchEvent(new PointerEvent('pointerenter'));
     await flush();
-    expect(styleContains(f.italic, 'bg-muted/70')).toBe(true);
+    expect(styleContains(f.italic, hoverPaint)).toBe(true);
     expect(f.root.getExposes().getValue()).toEqual(['bold']);
     setElementProps(f.italic, { value: 'italic', disabled: true });
     await flush();
-    expect(styleContains(f.italic, 'bg-muted/70')).toBe(false);
+    expect(styleContains(f.italic, hoverPaint)).toBe(false);
     setElementProps(f.italic, { value: 'italic' });
     await flush();
-    expect(styleContains(f.italic, 'bg-muted/70')).toBe(false);
+    expect(styleContains(f.italic, hoverPaint)).toBe(false);
     f.italic.dispatchEvent(new PointerEvent('pointerenter'));
     f.italic.dispatchEvent(new PointerEvent('pointercancel'));
     await flush();
-    expect(styleContains(f.italic, 'bg-muted/70')).toBe(false);
+    expect(styleContains(f.italic, hoverPaint)).toBe(false);
     f.italic.dispatchEvent(new PointerEvent('pointerenter'));
     await flush();
     f.italic.remove();
     await flush();
     f.root.append(f.italic);
     await flush();
-    expect(styleContains(f.italic, 'bg-muted/70')).toBe(false);
+    expect(styleContains(f.italic, hoverPaint)).toBe(false);
     expect(f.root.getExposes().getValue()).toEqual(['bold']);
     expect(f.root.getExposes().count.get()).toBe(2);
   });

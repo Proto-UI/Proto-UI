@@ -486,6 +486,7 @@ for (const family of FAMILIES) {
             .poll(() => content(retained).getAttribute('aria-hidden'), { timeout: 2000 })
             .toBe('true');
           await expect.poll(() => content(retained).isVisible()).toBe(false);
+          expect(await content(retained).getAttribute('aria-hidden')).toBe('true');
           expect(
             await content(retained).evaluate((element) => getComputedStyle(element).display)
           ).toBe('none');
