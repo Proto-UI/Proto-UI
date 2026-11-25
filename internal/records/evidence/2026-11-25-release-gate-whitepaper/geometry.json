@@ -1,0 +1,2174 @@
+{
+  "kind": "Direct native SVG diagnostic; not production article/Dialog acceptance",
+  "chromium": "156.0.8078.79",
+  "rows": [
+    {
+      "name": "whitepaper-evolution-feedback.en.svg",
+      "theme": "light",
+      "png": "whitepaper-evolution-feedback.en-light.png",
+      "sourceSha256": "f1e5ba376b02f75430ba0efd0f4779bf7687eacc3d0c59b02ce3902f5ea04041",
+      "markers": [
+        {
+          "id": "evo-arrow",
+          "fill": "rgb(113, 113, 122)",
+          "wireStroke": "rgb(113, 113, 122)"
+        },
+        {
+          "id": "evo-arrow-sm",
+          "fill": "rgb(113, 113, 122)",
+          "wireStroke": "rgb(113, 113, 122)"
+        }
+      ],
+      "canvas": {
+        "width": 960,
+        "height": 928
+      },
+      "text": [
+        {
+          "text": "Practice, evidence, and explicit revision",
+          "x": 48,
+          "y": 28,
+          "width": 723.109375,
+          "height": 44,
+          "fontSize": 40,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Three concurrent lines of work",
+          "x": 48,
+          "y": 85,
+          "width": 485.20703125,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Theory & kernel",
+          "x": 144.8671875,
+          "y": 183.39999389648438,
+          "width": 150.265625,
+          "height": 91.39999389648438,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Prototype libraries",
+          "x": 427.2265625,
+          "y": 183.39999389648438,
+          "width": 161.546875,
+          "height": 91.39999389648438,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Translation layer",
+          "x": 703.9375,
+          "y": 183.39999389648438,
+          "width": 184.125,
+          "height": 91.39999389648438,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Practice provides evidence",
+          "x": 285.234375,
+          "y": 367,
+          "width": 445.53125,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Outcomes, failures, counterexamples",
+          "x": 210.8671875,
+          "y": 421,
+          "width": 594.265625,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Which layer needs revision?",
+          "x": 96,
+          "y": 515,
+          "width": 466.71875,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Implementation drift",
+          "x": 130.1953125,
+          "y": 593,
+          "width": 332.33978271484375,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Fix implementation",
+          "x": 144.9375,
+          "y": 647,
+          "width": 302.125,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Host capability gap",
+          "x": 561.8046875,
+          "y": 593,
+          "width": 316.390625,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Improve translation",
+          "x": 566.9296875,
+          "y": 647,
+          "width": 306.140625,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Omission or overfitting",
+          "x": 106.2578125,
+          "y": 745,
+          "width": 379.484375,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Revise the Prototype",
+          "x": 128.90625,
+          "y": 799,
+          "width": 334.1875,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Relation challenged",
+          "x": 556.8046875,
+          "y": 745,
+          "width": 326.390625,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Revisit the theory",
+          "x": 580.9375,
+          "y": 799,
+          "width": 278.125,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Revise explicitly, then test again.",
+          "x": 48,
+          "y": 875,
+          "width": 519.59375,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        }
+      ],
+      "cards": [
+        {
+          "id": "theory-kernel",
+          "x": 96,
+          "y": 166,
+          "width": 248,
+          "height": 126,
+          "overflow": []
+        },
+        {
+          "id": "prototype-libraries",
+          "x": 384,
+          "y": 166,
+          "width": 248,
+          "height": 126,
+          "overflow": []
+        },
+        {
+          "id": "translation-layer",
+          "x": 672,
+          "y": 166,
+          "width": 248,
+          "height": 126,
+          "overflow": []
+        },
+        {
+          "id": "practice-evidence",
+          "x": 96,
+          "y": 352,
+          "width": 824,
+          "height": 124,
+          "overflow": []
+        },
+        {
+          "id": "implementation",
+          "x": 96,
+          "y": 578,
+          "width": 400,
+          "height": 128,
+          "overflow": []
+        },
+        {
+          "id": "host-capability",
+          "x": 520,
+          "y": 578,
+          "width": 400,
+          "height": 128,
+          "overflow": []
+        },
+        {
+          "id": "prototype",
+          "x": 96,
+          "y": 730,
+          "width": 400,
+          "height": 128,
+          "overflow": []
+        },
+        {
+          "id": "theory",
+          "x": 520,
+          "y": 730,
+          "width": 400,
+          "height": 128,
+          "overflow": []
+        }
+      ],
+      "canvasOverflow": []
+    },
+    {
+      "name": "whitepaper-evolution-feedback.zh-cn.svg",
+      "theme": "light",
+      "png": "whitepaper-evolution-feedback.zh-cn-light.png",
+      "sourceSha256": "81dcdabdbed66da7c7042b5584f48726e4b6cfa706911832a1ce91bcfcd78f9b",
+      "markers": [
+        {
+          "id": "evo-arrow",
+          "fill": "rgb(113, 113, 122)",
+          "wireStroke": "rgb(113, 113, 122)"
+        },
+        {
+          "id": "evo-arrow-sm",
+          "fill": "rgb(113, 113, 122)",
+          "wireStroke": "rgb(113, 113, 122)"
+        }
+      ],
+      "canvas": {
+        "width": 960,
+        "height": 928
+      },
+      "text": [
+        {
+          "text": "实践、证据与明确修正",
+          "x": 48,
+          "y": 18,
+          "width": 392,
+          "height": 58,
+          "fontSize": 40,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "三条主线并行推进",
+          "x": 48,
+          "y": 76,
+          "width": 288.015625,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "理论与 内核",
+          "x": 167.078125,
+          "y": 174.39999389648438,
+          "width": 105.84375,
+          "height": 102.39999389648438,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "原型库",
+          "x": 455.078125,
+          "y": 199.60000610351562,
+          "width": 105.84375,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "翻译层",
+          "x": 743.078125,
+          "y": 199.60000610351562,
+          "width": 105.84375,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "实践提供证据",
+          "x": 402.15625,
+          "y": 358,
+          "width": 211.6875,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "行为结果、失败与反例",
+          "x": 327.9921875,
+          "y": 412,
+          "width": 360.015625,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "归因：哪一层需要修正？",
+          "x": 96,
+          "y": 506,
+          "width": 388.09375,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "实现偏差",
+          "x": 225.4375,
+          "y": 584,
+          "width": 141.125,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "修正实现",
+          "x": 223.9921875,
+          "y": 638,
+          "width": 144.015625,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Host 能力缺口",
+          "x": 606.2734375,
+          "y": 584,
+          "width": 227.453125,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "补足翻译能力",
+          "x": 611.9921875,
+          "y": 638,
+          "width": 216.015625,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "义务遗漏或过拟合",
+          "x": 154.875,
+          "y": 736,
+          "width": 282.960205078125,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "修正 Prototype",
+          "x": 172.84375,
+          "y": 790,
+          "width": 246.3125,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "基础关系出现反例",
+          "x": 578.875,
+          "y": 736,
+          "width": 282.25,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "重审理论",
+          "x": 647.9921875,
+          "y": 790,
+          "width": 144.015625,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "明确修正，再次检验。",
+          "x": 48,
+          "y": 866,
+          "width": 360.015625,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        }
+      ],
+      "cards": [
+        {
+          "id": "theory-kernel",
+          "x": 96,
+          "y": 166,
+          "width": 248,
+          "height": 126,
+          "overflow": []
+        },
+        {
+          "id": "prototype-libraries",
+          "x": 384,
+          "y": 166,
+          "width": 248,
+          "height": 126,
+          "overflow": []
+        },
+        {
+          "id": "translation-layer",
+          "x": 672,
+          "y": 166,
+          "width": 248,
+          "height": 126,
+          "overflow": []
+        },
+        {
+          "id": "practice-evidence",
+          "x": 96,
+          "y": 352,
+          "width": 824,
+          "height": 124,
+          "overflow": []
+        },
+        {
+          "id": "implementation",
+          "x": 96,
+          "y": 578,
+          "width": 400,
+          "height": 128,
+          "overflow": []
+        },
+        {
+          "id": "host-capability",
+          "x": 520,
+          "y": 578,
+          "width": 400,
+          "height": 128,
+          "overflow": []
+        },
+        {
+          "id": "prototype",
+          "x": 96,
+          "y": 730,
+          "width": 400,
+          "height": 128,
+          "overflow": []
+        },
+        {
+          "id": "theory",
+          "x": 520,
+          "y": 730,
+          "width": 400,
+          "height": 128,
+          "overflow": []
+        }
+      ],
+      "canvasOverflow": []
+    },
+    {
+      "name": "whitepaper-evolution-feedback.mobile.en.svg",
+      "theme": "light",
+      "png": "whitepaper-evolution-feedback.mobile.en-light.png",
+      "sourceSha256": "3fd41a3405fec8e2b1c3e1d4c6591434c249fa3a0f3648e291f94137883b4046",
+      "markers": [
+        {
+          "id": "evo-arrow",
+          "fill": "rgb(113, 113, 122)",
+          "wireStroke": "rgb(113, 113, 122)"
+        },
+        {
+          "id": "evo-arrow-sm",
+          "fill": "rgb(113, 113, 122)",
+          "wireStroke": "rgb(113, 113, 122)"
+        }
+      ],
+      "canvas": {
+        "width": 500,
+        "height": 1000
+      },
+      "text": [
+        {
+          "text": "Practice to explicit revision",
+          "x": 32,
+          "y": 15,
+          "width": 346.359375,
+          "height": 31,
+          "fontSize": 28,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Three concurrent lines of work",
+          "x": 32,
+          "y": 56,
+          "width": 350.705078125,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Theory & kernel",
+          "x": 47.734375,
+          "y": 132.89999389648438,
+          "width": 108.53125,
+          "height": 66.39999389648438,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Prototype libraries",
+          "x": 199.6640625,
+          "y": 132.89999389648438,
+          "width": 116.721923828125,
+          "height": 66.39999389648438,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Translation layer",
+          "x": 347.5078125,
+          "y": 132.89999389648438,
+          "width": 132.984375,
+          "height": 66.39999389648438,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Practice provides evidence",
+          "x": 97.1171875,
+          "y": 282,
+          "width": 321.8235168457031,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Outcomes, failures, counterexamples",
+          "x": 146.0078125,
+          "y": 317,
+          "width": 223.984375,
+          "height": 66.39999389648438,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Which layer needs revision?",
+          "x": 32,
+          "y": 403,
+          "width": 337.078125,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Alternative diagnoses, not stages",
+          "x": 32,
+          "y": 437,
+          "width": 383.03125,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Implementation drift",
+          "x": 138.25,
+          "y": 500,
+          "width": 240.35653686523438,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Fix implementation",
+          "x": 148.8984375,
+          "y": 540,
+          "width": 218.203125,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Host capability gap",
+          "x": 143.7421875,
+          "y": 600,
+          "width": 228.515625,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Improve translation",
+          "x": 147.4453125,
+          "y": 640,
+          "width": 221.109375,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Omission or overfitting",
+          "x": 120.9609375,
+          "y": 700,
+          "width": 274.078125,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Revise the Prototype",
+          "x": 137.3203125,
+          "y": 740,
+          "width": 241.359375,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Relation challenged",
+          "x": 140.1328125,
+          "y": 800,
+          "width": 235.734375,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Revisit the theory",
+          "x": 157.5625,
+          "y": 840,
+          "width": 200.875,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Revise, then test again.",
+          "x": 32,
+          "y": 906,
+          "width": 271.71875,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "No silent rule changes.",
+          "x": 32,
+          "y": 942,
+          "width": 264.484375,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        }
+      ],
+      "cards": [
+        {
+          "id": "theory-kernel",
+          "x": 32,
+          "y": 108,
+          "width": 140,
+          "height": 116,
+          "overflow": []
+        },
+        {
+          "id": "prototype-libraries",
+          "x": 188,
+          "y": 108,
+          "width": 140,
+          "height": 116,
+          "overflow": []
+        },
+        {
+          "id": "translation-layer",
+          "x": 342,
+          "y": 108,
+          "width": 144,
+          "height": 116,
+          "overflow": []
+        },
+        {
+          "id": "practice-evidence",
+          "x": 32,
+          "y": 270,
+          "width": 452,
+          "height": 120,
+          "overflow": []
+        },
+        {
+          "id": "implementation",
+          "x": 44,
+          "y": 488,
+          "width": 428,
+          "height": 92,
+          "overflow": []
+        },
+        {
+          "id": "host-capability",
+          "x": 44,
+          "y": 588,
+          "width": 428,
+          "height": 92,
+          "overflow": []
+        },
+        {
+          "id": "prototype",
+          "x": 44,
+          "y": 688,
+          "width": 428,
+          "height": 92,
+          "overflow": []
+        },
+        {
+          "id": "theory",
+          "x": 44,
+          "y": 788,
+          "width": 428,
+          "height": 92,
+          "overflow": []
+        }
+      ],
+      "canvasOverflow": []
+    },
+    {
+      "name": "whitepaper-evolution-feedback.mobile.zh-cn.svg",
+      "theme": "light",
+      "png": "whitepaper-evolution-feedback.mobile.zh-cn-light.png",
+      "sourceSha256": "9b18a2b83bc7710fa4b4e2e3c1dd08621ee7c2d5a8adba6a55bf54d1379c5d10",
+      "markers": [
+        {
+          "id": "evo-arrow",
+          "fill": "rgb(113, 113, 122)",
+          "wireStroke": "rgb(113, 113, 122)"
+        },
+        {
+          "id": "evo-arrow-sm",
+          "fill": "rgb(113, 113, 122)",
+          "wireStroke": "rgb(113, 113, 122)"
+        }
+      ],
+      "canvas": {
+        "width": 500,
+        "height": 1000
+      },
+      "text": [
+        {
+          "text": "从实践到明确修正",
+          "x": 32,
+          "y": 8,
+          "width": 219.53125,
+          "height": 40,
+          "fontSize": 28,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "三条主线并行推进",
+          "x": 32,
+          "y": 50,
+          "width": 208.015625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "理论 与内核",
+          "x": 63.7734375,
+          "y": 126.89999389648438,
+          "width": 76.9600830078125,
+          "height": 73.39999389648438,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "原型库",
+          "x": 219.7734375,
+          "y": 145.10000610351562,
+          "width": 76.453125,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "翻译层",
+          "x": 375.7734375,
+          "y": 145.10000610351562,
+          "width": 76.453125,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "实践提供证据",
+          "x": 181.5546875,
+          "y": 276,
+          "width": 152.890625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "行为结果、失败与反例",
+          "x": 127.9921875,
+          "y": 317,
+          "width": 260.015625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "哪一层需要修正？",
+          "x": 32,
+          "y": 397,
+          "width": 203.84375,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "不同归因，并非先后阶段",
+          "x": 32,
+          "y": 431,
+          "width": 286.015625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "实现偏差",
+          "x": 207.0390625,
+          "y": 494,
+          "width": 101.921875,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "修正实现",
+          "x": 205.9921875,
+          "y": 534,
+          "width": 104.015625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "Host 能力缺口",
+          "x": 175.859375,
+          "y": 594,
+          "width": 164.28125,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "补足翻译能力",
+          "x": 179.9921875,
+          "y": 634,
+          "width": 156.015625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "义务遗漏或过拟合",
+          "x": 156.078125,
+          "y": 694,
+          "width": 204.36029052734375,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "修正 Prototype",
+          "x": 169.046875,
+          "y": 734,
+          "width": 177.90625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "基础关系出现反例",
+          "x": 156.078125,
+          "y": 794,
+          "width": 203.84375,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "重审理论",
+          "x": 205.9921875,
+          "y": 834,
+          "width": 104.015625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "明确修正，再次检验。",
+          "x": 32,
+          "y": 900,
+          "width": 260.015625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        },
+        {
+          "text": "实现结果不静默成为标准。",
+          "x": 32,
+          "y": 936,
+          "width": 312.015625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(24, 24, 27)"
+        }
+      ],
+      "cards": [
+        {
+          "id": "theory-kernel",
+          "x": 32,
+          "y": 108,
+          "width": 140,
+          "height": 116,
+          "overflow": []
+        },
+        {
+          "id": "prototype-libraries",
+          "x": 188,
+          "y": 108,
+          "width": 140,
+          "height": 116,
+          "overflow": []
+        },
+        {
+          "id": "translation-layer",
+          "x": 342,
+          "y": 108,
+          "width": 144,
+          "height": 116,
+          "overflow": []
+        },
+        {
+          "id": "practice-evidence",
+          "x": 32,
+          "y": 270,
+          "width": 452,
+          "height": 120,
+          "overflow": []
+        },
+        {
+          "id": "implementation",
+          "x": 44,
+          "y": 488,
+          "width": 428,
+          "height": 92,
+          "overflow": []
+        },
+        {
+          "id": "host-capability",
+          "x": 44,
+          "y": 588,
+          "width": 428,
+          "height": 92,
+          "overflow": []
+        },
+        {
+          "id": "prototype",
+          "x": 44,
+          "y": 688,
+          "width": 428,
+          "height": 92,
+          "overflow": []
+        },
+        {
+          "id": "theory",
+          "x": 44,
+          "y": 788,
+          "width": 428,
+          "height": 92,
+          "overflow": []
+        }
+      ],
+      "canvasOverflow": []
+    },
+    {
+      "name": "whitepaper-evolution-feedback.en.svg",
+      "theme": "dark",
+      "png": "whitepaper-evolution-feedback.en-dark.png",
+      "sourceSha256": "f1e5ba376b02f75430ba0efd0f4779bf7687eacc3d0c59b02ce3902f5ea04041",
+      "markers": [
+        {
+          "id": "evo-arrow",
+          "fill": "rgb(113, 113, 122)",
+          "wireStroke": "rgb(113, 113, 122)"
+        },
+        {
+          "id": "evo-arrow-sm",
+          "fill": "rgb(113, 113, 122)",
+          "wireStroke": "rgb(113, 113, 122)"
+        }
+      ],
+      "canvas": {
+        "width": 960,
+        "height": 928
+      },
+      "text": [
+        {
+          "text": "Practice, evidence, and explicit revision",
+          "x": 48,
+          "y": 28,
+          "width": 723.109375,
+          "height": 44,
+          "fontSize": 40,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Three concurrent lines of work",
+          "x": 48,
+          "y": 85,
+          "width": 485.20703125,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Theory & kernel",
+          "x": 144.8671875,
+          "y": 183.39999389648438,
+          "width": 150.265625,
+          "height": 91.39999389648438,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Prototype libraries",
+          "x": 427.2265625,
+          "y": 183.39999389648438,
+          "width": 161.546875,
+          "height": 91.39999389648438,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Translation layer",
+          "x": 703.9375,
+          "y": 183.39999389648438,
+          "width": 184.125,
+          "height": 91.39999389648438,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Practice provides evidence",
+          "x": 285.234375,
+          "y": 367,
+          "width": 445.53125,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Outcomes, failures, counterexamples",
+          "x": 210.8671875,
+          "y": 421,
+          "width": 594.265625,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Which layer needs revision?",
+          "x": 96,
+          "y": 515,
+          "width": 466.71875,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Implementation drift",
+          "x": 130.1953125,
+          "y": 593,
+          "width": 332.33978271484375,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Fix implementation",
+          "x": 144.9375,
+          "y": 647,
+          "width": 302.125,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Host capability gap",
+          "x": 561.8046875,
+          "y": 593,
+          "width": 316.390625,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Improve translation",
+          "x": 566.9296875,
+          "y": 647,
+          "width": 306.140625,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Omission or overfitting",
+          "x": 106.2578125,
+          "y": 745,
+          "width": 379.484375,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Revise the Prototype",
+          "x": 128.90625,
+          "y": 799,
+          "width": 334.1875,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Relation challenged",
+          "x": 556.8046875,
+          "y": 745,
+          "width": 326.390625,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Revisit the theory",
+          "x": 580.9375,
+          "y": 799,
+          "width": 278.125,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Revise explicitly, then test again.",
+          "x": 48,
+          "y": 875,
+          "width": 519.59375,
+          "height": 41,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        }
+      ],
+      "cards": [
+        {
+          "id": "theory-kernel",
+          "x": 96,
+          "y": 166,
+          "width": 248,
+          "height": 126,
+          "overflow": []
+        },
+        {
+          "id": "prototype-libraries",
+          "x": 384,
+          "y": 166,
+          "width": 248,
+          "height": 126,
+          "overflow": []
+        },
+        {
+          "id": "translation-layer",
+          "x": 672,
+          "y": 166,
+          "width": 248,
+          "height": 126,
+          "overflow": []
+        },
+        {
+          "id": "practice-evidence",
+          "x": 96,
+          "y": 352,
+          "width": 824,
+          "height": 124,
+          "overflow": []
+        },
+        {
+          "id": "implementation",
+          "x": 96,
+          "y": 578,
+          "width": 400,
+          "height": 128,
+          "overflow": []
+        },
+        {
+          "id": "host-capability",
+          "x": 520,
+          "y": 578,
+          "width": 400,
+          "height": 128,
+          "overflow": []
+        },
+        {
+          "id": "prototype",
+          "x": 96,
+          "y": 730,
+          "width": 400,
+          "height": 128,
+          "overflow": []
+        },
+        {
+          "id": "theory",
+          "x": 520,
+          "y": 730,
+          "width": 400,
+          "height": 128,
+          "overflow": []
+        }
+      ],
+      "canvasOverflow": []
+    },
+    {
+      "name": "whitepaper-evolution-feedback.zh-cn.svg",
+      "theme": "dark",
+      "png": "whitepaper-evolution-feedback.zh-cn-dark.png",
+      "sourceSha256": "81dcdabdbed66da7c7042b5584f48726e4b6cfa706911832a1ce91bcfcd78f9b",
+      "markers": [
+        {
+          "id": "evo-arrow",
+          "fill": "rgb(113, 113, 122)",
+          "wireStroke": "rgb(113, 113, 122)"
+        },
+        {
+          "id": "evo-arrow-sm",
+          "fill": "rgb(113, 113, 122)",
+          "wireStroke": "rgb(113, 113, 122)"
+        }
+      ],
+      "canvas": {
+        "width": 960,
+        "height": 928
+      },
+      "text": [
+        {
+          "text": "实践、证据与明确修正",
+          "x": 48,
+          "y": 18,
+          "width": 392,
+          "height": 58,
+          "fontSize": 40,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "三条主线并行推进",
+          "x": 48,
+          "y": 76,
+          "width": 288.015625,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "理论与 内核",
+          "x": 167.078125,
+          "y": 174.39999389648438,
+          "width": 105.84375,
+          "height": 102.39999389648438,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "原型库",
+          "x": 455.078125,
+          "y": 199.60000610351562,
+          "width": 105.84375,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "翻译层",
+          "x": 743.078125,
+          "y": 199.60000610351562,
+          "width": 105.84375,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "实践提供证据",
+          "x": 402.15625,
+          "y": 358,
+          "width": 211.6875,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "行为结果、失败与反例",
+          "x": 327.9921875,
+          "y": 412,
+          "width": 360.015625,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "归因：哪一层需要修正？",
+          "x": 96,
+          "y": 506,
+          "width": 388.09375,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "实现偏差",
+          "x": 225.4375,
+          "y": 584,
+          "width": 141.125,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "修正实现",
+          "x": 223.9921875,
+          "y": 638,
+          "width": 144.015625,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Host 能力缺口",
+          "x": 606.2734375,
+          "y": 584,
+          "width": 227.453125,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "补足翻译能力",
+          "x": 611.9921875,
+          "y": 638,
+          "width": 216.015625,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "义务遗漏或过拟合",
+          "x": 154.875,
+          "y": 736,
+          "width": 282.960205078125,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "修正 Prototype",
+          "x": 172.84375,
+          "y": 790,
+          "width": 246.3125,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "基础关系出现反例",
+          "x": 578.875,
+          "y": 736,
+          "width": 282.25,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "重审理论",
+          "x": 647.9921875,
+          "y": 790,
+          "width": 144.015625,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "明确修正，再次检验。",
+          "x": 48,
+          "y": 866,
+          "width": 360.015625,
+          "height": 52,
+          "fontSize": 36,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        }
+      ],
+      "cards": [
+        {
+          "id": "theory-kernel",
+          "x": 96,
+          "y": 166,
+          "width": 248,
+          "height": 126,
+          "overflow": []
+        },
+        {
+          "id": "prototype-libraries",
+          "x": 384,
+          "y": 166,
+          "width": 248,
+          "height": 126,
+          "overflow": []
+        },
+        {
+          "id": "translation-layer",
+          "x": 672,
+          "y": 166,
+          "width": 248,
+          "height": 126,
+          "overflow": []
+        },
+        {
+          "id": "practice-evidence",
+          "x": 96,
+          "y": 352,
+          "width": 824,
+          "height": 124,
+          "overflow": []
+        },
+        {
+          "id": "implementation",
+          "x": 96,
+          "y": 578,
+          "width": 400,
+          "height": 128,
+          "overflow": []
+        },
+        {
+          "id": "host-capability",
+          "x": 520,
+          "y": 578,
+          "width": 400,
+          "height": 128,
+          "overflow": []
+        },
+        {
+          "id": "prototype",
+          "x": 96,
+          "y": 730,
+          "width": 400,
+          "height": 128,
+          "overflow": []
+        },
+        {
+          "id": "theory",
+          "x": 520,
+          "y": 730,
+          "width": 400,
+          "height": 128,
+          "overflow": []
+        }
+      ],
+      "canvasOverflow": []
+    },
+    {
+      "name": "whitepaper-evolution-feedback.mobile.en.svg",
+      "theme": "dark",
+      "png": "whitepaper-evolution-feedback.mobile.en-dark.png",
+      "sourceSha256": "3fd41a3405fec8e2b1c3e1d4c6591434c249fa3a0f3648e291f94137883b4046",
+      "markers": [
+        {
+          "id": "evo-arrow",
+          "fill": "rgb(113, 113, 122)",
+          "wireStroke": "rgb(113, 113, 122)"
+        },
+        {
+          "id": "evo-arrow-sm",
+          "fill": "rgb(113, 113, 122)",
+          "wireStroke": "rgb(113, 113, 122)"
+        }
+      ],
+      "canvas": {
+        "width": 500,
+        "height": 1000
+      },
+      "text": [
+        {
+          "text": "Practice to explicit revision",
+          "x": 32,
+          "y": 15,
+          "width": 346.359375,
+          "height": 31,
+          "fontSize": 28,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Three concurrent lines of work",
+          "x": 32,
+          "y": 56,
+          "width": 350.705078125,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Theory & kernel",
+          "x": 47.734375,
+          "y": 132.89999389648438,
+          "width": 108.53125,
+          "height": 66.39999389648438,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Prototype libraries",
+          "x": 199.6640625,
+          "y": 132.89999389648438,
+          "width": 116.721923828125,
+          "height": 66.39999389648438,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Translation layer",
+          "x": 347.5078125,
+          "y": 132.89999389648438,
+          "width": 132.984375,
+          "height": 66.39999389648438,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Practice provides evidence",
+          "x": 97.1171875,
+          "y": 282,
+          "width": 321.8235168457031,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Outcomes, failures, counterexamples",
+          "x": 146.0078125,
+          "y": 317,
+          "width": 223.984375,
+          "height": 66.39999389648438,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Which layer needs revision?",
+          "x": 32,
+          "y": 403,
+          "width": 337.078125,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Alternative diagnoses, not stages",
+          "x": 32,
+          "y": 437,
+          "width": 383.03125,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Implementation drift",
+          "x": 138.25,
+          "y": 500,
+          "width": 240.35653686523438,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Fix implementation",
+          "x": 148.8984375,
+          "y": 540,
+          "width": 218.203125,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Host capability gap",
+          "x": 143.7421875,
+          "y": 600,
+          "width": 228.515625,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Improve translation",
+          "x": 147.4453125,
+          "y": 640,
+          "width": 221.109375,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Omission or overfitting",
+          "x": 120.9609375,
+          "y": 700,
+          "width": 274.078125,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Revise the Prototype",
+          "x": 137.3203125,
+          "y": 740,
+          "width": 241.359375,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Relation challenged",
+          "x": 140.1328125,
+          "y": 800,
+          "width": 235.734375,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Revisit the theory",
+          "x": 157.5625,
+          "y": 840,
+          "width": 200.875,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Revise, then test again.",
+          "x": 32,
+          "y": 906,
+          "width": 271.71875,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "No silent rule changes.",
+          "x": 32,
+          "y": 942,
+          "width": 264.484375,
+          "height": 30,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        }
+      ],
+      "cards": [
+        {
+          "id": "theory-kernel",
+          "x": 32,
+          "y": 108,
+          "width": 140,
+          "height": 116,
+          "overflow": []
+        },
+        {
+          "id": "prototype-libraries",
+          "x": 188,
+          "y": 108,
+          "width": 140,
+          "height": 116,
+          "overflow": []
+        },
+        {
+          "id": "translation-layer",
+          "x": 342,
+          "y": 108,
+          "width": 144,
+          "height": 116,
+          "overflow": []
+        },
+        {
+          "id": "practice-evidence",
+          "x": 32,
+          "y": 270,
+          "width": 452,
+          "height": 120,
+          "overflow": []
+        },
+        {
+          "id": "implementation",
+          "x": 44,
+          "y": 488,
+          "width": 428,
+          "height": 92,
+          "overflow": []
+        },
+        {
+          "id": "host-capability",
+          "x": 44,
+          "y": 588,
+          "width": 428,
+          "height": 92,
+          "overflow": []
+        },
+        {
+          "id": "prototype",
+          "x": 44,
+          "y": 688,
+          "width": 428,
+          "height": 92,
+          "overflow": []
+        },
+        {
+          "id": "theory",
+          "x": 44,
+          "y": 788,
+          "width": 428,
+          "height": 92,
+          "overflow": []
+        }
+      ],
+      "canvasOverflow": []
+    },
+    {
+      "name": "whitepaper-evolution-feedback.mobile.zh-cn.svg",
+      "theme": "dark",
+      "png": "whitepaper-evolution-feedback.mobile.zh-cn-dark.png",
+      "sourceSha256": "9b18a2b83bc7710fa4b4e2e3c1dd08621ee7c2d5a8adba6a55bf54d1379c5d10",
+      "markers": [
+        {
+          "id": "evo-arrow",
+          "fill": "rgb(113, 113, 122)",
+          "wireStroke": "rgb(113, 113, 122)"
+        },
+        {
+          "id": "evo-arrow-sm",
+          "fill": "rgb(113, 113, 122)",
+          "wireStroke": "rgb(113, 113, 122)"
+        }
+      ],
+      "canvas": {
+        "width": 500,
+        "height": 1000
+      },
+      "text": [
+        {
+          "text": "从实践到明确修正",
+          "x": 32,
+          "y": 8,
+          "width": 219.53125,
+          "height": 40,
+          "fontSize": 28,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "三条主线并行推进",
+          "x": 32,
+          "y": 50,
+          "width": 208.015625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "理论 与内核",
+          "x": 63.7734375,
+          "y": 126.89999389648438,
+          "width": 76.9600830078125,
+          "height": 73.39999389648438,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "原型库",
+          "x": 219.7734375,
+          "y": 145.10000610351562,
+          "width": 76.453125,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "翻译层",
+          "x": 375.7734375,
+          "y": 145.10000610351562,
+          "width": 76.453125,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "实践提供证据",
+          "x": 181.5546875,
+          "y": 276,
+          "width": 152.890625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "行为结果、失败与反例",
+          "x": 127.9921875,
+          "y": 317,
+          "width": 260.015625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "哪一层需要修正？",
+          "x": 32,
+          "y": 397,
+          "width": 203.84375,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "不同归因，并非先后阶段",
+          "x": 32,
+          "y": 431,
+          "width": 286.015625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "实现偏差",
+          "x": 207.0390625,
+          "y": 494,
+          "width": 101.921875,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "修正实现",
+          "x": 205.9921875,
+          "y": 534,
+          "width": 104.015625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "Host 能力缺口",
+          "x": 175.859375,
+          "y": 594,
+          "width": 164.28125,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "补足翻译能力",
+          "x": 179.9921875,
+          "y": 634,
+          "width": 156.015625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "义务遗漏或过拟合",
+          "x": 156.078125,
+          "y": 694,
+          "width": 204.36029052734375,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "修正 Prototype",
+          "x": 169.046875,
+          "y": 734,
+          "width": 177.90625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "基础关系出现反例",
+          "x": 156.078125,
+          "y": 794,
+          "width": 203.84375,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "重审理论",
+          "x": 205.9921875,
+          "y": 834,
+          "width": 104.015625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "明确修正，再次检验。",
+          "x": 32,
+          "y": 900,
+          "width": 260.015625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        },
+        {
+          "text": "实现结果不静默成为标准。",
+          "x": 32,
+          "y": 936,
+          "width": 312.015625,
+          "height": 37,
+          "fontSize": 26,
+          "family": "-apple-system, BlinkMacSystemFont, Inter, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "fill": "rgb(244, 244, 245)"
+        }
+      ],
+      "cards": [
+        {
+          "id": "theory-kernel",
+          "x": 32,
+          "y": 108,
+          "width": 140,
+          "height": 116,
+          "overflow": []
+        },
+        {
+          "id": "prototype-libraries",
+          "x": 188,
+          "y": 108,
+          "width": 140,
+          "height": 116,
+          "overflow": []
+        },
+        {
+          "id": "translation-layer",
+          "x": 342,
+          "y": 108,
+          "width": 144,
+          "height": 116,
+          "overflow": []
+        },
+        {
+          "id": "practice-evidence",
+          "x": 32,
+          "y": 270,
+          "width": 452,
+          "height": 120,
+          "overflow": []
+        },
+        {
+          "id": "implementation",
+          "x": 44,
+          "y": 488,
+          "width": 428,
+          "height": 92,
+          "overflow": []
+        },
+        {
+          "id": "host-capability",
+          "x": 44,
+          "y": 588,
+          "width": 428,
+          "height": 92,
+          "overflow": []
+        },
+        {
+          "id": "prototype",
+          "x": 44,
+          "y": 688,
+          "width": 428,
+          "height": 92,
+          "overflow": []
+        },
+        {
+          "id": "theory",
+          "x": 44,
+          "y": 788,
+          "width": 428,
+          "height": 92,
+          "overflow": []
+        }
+      ],
+      "canvasOverflow": []
+    }
+  ]
+}

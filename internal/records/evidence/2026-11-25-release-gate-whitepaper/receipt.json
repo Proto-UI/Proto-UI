@@ -1,0 +1,67 @@
+{
+  "kind": "Bounded readability repair of existing Evolution redraw; native direct-SVG diagnostic and original source controls, not production article/Dialog acceptance",
+  "headAtValidation": "8b44c62992a5a3de560c02165bf650d2fe6f6ec7",
+  "files": {
+    "apps/www/scripts/generate-whitepaper-diagrams.mjs": "39d198ea79dd648e3b05fbc21e5840425fe57861b8de622252f6b74e1ba8f0d2",
+    "scripts/docs/test/generated-whitepaper-diagrams.test.mjs": "1ef7011036934dc2fbaae12f3e31a78cefab6580b108fec65d2f5dbf704c7dcb",
+    "apps/www/public/diagrams/whitepaper-evolution-feedback.zh-cn.svg": "81dcdabdbed66da7c7042b5584f48726e4b6cfa706911832a1ce91bcfcd78f9b",
+    "apps/www/public/diagrams/whitepaper-evolution-feedback.mobile.zh-cn.svg": "9b18a2b83bc7710fa4b4e2e3c1dd08621ee7c2d5a8adba6a55bf54d1379c5d10",
+    "apps/www/public/diagrams/whitepaper-evolution-feedback.mobile.en.svg": "3fd41a3405fec8e2b1c3e1d4c6591434c249fa3a0f3648e291f94137883b4046",
+    "apps/www/public/diagrams/whitepaper-evolution-feedback.en.svg": "f1e5ba376b02f75430ba0efd0f4779bf7687eacc3d0c59b02ce3902f5ea04041"
+  },
+  "authority": [
+    "apps/www/public/diagrams/README.md",
+    "internal/records/2026-11-22-whitepaper-diagram-dispositions.md",
+    "scripts/docs/test/generated-whitepaper-diagrams.test.mjs"
+  ],
+  "preserved": [
+    "author redraw cards, color theme, rounded connectors and accents",
+    "desktop960x928/mobile500x1000; all desktop labels>=36 and mobile>=26",
+    "three concurrent work lines with bidirectional exchanges",
+    "one practice-evidence node; four alternative diagnosis condition/action pairs with no sequencing edges",
+    "shared revision return and explicit retest; identical accessible full bilingual descriptions",
+    "other12 generator assets byte-identical; no embedded remote or active SVG content"
+  ],
+  "changes": [
+    "reflow the existing redraw to retained minimum type sizes, removing decorative tiny codes/chips",
+    "bind the feedback loop to the shared diagnosis enclosure instead of the first card",
+    "place the existing marker definitions in the theme group, so dark arrowheads inherit line color instead of fallback black",
+    "renew the2 reviewed desktop fingerprints and exact mobile box/style selectors; preserve all semantic, type and fixed-canvas assertions"
+  ],
+  "validation": {
+    "focused": {
+      "command": "node --test scripts/docs/test/generated-whitepaper-diagrams.test.mjs scripts/docs/test/whitepaper-diagrams.test.mjs scripts/docs/test/whitepaper-anchors.test.mjs",
+      "tests": 26,
+      "passed": 26,
+      "failed": 0,
+      "exitCode": 0
+    },
+    "publicDocs": {
+      "command": "corepack pnpm@10.32.1 -s test:public-docs",
+      "tests": 564,
+      "passed": 564,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "todo": 0,
+      "exitCode": 0
+    },
+    "native": {
+      "chromium": "156.0.8078.79",
+      "variants": 8,
+      "canvasOverflows": 0,
+      "cardOverflows": 0,
+      "markerColor": "All8 marker fill and connector stroke both rgb(113,113,122)",
+      "directSvgOnly": true,
+      "visualReview": [
+        "desktop en/light",
+        "desktop zh-cn/dark",
+        "mobile en/light",
+        "mobile zh-cn/dark"
+      ]
+    },
+    "localPreparationFailures": "First two public-docs attempts failed because the restored sparse checkout omitted required tracked repository entries; retained logs are diagnostic, not product failures. After expanding the real tracked paths, all564 pass."
+  },
+  "review": "Author visual/source review only; independent root review pending",
+  "remaining": "No assertion of current production article/Dialog readability or full CI pass"
+}
