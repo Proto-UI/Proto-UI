@@ -2,9 +2,13 @@
 
 The requested work was to investigate the React, Vue and Web Component size regressions and reduce actual retained bytes while preserving behavior. The baseline is `078c6e91c6ffdc1a4e1508978f63f31289da2cf8`.
 
-The [measured report](size-audit.json) retains the unchanged strict budgets, external dependency boundary, toolchain and artifact hashes. The retained change shares the Props fallback search and Anatomy query/diagnostic traversal. Each adapter loses 2,542 minified bytes. Gzip savings are only 29 B (React), 79 B (Vue) and 108 B (Web Component), because the original nearby copies already compressed well. These are different measurements; the three gzip budget gates remain failed. The report does not claim a canonical CI pass or release readiness.
+The [measured report](size-audit.json) retains the unchanged strict budgets, external dependency boundary, toolchain and artifact hashes. The retained change shares the Props fallback search and Anatomy query/diagnostic traversal. Each adapter loses 2,542 minified bytes. Gzip savings are only 29 B (React), 79 B (Vue) and 108 B (Web Component), because the original nearby copies already compressed well. These are different measurements; the three gzip comparisons against the original recorded ceilings remain failed. The report does not claim a canonical CI pass or release readiness.
 
 The graph did not reveal duplicate positioning copies or source/dist duplicates. Recent positioning changes retain real scroll, measurement and style-ownership behavior; moving them into another bundled workspace package would not remove bytes. The excluded experiments in the report are measurements, not accepted compatibility changes.
+
+## Subsequent main budget reconciliation
+
+After these measurements, [PR #1845](https://github.com/Proto-UI/Proto-UI/pull/1845) merged as `8ca216038ddb1f0c17a5dbfc6dee62283e3f3a2e`. It accounts separately for the accepted scroll-preserving intrinsic measurement: the React, Vue and Web Component ceilings became 181,800 B, 180,600 B and 218,100 B. That transaction changed no bundled implementation bytes. This candidate subsequently incorporated that main revision without changing any owned implementation or fixture content. The report here intentionally retains the original failed ceilings and measured optimization deltas. Compliance with the newer ceilings needs its own candidate-bound canonical result and must not be presented as bytes removed by this refactor.
 
 ## Behavioral comparison
 
