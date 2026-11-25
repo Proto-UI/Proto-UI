@@ -132,6 +132,7 @@ describe('Drawer Handle behavior and optional family presentation', () => {
         expect(bottom).not.toContain('absolute');
         expect(bottom).not.toContain('-translate-x-1/2');
       }
+      if (family !== brutalist) expect(bottom).not.toContain('w-[100px]');
       expect(bottom).not.toContain('mt-4');
       setElementProps(content, { side: 'top' });
       await flush();
@@ -148,6 +149,7 @@ describe('Drawer Handle behavior and optional family presentation', () => {
       );
       for (const token of ['relative', 'mx-[auto]', 'mt-1', 'w-[100px]'])
         expect(tokensOf(handle)).not.toContain(token);
+      expect(tokensOf(handle)).not.toContain('top-1');
       setElementProps(content, { side: 'bottom' });
       await flush();
       expect(tokensOf(handle)).toEqual(bottom);

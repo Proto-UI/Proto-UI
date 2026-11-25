@@ -160,6 +160,7 @@ describe('Neo Popover Title bounded presentation', () => {
     // Other components still own these tokens. This slice must not erase them.
     expect(complete).toContain('text-xl');
     expect(complete).toContain('font-medium');
+    expect(complete).toContain('font-semibold');
     for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
       const css = render(complete);
       expect(css).not.toContain('Unsupported Proto UI style tokens');

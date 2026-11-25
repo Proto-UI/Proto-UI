@@ -1,0 +1,363 @@
+{
+  "schemaVersion": 1,
+  "kind": "fixed-main-source-reconciliation",
+  "checkpoint": "91f4cd4bd368d0a988053708c2f9eb68dc4a238e",
+  "incomingMain": "c9b8377c82b3e91713062ac17c276cc5f72791d2",
+  "comparison": {
+    "mainDeltaFiles": 27,
+    "exactlyIdentical": 14,
+    "otherFiles": 13,
+    "extraShadcnEntryFiles": 2
+  },
+  "decisions": [
+    {
+      "path": "internal/website/self-hosting-coverage-matrix.md",
+      "action": "preserve-candidate",
+      "reason": "Keep current candidate source hashes, owner/role additions and source-review links. Main has historical bindings for earlier source; do not overwrite. Refresh only newly reviewed actual source after the final integration.",
+      "candidateBlob": "76448601a293154fae7548fb0dd2e82daf5c2526",
+      "mainBlob": "40b9e2aef4ed24ecc0b6e144a41f8c5235110e37"
+    },
+    {
+      "path": "native/gpui/fixtures/style-tokens.json",
+      "action": "regenerate-from-final-source",
+      "reason": "Generated artifact: retain current source closure and rerun its owner after merging source. Do not accept older main fixture wholesale: it removes border-inherit, p-3.5 and size-[16px], while adding other recipe tokens.",
+      "candidateBlob": "d2c5ea0b17e01482e5f7b1f9e2a28ae0c9722ca7",
+      "mainBlob": "f7f48b8261935a445d69b2a8c7f604a63f763652"
+    },
+    {
+      "path": "packages/cli/src/generated/brutalist-style-tokens.ts",
+      "action": "regenerate-from-final-source",
+      "reason": "Main adds data-[focus-visible]:border-destructive from a different authored closure. Do not hand-edit/union generated tokens or overwrite current candidate; use owning generator on final source.",
+      "candidateBlob": "bf007e020637df25aa7a1ce748a7e29fc67c54a9",
+      "mainBlob": "f43c9292d040b1cceac6849f7bfb7a0c9bbd4a7d"
+    },
+    {
+      "path": "packages/cli/src/generated/draft-family-style-tokens.ts",
+      "action": "regenerate-from-final-source",
+      "reason": "Multiple Bootstrap/Liquid recipe snapshots differ; preserve source decisions and regenerate once. Main would drop current border-inherit and other guarded variants.",
+      "candidateBlob": "f6186d5a9ac4707b2fb54168a025232249737196",
+      "mainBlob": "e38588ff0f25fc2b5a2e579f3b50a10069c72cdc"
+    },
+    {
+      "path": "packages/cli/src/services/proto-style-css.ts",
+      "action": "preserve-candidate",
+      "reason": "Direct file difference is only candidate border-inherit declaration. All Toast dedup changes are already present. Current Bootstrap collapsible/content.proto.ts consumes border-inherit.",
+      "candidateBlob": "0cd5fd347f3efd8b302761eda82b8efaab5a1f27",
+      "mainBlob": "426c3d5131355839ed3208c68709a55ef16d23f6"
+    },
+    {
+      "path": "packages/prototypes/brutalist/test/drawer-command-density.test.ts",
+      "action": "preserve-candidate",
+      "reason": "Candidate matches accepted flat border-foreground/bg-background sources and retains 41 extra lines testing hover/press/cancel/disabled and no shadow/translate/scale/hit-envelope. Main aligns older colored recipes and removes those guards.",
+      "candidateBlob": "a9d33444e8943f09aae3d824a2ffd3c270c35cc8",
+      "mainBlob": "f5a08b3a30dba13a74010218828da13d5a416f3e"
+    },
+    {
+      "path": "packages/prototypes/brutalist/test/popover-title.test.ts",
+      "action": "combine-explicitly",
+      "reason": "Both font-medium and font-semibold remain in current complete-family source/tokens. Preserve medium and add semibold if absorbing the new guard. Record the independent timeout difference: candidate120000 vs main30000; do not present it as only a token change or silently alter accepted timing.",
+      "candidateBlob": "61bf0b03cd39f56e2624b7d3a8a413e798bf3400",
+      "mainBlob": "045eedbb98afbcbbb61b97226642f8e34ee54c30"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/src/dialog/close.proto.ts",
+      "action": "adopt-main-cursor-fix",
+      "reason": "Absorb COMMAND_BLOCKED. Independent prototype review agrees; unchanged draft Dialog Close visual criterion explicitly requires cursor-not-allowed and withdrawn shadow. Constants preserve the physical hit target while inherited Base disabled state gates activation; this is not browser acceptance.",
+      "candidateBlob": "233e6ba69ee99803f4ef17f08ed7cbc132ec2d9d",
+      "mainBlob": "d8d23360793f081a218dcb5167d8bc7b600990e4"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/src/dialog/trigger.proto.ts",
+      "action": "adopt-main-cursor-fix",
+      "reason": "Absorb COMMAND_BLOCKED. Independent prototype review agrees; unchanged draft Dialog Close visual criterion explicitly requires cursor-not-allowed and withdrawn shadow. Constants preserve the physical hit target while inherited Base disabled state gates activation; this is not browser acceptance.",
+      "candidateBlob": "c57b5b8b7552bcfc721eb158b183e80e616e1cd1",
+      "mainBlob": "30fb44834096882e2efc69d3ecbebc073118edb4"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/src/drawer/content.proto.ts",
+      "action": "already-retained-format-only",
+      "reason": "The governed zero-duration material/content repair and Base state owner are already present. Direct difference is only one-line formatting of the material rule.",
+      "candidateBlob": "5ef8f0588221f3fb815267a305ec325d9b7fd435",
+      "mainBlob": "473a9025ba25824c5158a24dc208ebc267faed48"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/src/drawer/handle.proto.ts",
+      "action": "preserve-candidate-accepted-presentation",
+      "reason": "Keep accepted candidate in-flow bottom h1.5/w12 recipe. Independent prototype review found no requirement for a default absolute bottom; Base helper explicitly permits bottom:false, and b0 already verifies full bottom→top→bottom restoration. Do not change this source solely to align the new main test.",
+      "candidateBlob": "70e8422fca548fc3e8c5d549cf6220ca8acf349f",
+      "mainBlob": "804a675358941cc593db36b8f357b76b7c70d169"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/drawer-entry-diagnostic.test.ts",
+      "action": "preserve-candidate-extra",
+      "reason": "Outside the27 since67fd scope; candidate already has Move Goal plus Daily activity goal/goal-value. Main drops the extra diagnostic checks.",
+      "candidateBlob": "6e68fec184631cf2f0aa0d83d84ebd0146ff5e78",
+      "mainBlob": "cbd03ea84eefbdb1572461206675eedf60872919"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/drawer-handle-presentation.test.ts",
+      "action": "preserve-candidate-plus-independent-negative-guards",
+      "reason": "Retain current Liquid/Brutalist custom bottom recipes and full bottom→top→bottom verification. May add main non-Brutalist not-w100 and top not-top1 guards without changing source expectations or removing any candidate assertion.",
+      "candidateBlob": "4d821e07f79e4daa08f536a5ff69b5e658263867",
+      "mainBlob": "ac29767bcc5383fe6dcf55ded9be906e516c86ad"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/drawer-public-entry.test.ts",
+      "action": "preserve-candidate-extra",
+      "reason": "Outside the27 since67fd scope; preserve full350→360→350→closed and submit openChange sequence. Main only asserts initial350.",
+      "candidateBlob": "a2f6f7e9b0521e7b1b8dd2f403b0ca9797d2e3d4",
+      "mainBlob": "e2fb0baa6b86cc8953a99372d985ef5b8b494ca6"
+    },
+    {
+      "path": "scripts/gpui/test/style-fixture.test.mjs",
+      "action": "adopt-main-exact",
+      "reason": "Main correctly replaces obsolete Toast z-20/z-30 expectations with current indexed-stack utilities. All7 new tokens already exist with declarations/order in b0 fixture; z-20/z-30 do not. The actual b0 Toast source uses these indexed styles. Do not manufacture obsolete generated tokens to keep stale expectations.",
+      "candidateBlob": "e63c7dc4b8c2d16c0d8c963bbc0f674f4d6ec03e",
+      "mainBlob": "b5dd22e59f153ca21a146fddd623a7b8f18c149d"
+    }
+  ],
+  "dialogAuthority": [
+    {
+      "path": "spec/prototypes/P-LIQUID-GLASS-DIALOG-CLOSE.yaml",
+      "blobAtBothHeads": "9f0f7c8119f99943cee1c582599a1a4ba51fbee3",
+      "criteria": [
+        "P-LIQUID-GLASS-DIALOG-CLOSE-VISUAL",
+        "P-LIQUID-GLASS-DIALOG-CLOSE-BASE"
+      ],
+      "reason": "Disabled cursor-not-allowed and withdrawn shadow, preserve opaque fill/foreground; existing requirement predates incoming repair.",
+      "url": "https://github.com/Proto-UI/Proto-UI/blob/c9b8377c82b3e91713062ac17c276cc5f72791d2/spec/prototypes/P-LIQUID-GLASS-DIALOG-CLOSE.yaml",
+      "baselineURL": "https://github.com/Proto-UI/Proto-UI/blob/b0a5f6ce29efb128ed52373d44c034515aeef633/spec/prototypes/P-LIQUID-GLASS-DIALOG-CLOSE.yaml"
+    },
+    {
+      "path": "spec/prototypes/P-LIQUID-GLASS-DIALOG-TRIGGER.yaml",
+      "criteria": [
+        "P-LIQUID-GLASS-DIALOG-TRIGGER-VISUAL",
+        "P-LIQUID-GLASS-DIALOG-TRIGGER-BASE"
+      ],
+      "reason": "Family command paint and retained Base protocol.",
+      "url": "https://github.com/Proto-UI/Proto-UI/blob/c9b8377c82b3e91713062ac17c276cc5f72791d2/spec/prototypes/P-LIQUID-GLASS-DIALOG-TRIGGER.yaml"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-DIALOG-TRIGGER.yaml",
+      "blob": "df92aefa8ae8ddfd347f9f9669b703e4368e25cd",
+      "criteria": [
+        "P-BASE-DIALOG-TRIGGER-DISABLED",
+        "P-BASE-DIALOG-TRIGGER-COMMAND"
+      ],
+      "url": "https://github.com/Proto-UI/Proto-UI/blob/c9b8377c82b3e91713062ac17c276cc5f72791d2/spec/prototypes/P-BASE-DIALOG-TRIGGER.yaml"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-DIALOG-CLOSE.yaml",
+      "blob": "b2d9c4e3339a22cb9422f295784c45cc1444e8b5",
+      "criteria": [
+        "P-BASE-DIALOG-CLOSE-DISABLED",
+        "P-BASE-DIALOG-CLOSE-COMMAND"
+      ],
+      "url": "https://github.com/Proto-UI/Proto-UI/blob/c9b8377c82b3e91713062ac17c276cc5f72791d2/spec/prototypes/P-BASE-DIALOG-CLOSE.yaml"
+    }
+  ],
+  "independentDialogOracle": {
+    "path": "packages/prototypes/liquid-glass/test/draft-overlay-projections.test.ts",
+    "blobAtOriginalMain710aAndIncomingC9": "82f99e05cac21d263f2469836920196e99c81f82",
+    "case": "keeps a disabled family closed and reports the exposed trigger state",
+    "restoredAssertions": [
+      "bg-secondary",
+      "text-secondary-foreground",
+      "cursor-not-allowed",
+      "shadow-none"
+    ],
+    "retainedAssertions": [
+      "not opacity-50",
+      "effective disabled state",
+      "activation cannot open Root",
+      "Content material candidates remain empty"
+    ],
+    "otherB0Lines": "unchanged",
+    "baselineURL": "https://github.com/Proto-UI/Proto-UI/blob/710a90df2ea57d9f93d7d09e43ebfb2b7b8e5057/packages/prototypes/liquid-glass/test/draft-overlay-projections.test.ts",
+    "incomingURL": "https://github.com/Proto-UI/Proto-UI/blob/c9b8377c82b3e91713062ac17c276cc5f72791d2/packages/prototypes/liquid-glass/test/draft-overlay-projections.test.ts"
+  },
+  "resolution": {
+    "checkpoint": "91f4cd4bd368d0a988053708c2f9eb68dc4a238e",
+    "fixedMain": "c9b8377c82b3e91713062ac17c276cc5f72791d2",
+    "conflicts": [
+      "native/gpui/fixtures/style-tokens.json",
+      "packages/prototypes/brutalist/test/popover-title.test.ts",
+      "packages/prototypes/shadcn/test/drawer-entry-diagnostic.test.ts",
+      "packages/prototypes/shadcn/test/drawer-handle-presentation.test.ts",
+      "packages/prototypes/shadcn/test/drawer-public-entry.test.ts"
+    ],
+    "keptFromCheckpoint": [
+      "internal/website/self-hosting-coverage-matrix.md",
+      "native/gpui/fixtures/style-tokens.json",
+      "packages/cli/src/generated/brutalist-style-tokens.ts",
+      "packages/cli/src/generated/draft-family-style-tokens.ts",
+      "packages/cli/src/services/proto-style-css.ts",
+      "packages/prototypes/brutalist/test/drawer-command-density.test.ts",
+      "packages/prototypes/brutalist/test/popover-title.test.ts",
+      "packages/prototypes/liquid-glass/src/drawer/content.proto.ts",
+      "packages/prototypes/liquid-glass/src/drawer/handle.proto.ts",
+      "packages/prototypes/shadcn/test/drawer-entry-diagnostic.test.ts",
+      "packages/prototypes/shadcn/test/drawer-handle-presentation.test.ts",
+      "packages/prototypes/shadcn/test/drawer-public-entry.test.ts",
+      "packages/cli/src/generated/shadcn-style-tokens.ts"
+    ],
+    "adoptedFromMain": [
+      "packages/prototypes/liquid-glass/src/dialog/close.proto.ts",
+      "packages/prototypes/liquid-glass/src/dialog/trigger.proto.ts",
+      "scripts/gpui/test/style-fixture.test.mjs"
+    ],
+    "changed": [
+      "packages/prototypes/brutalist/test/popover-title.test.ts",
+      "packages/prototypes/liquid-glass/src/dialog/close.proto.ts",
+      "packages/prototypes/liquid-glass/src/dialog/trigger.proto.ts",
+      "packages/prototypes/liquid-glass/test/draft-overlay-projections.test.ts",
+      "packages/prototypes/shadcn/test/drawer-handle-presentation.test.ts",
+      "scripts/gpui/test/style-fixture.test.mjs"
+    ],
+    "sourceBindings": [
+      {
+        "path": "packages/prototypes/brutalist/test/popover-title.test.ts",
+        "sha256": "f4660a563fabc7073481932445c0e8cae58fdde798023558c7424042eaf28e01"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/dialog/close.proto.ts",
+        "sha256": "5f27a83f99e05c500388dec42f370868403ada5257508adf9759411f3e1297aa"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/dialog/trigger.proto.ts",
+        "sha256": "44bb301e20974099dfed951e262369c5b660973da074d3bd507fd00d7319438d"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/test/draft-overlay-projections.test.ts",
+        "sha256": "6330f2f498e4ed70fad1627facaac9903a230218847ebd3ad065d49ae37b0ef0"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/drawer-handle-presentation.test.ts",
+        "sha256": "58c11cdeb08888254f902c015e1fccfae2186d9bb9db312fc092a05b73b1a5cd"
+      },
+      {
+        "path": "scripts/gpui/test/style-fixture.test.mjs",
+        "sha256": "a18574a32004e99c8ecb5b6e6691cef4c91f1cf9df9dac94c9e38a737279411d"
+      }
+    ],
+    "generatorsPending": true,
+    "originalBudgetsChanged": false,
+    "formalReviewClaimed": false
+  },
+  "originalGenerators": {
+    "commands": [
+      "corepack pnpm@10.32.1 -s styles:preset:generate",
+      "corepack pnpm@10.32.1 -s gpui:style-fixture"
+    ],
+    "changed": [],
+    "sourceBindings": [],
+    "manualGeneratedEdits": false
+  },
+  "headerNative": {
+    "subject": "b0 plus retained reviewed product/probe diffs, not this final frozen merge",
+    "originalCase": "brutalist/vue/light",
+    "fullFileCount": 22,
+    "selected": 1,
+    "unselected": 21,
+    "candidate": {
+      "status": "passed",
+      "sourceStable": true,
+      "viewports": [
+        1440,
+        390
+      ],
+      "clippedWipFragments": 0
+    },
+    "oldProduct": {
+      "status": "failed",
+      "sourceStable": true,
+      "negativeReproduced": true,
+      "clippedWipFragments": 1
+    },
+    "priorAttempts": [
+      {
+        "kind": "original old product",
+        "result": "beforeAll150s timeout;0 executed/22pending;not accepted as negative"
+      },
+      {
+        "kind": "first repeat admission",
+        "result": "No browser executed: known observer unit helper remained changed. Exact postimage was verified and restored before the successful repeat."
+      }
+    ],
+    "fullFrozen22Pending": true
+  },
+  "sourceBindings": [
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-client.post-render-cleanup.test.ts",
+      "sha256": "ae82a6187b7c857ed586e767234d95bf5a702d3d7097c402915cead60b3d5073"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+      "sha256": "b3dbdf6070a43e08f87487b32e8748889cabe8c55f1e773ff822d31a91f5ceea"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-composition.ts",
+      "sha256": "1553387caf89b9bfb4b4c0dc35a8d541e53dca0d6f4effccefcdbaadc3862480"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/header-popup-evidence.test.ts",
+      "sha256": "a92301820ff6988974946039b4e7e3f150ec8eecf08361f2c8a2dc6cfcb3b556"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/header-popup-evidence.ts",
+      "sha256": "8fcf522735156ace41407b95b8b79085e045a730c02733323432ce85ba273019"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts",
+      "sha256": "d39cf1b5ac999cdcf30c1f623bc55e01795e2e3eb5f1c033797c0c5202ef8d6e"
+    },
+    {
+      "path": "internal/records/2026-11-26-ready-pr-followup-source-review.json",
+      "sha256": "f170745cd9122333e1ae6bf88080aec7fd45b958ff895294e0ab85af09591bbd"
+    },
+    {
+      "path": "internal/website/self-hosting-coverage-matrix.md",
+      "sha256": "971388b847cb7a75280d204763e20258b6cfe430b3e513e19aafc8ac7f8bd404"
+    },
+    {
+      "path": "packages/adapters/web-component/src/runtime/modules.ts",
+      "sha256": "defab3fc457c266451b2a5dff7163104cb90c7759395820c777c69d2c1272469"
+    },
+    {
+      "path": "packages/adapters/web-component/test/focus-entry-refresh-coalescing.test.ts",
+      "sha256": "f8c2986b44ef4b8eb7cfd90ca038fa2d70fc05683511c7ee5fc6c9c787c18b84"
+    },
+    {
+      "path": "packages/prototypes/brutalist/test/popover-title.test.ts",
+      "sha256": "f4660a563fabc7073481932445c0e8cae58fdde798023558c7424042eaf28e01"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/src/dialog/close.proto.ts",
+      "sha256": "5f27a83f99e05c500388dec42f370868403ada5257508adf9759411f3e1297aa"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/src/dialog/trigger.proto.ts",
+      "sha256": "44bb301e20974099dfed951e262369c5b660973da074d3bd507fd00d7319438d"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/test/draft-overlay-projections.test.ts",
+      "sha256": "6330f2f498e4ed70fad1627facaac9903a230218847ebd3ad065d49ae37b0ef0"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/drawer-handle-presentation.test.ts",
+      "sha256": "58c11cdeb08888254f902c015e1fccfae2186d9bb9db312fc092a05b73b1a5cd"
+    },
+    {
+      "path": "scripts/gpui/test/style-fixture.test.mjs",
+      "sha256": "a18574a32004e99c8ecb5b6e6691cef4c91f1cf9df9dac94c9e38a737279411d"
+    }
+  ],
+  "acceptance": {
+    "allOriginalBudgetsRetained": true,
+    "coverageGeneratorPending": true,
+    "fullFrozenValidationPending": true,
+    "formalGithubReviewNotClaimed": true,
+    "notAMainMerge": true,
+    "protected20CompilerIssuesRemainOpen": true
+  }
+}

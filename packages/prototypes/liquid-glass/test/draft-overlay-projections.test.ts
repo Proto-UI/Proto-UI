@@ -305,8 +305,7 @@ describe('liquid-glass dialog projection', () => {
           expect.arrayContaining([
             'bg-secondary',
             'text-secondary-foreground',
-            'pointer-events-none',
-            'cursor-default',
+            'cursor-not-allowed',
             'shadow-none',
           ])
         );
