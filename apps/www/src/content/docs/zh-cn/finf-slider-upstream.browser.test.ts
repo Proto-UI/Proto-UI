@@ -7,6 +7,10 @@ import { tmpdir } from 'node:os';
 import { chromium, type Browser, type Locator } from 'playwright-core';
 import { beforeAll, afterAll, it, expect } from 'vitest';
 import {
+  mountSliderUpstream,
+  type SliderUpstreamFixtureHandle,
+} from '../../../../test/fixtures/slider-upstream-fixture';
+import {
   appendSliderPageError,
   type SliderPageErrorContext,
   type SliderPageErrorReceipt,
@@ -28,6 +32,13 @@ const upstream = {
   url: 'https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css',
   gitBlob: '94bbca2a7f78845e7cfbcff68fb8f535e3848a98',
 };
+const consumer = {
+  kind: 'test-owned ordinary Rhea consumer',
+  fixture: 'apps/www/test/fixtures/slider-upstream-fixture.ts',
+  publicDemo: 'apps/www/src/content/docs/demo-shadcn-slider.demo.ts',
+  publicEntries: ['volume-root', 'field-root'],
+  cases: ['horizontal', 'disabled', 'readonly', 'rtl', 'field', 'vertical'],
+};
 let browser: Browser;
 let baseUrl = '';
 const writeJson = (name: string, value: unknown) =>
@@ -38,6 +49,7 @@ beforeAll(async () => {
     revision,
     tree,
     upstream,
+    consumer,
     phase: 'planned; terminal receipts establish outcomes',
   });
   try {
@@ -123,22 +135,53 @@ for (const runtime of RUNTIMES)
         lastInteraction,
       });
     });
+    let fixture: SliderUpstreamFixtureHandle | undefined;
+    const observations: Record<string, unknown> = {};
     let result = 'failed';
     let failure: string | undefined;
     try {
       runtimePhase = 'loading-initial-wc';
       interaction('navigate', '/en/ui-libraries/shadcn/slider/');
       await page.goto(`${baseUrl}/en/ui-libraries/shadcn/slider/`, { waitUntil: 'networkidle' });
-      const previewer = page.locator('[data-previewer-id]').first();
+      const publicPreviewer = page.locator('[data-previewer-id]').first();
+      expect(await publicPreviewer.getAttribute('data-demo-id')).toBe('demo-shadcn-slider');
       stage = 'initial-preview-readiness';
-      await waitForPreviewRuntime(page, 'wc', '[role="slider"]', 6);
+      await waitForPreviewRuntime(page, 'wc', '[role="slider"]', 2);
       runtimePhase = 'ready-wc';
       if (runtime !== 'wc') {
         runtimePhase = `switching-to-${runtime}`;
         interaction('runtime-switch', runtime);
-        await selectRuntime(page, previewer, runtime, '[role="slider"]', 6);
+        await selectRuntime(page, publicPreviewer, runtime, '[role="slider"]', 2);
         runtimePhase = `ready-${runtime}`;
       }
+      const publicEntries = {
+        count: await publicPreviewer.locator('[role="slider"]').count(),
+        volume: await publicPreviewer
+          .locator('[data-demo-ref="volume-thumb"]')
+          .getAttribute('aria-valuenow'),
+        field: await publicPreviewer
+          .locator('[data-demo-ref="field-thumb"]')
+          .getAttribute('aria-valuenow'),
+      };
+      observations.publicEntries = publicEntries;
+      expect(publicEntries).toEqual({ count: 2, volume: '75', field: '50' });
+      stage = 'mount-six-scenario-consumer';
+      runtimePhase = `mounting-fixture-${runtime}`;
+      fixture = await mountSliderUpstream(page, runtime);
+      const profiles = await fixture.evaluate((view) => ({
+        publicProfile: view.publicProfile,
+        fixtureProfile: view.fixtureProfile,
+        cases: view.cases,
+      }));
+      observations.profiles = profiles;
+      expect(profiles).toEqual({
+        publicProfile: 'rhea',
+        fixtureProfile: 'rhea',
+        cases: consumer.cases,
+      });
+      const previewer = page.locator('[data-slider-upstream-fixture]');
+      await expect.poll(() => previewer.locator('[role="slider"]').count()).toBe(6);
+      runtimePhase = `fixture-ready-${runtime}`;
       stage = 'rest-geometry';
       const ref = (name: string) => previewer.locator(`[data-demo-ref="${name}"]`);
       const thumb = ref('horizontal-thumb'),
@@ -149,7 +192,7 @@ for (const runtime of RUNTIMES)
       await expect.poll(() => rail.count()).toBe(1);
       const capture = async (
         state: string,
-        crop = previewer.locator('[data-slider-case="horizontal"]')
+        crop = previewer.locator('[data-demo-ref="horizontal-case"]')
       ) => {
         stage = `capture:${state}`;
         const file = `slider-${runtime}-${state}.png`;
@@ -271,22 +314,22 @@ for (const runtime of RUNTIMES)
       interaction('click', 'disabled-track', '100,6');
       await ref('disabled-track').click({ position: { x: 100, y: 6 } });
       expect(await disabled.getAttribute('aria-valuenow')).toBe(disabledValue);
-      await capture('disabled', previewer.locator('[data-slider-case="disabled"]'));
+      await capture('disabled', previewer.locator('[data-demo-ref="disabled-case"]'));
       expect(await ref('readonly-thumb').getAttribute('aria-readonly')).toBe('true');
       expect((await geometry(ref('readonly-track'))).opacity).toBe('1');
-      await capture('readonly', previewer.locator('[data-slider-case="readonly"]'));
+      await capture('readonly', previewer.locator('[data-demo-ref="readonly-case"]'));
       const vertical = ref('vertical-track');
       expect((await geometry(vertical)).height).toBeGreaterThanOrEqual(10 * rem);
       expect((await geometry(decoration(vertical))).width).toBe(rem / 4);
-      await capture('vertical', previewer.locator('[data-slider-case="vertical"]'));
+      await capture('vertical', previewer.locator('[data-demo-ref="vertical-case"]'));
       expect((await geometry(decoration(ref('field-thumb')))).width).toBe(rem);
       interaction('click', 'field-thumb');
       await ref('field-thumb').click();
       interaction('keyboard-press', 'current-focus', 'End');
       await page.keyboard.press('End');
       await expect.poll(() => ref('field-thumb').getAttribute('aria-valuenow')).toBe('100');
-      await capture('field-thumb', previewer.locator('[data-slider-case="field"]'));
-      await capture('rtl', previewer.locator('[data-slider-case="rtl"]'));
+      await capture('field-thumb', previewer.locator('[data-demo-ref="field-case"]'));
+      await capture('rtl', previewer.locator('[data-demo-ref="rtl-case"]'));
       stage = 'assert-no-page-errors';
       expect(errors).toEqual([]);
       result = 'passed';
@@ -305,31 +348,42 @@ for (const runtime of RUNTIMES)
       }
       throw error;
     } finally {
-      await writeJson(`slider-${runtime}.json`, {
-        revision,
-        tree,
-        upstream,
-        runtime,
-        result,
-        failure,
-        screenshots,
-        hitProbes,
-        errors,
-        pageErrorDetails,
-        terminalStage: stage,
-        runtimePhase,
-        lastInteraction,
-        limitations: [
-          'Source-derived geometry and state assertions, not a same-state upstream pixel diff.',
-          'Rhea is selected by this public demo; unscoped Slider retains the separately tested Nova compatibility recipe.',
-          'The Base-owned rectangular Thumb hit corners are retained; upstream rounded-element corner-hit equivalence is not established.',
-          'Vertical and RTL cases record geometry/screenshots only; native axis/direction editing is not established.',
-          'Keyboard evidence covers focus and Home/End, not arrow stepping; readonly evidence covers aria/paint, not input refusal.',
-          'Thumb centers retain the existing full Track coordinate interval. Upstream edge alignment and matching axis inset contract remain open.',
-          'Single-thumb only; multi-thumb/range constraints and full upstream API parity remain open.',
-          'Web Chromium evidence does not establish native GPUI/Qt, assistive technology, packed consumer or Compiler fidelity.',
-        ],
-      });
-      await context.close();
+      try {
+        await writeJson(`slider-${runtime}.json`, {
+          revision,
+          tree,
+          upstream,
+          consumer,
+          observations,
+          runtime,
+          result,
+          failure,
+          screenshots,
+          hitProbes,
+          errors,
+          pageErrorDetails,
+          terminalStage: stage,
+          runtimePhase,
+          lastInteraction,
+          limitations: [
+            'Source-derived geometry and state assertions, not a same-state upstream pixel diff.',
+            'The public Rhea demo is verified as two live entries (Volume scalar75 and Brightness Field50); the six-scenario captures use the explicitly test-owned Rhea consumer.',
+            'Disabled/readOnly/RTL/vertical are fixture props on the public scalar entry; the Field entry is retained. These screenshots do not claim six cases in the first public preview.',
+            'Unscoped Slider retains the separately tested Nova compatibility recipe.',
+            'The Base-owned rectangular Thumb hit corners are retained; upstream rounded-element corner-hit equivalence is not established.',
+            'Vertical and RTL cases record geometry/screenshots only; native axis/direction editing is not established.',
+            'Keyboard evidence covers focus and Home/End, not arrow stepping; readonly evidence covers aria/paint, not input refusal.',
+            'Thumb centers retain the existing full Track coordinate interval. Upstream edge alignment and matching axis inset contract remain open.',
+            'Single-thumb only; multi-thumb/range constraints and full upstream API parity remain open.',
+            'Web Chromium evidence does not establish native GPUI/Qt, assistive technology, packed consumer or Compiler fidelity.',
+          ],
+        });
+      } finally {
+        try {
+          await fixture?.evaluate((view) => view.destroy()).finally(() => fixture?.dispose());
+        } finally {
+          await context.close();
+        }
+      }
     }
   }, 180_000);

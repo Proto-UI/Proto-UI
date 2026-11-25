@@ -9,6 +9,7 @@ import {
   chromium,
   type Browser,
   type BrowserContext,
+  type JSHandle,
   type Locator,
   type Page,
 } from 'playwright-core';
@@ -26,6 +27,9 @@ import { startPopoverDomProbe, type PopoverDomProbe } from './popover-public-dom
 
 const route = '/en/ui-libraries/brutalist/components/popover/';
 const demoId = 'demo-brutalist-popover';
+const publicControls = { trigger: 'Open popover', close: 'Done' };
+const interactionFixture =
+  'Explicit native outside button before the public preview; the current public demo has no outside command.';
 // The public Neo preview promises this heading/body role in both color schemes.
 const expectedNeoFamily = '"DM Sans", ui-sans-serif, system-ui, sans-serif';
 const output =
@@ -67,6 +71,8 @@ beforeAll(async () => {
     references,
     demoId,
     route,
+    publicControls,
+    interactionFixture,
     expectedCases: RUNTIMES.length * COLOR_SCHEMES.length + RUNTIMES.length,
     typographyCases: RUNTIMES.length * COLOR_SCHEMES.length,
     interactionDiagnosticCases: RUNTIMES.length,
@@ -288,11 +294,15 @@ for (const runtime of RUNTIMES)
           const response = await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
           expect(response?.status()).toBe(200);
           const previewer = page.locator('[data-previewer-id]').first();
+          expect(await previewer.getAttribute('data-demo-id')).toBe(demoId);
           await previewer.scrollIntoViewIfNeeded();
           await selectRuntime(page, previewer, runtime, '[data-demo-ref="root"]', 1);
           await applyColorScheme(page, scheme);
           await page.evaluate(() => document.fonts.ready);
-          const trigger = previewer.getByRole('button', { name: 'Open Popover', exact: true });
+          const trigger = previewer.getByRole('button', {
+            name: publicControls.trigger,
+            exact: true,
+          });
           domProbe = await startPopoverDomProbe(page, trigger);
           const capture = async (state: string, observation: unknown) => {
             const file = `${id}-${state}.png`;
@@ -366,13 +376,13 @@ for (const runtime of RUNTIMES)
           await defaultTypography(title, panel);
 
           stage = 'close-and-pointer-reopen';
-          await panel.getByRole('button', { name: 'Close', exact: true }).click();
+          await panel.getByRole('button', { name: publicControls.close, exact: true }).click();
           await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
           panel = await open(page, trigger, domProbe);
           title = await titleFor(page, panel);
           observations.reopened = await defaultTypography(title, panel);
           await capture('reopened', observations.reopened);
-          await panel.getByRole('button', { name: 'Close', exact: true }).click();
+          await panel.getByRole('button', { name: publicControls.close, exact: true }).click();
           await panel.waitFor({ state: 'hidden' });
 
           stage = 'narrow-200-percent-root-text';
@@ -407,7 +417,7 @@ for (const runtime of RUNTIMES)
               '200% root text-size fixture, not physical browser zoom or upstream pixel parity.',
           });
           await domProbe.mark('narrow.afterScreenshot-beforeFinalCloseClick');
-          await panel.getByRole('button', { name: 'Close', exact: true }).click();
+          await panel.getByRole('button', { name: publicControls.close, exact: true }).click();
           await domProbe.mark('narrow.afterFinalCloseClick');
           await panel.waitFor({ state: 'hidden' });
           expect(errors).toEqual([]);
@@ -464,7 +474,8 @@ for (const runtime of RUNTIMES)
     );
   }
 
-// Public-demo interaction diagnostics are deliberately separate from typography.
+// Public-demo interaction diagnostics with an explicit outside consumer remain
+// separate from typography.
 // Existing Shadcn/source regression assertions remain unchanged; this observational
 // case does not claim the next native Tab must land on a named outside button.
 for (const runtime of RUNTIMES) {
@@ -474,6 +485,7 @@ for (const runtime of RUNTIMES) {
     async () => {
       let context: BrowserContext | undefined;
       let page: Page | undefined;
+      let outsideFixture: JSHandle<HTMLButtonElement> | undefined;
       let stage = 'created';
       let result = 'failed';
       let failure: string | undefined;
@@ -502,14 +514,25 @@ for (const runtime of RUNTIMES) {
         const response = await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
         expect(response?.status()).toBe(200);
         const previewer = page.locator('[data-previewer-id]').first();
+        expect(await previewer.getAttribute('data-demo-id')).toBe(demoId);
         await previewer.scrollIntoViewIfNeeded();
         await selectRuntime(page, previewer, runtime, '[data-demo-ref="root"]', 1);
         await applyColorScheme(page, 'light');
-        const trigger = previewer.getByRole('button', { name: 'Open Popover', exact: true });
-        const outside = previewer.getByRole('button', {
-          name: 'Outside focus target',
+        const trigger = previewer.getByRole('button', {
+          name: publicControls.trigger,
           exact: true,
         });
+        outsideFixture = await previewer.evaluateHandle((element) => {
+          const outside = document.createElement('button');
+          outside.type = 'button';
+          outside.dataset.neoPopoverOutsideFixture = '';
+          outside.textContent = 'Outside focus target';
+          element.before(outside);
+          return outside;
+        });
+        const outside = page.locator('[data-neo-popover-outside-fixture]');
+        expect(await outside.count()).toBe(1);
+        observations.outsideConsumer = interactionFixture;
         let panel = await open(page, trigger);
         const capture = async (state: string) => {
           const file = `${id}-${state}.png`;
@@ -528,6 +551,11 @@ for (const runtime of RUNTIMES) {
         if (runtime === 'wc') {
           let title = await titleFor(page, panel);
           const titleId = await title.getAttribute('id');
+          const titleLocation = await title.evaluateHandle((element) => ({
+            parent: element.parentElement,
+            nextSibling: element.nextSibling,
+            text: element.textContent,
+          }));
           await title.evaluate((element) => {
             element.textContent = 'Updated Popover settings';
           });
@@ -549,18 +577,25 @@ for (const runtime of RUNTIMES) {
             labelledBy: await panel.getAttribute('aria-labelledby'),
             fallbackLabel: await panel.getAttribute('aria-label'),
             knownDebt:
-              'The public demo callback-only setProps may clear a11yLabel. This observed fixture debt is not Title typography acceptance; existing source and Shadcn regression assertions remain unchanged.',
+              'Fallback naming is observed on the current Dimensions consumer separately from Title typography; this is not complete naming acceptance.',
           };
           await capture('title-removed');
-          await panel.evaluate((element, child) => element.prepend(child), retainedTitle);
+          await titleLocation.evaluate((location, child) => {
+            if (!location.parent) throw new Error('Original Title parent disappeared.');
+            location.parent.insertBefore(child, location.nextSibling);
+          }, retainedTitle);
           await retainedTitle.dispose();
           title = await titleFor(page, panel);
           expect(await title.getAttribute('id')).toBe(titleId);
-          await title.evaluate((element) => {
-            element.textContent = 'Popover settings';
-          });
+          await title.evaluate(
+            (element, text) => {
+              element.textContent = text;
+            },
+            await titleLocation.evaluate((location) => location.text)
+          );
+          await titleLocation.dispose();
           observations.titleLifecycle =
-            'WC native disconnect/reconnect observed; fallback-label fixture debt is reported separately.';
+            'WC native disconnect/reconnect at the original parent observed; fallback-label behavior is reported separately.';
         } else {
           observations.titleLifecycle =
             'Renderer-driven isolated Title removal/remount remains untested.';
@@ -598,7 +633,7 @@ for (const runtime of RUNTIMES) {
           closed: true,
           outsideFocused: true,
           input:
-            'Playwright pointer click on the real public Outside focus target; may dismiss via pointer.outside before focus moves. Not a pure-focus or Tab-order claim.',
+            'Playwright pointer click on the explicit native outside consumer; may dismiss via pointer.outside before focus moves. Not a pure-focus or Tab-order claim.',
         };
         await capture('explicit-outside-click');
 
@@ -642,10 +677,12 @@ for (const runtime of RUNTIMES) {
             tree,
             references,
             demoId,
+            publicControls,
+            interactionFixture,
             runtime,
             scheme: 'light',
             coverage:
-              'independent public-demo interaction diagnostics, not complete naming or natural Tab-order acceptance',
+              'public-demo interaction diagnostics with an explicit native outside consumer, not complete naming or natural Tab-order acceptance',
             stage,
             result,
             failure,
@@ -656,7 +693,13 @@ for (const runtime of RUNTIMES) {
             browser: browser.version(),
           });
         } finally {
-          await context?.close();
+          try {
+            await outsideFixture
+              ?.evaluate((element) => element.remove())
+              .finally(() => outsideFixture?.dispose());
+          } finally {
+            await context?.close();
+          }
         }
       }
     },

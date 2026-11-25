@@ -148,10 +148,12 @@ export const codeMap = {
   <shadcn-dropdown-root>
     <shadcn-dropdown-trigger indicator indicator-icon="chevrons-up-down">Workspace</shadcn-dropdown-trigger>
     <shadcn-dropdown-content side="right" align="start" side-offset="6" class="w-40">
-      <shadcn-dropdown-label>Switch workspace</shadcn-dropdown-label>
-      <shadcn-dropdown-item value="personal" text-value="Personal">Personal</shadcn-dropdown-item>
-      <shadcn-dropdown-item value="studio" text-value="Design Studio">Design Studio</shadcn-dropdown-item>
-      <shadcn-dropdown-item value="acme" text-value="Acme Inc.">Acme Inc.</shadcn-dropdown-item>
+      <shadcn-dropdown-group>
+        <shadcn-dropdown-label>Switch workspace</shadcn-dropdown-label>
+        <shadcn-dropdown-item value="personal" text-value="Personal">Personal</shadcn-dropdown-item>
+        <shadcn-dropdown-item value="studio" text-value="Design Studio">Design Studio</shadcn-dropdown-item>
+        <shadcn-dropdown-item value="acme" text-value="Acme Inc.">Acme Inc.</shadcn-dropdown-item>
+      </shadcn-dropdown-group>
     </shadcn-dropdown-content>
   </shadcn-dropdown-root>
 </div>`,
@@ -256,9 +258,11 @@ export const codeMap = {
   <brutalist-dropdown-root>
     <brutalist-dropdown-trigger indicator indicator-icon="chevrons-up-down">Workspace</brutalist-dropdown-trigger>
     <brutalist-dropdown-content align="start" class="w-40">
-      <brutalist-dropdown-label>Switch workspace</brutalist-dropdown-label>
-      <brutalist-dropdown-item value="personal" text-value="Personal">Personal</brutalist-dropdown-item>
-      <brutalist-dropdown-item value="studio" text-value="Design Studio">Design Studio</brutalist-dropdown-item>
+      <brutalist-dropdown-group>
+        <brutalist-dropdown-label>Switch workspace</brutalist-dropdown-label>
+        <brutalist-dropdown-item value="personal" text-value="Personal">Personal</brutalist-dropdown-item>
+        <brutalist-dropdown-item value="studio" text-value="Design Studio">Design Studio</brutalist-dropdown-item>
+      </brutalist-dropdown-group>
     </brutalist-dropdown-content>
   </brutalist-dropdown-root>
 </div>`,
@@ -424,9 +428,11 @@ export const codeMap = {
   <liquid-glass-dropdown-root>
     <liquid-glass-dropdown-trigger prominence="prominent" indicator>Create New</liquid-glass-dropdown-trigger>
     <liquid-glass-dropdown-content align="end" class="w-44">
-      <liquid-glass-dropdown-label>New item</liquid-glass-dropdown-label>
-      <liquid-glass-dropdown-item value="note" text-value="Note">Note</liquid-glass-dropdown-item>
-      <liquid-glass-dropdown-item value="folder" text-value="Folder">Folder</liquid-glass-dropdown-item>
+      <liquid-glass-dropdown-group>
+        <liquid-glass-dropdown-label>New item</liquid-glass-dropdown-label>
+        <liquid-glass-dropdown-item value="note" text-value="Note">Note</liquid-glass-dropdown-item>
+        <liquid-glass-dropdown-item value="folder" text-value="Folder">Folder</liquid-glass-dropdown-item>
+      </liquid-glass-dropdown-group>
     </liquid-glass-dropdown-content>
   </liquid-glass-dropdown-root>
 </div>`,
@@ -434,9 +440,11 @@ export const codeMap = {
   <liquid-glass-dropdown-root>
     <liquid-glass-dropdown-trigger material="opaque">Opaque Surface</liquid-glass-dropdown-trigger>
     <liquid-glass-dropdown-content align="start" material="opaque" class="w-44">
-      <liquid-glass-dropdown-label>Solid fallback</liquid-glass-dropdown-label>
-      <liquid-glass-dropdown-item value="inspect" text-value="Inspect">Inspect</liquid-glass-dropdown-item>
-      <liquid-glass-dropdown-item value="export" text-value="Export">Export</liquid-glass-dropdown-item>
+      <liquid-glass-dropdown-group>
+        <liquid-glass-dropdown-label>Solid fallback</liquid-glass-dropdown-label>
+        <liquid-glass-dropdown-item value="inspect" text-value="Inspect">Inspect</liquid-glass-dropdown-item>
+        <liquid-glass-dropdown-item value="export" text-value="Export">Export</liquid-glass-dropdown-item>
+      </liquid-glass-dropdown-group>
     </liquid-glass-dropdown-content>
   </liquid-glass-dropdown-root>
 
@@ -658,6 +666,7 @@ export function DropdownMenuInset() {
     'demo-shadcn-dropdown-menu-indicator': `import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -684,10 +693,12 @@ export function DropdownMenuIndicator() {
           Workspace
         </DropdownMenuTrigger>
         <DropdownMenuContent side="right" align="start" sideOffset={6} className="w-40">
-          <DropdownMenuLabel>Switch workspace</DropdownMenuLabel>
-          <DropdownMenuItem value="personal">Personal</DropdownMenuItem>
-          <DropdownMenuItem value="studio">Design Studio</DropdownMenuItem>
-          <DropdownMenuItem value="acme">Acme Inc.</DropdownMenuItem>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Switch workspace</DropdownMenuLabel>
+            <DropdownMenuItem value="personal">Personal</DropdownMenuItem>
+            <DropdownMenuItem value="studio">Design Studio</DropdownMenuItem>
+            <DropdownMenuItem value="acme">Acme Inc.</DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
@@ -811,6 +822,7 @@ export function BrutalistDropdownInset() {
     'demo-brutalist-dropdown-menu-indicator': `import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -833,9 +845,11 @@ export function BrutalistDropdownIndicator() {
       <DropdownMenu>
         <DropdownMenuTrigger indicator indicatorIcon="chevrons-up-down">Workspace</DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-40">
-          <DropdownMenuLabel>Switch workspace</DropdownMenuLabel>
-          <DropdownMenuItem value="personal">Personal</DropdownMenuItem>
-          <DropdownMenuItem value="studio">Design Studio</DropdownMenuItem>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Switch workspace</DropdownMenuLabel>
+            <DropdownMenuItem value="personal">Personal</DropdownMenuItem>
+            <DropdownMenuItem value="studio">Design Studio</DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
@@ -1015,6 +1029,7 @@ export function LiquidGlassDropdownDestructive() {
     'demo-liquid-glass-dropdown-menu-prominence': `import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
@@ -1034,9 +1049,11 @@ export function LiquidGlassDropdownProminence() {
       <DropdownMenu>
         <DropdownMenuTrigger prominence="prominent" indicator>Create New</DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-44">
-          <DropdownMenuLabel>New item</DropdownMenuLabel>
-          <DropdownMenuItem value="note">Note</DropdownMenuItem>
-          <DropdownMenuItem value="folder">Folder</DropdownMenuItem>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>New item</DropdownMenuLabel>
+            <DropdownMenuItem value="note">Note</DropdownMenuItem>
+            <DropdownMenuItem value="folder">Folder</DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
@@ -1045,6 +1062,7 @@ export function LiquidGlassDropdownProminence() {
     'demo-liquid-glass-dropdown-menu-opaque': `import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
@@ -1056,9 +1074,11 @@ export function LiquidGlassDropdownOpaque() {
       <DropdownMenu>
         <DropdownMenuTrigger material="opaque">Opaque Surface</DropdownMenuTrigger>
         <DropdownMenuContent align="start" material="opaque" className="w-44">
-          <DropdownMenuLabel>Solid fallback</DropdownMenuLabel>
-          <DropdownMenuItem value="inspect">Inspect</DropdownMenuItem>
-          <DropdownMenuItem value="export">Export</DropdownMenuItem>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Solid fallback</DropdownMenuLabel>
+            <DropdownMenuItem value="inspect">Inspect</DropdownMenuItem>
+            <DropdownMenuItem value="export">Export</DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -1190,10 +1210,12 @@ export function LiquidGlassDropdownOpaque() {
     <DropdownMenu>
       <DropdownMenuTrigger indicator indicator-icon="chevrons-up-down">Workspace</DropdownMenuTrigger>
       <DropdownMenuContent side="right" align="start" :side-offset="6" class="w-40">
-        <DropdownMenuLabel>Switch workspace</DropdownMenuLabel>
-        <DropdownMenuItem value="personal">Personal</DropdownMenuItem>
-        <DropdownMenuItem value="studio">Design Studio</DropdownMenuItem>
-        <DropdownMenuItem value="acme">Acme Inc.</DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Switch workspace</DropdownMenuLabel>
+          <DropdownMenuItem value="personal">Personal</DropdownMenuItem>
+          <DropdownMenuItem value="studio">Design Studio</DropdownMenuItem>
+          <DropdownMenuItem value="acme">Acme Inc.</DropdownMenuItem>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   </div>
@@ -1273,9 +1295,11 @@ export function LiquidGlassDropdownOpaque() {
     <BrutalistDropdownRoot>
       <BrutalistDropdownTrigger indicator indicator-icon="chevrons-up-down">Workspace</BrutalistDropdownTrigger>
       <BrutalistDropdownContent align="start" class="w-40">
-        <BrutalistDropdownLabel>Switch workspace</BrutalistDropdownLabel>
-        <BrutalistDropdownItem value="personal">Personal</BrutalistDropdownItem>
-        <BrutalistDropdownItem value="studio">Design Studio</BrutalistDropdownItem>
+        <BrutalistDropdownGroup>
+          <BrutalistDropdownLabel>Switch workspace</BrutalistDropdownLabel>
+          <BrutalistDropdownItem value="personal">Personal</BrutalistDropdownItem>
+          <BrutalistDropdownItem value="studio">Design Studio</BrutalistDropdownItem>
+        </BrutalistDropdownGroup>
       </BrutalistDropdownContent>
     </BrutalistDropdownRoot>
   </div>
@@ -1396,9 +1420,11 @@ export function LiquidGlassDropdownOpaque() {
     <LiquidGlassDropdownRoot>
       <LiquidGlassDropdownTrigger prominence="prominent" indicator>Create New</LiquidGlassDropdownTrigger>
       <LiquidGlassDropdownContent align="end" class="w-44">
-        <LiquidGlassDropdownLabel>New item</LiquidGlassDropdownLabel>
-        <LiquidGlassDropdownItem value="note">Note</LiquidGlassDropdownItem>
-        <LiquidGlassDropdownItem value="folder">Folder</LiquidGlassDropdownItem>
+        <LiquidGlassDropdownGroup>
+          <LiquidGlassDropdownLabel>New item</LiquidGlassDropdownLabel>
+          <LiquidGlassDropdownItem value="note">Note</LiquidGlassDropdownItem>
+          <LiquidGlassDropdownItem value="folder">Folder</LiquidGlassDropdownItem>
+        </LiquidGlassDropdownGroup>
       </LiquidGlassDropdownContent>
     </LiquidGlassDropdownRoot>
   </div>
@@ -1408,9 +1434,11 @@ export function LiquidGlassDropdownOpaque() {
     <LiquidGlassDropdownRoot>
       <LiquidGlassDropdownTrigger material="opaque">Opaque Surface</LiquidGlassDropdownTrigger>
       <LiquidGlassDropdownContent align="start" material="opaque" class="w-44">
-        <LiquidGlassDropdownLabel>Solid fallback</LiquidGlassDropdownLabel>
-        <LiquidGlassDropdownItem value="inspect">Inspect</LiquidGlassDropdownItem>
-        <LiquidGlassDropdownItem value="export">Export</LiquidGlassDropdownItem>
+        <LiquidGlassDropdownGroup>
+          <LiquidGlassDropdownLabel>Solid fallback</LiquidGlassDropdownLabel>
+          <LiquidGlassDropdownItem value="inspect">Inspect</LiquidGlassDropdownItem>
+          <LiquidGlassDropdownItem value="export">Export</LiquidGlassDropdownItem>
+        </LiquidGlassDropdownGroup>
       </LiquidGlassDropdownContent>
     </LiquidGlassDropdownRoot>
 
@@ -1541,10 +1569,12 @@ export function LiquidGlassDropdownOpaque() {
     <DropdownMenu>
       <DropdownMenuTrigger :indicator="true" indicator-icon="chevrons-up-down">Workspace</DropdownMenuTrigger>
       <DropdownMenuContent side="right" align="start" :side-offset="6" class="w-40">
-        <DropdownMenuLabel>Switch workspace</DropdownMenuLabel>
-        <DropdownMenuItem value="personal">Personal</DropdownMenuItem>
-        <DropdownMenuItem value="studio">Design Studio</DropdownMenuItem>
-        <DropdownMenuItem value="acme">Acme Inc.</DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Switch workspace</DropdownMenuLabel>
+          <DropdownMenuItem value="personal">Personal</DropdownMenuItem>
+          <DropdownMenuItem value="studio">Design Studio</DropdownMenuItem>
+          <DropdownMenuItem value="acme">Acme Inc.</DropdownMenuItem>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   </div>
@@ -1624,9 +1654,11 @@ export function LiquidGlassDropdownOpaque() {
     <BrutalistDropdownRoot>
       <BrutalistDropdownTrigger :indicator="true" indicator-icon="chevrons-up-down">Workspace</BrutalistDropdownTrigger>
       <BrutalistDropdownContent align="start" class="w-40">
-        <BrutalistDropdownLabel>Switch workspace</BrutalistDropdownLabel>
-        <BrutalistDropdownItem value="personal">Personal</BrutalistDropdownItem>
-        <BrutalistDropdownItem value="studio">Design Studio</BrutalistDropdownItem>
+        <BrutalistDropdownGroup>
+          <BrutalistDropdownLabel>Switch workspace</BrutalistDropdownLabel>
+          <BrutalistDropdownItem value="personal">Personal</BrutalistDropdownItem>
+          <BrutalistDropdownItem value="studio">Design Studio</BrutalistDropdownItem>
+        </BrutalistDropdownGroup>
       </BrutalistDropdownContent>
     </BrutalistDropdownRoot>
   </div>
@@ -1747,9 +1779,11 @@ export function LiquidGlassDropdownOpaque() {
     <LiquidGlassDropdownRoot>
       <LiquidGlassDropdownTrigger prominence="prominent" :indicator="true">Create New</LiquidGlassDropdownTrigger>
       <LiquidGlassDropdownContent align="end" class="w-44">
-        <LiquidGlassDropdownLabel>New item</LiquidGlassDropdownLabel>
-        <LiquidGlassDropdownItem value="note">Note</LiquidGlassDropdownItem>
-        <LiquidGlassDropdownItem value="folder">Folder</LiquidGlassDropdownItem>
+        <LiquidGlassDropdownGroup>
+          <LiquidGlassDropdownLabel>New item</LiquidGlassDropdownLabel>
+          <LiquidGlassDropdownItem value="note">Note</LiquidGlassDropdownItem>
+          <LiquidGlassDropdownItem value="folder">Folder</LiquidGlassDropdownItem>
+        </LiquidGlassDropdownGroup>
       </LiquidGlassDropdownContent>
     </LiquidGlassDropdownRoot>
   </div>
@@ -1759,9 +1793,11 @@ export function LiquidGlassDropdownOpaque() {
     <LiquidGlassDropdownRoot>
       <LiquidGlassDropdownTrigger material="opaque">Opaque Surface</LiquidGlassDropdownTrigger>
       <LiquidGlassDropdownContent align="start" material="opaque" class="w-44">
-        <LiquidGlassDropdownLabel>Solid fallback</LiquidGlassDropdownLabel>
-        <LiquidGlassDropdownItem value="inspect">Inspect</LiquidGlassDropdownItem>
-        <LiquidGlassDropdownItem value="export">Export</LiquidGlassDropdownItem>
+        <LiquidGlassDropdownGroup>
+          <LiquidGlassDropdownLabel>Solid fallback</LiquidGlassDropdownLabel>
+          <LiquidGlassDropdownItem value="inspect">Inspect</LiquidGlassDropdownItem>
+          <LiquidGlassDropdownItem value="export">Export</LiquidGlassDropdownItem>
+        </LiquidGlassDropdownGroup>
       </LiquidGlassDropdownContent>
     </LiquidGlassDropdownRoot>
 

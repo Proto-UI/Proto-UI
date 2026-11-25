@@ -312,7 +312,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/LibraryCardFrame.astro` | `www.gallery.ui-library-cards` | `f583b5140d82d64d1620ec8b0e62cf309e5ebec27fce5459e3c4926ca34b6665` |
 | `apps/www/src/components/LibraryCardPart.astro` | `www.gallery.ui-library-cards` | `6199ea488b345c01f110795b2f3629781277f9eefdf3fd8919ab99b95d29c891` |
 | `apps/www/src/components/library-card-client.ts` | `www.gallery.ui-library-cards` | `a76ff8694ef17cc01d0da51c1e9e8efc5fa7192dec59d916a601c3088f8d3ff3` |
-| `apps/www/src/components/library-style-seed.ts` | `www.gallery.ui-library-cards` | `ff2a962e7dd010d55d05e512ef103287c435a96c545ca146c887622abc5270c2` |
+| `apps/www/src/components/library-style-seed.ts` | `www.gallery.ui-library-cards` | `bfb98a5e1e38273abffeb5f656b612d432cf43180bd8b8af015cbba813ee3330` |
 | `apps/www/src/components/library-card-prototypes.ts` | `www.gallery.ui-library-cards` | `a3b68f1d7e9d8b00a683d826cedd549b73d9fba686c0dbe6a79d13772fbafabf` |
 | `apps/www/src/components/library-card-snapshot.ts` | `www.gallery.ui-library-cards` | `054f688a4e6b5063f865d87b07967fd8b22bfe6124ee1cd5f730624ed193a2eb` |
 | `apps/www/src/content/docs/zh-cn/library-card-font-trace.ts` | `www.gallery.ui-library-cards` | `1259f2df0ec7e0262207a7a88b0a4aeedb5874ac7db023f9f6647d231b78c68a` |
@@ -490,7 +490,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/content/docs/demo_components/navigation-menu/demo-liquid-glass-navigation-menu-controlled.demo.ts` | `www.demo.authored-controllers` | `58ba3306e314e1866928fd333b0780c45f6374ae8b23bbb72ebb687be9cee185` |
 | `apps/www/src/content/docs/demo_components/navigation-menu/demo-shadcn-navigation-menu-controlled.demo.ts` | `www.demo.authored-controllers` | `17845251971d6e704316f8286fb85bef15c27a4d798ef3deae4ba44d21f070dc` |
 | `apps/www/src/content/docs/demo_components/popover/demo-bootstrap-2-3-2-popover-controlled.demo.ts` | `www.demo.authored-controllers` | `54503db8d9d7d7dc5b85450dd382800dfb5c666e8af89a7897c93bdbe6e5d39f` |
-| `apps/www/src/content/docs/demo_components/popover/demo-brutalist-popover-controlled.demo.ts` | `www.demo.authored-controllers` | `8dbc0c56f0970ea39eaff090ee14143c586753f7ea1f151d9d1ffd59695e7ede` |
+| `apps/www/src/content/docs/demo_components/popover/demo-brutalist-popover-controlled.demo.ts` | `www.demo.authored-controllers` | `c8b4ac2e0607e525d8e5ef979b4cff6cfd1247a77a1b920fab805417ff58e87d` |
 | `apps/www/src/content/docs/demo_components/popover/demo-liquid-glass-popover-controlled.demo.ts` | `www.demo.authored-controllers` | `d7b8015c156f02e7833cb36e1de4189807846de38488d1494f7af3607c5d116c` |
 | `apps/www/src/content/docs/demo_components/popover/demo-shadcn-popover-controlled.demo.ts` | `www.demo.authored-controllers` | `13b21aed8c53d2c93ee670edc0690eab54b14276f53d6b77961d12629577c6d2` |
 | `apps/www/src/content/docs/zh-cn/demo-shadcn-select.demo.ts` | `www.demo.authored-controllers` | `17c0b78360489b4e35c1caf5084dcb50a9b67e3df8810d2b2fbf602ab023a291` |

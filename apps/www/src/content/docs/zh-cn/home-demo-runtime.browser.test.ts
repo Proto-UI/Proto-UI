@@ -1680,6 +1680,11 @@ describe.sequential('Independent Label public documentation', () => {
           for (const ref of ['label-passive', 'description']) {
             const description = content.locator(`[data-demo-ref="${ref}"]`);
             await description.scrollIntoViewIfNeeded();
+            // Keep the native drag away from viewport-edge autoscroll before
+            // reading glyph coordinates; selection still belongs to real input.
+            await description.evaluate((element) =>
+              element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' })
+            );
             const drag = await description.evaluate(measureLabelTextDrag);
             const geometry = { ...drag.bounds, start: drag.start, end: drag.end };
             const recorder = await description.evaluateHandle(recordLabelPointerTrace);

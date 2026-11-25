@@ -14,7 +14,7 @@ export interface PopoverNovaFixture {
 export type PopoverNovaFixtureHandle = JSHandle<PopoverNovaFixture>;
 
 // The public demo selects Rhea. Retain the historical Nova oracle on a separate
-// ordinary consumer of that DemoSpec, following the AlertDialog layout fixture.
+// ordinary consumer of the public prototypes, independent of the docs composition.
 export async function mountPopoverNova(page: Page, runtime: 'wc' | 'react' | 'vue' | 'vue2') {
   return page.evaluateHandle(async (runtime) => {
     const browserImport = new Function('url', 'return import(url)') as (
@@ -47,25 +47,73 @@ export async function mountPopoverNova(page: Page, runtime: 'wc' | 'react' | 'vu
       original.root.props?.styleProfile !== 'rhea'
     )
       throw new Error('Public Popover demo must retain its Rhea scope.');
-    const root = structuredClone(original.root);
-    root.props = { ...root.props, styleProfile: 'nova' };
-    const scene = root.children?.[0];
-    if (!scene || typeof scene === 'string' || scene.kind !== 'box' || !scene.children)
-      throw new Error('Popover fixture requires the authored layout box.');
-    const outsideIndex = scene.children.findIndex(
-      (child) =>
-        typeof child !== 'string' && child.kind === 'proto' && child.prototypeId === 'shadcn-button'
-    );
-    if (outsideIndex < 0) throw new Error('Popover fixture outside control missing.');
-    scene.ref = '__popover_nova_scene__';
-    // Keep native sequential focus after the portaled Close and before the
-    // authored outside control. The preview shell's default outlet follows all
-    // demo children, which would put the outside control before Close.
-    scene.children.splice(outsideIndex, 0, {
-      kind: 'box',
-      ref: '__popover_nova_outlet__',
+    // This fixture owns the minimal Nova consumer exercised by the title and
+    // command-density contracts. The public Rhea demo can evolve independently
+    // (for example, to a form with additional focusable controls).
+    const root = {
+      kind: 'proto',
+      prototypeId: 'shadcn-style-scope',
       className: 'contents',
-    });
+      props: { styleProfile: 'nova' },
+      children: [
+        {
+          kind: 'box',
+          ref: '__popover_nova_scene__',
+          className: 'flex min-w-0 flex-wrap gap-4 p-4',
+          children: [
+            {
+              kind: 'proto',
+              prototypeId: 'shadcn-popover-root',
+              ref: 'root',
+              props: { a11yLabel: 'Popover' },
+              children: [
+                {
+                  kind: 'proto',
+                  prototypeId: 'shadcn-popover-trigger',
+                  children: ['Open Popover'],
+                },
+                {
+                  kind: 'proto',
+                  prototypeId: 'shadcn-popover-content',
+                  props: { enterDuration: 0, leaveDuration: 0 },
+                  children: [
+                    {
+                      kind: 'proto',
+                      prototypeId: 'shadcn-popover-title',
+                      children: ['Popover settings'],
+                    },
+                    {
+                      kind: 'proto',
+                      prototypeId: 'shadcn-popover-description',
+                      children: [
+                        'Tab between the trigger and content, then move to the outside control. Outside focus closes without moving focus back.',
+                      ],
+                    },
+                    {
+                      kind: 'proto',
+                      prototypeId: 'shadcn-popover-close',
+                      children: ['Close'],
+                    },
+                  ],
+                },
+              ],
+            },
+            // Native sequential focus must pass from the portaled Close to the
+            // outside control, rather than using the preview's trailing outlet.
+            {
+              kind: 'box',
+              ref: '__popover_nova_outlet__',
+              className: 'contents',
+            },
+            {
+              kind: 'proto',
+              prototypeId: 'shadcn-button',
+              children: ['Outside focus target'],
+            },
+          ],
+        },
+      ],
+    } satisfies DemoTypes.DemoSpec['root'];
     const previewer = document.querySelector<HTMLElement>(
       '[data-previewer-id][data-demo-id="demo-shadcn-popover"]'
     );
@@ -76,21 +124,13 @@ export async function mountPopoverNova(page: Page, runtime: 'wc' | 'react' | 'vu
     document.body.append(host);
     const surface = createRuntimePreviewSurface(
       {
-        ...original,
+        type: 'demo',
         root,
         setup(context) {
-          const cleanup = original.setup?.(context);
-          const unregister = registerWebPortalDestination(
+          return registerWebPortalDestination(
             context.refs.__popover_nova_scene__,
             context.refs.__popover_nova_outlet__
           );
-          return () => {
-            try {
-              unregister();
-            } finally {
-              cleanup?.();
-            }
-          };
         },
       },
       'shadcn',

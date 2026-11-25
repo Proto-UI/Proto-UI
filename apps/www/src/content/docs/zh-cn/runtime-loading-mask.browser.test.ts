@@ -197,13 +197,21 @@ for (const family of ['shadcn', 'brutalist']) {
                 .click();
               await preferences.waitFor({ state: 'hidden' });
             }
-            // Compact cards start as an inert overview. Use the public layout
-            // control before making and then retaining a real native edit.
-            const layoutToggle = page.locator('[data-home-gallery-layout-toggle]');
-            await layoutToggle.waitFor({ state: 'visible' });
-            if ((await layoutToggle.getAttribute('aria-expanded')) === 'false')
-              await layoutToggle.click();
-            expect(await layoutToggle.getAttribute('aria-expanded')).toBe('true');
+            // The public Hero Demo link opens the compact gallery through its native fragment.
+            const demoAction = page.locator(
+              '#homepage-hero-actions [data-projection-generation-state="active"] a[data-site-link-enhanced][href="#home-demo-previewer"]'
+            );
+            await demoAction.waitFor({ state: 'visible' });
+            await demoAction.focus();
+            await page.keyboard.press('Enter');
+            await expect.poll(() => new URL(page.url()).hash).toBe('#home-demo-previewer');
+            await expect
+              .poll(() =>
+                page
+                  .locator('[data-home-gallery-stage]')
+                  .evaluate((node) => (node as HTMLElement).inert)
+              )
+              .toBe(false);
           }
           if (scenario.enlarged)
             await page.evaluate(() => {

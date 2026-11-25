@@ -123,7 +123,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
   // Exact consumer-owned withdrawal of the serialized Library SSR style seed.
   // Both imports are type-only; this grants no general Adapter hydration boundary.
   'apps/www/src/components/library-style-seed.ts': Object.freeze({
-    sourceSha256: 'ff2a962e7dd010d55d05e512ef103287c435a96c545ca146c887622abc5270c2',
+    sourceSha256: 'bfb98a5e1e38273abffeb5f656b612d432cf43180bd8b8af015cbba813ee3330',
     specifiers: Object.freeze(['@proto.ui/core', '@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/library-card-client.ts': Object.freeze({

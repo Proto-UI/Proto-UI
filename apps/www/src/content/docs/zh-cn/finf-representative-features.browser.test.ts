@@ -432,6 +432,7 @@ export type PopoverFrame = {
   visibility: string | null;
   opacity: string | null;
   transform: string | null;
+  color: string | null;
   shadow: string | null;
   animations: Array<{
     sequence: number;
@@ -517,6 +518,7 @@ function createPopoverMotionProbe(
       visibility: style?.visibility ?? null,
       opacity: style?.opacity ?? null,
       transform: style?.transform ?? null,
+      color: style?.color ?? null,
       shadow: style?.boxShadow ?? null,
       animations:
         panel?.getAnimations().map((animation) => {
@@ -661,8 +663,15 @@ async function captureSettledPopover(
     )
   ).toBe(true);
   if (family === 'shadcn' || family === 'brutalist') {
-    expect(Math.abs(before.rect!.width - 18 * before.rem)).toBeLessThanOrEqual(1);
-    if (family === 'brutalist') expect(before.shadow).toBe('none');
+    // These source-bound demo consumers explicitly override the 18rem primitive with w-80.
+    expect(Math.abs(before.rect!.width - 20 * before.rem)).toBeLessThanOrEqual(1);
+    if (family === 'brutalist') {
+      // D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 gives anchored panels one 3px foreground shadow.
+      const layers = (before.shadow ?? '').split(/,(?![^()]*\))/).map((layer) => layer.trim());
+      expect(layers.filter((layer) => !hasNoVisibleBoxShadow(layer))).toEqual([
+        `${before.color} 3px 3px 0px 0px`,
+      ]);
+    }
   }
 }
 
@@ -673,7 +682,7 @@ async function installPopoverNegativeControl(panel: Locator, control: string | u
   if (!['wrong-width', 'nonsettling'].includes(control))
     throw new Error(`Unknown Popover negative control: ${control}`);
   await panel.evaluate((element, fault) => {
-    if (fault === 'wrong-width') element.style.setProperty('width', '20rem', 'important');
+    if (fault === 'wrong-width') element.style.setProperty('width', '18rem', 'important');
     else
       element.animate([{ opacity: 0.5 }, { opacity: 1 }], { duration: 200, iterations: Infinity });
   }, control);
@@ -1438,6 +1447,21 @@ async function drawerJourney({ page, previewer, capture }: Journey) {
       )
     )
     .toBe('50');
+  // Snap state publishes before the authored 500ms physical entry reaches zero translation.
+  // Observe that endpoint within the existing default poll bound, without finishing motion.
+  await expect
+    .poll(
+      () =>
+        panel.evaluate((element) => {
+          const translate = getComputedStyle(element).translate;
+          return (
+            translate === 'none' ||
+            translate.split(/\s+/).every((axis) => /^0(?:px|%)?$/.test(axis))
+          );
+        }),
+      { timeout: 1_000 }
+    )
+    .toBe(true);
   const geometry = await panel.evaluate((element) => {
     const rect = element.getBoundingClientRect(),
       style = getComputedStyle(element);
@@ -1448,6 +1472,7 @@ async function drawerJourney({ page, previewer, capture }: Journey) {
       height: rect.height,
       right: rect.right,
       bottom: rect.bottom,
+      translate: style.translate,
       rootTextSize: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
       availableHeight:
         Number.parseFloat(style.getPropertyValue('--proto-ui-available-region-height')) ||
