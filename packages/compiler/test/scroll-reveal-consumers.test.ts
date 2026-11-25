@@ -130,7 +130,10 @@ for (const profile of nativeOwnerProfiles)
     });
 
     it('reveals a descendant surface part whose nearest strict same-role ancestor is this surface', async () => {
-      const owner = await mountScrollFamily(profile);
+      // Mounting may still have an end-follow frame for the nested surface.
+      // Finish that independent work before assigning the offset this request
+      // must preserve, just as the ownership-rejection cases below do.
+      const owner = await mountSettledScrollFamily(profile);
       const surface = owner.physical('surface'),
         target = owner.physical('nested');
       geometry(surface, target);

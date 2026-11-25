@@ -56,8 +56,8 @@ const oldRootIdentityPredicate = (plan, sample) =>
 
 for (const [family, rootRef, part] of [
   ['switch', 'releaseAlertsSwitch', 'thumb'],
-  ['checkbox', 'checkedCheckbox', 'indicator'],
-  ['checkbox', 'mixedCheckbox', 'indicator'],
+  ['checkbox', 'updatesCheckbox', 'indicator'],
+  ['checkbox', 'channelsCheckbox', 'indicator'],
 ])
   test(`rejects missing ${family} ${rootRef} ${part} that the old identity guard accepts`, async () => {
     const plan = await load(family);
@@ -79,8 +79,8 @@ for (const [family, rootRef, part] of [
 test('global equal counts cannot move an Indicator from one authored Root to another', async () => {
   const plan = await load('checkbox');
   const sample = model(plan, 'checkbox');
-  const checked = plan.instances.find((node) => node.ref === 'checkedCheckbox');
-  const mixed = plan.instances.find((node) => node.ref === 'mixedCheckbox');
+  const checked = plan.instances.find((node) => node.ref === 'updatesCheckbox');
+  const mixed = plan.instances.find((node) => node.ref === 'channelsCheckbox');
   const part = sample.surfaces.find((surface) => surface.parent === checked.path);
   part.parent = mixed.path;
   assert.equal(sample.surfaces.length, plan.instances.length);
@@ -91,10 +91,9 @@ test('unchecked Indicator may be unpainted but checked/mixed Indicator and Switc
   const plan = await load('checkbox');
   const sample = model(plan, 'checkbox');
   const root = (ref) => plan.instances.find((node) => node.ref === ref);
-  sample.surfaces.find((surface) => surface.parent === root('uncheckedCheckbox').path).painted =
-    false;
+  sample.surfaces.find((surface) => surface.parent === root('termsCheckbox').path).painted = false;
   assert.equal(compareContrastAnatomy(plan, sample).achieved, true);
-  for (const ref of ['checkedCheckbox', 'mixedCheckbox']) {
+  for (const ref of ['updatesCheckbox', 'channelsCheckbox']) {
     const part = sample.surfaces.find((surface) => surface.parent === root(ref).path);
     part.painted = false;
     assert.equal(compareContrastAnatomy(plan, sample).achieved, false);
@@ -150,9 +149,9 @@ test('selected Tabs panel follows authored value and current controls, inactive 
   for (const node of plan.instances.filter((node) => node.part === 'trigger')) {
     const target = sample.surfaces.find((surface) => surface.uid === node.path);
     target.controls = [panels.find((panel) => panel.props.value === node.props.value).path];
-    target.ariaSelected = String(node.props.value === 'overview');
+    target.ariaSelected = String(node.props.value === 'account');
   }
-  const hidden = panels.find((node) => node.props.value === 'details');
+  const hidden = panels.find((node) => node.props.value === 'password');
   sample.surfaces = sample.surfaces.filter((surface) => surface.uid !== hidden.path);
   assert.equal(compareContrastAnatomy(plan, sample).achieved, true);
   const selected = sample.surfaces.find((surface) => surface.uid === panels[0].path);
@@ -230,7 +229,7 @@ test('delayed or dismissed Tooltip intent alone does not invent materialization'
 test('keepMounted Tabs require an inactive physical subtree without claiming its paint', async () => {
   const plan = await load('tabs');
   const panel = plan.instances.find(
-    (node) => node.part === 'content' && node.props.value === 'details'
+    (node) => node.part === 'content' && node.props.value === 'password'
   );
   panel.props = { ...panel.props, keepMounted: true };
   const sample = model(plan, 'tabs');
@@ -241,7 +240,7 @@ test('keepMounted Tabs require an inactive physical subtree without claiming its
         (panel) => panel.part === 'content' && panel.props.value === node.props.value
       ).path,
     ];
-    target.ariaSelected = String(node.props.value === 'overview');
+    target.ariaSelected = String(node.props.value === 'account');
   }
   sample.surfaces.find((surface) => surface.uid === panel.path).painted = false;
   assert.equal(compareContrastAnatomy(plan, sample).achieved, true);
@@ -478,9 +477,33 @@ const retainedTooltipNative = JSON.parse(
     'utf8'
   )
 );
+const retainedTooltipSources = JSON.parse(
+  readFileSync(
+    new URL('./fixtures/contrast-anatomy-30e-tooltip-sources.json', import.meta.url),
+    'utf8'
+  )
+);
+assert.equal(retainedTooltipSources.sourceCommit, retainedTooltipNative.sourceCommit);
+const retainedTooltipPlan = (async () => {
+  const loadSource = async (identity) => {
+    const source = retainedTooltipSources.sources[identity];
+    assert.equal(createHash('sha256').update(source.content).digest('hex'), source.sha256);
+    const { code } = await transform(source.content, {
+      loader: 'ts',
+      format: 'esm',
+      sourcefile: source.path,
+    });
+    return import(`data:text/javascript;base64,${Buffer.from(code).toString('base64')}`);
+  };
+  const [{ default: demo }, { PROJECTION_FAMILY_MANIFESTS: manifests }] = await Promise.all([
+    loadSource('recipe-tooltip'),
+    loadSource('projection-manifest'),
+  ]);
+  return compileContrastAnatomy(demo, manifests.brutalist.families.tooltip);
+})();
 for (const frame of retainedTooltipNative.frames)
   test(`replays recorded 30e Tooltip retained identity: ${frame.name}`, async () => {
-    const plan = await load('tooltip');
+    const plan = await retainedTooltipPlan;
     assert.equal(frame.beforeFingerprintDigest, frame.afterFingerprintDigest);
     const result = compareContrastAnatomy(plan, frame.observed, {
       requirePrimaryOpen: frame.requirePrimaryOpen,
@@ -527,7 +550,8 @@ for (const [name, mutate] of Object.entries({
     assert.equal(part.role, 'tooltip');
     mutate(part, sample);
     assert.equal(
-      compareContrastAnatomy(await load('tooltip'), sample, { requirePrimaryOpen: true }).achieved,
+      compareContrastAnatomy(await retainedTooltipPlan, sample, { requirePrimaryOpen: true })
+        .achieved,
       false,
       name
     );
