@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdtempSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -1217,7 +1225,7 @@ test('Docs evidence cannot accept a skipped, filtered, missing or failing case a
   const step = workflows[websiteShaderWorkflow].jobs['docs-columns'].steps.find(
     (item) => item.id === 'verify-complete-docs'
   );
-  const temporary = mkdtempSync(path.join(os.tmpdir(), 'pui-docs-inventory-'));
+  const temporary = realpathSync(mkdtempSync(path.join(os.tmpdir(), 'pui-docs-inventory-')));
   t.after(() => rmSync(temporary, { recursive: true, force: true }));
   const valid = {
     success: true,
