@@ -117,6 +117,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/components/documentation-image-preview.browser.test.ts',
   'apps/www/test/message-composition.browser.test.ts',
   'apps/www/test/color-scheme.browser.test.ts',
+  'apps/www/test/shadow-percentage-translation.browser.test.ts',
   'apps/www/test/preferences.browser.test.ts',
   'apps/www/test/button-view-lifetime.browser.test.ts',
   'apps/www/test/radio-group-entry.browser.test.ts',
@@ -487,8 +488,12 @@ for (const file of [
 }
 // The passive-atoms file was still running when the old shard was killed. Its
 // 600s reserve is explicitly an estimate, not an invented completion sample.
-const interruptedSuiteReserves = {
+const estimatedSuiteReserves = {
   'apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts': 600,
+  // The restored Field journey checks both the current public form and the
+  // complete companion. Its local native run took 280.9s; reserve 300s here.
+  // This is a planning estimate, not an invented historical CI observation.
+  'apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts': 300,
 };
 export const DEFAULT_BROWSER_SUITE_WEIGHT_SECONDS = 120;
 
@@ -496,7 +501,7 @@ export function browserSuiteWeightSeconds(suite) {
   const known = [
     BROWSER_SUITE_WEIGHT_SECONDS[suite],
     observedCosts[suite],
-    interruptedSuiteReserves[suite],
+    estimatedSuiteReserves[suite],
   ].filter((value) => value !== undefined);
   return known.length ? Math.max(...known) : DEFAULT_BROWSER_SUITE_WEIGHT_SECONDS;
 }
