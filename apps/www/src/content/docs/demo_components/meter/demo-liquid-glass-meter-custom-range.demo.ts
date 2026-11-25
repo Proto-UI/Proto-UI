@@ -4,13 +4,11 @@ const demo: DemoSpec = {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'w-full rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    className: 'w-full',
     children: [
       {
         kind: 'box',
-        className:
-          'mx-auto grid w-full max-w-md min-w-0 gap-5 rounded-xl border border-border bg-background/85 p-5 shadow-xs',
+        className: 'mx-auto grid w-full max-w-md min-w-0 gap-5',
         children: [
           {
             kind: 'proto',

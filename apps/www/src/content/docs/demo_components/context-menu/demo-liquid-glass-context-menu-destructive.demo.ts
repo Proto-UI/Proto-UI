@@ -4,8 +4,7 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'flex min-w-0 w-full items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    className: 'flex min-w-0 w-full items-center justify-center',
     children: [
       {
         kind: 'proto',
@@ -42,7 +41,12 @@ export default {
               {
                 kind: 'proto',
                 prototypeId: 'liquid-glass-context-menu-item',
-                props: { value: 'delete', textValue: 'Delete', variant: 'destructive', inset: true },
+                props: {
+                  value: 'delete',
+                  textValue: 'Delete',
+                  variant: 'destructive',
+                  inset: true,
+                },
                 children: ['Delete'],
               },
             ],

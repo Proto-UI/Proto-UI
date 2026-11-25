@@ -10,8 +10,7 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6 flex min-w-0 flex-wrap items-center justify-center gap-4',
+    className: 'flex min-w-0 flex-wrap items-center justify-center gap-4',
     children: [
       {
         kind: 'proto',
