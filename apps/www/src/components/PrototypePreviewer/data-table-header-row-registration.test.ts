@@ -114,6 +114,18 @@ describe('DataTable HeaderRow actual website and static entry closure', () => {
               .getRows()
               .map((record) => record.id)
           ).toEqual(['api', 'docs', 'web']);
+        } else {
+          expect(
+            table
+              .getExposes()
+              .getRows()
+              .map((record) => record.email)
+          ).toEqual([
+            'carmella@example.com',
+            'monserrat44@example.com',
+            'ken99@example.com',
+            'abe45@example.com',
+          ]);
         }
         headers[1]!.focus();
         headers[1]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
@@ -130,6 +142,18 @@ describe('DataTable HeaderRow actual website and static entry closure', () => {
               .getRows()
               .map((record) => record.id)
           ).toEqual(['docs', 'api', 'web']);
+        } else {
+          expect(
+            table
+              .getExposes()
+              .getRows()
+              .map((record) => record.email)
+          ).toEqual([
+            'abe45@example.com',
+            'carmella@example.com',
+            'ken99@example.com',
+            'monserrat44@example.com',
+          ]);
         }
         expect(selections).toEqual([]);
         await view.destroy();
