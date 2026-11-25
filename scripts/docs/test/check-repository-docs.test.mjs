@@ -25,7 +25,11 @@ async function fixture(t, entries, overrides = {}) {
     localProjections: [],
     ...overrides,
   };
-  return { root, check: () => runRepositoryDocsCheck({ root, files: Object.keys(files), policy }) };
+  return {
+    root,
+    check: (from = root) =>
+      runRepositoryDocsCheck({ root: from, files: Object.keys(files), policy }),
+  };
 }
 
 test('actual Markdown links, image references and encoded paths fail when their local target disappears', async (t) => {
@@ -282,4 +286,25 @@ test('local links cannot escape through traversal or symlinks, and generated loc
   assert.ok(report.errors.some((error) => /generated projection must not be tracked/.test(error)));
   assert.ok(report.errors.some((error) => /generator .* is missing/.test(error)));
   assert.ok(report.errors.some((error) => /root script spec:docs:agent must invoke/.test(error)));
+});
+
+test('checks physical containment when a checkout is opened through a symlink', async (t) => {
+  const { root, check } = await fixture(t, {
+    'README.md': '[guide](guide.md)\n[traversal](../outside.md)\n[symlink](linked.md)',
+    'guide.md': '# Guide\n',
+  });
+  const parent = await fs.mkdtemp(path.join(os.tmpdir(), 'repository-docs-alias-'));
+  t.after(() => fs.rm(parent, { recursive: true, force: true }));
+  const checkout = path.join(parent, 'checkout');
+  const outside = path.join(parent, 'outside.md');
+  await fs.writeFile(outside, '# Outside\n');
+  await fs.symlink(root, checkout, 'dir');
+  await fs.symlink(outside, path.join(root, 'linked.md'));
+
+  const report = await check(checkout);
+  assert.equal(report.checkedLinks, 3);
+  assert.deepEqual(report.errors, [
+    'README.md:2: local link ../outside.md escapes the repository.',
+    'README.md:3: local link linked.md resolves outside the repository.',
+  ]);
 });
