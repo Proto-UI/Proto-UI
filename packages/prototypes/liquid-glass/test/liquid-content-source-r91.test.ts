@@ -391,7 +391,6 @@ describe('Liquid content: data and collection ownership survives neutral paint',
       expect(latest(element).material).toEqual({
         slot: {
           version: 2,
-          paintReservation: 'required',
           shape: { kind: 'rounded-rect', geometry: 'style' },
           source: { kind: 'in-app-backdrop' },
           fallback: { fill: 'style', foreground: 'style' },
