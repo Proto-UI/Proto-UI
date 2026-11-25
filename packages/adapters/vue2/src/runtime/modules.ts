@@ -1,4 +1,5 @@
 import type { WebShaderHostOptions } from '@proto.ui/adapter-base';
+import { notifyPortalSubtreeReadiness } from '../platform/portal-readiness';
 import { MATERIAL_PAINT_RESERVATION_CAP } from '@proto.ui/module-feedback';
 import {
   beginWebPortalMaterialEpoch,
@@ -237,11 +238,19 @@ export function createVue2OverlayGlobalMount(
         projectedParent = next.destination;
         if (hostEl.parentNode === projectedParent) {
           materialEpoch?.commitProjection();
+          notifyPortalSubtreeReadiness(
+            hostEl,
+            () => !retired && unchanged() && hostEl.parentNode === projectedParent
+          );
           return;
         }
         projectedParent.appendChild(hostEl);
         if (!retired && unchanged() && hostEl.parentNode === projectedParent) {
           materialEpoch?.commitProjection();
+          notifyPortalSubtreeReadiness(
+            hostEl,
+            () => !retired && unchanged() && hostEl.parentNode === projectedParent
+          );
           if (!retired && unchanged() && hostEl.parentNode === projectedParent)
             notifyWebPortalProjection(hostEl);
         }
