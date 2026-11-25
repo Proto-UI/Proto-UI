@@ -15,7 +15,7 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Tooltip displays concise contextual descriptions on hover or keyboard focus using anchored portal positioning, `Escape` dismissal, and automatic `aria-describedby` / `role="tooltip"` wiring. Brutalist styles `Content` as a 5px rounded neutral surface with a theme-adaptive 2px foreground border across Light and Dark modes.
+Tooltip displays concise contextual descriptions on hover or keyboard focus using anchored portal positioning, `Escape` dismissal, and automatic `aria-describedby` / `role="tooltip"` wiring. Brutalist styles `Content` as a 5px rounded neutral surface with a fixed 2px black border; its fill and text follow Light and Dark themes.
 
 ## Preview
 
@@ -72,7 +72,7 @@ TooltipGroup (optional)
 - `Group`: Shares delay defaults, warm-window skip timing, and active-tooltip coordination across sibling tooltips.
 - `Root`: Manages controlled or uncontrolled open state and per-tooltip delay overrides.
 - `Trigger`: Transparent trigger host that routes hover/focus events and manages `aria-describedby`.
-- `Content`: Renders the 5px rounded neutral surface in a portal with theme-adaptive foreground border, anchored positioning, and `Escape` dismissal.
+- `Content`: Renders the 5px rounded neutral surface in a portal with a fixed black border, theme-aware fill and text, anchored positioning, and `Escape` dismissal.
 
 ## Examples
 
