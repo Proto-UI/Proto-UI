@@ -75,13 +75,24 @@ export default withShadcnRheaDemo({
                   ],
                 },
                 {
-                  kind: 'proto',
-                  prototypeId: 'shadcn-toast-action',
-                  ref: item.actionRef,
-                  props: {
-                    a11yLabel: `Undo ${item.title}`,
-                  },
-                  children: ['Undo'],
+                  kind: 'box',
+                  className: 'flex shrink-0 items-center gap-2',
+                  children: [
+                    {
+                      kind: 'proto',
+                      prototypeId: 'shadcn-toast-action',
+                      ref: item.actionRef,
+                      props: {
+                        a11yLabel: `Undo ${item.title}`,
+                      },
+                      children: ['Undo'],
+                    },
+                    {
+                      kind: 'proto',
+                      prototypeId: 'shadcn-toast-close',
+                      children: ['Dismiss'],
+                    },
+                  ],
                 },
               ],
             },
