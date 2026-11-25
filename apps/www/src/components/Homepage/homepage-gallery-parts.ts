@@ -78,7 +78,7 @@ export function createHomepageGalleryParts(
           ? {
               minWidth: '0',
               maxWidth: '100%',
-              width: '100%',
+              width: 'fit-content',
               height: 'auto',
               minHeight: '3rem',
               flexWrap: 'wrap',

@@ -34,7 +34,7 @@
   flex: none;
   white-space: nowrap;
 }
-.pui-runtime-box .pui-projection-control > [data-pui-root] {
+.pui-runtime-box .pui-projection-control:not(.pui-runtime-tabs-control) > [data-pui-root] {
   flex: 1 1 auto;
 }
 
