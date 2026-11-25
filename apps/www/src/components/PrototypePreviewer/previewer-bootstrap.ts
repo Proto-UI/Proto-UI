@@ -210,7 +210,24 @@ export function initPreviewerBootstrap(
   };
   const removal = new view.MutationObserver((records) => {
     if (!records.some((record) => record.removedNodes.length > 0)) return;
-    for (const root of pending.keys()) if (!root.isConnected) release(root);
+    // Runtime child/status removal must not rescan every Matrix previewer.
+    // Use tracked identity rather than attributes, which may change after scan.
+    const removedRoots = new Set<PreviewerRoot>();
+    for (const record of records) {
+      for (const node of record.removedNodes) {
+        if (node.nodeType !== 1) continue;
+        const root = node as PreviewerRoot;
+        if (pending.has(root)) removedRoots.add(root);
+        if (!node.hasChildNodes()) continue;
+        const descendants = document.createTreeWalker(node, view.NodeFilter.SHOW_ELEMENT);
+        for (let child = descendants.nextNode(); child; child = descendants.nextNode()) {
+          if (pending.has(child as PreviewerRoot)) removedRoots.add(child as PreviewerRoot);
+        }
+      }
+    }
+    // Collect before destroy mutates detached subtrees. Reinserted/moved roots
+    // retain their owners, including moves recorded earlier in this delivery.
+    for (const root of removedRoots) if (!root.isConnected) release(root);
   });
   removal.observe(document.documentElement, { childList: true, subtree: true });
   const dispose = () => {
