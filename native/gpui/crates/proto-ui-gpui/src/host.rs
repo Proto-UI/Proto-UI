@@ -795,12 +795,15 @@ fn render_surface(surface: &SurfaceNode, bridge: &Rc<RefCell<InputBridge>>) -> A
         }
     }));
     let element = match &surface.a11y {
-        Some(a11y) if a11y.disabled || a11y.read_only.is_some() => AccessibilityFlags {
-            element,
-            disabled: a11y.disabled,
-            read_only: a11y.read_only,
+        Some(a11y) if a11y.disabled || a11y.read_only.is_some() || a11y.required.is_some() => {
+            AccessibilityFlags {
+                element,
+                disabled: a11y.disabled,
+                read_only: a11y.read_only,
+                required: a11y.required,
+            }
+            .into_any_element()
         }
-        .into_any_element(),
         _ => element.into_any_element(),
     };
     match bridge.borrow().fixed_centers.get(&surface.id).copied() {
@@ -818,6 +821,7 @@ struct AccessibilityFlags {
     element: Stateful<Div>,
     disabled: bool,
     read_only: Option<bool>,
+    required: Option<bool>,
 }
 
 impl IntoElement for AccessibilityFlags {
@@ -906,6 +910,11 @@ impl Element for AccessibilityFlags {
             Some(false) => node.clear_read_only(),
             None => {}
         }
+        match self.required {
+            Some(true) => node.set_required(),
+            Some(false) => node.clear_required(),
+            None => {}
+        }
     }
 
     fn a11y_synthetic_children(
@@ -934,6 +943,7 @@ mod accessibility_flags_tests {
                         .on_a11y_action(AccessibleAction::Click, |_, _, _| {}),
                     disabled,
                     read_only,
+                    required: None,
                 };
                 let mut node = accesskit::Node::new(element.a11y_role().unwrap());
                 // Explicit false must clear an earlier contribution; absence
@@ -1097,38 +1107,45 @@ mod a11y_state_tests {
                     (json!(true), accesskit::Toggled::True),
                     (json!("mixed"), accesskit::Toggled::Mixed),
                 ] {
-                    let surface = surface(json!({
-                        "semanticObjectId": "checkbox",
-                        "role": "checkbox",
-                        "name": { "kind": "text", "value": "Receive updates" },
-                        "states": {
-                            "readOnly": read_only,
-                            "disabled": disabled,
-                            "checked": checked,
-                        },
-                        "actions": { "activate": { "event": "click" } },
-                        "relations": {},
-                    }));
-                    let bridge = Rc::new(RefCell::new(InputBridge::new()));
-                    let mut rendered = render_surface(&surface, &bridge);
-                    let element = rendered
-                        .downcast_mut::<AccessibilityFlags>()
-                        .expect("the production renderer carries declared states");
-                    assert_eq!(Element::a11y_role(element), Some(accesskit::Role::CheckBox));
-                    let mut node = accesskit::Node::new(accesskit::Role::CheckBox);
-                    // A false declaration must clear an existing flag, not
-                    // merely agree with the default on a freshly created node.
-                    if !read_only {
-                        node.set_read_only();
+                    for required in [false, true] {
+                        let surface = surface(json!({
+                            "semanticObjectId": "checkbox",
+                            "role": "checkbox",
+                            "name": { "kind": "text", "value": "Receive updates" },
+                            "states": {
+                                "readOnly": read_only,
+                                "disabled": disabled,
+                                "checked": checked,
+                                "required": required,
+                            },
+                            "actions": { "activate": { "event": "click" } },
+                            "relations": {},
+                        }));
+                        let bridge = Rc::new(RefCell::new(InputBridge::new()));
+                        let mut rendered = render_surface(&surface, &bridge);
+                        let element = rendered
+                            .downcast_mut::<AccessibilityFlags>()
+                            .expect("the production renderer carries declared states");
+                        assert_eq!(Element::a11y_role(element), Some(accesskit::Role::CheckBox));
+                        let mut node = accesskit::Node::new(accesskit::Role::CheckBox);
+                        // A false declaration must clear an existing flag, not
+                        // merely agree with the default on a freshly created node.
+                        if !read_only {
+                            node.set_read_only();
+                        }
+                        if !required {
+                            node.set_required();
+                        }
+                        Element::write_a11y_info(element, &mut node);
+                        assert_eq!(node.is_required(), required);
+                        assert_eq!(node.is_read_only(), read_only);
+                        assert_eq!(node.is_disabled(), disabled);
+                        assert_eq!(node.toggled(), Some(toggled));
+                        assert_eq!(node.label(), Some("Receive updates"));
+                        // Read-only is a reported state. The Prototype still owns
+                        // what an activation does, just as it does for disabled.
+                        assert!(node.supports_action(accesskit::Action::Click));
                     }
-                    Element::write_a11y_info(element, &mut node);
-                    assert_eq!(node.is_read_only(), read_only);
-                    assert_eq!(node.is_disabled(), disabled);
-                    assert_eq!(node.toggled(), Some(toggled));
-                    assert_eq!(node.label(), Some("Receive updates"));
-                    // Read-only is a reported state. The Prototype still owns
-                    // what an activation does, just as it does for disabled.
-                    assert!(node.supports_action(accesskit::Action::Click));
                 }
             }
         }

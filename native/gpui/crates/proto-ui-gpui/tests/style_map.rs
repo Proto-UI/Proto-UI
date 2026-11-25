@@ -393,7 +393,7 @@ fn reports_a_property_it_cannot_express() {
 ///
 /// Every entry here is deliberate, not an oversight: each needs work beyond a
 /// property assignment, and each is named in the plan as its own slice.
-const EXPECTED_UNMAPPED: [&str; 33] = [
+const EXPECTED_UNMAPPED: [&str; 87] = [
     // Composed paint that needs BoxShadow construction from the ring/shadow
     // custom properties rather than a single declaration.
     "box-shadow",
@@ -438,6 +438,61 @@ const EXPECTED_UNMAPPED: [&str; 33] = [
     "text-underline-offset",
     "white-space",
     "overflow-wrap",
+    // Newly authored source families; these remain explicit unsupported declarations.
+    "-webkit-box-orient",
+    "-webkit-line-clamp",
+    "-webkit-user-select",
+    "align-content",
+    "align-self",
+    "animation",
+    "background-position",
+    "background-repeat",
+    "border-bottom-color",
+    "border-bottom-left-radius",
+    "border-bottom-right-radius",
+    "border-collapse",
+    "border-left-color",
+    "border-right-color",
+    "border-spacing",
+    "border-top-left-radius",
+    "border-top-right-radius",
+    "box-sizing",
+    "caption-side",
+    "container-type",
+    "direction",
+    "field-sizing",
+    "flex-basis",
+    "flex-grow",
+    "flex-wrap",
+    "float",
+    "font-variant-numeric",
+    "grid-template-columns",
+    "inset-inline-end",
+    "inset-inline-start",
+    "isolation",
+    "list-style-type",
+    "margin-block",
+    "margin-bottom",
+    "margin-inline",
+    "margin-inline-end",
+    "margin-inline-start",
+    "margin-left",
+    "margin-right",
+    "margin-top",
+    "overscroll-behavior",
+    "padding-inline-end",
+    "padding-inline-start",
+    "place-items",
+    "scroll-margin-block",
+    "scroll-padding-block",
+    "scroll-padding-bottom",
+    "scroll-padding-top",
+    "text-shadow",
+    "text-transform",
+    "text-wrap",
+    "user-select",
+    "vertical-align",
+    "visibility",
 ];
 
 #[test]
@@ -511,7 +566,7 @@ fn selectable_text_affordances_remain_explicitly_unmapped() {
 /// This is a separate list from the property inventory on purpose. `width` is
 /// mapped; `width: fit-content` is not. Recording the pair keeps the property
 /// inventory from claiming that `width` never reaches a surface.
-const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 13] = [
+const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 43] = [
     (
         "overflow-x",
         "auto",
@@ -592,6 +647,156 @@ const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 13] = [
         "overflow-y",
         "auto",
         "GPUI has no Auto overflow mode and Scroll reserves scrollbar space even when content fits.",
+    ),
+    (
+        "border-radius",
+        "inherit",
+        "Inherited radii require the parent style, which this single-surface mapper does not receive.",
+    ),
+    (
+        "cursor",
+        "ew-resize",
+        "This cursor value has no implemented mapping; preserve its explicit diagnostic.",
+    ),
+    (
+        "cursor",
+        "move",
+        "This cursor value has no implemented mapping; preserve its explicit diagnostic.",
+    ),
+    (
+        "cursor",
+        "ns-resize",
+        "This cursor value has no implemented mapping; preserve its explicit diagnostic.",
+    ),
+    (
+        "display",
+        "inline-grid",
+        "This display mode has no implemented host realization; do not substitute block or flex.",
+    ),
+    (
+        "display",
+        "-webkit-box",
+        "This display mode has no implemented host realization; do not substitute block or flex.",
+    ),
+    (
+        "display",
+        "table",
+        "This display mode has no implemented host realization; do not substitute block or flex.",
+    ),
+    (
+        "display",
+        "table-caption",
+        "This display mode has no implemented host realization; do not substitute block or flex.",
+    ),
+    (
+        "display",
+        "table-cell",
+        "This display mode has no implemented host realization; do not substitute block or flex.",
+    ),
+    (
+        "display",
+        "table-row",
+        "This display mode has no implemented host realization; do not substitute block or flex.",
+    ),
+    (
+        "flex",
+        "none",
+        "The none shorthand has no implemented mapping; the supported three-part shorthand stays unchanged.",
+    ),
+    (
+        "height",
+        "fit-content",
+        "This intrinsic or reset keyword has no implemented length mapping; do not substitute a definite size.",
+    ),
+    (
+        "width",
+        "auto",
+        "This intrinsic or reset keyword has no implemented length mapping; do not substitute a definite size.",
+    ),
+    (
+        "width",
+        "max-content",
+        "This intrinsic or reset keyword has no implemented length mapping; do not substitute a definite size.",
+    ),
+    (
+        "width",
+        "calc(100cqw - 2px)",
+        "The standalone mapper has no viewport or query-container dimensions.",
+    ),
+    (
+        "max-width",
+        "max-content",
+        "This intrinsic or reset keyword has no implemented length mapping; do not substitute a definite size.",
+    ),
+    (
+        "max-width",
+        "calc(100vw - 2rem)",
+        "The standalone mapper has no viewport or query-container dimensions.",
+    ),
+    (
+        "max-width",
+        "min(20rem,calc(100% - 2rem))",
+        "Choosing this minimum requires a percentage layout basis that the standalone mapper does not receive.",
+    ),
+    (
+        "max-width",
+        "min(24rem,calc(100% - 2rem))",
+        "Choosing this minimum requires a percentage layout basis that the standalone mapper does not receive.",
+    ),
+    (
+        "max-width",
+        "min(28rem,calc(100% - 2rem))",
+        "Choosing this minimum requires a percentage layout basis that the standalone mapper does not receive.",
+    ),
+    (
+        "max-width",
+        "min(360px,100%)",
+        "Choosing this minimum requires a percentage layout basis that the standalone mapper does not receive.",
+    ),
+    (
+        "max-width",
+        "min(560px,100%)",
+        "Choosing this minimum requires a percentage layout basis that the standalone mapper does not receive.",
+    ),
+    (
+        "max-height",
+        "calc(100vh - 2rem)",
+        "The standalone mapper has no viewport or query-container dimensions.",
+    ),
+    (
+        "max-height",
+        "calc(100vh*0.85 - 1rem)",
+        "The standalone mapper has no viewport or query-container dimensions.",
+    ),
+    (
+        "max-height",
+        "calc(100vh*2/3 - 1rem)",
+        "The standalone mapper has no viewport or query-container dimensions.",
+    ),
+    (
+        "max-height",
+        "none",
+        "This intrinsic or reset keyword has no implemented length mapping; do not substitute a definite size.",
+    ),
+    (
+        "border-color",
+        "#e5e5e5 #e5e5e5 #fff #e5e5e5",
+        "GPUI exposes one border color; distinct CSS edge colors cannot be represented by that field.",
+    ),
+    (
+        "border-color",
+        "#eee #eee #ddd",
+        "GPUI exposes one border color; distinct CSS edge colors cannot be represented by that field.",
+    ),
+    (
+        "border-color",
+        "#eee #eee #fff #eee",
+        "GPUI exposes one border color; distinct CSS edge colors cannot be represented by that field.",
+    ),
+    (
+        "border-color",
+        "#eee #fff #eee #eee",
+        "GPUI exposes one border color; distinct CSS edge colors cannot be represented by that field.",
     ),
 ];
 
@@ -921,7 +1126,7 @@ fn bootstrap_gradient_keeps_the_mapped_fill_and_reports_the_missing_image() {
     let mapped = map(
         &resolve(
             &[
-                "bg-[linear-gradient(#08c,#04c)]",
+                "bg-[#006dcc_linear-gradient(#08c,#04c)_0_0_repeat-x]",
                 "rounded-[4px]",
                 "opacity-65",
             ],

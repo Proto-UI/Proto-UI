@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { readFileSync } from 'node:fs';
 import ts from 'typescript';
+import { parse as parseYaml } from 'yaml';
 import { expect, it } from 'vitest';
 import {
   sidebarGroupIdentities,
@@ -156,8 +157,18 @@ it('renders every early draft as a badge without appending status to translated 
         const slug = property(node, 'slug');
         expect(slug && ts.isStringLiteral(slug)).toBe(true);
         if (slug && ts.isStringLiteral(slug)) {
-          const family = slug.text.split('/')[1]!;
-          drafts.set(family, [...(drafts.get(family) ?? []), slug.text]);
+          const [, family, ...parts] = slug.text.split('/');
+          const entityId = `P-${family!.toUpperCase()}-${parts.at(-1)!.toUpperCase()}`;
+          const entity = parseYaml(
+            readFileSync(
+              new URL(`../../../../../spec/prototypes/${entityId}.yaml`, import.meta.url),
+              'utf8'
+            )
+          );
+          expect(entity.id).toBe(entityId);
+          expect(entity.type).toBe('prototype');
+          expect(entity.status).toBe('draft');
+          drafts.set(family!, [...(drafts.get(family!) ?? []), slug.text]);
         }
       }
     }
@@ -165,15 +176,15 @@ it('renders every early draft as a badge without appending status to translated 
   }
   visit(ast);
   expect(Object.fromEntries([...drafts].map(([family, slugs]) => [family, slugs.length]))).toEqual({
-    base: 31,
-    shadcn: 34,
-    brutalist: 35,
-    'bootstrap-2-3-2': 30,
-    'liquid-glass': 31,
+    base: 36,
+    shadcn: 40,
+    brutalist: 40,
+    'bootstrap-2-3-2': 40,
+    'liquid-glass': 46,
   });
   expect(config).toContain("text: 'Early draft'");
   expect(config).toContain("class: 'docs-wip-badge docs-early-draft-badge'");
   // Existing WIP and experimental family states are not relabeled as drafts.
   expect(config).toContain("text: { en: 'WIP', 'zh-CN': '施工中' }");
-  expect(config).toContain("text: { en: 'WIP / Experimental', 'zh-CN': 'WIP / 实验性' }");
+  expect(config).toContain("text: { en: 'WIP / Experimental', 'zh-CN': 'WIP / Experimental' }");
 });

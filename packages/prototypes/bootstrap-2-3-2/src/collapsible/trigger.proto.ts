@@ -21,17 +21,28 @@ const collapsibleTrigger = definePrototype<
     // P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY: no fixed width/height or clipped long label.
     def.feedback.style.use(
       tw(
-        'block w-full min-w-0 max-w-full wrap-anywhere whitespace-break-spaces text-left cursor-pointer select-none px-[15px] py-[8px] text-[14px] leading-[20px] font-normal text-[#08c] dark:text-ring'
+        'block w-full min-w-0 max-w-full wrap-anywhere whitespace-break-spaces text-left cursor-pointer select-none px-[15px] py-[8px] text-[14px] leading-[20px] font-normal text-[#08c]'
       )
     );
     def.rule({
+      when: (w) => w.meta('colorScheme').eq('dark'),
+      intent: (i) => i.feedback.style.use(tw('text-ring')),
+    });
+    def.rule({
       when: (w) => w.state(hovered).eq(true),
-      intent: (i) => i.feedback.style.use(tw('text-[#005580] dark:text-foreground underline')),
+      intent: (i) => i.feedback.style.use(tw('text-[#005580] underline')),
     });
     def.rule({
       when: (w) => w.state(pressed).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(tw('bg-muted/50 text-[#005580] dark:text-foreground underline')),
+      intent: (i) => i.feedback.style.use(tw('bg-muted/50 text-[#005580] underline')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.meta('colorScheme').eq('dark'),
+          w.any(w.state(hovered).eq(true), w.state(pressed).eq(true))
+        ),
+      intent: (i) => i.feedback.style.use(tw('text-foreground')),
     });
     def.rule({
       when: (w) => w.state(focusVisible).eq(true),

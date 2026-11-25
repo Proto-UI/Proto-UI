@@ -232,8 +232,36 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 
 The 2026-11-24 [main boundary repair](../records/2026-11-24-main-website-boundary-repair.json) reviews main `248f8270dd3458d1fcbc507e618337f98b9fde96` against every recovered prior source hash. The exact Feedback/Runtime, optical host and browser-compiler closures retain their existing owners; six finite helpers gain exact path, source and literal-import bindings. The material source's prior edge-only exception now also requires its complete source hash, and the duplicate Presence projector override is removed. The Bootstrap fixture adds only existing composition-event observation. DemoMatrix's page-only module delivery hook receives its missing matrix binding. The compiler panel's grouped binding drops the extra raw-Adapter owner, preserving its three blocked UI owners. All row states, lifecycle gates and browser/native/optical acceptance debt remain unchanged.
 
+The 2026-11-25 documentation parity review binds the new Calendar date presets, controlled Checkbox and Combobox, nested Fieldset, Radio Group choice cards, Toast controls, and Virtual List examples to `www.demo.authored-controllers`. The demos own sample data, controlled values and readouts. The prototypes own the underlying control semantics, and the public Web attachment owns Virtual List measurement and materialization. The Select hero examples now supply their names through public trigger props, and the Shadcn Radio Group hero delegates selection to the prototype without a local observer. Representative retained sources changed in the same documentation waves, including the expanded Async Region and Transition compositions. These are source ownership records under the existing blocked row.
+
+The import registry binds the exact preview files to the public Input Shell control binder, Calendar caption binder, Field validation request type, and Virtual List Web attachment and collection type. The current Astro configuration differs from the previously reviewed Retry profile only in sidebar entries and display labels. The same four preview owners use the virtual Retry URLs, with the existing helper fingerprints required.
+
 | Interactive or integration source | Owning matrix row | Source SHA-256 |
 | --- | --- | --- |
+| `apps/www/src/content/docs/demo_components/calendar/calendar-examples.shared.ts` | `www.demo.authored-controllers` | `a5d9bf31eb2904ae7e85a189508c699665ed10d57cab76b15ec89a1f931bd565` |
+| `apps/www/src/content/docs/demo_components/checkbox/demo-bootstrap-2-3-2-checkbox-controlled.demo.ts` | `www.demo.authored-controllers` | `99b848f00b34ed61623a284fde82d31e2c3e121049ae598d1ae345bb70f160ec` |
+| `apps/www/src/content/docs/demo_components/checkbox/demo-liquid-glass-checkbox-controlled.demo.ts` | `www.demo.authored-controllers` | `c69702bca883411461757610c5c83f17b03badf7c493c2f6a0d8fa55babc77d5` |
+| `apps/www/src/content/docs/demo_components/checkbox/demo-shadcn-checkbox-controlled.demo.ts` | `www.demo.authored-controllers` | `3ee07a227ea5eaa92e587c4854871802fd53d783e004fe2965307a89c7b09d4a` |
+| `apps/www/src/content/docs/demo_components/combobox/demo-shadcn-combobox-controlled.demo.ts` | `www.demo.authored-controllers` | `7c2dbd231145cf7cb36a894eeee314ecc4abab9b14cc96d96e0cf0632fea08bc` |
+| `apps/www/src/content/docs/demo_components/fieldset/fieldset-demo.shared.ts` | `www.demo.authored-controllers` | `501ecf263a05d6ead3ec21c283003e23e514d7bab121454612efc31d61d2324c` |
+| `apps/www/src/content/docs/demo_components/radio-group/demo-bootstrap-2-3-2-radio-group-choice-card.demo.ts` | `www.demo.authored-controllers` | `532c4e7bf9cffba3e41df7fdb65a9b133efbcc65a68161e7af1e5a350b6e8b91` |
+| `apps/www/src/content/docs/demo_components/radio-group/demo-brutalist-radio-group-choice-card.demo.ts` | `www.demo.authored-controllers` | `d027dce38765cc619b6dd254fb9b00e8419b55c7bca816ab7d78a198fe1dce83` |
+| `apps/www/src/content/docs/demo_components/radio-group/demo-liquid-glass-radio-group-choice-card.demo.ts` | `www.demo.authored-controllers` | `600348462574dd580816e7e7d069df36f4d103facfac1bf0210b5e6d96013b72` |
+| `apps/www/src/content/docs/demo_components/radio-group/demo-shadcn-radio-group-choice-card.demo.ts` | `www.demo.authored-controllers` | `8f77996baa8e3c03279ba5069a6d69bfd74136bbb79caa58fe10cd649f4c0a1a` |
+| `apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-position.demo.ts` | `www.demo.authored-controllers` | `f07646a90412f3e608265e4a086a009c3aee6ba3d883ad78dc30cc017e1d79a5` |
+| `apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-rich-colors.demo.ts` | `www.demo.authored-controllers` | `7d1498ec2d0bd6e62c727bb1b732fb39e878aaf55d74c69edf8fcfc08495f5df` |
+| `apps/www/src/content/docs/demo_components/virtual-list/demo-bootstrap-2-3-2-virtual-list-filter.demo.ts` | `www.demo.authored-controllers` | `adde61f6ee9055e4acfd7606971f78c3b3bf67b2a6b2c2030465de1b8765f4b4` |
+| `apps/www/src/content/docs/demo_components/virtual-list/demo-bootstrap-2-3-2-virtual-list-jump.demo.ts` | `www.demo.authored-controllers` | `757c24e39695b5834e131536d900df6e8b0bbf2e8740bfc92d84cb37dee6441b` |
+| `apps/www/src/content/docs/demo_components/virtual-list/demo-bootstrap-2-3-2-virtual-list-window.demo.ts` | `www.demo.authored-controllers` | `e9568d70d15db2d4f52fb1d677f80e6dce07c473ed4d1a0d05a12728eb5181e3` |
+| `apps/www/src/content/docs/demo_components/virtual-list/demo-brutalist-virtual-list-filter.demo.ts` | `www.demo.authored-controllers` | `baf2b6ffdfba697637ebc5a7e8ac6500f706a6fd6b1a772b09876b3963f3a66e` |
+| `apps/www/src/content/docs/demo_components/virtual-list/demo-brutalist-virtual-list-jump.demo.ts` | `www.demo.authored-controllers` | `6b14404a054787aeaab9c4066a2bd1a07955d4984a54be8d85163c2cbfc77d55` |
+| `apps/www/src/content/docs/demo_components/virtual-list/demo-brutalist-virtual-list-window.demo.ts` | `www.demo.authored-controllers` | `194f8b3058e2d0dc07bb4d21e147df3117aad777ccc6e75e9529ef26ce67fd38` |
+| `apps/www/src/content/docs/demo_components/virtual-list/demo-liquid-glass-virtual-list-filter.demo.ts` | `www.demo.authored-controllers` | `a0bc39776523939e7cacbfd485667bf9e9a39d9b30d65bcd49f9ab84805e964e` |
+| `apps/www/src/content/docs/demo_components/virtual-list/demo-liquid-glass-virtual-list-jump.demo.ts` | `www.demo.authored-controllers` | `21c8f40fe9d370505e90deb0d59095b7bde7c3035b046ce409fc7018ffaf9fba` |
+| `apps/www/src/content/docs/demo_components/virtual-list/demo-liquid-glass-virtual-list-window.demo.ts` | `www.demo.authored-controllers` | `1d921324c455efd7a7510ab3e934edeb2586ee08d66760600e9ca99f7a2723dc` |
+| `apps/www/src/content/docs/demo_components/virtual-list/demo-shadcn-virtual-list-filter.demo.ts` | `www.demo.authored-controllers` | `8aeb9ce39501ebb444e17f59d7ee116b7b897737ad808f46bb38f1d590b772b9` |
+| `apps/www/src/content/docs/demo_components/virtual-list/demo-shadcn-virtual-list-jump.demo.ts` | `www.demo.authored-controllers` | `da28dba79c1a0607f6dee4438d9caa2c65ff2faeb24d8dab37e9b8107b67379f` |
+| `apps/www/src/content/docs/demo_components/virtual-list/demo-shadcn-virtual-list-window.demo.ts` | `www.demo.authored-controllers` | `aad71a8ba1eb087efdba722bb960a0cb16bf0ba5159f728e1c411f17ff090a7c` |
 | `apps/www/src/content/docs/zh-cn/native-composition-evidence.ts` | `www.demo.demo-matrix` | `500383b4dec06992582ba5132e36fc3fa73036d7648e5fdc39ccd7a87d3d599b` |
 | `apps/www/src/pages/en/test/liquid-glass-state-controls.astro` | `www.demo.authored-controllers`, `www.demo.demo-matrix` | `f62df3e8178f7adc34d14f49597bb524288695bc2b49cbec45604838a438efce` |
 | `apps/www/src/pages/en/test/liquid-visible-refraction-diagnostic.astro` | `www.demo.demo-matrix` | `1b930e0fcbe8bda0360bbb89b10d00966656c1fe6f39bccab76901e6451137e0` |
@@ -247,10 +275,10 @@ The 2026-11-24 [main boundary repair](../records/2026-11-24-main-website-boundar
 | `apps/www/src/content/docs/zh-cn/liquid-toggle-detail-probe.ts` | `www.demo.authored-controllers`, `www.demo.demo-matrix` | `ccc7d8268a06ebd987313ffedbbe816cac468b8d2a8886ca405b000210cbdce0` |
 | `apps/www/src/content/docs/zh-cn/liquid-tint-stage-diagnostic.ts` | `www.demo.demo-matrix` | `a15d4864f21efc3008eb4caad0e2e8512e0bda657b289ce12848515909cb95bb` |
 | `apps/www/src/content/docs/zh-cn/demo-base-virtual-list.demo.ts` | `www.demo.authored-controllers` | `f3fff0e817ed9b28a5c7e7481ea6cb1962eac0f71564f56646ff6bf0ce2553d4` |
-| `apps/www/src/content/docs/zh-cn/demo-shadcn-virtual-list.demo.ts` | `www.demo.authored-controllers` | `dc682916e40657032a9f0eaf660e0f2b65669e4829023842333068da0ea260f2` |
-| `apps/www/src/content/docs/zh-cn/demo-brutalist-virtual-list.demo.ts` | `www.demo.authored-controllers` | `f5e9bd67eba3140e3fc2cf8040d5fea6cb1c6e08198ad44b30ff14d8415798d8` |
-| `apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-virtual-list.demo.ts` | `www.demo.authored-controllers` | `97f079a40171dbce4a49bf09b0dd346b210a46f300a47931989b23428201b7e6` |
-| `apps/www/src/content/docs/zh-cn/demo-liquid-glass-virtual-list.demo.ts` | `www.demo.authored-controllers` | `8bbb5fbfb4e58cf6e64ba2d96a7523790e2f35f7254987a89af4fb02569f1f7b` |
+| `apps/www/src/content/docs/zh-cn/demo-shadcn-virtual-list.demo.ts` | `www.demo.authored-controllers` | `cb46e33e36095dd05150367f7576ee67552730265a220ef687d6cfa382b9e01a` |
+| `apps/www/src/content/docs/zh-cn/demo-brutalist-virtual-list.demo.ts` | `www.demo.authored-controllers` | `faca72985d274b9298ddd79cbfd8fefbbce18c32ec7023a5d39d523c0fd3556e` |
+| `apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-virtual-list.demo.ts` | `www.demo.authored-controllers` | `094c932c7c2607a8b08bcd8e94edc7e59a8ac92e28634911aeb62a15a4a9987d` |
+| `apps/www/src/content/docs/zh-cn/demo-liquid-glass-virtual-list.demo.ts` | `www.demo.authored-controllers` | `76abaea39fcfef64c32f5697ac9a8d2bb5ad131f9040b52f7b7e91351461c1ed` |
 | `apps/www/src/components/code-example-tabs.ts` | `www.docs.code-example-host-tabs` | `88747166dab1887b8f2a7309c6d869715958356167d6eb3743ec05bb0024a058` |
 | `apps/www/src/components/code-example-tree.ts` | `www.docs.code-example-file-tabs` | `1420259e7f613f5cf6980615a9cec9ed2147593d074948766435a8845f9dc336` |
 | `apps/www/src/components/CodeFileBrowser.astro` | `www.docs.code-example-file-tabs`, `www.docs.code-panel-copy`, `www.docs.code-panel-scroll`, `www.docs.code-surface` | `fb4f78c2a8f97a6d14c063fb05d1b1885baf84cef50b1d80549437cfb1a118a6` |
@@ -288,19 +316,19 @@ The 2026-11-24 [main boundary repair](../records/2026-11-24-main-website-boundar
 | `apps/www/src/components/PrototypePreviewer/shadow-split-s3.ts` | `www.demo.authored-controllers` | `85b7c3c518e6f1ef1e72f20b975d6ac4ce317c1a046a3cc0562602c899dffc46` |
 | `apps/www/src/components/PrototypePreviewer/shadow-split-s4.ts` | `www.demo.authored-controllers` | `4492f622a7d0cd411f60ea7e3906205219cb9b4bc2d1062c0eed5703e1bfd514` |
 | `apps/www/src/components/PrototypePreviewer/shadow-split-s5.ts` | `www.demo.authored-controllers` | `fa92aa85ff8afb7a0f0233155e485dc3363ee886068015ceb979162e2ae66cbf` |
-| `apps/www/src/content/docs/accordion-demo.shared.ts` | `www.demo.authored-controllers` | `15ef5c53f63cc69c06dfddc457b85385196ae280e99159dfcd683c81c9d3166f` |
-| `apps/www/src/content/docs/async-region-demo.shared.ts` | `www.demo.authored-controllers` | `b635ce9d4b1fee601987ea683e8cfc158f52115459b74353e56ea7f1a20af4c2` |
+| `apps/www/src/content/docs/accordion-demo.shared.ts` | `www.demo.authored-controllers` | `839f821d8dd75692cda58fa05b13fb9b4c6de18191d8475c66fa44304c4d55bf` |
+| `apps/www/src/content/docs/async-region-demo.shared.ts` | `www.demo.authored-controllers` | `4a54b02a585a90b82f90c9bd972aa2a58b4b4aaa4bea704a752f3880415de3b3` |
 | `apps/www/src/content/docs/zh-cn/popover-public-dom-probe.ts` | `www.demo.demo-matrix` | `30d01d9c17c7824e92cb36879b99666eb89f37ccd03fcd499ce4edfeac991b63` |
 | `apps/www/src/content/docs/zh-cn/tooltip-pressed-observation.ts` | `www.demo.demo-matrix` | `ff759b29b654aabe746f9ba12cabb7bafcc08d6ae9a674d52bc8fc49d53aae65` |
-| `apps/www/src/content/docs/demo-bootstrap-2-3-2-select.demo.ts` | `www.demo.authored-controllers` | `505d0e1d02df1fb14bab6f3be958e9b331a79c6b0c1e4352726af24c3d4d59c1` |
-| `apps/www/src/content/docs/demo-liquid-glass-select.demo.ts` | `www.demo.authored-controllers` | `3ecd674e4bfc765319ce5c9c0783bd4c116ab1eaad068b0a3c546016fb08fa04` |
-| `apps/www/src/content/docs/field-demo.shared.ts` | `www.demo.authored-controllers` | `bd8d2918449a7712d0c24223185bf5a6a042d7bdbf8672b2b5047b4e7bf5c32b` |
-| `apps/www/src/content/docs/transition-demo.shared.ts` | `www.demo.authored-controllers` | `8c6d04cd8474c649decfae175c956beff9dccfe3c7adcf57b8ce48bef4d1a3dc` |
-| `apps/www/src/content/docs/zh-cn/calendar-demo.shared.ts` | `www.demo.authored-controllers` | `57d48df5281bd97cf579a701642781cc7e072ff2c9b29ea8494a3eae2ddc6894` |
-| `apps/www/src/content/docs/demo-bootstrap-2-3-2-collapsible.demo.ts` | `www.demo.authored-controllers` | `95a125af610fb66bcdda399a883fc56f5c7f62a14f25a208686a190890af016e` |
-| `apps/www/src/content/docs/demo-brutalist-collapsible.demo.ts` | `www.demo.authored-controllers` | `2d679aff5cff897010d07f3b5bce40abf7fc4a2dbe297bff3da534591fd84b00` |
-| `apps/www/src/content/docs/demo-liquid-glass-collapsible.demo.ts` | `www.demo.authored-controllers` | `1c2ec85076c0b2ba5975e2f826c723539a06e74133220003fbf726a7953ae1a1` |
-| `apps/www/src/content/docs/demo-shadcn-collapsible.demo.ts` | `www.demo.authored-controllers` | `a6a3dcfcab66618357acbe97cb4e98cc2a751827d015b798e268ae4c174be61c` |
+| `apps/www/src/content/docs/demo-bootstrap-2-3-2-select.demo.ts` | `www.demo.authored-controllers` | `ee0ca51c4c9b248a1b75439f684212bb698830f7929f310d9f2785b54c79a198` |
+| `apps/www/src/content/docs/demo-liquid-glass-select.demo.ts` | `www.demo.authored-controllers` | `532a3f85abaf86c0d25160f5256316fd70642a027d6445be3728f6e68df1968f` |
+| `apps/www/src/content/docs/field-demo.shared.ts` | `www.demo.authored-controllers` | `210897bc72c9981b94e53aef439883c07a3133feb2c5be6871d137b839527693` |
+| `apps/www/src/content/docs/transition-demo.shared.ts` | `www.demo.authored-controllers` | `a41a007f1b603523409df2e922280d0fa4308394168c81c027f068e3000dbd12` |
+| `apps/www/src/content/docs/zh-cn/calendar-demo.shared.ts` | `www.demo.authored-controllers` | `37c792ceced2ceb4074276b3d35e4f8efedb154406fd1d203d3dc981305b36ff` |
+| `apps/www/src/content/docs/demo-bootstrap-2-3-2-collapsible.demo.ts` | `www.demo.authored-controllers` | `7b009cc407f38918b3fa7f98e5b8d3a330f34c6c43ac70c4924a21dc2ccc6e73` |
+| `apps/www/src/content/docs/demo-brutalist-collapsible.demo.ts` | `www.demo.authored-controllers` | `5e73c9f8da42c399abd7d7fa99abc6ec5218fe109ffe16025c2443e977b2e021` |
+| `apps/www/src/content/docs/demo-liquid-glass-collapsible.demo.ts` | `www.demo.authored-controllers` | `02e09f7a2849ff9de286a571541275a5a177de4ab0a1de2dcc301502217019ac` |
+| `apps/www/src/content/docs/demo-shadcn-collapsible.demo.ts` | `www.demo.authored-controllers` | `603b372c67be8bf1ed0c905069e005559709348fb21fff10a427332401aeede0` |
 | `apps/www/src/content/docs/demo-base-collapsible.demo.ts` | `www.demo.authored-controllers` | `6949bad43880e30cd0849ebbc94e1451b362015fc99619ca2cd0e4283004d976` |
 | `apps/www/src/pages/en/test/bootstrap-state-controls.astro` | `www.demo.authored-controllers`, `www.demo.demo-matrix` | `e1b429683a78b52b10ab3c24efb411d10097da439167fe9288003b130fe3425a` |
 | `apps/www/src/pages/en/test/command-no-addon.astro` | `www.demo.demo-matrix` | `72a8d7770b353fca2083a4c28e40dd6862b120b54e9887be7d3d0a0835887477` |
@@ -313,7 +341,7 @@ The 2026-11-24 [main boundary repair](../records/2026-11-24-main-website-boundar
 | `packages/compiler/src/browser/client.ts` | `www.demo.raw-adapter-runtimes` | `f6af8985c52edbfdbd0e1796fc680e0f54e3c889769d099459abe0f23bc58be7` |
 | `packages/compiler/src/browser/worker.ts` | `www.demo.raw-adapter-runtimes` | `d373263fa25d9f77fe22603b89523461d43a007cdc40e21f53b4a55f39036078` |
 | `apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts` | `www.demo.demo-matrix` | `4ed8116369f2fee3872be81dabdaf4c6ad22de3bf74694f5091066637687dcb5` |
-| `apps/www/src/content/docs/demo_components/tabs/demo-shadcn-tabs-profile-switch.demo.ts` | `www.demo.authored-controllers` | `5fcc777f315f41748b13965613c3ee24bdea052ed4b181e6042d58156e629ad8` |
+| `apps/www/src/content/docs/demo_components/tabs/demo-shadcn-tabs-profile-switch.demo.ts` | `www.demo.authored-controllers` | `dea49f4491b9b4d6cf8e328a73c0fe4fb7b3dc2d5f118ab3a5a9464fef6996d4` |
 | `apps/www/src/content/docs/zh-cn/demo-matrix-observation.ts` | `www.demo.demo-matrix` | `1d40c4e675797928a60d6e3d2e7f09c89996e38d85c3574a63db2409f199ee0d` |
 | `apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts` | `www.shell.mobile-menu-panel` | `c2be71f093207be7e3e588940cc9d801dae046e764a2b5b8676d0863cd308c45` |
 | `apps/www/src/components/DocumentationImagePreview.astro` | `www.docs.whitepaper-diagram-viewer` | `a4262c4ce8a4a491c6766a466381248704d4d297af4f722e689cf129fd855cff` |
@@ -370,7 +398,7 @@ The 2026-11-24 [main boundary repair](../records/2026-11-24-main-website-boundar
 | `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `fd27997ad813469f2d2d7d75d235d70e339548c3016865d2a326fa07b628f730` |
 | `apps/www/src/components/PrototypePreviewer/projection-materializer.ts` | `www.demo.prototype-previewer` | `da804d7ae21ba4f2000f6e8eabc936d5f1273245c27194d82fac94f30daf6ffd` |
 | `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `9eb11c5eff68f6a382ad895ca1c6f698480de5ca56a6b41095e5626c9955c6c6` |
-| `apps/www/src/components/PrototypePreviewer/runtime-loading-mask.ts` | `www.demo.home-demo-select` | `d688b2ee5af32dc2f2b7461b7f843b4b9e8136dc01f4a1885204c96cb9658f16` |
+| `apps/www/src/components/PrototypePreviewer/runtime-loading-mask.ts` | `www.demo.home-demo-select` | `16845ab5f031db1b75a5a5c7dce214d2fded101807fcb4e899ed29f97ffcb275` |
 | `apps/www/src/components/PrototypePreviewer/runtime-tabs.ts` | `www.demo.runtime-select` | `f4d21125f8019fcf35e75580a77b1950e8a6b69f877a39ef868c07943cfe2178` |
 | `apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts` | `www.demo.preview-surface` | `3af95119b8f190cfe06b757d744c0f258db8a0f6f482d51e52ce87776c393cc2` |
 | `apps/www/src/components/PrototypePreviewer/wc-registry.ts` | `www.demo.raw-adapter-runtimes` | `3176c5c92408e9428283b428c130f818c33ab2fd53666fd255e6d6a99b2a31ca` |
@@ -384,7 +412,7 @@ The 2026-11-24 [main boundary repair](../records/2026-11-24-main-website-boundar
 | `apps/www/src/components/documentation-image-controls.ts` | `www.docs.whitepaper-diagram-viewer` | `c116f197edd97a5e8762c12b224723bb58566ce7fbd2c20d8fe9087eee383ba6` |
 | `apps/www/src/components/documentation-image-preview.ts` | `www.docs.whitepaper-diagram-viewer` | `7f2becfd1dd2aacbdf69ee055c60dc8f08449fdc6a7202a8f9a9d12b89bb719a` |
 | `apps/www/src/components/hidden-first-activation.ts` | `www.docs.code-panel-copy`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.note-surface` | `d1de936074817b50b3c1cd15fb5256a29809a0dd2952d8d0cbc774f832e5c80d` |
-| `apps/www/src/components/override/AdapterSelect.astro` | `www.shell.adapter-select` | `d27ebe139e1daebed981db5736c1a94dd2beb8f301e267026e2136e8ff593cc8` |
+| `apps/www/src/components/override/AdapterSelect.astro` | `www.shell.adapter-select` | `b2611d2f5c62377c57da2c7693928720e8b3beb7e751f6b6b7a5e047d611ba22` |
 | `apps/www/src/components/override/Header.astro` | `www.shell.header-separators`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.primary-nav` | `7457f2de19b85e74d9d0709b618d1330c0264c3490e004d75326930c3ff982a0` |
 | `apps/www/src/components/override/Hero.astro` | `www.shell.hero-actions`, `www.shell.native-link-presentation` | `acac2f7152cd6aa5ed352418526a76db562c9bdbc1a18bbdb7def035976ad27d` |
 | `apps/www/src/components/override/LanguageSelect.astro` | `www.shell.language-select` | `351a12c4517d9d685c1a819a38ecda6ccfe5a264451454b8d7282886339e43ea` |
@@ -435,9 +463,9 @@ The 2026-11-24 [main boundary repair](../records/2026-11-24-main-website-boundar
 | `apps/www/src/content/docs/zh-cn/demo-base-textarea.demo.ts` | `www.demo.authored-controllers` | `5086c8bb63dddf28ba06726eda54ab354479b6f1ff2c703619b9ddbe8c49b7a4` |
 | `apps/www/src/content/docs/zh-cn/demo-base-transition-command.demo.ts` | `www.demo.authored-controllers` | `357374c075b3cfc5066e534528f23ecbfb5ab9458088143eca10349a58334580` |
 | `apps/www/src/content/docs/zh-cn/demo-base-transition-controlled.demo.ts` | `www.demo.authored-controllers` | `2dd09fc318f19b1fa34d46f0bec17cab0375da92b939113e6b1baf7760025b9d` |
-| `apps/www/src/content/docs/zh-cn/demo-brutalist-select.demo.ts` | `www.demo.authored-controllers` | `cc88bc8d07c0fa55229974d5aa7e32c8e5b7a3c219a09f5532652378944c5657` |
+| `apps/www/src/content/docs/zh-cn/demo-brutalist-select.demo.ts` | `www.demo.authored-controllers` | `a3b7cef8fd37df08b3b35aebe4eef708101531a8295aae5e1fb37098f1c3fb1c` |
 | `apps/www/src/content/docs/zh-cn/demo-brutalist-separator.demo.ts` | `www.demo.brutalist-separator` | `9537491157911b1973878a3913b4894a6d3beb9d84091fe892654fc107c5fa08` |
-| `apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.demo.ts` | `www.demo.authored-controllers` | `395cbf668a4f1e337a09081486030851f643c92b2ec2d83954698142d9fb03d4` |
+| `apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.demo.ts` | `www.demo.authored-controllers` | `b75e71c3b87b042fd491c65c6d1dc4eed4f2e2e063127f973744f76aea799b63` |
 | `apps/www/src/content/docs/demo_components/style-scope/demo-shadcn-style-scope-state-preservation.demo.ts` | `www.demo.authored-controllers` | `e151f512ba3906d1dfa7091ab0c0d91ccc149c6b2049875773da86554e142c34` |
 | `apps/www/src/content/docs/demo_components/surface/demo-bootstrap-2-3-2-surface-action.demo.ts` | `www.demo.authored-controllers` | `a74faa1cffc839e8f1a2b60a52bd728ba8a7c2688a7d20e6f3676f1b19cb3a66` |
 | `apps/www/src/content/docs/demo_components/surface/demo-brutalist-surface-composition.demo.ts` | `www.demo.authored-controllers` | `fbe71560811432d3860af30e4836691fe788d372fad034d55fab8c19abead009` |
@@ -456,7 +484,7 @@ The 2026-11-24 [main boundary repair](../records/2026-11-24-main-website-boundar
 | `apps/www/src/content/docs/demo_components/popover/demo-brutalist-popover-controlled.demo.ts` | `www.demo.authored-controllers` | `8dbc0c56f0970ea39eaff090ee14143c586753f7ea1f151d9d1ffd59695e7ede` |
 | `apps/www/src/content/docs/demo_components/popover/demo-liquid-glass-popover-controlled.demo.ts` | `www.demo.authored-controllers` | `d7b8015c156f02e7833cb36e1de4189807846de38488d1494f7af3607c5d116c` |
 | `apps/www/src/content/docs/demo_components/popover/demo-shadcn-popover-controlled.demo.ts` | `www.demo.authored-controllers` | `13b21aed8c53d2c93ee670edc0690eab54b14276f53d6b77961d12629577c6d2` |
-| `apps/www/src/content/docs/zh-cn/demo-shadcn-select.demo.ts` | `www.demo.authored-controllers` | `c970ce38944dca2017729c6882d9953f74237593bb2d0e70a6bad2a695933c9c` |
+| `apps/www/src/content/docs/zh-cn/demo-shadcn-select.demo.ts` | `www.demo.authored-controllers` | `17c0b78360489b4e35c1caf5084dcb50a9b67e3df8810d2b2fbf602ab023a291` |
 | `apps/www/src/content/docs/zh-cn/whitepaper/2-interaction-relations.md` | `www.content.native-disclosures`, `www.docs.whitepaper-diagram-viewer` | `c43caf4634be5706ffd3d5fdff9f5f270cee0acbce3919826db3df6b48b823b3` |
 | `apps/www/src/content/docs/zh-cn/whitepaper/3-component-boundary.md` | `www.content.native-disclosures`, `www.docs.whitepaper-diagram-viewer` | `5787524c3d030ee6dcfe248ea1880eb7251b61a9657bbbce435f111eeba7e31b` |
 | `apps/www/src/content/docs/zh-cn/whitepaper/4-semantics-beyond-channels.md` | `www.docs.whitepaper-diagram-viewer` | `cabaa379c34e7353ab8af8f93954c5a816f5cbeba95ab2ddc4cbf58eb9205813` |

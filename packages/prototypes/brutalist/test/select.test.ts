@@ -367,6 +367,10 @@ describe('prototypes/brutalist: select', () => {
       expect(lifecycle).toEqual(mounted);
       expect(await frame()).toBeGreaterThan(0);
       expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      expect(content.parentElement).toBe(document.body);
+      expect(lifecycle).toEqual(mounted);
+      expect(await frame()).toBeGreaterThan(0);
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
       expect(content.parentElement).toBe(root);
       expect([...content.querySelectorAll(selectItem.name)]).toEqual(items);
       expect(lifecycle).toEqual([

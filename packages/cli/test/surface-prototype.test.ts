@@ -46,6 +46,7 @@ describe('Surface public compiler consumption', () => {
         readFileSync(`packages/prototypes/${family}/package.json`, 'utf8')
       );
       expect(manifest.exports['./surface']).toEqual({
+        ...(family === 'base' ? { proto: './src/surface/index.ts' } : {}),
         types: './dist/surface/index.d.ts',
         import: './dist/surface/index.js',
         default: './dist/surface/index.js',

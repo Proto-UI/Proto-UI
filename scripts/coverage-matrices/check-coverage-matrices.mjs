@@ -178,7 +178,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // The authored Form demo consumes only the public Field request type.
   // Its interactive controller remains owned by the existing blocked demo row.
   'apps/www/src/content/docs/form-validation-demo.shared.ts': Object.freeze({
-    sourceSha256: 'a1ad9240bff32c3d0c3eace6c2cd7ed170fe9b37f618a14111d2e9c06b936db5',
+    sourceSha256: '82eb473290d2afa5714d2cb97abfd32efad153bee53359902478740a0a4797ad',
     specifiers: Object.freeze(['@proto.ui/prototypes-base/field']),
   }),
   // Import-edge allowances only: an inline entry without a `sourceSha256`
@@ -354,11 +354,15 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
 
   // Exact public caption binding consumed by the blocked application controller.
   'apps/www/src/content/docs/zh-cn/calendar-demo.shared.ts': Object.freeze({
-    sourceSha256: '57d48df5281bd97cf579a701642781cc7e072ff2c9b29ea8494a3eae2ddc6894',
+    sourceSha256: '37c792ceced2ceb4074276b3d35e4f8efedb154406fd1d203d3dc981305b36ff',
     specifiers: Object.freeze(['@proto.ui/prototypes-base/calendar']),
   }),
   // Reviewed Field validation request type consumed by the blocked demo controller.
   'apps/www/src/content/docs/field-demo.shared.ts': Object.freeze({
+    specifiers: Object.freeze(['@proto.ui/prototypes-base/field']),
+  }),
+  'apps/www/src/content/docs/demo_components/field/field-examples.shared.ts': Object.freeze({
+    sourceSha256: '465da4c285c65ef402376cbe8caec3c1be06119839856bf43a3eb48992ae0504',
     specifiers: Object.freeze(['@proto.ui/prototypes-base/field']),
   }),
   // Exact public-fact demo compositions under the blocked authored-controller
@@ -374,7 +378,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Exact demo compositions delegating geometry/materialization to the public Web
   // attachment. Their authored-controller owner remains blocked. Bootstrap and
-  // Liquid Glass remain WIP/Experimental; these ten edges grant no family support.
+  // Liquid Glass remain WIP/Experimental. These exact edges admit preview source only.
   'apps/www/src/content/docs/zh-cn/demo-base-virtual-list.demo.ts': Object.freeze({
     sourceSha256: 'f3fff0e817ed9b28a5c7e7481ea6cb1962eac0f71564f56646ff6bf0ce2553d4',
     specifiers: Object.freeze([
@@ -383,33 +387,129 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/content/docs/zh-cn/demo-shadcn-virtual-list.demo.ts': Object.freeze({
-    sourceSha256: 'dc682916e40657032a9f0eaf660e0f2b65669e4829023842333068da0ea260f2',
+    sourceSha256: 'cb46e33e36095dd05150367f7576ee67552730265a220ef687d6cfa382b9e01a',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-base/virtual-list/web',
       '@proto.ui/prototypes-base/virtual-list',
     ]),
   }),
   'apps/www/src/content/docs/zh-cn/demo-brutalist-virtual-list.demo.ts': Object.freeze({
-    sourceSha256: 'f5e9bd67eba3140e3fc2cf8040d5fea6cb1c6e08198ad44b30ff14d8415798d8',
+    sourceSha256: 'faca72985d274b9298ddd79cbfd8fefbbce18c32ec7023a5d39d523c0fd3556e',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-base/virtual-list/web',
       '@proto.ui/prototypes-base/virtual-list',
     ]),
   }),
   'apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-virtual-list.demo.ts': Object.freeze({
-    sourceSha256: '97f079a40171dbce4a49bf09b0dd346b210a46f300a47931989b23428201b7e6',
+    sourceSha256: '094c932c7c2607a8b08bcd8e94edc7e59a8ac92e28634911aeb62a15a4a9987d',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-base/virtual-list/web',
       '@proto.ui/prototypes-base/virtual-list',
     ]),
   }),
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-virtual-list.demo.ts': Object.freeze({
-    sourceSha256: '8bbb5fbfb4e58cf6e64ba2d96a7523790e2f35f7254987a89af4fb02569f1f7b',
+    sourceSha256: '76abaea39fcfef64c32f5697ac9a8d2bb5ad131f9040b52f7b7e91351461c1ed',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-base/virtual-list/web',
       '@proto.ui/prototypes-base/virtual-list',
     ]),
   }),
+  'apps/www/src/content/docs/demo_components/virtual-list/demo-bootstrap-2-3-2-virtual-list-filter.demo.ts':
+    Object.freeze({
+      sourceSha256: 'adde61f6ee9055e4acfd7606971f78c3b3bf67b2a6b2c2030465de1b8765f4b4',
+      specifiers: Object.freeze([
+        '@proto.ui/prototypes-base/virtual-list/web',
+        '@proto.ui/prototypes-base/virtual-list',
+      ]),
+    }),
+  'apps/www/src/content/docs/demo_components/virtual-list/demo-bootstrap-2-3-2-virtual-list-jump.demo.ts':
+    Object.freeze({
+      sourceSha256: '757c24e39695b5834e131536d900df6e8b0bbf2e8740bfc92d84cb37dee6441b',
+      specifiers: Object.freeze([
+        '@proto.ui/prototypes-base/virtual-list/web',
+        '@proto.ui/prototypes-base/virtual-list',
+      ]),
+    }),
+  'apps/www/src/content/docs/demo_components/virtual-list/demo-bootstrap-2-3-2-virtual-list-window.demo.ts':
+    Object.freeze({
+      sourceSha256: 'e9568d70d15db2d4f52fb1d677f80e6dce07c473ed4d1a0d05a12728eb5181e3',
+      specifiers: Object.freeze([
+        '@proto.ui/prototypes-base/virtual-list/web',
+        '@proto.ui/prototypes-base/virtual-list',
+      ]),
+    }),
+  'apps/www/src/content/docs/demo_components/virtual-list/demo-brutalist-virtual-list-filter.demo.ts':
+    Object.freeze({
+      sourceSha256: 'baf2b6ffdfba697637ebc5a7e8ac6500f706a6fd6b1a772b09876b3963f3a66e',
+      specifiers: Object.freeze([
+        '@proto.ui/prototypes-base/virtual-list/web',
+        '@proto.ui/prototypes-base/virtual-list',
+      ]),
+    }),
+  'apps/www/src/content/docs/demo_components/virtual-list/demo-brutalist-virtual-list-jump.demo.ts':
+    Object.freeze({
+      sourceSha256: '6b14404a054787aeaab9c4066a2bd1a07955d4984a54be8d85163c2cbfc77d55',
+      specifiers: Object.freeze([
+        '@proto.ui/prototypes-base/virtual-list/web',
+        '@proto.ui/prototypes-base/virtual-list',
+      ]),
+    }),
+  'apps/www/src/content/docs/demo_components/virtual-list/demo-brutalist-virtual-list-window.demo.ts':
+    Object.freeze({
+      sourceSha256: '194f8b3058e2d0dc07bb4d21e147df3117aad777ccc6e75e9529ef26ce67fd38',
+      specifiers: Object.freeze([
+        '@proto.ui/prototypes-base/virtual-list/web',
+        '@proto.ui/prototypes-base/virtual-list',
+      ]),
+    }),
+  'apps/www/src/content/docs/demo_components/virtual-list/demo-liquid-glass-virtual-list-filter.demo.ts':
+    Object.freeze({
+      sourceSha256: 'a0bc39776523939e7cacbfd485667bf9e9a39d9b30d65bcd49f9ab84805e964e',
+      specifiers: Object.freeze([
+        '@proto.ui/prototypes-base/virtual-list/web',
+        '@proto.ui/prototypes-base/virtual-list',
+      ]),
+    }),
+  'apps/www/src/content/docs/demo_components/virtual-list/demo-liquid-glass-virtual-list-jump.demo.ts':
+    Object.freeze({
+      sourceSha256: '21c8f40fe9d370505e90deb0d59095b7bde7c3035b046ce409fc7018ffaf9fba',
+      specifiers: Object.freeze([
+        '@proto.ui/prototypes-base/virtual-list/web',
+        '@proto.ui/prototypes-base/virtual-list',
+      ]),
+    }),
+  'apps/www/src/content/docs/demo_components/virtual-list/demo-liquid-glass-virtual-list-window.demo.ts':
+    Object.freeze({
+      sourceSha256: '1d921324c455efd7a7510ab3e934edeb2586ee08d66760600e9ca99f7a2723dc',
+      specifiers: Object.freeze([
+        '@proto.ui/prototypes-base/virtual-list/web',
+        '@proto.ui/prototypes-base/virtual-list',
+      ]),
+    }),
+  'apps/www/src/content/docs/demo_components/virtual-list/demo-shadcn-virtual-list-filter.demo.ts':
+    Object.freeze({
+      sourceSha256: '8aeb9ce39501ebb444e17f59d7ee116b7b897737ad808f46bb38f1d590b772b9',
+      specifiers: Object.freeze([
+        '@proto.ui/prototypes-base/virtual-list/web',
+        '@proto.ui/prototypes-base/virtual-list',
+      ]),
+    }),
+  'apps/www/src/content/docs/demo_components/virtual-list/demo-shadcn-virtual-list-jump.demo.ts':
+    Object.freeze({
+      sourceSha256: 'da28dba79c1a0607f6dee4438d9caa2c65ff2faeb24d8dab37e9b8107b67379f',
+      specifiers: Object.freeze([
+        '@proto.ui/prototypes-base/virtual-list/web',
+        '@proto.ui/prototypes-base/virtual-list',
+      ]),
+    }),
+  'apps/www/src/content/docs/demo_components/virtual-list/demo-shadcn-virtual-list-window.demo.ts':
+    Object.freeze({
+      sourceSha256: 'aad71a8ba1eb087efdba722bb960a0cb16bf0ba5159f728e1c411f17ff090a7c',
+      specifiers: Object.freeze([
+        '@proto.ui/prototypes-base/virtual-list/web',
+        '@proto.ui/prototypes-base/virtual-list',
+      ]),
+    }),
   // The recipe projects serializable intent into the render-local association scope.
   'apps/www/src/components/PrototypePreviewer/shadcn-checkbox-composition.ts': Object.freeze({
     sourceSha256: '249b335382c69683b873c9b0ec7b63287e532ee1b16c709bad7595d47e1d7a86',
@@ -417,9 +517,34 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // The application demo supplies view lifetime and disposes the public binding.
   'apps/www/src/content/docs/demo-shadcn-input-shell.demo.ts': Object.freeze({
-    sourceSha256: '64de80957e698deb7453372ca73d9a47e3c3386f7f17a991a1fd6684e636cf88',
+    sourceSha256: '59d29ced33398d842168046455584ac40f7d0a390c4566992821da53101a09ac',
     specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
   }),
+  'apps/www/src/content/docs/demo_components/input-shell/demo-shadcn-input-shell-command.demo.ts':
+    Object.freeze({
+      sourceSha256: '491c986c60a2fe59e0268f290a9bde60f385491485abfbf8f91d1e0c92dadb73',
+      specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
+    }),
+  'apps/www/src/content/docs/demo_components/input-shell/demo-shadcn-input-shell-controlled.demo.ts':
+    Object.freeze({
+      sourceSha256: 'c62fa529ac16a57af832ebfa565bf748b7d2a8833443ac773a8c8a0c4f59764b',
+      specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
+    }),
+  'apps/www/src/content/docs/demo_components/input-shell/demo-shadcn-input-shell-profiles.demo.ts':
+    Object.freeze({
+      sourceSha256: '52ff2ab3a544d07dad8335d90d1ac40b7bf548948cf9a5def2b5432db5399fb0',
+      specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
+    }),
+  'apps/www/src/content/docs/demo_components/input-shell/demo-shadcn-input-shell-rhea.demo.ts':
+    Object.freeze({
+      sourceSha256: 'ea52c6298491345bd8e27cc91c77d9bed0f570cea08ae56e74027d0f51241552',
+      specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
+    }),
+  'apps/www/src/content/docs/demo_components/input-shell/demo-shadcn-input-shell-states.demo.ts':
+    Object.freeze({
+      sourceSha256: '3f4d16509a55b811796454428b796f3a52c81503da5b267b97a9f6746d023c18',
+      specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
+    }),
   'apps/www/src/content/docs/demo-bootstrap-2-3-2-dialog.demo.ts': Object.freeze({
     sourceSha256: 'bed828050a2f4b8157678f4d903eade26184762b97c42dd181c7e2fdcd836668',
     specifiers: Object.freeze(['@proto.ui/prototypes-bootstrap-2-3-2/surface']),
@@ -9829,6 +9954,9 @@ const WEBSITE_CLIENT_CHUNKS_RETRY_CONFIGS = Object.freeze([
   '2d9b2f28c7435754064aaa15e15a18ff0823f46a4081b11e1e89f302b8725177',
   // Adds Dialog, Hover Card and Tooltip sidebar links for Bootstrap and Liquid Glass.
   '83b07d7fbebf1a068297756926aae079e6340ed272b91e30eee065ee85e7020b',
+  // Adds the Wave 3–5 sidebar links and English UI Library labels only.
+  // Retry imports, resolver, client chunk hook and exact helper bytes are unchanged.
+  '36a90352d9b22089abfde1318c29cd9e920dda2e79f088f259eec9c2de10be70',
 ]);
 const WEBSITE_CLIENT_CHUNKS_HELPER = [
   'apps/www/scripts/client-chunk-isolation.mjs',
