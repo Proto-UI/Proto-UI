@@ -1,9 +1,12 @@
 import { execFileSync } from 'node:child_process';
+import { realpathSync } from 'node:fs';
 import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { tmpdir as osTmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+
+const tmpdir = () => realpathSync(osTmpdir());
 
 import { createExposeStateWebNameMap } from '../../modules/expose-state-web/src/utils';
 import {

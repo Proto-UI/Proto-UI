@@ -612,17 +612,22 @@ describe('actual Header Button anchoring', () => {
 
 // Geometry is injected here; browser evidence measures the real layout.
 describe('Docs header offset ownership', () => {
+  const portalHeight = '--docs-preview-header-height';
+
   function measuredFixture(initial = '7rem') {
-    let deliver!: () => void;
+    const deliveries = new Map<Element, () => void>();
     const observe = vi.fn();
     const disconnect = vi.fn();
     vi.stubGlobal(
       'ResizeObserver',
       class {
-        constructor(callback: () => void) {
-          deliver = callback;
+        observe: (target: Element) => void;
+        constructor(callback: (entries: Pick<ResizeObserverEntry, 'target'>[]) => void) {
+          this.observe = (target) => {
+            deliveries.set(target, () => callback([{ target }]));
+            observe(target);
+          };
         }
-        observe = observe;
         disconnect = disconnect;
       }
     );
@@ -639,7 +644,7 @@ describe('Docs header offset ownership', () => {
     return {
       frame,
       root,
-      deliver: () => deliver(),
+      deliver: () => deliveries.get(root)!(),
       observe,
       disconnect,
       writes,
@@ -653,6 +658,7 @@ describe('Docs header offset ownership', () => {
   it('publishes actual height once, ignores unchanged portal delivery and follows font-driven height', () => {
     const h = measuredFixture();
     expect(h.frame.style.getPropertyValue('--header-height')).toBe('137px');
+    expect(document.documentElement.style.getPropertyValue(portalHeight)).toBe('137px');
     expect(h.observe).toHaveBeenCalledWith(h.root);
     expect(h.observe).toHaveBeenCalledWith(h.root.querySelector('[data-site-header-panel]'));
     expect(initSiteHeaderDisclosure(h.root)).toBe(disclosure);
@@ -666,6 +672,7 @@ describe('Docs header offset ownership', () => {
     h.setHeight(221);
     h.deliver();
     expect(h.frame.style.getPropertyValue('--header-height')).toBe('221px');
+    expect(document.documentElement.style.getPropertyValue(portalHeight)).toBe('221px');
     h.setHeight(0);
     h.deliver();
     expect(h.frame.style.getPropertyValue('--header-height')).toBe('221px');
@@ -692,6 +699,28 @@ describe('Docs header offset ownership', () => {
     disclosure!.destroy();
     expect(second.frame.style.getPropertyValue('--header-height')).toBe('137px');
     expect(second.frame.style.getPropertyPriority('--header-height')).toBe('important');
+  });
+
+  it('keeps the newer document measurement when an older frame resizes and retires', () => {
+    const first = measuredFixture();
+    const firstDisclosure = disclosure!;
+    const newerFrame = first.frame.cloneNode(true) as HTMLElement;
+    const newerHeader = newerFrame.querySelector<HTMLElement>('[data-docs-site-header]')!;
+    vi.spyOn(newerHeader, 'offsetHeight', 'get').mockReturnValue(180);
+    document.body.append(newerFrame);
+    const newerDisclosure = initSiteHeaderDisclosure(newerHeader);
+    try {
+      newerDisclosure.enhance();
+      first.setHeight(155);
+      first.deliver();
+      expect(first.frame.style.getPropertyValue('--header-height')).toBe('155px');
+      expect(document.documentElement.style.getPropertyValue(portalHeight)).toBe('180px');
+      firstDisclosure.destroy();
+      expect(document.documentElement.style.getPropertyValue(portalHeight)).toBe('180px');
+    } finally {
+      newerDisclosure.destroy();
+    }
+    expect(document.documentElement.style.getPropertyValue(portalHeight)).toBe('');
   });
 });
 

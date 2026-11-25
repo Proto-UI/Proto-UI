@@ -1,11 +1,21 @@
 // @vitest-environment node
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { Browser } from 'playwright-core';
+import type { Browser, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { launchBrowser, openRoute, startServer, stopServer } from './browser-harness';
+import {
+  launchBrowser,
+  openRoute,
+  RUNTIMES,
+  selectRuntime,
+  startServer,
+  stopServer,
+} from './browser-harness';
 
 const ROUTE = '/zh-cn/ui-libraries/shadcn/toast/';
+const STACK_DEMO = 'demo-shadcn-toast';
+const POSITION_DEMO = 'demo-shadcn-toast-position';
+const DEMO_ROOT = '[data-demo-ref="toast-demo"]';
 const POSITIONS = [
   ['Top Left', 'top-left'],
   ['Top Center', 'top-center'],
@@ -18,6 +28,24 @@ const POSITIONS = [
 let browser: Browser;
 let baseUrl: string;
 
+const previewFor = (page: Page, id: string) => page.locator(`[data-demo-id="${id}"]`);
+
+async function ownedViewport(preview: Locator) {
+  const owner = await preview.locator(DEMO_ROOT).getAttribute('data-demo-owner');
+  if (!owner) throw new Error('The Toast demo owner is missing.');
+  const viewport = preview.page().locator(
+    `[data-demo-ref="viewport"]:is([data-demo-owner=${JSON.stringify(owner)}], .pui-owner-${owner})`
+  );
+  await viewport.waitFor({ state: 'attached' });
+  expect(
+    await viewport.evaluate(
+      (element) =>
+        element.ownerDocument.body.contains(element) && !element.closest('.site-page-frame')
+    )
+  ).toBe(true);
+  return viewport;
+}
+
 beforeAll(async () => {
   baseUrl = await startServer(ROUTE);
   browser = await launchBrowser();
@@ -28,7 +56,7 @@ afterAll(async () => {
   await stopServer();
 }, 60_000);
 
-describe('Toast positioning in the documentation viewport', () => {
+describe.each(RUNTIMES)('Toast positioning in the documentation viewport (%s)', (runtime) => {
   it.each([
     { width: 1280, height: 900, positions: POSITIONS },
     { width: 1100, height: 750, positions: [POSITIONS[0], POSITIONS[5]] },
@@ -40,35 +68,39 @@ describe('Toast positioning in the documentation viewport', () => {
       const { context, page } = await openRoute(browser, baseUrl, ROUTE, { width, height });
       const samples: Array<Record<string, unknown>> = [];
       try {
-        const preview = page.locator('[data-demo-id="demo-shadcn-toast-position"]');
-        const viewport = preview.locator('[data-demo-ref="viewport"]');
-        const toast = preview.locator('[data-demo-ref="toast"]');
+        const preview = previewFor(page, POSITION_DEMO);
+        await selectRuntime(page, preview, runtime, DEMO_ROOT, 1);
+        const viewport = await ownedViewport(preview);
+        const toast = viewport.locator('[data-demo-ref="toast"]');
+        const header = page.locator('.site-page-frame > header:has([data-docs-site-header])');
 
         for (const [label, position] of positions) {
-          await preview.getByRole('button', { name: label, exact: true }).click();
+          const command = preview.getByRole('button', { name: label, exact: true });
+          await command.scrollIntoViewIfNeeded();
+          expect(await page.evaluate(() => scrollY)).toBeGreaterThan(0);
+          await command.click();
           const title = toast.getByText('Toast (' + label + ')', { exact: true });
           await title.waitFor({ state: 'visible', timeout: 3000 });
 
-          const frame = await viewport.evaluate((element) => {
+          const headerBottom = await header.evaluate(
+            (element) => element.getBoundingClientRect().bottom
+          );
+          const frame = await viewport.evaluate((element, headerBottom) => {
             const box = element.getBoundingClientRect();
-            const header = element
-              .closest('.site-page-frame')
-              ?.querySelector('header:has([data-docs-site-header])');
-            if (!header) throw new Error('The documentation header is missing.');
             return {
               position: getComputedStyle(element).position,
               top: box.top,
               left: box.left,
               right: box.right,
               bottom: box.bottom,
-              headerBottom: header.getBoundingClientRect().bottom,
+              headerBottom,
               headerClearance: getComputedStyle(element).getPropertyValue('--header-height').trim(),
               inset: 1.5 * parseFloat(getComputedStyle(document.documentElement).fontSize),
               maxHeight: parseFloat(getComputedStyle(element).maxHeight),
               viewportWidth: innerWidth,
               viewportHeight: innerHeight,
             };
-          });
+          }, headerBottom);
           const titleHit = await title.evaluate((element) => {
             const box = element.getBoundingClientRect();
             const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
@@ -99,7 +131,9 @@ describe('Toast positioning in the documentation viewport', () => {
           const evidence = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR;
           if (evidence && position.startsWith('top-')) {
             await mkdir(evidence, { recursive: true });
-            await toast.screenshot({ path: path.join(evidence, width + '-' + position + '.png') });
+            await toast.screenshot({
+              path: path.join(evidence, `${runtime}-${width}-${position}.png`),
+            });
           }
           await toast.getByRole('button', { name: 'Dismiss', exact: true }).click();
           await title.waitFor({ state: 'hidden', timeout: 3000 });
@@ -109,7 +143,7 @@ describe('Toast positioning in the documentation viewport', () => {
         if (evidence) {
           await mkdir(evidence, { recursive: true });
           await writeFile(
-            path.join(evidence, width + '-positions.json'),
+            path.join(evidence, `${runtime}-${width}-positions.json`),
             JSON.stringify(samples, null, 2) + '\n'
           );
         }
@@ -122,36 +156,54 @@ describe('Toast positioning in the documentation viewport', () => {
   it('keeps the collapsed stack inside a narrow viewport and dismisses the front card', async () => {
     const { context, page } = await openRoute(browser, baseUrl, ROUTE, { width: 320, height: 900 });
     try {
-      const preview = page.locator('[data-demo-id="demo-shadcn-toast"]');
+      const preview = previewFor(page, STACK_DEMO);
+      await selectRuntime(page, preview, runtime, DEMO_ROOT, 1);
       const trigger = preview.locator('[data-demo-ref="trigger"]');
-      const cards = [0, 1, 2].map((index) =>
-        preview.locator('[data-demo-ref="root-' + index + '"]')
-      );
+      const viewport = await ownedViewport(preview);
+      const cards = [0, 1, 2, 3].map((index) => viewport.locator(`[data-demo-ref="root-${index}"]`));
       for (const card of cards) {
         await trigger.click();
         await card.waitFor({ state: 'visible', timeout: 4000 });
       }
-      const viewport = preview.locator('[data-demo-ref="viewport"]');
-      await page.waitForFunction(
-        () =>
-          [10, 20, 30].every((layer, index) => {
-            const card = document.querySelector(
-              '[data-demo-id="demo-shadcn-toast"] [data-demo-ref="root-' + index + '"]'
+      await expect
+        .poll(
+          async () => {
+            const layers = await Promise.all(
+              cards.slice(1).map((card) =>
+                card.evaluate((element) => {
+                  const { position, order, zIndex } = getComputedStyle(element);
+                  return { position, order: Number(order), zIndex: Number(zIndex) };
+                })
+              )
             );
-            return !!card && getComputedStyle(card).zIndex === String(layer);
-          }),
-        undefined,
-        { timeout: 4000 }
-      );
+            return {
+              positions: layers.map((layer) => layer.position),
+              order: layers.map((layer) => layer.order),
+              newestPaintsAboveOlder:
+                layers[0]!.zIndex < layers[1]!.zIndex && layers[1]!.zIndex < layers[2]!.zIndex,
+            };
+          },
+          { timeout: 4000 }
+        )
+        .toEqual({
+          positions: ['absolute', 'absolute', 'relative'],
+          order: [2, 1, 0],
+          newestPaintsAboveOlder: true,
+        });
+      expect(await cards[0].count()).toBe(1);
+      expect(await cards[0].isHidden()).toBe(true);
       const frame = await viewport.boundingBox();
       expect(frame).not.toBeNull();
       if (!frame) throw new Error('The Toast viewport is missing.');
-      for (const card of cards) {
+      for (const card of cards.slice(1)) {
         const rect = await card.boundingBox();
         if (!rect) throw new Error('A stacked Toast card is missing.');
         expect(rect.x).toBeGreaterThanOrEqual(frame.x - 1);
         expect(rect.x + rect.width).toBeLessThanOrEqual(frame.x + frame.width + 1);
       }
+      await cards[3].getByRole('button', { name: 'Dismiss', exact: true }).click();
+      await cards[3].waitFor({ state: 'hidden', timeout: 4000 });
+      await cards[0].waitFor({ state: 'visible', timeout: 4000 });
       await cards[2].getByRole('button', { name: 'Dismiss', exact: true }).click();
       await cards[2].waitFor({ state: 'hidden', timeout: 4000 });
       await cards[1].getByRole('button', { name: 'Dismiss', exact: true }).click();
@@ -161,4 +213,25 @@ describe('Toast positioning in the documentation viewport', () => {
       await context.close();
     }
   }, 30_000);
+
+  it('dismisses only the owner’s notifications across body portals', async () => {
+    const { context, page } = await openRoute(browser, baseUrl, ROUTE, { width: 1280, height: 900 });
+    try {
+      const position = previewFor(page, POSITION_DEMO);
+      const stack = previewFor(page, STACK_DEMO);
+      await selectRuntime(page, position, runtime, DEMO_ROOT, 1);
+      await selectRuntime(page, stack, runtime, DEMO_ROOT, 1);
+      const positioned = (await ownedViewport(position)).locator('[data-demo-ref="toast"]');
+      const stacked = (await ownedViewport(stack)).locator('[data-demo-ref="root-0"]');
+      await stack.getByRole('button', { name: 'Show Toast', exact: true }).click();
+      await stacked.waitFor({ state: 'visible' });
+      await position.getByRole('button', { name: 'Top Left', exact: true }).click();
+      await positioned.waitFor({ state: 'visible' });
+      await position.getByRole('button', { name: 'Dismiss All', exact: true }).click();
+      await positioned.waitFor({ state: 'hidden' });
+      expect(await stacked.isVisible()).toBe(true);
+    } finally {
+      await context.close();
+    }
+  }, 60_000);
 });

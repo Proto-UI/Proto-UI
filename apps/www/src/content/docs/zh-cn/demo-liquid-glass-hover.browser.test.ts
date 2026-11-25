@@ -1038,6 +1038,10 @@ describe.sequential('Liquid command static hover and existing self-contact nativ
                     await fixture(page, runtime, part, 'source', false);
                     const lost = await sample('source-lost', { quality: 'opaque-fallback' });
                     fallback(lost);
+                    if (part === 'button') {
+                      expect(lost.facts.background).toEqual(lost.facts.palette.secondary);
+                      expect(lost.facts.foreground).toEqual(lost.facts.palette.secondaryForeground);
+                    }
                     await target.hover();
                     const lostHover = await sample('source-lost-hover');
                     fallback(lostHover);

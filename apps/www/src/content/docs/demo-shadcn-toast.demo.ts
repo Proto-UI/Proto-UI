@@ -67,6 +67,7 @@ export default withShadcnRheaDemo({
   type: 'demo',
   root: {
     kind: 'box',
+    ref: 'toast-demo',
     className: 'min-w-0 flex items-center justify-center p-4',
     children: [
       {

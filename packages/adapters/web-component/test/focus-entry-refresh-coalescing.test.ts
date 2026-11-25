@@ -96,6 +96,61 @@ function entryFixture() {
 }
 
 describe('WC entry dependency refresh coalescing', () => {
+  it('defers dependency scans under an inert ancestor and reads current inputs on reveal', async () => {
+    const fixture = entryFixture();
+    const { ancestor, target, style } = fixture;
+    try {
+      ancestor.setAttribute('inert', '');
+      await settle();
+      fixture.observations.length = 0;
+      const button = document.createElement('button');
+      button.tabIndex = 0;
+      button.className = 'entry-refresh-button';
+      target.append(button);
+      ancestor.className = 'unrelated-while-inert';
+      const rule = style.sheet!.cssRules[0] as CSSStyleRule;
+      rule.style.setProperty('display', 'none');
+      await settle();
+      expect(fixture.rebuilds()).toBe(0);
+      expect(target.tabIndex).toBe(0);
+
+      ancestor.removeAttribute('inert');
+      await settle();
+      expect(fixture.rebuilds()).toBe(1);
+      expect(target.tabIndex).toBe(0);
+
+      rule.style.removeProperty('display');
+      await settle();
+      expect(target.hasAttribute('tabindex')).toBe(false);
+
+      button.style.visibility = 'hidden';
+      await settle();
+      expect(target.tabIndex).toBe(0);
+    } finally {
+      fixture.dispose();
+    }
+  });
+
+  it('rebuilds when a dormant entry moves outside its inert ancestor', async () => {
+    const fixture = entryFixture();
+    const { ancestor, target } = fixture;
+    try {
+      ancestor.setAttribute('inert', '');
+      const button = document.createElement('button');
+      button.tabIndex = 0;
+      target.append(button);
+      await settle();
+      fixture.observations.length = 0;
+
+      document.body.append(target);
+      await settle();
+      expect(fixture.rebuilds()).toBe(1);
+      expect(target.hasAttribute('tabindex')).toBe(false);
+    } finally {
+      fixture.dispose();
+    }
+  });
+
   it.each([
     ['descendant', 'class'],
     ['descendant', 'style'],
