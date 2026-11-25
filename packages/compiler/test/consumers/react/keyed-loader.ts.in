@@ -1,0 +1,53 @@
+interface Resource {
+  readonly path: string;
+  readonly cancellable: boolean;
+}
+interface Request {
+  readonly key: string;
+  readonly path: string;
+  readonly signal: AbortSignal;
+  state: 'pending' | 'returned' | 'rejected';
+  value: string | null;
+}
+
+// A retired key and its new incarnation can have different HTTP responses in flight.
+const resources = new Map<string, Resource[]>();
+const requests: Request[] = [];
+const unexpected: string[] = [];
+
+export function enqueue(key: string, path: string, cancellable: boolean): void {
+  const queue = resources.get(key) ?? [];
+  queue.push({ path, cancellable });
+  resources.set(key, queue);
+}
+
+export async function loadKeyedItem(key: string, signal: AbortSignal): Promise<string> {
+  const resource = resources.get(key)?.shift();
+  if (!resource) {
+    unexpected.push(key);
+    throw new Error(`No loopback resource was scheduled for ${key}`);
+  }
+  const request: Request = { key, path: resource.path, signal, state: 'pending', value: null };
+  requests.push(request);
+  const url = new URL(resource.path, location.origin);
+  url.searchParams.set('selected', key);
+  try {
+    const response = await fetch(url, { cache: 'no-store', signal: resource.cancellable ? signal : undefined });
+    if (!response.ok) throw new Error(`Loopback request for ${key} returned ${response.status}`);
+    request.value = await response.text();
+    request.state = 'returned';
+    return request.value;
+  } catch (error) {
+    request.state = 'rejected';
+    throw error;
+  }
+}
+
+export function loadHistory() {
+  return {
+    unexpected: [...unexpected],
+    requests: requests.map(({ key, path, signal, state, value }) => ({
+      key, path, state, value, aborted: signal.aborted, reason: signal.aborted ? signal.reason : null,
+    })),
+  };
+}

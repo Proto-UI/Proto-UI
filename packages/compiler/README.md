@@ -35,6 +35,8 @@ The Toggle's optional boolean input selects its mode at creation. A controlled c
 
 The source producer also links nominal Context keys, pure provider values, required reads and stable text-keyed children in one compilation unit. The authored `LevelOwner` and `LevelReader` fixture exercises live provider updates, same-label key identity, replacement by an equal-valued provider and retained child initialization. Chromium observes a portal and GPUI observes physical detachment and reattachment.
 
+The [keyed task owner](test/fixtures/authoring-keyed-tasks/owner.proto.ts.txt) declares two siblings whose text keys come from the parent's `first` and `second` props. Each child records its initial Context and starts one load for its own ID. Its rendered result includes the Context captured before suspension and the current Context read after the load completes. These values distinguish a retained child from a new child created with a previously used key.
+
 The versioned Tabs owner and `AsyncTabPanel` both reach the declared extern `authoring.load-tab`. Pass `--bindings host-bindings.json` to `compile` when emitting either export. The path is relative to the working directory. In this example the React entry names an ESM export and the GPUI entry names a Rust function in the consuming crate.
 
 ```json
@@ -64,6 +66,7 @@ The host suites compile the versioned sources and import the generated component
 node --test packages/compiler/test/react-target.node-test.mjs
 node --test packages/compiler/test/controlled-source-react.node-test.mjs
 node --test packages/compiler/test/context-source-react.node-test.mjs
+node --test packages/compiler/test/keyed-task-lifetime-react.node-test.mjs
 node --test packages/compiler/test/tabs-source-react.node-test.mjs
 node --test packages/compiler/test/extern-bindings-cli.node-test.mjs
 node --test packages/compiler/test/gpui-target.node-test.mjs

@@ -33,6 +33,10 @@ export function authoredContextSource() {
   return compileSource(new URL('./authoring-context/owner.proto.ts.txt', import.meta.url), 'LevelOwner', 'default');
 }
 
+export function authoredKeyedTaskSource() {
+  return compileSource(new URL('./authoring-keyed-tasks/owner.proto.ts.txt', import.meta.url), 'KeyedTaskOwner', 'default');
+}
+
 export function authoredBadgeSource() {
   const result = authoredSource('readonly-badge.proto.ts.txt', 'AuthoringBadge');
   assert.equal(result.status, 'produced', JSON.stringify(result.diagnostics));

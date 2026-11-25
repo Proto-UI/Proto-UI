@@ -4,6 +4,7 @@
 mod authoring_badge;
 mod context_source;
 mod controlled_source;
+mod keyed_task_source;
 mod support;
 mod tabs_source;
 
