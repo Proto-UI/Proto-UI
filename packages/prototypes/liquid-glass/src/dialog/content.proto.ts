@@ -32,17 +32,15 @@ export default definePrototype<LiquidGlassDialogContentProps, DialogContentExpos
     });
     def.rule({
       when: (w) =>
-        w.all(
-          w.state(behavior.stateHandles.open).eq(true),
-          w.not(w.prop('material').eq('opaque'))
-        ),
+        w.all(w.state(behavior.stateHandles.open).eq(true), w.not(w.prop('material').eq('opaque'))),
       intent: (i) => i.feedback.material.use({ intent: 'liquid-glass' }),
     });
     def.rule({
       when: (w) =>
         w.all(
           w.state(behavior.stateHandles.open).eq(true),
-          w.not(w.meta('preference.reducedMotion').eq('reduce'))
+          w.state(behavior.asTransition.transitionState).eq('entering'),
+          w.meta('preference.reducedMotion').eq('no-preference')
         ),
       intent: (i) => i.feedback.style.use(tw('animate-in fade-in-0 zoom-in-95')),
     });
@@ -50,7 +48,8 @@ export default definePrototype<LiquidGlassDialogContentProps, DialogContentExpos
       when: (w) =>
         w.all(
           w.state(behavior.stateHandles.open).eq(false),
-          w.not(w.meta('preference.reducedMotion').eq('reduce'))
+          w.state(behavior.asTransition.transitionState).eq('leaving'),
+          w.meta('preference.reducedMotion').eq('no-preference')
         ),
       intent: (i) => i.feedback.style.use(tw('animate-out fade-out-0 zoom-out-95')),
     });

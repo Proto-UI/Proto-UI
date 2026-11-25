@@ -6,7 +6,9 @@ import {
 } from '@proto.ui/prototypes-base/field';
 import { setupLiquidTextareaVisual } from '../textarea/visual';
 
-export type LiquidGlassFieldTextareaProps = FieldTextareaProps;
+export type LiquidGlassFieldTextareaProps = FieldTextareaProps & {
+  material?: 'auto' | 'opaque';
+};
 export type LiquidGlassFieldTextareaExposes = FieldTextareaExposes;
 
 // Match the public Field-bound entry, not an ordinary Textarea plus a second

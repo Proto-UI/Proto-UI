@@ -5,10 +5,18 @@ import type {
 import { definePrototype, tw } from '@proto.ui/core';
 import { asNumberFieldDecrement } from '@proto.ui/prototypes-base/number-field';
 import { COMMAND_BLOCKED, COMMAND_FOCUS } from '../interactive-surface';
-export default definePrototype<NumberFieldPartProps, NumberFieldStepExposes>({
+export type LiquidGlassNumberFieldDecrementProps = NumberFieldPartProps & {
+  material?: 'auto' | 'opaque';
+};
+
+export default definePrototype<LiquidGlassNumberFieldDecrementProps, NumberFieldStepExposes>({
   name: 'liquid-glass-number-field-decrement',
   modules: asNumberFieldDecrement.modules,
   setup(def) {
+    def.props.define({
+      material: { type: 'enum', options: ['auto', 'opaque'], empty: 'fallback' },
+    });
+    def.props.setDefaults({ material: 'auto' });
     const inherited = asNumberFieldDecrement();
     const state = inherited.stateHandles!;
     const hovered = def.state.bool('stepPointerHovered', false);
@@ -47,6 +55,28 @@ export default definePrototype<NumberFieldPartProps, NumberFieldStepExposes>({
         'inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-2xl border border-border bg-secondary p-2 font-sans text-secondary-foreground shadow-xs select-none cursor-pointer outline-none transition-shadow'
       )
     );
+    def.feedback.material.declare({
+      version: 2,
+      shape: { kind: 'rounded-rect', geometry: 'style' },
+      source: { kind: 'in-app-backdrop' },
+      fallback: { fill: 'style', foreground: 'style' },
+    });
+    for (const phase of [false, true]) {
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('material').eq('auto'),
+            w.state(state.disabled).eq(false),
+            w.state(pressed).eq(phase)
+          ),
+        intent: (i) =>
+          i.feedback.material.use({
+            intent: 'liquid-glass',
+            variant: 'regular',
+            deformation: { kind: 'press', phase: phase ? 'pressed' : 'rest', contact: 'pointer' },
+          }),
+      });
+    }
     def.rule({
       when: (w) =>
         w.all(

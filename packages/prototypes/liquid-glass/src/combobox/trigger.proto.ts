@@ -8,6 +8,8 @@ import {
 
 export type ComboboxTriggerProps = BaseComboboxTriggerProps & {
   prominence?: 'regular' | 'prominent';
+  /** Auto enhances only when all live preference/support inputs are affirmative. */
+  material?: 'auto' | 'opaque';
 };
 
 export default definePrototype<ComboboxTriggerProps, ComboboxTriggerExposes>({
@@ -16,10 +18,25 @@ export default definePrototype<ComboboxTriggerProps, ComboboxTriggerExposes>({
   setup(def) {
     const behavior = asComboboxTrigger();
     const disabled = behavior.getState!('disabled')!;
+    const pressed = def.state.bool('pressed', false);
     def.props.define({
       prominence: { type: 'enum', empty: 'fallback', options: ['regular', 'prominent'] },
+      material: { type: 'enum', empty: 'fallback', options: ['auto', 'opaque'] },
     });
-    def.props.setDefaults({ prominence: 'regular' });
+    def.props.setDefaults({ prominence: 'regular', material: 'auto' });
+
+    def.event.on('pointer.down', () => {
+      if (!disabled.get()) pressed.set(true, 'reason: liquid-glass combobox trigger pointer.down');
+    });
+    const clearPressed = () =>
+      pressed.set(false, 'reason: liquid-glass combobox trigger press ended');
+    def.event.on('pointer.up', clearPressed);
+    def.event.on('pointer.leave', clearPressed);
+    def.event.on('pointer.cancel', clearPressed);
+    def.event.on('press.cancel', clearPressed);
+    def.event.on('press.commit', clearPressed);
+    def.lifecycle.onUnmounted(clearPressed);
+
     def.feedback.style.use(
       tw(
         'font-sans rounded-xl border border-border inline-flex shrink-0 min-w-10 items-center justify-center gap-1.5 px-3 py-2 text-sm shadow-sm outline-none cursor-pointer select-none transition-shadow'
@@ -34,6 +51,36 @@ export default definePrototype<ComboboxTriggerProps, ComboboxTriggerExposes>({
       intent: (i) =>
         i.feedback.style.use(tw('bg-primary text-primary-foreground border-transparent')),
     });
+    def.feedback.material.declare({
+      version: 2,
+      shape: { kind: 'rounded-rect', geometry: 'style' },
+      source: { kind: 'in-app-backdrop' },
+      fallback: { fill: 'style', foreground: 'style' },
+    });
+    for (const prominence of ['regular', 'prominent'] as const) {
+      for (const phase of [false, true]) {
+        def.rule({
+          when: (w) =>
+            w.all(
+              w.prop('prominence').eq(prominence),
+              w.prop('material').eq('auto'),
+              w.state(disabled).eq(false),
+              w.state(pressed).eq(phase)
+            ),
+          intent: (i) =>
+            i.feedback.material.use({
+              intent: 'liquid-glass',
+              variant: 'regular',
+              ...(prominence === 'prominent' ? { tint: 'style-fill' as const } : {}),
+              deformation: {
+                kind: 'press',
+                phase: phase ? 'pressed' : 'rest',
+                contact: 'pointer',
+              },
+            }),
+        });
+      }
+    }
     def.rule({
       when: (w) =>
         w.all(w.state(behavior.getState!('focused')!).eq(true), w.state(disabled).eq(false)),
