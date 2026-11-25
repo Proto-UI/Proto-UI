@@ -18,7 +18,10 @@ it.each(cases)(
     const recorder = new FeedbackStyleRecorder();
     recorder.use(tw(token));
     expect(recorder.export().tokens).toEqual([token]);
-    expect(mergeTwTokensV0([token, 'rounded-none', token]).tokens).toEqual([token]);
+    // A directional radius retains the whole-box base for its other corners.
+    expect(mergeTwTokensV0([token, 'rounded-none', token]).tokens).toEqual(
+      prefix === 'rounded-' ? [token] : [token, 'rounded-none']
+    );
     for (const css of [
       renderProtoStyleTokenCss([token]),
       renderProtoShadowStyleArtifact([token]).cssText,

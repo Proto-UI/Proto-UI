@@ -246,19 +246,23 @@ describe('site Shadcn control bridge', () => {
     expect(root.setProps).toHaveBeenLastCalledWith({ value: 'vue', disabled: true });
   });
 
-  it('retains content text as the accessible source for projected icon buttons', async () => {
-    const button = document.createElement('wc-shadcn-button');
-    button.dataset.siteShadcnButton = '1';
-    button.setAttribute('aria-label', 'Copy code');
-    button.innerHTML = '<svg aria-hidden="true"></svg><span class="sr-only">Copy code</span>';
-    document.body.append(button);
+  it.each([false, true])(
+    'retains icon-button naming with an explicit host name: %s',
+    async (explicitName) => {
+      const button = document.createElement('wc-shadcn-button');
+      button.dataset.siteShadcnButton = '1';
+      if (explicitName) button.setAttribute('aria-label', 'Copy snippet');
+      button.innerHTML = '<svg aria-hidden="true"></svg><span class="sr-only">Copy code</span>';
+      document.body.append(button);
 
-    initSiteShadcnControls(document);
-    await settle();
+      initSiteShadcnControls(document);
+      await settle();
 
-    expect(button.hasAttribute('aria-label')).toBe(false);
-    expect(button.querySelector('.sr-only')?.textContent).toBe('Copy code');
-  });
+      // C-A11Y-0001-I preserves host names; content naming contributes no scalar.
+      expect(button.getAttribute('aria-label')).toBe(explicitName ? 'Copy snippet' : null);
+      expect(button.querySelector('.sr-only')?.textContent).toBe('Copy code');
+    }
+  );
 });
 
 describe('site family projections', () => {

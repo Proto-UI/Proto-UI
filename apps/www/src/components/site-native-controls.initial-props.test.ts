@@ -158,7 +158,7 @@ it.each(['first registration', 'already registered'])(
   }
 );
 
-it('uses one public update per existing atom and retains pressed/current facts', async () => {
+it('uses one public update per existing atom and retains stationary navigation/current facts', async () => {
   releases.push(initSiteNativeControls());
   await settle();
   const link = document.querySelector('a')!;
@@ -181,7 +181,9 @@ it('uses one public update per existing atom and retains pressed/current facts',
     expect(node.style.getPropertyValue('--pui-foreground')).toBe('#222222');
     expect(metrics(node).controllerUpdates - before[index].controllerUpdates).toBe(1);
   }
-  expect(getElementProps(nodes[0])?.pressed).toBe(true);
+  // Shadcn navigation deliberately stays stationary during native selection.
+  // The one-update assertions above still require the new facts to be delivered.
+  expect(getElementProps(nodes[0])?.pressed).toBe(false);
   expect(link.getAttribute('aria-current')).toBe('page');
   const beforeThemeChange = nodes.map(metrics);
   document.documentElement.style.setProperty('--pui-foreground', '#ff0000');

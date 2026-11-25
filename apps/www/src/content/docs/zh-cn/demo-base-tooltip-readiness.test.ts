@@ -96,12 +96,12 @@ it.each(['wc', 'react', 'vue', 'vue2'] as const)(
     expect((root as any).__previewer__.getCurrentRuntime()).toBe(runtime);
     expect(surface.isConnected).toBe(true);
 
-    // Preserve the old assumption's distinguishing counterexample: the real
-    // closed React recipe has two usable Triggers but no physical Contents yet.
-    if (runtime === 'react') {
-      expect(surface.querySelectorAll('[data-pui-root]')).toHaveLength(5);
-      expect(await ready('[data-pui-root]', 7)).toBe(false);
+    for (const trigger of triggers) {
+      trigger.focus();
+      expect(document.activeElement).toBe(trigger);
+      expect(await ready()).toBe(true);
     }
+    triggers[1]!.blur();
 
     const first = triggers[0]!;
     const parent = first.parentNode!;
