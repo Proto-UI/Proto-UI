@@ -79,7 +79,7 @@ it.each([false, true])(
       await vi.waitFor(() => expect(root.getExposes().open.get()).toBe(true));
       expect(changes).toMatchObject([{ open: true }]);
       expect(document.querySelector('wc-shadcn-drawer-root')).toBe(root);
-      expect(document.querySelector('[data-demo-ref="status"]')?.textContent).toMatch(/^Opened:/);
+      expect(document.querySelector('[data-demo-ref="goal-value"]')?.textContent).toBe('350');
     } finally {
       document.removeEventListener('click', recordClick, true);
       root.removeEventListener('openChange', recordChange);
