@@ -1280,7 +1280,7 @@ describe('WC acquisition preserves the registered initial plane (synthetic layou
       ...f.visual,
       style: {
         kind: 'tw',
-        tokens: ['rounded-full', 'border-0', 'bg-background', 'text-foreground'],
+        tokens: ['transition-none', 'rounded-full', 'border-0', 'bg-background', 'text-foreground'],
       },
       material: {
         ...f.visual.material,
