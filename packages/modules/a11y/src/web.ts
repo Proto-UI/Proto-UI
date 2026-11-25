@@ -9,39 +9,14 @@ import {
 import type { A11yProjector } from './caps';
 import { ownGeneratedId, retainGeneratedId, type GeneratedIdLease } from './generated-id';
 
-const ARIA_STATE_ATTRS: Record<string, string> = {
-  atomic: 'aria-atomic',
-  autocomplete: 'aria-autocomplete',
-  current: 'aria-current',
-  sort: 'aria-sort',
-  busy: 'aria-busy',
-  checked: 'aria-checked',
-  disabled: 'aria-disabled',
-  expanded: 'aria-expanded',
-  hasPopup: 'aria-haspopup',
-  invalid: 'aria-invalid',
-  live: 'aria-live',
-  orientation: 'aria-orientation',
-  pressed: 'aria-pressed',
-  rowCount: 'aria-rowcount',
-  columnCount: 'aria-colcount',
-  rowIndex: 'aria-rowindex',
-  columnIndex: 'aria-colindex',
-  rowSpan: 'aria-rowspan',
-  columnSpan: 'aria-colspan',
-  readOnly: 'aria-readonly',
-  required: 'aria-required',
-  selected: 'aria-selected',
-  modal: 'aria-modal',
-  multiSelectable: 'aria-multiselectable',
-  valueMin: 'aria-valuemin',
-  valueMax: 'aria-valuemax',
-  valueNow: 'aria-valuenow',
-  valueText: 'aria-valuetext',
-  level: 'aria-level',
-  posInSet: 'aria-posinset',
-  setSize: 'aria-setsize',
-};
+const ariaAttrMap = (keys: string): Record<string, string> =>
+  Object.fromEntries(
+    keys.split(' ').map((key) => [key, `aria-${key.replace(/^column/, 'col').toLowerCase()}`])
+  );
+
+const ARIA_STATE_ATTRS = ariaAttrMap(
+  'atomic autocomplete current sort busy checked disabled expanded hasPopup invalid live orientation pressed rowCount columnCount rowIndex columnIndex rowSpan columnSpan readOnly required selected modal multiSelectable valueMin valueMax valueNow valueText level posInSet setSize'
+);
 
 const TABLE_COUNT_STATE_KEYS = new Set(['rowCount', 'columnCount', 'setSize']);
 const POSITIVE_INTEGER_STATE_KEYS = new Set([
@@ -53,13 +28,9 @@ const POSITIVE_INTEGER_STATE_KEYS = new Set([
   'posInSet',
 ]);
 
-const ARIA_RELATION_ATTRS: Record<string, string> = {
-  activeDescendant: 'aria-activedescendant',
-  controls: 'aria-controls',
-  describedBy: 'aria-describedby',
-  errorMessage: 'aria-errormessage',
-  labelledBy: 'aria-labelledby',
-};
+const ARIA_RELATION_ATTRS = ariaAttrMap(
+  'activeDescendant controls describedBy errorMessage labelledBy'
+);
 
 type RelationProjection = {
   target: HTMLElement;
