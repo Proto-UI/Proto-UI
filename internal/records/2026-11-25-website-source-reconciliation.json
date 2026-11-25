@@ -1,0 +1,814 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-ownership-audit",
+  "reviewDate": "2026-11-25",
+  "reviewBase": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+  "reviewScope": "Author source audit of 22 historical Website binding deltas and 24 newly inventoried demo bodies. Their current sources and merged source bindings are identical at review base 078c6e91c and integrated main 59bbed9b; this record is not a second hash repair, independent approval or behavior acceptance.",
+  "sourceHashNormalization": "UTF-8 text; CRLF and CR normalized to LF, matching sourceScanDigest.",
+  "acceptance": "PR #1844 supplies the merged source synchronization and import registry changes. This downstream audit preserves source findings and evidence links only. All upstream source-binding rows, row IDs, states, ownership, lifecycles and acceptance criteria are retained byte-for-byte outside the evidence-link cells.",
+  "reconciledSources": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-virtual-list.demo.ts",
+      "previous": {
+        "sourceSha256": "dc682916e40657032a9f0eaf660e0f2b65669e4829023842333068da0ea260f2",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "714f79a762c682dadceba7f649522ca53f9f9f85"
+      },
+      "reviewed": {
+        "sourceSha256": "cb46e33e36095dd05150367f7576ee67552730265a220ef687d6cfa382b9e01a",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "852c31e9861b7429d2ef0c9907b1160db0f9d269"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Replaces numeric row labels with 1,000 deterministic variable-height activity records and a keyed lookup; keeps public Virtual List attachment, overscan=3, maxMaterializedItems=60 and host cleanup. Rows are created through the viewport ownerDocument; family paint and size estimates change. No new package import is introduced."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-virtual-list.demo.ts",
+      "previous": {
+        "sourceSha256": "f5e9bd67eba3140e3fc2cf8040d5fea6cb1c6e08198ad44b30ff14d8415798d8",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "4b948ffa147e08e789758759fbfed2aa7d3d008a"
+      },
+      "reviewed": {
+        "sourceSha256": "faca72985d274b9298ddd79cbfd8fefbbce18c32ec7023a5d39d523c0fd3556e",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "016a620187144b1b30db26f3b5c9ac730a1c3282"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Replaces numeric row labels with 1,000 deterministic variable-height activity records and a keyed lookup; keeps public Virtual List attachment, overscan=3, maxMaterializedItems=60 and host cleanup. Rows are created through the viewport ownerDocument; family paint and size estimates change. No new package import is introduced."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-virtual-list.demo.ts",
+      "previous": {
+        "sourceSha256": "97f079a40171dbce4a49bf09b0dd346b210a46f300a47931989b23428201b7e6",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "8806842ed65ff7de2f807c0b1b1aa16c094ffe97"
+      },
+      "reviewed": {
+        "sourceSha256": "094c932c7c2607a8b08bcd8e94edc7e59a8ac92e28634911aeb62a15a4a9987d",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "781ee90c3f63f816fa60628a2423d7818035fe1e"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Replaces numeric row labels with 1,000 deterministic variable-height activity records and a keyed lookup; keeps public Virtual List attachment, overscan=3, maxMaterializedItems=60 and host cleanup. Rows are created through the viewport ownerDocument; family paint and size estimates change. No new package import is introduced."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-virtual-list.demo.ts",
+      "previous": {
+        "sourceSha256": "8bbb5fbfb4e58cf6e64ba2d96a7523790e2f35f7254987a89af4fb02569f1f7b",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "cebc561b958f5c76b4e70c81070cfff18127d787"
+      },
+      "reviewed": {
+        "sourceSha256": "76abaea39fcfef64c32f5697ac9a8d2bb5ad131f9040b52f7b7e91351461c1ed",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "0c61fd78e9225eb41fa5427d9f3a5cb711cbb9f8"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Replaces numeric row labels with 1,000 deterministic variable-height activity records and a keyed lookup; keeps public Virtual List attachment, overscan=3, maxMaterializedItems=60 and host cleanup. Rows are created through the viewport ownerDocument; family paint and size estimates change. No new package import is introduced."
+    },
+    {
+      "path": "apps/www/src/content/docs/accordion-demo.shared.ts",
+      "previous": {
+        "sourceSha256": "15ef5c53f63cc69c06dfddc457b85385196ae280e99159dfcd683c81c9d3166f",
+        "revision": "e70d65ba78edda42c79d92c77e885a94278bfccd",
+        "gitBlob": "3bbddb2edce1e648cf0d22c2ed48c4617e05ee97"
+      },
+      "reviewed": {
+        "sourceSha256": "839f821d8dd75692cda58fa05b13fb9b4c6de18191d8475c66fa44304c4d55bf",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "96f28a3abd20300ee223456a25e502572844b799"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Replaces diagnostic copy with shipping/settings content, adds a physical RTL wrapper and family layout, and retains single/multiple/nested/disabled/controlled public Accordion request and acceptance ownership. The old long unbroken boundary text is no longer this hero example."
+    },
+    {
+      "path": "apps/www/src/content/docs/async-region-demo.shared.ts",
+      "previous": {
+        "sourceSha256": "b635ce9d4b1fee601987ea683e8cfc158f52115459b74353e56ea7f1a20af4c2",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "3ab7138adea46d26562e774777b1fa84540a0521"
+      },
+      "reviewed": {
+        "sourceSha256": "4a54b02a585a90b82f90c9bd972aa2a58b4b4aaa4bea704a752f3880415de3b3",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "1327967c65ca1b52974e1d479f90332a2578e132"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Expands one busy-state example into hero, focus/input, selective-disable and Live Region compositions. Application callbacks still set busy through public props; DOM text/style badges and aria-busy MutationObservers are demonstration-owned. Each observer disconnects on disposal; queued animation-frame callbacks are not independently certified by this source review."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-bootstrap-2-3-2-select.demo.ts",
+      "previous": {
+        "sourceSha256": "505d0e1d02df1fb14bab6f3be958e9b331a79c6b0c1e4352726af24c3d4d59c1",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "45e9e2ae9b204a52f71d9ce616c866f5697b19b9"
+      },
+      "reviewed": {
+        "sourceSha256": "ee0ca51c4c9b248a1b75439f684212bb698830f7929f310d9f2785b54c79a198",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "7b7098df6e3cff73f91061a5179e7daa01d62f84"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Replaces four diagnostic Select instances with a single controlled produce selector plus Reset; public accessibleLabel replaces the label observer, and an alive guard retires callbacks. The old disabled/RTL/long-label/delayed-acceptance scenarios are no longer this hero and require separate conformance evidence."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+      "previous": {
+        "sourceSha256": "3ecd674e4bfc765319ce5c9c0783bd4c116ab1eaad068b0a3c546016fb08fa04",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "2cbd484e693cd25b1aa8d8073bb134bd67714407"
+      },
+      "reviewed": {
+        "sourceSha256": "532a3f85abaf86c0d25160f5256316fd70642a027d6445be3728f6e68df1968f",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "944f66684ba1d421731440e5711ebb7f3dbfb741"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Replaces four diagnostic Select instances with a single controlled produce selector plus Reset; public accessibleLabel replaces the label observer, and an alive guard retires callbacks. The old disabled/RTL/long-label/delayed-acceptance scenarios are no longer this hero and require separate conformance evidence."
+    },
+    {
+      "path": "apps/www/src/content/docs/field-demo.shared.ts",
+      "previous": {
+        "sourceSha256": "bd8d2918449a7712d0c24223185bf5a6a042d7bdbf8672b2b5047b4e7bf5c32b",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "89188faa9cc7291813c9036b723469220fff2cca"
+      },
+      "reviewed": {
+        "sourceSha256": "210897bc72c9981b94e53aef439883c07a3133feb2c5be6871d137b839527693",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "12bc5974f9dacdce427cc491a2208f7958a1d153"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Reframes the demo as workspace settings, renames refs, uses a 400ms external-validation callback, and preserves request-ID checks, alive guard and timer disposal. Save/reset now address username and handle. The old explicit cancel and owner-rejected validity demonstrations are removed from this hero; their conformance remains separate evidence debt."
+    },
+    {
+      "path": "apps/www/src/content/docs/transition-demo.shared.ts",
+      "previous": {
+        "sourceSha256": "8c6d04cd8474c649decfae175c956beff9dccfe3c7adcf57b8ce48bef4d1a3dc",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "a3a4286f523808c5c801a509d559bfde34d46832"
+      },
+      "reviewed": {
+        "sourceSha256": "a41a007f1b603523409df2e922280d0fa4308394168c81c027f068e3000dbd12",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "d5aec73037b11b615434eae8cd5481f96d28d640"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Expands the four-family demo into phase/presence feedback, controlled completion, interruption-policy, lifecycle-log and Liquid accessibility examples. Public props/controls/exposes remain the state interface; the application adds family paint, CSS-transition completion, DOM observation, animation-frame and timer cleanup. This binding does not certify phase/animation timing, reduced-motion, lifecycle, or Liquid material behavior."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/calendar-demo.shared.ts",
+      "previous": {
+        "sourceSha256": "57d48df5281bd97cf579a701642781cc7e072ff2c9b29ea8494a3eae2ddc6894",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "c08c2a69ffdfe457bc322d340657e2649d4b0c0b"
+      },
+      "reviewed": {
+        "sourceSha256": "37c792ceced2ceb4074276b3d35e4f8efedb154406fd1d203d3dc981305b36ff",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "25e81eed62189485f025372f45a6cb4f65f788c9"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Adds five family-specific caption trigger dimensions, adjusts the passive wrappers, and removes explanatory comments/copy. The caption subscriptions, queued complete controlled-prop record, public Calendar date requests, year ranges and disposal remain unchanged."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-bootstrap-2-3-2-collapsible.demo.ts",
+      "previous": {
+        "sourceSha256": "95a125af610fb66bcdda399a883fc56f5c7f62a14f25a208686a190890af016e",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "509d066edf5d9a24b4a18a9f43803f50b4fd62cc"
+      },
+      "reviewed": {
+        "sourceSha256": "7b009cc407f38918b3fa7f98e5b8d3a330f34c6c43ac70c4924a21dc2ccc6e73",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "94d0358eda1a707d82cfce30181a4801623a9cd3"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Replaces diagnostic copy with order/invoice content and adjusts passive layout. Uncontrolled, retained, disabled and delayed controlled-acceptance examples keep the same public onOpenChange/onClick ownership. Shadcn additionally preserves outline/small button props during callback publication."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-brutalist-collapsible.demo.ts",
+      "previous": {
+        "sourceSha256": "2d679aff5cff897010d07f3b5bce40abf7fc4a2dbe297bff3da534591fd84b00",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "7d40459284435035d497742a243784d372b7ae09"
+      },
+      "reviewed": {
+        "sourceSha256": "5e73c9f8da42c399abd7d7fa99abc6ec5218fe109ffe16025c2443e977b2e021",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "d1350ba0205ef633b71b93229951c9cd58b5fa95"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Replaces diagnostic copy with order/invoice content and adjusts passive layout. Uncontrolled, retained, disabled and delayed controlled-acceptance examples keep the same public onOpenChange/onClick ownership. Shadcn additionally preserves outline/small button props during callback publication."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-liquid-glass-collapsible.demo.ts",
+      "previous": {
+        "sourceSha256": "1c2ec85076c0b2ba5975e2f826c723539a06e74133220003fbf726a7953ae1a1",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "9f9c59919ffaebcb5fd134671175680e5656752a"
+      },
+      "reviewed": {
+        "sourceSha256": "02e09f7a2849ff9de286a571541275a5a177de4ab0a1de2dcc301502217019ac",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "7d6e16d2dc25015aed625d23b2987d41f4bba192"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Replaces diagnostic copy with order/invoice content and adjusts passive layout. Uncontrolled, retained, disabled and delayed controlled-acceptance examples keep the same public onOpenChange/onClick ownership. Shadcn additionally preserves outline/small button props during callback publication."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-shadcn-collapsible.demo.ts",
+      "previous": {
+        "sourceSha256": "a6a3dcfcab66618357acbe97cb4e98cc2a751827d015b798e268ae4c174be61c",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "a4a8ec4debcfdd89a512ccab5a998b5ea77d7d0b"
+      },
+      "reviewed": {
+        "sourceSha256": "603b372c67be8bf1ed0c905069e005559709348fb21fff10a427332401aeede0",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "d9372afcb31207800d039612edb7b7abd03a6a15"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Replaces diagnostic copy with order/invoice content and adjusts passive layout. Uncontrolled, retained, disabled and delayed controlled-acceptance examples keep the same public onOpenChange/onClick ownership. Shadcn additionally preserves outline/small button props during callback publication."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/tabs/demo-shadcn-tabs-profile-switch.demo.ts",
+      "previous": {
+        "sourceSha256": "5fcc777f315f41748b13965613c3ee24bdea052ed4b181e6042d58156e629ad8",
+        "revision": "afa1e1c9a47d8fb37b97528c973048056e053548",
+        "gitBlob": "ab44bf1cd450088bfd1dcf639ef06ce90fae5456"
+      },
+      "reviewed": {
+        "sourceSha256": "dea49f4491b9b4d6cf8e328a73c0fe4fb7b3dc2d5f118ab3a5a9464fef6996d4",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "3e25ef57ab0512dfcf3082b8a9c910ca4d8e2dc3"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Changes only profile display labels/status text and removes explanatory comments; public style-profile switching, keyboard shortcut guards and disposal are unchanged."
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro",
+      "previous": {
+        "sourceSha256": "a6ddb4c223030b63e6f0ade8e2497f7447db25c8d43318024c7faa7c35db96f4",
+        "revision": "1b4da36e62fc0ef34894dc9e210c891e2a742769",
+        "gitBlob": "cda98eb2055674a6ef678d11633185c56bff6090"
+      },
+      "reviewed": {
+        "sourceSha256": "0d887b9d415df5273a28fa65538be9db0667cd5eff8f330f5c02d1cb06725de1",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "862c393509a6aa8fa4183d6cbd3568f42764aee4"
+      },
+      "ownersBefore": ["www.demo.home-demo-select"],
+      "ownersAfter": ["www.demo.home-demo-select"],
+      "sourceReview": "Adds an inert five-column-capable ghost-card skeleton with one/two/three/five responsive columns and a bottom fade. Ready/error hides it; homepage loading scrim/panel CSS is suppressed. Existing controller/selection ownership is retained; layout, cancellation and live-preview acceptance are not established here."
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/runtime-loading-mask.ts",
+      "previous": {
+        "sourceSha256": "d688b2ee5af32dc2f2b7461b7f843b4b9e8136dc01f4a1885204c96cb9658f16",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "6232cc272fd591129b493613e157485922ee0b0d"
+      },
+      "reviewed": {
+        "sourceSha256": "16845ab5f031db1b75a5a5c7dce214d2fded101807fcb4e899ed29f97ffcb275",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "036fe9bafc52b51b8eb03c42beb6c647ff7862af"
+      },
+      "ownersBefore": ["www.demo.home-demo-select"],
+      "ownersAfter": ["www.demo.home-demo-select"],
+      "sourceReview": "Always hides the scrim and hides the panel only while loading without a cancel action; existing loading/error/status/target-runtime and cancellation state remain demonstration-owned. This is not proof of all composed homepage cancel visibility."
+    },
+    {
+      "path": "apps/www/src/components/override/AdapterSelect.astro",
+      "previous": {
+        "sourceSha256": "d27ebe139e1daebed981db5736c1a94dd2beb8f301e267026e2136e8ff593cc8",
+        "revision": "6ca8f262a074ed19cb24b35d5cc199b5b0e23e08",
+        "gitBlob": "5e38016f1dba7fab696b320afaf72f43d373cd42"
+      },
+      "reviewed": {
+        "sourceSha256": "b2611d2f5c62377c57da2c7693928720e8b3beb7e751f6b6b7a5e047d611ba22",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "306bc67d59e89e86b453e4f3a5d9e0e5193f4920"
+      },
+      "ownersBefore": ["www.shell.adapter-select"],
+      "ownersAfter": ["www.shell.adapter-select"],
+      "sourceReview": "Limits the explicit popper positioning override to Brutalist, preserving its end alignment. Other families use their defined default placement. The previous multiline explanatory comment is removed; enlarged-text and focus behavior require current browser evidence."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-select.demo.ts",
+      "previous": {
+        "sourceSha256": "cc88bc8d07c0fa55229974d5aa7e32c8e5b7a3c219a09f5532652378944c5657",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "692056f7b41aef5762ef931ec05adc66b81eaeb6"
+      },
+      "reviewed": {
+        "sourceSha256": "a3b7cef8fd37df08b3b35aebe4eef708101531a8295aae5e1fb37098f1c3fb1c",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "1cb5ce629bcf4850c63dc3d745f0251b66589543"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Replaces the Paper/Ink hero with an initially empty five-fruit Select and sets accessibleLabel through the public trigger prop. The page-local aria-label MutationObserver is removed; this does not certify its former default-selection example."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.demo.ts",
+      "previous": {
+        "sourceSha256": "395cbf668a4f1e337a09081486030851f643c92b2ec2d83954698142d9fb03d4",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "03badfca8bef247bf4e56180c8daacb758d1e719"
+      },
+      "reviewed": {
+        "sourceSha256": "b75e71c3b87b042fd491c65c6d1dc4eed4f2e2e063127f973744f76aea799b63",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "fd37dce224415e747e238de1804474fb9735864f"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Replaces the three diagnostic groups with one display-density hero. Public Label associations and radio anatomy remain; empty/disabled-group/item examples and the page-local value observer are no longer present here. Those behaviors are not accepted by updating this source binding."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-select.demo.ts",
+      "previous": {
+        "sourceSha256": "c970ce38944dca2017729c6882d9953f74237593bb2d0e70a6bad2a695933c9c",
+        "revision": "ed9694c2bc6e711671263e292c5d54795382a389",
+        "gitBlob": "90eae32b47b4d6b18ccea89b0f9fe57e710a6832"
+      },
+      "reviewed": {
+        "sourceSha256": "17c0b78360489b4e35c1caf5084dcb50a9b67e3df8810d2b2fbf602ab023a291",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "335347d9640599e38de5dbcd9ecf0c1d08de2351"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Replaces framework-adapter options with fruit/vegetable groups, uses the public trigger accessibleLabel, and removes the page-local name MutationObserver. The previous disabled Solid item is not part of this hero; keyboard, disabled and geometry coverage remain independent."
+    }
+  ],
+  "verification": {
+    "sourceBodies": {
+      "recoveredPriorBindings": 22,
+      "currentSourcesMatchedReviewBase": 46,
+      "newBindings": 24,
+      "result": "pass"
+    },
+    "matrixRows": {
+      "before": 79,
+      "after": 79,
+      "idsUnchanged": true,
+      "statesUnchanged": true,
+      "existingOwnerSetsUnchanged": true,
+      "acceptanceCriteriaUnchanged": true
+    },
+    "baselineCoverageCommand": "node scripts/coverage-matrices/check-coverage-matrices.mjs",
+    "baselineCoverageResult": {
+      "status": "fail",
+      "diagnostics": 156,
+      "virtualModuleAdmission": 4,
+      "rawImportBodyOrEdgeAdmission": 78,
+      "staleSourceFingerprints": 22,
+      "missingSourceFingerprints": 24,
+      "missingMatrixOwners": 24,
+      "closedHarnessIssueReferences": 4,
+      "scope": "Observed pre-integration shared working tree at HEAD 078c6e91c, with concurrent adapter experiments; not a reproducible clean-commit gate result."
+    },
+    "baselineCoverageLogSha256": "5705679afd40b84f562b2e6a5ac47e8a416a3d0f45c18e55f37ebe4c8966bc96",
+    "postReconciliationCoverage": {
+      "command": "node scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "head": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+      "result": "fail",
+      "diagnostics": 49,
+      "rawImportAdmission": 41,
+      "virtualModuleAdmission": 4,
+      "closedHarnessIssueReferences": 4,
+      "staleSourceFingerprints": 0,
+      "missingSourceFingerprints": 0,
+      "missingMatrixOwners": 0,
+      "logSha256": "bec00894dfb225d2e2e613c2ad9326b445f1981c49a72988f774b13be2fdebfc",
+      "scope": "Observed before integration of PR #1844. The disappearance of 37 other raw-import diagnostics between shared-tree runs is not attributed to this source audit; concurrent adapter experiments were not pinned by this record."
+    },
+    "postIntegrationSourceAudit": {
+      "head": "59bbed9b38ed2426633e26e5c95687878348bca1",
+      "result": "pass",
+      "exactSourceAndBindingComparisons": 46,
+      "duplicateAuditedBindings": 0,
+      "upstreamSourceBindingTableByteIdentical": true,
+      "upstreamMatrixRowsPreserved": 79,
+      "upstreamStatesAndCriteriaUnchanged": true,
+      "fullCoverageScannerRerun": false,
+      "limit": "The pre-integration failed run is historical. Aggregate gate success after PR #1844 is owned by the integration checks, not claimed by this source audit."
+    }
+  },
+  "newlyInventoriedSources": [
+    {
+      "path": "apps/www/src/content/docs/demo_components/calendar/calendar-examples.shared.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "a5d9bf31eb2904ae7e85a189508c699665ed10d57cab76b15ec89a1f931bd565",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "fa035465dec98cb08ba85bc8c61e0860e5e1fa0d"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Composes the four family Calendar projections for basic, range, booked, RTL and preset cases. The application owns controlled month/value publication, fixed-date preset calculation and button listeners; active-owner guards and listener cleanup are explicit. Calendar retains date selection, focus and public request semantics.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/checkbox/demo-bootstrap-2-3-2-checkbox-controlled.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "99b848f00b34ed61623a284fde82d31e2c3e121049ae598d1ae345bb70f160ec",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "eb757efcacef116808bce229afa01c70c28ca3b6"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Composes public Checkbox and Label with controlled checked/indeterminate callbacks, mixed initial state and a Set Mixed action. Application status text and accepted prop values stay with this controller; active-owner checks and native action-listener removal are explicit. Checkbox retains activation and mixed-state semantics.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/checkbox/demo-liquid-glass-checkbox-controlled.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "c69702bca883411461757610c5c83f17b03badf7c493c2f6a0d8fa55babc77d5",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "0481e9901c383823828f8f575895b98aebd57170"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Composes public Checkbox and Label with controlled checked/indeterminate callbacks, mixed initial state and a Set Mixed action. Application status text and accepted prop values stay with this controller; active-owner checks and native action-listener removal are explicit. Checkbox retains activation and mixed-state semantics.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/checkbox/demo-shadcn-checkbox-controlled.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "3ee07a227ea5eaa92e587c4854871802fd53d783e004fe2965307a89c7b09d4a",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "9058b2b44a6baf02d2ec6cbd2d06bd679ae11641"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Composes public Checkbox and Label with controlled checked/indeterminate callbacks, mixed initial state and a Set Mixed action. Application status text and accepted prop values stay with this controller; active-owner checks and native action-listener removal are explicit. Checkbox retains activation and mixed-state semantics.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/combobox/demo-shadcn-combobox-controlled.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "7c2dbd231145cf7cb36a894eeee314ecc4abab9b14cc96d96e0cf0632fea08bc",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "fdfd18b359f119c8762b2f9169161876aa89b886"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Maintains application-controlled value, inputValue and open props through the public Combobox callbacks; Set Astro and Clear actions update public props and readouts. Native action listeners are removed on disposal; callbacks have no explicit active-owner guard, so this source binding does not establish queued-callback retirement.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/fieldset/fieldset-demo.shared.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "501ecf263a05d6ead3ec21c283003e23e514d7bab121454612efc31d61d2324c",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "01656f162756aee72fac4de71082a123cd389996"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Builds public Fieldset, Field, Checkbox and Checkbox Group anatomy for address, grouped and nested disabled examples. The application toggles the outer/middle disabled props and disposes its listeners. Its local expected-disabled readout is not observation or acceptance of effective child-disabled behavior.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/radio-group/demo-bootstrap-2-3-2-radio-group-choice-card.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "532c4e7bf9cffba3e41df7fdb65a9b133efbcc65a68161e7af1e5a350b6e8b91",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "7534a3d0eb958dd6701d7e260743487720a971c9"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Builds choice-card paint around public Radio Group/Radio/Label anatomy and public Label associations. A public exposed-value read, aria-checked observation and valueChange event schedule a single animation-frame paint update. Disposal disconnects the observer, removes the event listener and cancels the frame; this review supplies no browser or assistive-technology result.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/radio-group/demo-brutalist-radio-group-choice-card.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "d027dce38765cc619b6dd254fb9b00e8419b55c7bca816ab7d78a198fe1dce83",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "630a2e1a78fc3a225a14ef56d00999203f9ec5fb"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Builds choice-card paint around public Radio Group/Radio/Label anatomy and public Label associations. A public exposed-value read, aria-checked observation and valueChange event schedule a single animation-frame paint update. Disposal disconnects the observer, removes the event listener and cancels the frame; this review supplies no browser or assistive-technology result.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/radio-group/demo-liquid-glass-radio-group-choice-card.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "600348462574dd580816e7e7d069df36f4d103facfac1bf0210b5e6d96013b72",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "1468561b3989fb66c4bbfde36b32606c4bb49a08"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Builds choice-card paint around public Radio Group/Radio/Label anatomy and public Label associations. A public exposed-value read, aria-checked observation and valueChange event schedule a single animation-frame paint update. Disposal disconnects the observer, removes the event listener and cancels the frame; this review supplies no browser or assistive-technology result.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/radio-group/demo-shadcn-radio-group-choice-card.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "8f77996baa8e3c03279ba5069a6d69bfd74136bbb79caa58fe10cd649f4c0a1a",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "fa10d1dcf081d482ccf9fe48a88628c593dc10bd"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Builds choice-card paint around public Radio Group/Radio/Label anatomy and public Label associations. A public exposed-value read, aria-checked observation and valueChange event schedule a single animation-frame paint update. Disposal disconnects the observer, removes the event listener and cancels the frame; this review supplies no browser or assistive-technology result.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-position.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "f07646a90412f3e608265e4a086a009c3aee6ba3d883ad78dc30cc017e1d79a5",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "f1091e10dc0eee1d9bf677ce46763257cfcfe625"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Composes six public Toast viewport positions. Application action buttons call public openToast and dismissAll exposes, maintain example copy and remove their listeners. Toast retains timer, close, announcement and stacking semantics; this is not observed position, keyboard or cross-runtime acceptance.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-rich-colors.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "7d1498ec2d0bd6e62c727bb1b732fb39e878aaf55d74c69edf8fcfc08495f5df",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "ad70b6d187246ce552cff36266d80c7ae6db7d6b"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Composes five Toast variants through public type/richColors props and openToast exposes. Application action listeners update example readout text and are removed on teardown. Demo copy mentioning 0.3 is fixture text, not release evidence; Toast lifetime and announcement behavior remain unaccepted here.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/virtual-list/demo-bootstrap-2-3-2-virtual-list-filter.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "adde61f6ee9055e4acfd7606971f78c3b3bf67b2a6b2c2030465de1b8765f4b4",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "d06a4bcf35aabfe1c1b0591fc66c8bbfa55e4bad"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Owns 500 deterministic record keys, All/Release/Alert/Empty filtering, public itemKeys updates, example button appearance and passive empty/status output. It obtains the public collection, delegates materialization/geometry to attachWebVirtualList, creates rows through viewport.ownerDocument, and removes listeners/disposes the host. The explicit scrollTop reset remains application composition. The two literal package imports are separately recorded by the merged PR #1844 import registry; this source-body audit does not establish runtime acceptance.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/virtual-list/demo-bootstrap-2-3-2-virtual-list-jump.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "757c24e39695b5834e131536d900df6e8b0bbf2e8740bfc92d84cb37dee6441b",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "bfdc188216121e299f7001600a3a0606eb8b85ca"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Owns 1,000 deterministic keys and four public-button actions for start/center/end ensureVisible calls. Row highlighting and status output are application presentation; physical materialization stays with attachWebVirtualList. Listener cleanup, rowNodes.clear and host.dispose occur on teardown. The rowNodes map retains previously created entries during a live session, so the materialized-window cap is not proof of bounded application-retained nodes. The merged PR #1844 registry separately binds the two literal package imports; runtime acceptance remains outside this source-body audit.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/virtual-list/demo-bootstrap-2-3-2-virtual-list-window.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "e9568d70d15db2d4f52fb1d677f80e6dce07c473ed4d1a0d05a12728eb5181e3",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "6bb4accdf829b016113c76525dbe2673eeeaae63"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Owns 2,000 deterministic keys, public overscanItems changes (1/6), a materialization cap of 40 and snapshot-derived telemetry. attachWebVirtualList owns physical materialization; listeners/subscription/host are disposed. Microtask readouts queued by collection notifications and actions have no explicit active-owner guard, so teardown acceptance is unresolved. The merged PR #1844 registry separately binds the two literal package imports; runtime acceptance remains outside this source-body audit.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/virtual-list/demo-brutalist-virtual-list-filter.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "baf2b6ffdfba697637ebc5a7e8ac6500f706a6fd6b1a772b09876b3963f3a66e",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "442fe8f1e592144e2a7dacc39eb363ad53149d19"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Owns 500 deterministic record keys, All/Release/Alert/Empty filtering, public itemKeys updates, example button appearance and passive empty/status output. It obtains the public collection, delegates materialization/geometry to attachWebVirtualList, creates rows through viewport.ownerDocument, and removes listeners/disposes the host. The explicit scrollTop reset remains application composition. The two literal package imports are separately recorded by the merged PR #1844 import registry; this source-body audit does not establish runtime acceptance.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/virtual-list/demo-brutalist-virtual-list-jump.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "6b14404a054787aeaab9c4066a2bd1a07955d4984a54be8d85163c2cbfc77d55",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "551281bfcd1ec13fec784179f522318759b24e20"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Owns 1,000 deterministic keys and four public-button actions for start/center/end ensureVisible calls. Row highlighting and status output are application presentation; physical materialization stays with attachWebVirtualList. Listener cleanup, rowNodes.clear and host.dispose occur on teardown. The rowNodes map retains previously created entries during a live session, so the materialized-window cap is not proof of bounded application-retained nodes. The merged PR #1844 registry separately binds the two literal package imports; runtime acceptance remains outside this source-body audit.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/virtual-list/demo-brutalist-virtual-list-window.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "194f8b3058e2d0dc07bb4d21e147df3117aad777ccc6e75e9529ef26ce67fd38",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "23c68f4495fc791c011b26054d4e27112f7fce27"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Owns 2,000 deterministic keys, public overscanItems changes (1/6), a materialization cap of 40 and snapshot-derived telemetry. attachWebVirtualList owns physical materialization; listeners/subscription/host are disposed. Microtask readouts queued by collection notifications and actions have no explicit active-owner guard, so teardown acceptance is unresolved. The merged PR #1844 registry separately binds the two literal package imports; runtime acceptance remains outside this source-body audit.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/virtual-list/demo-liquid-glass-virtual-list-filter.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "a0bc39776523939e7cacbfd485667bf9e9a39d9b30d65bcd49f9ab84805e964e",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "db357a5f0598c9cb31b994a0704c3b5fef828e6a"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Owns 500 deterministic record keys, All/Release/Alert/Empty filtering, public itemKeys updates, example button appearance and passive empty/status output. It obtains the public collection, delegates materialization/geometry to attachWebVirtualList, creates rows through viewport.ownerDocument, and removes listeners/disposes the host. The explicit scrollTop reset remains application composition. The two literal package imports are separately recorded by the merged PR #1844 import registry; this source-body audit does not establish runtime acceptance.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/virtual-list/demo-liquid-glass-virtual-list-jump.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "21c8f40fe9d370505e90deb0d59095b7bde7c3035b046ce409fc7018ffaf9fba",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "e700f77b58bbb68c5b9980fb8ef47cd9a1a8230f"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Owns 1,000 deterministic keys and four public-button actions for start/center/end ensureVisible calls. Row highlighting and status output are application presentation; physical materialization stays with attachWebVirtualList. Listener cleanup, rowNodes.clear and host.dispose occur on teardown. The rowNodes map retains previously created entries during a live session, so the materialized-window cap is not proof of bounded application-retained nodes. The merged PR #1844 registry separately binds the two literal package imports; runtime acceptance remains outside this source-body audit.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/virtual-list/demo-liquid-glass-virtual-list-window.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "1d921324c455efd7a7510ab3e934edeb2586ee08d66760600e9ca99f7a2723dc",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "5e2f87c16daab5a5ef44642f18352fe6bb575320"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Owns 2,000 deterministic keys, public overscanItems changes (1/6), a materialization cap of 40 and snapshot-derived telemetry. attachWebVirtualList owns physical materialization; listeners/subscription/host are disposed. Microtask readouts queued by collection notifications and actions have no explicit active-owner guard, so teardown acceptance is unresolved. The merged PR #1844 registry separately binds the two literal package imports; runtime acceptance remains outside this source-body audit.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/virtual-list/demo-shadcn-virtual-list-filter.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "8aeb9ce39501ebb444e17f59d7ee116b7b897737ad808f46bb38f1d590b772b9",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "585c514ffc3c04fd8c674010663b1bd87d0cf17e"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Owns 500 deterministic record keys, All/Release/Alert/Empty filtering, public itemKeys updates, example button appearance and passive empty/status output. It obtains the public collection, delegates materialization/geometry to attachWebVirtualList, creates rows through viewport.ownerDocument, and removes listeners/disposes the host. The explicit scrollTop reset remains application composition. The two literal package imports are separately recorded by the merged PR #1844 import registry; this source-body audit does not establish runtime acceptance.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/virtual-list/demo-shadcn-virtual-list-jump.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "da28dba79c1a0607f6dee4438d9caa2c65ff2faeb24d8dab37e9b8107b67379f",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "4efea64b830fd2bfb5c42b38f6a7697602b0c86c"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Owns 1,000 deterministic keys and four public-button actions for start/center/end ensureVisible calls. Row highlighting and status output are application presentation; physical materialization stays with attachWebVirtualList. Listener cleanup, rowNodes.clear and host.dispose occur on teardown. The rowNodes map retains previously created entries during a live session, so the materialized-window cap is not proof of bounded application-retained nodes. The merged PR #1844 registry separately binds the two literal package imports; runtime acceptance remains outside this source-body audit.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/virtual-list/demo-shadcn-virtual-list-window.demo.ts",
+      "previous": {
+        "binding": "absent"
+      },
+      "reviewed": {
+        "sourceSha256": "aad71a8ba1eb087efdba722bb960a0cb16bf0ba5159f728e1c411f17ff090a7c",
+        "revision": "078c6e91c6ffdc1a4e1508978f63f31289da2cf8",
+        "gitBlob": "257def3ea226d992754cbc179a1efb50881ea815"
+      },
+      "ownersBefore": [],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "rowStateAfter": "blocked",
+      "sourceReview": "Owns 2,000 deterministic keys, public overscanItems changes (1/6), a materialization cap of 40 and snapshot-derived telemetry. attachWebVirtualList owns physical materialization; listeners/subscription/host are disposed. Microtask readouts queued by collection notifications and actions have no explicit active-owner guard, so teardown acceptance is unresolved. The merged PR #1844 registry separately binds the two literal package imports; runtime acceptance remains outside this source-body audit.",
+      "upstreamBindingDisposition": "Already bound to the same owner and digest by merged PR #1844; no duplicate binding is added by this audit."
+    }
+  ],
+  "upstreamSynchronization": {
+    "pullRequest": "https://github.com/Proto-UI/Proto-UI/pull/1844",
+    "mergedRevision": "59bbed9b38ed2426633e26e5c95687878348bca1",
+    "matchingSourceBlobs": 46,
+    "matchingSourceFingerprints": 46,
+    "matchingOwnerSets": 46,
+    "downstreamSourceBindingChanges": 0,
+    "downstreamRowStateChanges": 0,
+    "downstreamImportAllowlistChanges": 0,
+    "integrationNote": "Stash application initially duplicated the 24 new rows at the table tail. The exact upstream table was restored; this audit retains only its three row evidence links and one explanatory paragraph."
+  }
+}

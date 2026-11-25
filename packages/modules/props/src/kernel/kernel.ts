@@ -228,7 +228,7 @@ export class PropsKernel<P extends PropsBaseType> {
       // host-provided value and must not revive it through prevValid.
       if (isMissing) {
         const requireNonEmpty = strict && eb === 'error';
-        const fb = this.pickFallbackMissingOnly(k, decl, requireNonEmpty);
+        const fb = this.pickFallback(k, decl, requireNonEmpty, false);
 
         if (!fb.ok) {
           throw new Error(
@@ -253,7 +253,7 @@ export class PropsKernel<P extends PropsBaseType> {
 
         const mode: 'any' | 'non-empty' = strict && eb === 'error' ? 'non-empty' : 'any';
 
-        const fb = this.pickFallbackProvidedUnusable(k, decl, mode);
+        const fb = this.pickFallback(k, decl, mode === 'non-empty', true);
 
         if (!fb.ok) {
           throw new Error(
@@ -280,7 +280,7 @@ export class PropsKernel<P extends PropsBaseType> {
 
       const mode: 'any' | 'non-empty' = strict && eb === 'error' ? 'non-empty' : 'any';
 
-      const fb = this.pickFallbackProvidedUnusable(k, decl, mode);
+      const fb = this.pickFallback(k, decl, mode === 'non-empty', true);
 
       if (!fb.ok) {
         throw new Error(
@@ -351,97 +351,43 @@ export class PropsKernel<P extends PropsBaseType> {
   }
 
   /**
-   * Missing fallback: setDefaults layers -> spec.default -> null (never prevValid).
-   *
-   * - if requireNonEmpty=true: must find non-empty valid fallback; otherwise fail.
-   * - else: may return null if nothing provided.
+   * Missing values start with defaults. Provided unusable values may first
+   * reuse their previous valid candidate. Both paths validate the same ordered
+   * defaults and preserve their empty-value and diagnostic semantics.
    */
-  private pickFallbackMissingOnly(
+  private pickFallback(
     key: string,
     decl: PropSpec,
-    requireNonEmpty: boolean
+    requireNonEmpty: boolean,
+    includePrevious: boolean
   ): FallbackResult {
-    const acceptAny = (v: any) => v !== undefined;
-    const acceptNonEmpty = (v: any) => v !== null && v !== undefined;
-    const accept = requireNonEmpty ? acceptNonEmpty : acceptAny;
-
     const tryTake = (v: any, usedDefault: boolean): FallbackResult => {
-      if (!accept(v)) return { ok: false, usedDefault, isNonEmpty: false };
-      if (v === null || v === undefined) {
-        return { ok: true, value: null, usedDefault, isNonEmpty: false };
-      }
+      if (v === undefined || (requireNonEmpty && v === null))
+        return { ok: false, usedDefault, isNonEmpty: false };
+      if (v === null) return { ok: true, value: null, usedDefault, isNonEmpty: false };
       const valid = this.validateNonEmptyValue(v, decl);
       if (!valid.ok) return { ok: false, usedDefault, isNonEmpty: false };
       return { ok: true, value: valid.value, usedDefault, isNonEmpty: true };
     };
 
-    // defaultStack latest-first
+    if (includePrevious && hasOwn(this.prevValid, key)) {
+      const result = tryTake((this.prevValid as any)[key], false);
+      if (result.ok) return result;
+    }
+    // defaultStack remains latest-first; validators can observe that order.
     for (const layer of this.defaultStack) {
       if (hasOwn(layer, key)) {
-        const r = tryTake((layer as any)[key], true);
-        if (r.ok) return r;
+        const result = tryTake((layer as any)[key], true);
+        if (result.ok) return result;
       }
     }
-
-    if (hasOwn(decl as any, 'default')) {
-      const r = tryTake((decl as any).default, true);
-      if (r.ok) return r;
+    if (hasOwn(decl, 'default')) {
+      const result = tryTake((decl as any).default, true);
+      if (result.ok) return result;
     }
-
-    if (!requireNonEmpty) {
-      return { ok: true, value: null, usedDefault: true, isNonEmpty: false };
-    }
-
-    return { ok: false, usedDefault: false, isNonEmpty: false };
-  }
-
-  /**
-   * Provided-but-unusable fallback: prevValid first, then defaults, then spec.default, then null (mode any).
-   * This is for invalid raw values or empty=fallback scenarios.
-   */
-  private pickFallbackProvidedUnusable(
-    key: string,
-    decl: PropSpec,
-    mode: 'any' | 'non-empty'
-  ): FallbackResult {
-    const acceptAny = (v: any) => v !== undefined;
-    const acceptNonEmpty = (v: any) => v !== null && v !== undefined;
-
-    const accept = mode === 'non-empty' ? acceptNonEmpty : acceptAny;
-
-    const tryTake = (v: any, usedDefault: boolean): FallbackResult => {
-      if (!accept(v)) return { ok: false, usedDefault, isNonEmpty: false };
-      if (v === null || v === undefined) {
-        return { ok: true, value: null, usedDefault, isNonEmpty: false };
-      }
-      const valid = this.validateNonEmptyValue(v, decl);
-      if (!valid.ok) return { ok: false, usedDefault, isNonEmpty: false };
-      return { ok: true, value: valid.value, usedDefault, isNonEmpty: true };
-    };
-
-    if (hasOwn(this.prevValid, key)) {
-      const v = (this.prevValid as any)[key];
-      const r = tryTake(v, false);
-      if (r.ok) return r;
-    }
-
-    for (const layer of this.defaultStack) {
-      if (hasOwn(layer, key)) {
-        const r = tryTake((layer as any)[key], true);
-        if (r.ok) return r;
-      }
-    }
-
-    if (hasOwn(decl as any, 'default')) {
-      const r = tryTake((decl as any).default, true);
-      if (r.ok) return r;
-    }
-
-    if (mode === 'any') {
-      return { ok: true, value: null, usedDefault: true, isNonEmpty: false };
-    }
-
-    return { ok: false, usedDefault: false, isNonEmpty: false };
+    return requireNonEmpty
+      ? { ok: false, usedDefault: false, isNonEmpty: false }
+      : { ok: true, value: null, usedDefault: true, isNonEmpty: false };
   }
 
   dispose() {
