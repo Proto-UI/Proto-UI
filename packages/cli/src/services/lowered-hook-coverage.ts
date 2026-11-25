@@ -776,6 +776,7 @@ function scanRuleStateSource(
     ts.isNonNullExpression(node) ||
     ts.isParenthesizedExpression(node) ||
     ts.isAsExpression(node) ||
+    ts.isSatisfiesExpression(node) ||
     ts.isTypeAssertionExpression(node)
       ? unwrap(node.expression)
       : node;
@@ -3837,8 +3838,9 @@ function scanRuleStateSource(
       return false;
     }
     if (ts.isElementAccessExpression(inner)) {
-      // Retain the existing element-access owner proof.
-      return resolvableTokenArgument(inner.expression, scope, seen);
+      // An extractable owner's inventory does not prove an unknown key reads
+      // its own string data. Use the same private-leaf proof as dot access.
+      return literalTokenMember(inner, scope) !== null;
     }
     // evaluateTokenGraph/tokenMember also reads ordinary dot members. Admit a
     // finite own string leaf, not an opaque receiver's partial token inventory.
