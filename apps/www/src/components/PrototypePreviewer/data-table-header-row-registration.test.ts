@@ -107,14 +107,14 @@ describe('DataTable HeaderRow actual website and static entry closure', () => {
             { sortKey: isBase ? 'name' : 'status', sortDirection: 'ascending' },
           ])
         );
-        if (isBase) {
-          expect(
-            table
-              .getExposes()
-              .getRows()
-              .map((record) => record.id)
-          ).toEqual(['api', 'docs', 'web']);
-        }
+        expect(
+          table
+            .getExposes()
+            .getRows()
+            .map((record) => record.id)
+        ).toEqual(
+          isBase ? ['api', 'docs', 'web'] : ['bhqecj4p', 'derv1ws0', 'm5gr84i9', '3u1reuv4']
+        );
         headers[1]!.focus();
         headers[1]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
         headers[1]!.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
@@ -123,14 +123,14 @@ describe('DataTable HeaderRow actual website and static entry closure', () => {
           sortKey: isBase ? 'requests' : 'email',
           sortDirection: 'ascending',
         });
-        if (isBase) {
-          expect(
-            table
-              .getExposes()
-              .getRows()
-              .map((record) => record.id)
-          ).toEqual(['docs', 'api', 'web']);
-        }
+        expect(
+          table
+            .getExposes()
+            .getRows()
+            .map((record) => record.id)
+        ).toEqual(
+          isBase ? ['docs', 'api', 'web'] : ['3u1reuv4', 'bhqecj4p', 'm5gr84i9', 'derv1ws0']
+        );
         expect(selections).toEqual([]);
         await view.destroy();
         cleanup.pop();

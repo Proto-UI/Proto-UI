@@ -485,6 +485,9 @@
     "bg-main/25": {
       "background-color": "color-mix(in oklab, var(--pui-main) 25%, transparent)"
     },
+    "bg-main/80": {
+      "background-color": "color-mix(in oklab, var(--pui-main) 80%, transparent)"
+    },
     "bg-mint": {
       "background-color": "var(--pui-mint)"
     },
@@ -2359,9 +2362,6 @@
     "rounded-[min(var(--pui-radius-md),8px)]": {
       "border-radius": "min(var(--pui-radius-md), 8px)"
     },
-    "rounded-[min(var(--radius-md),12px)]": {
-      "border-radius": "min(var(--pui-radius-md), 12px)"
-    },
     "rounded-[var(--pui-radius-2xl)]": {
       "border-radius": "var(--pui-radius-2xl)"
     },
@@ -3665,6 +3665,7 @@
     "bg-main",
     "bg-main/20",
     "bg-main/25",
+    "bg-main/80",
     "bg-mint",
     "bg-muted",
     "bg-muted-foreground",
@@ -4215,7 +4216,6 @@
     "rounded-[min(var(--pui-radius-md),10px)]",
     "rounded-[min(var(--pui-radius-md),12px)]",
     "rounded-[min(var(--pui-radius-md),8px)]",
-    "rounded-[min(var(--radius-md),12px)]",
     "rounded-[var(--pui-radius-2xl)]",
     "rounded-[var(--pui-radius-3xl)]",
     "rounded-[var(--pui-radius-4xl)]",

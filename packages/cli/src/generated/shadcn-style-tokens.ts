@@ -899,7 +899,6 @@ export const SHADCN_STYLE_TOKENS: string[] = [
   'rounded-[min(var(--pui-radius-md),10px)]',
   'rounded-[min(var(--pui-radius-md),12px)]',
   'rounded-[min(var(--pui-radius-md),8px)]',
-  'rounded-[min(var(--radius-md),12px)]',
   'rounded-[var(--pui-radius-2xl)]',
   'rounded-[var(--pui-radius-3xl)]',
   'rounded-[var(--pui-radius-4xl)]',

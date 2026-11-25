@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Prototype } from '@proto.ui/core';
+import * as adapterBase from '@proto.ui/adapter-base';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
-import type { VisualFeedbackFrame } from '@proto.ui/module-feedback';
+import type { ResidentMotionFrame, VisualFeedbackFrame } from '@proto.ui/module-feedback';
 import * as scrollArea from '../src/scroll-area';
 import * as table from '../src/data-table';
 import * as tree from '../src/tree';
@@ -501,6 +502,22 @@ describe('Liquid content: data and collection ownership survives neutral paint',
 
 describe('Liquid content: passive facts, date rendering and ordinary editors', () => {
   it('keeps Progress indeterminate withdrawal distinct from Meter critical status', async () => {
+    const motionFrames = new WeakMap<HTMLElement, ResidentMotionFrame[]>();
+    const createMotionSink = adapterBase.createWebResidentMotionSink;
+    vi.spyOn(adapterBase, 'createWebResidentMotionSink').mockImplementation(
+      (host, effects, options) => {
+        const sink = createMotionSink(host, effects, options);
+        const records: ResidentMotionFrame[] = [];
+        motionFrames.set(host, records);
+        return {
+          ...sink,
+          commit(frame) {
+            records.push(frame);
+            sink.commit(frame);
+          },
+        };
+      }
+    );
     const progressRoot = make(progress.progressRoot);
     const progressTrack = make(progress.progressTrack);
     const progressIndicator = make(progress.progressIndicator);
@@ -527,6 +544,7 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     expect(progressIndicator.getExposes().indeterminate.get()).toBe(true);
     expect(progressIndicator.getExposes().percentage.get()).toBe(0);
     expect(progressIndicator.getAttribute('aria-hidden')).toBe('true');
+    expect(motionFrames.get(progressIndicator)?.at(-1)?.style.tokens).toContain('w-1/3');
     expect(meterRoot.getAttribute('role')).toBe('meter');
     expect(meterIndicator.getExposes().status.get()).toBe('critical');
     setElementProps(progressRoot, { value: 50, valueText: 'Half complete' });
@@ -538,10 +556,27 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     expect(progressIndicator.getExposes().percentage.get()).toBe(50);
     expect(progressIndicator.style.getPropertyValue('--pui-percentage')).toBe('50');
     expect(meterIndicator.getExposes().status.get()).toBe('optimal');
+    // Resident motion has one projection owner and rejects combined material.
+    // Observe its actual pass-through sink, not a fabricated visual-material frame.
+    const indicatorFrame = motionFrames.get(progressIndicator)?.at(-1);
+    expect(indicatorFrame?.declarations).toEqual([
+      { properties: ['width'], durationMs: 300, easing: [0.4, 0, 0.2, 1] },
+    ]);
+    expect(indicatorFrame?.style.tokens).toContain('w-[calc(var(--pui-percentage)*1%)]');
+    expect(indicatorFrame?.style.tokens).not.toContain('w-1/3');
+    expect(frames.get(progressIndicator) ?? []).toEqual([]);
+    setElementProps(progressRoot, {});
+    await flush();
+    expect(progressRoot.hasAttribute('aria-valuenow')).toBe(false);
+    expect(progressIndicator.getExposes().indeterminate.get()).toBe(true);
+    expect(motionFrames.get(progressIndicator)?.at(-1)?.style.tokens).toContain('w-1/3');
+    expect(motionFrames.get(progressIndicator)?.at(-1)?.style.tokens).not.toContain(
+      'w-[calc(var(--pui-percentage)*1%)]'
+    );
+    expect(frames.get(progressIndicator) ?? []).toEqual([]);
     expectNeutral(
       progressRoot,
       progressTrack,
-      progressIndicator,
       progressValue,
       meterRoot,
       meterTrack,
@@ -749,8 +784,19 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     expect(control.querySelectorAll('input,textarea')).toHaveLength(1);
     expect(latest(control).material.candidates).toEqual([{ intent: 'liquid-glass' }]);
     expect(latest(control).style.tokens).toEqual(
+      expect.arrayContaining(['bg-muted', 'text-muted-foreground'])
+    );
+    expect(latest(control).style.tokens.some((token) => token.startsWith('opacity-'))).toBe(false);
+    setElementProps(root, {});
+    await flush();
+    expect(control.querySelector('input')).toBe(editor);
+    expect(editor.disabled).toBe(false);
+    expect(latest(control).material.candidates).toEqual([{ intent: 'liquid-glass' }]);
+    expect(latest(control).style.tokens).toEqual(
       expect.arrayContaining(['bg-background', 'text-foreground'])
     );
+    expect(latest(control).style.tokens).not.toContain('bg-muted');
+    expect(latest(control).style.tokens).not.toContain('text-muted-foreground');
     expect(latest(control).style.tokens.some((token) => token.startsWith('opacity-'))).toBe(false);
     expectNeutral(root, label);
   });
@@ -862,7 +908,7 @@ describe('Liquid scalar Slider: transient material never owns value or capture',
       expectNeutral(root, track);
       expect(latest(thumb).material.candidates).toEqual([]);
       expect(latest(thumb).style.tokens).toEqual(
-        expect.arrayContaining(['bg-background', 'text-foreground'])
+        expect.arrayContaining(['bg-secondary', 'text-secondary-foreground'])
       );
       thumb.dispatchEvent(pointer('pointerdown'));
       await flush();
@@ -873,6 +919,9 @@ describe('Liquid scalar Slider: transient material never owns value or capture',
       await flush();
       expect(thumb.getExposes().pressed.get()).toBe(true);
       expect(latest(thumb).material.candidates).toEqual([]);
+      expect(latest(thumb).style.tokens).toEqual(
+        expect.arrayContaining(['bg-secondary', 'text-secondary-foreground'])
+      );
       setElementProps(thumb, {});
       await flush();
       expect(latest(thumb).material.candidates).toEqual(candidate);
@@ -884,6 +933,9 @@ describe('Liquid scalar Slider: transient material never owns value or capture',
       await flush();
       expect(thumb.getExposes().pressed.get()).toBe(false);
       expect(latest(thumb).material.candidates).toEqual([]);
+      expect(latest(thumb).style.tokens).toEqual(
+        expect.arrayContaining(['bg-secondary', 'text-secondary-foreground'])
+      );
       setElementProps(root, { value: 25 });
       await flush();
       thumb.dispatchEvent(pointer('pointerdown', { pointerId: 8 }));
