@@ -315,8 +315,8 @@ export function scanRuleStateReadInventory(
               ? sourceSummary.resolveSourceFunction(parent.name, source)
               : null;
           // Core's configured setup reference is not an opaque callback. The
-          // summary accepts it only when every reference stays in canonical
-          // registrations; the setup's actual Rule observations remain intact.
+          // summary accepts canonical registrations and explicitly proved
+          // first native setup calls; actual Rule observations remain intact.
           const configured = sourceSummary.isClosedAuthoredSetupReference(node, source);
           if (!direct && !configured && (!alias || functionKey(alias) !== functionKey(helper)))
             markUnclosed(source, node, helper);
@@ -370,6 +370,7 @@ type LocalStateBinding = {
 };
 
 type Binding =
+  | { kind: 'nativeDefinition'; bindingNode: ts.Node }
   | {
       kind: 'hookResult';
       hook: string;
@@ -2537,6 +2538,33 @@ function scanRuleStateSource(
       }
     }
 
+    // A source-known ordinary helper may return a State created by this
+    // invocation's Def. This carries local ownership only, never a producer
+    // name or a variant. A foreign caller does not inherit another call's Def.
+    if (ts.isCallExpression(value) && ts.isIdentifier(name)) {
+      const nativeDefinitions = new Set<ts.Node>();
+      const shadowed = new Set<string>();
+      for (let current: Scope | null = lookupScope; current; current = current.parent) {
+        for (const [key, binding] of current.bindings) {
+          if (shadowed.has(key)) continue;
+          shadowed.add(key);
+          if (binding.kind === 'nativeDefinition') nativeDefinitions.add(binding.bindingNode);
+        }
+      }
+      const returned = lookupScope.sourceSummary.resolveReturnedLocalState(
+        value,
+        source,
+        nativeDefinitions
+      );
+      if (returned && exposureFor(name.text, scope) === undefined) {
+        declare(scope, name.text, {
+          kind: 'localState',
+          declaredAs: returned.declaredName,
+        });
+        return;
+      }
+    }
+
     // `const hidden = def.state.bool('hidden', true)` — a prototype-owned state.
     // Production reads the member name statically, so `def.state['bool'](…)`
     // reaches the same declaration and must not be reported unresolved.
@@ -3573,20 +3601,25 @@ function scanRuleStateSource(
     return null;
   };
 
-  type LiteralTokenData = string | Map<string, LiteralTokenData>;
+  const literalStateHandle = Symbol('literal-state-handle');
+  type LiteralTokenData = string | typeof literalStateHandle | Map<string, LiteralTokenData>;
 
   /** Plain own data only: getters, spreads and prototype setters are not values. */
-  const literalTokenData = (expression: ts.Expression): LiteralTokenData | null => {
+  const literalTokenData = (expression: ts.Expression, scope: Scope): LiteralTokenData | null => {
     const value = unwrapWritten(expression);
     if (ts.isStringLiteralLike(value) || ts.isNoSubstitutionTemplateLiteral(value))
       return value.text;
-    if (!ts.isObjectLiteralExpression(value)) return null;
+    // The collector keeps State and token members independently. A previously
+    // resolved State identifier may share this private container, but its marker
+    // is never string token data and grants no new State or Runtime capability.
+    if (!ts.isObjectLiteralExpression(value))
+      return ts.isIdentifier(value) && readState(value, scope) !== null ? literalStateHandle : null;
     const members = new Map<string, LiteralTokenData>();
     for (const property of value.properties) {
       if (!ts.isPropertyAssignment(property)) return null;
       const key = propertyName(property.name);
       if (key === null || key === '__proto__') return null;
-      const member = literalTokenData(property.initializer);
+      const member = literalTokenData(property.initializer, scope);
       if (member === null) return null;
       members.set(key, member);
     }
@@ -3594,8 +3627,9 @@ function scanRuleStateSource(
   };
 
   /**
-   * A private map read hands only a proven string to its consumer. Bare
-   * references, exports, aliases, writes and unknown paths withhold this proof.
+   * A private map read hands only a proven string or existing State leaf to its
+   * consumer. Bare references, exports, aliases, writes and unknown paths
+   * withhold this proof.
    * The entire source is checked, including deferred writes and later escapes.
    */
   const literalTokenMapIsReadOnly = (
@@ -3666,7 +3700,18 @@ function scanRuleStateSource(
           data = data.get(key)!;
           current = next;
         }
-        if (typeof data !== 'string') {
+        if (typeof data !== 'string' && data !== literalStateHandle) {
+          safe = false;
+          return;
+        }
+        // Callable uses are outside a State-leaf read; method and tagged calls
+        // would also hand the owner to an opaque callee as `this`.
+        if (
+          data === literalStateHandle &&
+          ((ts.isCallExpression(current.parent) && current.parent.expression === current) ||
+            (ts.isNewExpression(current.parent) && current.parent.expression === current) ||
+            (ts.isTaggedTemplateExpression(current.parent) && current.parent.tag === current))
+        ) {
           safe = false;
           return;
         }
@@ -3714,7 +3759,7 @@ function scanRuleStateSource(
             : null;
         return owner instanceof Map && key !== null ? (owner.get(key) ?? null) : null;
       }
-      if (!ts.isIdentifier(value)) return literalTokenData(value as ts.Expression);
+      if (!ts.isIdentifier(value)) return literalTokenData(value as ts.Expression, scope);
       const binding = lookup(scope, value.text);
       // Imported const objects remain mutable through other modules. This
       // proof admits only a private owner whose complete source is visible.
@@ -3742,7 +3787,7 @@ function scanRuleStateSource(
         statement.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)
       )
         return null;
-      const data = literalTokenData(declaration.initializer);
+      const data = literalTokenData(declaration.initializer, scope);
       if (!(data instanceof Map)) return null;
       if (!literalTokenMapIsReadOnly(declaration.getSourceFile(), declaration.name, data))
         return null;
@@ -4659,7 +4704,14 @@ function scanRuleStateSource(
     // own origin cannot be recovered from the source, so it resolves to nothing
     // rather than falling through to an outer handle of the same name.
     if (ts.isFunctionLike(node)) {
-      for (const parameter of node.parameters) shadowBindingPattern(current, parameter.name);
+      for (const parameter of node.parameters) {
+        shadowBindingPattern(current, parameter.name);
+        if (ts.isIdentifier(parameter.name) && sourceSummary.isNativeSetupDefinition(parameter))
+          declare(current, parameter.name.text, {
+            kind: 'nativeDefinition',
+            bindingNode: parameter,
+          });
+      }
     }
     if (ts.isCatchClause(node) && node.variableDeclaration) {
       shadowBindingPattern(current, node.variableDeclaration.name);
