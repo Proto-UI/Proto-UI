@@ -313,6 +313,9 @@ for (const type of [
   'readonly number[]',
   '[number, number]',
   'readonly [number, number]',
+  'readonly number[] | readonly string[]',
+  'readonly [number] | readonly [number, number]',
+  'readonly number[] | readonly [number]',
 ]) {
   test(`array and tuple prelude members remain capability debt: ${type}`, (t) => {
     const result = fixture(t, {
@@ -326,6 +329,22 @@ for (const type of [
     assert.deepEqual(errors(result), []);
     assert.equal(result.sourceValid, null);
     assert.equal(result.analysisComplete, false);
+  });
+}
+
+for (const type of [
+  'readonly number[] | { readonly known: number }',
+  '{ readonly left: number } | { readonly right: number }',
+]) {
+  test(`union record member typos remain source-invalid: ${type}`, (t) => {
+    const result = fixture(t, {
+      'entry.ts': `declare const values: ${type}; values.slice(0, 1);`,
+    }).analyze();
+    const diagnostics = errors(result);
+    assert.equal(diagnostics.length, 1);
+    assert.equal(diagnostics[0].code, 'PUI_TYPESCRIPT_2339');
+    assert.equal(diagnostics[0].ruleId, 'proto/typescript-type');
+    assert.equal(result.sourceValid, false);
   });
 }
 

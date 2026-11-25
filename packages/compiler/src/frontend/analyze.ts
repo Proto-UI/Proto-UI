@@ -463,13 +463,16 @@ export function analyzeProtoProgram(
     if ((diagnostic.code === 2339 || diagnostic.code === 2551) && access) {
       const type = checker.getTypeAtLocation(access.expression);
       const domain = domains(type, checker);
-      // Tuple types inherit Array/ReadonlyArray members without an owning
-      // declaration symbol, so their missing prelude members remain unresolved.
-      const isPreludeType =
-        checker.isTupleType(type) ||
-        type.symbol?.declarations?.some(
-          (declaration) => declaration.getSourceFile().fileName === PRELUDE_PATH
-        );
+      // Tuple and union types can lack an owning declaration symbol. Missing
+      // members stay prelude debt only when every union branch has that origin.
+      const memberTypes = type.isUnion() ? type.types : [type];
+      const isPreludeType = memberTypes.every(
+        (memberType) =>
+          checker.isTupleType(memberType) ||
+          memberType.symbol?.declarations?.some(
+            (declaration) => declaration.getSourceFile().fileName === PRELUDE_PATH
+          )
+      );
       // A typo on an actually declared user record is different from an absent
       // API in today's intentionally incomplete primitive/host prelude.
       authorError = only(domain, 'object') && !isPreludeType;
