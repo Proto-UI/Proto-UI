@@ -661,6 +661,17 @@ for (const width of [2048, 390]) {
               runtime
             );
           }
+          if (route === '/zh-cn/' && width === 390 && !baseline) {
+            const entry = page.locator('a[href="#home-demo-previewer"]').first();
+            await entry.focus();
+            await page.keyboard.press('Enter');
+            await expect.poll(() => new URL(page.url()).hash).toBe('#home-demo-previewer');
+            await expect
+              .poll(() =>
+                page.locator('[data-home-showcase]').evaluate((node) => (node as HTMLElement).inert)
+              )
+              .toBe(false);
+          }
           const trigger = page
             .locator(
               route === '/zh-cn/'
@@ -1065,7 +1076,9 @@ for (const width of [2048, 390]) {
         const preview = page.locator('.proto-previewer[data-demo-id="demo-base-button"]');
         await expect.poll(() => preview.getAttribute('data-inited')).toBe('1');
         const pending = await preview.evaluate((root) => {
-          const status = root.querySelector<HTMLElement>('[role="status"]');
+          const status = root.querySelector<HTMLElement>(
+            '.proto-previewer__skeleton[role="status"]'
+          );
           const host = root.querySelector<HTMLElement>('.host')!;
           return {
             statusConnected: Boolean(status?.isConnected),
@@ -1100,7 +1113,9 @@ for (const width of [2048, 390]) {
         const settled = await preview.evaluate((root) => {
           const host = root.querySelector<HTMLElement>('.host')!;
           return {
-            statusCount: root.querySelectorAll('[role="status"]').length,
+            // The optional compiler panel owns a separate live status. Observe
+            // only the loading status whose lifetime this journey exercises.
+            statusCount: root.querySelectorAll('.proto-previewer__skeleton[role="status"]').length,
             hostInert: host.inert,
             hostVisibility: getComputedStyle(host).visibility,
             text: host.textContent,
