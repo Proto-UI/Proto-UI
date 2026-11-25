@@ -110,6 +110,18 @@ describe('Liquid hover first-party fixture composition (source only)', () => {
       allowEmpty: false,
     });
   });
+  it('keeps ordinary Accordion padding outside the exact target reservation', () => {
+    const demo = liquidHoverDemo('accordion', () => {}, []);
+    const nodes = walk(demo.root);
+    const heading = nodes.find(({ node }) => node.kind === 'proto' && node.ref === 'heading')!.node;
+    expect(heading.kind === 'proto' && heading.children).toEqual([
+      expect.objectContaining({ kind: 'proto', ref: 'subject' }),
+    ]);
+    const inset = nodes.find(
+      ({ node }) => node.kind === 'box' && node.className === 'liquid-hover-inset'
+    )!.node;
+    expect(inset.kind === 'box' && inset.children).toEqual([heading]);
+  });
 });
 
 describe('native screenshot context retains outer visual evidence', () => {
