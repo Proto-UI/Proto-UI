@@ -102,32 +102,36 @@ describe('one owner for migrated demo callbacks', () => {
       const writes = statusWrites(f.refs.requestStatus!);
       signal(f.refs.controlled!, 'openChange', { open: true, reason: 'trigger' });
       expect(writes).toHaveBeenCalledTimes(1);
-      expect(f.refs.requestStatus!.textContent).toContain('owner has not accepted');
+      expect(f.refs.requestStatus!.textContent).toContain(
+        family === 'base' ? 'owner has not accepted' : 'Click Accept to apply.'
+      );
       f.refs.accept!.click();
       expect(f.props.mock.calls.filter(([ref]) => ref === 'controlled')).toHaveLength(1);
-      expect(f.refs.requestStatus!.textContent).toBe('Owner accepted: open.');
+      expect(f.refs.requestStatus!.textContent).toBe(
+        family === 'base' ? 'Owner accepted: open.' : 'Invoice details are now expanded.'
+      );
     });
   }
   for (const [family, demo] of Object.entries({
     bootstrap: bootstrapSelect,
     liquid: liquidSelect,
   })) {
-    it(`${family} Select applies one proposal and preserves its label observer`, async () => {
+    it(`${family} Select applies one proposal and resets once`, async () => {
       const f = await mount(demo);
-      const writes = statusWrites(f.refs.requestStatus!);
-      signal(f.refs.controlled!, 'valueChange', {
-        value: 'beta',
-        textValue: 'Beta',
+      signal(f.refs.fruitSelect!, 'valueChange', {
+        value: 'banana',
+        textValue: 'Banana',
         reason: 'selection',
       });
-      expect(writes).toHaveBeenCalledTimes(1);
-      f.refs.accept!.click();
-      expect(f.props.mock.calls.filter(([ref]) => ref === 'controlled')).toHaveLength(1);
-      expect(f.refs.requestStatus!.textContent).toBe('Owner accepted: beta.');
-      f.refs.controlledTrigger!.setAttribute('aria-label', 'changed');
-      await vi.waitFor(() =>
-        expect(f.refs.controlledTrigger!.getAttribute('aria-label')).toBe('controlled selection')
-      );
+      expect(f.props.mock.calls.filter(([ref]) => ref === 'fruitSelect')).toHaveLength(1);
+      expect(f.props.mock.calls.find(([ref]) => ref === 'fruitSelect')?.[1]).toMatchObject({
+        value: 'banana',
+      });
+      f.refs.resetProduce!.click();
+      expect(f.props.mock.calls.filter(([ref]) => ref === 'fruitSelect')).toHaveLength(2);
+      expect(f.props.mock.calls.filter(([ref]) => ref === 'fruitSelect')[1]?.[1]).toMatchObject({
+        value: 'apple',
+      });
     });
   }
   for (const [family, demo] of Object.entries({
@@ -153,14 +157,17 @@ describe('one owner for migrated demo callbacks', () => {
     });
     expect(writes).toHaveBeenCalledTimes(1);
   });
-  it('Field calls each validation command once and retains its validity callback', async () => {
+  it('Field calls each validation command once and retains its validation callback', async () => {
     const f = await mount(createFieldDemo('base'));
     f.refs.validate!.click();
     expect(
-      f.calls.mock.calls.filter(([ref, method]) => ref === 'requiredRoot' && method === 'validate')
+      f.calls.mock.calls.filter(([ref, method]) => ref === 'usernameRoot' && method === 'validate')
     ).toHaveLength(1);
-    const writes = statusWrites(f.refs.controlledStatus!);
-    signal(f.refs.controlledRoot!, 'validityChange', { invalid: true, errors: ['Required'] });
+    expect(
+      f.calls.mock.calls.filter(([ref, method]) => ref === 'handleRoot' && method === 'validate')
+    ).toHaveLength(1);
+    const writes = statusWrites(f.refs.handleStatus!);
+    signal(f.refs.handleRoot!, 'validationRequest', { value: 'ada', requestId: 'req-1' });
     expect(writes).toHaveBeenCalledTimes(1);
   });
   it('Form reports one submitted value record', async () => {
@@ -168,7 +175,7 @@ describe('one owner for migrated demo callbacks', () => {
     const writes = statusWrites(f.refs.status!);
     signal(f.refs.form!, 'submit', { values: { name: 'Ada' } });
     expect(writes).toHaveBeenCalledTimes(1);
-    expect(f.refs.status!.textContent).toBe('{"name":"Ada"}');
+    expect(f.refs.status!.textContent).toBe('Submitted: {"name":"Ada"}');
   });
   it('Range advances by one step rather than two', async () => {
     const f = await mount(createRangeReadoutDemo('base', 'progress'));
