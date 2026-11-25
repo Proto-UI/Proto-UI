@@ -35,7 +35,7 @@ it.each(Object.entries(files).filter(([path]) => path.includes('shadcn')))(
     const column = direct.find(
       (child): child is Extract<DemoNode, { kind: 'box' }> =>
         child.kind === 'box' &&
-        child.children?.some(
+        (child.children ?? []).some(
           (part) =>
             typeof part !== 'string' &&
             part.kind === 'proto' &&

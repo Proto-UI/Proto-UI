@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { initProjectedPreviewer } from './projected-previewer-client';
-import { assertDemoSpec, type DemoNode, type DemoRuntimeApi } from './demo-types';
+import {
+  assertDemoSpec,
+  type DemoNode,
+  type DemoRuntimeApi,
+  type DemoSetupContext,
+} from './demo-types';
 import { PROJECTION_FAMILY_MANIFESTS } from './projection-families';
 import { loadPrototype } from './prototype-modules';
 import { getPrototype } from './registry';
@@ -17,7 +22,7 @@ vi.mock('./demo-modules', async (original) => {
       if (!/^demo-(bootstrap-2-3-2|liquid-glass)-select$/.test(id)) return demo;
       return {
         ...demo,
-        setup(context: Parameters<NonNullable<typeof demo.setup>>[0]) {
+        setup(context: DemoSetupContext) {
           // Observe the actual authored owner's public API. No identity,
           // selection, readiness or renderer result is substituted.
           authoredApis.set(id, context.api);

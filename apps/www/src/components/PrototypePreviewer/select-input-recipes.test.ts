@@ -163,10 +163,8 @@ for (const [family, demo] of Object.entries({
       expect(x('select').getCollectionCount()).toBe(18);
       expect(x('item3').disabled.get()).toBe(true);
       api.call('select', 'openDropdown', 'recipe');
-      await vi.waitFor(() =>
-        expect(refs[family === 'brutalist' ? 'selectContent' : 'selectViewport']).toBeDefined()
-      );
-      const viewport = refs[family === 'brutalist' ? 'selectContent' : 'selectViewport'];
+      await vi.waitFor(() => expect(refs.selectViewport).toBeDefined());
+      const viewport = refs.selectViewport;
       expect(viewport.style.maxHeight).toBe('180px');
       expect(viewport.style.overflowY).toBe('auto');
       refs.toggleRefusal.click();
