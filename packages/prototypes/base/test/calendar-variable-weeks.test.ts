@@ -131,7 +131,7 @@ it('keeps explicit outside dates visible while applying availability and preserv
   expect(day.getExposes().outside.get()).toBe(true);
   expect(day.getExposes().disabled.get()).toBe(true);
 });
-it('declares a focused Shadcn ring independently of selected when the host reports non-visible focus', async () => {
+it('applies Shadcn focus-visible ring independently of selected while keeping pointer focus ring-free', async () => {
   const root = node('shadcn-calendar-root', { month: '2026-11' });
   const day = node('shadcn-calendar-day', { date: '2026-11-07' });
   root.append(day);
@@ -141,20 +141,31 @@ it('declares a focused Shadcn ring independently of selected when the host repor
   // Happy DOM treats every focus as :focus-visible. Supply the explicit host
   // fact for this semantic test; real browser pointer focus remains a visual gate.
   const matches = day.matches.bind(day);
-  vi.spyOn(day as HTMLElement, 'matches').mockImplementation((selector: string) =>
-    selector === ':focus-visible' ? false : matches(selector)
-  );
+  const spy = vi
+    .spyOn(day as HTMLElement, 'matches')
+    .mockImplementation((selector: string) =>
+      selector === ':focus-visible' ? false : matches(selector)
+    );
   day.getExposes().focusSelf({ reason: 'pointer' });
   await flush();
   expect(day.getExposes().focused.get()).toBe(true);
   expect(day.getExposes().focusVisible.get()).toBe(false);
   expect(day.getExposes().selected.get()).toBe(false);
-  expect(day.getAttribute('data-pui-style')).toContain('data-[focused]:ring-3');
+  expect(day.getAttribute('data-pui-style')).not.toContain('ring-3');
+  spy.mockRestore();
+  day.blur();
+  await flush();
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+  day.getExposes().focusSelf({ reason: 'keyboard' });
+  await flush();
+  expect(day.getExposes().focused.get()).toBe(true);
+  expect(day.getExposes().focusVisible.get()).toBe(true);
+  expect(day.getAttribute('data-pui-style')).toContain('ring-3');
   day.click();
   await flush();
   expect(day.getExposes().selected.get()).toBe(true);
   expect(day.getExposes().focused.get()).toBe(true);
   expect(day.getAttribute('data-pui-style')).toContain(
-    'data-[selected]:not-[data-range-middle]:bg-primary'
+    'data-[selected]:not-[data-range-middle]:not-[data-range-pending]:bg-primary'
   );
 });
