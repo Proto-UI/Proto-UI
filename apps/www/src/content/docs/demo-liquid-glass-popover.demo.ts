@@ -70,6 +70,7 @@ export default {
                           associations: { controlLabel: field.key },
                           props: {
                             defaultValue: field.value,
+                            material: 'opaque',
                           },
                         },
                       ],

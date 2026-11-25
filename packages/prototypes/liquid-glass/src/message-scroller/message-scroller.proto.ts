@@ -102,7 +102,7 @@ export const messageScrollerJump = definePrototype<
 
     def.feedback.style.use(
       tw(
-        'absolute bottom-4 left-1/2 -translate-x-1/2 z-10 inline-flex shrink-0 min-h-9 items-center justify-center gap-1.5 rounded-full border border-border px-4 py-1.5 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm transition-shadow'
+        'absolute bottom-4 left-0 right-0 mx-auto w-fit z-10 inline-flex shrink-0 min-h-9 items-center justify-center gap-1.5 rounded-full border border-border px-4 py-1.5 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm transition-shadow'
       )
     );
     (Object.keys(JUMP_FILLS) as Array<keyof typeof JUMP_FILLS>).forEach((variant) => {
