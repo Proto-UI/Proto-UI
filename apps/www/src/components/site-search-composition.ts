@@ -46,7 +46,7 @@ type PrepareOpenerReturn = (panel: HTMLElement | undefined) => (() => void) | un
 
 export function createSiteSearchComposition(options: {
   family: 'shadcn' | 'brutalist' | 'bootstrap-2-3-2';
-  shadcnStyle: 'rhea' | 'new-york-v4';
+  shadcnStyle: 'luma' | 'rhea' | 'new-york-v4';
   session: SiteSearchSession;
   copy: SiteSearchCopy;
   isCurrent(): boolean;

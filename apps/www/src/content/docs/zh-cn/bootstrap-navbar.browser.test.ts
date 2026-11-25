@@ -386,7 +386,7 @@ async function selectFamily() {
   await page!
     .locator(`[id=${JSON.stringify(id)}]`)
     .getByRole('option', {
-      name: 'Bootstrap 2.3.2 · WIP',
+      name: 'Bootstrap 2.3.2',
       exact: true,
     })
     .click();

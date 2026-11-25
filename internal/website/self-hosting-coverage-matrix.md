@@ -291,7 +291,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/code-file-browser-client.ts` | `www.docs.code-example-file-tabs`, `www.docs.code-panel-scroll` | `315a30074f97c4fd94aad261bfcedde61add36122e4f8c56f2ab56bd98f48d5e` |
 | `apps/www/src/components/CliInitOutput.astro` | `www.content.native-disclosures`, `www.docs.code-example-file-tabs`, `www.docs.code-panel-copy`, `www.docs.code-surface` | `6b17d95499e4442265d74cec71bab184266e7abe7d40396b0bd80bc956c8bdcf` |
 | `apps/www/src/components/override/Sidebar.astro` | `www.shell.sidebar-navigation` | `9cf7486a4a86e8512c9f75215cff83f0ffb0b1a3f3753c802782c08f0fb0ece5` |
-| `apps/www/src/components/site-contents-panel.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `85e968cb5abb1be2a7d3645a241143578c407730a650e5c152cf522346668d2a` |
+| `apps/www/src/components/site-contents-panel.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `5b431e8813cfae83c06bb5542c179bc9c961569557fbb45c432521fce5201812` |
 | `apps/www/src/components/site-sidebar-disclosure-bootstrap.js` | `www.shell.sidebar-navigation` | `288fea49c1e048164274439f1d25b65cd51a19a06a09ed5672981478f4811edd` |
 | `apps/www/src/components/StaticFamilyIcon.astro` | `www.gallery.ui-library-cards` | `8bc794693641b340a84154400a7e9386958c49528e58ffac81c49f9174dec6e6` |
 | `apps/www/src/components/PrototypePreviewer/ShadowSplitAcceptance.astro` | `www.demo.authored-controllers` | `3c9c12659926d2a3cc8a531783c1f448b8cbe8e32d3aab44429de11424265684` |
@@ -306,7 +306,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/LibraryLiquidScene.astro` | `www.gallery.ui-library-cards` | `4db6d52ad50e06a57ba01bba6e57d4f04b9baadc3920c5882ff9526640eb5661` |
 | `apps/www/src/components/library-liquid-card-client.ts` | `www.gallery.ui-library-cards` | `a2b9d2019202dea0d1a7f7c6157afef3897a71acadb5a00ca64951570d8fc2e0` |
 | `apps/www/src/components/library-liquid-scene.ts` | `www.gallery.ui-library-cards` | `d8ccbb061715254ca258abef8e686561aa87cafd9327d84d7a789e8759740a0b` |
-| `apps/www/src/components/UiLibraryGallery.astro` | `www.gallery.ui-library-cards` | `a58a50d68d67fdca2a22e3312191372658daf4b8349855c7d6b5e73872c521bb` |
+| `apps/www/src/components/UiLibraryGallery.astro` | `www.gallery.ui-library-cards` | `b93920864a23913c3f752b748c30a32c5f4bafda35b83d0065d26ce8861a4a19` |
 | `apps/www/src/components/LibraryCardFrame.astro` | `www.gallery.ui-library-cards` | `f583b5140d82d64d1620ec8b0e62cf309e5ebec27fce5459e3c4926ca34b6665` |
 | `apps/www/src/components/LibraryCardPart.astro` | `www.gallery.ui-library-cards` | `9f06c431bc331ab4d67b916ddca3b9fb52cbc1ce5eb658d5e53679bd6cad0d40` |
 | `apps/www/src/components/library-card-client.ts` | `www.gallery.ui-library-cards` | `7b4f42ca2201e26ca971fa4c61ce0bdaa08ea03f20df7a9f58677b328386ffb8` |
@@ -354,18 +354,18 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/Homepage/HomeActions.astro` | `www.shell.adapter-select`, `www.shell.hero-actions`, `www.shell.mobile-menu-toggle`, `www.shell.native-link-presentation`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `aae02e68c94fca95e06ba50abb9d82e45b55302be2d4bdb520b9a6f4b4195605` |
 | `apps/www/src/components/Homepage/HomepageRuntime.astro` | `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `d56557a3ba35c4ab139b13a350ebf4bb59bd3e310ba8623768a93bc6991bd21a` |
 | `apps/www/src/components/Homepage/home-action-icons.ts` | `www.shell.hero-actions` | `f06c052c540bab9e1b8e4b2b9cb14320241bb5bfbe2dee15cc2435a5f2ee1c0c` |
-| `apps/www/src/components/Homepage/homepage-demo-participant.ts` | `www.demo.home-demo-select` | `172b312a4035f28bd5c9d54a2a916481f1aa4b966c50822386752d233984c088` |
+| `apps/www/src/components/Homepage/homepage-demo-participant.ts` | `www.demo.home-demo-select` | `2bfe62aecf04854ff1efec7bffb8e683ad631413ad1f20f464751139dceec8e3` |
 | `apps/www/src/components/Homepage/homepage-ghost-theme.ts` | `www.demo.home-demo-select` | `106a0a26ccbf02a304e08abf82760b5ee7209877cf77512d37627d4ffe11e7f4` |
-| `apps/www/src/components/Homepage/HomepageGhostCard.astro` | `www.demo.home-demo-select` | `aa0aefbf186d33d73257078cc3ee870172f81cc942f66852e7d4a4642860a515` |
-| `apps/www/src/components/Homepage/homepage-gallery-icons.ts` | `www.demo.home-demo-select` | `ee553761832372e9d3df502d2b0ca15e62604c9d3c5bfb5b1a9cb157b461f0c7` |
-| `apps/www/src/components/Homepage/homepage-gallery-parts.ts` | `www.demo.home-demo-select` | `4bbc79f81ba5ab713e48bc79593b164b1354f24be8ee3eaf686985061900c7e3` |
+| `apps/www/src/components/Homepage/HomepageGhostCard.astro` | `www.demo.home-demo-select` | `d6877d9fac6a4265df5845b2539a696adb8a3277d6d5d6ec71028328c3100196` |
+| `apps/www/src/components/Homepage/homepage-gallery-icons.ts` | `www.demo.home-demo-select` | `8ed70c54c924a2b9757839f48f6414a4bbfa1a5bb7bb2278f0ea6e2f711b7940` |
+| `apps/www/src/components/Homepage/homepage-gallery-parts.ts` | `www.demo.home-demo-select` | `ea0a3931fcd6764d2dd93e3e4f96b14c17e36b44fd044cb4fbff9153b60b1e3b` |
 | `apps/www/src/components/Homepage/homepage-locale-select.ts` | `www.shell.language-select` | `c98f69429cdb314c7d0f5a48bd1076ec00fa0a84733b8922e81c0f88fc4d1dac` |
 | `apps/www/src/content/docs/zh-cn/label-selection-observer.ts` | `www.demo.home-demo-select` | `0f3d2218bbc973f9feeb3f46b7adeec0863a3fcd3a0a8408950aa64361c8ee05` |
 | `apps/www/src/content/docs/zh-cn/site-search-ime-evidence.ts` | `www.search.input-results` | `c84f1c2e125dcebd7d6096b1f5fa7441dcaf40c8110d83015324b7d85350d3ba` |
 | `apps/www/src/components/Homepage/homepage-live-preview.ts` | `www.demo.home-demo-select` | `f154381eeb8b5cdabdbd6eb49cc35bd4b51c80f4a64cb738364f12d232cf2c91` |
-| `apps/www/src/components/Homepage/homepage-runtime-client.ts` | `www.content.typography-presentation`, `www.demo.home-demo-select`, `www.search.dialog`, `www.search.launcher`, `www.search.loading-failure`, `www.shell.adapter-select`, `www.shell.hero-actions`, `www.shell.hero-hash-scroll`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.native-link-presentation`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `04ab0568d223ab7cc0fea4caf3056f9a3488c76f2a5ef082b724ab10fae8a2bd` |
-| `apps/www/src/components/Homepage/homepage-showcase.ts` | `www.demo.home-demo-select` | `724948f5c3aa0b3eb9eec21d1d8e22254dcd3e0b90a9166ce2bdce8a18a113c7` |
-| `apps/www/src/components/Homepage/homepage-text.ts` | `www.demo.home-demo-select` | `bebbe40586af030a01536b1e63c010fff697aed294b7a30437e2575ed1aa08f3` |
+| `apps/www/src/components/Homepage/homepage-runtime-client.ts` | `www.content.typography-presentation`, `www.demo.home-demo-select`, `www.search.dialog`, `www.search.launcher`, `www.search.loading-failure`, `www.shell.adapter-select`, `www.shell.hero-actions`, `www.shell.hero-hash-scroll`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.native-link-presentation`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `0bef3c6ef11e1527e136d93a807812dcce527eab713d99f6bcf175689bb5d3e3` |
+| `apps/www/src/components/Homepage/homepage-showcase.ts` | `www.demo.home-demo-select` | `b80ff7afc6408fbbe4a1561a1acff19e36a4c23365ccb0dce2bb66189d7dbe95` |
+| `apps/www/src/components/Homepage/homepage-text.ts` | `www.demo.home-demo-select` | `ff74daefab110366d895efb116a04b3d56de035255cf6f016a2bf0dbd3f7348a` |
 | `apps/www/src/components/InstallCommandCard.astro` | `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.install-manager-tabs` | `05c9324e9bb8a39e6ec6772d205c9823258d86638887c0e8b903f762cd887de7` |
 | `apps/www/src/components/install-command-card-client.ts` | `www.docs.install-manager-tabs` | `dd644892e2650c8c6978c8b5707692ace5cc68d680acf940ef65d3483aa8fb64` |
 | `apps/www/src/components/LanguageRedirect.astro` | `www.route.root-locale-redirect` | `18eb5d0fa57946c881a41698a55ec3fa36a8eeb04fcfd263d333c1f9e37087b6` |
@@ -379,7 +379,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/PrototypePreviewer/DemoPreviewer.astro` | `www.demo.prototype-previewer` | `f8fcf3d1603b1a6e21e464cc9b70b4dcba2b53cbc6a74f8a41975e770e0e4c72` |
 | `apps/www/src/components/PrototypePreviewer/DemoMatrix.astro` | `www.demo.demo-matrix` | `28e2afbcee6a6a538157cc7714e8ffaea08394df89bdae390ea10ab55e209479` |
 | `apps/www/src/components/PrototypePreviewer/DialogDemoStyles.astro` | `www.demo.prototype-previewer` | `3f25d1a890299e4246e2757dc096402a07288ee168c8ca9344b8b3c5ef0ef987` |
-| `apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro` | `www.demo.home-demo-select` | `78ecc05f4319dd16ed7be2ffe06586c06c81420a8922d1568ebc979f40f40fb1` |
+| `apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro` | `www.demo.home-demo-select` | `ebde5eeaa140a2ec80284aa41b94c2dcf1851a76a7812947299879946bf776b9` |
 | `apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `9f9b75906e72f8fb16d0f0d33eb02c4c397f227f53747fb4c212f72951bf5c3f` |
 | `apps/www/src/components/PrototypePreviewer/TransitionDemoStyles.astro` | `www.demo.prototype-previewer` | `bf8f7ef09b0fdfcb0d01f09d90ec093e141e05e884ec3afb949ac2b78c89d383` |
 | `apps/www/src/components/PrototypePreviewer/code-panel-client.ts` | `www.demo.code-panel`, `www.docs.code-panel-expand` | `8ee4c63e5b1581afcade0b02ada62710ad3da7538a986471fc176ff0f3582cc7` |
@@ -401,9 +401,9 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `7ef6183e86ad551f6252af164955ca4dae855b8ebc115cb024f1f717dbbda51a` |
 | `apps/www/src/components/PrototypePreviewer/previewer-removal.ts` | `www.demo.prototype-previewer` | `547aa146738b442dfc17c25c01db979ae4711ea9ff226c76dbc56857f32f3a89` |
 | `apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `3d872af075760e384e9f98f438ff95f062dd8c388a83847f4222f3d015d2bf1a` |
-| `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `cbcfb8f996eb26f6bd1f8d0ea9f863c948e26ab4718a8da6f633316905ddce5a` |
+| `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `857a983c9101da3677e6fdd3946caa099b557db79f1f58620970e2ab216ba4cb` |
 | `apps/www/src/components/PrototypePreviewer/projection-materializer.ts` | `www.demo.prototype-previewer` | `7b44a01b23f7910150ca875cdf5e9f0320e3be7ac28b1372f167be78c9029e10` |
-| `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `8f944d960b3f435b5af9a48ca38ca1856003536755f8ef1d2357de93f538fe0d` |
+| `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `3c6a0b9111f3ec8cc6942a7469fe0d387ed64222c34c36c0c49f9f71b279e6f2` |
 | `apps/www/src/components/PrototypePreviewer/runtime-loading-mask.ts` | `www.demo.home-demo-select` | `16845ab5f031db1b75a5a5c7dce214d2fded101807fcb4e899ed29f97ffcb275` |
 | `apps/www/src/components/PrototypePreviewer/runtime-tabs.ts` | `www.demo.runtime-select` | `474e5be107742102059b663053f8c6d30c9482731d8d82bde40c514f4083e54b` |
 | `apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts` | `www.demo.preview-surface` | `c506d06d1d8dbd31f9ec2d48a93d029a7ae0e52f299c5db9b57d77da7a9d9304` |
@@ -419,18 +419,18 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/documentation-image-preview.ts` | `www.docs.whitepaper-diagram-viewer` | `7f2becfd1dd2aacbdf69ee055c60dc8f08449fdc6a7202a8f9a9d12b89bb719a` |
 | `apps/www/src/components/hidden-first-activation.ts` | `www.docs.code-panel-copy`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.note-surface` | `d1de936074817b50b3c1cd15fb5256a29809a0dd2952d8d0cbc774f832e5c80d` |
 | `apps/www/src/components/override/AdapterSelect.astro` | `www.shell.adapter-select` | `b2611d2f5c62377c57da2c7693928720e8b3beb7e751f6b6b7a5e047d611ba22` |
-| `apps/www/src/components/override/Header.astro` | `www.shell.header-separators`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.primary-nav` | `7457f2de19b85e74d9d0709b618d1330c0264c3490e004d75326930c3ff982a0` |
-| `apps/www/src/components/override/Hero.astro` | `www.shell.hero-actions`, `www.shell.native-link-presentation` | `acac2f7152cd6aa5ed352418526a76db562c9bdbc1a18bbdb7def035976ad27d` |
+| `apps/www/src/components/override/Header.astro` | `www.shell.header-separators`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.primary-nav` | `9b0a11bcf0ad5ec5d36ef0d97b31f6aad580533e46e5bf92310563396d78656a` |
+| `apps/www/src/components/override/Hero.astro` | `www.shell.hero-actions`, `www.shell.native-link-presentation` | `6507ab63cce0941bbd4e248637e1660eafac69013406956ee2feed5749d15a81` |
 | `apps/www/src/components/override/LanguageSelect.astro` | `www.shell.language-select` | `351a12c4517d9d685c1a819a38ecda6ccfe5a264451454b8d7282886339e43ea` |
-| `apps/www/src/components/override/PageFrame.astro` | `www.docs.whitepaper-diagram-viewer`, `www.docs.wiki-term`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.page-layout`, `www.shell.sidebar-navigation` | `753f40ce6c26eafd0ea860450c60c277a7bbff6adddc83cb65c753211fad8d57` |
-| `apps/www/src/components/override/Search.astro` | `www.search.dialog`, `www.search.input-results`, `www.search.launcher`, `www.search.loading-failure`, `www.search.pagefind-engine` | `043a32a80c35a73801ef5b4a4d7a4b27df512de5481852b1f04572b46f88f921` |
+| `apps/www/src/components/override/PageFrame.astro` | `www.docs.whitepaper-diagram-viewer`, `www.docs.wiki-term`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.page-layout`, `www.shell.sidebar-navigation` | `472171ece57481cd8b5f5b8defab8166d54f45bc058139ace89178cfaeb76a85` |
+| `apps/www/src/components/override/Search.astro` | `www.search.dialog`, `www.search.input-results`, `www.search.launcher`, `www.search.loading-failure`, `www.search.pagefind-engine` | `fa9af77f2ff684f24e34a014494841695bc0f9db7cdc286f200d7534e5247af7` |
 | `apps/www/src/components/override/Select.astro` | `www.shell.language-select` | `2de370ac250545ea251fcdd6a837c4d793dfa21ae5b659805c30bed6507a5c51` |
 | `apps/www/src/components/override/SocialIcons.astro` | `www.shell.native-link-presentation`, `www.shell.social-links` | `6f92b07d95903b205d9c31bf06c04e0b3fb2fab6fb6d37aa5da13aa93ad70fc4` |
 | `apps/www/src/components/override/TableOfContents/TableOfContents.astro` | `www.shell.table-of-contents` | `60bdc13dc0f9d34d39bbc4e4905f48acb1ea129773e90b385710118673b85497` |
 | `apps/www/src/components/override/TableOfContents/TableOfContentsList.astro` | `www.shell.table-of-contents` | `91882176089ca527813973dfc37d7b4982683ecebb860632c20904507da39c1b` |
 | `apps/www/src/components/override/TableOfContents/starlight-toc.ts` | `www.shell.table-of-contents` | `0081183e4d4fde2d4c2df9c990e01b49b230f397d75b2e48c73afa409146b9a1` |
 | `apps/www/src/components/override/ThemeProvider.astro` | `www.shell.theme-provider` | `7357e80613d87dcba985a5318d2d03b853537cef660ac76fbd457145cb227993` |
-| `apps/www/src/components/override/ThemeToggle.astro` | `www.shell.theme-toggle` | `343da75ff4a3ded93be875afe59837a85851bb42dc6df9b469b71e78594933da` |
+| `apps/www/src/components/override/ThemeToggle.astro` | `www.shell.theme-toggle` | `30e50bbda39a9eb1b0b854160fffd3766694d886cdfa37af1b6d1943154f7855` |
 | `apps/www/src/components/site-code-surface.ts` | `www.docs.code-surface`, `www.docs.note-surface` | `c29c1363d7d62a5753a7142a4b2bf2a8cdd908e630d9e195e7898d3b8693dbfe` |
 | `apps/www/src/components/site-contents-command.ts` | `www.shell.mobile-menu-toggle` | `b9076feb0bdf2f2a7d3887ef0a1a44f88b086c6ff33256ae4b71282e6d6b4799` |
 | `apps/www/src/components/site-copy-client.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `b4cdf3ccd25e466ae152c1b31b8e82e8010442f1b828a4b575c290ca67cbcb0d` |
@@ -438,19 +438,19 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/site-copy-controller.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `1a39475db2f52b420beec1b26d853d38e05f82d51864e8f50996c769861e59ba` |
 | `apps/www/src/components/site-header-disclosure.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `d784ea0ba41797e8540f4f582b85e1c04bac1a9995f9b4b01a6807a029f361dd` |
 | `apps/www/src/components/site-header-surface.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `b11e5dbb0a5f4d4a9a1fbce5e2575fd6c45b0d7c461dee44291e991234879abb` |
-| `apps/www/src/components/site-link-recipes.ts` | `www.shell.native-link-presentation` | `34d8b45ee47007e73ce6008ae58c1b9a06691bb26e856b91051c2ebb72458adc` |
+| `apps/www/src/components/site-link-recipes.ts` | `www.shell.native-link-presentation` | `16860dec9586b26f48518fc6466119f25199ea15d9bffaf446297966e2c32479` |
 | `apps/www/src/components/site-native-controls.ts` | `www.shell.native-link-presentation`, `www.shell.table-of-contents` | `b3adf001ead0e1cdbf5748a7f8e6a0b2e0d4f10b0c273e5a8d2751708b714451` |
 | `apps/www/src/components/site-native-link-facts.ts` | `www.shell.native-link-presentation` | `b1abc0626005f00d0f2298b2fe0d964e733f2df60a1141e158c52331486451cf` |
-| `apps/www/src/components/site-search-commands.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.launcher` | `faa8fc22e5006ee49d3dd6e2085989023aff7d2ab1d6d82d2ae0a5681ca6b572` |
-| `apps/www/src/components/site-search-composition.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.loading-failure` | `50828c387006e09d4440ae2027c0824750db76f5f896bc46d056f93fc42cdcd3` |
+| `apps/www/src/components/site-search-commands.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.launcher` | `e46446b1bfcfd4b3874017bf0e72ab111901cbc089bf835286265801db745541` |
+| `apps/www/src/components/site-search-composition.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.loading-failure` | `37e4f54bf7ae1afad9fd7a08417c104304bf7285b0f8ccee3a6b5923f4587ea7` |
 | `apps/www/src/components/site-search-owner.ts` | `www.search.input-results`, `www.search.loading-failure`, `www.search.pagefind-engine` | `aa4d3cc13174e2e9d62b557d81a8cf192483b669217af733332d22d42842f580` |
 | `apps/www/src/components/site-search-session.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.loading-failure` | `7e3aea951b4d101f80a560ea482df9082f82289dd8b7f47840eb18c78ce55a4f` |
 | `apps/www/src/components/site-search-data.ts` | `www.search.input-results`, `www.search.loading-failure`, `www.search.pagefind-engine` | `bef47a9111cce57e1c19c062be60b5c11178eb8c516ee7cb8a33d684aeb286eb` |
 | `apps/www/src/components/site-pagefind-resource.ts` | `www.search.pagefind-engine` | `1af8170a8e53e5b06f8583d13a8a4b7680e178abeccbffd04237ecb3a885b02a` |
 | `apps/www/src/components/site-select-dismissal.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select`, `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `3d990e18321eb574957172f2a33252cc0dd157e96c7973252a0cb4adbcef33d0` |
-| `apps/www/src/components/site-shadcn-controls.ts` | `www.demo.runtime-select`, `www.docs.code-panel-expand`, `www.docs.install-manager-tabs`, `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-toggle`, `www.shell.theme-toggle` | `087311d17d74329b1e58345672da46e1767f97de9ed03fb721fe8af0f51596b5` |
+| `apps/www/src/components/site-shadcn-controls.ts` | `www.demo.runtime-select`, `www.docs.code-panel-expand`, `www.docs.install-manager-tabs`, `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-toggle`, `www.shell.theme-toggle` | `b441db9889421b028ba5cf1422ca78db1f203bdcb5ed1419d1425fcdc38db41f` |
 | `apps/www/src/components/site-sidebar-current-visibility.ts` | `www.shell.sidebar-navigation` | `0c82ae36d1fa9d81efbceaad25c2e153a52333d3da0087abae9f3aac16315b6b` |
-| `apps/www/src/components/site-text-recipes.ts` | `www.content.typography-presentation` | `e035ff8d22dcff7af4e7df6b21ef4938f23884e98a6d362c0167180bf9dcce8d` |
+| `apps/www/src/components/site-text-recipes.ts` | `www.content.typography-presentation` | `d87897eae6f2ad94c5524c9f8a323ef1ff63b2b84b065a97556a1c596f989014` |
 | `apps/www/src/components/site-typography-client.ts` | `www.content.typography-presentation` | `779a638445611fa5dffe633ef6699902d6a3ca605ead481232522e7c7f270176` |
 | `apps/www/src/components/site-typography.ts` | `www.content.typography-presentation` | `9da41374b7379af51514477115d210076eb54fea9555c300be33bd1b61ba4b74` |
 | `apps/www/src/content/docs/demo-base-radio-group.demo.ts` | `www.demo.authored-controllers` | `a70429e2c53f24b0bd216aed456446ab91dbcf803c74638f8d06588bc253ebc3` |

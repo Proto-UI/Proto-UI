@@ -7,14 +7,14 @@ import {
 import { linkSurfaceProps, linkSurfaceLayout, linkTextProps } from './site-link-recipes';
 
 const idle = { hovered: false, focusVisible: false, pressed: false, current: false };
-it('selects native Rhea Button and Select recipes without redefining a library default', () => {
+it('selects native Luma Button and Select recipes without redefining a library default', () => {
   expect(headerButtonProps('shadcn')).toEqual({
-    styleProfile: 'rhea',
+    styleProfile: 'luma',
     variant: 'secondary',
     size: 'icon',
   });
   expect(headerSelectControlProps('shadcn')).toMatchObject({
-    shadcnStyleProfile: 'rhea',
+    shadcnStyleProfile: 'luma',
     triggerAppearance: 'default',
     compactTriggerAppearance: 'default',
     labelPresentation: 'accessible',
@@ -43,7 +43,7 @@ it('uses public ghost feedback for navigation, not text-link underline', () => {
   ]) {
     expect(linkTextProps('nav', facts, 'shadcn').decoration).toBe('none');
     expect(linkSurfaceProps('shadcn', 'nav', 'minimal', facts)).toMatchObject({
-      actionProfile: 'rhea',
+      actionProfile: 'luma',
       hovered: facts.hovered || facts.current,
       focusVisible: facts.focusVisible,
       // Native navigation preserves stationary text selection rather than press feedback.

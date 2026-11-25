@@ -587,7 +587,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/site-link-recipes.ts': Object.freeze({
-    sourceSha256: '34d8b45ee47007e73ce6008ae58c1b9a06691bb26e856b91051c2ebb72458adc',
+    sourceSha256: '16860dec9586b26f48518fc6466119f25199ea15d9bffaf446297966e2c32479',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-base/surface',
       '@proto.ui/prototypes-base/text',
@@ -609,7 +609,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/site-search-commands.ts': Object.freeze({
-    sourceSha256: 'faa8fc22e5006ee49d3dd6e2085989023aff7d2ab1d6d82d2ae0a5681ca6b572',
+    sourceSha256: 'e46446b1bfcfd4b3874017bf0e72ab111901cbc089bf835286265801db745541',
     specifiers: Object.freeze([
       '@proto.ui/module-expose-state',
       '../../../../packages/prototypes/lucide/src/icons/search',
@@ -619,7 +619,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Public InputShell binding only; neither Search source gains UI acceptance.
   'apps/www/src/components/site-search-composition.ts': Object.freeze({
-    sourceSha256: '50828c387006e09d4440ae2027c0824750db76f5f896bc46d056f93fc42cdcd3',
+    sourceSha256: '37e4f54bf7ae1afad9fd7a08417c104304bf7285b0f8ccee3a6b5923f4587ea7',
     specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
   }),
   'apps/www/src/components/site-text-recipes.ts': Object.freeze({
@@ -895,25 +895,42 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-lucide/icons/arrow-right']),
   }),
   'apps/www/src/components/Homepage/homepage-gallery-icons.ts': Object.freeze({
-    sourceSha256: 'ee553761832372e9d3df502d2b0ca15e62604c9d3c5bfb5b1a9cb157b461f0c7',
+    sourceSha256: '8ed70c54c924a2b9757839f48f6414a4bbfa1a5bb7bb2278f0ea6e2f711b7940',
     specifiers: Object.freeze([
+      '@proto.ui/prototypes-lucide/icons/activity',
+      '@proto.ui/prototypes-lucide/icons/arrow-right',
       '@proto.ui/prototypes-lucide/icons/bell',
+      '@proto.ui/prototypes-lucide/icons/blocks',
+      '@proto.ui/prototypes-lucide/icons/book-open',
+      '@proto.ui/prototypes-lucide/icons/box',
       '@proto.ui/prototypes-lucide/icons/chart-no-axes-column-increasing',
       '@proto.ui/prototypes-lucide/icons/circle-question-mark',
+      '@proto.ui/prototypes-lucide/icons/code',
+      '@proto.ui/prototypes-lucide/icons/compass',
+      '@proto.ui/prototypes-lucide/icons/cpu',
+      '@proto.ui/prototypes-lucide/icons/globe',
       '@proto.ui/prototypes-lucide/icons/layers',
+      '@proto.ui/prototypes-lucide/icons/layout-grid',
       '@proto.ui/prototypes-lucide/icons/mouse-pointer-click',
+      '@proto.ui/prototypes-lucide/icons/palette',
+      '@proto.ui/prototypes-lucide/icons/plus',
       '@proto.ui/prototypes-lucide/icons/scan-search',
       '@proto.ui/prototypes-lucide/icons/settings-2',
+      '@proto.ui/prototypes-lucide/icons/shield',
       '@proto.ui/prototypes-lucide/icons/sliders-horizontal',
+      '@proto.ui/prototypes-lucide/icons/sparkles',
       '@proto.ui/prototypes-lucide/icons/square-check-big',
+      '@proto.ui/prototypes-lucide/icons/terminal',
       '@proto.ui/prototypes-lucide/icons/text-cursor-input',
+      '@proto.ui/prototypes-lucide/icons/workflow',
+      '@proto.ui/prototypes-lucide/icons/wrench',
     ]),
   }),
   'apps/www/src/components/StaticLucideIcon.astro': Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
   'apps/www/src/components/site-shadcn-controls.ts': Object.freeze({
-    sourceSha256: '087311d17d74329b1e58345672da46e1767f97de9ed03fb721fe8af0f51596b5',
+    sourceSha256: 'b441db9889421b028ba5cf1422ca78db1f203bdcb5ed1419d1425fcdc38db41f',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-bootstrap-2-3-2/button',
@@ -9958,6 +9975,9 @@ const WEBSITE_CLIENT_CHUNKS_RETRY_CONFIGS = Object.freeze([
   // Adds the Wave 3–5 sidebar links and English UI Library labels only.
   // Retry imports, resolver, client chunk hook and exact helper bytes are unchanged.
   '36a90352d9b22089abfde1318c29cd9e920dda2e79f088f259eec9c2de10be70',
+  // Removes graduated Early draft / WIP sidebar badges from component entries only.
+  // Retry imports, resolver, client chunk hook and exact helper bytes are unchanged.
+  'abce1afc9d7e4211b0cb4c6bd3fbfb9ed26b08422f3ca5ceb571d18fb8c9d9b1',
 ]);
 const WEBSITE_CLIENT_CHUNKS_HELPER = [
   'apps/www/scripts/client-chunk-isolation.mjs',

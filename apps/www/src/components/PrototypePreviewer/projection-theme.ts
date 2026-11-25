@@ -14,6 +14,9 @@ export { scheduleProjectionThemeRead } from './projection-theme-read';
  */
 export const WEBSITE_SHADCN_THEME_TOKENS = [
   'radius',
+  'radius-2xl',
+  'radius-3xl',
+  'radius-4xl',
   'radius-xl',
   'radius-lg',
   'radius-md',

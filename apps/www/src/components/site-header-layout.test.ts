@@ -425,7 +425,7 @@ it('separates full-width Header chrome and edge rails from the bounded reading m
   const root = css.match(/\.site-header\s*\{([^}]+)\}/)![1];
   expect(root).toContain('max-width: none');
   expect(root).toContain('padding-inline: clamp(1rem, 2vw, 2rem)');
-  expect(root).toContain('--site-header-row-height: 4.5rem');
+  expect(root).toContain('--site-header-row-height: 3.75rem');
   expect(root).toContain('--site-control-height: 2.75rem');
   expect(root).toContain('--site-select-control-height: 2.75rem');
   expect(css).not.toContain('max-width: 82.5rem');

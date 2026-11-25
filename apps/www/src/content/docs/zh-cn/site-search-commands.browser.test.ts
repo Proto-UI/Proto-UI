@@ -1402,7 +1402,7 @@ it('keeps Bootstrap Homepage Search available after selecting the WIP family', a
     await installSuccessfulEmptySearchData(page);
     expect((await page.goto(`${baseUrl}/zh-cn/`, { waitUntil: 'networkidle' }))?.ok()).toBe(true);
     await homeReady(page, 'shadcn', 'wc');
-    await choosePageControl(page, 'family', 'Bootstrap 2.3.2 · WIP');
+    await choosePageControl(page, 'family', 'Bootstrap 2.3.2');
     await homeReady(page, 'bootstrap-2-3-2', 'wc');
     await page
       .locator('site-search [data-projection-generation-state="active"] [data-open-modal]')

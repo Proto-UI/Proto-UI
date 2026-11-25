@@ -409,7 +409,7 @@ function initializeSelect(root: SiteSelectRoot): void {
       disabled: root.dataset.disabled === 'true',
       closeOnSelect: true,
       ...(family === 'shadcn' && root.closest('[data-site-header]')
-        ? { styleProfile: 'rhea' }
+        ? { styleProfile: 'luma' }
         : {}),
       ...(selectSurfaceStyle(root, 'root')
         ? { surfaceStyle: selectSurfaceStyle(root, 'root') }
@@ -424,7 +424,7 @@ function initializeSelect(root: SiteSelectRoot): void {
       ...(root.closest('[data-site-header]')
         ? {
             appearance: family === 'brutalist' ? (trigger.dataset.appearance ?? 'flat') : 'default',
-            ...(family === 'shadcn' ? { styleProfile: 'rhea' } : {}),
+            ...(family === 'shadcn' ? { styleProfile: 'luma' } : {}),
           }
         : {}),
       ...(family === 'brutalist' &&

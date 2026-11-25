@@ -128,7 +128,9 @@ const navigationLabel = siteShellLabels(currentLocale).primaryNavigation;
           data-site-button
           data-site-control-family={family}
           data-site-menu-button
-          data-variant={family === 'brutalist' ? 'surface' : 'ghost'}
+          data-variant={
+            family === 'brutalist' ? 'surface' : family === 'shadcn' ? 'secondary' : 'ghost'
+          }
           data-size="icon"
           aria-label={menuLabel}
           aria-expanded="false"

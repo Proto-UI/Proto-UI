@@ -11,7 +11,7 @@ import {
 describe('homepage gallery decorative artwork', () => {
   it('allocates one unique ref slot per card icon', () => {
     const names = Object.keys(HOMEPAGE_GALLERY_ICONS) as HomepageGalleryIcon[];
-    expect(names).toHaveLength(10);
+    expect(names).toHaveLength(28);
     const slots = names.map((name) => homepageGalleryIcon(name));
     const refs: string[] = [];
     const visit = (node: DemoNode) => {
@@ -24,7 +24,7 @@ describe('homepage gallery decorative artwork', () => {
     expect(refs).toEqual(names.map((name) => `gallery-icon-${name}`));
   });
 
-  it('renders real Lucide paths as decorative SVG without accessible names', () => {
+  it('renders real Lucide geometry as decorative SVG without accessible names', () => {
     const host = document.createElement('div');
     document.body.append(host);
     try {
@@ -37,7 +37,8 @@ describe('homepage gallery decorative artwork', () => {
         expect(svg.getAttribute('aria-hidden')).toBe('true');
         expect(svg.getAttribute('focusable')).toBe('false');
         expect(svg.getAttribute('stroke')).toBe('currentColor');
-        expect(svg.querySelectorAll('path').length).toBeGreaterThan(0);
+        const shapes = svg.querySelectorAll('path, circle, rect, line, polyline, polygon, ellipse');
+        expect(shapes.length).toBeGreaterThan(0);
         for (const path of svg.querySelectorAll('path'))
           expect(path.getAttribute('d')?.length).toBeGreaterThan(0);
       }
@@ -56,12 +57,12 @@ describe('homepage gallery decorative artwork', () => {
       const bars = [...host.querySelectorAll('rect[data-gallery-bar]')];
       expect(bars).toHaveLength(6);
       expect(bars.map((bar) => bar.getAttribute('height'))).toEqual([
-        '20',
-        '31',
-        '36',
-        '49',
-        '44',
-        '59',
+        '63',
+        '107',
+        '75',
+        '100',
+        '70',
+        '88',
       ]);
       expect(svg.getAttribute('viewBox')).toBe('0 0 320 176');
       for (const bar of bars) {
