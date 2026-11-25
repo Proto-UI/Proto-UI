@@ -1,5 +1,6 @@
 import { withShadcnRheaDemo } from '../../shadcn-demo-style';
 import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
+import { setToastCopy } from './toast-copy';
 
 const VARIANTS = [
   ['success', 'Success', 'Deployment succeeded', 'Release 0.3.0 is live in production.'],
@@ -46,14 +47,26 @@ export default withShadcnRheaDemo({
               {
                 kind: 'proto',
                 prototypeId: 'shadcn-toast-title',
-                ref: 'title',
-                children: ['Deployment succeeded'],
+                children: [
+                  {
+                    kind: 'box',
+                    tag: 'span',
+                    ref: 'title-copy',
+                    dynamicChildren: { prototypeIds: [] },
+                  },
+                ],
               },
               {
                 kind: 'proto',
                 prototypeId: 'shadcn-toast-description',
-                ref: 'desc',
-                children: ['Release 0.3.0 is live in production.'],
+                children: [
+                  {
+                    kind: 'box',
+                    tag: 'span',
+                    ref: 'description-copy',
+                    dynamicChildren: { prototypeIds: [] },
+                  },
+                ],
               },
               {
                 kind: 'box',
@@ -72,22 +85,21 @@ export default withShadcnRheaDemo({
       },
     ],
   },
-  setup({ refs, api }) {
-    const cleanups: Array<() => void> = [];
+  setup({ api }) {
+    let revision = 0;
     for (const [kind, _label, title, desc] of VARIANTS) {
-      const btn = refs[`btn-${kind}`];
-      const onClick = () => {
-        api.setProps('toast', { type: kind, richColors: true });
-        refs.title.textContent = title;
-        refs.desc.textContent = desc;
-        const toastExposes = api.getExposes('toast') as { openToast?: () => void } | null;
-        toastExposes?.openToast?.();
-      };
-      btn.addEventListener('click', onClick);
-      cleanups.push(() => btn.removeEventListener('click', onClick));
+      api.setProps(`btn-${kind}`, {
+        async onClick() {
+          const request = ++revision;
+          const committed = await setToastCopy(api, title, desc);
+          if (!committed || request !== revision) return;
+          api.setProps('toast', { type: kind, richColors: true });
+          api.call('toast', 'openToast');
+        },
+      });
     }
     return () => {
-      for (const fn of cleanups) fn();
+      revision++;
     };
   },
 } satisfies DemoSpec);
