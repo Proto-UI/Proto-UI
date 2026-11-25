@@ -1,0 +1,157 @@
+{
+  "acceptedCapability": "#1812: preserve native scroll offset and current style ownership during intrinsic popup measurement",
+  "integration": "f62299ab4b8bdc56ea224c88c0acecc3857d3889",
+  "baseline": {
+    "head": "bdc564c0da040a9b8438b1a94b3eaea74cb94b67",
+    "run": 45430368161,
+    "job": 138626272476,
+    "artifact": 14944768797,
+    "reportSha256": "fc93d296f481477e48004bd80e17b31e05751779d2d67211c98f591dfb685ee4"
+  },
+  "candidate": {
+    "head": "47ae41c671c64091ae87d717f3fa61d02c13f355",
+    "run": 45513860306,
+    "job": 138868298533,
+    "artifact": 14977272341,
+    "reportSha256": "dffd5b0d91bfa073439706333827ad12d4cd33858220caebe5ad4c169d405355"
+  },
+  "environment": {
+    "node": "v24.22.3",
+    "zlib": "1.3.2.1-motley-285e94b",
+    "esbuild": "0.25.12",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "measurement": {
+    "bundle": true,
+    "minify": true,
+    "treeShaking": true,
+    "format": "esm",
+    "platform": "browser",
+    "target": [
+      "es2020"
+    ],
+    "gzipLevel": 9,
+    "externalSha256": "6a8bd56596b933f9a9d941db2a9e325789b44886af2648d6a9795f022787c253"
+  },
+  "transactionBase": "59bbed9b38ed2426633e26e5c95687878348bca1",
+  "bundleInputDeltaSinceCandidate": [],
+  "entries": [
+    {
+      "entry": "adapter-react root",
+      "oldCeiling": 180900,
+      "before": {
+        "minifiedBytes": 628387,
+        "minifiedSha256": "891014b16bbfefbfef76f169bcc3a513f1629e73a2ea837233cc42e8cc7789a2",
+        "gzipBytes": 180715,
+        "pass": true
+      },
+      "after": {
+        "minifiedBytes": 631027,
+        "minifiedSha256": "f1240517244e40324770108f7630a52c4bd5d2ab3010b2f28f6bc0cef30e1089",
+        "gzipBytes": 181710,
+        "pass": false
+      },
+      "gzipDelta": 995,
+      "newCeiling": 181800,
+      "headroom": 90,
+      "changedInputs": [
+        {
+          "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+          "oldSourceSha256": "bf448f4f54828a4672de68eada99f27b5829455f659180aaefd2eda33e6d54d5",
+          "newSourceSha256": "298087c31bba3cc7b11b0a9b73735cd065d933f935117ca5557bd0e8c30531bd",
+          "oldRetainedBytes": 8523,
+          "newRetainedBytes": 9993
+        },
+        {
+          "path": "packages/modules/positioning/src/web/owned-style-lease.ts",
+          "oldSourceSha256": "6529e87ddbf38b3f379d51bfa26b22fedff225c67c196425c29d7f9d7d421f8f",
+          "newSourceSha256": "5e3911a7d2a532ba64ce9977f5a8e683801bf6a1c11a468f2026f15e55c3faea",
+          "oldRetainedBytes": 1047,
+          "newRetainedBytes": 2217
+        }
+      ],
+      "beforeClosure": "ba23d7e3a3a6990ed265dc6f413feb9a42b173d93d0641509c4de0c12f575e91",
+      "afterClosure": "0be2ea0c9224d0235db0cfb88756e11a92e8701ae47acae04de4341deaf50457",
+      "addedOrRemovedInputs": []
+    },
+    {
+      "entry": "adapter-vue root",
+      "oldCeiling": 179700,
+      "before": {
+        "minifiedBytes": 623793,
+        "minifiedSha256": "dd6bc6ae2881348fc3d949d3346968b1f06762fbcdd2a59bbc03fc42bf11bb5f",
+        "gzipBytes": 179616,
+        "pass": true
+      },
+      "after": {
+        "minifiedBytes": 626433,
+        "minifiedSha256": "55f51d20c2a4cde4bfdd028d7081733541fead51a493c81b4378f6b4d0bea1aa",
+        "gzipBytes": 180546,
+        "pass": false
+      },
+      "gzipDelta": 930,
+      "newCeiling": 180600,
+      "headroom": 54,
+      "changedInputs": [
+        {
+          "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+          "oldSourceSha256": "bf448f4f54828a4672de68eada99f27b5829455f659180aaefd2eda33e6d54d5",
+          "newSourceSha256": "298087c31bba3cc7b11b0a9b73735cd065d933f935117ca5557bd0e8c30531bd",
+          "oldRetainedBytes": 8523,
+          "newRetainedBytes": 9993
+        },
+        {
+          "path": "packages/modules/positioning/src/web/owned-style-lease.ts",
+          "oldSourceSha256": "6529e87ddbf38b3f379d51bfa26b22fedff225c67c196425c29d7f9d7d421f8f",
+          "newSourceSha256": "5e3911a7d2a532ba64ce9977f5a8e683801bf6a1c11a468f2026f15e55c3faea",
+          "oldRetainedBytes": 1047,
+          "newRetainedBytes": 2217
+        }
+      ],
+      "beforeClosure": "6ca452fbd2d1b0eb3266928994836d8a4b0b5c69d71164caf3fd330f859dcfbf",
+      "afterClosure": "02aa04b3e7d214ab4a9cfa223154d59bd5807b764ba3cebb236a97b4ca5ec6b8",
+      "addedOrRemovedInputs": []
+    },
+    {
+      "entry": "adapter-web-component root",
+      "oldCeiling": 217400,
+      "before": {
+        "minifiedBytes": 736121,
+        "minifiedSha256": "686ab7b7ba0bd46cd320512dbd838810ef63899276861336f98c954f354059be",
+        "gzipBytes": 217155,
+        "pass": true
+      },
+      "after": {
+        "minifiedBytes": 738757,
+        "minifiedSha256": "65093ac5b28c7f34fab8ea4ebfeae4fa586cf5dd9d22002c9db2388a228ccd4a",
+        "gzipBytes": 218094,
+        "pass": false
+      },
+      "gzipDelta": 939,
+      "newCeiling": 218100,
+      "headroom": 6,
+      "changedInputs": [
+        {
+          "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+          "oldSourceSha256": "bf448f4f54828a4672de68eada99f27b5829455f659180aaefd2eda33e6d54d5",
+          "newSourceSha256": "298087c31bba3cc7b11b0a9b73735cd065d933f935117ca5557bd0e8c30531bd",
+          "oldRetainedBytes": 8520,
+          "newRetainedBytes": 9986
+        },
+        {
+          "path": "packages/modules/positioning/src/web/owned-style-lease.ts",
+          "oldSourceSha256": "6529e87ddbf38b3f379d51bfa26b22fedff225c67c196425c29d7f9d7d421f8f",
+          "newSourceSha256": "5e3911a7d2a532ba64ce9977f5a8e683801bf6a1c11a468f2026f15e55c3faea",
+          "oldRetainedBytes": 1047,
+          "newRetainedBytes": 2217
+        }
+      ],
+      "beforeClosure": "6e0800c6c13f2d10fc12be552eb17f80a7dcff8b8ad5009f44d1b1b4f0ea1318",
+      "afterClosure": "4809875c4167e1f27aa9fb3aaff60d28f881db4e084980b949a4964da88c063c",
+      "addedOrRemovedInputs": []
+    }
+  ],
+  "rationale": "The three existing roots already instantiate the Web positioning host. Input membership is identical across the passing and failing measurements. Each root retains changed bytes only from the intrinsic measurement host and its style ownership lease. Integrated whole-entry gzip costs are measured separately. Each ceiling rounds its measured cost up to the next 100-byte boundary.",
+  "rollback": "Restore the prior three ceilings when reverting the accepted positioning change or after canonical measurements support lower limits."
+}
