@@ -1,6 +1,27 @@
 import { withShadcnRheaDemo } from './shadcn-demo-style';
 import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
 
+const STACK_ITEMS = [
+  {
+    ref: 'root-0',
+    actionRef: 'action-0',
+    title: 'Event has been created',
+    description: 'Sunday, December 03, 2023 at 9:00 AM',
+  },
+  {
+    ref: 'root-1',
+    actionRef: 'action-1',
+    title: 'Calendar invite sent',
+    description: 'Shared with 4 team members',
+  },
+  {
+    ref: 'root-2',
+    actionRef: 'action-2',
+    title: 'Reminder scheduled',
+    description: '15 minutes before the event starts',
+  },
+] as const;
+
 export default withShadcnRheaDemo({
   type: 'demo',
   root: {
@@ -22,77 +43,70 @@ export default withShadcnRheaDemo({
         ref: 'viewport',
         props: {
           a11yLabel: 'Notifications',
+          position: 'bottom-right',
         },
-        children: [
-          {
-            kind: 'proto',
-            prototypeId: 'shadcn-toast-root',
-            ref: 'root',
-            props: {
-              defaultOpen: false,
-              duration: 5000,
-            },
-            children: [
-              {
-                kind: 'box',
-                className: 'flex items-start justify-between gap-4 min-w-0',
-                children: [
-                  {
-                    kind: 'box',
-                    className: 'grid gap-1 min-w-0',
-                    children: [
-                      {
-                        kind: 'proto',
-                        prototypeId: 'shadcn-toast-title',
-                        children: ['Event has been created'],
-                      },
-                      {
-                        kind: 'proto',
-                        prototypeId: 'shadcn-toast-description',
-                        children: ['Sunday, December 03, 2023 at 9:00 AM'],
-                      },
-                    ],
-                  },
-                  {
-                    kind: 'box',
-                    className: 'flex items-center gap-2 shrink-0',
-                    children: [
-                      {
-                        kind: 'proto',
-                        prototypeId: 'shadcn-toast-action',
-                        ref: 'action',
-                        props: {
-                          a11yLabel: 'Undo event creation',
-                        },
-                        children: ['Undo'],
-                      },
-                      {
-                        kind: 'proto',
-                        prototypeId: 'shadcn-toast-close',
-                        children: ['Dismiss'],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
+        children: STACK_ITEMS.map((item) => ({
+          kind: 'proto' as const,
+          prototypeId: 'shadcn-toast-root',
+          ref: item.ref,
+          props: {
+            defaultOpen: false,
+            duration: 5000,
           },
-        ],
+          children: [
+            {
+              kind: 'box',
+              className: 'flex items-center justify-between gap-3 min-w-0',
+              children: [
+                {
+                  kind: 'box',
+                  className: 'grid gap-0.5 min-w-0',
+                  children: [
+                    {
+                      kind: 'proto',
+                      prototypeId: 'shadcn-toast-title',
+                      children: [item.title],
+                    },
+                    {
+                      kind: 'proto',
+                      prototypeId: 'shadcn-toast-description',
+                      children: [item.description],
+                    },
+                  ],
+                },
+                {
+                  kind: 'proto',
+                  prototypeId: 'shadcn-toast-action',
+                  ref: item.actionRef,
+                  props: {
+                    a11yLabel: `Undo ${item.title}`,
+                  },
+                  children: ['Undo'],
+                },
+              ],
+            },
+          ],
+        })),
       },
     ],
   },
   setup({ api }) {
+    let cursor = 0;
     api.setProps('trigger', {
       onClick: () => {
-        const openToast = api.getExposes('root')?.openToast;
+        const item = STACK_ITEMS[cursor % STACK_ITEMS.length]!;
+        cursor++;
+        const openToast = api.getExposes(item.ref)?.openToast;
         if (typeof openToast === 'function') openToast();
       },
     });
-    api.setProps('action', {
-      onAction: () => {
-        const close = api.getExposes('root')?.close;
-        if (typeof close === 'function') close('action');
-      },
-    });
+    for (const item of STACK_ITEMS) {
+      api.setProps(item.actionRef, {
+        onAction: () => {
+          const close = api.getExposes(item.ref)?.close;
+          if (typeof close === 'function') close('action');
+        },
+      });
+    }
   },
 } satisfies DemoSpec);

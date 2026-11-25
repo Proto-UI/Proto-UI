@@ -92,7 +92,8 @@ export function createRuntimeLoadingMask(options: {
     refs.retryBox.style.display = loading ? 'none' : 'block';
     refs.cancelBox.hidden = !cancellable;
     refs.cancelBox.style.display = cancellable ? 'block' : 'none';
-    refs.scrim.style.display = loading ? 'block' : 'none';
+    refs.scrim.style.display = 'none';
+    refs.panel.style.display = loading && !cancellable ? 'none' : 'grid';
     mount.hidden = false;
     mount.dataset.state = state;
     mount.dataset.targetRuntime = target;

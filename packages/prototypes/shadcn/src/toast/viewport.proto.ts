@@ -1,4 +1,4 @@
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype, tw, type StyleHandle } from '@proto.ui/core';
 import {
   asToastViewport,
   type ToastPosition,
@@ -7,13 +7,13 @@ import {
 import type { ToastViewportProps } from './types';
 import { setupShadcnStyleScope } from '../style-scope';
 
-const VIEWPORT_POSITION_CLASSES: Record<ToastPosition, string> = {
-  'top-left': 'top-4 start-4',
-  'top-center': 'top-4 left-1/2 -translate-x-1/2',
-  'top-right': 'top-4 end-4',
-  'bottom-left': 'bottom-4 start-4',
-  'bottom-center': 'bottom-4 left-1/2 -translate-x-1/2',
-  'bottom-right': 'bottom-4 end-4',
+const VIEWPORT_POSITION_STYLES: Record<ToastPosition, StyleHandle> = {
+  'top-left': tw('top-6 left-6'),
+  'top-center': tw('top-6 left-1/2 -translate-x-1/2'),
+  'top-right': tw('top-6 right-6'),
+  'bottom-left': tw('bottom-6 left-6'),
+  'bottom-center': tw('bottom-6 left-1/2 -translate-x-1/2'),
+  'bottom-right': tw('bottom-6 right-6'),
 };
 
 export default definePrototype<ToastViewportProps, ToastViewportExposes>({
@@ -23,23 +23,41 @@ export default definePrototype<ToastViewportProps, ToastViewportExposes>({
     const state = behavior.stateHandles!;
     setupShadcnStyleScope(def);
     def.feedback.style.use(
-      tw(
-        'fixed z-50 grid w-96 max-w-[calc(100vw_-_2rem)] max-h-[calc(100vh_-_2rem)] overflow-y-auto p-1'
-      )
+      tw('fixed z-50 w-[356px] max-w-[calc(100vw_-_2rem)] pointer-events-none')
     );
-    for (const pos of Object.keys(VIEWPORT_POSITION_CLASSES) as ToastPosition[]) {
+    for (const pos of Object.keys(VIEWPORT_POSITION_STYLES) as ToastPosition[]) {
       def.rule({
         when: (w) => w.state(state.position).eq(pos),
-        intent: (i) => i.feedback.style.use(tw(VIEWPORT_POSITION_CLASSES[pos])),
+        intent: (i) => i.feedback.style.use(VIEWPORT_POSITION_STYLES[pos]),
       });
     }
     def.rule({
       when: (w) => w.state(state.expanded).eq(false),
-      intent: (i) => i.feedback.style.use(tw('gap-2')),
+      intent: (i) => i.feedback.style.use(tw('block')),
     });
     def.rule({
-      when: (w) => w.state(state.expanded).eq(true),
-      intent: (i) => i.feedback.style.use(tw('gap-3')),
+      when: (w) =>
+        w.all(
+          w.state(state.expanded).eq(true),
+          w.any(
+            w.state(state.position).eq('bottom-left'),
+            w.state(state.position).eq('bottom-center'),
+            w.state(state.position).eq('bottom-right')
+          )
+        ),
+      intent: (i) => i.feedback.style.use(tw('flex flex-col-reverse gap-3.5')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(state.expanded).eq(true),
+          w.any(
+            w.state(state.position).eq('top-left'),
+            w.state(state.position).eq('top-center'),
+            w.state(state.position).eq('top-right')
+          )
+        ),
+      intent: (i) => i.feedback.style.use(tw('flex flex-col gap-3.5')),
     });
     return behavior.render;
   },

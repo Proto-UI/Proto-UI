@@ -155,15 +155,98 @@ export default definePrototype<ToastRootProps, ToastRootExposes>({
       when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
       intent: (i) => i.feedback.style.use(tw('transition-none')),
     });
+    // Sonner-style 3D collapsed deck vs expanded vertical stack
+    def.rule({
+      when: (w) =>
+        w.any(
+          w.state(toastState.stackTier).eq('front'),
+          w.all(
+            w.state(toastState.expanded).eq(true),
+            w.not(w.state(toastState.stackTier).eq('overflow'))
+          )
+        ),
+      intent: (i) => i.feedback.style.use(tw('relative z-30 w-full opacity-100')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(toastState.expanded).eq(false),
+          w.state(toastState.stackTier).eq('second'),
+          w.any(
+            w.state(toastState.position).eq('bottom-left'),
+            w.state(toastState.position).eq('bottom-center'),
+            w.state(toastState.position).eq('bottom-right')
+          )
+        ),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('absolute left-0 right-0 mx-auto w-[338px] bottom-[14px] z-20 opacity-95')
+        ),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(toastState.expanded).eq(false),
+          w.state(toastState.stackTier).eq('second'),
+          w.any(
+            w.state(toastState.position).eq('top-left'),
+            w.state(toastState.position).eq('top-center'),
+            w.state(toastState.position).eq('top-right')
+          )
+        ),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('absolute left-0 right-0 mx-auto w-[338px] top-[14px] z-20 opacity-95')
+        ),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(toastState.expanded).eq(false),
+          w.state(toastState.stackTier).eq('third'),
+          w.any(
+            w.state(toastState.position).eq('bottom-left'),
+            w.state(toastState.position).eq('bottom-center'),
+            w.state(toastState.position).eq('bottom-right')
+          )
+        ),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('absolute left-0 right-0 mx-auto w-[320px] bottom-[28px] z-10 opacity-90')
+        ),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(toastState.expanded).eq(false),
+          w.state(toastState.stackTier).eq('third'),
+          w.any(
+            w.state(toastState.position).eq('top-left'),
+            w.state(toastState.position).eq('top-center'),
+            w.state(toastState.position).eq('top-right')
+          )
+        ),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('absolute left-0 right-0 mx-auto w-[320px] top-[28px] z-10 opacity-90')
+        ),
+    });
+    def.rule({
+      when: (w) => w.state(toastState.stackTier).eq('overflow'),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('absolute left-0 right-0 mx-auto w-[320px] z-0 opacity-0 pointer-events-none')
+        ),
+    });
     def.feedback.style.use(
       tw(
-        'border border-border shadow-lg flex items-start gap-3 min-w-0 w-full p-4 text-start transition-opacity duration-150'
+        'pointer-events-auto border border-border shadow-[0_4px_12px_rgb(0_0_0/10%)] flex items-center gap-2.5 min-w-0 p-4 text-start transition-all duration-300 ease-out'
       )
     );
     return (r) => {
       const icon = renderToastIcon(r, toastState.type.get());
-      if (!icon) return r.el('div', { style: tw('grid gap-2 min-w-0 flex-1') }, r.slot());
-      return [icon, r.el('div', { style: tw('grid gap-2 min-w-0 flex-1') }, r.slot())];
+      if (!icon) return r.el('div', { style: tw('grid gap-1 min-w-0 flex-1') }, r.slot());
+      return [icon, r.el('div', { style: tw('grid gap-1 min-w-0 flex-1') }, r.slot())];
     };
   },
 });

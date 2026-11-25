@@ -12,40 +12,175 @@
   .line { fill:none; stroke:var(--muted); stroke-width:2; stroke-linejoin:round; }
 </style><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="var(--muted)" stroke-width="1.5"/></marker></defs>
 <desc id="description">Theory and kernel, prototype libraries, and the translation layer advance concurrently. Implementations, conformance tests, and real use provide evidence for diagnosis: implementation drift calls for an implementation fix; a Host capability gap calls for improved translation; omitted necessary semantics or a definition overfitted to a class of Host calls for a Prototype revision; a counterexample to fundamental relations calls for reexamining the theory. These are alternative diagnoses, not sequential stages. Revise the relevant layer explicitly and test again; implementation behavior does not silently become a rule.</desc>
-<text x="48" y="74" font-size="40" text-anchor="start" class="strong"><tspan x="48" dy="0">Practice, evidence, explicit revision</tspan></text>
-<text x="48" y="132" font-size="36" text-anchor="start" class="muted"><tspan x="48" dy="0">Three concurrent lines of work</tspan></text>
-<rect x="112" y="181" width="224" height="115" rx="14" class="blue"/>
-<text x="224" y="225.9" font-size="36" text-anchor="middle" class=""><tspan x="224" dy="0">Theory</tspan><tspan x="224" dy="50.4">and kernel</tspan></text>
-<rect x="400" y="181" width="224" height="115" rx="14" class="green"/>
-<text x="512" y="225.9" font-size="36" text-anchor="middle" class=""><tspan x="512" dy="0">Prototype</tspan><tspan x="512" dy="50.4">libraries</tspan></text>
-<rect x="688" y="181" width="224" height="115" rx="14" class="amber"/>
-<text x="800" y="225.9" font-size="36" text-anchor="middle" class=""><tspan x="800" dy="0">Translation</tspan><tspan x="800" dy="50.4">layer</tspan></text>
-<path d="M336 225 H397" class="line " marker-end="url(#arrow)"/>
-<path d="M400 254 H339" class="line " marker-end="url(#arrow)"/>
-<path d="M624 225 H685" class="line " marker-end="url(#arrow)"/>
-<path d="M688 254 H627" class="line " marker-end="url(#arrow)"/>
-<path d="M224 296 V337 H512" class="line "/>
-<path d="M512 296 V337 H512" class="line "/>
-<path d="M800 296 V337 H512" class="line "/>
-<path d="M512 337 V376" class="line " marker-end="url(#arrow)"/>
-<rect x="112" y="376" width="800" height="100" rx="14" class="panel"/>
-<text x="512" y="413.40000000000003" font-size="36" text-anchor="middle" class=""><tspan x="512" dy="0">Practice provides evidence</tspan><tspan x="512" dy="50.4">Outcomes, failures, counterexamples</tspan></text>
-<path d="M512 476 V521" class="line " marker-end="url(#arrow)"/>
-<rect x="112" y="521" width="800" height="68" rx="14" class="blue"/>
-<text x="512" y="567.6" font-size="36" text-anchor="middle" class=""><tspan x="512" dy="0">Which layer needs revision?</tspan></text>
-<path d="M512 589 V615" class="line " marker-end="url(#arrow)"/>
-<rect x="100" y="615" width="824" height="238" rx="14" class="scope"/>
-<rect x="112" y="631" width="384" height="92" rx="14" class="panel"/>
-<text x="304" y="664.4" font-size="36" text-anchor="middle" class=""><tspan x="304" dy="0">Implementation drift</tspan><tspan x="304" dy="50.4">Fix implementation</tspan></text>
-<rect x="528" y="631" width="384" height="92" rx="14" class="panel"/>
-<text x="720" y="664.4" font-size="36" text-anchor="middle" class=""><tspan x="720" dy="0">Host capability gap</tspan><tspan x="720" dy="50.4">Improve translation</tspan></text>
-<rect x="112" y="748" width="384" height="92" rx="14" class="panel"/>
-<text x="304" y="781.4" font-size="36" text-anchor="middle" class=""><tspan x="304" dy="0">Omission or overfitting</tspan><tspan x="304" dy="50.4">Revise the Prototype</tspan></text>
-<rect x="528" y="748" width="384" height="92" rx="14" class="panel"/>
-<text x="720" y="781.4" font-size="36" text-anchor="middle" class=""><tspan x="720" dy="0">Relation challenged</tspan><tspan x="720" dy="50.4">Revisit the theory</tspan></text>
-<path d="M100 734 H72 V164 H800" class="line "/>
-<path d="M224 164 V178" class="line " marker-end="url(#arrow)"/>
-<path d="M512 164 V178" class="line " marker-end="url(#arrow)"/>
-<path d="M800 164 V178" class="line " marker-end="url(#arrow)"/>
-<text x="48" y="886" font-size="36" text-anchor="start" class="muted"><tspan x="48" dy="0">Revise explicitly, then test again.</tspan></text>
+<defs>
+  <style>
+    .evo-root {
+      --evo-bg: #fafaf9;
+      --evo-surface: #ffffff;
+      --evo-surface-subtle: #f4f4f5;
+      --evo-border: #d4d4d8;
+      --evo-border-strong: #a1a1aa;
+      --evo-ink: #18181b;
+      --evo-muted: #52525b;
+      --evo-faint: #71717a;
+      --evo-line: #71717a;
+      --evo-blue: #2563eb;
+      --evo-blue-soft: #eff6ff;
+      --evo-green: #059669;
+      --evo-green-soft: #ecfdf5;
+      --evo-amber: #d97706;
+      --evo-amber-soft: #fffbeb;
+      --evo-slate: #475569;
+      --evo-slate-soft: #f1f5f9;
+    }
+    @media (prefers-color-scheme: dark) {
+      .evo-root {
+        --evo-bg: #111113;
+        --evo-surface: #18181b;
+        --evo-surface-subtle: #202024;
+        --evo-border: #2e2e33;
+        --evo-border-strong: #52525b;
+        --evo-ink: #f4f4f5;
+        --evo-muted: #a1a1aa;
+        --evo-faint: #71717a;
+        --evo-line: #71717a;
+        --evo-blue: #60a5fa;
+        --evo-blue-soft: #172554;
+        --evo-green: #34d399;
+        --evo-green-soft: #064e3b;
+        --evo-amber: #fbbf24;
+        --evo-amber-soft: #451a03;
+        --evo-slate: #94a3b8;
+        --evo-slate-soft: #1e293b;
+      }
+    }
+    .evo-root text {
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      fill: var(--evo-ink);
+    }
+    .evo-mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+      letter-spacing: 0.06em;
+    }
+    .evo-title { font-weight: 650; letter-spacing: -0.02em; fill: var(--evo-ink); }
+    .evo-sub { font-weight: 450; fill: var(--evo-muted); }
+    .evo-kicker { font-weight: 600; fill: var(--evo-faint); }
+    .evo-card { fill: var(--evo-surface); stroke: var(--evo-border); stroke-width: 1.25; }
+    .evo-zone { fill: var(--evo-surface-subtle); stroke: var(--evo-border); stroke-width: 1; }
+    .evo-pill { fill: var(--evo-surface); stroke: var(--evo-border); stroke-width: 1; }
+    .evo-wire { fill: none; stroke: var(--evo-line); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .evo-wire-dash { fill: none; stroke: var(--evo-border-strong); stroke-width: 1.5; stroke-dasharray: 5 4; stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+  <filter id="evo-shadow" x="-6%" y="-10%" width="112%" height="126%">
+    <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.06"/>
+  </filter>
+  <marker id="evo-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M1.5 1.5 L8.5 5 L1.5 8.5 Z" fill="var(--evo-line)"/>
+  </marker>
+  <marker id="evo-arrow-sm" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M1.5 2 L8.5 5 L1.5 8 Z" fill="var(--evo-line)"/>
+  </marker>
+</defs>
+<g class="evo-root">
+<rect x="0" y="0" width="960" height="928" rx="16" fill="var(--evo-bg)" stroke="none"/>
+<text x="56" y="48" font-size="12" class="evo-mono evo-kicker">EVOLUTION LOOP · CH. 07</text>
+<text x="56" y="84" font-size="28" class="evo-title">Practice, evidence, and explicit revision</text>
+<text x="56" y="112" font-size="16" class="evo-sub">Three concurrent tracks revised explicitly from practice evidence</text>
+<path data-relation="revision-loop" data-from="diagnoses" data-to="work" d="M 104 706 H 58 Q 44 706 44 692 V 164 Q 44 150 58 150 H 782 Q 796 150 796 164 V 184" class="evo-wire-dash" marker-end="url(#evo-arrow)"/>
+<path data-relation="revision-return" data-from="diagnoses" data-to="theory-kernel" d="M 228 150 V 184" class="evo-wire-dash" marker-end="url(#evo-arrow)"/>
+<path data-relation="revision-return" data-from="diagnoses" data-to="prototype-libraries" d="M 512 150 V 184" class="evo-wire-dash" marker-end="url(#evo-arrow)"/>
+<g transform="translate(44 432) rotate(-90)">
+      <rect x="-64" y="-12" width="128" height="24" rx="12" class="evo-pill"/>
+      <text x="0" y="4" font-size="11" text-anchor="middle" class="evo-mono evo-kicker">EXPLICIT REVISION</text>
+    </g>
+<g data-node="theory-kernel" filter="url(#evo-shadow)">
+      <rect x="112" y="192" width="232" height="114" rx="12" class="evo-card"/>
+      <rect x="112" y="192" width="232" height="4" rx="2" fill="var(--evo-blue)" stroke="none"/>
+      <rect x="130" y="210" width="32" height="20" rx="6" fill="var(--evo-blue-soft)" stroke="none"/>
+      <text x="146" y="224" font-size="11" text-anchor="middle" class="evo-mono" fill="var(--evo-blue)" font-weight="600">01</text>
+      <text x="130" y="260" font-size="20" class="evo-title">Theory &amp; kernel</text>
+      <text x="130" y="286" font-size="13" class="evo-sub">Model · contracts · lifecycle</text>
+    </g>
+<g data-node="prototype-libraries" filter="url(#evo-shadow)">
+      <rect x="396" y="192" width="232" height="114" rx="12" class="evo-card"/>
+      <rect x="396" y="192" width="232" height="4" rx="2" fill="var(--evo-green)" stroke="none"/>
+      <rect x="414" y="210" width="32" height="20" rx="6" fill="var(--evo-green-soft)" stroke="none"/>
+      <text x="430" y="224" font-size="11" text-anchor="middle" class="evo-mono" fill="var(--evo-green)" font-weight="600">02</text>
+      <text x="414" y="260" font-size="20" class="evo-title">Prototype libraries</text>
+      <text x="414" y="286" font-size="13" class="evo-sub">Semantics · interaction · anatomy</text>
+    </g>
+<g data-node="translation-layer" filter="url(#evo-shadow)">
+      <rect x="680" y="192" width="232" height="114" rx="12" class="evo-card"/>
+      <rect x="680" y="192" width="232" height="4" rx="2" fill="var(--evo-amber)" stroke="none"/>
+      <rect x="698" y="210" width="32" height="20" rx="6" fill="var(--evo-amber-soft)" stroke="none"/>
+      <text x="714" y="224" font-size="11" text-anchor="middle" class="evo-mono" fill="var(--evo-amber)" font-weight="600">03</text>
+      <text x="698" y="260" font-size="20" class="evo-title">Translation layer</text>
+      <text x="698" y="286" font-size="13" class="evo-sub">Adapters · Host capabilities</text>
+    </g>
+<path data-relation="work-exchange" data-from="theory-kernel" data-to="prototype-libraries" d="M 346 240 H 390" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>
+<path data-relation="work-exchange" data-from="prototype-libraries" data-to="theory-kernel" d="M 394 256 H 350" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>
+<path data-relation="work-exchange" data-from="prototype-libraries" data-to="translation-layer" d="M 630 240 H 674" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>
+<path data-relation="work-exchange" data-from="translation-layer" data-to="prototype-libraries" d="M 678 256 H 634" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>
+<path data-relation="practice-input" data-from="theory-kernel" data-to="practice-evidence" d="M 228 306 V 326 Q 228 338 240 338 H 512" class="evo-wire"/>
+<path data-relation="practice-input" data-from="translation-layer" data-to="practice-evidence" d="M 796 306 V 326 Q 796 338 784 338 H 512" class="evo-wire"/>
+<path data-relation="evidence-entry" data-from="prototype-libraries" data-to="practice-evidence" d="M 512 306 V 364" class="evo-wire" marker-end="url(#evo-arrow)"/>
+<g data-node="practice-evidence" filter="url(#evo-shadow)">
+    <rect x="112" y="372" width="800" height="106" rx="12" class="evo-card"/>
+    <text x="136" y="400" font-size="11" class="evo-mono evo-kicker">STAGE 01 · EVIDENCE</text>
+    <text x="136" y="428" font-size="20" class="evo-title">Practice provides evidence</text>
+    <text x="136" y="454" font-size="14" class="evo-sub">Implementations, conformance suites, and real Host usage surface mismatches</text>
+  </g>
+<g>
+      <rect x="612" y="408" width="88" height="32" rx="8" fill="var(--evo-surface-subtle)" stroke="var(--evo-border)" stroke-width="1"/>
+      <text x="656" y="428" font-size="12" text-anchor="middle" fill="var(--evo-ink)" font-weight="500">Outcomes</text>
+    </g>
+<g>
+      <rect x="708" y="408" width="88" height="32" rx="8" fill="var(--evo-surface-subtle)" stroke="var(--evo-border)" stroke-width="1"/>
+      <text x="752" y="428" font-size="12" text-anchor="middle" fill="var(--evo-ink)" font-weight="500">Failures</text>
+    </g>
+<g>
+      <rect x="804" y="408" width="88" height="32" rx="8" fill="var(--evo-surface-subtle)" stroke="var(--evo-border)" stroke-width="1"/>
+      <text x="848" y="428" font-size="12" text-anchor="middle" fill="var(--evo-ink)" font-weight="500">Counterexamples</text>
+    </g>
+<path data-relation="diagnose" data-from="practice-evidence" data-to="diagnoses" d="M 512 478 V 512" class="evo-wire" marker-end="url(#evo-arrow)"/>
+<g data-alternatives="diagnoses">
+    <rect x="104" y="520" width="816" height="324" rx="16" class="evo-zone"/>
+    <text x="130" y="550" font-size="11" class="evo-mono evo-kicker">STAGE 02 · ATTRIBUTION (ALTERNATIVE DIAGNOSES, NOT STAGES)</text>
+    <text x="130" y="578" font-size="20" class="evo-title">Which layer needs revision?</text>
+  
+<g data-diagnosis="implementation" filter="url(#evo-shadow)">
+      <rect x="128" y="602" width="374" height="102" rx="12" class="evo-card"/>
+      <rect x="128" y="618" width="4" height="70" rx="2" fill="var(--evo-slate)" stroke="none"/>
+      <text x="148" y="636" font-size="16" class="evo-title">Implementation drift</text>
+      <text x="148" y="658" font-size="13" class="evo-sub">Behavior diverges from governed spec</text>
+      <rect x="148" y="670" width="154" height="24" rx="6" fill="var(--evo-slate-soft)" stroke="none"/>
+      <text x="158" y="686" font-size="12" fill="var(--evo-slate)" font-weight="600">→ Fix implementation</text>
+    </g>
+<g data-diagnosis="host-capability" filter="url(#evo-shadow)">
+      <rect x="522" y="602" width="374" height="102" rx="12" class="evo-card"/>
+      <rect x="522" y="618" width="4" height="70" rx="2" fill="var(--evo-amber)" stroke="none"/>
+      <text x="542" y="636" font-size="16" class="evo-title">Host capability gap</text>
+      <text x="542" y="658" font-size="13" class="evo-sub">Target Host lacks required primitive</text>
+      <rect x="542" y="670" width="154" height="24" rx="6" fill="var(--evo-amber-soft)" stroke="none"/>
+      <text x="552" y="686" font-size="12" fill="var(--evo-amber)" font-weight="600">→ Improve translation</text>
+    </g>
+<g data-diagnosis="prototype" filter="url(#evo-shadow)">
+      <rect x="128" y="722" width="374" height="102" rx="12" class="evo-card"/>
+      <rect x="128" y="738" width="4" height="70" rx="2" fill="var(--evo-green)" stroke="none"/>
+      <text x="148" y="756" font-size="16" class="evo-title">Omission or overfitting</text>
+      <text x="148" y="778" font-size="13" class="evo-sub">Missing semantics or Host-overfitted</text>
+      <rect x="148" y="790" width="154" height="24" rx="6" fill="var(--evo-green-soft)" stroke="none"/>
+      <text x="158" y="806" font-size="12" fill="var(--evo-green)" font-weight="600">→ Revise Prototype</text>
+    </g>
+<g data-diagnosis="theory" filter="url(#evo-shadow)">
+      <rect x="522" y="722" width="374" height="102" rx="12" class="evo-card"/>
+      <rect x="522" y="738" width="4" height="70" rx="2" fill="var(--evo-blue)" stroke="none"/>
+      <text x="542" y="756" font-size="16" class="evo-title">Fundamental counterexample</text>
+      <text x="542" y="778" font-size="13" class="evo-sub">Core model fails to explain relation</text>
+      <rect x="542" y="790" width="154" height="24" rx="6" fill="var(--evo-blue-soft)" stroke="none"/>
+      <text x="552" y="806" font-size="12" fill="var(--evo-blue)" font-weight="600">→ Revisit theory</text>
+    </g>
+</g>
+<text x="104" y="888" font-size="15" class="evo-sub">Revise the relevant layer explicitly and test again — implementation behavior never silently becomes a rule.</text>
+</g>
 </svg>

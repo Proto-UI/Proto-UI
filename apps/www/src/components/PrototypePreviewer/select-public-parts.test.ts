@@ -264,11 +264,7 @@ describe('website public Shadcn Select compositions', () => {
       expect(flat).toMatch(/<SelectItem\b[^>]*>[\s\S]*?<\/SelectItem>/);
       expect(flat).not.toMatch(/<Select(?:Surface|Viewport|ItemText)\b/);
       const attributes = content.match(/^<SelectContent\b[^>]*>/)?.[0] ?? '';
-      expect(attributes).toContain(
-        name === 'AdapterSelect'
-          ? 'data-position="popper"'
-          : "data-position={family === 'brutalist' ? 'popper' : undefined}"
-      );
+      expect(attributes).toContain("data-position={family === 'brutalist' ? 'popper' : undefined}");
       expect(attributes).toContain("data-align={family === 'brutalist' ? 'end' : undefined}");
       expect(attributes).not.toMatch(/\s(?:position|align)\s*=/);
       expect(source).toMatch(/<SelectTrigger\b[^>]*\saria-labelledby=\{labelId\}/);

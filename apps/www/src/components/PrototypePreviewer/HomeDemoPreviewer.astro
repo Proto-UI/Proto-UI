@@ -78,6 +78,16 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   >
     {copy.expand}
   </button>
+  <div class="home-demo-previewer__skeleton" data-home-demo-skeleton aria-hidden="true" inert>
+    {
+      [0, 1, 2, 3, 4].map((col) => (
+        <div class="home-demo-previewer__skeleton-col">
+          <HomepageGhostCard tall={col % 2 === 1} />
+          <HomepageGhostCard tall={col % 2 === 0} />
+        </div>
+      ))
+    }
+  </div>
   <div id={`${id}-demos`} class="home-demo-previewer__host" data-home-demo-host aria-busy="true">
   </div>
   <output
@@ -168,6 +178,63 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     min-height: 20rem;
     width: 100%;
   }
+  .home-demo-previewer__host:empty {
+    min-height: 0;
+  }
+  .home-demo-previewer__skeleton {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: var(--homepage-gallery-column-gap);
+    width: 100%;
+    color: var(--color-muted-foreground);
+    opacity: 0.45;
+    pointer-events: none;
+    user-select: none;
+    mask-image: linear-gradient(to bottom, black, black 72%, transparent 100%);
+  }
+  .home-demo-previewer__skeleton-col {
+    display: grid;
+    align-content: start;
+    gap: var(--homepage-gallery-row-gap);
+    min-width: 0;
+  }
+  .home-demo-previewer__skeleton-col:nth-child(n + 2) {
+    display: none;
+  }
+  @media (min-width: 48rem) {
+    .home-demo-previewer__skeleton {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .home-demo-previewer__skeleton-col:nth-child(2) {
+      display: grid;
+    }
+  }
+  @media (min-width: 72rem) {
+    .home-demo-previewer__skeleton {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .home-demo-previewer__skeleton-col:nth-child(3) {
+      display: grid;
+    }
+  }
+  @media (min-width: 100rem) {
+    .home-demo-previewer__skeleton {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+    .home-demo-previewer__skeleton-col:nth-child(n + 4) {
+      display: grid;
+    }
+  }
+  .home-demo-previewer[data-runner-state='ready'] .home-demo-previewer__skeleton,
+  .home-demo-previewer[data-runner-state='error'] .home-demo-previewer__skeleton {
+    display: none;
+  }
+  .home-demo-previewer
+    :global([data-runtime-loading-mask][data-state='loading'] [data-demo-ref='scrim']),
+  .home-demo-previewer
+    :global([data-runtime-loading-mask][data-state='loading'] [data-demo-ref='panel']) {
+    display: none !important;
+  }
   .home-demo-previewer :global(.pui-projection-generation),
   .home-demo-previewer :global(.pui-projection-scope),
   .home-demo-previewer :global(.pui-projection-content) {
@@ -188,8 +255,6 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     white-space: nowrap;
   }
   .home-demo-previewer:not([data-runtime-mask-ready='true'])[data-runner-state='error']
-    .home-demo-previewer__status,
-  .home-demo-previewer:not([data-runtime-mask-ready='true'])[data-runner-state='loading']
     .home-demo-previewer__status {
     position: static;
     display: block;

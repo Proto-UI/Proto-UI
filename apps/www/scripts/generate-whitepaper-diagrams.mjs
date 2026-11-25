@@ -339,163 +339,495 @@ function evolutionDescription() {
   );
 }
 
+function evolutionStyles() {
+  parts.push(`<defs>
+  <style>
+    .evo-root {
+      --evo-bg: #fafaf9;
+      --evo-surface: #ffffff;
+      --evo-surface-subtle: #f4f4f5;
+      --evo-border: #d4d4d8;
+      --evo-border-strong: #a1a1aa;
+      --evo-ink: #18181b;
+      --evo-muted: #52525b;
+      --evo-faint: #71717a;
+      --evo-line: #71717a;
+      --evo-blue: #2563eb;
+      --evo-blue-soft: #eff6ff;
+      --evo-green: #059669;
+      --evo-green-soft: #ecfdf5;
+      --evo-amber: #d97706;
+      --evo-amber-soft: #fffbeb;
+      --evo-slate: #475569;
+      --evo-slate-soft: #f1f5f9;
+    }
+    @media (prefers-color-scheme: dark) {
+      .evo-root {
+        --evo-bg: #111113;
+        --evo-surface: #18181b;
+        --evo-surface-subtle: #202024;
+        --evo-border: #2e2e33;
+        --evo-border-strong: #52525b;
+        --evo-ink: #f4f4f5;
+        --evo-muted: #a1a1aa;
+        --evo-faint: #71717a;
+        --evo-line: #71717a;
+        --evo-blue: #60a5fa;
+        --evo-blue-soft: #172554;
+        --evo-green: #34d399;
+        --evo-green-soft: #064e3b;
+        --evo-amber: #fbbf24;
+        --evo-amber-soft: #451a03;
+        --evo-slate: #94a3b8;
+        --evo-slate-soft: #1e293b;
+      }
+    }
+    .evo-root text {
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      fill: var(--evo-ink);
+    }
+    .evo-mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+      letter-spacing: 0.06em;
+    }
+    .evo-title { font-weight: 650; letter-spacing: -0.02em; fill: var(--evo-ink); }
+    .evo-sub { font-weight: 450; fill: var(--evo-muted); }
+    .evo-kicker { font-weight: 600; fill: var(--evo-faint); }
+    .evo-card { fill: var(--evo-surface); stroke: var(--evo-border); stroke-width: 1.25; }
+    .evo-zone { fill: var(--evo-surface-subtle); stroke: var(--evo-border); stroke-width: 1; }
+    .evo-pill { fill: var(--evo-surface); stroke: var(--evo-border); stroke-width: 1; }
+    .evo-wire { fill: none; stroke: var(--evo-line); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .evo-wire-dash { fill: none; stroke: var(--evo-border-strong); stroke-width: 1.5; stroke-dasharray: 5 4; stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+  <filter id="evo-shadow" x="-6%" y="-10%" width="112%" height="126%">
+    <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.06"/>
+  </filter>
+  <marker id="evo-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M1.5 1.5 L8.5 5 L1.5 8.5 Z" fill="var(--evo-line)"/>
+  </marker>
+  <marker id="evo-arrow-sm" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M1.5 2 L8.5 5 L1.5 8 Z" fill="var(--evo-line)"/>
+  </marker>
+</defs>`);
+}
+
 function evolution() {
   evolutionDescription();
-  // Keep details in the chapter and accessible description; prioritize labels at article width.
-  text(
-    48,
-    74,
-    tr('实践、证据与明确修正', 'Practice, evidence, explicit revision'),
-    40,
-    'start',
-    'strong'
+  evolutionStyles();
+  parts.push('<g class="evo-root">');
+
+  // Subtle architectural grid dots in background
+  parts.push(
+    `<rect x="0" y="0" width="960" height="928" rx="16" fill="var(--evo-bg)" stroke="none"/>`
   );
-  text(48, 132, tr('三条主线并行推进', 'Three concurrent lines of work'), 36, 'start', 'muted');
-  const xs = [112, 400, 688];
-  const labels = [
-    tr('理论|与内核', 'Theory|and kernel'),
-    tr('原型库', 'Prototype|libraries'),
-    tr('翻译层', 'Translation|layer'),
+
+  // Header
+  parts.push(
+    `<text x="56" y="48" font-size="12" class="evo-mono evo-kicker">${esc(
+      tr('EVOLUTION LOOP · 演进闭环', 'EVOLUTION LOOP · CH. 07')
+    )}</text>`
+  );
+  parts.push(
+    `<text x="56" y="84" font-size="28" class="evo-title">${esc(
+      tr('实践、证据与明确修正', 'Practice, evidence, and explicit revision')
+    )}</text>`
+  );
+  parts.push(
+    `<text x="56" y="112" font-size="16" class="evo-sub">${esc(
+      tr(
+        '三条主线并行推进，实践证据驱动显式归因与定向修正',
+        'Three concurrent tracks revised explicitly from practice evidence'
+      )
+    )}</text>`
+  );
+
+  // Return feedback bus (left rail -> top rail -> drops into each track)
+  parts.push(
+    `<path data-relation="revision-loop" data-from="diagnoses" data-to="work" d="M 104 706 H 58 Q 44 706 44 692 V 164 Q 44 150 58 150 H 782 Q 796 150 796 164 V 184" class="evo-wire-dash" marker-end="url(#evo-arrow)"/>`
+  );
+  parts.push(
+    `<path data-relation="revision-return" data-from="diagnoses" data-to="theory-kernel" d="M 228 150 V 184" class="evo-wire-dash" marker-end="url(#evo-arrow)"/>`
+  );
+  parts.push(
+    `<path data-relation="revision-return" data-from="diagnoses" data-to="prototype-libraries" d="M 512 150 V 184" class="evo-wire-dash" marker-end="url(#evo-arrow)"/>`
+  );
+  // Feedback loop badge on left rail
+  parts.push(
+    `<g transform="translate(44 432) rotate(-90)">
+      <rect x="-64" y="-12" width="128" height="24" rx="12" class="evo-pill"/>
+      <text x="0" y="4" font-size="11" text-anchor="middle" class="evo-mono evo-kicker">${esc(
+        tr('显式修正回路', 'EXPLICIT REVISION')
+      )}</text>
+    </g>`
+  );
+
+  // Stage 1: Three concurrent tracks
+  const tracks = [
+    {
+      id: 'theory-kernel',
+      x: 112,
+      code: '01',
+      accent: 'var(--evo-blue)',
+      soft: 'var(--evo-blue-soft)',
+      title: tr('理论与内核', 'Theory & kernel'),
+      desc: tr('模型 · 契约 · 生命周期', 'Model · contracts · lifecycle'),
+    },
+    {
+      id: 'prototype-libraries',
+      x: 396,
+      code: '02',
+      accent: 'var(--evo-green)',
+      soft: 'var(--evo-green-soft)',
+      title: tr('原型库', 'Prototype libraries'),
+      desc: tr('语义协议 · 交互与组合', 'Semantics · interaction · anatomy'),
+    },
+    {
+      id: 'translation-layer',
+      x: 680,
+      code: '03',
+      accent: 'var(--evo-amber)',
+      soft: 'var(--evo-amber-soft)',
+      title: tr('翻译层', 'Translation layer'),
+      desc: tr('Adapter · 宿主能力映射', 'Adapters · Host capabilities'),
+    },
   ];
-  xs.forEach((x, i) => box(x, 181, 224, 115, labels[i], ['blue', 'green', 'amber'][i], 36));
-  path('M336 225 H397');
-  path('M400 254 H339');
-  path('M624 225 H685');
-  path('M688 254 H627');
-  xs.forEach((x) => path(`M${x + 112} 296 V337 H512`, false));
-  path('M512 337 V376');
-  box(
-    112,
-    376,
-    800,
-    100,
-    tr(
-      '实践提供证据|行为结果、失败与反例',
-      'Practice provides evidence|Outcomes, failures, counterexamples'
-    ),
-    'panel',
-    36
+
+  tracks.forEach((t) => {
+    parts.push(`<g data-node="${t.id}" filter="url(#evo-shadow)">
+      <rect x="${t.x}" y="192" width="232" height="114" rx="12" class="evo-card"/>
+      <rect x="${t.x}" y="192" width="232" height="4" rx="2" fill="${t.accent}" stroke="none"/>
+      <rect x="${t.x + 18}" y="210" width="32" height="20" rx="6" fill="${t.soft}" stroke="none"/>
+      <text x="${t.x + 34}" y="224" font-size="11" text-anchor="middle" class="evo-mono" fill="${t.accent}" font-weight="600">${t.code}</text>
+      <text x="${t.x + 18}" y="260" font-size="20" class="evo-title">${esc(t.title)}</text>
+      <text x="${t.x + 18}" y="286" font-size="13" class="evo-sub">${esc(t.desc)}</text>
+    </g>`);
+  });
+
+  // Bidirectional exchange wires between tracks
+  parts.push(
+    `<path data-relation="work-exchange" data-from="theory-kernel" data-to="prototype-libraries" d="M 346 240 H 390" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>`
   );
-  path('M512 476 V521');
-  box(112, 521, 800, 68, tr('归因：哪一层需要修正？', 'Which layer needs revision?'), 'blue', 36);
-  const cards = [
-    [112, 631, tr('实现偏差|修正实现', 'Implementation drift|Fix implementation')],
-    [528, 631, tr('Host 能力缺口|补足翻译能力', 'Host capability gap|Improve translation')],
-    [
-      112,
-      748,
-      tr('义务遗漏或过拟合|修正 Prototype', 'Omission or overfitting|Revise the Prototype'),
-    ],
-    [528, 748, tr('基础关系出现反例|重审理论', 'Relation challenged|Revisit the theory')],
+  parts.push(
+    `<path data-relation="work-exchange" data-from="prototype-libraries" data-to="theory-kernel" d="M 394 256 H 350" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>`
+  );
+  parts.push(
+    `<path data-relation="work-exchange" data-from="prototype-libraries" data-to="translation-layer" d="M 630 240 H 674" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>`
+  );
+  parts.push(
+    `<path data-relation="work-exchange" data-from="translation-layer" data-to="prototype-libraries" d="M 678 256 H 634" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>`
+  );
+
+  // Convergence connectors from the 3 tracks into Evidence
+  parts.push(
+    `<path data-relation="practice-input" data-from="theory-kernel" data-to="practice-evidence" d="M 228 306 V 326 Q 228 338 240 338 H 512" class="evo-wire"/>`
+  );
+  parts.push(
+    `<path data-relation="practice-input" data-from="translation-layer" data-to="practice-evidence" d="M 796 306 V 326 Q 796 338 784 338 H 512" class="evo-wire"/>`
+  );
+  parts.push(
+    `<path data-relation="evidence-entry" data-from="prototype-libraries" data-to="practice-evidence" d="M 512 306 V 364" class="evo-wire" marker-end="url(#evo-arrow)"/>`
+  );
+
+  // Stage 2: Practice Evidence band
+  parts.push(`<g data-node="practice-evidence" filter="url(#evo-shadow)">
+    <rect x="112" y="372" width="800" height="106" rx="12" class="evo-card"/>
+    <text x="136" y="400" font-size="11" class="evo-mono evo-kicker">${esc(
+      tr('STAGE 01 · 实践证据', 'STAGE 01 · EVIDENCE')
+    )}</text>
+    <text x="136" y="428" font-size="20" class="evo-title">${esc(
+      tr('实践提供证据', 'Practice provides evidence')
+    )}</text>
+    <text x="136" y="454" font-size="14" class="evo-sub">${esc(
+      tr(
+        '真实实现、符合性测试与跨宿主使用暴露当前近似的边界',
+        'Implementations, conformance suites, and real Host usage surface mismatches'
+      )
+    )}</text>
+  </g>`);
+
+  // Evidence chips on the right side of Stage 2
+  const chips = [
+    tr('行为结果', 'Outcomes'),
+    tr('失败案例', 'Failures'),
+    tr('反例样本', 'Counterexamples'),
   ];
-  path('M512 589 V615');
-  rect(100, 615, 824, 238, 'scope');
-  // The four panels are alternative diagnoses, not sequential stages.
-  cards.forEach(([x, y, label]) => box(x, y, 384, 92, label, 'panel', 36));
-  path('M100 734 H72 V164 H800', false);
-  xs.forEach((x) => path(`M${x + 112} 164 V178`));
-  text(
-    48,
-    886,
-    tr('明确修正，再次检验。', 'Revise explicitly, then test again.'),
-    36,
-    'start',
-    'muted'
+  chips.forEach((label, idx) => {
+    const cx = 612 + idx * 96;
+    parts.push(`<g>
+      <rect x="${cx}" y="408" width="88" height="32" rx="8" fill="var(--evo-surface-subtle)" stroke="var(--evo-border)" stroke-width="1"/>
+      <text x="${cx + 44}" y="428" font-size="12" text-anchor="middle" fill="var(--evo-ink)" font-weight="500">${esc(label)}</text>
+    </g>`);
+  });
+
+  // Connector Evidence -> Attribution
+  parts.push(
+    `<path data-relation="diagnose" data-from="practice-evidence" data-to="diagnoses" d="M 512 478 V 512" class="evo-wire" marker-end="url(#evo-arrow)"/>`
   );
+
+  // Stage 3: Attribution Zone (2x2 alternative diagnoses, not sequential stages)
+  parts.push(`<g data-alternatives="diagnoses">
+    <rect x="104" y="520" width="816" height="324" rx="16" class="evo-zone"/>
+    <text x="130" y="550" font-size="11" class="evo-mono evo-kicker">${esc(
+      tr(
+        'STAGE 02 · 归因分流（并行方向，非先后阶段）',
+        'STAGE 02 · ATTRIBUTION (ALTERNATIVE DIAGNOSES, NOT STAGES)'
+      )
+    )}</text>
+    <text x="130" y="578" font-size="20" class="evo-title">${esc(
+      tr('归因：哪一层需要修正？', 'Which layer needs revision?')
+    )}</text>
+  `);
+
+  const diagnoses = [
+    {
+      id: 'implementation',
+      x: 128,
+      y: 602,
+      accent: 'var(--evo-slate)',
+      soft: 'var(--evo-slate-soft)',
+      symptom: tr('实现偏差', 'Implementation drift'),
+      detail: tr('行为偏离已有规范与契约', 'Behavior diverges from governed spec'),
+      action: tr('修正实现', 'Fix implementation'),
+    },
+    {
+      id: 'host-capability',
+      x: 522,
+      y: 602,
+      accent: 'var(--evo-amber)',
+      soft: 'var(--evo-amber-soft)',
+      symptom: tr('Host 能力缺口', 'Host capability gap'),
+      detail: tr('目标宿主缺少所需承载能力', 'Target Host lacks required primitive'),
+      action: tr('补足翻译能力', 'Improve translation'),
+    },
+    {
+      id: 'prototype',
+      x: 128,
+      y: 722,
+      accent: 'var(--evo-green)',
+      soft: 'var(--evo-green-soft)',
+      symptom: tr('义务遗漏或过拟合', 'Omission or overfitting'),
+      detail: tr('定义遗漏必要语义或绑定特定 Host', 'Missing semantics or Host-overfitted'),
+      action: tr('修正 Prototype', 'Revise Prototype'),
+    },
+    {
+      id: 'theory',
+      x: 522,
+      y: 722,
+      accent: 'var(--evo-blue)',
+      soft: 'var(--evo-blue-soft)',
+      symptom: tr('基础关系出现反例', 'Fundamental counterexample'),
+      detail: tr('现有模型无法一致解释基础关系', 'Core model fails to explain relation'),
+      action: tr('重审理论', 'Revisit theory'),
+    },
+  ];
+
+  diagnoses.forEach((d) => {
+    parts.push(`<g data-diagnosis="${d.id}" filter="url(#evo-shadow)">
+      <rect x="${d.x}" y="${d.y}" width="374" height="102" rx="12" class="evo-card"/>
+      <rect x="${d.x}" y="${d.y + 16}" width="4" height="70" rx="2" fill="${d.accent}" stroke="none"/>
+      <text x="${d.x + 20}" y="${d.y + 34}" font-size="16" class="evo-title">${esc(d.symptom)}</text>
+      <text x="${d.x + 20}" y="${d.y + 56}" font-size="13" class="evo-sub">${esc(d.detail)}</text>
+      <rect x="${d.x + 20}" y="${d.y + 68}" width="${en ? 154 : 116}" height="24" rx="6" fill="${d.soft}" stroke="none"/>
+      <text x="${d.x + 30}" y="${d.y + 84}" font-size="12" fill="${d.accent}" font-weight="600">→ ${esc(d.action)}</text>
+    </g>`);
+  });
+
+  parts.push('</g>');
+
+  // Footer
+  parts.push(
+    `<text x="104" y="888" font-size="15" class="evo-sub">${esc(
+      tr(
+        '明确修正对应层，再次检验。实现结果不会静默成为新标准。',
+        'Revise the relevant layer explicitly and test again — implementation behavior never silently becomes a rule.'
+      )
+    )}</text>`
+  );
+
+  parts.push('</g>');
   return 928;
 }
 
 function evolutionMobile() {
-  // The mobile composition preserves the desktop graph and complete description.
-  // Parallel work stays on one row; the lower cards are alternative diagnoses.
   evolutionDescription();
+  evolutionStyles();
+  parts.push('<g class="evo-root">');
   parts.push(
-    '<defs><marker id="mobile-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="var(--muted)" stroke-width="1.5"/></marker></defs>'
+    `<rect x="0" y="0" width="500" height="1000" rx="14" fill="var(--evo-bg)" stroke="none"/>`
   );
-  const edge = (relation, from, to, d, arrow = true) =>
-    parts.push(
-      `<path data-relation="${relation}" data-from="${from}" data-to="${to}" d="${d}" class="line"${arrow ? ' marker-end="url(#mobile-arrow)"' : ''}/>`
-    );
-  const node = (id, x, y, w, h, label, cls = 'panel') => {
-    parts.push(`<g data-node="${id}">`);
-    box(x, y, w, h, label, cls, 26);
-    parts.push('</g>');
-  };
 
-  text(32, 40, tr('从实践到明确修正', 'Practice to explicit revision'), 28, 'start', 'strong');
-  text(32, 80, tr('三条主线并行推进', 'Three concurrent lines of work'), 26, 'start', 'muted');
+  parts.push(
+    `<text x="28" y="34" font-size="11" class="evo-mono evo-kicker">${esc(
+      tr('EVOLUTION LOOP · 演进闭环', 'EVOLUTION LOOP · CH. 07')
+    )}</text>`
+  );
+  parts.push(
+    `<text x="28" y="64" font-size="22" class="evo-title">${esc(
+      tr('从实践到明确修正', 'Practice to explicit revision')
+    )}</text>`
+  );
+  parts.push(
+    `<text x="28" y="88" font-size="14" class="evo-sub">${esc(
+      tr('三条主线并行推进', 'Three concurrent lines of work')
+    )}</text>`
+  );
+
+  // Return feedback bus
+  parts.push(
+    `<path data-relation="revision-loop" data-from="diagnoses" data-to="work" d="M 32 710 H 14 Q 8 710 8 702 V 114 Q 8 106 16 106 H 404 Q 412 106 412 114 V 124" class="evo-wire-dash" marker-end="url(#evo-arrow-sm)"/>`
+  );
+  parts.push(
+    `<path data-relation="revision-return" data-from="diagnoses" data-to="theory-kernel" d="M 102 106 V 124" class="evo-wire-dash" marker-end="url(#evo-arrow-sm)"/>`
+  );
+  parts.push(
+    `<path data-relation="revision-return" data-from="diagnoses" data-to="prototype-libraries" d="M 257 106 V 124" class="evo-wire-dash" marker-end="url(#evo-arrow-sm)"/>`
+  );
+
   const lanes = [
-    ['theory-kernel', 32, tr('理论|与内核', 'Theory|and kernel'), 'blue'],
-    ['prototype-libraries', 188, tr('原型库', 'Prototype|libraries'), 'green'],
-    ['translation-layer', 344, tr('翻译层', 'Translation|layer'), 'amber'],
+    {
+      id: 'theory-kernel',
+      x: 34,
+      code: '01',
+      accent: 'var(--evo-blue)',
+      soft: 'var(--evo-blue-soft)',
+      label: tr('理论与内核', 'Theory &|kernel'),
+    },
+    {
+      id: 'prototype-libraries',
+      x: 189,
+      code: '02',
+      accent: 'var(--evo-green)',
+      soft: 'var(--evo-green-soft)',
+      label: tr('原型库', 'Prototype|libraries'),
+    },
+    {
+      id: 'translation-layer',
+      x: 344,
+      code: '03',
+      accent: 'var(--evo-amber)',
+      soft: 'var(--evo-amber-soft)',
+      label: tr('翻译层', 'Translation|layer'),
+    },
   ];
-  lanes.forEach(([id, x, label, cls]) => node(id, x, 108, 140, 116, label, cls));
-  edge('work-exchange', 'theory-kernel', 'prototype-libraries', 'M172 152 H186');
-  edge('work-exchange', 'prototype-libraries', 'theory-kernel', 'M188 181 H174');
-  edge('work-exchange', 'prototype-libraries', 'translation-layer', 'M328 152 H342');
-  edge('work-exchange', 'translation-layer', 'prototype-libraries', 'M344 181 H330');
-  lanes.forEach(([id, x]) =>
-    edge('practice-input', id, 'practice-evidence', `M${x + 70} 224 V246 H258`, false)
+  lanes.forEach((t) => {
+    const lines = t.label.split('|');
+    parts.push(`<g data-node="${t.id}" filter="url(#evo-shadow)">
+      <rect x="${t.x}" y="130" width="136" height="92" rx="10" class="evo-card"/>
+      <rect x="${t.x}" y="130" width="136" height="3.5" rx="2" fill="${t.accent}" stroke="none"/>
+      <rect x="${t.x + 12}" y="144" width="26" height="17" rx="5" fill="${t.soft}" stroke="none"/>
+      <text x="${t.x + 25}" y="156" font-size="10" text-anchor="middle" class="evo-mono" fill="${t.accent}" font-weight="600">${t.code}</text>
+      <text x="${t.x + 12}" y="${lines.length > 1 ? 184 : 194}" font-size="${en ? 15 : 17}" class="evo-title">${lines
+        .map((l, i) => `<tspan x="${t.x + 12}" dy="${i ? 19 : 0}">${esc(l)}</tspan>`)
+        .join('')}</text>
+    </g>`);
+  });
+
+  parts.push(
+    `<path data-relation="work-exchange" data-from="theory-kernel" data-to="prototype-libraries" d="M 171 170 H 185" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>`
   );
-  edge('evidence-entry', 'work', 'practice-evidence', 'M258 246 V267');
-  node(
-    'practice-evidence',
-    32,
-    270,
-    452,
-    108,
-    tr(
-      '实践提供证据|行为结果、失败与反例',
-      'Practice provides evidence|Outcomes, failures,|counterexamples'
-    )
+  parts.push(
+    `<path data-relation="work-exchange" data-from="prototype-libraries" data-to="theory-kernel" d="M 188 184 H 174" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>`
   );
-  edge('diagnose', 'practice-evidence', 'diagnoses', 'M258 378 V390');
-  text(32, 411, tr('哪一层需要修正？', 'Which layer needs revision?'), 26, 'start', 'strong');
-  text(
-    32,
-    445,
-    tr('不同归因，并非先后阶段', 'Alternative diagnoses, not stages'),
-    26,
-    'start',
-    'muted'
+  parts.push(
+    `<path data-relation="work-exchange" data-from="prototype-libraries" data-to="translation-layer" d="M 326 170 H 340" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>`
+  );
+  parts.push(
+    `<path data-relation="work-exchange" data-from="translation-layer" data-to="prototype-libraries" d="M 343 184 H 329" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>`
   );
 
-  parts.push('<g data-alternatives="diagnoses">');
-  rect(32, 462, 452, 416, 'scope');
-  const diagnoses = [
-    ['implementation', 472, tr('实现偏差|修正实现', 'Implementation drift|Fix implementation')],
-    [
-      'host-capability',
-      572,
-      tr('Host 能力缺口|补足翻译能力', 'Host capability gap|Improve translation'),
-    ],
-    [
-      'prototype',
-      672,
-      tr('义务遗漏或过拟合|修正 Prototype', 'Omission or overfitting|Revise the Prototype'),
-    ],
-    ['theory', 772, tr('基础关系出现反例|重审理论', 'Relation challenged|Revisit the theory')],
-  ];
-  diagnoses.forEach(([id, y, label]) => {
-    parts.push(`<g data-diagnosis="${id}">`);
-    box(44, y, 428, 88, label, 'panel', 26);
-    parts.push('</g>');
-  });
-  parts.push('</g>');
-  // A single return bus reaches all concurrent lanes. No card-to-card arrows.
-  edge('revision-loop', 'diagnoses', 'work', 'M32 670 H12 V94 H414', false);
-  lanes.forEach(([id, x]) => edge('revision-return', 'diagnoses', id, `M${x + 70} 94 V105`));
-  text(
-    32,
-    930,
-    tr(
-      '明确修正，再次检验。|实现结果不静默成为标准。',
-      'Revise, then test again.|No silent rule changes.'
-    ),
-    26,
-    'start',
-    'muted'
+  // Converge into evidence
+  parts.push(
+    `<path data-relation="practice-input" data-from="theory-kernel" data-to="practice-evidence" d="M 102 222 V 240 Q 102 248 110 248 H 257" class="evo-wire"/>`
   );
+  parts.push(
+    `<path data-relation="practice-input" data-from="translation-layer" data-to="practice-evidence" d="M 412 222 V 240 Q 412 248 404 248 H 257" class="evo-wire"/>`
+  );
+  parts.push(
+    `<path data-relation="evidence-entry" data-from="work" data-to="practice-evidence" d="M 257 222 V 268" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>`
+  );
+
+  parts.push(`<g data-node="practice-evidence" filter="url(#evo-shadow)">
+    <rect x="34" y="274" width="446" height="96" rx="12" class="evo-card"/>
+    <text x="52" y="298" font-size="10" class="evo-mono evo-kicker">${esc(
+      tr('STAGE 01 · 实践证据', 'STAGE 01 · EVIDENCE')
+    )}</text>
+    <text x="52" y="324" font-size="18" class="evo-title">${esc(
+      tr('实践提供证据', 'Practice provides evidence')
+    )}</text>
+    <text x="52" y="350" font-size="13" class="evo-sub">${esc(
+      tr('行为结果 · 失败案例 · 反例样本', 'Outcomes · failures · counterexamples')
+    )}</text>
+  </g>`);
+
+  parts.push(
+    `<path data-relation="diagnose" data-from="practice-evidence" data-to="diagnoses" d="M 257 370 V 400" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>`
+  );
+
+  parts.push(`<g data-alternatives="diagnoses">
+    <rect x="32" y="406" width="448" height="492" rx="14" class="evo-zone"/>
+    <text x="50" y="432" font-size="10" class="evo-mono evo-kicker">${esc(
+      tr('STAGE 02 · 并行归因（非先后阶段）', 'STAGE 02 · ALTERNATIVE DIAGNOSES')
+    )}</text>
+    <text x="50" y="458" font-size="18" class="evo-title">${esc(
+      tr('归因：哪一层需要修正？', 'Which layer needs revision?')
+    )}</text>`);
+
+  const mDiagnoses = [
+    {
+      id: 'implementation',
+      y: 476,
+      accent: 'var(--evo-slate)',
+      soft: 'var(--evo-slate-soft)',
+      symptom: tr('实现偏差', 'Implementation drift'),
+      action: tr('修正实现', 'Fix implementation'),
+    },
+    {
+      id: 'host-capability',
+      y: 580,
+      accent: 'var(--evo-amber)',
+      soft: 'var(--evo-amber-soft)',
+      symptom: tr('Host 能力缺口', 'Host capability gap'),
+      action: tr('补足翻译能力', 'Improve translation'),
+    },
+    {
+      id: 'prototype',
+      y: 684,
+      accent: 'var(--evo-green)',
+      soft: 'var(--evo-green-soft)',
+      symptom: tr('义务遗漏或过拟合', 'Omission or overfitting'),
+      action: tr('修正 Prototype', 'Revise Prototype'),
+    },
+    {
+      id: 'theory',
+      y: 788,
+      accent: 'var(--evo-blue)',
+      soft: 'var(--evo-blue-soft)',
+      symptom: tr('基础关系出现反例', 'Fundamental counterexample'),
+      action: tr('重审理论', 'Revisit theory'),
+    },
+  ];
+  mDiagnoses.forEach((d) => {
+    parts.push(`<g data-diagnosis="${d.id}" filter="url(#evo-shadow)">
+      <rect x="48" y="${d.y}" width="416" height="90" rx="10" class="evo-card"/>
+      <rect x="48" y="${d.y + 14}" width="4" height="62" rx="2" fill="${d.accent}" stroke="none"/>
+      <text x="66" y="${d.y + 36}" font-size="16" class="evo-title">${esc(d.symptom)}</text>
+      <rect x="66" y="${d.y + 50}" width="${en ? 156 : 120}" height="24" rx="6" fill="${d.soft}" stroke="none"/>
+      <text x="76" y="${d.y + 66}" font-size="12" fill="${d.accent}" font-weight="600">→ ${esc(d.action)}</text>
+    </g>`);
+  });
+
+  parts.push('</g>');
+  parts.push(
+    `<text x="32" y="936" font-size="14" class="evo-sub">${esc(
+      tr('明确修正，再次检验。', 'Revise explicitly, then test again.')
+    )}</text>`
+  );
+  parts.push(
+    `<text x="32" y="960" font-size="13" class="evo-sub">${esc(
+      tr('实现结果不会静默成为新标准。', 'Implementation behavior never silently becomes a rule.')
+    )}</text>`
+  );
+  parts.push('</g>');
   return 1000;
 }
 
