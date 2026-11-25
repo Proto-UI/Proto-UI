@@ -27,7 +27,7 @@ import type {
   ToastRootAsHookContract,
 } from './types';
 
-const USER_DISMISS_REASONS = new Set(['close', 'escape', 'swipe']);
+const USER_DISMISS_REASONS = ['close', 'escape', 'swipe'] as const;
 
 function resolveType(raw: unknown): ToastType {
   return typeof raw === 'string' && (TOAST_TYPES as readonly string[]).includes(raw)
@@ -163,7 +163,8 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
   const request = (next: boolean, reason: string) => {
     const run = currentRun;
     if (!run || open.get() === next) return;
-    if (!next && !dismissible.get() && USER_DISMISS_REASONS.has(reason)) return;
+    if (!next && !dismissible.get() && (USER_DISMISS_REASONS as readonly string[]).includes(reason))
+      return;
     const view = viewEpoch;
     if (!run.props.isProvided('open')) apply(next);
     if (currentRun !== run || viewEpoch !== view) return;
