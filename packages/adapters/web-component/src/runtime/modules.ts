@@ -1993,6 +1993,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 stopEntryAttachShadowWatch?.();
                 stopEntryAttachShadowWatch = null;
                 stopEntryUpgradeWatch?.();
+                const parents = new Set<Node>();
                 const slotRoots = new Set<EventTarget>();
                 for (
                   let ancestor: Element | null = target;
@@ -2000,28 +2001,22 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   ancestor = composedParentElement(ancestor)
                 ) {
                   observedRoots.add(ancestor);
-                  entryObserver?.observe(ancestor, {
-                    attributes: true,
-                    attributeFilter: ['inert', 'slot', 'name'],
-                    attributeOldValue: true,
-                  });
                   // A slotted node's physical parent can differ from the
                   // composed one. Observe both movement and reassignment.
                   const parent = ancestor.parentNode;
+                  if (parent) parents.add(parent);
                   if (parent?.nodeType === 11) slotRoots.add(parent);
                   if (ancestor.parentElement?.shadowRoot)
                     slotRoots.add(ancestor.parentElement.shadowRoot);
                 }
                 for (const ancestor of observedRoots) {
-                  const parent = ancestor.parentNode;
-                  if (!parent) continue;
-                  entryObserver?.observe(parent, {
-                    ...(observedRoots.has(parent)
-                      ? { attributeFilter: ['inert', 'slot', 'name'], attributeOldValue: true }
-                      : {}),
-                    childList: true,
+                  entryObserver?.observe(ancestor, {
+                    attributeFilter: ['inert', 'slot', 'name'],
+                    attributeOldValue: true,
+                    childList: parents.delete(ancestor),
                   });
                 }
+                for (const parent of parents) entryObserver?.observe(parent, { childList: true });
                 stopEntrySlotWatch = listenToEntryEvents(slotRoots, ['slotchange'], refreshTree);
                 return;
               }
