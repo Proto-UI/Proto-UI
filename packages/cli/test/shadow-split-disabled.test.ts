@@ -129,7 +129,7 @@ describe('public split disabled token boundary', () => {
 });
 
 describe('helper-carried Rule stylesheet equivalence', () => {
-  it('provides distinct active background and shadow rules for the actual Toggle lowering', async () => {
+  it('provides distinct active background and shadow rules for the actual Toggle recipe', async () => {
     const tokens = (await collectProtoStyleTokens(
       'packages/prototypes/bootstrap-2-3-2/src/toggle'
     )) as string[];
@@ -139,15 +139,28 @@ describe('helper-carried Rule stylesheet equivalence', () => {
     document.body.append(host);
     await flush();
 
-    const runtimeTokens = host.getAttribute('data-pui-style')!.split(' ');
-    const shadowToken = runtimeTokens.find((token) => token.startsWith('data-[active]:shadow-'));
-    const backgroundToken = runtimeTokens.find((token) => token.startsWith('data-[active]:bg-'));
-    const restShadowToken = runtimeTokens.find((token) => token.startsWith('shadow-'));
-    expect(shadowToken).toBeDefined();
-    expect(backgroundToken).toBeDefined();
+    const restTokens = host.getAttribute('data-pui-style')!.split(' ');
+    const restShadowToken = restTokens.find((token) => token.startsWith('shadow-'));
+    const restBackgroundToken = restTokens.find((token) => token.startsWith('bg-'));
+    setElementProps(host, { active: true });
+    host.update();
+    await flush();
+    // The current source combines active/pressed, availability, variant and
+    // hover conditions. Runtime resolves those branches before emitting these
+    // paint tokens; a data-[active] prefix alone cannot express that recipe.
+    const activeTokens = host.getAttribute('data-pui-style')!.split(' ');
+    const shadowToken = activeTokens.find((token) => token.startsWith('shadow-'));
+    const backgroundToken = activeTokens.find((token) => token.startsWith('bg-'));
+    expect(shadowToken, JSON.stringify(activeTokens)).toBeDefined();
+    expect(backgroundToken, JSON.stringify(activeTokens)).toBeDefined();
     expect(restShadowToken).toBeDefined();
+    expect(restBackgroundToken).toBeDefined();
+    expect(shadowToken).not.toBe(restShadowToken);
+    expect(backgroundToken).not.toBe(restBackgroundToken);
     expect(tokens).toContain(shadowToken);
     expect(tokens).toContain(backgroundToken);
+    expect(tokens).toContain(restShadowToken);
+    expect(tokens).toContain(restBackgroundToken);
 
     const css = renderProtoStyleTokenCss(tokens);
     const parser = parsers.css;
@@ -179,7 +192,10 @@ describe('helper-carried Rule stylesheet equivalence', () => {
           .map((child) => css.slice(parser.locStart(child), parser.locEnd(child)))
           .join(';');
         rules.push({ selector: node.selector!, style });
-      } else if (node.type === 'css-root' || (node.type === 'css-atrule' && node.name === 'layer')) {
+      } else if (
+        node.type === 'css-root' ||
+        (node.type === 'css-atrule' && node.name === 'layer')
+      ) {
         for (const child of node.nodes ?? []) visit(child);
       }
     };
@@ -201,8 +217,7 @@ describe('helper-carried Rule stylesheet equivalence', () => {
         case 'selector-pseudo':
           if (selector.value === ':where' || selector.value === ':is')
             return children.some((child) => matches(child, element));
-          if (selector.value === ':not')
-            return !children.some((child) => matches(child, element));
+          if (selector.value === ':not') return !children.some((child) => matches(child, element));
           break;
         case 'selector-attribute': {
           if (!selector.attribute || selector.namespace || selector.insensitive)
@@ -238,7 +253,10 @@ describe('helper-carried Rule stylesheet equivalence', () => {
           matches(rule.selector, probe) &&
           !matches(rule.selector, empty)
       );
-      expect(matching.length, `${token} must select its own ${property} declaration`).toBeGreaterThan(0);
+      expect(
+        matching.length,
+        `${token} must select its own ${property} declaration`
+      ).toBeGreaterThan(0);
       return matching.at(-1)!;
     };
     const shadow = forToken(shadowToken!, '--pui-shadow', true);

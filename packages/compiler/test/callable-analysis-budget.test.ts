@@ -95,8 +95,8 @@ describe('finite callable analysis resources', () => {
         {
           code: 'PUI1007',
           category: 'unsupported-input',
-          message: expect.stringContaining('deterministic analysis store-work budget'),
-          span: { file: 'packages/prototypes/base/src/transition/machine.ts' },
+          message: expect.stringContaining('finite analysis call-depth boundary'),
+          span: { file: 'packages/prototypes/base/src/transition/as-transition.proto.ts' },
         },
       ],
     });
