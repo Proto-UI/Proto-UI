@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "kind": "ready-pr-website-followup-repairs",
+  "observedAt": "2026-11-25T13:56:48.598222+00:00",
+  "sourceBefore": "4188e17887abb155e927eba48455bc2752f7ea02",
+  "preimageContext": "c738a4076e3bb1f8de0267130991416c69c9d10d",
+  "files": [
+    {
+      "path": "apps/www/src/components/site-typography-client.ts",
+      "preimageGitBlob": "e56e21cd1236387a1b3b9ffdb7f6989faf9e7d4a",
+      "preimageSha256": "779a638445611fa5dffe633ef6699902d6a3ca605ead481232522e7c7f270176",
+      "candidateGitBlob": "375688656872929c460eb02ba0e1e38b4d7b0a69",
+      "candidateSha256": "b5cdff226ccb3d4591190a0a851d3dd49b70e3c157fbe22ee98b46e7fff021d8",
+      "beforeBytes": 7375,
+      "afterBytes": 7494
+    },
+    {
+      "path": "apps/www/src/components/site-typography.test.ts",
+      "preimageGitBlob": "fba5aa66ebd39881437b54dc20682420965ccec3",
+      "preimageSha256": "0e247343b1ba837d5f57aa43a58157e4f766abc1cfa3dbcf1e4cb62cd06bd4b4",
+      "candidateGitBlob": "2f3364a3c12debe8de64e3de7f4c0101c2df8485",
+      "candidateSha256": "c31ba15846c3ea0f5cb138d66ed559d6d951abf1cbf9cacdba1391363ea8ceac",
+      "beforeBytes": 56091,
+      "afterBytes": 61544
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/native-content-lease.ts",
+      "preimageGitBlob": "5c5138bfa38cd9a7b1097a97e262ba3b07069274",
+      "preimageSha256": "7c4b4d5f910d85885270cd204d549378d8fdbb98c832f48185803576527ae238",
+      "candidateGitBlob": "a6a0c64201066143fe5987c2d76dee90e3dac38c",
+      "candidateSha256": "4fa0adf0026d10621e5e58ee7528e9e8152b805dbddf35359f1df6ff608c27e0"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/native-content-lease.test.ts",
+      "preimageGitBlob": "8b32de0d94a43f86bbe81bbe88628e454fc86f13",
+      "preimageSha256": "49aa1d1c3447a808279cc4c04353e3e92448b69da3c610d80e060e29011e4bb6",
+      "candidateGitBlob": "b5f987a5f99dff57a95bcca9749697b23835bac2",
+      "candidateSha256": "df6e62a59804578fdf21fe79745092cb60cadbf751969abbc01bf775170021ee"
+    }
+  ],
+  "changes": [
+    "Accept the existing Bootstrap typography family at both documentation entry guards; preserve native content identity, runtime replacement and teardown.",
+    "Avoid reading Selection endpoints when the current live rangeCount is zero; retain focus and non-empty selection ownership."
+  ],
+  "verification": {
+    "bootstrap": {
+      "receipt": "bootstrap-typography/positive.report.json",
+      "sha256": "dc7b153d54499158e62a73c4fb4e5b62de354cbe9c131fe6f3d4796c7d16d04a",
+      "numTotalTests": 155,
+      "numPassedTests": 155,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTodoTests": 0
+    },
+    "bootstrapOriginalMaterializationGuard": {
+      "receipt": "bootstrap-typography/materialization.report.json",
+      "sha256": "4ff58ceaeb8d1f8145e21bd783e61e4023db346e2e60d34918fb0a015763e67a",
+      "numTotalTests": 155,
+      "numPassedTests": 150,
+      "numFailedTests": 5,
+      "numPendingTests": 0,
+      "numTodoTests": 0
+    },
+    "bootstrapOriginalCommittedGuard": {
+      "receipt": "bootstrap-typography/committed.report.json",
+      "sha256": "0b2441e308d0d088270ada48e6533ac537e424777d50ed2efc3ee4ed2c9b6d26",
+      "numTotalTests": 155,
+      "numPassedTests": 154,
+      "numFailedTests": 1,
+      "numPendingTests": 0,
+      "numTodoTests": 0
+    },
+    "nativeAndTypography": {
+      "receipt": "native-selection/combined.report.json",
+      "sha256": "d37920d68bd3d5b139da7be625335959ff10850ce910ac933f2b88e2bf2a12d7",
+      "numTotalTests": 185,
+      "numPassedTests": 185,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTodoTests": 0
+    }
+  },
+  "limits": [
+    "No Matrix 60000ms initialization acceptance is claimed by these unit results.",
+    "Original c738 Search 84-case run ended at the 600-second outer limit; case 56 had started, final case totals unknown.",
+    "Original c738 Header font-corrected run ended at its 900-second limit; the earlier 22-case local run took 953.23 seconds and is not original-900 acceptance.",
+    "Existing c738 production focus checks pass, but its unchanged Bootstrap entry still reports typography errors; a fresh build of this repair remains required.",
+    "Original complete CLI inventory remains 822/823 with 3309 unresolved subjects; no exemption or lowered guard.",
+    "No Issue checkbox, deferred 0.4 Issue, admission, test assertion, or budget is changed."
+  ]
+}
