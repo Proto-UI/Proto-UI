@@ -1209,129 +1209,82 @@ export class AnatomyModuleImpl extends ModuleBase {
     const counts = new Map<string, number>();
     for (const claim of claims) counts.set(claim.role, (counts.get(claim.role) ?? 0) + 1);
 
-    for (const [role, roleState] of Object.entries(familyDef.roles)) {
-      const count = counts.get(role) ?? 0;
-      if (count < roleState.cardinality.min) {
+    // Family errors and profile warnings share traversal, but retain their
+    // distinct wording, codes and output shape. Profile requirements inherited
+    // from the family have already been reported by the first pass.
+    const collect = (
+      definition: Pick<NormalizedFamily, 'roles' | 'relations'>,
+      profileName?: string
+    ) => {
+      const scope = profileName ? 'profile' : 'family';
+      const prefix = profileName ? 'ANATOMY_PROFILE_' : 'ANATOMY_FAMILY_';
+      const push = (kind: string, role: string, message: string) => {
         diagnostics.push({
-          level: 'error',
-          scope: 'family',
-          code: 'ANATOMY_FAMILY_MIN',
-          message: `[Anatomy] role '${role}' is below family min in '${family.debugName}'`,
+          level: profileName ? 'warning' : 'error',
+          scope,
+          code: prefix + kind,
+          message,
           family,
           role,
+          ...(profileName ? { profile: profileName } : {}),
         });
-      }
-      if (exceedsCardinalityMax(count, roleState.cardinality.max)) {
-        diagnostics.push({
-          level: 'error',
-          scope: 'family',
-          code: 'ANATOMY_FAMILY_MAX',
-          message: `[Anatomy] role '${role}' exceeds family max in '${family.debugName}'`,
-          family,
-          role,
-        });
-      }
-    }
-
-    for (const claim of claims) {
-      const familyRole = familyDef.roles[claim.role];
-      for (const req of familyRole?.requires ?? []) {
-        if (!getHookNames(claim.prototype).has(req.name)) {
-          diagnostics.push({
-            level: 'error',
-            scope: 'family',
-            code: 'ANATOMY_FAMILY_HOOK_REQUIRED',
-            message: `[Anatomy] role '${claim.role}' requires hook '${req.name}'`,
-            family,
-            role: claim.role,
-          });
+      };
+      for (const [role, roleState] of Object.entries(definition.roles)) {
+        const count = counts.get(role) ?? 0;
+        if (count < roleState.cardinality.min) {
+          push(
+            'MIN',
+            role,
+            `[Anatomy] role '${role}' is below ${scope} min in '${family.debugName}${profileName ? '/' + profileName : ''}'`
+          );
+        }
+        if (exceedsCardinalityMax(count, roleState.cardinality.max)) {
+          push(
+            'MAX',
+            role,
+            `[Anatomy] role '${role}' exceeds ${scope} max in '${family.debugName}${profileName ? '/' + profileName : ''}'`
+          );
         }
       }
-    }
-
-    for (const relation of familyDef.relations) {
-      for (const claim of claims.filter((it) => it.role === relation.child)) {
-        if (!this.hasAncestorRole(claim.instance, family, relation.parent, domain.rootInstance)) {
-          diagnostics.push({
-            level: 'error',
-            scope: 'family',
-            code: 'ANATOMY_FAMILY_RELATION',
-            message: `[Anatomy] role '${relation.child}' must be contained by '${relation.parent}'`,
-            family,
-            role: relation.child,
-          });
+      for (const claim of claims) {
+        const role = definition.roles[claim.role];
+        const inherited = profileName
+          ? new Set((familyDef.roles[claim.role]?.requires ?? []).map((it) => it.name))
+          : null;
+        for (const req of role?.requires ?? []) {
+          if (inherited?.has(req.name)) continue;
+          if (!getHookNames(claim.prototype).has(req.name)) {
+            push(
+              'HOOK_REQUIRED',
+              claim.role,
+              `[Anatomy] role '${claim.role}' ${profileName ? 'is missing profile' : 'requires'} hook '${req.name}'`
+            );
+          }
         }
       }
-    }
+      const relations = profileName
+        ? definition.relations.slice(familyDef.relations.length)
+        : definition.relations;
+      for (const relation of relations) {
+        for (const claim of claims.filter((it) => it.role === relation.child)) {
+          if (!this.hasAncestorRole(claim.instance, family, relation.parent, domain.rootInstance)) {
+            push(
+              'RELATION',
+              relation.child,
+              `[Anatomy] role '${relation.child}' ${profileName ? 'should' : 'must'} be contained by '${relation.parent}'`
+            );
+          }
+        }
+      }
+    };
 
+    collect(familyDef);
     const profileName = claims.find(
       (claim) => claim.role === 'root' && claim.instance === domain.rootInstance
     )?.profile;
-    if (!profileName) return diagnostics;
-    const profile = familyDef.profiles[profileName];
-    if (!profile) return diagnostics;
-
-    for (const [role, roleState] of Object.entries(profile.roles)) {
-      const count = counts.get(role) ?? 0;
-      if (count < roleState.cardinality.min) {
-        diagnostics.push({
-          level: 'warning',
-          scope: 'profile',
-          code: 'ANATOMY_PROFILE_MIN',
-          message: `[Anatomy] role '${role}' is below profile min in '${family.debugName}/${profileName}'`,
-          family,
-          role,
-          profile: profileName,
-        });
-      }
-      if (exceedsCardinalityMax(count, roleState.cardinality.max)) {
-        diagnostics.push({
-          level: 'warning',
-          scope: 'profile',
-          code: 'ANATOMY_PROFILE_MAX',
-          message: `[Anatomy] role '${role}' exceeds profile max in '${family.debugName}/${profileName}'`,
-          family,
-          role,
-          profile: profileName,
-        });
-      }
-    }
-
-    for (const claim of claims) {
-      const profileRole = profile.roles[claim.role];
-      const familyReqNames = new Set(
-        (familyDef.roles[claim.role]?.requires ?? []).map((it) => it.name)
-      );
-      for (const req of profileRole?.requires ?? []) {
-        if (familyReqNames.has(req.name)) continue;
-        if (!getHookNames(claim.prototype).has(req.name)) {
-          diagnostics.push({
-            level: 'warning',
-            scope: 'profile',
-            code: 'ANATOMY_PROFILE_HOOK_REQUIRED',
-            message: `[Anatomy] role '${claim.role}' is missing profile hook '${req.name}'`,
-            family,
-            role: claim.role,
-            profile: profileName,
-          });
-        }
-      }
-    }
-
-    for (const relation of profile.relations.slice(familyDef.relations.length)) {
-      for (const claim of claims.filter((it) => it.role === relation.child)) {
-        if (!this.hasAncestorRole(claim.instance, family, relation.parent, domain.rootInstance)) {
-          diagnostics.push({
-            level: 'warning',
-            scope: 'profile',
-            code: 'ANATOMY_PROFILE_RELATION',
-            message: `[Anatomy] role '${relation.child}' should be contained by '${relation.parent}'`,
-            family,
-            role: relation.child,
-            profile: profileName,
-          });
-        }
-      }
+    if (profileName) {
+      const profile = familyDef.profiles[profileName];
+      if (profile) collect(profile, profileName);
     }
 
     return diagnostics;
