@@ -164,8 +164,14 @@ export async function generateCliInitDocs() {
     await rm(temporary, { recursive: true, force: true });
   }
 }
-if (
-  process.argv[1] &&
-  realpathSync(path.resolve(process.argv[1])) === realpathSync(fileURLToPath(import.meta.url))
-)
-  await generateCliInitDocs();
+function isEntryPoint() {
+  if (!process.argv[1]) return false;
+  try {
+    return (
+      realpathSync(path.resolve(process.argv[1])) === realpathSync(fileURLToPath(import.meta.url))
+    );
+  } catch {
+    return false;
+  }
+}
+if (isEntryPoint()) await generateCliInitDocs();
