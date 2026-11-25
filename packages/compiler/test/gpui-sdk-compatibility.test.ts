@@ -76,9 +76,12 @@ describe('shared GPUI SDK compatibility', () => {
     );
     expect(allow).toBeGreaterThanOrEqual(0);
     expect(allow).toBeLessThan(firstItem);
-    for (const lint of ['unused_parens', 'unused_variables', 'unused_mut', 'unused_imports']) {
-      expect(lines[allow]).toContain(lint);
-    }
+    // Exactly the reproduced lowering noise; diagnostics that can reveal a
+    // lowering defect (dead_code, unreachable_code, unused_mut, ...) stay on.
+    expect(lines[allow]).toBe('#![allow(unused_parens, unused_variables, non_upper_case_globals)]');
+    expect(
+      lines.filter((line) => line.startsWith('#![allow(') || line.startsWith('#[allow('))
+    ).toEqual([lines[allow]]);
   });
 
   it.each([false, true])(
