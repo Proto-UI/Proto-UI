@@ -2,7 +2,7 @@ import { createHiddenFirstActivation } from './hidden-first-activation';
 import { surfacePrototypeId } from './surface-recipes';
 import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from './adapter-preference';
 import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/ids';
-import { runtimePreviewFamily } from './site-library-family';
+import { resolvePreviewControlFamily, runtimePreviewFamily } from './site-library-family';
 import {
   createProjectionScopeController,
   type ProjectionScopeController,
@@ -89,10 +89,10 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
     const scope: ProjectionScopeController = createProjectionScopeController({
       initialSelection,
       async materialize(request) {
-        const family =
-          request.selection.projectionFamilyId === 'brutalist' ? 'brutalist' : 'shadcn';
+        const family = resolvePreviewControlFamily('/', request.selection.projectionFamilyId);
         return materializeProjectionCandidate(request, {
           mount,
+          automaticMaterialScene: false,
           yieldAfterPaint: purpose === 'code',
           backgroundPreparation:
             preparation &&
@@ -132,9 +132,11 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
                       ? 'outline'
                       : root.dataset.siteCodeSurface === 'toolbar'
                         ? 'transparent'
-                        : family === 'shadcn'
+                        : family === 'shadcn' || family === 'liquid-glass'
                           ? 'muted'
-                          : 'outline',
+                          : family === 'bootstrap-2-3-2'
+                            ? 'secondary'
+                            : 'outline',
                   radius:
                     purpose === 'note' && family === 'shadcn'
                       ? 'lg'
@@ -222,6 +224,7 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
       attributeFilter: [
         'data-site-library-family',
         'data-projection-family',
+        'data-preview-control-family',
         'data-projection-runtime',
         'data-runner-runtime',
       ],

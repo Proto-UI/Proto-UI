@@ -1,6 +1,9 @@
 /** Website consumer identity. Runtime/adapter choice is a separate axis. */
 export type SiteLibraryFamily = 'shadcn' | 'brutalist' | 'bootstrap-2-3-2';
 
+/** Preview/code-panel controls adapt across all four documented library families. */
+export type PreviewControlFamily = SiteLibraryFamily | 'liquid-glass';
+
 /** Whole-site compositions need the complete control families. Partial library
  * demos have their own explicit registry and cannot be silently admitted here. */
 export function requireSiteLibraryFamily(value: unknown): SiteLibraryFamily {
@@ -17,13 +20,43 @@ export function resolveSiteLibraryFamily(pathname: string): SiteLibraryFamily {
   return 'shadcn';
 }
 
-export function runtimePreviewFamily(root: HTMLElement): SiteLibraryFamily {
+export function resolvePreviewControlFamily(
+  pathname: string,
+  explicitFamily?: string | null
+): PreviewControlFamily {
+  if (
+    explicitFamily === 'shadcn' ||
+    explicitFamily === 'brutalist' ||
+    explicitFamily === 'bootstrap-2-3-2' ||
+    explicitFamily === 'liquid-glass'
+  ) {
+    return explicitFamily;
+  }
+  if (/^\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?ui-libraries\/liquid-glass(?:\/|$)/i.test(pathname))
+    return 'liquid-glass';
+  return resolveSiteLibraryFamily(pathname);
+}
+
+export function previewButtonTag(family: PreviewControlFamily) {
+  return `wc-${family}-button` as const;
+}
+
+export function runtimePreviewFamily(root: HTMLElement): PreviewControlFamily {
   for (let scope: HTMLElement | null = root; scope; scope = scope.parentElement) {
-    const family = scope.dataset.projectionFamily ?? scope.dataset.siteLibraryFamily;
-    if (family === 'shadcn' || family === 'brutalist') return family;
+    const family =
+      scope.dataset.projectionFamily ??
+      scope.dataset.previewControlFamily ??
+      scope.dataset.siteLibraryFamily;
+    if (
+      family === 'shadcn' ||
+      family === 'brutalist' ||
+      family === 'bootstrap-2-3-2' ||
+      family === 'liquid-glass'
+    )
+      return family;
     if (scope.classList.contains('brutalist-demo-frame')) return 'brutalist';
   }
-  return resolveSiteLibraryFamily(root.ownerDocument.defaultView?.location.pathname ?? '/');
+  return resolvePreviewControlFamily(root.ownerDocument.defaultView?.location.pathname ?? '/');
 }
 
 export function siteControlTags(family: SiteLibraryFamily) {

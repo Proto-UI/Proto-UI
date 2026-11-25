@@ -184,6 +184,9 @@
    the preserved Shadcn bank used while staging another projection family. */
 :root[data-site-library-family='bootstrap-2-3-2'],
 [data-site-family-scope][data-site-library-family='bootstrap-2-3-2'] {
+  --site-surface-radius: 4px;
+  --site-surface-border-width: 1px;
+  --docs-code-radius: 4px;
   --color-background: var(--site-bootstrap-background);
   --color-foreground: var(--site-bootstrap-foreground);
   --color-secondary: var(--site-bootstrap-secondary);
@@ -197,4 +200,22 @@
   --sl-color-bg-nav: var(--site-bootstrap-background);
   --sl-color-bg-sidebar: var(--site-bootstrap-background);
   --sl-color-hairline: var(--site-bootstrap-border);
+}
+
+[data-projection-family='brutalist'] {
+  --site-surface-radius: 0;
+  --site-surface-border-width: 2px;
+  --docs-code-radius: 0px;
+}
+
+[data-projection-family='bootstrap-2-3-2'] {
+  --site-surface-radius: 4px;
+  --site-surface-border-width: 1px;
+  --docs-code-radius: 4px;
+}
+
+[data-projection-family='liquid-glass'] {
+  --site-surface-radius: 1rem;
+  --site-surface-border-width: 1px;
+  --docs-code-radius: 1rem;
 }
