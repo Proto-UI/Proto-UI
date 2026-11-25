@@ -5,6 +5,7 @@ import { createFeedbackModule } from '../src/create';
 import { EFFECTS_CAP } from '../src/caps';
 import { FINAL_STYLE_SINK_CAP } from '../src/material/final-style-sink';
 import { VISUAL_FEEDBACK_SINK_CAP } from '../src/material/shared-sink';
+import { PRESENCE_PRESENTATION_SINK_CAP } from '../src/presence/sink';
 import type { FeedbackPort, FeedbackInternalHooks } from '../src/types';
 
 function fixture(kind: 'effects' | 'final' | 'visual') {
@@ -41,6 +42,7 @@ function fixture(kind: 'effects' | 'final' | 'visual') {
   const hooks = module.hooks as FeedbackInternalHooks;
   const port = (module as typeof module & { port: FeedbackPort }).port;
   return {
+    caps,
     module,
     hooks,
     port,
@@ -55,6 +57,55 @@ function fixture(kind: 'effects' | 'final' | 'visual') {
 }
 
 describe('main Root provenance and Finf final visual sinks', () => {
+  it('projects presence with opaque style when material has no combined sink', () => {
+    const f = fixture('visual');
+    const sink = { commit: vi.fn(), release: vi.fn(), cancel: vi.fn(), settle: vi.fn() };
+    const queueStyle = vi.fn();
+    f.caps.attach([
+      [PRESENCE_PRESENTATION_SINK_CAP, sink],
+      [EFFECTS_CAP, { queueStyle, requestFlush() {} }],
+    ]);
+    const owner = f.module.facade.presence.owner();
+    const slot = {
+      version: 2,
+      shape: { kind: 'rounded-rect', geometry: 'style' },
+      source: { kind: 'in-app-backdrop' },
+      fallback: { fill: 'style', foreground: 'style' },
+    } as const;
+    const candidate = { intent: 'liquid-glass' } as const;
+    f.module.facade.style.use(tw('bg-secondary text-secondary-foreground'));
+    f.module.facade.style.presence({
+      owner: owner.ref,
+      closed: { opacity: 0 },
+      entered: { opacity: 1 },
+      easing: [0, 0, 1, 1],
+    });
+    f.module.facade.material.declare(slot);
+    f.module.facade.material.use(candidate);
+
+    f.mount(1);
+    const style = expect.objectContaining({
+      tokens: ['bg-secondary', 'text-secondary-foreground'],
+    });
+    expect(queueStyle).toHaveBeenLastCalledWith(style);
+    f.module.facade.presence.publish(owner.writer, {
+      owner: owner.ref,
+      phase: 'entering',
+      revision: 1,
+      attempt: { ownerEpoch: 1, phaseAttempt: 1 },
+      completion: 'presentation',
+      durationMs: 20,
+      timeoutMs: 100,
+    });
+    expect(sink.commit).toHaveBeenLastCalledWith(
+      expect.objectContaining({ owner: expect.objectContaining({ phase: 'entering' }), style })
+    );
+    expect(f.publish).not.toHaveBeenCalled();
+    expect(f.port.exportMaterialFrame?.()).toEqual({ slot, candidates: [candidate] });
+    expect(f.port.materialDiagnostics?.()).toEqual(['material-presence-host-unavailable']);
+    f.hooks.dispose?.();
+  });
+
   it.each(['effects', 'final', 'visual'] as const)(
     'retains setup/rule/runtime origin across %s sink and remount',
     (kind) => {
