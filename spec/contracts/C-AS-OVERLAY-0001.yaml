@@ -36,8 +36,8 @@ criteria:
       en: Logical close must not revoke portal, layer, or modal resources while a bound Presence driver remains present during leaving.
   - id: C-AS-OVERLAY-0001-F
     text:
-      zh-CN: Boundary stack 跟随 logical open；portal/layer 的彻底撤销跟随 view epoch detach，modal active 跟随 binding present。
-      en: Boundary stack follows logical open; final portal/layer revocation follows view-epoch detach, while modal activity follows binding presence.
+      zh-CN: Boundary stack 默认跟随 logical open；显式配置 boundaryStack 为 false 时，Overlay 不占据 Boundary outside 仲裁位置，也不得阻挡其它 Boundary 的 outside 分类。配置变更必须协调当前 logical open，重复配置、重复 open 与 view epoch 重入不得提升既有逻辑激活顺序。此选择独立于 dismissal opt-in、portal/layer 与 modal；portal/layer 的彻底撤销跟随 view epoch detach，modal active 跟随 binding present。
+      en: Boundary stack follows logical open by default; with explicit boundaryStack false, the Overlay does not occupy Boundary outside arbitration or block another Boundary's outside classification. Configuration changes must reconcile the current logical open state, while repeated configuration, repeated open, and view-epoch reentry must not promote an existing logical activation rank. This choice is independent of dismissal opt-in, portal/layer, and modal policy; final portal/layer revocation follows view-epoch detach, while modal activity follows binding presence.
   - id: C-AS-OVERLAY-0001-G
     text:
       zh-CN: Overlay 可以消费 Boundary 的 outside 分类，但不得把 Hit Participation 合并为 Overlay 自身策略。
@@ -144,6 +144,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: extended
     summary: Realized opt-in focus-outside dismissal through Boundary current-focus evidence, preserving pointer separation and synchronous controlled-owner reopen.
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Added explicit Boundary stack participation for passive portaled presentations without changing ordinary Overlay ordering or resource lifetime.
 tags:
   - overlay
   - as-hook

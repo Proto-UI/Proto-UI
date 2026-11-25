@@ -74,7 +74,7 @@ it.each(SHADCN_STYLE_IDS)(
     }
     // Shortcut foreground lowers to a data-[active] variant: the static token
     // is wired once and the data-active attribute follows the observed state.
-    expect(styleContains(shortcuts[1], 'data-[active]:text-accent-foreground')).toBe(true);
+    expect(styleContains(shortcuts[1], 'data-[active]:text-inherit')).toBe(true);
     expect(shortcuts[0].hasAttribute('data-active')).toBe(false);
     expect(shortcuts[1].hasAttribute('data-active')).toBe(true);
     // Keep the mouse physically over Billing while the keyboard selects Home.

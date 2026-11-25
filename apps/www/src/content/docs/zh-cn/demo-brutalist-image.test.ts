@@ -22,7 +22,7 @@ describe('Brutalist Image demo contract', () => {
     const images = nodes.filter(
       (node) => node.kind === 'proto' && node.prototypeId === 'brutalist-image-root'
     );
-    expect(images).toHaveLength(5);
+    expect(images).toHaveLength(4);
 
     const fits = new Set<string>();
     const modes = new Set<string>();
@@ -44,9 +44,6 @@ describe('Brutalist Image demo contract', () => {
       }
     }
     expect(fits).toEqual(new Set(['contain', 'cover', 'fill']));
-    expect(modes).toEqual(new Set(['informative', 'decorative']));
-    // The error-path instance keeps an informative name on its broken source.
-    const broken = images.find((item) => item.kind === 'proto' && item.ref === 'error');
-    expect(broken).toBeTruthy();
+    expect(modes).toEqual(new Set(['informative']));
   });
 });

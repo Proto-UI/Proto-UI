@@ -297,7 +297,7 @@ describe('source-bound command profile transitions', () => {
           }
           if (!icon) expect(actual).toContain(`px-${profile.padding[index as 0 | 1 | 2]}`);
           if (profile.id === 'vega' && size === 'sm')
-            expect(actual).toContain('rounded-[min(var(--radius-md),10px)]');
+            expect(actual).toContain('rounded-[min(var(--pui-radius-md),10px)]');
           if (profile.id === 'nova' && size === 'sm') expect(actual).toContain('text-[0.8rem]');
           expect(command.getExposes().disabled).toBe(disabled);
           expect(command.firstChild).toBe(label);
@@ -424,9 +424,10 @@ describe('source-bound command profile transitions', () => {
         expect(actual.includes('text-accent-foreground')).toBe(profile.id === 'new-york-v4');
         if (profile.id === 'mira') {
           expect(actual).toContain('text-[0.625rem]');
-          expect(actual).toContain('rounded-[min(var(--radius-md),8px)]');
+          expect(actual).toContain('rounded-[min(var(--pui-radius-md),8px)]');
         }
-        if (profile.id === 'nova') expect(actual).toContain('rounded-[min(var(--radius-md),12px)]');
+        if (profile.id === 'nova')
+          expect(actual).toContain('rounded-[min(var(--pui-radius-md),12px)]');
         expect(exposure.current?.active).toBe(active);
         expect(active.get()).toBe(true);
         expect(emitted).toEqual([]);

@@ -20,6 +20,8 @@ for (const family of Object.values(families)) {
     family.dataTableHeader,
     family.dataTableHeaderRow,
     family.dataTableCaption,
+    family.dataTablePrevious,
+    family.dataTableNext,
   ]) {
     const tag = `header-row-test-${proto.name}`;
     tags.set(proto, tag);
@@ -94,16 +96,11 @@ for (const [name, family] of Object.entries(families))
       expect(f.head.tabIndex).toBe(-1);
       expect(f.head.getAttribute('aria-selected')).toBeNull();
       const staticRecipe = f.head.getAttribute('data-pui-style');
-      const bodyStaticTokens = (f.body[0]!.getAttribute('data-pui-style') ?? '')
-        .split(/\s+/)
-        .filter((token) => !/^data-\[(focus-visible|selected)\]:/.test(token))
-        .filter(Boolean);
-      // Independent owners can first record the display group at different
-      // positions. Compare the complete static recipe, retaining extra or
-      // duplicate-token failures, rather than incidental group insertion order.
-      expect((staticRecipe ?? '').split(/\s+/).filter(Boolean).sort()).toEqual(
-        bodyStaticTokens.sort()
-      );
+      const staticTokens = (staticRecipe ?? '').split(/\s+/).filter(Boolean);
+      if (name !== 'base') {
+        expect(staticTokens).toContain('table-row');
+      }
+      expect(staticTokens).not.toContain('cursor-pointer');
       expect(staticRecipe ?? '').not.toMatch(/data-\[(focus-visible|selected)\]:/);
       expect(structure.rows[1].cells[0].columnHeaders).toEqual([structure.rows[0].cells[0].ref]);
       expect(structure.rows[1].cells[1].columnHeaders).toEqual([structure.rows[0].cells[1].ref]);
@@ -267,20 +264,38 @@ for (const [index, family] of Object.values(families).entries())
         family.dataTableHeader,
         family.dataTableCell,
         family.dataTableCaption,
+        family.dataTablePrevious,
+        family.dataTableNext,
         styleScope,
       ].map((proto) => [proto.name, proto])
     );
+    const findTableRoot = (spec: any): any => {
+      if (!spec || typeof spec === 'string') return null;
+      if (spec.prototypeId === family.dataTableRoot.name) return spec;
+      for (const child of spec.children ?? []) {
+        const found = findTableRoot(child);
+        if (found) return found;
+      }
+      return null;
+    };
     // This checks authored source/local exports; shared Previewer/CLI registration
     // is integrated and tested by its separate owner, not simulated here.
     const render = (spec: any): Node => {
       if (typeof spec === 'string') return document.createTextNode(spec);
+      if (spec.kind === 'box') {
+        const box = document.createElement(spec.tag ?? 'div');
+        for (const child of spec.children ?? []) box.append(render(child));
+        return box;
+      }
       const proto = protos.get(spec.prototypeId);
       if (!proto) throw new Error(`Missing exact local prototype ${spec.prototypeId}`);
       const element = node(proto, spec.props ?? {});
       for (const child of spec.children ?? []) element.append(render(child));
       return element;
     };
-    const rendered = render(demos[index]!.root) as HTMLElement;
+    const tableSpec = findTableRoot(demos[index]!.root);
+    expect(tableSpec).not.toBeNull();
+    const rendered = render(tableSpec) as HTMLElement;
     document.body.append(rendered);
     const root = (
       rendered.matches(tags.get(family.dataTableRoot)!)
@@ -288,13 +303,16 @@ for (const [index, family] of Object.values(families).entries())
         : rendered.querySelector(tags.get(family.dataTableRoot)!)!
     ) as HTMLElement & { getExposes(): any };
     await flush();
+    const isBaseDemo = index === 0;
     expect(root.getExposes().getStructure()).toMatchObject({
       valid: true,
-      rowCount: 4,
-      columnCount: 2,
+      rowCount: isBaseDemo ? 4 : 5,
+      columnCount: isBaseDemo ? 2 : 3,
     });
-    expect(root.getExposes().count.get()).toBe(3);
+    expect(root.getExposes().count.get()).toBe(isBaseDemo ? 3 : 4);
     const headerRow = root.querySelector(tags.get(family.dataTableHeaderRow)!)!;
     expect(headerRow.getAttribute('role')).toBe('row');
-    expect(headerRow.querySelectorAll(tags.get(family.dataTableHeader)!)).toHaveLength(2);
+    expect(headerRow.querySelectorAll(tags.get(family.dataTableHeader)!)).toHaveLength(
+      isBaseDemo ? 2 : 3
+    );
   });

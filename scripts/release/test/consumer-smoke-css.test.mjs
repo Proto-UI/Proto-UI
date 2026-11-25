@@ -41,8 +41,8 @@ const generated = spawnSync(
 assert.equal(generated.status, 0, generated.stderr);
 const css = JSON.parse(generated.stdout);
 const tokens = css['proto-ui-tokens.generated.css'];
-const tokenSelector = (token) =>
-  `:where([data-pui-style~="${token.replace(/\[/g, '\\[').replace(/\]/g, '\\]')}"])`;
+const tokenSelector = (token, suffix = '') =>
+  `:where([data-pui-style~="${token.replace(/\[/g, '\\[').replace(/\]/g, '\\]')}"])${suffix}`;
 const marker = '@layer proto-ui {';
 const prefix = tokens.slice(0, tokens.indexOf(marker) + marker.length);
 const body = tokens.slice(prefix.length, -2);
@@ -178,6 +178,18 @@ for (const [name, token, from, to] of [
     'transform:',
     '--unused-transform:',
   ],
+  [
+    'checked travel',
+    'data-[checked]:data-[direction=ltr]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]',
+    'calc(100% - 2px)',
+    '14px',
+  ],
+  [
+    'checked transform',
+    'data-[checked]:data-[direction=ltr]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]',
+    'transform:',
+    '--unused-transform:',
+  ],
 ]) {
   test(`rejects missing or stale ${name} declaration in installed generated CSS`, (t) => {
     const { directory, window } = fixture(t);
@@ -194,10 +206,71 @@ for (const [name, token, from, to] of [
   });
 }
 
-test('rejects a missing or unstyled default Thumb', (t) => {
+test('rejects removal of the non-draggable guard from the checked rule', (t) => {
   const { directory, window } = fixture(t);
   const element = switchFixture(window.document);
-  loadConsumerStyles(window.document, { root: directory });
+  const { styles } = loadConsumerStyles(window.document, { root: directory });
+  const selector = tokenSelector(
+    'data-[checked]:data-[direction=ltr]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]',
+    "[data-checked][data-direction='ltr']:not([data-draggable])"
+  );
+  assert.ok(styles[1].textContent.includes(selector));
+  styles[1].textContent = styles[1].textContent.replace(
+    selector,
+    selector.replace(':not([data-draggable])', '')
+  );
+  assert.throws(
+    () => assertStyledSwitch(element, 'missing draggable guard'),
+    /generated CSS rule is missing/
+  );
+});
+
+test('rejects an unscoped or reversed installed RTL checked rule', (t) => {
+  const { directory, window } = fixture(t);
+  const element = switchFixture(window.document);
+  const { styles } = loadConsumerStyles(window.document, { root: directory });
+  const installed = styles[1].textContent;
+  const selector = tokenSelector(
+    'data-[checked]:data-[direction=rtl]:not-[data-draggable]:translate-x-[calc(2px_-_100%)]',
+    "[data-checked][data-direction='rtl']:not([data-draggable])"
+  );
+  const start = installed.indexOf(selector);
+  assert.ok(start >= 0);
+  const end = installed.indexOf('}', start) + 1;
+  const rule = installed.slice(start, end);
+  assert.ok(rule.includes('calc(2px - 100%)'));
+  styles[1].textContent = installed.replace(
+    selector,
+    selector.replace("[data-direction='rtl']", '')
+  );
+  assert.throws(() => assertStyledSwitch(element, 'unscoped RTL'), /generated CSS rule is missing/);
+  styles[1].textContent = installed.replace(
+    rule,
+    rule.replace('calc(2px - 100%)', 'calc(100% - 2px)')
+  );
+  assert.throws(
+    () => assertStyledSwitch(element, 'unmirrored RTL'),
+    /generated CSS declaration is missing/
+  );
+});
+
+test('rejects a missing checked selector and a missing or unstyled default Thumb', (t) => {
+  const { directory, window } = fixture(t);
+  const element = switchFixture(window.document);
+  const { styles } = loadConsumerStyles(window.document, { root: directory });
+  const text = styles[1].textContent;
+  styles[1].textContent = text.replace(
+    tokenSelector(
+      'data-[checked]:data-[direction=ltr]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]',
+      "[data-checked][data-direction='ltr']:not([data-draggable])"
+    ),
+    tokenSelector(
+      'data-[checked]:data-[direction=ltr]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]',
+      "[data-unchecked][data-direction='ltr']:not([data-draggable])"
+    )
+  );
+  assert.throws(() => assertStyledSwitch(element, 'wrong state'), /generated CSS rule is missing/);
+  styles[1].textContent = text;
   const thumb = element.firstElementChild;
   thumb.removeAttribute('data-pui-style');
   assert.throws(
@@ -273,7 +346,7 @@ test('requires runtime-evaluated Thumb travel and explicit Root/Thumb checked ag
     'data-pui-style',
     original.replace(
       'translate-x-0',
-      'data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]'
+      'data-[checked]:data-[direction=ltr]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]'
     )
   );
   assert.throws(
@@ -322,9 +395,15 @@ for (const [name, checked, token, inline, priority = '', transform = ''] of [
     '',
   ],
   [
-    'lowered compound checked token',
+    'obsolete checked token without direction',
     true,
     'data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]',
+    '',
+  ],
+  [
+    'lowered compound checked token',
+    true,
+    'data-[checked]:data-[direction=ltr]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]',
     '',
   ],
   ['nonzero unchecked inline', false, '', '1px 0px'],
@@ -375,7 +454,7 @@ for (const [name, token, mutate] of [
   ],
   [
     'important checked transform',
-    'translate-x-[calc(100%_-_2px)]',
+    'data-[checked]:data-[direction=ltr]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]',
     (rule, text) =>
       text.replace(rule, rule.replace('transform:', 'transform: scale(99) !important; transform:')),
   ],
@@ -395,7 +474,7 @@ for (const [name, token, mutate] of [
   });
 }
 
-test('rejects a missing checked travel rule for the mounted Thumb', (t) => {
+test('rejects a missing active checked CSS rule even while the unused lowered rule remains', (t) => {
   const { directory, window } = fixture(t);
   const element = switchFixture(window.document);
   loadConsumerStyles(window.document, { root: directory });

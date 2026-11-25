@@ -245,14 +245,14 @@ export function assertStyledSwitch(element, label) {
   ]
     .map((sheet) => sheet.textContent)
     .join('\n');
-  const requireRule = (host, token, declarations) => {
+  const requireRule = (host, token, declarations, suffix = '') => {
     if (host && !host.getAttribute('data-pui-style')?.split(/\s+/).includes(token)) {
       throw new Error(`${label}: Switch current recipe token is missing: ${token}`);
     }
     // Match the exact bounded generator rule, not a CSSOM-normalized px result.
     // HappyDOM does not reliably resolve arbitrary-value selectors or transforms.
     const parserToken = token.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
-    const selector = `:where([data-pui-style~="${parserToken}"])`;
+    const selector = `:where([data-pui-style~="${parserToken}"])${suffix}`;
     // Parse with the host's CSSOM, not a handwritten declaration/cascade parser.
     // HappyDOM 15 cannot parse some arbitrary-value selectors. Substitute only
     // this exact selector in a detached parsing copy; the installed CSS and DOM
@@ -293,10 +293,20 @@ export function assertStyledSwitch(element, label) {
   const transform =
     'transform: translate(var(--pui-translate-x, 0), var(--pui-translate-y, 0)) scale(var(--pui-scale-x, 1), var(--pui-scale-y, 1))';
   requireRule(null, 'translate-x-0', ['--pui-translate-x: 0px', transform]);
-  requireRule(null, 'translate-x-[calc(100%_-_2px)]', [
-    '--pui-translate-x: calc(100% - 2px)',
-    transform,
-  ]);
+  for (const [direction, expression] of [
+    ['ltr', '100% - 2px'],
+    ['rtl', '2px - 100%'],
+  ]) {
+    const token = `translate-x-[calc(${expression.replaceAll(' ', '_')})]`;
+    const declarations = [`--pui-translate-x: calc(${expression})`, transform];
+    requireRule(null, token, declarations);
+    requireRule(
+      null,
+      `data-[checked]:data-[direction=${direction}]:not-[data-draggable]:${token}`,
+      declarations,
+      `[data-checked][data-direction='${direction}']:not([data-draggable])`
+    );
+  }
   assertSwitchThumbState(element, element.getAttribute('aria-checked') === 'true', label);
   // These simple rem properties are resolved by this host. This is computed CSS,
   // not measured layout. Arbitrary height/transform selectors need browser QA.

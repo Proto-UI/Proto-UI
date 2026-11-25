@@ -1,7 +1,10 @@
+import { realpathSync } from 'node:fs';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { tmpdir as osTmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+
+const tmpdir = () => realpathSync(osTmpdir());
 
 import { scanRuleStateReads } from '../src/services/lowered-hook-coverage';
 import { createHookSourceSummaryContext } from '../src/services/hook-source-summary';

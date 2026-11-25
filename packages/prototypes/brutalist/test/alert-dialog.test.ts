@@ -180,12 +180,12 @@ describe('Neo-Brutalist AlertDialog source-aligned passive projection', () => {
     p.trigger.dispatchEvent(new Event('pointerenter'));
     await flush();
     expect(p.trigger.getExposes().hovered.get()).toBe(true);
-    expect(styleContains(p.trigger, 'data-[hovered]:translate-x-1')).toBe(true);
-    expect(styleContains(p.trigger, 'data-[hovered]:shadow-none')).toBe(true);
+    expect(styleContains(p.trigger, 'data-[hovered]:not-[data-disabled]:translate-x-1')).toBe(true);
+    expect(styleContains(p.trigger, 'data-[hovered]:not-[data-disabled]:shadow-none')).toBe(true);
     p.trigger.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     await flush();
     expect(p.trigger.getExposes().pressed.get()).toBe(true);
-    expect(styleContains(p.trigger, 'data-[pressed]:shadow-none')).toBe(true);
+    expect(styleContains(p.trigger, 'data-[pressed]:not-[data-disabled]:shadow-none')).toBe(true);
     p.trigger.dispatchEvent(new PointerEvent('pointercancel', { bubbles: true }));
     await flush();
     expect(p.trigger.getExposes().pressed.get()).toBe(false);

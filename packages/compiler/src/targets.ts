@@ -10,7 +10,12 @@ import { declaredSetValueEvent } from './a11y-event-types';
 import { nativeRuleMetaKeys } from './native-rule-meta';
 import { isEcmaIntrinsic } from './ecmascript-values';
 import { hasPropsValidatorDeclaration } from './pointer-facts-admission';
-import { arrayElementType, serializableDataType } from './value-types';
+import {
+  arrayElementType,
+  objectFields,
+  serializableDataType,
+  valueAlternatives,
+} from './value-types';
 import { GPUI_NATIVE_SDK_VERSION } from './gpui-native-sdk';
 import { GPUI_PROFILE_VERSION } from './gpui-dependency';
 import {
@@ -855,6 +860,19 @@ export function checkTargetOperations(
       );
     switch (value.kind) {
       case 'operation':
+        if (
+          !javascript &&
+          value.operation === 'overlay.configure' &&
+          value.arguments[0] &&
+          valueAlternatives(value.arguments[0].type).some((type) =>
+            objectFields(type)?.some((field) => field.name === 'boundaryStack')
+          )
+        )
+          diagnostic(
+            'PUI4003',
+            `Overlay boundaryStack configuration is not lowered by ${selected.id}.`,
+            value.span
+          );
         if (!javascript && hasPropsValidatorDeclaration(value))
           diagnostic(
             'PUI4003',

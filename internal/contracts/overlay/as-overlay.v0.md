@@ -127,7 +127,7 @@ The following facts remain distinct:
 - lifecycle ViewIntent
 - current view-epoch mount phase
 
-Boundary stack participation follows logical open. Modal activity follows perceptual presence. Portal and layer resources remain attached through leaving and are finally revoked when the current view epoch detaches.
+Boundary stack participation follows logical open by default. Explicit `boundaryStack: false` opts a passive presentation out of outside arbitration without changing its Portal, layer or presence lifetime. It does not replace the separate dismissal opt-ins. Configuration reconciles the current logical open state; repeated configuration, repeated open and view reentry do not promote an existing activation, while a new logical open transition retains its normal activation order. Modal activity follows perceptual presence. Portal and layer resources remain attached through leaving and are finally revoked when the current view epoch detaches.
 
 The primary authoring entry is expected to be content/root-oriented hooks such as:
 

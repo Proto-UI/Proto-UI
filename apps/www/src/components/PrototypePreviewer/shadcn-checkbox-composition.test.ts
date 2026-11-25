@@ -112,9 +112,8 @@ describe('shared Shadcn Checkbox website composition projection', () => {
     ).toEqual([
       { defaultChecked: false },
       { defaultChecked: true },
-      { defaultIndeterminate: true },
-      { disabled: true, defaultChecked: true },
-      { defaultChecked: false },
+      { disabled: true },
+      { defaultChecked: true },
     ]);
     expect(homepage.find((node) => node.ref === 'gallery-checkbox')?.props).toEqual({
       defaultChecked: true,

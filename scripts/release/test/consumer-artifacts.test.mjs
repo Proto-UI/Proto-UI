@@ -6,15 +6,18 @@ import {
   mkdtempSync,
   readFileSync,
   readdirSync,
+  realpathSync,
   rmSync,
   symlinkSync,
   writeFileSync,
 } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { tmpdir as osTmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { parseConsumerArtifactArgs, reserveConsumerArtifacts } from '../consumer-artifacts.mjs';
+
+const tmpdir = () => realpathSync(osTmpdir());
 
 function fixture(t) {
   const directory = mkdtempSync(path.join(tmpdir(), 'pui-consumer-artifacts-'));

@@ -239,7 +239,7 @@ describe.sequential('shadcn Tooltip browser acceptance', () => {
         expect(await content.getAttribute('role'), `${runtime}/content-role`).toBe('tooltip');
         expect(await content.getAttribute('tabindex'), `${runtime}/content-tabindex`).toBeNull();
         expect(await content.textContent(), `${runtime}/content-text`).toContain(
-          'Open account settings.'
+          'View account settings'
         );
         expect(
           await content.locator('a,button,input,select,textarea,[tabindex]').count(),

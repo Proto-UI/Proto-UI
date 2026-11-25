@@ -19,30 +19,67 @@ export function homepageDemoParticipant(
   if (!root) return null;
   const mount = root.querySelector<HTMLElement>('[data-home-demo-host]');
   if (!mount) throw new Error('[HomepageRuntime] live example mount is missing.');
-  const toggle = root.querySelector<HTMLButtonElement>('[data-home-gallery-layout-toggle]');
-  const narrow = root.ownerDocument.defaultView?.matchMedia?.('(width < 768px)');
-  let expanded = false;
+  const view = root.ownerDocument.defaultView;
+  const narrow = view?.matchMedia?.('(width < 768px)');
+  const hasDemoTarget = () => view?.location.hash === `#${root.id}`;
+  let expanded = hasDemoTarget();
+  let destroyed = false;
+  const observed = new Set<Element>();
+  const syncScale = () => {
+    if (destroyed) return;
+    const stages = mount.querySelectorAll<HTMLElement>('[data-home-gallery-stage]');
+    const targets = new Set<Element>([root]);
+    for (const stage of stages) {
+      targets.add(stage);
+      if (stage.parentElement) targets.add(stage.parentElement);
+    }
+    for (const target of observed) {
+      if (targets.has(target)) continue;
+      resizeObserver?.unobserve(target);
+      observed.delete(target);
+    }
+    for (const target of targets) {
+      if (observed.has(target)) continue;
+      resizeObserver?.observe(target);
+      observed.add(target);
+    }
+    for (const stage of stages) {
+      if (root.dataset.homeGalleryCompact !== 'true') {
+        stage.style.removeProperty('--homepage-gallery-scale');
+        continue;
+      }
+      // offsetWidth is unscaled; a zoomed client rect would compound the scale.
+      // Measure the actual rem-based stage so font and container changes both fit.
+      const availableWidth = stage.parentElement?.clientWidth ?? 0;
+      const stageWidth = stage.offsetWidth;
+      if (availableWidth <= 0 || stageWidth <= 0) continue;
+      const scale = String(availableWidth / stageWidth);
+      if (stage.style.getPropertyValue('--homepage-gallery-scale') !== scale)
+        stage.style.setProperty('--homepage-gallery-scale', scale);
+    }
+  };
+  const resizeObserver = view?.ResizeObserver ? new view.ResizeObserver(syncScale) : null;
   const syncLayout = () => {
+    if (destroyed) return;
     const stages = mount.querySelectorAll<HTMLElement>('[data-home-gallery-stage]');
     // Resizing a desktop window must not turn a currently focused live control inert.
     if (narrow?.matches && [...stages].some((stage) => stage.matches(':focus-within'))) {
       expanded = true;
     }
-    const compact = Boolean(narrow?.matches && !expanded && toggle);
+    const compact = Boolean(narrow?.matches && !expanded);
     if (compact) root.dataset.homeGalleryCompact = 'true';
     else delete root.dataset.homeGalleryCompact;
     for (const stage of stages) stage.inert = compact;
-    if (!toggle) return;
-    toggle.hidden = !narrow?.matches;
-    toggle.setAttribute('aria-expanded', String(!compact));
-    toggle.textContent =
-      (compact ? toggle.dataset.labelExpand : toggle.dataset.labelCollapse) ?? '';
+    syncScale();
   };
-  const toggleLayout = () => {
-    expanded = !expanded;
+  const syncFragment = () => {
+    // The existing Hero link owns native fragment navigation. Its destination
+    // also expresses intent to use the full-size demos, including direct links.
+    expanded = hasDemoTarget();
     syncLayout();
   };
-  toggle?.addEventListener('click', toggleLayout);
+  view?.addEventListener('hashchange', syncFragment);
+  view?.addEventListener('resize', syncScale);
   narrow?.addEventListener('change', syncLayout);
   syncLayout();
   const ownerId = root.dataset.projectionOwner || root.id || 'homepage-live-example';
@@ -74,12 +111,17 @@ export function homepageDemoParticipant(
     mount,
     ownerId,
     destroy: () => {
-      toggle?.removeEventListener('click', toggleLayout);
+      destroyed = true;
+      view?.removeEventListener('hashchange', syncFragment);
+      view?.removeEventListener('resize', syncScale);
       narrow?.removeEventListener('change', syncLayout);
-      if (toggle) toggle.hidden = true;
+      resizeObserver?.disconnect();
+      observed.clear();
       delete root.dataset.homeGalleryCompact;
-      for (const stage of mount.querySelectorAll<HTMLElement>('[data-home-gallery-stage]'))
+      for (const stage of mount.querySelectorAll<HTMLElement>('[data-home-gallery-stage]')) {
         stage.inert = false;
+        stage.style.removeProperty('--homepage-gallery-scale');
+      }
       return mask?.destroy();
     },
     // The existing materializer requires a known lane member even when an explicit

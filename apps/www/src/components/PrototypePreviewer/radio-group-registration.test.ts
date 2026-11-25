@@ -52,8 +52,8 @@ describe('Radio group actual DemoSpec registration', () => {
     const labels = nodes.filter(
       (node) => node.kind === 'proto' && node.prototypeId === 'shadcn-label-root'
     );
-    expect(items).toHaveLength(9);
-    expect(labels).toHaveLength(9);
+    expect(items).toHaveLength(3);
+    expect(labels).toHaveLength(3);
     const keys = new Set<string>();
     for (const item of items) {
       if (item.kind !== 'proto') throw new Error('Expected Radio Item');
@@ -72,7 +72,7 @@ describe('Radio group actual DemoSpec registration', () => {
         { kind: 'proto', prototypeId: 'shadcn-radio-group-indicator' },
       ]);
     }
-    expect(keys.size).toBe(9);
+    expect(keys.size).toBe(3);
   });
 
   for (const { family, mdxPath, runtimes, slug, manifestBound } of RADIO_GROUP_FAMILIES) {

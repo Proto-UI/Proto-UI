@@ -18,7 +18,7 @@ export type ShadcnMessageScrollerJumpVisualProps = ShadcnStyleProps & {
 // Base end-direction part only.
 const ICON_SIZE: Record<ShadcnStyleId, StyleHandle> = {
   vega: tw('size-8 rounded-[min(var(--pui-radius-md),10px)] text-sm font-medium'),
-  nova: tw('size-7 rounded-[min(var(--radius-md),12px)] text-sm font-medium'),
+  nova: tw('size-7 rounded-[min(var(--pui-radius-md),12px)] text-sm font-medium'),
   maia: tw('size-8 rounded-[var(--pui-radius-4xl)] text-sm font-medium'),
   lyra: tw('size-7 rounded-none text-xs font-medium'),
   mira: tw('size-6 rounded-md text-xs leading-relaxed font-medium'),
@@ -30,7 +30,7 @@ const ICON_SIZE: Record<ShadcnStyleId, StyleHandle> = {
 
 const PILL_SIZE: Record<ShadcnStyleId, StyleHandle> = {
   vega: tw('h-8 px-3 gap-1.5 rounded-[min(var(--pui-radius-md),10px)] text-sm font-medium'),
-  nova: tw('h-7 px-2.5 gap-1.5 rounded-[min(var(--radius-md),12px)] text-sm font-medium'),
+  nova: tw('h-7 px-2.5 gap-1.5 rounded-[min(var(--pui-radius-md),12px)] text-sm font-medium'),
   maia: tw('h-8 px-3 gap-1.5 rounded-[var(--pui-radius-4xl)] text-sm font-medium'),
   lyra: tw('h-7 px-2.5 gap-1.5 rounded-none text-xs font-medium'),
   mira: tw('h-6 px-2 gap-1 rounded-md text-xs leading-relaxed font-medium'),
