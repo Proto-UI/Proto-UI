@@ -147,4 +147,78 @@ describe('Base Toast viewport, stacking, semantic type, dismissible, and action 
     expect(count).toBe(2);
     expect(root.getExposes().open.get()).toBe(false);
   });
+
+  it('dismisses on swipe in the configured viewport swipeDirection and respects none and dismissible=false', async () => {
+    const { Viewport, Root } = registerSet();
+    const vp = new Viewport();
+    const root = new Root();
+    root.getBoundingClientRect = () => ({ left: 0, top: 0, width: 200, height: 100 }) as DOMRect;
+    const events: unknown[] = [];
+    root.addEventListener('openChange', (event) => events.push((event as CustomEvent).detail));
+    setElementProps(vp, { swipeDirection: 'right' });
+    setElementProps(root, { defaultOpen: true, duration: 0 });
+    vp.append(root);
+    document.body.append(vp);
+    mounted.push(vp);
+    await flush();
+
+    const swipe = (x0: number, y0: number, x1: number, y1: number) => {
+      const send = (type: string, clientX: number, clientY: number) =>
+        root.dispatchEvent(
+          new PointerEvent(type, {
+            bubbles: true,
+            cancelable: true,
+            pointerId: 7,
+            pointerType: 'mouse',
+            isPrimary: true,
+            button: 0,
+            clientX,
+            clientY,
+          })
+        );
+      send('pointerdown', x0, y0);
+      send('pointermove', x1, y1);
+      send('pointerup', x1, y1);
+    };
+
+    // Opposite or below-threshold drag does not dismiss.
+    swipe(100, 50, 10, 50);
+    await flush();
+    expect(root.getExposes().open.get()).toBe(true);
+    swipe(100, 50, 140, 50);
+    await flush();
+    expect(root.getExposes().open.get()).toBe(true);
+
+    // Drag >= 30% in configured direction ('right') dismisses with reason 'swipe'.
+    swipe(100, 50, 170, 50);
+    await flush();
+    expect(root.getExposes().open.get()).toBe(false);
+    expect(events).toEqual([{ open: false, reason: 'swipe' }]);
+
+    // Reopen and switch to 'up'.
+    root.getExposes().openToast();
+    setElementProps(vp, { swipeDirection: 'up' });
+    await flush();
+    expect(root.getExposes().open.get()).toBe(true);
+    swipe(100, 80, 100, 40);
+    await flush();
+    expect(root.getExposes().open.get()).toBe(false);
+    expect(events.at(-1)).toEqual({ open: false, reason: 'swipe' });
+
+    // swipeDirection='none' disables swipe dismissal.
+    root.getExposes().openToast();
+    setElementProps(vp, { swipeDirection: 'none' });
+    await flush();
+    swipe(100, 50, 200, 50);
+    await flush();
+    expect(root.getExposes().open.get()).toBe(true);
+
+    // dismissible=false blocks swipe dismissal even with an active direction.
+    setElementProps(vp, { swipeDirection: 'left' });
+    setElementProps(root, { dismissible: false });
+    await flush();
+    swipe(150, 50, 20, 50);
+    await flush();
+    expect(root.getExposes().open.get()).toBe(true);
+  });
 });
