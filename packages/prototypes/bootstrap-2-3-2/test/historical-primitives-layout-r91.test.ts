@@ -452,11 +452,15 @@ describe('Bootstrap 2.3.2 primitives/layout: real WC runtime, not native paint a
     await update(root, { open: true });
     expect(content.getExposes().hidden.get()).toBe(false);
     expect(content.getAttribute('role')).toBeNull();
-    expect(content.firstElementChild).toBe(authored);
+    // The styled inner content owns padding and border while Content clips the transition.
+    const inner = content.firstElementChild;
+    expect(inner?.firstElementChild).toBe(authored);
     await update(root, { open: true, disabled: true });
     await click(trigger);
     expect(requests).toHaveLength(1);
     expect(root.getExposes().open.get()).toBe(true);
+    expect(content.firstElementChild).toBe(inner);
+    expect(inner?.firstElementChild).toBe(authored);
   });
 
   it('preserves one standalone editor and controlled refusal through policy withdrawal', async () => {

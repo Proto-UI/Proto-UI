@@ -151,6 +151,14 @@ async function mount(
   await vi.waitFor(() => {
     expect(value(context.api, 'root', 'open')).toBe(true);
     expect(value(context.api, 'content', 'transitionState')).toBe('entered');
+    // Input must reach the current materialized Close in the committed portal.
+    const { close, closeAppearance, closeLabel, content } = context.refs;
+    expect(close?.isConnected).toBe(true);
+    expect(close?.getAttribute('role')).toBe('button');
+    expect(closeAppearance?.isConnected).toBe(true);
+    expect(closeLabel?.isConnected).toBe(true);
+    expect(content?.contains(close ?? null)).toBe(true);
+    expect(context.api.getPublicInstance?.('close')).toBeDefined();
   });
   requests.mockClear();
   return {
@@ -218,7 +226,7 @@ describe('Bootstrap Dialog recipe keeps Close as its only command owner', () => 
       expect(surface.hasAttribute('tabindex')).toBe(false);
       expect(label.getAttribute('role')).toBeNull();
       expect(label.hasAttribute('tabindex')).toBe(false);
-      expect(hasToken(label, 'text-[14px]')).toBe(true);
+      expect(hasToken(label, 'text-base')).toBe(true);
       expect(hasToken(surface, 'px-[12px]')).toBe(true);
       expect(hasToken(surface, 'py-[4px]')).toBe(true);
       expect(surface.style.pointerEvents).toBe('none');
