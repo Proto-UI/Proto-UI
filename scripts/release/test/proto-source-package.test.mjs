@@ -4,11 +4,14 @@ import {
   mkdtempSync,
   mkdirSync,
   readFileSync,
+  realpathSync,
   rmSync,
   symlinkSync,
   writeFileSync,
 } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { tmpdir as osTmpdir } from 'node:os';
+
+const tmpdir = () => realpathSync(osTmpdir());
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { test } from 'node:test';

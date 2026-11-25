@@ -124,11 +124,12 @@ export function sampleWebComponentScopeTargets(
   const recentTarget = recentFocusTarget?.() ?? null;
   type Entry = { element: HTMLElement; target: boolean; priority: number; children?: Entry[] };
   const scope: Entry[] = [];
-  if (container.hidden || container.hasAttribute('inert')) {
+  if (
+    container.hidden ||
+    container.hasAttribute('inert') ||
+    isPrunedByExternalAncestor(container)
+  ) {
     return { targets: [], activeTarget, recentTarget };
-  }
-  if (isPrunedByExternalAncestor(container)) {
-    return { targets: [], activeTarget, recentTarget: recentFocusTarget?.() ?? null };
   }
   const visited = new Set<Element>();
   let findingOrdinaryDescendant = stopAtOrdinaryDescendant;

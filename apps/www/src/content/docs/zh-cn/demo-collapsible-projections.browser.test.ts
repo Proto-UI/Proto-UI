@@ -480,8 +480,9 @@ for (const family of FAMILIES) {
           await expanded(trigger(retained), false);
           expect(await content(retained).count()).toBe(1);
           expect(await controls(retained)).toBe(retainedIdentity);
-          expect(await content(retained).getAttribute('aria-hidden')).toBe('true');
+          // A bound Transition keeps the existing Content present through leave.
           await expect.poll(() => content(retained).isVisible()).toBe(false);
+          expect(await content(retained).getAttribute('aria-hidden')).toBe('true');
           expect(
             await content(retained).evaluate((element) => getComputedStyle(element).display)
           ).toBe('none');
@@ -792,7 +793,11 @@ for (const family of FAMILIES) {
               expect(line.left).toBeGreaterThanOrEqual(textBounds.contentLeft - 1);
               expect(line.right).toBeLessThanOrEqual(textBounds.contentRight + 1);
             }
-            for (const target of [trigger(root), content(root)]) {
+            const frame = content(root);
+            // Bootstrap's intrinsic-height frame wraps the padded body.
+            const paddedContent =
+              family === 'bootstrap-2-3-2' ? frame.locator(':scope > div').first() : frame;
+            for (const target of [trigger(root), paddedContent]) {
               const padding = await target.evaluate((node) => {
                 const s = getComputedStyle(node);
                 return [parseFloat(s.paddingLeft), parseFloat(s.paddingRight)];

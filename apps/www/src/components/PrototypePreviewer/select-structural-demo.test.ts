@@ -19,7 +19,7 @@ it('feeds real grouped parts and mixed Items back into the source-pinned public 
   expect(all.filter((node) => node.prototypeId === 'shadcn-select-separator')).toHaveLength(1);
   expect(
     all.filter((node) => node.prototypeId === 'shadcn-select-item').map((node) => node.props?.value)
-  ).toEqual(['react', 'vue', 'wc', 'solid']);
+  ).toEqual(['apple', 'banana', 'blueberry', 'carrot', 'broccoli', 'spinach']);
   const loaders = readFileSync(
     'apps/www/src/components/PrototypePreviewer/prototype-modules.ts',
     'utf8'

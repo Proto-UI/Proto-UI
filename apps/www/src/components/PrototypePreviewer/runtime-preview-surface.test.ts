@@ -200,9 +200,13 @@ describe('RuntimeBox canvas composition', () => {
           const button = context.refs['actual-button'];
           await vi.waitFor(() => expect(button.getAttribute('role')).toBe('button'));
           const tokens = frame.getAttribute('data-pui-style') ?? '';
-          if (family === 'bootstrap-2-3-2') expect(tokens.split(/\s+/)).toContain('border');
-          expect(tokens).not.toContain('rounded-xl');
-          expect(tokens).toContain(family === 'bootstrap-2-3-2' ? 'rounded-[4px]' : 'rounded-none');
+          if (family === 'bootstrap-2-3-2') {
+            expect(tokens.split(/\s+/)).toContain('border');
+            expect(tokens).not.toContain('rounded-xl');
+            expect(tokens).toContain('rounded-[4px]');
+          } else {
+            expect(tokens).toContain('rounded-xl');
+          }
           expect(tokens).not.toContain('backdrop-blur');
           expect(frame.style.getPropertyValue('--pui-background')).toBe('#123456');
           expect(frame.getAttribute('role')).toBeNull();

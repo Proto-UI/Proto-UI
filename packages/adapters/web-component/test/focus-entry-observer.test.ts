@@ -1049,6 +1049,60 @@ describe('WC live focus-entry resolver inputs', () => {
     }
   });
 
+  it('skips the nesting context of a flat selector', async () => {
+    const style = document.createElement('style');
+    document.body.append(style);
+    const selectorText = vi.fn(() => '.entry-flat-selector button');
+    const parentRule = vi.fn(() => null);
+    Object.defineProperty(style.sheet!, 'cssRules', {
+      configurable: true,
+      value: [
+        {
+          type: 1,
+          get selectorText() {
+            return selectorText();
+          },
+          get parentRule() {
+            return parentRule();
+          },
+        },
+      ],
+    });
+    const host = panel(false);
+    host.append(document.createElement('button'));
+    await settle();
+    expect(selectorText).toHaveBeenCalled();
+    expect(parentRule).not.toHaveBeenCalled();
+  });
+
+  it('probes the edited parent selector of a nested eligibility rule', async () => {
+    const style = document.createElement('style');
+    const wrapper = document.createElement('div');
+    wrapper.className = 'entry-new-parent';
+    document.body.append(style, wrapper);
+    const parentRule = { type: 1, selectorText: '.entry-old-parent' };
+    const nested = { type: 1, selectorText: '&:has(.entry-flag)', parentRule };
+    Object.defineProperty(style.sheet!, 'cssRules', {
+      configurable: true,
+      value: [{ ...parentRule, cssRules: [nested] }],
+    });
+    const matches = vi.spyOn(Element.prototype, 'matches');
+    const host = panel(false);
+    wrapper.append(host);
+    host.append(document.createElement('button'));
+    await settle();
+    expect(matches).toHaveBeenCalledWith(':is(.entry-old-parent):where(*)');
+
+    matches.mockClear();
+    parentRule.selectorText = '.entry-new-parent';
+    const trigger = document.createElement('style');
+    trigger.textContent = '.entry-edit-trigger { color: red; }';
+    document.body.append(trigger);
+    await settle();
+    expect(matches).toHaveBeenCalledWith(':is(.entry-new-parent):where(*)');
+    expect(matches).not.toHaveBeenCalledWith(':is(.entry-old-parent):where(*)');
+  });
+
   it('observes external subtrees only while an author relational selector can reach the entry', async () => {
     const observe = vi.spyOn(MutationObserver.prototype, 'observe');
     const style = document.createElement('style');

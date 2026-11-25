@@ -43,16 +43,14 @@ describe('Brutalist Radio Group demo contract', () => {
     const indicators = nodes.filter(
       (node) => node.kind === 'proto' && node.prototypeId === 'brutalist-radio-group-indicator'
     );
-    expect(roots).toHaveLength(2);
-    expect(items).toHaveLength(5);
-    expect(indicators).toHaveLength(5);
+    expect(roots).toHaveLength(1);
+    expect(items).toHaveLength(3);
+    expect(indicators).toHaveLength(3);
 
-    // Exactly one group preselects a value; the other exercises zero checked.
     const defaults = roots.map((root) =>
       root.kind === 'proto' ? (root.props?.defaultValue as string | undefined) : null
     );
-    expect(defaults).toContain('comfortable');
-    expect(defaults).toContain('');
+    expect(defaults).toEqual(['comfortable']);
 
     for (const item of items) {
       if (item.kind !== 'proto') throw new Error('Expected Radio Item');

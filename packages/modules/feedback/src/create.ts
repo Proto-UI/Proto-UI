@@ -390,6 +390,8 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         }
 
         materialDiagnostics(): readonly string[] {
+          if (this.sharedSlot && this.presence.declared)
+            return Object.freeze(['material-presence-host-unavailable']);
           return Object.freeze(
             this.sharedSlot && !this.caps.has(VISUAL_FEEDBACK_SINK_CAP)
               ? ['material-host-unavailable']
@@ -741,8 +743,9 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
                 })
               );
             } else if (this.presence.declared) {
-              if (this.sharedSlot || this.material)
+              if (this.material)
                 throw new Error('[feedback.presence] Combined material projection unavailable');
+              // Presence owns the style fallback until an atomic host can consume both frames.
               this.presence.commit(pending, this.viewEpoch, revision);
             } else if (this.motionDeclarations.size && this.caps.has(RESIDENT_MOTION_SINK_CAP)) {
               // Optical material needs an atomic combined consumer; never let two

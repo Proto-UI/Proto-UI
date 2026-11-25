@@ -72,7 +72,8 @@ export type AnatomyPort = ModulePort & {
   parts: AnatomyQueryOrderView['parts'];
   order: AnatomyQueryOrderView;
   setOrderCallbackDispatcher(dispatch: AnatomyOrderCallbackDispatcher): void;
-  subscribeOrder(family: AnatomyFamily, cb: AnatomyOrderChangeCb): Unsubscribe;
+  /** Internal consumers may observe just the role they read. */
+  subscribeOrder(family: AnatomyFamily, cb: AnatomyOrderChangeCb, role?: string): Unsubscribe;
   /** Module-internal target readiness/replacement signal; carries no target or data payload. */
   subscribeTargets(family: AnatomyFamily, cb: AnatomyOrderChangeCb): Unsubscribe;
 };

@@ -47,12 +47,7 @@ const TABS_FAMILIES = [
   {
     family: 'shadcn',
     mdxPath: 'tabs.mdx',
-    runtimes: [
-      "runtimes={['wc']}",
-      "runtimes={['react']}",
-      "runtimes={['vue']}",
-      "runtimes={['vue2']}",
-    ],
+    runtimes: ["runtimes={['wc', 'react', 'vue', 'vue2']}"],
     sidebarSlug: 'ui-libraries/shadcn/tabs',
     manifestBound: true,
     expectedIds: null,
@@ -169,10 +164,7 @@ describe('Tabs actual DemoSpec registration', () => {
         );
         expect(source).toContain(`demoId="${id}"`);
         expect(source).toContain('initialRuntime="wc"');
-        expect(source).toContain("runtimes={['wc']}");
-        expect(source).toContain("runtimes={['react']}");
-        expect(source).toContain("runtimes={['vue']}");
-        expect(source).toContain("runtimes={['vue2']}");
+        expect(source).toContain("runtimes={['wc', 'react', 'vue', 'vue2']}");
       });
     }
   }

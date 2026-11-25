@@ -162,7 +162,7 @@ describe('exact-source native full-width editor composition', () => {
               try {
                 const edited = 'Actual native keyboard editing';
                 await target.fill(edited);
-                await target.press('Control+Home');
+                await target.press(process.platform === 'darwin' ? 'Meta+ArrowUp' : 'Control+Home');
                 for (let i = 0; i < 3; i++) await target.press('Shift+ArrowRight');
                 row.editedValue = await target.inputValue();
                 row.editedSelection = await target.evaluate((node) => [

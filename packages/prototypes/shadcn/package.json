@@ -466,6 +466,7 @@
     "src/separator/root.proto.ts",
     "src/separator/types.ts",
     "src/style-scope/context.ts",
+    "src/style-scope/ids.ts",
     "src/style-scope/index.ts",
     "src/style-scope/root.proto.ts",
     "src/style-scope/selection.ts",

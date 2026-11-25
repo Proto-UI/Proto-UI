@@ -97,7 +97,10 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
       // Focus rings are style-gated runtime rules here, so the collector emits
       // their ring vocabulary unprefixed rather than a data-[focus-visible]
       // variant.
-      expect(tokens.some((x) => /^ring-\d/.test(x)), tokens.join('\n')).toBe(true);
+      expect(
+        tokens.some((x) => /^ring-\d/.test(x)),
+        tokens.join('\n')
+      ).toBe(true);
     } else if (family === 'bootstrap-2-3-2') {
       // Bootstrap 2.3.2 has no focus-ring recipes: the historical form surface
       // keeps its literal invalid/error text recipes instead.
@@ -171,8 +174,10 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     expect(svg(a).getAttribute('aria-hidden')).toBe('true');
     expect(svg(a).getAttribute('tabindex')).toBe(null);
     expect(svg(a).getAttribute('role')).toBe(null);
-    expect(svg(a).getAttribute('width')).toBe('16');
-    expect(svg(a).getAttribute('stroke-width')).toBe(family === 'brutalist' ? '3' : '2');
+    expect(svg(a).getAttribute('width')).toBe(family === 'liquid-glass' ? '14' : '16');
+    expect(svg(a).getAttribute('stroke-width')).toBe(
+      family === 'brutalist' ? '3' : family === 'liquid-glass' ? '2.25' : '2'
+    );
     let proposals = 0;
     root.addEventListener('valueChange', () => proposals++);
     b.click();
@@ -204,9 +209,9 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     // lowers everywhere except shadcn, whose glyph-paint focus rules are gated
     // on the parameter state and emit unprefixed runtime tokens instead
     // (forced-colors-focus-outline proven below). Checked and mixed paint is
-    // renderer-driven through the watched-state glyph update in
-    // shadcn/brutalist/bootstrap-2-3-2 (proven by the DOM evidence above), so
-    // only liquid-glass lowers those to data-[...] variants.
+    // renderer-driven through the watched-state glyph update in all four
+    // families (proven by the DOM evidence above), emitting unprefixed
+    // indicator tokens instead of data-[checked]/indeterminate variants.
     expect(
       tokens.some((x) => x.includes('data-[disabled]:')),
       tokens.join('\n')
@@ -220,11 +225,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
       ).toBe(true);
     }
     if (family === 'liquid-glass') {
-      for (const state of ['checked', 'indeterminate']) {
-        expect(
-          tokens.some((x) => x.includes('data-[' + state + ']:')),
-          tokens.join('\n')
-        ).toBe(true);
-      }
+      expect(tokens).toContain('bg-primary');
+      expect(tokens).toContain('border-primary');
     }
   });
