@@ -168,6 +168,9 @@ describe('private Rust data source and artifact boundary', () => {
       true
     );
 
+    expect(await readFile(path.join(output, 'lib.rs'), 'utf8')).toMatch(
+      /^#!\[allow\([^\]]*\bunused_parens\b/m
+    );
     const authored = 'consumer-owned extra file\n';
     await writeFile(path.join(output, 'notes.txt'), authored);
     const originalSource = await readFile(path.join(output, 'lib.rs'), 'utf8');

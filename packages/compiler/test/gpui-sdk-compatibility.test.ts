@@ -67,6 +67,20 @@ afterEach(async () => {
 });
 
 describe('shared GPUI SDK compatibility', () => {
+  it('allows generated-code lints as an inner attribute before the first item', () => {
+    const code = component().output.code;
+    const lines = code.split('\n').map((line) => line.trim());
+    const allow = lines.findIndex((line) => line.startsWith('#![allow('));
+    const firstItem = lines.findIndex((line) =>
+      /^(pub |use |#\[|fn |struct |impl |mod )/.test(line)
+    );
+    expect(allow).toBeGreaterThanOrEqual(0);
+    expect(allow).toBeLessThan(firstItem);
+    for (const lint of ['unused_parens', 'unused_variables', 'unused_mut', 'unused_imports']) {
+      expect(lines[allow]).toContain(lint);
+    }
+  });
+
   it.each([false, true])(
     'emits one ControlLabel owner and one module field (workspace=%s)',
     (workspace) => {

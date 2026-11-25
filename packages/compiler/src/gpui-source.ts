@@ -2819,7 +2819,11 @@ impl __PuiNativeRecordValue {
     .join('\n');
   const setupCallable = functionValue(ir.setup, new Set(), 2);
   const nativeRecords = nativeRecordTypes();
+  // Lowered expressions keep conservative grouping parentheses and uniform
+  // callback signatures; those are properties of generated code, not of the
+  // authored source, so they must not surface as consumer build warnings.
   const code = `// Direct checked-source GPUI component. Supporting files are ordinary editable Rust.
+  #![allow(unused_parens, unused_variables, unused_mut, unused_imports, dead_code, unreachable_code)]
   ${emitsExceptions ? '#[cfg(panic = "abort")] compile_error!("Authored exception lowering requires panic=unwind");' : ''}
   pub use proto_ui_gpui_native as native;
   pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};
