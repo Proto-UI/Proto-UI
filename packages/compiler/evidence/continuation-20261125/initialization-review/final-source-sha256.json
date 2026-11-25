@@ -1,0 +1,13 @@
+{
+  "packages/compiler/src/frontend/bindings.ts": "643fe05aaf49442aa2f96822eb2370043bf60db6d77a5349faf08a2fb682946b",
+  "packages/compiler/src/frontend/constants.ts": "670590cb9cbf8b076075ab8f7daf9e24979a6d41a51fa9a3734030dd07c70d93",
+  "packages/compiler/src/frontend/syntax.ts": "16c49c4233475c8a0c0e3884ee741a26a0d44e3883de353be2d5d9a6343ae4b6",
+  "packages/compiler/src/frontend/actions.ts": "e98bc61735ddc4ffef0ae4add38be9914088cc55497c795c4d6176f30c9067d3",
+  "packages/compiler/src/frontend/extract.ts": "422ae587c0aecc080a88a7f90a7030445571b67993e1fbe8be177f9ef45fb289",
+  "packages/compiler/src/frontend/template.ts": "99f97dd46bfb7ac4d15bf42e8964d7861a7ab35cca359da13608e8ad4073225c",
+  "packages/compiler/src/frontend/rules.ts": "f5655054ba2821e9e04a817a1ff2c252b4ac539fef61af55c86deccd80d54f4a",
+  "packages/compiler/src/targets/action-flow.ts": "b9b621ca05442bec2e3bbaf4e9db25c7c88fa231185d24dfc12f82c2eb477925",
+  "packages/compiler/src/targets/react.ts": "d2e8ad3a197007646cfb1d18eaaf5483ce29bf4bd7acaeb94043399770f8d12f",
+  "packages/compiler/src/output.ts": "b13a57e8f6ee8a6e26794a43172980da981ad13c63ef38a8c8b73e1af771994c",
+  "packages/compiler/test/initialization-proof.test.ts": "d91bec56e2f3b35507bb01e3973f78d10ebd7ed69b9a9c39fcd8593254269ffc"
+}

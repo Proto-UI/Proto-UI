@@ -3,6 +3,7 @@ import { DIAGNOSTIC_IMPORT_ALLOWLIST } from './diagnostic-imports.mjs';
 import {
   BROWSER_COMPILER_IMPORT_ALLOWLIST,
   BROWSER_COMPILER_INTERACTIVE_SOURCES,
+  BROWSER_COMPILER_EXECUTION_BOUNDARIES,
 } from './browser-compiler-imports.mjs';
 import {
   LIBRARY_CARD_IMPORT_ALLOWLIST,
@@ -9712,6 +9713,26 @@ function websiteRawImportIsAllowed(sourcePath, specifier, guardedImport, rootDir
   return allowance.resolvedPaths?.includes(guardedImport.resolvedPath) ?? false;
 }
 
+function reviewedBrowserCompilerExecutionEdge(rootDir, rawImport) {
+  return BROWSER_COMPILER_EXECUTION_BOUNDARIES.some((boundary) => {
+    if (
+      rawImport.sourcePath !== boundary.source.path ||
+      rawImport.specifier !== boundary.specifier ||
+      rawImport.category !== boundary.category ||
+      !reviewedWebsiteImportSourceMatches(rootDir, boundary.source.path, boundary.source.sha256)
+    )
+      return false;
+    // The complete source digest fixes every statement, including the number
+    // of construction/import sites. Keep the reviewed site visible as well;
+    // this is never an allowance for a class of unresolved Worker or imports.
+    const source = fs.readFileSync(path.join(rootDir, boundary.source.path), 'utf8');
+    if (source.split(boundary.site).length !== 2) return false;
+    return boundary.companions.every((companion) =>
+      reviewedWebsiteImportSourceMatches(rootDir, companion.path, companion.sha256)
+    );
+  });
+}
+
 // Historical Node-only test helpers live beside documentation fixtures. They
 // are not production roots; any import from a production seed restores them
 // (and their complete dependency closure) to every source/consumer scan.
@@ -10538,6 +10559,7 @@ function discoverWebsiteRawImports(rootDir) {
 
 function validateWebsiteRawImports(rootDir, relativePath, issues) {
   for (const rawImport of discoverWebsiteRawImports(rootDir)) {
+    if (reviewedBrowserCompilerExecutionEdge(rootDir, rawImport)) continue;
     if (rawImport.category === 'unverified-public-svg') {
       issues.push(
         `${relativePath}: public SVG \`${rawImport.sourcePath}\` contains ${rawImport.reason}; active document behavior remains unverified and is not admitted by a Source-scan binding`

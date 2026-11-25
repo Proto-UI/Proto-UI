@@ -109,6 +109,9 @@ function copyRuntimePackage(name, from) {
 try {
   assert.equal(metadata.schema, 'proto-ui.compiler-package.v3');
   assert.match(metadata.revision, /^[0-9a-f]{40}$/);
+  const packageManifest = json(path.join(installation, 'package.json'));
+  assert.equal(packageManifest.exports['./runtime'], undefined);
+  assert.equal(packageManifest.exports['./kernel-host'], './kernel-host.js');
   for (const entry of metadata.files) {
     const content = readFileSync(path.join(installation, entry.path));
     assert.equal(content.length, entry.bytes, entry.path);
@@ -237,10 +240,13 @@ try {
   const require = createRequire(path.join(consumer, 'package.json'));
   const React = require('react');
   const { renderToStaticMarkup } = require('react-dom/server');
-  assert.equal(renderToStaticMarkup(React.createElement(Component)), '<div>Count:0</div>');
+  assert.equal(
+    renderToStaticMarkup(React.createElement(Component)),
+    '<div><div>Count:0</div></div>'
+  );
   assert.equal(
     renderToStaticMarkup(React.createElement(Component, { label: 'Actual:' })),
-    '<div>Actual:0</div>'
+    '<div><div>Actual:0</div></div>'
   );
   report.checks.push(
     'source → packaged compiler API/CLI → native React artifact → ordinary React consumer'
@@ -248,12 +254,37 @@ try {
   report.consumerDependencies = Object.fromEntries(copied);
 
   if (flags.has('--llvm')) {
-    const kernel = compiler.compileFile(entry, { target: 'kernel', llvm: { verify: true } });
+    const kernelEntry = path.join(authoring, 'kernel.proto.ts');
+    cpSync(
+      fileURLToPath(new URL('./fixtures/pinned-kernel.proto.ts', import.meta.url)),
+      kernelEntry
+    );
+    const kernel = compiler.compileFile(kernelEntry, {
+      target: 'kernel',
+      llvm: { verify: true, emitWasm: true },
+    });
     assert.equal(kernel.ok, true, JSON.stringify(kernel.diagnostics));
     assert.equal(kernel.value.llvm.verified, true);
     assert.match(kernel.value.llvm.ir, /fneg double/);
     writeFileSync(path.join(work, 'module.ll'), kernel.value.llvm.ir);
-    report.checks.push('packaged LLVM IRBuilder source compiled and module verified by LLVM');
+    assert.ok(kernel.value.llvm.wasm instanceof Uint8Array);
+    writeFileSync(path.join(work, 'module.wasm'), kernel.value.llvm.wasm);
+    const { instantiateWasmKernel } = await import(
+      pathToFileURL(path.join(installation, 'kernel-host.js')).href
+    );
+    const host = await instantiateWasmKernel(kernel.value.llvm.wasm);
+    assert.equal(typeof host.exports.helper_negate, 'function');
+    assert.ok(Object.is(host.exports.helper_negate(0), -0));
+    assert.ok(Object.is(host.exports.helper_negate(-0), 0));
+    assert.ok(Number.isNaN(host.exports.helper_negate(NaN)));
+    host.exports.pinned_scalar_kernel_init_state(host.statesPtr);
+    assert.equal(host.getStateF64(0), 0);
+    host.setStateF64(0, 7);
+    assert.equal(host.getStateF64(0), 7);
+    assert.throws(() => host.setStateF64(1, 9), RangeError);
+    report.checks.push(
+      'packaged LLVM IRBuilder → verified module → actual WASM execution through the separately packaged bounded kernel host'
+    );
   }
   if (flags.has('--gpui')) {
     const gpui = compiler.compileFile(entry, { target: 'gpui' });

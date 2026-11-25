@@ -1,7 +1,7 @@
 import type { BrowserCompilerBuild } from '../../packages/compiler/src/browser/protocol';
 export interface BrowserBuildEvidence {
-  format: 1;
-  kind: 'canonical-browser-build-inputs-v1';
+  format: 2;
+  kind: 'canonical-browser-build-inputs-v2';
   sourcePolicy: 'workspace-superset-and-esbuild-inputs-v1';
   compilerBuild: BrowserCompilerBuild;
   targetModulesSha256: Record<string, string>;

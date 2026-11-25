@@ -3,10 +3,10 @@ import test from 'node:test';
 import { classifyResult, compareReports } from './library-profile-inventory.mjs';
 
 const diagnostic = (category) => ({ code: 'fixture', category, message: category });
-const schema = 'proto-ui.library-profile-inventory.v1';
+const schema = 'proto-ui.library-profile-inventory.v2';
 const row = (status, extra = {}) => ({
   entry: 'packages/prototypes/base/src/button/button.proto.ts',
-  profile: 'react-runtime-v1',
+  profile: 'react',
   entrySha256: 'old',
   status,
   failureKind: null,
@@ -88,4 +88,43 @@ test('new defects fail separately from admission gains; duplicate identities are
   assert.equal(improved.ok, true);
   assert.equal(improved.improvements.length, 1);
   assert.throws(() => compareReports(baseline, report([row('PASS'), row('PASS')])), /Duplicate/);
+});
+
+test('current unsupported codes cannot conceal a type error or native builder defect', () => {
+  const unsupported = {
+    code: 'PUI_REACT_UNSUPPORTED',
+    severity: 'error',
+    category: 'codegen',
+    message: 'unlowered operation',
+  };
+  assert.equal(classifyResult({ ok: false, diagnostics: [unsupported] }).status, 'UNSUPPORTED');
+  assert.equal(
+    classifyResult({
+      ok: false,
+      diagnostics: [
+        unsupported,
+        { code: 'TS2322', severity: 'error', category: 'typecheck', message: 'invalid source' },
+      ],
+    }).failureKind,
+    'invalid-input'
+  );
+  assert.equal(
+    classifyResult({
+      ok: false,
+      diagnostics: [
+        unsupported,
+        {
+          code: 'PUI_GPUI_BUILDER003',
+          severity: 'error',
+          category: 'codegen',
+          message: 'builder failure',
+        },
+      ],
+    }).failureKind,
+    'compiler-defect'
+  );
+  assert.equal(
+    classifyResult({ ok: false, diagnostics: [{ ...unsupported, severity: 'warning' }] }).status,
+    'FAIL'
+  );
 });

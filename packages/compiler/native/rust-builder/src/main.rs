@@ -303,6 +303,13 @@ fn closure(parameters: &[&str], statements: Vec<Stmt>) -> Expr {
         body: Box::new(block_expr(statements)),
     })
 }
+fn fallible_closure(parameters: &[&str], statements: Vec<Stmt>) -> Expr {
+    let mut result = closure(parameters, statements);
+    if let Expr::Closure(node) = &mut result {
+        node.output = ReturnType::Type(Default::default(), Box::new(result_type(unit_type())));
+    }
+    result
+}
 fn field_name(prefix: &str, source: &str) -> String {
     prefix.to_owned()
         + &source
@@ -340,7 +347,7 @@ fn scalar(v: &Json) -> Result<Expr> {
 fn value_type(decl: &Json) -> Result<&'static str> {
     match text(decl, "kind")? {
         "bool" | "boolean" => Ok("bool"),
-        "number" | "number.discrete" => Ok("f64"),
+        "number" | "number.discrete" | "number.range" => Ok("f64"),
         "string" | "enum" => Ok("String"),
         _ => Err("Unsupported native scalar declaration.".to_owned()),
     }
@@ -350,7 +357,14 @@ fn expression(v: &Json) -> Result<Expr> {
         "literal" => scalar(&v["value"])?,
         "state" => method(self_field("state_", text(v, "name")?), "clone", vec![]),
         "prop" => method(
-            cloned(self_field("resolved_prop_", text(v, "name")?)),
+            cloned(self_field(
+                if v["source"] == "previous" {
+                    "previous_snapshot_prop_"
+                } else {
+                    "resolved_prop_"
+                },
+                text(v, "name")?,
+            )),
             "expect",
             vec![string("Compiler proved a non-empty prop fallback")],
         ),
@@ -415,7 +429,7 @@ fn rule(v: &Json) -> Result<Expr> {
             match text(v, "source")? {
                 "state" => comparison(self_field("state_", key))?,
                 "prop" => method(
-                    cloned(self_field("resolved_prop_", key)),
+                    cloned(self_field("render_prop_", key)),
                     "is_some_and",
                     vec![closure(&["value"], vec![tail(comparison(name("value"))?)])],
                 ),
@@ -430,6 +444,18 @@ fn action_body(items: &[Json]) -> Result<Vec<Stmt>> {
     for item in items {
         statements.push(match text(item, "kind")? {
             "return" => statement(return_expr(ok_unit())),
+            "request-update" => statement(block_expr(vec![
+                statement(method(name("self"), "capture_render_snapshot", vec![])),
+                statement(assign(
+                    member(name("self"), "update_requested"),
+                    boolean(true),
+                )),
+            ])),
+            "invoke" => {
+                let mut body = action_body(list(item, "body")?)?;
+                body.push(tail(ok_unit()));
+                statement(try_expr(call(fallible_closure(&[], body), vec![])))
+            }
             "local" => local(
                 &field_name("local_", text(item, "name")?),
                 expression(&item["value"])?,
@@ -544,6 +570,74 @@ fn structure(name: &str, fields: Vec<(String, Type, bool)>) -> Item {
         semi_token: None,
     })
 }
+fn children_enum(enum_name: &str) -> Item {
+    Item::Enum(ItemEnum {
+        attrs: vec![],
+        vis: Visibility::Public(Default::default()),
+        enum_token: Default::default(),
+        ident: ident(enum_name),
+        generics: Generics::default(),
+        brace_token: Default::default(),
+        variants: punct(
+            [("Text", ty("String")), ("View", ty("gpui::AnyView"))]
+                .into_iter()
+                .map(|(variant, field_type)| Variant {
+                    attrs: vec![],
+                    ident: ident(variant),
+                    fields: Fields::Unnamed(FieldsUnnamed {
+                        paren_token: Default::default(),
+                        unnamed: punct(vec![Field {
+                            attrs: vec![],
+                            vis: Visibility::Inherited,
+                            mutability: FieldMutability::None,
+                            ident: None,
+                            colon_token: None,
+                            ty: field_type,
+                        }]),
+                    }),
+                    discriminant: None,
+                }),
+        ),
+    })
+}
+fn append_slot(node: Expr, enum_name: &str) -> Expr {
+    let projected = Expr::Match(ExprMatch {
+        attrs: vec![],
+        match_token: Default::default(),
+        expr: Box::new(name("child")),
+        brace_token: Default::default(),
+        arms: ["Text", "View"]
+            .into_iter()
+            .map(|variant| Arm {
+                attrs: vec![],
+                pat: Pat::TupleStruct(PatTupleStruct {
+                    attrs: vec![],
+                    qself: None,
+                    path: path(&(enum_name.to_owned() + "::" + variant)),
+                    paren_token: Default::default(),
+                    elems: punct(vec![pattern("value", false)]),
+                }),
+                guard: None,
+                fat_arrow_token: Default::default(),
+                body: Box::new(method(name("node"), "child", vec![cloned(name("value"))])),
+                comma: Some(Default::default()),
+            })
+            .collect(),
+    });
+    block_expr(vec![
+        local("node", node, true),
+        statement(Expr::ForLoop(ExprForLoop {
+            attrs: vec![],
+            label: None,
+            for_token: Default::default(),
+            pat: Box::new(pattern("child", false)),
+            in_token: Default::default(),
+            expr: Box::new(borrow(member(name("self"), "slot_children"))),
+            body: block(vec![statement(assign(name("node"), projected))]),
+        })),
+        tail(name("node")),
+    ])
+}
 fn construct(name: &str, fields: Vec<(String, Expr)>) -> Expr {
     Expr::Struct(ExprStruct {
         attrs: vec![],
@@ -601,6 +695,10 @@ fn display_value(v: Expr, rust_type: &str) -> Expr {
 fn element(node: &Json, plan: &Json) -> Result<Expr> {
     let mut result = native_styles(call(name("gpui::div"), vec![]), list(node, "styles")?)?;
     for child in list(node, "children")? {
+        if child["kind"] == "slot" {
+            result = append_slot(result, text(plan, "childrenTypeName")?);
+            continue;
+        }
         let child_expr = match text(child, "kind")? {
             "text" => method(string(text(child, "value")?), "to_owned", vec![]),
             "element" => element(&child["node"], plan)?,
@@ -610,7 +708,7 @@ fn element(node: &Json, plan: &Json) -> Result<Expr> {
                 if rust_type == "bool" {
                     return Err("Boolean state is not a template child.".to_owned());
                 }
-                display_value(self_field("state_", key), rust_type)
+                display_value(self_field("render_state_", key), rust_type)
             }
             "prop-read" => {
                 let key = text(child, "propName")?;
@@ -619,7 +717,7 @@ fn element(node: &Json, plan: &Json) -> Result<Expr> {
                     return Err("Boolean prop is not a template child.".to_owned());
                 }
                 method(
-                    cloned(self_field("resolved_prop_", key)),
+                    cloned(self_field("render_prop_", key)),
                     "map_or_else",
                     vec![
                         name("String::new"),
@@ -639,7 +737,7 @@ fn element(node: &Json, plan: &Json) -> Result<Expr> {
 fn validity(decl: &Json, candidate: Expr, state: bool) -> Result<Expr> {
     let kind = text(decl, "kind")?;
     let mut valid = boolean(true);
-    if kind == "number" || kind == "number.discrete" {
+    if kind == "number" || kind == "number.discrete" || kind == "number.range" {
         valid = if state {
             unary("!", method(candidate.clone(), "is_nan", vec![]))
         } else {
@@ -664,7 +762,7 @@ fn validity(decl: &Json, candidate: Expr, state: bool) -> Result<Expr> {
             return Ok(valid);
         }
     }
-    if kind == "number" || kind == "number.discrete" {
+    if kind == "number" || kind == "number.discrete" || kind == "number.range" {
         let range = if state { decl } else { &decl["range"] };
         if let Some(min) = range.get("min") {
             valid = binary(
@@ -679,6 +777,26 @@ fn validity(decl: &Json, candidate: Expr, state: bool) -> Result<Expr> {
                 valid,
                 unary("!", binary(">", candidate.clone(), scalar(max)?)?),
             )?;
+        }
+        if state && kind == "number.discrete" {
+            if let Some(step) = decl.get("step") {
+                let n = binary(
+                    "/",
+                    binary(
+                        "-",
+                        candidate.clone(),
+                        scalar(decl.get("min").unwrap_or(&json!(0)))?,
+                    )?,
+                    scalar(step)?,
+                )?;
+                let enabled = binary(">", scalar(step)?, float(0.0))?;
+                let integer = binary(
+                    "&&",
+                    method(n.clone(), "is_finite", vec![]),
+                    binary("===", method(n, "fract", vec![]), float(0.0))?,
+                )?;
+                valid = binary("&&", valid, binary("||", unary("!", enabled), integer)?)?;
+            }
         }
     }
     Ok(valid)
@@ -749,6 +867,29 @@ fn prop_resolution(decl: &Json) -> Result<Stmt> {
 fn result_type(inner: Type) -> Type {
     generic("Result", vec![inner, ty("String")])
 }
+fn prop_changed(plan: &Json, key: &str) -> Result<Expr> {
+    let decl = declaration(plan, "props", key)?;
+    let comparable = |prefix: &str| {
+        let value = cloned(self_field(prefix, key));
+        if value_type(decl).unwrap() == "f64" {
+            method(
+                value,
+                "map",
+                vec![closure(
+                    &["value"],
+                    vec![tail(method(name("value"), "to_bits", vec![]))],
+                )],
+            )
+        } else {
+            value
+        }
+    };
+    binary(
+        "!==",
+        comparable("resolved_prop_"),
+        comparable("previous_snapshot_prop_"),
+    )
+}
 fn unit_type() -> Type {
     Type::Tuple(TypeTuple {
         paren_token: Default::default(),
@@ -761,6 +902,7 @@ fn build(plan: &Json) -> Result<File> {
     }
     let component = text(plan, "componentName")?;
     let props_name = text(plan, "propsTypeName")?;
+    let has_watches = !list(plan, "propWatches")?.is_empty();
     let mut items = vec![Item::Use(ItemUse {
         attrs: vec![],
         vis: Visibility::Inherited,
@@ -807,6 +949,8 @@ fn build(plan: &Json) -> Result<File> {
     ));
     let mut fields = vec![
         ("props".to_owned(), ty(props_name), false),
+        ("update_requested".to_owned(), ty("bool"), false),
+        ("feedback_dirty".to_owned(), ty("bool"), false),
         (
             "last_error".to_owned(),
             generic("Option", vec![ty("String")]),
@@ -819,8 +963,45 @@ fn build(plan: &Json) -> Result<File> {
             call(name(&(props_name.to_owned() + "::default")), vec![]),
         ),
         ("last_error".to_owned(), name("None")),
+        ("update_requested".to_owned(), boolean(false)),
+        ("feedback_dirty".to_owned(), boolean(false)),
     ];
     let mut methods = Vec::new();
+    let mut capture_render = Vec::new();
+    if has_watches {
+        fields.push(("props_initialized".to_owned(), ty("bool"), false));
+        initial.push(("props_initialized".to_owned(), boolean(false)));
+    }
+    if plan["hasSlot"] == true {
+        let child_type = text(plan, "childrenTypeName")?;
+        items.push(children_enum(child_type));
+        fields.push((
+            "slot_children".to_owned(),
+            generic("Vec", vec![ty(child_type)]),
+            false,
+        ));
+        initial.push(("slot_children".to_owned(), call(name("Vec::new"), vec![])));
+        methods.push(function(
+            "set_children",
+            vec![
+                receiver(true),
+                parameter("children", generic("Vec", vec![ty(child_type)])),
+                parameter(
+                    "cx",
+                    reference_type(generic("gpui::Context", vec![ty("Self")]), true),
+                ),
+            ],
+            unit_type(),
+            vec![
+                statement(assign(
+                    member(name("self"), "slot_children"),
+                    name("children"),
+                )),
+                statement(method(name("cx"), "notify", vec![])),
+            ],
+            true,
+        ));
+    }
     let mut props_update = vec![statement(assign(
         member(name("self"), "props"),
         name("props"),
@@ -829,10 +1010,26 @@ fn build(plan: &Json) -> Result<File> {
     for prop in list(plan, "props")? {
         let key = text(prop, "name")?;
         let rust_type = generic("Option", vec![ty(value_type(prop)?)]);
-        for prefix in ["resolved_prop_", "previous_prop_"] {
+        for prefix in ["resolved_prop_", "previous_prop_", "render_prop_"] {
             let field = field_name(prefix, key);
             fields.push((field.clone(), rust_type.clone(), false));
             initial.push((field, name("None")));
+        }
+        capture_render.push(statement(assign(
+            self_field("render_prop_", key),
+            cloned(self_field("resolved_prop_", key)),
+        )));
+        if has_watches {
+            let field = field_name("previous_snapshot_prop_", key);
+            fields.push((field.clone(), rust_type.clone(), false));
+            initial.push((field, name("None")));
+            props_update.insert(
+                0,
+                statement(assign(
+                    self_field("previous_snapshot_prop_", key),
+                    cloned(self_field("resolved_prop_", key)),
+                )),
+            );
         }
         props_update.push(prop_resolution(prop)?);
         let resolved = name(&field_name("resolved_", key));
@@ -863,6 +1060,37 @@ fn build(plan: &Json) -> Result<File> {
         ));
     }
     props_update.extend(resolved_commits);
+    if has_watches {
+        let mut callbacks = Vec::new();
+        for watch in list(plan, "propWatches")? {
+            let mut changed = boolean(false);
+            for key in list(watch, "keys")? {
+                changed = binary(
+                    "||",
+                    changed,
+                    prop_changed(plan, key.as_str().ok_or("Invalid watch key")?)?,
+                )?;
+            }
+            callbacks.push(statement(conditional(
+                changed,
+                vec![statement(try_expr(method(
+                    name("self"),
+                    text(watch, "method")?,
+                    vec![],
+                )))],
+                None,
+            )));
+        }
+        props_update.push(statement(conditional(
+            member(name("self"), "props_initialized"),
+            callbacks,
+            None,
+        )));
+        props_update.push(statement(assign(
+            member(name("self"), "props_initialized"),
+            boolean(true),
+        )));
+    }
     props_update.push(tail(ok_unit()));
     for state in list(plan, "states")? {
         let key = text(state, "name")?;
@@ -870,6 +1098,15 @@ fn build(plan: &Json) -> Result<File> {
         let rust_type = value_type(state)?;
         fields.push((field.clone(), ty(rust_type), false));
         initial.push((field, scalar(&state["initialValue"])?));
+        fields.push((field_name("render_state_", key), ty(rust_type), false));
+        initial.push((
+            field_name("render_state_", key),
+            scalar(&state["initialValue"])?,
+        ));
+        capture_render.push(statement(assign(
+            self_field("render_state_", key),
+            cloned(self_field("state_", key)),
+        )));
         methods.push(function(
             &field_name("read_state_", key),
             vec![receiver(false)],
@@ -878,6 +1115,28 @@ fn build(plan: &Json) -> Result<File> {
             true,
         ));
         let mut setter = validation(state, name("value"), true)?;
+        if list(plan, "feedbackStates")?
+            .iter()
+            .any(|value| value.as_str() == Some(key))
+        {
+            let changed = if rust_type == "f64" {
+                binary(
+                    "!==",
+                    method(name("value"), "to_bits", vec![]),
+                    method(self_field("state_", key), "to_bits", vec![]),
+                )?
+            } else {
+                binary("!==", name("value"), self_field("state_", key))?
+            };
+            setter.push(statement(conditional(
+                changed,
+                vec![statement(assign(
+                    member(name("self"), "feedback_dirty"),
+                    boolean(true),
+                ))],
+                None,
+            )));
+        }
         setter.push(statement(assign(self_field("state_", key), name("value"))));
         setter.push(tail(ok_unit()));
         methods.push(function(
@@ -888,16 +1147,45 @@ fn build(plan: &Json) -> Result<File> {
             false,
         ));
     }
+    methods.push(function(
+        "capture_render_snapshot",
+        vec![receiver(true)],
+        unit_type(),
+        capture_render,
+        false,
+    ));
     items.push(structure(component, fields));
-    let ctor = vec![
+    let mut ctor = vec![
         local("component", construct("Self", initial), true),
         statement(try_expr(method(
             name("component"),
             "update_props",
             vec![name("props")],
         ))),
-        tail(call(name("Ok"), vec![name("component")])),
     ];
+    for handler in list(plan, "created")? {
+        ctor.push(statement(try_expr(method(
+            name("component"),
+            text(handler, "method")?,
+            vec![],
+        ))));
+    }
+    ctor.push(statement(method(
+        name("component"),
+        "capture_render_snapshot",
+        vec![],
+    )));
+    // Constructing the Entity already requires its first render. A request
+    // raised during created must not leak into an unrelated later callback.
+    ctor.push(statement(assign(
+        member(name("component"), "update_requested"),
+        boolean(false),
+    )));
+    ctor.push(statement(assign(
+        member(name("component"), "feedback_dirty"),
+        boolean(false),
+    )));
+    ctor.push(tail(call(name("Ok"), vec![name("component")])));
     methods.push(function(
         "new",
         vec![parameter("props", ty(props_name))],
@@ -924,15 +1212,64 @@ fn build(plan: &Json) -> Result<File> {
         ],
         result_type(unit_type()),
         vec![
-            statement(try_expr(method(
-                name("self"),
-                "update_props",
-                vec![name("props")],
-            ))),
-            statement(method(name("cx"), "notify", vec![])),
-            tail(ok_unit()),
+            local(
+                "result",
+                method(name("self"), "update_props", vec![name("props")]),
+                false,
+            ),
+            local(
+                "requested",
+                method(name("self"), "take_update_request", vec![]),
+                false,
+            ),
+            local(
+                "feedback",
+                method(name("self"), "take_feedback_update", vec![]),
+                false,
+            ),
+            statement(conditional(
+                method(name("result"), "is_ok", vec![]),
+                vec![
+                    statement(method(name("self"), "capture_render_snapshot", vec![])),
+                    statement(method(name("cx"), "notify", vec![])),
+                ],
+                Some(vec![statement(conditional(
+                    binary("||", name("requested"), name("feedback"))?,
+                    vec![statement(method(name("cx"), "notify", vec![]))],
+                    None,
+                ))]),
+            )),
+            tail(name("result")),
         ],
         true,
+    ));
+    methods.push(function(
+        "take_update_request",
+        vec![receiver(true)],
+        ty("bool"),
+        vec![
+            local("requested", member(name("self"), "update_requested"), false),
+            statement(assign(
+                member(name("self"), "update_requested"),
+                boolean(false),
+            )),
+            tail(name("requested")),
+        ],
+        false,
+    ));
+    methods.push(function(
+        "take_feedback_update",
+        vec![receiver(true)],
+        ty("bool"),
+        vec![
+            local("dirty", member(name("self"), "feedback_dirty"), false),
+            statement(assign(
+                member(name("self"), "feedback_dirty"),
+                boolean(false),
+            )),
+            tail(name("dirty")),
+        ],
+        false,
     ));
     methods.push(function(
         "take_error",
@@ -945,16 +1282,18 @@ fn build(plan: &Json) -> Result<File> {
         ))],
         true,
     ));
-    for event in list(plan, "events")? {
-        let mut body = action_body(list(event, "body")?)?;
-        body.push(tail(ok_unit()));
-        methods.push(function(
-            text(event, "method")?,
-            vec![receiver(true)],
-            result_type(unit_type()),
-            body,
-            true,
-        ));
+    for (collection, public) in [("events", true), ("created", false), ("propWatches", false)] {
+        for handler in list(plan, collection)? {
+            let mut body = action_body(list(handler, "body")?)?;
+            body.push(tail(ok_unit()));
+            methods.push(function(
+                text(handler, "method")?,
+                vec![receiver(true)],
+                result_type(unit_type()),
+                body,
+                public,
+            ));
+        }
     }
     items.push(implementation(component, None, methods));
 
@@ -1003,7 +1342,21 @@ fn build(plan: &Json) -> Result<File> {
                     ))],
                     None,
                 )),
-                statement(method(name("cx"), "notify", vec![])),
+                local(
+                    "update_requested",
+                    method(name("this"), "take_update_request", vec![]),
+                    false,
+                ),
+                local(
+                    "feedback_dirty",
+                    method(name("this"), "take_feedback_update", vec![]),
+                    false,
+                ),
+                statement(conditional(
+                    binary("||", name("update_requested"), name("feedback_dirty"))?,
+                    vec![statement(method(name("cx"), "notify", vec![]))],
+                    None,
+                )),
             ],
         );
         root = method(
@@ -1073,11 +1426,14 @@ fn run() -> Result<()> {
     if plan["workspaceDependency"] != true {
         manifest["workspace"] = json!({});
     }
-    let response = json!({
+    let mut response = json!({
         "componentName": component, "propsTypeName": text(&plan, "propsTypeName")?,
         "code": prettyplease::unparse(&ast),
         "cargoToml": toml::to_string_pretty(&manifest).map_err(|e| e.to_string())?,
     });
+    if plan["hasSlot"] == true {
+        response["childrenTypeName"] = plan["childrenTypeName"].clone();
+    }
     println!(
         "{}",
         serde_json::to_string(&response).map_err(|e| e.to_string())?

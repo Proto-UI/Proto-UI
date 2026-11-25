@@ -16,9 +16,9 @@ The starter is an ordinary unfinished app task, not a replacement component. It 
 
 The current job was supplied by the experiment, not independently discovered demand. No follow-on product is selected. Before moving beyond Button, preserve the [demand companion requirements](https://github.com/Proto-UI/Proto-UI/issues/750#issuecomment-5909770134): concrete job, dated firsthand source, recurring workaround/cost, alternatives, insufficiency, switching cost and observable voluntary adoption. Existing solutions satisfying the job cheaply are a valid reason to defer a product. Consumption, demand and optional two-target maintenance economics remain separate.
 
-## Main-only serial execution
+## Retained study controls and blocked new production
 
-The commands below are the original preparation/reproduction playbook, not execution receipts. The dated record above identifies which real commands and versions ran. Main owns the portfolio's single heavy slot, dependency setup, all native instances, independent review and external writes. Run repository commands in the supplied Issue #750 worktree using Node24. No worker should execute them to refresh evidence.
+The historical study and its sealed artifacts remain valid within their recorded scope. New artifact production is blocked while the current native AST compiler lacks full official Base Button behavior; the old private-API producer has been removed. The commands below retain accounting and observation tools, not a replacement artifact producer. The dated record above identifies which real commands and versions ran. Main owns the portfolio's single heavy slot, dependency setup, all native instances, independent review and external writes. Run repository commands in the supplied Issue #750 worktree using Node24. No worker should execute them to refresh evidence.
 
 First run only the admission/accounting controls and the real missing-prerequisite producer:
 
@@ -29,49 +29,18 @@ First run only the admission/accounting controls and the real missing-prerequisi
 
 The second command must return `blocked-prerequisite`, `observedRuns: 0`, `measurements: null`, and `originalCriteriaComplete: false`. The synthetic tests challenge abandonment, install failure, prior knowledge, changed controls and output, absent generated artifacts, unbound admission, unsupported compilation, runtime leakage, failed builds, chronology, production capture, edit preimages and missing explanation/change evidence. They execute no generated component and are not study results. There is no claimed product regression or failed-before run: the base has no experiment collector.
 
-Prepare the **unchanged official Base Button**, not a reduced fixture or handwritten substitute:
+### Required producer migration
 
-```sh
-/home/ezra/.npm/_npx/387698761821791d/node_modules/node/bin/node --import tsx scripts/analysis/invisible-consumption/produce-button.mjs prepare /tmp/i750-main-01
-```
+A replacement must compile the **unchanged official Base Button** through the current semantic compiler API and native React target. A reduced fixture, handwritten substitute, runtime wrapper, or getter-only expose implementation cannot satisfy this study. The current `createCompiler` API and commands are documented in [the compiler tool guide](../../compiler/README.md). The original `react-dom-source-v1` protocol remains frozen for its historical measurements; a future current-target study needs separately bound protocol and artifact identities instead of relabeling old evidence.
 
-The real existing `compileFile` and `writeCompilation` APIs read the direct Base Button source closure, emit `react-dom-source-v1` with `GeneratedButton`, and create an external source distribution plus a separate informed operator app. The producer preserves compiler input bytes, Compiler source bytes, repository lock, actual compile/write diagnostics, every generated artifact including hidden helpers, and exact hashes. `candidate.json` is explicitly **not admitted**. Any source rejection or missing dependency leaves the actual failure intact and the study blocked; route Compiler defects to the existing owner.
+The removed `produce-button.mjs` depended on deleted `writeCompilation`, provenance/helper and consumer-closure interfaces. Its complete implementation remains in Git history at `59c18246275c9a5ed0ad313c6da2627956930597`; there is no maintained command that restores or executes that old compiler. [The cleanup ledger](../../../internal/compiler/legacy-cleanup.md) retains these producer obligations:
 
-For an independent unsupported-profile boundary, Main may run the actual CLI once, retaining its real stdout/stderr/exit and confirming it created no output:
+- Bind all actual compiler/source/type inputs, the source commit and dirty-state facts, dependency locks, diagnostics and every emitted file; preserve every failed attempt in a new output directory.
+- Build an independent ordinary consumer through real `tsc --noEmit` and Vite, with exact installed dependencies and no source-workspace links. Preserve delivered/consumer bytes, production files and command receipts.
+- Verify the entire consumer dependency/import closure and retain independently injected internal-import and missing-support controls. Original negative controls must still reject their mutations.
+- Preserve source editing ownership, maps, complete component behavior, production-browser input/focus/disabled observations and independent artifact-bound admission. A completed build remains operator preflight, with zero measured participant runs.
 
-```sh
-/home/ezra/.npm/_npx/387698761821791d/node_modules/node/bin/node --import tsx packages/compiler/src/cli.ts compile --root . --entry packages/prototypes/base/src/button/button.proto.ts --profile react-dom-ssr-v1 --output /tmp/i750-unsupported-01 --json
-```
-
-The expected boundary is a nonzero unsupported-profile diagnostic, not acceptance of public SSR. A different setup/parser failure must retain its real classification. Do not replace it with the private SSR harness or a runtime-backed profile.
-
-In `/tmp/i750-main-01/clean-consumer`, Main installs the exact declared external dependencies in this independent project:
-
-```sh
-env PATH=/home/ezra/.npm/_npx/387698761821791d/node_modules/node/bin:$PATH npm install --ignore-scripts --no-audit --no-fund
-```
-
-Record actual npm version, registry and command outcome. The producer has not installed anything. A failed install remains a failed prerequisite; do not link workspace/source `node_modules` to make it pass. Then, back in the Issue worktree:
-
-```sh
-/home/ezra/.npm/_npx/387698761821791d/node_modules/node/bin/node --import tsx scripts/analysis/invisible-consumption/produce-button.mjs verify /tmp/i750-main-01
-```
-
-`verify` runs the real `npm run build` (`tsc --noEmit` and Vite production build), retains command status/stdout/stderr, binds the production files and package-lock, compares delivered and consumer generated bytes, and uses the existing `verifyConsumerClosure`. It keeps the original compiler provenance unchanged and uses the established dependency-only projection for closure inspection. Two explicitly injected controls must be rejected for `undeclared-import` and `missing-helper`. These controls are not product defects or naive-consumer observations. `clean-consumer.json` remains `operator-preflight-only`, even after success.
-
-Start an owned, managed preview in `/tmp/i750-main-01/clean-consumer`:
-
-```sh
-env PATH=/home/ezra/.npm/_npx/387698761821791d/node_modules/node/bin:$PATH npm run preview -- --port 4750 --strictPort
-```
-
-After that exact preview is ready, execute in the Issue worktree:
-
-```sh
-/home/ezra/.npm/_npx/387698761821791d/node_modules/node/bin/node --import tsx scripts/analysis/invisible-consumption/observe-button.mjs /tmp/i750-main-01 http://127.0.0.1:4750/
-```
-
-The observer binds the served index and script/stylesheet responses to the actual production bytes. A conditional 304 must refer to an earlier body this observer actually verified, request that body's exact ETag, and still match the unchanged production file; an unknown or contradictory cache response fails. The receipt distinguishes a full response body from its later conditional revalidation. Its nine native checkpoints are enabled, pointer activation, Tab focus, Enter activation, Space held, Space released, disabled, attempted disabled pointer activation, and re-enabled activation. This fixed Web target commits Enter/Space on keydown: Space held adds one activation and release adds none. That host mapping is not a cross-host edge guarantee; the keyboard-keyup illustration in `internal/contracts/event/event-type.v0.md` is explicitly non-normative. It retains PNGs, geometry/hit/focus/disabled/count observations, a finite 250ms disabled rejection observation, native errors and a Playwright trace. Review every adjacent image pair. The unstyled Base shell has no admitted family paint: do not label a count, computed color or screenshot as complete visual-family, accessibility-technology or Adapter parity. Stop only Main's owned preview after capture. A native failure is a prerequisite finding, not a study outcome.
+`observe-button.mjs` remains available for a retained original production tree and separately owned preview; it does not compile an artifact. It checks served production bytes, conditional-response identity, pointer/Tab/Enter/Space/disabled behavior, screenshots, geometry, native errors and traces. It cannot turn the current missing native Button producer into a new successful study. The original keyboard mapping, fixed observation window and interpretation stay bound to the original profile; they are not universal cross-host guarantees.
 
 For the **participant's actual production app**, inspect enabled → saving/disabled → success, enabled → saving/disabled → injected error → enabled recovery → successful retry, keyboard focus/Enter/Space, and saved name after reload. Use the participant's actual build/preview commands and retain their command receipts, output bytes, edited source and adjacent captures. The operator preflight app and observer cannot replace that journey.
 

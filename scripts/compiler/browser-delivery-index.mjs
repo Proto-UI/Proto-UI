@@ -11,18 +11,19 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 const inventoryFile = 'internal/compiler/website-demo-migrations.json';
 const outputFile = 'internal/compiler/browser-demo-delivery.json';
 const digest = (bytes) => createHash('sha256').update(bytes).digest('hex');
-export const browserProfiles = [
+export const historicalBrowserTargets = [
   'web-component-source-v1',
   'react-dom-source-v1',
   'vue-source-v1',
   'vue2-source-v1',
 ];
+export const browserTargets = ['react'];
 const controls = [
   'ordinary-documentation-preview-before-compiler-load',
   'edit-reject-recover-same-revision-source-and-preview',
   'cancel-running-edit-and-reopen-fresh-owner',
   'chinese-documentation-route-and-navigation-cleanup',
-  'loaded-compiler-target-and-wasm-bindings',
+  'loaded-compiler-target-and-worker-bindings',
   'source-and-asset-stability',
   'runner-owned-local-service',
 ];
@@ -35,9 +36,11 @@ export async function verifyBrowserReceipt(
   { capture = captureCurrentBrowserEvidence } = {}
 ) {
   if (
-    receipt?.kind !== 'canonical-wasm-docs-browser-v1' ||
+    receipt?.kind !== 'canonical-ast-docs-browser-v2' ||
     !receipt.browser ||
-    receipt.compilerBuild?.execution !== 'quickjs-wasm' ||
+    receipt.compilerBuild?.execution !== 'worker-js' ||
+    receipt.compilerBuild?.format !== 2 ||
+    JSON.stringify(receipt.compilerBuild.targets) !== '["react"]' ||
     !/^[a-f0-9]{64}$/.test(receipt.compilerBuild.compilerSha256) ||
     !Array.isArray(receipt.cases) ||
     !receipt.sourceFiles ||
@@ -48,7 +51,7 @@ export async function verifyBrowserReceipt(
     );
   if (!Object.keys(receipt.sourceFiles).length)
     throw new Error('Missing browser receipt source binding inventory.');
-  if (receipt.buildManifest?.kind !== 'canonical-browser-build-inputs-v1')
+  if (receipt.buildManifest?.kind !== 'canonical-browser-build-inputs-v2')
     throw new Error('Missing browser receipt compiler/build/target input manifest.');
   verifyRecordedBrowserEvidence(receipt, await capture());
   return new Map(receipt.cases.map((entry) => [entry.name, entry]));
@@ -68,14 +71,18 @@ export async function createBrowserDeliveryIndex({ receipt } = {}) {
       ...(language
         ? {
             prototypeId: 'base-button',
-            targets: browserProfiles.map((profile) => ({
-              profile,
+            targets: browserTargets.map((target) => ({
+              target,
               status:
                 common &&
-                cases.get(`${language === 'zh' ? 'zh-' : ''}base-button-${profile}`)?.status ===
+                cases.get(`${language === 'zh' ? 'zh-' : ''}base-button-${target}`)?.status ===
                   'passed'
                   ? 'browser-executed-awaiting-independent-acceptance'
                   : 'pending-browser-execution',
+            })),
+            historicalTargetObligations: historicalBrowserTargets.map((target) => ({
+              target,
+              status: 'not-migrated',
             })),
           }
         : {}),
@@ -85,7 +92,7 @@ export async function createBrowserDeliveryIndex({ receipt } = {}) {
   if (candidates.length !== candidateRoutes.size)
     throw new Error('A selected documentation page disappeared from the preserved inventory.');
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     ownerIssue: 817,
     meaning:
       'Execution overlay; the complete prior source inventory and all its rejected rows remain unchanged. No parent completion is inferred.',

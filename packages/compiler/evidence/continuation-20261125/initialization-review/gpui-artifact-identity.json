@@ -1,0 +1,376 @@
+{
+  "recorded_utc": "2026-11-25T01:34:34.213087+00:00",
+  "command": "PUI_GPUI_ARTIFACT_DIR=/tmp/pui-gpui-final-identity-20261125-0934 corepack pnpm@10.32.1 exec vitest run packages/compiler/test/gpui-ast-codegen.test.ts",
+  "test_exit_code": 0,
+  "baseline_directory": "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated",
+  "fresh_directory": "/tmp/pui-gpui-final-identity-20261125-0934",
+  "expected_components": [
+    "BaseSurfaceRoot",
+    "BaseTextRoot",
+    "CreatedFailure",
+    "CreatedWatch",
+    "EmptyRoot",
+    "EscapedText",
+    "GpuiCounter",
+    "GpuiExpandedPinned",
+    "GpuiPinned",
+    "InvokeReturn",
+    "NumericPolicy",
+    "NumericState",
+    "PropsMatrix",
+    "RequiredProp",
+    "RuleScheduling",
+    "SlotHost",
+    "UpdateScheduling"
+  ],
+  "observed_components": [
+    "BaseSurfaceRoot",
+    "BaseTextRoot",
+    "CreatedFailure",
+    "CreatedWatch",
+    "EmptyRoot",
+    "EscapedText",
+    "GpuiCounter",
+    "GpuiExpandedPinned",
+    "GpuiPinned",
+    "InvokeReturn",
+    "NumericPolicy",
+    "NumericState",
+    "PropsMatrix",
+    "RequiredProp",
+    "RuleScheduling",
+    "SlotHost",
+    "UpdateScheduling"
+  ],
+  "component_count": 17,
+  "compared_file_count": 34,
+  "missing_components": [],
+  "extra_components": [],
+  "files": [
+    {
+      "component": "BaseSurfaceRoot",
+      "path": "Cargo.toml",
+      "baseline_sha256": "03f3e1c05859181bd68ce720f5ef1a0d73634932ece5b144765891e486b428a3",
+      "fresh_sha256": "03f3e1c05859181bd68ce720f5ef1a0d73634932ece5b144765891e486b428a3",
+      "byte_identical": true,
+      "baseline_bytes": 194,
+      "fresh_bytes": 194
+    },
+    {
+      "component": "BaseSurfaceRoot",
+      "path": "src/lib.rs",
+      "baseline_sha256": "13448cf2cda6844177d60105c39082a1f3f3bf81d72601e5c71dcb1c99919895",
+      "fresh_sha256": "13448cf2cda6844177d60105c39082a1f3f3bf81d72601e5c71dcb1c99919895",
+      "byte_identical": true,
+      "baseline_bytes": 18314,
+      "fresh_bytes": 18314
+    },
+    {
+      "component": "BaseTextRoot",
+      "path": "Cargo.toml",
+      "baseline_sha256": "9ab8a12ca9b7809294b787ac9de34008a2d8e0e4ec43ec73469c4f4c1a143d43",
+      "fresh_sha256": "9ab8a12ca9b7809294b787ac9de34008a2d8e0e4ec43ec73469c4f4c1a143d43",
+      "byte_identical": true,
+      "baseline_bytes": 191,
+      "fresh_bytes": 191
+    },
+    {
+      "component": "BaseTextRoot",
+      "path": "src/lib.rs",
+      "baseline_sha256": "ae217373a848e2fb26ebaf672d5bace564fda6a1430a62796e3827faf8886d09",
+      "fresh_sha256": "ae217373a848e2fb26ebaf672d5bace564fda6a1430a62796e3827faf8886d09",
+      "byte_identical": true,
+      "baseline_bytes": 16303,
+      "fresh_bytes": 16303
+    },
+    {
+      "component": "CreatedFailure",
+      "path": "Cargo.toml",
+      "baseline_sha256": "e1ee8ca3fc35cb5c8e5486cfc1ec960dc294a7349b3b85d7e0b3cb9e93bf6ccc",
+      "fresh_sha256": "e1ee8ca3fc35cb5c8e5486cfc1ec960dc294a7349b3b85d7e0b3cb9e93bf6ccc",
+      "byte_identical": true,
+      "baseline_bytes": 193,
+      "fresh_bytes": 193
+    },
+    {
+      "component": "CreatedFailure",
+      "path": "src/lib.rs",
+      "baseline_sha256": "06b59def2d6c104c71e358c0a21f9d7d9d59d7fdab64eed0dc120dc5a9bd3536",
+      "fresh_sha256": "06b59def2d6c104c71e358c0a21f9d7d9d59d7fdab64eed0dc120dc5a9bd3536",
+      "byte_identical": true,
+      "baseline_bytes": 2924,
+      "fresh_bytes": 2924
+    },
+    {
+      "component": "CreatedWatch",
+      "path": "Cargo.toml",
+      "baseline_sha256": "d57f5e588c0db4f0dd85287c43c63679eb3d9446f8c8ab712e320a18fe405494",
+      "fresh_sha256": "d57f5e588c0db4f0dd85287c43c63679eb3d9446f8c8ab712e320a18fe405494",
+      "byte_identical": true,
+      "baseline_bytes": 191,
+      "fresh_bytes": 191
+    },
+    {
+      "component": "CreatedWatch",
+      "path": "src/lib.rs",
+      "baseline_sha256": "24373012c8ce193a4099fc68474bf7209fddb751279ad72e1f152ef5c503517d",
+      "fresh_sha256": "24373012c8ce193a4099fc68474bf7209fddb751279ad72e1f152ef5c503517d",
+      "byte_identical": true,
+      "baseline_bytes": 10351,
+      "fresh_bytes": 10351
+    },
+    {
+      "component": "EmptyRoot",
+      "path": "Cargo.toml",
+      "baseline_sha256": "d426d008fbffadd05f875882fecbe25d81d1b173f683013486bee51fe9b8fc51",
+      "fresh_sha256": "d426d008fbffadd05f875882fecbe25d81d1b173f683013486bee51fe9b8fc51",
+      "byte_identical": true,
+      "baseline_bytes": 188,
+      "fresh_bytes": 188
+    },
+    {
+      "component": "EmptyRoot",
+      "path": "src/lib.rs",
+      "baseline_sha256": "5841dc243894b9c0dd89fa0d80c4c839bc785c82293400cd2033fa79c17579b5",
+      "fresh_sha256": "5841dc243894b9c0dd89fa0d80c4c839bc785c82293400cd2033fa79c17579b5",
+      "byte_identical": true,
+      "baseline_bytes": 2129,
+      "fresh_bytes": 2129
+    },
+    {
+      "component": "EscapedText",
+      "path": "Cargo.toml",
+      "baseline_sha256": "f126a36604f5c582afc2be0b056984f00437c13327a660854da260020a57c96e",
+      "fresh_sha256": "f126a36604f5c582afc2be0b056984f00437c13327a660854da260020a57c96e",
+      "byte_identical": true,
+      "baseline_bytes": 190,
+      "fresh_bytes": 190
+    },
+    {
+      "component": "EscapedText",
+      "path": "src/lib.rs",
+      "baseline_sha256": "b972da5c02224972cd199dd21bc115dcfd68f75f43abd48b0f0ce7173db5d342",
+      "fresh_sha256": "b972da5c02224972cd199dd21bc115dcfd68f75f43abd48b0f0ce7173db5d342",
+      "byte_identical": true,
+      "baseline_bytes": 2396,
+      "fresh_bytes": 2396
+    },
+    {
+      "component": "GpuiCounter",
+      "path": "Cargo.toml",
+      "baseline_sha256": "6f7cef34fd4c6c93125d3bbee09109c9470230f866b39bcbfc6aa175c59e09f9",
+      "fresh_sha256": "6f7cef34fd4c6c93125d3bbee09109c9470230f866b39bcbfc6aa175c59e09f9",
+      "byte_identical": true,
+      "baseline_bytes": 190,
+      "fresh_bytes": 190
+    },
+    {
+      "component": "GpuiCounter",
+      "path": "src/lib.rs",
+      "baseline_sha256": "96416ee150bf2cadf68e6b12aefeb9a58d1a2aaaa1a04dadfb8a5eab25b075cd",
+      "fresh_sha256": "96416ee150bf2cadf68e6b12aefeb9a58d1a2aaaa1a04dadfb8a5eab25b075cd",
+      "byte_identical": true,
+      "baseline_bytes": 6549,
+      "fresh_bytes": 6549
+    },
+    {
+      "component": "GpuiExpandedPinned",
+      "path": "Cargo.toml",
+      "baseline_sha256": "f28208883ff2ac94954a498bce61b36dc67f57dba7e377cf20e164fb28e39fbf",
+      "fresh_sha256": "f28208883ff2ac94954a498bce61b36dc67f57dba7e377cf20e164fb28e39fbf",
+      "byte_identical": true,
+      "baseline_bytes": 288,
+      "fresh_bytes": 288
+    },
+    {
+      "component": "GpuiExpandedPinned",
+      "path": "src/lib.rs",
+      "baseline_sha256": "b78f2fb1b79f59e2079f66daf0ecfdec9609c680043f874a2947d000270e29ba",
+      "fresh_sha256": "b78f2fb1b79f59e2079f66daf0ecfdec9609c680043f874a2947d000270e29ba",
+      "byte_identical": true,
+      "baseline_bytes": 12098,
+      "fresh_bytes": 12098
+    },
+    {
+      "component": "GpuiPinned",
+      "path": "Cargo.toml",
+      "baseline_sha256": "a14b1fab2911cd191e98c53b30a83d5c5499bf04a66060718e97af7b4fcbbf1f",
+      "fresh_sha256": "a14b1fab2911cd191e98c53b30a83d5c5499bf04a66060718e97af7b4fcbbf1f",
+      "byte_identical": true,
+      "baseline_bytes": 280,
+      "fresh_bytes": 280
+    },
+    {
+      "component": "GpuiPinned",
+      "path": "src/lib.rs",
+      "baseline_sha256": "568c1c2e3fb00d5742c5a8df4635aba52138fa9b2b183d1349083d418e93e4aa",
+      "fresh_sha256": "568c1c2e3fb00d5742c5a8df4635aba52138fa9b2b183d1349083d418e93e4aa",
+      "byte_identical": true,
+      "baseline_bytes": 6539,
+      "fresh_bytes": 6539
+    },
+    {
+      "component": "InvokeReturn",
+      "path": "Cargo.toml",
+      "baseline_sha256": "0625b93f4de58705bc7c30a3488dce7f2edb38ba02c7b75e35734380e6688d6a",
+      "fresh_sha256": "0625b93f4de58705bc7c30a3488dce7f2edb38ba02c7b75e35734380e6688d6a",
+      "byte_identical": true,
+      "baseline_bytes": 191,
+      "fresh_bytes": 191
+    },
+    {
+      "component": "InvokeReturn",
+      "path": "src/lib.rs",
+      "baseline_sha256": "6dead2ac0d56fc935e9b85b2aafcbd1ac197b022942200822d4ae153c2269286",
+      "fresh_sha256": "6dead2ac0d56fc935e9b85b2aafcbd1ac197b022942200822d4ae153c2269286",
+      "byte_identical": true,
+      "baseline_bytes": 3846,
+      "fresh_bytes": 3846
+    },
+    {
+      "component": "NumericPolicy",
+      "path": "Cargo.toml",
+      "baseline_sha256": "b68c05c1ef43599e6aa36b19e7b4d657d7a50de8f93af49251ec874996661734",
+      "fresh_sha256": "b68c05c1ef43599e6aa36b19e7b4d657d7a50de8f93af49251ec874996661734",
+      "byte_identical": true,
+      "baseline_bytes": 192,
+      "fresh_bytes": 192
+    },
+    {
+      "component": "NumericPolicy",
+      "path": "src/lib.rs",
+      "baseline_sha256": "40ea00d14637d1a9f653b29c302af0f46d8b80a55d3679774ae33c39bcda4b73",
+      "fresh_sha256": "40ea00d14637d1a9f653b29c302af0f46d8b80a55d3679774ae33c39bcda4b73",
+      "byte_identical": true,
+      "baseline_bytes": 5908,
+      "fresh_bytes": 5908
+    },
+    {
+      "component": "NumericState",
+      "path": "Cargo.toml",
+      "baseline_sha256": "ed2528d0499940a1eff105be1a55e15aabd071f4d5cbdf8154d9bb450eed3ca5",
+      "fresh_sha256": "ed2528d0499940a1eff105be1a55e15aabd071f4d5cbdf8154d9bb450eed3ca5",
+      "byte_identical": true,
+      "baseline_bytes": 191,
+      "fresh_bytes": 191
+    },
+    {
+      "component": "NumericState",
+      "path": "src/lib.rs",
+      "baseline_sha256": "afbaf81d5e7da9686b49c931f89af0b70bb87448b2c402faab68c854d6c8697f",
+      "fresh_sha256": "afbaf81d5e7da9686b49c931f89af0b70bb87448b2c402faab68c854d6c8697f",
+      "byte_identical": true,
+      "baseline_bytes": 4726,
+      "fresh_bytes": 4726
+    },
+    {
+      "component": "PropsMatrix",
+      "path": "Cargo.toml",
+      "baseline_sha256": "c797643f09e1f9b18d992c79862b94802f8bf2c2b21365c756fd3277325cb945",
+      "fresh_sha256": "c797643f09e1f9b18d992c79862b94802f8bf2c2b21365c756fd3277325cb945",
+      "byte_identical": true,
+      "baseline_bytes": 190,
+      "fresh_bytes": 190
+    },
+    {
+      "component": "PropsMatrix",
+      "path": "src/lib.rs",
+      "baseline_sha256": "87703339fca79053ae2da4ec69601dfa7f00fcb2ea73bf1f82191673bb3ab154",
+      "fresh_sha256": "87703339fca79053ae2da4ec69601dfa7f00fcb2ea73bf1f82191673bb3ab154",
+      "byte_identical": true,
+      "baseline_bytes": 7114,
+      "fresh_bytes": 7114
+    },
+    {
+      "component": "RequiredProp",
+      "path": "Cargo.toml",
+      "baseline_sha256": "e98aa9ef1e8aa34024b25eb4191c13801288e767606f2477124ed5fccb6fa135",
+      "fresh_sha256": "e98aa9ef1e8aa34024b25eb4191c13801288e767606f2477124ed5fccb6fa135",
+      "byte_identical": true,
+      "baseline_bytes": 191,
+      "fresh_bytes": 191
+    },
+    {
+      "component": "RequiredProp",
+      "path": "src/lib.rs",
+      "baseline_sha256": "d73078d9511c204df79c6adec0bbc2619e3bc8ae34fe7afe26e9bceb3833f15e",
+      "fresh_sha256": "d73078d9511c204df79c6adec0bbc2619e3bc8ae34fe7afe26e9bceb3833f15e",
+      "byte_identical": true,
+      "baseline_bytes": 3646,
+      "fresh_bytes": 3646
+    },
+    {
+      "component": "RuleScheduling",
+      "path": "Cargo.toml",
+      "baseline_sha256": "c2c196ecf00c615b641113e1df557674af19fdc7e598aa40404debd4441cff95",
+      "fresh_sha256": "c2c196ecf00c615b641113e1df557674af19fdc7e598aa40404debd4441cff95",
+      "byte_identical": true,
+      "baseline_bytes": 193,
+      "fresh_bytes": 193
+    },
+    {
+      "component": "RuleScheduling",
+      "path": "src/lib.rs",
+      "baseline_sha256": "1ec46d280064e5f5d345c79182016c870c01f09eca692572250189df99edec8f",
+      "fresh_sha256": "1ec46d280064e5f5d345c79182016c870c01f09eca692572250189df99edec8f",
+      "byte_identical": true,
+      "baseline_bytes": 4017,
+      "fresh_bytes": 4017
+    },
+    {
+      "component": "SlotHost",
+      "path": "Cargo.toml",
+      "baseline_sha256": "0f2124c201ddc4ed74b03e47212a2e4d91aa078ecbf0a049e07809060538a893",
+      "fresh_sha256": "0f2124c201ddc4ed74b03e47212a2e4d91aa078ecbf0a049e07809060538a893",
+      "byte_identical": true,
+      "baseline_bytes": 187,
+      "fresh_bytes": 187
+    },
+    {
+      "component": "SlotHost",
+      "path": "src/lib.rs",
+      "baseline_sha256": "b11d1ab3ee1d08b01885c5d46016386ac506719af77e2bbc7d51be93fbfbea54",
+      "fresh_sha256": "b11d1ab3ee1d08b01885c5d46016386ac506719af77e2bbc7d51be93fbfbea54",
+      "byte_identical": true,
+      "baseline_bytes": 6057,
+      "fresh_bytes": 6057
+    },
+    {
+      "component": "UpdateScheduling",
+      "path": "Cargo.toml",
+      "baseline_sha256": "d04188559995b5f9c97b8c71ad7dc515697a88f6dcc77764f8aebbe0b4456d03",
+      "fresh_sha256": "d04188559995b5f9c97b8c71ad7dc515697a88f6dcc77764f8aebbe0b4456d03",
+      "byte_identical": true,
+      "baseline_bytes": 195,
+      "fresh_bytes": 195
+    },
+    {
+      "component": "UpdateScheduling",
+      "path": "src/lib.rs",
+      "baseline_sha256": "6ff947d77c65a667dee02a309cb908d35ae28411ce53070f465eeb5663c8c3bd",
+      "fresh_sha256": "6ff947d77c65a667dee02a309cb908d35ae28411ce53070f465eeb5663c8c3bd",
+      "byte_identical": true,
+      "baseline_bytes": 3964,
+      "fresh_bytes": 3964
+    }
+  ],
+  "source_sha256": {
+    "packages/compiler/src/frontend/bindings.ts": "643fe05aaf49442aa2f96822eb2370043bf60db6d77a5349faf08a2fb682946b",
+    "packages/compiler/src/frontend/constants.ts": "670590cb9cbf8b076075ab8f7daf9e24979a6d41a51fa9a3734030dd07c70d93",
+    "packages/compiler/src/frontend/syntax.ts": "16c49c4233475c8a0c0e3884ee741a26a0d44e3883de353be2d5d9a6343ae4b6",
+    "packages/compiler/src/frontend/actions.ts": "e98bc61735ddc4ffef0ae4add38be9914088cc55497c795c4d6176f30c9067d3",
+    "packages/compiler/src/frontend/extract.ts": "422ae587c0aecc080a88a7f90a7030445571b67993e1fbe8be177f9ef45fb289",
+    "packages/compiler/src/frontend/template.ts": "99f97dd46bfb7ac4d15bf42e8964d7861a7ab35cca359da13608e8ad4073225c",
+    "packages/compiler/src/frontend/rules.ts": "f5655054ba2821e9e04a817a1ff2c252b4ac539fef61af55c86deccd80d54f4a",
+    "packages/compiler/src/targets/gpui.ts": "e3b7c3254e0e78af99dbcf3b0fadbc3fe082b6fc0c613df56937f4bb7675d95b",
+    "packages/compiler/native/rust-builder/src/main.rs": "ab077a8251aa8f9818b1ce8c5e2b12f9570a0f3dc7185b704aa5af8bea7b2a38",
+    "packages/compiler/native/rust-builder/Cargo.toml": "69df3d2943090c306db22104ab1100a82cf89b2d0c37808178f8dfbb0922dcd2",
+    "packages/compiler/native/rust-builder/Cargo.lock": "f15be8319b7af506f6c01dc41c5dbe45703b110b02054c3a295de9ffc07387a9",
+    "packages/compiler/test/gpui-ast-codegen.test.ts": "1c8ccfd7d5c3ca408caee26513d5ce1344618d4028448a1d5fcf740f33297568"
+  },
+  "source_hashes_stable": true,
+  "all_byte_identical": true,
+  "reused_native_receipt": "packages/compiler/native/rust-builder/test-support/evidence/continuation-20261125-fork-native.txt",
+  "reused_native_tests": 13,
+  "native_tests_rerun": false
+}

@@ -1,0 +1,48 @@
+{
+  "recorded_utc": "2026-11-25T01:47:41.146201+00:00",
+  "initialization_test": "packages/compiler/test/initialization-proof.test.ts",
+  "initialization_tests": {
+    "passed": 20,
+    "failed": 0,
+    "skipped": 0,
+    "rejection_cases": 15,
+    "positive_controls": 5
+  },
+  "initialization_test_sha256": "d91bec56e2f3b35507bb01e3973f78d10ebd7ed69b9a9c39fcd8593254269ffc",
+  "original_reproductions": {
+    "source_type_errors": 0,
+    "incorrect_acceptances_before_fix": 7,
+    "explicit_rejections_after_fix": 7
+  },
+  "supplemental_controls": {
+    "cases": 10,
+    "mismatches": 0,
+    "accepted": 4,
+    "rejected": 6
+  },
+  "style_alias_regression_before_fix": {
+    "passed": 17,
+    "failed": 3,
+    "total": 20
+  },
+  "gpui_ast_tests": {
+    "passed": 10,
+    "failed": 0,
+    "skipped": 0
+  },
+  "gpui_artifact_identity": {
+    "components": 17,
+    "files": 34,
+    "byte_identical": true,
+    "missing": 0,
+    "extra": 0
+  },
+  "native_continuity": {
+    "previous_native_tests": 13,
+    "native_tests_rerun": false,
+    "golden_files_changed": false,
+    "basis": "byte-identical generated source and manifests"
+  },
+  "admission_limit": "Callback captures initialized only after registration remain explicitly unsupported.",
+  "frontend_and_gpui_changes_by_reviewer": false
+}

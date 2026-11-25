@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { detectLlvmToolchain, runCompilerCli } from '../src';
+import { createCompiler, detectLlvmToolchain, runCompilerCli } from '../src';
 
 const source = `import {definePrototype} from '@proto.ui/core';
 export default definePrototype({name:'cli-label',setup(){return r=>r.el('div','compiled');}});`;
@@ -18,6 +18,15 @@ function fixture(action: (directory: string, entry: string) => void) {
 }
 
 describe('Native compiler CLI', () => {
+  it('rejects an unknown API target instead of treating it as semantic IR output', () => {
+    const result = createCompiler({ rootDir: process.cwd() }).compilePrototype(source, {
+      target: 'retired-profile' as never,
+    });
+    expect(result.ok).toBe(false);
+    expect(
+      result.diagnostics.some((issue) => issue.code === 'PUI_TARGET_INVALID' && issue.span)
+    ).toBe(true);
+  });
   it('reports target and toolchain identity', () => {
     const result = runCompilerCli(['info']);
     expect(result.exitCode).toBe(0);

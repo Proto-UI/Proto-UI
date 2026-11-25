@@ -6,6 +6,7 @@ since: 0.3.0
 lifecycleRationale: >-
   Maps acceptance for the current-user correction of #1809 to a semantic compiler with no source-template generation or prototype-runtime fallback. Earlier passing mappings described the 73ff2847 wrapper/metadata snapshot and are not inherited as evidence for this contract. Required native corpus, regression, and consumer coverage remains explicit debt; individual mappings may become passing only after their revised executable tests are run and reviewed.
 
+
 summary: Separate behavioral compilation evidence from analysis, coverage reporting, kernel output, and real consumer acceptance.
 cases:
   - id: T-COMPILER-PIPELINE-0001-CASE-HIR
@@ -86,6 +87,69 @@ implementations:
       - Covers canonical factory aliases and setup-handle aliases, proven pure initializers versus unproven external calls, callback control flow, dynamic setup and rule effects rejected without erasure, default precedence, lifecycle/watch bodies, both helper return branches, and floating-point negation.
       - Additional regression cases retain unresolved definitions in the inventory denominator, resolve immutable local factory aliases and quoted setup keys, bind shadowed state symbols, preserve return completion, reject mutable-function constant folding, and retain executable module initializers as explicit unsupported behavior.
       - This test record does not establish full helper/Hook composition, closure/ownership semantics, or complete Base/family coverage.
+  - id: compiler-semantic-composition
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/composition-hir.test.ts
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-HIR
+    notes:
+      - The current 18 cases cover expression-bodied setup, empty/array/slot templates, canonical once-hook aliases, per-invocation scalar options/defaults, static branches and styles, helper argument snapshots/return scope, props snapshots and transitive authored module effects.
+      - Callback default-parameter effects in lifecycle/events/watch and generator/async rule intent are explicitly rejected. This evidence does not grant unsupported effects ordinary synchronous execution semantics.
+  - id: compiler-initialization-proof
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/initialization-proof.test.ts
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-HIR
+      - T-COMPILER-PIPELINE-0001-CASE-SSA-OPT
+    notes:
+      - All 20 actual TypeScript cases passed with no source diagnostics, including 15 rejection controls and 5 positive controls. Original independent reproductions were rerun after the fix.
+      - Checks module/setup/callback TDZ, const callee and alias initialization, ambient global reads, direct and hoisted-function-mediated cyclic module reads, unreachable captured declarations, and style-intrinsic aliases in render/rule/setup helpers. Initialized captures, hoisted functions, safe aliases and ordinary action helpers remain accepted.
+      - A local captured only after callback registration remains conservatively unsupported until setup-exit initialization proof is represented; this rejects a valid subset explicitly instead of treating all source positions as completed.
+  - id: compiler-action-update-order
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/action-flow.test.ts
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-HIR
+    notes:
+      - The three shared admission tests check path-sensitive terminal requests, helper return boundaries, and concatenated callback groups. Target tests additionally reject multiple or early updates across same-event handlers and watcher/lifecycle ordering.
+      - Full synchronous-first-read and in-flight commit scheduling remains unimplemented; passing this bounded admission check does not complete that obligation.
+  - id: compiler-actual-base-source-slice
+    kind: runtime-test
+    status: passing
+    path: packages/compiler/test/real-base-react.test.ts
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-THIN-REACT
+    notes:
+      - Three source-driven React tests compile the real Text/Surface definitions, execute their props/children and fallback behavior, and reject a composite Base button whose required capabilities remain unsupported.
+      - Matching GPUI source and native tests and the browser Worker exercise the same unchanged authored sources. This bounded slice does not satisfy CASE-BASE-CORPUS or a full application migration.
+  - id: compiler-browser-memory-program
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/browser-ast.test.ts
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-HIR
+      - T-COMPILER-PIPELINE-0001-CASE-CONSUMERS
+    notes:
+      - Five memory-host tests check actual TypeScript binding and shared HIR/React lowering, build-owned core/types/lib sources, editable path and intrinsic-identity protection, and explicit unsupported/invalid diagnostics without evaluating authored modules.
+  - id: compiler-browser-native-react
+    kind: runtime-test
+    status: passing
+    path: scripts/compiler/browser-ast-smoke.mjs
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-THIN-REACT
+      - T-COMPILER-PIPELINE-0001-CASE-CONSUMERS
+    notes:
+      - Seven actual Chrome cases execute the real Worker and isolated native React preview, including Base Text/Surface, edit/recompile, state-only versus explicit update, module-effect rejection, unsupported GPUI clearing stale output, digest rejection and cancel/reopen cleanup.
+      - Current source requests, generated TS/JS, actual DOM, build fingerprints and raw receipts are retained at packages/compiler/evidence/browser-ast-20261125/README.md. This is bounded browser compiler execution, not a full deployed docs-route or non-React target claim.
   - id: compiler-ssa-ir-unit
     kind: module-test
     status: passing
@@ -135,11 +199,11 @@ implementations:
     consumesCases:
       - T-COMPILER-PIPELINE-0001-CASE-THIN-REACT
     notes:
-      - The revised file passed 10 of 10 tests in the isolated worktree on 2026-11-25; generated modules underwent strict TypeScript checking and React 19/happy-dom execution, with an import allowlist containing only React.
+      - The current revised file passed 11 of 11 tests in the isolated worktree on 2026-11-25; generated modules underwent strict TypeScript checking and React 19/happy-dom execution, with an import allowlist containing only React.
       - Covers props updates and prevValid, missing/empty/error fallback, native keyboard callbacks with local/if/else/return and synchronous state reads, listener cleanup, static/rule styles, signed-zero/text literals, and explicit unsupported diagnostics.
       - Also covers created before the first render, actual React StrictMode detach/remount preserving state, resolved watcher hydration skipping and FIFO/current/previous/batched-change semantics, synchronous watcher state writes before updated callbacks, Object.is signed-zero changes, finite gte rules, and semantic style-token merging.
       - Nullable current/previous props retain native primitive arithmetic, string concatenation and comparison, nullish right-hand values, and signed-zero unary semantics through AST-generated helpers.
-      - Hook/context/expose, global or unsupported events, dynamic render, non-scalar props, before-dispose, and raw props subscriptions remain unsupported; this record does not claim full prototype coverage.
+      - Unexpanded/builtin hooks, context/expose, global or unsupported events, dynamic render, non-scalar props, before-dispose, and raw props subscriptions remain unsupported; this record does not claim full prototype coverage.
   - id: compiler-gpui-ast-output
     kind: module-test
     status: passing
@@ -148,8 +212,8 @@ implementations:
     consumesCases:
       - T-COMPILER-PIPELINE-0001-CASE-GPUI
     notes:
-      - The revised AST target suite passed 5 of 5 tests in the isolated worktree on 2026-11-25, using the actual syn/prettyplease builder with authored control flow, typed raw/resolved props, numeric edge cases, safe literals, and explicit unsupported diagnostics.
-      - The final formatted driver was rebuilt with a new cold cache key and the six generated fixture crates retained identical printer output; raw logs are retained under packages/compiler/native/rust-builder/test-support/evidence.
+      - The expanded AST target suite passed 10 of 10 tests in the isolated worktree on 2026-11-25, using the actual syn/prettyplease builder with authored control flow, typed raw/resolved props, numeric edge cases, safe literals, and explicit unsupported diagnostics.
+      - Source-to-HIR-to-Rust checks include unchanged official Base Text and Surface, host Root versus template structure, native slots, created/watch actions, numeric state policies and explicit update admission. Current hashes and logs are retained under packages/compiler/native/rust-builder/test-support/evidence/continuation-20261125-summary.md; older six-fixture receipts remain historical.
       - AST generation is recorded separately from native Cargo execution and real application integration.
   - id: compiler-gpui-native-output
     kind: runtime-test
@@ -159,8 +223,8 @@ implementations:
     consumesCases:
       - T-COMPILER-PIPELINE-0001-CASE-GPUI
     notes:
-      - The generated-component workspace passed cargo +1.98.1 check --workspace --all-targets and 6 native tests with no skips on 2026-11-25, using the actual Verdant fork cyjin-yl/z3rm at e5f2f9db75e97613232b5c1946333e61fa3828ab.
-      - Covers real native clicks changing state 0 to 1 to 0.5, boolean toggles, Render entering the GPUI text-layout system, props updates and fallback history, instance isolation, signed zero/Infinity/NaN behavior, safe text, and handler order with error abort. Layout observations do not claim pixel output or accessibility-tree acceptance.
+      - The generated-component workspace passed cargo +1.98.1 check --workspace --all-targets --locked and 13 native tests with no skips on 2026-11-25, using the actual Verdant fork cyjin-yl/z3rm at e5f2f9db75e97613232b5c1946333e61fa3828ab.
+      - Covers actual Base Text/Surface, independent host Root and templates, Text/AnyView slot identity and final release, bubbling input, created and resolved-watch ordering, explicit update versus state-only writes, immediate rule paint with unchanged template text, props/default/empty/prevValid, instance isolation and numeric domains. A throwing watcher preserves earlier live effects and resolved props, aborts later watchers and retains the prior template snapshot. Layout and paint observations do not claim full screenshot or accessibility-tree acceptance.
       - This is an isolated native harness against the consumer dependency. Full Verdant application migration remains required separately, and Shenko remains a React/Web consumer.
   - id: compiler-gpui-upstream-pin
     kind: module-test
@@ -170,7 +234,7 @@ implementations:
     consumesCases:
       - T-COMPILER-PIPELINE-0001-CASE-GPUI
     notes:
-      - The actual generated GpuiPinned crate passed cargo +1.98.1 check against upstream GPUI 62e5991 on 2026-11-25, followed by a successful --locked check using its recorded manifest and lockfile.
+      - The expanded generated native workspace passed cargo +1.98.1 check --workspace --all-targets --locked against upstream GPUI 62e5991dd0f0c8a3af8d5e7e9c4652490d468db8 on 2026-11-25 using the recorded manifest and lockfile; the earlier single GpuiPinned crate check remains historical.
       - This is independent build evidence for the default upstream pin. It does not inherit the different Verdant fork's native execution result or establish real consumer migration.
   - id: compiler-corpus-report
     kind: module-test
@@ -181,7 +245,7 @@ implementations:
       - T-COMPILER-PIPELINE-0001-CASE-COVERAGE-REPORT
     notes:
       - The revised coverage-report test passed in the isolated worktree on 2026-11-25, enumerating every official Base input and checking declared/unsupported/source-error accounting, explicit failure diagnostics, incomplete native coverage, and zero execution claims.
-      - The final actual React and GPUI inventories each analyzed 184 files, identified 212 prototypes and 214 authored Hooks, emitted 0 of 212 prototypes natively, and reported 212 unsupported prototypes with 0 source-error files and 0 execution-verified prototypes. Each target has 179 unsupported files and 5 hook-analysis files; the summary is retained at packages/compiler/evidence/ast-pipeline-20261125/base-inventory-summary.json.
+      - The final actual React and GPUI inventories each analyzed 184 files, identified 212 prototypes and 214 authored Hooks, emitted 2 of 212 prototypes natively (Text and Surface), and reported 210 unsupported prototypes with 0 source-error files and 0 execution-verified prototypes. Each target has 2 emitted files, 177 unsupported files and 5 hook-analysis files; the final summary is retained at packages/compiler/evidence/continuation-20261125/base-inventory-summary.json. The older 0/212 result retains its separate historical receipt.
       - A correct report may include unsupported components and does not satisfy the separate full native corpus case.
   - id: compiler-base-shadcn-corpus
     kind: runtime-test
@@ -190,7 +254,7 @@ implementations:
     consumesCases:
       - T-COMPILER-PIPELINE-0001-CASE-BASE-CORPUS
     notes:
-      - The old 184/184 report included runtime-wrapper generation. The current actual React and GPUI inventories both emit 0 of 212 official Base prototypes natively. Full native lowering and behavior evidence remains required.
+      - The old 184/184 report included runtime-wrapper generation. The current actual React and GPUI inventories both emit 2 of 212 official Base prototypes natively; the remaining 210 remain unsupported. Full native lowering and behavior evidence remains required.
   - id: compiler-native-assets
     kind: module-test
     status: passing
@@ -218,8 +282,8 @@ implementations:
     consumesCases:
       - T-COMPILER-PIPELINE-0001-CASE-CLI
     notes:
-      - All 5 revised CLI tests passed with no skips in the final isolated-worktree integration run on 2026-11-25. They cover target/toolchain identity, option position and invalid combinations, React without LLVM, explicit missing-toolchain failures, output/input overwrite protection, no output after unsupported source failure, and a real requested optimized LLVM module.
-      - The final compiler integration run passed 12 Vitest files and 61 tests with zero failures or skips. The 6 GPUI native Rust tests and independent Cargo checks are separate evidence; neither total is a full native corpus or application-migration claim.
+      - All 6 revised CLI tests passed with no skips in the final isolated-worktree integration run on 2026-11-25. They cover target/toolchain identity, option position and invalid combinations, React without LLVM, explicit missing-toolchain failures, output/input overwrite protection, no output after unsupported source failure, a real requested optimized LLVM module, and invalid target rejection through the public API. Independent source/installed CLI controls additionally check symlink paths, concurrent exclusive publication and explicit overwrite semantics.
+      - The final current compiler run is recorded by exact suite/test counts and source hashes under packages/compiler/evidence/continuation-20261125. The earlier 12-file/61-test result belongs to 59c18246 and is not inherited. The current 13 GPUI native Rust tests and independent Cargo checks are separate evidence; none of these totals establishes full corpus or application migration.
 verifies:
   decisions:
     - id: D-COMPILER-ARCH-0001
@@ -258,7 +322,7 @@ revisions:
     summary: Mapped the five executable Vitest suites validating the #1809 v2 compiler pipeline (SSA IR, LLVM 22/WASM, 3-tier React, full Base corpus, and CLI).
   - version: 0.3.0
     change: refined
-    summary: Refined acceptance mappings for the AST/IRBuilder compiler; historical wrapper-based passing evidence is not inherited, and GPUI structured component generation is a current required track, and coverage reporting is separate from required full native corpus and consumer migration evidence.
+    summary: Refined AST/IRBuilder acceptance with semantic composition and initialization proof, shared update admission, actual Base Text/Surface, native GPUI and browser execution, safe CLI publication and retained full-corpus/real-consumer obligations. Historical wrapper and earlier snapshot results are not inherited.
 tags:
   - compiler
   - hir

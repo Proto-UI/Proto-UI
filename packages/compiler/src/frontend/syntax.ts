@@ -2,7 +2,13 @@ import ts from 'typescript';
 import type { SourceSpan } from '../diagnostics';
 import type { ScalarLiteral } from '../ir';
 import { evaluateStaticScalar } from './constants';
-import { hasBindingWrites, isConstDeclaration } from './bindings';
+import {
+  hasBindingWrites,
+  isConstDeclaration,
+  atExecutionPoint,
+  isBindingInitialized,
+  type InitializationPoints,
+} from './bindings';
 
 export function spanOf(node: ts.Node, sf: ts.SourceFile): SourceSpan {
   const start = sf.getLineAndCharacterOfPosition(node.getStart(sf));
@@ -25,6 +31,7 @@ export function unwrapExpr(expr: ts.Expression): ts.Expression {
   while (
     ts.isParenthesizedExpression(cur) ||
     ts.isAsExpression(cur) ||
+    ts.isTypeAssertionExpression(cur) ||
     ts.isSatisfiesExpression(cur) ||
     ts.isNonNullExpression(cur)
   ) {
@@ -40,25 +47,55 @@ export function extractScalarLiteral(
   return evaluateStaticScalar(expr, checker);
 }
 
+export function isKnownUndefined(expr: ts.Expression, checker: ts.TypeChecker): boolean {
+  const value = unwrapExpr(expr);
+  return (
+    (ts.isIdentifier(value) &&
+      value.text === 'undefined' &&
+      !checker.getSymbolAtLocation(value)?.valueDeclaration) ||
+    (ts.isVoidExpression(value) && evaluateStaticScalar(value.expression, checker) !== undefined)
+  );
+}
+
 export function resolveAliasedSymbol(
   checker: ts.TypeChecker,
   sym: ts.Symbol | undefined
 ): ts.Symbol | undefined {
-  if (!sym) return undefined;
-  return sym.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(sym) : sym;
+  const visited = new Set<ts.Symbol>();
+  while (sym && !visited.has(sym)) {
+    visited.add(sym);
+    if (sym.flags & ts.SymbolFlags.Alias) {
+      sym = checker.getAliasedSymbol(sym);
+      continue;
+    }
+    const declaration = sym.valueDeclaration;
+    if (declaration && ts.isShorthandPropertyAssignment(declaration)) {
+      const value = checker.getShorthandAssignmentValueSymbol(declaration);
+      if (value && value !== sym) {
+        sym = value;
+        continue;
+      }
+    }
+    return sym;
+  }
+  return undefined;
 }
 
 export function resolveCallName(
   expr: ts.Expression,
   checker: ts.TypeChecker,
-  visited = new Set<ts.Symbol>()
+  visited = new Set<ts.Symbol>(),
+  initializationPoints: InitializationPoints = new Map()
 ): { name: string; sourceFile?: string } | undefined {
   const e = unwrapExpr(expr);
+  const points = atExecutionPoint(e, initializationPoints);
   const sym = resolveAliasedSymbol(checker, checker.getSymbolAtLocation(e));
   if (sym) {
     if (visited.has(sym)) return undefined;
     visited.add(sym);
     const decl = sym.valueDeclaration ?? sym.declarations?.[0];
+    if (decl && ts.isVariableDeclaration(decl) && !isBindingInitialized(decl, points, checker))
+      return undefined;
     if (
       decl &&
       ts.isVariableDeclaration(decl) &&
@@ -67,7 +104,7 @@ export function resolveCallName(
       (ts.isIdentifier(unwrapExpr(decl.initializer)) ||
         ts.isPropertyAccessExpression(unwrapExpr(decl.initializer)))
     ) {
-      return resolveCallName(decl.initializer, checker, visited);
+      return resolveCallName(decl.initializer, checker, visited, points);
     }
     return { name: sym.getName(), sourceFile: decl?.getSourceFile().fileName };
   }
@@ -79,14 +116,16 @@ export function findFactoryCall(
   expr: ts.Expression,
   checker: ts.TypeChecker,
   factoryNames: readonly string[],
-  visited = new Set<ts.Node>()
+  visited = new Set<ts.Node>(),
+  initializationPoints: InitializationPoints = new Map()
 ): { call: ts.CallExpression; factory: string } | undefined {
   const e = unwrapExpr(expr);
+  const points = atExecutionPoint(e, initializationPoints);
   if (visited.has(e)) return undefined;
   visited.add(e);
 
   if (ts.isCallExpression(e)) {
-    const resolved = resolveCallName(e.expression, checker);
+    const resolved = resolveCallName(e.expression, checker, new Set(), points);
     if (resolved && factoryNames.includes(resolved.name) && isCoreIntrinsic(resolved)) {
       return { call: e, factory: resolved.name };
     }
@@ -94,8 +133,14 @@ export function findFactoryCall(
   if (ts.isIdentifier(e)) {
     const sym = resolveAliasedSymbol(checker, checker.getSymbolAtLocation(e));
     const decl = sym?.valueDeclaration ?? sym?.declarations?.[0];
-    if (decl && ts.isVariableDeclaration(decl) && decl.initializer) {
-      return findFactoryCall(decl.initializer, checker, factoryNames, visited);
+    if (
+      decl &&
+      ts.isVariableDeclaration(decl) &&
+      isConstDeclaration(decl) &&
+      decl.initializer &&
+      isBindingInitialized(decl, points, checker)
+    ) {
+      return findFactoryCall(decl.initializer, checker, factoryNames, visited, points);
     }
   }
   return undefined;
@@ -109,9 +154,14 @@ export function isCoreIntrinsic(binding: { sourceFile?: string }): boolean {
 
 export function resolveFunctionLike(
   expr: ts.Expression,
-  checker: ts.TypeChecker
+  checker: ts.TypeChecker,
+  initializationPoints: InitializationPoints = new Map(),
+  visited = new Set<ts.Node>()
 ): ts.FunctionLikeDeclaration | undefined {
   const e = unwrapExpr(expr);
+  const points = atExecutionPoint(e, initializationPoints);
+  if (visited.has(e)) return undefined;
+  visited.add(e);
   if (ts.isArrowFunction(e) || ts.isFunctionExpression(e)) return e;
   if (ts.isIdentifier(e)) {
     const sym = resolveAliasedSymbol(checker, checker.getSymbolAtLocation(e));
@@ -120,8 +170,13 @@ export function resolveFunctionLike(
     if (ts.isFunctionDeclaration(decl))
       return sym && !hasBindingWrites(sym, checker) ? decl : undefined;
     if (ts.isMethodDeclaration(decl)) return decl;
-    if (ts.isVariableDeclaration(decl) && isConstDeclaration(decl) && decl.initializer) {
-      return resolveFunctionLike(decl.initializer, checker);
+    if (
+      ts.isVariableDeclaration(decl) &&
+      isConstDeclaration(decl) &&
+      decl.initializer &&
+      isBindingInitialized(decl, points, checker)
+    ) {
+      return resolveFunctionLike(decl.initializer, checker, points, visited);
     }
   }
   return undefined;
@@ -167,7 +222,7 @@ export function extractObjectProperty(
   obj: ts.ObjectLiteralExpression,
   name: string
 ): ts.Expression | undefined {
-  for (const prop of obj.properties) {
+  for (const prop of [...obj.properties].reverse()) {
     if (ts.isPropertyAssignment(prop)) {
       const key =
         ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name) ? prop.name.text : undefined;
@@ -188,9 +243,10 @@ export function extractObjectProperty(
 
 export function extractSetupFunction(
   obj: ts.ObjectLiteralExpression,
-  checker: ts.TypeChecker
+  checker: ts.TypeChecker,
+  initializationPoints: InitializationPoints = new Map()
 ): ts.FunctionLikeDeclaration | undefined {
-  for (const prop of obj.properties) {
+  for (const prop of [...obj.properties].reverse()) {
     if (
       ts.isMethodDeclaration(prop) &&
       (ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name)) &&
@@ -203,10 +259,10 @@ export function extractSetupFunction(
       (ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name)) &&
       prop.name.text === 'setup'
     ) {
-      return resolveFunctionLike(prop.initializer, checker);
+      return resolveFunctionLike(prop.initializer, checker, initializationPoints);
     }
     if (ts.isShorthandPropertyAssignment(prop) && prop.name.text === 'setup') {
-      return resolveFunctionLike(prop.name, checker);
+      return resolveFunctionLike(prop.name, checker, initializationPoints);
     }
   }
   return undefined;
@@ -215,7 +271,8 @@ export function extractSetupFunction(
 /** Resolve a const definition object only when every reference stays at an intrinsic boundary. */
 export function resolveDefinitionObject(
   expression: ts.Expression,
-  checker: ts.TypeChecker
+  checker: ts.TypeChecker,
+  initializationPoints: InitializationPoints = new Map()
 ): ts.ObjectLiteralExpression | undefined {
   const value = unwrapExpr(expression);
   if (ts.isObjectLiteralExpression(value)) return value;
@@ -227,7 +284,8 @@ export function resolveDefinitionObject(
     !ts.isVariableDeclaration(declaration) ||
     !declaration.initializer ||
     !ts.isVariableDeclarationList(declaration.parent) ||
-    !(declaration.parent.flags & ts.NodeFlags.Const)
+    !(declaration.parent.flags & ts.NodeFlags.Const) ||
+    !isBindingInitialized(declaration, atExecutionPoint(value, initializationPoints), checker)
   )
     return undefined;
   const object = unwrapExpr(declaration.initializer);

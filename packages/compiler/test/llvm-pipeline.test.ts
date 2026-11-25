@@ -9,7 +9,7 @@ import {
   optimizeLlvmIr,
   verifyLlvmIr,
 } from '../src';
-import { instantiateWasmKernel } from '../src/runtime';
+import { instantiateWasmKernel } from '../src/kernel-host';
 
 const toolchain = detectLlvmToolchain();
 

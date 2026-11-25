@@ -44,6 +44,7 @@ const STATIC_INPUT_PATHS = Object.freeze([
   'pnpm-lock.yaml',
   'scripts/build/public-packages.mjs',
   'scripts/compiler/website-demo-inventory.mjs',
+  'scripts/compiler/current-api.mjs',
   'scripts/compiler/website-demo-migrations-829.json',
   'tsconfig.json',
 ]);
@@ -1326,9 +1327,10 @@ export async function generateWebsiteInventory({ root = DEFAULT_ROOT, outputPath
   const { parse: parseAstro } = await import(
     createRequire(require.resolve('astro/package.json')).resolve('@astrojs/compiler')
   );
-  const { compileFile } = await import('../../packages/compiler/src/compile.ts');
-  const { isLocalSourceSpecifier, resolveLocalSource, runtimeSourceEdges, sourceName } =
-    await import('../../packages/compiler/src/source-resolution.ts');
+  const { createCompiler } = await import('../../packages/compiler/src/index.ts');
+  const { localSourceSnapshot } = await import('./current-api.mjs');
+  const compiler = createCompiler({ rootDir: root });
+  const sourceName = (file) => file.split(path.sep).join('/');
   const markdown = unified().use(remarkParse).use(remarkMdx);
   const relative = (file) => relativeTo(root, file);
   const inputBefore = await snapshotInputBinding(root);
@@ -1771,35 +1773,7 @@ export async function generateWebsiteInventory({ root = DEFAULT_ROOT, outputPath
       }
     }
 
-  const compilerRoot = await realpath(root);
-  const compileSourceSnapshot = async (entry) => {
-    const files = Object.create(null);
-    let entryName = sourceName(relativeTo(compilerRoot, path.resolve(entry)));
-    let error = null;
-    const load = async (filename) => {
-      const absolute = await realpath(filename);
-      const identityPath = relativeTo(compilerRoot, absolute);
-      if (identityPath === '..' || identityPath.startsWith('../') || path.isAbsolute(identityPath))
-        throw new Error(`Compiler source ${filename} escapes the declared project root.`);
-      const identity = sourceName(identityPath);
-      if (Object.hasOwn(files, identity)) return identity;
-      const text = await readFile(absolute, 'utf8');
-      files[identity] = text;
-      const ast = ts.createSourceFile(identity, text, ts.ScriptTarget.Latest, true);
-      for (const edge of runtimeSourceEdges(ast)) {
-        if (!isLocalSourceSpecifier(edge.specifier)) continue;
-        const target = await resolveLocalSource(compilerRoot, identity, edge.specifier);
-        await load(path.join(compilerRoot, target));
-      }
-      return identity;
-    };
-    try {
-      entryName = await load(path.resolve(entry));
-    } catch (cause) {
-      error = cause instanceof Error ? cause.message : String(cause);
-    }
-    return { snapshot: { entry: entryName, files }, error };
-  };
+  const compileSourceSnapshot = async (entry) => localSourceSnapshot(compiler, entry);
 
   const unavailableCurrentBrowserHost = 'unavailable-in-current-main-no-browser-host';
   const admissions = [];
@@ -1808,7 +1782,10 @@ export async function generateWebsiteInventory({ root = DEFAULT_ROOT, outputPath
     const base = {
       id,
       usage: usageById.get(id),
-      target: 'web-component-source-v1',
+      target: 'react',
+      historicalTargetObligations: [
+        { target: 'web-component-source-v1', status: 'unimplemented', migration: 'not-migrated' },
+      ],
       statuses: {
         nodeAdmission: 'unresolved-registration',
         wasmExecution: unavailableCurrentBrowserHost,
@@ -1873,14 +1850,10 @@ export async function generateWebsiteInventory({ root = DEFAULT_ROOT, outputPath
       continue;
     }
     const sourceClosure = await compileSourceSnapshot(file);
-    const compileOptions = {
-      root,
+    const result = compiler.compileFile(file, {
       exportName: origin.exportName,
-      profile: 'web-component-source-v1',
-    };
-    const result = sourceClosure.error
-      ? await compileFile(file, compileOptions)
-      : await compileFile(file, { ...compileOptions, sourceSnapshot: sourceClosure.snapshot });
+      target: 'react',
+    });
     const sourceFiles = Object.entries(sourceClosure.snapshot.files)
       .map(([sourcePath, content]) => ({
         file: sourcePath,
@@ -1914,11 +1887,10 @@ export async function generateWebsiteInventory({ root = DEFAULT_ROOT, outputPath
       },
       ...(result.ok
         ? {
-            definitionFile: result.value.ir.setup.span.file,
-            compilerSourceFiles: result.value.ir.sourceFiles.map((source) => ({
-              file: source.file,
-              sha256: source.sha256,
-            })),
+            definitionFile: result.value.ir.sourceFile,
+            nativeEmittedPrototypes: result.value.prototypes.length,
+            executionVerifiedPrototypes: 0,
+            compilerSourceFiles: sourceFiles,
           }
         : { diagnostics: result.diagnostics }),
       ...(sourceClosure.error
@@ -1974,9 +1946,10 @@ export async function generateWebsiteInventory({ root = DEFAULT_ROOT, outputPath
     scope:
       'Current mounted demo-bearing MDX pages and the source-backed homepage, Matrix, library, manual, spread, exact-registration and automatic demo loaders. Discovery is static and AST-only; no page is excluded because compiler admission rejects or remains unresolved.',
     compilerBoundary:
-      'Canonical private Node compileFile admission with explicit web-component-source-v1 only. This inventory is not browser-host delivery, WASM execution, preview, page migration, public compiler support or full parity evidence.',
+      'Current TypeScript/HIR/React AST source admission. Historical Web Components acceptance stays unimplemented and every old rejection remains an obligation. Node emission is not browser execution, WASM execution, page migration or full parity evidence.',
     statuses: {
       nodeAdmission: 'source-classification-only',
+      browserExecution: 'not-run',
       wasmExecution: unavailableCurrentBrowserHost,
       preview: 'not-run',
       migration: 'not-migrated',

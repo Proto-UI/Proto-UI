@@ -1,0 +1,388 @@
+{
+  "kind": "native-ast-browser-execution-v2",
+  "browser": "156.0.8078.47",
+  "compilerBuild": {
+    "format": 2,
+    "compilerSha256": "776467b51a0a7158d14c55d56ee1394a76f64eb272cf695eb791372706c7d556",
+    "typescriptVersion": "5.9.3",
+    "execution": "worker-js",
+    "targets": ["react"],
+    "authoringSha256": "05cda317e29257f882297a7fb1e6aaed601fcfa113ff5c7a40760c259b36b156"
+  },
+  "service": {
+    "mode": "runner-owned-loopback",
+    "url": "http://127.0.0.1:46547",
+    "closed": true
+  },
+  "cases": [
+    {
+      "name": "packages/prototypes/base/src/text/root.proto.ts",
+      "status": "passed",
+      "requestSha256": "7ff7100e91c005c2497771437709dedf95dc7bedb6c41462b0fe8eb7eaf40e82",
+      "sourceSha256": "6a2eaee970d3c0cf516c5d889f28afb2e1388c77310a2a438128156098b9e304",
+      "observation": {
+        "path": "observations/base-text.json",
+        "bytes": 18819,
+        "sha256": "f20eaa7e51f1f3fbba4ccea546d051035576924f3fdd40c1934cf432d9536bba"
+      }
+    },
+    {
+      "name": "packages/prototypes/base/src/surface/root.proto.ts",
+      "status": "passed",
+      "requestSha256": "3f75efa2afb83e8091c20ead35bfca6a0e45f77afc39cf64853ef5d3209888dd",
+      "sourceSha256": "be5b9e5539026e71aabb00c8c8ddab25ffb172f5c73edbe6d9b117d3ca8ecad7",
+      "observation": {
+        "path": "observations/base-surface.json",
+        "bytes": 21923,
+        "sha256": "04b8adeb431df96a8e3bcb65ef2d4cda66bbca3ed35d009cf6babfbd3cb32036"
+      }
+    },
+    {
+      "name": "edited-real-base-source",
+      "status": "passed",
+      "requestSha256": "7e6f9e6a8c9a0618450b19d3d0be008e7bfdd9d5a8b3baf53cdb9b1834100d5c",
+      "observation": {
+        "path": "observations/edited-base-text.json",
+        "bytes": 18861,
+        "sha256": "a847bef9d37f454e357f4372c92d5af333aea8d3e849f5d5c9f6bc00bcbeeac3"
+      }
+    },
+    {
+      "name": "native-event-state-and-explicit-update",
+      "status": "passed",
+      "requestSha256": "71cb08ff1aa4eba21f14c7eb485d387619bc655c19f778248aa3f763b1194a04",
+      "observations": [
+        {
+          "path": "observations/state-only.json",
+          "bytes": 7028,
+          "sha256": "4bc1616a4c8dc52dcbfa5cfc7513576a5eb0e6d2f1123f578cd2a723e92c870e"
+        },
+        {
+          "path": "observations/explicit-update.json",
+          "bytes": 7028,
+          "sha256": "2ddbf6e0a00376e3a404b38e866422f6fe5ace0f9ecfd18da73b05373a1482ca"
+        }
+      ]
+    },
+    {
+      "name": "authored-module-effects-remain-inert",
+      "status": "passed",
+      "observation": {
+        "path": "observations/rejected-side-effect.json",
+        "bytes": 1368,
+        "sha256": "e18e6f8736eac81108399d8934ed933a20068cff04941116b11e5ff8f5452060"
+      }
+    },
+    {
+      "name": "unsupported-native-target-retires-preview",
+      "status": "passed",
+      "observation": {
+        "path": "observations/rejected-native-target.json",
+        "bytes": 1271,
+        "sha256": "56febe8c1db8af65ef253014b72c66e65e463f7fcaa4ca64859f6144f307fc8c"
+      }
+    },
+    {
+      "name": "digest-check-cancel-reopen-fresh-owner",
+      "status": "passed",
+      "observation": {
+        "path": "observations/reopened.json",
+        "bytes": 7028,
+        "sha256": "4bc1616a4c8dc52dcbfa5cfc7513576a5eb0e6d2f1123f578cd2a723e92c870e"
+      }
+    }
+  ],
+  "observations": [
+    {
+      "path": "observations/base-text.json",
+      "bytes": 18819,
+      "sha256": "f20eaa7e51f1f3fbba4ccea546d051035576924f3fdd40c1934cf432d9536bba"
+    },
+    {
+      "path": "observations/base-surface.json",
+      "bytes": 21923,
+      "sha256": "04b8adeb431df96a8e3bcb65ef2d4cda66bbca3ed35d009cf6babfbd3cb32036"
+    },
+    {
+      "path": "observations/edited-base-text.json",
+      "bytes": 18861,
+      "sha256": "a847bef9d37f454e357f4372c92d5af333aea8d3e849f5d5c9f6bc00bcbeeac3"
+    },
+    {
+      "path": "observations/state-only.json",
+      "bytes": 7028,
+      "sha256": "4bc1616a4c8dc52dcbfa5cfc7513576a5eb0e6d2f1123f578cd2a723e92c870e"
+    },
+    {
+      "path": "observations/explicit-update.json",
+      "bytes": 7028,
+      "sha256": "2ddbf6e0a00376e3a404b38e866422f6fe5ace0f9ecfd18da73b05373a1482ca"
+    },
+    {
+      "path": "observations/rejected-side-effect.json",
+      "bytes": 1368,
+      "sha256": "e18e6f8736eac81108399d8934ed933a20068cff04941116b11e5ff8f5452060"
+    },
+    {
+      "path": "observations/rejected-native-target.json",
+      "bytes": 1271,
+      "sha256": "56febe8c1db8af65ef253014b72c66e65e463f7fcaa4ca64859f6144f307fc8c"
+    },
+    {
+      "path": "observations/reopened.json",
+      "bytes": 7028,
+      "sha256": "4bc1616a4c8dc52dcbfa5cfc7513576a5eb0e6d2f1123f578cd2a723e92c870e"
+    }
+  ],
+  "loadedAssets": [
+    {
+      "path": "/",
+      "sha256": "90276a7dcc0b654110c80fc3825a1c62d49307f2363f498f0d571954a789153b"
+    },
+    {
+      "path": "/harness.js",
+      "sha256": "f892bdf907c78735cdc920c4a67903325ad6126095a0ddbb4957e12b8c732f00"
+    },
+    {
+      "path": "/compiler.js",
+      "sha256": "776467b51a0a7158d14c55d56ee1394a76f64eb272cf695eb791372706c7d556"
+    },
+    {
+      "path": "/build.json",
+      "sha256": "88b4ca930d177e257514b5b216280cdbe1f84ccd2e5a39c4f6174ee1213d07b6"
+    },
+    {
+      "path": "/targets/react.json",
+      "sha256": "b6cd191c231e6477e35d62ec6a083468a96a8f4e59f8eab18c70f4a7507222ea"
+    },
+    {
+      "path": "/compiler.js",
+      "sha256": "776467b51a0a7158d14c55d56ee1394a76f64eb272cf695eb791372706c7d556"
+    },
+    {
+      "path": "/build.json",
+      "sha256": "88b4ca930d177e257514b5b216280cdbe1f84ccd2e5a39c4f6174ee1213d07b6"
+    },
+    {
+      "path": "/compiler.js",
+      "sha256": "776467b51a0a7158d14c55d56ee1394a76f64eb272cf695eb791372706c7d556"
+    },
+    {
+      "path": "/build.json",
+      "sha256": "88b4ca930d177e257514b5b216280cdbe1f84ccd2e5a39c4f6174ee1213d07b6"
+    },
+    {
+      "path": "/targets/react.json",
+      "sha256": "b6cd191c231e6477e35d62ec6a083468a96a8f4e59f8eab18c70f4a7507222ea"
+    }
+  ],
+  "loadedWorkers": [
+    {
+      "url": "blob:http://127.0.0.1:46547/a43bd4b3-f5d3-42d5-bc64-eb91ff964e81",
+      "compilerSha256": "776467b51a0a7158d14c55d56ee1394a76f64eb272cf695eb791372706c7d556",
+      "closed": true
+    },
+    {
+      "url": "blob:http://127.0.0.1:46547/bab7ba9c-83dd-4bd1-8c8d-5a56439d0836",
+      "compilerSha256": "776467b51a0a7158d14c55d56ee1394a76f64eb272cf695eb791372706c7d556",
+      "closed": true
+    }
+  ],
+  "sourceFiles": {
+    "apps/www/src/components/PrototypePreviewer/compiled-preview-runtime.ts": "6c0d536f39f1a13218f8ea6f88e59836453a04f139141188a304425696f8a652",
+    "apps/www/src/components/PrototypePreviewer/compiled-preview-sandbox.ts": "fc47db5c3ba74cd82a4f98df0f150713ff72689fef685a6ae492d1431c7f2c0a",
+    "apps/www/src/components/PrototypePreviewer/compiled-revision-session.ts": "89d572e8fd2ae2d700194075718e07cc6ab8de3231c83144f1b48611ea4365bc",
+    "node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/cjs/react-dom-client.production.js": "e7e8275ddedd11991183aec736095ba33e90fd4ce04a8dbb413efce1dae6050b",
+    "node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/cjs/react-dom.production.js": "ec8130a495522e7b601a112d6344fc387c0d081fc927b6a9bd7cc3eced3f72dd",
+    "node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/client.js": "00e348ab3d6bc2eef908345d0bc4e008c95bcfecec060dfda5c4967953761396",
+    "node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/index.js": "ba1a3e33489f868371561777607e3ee5091df0f7ea3f1a10f789d6b86e4c1505",
+    "node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/package.json": "2c195b9bfa1b4f7dee5dd6f955c0fbb716e83c3e9c2e7a80b5e19c5a18507718",
+    "node_modules/.pnpm/react@19.2.6/node_modules/react/cjs/react.production.js": "f4860eb156f9cab3878103a196822083db8fe6e7a1bba701acbd372c9a75b92c",
+    "node_modules/.pnpm/react@19.2.6/node_modules/react/index.js": "60caffdecbdc5db3bc4ec4e83df9488345ccb271d07533b9210bf5750918d97e",
+    "node_modules/.pnpm/react@19.2.6/node_modules/react/package.json": "e631b6ac066fa758d9b36f226d96e8fc05425d1e8993ffcc99c6de2d6aa7268c",
+    "node_modules/.pnpm/scheduler@0.27.0/node_modules/scheduler/cjs/scheduler.production.js": "679adff761d31e9426604f80c0e99be44a3e6f4c6834b0218ecf0312a67c171f",
+    "node_modules/.pnpm/scheduler@0.27.0/node_modules/scheduler/index.js": "145965504d60007bc25486ab930b0367867dcd5d579ccd343c148d69349a7cfb",
+    "node_modules/.pnpm/scheduler@0.27.0/node_modules/scheduler/package.json": "393bb96b7e481bf50189a1a02c7e0e7f4d01acba5abc6fbe7d214638624462fc",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.decorators.d.ts": "8e7f8264d0fb4c5339605a15daadb037bf238c10b654bb3eee14208f860a32ea",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.decorators.legacy.d.ts": "782dec38049b92d4e85c1585fbea5474a219c6984a35b004963b00beb1aab538",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.dom.asynciterable.d.ts": "d7a3c8b952931daebdfc7a2897c53c0a1c73624593fa070e46bd537e64dcd20a",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.dom.d.ts": "080941d9f9ff9307f7e27a83bcd888b7c8270716c39af943532438932ec1d0b9",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.dom.iterable.d.ts": "2e80ee7a49e8ac312cc11b77f1475804bee36b3b2bc896bead8b6e1266befb43",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.collection.d.ts": "dc2df20b1bcdc8c2d34af4926e2c3ab15ffe1160a63e58b7e09833f616efff44",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.core.d.ts": "c57796738e7f83dbc4b8e65132f11a377649c00dd3eee333f672b8f0a6bea671",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.d.ts": "45b7ab580deca34ae9729e97c13cfd999df04416a79116c3bfb483804f85ded4",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.generator.d.ts": "515d0b7b9bea2e31ea4ec968e9edd2c39d3eebf4a2d5cbd04e88639819ae3b71",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.iterable.d.ts": "0559b1f683ac7505ae451f9a96ce4c3c92bdc71411651ca6ddb0e88baaaad6a3",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.promise.d.ts": "0dc1e7ceda9b8b9b455c3a2d67b0412feab00bd2f66656cd8850e8831b08b537",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.proxy.d.ts": "ce691fb9e5c64efb9547083e4a34091bcbe5bdb41027e310ebba8f7d96a98671",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.reflect.d.ts": "8d697a2a929a5fcb38b7a65594020fcef05ec1630804a33748829c5ff53640d0",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.symbol.d.ts": "4ff2a353abf8a80ee399af572debb8faab2d33ad38c4b4474cff7f26e7653b8d",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts": "fb0f136d372979348d59b3f5020b4cdb81b5504192b1cacff5d1fbba29378aa1",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2016.array.include.d.ts": "d15bea3d62cbbdb9797079416b8ac375ae99162a7fba5de2c6c505446486ac0a",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2016.d.ts": "3facaf05f0c5fc569c5649dd359892c98a85557e3e0c847964caeb67076f4d75",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2016.intl.d.ts": "68d18b664c9d32a7336a70235958b8997ebc1c3b8505f4f1ae2b7e7753b87618",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.arraybuffer.d.ts": "eb3d66c8327153d8fa7dd03f9c58d351107fe824c79e9b56b462935176cdf12a",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.d.ts": "e44bb8bbac7f10ecc786703fe0a6a4b952189f908707980ba8f3c8975a760962",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.date.d.ts": "38f0219c9e23c915ef9790ab1d680440d95419ad264816fa15009a8851e79119",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.intl.d.ts": "4de680d5bb41c17f7f68e0419412ca23c98d5749dcaaea1896172f06435891fc",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.object.d.ts": "69ab18c3b76cd9b1be3d188eaf8bba06112ebbe2f47f6c322b5105a6fbc45a2e",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.sharedmemory.d.ts": "a680117f487a4d2f30ea46f1b4b7f58bef1480456e18ba53ee85c2746eeca012",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.string.d.ts": "2f11ff796926e0832f9ae148008138ad583bd181899ab7dd768a2666700b1893",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.typedarrays.d.ts": "954296b30da6d508a104a3a0b5d96b76495c709785c1d11610908e63481ee667",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.asyncgenerator.d.ts": "ac9538681b19688c8eae65811b329d3744af679e0bdfa5d842d0e32524c73e1c",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.asynciterable.d.ts": "0a969edff4bd52585473d24995c5ef223f6652d6ef46193309b3921d65dd4376",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.d.ts": "5e1c4c362065a6b95ff952c0eab010f04dcd2c3494e813b493ecfd4fcb9fc0d8",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.intl.d.ts": "9e9fbd7030c440b33d021da145d3232984c8bb7916f277e8ffd3dc2e3eae2bdb",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.promise.d.ts": "811ec78f7fefcabbda4bfa93b3eb67d9ae166ef95f9bff989d964061cbf81a0c",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.regexp.d.ts": "717937616a17072082152a2ef351cb51f98802fb4b2fdabd32399843875974ca",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.array.d.ts": "d7e7d9b7b50e5f22c915b525acc5a49a7a6584cf8f62d0569e557c5cfc4b2ac2",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.d.ts": "68d73b4a11549f9c0b7d352d10e91e5dca8faa3322bfb77b661839c42b1ddec7",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.intl.d.ts": "74f7fa2d027d5b33eb0471c8e82a6c87216223181ec31247c357a3e8e2fddc5b",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.object.d.ts": "71c37f4c9543f31dfced6c7840e068c5a5aacb7b89111a4364b1d5276b852557",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.string.d.ts": "576711e016cf4f1804676043e6a0a5414252560eb57de9faceee34d79798c850",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.symbol.d.ts": "89c1b1281ba7b8a96efc676b11b264de7a8374c5ea1e6617f11880a13fc56dc6",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.bigint.d.ts": "d6d7ae4d1f1f3772e2a3cde568ed08991a8ae34a080ff1151af28b7f798e22ca",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.d.ts": "5efce4fc3c29ea84e8928f97adec086e3dc876365e0982cc8479a07954a3efd4",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.date.d.ts": "063600664504610fe3e99b717a1223f8b1900087fab0b4cad1496a114744f8df",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.intl.d.ts": "639e512c0dfc3fad96a84caad71b8834d66329a1f28dc95e3946c9b58176c73a",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.number.d.ts": "368af93f74c9c932edd84c58883e736c9e3d53cec1fe24c0b0ff451f529ceab1",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.promise.d.ts": "934019d7e3c81950f9a8426d093458b65d5aff2c7c1511233c0fd5b941e608ab",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.sharedmemory.d.ts": "52ada8e0b6e0482b728070b7639ee42e83a9b1c22d205992756fe020fd9f4a47",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.string.d.ts": "3bdefe1bfd4d6dee0e26f928f93ccc128f1b64d5d501ff4a8cf3c6371200e5e6",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.symbol.wellknown.d.ts": "59fb2c069260b4ba00b5643b907ef5d5341b167e7d1dbf58dfd895658bda2867",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2021.d.ts": "feecb1be483ed332fad555aff858affd90a48ab19ba7272ee084704eb7167569",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2021.intl.d.ts": "965f36eae237dd74e6cca203a43e9ca801ce38824ead814728a2807b1910117d",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2021.promise.d.ts": "af3dd424cf267428f30ccfc376f47a2c0114546b55c44d8c0f1d57d841e28d74",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2021.string.d.ts": "995c005ab91a498455ea8dfb63aa9f83fa2ea793c3d8aa344be4a1678d06d399",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2021.weakref.d.ts": "959d36cddf5e7d572a65045b876f2956c973a586da58e5d26cde519184fd9b8a",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.array.d.ts": "3925a6c820dcb1a06506c90b1577db1fdbf7705d65b62b99dce4be75c637e26b",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.d.ts": "ee7bad0c15b58988daa84371e0b89d313b762ab83cb5b31b8a2d1162e8eb41c2",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.error.d.ts": "0a3d63ef2b853447ec4f749d3f368ce642264246e02911fcb1590d8c161b8005",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.full.d.ts": "3cbad9a1ba4453443026ed38e4b8be018abb26565fa7c944376463ad9df07c41",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.intl.d.ts": "8cdf8847677ac7d20486e54dd3fcf09eda95812ac8ace44b4418da1bbbab6eb8",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.object.d.ts": "8444af78980e3b20b49324f4a16ba35024fef3ee069a0eb67616ea6ca821c47a",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.regexp.d.ts": "b4b67b1a91182421f5df999988c690f14d813b9850b40acd06ed44691f6727ad",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.string.d.ts": "3287d9d085fbd618c3971944b65b4be57859f5415f495b33a6adc994edd2f004",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es5.d.ts": "c430d44666289dae81f30fa7b2edebf186ecc91a2d4c71266ea6ae76388792e1",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.scripthost.d.ts": "cd034f499c6cdca722b60c04b5b1b78e058487a7085a8e0d6fb50809947ee573",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.webworker.importscripts.d.ts": "80e18897e5884b6723488d4f5652167e7bb5024f946743134ecc4aa4ee731f89",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/typescript.js": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675",
+    "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/package.json": "822ef7ca6452205657b6288b066481ecf508bfbf43455d715cf7d3ec457561e6",
+    "packages/compiler/src/browser/client.ts": "593fa1f10d257ee49550f9e2d7f9848b0fc17024e3397e6c3ae917031c8befa8",
+    "packages/compiler/src/browser/engine.ts": "f49d8f8f0306ea80a4c12f1bd14d779727d68dca9376b9ce8358ea4cdd3ccf7b",
+    "packages/compiler/src/browser/hash.ts": "2b9f88aa16e1397ca628ec011eaf9956bb46b2e5106c6b8d6fbf9c59389e2be5",
+    "packages/compiler/src/browser/memory-program.ts": "5106144d8005d655ee44dec13730c8144104f0539828316411d3c5d1dd2a5e4e",
+    "packages/compiler/src/browser/protocol.ts": "a7e8621b978463695e83d5ece75c3bcbadf4d4265492b6b6eb322641077789e0",
+    "packages/compiler/src/browser/worker.ts": "9cab00c603d841645f5c3819edb5a8d9328b17e2f727a128336eecbc478256ca",
+    "packages/compiler/src/diagnostics.ts": "c452fa53654aa945d0f277793616ab6a6ebb80442810c80ed86f9bbd323abcb0",
+    "packages/compiler/src/frontend/actions.ts": "e98bc61735ddc4ffef0ae4add38be9914088cc55497c795c4d6176f30c9067d3",
+    "packages/compiler/src/frontend/bindings.ts": "643fe05aaf49442aa2f96822eb2370043bf60db6d77a5349faf08a2fb682946b",
+    "packages/compiler/src/frontend/constants.ts": "670590cb9cbf8b076075ab8f7daf9e24979a6d41a51fa9a3734030dd07c70d93",
+    "packages/compiler/src/frontend/extract.ts": "422ae587c0aecc080a88a7f90a7030445571b67993e1fbe8be177f9ef45fb289",
+    "packages/compiler/src/frontend/kernel.ts": "47428e337a4b8da6437e146ef093665dc30c1e23eaffefbb879800c7ed77aeae",
+    "packages/compiler/src/frontend/rules.ts": "f5655054ba2821e9e04a817a1ff2c252b4ac539fef61af55c86deccd80d54f4a",
+    "packages/compiler/src/frontend/scalars.ts": "0e351af2c75f056dc1a0cfd6430ba691979b7dc6ce43907e10986fa1ff463dbf",
+    "packages/compiler/src/frontend/syntax.ts": "16c49c4233475c8a0c0e3884ee741a26a0d44e3883de353be2d5d9a6343ae4b6",
+    "packages/compiler/src/frontend/template.ts": "99f97dd46bfb7ac4d15bf42e8964d7861a7ab35cca359da13608e8ad4073225c",
+    "packages/compiler/src/ir/builder.ts": "db07b4c27e3d50c426015194474d8193925914aecf87da49b2b1c20e79313927",
+    "packages/compiler/src/ir/index.ts": "82db38445f6361b4be526d6df0b2fe3d0dca7f8cd963a29a7ee9e349e3a888e5",
+    "packages/compiler/src/ir/passes.ts": "51a288feb3aeec627c5ee2073ce92e5dc751011cd78620e97e8d07e2e159e3b0",
+    "packages/compiler/src/ir/print.ts": "77e8bda18fe82f079ac92d2eb02ba9da5b7ede79608b1bc961583bf4dc2876cc",
+    "packages/compiler/src/ir/types.ts": "1aab920271dcea135812b6a9d73b71a236cebe63f0838eccb99446b3d94e1c99",
+    "packages/compiler/src/ir/verify.ts": "891dc20a3c39fabe0ee399e65a22dff942d0fd58f6e72d00243b78e859ccea8d",
+    "packages/compiler/src/targets/action-flow.ts": "b9b621ca05442bec2e3bbaf4e9db25c7c88fa231185d24dfc12f82c2eb477925",
+    "packages/compiler/src/targets/react.ts": "d2e8ad3a197007646cfb1d18eaaf5483ce29bf4bd7acaeb94043399770f8d12f",
+    "packages/core/src/a11y.ts": "6915c5303dc2d6c445453c30336c0371addc947e1e19bad9ca22dfd73a261c48",
+    "packages/core/src/anatomy.ts": "f8017ddec6abf7f6d3dff784678b6d3af88a4c92c0721108beac51fe294519e3",
+    "packages/core/src/axis-input.ts": "8b9bf9fa9963c71873c0e8c2552e98ebe0c588e056b53516be22ff8f90513093",
+    "packages/core/src/boundary.ts": "41008ba239136e46494041787d6b8ca265fb1cdcf02ccfec0fa7e3396cc6de63",
+    "packages/core/src/caps/entry.ts": "23fe15c0766dfc0af7e45a01b210ef3f5b564089e9645293fc6dd215bbe61b99",
+    "packages/core/src/caps/host.ts": "b2542e965a6c0f548003662f931b505f063118cd4036cfbabf27767462e9e81d",
+    "packages/core/src/caps/index.ts": "a0833fa73b44034da91bff352029f01181427cdb21fdc3be50fdbf7bafa387ef",
+    "packages/core/src/caps/token.ts": "f1e92dece196a380477006d905f5b2abc528f8eba41caa7aeaee1edf88e9df79",
+    "packages/core/src/caps/vault.ts": "13e6a085ab5d772789c0867e680765d48f410e0c23880e02110cac01c06b5725",
+    "packages/core/src/collection.ts": "a4a451c037b2114c7f9c94c814c2f09abc584890e24004d55e8b49fe8792c4bc",
+    "packages/core/src/context-menu-input.ts": "0c276fd43a01dd4539284e1e0242d71695c122a1f6b16acdf2f8144c6da36da5",
+    "packages/core/src/context.ts": "5a6d275535a3e5f93ea6b2bc03a6514fa7d641abfe87e9b1768a3645400089f6",
+    "packages/core/src/control-label.ts": "5ef3f317bdadf74070622efc1ea7dbaa0a1aa3079b7f9ea669468c05c6c4a8c6",
+    "packages/core/src/delay.ts": "b2111d833c7d46e48e06a4816eb1b8638afccb1b98cd630b1e36aea611b8dbfe",
+    "packages/core/src/effects/index.ts": "d5c19655468e29f60c871b21e73af8ebc653f736e7123ade916f22c4a5f80ce5",
+    "packages/core/src/effects/types.ts": "dcaeed5ba405406d18ad15e7c86e9a1f76fa2e988b719b5f733e7b6fed75c471",
+    "packages/core/src/errors/codes.ts": "1e35e7e6a995ef0b484ea4fb3852f2aaa8579340316f15e27ff4d048d567268f",
+    "packages/core/src/errors/index.ts": "652c62a961d7e676deda59136735193f362515d55132038ea572724e4b3f4b9d",
+    "packages/core/src/focus.ts": "1d9b84a5fb1e58187ccf7e3a90bf66c3d270e4c0f610b7c784d7b3d75cef7941",
+    "packages/core/src/handles.ts": "25b7d940e4fbe8c12d9ae1f244c0346cc9a1adfc06af05c7cbcc8e53c8ef1032",
+    "packages/core/src/hit-participation.ts": "d2e293f4887dc8d2717f8f7858e07fd95d5906706d7f40e012d8c13ef5f93a43",
+    "packages/core/src/image-view.ts": "3a6df9612b0982a50ec02d2544342dc88d431ea91a49d5207704cbc723a18673",
+    "packages/core/src/index.ts": "354e1d965b701feb0164b407c78a3c793a30aa2cd501f010247faf16a1e782a4",
+    "packages/core/src/internal.ts": "2b16d692f539b0addc652c8fb9cc03b51064d3eba8424fbf836161b289a9eda7",
+    "packages/core/src/material-contact.ts": "e85152859bdf21cf2890c14c6634c0ddeca70610962b535de0ac7dd42d65fdaa",
+    "packages/core/src/material-paint-reservation.ts": "288d506b2df7d30f54ccac480a70136533abfa037475072e46ce7080af20d95e",
+    "packages/core/src/material.ts": "47cbaf20254ab4340e7057c86ab4695878b5df6bf3e2f750e4561aad50d98627",
+    "packages/core/src/module/index.ts": "d5c19655468e29f60c871b21e73af8ebc653f736e7123ade916f22c4a5f80ce5",
+    "packages/core/src/module/types.ts": "07feee9d49bd7ae7e78cf2329edb6ded3d8b909c9a4c261ae8fc04df26a912df",
+    "packages/core/src/move.ts": "2400ddff0b68ffba57dce16f9984b998439b8cfe86d14f1aa84762a5fa79541f",
+    "packages/core/src/native-link.ts": "3b9b67e934ff43b09bdd01c0c208a9fcd975d02ce0f36f842cf07844e6ad29c4",
+    "packages/core/src/overlay.ts": "020ed59cd9fe99ed3ece6a9e48b3f702b2449cace10ba1d289fca4b3924405d2",
+    "packages/core/src/positioning.ts": "d0336ed3c5ecf5ac1082116029374443ece6e5db746ad2f73d60d375097265d4",
+    "packages/core/src/presence-presentation.ts": "edb67aa4b338842825d2640db1b1754f79e692596ea7ec15885a38153f5fc473",
+    "packages/core/src/prototype.ts": "a947c979836fcd7c4bece4bc27d614de3d541ea09826f70e908bd45de58e10bc",
+    "packages/core/src/resident-motion.ts": "7f5350c65b3d3890c25d309dd4a6dd24a91378e04f3250a0ad709badbbae92d8",
+    "packages/core/src/scroll.ts": "a2f34a384c798e6a4a0fbbbad7eb67465b508c5a1a8182c29733ebfbe4a3f64a",
+    "packages/core/src/shader-presentation.ts": "2934afceac6f565cb7468455fa052241efe791e5f45c9fd5c01b54f363d97815",
+    "packages/core/src/spec/feedback/application-role.ts": "2f95669717b5b7e5521cfdd8eb0711f2615f2afeb001b62b8b6fea993a548cab",
+    "packages/core/src/spec/feedback/index.ts": "5615a1d8614eafa79cd3c245317d433208f81262bc2bf19d153e460f5d1105a3",
+    "packages/core/src/spec/feedback/placeholder.ts": "4d68d6f1b4c37fd98bace9d81a7fd7377de2943c4bc21001fe6900b54aaf8052",
+    "packages/core/src/spec/feedback/recorder.ts": "d0622791924858f06da45c936bf847752ab1451a2adf2f9539cafef4f8229edb",
+    "packages/core/src/spec/feedback/root-effect.ts": "38c07aca4122c82f2cb0ac5dac470e52c784a1f2553d99f036a5684d5601cdbb",
+    "packages/core/src/spec/feedback/semantic-merge.ts": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+    "packages/core/src/spec/feedback/style.ts": "cb8000de9c07ac974ac4950f8053de7848d9911692c36402b1af08690bb17dcc",
+    "packages/core/src/spec/feedback/tokens.ts": "250e9fba631156de890dac800447ac636b3c1d07eb66b0052a6d76f05cfe7db3",
+    "packages/core/src/spec/index.ts": "24f03a4f1c9ea9b526a2defa35239fc920e34d2b48e41c106f409f1167694bb3",
+    "packages/core/src/spec/owned-template-blueprint.ts": "fcfe513cdb1a6533c164fdedc25ae3e085d97f209953c149e8c867df899cb3b2",
+    "packages/core/src/spec/svg-tags.ts": "816196bcb9d6899d9185a4dfd11ebe07398a7717afccdb9b5e56e46f95e30bf0",
+    "packages/core/src/spec/template.ts": "6e63757bad33a6b6a23ea94b95fb34b44e5a4f78d97aca8d8938d9089bb42c6f",
+    "packages/core/src/state.ts": "234bd9923e31a60d9872c46fda137b49d63de9e9df1dca6225ed28ebee53978f",
+    "packages/core/src/text-control.ts": "03cef97966a595e243919f3e3efe553b21ba3cd8687d0d36b3300a000b2aecc1",
+    "packages/prototypes/base/src/surface/root.proto.ts": "be5b9e5539026e71aabb00c8c8ddab25ffb172f5c73edbe6d9b117d3ca8ecad7",
+    "packages/prototypes/base/src/surface/types.ts": "77edb4033c755f4f5fd5b59403e62362864115cf5eebc5c1468d6140a011e859",
+    "packages/prototypes/base/src/text/root.proto.ts": "6a2eaee970d3c0cf516c5d889f28afb2e1388c77310a2a438128156098b9e304",
+    "packages/prototypes/base/src/text/types.ts": "33a19aabd2eab1f3831ff1b9ee57bfa2209df7ab7c453fe5f523a1b1dc3149e1",
+    "packages/types/src/context.ts": "f8472ee491da62443444332c7f947f6e5827662b2d154fea5055adb5ea6fb8fc",
+    "packages/types/src/event.ts": "d86cc5dcb12274cd801586120ce0a09816655af20e7f26492397d0e4b4daf566",
+    "packages/types/src/index.ts": "bbd5b34fa79f5ada92c28b9c32a1f191443976141b1ec579139a8e7740a30d2d",
+    "packages/types/src/props.ts": "8b3c9da4105a174436a554f2e11ed9c2985a9c7430f0458a5ab5a031a6be1e5b",
+    "packages/types/src/semantics.ts": "753250f46097ce0470763037f818ed16d8d3f049c1a4dd76fb5663840228d036",
+    "packages/types/src/state.ts": "2628b0cab94fcb27e88b3df4e0e293ef52db0f408a6f2a18bff416754bffe9fa",
+    "scripts/compiler/browser-ast-entry.ts": "6b4962bc4548b47287910d3075fe76116c6bbd69be3e9941e1a71234beac05f3",
+    "scripts/compiler/browser-ast-smoke.mjs": "841e5bd762a99b5eafaadc82e4a2269d1e60b37bf51f7853f50543cc66e006ab",
+    "scripts/compiler/browser-authoring.mjs": "760c755670d878e0a013ef34ecb79b62d2f3c1caf65bd639ca680dd92f1b5282",
+    "scripts/compiler/browser-targets/react-client.mjs": "55f966b1e364fe6309e290ce33d321d9cdb628c343a6f317d3d51e96e9b4ddc5",
+    "scripts/compiler/browser-targets/react-dom.mjs": "a680aede060f48fdd1eb1cb6119eb1792db2d2aa92a0d5d65be0a5a2be43cc1f",
+    "scripts/compiler/browser-targets/react-runtime.mjs": "b8d45597c56bc301b17dee9f74da4b076e864e7705251dde752fd9b26ff03299",
+    "scripts/compiler/browser-targets/react.mjs": "784209e308697371a9cd2dc35b0d3e4fedad0bb2a0410554ba2dd6d12fbd75d8",
+    "scripts/compiler/fixtures/browser-ast.html": "90276a7dcc0b654110c80fc3825a1c62d49307f2363f498f0d571954a789153b",
+    "scripts/compiler/fixtures/browser-counter.proto.ts": "26cb6193811ee1cabf8303461d788f4bd800351f73d03de29e983e9e2fb7838a",
+    "tsconfig.json": "f0e0085455b433e6f1ad390815c9a00ee834a582dd7c1072a79052c475e30cb2"
+  },
+  "pageErrors": [],
+  "documentationRouteAcceptance": "not-run",
+  "historicalTargets": [
+    {
+      "target": "web-component-source-v1",
+      "status": "not-migrated"
+    },
+    {
+      "target": "react-dom-source-v1",
+      "status": "not-migrated"
+    },
+    {
+      "target": "vue-source-v1",
+      "status": "not-migrated"
+    },
+    {
+      "target": "vue2-source-v1",
+      "status": "not-migrated"
+    }
+  ]
+}

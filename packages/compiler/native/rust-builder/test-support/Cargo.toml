@@ -11,6 +11,16 @@ members = [
   "generated/RequiredProp",
   "generated/NumericState",
   "generated/EscapedText",
+  "generated/BaseTextRoot",
+  "generated/BaseSurfaceRoot",
+  "generated/SlotHost",
+  "generated/EmptyRoot",
+  "generated/CreatedWatch",
+  "generated/CreatedFailure",
+  "generated/NumericPolicy",
+  "generated/UpdateScheduling",
+  "generated/InvokeReturn",
+  "generated/RuleScheduling",
 ]
 resolver = "2"
 
@@ -26,6 +36,16 @@ compiled-propsmatrix = { path = "generated/PropsMatrix" }
 compiled-requiredprop = { path = "generated/RequiredProp" }
 compiled-numericstate = { path = "generated/NumericState" }
 compiled-escapedtext = { path = "generated/EscapedText" }
+compiled-basetextroot = { path = "generated/BaseTextRoot" }
+compiled-basesurfaceroot = { path = "generated/BaseSurfaceRoot" }
+compiled-slothost = { path = "generated/SlotHost" }
+compiled-emptyroot = { path = "generated/EmptyRoot" }
+compiled-createdwatch = { path = "generated/CreatedWatch" }
+compiled-createdfailure = { path = "generated/CreatedFailure" }
+compiled-numericpolicy = { path = "generated/NumericPolicy" }
+compiled-updatescheduling = { path = "generated/UpdateScheduling" }
+compiled-invokereturn = { path = "generated/InvokeReturn" }
+compiled-rulescheduling = { path = "generated/RuleScheduling" }
 
 [profile.dev]
 debug = 0

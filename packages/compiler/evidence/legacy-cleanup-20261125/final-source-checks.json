@@ -1,0 +1,59 @@
+{
+  "schema": "proto-ui.cleanup-final-source-checks.v1",
+  "scope": "Final owned documentation and script syntax, plus source-mode checks of packaging fixtures; not a source-pinned installed package receipt.",
+  "publicDocs": {
+    "name": "public-docs",
+    "command": "corepack pnpm@10.32.1 -w -s check:public-docs",
+    "exit": 0,
+    "seconds": 5.78
+  },
+  "consumerInventorySyntax": {
+    "name": "consumer-syntax",
+    "command": "node --check scripts/compiler/consumer-project-inventory.mjs",
+    "exit": 0,
+    "seconds": 1.07
+  },
+  "sourcePackageFixtures": {
+    "command": "node --import tsx /tmp/pui-cleanup-package-fixtures-rlzuvq_2/checks.mjs /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125 /tmp/pui-cleanup-package-fixtures-rlzuvq_2/summary.json",
+    "exit": 0,
+    "seconds": 4.26,
+    "summary": {
+      "ok": true,
+      "scope": "Current source smoke for the two packaging fixtures, including actual SSR and LLVM/WASM. This is not the final relocated installed-package receipt.",
+      "markup": "<div><div>Count:0</div></div>",
+      "llvmVerified": true,
+      "wasmBytes": 1238,
+      "exports": [
+        "memory",
+        "__wasm_call_ctors",
+        "__stack_pointer",
+        "helper_negate",
+        "pinned_scalar_kernel_on_host_click_0",
+        "pinned_scalar_kernel_capabilities",
+        "pinned_scalar_kernel_prop_count",
+        "pinned_scalar_kernel_state_count",
+        "pinned_scalar_kernel_rule_count",
+        "pinned_scalar_kernel_init_state",
+        "__pui_abi_version",
+        "__pui_slot_bytes",
+        "__pui_props_slots",
+        "__pui_states_slots",
+        "__dso_handle",
+        "__data_end",
+        "__stack_low",
+        "__stack_high",
+        "__global_base",
+        "__heap_base",
+        "__heap_end",
+        "__memory_base",
+        "__table_base",
+        "__wasm_first_page_end"
+      ]
+    }
+  },
+  "archive": {
+    "path": "final-source-checks-receipts.tar.gz",
+    "bytes": 2833,
+    "sha256": "53f6ce5c69c3acc99960a590792056d583b458f42586887cdc56a36cec967f02"
+  }
+}

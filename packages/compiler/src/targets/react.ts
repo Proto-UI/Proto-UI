@@ -1,6 +1,7 @@
 import ts from 'typescript';
 import { getSemanticGroupKeyV0 } from '@proto.ui/core';
 import { diagnostic, type CompilerDiagnostic } from '../diagnostics';
+import { getUpdateOrderingIssues } from './action-flow';
 import type {
   ActionStatementIR,
   EventDeclIR,
@@ -16,12 +17,6 @@ import type {
 
 export interface ReactEmitOptions {
   readonly componentName?: string;
-  /** Kept for callers migrating from v2. Native output never imports its source. */
-  readonly prototypeImport?: string;
-  /** Kept for callers migrating from v2. Native output never imports a Proto runtime. */
-  readonly runtimeImport?: string;
-  readonly outputFile?: string;
-  readonly rootDir?: string;
 }
 
 export interface ReactEmitResult {
@@ -233,7 +228,8 @@ function checkActions(
   proto: PrototypeIR,
   outer: ReadonlySet<string>,
   reject: (message: string) => void,
-  previousAllowed = false
+  previousAllowed = false,
+  updatesAllowed = true
 ): void {
   const locals = new Set(outer);
   const declaredHere = new Set<string>();
@@ -253,13 +249,41 @@ function checkActions(
         break;
       case 'if':
         checkValue(action.condition, proto, locals, reject, previousAllowed);
-        checkActions(action.then, proto, locals, reject, previousAllowed);
-        checkActions(action.otherwise, proto, locals, reject, previousAllowed);
+        checkActions(action.then, proto, locals, reject, previousAllowed, updatesAllowed);
+        checkActions(action.otherwise, proto, locals, reject, previousAllowed, updatesAllowed);
+        break;
+      case 'invoke':
+        checkActions(action.body, proto, locals, reject, previousAllowed, updatesAllowed);
+        break;
+      case 'request-update':
+        if (!updatesAllowed)
+          reject(
+            'A render request during creation or detached cleanup needs explicit lifecycle scheduling.'
+          );
         break;
       case 'return':
         break;
     }
   }
+}
+
+function eventActionFlow(event: EventDeclIR): readonly ActionStatementIR[] {
+  if (event.body) return event.body;
+  const action = event.simpleAction;
+  if (!action) return [];
+  const current: ValueExprIR = { kind: 'state', name: action.stateName };
+  const value: ValueExprIR =
+    action.kind === 'set-state'
+      ? { kind: 'literal', value: action.value }
+      : action.kind === 'toggle-state'
+        ? { kind: 'unary', operator: '!', operand: current }
+        : {
+            kind: 'binary',
+            operator: '+',
+            left: current,
+            right: { kind: 'literal', value: action.delta },
+          };
+  return [{ kind: 'state-set', stateName: action.stateName, value }];
 }
 
 /** Admission is based on represented semantics, never the old protocol tier label. */
@@ -281,7 +305,7 @@ export function getReactLoweringDiagnostics(proto: PrototypeIR): readonly Compil
   for (const cap of proto.capabilities)
     if (!SUPPORTED_CAPABILITIES.has(cap))
       reject('React AST lowering does not yet cover capability: ' + cap + '.');
-  if (proto.hooks.length)
+  if (proto.hooks.some((hook) => !hook.lowered))
     reject('Hook bodies must be lowered to supported semantic operations before React emission.');
   if (proto.contexts.length)
     reject('Context operations need executable semantic IR before React emission.');
@@ -301,7 +325,14 @@ export function getReactLoweringDiagnostics(proto: PrototypeIR): readonly Compil
   for (const handler of proto.lifecycleHandlers ?? []) {
     if (handler.phase === 'before-dispose')
       reject('Terminal disposal cannot be equated with React effect cleanup or StrictMode replay.');
-    checkActions(handler.body, proto, new Set(), reject);
+    checkActions(
+      handler.body,
+      proto,
+      new Set(),
+      reject,
+      false,
+      handler.phase !== 'created' && handler.phase !== 'unmounted'
+    );
   }
   for (const watch of proto.propWatches ?? []) {
     if (
@@ -312,6 +343,29 @@ export function getReactLoweringDiagnostics(proto: PrototypeIR): readonly Compil
       reject('A keyed props watcher requires non-empty declared keys.');
     checkActions(watch.body, proto, new Set(), reject, true);
   }
+  const checkGroup = (bodies: readonly (readonly ActionStatementIR[])[]) => {
+    const invocations: ActionStatementIR[] = bodies.map((body) => ({ kind: 'invoke', body }));
+    for (const issue of getUpdateOrderingIssues(invocations)) reject(issue);
+  };
+  const eventGroups = new Map<string, (readonly ActionStatementIR[])[]>();
+  for (const event of proto.events) {
+    const key = event.scope + ':' + (DOM_EVENTS[event.eventName] ?? event.eventName);
+    const group = eventGroups.get(key) ?? [];
+    group.push(eventActionFlow(event));
+    eventGroups.set(key, group);
+  }
+  for (const group of eventGroups.values()) checkGroup(group);
+  checkGroup(
+    (proto.lifecycleHandlers ?? [])
+      .filter((handler) => handler.phase === 'mounted')
+      .map((handler) => handler.body)
+  );
+  checkGroup([
+    ...(proto.propWatches ?? []).map((watch) => watch.body),
+    ...(proto.lifecycleHandlers ?? [])
+      .filter((handler) => handler.phase === 'updated')
+      .map((handler) => handler.body),
+  ]);
   for (const declaration of proto.props) {
     if (declaration.kind === 'object' || declaration.kind === 'any')
       reject(
@@ -398,8 +452,10 @@ export function getReactLoweringDiagnostics(proto: PrototypeIR): readonly Compil
     if (rule.dynamic) reject('Dynamic rule conditions require executable semantic IR.');
     checkCondition(rule.condition);
   }
+  let slots = 0;
   const checkChildren = (children: readonly TemplateChildIR[]): void => {
     for (const child of children) {
+      if (child.kind === 'slot') slots += 1;
       if (
         child.kind === 'prop-read' &&
         !proto.props.some((declaration) => declaration.name === child.propName)
@@ -415,6 +471,8 @@ export function getReactLoweringDiagnostics(proto: PrototypeIR): readonly Compil
   };
   if (proto.render.kind === 'static-tree' || proto.render.kind === 'reactive-tree')
     checkChildren(proto.render.root.children);
+  else if (proto.render.kind === 'fragment') checkChildren(proto.render.children);
+  if (slots > 1) reject('A prototype template can contain at most one default slot.');
   return issues;
 }
 
@@ -613,7 +671,12 @@ function initialStateValue(state: StateDeclIR): ScalarLiteral {
   return value;
 }
 
-function emitState(state: StateDeclIR, index: number, created: boolean): ts.Statement[] {
+function emitState(
+  state: StateDeclIR,
+  index: number,
+  created: boolean,
+  feedback: boolean
+): ts.Statement[] {
   const type = scalarType(state.kind);
   const initial = created
     ? f.createElementAccessExpression(id('_createdStates'), index)
@@ -621,13 +684,6 @@ function emitState(state: StateDeclIR, index: number, created: boolean): ts.Stat
   const ref = id('_stateRef' + index);
   const next = id('_nextState');
   return [
-    variable(
-      f.createArrayBindingPattern([
-        f.createBindingElement(undefined, undefined, '_state' + index),
-        f.createBindingElement(undefined, undefined, '_setState' + index),
-      ]),
-      react('useState', [initial], [type])
-    ),
     variable(ref, react('useRef', [initial], [type])),
     variable(
       '_writeState' + index,
@@ -651,11 +707,138 @@ function emitState(state: StateDeclIR, index: number, created: boolean): ts.Stat
             throwError('State update violates domain: ' + state.name + '.')
           ),
           assign(prop(ref, 'current'), next),
-          f.createExpressionStatement(call(id('_setState' + index), [next])),
+          ...(feedback ? [f.createExpressionStatement(call(id('_refreshFeedback')))] : []),
         ])
       )
     ),
   ];
+}
+
+/** State writes do not request a render. Admitted callbacks explicitly request one. */
+function emitRenderRequest(prototype: PrototypeIR): ts.Statement[] {
+  if (
+    !prototype.states.length &&
+    !prototype.events.length &&
+    !prototype.lifecycleHandlers?.length &&
+    !prototype.propWatches?.length
+  )
+    return [];
+  const tuple = f.createTupleTypeNode(prototype.states.map((state) => scalarType(state.kind)));
+  const liveStates = () =>
+    f.createArrayLiteralExpression(
+      prototype.states.map((_state, index) => prop(id('_stateRef' + index), 'current'))
+    );
+  const inputs = f.createArrayLiteralExpression(
+    prototype.props.flatMap((declaration) => [
+      call(prop(id('Object'), 'hasOwn'), [id('props'), f.createStringLiteral(declaration.name)]),
+      item(id('props'), declaration.name),
+    ])
+  );
+  const snapshot = prop(id('_templateState'), 'current');
+  const version = prop(id('_requestVersion'), 'current');
+  const statements: ts.Statement[] = [
+    variable('_templateState', react('useRef', [liveStates()], [tuple])),
+    variable('_requestVersion', react('useRef', [f.createNumericLiteral(0)])),
+    variable('_renderVersion', version),
+    variable(
+      '_renderInputs',
+      inputs,
+      f.createArrayTypeNode(f.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword))
+    ),
+    variable('_committedInputs', react('useRef', [id('_renderInputs')])),
+    variable(
+      '_inputsChanged',
+      call(prop(id('_renderInputs'), 'some'), [
+        f.createArrowFunction(
+          undefined,
+          undefined,
+          [
+            f.createParameterDeclaration(undefined, undefined, '_value'),
+            f.createParameterDeclaration(undefined, undefined, '_index'),
+          ],
+          undefined,
+          undefined,
+          not(
+            call(prop(id('Object'), 'is'), [
+              id('_value'),
+              f.createElementAccessExpression(
+                prop(id('_committedInputs'), 'current'),
+                id('_index')
+              ),
+            ])
+          )
+        ),
+      ])
+    ),
+    variable(
+      '_renderStates',
+      f.createConditionalExpression(
+        id('_inputsChanged'),
+        undefined,
+        liveStates(),
+        undefined,
+        snapshot
+      ),
+      tuple
+    ),
+    variable(
+      f.createArrayBindingPattern([
+        f.createOmittedExpression(),
+        f.createBindingElement(undefined, undefined, '_setRenderRevision'),
+      ]),
+      react('useState', [f.createNumericLiteral(0)])
+    ),
+    variable(
+      '_requestUpdate',
+      f.createArrowFunction(
+        undefined,
+        undefined,
+        [],
+        undefined,
+        undefined,
+        block([
+          assign(snapshot, liveStates()),
+          assign(version, bin(version, ts.SyntaxKind.PlusToken, f.createNumericLiteral(1))),
+          f.createExpressionStatement(
+            call(id('_setRenderRevision'), [
+              f.createArrowFunction(
+                undefined,
+                undefined,
+                [f.createParameterDeclaration(undefined, undefined, '_revision')],
+                undefined,
+                undefined,
+                bin(id('_revision'), ts.SyntaxKind.PlusToken, f.createNumericLiteral(1))
+              ),
+            ])
+          ),
+        ])
+      )
+    ),
+    f.createExpressionStatement(
+      react('useLayoutEffect', [
+        f.createArrowFunction(
+          undefined,
+          undefined,
+          [],
+          undefined,
+          undefined,
+          block([
+            assign(prop(id('_committedInputs'), 'current'), id('_renderInputs')),
+            f.createIfStatement(
+              eq(version, id('_renderVersion')),
+              assign(snapshot, id('_renderStates'))
+            ),
+          ])
+        ),
+      ])
+    ),
+  ];
+  prototype.states.forEach((_state, index) =>
+    statements.push(
+      variable('_state' + index, f.createElementAccessExpression(id('_renderStates'), index))
+    )
+  );
+  return statements;
 }
 
 const operatorTokens: Readonly<Record<string, ts.BinaryOperator>> = {
@@ -723,7 +906,7 @@ function emitValueHelpers(prototype: PrototypeIR): ts.Statement[] {
         value(action.condition);
         actions(action.then);
         actions(action.otherwise);
-      }
+      } else if (action.kind === 'invoke') actions(action.body);
     }
   };
   const rule = (condition: RuleExpr): void => {
@@ -882,17 +1065,42 @@ function emitActions(
       case 'return':
         output.push(f.createReturnStatement());
         break;
+      case 'request-update':
+        output.push(f.createExpressionStatement(call(id('_requestUpdate'))));
+        break;
+      case 'invoke':
+        output.push(
+          f.createExpressionStatement(
+            call(
+              f.createArrowFunction(
+                undefined,
+                undefined,
+                [],
+                undefined,
+                undefined,
+                block(emitActions(action.body, proto, locals, counter, context))
+              )
+            )
+          )
+        );
+        break;
     }
   }
   return output;
 }
 
-function emitCondition(condition: RuleExpr, prototype: PrototypeIR): ts.Expression {
+function emitCondition(
+  condition: RuleExpr,
+  prototype: PrototypeIR,
+  committed = false
+): ts.Expression {
   if (condition.kind === 'true') return f.createTrue();
   if (condition.kind === 'false') return f.createFalse();
-  if (condition.kind === 'not') return not(emitCondition(condition.expr, prototype));
+  if (condition.kind === 'not') return not(emitCondition(condition.expr, prototype, committed));
   if (condition.kind === 'all' || condition.kind === 'any') {
-    const values = condition.exprs.map((expression) => emitCondition(expression, prototype));
+    const values = condition.exprs.map((expression) =>
+      emitCondition(expression, prototype, committed)
+    );
     const identity = condition.kind === 'all' ? f.createTrue() : f.createFalse();
     return values.reduce(
       (acc, value) => (condition.kind === 'all' ? and(acc, value) : or(acc, value)),
@@ -901,8 +1109,18 @@ function emitCondition(condition: RuleExpr, prototype: PrototypeIR): ts.Expressi
   }
   const source =
     condition.source === 'prop'
-      ? id('_prop' + prototype.props.findIndex((declaration) => declaration.name === condition.key))
-      : id('_state' + prototype.states.findIndex((state) => state.name === condition.key));
+      ? committed
+        ? f.createElementAccessExpression(
+            prop(id('_committedProps'), 'current'),
+            prototype.props.findIndex((declaration) => declaration.name === condition.key)
+          )
+        : id(
+            '_prop' + prototype.props.findIndex((declaration) => declaration.name === condition.key)
+          )
+      : prop(
+          id('_stateRef' + prototype.states.findIndex((state) => state.name === condition.key)),
+          'current'
+        );
   if (condition.operator === 'eq')
     return call(id(operatorHelpers['===']), [source, scalar(condition.value)]);
   return and(
@@ -1014,7 +1232,10 @@ function emitCreatedInitializer(prototype: PrototypeIR): ts.Statement[] {
 
 /** Keep the last committed props available to unmount callbacks without stale closures. */
 function emitCommittedProps(prototype: PrototypeIR): ts.Statement[] {
-  if (!(prototype.lifecycleHandlers ?? []).some((handler) => handler.phase !== 'created'))
+  if (
+    !prototype.rules.length &&
+    !(prototype.lifecycleHandlers ?? []).some((handler) => handler.phase !== 'created')
+  )
     return [];
   return [
     variable(
@@ -1178,10 +1399,6 @@ function emitEventEffects(prototype: PrototypeIR): ts.Statement[] {
     )
   );
   return [
-    variable(
-      '_rootRef',
-      react('useRef', [f.createNull()], [nullable(f.createTypeReferenceNode('Element'))])
-    ),
     f.createExpressionStatement(
       react('useLayoutEffect', [
         f.createArrowFunction(undefined, undefined, [], undefined, undefined, block(setup)),
@@ -1236,6 +1453,109 @@ function emitMergedTokens(tokens: readonly ConditionalToken[]): ts.Expression[] 
   return output;
 }
 
+function emitClassName(classes: readonly ts.Expression[]): ts.Expression {
+  return or(
+    call(
+      prop(call(prop(f.createArrayLiteralExpression(classes), 'filter'), [id('Boolean')]), 'join'),
+      [f.createStringLiteral(' ')]
+    ),
+    f.createVoidZero()
+  );
+}
+
+/** Rule feedback is a state subscription; it does not request a template render. */
+function emitFeedbackEffects(prototype: PrototypeIR): ts.Statement[] {
+  if (!prototype.rules.length) return [];
+  const active = prop(id('_feedbackActive'), 'current');
+  const root = id('_feedbackRoot');
+  const tokens: ConditionalToken[] = prototype.staticStyleTokens.map((token) => ({ token }));
+  const body: ts.Statement[] = [
+    variable(root, prop(id('_rootRef'), 'current')),
+    f.createIfStatement(or(not(active), eq(root, f.createNull())), f.createReturnStatement()),
+  ];
+  prototype.rules.forEach((rule, index) => {
+    const condition = id('_feedbackRule' + index);
+    body.push(variable(condition, emitCondition(rule.condition, prototype, true)));
+    tokens.push(...rule.styleTokens.map((token) => ({ token, condition })));
+  });
+  body.push(
+    variable(
+      '_feedbackClasses',
+      emitClassName([prop(id('_feedbackClassName'), 'current'), ...emitMergedTokens(tokens)])
+    )
+  );
+  body.push(
+    f.createIfStatement(
+      ne(
+        call(prop(root, 'getAttribute'), [f.createStringLiteral('class')]),
+        bin(id('_feedbackClasses'), ts.SyntaxKind.QuestionQuestionToken, f.createNull())
+      ),
+      block([
+        f.createIfStatement(
+          id('_feedbackClasses'),
+          f.createExpressionStatement(
+            call(prop(root, 'setAttribute'), [
+              f.createStringLiteral('class'),
+              id('_feedbackClasses'),
+            ])
+          ),
+          f.createExpressionStatement(
+            call(prop(root, 'removeAttribute'), [f.createStringLiteral('class')])
+          )
+        ),
+      ])
+    )
+  );
+  return [
+    variable('_feedbackActive', react('useRef', [f.createFalse()])),
+    variable('_feedbackClassName', react('useRef', [prop(id('props'), 'className')])),
+    variable(
+      '_refreshFeedback',
+      f.createArrowFunction(undefined, undefined, [], undefined, undefined, block(body))
+    ),
+    f.createExpressionStatement(
+      react('useLayoutEffect', [
+        f.createArrowFunction(
+          undefined,
+          undefined,
+          [],
+          undefined,
+          undefined,
+          block([
+            assign(prop(id('_feedbackClassName'), 'current'), prop(id('props'), 'className')),
+            assign(active, f.createTrue()),
+            f.createExpressionStatement(call(id('_refreshFeedback'))),
+          ])
+        ),
+      ])
+    ),
+    f.createExpressionStatement(
+      react('useLayoutEffect', [
+        f.createArrowFunction(
+          undefined,
+          undefined,
+          [],
+          undefined,
+          undefined,
+          block([
+            f.createReturnStatement(
+              f.createArrowFunction(
+                undefined,
+                undefined,
+                [],
+                undefined,
+                undefined,
+                block([assign(active, f.createFalse())])
+              )
+            ),
+          ])
+        ),
+        f.createArrayLiteralExpression([]),
+      ])
+    ),
+  ];
+}
+
 function emitTemplate(
   node: TemplateElementIR,
   prototype: PrototypeIR,
@@ -1252,24 +1572,10 @@ function emitTemplate(
     });
   classes.push(...emitMergedTokens(tokens));
   if (classes.length)
-    properties.push(
-      f.createPropertyAssignment(
-        'className',
-        or(
-          call(
-            prop(
-              call(prop(f.createArrayLiteralExpression(classes), 'filter'), [id('Boolean')]),
-              'join'
-            ),
-            [f.createStringLiteral(' ')]
-          ),
-          f.createVoidZero()
-        )
-      )
-    );
+    properties.push(f.createPropertyAssignment('className', emitClassName(classes)));
   if (root) {
     properties.push(f.createPropertyAssignment('style', prop(id('props'), 'style')));
-    if (prototype.events.length)
+    if (prototype.events.length || prototype.rules.length)
       properties.push(
         f.createPropertyAssignment(
           'ref',
@@ -1382,8 +1688,19 @@ export function emitReactComponent(
   );
   const hasCreated = !!prototype.lifecycleHandlers?.some((handler) => handler.phase === 'created');
   body.push(...emitCreatedInitializer(prototype));
-  prototype.states.forEach((state, index) => body.push(...emitState(state, index, hasCreated)));
+  prototype.states.forEach((state, index) =>
+    body.push(...emitState(state, index, hasCreated, prototype.rules.length > 0))
+  );
+  body.push(...emitRenderRequest(prototype));
   body.push(...emitCommittedProps(prototype));
+  if (prototype.events.length || prototype.rules.length)
+    body.push(
+      variable(
+        '_rootRef',
+        react('useRef', [f.createNull()], [nullable(f.createTypeReferenceNode('Element'))])
+      )
+    );
+  body.push(...emitFeedbackEffects(prototype));
   body.push(...emitEventEffects(prototype));
   body.push(...emitPropWatches(prototype));
   body.push(...emitLifecycleEffects(prototype));
@@ -1393,10 +1710,15 @@ export function emitReactComponent(
   prototype.rules.forEach((rule, index) =>
     body.push(variable('_rule' + index, emitCondition(rule.condition, prototype)))
   );
-  const root: TemplateElementIR =
+  // Template nodes are contents of the host root; even the outermost template
+  // element cannot own component-level feedback, events, or presentation inputs.
+  const children: readonly TemplateChildIR[] =
     prototype.render.kind === 'static-tree' || prototype.render.kind === 'reactive-tree'
-      ? prototype.render.root
-      : { tag: 'div', children: [{ kind: 'slot' }] };
+      ? [{ kind: 'element', node: prototype.render.root }]
+      : prototype.render.kind === 'fragment'
+        ? prototype.render.children
+        : [{ kind: 'slot' }];
+  const root: TemplateElementIR = { tag: 'div', children };
   body.push(f.createReturnStatement(emitTemplate(root, prototype, true)));
   statements.push(
     f.createFunctionDeclaration(

@@ -10,9 +10,10 @@ import { build, version as esbuildVersion } from 'esbuild';
 import ts from 'typescript';
 import { parse as parseYaml } from 'yaml';
 import { PROTO_IR_VERSION } from '../../packages/compiler/src/ir/types';
+import { COMPILATION_TARGETS } from '../../packages/compiler/src/targets/kinds';
 
 const IR_VERSION = PROTO_IR_VERSION;
-const TARGETS = ['react', 'gpui', 'kernel', 'ir'] as const;
+const TARGETS = COMPILATION_TARGETS;
 
 interface CompilerBuildIdentity {
   readonly schema: 'proto-ui.compiler-package.v3';
@@ -165,6 +166,7 @@ async function main() {
     absWorkingDir: root,
     entryPoints: {
       index: 'packages/compiler/src/index.ts',
+      'kernel-host': 'packages/compiler/src/kernel-host.ts',
       cli: 'scripts/compiler/pinned-cli-entry.ts',
     },
     outdir: virtualOutput,
@@ -234,6 +236,7 @@ async function main() {
     engines: { node: '24.x' },
     exports: {
       '.': './index.js',
+      './kernel-host': './kernel-host.js',
       './build': './compiler-build.json',
       './profiles': './profiles.json',
     },
@@ -306,6 +309,7 @@ async function main() {
         'Unsupported semantics produce diagnostics; this package does not promise that every Base prototype is admitted.',
         'CLI compilation rejects existing generated files unless --overwrite is supplied. The current CLI does not provide the historical diff/watch commands.',
         'index.js exports the current compiler API. This artifact does not publish TypeScript declaration files or the historical compilerBuildIdentity API.',
+        'kernel-host.js exposes bounded WASM ABI access under ./kernel-host; there is no ./runtime export or Proto interpreter.',
         '',
       ].join('\n'),
     }

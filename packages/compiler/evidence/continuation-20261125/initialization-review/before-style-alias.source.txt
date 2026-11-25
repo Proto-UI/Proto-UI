@@ -1,0 +1,10 @@
+import {TsProgramSession,extractModuleIR} from '/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/index.ts';
+import {getReactLoweringDiagnostics} from '/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/targets/react.ts';
+const s=new TsProgramSession({rootDir:"/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125"});
+const source="import {definePrototype,tw} from '@proto.ui/core';\n"+`export default definePrototype({name:'render-tw-alias',setup(){
+ return r=>r.el('div',{style:twAlias('p-2')},'x');
+ const twAlias=tw;
+}});`;
+const {program,entryPath}=s.createVirtualProgram('packages/compiler/test/__review_render_tw_alias__.proto.ts',source);
+const out=extractModuleIR(program,entryPath),p=out.ir.prototypes[0];
+console.log(JSON.stringify({diagnostics:out.diagnostics,unlowered:p?.unlowered,render:p?.render,admission:p?getReactLoweringDiagnostics(p):[]}));

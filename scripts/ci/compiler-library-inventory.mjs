@@ -1,5 +1,5 @@
 // Source-bound whole-library admission receipts for the coordinated CI cycle.
-// The public registry supplies the profile denominator. No accepted baseline is
+// The current compiler supplies component targets; retired target obligations remain explicit. No accepted baseline is
 // invented; UNSUPPORTED/UNIMPLEMENTED remain explicit admission boundaries.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
@@ -68,7 +68,7 @@ export function assertCompleteInventory(report, expected) {
     'Truncated entry/profile denominator'
   );
   const observed = new Set();
-  const counts = { PASS: 0, FAIL: 0, UNSUPPORTED: 0, UNIMPLEMENTED: 0, UNTESTED: 0 };
+  const counts = { PASS: 0, FAIL: 0, UNSUPPORTED: 0, UNIMPLEMENTED: 0, UNTESTED: 0, ANALYZED: 0 };
   for (const row of report.rows) {
     const entry = entries.get(row.entry),
       profile = profiles.get(row.profile);
@@ -86,18 +86,28 @@ export function assertCompleteInventory(report, expected) {
       assert.deepEqual(row.diagnostics, profile.declarationDiagnostics);
     } else {
       assert.ok(
-        ['PASS', 'UNSUPPORTED', 'FAIL'].includes(row.status),
+        ['PASS', 'UNSUPPORTED', 'FAIL', 'ANALYZED'].includes(row.status),
         'Implemented row is UNTESTED'
       );
       assert.equal(row.execution, 'compileFile-source-to-emitter');
       assert.ok(row.closure?.sha256 && row.elapsedMs >= 0, 'Missing actual compilation receipt');
       if (row.status === 'PASS') {
         assert.equal(row.output?.profile, row.profile, 'PASS requires its emitted profile');
+        assert.ok(row.nativeEmittedPrototypes > 0, 'PASS requires at least one emitted prototype');
+        assert.equal(row.nativeEmittedPrototypes, row.prototypeDeclarations);
+        assert.ok(row.output.artifacts.count > 0, 'PASS requires a native source artifact');
         assert.equal(row.failureKind, null);
         assert.equal(row.firstDiagnostic, null);
         assert.deepEqual(row.diagnostics, []);
+      } else if (row.status === 'ANALYZED') {
+        assert.equal(row.analysisKind, 'hook-only');
+        assert.equal(row.prototypeDeclarations, 0);
+        assert.ok(row.authoredHookDeclarations > 0);
+        assert.equal(row.nativeEmittedPrototypes, 0);
+        assert.equal(row.output, undefined, 'Analysis is not emitted component source');
       } else {
         assert.equal(row.output, undefined, 'A refused input cannot claim an emitted output');
+        assert.equal(row.nativeEmittedPrototypes, 0, 'Refusal cannot claim native emission');
         const classified = classifyResult({ ok: false, diagnostics: row.diagnostics });
         assert.equal(row.status, classified.status);
         assert.equal(row.failureKind, classified.failureKind);
@@ -105,6 +115,15 @@ export function assertCompleteInventory(report, expected) {
       }
     }
   }
+  assert.equal(
+    report.counts.executionVerifiedPrototypes,
+    0,
+    'Source inventory does not execute generated components'
+  );
+  assert.equal(
+    report.counts.nativeEmittedPrototypes,
+    report.rows.reduce((sum, row) => sum + (row.nativeEmittedPrototypes ?? 0), 0)
+  );
   assert.equal(report.counts.entries, entries.size);
   const families = {};
   for (const entry of entries.values()) families[entry.family] = (families[entry.family] ?? 0) + 1;

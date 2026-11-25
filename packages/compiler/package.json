@@ -13,9 +13,9 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
-    "./runtime": {
-      "types": "./src/runtime/index.ts",
-      "default": "./src/runtime/index.ts"
+    "./kernel-host": {
+      "types": "./src/kernel-host.ts",
+      "default": "./src/kernel-host.ts"
     },
     "./browser": {
       "types": "./src/browser/index.ts",

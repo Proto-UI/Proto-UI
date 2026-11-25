@@ -19,18 +19,26 @@ const { prototypeId, items = [{ props: {}, text: 'Preview' }], isZh = false } = 
       <p class="compiler-explanation">
         {
           isZh
-            ? '选择目标后查看此原型的生成源码与预览。展开编辑器可以修改源码；每次编译创建新的预览实例。'
-            : 'Choose a target to inspect this prototype’s generated source and preview. Open the editor to change its source; each compilation creates a fresh preview instance.'
+            ? '查看此原型的 React 生成源码与预览。展开编辑器可以修改源码；每次编译创建新的预览实例。不支持的原型能力会显示诊断。'
+            : 'Inspect this prototype’s generated React source and preview. Open the editor to change its source; each compilation creates a fresh preview instance. Unsupported prototype features produce diagnostics.'
         }
       </p>
       <div class="compiler-controls">
         <label
           >{isZh ? '生成目标' : 'Target'}
           <select data-compiler-target>
-            <option value="web-component-source-v1">Web Components</option>
-            <option value="react-dom-source-v1">React 19</option>
-            <option value="vue-source-v1">Vue 3</option>
-            <option value="vue2-source-v1">Vue 2</option>
+            <option value="react">React 19</option>
+            <option value="web-component" disabled
+              >Web Components · {isZh ? '尚未迁移' : 'not yet migrated'}</option
+            >
+            <option value="vue" disabled>Vue 3 · {isZh ? '尚未迁移' : 'not yet migrated'}</option>
+            <option value="vue2" disabled>Vue 2 · {isZh ? '尚未迁移' : 'not yet migrated'}</option>
+            <option value="gpui" disabled
+              >GPUI · {isZh ? '使用本地编译器' : 'use the native compiler'}</option
+            >
+            <option value="kernel" disabled
+              >LLVM · {isZh ? '使用本地编译器' : 'use the native compiler'}</option
+            >
           </select></label
         >
         <button type="button" data-compiler-run>{isZh ? '编译' : 'Compile'}</button>

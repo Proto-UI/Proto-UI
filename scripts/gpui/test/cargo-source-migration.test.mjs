@@ -307,8 +307,13 @@ function invoke(t, args) {
   return { result, output };
 }
 
-test('CLI profile selects the unchanged commit and records expectation even when Cargo is absent', (t) => {
-  const { result, output } = invoke(t, ['--profile', 'gpui-source-v1']);
+test('CLI explicit pinned Git source records expectation even when Cargo is absent', (t) => {
+  const { result, output } = invoke(t, [
+    '--git',
+    git,
+    '--rev',
+    '62e5991dd0f0c8a3af8d5e7e9c4652490d468db8',
+  ]);
   assert.equal(result.status, 1);
   const receipt = JSON.parse(readFileSync(output, 'utf8'));
   assert.deepEqual(receipt.expectedDependency, {
@@ -342,17 +347,17 @@ test('CLI registry selection retains independently specified platform version in
 });
 
 for (const [name, args, error] of [
-  ['no source', [], /Select --profile/],
-  ['future profile', ['--profile', 'gpui-standalone-v1'], /Only the existing/],
+  ['no source', [], /Select --git\/--rev/],
+  ['future profile', ['--profile', 'gpui-standalone-v1'], /Unknown option --profile/],
   [
     'mixed profile and source',
     ['--profile', 'gpui-source-v1', '--git', git, '--rev', revision],
-    /profile or explicit source/,
+    /Unknown option --profile/,
   ],
   [
     'mixed profile and platform',
     ['--profile', 'gpui-source-v1', '--platform-git', git, '--platform-rev', revision],
-    /profile or explicit source/,
+    /Unknown option --profile/,
   ],
   [
     'mixed source kinds',

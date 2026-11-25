@@ -9,7 +9,7 @@ export function getKernelLoweringDiagnostics(module: ModuleIR): CompilerDiagnost
       issues.push(diagnostic('PUI_KERNEL_UNSUPPORTED', 'llvm', message, proto.span));
     for (const gap of proto.unlowered ?? []) reject(gap.operation + ': ' + gap.message);
     if (
-      proto.hooks.length ||
+      proto.hooks.some((hook) => !hook.lowered) ||
       proto.contexts.length ||
       proto.exposes.length ||
       proto.lifecycle.length ||

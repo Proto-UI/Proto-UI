@@ -6,23 +6,26 @@ since: 0.3.0
 lifecycleRationale: >-
   Defines the corrected #1809 0.4-scope compiler contract from TypeScript binding and Proto semantic HIR through target admission, React/GPUI AST generation, and native LLVM IRBuilder output. Replaces the former protocol-wrapper route under the current user's explicit instruction. Remains draft pending full semantic coverage, regression migration, cross-target consumer evidence, and applicable acceptance; earlier wrapper and metadata tests are not inherited proof.
 
+
 summary: Preserve authored semantics through explicit HIR and verified target lowering; reject unsupported behavior and generate programs through target AST/IR APIs without runtime fallback.
 statement:
   zh-CN: >-
     编译器必须将合法的 Proto UI 定义与 authored 行为表示为可追踪源位置的语义 HIR，按所选目标检查能力并保存求值顺序、控制流、状态、事件、生命周期和所有权，再通过 TypeScript AST、GPUI Rust AST 或原生 LLVM IRBuilder 构造目标程序。未实现语义必须给出明确的未支持诊断；不得静默删除或委托原型 runtime。请求的产物须实际构建及验证，分析成功、内核输出、组件原生编译和真实消费者执行分别报告。
 
+
   en: >-
     The compiler must represent valid Proto UI definitions and authored behavior as source-traceable semantic HIR, admit capabilities for the selected target, preserve evaluation order, control flow, state, events, lifecycle, and ownership, then construct target programs through TypeScript AST, GPUI Rust AST, or native LLVM IRBuilder. Unsupported semantics receive explicit diagnostics and must not be erased or delegated to a prototype runtime. Requested artifacts must actually be built and verified; analysis, kernel emission, native component compilation, and consumer execution are reported separately.
+
 
 criteria:
   - id: C-COMPILER-PIPELINE-0001-FRONTEND
     text:
-      zh-CN: 使用缓存 ts.Program/ts.TypeChecker 解析真实符号、导出、别名及组合；已识别操作产生语义表示，无法分析的语句/回调/选项产生含源位置和原因的 lowering gap，不得仅以名称、语法扫描或能力缺失推定可静态编译。
-      en: Resolve real symbols, exports, aliases, and composition through cached ts.Program/ts.TypeChecker sessions. Recognized operations produce semantics; unanalyzed statements/callbacks/options produce source-located lowering gaps rather than being treated as statically compilable because a name scan or capability summary omitted them.
+      zh-CN: 使用缓存 ts.Program/ts.TypeChecker 解析真实符号、导出、别名及组合；已识别操作产生语义表示，无法分析的语句/回调/选项产生含源位置和原因的 lowering gap，不得仅以名称、语法扫描或能力缺失推定可静态编译。常量与函数别名的读取须证明初始化顺序，保留调用者执行点并检查跨模块值依赖循环；未知全局读取、回调默认参数和异步/生成器效果不得被消除。
+      en: Resolve real symbols, exports, aliases, and composition through cached ts.Program/ts.TypeChecker sessions. Recognized operations produce semantics; unanalyzed statements/callbacks/options produce source-located lowering gaps rather than being treated as statically compilable because a name scan or capability summary omitted them. Constant and function-alias reads require initialization-order proof, including caller execution points and cyclic module value dependencies; unknown global reads, callback defaults, and asynchronous/generator effects must not disappear.
   - id: C-COMPILER-PIPELINE-0001-HIR
     text:
-      zh-CN: HIR 必须保存表达式与动作体、if/else 两侧、短路及求值次数、绑定身份、props/default/empty/update、state读写与事件顺序、生命周期及能力owner；任何尚未完整表示或降低的相关行为在目标生成前明确拒绝，不得被摘要或默认常量代替。
-      en: HIR must preserve expressions and action bodies, both if/else branches, short-circuit evaluation, binding identity, props/default/empty/update semantics, state and event order, lifecycle, and capability ownership. Relevant behavior not fully represented or lowered is rejected before target emission, never replaced by summaries or default constants.
+      zh-CN: HIR 必须保存表达式与动作体、if/else 两侧、短路及求值次数、绑定身份、props/default/empty/update、state读写与事件顺序、生命周期及能力owner。普通helper调用的参数只求值一次且return只退出该次调用；authored Hook按真实注册模式展开。state写入、订阅反馈和显式run.update是独立操作；宿主自发重画不得提前推进模板状态。任何尚未完整表示或降低的相关行为在目标生成前明确拒绝，不得被摘要或默认常量代替。
+      en: HIR must preserve expressions and action bodies, both if/else branches, short-circuit evaluation, binding identity, props/default/empty/update semantics, state and event order, lifecycle, and capability ownership. Ordinary helper arguments evaluate once and return exits only that invocation; authored Hooks expand according to their registration mode. State writes, subscription feedback, and explicit run.update are distinct operations; incidental host redraws must not advance template state. Relevant behavior not fully represented or lowered is rejected before target emission, never replaced by summaries or default constants.
   - id: C-COMPILER-PIPELINE-0001-SSA-IR
     text:
       zh-CN: 类型化内核必须满足值唯一性、基本块终结、操作数与返回类型、支配关系、PHI前驱、调用签名及指针/槽范围不变量；优化前后校验，非法IR必须在目标构造前失败。
@@ -45,8 +48,8 @@ criteria:
       en: The GPUI backend must construct Rust components through syn nodes and prettyplease, preserving admitted props/state/Render/event/rule/lifecycle semantics without Rust source templates or prototype execution fallback. Dependency pins/features remain auditable against real consumers; actual Cargo builds, behavior, and Verdant GPUI acceptance are recorded separately, with diagnostics for missing capabilities.
   - id: C-COMPILER-PIPELINE-0001-DIAGNOSTICS
     text:
-      zh-CN: API/CLI输出结构化诊断与确定退出码，区分输入非法、目标未支持、构建或验证失败。显式请求的LLVM/原生/WASM阶段必须真实执行；工具链不可用时失败，不以warning或静默跳过记作通过，输出失败不得伪造成功产物。
-      en: APIs/CLI emit structured diagnostics and deterministic exits distinguishing invalid input, unsupported targets, and build/verification failure. Explicit LLVM/native/WASM stages actually run and fail when unavailable rather than passing with warnings or silent skips; failed output must not be presented as a successful artifact.
+      zh-CN: API/CLI输出结构化诊断与确定退出码，区分输入非法、目标未支持、构建或验证失败。显式请求的LLVM/原生/WASM阶段必须真实执行；工具链不可用时失败，不以warning或静默跳过记作通过。产物写入须保护输入及已有文件，拒绝输出路径上的符号链接，并发无覆盖写入不能互相覆盖；验证失败不得留下冒充成功的产物。
+      en: APIs/CLI emit structured diagnostics and deterministic exits distinguishing invalid input, unsupported targets, and build/verification failure. Explicit LLVM/native/WASM stages actually run and fail when unavailable rather than passing with warnings or silent skips. Artifact publication protects inputs and existing files, rejects symbolic links in output paths, and prevents concurrent no-overwrite writers from replacing each other; verification failure must not leave artifacts presented as successful output.
   - id: C-COMPILER-PIPELINE-0001-COVERAGE
     text:
       zh-CN: 每文件、原型、hook及目标分别报告分析、原生编译、未支持/非法、内核生成与消费者执行；统计包含原因和证明边界。产物体积计入传递依赖，冷/热/增量耗时分开，包装行数与删除代码量不能代表覆盖或性能收益。
@@ -78,11 +81,23 @@ sources:
   - path: packages/compiler/native/llvm-builder.cpp
   - path: packages/compiler/src/targets/react.ts
   - path: packages/compiler/src/targets/kernel.ts
+  - path: packages/compiler/src/targets/action-flow.ts
+  - path: packages/compiler/src/targets/kinds.ts
+  - path: packages/compiler/src/output.ts
   - path: packages/compiler/src/targets/gpui.ts
   - path: packages/compiler/native/rust-builder/src/main.rs
   - path: packages/compiler/native/rust-builder/test-support/Cargo.toml
-  - path: packages/compiler/src/runtime/index.ts
+  - path: packages/compiler/src/kernel-host.ts
+  - path: internal/contracts/state/state-v0.md
+  - path: internal/contracts/template/template-node.md
 openQuestions:
+  - id: C-COMPILER-PIPELINE-0001-Q-COMMIT-SCHEDULING
+    question:
+      zh-CN: 当前原生目标仅准入每个回调执行路径末尾的一次显式update，跨handler、watch与生命周期组也须检查。首次update同步读取模板而后续in-flight请求合并的完整commit调度、完整Expose读订阅spec/dispose语义、以及更多原子能力仍需实现；这些合法定义不能被重新解释为另一种语义。
+      en: Current native targets admit one terminal explicit update per callback path and check combined handler, watch, and lifecycle sequences. Full commit scheduling with synchronous first-request template reads and coalesced in-flight requests, complete Expose read/subscription/spec/disposal behavior, and additional atomic capabilities remain to be implemented; valid definitions must not be reinterpreted as different semantics.
+    blocks:
+      - activation:C-COMPILER-PIPELINE-0001
+      - criterion:C-COMPILER-PIPELINE-0001#C-COMPILER-PIPELINE-0001-HIR
   - id: C-COMPILER-PIPELINE-0001-Q-NON-REACT-TARGETS
     question:
       zh-CN: 全量原型语义和各目标降级、浏览器/CLI/库兼容、旧回归及GPUI/Shenko/Verdant真实消费者证据尚待逐项完成；局部React与LLVM内核用例不能覆盖这些义务。

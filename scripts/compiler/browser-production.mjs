@@ -233,11 +233,13 @@ export function verifyProductionBrowserEvidence(receipt, environment = process.e
   for (const worker of workers) {
     const url = new URL(worker.url);
     assert.equal(url.origin, receipt.service.url);
-    assert.match(url.pathname, /^\/_astro\/[^/]+\.js$/);
-    assert.equal(worker.closed, true, 'navigation must retire every actual module Worker');
+    assert.equal(url.protocol, 'blob:');
+    assert.equal(worker.sourceAsset, 'compiler-assets/compiler.js');
+    assert.equal(worker.compilerSha256, production.files[worker.sourceAsset]?.sha256);
+    assert.equal(worker.closed, true, 'navigation must retire every actual compiler Worker');
     assert.ok(
-      receipt.loadedProductionAssets[url.pathname.slice(1)],
-      'actual Worker entry was consumed'
+      receipt.loadedProductionAssets[worker.sourceAsset],
+      'digest-verified Worker source was consumed from the sealed build'
     );
   }
   for (const [file, loaded] of Object.entries(receipt.loadedProductionAssets)) {

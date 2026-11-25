@@ -1,0 +1,49 @@
+{
+  "kind": "native-react-browser-worktree-receipt-v2",
+  "recordedAt": "2026-11-25T01:34:23.405039+00:00",
+  "status": "passed",
+  "baselineHead": "59c18246275c9a5ed0ad313c6da2627956930597",
+  "candidateHasUncommittedChanges": true,
+  "compilerSourcesStableAcrossRun": true,
+  "compilerSourceCount": 42,
+  "browser": "156.0.8078.47",
+  "caseCount": 7,
+  "observationCount": 8,
+  "compilerBuild": {
+    "format": 2,
+    "compilerSha256": "776467b51a0a7158d14c55d56ee1394a76f64eb272cf695eb791372706c7d556",
+    "typescriptVersion": "5.9.3",
+    "execution": "worker-js",
+    "targets": ["react"],
+    "authoringSha256": "05cda317e29257f882297a7fb1e6aaed601fcfa113ff5c7a40760c259b36b156"
+  },
+  "sourceClosureCount": 175,
+  "sourceClosureSha256": "29935ea03ad18d4ec0dd9cd7fd29e22265dd62c554dba1758538755fc14a7893",
+  "sourceClosureDigestEncoding": "UTF-8 compact JSON with sorted keys",
+  "archive": {
+    "path": "browser-receipts.tar.gz",
+    "bytes": 1544591,
+    "sha256": "7b8d6b4657d85fb4459d7aa666fb0fa1ffe86f1d7f44e4c1341003e3eb8a8bbc",
+    "entries": 63
+  },
+  "documentationRouteAcceptance": "not-run",
+  "installedPackagePinAcceptance": "separate-obligation",
+  "historicalTargets": [
+    {
+      "target": "web-component-source-v1",
+      "status": "not-migrated"
+    },
+    {
+      "target": "react-dom-source-v1",
+      "status": "not-migrated"
+    },
+    {
+      "target": "vue-source-v1",
+      "status": "not-migrated"
+    },
+    {
+      "target": "vue2-source-v1",
+      "status": "not-migrated"
+    }
+  ]
+}

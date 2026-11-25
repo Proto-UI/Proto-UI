@@ -1,0 +1,58 @@
+{
+  "react": {
+    "totals": {
+      "inputFiles": 184,
+      "analyzedFiles": 184,
+      "prototypeDeclarations": 212,
+      "authoredHookDeclarations": 214,
+      "nativeEmittedPrototypes": 2,
+      "unsupportedPrototypes": 210,
+      "sourceErrorFiles": 0,
+      "executionVerifiedPrototypes": 0
+    },
+    "completeNativeCoverage": false,
+    "fileStatuses": {
+      "unsupported": 177,
+      "hook-analysis": 5,
+      "emitted": 2
+    },
+    "emitted": [
+      {
+        "sourceFile": "packages/prototypes/base/src/surface/root.proto.ts",
+        "prototypes": ["base-surface-root"]
+      },
+      {
+        "sourceFile": "packages/prototypes/base/src/text/root.proto.ts",
+        "prototypes": ["base-text-root"]
+      }
+    ]
+  },
+  "gpui": {
+    "totals": {
+      "inputFiles": 184,
+      "analyzedFiles": 184,
+      "prototypeDeclarations": 212,
+      "authoredHookDeclarations": 214,
+      "nativeEmittedPrototypes": 2,
+      "unsupportedPrototypes": 210,
+      "sourceErrorFiles": 0,
+      "executionVerifiedPrototypes": 0
+    },
+    "completeNativeCoverage": false,
+    "fileStatuses": {
+      "unsupported": 177,
+      "hook-analysis": 5,
+      "emitted": 2
+    },
+    "emitted": [
+      {
+        "sourceFile": "packages/prototypes/base/src/surface/root.proto.ts",
+        "prototypes": ["base-surface-root"]
+      },
+      {
+        "sourceFile": "packages/prototypes/base/src/text/root.proto.ts",
+        "prototypes": ["base-text-root"]
+      }
+    ]
+  }
+}

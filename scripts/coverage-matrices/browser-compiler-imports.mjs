@@ -1,112 +1,19 @@
-// Exact static import edges reached by the optional browser compiler's source
-// and type graph. This includes Core declarations and native source emitters;
-// it is not a claim that a browser preview hosts GPUI/Qt/Flutter components.
-// Every entry binds its full source and the reviewed browser compiler owner.
-// No path prefixes, import categories or surrounding UI exemptions are admitted.
-// Current-main renewal binds eleven changed importer bodies. Their exact
-// import strings and reviewed browser compiler companion remain unchanged.
-// See internal/records/2026-11-23-seven-sprint-website-source-inventory.md.
-// Owner review renewal 2026-11-24: the reviewed owner body now retires its
-// compiler session asynchronously before a new Worker or session starts. The
-// renewal changes no importer, specifier or import edge.
-// Import-edge review renewal 2026-11-24: seven changed importer bodies are
-// re-pinned to their reviewed bytes, and the new Core SVG tag schema module
-// is recorded with its single Core edge. Every added edge stays inside the
-// reviewed compiler and Core source graph. No new website consumer, path
-// prefix or import category is admitted.
-// Main 248f8270d reconciliation is backed by recovered previous bodies and
-// complete diffs in internal/records/2026-11-24-main-website-boundary-repair.json.
-// The compiler owner's fingerprint and UI owner set are independent gates.
+// Exact static import edges in the browser AST compiler's source and type graph.
+// The React emitter calls a pure Core semantic-token helper at compile time;
+// generated components import only React. Core declaration edges retain their
+// existing exact review. Deleted legacy source emitters grant no admission.
+// Every edge binds its full source bytes and the reviewed compiler panel body.
+// No path prefix, import category, surrounding UI or other target is exempted.
 const BROWSER_COMPILER_OWNER = Object.freeze({
   path: 'apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts',
-  sha256: '13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9',
+  sha256: '89f222e764fa8f535bc554a533ebb9519de55a764a695ff823867ba03bcec7d9',
 });
 
 export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
-  'packages/compiler/src/core-value-types.ts': Object.freeze({
-    sourceSha256: '95d2852d40d97b570e75a3f095b25a7ce633e81606f21148557266795ff2842e',
+  'packages/compiler/src/targets/react.ts': Object.freeze({
+    sourceSha256: 'd2e8ad3a197007646cfb1d18eaaf5483ce29bf4bd7acaeb94043399770f8d12f',
     companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze(['../../core/src/control-label']),
-  }),
-  'packages/compiler/src/flutter-source.ts': Object.freeze({
-    sourceSha256: 'c01bb42e8dd1becbd1ce5a565388a5420a4e88f13862e335aca98a77765d6ddd',
-    companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze(['../../core/src/spec/feedback/semantic-merge']),
-  }),
-  'packages/compiler/src/gpui-source.ts': Object.freeze({
-    sourceSha256: '897cd8622b7bd9353e6bf8cd28e43a6a2e556e080ad15ac8e115fc408adb5089',
-    companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze(['../../core/src/spec/feedback/semantic-merge']),
-  }),
-  'packages/compiler/src/ir-validation.ts': Object.freeze({
-    sourceSha256: '5ac930b76ee1e7275ff39950fd4639f7351e5f8672479a0efe7d632b814c4b09',
-    companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze(['../../core/src/spec/feedback/tokens']),
-  }),
-  'packages/compiler/src/native-async.ts': Object.freeze({
-    sourceSha256: '0b9c33c233a6fc648befeaad36ab7b7fdfe56804cd3261055ef3b0da1997c211',
-    companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze(['../../core/src/shader-presentation']),
-  }),
-  'packages/compiler/src/native-shader-specialization.ts': Object.freeze({
-    sourceSha256: '22a5a5b43fcccd6e13533e22f21e3d50e606d11a78f5930a4082a18e5c4dbd38',
-    companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze(['../../core/src/shader-presentation']),
-  }),
-  'packages/compiler/src/native-shader.ts': Object.freeze({
-    sourceSha256: '2504c8cafcbc1a99a4cedac3c230d52318d5b944eb2e4f031496544795a3490f',
-    companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze(['../../core/src/shader-presentation']),
-  }),
-  'packages/compiler/src/native-style.ts': Object.freeze({
-    sourceSha256: '0e2f301a1109446b51954e05ab9a5d8dd376d109adb4ef03c16564b86799a007',
-    companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze(['../../core/src/spec/feedback/semantic-merge']),
-  }),
-  'packages/compiler/src/qt-native-style.ts': Object.freeze({
-    sourceSha256: 'b030490ebb75ef806a58cbaa28e0cfaf42303d137f5f276f70855c2e00f486e0',
-    companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze(['../../core/src/spec/feedback/semantic-merge']),
-  }),
-  'packages/compiler/src/rule-declarations.ts': Object.freeze({
-    sourceSha256: 'e6841f7531d59aff8ff4082907f98f49e82c533750254188c27eda9b97a574ab',
-    companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze([
-      '../../core/src/handles',
-      '../../core/src/spec/feedback/style',
-      '../../core/src/spec/feedback/tokens',
-    ]),
-  }),
-  'packages/compiler/src/rule-plan.ts': Object.freeze({
-    sourceSha256: 'b728641be54fc2a329a177c037a8f828ee55019de2e7e0500c1e71f36ec4540d',
-    companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze([
-      '../../core/src/spec/feedback/semantic-merge',
-      '../../core/src/spec/feedback/tokens',
-    ]),
-  }),
-  'packages/compiler/src/shader-plan.ts': Object.freeze({
-    sourceSha256: '625b890c12d1a1fcd2a96a3930ba0f2e0a7d241d442133c1ce60dda55250f0bd',
-    companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze(['../../core/src/shader-presentation']),
-  }),
-  'packages/compiler/src/static-declarations.ts': Object.freeze({
-    sourceSha256: '304f4b27ac6b701547a8b4683ab70a230b5953f85a3de9a64efde989b429654f',
-    companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze(['../../core/src/control-label']),
-  }),
-  'packages/compiler/src/style-plan.ts': Object.freeze({
-    sourceSha256: '1095f92194f6dd9cc573cb5958d7a519a0254fa2840355008da3edb4f7a6a1e9',
-    companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze([
-      '../../core/src/spec/feedback/semantic-merge',
-      '../../core/src/spec/feedback/tokens',
-    ]),
-  }),
-  'packages/compiler/src/targets.ts': Object.freeze({
-    sourceSha256: 'c2dc909977e3968f884cf170bf491e7d961b37f5b13ae9ad975a143f52c85e1c',
-    companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze(['../../core/src/shader-presentation']),
+    specifiers: Object.freeze(['@proto.ui/core']),
   }),
   'packages/core/src/control-label.ts': Object.freeze({
     sourceSha256: '5ef3f317bdadf74070622efc1ea7dbaa0a1aa3079b7f9ea669468c05c6c4a8c6',
@@ -225,7 +132,104 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
 // owner. This admits neither adjacent compiler files nor the panel's blocked UI.
 export const BROWSER_COMPILER_INTERACTIVE_SOURCES = Object.freeze({
   'packages/compiler/src/browser/client.ts':
-    'f6af8985c52edbfdbd0e1796fc680e0f54e3c889769d099459abe0f23bc58be7',
+    '593fa1f10d257ee49550f9e2d7f9848b0fc17024e3397e6c3ae917031c8befa8',
   'packages/compiler/src/browser/worker.ts':
-    'd373263fa25d9f77fe22603b89523461d43a007cdc40e21f53b4a55f39036078',
+    '9cab00c603d841645f5c3819edb5a8d9328b17e2f727a128336eecbc478256ca',
 });
+
+// Three finite executable edges of the native React browser compiler. The
+// first constructs the SHA-verified bundle in one Blob Worker. The preview
+// admits only its fixed import-map names and one generated module. Expected
+// compiler/target identities come from the bound build producers and caller,
+// never an unreviewed category or a user-supplied arbitrary module URL.
+export const BROWSER_COMPILER_EXECUTION_BOUNDARIES = Object.freeze([
+  {
+    'source': {
+      'path': 'packages/compiler/src/browser/client.ts',
+      'sha256': '593fa1f10d257ee49550f9e2d7f9848b0fc17024e3397e6c3ae917031c8befa8',
+    },
+    'specifier': '<unresolved Worker entry>',
+    'category': 'unresolved-worker-entry',
+    'site': "new Worker(url!, { name: 'proto-ui-compiler' })",
+    'companions': [
+      {
+        'path': 'apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts',
+        'sha256': '89f222e764fa8f535bc554a533ebb9519de55a764a695ff823867ba03bcec7d9',
+      },
+      {
+        'path': 'packages/compiler/src/browser/worker.ts',
+        'sha256': '9cab00c603d841645f5c3819edb5a8d9328b17e2f727a128336eecbc478256ca',
+      },
+      {
+        'path': 'packages/compiler/src/browser/hash.ts',
+        'sha256': '2b9f88aa16e1397ca628ec011eaf9956bb46b2e5106c6b8d6fbf9c59389e2be5',
+      },
+      {
+        'path': 'scripts/compiler/build-browser.mjs',
+        'sha256': '64b20eafc92acd144e5136ce1f1ad0fc0f56bfe5bcd76ae6537b2769b58546e1',
+      },
+    ],
+  },
+  {
+    'specifier': '<dynamic executable script src>',
+    'category': 'dynamic-executable-script',
+    'site': 'map.textContent = JSON.stringify({ imports });',
+    'source': {
+      'path': 'apps/www/src/components/PrototypePreviewer/compiled-preview-runtime.ts',
+      'sha256': '6c0d536f39f1a13218f8ea6f88e59836453a04f139141188a304425696f8a652',
+    },
+    'companions': [
+      {
+        'path': 'apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts',
+        'sha256': '89f222e764fa8f535bc554a533ebb9519de55a764a695ff823867ba03bcec7d9',
+      },
+      {
+        'path': 'packages/compiler/src/browser/engine.ts',
+        'sha256': 'f49d8f8f0306ea80a4c12f1bd14d779727d68dca9376b9ce8358ea4cdd3ccf7b',
+      },
+      {
+        'path': 'packages/compiler/src/browser/protocol.ts',
+        'sha256': 'a7e8621b978463695e83d5ece75c3bcbadf4d4265492b6b6eb322641077789e0',
+      },
+      {
+        'path': 'scripts/compiler/browser-assets.ts',
+        'sha256': 'de92b71cb8946c36df16e8c1cfd7fe637fadad75938dc734ed1357930c3c393f',
+      },
+      {
+        'path': 'apps/www/src/components/PrototypePreviewer/compiled-preview-sandbox.ts',
+        'sha256': 'fc47db5c3ba74cd82a4f98df0f150713ff72689fef685a6ae492d1431c7f2c0a',
+      },
+    ],
+  },
+  {
+    'specifier': 'pui:compiled/component',
+    'category': 'external-executable-script',
+    'site': "import('pui:compiled/component')",
+    'source': {
+      'path': 'apps/www/src/components/PrototypePreviewer/compiled-preview-runtime.ts',
+      'sha256': '6c0d536f39f1a13218f8ea6f88e59836453a04f139141188a304425696f8a652',
+    },
+    'companions': [
+      {
+        'path': 'apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts',
+        'sha256': '89f222e764fa8f535bc554a533ebb9519de55a764a695ff823867ba03bcec7d9',
+      },
+      {
+        'path': 'packages/compiler/src/browser/engine.ts',
+        'sha256': 'f49d8f8f0306ea80a4c12f1bd14d779727d68dca9376b9ce8358ea4cdd3ccf7b',
+      },
+      {
+        'path': 'packages/compiler/src/browser/protocol.ts',
+        'sha256': 'a7e8621b978463695e83d5ece75c3bcbadf4d4265492b6b6eb322641077789e0',
+      },
+      {
+        'path': 'scripts/compiler/browser-assets.ts',
+        'sha256': 'de92b71cb8946c36df16e8c1cfd7fe637fadad75938dc734ed1357930c3c393f',
+      },
+      {
+        'path': 'apps/www/src/components/PrototypePreviewer/compiled-preview-sandbox.ts',
+        'sha256': 'fc47db5c3ba74cd82a4f98df0f150713ff72689fef685a6ae492d1431c7f2c0a',
+      },
+    ],
+  },
+]);

@@ -1,12 +1,18 @@
 import ts from 'typescript';
 import type { ActionStatementIR, ScalarLiteral, ValueExprIR } from '../ir/types';
+import { resolveFunctionLike, unwrapExpr } from './syntax';
+import { atExecutionPoint, type InitializationPoints } from './bindings';
 
 export interface ActionBindings {
   readonly states: ReadonlyMap<ts.Symbol, string>;
   readonly checker: ts.TypeChecker;
   readonly runParameter?: string;
   readonly propParameters?: ReadonlyMap<string, 'current' | 'previous'>;
-  readonly constant: (expression: ts.Expression) => ScalarLiteral | undefined;
+  readonly constant: (
+    expression: ts.Expression,
+    points?: InitializationPoints
+  ) => ScalarLiteral | undefined;
+  readonly initializationPoints?: InitializationPoints;
 }
 
 export type ActionLowering =
@@ -33,69 +39,102 @@ const binaryOperators = new Map<
   [ts.SyntaxKind.QuestionQuestionToken, '??'],
 ]);
 
-function unwrap(expression: ts.Expression): ts.Expression {
-  let current = expression;
-  while (
-    ts.isParenthesizedExpression(current) ||
-    ts.isAsExpression(current) ||
-    ts.isSatisfiesExpression(current) ||
-    ts.isNonNullExpression(current)
-  )
-    current = current.expression;
-  return current;
+interface ActionScope {
+  readonly locals: Map<ts.Symbol, string>;
+  readonly props: Map<ts.Symbol, 'current' | 'previous'>;
+  readonly runs: Set<ts.Symbol>;
+  readonly states: Map<ts.Symbol, string>;
+  readonly initializationPoints: InitializationPoints;
 }
 
-/** Lower a callback body to target-independent actions, preserving blocks and evaluation order. */
+function childScope(parent: ActionScope): ActionScope {
+  return {
+    locals: new Map(parent.locals),
+    props: new Map(parent.props),
+    runs: new Set(parent.runs),
+    states: new Map(parent.states),
+    initializationPoints: parent.initializationPoints,
+  };
+}
+
+/** Lower callback control flow and ordinary helper calls without copying executable source. */
 export function lowerActionBody(
   fn: ts.FunctionLikeDeclaration,
   bindings: ActionBindings
 ): ActionLowering {
   if (!fn.body) return { ok: false, node: fn, message: 'Callback has no implementation body.' };
+  const unsupportedParameter = fn.parameters.find(
+    (parameter) =>
+      !ts.isIdentifier(parameter.name) || parameter.dotDotDotToken || parameter.initializer
+  );
+  if (unsupportedParameter)
+    return {
+      ok: false,
+      node: unsupportedParameter,
+      message:
+        'Callback parameter defaults, destructuring and rest require explicit argument semantics.',
+    };
+  if (
+    fn.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword) ||
+    fn.asteriskToken
+  )
+    return {
+      ok: false,
+      node: fn,
+      message: 'Asynchronous and generator callbacks require separate action semantics.',
+    };
   let failure: { node: ts.Node; message: string } | undefined;
   let nextLocal = 0;
+  let budget = 4096;
+  const active = new Set<ts.FunctionLikeDeclaration>();
   const reject = (node: ts.Node, message: string): undefined => {
     failure ??= { node, message };
     return undefined;
   };
-  const value = (
-    expression: ts.Expression,
-    locals: ReadonlyMap<string, string>
-  ): ValueExprIR | undefined => {
-    const expr = unwrap(expression);
-    if (ts.isIdentifier(expr) && locals.has(expr.text)) {
-      return { kind: 'local', name: locals.get(expr.text)! };
-    }
-    if (ts.isPropertyAccessExpression(expr) && ts.isIdentifier(expr.expression)) {
-      const source = bindings.propParameters?.get(expr.expression.text);
+  const symbol = (node: ts.Node): ts.Symbol | undefined =>
+    bindings.checker.getSymbolAtLocation(node);
+  const propsSource = (
+    raw: ts.Expression,
+    scope: ActionScope
+  ): 'current' | 'previous' | undefined => {
+    const expression = unwrapExpr(raw);
+    if (ts.isIdentifier(expression)) return scope.props.get(symbol(expression)!);
+    if (
+      !ts.isCallExpression(expression) ||
+      expression.arguments.length ||
+      !ts.isPropertyAccessExpression(expression.expression) ||
+      expression.expression.name.text !== 'get'
+    )
+      return undefined;
+    const props = unwrapExpr(expression.expression.expression);
+    if (
+      ts.isPropertyAccessExpression(props) &&
+      props.name.text === 'props' &&
+      ts.isIdentifier(props.expression) &&
+      scope.runs.has(symbol(props.expression)!)
+    )
+      return 'current';
+    return undefined;
+  };
+  const value = (expression: ts.Expression, scope: ActionScope): ValueExprIR | undefined => {
+    if (--budget < 0)
+      return reject(expression, 'Action expansion exceeded its finite lowering budget.');
+    const expr = unwrapExpr(expression);
+    if (ts.isIdentifier(expr) && scope.locals.has(symbol(expr)!))
+      return { kind: 'local', name: scope.locals.get(symbol(expr)!)! };
+    if (ts.isPropertyAccessExpression(expr)) {
+      const source = propsSource(expr.expression, scope);
       if (source) return { kind: 'prop', name: expr.name.text, source };
     }
     if (ts.isCallExpression(expr) && ts.isPropertyAccessExpression(expr.expression)) {
-      const recv = unwrap(expr.expression.expression);
+      const recv = unwrapExpr(expr.expression.expression);
       if (
         ts.isIdentifier(recv) &&
         expr.expression.name.text === 'get' &&
         expr.arguments.length === 0
       ) {
-        const state = bindings.states.get(bindings.checker.getSymbolAtLocation(recv)!);
-        if (state) return { kind: 'state', name: state };
-      }
-    }
-    if (ts.isPropertyAccessExpression(expr) && ts.isCallExpression(unwrap(expr.expression))) {
-      const getter = unwrap(expr.expression) as ts.CallExpression;
-      if (
-        getter.arguments.length === 0 &&
-        ts.isPropertyAccessExpression(getter.expression) &&
-        getter.expression.name.text === 'get'
-      ) {
-        const props = unwrap(getter.expression.expression);
-        if (
-          ts.isPropertyAccessExpression(props) &&
-          props.name.text === 'props' &&
-          ts.isIdentifier(props.expression) &&
-          props.expression.text === bindings.runParameter
-        ) {
-          return { kind: 'prop', name: expr.name.text };
-        }
+        const state = scope.states.get(symbol(recv)!);
+        if (state !== undefined) return { kind: 'state', name: state };
       }
     }
     if (ts.isPrefixUnaryExpression(expr)) {
@@ -107,7 +146,7 @@ export function lowerActionBody(
             : expr.operator === ts.SyntaxKind.PlusToken
               ? '+'
               : undefined;
-      const operand = operator ? value(expr.operand, locals) : undefined;
+      const operand = operator ? value(expr.operand, scope) : undefined;
       if (operator && operand) return { kind: 'unary', operator, operand };
       return reject(expr, 'Unsupported unary action expression.');
     }
@@ -118,114 +157,220 @@ export function lowerActionBody(
           expr,
           'Unsupported action operator; source coercion is not silently changed.'
         );
-      const left = value(expr.left, locals);
-      const right = value(expr.right, locals);
+      const left = value(expr.left, scope),
+        right = value(expr.right, scope);
       return left && right ? { kind: 'binary', operator, left, right } : undefined;
     }
     if (ts.isConditionalExpression(expr)) {
-      const condition = value(expr.condition, locals);
-      const then = value(expr.whenTrue, locals);
-      const otherwise = value(expr.whenFalse, locals);
+      const condition = value(expr.condition, scope),
+        then = value(expr.whenTrue, scope),
+        otherwise = value(expr.whenFalse, scope);
       return condition && then && otherwise
         ? { kind: 'conditional', condition, then, otherwise }
         : undefined;
     }
-    const literal = bindings.constant(expr);
+    const literal = bindings.constant(expr, scope.initializationPoints);
     if (literal !== undefined) return { kind: 'literal', value: literal };
     return reject(
       expr,
       'Action value has no semantic lowering; no source text or callback is copied to the target.'
     );
   };
-  const action = (
-    expression: ts.Expression,
-    locals: ReadonlyMap<string, string>
-  ): ActionStatementIR | undefined => {
-    const expr = unwrap(expression);
-    if (
-      ts.isCallExpression(expr) &&
-      ts.isPropertyAccessExpression(expr.expression) &&
-      expr.expression.name.text === 'set' &&
-      ts.isIdentifier(expr.expression.expression)
-    ) {
-      const stateName = bindings.states.get(
-        bindings.checker.getSymbolAtLocation(expr.expression.expression)!
-      );
-      if (stateName && expr.arguments.length >= 1 && expr.arguments.length <= 2) {
-        if (expr.arguments[1] && typeof bindings.constant(expr.arguments[1]) !== 'string') {
-          return reject(
-            expr.arguments[1],
-            'A state reason must be a proven static string; its evaluation cannot be discarded.'
-          );
-        }
-        const next = value(expr.arguments[0], locals);
-        if (next) return { kind: 'state-set', stateName, value: next };
+  const bindAlias = (
+    binding: ts.Symbol,
+    raw: ts.Expression,
+    scope: ActionScope,
+    target: ActionScope
+  ): boolean => {
+    const expression = unwrapExpr(raw);
+    const props = propsSource(expression, scope);
+    if (props) {
+      target.props.set(binding, props);
+      return true;
+    }
+    if (ts.isIdentifier(expression)) {
+      const source = symbol(expression)!;
+      if (scope.runs.has(source)) {
+        target.runs.add(binding);
+        return true;
+      }
+      const state = scope.states.get(source);
+      if (state !== undefined) {
+        target.states.set(binding, state);
+        return true;
       }
     }
-    return reject(expr, 'Callback operation has no target-independent lowering.');
+    return false;
+  };
+  const action = (
+    expression: ts.Expression,
+    scope: ActionScope
+  ): ActionStatementIR[] | undefined => {
+    const expr = unwrapExpr(expression);
+    if (!ts.isCallExpression(expr))
+      return reject(expr, 'Callback operation has no target-independent lowering.');
+    if (ts.isPropertyAccessExpression(expr.expression)) {
+      const receiver = unwrapExpr(expr.expression.expression);
+      if (ts.isIdentifier(receiver)) {
+        if (scope.runs.has(symbol(receiver)!) && expr.expression.name.text === 'update') {
+          if (expr.arguments.length)
+            return reject(
+              expr,
+              'run.update() takes no arguments; argument effects cannot be discarded.'
+            );
+          return [{ kind: 'request-update' }];
+        }
+        const stateName = scope.states.get(symbol(receiver)!);
+        if (
+          stateName !== undefined &&
+          expr.expression.name.text === 'set' &&
+          expr.arguments.length >= 1 &&
+          expr.arguments.length <= 2
+        ) {
+          if (
+            expr.arguments[1] &&
+            typeof bindings.constant(expr.arguments[1], scope.initializationPoints) !== 'string'
+          )
+            return reject(
+              expr.arguments[1],
+              'A state reason must be a proven static string; its evaluation cannot be discarded.'
+            );
+          const next = value(expr.arguments[0], scope);
+          return next ? [{ kind: 'state-set', stateName, value: next }] : undefined;
+        }
+      }
+    }
+    const callPoints = atExecutionPoint(expr, scope.initializationPoints);
+    const helper = resolveFunctionLike(expr.expression, bindings.checker, callPoints);
+    if (!helper?.body)
+      return reject(expr, 'Callback operation has no target-independent lowering.');
+    if (active.has(helper))
+      return reject(expr, 'Recursive action helpers require an explicit call representation.');
+    if (
+      helper.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword) ||
+      helper.asteriskToken
+    )
+      return reject(expr, 'Asynchronous and generator helpers require separate action semantics.');
+    if (
+      expr.arguments.length > helper.parameters.length ||
+      helper.parameters.some(
+        (parameter) => !ts.isIdentifier(parameter.name) || parameter.dotDotDotToken
+      )
+    )
+      return reject(expr, 'Helper arguments must bind to explicit positional parameters.');
+    const local = { ...childScope(scope), initializationPoints: callPoints };
+    const prefix: ActionStatementIR[] = [];
+    for (let index = 0; index < helper.parameters.length; index++) {
+      const parameter = helper.parameters[index];
+      const argument = expr.arguments[index] ?? parameter.initializer;
+      if (!argument)
+        return reject(
+          parameter,
+          'Missing helper arguments require an explicit undefined representation.'
+        );
+      const binding = symbol(parameter.name)!;
+      const argumentScope = expr.arguments[index] ? scope : local;
+      if (bindAlias(binding, argument, argumentScope, local)) continue;
+      const initial = value(argument, argumentScope);
+      if (!initial) return undefined;
+      const name = 'local' + nextLocal++;
+      local.locals.set(binding, name);
+      prefix.push({ kind: 'local', name, value: initial });
+    }
+    active.add(helper);
+    const body = ts.isBlock(helper.body)
+      ? statements(helper.body.statements, local)
+      : action(helper.body, local);
+    active.delete(helper);
+    return body ? [{ kind: 'invoke', body: [...prefix, ...body] }] : undefined;
   };
   const statements = (
     nodes: readonly ts.Statement[],
-    outer: ReadonlyMap<string, string>
+    outer: ActionScope
   ): ActionStatementIR[] | undefined => {
-    const locals = new Map(outer);
+    const scope = childScope(outer);
     const result: ActionStatementIR[] = [];
     for (const node of nodes) {
-      if (ts.isEmptyStatement(node)) continue;
+      if (--budget < 0)
+        return reject(node, 'Action expansion exceeded its finite lowering budget.');
+      if (ts.isEmptyStatement(node) || ts.isFunctionDeclaration(node)) continue;
       if (ts.isBlock(node)) {
-        const block = statements(node.statements, locals);
-        if (!block) return undefined;
-        result.push(...block);
+        const nested = statements(node.statements, scope);
+        if (!nested) return undefined;
+        result.push(...nested);
       } else if (ts.isVariableStatement(node)) {
-        if (!(node.declarationList.flags & ts.NodeFlags.Const)) {
+        if (!(node.declarationList.flags & ts.NodeFlags.Const))
           return reject(node, 'Mutable local bindings require explicit assignment lowering.');
-        }
         for (const declaration of node.declarationList.declarations) {
-          if (!ts.isIdentifier(declaration.name) || !declaration.initializer) {
+          if (!ts.isIdentifier(declaration.name) || !declaration.initializer)
             return reject(declaration, 'Action bindings must have an explicit initializer.');
-          }
-          const initial = value(declaration.initializer, locals);
+          if (
+            ts.isArrowFunction(unwrapExpr(declaration.initializer)) ||
+            ts.isFunctionExpression(unwrapExpr(declaration.initializer))
+          )
+            continue;
+          const binding = symbol(declaration.name)!;
+          if (bindAlias(binding, declaration.initializer, scope, scope)) continue;
+          const initial = value(declaration.initializer, scope);
           if (!initial) return undefined;
           const name = 'local' + nextLocal++;
-          locals.set(declaration.name.text, name);
+          scope.locals.set(binding, name);
           result.push({ kind: 'local', name, value: initial });
         }
       } else if (ts.isExpressionStatement(node)) {
-        const lowered = action(node.expression, locals);
+        const lowered = action(node.expression, scope);
         if (!lowered) return undefined;
-        result.push(lowered);
+        result.push(...lowered);
       } else if (ts.isIfStatement(node)) {
-        const condition = value(node.expression, locals);
+        const condition = value(node.expression, scope);
         const then = statements(
           ts.isBlock(node.thenStatement) ? node.thenStatement.statements : [node.thenStatement],
-          locals
+          scope
         );
         const otherwise = node.elseStatement
           ? statements(
               ts.isBlock(node.elseStatement) ? node.elseStatement.statements : [node.elseStatement],
-              locals
+              scope
             )
           : [];
         if (!condition || !then || !otherwise) return undefined;
         result.push({ kind: 'if', condition, then, otherwise });
-      } else if (ts.isReturnStatement(node) && !node.expression) {
+      } else if (ts.isReturnStatement(node)) {
+        if (node.expression) {
+          // Returning a helper invocation still executes it; the enclosing callback returns afterwards.
+          const returned = unwrapExpr(node.expression);
+          if (ts.isCallExpression(returned)) {
+            const lowered = action(returned, scope);
+            if (!lowered) return undefined;
+            result.push(...lowered);
+          } else if (!value(returned, scope)) return undefined;
+        }
         result.push({ kind: 'return' });
         break;
-      } else {
+      } else
         return reject(
           node,
           'Statement has no action lowering; the compiler will not drop control flow or effects.'
         );
-      }
     }
     return result;
   };
-  const body = ts.isBlock(fn.body)
-    ? statements(fn.body.statements, new Map())
-    : (() => {
-        const lowered = action(fn.body as ts.Expression, new Map());
-        return lowered ? [lowered] : undefined;
-      })();
+  const root: ActionScope = {
+    locals: new Map(),
+    props: new Map(),
+    runs: new Set(),
+    states: new Map(bindings.states),
+    initializationPoints: bindings.initializationPoints ?? new Map(),
+  };
+  for (const parameter of fn.parameters) {
+    if (!ts.isIdentifier(parameter.name)) continue;
+    const binding = symbol(parameter.name)!;
+    if (parameter.name.text === bindings.runParameter) root.runs.add(binding);
+    const props = bindings.propParameters?.get(parameter.name.text);
+    if (props) root.props.set(binding, props);
+  }
+  active.add(fn);
+  const body = ts.isBlock(fn.body) ? statements(fn.body.statements, root) : action(fn.body, root);
   return body
     ? { ok: true, body }
     : { ok: false, ...(failure ?? { node: fn, message: 'Action lowering failed.' }) };

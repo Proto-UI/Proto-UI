@@ -1,7 +1,7 @@
 ---
 title: 'Compiler Guide'
-desp: 'The 0.2 release boundary and the separately verified private compiler experiment'
-description: 'The 0.2 release boundary and the separately verified private compiler experiment'
+desp: 'The current private native AST compiler and the separate 0.2 release boundary'
+description: 'The current private native AST compiler and the separate 0.2 release boundary'
 ---
 
 Proto UI 0.2 does **not** ship a Compiler implementation or a Compiler authoring workflow. There is no `@proto.ui/compiler` package, compiler entity type, official compiler profile, CLI compile command, or supported compiler input/output artifact in the 0.2 release.
@@ -21,7 +21,7 @@ Read [Chapter 5: Translation Layer](/en/whitepaper/5-translation-layer/) for the
 | Official Adapters | Translate Runtime output and semantic host capabilities for Web Component, React, and Vue profiles |
 | `@proto.ui/cli` | Initialize projects and generate themes, tokens, styles, and component preset material; it is not a Prototype compiler |
 
-The current production route is therefore:
+The production route shipped in 0.2 is:
 
 ```text
 Prototype TypeScript → Runtime execution → official Adapter → Web host
@@ -37,7 +37,7 @@ Nothing in 0.2 promises the second route's accepted source language, optimizatio
 
 ## Constraints that already apply
 
-Even without a Compiler package, cataloged protocol boundaries constrain any future official translation:
+Although 0.2 did not ship a Compiler package, cataloged protocol boundaries constrain compiler implementations:
 
 - `K-PROTOTYPE-COMPOSITION-0001`: templates describe one Root Node; they do not embed another Prototype definition.
 - `C-TEMPLATE-0005`: the v0 slot is anonymous, singular, and parameterless.
@@ -49,7 +49,7 @@ These are protocol constraints, not a Compiler SPI. They do not specify a parser
 
 ## Static intent versus arbitrary functions
 
-Some authoring forms preserve more analyzable intent than callbacks. Rule is the clearest current example: it separates condition from semantic intent and compiles internally to `RuleIR` for Runtime evaluation. That does **not** mean the repository has a general Prototype compiler, nor that arbitrary callback bodies can be translated losslessly.
+Some authoring forms preserve more analyzable intent than callbacks. Rule separates condition from semantic intent and compiles internally to `RuleIR` for Runtime evaluation. That representation alone is not a complete Prototype compiler. The private AST compiler described below analyzes callback control flow explicitly and diagnoses forms it cannot preserve.
 
 Use declarative forms when they accurately express behavior, but do not rewrite working 0.2 semantics around an imagined compiler. `internal/contracts/integration/portability-and-integration.md` discusses this longer-term direction as explanatory, non-normative material.
 
@@ -66,174 +66,85 @@ Use declarative forms when they accurately express behavior, but do not rewrite 
 
 If a future proposal needs one of these answers to change, it requires explicit catalog and API work rather than documentation inference.
 
-## Private repository compiler experiment
+## Private repository AST compiler
 
-`packages/compiler` is an implemented **private experiment**, not an official Compiler distribution. Its manifest retains `private: true` and `protoUi.release.scan: false`. The private compiler CLI is separate from the published `proto-ui` CLI; publication, catalog admission and maintained compatibility require their own approval.
+The private repository package uses a TypeScript binding/type frontend, semantic HIR, explicit target admission and native target builders. React output is constructed with TypeScript AST nodes; GPUI output uses Rust syntax nodes; LLVM kernels use the native LLVM IRBuilder. Unsupported operations produce diagnostics. There is no fallback that imports the authored prototype into a Proto Runtime or Adapter.
 
-### Current-main browser boundary and website inventory
+This is draft implementation work, not a 0.2 release guarantee. The governing direction and acceptance obligations are recorded in `D-COMPILER-ARCH-0001`, `C-COMPILER-PIPELINE-0001` and `T-COMPILER-PIPELINE-0001`. `packages/compiler/README.md` and `internal/compiler/v2-compilation-spec.md` describe the source and evidence boundaries.
 
-At current main `7181a93a5ec5cad43936a72e31d5477d5488733a`, the browser-host prototype associated with PR #829 is absent: there is no current browser export, VM host, memory entry, browser build or WASM regression in the compiler package. PR #829's source landed on a feature branch, not this main revision; its browser code and dependencies are historical evidence, not current delivery.
+### Targets and actual coverage
 
-Issue #817 remains open. The website demo inventory is source-AST discovery plus canonical private Node `compileFile` admission only. It records mounted pages, static registrations, source-located rejections and unresolved bindings; it does not execute WASM, run a compiler preview, migrate a page or establish browser isolation, security, performance, full parity or a public Compiler. Historical #829 inventory rows—including rejected rows—remain dated evidence and reconciliation obligations, never new passes.
+| Target | Output and boundary |
+| --- | --- |
+| `react` | Ordinary React component source built through the TypeScript factory and printer. Only admitted authored operations are emitted. |
+| `gpui` | A Rust crate with a native GPUI component, built through `syn` and `prettyplease`. Generation needs Cargo; execution requires a compatible GPUI host. |
+| `kernel` | A scalar kernel built through LLVM's native object API. It is not a whole UI component or GPUI backend. |
+| `ir` | Semantic analysis, including unresolved operations. Analysis does not count as native emission. |
+| Vue3, Vue2, Web Components, Qt, Flutter and SSR | Their original implementation and consumer obligations remain open. An old profile name cannot invoke a hidden retired backend. |
 
-Regenerate the inventory with `node --import tsx scripts/compiler/website-demo-inventory.mjs`. The generator retains the complete immutable historical input in `scripts/compiler/website-demo-migrations-829.json`, verifies its SHA-256, and writes `internal/compiler/website-demo-migrations.json`. Current input membership (including hidden scoped source files), bytes, installed parser dependency closure, HEAD/index provenance and dirty worktree bindings are recorded separately. Changed, missing or newly added inputs invalidate the binding; unresolved or dynamic source addresses remain visible rather than becoming successful admissions.
+The first source-bound AST delivery at `59c18246275c9a5ed0ad313c6da2627956930597` analyzed 184 Base files containing 212 prototype declarations and 214 authored Hooks. Both React and GPUI emitted **0/212** Base prototypes at that snapshot. Each target separately recorded 212 unsupported declarations, five hook-only files and zero executed prototypes. Those historical counts remain in `packages/compiler/evidence/ast-pipeline-20261125/`; subsequent capabilities need new reports.
 
-### Implemented profiles and compatibility
+The current continuation emits **2/212 on each target**, the unchanged `base-text-root` and `base-surface-root`, through generic lowering. All 184 files remain analyzed: 210 prototype declarations are unsupported, with 177 unsupported files, five Hook-only files, two emitted files and zero source errors. `executionVerifiedPrototypes` remains zero in the inventory. Actual React and GPUI tests exercise those Base sources separately; they do not establish full Base/family coverage or whole application migration. The current summary is retained in `packages/compiler/evidence/legacy-cleanup-20261125/base-inventory-summary.json`.
 
-| Private profile | Exercised target | Output dependency boundary |
-| --- | --- | --- |
-| `react-runtime-v1` | React / React DOM 19.2.6 | Retains Proto UI Core, Hooks and React Adapter; not Runtime-independent |
-| `react-dom-source-v1` | React / React DOM 19.2.6 | Target framework plus emitted native helpers; no Proto UI Runtime/Adapter |
-| `vue-source-v1` | Vue 3.5.31 | Target framework plus emitted native helpers; no Proto UI Runtime/Adapter |
-| `vue2-source-v1` | Vue 2.6.14 | Target framework plus emitted native helpers; no Proto UI Runtime/Adapter |
-| `web-component-source-v1` | Custom Elements v1 | Emitted native helpers; no framework or Proto UI Runtime/Adapter dependency |
-| `gpui-source-v1` | GPUI pinned to Git revision `62e5991dd0f0c8a3af8d5e7e9c4652490d468db8` | GPUI plus an emitted shared Rust support crate; no Proto UI Runtime/Adapter dependency |
+An emitter, a successful isolated fixture, a whole-library inventory and a real application migration are different claims. Inventories retain unsupported, source-error and hook-analysis rows. They never turn a wrapper, an IR dump or a declaration into an executed native component.
 
-Qt, Flutter and the four SSR profile identities are **unimplemented** and reject registry-based compilation. The existing direct emitter `ssr: true` entry points remain private experiments; exercising them does not activate an SSR profile or establish SSR/hydration conformance. GPUI remains a private source profile, not a cataloged official Adapter or a complete native conformance claim. A profile's concrete tested target version is not a compatibility promise for other versions. Restricted source admission, semantic IR version **7**, target profile identity and emitted Web helper ABI **1** are separate private compatibility dimensions; neither IR nor helper files are a public plugin SPI.
+### Browser and website boundary
 
-The GPUI source owner interprets `void` setup as the defined anonymous slot inside its host Root (`C-CORE-SYNTAX-0004-C`, `C-TEMPLATE-0001`). A pure author definition with State and a public increment method was compiled without Web globals and exercised in a real headless GPUI window. The same generated component admitted two native slot children in order, preserved their measured boxes across the method call, and exposed the State change from 0 to 1. This bounded evidence does not establish OS-visible rendering, assistive-technology fidelity or full compiler/Prototype equivalence. Missing native style declarations are diagnosed rather than replaced with Web behavior.
+The website inventory preserves authored registration/source graphs and every historical rejected demo. It records current React source admission separately from unfinished historical Web Components acceptance. Node compilation does not establish Worker execution, iframe preview, physical input, cleanup, pixel or accessibility acceptance.
 
-The frontend reads a closed, root-contained TypeScript source graph without importing or evaluating the author program. It admits checked data, primitive/control-flow callbacks, static helpers and authored hooks, explicit updates, named State and typed exposes, Props and Context reads/watchers, one-Root templates, serializable Rule conditions and style intent, and the declared native event/focus/accessibility slice. Unsupported syntax, phase/capture authority, operations, target versions and missing host capabilities are diagnostics, not silent bridges.
+Browser delivery has its own source-bound receipts. A React AST Worker receipt cannot reuse an old QuickJS/WASM receipt. GPUI and LLVM toolchain requirements must be reported explicitly. Existing demo and frame ownership conventions remain applicable.
 
-Public atomic hook imports and operation lowering use one admission table. Every exported `asHook` has an explicit disposition, including renamed imports and local re-exports. `asControlLabel` is admitted and lowered in the four implemented Web client source profiles. It retains explicit unsupported diagnostics for GPUI and the direct Qt/Flutter and default SSR entries; the private Web Component hydration experiment separately requires its explicit `controlLabelHydration: 'client-only'` option. `asAxisInput`, `asContextMenuInput` and `asNativeLink` remain unsupported, with a diagnostic naming the missing capability lowering at the author import. Admission of another hook does not admit every method or every target: an unsupported capability call names its actual callee and source range. These diagnostics do not establish implementation or conformance for an unsupported capability.
+### Compile and inspect locally
 
-Static helper parameters may use supported local record aliases with optional fields and finite literal unions. A direct literal argument such as `{ entry: 'manual' }` retains its value when checked against that parameter; incompatible literal values and forged IR are still rejected. The source frontend and IR validator apply the same data compatibility rule without evaluating author code.
-
-Private scalar `let` bindings have ordinary lexical lifetime and assignment semantics. Closures share their storage, while a `const` alias snapshots the current scalar value. A write schedules no render and sends no State notification. JavaScript targets use native `let`; GPUI retains captured cells with native reference ownership and ends each borrow before calling authored code. Pure scalar module initializers and reached named source helpers preserve a separate module lifetime across component instances. Helpers resolve their defining module's bindings; caller-local names cannot supply their captures. Module cells belong to one generated artifact (and the UI thread for GPUI); separately compiled artifacts do not acquire a shared source-module registry. Source graph, export and top-level execution checks remain closed, and compilation never executes an initializer or an uncalled function body.
-
-Private synchronous `try`/`catch`/`finally` and `throw` retain the original admitted thrown data, including `undefined`, `null`, `false`, zero, empty strings and record/array identity. Catch bindings stay opaque: a TypeScript assertion grants no public data, State or execution authority. An authored finalizer runs in source order, and its return or throw replaces the earlier authored completion. GPUI requires `panic=unwind` for emitted source exceptions and recognizes only its own thrown-value marker; unrelated native failures retain their original payload after cleanup. Caught data fields and scalar/list members are available, while JavaScript prototype property names remain outside this bounded GPUI access surface.
-
-Context failure delivery preserves each committed update, drains the remaining eligible callbacks, resets dispatch state, then rethrows the primary authored value even when it is falsy. Required disconnected Context reads/updates and strict missing Anatomy domains retain distinguishable error codes for authored catch discrimination. These source-lowering boundaries do not establish new native acceptance or replace the unchanged actual public GPUI composition consumer.
-
-The generated Web Context helper records the provider identity for each queued transition and rechecks the recipient's current ancestry before delivery. Rebinding during an earlier callback cannot deliver an old provider's queued transition to the new binding. Error presence is tracked separately from the thrown value, so `throw undefined` and `throw null` remain failures and later callback errors cannot replace the first value.
-
-This lexical lowering leaves the ordinary `defineHook` facade's admission unresolved. `D-AS-HOOK-DEFINE-HOOK-0001` places its capture, store and configurable authoring surface outside the core authored-asHook contract; the legacy parameterized-asHook note remains a proposal. The existing ordinary facade and its public consumers remain valid implementation evidence. Compiler support needs an independently governed boundary and real consumer evidence. An import whitelist or substitution with an atomic or authored asHook does not supply that support.
-
-Native templates keep child style separate from Root feedback and support the singular anonymous slot. Arbitrary attributes, `PrototypeRef`, multiple/named slots, native interaction groups/portals and operations outside the admitted interaction vocabulary remain unsupported. Raw host events are opaque; raw Props snapshots are available, but arbitrary raw-member access is not treated as typed portable data. The setup style `unUse` and Rule declaration disposer stay setup-only; runtime changes use Rules and `run.feedback.style.patch/suppress/clearPatch`.
-
-State writes and feedback projection do not themselves request a template render. Explicit authored update intent remains separate from host policy: React/Vue 3 consumers exercise authored updates; the default Vue 2 props policy and Custom Element `setProps` can explicitly request semantic updates. View detach retains instance state, exposed handles, Context and pending intent; terminal disposal closes them. Framework wrappers compose components through their native ownership mechanisms, not Prototype nodes embedded in templates.
-
-In the private Vue 2 client profile, ordinary framework repaints retain the last authored commit while native slots stay live. A declared Text Control owns its native editor value after the initial mount. Uncontrolled edits survive framework repaints and later default-value changes; controlled edits remain proposals, and unrelated updates preserve active composition. Recreating the view binds a new physical editor to the retained logical value. These boundaries do not establish browser IME fidelity, internal SSR/hydration migration, complete generated typing for every admitted program, or full reached-support and production-cost acceptance; those remain separately tracked in [#1055](https://github.com/Proto-UI/Proto-UI/issues/1055).
-
-The private Vue 2 emitter keeps client render-call annotations inside the client branch. SSR output retains its separate renderer path; the bounded annotation regression checks preserve all other SSR diagnostics and do not establish complete SSR typing or hydration acceptance.
-
-The complete generated Vue 2 pointer consumer and its supporting module graph now pass the existing strict TypeScript check with `checkJs: true` and `skipLibCheck: false`. The emitter registers exact owned/observed State handles with their external views and validates the interactive HTML Root before using it. This is bounded evidence for the exercised client program; the historical consumer measurement below still did not check JavaScript bodies, and complete typing for other programs and SSR remains separate work.
-
-### Multi-entry native Web output
-
-Components that share a source Context declaration need one generated module graph. The private project API can compile all entries from one source root and publish their sources and shared supporting modules together:
-
-```ts
-import { compileProject, writeProjectCompilation } from './packages/compiler/src/index.ts';
-
-const compiled = await compileProject({
-  root: '.',
-  entries: ['src/provider.proto.ts', 'src/consumer.proto.ts'],
-  profile: 'react-dom-source-v1',
-});
-if (!compiled.ok) throw new Error(JSON.stringify(compiled.diagnostics));
-
-const written = await writeProjectCompilation(compiled.value, '.cache/context-assembly', {
-  sourcePaths: {
-    'src/provider.proto.ts': 'Provider.tsx',
-    'src/consumer.proto.ts': 'Consumer.tsx',
-  },
-});
-if (!written.ok) throw new Error(JSON.stringify(written.diagnostics));
-```
-
-Choose a fresh output directory and a unique flat source filename for every entry. React uses `.tsx`, Vue 3 and Web Component use `.ts`, and Vue 2 uses `.js`. The planner coalesces supporting files only when their paths, kinds and bytes agree; conflicting helpers, mismatched source snapshots, ambiguous paths and incomplete entry mappings fail before publication. Each entry retains its source map and provenance manifest, and `provenance.json` records the complete project artifact set. `projectCompilationArtifacts` exposes the same plan and `diffProjectCompilation` compares it with consumer-owned output without writing.
-
-An ordinary React consumer can import `CompiledComponent as Provider` from `Provider.tsx` and `CompiledComponent as Consumer` from `Consumer.tsx`. Both then import the same physical Context key, scope and React transport modules, retaining source declaration reference identity through native composition. Independently published directories remain separate graphs even when their source bytes and debug names match. This workflow does not introduce a shared source-module registry, bridge Runtime/Adapter instances, or change the single-entry CLI. The React consumer regression exercises aliases, nearest providers, explicit updates and terminal cleanup; the artifact planner is also exercised for the other three Web source profiles.
-
-### Local commands and consumer ownership
-
-Run from the repository root with its development dependencies installed. Choose a fresh output directory:
+Run these commands from the repository root with the declared Node 24 and pnpm toolchain:
 
 ```sh
-node --import tsx packages/compiler/src/cli-entry.ts check packages/prototypes/base/src/button/button.proto.ts --root . --profile react-dom-source-v1
-node --import tsx packages/compiler/src/cli-entry.ts compile packages/prototypes/base/src/button/button.proto.ts --root . --profile react-dom-source-v1 --output .cache/compiler-guide-button
-node --import tsx packages/compiler/src/cli-entry.ts diff packages/prototypes/base/src/button/button.proto.ts --root . --profile react-dom-source-v1 --output .cache/compiler-guide-button --json
-node --import tsx packages/compiler/src/cli-entry.ts watch packages/prototypes/base/src/button/button.proto.ts --root . --profile react-dom-source-v1 --output .cache/compiler-guide-watch --json
+node --import tsx scripts/compiler/pinned-cli-entry.ts info
+node --import tsx scripts/compiler/pinned-cli-entry.ts check packages/prototypes/base/src/button/button.proto.ts --target react --json
+node --import tsx scripts/compiler/pinned-cli-entry.ts inventory packages/prototypes/base/src --target react --json
+node --import tsx scripts/compiler/pinned-cli-entry.ts compile path/to/entry.proto.ts --target react --out .cache/generated --json
 ```
 
-`inspect` prints checked IR; `explain` reports the profile, requirements and dependencies. `--config` explicitly selects JSON with `entry`, `root`, `export`, `output`, `profile` and `json`; configuration paths are relative to that file, command-line paths to the working directory. Command-line values override configuration, and unknown/repeated flags or fields fail.
+The `check` command may reject a valid prototype whose operations are not yet lowered. Preserve its authored behavior. Do not rewrite the prototype, omit operations or select a runtime wrapper to obtain success.
 
-Compilation plans source, supporting helpers, standard source maps and hash/provenance manifests before create-only publication. Existing consumer files are never overwritten. `diff` is read-only and identifies consumer modifications against recorded hashes. `watch` publishes immutable `<output>/<session UUID>/revision-<N>` generations, retaining the last successful generation on rejected input; it does not maintain a mutable latest pointer. Consumer edits require a normal target rebuild. The original compiler map remains historical and can be stale after an edit; a rebuild supplies the current executable-to-edited-source map.
+Choose `--target gpui` for Rust components, `--target kernel` for a kernel or `ir` to inspect HIR. Output is protected from accidental replacement; `--overwrite` explicitly replaces generated files. Inputs and symlink destinations remain protected. Historical `--profile`, `diff` and `watch` interfaces are unavailable; unfinished ownership and consumer acceptance remains in the cleanup ledger.
 
-### Supported pinned-source compiler build
+### Build and consume an exact source pin
 
-The build-time compiler now has a supported **source-pinned Node CLI and JavaScript artifact**. This route preserves the private experimental profiles; it is not an npm publication, a stable declaration-file release, or admission of an unsupported target. Pin a reviewed full Git SHA, the frozen pnpm lock and the chosen profile together.
-
-From a clean checkout at that SHA, with Node 24 and the frozen development install:
+A pinned artifact requires a clean checkout and an exact full commit SHA:
 
 ```sh
-corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
-mkdir -p ../compiler-artifacts
-node --import tsx scripts/compiler/build-pinned.ts --revision <full-40-character-HEAD-SHA> --output ../compiler-artifacts/<fresh-name>
-cd ../compiler-artifacts/<fresh-name>
-npm ci --ignore-scripts
-node cli.js --build-info
+node --import tsx scripts/compiler/build-pinned.ts --revision "$(git rev-parse HEAD)" --output /absolute/fresh-compiler-package
+npm --prefix /absolute/fresh-compiler-package ci --ignore-scripts
+node /absolute/fresh-compiler-package/cli.js --build-info
+node scripts/compiler/pinned-ast-smoke.mjs --compiler /absolute/fresh-compiler-package/index.js --llvm --gpui
+NATIVE_CONSUMER_COMPILER=/absolute/fresh-compiler-package/index.js node scripts/compiler/pinned-cli-smoke.mjs
 ```
 
-The builder refuses a different revision, a dirty checkout, mismatched TypeScript/esbuild installations and an existing destination. Its package lock declares the exact TypeScript version and registry integrity from the source lock. The executable compiler needs only that TypeScript package and Node built-ins. It does not need the public workspace package build, a Runtime/Adapter, or a Floating UI installation borrowed from another package. `compiler-build.json` records every bundled source input, delivered file digest, toolchain and profile digest. Source maps include their source text, and the same inputs/toolchain produce the same artifact bytes in another destination. `index.js` exposes the existing JavaScript API; `cli.js` runs directly in Node without tsx. Each generated provenance records the compiler build identity.
+The package contains the current API/CLI and source-bound native builder assets. Metadata uses `proto-ui.compiler-package.v3`; identity comes from `compiler-build.json` or `--build-info`. Removed `compilerBuildIdentity`, `TARGET_PROFILES`, `compilationArtifacts` and runtime-profile APIs are not compatibility shims.
 
-A minimal family consumer can compile an authored entry directly from the same pinned source checkout:
-
-```sh
-mkdir -p /absolute/consumer/generated
-node cli.js compile /absolute/Proto-UI/packages/prototypes/shadcn/src/button/button.proto.ts --root /absolute/Proto-UI --profile react-dom-source-v1 --output /absolute/consumer/generated/button
-```
-
-The source resolver reads the entry's declared authoring closure without executing it or requiring family `dist` builds. Install the **generated provenance's dependencies**, then import its ordinary component and supporting files through the target's normal build. The three 0.3 Button families on the React source profile need React and React DOM at the exact profile versions; a generated geometry consumer additionally owns its declared Floating UI dependency. Vue 3, Vue 2 and Web Component consumers retain their own profiles and dependency lists. A runtime Adapter consumer, such as Shenko's nine adopted Shadcn families, still has its separate declared runtime package closure; compiling Shenko's two own prototypes does not migrate those families.
-
-Output parent directories are a **caller prerequisite**. The artifact root itself is created exclusively. An absent parent fails without creating ancestors; an existing root, symlink, conflicting artifact or concurrent competing writer is rejected under the existing create-only contract. `diff` never writes user edits, and `watch` creates immutable session/revision directories. Keep the compiler build immutable and make consumer edits only in its generated source. The original compiler map is historical after an edit; the normal target rebuild supplies the current executable-to-edited-source map.
-
-For a clean installation check from the same source checkout, select the built compiler and the explicit registry mode:
-
-```sh
-NATIVE_CONSUMER_COMPILER=/absolute/pinned/index.js NATIVE_CONSUMER_DEPENDENCIES=registry node scripts/compiler/release-family-smoke.mjs
-NATIVE_CONSUMER_COMPILER=/absolute/pinned/index.js NATIVE_CONSUMER_DEPENDENCIES=registry node scripts/compiler/pinned-cli-smoke.mjs
-```
-
-Each consumer starts without installed packages, resolves only its exact manifest declarations into a new lockfile, then runs `npm ci --ignore-scripts` with its own cache. The first command builds and mounts the full Base/Shadcn/Brutalist Button sources across the four Web source profiles in Happy DOM; the second checks the editable CLI workflow and non-overwrite boundaries. Copying an existing installed payload remains a separately labeled offline mode. Watch retains the identity of its original session directory and terminates with an output conflict if that path is replaced by another directory or symlink; it does not adopt the replacement as a new owner. These checks do not claim native-browser, hardware, screen-reader or full application acceptance.
-
-### Executed evidence and measured costs
-
-The private verification runs compile and mount three-component/Context assemblies in physically isolated consumers for all four Web source profiles, type-check generated TypeScript and helpers, rebuild and execute a consumer-owned template edit, reject an introduced syntax error, and verify the physical dependency tree and artifact hashes. These Web consumer measurements do not exercise GPUI. Vue 2 JavaScript component bodies are not `checkJs`-validated. A separate offline private-package rehearsal executes the bundled compiler JavaScript API in plain Node and records tarball integrity, bundled compile-time inputs, dependencies, BOM and licenses; this is not an official package or public declaration-file release.
-
-Real Chromium evidence independently checks the original React Adapter, runtime-backed output and native React output for explicit update/detach/reattach contracts and a finite Rule/style/AX/input program. Missing-update and duplicate-activation mutants fail those observations. Separate real failing generated callback stacks resolve through standard executable-to-generated and generated-to-author maps; automatic map composition is not claimed.
-
-Replay the isolated native consumer measurement with:
+The current React consumer checks strict generated TypeScript, props/state/update behavior, instance isolation, styles, listener cleanup and editable output:
 
 ```sh
 node --import tsx scripts/compiler/native-consumer-smoke.mjs
 ```
 
-Each run retains `summary.json`, `timing.json`, `costs.json`, runtime traces, diagnostics and dependency integrity in its printed evidence directory. Measurements cover cold/hot/changed compilation, whole-process peak RSS and coarse memory snapshots, emitted/supporting source and dependency payload bytes, real framework initialization/update/teardown, retained handle identity and observed instance/view-epoch/Root counts. They do **not** measure exact allocation counts, garbage collection, native-browser layout latency or Adapter-relative speed. Happy DOM consumers are one-sided evidence; the finite Chromium program is not general equivalence, SSR/hydration support or a claim that compiled output is universally faster or smaller.
-
-## Contribution boundary
-
-A Compiler proposal begins as Agent-led governed research. Research, candidate entities, implementation probes, and executable evidence may proceed immediately; only product choices not decided by current authority become an attended decision. The proposal must identify at least:
-
-1. the portable source subset and how unsupported constructs fail;
-2. the output host and ownership of generated artifacts;
-3. semantic parity with existing Contract criteria;
-4. lifecycle, capability, and component-composition treatment;
-5. a versioned identity and executable conformance model; and
-6. migration and coexistence with the Runtime/Adapter path.
-
-Do not open an implementation PR by treating `packages/modules/rule/src/compile.ts`, CLI style generation, or a bundler transform as the missing Compiler architecture. Those are bounded implementations with different owners.
-
-## Verification of the current boundary
-
-The following checks exercise the portable template and analyzable Rule constraints that exist today:
+For a real application, inspect unchanged authored inputs through an installed pin:
 
 ```sh
-corepack pnpm@10.32.1 vitest run packages/core/test/contract/template.normalize.contract.test.ts
-corepack pnpm@10.32.1 vitest run packages/adapters/web-component/test/contract/template.no-prototype-composition.v0.contract.test.ts
-corepack pnpm@10.32.1 vitest run packages/runtime/test/contract/rule.props-style.smoke.v0.contract.test.ts
-corepack pnpm@10.32.1 check:types
+node scripts/compiler/consumer-project-inventory.mjs --compiler /absolute/fresh-compiler-package/index.js --consumer-root /absolute/shenko --name Shenko --target react --out /absolute/fresh-shenko-inventory.json
 ```
 
-For work that can ship now, continue to [Runtime Architecture](/en/build/runtime-architecture/), [Module & Extension Architecture](/en/build/module-extension-architecture/), or the bounded [Adapter Guide](/en/build/adapter-guide/). For future sequencing, see [Roadmap](/en/project/roadmap/).
+This command does not rewrite the application. It retains `applicationMigrationVerified: false` and zero execution claims. Shenko's Web consumer and Verdant's GPUI consumer require their own application acceptance. Using Verdant's GPUI fork in a harness is not an application migration.
+
+### Retired implementation and preserved obligations
+
+Old runtime/source-template generators and obsolete execution harnesses have been removed from maintained entry points. Their exact source remains in Git history. `internal/compiler/legacy-cleanup.md` maps independent assertions to current tests and retains unfinished full-family behavior, context/expose ownership, missing backends, browser/native acceptance, watch/diff and production cost evidence.
+
+Frozen-foundation tools only verify hashes, inspect definition identity or materialize authenticated source bytes into a new directory. They never install or invoke the old compiler and are not dependencies of the current build.
+
+## Contribution and verification boundary
+
+Implement shared definitions independently in the compiler and prototype. Preserve lifecycle, state, props, event, template, slot and host ownership rules. TypeScript checking does not perform Proto effect/phase analysis; LLVM does not replace UI ownership or target admission.
+
+Use the compiler's strict type check, focused target/consumer tests and repository documentation checks. Report exact source, generated artifacts, executed targets and remaining obligations. A documentation or inventory-accounting pass does not establish application acceptance.

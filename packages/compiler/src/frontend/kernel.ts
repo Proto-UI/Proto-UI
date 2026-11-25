@@ -35,7 +35,7 @@ export function detectSimpleEventAction(
     ts.isPropertyAccessExpression(call.expression) && ts.isIdentifier(call.expression.expression)
       ? stateVarToName.get(checker.getSymbolAtLocation(call.expression.expression)!)
       : undefined;
-  if (!stateName) return undefined;
+  if (stateName === undefined) return undefined;
   const arg = unwrapExpr(call.arguments[0]);
 
   // count.set(count.get() + 1)

@@ -1,6 +1,6 @@
 /**
- * Complete authored *.proto.ts × public TARGET_PROFILES admission inventory.
- * A fresh bounded-heap worker owns one entry, one FileSourceGraph snapshot and
+ * Complete authored *.proto.ts × current component target and retained target obligations.
+ * A fresh bounded-heap worker owns one entry, one TypeScript Program snapshot and
  * independent compileFile calls for every selected implemented profile.
  * No target build, runtime parity, native execution or public admission is inferred.
  *
@@ -25,10 +25,16 @@ import {
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import {
+  currentComponentProfiles,
+  componentArtifacts,
+  programSourceBinding,
+  verifyProgramSourceBinding,
+} from './current-api.mjs';
 
 const script = fileURLToPath(import.meta.url);
 const root = realpathSync(fileURLToPath(new URL('../../', import.meta.url)));
-const SCHEMA = 'proto-ui.library-profile-inventory.v1';
+const SCHEMA = 'proto-ui.library-profile-inventory.v2';
 export const HISTORY = Object.freeze({
   revision: '35195a6e6f1ba6a7d800da0029f2683013abd18b',
   families: { base: 178, shadcn: 216 },
@@ -157,15 +163,30 @@ export function classifyResult(result) {
   if (result.ok)
     return { status: 'PASS', failureKind: null, firstDiagnostic: null, diagnostics: [] };
   const diagnostics = result.diagnostics ?? [];
-  const categories = new Set(diagnostics.map((item) => item.category));
-  if (categories.has('compiler-defect'))
+  const errors = diagnostics.filter(
+    (item) => item.severity !== 'warning' && item.severity !== 'info'
+  );
+  const categories = new Set(errors.map((item) => item.category));
+  if (
+    categories.has('compiler-defect') ||
+    categories.has('ir') ||
+    errors.some((item) => /_BUILDER|_EMIT$/.test(item.code))
+  )
     return {
       status: 'FAIL',
       failureKind: 'compiler-defect',
       firstDiagnostic: diagnostics[0] ?? null,
       diagnostics,
     };
-  if (diagnostics.length && categories.size === 1 && categories.has('unsupported-input'))
+  const unsupported = (item) =>
+    item.category === 'unsupported-input' ||
+    [
+      'PUI_REACT_UNSUPPORTED',
+      'PUI_GPUI_UNSUPPORTED',
+      'PUI_KERNEL_UNSUPPORTED',
+      'PUI_FE002',
+    ].includes(item.code);
+  if (errors.length && errors.every(unsupported))
     return {
       status: 'UNSUPPORTED',
       failureKind: 'unsupported-input',
@@ -174,7 +195,11 @@ export function classifyResult(result) {
     };
   return {
     status: 'FAIL',
-    failureKind: categories.has('invalid-input') ? 'invalid-input' : 'other-diagnostic',
+    failureKind: ['invalid-input', 'input', 'typecheck', 'io'].some((category) =>
+      categories.has(category)
+    )
+      ? 'invalid-input'
+      : 'other-diagnostic',
     firstDiagnostic: diagnostics[0] ?? null,
     diagnostics,
   };
@@ -182,8 +207,8 @@ export function classifyResult(result) {
 
 /** A source change is reported; it does not silently forgive a prior PASS regression. */
 export function compareReports(previous, current) {
-  assert.equal(previous.schema, SCHEMA);
-  assert.equal(current.schema, SCHEMA);
+  assert.ok([SCHEMA, 'proto-ui.library-profile-inventory.v1'].includes(previous.schema));
+  assert.ok([SCHEMA, 'proto-ui.library-profile-inventory.v1'].includes(current.schema));
   const now = new Map(current.rows.map((row) => [key(row.entry, row.profile), row]));
   const before = new Map(previous.rows.map((row) => [key(row.entry, row.profile), row]));
   assert.equal(now.size, current.rows.length, 'Duplicate current entry/profile');
@@ -256,16 +281,16 @@ function packageIdentity(owner, name) {
 }
 async function describe(modulePath) {
   const compiler = await compilerModule(modulePath);
-  const profiles = Object.values(compiler.TARGET_PROFILES)
-    .map((profile) => {
-      const admission = profile.implemented ? null : compiler.resolveTargetProfile(profile.id);
-      if (admission)
-        assert.equal(admission.ok, false, 'Unimplemented public profile unexpectedly admitted');
-      return { ...profile, declarationDiagnostics: admission?.diagnostics ?? [] };
-    })
-    .sort((left, right) => left.id.localeCompare(right.id));
+  const profiles = currentComponentProfiles(compiler);
+  let compilerBuild = null;
   if (modulePath) {
     const identity = json(path.join(path.dirname(modulePath), 'compiler-build.json'));
+    assert.equal(
+      identity.schema,
+      'proto-ui.compiler-package.v3',
+      'Expected a current source-pinned compiler'
+    );
+    compilerBuild = identity;
     for (const input of identity.inputs)
       assert.equal(
         sha(readFileSync(path.join(root, input.path))),
@@ -276,13 +301,13 @@ async function describe(modulePath) {
   const sourceLoaderTypeScript = packageIdentity(script, 'typescript');
   return {
     profiles,
-    compilerBuild: compiler.compilerBuildIdentity,
+    compilerBuild,
     compilerModule: modulePath ?? 'packages/compiler/src/index.ts',
     compilerModuleSha256: sha(
       readFileSync(modulePath ?? path.join(root, 'packages/compiler/src/index.ts'))
     ),
-    sourceLoaderSha256: sha(
-      readFileSync(path.join(root, 'packages/compiler/src/source-loader.ts'))
+    sourceProgramSha256: sha(
+      readFileSync(path.join(root, 'packages/compiler/src/frontend/program.ts'))
     ),
     node: process.version,
     compilerTypeScript: modulePath
@@ -308,27 +333,14 @@ function workerCommand(extra, heapMb, timeoutMs = 180000) {
 function resourceSnapshot() {
   return { ...process.memoryUsage(), peakRssKiB: process.resourceUsage().maxRSS };
 }
-function closureBinding(snapshot, graph, failures, entry) {
-  const files = Object.entries(snapshot?.files ?? {})
-    .map(([file, content]) => ({
-      file,
-      sha256: sha(content),
-      bytes: Buffer.byteLength(content),
-    }))
-    .sort((left, right) => left.file.localeCompare(right.file));
+function closureBinding(program, entry) {
+  const files = programSourceBinding(program);
   return {
     entry,
     files,
     filesSha256: digest(files),
-    sourceImports: snapshot?.sourceImports ?? {},
-    sourceResolution: snapshot?.sourceResolution ?? null,
-    dependencies: [...graph.dependencies].sort(),
-    resolutionFiles: [...graph.resolutionFiles].sort(),
-    failures: failures.map((error) => ({
-      name: error?.name ?? null,
-      message: String(error?.message ?? error),
-    })),
-    sharedSnapshot: !!snapshot && failures.length === 0,
+    sharedSnapshot: true,
+    scope: 'Exact TS Program source/type inputs. No author module was executed.',
   };
 }
 
@@ -354,8 +366,8 @@ async function compileEntry(requestPath) {
     'Worker compiler entry changed'
   );
   assert.equal(
-    sha(readFileSync(path.join(root, 'packages/compiler/src/source-loader.ts'))),
-    plan.binding.sourceLoaderSha256
+    sha(readFileSync(path.join(root, 'packages/compiler/src/frontend/program.ts'))),
+    plan.binding.sourceProgramSha256
   );
   const loaderTypeScript = packageIdentity(script, 'typescript');
   assert.deepEqual(
@@ -376,7 +388,7 @@ async function compileEntry(requestPath) {
     'TypeScript loader changed'
   );
   const compiler = await compilerModule(plan.binding.compilerModulePath);
-  const { FileSourceGraph } = await import('../../packages/compiler/src/source-loader.ts');
+  const instance = compiler.createCompiler({ rootDir: root });
   const entry = plan.entries.find((row) => row.entry === request.entry);
   assert.ok(entry, 'Worker entry must be in the frozen universe');
   assert.equal(
@@ -384,17 +396,10 @@ async function compileEntry(requestPath) {
     entry.sha256,
     'Entry changed before worker read'
   );
-  const graph = new FileSourceGraph(root),
-    started = performance.now();
-  let snapshot,
-    failures = [];
-  try {
-    snapshot = await graph.load(await graph.entry(path.join(root, entry.entry)));
-    failures = [...snapshot.failures];
-  } catch (error) {
-    failures = [error];
-  }
-  const closure = closureBinding(snapshot, graph, failures, entry.entry);
+  const started = performance.now();
+  const program = instance.session.ensureFiles([path.join(root, entry.entry)]);
+  const extracted = compiler.extractModuleIR(program, path.join(root, entry.entry));
+  const closure = closureBinding(program, entry.entry);
   const closureSha256 = digest(closure),
     closureFile = `closures/${id(entry.entry)}.json`;
   const closurePath = path.join(request.output, closureFile);
@@ -402,10 +407,6 @@ async function compileEntry(requestPath) {
     assert.equal(digest(json(closurePath)), closureSha256, 'Closure changed during resume');
   else save(closurePath, closure);
   const closureReadMs = performance.now() - started;
-  if (closure.sharedSnapshot) {
-    Object.freeze(snapshot.files);
-    if (snapshot.sourceImports) Object.freeze(snapshot.sourceImports);
-  }
   for (const profile of request.profiles) {
     assert.ok(
       plan.profiles.find((row) => row.id === profile)?.implemented,
@@ -415,13 +416,7 @@ async function compileEntry(requestPath) {
       before = resourceSnapshot();
     let result;
     try {
-      // A failed load cannot be passed as sourceSnapshot: compileFile must perform
-      // its own loader-error path. All successful loads share this exact snapshot.
-      result = await compiler.compileFile(entry.entry, {
-        root,
-        profile,
-        ...(closure.sharedSnapshot ? { sourceSnapshot: snapshot } : {}),
-      });
+      result = instance.compileFile(entry.entry, { target: profile, allowHookOnly: true });
     } catch (error) {
       result = {
         ok: false,
@@ -453,6 +448,13 @@ async function compileEntry(requestPath) {
       profileSha256: digest(plan.profiles.find((item) => item.id === profile)),
       execution: 'compileFile-source-to-emitter',
       ...classifyResult(result),
+      compilerDiagnostics: result.diagnostics ?? [],
+      prototypeDeclarations: extracted.ir.prototypes.length,
+      authoredHookDeclarations: extracted.ir.authoredHooks.length,
+      nativeEmittedPrototypes: result.ok
+        ? result.value.prototypes.length + result.value.gpuiPrototypes.length
+        : 0,
+      executionVerifiedPrototypes: 0,
       elapsedMs,
       closure: {
         file: closureFile,
@@ -471,38 +473,36 @@ async function compileEntry(requestPath) {
       },
     };
     if (result.ok) {
-      const output = result.value.output;
-      const artifacts = compiler.compilationArtifacts(result.value).map((file) => ({
+      const artifacts = componentArtifacts(result.value).map((file) => ({
         path: file.path,
         kind: file.kind,
         bytes: Buffer.byteLength(file.contents),
         sha256: sha(file.contents),
       }));
-      const emittedFiles = `emitted/${id(key(entry.entry, profile))}.json`;
-      save(path.join(request.output, emittedFiles), { artifacts });
-      row.output = {
-        profile: output.profile,
-        irSha256: digest(result.value.ir),
-        sourceGraphSha256: result.value.ir.source.sha256,
-        admittedSourceFilesSha256: digest(
-          result.value.ir.sourceFiles.map(({ file, sha256 }) => ({ file, sha256 }))
-        ),
-        generatedSourceSha256: sha(output.code),
-        generatedSourceBytes: Buffer.byteLength(output.code),
-        supportingFiles: output.supportingFiles?.length ?? 0,
-        supportingSourceBytes: (output.supportingFiles ?? [])
-          .filter((file) => file.kind === 'source')
-          .reduce((sum, file) => sum + Buffer.byteLength(file.contents), 0),
-        dependencies: output.dependencies,
-        artifacts: { file: emittedFiles, sha256: digest({ artifacts }), count: artifacts.length },
-      };
+      if (artifacts.length === 0) {
+        assert.ok(
+          result.value.ir.authoredHooks.length > 0,
+          'An empty artifact cannot be a native emission'
+        );
+        row.status = 'ANALYZED';
+        row.analysisKind = 'hook-only';
+      } else {
+        const emittedFiles = `emitted/${id(key(entry.entry, profile))}.json`;
+        save(path.join(request.output, emittedFiles), { artifacts });
+        row.output = {
+          profile,
+          artifactKind: result.value.artifactKind,
+          irSha256: sha(result.value.irText),
+          admittedSourceFilesSha256: closure.filesSha256,
+          generatedSourceBytes: artifacts
+            .filter((file) => file.kind === 'source')
+            .reduce((sum, file) => sum + file.bytes, 0),
+          artifacts: { file: emittedFiles, sha256: digest({ artifacts }), count: artifacts.length },
+        };
+      }
     }
     row.memory.after = resourceSnapshot();
-    assert.equal(
-      digest(closureBinding(snapshot, graph, failures, entry.entry)),
-      closureSha256,
-      'Shared source snapshot changed before receipt publication'
-    );
+    verifyProgramSourceBinding(closure.files);
     save(path.join(request.output, 'rows', `${id(key(entry.entry, profile))}.json`), row);
     process.stdout.write(
       JSON.stringify({
@@ -545,7 +545,7 @@ function storedRows(directory, plan, selectedKeys) {
     assert.ok(profile?.implemented);
     assert.equal(row.profileSha256, digest(profile), 'Stored profile identity changed');
     assert.equal(row.execution, 'compileFile-source-to-emitter');
-    assert.ok(['PASS', 'FAIL', 'UNSUPPORTED'].includes(row.status));
+    assert.ok(['PASS', 'FAIL', 'UNSUPPORTED', 'ANALYZED'].includes(row.status));
     assert.equal(row.closure.file, `closures/${id(row.entry)}.json`);
     assert.equal(digest(json(path.join(directory, row.closure.file))), row.closure.sha256);
     if (row.status === 'PASS') {
@@ -559,6 +559,12 @@ function storedRows(directory, plan, selectedKeys) {
         digest(json(path.join(directory, row.output.artifacts.file))),
         row.output.artifacts.sha256
       );
+    } else if (row.status === 'ANALYZED') {
+      assert.equal(row.analysisKind, 'hook-only');
+      assert.equal(row.prototypeDeclarations, 0);
+      assert.ok(row.authoredHookDeclarations > 0);
+      assert.equal(row.nativeEmittedPrototypes, 0);
+      assert.equal(row.output, undefined);
     } else {
       const classified = classifyResult({ ok: false, diagnostics: row.diagnostics });
       assert.equal(row.status, classified.status, 'Stored diagnostic classification changed');
@@ -593,7 +599,7 @@ function report(plan, completed, receipts) {
       );
     }
   const statuses = Object.fromEntries(
-    ['PASS', 'FAIL', 'UNSUPPORTED', 'UNIMPLEMENTED', 'UNTESTED'].map((status) => [
+    ['PASS', 'FAIL', 'UNSUPPORTED', 'UNIMPLEMENTED', 'UNTESTED', 'ANALYZED'].map((status) => [
       status,
       rows.filter((row) => row.status === status).length,
     ])
@@ -631,7 +637,7 @@ function report(plan, completed, receipts) {
     universeFingerprint: plan.universeFingerprint,
     binding: plan.binding,
     scope:
-      'Complete tracked authored entry × public profile admission. PASS means compileFile reached an emitted output; it does not establish strict target build, runtime parity, physical/native platform execution, visual/AT acceptance or all Issue #732 conditions.',
+      'Complete tracked authored entry × current component target and retained historical target obligations. PASS requires native source artifacts; ANALYZED is hook-only and emits no component. No target build, native/browser execution, visual/AT acceptance or full Issue #732 completion is inferred.',
     counts: {
       entries: plan.entries.length,
       families: familyCounts(plan.entries),
@@ -639,6 +645,11 @@ function report(plan, completed, receipts) {
       implementedProfiles: plan.profiles.filter((item) => item.implemented).length,
       rows: rows.length,
       statuses,
+      nativeEmittedPrototypes: rows.reduce(
+        (sum, row) => sum + (row.nativeEmittedPrototypes ?? 0),
+        0
+      ),
+      executionVerifiedPrototypes: 0,
       compilerDefects: rows.filter((row) => row.failureKind === 'compiler-defect').length,
     },
     admissionCoverageComplete: statuses.UNTESTED === 0,

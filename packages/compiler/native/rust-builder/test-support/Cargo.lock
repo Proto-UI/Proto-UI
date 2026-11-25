@@ -469,6 +469,46 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b"
 
 [[package]]
+name = "compiled-basesurfaceroot"
+version = "0.0.0"
+dependencies = [
+ "gpui",
+ "ryu-js",
+]
+
+[[package]]
+name = "compiled-basetextroot"
+version = "0.0.0"
+dependencies = [
+ "gpui",
+ "ryu-js",
+]
+
+[[package]]
+name = "compiled-createdfailure"
+version = "0.0.0"
+dependencies = [
+ "gpui",
+ "ryu-js",
+]
+
+[[package]]
+name = "compiled-createdwatch"
+version = "0.0.0"
+dependencies = [
+ "gpui",
+ "ryu-js",
+]
+
+[[package]]
+name = "compiled-emptyroot"
+version = "0.0.0"
+dependencies = [
+ "gpui",
+ "ryu-js",
+]
+
+[[package]]
 name = "compiled-escapedtext"
 version = "0.0.0"
 dependencies = [
@@ -478,6 +518,22 @@ dependencies = [
 
 [[package]]
 name = "compiled-gpuicounter"
+version = "0.0.0"
+dependencies = [
+ "gpui",
+ "ryu-js",
+]
+
+[[package]]
+name = "compiled-invokereturn"
+version = "0.0.0"
+dependencies = [
+ "gpui",
+ "ryu-js",
+]
+
+[[package]]
+name = "compiled-numericpolicy"
 version = "0.0.0"
 dependencies = [
  "gpui",
@@ -502,6 +558,30 @@ dependencies = [
 
 [[package]]
 name = "compiled-requiredprop"
+version = "0.0.0"
+dependencies = [
+ "gpui",
+ "ryu-js",
+]
+
+[[package]]
+name = "compiled-rulescheduling"
+version = "0.0.0"
+dependencies = [
+ "gpui",
+ "ryu-js",
+]
+
+[[package]]
+name = "compiled-slothost"
+version = "0.0.0"
+dependencies = [
+ "gpui",
+ "ryu-js",
+]
+
+[[package]]
+name = "compiled-updatescheduling"
 version = "0.0.0"
 dependencies = [
  "gpui",
@@ -2205,11 +2285,21 @@ name = "proto-ui-gpui-native-tests"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "compiled-basesurfaceroot",
+ "compiled-basetextroot",
+ "compiled-createdfailure",
+ "compiled-createdwatch",
+ "compiled-emptyroot",
  "compiled-escapedtext",
  "compiled-gpuicounter",
+ "compiled-invokereturn",
+ "compiled-numericpolicy",
  "compiled-numericstate",
  "compiled-propsmatrix",
  "compiled-requiredprop",
+ "compiled-rulescheduling",
+ "compiled-slothost",
+ "compiled-updatescheduling",
  "gpui",
 ]
 

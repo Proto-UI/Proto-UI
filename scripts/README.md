@@ -15,7 +15,7 @@ This directory contains build/generation commands, repository checks, evidence r
 | [`agent-operations/`](agent-operations/) and [`autonomous-maintenance/`](autonomous-maintenance/) | Governed contributor and maintenance workflows; start at [`AGENTS.md`](../AGENTS.md). |
 | [`benchmark/`](benchmark/) | Coordinators and validators for [`benchmarks/`](../benchmarks/README.md). |
 | [`analysis/`](analysis/) | Package cost, conformance and other bounded engineering analyses. |
-| [`compiler/`](compiler/) and [`gpui/`](gpui/) | Compiler consumer checks and native protocol/style/session fixture generation. |
+| [`compiler/`](compiler/README.md) and [`gpui/`](gpui/) | Current AST compiler inventories/consumers, bounded historical source verification, and native protocol/style/session fixture generation. |
 | [`styles/`](styles/) and [`components/`](components/) | Style/token and component-preset generators. |
 | [`prototypes/`](prototypes/) and [`feedback/`](feedback/) | Scoped prototype/Feedback consumer evidence and supporting fixtures. |
 | [`preview/`](preview/README.md) | Review-preview artifact preparation and serving. |

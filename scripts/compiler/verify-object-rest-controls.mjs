@@ -165,9 +165,11 @@ export async function verifyObjectRestControls(input, output) {
     reference,
     'All archived whole-helper expected values remain unchanged.'
   );
-  const { parsePrototype } = await import('../../packages/compiler/src/parser.ts');
+  const { createCompiler } = await import('../../packages/compiler/src/index.ts');
+  const compiler = createCompiler();
   const parse = (files) =>
-    parsePrototype(files['object-rest.proto.ts'], {
+    compiler.compilePrototype(files['object-rest.proto.ts'], {
+      target: 'ir',
       fileName: 'object-rest.proto.ts',
       files: { 'object-rest-observer.ts': files['object-rest-observer.ts'] },
     });
@@ -176,6 +178,8 @@ export async function verifyObjectRestControls(input, output) {
     typescript: ts.version,
     node: process.version,
     privateSourceAcceptance: false,
+    compilerObservation:
+      'Current TypeScript/HIR analysis only. An IR result is not native compilation or acceptance of the frozen private source.',
     original: {
       sourceHashes: frozenHashes,
       diagnostics: original.diagnostics,

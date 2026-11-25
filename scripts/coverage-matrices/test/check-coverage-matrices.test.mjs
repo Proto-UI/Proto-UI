@@ -19,8 +19,120 @@ import {
   collectCoverageMatrixIssues,
   validateCoverageMatrices,
 } from '../check-coverage-matrices.mjs';
+import { BROWSER_COMPILER_EXECUTION_BOUNDARIES } from '../browser-compiler-imports.mjs';
 
 const temporaryRoots = [];
+
+function copyBrowserCompilerExecutionSources(root) {
+  const sources = new Set(
+    BROWSER_COMPILER_EXECUTION_BOUNDARIES.flatMap((boundary) => [
+      boundary.source.path,
+      ...boundary.companions.map((companion) => companion.path),
+    ])
+  );
+  for (const source of sources) {
+    const target = path.join(root, source);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(new URL(`../../../${source}`, import.meta.url), target);
+  }
+  return [
+    [
+      'apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts',
+      ['www.demo.runtime-select', 'www.demo.code-panel', 'www.demo.authored-controllers'],
+    ],
+    ...[
+      'apps/www/src/components/PrototypePreviewer/compiled-preview-sandbox.ts',
+      'apps/www/src/components/PrototypePreviewer/compiled-preview-runtime.ts',
+      'packages/compiler/src/browser/client.ts',
+      'packages/compiler/src/browser/worker.ts',
+    ].map((source) => [source, ['www.demo.raw-adapter-runtimes']]),
+  ];
+}
+
+for (const scenario of [
+  'exact',
+  'second-worker-site',
+  'removed-digest-check',
+  'changed-worker-producer',
+  'missing-hash-source',
+  'changed-panel',
+  'adjacent-client',
+  'second-script-site',
+  'changed-fixed-module',
+  'changed-target-producer',
+  'missing-preview-engine',
+]) {
+  test(`compiler executable boundary: ${scenario}`, () => {
+    const root = createRoot();
+    const websiteBindings = copyBrowserCompilerExecutionSources(root);
+    const client = 'packages/compiler/src/browser/client.ts';
+    const preview = 'apps/www/src/components/PrototypePreviewer/compiled-preview-runtime.ts';
+    const append = (file, text) => fs.appendFileSync(path.join(root, file), text);
+    if (scenario === 'second-worker-site') append(client, '\nnew Worker(unreviewedWorkerUrl);\n');
+    if (scenario === 'removed-digest-check') {
+      const file = path.join(root, client);
+      const before = fs.readFileSync(file, 'utf8');
+      const after = before.replace(
+        '(await browserSha256(bundle)) !== build.compilerSha256',
+        'false'
+      );
+      assert.notEqual(before, after);
+      fs.writeFileSync(file, after);
+    }
+    if (scenario === 'changed-worker-producer')
+      append('scripts/compiler/build-browser.mjs', '\n// Different producer identity\n');
+    if (scenario === 'missing-hash-source')
+      fs.unlinkSync(path.join(root, 'packages/compiler/src/browser/hash.ts'));
+    if (scenario === 'changed-panel')
+      append(
+        'apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts',
+        '\n// Different delivery caller\n'
+      );
+    if (scenario === 'adjacent-client') {
+      const adjacent = client.replace('client.ts', 'foreign-client.ts');
+      fs.copyFileSync(path.join(root, client), path.join(root, adjacent));
+      const entry = 'apps/www/src/components/UnreviewedCompilerClient.ts';
+      fs.writeFileSync(
+        path.join(root, entry),
+        "import '../../../../packages/compiler/src/browser/foreign-client';\n"
+      );
+      websiteBindings.push([entry, ['www.demo.raw-adapter-runtimes']]);
+    }
+    if (scenario === 'second-script-site')
+      append(
+        preview,
+        "\nconst foreign = document.createElement('script'); foreign.textContent = unreviewedCode;\n"
+      );
+    if (scenario === 'changed-fixed-module') {
+      const file = path.join(root, preview);
+      const before = fs.readFileSync(file, 'utf8');
+      const after = before.replace(
+        "import('pui:compiled/component')",
+        "import('https://example.invalid/foreign.js')"
+      );
+      assert.notEqual(before, after);
+      fs.writeFileSync(file, after);
+    }
+    if (scenario === 'changed-target-producer')
+      append('scripts/compiler/browser-assets.ts', '\n// Different target producer identity\n');
+    if (scenario === 'missing-preview-engine')
+      fs.unlinkSync(path.join(root, 'packages/compiler/src/browser/engine.ts'));
+    // Renewing a matrix fingerprint does not renew any executable allowance.
+    writeValidMatrices(root, {}, {}, { websiteBindings });
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    if (scenario === 'exact') assert.equal(message, '');
+    else if (
+      [
+        'second-script-site',
+        'changed-fixed-module',
+        'changed-target-producer',
+        'missing-preview-engine',
+      ].includes(scenario)
+    )
+      assert.match(message, /dynamic executable script source.*compiled-preview-runtime/);
+    else assert.match(message, /unresolved Worker\/SharedWorker entry.*(?:client|foreign-client)/);
+  });
+}
 
 for (const scenario of ['literal', 'changed', 'missing', 'glob', 'traversal', 'duplicate']) {
   test(`literal bracketed website source binding: ${scenario}`, () => {
@@ -99,18 +211,9 @@ for (const mode of ['file', 'directory', 'ancestor-directory']) {
 for (const scenario of ['exact', 'foreign-owner', 'unlisted-compiler-source']) {
   test(`compiler browser source binding: ${scenario}`, () => {
     const root = createRoot();
-    const panel = 'apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts';
+    const websiteBindings = copyBrowserCompilerExecutionSources(root);
     const client = 'packages/compiler/src/browser/client.ts';
     const engine = 'packages/compiler/src/browser/engine.ts';
-    fs.mkdirSync(path.dirname(path.join(root, panel)), { recursive: true });
-    fs.mkdirSync(path.dirname(path.join(root, client)), { recursive: true });
-    fs.writeFileSync(
-      path.join(root, panel),
-      `import { createBrowserCompilerClient } from '../../../../../packages/compiler/src/browser/client';\nexport const panel = createBrowserCompilerClient;\n`
-    );
-    // A positive owner fixture must first satisfy the independent source gate.
-    // Synthetic client bytes made the old "exact" case pass while still denied.
-    fs.copyFileSync(new URL(`../../../${client}`, import.meta.url), path.join(root, client));
     let boundSource = client;
     let boundOwners = ['www.demo.raw-adapter-runtimes'];
     if (scenario === 'foreign-owner') boundOwners = ['www.shell.primary-nav'];
@@ -121,7 +224,17 @@ for (const scenario of ['exact', 'foreign-owner', 'unlisted-compiler-source']) {
       );
       boundSource = engine;
     }
-    writeValidMatrices(root, {}, {}, { websiteBindings: [[boundSource, boundOwners]] });
+    writeValidMatrices(
+      root,
+      {},
+      {},
+      {
+        websiteBindings: [
+          ...websiteBindings.filter(([source]) => source !== boundSource),
+          [boundSource, boundOwners],
+        ],
+      }
+    );
     const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
     if (scenario === 'exact') {
       assert.equal(message, '');
@@ -19791,17 +19904,7 @@ for (const reviewed of [
   'packages/core/src/spec/owned-template-blueprint.ts',
   'packages/core/src/spec/template.ts',
   'packages/core/src/spec/svg-tags.ts',
-  'packages/compiler/src/shader-plan.ts',
-  'packages/compiler/src/core-value-types.ts',
-  'packages/compiler/src/flutter-source.ts',
-  'packages/compiler/src/gpui-source.ts',
-  'packages/compiler/src/ir-validation.ts',
-  'packages/compiler/src/native-async.ts',
-  'packages/compiler/src/native-style.ts',
-  'packages/compiler/src/rule-declarations.ts',
-  'packages/compiler/src/rule-plan.ts',
-  'packages/compiler/src/static-declarations.ts',
-  'packages/compiler/src/targets.ts',
+  'packages/compiler/src/targets/react.ts',
 ]) {
   for (const scenario of [
     'exact',

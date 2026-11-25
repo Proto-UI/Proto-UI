@@ -23,7 +23,7 @@ function fixture() {
     { entry: 'shadcn/button.proto.ts', family: 'shadcn', sha256: 'source-two' },
   ];
   const expected = {
-    schema: 'proto-ui.library-profile-inventory.v1',
+    schema: 'proto-ui.library-profile-inventory.v2',
     universeFingerprint: 'independent-fixture',
     binding: { revision: 'a'.repeat(40) },
     entries,
@@ -40,6 +40,11 @@ function fixture() {
       entrySha256: entry.sha256,
       family: entry.family,
       profile: profile.id,
+      prototypeDeclarations: 1,
+      authoredHookDeclarations: 0,
+      nativeEmittedPrototypes:
+        profile.implemented && !(index === 1 && profile.id === 'public-two') ? 1 : 0,
+      executionVerifiedPrototypes: 0,
       status: !profile.implemented
         ? 'UNIMPLEMENTED'
         : index === 1 && profile.id === 'public-two'
@@ -58,7 +63,7 @@ function fixture() {
           : [],
       ...(profile.implemented ? { closure: { sha256: 'closure' }, elapsedMs: 1 } : {}),
       ...(profile.implemented && !(index === 1 && profile.id === 'public-two')
-        ? { output: { profile: profile.id } }
+        ? { output: { profile: profile.id, artifacts: { count: 1 } } }
         : {}),
     }))
   );
@@ -75,8 +80,10 @@ function fixture() {
       profiles: 3,
       implementedProfiles: 2,
       rows: 6,
-      statuses: { PASS: 3, FAIL: 0, UNSUPPORTED: 1, UNIMPLEMENTED: 2, UNTESTED: 0 },
+      statuses: { PASS: 3, FAIL: 0, UNSUPPORTED: 1, UNIMPLEMENTED: 2, UNTESTED: 0, ANALYZED: 0 },
       compilerDefects: 0,
+      nativeEmittedPrototypes: 3,
+      executionVerifiedPrototypes: 0,
     },
     execution: {
       recordedAttempts: 2,
@@ -129,6 +136,7 @@ test('UNTESTED and a compiler defect stay red even when supplied summary fields 
       };
       Object.assign(report.rows[0], {
         failureKind: 'compiler-defect',
+        nativeEmittedPrototypes: 0,
         diagnostics: [diagnostic],
         firstDiagnostic: diagnostic,
       });
@@ -136,6 +144,7 @@ test('UNTESTED and a compiler defect stay red even when supplied summary fields 
       report.counts.statuses.PASS--;
       report.counts.statuses.FAIL++;
       report.counts.compilerDefects++;
+      report.counts.nativeEmittedPrototypes--;
     }
     assert.throws(() => assertCompleteInventory(report, expected), /UNTESTED|Compiler defects/);
   }
@@ -196,4 +205,23 @@ test('the latest actual shard attempt wins; missing, foreign and future attempts
       ),
     /Foreign run/
   );
+});
+
+test('hook analysis stays in the denominator without becoming an emitted prototype', () => {
+  const { expected, report } = fixture();
+  Object.assign(report.rows[0], {
+    status: 'ANALYZED',
+    analysisKind: 'hook-only',
+    prototypeDeclarations: 0,
+    authoredHookDeclarations: 1,
+    nativeEmittedPrototypes: 0,
+  });
+  delete report.rows[0].output;
+  report.counts.statuses.PASS--;
+  report.counts.statuses.ANALYZED++;
+  report.counts.nativeEmittedPrototypes--;
+  assert.equal(assertCompleteInventory(report, expected).counts.ANALYZED, 1);
+  report.rows[0].nativeEmittedPrototypes = 1;
+  report.counts.nativeEmittedPrototypes++;
+  assert.throws(() => assertCompleteInventory(report, expected));
 });

@@ -7,3 +7,4 @@ export {
 } from './react';
 export { emitGpuiComponent, type GpuiEmitOptions, type GpuiEmitResult } from './gpui';
 export { getKernelLoweringDiagnostics } from './kernel';
+export * from './kinds';

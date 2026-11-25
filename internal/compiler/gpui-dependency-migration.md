@@ -1,6 +1,6 @@
 # GPUI dependency migration preparation
 
-This maintained contributor guide prepares a later change of GPUI source. It does not admit a new GPUI release, change `gpui-source-v1` capabilities, or certify a standalone native build. The observations below were checked on **2026-11-24**. The [Compiler README](../../packages/compiler/README.md) owns supported usage; [atomic lowering and completion](atomic-lowering-completion.md) owns the broader Compiler acceptance boundary.
+This maintained contributor guide prepares a later change of GPUI source. It does not admit a new GPUI release, restore the retired `gpui-source-v1` compiler, or certify a standalone native build. The observations below were checked on **2026-11-24**. The [Compiler README](../../packages/compiler/README.md) owns supported usage; [atomic lowering and completion](atomic-lowering-completion.md) owns the broader Compiler acceptance boundary.
 
 ## Upstream observation
 
@@ -18,7 +18,7 @@ The historical v1 module `packages/compiler/src/gpui-dependency.ts` owned the le
 | Independent repository | Exact `zed-industries/gpui` Git URL + full resolved commit | Future candidate only; the observed repository cannot supply a Cargo dependency. |
 | Registry package | Registry index URL + exact resolved package version + lockfile checksum | Future candidate only; no upcoming version number is assumed. |
 
-Applications can keep `gpuiDependency: "workspace"` so generated components and their shared SDK inherit one application-owned source. The Compiler's default profile identity and the application's actual Cargo identity are separate facts; record both. Check the full resolved graph as well as manifest declarations.
+Current AST-generated components can use `gpuiDependency: "workspace"` to inherit the application-owned GPUI dependency. Historical consumers may still own a shared SDK; its graph checks remain applicable to those consumers and do not imply that the current AST compiler emits that SDK. The compiler default pin in `packages/compiler/src/targets/gpui.ts` and the application's actual Cargo identity are separate facts; record both. Check the full resolved graph as well as manifest declarations.
 
 Select native API capabilities independently: Element/IntoElement behavior, cached path IDs, text-selection notifications, focus, input, accessibility, platform initialization, and window/font backends need their own evidence. `gpui-modern-element-api` does not imply `gpui-text-selection-notification`. A renamed repository, matching version string, or successful dependency resolution does not prove any of these capabilities.
 
@@ -28,7 +28,9 @@ Run these commands from the repository root with Node 24. Set the manifest varia
 
 ```sh
 node scripts/gpui/check-cargo-graph.mjs \
-  --manifest-path "$GPUI_CONSUMER_MANIFEST" --profile gpui-source-v1
+  --manifest-path "$GPUI_CONSUMER_MANIFEST" \
+  --git https://github.com/zed-industries/zed \
+  --rev 62e5991dd0f0c8a3af8d5e7e9c4652490d468db8
 
 node scripts/gpui/check-cargo-graph.mjs \
   --manifest-path "$GPUI_CONSUMER_MANIFEST" \
@@ -41,7 +43,7 @@ node scripts/gpui/check-cargo-graph.mjs \
   --platform-version "$CANDIDATE_GPUI_PLATFORM_VERSION"
 ```
 
-The three primary selectors are mutually exclusive: `--profile gpui-source-v1`, `--git` with `--rev`, or `--registry` with `--version`. Only the existing default profile is selectable; explicit candidate arguments do not promote a profile. For explicit sources, an independent platform selector is either `--platform-git` with `--platform-rev`, or `--platform-registry` with `--platform-version`. Providing either pair requires exactly one reachable `gpui_platform` package.
+The two primary selectors are mutually exclusive: `--git` with `--rev`, or `--registry` with `--version`. The retired `--profile` selector is rejected; this independent graph checker imports no compiler or legacy SDK identity. Explicit dependency arguments do not establish native API admission. An independent platform selector is either `--platform-git` with `--platform-rev`, or `--platform-registry` with `--platform-version`. Providing either pair requires exactly one reachable `gpui_platform` package.
 
 A Git source defaults any present platform crate to the same URL and commit; without explicit platform options, its presence is optional. Registry packages may release independently: a present `gpui_platform` requires its own explicit source/version. Its version is never inferred from `gpui`. An ordinary index URL expects `registry+<URL>`; for crates.io use `https://github.com/rust-lang/crates.io-index`. Alternatively pass the full `registry+<URL>` or `sparse+<URL>` source ID returned by [Cargo metadata](https://doc.rust-lang.org/cargo/commands/cargo-metadata.html). These source IDs are opaque and Cargo-version-dependent: retain `cargoVersion` and match the actual identity rather than inferring it from the download protocol or a registry's friendly configuration name. CLI version arguments are complete versions, without `=`, ranges, or `*`.
 

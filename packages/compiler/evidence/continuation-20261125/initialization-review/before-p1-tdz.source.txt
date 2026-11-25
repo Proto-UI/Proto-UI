@@ -1,0 +1,58 @@
+import { TsProgramSession, extractModuleIR } from '/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/index.ts';
+import { getReactLoweringDiagnostics, emitReactComponent } from '/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/targets/react.ts';
+const session = new TsProgramSession({rootDir:"/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125"});
+const cases = {
+module_tdz: `function readLater() { return later; }
+const initial = readLater();
+const later = 1;
+export default definePrototype({
+ name: 'tdz-module',
+ setup(def) {
+  const n = def.state.numberDiscrete('n', initial);
+  return r => r.el('div', n.get());
+ }
+});`,
+callback_tdz: `export default definePrototype({
+ name: 'tdz-callback',
+ setup(def) {
+  const n = def.state.numberDiscrete('n', 0);
+  def.event.on('host:click', run => {
+   function bad() { n.set(later); }
+   bad();
+   const later = 1;
+   run.update();
+  });
+  return r => r.el('div', n.get());
+ }
+});`,
+setup_tdz: `function readLater() { return later; }
+const initial = 0;
+const later = 1;
+export default definePrototype({
+ name: 'setup-tdz',
+ setup(def) {
+  function readLocal() { return after; }
+  const n = def.state.numberDiscrete('n', readLocal());
+  const after = 1;
+  return r => r.el('div', n.get());
+ }
+});`
+};
+for (const [name,body] of Object.entries(cases)) {
+ const source = "import { definePrototype } from '@proto.ui/core';\n"+body;
+ const {program,entryPath}=session.createVirtualProgram('packages/compiler/test/__final_review_'+name+'.proto.ts',source);
+ const out=extractModuleIR(program,entryPath);
+ const p=out.ir.prototypes[0];
+ const admission=p?getReactLoweringDiagnostics(p):null;
+ let emitted:any;
+ try { emitted=p&&!admission?.length?emitReactComponent(p):undefined; } catch(e) { emitted=String(e); }
+ console.log(JSON.stringify({name,diagnostics:out.diagnostics,unlowered:p?.unlowered,states:p?.states,events:p?.events,admission,emitted}));
+}
+for (const [name,fn] of Object.entries({
+ module_tdz:()=>{function readLater(){return later;}const initial=readLater();const later=1;return initial;},
+ callback_tdz:()=>{let result=0;function bad(){result=later;}bad();const later=1;return result;},
+ setup_tdz:()=>{function readLocal(){return after;}const n=readLocal();const after=1;return n;}
+})) {
+ try { console.log(JSON.stringify({name,source_result:fn()})); }
+ catch(e) { console.log(JSON.stringify({name,source_error:String(e)})); }
+}

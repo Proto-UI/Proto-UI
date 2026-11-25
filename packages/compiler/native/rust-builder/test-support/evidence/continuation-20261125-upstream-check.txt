@@ -1,0 +1,20 @@
+COMMAND cargo +1.98.1 check --locked --manifest-path packages/compiler/native/rust-builder/test-support/generated/GpuiExpandedPinned/Cargo.toml --target-dir /tmp/pui-gpui-native-target-1809
+    Checking compiled-gpuiexpandedpinned v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/GpuiExpandedPinned)
+warning: methods `set_state_range` and `set_state_step` are never used
+   --> src/lib.rs:104:8
+    |
+ 46 | impl GpuiExpandedPinned {
+    | ----------------------- methods in this implementation
+...
+104 |     fn set_state_range(&mut self, value: f64) -> Result<(), String> {
+    |        ^^^^^^^^^^^^^^^
+...
+114 |     fn set_state_step(&mut self, value: f64) -> Result<(), String> {
+    |        ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `compiled-gpuiexpandedpinned` (lib) generated 1 warning
+    Finished `dev` profile [unoptimized] target(s) in 0.63s
+PUI_COMMAND_EXIT 0
+PUI_STAGE_EXIT 0

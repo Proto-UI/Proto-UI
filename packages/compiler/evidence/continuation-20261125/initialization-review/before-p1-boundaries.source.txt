@@ -1,0 +1,30 @@
+import { TsProgramSession, extractModuleIR } from '/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/index.ts';
+import { getReactLoweringDiagnostics } from '/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/targets/react.ts';
+const session=new TsProgramSession({rootDir:"/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125"});
+const cases={
+created_default:`export default definePrototype({name:'created-default',setup(def){
+ const n=def.state.numberDiscrete('n',0);
+ def.lifecycle.onCreated((_run, ignored=n.set(1))=>{});
+ return r=>r.el('div',n.get());
+}});`,
+event_default:`export default definePrototype({name:'event-default',setup(def){
+ const n=def.state.numberDiscrete('n',0);
+ def.event.on('host:click',(run,_event, ignored=n.set(1))=>{run.update();});
+ return r=>r.el('div',n.get());
+}});`,
+rule_generator:`export default definePrototype({name:'rule-generator',setup(def){
+ def.rule({when:w=>w.t(),intent:function*(i){i.feedback.style.use(tw('bg-blue-500'));}});
+ return ()=>null;
+}});`,
+ambient_read:`declare const unseen:number;
+const unused=unseen;
+export default definePrototype({name:'ambient-read',setup(){return()=>null;}});`
+};
+for(const [name,body] of Object.entries(cases)){
+ const {program,entryPath}=session.createVirtualProgram('packages/compiler/test/__final_review2_'+name+'.proto.ts',"import {definePrototype,tw} from '@proto.ui/core';\n"+body);
+ const out=extractModuleIR(program,entryPath),p=out.ir.prototypes[0];
+ console.log(JSON.stringify({name,diagnostics:out.diagnostics,unlowered:p?.unlowered,states:p?.states,lifecycle:p?.lifecycleHandlers,events:p?.events,rules:p?.rules,admission:p?getReactLoweringDiagnostics(p):null}));
+}
+let value=0; ((_run:unknown,ignored=(value=1))=>{})({}); console.log(JSON.stringify({name:'created_default',actual:value}));
+value=0; ((_run:unknown,_event:unknown,ignored=(value=1))=>{})({},{});console.log(JSON.stringify({name:'event_default',actual:value}));
+let styles:string[]=[];(function*(i:{use:(s:string)=>void}){i.use('blue');})({use:s=>styles.push(s)});console.log(JSON.stringify({name:'rule_generator',actual_styles:styles}));

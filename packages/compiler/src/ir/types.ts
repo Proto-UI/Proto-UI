@@ -271,6 +271,9 @@ export type ValueExprIR =
     };
 
 export type ActionStatementIR =
+  | { readonly kind: 'request-update' }
+  /** A lowered ordinary function call. Return exits only this invocation. */
+  | { readonly kind: 'invoke'; readonly body: readonly ActionStatementIR[] }
   | { readonly kind: 'state-set'; readonly stateName: string; readonly value: ValueExprIR }
   | { readonly kind: 'local'; readonly name: string; readonly value: ValueExprIR }
   | {
@@ -302,6 +305,8 @@ export interface HookCallIR {
   readonly name: string;
   readonly moduleSpecifier?: string;
   readonly kind: 'builtin' | 'authored';
+  /** The invocation has been fully expanded into this prototype's semantic declarations. */
+  readonly lowered?: boolean;
 }
 
 export interface ContextUsageIR {
@@ -352,6 +357,7 @@ export interface TemplateElementIR {
 
 export type RenderIR =
   | { readonly kind: 'default-slot' }
+  | { readonly kind: 'fragment'; readonly children: readonly TemplateChildIR[] }
   | { readonly kind: 'static-tree'; readonly root: TemplateElementIR }
   | { readonly kind: 'reactive-tree'; readonly root: TemplateElementIR }
   | { readonly kind: 'dynamic' };

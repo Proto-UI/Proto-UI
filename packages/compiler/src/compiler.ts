@@ -21,13 +21,18 @@ import {
   getReactLoweringDiagnostics,
   getKernelLoweringDiagnostics,
   emitGpuiComponent,
-  type ReactEmitOptions,
   type ReactEmitResult,
   type GpuiEmitOptions,
   type GpuiEmitResult,
 } from './targets';
 
-export type CompilationTarget = 'react' | 'gpui' | 'kernel' | 'ir';
+import { COMPILATION_TARGETS, type CompilationTarget } from './targets/kinds';
+export {
+  COMPILATION_TARGETS,
+  COMPONENT_TARGETS,
+  type CompilationTarget,
+  type ComponentTarget,
+} from './targets/kinds';
 
 export interface LlvmPipelineOptions {
   readonly targetTriple?: string;
@@ -45,9 +50,6 @@ export interface CompileOptions {
   readonly componentName?: string;
   readonly checkTypes?: boolean;
   readonly allowHookOnly?: boolean;
-  /** Select kernel artifacts explicitly. This does not claim to implement a UI host. */
-  readonly emitReact?: boolean;
-  readonly react?: Omit<ReactEmitOptions, 'componentName'>;
   readonly gpui?: Omit<GpuiEmitOptions, 'componentName'>;
   readonly llvm?: LlvmPipelineOptions;
 }
@@ -138,19 +140,30 @@ export interface ProjectCoverageReport {
 }
 
 function selectedTarget(options: CompileOptions): CompilationTarget {
-  return (
-    options.target ?? (options.emitReact === false ? (options.llvm ? 'kernel' : 'ir') : 'react')
-  );
+  return options.target ?? 'react';
 }
 
 function finalizeCompilation(
   extracted: ReturnType<typeof extractModuleIR>,
   options: CompileOptions,
-  startedAt: number,
-  rootDir: string
+  startedAt: number
 ): CompileResult<CompilationOutput> {
   const allDiags: CompilerDiagnostic[] = [...extracted.diagnostics];
   const target = selectedTarget(options);
+  if (!COMPILATION_TARGETS.includes(target))
+    return err([
+      ...allDiags,
+      diagnostic(
+        'PUI_TARGET_INVALID',
+        'input',
+        'Unsupported compilation target: ' + String(target),
+        {
+          file: extracted.ir.sourceFile,
+          line: 1,
+          column: 1,
+        }
+      ),
+    ]);
   const hasErrors = allDiags.some((d) => d.severity === 'error');
   if (hasErrors) return err(allDiags);
 
@@ -159,7 +172,10 @@ function finalizeCompilation(
     const detail = options.exportName
       ? `Export '${options.exportName}' is not a definePrototype() declaration in ${rawIr.sourceFile}.`
       : `No definePrototype() declaration found in ${rawIr.sourceFile}.`;
-    return err([...allDiags, diagnostic('PUI_FE002', 'frontend', detail)]);
+    return err([
+      ...allDiags,
+      diagnostic('PUI_FE002', 'frontend', detail, { file: rawIr.sourceFile, line: 1, column: 1 }),
+    ]);
   }
 
   const verifyIssues = verifyModuleIR(rawIr);
@@ -182,7 +198,7 @@ function finalizeCompilation(
       index === 0 && options.componentName ? { componentName: options.componentName } : {};
     if (target === 'react') {
       try {
-        const react = emitReactComponent(proto, { rootDir, ...options.react, ...component });
+        const react = emitReactComponent(proto, component);
         prototypes.push({
           name: proto.name,
           exportName: proto.exportName,
@@ -312,7 +328,7 @@ export function createCompiler(options: CompilerSessionOptions = {}): ProtoCompi
         exportName: compileOptions.exportName,
         checkTypes: compileOptions.checkTypes,
       });
-      return finalizeCompilation(extracted, compileOptions, startedAt, session.rootDir);
+      return finalizeCompilation(extracted, compileOptions, startedAt);
     },
 
     compilePrototype(source, compileOptions = {}) {
@@ -327,7 +343,7 @@ export function createCompiler(options: CompilerSessionOptions = {}): ProtoCompi
         exportName: compileOptions.exportName,
         checkTypes: compileOptions.checkTypes,
       });
-      return finalizeCompilation(extracted, compileOptions, startedAt, session.rootDir);
+      return finalizeCompilation(extracted, compileOptions, startedAt);
     },
 
     compileProject(entries, compileOptions = {}) {
@@ -351,7 +367,7 @@ export function createCompiler(options: CompilerSessionOptions = {}): ProtoCompi
           exportName: compileOptions.exportName,
           checkTypes: compileOptions.checkTypes,
         });
-        const res = finalizeCompilation(extracted, compileOptions, fileStart, session.rootDir);
+        const res = finalizeCompilation(extracted, compileOptions, fileStart);
         diagnostics.push(...res.diagnostics);
         if (!res.ok) return err(diagnostics);
         outputs.push(res.value);
@@ -402,8 +418,7 @@ export function createCompiler(options: CompilerSessionOptions = {}): ProtoCompi
           const compiled = finalizeCompilation(
             extracted,
             { ...compileOptions, target, llvm: undefined },
-            performance.now(),
-            session.rootDir
+            performance.now()
           );
           files.push({
             ...base,

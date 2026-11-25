@@ -1,0 +1,56 @@
+{
+  "scope": "Current source CLI execution; not a source-pinned package receipt",
+  "head": "59c18246275c9a5ed0ad313c6da2627956930597",
+  "steps": [
+    {
+      "name": "fresh",
+      "status": 0,
+      "signal": null
+    },
+    {
+      "name": "collision",
+      "status": 2,
+      "signal": null
+    },
+    {
+      "name": "directory-link",
+      "status": 1,
+      "signal": null
+    },
+    {
+      "name": "file-link",
+      "status": 1,
+      "signal": null
+    },
+    {
+      "name": "race-b",
+      "status": 0,
+      "signal": null
+    },
+    {
+      "name": "race-a",
+      "status": 2,
+      "signal": null
+    },
+    {
+      "name": "edited-collision",
+      "status": 2,
+      "signal": null
+    },
+    {
+      "name": "explicit-overwrite",
+      "status": 0,
+      "signal": null
+    }
+  ],
+  "ok": true,
+  "receiptSchema": "proto-ui.cli-source-safety.v1",
+  "sourceState": "Uncommitted current worktree based on the recorded HEAD; this is not an exact installed-package pin receipt.",
+  "originalFailedHarness": "pui-cleanup-cli-source-hg814ts6/result.json",
+  "originalFailure": "The first harness expected exit 2 for a symlink I/O refusal; the actual safe refusal was exit 1. Both attempts and all output checks are preserved.",
+  "archive": {
+    "file": "cli-source-safety-receipts.tar.gz",
+    "bytes": 3570,
+    "sha256": "afeb99436d6a9c22deead02c711c208a61ff5954778dd41df4f6d5db1a92f2d5"
+  }
+}

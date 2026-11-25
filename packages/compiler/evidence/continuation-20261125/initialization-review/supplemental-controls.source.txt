@@ -1,0 +1,76 @@
+import { TsProgramSession, extractModuleIR } from '/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/index.ts';
+import { getReactLoweringDiagnostics } from '/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/targets/react.ts';
+const session=new TsProgramSession({rootDir:"/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125"});
+const header="import {definePrototype, type DefHandle} from '@proto.ui/core';\n";
+const cases=[
+  {
+    "name": "safe_hoisted_module_function",
+    "want": "accept",
+    "source": "const initial=readValue(); function readValue(){return 1;}\nexport default definePrototype({name:'safe-hoisted',setup(def){const n=def.state.numberDiscrete('n',initial);return r=>r.el('div',n.get());}});"
+  },
+  {
+    "name": "safe_initialized_capture",
+    "want": "accept",
+    "source": "export default definePrototype({name:'safe-capture',setup(def){\n const n=def.state.numberDiscrete('n',0); const later=1;\n def.event.on('host:click',run=>{n.set(later);run.update();});\n return r=>r.el('div',n.get());\n}});"
+  },
+  {
+    "name": "safe_setup_function_alias",
+    "want": "accept",
+    "source": "function decorate(def:DefHandle<{}>){def.state.bool('active',true);}\nconst alias=decorate;\nexport default definePrototype({name:'safe-alias',setup(def){alias(def);return()=>null;}});"
+  },
+  {
+    "name": "safe_action_hoisted_once_parameter",
+    "want": "accept",
+    "source": "export default definePrototype({name:'safe-action',setup(def){\n const n=def.state.numberDiscrete('n',0);\n def.event.on('host:click',run=>{\n   adjust(n.get()); run.update();\n   function adjust(value:number){n.set(value+1);n.set(value+2);}\n });\n return r=>r.el('div',n.get());\n}});"
+  },
+  {
+    "name": "future_capture_bounded_reject",
+    "want": "reject",
+    "source": "export default definePrototype({name:'future-capture',setup(def){\n const n=def.state.numberDiscrete('n',0);\n def.event.on('host:click',run=>{n.set(later);run.update();});\n const later=1; return r=>r.el('div',n.get());\n}});"
+  },
+  {
+    "name": "never_initialized_capture",
+    "want": "reject",
+    "source": "export default definePrototype({name:'never-initialized',setup(def){\n const n=def.state.numberDiscrete('n',0);\n def.event.on('host:click',run=>{n.set(later);run.update();});\n return r=>r.el('div',n.get()); const later=1;\n}});"
+  },
+  {
+    "name": "module_const_callee_tdz",
+    "want": "reject",
+    "source": "function invoke(){return late();}\nconst initial=invoke(); const late=()=>1;\nexport default definePrototype({name:'callee-tdz',setup(def){const n=def.state.numberDiscrete('n',initial);return r=>r.el('div',n.get());}});"
+  },
+  {
+    "name": "action_const_callee_tdz",
+    "want": "reject",
+    "source": "export default definePrototype({name:'action-callee-tdz',setup(def){\n const n=def.state.numberDiscrete('n',0);\n def.event.on('host:click',run=>{\n  function invoke(){late();} invoke();\n  const late=()=>{n.set(1);}; run.update();\n });\n return r=>r.el('div',n.get());\n}});"
+  },
+  {
+    "name": "module_cycle_const",
+    "want": "reject",
+    "entry": "packages/compiler/test/__review_cycle_a__.proto.ts",
+    "source": "import {b} from './__review_cycle_b__'; export const a=1;\nexport default definePrototype({name:'cycle-const',setup(def){const n=def.state.numberDiscrete('n',b);return r=>r.el('div',n.get());}});",
+    "extra": {
+      "packages/compiler/test/__review_cycle_b__.ts": "import {a} from './__review_cycle_a__.proto'; export const b=a;"
+    }
+  },
+  {
+    "name": "module_cycle_hoisted_function",
+    "want": "reject",
+    "entry": "packages/compiler/test/__review_cycle_fn_a__.proto.ts",
+    "source": "import {b} from './__review_cycle_fn_b__'; export const a=1; export function getA(){return a;}\nexport default definePrototype({name:'cycle-function',setup(def){const n=def.state.numberDiscrete('n',b);return r=>r.el('div',n.get());}});",
+    "extra": {
+      "packages/compiler/test/__review_cycle_fn_b__.ts": "import {getA} from './__review_cycle_fn_a__.proto'; export const b=getA();"
+    }
+  }
+];
+let mismatches=0;
+for(const c of cases){
+ const {program,entryPath}=session.createVirtualProgram(c.entry??'packages/compiler/test/__final_review3_'+c.name+'.proto.ts',header+c.source,c.extra??{});
+ const out=extractModuleIR(program,entryPath),p=out.ir.prototypes[0];
+ const admission=p?getReactLoweringDiagnostics(p):[];
+ const accepted=!out.diagnostics.length&&!!p&&!p.unlowered?.length&&!admission.length;
+ const matches=accepted===(c.want==='accept');
+ if(!matches)mismatches++;
+ console.log(JSON.stringify({name:c.name,want:c.want,accepted,matches,diagnostics:out.diagnostics,unlowered:p?.unlowered,admission,states:p?.states,events:p?.events}));
+}
+console.log(JSON.stringify({cases:cases.length,mismatches}));
+if(mismatches)process.exitCode=1;

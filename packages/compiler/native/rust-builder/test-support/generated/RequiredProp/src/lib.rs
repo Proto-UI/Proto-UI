@@ -9,22 +9,34 @@ impl Default for RequiredPropProps {
 }
 pub struct RequiredProp {
     props: RequiredPropProps,
+    update_requested: bool,
+    feedback_dirty: bool,
     last_error: Option<String>,
     resolved_prop_required: Option<String>,
     previous_prop_required: Option<String>,
+    render_prop_required: Option<String>,
 }
 impl RequiredProp {
     pub fn read_prop_required(&self) -> Option<String> {
         self.resolved_prop_required.clone()
     }
+    fn capture_render_snapshot(&mut self) -> () {
+        self.render_prop_required = self.resolved_prop_required.clone();
+    }
     pub fn new(props: RequiredPropProps) -> Result<Self, String> {
         let mut component = Self {
             props: RequiredPropProps::default(),
             last_error: None,
+            update_requested: false,
+            feedback_dirty: false,
             resolved_prop_required: None,
             previous_prop_required: None,
+            render_prop_required: None,
         };
         component.update_props(props)?;
+        component.capture_render_snapshot();
+        component.update_requested = false;
+        component.feedback_dirty = false;
         Ok(component)
     }
     pub fn update_props(&mut self, props: RequiredPropProps) -> Result<(), String> {
@@ -58,9 +70,28 @@ impl RequiredProp {
         props: RequiredPropProps,
         cx: &mut gpui::Context<Self>,
     ) -> Result<(), String> {
-        self.update_props(props)?;
-        cx.notify();
-        Ok(())
+        let result = self.update_props(props);
+        let requested = self.take_update_request();
+        let feedback = self.take_feedback_update();
+        if result.is_ok() {
+            self.capture_render_snapshot();
+            cx.notify();
+        } else {
+            if requested || feedback {
+                cx.notify();
+            }
+        };
+        result
+    }
+    fn take_update_request(&mut self) -> bool {
+        let requested = self.update_requested;
+        self.update_requested = false;
+        requested
+    }
+    fn take_feedback_update(&mut self) -> bool {
+        let dirty = self.feedback_dirty;
+        self.feedback_dirty = false;
+        dirty
     }
     pub fn take_error(&mut self) -> Option<String> {
         self.last_error.take()
@@ -73,7 +104,7 @@ impl gpui::Render for RequiredProp {
         cx: &mut gpui::Context<Self>,
     ) -> impl gpui::IntoElement {
         let root = gpui::div()
-            .child("Hello".to_owned())
+            .child(gpui::div().child("Hello".to_owned()))
             .id(("proto-root", cx.entity_id()));
         root.into_any_element()
     }

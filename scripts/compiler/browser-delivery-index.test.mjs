@@ -51,16 +51,21 @@ test('retains all prior pages, demos and prototype rejects without treating sour
 test('refuses a success-shaped receipt with no exact source binding', async () => {
   await assert.rejects(
     verifyBrowserReceipt({
-      kind: 'canonical-wasm-docs-browser-v1',
+      kind: 'canonical-ast-docs-browser-v2',
       browser: 'Chromium',
-      compilerBuild: { execution: 'quickjs-wasm', compilerSha256: 'a'.repeat(64) },
+      compilerBuild: {
+        format: 2,
+        targets: ['react'],
+        execution: 'worker-js',
+        compilerSha256: 'a'.repeat(64),
+      },
       sourceFiles: {},
       cases: [],
     }),
     /Missing browser receipt source binding/
   );
   await assert.rejects(
-    verifyBrowserReceipt({ kind: 'canonical-wasm-docs-browser-v1', cases: [{ status: 'passed' }] }),
+    verifyBrowserReceipt({ kind: 'canonical-ast-docs-browser-v2', cases: [{ status: 'passed' }] }),
     /does not identify/
   );
 });
@@ -82,7 +87,7 @@ async function evidenceFixture(t) {
     `import {token} from './${coreInput}'; import {css} from './${cssInput}'; export const result = token + css;`
   );
   await write('vendor.ts', 'export const targetVersion = "1";');
-  await write('vm.wasm', 'fixture-wasm-bytes');
+  await write('worker.ts', 'export const worker = true;');
   const capture = async () => {
     const bundle = (entry) =>
       build({
@@ -97,37 +102,38 @@ async function evidenceFixture(t) {
       target = await bundle('vendor.ts');
     const compilerInputs = await hashMetafileInputs(compiler.metafile, directory);
     const targetInputs = await hashMetafileInputs(target.metafile, directory);
-    const vmInputs = await hashInputFiles(['vm.wasm'], directory);
+    const workerInputs = await hashInputFiles(['worker.ts'], directory);
     const compilerBuild = {
-      format: 1,
-      execution: 'quickjs-wasm',
+      format: 2,
+      targets: ['react'],
+      execution: 'worker-js',
       compilerSha256: digest(compiler.outputFiles[0].text),
       typescriptVersion: 'test-fixture',
     };
     const targetText = JSON.stringify({ modules: { react: target.outputFiles[0].text } });
     return {
-      format: 1,
-      kind: 'canonical-browser-build-inputs-v1',
+      format: 2,
+      kind: 'canonical-browser-build-inputs-v2',
       sourcePolicy: 'workspace-superset-and-esbuild-inputs-v1',
       compilerBuild,
-      targetModulesSha256: { 'react-dom-source-v1': digest(targetText) },
+      targetModulesSha256: { 'react': digest(targetText) },
       inputGroups: {
         compiler: Object.keys(compilerInputs),
-        targets: { 'react-dom-source-v1': Object.keys(targetInputs) },
-        delivery: Object.keys(vmInputs),
+        targets: { 'react': Object.keys(targetInputs) },
+        delivery: Object.keys(workerInputs),
       },
       assets: {
         'compiler.js': compilerBuild.compilerSha256,
-        'targets/react-dom-source-v1.json': digest(targetText),
+        'targets/react.json': digest(targetText),
       },
-      sourceFiles: mergeInputFiles(compilerInputs, targetInputs, vmInputs),
+      sourceFiles: mergeInputFiles(compilerInputs, targetInputs, workerInputs),
     };
   };
   const manifest = await capture();
   const manifestSha256 = digest(JSON.stringify(manifest)),
     sourceSha256 = digest(JSON.stringify(manifest.sourceFiles));
   const receipt = {
-    kind: 'canonical-wasm-docs-browser-v1',
+    kind: 'canonical-ast-docs-browser-v2',
     browser: 'fixture-browser',
     cases: [],
     ...browserEvidenceRecord(manifest),
@@ -155,7 +161,7 @@ async function evidenceFixture(t) {
       manifestSha256,
     },
     loadedAssets: { ...manifest.assets },
-    loadedWasm: [{ sha256: manifest.sourceFiles['vm.wasm'] }],
+    loadedWorkers: [{ compilerSha256: manifest.compilerBuild.compilerSha256, closed: true }],
   };
   return { write, capture, manifest, receipt };
 }
@@ -212,7 +218,7 @@ test('rejects deleted bindings, a missing build-manifest input, and a newly impo
 test('rejects stale target bundles, mismatched remote-service bytes and missing final stability', async (t) => {
   const fixture = await evidenceFixture(t);
   const staleTarget = structuredClone(fixture.receipt);
-  staleTarget.buildManifest.assets['targets/react-dom-source-v1.json'] = 'f'.repeat(64);
+  staleTarget.buildManifest.assets['targets/react.json'] = 'f'.repeat(64);
   await assert.rejects(
     verifyBrowserReceipt(staleTarget, { capture: fixture.capture }),
     /manifest drift/

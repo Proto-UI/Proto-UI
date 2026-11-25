@@ -132,6 +132,71 @@ function mount(
 }
 
 describe('React AST target: executable native artifacts', () => {
+  it('keeps state writes synchronous without rendering until an explicit update', () => {
+    const Component = compiled(
+      prototype({
+        props: [
+          {
+            index: 0,
+            name: 'value',
+            kind: 'number',
+            tsType: 'number',
+            defaultValue: 0,
+            ssaType: 'f64',
+          },
+        ],
+        states: [count],
+        events: [
+          {
+            scope: 'root',
+            eventName: 'host:click',
+            body: [
+              {
+                kind: 'state-set',
+                stateName: 'count',
+                value: {
+                  kind: 'binary',
+                  operator: '+',
+                  left: { kind: 'state', name: 'count' },
+                  right: { kind: 'literal', value: 1 },
+                },
+              },
+            ],
+          },
+          { scope: 'root', eventName: 'key.up', body: [{ kind: 'request-update' }] },
+        ],
+        rules: [
+          {
+            id: 0,
+            condition: { kind: 'cmp', source: 'state', key: 'count', operator: 'gte', value: 2 },
+            styleTokens: ['updated-feedback'],
+          },
+        ],
+        render: {
+          kind: 'reactive-tree',
+          root: { tag: 'button', children: [{ kind: 'state-read', stateName: 'count' }] },
+        },
+      })
+    );
+    const view = mount(Component);
+    const owner = view.host.firstElementChild!;
+    const button = view.host.querySelector('button')!;
+    flushSync(() => button.click());
+    flushSync(() => button.click());
+    expect(view.host.textContent).toBe('0');
+    expect(owner.className).toBe('updated-feedback');
+    view.render({});
+    expect(view.host.textContent).toBe('0');
+    expect(owner.className).toBe('updated-feedback');
+    flushSync(() => owner.dispatchEvent(new KeyboardEvent('keyup')));
+    expect(view.host.textContent).toBe('2');
+    expect(view.host.firstElementChild).toBe(owner);
+    flushSync(() => button.click());
+    expect(view.host.textContent).toBe('2');
+    view.render({ value: 1 });
+    expect(view.host.textContent).toBe('3');
+  });
+
   it('preserves a props-only render tree, updates, and committed fallback history', () => {
     const Component = compiled(
       prototype({
@@ -154,7 +219,8 @@ describe('React AST target: executable native artifacts', () => {
       })
     );
     const view = mount(Component, { label: 'First' });
-    expect(view.host.firstElementChild?.tagName).toBe('BUTTON');
+    expect(view.host.firstElementChild?.tagName).toBe('DIV');
+    expect(view.host.firstElementChild?.firstElementChild?.tagName).toBe('BUTTON');
     expect(view.host.textContent).toBe('First');
     view.render({ label: null });
     expect(view.host.textContent).toBe('First');
@@ -198,7 +264,7 @@ describe('React AST target: executable native artifacts', () => {
       prototype({ ...base, props: [{ ...base.props[0], empty: 'error' }] })
     );
     expect(renderToStaticMarkup(React.createElement(ErrorWithFallback, { label: null }))).toBe(
-      '<span>Default</span>'
+      '<div><span>Default</span></div>'
     );
     const ErrorWithoutFallback = compiled(
       prototype({ ...base, props: [{ ...base.props[0], defaultValue: undefined, empty: 'error' }] })
@@ -256,7 +322,19 @@ describe('React AST target: executable native artifacts', () => {
           {
             scope: 'root',
             eventName: 'key.down',
-            simpleAction: { kind: 'increment-state', stateName: 'count', delta: 10 },
+            body: [
+              {
+                kind: 'state-set',
+                stateName: 'count',
+                value: {
+                  kind: 'binary',
+                  operator: '+',
+                  left: { kind: 'state', name: 'count' },
+                  right: { kind: 'literal', value: 10 },
+                },
+              },
+              { kind: 'request-update' },
+            ],
           },
         ],
         render: {
@@ -267,13 +345,17 @@ describe('React AST target: executable native artifacts', () => {
     );
     const view = mount(Component);
     const button = view.host.querySelector('button')!;
-    flushSync(() => button.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' })));
+    flushSync(() =>
+      button.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+    );
     expect(button.textContent).toBe('13');
-    flushSync(() => button.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' })));
+    flushSync(() =>
+      button.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+    );
     expect(button.textContent).toBe('5');
     flushSync(() => button.click());
     expect(button.textContent).toBe('5');
-    const remove = vi.spyOn(button, 'removeEventListener');
+    const remove = vi.spyOn(view.host.firstElementChild!, 'removeEventListener');
     flushSync(() => view.root.unmount());
     roots.delete(view.root);
     expect(remove.mock.calls.filter(([name]) => name === 'keydown')).toHaveLength(2);
@@ -299,7 +381,19 @@ describe('React AST target: executable native artifacts', () => {
           {
             scope: 'root',
             eventName: 'host:click',
-            simpleAction: { kind: 'increment-state', stateName: 'count', delta: 1 },
+            body: [
+              {
+                kind: 'state-set',
+                stateName: 'count',
+                value: {
+                  kind: 'binary',
+                  operator: '+',
+                  left: { kind: 'state', name: 'count' },
+                  right: { kind: 'literal', value: 1 },
+                },
+              },
+              { kind: 'request-update' },
+            ],
           },
         ],
         staticStyleTokens: ['base-token'],
@@ -328,12 +422,16 @@ describe('React AST target: executable native artifacts', () => {
     );
     const view = mount(Component, { className: 'caller-token' });
     const button = view.host.querySelector('button')!;
-    expect(button.className.split(' ')).toEqual(['caller-token', 'base-token', 'element-token']);
+    const owner = view.host.firstElementChild!;
+    expect(owner.className.split(' ')).toEqual(['caller-token', 'base-token']);
+    expect(button.className).toBe('element-token');
     flushSync(() => button.click());
-    expect(button.classList.contains('active-token')).toBe(true);
+    expect(owner.classList.contains('active-token')).toBe(true);
+    expect(button.className).toBe('element-token');
     view.render({ enabled: false });
-    expect(button.classList.contains('active-token')).toBe(false);
-    expect(button.classList.contains('base-token')).toBe(true);
+    expect(owner.classList.contains('active-token')).toBe(false);
+    expect(owner.classList.contains('base-token')).toBe(true);
+    expect(view.host.firstElementChild).toBe(owner);
   });
 
   it('retains literal text safely and preserves signed numeric state constants', () => {
@@ -363,10 +461,10 @@ describe('React AST target: executable native artifacts', () => {
       if (
         ts.isCallExpression(node) &&
         ts.isPropertyAccessExpression(node.expression) &&
-        node.expression.name.text === 'useState'
+        node.expression.name.text === 'useRef'
       ) {
         const value = node.arguments[0];
-        preserved =
+        preserved ||=
           ts.isPrefixUnaryExpression(value) &&
           value.operator === ts.SyntaxKind.MinusToken &&
           ts.isNumericLiteral(value.operand) &&
@@ -415,6 +513,7 @@ describe('React AST target: executable native artifacts', () => {
                   right: { kind: 'literal', value: 1 },
                 },
               },
+              { kind: 'request-update' },
             ],
           },
           {
@@ -440,7 +539,9 @@ describe('React AST target: executable native artifacts', () => {
       })
     );
     // Server rendering is used only to observe pre-commit initialization, not as an SSR-profile claim.
-    expect(renderToStaticMarkup(React.createElement(Component, {}))).toBe('<span>10</span>');
+    expect(renderToStaticMarkup(React.createElement(Component, {}))).toBe(
+      '<div><span>10</span></div>'
+    );
     const ordinary = mount(Component);
     expect(ordinary.host.textContent).toBe('11');
     ordinary.render({ unrelated: true });
@@ -490,7 +591,7 @@ describe('React AST target: executable native artifacts', () => {
           numeric('count', 0),
           numeric('previous', 1),
           numeric('calls', 2),
-          numeric('lastSeen', 3, 1),
+          numeric('lastSeen', 3),
           numeric('observed', 4),
         ],
         propWatches: [
@@ -538,11 +639,12 @@ describe('React AST target: executable native artifacts', () => {
                   kind: 'binary',
                   operator: '!==',
                   left: readState('lastSeen'),
-                  right: readProp('value'),
+                  right: readState('calls'),
                 },
                 then: [
                   { kind: 'state-set', stateName: 'observed', value: readState('count') },
-                  { kind: 'state-set', stateName: 'lastSeen', value: readProp('value') },
+                  { kind: 'state-set', stateName: 'lastSeen', value: readState('calls') },
+                  { kind: 'request-update' },
                 ],
                 otherwise: [],
               },
@@ -607,6 +709,7 @@ describe('React AST target: executable native artifacts', () => {
                   right: { kind: 'literal', value: 1 },
                 },
               },
+              { kind: 'request-update' },
             ],
           },
         ],
@@ -720,6 +823,7 @@ describe('React AST target: executable native artifacts', () => {
                   right: read('value'),
                 },
               },
+              { kind: 'request-update' },
             ],
           },
         ],
@@ -768,6 +872,7 @@ describe('React AST target: executable native artifacts', () => {
                   right: { kind: 'unary', operator: '-', operand: read('value') },
                 },
               },
+              { kind: 'request-update' },
             ],
           },
         ],
@@ -817,6 +922,38 @@ describe('React AST target: executable native artifacts', () => {
   it('rejects every unsupported semantic edge instead of importing a prototype or adapter', () => {
     const rejected: Partial<PrototypeIR>[] = [
       { render: { kind: 'dynamic' } },
+      { render: { kind: 'fragment', children: [{ kind: 'slot' }, { kind: 'slot' }] } },
+      {
+        events: [
+          {
+            scope: 'root',
+            eventName: 'host:click',
+            body: [
+              { kind: 'request-update' },
+              { kind: 'local', name: 'after', value: { kind: 'literal', value: 1 } },
+            ],
+          },
+        ],
+      },
+      {
+        events: [
+          {
+            scope: 'root',
+            eventName: 'host:click',
+            body: [{ kind: 'request-update' }, { kind: 'request-update' }],
+          },
+        ],
+      },
+      {
+        events: [
+          { scope: 'root', eventName: 'key.down', body: [{ kind: 'request-update' }] },
+          {
+            scope: 'root',
+            eventName: 'host:keydown',
+            body: [{ kind: 'local', name: 'later', value: { kind: 'literal', value: 1 } }],
+          },
+        ],
+      },
       { hooks: [{ name: 'asTrigger', kind: 'builtin' }] },
       { contexts: [{ keyName: 'KEY', mode: 'read' }] },
       { exposes: [{ name: 'count', kind: 'state', tsType: 'number' }] },

@@ -1,0 +1,163 @@
+{
+  "baseCommit": "59c18246275c9a5ed0ad313c6da2627956930597",
+  "branch": "feat/compiler-ast-pipeline-1809",
+  "sourceGateStage": "final-style",
+  "checks": {
+    "compiler-types": {
+      "exit": 0,
+      "seconds": 10.661396026611328,
+      "command": "corepack pnpm@10.32.1 --filter @proto.ui/compiler check:types"
+    },
+    "workspace-types": {
+      "exit": 0,
+      "seconds": 63.382099628448486,
+      "command": "corepack pnpm@10.32.1 -w -s check:types:workspace"
+    },
+    "vitest": {
+      "exit": 0,
+      "seconds": 28.50753164291382,
+      "command": "corepack pnpm@10.32.1 exec vitest run packages/compiler/test --reporter=default --reporter=json --outputFile=/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-continuation/final-style/vitest.report.json"
+    },
+    "source-native-consumer": {
+      "exit": 0,
+      "seconds": 7.991000413894653,
+      "command": "node --import tsx scripts/compiler/native-consumer-smoke.mjs"
+    },
+    "inventory-react": {
+      "exit": 0,
+      "seconds": 14.078051805496216,
+      "command": "node --import tsx /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-continuation/final-style/inventory.mjs react /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-continuation/final-style/inventory-react.json"
+    },
+    "inventory-gpui": {
+      "exit": 0,
+      "seconds": 15.028271436691284,
+      "command": "node --import tsx /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-continuation/final-style/inventory.mjs gpui /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-continuation/final-style/inventory-gpui.json"
+    }
+  },
+  "vitest": {
+    "files": 17,
+    "tests": 117,
+    "passed": 117,
+    "failed": 0,
+    "skipped": 0,
+    "perFile": [
+      {
+        "path": "packages/compiler/test/action-flow.test.ts",
+        "tests": 3
+      },
+      {
+        "path": "packages/compiler/test/base-corpus.test.ts",
+        "tests": 1
+      },
+      {
+        "path": "packages/compiler/test/browser-ast.test.ts",
+        "tests": 5
+      },
+      {
+        "path": "packages/compiler/test/cli.test.ts",
+        "tests": 6
+      },
+      {
+        "path": "packages/compiler/test/composition-hir.test.ts",
+        "tests": 18
+      },
+      {
+        "path": "packages/compiler/test/frontend-hir.test.ts",
+        "tests": 15
+      },
+      {
+        "path": "packages/compiler/test/gpui-ast-codegen.test.ts",
+        "tests": 10
+      },
+      {
+        "path": "packages/compiler/test/initialization-proof.test.ts",
+        "tests": 20
+      },
+      {
+        "path": "packages/compiler/test/kernel-admission.test.ts",
+        "tests": 2
+      },
+      {
+        "path": "packages/compiler/test/llvm-pipeline.test.ts",
+        "tests": 3
+      },
+      {
+        "path": "packages/compiler/test/native-assets.test.ts",
+        "tests": 2
+      },
+      {
+        "path": "packages/compiler/test/react-ast-codegen.test.ts",
+        "tests": 11
+      },
+      {
+        "path": "packages/compiler/test/react-codegen.test.ts",
+        "tests": 4
+      },
+      {
+        "path": "packages/compiler/test/real-base-react.test.ts",
+        "tests": 3
+      },
+      {
+        "path": "packages/compiler/test/ssa-ir.test.ts",
+        "tests": 3
+      },
+      {
+        "path": "packages/compiler/test/ssa-llvm-builder.test.ts",
+        "tests": 8
+      },
+      {
+        "path": "packages/compiler/test/wasm-kernel-layout.test.ts",
+        "tests": 3
+      }
+    ]
+  },
+  "artifacts": {
+    "source-gates.tar.gz": {
+      "bytes": 577163,
+      "sha256": "0d6e72014740b6c88557ff4c4c3ea05924eda565939c13f0610198a003eb1c84"
+    },
+    "source-hashes.json": {
+      "bytes": 96285,
+      "sha256": "cdd15cbdabb2dddeb4d6a36d01f369b2474705403213430369b77d6df0a34b68"
+    },
+    "base-inventory-summary.json": {
+      "bytes": 1474,
+      "sha256": "177696e00266fb6ee988461384b961bb9d78c0c43c9e98d4372ffd88bbdd087d"
+    },
+    "docs-gates.tar.gz": {
+      "bytes": 3472,
+      "sha256": "98db2102bf89353684def60f3d87f32165c559e8a3ab03f665045815ee253a22"
+    }
+  },
+  "documentationChecks": {
+    "authoring": {
+      "exit": 0,
+      "seconds": 27.710649490356445,
+      "command": "corepack pnpm@10.32.1 check:spec-authoring -- --base 73ff284730c4b93a8c145bd23a4ab0370edec9a1"
+    },
+    "catalog-all-cited-staged": {
+      "exit": 0,
+      "seconds": 8.50864028930664,
+      "command": "corepack pnpm@10.32.1 exec vitest run packages/spec/graph/test/catalog-evidence-integrity.test.ts"
+    },
+    "agent-generate": {
+      "exit": 0,
+      "seconds": 7.063290119171143,
+      "command": "corepack pnpm@10.32.1 spec:docs:agent"
+    },
+    "agent-check": {
+      "exit": 0,
+      "seconds": 6.709861755371094,
+      "command": "corepack pnpm@10.32.1 check:agent-doc"
+    },
+    "public-docs": {
+      "exit": 0,
+      "seconds": 4.652012348175049,
+      "command": "corepack pnpm@10.32.1 -w -s check:public-docs"
+    }
+  },
+  "documentationNotes": [
+    "Catalog integrity passes all 13 tests after new cited source/test files were added to the Git index. Two earlier failures due to untracked evidence paths are preserved.",
+    "Public documentation check passes for 458 maintained documents. The generated agent projection remains Git-ignored."
+  ]
+}

@@ -5,11 +5,14 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { diagnostic, err, ok, type CompileResult, type CompilerDiagnostic } from '../diagnostics';
 import { resolveCompilerNativeAsset } from '../native-assets';
+import { getUpdateOrderingIssues } from './action-flow';
 import type {
   ActionStatementIR,
   PrototypeIR,
   RuleExpr,
   ScalarLiteral,
+  StateDeclIR,
+  TemplateChildIR,
   TemplateElementIR,
   ValueExprIR,
 } from '../ir/types';
@@ -27,6 +30,7 @@ export interface GpuiEmitOptions {
 export interface GpuiEmitResult {
   readonly componentName: string;
   readonly propsTypeName: string;
+  readonly childrenTypeName?: string;
   readonly code: string;
   readonly cargoToml: string;
   readonly dependency: typeof GPUI_V2_DEPENDENCY;
@@ -100,27 +104,64 @@ function buildPlan(proto: PrototypeIR, options: GpuiEmitOptions): CompileResult<
     reject('GPUI requires a non-reserved PascalCase component name.');
   }
   for (const gap of proto.unlowered ?? []) reject(gap.operation + ': ' + gap.message);
+  if (proto.hooks.some((hook) => !hook.lowered) || proto.contexts.length || proto.exposes.length) {
+    reject(
+      'GPUI unlowered hooks, context and expose require native lowering that is not implemented.'
+    );
+  }
   if (
-    proto.hooks.length ||
-    proto.contexts.length ||
-    proto.exposes.length ||
-    proto.lifecycle.length ||
-    proto.lifecycleHandlers?.length ||
-    proto.propWatches?.length
+    proto.lifecycle.some((name) => name !== 'onCreated') ||
+    proto.lifecycleHandlers?.some((handler) => handler.phase !== 'created')
   ) {
     reject(
-      'GPUI authored hooks, context, expose, lifecycle and prop watches require native lowering that is not implemented.'
+      'GPUI mount/update/unmount/dispose callbacks require native commit and mount-epoch lowering.'
     );
   }
-  if (proto.render.kind !== 'static-tree' && proto.render.kind !== 'reactive-tree') {
+  if (
+    proto.lifecycle.includes('onCreated') &&
+    !proto.lifecycleHandlers?.some((handler) => handler.phase === 'created')
+  ) {
+    reject('GPUI created callbacks require a lowered ordered action body.');
+  }
+  const hasUpdateRequest = (body: readonly ActionStatementIR[]): boolean =>
+    body.some(
+      (statement) =>
+        statement.kind === 'request-update' ||
+        (statement.kind === 'invoke' && hasUpdateRequest(statement.body)) ||
+        (statement.kind === 'if' &&
+          (hasUpdateRequest(statement.then) || hasUpdateRequest(statement.otherwise)))
+    );
+  if (
+    proto.lifecycleHandlers?.some(
+      (handler) => handler.phase === 'created' && hasUpdateRequest(handler.body)
+    )
+  ) {
     reject(
-      'GPUI currently requires an explicit static or reactive element tree; dynamic render and slot ownership are unsupported.'
+      'GPUI created-time update requests require a native instance context before initial render.'
     );
   }
+  const checkCallbackOrder = (label: string, bodies: readonly (readonly ActionStatementIR[])[]) => {
+    const callbacks: ActionStatementIR[] = bodies.map((body) => ({ kind: 'invoke', body }));
+    for (const issue of getUpdateOrderingIssues(callbacks)) reject(label + ': ' + issue);
+  };
+  const eventBodies = new Map<string, (readonly ActionStatementIR[])[]>();
+  for (const event of proto.events) {
+    const key = event.scope + ':' + event.eventName;
+    const group = eventBodies.get(key) ?? [];
+    group.push(event.body ?? []);
+    eventBodies.set(key, group);
+  }
+  for (const [key, bodies] of eventBodies) checkCallbackOrder('GPUI event ' + key, bodies);
+  checkCallbackOrder(
+    'GPUI resolved prop watchers',
+    (proto.propWatches ?? []).map((watch) => watch.body)
+  );
+  if (proto.render.kind === 'dynamic') reject('GPUI dynamic render requires native lowering.');
   const props = new Map<string, ValueType>();
   const nullableProps = new Set<string>();
   const propPlans: unknown[] = [];
   const states = new Map<string, ValueType>();
+  const statePlans: StateDeclIR[] = [];
   const names = new Set<string>();
   const checkLiteral = (literal: ScalarLiteral | undefined, expected: ValueType, label: string) => {
     if (literal === undefined || scalarType(literal) !== expected)
@@ -176,26 +217,48 @@ function buildPlan(proto: PrototypeIR, options: GpuiEmitOptions): CompileResult<
       reject('GPUI state options must be well-formed literals of the declared scalar type.');
     }
     checkLiteral(state.initialValue, type, 'Initial state ' + state.name);
-    if (state.kind === 'number.range' || state.step !== undefined || state.clamp !== undefined) {
-      reject(
-        'GPUI range/step/clamp state policy is not yet lowered; state ' +
-          state.name +
-          ' cannot be emitted.'
-      );
+    let initialValue = state.initialValue;
+    if (state.kind === 'number.range') {
+      if (
+        typeof state.min !== 'number' ||
+        typeof state.max !== 'number' ||
+        Number.isNaN(state.min) ||
+        Number.isNaN(state.max)
+      )
+        reject('GPUI number.range requires explicit non-NaN min and max bounds.');
+      if (typeof initialValue === 'number' && state.clamp) {
+        if (state.min !== undefined && initialValue < state.min) initialValue = state.min;
+        else if (state.max !== undefined && initialValue > state.max) initialValue = state.max;
+      }
     }
+    if (state.step !== undefined && state.kind !== 'number.discrete')
+      reject('GPUI step policy belongs to number.discrete state.');
+    if (state.clamp !== undefined && state.kind !== 'number.range')
+      reject('GPUI clamp policy belongs to number.range state.');
     if (type === 'number' && Number.isNaN(state.initialValue)) {
       reject('GPUI numeric state initial value cannot be NaN.');
     }
-    if (state.options?.length && !state.options.includes(state.initialValue!)) {
+    if (state.options?.length && !state.options.includes(initialValue!)) {
       reject('GPUI initial state must be in its declared options.');
     } else if (
       !state.options?.length &&
-      typeof state.initialValue === 'number' &&
-      ((state.min !== undefined && state.initialValue < state.min) ||
-        (state.max !== undefined && state.initialValue > state.max))
+      typeof initialValue === 'number' &&
+      ((state.min !== undefined && initialValue < state.min) ||
+        (state.max !== undefined && initialValue > state.max))
     ) {
       reject('GPUI initial state violates its numeric bounds.');
     }
+    if (
+      state.kind === 'number.discrete' &&
+      !state.options?.length &&
+      state.step !== undefined &&
+      state.step > 0 &&
+      typeof initialValue === 'number' &&
+      !Number.isInteger((initialValue - (state.min ?? 0)) / state.step)
+    ) {
+      reject('GPUI initial state violates its numeric step.');
+    }
+    statePlans.push({ ...state, initialValue });
     const field = identifier('state_', state.name);
     if (names.has(field)) reject('GPUI state names collide after identifier normalization.');
     names.add(field);
@@ -263,7 +326,8 @@ function buildPlan(proto: PrototypeIR, options: GpuiEmitOptions): CompileResult<
   };
   const expression = (
     expr: ValueExprIR,
-    locals: Map<string, ValueType>
+    locals: Map<string, ValueType>,
+    previousAllowed = false
   ): Record<string, unknown> => {
     let type: ValueType | undefined;
     let data: Record<string, unknown> = { ...expr };
@@ -273,7 +337,8 @@ function buildPlan(proto: PrototypeIR, options: GpuiEmitOptions): CompileResult<
         reject('A GPUI string literal contains an unpaired surrogate.');
     } else if (expr.kind === 'state') type = states.get(expr.name);
     else if (expr.kind === 'prop') {
-      if (expr.source === 'previous') reject('GPUI previous-props reads require a lowered watch.');
+      if (expr.source === 'previous' && !previousAllowed)
+        reject('GPUI previous-props reads are only valid inside a prop watch.');
       if (nullableProps.has(expr.name))
         reject(
           'Nullable GPUI prop ' +
@@ -283,14 +348,14 @@ function buildPlan(proto: PrototypeIR, options: GpuiEmitOptions): CompileResult<
       type = props.get(expr.name);
     } else if (expr.kind === 'local') type = locals.get(expr.name);
     else if (expr.kind === 'unary') {
-      const operand = expression(expr.operand, locals);
+      const operand = expression(expr.operand, locals, previousAllowed);
       type = expr.operator === '!' ? 'boolean' : 'number';
       if (operand.valueType !== type)
         reject('GPUI unary operands require an explicit native scalar type.');
       data = { ...expr, operand };
     } else if (expr.kind === 'binary') {
-      const left = expression(expr.left, locals),
-        right = expression(expr.right, locals);
+      const left = expression(expr.left, locals, previousAllowed),
+        right = expression(expr.right, locals, previousAllowed);
       if (left.valueType !== right.valueType)
         reject('GPUI binary operands must have matching scalar types.');
       if (['===', '!==', '<', '<=', '>', '>='].includes(expr.operator)) type = 'boolean';
@@ -309,9 +374,9 @@ function buildPlan(proto: PrototypeIR, options: GpuiEmitOptions): CompileResult<
         reject('GPUI nullish values are not represented by this typed target.');
       data = { ...expr, left, right };
     } else if (expr.kind === 'conditional') {
-      const condition = expression(expr.condition, locals);
-      const then = expression(expr.then, locals),
-        otherwise = expression(expr.otherwise, locals);
+      const condition = expression(expr.condition, locals, previousAllowed);
+      const then = expression(expr.then, locals, previousAllowed),
+        otherwise = expression(expr.otherwise, locals, previousAllowed);
       if (condition.valueType !== 'boolean' || then.valueType !== otherwise.valueType) {
         reject('GPUI conditional expression has incompatible native types.');
       }
@@ -323,30 +388,35 @@ function buildPlan(proto: PrototypeIR, options: GpuiEmitOptions): CompileResult<
   };
   const actions = (
     body: readonly ActionStatementIR[],
-    inherited = new Map<string, ValueType>()
+    inherited = new Map<string, ValueType>(),
+    previousAllowed = false
   ): unknown[] => {
     const locals = new Map(inherited);
     return body.map((statement) => {
-      if (statement.kind === 'return') return statement;
+      if (statement.kind === 'return' || statement.kind === 'request-update') return statement;
+      if (statement.kind === 'invoke')
+        return { ...statement, body: actions(statement.body, locals, previousAllowed) };
       if (statement.kind === 'if') {
-        const condition = expression(statement.condition, locals);
+        const condition = expression(statement.condition, locals, previousAllowed);
         if (condition.valueType !== 'boolean') reject('GPUI action condition must be boolean.');
         return {
           ...statement,
           condition,
-          then: actions(statement.then, locals),
-          otherwise: actions(statement.otherwise, locals),
+          then: actions(statement.then, locals, previousAllowed),
+          otherwise: actions(statement.otherwise, locals, previousAllowed),
         };
       }
-      const value = expression(statement.value, locals);
+      const value = expression(statement.value, locals, previousAllowed);
       if (statement.kind === 'local') locals.set(statement.name, value.valueType as ValueType);
       else if (value.valueType !== states.get(statement.stateName))
         reject('GPUI state assignment has the wrong scalar type.');
       return { ...statement, value };
     });
   };
+  const feedbackStates = new Set<string>();
   const rules = (rule: RuleExpr): unknown => {
     if (rule.kind === 'cmp') {
+      if (rule.source === 'state') feedbackStates.add(rule.key);
       const type =
         rule.source === 'state'
           ? states.get(rule.key)
@@ -369,6 +439,27 @@ function buildPlan(proto: PrototypeIR, options: GpuiEmitOptions): CompileResult<
       return { ...rule, exprs: rule.exprs.map(rules) };
     return rule;
   };
+  let slotCount = 0;
+  const children = (input: readonly TemplateChildIR[]): unknown[] =>
+    input.map((child) => {
+      if (child.kind === 'element') return { ...child, node: tree(child.node) };
+      if (child.kind === 'slot') slotCount += 1;
+      if (child.kind === 'text' && hasLoneSurrogate(child.value))
+        reject('GPUI text contains an unpaired UTF-16 surrogate.');
+      if (child.kind === 'state-read' && !states.has(child.stateName))
+        reject('GPUI render reads undeclared state.');
+      if (child.kind === 'prop-read' && !props.has(child.propName))
+        reject('GPUI render reads undeclared prop.');
+      if (
+        (child.kind === 'state-read' && states.get(child.stateName) === 'boolean') ||
+        (child.kind === 'prop-read' && props.get(child.propName) === 'boolean')
+      ) {
+        reject(
+          'Boolean values are not TemplateChildrenInput; GPUI does not invent their text representation.'
+        );
+      }
+      return child;
+    });
   const tree = (node: TemplateElementIR): unknown => {
     if (node.tag !== 'div' && node.tag !== 'span') {
       reject(
@@ -382,53 +473,60 @@ function buildPlan(proto: PrototypeIR, options: GpuiEmitOptions): CompileResult<
     return {
       ...node,
       styles: nativeStyles,
-      children: node.children.map((child) => {
-        if (child.kind === 'element') return { ...child, node: tree(child.node) };
-        if (child.kind === 'slot') reject('GPUI slot ownership is not implemented.');
-        if (child.kind === 'text' && hasLoneSurrogate(child.value))
-          reject('GPUI text contains an unpaired UTF-16 surrogate.');
-        if (child.kind === 'state-read' && !states.has(child.stateName))
-          reject('GPUI render reads undeclared state.');
-        if (child.kind === 'prop-read' && !props.has(child.propName))
-          reject('GPUI render reads undeclared prop.');
-        if (
-          (child.kind === 'state-read' && states.get(child.stateName) === 'boolean') ||
-          (child.kind === 'prop-read' && props.get(child.propName) === 'boolean')
-        ) {
-          reject(
-            'Boolean values are not TemplateChildrenInput; GPUI does not invent their text representation.'
-          );
-        }
-        return child;
-      }),
+      children: children(node.children),
     };
   };
-  if (proto.render.kind === 'static-tree' || proto.render.kind === 'reactive-tree') {
-    checkStyleCascade(
-      styles([
-        ...proto.staticStyleTokens,
-        ...(proto.render.root.styleTokens ?? []),
-        ...proto.rules.flatMap((rule) => rule.styleTokens),
-      ])
-    );
-  }
+  // Template nodes belong inside the host Root. Root feedback must never style
+  // the outermost template element or change its independent cascade.
+  checkStyleCascade(
+    styles([...proto.staticStyleTokens, ...proto.rules.flatMap((rule) => rule.styleTokens)])
+  );
+  const root = {
+    tag: 'div',
+    styles: [],
+    children: children(
+      proto.render.kind === 'static-tree' || proto.render.kind === 'reactive-tree'
+        ? [{ kind: 'element', node: proto.render.root }]
+        : proto.render.kind === 'default-slot'
+          ? [{ kind: 'slot' }]
+          : proto.render.kind === 'fragment'
+            ? proto.render.children
+            : []
+    ),
+  };
+  if (slotCount > 1) reject('A template may contain at most one anonymous slot.');
   const plan = {
     protocolVersion: 1,
     componentName,
     propsTypeName: componentName + 'Props',
+    childrenTypeName: slotCount === 1 ? componentName + 'Child' : undefined,
+    hasSlot: slotCount === 1,
     dependency: GPUI_V2_DEPENDENCY,
     workspaceDependency: options.gpuiDependency === 'workspace',
     props: propPlans,
-    states: proto.states,
+    states: statePlans,
+    created: (proto.lifecycleHandlers ?? [])
+      .filter((handler) => handler.phase === 'created')
+      .map((handler, index) => ({
+        method: 'handle_created_' + index,
+        body: actions(handler.body),
+      })),
+    propWatches: (proto.propWatches ?? []).map((watch, index) => {
+      if (watch.keys !== null && (!watch.keys.length || watch.keys.some((key) => !props.has(key))))
+        reject('GPUI prop watches require a non-empty selection of declared keys or watchAll.');
+      return {
+        method: 'handle_props_watch_' + index,
+        keys: watch.keys ?? [...props.keys()],
+        body: actions(watch.body, new Map(), true),
+      };
+    }),
     styles: styles(proto.staticStyleTokens),
-    root:
-      proto.render.kind === 'static-tree' || proto.render.kind === 'reactive-tree'
-        ? tree(proto.render.root)
-        : null,
+    root,
     rules: proto.rules.map((rule) => {
       if (rule.dynamic) reject('GPUI dynamic rule has no native lowering.');
       return { ...rule, condition: rules(rule.condition), styles: styles(rule.styleTokens) };
     }),
+    feedbackStates: [...feedbackStates],
     events: proto.events.map((event, index) => {
       if (event.scope !== 'root' || event.eventName !== 'host:click') {
         reject(

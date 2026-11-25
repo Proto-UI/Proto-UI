@@ -1,0 +1,17 @@
+[dependencies]
+ryu-js = "=1.0.3"
+
+[dependencies.gpui]
+git = "https://github.com/zed-industries/zed"
+rev = "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8"
+
+[lib]
+path = "src/lib.rs"
+
+[package]
+edition = "2021"
+name = "compiled-gpuiexpandedpinned"
+publish = false
+version = "0.0.0"
+
+[workspace]

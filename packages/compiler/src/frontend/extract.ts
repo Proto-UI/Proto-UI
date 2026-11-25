@@ -1,4 +1,3 @@
-import path from 'node:path';
 import ts from 'typescript';
 import { diagnostic, type CompilerDiagnostic } from '../diagnostics';
 import {
@@ -16,10 +15,11 @@ import {
   resolveDefinitionObject,
   isPrototypeType,
   isCoreIntrinsic,
+  isKnownUndefined,
 } from './syntax';
 import { propKindToSsaType, stateKindToSsaType, internString } from './scalars';
 import { parseRuleCondition } from './rules';
-import { collectTwTokens, collectRuleStyleTokens, parseTemplateElement } from './template';
+import { collectTwTokens, collectRuleStyleTokens, parseTemplateChild } from './template';
 import {
   detectSimpleEventAction,
   lowerRuleToSsa,
@@ -28,6 +28,14 @@ import {
   tryLowerPureScalarFunction,
 } from './kernel';
 import { lowerActionBody } from './actions';
+import { evaluateStaticScalar } from './constants';
+import {
+  atExecutionPoint,
+  hasBindingWrites,
+  isBindingInitialized,
+  isConstDeclaration,
+  type InitializationPoints,
+} from './bindings';
 import {
   PROTO_IR_VERSION,
   computePrototypeCapabilities,
@@ -103,7 +111,8 @@ export function extractModuleIR(
   options: ExtractOptions = {}
 ): ExtractOutput {
   const diagnostics: CompilerDiagnostic[] = [];
-  const sf = program.getSourceFile(path.resolve(entryPath));
+  // Program resolves relative names against its CompilerHost, including virtual browser files.
+  const sf = program.getSourceFile(entryPath);
   if (!sf) {
     return {
       ir: {
@@ -154,7 +163,7 @@ export function extractModuleIR(
 
   const moduleSym = checker.getSymbolAtLocation(sf);
   const exportsList = moduleSym ? checker.getExportsOfModule(moduleSym) : [];
-  const seenCalls = new Set<ts.CallExpression>();
+  const seenCalls = new Map<ts.CallExpression, number>();
 
   for (const expSym of exportsList) {
     const expName = expSym.getName();
@@ -218,8 +227,13 @@ export function extractModuleIR(
     }
 
     if (found.factory === 'definePrototype') {
-      if (seenCalls.has(found.call) && !options.exportName) continue;
-      seenCalls.add(found.call);
+      const prior = seenCalls.get(found.call);
+      if (prior !== undefined && !options.exportName) {
+        if (expName === 'default')
+          prototypes[prior] = { ...prototypes[prior], isDefaultExport: true };
+        continue;
+      }
+      seenCalls.set(found.call, prototypes.length);
       const proto = extractPrototype(
         found.call,
         expName,
@@ -247,63 +261,10 @@ export function extractModuleIR(
     }
   }
 
-  const pureInitializer = (raw: ts.Expression): boolean => {
-    const value = unwrapExpr(raw);
-    if (
-      extractScalarLiteral(value, checker) !== undefined ||
-      ts.isIdentifier(value) ||
-      ts.isArrowFunction(value) ||
-      ts.isFunctionExpression(value)
-    )
-      return true;
-    if (ts.isArrayLiteralExpression(value))
-      return value.elements.every(
-        (element) => !ts.isSpreadElement(element) && pureInitializer(element)
-      );
-    if (ts.isObjectLiteralExpression(value))
-      return value.properties.every(
-        (field) =>
-          ((ts.isMethodDeclaration(field) ||
-            ts.isGetAccessorDeclaration(field) ||
-            ts.isSetAccessorDeclaration(field)) &&
-            !ts.isComputedPropertyName(field.name)) ||
-          ts.isShorthandPropertyAssignment(field) ||
-          (ts.isPropertyAssignment(field) &&
-            !ts.isComputedPropertyName(field.name) &&
-            pureInitializer(field.initializer))
-      );
-    const intrinsic =
-      ts.isCallExpression(value) || ts.isPropertyAccessExpression(value)
-        ? resolveCallName(ts.isCallExpression(value) ? value.expression : value, checker)
-        : undefined;
-    return (
-      !!intrinsic &&
-      isCoreIntrinsic(intrinsic) &&
-      ['definePrototype', 'defineAsHook', 'defineHook'].includes(intrinsic.name) &&
-      (!ts.isCallExpression(value) || value.arguments.every(pureInitializer))
-    );
-  };
-  const moduleEffects: LoweringGapIR[] = sf.statements
-    .filter(
-      (statement) =>
-        (ts.isExpressionStatement(statement) && !ts.isStringLiteral(statement.expression)) ||
-        ts.isIfStatement(statement) ||
-        ts.isIterationStatement(statement, false) ||
-        ts.isTryStatement(statement) ||
-        ts.isThrowStatement(statement) ||
-        (ts.isVariableStatement(statement) &&
-          statement.declarationList.declarations.some(
-            (declaration) =>
-              !ts.isIdentifier(declaration.name) ||
-              (declaration.initializer && !pureInitializer(declaration.initializer))
-          )) ||
-        (ts.isImportDeclaration(statement) && !statement.importClause)
-    )
-    .map((statement) => ({
-      operation: 'module-effect',
-      message: 'Top-level executable effects require explicit module-initialization lowering.',
-      span: spanOf(statement, sf),
-    }));
+  const moduleEffects = [
+    ...collectModuleEffects(sf, checker),
+    ...collectImportedModuleEffects(sf, checker),
+  ];
   if (moduleEffects.length) {
     for (let index = 0; index < prototypes.length; index++)
       prototypes[index] = {
@@ -321,6 +282,181 @@ export function extractModuleIR(
     },
     diagnostics,
   };
+}
+
+/** Check initialization effects in authored source modules that would otherwise disappear. */
+function collectModuleEffects(sf: ts.SourceFile, checker: ts.TypeChecker): LoweringGapIR[] {
+  const activeInitializers = new Set<ts.Node>();
+  const pureInitializer = (
+    raw: ts.Expression,
+    inheritedPoints: InitializationPoints = new Map()
+  ): boolean => {
+    const value = unwrapExpr(raw);
+    const points = atExecutionPoint(value, inheritedPoints);
+    if (
+      evaluateStaticScalar(value, checker, new Map(), points) !== undefined ||
+      ts.isArrowFunction(value) ||
+      ts.isFunctionExpression(value)
+    )
+      return true;
+    if (ts.isIdentifier(value)) {
+      const binding = resolveAliasedSymbol(checker, checker.getSymbolAtLocation(value));
+      const declaration = binding?.valueDeclaration ?? binding?.declarations?.[0];
+      if (!binding || !declaration || !isBindingInitialized(declaration, points, checker))
+        return false;
+      if (ts.isFunctionDeclaration(declaration))
+        return !!declaration.body && !hasBindingWrites(binding, checker);
+      if (
+        !ts.isVariableDeclaration(declaration) ||
+        !isConstDeclaration(declaration) ||
+        !declaration.initializer ||
+        activeInitializers.has(declaration)
+      )
+        return false;
+      activeInitializers.add(declaration);
+      const result = pureInitializer(declaration.initializer, points);
+      activeInitializers.delete(declaration);
+      return result;
+    }
+    if (ts.isArrayLiteralExpression(value))
+      return value.elements.every(
+        (element) => !ts.isSpreadElement(element) && pureInitializer(element, points)
+      );
+    if (ts.isObjectLiteralExpression(value))
+      return value.properties.every(
+        (field) =>
+          ((ts.isMethodDeclaration(field) ||
+            ts.isGetAccessorDeclaration(field) ||
+            ts.isSetAccessorDeclaration(field)) &&
+            !ts.isComputedPropertyName(field.name)) ||
+          (ts.isShorthandPropertyAssignment(field) && pureInitializer(field.name, points)) ||
+          (ts.isPropertyAssignment(field) &&
+            !ts.isComputedPropertyName(field.name) &&
+            pureInitializer(field.initializer, points))
+      );
+    const intrinsic =
+      ts.isCallExpression(value) || ts.isPropertyAccessExpression(value)
+        ? resolveCallName(
+            ts.isCallExpression(value) ? value.expression : value,
+            checker,
+            new Set(),
+            points
+          )
+        : undefined;
+    if (
+      !intrinsic ||
+      !isCoreIntrinsic(intrinsic) ||
+      !['definePrototype', 'defineAsHook', 'defineHook'].includes(intrinsic.name)
+    )
+      return false;
+    if (!ts.isCallExpression(value)) return true;
+    if (
+      value.arguments.length !== 1 ||
+      !value.arguments.every((argument) => pureInitializer(argument, points))
+    )
+      return false;
+    const definition = resolveDefinitionObject(value.arguments[0], checker, points);
+    if (!definition) return false;
+    const name = extractObjectProperty(definition, 'name');
+    const nameValue = name && evaluateStaticScalar(name, checker, new Map(), points);
+    if (
+      typeof nameValue !== 'string' ||
+      !nameValue ||
+      !extractSetupFunction(definition, checker, points)
+    )
+      return false;
+    // Factory validation runs at module initialization, even for an unused declaration.
+    // Nonempty module lists and property accessors require their own validation/effect lowering.
+    const modules = extractObjectProperty(definition, 'modules');
+    if (
+      modules &&
+      (!ts.isArrayLiteralExpression(unwrapExpr(modules)) ||
+        (unwrapExpr(modules) as ts.ArrayLiteralExpression).elements.length)
+    )
+      return false;
+    return !definition.properties.some(
+      (field) =>
+        ts.isGetAccessorDeclaration(field) ||
+        ts.isSetAccessorDeclaration(field) ||
+        ts.isSpreadAssignment(field)
+    );
+  };
+  return sf.statements
+    .filter((statement) => {
+      if (
+        ts.canHaveModifiers(statement) &&
+        ts
+          .getModifiers(statement)
+          ?.some((modifier) => modifier.kind === ts.SyntaxKind.DeclareKeyword)
+      )
+        return false;
+      if (ts.isExpressionStatement(statement)) return !ts.isStringLiteral(statement.expression);
+      if (ts.isExportAssignment(statement)) return !pureInitializer(statement.expression);
+      if (ts.isVariableStatement(statement))
+        return statement.declarationList.declarations.some(
+          (declaration) =>
+            !ts.isIdentifier(declaration.name) ||
+            (declaration.initializer && !pureInitializer(declaration.initializer))
+        );
+      if (ts.isImportDeclaration(statement)) return !statement.importClause;
+      return !(
+        ts.isFunctionDeclaration(statement) ||
+        ts.isInterfaceDeclaration(statement) ||
+        ts.isTypeAliasDeclaration(statement) ||
+        ts.isExportDeclaration(statement) ||
+        ts.isEmptyStatement(statement)
+      );
+    })
+    .map((statement) => ({
+      operation: 'module-effect',
+      message: 'Top-level executable effects require explicit module-initialization lowering.',
+      span: spanOf(statement, sf),
+    }));
+}
+
+function collectImportedModuleEffects(sf: ts.SourceFile, checker: ts.TypeChecker): LoweringGapIR[] {
+  const checked = new Set<ts.SourceFile>([sf]);
+  const issues: LoweringGapIR[] = [];
+  const visit = (source: ts.SourceFile): void => {
+    for (const statement of source.statements) {
+      if (
+        (!ts.isImportDeclaration(statement) && !ts.isExportDeclaration(statement)) ||
+        !statement.moduleSpecifier ||
+        (ts.isExportDeclaration(statement) && statement.isTypeOnly)
+      )
+        continue;
+      if (ts.isImportDeclaration(statement) && statement.importClause?.isTypeOnly) continue;
+      if (
+        ts.isImportDeclaration(statement) &&
+        !statement.importClause?.name &&
+        statement.importClause?.namedBindings &&
+        ts.isNamedImports(statement.importClause.namedBindings) &&
+        statement.importClause.namedBindings.elements.every((element) => element.isTypeOnly)
+      )
+        continue;
+      if (
+        ts.isExportDeclaration(statement) &&
+        statement.exportClause &&
+        ts.isNamedExports(statement.exportClause) &&
+        statement.exportClause.elements.every((element) => element.isTypeOnly)
+      )
+        continue;
+      const binding = checker.getSymbolAtLocation(statement.moduleSpecifier);
+      const imported = binding?.declarations?.find(ts.isSourceFile);
+      if (
+        !imported ||
+        checked.has(imported) ||
+        imported.isDeclarationFile ||
+        isCoreIntrinsic({ sourceFile: imported.fileName })
+      )
+        continue;
+      checked.add(imported);
+      issues.push(...collectModuleEffects(imported, checker));
+      visit(imported);
+    }
+  };
+  visit(sf);
+  return issues;
 }
 
 function extractAuthoredHookSummary(
@@ -499,7 +635,9 @@ function analyzeSetup(
     );
   };
 
-  const visitedFns = new Set<ts.FunctionLikeDeclaration>();
+  const activeFns = new Set<ts.FunctionLikeDeclaration>();
+  const hookResults = new Map<string, { render?: RenderIR; lowered: boolean }>();
+  const hookBindings = new Map<ts.Symbol, { render?: RenderIR; lowered: boolean }>();
 
   const recordContextCall = (method: string, keyArg: ts.Expression | undefined) => {
     const mode: ContextUsageIR['mode'] =
@@ -531,20 +669,33 @@ function analyzeSetup(
     scan(cb.body);
   };
 
-  const walkFunction = (fn: ts.FunctionLikeDeclaration, defParamName?: string) => {
+  const walkFunction = (
+    fn: ts.FunctionLikeDeclaration,
+    defParamName?: string,
+    constants: ReadonlyMap<ts.Symbol, ScalarLiteral> = new Map(),
+    discardedHelperReturn = false,
+    initializationPoints: InitializationPoints = new Map()
+  ): RenderIR | undefined => {
+    const boundConstants = new Map(constants);
+    const scalar = (
+      expression: ts.Expression,
+      points: InitializationPoints = initializationPoints
+    ): ScalarLiteral | undefined =>
+      evaluateStaticScalar(expression, checker, boundConstants, points);
+    let functionRender: RenderIR | undefined;
     if (!fn.body) {
       gap(fn, 'setup', 'Setup implementation is not available.');
       return;
     }
-    if (visitedFns.has(fn)) {
+    if (activeFns.has(fn)) {
       gap(
         fn,
         'setup-composition',
-        'Repeated or recursive setup composition requires instance-sensitive expansion.'
+        'Recursive setup composition cannot be expanded into a finite declaration sequence.'
       );
       return;
     }
-    visitedFns.add(fn);
+    activeFns.add(fn);
 
     const p0 = fn.parameters[0];
     const defName = defParamName ?? (p0 && ts.isIdentifier(p0.name) ? p0.name.text : undefined);
@@ -553,12 +704,113 @@ function analyzeSetup(
     );
     const defSymbol = defBinding && checker.getSymbolAtLocation(defBinding.name);
     const defAliases = new Set<ts.Symbol>(defSymbol ? [defSymbol] : []);
+    for (const parameter of fn.parameters) {
+      if (!ts.isIdentifier(parameter.name) || parameter.dotDotDotToken) {
+        gap(
+          parameter,
+          'setup-binding',
+          'Setup parameter destructuring and rest bindings require explicit lowering.'
+        );
+        continue;
+      }
+      const binding = checker.getSymbolAtLocation(parameter.name)!;
+      if (binding === defSymbol || boundConstants.has(binding) || !parameter.initializer) continue;
+      const initial = scalar(parameter.initializer);
+      if (initial === undefined)
+        gap(
+          parameter.initializer,
+          'setup-binding',
+          'Default parameter effects and values require explicit lowering.'
+        );
+      else boundConstants.set(binding, initial);
+    }
     const rootBinding = (expression: ts.Expression): ts.Symbol | undefined => {
       let root = unwrapExpr(expression);
       while (ts.isPropertyAccessExpression(root)) root = unwrapExpr(root.expression);
       return ts.isIdentifier(root) ? checker.getSymbolAtLocation(root) : undefined;
     };
     let returned = false;
+
+    const captureReturn = (expression: ts.Expression, node: ts.Node): void => {
+      const returnedValue = unwrapExpr(expression);
+      if (
+        ts.isPropertyAccessExpression(returnedValue) &&
+        ts.isIdentifier(returnedValue.expression) &&
+        returnedValue.name.text === 'render'
+      ) {
+        const result = hookBindings.get(checker.getSymbolAtLocation(returnedValue.expression)!);
+        if (result) {
+          functionRender = result.render;
+          return;
+        }
+      }
+      const returnPoints = atExecutionPoint(node, initializationPoints);
+      const retFn = resolveFunctionLike(expression, checker, returnPoints);
+      if (retFn && retFn.body) {
+        if (
+          retFn.parameters.length > 1 ||
+          retFn.parameters.some(
+            (parameter) => !ts.isIdentifier(parameter.name) || parameter.dotDotDotToken
+          )
+        ) {
+          gap(
+            retFn,
+            'render',
+            'Render parameter destructuring, rest and additional defaults require explicit binding semantics.'
+          );
+          return;
+        }
+        if (
+          retFn.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword) ||
+          retFn.asteriskToken
+        ) {
+          gap(
+            retFn,
+            'render',
+            'Asynchronous and generator render functions require separate execution semantics.'
+          );
+          return;
+        }
+        const rp = retFn.parameters[0];
+        const renderParam = rp && ts.isIdentifier(rp.name) ? rp.name.text : 'r';
+        const bodyExpr = !ts.isBlock(retFn.body)
+          ? retFn.body
+          : retFn.body.statements.length === 1 &&
+              ts.isReturnStatement(retFn.body.statements[0]) &&
+              retFn.body.statements[0].expression
+            ? retFn.body.statements[0].expression
+            : undefined;
+        if (bodyExpr) {
+          const parsed = parseTemplateChild(
+            bodyExpr,
+            renderParam,
+            stateVarToName,
+            checker,
+            (expression) => scalar(expression, returnPoints),
+            returnPoints
+          );
+          const only = parsed?.children.length === 1 ? parsed.children[0] : undefined;
+          functionRender = !parsed
+            ? { kind: 'dynamic' }
+            : only?.kind === 'slot'
+              ? { kind: 'default-slot' }
+              : only?.kind === 'element'
+                ? { kind: parsed.reactive ? 'reactive-tree' : 'static-tree', root: only.node }
+                : { kind: 'fragment', children: parsed.children };
+        } else {
+          functionRender = { kind: 'dynamic' };
+        }
+      } else if (
+        !isKnownUndefined(expression, checker) &&
+        (!discardedHelperReturn || scalar(expression) === undefined)
+      ) {
+        gap(
+          node,
+          'setup-return',
+          'A returned value requires explicit function or hook-result lowering.'
+        );
+      }
+    };
 
     const visit = (node: ts.Node) => {
       // Preserve sequential completion, including returns nested in unconditional blocks.
@@ -585,8 +837,21 @@ function analyzeSetup(
         return;
       }
 
+      if (ts.isIfStatement(node)) {
+        const condition = scalar(node.expression);
+        if (condition === undefined)
+          gap(
+            node,
+            'setup-control-flow',
+            'Dynamic setup branches require conditional declaration semantics.'
+          );
+        else {
+          const selected = condition ? node.thenStatement : node.elseStatement;
+          if (selected) visit(selected);
+        }
+        return;
+      }
       if (
-        ts.isIfStatement(node) ||
         ts.isIterationStatement(node, false) ||
         ts.isSwitchStatement(node) ||
         ts.isTryStatement(node) ||
@@ -616,70 +881,26 @@ function analyzeSetup(
           !ts.isCallExpression(initial) &&
           !ts.isArrowFunction(initial) &&
           !ts.isFunctionExpression(initial) &&
-          extractScalarLiteral(initial, checker) === undefined
+          scalar(initial) === undefined
         ) {
           gap(node, 'setup-binding', 'The local binding initializer has no semantic lowering.');
           return;
         }
       }
 
-      // Capture return statement in top-level setup as RenderIR.
-      if (fn === setupFn && ts.isReturnStatement(node) && node.expression) {
-        const retFn = resolveFunctionLike(node.expression, checker);
-        if (retFn && retFn.body) {
-          const rp = retFn.parameters[0];
-          const renderParam = rp && ts.isIdentifier(rp.name) ? rp.name.text : 'r';
-          const bodyExpr = !ts.isBlock(retFn.body)
-            ? retFn.body
-            : retFn.body.statements.length === 1 &&
-                ts.isReturnStatement(retFn.body.statements[0]) &&
-                retFn.body.statements[0].expression
-              ? retFn.body.statements[0].expression
-              : undefined;
-          if (bodyExpr) {
-            const u = unwrapExpr(bodyExpr);
-            if (ts.isCallExpression(u)) {
-              const chain = propAccessChain(u.expression);
-              if (
-                chain &&
-                chain.length === 2 &&
-                chain[0] === renderParam &&
-                chain[1] === 'slot' &&
-                u.arguments.length === 0
-              ) {
-                renderBox.current = { kind: 'default-slot' };
-              } else if (
-                chain &&
-                chain.length === 2 &&
-                chain[0] === renderParam &&
-                chain[1] === 'el'
-              ) {
-                const parsed = parseTemplateElement(u, renderParam, stateVarToName, checker);
-                renderBox.current = parsed
-                  ? { kind: parsed.reactive ? 'reactive-tree' : 'static-tree', root: parsed.node }
-                  : { kind: 'dynamic' };
-              } else {
-                renderBox.current = { kind: 'dynamic' };
-              }
-            } else {
-              renderBox.current = { kind: 'dynamic' };
-            }
-          } else {
-            renderBox.current = { kind: 'dynamic' };
-          }
-        } else {
-          renderBox.current = { kind: 'dynamic' };
-        }
+      if (ts.isReturnStatement(node) && node.expression) {
+        captureReturn(node.expression, node);
         return;
       }
 
       if (ts.isReturnStatement(node)) {
-        if (node.expression && extractScalarLiteral(node.expression, checker) === undefined)
+        if (node.expression && scalar(node.expression) === undefined)
           gap(node, 'setup-return', 'A helper return value requires explicit lowering.');
         return;
       }
 
       if (ts.isCallExpression(node)) {
+        const callPoints = atExecutionPoint(node, initializationPoints);
         const chain = propAccessChain(node.expression);
 
         // 1. def.* operations
@@ -712,7 +933,7 @@ function analyzeSetup(
 
                 if (ts.isObjectLiteralExpression(spec)) {
                   const typeExpr = extractObjectProperty(spec, 'type');
-                  const typeLit = typeExpr ? extractScalarLiteral(typeExpr, checker) : undefined;
+                  const typeLit = typeExpr ? scalar(typeExpr) : undefined;
                   if (
                     typeLit === 'boolean' ||
                     typeLit === 'number' ||
@@ -725,12 +946,12 @@ function analyzeSetup(
                   }
                   const defExpr = extractObjectProperty(spec, 'default');
                   if (defExpr) {
-                    defaultValue = extractScalarLiteral(defExpr, checker);
+                    defaultValue = scalar(defExpr);
                     if (defaultValue === undefined)
                       gap(defExpr, sub, 'Property default is not a proven static scalar.');
                   }
                   const emptyExpr = extractObjectProperty(spec, 'empty');
-                  const emptyLit = emptyExpr ? extractScalarLiteral(emptyExpr, checker) : undefined;
+                  const emptyLit = emptyExpr ? scalar(emptyExpr) : undefined;
                   if (emptyLit === 'accept' || emptyLit === 'fallback' || emptyLit === 'error') {
                     empty = emptyLit;
                   } else if (emptyExpr)
@@ -738,7 +959,7 @@ function analyzeSetup(
                   const optExpr = extractObjectProperty(spec, 'options');
                   if (optExpr && ts.isArrayLiteralExpression(unwrapExpr(optExpr))) {
                     options = (unwrapExpr(optExpr) as ts.ArrayLiteralExpression).elements
-                      .map((el) => extractScalarLiteral(el, checker))
+                      .map((el) => scalar(el))
                       .filter((v): v is ScalarLiteral => v !== undefined);
                     if (
                       options.length !==
@@ -761,8 +982,8 @@ function analyzeSetup(
                       gap(rangeExpr, sub, 'Every range field must have explicit lowering.');
                     const minExpr = extractObjectProperty(limits, 'min');
                     const maxExpr = extractObjectProperty(limits, 'max');
-                    const min = minExpr ? extractScalarLiteral(minExpr, checker) : undefined;
-                    const max = maxExpr ? extractScalarLiteral(maxExpr, checker) : undefined;
+                    const min = minExpr ? scalar(minExpr) : undefined;
+                    const max = maxExpr ? scalar(maxExpr) : undefined;
                     if (
                       (minExpr && typeof min !== 'number') ||
                       (maxExpr && typeof max !== 'number')
@@ -830,7 +1051,7 @@ function analyzeSetup(
                   continue;
                 }
                 const existing = propsMap.get(key);
-                const val = extractScalarLiteral(p.initializer, checker);
+                const val = scalar(p.initializer);
                 if (existing && val !== undefined) {
                   if (typeof val === 'number' && !Number.isFinite(val)) {
                     gap(p, sub, 'Defaults must be JSON scalar values.');
@@ -858,12 +1079,8 @@ function analyzeSetup(
           ) {
             if (node.arguments.length < 2 || node.arguments.length > 3)
               gap(node, sub, 'Unexpected state declaration arguments cannot be discarded.');
-            const nameLit = node.arguments[0]
-              ? extractScalarLiteral(node.arguments[0], checker)
-              : undefined;
-            const initLit = node.arguments[1]
-              ? extractScalarLiteral(node.arguments[1], checker)
-              : undefined;
+            const nameLit = node.arguments[0] ? scalar(node.arguments[0]) : undefined;
+            const initLit = node.arguments[1] ? scalar(node.arguments[1]) : undefined;
             const kindMap: Record<string, StateDeclIR['kind']> = {
               'state.bool': 'bool',
               'state.string': 'string',
@@ -872,8 +1089,8 @@ function analyzeSetup(
               'state.numberRange': 'number.range',
             };
             const kind = kindMap[sub];
-            if (typeof nameLit !== 'string' || !/^[a-z0-9-]+(\.[a-z0-9-]+)*$/.test(nameLit))
-              gap(node, sub, 'State semantic must be a valid static name.');
+            if (typeof nameLit !== 'string')
+              gap(node, sub, 'State semantic must be a proven static string.');
             if (initLit === undefined)
               gap(node, sub, 'State initializer has no proven value or expression lowering.');
             if (typeof initLit === 'string') internString(stringTable, initLit);
@@ -901,12 +1118,12 @@ function analyzeSetup(
                   const key = field.name.text;
                   const init = unwrapExpr(field.initializer);
                   if (key === 'options' && ts.isArrayLiteralExpression(init)) {
-                    const values = init.elements.map((e) => extractScalarLiteral(e, checker));
+                    const values = init.elements.map((e) => scalar(e));
                     if (values.some((v) => v === undefined))
                       gap(field, sub, 'State options must be static scalar values.');
                     else stateSpec.options = values as ScalarLiteral[];
                   } else {
-                    const v = extractScalarLiteral(init, checker);
+                    const v = scalar(init);
                     if (['min', 'max', 'step'].includes(key) && typeof v === 'number')
                       stateSpec[key as 'min' | 'max' | 'step'] = v;
                     else if (key === 'clamp' && typeof v === 'boolean') stateSpec.clamp = v;
@@ -938,9 +1155,7 @@ function analyzeSetup(
             sub === 'expose.method' ||
             sub === 'expose.value'
           ) {
-            const keyLit = node.arguments[0]
-              ? extractScalarLiteral(node.arguments[0], checker)
-              : undefined;
+            const keyLit = node.arguments[0] ? scalar(node.arguments[0]) : undefined;
             if (typeof keyLit === 'string') {
               const kind = sub.slice('expose.'.length) as ExposeDeclIR['kind'];
               const valType = node.arguments[1]
@@ -955,7 +1170,7 @@ function analyzeSetup(
             if (node.arguments.length !== (sub === 'props.watch' ? 2 : 1))
               gap(node, sub, 'Unexpected watcher arguments cannot be discarded.');
             const cbArg = node.arguments[node.arguments.length - 1];
-            const handler = cbArg ? resolveFunctionLike(cbArg, checker) : undefined;
+            const handler = cbArg ? resolveFunctionLike(cbArg, checker, callPoints) : undefined;
             scanRunCallback(handler);
             if (sub !== 'props.watch' && sub !== 'props.watchAll') {
               gap(
@@ -967,7 +1182,7 @@ function analyzeSetup(
               let keys: string[] | null | undefined = sub === 'props.watchAll' ? null : undefined;
               const keysArg = node.arguments[0] && unwrapExpr(node.arguments[0]);
               if (sub === 'props.watch' && keysArg && ts.isArrayLiteralExpression(keysArg)) {
-                const values = keysArg.elements.map((key) => extractScalarLiteral(key, checker));
+                const values = keysArg.elements.map((key) => scalar(key));
                 if (values.every((key): key is string => typeof key === 'string')) keys = values;
               }
               const propParameters = new Map<string, 'current' | 'previous'>();
@@ -984,7 +1199,8 @@ function analyzeSetup(
                         ? handler.parameters[0].name.text
                         : undefined,
                     propParameters,
-                    constant: (expression) => extractScalarLiteral(expression, checker),
+                    constant: scalar,
+                    initializationPoints: callPoints,
                   })
                 : undefined;
               if (keys === undefined || keys?.some((key) => !propsMap.has(key)))
@@ -1003,12 +1219,10 @@ function analyzeSetup(
           else if (sub === 'event.on' || sub === 'event.onGlobal') {
             if (node.arguments.length !== 2)
               gap(node, sub, 'Event options need explicit host lowering.');
-            const evLit = node.arguments[0]
-              ? extractScalarLiteral(node.arguments[0], checker)
-              : undefined;
+            const evLit = node.arguments[0] ? scalar(node.arguments[0]) : undefined;
             if (typeof evLit === 'string') {
               const handler = node.arguments[1]
-                ? resolveFunctionLike(node.arguments[1], checker)
+                ? resolveFunctionLike(node.arguments[1], checker, callPoints)
                 : undefined;
               scanRunCallback(handler);
               const simpleAction = handler
@@ -1022,7 +1236,8 @@ function analyzeSetup(
                       handler.parameters[0] && ts.isIdentifier(handler.parameters[0].name)
                         ? handler.parameters[0].name.text
                         : undefined,
-                    constant: (expression) => extractScalarLiteral(expression, checker),
+                    constant: scalar,
+                    initializationPoints: callPoints,
                   })
                 : undefined;
               if (!action?.ok)
@@ -1047,7 +1262,7 @@ function analyzeSetup(
             const method = sub.slice('lifecycle.'.length) as LifecycleHookName;
             if (LIFECYCLE_METHODS.has(method)) lifecycle.add(method);
             const cbArg = node.arguments[0];
-            const handler = cbArg ? resolveFunctionLike(cbArg, checker) : undefined;
+            const handler = cbArg ? resolveFunctionLike(cbArg, checker, callPoints) : undefined;
             scanRunCallback(handler);
             const lowered = handler
               ? lowerActionBody(handler, {
@@ -1057,7 +1272,8 @@ function analyzeSetup(
                     handler.parameters[0] && ts.isIdentifier(handler.parameters[0].name)
                       ? handler.parameters[0].name.text
                       : undefined,
-                  constant: (expression) => extractScalarLiteral(expression, checker),
+                  constant: scalar,
+                  initializationPoints: callPoints,
                 })
               : undefined;
             const phases: Record<LifecycleHookName, LifecycleDeclIR['phase']> = {
@@ -1081,13 +1297,14 @@ function analyzeSetup(
           else if (sub.startsWith('context.')) {
             const method = sub.slice('context.'.length);
             recordContextCall(method, node.arguments[0]);
-            if (node.arguments[1]) scanRunCallback(resolveFunctionLike(node.arguments[1], checker));
+            if (node.arguments[1])
+              scanRunCallback(resolveFunctionLike(node.arguments[1], checker, callPoints));
           }
 
           // def.feedback.style.use(tw(...))
           else if (sub === 'feedback.style.use') {
             for (const a of node.arguments) {
-              if (!collectTwTokens(a, checker, staticStyleTokens))
+              if (!collectTwTokens(a, checker, staticStyleTokens, scalar, callPoints))
                 gap(
                   a,
                   sub,
@@ -1105,7 +1322,16 @@ function analyzeSetup(
               const whenExpr = extractObjectProperty(obj, 'when');
               const intentExpr = extractObjectProperty(obj, 'intent');
               const styleTokens: string[] = [];
-              if (!intentExpr || !collectRuleStyleTokens(intentExpr, checker, styleTokens)) {
+              if (
+                !intentExpr ||
+                !collectRuleStyleTokens(
+                  intentExpr,
+                  checker,
+                  styleTokens,
+                  (expression) => scalar(expression, callPoints),
+                  callPoints
+                )
+              ) {
                 gap(
                   intentExpr ?? obj,
                   sub,
@@ -1123,8 +1349,22 @@ function analyzeSetup(
               let condition: RuleExpr = { kind: 'true' };
               let dynamic = false;
               if (whenExpr) {
-                const whenFn = resolveFunctionLike(whenExpr, checker);
-                if (whenFn && whenFn.body) {
+                const whenFn = resolveFunctionLike(whenExpr, checker, callPoints);
+                if (
+                  whenFn &&
+                  whenFn.body &&
+                  !whenFn.asteriskToken &&
+                  !whenFn.modifiers?.some(
+                    (modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword
+                  ) &&
+                  whenFn.parameters.length <= 1 &&
+                  whenFn.parameters.every(
+                    (parameter) =>
+                      ts.isIdentifier(parameter.name) &&
+                      !parameter.initializer &&
+                      !parameter.dotDotDotToken
+                  )
+                ) {
                   const wp = whenFn.parameters[0];
                   const wName = wp && ts.isIdentifier(wp.name) ? wp.name.text : 'w';
                   const bodyExpr = !ts.isBlock(whenFn.body)
@@ -1135,7 +1375,9 @@ function analyzeSetup(
                       ? whenFn.body.statements[0].expression
                       : undefined;
                   const parsed = bodyExpr
-                    ? parseRuleCondition(bodyExpr, wName, stateVarToName, checker)
+                    ? parseRuleCondition(bodyExpr, wName, stateVarToName, checker, (expression) =>
+                        scalar(expression, callPoints)
+                      )
                     : undefined;
                   if (parsed) condition = parsed;
                   else dynamic = true;
@@ -1156,91 +1398,201 @@ function analyzeSetup(
           return;
         }
 
-        // 2. Hook calls (`asTrigger()`, `asFocusable()`, `asButton()`, ...)
-        const resolved = resolveCallName(node.expression, checker);
-        if (resolved) {
-          if (BUILTIN_HOOK_NAMES.has(resolved.name)) {
-            hooks.push({
-              name: resolved.name,
-              moduleSpecifier: resolved.sourceFile,
-              kind: 'builtin',
-            });
-          } else if (resolved.name.startsWith('as') && /^as[A-Z]/.test(resolved.name)) {
-            hooks.push({
-              name: resolved.name,
-              moduleSpecifier: resolved.sourceFile,
-              kind: 'authored',
-            });
-            // Follow authored hook's setup if defined via defineAsHook in the program!
-            const sym = resolveAliasedSymbol(
-              checker,
-              checker.getSymbolAtLocation(unwrapExpr(node.expression))
+        // Resolve hook identity through canonical factory bindings, independent of its spelling.
+        const resolved = resolveCallName(node.expression, checker, new Set(), callPoints);
+        const hookFactory = findFactoryCall(
+          node.expression,
+          checker,
+          ['defineAsHook', 'defineHook'],
+          new Set(),
+          callPoints
+        );
+        if (hookFactory) {
+          const gapStart = unlowered.length;
+          const hookArg = hookFactory.call.arguments[0]
+            ? resolveDefinitionObject(hookFactory.call.arguments[0], checker, callPoints)
+            : undefined;
+          const nameExpression = hookArg && extractObjectProperty(hookArg, 'name');
+          const hookName = nameExpression && scalar(nameExpression);
+          const nestedSetup = hookArg && extractSetupFunction(hookArg, checker, callPoints);
+          if (
+            hookFactory.call.arguments.length !== 1 ||
+            !hookArg ||
+            typeof hookName !== 'string' ||
+            !nestedSetup
+          ) {
+            gap(
+              node,
+              'hook-composition',
+              'Hook identity and setup must resolve to a canonical authored definition.'
             );
-            const decl = sym?.valueDeclaration ?? sym?.declarations?.[0];
-            if (decl && ts.isVariableDeclaration(decl) && decl.initializer) {
-              const hookFactory = findFactoryCall(decl.initializer, checker, [
-                'defineAsHook',
-                'defineHook',
-              ]);
-              const hookArg = hookFactory?.call.arguments[0]
-                ? unwrapExpr(hookFactory.call.arguments[0])
-                : undefined;
-              if (hookArg && ts.isObjectLiteralExpression(hookArg)) {
-                const nestedSetup = extractSetupFunction(hookArg, checker);
-                if (nestedSetup) walkFunction(nestedSetup);
-                else gap(node, 'hook-composition', 'Authored hook setup could not be resolved.');
-              } else
-                gap(node, 'hook-composition', 'Hook calls require a resolved authored definition.');
+            hooks.push({ name: resolved?.name ?? 'unknown', kind: 'authored' });
+            return;
+          }
+          for (const field of hookArg.properties) {
+            if (
+              ts.isGetAccessorDeclaration(field) ||
+              ts.isSetAccessorDeclaration(field) ||
+              ts.isSpreadAssignment(field)
+            ) {
+              gap(
+                field,
+                'hook-composition',
+                'Hook definition accessors and spreads require explicit effect lowering.'
+              );
+              continue;
             }
-          } else if (
-            defName &&
-            node.arguments.some(
-              (a) =>
-                ts.isIdentifier(unwrapExpr(a)) &&
-                defAliases.has(checker.getSymbolAtLocation(unwrapExpr(a))!)
+            const key =
+              'name' in field &&
+              field.name &&
+              (ts.isIdentifier(field.name) || ts.isStringLiteral(field.name))
+                ? field.name.text
+                : undefined;
+            if (key === 'name' || key === 'setup' || key === 'mode') continue;
+            const modules =
+              key === 'modules' ? extractObjectProperty(hookArg, 'modules') : undefined;
+            if (
+              modules &&
+              ts.isArrayLiteralExpression(unwrapExpr(modules)) &&
+              (unwrapExpr(modules) as ts.ArrayLiteralExpression).elements.length === 0
+            )
+              continue;
+            gap(
+              field,
+              'hook-composition',
+              'Hook configuration, projected handles and module declarations require explicit lowering.'
+            );
+          }
+          const modeExpression = extractObjectProperty(hookArg, 'mode');
+          if (modeExpression && scalar(modeExpression) !== 'once')
+            gap(
+              modeExpression,
+              'hook-composition',
+              'Configurable and multiple hooks require their own registration semantics.'
+            );
+          if (node.arguments.length > (hookFactory.factory === 'defineAsHook' ? 0 : 1))
+            gap(node, 'hook-composition', 'Unexpected hook arguments cannot be omitted.');
+          const childConstants = new Map(boundConstants);
+          for (const argument of node.arguments)
+            if (scalar(argument) === undefined)
+              gap(
+                argument,
+                'hook-composition',
+                'Hook options require proven static argument binding.'
+              );
+          const optionsParameter = nestedSetup.parameters[1];
+          if (hookFactory.factory === 'defineHook' && optionsParameter) {
+            const argument = node.arguments[0] ?? optionsParameter.initializer;
+            const value = argument && scalar(argument);
+            if (argument && value !== undefined && ts.isIdentifier(optionsParameter.name))
+              childConstants.set(checker.getSymbolAtLocation(optionsParameter.name)!, value);
+          }
+          let result = hookResults.get(hookName);
+          if (!result) {
+            // Register once before expansion, matching the canonical setup registration order.
+            result = { lowered: false };
+            hookResults.set(hookName, result);
+            result.render = walkFunction(nestedSetup, undefined, childConstants, false, callPoints);
+            result.lowered = unlowered.length === gapStart;
+          }
+          const lowered = result.lowered && unlowered.length === gapStart;
+          hooks.push({
+            name: resolved?.name ?? hookName,
+            moduleSpecifier: resolved?.sourceFile,
+            kind: 'authored',
+            lowered,
+          });
+          if (ts.isVariableDeclaration(node.parent) && ts.isIdentifier(node.parent.name))
+            hookBindings.set(checker.getSymbolAtLocation(node.parent.name)!, result);
+        } else if (resolved && BUILTIN_HOOK_NAMES.has(resolved.name)) {
+          hooks.push({
+            name: resolved.name,
+            moduleSpecifier: resolved.sourceFile,
+            kind: 'builtin',
+          });
+        } else if (
+          defName &&
+          node.arguments.some(
+            (argument) =>
+              ts.isIdentifier(unwrapExpr(argument)) &&
+              defAliases.has(checker.getSymbolAtLocation(unwrapExpr(argument))!)
+          )
+        ) {
+          const helperFn = resolveFunctionLike(node.expression, checker, callPoints);
+          if (!helperFn) {
+            gap(node, 'setup-composition', 'Setup helper implementation could not be resolved.');
+            return;
+          }
+          const defArgIdx = node.arguments.findIndex(
+            (argument) =>
+              ts.isIdentifier(unwrapExpr(argument)) &&
+              defAliases.has(checker.getSymbolAtLocation(unwrapExpr(argument))!)
+          );
+          const targetParam = helperFn.parameters[defArgIdx];
+          if (
+            !targetParam ||
+            !ts.isIdentifier(targetParam.name) ||
+            node.arguments.length > helperFn.parameters.length ||
+            helperFn.parameters.some(
+              (parameter) => !ts.isIdentifier(parameter.name) || parameter.dotDotDotToken
             )
           ) {
-            // Follow local helper calls passing `def` (e.g. `setupShadcnStyleSelection(def, ...)`).
-            const helperFn = resolveFunctionLike(node.expression, checker);
-            if (helperFn) {
-              const defArgIdx = node.arguments.findIndex(
-                (a) =>
-                  ts.isIdentifier(unwrapExpr(a)) &&
-                  defAliases.has(checker.getSymbolAtLocation(unwrapExpr(a))!)
-              );
-              const targetParam = helperFn.parameters[defArgIdx];
-              const targetParamName =
-                targetParam && ts.isIdentifier(targetParam.name)
-                  ? targetParam.name.text
-                  : undefined;
-              if (
-                targetParamName &&
-                node.arguments.length === 1 &&
-                helperFn.parameters.length === 1
-              )
-                walkFunction(helperFn, targetParamName);
-              else
-                gap(
-                  node,
-                  'setup-composition',
-                  'Helper arguments require explicit parameter substitution before expansion.'
-                );
-            } else
-              gap(node, 'setup-composition', 'Setup helper implementation could not be resolved.');
-          } else if (extractScalarLiteral(node, checker) === undefined) {
-            gap(node, resolved.name, 'Setup call has no lowering and cannot be omitted.');
+            gap(
+              node,
+              'setup-composition',
+              'Setup helper parameters require explicit scalar and definition-handle bindings.'
+            );
+            return;
           }
-        } else gap(node, 'call', 'Setup call binding could not be resolved.');
+          const childConstants = new Map(boundConstants);
+          let bound = true;
+          for (let index = 0; index < helperFn.parameters.length; index++) {
+            if (index === defArgIdx) continue;
+            const parameter = helperFn.parameters[index];
+            const argument = node.arguments[index] ?? parameter.initializer;
+            const value =
+              argument && evaluateStaticScalar(argument, checker, childConstants, callPoints);
+            if (argument && value !== undefined)
+              childConstants.set(checker.getSymbolAtLocation(parameter.name)!, value);
+            else if (argument) {
+              gap(
+                argument,
+                'setup-composition',
+                'A helper argument requires a proven static value before declaration expansion.'
+              );
+              bound = false;
+            }
+          }
+          if (bound)
+            walkFunction(helperFn, targetParam.name.text, childConstants, true, callPoints);
+        } else if (scalar(node) === undefined) {
+          gap(node, resolved?.name ?? 'call', 'Setup call has no lowering and cannot be omitted.');
+        }
         return;
       }
 
       ts.forEachChild(node, visit);
     };
 
-    visit(fn.body);
+    try {
+      if (
+        fn.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword) ||
+        fn.asteriskToken
+      )
+        gap(
+          fn,
+          'setup',
+          'Asynchronous and generator setup bodies require separate execution semantics.'
+        );
+      else if (ts.isBlock(fn.body)) visit(fn.body);
+      else captureReturn(fn.body, fn);
+      return functionRender;
+    } finally {
+      activeFns.delete(fn);
+    }
   };
 
-  walkFunction(setupFn);
+  renderBox.current = walkFunction(setupFn) ?? { kind: 'default-slot' };
 
   const props = [...propsMap.values()];
   const protoSym = sanitizeSym(name);

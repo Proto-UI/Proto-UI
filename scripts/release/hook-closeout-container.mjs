@@ -770,23 +770,32 @@ async function runInside() {
           '/work/consumer'
         );
       });
-      for (const profile of ['web-component-source-v1', 'gpui-source-v1']) {
+      for (const { profile, target } of [
+        { profile: 'web-component-source-v1', target: null },
+        { profile: 'gpui-source-v1', target: 'gpui' },
+      ]) {
         await phase(`unchanged-source-canonical-compiler-${profile}`, () => {
+          // Keep original target acceptance identities. A new native target run
+          // earns its own evidence and cannot inherit the removed emitter's pass.
+          if (target === null)
+            throw new Error(
+              'PUI_TARGET_UNIMPLEMENTED: The current AST compiler has no Web Component backend; the original unchanged-source Hook acceptance remains missing.'
+            );
           command(
             `compiler-${profile}`,
             process.execPath,
             [
               '--import',
               'tsx',
-              join(repository, 'packages/compiler/src/cli-entry.ts'),
+              join(repository, 'scripts/compiler/pinned-cli-entry.ts'),
               'compile',
               '/work/consumer/hook-closeout.proto.ts',
               '--root',
               '/work/consumer',
-              '--output',
+              '--out',
               `/evidence/compiler-${profile}`,
-              '--profile',
-              profile,
+              '--target',
+              target,
               '--json',
             ],
             repository

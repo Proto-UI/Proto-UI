@@ -76,18 +76,18 @@ test(
       // and every input hashing default; a source-route-only repair is insufficient.
       'const assets = await owner.buildBrowserAssets(process.env.PUI_ASSET_BUILD_DIRECTORY);',
       "const manifest = JSON.parse(assets.get('input-manifest.json'));",
-      "assert.equal(manifest.kind, 'canonical-browser-build-inputs-v1');",
+      "assert.equal(manifest.kind, 'canonical-browser-build-inputs-v2');",
       "assert.ok(manifest.sourceFiles['internal/compiler/website-demo-migrations.json']);",
-      "assert.ok(manifest.sourceFiles['packages/compiler/src/browser/entry.ts']);",
+      "assert.ok(manifest.sourceFiles['packages/compiler/src/browser/worker.ts']);",
       "assert.equal(manifest.compilerBuild.compilerSha256, hash(assets.get('compiler.js')));",
-      "const profiles = ['web-component-source-v1','react-dom-source-v1','vue-source-v1','vue2-source-v1'];",
+      "const profiles = ['react'];",
       'for (const profile of profiles) {',
       "  const name = 'targets/' + profile + '.json';",
       '  const target = JSON.parse(assets.get(name));',
-      '  assert.equal(target.profile, profile);',
+      '  assert.equal(target.target, profile);',
       '  assert.ok(Object.keys(target.modules).length > 0);',
-      '  assert.equal(target.modulesSha256, hash(JSON.stringify(target.modules)));',
-      '  assert.equal(manifest.targetModulesSha256[profile], target.modulesSha256);',
+      '  assert.equal(target.artifactSha256, hash(JSON.stringify({modules:target.modules,previewRuntime:target.previewRuntime})));',
+      '  assert.equal(manifest.targetModulesSha256[profile], target.artifactSha256);',
       '  assert.equal(manifest.assets[name], hash(assets.get(name)));',
       '}',
       'console.log(JSON.stringify({routes:paths.length,source:source.id,targets:profiles.length,root:owner.browserRepositoryRoot}));',
@@ -116,7 +116,7 @@ test(
     assert.deepEqual(observation, {
       routes: expected.length,
       source: 'base-button',
-      targets: 4,
+      targets: 1,
       root: repository,
     });
   }

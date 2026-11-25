@@ -1,0 +1,56 @@
+{
+  "schema": "proto-ui.cleanup-current-tools.v1",
+  "scope": "Current Cargo graph and GPUI HIR/artifact audit controls. No new full Hook closeout, blind study, native UI or application migration is inferred.",
+  "cargoSourceControls": {
+    "passed": 35,
+    "failed": 0,
+    "skipped": 0,
+    "run": {
+      "name": "cargo-audit-controls",
+      "command": "node --test scripts/gpui/test/cargo-source-migration.test.mjs scripts/gpui/test/current-source-audit.test.mjs",
+      "exit": 1,
+      "seconds": 5.66
+    },
+    "boundary": "The combined initial command also contains the two failed new audit tests below; the raw overall exit is correctly retained as 1."
+  },
+  "initialAuditFailure": "Two new audit tests and the first positive invocation imported a target constant that is intentionally not re-exported by the public compiler index. The script was corrected to import its single current target definition; original failed outputs are retained.",
+  "auditControls": {
+    "name": "audit-controls",
+    "command": "node --test scripts/gpui/test/current-source-audit.test.mjs",
+    "exit": 0,
+    "seconds": 6.83,
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0
+  },
+  "actualBaseTextAudit": {
+    "name": "gpui-source-audit",
+    "command": "node --import tsx scripts/gpui/audit-source-lowering.mjs packages/prototypes/base/src/text/root.proto.ts /tmp/pui-gpui-current-audit-20261125.json",
+    "exit": 0,
+    "seconds": 4.04,
+    "status": "PASS",
+    "totals": {
+      "prototypeDeclarations": 1,
+      "authoredHookDeclarations": 1,
+      "nativeEmittedPrototypes": 1,
+      "executionVerifiedPrototypes": 0
+    }
+  },
+  "hookCloseoutSyntaxOnly": {
+    "name": "hook-closeout-syntax",
+    "command": "node --check scripts/release/hook-closeout-container.mjs",
+    "exit": 0,
+    "seconds": 1.12
+  },
+  "publicDocs": {
+    "name": "public-docs",
+    "command": "corepack pnpm@10.32.1 -w -s check:public-docs",
+    "exit": 0,
+    "seconds": 5.55
+  },
+  "archive": {
+    "path": "additional-current-tools-receipts.tar.gz",
+    "bytes": 27041,
+    "sha256": "e3461aa5046b95c42dfbd7bc7bbe9757a86dd605d26a6e44d67c122a8cb96ac7"
+  }
+}

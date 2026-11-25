@@ -1,6 +1,5 @@
 import { build } from 'esbuild';
 import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -17,7 +16,6 @@ import {
 } from './browser-inputs.mjs';
 
 const compilerRequire = createRequire(path.join(root, 'packages/compiler/package.json'));
-const wwwRequire = createRequire(path.join(root, 'apps/www/package.json'));
 let preparation: Promise<Map<string, string>> | undefined;
 
 export interface BrowserSourceAsset {
@@ -31,7 +29,11 @@ export interface BrowserSourceAsset {
   sourceGraphSha256: string;
 }
 
-async function bundleTarget(entry: string, alias: Record<string, string> = {}) {
+async function bundleTarget(
+  entry: string,
+  alias: Record<string, string> = {},
+  external: string[] = []
+) {
   const result = await build({
     absWorkingDir: root,
     entryPoints: [entry],
@@ -43,11 +45,9 @@ async function bundleTarget(entry: string, alias: Record<string, string> = {}) {
     minify: true,
     metafile: true,
     alias,
+    external,
     define: {
       'process.env.NODE_ENV': '"production"',
-      '__VUE_OPTIONS_API__': 'true',
-      '__VUE_PROD_DEVTOOLS__': 'false',
-      '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__': 'false',
     },
   });
   return {
@@ -57,14 +57,11 @@ async function bundleTarget(entry: string, alias: Record<string, string> = {}) {
 }
 
 async function browserDeliveryInputs() {
-  // Probe the actual entry imports, including the separate module Worker and
-  // its binary WASM dependency. These probe bundles are not served as UI code.
+  // The compiler Worker is already bound by its own build input graph. Probe
+  // the actual page/client boundary separately without pulling Node tooling in.
   const result = await build({
     absWorkingDir: root,
-    entryPoints: [
-      'apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts',
-      'packages/compiler/src/browser/worker.ts',
-    ],
+    entryPoints: ['apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts'],
     outdir: path.join(root, '.cache/compiler-browser-input-probe'),
     bundle: true,
     write: false,
@@ -72,17 +69,6 @@ async function browserDeliveryInputs() {
     format: 'esm',
     platform: 'browser',
     target: 'es2022',
-    loader: { '.wasm': 'file' },
-    plugins: [
-      {
-        name: 'wasm-url-input',
-        setup(builder) {
-          builder.onResolve({ filter: /\/wasm\?url$/ }, ({ path: id }) => ({
-            path: compilerRequire.resolve(id.slice(0, -4)),
-          }));
-        },
-      },
-    ],
   });
   return hashMetafileInputs(result.metafile);
 }
@@ -103,54 +89,45 @@ export async function buildBrowserTargets() {
   const react = await facade('react.mjs');
   const reactDom = await facade('react-dom.mjs');
   const reactClient = await facade('react-client.mjs');
-  const vue = await bundleTarget(wwwRequire.resolve('vue/dist/vue.runtime.esm-bundler.js'));
-  const vue2 = await bundleTarget(wwwRequire.resolve('vue2-runtime/dist/vue.runtime.esm.js'));
-  const floatingRequire = createRequire(
-    path.join(root, 'packages/modules/positioning/package.json')
+  const runtime = await bundleTarget(
+    path.join(root, 'apps/www/src/components/PrototypePreviewer/compiled-preview-runtime.ts'),
+    {},
+    ['react', 'react-dom', 'react-dom/client', 'pui:compiled/component']
   );
-  const floating = await bundleTarget(floatingRequire.resolve('@floating-ui/dom'));
   const targets = {
-    'web-component-source-v1': { '@floating-ui/dom': floating },
-    'react-dom-source-v1': {
+    react: {
       'pui:target/react-runtime': reactRuntime,
       react,
       'react-dom': reactDom,
       'react-dom/client': reactClient,
-      '@floating-ui/dom': floating,
     },
-    'vue-source-v1': { vue, '@floating-ui/dom': floating },
-    'vue2-source-v1': { vue: vue2, '@floating-ui/dom': floating },
   };
   const version = async (resolver: NodeRequire, name: string) =>
     JSON.parse(await readFile(resolver.resolve(`${name}/package.json`), 'utf8')).version as string;
   const versions = {
     react: await version(compilerRequire, 'react'),
     'react-dom': await version(compilerRequire, 'react-dom'),
-    vue: await version(wwwRequire, 'vue'),
-    '@floating-ui/dom': await version(floatingRequire, '@floating-ui/dom'),
   };
   const targetInputs: Record<string, Record<string, string>> = {};
   const targetModulesSha256: Record<string, string> = {};
-  for (const [profile, bundles] of Object.entries(targets)) {
+  for (const [target, bundles] of Object.entries(targets)) {
     const modules = Object.fromEntries(
       Object.entries(bundles).map(([name, bundle]) => [name, bundle.code])
     );
-    targetModulesSha256[profile] = digest(JSON.stringify(modules));
-    targetInputs[profile] = mergeInputFiles(
+    targetModulesSha256[target] = digest(JSON.stringify({ modules, previewRuntime: runtime.code }));
+    targetInputs[target] = mergeInputFiles(
+      runtime.inputFiles,
       ...Object.values(bundles).map((bundle) => bundle.inputFiles)
     );
-    const selected =
-      profile === 'vue2-source-v1'
-        ? { ...versions, vue: await version(wwwRequire, 'vue2-runtime') }
-        : versions;
     assets.set(
-      `targets/${profile}.json`,
+      `targets/${target}.json`,
       JSON.stringify({
-        format: 1,
-        profile,
+        format: 2,
+        target,
         modules,
-        versions: selected,
-        modulesSha256: targetModulesSha256[profile],
+        previewRuntime: runtime.code,
+        versions,
+        artifactSha256: targetModulesSha256[target],
       })
     );
   }
@@ -178,8 +155,8 @@ export async function buildBrowserAssets(
     deliveryInputs
   );
   const manifest = {
-    format: 1,
-    kind: 'canonical-browser-build-inputs-v1',
+    format: 2,
+    kind: 'canonical-browser-build-inputs-v2',
     sourcePolicy: 'workspace-superset-and-esbuild-inputs-v1',
     compilerBuild: JSON.parse(assets.get('build.json')!),
     targetModulesSha256,
@@ -220,19 +197,11 @@ export function browserSourceRegistrations(): Promise<BrowserSourceRegistration[
   ).then((text): BrowserSourceRegistration[] => JSON.parse(text).prototypes));
 }
 
-function resolveRelativeSource(fromFile: string, specifier: string): string | undefined {
-  if (!specifier.startsWith('.')) return undefined;
-  const base = path.resolve(path.dirname(fromFile), specifier);
-  const candidates = [
-    base,
-    `${base}.ts`,
-    `${base}.tsx`,
-    `${base}.mts`,
-    `${base}.js`,
-    path.join(base, 'index.ts'),
-    path.join(base, 'index.tsx'),
-  ];
-  return candidates.find((candidate) => existsSync(candidate));
+function browserSourceOptions(): ts.CompilerOptions {
+  const config = ts.readConfigFile(path.join(root, 'tsconfig.json'), ts.sys.readFile);
+  if (config.error)
+    throw new Error(ts.flattenDiagnosticMessageText(config.error.messageText, '\n'));
+  return ts.parseJsonConfigFileContent(config.config, ts.sys, root).options;
 }
 
 export async function readBrowserSource(id: string): Promise<BrowserSourceAsset> {
@@ -244,21 +213,39 @@ export async function readBrowserSource(id: string): Promise<BrowserSourceAsset>
   const visited = new Map<string, string>();
   const sourceImports: Record<string, string> = {};
   const queue = [entryAbs];
+  const options = browserSourceOptions();
+  const trustedModules = new Set(['@proto.ui/core', '@proto.ui/core/internal', '@proto.ui/types']);
 
   while (queue.length > 0) {
     const current = queue.shift()!;
     const rel = path.relative(root, current).split(path.sep).join('/');
+    if (rel.startsWith('../') || path.isAbsolute(rel))
+      throw new Error('A browser source binding must remain inside the repository.');
     if (visited.has(rel)) continue;
     const text = await readFile(current, 'utf8');
     visited.set(rel, text);
     const info = ts.preProcessFile(text, true, true);
     for (const imp of info.importedFiles) {
-      const resolved = resolveRelativeSource(current, imp.fileName);
-      if (resolved) {
-        queue.push(resolved);
-      } else if (!imp.fileName.startsWith('.')) {
+      if (trustedModules.has(imp.fileName)) {
         sourceImports[imp.fileName] = imp.fileName;
+        continue;
       }
+      const resolved = ts.resolveModuleName(imp.fileName, current, options, ts.sys).resolvedModule
+        ?.resolvedFileName;
+      if (!resolved) continue; // The real memory Program reports the missing module.
+      const dependency = path.relative(root, resolved).split(path.sep).join('/');
+      if (
+        dependency.startsWith('../') ||
+        dependency.includes('/node_modules/') ||
+        dependency.startsWith('node_modules/')
+      )
+        continue;
+      if (dependency.startsWith('packages/core/') || dependency.startsWith('packages/types/'))
+        throw new Error(
+          'Authoring internals require their canonical package import: ' + imp.fileName
+        );
+      queue.push(resolved);
+      if (!imp.fileName.startsWith('.')) sourceImports[imp.fileName] = dependency;
     }
   }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { instantiateWasmKernel } from '../src/runtime';
+import { instantiateWasmKernel } from '../src/kernel-host';
 
 // Minimal standard Wasm module exporting one page of memory, with no compiler metadata.
 const memoryModule = Uint8Array.from([

@@ -505,6 +505,7 @@ export function computePrototypeCapabilities(
   }
   if (proto.render.kind !== 'default-slot') caps.add('render');
   for (const hook of proto.hooks) {
+    if (hook.lowered) continue;
     const mapped = HOOK_CAPABILITY_MAP[hook.name];
     if (mapped) caps.add(mapped);
     else if (hook.kind === 'authored') caps.add('authoredHooks');

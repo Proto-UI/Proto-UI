@@ -1,0 +1,53 @@
+{
+  "schema": "proto-ui.cleanup-source-controls.v1",
+  "scope": "Actual current-worktree source controls and independent React execution. These are not installed final-candidate pin receipts or full application migrations.",
+  "controls": {
+    "name": "controls",
+    "command": "node --test scripts/compiler/current-api.test.mjs scripts/compiler/library-profile-inventory.test.mjs scripts/ci/test/compiler-library-inventory.test.mjs scripts/compiler/verify-object-rest-controls.test.mjs scripts/compiler/website-demo-inventory.test.mjs",
+    "exit": 0,
+    "seconds": 10.12
+  },
+  "counts": {
+    "passed": 26,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "registry": {
+    "name": "registry",
+    "command": "node --import tsx scripts/compiler/library-profile-inventory.mjs --describe",
+    "exit": 0,
+    "seconds": 2.59
+  },
+  "native": {
+    "exit": 0,
+    "seconds": 5.6,
+    "ok": true,
+    "scope": "Actual generated React component in an independent package copy and Happy DOM. No native browser, pixel, accessibility-tree, other backend or full application claim.",
+    "checks": [
+      "Authored source compiled to a React-only artifact and passed strict target TypeScript checking",
+      "Created-before-first-render, instance isolation, native click state followed by explicit keyboard update, props watch, previous-valid fallback, missing default and stable root",
+      "Authored static/rule style composition and ordinary native React sibling",
+      "Terminal native listener cleanup and host detachment",
+      "Ordinary generated source can be edited and rebuilt; original authored and generated evidence stays unchanged"
+    ],
+    "sourceSha256": "9aa8c6adabc62c9df01b76aa982de956f2431165478526609c206378a52bb24a",
+    "generatedSha256": "1d1adf860e1b3431133d10ce4dfa6ec599faac34cd1a9349dfd1a2605016273c",
+    "installedPackages": {
+      "react": "19.2.6",
+      "react-dom": "19.2.6",
+      "scheduler": "0.27.0",
+      "@types/react": "19.2.14",
+      "csstype": "3.2.3",
+      "@types/react-dom": "19.2.3"
+    }
+  },
+  "preservedFailures": [
+    "The first current native consumer rejects unlowered authored run.update; it was retained and the compiler was extended."
+  ],
+  "archive": {
+    "path": "controls-native-source-receipts.tar.gz",
+    "bytes": 19533,
+    "sha256": "c19967eefa55e90e92d9394131c282af8d61748b4b90fd31f44fe473b521e2c2"
+  }
+}

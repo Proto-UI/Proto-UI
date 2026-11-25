@@ -1,209 +1,138 @@
 #!/usr/bin/env node
-// node --import tsx scripts/gpui/audit-source-lowering.mjs GENERATED OUTPUT.json
-// Inventory, not conformance certification. Native test/link/OS results remain separate.
+/** Current HIR/admission/artifact inventory; no inherited legacy operation certificate. */
+import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import ts from 'typescript';
-import { OPERATION_RULES } from '../../packages/compiler/src/operations.ts';
-import { TARGET_PROFILES, checkTargetOperations } from '../../packages/compiler/src/targets.ts';
-import { validateIR } from '../../packages/compiler/src/ir-validation.ts';
-import { gpuiNativeSdkIdentity } from '../../packages/compiler/src/gpui-native-sdk.ts';
+import { createCompiler, extractModuleIR } from '../../packages/compiler/src/index.ts';
+import { GPUI_V2_DEPENDENCY } from '../../packages/compiler/src/targets/gpui.ts';
+import { programSourceBinding, verifyProgramSourceBinding } from '../compiler/current-api.mjs';
+import { classifyResult } from '../compiler/library-profile-inventory.mjs';
 
-const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const [generated, output] = process.argv.slice(2);
-if (!generated || !output || process.argv.length !== 4)
-  throw new Error(
-    'Usage: node --import tsx scripts/gpui/audit-source-lowering.mjs GENERATED OUTPUT.json'
-  );
-const sha256 = (value) => createHash('sha256').update(value).digest('hex');
-const receiptBytes = readFileSync(path.join(generated, 'source-receipt.json'));
-const receipt = JSON.parse(receiptBytes);
-if (
-  sha256(readFileSync(path.join(generated, 'transition/Cargo.toml'))) !==
-  receipt.consumerManifestSha256
-)
-  throw new Error('The consumer manifest changed after its producer receipt.');
-const emitterPath = 'packages/compiler/src/gpui-source.ts';
-const emitter = readFileSync(path.join(repository, emitterPath), 'utf8');
-const ast = ts.createSourceFile(emitterPath, emitter, ts.ScriptTarget.Latest, true);
-const cases = new Map();
-function walk(node, visitor) {
-  visitor(node);
-  ts.forEachChild(node, (child) => walk(child, visitor));
-}
-walk(ast, (node) => {
-  if (!ts.isCaseClause(node) || !ts.isStringLiteral(node.expression)) return;
-  const parent = node.parent.parent;
-  if (!ts.isSwitchStatement(parent) || parent.expression.getText(ast) !== 'node.operation') return;
-  cases.set(node.expression.text, ast.getLineAndCharacterOfPosition(node.getStart(ast)).line + 1);
-});
-const moduleFacts = receipt.modules.map((module) => {
-  for (const file of module.files) {
-    const contents = readFileSync(
-      path.join(
-        generated,
-        module.name,
-        file.path === 'Cargo.toml' ? 'Cargo.toml.generated' : file.path
-      )
-    );
-    if (sha256(contents) !== file.sha256)
-      throw new Error(
-        `Generated artifact changed after producer receipt: ${module.name}/${file.path}`
-      );
-  }
-  const ir = JSON.parse(readFileSync(path.join(generated, module.name, 'checked-ir.json')));
-  const validated = validateIR(ir);
-  if (!validated.ok) throw new Error(`${module.name}: ${JSON.stringify(validated.diagnostics)}`);
-  const demand = checkTargetOperations(validated.value, TARGET_PROFILES['gpui-source-v1']);
-  if (!demand.ok) throw new Error(`${module.name}: ${JSON.stringify(demand.diagnostics)}`);
-  const code = readFileSync(path.join(generated, module.name, 'Component.rs'), 'utf8');
-  const imports = [
-    ...new Set(code.split('\n').filter((line) => /^\s*(pub\s+)?use\s/.test(line))),
-  ].sort();
-  const expressionKinds = new Set();
-  const statementKinds = new Set();
-  const intrinsics = new Set();
-  const visit = (node) => {
-    if (!node || typeof node !== 'object') return;
-    if (node.kind && node.span) {
-      if ('type' in node) expressionKinds.add(node.kind);
-      else statementKinds.add(node.kind);
-    }
-    if (node.kind === 'intrinsic') intrinsics.add(node.name);
-    for (const [key, child] of Object.entries(node))
-      if (!['type', 'span', 'sourceFiles'].includes(key)) visit(child);
-  };
-  // This is authored IR presence, distinct from the reached operation/function proof.
-  visit(ir);
-  return {
-    name: module.name,
-    sourceSha256: module.sourceSha256,
-    generatedComponentSha256: sha256(code),
-    generatedComponentBytes: Buffer.byteLength(code),
-    imports,
-    reachedOperations: [...demand.value.operations].sort(),
-    reachedFunctionCount: demand.value.functions.length,
-    reachedAuthoredHooks: [...demand.value.authoredHooks].sort(),
-    expressionKinds: [...expressionKinds].sort(),
-    statementKinds: [...statementKinds].sort(),
-    intrinsics: [...intrinsics].sort(),
-  };
-});
-
-const irSource = ts.createSourceFile(
-  'ir.ts',
-  readFileSync(path.join(repository, 'packages/compiler/src/ir.ts'), 'utf8'),
-  ts.ScriptTarget.Latest,
-  true
-);
-function literalProperties(alias, property) {
-  const values = new Set();
-  const declaration = irSource.statements.find(
-    (node) => ts.isTypeAliasDeclaration(node) && node.name.text === alias
-  );
-  if (!declaration) throw new Error(`Missing IR alias ${alias}`);
-  walk(declaration.type, (node) => {
-    if (!ts.isPropertySignature(node) || node.name.getText(irSource) !== property || !node.type)
-      return;
-    walk(node.type, (value) => {
-      if (ts.isLiteralTypeNode(value) && ts.isStringLiteral(value.literal))
-        values.add(value.literal.text);
-    });
-  });
-  return [...values].sort();
-}
-const profileOperations = new Set(TARGET_PROFILES['gpui-source-v1'].operations);
-const operationInventory = Object.entries(OPERATION_RULES).map(([operation, rule]) => ({
-  operation,
-  declaredByGpuiProfile: profileOperations.has(operation),
-  emitterCaseLine: cases.get(operation) ?? null,
-  specialLowering:
-    operation === 'render.el' || operation === 'render.slot'
-      ? 'nativeElement/snapshotExpression'
-      : operation === 'style.tw'
-        ? 'compile-time style-handle'
-        : operation === 'rule.declare'
-          ? 'checked rule expression'
-          : null,
-  requiredCapabilities: rule.requiredCapabilities,
-  resultType: rule.result,
-  effects: rule.effects,
-  generatedConsumers: moduleFacts
-    .filter((module) => module.reachedOperations.includes(operation))
-    .map((module) => module.name),
-}));
-const sourcePaths = [
-  emitterPath,
-  'packages/compiler/src/gpui-scalar-lowering.ts',
-  'packages/compiler/src/gpui-native-owner.ts',
-  'packages/compiler/src/gpui-native-sdk.ts',
-  'packages/compiler/src/targets.ts',
-  'packages/compiler/src/operations.ts',
-  'packages/compiler/src/ir.ts',
-];
-const result = {
-  schemaVersion: 1,
-  kind: 'gpui-source-lowering-inventory',
-  sourceRevision: execFileSync('git', ['rev-parse', 'HEAD'], {
-    cwd: repository,
-    encoding: 'utf8',
-  }).trim(),
-  sourceFiles: sourcePaths.map((file) => ({
-    file,
-    sha256: sha256(readFileSync(path.join(repository, file))),
-  })),
-  producerReceiptSha256: sha256(receiptBytes),
-  sdk: gpuiNativeSdkIdentity(),
-  evidenceBoundary:
-    'Static checked-source demand and generated artifacts only. Generated consumers are not individual operation runtime passes. Retained optimized link bytes, initialization traces, OS input and accessibility require their own results.',
-  representation: {
-    numericAndBooleanLocals: 'f64/bool; mutable cells Rc<RefCell<f64/bool>>',
-    provenDataCallables:
-      'typed Rc<dyn Fn>; one stable Value callable bridge at dynamic/public boundaries',
-    templates: 'NativeSnapshot and native GPUI factories; no Value::Template paint interpreter',
-    strings: 'lossless Value boundary; UTF-16 comparisons include caught code units',
-    ordinaryRecordsAndArrays:
-      'identity-preserving Value storage remains; complete per-field native lowering is not established',
-    support:
-      'shared content-bound SDK source; reached operation/callback pruning controls call sites and capability initialization; full helper source selection and optimized link cost are not certified',
-  },
-  expressionInventory: literalProperties('ExpressionIR', 'kind')
-    .filter((kind) => !['entry', 'spread'].includes(kind))
-    .map((kind) => ({
-      kind,
-      generatedConsumers: moduleFacts
-        .filter((module) => module.expressionKinds.includes(kind))
-        .map((module) => module.name),
-    })),
-  statementInventory: literalProperties('StatementIR', 'kind').map((kind) => ({
-    kind,
-    generatedConsumers: moduleFacts
-      .filter((module) => module.statementKinds.includes(kind))
-      .map((module) => module.name),
-  })),
-  intrinsicInventory: literalProperties('ExpressionIR', 'name')
-    .filter((name) => name.includes('.') || ['string', 'typeof', 'error'].includes(name))
-    .map((name) => ({
-      name,
-      generatedConsumers: moduleFacts
-        .filter((module) => module.intrinsics.includes(name))
-        .map((module) => module.name),
-    })),
-  operationInventory,
-  modules: moduleFacts,
+const repository = fileURLToPath(new URL('../../', import.meta.url));
+const hash = (value) => createHash('sha256').update(value).digest('hex');
+const encode = (_key, value) => {
+  if (typeof value === 'bigint') return { $bigint: String(value) };
+  if (typeof value === 'number' && (!Number.isFinite(value) || Object.is(value, -0)))
+    return { $number: Object.is(value, -0) ? '-0' : String(value) };
+  return value;
 };
-writeFileSync(output, JSON.stringify(result, null, 2) + '\n');
-console.log(
-  JSON.stringify({
-    output,
-    operations: operationInventory.length,
-    admitted: operationInventory.filter((row) => row.declaredByGpuiProfile).length,
-    generatedModules: moduleFacts.length,
-    admittedWithoutGeneratedConsumer: operationInventory
-      .filter((row) => row.declaredByGpuiProfile && !row.generatedConsumers.length)
-      .map((row) => row.operation),
-  })
-);
+const json = (value) => JSON.stringify(value, encode, 2) + '\n';
+
+function implementationInputs() {
+  const files = [];
+  const walk = (relative) => {
+    for (const entry of readdirSync(path.join(repository, relative), { withFileTypes: true })) {
+      const name = path.posix.join(relative, entry.name);
+      if (entry.isDirectory()) walk(name);
+      else if (entry.isFile()) files.push(name);
+      else throw new Error('Compiler implementation input is not a regular file: ' + name);
+    }
+  };
+  walk('packages/compiler/src');
+  walk('packages/compiler/native/rust-builder/src');
+  files.push(
+    'packages/compiler/native/rust-builder/Cargo.toml',
+    'packages/compiler/native/rust-builder/Cargo.lock',
+    'scripts/gpui/audit-source-lowering.mjs',
+    'scripts/compiler/current-api.mjs',
+    'scripts/compiler/library-profile-inventory.mjs'
+  );
+  return files.sort().map((file) => {
+    const bytes = readFileSync(path.join(repository, file));
+    return { file, bytes: bytes.length, sha256: hash(bytes) };
+  });
+}
+
+function kinds(value, found = new Set()) {
+  if (!value || typeof value !== 'object') return found;
+  if (typeof value.kind === 'string') found.add(value.kind);
+  for (const [key, child] of Object.entries(value)) if (key !== 'span') kinds(child, found);
+  return found;
+}
+
+export function auditGpuiSource(entryFile, { rootDir = repository } = {}) {
+  const entry = path.resolve(rootDir, entryFile);
+  const inputs = implementationInputs();
+  const compiler = createCompiler({ rootDir });
+  const program = compiler.session.ensureFiles([entry]);
+  const sourceInputs = programSourceBinding(program);
+  const extracted = extractModuleIR(program, entry);
+  const result = compiler.compileFile(entry, { target: 'gpui', allowHookOnly: true });
+  const classification = classifyResult(result);
+  const artifacts = result.ok
+    ? result.value.gpuiPrototypes.flatMap((item) => [
+        { path: item.gpui.componentName + '/src/lib.rs', kind: 'source', contents: item.gpui.code },
+        {
+          path: item.gpui.componentName + '/Cargo.toml',
+          kind: 'manifest',
+          contents: item.gpui.cargoToml,
+        },
+      ])
+    : [];
+  const nativeEmitted = result.ok ? result.value.gpuiPrototypes.length : 0;
+  if (result.ok && extracted.ir.prototypes.length === 0) {
+    assert.ok(
+      extracted.ir.authoredHooks.length > 0,
+      'An empty result cannot become native emission'
+    );
+    classification.status = 'ANALYZED';
+  } else if (result.ok) {
+    assert.equal(nativeEmitted, extracted.ir.prototypes.length);
+    assert.ok(nativeEmitted > 0);
+  }
+  verifyProgramSourceBinding(sourceInputs);
+  assert.deepEqual(implementationInputs(), inputs, 'Compiler implementation changed during audit');
+  return {
+    schemaVersion: 2,
+    kind: 'gpui-semantic-source-admission',
+    sourceRevision: execFileSync('git', ['rev-parse', 'HEAD'], {
+      cwd: repository,
+      encoding: 'utf8',
+    }).trim(),
+    worktreeStatus: execFileSync('git', ['status', '--porcelain'], {
+      cwd: repository,
+      encoding: 'utf8',
+    }),
+    entry,
+    target: 'gpui',
+    defaultDependency: GPUI_V2_DEPENDENCY,
+    implementationInputs: inputs,
+    sourceInputs,
+    status: classification.status,
+    failureKind: classification.failureKind,
+    diagnostics: result.diagnostics,
+    semanticIR: extracted.ir,
+    semanticKindsPresent: [...kinds(extracted.ir)].sort(),
+    artifacts: artifacts.map((artifact) => ({
+      ...artifact,
+      bytes: Buffer.byteLength(artifact.contents),
+      sha256: hash(artifact.contents),
+    })),
+    totals: {
+      prototypeDeclarations: extracted.ir.prototypes.length,
+      authoredHookDeclarations: extracted.ir.authoredHooks.length,
+      nativeEmittedPrototypes: nativeEmitted,
+      executionVerifiedPrototypes: 0,
+    },
+    evidenceBoundary:
+      'Current source/type input, semantic HIR, target admission and actual generated artifact bytes only. HIR kind presence is not per-operation execution proof. No legacy operation/SDK certificate, Cargo target build, native window, pixel, accessibility, or real application migration is inferred.',
+  };
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const [entry, output] = process.argv.slice(2);
+  assert.ok(
+    entry && output && process.argv.length === 4,
+    'Usage: node --import tsx scripts/gpui/audit-source-lowering.mjs ENTRY.proto.ts NEW-REPORT.json'
+  );
+  const report = auditGpuiSource(entry);
+  writeFileSync(output, json(report), { flag: 'wx' });
+  console.log(
+    JSON.stringify({ output: path.resolve(output), status: report.status, totals: report.totals })
+  );
+  if (report.status === 'FAIL') process.exitCode = 1;
+  else if (report.status === 'UNSUPPORTED') process.exitCode = 2;
+}

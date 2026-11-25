@@ -1,0 +1,56 @@
+{
+  "kind": "native-browser-source-and-boundary-controls",
+  "exactBoundaryControls": {
+    "tests": 108,
+    "exitCode": 0,
+    "log": "controls/pui-stage8-exact-gate-tests.log"
+  },
+  "assetEvidenceAndRootControls": {
+    "tests": 10,
+    "exitCode": 0,
+    "log": "controls/pui-stage9-browser-evidence.log"
+  },
+  "fullCoverageMatrix": {
+    "matrices": 2,
+    "exitCode": 0,
+    "log": "controls/pui-stage9-matrix-gate.log"
+  },
+  "websiteBrowserStrictTypes": {
+    "exitCode": 0,
+    "config": "controls/browser-source-check.json",
+    "log": "controls/pui-browser-source-types.log"
+  },
+  "stage8": {
+    "steps": [
+      {
+        "name": "exact-gate-tests",
+        "exit_code": 0,
+        "seconds": 14.53620195388794,
+        "log": "/tmp/pui-stage8-exact-gate-tests.log"
+      },
+      {
+        "name": "browser-execution",
+        "exit_code": 0,
+        "seconds": 9.41088581085205,
+        "log": "/tmp/pui-stage8-browser-execution.log"
+      }
+    ]
+  },
+  "stage9": {
+    "steps": [
+      {
+        "name": "browser-evidence",
+        "exit_code": 0,
+        "seconds": 5.503387212753296,
+        "log": "/tmp/pui-stage9-browser-evidence.log"
+      },
+      {
+        "name": "matrix-gate",
+        "exit_code": 0,
+        "seconds": 300.66244864463806,
+        "log": "/tmp/pui-stage9-matrix-gate.log"
+      }
+    ]
+  },
+  "scope": "These control runs preceded the final frontend initialization review; their actual logs are retained. The separate final Chrome run binds the reviewed compiler source closure."
+}

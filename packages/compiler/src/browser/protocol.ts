@@ -1,7 +1,8 @@
 import type { CompilerDiagnostic } from '../diagnostics';
 
 export const BROWSER_COMPILER_LIMITS = Object.freeze({
-  inputBytes: 256 * 1024,
+  inputBytes: 2 * 1024 * 1024,
+  inputFiles: 1024,
   outputCharacters: 2 * 1024 * 1024,
   initializationMs: 10_000,
   compilationMs: 10_000,
@@ -9,11 +10,11 @@ export const BROWSER_COMPILER_LIMITS = Object.freeze({
 });
 
 export interface BrowserCompileRequest {
-  format: 1;
+  format: 2;
   revision: string;
   source: string;
   options: {
-    profile: string | { profile?: string; [key: string]: unknown };
+    target: string;
     fileName: string;
     files?: Readonly<Record<string, string>>;
     sourceImports?: Readonly<Record<string, string>>;
@@ -24,17 +25,17 @@ export interface BrowserCompileRequest {
 }
 
 export interface BrowserPreviewArtifact {
-  format: 1;
+  format: 2;
   entry: string;
   modules: Record<string, string>;
   styles: string[];
   events: string[];
-  executionBudget: '100000-checkpoints-per-task-v1';
+  execution: 'native-react';
 }
 
 export interface BrowserGeneratedModule {
   code: string;
-  profile: string;
+  target: 'react';
   supportingFiles?: readonly {
     path: string;
     contents: string;
@@ -69,7 +70,7 @@ export type BrowserCompileResult =
           | 'invalid-request'
           | 'input-limit'
           | 'execution-limit'
-          | 'wasm-execution'
+          | 'worker-execution'
           | 'preview-policy'
           | 'disposed';
         message: string;
@@ -77,11 +78,25 @@ export type BrowserCompileResult =
     };
 
 export interface BrowserCompilerBuild {
-  format: 1;
+  format: 2;
   compilerSha256: string;
   typescriptVersion: string;
-  execution: 'worker-js' | 'quickjs-wasm';
+  execution: 'worker-js';
+  targets: readonly ['react'];
+  authoringSha256: string;
 }
+
+export interface BrowserAuthoringEnvironment {
+  readonly files: Readonly<Record<string, string>>;
+  readonly modules: Readonly<Record<string, string>>;
+  readonly defaultLibFile: string;
+  readonly typescriptVersion: string;
+  readonly reactVersion: string;
+}
+
+export type CompilerWorkerRequest =
+  | { type: 'initialize'; build: BrowserCompilerBuild }
+  | { type: 'compile'; id: number; request: BrowserCompileRequest };
 
 export interface CompilerWorkerResponse {
   type: 'compiled';

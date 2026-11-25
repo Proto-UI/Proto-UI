@@ -1,7 +1,7 @@
 ---
 title: 'Compiler 指南'
-desp: '0.2 release 边界与分别验证的私有 Compiler 实验'
-description: '0.2 release 边界与分别验证的私有 Compiler 实验'
+desp: '当前私有原生 AST 编译器与独立的 0.2 release 边界'
+description: '当前私有原生 AST 编译器与独立的 0.2 release 边界'
 ---
 
 Proto UI 0.2 **没有**交付 Compiler 实现或 Compiler authoring workflow。0.2 release 中不存在 `@proto.ui/compiler` package、compiler entity type、official compiler profile、CLI compile command 或受支持的 compiler input/output artifact。
@@ -21,7 +21,7 @@ Release support 与仓库实验分开。下文的私有实验不改变 0.2 packa
 | 官方 Adapter | 为 Web Component、React 与 Vue profile 翻译 Runtime output 和 semantic host capability |
 | `@proto.ui/cli` | 初始化项目并生成 theme、token、style 与 component preset material；它不是 Prototype compiler |
 
-当前 production route 是：
+0.2 实际交付的 production route 是：
 
 ```text
 Prototype TypeScript → Runtime execution → official Adapter → Web host
@@ -37,7 +37,7 @@ portable analyzable input → [future Compiler] → host artifacts
 
 ## 已经适用的约束
 
-即使没有 Compiler package，已经编目的协议边界仍会约束任何未来 official translation：
+虽然 0.2 没有交付 Compiler package，已经编目的协议边界仍约束编译器实现：
 
 - `K-PROTOTYPE-COMPOSITION-0001`：template 描述一个 Root Node，不嵌入另一个 Prototype definition。
 - `C-TEMPLATE-0005`：v0 slot 是 anonymous、singular、parameterless。
@@ -49,7 +49,7 @@ portable analyzable input → [future Compiler] → host artifacts
 
 ## Static intent 与任意 function
 
-有些作者形式比 callback 更能保留可分析 intent。Rule 是当前最清楚的例子：它把 condition 与 semantic intent 分开，并在内部编译为 `RuleIR` 供 Runtime evaluation。这不代表仓库已经有通用 Prototype compiler，也不意味着任意 callback body 都可以无损翻译。
+有些作者形式比 callback 更能保留可分析 intent。Rule 把 condition 与 semantic intent 分开，并在内部编译为 `RuleIR` 供 Runtime evaluation。这一表示本身不是完整的 Prototype 编译器。下文的私有 AST 编译器显式分析 callback 控制流，对不能保真的作者形式给出诊断。
 
 当 declarative form 能准确表达行为时应优先使用，但不要围绕想象中的 Compiler 改写已经成立的 0.2 semantics。`internal/contracts/integration/portability-and-integration.md` 对长期方向有更多解释，但它属于 non-normative material。
 
@@ -66,174 +66,85 @@ portable analyzable input → [future Compiler] → host artifacts
 
 如果未来 proposal 要改变这些回答，必须显式新增 catalog 与 API 工作，不能从文档推断。
 
-## 仓库内的私有 Compiler 实验
+## 仓库内的私有 AST 编译器
 
-`packages/compiler` 是已实现的**私有实验**，不是 official Compiler distribution。Manifest 保持 `private: true` 与 `protoUi.release.scan: false`。私有 Compiler CLI 与已发布的 `proto-ui` CLI 分开；publication、catalog admission 和长期 compatibility 需要各自的批准。
+私有仓库包采用 TypeScript binding/type 前端、语义 HIR、显式目标准入和原生目标构建器。React 产物由 TypeScript AST 节点构造；GPUI 产物由 Rust syntax 节点构造；LLVM 内核使用原生 LLVM IRBuilder。无法降低的操作必须给出诊断，不会回退到导入原始 Prototype、调用 Proto Runtime 或 Adapter 的包装路径。
 
-### 当前 main 的浏览器边界与网站 inventory
+这些是 draft 实现工作，不是 0.2 release 保证。方向及验收义务见 `D-COMPILER-ARCH-0001`、`C-COMPILER-PIPELINE-0001`、`T-COMPILER-PIPELINE-0001`。`packages/compiler/README.md` 与 `internal/compiler/v2-compilation-spec.md` 记录源码和证据边界。
 
-在当前 main `7181a93a5ec5cad43936a72e31d5477d5488733a` 中，与 PR #829 相关的 browser-host prototype 不存在：compiler package 没有当前 browser export、VM host、memory entry、browser build 或 WASM regression。PR #829 的源码进入的是 feature branch，不是这一 main revision；其 browser code 和 dependencies 属于历史证据，不是当前交付。
+### 目标与实际覆盖
 
-Issue #817 仍保持 open。网站 demo inventory 只做 source-AST discovery 与 canonical private Node `compileFile` admission。它记录已挂载页面、静态 registration、source-located rejection 和 unresolved binding；它不会执行 WASM、运行 compiler preview、迁移页面，也不证明 browser isolation、security、performance、full parity 或 public Compiler。历史 #829 inventory 的各行（包括 rejection）继续作为带日期的 evidence 与 reconciliation obligation 保留，绝不是新的 pass。
+| 目标 | 产物和边界 |
+| --- | --- |
+| `react` | 通过 TypeScript factory/printer 生成普通 React component source，只发射已准入的 authored 操作。 |
+| `gpui` | 通过 `syn`、`prettyplease` 生成包含原生 GPUI component 的 Rust crate。生成需要 Cargo，执行需要兼容的 GPUI host。 |
+| `kernel` | 使用 LLVM 原生对象 API 构造的 scalar kernel；它不是完整 UI component 或 GPUI backend。 |
+| `ir` | 包含未降低操作的语义分析结果；分析不计为原生发射。 |
+| Vue3、Vue2、Web Components、Qt、Flutter、SSR | 保留原有实现及消费者验收义务。旧 profile 名称不能调用隐藏的旧 backend。 |
 
-使用 `node --import tsx scripts/compiler/website-demo-inventory.mjs` 重新生成 inventory。Generator 在 `scripts/compiler/website-demo-migrations-829.json` 保留完整 immutable historical input，核对其 SHA-256，并输出 `internal/compiler/website-demo-migrations.json`。当前 input membership（包括范围内隐藏 source file）、bytes、已安装 parser dependency closure、HEAD/index provenance 与 dirty worktree binding 分别记录。修改、缺失或新增 input 会使原 binding 失效；unresolved 或 dynamic source address 继续显式保留，不会变成成功 admission。
+首个绑定源码的 AST 交付 `59c18246275c9a5ed0ad313c6da2627956930597` 分析了 184 个 Base 文件，其中有 212 个 prototype declaration、214 个 authored Hook。该快照的 React 与 GPUI 原生发射均为 **0/212**；各自另有 212 个 unsupported declaration、5 个 hook-only 文件、0 个已执行 prototype。历史报告保留在 `packages/compiler/evidence/ast-pipeline-20261125/`，后续能力必须由新报告证明。
 
-### 已实现 profile 与 compatibility
+当前继续实现后的两条目标均为 **2/212**，通过通用语义降低编译未改写的 `base-text-root` 与 `base-surface-root`。184 个文件仍全部分析：210 个 prototype declaration 尚不支持，文件结果是 177 个 unsupported、5 个 Hook-only、2 个 emitted，source error 为 0。库存中的 `executionVerifiedPrototypes` 仍为 0；独立的 React 与 GPUI 测试实际执行这些 Base 源码，但不代表完整 Base/family 或整应用迁移已完成。当前摘要保留在 `packages/compiler/evidence/legacy-cleanup-20261125/base-inventory-summary.json`。
 
-| 私有 profile | 实际运行的 target | Output dependency 边界 |
-| --- | --- | --- |
-| `react-runtime-v1` | React / React DOM 19.2.6 | 保留 Proto UI Core、Hooks 与 React Adapter；不独立于 Runtime |
-| `react-dom-source-v1` | React / React DOM 19.2.6 | Target framework 加生成的 native helper；不依赖 Proto UI Runtime/Adapter |
-| `vue-source-v1` | Vue 3.5.31 | Target framework 加生成的 native helper；不依赖 Proto UI Runtime/Adapter |
-| `vue2-source-v1` | Vue 2.6.14 | Target framework 加生成的 native helper；不依赖 Proto UI Runtime/Adapter |
-| `web-component-source-v1` | Custom Elements v1 | 生成的 native helper；不依赖 framework 或 Proto UI Runtime/Adapter |
-| `gpui-source-v1` | 固定 Git revision `62e5991dd0f0c8a3af8d5e7e9c4652490d468db8` 的 GPUI | GPUI 加生成的共享 Rust support crate；不依赖 Proto UI Runtime/Adapter |
+存在 emitter、孤立 fixture 成功、完整 authored 库库存和真实应用迁移，是不同结论。库存保留 unsupported、source-error、hook-analysis 行，不把 wrapper、IR dump 或声明数量算成已执行的原生组件。
 
-Qt、Flutter 与四个 SSR profile identity **尚未实现**，通过 registry 选择它们会拒绝编译。现有 direct emitter 的 `ssr: true` 入口仍是私有实验；执行这些入口不激活 SSR profile，也不建立 SSR/hydration conformance。GPUI 仍是私有 source profile，不是已编目的 official Adapter，也不代表完整 native conformance。实际测试的 target version 不构成对其他版本的 compatibility 承诺。Restricted source admission、semantic IR version **7**、target profile identity 与生成 Web helper ABI **1** 是不同的私有 compatibility 维度；IR 和 helper 文件都不是 public plugin SPI。
+### 浏览器与网站边界
 
-GPUI source owner 按定义将 `void` setup 解释为 host Root 内部的匿名 slot（`C-CORE-SYNTAX-0004-C`、`C-TEMPLATE-0001`）。包含 State 和公开 increment method 的纯作者定义在没有 Web global 的环境中完成编译，并在真实 headless GPUI window 中运行。同一生成组件按顺序接入两个 native slot child，method 调用前后保留实际测得的布局框，并通过公开 State 观察到 0 到 1 的变化。这份有界证据不代表 OS-visible rendering、assistive-technology fidelity 或完整 compiler/Prototype equivalence；缺失 native style declaration 会生成 diagnostic，而不会替换成 Web 行为。
+网站库存保留 authored registration/source graph 及每一个历史拒绝的 demo。当前 React 源码准入与尚未完成的历史 Web Components 验收分别记录。Node 编译不证明 Worker 执行、iframe preview、物理输入、清理、像素或 accessibility 验收。
 
-Frontend 读取限定 root 内的完整 TypeScript source graph，不 import 或 evaluate 作者程序。准入范围包括 checked data、primitive/control-flow callback、static helper 和 authored hook、显式 update、named State 与 typed expose、Props/Context read/watch、单 Root template、serializable Rule condition/style intent，以及已声明的 native event/focus/accessibility 切片。Unsupported syntax、phase/capture authority、operation、target version 和缺失 host capability 会生成 diagnostic，不会静默 bridge。
+浏览器交付有独立的源码绑定回执。React AST Worker 不能复用旧 QuickJS/WASM 回执；GPUI、LLVM 的原生工具链需求必须明确报告。既有 demo 和 frame 的所有权约定继续适用。
 
-公开 atomic hook 的 import 校验与 operation lowering 复用同一 admission table。每个导出的 `asHook` 都有明确分类，改名 import 与本地 re-export 使用相同规则。`asControlLabel` 已准入，并在四个已实现的 Web client source profile 中完成 lowering；GPUI、direct Qt/Flutter 与默认 SSR 入口继续给出明确的 unsupported diagnostic。私有 Web Component hydration 实验另须显式选择 `controlLabelHydration: 'client-only'`。`asAxisInput`、`asContextMenuInput`、`asNativeLink` 仍不支持，diagnostic 在作者 import 处说明缺少哪项 capability lowering。其他 hook 获得准入，也不表示其每个 method 或每个 target 都已支持：不支持的 capability call 会带上实际 callee 与 source range。这些 diagnostic 不构成缺失 capability 的实现或 conformance 证据。
+### 本地编译和检查
 
-Static helper 参数可使用已支持的 local record alias，包括 optional field 与有限 literal union。直接传入 `{ entry: 'manual' }` 这类字面量时，会保留其具体值来核对参数类型；不兼容的 literal value 与伪造 IR 仍会被拒绝。Source frontend 与 IR validator 复用同一 data compatibility 规则，不执行作者代码。
-
-私有 scalar `let` 保留普通词法 lifetime 与 assignment semantics。Closure 共享其 storage，`const` alias 则保存读取当时的 scalar snapshot；写入不会请求 render，也不发送 State notification。JavaScript target 使用原生 `let`；GPUI 以 native reference ownership 保留被捕获的 cell，并在调用作者代码前结束每一次 borrow。纯 scalar module initializer 与实际到达的具名 source helper 保留跨 component instance 的 module lifetime。Helper 的 capture 来自定义它的 module，不能由 caller-local 同名变量补足。Module cell 属于单个 generated artifact（GPUI 中还限定 UI thread）；单独编译的 artifact 不会自动获得共享 source-module registry。Source graph、export 与 top-level execution 继续受闭图检查约束，编译不会执行 initializer 或未调用的 function body。
-
-私有同步 `try`/`catch`/`finally` 与 `throw` 保留原始的已准入 thrown data，包括 `undefined`、`null`、`false`、零、空字符串，以及 record/array identity。Catch binding 始终 opaque：TypeScript assertion 不授予 public data、State 或 execution authority。作者的 finalizer 按 source order 执行，其 return 或 throw 替换先前的 authored completion。GPUI 对生成的 source exception 要求 `panic=unwind`，且仅识别自身的 thrown-value marker；无关 native failure 在 cleanup 后保留原始 payload。可读取 caught data field 与 scalar/list member；JavaScript prototype property name 仍不在这项有界 GPUI access surface 内。
-
-Context failure delivery 保留已提交的每次 update，完成其余仍有效的 callback、重置 dispatch state，再抛出 primary authored value；即使该值为 falsy，也不会被当作成功。Required Context 断连 read/update 与 strict Anatomy 缺少 domain 的失败保留可区分的 error code，供作者 catch 判别。这些 source-lowering 边界不构成新的 native acceptance，也不替代未改动的真实公共 GPUI composition consumer。
-
-生成的 Web Context helper 为每个排队 transition 记录 provider identity，并在 delivery 前重新检查接收者的当前 ancestry。前一个 callback 导致 rebind 后，旧 provider 的排队 transition 不会送入新 binding。错误是否发生与 thrown value 分开记录，因此 `throw undefined` 和 `throw null` 仍是失败，后续 callback 的错误也不会替换第一个值。
-
-这项词法 lowering 保留普通 `defineHook` facade 的准入缺口。`D-AS-HOOK-DEFINE-HOOK-0001` 将其 capture、store 与 configurable authoring surface 留在核心 authored-asHook 契约之外；旧 parameterized-asHook note 仍为 proposal。现有普通 facade 及其公共 consumer 是有效 implementation evidence。Compiler 支持仍需独立治理的边界与真实 consumer evidence；仅添加 import whitelist，或替换为 atomic/authored asHook，不能建立这项支持。
-
-Native template 将 child style 与 Root feedback 分开，并支持 singular anonymous slot。任意 attribute、`PrototypeRef`、multiple/named slot、native interaction group/portal，以及准入 vocabulary 之外的 interaction operation 仍不支持。Raw host event 是 opaque；可读取 raw Props snapshot，但任意 raw member 不会冒充 typed portable data。Setup style 的 `unUse` 与 Rule declaration disposer 仍是 setup-only；runtime 变化使用 Rule 和 `run.feedback.style.patch/suppress/clearPatch`。
-
-State write 与 feedback projection 本身不会请求 template render。作者显式 update intent 与 host policy 分开：React/Vue 3 consumer 执行 authored update；Vue 2 的默认 props policy 与 Custom Element `setProps` 可以显式请求 semantic update。View detach 保留 instance state、exposed handle、Context 与 pending intent；terminal disposal 才关闭它们。Framework wrapper 使用 native ownership 组合 component，而不是在 template 内嵌入 Prototype node。
-
-私有 Vue 2 client profile 的普通 framework repaint 保留上次 authored commit，同时让 native slot 保持实时。已声明的 Text Control 在首次 mount 后拥有原生 editor value：非受控编辑不会被 framework repaint 或后续 defaultValue 变化重置；受控编辑仍只是 proposal，无关更新保留正在进行的 composition。重新创建 view 时，新的物理 editor 绑定到保留的 logical value。这些边界不代表浏览器 IME fidelity、内部 SSR/hydration 迁移、所有准入程序的完整生成类型、完整 reached-support 或 production cost 已通过验收；这些工作仍在 [#1055](https://github.com/Proto-UI/Proto-UI/issues/1055) 分别追踪。
-
-私有 Vue 2 emitter 仅在 client 分支生成 client render-call 注释。SSR 输出保留独立的 renderer 路径；有界的注释回归检查保留其余全部 SSR diagnostic，不代表完整 SSR typing 或 hydration 已通过验收。
-
-完整生成的 Vue 2 pointer consumer 及其 supporting module graph 现已通过原有 strict TypeScript 检查，保留 `checkJs: true` 与 `skipLibCheck: false`。Emitter 将精确的 owned/observed State handle 注册到对应 external view，并在使用 interactive Root 前验证它确为 HTML element。这份证据限定于实际执行的 client 程序；下文历史 consumer measurement 仍未检查 JavaScript body，其他程序与 SSR 的完整类型验收仍需独立完成。
-
-### 多入口 native Web 产物
-
-共享同一个 source Context declaration 的 component 需要使用同一个生成模块图。私有 project API 可以从同一 source root 编译所有 entry，并一起发布组件 source 与共享 supporting module：
-
-```ts
-import { compileProject, writeProjectCompilation } from './packages/compiler/src/index.ts';
-
-const compiled = await compileProject({
-  root: '.',
-  entries: ['src/provider.proto.ts', 'src/consumer.proto.ts'],
-  profile: 'react-dom-source-v1',
-});
-if (!compiled.ok) throw new Error(JSON.stringify(compiled.diagnostics));
-
-const written = await writeProjectCompilation(compiled.value, '.cache/context-assembly', {
-  sourcePaths: {
-    'src/provider.proto.ts': 'Provider.tsx',
-    'src/consumer.proto.ts': 'Consumer.tsx',
-  },
-});
-if (!written.ok) throw new Error(JSON.stringify(written.diagnostics));
-```
-
-选择未使用的 output directory，并为每个 entry 指定唯一、平铺的 source filename。React 使用 `.tsx`，Vue 3 与 Web Component 使用 `.ts`，Vue 2 使用 `.js`。Planner 只合并 path、kind 和字节完全一致的 supporting file；helper 冲突、source snapshot 不一致、路径歧义或 entry 映射不完整都在发布前拒绝。每个 entry 保留 source map 与 provenance manifest，`provenance.json` 记录整个 project artifact set。`projectCompilationArtifacts` 返回相同的产物规划，`diffProjectCompilation` 只读比较 consumer-owned output。
-
-普通 React consumer 可以从 `Provider.tsx` 导入 `CompiledComponent as Provider`，从 `Consumer.tsx` 导入 `CompiledComponent as Consumer`。二者由此 import 同一组物理 Context key、scope 与 React transport module，通过 native composition 保留 source declaration 的引用身份。独立发布的目录仍是独立模块图，即使 source 字节与 debug name 相同。这条路径不引入共享 source-module registry、不桥接 Runtime/Adapter instance，也不改变单入口 CLI。React consumer 回归覆盖 alias、nearest provider、显式 update 与 terminal cleanup；artifact planner 同时覆盖其余三个 Web source profile。
-
-### 本地命令与 consumer ownership
-
-在安装了 development dependencies 的仓库 root 执行，并选择未使用的 output directory：
+使用仓库声明的 Node 24、pnpm 工具链，从仓库根目录运行：
 
 ```sh
-node --import tsx packages/compiler/src/cli-entry.ts check packages/prototypes/base/src/button/button.proto.ts --root . --profile react-dom-source-v1
-node --import tsx packages/compiler/src/cli-entry.ts compile packages/prototypes/base/src/button/button.proto.ts --root . --profile react-dom-source-v1 --output .cache/compiler-guide-button
-node --import tsx packages/compiler/src/cli-entry.ts diff packages/prototypes/base/src/button/button.proto.ts --root . --profile react-dom-source-v1 --output .cache/compiler-guide-button --json
-node --import tsx packages/compiler/src/cli-entry.ts watch packages/prototypes/base/src/button/button.proto.ts --root . --profile react-dom-source-v1 --output .cache/compiler-guide-watch --json
+node --import tsx scripts/compiler/pinned-cli-entry.ts info
+node --import tsx scripts/compiler/pinned-cli-entry.ts check packages/prototypes/base/src/button/button.proto.ts --target react --json
+node --import tsx scripts/compiler/pinned-cli-entry.ts inventory packages/prototypes/base/src --target react --json
+node --import tsx scripts/compiler/pinned-cli-entry.ts compile path/to/entry.proto.ts --target react --out .cache/generated --json
 ```
 
-`inspect` 输出 checked IR；`explain` 输出 profile、requirements 与 dependencies。`--config` 显式选择 JSON，字段限于 `entry`、`root`、`export`、`output`、`profile`、`json`；配置路径相对配置文件，命令行路径相对 working directory。命令行覆盖配置；unknown/repeated flag 或 field 会失败。
+合法 Prototype 如果包含尚未降低的操作，`check` 可以返回拒绝诊断。应保留 authored 行为，不能为获得成功而修改原型、遗漏操作或选择 Runtime wrapper。
 
-Compilation 先规划 source、supporting helper、standard source map 与 hash/provenance manifest，再 create-only 发布。现有 consumer file 从不被覆盖。`diff` 只读，通过记录的 hash 识别 consumer modification。`watch` 发布 immutable `<output>/<session UUID>/revision-<N>`，输入被拒绝时保留最后成功 generation，不维护可变 latest pointer。Consumer edit 使用普通 target rebuild；原 compiler map 是历史证据，编辑后可能 stale，rebuild 才生成当前 executable-to-edited-source map。
+Rust component 选择 `--target gpui`；内核选择 `--target kernel`；查看 HIR 使用 `ir`。生成文件默认不能被意外覆盖，`--overwrite` 才表示明确替换；compiler input 和 symlink destination 仍受保护。历史 `--profile`、`diff`、`watch` 接口不可用，其未完成的所有权及消费者验收保留在清理清单中。
 
-### 受支持的固定源码编译器构建
+### 构建和消费精确源码 pin
 
-构建期编译器现在提供受支持的 **source-pinned Node CLI 与 JavaScript 产物**。这条路线保留 private experimental profile；不等于 npm 发布、稳定 declaration-file 发行或未实现 target 的准入。将已审查的完整 Git SHA、冻结的 pnpm lock 与选定 profile 一起固定。
-
-在该 SHA 的干净 checkout 中，使用 Node 24 与冻结的开发依赖：
+固定产物要求干净工作树和完整 commit SHA：
 
 ```sh
-corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
-mkdir -p ../compiler-artifacts
-node --import tsx scripts/compiler/build-pinned.ts --revision <full-40-character-HEAD-SHA> --output ../compiler-artifacts/<fresh-name>
-cd ../compiler-artifacts/<fresh-name>
-npm ci --ignore-scripts
-node cli.js --build-info
+node --import tsx scripts/compiler/build-pinned.ts --revision "$(git rev-parse HEAD)" --output /absolute/fresh-compiler-package
+npm --prefix /absolute/fresh-compiler-package ci --ignore-scripts
+node /absolute/fresh-compiler-package/cli.js --build-info
+node scripts/compiler/pinned-ast-smoke.mjs --compiler /absolute/fresh-compiler-package/index.js --llvm --gpui
+NATIVE_CONSUMER_COMPILER=/absolute/fresh-compiler-package/index.js node scripts/compiler/pinned-cli-smoke.mjs
 ```
 
-Builder 拒绝不匹配 revision、脏源码、与 lock 不一致的 TypeScript/esbuild，以及已存在的输出目录。产物 package lock 从源码 lock 记录精确 TypeScript 版本和 registry integrity。执行 compiler 只需该 TypeScript 包和 Node built-in，不要求先构建全部公共包、安装 Runtime/Adapter，也不借用其他包偶然安装的 Floating UI。`compiler-build.json` 记录实际 bundled source input、交付文件 digest、toolchain 与 profile digest；source map 自带 source text。相同输入与工具链在不同目录生成相同字节。`index.js` 暴露现有 JavaScript API；`cli.js` 可直接由 Node 执行，不再需要 tsx。生成代码的 provenance 会记录本次 compiler build identity。
+包内包含当前 API/CLI 和绑定源码的 native builder assets。Metadata 使用 `proto-ui.compiler-package.v3`，身份读取 `compiler-build.json` 或 `--build-info`。已移除的 `compilerBuildIdentity`、`TARGET_PROFILES`、`compilationArtifacts` 和 runtime-profile API 不会作为兼容 shim 重新出现。
 
-少量 family consumer 可直接从同一 pinned checkout 编译 authored entry：
-
-```sh
-mkdir -p /absolute/consumer/generated
-node cli.js compile /absolute/Proto-UI/packages/prototypes/shadcn/src/button/button.proto.ts --root /absolute/Proto-UI --profile react-dom-source-v1 --output /absolute/consumer/generated/button
-```
-
-Source resolver 只读取已声明的作者源码闭包，不执行源码，也不要求 family `dist` 构建。安装**生成 provenance 声明的依赖**后，通过目标框架的普通构建导入 component 和 supporting files。三种 0.3 Button 家族的 React source profile 使用其精确版本 React/React DOM；需要几何能力的生成消费者另行拥有已声明的 Floating UI 依赖。Vue 3、Vue 2 与 Web Component 分别保留各自 profile 和依赖表。Shenko 九个 Shadcn 家族这类 runtime Adapter 消费仍有独立 runtime package 闭包；编译 Shenko 两个自有 prototype 不代表迁移这些家族。
-
-输出父目录是 **caller prerequisite**，artifact root 自身采用 exclusive creation。父目录缺失时失败且不创建祖先目录；已存在 root、symlink、artifact 冲突与并发竞争仍按既有 create-only 契约拒绝。`diff` 不写用户编辑，`watch` 生成不可变 session/revision 目录。Compiler build 保持不可变，用户编辑属于生成源码。编辑后原 compiler map 是历史记录；普通 target 重建为当前 executable-to-edited-source 提供新 map。
-
-从同一 source checkout 核对干净安装时，显式选择已构建的 compiler 和 registry 模式：
-
-```sh
-NATIVE_CONSUMER_COMPILER=/absolute/pinned/index.js NATIVE_CONSUMER_DEPENDENCIES=registry node scripts/compiler/release-family-smoke.mjs
-NATIVE_CONSUMER_COMPILER=/absolute/pinned/index.js NATIVE_CONSUMER_DEPENDENCIES=registry node scripts/compiler/pinned-cli-smoke.mjs
-```
-
-每个 consumer 从没有已安装包的目录开始，仅用自身 manifest 中的精确依赖生成新 lockfile，再以独立 cache 运行 `npm ci --ignore-scripts`。第一条在四个 Web source profile 中构建完整 Base/Shadcn/Brutalist Button 作者源码，并在 Happy DOM 实际挂载；第二条验证可编辑 CLI 旅程及非覆盖边界。复制既有安装 payload 仍是单独标记的离线模式。Watch 保留首次 session 目录的身份；路径被另一个真实目录或 symlink 替换时，报告 output conflict 并终止，不把替换目录接纳为新 owner。这些检查不代替真实浏览器、硬件、读屏或完整应用验收。
-
-### 已执行证据与成本测量
-
-私有验证在四个 Web source profile 的独立物理 consumer 中编译、挂载三 component/Context assembly，type-check 生成的 TypeScript/helper，重建并执行 consumer-owned template edit，拒绝引入的 syntax error，并验证物理 dependency tree 与 artifact hash；这些 Web consumer 测量不执行 GPUI。Vue 2 的 JavaScript component body 不执行 `checkJs`。另有 offline private-package rehearsal，在普通 Node 中执行打包 Compiler 的 JavaScript API，并记录 tarball integrity、实际 bundled compile-time input、dependency、BOM 和 license；这不等于 official package 或 public declaration-file release。
-
-真实 Chromium 分别核对原 React Adapter、runtime-backed output 与 native React output 的 explicit update/detach/reattach，以及有限 Rule/style/AX/input 程序。Missing-update 与 duplicate-activation mutant 被实际观察拒绝。独立的生成 callback 真实错误堆栈通过 standard executable-to-generated、generated-to-author 两段 map 精确定位；不宣称自动 map composition。
-
-重放独立 native consumer 测量：
+当前 React consumer 检查生成代码的 strict TypeScript、props/state/update 行为、实例隔离、样式、listener 清理及产物可编辑性：
 
 ```sh
 node --import tsx scripts/compiler/native-consumer-smoke.mjs
 ```
 
-每次执行在输出的 evidence directory 中保留 `summary.json`、`timing.json`、`costs.json`、runtime trace、diagnostic 与 dependency integrity。测量包括 cold/hot/changed compilation、whole-process peak RSS 与 coarse memory snapshot、生成/supporting source 和 dependency payload byte、真实 framework initialization/update/teardown、retained handle identity，以及观察到的 instance/view-epoch/Root count。**没有**测量 exact allocation、garbage collection、native-browser layout latency 或相对 Adapter 的速度。Happy DOM consumer 是单边证据；有限 Chromium 程序不构成普遍等价、SSR/hydration 支持或编译产物必然更快/更小的承诺。
-
-## 贡献边界
-
-Compiler proposal 从 Agent-led governed research 开始。research、candidate entity、实现探针与 executable evidence 可以立即推进；只有现有 authority 未决定的产品选择才形成 attended decision。proposal 至少说明：
-
-1. portable source subset，以及 unsupported construct 如何失败；
-2. output host 与 generated artifact ownership；
-3. 如何与现有 Contract criteria 保持 semantic parity；
-4. lifecycle、capability 与 component composition 如何处理；
-5. versioned identity 与 executable conformance model；
-6. 如何迁移并与 Runtime/Adapter path 共存。
-
-不要把 `packages/modules/rule/src/compile.ts`、CLI style generation 或 bundler transform 当成缺失的 Compiler architecture 并直接发起实现 PR；它们是由其他层拥有的局部实现。
-
-## 验证当前边界
-
-以下检查覆盖今天已经存在的 portable template 与 analyzable Rule 约束：
+针对实际应用，可用固定产物检查未修改的 authored 输入：
 
 ```sh
-corepack pnpm@10.32.1 vitest run packages/core/test/contract/template.normalize.contract.test.ts
-corepack pnpm@10.32.1 vitest run packages/adapters/web-component/test/contract/template.no-prototype-composition.v0.contract.test.ts
-corepack pnpm@10.32.1 vitest run packages/runtime/test/contract/rule.props-style.smoke.v0.contract.test.ts
-corepack pnpm@10.32.1 check:types
+node scripts/compiler/consumer-project-inventory.mjs --compiler /absolute/fresh-compiler-package/index.js --consumer-root /absolute/shenko --name Shenko --target react --out /absolute/fresh-shenko-inventory.json
 ```
 
-希望现在就能交付的工作，请继续阅读 [Runtime 架构](/zh-cn/build/runtime-architecture/)、[模块与扩展架构](/zh-cn/build/module-extension-architecture/)或边界明确的 [Adapter 指南](/zh-cn/build/adapter-guide/)；未来顺序见[里程碑](/zh-cn/project/roadmap/)。
+该命令不重写应用。报告明确保留 `applicationMigrationVerified: false` 和 0 个执行声明。Shenko 的 Web 消费与 Verdant 的 GPUI 消费分别需要实际应用验收；使用 Verdant GPUI fork 运行 harness，不等于迁移了 Verdant 应用。
+
+### 旧实现清理与保留义务
+
+旧 Runtime/source-template 生成器及失效执行 harness 已从维护入口移除，完整源码保留在 Git 历史。`internal/compiler/legacy-cleanup.md` 将独立断言映射到当前测试，并保留完整 family 行为、context/expose 所有权、缺失 backend、浏览器/原生验收、watch/diff、生产成本证据等尚未完成的义务。
+
+Frozen-foundation 工具只核对哈希、比较定义身份，或将认证过的源码字节恢复到新目录。它们不会安装或调用旧编译器，也不是当前构建的依赖。
+
+## 贡献与验证边界
+
+编译器和 Prototype 必须独立实现共享定义，保留 lifecycle、state、props、event、template、slot、host 所有权规则。TypeScript 类型检查不承担 Proto effect/phase 分析，LLVM 不能取代 UI 所有权或目标准入。
+
+运行编译器 strict 类型检查、相关目标/消费者测试及仓库文档检查。报告精确源码、生成产物、实际执行目标和剩余义务。文档或库存计数门禁通过，不证明应用完成验收。

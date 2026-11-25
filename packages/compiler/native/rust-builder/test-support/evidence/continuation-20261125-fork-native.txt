@@ -1,0 +1,113 @@
+COMMAND cargo +1.98.1 test --locked --manifest-path packages/compiler/native/rust-builder/test-support/Cargo.toml --target-dir /tmp/pui-gpui-native-target-1809 --lib
+   Compiling compiled-requiredprop v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/RequiredProp)
+   Compiling compiled-basetextroot v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/BaseTextRoot)
+   Compiling compiled-createdwatch v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/CreatedWatch)
+   Compiling compiled-numericstate v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/NumericState)
+   Compiling compiled-emptyroot v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/EmptyRoot)
+   Compiling compiled-slothost v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/SlotHost)
+   Compiling compiled-invokereturn v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/InvokeReturn)
+   Compiling compiled-updatescheduling v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/UpdateScheduling)
+   Compiling compiled-escapedtext v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/EscapedText)
+   Compiling compiled-numericpolicy v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/NumericPolicy)
+   Compiling compiled-propsmatrix v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/PropsMatrix)
+   Compiling compiled-createdfailure v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/CreatedFailure)
+   Compiling compiled-rulescheduling v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/RuleScheduling)
+   Compiling compiled-gpuicounter v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/GpuiCounter)
+   Compiling compiled-basesurfaceroot v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support/generated/BaseSurfaceRoot)
+warning: structure field `prop_transitionState` should have a snake case name
+ --> generated/BaseSurfaceRoot/src/lib.rs:7:9
+  |
+7 |     pub prop_transitionState: Option<Option<String>>,
+  |         ^^^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `prop_transition_state`
+  |
+  = note: `#[warn(non_snake_case)]` (part of `#[warn(nonstandard_style)]`) on by default
+
+warning: structure field `prop_focusVisible` should have a snake case name
+  --> generated/BaseSurfaceRoot/src/lib.rs:10:9
+   |
+10 |     pub prop_focusVisible: Option<Option<bool>>,
+   |         ^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `prop_focus_visible`
+
+warning: structure field `resolved_prop_transitionState` should have a snake case name
+  --> generated/BaseSurfaceRoot/src/lib.rs:52:5
+   |
+52 |     resolved_prop_transitionState: Option<String>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `resolved_prop_transition_state`
+
+warning: structure field `previous_prop_transitionState` should have a snake case name
+  --> generated/BaseSurfaceRoot/src/lib.rs:53:5
+   |
+53 |     previous_prop_transitionState: Option<String>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `previous_prop_transition_state`
+
+warning: structure field `render_prop_transitionState` should have a snake case name
+  --> generated/BaseSurfaceRoot/src/lib.rs:54:5
+   |
+54 |     render_prop_transitionState: Option<String>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `render_prop_transition_state`
+
+warning: structure field `resolved_prop_focusVisible` should have a snake case name
+  --> generated/BaseSurfaceRoot/src/lib.rs:61:5
+   |
+61 |     resolved_prop_focusVisible: Option<bool>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `resolved_prop_focus_visible`
+
+warning: structure field `previous_prop_focusVisible` should have a snake case name
+  --> generated/BaseSurfaceRoot/src/lib.rs:62:5
+   |
+62 |     previous_prop_focusVisible: Option<bool>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `previous_prop_focus_visible`
+
+warning: structure field `render_prop_focusVisible` should have a snake case name
+  --> generated/BaseSurfaceRoot/src/lib.rs:63:5
+   |
+63 |     render_prop_focusVisible: Option<bool>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `render_prop_focus_visible`
+
+warning: method `read_prop_transitionState` should have a snake case name
+  --> generated/BaseSurfaceRoot/src/lib.rs:92:12
+   |
+92 |     pub fn read_prop_transitionState(&self) -> Option<String> {
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `read_prop_transition_state`
+
+warning: method `read_prop_focusVisible` should have a snake case name
+   --> generated/BaseSurfaceRoot/src/lib.rs:101:12
+    |
+101 |     pub fn read_prop_focusVisible(&self) -> Option<bool> {
+    |            ^^^^^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `read_prop_focus_visible`
+
+warning: variable `resolved_transitionState` should have a snake case name
+   --> generated/BaseSurfaceRoot/src/lib.rs:281:13
+    |
+281 |         let resolved_transitionState = if let Some(raw) = self
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `resolved_transition_state`
+
+warning: variable `resolved_focusVisible` should have a snake case name
+   --> generated/BaseSurfaceRoot/src/lib.rs:350:13
+    |
+350 |         let resolved_focusVisible = if let Some(raw) = self
+    |             ^^^^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `resolved_focus_visible`
+
+warning: `compiled-basesurfaceroot` (lib) generated 12 warnings
+   Compiling proto-ui-gpui-native-tests v0.0.0 (/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/native/rust-builder/test-support)
+    Finished `test` profile [unoptimized] target(s) in 2.10s
+     Running unittests src/lib.rs (/tmp/pui-gpui-native-target-1809/debug/deps/proto_ui_gpui_native_tests-e08a03fab0928652)
+
+running 13 tests
+test tests::native_f64_actions_match_signed_zero_fraction_and_non_nan_validation ... ok
+test tests::native_state_policies_clamp_only_initial_range_and_validate_every_write ... ok
+test tests::full_prop_snapshots_preserve_canonical_fallback_history ... ok
+test tests::required_props_error_only_when_no_nonempty_fallback_exists ... ok
+test tests::empty_fragment_still_constructs_a_native_root ... ok
+test tests::escaped_literals_reach_gpui_as_text ... ok
+test tests::state_rules_update_root_feedback_without_advancing_template_snapshot ... ok
+test tests::numeric_display_uses_ecmascript_formatting_in_real_render ... ok
+test tests::state_writes_do_not_schedule_native_updates_but_run_update_does ... ok
+test tests::actual_base_text_and_surface_props_and_slots_reach_native_layout ... ok
+test tests::real_native_click_changes_state_and_reaches_text_layout ... ok
+test tests::created_hydration_and_ordered_resolved_watches_match_canonical_snapshots ... ok
+test tests::mixed_slot_children_keep_native_identity_and_release_replaced_views ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+PUI_COMMAND_EXIT 0

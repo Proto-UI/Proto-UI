@@ -1,0 +1,9 @@
+{
+  "scope": "Actual full Base source admission in the continuing worktree. Inventory execution is zero; separate behavior receipts are required.",
+  "summarySha256": "437f12187f814253181c79d11149c7faa65613dc047ea911f0f53afee980c73c",
+  "archive": {
+    "path": "base-inventory-receipts.tar.gz",
+    "bytes": 166405,
+    "sha256": "dc6d406dcbedbbe7d74be224d662880a542098f4bd17ac0ad964800a66b8d4f5"
+  }
+}

@@ -1,0 +1,7 @@
+{"name":"created_default","diagnostics":[],"unlowered":[],"states":[{"index":0,"name":"n","variableName":"n","kind":"number.discrete","initialValue":0,"ssaType":"f64"}],"lifecycle":[{"phase":"created","body":[]}],"events":[],"rules":[],"admission":[]}
+{"name":"event_default","diagnostics":[],"unlowered":[],"states":[{"index":0,"name":"n","variableName":"n","kind":"number.discrete","initialValue":0,"ssaType":"f64"}],"lifecycle":[],"events":[{"scope":"root","eventName":"host:click","body":[{"kind":"request-update"}]}],"rules":[],"admission":[]}
+{"name":"rule_generator","diagnostics":[],"unlowered":[],"states":[],"lifecycle":[],"events":[],"rules":[{"id":0,"condition":{"kind":"true"},"styleTokens":["bg-blue-500"]}],"admission":[]}
+{"name":"ambient_read","diagnostics":[],"unlowered":[],"states":[],"lifecycle":[],"events":[],"rules":[],"admission":[]}
+{"name":"created_default","actual":1}
+{"name":"event_default","actual":1}
+{"name":"rule_generator","actual_styles":[]}

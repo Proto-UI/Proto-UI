@@ -1,6 +1,12 @@
 import ts from 'typescript';
 import type { ScalarLiteral } from '../ir/types';
-import { hasBindingWrites, isConstDeclaration } from './bindings';
+import {
+  hasBindingWrites,
+  isConstDeclaration,
+  atExecutionPoint,
+  isBindingInitialized,
+  type InitializationPoints,
+} from './bindings';
 
 type Evaluation = { known: true; value: ScalarLiteral } | { known: false };
 const unknown: Evaluation = { known: false };
@@ -8,7 +14,9 @@ const unknown: Evaluation = { known: false };
 /** Bounded compile-time evaluation of proven pure scalar syntax, never of a type assertion. */
 export function evaluateStaticScalar(
   expression: ts.Expression,
-  checker: ts.TypeChecker
+  checker: ts.TypeChecker,
+  bindings: ReadonlyMap<ts.Symbol, ScalarLiteral> = new Map(),
+  initializationPoints: InitializationPoints = new Map()
 ): ScalarLiteral | undefined {
   let budget = 512;
   const active = new Set<ts.Node>();
@@ -19,16 +27,19 @@ export function evaluateStaticScalar(
   };
   const evaluate = (
     raw: ts.Expression,
-    scope: ReadonlyMap<ts.Symbol, ScalarLiteral>
+    scope: ReadonlyMap<ts.Symbol, ScalarLiteral>,
+    inheritedPoints: InitializationPoints
   ): Evaluation => {
+    const points = atExecutionPoint(raw, inheritedPoints);
     if (--budget < 0) return unknown;
     if (
       ts.isParenthesizedExpression(raw) ||
       ts.isAsExpression(raw) ||
+      ts.isTypeAssertionExpression(raw) ||
       ts.isSatisfiesExpression(raw) ||
       ts.isNonNullExpression(raw)
     )
-      return evaluate(raw.expression, scope);
+      return evaluate(raw.expression, scope, points);
     if (ts.isStringLiteral(raw) || ts.isNoSubstitutionTemplateLiteral(raw)) return known(raw.text);
     if (ts.isNumericLiteral(raw)) return known(Number(raw.text));
     if (raw.kind === ts.SyntaxKind.TrueKeyword) return known(true);
@@ -45,17 +56,18 @@ export function evaluateStaticScalar(
         declaration.initializer &&
         ts.isVariableDeclarationList(declaration.parent) &&
         declaration.parent.flags & ts.NodeFlags.Const &&
+        isBindingInitialized(declaration, points, checker) &&
         !active.has(declaration)
       ) {
         active.add(declaration);
-        const result = evaluate(declaration.initializer, scope);
+        const result = evaluate(declaration.initializer, scope, points);
         active.delete(declaration);
         return result;
       }
       return unknown;
     }
     if (ts.isPrefixUnaryExpression(raw)) {
-      const operand = evaluate(raw.operand, scope);
+      const operand = evaluate(raw.operand, scope, points);
       if (!operand.known) return unknown;
       if (raw.operator === ts.SyntaxKind.ExclamationToken) return known(!operand.value);
       if (typeof operand.value !== 'number') return unknown;
@@ -64,21 +76,22 @@ export function evaluateStaticScalar(
       return unknown;
     }
     if (ts.isConditionalExpression(raw)) {
-      const condition = evaluate(raw.condition, scope);
+      const condition = evaluate(raw.condition, scope, points);
       return condition.known
-        ? evaluate(condition.value ? raw.whenTrue : raw.whenFalse, scope)
+        ? evaluate(condition.value ? raw.whenTrue : raw.whenFalse, scope, points)
         : unknown;
     }
     if (ts.isBinaryExpression(raw)) {
-      const left = evaluate(raw.left, scope);
+      const left = evaluate(raw.left, scope, points);
       if (!left.known) return unknown;
       const op = raw.operatorToken.kind;
       if (op === ts.SyntaxKind.AmpersandAmpersandToken)
-        return left.value ? evaluate(raw.right, scope) : left;
-      if (op === ts.SyntaxKind.BarBarToken) return left.value ? left : evaluate(raw.right, scope);
+        return left.value ? evaluate(raw.right, scope, points) : left;
+      if (op === ts.SyntaxKind.BarBarToken)
+        return left.value ? left : evaluate(raw.right, scope, points);
       if (op === ts.SyntaxKind.QuestionQuestionToken)
-        return left.value === null ? evaluate(raw.right, scope) : left;
-      const right = evaluate(raw.right, scope);
+        return left.value === null ? evaluate(raw.right, scope, points) : left;
+      const right = evaluate(raw.right, scope, points);
       if (!right.known) return unknown;
       if (op === ts.SyntaxKind.EqualsEqualsEqualsToken) return known(left.value === right.value);
       if (op === ts.SyntaxKind.ExclamationEqualsEqualsToken)
@@ -117,6 +130,7 @@ export function evaluateStaticScalar(
     if (ts.isCallExpression(raw) && ts.isIdentifier(raw.expression)) {
       const binding = symbol(raw.expression);
       const declaration = binding?.valueDeclaration ?? binding?.declarations?.[0];
+      if (!declaration || !isBindingInitialized(declaration, points, checker)) return unknown;
       const fn =
         declaration && ts.isFunctionDeclaration(declaration)
           ? declaration
@@ -139,14 +153,14 @@ export function evaluateStaticScalar(
         if (!ts.isIdentifier(parameter.name) || parameter.dotDotDotToken || parameter.initializer)
           return unknown;
         const parameterSymbol = symbol(parameter.name);
-        const argument = evaluate(raw.arguments[i], scope);
+        const argument = evaluate(raw.arguments[i], scope, points);
         if (!parameterSymbol || !argument.known) return unknown;
         local.set(parameterSymbol, argument.value);
       }
       active.add(fn);
       const result = ts.isBlock(fn.body)
-        ? execute(fn.body.statements, local)
-        : evaluate(fn.body, local);
+        ? execute(fn.body.statements, local, points)
+        : evaluate(fn.body, local, points);
       active.delete(fn);
       return result;
     }
@@ -154,28 +168,29 @@ export function evaluateStaticScalar(
   };
   const execute = (
     statements: readonly ts.Statement[],
-    outer: ReadonlyMap<ts.Symbol, ScalarLiteral>
+    outer: ReadonlyMap<ts.Symbol, ScalarLiteral>,
+    points: InitializationPoints
   ): Evaluation => {
     const local = new Map(outer);
     for (const stmt of statements) {
       if (--budget < 0) return unknown;
       if (ts.isReturnStatement(stmt))
-        return stmt.expression ? evaluate(stmt.expression, local) : unknown;
+        return stmt.expression ? evaluate(stmt.expression, local, points) : unknown;
       if (ts.isVariableStatement(stmt) && stmt.declarationList.flags & ts.NodeFlags.Const) {
         for (const declaration of stmt.declarationList.declarations) {
           if (!ts.isIdentifier(declaration.name) || !declaration.initializer) return unknown;
           const binding = symbol(declaration.name);
-          const result = evaluate(declaration.initializer, local);
+          const result = evaluate(declaration.initializer, local, points);
           if (!binding || !result.known) return unknown;
           local.set(binding, result.value);
         }
       } else if (ts.isIfStatement(stmt)) {
-        const condition = evaluate(stmt.expression, local);
+        const condition = evaluate(stmt.expression, local, points);
         if (!condition.known) return unknown;
         const chosen = condition.value ? stmt.thenStatement : stmt.elseStatement;
         if (chosen) {
           // A scalar folded branch must return. Fall-through effects are never ignored.
-          const branch = execute(ts.isBlock(chosen) ? chosen.statements : [chosen], local);
+          const branch = execute(ts.isBlock(chosen) ? chosen.statements : [chosen], local, points);
           if (branch.known) return branch;
           return unknown;
         }
@@ -183,6 +198,6 @@ export function evaluateStaticScalar(
     }
     return unknown;
   };
-  const result = evaluate(expression, new Map());
+  const result = evaluate(expression, bindings, initializationPoints);
   return result.known ? result.value : undefined;
 }

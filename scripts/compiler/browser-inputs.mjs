@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
+import { existsSync, realpathSync } from 'node:fs';
 import path from 'node:path';
 import { findBrowserRepositoryRoot } from './browser-repository-root.mjs';
 
@@ -25,7 +26,26 @@ export const browserRepositoryInputPaths = [
 ];
 
 export function relativeInputPath(file, root = browserRepositoryRoot) {
-  const relative = path.relative(root, path.resolve(root, file)).split(path.sep).join('/');
+  const absolute = path.resolve(root, file);
+  let relative = path.relative(root, absolute).split(path.sep).join('/');
+  // A worktree may reuse the same installed dependency store through a symlink.
+  // Bind it to the repository's actual node_modules route, never to an arbitrary
+  // outside file with a similar name or to another worktree's authored sources.
+  if (relative === '..' || relative.startsWith('../')) {
+    const parts = absolute.split(path.sep);
+    for (let index = 0; index < parts.length; index++) {
+      if (parts[index] !== 'node_modules') continue;
+      const candidate = parts.slice(index).join('/');
+      try {
+        if (realpathSync(path.join(root, candidate)) === realpathSync(absolute)) {
+          relative = candidate;
+          break;
+        }
+      } catch {
+        /* This is not a dependency installed in this repository. */
+      }
+    }
+  }
   if (!relative || relative === '..' || relative.startsWith('../') || path.isAbsolute(relative))
     throw new Error(`Browser build input is outside the repository: ${file}`);
   return relative;
@@ -73,7 +93,7 @@ export async function snapshotBrowserRepositoryInputs(root = browserRepositoryRo
     { cwd: root, encoding: 'utf8' }
   )
     .split('\0')
-    .filter(Boolean);
+    .filter((file) => file && existsSync(path.join(root, file)));
   return hashInputFiles(files, root);
 }
 

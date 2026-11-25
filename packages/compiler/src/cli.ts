@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { createCompiler, type CompilationTarget } from './compiler';
+import { createCompiler, COMPILATION_TARGETS, type CompilationTarget } from './compiler';
 import { formatDiagnostics } from './diagnostics';
 import { detectLlvmToolchain } from './llvm';
+import { writeGeneratedArtifacts } from './output';
 
 export interface CliResult {
   readonly exitCode: number;
@@ -20,7 +21,7 @@ const valueFlags = new Set([
   '--gpui-dependency',
 ]);
 const booleanFlags = new Set(['--json', '--optimize', '--wasm', '--ll', '--pir', '--overwrite']);
-const targets = new Set<CompilationTarget>(['react', 'gpui', 'kernel', 'ir']);
+const targets = new Set<CompilationTarget>(COMPILATION_TARGETS);
 const usage = [
   'Usage: proto-compiler <command> <entry> [options]',
   '',
@@ -103,7 +104,7 @@ export function runCompilerCli(argv: readonly string[]): CliResult {
           {
             compiler: '@proto.ui/compiler',
             irVersion: 2,
-            targets: ['react', 'gpui', 'kernel', 'ir'],
+            targets: COMPILATION_TARGETS,
             llvm: detectLlvmToolchain(),
           },
           null,
@@ -291,10 +292,7 @@ export function runCompilerCli(argv: readonly string[]): CliResult {
             artifact.destination
         );
     }
-    for (const artifact of artifacts) {
-      fs.mkdirSync(path.dirname(artifact.destination), { recursive: true });
-      fs.writeFileSync(artifact.destination, artifact.content);
-    }
+    writeGeneratedArtifacts(outDir, artifacts, flags.has('--overwrite'));
     const written = artifacts.map((artifact) => artifact.destination);
     return {
       exitCode: 0,

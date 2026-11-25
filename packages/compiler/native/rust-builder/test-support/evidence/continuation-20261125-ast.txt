@@ -1,0 +1,224 @@
+COMMAND corepack pnpm@10.32.1 exec vitest run packages/compiler/test/gpui-ast-codegen.test.ts
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+
+ RUN  v2.1.9 /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125
+
+08:37:30 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import fs from 'node:fs';
+2  |  import path from 'node:path';
+   |                       ^
+3  |  import { describe, expect, it } from 'vitest';
+4  |  import { TsProgramSession, extractModuleIR } from '../src/frontend';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/test/gpui-ast-codegen.test.ts
+08:37:30 [vite] warning: Unrecognized target environment "ES2024"
+1  |  export { TsProgramSession, type CompilerSessionOptions } from './program';
+   |                                                 ^
+2  |  export { extractModuleIR, type ExtractOptions, type ExtractOutput } from './extract';
+3  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/index.ts
+08:37:30 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import fs from 'node:fs';
+2  |  import path from 'node:path';
+   |                       ^
+3  |  import ts from 'typescript';
+4  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/program.ts
+08:37:30 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import { diagnostic, type CompilerDiagnostic } from '../diagnostics';
+   |                    ^
+3  |  import {
+4  |    spanOf,
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/extract.ts
+08:37:30 [vite] warning: Unrecognized target environment "ES2024"
+1  |  export interface SourceSpan {
+2  |    readonly file: string;
+   |                   ^
+3  |    readonly line: number;
+4  |    readonly column: number;
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/diagnostics.ts
+08:37:30 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { SourceSpan } from '../diagnostics';
+   |                    ^
+3  |  import type { ScalarLiteral } from '../ir';
+4  |  import { evaluateStaticScalar } from './constants';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/syntax.ts
+08:37:30 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { ScalarLiteral } from '../ir/types';
+   |                    ^
+3  |  import { hasBindingWrites, isConstDeclaration } from './bindings';
+4  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/constants.ts
+08:37:30 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |
+3  |  /** Function declarations are mutable in JavaScript even though they are not `let`. */
+   |                   ^
+4  |  export function hasBindingWrites(binding: ts.Symbol, checker: ts.TypeChecker): boolean {
+5  |    const files = new Set(
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/bindings.ts
+08:37:30 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import type { PropDeclIR, StateDeclIR, SsaType } from '../ir';
+   |                                                 ^
+2  |
+3  |  export function propKindToSsaType(kind: PropDeclIR['kind']): Exclude<SsaType, 'void'> {
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/scalars.ts
+08:37:30 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { RuleExpr, ScalarLiteral } from '../ir';
+   |                    ^
+3  |  import { unwrapExpr, extractScalarLiteral } from './syntax';
+4  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/rules.ts
+08:37:30 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { ScalarLiteral, TemplateChildIR, TemplateElementIR } from '../ir';
+   |                    ^
+3  |  import {
+4  |    unwrapExpr,
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/template.ts
+08:37:30 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import {
+3  |    SsaBuilder,
+   |           ^
+4  |    type EventDeclIR,
+5  |    type RuleIR,
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/kernel.ts
+08:37:30 [vite] warning: Unrecognized target environment "ES2024"
+1  |  export * from './types';
+2  |  export { SsaBuilder } from './builder';
+   |                        ^
+3  |  export { verifyModuleIR, verifySsaFunction } from './verify';
+4  |  export {
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/index.ts
+08:37:31 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import type { SourceSpan } from '../diagnostics';
+   |                                                 ^
+2  |
+3  |  export const PROTO_IR_VERSION = 2 as const;
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/types.ts
+08:37:31 [vite] warning: Unrecognized target environment "ES2024"
+2  |    HostOpKind,
+3  |    SsaBasicBlock,
+4  |    SsaBinOp,
+   |    ^
+5  |    SsaCmpOp,
+6  |    SsaFunction,
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/builder.ts
+08:37:31 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { diagnostic, type CompilerDiagnostic } from '../diagnostics';
+   |                                                 ^
+2  |  import {
+3  |    PROTO_IR_VERSION,
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/verify.ts
+08:37:31 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import {
+2  |    encodeCapabilityMask,
+3  |    type CapabilityName,
+   |                ^
+4  |    type ModuleIR,
+5  |    type PrototypeIR,
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/passes.ts
+08:37:31 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import type { ModuleIR, PrototypeIR, SsaFunction } from './types';
+   |                                                 ^
+2  |
+3  |  /** Diagnostic serialization of typed IR. Target source is printed by target SDKs. */
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/ir/print.ts
+08:37:31 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import type { ActionStatementIR, ScalarLiteral, ValueExprIR } from '../ir/types';
+   |                    ^
+3  |  import { resolveFunctionLike, unwrapExpr } from './syntax';
+4  |
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/frontend/actions.ts
+08:37:31 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import fs from 'node:fs';
+2  |  import os from 'node:os';
+   |                       ^
+3  |  import path from 'node:path';
+4  |  import { spawnSync } from 'node:child_process';
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/targets/gpui.ts
+08:37:31 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import path from 'node:path';
+2  |  import { fileURLToPath } from 'node:url';
+   |                   ^
+3  |
+4  |  // The pinned Node bundle defines this path relative to its emitted index.js.
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/native-assets.ts
+08:37:31 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import type { ActionStatementIR } from '../ir/types';
+   |                                                 ^
+2  |
+3  |  /**
+
+  Plugin: vite:esbuild
+  File: /home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/compiler/src/targets/action-flow.ts
+ ✓ packages/compiler/test/gpui-ast-codegen.test.ts (10 tests) 11428ms
+   ✓ GPUI Rust AST target > compiles authored props/state/control flow to an actual native Render component 7303ms
+   ✓ GPUI Rust AST target > lowers actual Base Text and Surface to ordinary native child slots 1041ms
+   ✓ GPUI Rust AST target > lowers created callbacks and ordered resolved prop watches from authored source 1119ms
+   ✓ GPUI Rust AST target > keeps state writes distinct from explicit update requests and helper return scopes 1342ms
+
+ Test Files  1 passed (1)
+      Tests  10 passed (10)
+   Start at  08:37:29
+   Duration  13.12s (transform 387ms, setup 0ms, collect 1.04s, tests 11.43s, environment 190ms, prepare 57ms)
+
+PUI_COMMAND_EXIT 0

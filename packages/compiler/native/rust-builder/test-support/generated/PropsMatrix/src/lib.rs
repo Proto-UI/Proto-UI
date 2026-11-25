@@ -15,13 +15,18 @@ impl Default for PropsMatrixProps {
 }
 pub struct PropsMatrix {
     props: PropsMatrixProps,
+    update_requested: bool,
+    feedback_dirty: bool,
     last_error: Option<String>,
     resolved_prop_label: Option<String>,
     previous_prop_label: Option<String>,
+    render_prop_label: Option<String>,
     resolved_prop_amount: Option<f64>,
     previous_prop_amount: Option<f64>,
+    render_prop_amount: Option<f64>,
     resolved_prop_nullable: Option<String>,
     previous_prop_nullable: Option<String>,
+    render_prop_nullable: Option<String>,
 }
 impl PropsMatrix {
     pub fn read_prop_label(&self) -> Option<String> {
@@ -33,18 +38,31 @@ impl PropsMatrix {
     pub fn read_prop_nullable(&self) -> Option<String> {
         self.resolved_prop_nullable.clone()
     }
+    fn capture_render_snapshot(&mut self) -> () {
+        self.render_prop_label = self.resolved_prop_label.clone();
+        self.render_prop_amount = self.resolved_prop_amount.clone();
+        self.render_prop_nullable = self.resolved_prop_nullable.clone();
+    }
     pub fn new(props: PropsMatrixProps) -> Result<Self, String> {
         let mut component = Self {
             props: PropsMatrixProps::default(),
             last_error: None,
+            update_requested: false,
+            feedback_dirty: false,
             resolved_prop_label: None,
             previous_prop_label: None,
+            render_prop_label: None,
             resolved_prop_amount: None,
             previous_prop_amount: None,
+            render_prop_amount: None,
             resolved_prop_nullable: None,
             previous_prop_nullable: None,
+            render_prop_nullable: None,
         };
         component.update_props(props)?;
+        component.capture_render_snapshot();
+        component.update_requested = false;
+        component.feedback_dirty = false;
         Ok(component)
     }
     pub fn update_props(&mut self, props: PropsMatrixProps) -> Result<(), String> {
@@ -120,9 +138,28 @@ impl PropsMatrix {
         props: PropsMatrixProps,
         cx: &mut gpui::Context<Self>,
     ) -> Result<(), String> {
-        self.update_props(props)?;
-        cx.notify();
-        Ok(())
+        let result = self.update_props(props);
+        let requested = self.take_update_request();
+        let feedback = self.take_feedback_update();
+        if result.is_ok() {
+            self.capture_render_snapshot();
+            cx.notify();
+        } else {
+            if requested || feedback {
+                cx.notify();
+            }
+        };
+        result
+    }
+    fn take_update_request(&mut self) -> bool {
+        let requested = self.update_requested;
+        self.update_requested = false;
+        requested
+    }
+    fn take_feedback_update(&mut self) -> bool {
+        let dirty = self.feedback_dirty;
+        self.feedback_dirty = false;
+        dirty
     }
     pub fn take_error(&mut self) -> Option<String> {
         self.last_error.take()
@@ -136,25 +173,28 @@ impl gpui::Render for PropsMatrix {
     ) -> impl gpui::IntoElement {
         let root = gpui::div()
             .child(
-                self
-                    .resolved_prop_label
-                    .clone()
-                    .map_or_else(String::new, |value| { value.clone() }),
-            )
-            .child(
-                self
-                    .resolved_prop_amount
-                    .clone()
-                    .map_or_else(
-                        String::new,
-                        |value| { ryu_js::Buffer::new().format(value).to_owned() },
+                gpui::div()
+                    .child(
+                        self
+                            .render_prop_label
+                            .clone()
+                            .map_or_else(String::new, |value| { value.clone() }),
+                    )
+                    .child(
+                        self
+                            .render_prop_amount
+                            .clone()
+                            .map_or_else(
+                                String::new,
+                                |value| { ryu_js::Buffer::new().format(value).to_owned() },
+                            ),
+                    )
+                    .child(
+                        self
+                            .render_prop_nullable
+                            .clone()
+                            .map_or_else(String::new, |value| { value.clone() }),
                     ),
-            )
-            .child(
-                self
-                    .resolved_prop_nullable
-                    .clone()
-                    .map_or_else(String::new, |value| { value.clone() }),
             )
             .id(("proto-root", cx.entity_id()));
         root.into_any_element()

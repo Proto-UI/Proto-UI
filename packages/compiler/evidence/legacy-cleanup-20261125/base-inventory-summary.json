@@ -1,0 +1,60 @@
+{
+  "react": {
+    "exit": 0,
+    "seconds": 8.959106206893921,
+    "totals": {
+      "inputFiles": 184,
+      "analyzedFiles": 184,
+      "prototypeDeclarations": 212,
+      "authoredHookDeclarations": 214,
+      "nativeEmittedPrototypes": 2,
+      "unsupportedPrototypes": 210,
+      "sourceErrorFiles": 0,
+      "executionVerifiedPrototypes": 0
+    },
+    "statuses": {
+      "unsupported": 177,
+      "hook-analysis": 5,
+      "emitted": 2
+    },
+    "emitted": [
+      {
+        "file": "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/prototypes/base/src/surface/root.proto.ts",
+        "prototypes": ["base-surface-root"]
+      },
+      {
+        "file": "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/prototypes/base/src/text/root.proto.ts",
+        "prototypes": ["base-text-root"]
+      }
+    ]
+  },
+  "gpui": {
+    "exit": 0,
+    "seconds": 9.77987551689148,
+    "totals": {
+      "inputFiles": 184,
+      "analyzedFiles": 184,
+      "prototypeDeclarations": 212,
+      "authoredHookDeclarations": 214,
+      "nativeEmittedPrototypes": 2,
+      "unsupportedPrototypes": 210,
+      "sourceErrorFiles": 0,
+      "executionVerifiedPrototypes": 0
+    },
+    "statuses": {
+      "unsupported": 177,
+      "hook-analysis": 5,
+      "emitted": 2
+    },
+    "emitted": [
+      {
+        "file": "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/prototypes/base/src/surface/root.proto.ts",
+        "prototypes": ["base-surface-root"]
+      },
+      {
+        "file": "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/prototypes/base/src/text/root.proto.ts",
+        "prototypes": ["base-text-root"]
+      }
+    ]
+  }
+}

@@ -51,7 +51,7 @@ describe('Source to native React component integration', () => {
     const result = compiler.compilePrototype(`import {definePrototype} from '@proto.ui/core';
       export default definePrototype({name:'counter',setup(def){
         const count=def.state.numberDiscrete('count',7);
-        def.event.on('key.down',()=>{const old=count.get(); if(old>=9){count.set(0);return;} count.set(old+1);});
+        def.event.on('key.down',run=>{const old=count.get(); if(old>=9){count.set(0);run.update();return;} count.set(old+1);run.update();});
         return r => r.el('div',count.get());
       }});`);
     expect(result.ok, JSON.stringify(result.diagnostics)).toBe(true);

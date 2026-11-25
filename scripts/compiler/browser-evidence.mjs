@@ -45,15 +45,13 @@ export function verifyRecordedBrowserEvidence(receipt, current) {
   )
     throw new Error('Browser service assets do not bind the current local compiler/target inputs.');
   assertSameInputFiles(receipt.loadedAssets, current.assets);
-  const wasmDigests = new Set(
-    Object.entries(current.sourceFiles)
-      .filter(([file]) => file.endsWith('.wasm'))
-      .map(([, sha256]) => sha256)
-  );
   if (
-    !Array.isArray(receipt.loadedWasm) ||
-    !receipt.loadedWasm.length ||
-    receipt.loadedWasm.some((entry) => !wasmDigests.has(entry.sha256))
+    !Array.isArray(receipt.loadedWorkers) ||
+    !receipt.loadedWorkers.length ||
+    receipt.loadedWorkers.some(
+      (entry) =>
+        entry.compilerSha256 !== current.compilerBuild.compilerSha256 || entry.closed !== true
+    )
   )
-    throw new Error('Browser receipt does not bind the actually loaded Worker WASM bytes.');
+    throw new Error('Browser receipt does not bind and retire its actual AST compiler Workers.');
 }

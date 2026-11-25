@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createCompiler, detectLlvmToolchain } from '../src';
-import { instantiateWasmKernel } from '../src/runtime';
+import { instantiateWasmKernel } from '../src/kernel-host';
 
 const compiler = createCompiler({ rootDir: process.cwd() });
 function source(body: string) {

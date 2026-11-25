@@ -5,7 +5,7 @@ import { verifyModuleIR, verifySsaFunction } from '../src/ir/verify';
 import type { ModuleIR, PrototypeIR, SsaFunction } from '../src/ir/types';
 import { emitLlvmIRResult } from '../src/llvm/emit';
 import { compileLlvmToWasm, detectLlvmToolchain } from '../src/llvm/toolchain';
-import { instantiateWasmKernel } from '../src/runtime';
+import { instantiateWasmKernel } from '../src/kernel-host';
 
 const moduleOf = (
   functions: readonly SsaFunction[],

@@ -14,12 +14,7 @@ import {
   type CompiledPreviewItem,
 } from './compiled-preview-sandbox';
 
-const profiles = new Set([
-  'web-component-source-v1',
-  'react-dom-source-v1',
-  'vue-source-v1',
-  'vue2-source-v1',
-]);
+const targets = new Set(['react', 'web-component', 'vue', 'vue2', 'gpui', 'kernel']);
 
 /** One optional compiler session inside the existing RuntimeBox. */
 export class BrowserCompilerPanel extends HTMLElement {
@@ -154,14 +149,14 @@ export class BrowserCompilerPanel extends HTMLElement {
       this.session = new CompiledRevisionSession({
         compile: async (request) => (await client.compile(request)).result,
         prepare: async (result) => {
-          const profile = result.output.profile;
-          let target = this.targets.get(profile);
+          const targetName = result.output.target;
+          let target = this.targets.get(targetName);
           if (!target) {
             target = await this.json<BrowserTargetAssets>(
-              `/compiler-assets/targets/${profile}.json`,
+              `/compiler-assets/targets/${targetName}.json`,
               lifetime.signal
             );
-            this.targets.set(profile, target);
+            this.targets.set(targetName, target);
           }
           const asset = target;
           for (const dependency of result.output.dependencies) {
@@ -177,19 +172,21 @@ export class BrowserCompilerPanel extends HTMLElement {
             ...new Uint8Array(
               await crypto.subtle.digest(
                 'SHA-256',
-                new TextEncoder().encode(JSON.stringify(asset.modules))
+                new TextEncoder().encode(
+                  JSON.stringify({ modules: asset.modules, previewRuntime: asset.previewRuntime })
+                )
               )
             ),
           ]
             .map((value) => value.toString(16).padStart(2, '0'))
             .join('');
-          if (digest !== asset.modulesSha256)
+          if (digest !== asset.artifactSha256)
             throw new Error('Preview target artifact digest mismatch.');
           const items = JSON.parse(
             this.dataset.items ?? '[{"props":{},"text":"Preview"}]'
           ) as CompiledPreviewItem[];
           return () => {
-            this.dataset.targetSha256 = asset.modulesSha256;
+            this.dataset.targetSha256 = asset.artifactSha256;
             return mountCompiledPreview(
               this.element('[data-compiled-preview]'),
               result,
@@ -234,17 +231,17 @@ export class BrowserCompilerPanel extends HTMLElement {
       await this.open();
       return;
     }
-    if (!profiles.has(this.target.value)) throw new Error('Unsupported browser preview target.');
+    if (!targets.has(this.target.value)) throw new Error('Unknown compilation target.');
     const revision = String(++this.revisionNumber);
     const request: BrowserCompileRequest = {
-      format: 1,
+      format: 2,
       revision,
       source: this.files[this.source.entry],
       preview: true,
       options: {
         fileName: this.source.entry,
         exportName: this.source.exportName,
-        profile: this.target.value as BrowserCompileRequest['options']['profile'],
+        target: this.target.value,
         files: { ...this.files },
         sourceImports: this.source.sourceImports,
       },
@@ -273,8 +270,7 @@ export class BrowserCompilerPanel extends HTMLElement {
       this.status.textContent =
         this.messages('Source changed; waiting to compile', '源码已修改，等待编译') + revision;
     if (state.phase === 'compiling')
-      this.status.textContent =
-        this.messages('Compiling in WebAssembly', '正在 WebAssembly 中编译') + revision;
+      this.status.textContent = this.messages('Compiling source', '正在编译源码') + revision;
     if (state.phase === 'mounting')
       this.status.textContent =
         this.messages('Opening generated preview', '正在打开生成预览') + revision;
@@ -288,8 +284,8 @@ export class BrowserCompilerPanel extends HTMLElement {
         state.result?.ok === false && state.result.phase === 'compile'
           ? state.result.diagnostics.map((entry) => JSON.stringify(entry, null, 2)).join('\n')
           : state.message;
-      // Transport/VM/mount failure gets a fresh Worker on the next attempt.
-      // Ordinary compiler diagnostics keep the healthy VM and its bounded cache.
+      // Transport/mount failure gets a fresh Worker on the next attempt.
+      // Ordinary compiler diagnostics keep the healthy compilation session.
       if (!state.result || (!state.result.ok && state.result.phase === 'host')) {
         const failedGeneration = ++this.generation;
         void this.retireSession().catch((error) => {
