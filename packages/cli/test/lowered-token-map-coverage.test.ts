@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -28,7 +28,7 @@ async function observeTokenMap({
   moduleDeclarations = '',
   files = {},
 }: TokenMapFixture) {
-  const directory = await mkdtemp(path.join(tmpdir(), 'lowered-token-map-'));
+  const directory = await realpath(await mkdtemp(path.join(tmpdir(), 'lowered-token-map-')));
   try {
     const producer = path.join(directory, 'producer.ts');
     const file = path.join(directory, 'consumer.proto.ts');
