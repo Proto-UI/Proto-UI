@@ -15,6 +15,8 @@ Current development follows the [0.3 delivery plan](https://github.com/Proto-UI/
 
 The development workspace is identified by [`VERSION`](https://github.com/Proto-UI/Proto-UI/blob/main/VERSION) and its corresponding [version entity](https://github.com/Proto-UI/Proto-UI/tree/main/spec/versions); a draft train does not establish publication. The old private compiler is retired. Its [0.4 replacement foundation](https://github.com/Proto-UI/Proto-UI/blob/main/internal/compiler/README.md) defines the new contract; all five backends remain unimplemented and do not block 0.3 delivery.
 
+Existing compiler consumers should read the [retirement and migration guidance](/en/build/compiler-guide/#existing-compiler-consumers) before updating their pin. [`67fd94f58372cf35fa929f24ef731416b5817e31`](https://github.com/Proto-UI/Proto-UI/tree/67fd94f58372cf35fa929f24ef731416b5817e31) is this change's pre-retirement baseline. Keep an already-validated earlier pin, or explicitly migrate affected components to Runtime/Adapters; old compiler exports are unavailable after the reset.
+
 ## What is currently being built?
 
 Proto UI is currently focused on the following areas:

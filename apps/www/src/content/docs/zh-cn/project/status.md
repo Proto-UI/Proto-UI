@@ -15,6 +15,8 @@ npm 稳定版可用性与项目成熟度描述的是不同边界。0.2 package r
 
 工作区版本由 [`VERSION`](https://github.com/Proto-UI/Proto-UI/blob/main/VERSION) 和对应[版本实体](https://github.com/Proto-UI/Proto-UI/tree/main/spec/versions)标识；开发计划不代表已经发布。旧的私有编译器已经退役。[0.4 新编译器基础文档](https://github.com/Proto-UI/Proto-UI/blob/main/internal/compiler/README.md)定义后续合同；五个后端均尚未实现，重建不作为 0.3 交付的新增阻塞项。
 
+已有编译器消费方更新 pin 前应先阅读[退役与迁移说明](/zh-cn/build/compiler-guide/#已有编译器消费方如何迁移)。[`67fd94f58372cf35fa929f24ef731416b5817e31`](https://github.com/Proto-UI/Proto-UI/tree/67fd94f58372cf35fa929f24ef731416b5817e31) 是本次改动的退役前基线。可以保留已经验证过的较早 pin，或主动把受影响的组件迁到 Runtime / Adapter；重建后的包不再提供旧编译器导出。
+
 ## 目前正在建设什么？
 
 Proto UI 当前主要围绕以下几个方向推进：

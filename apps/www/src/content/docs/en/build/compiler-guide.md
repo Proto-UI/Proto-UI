@@ -8,6 +8,14 @@ The old private compiler has been retired. The replacement belongs to **0.4 scop
 
 Existing applications continue to use [Runtime](/en/build/runtime-architecture/) and [Adapters](/en/build/adapter-guide/). Their working examples, component facades and style tooling remain supported within their own release boundaries. The compiler rebuild does not add an acceptance condition to the 0.3 release.
 
+## Existing compiler consumers
+
+The retirement change is based on [`67fd94f58372cf35fa929f24ef731416b5817e31`](https://github.com/Proto-UI/Proto-UI/tree/67fd94f58372cf35fa929f24ef731416b5817e31), the revision immediately before this change. Applications that build with the old private compiler should retain an already-validated earlier pin until they migrate. This baseline identifies the retirement boundary; it does not certify an application's build at that revision.
+
+Moving a dependency pin across this boundary removes old exports such as `compileFile`, `writeCompilation` and `formatCompilerDiagnostics`. Existing imports or consumer export checks can fail before any compiler function is called. The replacement does not preserve those APIs.
+
+An application can explicitly migrate its affected components to the existing Runtime/Adapter path and validate them against that path's versioned contracts, or wait for the required new compiler capability. This is a consumer migration choice. The compiler does not automatically fall back to an Adapter or reinterpret old sources as the new language.
+
 ## Source of truth
 
 The new compiler has no compatibility obligation to the retired parser, APIs, generated output or tests. Its behavior is defined by the spec catalog:
@@ -54,7 +62,7 @@ The private package exposes availability only:
 node packages/compiler/src/cli-entry.mjs --status
 ```
 
-Compilation requests fail explicitly with `PUI_COMPILER_NOT_IMPLEMENTED`. There is no supported replacement compile command yet. The package remains private; this status boundary is not a promised compiler API.
+The temporary CLI rejects compilation requests with `PUI_COMPILER_NOT_IMPLEMENTED`; the `requireCompilerImplementation()` availability guard raises the same code. Imports of removed APIs can instead fail at module loading or a consumer's export check. There is no supported replacement compile command yet. The package remains private; this status boundary is not a promised compiler API.
 
 Each implementation batch must demonstrate its complete scenario through ordinary target builds and observed behavior. Unsupported language features, missing compiler work, missing backend lowering and unbound externs must remain distinguishable. Performance work starts with reproducible cold, warm, incremental, shared and per-component measurements before adopting hard budgets.
 

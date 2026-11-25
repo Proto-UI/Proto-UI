@@ -8,6 +8,14 @@ description: '0.4 Proto 语言编译器的基础规范与实现状态'
 
 现有应用继续使用 [Runtime](/zh-cn/build/runtime-architecture/) 与 [Adapter](/zh-cn/build/adapter-guide/)。真实运行的示例、组件 facade 与样式工具沿用各自版本边界。新编译器重建不会成为 0.3 发布的新增验收条件。
 
+## 已有编译器消费方如何迁移
+
+本次退役改动以 [`67fd94f58372cf35fa929f24ef731416b5817e31`](https://github.com/Proto-UI/Proto-UI/tree/67fd94f58372cf35fa929f24ef731416b5817e31) 为直接基线，该版本仍保留旧编译器。依赖旧私有编译器构建的应用，应在完成迁移前保留自己已经验证过的较早 pin。这个基线标识退役边界，并不证明应用在该版本上已经通过构建。
+
+将依赖 pin 升过这一边界后，旧的 `compileFile`、`writeCompilation`、`formatCompilerDiagnostics` 等导出会消失。已有导入或消费方的导出检查可能在调用编译器函数之前就失败；新编译器不承诺保留这些 API。
+
+应用可以主动把受影响的组件迁到现有 Runtime / Adapter 路径，并按该路径的版本化合同验证行为，也可以等待所需的新编译能力。这是消费方的迁移选择；编译器不会自动回退到 Adapter，也不会把旧源码静默解释为新语言。
+
 ## 以什么为准
 
 新编译器不承担旧解析器、API、生成代码或测试的兼容义务。行为由 spec catalog 定义：
@@ -54,7 +62,7 @@ Proto 使用合法的 TypeScript 语法及其编译器基础设施，独立定�
 node packages/compiler/src/cli-entry.mjs --status
 ```
 
-编译请求明确返回 `PUI_COMPILER_NOT_IMPLEMENTED`。目前没有可用的新编译命令；该包仍为私有包，可用性查询也不是已承诺的编译器 API。
+临时 CLI 对编译请求返回 `PUI_COMPILER_NOT_IMPLEMENTED`，`requireCompilerImplementation()` 可用性检查也抛出同一错误码。导入已移除的 API 则可能在模块加载或消费方的导出检查处失败。目前没有可用的新编译命令；该包仍为私有包，可用性查询也不是已承诺的编译器 API。
 
 后续按能力集交付，每批通过普通目标构建与真实行为验证完整场景。语言不合法、编译器尚未实现、后端尚未降低、extern 缺少绑定应能分别诊断。性能工作先固定冷、热、增量、共享成本与单组件成本的测量方法，再制定硬预算。
 
