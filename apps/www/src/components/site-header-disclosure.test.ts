@@ -615,16 +615,19 @@ describe('Docs header offset ownership', () => {
   const portalHeight = '--docs-preview-header-height';
 
   function measuredFixture(initial = '7rem') {
-    let deliver!: () => void;
+    const deliveries = new Map<Element, () => void>();
     const observe = vi.fn();
     const disconnect = vi.fn();
     vi.stubGlobal(
       'ResizeObserver',
       class {
-        constructor(callback: () => void) {
-          deliver = callback;
+        observe: (target: Element) => void;
+        constructor(callback: (entries: Pick<ResizeObserverEntry, 'target'>[]) => void) {
+          this.observe = (target) => {
+            deliveries.set(target, () => callback([{ target }]));
+            observe(target);
+          };
         }
-        observe = observe;
         disconnect = disconnect;
       }
     );
@@ -641,7 +644,7 @@ describe('Docs header offset ownership', () => {
     return {
       frame,
       root,
-      deliver: () => deliver(),
+      deliver: () => deliveries.get(root)!(),
       observe,
       disconnect,
       writes,
