@@ -31,13 +31,20 @@ const collapsibleContent = definePrototype<
     });
     // P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT-VISUAL-SAFETY: no fixed width/height or clipped long label.
     def.feedback.style.use(
-      tw('block min-w-0 max-w-full text-foreground wrap-anywhere text-[14px] leading-[20px]')
+      tw(
+        'block min-w-0 max-w-full text-foreground wrap-anywhere text-[14px] leading-[20px] border-[#e5e5e5]'
+      )
     );
+    def.rule({
+      when: (w) => w.meta('colorScheme').eq('dark'),
+      intent: (i) => i.feedback.style.use(tw('border-border')),
+    });
     return (renderer) =>
       renderer.el(
         'div',
         {
-          style: tw('border-t border-border px-[15px] py-[9px]'),
+          // Only color inherits; the animated host keeps zero border width and padding.
+          style: tw('border-t border-inherit px-[15px] py-[9px]'),
         },
         renderer.slot()
       );

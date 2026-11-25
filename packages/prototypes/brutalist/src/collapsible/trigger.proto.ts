@@ -28,12 +28,21 @@ const collapsibleTrigger = definePrototype<
     // Raised control: 4px hard shadow at rest; +4px,+4px press-only displacement (no hover shift).
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full text-main-foreground wrap-anywhere whitespace-break-spaces text-left cursor-pointer select-none inline-flex items-center justify-start gap-2 rounded-base border-2 border-border bg-main px-4 py-2 text-sm font-sans font-medium shadow-[4px_4px_0_0_var(--pui-foreground)] relative hit-envelope-translate-1'
+        'min-w-0 max-w-full text-main-foreground wrap-anywhere whitespace-break-spaces text-left cursor-pointer select-none inline-flex items-center justify-start gap-2 rounded-base border-2 border-border bg-main px-4 py-2 text-sm font-sans font-medium shadow-[4px_4px_0_0_#000] relative hit-envelope-translate-1'
       )
     );
     def.rule({
       when: (w) => w.meta('colorScheme').eq('dark'),
       intent: (i) => i.feedback.style.use(tw('border-foreground')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.meta('colorScheme').eq('dark'),
+          w.not(w.prop('variant').eq('noShadow')),
+          w.state(pressed).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('shadow-[4px_4px_0_0_var(--pui-foreground)]')),
     });
     def.rule({
       when: (w) => w.prop('variant').eq('neutral'),
