@@ -62,9 +62,13 @@ it('T-COLLECTION-0002-CASE-MODULE: projects current Anatomy order and metadata w
     last: false,
   });
   expect(anatomy.order.indexOfSelf).not.toHaveBeenCalled();
-  const cancel = provider.subscribe(() => {});
+  const change = () => {};
+  const cancel = provider.subscribe(change);
+  expect(subscribe).toHaveBeenLastCalledWith(config.family, change, 'item');
   cancel();
-  expect(off).toHaveBeenCalledTimes(1);
+  item.subscribe(change)();
+  expect(subscribe).toHaveBeenLastCalledWith(config.family, change, 'item');
+  expect(off).toHaveBeenCalledTimes(2);
   parts = [];
   expect(provider.readCount()).toBe(0);
   expect(item.readPosition()).toEqual({ index: -1, total: 0, first: false, last: false });
