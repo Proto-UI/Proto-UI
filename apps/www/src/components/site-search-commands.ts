@@ -438,7 +438,12 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
         !candidate.host.inert;
       const composition = createSiteSearchComposition({
         family,
-        shadcnStyle: root.dataset.searchStyle === 'new-york-v4' ? 'new-york-v4' : 'rhea',
+        shadcnStyle:
+          root.dataset.searchStyle === 'new-york-v4'
+            ? 'new-york-v4'
+            : root.dataset.searchStyle === 'rhea'
+              ? 'rhea'
+              : 'luma',
         session: search.session,
         copy: search.copy,
         isCurrent: current,

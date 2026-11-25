@@ -103,20 +103,22 @@ async function mount(family: Family) {
 
 for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
   describe(`${family} homepage scenes real WC integration`, () => {
-    it('mounts ten real cards, decorative icons, a labelled sample chart and attribution', async () => {
+    it('mounts twelve real cards, decorative icons, a labelled sample chart and attribution', async () => {
       const view = await mount(family);
       await settle();
       const cards = [...view.host.querySelectorAll<HTMLElement>('[data-gallery-demo]')];
       expect(cards.map((card) => card.dataset.galleryDemo)).toEqual([
         'controls',
-        'workspace-command',
+        'shortcuts',
         'workspace-analytics',
-        'workspace-progress',
+        'workspace-command',
         'preferences',
-        'workspace-help',
-        'editor',
+        'workspace-progress',
         'hover',
+        'editor',
+        'workspace-help',
         'overlays',
+        'spark',
         'choices',
       ]);
       const analytics = cards.find((card) => card.dataset.galleryDemo === 'workspace-analytics')!;
@@ -133,7 +135,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
         .poll(() => [...bars].map((bar) => bar.getAttribute('height')).join(','))
         .not.toBe(initialHeights.join(','));
       const icons = view.host.querySelectorAll('[data-gallery-icon] svg');
-      expect(icons).toHaveLength(10);
+      expect(icons).toHaveLength(18);
       for (const icon of icons) {
         expect(icon.getAttribute('aria-hidden')).toBe('true');
         expect(icon.closest('[data-gallery-icon]')?.getAttribute('aria-hidden')).toBe('true');

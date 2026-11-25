@@ -6,20 +6,40 @@ import type { ProjectionFamilyId } from '../PrototypePreviewer/projection-famili
  * finite variant vocabulary, so a name that one family accepts is invalid for
  * another and silently falls back to that family's declared default.
  *
- * - Shadcn: `default` / `outline` / `destructive`
+ * - Shadcn: `default` / `secondary` / `outline` / `destructive`
  * - Brutalist: `solid` / `surface` / `destructive`
  * - Bootstrap 2.3.2: `default` / `primary` / `danger` and the other hue names
  * - Liquid Glass: `regular` / `prominent`
  */
-export type HomepageButtonIntent = 'primary' | 'secondary' | 'danger';
+export type HomepageButtonIntent = 'primary' | 'secondary' | 'outline' | 'danger';
 
 const VARIANT_BY_FAMILY: Readonly<
   Record<ProjectionFamilyId, Readonly<Record<HomepageButtonIntent, string>>>
 > = {
-  shadcn: { primary: 'default', secondary: 'outline', danger: 'destructive' },
-  brutalist: { primary: 'solid', secondary: 'surface', danger: 'destructive' },
-  'bootstrap-2-3-2': { primary: 'primary', secondary: 'default', danger: 'danger' },
-  'liquid-glass': { primary: 'prominent', secondary: 'regular', danger: 'regular' },
+  shadcn: {
+    primary: 'default',
+    secondary: 'secondary',
+    outline: 'outline',
+    danger: 'destructive',
+  },
+  brutalist: {
+    primary: 'solid',
+    secondary: 'surface',
+    outline: 'surface',
+    danger: 'destructive',
+  },
+  'bootstrap-2-3-2': {
+    primary: 'primary',
+    secondary: 'default',
+    outline: 'default',
+    danger: 'danger',
+  },
+  'liquid-glass': {
+    primary: 'prominent',
+    secondary: 'regular',
+    outline: 'regular',
+    danger: 'regular',
+  },
 };
 
 /** The variant name this family actually declares for the requested intent. */

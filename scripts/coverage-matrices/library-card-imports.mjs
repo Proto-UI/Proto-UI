@@ -109,7 +109,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/UiLibraryGallery.astro': Object.freeze({
-    sourceSha256: 'a58a50d68d67fdca2a22e3312191372658daf4b8349855c7d6b5e73872c521bb',
+    sourceSha256: 'b93920864a23913c3f752b748c30a32c5f4bafda35b83d0065d26ce8861a4a19',
     specifiers: Object.freeze([
       '../../../../packages/prototypes/brutalist/src/theme',
       '../../../../packages/prototypes/bootstrap-2-3-2/src/theme',

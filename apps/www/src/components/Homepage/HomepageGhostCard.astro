@@ -22,14 +22,14 @@ const colorSchemes = ['light', 'dark'] as const;
             <div class="ghost-card__scheme" data-home-ghost-scheme={colorScheme}>
               <LibraryCardPart
                 part="shadcn-card"
-                props={{ styleProfile: 'rhea' }}
+                props={{ styleProfile: 'luma' }}
                 colorScheme={colorScheme}
               >
-                <LibraryCardPart part="shadcn-header" props={{ styleProfile: 'rhea' }}>
+                <LibraryCardPart part="shadcn-header" props={{ styleProfile: 'luma' }}>
                   <span class="ghost-card__line ghost-card__title" />
                   <span class="ghost-card__line" />
                 </LibraryCardPart>
-                <LibraryCardPart part="shadcn-content" props={{ styleProfile: 'rhea' }}>
+                <LibraryCardPart part="shadcn-content" props={{ styleProfile: 'luma' }}>
                   <div class="ghost-card__body">
                     <span class="ghost-card__media" />
                     <span class="ghost-card__line" />
@@ -38,6 +38,21 @@ const colorSchemes = ['light', 'dark'] as const;
               </LibraryCardPart>
             </div>
           ))
+        ) : family === 'brutalist' ? (
+          <LibraryCardPart part="brutalist-card">
+            <LibraryCardPart part="brutalist-header">
+              <div class="ghost-card__heading">
+                <span class="ghost-card__line ghost-card__title" />
+                <span class="ghost-card__line" />
+              </div>
+            </LibraryCardPart>
+            <LibraryCardPart part="brutalist-content">
+              <div class="ghost-card__body">
+                <span class="ghost-card__media" />
+                <span class="ghost-card__line" />
+              </div>
+            </LibraryCardPart>
+          </LibraryCardPart>
         ) : (
           <LibraryCardPart
             part={`${family}-surface`}
@@ -96,6 +111,12 @@ const colorSchemes = ['light', 'dark'] as const;
       display: block;
     }
   }
+  .ghost-card__heading {
+    display: grid;
+    gap: 0.5rem;
+    width: 100%;
+    min-width: 0;
+  }
   .ghost-card__body {
     display: grid;
     gap: 1rem;
@@ -111,6 +132,7 @@ const colorSchemes = ['light', 'dark'] as const;
   .ghost-card__line {
     width: 85%;
     height: 0.5rem;
+    border-radius: 9999px;
   }
   .ghost-card__title {
     width: 55%;
@@ -118,9 +140,10 @@ const colorSchemes = ['light', 'dark'] as const;
   }
   .ghost-card__media {
     width: 100%;
-    height: 5rem;
+    height: 6rem;
+    border-radius: 0.75rem;
   }
   .ghost-card--tall .ghost-card__media {
-    height: 9rem;
+    height: 11rem;
   }
 </style>

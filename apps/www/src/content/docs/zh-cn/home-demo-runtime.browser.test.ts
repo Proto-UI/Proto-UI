@@ -27,7 +27,7 @@ const CONTROL_OPTION_LABELS = {
   family: {
     shadcn: 'Shadcn',
     brutalist: 'Brutalist',
-    'bootstrap-2-3-2': 'Bootstrap 2.3.2 · WIP',
+    'bootstrap-2-3-2': 'Bootstrap 2.3.2',
   },
 } as const;
 
@@ -261,7 +261,7 @@ async function createHomeGalleryObservation(
     expect(facts).toMatchObject({
       inert: true,
       columnCount: 5,
-      cardCount: 10,
+      cardCount: 12,
       noOverflow: true,
       fitsGallery: true,
       fadePointerEvents: 'none',
@@ -307,6 +307,9 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
       const home = page.locator(HOME_SELECTOR);
       await chooseRuntime(page, home, 'wc');
       await chooseProjectionControl(page, home, 'family', 'bootstrap-2-3-2');
+      await expect
+        .poll(() => home.getAttribute('data-projection-family'), { timeout: 30_000 })
+        .toBe('bootstrap-2-3-2');
       const choices = home.locator('[data-demo-ref="choice-product"]').locator('xpath=..');
       const control = choices.getByRole('checkbox', { name: '产品更新', exact: true });
       const label = choices.getByText('产品更新', { exact: true });
@@ -352,6 +355,9 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
       const home = page.locator(HOME_SELECTOR);
       await chooseRuntime(page, home, 'wc');
       await chooseProjectionControl(page, home, 'family', 'bootstrap-2-3-2');
+      await expect
+        .poll(() => home.getAttribute('data-projection-family'), { timeout: 30_000 })
+        .toBe('bootstrap-2-3-2');
       const editorCard = home.locator('[data-gallery-demo="editor"]');
       const edit = editorCard.getByRole('tab', { name: '编辑', exact: true });
       const preview = editorCard.getByRole('tab', { name: '预览', exact: true });
@@ -390,7 +396,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
     } finally {
       await context.close();
     }
-  });
+  }, 60_000);
 
   it('separates action-label selection from useful content and native editor selection across runtimes', async () => {
     // C-CONTENT-SELECTION-AFFORDANCE-0001: actual Chromium mouse/keyboard input;
@@ -810,7 +816,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         if (sample.ref === 'settings-save' || sample.ref === 'settings-reset') {
           const tokens = sample.style.split(/\s+/);
           expect(tokens).toContain('transition-all');
-          expect(tokens).toContain('min-h-8');
+          expect(tokens).toContain('min-h-9');
           expect(tokens).toContain('h-auto');
         }
       }
@@ -933,7 +939,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         expect(initial).toMatchObject({
           inert: true,
           columnCount: 5,
-          cardCount: 10,
+          cardCount: 12,
           noOverflow: true,
           fitsGallery: true,
           fadePointerEvents: 'none',

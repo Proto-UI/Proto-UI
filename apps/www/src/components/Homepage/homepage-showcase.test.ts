@@ -122,10 +122,12 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     collectPrototypeIds(content.demo.root, ids);
     expect([...ids].sort()).toEqual([...content.recipe.prototypeIds].sort());
 
-    if (family === 'shadcn') {
+    if (family === 'shadcn' || family === 'brutalist') {
       for (const part of ['root', 'header', 'content'])
-        expect(ids.has(`shadcn-card-${part}`)).toBe(true);
-      expect(ids.has('shadcn-surface-root')).toBe(true); // the passive profile mark
+        expect(ids.has(`${family}-card-${part}`)).toBe(true);
+    }
+    if (family === 'shadcn') {
+      expect(ids.has('shadcn-surface-root')).toBe(true); // passive badges and icon tiles
       expect(ids.has('shadcn-select-group')).toBe(true);
     }
     const sceneIds = [
@@ -148,6 +150,10 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       'accordion-heading',
       'accordion-trigger',
       'accordion-content',
+      'input-root',
+      'radio-group-root',
+      'radio-group-item',
+      'radio-group-indicator',
     ].map((suffix) => `${family}-${suffix}`);
     if (family === 'shadcn') sceneIds.push('shadcn-command-input-wrapper', 'shadcn-input-shell');
     const assertRecipe = (recipe: readonly string[]) => {
@@ -167,7 +173,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       [...ids].every((id) => id.startsWith(`${family}-`) || id === PREVIEW_SURFACE_ID(family))
     ).toBe(true);
     expect(ids.has(`${family}-hover-card-root`)).toBe(true);
-    expect(ids.has(`${family}-card-root`)).toBe(family === 'shadcn');
+    expect(ids.has(`${family}-card-root`)).toBe(family === 'shadcn' || family === 'brutalist');
     const composition = createProjectionComposition({
       ownerId: 'settings',
       runtimeId: 'wc',
@@ -192,7 +198,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     );
     expect(JSON.stringify(composition.demo.root)).not.toContain('"data-projection-id":"button"');
   });
-  it(`${family} composes ten task cards without a veil over live controls and with real source attribution`, () => {
+  it(`${family} composes twelve task cards without a veil over live controls and with real source attribution`, () => {
     const content = createHomepageShowcase(family, 'wc', 'en', () => true);
     assertDemoSpec(content.demo);
     const root = content.demo.root;
@@ -225,14 +231,16 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     visit(root);
     expect(cards.map((card) => card.id)).toEqual([
       'controls',
-      'workspace-command',
+      'shortcuts',
       'workspace-analytics',
-      'workspace-progress',
+      'workspace-command',
       'preferences',
-      'workspace-help',
-      'editor',
+      'workspace-progress',
       'hover',
+      'editor',
+      'workspace-help',
       'overlays',
+      'spark',
       'choices',
     ]);
     expect(new Set(cards.map((card) => card.density))).toEqual(new Set(['regular', 'compact']));
@@ -241,9 +249,10 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     );
     expect(cards.filter((card) => card.body === 'edge-media').map((card) => card.id)).toEqual([
       'workspace-analytics',
+      'spark',
     ]);
-    expect(icons).toHaveLength(10);
-    expect(new Set(icons).size).toBe(10);
+    expect(icons).toHaveLength(18);
+    expect(new Set(icons).size).toBe(18);
     expect(charts).toBe(1);
     expect(fades).toBe(0);
     expect(links).toEqual([

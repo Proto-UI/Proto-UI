@@ -137,7 +137,7 @@ export function siteTextRecipe(
             ? 'inherit'
             : 'default',
     weight: chineseSlogan
-      ? 'medium'
+      ? 'semibold'
       : role === 'notice-title' || role === 'table-head'
         ? 'semibold'
         : heading
@@ -168,7 +168,7 @@ export function siteTextRecipe(
                   ? 'size'
                   : 'normal',
     tracking: chineseSlogan
-      ? 'normal'
+      ? 'tight'
       : shadcnHero && role === 'slogan' && heroViewport === 'wide'
         ? 'tighter'
         : role === 'slogan' || role === 'h1' || role === 'h2'
