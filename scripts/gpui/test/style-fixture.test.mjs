@@ -48,6 +48,33 @@ test('selection tokens are neither element declarations nor no-op markers', () =
   }
 });
 
+test('authored Toast styles are declarations rather than selector-only markers', () => {
+  const fixture = JSON.parse(readFileSync(FIXTURE, 'utf8'));
+  for (const token of [
+    'duration-300',
+    'ease-out',
+    'leading-[1.4]',
+    'opacity-95',
+    'pointer-events-auto',
+    'shadow-[0_4px_12px_rgb(0_0_0/10%)]',
+    'z-0',
+    'z-20',
+    'z-30',
+  ]) {
+    assert.ok(fixture.tokens[token], `${token} must retain its compiled declarations`);
+    assert.ok(fixture.order.includes(token), `${token} must retain cascade order`);
+    assert.ok(!fixture.noDeclarations.includes(token), `${token} is not a selector marker`);
+  }
+  // The native vocabulary treats every noDeclarations entry as intentionally
+  // ignorable. A fresh snapshot must not conceal an unimplemented utility.
+  assert.deepEqual(
+    fixture.noDeclarations.filter(
+      (token) => token !== 'peer' && !/^group\/[a-z0-9-]+$/.test(token)
+    ),
+    []
+  );
+});
+
 test('the Spinner single border-color intent retains the existing native declaration gaps', () => {
   const tokens = JSON.parse(readFileSync(FIXTURE, 'utf8')).tokens;
   // Same declarations as the former border-current + border-t-transparent pair.
