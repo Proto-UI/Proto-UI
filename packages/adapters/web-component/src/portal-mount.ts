@@ -42,6 +42,18 @@ export function beginWebComponentPortalViewAcquisition(el: HTMLElement): () => v
   };
 }
 
+const reconcileViewColorScheme = new WeakMap<Element, () => void>();
+/** Register only a current WC default-reader view; this is not a document notification. */
+export function registerWebComponentPortalColorScheme(
+  el: HTMLElement,
+  reconcile: () => void
+): () => void {
+  reconcileViewColorScheme.set(el, reconcile);
+  return () => {
+    if (reconcileViewColorScheme.get(el) === reconcile) reconcileViewColorScheme.delete(el);
+  };
+}
+
 const refreshProjections = new WeakMap<HTMLElement, () => void>();
 export function refreshWebComponentPortalProjection(el: HTMLElement): void {
   refreshProjections.get(el)?.();
@@ -267,6 +279,16 @@ export function createWebComponentPortalMount() {
       const presentFirstRender = () => {
         if (!revealIsFirstRender) return;
         revealIsFirstRender = false;
+        const reveal = cancelReveal;
+        // A parent's mounted callback can change the document theme after its
+        // children mounted. Reconcile their existing active leases before the
+        // first style is published, without extending the transition guard or
+        // suppressing authored @starting-style entrances.
+        for (const target of [el, ...el.querySelectorAll('*')]) {
+          if (!isCurrent() || cancelReveal !== reveal) return;
+          if (target === el || el.contains(target)) reconcileViewColorScheme.get(target)?.();
+        }
+        if (!isCurrent() || cancelReveal !== reveal) return;
         endReveal();
       };
       let unbindAdoption: (() => void) | null = null;

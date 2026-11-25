@@ -125,6 +125,7 @@ import {
   adoptWebComponentPortalProjections,
   isWebComponentPortaled,
   beginWebComponentPortalViewAcquisition,
+  registerWebComponentPortalColorScheme,
 } from './portal-mount';
 import { createRebindableColorSchemeSource } from './color-scheme-source';
 import { createRebindableWebKeyedMetaSources } from './keyed-meta-sources';
@@ -526,6 +527,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       let runFocusCallbackScope: ((fn: () => void) => void) | null = null;
       const scopedExposesReader = createScopedExposesReader(() => runFocusCallbackScope);
       let releaseCurrentView: (() => void) | null = null;
+      let releasePortalColorScheme: (() => void) | null = null;
       let ownerResourcesReleased = false;
       const releaseOwnerResources = () => {
         if (ownerResourcesReleased) return;
@@ -533,6 +535,10 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         this._documentChangeListeners.clear();
         this._pendingPresentationDocument = null;
         completeCleanup([
+          () => {
+            releasePortalColorScheme?.();
+            releasePortalColorScheme = null;
+          },
           () => {
             const cleanup = releaseCurrentView;
             releaseCurrentView = null;
@@ -636,6 +642,18 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               ownerSplitResources.environment.subscribe(listener),
           }
         : this._defaultColorSchemeSource;
+      if (!shadow && this._defaultColorSchemeSource) {
+        releasePortalColorScheme = registerWebComponentPortalColorScheme(thisEl, () => {
+          if (
+            !ownerResourcesReleased &&
+            !this._terminalDisposing &&
+            this._instanceToken === instanceToken &&
+            owner.hasView &&
+            thisEl.isConnected
+          )
+            this._defaultColorSchemeSource?.reconcileForView();
+        });
+      }
       this._hostDisplay = installDefaultHostDisplay(thisEl, {
         displayOwner: split ? 'presentation' : 'fallback',
       });
