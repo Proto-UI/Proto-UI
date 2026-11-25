@@ -1,0 +1,60 @@
+{
+  "codeRevision": "39ea50a0635be857734461a7af1bd6e61ecd70a6",
+  "changeScope": "documentation and installed-package evidence only",
+  "checks": {
+    "authoring": {
+      "exit": 0,
+      "seconds": 24.00590991973877,
+      "steps": [
+        {
+          "command": "corepack pnpm@10.32.1 check:spec-authoring -- --base 73ff284730c4b93a8c145bd23a4ab0370edec9a1",
+          "exit": 0
+        }
+      ]
+    },
+    "catalog": {
+      "exit": 0,
+      "seconds": 9.001861333847046,
+      "steps": [
+        {
+          "command": "corepack pnpm@10.32.1 exec vitest run packages/spec/graph/test/catalog-evidence-integrity.test.ts",
+          "exit": 0
+        }
+      ]
+    },
+    "agent-doc": {
+      "exit": 0,
+      "seconds": 14.42122769355774,
+      "steps": [
+        {
+          "command": "corepack pnpm@10.32.1 spec:docs:agent",
+          "exit": 0
+        },
+        {
+          "command": "corepack pnpm@10.32.1 check:agent-doc",
+          "exit": 0
+        }
+      ]
+    }
+  },
+  "publicDocs": {
+    "command": ["bash", "-lc", "corepack pnpm@10.32.1 -w -s check:public-docs"],
+    "exitCode": 0,
+    "seconds": 4.5,
+    "stdout": "[public-docs] OK: stable 0.2.0 from spec/versions/V-PROTO-UI-0008.yaml; workspace 0.3.0; 307 bilingual primary routes; 4 library inventories; 459 maintained repository documents.\n",
+    "stderr": "",
+    "allPublishedFileAndArchiveEntryHashesVerified": true,
+    "archiveEntries": 114
+  },
+  "documents": {
+    "internal/compiler/v2-compilation-spec.md": "ba1275ea8080182455ac49277e7a4e421101eb0c64fae5556e88b9942e9be92a",
+    "spec/tests/T-COMPILER-PIPELINE-0001.yaml": "23da975c781f6799ed76d1e8773f6f1d5b8f86b98d452c1cd5491fb3aa937372",
+    "packages/compiler/evidence/continuation-20261125/README.md": "9d003e6ee04d9a775147ea880278409fe606201922cd8a5a1be236f7a58490ff",
+    "packages/compiler/evidence/pinned-package-39ea50a0/README.md": "34f37b66a049a75fa30fbd217c0ddaaaf3d090a68ea88eb53efa59d34d6f28a4"
+  },
+  "archive": {
+    "path": "post-package-docs.tar.gz",
+    "bytes": 2982,
+    "sha256": "77830b47cf2293c2ffe6aa7f700966a2354bc935e593583e4ba9cfb913ad370a"
+  }
+}

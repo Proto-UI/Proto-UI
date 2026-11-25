@@ -260,6 +260,8 @@ API 和 CLI 共享结构化诊断：错误码、类别、严重度、源位置�
 
 本轮最终集成数字和逐项命令保存在[当前执行回执](../../packages/compiler/evidence/continuation-20261125/README.md)，包含完整 compiler Vitest、严格 compiler/workspace TypeScript 检查、初始化顺序正反控和真实原生消费者。GPUI 的 13 项原生 Rust 测试与两套 pin 的 Cargo 检查单独计数；浏览器的 [7 项真实 Chrome 流程及原始产物](../../packages/compiler/evidence/browser-ast-20261125/README.md)单独计数。任何一个数字都不替代全量 Base 或真实应用迁移。
 
+当前固定版本包绑定代码提交 `39ea50a0635be857734461a7af1bd6e61ecd70a6`，已执行干净构建、安装、完整包移位及新缓存下的 LLVM/Rust 构建；React SSR/DOM、真实 WASM 内核和 CLI 发布保护均通过。[固定版本回执](../../packages/compiler/evidence/pinned-package-39ea50a0/README.md)独立记录命令、退出值和字节身份。两份未配置 authoring SDK 的真实消费者 checkout 均保留其原始 source error；显式绑定本候选 Core/Types 后，Shenko 的 transport-badge 原生产出 React，Verdant 的 pitch-gesture-surface 因 expose 未实现明确拒绝。两者 execution count 均为 0，不代表应用集成或运行验收。
+
 此前 `59c18246` 的 12 个 Vitest 文件/61 项测试、0/212 Base 盘点及 6 项 GPUI 原生测试保留在[历史回执](../../packages/compiler/evidence/ast-pipeline-20261125/receipt.json)。它们描述各自源码快照，不继承为后续修改的验证。较早临时固定包的[机制验证](../../packages/compiler/evidence/pinned-package-snapshot-01a33b38/README.md)也不代表当前候选提交。
 
 | 层 | 必须执行的检查 |

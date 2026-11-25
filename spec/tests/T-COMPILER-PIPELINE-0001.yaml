@@ -264,8 +264,8 @@ implementations:
       - T-COMPILER-PIPELINE-0001-CASE-CONSUMERS
     notes:
       - Both native-asset location tests passed in the isolated worktree on 2026-11-25, covering source and relocated bundle layouts for the LLVM and Rust drivers.
-      - The separate pinned-package smoke exercised a temporary clean snapshot with fresh native caches; it is mechanism evidence and not approval of the final candidate pin or a substitute for real application migration.
-      - Raw mechanism receipts are retained at packages/compiler/evidence/pinned-package-snapshot-01a33b38, explicitly identifying the temporary snapshot rather than the final candidate.
+      - The exact clean candidate 39ea50a0635be857734461a7af1bd6e61ecd70a6 was built, installed with npm ci, relocated intact and consumed with fresh native caches. Installed-package React SSR, LLVM IRBuilder/WASM/kernel-host, GPUI Rust AST, CLI publication and independent DOM consumer checks all passed; receipts are retained at packages/compiler/evidence/pinned-package-39ea50a0/README.md.
+      - Earlier mechanism receipts remain at packages/compiler/evidence/pinned-package-snapshot-01a33b38 with their original temporary snapshot identity. The current installed package has no ./runtime export and explicitly exposes ./kernel-host; package success does not complete real application migration.
   - id: compiler-real-consumers
     kind: runtime-test
     status: missing
@@ -274,6 +274,8 @@ implementations:
       - T-COMPILER-PIPELINE-0001-CASE-CONSUMERS
     notes:
       - Retains cross-target, browser/library, Shenko React/Web, and Verdant GPUI migration obligations. Verdant workspace z3rm@e5f2f9db75e97613232b5c1946333e61fa3828ab and compiler upstreamGPUI 62e5991 require separate checks, not an assertion of one identical version.
+      - Current exact-package admission preserves both raw-checkout TS2307 failures caused by missing authoring SDK resolution. With explicit candidate Core/Types mapping and unchanged consumer source, Shenko transport-badge emits one React prototype; Verdant pitch-gesture-surface is explicitly unsupported because expose lowering is missing. Both reports claim zero execution and no application source changes.
+      - The migrated library worker coordinator retains 1015 authored entries across 11 target/obligation rows. The selected Text rows emit for React and GPUI, Button rows remain unsupported, and all unselected/unimplemented rows retain their states; selected execution completeness is separate from full admission coverage.
   - id: compiler-cli-e2e
     kind: module-test
     status: passing

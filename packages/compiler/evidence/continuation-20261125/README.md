@@ -32,7 +32,7 @@ Callback defaults and async/generator rule intents are explicitly rejected until
 - [GPUI native execution](../../native/rust-builder/test-support/evidence/continuation-20261125-summary.md) records 13 fork-native tests and independently locked fork/upstream builds.
 - [Browser execution](../browser-ast-20261125/README.md) records real Chrome Worker/native-preview cases and retained generated TS/JS and DOM.
 - [Legacy cleanup](../legacy-cleanup-20261125/README.md) records migrated tools, output-publication controls and original failed attempts.
-- Installed-package verification is recorded separately against the exact candidate commit after that commit is created; these source-mode gates alone do not claim installed-package acceptance.
+- [Installed-package verification](../pinned-package-39ea50a0/README.md) passed against the exact clean code commit `39ea50a0635be857734461a7af1bd6e61ecd70a6`, with installation, relocation, cold native builders, CLI protection and independent React consumption. Raw consumer environment failures and SDK-bound admission results remain separate from that package acceptance.
 
 ## Raw evidence
 

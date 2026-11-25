@@ -1,0 +1,436 @@
+{
+  "schema": "proto-ui.published-exact-candidate-verification.v1",
+  "codeRevision": "39ea50a0635be857734461a7af1bd6e61ecd70a6",
+  "runStatus": "completed-with-consumer-admission-failures",
+  "packageVerificationPassed": true,
+  "runSeconds": 72.54,
+  "toolchain": {
+    "node": "v24.3.0",
+    "execPath": "/home/ezra/.local/share/fnm/node-versions/v24.3.0/installation/bin/node"
+  },
+  "sourceBefore": {
+    "revision": "39ea50a0635be857734461a7af1bd6e61ecd70a6",
+    "tree": "74ea5cbe0eb29cfabe8e7f346976a75b1f012391",
+    "status": ""
+  },
+  "sourceAfter": {
+    "revision": "39ea50a0635be857734461a7af1bd6e61ecd70a6",
+    "tree": "74ea5cbe0eb29cfabe8e7f346976a75b1f012391",
+    "status": ""
+  },
+  "steps": [
+    {
+      "name": "toolchain",
+      "argv": ["node", "-p", "JSON.stringify({node:process.version,execPath:process.execPath})"],
+      "exitCode": 0,
+      "seconds": 0.916,
+      "requiredPackageGate": true
+    },
+    {
+      "name": "build-pinned",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/scripts/compiler/build-pinned.ts",
+        "--revision",
+        "39ea50a0635be857734461a7af1bd6e61ecd70a6",
+        "--output",
+        "/tmp/pui-exact-39ea50a0-xsn__c3y/built-package"
+      ],
+      "exitCode": 0,
+      "seconds": 4.524,
+      "requiredPackageGate": true
+    },
+    {
+      "name": "npm-ci",
+      "argv": ["npm", "ci", "--ignore-scripts", "--no-audit", "--no-fund"],
+      "exitCode": 0,
+      "seconds": 1.617,
+      "requiredPackageGate": true
+    },
+    {
+      "name": "build-info",
+      "argv": [
+        "node",
+        "/tmp/pui-exact-39ea50a0-xsn__c3y/relocated/compiler/cli.js",
+        "--build-info"
+      ],
+      "exitCode": 0,
+      "seconds": 1.318,
+      "requiredPackageGate": true
+    },
+    {
+      "name": "cli-info",
+      "argv": [
+        "node",
+        "/tmp/pui-exact-39ea50a0-xsn__c3y/relocated/compiler/cli.js",
+        "info",
+        "--json"
+      ],
+      "exitCode": 0,
+      "seconds": 1.367,
+      "requiredPackageGate": true
+    },
+    {
+      "name": "copy-authoring-support",
+      "argv": [
+        "node",
+        "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-deliveries/39ea50a0635be857734461a7af1bd6e61ecd70a6/exact-package/prepare-support.mjs",
+        "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125",
+        "/tmp/pui-exact-39ea50a0-xsn__c3y/authoring-support"
+      ],
+      "exitCode": 0,
+      "seconds": 1.168,
+      "requiredPackageGate": true
+    },
+    {
+      "name": "pinned-ast",
+      "argv": [
+        "node",
+        "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/scripts/compiler/pinned-ast-smoke.mjs",
+        "--compiler",
+        "/tmp/pui-exact-39ea50a0-xsn__c3y/relocated/compiler/index.js",
+        "--source-root",
+        "/tmp/pui-exact-39ea50a0-xsn__c3y/authoring-support",
+        "--llvm",
+        "--gpui"
+      ],
+      "exitCode": 0,
+      "seconds": 16.652,
+      "requiredPackageGate": true
+    },
+    {
+      "name": "pinned-cli",
+      "argv": [
+        "node",
+        "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/scripts/compiler/pinned-cli-smoke.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 18.256,
+      "requiredPackageGate": true
+    },
+    {
+      "name": "library-coordinator",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/scripts/compiler/library-profile-inventory.mjs",
+        "--compiler",
+        "/tmp/pui-exact-39ea50a0-xsn__c3y/relocated/compiler/index.js",
+        "--profiles",
+        "react,gpui",
+        "--entry",
+        "packages/prototypes/base/src/text/root.proto.ts",
+        "--entry",
+        "packages/prototypes/base/src/button/button.proto.ts",
+        "--output",
+        "/tmp/pui-exact-39ea50a0-xsn__c3y/library-text-button"
+      ],
+      "exitCode": 0,
+      "seconds": 11.59,
+      "requiredPackageGate": true
+    },
+    {
+      "name": "shenko-untouched-checkout",
+      "argv": [
+        "node",
+        "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/scripts/compiler/consumer-project-inventory.mjs",
+        "--compiler",
+        "/tmp/pui-exact-39ea50a0-xsn__c3y/relocated/compiler/index.js",
+        "--consumer-root",
+        "/tank/shared/projects/shenko/shenko",
+        "--name",
+        "shenko",
+        "--target",
+        "react",
+        "--out",
+        "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-deliveries/39ea50a0635be857734461a7af1bd6e61ecd70a6/exact-package/shenko-untouched-checkout.json"
+      ],
+      "exitCode": 1,
+      "seconds": 2.871,
+      "requiredPackageGate": false
+    },
+    {
+      "name": "shenko-candidate-sdk-admission",
+      "argv": [
+        "node",
+        "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-deliveries/39ea50a0635be857734461a7af1bd6e61ecd70a6/exact-package/consumer-sdk-admission.mjs",
+        "--compiler",
+        "/tmp/pui-exact-39ea50a0-xsn__c3y/relocated/compiler/index.js",
+        "--consumer-root",
+        "/tank/shared/projects/shenko/shenko",
+        "--name",
+        "shenko",
+        "--target",
+        "react",
+        "--tsconfig",
+        "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-deliveries/39ea50a0635be857734461a7af1bd6e61ecd70a6/exact-package/shenko-candidate-sdk.tsconfig.json",
+        "--sdk-root",
+        "/tmp/pui-exact-39ea50a0-xsn__c3y/authoring-support",
+        "--revision",
+        "39ea50a0635be857734461a7af1bd6e61ecd70a6",
+        "--out",
+        "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-deliveries/39ea50a0635be857734461a7af1bd6e61ecd70a6/exact-package/shenko-candidate-sdk-admission.json"
+      ],
+      "exitCode": 0,
+      "seconds": 2.971,
+      "requiredPackageGate": false
+    },
+    {
+      "name": "verdant-untouched-checkout",
+      "argv": [
+        "node",
+        "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/scripts/compiler/consumer-project-inventory.mjs",
+        "--compiler",
+        "/tmp/pui-exact-39ea50a0-xsn__c3y/relocated/compiler/index.js",
+        "--consumer-root",
+        "/tank/shared/projects/opengreendam/verdant-plugin-suite-20261122",
+        "--name",
+        "verdant",
+        "--target",
+        "gpui",
+        "--out",
+        "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-deliveries/39ea50a0635be857734461a7af1bd6e61ecd70a6/exact-package/verdant-untouched-checkout.json"
+      ],
+      "exitCode": 1,
+      "seconds": 3.022,
+      "requiredPackageGate": false
+    },
+    {
+      "name": "verdant-candidate-sdk-admission",
+      "argv": [
+        "node",
+        "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-deliveries/39ea50a0635be857734461a7af1bd6e61ecd70a6/exact-package/consumer-sdk-admission.mjs",
+        "--compiler",
+        "/tmp/pui-exact-39ea50a0-xsn__c3y/relocated/compiler/index.js",
+        "--consumer-root",
+        "/tank/shared/projects/opengreendam/verdant-plugin-suite-20261122",
+        "--name",
+        "verdant",
+        "--target",
+        "gpui",
+        "--tsconfig",
+        "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-deliveries/39ea50a0635be857734461a7af1bd6e61ecd70a6/exact-package/verdant-candidate-sdk.tsconfig.json",
+        "--sdk-root",
+        "/tmp/pui-exact-39ea50a0-xsn__c3y/authoring-support",
+        "--revision",
+        "39ea50a0635be857734461a7af1bd6e61ecd70a6",
+        "--out",
+        "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/.cache/compiler-deliveries/39ea50a0635be857734461a7af1bd6e61ecd70a6/exact-package/verdant-candidate-sdk-admission.json"
+      ],
+      "exitCode": 0,
+      "seconds": 2.871,
+      "requiredPackageGate": false
+    }
+  ],
+  "installedAstChecks": [
+    "package file hashes and native source inventory",
+    "plain-Node CLI result handling and actual build metadata",
+    "source → packaged compiler API/CLI → native React artifact → ordinary React consumer",
+    "packaged LLVM IRBuilder → verified module → actual WASM execution through the separately packaged bounded kernel host",
+    "packaged locked Rust syntax builder emitted a native GPUI component"
+  ],
+  "installedCliChecks": [
+    "Plain-Node metadata/compile, default collision protection, retained consumer edit and explicit overwrite",
+    "Directory/file symlinks cannot redirect output into consumer-owned paths",
+    "Two real concurrent CLI processes cannot both publish the same output",
+    "The same pinned API emits an independently mounted and editable ordinary React component"
+  ],
+  "libraryCoordinator": {
+    "counts": {
+      "entries": 1015,
+      "families": {
+        "base": 184,
+        "bootstrap-2-3-2": 205,
+        "brutalist": 206,
+        "liquid-glass": 201,
+        "lucide": 1,
+        "shadcn": 218
+      },
+      "profiles": 11,
+      "implementedProfiles": 2,
+      "rows": 11165,
+      "statuses": {
+        "PASS": 2,
+        "FAIL": 0,
+        "UNSUPPORTED": 2,
+        "UNIMPLEMENTED": 9135,
+        "UNTESTED": 2026,
+        "ANALYZED": 0
+      },
+      "nativeEmittedPrototypes": 2,
+      "executionVerifiedPrototypes": 0,
+      "compilerDefects": 0
+    },
+    "selectedComplete": true,
+    "admissionCoverageComplete": false,
+    "scope": "Only Text and Button x React and GPUI workers executed. All other source/target rows remain visible and untested; native execution count is zero."
+  },
+  "selectedLibraryRows": [
+    {
+      "entry": "packages/prototypes/base/src/button/button.proto.ts",
+      "profile": "gpui",
+      "status": "UNSUPPORTED",
+      "nativeEmittedPrototypes": 0,
+      "executionVerifiedPrototypes": 0,
+      "firstDiagnostic": {
+        "code": "PUI_GPUI_UNSUPPORTED",
+        "severity": "error",
+        "category": "codegen",
+        "message": "module-effect: Top-level executable effects require explicit module-initialization lowering.",
+        "span": {
+          "file": "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/prototypes/base/src/button/button.proto.ts",
+          "line": 173,
+          "column": 16,
+          "endLine": 176,
+          "endColumn": 3
+        }
+      }
+    },
+    {
+      "entry": "packages/prototypes/base/src/button/button.proto.ts",
+      "profile": "react",
+      "status": "UNSUPPORTED",
+      "nativeEmittedPrototypes": 0,
+      "executionVerifiedPrototypes": 0,
+      "firstDiagnostic": {
+        "code": "PUI_REACT_UNSUPPORTED",
+        "severity": "error",
+        "category": "codegen",
+        "message": "module-effect: Top-level executable effects require explicit module-initialization lowering.",
+        "span": {
+          "file": "/home/ezra/.t3/worktrees/proto-ui/compiler-ast-pipeline-1809-20261125/packages/hooks/src/as-accessible.ts",
+          "line": 6,
+          "column": 1,
+          "endLine": 15,
+          "endColumn": 4
+        }
+      }
+    },
+    {
+      "entry": "packages/prototypes/base/src/text/root.proto.ts",
+      "profile": "gpui",
+      "status": "PASS",
+      "nativeEmittedPrototypes": 1,
+      "executionVerifiedPrototypes": 0,
+      "firstDiagnostic": null
+    },
+    {
+      "entry": "packages/prototypes/base/src/text/root.proto.ts",
+      "profile": "react",
+      "status": "PASS",
+      "nativeEmittedPrototypes": 1,
+      "executionVerifiedPrototypes": 0,
+      "firstDiagnostic": null
+    }
+  ],
+  "realConsumerIdentities": [
+    {
+      "name": "shenko",
+      "root": "/tank/shared/projects/shenko/shenko",
+      "target": "react",
+      "revision": "4f24740cef3832978ca97bb26acaf7207b4acc7c",
+      "tree": "18b8c41830e71e8c034999e13ea512423c283dd3",
+      "status": "",
+      "entries": [
+        {
+          "path": "crates/shenko-ui/web/prototypes/transport-badge.proto.ts",
+          "bytes": 1798,
+          "sha256": "e19b9465bbef1099e59145c049089d40702bd81087530c5f18983c499aec36c3"
+        }
+      ]
+    },
+    {
+      "name": "verdant",
+      "root": "/tank/shared/projects/opengreendam/verdant-plugin-suite-20261122",
+      "target": "gpui",
+      "revision": "44aeee6383b8e3257c56b812f8cd7ada13e04bbe",
+      "tree": "cd679ac2f1919db0edfc74042e24418df3c09a88",
+      "status": "",
+      "entries": [
+        {
+          "path": "frontend/proto-ui/src/pitch-gesture-surface.proto.ts",
+          "bytes": 8119,
+          "sha256": "9e1add6f335945f024db95ecdde0b65b960f84f0c12d69995fdbb2971e5e5e78"
+        }
+      ]
+    }
+  ],
+  "consumerAdmissions": [
+    {
+      "name": "shenko",
+      "target": "react",
+      "untouchedCheckout": {
+        "exitCode": 1,
+        "report": "shenko-untouched-checkout.json",
+        "totals": {
+          "inputFiles": 1,
+          "analyzedFiles": 0,
+          "prototypeDeclarations": 0,
+          "authoredHookDeclarations": 0,
+          "nativeEmittedPrototypes": 0,
+          "unsupportedPrototypes": 0,
+          "sourceErrorFiles": 1,
+          "executionVerifiedPrototypes": 0
+        },
+        "compilerFailures": 1
+      },
+      "candidateSdk": {
+        "exitCode": 0,
+        "report": "shenko-candidate-sdk-admission.json",
+        "totals": {
+          "inputFiles": 1,
+          "analyzedFiles": 1,
+          "prototypeDeclarations": 1,
+          "authoredHookDeclarations": 0,
+          "nativeEmittedPrototypes": 1,
+          "unsupportedPrototypes": 0,
+          "sourceErrorFiles": 0,
+          "executionVerifiedPrototypes": 0
+        },
+        "compilerFailures": 0
+      },
+      "applicationMigrationVerified": false
+    },
+    {
+      "name": "verdant",
+      "target": "gpui",
+      "untouchedCheckout": {
+        "exitCode": 1,
+        "report": "verdant-untouched-checkout.json",
+        "totals": {
+          "inputFiles": 1,
+          "analyzedFiles": 0,
+          "prototypeDeclarations": 0,
+          "authoredHookDeclarations": 0,
+          "nativeEmittedPrototypes": 0,
+          "unsupportedPrototypes": 0,
+          "sourceErrorFiles": 1,
+          "executionVerifiedPrototypes": 0
+        },
+        "compilerFailures": 1
+      },
+      "candidateSdk": {
+        "exitCode": 0,
+        "report": "verdant-candidate-sdk-admission.json",
+        "totals": {
+          "inputFiles": 1,
+          "analyzedFiles": 1,
+          "prototypeDeclarations": 1,
+          "authoredHookDeclarations": 0,
+          "nativeEmittedPrototypes": 0,
+          "unsupportedPrototypes": 1,
+          "sourceErrorFiles": 0,
+          "executionVerifiedPrototypes": 0
+        },
+        "compilerFailures": 0
+      },
+      "applicationMigrationVerified": false
+    }
+  ],
+  "consumerSourceAndCheckoutUnchanged": true,
+  "applicationMigrationVerified": false,
+  "scope": "Installed package gates passed. Two untouched consumer source-error results remain recorded. Explicit candidate SDK mapping admits Shenko source and explicitly rejects Verdant expose semantics. Admission is not execution or full application migration."
+}
