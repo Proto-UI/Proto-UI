@@ -29,7 +29,7 @@ it('gives authored Value and Trigger the fixed intrinsic recipe', async () => {
   const trigger = await collectProtoStyleTokensFromFiles([source('trigger')]);
   const value = await collectProtoStyleTokensFromFiles([source('value')]);
   expect(trigger).toContain('w-full');
-  for (const token of ['flex', 'flex-1', 'items-center', 'gap-2', 'text-left'])
+  for (const token of ['flex', 'flex-1', 'items-center', 'gap-2', 'text-start'])
     expect(value).toContain(token);
   expect(readFileSync(source('content'), 'utf8')).toContain("align: 'center'");
 });
