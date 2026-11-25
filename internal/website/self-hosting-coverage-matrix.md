@@ -348,7 +348,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/Homepage/HomeActions.astro` | `www.shell.adapter-select`, `www.shell.hero-actions`, `www.shell.mobile-menu-toggle`, `www.shell.native-link-presentation`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `aae02e68c94fca95e06ba50abb9d82e45b55302be2d4bdb520b9a6f4b4195605` |
 | `apps/www/src/components/Homepage/HomepageRuntime.astro` | `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `d56557a3ba35c4ab139b13a350ebf4bb59bd3e310ba8623768a93bc6991bd21a` |
 | `apps/www/src/components/Homepage/home-action-icons.ts` | `www.shell.hero-actions` | `f06c052c540bab9e1b8e4b2b9cb14320241bb5bfbe2dee15cc2435a5f2ee1c0c` |
-| `apps/www/src/components/Homepage/homepage-demo-participant.ts` | `www.demo.home-demo-select` | `621722fc928e6bdeb5c0526da489bf49085bebc567038586414dd57e54ce83cd` |
+| `apps/www/src/components/Homepage/homepage-demo-participant.ts` | `www.demo.home-demo-select` | `172b312a4035f28bd5c9d54a2a916481f1aa4b966c50822386752d233984c088` |
 | `apps/www/src/components/Homepage/homepage-ghost-theme.ts` | `www.demo.home-demo-select` | `106a0a26ccbf02a304e08abf82760b5ee7209877cf77512d37627d4ffe11e7f4` |
 | `apps/www/src/components/Homepage/HomepageGhostCard.astro` | `www.demo.home-demo-select` | `aa0aefbf186d33d73257078cc3ee870172f81cc942f66852e7d4a4642860a515` |
 | `apps/www/src/components/Homepage/homepage-gallery-icons.ts` | `www.demo.home-demo-select` | `ee553761832372e9d3df502d2b0ca15e62604c9d3c5bfb5b1a9cb157b461f0c7` |
@@ -358,7 +358,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/content/docs/zh-cn/site-search-ime-evidence.ts` | `www.search.input-results` | `c84f1c2e125dcebd7d6096b1f5fa7441dcaf40c8110d83015324b7d85350d3ba` |
 | `apps/www/src/components/Homepage/homepage-live-preview.ts` | `www.demo.home-demo-select` | `f154381eeb8b5cdabdbd6eb49cc35bd4b51c80f4a64cb738364f12d232cf2c91` |
 | `apps/www/src/components/Homepage/homepage-runtime-client.ts` | `www.content.typography-presentation`, `www.demo.home-demo-select`, `www.search.dialog`, `www.search.launcher`, `www.search.loading-failure`, `www.shell.adapter-select`, `www.shell.hero-actions`, `www.shell.hero-hash-scroll`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.native-link-presentation`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `04ab0568d223ab7cc0fea4caf3056f9a3488c76f2a5ef082b724ab10fae8a2bd` |
-| `apps/www/src/components/Homepage/homepage-showcase.ts` | `www.demo.home-demo-select` | `dc485e86101ce785a9dd98066c348c1a841d82f5652ea9439554d8102a366815` |
+| `apps/www/src/components/Homepage/homepage-showcase.ts` | `www.demo.home-demo-select` | `724948f5c3aa0b3eb9eec21d1d8e22254dcd3e0b90a9166ce2bdce8a18a113c7` |
 | `apps/www/src/components/Homepage/homepage-text.ts` | `www.demo.home-demo-select` | `bebbe40586af030a01536b1e63c010fff697aed294b7a30437e2575ed1aa08f3` |
 | `apps/www/src/components/InstallCommandCard.astro` | `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.install-manager-tabs` | `05c9324e9bb8a39e6ec6772d205c9823258d86638887c0e8b903f762cd887de7` |
 | `apps/www/src/components/install-command-card-client.ts` | `www.docs.install-manager-tabs` | `dd644892e2650c8c6978c8b5707692ace5cc68d680acf940ef65d3483aa8fb64` |
@@ -373,7 +373,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/PrototypePreviewer/DemoPreviewer.astro` | `www.demo.prototype-previewer` | `f8fcf3d1603b1a6e21e464cc9b70b4dcba2b53cbc6a74f8a41975e770e0e4c72` |
 | `apps/www/src/components/PrototypePreviewer/DemoMatrix.astro` | `www.demo.demo-matrix` | `aafe95f305b3125ec7eea7b388612e847567d6efc8e0adc5243b105dcac6d43e` |
 | `apps/www/src/components/PrototypePreviewer/DialogDemoStyles.astro` | `www.demo.prototype-previewer` | `3f25d1a890299e4246e2757dc096402a07288ee168c8ca9344b8b3c5ef0ef987` |
-| `apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro` | `www.demo.home-demo-select` | `0d887b9d415df5273a28fa65538be9db0667cd5eff8f330f5c02d1cb06725de1` |
+| `apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro` | `www.demo.home-demo-select` | `78ecc05f4319dd16ed7be2ffe06586c06c81420a8922d1568ebc979f40f40fb1` |
 | `apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `4fd03809c049a6a70e774dd6a5402edad258b08e16fdd43648cc6e4159f73460` |
 | `apps/www/src/components/PrototypePreviewer/TransitionDemoStyles.astro` | `www.demo.prototype-previewer` | `bf8f7ef09b0fdfcb0d01f09d90ec093e141e05e884ec3afb949ac2b78c89d383` |
 | `apps/www/src/components/PrototypePreviewer/code-panel-client.ts` | `www.demo.code-panel`, `www.docs.code-panel-expand` | `0d9271cdf2edb564cfbe0441d717a55278026ca18ef96301f77b006d27640c0c` |

@@ -498,9 +498,16 @@ export function createHomepageShowcase(
     children: [
       {
         kind: 'box',
-        className: 'home-gallery__stage',
-        attrs: { 'data-home-gallery-stage': '' },
-        children: gallery.columns(form, gallery.analytics),
+        className: 'home-gallery__viewport',
+        attrs: { 'data-home-gallery-viewport': '' },
+        children: [
+          {
+            kind: 'box',
+            className: 'home-gallery__stage',
+            attrs: { 'data-home-gallery-stage': '' },
+            children: gallery.columns(form, gallery.analytics),
+          },
+        ],
       },
       {
         kind: 'box',
