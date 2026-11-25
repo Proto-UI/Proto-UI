@@ -1,0 +1,89 @@
+{
+  "status": "ready for independent review; directSVG diagnostics are not production article/Dialog acceptance",
+  "sources": [
+    "apps/www/scripts/generate-whitepaper-diagrams.mjs",
+    "scripts/docs/test/generated-whitepaper-diagrams.test.mjs",
+    "apps/www/public/diagrams/whitepaper-evolution-feedback.zh-cn.svg",
+    "apps/www/public/diagrams/whitepaper-evolution-feedback.mobile.zh-cn.svg",
+    "apps/www/public/diagrams/whitepaper-evolution-feedback.mobile.en.svg",
+    "apps/www/public/diagrams/whitepaper-evolution-feedback.en.svg"
+  ],
+  "files": [
+    {
+      "path": "apps/www/public/diagrams/whitepaper-evolution-feedback.en.svg",
+      "sha256": "f1e5ba376b02f75430ba0efd0f4779bf7687eacc3d0c59b02ce3902f5ea04041"
+    },
+    {
+      "path": "apps/www/public/diagrams/whitepaper-evolution-feedback.mobile.en.svg",
+      "sha256": "3fd41a3405fec8e2b1c3e1d4c6591434c249fa3a0f3648e291f94137883b4046"
+    },
+    {
+      "path": "apps/www/public/diagrams/whitepaper-evolution-feedback.mobile.zh-cn.svg",
+      "sha256": "9b18a2b83bc7710fa4b4e2e3c1dd08621ee7c2d5a8adba6a55bf54d1379c5d10"
+    },
+    {
+      "path": "apps/www/public/diagrams/whitepaper-evolution-feedback.zh-cn.svg",
+      "sha256": "81dcdabdbed66da7c7042b5584f48726e4b6cfa706911832a1ce91bcfcd78f9b"
+    },
+    {
+      "path": "apps/www/scripts/generate-whitepaper-diagrams.mjs",
+      "sha256": "39d198ea79dd648e3b05fbc21e5840425fe57861b8de622252f6b74e1ba8f0d2"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/focused-controls.log.gz",
+      "sha256": "24093eee832750c8de3befbbcbbc4873c2f400800dc216b0d8804f6ae38ed62e"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/geometry.json",
+      "sha256": "4db9356934bc2d4feec4f0508a74e09588fe71b205a9f14bf09cbdb13ebe0f6e"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/incomplete-local-first.log.gz",
+      "sha256": "21fb97af4cb74c3e59bb04eec49aeea8c30a2eefc4ade2e6307083779a9d00d3"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/incomplete-local-releases-only.log.gz",
+      "sha256": "a569d1ce717ab367b053a67c1e1c2d52e42e8c76c275ccad0115c153e6645271"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/native-svg-render.tar.gz",
+      "sha256": "a9eb8780fdeba676cbef98f39ffcbb43b250a7f53dcf45848169b1b4c7f1b9aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/public-docs.log.gz",
+      "sha256": "a913dd93dadc8e26430e58652a6c54c81922b3891041b24e169e1982e01e570f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/receipt.json",
+      "sha256": "aaa84a336c3278fa8a9f93ff59a1caea70af9ed3a41267eddf51c65444e487e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/render.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/render.mjs",
+      "sha256": "5e521433899c3cce712f2a3d794d8dd7b8aa48b30bd08755696452e7a1406f08"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/whitepaper-evolution-feedback.en-light.png",
+      "sha256": "3bde3fc4120eafbfa21441e83e9414f8c0984a7c14d52d38facfb0fabf377dfe"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/whitepaper-evolution-feedback.mobile.en-light.png",
+      "sha256": "386f82bafacc4e7037929d34e53420193afb23b4f95c73c52aa0c626d46bc1b6"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/whitepaper-evolution-feedback.mobile.zh-cn-dark.png",
+      "sha256": "7cc1c973181f9c2bc22bfbd6ea19748caaebf2497f577edcc1af76fe6936a29f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/whitepaper-evolution-feedback.zh-cn-dark.png",
+      "sha256": "89027b37bc75c3e3e0736cb916ee450d968f42aeddf2ac23825553a2969f18d5"
+    },
+    {
+      "path": "scripts/docs/test/generated-whitepaper-diagrams.test.mjs",
+      "sha256": "1ef7011036934dc2fbaae12f3e31a78cefab6580b108fec65d2f5dbf704c7dcb"
+    }
+  ]
+}

@@ -103,6 +103,20 @@ it.each(['wc', 'react', 'vue', 'vue2'] as const)(
     }
     triggers[1]!.blur();
 
+    // A broad marker count is not the caller's focus-subject readiness contract.
+    // Retained closed React Content hosts may still carry physical markers.
+    if (runtime === 'react') {
+      expect(surface.querySelectorAll('[data-pui-root]')).toHaveLength(7);
+      const currentTabIndex = triggers[0].tabIndex;
+      triggers[0].tabIndex = -1;
+      try {
+        expect(await ready('[data-pui-root]', 7)).toBe(true);
+        expect(await ready()).toBe(false);
+      } finally {
+        triggers[0].tabIndex = currentTabIndex;
+      }
+    }
+
     const first = triggers[0]!;
     const parent = first.parentNode!;
     const next = first.nextSibling;

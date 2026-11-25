@@ -1,0 +1,1140 @@
+{
+  "baseRevision": "5f0844907895a4ae0db506fe6a5d0bf162318329",
+  "worktree": "/home/ezra/proto-ui-browser-gate-cb5d",
+  "checkoutState": "dirty candidate; not official clean-head CI",
+  "browser": "/usr/bin/chromium",
+  "runs": [
+    {
+      "label": "home-runtime-final",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/home-runtime-final.json",
+      "rawSha256": "3e1ecb5c91d3499bd672018651ddb33ecae5d2605dd06683573626bdf0f9015c",
+      "exit": 0,
+      "passed": 8,
+      "failed": 0,
+      "filtered": 6,
+      "startTime": 1795569070097,
+      "cases": [
+        {
+          "fullName": "Homepage Runtime demobox browser smoke keeps the compact Bootstrap homepage checkbox operable through its visible label",
+          "status": "passed",
+          "duration": 11208.465753,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Homepage Runtime demobox browser smoke keeps Bootstrap editor tab labels from selecting without blocking the panel or editor",
+          "status": "passed",
+          "duration": 10136.505581999998,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Independent Label public documentation base: naming, activation and copyable content across four Web adapters",
+          "status": "passed",
+          "duration": 19774.361393,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Independent Label public documentation shadcn: naming, activation and copyable content across four Web adapters",
+          "status": "passed",
+          "duration": 31749.459436999998,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Independent Label public documentation brutalist: naming, activation and copyable content across four Web adapters",
+          "status": "passed",
+          "duration": 29821.247558000003,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Independent Label public documentation bootstrap-2-3-2: naming, activation and copyable content across four Web adapters",
+          "status": "passed",
+          "duration": 32653.22235699999,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Independent Label public documentation liquid-glass: naming, activation and copyable content across four Web adapters",
+          "status": "passed",
+          "duration": 44183.48519499999,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Independent Label public documentation records native HTML label click versus pointerup cancellation with real input",
+          "status": "passed",
+          "duration": 278.5210440000228,
+          "failureMessages": []
+        }
+      ]
+    },
+    {
+      "label": "search-placement-candidate",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/search-placement-candidate.json",
+      "rawSha256": "9212eda393071e14492660425f7cd887da751b0afa3dafd276fc9aa06d28bfe3",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "filtered": 80,
+      "startTime": 1795569298634,
+      "cases": [
+        {
+          "fullName": "Docs shadcn 320px keeps enlarged 200% text reachable without clipping",
+          "status": "passed",
+          "duration": 41660.541898,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Docs brutalist 320px keeps enlarged 200% text reachable without clipping",
+          "status": "passed",
+          "duration": 39321.006223,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Docs shadcn 390px keeps enlarged 200% text reachable without clipping",
+          "status": "passed",
+          "duration": 42466.946329,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Docs brutalist 390px keeps enlarged 200% text reachable without clipping",
+          "status": "passed",
+          "duration": 37975.62788100001,
+          "failureMessages": []
+        }
+      ]
+    },
+    {
+      "label": "markup-current",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/markup-current.json",
+      "rawSha256": "307b7c5f4e985d59d9c57e018ba36d45a083e95f152bb4daed4acb947ddb7ebe",
+      "exit": 0,
+      "passed": 17,
+      "failed": 0,
+      "filtered": 0,
+      "startTime": 1795569463234,
+      "cases": [
+        {
+          "fullName": "834 actual generic response, runtime, copy and remount light 390",
+          "status": "passed",
+          "duration": 15240.599731999999,
+          "failureMessages": []
+        },
+        {
+          "fullName": "834 actual generic response, runtime, copy and remount light 1180",
+          "status": "passed",
+          "duration": 16870.031746,
+          "failureMessages": []
+        },
+        {
+          "fullName": "834 actual generic response, runtime, copy and remount dark 390",
+          "status": "passed",
+          "duration": 13656.784043,
+          "failureMessages": []
+        },
+        {
+          "fullName": "834 actual generic response, runtime, copy and remount dark 1180",
+          "status": "passed",
+          "duration": 16228.482954999992,
+          "failureMessages": []
+        },
+        {
+          "fullName": "834 actual projected response, runtime, copy and remount light 390",
+          "status": "passed",
+          "duration": 24042.734142,
+          "failureMessages": []
+        },
+        {
+          "fullName": "834 actual projected response, runtime, copy and remount light 1180",
+          "status": "passed",
+          "duration": 25551.273656999998,
+          "failureMessages": []
+        },
+        {
+          "fullName": "834 actual projected response, runtime, copy and remount dark 390",
+          "status": "passed",
+          "duration": 23378.076505999998,
+          "failureMessages": []
+        },
+        {
+          "fullName": "834 actual projected response, runtime, copy and remount dark 1180",
+          "status": "passed",
+          "duration": 24138.517201999988,
+          "failureMessages": []
+        },
+        {
+          "fullName": "834 original code and install commands remain readable without JavaScript light 390",
+          "status": "passed",
+          "duration": 4551.5045469999895,
+          "failureMessages": []
+        },
+        {
+          "fullName": "834 original code and install commands remain readable without JavaScript light 1180",
+          "status": "passed",
+          "duration": 5574.604349000001,
+          "failureMessages": []
+        },
+        {
+          "fullName": "834 original code and install commands remain readable without JavaScript dark 390",
+          "status": "passed",
+          "duration": 4493.419718999998,
+          "failureMessages": []
+        },
+        {
+          "fullName": "834 original code and install commands remain readable without JavaScript dark 1180",
+          "status": "passed",
+          "duration": 5900.266093999991,
+          "failureMessages": []
+        },
+        {
+          "fullName": "834 real Shiki producer and native template clone preserve hostile example text for html",
+          "status": "passed",
+          "duration": 171.5883249999897,
+          "failureMessages": []
+        },
+        {
+          "fullName": "834 real Shiki producer and native template clone preserve hostile example text for tsx",
+          "status": "passed",
+          "duration": 121.41301899999962,
+          "failureMessages": []
+        },
+        {
+          "fullName": "834 real Shiki producer and native template clone preserve hostile example text for vue",
+          "status": "passed",
+          "duration": 140.3277539999981,
+          "failureMessages": []
+        },
+        {
+          "fullName": "834 current install Copy preserves original command and stable glyphs light",
+          "status": "passed",
+          "duration": 19143.442310000013,
+          "failureMessages": []
+        },
+        {
+          "fullName": "834 current install Copy preserves original command and stable glyphs dark",
+          "status": "passed",
+          "duration": 18499.32347200002,
+          "failureMessages": []
+        }
+      ]
+    },
+    {
+      "label": "select-final",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/select-final.json",
+      "rawSha256": "9da032a60164a2c8d92efd35450ffdd78cce2a84ad051eb653adfe10ff2c2286",
+      "exit": 0,
+      "passed": 12,
+      "failed": 0,
+      "filtered": 0,
+      "startTime": 1795569996975,
+      "cases": [
+        {
+          "fullName": "actual Bootstrap/Liquid Select input, layout and source-bound paint bootstrap-2-3-2/wc/light: full selection flow, own toolbar, RTL portal and narrow long labels",
+          "status": "passed",
+          "duration": 10964.456498,
+          "failureMessages": []
+        },
+        {
+          "fullName": "actual Bootstrap/Liquid Select input, layout and source-bound paint bootstrap-2-3-2/wc/dark: full selection flow, own toolbar, RTL portal and narrow long labels",
+          "status": "passed",
+          "duration": 11630.863734,
+          "failureMessages": []
+        },
+        {
+          "fullName": "actual Bootstrap/Liquid Select input, layout and source-bound paint bootstrap-2-3-2/react/light: full selection flow, own toolbar, RTL portal and narrow long labels",
+          "status": "passed",
+          "duration": 12092.269080000002,
+          "failureMessages": []
+        },
+        {
+          "fullName": "actual Bootstrap/Liquid Select input, layout and source-bound paint bootstrap-2-3-2/react/dark: full selection flow, own toolbar, RTL portal and narrow long labels",
+          "status": "passed",
+          "duration": 12274.966370999995,
+          "failureMessages": []
+        },
+        {
+          "fullName": "actual Bootstrap/Liquid Select input, layout and source-bound paint bootstrap-2-3-2/vue/light: full selection flow, own toolbar, RTL portal and narrow long labels",
+          "status": "passed",
+          "duration": 12930.518306000005,
+          "failureMessages": []
+        },
+        {
+          "fullName": "actual Bootstrap/Liquid Select input, layout and source-bound paint bootstrap-2-3-2/vue/dark: full selection flow, own toolbar, RTL portal and narrow long labels",
+          "status": "passed",
+          "duration": 15783.084074999999,
+          "failureMessages": []
+        },
+        {
+          "fullName": "actual Bootstrap/Liquid Select input, layout and source-bound paint bootstrap-2-3-2/vue2/light: full selection flow, own toolbar, RTL portal and narrow long labels",
+          "status": "passed",
+          "duration": 12543.308512000003,
+          "failureMessages": []
+        },
+        {
+          "fullName": "actual Bootstrap/Liquid Select input, layout and source-bound paint bootstrap-2-3-2/vue2/dark: full selection flow, own toolbar, RTL portal and narrow long labels",
+          "status": "passed",
+          "duration": 12242.728143,
+          "failureMessages": []
+        },
+        {
+          "fullName": "actual family Text selection and typography bootstrap-2-3-2/wc: document Text stays selectable beside nonselectable Select content",
+          "status": "passed",
+          "duration": 5195.179091000013,
+          "failureMessages": []
+        },
+        {
+          "fullName": "actual family Text selection and typography bootstrap-2-3-2/react: document Text stays selectable beside nonselectable Select content",
+          "status": "passed",
+          "duration": 5699.427123000001,
+          "failureMessages": []
+        },
+        {
+          "fullName": "actual family Text selection and typography bootstrap-2-3-2/vue: document Text stays selectable beside nonselectable Select content",
+          "status": "passed",
+          "duration": 5663.294422000006,
+          "failureMessages": []
+        },
+        {
+          "fullName": "actual family Text selection and typography bootstrap-2-3-2/vue2: document Text stays selectable beside nonselectable Select content",
+          "status": "passed",
+          "duration": 5553.889711000011,
+          "failureMessages": []
+        }
+      ]
+    },
+    {
+      "label": "header-desktop-placement",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/header-desktop-placement.json",
+      "rawSha256": "69b3462bfbf3106401ae99f9782987885729052061c6573d0d4354a24785e9e3",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "filtered": 20,
+      "startTime": 1795570223446,
+      "cases": [
+        {
+          "fullName": "Header public family presentation and labelled compact fields shadcn/wc/light: candidate-acceptance; source-bound rest, hover, native focus, popup and compact reparenting",
+          "status": "passed",
+          "duration": 35378.888314,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Header public family presentation and labelled compact fields shadcn/wc/dark: candidate-acceptance; source-bound rest, hover, native focus, popup and compact reparenting",
+          "status": "passed",
+          "duration": 36734.668103,
+          "failureMessages": []
+        }
+      ]
+    },
+    {
+      "label": "passive-negative",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/passive-negative.json",
+      "rawSha256": "4b2418f9daf01038dc7ebb7e62df2603420085d9360e1bd54a3a3360a90c511a",
+      "exit": 1,
+      "passed": 2,
+      "failed": 2,
+      "filtered": 76,
+      "startTime": 1795569915260,
+      "cases": [
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'base'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4031.8239109999995,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'text'/'wc' retains public content and passive ownership",
+          "status": "failed",
+          "duration": 28258.136585,
+          "failureMessages": [
+            "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:213:9\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)"
+          ]
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'base'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3010.9719289999994,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'surface'/'wc' retains public content and passive ownership",
+          "status": "failed",
+          "duration": 27351.366442000006,
+          "failureMessages": [
+            "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:213:9\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "passive-wc-owner-candidate",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/passive-wc-owner-candidate.json",
+      "rawSha256": "d1169a7ef5bddf06b39a81ec296f0386ca752dfd63f07b0399a54185096acdf8",
+      "exit": 0,
+      "passed": 20,
+      "failed": 0,
+      "filtered": 60,
+      "startTime": 1795570482839,
+      "cases": [
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'base'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3955.4418029999997,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'base'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 2880.611206999998,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 6427.2357889999985,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5880.246236999999,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'brutalist'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4301.245113000001,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'brutalist'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4474.921578000001,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'bootstrap-2-3-2'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4855.784289000003,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'bootstrap-2-3-2'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4504.3289929999955,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'liquid-glass'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5086.433128000004,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'liquid-glass'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5068.709901999995,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'base'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3131.6036930000046,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'base'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3078.0994969999956,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 7642.1017400000055,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 8000.1587639999925,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'brutalist'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4280.207567999998,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'brutalist'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4110.624828,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'bootstrap-2-3-2'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4060.220757999996,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'bootstrap-2-3-2'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3968.3991360000073,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'liquid-glass'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5263.495456999997,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'liquid-glass'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4775.108334000004,
+          "failureMessages": []
+        }
+      ]
+    },
+    {
+      "label": "passive-final",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/passive-final.json",
+      "rawSha256": "91e1b9c03ec3144867d8dfeefb70dc75fe9b0eb1baae4f735babed46eb9d9cb6",
+      "exit": 0,
+      "passed": 80,
+      "failed": 0,
+      "filtered": 0,
+      "startTime": 1795570675823,
+      "cases": [
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'base'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 2976.172434,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'base'/'text'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3353.093078,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'base'/'text'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3073.947819000001,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'base'/'text'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3484.227304,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'base'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 2827.9887609999987,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'base'/'text'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3385.385639,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'base'/'text'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3199.223769,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'base'/'text'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3321.105975000002,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5485.618568000002,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'text'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 7212.065202000002,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'text'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 6948.127653999996,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'text'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 6708.718712000002,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5163.375857999999,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'text'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 6886.129451000001,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'text'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 6904.987852000006,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'text'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 6799.693457000001,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'brutalist'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4632.869201000009,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'brutalist'/'text'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5264.938098999992,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'brutalist'/'text'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5487.484385000003,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'brutalist'/'text'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5598.582472999988,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'brutalist'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3949.383566000004,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'brutalist'/'text'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5302.722365000009,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'brutalist'/'text'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5713.591964000007,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'brutalist'/'text'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5048.559156999996,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'bootstrap-2-3-2'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4862.425959,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'bootstrap-2-3-2'/'text'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5655.394988999993,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'bootstrap-2-3-2'/'text'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5393.546060999986,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'bootstrap-2-3-2'/'text'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5435.131703999999,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'bootstrap-2-3-2'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4170.970166000014,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'bootstrap-2-3-2'/'text'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4914.879875000013,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'bootstrap-2-3-2'/'text'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4815.697119999997,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'bootstrap-2-3-2'/'text'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4885.086986999988,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'liquid-glass'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4136.834120000014,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'liquid-glass'/'text'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5776.488630000007,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'liquid-glass'/'text'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5699.85338700001,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'liquid-glass'/'text'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 6085.234517000004,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'liquid-glass'/'text'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4576.589236,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'liquid-glass'/'text'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5774.011338000011,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'liquid-glass'/'text'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 6068.6805779999995,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'liquid-glass'/'text'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5754.034052000003,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'base'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 2821.929403999995,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'base'/'surface'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3603.198693000013,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'base'/'surface'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3382.6714839999913,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'base'/'surface'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3047.9393480000144,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'base'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 2607.0442780000158,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'base'/'surface'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3429.7881650000054,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'base'/'surface'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3496.979385999992,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'base'/'surface'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3216.4587069999834,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 7052.209579999995,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'surface'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 7174.804837000003,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'surface'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 6885.022346999991,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'surface'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 7178.797754999978,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 6678.951316000021,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'surface'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 7827.103795000003,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'surface'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 7219.774464000016,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'surface'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 7357.475886999979,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'brutalist'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3963.830614000035,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'brutalist'/'surface'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4891.314605000021,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'brutalist'/'surface'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5278.061072000011,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'brutalist'/'surface'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5122.007887000043,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'brutalist'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4030.354966999963,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'brutalist'/'surface'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4895.447450999985,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'brutalist'/'surface'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5214.340399000037,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'brutalist'/'surface'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4606.397904000012,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'bootstrap-2-3-2'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4060.7279979999876,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'bootstrap-2-3-2'/'surface'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4741.176948999986,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'bootstrap-2-3-2'/'surface'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4509.997888999991,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'bootstrap-2-3-2'/'surface'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4603.280484999996,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'bootstrap-2-3-2'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 3386.7668990000384,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'bootstrap-2-3-2'/'surface'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4841.948925000033,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'bootstrap-2-3-2'/'surface'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4449.20645399997,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'bootstrap-2-3-2'/'surface'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4616.388266999973,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'liquid-glass'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4569.907232000027,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'liquid-glass'/'surface'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 6212.7210529999575,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'liquid-glass'/'surface'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5727.240997000015,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'en'/'liquid-glass'/'surface'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 6159.333723000018,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'liquid-glass'/'surface'/'wc' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 4532.497768000001,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'liquid-glass'/'surface'/'react' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 6116.721621000033,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'liquid-glass'/'surface'/'vue' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 5905.242909000022,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'liquid-glass'/'surface'/'vue2' retains public content and passive ownership",
+          "status": "passed",
+          "duration": 6020.2809939999715,
+          "failureMessages": []
+        }
+      ]
+    },
+    {
+      "label": "runtime-surface-current",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/runtime-surface-current.json",
+      "rawSha256": "c97a116c219a7dd65f0710e7e79355ca4903385faa635bce3f482e28c8fbcf1d",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "filtered": 5,
+      "startTime": 1795570629178,
+      "cases": [
+        {
+          "fullName": "RuntimeBox single actual Prototype surface keeps Runtime Tabs outside the canvas and the demonstrated Select popup usable at 390px",
+          "status": "passed",
+          "duration": 6704.294448000001,
+          "failureMessages": []
+        }
+      ]
+    },
+    {
+      "label": "accordion-bootstrap-presence",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/accordion-bootstrap-presence.json",
+      "rawSha256": "69d108c651097d0266990baa3d8134c98ea274fe011fb246ff45431a4244e057",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "filtered": 24,
+      "startTime": 1795572389486,
+      "cases": [
+        {
+          "fullName": "Accordion five families / four native Web consumers bootstrap-2-3-2 wc preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "duration": 18560.954134,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Accordion five families / four native Web consumers bootstrap-2-3-2 react preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "duration": 16760.095353,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Accordion five families / four native Web consumers bootstrap-2-3-2 vue preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "duration": 15877.677622000003,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Accordion five families / four native Web consumers bootstrap-2-3-2 vue2 preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "duration": 16298.94917,
+          "failureMessages": []
+        }
+      ]
+    },
+    {
+      "label": "dialog-wrap-current",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/dialog-wrap-current.json",
+      "rawSha256": "f82e332f1e746131553484de12fd9beba64d44608427ed6231274b860a95189e",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "filtered": 4,
+      "startTime": 1795573148692,
+      "cases": [
+        {
+          "fullName": "brutalist/wc: live available region bounds content, leaves Mask full-size, scrolls long text and restores on close",
+          "status": "passed",
+          "duration": 15862.393161,
+          "failureMessages": []
+        },
+        {
+          "fullName": "brutalist/react: live available region bounds content, leaves Mask full-size, scrolls long text and restores on close",
+          "status": "passed",
+          "duration": 12369.755191999997,
+          "failureMessages": []
+        },
+        {
+          "fullName": "brutalist/vue: live available region bounds content, leaves Mask full-size, scrolls long text and restores on close",
+          "status": "passed",
+          "duration": 12470.73846,
+          "failureMessages": []
+        },
+        {
+          "fullName": "brutalist/vue2: live available region bounds content, leaves Mask full-size, scrolls long text and restores on close",
+          "status": "passed",
+          "duration": 12930.145666000004,
+          "failureMessages": []
+        }
+      ]
+    },
+    {
+      "label": "select-first-paint-owner",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/select-first-paint-owner.json",
+      "rawSha256": "02c03be4a782a5e9117fe561d08195eec98fb63514506e97873a72e25c6e55af",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "filtered": 0,
+      "startTime": 1795573215296,
+      "cases": [
+        {
+          "fullName": "Select first paint with the popup never opened shows the authored label in every runtime",
+          "status": "passed",
+          "duration": 11634.063495999999,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Select first paint with the popup never opened keeps the closed content mounted and marked detached in every runtime",
+          "status": "passed",
+          "duration": 11866.115286,
+          "failureMessages": []
+        },
+        {
+          "fullName": "React Select retained native entry focus observes selected entry and native End/Home without committing selection",
+          "status": "passed",
+          "duration": 7821.957172999999,
+          "failureMessages": []
+        }
+      ]
+    },
+    {
+      "label": "code-grammar-initial-snapshot",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/code-grammar-initial-snapshot.json",
+      "rawSha256": "6c429e12f9d08af001b149ecfb4136ca51007a5212fbc10ac4eddecf51740e82",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "filtered": 26,
+      "startTime": 1795574314852,
+      "cases": [
+        {
+          "fullName": "keeps every authored source reachable without JavaScript and does not fake an interactive tree",
+          "status": "passed",
+          "duration": 12002.466889,
+          "failureMessages": []
+        },
+        {
+          "fullName": "keeps both file-browser panels bounded while files and directories change (1280px)",
+          "status": "passed",
+          "duration": 16785.522576,
+          "failureMessages": []
+        },
+        {
+          "fullName": "keeps both file-browser panels bounded while files and directories change (390px)",
+          "status": "passed",
+          "duration": 19637.581797,
+          "failureMessages": []
+        }
+      ]
+    }
+  ]
+}

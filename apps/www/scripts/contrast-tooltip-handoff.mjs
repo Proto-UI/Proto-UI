@@ -38,7 +38,10 @@ export function compileTooltipWarmHandoffPlan(demo, serializedRuntimes) {
   const openDelay = delay(group.props?.openDelay, 'Group openDelay');
   const closeDelay = delay(group.props?.closeDelay, 'Group closeDelay');
   const skipDelay = delay(group.props?.skipDelay, 'Group skipDelay');
-  if (openDelay <= TOOLTIP_WARM_OBSERVATION_MS || skipDelay <= 0 || closeDelay !== 0)
+  // Ordinary closing uses closeDelay. Group coordination requests the previous
+  // Root's closure directly and retires its perceptual presence during the
+  // same reconciliation (P-BASE-TOOLTIP-GROUP-INSTANT-HANDOFF).
+  if (openDelay <= TOOLTIP_WARM_OBSERVATION_MS || skipDelay <= 0)
     throw new Error('The authored recipe must distinguish cold delay from the native warm budget.');
   const pairs = roots.map((root, index) => {
     if (

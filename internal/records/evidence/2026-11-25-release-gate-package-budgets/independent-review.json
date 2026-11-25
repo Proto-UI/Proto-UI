@@ -1,0 +1,17 @@
+{
+  "reviewer": "root, separate from the transaction author ci_failure_inventory",
+  "candidateBase": "8b44c62992a5a3de560c02165bf650d2fe6f6ec7",
+  "result": "No blocking finding in the bounded numeric transaction; final-head canonical strict run required",
+  "checked": [
+    "All 24 READY file hashes match the reviewed bytes",
+    "All three retained canonical report SHA-256 values match the decompressed original reports",
+    "Exact source comparison permits only the three named numeric replacements and two evidence-comment lines",
+    "The canonical costs are 181862, 180720 and 218353 bytes; proposed next-100 ceilings leave 38, 80 and 47 bytes",
+    "The accepted-capability trace and unchanged closure-membership evidence distinguish integrated cost from dependency duplication",
+    "The original 28 strict measurement controls pass and old failed results remain preserved"
+  ],
+  "limitations": [
+    "This is an independent source/evidence review, not a GitHub approval or release acceptance",
+    "The final committed combination must pass the unchanged strict canonical workflow"
+  ]
+}

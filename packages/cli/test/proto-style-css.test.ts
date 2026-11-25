@@ -640,6 +640,7 @@ describe('proto style css renderer', () => {
     ['w-72', 'width: 18rem;'],
     ['text-[1.3125rem]', 'font-size: 1.3125rem;'],
     ['border-[#e5e5e5]', 'border-color: #e5e5e5;'],
+    ['border-inherit', 'border-color: inherit;'],
     ['outline-border', 'outline-color: var(--pui-border);'],
   ])(
     'renders the existing physical vocabulary %s in document and Shadow output',
@@ -1217,28 +1218,34 @@ describe('proto style css renderer', () => {
     expect(css).toContain('transition-property: none;');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
-  it('emits explicit duration and ease overrides after transition utilities so they win the cascade', () => {
-    const css = renderProtoStyleTokenCss([
-      'duration-200',
-      'ease-in-out',
-      'transition-all',
-      'transition-colors',
-    ]);
+  it.each([
+    ['duration-200', 'ease-in-out', '200ms'],
+    ['duration-300', 'ease-out', '300ms'],
+  ])(
+    'emits %s and %s after transition utilities so they win the cascade',
+    (durationToken, easeToken, durationValue) => {
+      const css = renderProtoStyleTokenCss([
+        durationToken,
+        easeToken,
+        'transition-all',
+        'transition-colors',
+      ]);
 
-    const transitionAll = css.indexOf('[data-pui-style~="transition-all"]');
-    const transitionColors = css.indexOf('[data-pui-style~="transition-colors"]');
-    const duration = css.indexOf('[data-pui-style~="duration-200"]');
-    const ease = css.indexOf('[data-pui-style~="ease-in-out"]');
+      const transitionAll = css.indexOf('[data-pui-style~="transition-all"]');
+      const transitionColors = css.indexOf('[data-pui-style~="transition-colors"]');
+      const duration = css.indexOf(`[data-pui-style~="${durationToken}"]`);
+      const ease = css.indexOf(`[data-pui-style~="${easeToken}"]`);
 
-    expect(transitionAll).toBeGreaterThan(-1);
-    expect(duration).toBeGreaterThan(transitionAll);
-    expect(duration).toBeGreaterThan(transitionColors);
-    expect(ease).toBeGreaterThan(transitionAll);
-    expect(ease).toBeGreaterThan(transitionColors);
-    expect(css).toContain('transition-duration: 150ms;');
-    expect(css).toContain('transition-duration: 200ms;');
-    expect(css).not.toContain('Unsupported Proto UI style tokens');
-  });
+      expect(transitionAll).toBeGreaterThan(-1);
+      expect(duration).toBeGreaterThan(transitionAll);
+      expect(duration).toBeGreaterThan(transitionColors);
+      expect(ease).toBeGreaterThan(transitionAll);
+      expect(ease).toBeGreaterThan(transitionColors);
+      expect(css).toContain('transition-duration: 150ms;');
+      expect(css).toContain(`transition-duration: ${durationValue};`);
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+    }
+  );
   it('emits explicit leading overrides after text-size utilities', () => {
     const css = renderProtoStyleTokenCss(['leading-6', 'text-sm']);
 

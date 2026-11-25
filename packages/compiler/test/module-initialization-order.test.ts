@@ -21,6 +21,49 @@ const accept = (source: string, files: Record<string, string> = {}) => {
 };
 
 describe('every eager module initializer retains lexical binding order', () => {
+  it.each([
+    "const selected=new Set(['ready']);",
+    "const selected=new Set<string>(['ready']);",
+    "const values=['ready'];const selected=new Set(values);",
+  ])('retains an admitted unshadowed finite Set initializer: %s', (declarations) => {
+    accept(entry(declarations, "selected.has('ready')"));
+  });
+
+  it('checks a finite Set initializer through an imported source binding', () => {
+    accept(entry("import {selected} from './membership';", "selected.has('ready')"), {
+      'membership.ts': "const values=['ready'];export const selected=new Set(values);",
+    });
+  });
+
+  it.each([
+    "const selected=new Set([later]);const later='ready';",
+    "const selected=new Set(later);const later=['ready'];",
+  ])('retains argument TDZ checks for a finite Set initializer: %s', (declarations) => {
+    rejectTDZ(entry(declarations, "selected.has('ready')"));
+  });
+
+  it('retains cross-module argument TDZ in a Set initializer', () => {
+    rejectTDZ(entry("import {selected} from './membership';", "selected.has('ready')"), {
+      'membership.ts': "import {values} from './values';export const selected=new Set(values);",
+      'values.ts': "import {selected} from './membership';export const values=[selected];",
+    });
+  });
+
+  it.each([
+    ['const Set=0;', {}],
+    ["import {Set} from './shadow';", { 'shadow.ts': 'export const Set=0;' }],
+  ])('does not grant builtin identity to a shadowed Set: %s', (declarations, files) => {
+    expect(
+      parsePrototype(
+        entry(`${declarations}const selected=new Set(['ready']);`, "selected.has('ready')"),
+        {
+          fileName: 'subject.proto.ts',
+          files,
+        }
+      )
+    ).toMatchObject({ ok: false });
+  });
+
   it.each(['const first=second;const second=run;', 'const first=second,second=run;'])(
     'does not erase an intermediate TDZ by resolving its final hoisted function: %s',
     (aliases) => {

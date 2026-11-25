@@ -19,8 +19,8 @@ const desktopSha256 = {
   'conditional-consistency.en': '5d24f0d566cbcfb8bba47c43336e12afe7424137424294182bfffe81bf827e1a',
   'conditional-consistency.zh-cn':
     '9eaaf1b5c7f69ca6fe8cdbe6808d43695b1115830d83b003849c7ba15a529fb7',
-  'evolution-feedback.en': 'd1b31fde58a0866b8a8a7c77d01ef6f25cd3209505c847532930a31b55ad6682',
-  'evolution-feedback.zh-cn': 'e6331476ff25de268950ccfb3fcc4f481f495c69b54432459a2baaf52b95ad69',
+  'evolution-feedback.en': 'f1e5ba376b02f75430ba0efd0f4779bf7687eacc3d0c59b02ce3902f5ea04041',
+  'evolution-feedback.zh-cn': '81dcdabdbed66da7c7042b5584f48726e4b6cfa706911832a1ce91bcfcd78f9b',
   'switch-activation.en': '3552003db261bc795a2ff74976334563b9be4293dbbf14a7b2e853479d9a1232',
   'switch-activation.zh-cn': '11c193fd5aeb9132422d0ac6af69c99f2cf718d01201c60d794e53dadae8cce4',
 };
@@ -127,6 +127,8 @@ for (const locale of ['en', 'zh-cn']) {
       const root = svg.match(/^<svg\b[^>]*>/)?.[0];
       assert.ok(root);
       assert.match(root, /role="img" aria-labelledby="title" aria-describedby="description"/);
+      // Marker paint must inherit the same theme variables as the diagram wires.
+      assert.match(svg, /<g class="evo-root">\s*<defs>[\s\S]*?<marker id="evo-arrow-sm"/);
       assert.ok(root.includes(`xml:lang="${locale}"`));
       for (const id of ['title', 'description']) {
         assert.equal([...svg.matchAll(new RegExp(`\\bid="${id}"`, 'g'))].length, 1, id);
@@ -224,6 +226,19 @@ for (const locale of ['en', 'zh-cn']) {
       'utf8'
     );
     assert.match(svg, /viewBox="0 0 960 928"/);
+    const alternatives = svg.slice(
+      svg.indexOf('<g data-alternatives="diagnoses">'),
+      svg.indexOf('<path data-relation="revision-loop"')
+    );
+    assert.match(
+      alternatives,
+      /<rect x="80" y="496" width="856" height="376"[^>]+class="evo-zone"/
+    );
+    assert.doesNotMatch(alternatives, /<path\b/, 'the diagnoses are alternatives, not stages');
+    assert.match(
+      svg,
+      /data-relation="revision-loop" data-from="diagnoses" data-to="work" d="M80 684 /
+    );
     const sizes = [...svg.matchAll(/<text\b[^>]*font-size="([0-9.]+)"/g)].map((m) => Number(m[1]));
     assert.ok(sizes.length > 0);
     assert.ok(
@@ -281,7 +296,12 @@ for (const locale of ['en', 'zh-cn']) {
     for (const [index, lane] of lanes.entries()) {
       const group = svg.match(new RegExp(`<g data-node="${lane}">([\\s\\S]*?)<\\/g>`))?.[1];
       assert.ok(group, lane);
-      assert.ok(group.includes(`<rect x="${32 + 156 * index}" y="108" width="140" height="116"`));
+      const [x, width] = [
+        [32, 140],
+        [188, 140],
+        [342, 144],
+      ][index];
+      assert.ok(group.includes(`<rect x="${x}" y="108" width="${width}" height="116"`));
     }
     assert.deepEqual(
       [...svg.matchAll(/data-node="([^"]+)"/g)].map((match) => match[1]),
@@ -301,7 +321,7 @@ for (const locale of ['en', 'zh-cn']) {
       const group = svg.match(
         new RegExp(`<g data-diagnosis="${diagnosis}">([\\s\\S]*?)<\\/g>`)
       )?.[1];
-      assert.ok(group?.includes(`<rect x="44" y="${472 + 100 * index}" width="428" height="88"`));
+      assert.ok(group?.includes(`<rect x="44" y="${488 + 100 * index}" width="428" height="92"`));
       assert.doesNotMatch(group, /<path\b/);
     }
     const alternatives = svg.slice(
@@ -314,7 +334,7 @@ for (const locale of ['en', 'zh-cn']) {
         /<path data-relation="([^"]+)" data-from="([^"]+)" data-to="([^"]+)" d="([^"]+)"/g
       ),
     ].map((match) => match.slice(1));
-    assert.equal([...svg.matchAll(/<path\b[^>]*class="line"/g)].length, edges.length);
+    assert.equal([...svg.matchAll(/<path\b[^>]*class="evo-wire"/g)].length, edges.length);
     assert.deepEqual(
       edges.map(([relation, from, to]) => [relation, from, to]),
       [

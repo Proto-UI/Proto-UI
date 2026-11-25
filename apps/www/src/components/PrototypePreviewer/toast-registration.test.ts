@@ -15,8 +15,8 @@ import {
 // Toast is published for base, shadcn, brutalist, bootstrap-2-3-2, and
 // liquid-glass. Every family declares initialRuntime="wc" and a four-runtime
 // selector (including vue2). None of the families has a projection manifest
-// entry, so each demo's atom id set is asserted exactly against the published
-// roles instead of being bound to a manifest.
+// entry, so each demo's authored atom set is asserted exactly. Independently
+// load every published role, including optional parts absent from that demo.
 const TOAST_FAMILIES = [
   {
     family: 'base',
@@ -91,10 +91,13 @@ describe('Toast actual DemoSpec registration', () => {
       const declaredIds = new Set<string>();
       collectPrototypeIds(demo.root, declaredIds);
       const ids = [...declaredIds].sort();
-      const expected = TOAST_ROLES.map((role) => `${family}-${role}`);
+      const published = TOAST_ROLES.map((role) => `${family}-${role}`);
+      // Keyed notifications declare their future atoms, including Close,
+      // before the first notification is mounted.
+      const expected = [...published];
       if (family === 'shadcn') expected.push('shadcn-style-scope');
       expect(ids).toEqual(expected.sort());
-      for (const id of ids) {
+      for (const id of new Set([...ids, ...published])) {
         await loadPrototype(id);
         expect(getPrototype(id)?.name).toBe(id);
       }

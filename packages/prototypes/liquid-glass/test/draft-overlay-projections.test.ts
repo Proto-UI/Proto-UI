@@ -1,10 +1,7 @@
 import { afterEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { definePrototype, type Prototype } from '@proto.ui/core';
 import { createRuntimeSession, type RuntimeSession } from '@proto.ui/runtime';
-import {
-  VISUAL_FEEDBACK_SINK_CAP,
-  type VisualFeedbackFrame,
-} from '@proto.ui/module-feedback';
+import { VISUAL_FEEDBACK_SINK_CAP, type VisualFeedbackFrame } from '@proto.ui/module-feedback';
 import {
   ANATOMY_INSTANCE_TOKEN_CAP,
   ANATOMY_PARENT_CAP,
@@ -246,9 +243,7 @@ describe('liquid-glass dialog projection', () => {
       expect(f.content.exposes.open.get()).toBe(false);
       // Mask keeps an ordinary dimming layer; it never becomes a material owner.
       expect(f.mask.frame().material).toEqual({ slot: null, candidates: [] });
-      expect(f.mask.frame().style.tokens).toEqual(
-        expect.arrayContaining(['fixed', 'bg-black/50'])
-      );
+      expect(f.mask.frame().style.tokens).toEqual(expect.arrayContaining(['fixed', 'bg-black/50']));
       expect(f.content.frame().material.slot).toEqual({
         version: 2,
         shape: { kind: 'rounded-rect', geometry: 'style' },
@@ -261,9 +256,7 @@ describe('liquid-glass dialog projection', () => {
       await expect.poll(() => f.root.exposes.open.get()).toBe(true);
       await flush();
       expect(f.content.exposes.open.get()).toBe(true);
-      expect(f.content.frame().material.candidates).toEqual([
-        { intent: 'liquid-glass' },
-      ]);
+      expect(f.content.frame().material.candidates).toEqual([{ intent: 'liquid-glass' }]);
       expect(f.content.frame().style.tokens).toEqual(
         expect.arrayContaining(['fixed', 'rounded-2xl', 'bg-secondary'])
       );
@@ -297,9 +290,7 @@ describe('liquid-glass dialog projection', () => {
       await flush();
       expect(f.root.exposes.open.get()).toBe(true);
       // The retained complete candidate still describes the open surface.
-      expect(f.content.frame().material.candidates).toEqual([
-        { intent: 'liquid-glass' },
-      ]);
+      expect(f.content.frame().material.candidates).toEqual([{ intent: 'liquid-glass' }]);
     } finally {
       await f.dispose();
     }
@@ -314,7 +305,8 @@ describe('liquid-glass dialog projection', () => {
           expect.arrayContaining([
             'bg-secondary',
             'text-secondary-foreground',
-            'cursor-not-allowed',
+            'pointer-events-none',
+            'cursor-default',
             'shadow-none',
           ])
         );
@@ -376,9 +368,7 @@ describe('liquid-glass hover-card projection', () => {
       await vi.advanceTimersByTimeAsync(1);
       expect(f.root.exposes.open.get()).toBe(true);
       expect(f.content.exposes.open.get()).toBe(true);
-      expect(f.content.frame().material.candidates).toEqual([
-        { intent: 'liquid-glass' },
-      ]);
+      expect(f.content.frame().material.candidates).toEqual([{ intent: 'liquid-glass' }]);
 
       // The trigger→content hover bridge holds the card open while the pointer
       // crosses; leaving content starts a fresh close deadline.

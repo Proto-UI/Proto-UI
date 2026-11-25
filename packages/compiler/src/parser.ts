@@ -2646,23 +2646,33 @@ class Frontend {
       !module.declarations.has('Set') &&
       !module.imports.has('Set')
     ) {
-      const args = (node.arguments ?? []).map((argument) =>
-        this.expression(module, argument, scope, phase)
-      );
       const contextual =
         expectedType &&
         valueAlternatives(expectedType).find(
           (type) => typeof type !== 'string' && type.kind === 'set'
         );
+      const declaredElement = node.typeArguments?.[0]
+        ? this.sourceValueType(module, node.typeArguments[0], this.substitutions)
+        : contextual && typeof contextual !== 'string' && contextual.kind === 'set'
+          ? contextual.element
+          : undefined;
+      const args = (node.arguments ?? []).map((argument, index) =>
+        this.expression(
+          module,
+          argument,
+          scope,
+          phase,
+          undefined,
+          index === 0 && declaredElement ? ordinaryArrayType(declaredElement, true) : undefined
+        )
+      );
       const declared: ValueType = {
         kind: 'set',
-        element: node.typeArguments?.[0]
-          ? this.sourceValueType(module, node.typeArguments[0], this.substitutions)
-          : contextual && typeof contextual !== 'string' && contextual.kind === 'set'
-            ? contextual.element
-            : args[0]
-              ? (iterableElementType(args[0].type) ?? 'unknown')
-              : { kind: 'union', members: [] },
+        element:
+          declaredElement ??
+          (args[0]
+            ? (iterableElementType(args[0].type) ?? 'unknown')
+            : { kind: 'union', members: [] }),
       };
       const type = this.checkedValue(node, () =>
         intrinsicResult(
@@ -5043,7 +5053,10 @@ class Frontend {
       rejectNode(node, 'PUI1006', `Invalid argument count for ${operation}.`);
     this.requirements.add(operation.split('.')[0]);
     if (operation === 'rule.declare') {
-      const lifted = liftRuleDeclarationConditional(node);
+      const lifted = liftRuleDeclarationConditional(node, (expression) => {
+        const value = this.expression(module, expression, scope, phase);
+        return typeof value.type !== 'string' && value.type.kind === 'set';
+      });
       if (lifted) return this.expression(module, lifted, scope, phase);
       const expanded = lowerRuleLiteralArgumentSpreads(node);
       if (expanded) return this.expression(module, expanded, scope, phase);

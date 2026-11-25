@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "release_gate_audit independent agent",
+  "scope": "Read-only source review and five adversarial compile refusals; not platform approval or clean release CI",
+  "head": "2f182fd10a1b1399abdd5b404563df3ee4d562c2",
+  "files": [
+    {
+      "path": "packages/compiler/src/rule-declarations.ts",
+      "sha256": "aab4b30c7f13f53d06d01a7d6b9c3d0ac0dfbf74d3d67a1d975fb944f0499a25"
+    },
+    {
+      "path": "packages/compiler/src/parser.ts",
+      "sha256": "00921e96fbe91db4c315cc49d5ef9c020ce8f5a0fbd5dfe048cdcc1c480ad793"
+    },
+    {
+      "path": "packages/compiler/test/rule-captured-membership.test.ts",
+      "sha256": "ff6d0730244b7a48e141f7e30d0a43e097c7e9057d0911b62798709f434c4d77"
+    },
+    {
+      "path": "internal/compiler/source-language.md",
+      "sha256": "761ac68551cbe64b11d83545882f751ac52dd0a9676783ec4310f16f65169eac"
+    }
+  ],
+  "results": [
+    {
+      "name": "destructuredLocalSet",
+      "source": "import {definePrototype,tw} from '@proto.ui/core'; const ICONS=new Set<string>(['icon']); export default definePrototype({name:'review',setup(def){def.rule({when:w=>{const {ICONS}={ICONS:new Set<string>(['text'])};return ICONS.has('icon')?w.t():w.f()},intent:i=>i.feedback.style.use(tw('p-2'))});}})",
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI1024",
+          "category": "unsupported-input",
+          "message": "Rule callback destructuring and uninitialized declarations are unsupported.",
+          "span": {
+            "file": "input.proto.ts",
+            "start": 172,
+            "end": 213,
+            "line": 1,
+            "column": 173,
+            "endLine": 1,
+            "endColumn": 214
+          }
+        }
+      ]
+    },
+    {
+      "name": "callbackMutation",
+      "source": "import {definePrototype,tw} from '@proto.ui/core'; const ICONS=new Set<string>(['icon']); export default definePrototype({name:'review',setup(def){def.rule({when:w=>{ICONS.clear();return ICONS.has('icon')?w.t():w.f()},intent:i=>i.feedback.style.use(tw('p-2'))});}})",
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI1024",
+          "category": "unsupported-input",
+          "message": "Static when callbacks allow only constant aliases followed by one return.",
+          "span": {
+            "file": "input.proto.ts",
+            "start": 166,
+            "end": 180,
+            "line": 1,
+            "column": 167,
+            "endLine": 1,
+            "endColumn": 181
+          }
+        }
+      ]
+    },
+    {
+      "name": "localFunctionShadow",
+      "source": "import {definePrototype,tw} from '@proto.ui/core'; const ICONS=new Set<string>(['icon']); export default definePrototype({name:'review',setup(def){def.rule({when:w=>{function ICONS(){};return ICONS.has('icon')?w.t():w.f()},intent:i=>i.feedback.style.use(tw('p-2'))});}})",
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI1024",
+          "category": "unsupported-input",
+          "message": "Static when callbacks allow only constant aliases followed by one return.",
+          "span": {
+            "file": "input.proto.ts",
+            "start": 166,
+            "end": 184,
+            "line": 1,
+            "column": 167,
+            "endLine": 1,
+            "endColumn": 185
+          }
+        }
+      ]
+    },
+    {
+      "name": "arrayDestructuredLocalSet",
+      "source": "import {definePrototype,tw} from '@proto.ui/core'; const ICONS=new Set<string>(['icon']); export default definePrototype({name:'review',setup(def){def.rule({when:w=>{const [ICONS]=[new Set<string>(['text'])];return ICONS.has('icon')?w.t():w.f()},intent:i=>i.feedback.style.use(tw('p-2'))});}})",
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI1024",
+          "category": "unsupported-input",
+          "message": "Rule callback destructuring and uninitialized declarations are unsupported.",
+          "span": {
+            "file": "input.proto.ts",
+            "start": 172,
+            "end": 207,
+            "line": 1,
+            "column": 173,
+            "endLine": 1,
+            "endColumn": 208
+          }
+        }
+      ]
+    },
+    {
+      "name": "nullableReceiver",
+      "source": "import {definePrototype,tw} from '@proto.ui/core'; const ICONS=new Set<string>(['icon']); export default definePrototype({name:'review',setup(def){const maybe:Set<string>|undefined=undefined;def.rule({when:w=>maybe.has('icon')?w.t():w.f(),intent:i=>i.feedback.style.use(tw('p-2'))});}})",
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI1024",
+          "category": "unsupported-input",
+          "message": "Dynamic conditions, host values and executable Rule expressions are unsupported.",
+          "span": {
+            "file": "input.proto.ts",
+            "start": 209,
+            "end": 238,
+            "line": 1,
+            "column": 210,
+            "endLine": 1,
+            "endColumn": 239
+          }
+        }
+      ]
+    }
+  ]
+}

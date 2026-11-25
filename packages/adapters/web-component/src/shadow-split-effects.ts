@@ -125,7 +125,15 @@ function hasCanonicalProjectionRecipe(rule: CompiledStyleRule, entry: RootStyleE
 }
 
 function needsPercentageTranslationRecipe(token: string): boolean {
-  return token === 'translate-x-[calc(100%_-_4px)]' || isPercentageRootTranslationV1(token);
+  return (
+    token === 'translate-x-[calc(100%_-_4px)]' ||
+    token === 'translate-x-[-0.0625rem]' ||
+    token === 'translate-x-[calc(2px_-_100%)]' ||
+    token === 'translate-x-[calc(8px_-_100%)]' ||
+    token === 'translate-x-[calc(-100%_-_2px)]' ||
+    token === 'translate-x-[calc(4px_-_100%)]' ||
+    isPercentageRootTranslationV1(token)
+  );
 }
 
 function nextCssBoundary(

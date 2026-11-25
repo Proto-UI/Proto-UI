@@ -904,7 +904,9 @@ it('keeps every authored source reachable without JavaScript and does not fake a
     });
     expect(await generated.locator('[data-code-directory-path]').count()).toBe(6);
     expect(await example.locator('[data-code-file-panel]:visible').count()).toBe(4);
-    const htmlLink = example.locator('[data-code-file-tabs] a').filter({ hasText: /^index.html$/ });
+    const htmlLink = example
+      .locator('[data-code-host-panel][data-code-host="wc"] [data-code-file-tabs]')
+      .getByRole('link', { name: 'index.html', exact: true });
     await htmlLink.click();
     expect(
       await example.locator('[data-code-host="wc"] [data-code-file-panel]:visible').count()
@@ -1495,17 +1497,33 @@ for (const width of [1280, 390]) {
       const generated = page.locator('[data-standalone-file-browser][data-file-browser-init="1"]');
       await generated.waitFor();
       const tree = generated.locator('[role="tree"]');
-      const treeViewport = generated.locator('[data-code-files] [data-code-tree-scroll]');
-      await expect
-        .poll(() =>
-          treeViewport.evaluate((node) => {
-            const facts = node as HTMLElement & {
-              getExposes?(): { scrollProjection?: { get(): string } };
-            };
-            return facts.getExposes?.().scrollProjection?.get();
-          })
-        )
-        .toBe('composed');
+      // Tree publication precedes the separately lazy ScrollArea upgrade.
+      // Bind its actual native viewport, not the earlier SSR fallback region.
+      const treeViewport = generated.locator(
+        '[data-code-files] [data-code-scroll-ready] [data-code-scroll-viewport][data-code-tree-scroll]'
+      );
+      await treeViewport.waitFor({ state: 'visible' });
+      // Assert the first native snapshot from the published viewport. A cold
+      // CDP read may outlast Vitest's default 1s poll before returning any fact;
+      // it must finish under the existing operation/case budgets before verdict.
+      const observed = await treeViewport.evaluate((node) => {
+        const facts = node as HTMLElement & {
+          getExposes?(): { scrollProjection?: { get(): string } };
+        };
+        const exposed = facts.getExposes?.();
+        return {
+          projection: exposed?.scrollProjection?.get(),
+          tag: node.localName,
+          connected: node.isConnected,
+          getExposesType: typeof facts.getExposes,
+          exposedKeys: Object.keys(exposed ?? {}),
+          attributes: Object.fromEntries(
+            Array.from(node.attributes, (attribute) => [attribute.name, attribute.value])
+          ),
+        };
+      });
+      pagePhase(page, 'tree-scroll.projection', 'event', observed);
+      expect(observed.projection).toBe('composed');
       expect(await treeViewport.evaluate((node) => getComputedStyle(node).scrollbarWidth)).toBe(
         'none'
       );

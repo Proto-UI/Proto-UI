@@ -1,0 +1,153 @@
+{
+  "scope": "Focused native preference diagnostic on the existing fixture; official production admission remains required",
+  "changes": [
+    "Button transitions shadow only so restrictive opaque background takes effect at the first committed fallback paint",
+    "Submit, Reset and Select retain the complete Base press descriptor across live preference changes; Host policy controls static reduced/unknown motion"
+  ],
+  "sourceHashes": {
+    "packages/prototypes/liquid-glass/src/button/button.proto.ts": "28a82b16f0e1648ce5cd01b03ad6c00b78a69c5521b7f0479f5635998d0f0ccd",
+    "packages/prototypes/liquid-glass/src/form/submit.proto.ts": "32618ac62270ab2311f35c27309d27c1867ba9d4c01194e5637ccbd0a37cc1b7",
+    "packages/prototypes/liquid-glass/src/form/reset.proto.ts": "2372407a7db3847bacd2398f953383924150b143c2a6bef149cfaec93e929cf6",
+    "packages/prototypes/liquid-glass/src/select/trigger-visual.ts": "9c46b36e39fe5fef75673a23c92143e0a8653366b672afde97ac29567b2908a8",
+    "packages/prototypes/liquid-glass/test/interactive-surface.test.ts": "8dbf5d000bad4e72a331bd7a5f5ae00439a81a3fe76b83c83e48c4b25447642c"
+  },
+  "unitBefore": {
+    "numTotalTests": 33,
+    "numPassedTests": 29,
+    "numFailedTests": 4,
+    "numPendingTests": 0,
+    "success": false
+  },
+  "unitAfter": {
+    "numTotalTests": 49,
+    "numPassedTests": 49,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "success": true
+  },
+  "native": {
+    "total": 16,
+    "passed": 16,
+    "failed": 0,
+    "success": true,
+    "exit": 0,
+    "cases": [
+      {
+        "runtime": "wc",
+        "theme": "light",
+        "part": "button",
+        "passed": true
+      },
+      {
+        "runtime": "wc",
+        "theme": "light",
+        "part": "submit",
+        "passed": true
+      },
+      {
+        "runtime": "wc",
+        "theme": "dark",
+        "part": "button",
+        "passed": true
+      },
+      {
+        "runtime": "wc",
+        "theme": "dark",
+        "part": "submit",
+        "passed": true
+      },
+      {
+        "runtime": "react",
+        "theme": "light",
+        "part": "button",
+        "passed": true
+      },
+      {
+        "runtime": "react",
+        "theme": "light",
+        "part": "submit",
+        "passed": true
+      },
+      {
+        "runtime": "react",
+        "theme": "dark",
+        "part": "button",
+        "passed": true
+      },
+      {
+        "runtime": "react",
+        "theme": "dark",
+        "part": "submit",
+        "passed": true
+      },
+      {
+        "runtime": "vue",
+        "theme": "light",
+        "part": "button",
+        "passed": true
+      },
+      {
+        "runtime": "vue",
+        "theme": "light",
+        "part": "submit",
+        "passed": true
+      },
+      {
+        "runtime": "vue",
+        "theme": "dark",
+        "part": "button",
+        "passed": true
+      },
+      {
+        "runtime": "vue",
+        "theme": "dark",
+        "part": "submit",
+        "passed": true
+      },
+      {
+        "runtime": "vue2",
+        "theme": "light",
+        "part": "button",
+        "passed": true
+      },
+      {
+        "runtime": "vue2",
+        "theme": "light",
+        "part": "submit",
+        "passed": true
+      },
+      {
+        "runtime": "vue2",
+        "theme": "dark",
+        "part": "button",
+        "passed": true
+      },
+      {
+        "runtime": "vue2",
+        "theme": "dark",
+        "part": "submit",
+        "passed": true
+      }
+    ]
+  },
+  "nativeChecks": [
+    "actual current fixture ready barrier",
+    "native held press then live reduced-motion preference",
+    "current self-optical static/rest commit before inspection",
+    "decoded paint commit and foreground contrast >=4.5",
+    "opaque first fallback paint and no optical URI for reduced-transparency, contrast-more and forced-colors",
+    "same focused control after preference changes",
+    "no page errors"
+  ],
+  "priorDiagnostic": {
+    "total": 16,
+    "passed": 2,
+    "failed": 14,
+    "scope": "Preserved unsuccessful diagnostic sampled previous committed contact immediately after changing media preferences; current-receipt run waits for actual current static/rest commit using the existing four-second allowance."
+  },
+  "archiveSha256": "0d77b99fc098bce5cda2b7f7fb9947336c1f07df500dd7ef21bb2e96b25b68cb",
+  "limitations": [
+    "Native preference matrix covers Button and Submit; Reset/Select ownership and preference sequences additionally use focused runtime controls. It does not replace the retained full production workflow.",
+    "Native source manifest records the actual diagnostic worktree, including its existing overlays; these are not clean-source CI receipts."
+  ]
+}

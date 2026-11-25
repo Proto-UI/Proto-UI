@@ -67,7 +67,7 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
     );
     def.rule({
       when: (w) => w.meta('preference.reducedMotion').eq('no-preference'),
-      intent: (i) => i.feedback.style.use(tw('transition-all duration-150')),
+      intent: (i) => i.feedback.style.use(tw('transition-shadow duration-150')),
     });
     def.rule({
       when: (w) => w.not(w.meta('preference.reducedMotion').eq('no-preference')),

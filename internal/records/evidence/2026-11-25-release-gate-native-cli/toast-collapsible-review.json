@@ -1,0 +1,43 @@
+{
+  "reviewer": "ci_failure_inventory (independent source review; not GitHub APPROVED)",
+  "base": "acfa206d9f2772fb189bc5742d5cc96f337983f2",
+  "scope": "The six listed candidate source files and their bounded source diffs; relevant existing Toast command regression and Collapsible semantics were inspected.",
+  "files": [
+    {
+      "path": "packages/prototypes/brutalist/src/toast/action.proto.ts",
+      "sha256": "88f92d88437363d8cb48a6e47057a0a55bbf0c9b35440d5e94ece65670518365"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/toast/close.proto.ts",
+      "sha256": "4c8a4dac8d8914dab533f23d2737643e11acc536fd1c790e729b02de84232a83"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/toast/press-visual.ts",
+      "sha256": "0acfbae66c23d6eb4619d2be0e7994d7afe1d7b8e111b8366c9fe061bb12a023"
+    },
+    {
+      "path": "packages/prototypes/bootstrap-2-3-2/src/collapsible/content.proto.ts",
+      "sha256": "1366762cdc887102244f6ea75ff1f740018cf4b6d938bce7e71ba820ace30222"
+    },
+    {
+      "path": "packages/prototypes/bootstrap-2-3-2/src/collapsible/trigger.proto.ts",
+      "sha256": "731d13d50d6ec8978ec8e3728f14ee4b41cef4035ed90a5424e5720c74ed75f4"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/collapsible/trigger.proto.ts",
+      "sha256": "0bc31f961a12abed53bae0744693f390f3d4128bcf646705a118f9b91e8621e7"
+    }
+  ],
+  "conclusion": "No blocking findings in the reviewed bounded changes.",
+  "reasoning": [
+    "Toast local pointer paint retains Base command activation and dismissal authority; up/leave/cancel, disabled transition and unmount clear the private pressed state. The Rule independently gates unavailable paint.",
+    "Bootstrap Collapsible content assigns only inherited border color to the motion host; inner border width and padding retain zero collapsed host geometry and exact light #e5e5e5/dark theme color.",
+    "Bootstrap trigger separates light/dark hover and press rules and excludes disabled feedback.",
+    "Brutalist trigger retains noShadow and pressed variants when dark rest-shadow changes; the scheme rule cannot repaint a shadow during press."
+  ],
+  "limitations": [
+    "This is a static review and does not assert native browser acceptance of these prototypes.",
+    "Existing lifecycle/spec status and whole-feature acceptance are unchanged.",
+    "No GitHub review, approval, commit or merge was performed by this reviewer."
+  ]
+}

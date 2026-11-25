@@ -1,0 +1,691 @@
+{
+  "priorRun": 45513860306,
+  "priorHead": "47ae41c671c64091ae87d717f3fa61d02c13f355",
+  "priorReportSha256": "dffd5b0d91bfa073439706333827ad12d4cd33858220caebe5ad4c169d405355",
+  "candidateRun": 45552827234,
+  "candidateHead": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1",
+  "candidateReportSha256": "47fcdf19c451815a7a9f86bd00ee6b2698b87e10fd6be7ef3cd084110a408b84",
+  "environmentEqual": true,
+  "measurementEqual": true,
+  "rows": [
+    {
+      "name": "lucide/icons/x",
+      "oldGzipBytes": 1797,
+      "newGzipBytes": 1796,
+      "deltaGzipBytes": -1,
+      "oldMinifiedBytes": 4765,
+      "newMinifiedBytes": 4765,
+      "oldMinifiedSha256": "05a98e24767b887f96f4893381f5cfbdbe2c2ddd48c2ff3f730a662392c6ab1d",
+      "newMinifiedSha256": "f7fa573b04db4ac0e3c64776cc485623622ab14b2f6c75b4fad47141d7f540f9",
+      "oldClosure": "bf3cd230b9557438e975afc1ec1d7ad6c0038c6cd2f9b07052074b15a8d2d65f",
+      "newClosure": "88642f36700a3c0e4b5f73dfb075bfa65dcf382ff816d36cbcd723992a2b42d3",
+      "addedInputs": [],
+      "removedInputs": [],
+      "changedSourceInputs": [
+        {
+          "path": "packages/core/src/spec/feedback/application-role.ts",
+          "old": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7247,
+            "sourceSha256": "2f95669717b5b7e5521cfdd8eb0711f2615f2afeb001b62b8b6fea993a548cab",
+            "retainedBytes": 0
+          },
+          "new": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7756,
+            "sourceSha256": "0f0900c247310fd34d0d59028a2ac00f09e4ddf235e299a69378c23c1258d0d2",
+            "retainedBytes": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "lucide root",
+      "oldGzipBytes": 635846,
+      "newGzipBytes": 635846,
+      "deltaGzipBytes": 0,
+      "oldMinifiedBytes": 4083517,
+      "newMinifiedBytes": 4083517,
+      "oldMinifiedSha256": "dfe25b297b6499626de01289b35b82a9a9837a1285f683dbaed78d2e5e2275bd",
+      "newMinifiedSha256": "dfe25b297b6499626de01289b35b82a9a9837a1285f683dbaed78d2e5e2275bd",
+      "oldClosure": "59ab09be62ab51d3cb2bd88ab38cb436c8f4ffbc915c03733bfd38862a7de809",
+      "newClosure": "d5ca4506b469548a6c9cf5801bfa8a67af43f65ae4ed08c856258fedbf391516",
+      "addedInputs": [],
+      "removedInputs": [],
+      "changedSourceInputs": [
+        {
+          "path": "packages/core/src/spec/feedback/application-role.ts",
+          "old": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7247,
+            "sourceSha256": "2f95669717b5b7e5521cfdd8eb0711f2615f2afeb001b62b8b6fea993a548cab",
+            "retainedBytes": 34
+          },
+          "new": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7756,
+            "sourceSha256": "0f0900c247310fd34d0d59028a2ac00f09e4ddf235e299a69378c23c1258d0d2",
+            "retainedBytes": 34
+          }
+        }
+      ]
+    },
+    {
+      "name": "core root",
+      "oldGzipBytes": 12967,
+      "newGzipBytes": 13012,
+      "deltaGzipBytes": 45,
+      "oldMinifiedBytes": 40953,
+      "newMinifiedBytes": 41284,
+      "oldMinifiedSha256": "d2bbd2ef4c8b0a087b78392b16ded9e51d6751f5f224f78160483bccae1868ae",
+      "newMinifiedSha256": "454e0c894e9eb5f35fe36ea0b6e43cd1e83bd87fcb18b9ef2f29144fc73acd3c",
+      "oldClosure": "ad06540b025ac5b86ef888c6bf5b3aefcb31867af0c4165f8fd919ab2bc260d1",
+      "newClosure": "4720e33f7f0b7a64b9203a797862a0bcf3c7588bc89341130ed1328535ed9866",
+      "addedInputs": [],
+      "removedInputs": [],
+      "changedSourceInputs": [
+        {
+          "path": "packages/core/src/spec/feedback/application-role.ts",
+          "old": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7247,
+            "sourceSha256": "2f95669717b5b7e5521cfdd8eb0711f2615f2afeb001b62b8b6fea993a548cab",
+            "retainedBytes": 3251
+          },
+          "new": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7756,
+            "sourceSha256": "0f0900c247310fd34d0d59028a2ac00f09e4ddf235e299a69378c23c1258d0d2",
+            "retainedBytes": 3582
+          }
+        }
+      ]
+    },
+    {
+      "name": "runtime root",
+      "oldGzipBytes": 107035,
+      "newGzipBytes": 107204,
+      "deltaGzipBytes": 169,
+      "oldMinifiedBytes": 410800,
+      "newMinifiedBytes": 410501,
+      "oldMinifiedSha256": "8a4f23c468b71f7ea2ddcdb9e592826edba305966240dd7785eed6b4ab117328",
+      "newMinifiedSha256": "6b24966651c89973b6983ef3aefd90ca961afe139f3aa86a0892790e5e33a549",
+      "oldClosure": "3a7460188fa78af2bc62917ff19f673e6808914a71c104a57e3370f87bd53be1",
+      "newClosure": "1e39d3190eb17181187924b8592400a5a32b5b7d5c8e3785933aec69fabf0e71",
+      "addedInputs": [],
+      "removedInputs": [],
+      "changedSourceInputs": [
+        {
+          "path": "packages/core/src/spec/feedback/application-role.ts",
+          "old": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7247,
+            "sourceSha256": "2f95669717b5b7e5521cfdd8eb0711f2615f2afeb001b62b8b6fea993a548cab",
+            "retainedBytes": 3269
+          },
+          "new": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7756,
+            "sourceSha256": "0f0900c247310fd34d0d59028a2ac00f09e4ddf235e299a69378c23c1258d0d2",
+            "retainedBytes": 3600
+          }
+        },
+        {
+          "path": "packages/modules/anatomy/src/impl.ts",
+          "old": {
+            "path": "packages/modules/anatomy/src/impl.ts",
+            "sourceBytes": 58247,
+            "sourceSha256": "96abf05e884dd8f3240687c60bcc9037eb183802e22b5209e82986d2f3d15209",
+            "retainedBytes": 24151
+          },
+          "new": {
+            "path": "packages/modules/anatomy/src/impl.ts",
+            "sourceBytes": 58229,
+            "sourceSha256": "ffd0b635b5c0aecaf1b62cddf1307d9520840dcccfb886d9d9ae093efabd1a99",
+            "retainedBytes": 23399
+          }
+        },
+        {
+          "path": "packages/modules/anatomy/src/types.ts",
+          "old": {
+            "path": "packages/modules/anatomy/src/types.ts",
+            "sourceBytes": 3175,
+            "sourceSha256": "2dd9c79a21d0e84067e2f8ea45b31f0f58694d3dfc4a0ee88251e13a170cccf6",
+            "retainedBytes": 0
+          },
+          "new": {
+            "path": "packages/modules/anatomy/src/types.ts",
+            "sourceBytes": 3255,
+            "sourceSha256": "98c951e540be1a204faafa13176ccc439d91521c6d6432b2824f0d64bbf62513",
+            "retainedBytes": 0
+          }
+        },
+        {
+          "path": "packages/modules/collection/src/create.ts",
+          "old": {
+            "path": "packages/modules/collection/src/create.ts",
+            "sourceBytes": 5690,
+            "sourceSha256": "7865b013cfb97005b7dc3521e777fab6ca591649dc09d18884823c2bef4557c8",
+            "retainedBytes": 2690
+          },
+          "new": {
+            "path": "packages/modules/collection/src/create.ts",
+            "sourceBytes": 5720,
+            "sourceSha256": "a9a2e4c2e61dafe52ece2760cf3ff29a9f730f96ac02d216b8df16d977de20f3",
+            "retainedBytes": 2708
+          }
+        },
+        {
+          "path": "packages/modules/feedback/src/create.ts",
+          "old": {
+            "path": "packages/modules/feedback/src/create.ts",
+            "sourceBytes": 42728,
+            "sourceSha256": "7faa1043eebc7e6874623de07ff2fc0c761b7eb2b15de9c57fcbc18b6b2f72b9",
+            "retainedBytes": 19367
+          },
+          "new": {
+            "path": "packages/modules/feedback/src/create.ts",
+            "sourceBytes": 42936,
+            "sourceSha256": "c017de5f25e061655cf497eac65d1ea0b8c7cdaaba7e8923bbdcc9a371ec49e0",
+            "retainedBytes": 19444
+          }
+        }
+      ]
+    },
+    {
+      "name": "adapter-react root",
+      "oldGzipBytes": 181710,
+      "newGzipBytes": 181862,
+      "deltaGzipBytes": 152,
+      "oldMinifiedBytes": 631027,
+      "newMinifiedBytes": 630719,
+      "oldMinifiedSha256": "f1240517244e40324770108f7630a52c4bd5d2ab3010b2f28f6bc0cef30e1089",
+      "newMinifiedSha256": "4f9e165d93231acb1d71b0882343313a591b1d6f8011b9910fde53c15111da38",
+      "oldClosure": "0be2ea0c9224d0235db0cfb88756e11a92e8701ae47acae04de4341deaf50457",
+      "newClosure": "d32f861a966208c65d817da99fbda342ded4513711beb2754db40247f84453d4",
+      "addedInputs": [],
+      "removedInputs": [],
+      "changedSourceInputs": [
+        {
+          "path": "packages/adapters/react/src/runtime/modules.ts",
+          "old": {
+            "path": "packages/adapters/react/src/runtime/modules.ts",
+            "sourceBytes": 27876,
+            "sourceSha256": "b3c2e35408c2415e3808a787f759ea1b52b9f9f02277cc284c18e35e3d6e105a",
+            "retainedBytes": 6247
+          },
+          "new": {
+            "path": "packages/adapters/react/src/runtime/modules.ts",
+            "sourceBytes": 27778,
+            "sourceSha256": "770ae3463ab2af4f2dc096cefe2e5dd23a4d597d2983800d0f6d70723a98b7fe",
+            "retainedBytes": 6235
+          }
+        },
+        {
+          "path": "packages/core/src/spec/feedback/application-role.ts",
+          "old": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7247,
+            "sourceSha256": "2f95669717b5b7e5521cfdd8eb0711f2615f2afeb001b62b8b6fea993a548cab",
+            "retainedBytes": 3269
+          },
+          "new": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7756,
+            "sourceSha256": "0f0900c247310fd34d0d59028a2ac00f09e4ddf235e299a69378c23c1258d0d2",
+            "retainedBytes": 3600
+          }
+        },
+        {
+          "path": "packages/modules/anatomy/src/impl.ts",
+          "old": {
+            "path": "packages/modules/anatomy/src/impl.ts",
+            "sourceBytes": 58247,
+            "sourceSha256": "96abf05e884dd8f3240687c60bcc9037eb183802e22b5209e82986d2f3d15209",
+            "retainedBytes": 24155
+          },
+          "new": {
+            "path": "packages/modules/anatomy/src/impl.ts",
+            "sourceBytes": 58229,
+            "sourceSha256": "ffd0b635b5c0aecaf1b62cddf1307d9520840dcccfb886d9d9ae093efabd1a99",
+            "retainedBytes": 23433
+          }
+        },
+        {
+          "path": "packages/modules/anatomy/src/types.ts",
+          "old": {
+            "path": "packages/modules/anatomy/src/types.ts",
+            "sourceBytes": 3175,
+            "sourceSha256": "2dd9c79a21d0e84067e2f8ea45b31f0f58694d3dfc4a0ee88251e13a170cccf6",
+            "retainedBytes": 0
+          },
+          "new": {
+            "path": "packages/modules/anatomy/src/types.ts",
+            "sourceBytes": 3255,
+            "sourceSha256": "98c951e540be1a204faafa13176ccc439d91521c6d6432b2824f0d64bbf62513",
+            "retainedBytes": 0
+          }
+        },
+        {
+          "path": "packages/modules/collection/src/create.ts",
+          "old": {
+            "path": "packages/modules/collection/src/create.ts",
+            "sourceBytes": 5690,
+            "sourceSha256": "7865b013cfb97005b7dc3521e777fab6ca591649dc09d18884823c2bef4557c8",
+            "retainedBytes": 2692
+          },
+          "new": {
+            "path": "packages/modules/collection/src/create.ts",
+            "sourceBytes": 5720,
+            "sourceSha256": "a9a2e4c2e61dafe52ece2760cf3ff29a9f730f96ac02d216b8df16d977de20f3",
+            "retainedBytes": 2710
+          }
+        },
+        {
+          "path": "packages/modules/feedback/src/create.ts",
+          "old": {
+            "path": "packages/modules/feedback/src/create.ts",
+            "sourceBytes": 42728,
+            "sourceSha256": "7faa1043eebc7e6874623de07ff2fc0c761b7eb2b15de9c57fcbc18b6b2f72b9",
+            "retainedBytes": 19373
+          },
+          "new": {
+            "path": "packages/modules/feedback/src/create.ts",
+            "sourceBytes": 42936,
+            "sourceSha256": "c017de5f25e061655cf497eac65d1ea0b8c7cdaaba7e8923bbdcc9a371ec49e0",
+            "retainedBytes": 19450
+          }
+        }
+      ]
+    },
+    {
+      "name": "adapter-vue root",
+      "oldGzipBytes": 180546,
+      "newGzipBytes": 180720,
+      "deltaGzipBytes": 174,
+      "oldMinifiedBytes": 626433,
+      "newMinifiedBytes": 626125,
+      "oldMinifiedSha256": "55f51d20c2a4cde4bfdd028d7081733541fead51a493c81b4378f6b4d0bea1aa",
+      "newMinifiedSha256": "78921be45bf87a060f37c7a79000a2b524e1ec2a34a6c71758557b4a2f9e8e53",
+      "oldClosure": "02aa04b3e7d214ab4a9cfa223154d59bd5807b764ba3cebb236a97b4ca5ec6b8",
+      "newClosure": "5f6a154cf925115a11367e42f54662f11ef105c1c0d2c59ac253ebd190485c8b",
+      "addedInputs": [],
+      "removedInputs": [],
+      "changedSourceInputs": [
+        {
+          "path": "packages/adapters/vue/src/runtime/modules.ts",
+          "old": {
+            "path": "packages/adapters/vue/src/runtime/modules.ts",
+            "sourceBytes": 22980,
+            "sourceSha256": "678398a363a711c7c7a40bb94eba8d49348f9dec3a30693ca4185785493aee08",
+            "retainedBytes": 4577
+          },
+          "new": {
+            "path": "packages/adapters/vue/src/runtime/modules.ts",
+            "sourceBytes": 22882,
+            "sourceSha256": "6a4307104010b649beaea7fbda768eddbbe3b55539acd71325f7768f1570f127",
+            "retainedBytes": 4565
+          }
+        },
+        {
+          "path": "packages/core/src/spec/feedback/application-role.ts",
+          "old": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7247,
+            "sourceSha256": "2f95669717b5b7e5521cfdd8eb0711f2615f2afeb001b62b8b6fea993a548cab",
+            "retainedBytes": 3269
+          },
+          "new": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7756,
+            "sourceSha256": "0f0900c247310fd34d0d59028a2ac00f09e4ddf235e299a69378c23c1258d0d2",
+            "retainedBytes": 3600
+          }
+        },
+        {
+          "path": "packages/modules/anatomy/src/impl.ts",
+          "old": {
+            "path": "packages/modules/anatomy/src/impl.ts",
+            "sourceBytes": 58247,
+            "sourceSha256": "96abf05e884dd8f3240687c60bcc9037eb183802e22b5209e82986d2f3d15209",
+            "retainedBytes": 24155
+          },
+          "new": {
+            "path": "packages/modules/anatomy/src/impl.ts",
+            "sourceBytes": 58229,
+            "sourceSha256": "ffd0b635b5c0aecaf1b62cddf1307d9520840dcccfb886d9d9ae093efabd1a99",
+            "retainedBytes": 23433
+          }
+        },
+        {
+          "path": "packages/modules/anatomy/src/types.ts",
+          "old": {
+            "path": "packages/modules/anatomy/src/types.ts",
+            "sourceBytes": 3175,
+            "sourceSha256": "2dd9c79a21d0e84067e2f8ea45b31f0f58694d3dfc4a0ee88251e13a170cccf6",
+            "retainedBytes": 0
+          },
+          "new": {
+            "path": "packages/modules/anatomy/src/types.ts",
+            "sourceBytes": 3255,
+            "sourceSha256": "98c951e540be1a204faafa13176ccc439d91521c6d6432b2824f0d64bbf62513",
+            "retainedBytes": 0
+          }
+        },
+        {
+          "path": "packages/modules/collection/src/create.ts",
+          "old": {
+            "path": "packages/modules/collection/src/create.ts",
+            "sourceBytes": 5690,
+            "sourceSha256": "7865b013cfb97005b7dc3521e777fab6ca591649dc09d18884823c2bef4557c8",
+            "retainedBytes": 2692
+          },
+          "new": {
+            "path": "packages/modules/collection/src/create.ts",
+            "sourceBytes": 5720,
+            "sourceSha256": "a9a2e4c2e61dafe52ece2760cf3ff29a9f730f96ac02d216b8df16d977de20f3",
+            "retainedBytes": 2710
+          }
+        },
+        {
+          "path": "packages/modules/feedback/src/create.ts",
+          "old": {
+            "path": "packages/modules/feedback/src/create.ts",
+            "sourceBytes": 42728,
+            "sourceSha256": "7faa1043eebc7e6874623de07ff2fc0c761b7eb2b15de9c57fcbc18b6b2f72b9",
+            "retainedBytes": 19373
+          },
+          "new": {
+            "path": "packages/modules/feedback/src/create.ts",
+            "sourceBytes": 42936,
+            "sourceSha256": "c017de5f25e061655cf497eac65d1ea0b8c7cdaaba7e8923bbdcc9a371ec49e0",
+            "retainedBytes": 19450
+          }
+        }
+      ]
+    },
+    {
+      "name": "adapter-web-component root",
+      "oldGzipBytes": 218094,
+      "newGzipBytes": 218353,
+      "deltaGzipBytes": 259,
+      "oldMinifiedBytes": 738757,
+      "newMinifiedBytes": 738519,
+      "oldMinifiedSha256": "65093ac5b28c7f34fab8ea4ebfeae4fa586cf5dd9d22002c9db2388a228ccd4a",
+      "newMinifiedSha256": "f71780b421ab55c62308ac4f07e036b446ec74f7235bd3b9a306cba88eca7cb8",
+      "oldClosure": "4809875c4167e1f27aa9fb3aaff60d28f881db4e084980b949a4964da88c063c",
+      "newClosure": "729a7976073b1e7404be2989bafcae2b869383aa4eb1d755931652209ba3bd60",
+      "addedInputs": [],
+      "removedInputs": [],
+      "changedSourceInputs": [
+        {
+          "path": "packages/adapters/web-component/src/adapt.ts",
+          "old": {
+            "path": "packages/adapters/web-component/src/adapt.ts",
+            "sourceBytes": 68404,
+            "sourceSha256": "56007c4a020fb54daf1ee24be9bd803e1281b04cf88dad805a8b0b6285f320c6",
+            "retainedBytes": 21761
+          },
+          "new": {
+            "path": "packages/adapters/web-component/src/adapt.ts",
+            "sourceBytes": 68090,
+            "sourceSha256": "0f50397f1ae5a6d83067a9b1a85c9fb1e8bd16788f92d698069b68cf1f1b9e0e",
+            "retainedBytes": 21625
+          }
+        },
+        {
+          "path": "packages/adapters/web-component/src/color-scheme-source.ts",
+          "old": {
+            "path": "packages/adapters/web-component/src/color-scheme-source.ts",
+            "sourceBytes": 1198,
+            "sourceSha256": "dfefd972179ce2e8713c462bbd0ddf21a6adafb9abd9014cd6f130679abe39df",
+            "retainedBytes": 325
+          },
+          "new": {
+            "path": "packages/adapters/web-component/src/color-scheme-source.ts",
+            "sourceBytes": 1451,
+            "sourceSha256": "d549c9dd9847cc042a37193732fdb46e6e654e1772098f71d2e9209bb8a2e96b",
+            "retainedBytes": 344
+          }
+        },
+        {
+          "path": "packages/adapters/web-component/src/portal-mount.ts",
+          "old": {
+            "path": "packages/adapters/web-component/src/portal-mount.ts",
+            "sourceBytes": 21090,
+            "sourceSha256": "ada0e5d42a9ff28d43a02648d78368869c727269cccb8f75ebd782b7701f5a13",
+            "retainedBytes": 4785
+          },
+          "new": {
+            "path": "packages/adapters/web-component/src/portal-mount.ts",
+            "sourceBytes": 21104,
+            "sourceSha256": "40cf50d461c4192e28536b0088510b76747da71a975bf790cb9bcb611b544715",
+            "retainedBytes": 5026
+          }
+        },
+        {
+          "path": "packages/adapters/web-component/src/runtime/modules.ts",
+          "old": {
+            "path": "packages/adapters/web-component/src/runtime/modules.ts",
+            "sourceBytes": 115936,
+            "sourceSha256": "b41e1392ffd953e396c2128aafb643524320fd85c9e020366c98d82b5757a84e",
+            "retainedBytes": 29754
+          },
+          "new": {
+            "path": "packages/adapters/web-component/src/runtime/modules.ts",
+            "sourceBytes": 116472,
+            "sourceSha256": "a72bac5d73b9062576d0ae4e934a97d6c186616e147549680c352c66c7b34b85",
+            "retainedBytes": 29968
+          }
+        },
+        {
+          "path": "packages/adapters/web-component/src/shadow-split-effects.ts",
+          "old": {
+            "path": "packages/adapters/web-component/src/shadow-split-effects.ts",
+            "sourceBytes": 35505,
+            "sourceSha256": "ee779a1177b8dabdab258bec43953267795ea72aabb0465d649dfd2cb78b6d1a",
+            "retainedBytes": 13852
+          },
+          "new": {
+            "path": "packages/adapters/web-component/src/shadow-split-effects.ts",
+            "sourceBytes": 35764,
+            "sourceSha256": "a8333d297c25f3842c5dde454956a17ec7e9e02137db4fb5c6837673e619c77b",
+            "retainedBytes": 14037
+          }
+        },
+        {
+          "path": "packages/adapters/web-component/src/shadow-style-artifact.ts",
+          "old": {
+            "path": "packages/adapters/web-component/src/shadow-style-artifact.ts",
+            "sourceBytes": 11957,
+            "sourceSha256": "b98f2e259cc2aea8b5153cf57ba94ccd577e396c01607b9e43bb31e290404ead",
+            "retainedBytes": 3797
+          },
+          "new": {
+            "path": "packages/adapters/web-component/src/shadow-style-artifact.ts",
+            "sourceBytes": 10538,
+            "sourceSha256": "f318869491eaf1610d5da832fee0f38f54b52ff5a3f36270cb46a65c5bf944c3",
+            "retainedBytes": 3332
+          }
+        },
+        {
+          "path": "packages/core/src/spec/feedback/application-role.ts",
+          "old": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7247,
+            "sourceSha256": "2f95669717b5b7e5521cfdd8eb0711f2615f2afeb001b62b8b6fea993a548cab",
+            "retainedBytes": 3269
+          },
+          "new": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7756,
+            "sourceSha256": "0f0900c247310fd34d0d59028a2ac00f09e4ddf235e299a69378c23c1258d0d2",
+            "retainedBytes": 3600
+          }
+        },
+        {
+          "path": "packages/modules/anatomy/src/impl.ts",
+          "old": {
+            "path": "packages/modules/anatomy/src/impl.ts",
+            "sourceBytes": 58247,
+            "sourceSha256": "96abf05e884dd8f3240687c60bcc9037eb183802e22b5209e82986d2f3d15209",
+            "retainedBytes": 24155
+          },
+          "new": {
+            "path": "packages/modules/anatomy/src/impl.ts",
+            "sourceBytes": 58229,
+            "sourceSha256": "ffd0b635b5c0aecaf1b62cddf1307d9520840dcccfb886d9d9ae093efabd1a99",
+            "retainedBytes": 23433
+          }
+        },
+        {
+          "path": "packages/modules/anatomy/src/types.ts",
+          "old": {
+            "path": "packages/modules/anatomy/src/types.ts",
+            "sourceBytes": 3175,
+            "sourceSha256": "2dd9c79a21d0e84067e2f8ea45b31f0f58694d3dfc4a0ee88251e13a170cccf6",
+            "retainedBytes": 0
+          },
+          "new": {
+            "path": "packages/modules/anatomy/src/types.ts",
+            "sourceBytes": 3255,
+            "sourceSha256": "98c951e540be1a204faafa13176ccc439d91521c6d6432b2824f0d64bbf62513",
+            "retainedBytes": 0
+          }
+        },
+        {
+          "path": "packages/modules/collection/src/create.ts",
+          "old": {
+            "path": "packages/modules/collection/src/create.ts",
+            "sourceBytes": 5690,
+            "sourceSha256": "7865b013cfb97005b7dc3521e777fab6ca591649dc09d18884823c2bef4557c8",
+            "retainedBytes": 2692
+          },
+          "new": {
+            "path": "packages/modules/collection/src/create.ts",
+            "sourceBytes": 5720,
+            "sourceSha256": "a9a2e4c2e61dafe52ece2760cf3ff29a9f730f96ac02d216b8df16d977de20f3",
+            "retainedBytes": 2710
+          }
+        },
+        {
+          "path": "packages/modules/feedback/src/create.ts",
+          "old": {
+            "path": "packages/modules/feedback/src/create.ts",
+            "sourceBytes": 42728,
+            "sourceSha256": "7faa1043eebc7e6874623de07ff2fc0c761b7eb2b15de9c57fcbc18b6b2f72b9",
+            "retainedBytes": 19373
+          },
+          "new": {
+            "path": "packages/modules/feedback/src/create.ts",
+            "sourceBytes": 42936,
+            "sourceSha256": "c017de5f25e061655cf497eac65d1ea0b8c7cdaaba7e8923bbdcc9a371ec49e0",
+            "retainedBytes": 19450
+          }
+        }
+      ]
+    },
+    {
+      "name": "prototypes-base/button",
+      "oldGzipBytes": 4311,
+      "newGzipBytes": 4311,
+      "deltaGzipBytes": 0,
+      "oldMinifiedBytes": 14562,
+      "newMinifiedBytes": 14562,
+      "oldMinifiedSha256": "2c2fdb311431ebe0d3c7b1bc9c83d99e3fed254029d193c2f22e226710a088a9",
+      "newMinifiedSha256": "6dff8377eae2cf21e3a000370423392feb1c2eaad1f98daa7bed92e470b002f2",
+      "oldClosure": "57dded66791382e2e1f43be3c3f3d6b6ede53d3368f857e3766241ef82177b35",
+      "newClosure": "3498a2478b9bb09e00e9066b4d19623be82228528e9e2799453abd7301326d2d",
+      "addedInputs": [],
+      "removedInputs": [],
+      "changedSourceInputs": [
+        {
+          "path": "packages/core/src/spec/feedback/application-role.ts",
+          "old": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7247,
+            "sourceSha256": "2f95669717b5b7e5521cfdd8eb0711f2615f2afeb001b62b8b6fea993a548cab",
+            "retainedBytes": 0
+          },
+          "new": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7756,
+            "sourceSha256": "0f0900c247310fd34d0d59028a2ac00f09e4ddf235e299a69378c23c1258d0d2",
+            "retainedBytes": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "prototypes-shadcn/button",
+      "oldGzipBytes": 7153,
+      "newGzipBytes": 7156,
+      "deltaGzipBytes": 3,
+      "oldMinifiedBytes": 33989,
+      "newMinifiedBytes": 33993,
+      "oldMinifiedSha256": "77d5d1f6b2a141eebe45e424179922cdb7ba1fc58d2bad268290d3cc16b99fba",
+      "newMinifiedSha256": "d813f75fec2e81368c6f63a6f1ea719ef31fbe12b5fc67df7d2b204adc576607",
+      "oldClosure": "47d6ad67ae49e47d97348be031f2dc7aab18ae4b12a8cd4055e6c9d3d77435b6",
+      "newClosure": "256239e949f6734b3fd938bf9f9bf7b04e4a2d991b2dd6234652cdd591f09209",
+      "addedInputs": ["packages/prototypes/shadcn/src/style-scope/ids.ts"],
+      "removedInputs": [],
+      "changedSourceInputs": [
+        {
+          "path": "packages/core/src/spec/feedback/application-role.ts",
+          "old": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7247,
+            "sourceSha256": "2f95669717b5b7e5521cfdd8eb0711f2615f2afeb001b62b8b6fea993a548cab",
+            "retainedBytes": 0
+          },
+          "new": {
+            "path": "packages/core/src/spec/feedback/application-role.ts",
+            "sourceBytes": 7756,
+            "sourceSha256": "0f0900c247310fd34d0d59028a2ac00f09e4ddf235e299a69378c23c1258d0d2",
+            "retainedBytes": 0
+          }
+        },
+        {
+          "path": "packages/prototypes/shadcn/src/style-scope/context.ts",
+          "old": {
+            "path": "packages/prototypes/shadcn/src/style-scope/context.ts",
+            "sourceBytes": 1080,
+            "sourceSha256": "60d5750a5fe453edaa4e051c5d8b26132db1124b5f18e7c5efa2d5ab27743fa0",
+            "retainedBytes": 288
+          },
+          "new": {
+            "path": "packages/prototypes/shadcn/src/style-scope/context.ts",
+            "sourceBytes": 924,
+            "sourceSha256": "3afc726b895d2e76da9bcd1bbaa1e7ee2ac7e841f5220e29fdd968a23f95a0c9",
+            "retainedBytes": 214
+          }
+        },
+        {
+          "path": "packages/prototypes/shadcn/src/style-scope/ids.ts",
+          "old": null,
+          "new": {
+            "path": "packages/prototypes/shadcn/src/style-scope/ids.ts",
+            "sourceBytes": 280,
+            "sourceSha256": "2cdb5534f5ccceee5155a0334b2114f37fc1e3e6233896b24e7a2c537cec1a7c",
+            "retainedBytes": 78
+          }
+        },
+        {
+          "path": "packages/prototypes/shadcn/src/style-scope/index.ts",
+          "old": {
+            "path": "packages/prototypes/shadcn/src/style-scope/index.ts",
+            "sourceBytes": 336,
+            "sourceSha256": "52769ca3613ed5f1da65f2c9723d02f29b73e1a571c57c6e654bdc92174c2270",
+            "retainedBytes": 0
+          },
+          "new": {
+            "path": "packages/prototypes/shadcn/src/style-scope/index.ts",
+            "sourceBytes": 356,
+            "sourceSha256": "fbf401fb842b2044b84efc3ff44ec7aba1211e0fd341cf2a64404dae244934bc",
+            "retainedBytes": 0
+          }
+        }
+      ]
+    }
+  ]
+}

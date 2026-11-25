@@ -96,13 +96,28 @@ export default definePrototype<LiquidGlassAccordionTriggerProps, AccordionTrigge
       intent: (i) => i.feedback.style.use(tw(COMMAND_PRESS)),
     });
     def.rule({
+      when: (w) => w.state(state.expanded).eq(true),
+      intent: (i) => i.feedback.style.use(tw('font-semibold')),
+    });
+    // Persistent expansion yields the complete ring to visible focus. Keeping
+    // its inset/color alongside COMMAND_FOCUS would contaminate the focus ring.
+    def.rule({
       when: (w) =>
-        w.all(w.state(state.expanded).eq(true), w.not(w.prop('prominence').eq('prominent'))),
-      intent: (i) => i.feedback.style.use(tw('font-semibold ring-1 ring-inset ring-foreground/10')),
+        w.all(
+          w.state(state.expanded).eq(true),
+          w.state(state.focusVisible).eq(false),
+          w.not(w.prop('prominence').eq('prominent'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('ring-1 ring-inset ring-foreground/10')),
     });
     def.rule({
-      when: (w) => w.all(w.state(state.expanded).eq(true), w.prop('prominence').eq('prominent')),
-      intent: (i) => i.feedback.style.use(tw('font-semibold ring-1 ring-inset ring-border')),
+      when: (w) =>
+        w.all(
+          w.state(state.expanded).eq(true),
+          w.state(state.focusVisible).eq(false),
+          w.prop('prominence').eq('prominent')
+        ),
+      intent: (i) => i.feedback.style.use(tw('ring-1 ring-inset ring-border')),
     });
     // Disabled withdraws optical elevation and pointer interaction without dimming fallback contrast.
     def.rule({

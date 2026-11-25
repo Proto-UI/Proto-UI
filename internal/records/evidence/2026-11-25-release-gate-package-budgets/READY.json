@@ -1,0 +1,105 @@
+{
+  "status": "ready for independent review; canonical final-head package gate pending",
+  "sources": [
+    "scripts/analysis/package-budgets.mjs",
+    "internal/records/2026-11-25-release-gate-package-budget-transaction.json"
+  ],
+  "files": [
+    {
+      "path": "internal/records/2026-11-25-release-gate-package-budget-transaction.json",
+      "sha256": "80c5f1a0f3b0f74c90ae82fe75fa0b09f1b41c036c72bd8528d1462ef6a618d0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/README.md",
+      "sha256": "f7c3a0be57f9d42035fd7d005e9c562e832cf3b22b471bbdc72fc43e036c3be6"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-47ae.json.gz",
+      "sha256": "59a9823d4dbc7a2af84eb6c6ab3a3e92bb4e17920f9111603c4f1956741fcac1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d-build.log.gz",
+      "sha256": "f80a7dcaee67900b4abea806915fc60864836fe3dd0911c2a7309696eed559f4"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d-controls.log.gz",
+      "sha256": "65e677cf76e638c6ebba3371678dcc276578f08cb46117529e822df000b5ac64"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d-gate.log.gz",
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d-setup.log.gz",
+      "sha256": "4be65cf4daca520544ed8145054a4bef9edfeba5993d4ed308087921f34bd4f6"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d-terminal.json.gz",
+      "sha256": "4ee53b0837f150c45635c378bffe42cf3ab779d4b43b307ea08c82265076d169"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d.json.gz",
+      "sha256": "e8f3eedb687a5237d16f43bcc1ccc05adaccc30c5738e912676464f3d83b9e8a"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-build.log.gz",
+      "sha256": "e423c0bb215f0f96d0d8130517380583554e37ae305b6b03d1e0dc74b168b0a1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-controls.log.gz",
+      "sha256": "b4e20181e9aca34ecf552cfea2be32906e58166a1b717280de39e574296b8725"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-gate.log.gz",
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-job.log.gz",
+      "sha256": "c3f115404b59a95f62eff100cc3b3fc96c46839ac48486180736c06a69cc6db9"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-setup.log.gz",
+      "sha256": "28e427bb67b8d3d7cb432e55f610364f26905272dfeae4015eb57957998aa6fa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-terminal.json.gz",
+      "sha256": "04b35e75a16c96fe5f795fde88601e36bb5500282576086bebbefdb5a9fd962c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798.json.gz",
+      "sha256": "c30f7a4fa5fb95bfe54744fe58a81059bb132dcc78831c7c33e9c6d3a1641fa9"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/comparison-47ae-to-798.json",
+      "sha256": "c0c06ab90a5825ee68a0d10147835d9e1aaf843034a744930fe357eb7b818ea0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/comparison-4d-to-798.json",
+      "sha256": "2acf68171eca42ce3e8f911fc0968d8e42c790edc5559ee4337ea54d90cd872a"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/controls-candidate.gz",
+      "sha256": "4983d2e255861726c0542be83b6b0aee1737f86010d204a177b1662becd91ec7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/controls-child-diagnostic.gz",
+      "sha256": "571dea6ed951cfc8cbdf810b7291a5496777c8ab768128773a152163eac22b72"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/controls-child-stdio.gz",
+      "sha256": "d4b27118d20aa9083aaa515d8d6ea48a32949ff93315189e01c2daf4f355cb8b"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/controls-initial-failed.gz",
+      "sha256": "58896b6b47014b90ebb68d08f7999a4d254e630310b0d37aa9084802c8e56614"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/transaction-input-equality.json",
+      "sha256": "7778e42870fefd0dfc8c9de7ef594cd087c196b9282ece3bd003b31e5a65facd"
+    },
+    {
+      "path": "scripts/analysis/package-budgets.mjs",
+      "sha256": "104566e4cb4fe754234e9d41470633b8a36823a311543ff0a5fcd1e2ce2ce9b7"
+    }
+  ]
+}

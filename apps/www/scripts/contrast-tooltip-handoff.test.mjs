@@ -85,15 +85,44 @@ for (const locale of ['en', 'zh-cn']) {
     );
     assert.equal(plan.cells.length, 8);
     assert.equal(plan.openDelay, 500);
-    assert.equal(plan.closeDelay, 0);
+    assert.equal(plan.closeDelay, 100);
     assert.equal(plan.skipDelay, 300);
     assert.equal(plan.warmDeadlineMs, 300);
     assert.deepEqual(
       plan.pairs.map((pair) => pair.triggerText),
-      ['Hover or focus for details', 'Move to the second trigger']
+      ['Account', 'Notifications']
     );
   });
 }
+
+test('ordinary close delay does not replace the instant sibling handoff boundary', () => {
+  for (const closeDelay of [100, 640]) {
+    const demo = authored();
+    demo.root.children[0].props.closeDelay = closeDelay;
+    const plan = compileTooltipWarmHandoffPlan(demo, '["wc"]');
+    assert.equal(plan.closeDelay, closeDelay);
+    assert.equal(plan.warmDeadlineMs, 300);
+    assert.ok(plan.authority.includes('P-BASE-TOOLTIP-GROUP-INSTANT-HANDOFF'));
+  }
+});
+
+test('all authored delays remain explicit finite values and cold opening exceeds the warm budget', () => {
+  for (const name of ['openDelay', 'closeDelay', 'skipDelay']) {
+    for (const value of [undefined, -1, NaN, Infinity, '100']) {
+      const demo = authored();
+      demo.root.children[0].props[name] = value;
+      assert.throws(() => compileTooltipWarmHandoffPlan(demo, '["wc"]'), /explicit finite/);
+    }
+  }
+  for (const [name, value] of [
+    ['openDelay', 300],
+    ['skipDelay', 0],
+  ]) {
+    const demo = authored();
+    demo.root.children[0].props[name] = value;
+    assert.throws(() => compileTooltipWarmHandoffPlan(demo, '["wc"]'), /cold delay/);
+  }
+});
 
 test('empty, duplicate and unknown runtime declarations still fail before the native journey', () => {
   for (const runtimes of ['[]', '["wc","wc"]', '["wc","native"]']) {

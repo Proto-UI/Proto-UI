@@ -220,7 +220,7 @@ describe('RuntimeBox single actual Prototype surface', () => {
         element.closest('[data-projection-generation]')?.getAttribute('data-projection-generation')
       );
       expect(generation).toBeTruthy();
-      await demoPopup.getByRole('option', { name: 'Ink', exact: true }).click();
+      await demoPopup.getByRole('option', { name: 'Banana', exact: true }).click();
       try {
         await expect
           .poll(
@@ -232,9 +232,9 @@ describe('RuntimeBox single actual Prototype surface', () => {
               }))),
               popupHidden: !(await demoPopup.isVisible()),
             }),
-            { timeout: 2000, message: 'The same React Select trigger must commit Ink and close' }
+            { timeout: 2000, message: 'The same React Select trigger must commit Banana and close' }
           )
-          .toEqual({ connected: true, text: 'Ink', expanded: 'false', popupHidden: true });
+          .toEqual({ connected: true, text: 'Banana', expanded: 'false', popupHidden: true });
         expect(
           await selectedTrigger.evaluate((element) =>
             element

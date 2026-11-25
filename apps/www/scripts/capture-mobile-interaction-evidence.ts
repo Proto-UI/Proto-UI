@@ -344,16 +344,19 @@ try {
               const canvas = document.createElement('canvas');
               canvas.width = canvas.height = 1;
               const ctx = canvas.getContext('2d')!;
-              const alpha = (color: string) => {
+              const [backgroundAlpha, borderAlpha] = [
+                style.backgroundColor,
+                style.borderTopColor,
+              ].map((color) => {
                 ctx.clearRect(0, 0, 1, 1);
                 ctx.fillStyle = color;
                 ctx.fillRect(0, 0, 1, 1);
                 return ctx.getImageData(0, 0, 1, 1).data[3];
-              };
+              });
               return {
                 prototype: e.getAttribute('data-projection-prototype'),
-                backgroundAlpha: alpha(style.backgroundColor),
-                borderAlpha: alpha(style.borderTopColor),
+                backgroundAlpha,
+                borderAlpha,
                 role: e.getAttribute('role'),
                 tabindex: e.getAttribute('tabindex'),
               };
@@ -825,6 +828,8 @@ try {
             width: e.clientWidth,
             fullWidth: e.scrollWidth,
             lineHeight: parseFloat(getComputedStyle(e).lineHeight),
+            rootFontSize: parseFloat(getComputedStyle(document.documentElement).fontSize),
+            viewportHeight: innerHeight,
             raw: e.querySelector('code')?.getAttribute('data-raw-code'),
             documentOverflow: document.documentElement.scrollWidth - innerWidth,
           }));
@@ -846,7 +851,9 @@ try {
           }));
           await observe(`code-${sourceKind}-layout`);
           assert.ok(
-            facts.documentOverflow <= 1 && facts.height > 0 && facts.height <= 417,
+            facts.documentOverflow <= 1 &&
+              facts.height > 0 &&
+              facts.height <= Math.min(36 * facts.rootFontSize, 0.65 * facts.viewportHeight) + 1,
             'Enlarged source fits its independent viewport'
           );
           if (sourceKind === 'short')

@@ -179,7 +179,8 @@ function literal(node: ts.Expression): Primitive | undefined {
  * This is source-language lowering, not a component name or optional-state recipe.
  */
 export function liftRuleDeclarationConditional(
-  node: ts.CallExpression
+  node: ts.CallExpression,
+  isCheckedSetReceiver: (receiver: ts.Expression) => boolean = () => false
 ): ts.ConditionalExpression | undefined {
   const linkParents = (parent: ts.Node): void =>
     ts.forEachChild(parent, (child) => {
@@ -208,6 +209,25 @@ export function liftRuleDeclarationConditional(
       if (ts.isPropertyAccessExpression(part)) return pureCapture(part.expression);
       if (ts.isPrefixUnaryExpression(part) && part.operator === ts.SyntaxKind.ExclamationToken)
         return pureCapture(part.operand);
+      if (
+        ts.isCallExpression(part) &&
+        !part.questionDotToken &&
+        !part.typeArguments?.length &&
+        ts.isPropertyAccessExpression(part.expression) &&
+        !part.expression.questionDotToken &&
+        part.expression.name.text === 'has' &&
+        part.arguments.length === 1 &&
+        !ts.isSpreadElement(part.arguments[0])
+      ) {
+        // A spelling alone grants no purity: the ordinary parser must prove
+        // this is the existing Set intrinsic, and neither operand may borrow
+        // a callback-local binding or execute a helper while being hoisted.
+        return (
+          pureCapture(part.expression.expression) &&
+          pureCapture(part.arguments[0]) &&
+          isCheckedSetReceiver(part.expression.expression)
+        );
+      }
       return (
         ts.isBinaryExpression(part) &&
         [

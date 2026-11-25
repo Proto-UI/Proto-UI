@@ -158,11 +158,16 @@ it.each(['bootstrap-2-3-2', 'brutalist'])(
         const body = content.querySelector('div')!;
         expect(body).not.toBeNull();
         expect(styleContains(root, 'border-[#e5e5e5]')).toBe(true);
-        expect(styleContains(body, 'border-[#e5e5e5]')).toBe(true);
-        expect(styleContains(body, 'dark:border-border')).toBe(true);
+        // The unpadded animated host owns the live theme rule. The inset body
+        // inherits that color while owning the actual one-pixel divider.
+        expect(styleContains(content, 'border-[#e5e5e5]')).toBe(true);
+        expect(styleContains(body, 'border-t')).toBe(true);
+        expect(styleContains(body, 'border-inherit')).toBe(true);
+        expect(styleContains(body, 'dark:border-border')).toBe(false);
         expect(styleContains(trigger, 'text-[#08c]')).toBe(true);
         html.dataset.theme = 'dark';
         expect(styleContains(root, 'dark:border-border')).toBe(true);
+        expect(styleContains(content, 'dark:border-border')).toBe(true);
         trigger.dispatchEvent(new Event('pointerenter'));
         await expect.poll(() => styleContains(trigger, 'text-foreground')).toBe(true);
         expect(styleContains(trigger, 'text-[#005580]')).toBe(false);

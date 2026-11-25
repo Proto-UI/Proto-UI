@@ -1,6 +1,6 @@
 id: P-BRUTALIST-HOVER-CARD-CONTENT
 type: prototype
-title: 'Brutalist Hover Card Content inherits Base preview content and layers a hard-shadowed transition panel'
+title: 'Brutalist Hover Card Content inherits Base preview content and layers a flat anchored transition panel'
 
 status: draft
 since: 0.2.0-rc.7
@@ -38,14 +38,15 @@ criteria:
   - id: P-BRUTALIST-HOVER-CARD-CONTENT-VISUAL-GRAMMAR
     text:
       en: >-
-        The content uses BRUTALIST_PANEL_TOKENS: rounded-base (5px), border-2 border-black, bg-background/text-foreground, font-sans font-medium. This anchored popup has no hard shadow. Existing positioning, available-space bounds, padding, transition and focus ownership remain unchanged. Rounded children own their own radius; the parent must not globally zero or override child geometry.
+        The content uses BRUTALIST_PANEL_TOKENS: rounded-base (5px), border-2 border-black, bg-background/text-foreground, font-sans font-medium. This anchored popup has no hard shadow, retaining the named anchored-content exception in D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001. Existing positioning, available-space bounds, padding, transition and focus ownership remain unchanged. Rounded children own their own radius; the parent must not globally zero or override child geometry.
 
 
       zh-CN: >-
-        Content 使用 BRUTALIST_PANEL_TOKENS：rounded-base（5px）、border-2 border-black、bg-background/text-foreground、font-sans font-medium。anchored popup 无硬阴影；现有 positioning、可用空间边界、padding、transition 与 focus owner 不变。圆角 child 各自拥有 radius；父级不得全局清零或覆盖 child 几何。
+        Content 使用 BRUTALIST_PANEL_TOKENS：rounded-base（5px）、border-2 border-black、bg-background/text-foreground、font-sans font-medium。anchored popup 无硬阴影，保留 D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 中已命名的 anchored-content 例外；现有 positioning、可用空间边界、padding、transition 与 focus owner 不变。圆角 child 各自拥有 radius；父级不得全局清零或覆盖 child 几何。
 
 
 sources:
+  - path: spec/decisions/D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001.yaml
   - path: docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md
   - path: packages/prototypes/brutalist/src/hover-card/content.proto.ts
   - path: packages/prototypes/brutalist/src/hover-card/types.ts
@@ -54,12 +55,22 @@ sources:
 relates:
   knowledge: [K-BRUTALIST-0001]
 dependsOn:
+  decisions:
+    - id: D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001
+      since: 0.3.0-alpha.1
+      anchors:
+        - D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CATALOG
+        - D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-EXCEPTIONS
+      note: Anchored-content category with the retained no-hard-shadow Hover Card Content exception.
   contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
 inherits:
   prototypes:
     - id: P-BASE-HOVER-CARD-CONTENT
 verifies: { tests: [T-BRUTALIST-HOVER-CARD-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Linked the existing no-hard-shadow anchored popup criterion to its named family-depth exception; preserved the governed transition, positioning and lifecycle.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Aligned draft visual grammar with neobrutalism-components 3306a802; preserved Base semantics and documented Proto UI extensions.

@@ -58,6 +58,9 @@ const pressToken = {
 // Registered feedback vocabularies differ per family and consumer: web-exposed
 // states project as data-[state] variants, while profile-gated paint is dynamic.
 const disabledTokens = (family: string, component: string): string[] => {
+  if (family === 'liquid-glass' && (component === 'carousel' || component === 'data-table'))
+    // Material owners emit the resolved complete frame, including disabled paint.
+    return ['cursor-default', 'shadow-none', 'pointer-events-none'];
   if (family === 'liquid-glass')
     // Liquid disabled commands withdraw optional material without whole-control
     // opacity (README: no opacity suppression for disabled commands).
@@ -70,8 +73,10 @@ const disabledTokens = (family: string, component: string): string[] => {
   return ['data-[disabled]:opacity-50'];
 };
 const focusVisibleToken = (family: string, component: string, part: string): string | null => {
+  if (family === 'liquid-glass' && (component === 'carousel' || component === 'data-table'))
+    return null;
   if (family !== 'shadcn') return 'data-[focus-visible]:ring-2';
-  if (part === 'day') return 'data-[focused]:ring-3';
+  if (part === 'day') return null;
   if (component === 'carousel' || component === 'message-scroller')
     // Profile-gated ring paints dynamically; asserted in the focused phase.
     return null;
@@ -81,6 +86,12 @@ const pressedToken = (family: string, component: string, part: string): string |
   if (family === 'shadcn')
     // Multi-profile press paint is dynamic; asserted in the pressed phase.
     return null;
+  if (family === 'brutalist' && part === 'day') return null;
+  if (family === 'liquid-glass') {
+    if (component === 'carousel' || component === 'data-table') return null;
+    if (component === 'tree') return 'data-[pressed]:not-[data-disabled]:shadow-none';
+    if (part === 'day') return 'data-[pressed]:not-[data-disabled]:not-[data-selected]:shadow-none';
+  }
   const token = `data-[pressed]:not-[data-disabled]:${pressToken[family as keyof typeof pressToken]}`;
   if (family === 'bootstrap-2-3-2') {
     if (component === 'message-scroller')
@@ -94,6 +105,7 @@ const pressedToken = (family: string, component: string, part: string): string |
 // Profiles without a static press variant keep pressed feedback dynamic; the
 // New York profile and popup triggers intentionally register none.
 const dynamicPressed: Record<string, Record<string, string[]>> = {
+  'liquid-glass': { carousel: ['shadow-xs'], 'data-table': ['shadow-xs'] },
   shadcn: {
     tree: ['translate-y-px'],
     'data-table': ['translate-y-px'],
@@ -153,11 +165,16 @@ for (const [family, modules] of Object.entries(families)) {
       await flush();
       expect(exposed.focusVisible.get()).toBe(true);
       expect(control.hasAttribute('data-focus-visible')).toBe(true);
-      if (family === 'shadcn' && part !== 'day') {
+      if (family === 'shadcn') {
         // Profile-driven focus paint applies dynamically while focusVisible.
         expect(tokens()).toContain('ring-3');
         expect(tokens()).toContain('ring-ring/50');
         expect(tokens()).toContain('border-ring');
+      }
+      if (family === 'liquid-glass' && (component === 'carousel' || component === 'data-table')) {
+        expect(tokens()).toEqual(
+          expect.arrayContaining(['ring-2', 'ring-ring', 'forced-colors-focus-outline'])
+        );
       }
       control.dispatchEvent(new Event('pointerdown'));
       await flush();
@@ -168,6 +185,10 @@ for (const [family, modules] of Object.entries(families)) {
           ? shadcnDayPressed
           : (dynamicPressed[family]?.[component] ?? null);
       if (gained) for (const token of gained) expect(tokens()).toContain(token);
+      if (family === 'brutalist' && part === 'day') {
+        // Flat calendar cells retain pressed semantics without raised-button translation.
+        expect(tokens().some((token: string) => token.includes('translate-'))).toBe(false);
+      }
       control.dispatchEvent(new Event('pointercancel'));
       await flush();
       expect(exposed.pressed.get()).toBe(false);
@@ -200,10 +221,15 @@ for (const [family, modules] of Object.entries(families)) {
           // C-CALENDAR-SELECTION-0001-DAYS distinguishes range middles from
           // selected endpoints. Both exposed conditions lower to one selector;
           // the same recipe must match only the currently selected endpoint.
-          expect(tokens()).toContain('data-[selected]:not-[data-range-middle]:bg-primary');
-          expect(tokens()).toContain(
-            'data-[selected]:not-[data-range-middle]:text-primary-foreground'
-          );
+          const selectedPrefix =
+            family === 'shadcn'
+              ? 'data-[selected]:not-[data-range-middle]:not-[data-range-pending]:'
+              : 'data-[selected]:not-[data-range-middle]:';
+          const selectedFill = family === 'brutalist' ? 'bg-main' : 'bg-primary';
+          const selectedText =
+            family === 'brutalist' ? 'text-main-foreground' : 'text-primary-foreground';
+          expect(tokens()).toContain(`${selectedPrefix}${selectedFill}`);
+          expect(tokens()).toContain(`${selectedPrefix}${selectedText}`);
           expect(control.hasAttribute('data-selected')).toBe(true);
           expect(exposed.rangeMiddle.get()).toBe(false);
           expect(control.hasAttribute('data-range-middle')).toBe(false);
@@ -213,7 +239,7 @@ for (const [family, modules] of Object.entries(families)) {
           expect(control.getExposes().selected).toBe(exposed.selected);
           expect(exposed.selected.get()).toBe(false);
           expect(control.hasAttribute('data-selected')).toBe(false);
-          expect(tokens()).toContain('data-[selected]:not-[data-range-middle]:bg-primary');
+          expect(tokens()).toContain(`${selectedPrefix}${selectedFill}`);
         }
       }
     });
@@ -227,11 +253,18 @@ for (const family of Object.keys(families))
     roots.push(root);
     document.body.append(root);
     await flush();
-    expect(viewport.getAttribute('data-pui-style')).toContain('data-[focus-visible]:ring-2');
+    if (family === 'shadcn')
+      expect((viewport.getAttribute('data-pui-style') ?? '').split(/\s+/)).not.toContain('ring-2');
+    else expect(viewport.getAttribute('data-pui-style')).toContain('data-[focus-visible]:ring-2');
     viewport.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
     viewport.focus();
     await flush();
     expect(viewport.getExposes().focused.get()).toBe(true);
     expect(viewport.getExposes().focusVisible.get()).toBe(true);
     expect(viewport.hasAttribute('data-focus-visible')).toBe(true);
+    if (family === 'shadcn') {
+      expect((viewport.getAttribute('data-pui-style') ?? '').split(/\s+/)).toEqual(
+        expect.arrayContaining(['ring-2', 'ring-ring', 'ring-inset', 'forced-colors-focus-outline'])
+      );
+    }
   });

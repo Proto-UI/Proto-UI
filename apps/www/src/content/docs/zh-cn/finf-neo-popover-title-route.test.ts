@@ -60,6 +60,8 @@ describe('Neo Popover Title evidence public-route binding', () => {
     expect(publicMdx).toContain(`demoId="${demoId}"`);
     expect(publicMdx).toContain("runtimes={['wc', 'react', 'vue', 'vue2']}");
     const fixture = readFileSync(path.join(docsRoot, `${demoId}.demo.ts`), 'utf8');
-    expect(fixture).toContain("'prototypeId': 'brutalist-popover-title'");
+    expect(fixture).toMatch(
+      /(?:['"]prototypeId['"]|prototypeId)\s*:\s*['"]brutalist-popover-title['"]/
+    );
   });
 });

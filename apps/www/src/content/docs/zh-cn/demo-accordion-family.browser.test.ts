@@ -273,9 +273,7 @@ afterAll(async () => {
 describe.sequential('Accordion five families / four native Web consumers', () => {
   for (const family of families)
     for (const runtime of RUNTIMES)
-      it(
-        `${family} ${runtime} preserves activation, natural Tab, ownership, relationships and repeatable lifetime`,
-        async () => {
+      it(`${family} ${runtime} preserves activation, natural Tab, ownership, relationships and repeatable lifetime`, async () => {
         const { context, page, previewer } = await openRoute(browser, baseUrl, route(family), {
           width: 1280,
           height: 1000,
@@ -332,6 +330,20 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
           await page.keyboard.press('Space');
           await expanded(second, false);
           expect(await page.evaluate(() => window.scrollY)).toBe(scrollY);
+          if (family === 'bootstrap-2-3-2') {
+            // C-DISCLOSURE-PRESENCE-0001 keeps Bootstrap's view and IDREFs
+            // live throughout its 350ms exit. Observe actual L1 withdrawal
+            // before the unchanged immediate relationship assertion.
+            await expect
+              .poll(() =>
+                ref(previewer, 'single-lifetime-content').evaluateAll(
+                  (nodes) =>
+                    nodes.length === 0 ||
+                    (nodes.length === 1 && nodes[0].hasAttribute('data-pui-view-detached'))
+                )
+              )
+              .toBe(true);
+          }
           expect(await second.getAttribute('aria-controls')).toBeNull();
           activation?.setPhase('second-fresh-enter');
           await page.keyboard.press('Enter');
@@ -364,9 +376,19 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
           await ref(previewer, 'multiple-b-trigger').click();
           await required.click();
           await expanded(required, false);
+          if (family === 'bootstrap-2-3-2') {
+            // keepMounted retains this exact Content after the same exit.
+            await expect
+              .poll(() =>
+                ref(previewer, 'multiple-a-content').evaluateAll(
+                  (nodes) => nodes.length === 1 && getComputedStyle(nodes[0]).display === 'none'
+                )
+              )
+              .toBe(true);
+          }
           expect(await required.getAttribute('aria-controls')).toBe(retainedId);
           expect(await ref(previewer, 'multiple-a-content').isVisible()).toBe(false);
-          if (family === 'shadcn') {
+          if (family === 'shadcn' || family === 'bootstrap-2-3-2') {
             // The family open-flow rule must not defeat retained Base hiding.
             expect(await ref(previewer, 'multiple-a-content').count()).toBe(1);
             expect(
@@ -455,13 +477,9 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
             } catch {}
           }
         }
-        },
-        90_000
-      );
+      }, 90_000);
   for (const family of families)
-    it(
-      `${family} Chinese 320px / 200% text keeps long labels and overflow inside the page`,
-      async () => {
+    it(`${family} Chinese 320px / 200% text keeps long labels and overflow inside the page`, async () => {
       const { context, page, previewer } = await openRoute(
         browser,
         baseUrl,
@@ -509,9 +527,7 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
       } finally {
         await context.close();
       }
-      },
-      90_000
-    );
+    }, 90_000);
   for (const runtime of RUNTIMES) {
     for (const scenario of [
       { width: 1180, rootPercent: 100 },
@@ -558,6 +574,20 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
             }
           }
           await page.getByText(`${label} · Ready`, { exact: true }).waitFor({ state: 'visible' });
+          if (scenario.width < 768) {
+            // The compact overview intentionally scales an inert desktop stage.
+            // Exercise the visible layout control before asserting live Rhea flow.
+            const layoutToggle = page.locator('[data-home-gallery-layout-toggle]');
+            await layoutToggle.waitFor({ state: 'visible' });
+            if ((await layoutToggle.getAttribute('aria-expanded')) === 'false')
+              await layoutToggle.click();
+            expect(await layoutToggle.getAttribute('aria-expanded')).toBe('true');
+          }
+          expect(
+            await gallery
+              .locator('[data-home-gallery-stage]')
+              .evaluate((node) => (node as HTMLElement).inert)
+          ).toBe(false);
           // Isolated test environment only, not a production DOM style patch.
           await page.evaluate((percent) => {
             document.documentElement.style.fontSize = `${percent}%`;

@@ -159,7 +159,7 @@ function mockedCase(
       if (options.navigationFailure) throw options.navigationFailure;
       return { status: () => 200 };
     }),
-    locator: vi.fn((_selector: string) => ({ first: () => previewer })),
+    locator: vi.fn((_selector: string) => previewer),
     evaluate: vi.fn(async () => ({ locale: 'zh-CN', today: '2026-10-10T12:00:00.000Z' })),
     viewportSize: () => ({ width: 1365, height: 1000 }),
     screenshot: vi.fn(async (shot: HarnessScreenshot) => {
@@ -287,10 +287,9 @@ describe('Finf representative evidence harness, no native browser', () => {
       waitFor: vi.fn(),
       evaluate: vi.fn(async () => selection.outerHTML),
     };
-    fixture.page.locator.mockImplementation((selector: string) => ({
-      first: () =>
-        window.document.querySelector(selector) === caption ? fixture.previewer : otherPreviewer,
-    }));
+    fixture.page.locator.mockImplementation((selector: string) =>
+      window.document.querySelector(selector) === caption ? fixture.previewer : otherPreviewer
+    );
 
     await expect(fixture.run()).rejects.toBe(failure);
     expect(fixture.previewer.waitFor).toHaveBeenCalledOnce();

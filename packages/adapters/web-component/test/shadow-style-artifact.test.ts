@@ -7,6 +7,7 @@ import {
   SHADOW_STYLE_ARTIFACT_ENVIRONMENT,
   SHADOW_STYLE_ARTIFACT_KIND,
   SHADOW_STYLE_ARTIFACT_VERSION,
+  stripShadowCssComments,
   validateShadowStyleArtifact,
 } from '../src/shadow-style-artifact';
 
@@ -32,15 +33,16 @@ function createShell() {
 
 // Count the real comment scanner without a timing threshold or a cache API.
 function withCommentScanCount(cssText: string, run: (count: () => number) => void) {
-  const indexOf = String.prototype.indexOf;
+  const replace = String.prototype.replace;
   let scans = 0;
-  const spy = vi.spyOn(String.prototype, 'indexOf').mockImplementation(function (
+  const spy = vi.spyOn(String.prototype, 'replace').mockImplementation(function (
     this: string,
-    search: string,
-    position?: number
+    ...args: Parameters<typeof replace>
   ) {
-    if (this === cssText && search === '*/' && position === 2) scans += 1;
-    return indexOf.call(this, search, position);
+    // Observe the full input's literal/comment pass. Later structural string
+    // replacements and scans of other CSS snapshots do not count as reuse.
+    if (this === cssText && typeof args[1] === 'function') scans += 1;
+    return replace.apply(this, args);
   });
   try {
     run(() => scans);
@@ -50,6 +52,22 @@ function withCommentScanCount(cssText: string, run: (count: () => number) => voi
 }
 
 describe('adapter-web-component Shadow style artifact', () => {
+  it.each([
+    ['/*/', '/*/'],
+    ['prefix /*/', 'prefix /*/'],
+    ['/*/ suffix', '/*/ suffix'],
+    ['prefix /*/\n', 'prefix /*/\n'],
+    ['/*/ "quoted" /* nested', '/*/ "quoted" /* nested'],
+    ['before /* "unterminated quote', 'before /* "unterminated quote'],
+    ['before /* open /* nested', 'before /* open /* nested'],
+    ['before /* open /*/ after', 'before  after'],
+    ['/*/ /*/', ''],
+    ['/* complete */ /*/', ' /*/'],
+    ['"/* quoted */" /* complete */', '"/* quoted */" '],
+  ])('removes only a separately closed comment from %j', (input, expected) => {
+    expect(stripShadowCssComments(input)).toBe(expected);
+  });
+
   it('accepts the exact v1 shape as a frozen canonical copy', () => {
     const input = artifact();
     const validated = validateShadowStyleArtifact(input);

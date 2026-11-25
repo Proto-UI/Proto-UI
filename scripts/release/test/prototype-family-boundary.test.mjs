@@ -231,6 +231,53 @@ test('packed Button boundary allows its shared style-selection support but rejec
   );
 });
 
+test('packed Button bundle guard admits style IDs while retaining exact family exclusions', async () => {
+  const { default: config } =
+    await import('../consumer-smoke/react-vite/vite.button-boundary.mjs');
+  const guard = config.plugins.find((plugin) => plugin.name === 'proto-ui-button-family-boundary');
+  const moduleId = (packageName, path) =>
+    `/consumer/node_modules/@proto.ui/${packageName}/dist/${path}`;
+  const buttonModules = [
+    ['prototypes-base', 'button/index.js'],
+    ['prototypes-shadcn', 'button/button.proto.js'],
+    ['prototypes-shadcn', 'style-scope/context.js'],
+    ['prototypes-shadcn', 'style-scope/selection.js'],
+    ['prototypes-shadcn', 'style-scope/ids.js'],
+  ];
+  const check = (modules) =>
+    guard.generateBundle(
+      {},
+      {
+        'button.js': {
+          type: 'chunk',
+          modules: Object.fromEntries(modules.map(([name, path]) => [moduleId(name, path), {}])),
+        },
+      }
+    );
+
+  // The installed Button consumes the shared ID leaf after #1862 extracted it
+  // from context.js. Exercise the actual emitted-chunk guard, not only its predicate.
+  assert.doesNotThrow(() => check(buttonModules));
+  for (const unexpected of [
+    ['prototypes-shadcn', 'dialog/index.js'],
+    ['prototypes-shadcn', 'style-scope/root.proto.js'],
+    ['prototypes-shadcn', 'style-scope/index.js'],
+    ['prototypes-shadcn', 'style-scope/unreviewed.js'],
+    ['prototypes-base', 'style-scope/ids.js'],
+  ]) {
+    assert.throws(
+      () => check([...buttonModules, unexpected]),
+      /Button family boundary included unrelated prototype modules/
+    );
+  }
+  for (const missing of ['prototypes-base', 'prototypes-shadcn']) {
+    assert.throws(
+      () => check(buttonModules.filter(([name]) => name !== missing)),
+      new RegExp(`Button family boundary did not consume @proto.ui/${missing}`)
+    );
+  }
+});
+
 function assertFamilyExports(packageRoot, families, protoSources = {}) {
   const manifest = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8'));
   assert.equal(manifest.sideEffects, false, `${manifest.name} must declare sideEffects=false`);

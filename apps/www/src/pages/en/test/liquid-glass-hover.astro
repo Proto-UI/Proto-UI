@@ -112,6 +112,7 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
       const scenes = new Map<string, ReturnType<typeof createPreviewMaterialScene>>();
       const apis = new Map<string, DemoRuntimeApi>();
       const requests = new Map<string, HoverRequest[]>();
+      const layoutObservers: ResizeObserver[] = [];
       const key = (runtime: string, part: string) => `${runtime}-${part}`;
       const fixture = {
         state(runtime: string, part: string, name: string) {
@@ -141,6 +142,7 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
           for (const scene of scenes.values()) scene.pause(value);
         },
         async dispose() {
+          for (const observer of layoutObservers.splice(0)) observer.disconnect();
           for (const record of records.splice(0).reverse()) await record.destroy();
           for (const scene of scenes.values()) scene.dispose();
           scenes.clear();
@@ -197,13 +199,33 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
           )!.style.clipPath = 'inset(4px)';
         if (id === 'accordion-tight') {
           scene.mount.querySelector<HTMLElement>('.liquid-hover-inset')!.style.padding = '0px';
-          // Retain this negative's real destination overlap: the Item's 1px
-          // bottom border leaves a 1px gap, inside the 35px contact footprint.
-          // Empty destinations are opacity 0 so they are not painted content.
-          // This negative keeps that same destination visible; otherwise
-          // admission skips it and the closed trigger stays self-optical.
+          // The family now reserves its own current carrier and border clearance.
+          // Keep the negative's existing destination one actual CSS pixel below
+          // the subject, independently of that in-flow reservation. This is
+          // application geometry only; material admission and paint stay owned
+          // by the real host. Empty destinations otherwise have opacity zero.
           scene.overlayMount.style.opacity = '1';
           scene.mount.style.paddingBottom = '0px';
+          scene.overlayMount.style.position = 'absolute';
+          const positionDestination = () => {
+            const target = subject.getBoundingClientRect();
+            const scope = scene.scope.getBoundingClientRect();
+            const mount = scene.mount.getBoundingClientRect();
+            if (target.width <= 0 || target.height <= 0 || mount.width <= 0) return;
+            const next = {
+              left: `${mount.left - scope.left - scene.scope.clientLeft}px`,
+              top: `${target.bottom - scope.top - scene.scope.clientTop + 1}px`,
+              width: `${mount.width}px`,
+            };
+            for (const [property, value] of Object.entries(next))
+              if (scene.overlayMount.style.getPropertyValue(property) !== value)
+                scene.overlayMount.style.setProperty(property, value);
+          };
+          const observer = new ResizeObserver(positionDestination);
+          observer.observe(scene.mount);
+          observer.observe(subject);
+          layoutObservers.push(observer);
+          positionDestination();
         }
         scene.pause(true);
       }

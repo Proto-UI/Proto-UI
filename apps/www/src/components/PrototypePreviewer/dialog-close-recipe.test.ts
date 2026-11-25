@@ -160,6 +160,14 @@ async function mount(
     expect(content?.contains(close ?? null)).toBe(true);
     expect(context.api.getPublicInstance?.('close')).toBeDefined();
   });
+  // Content's entered state can precede React's committed passive children.
+  // Wait for the actual Close view and its authored appearance before input.
+  await vi.waitFor(() => {
+    expect(context.refs.close?.isConnected).toBe(true);
+    expect(context.refs.close?.getAttribute('role')).toBe('button');
+    expect(hasToken(context.refs.closeLabel!, 'text-base')).toBe(true);
+    expect(hasToken(context.refs.closeAppearance!, 'px-[12px]')).toBe(true);
+  });
   requests.mockClear();
   return {
     ...context,

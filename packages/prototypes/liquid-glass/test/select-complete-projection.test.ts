@@ -431,7 +431,7 @@ describe('Liquid Field Select Trigger (intent only)', () => {
       expect(trigger.target.getAttribute('aria-describedby')).toBe(description.target.id);
       expect(trigger.target.getAttribute('aria-errormessage')).toBe(error.target.id);
       expect(trigger.frames.at(-1)?.style.tokens).toEqual(
-        expect.arrayContaining(['border-2', 'border-foreground'])
+        expect.arrayContaining(['border-2', 'border-destructive'])
       );
       // Disabled through Field suppresses the press candidates.
       field.set({ invalid: true, errors: ['Required'], disabled: true });
@@ -439,6 +439,9 @@ describe('Liquid Field Select Trigger (intent only)', () => {
       expect(trigger.frames.at(-1)?.material.candidates).toEqual([]);
       field.set({ invalid: false });
       expect(trigger.exposes.invalid.get()).toBe(false);
+      expect(trigger.frames.at(-1)?.style.tokens).toContain('border-border');
+      expect(trigger.frames.at(-1)?.style.tokens).not.toContain('border-destructive');
+      expect(trigger.frames.at(-1)?.style.tokens).not.toContain('border-2');
       expect(trigger.target.hasAttribute('aria-errormessage')).toBe(false);
       expect(trigger.frames.at(-1)?.material.candidates).toEqual([pressCandidate('rest')]);
       expect(root.exposes.value.get()).toBe('v0');

@@ -136,7 +136,9 @@ describe('Accordion demo narrow-width ownership', () => {
           typeof node !== 'string' &&
           node.kind === 'box' &&
           node.children?.some(
-            (child) => typeof child === 'string' && child.startsWith('UnbrokenContentBoundary_')
+            (child) =>
+              typeof child === 'string' &&
+              child.startsWith('Reach us anytime via support@example.com')
           )
       );
       expect(
@@ -225,16 +227,21 @@ describe('Liquid Accordion bounded source ownership', () => {
     ).toEqual(['controlled', 'requestStatus', 'accept']);
   });
 
-  it('keeps other families in their original unsegmented example order', () => {
+  it('keeps other families in unsegmented example order through their layout wrappers', () => {
     for (const family of ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2']) {
       const root = createAccordionDemo(family).root;
       expect(planMaterialStages(root)).toEqual([]);
       if (root.kind !== 'box') throw new Error('Expected recipe layout box');
       expect(
-        root.children?.map((node) =>
-          typeof node === 'string' || node.kind === 'text' ? null : (node.ref ?? null)
+        nodes(root).flatMap((node) =>
+          node.kind !== 'text' &&
+          ['single', 'multiple', 'rtl', 'controlled', 'requestStatus', 'accept'].includes(
+            node.ref ?? ''
+          )
+            ? [node.ref]
+            : []
         )
-      ).toEqual(['single', null, 'multiple', null, 'rtl', 'controlled', 'requestStatus', 'accept']);
+      ).toEqual(['single', 'multiple', 'rtl', 'controlled', 'requestStatus', 'accept']);
     }
   });
 });

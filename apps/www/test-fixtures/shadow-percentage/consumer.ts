@@ -1,5 +1,14 @@
 import { definePrototype, tw, type RunHandle } from '@proto.ui/core';
-import { AdaptToWebComponent, type ShadowStyleArtifactV1 } from '@proto.ui/adapter-web-component';
+import {
+  AdaptToWebComponent,
+  setElementProps,
+  type ShadowStyleArtifactV1,
+} from '@proto.ui/adapter-web-component';
+import {
+  switchRoot,
+  switchThumb,
+  type ShadcnSwitchRootProps,
+} from '@proto.ui/prototypes-shadcn/switch';
 
 // Authored public inputs. The CLI discovers these ordinary tw() calls; the
 // browser observer maintains its equations independently of this list.
@@ -13,6 +22,13 @@ const movements = [
   tw('translate-x-[calc((8px_-_100%)*var(--pui-percentage)/100)]'),
   tw('translate-x-[calc(1px_+_(100%_+_1px)*var(--pui-percentage)/100)]'),
   tw('translate-x-[calc(-1px_-_(100%_+_1px)*var(--pui-percentage)/100)]'),
+  tw('translate-x-[-0.0625rem]'),
+  tw('translate-x-[calc(2px_-_100%)]'),
+  tw('translate-x-[calc(8px_-_100%)]'),
+  tw('translate-x-[calc(-100%_-_2px)]'),
+  tw('translate-x-[calc(4px_-_100%)]'),
+  tw('translate-x-[calc(0.0625rem_+_(100%_+_2px_-_0.0625rem)*var(--pui-percentage)/100)]'),
+  tw('translate-x-[calc(-0.0625rem_-_(100%_+_2px_-_0.0625rem)*var(--pui-percentage)/100)]'),
 ];
 const widths = { 16: tw('w-4'), 32: tw('w-8'), 48: tw('w-12') };
 const base = tw('block h-4 transition-none');
@@ -65,7 +81,7 @@ export function createPercentageLab(artifact: ShadowStyleArtifactV1) {
         let run!: RunHandle<Record<string, unknown>>;
         let clicks = 0;
         const percentage =
-          config.expression === 0
+          config.expression === 0 || (config.expression >= 9 && config.expression <= 13)
             ? null
             : def.state.numberRange('percentage', 0, { min: 0, max: 100 });
         if (percentage) def.expose.state('percentage', percentage);
@@ -149,6 +165,7 @@ export function createPercentageLab(artifact: ShadowStyleArtifactV1) {
       trustedClicks: [...trustedClicks],
       ...controls(host).counts(),
       state: controls(host).read(),
+      rootFont: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
     };
   }
   return {
@@ -227,6 +244,82 @@ export function createPercentageLab(artifact: ShadowStyleArtifactV1) {
           ?.querySelector('slot')
           ?.assignedNodes()
           .includes(rows[1]!.host),
+      }));
+    },
+    dispose() {
+      stage.remove();
+    },
+  };
+}
+
+// The actual public Switch/Thumb pair exercises the finite recipe in its real
+// owner graph. Only ordinary public props and trusted browser input change it.
+export function createSwitchLab(artifact: ShadowStyleArtifactV1) {
+  const stage = document.createElement('main');
+  stage.style.cssText = 'padding:48px;display:grid;gap:32px;';
+  document.body.append(stage);
+  let rows: Array<{
+    root: HTMLElement & { getExposes(): any };
+    thumb: HTMLElement;
+    direction: 'ltr' | 'rtl';
+    profile: 'light' | 'split';
+    trustedClicks: boolean[];
+  }> = [];
+  const classes = (profile: 'light' | 'split') => {
+    const options = {
+      shadow:
+        profile === 'split'
+          ? ({ mode: 'open', presentation: 'split', styleArtifact: artifact } as const)
+          : false,
+    } as const;
+    return {
+      Root: AdaptToWebComponent(switchRoot, {
+        ...options,
+        registerAs: `percentage-real-${profile}-switch`,
+      }),
+      Thumb: AdaptToWebComponent(switchThumb, {
+        ...options,
+        registerAs: `percentage-real-${profile}-thumb`,
+      }),
+    };
+  };
+  const light = classes('light');
+  const split = classes('split');
+  const rect = (element: Element) => {
+    const value = element.getBoundingClientRect();
+    return { x: value.x, y: value.y, width: value.width, height: value.height };
+  };
+  return {
+    mount(styleProfile: ShadcnSwitchRootProps['styleProfile'], size: 'default' | 'sm') {
+      stage.replaceChildren();
+      rows = [];
+      for (const profile of ['light', 'split'] as const)
+        for (const direction of ['ltr', 'rtl'] as const) {
+          const { Root, Thumb } = profile === 'light' ? light : split;
+          const root = new Root();
+          const thumb = new Thumb();
+          setElementProps(root, { styleProfile, size, direction, defaultChecked: false });
+          root.dataset.switchCase = `${profile}-${direction}`;
+          root.append(thumb);
+          const trustedClicks: boolean[] = [];
+          root.addEventListener('click', (event) => trustedClicks.push(event.isTrusted));
+          stage.append(root);
+          rows.push({ root, thumb, direction, profile, trustedClicks });
+        }
+    },
+    sample() {
+      return rows.map(({ root, thumb, direction, profile, trustedClicks }) => ({
+        direction,
+        profile,
+        root: rect(root),
+        thumb: rect(thumb),
+        translationX: new DOMMatrixReadOnly(getComputedStyle(thumb).transform).m41,
+        checked: root.getExposes().checked.get(),
+        rootFont: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
+        rootTokens: root.getAttribute('data-pui-split-root-style'),
+        thumbTokens: thumb.getAttribute('data-pui-split-root-style'),
+        trustedClicks: [...trustedClicks],
+        retainedThumb: root.firstChild === thumb,
       }));
     },
     dispose() {

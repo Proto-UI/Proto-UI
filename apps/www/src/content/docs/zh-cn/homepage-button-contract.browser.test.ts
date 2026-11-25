@@ -609,6 +609,14 @@ describe.sequential('Base Button selection and family-owned homepage geometry', 
           };
           await observeMotion(16);
           await page.setViewportSize({ width: 390, height: 1000 });
+          // Narrow screens first show an inert desktop overview. Enter the real
+          // interactive layout before measuring its enlarged control geometry.
+          const layoutToggle = page.locator('[data-home-gallery-layout-toggle]');
+          await layoutToggle.waitFor({ state: 'visible' });
+          if ((await layoutToggle.getAttribute('aria-expanded')) === 'false')
+            await layoutToggle.click();
+          expect(await layoutToggle.getAttribute('aria-expanded')).toBe('true');
+          expect(await reset.evaluate((node) => Boolean(node.closest('[inert]')))).toBe(false);
           await page.evaluate(() => {
             document.documentElement.style.fontSize = '200%';
           });

@@ -1264,9 +1264,21 @@ describe('WC acquisition preserves the registered initial plane (synthetic layou
       await import('@proto.ui/adapter-web-component');
     const { default: surface } = await import('@proto.ui/prototypes-liquid-glass/surface');
     let f: ReturnType<typeof fixture>;
+    const frames: VisualFeedbackFrame[] = [];
     const Constructor = AdaptToWebComponent(surface, {
       registerAs: 'seed-transaction-control',
-      createVisualSink: (host, effects) => createWebMaterialSink(host, effects, f.options),
+      createVisualSink: (host, effects) => {
+        const sink = createWebMaterialSink(host, effects, f.options);
+        return {
+          commit(frame) {
+            frames.push(frame);
+            sink.commit(frame);
+          },
+          release(view) {
+            sink.release(view);
+          },
+        };
+      },
     });
     f = fixture('seed-transaction-control', false);
     setElementProps(f.host, {
@@ -1280,6 +1292,8 @@ describe('WC acquisition preserves the registered initial plane (synthetic layou
       ...f.visual,
       style: {
         kind: 'tw',
+        // This synthetic host supplies no live motion metadata. The family's
+        // current unknown-preference policy explicitly withdraws CSS timing.
         tokens: ['transition-none', 'rounded-full', 'border-0', 'bg-background', 'text-foreground'],
       },
       material: {
@@ -1307,6 +1321,14 @@ describe('WC acquisition preserves the registered initial plane (synthetic layou
     const retire = vi.spyOn(lease, 'retire');
     decode.delayed = true;
     connect.call(f.host);
+    expect(frames).toHaveLength(1);
+    expect(frames[0].style.tokens).toEqual([
+      'transition-none',
+      'rounded-full',
+      'border-0',
+      'bg-background',
+      'text-foreground',
+    ]);
     expect(retire).not.toHaveBeenCalled();
     expect(f.host.style.backgroundImage).toContain(a.receipt.image.dataUrl);
     expect(f.host.dataset.materialReason).not.toBe('preparing');

@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "status": "focused-candidate-validation; integrated Actions pending",
+  "baseCommit": "fbe8f5d9dd573d869430f69301e0b5aa8214e54e",
+  "group": {
+    "id": "bounded-thumb-rtl-rem",
+    "files": [
+      {
+        "path": "spec/decisions/D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001.yaml",
+        "sha256": "a988171f703e0cdd14f6bf91e1c9562794434ffd670a6211eff13381c95b9001"
+      },
+      {
+        "path": "spec/tests/T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001.yaml",
+        "sha256": "15871960d04d10f5755a1bf6d65a28a0e2f7837b23595de84d1ad59d4b9cd5e4"
+      },
+      {
+        "path": "packages/core/src/spec/feedback/application-role.ts",
+        "sha256": "5f1311cd031836671678c548ad8db061b2ce6471c29937f559584f99d26e8bb3"
+      },
+      {
+        "path": "packages/adapters/web-component/src/shadow-split-effects.ts",
+        "sha256": "a8333d297c25f3842c5dde454956a17ec7e9e02137db4fb5c6837673e619c77b"
+      },
+      {
+        "path": "packages/core/test/feedback/percentage-root-translation.test.ts",
+        "sha256": "16c219bf10f68b103a807ce28d8fc01700f227d1c57db809f7c6e75d426d609d"
+      },
+      {
+        "path": "packages/adapters/web-component/test/shadow-percentage-translation.test.ts",
+        "sha256": "f35dd8a5d481f9db76482946555216433e9e655e8d29c31fcc9b4b531f078601"
+      },
+      {
+        "path": "apps/www/test-fixtures/shadow-percentage/consumer.ts",
+        "sha256": "4df27b888c8a623a57ad94e450a707e2937923c45aec09fe1fa6f599b3088d97"
+      },
+      {
+        "path": "apps/www/test-fixtures/shadow-percentage/main.ts",
+        "sha256": "7b9aa38b90404b95a85e88cf1666975a038146a83f4c9351aeec2a194ae49de3"
+      },
+      {
+        "path": "apps/www/test-fixtures/shadow-percentage/index.html",
+        "sha256": "2fc1c132dcaa91aae70f82676b087a7648751e878e66b607963a965e0922e71e"
+      },
+      {
+        "path": "apps/www/test-fixtures/shadow-percentage/vite.config.ts",
+        "sha256": "39706d30211aa1d6de9966aa33aa5d10647a27961370ec1da5fee4339ecd5f47"
+      },
+      {
+        "path": "apps/www/test/shadow-percentage-translation.browser.test.ts",
+        "sha256": "90b93668ae4de869c2c8c6d565617446f54cbc871b8891456f66c9fb842c9dec"
+      }
+    ],
+    "authority": [
+      "D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-RTL-REM-TRANSLATIONS",
+      "P-SHADCN-SWITCH-THUMB-DIRECTIONAL-ENDPOINTS",
+      "P-SHADCN-SWITCH-THUMB-DIRECTIONAL-PREVIEW"
+    ],
+    "scope": "5 exact static plus 2 exact dynamic current public source spellings only; preserves current recipe, owner, near-miss and atomic failure boundaries. T remains draft with independent admission blocker.",
+    "unitReceipt": {
+      "path": "/tmp/pui-cb5d-thumb-finite-candidate.json",
+      "files": 5,
+      "passed": 222,
+      "failed": 0
+    },
+    "nativeReceipt": {
+      "path": "/home/ezra/proto-ui-field-thumb-cb5d-control/thumb-final.json",
+      "sha256": "17941bdeb740f3615b10d02a18b7a6303cd2c9bf26ac642384898dbec0aee228",
+      "passed": 10,
+      "failed": 0,
+      "durationMs": 86546.156,
+      "sourceBase": "32efed90c60fa16ca12bc626dff23e133c5cfeb3",
+      "dirtyCandidate": true,
+      "evidenceDirectory": "/home/ezra/proto-ui-field-thumb-cb5d-control/thumb-final-evidence/shadow-percentage-native-hgZxID"
+    },
+    "nativeCoverage": [
+      "Original 9 and new 7 expressions x 16/32px root font x LTR/RTL x 3 widths x p 0/25/50/75/100",
+      "Actual complete Root/surface/slot geometry, native hit tests and trusted click",
+      "Real transition intermediate frames/reversal, owner withdrawal/reacquire, terminal reconnect, nested owners, double-transform negative control",
+      "Public Switch/Thumb source 9 profiles x 2 sizes x both directions x Light/split, real click/Space endpoints"
+    ],
+    "limits": [
+      "Transport/source equations are tested, not complete visual or draggable admission.",
+      "Existing Luma source at 32px font overflows Root outer boundary by about 2px identically in Light/split; source formula was not modified to hide this.",
+      "Early producer red receipts retained for constructor registration, props wiring, nested RTL oracle and initial Sera entrance sampling corrections.",
+      "Independent source review by release_gate_audit found no blocker; original S3 native receipt is separate."
+    ]
+  },
+  "verification": {
+    "specAuthoring": "/tmp/cb5d-thumb-spec-authoring-final.log",
+    "specGraph": {
+      "path": "/tmp/cb5d-thumb-spec-graph.json",
+      "passed": 5,
+      "failed": 0
+    },
+    "proportionalTypes": {
+      "path": "/tmp/cb5d-thumb-field-types.json",
+      "ownedFiles": 12,
+      "ownedErrors": 0,
+      "transitiveDiagnostics": 97,
+      "claim": "Only owned-file zero errors; not full application/workspace typecheck."
+    },
+    "catalogTracking": "New files must be committed by parent before catalog-integrity Git-tracking check can truthfully pass."
+  },
+  "archivedNativeReceipt": {
+    "path": "internal/records/evidence/2026-11-25-release-gate-shadow-percentage/thumb-final.json.gz",
+    "rawSha256": "17941bdeb740f3615b10d02a18b7a6303cd2c9bf26ac642384898dbec0aee228"
+  },
+  "archivedUnitReceipt": {
+    "path": "internal/records/evidence/2026-11-25-release-gate-shadow-percentage/pui-cb5d-thumb-finite-candidate.json.gz",
+    "rawSha256": "6f6f9e52be306b86ffdcef5917fb84e8048cb44792506f93507260106af93022"
+  }
+}

@@ -1,3 +1,8 @@
+import type { BrutalistButtonProps } from '@proto.ui/prototypes-brutalist/button';
+
+const cancelButtonProps = { variant: 'surface', wrap: true } satisfies BrutalistButtonProps;
+const saveButtonProps = { wrap: true } satisfies BrutalistButtonProps;
+
 export default {
   type: 'demo',
   root: {
@@ -40,10 +45,16 @@ export default {
                 kind: 'box',
                 className: 'grid gap-1.5',
                 children: [
-                  { kind: 'box', tag: 'span', className: 'text-sm font-medium', children: ['Name'] },
                   {
                     kind: 'box',
-                    className: 'rounded-base border-2 border-black bg-secondary-background px-3 py-2 text-sm',
+                    tag: 'span',
+                    className: 'text-sm font-medium',
+                    children: ['Name'],
+                  },
+                  {
+                    kind: 'box',
+                    className:
+                      'rounded-base border-2 border-black bg-secondary-background px-3 py-2 text-sm',
                     children: ['Pedro Duarte'],
                   },
                 ],
@@ -52,10 +63,16 @@ export default {
                 kind: 'box',
                 className: 'grid gap-1.5',
                 children: [
-                  { kind: 'box', tag: 'span', className: 'text-sm font-medium', children: ['Username'] },
                   {
                     kind: 'box',
-                    className: 'rounded-base border-2 border-black bg-secondary-background px-3 py-2 text-sm',
+                    tag: 'span',
+                    className: 'text-sm font-medium',
+                    children: ['Username'],
+                  },
+                  {
+                    kind: 'box',
+                    className:
+                      'rounded-base border-2 border-black bg-secondary-background px-3 py-2 text-sm',
                     children: ['@peduarte'],
                   },
                 ],
@@ -73,7 +90,7 @@ export default {
                   {
                     kind: 'proto',
                     prototypeId: 'brutalist-button',
-                    props: { variant: 'neutral' },
+                    props: cancelButtonProps,
                     children: ['Cancel'],
                   },
                 ],
@@ -81,7 +98,14 @@ export default {
               {
                 kind: 'proto',
                 prototypeId: 'brutalist-dialog-close',
-                children: [{ kind: 'proto', prototypeId: 'brutalist-button', children: ['Save changes'] }],
+                children: [
+                  {
+                    kind: 'proto',
+                    prototypeId: 'brutalist-button',
+                    props: saveButtonProps,
+                    children: ['Save changes'],
+                  },
+                ],
               },
             ],
           },

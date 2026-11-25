@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import { gunzipSync } from 'node:zlib';
 import { generalCheckPlan, executeGeneralChecks } from './general-ci.mjs';
 import { generalJobPlan, assertGeneralCheckEvidence } from './general-check-plan.mjs';
 import YAML from 'yaml';
@@ -19,6 +21,7 @@ import {
   browserShards,
   browserShardCosts,
   BROWSER_SUITES,
+  BROWSER_SHARD_COUNT,
   validateBrowserCostEvidence,
 } from './runtime-test-plan.mjs';
 
@@ -76,6 +79,68 @@ test('malformed or duplicated timing observations cannot bypass capacity admissi
     mutate(input);
     assert.throws(() => validateBrowserCostEvidence(input), /Invalid/);
   }
+});
+
+test('the latest official terminal costs retain failures and exclude interrupted selections', () => {
+  const evidence = validateBrowserCostEvidence(
+    JSON.parse(
+      readFileSync(
+        new URL('./fixtures/browser-suite-costs-45537881490.json', import.meta.url),
+        'utf8'
+      )
+    )
+  );
+  const directory = new URL(
+    '../../internal/records/evidence/2026-11-25-release-gate-browser-costs/',
+    import.meta.url
+  );
+  const receipt = JSON.parse(readFileSync(new URL('receipt.json', directory), 'utf8'));
+  const observations = [];
+  const missing = [];
+  assert.equal(receipt.runId, evidence.runId);
+  assert.equal(receipt.headSha, evidence.headSha);
+  assert.equal(receipt.jobs.length, 18);
+  for (const job of receipt.jobs) {
+    const compressed = readFileSync(new URL(job.logPath, directory));
+    const bytes = gunzipSync(compressed);
+    const digest = createHash('sha256').update(bytes).digest('hex');
+    assert.equal(createHash('sha256').update(compressed).digest('hex'), job.gzipSha256);
+    assert.equal(digest, job.logSha256);
+    const log = bytes.toString('utf8').replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, '');
+    const selection = JSON.parse(
+      log
+        .split('\n')
+        .find((line) => line.includes('[test:runtime] selection '))
+        .split('[test:runtime] selection ')[1]
+    );
+    assert.deepEqual(selection, job.selection);
+    assert.equal(selection.checkoutSha, evidence.headSha);
+    const terminal = new Set();
+    for (const match of log.matchAll(
+      /(✓|❯|×)\s+((?:apps|packages)\/\S+\.test\.[cm]?[jt]sx?)\s+\(([^)]*)\)\s+([\d.]+)ms/g
+    )) {
+      const row = evidence.observations.find((entry) => entry.suite === match[2]);
+      assert.ok(row, `unrecorded terminal file: ${match[2]}`);
+      assert.ok(selection.suites.includes(row.suite));
+      assert.equal(row.jobId, job.jobId);
+      assert.equal(row.logSha256, digest);
+      assert.equal(row.durationMs, Number(match[4]));
+      assert.equal(row.summary, match[3]);
+      assert.equal(row.fileOutcome, match[1] === '✓' ? 'passed' : 'failed');
+      terminal.add(row.suite);
+      observations.push(row.suite);
+    }
+    missing.push(...selection.suites.filter((suite) => !terminal.has(suite)));
+  }
+  assert.equal(observations.length, 98);
+  assert.equal(new Set(observations).size, 98);
+  assert.equal(evidence.observations.filter((row) => row.fileOutcome === 'failed').length, 15);
+  assert.deepEqual(observations.sort(), evidence.observations.map((row) => row.suite).sort());
+  assert.equal(missing.length, 16);
+  assert.deepEqual(missing.sort(), receipt.selectedWithoutTerminal.map((row) => row.suite).sort());
+  for (const suite of missing) assert.ok(!observations.includes(suite));
+  assert.equal(BROWSER_SHARD_COUNT, 18);
+  assert.doesNotThrow(() => assertBrowserShardCapacity());
 });
 
 test('general planning preserves every root gate and separates controls from runtime execution', () => {

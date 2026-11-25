@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "status": "focused-candidate-validation; integrated Actions pending",
+  "baseCommit": "fbe8f5d9dd573d869430f69301e0b5aa8214e54e",
+  "group": {
+    "id": "field-browser-current-public-and-companion",
+    "files": [
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts",
+        "sha256": "bf165935ae8fc0034cd13d44d574c41f094fb88e820b1504cd64f6fefaee019d"
+      },
+      {
+        "path": "apps/www/test-fixtures/field-current/consumer.ts",
+        "sha256": "42901af06f819d256f9cac43cafa5ec30d5f43a1512ac69279c110980e57926f"
+      },
+      {
+        "path": "apps/www/test-fixtures/field-current/main.ts",
+        "sha256": "c04c6ca5eb8c065f10f4c45366bd70c5cfac6f0612da4d32058a5ad59834eaa3"
+      },
+      {
+        "path": "apps/www/test-fixtures/field-current/index.html",
+        "sha256": "25b1e9f8712e96fd70ae4b5fae8f6cfbdadee8757f7b6f5966cb9b0e39276dd8"
+      },
+      {
+        "path": "apps/www/test-fixtures/field-current/vite.config.ts",
+        "sha256": "d2d753285e2761899663f5884d35fc744b9b9e24cd0c6fea628e5ade82a2f2a4"
+      }
+    ],
+    "scope": "20 original family-host journeys verify current public form then preserve every old six-field companion oracle; 5 original Chinese public routes verify current shared form. No product Field implementation change.",
+    "nativeReceipt": {
+      "path": "/home/ezra/proto-ui-field-thumb-cb5d-control/field-full.json",
+      "sha256": "103f727ddd5411053924ebcae98764c1070a9fe2e7d38353266db7aea3036050",
+      "passed": 25,
+      "failed": 0,
+      "durationMs": 280891.298,
+      "sourceBase": "32efed90c60fa16ca12bc626dff23e133c5cfeb3",
+      "dirtyCandidate": true,
+      "evidenceDirectory": "/home/ezra/proto-ui-field-thumb-cb5d-control/field-full-evidence/field",
+      "rawJsonCaptures": 60
+    },
+    "preserved": [
+      "All 5 families x WC/React/Vue/Vue2 native editing, label focus and owner binding",
+      "Controlled refusal then acceptance through actual public owner APIs",
+      "Busy/latest-request/cancel/650ms late result stability",
+      "Readonly and disabled distinction",
+      "Long text dark/narrow/200% geometry and trusted keyboard/input",
+      "120000ms per-case boundary"
+    ],
+    "limits": [
+      "Public demonstration and test-only companion are explicitly labelled separately in evidence.",
+      "Companion uses actual public prototypes, actual shared renderDemo and adapters; it never sets Field DOM or state to fabricate a result.",
+      "First selected native run reached the dark step but lacked a standalone OS theme bridge; that fixture wiring error is retained in field-wiring.json."
+    ]
+  },
+  "verification": {
+    "specAuthoring": "/tmp/cb5d-thumb-spec-authoring-final.log",
+    "specGraph": {
+      "path": "/tmp/cb5d-thumb-spec-graph.json",
+      "passed": 5,
+      "failed": 0
+    },
+    "proportionalTypes": {
+      "path": "/tmp/cb5d-thumb-field-types.json",
+      "ownedFiles": 12,
+      "ownedErrors": 0,
+      "transitiveDiagnostics": 97,
+      "claim": "Only owned-file zero errors; not full application/workspace typecheck."
+    },
+    "catalogTracking": "New files must be committed by parent before catalog-integrity Git-tracking check can truthfully pass."
+  },
+  "archivedNativeReceipt": {
+    "path": "internal/records/evidence/2026-11-25-release-gate-field-current/field-full.json.gz",
+    "rawSha256": "103f727ddd5411053924ebcae98764c1070a9fe2e7d38353266db7aea3036050"
+  }
+}

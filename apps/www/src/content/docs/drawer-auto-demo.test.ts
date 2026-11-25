@@ -33,13 +33,25 @@ it.each(Object.entries(files).filter(([path]) => path.includes('shadcn')))(
     const panel = panels(demo.root)[0];
     const direct = panel.children!.filter((child): child is DemoNode => typeof child !== 'string');
     const column = direct.find(
-      (child) => child.kind === 'box' && child.className === 'mx-auto w-full max-w-sm'
+      (child): child is Extract<DemoNode, { kind: 'box' }> =>
+        child.kind === 'box' &&
+        (child.children ?? []).some(
+          (part) =>
+            typeof part !== 'string' &&
+            part.kind === 'proto' &&
+            part.prototypeId === 'shadcn-drawer-header'
+        )
     );
     const children =
       column && 'children' in column
         ? column.children!.filter((child): child is DemoNode => typeof child !== 'string')
         : direct;
-    if (_path === './demo-shadcn-drawer.demo.ts') expect(column).toBeDefined();
+    if (!_path.includes('-scroll.')) {
+      expect(column).toBeDefined();
+      expect(column!.className?.split(/\s+/)).toEqual(
+        expect.arrayContaining(['mx-auto', 'w-full', 'max-w-sm'])
+      );
+    }
     const parts = children.filter(
       (child): child is Extract<DemoNode, { kind: 'proto' }> => child.kind === 'proto'
     );
@@ -56,14 +68,30 @@ it.each(Object.entries(files).filter(([path]) => path.includes('shadcn')))(
       footer!.children
         ?.filter((child) => typeof child !== 'string')
         .map((child) => (child.kind === 'proto' ? child.prototypeId : ''))
-    ).toEqual(['shadcn-drawer-close']);
+    ).toEqual(
+      _path === './demo-shadcn-drawer.demo.ts'
+        ? ['shadcn-button', 'shadcn-drawer-close']
+        : ['shadcn-drawer-close']
+    );
     expect(parts.map((part) => part.prototypeId)).not.toContain('shadcn-drawer-title');
-    for (const body of children.filter((child) => child.kind === 'box')) {
-      expect(
-        body.children?.every(
-          (child) => typeof child !== 'string' && child.kind === 'box' && child.className === 'p-4'
-        )
-      ).toBe(true);
+    // C-DRAWER-STRUCTURE-0001-INTERIOR gives Header/Footer their own
+    // padding and the authored body its spacing; it does not require every
+    // body child to be another p-4 box or restrict the Footer to one command.
+    const bodies = children.filter((child) => child.kind === 'box');
+    expect(bodies).toHaveLength(1);
+    const body = bodies[0];
+    expect(children.indexOf(header!)).toBeLessThan(children.indexOf(body));
+    expect(children.indexOf(body)).toBeLessThan(children.indexOf(footer!));
+    expect(body.className?.split(/\s+/)).toEqual(
+      expect.arrayContaining(['px-4', _path === './demo-shadcn-drawer.demo.ts' ? 'py-3' : 'py-2'])
+    );
+    expect(body.children!.length).toBeGreaterThan(0);
+    if (_path !== './demo-shadcn-drawer.demo.ts') {
+      expect(body.className?.split(/\s+/)).toEqual(
+        expect.arrayContaining(['flex-1', 'overflow-y-auto'])
+      );
     }
+    expect(header!.className ?? '').not.toMatch(/(?:^|\s)p[xytrblse]?-\S+/);
+    expect(footer!.className ?? '').not.toMatch(/(?:^|\s)p[xytrblse]?-\S+/);
   }
 );

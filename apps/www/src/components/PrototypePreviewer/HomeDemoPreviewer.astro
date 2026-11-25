@@ -209,13 +209,16 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
       display: grid;
     }
   }
+  /* Ghost cards cover cold acquisition only. A committed gallery stays usable
+     during a switch, with the existing regional cancel/retry controls. */
+  .home-demo-previewer[data-projection-generation] .home-demo-previewer__skeleton,
   .home-demo-previewer[data-runner-state='ready'] .home-demo-previewer__skeleton,
   .home-demo-previewer[data-runner-state='error'] .home-demo-previewer__skeleton {
     display: none;
   }
-  .home-demo-previewer
+  .home-demo-previewer:not([data-projection-generation])
     :global([data-runtime-loading-mask][data-state='loading'] [data-demo-ref='scrim']),
-  .home-demo-previewer
+  .home-demo-previewer:not([data-projection-generation])
     :global([data-runtime-loading-mask][data-state='loading'] [data-demo-ref='panel']) {
     display: none !important;
   }

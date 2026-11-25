@@ -13,6 +13,11 @@ import { EVENT_ROOT_TARGET_CAP, EVENT_GLOBAL_TARGET_CAP } from '@proto.ui/module
 import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
 import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
 import {
+  RULE_META_GET_CAP,
+  RULE_META_PREFERENCE_SOURCE_CAP,
+  type PreferenceKey,
+} from '@proto.ui/module-rule-meta';
+import {
   AS_TRIGGER_INSTANCE_CAP,
   AS_TRIGGER_PARENT_CAP,
   AS_TRIGGER_GET_PROTO_CAP,
@@ -105,8 +110,12 @@ const HOVER = ['shadow-md', 'ring-1', 'ring-inset', 'ring-border'];
 async function fixture(
   command: Command,
   initial: Record<string, unknown> = {},
-  rootInitial: Record<string, unknown> = {}
+  rootInitial: Record<string, unknown> = {},
+  initialPreferences?: Record<string, unknown>
 ) {
+  const preferences = { ...initialPreferences };
+  const subscribers = new Map<() => void, readonly PreferenceKey[]>();
+  const getter = (key: string) => preferences[key];
   const parents = new Map<unknown, unknown>();
   const prototypes = new Map<unknown, Prototype<any, any>>();
   const global = new EventTarget();
@@ -145,6 +154,20 @@ async function fixture(
         signal?.done();
       },
       onRuntimeReady(w) {
+        if (initialPreferences)
+          w.attach('rule-meta', [
+            [RULE_META_GET_CAP, getter],
+            [
+              RULE_META_PREFERENCE_SOURCE_CAP,
+              {
+                getter,
+                subscribe(keys: readonly PreferenceKey[], invalidate: () => void) {
+                  subscribers.set(invalidate, keys);
+                  return () => subscribers.delete(invalidate);
+                },
+              },
+            ],
+          ]);
         const parentOf = (token: unknown) => parents.get(token) ?? null;
         const protoOf = (token: unknown) => prototypes.get(token) ?? null;
         w.attach('anatomy', [
@@ -235,6 +258,10 @@ async function fixture(
     heading,
     control,
     global,
+    preference(key: PreferenceKey, value: unknown) {
+      preferences[key] = value;
+      for (const [invalidate, keys] of [...subscribers]) if (keys.includes(key)) invalidate();
+    },
     disable: () =>
       command.name === 'Accordion'
         ? root!.set({ ...rootInitial, disabled: true })
@@ -247,6 +274,72 @@ async function fixture(
 
 // Portable frames establish ownership and recipe behavior only, not optical paint.
 describe('Liquid command interaction recipe over eight implemented Base owners', () => {
+  it.each([commands[2], commands[3], commands[6]])(
+    '$name preserves its complete Base-owned material candidate across motion preference changes',
+    async (command) => {
+      const f = await fixture(
+        command,
+        {},
+        {},
+        {
+          'preference.reducedMotion': 'no-preference',
+          'preference.reducedTransparency': 'no-preference',
+        }
+      );
+      try {
+        const c = f.control;
+        for (const preference of ['no-preference', 'reduce', 'unknown', 'no-preference']) {
+          f.preference('preference.reducedMotion', preference);
+          // The Host policy suppresses motion. Keeping the complete candidate
+          // lets it preserve the same neutral contact carrier and static tint.
+          expect(c.frame().material.candidates).toHaveLength(1);
+          expect(c.frame().material.candidates[0]).toMatchObject({
+            intent: 'liquid-glass',
+            deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+          });
+          c.input('pointer.down');
+          expect(c.state().pressed.get()).toBe(true);
+          expect(c.frame().material.candidates).toHaveLength(1);
+          expect(c.frame().material.candidates[0]).toMatchObject({
+            deformation: { kind: 'press', phase: 'pressed', contact: 'pointer' },
+          });
+          c.input('pointer.up');
+        }
+        f.disable();
+        expect(c.frame().material.candidates).toEqual([]);
+      } finally {
+        await f.dispose();
+      }
+    }
+  );
+
+  it('Button limits its live permitted transition to elevation, preserving immediate fallback paint', async () => {
+    const f = await fixture(
+      commands[0],
+      {},
+      {},
+      {
+        'preference.reducedMotion': 'no-preference',
+      }
+    );
+    try {
+      expect(f.control.tokens()).toEqual(
+        expect.arrayContaining(['transition-shadow', 'duration-150'])
+      );
+      expect(f.control.tokens()).not.toContain('transition-all');
+      for (const preference of ['reduce', 'unknown']) {
+        f.preference('preference.reducedMotion', preference);
+        expect(f.control.tokens()).toContain('transition-none');
+        expect(f.control.tokens()).not.toContain('transition-shadow');
+      }
+      f.preference('preference.reducedMotion', 'no-preference');
+      expect(f.control.tokens()).toContain('transition-shadow');
+      expect(f.control.tokens()).not.toContain('transition-none');
+    } finally {
+      await f.dispose();
+    }
+  });
+
   it('keeps the complete opaque disabled recipe without whole-host opacity', () => {
     expect(COMMAND_DISABLED.split(' ')).toEqual([
       'pointer-events-none',
@@ -505,8 +598,10 @@ describe('Liquid command interaction recipe over eight implemented Base owners',
       try {
         expect(f.control.state().disabled.get()).toBe(disabled);
         expect(f.control.state().collapseBlocked.get()).toBe(blocked);
-        for (const token of ['shadow-none', 'cursor-not-allowed'])
-          expect(f.control.tokens().includes(token)).toBe(disabled || blocked);
+        expect(f.control.tokens().includes('shadow-none')).toBe(disabled || blocked);
+        expect(f.control.tokens().includes('cursor-not-allowed')).toBe(blocked);
+        expect(f.control.tokens().includes('cursor-default')).toBe(disabled);
+        expect(f.control.tokens().includes('pointer-events-none')).toBe(disabled);
         expect(f.control.frame().material.candidates).toHaveLength(disabled || blocked ? 0 : 1);
       } finally {
         await f.dispose();

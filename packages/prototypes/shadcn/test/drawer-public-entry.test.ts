@@ -79,7 +79,17 @@ it.each([false, true])(
       await vi.waitFor(() => expect(root.getExposes().open.get()).toBe(true));
       expect(changes).toMatchObject([{ open: true }]);
       expect(document.querySelector('wc-shadcn-drawer-root')).toBe(root);
-      expect(document.querySelector('[data-demo-ref="status"]')?.textContent).toMatch(/^Opened:/);
+      // The public recipe now renders the goal editor inside the same Drawer.
+      // Exercise its actual composed callbacks instead of a removed status ref.
+      const goal = document.querySelector('[data-demo-ref="goal-value"]')!;
+      expect(goal.textContent).toBe('350');
+      document.querySelector<HTMLElement>('[data-demo-ref="increase"]')!.click();
+      await vi.waitFor(() => expect(goal.textContent).toBe('360'));
+      document.querySelector<HTMLElement>('[data-demo-ref="decrease"]')!.click();
+      await vi.waitFor(() => expect(goal.textContent).toBe('350'));
+      document.querySelector<HTMLElement>('[data-demo-ref="submit"]')!.click();
+      await vi.waitFor(() => expect(root.getExposes().open.get()).toBe(false));
+      expect(changes).toMatchObject([{ open: true }, { open: false, reason: 'submit' }]);
     } finally {
       document.removeEventListener('click', recordClick, true);
       root.removeEventListener('openChange', recordChange);

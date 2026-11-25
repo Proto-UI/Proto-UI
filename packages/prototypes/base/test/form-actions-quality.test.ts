@@ -168,6 +168,17 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     await flush();
     const svg = (el: any) => el.shadowRoot?.querySelector('svg') ?? el.querySelector('svg');
     const glyph = (el: any) => svg(el)?.querySelector('path')?.getAttribute('d') ?? null;
+    const glyphPaint = (el: any) =>
+      (svg(el)?.parentElement?.getAttribute('data-pui-style') ?? '').split(/\s+/);
+    if (family === 'liquid-glass') {
+      expect(glyphPaint(a)).toEqual(
+        expect.arrayContaining(['bg-primary', 'text-primary-foreground'])
+      );
+      expect(glyphPaint(all)).toEqual(
+        expect.arrayContaining(['bg-primary', 'text-primary-foreground'])
+      );
+      expect(glyphPaint(b)).toEqual(expect.arrayContaining(['bg-background', 'text-foreground']));
+    }
     expect(glyph(a)).toBe(family === 'bootstrap-2-3-2' ? 'M5 12L10 17L19 7' : 'm20 6-11 11-5-5');
     expect(glyph(b)).toBe(null);
     expect(glyph(all)).toBe(family === 'bootstrap-2-3-2' ? 'M5 12H19' : 'M5 12h14');
@@ -175,6 +186,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     expect(svg(a).getAttribute('tabindex')).toBe(null);
     expect(svg(a).getAttribute('role')).toBe(null);
     expect(svg(a).getAttribute('width')).toBe(family === 'liquid-glass' ? '14' : '16');
+    expect(svg(a).getAttribute('height')).toBe(family === 'liquid-glass' ? '14' : '16');
     expect(svg(a).getAttribute('stroke-width')).toBe(
       family === 'brutalist' ? '3' : family === 'liquid-glass' ? '2.25' : '2'
     );
@@ -186,18 +198,35 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     expect(proposals).toBe(1);
     expect(glyph(b)).toBe(null);
     expect(root.getExposes().getValue()).toEqual(['a']);
+    if (family === 'liquid-glass') expect(glyphPaint(b)).toContain('bg-background');
     setElementProps(root, { value: ['a', 'b'] });
     await flush();
     await new Promise((resolve) => setTimeout(resolve, 5));
     await flush();
     expect(glyph(all)).toBe(glyph(a));
     expect(all.getAttribute('aria-checked')).toBe('true');
+    if (family === 'liquid-glass') {
+      for (const control of [a, b, all]) {
+        expect(glyphPaint(control)).toEqual(
+          expect.arrayContaining(['bg-primary', 'text-primary-foreground'])
+        );
+        expect(glyphPaint(control)).not.toContain('bg-background');
+      }
+    }
     setElementProps(root, { value: [], disabled: true });
     await flush();
     await new Promise((resolve) => setTimeout(resolve, 5));
     await flush();
     expect(glyph(a)).toBe(null);
     expect(glyph(all)).toBe(null);
+    if (family === 'liquid-glass') {
+      for (const control of [a, b, all]) {
+        expect(glyphPaint(control)).toEqual(
+          expect.arrayContaining(['bg-muted', 'text-muted-foreground', 'shadow-none'])
+        );
+        expect(glyphPaint(control)).not.toContain('bg-primary');
+      }
+    }
     a.click();
     expect(proposals).toBe(1);
     const tokens = (await collectProtoStyleTokens(
@@ -209,9 +238,9 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     // lowers everywhere except shadcn, whose glyph-paint focus rules are gated
     // on the parameter state and emit unprefixed runtime tokens instead
     // (forced-colors-focus-outline proven below). Checked and mixed paint is
-    // renderer-driven through the watched-state glyph update in all four
-    // families (proven by the DOM evidence above), emitting unprefixed
-    // indicator tokens instead of data-[checked]/indeterminate variants.
+    // renderer-driven through watched-state glyph updates in every family;
+    // the collector emits unprefixed indicator tokens rather than checked/mixed
+    // variants. Controlled acceptance, refusal and disabled DOM paint are checked above.
     expect(
       tokens.some((x) => x.includes('data-[disabled]:')),
       tokens.join('\n')
@@ -225,7 +254,14 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
       ).toBe(true);
     }
     if (family === 'liquid-glass') {
-      expect(tokens).toContain('bg-primary');
-      expect(tokens).toContain('border-primary');
+      expect(tokens).toEqual(
+        expect.arrayContaining([
+          'border-primary',
+          'bg-primary',
+          'text-primary-foreground',
+          'bg-muted',
+          'text-muted-foreground',
+        ])
+      );
     }
   });

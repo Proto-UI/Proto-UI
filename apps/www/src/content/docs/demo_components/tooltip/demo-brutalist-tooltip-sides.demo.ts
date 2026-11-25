@@ -34,6 +34,7 @@ export default {
               kind: 'proto' as const,
               prototypeId: 'brutalist-tooltip-content',
               ref: `brutalistSideContent-${side}`,
+              previewTheme: 'portal' as const,
               props: { side, align: 'center' },
               children: ['Add to library'],
             },
