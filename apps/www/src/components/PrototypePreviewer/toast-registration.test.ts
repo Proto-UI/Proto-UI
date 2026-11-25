@@ -17,8 +17,8 @@ function prototypes(node: DemoChild): string[] {
 // Toast is published for base, shadcn, brutalist, bootstrap-2-3-2, and
 // liquid-glass. Every family declares initialRuntime="wc" and a four-runtime
 // selector (including vue2). None of the families has a projection manifest
-// entry, so each demo's atom id set is asserted exactly against the published
-// roles instead of being bound to a manifest.
+// entry, so each demo's authored atom set is asserted exactly. Independently
+// load every published role, including optional parts absent from that demo.
 const TOAST_FAMILIES = [
   {
     family: 'base',
@@ -64,10 +64,14 @@ describe('Toast actual DemoSpec registration', () => {
       const demo = await loadDemo(recipeId);
       expect(() => assertDemoSpec(demo)).not.toThrow();
       const ids = [...new Set(prototypes(demo.root))].sort();
-      const expected = TOAST_ROLES.map((role) => `${family}-${role}`);
+      const published = TOAST_ROLES.map((role) => `${family}-${role}`);
+      // The Shadcn stack demo dismisses through Action and its timer. Close is
+      // optional anatomy (min: 0) and remains a published part used by the
+      // persistent example; its loader is still checked below.
+      const expected = published.filter((id) => id !== 'shadcn-toast-close');
       if (family === 'shadcn') expected.push('shadcn-style-scope');
       expect(ids).toEqual(expected.sort());
-      for (const id of ids) {
+      for (const id of new Set([...ids, ...published])) {
         await loadPrototype(id);
         expect(getPrototype(id)?.name).toBe(id);
       }
