@@ -15,6 +15,41 @@ const flush = async () => {
   for (let i = 0; i < 8; i++) await Promise.resolve();
 };
 
+it('hands the serialized Library style contribution to the live Surface before native state changes', async () => {
+  const owner = document.createElement('article');
+  const link = document.createElement('a');
+  link.href = '/liquid-glass/';
+  link.dataset.libraryAction = '';
+  const props = { variant: 'outline', radius: 'full', border: 'none', elevation: 'none' };
+  const tokens = await snapshotLibraryPart('liquid-glass-surface', props);
+  expect(tokens).toContain('bg-background');
+  const surface = document.createElement('wc-library-liquid-glass-surface');
+  surface.dataset.libraryPart = 'liquid-glass-surface';
+  surface.dataset.libraryProps = JSON.stringify(props);
+  surface.dataset.libraryStyleSeed = JSON.stringify(tokens);
+  surface.setAttribute('data-pui-style', tokens.join(' '));
+  const child = document.createElement('span');
+  child.textContent = 'Explore Liquid Glass';
+  surface.append(child);
+  link.append(surface);
+  owner.append(link);
+  document.body.append(owner);
+  const release = initLibraryCards(owner);
+  await flush();
+  const rendered = link.querySelector<HTMLElement>('[data-library-part]')!;
+  link.dispatchEvent(new Event('pointerenter'));
+  await flush();
+  const hovered = (rendered.getAttribute('data-pui-style') ?? '').split(/\s+/);
+  expect(hovered).toContain('bg-muted');
+  expect(hovered).not.toContain('bg-background');
+  expect(rendered.hasAttribute('data-library-style-seed')).toBe(false);
+  expect(rendered.firstElementChild).toBe(child);
+  expect(link.getAttribute('href')).toBe('/liquid-glass/');
+  release();
+  owner.remove();
+  await flush();
+});
+
 it('retains the serialized public Rhea action through native facts, cleanup and re-init', async () => {
   const recipe = libraryActionAppearanceForFamily('shadcn');
   const owner = document.createElement('article');
