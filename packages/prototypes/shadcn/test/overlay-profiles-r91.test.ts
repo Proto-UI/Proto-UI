@@ -394,8 +394,11 @@ describe('source-bound overlay style owners', () => {
     setElementProps(scope, { styleProfile: 'new-york-v4' });
     await flush();
     expect(tokens(content)).toContain('text-balance');
-    expect(tokens(content)).not.toContain('max-w-80');
-    expect(tokens(content)).not.toContain('gap-1.5');
+    expect(tokens(content)).toEqual(
+      expect.arrayContaining(['max-w-80', 'gap-1.5', 'bg-primary', 'text-primary-foreground'])
+    );
+    expect(tokens(content)).not.toContain('bg-foreground');
+    expect(tokens(content)).not.toContain('text-background');
     expect(root.getExposes().open).toBe(open);
     expect(open.get()).toBe(true);
     expect(content.getAttribute('role')).toBe('tooltip');
@@ -425,7 +428,7 @@ describe('source-bound overlay style owners', () => {
     expect(tokens(root)).toEqual(expect.arrayContaining(['rounded-none', 'bg-popover']));
     setElementProps(scope, { styleProfile: 'rhea' });
     await flush();
-    expect(tokens(root)).toContain('rounded-[var(--pui-radius-2xl)]');
+    expect(tokens(root)).toContain('rounded-xl');
     expect(tokens(root)).not.toContain('rounded-none');
     action.click();
     await flush();
@@ -438,12 +441,12 @@ describe('source-bound overlay style owners', () => {
     expect(tokens(root)).toEqual(
       expect.arrayContaining(['rounded-md', 'bg-background', 'text-foreground'])
     );
-    expect(tokens(root)).not.toContain('rounded-[var(--pui-radius-2xl)]');
+    expect(tokens(root)).not.toContain('rounded-xl');
     expect(tokens(root)).not.toContain('bg-popover');
     setElementProps(scope, { styleProfile: 'new-york-v4' });
     await flush();
     expect(tokens(root)).toEqual(
-      expect.arrayContaining(['rounded-base', 'bg-popover', 'text-popover-foreground'])
+      expect.arrayContaining(['rounded-lg', 'bg-popover', 'text-popover-foreground'])
     );
     expect(tokens(root)).not.toContain('rounded-md');
     expect(root.getExposes().open).toBe(open);

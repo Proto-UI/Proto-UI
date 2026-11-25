@@ -100,7 +100,8 @@ describe('Liquid Glass Tabs draft projection', () => {
   it('keeps functional navigation on the List and selected Trigger while Content remains neutral', async () => {
     const { root, list, a, b, content } = make();
     await flush();
-    expect(styleContains(list, 'rounded-2xl')).toBe(true);
+    expect(styleContains(list, 'rounded-full')).toBe(true);
+    expect(styleContains(a, 'rounded-full')).toBe(true);
     expect(styleContains(a, 'bg-background')).toBe(true);
     expect(styleContains(content, 'bg-background')).toBe(false);
     b.click();

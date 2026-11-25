@@ -1,0 +1,56 @@
+import { tw, type DefHandle, type State } from '@proto.ui/core';
+import type {
+  NumberFieldPartProps,
+  NumberFieldStepExposes,
+} from '@proto.ui/prototypes-base/number-field';
+import { COMMAND_BLOCKED, COMMAND_FOCUS } from '../interactive-surface';
+
+/** Static pointer paint; Number Field retains value, activation and focus ownership. */
+export function setupNumberFieldStepVisual(
+  def: DefHandle<NumberFieldPartProps, NumberFieldStepExposes>,
+  state: { disabled: State<boolean>; focusVisible: State<boolean> }
+) {
+  const hovered = def.state.bool('stepPointerHovered', false);
+  const pressed = def.state.bool('stepPointerPressed', false);
+  const clearPointer = () => {
+    hovered.set(false, 'reason: step pointer hover ended');
+    pressed.set(false, 'reason: step pointer press ended');
+  };
+  def.event.on('pointer.enter', () => {
+    if (!state.disabled.get()) hovered.set(true, 'reason: step pointer entered');
+  });
+  def.event.on('pointer.down', () => {
+    if (!state.disabled.get()) pressed.set(true, 'reason: step pointer down');
+  });
+  def.event.on('pointer.up', () => pressed.set(false, 'reason: step pointer up'));
+  def.event.on('pointer.leave', clearPointer);
+  def.event.on('pointer.cancel', clearPointer);
+  def.lifecycle.onUnmounted(clearPointer);
+  if ('watch' in state.disabled) {
+    state.disabled.watch((_run, event) => {
+      if (event.type === 'next' && event.next) clearPointer();
+    });
+  }
+
+  def.feedback.style.use(
+    tw(
+      'inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-2xl border border-border bg-secondary p-2 font-sans text-secondary-foreground shadow-xs select-none cursor-pointer outline-none transition-shadow'
+    )
+  );
+  def.rule({
+    when: (w) => w.all(w.state(state.disabled).eq(false), w.state(hovered).eq(true)),
+    intent: (i) => i.feedback.style.use(tw('shadow-md')),
+  });
+  def.rule({
+    when: (w) => w.all(w.state(state.disabled).eq(false), w.state(pressed).eq(true)),
+    intent: (i) => i.feedback.style.use(tw('shadow-xs bg-muted')),
+  });
+  def.rule({
+    when: (w) => w.state(state.focusVisible).eq(true),
+    intent: (i) => i.feedback.style.use(tw(COMMAND_FOCUS)),
+  });
+  def.rule({
+    when: (w) => w.state(state.disabled).eq(true),
+    intent: (i) => i.feedback.style.use(tw(COMMAND_BLOCKED, 'bg-muted text-muted-foreground')),
+  });
+}

@@ -56,6 +56,26 @@ const paletteColor = (theme: 'light' | 'dark', token: keyof typeof THEME.light) 
   return `rgb(${[1, 3, 5].map((offset) => parseInt(value.slice(offset, offset + 2), 16)).join(', ')})`;
 };
 
+async function paletteColorWithAlpha(
+  theme: 'light' | 'dark',
+  token: keyof typeof THEME.light,
+  percent: number
+) {
+  // Let the browser normalize the source's alpha color independently of the
+  // generated token renderer (Chromium may serialize this pair in Oklab).
+  return page.evaluate(
+    ({ color, percent }) => {
+      const reference = document.createElement('span');
+      reference.style.backgroundColor = `color-mix(in oklab, ${color} ${percent}%, transparent)`;
+      document.body.append(reference);
+      const normalized = getComputedStyle(reference).backgroundColor;
+      reference.remove();
+      return normalized;
+    },
+    { color: paletteColor(theme, token), percent }
+  );
+}
+
 async function manifest(status: string, terminal?: ReturnType<typeof assessLiquidStateControls>) {
   if (!evidence) return;
   await mkdir(evidence, { recursive: true });
@@ -550,10 +570,11 @@ describe
           expect(checkbox.radius).toBe('6px');
           expect(checkbox.width).toBe('20px');
           expect(checkbox.height).toBe('20px');
-          expect(checkbox.background).toBe(paletteColor(theme, 'background'));
-          expect(checkbox.color).toBe(paletteColor(theme, 'foreground'));
-          expect(indicator.width).toBe('16px');
-          expect(indicator.height).toBe('16px');
+          // Checkbox's unselected source pair is the secondary control surface.
+          expect(checkbox.background).toBe(paletteColor(theme, 'secondary'));
+          expect(checkbox.color).toBe(paletteColor(theme, 'secondary-foreground'));
+          expect(indicator.width).toBe('14px');
+          expect(indicator.height).toBe('14px');
           expect(switchRoot.width).toBe('48px');
           expect(switchRoot.height).toBe('28px');
           expect(switchRoot.background).toBe(paletteColor(theme, 'muted'));
@@ -581,8 +602,17 @@ describe
           expect(textarea.padding).toBe('12px 16px');
           expect(Number.parseFloat(textarea.height)).toBeGreaterThanOrEqual(96);
           expect(separator.height).toBe('1px');
-          expect(separator.background).toBe(paletteColor(theme, 'border'));
+          const separatorAutoColor = await paletteColorWithAlpha(theme, 'foreground', 20);
+          expect(separator.background).toBe(separatorAutoColor);
           expect(separator.border).toBe('0px');
+          await setProps(runtime, 'separator', { material: 'opaque' });
+          await expect
+            .poll(async () => (await paint(part(runtime, 'separator'))).background)
+            .toBe(paletteColor(theme, 'border'));
+          await setProps(runtime, 'separator', { material: 'auto' });
+          await expect
+            .poll(async () => (await paint(part(runtime, 'separator'))).background)
+            .toBe(separatorAutoColor);
           expect(
             await part(runtime, 'indicatorControlled').locator('svg path').getAttribute('d')
           ).toBe('M5 12h14');

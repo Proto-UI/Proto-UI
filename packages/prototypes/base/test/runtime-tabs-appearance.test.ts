@@ -82,7 +82,11 @@ for (const [family, parts] of [
         expect(tokens(list)).toContain('overflow-x-auto');
         expect(tokens(list)).toContain('bg-transparent');
         expect(tokens(a)).toContain('border-b-2');
-        expect(tokens(a)).toContain('border-foreground');
+        expect(tokens(a)).toContain(
+          family === 'bootstrap-2-3-2' || family === 'liquid-glass'
+            ? 'border-primary'
+            : 'border-foreground'
+        );
         expect(tokens(a)).toContain('text-foreground');
         expect(tokens(a)).toContain('bg-transparent');
         expect(tokens(b)).toContain('bg-transparent');
@@ -97,8 +101,19 @@ for (const [family, parts] of [
           'rounded-xl',
         ])
           expect(tokens(a), `${state}: no default ${token}`).not.toContain(token);
-        if (previous.focusVisible) expect(tokens(b)).toContain('outline-ring');
-        if (disabled) expect(tokens(b)).toContain('opacity-50');
+        if (previous.focusVisible) {
+          for (const token of family === 'brutalist' || family === 'liquid-glass'
+            ? ['ring-2', 'ring-ring', 'ring-offset-2']
+            : ['outline-2', 'outline-ring', 'outline-offset-2'])
+            expect(tokens(b)).toContain(token);
+        }
+        if (disabled) {
+          if (family === 'liquid-glass') {
+            for (const token of ['pointer-events-none', 'cursor-default', 'shadow-none'])
+              expect(tokens(b)).toContain(token);
+            expect(tokens(b)).not.toContain('opacity-50');
+          } else expect(tokens(b)).toContain('opacity-50');
+        }
         if (!previous.hovered && !previous.selectedB)
           expect(tokens(b)).toContain('text-muted-foreground');
         await setAppearance('default', disabled);

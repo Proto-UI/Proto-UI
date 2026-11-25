@@ -62,9 +62,7 @@ afterEach(async () => {
 for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']) {
   // Bootstrap projects the pinned 2.3.2 error-group recipe: the theme maps
   // `text-destructive` to the historical #b94a48 help/error ink.
-  const ink =
-    family === 'brutalist' ? 'text-destructive-ink' : 'text-destructive';
-  const projectsInk = family !== 'liquid-glass';
+  const ink = family === 'brutalist' ? 'text-destructive-ink' : 'text-destructive';
   it(`${family} FormField keeps validation, error relations and reset under the inherited owner`, async () => {
     const { form, field, control, error, editor } = mount(family);
     const invalid: unknown[] = [],
@@ -87,13 +85,8 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     expect(editor().getAttribute('aria-errormessage')).toBe(error.id);
     expect(error.textContent).toMatch(/required/i);
     expect(control.getExposes().focused.get()).toBe(true);
-    if (projectsInk) {
-      expect(tokens(field)).toContain(`data-[invalid]:${ink}`);
-      expect(field.hasAttribute('data-invalid')).toBe(true);
-    } else {
-      // No new visual policy is inferred for Liquid from the other families.
-      expect(tokens(field).some((token) => /invalid.*text-/.test(token))).toBe(false);
-    }
+    expect(tokens(field)).toContain(`data-[invalid]:${ink}`);
+    expect(field.hasAttribute('data-invalid')).toBe(true);
     editor().value = 'Ada';
     editor().dispatchEvent(new InputEvent('input', { bubbles: true, composed: true }));
     await flush();
@@ -111,7 +104,6 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     expect(field.hasAttribute('data-invalid')).toBe(false);
     expect(form.getExposes().submitted.get()).toBe(false);
   });
-  if (!projectsInk) continue;
   it(`${family} FormField paint follows controlled owner acceptance, never the validation proposal`, async () => {
     const { form, field, error, editor } = mount(family, { invalid: false });
     const proposals: unknown[] = [];

@@ -35,30 +35,9 @@ export default definePrototype<DrawerContentProps, DrawerContentExposes>({
       });
     }
 
-    behavior.asTransition.configure({
-      enterDuration: 320,
-      leaveDuration: 240,
-      completion: { kind: 'presentation', timeoutMs: 800 },
-    });
-    const zero = { px: 0, rootText: 0, ownBox: 0 };
-    const positive = { px: 0, rootText: 0, ownBox: 1 };
-    const negative = { px: 0, rootText: 0, ownBox: -1 };
-    def.feedback.style.presence({
-      owner: behavior.asTransition.presentationOwner,
-      closed: {
-        translate: {
-          source: side,
-          cases: {
-            top: [zero, negative],
-            bottom: [zero, positive],
-            left: [negative, zero],
-            right: [positive, zero],
-          },
-        },
-      },
-      entered: { translate: [zero, zero] },
-      easing: [0.22, 1, 0.36, 1],
-    });
+    // Content owns the material slot. Combined material/presence projection is
+    // not admitted yet; retain the supported static policy and Base phase owner.
+    behavior.asTransition.configure({ enterDuration: 0, leaveDuration: 0 });
 
     def.feedback.material.declare({
       version: 2,
@@ -67,7 +46,8 @@ export default definePrototype<DrawerContentProps, DrawerContentExposes>({
       fallback: { fill: 'style', foreground: 'style' },
     });
     def.rule({
-      when: (w) => w.all(w.state(behavior.stateHandles.open).eq(true), w.prop('material').eq('auto')),
+      when: (w) =>
+        w.all(w.state(behavior.stateHandles.open).eq(true), w.prop('material').eq('auto')),
       intent: (i) => i.feedback.material.use({ intent: 'liquid-glass' }),
     });
   },

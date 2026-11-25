@@ -72,9 +72,10 @@ it.each(SHADCN_STYLE_IDS)(
       expect(styleContains(items[0], token)).toBe(false);
       expect(styleContains(items[1], token)).toBe(true);
     }
-    // Shortcut foreground lowers to a data-[active] variant: the static token
-    // is wired once and the data-active attribute follows the observed state.
-    expect(styleContains(shortcuts[1], 'data-[active]:text-accent-foreground')).toBe(true);
+    // The passive Shortcut inherits the active Item's actual foreground,
+    // preserving destructive ink rather than overriding it with accent ink.
+    expect(styleContains(shortcuts[1], 'data-[active]:text-inherit')).toBe(true);
+    expect(styleContains(shortcuts[1], 'data-[active]:text-accent-foreground')).toBe(false);
     expect(shortcuts[0].hasAttribute('data-active')).toBe(false);
     expect(shortcuts[1].hasAttribute('data-active')).toBe(true);
     // Keep the mouse physically over Billing while the keyboard selects Home.
@@ -97,6 +98,8 @@ it.each(SHADCN_STYLE_IDS)(
       await move(2);
       expect(document.activeElement).toBe(items[2]);
       expect(styleContains(items[2], 'text-destructive')).toBe(true);
+      expect(shortcuts[2].hasAttribute('data-active')).toBe(true);
+      expect(styleContains(shortcuts[2], 'data-[active]:text-inherit')).toBe(true);
       expect(styleContains(items[2], `bg-destructive/${dark ? 20 : 10}`)).toBe(true);
       expect(styleContains(items[2], 'text-accent-foreground')).toBe(false);
       expect(styleContains(items[1], 'text-accent-foreground')).toBe(false);
@@ -106,6 +109,7 @@ it.each(SHADCN_STYLE_IDS)(
       expect(styleContains(items[2], 'text-destructive')).toBe(true);
       expect(styleContains(items[2], 'bg-destructive/10')).toBe(false);
       expect(styleContains(items[2], 'bg-destructive/20')).toBe(false);
+      expect(shortcuts[2].hasAttribute('data-active')).toBe(false);
       await move(1);
     }
     await move(3);

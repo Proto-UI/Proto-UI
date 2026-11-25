@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import * as adapterBase from '@proto.ui/adapter-base';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { afterTwoHostFrames } from '../../test-utils/host-rendering';
 import {
@@ -105,6 +106,7 @@ function appendDialog(parent: HTMLElement, props: Record<string, unknown> = {}) 
 afterEach(async () => {
   document.body.replaceChildren();
   await flush();
+  vi.restoreAllMocks();
   vi.useRealTimers();
 });
 
@@ -149,6 +151,35 @@ describe('prototypes/bootstrap-2-3-2: dialog projection', () => {
   });
 
   it('inherits open/close ownership, presence, and title/description relations', async () => {
+    const pendingPresentation = new Map<HTMLElement, () => void>();
+    const createPresenceSink = adapterBase.createWebPresencePresentationSink;
+    vi.spyOn(adapterBase, 'createWebPresencePresentationSink').mockImplementation(
+      (host, effects, options) => {
+        const sink = createPresenceSink(host, effects, options);
+        return {
+          ...sink,
+          commit(frame) {
+            // Delay actual host completion receipts to expose retained phases.
+            // The real sink still projects style; no phase or input is mocked.
+            sink.commit({
+              ...frame,
+              complete(binding, outcome) {
+                pendingPresentation.set(host, () => frame.complete(binding, outcome));
+              },
+            });
+          },
+          release(view) {
+            pendingPresentation.delete(host);
+            sink.release(view);
+          },
+        };
+      }
+    );
+    const releasePresentation = () => {
+      const receipts = [...pendingPresentation.values()];
+      pendingPresentation.clear();
+      for (const receipt of receipts) receipt();
+    };
     const { root, trigger, mask, content, title, description, close } = appendDialog(
       document.body,
       { a11yLabel: 'Session preferences' }
@@ -172,6 +203,8 @@ describe('prototypes/bootstrap-2-3-2: dialog projection', () => {
     expect(content.getAttribute('aria-labelledby')).toBe(title.id);
     expect(content.getAttribute('aria-describedby')).toBe(description.id);
 
+    expect(pendingPresentation.has(content)).toBe(true);
+    releasePresentation();
     await completeTransitions(mask, content);
     expect(transitionState(content)).toBe('entered');
     expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
@@ -189,6 +222,8 @@ describe('prototypes/bootstrap-2-3-2: dialog projection', () => {
 
     expect(stateValue<boolean>(root, 'open')).toBe(false);
     expect(transitionState(content)).toBe('leaving');
+    expect(pendingPresentation.has(content)).toBe(true);
+    releasePresentation();
     await completeTransitions(mask, content);
     expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
     expect(mask.hasAttribute('data-pui-view-detached')).toBe(true);

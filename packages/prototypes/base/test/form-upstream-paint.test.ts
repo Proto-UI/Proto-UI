@@ -77,13 +77,23 @@ it('standalone Labels retain their own family typography and layout', async () =
   );
   document.body.append(neo, shadcn, bootstrap);
   await flush();
-  expect(tokens(neo)).toEqual(expect.arrayContaining(['font-sans', 'font-bold']));
+  expect(tokens(neo)).toEqual(expect.arrayContaining(['font-sans', 'font-medium']));
+  expect(tokens(neo)).not.toContain('font-bold');
   expect(tokens(shadcn)).toEqual(expect.arrayContaining(['flex', 'items-center', 'gap-2']));
-  // Bootstrap 2.3.2 recipes are pinned in historical px, not the rem scale:
-  // 5px bottom margin, 14px/20px body text.
+  // Bootstrap keeps the historical 14px/20px type, while its current inline
+  // choice-label adaptation avoids an unconditional block or bottom margin.
   expect(tokens(bootstrap)).toEqual(
-    expect.arrayContaining(['block', 'mb-[5px]', 'text-[14px]', 'leading-[20px]', 'font-normal'])
+    expect.arrayContaining([
+      'inline-flex',
+      'items-center',
+      'gap-2',
+      'text-[14px]',
+      'leading-[20px]',
+      'font-normal',
+    ])
   );
+  expect(tokens(bootstrap)).not.toContain('block');
+  expect(tokens(bootstrap)).not.toContain('mb-[5px]');
   // P-BASE-LABEL-ACTION/OPTIONS: the default actionable label declares its
   // subject policy; a naming-only label keeps host-default text selection.
   for (const el of [neo, shadcn, bootstrap]) {

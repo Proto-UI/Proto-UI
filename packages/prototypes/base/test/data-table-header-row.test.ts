@@ -7,6 +7,15 @@ import * as brutalist from '../../brutalist/src/data-table';
 import * as bootstrap from '../../bootstrap-2-3-2/src/data-table';
 import * as liquid from '../../liquid-glass/src/data-table';
 import { styleScope } from '../../shadcn/src/style-scope';
+import shadcnButton from '../../shadcn/src/button';
+import shadcnInput from '../../shadcn/src/input';
+import brutalistButton from '../../brutalist/src/button';
+import brutalistInput from '../../brutalist/src/input';
+import bootstrapButton from '../../bootstrap-2-3-2/src/button';
+import bootstrapInput from '../../bootstrap-2-3-2/src/input';
+import liquidButton from '../../liquid-glass/src/button';
+import liquidInput from '../../liquid-glass/src/input';
+import type { DemoChild } from '../../../../apps/www/src/components/PrototypePreviewer/demo-types';
 const families = { base, shadcn, brutalist, bootstrap, liquid };
 const tags = new Map<object, string>();
 let disposed = 0;
@@ -20,6 +29,8 @@ for (const family of Object.values(families)) {
     family.dataTableHeader,
     family.dataTableHeaderRow,
     family.dataTableCaption,
+    family.dataTablePrevious,
+    family.dataTableNext,
   ]) {
     const tag = `header-row-test-${proto.name}`;
     tags.set(proto, tag);
@@ -33,6 +44,32 @@ for (const family of Object.values(families)) {
     });
   }
 }
+const demoExtras = [
+  shadcnButton,
+  shadcnInput,
+  brutalistButton,
+  brutalistInput,
+  bootstrapButton,
+  bootstrapInput,
+  liquidButton,
+  liquidInput,
+];
+for (const proto of demoExtras) {
+  const tag = `header-row-test-${proto.name}`;
+  tags.set(proto, tag);
+  AdaptToWebComponent(proto, { registerAs: tag });
+}
+// Header rows own passive family paint. Selectable body rows now add their own
+// cursor, hover, typography and selection recipes; equality would erase that split.
+const headerRecipes: Record<keyof typeof families, string> = {
+  base: '',
+  shadcn: 'table-row border-b border-border transition-colors',
+  brutalist:
+    'table-row min-w-0 max-w-full bg-background text-foreground border-b-2 border-black font-heading font-bold',
+  bootstrap: 'table-row',
+  liquid:
+    'table-row min-w-0 max-w-full border-b border-border bg-background/60 text-muted-foreground',
+};
 const rows = [
   { id: 'a', name: 'Zeta', requests: 3 },
   { id: 'b', name: 'Alpha', requests: 9 },
@@ -94,16 +131,10 @@ for (const [name, family] of Object.entries(families))
       expect(f.head.tabIndex).toBe(-1);
       expect(f.head.getAttribute('aria-selected')).toBeNull();
       const staticRecipe = f.head.getAttribute('data-pui-style');
-      const bodyStaticTokens = (f.body[0]!.getAttribute('data-pui-style') ?? '')
-        .split(/\s+/)
-        .filter((token) => !/^data-\[(focus-visible|selected)\]:/.test(token))
-        .filter(Boolean);
-      // Independent owners can first record the display group at different
-      // positions. Compare the complete static recipe, retaining extra or
-      // duplicate-token failures, rather than incidental group insertion order.
       expect((staticRecipe ?? '').split(/\s+/).filter(Boolean).sort()).toEqual(
-        bodyStaticTokens.sort()
+        headerRecipes[name as keyof typeof families].split(/\s+/).filter(Boolean).sort()
       );
+      expect((staticRecipe ?? '').split(/\s+/)).not.toContain('cursor-pointer');
       expect(staticRecipe ?? '').not.toMatch(/data-\[(focus-visible|selected)\]:/);
       expect(structure.rows[1].cells[0].columnHeaders).toEqual([structure.rows[0].cells[0].ref]);
       expect(structure.rows[1].cells[1].columnHeaders).toEqual([structure.rows[0].cells[1].ref]);
@@ -267,16 +298,28 @@ for (const [index, family] of Object.values(families).entries())
         family.dataTableHeader,
         family.dataTableCell,
         family.dataTableCaption,
+        family.dataTablePrevious,
+        family.dataTableNext,
         styleScope,
+        ...demoExtras,
       ].map((proto) => [proto.name, proto])
     );
     // This checks authored source/local exports; shared Previewer/CLI registration
     // is integrated and tested by its separate owner, not simulated here.
-    const render = (spec: any): Node => {
+    const render = (spec: DemoChild): Node => {
       if (typeof spec === 'string') return document.createTextNode(spec);
-      const proto = protos.get(spec.prototypeId);
-      if (!proto) throw new Error(`Missing exact local prototype ${spec.prototypeId}`);
-      const element = node(proto, spec.props ?? {});
+      if (spec.kind === 'text') return document.createTextNode(spec.text);
+      let element: HTMLElement;
+      if (spec.kind === 'box') {
+        element = document.createElement(spec.tag ?? 'div');
+        for (const [key, value] of Object.entries(spec.attrs ?? {}))
+          element.setAttribute(key, value);
+      } else {
+        const proto = protos.get(spec.prototypeId);
+        if (!proto) throw new Error(`Missing exact local prototype ${spec.prototypeId}`);
+        element = node(proto, spec.props ?? {});
+      }
+      if (spec.className) element.className = spec.className;
       for (const child of spec.children ?? []) element.append(render(child));
       return element;
     };
@@ -290,11 +333,17 @@ for (const [index, family] of Object.values(families).entries())
     await flush();
     expect(root.getExposes().getStructure()).toMatchObject({
       valid: true,
-      rowCount: 4,
-      columnCount: 2,
+      rowCount: index === 0 ? 4 : 5,
+      columnCount: index === 0 ? 2 : 3,
     });
-    expect(root.getExposes().count.get()).toBe(3);
+    expect(root.getExposes().count.get()).toBe(index === 0 ? 3 : 4);
     const headerRow = root.querySelector(tags.get(family.dataTableHeaderRow)!)!;
     expect(headerRow.getAttribute('role')).toBe('row');
-    expect(headerRow.querySelectorAll(tags.get(family.dataTableHeader)!)).toHaveLength(2);
+    expect(headerRow.querySelectorAll(tags.get(family.dataTableHeader)!)).toHaveLength(
+      index === 0 ? 2 : 3
+    );
+    expect(Object.keys((headerRow as HTMLElement & { getExposes(): object }).getExposes())).toEqual(
+      []
+    );
+    expect(headerRow.getAttribute('aria-selected')).toBeNull();
   });

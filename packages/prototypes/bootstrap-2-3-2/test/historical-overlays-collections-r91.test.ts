@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { AdapterPrototype } from '@proto.ui/adapter-base';
+import * as adapterBase from '@proto.ui/adapter-base';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { afterTwoHostFrames } from '../../test-utils/host-rendering';
 import { createRuntimeSession } from '@proto.ui/runtime';
@@ -155,6 +156,7 @@ async function completeTransitions(...elements: Host[]) {
 afterEach(async () => {
   document.body.replaceChildren();
   await flush();
+  vi.restoreAllMocks();
   vi.useRealTimers();
 });
 
@@ -177,6 +179,35 @@ function alertFixture(props: Record<string, unknown> = {}) {
 
 describe('Bootstrap historical modal and popup consumers', () => {
   it('keeps disabled AlertDialog commands, cancel entry, relations and leaving retention', async () => {
+    const pendingPresentation = new Map<HTMLElement, () => void>();
+    const createPresenceSink = adapterBase.createWebPresencePresentationSink;
+    vi.spyOn(adapterBase, 'createWebPresencePresentationSink').mockImplementation(
+      (host, effects, options) => {
+        const sink = createPresenceSink(host, effects, options);
+        return {
+          ...sink,
+          commit(frame) {
+            // Delay actual host completion receipts to expose retained phases.
+            // The real sink still projects style; no phase or input is mocked.
+            sink.commit({
+              ...frame,
+              complete(binding, outcome) {
+                pendingPresentation.set(host, () => frame.complete(binding, outcome));
+              },
+            });
+          },
+          release(view) {
+            pendingPresentation.delete(host);
+            sink.release(view);
+          },
+        };
+      }
+    );
+    const releasePresentation = () => {
+      const receipts = [...pendingPresentation.values()];
+      pendingPresentation.clear();
+      for (const receipt of receipts) receipt();
+    };
     const f = alertFixture({ disabled: true });
     const requests = details(f.root, 'openChange');
     await flush();
@@ -196,6 +227,8 @@ describe('Bootstrap historical modal and popup consumers', () => {
     expect(f.content.getAttribute('aria-describedby')).toBe(f.description.id);
     expect(stateValue(f.content, 'transitionState')).toBe('entering');
     expect(f.title.textContent).toBe('Delete record?');
+    expect(pendingPresentation.has(f.content)).toBe(true);
+    releasePresentation();
     await completeTransitions(f.mask, f.content);
     expect(document.activeElement).toBe(f.cancel);
 
@@ -207,6 +240,8 @@ describe('Bootstrap historical modal and popup consumers', () => {
     expect(stateValue(f.root, 'open')).toBe(false);
     expect(stateValue(f.content, 'transitionState')).toBe('leaving');
     expect(f.content.hasAttribute('data-pui-view-detached')).toBe(false);
+    expect(pendingPresentation.has(f.content)).toBe(true);
+    releasePresentation();
     await completeTransitions(f.mask, f.content);
     expect(f.content.hasAttribute('data-pui-view-detached')).toBe(true);
     expect(f.mask.hasAttribute('data-pui-view-detached')).toBe(true);
