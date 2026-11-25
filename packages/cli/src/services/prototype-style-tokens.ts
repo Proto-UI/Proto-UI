@@ -783,6 +783,42 @@ function nodeWithin(node, ancestor) {
   return false;
 }
 
+function collectWrittenIdentifierNames(node, target) {
+  if (!node) return;
+  if (ts.isIdentifier(node)) {
+    target.add(node.text);
+    return;
+  }
+  if (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) {
+    collectWrittenIdentifierNames(node.expression, target);
+    return;
+  }
+  if (
+    ts.isParenthesizedExpression(node) ||
+    ts.isAsExpression(node) ||
+    ts.isNonNullExpression(node)
+  ) {
+    collectWrittenIdentifierNames(node.expression, target);
+    return;
+  }
+  if (ts.isArrayLiteralExpression(node) || ts.isArrayBindingPattern(node)) {
+    for (const element of node.elements) collectWrittenIdentifierNames(element, target);
+    return;
+  }
+  if (ts.isObjectLiteralExpression(node)) {
+    for (const prop of node.properties) {
+      if (ts.isShorthandPropertyAssignment(prop)) target.add(prop.name.text);
+      else if (ts.isPropertyAssignment(prop))
+        collectWrittenIdentifierNames(prop.initializer, target);
+      else if (ts.isSpreadAssignment(prop)) collectWrittenIdentifierNames(prop.expression, target);
+    }
+    return;
+  }
+  if (ts.isSpreadElement(node) || ts.isBindingElement(node)) {
+    collectWrittenIdentifierNames(node.expression ?? node.name, target);
+  }
+}
+
 /** Cache syntax, never a closure's values or a call's source-graph proof. */
 function sourceFunctionRegion(node) {
   let region = node;
@@ -791,9 +827,29 @@ function sourceFunctionRegion(node) {
   }
   let result = sourceFunctionRegions.get(region);
   if (result) return result;
-  result = { node: region, names: new Set(), style: false };
+  result = { node: region, names: new Set(), writes: new Set(), style: false };
   const visit = (current) => {
     if (ts.isIdentifier(current)) result.names.add(current.text);
+    if (
+      ts.isBinaryExpression(current) &&
+      current.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+      current.operatorToken.kind <= ts.SyntaxKind.LastAssignment
+    ) {
+      collectWrittenIdentifierNames(current.left, result.writes);
+    } else if (
+      (ts.isPrefixUnaryExpression(current) || ts.isPostfixUnaryExpression(current)) &&
+      (current.operator === ts.SyntaxKind.PlusPlusToken ||
+        current.operator === ts.SyntaxKind.MinusMinusToken)
+    ) {
+      collectWrittenIdentifierNames(current.operand, result.writes);
+    } else if (ts.isDeleteExpression(current)) {
+      collectWrittenIdentifierNames(current.expression, result.writes);
+    } else if (
+      (ts.isForInStatement(current) || ts.isForOfStatement(current)) &&
+      !ts.isVariableDeclarationList(current.initializer)
+    ) {
+      collectWrittenIdentifierNames(current.initializer, result.writes);
+    }
     if (
       ts.isCallExpression(current) &&
       ((ts.isIdentifier(current.expression) && current.expression.text === 'tw') ||
@@ -819,28 +875,43 @@ function carriesHelperEffects(value) {
   );
 }
 
-/**
- * The lexical walk already visits every body in a closed, style-free region.
- * Replaying its sibling calls enumerates paths through a runtime callback
- * graph without adding a token or an externally visible binding write.
- * A capture, borrowed container or callback prevents that proof. In
- * particular, neither declaration identity nor a previous call can certify
- * the current closure/arguments: inspect their live bindings on every call.
- */
-function sourceFunctionNeedsReplay(helper, captured) {
-  const region = sourceFunctionRegion(helper.node);
-  if (region.style || captured.some((entry) => carriesHelperEffects(entry.binding))) return true;
-  for (let current = helper.scope; current; current = current.parent) {
-    if (current.borrowedSourceFunctionRegion === region.node) return true;
+function isClosedStyleFreeRegion(region, scope, seen) {
+  if (region.style) return false;
+  if (seen.has(region.node)) return true;
+  seen.add(region.node);
+  for (let current = scope; current; current = current.parent) {
+    if (current.borrowedSourceFunctionRegion === region.node) return false;
   }
   for (const name of region.names) {
-    const owner = scopeDeclaring(name, helper.scope);
+    const owner = scopeDeclaring(name, scope);
     if (!owner) continue;
     const binding = owner.bindings.get(name);
-    if (!nodeWithin(owner.node, region.node) && binding.sourceFunction?.node !== region.node)
-      return true;
-    if (binding.sourceFunction && !nodeWithin(binding.sourceFunction.node, region.node))
-      return true;
+    if (!nodeWithin(owner.node, region.node) && binding.sourceFunction?.node !== region.node) {
+      if (region.writes.has(name)) return false;
+      if (binding.sourceFunction) {
+        if (
+          !isClosedStyleFreeRegion(
+            sourceFunctionRegion(binding.sourceFunction.node),
+            binding.sourceFunction.scope,
+            seen
+          )
+        )
+          return false;
+        continue;
+      }
+      if (carriesHelperEffects(binding)) return false;
+      continue;
+    }
+    if (binding.sourceFunction && !nodeWithin(binding.sourceFunction.node, region.node)) {
+      if (
+        !isClosedStyleFreeRegion(
+          sourceFunctionRegion(binding.sourceFunction.node),
+          binding.sourceFunction.scope,
+          seen
+        )
+      )
+        return false;
+    }
     // A nested sibling may reach a callback/container borrowed by the outer
     // invocation, even when this particular call has no arguments.
     if (
@@ -849,7 +920,34 @@ function sourceFunctionNeedsReplay(helper, captured) {
       binding.bindingNode.parent === region.node &&
       carriesHelperEffects(binding)
     )
-      return true;
+      return false;
+  }
+  return true;
+}
+
+/**
+ * The lexical walk already visits every body in a closed, style-free region.
+ * Replaying its sibling calls enumerates paths through a runtime callback
+ * graph without adding a token or an externally visible binding write.
+ * A capture, borrowed container or callback prevents that proof. In
+ * particular, neither declaration identity nor a previous call can certify
+ * the current closure/arguments: inspect their live bindings on every call.
+ */
+function sourceFunctionNeedsReplay(helper, captured, callerScope, callNode) {
+  const region = sourceFunctionRegion(helper.node);
+  if (region.style) return true;
+  const seen = new Set();
+  if (!isClosedStyleFreeRegion(region, helper.scope, seen)) return true;
+  if (captured.some((entry) => carriesHelperEffects(entry.binding))) {
+    const callerFn = callNode ? enclosingFunction(callNode) : null;
+    if (!callerFn || !callerScope) return true;
+    const callerRegion = sourceFunctionRegion(callerFn);
+    if (!isClosedStyleFreeRegion(callerRegion, callerScope, seen)) return true;
+    for (const entry of captured) {
+      const fn = entry.binding?.sourceFunction;
+      if (fn && !isClosedStyleFreeRegion(sourceFunctionRegion(fn.node), fn.scope, seen))
+        return true;
+    }
   }
   return false;
 }
@@ -857,7 +955,7 @@ function sourceFunctionNeedsReplay(helper, captured) {
 /** Reached helper bodies use their defining scope and this call's arguments.
  * Unresolved calls keep the existing container-withdrawal boundary below. */
 function collectSourceFunctionCall(node, helper, captured, scope, tokens, rootInventory) {
-  if (!helper || !sourceFunctionNeedsReplay(helper, captured)) return;
+  if (!helper || !sourceFunctionNeedsReplay(helper, captured, scope, node)) return;
   const nextScope = createScope(helper.scope, helper.node, scope.sourceSummary);
   nextScope.decorationSourceFiles = scope.decorationSourceFiles;
   nextScope.decorationHelperUses = scope.decorationHelperUses;
