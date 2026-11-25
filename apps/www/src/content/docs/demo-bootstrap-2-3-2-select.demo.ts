@@ -19,7 +19,7 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className: 'flex flex-wrap items-center gap-3',
+    className: 'flex min-w-0 max-w-full flex-wrap items-center gap-3',
     children: [
       {
         kind: 'proto',

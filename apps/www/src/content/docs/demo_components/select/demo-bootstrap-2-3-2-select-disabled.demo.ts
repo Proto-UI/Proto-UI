@@ -64,7 +64,7 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className: 'flex flex-wrap items-center gap-4',
+    className: 'flex min-w-0 max-w-full flex-wrap items-center gap-4',
     children: [
       selectDemo(true, 'Disabled select', 'Disabled fruit selector'),
       selectDemo(false, 'Disabled item inside', 'Fruit selector with disabled item'),

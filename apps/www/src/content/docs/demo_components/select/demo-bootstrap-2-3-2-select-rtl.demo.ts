@@ -20,7 +20,7 @@ export default {
   root: {
     kind: 'box',
     attrs: { dir: 'rtl' },
-    className: 'flex items-center',
+    className: 'flex min-w-0 max-w-full items-center',
     children: [
       {
         kind: 'proto',
