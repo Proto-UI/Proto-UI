@@ -1,0 +1,244 @@
+{
+  "baseRevision": "5f0844907895a4ae0db506fe6a5d0bf162318329",
+  "worktree": "/home/ezra/proto-ui-browser-gate-cb5d",
+  "checkoutState": "isolated dirty candidate; not official clean-head CI",
+  "candidateFiles": [
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro",
+      "sha256": "f522d1c688f61454eed97defa507615cf42e5b5a1bf8f779c36822c197419c5b"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts",
+      "sha256": "9adecbdc191408c9c14820c2da972011e3f7cfd5aef4300ecd4aba5772133174"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts",
+      "sha256": "a7f64c8695bc963888854b4f15b2e9181c2271964089f1c26d7424853a647f52"
+    }
+  ],
+  "runs": [
+    {
+      "label": "loading-mask-original-narrow",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/loading-mask-original-narrow.json",
+      "rawSha256": "2717d531c89f5832c960b349cf5f3f534f57dff9c1aebb532e2d794b86603a92",
+      "passed": 0,
+      "failed": 2,
+      "filtered": 4,
+      "cases": [
+        {
+          "fullName": "shadcn native regional runtime mask retains the current demo after keyboard cancellation at narrow-dark-text200",
+          "status": "failed",
+          "duration": 35831.309728,
+          "failureMessages": [
+            "locator.focus: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-runtime-loading-mask]').getByRole('button', { name: 'Cancel switch', exact: true })\n\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts:234:24\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)"
+          ]
+        },
+        {
+          "fullName": "brutalist native regional runtime mask retains the current demo after keyboard cancellation at narrow-dark-text200",
+          "status": "failed",
+          "duration": 37793.672965,
+          "failureMessages": [
+            "locator.focus: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-runtime-loading-mask]').getByRole('button', { name: 'Cancel switch', exact: true })\n\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts:234:24\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "loading-mask-expanded",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/loading-mask-expanded.json",
+      "rawSha256": "203d70913f8e971efa7fd852eecc28dfe362fa2cc5c8a459a688201efcb3f108",
+      "passed": 0,
+      "failed": 6,
+      "filtered": 0,
+      "cases": [
+        {
+          "fullName": "shadcn native regional runtime mask retains the current demo after keyboard cancellation at desktop-light",
+          "status": "failed",
+          "duration": 35487.274971,
+          "failureMessages": [
+            "locator.focus: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-runtime-loading-mask]').getByRole('button', { name: 'Cancel switch', exact: true })\n\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts:234:24\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)"
+          ]
+        },
+        {
+          "fullName": "shadcn native regional runtime mask retains the current demo after keyboard cancellation at narrow-dark-text200",
+          "status": "failed",
+          "duration": 35332.654840999996,
+          "failureMessages": [
+            "locator.focus: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-runtime-loading-mask]').getByRole('button', { name: 'Cancel switch', exact: true })\n\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts:234:24\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)"
+          ]
+        },
+        {
+          "fullName": "shadcn native regional runtime mask retains a visible error and retries the failed target through its public Button",
+          "status": "failed",
+          "duration": 9362.347353000005,
+          "failureMessages": [
+            "Error: Matcher did not succeed in 1000ms\n    at Proxy.<anonymous> (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/vi.DgezovHB.js:66:37)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts:302:12\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+          ]
+        },
+        {
+          "fullName": "brutalist native regional runtime mask retains the current demo after keyboard cancellation at desktop-light",
+          "status": "failed",
+          "duration": 38899.28083799999,
+          "failureMessages": [
+            "locator.focus: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-runtime-loading-mask]').getByRole('button', { name: 'Cancel switch', exact: true })\n\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts:234:24\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)"
+          ]
+        },
+        {
+          "fullName": "brutalist native regional runtime mask retains the current demo after keyboard cancellation at narrow-dark-text200",
+          "status": "failed",
+          "duration": 37424.41940799999,
+          "failureMessages": [
+            "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-home-gallery-layout-toggle]')\n    - locator resolved to <button type=\"button\" aria-expanded=\"false\" data-home-gallery-layout-toggle=\"\" aria-controls=\"home-demo-previewer-demos\" data-label-expand=\"Open interactive demos\" data-label-collapse=\"Show desktop overview\" class=\"home-demo-previewer__layout-toggle astro-5d3r6e5z\">Open interactive demos</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"site-header-setting\">…</div> from <header class=\"bg-background sticky top-0 z-50 w-full astro-ceehzq5e\">…</header> subtree intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"site-header-setting\">…</div> from <header class=\"bg-background sticky top-0 z-50 w-full astro-ceehzq5e\">…</header> subtree intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    58 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"site-header-setting\">…</div> from <header class=\"bg-background sticky top-0 z-50 w-full astro-ceehzq5e\">…</header> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts:191:34\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)"
+          ]
+        },
+        {
+          "fullName": "brutalist native regional runtime mask retains a visible error and retries the failed target through its public Button",
+          "status": "failed",
+          "duration": 12235.902412999974,
+          "failureMessages": [
+            "Error: Matcher did not succeed in 1000ms\n    at Proxy.<anonymous> (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/vi.DgezovHB.js:66:37)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts:302:12\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "loading-mask-cold-scope",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/loading-mask-cold-scope.json",
+      "rawSha256": "0eaa8ab4a1d3eb7dda0e8b3b9a10b4a187e4bc3a24637e6013dfaf489e4d3b60",
+      "passed": 6,
+      "failed": 0,
+      "filtered": 0,
+      "cases": [
+        {
+          "fullName": "shadcn native regional runtime mask retains the current demo after keyboard cancellation at desktop-light",
+          "status": "passed",
+          "duration": 8709.292116,
+          "failureMessages": []
+        },
+        {
+          "fullName": "shadcn native regional runtime mask retains the current demo after keyboard cancellation at narrow-dark-text200",
+          "status": "passed",
+          "duration": 7839.055721999997,
+          "failureMessages": []
+        },
+        {
+          "fullName": "shadcn native regional runtime mask retains a visible error and retries the failed target through its public Button",
+          "status": "passed",
+          "duration": 8637.406809,
+          "failureMessages": []
+        },
+        {
+          "fullName": "brutalist native regional runtime mask retains the current demo after keyboard cancellation at desktop-light",
+          "status": "passed",
+          "duration": 9657.150657999999,
+          "failureMessages": []
+        },
+        {
+          "fullName": "brutalist native regional runtime mask retains the current demo after keyboard cancellation at narrow-dark-text200",
+          "status": "passed",
+          "duration": 9707.581721999995,
+          "failureMessages": []
+        },
+        {
+          "fullName": "brutalist native regional runtime mask retains a visible error and retries the failed target through its public Button",
+          "status": "passed",
+          "duration": 10827.909149999992,
+          "failureMessages": []
+        }
+      ]
+    },
+    {
+      "label": "code-surfaces-visible-token",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/code-surfaces-visible-token.json",
+      "rawSha256": "b8dbc7c373a401d676213739eb5c921f3af12e0c34dc81fdf0c6f09840e307f8",
+      "passed": 6,
+      "failed": 0,
+      "filtered": 1,
+      "cases": [
+        {
+          "fullName": "code-surface dogfood matrix (#630, #420, #568) shares tokens, palette, controls and scroll at 1440px/light",
+          "status": "passed",
+          "duration": 6217.984269999999,
+          "failureMessages": []
+        },
+        {
+          "fullName": "code-surface dogfood matrix (#630, #420, #568) shares tokens, palette, controls and scroll at 1440px/dark",
+          "status": "passed",
+          "duration": 5747.088518999999,
+          "failureMessages": []
+        },
+        {
+          "fullName": "code-surface dogfood matrix (#630, #420, #568) shares tokens, palette, controls and scroll at 390px/light",
+          "status": "passed",
+          "duration": 4755.124859999998,
+          "failureMessages": []
+        },
+        {
+          "fullName": "code-surface dogfood matrix (#630, #420, #568) shares tokens, palette, controls and scroll at 390px/dark",
+          "status": "passed",
+          "duration": 4872.668836000001,
+          "failureMessages": []
+        },
+        {
+          "fullName": "code-surface dogfood matrix (#630, #420, #568) shares tokens, palette, controls and scroll at 320px/light",
+          "status": "passed",
+          "duration": 5070.6590179999985,
+          "failureMessages": []
+        },
+        {
+          "fullName": "code-surface dogfood matrix (#630, #420, #568) shares tokens, palette, controls and scroll at 320px/dark",
+          "status": "passed",
+          "duration": 4643.816863000004,
+          "failureMessages": []
+        }
+      ]
+    }
+  ],
+  "observations": [
+    {
+      "artifact": "mask-negative-observations.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-tenth-5f084490/runtime-loading-mask/observations.json",
+      "rawSha256": "eebcb8cfe882d33bd8065d2eb0b712e31d6fb20b2bd653b55b8bbba4a4ca39e8"
+    },
+    {
+      "artifact": "mask-candidate-observations.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-twelfth-5f084490/runtime-loading-mask/observations.json",
+      "rawSha256": "3e0a3534d4bf57c3af1ac5f73e3ee1a1d2694a4bf8140ec5b0e87722c251d67a"
+    },
+    {
+      "artifact": "code-selection-negative-1440-light.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-eleventh-5f084490/code-surfaces/1440-light-native-selection.json",
+      "rawSha256": "9cce928903149bce402ff8985db709ebfb3ff8fb75252406be6e28a33f85cc9b"
+    },
+    {
+      "artifact": "code-selection-candidate-320-light-native-selection.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-twelfth-5f084490/code-surfaces/320-light-native-selection.json",
+      "rawSha256": "33479b0042d7ecd2d7da649d75f0f85e27f069fdff20d61088be38b03fee145d"
+    },
+    {
+      "artifact": "code-selection-candidate-390-dark-native-selection.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-twelfth-5f084490/code-surfaces/390-dark-native-selection.json",
+      "rawSha256": "521265e3fade852f039154f8a3baf7e7239e4137e020c5bab9327dce517e5fe8"
+    },
+    {
+      "artifact": "code-selection-candidate-1440-light-native-selection.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-twelfth-5f084490/code-surfaces/1440-light-native-selection.json",
+      "rawSha256": "3d4a523b30b5a7244a3742377022cb046bcaf410eeebe1a47ee2fe03b5933cf1"
+    },
+    {
+      "artifact": "code-selection-candidate-320-dark-native-selection.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-twelfth-5f084490/code-surfaces/320-dark-native-selection.json",
+      "rawSha256": "7717464f85f01f61ff6c918d30056075c927b8150e8bf158338a23b883b1237d"
+    },
+    {
+      "artifact": "code-selection-candidate-390-light-native-selection.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-twelfth-5f084490/code-surfaces/390-light-native-selection.json",
+      "rawSha256": "b6f6bc35c57a53165f1e75470c8ae88d632c61053109fb0f3fa7c2991f600a66"
+    },
+    {
+      "artifact": "code-selection-candidate-1440-dark-native-selection.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-twelfth-5f084490/code-surfaces/1440-dark-native-selection.json",
+      "rawSha256": "8901cea53e2768f2b6e432a3127d0ed4476821e66e6c0e11ad1aa56ebaa27617"
+    }
+  ]
+}

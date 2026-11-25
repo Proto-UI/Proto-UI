@@ -136,6 +136,11 @@ async function capture(page: Page, name: string) {
       ownBackground: mask.style.getPropertyValue('--pui-background').trim(),
       sourceBackground: getComputedStyle(region).getPropertyValue('--pui-background').trim(),
       panelRect: mask.querySelector('[data-demo-ref="panel"]')!.getBoundingClientRect().toJSON(),
+      regionAttributes: Object.fromEntries(
+        Array.from(region.attributes, (attribute) => [attribute.name, attribute.value])
+      ),
+      panelDisplay: getComputedStyle(mask.querySelector('[data-demo-ref="panel"]')!).display,
+      cancelBoxHidden: (mask.querySelector('[data-demo-ref="cancelBox"]') as HTMLElement).hidden,
       panelBackground: getComputedStyle(mask.querySelector('[data-demo-ref="panel"]')!)
         .backgroundColor,
       activeRole: document.activeElement?.getAttribute('role'),
@@ -182,6 +187,24 @@ for (const family of ['shadcn', 'brutalist']) {
         });
         try {
           await setup(page, family, scenario.colorScheme);
+          if (scenario.width < 768) {
+            const preferences = page.locator('[data-site-header] [data-site-header-preferences]');
+            if (await preferences.isVisible()) {
+              await page
+                .locator(
+                  '[data-site-header] .site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
+                )
+                .click();
+              await preferences.waitFor({ state: 'hidden' });
+            }
+            // Compact cards start as an inert overview. Use the public layout
+            // control before making and then retaining a real native edit.
+            const layoutToggle = page.locator('[data-home-gallery-layout-toggle]');
+            await layoutToggle.waitFor({ state: 'visible' });
+            if ((await layoutToggle.getAttribute('aria-expanded')) === 'false')
+              await layoutToggle.click();
+            expect(await layoutToggle.getAttribute('aria-expanded')).toBe('true');
+          }
           if (scenario.enlarged)
             await page.evaluate(() => {
               document.documentElement.style.fontSize = '200%';
@@ -189,7 +212,9 @@ for (const family of ['shadcn', 'brutalist']) {
           const content = page.locator('[data-home-demo-host]');
           const retained = await content.locator('[data-home-settings]').elementHandle();
           const note = content.getByRole('textbox', { name: 'Additional note', exact: true });
+          expect(await note.evaluate((node) => Boolean(node.closest('[inert]')))).toBe(false);
           await note.fill('Keep this authored value');
+          expect(await note.inputValue()).toBe('Keep this authored value');
           const oldOverflow = await page.evaluate(() => getComputedStyle(document.body).overflow);
           let requested = false;
           await page.route(await runtimeModuleRoute(page), async (route) => {
@@ -283,6 +308,14 @@ for (const family of ['shadcn', 'brutalist']) {
         await page.keyboard.press('Enter');
         await ready(page, 'react');
         await mask.waitFor({ state: 'hidden' });
+        observations.push({
+          name: `${family}-retry-focus-before-verdict`,
+          facts: await page.evaluate(() => ({
+            active: document.activeElement?.outerHTML.slice(0, 2000),
+            region: document.querySelector<HTMLElement>('[data-home-showcase]')?.dataset,
+            header: document.querySelector<HTMLElement>('[data-homepage-runtime]')?.dataset,
+          })),
+        });
         const restoredFocus = page.locator(
           '[data-homepage-runtime] [data-projection-generation-state="active"] [data-projection-control="runtime"] [role="combobox"]'
         );
