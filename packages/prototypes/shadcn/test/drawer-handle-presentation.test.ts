@@ -109,20 +109,57 @@ describe('Drawer Handle behavior and optional family presentation', () => {
   );
 
   for (const family of [base, brutalist, bootstrap, glass])
-    it(`${family.drawerHandle.name} retains its original edge placement`, async () => {
-      const { handle } = await fixture(family);
-      expect(tokensOf(handle)).toEqual(
+    it(`${family.drawerHandle.name} preserves its bottom recipe across side changes`, async () => {
+      const { content, handle } = await fixture(family);
+      const bottom = tokensOf(handle);
+      if (family === brutalist) {
+        expect(bottom).toEqual(
+          expect.arrayContaining([
+            'relative',
+            'mx-[auto]',
+            'mt-1',
+            'shrink-0',
+            'rounded-full',
+            'h-2',
+            'w-[100px]',
+          ])
+        );
+        expect(bottom).not.toContain('absolute');
+        expect(bottom).not.toContain('-translate-x-1/2');
+      } else {
+        expect(bottom).toEqual(
+          expect.arrayContaining([
+            'absolute',
+            'z-10',
+            'top-1',
+            'left-1/2',
+            '-translate-x-1/2',
+            'h-2',
+            'w-12',
+          ])
+        );
+      }
+      if (family !== brutalist) expect(bottom).not.toContain('w-[100px]');
+      expect(bottom).not.toContain('mt-4');
+
+      setElementProps(content, { side: 'top' });
+      await flush();
+      const top = tokensOf(handle);
+      expect(top).toEqual(
         expect.arrayContaining([
           'absolute',
           'z-10',
-          'top-1',
+          'bottom-1',
           'left-1/2',
           '-translate-x-1/2',
           'h-2',
           'w-12',
         ])
       );
-      expect(tokensOf(handle)).not.toContain('w-[100px]');
-      expect(tokensOf(handle)).not.toContain('mt-4');
+      for (const token of ['relative', 'mx-[auto]', 'mt-1', 'top-1', 'w-[100px]'])
+        expect(top).not.toContain(token);
+      setElementProps(content, { side: 'bottom' });
+      await flush();
+      expect(tokensOf(handle)).toEqual(bottom);
     });
 });
