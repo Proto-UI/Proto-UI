@@ -3,7 +3,6 @@ type StyleClaim = {
   priority: string;
   written: string;
   writtenPriority: string;
-  revision: number;
 };
 const styleOwners = new WeakMap<HTMLElement, Map<string, StyleClaim>>();
 
@@ -17,15 +16,22 @@ export function ownStyles(target: HTMLElement) {
   }
   const currentOwners = owners;
   let lost = false;
+  let revision = 0;
   let normalizer: CSSStyleDeclaration | undefined;
   const matches = (name: string, record: StyleClaim) =>
     target.style.getPropertyValue(name) === record.written &&
     target.style.getPropertyPriority(name) === record.writtenPriority;
-  const isCurrent = () =>
-    !lost &&
-    Array.from(fields).every(
-      ([name, record]) => currentOwners.get(name) === record && matches(name, record)
-    );
+  const isCurrent = () => {
+    if (lost) return false;
+    for (const [name, record] of fields) {
+      if (currentOwners.get(name) !== record || !matches(name, record)) return false;
+    }
+    return true;
+  };
+  const project = (name: string, value: string, priority: string) => {
+    if (value) target.style.setProperty(name, value, priority);
+    else target.style.removeProperty(name);
+  };
   return {
     isCurrent,
     write(name: string, value: string): boolean {
@@ -51,14 +57,13 @@ export function ownStyles(target: HTMLElement) {
           priority: inherit ? prior.priority : target.style.getPropertyPriority(name),
           written: '',
           writtenPriority: '',
-          revision: 0,
         };
         fields.set(name, record);
         currentOwners.set(name, record);
       }
       record.written = written;
       record.writtenPriority = '';
-      record.revision++;
+      revision++;
       target.style.setProperty(name, value);
       // A nested dispose or replacement must not be undone by this setter's
       // continuation, even when the successor wrote the same serialized value.
@@ -82,84 +87,55 @@ export function ownStyles(target: HTMLElement) {
         completion.restored = false;
       }
       if (!current() || !isCurrent()) return undefined;
-      const snapshot = Array.from(fields, ([name, record]) => ({
-        name,
-        record,
-        written: record.written,
-        priority: record.writtenPriority,
-        revision: record.revision,
-        suspended: false,
-      }));
-      const uninterrupted = () =>
-        current() &&
-        !lost &&
-        snapshot.every(
-          ({ name, record, revision }) =>
-            fields.get(name) === record &&
-            currentOwners.get(name) === record &&
-            record.revision === revision &&
-            matches(name, record)
-        );
-      const fullyRestored = () =>
-        uninterrupted() &&
-        snapshot.every(
-          ({ record, written, priority }) =>
-            record.written === written && record.writtenPriority === priority
-        );
-      const project = (name: string, value: string, priority: string) => {
-        if (value) target.style.setProperty(name, value, priority);
-        else target.style.removeProperty(name);
-      };
+      // Any write on this lease changes the measurement inputs, including
+      // a new field that was absent when the measurement began.
+      let expectedRevision = revision;
+      const uninterrupted = () => current() && revision === expectedRevision && isCurrent();
+      const suspended: { name: string; record: StyleClaim; value: string; priority: string }[] = [];
       let result: T | undefined;
-      let failed = false;
-      let failure: unknown;
+      let failure: { error: unknown } | undefined;
+      let restored = false;
       try {
-        for (const entry of snapshot) {
+        for (const [name, record] of fields) {
           if (!uninterrupted()) break;
-          if (
-            entry.record.written === entry.record.before &&
-            entry.record.writtenPriority === entry.record.priority
-          )
+          if (record.written === record.before && record.writtenPriority === record.priority)
             continue;
-          entry.record.written = entry.record.before;
-          entry.record.writtenPriority = entry.record.priority;
-          entry.revision = ++entry.record.revision;
-          entry.suspended = true;
+          suspended.push({ name, record, value: record.written, priority: record.writtenPriority });
+          record.written = record.before;
+          record.writtenPriority = record.priority;
+          expectedRevision = ++revision;
           if (completion) completion.changed = true;
-          project(entry.name, entry.record.written, entry.record.writtenPriority);
+          project(name, record.written, record.writtenPriority);
         }
         if (uninterrupted()) result = read();
       } catch (error) {
-        failed = true;
-        failure = error;
+        failure = { error };
       } finally {
-        for (const entry of snapshot) {
-          if (!entry.suspended) continue;
+        let resumed = 0;
+        for (const { name, record, value, priority } of suspended) {
           if (!uninterrupted()) break;
-          entry.record.written = entry.written;
-          entry.record.writtenPriority = entry.priority;
-          entry.revision = ++entry.record.revision;
+          record.written = value;
+          record.writtenPriority = priority;
+          expectedRevision = ++revision;
+          resumed++;
           try {
-            project(entry.name, entry.written, entry.priority);
+            project(name, value, priority);
           } catch (error) {
-            if (!failed) {
-              failed = true;
-              failure = error;
-            }
+            failure ??= { error };
           }
         }
-        if (completion) completion.restored = fullyRestored();
+        restored = resumed === suspended.length && uninterrupted();
+        if (completion) completion.restored = restored;
       }
-      if (failed) throw failure;
-      return fullyRestored() ? result : undefined;
+      if (failure) throw failure.error;
+      return restored ? result : undefined;
     },
     restore() {
+      if (fields.size) revision++;
       for (const [name, record] of fields) {
         if (currentOwners.get(name) !== record) continue;
         currentOwners.delete(name);
-        if (!matches(name, record)) continue;
-        if (record.before) target.style.setProperty(name, record.before, record.priority);
-        else target.style.removeProperty(name);
+        if (matches(name, record)) project(name, record.before, record.priority);
       }
       fields.clear();
     },
