@@ -342,3 +342,147 @@ describe('adapter panel first activation', () => {
     await vi.waitFor(() => expect(initPreviewer).toHaveBeenCalledTimes(1));
   });
 });
+
+async function deliverDocumentMutation(action: () => void) {
+  let observer: MutationObserver | undefined;
+  try {
+    await new Promise<void>((resolve) => {
+      observer = new MutationObserver(() => resolve());
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+      action();
+    });
+    await flush();
+  } finally {
+    observer?.disconnect();
+  }
+}
+
+async function mountedTrackedRoot() {
+  const element = root();
+  const destroy = vi.fn();
+  const initPreviewer = vi.fn(({ root: mounted }: { root: HTMLElement }) => {
+    mounted.dataset.inited = '1';
+    (mounted as HTMLElement & { __previewer__: unknown }).__previewer__ = { destroy };
+  });
+  dispose = initPreviewerBootstrap(document, async () => ({ initPreviewer }));
+  document.dispatchEvent(new Event('astro:page-load'));
+  deliver(element, true);
+  await flush();
+  expect(initPreviewer).toHaveBeenCalledOnce();
+  return { element, destroy };
+}
+
+function countConnectionReads(element: HTMLElement) {
+  const connected = Object.getOwnPropertyDescriptor(Node.prototype, 'isConnected')!.get!;
+  let reads = 0;
+  Object.defineProperty(element, 'isConnected', {
+    configurable: true,
+    get() {
+      reads++;
+      return connected.call(this);
+    },
+  });
+  return {
+    reads: () => reads,
+    restore: () => Reflect.deleteProperty(element, 'isConnected'),
+  };
+}
+
+describe('tracked previewer moves outside the observed document root', () => {
+  it.each(['open', 'closed'] as const)(
+    'retains an owner moved into a connected %s ShadowRoot and releases it on a later host removal',
+    async (mode) => {
+      const { element, destroy } = await mountedTrackedRoot();
+      const host = document.createElement('div');
+      document.body.append(host);
+      const shadow = host.attachShadow({ mode });
+      await deliverDocumentMutation(() => shadow.append(element));
+      expect(element.isConnected).toBe(true);
+      expect(destroy).not.toHaveBeenCalled();
+      if (mode === 'closed') expect(host.shadowRoot).toBeNull();
+      // The original scan owns identity, including after authored markers change.
+      element.removeAttribute('class');
+      element.removeAttribute('data-previewer-id');
+      await deliverDocumentMutation(() => host.remove());
+      expect(element.isConnected).toBe(false);
+      expect(destroy).toHaveBeenCalledOnce();
+      const connection = countConnectionReads(element);
+      await deliverDocumentMutation(() => {
+        const unrelated = document.createElement('div');
+        document.body.append(unrelated);
+        unrelated.remove();
+      });
+      expect(connection.reads()).toBe(0);
+      expect(destroy).toHaveBeenCalledOnce();
+      connection.restore();
+    }
+  );
+
+  it('forgets the exception after an addition moves the same owner back to the document', async () => {
+    const { element, destroy } = await mountedTrackedRoot();
+    const host = document.createElement('div');
+    document.body.append(host);
+    const shadow = host.attachShadow({ mode: 'closed' });
+    await deliverDocumentMutation(() => shadow.append(element));
+    await deliverDocumentMutation(() => document.body.append(element));
+    expect(element.getRootNode()).toBe(document);
+    const connection = countConnectionReads(element);
+    await deliverDocumentMutation(() => host.remove());
+    expect(connection.reads()).toBe(0);
+    expect(destroy).not.toHaveBeenCalled();
+    connection.restore();
+    await deliverDocumentMutation(() => element.remove());
+    expect(destroy).toHaveBeenCalledOnce();
+  });
+
+  it('preserves a move into and out of a closed root in one mutation delivery', async () => {
+    const { element, destroy } = await mountedTrackedRoot();
+    const host = document.createElement('div');
+    document.body.append(host);
+    const shadow = host.attachShadow({ mode: 'closed' });
+    await deliverDocumentMutation(() => {
+      shadow.append(element);
+      document.body.append(element);
+    });
+    expect(destroy).not.toHaveBeenCalled();
+    const connection = countConnectionReads(element);
+    await deliverDocumentMutation(() => host.remove());
+    expect(connection.reads()).toBe(0);
+    expect(destroy).not.toHaveBeenCalled();
+    connection.restore();
+  });
+
+  it('does not scan 10000 ordinary registered light-DOM roots for an unrelated removal', async () => {
+    const fragment = document.createDocumentFragment();
+    const elements: HTMLElement[] = [];
+    for (let index = 0; index < 10000; index++) {
+      const element = document.createElement('section');
+      element.className = 'proto-previewer';
+      element.dataset.previewerId = `unrelated-${index}`;
+      element.dataset.lazy = 'true';
+      fragment.append(element);
+      elements.push(element);
+    }
+    document.body.append(fragment);
+    const initPreviewer = vi.fn();
+    dispose = initPreviewerBootstrap(document, async () => ({ initPreviewer }));
+    document.dispatchEvent(new Event('astro:page-load'));
+    const connected = Object.getOwnPropertyDescriptor(Node.prototype, 'isConnected')!.get!;
+    let reads = 0;
+    for (const element of elements)
+      Object.defineProperty(element, 'isConnected', {
+        configurable: true,
+        get() {
+          reads++;
+          return connected.call(this);
+        },
+      });
+    await deliverDocumentMutation(() => {
+      const unrelated = document.createElement('span');
+      document.body.append(unrelated);
+      unrelated.remove();
+    });
+    expect(reads).toBe(0);
+    expect(initPreviewer).not.toHaveBeenCalled();
+  });
+});

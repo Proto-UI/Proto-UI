@@ -157,7 +157,14 @@ describe('WC entry dependency refresh coalescing', () => {
       await settle();
       fixture.observations.length = 0;
 
+      target.remove();
       document.body.append(target);
+      fixture.deliver();
+      expect(
+        fixture.delivered.some((record) =>
+          Array.from(record.removedNodes).includes(target)
+        )
+      ).toBe(true);
       await settle();
       expect(fixture.rebuilds()).toBe(1);
       expect(target.hasAttribute('tabindex')).toBe(false);

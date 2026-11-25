@@ -24,6 +24,9 @@ export function initPreviewerBootstrap(
   const view = document.defaultView;
   if (!view) return () => {};
   const pending = new Map<PreviewerRoot, PendingPreview>();
+  // Only roots observed leaving the light DOM need this fallback. A later
+  // host removal cannot expose a closed shadow subtree to a document walker.
+  const nonDocumentRoots = new Set<PreviewerRoot>();
   let disposed = false;
   let matrix: Matrix | null = null;
   let intersection: IntersectionObserver | undefined;
@@ -63,6 +66,7 @@ export function initPreviewerBootstrap(
     entry.observedAt = undefined;
   };
   const release = (root: PreviewerRoot) => {
+    nonDocumentRoots.delete(root);
     const entry = pending.get(root);
     if (!entry) return;
     entry.owner.abort();
@@ -209,8 +213,36 @@ export function initPreviewerBootstrap(
     for (const root of pending.keys()) release(root);
   };
   const removal = new view.MutationObserver((records) => {
-    if (!records.some((record) => record.removedNodes.length > 0)) return;
-    for (const root of pending.keys()) if (!root.isConnected) release(root);
+    if (!records.some((record) => record.removedNodes.length > 0)) {
+      // A move back from a shadow root appears here only as an addition.
+      // Stop tracking that exception before the next unrelated removal.
+      for (const root of nonDocumentRoots)
+        if (root.getRootNode() === document) nonDocumentRoots.delete(root);
+      return;
+    }
+    // Runtime child/status removal must not rescan every Matrix previewer.
+    // Use tracked identity rather than attributes, which may change after scan.
+    const removedRoots = new Set<PreviewerRoot>();
+    for (const record of records) {
+      for (const node of record.removedNodes) {
+        if (node.nodeType !== 1) continue;
+        const root = node as PreviewerRoot;
+        if (pending.has(root)) removedRoots.add(root);
+        if (!node.hasChildNodes()) continue;
+        const descendants = document.createTreeWalker(node, view.NodeFilter.SHOW_ELEMENT);
+        for (let child = descendants.nextNode(); child; child = descendants.nextNode()) {
+          if (pending.has(child as PreviewerRoot)) removedRoots.add(child as PreviewerRoot);
+        }
+      }
+    }
+    // Collect before destroy mutates detached subtrees. Reinserted/moved roots
+    // retain their owners, including moves recorded earlier in this delivery.
+    for (const root of nonDocumentRoots) removedRoots.add(root);
+    for (const root of removedRoots) {
+      if (!root.isConnected) release(root);
+      else if (root.getRootNode() !== document) nonDocumentRoots.add(root);
+      else nonDocumentRoots.delete(root);
+    }
   });
   removal.observe(document.documentElement, { childList: true, subtree: true });
   const dispose = () => {
