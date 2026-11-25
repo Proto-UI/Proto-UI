@@ -150,5 +150,69 @@ for (const [family, parts] of [
       b.click();
       expect(requests).toHaveBeenCalledTimes(1);
     });
+
+    it('projects dogfood variant=line from List context and restores default on roundtrip', async () => {
+      // T-RUNTIME-TABS-APPEARANCE-0001-CASE-LINE-VARIANT
+      for (const [part, proto] of [
+        ['root', parts.tabsRoot],
+        ['list', parts.tabsList],
+        ['trigger', parts.tabsTrigger],
+        ['content', parts.tabsContent],
+      ] as const) {
+        const tag = `variant-${family}-${part}`;
+        if (!customElements.get(tag))
+          customElements.define(tag, AdaptToWebComponent(proto, { register: false }));
+      }
+      const root = document.createElement(`variant-${family}-root`);
+      const list = document.createElement(`variant-${family}-list`);
+      const a = document.createElement(`variant-${family}-trigger`) as Trigger;
+      const b = document.createElement(`variant-${family}-trigger`) as Trigger;
+      setElementProps(root, {
+        value: 'a',
+        activationMode: 'manual',
+        ...(family === 'shadcn' ? { styleProfile: 'rhea' } : {}),
+      });
+      setElementProps(list, { variant: 'default' });
+      setElementProps(a, { value: 'a' });
+      setElementProps(b, { value: 'b' });
+      a.textContent = 'Web Components';
+      b.textContent = 'React';
+      list.append(a, b);
+      root.append(list);
+      document.body.append(root);
+      await vi.waitFor(() => expect(a.getExposes().selected.get()).toBe(true));
+
+      const defaultList = tokens(list);
+      const defaultA = tokens(a);
+      const defaultB = tokens(b);
+
+      setElementProps(list, { variant: 'line' });
+      await flush();
+      expect(a.getExposes().selected.get()).toBe(true);
+      expect(b.getExposes().selected.get()).toBe(false);
+      expect(tokens(list)).toContain('bg-transparent');
+      expect(tokens(a)).toContain('bg-transparent');
+      expect(tokens(b)).toContain('bg-transparent');
+      expect(tokens(a)).toContain('text-foreground');
+      if (family === 'shadcn') {
+        const activeLine = a.querySelector<HTMLElement>('[data-pui-owned-decoration]')!;
+        const inactiveLine = b.querySelector<HTMLElement>('[data-pui-owned-decoration]')!;
+        expect(tokens(activeLine)).toContain('opacity-100');
+        expect(tokens(inactiveLine)).not.toContain('opacity-100');
+      } else {
+        expect(tokens(a)).toContain('border-b-2');
+        expect(tokens(a)).toContain(
+          family === 'brutalist' ? 'border-foreground' : 'border-primary'
+        );
+        expect(tokens(b)).toContain('border-transparent');
+      }
+
+      setElementProps(list, { variant: 'default' });
+      await flush();
+      expect(tokens(list)).toEqual(defaultList);
+      expect(tokens(a)).toEqual(defaultA);
+      expect(tokens(b)).toEqual(defaultB);
+      root.remove();
+    });
   });
 }
