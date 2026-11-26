@@ -344,16 +344,19 @@ try {
               const canvas = document.createElement('canvas');
               canvas.width = canvas.height = 1;
               const ctx = canvas.getContext('2d')!;
-              const alpha = (color: string) => {
+              const [backgroundAlpha, borderAlpha] = [
+                style.backgroundColor,
+                style.borderTopColor,
+              ].map((color) => {
                 ctx.clearRect(0, 0, 1, 1);
                 ctx.fillStyle = color;
                 ctx.fillRect(0, 0, 1, 1);
                 return ctx.getImageData(0, 0, 1, 1).data[3];
-              };
+              });
               return {
                 prototype: e.getAttribute('data-projection-prototype'),
-                backgroundAlpha: alpha(style.backgroundColor),
-                borderAlpha: alpha(style.borderTopColor),
+                backgroundAlpha,
+                borderAlpha,
                 role: e.getAttribute('role'),
                 tabindex: e.getAttribute('tabindex'),
               };
