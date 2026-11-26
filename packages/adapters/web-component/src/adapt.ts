@@ -682,6 +682,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       type PortalAcquisition = { epoch: number; release: () => void };
       let portalAcquisition: PortalAcquisition | null = null;
       let completedMountAcquisition: PortalAcquisition | null = null;
+      let currentMountPhase: Extract<RuntimeLifecycleEvent, { type: 'mount.phase' }> | undefined;
       let focusIngressReady = false;
       let currentEventGate: ReturnType<typeof createEventGate> | null = null;
       let currentRouter: ReturnType<typeof createWebProtoEventRouter> | null = null;
@@ -820,6 +821,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 ? portalAcquisition
                 : null;
             if (event.type === 'mount.phase') {
+              currentMountPhase = event;
               if (event.phase === 'mounting') {
                 portalAcquisition?.release();
                 portalAcquisition = {
@@ -835,9 +837,15 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               if (event.type === 'mount.phase' && event.phase === 'mounted')
                 admitViewProjection?.();
               opt.diagnostics?.onLifecycleEvent?.(event);
-              if (event.type === 'mount.phase') {
+              // Projection and diagnostics can synchronously advance the phase or retire the owner.
+              if (
+                event === currentMountPhase &&
+                !ownerResourcesReleased &&
+                !this._terminalDisposing &&
+                this._instanceToken === instanceToken
+              ) {
                 focusIngressReady = event.phase === 'mounted';
-                if (focusIngressReady) this[NOTIFY_FOCUS_TARGET_READY]();
+                if (focusIngressReady && thisEl.isConnected) this[NOTIFY_FOCUS_TARGET_READY]();
               }
             } finally {
               // Runtime schedules this epoch after the complete notification
