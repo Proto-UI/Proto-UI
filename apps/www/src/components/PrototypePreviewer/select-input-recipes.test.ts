@@ -147,6 +147,11 @@ for (const [family, demo] of Object.entries({
         const trigger = host.querySelector<HTMLElement>('[role="combobox"]')!;
         await vi.waitFor(() => expect(trigger.textContent?.trim()).toBe('System'));
         trigger.click();
+        const content = await vi.waitFor(() => {
+          const listbox = document.getElementById(trigger.getAttribute('aria-controls')!);
+          expect(listbox).not.toBeNull();
+          return listbox!;
+        });
         const option = (label: string) => {
           const listbox = document.getElementById(trigger.getAttribute('aria-controls')!);
           return Array.from(listbox?.querySelectorAll<HTMLElement>('[role="option"]') ?? []).find(
@@ -188,10 +193,30 @@ for (const [family, demo] of Object.entries({
             expect(refs.selectedTheme.textContent).toContain('Selected: System');
           });
         }
+        const refusedThemes: string[] = [];
+        api.setProps('controlledSelect', {
+          value: 'system',
+          onValueChange: (event: { value: string }) => {
+            refusedThemes.push(event.value);
+          },
+        });
+        await flush();
+        expect(
+          api.call('controlledSelect', 'requestValue', {
+            value: 'light',
+            textValue: 'Light',
+            reason: 'programmatic',
+          })
+        ).toBe(true);
+        await flush();
+        expect(refusedThemes).toEqual(['light']);
+        expect(x('controlledSelect').value.get()).toBe('system');
+        expect(trigger.textContent?.trim()).toBe('System');
         await view.destroy();
         cleaned = true;
         await flush();
         expect(host.childElementCount).toBe(0);
+        expect(content.isConnected).toBe(false);
         return;
       }
 
@@ -213,6 +238,24 @@ for (const [family, demo] of Object.entries({
       await vi.waitFor(() => expect(x('timezoneSelect').value.get()).toBe('est'));
       refs.resetTimezone.click();
       await vi.waitFor(() => expect(x('timezoneSelect').value.get()).toBe('jst'));
+      const refusedZones: string[] = [];
+      api.setProps('timezoneSelect', {
+        value: 'jst',
+        onValueChange: (event: { value: string }) => {
+          refusedZones.push(event.value);
+        },
+      });
+      await flush();
+      expect(
+        api.call('timezoneSelect', 'requestValue', {
+          value: 'pst',
+          textValue: 'Pacific Standard Time (PST)',
+          reason: 'programmatic',
+        })
+      ).toBe(true);
+      await flush();
+      expect(refusedZones).toEqual(['pst']);
+      expect(x('timezoneSelect').value.get()).toBe('jst');
       await view.destroy();
       cleaned = true;
       await flush();
