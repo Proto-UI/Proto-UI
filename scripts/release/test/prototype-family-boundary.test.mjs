@@ -214,6 +214,10 @@ test('packed Button boundary allows its shared style-selection support but rejec
     true
   );
   assert.equal(
+    isButtonFamilyModule({ packageName: 'prototypes-shadcn', path: 'style-scope/ids.js' }),
+    true
+  );
+  assert.equal(
     isButtonFamilyModule({ packageName: 'prototypes-shadcn', path: 'style-scope/selection.js' }),
     true
   );
