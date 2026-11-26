@@ -212,6 +212,7 @@ test('external Rust consumer renders and interacts with generated views in headl
     /^test task_policy_source::cancelling_serial_reads_keeps_parallel_work_live_and_allows_a_fresh_read \.\.\. ok\r?$/m,
     /^test task_policy_source::declared_serial_and_parallel_tasks_capture_context_at_their_own_start \.\.\. ok\r?$/m,
     /^test task_policy_source::disposing_a_reader_retires_its_active_and_queued_serial_submissions \.\.\. ok\r?$/m,
+    /^test task_policy_source::restarting_serial_reads_in_one_action_cancels_the_old_reads_and_starts_the_replacement \.\.\. ok\r?$/m,
     /^test context_source::authored_owner_keeps_the_keyed_reader_and_supplies_a_reader_in_another_window \.\.\. ok\r?$/m,
     /^test context_source::required_reader_rejects_absence_and_the_other_key_with_the_same_label \.\.\. ok\r?$/m,
     /^test context_source::equal_replacement_withdraws_the_old_provider_and_a_physical_move_retains_the_reader \.\.\. ok\r?$/m,

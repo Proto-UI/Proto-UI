@@ -235,6 +235,59 @@ fn cancelling_serial_reads_keeps_parallel_work_live_and_allows_a_fresh_read() {
 }
 
 #[test]
+fn restarting_serial_reads_in_one_action_cancels_the_old_reads_and_starts_the_replacement() {
+    const B_LOG: &str = "B@left>left=Blue retained file;";
+
+    with_window(|cx, ui, files| {
+        let zone = cx.new(|_| POLICY_ZONE.provider("left".into()));
+        let reader = mount(cx, ContextScope::default().with(POLICY_ZONE, zone));
+        ui.show(cx, Some(&reader));
+        ui.logs(cx, &reader, "", "");
+        let _observation = cx.update(|app| app.observe(&reader, |entity, app| {
+            let projection = entity.read(app).projection();
+            assert!(matches!(projection.orderedLog(), "" | B_LOG), "unexpected ordered log {:?}", projection.orderedLog());
+            assert_eq!(projection.parallelLog(), "");
+        }));
+
+        let active_a = queue(&reader, "A", cx);
+        let queued_c = queue(&reader, "C", cx);
+        let [old_a] = requests::<1>(files, "A");
+        assert_eq!(files.len(), 1);
+        assert!(files.requests_for("C").is_empty());
+        assert_eq!(old_a.returned(), None);
+        assert_eq!(active_a.outcome(), None);
+        assert_eq!(queued_c.outcome(), None);
+
+        let action = reader.update(cx, |reader, cx| reader.actions(cx).restartOrdered("B".to_owned()));
+        assert_eq!(action, ActionOutcome::Committed);
+        ui.logs(cx, &reader, "", "");
+        let replacement_b = reader.read_with(cx, |reader, _| reader.tasks().ordered()).expect("missing restart receipt");
+        assert_eq!(replacement_b.outcome(), None, "the replacement B must be pending after restartOrdered");
+        assert_eq!(active_a.outcome(), Some(&TaskOutcome::Cancelled));
+        assert_eq!(queued_c.outcome(), Some(&TaskOutcome::Cancelled));
+        let [fresh_b] = requests::<1>(files, "B");
+        assert_eq!(files.len(), 2);
+        assert!(files.requests_for("C").is_empty());
+        assert_eq!(old_a.returned(), None);
+        assert_eq!(fresh_b.returned(), None);
+
+        old_a.deliver("old");
+        ui.logs(cx, &reader, "", "");
+        assert_eq!(old_a.returned().as_deref(), Some("Obsolete amber record"));
+        assert_eq!(replacement_b.outcome(), None);
+        assert_eq!(fresh_b.returned(), None);
+
+        fresh_b.deliver("original");
+        ui.logs(cx, &reader, B_LOG, "");
+        assert_eq!(fresh_b.returned().as_deref(), Some("Blue retained file"));
+        assert_eq!(replacement_b.outcome(), Some(&TaskOutcome::Completed(())));
+        assert_eq!(active_a.outcome(), Some(&TaskOutcome::Cancelled));
+        assert_eq!(queued_c.outcome(), Some(&TaskOutcome::Cancelled));
+        assert_eq!(files.len(), 2);
+    });
+}
+
+#[test]
 fn disposing_a_reader_retires_its_active_and_queued_serial_submissions() {
     with_window(|cx, ui, files| {
         let left = cx.new(|_| POLICY_ZONE.provider("left".into()));

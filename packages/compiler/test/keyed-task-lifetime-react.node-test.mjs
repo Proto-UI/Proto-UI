@@ -396,6 +396,67 @@ test('authored cancellation withdraws active and queued serial reads while the s
   }));
 });
 
+test('one authored action cancels existing serial reads before starting its replacement', async t => {
+  const { server, page, errors, evidence } = await openConsumer(t, authoredTaskPolicySource, 'task-policies-client.tsx', 'task-policy-source.json');
+  const oldA = server.resource('A', 'Obsolete amber record');
+  const queuedC = server.resource('C', 'Temporary chart');
+  const freshB = server.resource('B', 'Blue retained file');
+  const submitted = await page.evaluate(([a, c, b]) => {
+    const host = window.policyTrace;
+    host.mount();
+    host.enqueue('A', a, false);
+    host.enqueue('C', c, true);
+    host.enqueue('B', b, true);
+    return [host.queue('A'), host.queue('C')];
+  }, [oldA.path, queuedC.path, freshB.path]);
+  assert.deepEqual(submitted, ['committed', 'committed']);
+  assert.equal(await oldA.requested(), 'A');
+  const before = await page.evaluate(() => window.policyTrace.history());
+  assert.deepEqual(before.requests.map(r => [r.key, r.state, r.aborted]), [['A', 'pending', false]]);
+  const span = await page.locator('#app span').elementHandle();
+
+  const restart = await page.evaluate(() => {
+    const host = window.policyTrace;
+    host.publish('right');
+    return host.restartOrdered('B');
+  });
+  assert.equal(restart, 'committed');
+  const waiting = await expectPolicyView(page, '', '');
+  const issued = await page.evaluate(() => window.policyTrace.history());
+  assert.deepEqual(issued.requests.map(r => [r.key, r.state, r.aborted, r.reason]), [
+    ['A', 'pending', true, { status: 'cancelled' }], ['B', 'pending', false, null],
+  ]);
+  assert.equal(await freshB.requested(), 'B');
+  assert.equal(queuedC.requests, 0);
+
+  oldA.release();
+  await page.waitForFunction(path => window.policyTrace.history().requests.some(r => r.path === path && r.state === 'returned'), oldA.path);
+  const afterLate = await expectPolicyView(page, '', '');
+  const held = await page.evaluate(() => window.policyTrace.history());
+  const byPath = new Map(held.requests.map(request => [request.path, request]));
+  assert.deepEqual(byPath.get(oldA.path), {
+    key: 'A', path: oldA.path, state: 'returned', value: 'Obsolete amber record', aborted: true, reason: { status: 'cancelled' },
+  });
+  expectPending(byPath, freshB);
+  await page.evaluate(() => window.policyTrace.publish('last'));
+  freshB.release();
+  const completed = await expectPolicyView(page, 'B@right>last=Blue retained file;', '');
+  const sameSpan = await span.evaluate(node => node.isConnected && node === document.querySelector('#app span'));
+  await span.dispose();
+  assert.equal(sameSpan, true);
+  const network = await page.evaluate(() => window.policyTrace.history());
+  assert.deepEqual(network.unexpected, []);
+  assert.deepEqual(network.requests.map(r => [r.path, r.state, r.value, r.reason]), [
+    [oldA.path, 'returned', 'Obsolete amber record', { status: 'cancelled' }],
+    [freshB.path, 'returned', 'Blue retained file', null],
+  ]);
+  assert.deepEqual([oldA.requests, queuedC.requests, freshB.requests], [1, 0, 1]);
+  assert.deepEqual(errors, []);
+  if (evidence) await writeFile(path.join(evidence, 'restart-ordered-react-native.json'), JSON.stringify({
+    submitted, before, restart, waiting, issued, afterLate, held, completed, sameSpan, network, errors,
+  }));
+});
+
 test('replacing the whole keyed parent retires a returned response and a pending sibling before either can publish', async t => {
   const { server, page, errors, evidence } = await openConsumer(t, authoredKeyedTaskSource, 'keyed-task-client.tsx', 'keyed-parent-source.json');
   const oldA = server.resource('A', 'Obsolete amber record');

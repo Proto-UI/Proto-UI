@@ -55,6 +55,7 @@ const trace = {
   retirement: () => retirement,
   queue(id: string) { return reader.current!.queue(id).status; },
   cancelOrdered() { return reader.current!.cancelOrdered().status; },
+  restartOrdered(id: string) { return reader.current!.restartOrdered(id).status; },
   submit(id: string) { return reader.current!.submit(id).status; },
   publish(zone: string) { provider.publish(zone); },
 };
