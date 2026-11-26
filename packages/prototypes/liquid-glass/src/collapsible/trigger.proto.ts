@@ -115,7 +115,8 @@ const collapsibleTrigger = definePrototype<
     });
     def.rule({
       when: (w) => w.state(disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw(COMMAND_DISABLED)),
+      // Withdraw an in-flight enabled shadow transition with the disabled paint.
+      intent: (i) => i.feedback.style.use(tw(COMMAND_DISABLED, 'transition-none')),
     });
     return inherited.render;
   },
