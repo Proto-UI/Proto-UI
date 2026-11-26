@@ -5431,9 +5431,23 @@ function analyzeWhenVariants(node, scope) {
             const firstArg = subject.arguments[0];
             const expected = current.arguments[0];
             if (firstArg) {
-              const variants = resolveStateHandleSemantics(firstArg, scope)
-                .map((semantic) => resolveStateEqVariant(semantic, expected, scope))
-                .filter(Boolean);
+              const variants = resolveStateHandleSemantics(firstArg, scope).flatMap((semantic) => {
+                const proved = resolveStateEqVariant(semantic, expected, scope);
+                if (proved) return [proved];
+                const comparison = expected && unwrapTransparent(expected);
+                if (!comparison || !ts.isIdentifier(comparison)) return [];
+                const inventory = resolveExpression(comparison, scope);
+                if (!inventory.compoundRowInventory) return [];
+                // A compound row can retain literal CSS requirements without
+                // proving its mutable leaves. Preserve each known comparison
+                // beside that row's known intents; never change `single`, the
+                // State capability, or the ordinary finite-row proof.
+                return (inventory.strings ?? [])
+                  .map((text) =>
+                    resolveStateEqVariant(semantic, ts.factory.createStringLiteral(text), scope)
+                  )
+                  .filter(Boolean);
+              });
               if (variants.length > 0) groups.push([...new Set(variants)]);
             }
             return;
@@ -6444,7 +6458,10 @@ function bindTokenLoopPattern(name, graph, scope, readExpression = null, invento
     scope.bindings.set(
       name.text,
       withTokenGraph(
-        { ...emptyValue(), ...(inventoryOnly ? { unknownAlternative: true } : {}) },
+        {
+          ...emptyValue(),
+          ...(inventoryOnly ? { unknownAlternative: true, compoundRowInventory: true } : {}),
+        },
         graph ?? { kind: 'unknown' }
       )
     );
