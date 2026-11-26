@@ -1,0 +1,17 @@
+extends: existence
+message: "Prefer active, direct engineering voice over passive legalistic phrasing ('%s')."
+level: warning
+ignorecase: true
+tokens:
+  - '\bis not established by\b'
+  - '\bare not established by\b'
+  - '\bis not certified by\b'
+  - '\bare not certified by\b'
+  - '\bis not implied by\b'
+  - '\bare not implied by\b'
+  - '\bwas performed by\b'
+  - '\bwere performed by\b'
+  - '\bis not substituted for\b'
+  - '\bis not inferred from\b'
+  - '\bno\s+\w+\s+is\s+inferred\s+from\b'
+  - '\bno\s+\w+\s+is\s+claimed\s+by\b'

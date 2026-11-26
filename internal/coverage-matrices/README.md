@@ -10,11 +10,11 @@ The following are separate dimensions, not numbers to add into one coverage perc
 
 - Prototype families, cataloged atomic parts and lifecycle
 - Shadcn, Brutalist, Bootstrap 2.3.2 and Liquid Glass projection cells
-- [Website consumer jobs](../website/self-hosting-coverage-matrix.md), owned by #420
-- [Agent Harness consumer jobs](../agent-harness/dogfood-coverage-matrix.md), owned by #513/#514
+- [Website consumer jobs](../website/self-hosting-coverage-matrix.md) (backed by [structured JSON](../website/self-hosting-coverage-matrix.json)), owned by #420
+- [Agent Harness consumer jobs](../agent-harness/dogfood-coverage-matrix.md) (backed by [structured JSON](../agent-harness/dogfood-coverage-matrix.json)), owned by #513/#514
 - Native host and Compiler realization, evidence and intentional omissions
 
-The two consumer ledgers retain all row IDs, owners, application/service boundaries and completion rules. A matrix migration does not mean their consumers are implemented. Existing open Issues/PRs stay open and remain the implementation owners; no historical item is silently closed as fixed.
+The two consumer ledgers are generated from their canonical JSON sources (`corepack pnpm@10.32.1 coverage:matrices:render` / `coverage:matrices:check`), which automatically recompute State and Target-class totals from `rows`. Edit the JSON source and regenerate the Markdown view rather than hand-editing the tables. A matrix migration does not mean their consumers are implemented. Existing open Issues/PRs stay open and remain the implementation owners; no historical item is silently closed as fixed.
 
 Validation and regeneration:
 

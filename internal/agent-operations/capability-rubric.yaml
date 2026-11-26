@@ -37,7 +37,7 @@ dimensions:
       - authority
       - boundary
       - governance
-    criterion: Separate observation, inference, uncertainty, and decision while making provenance and snapshot limits explicit.
+    criterion: Separate observation, inference, uncertainty, and decision while making provenance and snapshot limits explicit once in a dedicated scope/limits slot rather than repeating disclaimers across every paragraph.
 criticalFailures:
   fabricated-evidence: The response presents invented or materially altered evidence as observed fact.
   answer-provenance-failure: The response cannot account for how its answer was produced or appears to rely on an answer source outside the permitted assessment surface.

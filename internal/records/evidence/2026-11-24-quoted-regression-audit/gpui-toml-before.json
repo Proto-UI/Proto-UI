@@ -1,6 +1,0 @@
-{
-  "baseline": "248f8270dd3458d1fcbc507e618337f98b9fde96",
-  "tomlResult": "PASS: current main248f already removed duplicate during S6 integration",
-  "modules": 38,
-  "externalScrollRegistrations": 1
-}

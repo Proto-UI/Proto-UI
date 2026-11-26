@@ -1,2 +1,0 @@
-[coverage-matrices] Coverage matrix validation failed with 1 issue:
-- internal/website/self-hosting-coverage-matrix.md:285: source fingerprint for `apps/www/src/content/docs/accordion-demo.shared.ts` does not match its reviewed SHA-256

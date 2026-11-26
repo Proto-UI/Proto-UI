@@ -1,7 +1,0 @@
-
-> proto-ui@ styles:preset:generate /var/tmp/proto-ui-cli-fix-456f
-> node --import tsx scripts/styles/generate-shadcn-style-tokens.ts && node --import tsx scripts/styles/generate-brutalist-style-tokens.ts && node --import tsx scripts/styles/generate-draft-family-style-tokens.ts && node --import tsx scripts/styles/generate-shadcn-motion-palette.ts
-
-Generated packages/cli/src/generated/shadcn-style-tokens.ts (961 tokens).
-Generated packages/cli/src/generated/brutalist-style-tokens.ts (560 tokens) and packages/cli/src/generated/brutalist-theme.ts.
-Generated packages/cli/src/generated/draft-family-style-tokens.ts.

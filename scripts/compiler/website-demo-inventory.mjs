@@ -65,6 +65,8 @@ function isSourceInputPath(relativePath, sourceTrees = DEFAULT_SOURCE_TREES) {
   const file = toPosix(relativePath);
   if (STATIC_INPUT_PATHS.includes(file)) return true;
   if (file.startsWith('packages/')) {
+    // Generated Lucide icon modules (~1,695 files) are not website demo compiler inputs.
+    if (/^packages\/prototypes\/lucide\/src\/(?:icons|shapes)\//u.test(file)) return false;
     return (
       /(?:^|\/)package\.json$/u.test(file) ||
       ((/(?:^|\/)src\//u.test(file) || file.startsWith('packages/compiler/test/')) &&
@@ -2055,7 +2057,7 @@ export async function generateWebsiteInventory({ root = DEFAULT_ROOT, outputPath
     },
   };
   await mkdir(path.dirname(output), { recursive: true });
-  await writeFile(output, JSON.stringify(inventory, null, 2) + '\n');
+  await writeFile(output, JSON.stringify(inventory) + '\n');
   console.log(
     JSON.stringify({
       output: relative(output),

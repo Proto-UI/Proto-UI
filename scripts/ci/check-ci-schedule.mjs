@@ -177,6 +177,7 @@ export function collectViolations(dir = path.join(repoRoot, WORKFLOW_DIR), sourc
   }
   const metadataJobs = new Set([
     'ci-config-audit',
+    'internal-docs-lint',
     'lockstep-check',
     'public_package_plan',
     'test-plan',

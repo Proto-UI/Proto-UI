@@ -24,7 +24,7 @@ Authority follows [AGENTS.md](../../AGENTS.md#authority-and-conflicts) and [the 
 | [spec/](../../spec/README.md) | Versioned semantic definitions and their relations | Change an entity through the definition process when its meaning changes; do not introduce a second specification in a README. |
 | [packages/](../../packages/README.md) | Implementation and package-local usage or development guidance | Put instructions next to the package they describe. Check whether its README is generated before editing it. |
 | [apps/](../../apps/README.md) | Public website and internal spec workspace | Public tutorials belong in the localized website content, not the root `docs/` directory. Follow the [prototype documentation style guide](prototype-docs-style-guide.md) for `ui-libraries/` component pages. |
-| [internal/](../README.md) | Contributor procedures, explanations, ledgers, and engineering context | Use the owning subdirectory; current policy, historical observations, and test receipts have different roles. |
+| [internal/](../README.md) | Contributor procedures, explanations, ledgers, and engineering context | Use the owning subdirectory; follow the [internal engineering writing guide](engineering-writing-guide.md) (single-slot scope/limits, narrative–receipt split, zero binary evidence in `main`). |
 | [docs/](../../docs/README.md) | Retained design sources and evidence at already referenced paths | Preserve existing citations. New daily investigations go to `internal/records/`; this directory is not another public documentation tree. |
 | [experiments/](../../experiments/README.md) | Isolated research probes and candidate implementations | State the question and how to reproduce it. Promotion into production requires its own definition, implementation, and evidence. |
 | [benchmarks/](../../benchmarks/README.md) | Measurement scenarios, calibration, methodology, and reports | Name the measured source, environment, and limits. A measurement does not create a semantic or release guarantee. |
@@ -68,10 +68,13 @@ Documentation follow-up belongs in the owning Issue or a dated record with a sou
 Run these checks from the repository root with the Node baseline in [AGENTS.md](../../AGENTS.md#commands-and-verification) and the package manager pinned in [package.json](../../package.json):
 
 ```sh
+corepack pnpm@10.32.1 check:internal-docs
 corepack pnpm@10.32.1 check:repository-docs
 corepack pnpm@10.32.1 check:public-docs
 corepack pnpm@10.32.1 test:public-docs
 ```
+
+`check:internal-docs` enforces the [internal engineering writing guide](engineering-writing-guide.md) under `internal/**` (binary/archive bans, file/JSON budgets, single-H1, prose readability AST rules with a debt ratchet in `internal/baselines/internal-docs-debt.json`, plus advisory Vale prose rules under `.vale/styles/ProtoUI/`).
 
 The repository checker inventories Markdown/MDX by role, verifies required maintained entry points, resolves local Markdown links and images, and checks supported explicit package-script invocations against their owning manifest. Its [policy](../../scripts/docs/repository-doc-policy.mjs) makes excluded history, evidence, generated content, and website routes explicit. New documents default to maintained; a new exclusion requires a real role and reason.
 
