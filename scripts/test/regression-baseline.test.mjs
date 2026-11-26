@@ -42,16 +42,16 @@ test('Search splitting preserves the complete retained inventory and fixed worke
     'apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts',
     'apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts',
   ]);
-  assert.equal(BROWSER_SHARD_COUNT, 18);
+  assert.equal(BROWSER_SHARD_COUNT, 19);
   assert.equal(BROWSER_EXECUTION_BUDGET_SECONDS, 900);
   assert.equal(BROWSER_SETUP_RESERVE_SECONDS, 180);
   const shards = browserShards();
-  assert.equal(shards.length, 18);
+  assert.equal(shards.length, 19);
   assert.deepEqual([...shards.flat()].sort(), [...BROWSER_SUITES].sort());
   assert.equal(new Set(shards.flat()).size, BROWSER_SUITES.length);
   assert.ok(
     shards.every(
-      (shard) => shard.length > 0 && shard.length <= Math.ceil(BROWSER_SUITES.length / 18)
+      (shard) => shard.length > 0 && shard.length <= Math.ceil(BROWSER_SUITES.length / 19)
     )
   );
   assert.deepEqual(browserShards([...BROWSER_SUITES].reverse()), shards);
@@ -174,7 +174,7 @@ test('the latest official terminal costs retain failures and exclude interrupted
   assert.equal(missing.length, 16);
   assert.deepEqual(missing.sort(), receipt.selectedWithoutTerminal.map((row) => row.suite).sort());
   for (const suite of missing) assert.ok(!observations.includes(suite));
-  assert.equal(BROWSER_SHARD_COUNT, 18);
+  assert.equal(BROWSER_SHARD_COUNT, 19);
   assert.doesNotThrow(() => assertBrowserShardCapacity());
 });
 
