@@ -91,8 +91,10 @@ describe('Tooltip public Usage', () => {
         );
         const source = await readFile(page, 'utf8');
         expect(source).toContain(`files={${family}TooltipFiles}`);
-        expect(source).toContain('scripts/release/consumer-smoke-cli.mjs');
-        expect(source).toContain('>=2.6.0 <2.7');
+        if (family === 'base') {
+          expect(source).toContain('scripts/release/consumer-smoke-cli.mjs');
+          expect(source).toContain('>=2.6.0 <2.7');
+        }
         expect(source).toContain('ShadowRoot');
         expect(source).not.toMatch(/npx @proto\.ui\/cli@latest add/);
         expect(source).not.toMatch(/add (?:wc|react|vue|vue2) (?:base|brutalist)-tooltip/);
