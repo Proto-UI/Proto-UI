@@ -70,8 +70,8 @@ async function capture(
           : undefined,
         checkedAt: new Date().toISOString(),
         viewport: previewer.page().viewportSize(),
-        asyncStatuses: await ref(previewer, 'asyncStatus').allTextContents(),
-        cancelButtons: await ref(previewer, 'cancel').evaluateAll((nodes) =>
+        asyncStatuses: await ref(previewer, 'handleStatus').allTextContents(),
+        cancelButtons: await ref(previewer, 'reset').evaluateAll((nodes) =>
           nodes.map((el) => ({
             rect: el.getBoundingClientRect().toJSON(),
             focused: el === document.activeElement,
@@ -126,8 +126,8 @@ describe('Field real browser journeys', () => {
             : undefined;
         try {
           previewer = mountedPreviewer;
-          await selectRuntime(page, previewer, runtime, 'input', 6);
-          for (const id of ['required', 'async', 'controlled', 'readonly', 'disabled', 'long']) {
+          await selectRuntime(page, previewer, runtime, 'input', 4);
+          for (const id of ['username', 'handle', 'email', 'plan']) {
             await expect
               .poll(() => previewer!.locator('.host').locator(fieldControlSelector(id)).count())
               .toBe(1);
@@ -162,11 +162,11 @@ describe('Field real browser journeys', () => {
                     .filter((node): node is Element => node instanceof Element);
                   const previewer = path.find((node) => node.hasAttribute('data-previewer-id'));
                   if (!previewer) return;
-                  const asyncOwner = previewer.querySelector('[data-demo-ref="asyncControl"]');
-                  const input = asyncOwner?.matches('input')
-                    ? asyncOwner
-                    : asyncOwner?.querySelector('input');
-                  const cancel = previewer.querySelector('[data-demo-ref="cancel"]');
+                  const handleOwner = previewer.querySelector('[data-demo-ref="handleControl"]');
+                  const input = handleOwner?.matches('input')
+                    ? handleOwner
+                    : handleOwner?.querySelector('input');
+                  const reset = previewer.querySelector('[data-demo-ref="reset"]');
                   const inspectGeometry = [
                     'pointerdown',
                     'pointerup',
@@ -189,7 +189,7 @@ describe('Field real browser journeys', () => {
                       event.type === 'validationRequest'
                         ? (event as CustomEvent).detail?.requestId
                         : null,
-                    asyncStatus: previewer.querySelector('[data-demo-ref="asyncStatus"]')
+                    asyncStatus: previewer.querySelector('[data-demo-ref="handleStatus"]')
                       ?.textContent,
                     asyncValue: (input as HTMLInputElement | null)?.value,
                     asyncInvalid: input?.getAttribute('aria-invalid'),
@@ -197,25 +197,25 @@ describe('Field real browser journeys', () => {
                     // Instantaneous geometry distinguishes a moving target
                     // from an activated command whose validation lease failed.
                     cancelRect: inspectGeometry
-                      ? (cancel?.getBoundingClientRect().toJSON() ?? null)
+                      ? (reset?.getBoundingClientRect().toJSON() ?? null)
                       : null,
                     pointer: pointer ? { x: pointer.clientX, y: pointer.clientY } : null,
                     hitRef: hit?.closest('[data-demo-ref]')?.getAttribute('data-demo-ref') ?? null,
-                    hitInsideCancel: hit && cancel ? cancel.contains(hit) : null,
-                    cancelInPath: !!cancel && path.includes(cancel),
+                    hitInsideCancel: hit && reset ? reset.contains(hit) : null,
+                    cancelInPath: !!reset && path.includes(reset),
                   });
                 },
                 { capture: true }
               );
           });
-          const input = editor(previewer, 'required');
+          const input = editor(previewer, 'username');
           expect(await input.getAttribute('aria-labelledby')).toBe(
-            await ref(previewer, 'requiredLabel').getAttribute('id')
+            await ref(previewer, 'usernameLabel').getAttribute('id')
           );
           expect(await input.getAttribute('aria-describedby')).toBe(
-            await ref(previewer, 'requiredDescription').getAttribute('id')
+            await ref(previewer, 'usernameDescription').getAttribute('id')
           );
-          await ref(previewer, 'requiredLabel').click();
+          await ref(previewer, 'usernameLabel').click();
           await expect
             .poll(() =>
               focusObservation.observe((attempt) =>
@@ -226,45 +226,39 @@ describe('Field real browser journeys', () => {
           await page.keyboard.press('Tab');
           await expect.poll(() => input.getAttribute('aria-invalid')).toBe('true');
           expect(await input.getAttribute('aria-errormessage')).toBe(
-            await ref(previewer, 'requiredError').getAttribute('id')
+            await ref(previewer, 'usernameError').getAttribute('id')
           );
           await input.fill('Ada');
           await page.keyboard.press('Tab');
           await expect.poll(() => input.getAttribute('aria-invalid')).toBe('false');
           expect(await input.getAttribute('aria-errormessage')).toBeNull();
-          await ref(previewer, 'propose').click();
-          expect(await editor(previewer, 'controlled').getAttribute('aria-invalid')).toBe('false');
-          await ref(previewer, 'accept').click();
-          await expect
-            .poll(() => editor(previewer!, 'controlled').getAttribute('aria-invalid'))
-            .toBe('true');
-          expect(await editor(previewer, 'readonly').isEditable()).toBe(false);
-          expect(await editor(previewer, 'readonly').isDisabled()).toBe(false);
-          expect(await editor(previewer, 'disabled').isDisabled()).toBe(true);
+          expect(await editor(previewer, 'email').isEditable()).toBe(false);
+          expect(await editor(previewer, 'email').isDisabled()).toBe(false);
+          expect(await editor(previewer, 'plan').isDisabled()).toBe(true);
           if (asyncObservation) await asyncObservation.start();
-          await editor(previewer, 'async').fill('taken');
+          await editor(previewer, 'handle').fill('taken');
           await expect
-            .poll(() => editor(previewer!, 'async').getAttribute('aria-busy'))
+            .poll(() => editor(previewer!, 'handle').getAttribute('aria-busy'))
             .toBe('true');
-          await editor(previewer, 'async').fill('newer');
+          await editor(previewer, 'handle').fill('newer');
           await expect
             .poll(() =>
               asyncObservation
-                ? asyncObservation.observe(() => ref(previewer!, 'asyncStatus').textContent())
-                : ref(previewer!, 'asyncStatus').textContent()
+                ? asyncObservation.observe(() => ref(previewer!, 'handleStatus').textContent())
+                : ref(previewer!, 'handleStatus').textContent()
             )
-            .toContain('Available');
-          expect(await editor(previewer, 'async').getAttribute('aria-invalid')).toBe('false');
-          await editor(previewer, 'async').fill('taken');
-          await ref(previewer, 'cancel').click();
-          // Distinguish a command that never arrived from a canceled lease that
+            .toContain('Handle available');
+          expect(await editor(previewer, 'handle').getAttribute('aria-invalid')).toBe('false');
+          await editor(previewer, 'handle').fill('taken');
+          await ref(previewer, 'reset').click();
+          // Distinguish a command that never arrived from a retired lease that
           // later changed. The original post-reply assertions remain below.
           await expect
-            .poll(() => ref(previewer!, 'asyncStatus').textContent())
-            .toContain('Canceled');
+            .poll(() => ref(previewer!, 'handleStatus').textContent())
+            .toContain('Handle ready');
           await page.waitForTimeout(650);
-          expect(await ref(previewer, 'asyncStatus').textContent()).toContain('Canceled');
-          expect(await editor(previewer, 'async').getAttribute('aria-invalid')).toBe('false');
+          expect(await ref(previewer, 'handleStatus').textContent()).toContain('Handle ready');
+          expect(await editor(previewer, 'handle').getAttribute('aria-invalid')).toBe('false');
           await capture(
             previewer,
             `${family}-${runtime}-light`,
@@ -274,7 +268,7 @@ describe('Field real browser journeys', () => {
           await applyColorScheme(page, 'dark');
           await page.setViewportSize({ width: 390, height: 1000 });
           await page.evaluate(() => (document.documentElement.style.fontSize = '32px'));
-          const geometry = await ref(previewer, 'longRoot').evaluate((el) => ({
+          const geometry = await ref(previewer, 'handleRoot').evaluate((el) => ({
             width: el.getBoundingClientRect().width,
             scroll: el.scrollWidth,
             client: el.clientWidth,
@@ -331,9 +325,9 @@ describe('Field real browser journeys', () => {
         { width: 1100, height: 1000 }
       );
       try {
-        await selectRuntime(page, previewer, 'wc', 'input', 6);
-        expect(await previewer.locator('.host input').count()).toBe(6);
-        expect(await ref(previewer, 'requiredLabel').textContent()).toContain('账户名');
+        await selectRuntime(page, previewer, 'wc', 'input', 4);
+        expect(await previewer.locator('.host input').count()).toBe(4);
+        expect(await ref(previewer, 'usernameLabel').textContent()).toContain('Username');
       } finally {
         await context.close();
       }
