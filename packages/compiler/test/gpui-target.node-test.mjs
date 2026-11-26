@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { emitGpui } from '@proto.ui/compiler/targets/gpui';
 import { controlledSelection, readonlyBadge, resumedFailure } from './fixtures/backend-programs.ts';
 import { authoredBadgeSource, authoredContextSource, authoredKeyedTaskSource, authoredPairSource, authoredSource, authoredSyncRetirementSource, authoredTaskPolicySource } from './fixtures/authoring-source.mjs';
+import { directPair } from './fixtures/direct-pair.mjs';
 
 const sdkRepository = 'https://github.com/zed-industries/zed';
 const sdkRevision = '62e5991dd0f0c8a3af8d5e7e9c4652490d468db8';
@@ -102,6 +103,8 @@ test('external Rust consumer renders and interacts with generated views in headl
   assert.equal(keyedOwner.status, 'produced', JSON.stringify(keyedOwner.diagnostics));
   const pairReader = authoredPairSource();
   assert.equal(pairReader.status, 'produced', JSON.stringify(pairReader.diagnostics));
+  const directPairReader = directPair();
+  assert.equal(directPairReader.status, 'produced', JSON.stringify(directPairReader.diagnostics));
   const failureReader = resumedFailure();
   const policyReader = authoredTaskPolicySource();
   assert.equal(policyReader.status, 'produced', JSON.stringify(policyReader.diagnostics));
@@ -133,6 +136,7 @@ test('external Rust consumer renders and interacts with generated views in headl
     writeFileSync(join(crate, 'context-source.json'), JSON.stringify(contextOwner));
     writeFileSync(join(crate, 'keyed-task-source.json'), JSON.stringify(keyedOwner));
     writeFileSync(join(crate, 'pair-source.json'), JSON.stringify(pairReader));
+    writeFileSync(join(crate, 'pair-direct-ir.json'), JSON.stringify(directPairReader));
     writeFileSync(join(crate, 'resumed-failure-ir.json'), JSON.stringify(failureReader));
     writeFileSync(join(crate, 'task-policy-source.json'), JSON.stringify(policyReader));
     writeFileSync(join(crate, 'sync-retirement-source.json'), JSON.stringify(syncTree));
@@ -149,6 +153,7 @@ test('external Rust consumer renders and interacts with generated views in headl
     ['context_owner', contextOwner.component],
     ['keyed_task_owner', keyedOwner.component, keyedFileBinding],
     ['pair_reader', pairReader.component, keyedFileBinding],
+    ['direct_pair_reader', directPairReader.component, keyedFileBinding],
     ['policy_reader', policyReader.component, keyedFileBinding],
     ['sync_tree', syncTree.component],
     ['tabs_owner', tabsOwner.component, { 'authoring.load-tab': { path: 'crate::tabs_loader::load_owner_tab' } }],
@@ -205,6 +210,7 @@ test('external Rust consumer renders and interacts with generated views in headl
     /^test sync_retirement::withdrawn_style_binding_rejects_mount_and_rebind_before_mutation \.\.\. ok\r?$/m,
     /^test keyed_task_source::reorder_removal_and_physical_move_preserve_the_correct_owned_task \.\.\. ok\r?$/m,
     /^test keyed_task_source::releasing_the_parent_ends_retained_keyed_tasks_before_their_files_can_publish \.\.\. ok\r?$/m,
+    /^test direct_pair::original_parameter_is_first_read_after_two_awaits_and_a_jump \.\.\. ok\r?$/m,
     /^test pair_source::two_file_awaits_publish_each_stage_and_read_current_context \.\.\. ok\r?$/m,
     /^test pair_source::ending_the_owner_during_the_second_await_isolates_its_replacement \.\.\. ok\r?$/m,
     /^test resumed_failure::failed_action_discards_task_cancellation_and_both_serial_reads_complete \.\.\. ok\r?$/m,

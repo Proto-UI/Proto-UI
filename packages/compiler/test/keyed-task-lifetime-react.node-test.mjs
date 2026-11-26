@@ -11,6 +11,7 @@ import ts from 'typescript';
 import { emitReact } from '@proto.ui/compiler/targets/react';
 import { authoredKeyedTaskSource, authoredPairSource, authoredTaskPolicySource } from './fixtures/authoring-source.mjs';
 import { resumedFailure } from './fixtures/backend-programs.ts';
+import { directPair } from './fixtures/direct-pair.mjs';
 import { openTabsServer } from './consumers/react/tabs-server.mjs';
 
 const require = createRequire(import.meta.url);
@@ -605,44 +606,33 @@ test('each authored await commits before its HTTP call and only the live reader 
   if (evidence) await writeFile(path.join(evidence, 'pair-react-native.json'), JSON.stringify({ views, starts, replacement, oldSecond, pending, network, errors }));
 });
 
-// The author producer normally threads a later reference through explicit block
-// arguments. Direct IR may read an original function parameter in any block.
-function directPair() {
-  const source = { file: 'packages/compiler/test/keyed-task-lifetime-react.node-test.mjs', start: 0, end: 0 };
-  const authored = authoredPairSource();
-  assert.equal(authored.status, 'produced', JSON.stringify(authored.diagnostics));
-  const component = authored.component;
-  const task = component.behaviors.find(fn => fn.binding.id === component.tasks[0].fn);
-  const [firstId, label] = task.params;
-  const local = id => ({ kind: 'local', id });
-  const text = value => ({ kind: 'text', value });
-  const binding = id => ({ id, name: id, type: 'text', source });
-  const wait = (arg, next) => ({ kind: 'await', extern: component.externs[0].binding.id, args: [arg], resume: { block: next, args: [] }, source });
-  task.entry = 'first';
-  task.blocks = [
-    { id: 'first', params: [], instructions: [], end: wait(local(firstId.id), 'second') },
-    { id: 'second', params: [binding('firstResult')], instructions: [], end: wait(text('B'), 'resumed') },
-    { id: 'resumed', params: [binding('secondResult')], instructions: [], end: {
-      kind: 'jump', to: { block: 'publish', args: [local('secondResult')] }, source,
-    } },
-    { id: 'publish', params: [binding('result')], instructions: [{
-      kind: 'write', target: component.fields[0].binding.id, source,
-      value: { kind: 'binary', op: 'concat', left: local(label.id), right: local('result') },
-    }], end: { kind: 'return', source } },
-  ];
-  return { status: 'produced', inputKind: 'direct-ir', component };
-}
-
 test('direct IR preserves an original parameter first read after two awaits and a synchronous jump', async t => {
-  const { server, page, errors } = await openConsumer(t, directPair, 'pair-client.tsx', 'pair-direct-ir.json');
+  const { server, page, errors, evidence } = await openConsumer(t, directPair, 'pair-client.tsx', 'pair-direct-ir.json');
+  const amber = 'Obsolete amber record';
+  const blue = 'Blue retained file';
+  const trials = [];
+  let stage = 'idle';
   await page.evaluate(() => window.pairTrace.mount());
-  const { first, second } = await beginPair(page, server, 'first document', 'second document', 'caller supplied: ');
-  first.release();
-  assert.equal(await second.requested(), 'B');
-  await expectPairStage(page, 'idle');
-  second.release();
-  await expectPairStage(page, 'caller supplied: second document');
+  for (const prefix of ['caller supplied: ', 'alternate caller: ']) {
+    const { first, second } = await beginPair(page, server, amber, blue, prefix);
+    const waitingA = await expectPairStage(page, stage);
+    first.release();
+    assert.equal(await second.requested(), 'B');
+    const waitingB = await expectPairStage(page, stage);
+    second.release();
+    stage = prefix + blue;
+    const completed = await expectPairStage(page, stage);
+    assert.deepEqual([first.requests, second.requests], [1, 1]);
+    trials.push({ prefix, first: first.path, second: second.path, waitingA, waitingB, completed });
+  }
+  const network = await page.evaluate(() => window.pairTrace.history());
+  assert.deepEqual(network.unexpected, []);
+  assert.deepEqual(network.requests, trials.flatMap(({ first, second }) => [
+    { key: 'A', path: first, state: 'returned', value: amber, aborted: false, reason: null },
+    { key: 'B', path: second, state: 'returned', value: blue, aborted: false, reason: null },
+  ]));
   assert.deepEqual(errors, []);
+  if (evidence) await writeFile(path.join(evidence, 'direct-pair-react-native.json'), JSON.stringify({ trials, network, errors }));
 });
 
 const failureSource = { file: 'packages/compiler/test/fixtures/backend-programs.ts', start: 0, end: 0 };

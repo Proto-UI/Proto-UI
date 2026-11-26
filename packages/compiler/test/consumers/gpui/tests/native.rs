@@ -4,6 +4,7 @@
 mod authoring_badge;
 mod context_source;
 mod controlled_source;
+mod direct_pair;
 mod keyed_task_source;
 mod pair_source;
 mod resumed_failure;
