@@ -109,12 +109,16 @@
       "path": "apps/www/src/components/site-search-commands.ts",
       "owners": "`www.search.dialog`, `www.search.input-results`, `www.search.launcher`",
       "recorded": "7d255f171bcf8d2ac8f5de89f559bfa1bdb6e36509e938a56ad1f6720b257c17",
-      "actual": "a182b2c521319bd7f1df00bb76db7b8013dd80671b542bb68b71eb33188118b1",
-      "blob": "b203f271b5332fb4b2d3effe34fe740903ce15fe",
+      "actual": "ca09a603a4bb717f2f735334f380e8446027647c4eec63045b258f6246a60a1b",
+      "blob": "cddc12e9ba5bb37a30ff7a854da09c4681e5f91f",
       "matchesParent": [],
-      "review": "Retain 1908 critical Header-preparation leases around the existing independent opener/Dialog projection controllers, keyed by runtime and generation. Publish, dispose, failure, supersession and destroy release existing reservations; no new activation or focus owner is introduced. Original Search budget failures remain unresolved acceptance debt.",
+      "review": "Retain 1908 critical Header-preparation leases around the existing independent opener/Dialog projection controllers, keyed by runtime and generation. Publish, dispose, failure, supersession and destroy release existing reservations; no new activation or focus owner is introduced. Original Search budget failures remain unresolved acceptance debt. Repository pre-commit formatting then collapsed the existing conditional expression only; the final fingerprint binds the formatted source commit.",
       "mainBlob": "8c3288214702d0055d19207193b065f9680a62ab",
-      "carrierBlob": "88f310b4cc406ae04c5924d186dbc430ba364bb0"
+      "carrierBlob": "88f310b4cc406ae04c5924d186dbc430ba364bb0",
+      "beforeFormatting": {
+        "sha256": "a182b2c521319bd7f1df00bb76db7b8013dd80671b542bb68b71eb33188118b1",
+        "gitBlob": "b203f271b5332fb4b2d3effe34fe740903ce15fe"
+      }
     },
     {
       "path": "apps/www/src/components/site-search-composition.ts",
@@ -157,6 +161,7 @@
   ],
   "bindingUpdate": {
     "beforeSha256": "6f060467b8cd556404a6c47811b08fe1994cd68071ad2c7faa071047746c09f2",
-    "afterSha256": "f0b41ec5134286b4b3575114d1a50464872373ed1c80340cbe74517cffa39186"
-  }
+    "afterSha256": "23df3dcb412d77ec9405a6d49dbb44ddba6c95e1282258cc8d30b998f7ca75d6"
+  },
+  "postFormatSourceCommit": "4ea39318353435f7dc148d1869f8af5bac6988a0"
 }

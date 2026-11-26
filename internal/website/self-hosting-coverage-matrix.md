@@ -446,7 +446,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/site-link-recipes.ts` | `www.shell.native-link-presentation` | `16860dec9586b26f48518fc6466119f25199ea15d9bffaf446297966e2c32479` |
 | `apps/www/src/components/site-native-controls.ts` | `www.shell.native-link-presentation`, `www.shell.table-of-contents` | `b3adf001ead0e1cdbf5748a7f8e6a0b2e0d4f10b0c273e5a8d2751708b714451` |
 | `apps/www/src/components/site-native-link-facts.ts` | `www.shell.native-link-presentation` | `b1abc0626005f00d0f2298b2fe0d964e733f2df60a1141e158c52331486451cf` |
-| `apps/www/src/components/site-search-commands.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.launcher` | `a182b2c521319bd7f1df00bb76db7b8013dd80671b542bb68b71eb33188118b1` |
+| `apps/www/src/components/site-search-commands.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.launcher` | `ca09a603a4bb717f2f735334f380e8446027647c4eec63045b258f6246a60a1b` |
 | `apps/www/src/components/site-search-composition.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.loading-failure` | `37e4f54bf7ae1afad9fd7a08417c104304bf7285b0f8ccee3a6b5923f4587ea7` |
 | `apps/www/src/components/site-search-owner.ts` | `www.search.input-results`, `www.search.loading-failure`, `www.search.pagefind-engine` | `aa4d3cc13174e2e9d62b557d81a8cf192483b669217af733332d22d42842f580` |
 | `apps/www/src/components/site-search-session.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.loading-failure` | `7e3aea951b4d101f80a560ea482df9082f82289dd8b7f47840eb18c78ce55a4f` |
