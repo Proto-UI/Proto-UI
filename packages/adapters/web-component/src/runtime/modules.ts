@@ -158,6 +158,7 @@ import {
 } from '../portal-mount';
 import {
   composedParentElement,
+  hasPotentialScopeDescendant,
   hasWebComponentScopeDescendant,
   observeWebComponentRadioFocus,
   sampleWebComponentScopeTargets,
@@ -2218,14 +2219,34 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 positionParents,
                 filteredPositionParents,
                 hasInputStateStyleDependency,
-              ] = collectEntryStyleDependencies(
-                view!,
-                mediaRoots,
-                target,
-                externalAncestors,
-                !!entryResizeObserver && !hasExternalStyleInputs,
-                observedRoots
-              );
+              ] =
+                // CSS can change eligibility, but cannot create a native Tab
+                // candidate in a decorative-only subtree. Keep the DOM,
+                // upgrade, late-root and portal watches live; their ordinary
+                // rebuild restores the current CSS graph when one appears.
+                // Slotted content, image maps and radio peers can depend on
+                // state outside this bounded subtree, so retain their full
+                // dependency scan even when the current sample is empty.
+                hasExternalStyleInputs ||
+                hasSlottedEntryContent ||
+                hasPotentialScopeDescendant(target)
+                  ? collectEntryStyleDependencies(
+                      view!,
+                      mediaRoots,
+                      target,
+                      externalAncestors,
+                      !!entryResizeObserver && !hasExternalStyleInputs,
+                      observedRoots
+                    )
+                  : ([
+                      [],
+                      0,
+                      new Set<Element>(),
+                      new Set<Element>(),
+                      new Set<Node>(),
+                      new Map<Element | ShadowRoot, boolean>(),
+                      false,
+                    ] as const);
               entryRelationalSubjects = relationalSubjects;
               for (const parent of positionParents) {
                 const filtered = filteredPositionParents.has(parent as Element | ShadowRoot);

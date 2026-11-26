@@ -370,7 +370,7 @@ export function sampleWebComponentScopeTargets(
   };
 }
 
-function hasPotentialScopeDescendant(container: HTMLElement): boolean {
+export function hasPotentialScopeDescendant(container: HTMLElement): boolean {
   // Entry projection only needs existence. A text/decorative-only composed
   // region has no possible descendant stop, regardless of its current CSS.
   // Prove that negative fact before asking the browser to update its box tree.
