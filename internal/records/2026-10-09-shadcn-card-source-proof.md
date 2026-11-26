@@ -10,7 +10,7 @@ The source commit was made through the actual staged Git hooks with the owner's 
 
 The first regeneration correctly rejected drift in the current website consumer mirror's `Proto UI chain` and `Lifecycle` columns. Only those two fields were synchronized from the already committed authoritative website ledger; the `blocked` disposition and original native/independent-acceptance debt were retained. Generated Markdown comes from the generator, not hand edits. The initial negative-control run retained 28 failures caused by the stale consumer mirror; after the two-field synchronization, all 113 source-proof tests passed (131.6 seconds). The regenerated source/count/link check reports 71 comparison rows, 22 Base projection rows, 141 consumers and 101 migrated links.
 
-The adjacent [raw package report](evidence/2026-10-09-shadcn-card-package-budgets.json) identifies this source revision and preserves all original results, minified hashes, environment and compression evidence. Its ledger digest truthfully names the pre-proof ledger used at measurement time. The unchanged advisory result does not erase React's 445-byte or Vue's 280-byte strict overage; no threshold changed.
+The adjacent [raw package report](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-10-09-shadcn-card-package-budgets.json) identifies this source revision and preserves all original results, minified hashes, environment and compression evidence. Its ledger digest truthfully names the pre-proof ledger used at measurement time. The unchanged advisory result does not erase React's 445-byte or Vue's 280-byte strict overage; no threshold changed.
 
 ## Reuse and remaining work
 

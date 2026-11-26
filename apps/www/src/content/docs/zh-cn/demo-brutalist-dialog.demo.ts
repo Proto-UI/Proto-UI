@@ -84,26 +84,38 @@ export default {
             prototypeId: 'brutalist-dialog-footer',
             children: [
               {
-                kind: 'proto',
-                prototypeId: 'brutalist-dialog-close',
+                kind: 'box',
+                className: 'min-w-0 max-w-full',
                 children: [
                   {
                     kind: 'proto',
-                    prototypeId: 'brutalist-button',
-                    props: cancelButtonProps,
-                    children: ['Cancel'],
+                    prototypeId: 'brutalist-dialog-close',
+                    children: [
+                      {
+                        kind: 'proto',
+                        prototypeId: 'brutalist-button',
+                        props: cancelButtonProps,
+                        children: ['Cancel'],
+                      },
+                    ],
                   },
                 ],
               },
               {
-                kind: 'proto',
-                prototypeId: 'brutalist-dialog-close',
+                kind: 'box',
+                className: 'min-w-0 max-w-full',
                 children: [
                   {
                     kind: 'proto',
-                    prototypeId: 'brutalist-button',
-                    props: saveButtonProps,
-                    children: ['Save changes'],
+                    prototypeId: 'brutalist-dialog-close',
+                    children: [
+                      {
+                        kind: 'proto',
+                        prototypeId: 'brutalist-button',
+                        props: saveButtonProps,
+                        children: ['Save changes'],
+                      },
+                    ],
                   },
                 ],
               },

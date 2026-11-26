@@ -8,7 +8,6 @@
     "node_modules",
     "dist",
     "packages/compiler/prelude",
-    "internal/records/evidence",
     "scripts/analysis/declarative-agent-ui",
     "scripts/release/consumer-smoke"
   ]

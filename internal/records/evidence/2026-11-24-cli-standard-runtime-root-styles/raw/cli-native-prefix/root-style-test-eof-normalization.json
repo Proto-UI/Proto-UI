@@ -1,7 +1,0 @@
-{
-  "beforeSha256": "617ad1cf18c0864b727e16f9c7a2020b50b93071204783ae85593dc85a62043c",
-  "afterSha256": "e1ea242e62b51ad24b4b12486a298a1cba209ce621a7518adf59743cf42ab1f1",
-  "beforeBytes": 12539,
-  "afterBytes": 12538,
-  "change": "Remove only inherited extra final newline from the newly authored test file to match the reviewed candidate bytes."
-}

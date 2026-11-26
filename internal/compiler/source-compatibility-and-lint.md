@@ -2,6 +2,12 @@
 
 This page projects the [source-compatibility criterion](../../spec/contracts/C-COMPILER-FOUNDATION-0001.yaml) and [lint contract](../../spec/contracts/C-COMPILER-LINT-0001.yaml). Their [independent cases](../../spec/tests/T-COMPILER-LINT-0001.yaml) own the expected diagnostic and migration results. This page adds no language restrictions.
 
+## Scope & Limits
+
+The contract and test entities remain draft. Their full analysis, editor/CLI parity and migration/inventory routes are recorded as missing. Bounded implementation increments must attach their actual subset evidence without converting those complete routes into unsupported passes.
+
+Rule IDs name required checks; each implementation report identifies the delivered subset.
+
 ## One authored source
 
 Adapter execution and compilation consume the same migrated component source and transitive authored helpers. Record the actual entrypoints, resolution configuration and per-file content digests. Checking only a root `.proto.ts` does not detect a substituted helper. Target-specific implementations of declared atomic host primitives or externs remain explicit target bindings; they cannot execute an entire prototype in place of compiler lowering.
@@ -24,7 +30,13 @@ The compiler, planned lint CLI and editor integration share the same frontend an
 
 An informational missing-capability diagnostic still prevents unsupported compilation. A restricted TS prelude helps reject undeclared members, but TS itself still accepts constructs such as a numeric condition. Missing Proto semantic checks must remain visible; an empty diagnostic list from a partial scanner is not a valid-source or backend-support certificate.
 
-The initial stable language-rule identities are `proto/explicit-bool-condition`, `proto/no-implicit-coercion`, `proto/text-api`, `proto/pure-derivation` and `proto/no-capability-assertion`. The lint contract defines their boundaries, positive/negative examples and criterion references. These names describe obligations, not a claim that all five are implemented.
+The lint contract defines boundaries, positive/negative examples and criterion references for these stable rule IDs:
+
+- `proto/explicit-bool-condition`
+- `proto/no-implicit-coercion`
+- `proto/text-api`
+- `proto/pure-derivation`
+- `proto/no-capability-assertion`
 
 Do not infer new bans from old parser failures. Declarations through legal helpers, defined Context-key lifetimes, admitted equality operations and style expressions require semantic analysis of their actual bindings and contracts. The old parser's rejection or a hard analysis limit does not settle validity.
 
@@ -38,7 +50,11 @@ Version the language, rules and compiler separately. A published rule-set change
 
 ## Inventory and delivery
 
-Keep the entire official-library and registered-consumer destination visible, including missing and unrun entries. Track source files, component entrypoints, semantic operations and target profiles separately. Newly registered source may increase the denominator and lower a percentage without being a regression in an already delivered capability. Regression gates protect actual delivered source/target capabilities and retain source mappings through migration.
+Keep the entire official-library and registered-consumer destination visible, including missing and unrun entries.
+
+- Track source files, component entrypoints, semantic operations and target profiles separately.
+- Newly registered source may increase the denominator and lower a percentage without regressing an already delivered capability.
+- Regression gates protect delivered source/target capabilities and retain source mappings through migration.
 
 [Shenko's intake](https://github.com/Proto-UI/Proto-UI/pull/1915#issuecomment-7170144913) reports 204 upstream files plus two consumer prototypes at its historical snapshot. That is a requested scope awaiting a verified manifest, not 206 independent compilation successes or a current inventory of every official prototype. Complete final acceptance still requires the full governed scope.
 

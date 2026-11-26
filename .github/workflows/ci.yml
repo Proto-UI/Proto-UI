@@ -122,6 +122,31 @@ jobs:
       - name: Verify public package exact versions
         run: node scripts/release/check-lockstep.mjs
 
+  internal-docs-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install root doc-lint dependencies
+        run: corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts --filter proto-ui
+
+      - name: Check internal documentation hygiene and prose ratchet
+        run: |
+          node --test scripts/docs/test/check-internal-docs.test.mjs
+          node scripts/docs/check-internal-docs.mjs --warnings
+
+      - name: Vale English prose guidance (warning-only)
+        uses: errata-ai/vale-action@v2
+        continue-on-error: true
+        with:
+          files: internal
+          fail_on_error: false
+
   public_package_plan:
     runs-on: ubuntu-latest
     timeout-minutes: 5

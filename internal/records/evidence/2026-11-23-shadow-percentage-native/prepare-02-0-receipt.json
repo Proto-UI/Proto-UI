@@ -1,6 +1,0 @@
-{
-  "command": ["node", "--check", "scripts/analysis/shadow-percentage-browser.mjs"],
-  "startedAt": "2026-11-23T13:12:53.701161+00:00",
-  "exitCode": 0,
-  "finishedAt": "2026-11-23T13:12:53.778173+00:00"
-}

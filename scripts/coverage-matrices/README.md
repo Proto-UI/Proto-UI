@@ -2,7 +2,9 @@
 
 The independent prototype/projection portfolio is [documented here](../../internal/coverage-matrices/README.md). Validate its JSON/source/consumer links with `node scripts/coverage-matrices/prototype-coverage.mjs --check`; regenerate the readable view with `--write`. Its negative controls run with the existing test glob. This source inventory is separate from the Website/Harness runtime ownership checks below.
 
-`node scripts/coverage-matrices/check-coverage-matrices.mjs` validates the retained matrices. `node --test scripts/coverage-matrices/test/*.test.mjs` exercises the negative controls. Source scanning is deliberately bounded static analysis, not an arbitrary runtime/data-flow proof; ordinary PR checks still need independent review when their checker, inputs or workflow change.
+`node scripts/coverage-matrices/render-consumer-matrices.mjs --check` verifies that `internal/website/self-hosting-coverage-matrix.md` and `internal/agent-harness/dogfood-coverage-matrix.md` stay byte-synced with their canonical JSON sources (`*.json`, regenerating with `--write` / `pnpm coverage:matrices:render`).
+
+`node scripts/coverage-matrices/check-coverage-matrices.mjs` (modularized with `website-raw-import-allowlist.mjs` and `matrix-configs.mjs`) validates the retained matrices. `node --test scripts/coverage-matrices/test/*.test.mjs` exercises the negative controls. Source scanning is deliberately bounded static analysis, not an arbitrary runtime/data-flow proof; ordinary PR checks still need independent review when their checker, inputs or workflow change.
 
 The [#834 browser study](https://github.com/Proto-UI/Proto-UI/issues/834) uses the [current source reference](test/fixtures/website-markup-provenance-current.json) for its sampled routes. The [original reference](test/fixtures/website-markup-provenance-source.json) preserves the earlier review baseline. The suite rejects changed bytes before launching the Website. Review any changes to the sampled inputs and their ownership before updating the current reference. Both references record unverified source admission. The served build and transitive source closure require separate evidence.
 

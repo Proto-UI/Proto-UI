@@ -1,9 +1,0 @@
-{
-  "revision": "511ea9893e615143c2be6518fa08ad75b43c07f8",
-  "moduleCount": 38,
-  "uniqueModuleCount": 38,
-  "externalScrollCount": 1,
-  "tomlFilesParsed": 39,
-  "nativeCargoMetadata": "not run: local Cargo absent and remote execution unavailable",
-  "sourceReceiptSha256": "d19336e444d696a9a8f6350c29c2c568e118147e03937457e8a81254719b5ab6"
-}

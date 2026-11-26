@@ -56,7 +56,7 @@ describe('bounded public Shadcn Dropdown recipes', () => {
         expect(authoredSource).toMatch(/^export default withShadcnRheaDemo\(\{/m);
         expect(demo.setup).toBeDefined();
       } else {
-        expect(authoredSource).toMatch(/^export default withShadcnRheaDemo\(\{/);
+        expect(authoredSource.trimStart()).toMatch(/^export default withShadcnRheaDemo\(\{/);
         expect(authoredSource).not.toMatch(/\bimport\b|\bfunction\b|=>|\bsetup\b/);
         expect(demo.setup).toBeUndefined();
       }
@@ -132,6 +132,7 @@ describe('bounded public Shadcn Dropdown recipes', () => {
     ]);
     expect(items.filter((node) => node.props?.disabled)).toEqual([]);
     expect(items[3].props?.disabled).toBeUndefined();
+    for (const item of items) expect(item.props?.disabled ?? false).toBe(false);
   });
 
   it('shows false and true inset for ordinary Labels and Items without replacing omitted parts', async () => {
@@ -170,12 +171,12 @@ describe('bounded public Shadcn Dropdown recipes', () => {
         `apps/www/src/content/docs/${locale}/ui-libraries/shadcn/dropdown-menu.mdx`,
         'utf8'
       );
-      for (const id of [oldId, ...recipeIds]) {
+      for (const id of [oldId, 'demo-shadcn-dropdown-menu-basic', ...recipeIds]) {
         expect(docs.match(new RegExp(`demoId="${id}"`, 'g'))).toHaveLength(1);
         const sourcePath = getDemoSourcePath(id);
         expect(readFileSync(sourcePath, 'utf8')).toMatch(/export default/);
       }
-      expect(docs).toContain('destructive');
+      expect(docs).toContain('variant="destructive"');
       expect(docs).toMatch(/name: 'inset', type: 'boolean'/);
       expect(docs).toContain('Base');
       expect(docs).toContain('Rhea');
@@ -187,6 +188,58 @@ describe('bounded public Shadcn Dropdown recipes', () => {
 // Actual WC renderer + prototypes in Happy DOM: source-host evidence only.
 // This does not measure browser paint/contrast, native input or native/GPUI.
 describe('Dropdown recipe WC source-host rendering', () => {
+  it('keeps Basic open on disabled API activation and selects Support by keyboard', async () => {
+    const demo = await recipe('demo-shadcn-dropdown-menu-basic');
+    const ids = new Set<string>();
+    collectPrototypeIds(demo.root, ids);
+    await loadPrototypes([...ids]);
+    const host = document.createElement('div');
+    document.body.append(host);
+    const view = await renderDemo({ runtime: 'wc', host, demo });
+    cleanups.push(() => view.destroy());
+    const trigger = host.querySelector<HTMLElement>('[aria-haspopup="menu"]')!;
+    trigger.click();
+    const menu = await vi.waitFor(() => {
+      expect(trigger.getAttribute('aria-expanded')).toBe('true');
+      const content = document.getElementById(trigger.getAttribute('aria-controls')!);
+      expect(content?.getAttribute('role')).toBe('menu');
+      return content!;
+    });
+    const items = Array.from(menu.querySelectorAll<HTMLElement>('[role="menuitem"]'));
+    const item = (label: string) => items.find((row) => row.textContent?.trim() === label)!;
+    const selected = vi.fn();
+    for (const row of items) row.addEventListener('select', selected);
+    const press = (key: string) => {
+      for (const type of ['keydown', 'keyup'])
+        document.activeElement!.dispatchEvent(
+          new KeyboardEvent(type, { key, bubbles: true, cancelable: true })
+        );
+    };
+    await vi.waitFor(() => expect(document.activeElement).toBe(item('Profile')));
+    press('End');
+    const disabled = item('API');
+    await vi.waitFor(() => expect(document.activeElement).toBe(disabled));
+    expect(disabled.getAttribute('aria-disabled')).toBe('true');
+    for (const key of ['Enter', ' ']) {
+      press(key);
+      expect(selected).not.toHaveBeenCalled();
+      expect(document.activeElement).toBe(disabled);
+      expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    }
+    press('ArrowUp');
+    await vi.waitFor(() => expect(document.activeElement).toBe(item('Support')));
+    press('Enter');
+    await vi.waitFor(() => {
+      expect(selected).toHaveBeenCalledTimes(1);
+      expect(selected.mock.calls[0]![0].detail).toMatchObject({
+        value: 'support',
+        reason: 'keyboard',
+      });
+      expect(trigger.getAttribute('aria-expanded')).toBe('false');
+      expect(document.activeElement).toBe(trigger);
+    });
+  }, 20_000);
+
   for (const id of recipeIds) {
     it(`${id}: renders fixed SVGs, live menu parts and their bounded props`, async () => {
       const demo = await recipe(id);

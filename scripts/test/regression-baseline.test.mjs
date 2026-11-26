@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
@@ -164,7 +164,24 @@ test('the latest official terminal costs retain failures and exclude interrupted
   assert.equal(receipt.headSha, evidence.headSha);
   assert.equal(receipt.jobs.length, 18);
   for (const job of receipt.jobs) {
-    const compressed = readFileSync(new URL(job.logPath, directory));
+    // Original raw logs live in the published ancestor after evidence archival.
+    // Keep their exact bytes and every digest/selection/terminal assertion below.
+    let compressed;
+    try {
+      compressed = execFileSync(
+        'git',
+        [
+          'show',
+          `1c4a23455175ec65d3b41a630cfa9797d74a721d:internal/records/evidence/2026-11-25-release-gate-browser-costs/${job.logPath}`,
+        ],
+        { cwd: runtimeRoot, env: { ...process.env, GIT_NO_LAZY_FETCH: '1' } }
+      );
+    } catch (cause) {
+      throw new Error(
+        `Original browser-cost evidence requires complete Git history through 1c4a23455175ec65d3b41a630cfa9797d74a721d; unable to read ${job.logPath}.`,
+        { cause }
+      );
+    }
     const bytes = gunzipSync(compressed);
     const digest = createHash('sha256').update(bytes).digest('hex');
     assert.equal(createHash('sha256').update(compressed).digest('hex'), job.gzipSha256);

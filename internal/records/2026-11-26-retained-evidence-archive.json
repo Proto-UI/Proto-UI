@@ -1,0 +1,2472 @@
+{
+  "schemaVersion": 1,
+  "kind": "retained-historical-evidence-archive",
+  "sourceRevision": "1c4a23455175ec65d3b41a630cfa9797d74a721d",
+  "disposition": "Original raw evidence is retained in the immutable published ancestor and a verified external byte archive; recorded outcomes and hashes are unchanged.",
+  "files": [
+    {
+      "path": "internal/coverage-matrices/snapshots/2026-11-26-before-ci-source-refresh-0ee5c606be88dc39f3782067d53c9d40eac45319.json",
+      "gitBlob": "05050e4d2410e872c9590d399f9b6c7f87afee21",
+      "bytes": 3735585,
+      "sha256": "057cc58fd03f8d280d0065988317e618232983e85f04d97363e7498fa05aa706",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/coverage-matrices/snapshots/2026-11-26-before-ci-source-refresh-0ee5c606be88dc39f3782067d53c9d40eac45319.json",
+      "originalCommit": "958f52c1e5dae857c72ae64dddf33d6787e939a1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-browser-gate-source-renewal/original-browser3.log.gz",
+      "gitBlob": "4a1355c4c83a94b944626ddc62c212336099ff11",
+      "bytes": 19198,
+      "sha256": "ed48f069df5782bb84acb11971a9866eb6b575572f4ac250724dbb3dd3d8ada3",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-browser-gate-source-renewal/original-browser3.log.gz",
+      "originalCommit": "e475ed0b3bc1eac562cab0d488bb3f49d4f090ea"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/controls-associations-and-tooltip-timeline.json.gz",
+      "gitBlob": "65c51ef1698e8f7fac9e3f6c24d16821d4627cca",
+      "bytes": 1245,
+      "sha256": "1fde458a1648ec0afab984f787e2f600bb859ba26e8911a88fdee27ecf547146",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/controls-associations-and-tooltip-timeline.json.gz",
+      "originalCommit": "aa6c135c06a3bd3488be735ce88d19a8b43895aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/controls-current-baseline.json.gz",
+      "gitBlob": "a28e879abb2dd64d1118bb316b1f7bf0992cbbe2",
+      "bytes": 1853,
+      "sha256": "8c186e0679a0319e30591665395f3f155edeedcd8a4a414511d4372db1e08fbf",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/controls-current-baseline.json.gz",
+      "originalCommit": "aa6c135c06a3bd3488be735ce88d19a8b43895aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/controls-current-contract.json.gz",
+      "gitBlob": "35a9cdbaa5ace2cf98a897c240157db273630b90",
+      "bytes": 1433,
+      "sha256": "af24dc10ff4f2334d27d50c1b2e7180c419b526254396f6524e5e691a95d6e75",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/controls-current-contract.json.gz",
+      "originalCommit": "aa6c135c06a3bd3488be735ce88d19a8b43895aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/controls-current-core-color.json.gz",
+      "gitBlob": "53573a58db3c08268883c7e0a4fb61bc5c6fb78b",
+      "bytes": 1435,
+      "sha256": "84c8afc1e95c9a07a0b50e64f22b86b6dd8c7b4582422992c84c48486a0bd8f8",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/controls-current-core-color.json.gz",
+      "originalCommit": "aa6c135c06a3bd3488be735ce88d19a8b43895aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/controls-final-affected.json.gz",
+      "gitBlob": "3deb765517bf0e5d2ccf65e505ff655a12e1e7ed",
+      "bytes": 1019,
+      "sha256": "410d613bda2c4c2d1570d932b46ed83b5fe0bcf9545fc0b7078bad6060584384",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/controls-final-affected.json.gz",
+      "originalCommit": "aa6c135c06a3bd3488be735ce88d19a8b43895aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/controls-final-affected.log.gz",
+      "gitBlob": "77c9facb33e439dc74166ccbad91f095ec78a2e0",
+      "bytes": 1473,
+      "sha256": "1d83685e66f464e0cd9c3c38b1c1ec5aa11f2d27ff5b9b9b07e6468a4898a1d2",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/controls-final-affected.log.gz",
+      "originalCommit": "aa6c135c06a3bd3488be735ce88d19a8b43895aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/public-example-motion-final.json.gz",
+      "gitBlob": "91194e33bcfb90174c75304007f8ef77121526f8",
+      "bytes": 7060,
+      "sha256": "935d2ebb73693c00aa9fe93855ef5178917a0f9480bf9bdc0c1e7ad2d71fb453",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/public-example-motion-final.json.gz",
+      "originalCommit": "aa6c135c06a3bd3488be735ce88d19a8b43895aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/public-example-motion.json.gz",
+      "gitBlob": "08a2d2985e826254c79f060375d658c895541625",
+      "bytes": 6969,
+      "sha256": "7918a7dfa6f81ad26a81cd76d43de06d9077f9060d84f059057453af4e0d7536",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/public-example-motion.json.gz",
+      "originalCommit": "aa6c135c06a3bd3488be735ce88d19a8b43895aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/theme-transition-negative.log.gz",
+      "gitBlob": "2880fc0f735a8de5f268f813773cd800e139bbd8",
+      "bytes": 3260,
+      "sha256": "b12419dcb6b98e26b9a771aba704dad649e714a56a324efd9b6283c5cf7a266f",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/theme-transition-negative.log.gz",
+      "originalCommit": "aa6c135c06a3bd3488be735ce88d19a8b43895aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/tooltip-border-candidate-unit.json.gz",
+      "gitBlob": "5e5940611f1f961964f13d0512742631c63e52d1",
+      "bytes": 674,
+      "sha256": "961ebd716c6df59018924256ae2f49657ec78726263f09a9461da08ff714ba11",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/tooltip-border-candidate-unit.json.gz",
+      "originalCommit": "aa6c135c06a3bd3488be735ce88d19a8b43895aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/tooltip-border-negative-unit.json.gz",
+      "gitBlob": "5509ffe8f100acbd39de0b7badb6f96661877d5a",
+      "bytes": 971,
+      "sha256": "2112f2c177cc898ac238e0a252811634f54fdb9dfdb0511018358526f099210b",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/tooltip-border-negative-unit.json.gz",
+      "originalCommit": "aa6c135c06a3bd3488be735ce88d19a8b43895aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/tooltip-explicit-keyframes.json.gz",
+      "gitBlob": "6fa58eee649312be529c355f6f11243f37b179c5",
+      "bytes": 945,
+      "sha256": "1a0c582711c0cafd4cbea588a86721881bbf141f1e75eff99b676664e2625ef6",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/tooltip-explicit-keyframes.json.gz",
+      "originalCommit": "aa6c135c06a3bd3488be735ce88d19a8b43895aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/tooltip-final-style-closure.log.gz",
+      "gitBlob": "92990ac1ec7323dc6a8e9e125f6f7c4baa0f90e6",
+      "bytes": 83,
+      "sha256": "dec89833b47ee493623caf04c05e881a598c1d72097f48aa188846e67ab827ef",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/tooltip-final-style-closure.log.gz",
+      "originalCommit": "aa6c135c06a3bd3488be735ce88d19a8b43895aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/tooltip-final-unit.json.gz",
+      "gitBlob": "26a3327880bdd503a773200a3ad627da1181b9b3",
+      "bytes": 680,
+      "sha256": "76a3a2cf5cf2963f0908f52a87547a0ae26b55e528bbcf4c036785baaa16b516",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/tooltip-final-unit.json.gz",
+      "originalCommit": "aa6c135c06a3bd3488be735ce88d19a8b43895aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/tooltip-owned-theme.json.gz",
+      "gitBlob": "ffc5ec9220f97210def629a7272e84d366d3bd0a",
+      "bytes": 1216,
+      "sha256": "7640b7d80c7fd6e35101bb776232399f4c159dce0c720ddfe9b9f60cffda30a8",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/tooltip-owned-theme.json.gz",
+      "originalCommit": "aa6c135c06a3bd3488be735ce88d19a8b43895aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/tooltip-public-docs.log.gz",
+      "gitBlob": "1b69853281ba7f613ce5115bb4f77e44507f2349",
+      "bytes": 170,
+      "sha256": "0eb9fa0f01b632c757db97b4ed279e3338fe30a7aa9e343426c7b20c01fc56a6",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/tooltip-public-docs.log.gz",
+      "originalCommit": "aa6c135c06a3bd3488be735ce88d19a8b43895aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/tooltip-theme-history.json.gz",
+      "gitBlob": "6001bfeaf5dea6b39834b842377b83de7b3b0556",
+      "bytes": 4990,
+      "sha256": "5bda6d6bd5a074c588b1a5f9dd08b69c7c08c1f0eaf34764b91d9785a56900b9",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-brutalist-controls-and-tooltip/tooltip-theme-history.json.gz",
+      "originalCommit": "aa6c135c06a3bd3488be735ce88d19a8b43895aa"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-brutalist-0-wc.json.gz",
+      "gitBlob": "7a39f8dd648c59b1f12183c701f7679043fa8871",
+      "bytes": 2129,
+      "sha256": "d3f8f67a192fb42400950fe7bf306a8aba66994f440bcce37bac8759ede5d7d0",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-brutalist-0-wc.json.gz",
+      "originalCommit": "53d3bc3c8f493a963366c1c0918bb1ca8a50f171"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-brutalist-1-react.json.gz",
+      "gitBlob": "522ae080494082774ce5dfda330b95714201650d",
+      "bytes": 2116,
+      "sha256": "734a0f00be6a8a2ce9e6cf1b2ea807dfde9bdf1c0f3f9362a153845096016ff8",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-brutalist-1-react.json.gz",
+      "originalCommit": "53d3bc3c8f493a963366c1c0918bb1ca8a50f171"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-brutalist-2-vue.json.gz",
+      "gitBlob": "ba0b60514906862c7c08ab9db2fe36834f8a412f",
+      "bytes": 2118,
+      "sha256": "f44af888886a7d7f9deea70b1c3192e7ac83cc8a1c01b4126387a30e6221ca8e",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-brutalist-2-vue.json.gz",
+      "originalCommit": "53d3bc3c8f493a963366c1c0918bb1ca8a50f171"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-brutalist-3-vue2.json.gz",
+      "gitBlob": "4dd529fa3353962d297088121f74efabe8771c99",
+      "bytes": 2120,
+      "sha256": "5e0be64035de83b83cb3b145a3d9e8d29d25946bf028c9fbed35fb26571006b6",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-brutalist-3-vue2.json.gz",
+      "originalCommit": "53d3bc3c8f493a963366c1c0918bb1ca8a50f171"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-brutalist-4-wc.json.gz",
+      "gitBlob": "311fbabd1244eb3a886e4b4dc1a4f1e13480626e",
+      "bytes": 2129,
+      "sha256": "a302e89f766ce6e916a92c92baa076d1c6167222e2a677df4a76c89ff4269c96",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-brutalist-4-wc.json.gz",
+      "originalCommit": "53d3bc3c8f493a963366c1c0918bb1ca8a50f171"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-shadcn-0-wc.json.gz",
+      "gitBlob": "47eadc73bc3fbb14a00a7c7509c39e7922a7ce0f",
+      "bytes": 2233,
+      "sha256": "30f7f6bf3a4e1d0ffd28149a849a25c5073d6d6c7a077e951b2f13395ac8aa1e",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-shadcn-0-wc.json.gz",
+      "originalCommit": "53d3bc3c8f493a963366c1c0918bb1ca8a50f171"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-shadcn-1-react.json.gz",
+      "gitBlob": "cea7d67b273017aae8fb7a26a79a5bde253194f8",
+      "bytes": 2233,
+      "sha256": "c3f24aab25834441d4bba5f0127f7b4b4c88b7f8e50f872fb40f3dacae9b89ab",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-shadcn-1-react.json.gz",
+      "originalCommit": "53d3bc3c8f493a963366c1c0918bb1ca8a50f171"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-shadcn-2-vue.json.gz",
+      "gitBlob": "23da5ec9807dc11e161a3d4db92febc20a6cd9f2",
+      "bytes": 2236,
+      "sha256": "2337fd48101340860dad65c61dbeb153ba59afdaf67dfa694faf04233cc9c411",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-shadcn-2-vue.json.gz",
+      "originalCommit": "53d3bc3c8f493a963366c1c0918bb1ca8a50f171"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-shadcn-3-vue2.json.gz",
+      "gitBlob": "7a8d044d3ae761968977eebb65ed67c9adb2a200",
+      "bytes": 2237,
+      "sha256": "800a765136d0203db49180f6ca476b4402c8406b73e7ae153a85df00e24a3448",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-shadcn-3-vue2.json.gz",
+      "originalCommit": "53d3bc3c8f493a963366c1c0918bb1ca8a50f171"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-shadcn-4-wc.json.gz",
+      "gitBlob": "d289e373cab45da2c44dd364f9b63c1bf1176f19",
+      "bytes": 2233,
+      "sha256": "1153686a578b56a6a25b7f3ffb7a3df2fd88456aa380f5487a782ef891d12954",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/candidate-docs-shadcn-4-wc.json.gz",
+      "originalCommit": "53d3bc3c8f493a963366c1c0918bb1ca8a50f171"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/layout-brutalist-original.json.gz",
+      "gitBlob": "6e0653a19c59207a5c4be1e1d5e1dce3b82e0d12",
+      "bytes": 892,
+      "sha256": "817d7422dde3376c9ee76f16934a3f89df8dc07b41dcb0ca2c5bd2b79a40b1be",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/layout-brutalist-original.json.gz",
+      "originalCommit": "53d3bc3c8f493a963366c1c0918bb1ca8a50f171"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/layout-docs-exact-order.json.gz",
+      "gitBlob": "fb7805df4193145fc2325f115e9175b6f224b502",
+      "bytes": 620,
+      "sha256": "7e25e2c894895d3b8defe8e48e5c51e7edf7d16764e0f6cbcfb29f2ab84b8509",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/layout-docs-exact-order.json.gz",
+      "originalCommit": "53d3bc3c8f493a963366c1c0918bb1ca8a50f171"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/liquid-button-current-baseline.json.gz",
+      "gitBlob": "292cbd5c743ad1d51912d4df0dacc69b82217cd4",
+      "bytes": 997,
+      "sha256": "742129d7d99ecaf51ca544856e9713bcbe423610a0dea0d87e6842f3da711cc6",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/liquid-button-current-baseline.json.gz",
+      "originalCommit": "53d3bc3c8f493a963366c1c0918bb1ca8a50f171"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/liquid-button-native-roles.json.gz",
+      "gitBlob": "afddce2e31fb2c9b0eaeeac6e5332ef80b91aefd",
+      "bytes": 516,
+      "sha256": "786bd97c95e917b90e5597365c6014f3e15fe22d05363a079420c10d2f270f72",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/liquid-button-native-roles.json.gz",
+      "originalCommit": "53d3bc3c8f493a963366c1c0918bb1ca8a50f171"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/negative-docs-brutalist-0-wc.json.gz",
+      "gitBlob": "2481bfd5cf53101f27e0abf926e4be55c46bb3b6",
+      "bytes": 2086,
+      "sha256": "d6ae253274058d06b8b448a3f7e9031d17abd1d1d2f2ef91b9757ded55cf07a8",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/negative-docs-brutalist-0-wc.json.gz",
+      "originalCommit": "53d3bc3c8f493a963366c1c0918bb1ca8a50f171"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/negative-docs-brutalist-1-react.json.gz",
+      "gitBlob": "5833ea6aa6e13381a6ef2a13b0cb85886484252b",
+      "bytes": 2075,
+      "sha256": "35ffd06f5ae4e58c81454d00492e539c1be51b06d4b10d3f2932fc59a6257cf5",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-docs-flow-and-liquid-public-consumers/negative-docs-brutalist-1-react.json.gz",
+      "originalCommit": "53d3bc3c8f493a963366c1c0918bb1ca8a50f171"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/brutalist-remaining-current.json.gz",
+      "gitBlob": "67aad41c930a3fc410632c2bbf00e4e3be6bf49b",
+      "bytes": 1065,
+      "sha256": "26caa3165c2e6be971508ad07953950237ca7d217229294e8f6c02f0ef3a0d9d",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/brutalist-remaining-current.json.gz",
+      "originalCommit": "5c79265311db7d8f3b7ff5b32c5442c99876b207"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/brutalist-remaining-flat.json.gz",
+      "gitBlob": "0cd0865f5788931e33fbbfc84987dae73e057d7f",
+      "bytes": 1155,
+      "sha256": "3067b90aea65b331952ef69b8d7a8fc25c262f3efd1b0070e962c57da2803bd2",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/brutalist-remaining-flat.json.gz",
+      "originalCommit": "5c79265311db7d8f3b7ff5b32c5442c99876b207"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hover-card-exact-owner.json.gz",
+      "gitBlob": "336f1c8242a9292b3a1f77409cbb2b3862a4887f",
+      "bytes": 744,
+      "sha256": "6fc71b9a71be672ab8c339b48389214fb2d789e4e135702be15072feb34a22cc",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hover-card-exact-owner.json.gz",
+      "originalCommit": "5c79265311db7d8f3b7ff5b32c5442c99876b207"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-candidate-unit.log.gz",
+      "gitBlob": "cd1035838f4a196a756b952f1dde1b83e91ff4a6",
+      "bytes": 20727,
+      "sha256": "47093a4e9356360efe0beeb70a67eacc95ac39e5a03506f427928c6548d8cf36",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-candidate-unit.log.gz",
+      "originalCommit": "5c79265311db7d8f3b7ff5b32c5442c99876b207"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-negative-unit.log.gz",
+      "gitBlob": "8bc64a13892948af3e572ab90f2668697214e97a",
+      "bytes": 19324,
+      "sha256": "5e4eecb4c9a12d41bd23e614b2ba3132e9387c2ac58d04116bb128a3a2a1d0a3",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-negative-unit.log.gz",
+      "originalCommit": "5c79265311db7d8f3b7ff5b32c5442c99876b207"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-prototype-catalog.log.gz",
+      "gitBlob": "02338db1370c6778eae52692ee930963a1947dca",
+      "bytes": 539,
+      "sha256": "89ece4f113b4b9a4e8bc55b70b97fb30b773ed59fb6f3bf6d087b2eb97127523",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-prototype-catalog.log.gz",
+      "originalCommit": "5c79265311db7d8f3b7ff5b32c5442c99876b207"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-public-docs-final.log.gz",
+      "gitBlob": "438be5b0e8c85a77d15087e876c64c587ccd7bce",
+      "bytes": 229,
+      "sha256": "8e2e24274c7b326bdf8711f41a3835199189fe1b7d295ed88ff2dcf553675c22",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-public-docs-final.log.gz",
+      "originalCommit": "5c79265311db7d8f3b7ff5b32c5442c99876b207"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-public-docs.log.gz",
+      "gitBlob": "438be5b0e8c85a77d15087e876c64c587ccd7bce",
+      "bytes": 229,
+      "sha256": "8e2e24274c7b326bdf8711f41a3835199189fe1b7d295ed88ff2dcf553675c22",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-public-docs.log.gz",
+      "originalCommit": "5c79265311db7d8f3b7ff5b32c5442c99876b207"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-spec-authoring-inprocess.log.gz",
+      "gitBlob": "85a5e6354abef89cc4c1e73572027b24b132d638",
+      "bytes": 108,
+      "sha256": "0b4e4a46304d1fe9f70922d533b26005b28e92b743f6b5cbd13cb057600e013a",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-spec-authoring-inprocess.log.gz",
+      "originalCommit": "5c79265311db7d8f3b7ff5b32c5442c99876b207"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-spec-authoring.log.gz",
+      "gitBlob": "74bbfac43b6c80e4ce5b6d71fe32b10e8024b611",
+      "bytes": 541,
+      "sha256": "cb81f4da17ad30d54a75428102d913b5d2765351bcdacfa5fe9275060b50183d",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-spec-authoring.log.gz",
+      "originalCommit": "5c79265311db7d8f3b7ff5b32c5442c99876b207"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-workspace-generate-inprocess.log.gz",
+      "gitBlob": "8f85d9d0937c5e5baf551d931e81e3f59ee132b1",
+      "bytes": 89,
+      "sha256": "bec5c823de73d4950752d137333709a3ad4f474d80227685f523095a74ffa0fe",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-workspace-generate-inprocess.log.gz",
+      "originalCommit": "5c79265311db7d8f3b7ff5b32c5442c99876b207"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-workspace-generate.log.gz",
+      "gitBlob": "afa65f1092634d716b4c58f5a4cfb27a8fd06570",
+      "bytes": 606,
+      "sha256": "24dfccfeb04b38d507858131166d22ff8759c152615d8dd6d21bc12a01bf765f",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/hovercard-workspace-generate.log.gz",
+      "originalCommit": "5c79265311db7d8f3b7ff5b32c5442c99876b207"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/source-history.json.gz",
+      "gitBlob": "825652afa54f2b593ae6da09a454c0efee907a01",
+      "bytes": 7728,
+      "sha256": "863f0a6f2f3d8fcc18489f60d5e9b60e475a9f6a2b79e4abc62c1a763b669033",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-hover-card-depth-reconciliation/source-history.json.gz",
+      "originalCommit": "5c79265311db7d8f3b7ff5b32c5442c99876b207"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/clean-cli-closure.tar.gz",
+      "gitBlob": "19748bfb3ad8f749b2c1428f615fa00bf57fc456",
+      "bytes": 74773,
+      "sha256": "0d7ba6fed925cd328392210bdc8482082ed6e0be1f254c92e8319defd1a372a0",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/clean-cli-closure.tar.gz",
+      "originalCommit": "9d5fb5b19e7038fdbf38d6dab3077e7b7b4c7608"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/generation-check.log.gz",
+      "gitBlob": "287a8ef3dfe36ba7dc898260bb928e6a87d1464e",
+      "bytes": 68,
+      "sha256": "b82f5116a8614535af357a916e141458f36f948d5fa674e19009c50211c7bfbb",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/generation-check.log.gz",
+      "originalCommit": "9d5fb5b19e7038fdbf38d6dab3077e7b7b4c7608"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/generation.log.gz",
+      "gitBlob": "b065effee6f72d8e5ce38f109b4c706f7dfcb671",
+      "bytes": 81,
+      "sha256": "323cc6ce2bf23e0ca89db709198800143d8d4cb3b9082551936bc0b6423e0d8b",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/generation.log.gz",
+      "originalCommit": "9d5fb5b19e7038fdbf38d6dab3077e7b7b4c7608"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate-react-dark-focus.png",
+      "gitBlob": "5f2591707435615b048392bb0dd5383fb22da4b2",
+      "bytes": 6744,
+      "sha256": "9bca49e87b0f6d784ccc159a1526104c948e121f4333c4c719e0c6f0dba7ff38",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate-react-dark-focus.png",
+      "originalCommit": "1c4a23455175ec65d3b41a630cfa9797d74a721d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate-react-light-focus.png",
+      "gitBlob": "cb4fe402dee263204d086c707879a53cc2ece3e1",
+      "bytes": 6650,
+      "sha256": "428f0fb1efbae06a7445386fc70dba686ac9da8752b7e887a98012502fda55f7",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate-react-light-focus.png",
+      "originalCommit": "1c4a23455175ec65d3b41a630cfa9797d74a721d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate-vue-dark-focus.png",
+      "gitBlob": "5f2591707435615b048392bb0dd5383fb22da4b2",
+      "bytes": 6744,
+      "sha256": "9bca49e87b0f6d784ccc159a1526104c948e121f4333c4c719e0c6f0dba7ff38",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate-vue-dark-focus.png",
+      "originalCommit": "1c4a23455175ec65d3b41a630cfa9797d74a721d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate-vue-light-focus.png",
+      "gitBlob": "cb4fe402dee263204d086c707879a53cc2ece3e1",
+      "bytes": 6650,
+      "sha256": "428f0fb1efbae06a7445386fc70dba686ac9da8752b7e887a98012502fda55f7",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate-vue-light-focus.png",
+      "originalCommit": "1c4a23455175ec65d3b41a630cfa9797d74a721d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate-vue2-dark-focus.png",
+      "gitBlob": "5f2591707435615b048392bb0dd5383fb22da4b2",
+      "bytes": 6744,
+      "sha256": "9bca49e87b0f6d784ccc159a1526104c948e121f4333c4c719e0c6f0dba7ff38",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate-vue2-dark-focus.png",
+      "originalCommit": "1c4a23455175ec65d3b41a630cfa9797d74a721d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate-vue2-light-focus.png",
+      "gitBlob": "cb4fe402dee263204d086c707879a53cc2ece3e1",
+      "bytes": 6650,
+      "sha256": "428f0fb1efbae06a7445386fc70dba686ac9da8752b7e887a98012502fda55f7",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate-vue2-light-focus.png",
+      "originalCommit": "1c4a23455175ec65d3b41a630cfa9797d74a721d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate-wc-dark-focus.png",
+      "gitBlob": "71c49ac423d7008a40307377aa6ff69c252a9cb3",
+      "bytes": 6730,
+      "sha256": "a77aad6b9026276afb8b6131653fdb5c552692d6dfad30cec8ec1abaf41df5a3",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate-wc-dark-focus.png",
+      "originalCommit": "1c4a23455175ec65d3b41a630cfa9797d74a721d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate-wc-light-focus.png",
+      "gitBlob": "cb4fe402dee263204d086c707879a53cc2ece3e1",
+      "bytes": 6650,
+      "sha256": "428f0fb1efbae06a7445386fc70dba686ac9da8752b7e887a98012502fda55f7",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate-wc-light-focus.png",
+      "originalCommit": "1c4a23455175ec65d3b41a630cfa9797d74a721d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate.json.gz",
+      "gitBlob": "a33bc3e77c76cf00e47470f1e41001f8cbef8298",
+      "bytes": 9355,
+      "sha256": "200d82627845920de5c4bc26ca9576e7a0ae42da3571c1ef5484004f7f11f065",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit-candidate.json.gz",
+      "originalCommit": "9d5fb5b19e7038fdbf38d6dab3077e7b7b4c7608"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit.mts.gz",
+      "gitBlob": "58b86e17bc722e76dddd8a35c82daf5b62ef9fdb",
+      "bytes": 4792,
+      "sha256": "44af80bbfdffae6141c1438aa3e53bb1f54b8578663a837a199e085445c1fee8",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-frame-audit.mts.gz",
+      "originalCommit": "9d5fb5b19e7038fdbf38d6dab3077e7b7b4c7608"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-ring-before.json.gz",
+      "gitBlob": "5444448fadda6a1f9933ee2c18750fbd913b6442",
+      "bytes": 766,
+      "sha256": "a82af0fcd0c3ac70d26b14c1e8b85c00c0a264720e3709241fd709e141436cb0",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-blocked-ring-before.json.gz",
+      "originalCommit": "9d5fb5b19e7038fdbf38d6dab3077e7b7b4c7608"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-candidate-negative-recovered.json.gz",
+      "gitBlob": "1a9118e55c959be87ec065d25571ecbdfd32c10a",
+      "bytes": 4878,
+      "sha256": "4f4a3d6585c219e2436a70784baa4e3350c645e46e6ca8ad48bf10fb5fca66b7",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-candidate-negative-recovered.json.gz",
+      "originalCommit": "9d5fb5b19e7038fdbf38d6dab3077e7b7b4c7608"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-disclosure-candidate-unit-recovered.json.gz",
+      "gitBlob": "ef4f9b08b0c8d9c36305239d4fc0c16cc481bf01",
+      "bytes": 5089,
+      "sha256": "5b8a9f443a4dc61ce15af728f4be3c5a1ba84c57e6b6fc4a86e8eeeb33c83f38",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-disclosure-candidate-unit-recovered.json.gz",
+      "originalCommit": "9d5fb5b19e7038fdbf38d6dab3077e7b7b4c7608"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-disclosure-candidate.json.gz",
+      "gitBlob": "c74786912a3af48b4005e44857f4a3ddd9a16889",
+      "bytes": 1521,
+      "sha256": "c9ac6810819912c93cdd7fea4518ef451078b108147f0650ad22c5ad4bf261a4",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-disclosure-candidate.json.gz",
+      "originalCommit": "9d5fb5b19e7038fdbf38d6dab3077e7b7b4c7608"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-disclosure-native.mts.gz",
+      "gitBlob": "48f91699401a4d8e42907d4eb66587e86734a104",
+      "bytes": 4252,
+      "sha256": "9d713a6be769908ad2fa5a434387374b255f85c47065b3be3dc0c95df7fc28f3",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-disclosure-native.mts.gz",
+      "originalCommit": "9d5fb5b19e7038fdbf38d6dab3077e7b7b4c7608"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-disclosure-owned-candidate.json.gz",
+      "gitBlob": "1850dbf86e7ca0493b5ef0d774ffd78298000ed1",
+      "bytes": 40730,
+      "sha256": "cd6adcfbed0d07d9df54e9c2c6ccc5fd7eeea7e73b02ed37b2039db91d1ca621",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-disclosure-owned-candidate.json.gz",
+      "originalCommit": "9d5fb5b19e7038fdbf38d6dab3077e7b7b4c7608"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-disclosure-serialized-candidate.json.gz",
+      "gitBlob": "5f163bc64a3128075904f9e1f675462ad196fb5d",
+      "bytes": 64519,
+      "sha256": "6d1ebac2f8885616e50f8d59b62e8c80eb1158215b5d3341f3666a9e70fd80b5",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-disclosure-serialized-candidate.json.gz",
+      "originalCommit": "9d5fb5b19e7038fdbf38d6dab3077e7b7b4c7608"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-hover-fixture-candidate-unit-recovered.json.gz",
+      "gitBlob": "184e79f9f2b45bed2c79fc429d87eeb77d352239",
+      "bytes": 6778,
+      "sha256": "5004748c932727906e0861512a89f5b10ceaf05c69d2c4a2078a4fbc6376a436",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-hover-fixture-candidate-unit-recovered.json.gz",
+      "originalCommit": "9d5fb5b19e7038fdbf38d6dab3077e7b7b4c7608"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-hover-paint-before.json.gz",
+      "gitBlob": "ea163bba7b34dbe463a00a9ced36c75d38880020",
+      "bytes": 5090,
+      "sha256": "5fdc36b3b4fa46f97f2e869669aab5b55eec73cd0a02c0338910b4a9bab23196",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-hover-paint-before.json.gz",
+      "originalCommit": "9d5fb5b19e7038fdbf38d6dab3077e7b7b4c7608"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-negative-inputs.json.gz",
+      "gitBlob": "bf945797595260cc37070dc2d8e80e21dce95b5f",
+      "bytes": 477,
+      "sha256": "ee1b705164c6af7256fceb19eac18dd5cc737f26e8177bc817069d65238bb799",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/liquid-negative-inputs.json.gz",
+      "originalCommit": "9d5fb5b19e7038fdbf38d6dab3077e7b7b4c7608"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/official-liquid-hover-138949906827.log.gz",
+      "gitBlob": "fe4bf97f26c5e5f2462c4d6a807071d099f1af21",
+      "bytes": 14074,
+      "sha256": "36451959ce391f3bae9be3a9349694406b501afda41a80918d6774abbfc41d4b",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-liquid-disclosure-paint-and-reservation/official-liquid-hover-138949906827.log.gz",
+      "originalCommit": "9d5fb5b19e7038fdbf38d6dab3077e7b7b4c7608"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-badge-clipping/cb5d-badge-retained.json.gz",
+      "gitBlob": "57fbee2d1ac55a61e3948a10be53a11c92d18368",
+      "bytes": 5000,
+      "sha256": "66dd946e9a6af71ad9800433d3d0b0b6559faef97d765b43a9a52fd787089ab4",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-badge-clipping/cb5d-badge-retained.json.gz",
+      "originalCommit": "fe1be37ef68a2d5ec69f6aea80b2d5e9630e2b5c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-badge-clipping/shadow-s1-candidate.json.gz",
+      "gitBlob": "4d9a5145a8f575ac27e1c908ba8da2e90797ee52",
+      "bytes": 722,
+      "sha256": "d428e951d35a3207c5f02b21cd20c7d35891cfceab6d6871d5d530414bab1d86",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-badge-clipping/shadow-s1-candidate.json.gz",
+      "originalCommit": "fe1be37ef68a2d5ec69f6aea80b2d5e9630e2b5c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342038.log.gz",
+      "gitBlob": "fa77f0ba237e0f6e643e436ed7c27da95ed1f792",
+      "bytes": 18948,
+      "sha256": "12850dae5ce096a4750c227c392efba1f998ac2670a208e0c405658417e3838c",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342038.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342041.log.gz",
+      "gitBlob": "e1322fc7b887bcd33843fa6d8be09ac6d7bd7d4f",
+      "bytes": 38171,
+      "sha256": "d8a6efd3a798d8d661921e8390877f69378b022bd3ef1921f1002e398a450f2d",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342041.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342044.log.gz",
+      "gitBlob": "828bf1f470a76fead901efbf5721a91c8da703c9",
+      "bytes": 40812,
+      "sha256": "a0484f72b81e3b19d405734de70e0313f3b5d47fd0d91fa06aa411dec1043f1e",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342044.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342062.log.gz",
+      "gitBlob": "668a012f4e98aa487f4eb29adce85728f706b11d",
+      "bytes": 63057,
+      "sha256": "b253a28eeef01e8fdae96ca7473707e107a751a7c56cc557bf0bf6876c2a2670",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342062.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342105.log.gz",
+      "gitBlob": "ebdec51419f31ec2c50f50efd7b07aafe8e8e34b",
+      "bytes": 20029,
+      "sha256": "f4ff75ca2a252ea4046a96cf18597a81c5b65950db8645a741e2a2a5b7c35f67",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342105.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342106.log.gz",
+      "gitBlob": "b9edd2af3dd5343a7b1184e13a57ddfcc5d0d52e",
+      "bytes": 19683,
+      "sha256": "ea5755364a666a4f5e8dbee83df3e723c24d4bd69958241b60724da51eb4b923",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342106.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342112.log.gz",
+      "gitBlob": "632d29ddc8d7b438a161d5adfcb3e4fbb8a23646",
+      "bytes": 26466,
+      "sha256": "560851ce15e67a997491eadc2b075dddfc62cd6bbbe88745a51b53a061421dc2",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342112.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342119.log.gz",
+      "gitBlob": "43f72afd98aecd924d9d6b857f5469d498a07b7b",
+      "bytes": 47922,
+      "sha256": "88a4ab6e477750cb61c1af2ce84efb8a6bede37f30efd706dcfb511a9c5b672f",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342119.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342121.log.gz",
+      "gitBlob": "a11842bf2d7e0713b88fe0f9955b06a0b4cb54b1",
+      "bytes": 24507,
+      "sha256": "6f9a9bfd7eefb5ac01cd9b6841b71846756399f167e6810447227bb958d8e615",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342121.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342125.log.gz",
+      "gitBlob": "9744861e0f61218656d42a871813de4082e33018",
+      "bytes": 45213,
+      "sha256": "9c0e19d4de414f34f737294114cbcc9ff2b42e58cc5ec9686e69937ac6b094e6",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342125.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342131.log.gz",
+      "gitBlob": "116d535adef534694f99d52d956be17d159560b1",
+      "bytes": 33923,
+      "sha256": "a36f2a97c9b07414a2318ac70cc7f394c38ecc32b01ab09323070b5da94accab",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342131.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342140.log.gz",
+      "gitBlob": "b5c26ff43cd0e68cfdf13b643898424b825776a1",
+      "bytes": 28602,
+      "sha256": "60875dead0d29791649d33cb255055f91d3b8a2d5717cd4190659526bfa9b3cb",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342140.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342142.log.gz",
+      "gitBlob": "3bd8d095ef16e3d1e76c609edf0643e398c722b5",
+      "bytes": 16521,
+      "sha256": "30d2d09d6373488643bd1ad5b343e9627139ad0b12cb295249e1ddf4c49a2774",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342142.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342143.log.gz",
+      "gitBlob": "7a6087e89379e13d12b65aee1188f68758cba528",
+      "bytes": 25731,
+      "sha256": "311cc60ef35e3b29739b4437127aa733ff3604057cc44a18f41b4ea82cb2844a",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342143.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342144.log.gz",
+      "gitBlob": "90764448c1c1fd54c4319562d68442262801bdcd",
+      "bytes": 41300,
+      "sha256": "af7abaf0b4b606bc856f700ed7be2eae2be8b0ac7ba847750a60517c0e2d25e7",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342144.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342209.log.gz",
+      "gitBlob": "2685d5cd57b68d1158d7b56c8daad565abfc3419",
+      "bytes": 35057,
+      "sha256": "56eb08c3cabc96389edd2f1f7d49d83b21f34897ef994810da813986cc671856",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342209.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949343990.log.gz",
+      "gitBlob": "2cb06eb7760342fb9f7f2e3544ed6928bcd09db3",
+      "bytes": 25898,
+      "sha256": "187badb5f7e540e05778cee9d9b406cfd6a28a645d6fb92a02021c54ac51bfa4",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949343990.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949344068.log.gz",
+      "gitBlob": "65cada832c95d1a3d2ebfb226f6650de6134ee19",
+      "bytes": 35578,
+      "sha256": "1d02cf586fe32dc9e986d9b7eea983c01702c981ea832d48a87d72e0c53472c9",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949344068.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/runtime-controls.log.gz",
+      "gitBlob": "c2bcf1a9ed4f3539d1a00ee280f957409a0bc04c",
+      "bytes": 6584,
+      "sha256": "c9c5467fbfe05002197ddc357aedd00194ef9ddbd00a3966873d5f61dc1f8631",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-costs/runtime-controls.log.gz",
+      "originalCommit": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-repairs/accordion-bootstrap-presence.json.gz",
+      "gitBlob": "c280edce24f65aa451a2b50a23b4ec49cb4bc234",
+      "bytes": 929,
+      "sha256": "32b8a00dbe6fdc1812ea130f0f47f81367e1b4076f1041752f0b5479f171f4a4",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-repairs/accordion-bootstrap-presence.json.gz",
+      "originalCommit": "ac6ee319ab94131df27d754f89438406faad46b8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-repairs/code-grammar-candidate-phases.jsonl.gz",
+      "gitBlob": "2f2129ae811421e9006309c69cdd515306849c32",
+      "bytes": 2780,
+      "sha256": "17c6b62b8afce903516ce32b9eb86abb44af8a8bdd094cc1b28615cacf3e10a6",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-repairs/code-grammar-candidate-phases.jsonl.gz",
+      "originalCommit": "ac6ee319ab94131df27d754f89438406faad46b8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-repairs/code-grammar-initial-snapshot.json.gz",
+      "gitBlob": "dfe3dc9c9b75af2549905bc18734701b76dc3689",
+      "bytes": 1158,
+      "sha256": "89cd2eca1ade1e541f1bb4ed6f02e28f98cb9d68e84a3c4bfe1d0b6d9ef3255c",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-repairs/code-grammar-initial-snapshot.json.gz",
+      "originalCommit": "ac6ee319ab94131df27d754f89438406faad46b8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-repairs/code-grammar-native-diagnostic.json.gz",
+      "gitBlob": "d511972abcbb24b7cdd9b428820d1ec8fd4c786f",
+      "bytes": 1469,
+      "sha256": "8eee627e975b32afb6ab87bacab06d23526ff584b9b43be5d5eb3bc38f6e81b9",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-repairs/code-grammar-native-diagnostic.json.gz",
+      "originalCommit": "ac6ee319ab94131df27d754f89438406faad46b8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-repairs/code-grammar-negative-phases.jsonl.gz",
+      "gitBlob": "056121130d3153674aa6d488516d1557b2ff4133",
+      "bytes": 2031,
+      "sha256": "bb6d73cc30df6ffe9e6b1f479b86635427f6d8a676c826d6957bffb53e37fc38",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-repairs/code-grammar-negative-phases.jsonl.gz",
+      "originalCommit": "ac6ee319ab94131df27d754f89438406faad46b8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-repairs/dialog-wrap-current.json.gz",
+      "gitBlob": "cc00e7c9a743e7fb026206eaaa8ec1fae0c0fe01",
+      "bytes": 623,
+      "sha256": "e4b197947ac4121e3220daaa31acbbca406e62472b07f293276aa8cae1d60b24",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-repairs/dialog-wrap-current.json.gz",
+      "originalCommit": "ac6ee319ab94131df27d754f89438406faad46b8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-repairs/select-first-paint-owner.json.gz",
+      "gitBlob": "cd8673f3ecf115a27e5b281f064b2e6239a4dfcc",
+      "bytes": 618,
+      "sha256": "1e35db67b7d7015275118d371c0afb33256de5acedbe79cc2c84dedd392595eb",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-repairs/select-first-paint-owner.json.gz",
+      "originalCommit": "ac6ee319ab94131df27d754f89438406faad46b8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/card-overflow-enlarged-before.json.gz",
+      "gitBlob": "eff8422580838ea8696fcbce11b23697d5772799",
+      "bytes": 1404,
+      "sha256": "6332505ff85abd208bf8b64d4903e6a079e7b8a878e3eb275c15060099ee72a7",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/card-overflow-enlarged-before.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/code-scroll-fresh-baseline.json.gz",
+      "gitBlob": "bc7b69aa76f24346d62a7431767b927c04a73143",
+      "bytes": 915,
+      "sha256": "29f20d015346aa5064c11e0362efb5d5c16134242829df4c64d575bc53de84fd",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/code-scroll-fresh-baseline.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/code-scroll-fresh-candidate.json.gz",
+      "gitBlob": "34ea03b31baa49632811142cb53ac1926e1644bb",
+      "bytes": 698,
+      "sha256": "eba5487dc247354259baa5467c411a1ff02f789977d9f6470808bed9bbb48bc0",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/code-scroll-fresh-candidate.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/code-scroll-source-guard-after.json.gz",
+      "gitBlob": "0786e3ebc99c92261d9e40895f4c3771dd1fcec4",
+      "bytes": 1244,
+      "sha256": "6ba991c26ab0297296953e9e9d1027216c7f3d172bdd0b32d6e9a61e6d76a9d0",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/code-scroll-source-guard-after.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/collapsible-full-candidate.json.gz",
+      "gitBlob": "6a8fa6fc64fce4247769eb1109fd2678b04439ee",
+      "bytes": 1221,
+      "sha256": "f95762b163cfc795e183f41720df8871ca915264ebeb5772cef225889227a3ee",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/collapsible-full-candidate.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/collapsible-paint-diagnostic.json.gz",
+      "gitBlob": "819ba51ce9d0a99d871aa63a312dd2c0d36ac460",
+      "bytes": 2374,
+      "sha256": "2410b4ed0609978e43f0d3fb3eeaf5ae4d59d5fefe226de87fd6d9301cfa67ba",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/collapsible-paint-diagnostic.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/collapsible-profile-css-merged-after.json.gz",
+      "gitBlob": "669d48484f4f50c9e6948f5dac6064fdf880775b",
+      "bytes": 1459,
+      "sha256": "c718f3639ae0477fdffa966a12e317b52df0161bd2e3679c708d0a63e1a1d52c",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/collapsible-profile-css-merged-after.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/collapsible-wc-baseline.json.gz",
+      "gitBlob": "40fe867303656cec963c70f6d8c703cb3a9c621e",
+      "bytes": 1334,
+      "sha256": "e749a07d54dac5ea9529a28b3818cb444507ba9070fba664c848f0d08d5cefee",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/collapsible-wc-baseline.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/columns-brutalist-candidate.json.gz",
+      "gitBlob": "0d4146242bb142c5833615015e9c06e6e8809847",
+      "bytes": 754,
+      "sha256": "cb67de1fa89a6cb6a88a6e8b6249a97f945a57d829798c1f2cc3bacd0950b56e",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/columns-brutalist-candidate.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/composed-full-candidate.json.gz",
+      "gitBlob": "523efba665378027061a208baa97b405c648e394",
+      "bytes": 550,
+      "sha256": "afdfde4cd33ea0dd491fa610832ece1f70f74b7ddd234ab082e51b1d464ca523",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/composed-full-candidate.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/controls-baseline.json.gz",
+      "gitBlob": "44666135b581d51ce55d07f7bef818b0f90e1f39",
+      "bytes": 1047,
+      "sha256": "cd2524060f02a03a38552c970f54651846cd227a11c56e6eed843e2c1077e332",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/controls-baseline.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/controls-candidate.json.gz",
+      "gitBlob": "7ddb3fd1f2ce91800bcd512bf955a1c66b6d5ba7",
+      "bytes": 786,
+      "sha256": "38cf660afe12166ceb957c8bba03945e542bf81bd86281afcdddbcb99ee6efc6",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/controls-candidate.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/docs-reading-nav-baseline.json.gz",
+      "gitBlob": "df483c204837639294f70cc196abe7d24b981df1",
+      "bytes": 1033,
+      "sha256": "f3d5e5796faed9982d317f88e9290666dad693c10eb07dc0c8e3bcc87ad16461",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/docs-reading-nav-baseline.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/docs-reading-nav-candidate.json.gz",
+      "gitBlob": "d2c2fd48acdfc714bc772ea7245b1f053536894c",
+      "bytes": 695,
+      "sha256": "83b8e68e6870a4262b83ec82fe36ab93691fc2b9c78dbdbec672af53a33af15a",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/docs-reading-nav-candidate.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase1.sh.gz",
+      "gitBlob": "c99e634141c039cea2a210e3d4ebbb402e936d96",
+      "bytes": 745,
+      "sha256": "fd80f141075158be5639f5627239fa74237ee4bf152ae33d398158ce02c5796f",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase1.sh.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase2-evidence--code-scroll-chain--observations.json.gz",
+      "gitBlob": "80a3e106759ce322b4a4e3761701f3c108eb53f4",
+      "bytes": 9351,
+      "sha256": "4eb5b7dd6842da5abb4da8d5b5a73beb426c20229ea7cb2031471c19bf6a196b",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase2-evidence--code-scroll-chain--observations.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase2.sh.gz",
+      "gitBlob": "43c420f4e01429f553a2cc509b03cf4c1ddcaa82",
+      "bytes": 631,
+      "sha256": "cc9e44481e2169e603a5f75f566275db4818bd21f3ef6c58eaf2d3437446522b",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase2.sh.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--bootstrap-2-3-2-react-open.json.gz",
+      "gitBlob": "d6a68d0305b9868412dd045f76886ca4c3988edd",
+      "bytes": 2282,
+      "sha256": "3f6860379f4e75301df808942074c8f51532b4ad3e8f69dc3c98368d910fecc2",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--bootstrap-2-3-2-react-open.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--bootstrap-2-3-2-vue-open.json.gz",
+      "gitBlob": "c1d83e0b3fea139418e0332f265338616b92a826",
+      "bytes": 2279,
+      "sha256": "7043ee438d213edf48d208823412bd5a2e9a49f7db3c6b9bb1ab22185b78ff68",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--bootstrap-2-3-2-vue-open.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--bootstrap-2-3-2-vue2-open.json.gz",
+      "gitBlob": "2a119a1f249125bb4fe8a5d8fe3dae784d8bee22",
+      "bytes": 2281,
+      "sha256": "9e640594d3973856c4eb3510b3d5651f4d79bbd11fb0ab89ad7033bdce356b22",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--bootstrap-2-3-2-vue2-open.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--bootstrap-2-3-2-wc-open.json.gz",
+      "gitBlob": "9ced6d84bbc68d687b87e9567218f9a1b7446016",
+      "bytes": 2368,
+      "sha256": "424fe99940fe83add72de533b88832e926e855c5f219c6484dbaf36ee797d9eb",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--bootstrap-2-3-2-wc-open.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-react-320-text200-dark-open.json.gz",
+      "gitBlob": "7b70a1e6ec352f9a82c8353cf6536289b6e5c71d",
+      "bytes": 2490,
+      "sha256": "46f4a274488371841b7cea073688392659bf458af6f45a263c08924bcd358e4e",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-react-320-text200-dark-open.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-react-320-text200-light-open.json.gz",
+      "gitBlob": "3cc0f170e3e357477563b36e173a2ddeef548d8b",
+      "bytes": 2491,
+      "sha256": "05ccf33f078c4e91408bd5ac37e014bb3c1a82e18cb6a14063e784fc02186195",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-react-320-text200-light-open.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-vue-320-text200-dark-open.json.gz",
+      "gitBlob": "0fda3a910beac13f065c84711a7eadcda52916ed",
+      "bytes": 2484,
+      "sha256": "7fbfede011afebb255c6b46d5bc6b54a9cb245dfa0a45547abe3394a3caad235",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-vue-320-text200-dark-open.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-vue-320-text200-light-open.json.gz",
+      "gitBlob": "80d8a5ada6871a71f7dd95a1920150cd38614944",
+      "bytes": 2484,
+      "sha256": "3b34cd68a93d3bad45d8a4a6068bccdb4573ce3754756e4d83f33df9bd7712e5",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-vue-320-text200-light-open.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-vue2-320-text200-dark-open.json.gz",
+      "gitBlob": "e2eb9f3d41794272001a7612e7b653e44c7c6e4a",
+      "bytes": 2478,
+      "sha256": "c7c183229f919929655ff9940b470efa83b1f895b7c2d4b46595482a2beee649",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-vue2-320-text200-dark-open.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-vue2-320-text200-light-open.json.gz",
+      "gitBlob": "f00f2f1fc3cdd2c92e56453e58443f9a4444c610",
+      "bytes": 2479,
+      "sha256": "e0a19bd8f69d65752022c804b9c1dc844b7b8761fca0051e82e0e0bb5ab939d6",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-vue2-320-text200-light-open.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-wc-320-text200-dark-open.json.gz",
+      "gitBlob": "533349b06f118bc9ef4d57e4170cd480cf0b35fc",
+      "bytes": 2579,
+      "sha256": "d7b10b469fa3ea21bcd3dbe6a66d5533f9f24bc09869a841798a96e3f8dbf326",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-wc-320-text200-dark-open.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-wc-320-text200-light-open.json.gz",
+      "gitBlob": "7419c85f8f0589430fb277e3919fa89c5c530b35",
+      "bytes": 2580,
+      "sha256": "d00b5bcf66dab0dde352f7ca27d03ef4fe9063e6455cd99834dc7a1947c426a0",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-wc-320-text200-light-open.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-evidence--code-scroll-chain--observations.json.gz",
+      "gitBlob": "10142b8af21b4a74115273a7206ddd06a83f1273",
+      "bytes": 13468,
+      "sha256": "0c607dfb61ae3dc51787002534878abb0c557b0a026eaf18f7048eee53313bfc",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-evidence--code-scroll-chain--observations.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-evidence--release-docs-reading--results.json.gz",
+      "gitBlob": "9f765f70f56aca49dd801155e253d9225a0b1cfc",
+      "bytes": 1372,
+      "sha256": "270069cf04770b258279cf11c8a680712faf85d960573961fcffd2fc0593814c",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-evidence--release-docs-reading--results.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-evidence--release-docs-reading--source.json.gz",
+      "gitBlob": "bdcdcc9b08647febb210f3380cdd1b037de4eec3",
+      "bytes": 987,
+      "sha256": "651ce58cce510b4f1eec1cce999ab7178b08ef1ba3c70e5c4a2ff0414bb75006",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-evidence--release-docs-reading--source.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3.sh.gz",
+      "gitBlob": "195b629b49f283e95cf9ca2020b1c8d7a7504356",
+      "bytes": 803,
+      "sha256": "8466e1216b5b2e180ec3684c15feada8d1a6243fc4c61bc82d0999c78ef49dad",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3.sh.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1188-root16.json.gz",
+      "gitBlob": "af4411286e66fba13037145ee9243ebed023ca01",
+      "bytes": 1550,
+      "sha256": "e1e4a4e025b86aa56241906c358000598541b42385f85833afc605413577a1de",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1188-root16.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1279-root16.json.gz",
+      "gitBlob": "3c7516bf0b96768c2b2ee756eb481d5afef10521",
+      "bytes": 1558,
+      "sha256": "4e09eae7c9a651812d9d8a73cb053c7d04944fd2dc9de43d0833d70a0ce4e0ee",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1279-root16.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1280-root16.json.gz",
+      "gitBlob": "f84a28f85fd4d8c411e04290c2d9cb578390337f",
+      "bytes": 1568,
+      "sha256": "531f5496f7c8d6e4a14df53b4bb9175137faf0e7e825a7592cc50c466ba53b29",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1280-root16.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1440-root16.json.gz",
+      "gitBlob": "cab173cd204f41088c33ac95ee25ca7c04ced196",
+      "bytes": 1556,
+      "sha256": "38cf697ec26204fdfbc7b37509e5cad7c9ead65b7d26ace647e2f4f84c9250b9",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1440-root16.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1440-root20.json.gz",
+      "gitBlob": "681d4e4906ddc9f700be52ed61076b0b82639ece",
+      "bytes": 1562,
+      "sha256": "aff22a2ffb10b98c8ae7d593d3e5a06ad49f2c9b80d2a22673ea9d543827b158",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1440-root20.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1440-root24.json.gz",
+      "gitBlob": "37b1890d5674b6dcce3c69cef9250b966dbab900",
+      "bytes": 1564,
+      "sha256": "add2102ea16824b13f8e4de2fc634f5eab2b94d5d260514a26e0d9437a575099",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1440-root24.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1440-root32.json.gz",
+      "gitBlob": "2460c1e5b8233c4b678dbf9268e4c7bffdc6eb3c",
+      "bytes": 1537,
+      "sha256": "bc72972f0ced17dc39fc0f30849f25916d438da27d129885059cb7182425e27d",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1440-root32.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1920-root16.json.gz",
+      "gitBlob": "0972b76439f70e6cc77df4501531fb18d8616c00",
+      "bytes": 1544,
+      "sha256": "06bf4aeb74864568cc330e22302bb933a1c98d01032c037aa847fddb806ec91a",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1920-root16.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1920-root24.json.gz",
+      "gitBlob": "569e800482339644a2aaeb3a6fc0fbe1385e2053",
+      "bytes": 1570,
+      "sha256": "bb5f952322377b47b329cd9d9a56134c906474c89bf4379506df91ad68d0b4d8",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1920-root24.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-320-root16.json.gz",
+      "gitBlob": "7ccca2bad0d77f27da460a5f96d7f5e33905efe2",
+      "bytes": 1516,
+      "sha256": "5721c769c7df96cb3379bf8f3d7aab593703db5de59cf0cb1aba23b9d3337540",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-320-root16.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-390-root24.json.gz",
+      "gitBlob": "926955ff70b82efda4ee103523d96b9e2eee5598",
+      "bytes": 1516,
+      "sha256": "b6be1cf5402242f3b6237b07e9cab030b7f4861434ac19e4b77e03f24e778737",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-390-root24.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1188-root16.json.gz",
+      "gitBlob": "af4411286e66fba13037145ee9243ebed023ca01",
+      "bytes": 1550,
+      "sha256": "e1e4a4e025b86aa56241906c358000598541b42385f85833afc605413577a1de",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1188-root16.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1279-root16.json.gz",
+      "gitBlob": "3c7516bf0b96768c2b2ee756eb481d5afef10521",
+      "bytes": 1558,
+      "sha256": "4e09eae7c9a651812d9d8a73cb053c7d04944fd2dc9de43d0833d70a0ce4e0ee",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1279-root16.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1280-root16.json.gz",
+      "gitBlob": "f84a28f85fd4d8c411e04290c2d9cb578390337f",
+      "bytes": 1568,
+      "sha256": "531f5496f7c8d6e4a14df53b4bb9175137faf0e7e825a7592cc50c466ba53b29",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1280-root16.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1440-root16.json.gz",
+      "gitBlob": "cab173cd204f41088c33ac95ee25ca7c04ced196",
+      "bytes": 1556,
+      "sha256": "38cf697ec26204fdfbc7b37509e5cad7c9ead65b7d26ace647e2f4f84c9250b9",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1440-root16.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1440-root20.json.gz",
+      "gitBlob": "55771a33e10e57ecbc32dfe3badfa3960ce6118b",
+      "bytes": 1561,
+      "sha256": "6e2c10dda68623777fe8af4b665d6e8d30c6c561468f66ca5d111053b8148b2f",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1440-root20.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1440-root24.json.gz",
+      "gitBlob": "37b1890d5674b6dcce3c69cef9250b966dbab900",
+      "bytes": 1564,
+      "sha256": "add2102ea16824b13f8e4de2fc634f5eab2b94d5d260514a26e0d9437a575099",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1440-root24.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1440-root32.json.gz",
+      "gitBlob": "2460c1e5b8233c4b678dbf9268e4c7bffdc6eb3c",
+      "bytes": 1537,
+      "sha256": "bc72972f0ced17dc39fc0f30849f25916d438da27d129885059cb7182425e27d",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1440-root32.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1920-root16.json.gz",
+      "gitBlob": "0972b76439f70e6cc77df4501531fb18d8616c00",
+      "bytes": 1544,
+      "sha256": "06bf4aeb74864568cc330e22302bb933a1c98d01032c037aa847fddb806ec91a",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1920-root16.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1920-root24.json.gz",
+      "gitBlob": "2687e4537f387e66f742d86fa54de3b8bcd0404c",
+      "bytes": 1572,
+      "sha256": "9c89c033adde2133ce151cacb1fa5e438fe45cf53a1e7a6e08fb9fa1c0bf0582",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1920-root24.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-320-root16.json.gz",
+      "gitBlob": "7ccca2bad0d77f27da460a5f96d7f5e33905efe2",
+      "bytes": 1516,
+      "sha256": "5721c769c7df96cb3379bf8f3d7aab593703db5de59cf0cb1aba23b9d3337540",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-320-root16.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-390-root24.json.gz",
+      "gitBlob": "926955ff70b82efda4ee103523d96b9e2eee5598",
+      "bytes": 1516,
+      "sha256": "b6be1cf5402242f3b6237b07e9cab030b7f4861434ac19e4b77e03f24e778737",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-390-root24.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--zh-cn-brutalist-dark-1440-root16.json.gz",
+      "gitBlob": "ee17d9f22f0d4d90f656cca5aaccdc77f2cb8d5a",
+      "bytes": 1558,
+      "sha256": "9a686a90342523a9ce529c1582e6750e8c103f54af236a9c2658f84b4b4d8bf9",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--zh-cn-brutalist-dark-1440-root16.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--zh-cn-brutalist-dark-1440-root20.json.gz",
+      "gitBlob": "0d47e942c25e72a69de3c07f9f0668be95e2300b",
+      "bytes": 1564,
+      "sha256": "14755dc6a9ed1cc312f25bffc5a09097b181bb3e9d16bd2622f5ed2c9c119aac",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--zh-cn-brutalist-dark-1440-root20.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--zh-cn-brutalist-light-1440-root16.json.gz",
+      "gitBlob": "ee17d9f22f0d4d90f656cca5aaccdc77f2cb8d5a",
+      "bytes": 1558,
+      "sha256": "9a686a90342523a9ce529c1582e6750e8c103f54af236a9c2658f84b4b4d8bf9",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--zh-cn-brutalist-light-1440-root16.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--zh-cn-brutalist-light-1440-root20.json.gz",
+      "gitBlob": "8a309fb5eb32fedde890a6e5ff8a796d14dfb90c",
+      "bytes": 1566,
+      "sha256": "75746e37fc7bbd75c99293cc40ddbf12269013beec67678527aa1b640324be6c",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--zh-cn-brutalist-light-1440-root20.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--switch-press-source-oracle--run.json.gz",
+      "gitBlob": "5fb2fb0e48116e28a5a10126acf85b3edcc9b01c",
+      "bytes": 2010,
+      "sha256": "8a2438fa9be81a17b43ba19c8a135f6ccb0f8c109a57729176268fd7ed029311",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--switch-press-source-oracle--run.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4.sh.gz",
+      "gitBlob": "bb09b403fb4792bdaba8a29783f4a61138346746",
+      "bytes": 501,
+      "sha256": "faab6ef36f051e3330f8c4f852b8b16707ae3aa87c336f1d7b45b8827753515e",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4.sh.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-baseline.json.gz",
+      "gitBlob": "0b3ae782b21082ba798c04a6f6af6b2607770cca",
+      "bytes": 946,
+      "sha256": "1f10bad1acccbed68b5d0344b2d748e38821a72413da6fbcb77620cb9af0abcc",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-baseline.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-full-candidate.json.gz",
+      "gitBlob": "1eb8d9cf2e49f1c2d61fdb7c7c9681c743693dac",
+      "bytes": 777,
+      "sha256": "387c47d465b6bccbe068f040ace9d74e9fb36c17f05362a0dbd4657461612056",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-full-candidate.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--react-initial-entry.json.gz",
+      "gitBlob": "65a0cc4175e95728de6dfbc41a585dd45df748c1",
+      "bytes": 654,
+      "sha256": "c4de1ea55cc492e16594d84947fa14745e75b0ae6a47a9ccf01fa0076a12c640",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--react-initial-entry.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--react-interaction.json.gz",
+      "gitBlob": "5feb660e221474c8bbd14bdbe5cdd68b5163f33d",
+      "bytes": 919,
+      "sha256": "72e212ece89bc429a3eabbf96cbf02903d825a509140c5667b14be9080a0397a",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--react-interaction.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--react-labels.json.gz",
+      "gitBlob": "21f9ac29374e02a95d84829342aef2f28419c0ee",
+      "bytes": 607,
+      "sha256": "9bddd17d0e52f697d5537f08232d2b8915b6202a16ec28eaac8cd3bc6b8d2949",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--react-labels.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue-initial-entry.json.gz",
+      "gitBlob": "9b5d0957b5d35392f994a09a11ac32a1ab33f232",
+      "bytes": 636,
+      "sha256": "e3214156d567761d2dcb58f5e713bb7f54cc0a517ab59a76e548672bccb8d43d",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue-initial-entry.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue-interaction.json.gz",
+      "gitBlob": "16ea92b9496a1a046b3309a96c786aadd3c6ecfc",
+      "bytes": 919,
+      "sha256": "730105198bd92ca5c8f77d50b05877250788f7f84349c01ec1ebf888eba20cd3",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue-interaction.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue-labels.json.gz",
+      "gitBlob": "4b6584270fde82235338c4c37b5f07acdb804fd2",
+      "bytes": 607,
+      "sha256": "181be9a8f2d5ace16fd903c9743cd58b7953b19135320bbae0ae634888252c01",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue-labels.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue2-initial-entry.json.gz",
+      "gitBlob": "f52ea83e92f1ed6920aaeaa807b529f6a4375580",
+      "bytes": 637,
+      "sha256": "c18efbe8514a3257ff20c2b4a2cc56439b25d0c56f0fff33ae9cb1c29ce68a35",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue2-initial-entry.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue2-interaction.json.gz",
+      "gitBlob": "1bac87e052999778e4f27026e0eaabe47e6bf8ff",
+      "bytes": 920,
+      "sha256": "99a5c837ce40df3eddcae03d833d2d824262b4974fa085beafec258ea934edb7",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue2-interaction.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue2-labels.json.gz",
+      "gitBlob": "f01f9e9c0ddaf5b2b6a4f674db4b45ff096c885b",
+      "bytes": 608,
+      "sha256": "937d13744e7d824c0f3003a4dd29cc5ee97436eaaa80373e28d3dc36d2b8dc51",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue2-labels.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--wc-initial-entry.json.gz",
+      "gitBlob": "dd131b55a5ef266b9f0446141ab56af92a54199e",
+      "bytes": 635,
+      "sha256": "872bdd8d9622d3bb0feab286a464860e1112063c5d66d9b45328f80eb32bcb45",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--wc-initial-entry.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--wc-interaction.json.gz",
+      "gitBlob": "15835b7377ef000e0f85b802aa04590688f195e2",
+      "bytes": 941,
+      "sha256": "6a8ad0928db9e17896a33326f4701edc337d43933c07d7f5157783fab6e0f3e1",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--wc-interaction.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--wc-labels.json.gz",
+      "gitBlob": "33eac7092c6e88e5fa1150ff6c72396740c4d22b",
+      "bytes": 596,
+      "sha256": "13ca93be36fb2b521b144c43e965febd65c83c5d82865ba1689f26026d8dfdc1",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--wc-labels.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-rhea-policy-after.json.gz",
+      "gitBlob": "de6fa0798e2ef1ff03372c0ca079d7448efb3c30",
+      "bytes": 8313,
+      "sha256": "a8d01c05a50df6955aba3c3694ec1ff189901b6c107fcc32c8a69e9ac9f1c02c",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-rhea-policy-after.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-wc-candidate.json.gz",
+      "gitBlob": "db71c398969f56ca9f89221c0f54b5459628465c",
+      "bytes": 988,
+      "sha256": "8b6de00a39474b586e4690790f671215a3d78337a0f21c970b39299c543fd520",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-wc-candidate.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-wc-interaction-candidate.json.gz",
+      "gitBlob": "4829033755d813ae4ec68c7ffcabe1862dfe34a4",
+      "bytes": 650,
+      "sha256": "9b6c7f236f2316ad793d1461536822c0e4bbebab2068524c2357fe5528b6faf2",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-wc-interaction-candidate.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/scoped-tsconfig.json.gz",
+      "gitBlob": "7a077d1932dcb7d805840d19578233384584d9e3",
+      "bytes": 918,
+      "sha256": "7d763f2c01eef3a1b8708f033064fa96118669fcbbdc4395092e9613edab72fb",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/scoped-tsconfig.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/scoped-types.log.gz",
+      "gitBlob": "d4b9926df0b7defceb6caf0b474c4a190c5ca8f0",
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/scoped-types.log.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/source-binding.json.gz",
+      "gitBlob": "5026f410ac0f9c1c4338d1fa8e6c8b716c5c5d8d",
+      "bytes": 1345,
+      "sha256": "7b6e10b7a783ab025eab44ab0f62aae1f56cbb58046f73f3685f661bc83fe302",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/source-binding.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/source-overlay-files.json.gz",
+      "gitBlob": "6c9e1f023a6d09d3650997069b69ebd8e2cfe0ae",
+      "bytes": 2300,
+      "sha256": "c9b473fe14c7f37807323780ea914925a640f759456546a09d699cb3f11ea4d7",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/source-overlay-files.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/sprint-baseline-ready.json.gz",
+      "gitBlob": "23c3de53d96bf0b754094c6978a5c4fee5eda94c",
+      "bytes": 1467,
+      "sha256": "9507f591e4ca81c29fa9f92b8177faf4e94bdd7af7fd7fc7e5eacd214e801bac",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/sprint-baseline-ready.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/sprint-profile-candidate.json.gz",
+      "gitBlob": "ecc540cced775ff0c352116af7df5f0a286656b1",
+      "bytes": 1098,
+      "sha256": "2d2ed1f57105ec53a24ae54aeaa5b47b594216bb867c4421f67dbc77ed30d388",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-tail/sprint-profile-candidate.json.gz",
+      "originalCommit": "71076e30668a84ed69cd37aa452408ab7a7855bb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-clean-native/native-receipts.tar.gz",
+      "gitBlob": "dad56ecd3d5ad3e167d81607fc3c5ad4f7735beb",
+      "bytes": 513941,
+      "sha256": "e963de22f59ecb8dfd32599a1f5f0627a706ebb40ddc22d974b698e391e6125a",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-clean-native/native-receipts.tar.gz",
+      "originalCommit": "13802054f9fbbc0d626c300653234998759e6524"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-compiler/cb5d-rule-membership-before.json.gz",
+      "gitBlob": "8a10968fa9f2e2b55108d95c60ad448983e80001",
+      "bytes": 1735,
+      "sha256": "b57799aecd573043989d4201beea6ef9a4fc122c8ca2e2a5c3b67b53418523fe",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-compiler/cb5d-rule-membership-before.json.gz",
+      "originalCommit": "f4d0357e748da33626a8a1429285c3d94f0168e3"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-compiler/cb5d-rule-membership-family-after.json.gz",
+      "gitBlob": "81972c62225442736ddfdba8566cf44fe6e825a2",
+      "bytes": 3360,
+      "sha256": "427d04c433b8d33c6b414f44a0f4dd0c40654ded11c201c105c202e43bb591b5",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-compiler/cb5d-rule-membership-family-after.json.gz",
+      "originalCommit": "f4d0357e748da33626a8a1429285c3d94f0168e3"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-compiler/cb5d-rule-membership-typed-final.json.gz",
+      "gitBlob": "ef3ed22f44a4ac5d7209cefad665000a8fe62a36",
+      "bytes": 4278,
+      "sha256": "7e4e9a18757596e8d431ea556682a9061b17ed9c4288857cf8678478ac5ec7ba",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-compiler/cb5d-rule-membership-typed-final.json.gz",
+      "originalCommit": "f4d0357e748da33626a8a1429285c3d94f0168e3"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-compiler/cb5d-rule-membership-union-before.json.gz",
+      "gitBlob": "1e6165c93f11c7e954575db27ee0ef6b1b5de2e5",
+      "bytes": 1476,
+      "sha256": "b209c5be00626c364e4a80e73abbcf85b22d8446d590eea092575b2cc941aaee",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-compiler/cb5d-rule-membership-union-before.json.gz",
+      "originalCommit": "f4d0357e748da33626a8a1429285c3d94f0168e3"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-component-range/native-report.json.gz",
+      "gitBlob": "b74ecb47b3f8652c2056ca31089846251b82516d",
+      "bytes": 3895,
+      "sha256": "414ca39df5e5c93737977a94d7f710f34c1d25511ef53d43073c7932dbfc8752",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-component-range/native-report.json.gz",
+      "originalCommit": "a03342ee46b5582284f6dd79914c2a62794bcb8f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-contrast/cb5d-contrast-escape-separation-guard.json.gz",
+      "gitBlob": "aa718ec195b19082e5a55aaf9d7b8d3d954905d6",
+      "bytes": 8330,
+      "sha256": "02e0f2fa6e60b72310a87fce28af0eee9b603a1500e3c144b7953c800bc8a0af",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-contrast/cb5d-contrast-escape-separation-guard.json.gz",
+      "originalCommit": "b17462fa174913e423b66726cb2adef9c701bec7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-contrast/cb5d-contrast-identity-preparation-separated.json.gz",
+      "gitBlob": "4756756731121a1ff6931ac4280458d1856f18f2",
+      "bytes": 11788,
+      "sha256": "52ff6bf0f77647aca2d4bd989d297f5f6941028580ae07975d7ab8bd3e97c16e",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-contrast/cb5d-contrast-identity-preparation-separated.json.gz",
+      "originalCommit": "b17462fa174913e423b66726cb2adef9c701bec7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-contrast/cb5d-contrast-plan-integrated.tap.gz",
+      "gitBlob": "84b2aa5fe5335731d5841590e241cd635c35196a",
+      "bytes": 2132,
+      "sha256": "a60abf0126c0337dbe6b40cc95ed8a78838e6d9403f9a34c20af0a131d891a7f",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-contrast/cb5d-contrast-plan-integrated.tap.gz",
+      "originalCommit": "b17462fa174913e423b66726cb2adef9c701bec7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-contrast/cb5d-contrast-pointer-source.json.gz",
+      "gitBlob": "fd102e9bacc9a66dbddcfa9a55ef1284273fdc23",
+      "bytes": 10476,
+      "sha256": "80ca872171b27de56687b4eacaa69754d3ede0402a7817f6dc7be885dad2ad60",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-contrast/cb5d-contrast-pointer-source.json.gz",
+      "originalCommit": "224c5cdf69a9faa973dd663bae2c6f5caa4fe9a8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-contrast/cb5d-contrast-pointer-source.log.gz",
+      "gitBlob": "ea558a150f28ce3d6f7541a7e78a675956e8d46f",
+      "bytes": 41426,
+      "sha256": "fa70b2a6f209cca9cdb7654673ccf48ebad3a6f1a195fcea715af8f821897730",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-contrast/cb5d-contrast-pointer-source.log.gz",
+      "originalCommit": "224c5cdf69a9faa973dd663bae2c6f5caa4fe9a8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-contrast/cb5d-contrast-sources-integrated.json.gz",
+      "gitBlob": "b72ff071a56596469492935622b1c980d7aeeab0",
+      "bytes": 18416,
+      "sha256": "ee8a9dd8a233ddaa8fb9682fce5db4ebc22299e1fd251acf5b4ee736ad8c5ed1",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-contrast/cb5d-contrast-sources-integrated.json.gz",
+      "originalCommit": "b17462fa174913e423b66726cb2adef9c701bec7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-contrast/contrast-root.json.gz",
+      "gitBlob": "6e4e46622274b04a759b31b1f45a34ea4c3195fb",
+      "bytes": 2318,
+      "sha256": "efa676e5fbfaf8790e0e9c56b93c6258fe4d2a366c0d8b49f1bd27ac0f311e6c",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-contrast/contrast-root.json.gz",
+      "originalCommit": "b17462fa174913e423b66726cb2adef9c701bec7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-contrast/select-pointer-baseline-negative.json.gz",
+      "gitBlob": "ca484fd2dd9a290ca98ff7e4595f467baf0ffdf9",
+      "bytes": 249965,
+      "sha256": "61544e2e1d57f74d1392db21ce753ca59f9e55aaf8a106fb026103a879eeb327",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-contrast/select-pointer-baseline-negative.json.gz",
+      "originalCommit": "224c5cdf69a9faa973dd663bae2c6f5caa4fe9a8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-contrast/select-pointer-edge-candidate.json",
+      "gitBlob": "3474904b58b8334a066ad6ae608bf5f3b2aa6216",
+      "bytes": 5829171,
+      "sha256": "39e0acd23a53983086fe9bd3a7bb7cb15414b1788acecbb9827ca1cc7847399f",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-contrast/select-pointer-edge-candidate.json",
+      "originalCommit": "224c5cdf69a9faa973dd663bae2c6f5caa4fe9a8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-contrast/source-tests-before-phase-separation.json.gz",
+      "gitBlob": "d78f2e746958f44fab1d1fe2e6c1a5c71226a2df",
+      "bytes": 18783,
+      "sha256": "db120b03071dfac2157c0d853903c204d8ed9eb895e66fb9c430413021e675f7",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-contrast/source-tests-before-phase-separation.json.gz",
+      "originalCommit": "b17462fa174913e423b66726cb2adef9c701bec7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-docs-types/docs-after.log.gz",
+      "gitBlob": "e6154b183d1d96edc4164bf2fbd9c4a6e1289f85",
+      "bytes": 2957,
+      "sha256": "37fe4f4f00263398a5af706d77ebb7a38259ace2adc13b273675affb97e32e1e",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-docs-types/docs-after.log.gz",
+      "originalCommit": "16c059d6d62eecb8cad278962f49063705823d01"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-docs-types/docs-before.log.gz",
+      "gitBlob": "7b960b9eafafa2d052e3f3e5ba71a32ad216e8c3",
+      "bytes": 3485,
+      "sha256": "88e7319853c36f0576871dfc4ac0d011659ca6ece59ea2a51f7de7bc14f4b5a8",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-docs-types/docs-before.log.gz",
+      "originalCommit": "16c059d6d62eecb8cad278962f49063705823d01"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-docs-types/original-suites.json.gz",
+      "gitBlob": "b56fe268adebcf27f5d34a4c15dbd81b3b4a8ea9",
+      "bytes": 1585,
+      "sha256": "6327e7a575392d9050315d9506942e70a62d264dae99a6591896822a01a41c7e",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-docs-types/original-suites.json.gz",
+      "originalCommit": "16c059d6d62eecb8cad278962f49063705823d01"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-docs-types/original-suites.log.gz",
+      "gitBlob": "8802e7ee6f8aaf94ca3fef1ac347ac3eae080b79",
+      "bytes": 30860,
+      "sha256": "a86aed9bb49a7900864fac14d7c190a003d8e32da5a6fece4d6e5d38507e75b4",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-docs-types/original-suites.log.gz",
+      "originalCommit": "16c059d6d62eecb8cad278962f49063705823d01"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-field-current/field-full.json.gz",
+      "gitBlob": "7afd9544ed67566c59d92a8e883da6431740e276",
+      "bytes": 1042,
+      "sha256": "222307890226baf78bc7b62715281089f713aa7dfb4fb6048afa757a3bebdce0",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-field-current/field-full.json.gz",
+      "originalCommit": "757c0df688f0b176bd9205e74e2b2d38f9e8e16e"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-finf-bindings/cb5d-finf-current-units-final.json.gz",
+      "gitBlob": "266cf4b8df3809577801e1c8c9c90320e698c11b",
+      "bytes": 5374,
+      "sha256": "98402af29c6e68d780ab108fd32bc8945dc74f80d70ddd6cb77dbedb27bf127f",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-finf-bindings/cb5d-finf-current-units-final.json.gz",
+      "originalCommit": "03ee59a243ef324426a2eddd14d5fa77da95089c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-finf-bindings/cb5d-finf-current-units-final.log.gz",
+      "gitBlob": "eac9c4b20b9ebe1842c73b522e3f1a01c82e9204",
+      "bytes": 33444,
+      "sha256": "6ed879b92398cc9f9386d9e14de8b30486cc263cd65b4cdf5902b7776d16ae65",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-finf-bindings/cb5d-finf-current-units-final.log.gz",
+      "originalCommit": "03ee59a243ef324426a2eddd14d5fa77da95089c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-finf-bindings/cb5d-finf-current-units.json.gz",
+      "gitBlob": "4499ba0659cd0bfd66db23a1988023fa3bf1b6e8",
+      "bytes": 6507,
+      "sha256": "88815e10cc2f7d251da52f28c5a7bd64290bc1063cfc939cad142b801c88d275",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-finf-bindings/cb5d-finf-current-units.json.gz",
+      "originalCommit": "03ee59a243ef324426a2eddd14d5fa77da95089c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-finf-bindings/cb5d-finf-current-units.log.gz",
+      "gitBlob": "a9bbca4ba947f5adce4fdeba478c7ff0ff8fa8e4",
+      "bytes": 33288,
+      "sha256": "54e1d127e848f875bb63e8fdca222d531a0870bc33eae5bd21252f57e0d9afc5",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-finf-bindings/cb5d-finf-current-units.log.gz",
+      "originalCommit": "03ee59a243ef324426a2eddd14d5fa77da95089c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-general-and-doc-models/card-provenance-fixed.log.gz",
+      "gitBlob": "28149ef57ba56cd01b580ec334d9f55ec82b39fd",
+      "bytes": 437,
+      "sha256": "37a57cc5a8dcdb3c2c8b10ce9f6f3aec5cf671b8451c7ba88958bfa9acb721c3",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-general-and-doc-models/card-provenance-fixed.log.gz",
+      "originalCommit": "05746ad3fa37a648af87d7e445af6b72cd0e10c8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-general-and-doc-models/contrast-current-source-drift-before.log.gz",
+      "gitBlob": "1ed34a99d8eb6701ef0a83c6421eb12b571bdd3c",
+      "bytes": 3104,
+      "sha256": "bb6a45abb61f2571c7fb5466adbefcb9fe88a0177227d47bca1f9ce7545a1de7",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-general-and-doc-models/contrast-current-source-drift-before.log.gz",
+      "originalCommit": "05746ad3fa37a648af87d7e445af6b72cd0e10c8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-general-and-doc-models/contrast-historical-source-fixed.log.gz",
+      "gitBlob": "d7fa8d5d9f9a71b8b7047f302762d4fc33638306",
+      "bytes": 2114,
+      "sha256": "7db38d451127cf83b1d5e7cd0259f1b70b10136581f54d66fab173b3801ed8bd",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-general-and-doc-models/contrast-historical-source-fixed.log.gz",
+      "originalCommit": "05746ad3fa37a648af87d7e445af6b72cd0e10c8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-general-and-doc-models/general-host-task-fixes.json.gz",
+      "gitBlob": "2f0c6c88a9b8e2aa90d221e8c055e3e86893e779",
+      "bytes": 2082,
+      "sha256": "a0d77be702967d594aaf2e021d4b45cbb62cc0103466f2a10a4f3ea70bba5b6b",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-general-and-doc-models/general-host-task-fixes.json.gz",
+      "originalCommit": "05746ad3fa37a648af87d7e445af6b72cd0e10c8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-general-and-doc-models/general-host-task-fixes.log.gz",
+      "gitBlob": "34c18a65ed2a467b11297a3ff873168df26fece6",
+      "bytes": 39708,
+      "sha256": "cb0945f74feb0ae676e9992fa6f8702ed6ea284cda674f49c60bb65cadf6d1d0",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-general-and-doc-models/general-host-task-fixes.log.gz",
+      "originalCommit": "05746ad3fa37a648af87d7e445af6b72cd0e10c8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-general-and-doc-models/general-originals-local.json.gz",
+      "gitBlob": "0b0b27f99c1056f8926e0854688d268c43c25c8f",
+      "bytes": 1508,
+      "sha256": "10c493622ce8c9f88eff87968a0b450f42eb60898ce81cd3817a07b51c19488c",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-general-and-doc-models/general-originals-local.json.gz",
+      "originalCommit": "05746ad3fa37a648af87d7e445af6b72cd0e10c8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-general-and-doc-models/official-governance-failures.log.gz",
+      "gitBlob": "654ed04d729c4e971400f8ee48697ab3224eb5d9",
+      "bytes": 1983,
+      "sha256": "162154c10fe3ab8183ece171fac1c213eba09d1400bf873fad938042810e96dd",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-general-and-doc-models/official-governance-failures.log.gz",
+      "originalCommit": "05746ad3fa37a648af87d7e445af6b72cd0e10c8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-homepage-observers/unit.log.gz",
+      "gitBlob": "bf4a19f9a3e0c416d45c242fbe808cb7a9af0826",
+      "bytes": 1281,
+      "sha256": "b79c8c2d2959d30b037b35aa38bd4fa0c8d4153b1ac9d020a33b19105145e784",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-homepage-observers/unit.log.gz",
+      "originalCommit": "938c8e04ca97911b642b2fa6cf63abb84ed223c7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-library-style-seed/baseline.json.gz",
+      "gitBlob": "d1ddeba7ebbbbf8704115889af1aeaf0c14cc19a",
+      "bytes": 1287,
+      "sha256": "de0d706aefa40855d05eab10193f31160d6a2302b5959e9f5173a0f6c10dc2b8",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-library-style-seed/baseline.json.gz",
+      "originalCommit": "8b44c62992a5a3de560c02165bf650d2fe6f6ec7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-library-style-seed/baseline.log.gz",
+      "gitBlob": "59b941ed8c2488032f57ac0529f6198eee8aa1b4",
+      "bytes": 21547,
+      "sha256": "692063c1c069448329d22b4aa3eb0ce6c8d0dc49fd999c51461e8f80fc7d1562",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-library-style-seed/baseline.log.gz",
+      "originalCommit": "8b44c62992a5a3de560c02165bf650d2fe6f6ec7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-library-style-seed/candidate-final.json.gz",
+      "gitBlob": "442f030988bcec5804281f4d8dbd5ca5005a2763",
+      "bytes": 2886,
+      "sha256": "e0219822ce578c519fac06e42865da3d619d51409fffe99a0c1b2c198c47bc23",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-library-style-seed/candidate-final.json.gz",
+      "originalCommit": "8b44c62992a5a3de560c02165bf650d2fe6f6ec7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-library-style-seed/candidate-final.log.gz",
+      "gitBlob": "a9d8b4498ee1f40c010276965b6dc367e921a7ed",
+      "bytes": 21874,
+      "sha256": "f1a225d447a7cb57897366220eee8d631314598f165b2a538510338e78275250",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-library-style-seed/candidate-final.log.gz",
+      "originalCommit": "8b44c62992a5a3de560c02165bf650d2fe6f6ec7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-library-style-seed/candidate.json.gz",
+      "gitBlob": "3009f79662ff5f9c046c9e02c16d8a133b8cdb81",
+      "bytes": 2425,
+      "sha256": "0ea829bc13590ec2c285730dae6633f6b4d1bf5d4f6982e558487b89bfa30483",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-library-style-seed/candidate.json.gz",
+      "originalCommit": "8b44c62992a5a3de560c02165bf650d2fe6f6ec7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-library-style-seed/candidate.log.gz",
+      "gitBlob": "e625cf8060674171270b4929599a117613744438",
+      "bytes": 21825,
+      "sha256": "a40dfd2fd1bc7f1f630c683c51b8258ebda9ff2d7398e82dff1a95c7c71f2cf7",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-library-style-seed/candidate.log.gz",
+      "originalCommit": "8b44c62992a5a3de560c02165bf650d2fe6f6ec7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-library-style-seed/native-diagnostics.tar.gz",
+      "gitBlob": "e943f277572c20ed87ea7868b05f69039f02830e",
+      "bytes": 26687,
+      "sha256": "c2a453a76a867a2e0ec1fb8cfa6806e52a39581cddd978a06cb299232b6e0393",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-library-style-seed/native-diagnostics.tar.gz",
+      "originalCommit": "8b44c62992a5a3de560c02165bf650d2fe6f6ec7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-liquid-preferences/cb5d-liquid-preferences-after.json.gz",
+      "gitBlob": "2fd2ae7c322f970f8c43342d4e68af13193aaa02",
+      "bytes": 2615,
+      "sha256": "50380d2ec9a2b57baf77d7510321ff554b7b3d40dc427b3947a7e9c9c635aa3e",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-liquid-preferences/cb5d-liquid-preferences-after.json.gz",
+      "originalCommit": "8d47f6534fad771fff6ca9cffba678964b3bcf8d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-liquid-preferences/cb5d-liquid-preferences-after.log.gz",
+      "gitBlob": "ae89b746657ce8ca9cfff2829c565a39607d94f5",
+      "bytes": 19033,
+      "sha256": "bf26c49c8645d1ecf5d6d704bb68e9b21facd4a33446bac0ed9fa1a242aaea7a",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-liquid-preferences/cb5d-liquid-preferences-after.log.gz",
+      "originalCommit": "8d47f6534fad771fff6ca9cffba678964b3bcf8d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-liquid-preferences/cb5d-liquid-preferences-before.json.gz",
+      "gitBlob": "7651561436a1797896446d356b2e165766df041a",
+      "bytes": 2136,
+      "sha256": "c7d9d26e8c72ce77506fa9b19d207c95e4a841c85385c4be8f85057c5db8153a",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-liquid-preferences/cb5d-liquid-preferences-before.json.gz",
+      "originalCommit": "8d47f6534fad771fff6ca9cffba678964b3bcf8d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-liquid-preferences/cb5d-liquid-preferences-before.log.gz",
+      "gitBlob": "ba184c7b123a70813a2c4a4a7ac8ca6d4fb94ac3",
+      "bytes": 16365,
+      "sha256": "dd8a9ddb9cd240c8a12d3b1ea9a51f79abce4d31090364b81a099b863fce5137",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-liquid-preferences/cb5d-liquid-preferences-before.log.gz",
+      "originalCommit": "8d47f6534fad771fff6ca9cffba678964b3bcf8d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-liquid-preferences/native-diagnostics.tar.gz",
+      "gitBlob": "7187114d43c2de46d0d2b7b1fbbf63b2f3c68a58",
+      "bytes": 635646,
+      "sha256": "0d77b99fc098bce5cda2b7f7fb9947336c1f07df500dd7ef21bb2e96b25b68cb",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-liquid-preferences/native-diagnostics.tar.gz",
+      "originalCommit": "8d47f6534fad771fff6ca9cffba678964b3bcf8d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-main-integration/base7-decisions.json.gz",
+      "gitBlob": "845ae69068c7a9a46959bce4a52e5a96a1695e8a",
+      "bytes": 1970,
+      "sha256": "2e6211edd069bb815efe0a5d693ec28d5e0c87984382f586bbb067b5aa20d973",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-main-integration/base7-decisions.json.gz",
+      "originalCommit": "fe7bdfe00666c4dda8aa5a7b41fcef736c8476db"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-main-integration/base7-tests.json.gz",
+      "gitBlob": "400140d0207982a35925c638786c050fdb39f35c",
+      "bytes": 2820,
+      "sha256": "2b5dc1585b75f3a8ecd3f85c6146b8849c76b7e85d762abfd32b4942d2483c60",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-main-integration/base7-tests.json.gz",
+      "originalCommit": "fe7bdfe00666c4dda8aa5a7b41fcef736c8476db"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-main-integration/card-provenance-after.tap.gz",
+      "gitBlob": "a8d7f5966b74c87d253c92ea3ec30bcc8d880592",
+      "bytes": 431,
+      "sha256": "81a07f69c055e5d5642ee30e268fe5740e49b8480f41c79adec5b7dd1f8a4673",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-main-integration/card-provenance-after.tap.gz",
+      "originalCommit": "124e329cfc3cd710c1f1d267d640f1b97ef2f4c9"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-main-integration/collapsible-after.json.gz",
+      "gitBlob": "dcfb46afb8fc54a729f651ad815d8d0992267c7e",
+      "bytes": 803,
+      "sha256": "6b3fe0ffc447aa95f41d7dcd4045e853be31dd7bb27db79ffefe72a9804d2be3",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-main-integration/collapsible-after.json.gz",
+      "originalCommit": "fe7bdfe00666c4dda8aa5a7b41fcef736c8476db"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-main-integration/portal-thumb-source.json.gz",
+      "gitBlob": "384014e2b09b82d20bcb217c9eddf3aec11cc6ad",
+      "bytes": 553,
+      "sha256": "e4714994137308ebcf0591c5af559bc77cb218bab28e0a16518f20e81159ec23",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-main-integration/portal-thumb-source.json.gz",
+      "originalCommit": "fe7bdfe00666c4dda8aa5a7b41fcef736c8476db"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-main-integration/portal-thumb-tests.json.gz",
+      "gitBlob": "f972163478c46168d3b72201fb5fa96df576b8ec",
+      "bytes": 2937,
+      "sha256": "3af593dd8c58b13cd3bfb8cc6a84d13a7cdc858acd6434c54501ea106c9884be",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-main-integration/portal-thumb-tests.json.gz",
+      "originalCommit": "fe7bdfe00666c4dda8aa5a7b41fcef736c8476db"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-main-integration/root5-before-lowering-assertion.json.gz",
+      "gitBlob": "57eff0b5b6890e89b46848ddb6794d921f5609fb",
+      "bytes": 3253,
+      "sha256": "d6a5b48da78d2ac7cd441bc637116a5d5ff2b904dbeff192fa71591c6d13e1fa",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-main-integration/root5-before-lowering-assertion.json.gz",
+      "originalCommit": "fe7bdfe00666c4dda8aa5a7b41fcef736c8476db"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-main-integration/www-decisions.json.gz",
+      "gitBlob": "89b452b0c21639a3505fd933892c63aef631083e",
+      "bytes": 1615,
+      "sha256": "1f4582304cf83f37217f331f6135cde3910017b7c8293070792446084c8bc9f5",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-main-integration/www-decisions.json.gz",
+      "originalCommit": "fe7bdfe00666c4dda8aa5a7b41fcef736c8476db"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-main-integration/www-tests.json.gz",
+      "gitBlob": "3dc50d764090067a077de54e6117f9c3464b713c",
+      "bytes": 5392,
+      "sha256": "e1fdb23bacc3c0449a8754c3cc9b525b96040409b623dbd590d7f526b7cb69ad",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-main-integration/www-tests.json.gz",
+      "originalCommit": "fe7bdfe00666c4dda8aa5a7b41fcef736c8476db"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-47ae.json.gz",
+      "gitBlob": "1b66d3fb353e16d3b44f338d8cbd4840b50a964e",
+      "bytes": 315445,
+      "sha256": "59a9823d4dbc7a2af84eb6c6ab3a3e92bb4e17920f9111603c4f1956741fcac1",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-47ae.json.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d-build.log.gz",
+      "gitBlob": "ef4c1d1f6e9b6b5d043ed8e3b01fb46706652bd3",
+      "bytes": 676,
+      "sha256": "f80a7dcaee67900b4abea806915fc60864836fe3dd0911c2a7309696eed559f4",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d-build.log.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d-controls.log.gz",
+      "gitBlob": "84bdebccdb01ae43b638dbba3d0d104c8a9bbf83",
+      "bytes": 1282,
+      "sha256": "65e677cf76e638c6ebba3371678dcc276578f08cb46117529e822df000b5ac64",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d-controls.log.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d-gate.log.gz",
+      "gitBlob": "d4b9926df0b7defceb6caf0b474c4a190c5ca8f0",
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d-gate.log.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d-setup.log.gz",
+      "gitBlob": "a1b12c435a43128a2dd5eaef092b4e34171a07ce",
+      "bytes": 790,
+      "sha256": "4be65cf4daca520544ed8145054a4bef9edfeba5993d4ed308087921f34bd4f6",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d-setup.log.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d-terminal.json.gz",
+      "gitBlob": "9377365955b8fb1a8047f08cc4965967bd966da7",
+      "bytes": 647,
+      "sha256": "4ee53b0837f150c45635c378bffe42cf3ab779d4b43b307ea08c82265076d169",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d-terminal.json.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d.json.gz",
+      "gitBlob": "7869e269d4d7e6af2a4026a44260acf26e01e898",
+      "bytes": 315400,
+      "sha256": "e8f3eedb687a5237d16f43bcc1ccc05adaccc30c5738e912676464f3d83b9e8a",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d.json.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-build.log.gz",
+      "gitBlob": "bd272bf566902deb105a1a929ac8949d0eee8941",
+      "bytes": 677,
+      "sha256": "e423c0bb215f0f96d0d8130517380583554e37ae305b6b03d1e0dc74b168b0a1",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-build.log.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-controls.log.gz",
+      "gitBlob": "b37a7bdcf7688d14a39fb04a26c1be76b3202e6a",
+      "bytes": 1286,
+      "sha256": "b4e20181e9aca34ecf552cfea2be32906e58166a1b717280de39e574296b8725",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-controls.log.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-gate.log.gz",
+      "gitBlob": "d4b9926df0b7defceb6caf0b474c4a190c5ca8f0",
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-gate.log.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-job.log.gz",
+      "gitBlob": "76076db2d93e00c25b4802d0648e5ebc4bbc7c71",
+      "bytes": 27812,
+      "sha256": "c3f115404b59a95f62eff100cc3b3fc96c46839ac48486180736c06a69cc6db9",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-job.log.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-setup.log.gz",
+      "gitBlob": "10accb1cb953056d5afb0f51a5df06b64c902518",
+      "bytes": 796,
+      "sha256": "28e427bb67b8d3d7cb432e55f610364f26905272dfeae4015eb57957998aa6fa",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-setup.log.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-terminal.json.gz",
+      "gitBlob": "6355797a4767324fdfa0b5c6f4cf7e2638f84b69",
+      "bytes": 649,
+      "sha256": "04b35e75a16c96fe5f795fde88601e36bb5500282576086bebbefdb5a9fd962c",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798-terminal.json.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798.json.gz",
+      "gitBlob": "f50457a5f2d753a4a70412939c31f906c9433719",
+      "bytes": 315529,
+      "sha256": "c30f7a4fa5fb95bfe54744fe58a81059bb132dcc78831c7c33e9c6d3a1641fa9",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798.json.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/controls-candidate.gz",
+      "gitBlob": "0ae00fd76c18b45b5d734429b9bbf60203ac06bb",
+      "bytes": 1163,
+      "sha256": "4983d2e255861726c0542be83b6b0aee1737f86010d204a177b1662becd91ec7",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/controls-candidate.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/controls-child-diagnostic.gz",
+      "gitBlob": "6c40274808b1c0f53b6d2f19aeb2dc12e0661329",
+      "bytes": 192,
+      "sha256": "571dea6ed951cfc8cbdf810b7291a5496777c8ab768128773a152163eac22b72",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/controls-child-diagnostic.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/controls-child-stdio.gz",
+      "gitBlob": "d3fb12adb2d8778a5a3dc18813735c6186318221",
+      "bytes": 4033,
+      "sha256": "d4b27118d20aa9083aaa515d8d6ea48a32949ff93315189e01c2daf4f355cb8b",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/controls-child-stdio.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-package-budgets/controls-initial-failed.gz",
+      "gitBlob": "dde2fdbc749b0158455bf2fe15a9e6ae7984d03a",
+      "bytes": 1429,
+      "sha256": "58896b6b47014b90ebb68d08f7999a4d254e630310b0d37aa9084802c8e56614",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/controls-initial-failed.gz",
+      "originalCommit": "8c3e9bda86f0d0b1f0c321798d8b7c987e8829e0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-preset-refresh/official-preset-generation.tar.gz",
+      "gitBlob": "d14384fe52bf21ca47212594cac5137899e1c6bd",
+      "bytes": 184283,
+      "sha256": "e62d50c48430d5de2a8db463cb684a528e528fd8874866a7bb2e7f7ea2def6e1",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-preset-refresh/official-preset-generation.tar.gz",
+      "originalCommit": "36cc92e50f8fdc012c88126435b6d0e353351b9f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/liquid-content-after.json.gz",
+      "gitBlob": "f619f05280e6092c51c04c3b3bdeb1ab2c8e554e",
+      "bytes": 2020,
+      "sha256": "a004b09e3013e575af22edd91310839056b1962486abb8b5f7395c1a407d4675",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-prototypes/liquid-content-after.json.gz",
+      "originalCommit": "362aae73e4fb82d8ea599c029f4e19bbfb6cafd6"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/numeric-before.json.gz",
+      "gitBlob": "55483d9f221233286b76d29294481f646c9d0d93",
+      "bytes": 6221,
+      "sha256": "c083540d2be14bbac8f3fb3d75153ddda3a62f9ea101299949233aa96b1f1551",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-prototypes/numeric-before.json.gz",
+      "originalCommit": "362aae73e4fb82d8ea599c029f4e19bbfb6cafd6"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/popover-serial-diagnostic.json.gz",
+      "gitBlob": "7835bf18ecf1f11c43e4e0fc716c4e0e360d7578",
+      "bytes": 1037,
+      "sha256": "ef30d25935d1344c678647e931f64cb35588cce37139da6eb1b154c299dc0a34",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-prototypes/popover-serial-diagnostic.json.gz",
+      "originalCommit": "362aae73e4fb82d8ea599c029f4e19bbfb6cafd6"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/prototype-final.json.gz",
+      "gitBlob": "544bfc2c91ce04bbe534a3f9e488cff4a2e84317",
+      "bytes": 25981,
+      "sha256": "f6efa6fdda91e45da96f2e71166f32e5a0d15705fe761278b1bd0425e4bdb002",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-prototypes/prototype-final.json.gz",
+      "originalCommit": "362aae73e4fb82d8ea599c029f4e19bbfb6cafd6"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/residual-batch1-before.json.gz",
+      "gitBlob": "95c99c2c78930b1d03f73da3a46533d0dae40a8c",
+      "bytes": 17394,
+      "sha256": "ef59e83fa7c7461a9e32dedf7d1b8a0f04c8d6dc25fc60cb99c1a1b210cfe6f1",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-prototypes/residual-batch1-before.json.gz",
+      "originalCommit": "362aae73e4fb82d8ea599c029f4e19bbfb6cafd6"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/residual-batch2-before.json.gz",
+      "gitBlob": "720b1fcd6972686383a89ad256fc85e16c9045f1",
+      "bytes": 7208,
+      "sha256": "6d729501ecb0442d57346b523643586560c7b5aa0ecf0ae88e4331e16314098e",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-prototypes/residual-batch2-before.json.gz",
+      "originalCommit": "362aae73e4fb82d8ea599c029f4e19bbfb6cafd6"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/residual-batch3-before.json.gz",
+      "gitBlob": "4ceea3cf1c4549c34a9bb240e9621f0d08d17e95",
+      "bytes": 2191,
+      "sha256": "7d53dcd47692f3322fbe865732fad41e02cf55b7e44cced52aa499cb8bd001cd",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-prototypes/residual-batch3-before.json.gz",
+      "originalCommit": "362aae73e4fb82d8ea599c029f4e19bbfb6cafd6"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/residual-batch4-before.json.gz",
+      "gitBlob": "fa65e04081bea7f2f55e99926db7cda5fcae1924",
+      "bytes": 7600,
+      "sha256": "6c62d9f93caeb5377a79456b4a68b036dc5b4d8890a899742fa933e0b988a029",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-prototypes/residual-batch4-before.json.gz",
+      "originalCommit": "362aae73e4fb82d8ea599c029f4e19bbfb6cafd6"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/step-feedback-after.json.gz",
+      "gitBlob": "744be3dc28b0deb693f6d7668e49be335b273365",
+      "bytes": 596,
+      "sha256": "3c257a35cd7241c2a1b6fe2f9ae6d19b0a3bd9a51f42f9bf3099a46b2b618ab8",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-prototypes/step-feedback-after.json.gz",
+      "originalCommit": "362aae73e4fb82d8ea599c029f4e19bbfb6cafd6"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/step-feedback-before.json.gz",
+      "gitBlob": "53ae2ac94f73619d7faceb13b9bad2ecd3d3002d",
+      "bytes": 1081,
+      "sha256": "b272fb6c3ce687ca30b847e1510fa129224025de9e315487865e3368c5837e0f",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-prototypes/step-feedback-before.json.gz",
+      "originalCommit": "362aae73e4fb82d8ea599c029f4e19bbfb6cafd6"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-shadow-percentage/pui-cb5d-thumb-finite-candidate.json.gz",
+      "gitBlob": "0d8ca418e1fadd7daff35b203dd2151652ec213f",
+      "bytes": 7459,
+      "sha256": "6c69d1aa1e16ed8585efb3ec6faccf861c945b34ea50cd9b1af5669366313550",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-shadow-percentage/pui-cb5d-thumb-finite-candidate.json.gz",
+      "originalCommit": "c183c64f3282c19c221c7b3220f25209fe80637e"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-shadow-percentage/thumb-final.json.gz",
+      "gitBlob": "b788a6cc423085bd730f83513ae60de7bcf14388",
+      "bytes": 898,
+      "sha256": "f52c3bc250d0eb6614b01dafcaf18193d03c08738874b88fa6b28c63695a5971",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-shadow-percentage/thumb-final.json.gz",
+      "originalCommit": "c183c64f3282c19c221c7b3220f25209fe80637e"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-shadow-s3/native-diagnostics.tar.gz",
+      "gitBlob": "0ea373fffe6e85026d516fbeba7ed2c6f7122af1",
+      "bytes": 8457,
+      "sha256": "26372d5d4dbfc82e01bc7950802d5e6691e545e798db1e9f4f6637192fc79353",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-shadow-s3/native-diagnostics.tar.gz",
+      "originalCommit": "db6c152b58f3b56cf1ecdc5c1ac03e736124a66b"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-shadow-s3/runtime-runner-tests.tap.gz",
+      "gitBlob": "16099db334dbe44ed9497d1b0f1f50e10e001fb9",
+      "bytes": 4663,
+      "sha256": "f193b2310498da8f152af5ec1e632722d77b95f518eeb488f6f3ea4e7cea639d",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-shadow-s3/runtime-runner-tests.tap.gz",
+      "originalCommit": "db6c152b58f3b56cf1ecdc5c1ac03e736124a66b"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-toast-registration/cb5d-toast-registration-current.json.gz",
+      "gitBlob": "ca1b6d6898a696ec89b36e9986d1f371a66d904d",
+      "bytes": 1284,
+      "sha256": "a7358bcfeb418fd0288d16071d794f111a5d62a3191a3b346e54cac1b9e0a08e",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-toast-registration/cb5d-toast-registration-current.json.gz",
+      "originalCommit": "c6b34b45262e5598fc944ad4d7a2d67051cf8c37"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-toast-registration/cb5d-toast-registration-fixed.json.gz",
+      "gitBlob": "ef9d0a7563fcbcce4e37c9d8aa8ba9bc621857f9",
+      "bytes": 939,
+      "sha256": "848d0b2a1c4ecd0271f1028ffca6ee804fa68bbfe8c9ee42db12ea1150b1bd33",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-toast-registration/cb5d-toast-registration-fixed.json.gz",
+      "originalCommit": "c6b34b45262e5598fc944ad4d7a2d67051cf8c37"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-tooltip-handoff/after.tap.gz",
+      "gitBlob": "7bfbf4673d302ea001269cf4e18cf9623112f0c3",
+      "bytes": 651,
+      "sha256": "ccf12f69004fa5c705d845ca59624340aa937a40eaa574613f88ca3efff00261",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-tooltip-handoff/after.tap.gz",
+      "originalCommit": "c443efa7a7226a9b62517f7af21faa379d128aa9"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-tooltip-handoff/before.tap.gz",
+      "gitBlob": "13ef7f64ba4c6f61cc850768eb1cde608232d725",
+      "bytes": 833,
+      "sha256": "0fd3e61996d3f5beb4b306a010e564b2285a12de239f1afa17695594abf499aa",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-tooltip-handoff/before.tap.gz",
+      "originalCommit": "c443efa7a7226a9b62517f7af21faa379d128aa9"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-types/cb5d-portal-color-types-test.json.gz",
+      "gitBlob": "fc27d01ea124d1077733c5b45e8cd0a558f049e1",
+      "bytes": 572,
+      "sha256": "5858b17be6f4990525c724df19dbeb98f7a832c34aa4216f786c888d71c970dc",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-types/cb5d-portal-color-types-test.json.gz",
+      "originalCommit": "4d288166d2d5e42ad6d9b7a34e8a8d03bbc94c0c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-wc-budget/budgets-after-v2.json.gz",
+      "gitBlob": "9fb1cf62f2d4953a7bb344c1d88517074fd267db",
+      "bytes": 315388,
+      "sha256": "88a8b0e171bff99790df24df6615c4f6954adc6183eeb95f1f22618f0b478bea",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-wc-budget/budgets-after-v2.json.gz",
+      "originalCommit": "9628b58eb04db57d0a0bdc6ced4901865a4ae462"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-wc-budget/budgets-before.json.gz",
+      "gitBlob": "1621950bd051794bce3978db74f810577ba81dd9",
+      "bytes": 315405,
+      "sha256": "4327f89eaea16683b925af23d35a4b8b104f973a327888b8a638b65d2486eee1",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-wc-budget/budgets-before.json.gz",
+      "originalCommit": "9628b58eb04db57d0a0bdc6ced4901865a4ae462"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-wc-budget/candidate-v2.patch",
+      "gitBlob": "f2e6c683dd59e39fc4e92b9376cfc250db28edab",
+      "bytes": 18361,
+      "sha256": "4eefe2f37b4ce13d1e4cc1c57c6603e0e504afbaf532afdd083918bd0ebb289c",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-wc-budget/candidate-v2.patch",
+      "originalCommit": "9628b58eb04db57d0a0bdc6ced4901865a4ae462"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-wc-budget/css-differential-v2.json.gz",
+      "gitBlob": "d7deb19962b5b2282590a7237b3bd67cbb952582",
+      "bytes": 378,
+      "sha256": "0bea05a8bcbdf04535ae7ec374b8e0e0bb2257df03c82bfb6a708ffd0fc1db41",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-wc-budget/css-differential-v2.json.gz",
+      "originalCommit": "9628b58eb04db57d0a0bdc6ced4901865a4ae462"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-wc-budget/local-types-resource-kill.log.gz",
+      "gitBlob": "dc7d833a8c21ceb34b59ee96d08a1b94765a7dd5",
+      "bytes": 27,
+      "sha256": "70858aec68412e3655b05b5c8290c3550bf58095772ecc22ffeeb592cb6b6c67",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-wc-budget/local-types-resource-kill.log.gz",
+      "originalCommit": "9628b58eb04db57d0a0bdc6ced4901865a4ae462"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-wc-budget/rejected-v1-overlapping-comment.json.gz",
+      "gitBlob": "ac7a21dc94bd6e77758e1568d5647fd689d0452c",
+      "bytes": 142,
+      "sha256": "b35c47e63acc04b43669444332317c203b19eac38deb32bc328d4aedd1ade123",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-wc-budget/rejected-v1-overlapping-comment.json.gz",
+      "originalCommit": "9628b58eb04db57d0a0bdc6ced4901865a4ae462"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-wc-budget/wc-original-and-regression-tests.json.gz",
+      "gitBlob": "a41fb26dd2ac0f5ac0d13c7e4adb10e44dae2a19",
+      "bytes": 62993,
+      "sha256": "bef47eb98cdf8dace95fa6eb242b27a05be36f6189d641e21cefe3c8d59123c4",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-wc-budget/wc-original-and-regression-tests.json.gz",
+      "originalCommit": "9628b58eb04db57d0a0bdc6ced4901865a4ae462"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-wc-budget/wc-original-and-regression-tests.log.gz",
+      "gitBlob": "f86f8c45574a05ac5dd96320cf77f46f67f28d76",
+      "bytes": 44230,
+      "sha256": "d7248b53ff7e7cd8c48b54b07a6cd77fe18f175f181939fa28eb3b301093a306",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-wc-budget/wc-original-and-regression-tests.log.gz",
+      "originalCommit": "9628b58eb04db57d0a0bdc6ced4901865a4ae462"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/focused-controls.log.gz",
+      "gitBlob": "9550b462b9e82d028ba4202b487b4f3d3faf4b14",
+      "bytes": 856,
+      "sha256": "24093eee832750c8de3befbbcbbc4873c2f400800dc216b0d8804f6ae38ed62e",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-whitepaper/focused-controls.log.gz",
+      "originalCommit": "ad2399554b6fff1546d4a9068f7f8fe6c27a14d0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/incomplete-local-first.log.gz",
+      "gitBlob": "83f8fd1e07de372d46839db0a655052e90885854",
+      "bytes": 14938,
+      "sha256": "21fb97af4cb74c3e59bb04eec49aeea8c30a2eefc4ade2e6307083779a9d00d3",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-whitepaper/incomplete-local-first.log.gz",
+      "originalCommit": "ad2399554b6fff1546d4a9068f7f8fe6c27a14d0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/incomplete-local-releases-only.log.gz",
+      "gitBlob": "ef5e6dcf5a0aca96dfa211e255df2d8b5bd769a7",
+      "bytes": 16142,
+      "sha256": "a569d1ce717ab367b053a67c1e1c2d52e42e8c76c275ccad0115c153e6645271",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-whitepaper/incomplete-local-releases-only.log.gz",
+      "originalCommit": "ad2399554b6fff1546d4a9068f7f8fe6c27a14d0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/native-svg-render.tar.gz",
+      "gitBlob": "b4eead38b668089e98564fc4fe1d2f19f2b00ac6",
+      "bytes": 794659,
+      "sha256": "a9eb8780fdeba676cbef98f39ffcbb43b250a7f53dcf45848169b1b4c7f1b9aa",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-whitepaper/native-svg-render.tar.gz",
+      "originalCommit": "ad2399554b6fff1546d4a9068f7f8fe6c27a14d0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/public-docs.log.gz",
+      "gitBlob": "d9c009afad0c37221497e832c37c7ad0bad550fb",
+      "bytes": 14587,
+      "sha256": "a913dd93dadc8e26430e58652a6c54c81922b3891041b24e169e1982e01e570f",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-whitepaper/public-docs.log.gz",
+      "originalCommit": "ad2399554b6fff1546d4a9068f7f8fe6c27a14d0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/whitepaper-evolution-feedback.en-light.png",
+      "gitBlob": "21fa6d3add66e4128807e16bad38d6754c37fd3b",
+      "bytes": 110346,
+      "sha256": "3bde3fc4120eafbfa21441e83e9414f8c0984a7c14d52d38facfb0fabf377dfe",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-whitepaper/whitepaper-evolution-feedback.en-light.png",
+      "originalCommit": "ad2399554b6fff1546d4a9068f7f8fe6c27a14d0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/whitepaper-evolution-feedback.mobile.en-light.png",
+      "gitBlob": "2001d9446eadfdb3f1f14cd1aed98bce451b857f",
+      "bytes": 97133,
+      "sha256": "386f82bafacc4e7037929d34e53420193afb23b4f95c73c52aa0c626d46bc1b6",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-whitepaper/whitepaper-evolution-feedback.mobile.en-light.png",
+      "originalCommit": "1c4a23455175ec65d3b41a630cfa9797d74a721d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/whitepaper-evolution-feedback.mobile.zh-cn-dark.png",
+      "gitBlob": "97870d5c1195685f6fd105ad90e253e3116332ee",
+      "bytes": 89719,
+      "sha256": "7cc1c973181f9c2bc22bfbd6ea19748caaebf2497f577edcc1af76fe6936a29f",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-whitepaper/whitepaper-evolution-feedback.mobile.zh-cn-dark.png",
+      "originalCommit": "1c4a23455175ec65d3b41a630cfa9797d74a721d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-whitepaper/whitepaper-evolution-feedback.zh-cn-dark.png",
+      "gitBlob": "04432005611e5dd369f384e71999545c33580b8d",
+      "bytes": 104837,
+      "sha256": "89027b37bc75c3e3e0736cb916ee450d968f42aeddf2ac23825553a2969f18d5",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-whitepaper/whitepaper-evolution-feedback.zh-cn-dark.png",
+      "originalCommit": "ad2399554b6fff1546d4a9068f7f8fe6c27a14d0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-www/unit-integrated.json.gz",
+      "gitBlob": "8ad1d4303ad8cf1dfde6843ae08e6f1d52e8863a",
+      "bytes": 22050,
+      "sha256": "c56afc3a7b1fe4297a5e737985585d2853e21cd6da01b434744312542ccd3a78",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-www/unit-integrated.json.gz",
+      "originalCommit": "2617e7269d523a187efc2b5e767f28642c0f5ebc"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/code-selection-candidate-1440-dark-native-selection.json.gz",
+      "gitBlob": "4972b5dd4a92b440cc08fd3368ca03cfd12e1bfd",
+      "bytes": 3172,
+      "sha256": "c8619a9b3995e3ba095c18c934b58eba633e8d6805413c5116a3b47ece0a44fd",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/code-selection-candidate-1440-dark-native-selection.json.gz",
+      "originalCommit": "5ff0a952bd21081e2b8efb2bf41d116264df767f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/code-selection-candidate-1440-light-native-selection.json.gz",
+      "gitBlob": "c688f8b81179dd4c0ece05fa6ef3e47b52343146",
+      "bytes": 3173,
+      "sha256": "307662d62f40934fb185cac64103fb8bb5b3b35df22c0f08d8018528f8bceb9d",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/code-selection-candidate-1440-light-native-selection.json.gz",
+      "originalCommit": "5ff0a952bd21081e2b8efb2bf41d116264df767f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/code-selection-candidate-320-dark-native-selection.json.gz",
+      "gitBlob": "375b21077e52fb9e2f7ce627365029ae15275676",
+      "bytes": 3174,
+      "sha256": "d78bd022fcd06883af1c27e4074aaf70443553d6e11b2a431459c246f81f0d0f",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/code-selection-candidate-320-dark-native-selection.json.gz",
+      "originalCommit": "5ff0a952bd21081e2b8efb2bf41d116264df767f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/code-selection-candidate-320-light-native-selection.json.gz",
+      "gitBlob": "2f547e270a5d3744bacb7d24c4c4391fd980a794",
+      "bytes": 3181,
+      "sha256": "c89e2a886d1c7f8323f955e791518ad95f9b59ee5c365e8d64af0ebe43715eba",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/code-selection-candidate-320-light-native-selection.json.gz",
+      "originalCommit": "5ff0a952bd21081e2b8efb2bf41d116264df767f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/code-selection-candidate-390-dark-native-selection.json.gz",
+      "gitBlob": "d288a8f3233c38c6945c8b95aa7edc03a0c3db10",
+      "bytes": 3164,
+      "sha256": "a71100bde8722def271f380183b747589669e7c68752a093c026425f8873691c",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/code-selection-candidate-390-dark-native-selection.json.gz",
+      "originalCommit": "5ff0a952bd21081e2b8efb2bf41d116264df767f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/code-selection-candidate-390-light-native-selection.json.gz",
+      "gitBlob": "e2a82b6dc10794894e7e0f78d09d75747d254d5f",
+      "bytes": 3170,
+      "sha256": "188d693db665543592f6334f4b7a66d40a352090483f83b801906052f2fea71a",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/code-selection-candidate-390-light-native-selection.json.gz",
+      "originalCommit": "5ff0a952bd21081e2b8efb2bf41d116264df767f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/code-selection-negative-1440-light.json.gz",
+      "gitBlob": "8e45b52cb8309d3b15051b41385191e8e4522065",
+      "bytes": 3146,
+      "sha256": "18a4a1c6539dd14b0ffe3b3b67f2175fee112d2982cfdd770dce906743da8133",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/code-selection-negative-1440-light.json.gz",
+      "originalCommit": "5ff0a952bd21081e2b8efb2bf41d116264df767f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/code-surfaces-visible-token.json.gz",
+      "gitBlob": "d490f0312c5faaddbc9701d604f64e7e24276f6c",
+      "bytes": 675,
+      "sha256": "0190f6a81f0fcbbe87f00c3cf8fdfe0d6f7ab09a292cefd6d4ac9a82b88a4f50",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/code-surfaces-visible-token.json.gz",
+      "originalCommit": "5ff0a952bd21081e2b8efb2bf41d116264df767f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/loading-mask-cold-scope.json.gz",
+      "gitBlob": "9c46a3b7bde94686be632626ebb0fc2c00e0c8bd",
+      "bytes": 662,
+      "sha256": "5d9e67023b19f66d04d83aad4f563fac9921ef1a41afa7287866dd474d319d15",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/loading-mask-cold-scope.json.gz",
+      "originalCommit": "5ff0a952bd21081e2b8efb2bf41d116264df767f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/loading-mask-expanded.json.gz",
+      "gitBlob": "8f17f3f75d87b57286092d062ff84e328961e9d8",
+      "bytes": 1749,
+      "sha256": "a3fa8dc0e397f610d5f478c2f4314b82a0773c20e8074c71cc356cec4b7ce50c",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/loading-mask-expanded.json.gz",
+      "originalCommit": "5ff0a952bd21081e2b8efb2bf41d116264df767f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/loading-mask-original-narrow.json.gz",
+      "gitBlob": "b4ae9538d6fa8c01759fdb846f5cf56249173220",
+      "bytes": 1096,
+      "sha256": "cec09980a9423c6476df2c4ac8f7edf72e4e740a1e24445bc7c06d58a59ae0ce",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/loading-mask-original-narrow.json.gz",
+      "originalCommit": "5ff0a952bd21081e2b8efb2bf41d116264df767f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/mask-candidate-observations.json.gz",
+      "gitBlob": "25b923d778c5bd581ec9367455dbdd8deea19bfd",
+      "bytes": 3767,
+      "sha256": "e6da4ebf74e0d19beebab20bc1643fe2d38f3b83566c477856cae7b643eabd77",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/mask-candidate-observations.json.gz",
+      "originalCommit": "5ff0a952bd21081e2b8efb2bf41d116264df767f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/mask-negative-observations.json.gz",
+      "gitBlob": "5112fb6a14593681596d171fdaa3ac17f3b3aef9",
+      "bytes": 42913,
+      "sha256": "709b4c9e02ea923d8fa8d9a618b7319b34289d639a4c56378b7e5b79b0d133e1",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/mask-negative-observations.json.gz",
+      "originalCommit": "5ff0a952bd21081e2b8efb2bf41d116264df767f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/original-skeleton-consumer.astro.gz",
+      "gitBlob": "9c51a71eb25d0f3ca0b43360ae84b359fe9fd2e5",
+      "bytes": 4824,
+      "sha256": "7e5f8585cfc1de7c29b62caab0b430c6e085a573d6704a531b9629104dd0a105",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-runtime-mask-and-code-selection/original-skeleton-consumer.astro.gz",
+      "originalCommit": "5ff0a952bd21081e2b8efb2bf41d116264df767f"
+    }
+  ]
+}

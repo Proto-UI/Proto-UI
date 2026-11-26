@@ -26,9 +26,13 @@ These entities are draft because implementation and execution evidence are missi
 
 TypeScript factory/printer facilities serve the JavaScript-family AST paths. Rust emission can use `syn`, `prettyplease` and local typed `quote` construction; whole source files and runtime bodies must not become raw string templates. API spellings and internal data layouts remain implementation choices under the contract. There is no LLVM dependency in the first source-compilation milestone.
 
-## Current delivery state
+## Scope & Limits: current delivery
 
-The first implementation increment provides one controlled TypeScript Program and checker shared by the analysis API, `proto-compiler lint`, and a Node editor diagnostic adapter. It records raw source bytes, module-resolution choices and configuration, and diagnoses a bounded set of explicit boolean, conversion and text-domain violations. This partial pass reports `analysisComplete: false` and `sourceValid: false | null`; a quiet report does not admit the source. Authoring bindings, phase/effect/ownership analysis, canonical IR and executable target lowering remain missing. See the [package entry](../../packages/compiler/README.md).
+The initial implementation shares one controlled TypeScript Program and checker across analysis, `proto-compiler lint` and a Node editor diagnostic API.
+
+- It records original source bytes, module resolution and configuration, and checks a bounded set of boolean, conversion and text violations.
+- The partial result remains `analysisComplete: false` and `sourceValid: false | null`; a quiet report does not admit source.
+- Authoring bindings, complete phase/effect/ownership analysis, canonical IR and executable target lowering remain missing. See the [package entry](../../packages/compiler/README.md).
 
 The [consumer intake](consumers/README.md) records exact revisions, source hashes, explicit entrypoints and unresolved inventory. Its verifier reuses that shared frontend closure; matching input bytes does not establish language validity, compilation or behavioral conformance.
 

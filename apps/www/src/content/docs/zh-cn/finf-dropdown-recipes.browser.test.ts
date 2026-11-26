@@ -237,7 +237,9 @@ for (const { recipe, profile } of dropdownEvidenceRecipes)
           await publicPreviewer.scrollIntoViewIfNeeded();
           await publicPreviewer.waitFor({ state: 'visible' });
           stage = 'runtime-readiness';
-          await selectRuntime(page, publicPreviewer, runtime, '[data-demo-ref="trigger"]', 1);
+          const triggerSelector =
+            recipe === 'basic' ? '[aria-haspopup="menu"]' : '[data-demo-ref="trigger"]';
+          await selectRuntime(page, publicPreviewer, runtime, triggerSelector, 1);
           await applyColorScheme(page, scheme);
           let previewer = publicPreviewer;
           if (profile === 'new-york-v4') {
@@ -251,7 +253,7 @@ for (const { recipe, profile } of dropdownEvidenceRecipes)
             ).toEqual({ publicProfile: 'rhea', fixtureProfile: 'new-york-v4' });
             previewer = page.locator(dropdownFixtureSelector(recipe));
           }
-          const trigger = previewer.locator('[data-demo-ref="trigger"]');
+          const trigger = previewer.locator(triggerSelector);
           expect(await trigger.count()).toBe(1);
           const capture = async (state: string, observation: unknown, menu?: Locator) => {
             stage = `capture:${state}`;
@@ -275,7 +277,10 @@ for (const { recipe, profile } of dropdownEvidenceRecipes)
           let menu = await openMenu(page, trigger);
           const ref = (name: string) => menu.locator(`[data-demo-ref="${name}"]`);
           if (recipe === 'destructive') {
-            expect(await menu.getByRole('menuitem').count()).toBe(4);
+            const items = menu.getByRole('menuitem');
+            expect(await items.count()).toBe(4);
+            expect(await items.allTextContents()).toEqual(['Edit', 'Share', 'Archive', 'Delete']);
+            expect(await menu.locator('[role="menuitem"][aria-disabled="true"]').count()).toBe(0);
             const item = ref('delete');
             await expect.poll(() => hasFocus(ref('edit'))).toBe(true);
             await page.mouse.move(0, 0);
@@ -319,6 +324,7 @@ for (const { recipe, profile } of dropdownEvidenceRecipes)
             // The current public recipe has one Delete Item. Keep the disabled
             // owner check by updating that same Item, then restore it below.
             await fixture.evaluate((view) => view.setDeleteDisabled(true));
+            await fixture.evaluate((view) => view.observeSelects());
             menu = await openMenu(page, trigger);
             await expect.poll(() => hasFocus(ref('edit'))).toBe(true);
             await page.keyboard.press('End');
@@ -329,10 +335,12 @@ for (const { recipe, profile } of dropdownEvidenceRecipes)
               opacity: '0.5',
               pointerEvents: 'none',
             });
-            await page.keyboard.press('Enter');
-            await page.keyboard.press('Space');
-            expect(await hasFocus(disabled)).toBe(true);
-            expect(await trigger.getAttribute('aria-expanded')).toBe('true');
+            for (const key of ['Enter', 'Space']) {
+              await page.keyboard.press(key);
+              expect(await fixture.evaluate((view) => view.selections)).toEqual([]);
+              expect(await hasFocus(disabled)).toBe(true);
+              expect(await trigger.getAttribute('aria-expanded')).toBe('true');
+            }
             await capture('disabled', await palette(disabled, percent), menu);
             stage = 'activate';
             await fixture.evaluate((view) => view.setDeleteDisabled(false));
@@ -342,6 +350,41 @@ for (const { recipe, profile } of dropdownEvidenceRecipes)
             await page.keyboard.press('ArrowDown');
             await expect.poll(() => hasFocus(ref('delete'))).toBe(true);
             await page.keyboard.press('Enter');
+            expect(await fixture.evaluate((view) => view.selections)).toEqual([
+              { value: 'delete', reason: 'keyboard' },
+            ]);
+          } else if (recipe === 'basic') {
+            stage = 'disabled-keyboard';
+            await fixture!.evaluate((view) => view.observeSelects());
+            const row = (name: string) => menu.getByRole('menuitem', { name, exact: true });
+            await expect.poll(() => hasFocus(row('Profile'))).toBe(true);
+            await page.keyboard.press('End');
+            const disabled = row('API');
+            await expect.poll(() => hasFocus(disabled)).toBe(true);
+            const paint = await disabled.evaluate((element) => ({
+              disabled: element.getAttribute('aria-disabled'),
+              opacity: getComputedStyle(element).opacity,
+              pointerEvents: getComputedStyle(element).pointerEvents,
+            }));
+            expect(paint).toEqual({
+              disabled: 'true',
+              opacity: '0.5',
+              pointerEvents: 'none',
+            });
+            for (const key of ['Enter', 'Space']) {
+              await page.keyboard.press(key);
+              expect(await fixture!.evaluate((view) => view.selections)).toEqual([]);
+              expect(await hasFocus(disabled)).toBe(true);
+              expect(await trigger.getAttribute('aria-expanded')).toBe('true');
+            }
+            await capture('disabled', paint, menu);
+            stage = 'activate-support';
+            await page.keyboard.press('ArrowUp');
+            await expect.poll(() => hasFocus(row('Support'))).toBe(true);
+            await page.keyboard.press('Enter');
+            expect(await fixture!.evaluate((view) => view.selections)).toEqual([
+              { value: 'support', reason: 'keyboard' },
+            ]);
           } else {
             await expect.poll(() => hasFocus(ref('copy'))).toBe(true);
             expect(await menu.getByRole('menuitem').count()).toBe(4);

@@ -1,4 +1,0 @@
-error: failed to parse manifest at `/workspace/scratch/1b24643d38b1/gpui-preparation-evidence/independent-registry-cwd-QcaP8S/consumer/Cargo.toml`
-
-Caused by:
-  registry index was not found in any configuration: `fixture`
