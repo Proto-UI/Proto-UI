@@ -28,7 +28,7 @@ The public Liquid Button page legitimately contains several panels for the same 
 | Liquid exact target inventory | Eight unique locale/runtime targets | Source-based identity proof, not rendered optics |
 | Liquid TypeScript syntax/emission | No errors | Not semantic type checking |
 
-The [structured evidence](evidence/2026-11-17-tabs-liquid-followups.json) preserves the actual Vitest results, command receipts, source hashes, earlier formatting failure and correction, locator inventory, and independent Liquid source review. The combined branch preserves the tested Tabs product/unit bytes and final fixture hashes; adding the unrelated Liquid locator does not turn earlier execution into a new combined native run.
+The [structured evidence](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-17-tabs-liquid-followups.json) preserves the actual Vitest results, command receipts, source hashes, earlier formatting failure and correction, locator inventory, and independent Liquid source review. The combined branch preserves the tested Tabs product/unit bytes and final fixture hashes; adding the unrelated Liquid locator does not turn earlier execution into a new combined native run.
 
 ## Remaining acceptance
 

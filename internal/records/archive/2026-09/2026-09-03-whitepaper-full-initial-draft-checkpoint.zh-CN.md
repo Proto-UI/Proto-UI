@@ -13,9 +13,9 @@
 | 部分 | 章节 | 当前推进 | 初稿记录 |
 | --- | --- | --- | --- |
 | 序章 | 我们还要发明多少遍 Button？ | 从跨技术反复建设相似交互责任进入有边界、可检验的经验假设 | [`2026-09-03-whitepaper-prologue-initial-draft.zh-CN.md`](./2026-09-03-whitepaper-prologue-initial-draft.zh-CN.md) |
-| 第一部 · 原型 | I-1 代码之前的组件 | 从跨技术“还原同一组件”的经验进入交互主体与可执行近似 | [`2026-08-30-whitepaper-part-one-chapter-1-initial-draft.zh-CN.md`](./2026-08-30-whitepaper-part-one-chapter-1-initial-draft.zh-CN.md) |
-| 第一部 · 原型 | I-2 从交互关系出发 | 从 User、Maker、Other Component 与方向性关系推导 information channel | [`2026-08-30-whitepaper-part-one-chapter-2-initial-draft.zh-CN.md`](./2026-08-30-whitepaper-part-one-chapter-2-initial-draft.zh-CN.md) |
-| 第一部 · 原型 | I-3 组件的边界 | 用独立参与者关系和 feedback-only 例外判断 Prototype 边界 | [`2026-08-30-whitepaper-part-one-chapter-3-initial-draft.zh-CN.md`](./2026-08-30-whitepaper-part-one-chapter-3-initial-draft.zh-CN.md) |
+| 第一部 · 原型 | I-1 代码之前的组件 | 从跨技术“还原同一组件”的经验进入交互主体与可执行近似 | [`2026-08-30-whitepaper-part-one-chapter-1-initial-draft.zh-CN.md`](../2026-08/2026-08-30-whitepaper-part-one-chapter-1-initial-draft.zh-CN.md) |
+| 第一部 · 原型 | I-2 从交互关系出发 | 从 User、Maker、Other Component 与方向性关系推导 information channel | [`2026-08-30-whitepaper-part-one-chapter-2-initial-draft.zh-CN.md`](../2026-08/2026-08-30-whitepaper-part-one-chapter-2-initial-draft.zh-CN.md) |
+| 第一部 · 原型 | I-3 组件的边界 | 用独立参与者关系和 feedback-only 例外判断 Prototype 边界 | [`2026-08-30-whitepaper-part-one-chapter-3-initial-draft.zh-CN.md`](../2026-08/2026-08-30-whitepaper-part-one-chapter-3-initial-draft.zh-CN.md) |
 | 第一部 · 原型 | I-4 通路之外的语义 | 用 State、Anatomy、Lifecycle 与 Switch 伪代码使 Prototype 接近可执行 | [`2026-09-02-whitepaper-part-two-chapter-4-initial-draft.zh-CN.md`](./2026-09-02-whitepaper-part-two-chapter-4-initial-draft.zh-CN.md) |
 | 第二部 · 翻译 | II-5 翻译层 | 解释 Host artifact、Module / Host Capability、翻译形式、结果与证据 | [`2026-09-02-whitepaper-part-two-chapter-5-initial-draft.zh-CN.md`](./2026-09-02-whitepaper-part-two-chapter-5-initial-draft.zh-CN.md) |
 | 第二部 · 翻译 | II-6 一致性的边界 | 说明 Prototype 先决定不变量，realization context 再决定比较强度 | [`2026-09-02-whitepaper-part-two-chapter-6-initial-draft.zh-CN.md`](./2026-09-02-whitepaper-part-two-chapter-6-initial-draft.zh-CN.md) |

@@ -37,7 +37,7 @@ The two selected integration identities are:
 - `Docs shadcn/vue2 returns focus to the current opener after a runtime replacement`
 - `public-mode Search through the actual projection materializer vue2/shadcn: staged activation, close/reopen and generation replacement retain the live query`
 
-The new fixture has SHA-256 `56f9d3cc2755ba49d8412fe237a5788a00038fa143dc810844df8a2dda6ac911` in both red and green runs. Each run's ten explicitly bound inputs remained unchanged. The three pre-existing affected fixture files were additionally audited against their unchanged `c22` blobs after execution; their hashes were not individually listed in the original runner input receipt. The [source-bound evidence record](evidence/2026-11-17-expose-state-terminal-cancellation.json) retains commands, case identities, input hashes, original failure identity, exact selections, process exits and log/report hashes.
+The new fixture has SHA-256 `56f9d3cc2755ba49d8412fe237a5788a00038fa143dc810844df8a2dda6ac911` in both red and green runs. Each run's ten explicitly bound inputs remained unchanged. The three pre-existing affected fixture files were additionally audited against their unchanged `c22` blobs after execution; their hashes were not individually listed in the original runner input receipt. The [source-bound evidence record](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-17-expose-state-terminal-cancellation.json) retains commands, case identities, input hashes, original failure identity, exact selections, process exits and log/report hashes.
 
 ## Remaining boundaries
 

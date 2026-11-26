@@ -2,7 +2,7 @@
 
 ## Scope and source
 
-This follow-up starts from main `1dd7afa3ea4ff43c1f28306c9b035e87ed11ea62`. It repairs seven bounded source, test and workflow paths discovered while checking the merged Sprint 3 evidence. The machine-readable [validation projection](evidence/2026-11-24-sprint3-header-font/validation.json) binds every tested source file and the original result digests.
+This follow-up starts from main `1dd7afa3ea4ff43c1f28306c9b035e87ed11ea62`. It repairs seven bounded source, test and workflow paths discovered while checking the merged Sprint 3 evidence. The machine-readable [validation projection](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint3-header-font/validation.json) binds every tested source file and the original result digests.
 
 The Header Escape capture now narrows its event target with the same owner-realm Element check already used by the adjacent Escape and outside handlers. The Base Select evidence lane uses the existing byte-verified CJK font helper with its original 220-second supervisor, five-minute step and original eight consumer cases. Its new lane participates in the existing success, failure and timeout controls.
 

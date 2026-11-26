@@ -40,6 +40,6 @@ The retained exact `fde59e8517b52f4c0a3fd19453a5d586e9fe7f3f` report used the sa
 
 ## Evidence and scope
 
-The [strict evidence archive](evidence/2026-11-24-anatomy-strict-package-budget.tar.gz) retains the original report, terminal verification, complete stage commands and logs, environment, old source-bound report and input-hash comparison. Its manifest hashes every member. The old report remains bound to `fde`; it is not relabeled as a new baseline execution.
+The [strict evidence archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-anatomy-strict-package-budget.tar.gz) retains the original report, terminal verification, complete stage commands and logs, environment, old source-bound report and input-hash comparison. Its manifest hashes every member. The old report remains bound to `fde`; it is not relabeled as a new baseline execution.
 
 The existing Vue margin accommodates this measured source with 84 B remaining. The final integrated candidate still needs its own exact source binding and strict receipt. Package-byte success does not prove the original native Matrix 60-second startup condition, full repository types, hosted CI, or release acceptance. No budget policy, assertion, source-admission status or lifecycle was changed, and this child performed no external write.

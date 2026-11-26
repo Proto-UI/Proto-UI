@@ -21,11 +21,11 @@
 
 此前选定七个小反例包含在 13/13 内，不重复计数。新增子进程 watchdog 捕获同步分析卡死，不延长原 authored 文件的限制。
 
-独立只读审查验证了真实 emit 扫描、函数默认值 / getter / try-catch-finally、冷 IR 的 exact-kind schema 边界及原反例仍启用完整检查。[审查原件](./evidence/2026-11-24-sprint2-compiler-convergence/independent-review.md)明确没有冒充独立重跑或 GitHub approval。
+独立只读审查验证了真实 emit 扫描、函数默认值 / getter / try-catch-finally、冷 IR 的 exact-kind schema 边界及原反例仍启用完整检查。[审查原件](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-compiler-convergence/independent-review.md)明确没有冒充独立重跑或 GitHub approval。
 
 ## 原始证据与来源
 
-[232 个原始文件清单](./evidence/2026-11-24-sprint2-compiler-convergence/manifest.json)、[归档收据](./evidence/2026-11-24-sprint2-compiler-convergence/archive-receipt.json)及[全部原始证据](./evidence/2026-11-24-sprint2-compiler-convergence/raw-evidence.tar.gz)随本提交交付。归档 1,803,320 bytes，SHA-256 为 3ea35a28c10833c58e3fd9d5e4a8a8450465c1304c06084a2f2a930dcad23fd1，逐成员读回哈希一致。
+[232 个原始文件清单](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-compiler-convergence/manifest.json)、[归档收据](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-compiler-convergence/archive-receipt.json)及[全部原始证据](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-compiler-convergence/raw-evidence.tar.gz)随本提交交付。归档 1,803,320 bytes，SHA-256 为 3ea35a28c10833c58e3fd9d5e4a8a8450465c1304c06084a2f2a930dcad23fd1，逐成员读回哈希一致。
 
 原件包含两队列的已完成 / 运行中 / 未执行事实、CPU profiles、被否定的分析假设与诊断变体、每个变体完整源码、最终 full-index patch、独立审查及三个完整通过文件的输出。保留第一版只按 void declaration 的实验，不将它冒充最终实现。
 

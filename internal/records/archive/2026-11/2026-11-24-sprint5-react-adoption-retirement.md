@@ -47,7 +47,7 @@ Real physical-browser adoption/replacement for React, Vue 3 and Vue 2, complete 
 
 ## Durable raw and independent review
 
-The [evidence manifest](evidence/2026-11-24-sprint5-react-adoption/manifest.json) binds the retained original failures and successful author logs, plus the separate reviewer’s unchanged four real-emitted consumer controls. The independent review supports exact tree `95576086dfad30c721b95dff5e97d4d103ba6be8` against its Vue parent; it is not GitHub approval. Integration applies the same five-file patch (SHA-256 `2176c2d23316aeea1c3d2d4be093197ac11e7fde532f77354ef2bed378ca554a`) after the independently resolved concurrent merge.
+The [evidence manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint5-react-adoption/manifest.json) binds the retained original failures and successful author logs, plus the separate reviewer’s unchanged four real-emitted consumer controls. The independent review supports exact tree `95576086dfad30c721b95dff5e97d4d103ba6be8` against its Vue parent; it is not GitHub approval. Integration applies the same five-file patch (SHA-256 `2176c2d23316aeea1c3d2d4be093197ac11e7fde532f77354ef2bed378ca554a`) after the independently resolved concurrent merge.
 
 ## Integrated source check
 

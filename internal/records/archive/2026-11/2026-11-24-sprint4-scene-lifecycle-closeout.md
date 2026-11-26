@@ -24,4 +24,4 @@ The execution archive and manifest contain the exact commands, timestamps, exit 
 
 The new complete 37-case shader browser gate and the canonical package measurement must run on this published combination. Prior c1 / c18 hosted 37-case and nine-entry budget results remain valid only for their recorded source. This change preserves the author's existing numeric ceilings. No browser deadline, case, assertion, or package threshold is relaxed.
 
-Public evidence: [manifest](evidence/2026-11-24-sprint4-scene-lifecycle-closeout/manifest.json) and [raw execution archive](evidence/2026-11-24-sprint4-scene-lifecycle-closeout/execution.tar.gz).
+Public evidence: [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint4-scene-lifecycle-closeout/manifest.json) and [raw execution archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint4-scene-lifecycle-closeout/execution.tar.gz).

@@ -38,7 +38,7 @@ The two diagnostic files pass a scoped TypeScript check extending the unchanged 
 
 An independent agent reviewed the complete helper, original caller lifecycle and the new held/finish/late-restart controls. It found no blocking ownership or retention issue within this bounded scope. This is local engineering review, not platform approval or native acceptance.
 
-The [manifest and raw evidence](evidence/2026-11-24-sprint1-matrix-cpu-chunks/manifest.json) bind the original native artifact, phase readback, baseline/candidate source hashes, failed control, complete passing suite and type-check result.
+The [manifest and raw evidence](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-matrix-cpu-chunks/manifest.json) bind the original native artifact, phase readback, baseline/candidate source hashes, failed control, complete passing suite and type-check result.
 
 ## Next acquisition
 

@@ -57,7 +57,7 @@ C2→C3 为 **5 files、225 insertions、12 deletions**。机器证据逐项保�
 
 ## 集成后的本地增量验证
 
-统一 runner 于 `2026-11-15T22:13:34.061Z` 开始，`22:18:10.525Z` 结束，Node `v24.22.1`，各检查串行执行。HEAD/tree 前后相同、工作树 clean。完整命令和原始 receipt 内嵌于 [本补充机器证据](evidence/2026-11-15-compiler-ci-followup.json)。
+统一 runner 于 `2026-11-15T22:13:34.061Z` 开始，`22:18:10.525Z` 结束，Node `v24.22.1`，各检查串行执行。HEAD/tree 前后相同、工作树 clean。完整命令和原始 receipt 内嵌于 [本补充机器证据](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-15-compiler-ci-followup.json)。
 
 | 检查 | 实际结果 | 证明范围 |
 | --- | --- | --- |

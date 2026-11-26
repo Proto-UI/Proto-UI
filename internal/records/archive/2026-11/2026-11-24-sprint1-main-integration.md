@@ -60,7 +60,7 @@ PR #1745's actual review collection was empty at the checkpoint. Local independe
 
 ## Evidence
 
-The [manifest](evidence/2026-11-24-sprint1-main-integration/manifest.json) records source identities, every command receipt, the complete unresolved inventory and per-file hashes. The [raw archive](evidence/2026-11-24-sprint1-main-integration/executed-validation.tar.gz) has 115 entries, each read back byte for byte, SHA-256 `0eaa9d82fb326c74830c6fb695c53c990122dc8582cb6fbf8527a7ca5fa3668d`. Failed, diagnostic, interrupted and final passing observations are retained separately.
+The [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-main-integration/manifest.json) records source identities, every command receipt, the complete unresolved inventory and per-file hashes. The [raw archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-main-integration/executed-validation.tar.gz) has 115 entries, each read back byte for byte, SHA-256 `0eaa9d82fb326c74830c6fb695c53c990122dc8582cb6fbf8527a7ca5fa3668d`. Failed, diagnostic, interrupted and final passing observations are retained separately.
 
 ## Commit-hook reconciliation
 
@@ -68,7 +68,7 @@ The normal repository hook formatted fourteen files carried from main while crea
 
 The changes are formatting only: eleven JSON token streams are identical when whitespace outside strings is removed; the Markdown table retains every cell and alignment; the diagnostic transport script has an identical parsed JavaScript structure and literal values; and the YAML decision has identical parsed values. The draft decision, criteria, numerical evidence and all reported failed results remain unchanged. No runtime product source was changed by the hook.
 
-The [complete reconciliation](evidence/2026-11-24-sprint1-main-integration/hook-format-reconciliation.json) lists every original and formatted blob and raw digest. All fourteen original files are also preserved byte for byte in the [original-byte archive](evidence/2026-11-24-sprint1-main-integration/pre-hook-originals.tar.gz), in addition to their immutable main parent. The earlier execution archive remains unchanged. A separate normal commit records this reconciliation before publication; final native results must still bind the final published head.
+The [complete reconciliation](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-main-integration/hook-format-reconciliation.json) lists every original and formatted blob and raw digest. All fourteen original files are also preserved byte for byte in the [original-byte archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-main-integration/pre-hook-originals.tar.gz), in addition to their immutable main parent. The earlier execution archive remains unchanged. A separate normal commit records this reconciliation before publication; final native results must still bind the final published head.
 
 ## Byte-bound payload restoration
 

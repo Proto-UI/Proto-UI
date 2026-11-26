@@ -89,7 +89,7 @@ The source and browser artifacts were first inspected on the primary filesystem.
 | Browser acceptance | 14865836984 | 2,126,283 | `9b56c4470458c16fb6e61f98b05d156409f676d601d3605f802a5e985fedda57` |
 | Production build | 14864599701 | 425,043 | `acee4d22c294ee1f4d5aee28601be58a659334edf24576f9b0912c6ca35d92ad` |
 
-The shared [repair evidence manifest](evidence/2026-11-23-sprint5-native-part-input-retirement/manifest.json) records 208 originals, 65,025,208 original bytes and 29,489,830 archived bytes, including complete artifact containers rather than a second copy of every generated file. Every archived byte stream is compared with its original. These originals describe ea600. Any repair accompanying this archive has its own source-bound receipt and does not re-execute or relabel ea600's tests as a different head.
+The shared [repair evidence manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint5-native-part-input-retirement/manifest.json) records 208 originals, 65,025,208 original bytes and 29,489,830 archived bytes, including complete artifact containers rather than a second copy of every generated file. Every archived byte stream is compared with its original. These originals describe ea600. Any repair accompanying this archive has its own source-bound receipt and does not re-execute or relabel ea600's tests as a different head.
 
 ## Readiness
 

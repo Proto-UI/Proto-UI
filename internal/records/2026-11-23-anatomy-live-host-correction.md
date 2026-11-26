@@ -12,7 +12,7 @@ The subscriber suite retains b8's earlier replacement-target and comparator-repl
 
 ## Executed evidence
 
-The [manifest](evidence/2026-11-23-anatomy-live-host-correction/manifest.json) binds the original command logs, complete JSON report, before-source snapshots, exact three-file patch, driver and receipts in a compressed archive.
+The [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-anatomy-live-host-correction/manifest.json) binds the original command logs, complete JSON report, before-source snapshots, exact three-file patch, driver and receipts in a compressed archive.
 
 | Observation | Actual result |
 | --- | --- |

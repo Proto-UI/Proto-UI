@@ -10,11 +10,11 @@
 - `caller.definition` 仍是传入对象，传入对象的 `name` / `setup` 之后可以修改。
 - `defineAsHook` 对照确实公开冻结数组，保留 Z / A 原声明顺序和两个 declaration 引用。
 
-这只是 Core source constructor 的直接观察，没有执行 generic setup、Adapter、packed consumer 或 Compiler；不能据此新增全 K 的通过或替代原 R3 的 installed-package 失败。 [实际观察 JSON](./evidence/2026-11-24-sprint2-hook-boundary/current-core-observation.json) 保留 `fullKAccepted: false`。
+这只是 Core source constructor 的直接观察，没有执行 generic setup、Adapter、packed consumer 或 Compiler；不能据此新增全 K 的通过或替代原 R3 的 installed-package 失败。 [实际观察 JSON](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-hook-boundary/current-core-observation.json) 保留 `fullKAccepted: false`。
 
 从本地已有 Git objects 恢复了公开原提交 `1576544cf0435eb07c478ddcecb35960dcfd0db5` 的七个精确输入：container driver、consumer probe、原 raw fixture、原 type fixture、两语页面和完整 dated record。commit 对应 tree 确认是 `abf6443baf245953b26ba3609b46256836449a9b`。每个成员从指定 blob 读取，保存原 mode、bytes、SHA-256，再从新 archive 逐成员读回。恢复没有访问网络或替换任何原始输入。
 
-[恢复清单](./evidence/2026-11-24-sprint2-hook-boundary/public-source-recovery.json)及 [七成员原始源码](./evidence/2026-11-24-sprint2-hook-boundary/public-source-1576544.tar.gz) 是完整、可读取的有界交付。这个新 archive 为 60,219 bytes，SHA-256 为 `396e816bca1378fc326a4399b602059ad3adc6b0eaefc06a0bfdf515b748e723`。
+[恢复清单](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-hook-boundary/public-source-recovery.json)及 [七成员原始源码](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-hook-boundary/public-source-1576544.tar.gz) 是完整、可读取的有界交付。这个新 archive 为 60,219 bytes，SHA-256 为 `396e816bca1378fc326a4399b602059ad3adc6b0eaefc06a0bfdf515b748e723`。
 
 它**不是**原 13,091-member 私有源码 archive，不能冒用原压缩包 SHA-256 `fd2794add510b12157453eb19ebb63fbd99f91138c68a69c97003888f170877e`。原 `spec/contracts/C-HOOK-0001.yaml` 独立文件也不在该公开提交的 tree 中；其 A–M 完整文字保留于已恢复 dated record 的 `correctionR2.fullGenericConditions`，这不等于原文件及整个原私有环境已经恢复。
 
@@ -24,8 +24,8 @@
 
 当前来源给出三个不同层次的事实：
 
-1. [Core 的 HookPrototype / HookCaller / createHookCaller](../../packages/core/src/prototype.ts) 没有给 legacy generic Hook 公开 `modules`。数组冻结和 caller 发布只发生在 `kind === 'asHook'` 分支。caller definition 引用也没有冻结 name / setup。
-2. [C-MODULE-DECLARATION-0001-F](../../spec/contracts/C-MODULE-DECLARATION-0001.yaml) 当前只规定 authored asHook 的静态发布和显式复用。该文件为 draft； [D-AS-HOOK-DEFINE-HOOK-0001](../../spec/decisions/D-AS-HOOK-DEFINE-HOOK-0001.yaml) 仍明确 generic authoring API 的关系未决。
+1. [Core 的 HookPrototype / HookCaller / createHookCaller](../../../../packages/core/src/prototype.ts) 没有给 legacy generic Hook 公开 `modules`。数组冻结和 caller 发布只发生在 `kind === 'asHook'` 分支。caller definition 引用也没有冻结 name / setup。
+2. [C-MODULE-DECLARATION-0001-F](../../../../spec/contracts/C-MODULE-DECLARATION-0001.yaml) 当前只规定 authored asHook 的静态发布和显式复用。该文件为 draft； [D-AS-HOOK-DEFINE-HOOK-0001](../../../../spec/decisions/D-AS-HOOK-DEFINE-HOOK-0001.yaml) 仍明确 generic authoring API 的关系未决。
 3. 四个 Web Adapter 已在 preparation 时读取 prototype 的 Module declarations，Runtime module orchestrator 在 module construction 前形成共同冻结视图。Compiler 的 `parser-module.ts` 可以解析 hook descriptor 的 `modules`； `parser.ts` 当前在到达 hook call 时执行 `addModuleDeclarations(descriptor.modules)`。因而“Core 增加一个字段”还不能单独证明 Adapter/Compiler 都遵守原 K 的显式采用边界。
 
 原 R3 的非空数组断言是有效的历史目标检查。它确实失败，其后的顺序、引用、字段和冻结断言尚未执行。不能改成比较两个 undefined、使用 `Object.isFrozen(undefined)`，或改测 `defineAsHook` 来获得名义上的 K green。
@@ -84,7 +84,7 @@
 
 ## 有界设备来源检查
 
-对 `doesvm-3f08` 的已知旧工作目录 `/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono` 做了只读、有界查找。[原始调用结果](./evidence/2026-11-24-sprint2-hook-boundary/device-archive-search.json)保留成功、访问边界、超时和连接失败，SHA-256 为 `e0c65c96c79da9ef91133ecd23ff744d022a36b91f91d80688671b1a6ceba254`。
+对 `doesvm-3f08` 的已知旧工作目录 `/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono` 做了只读、有界查找。[原始调用结果](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-hook-boundary/device-archive-search.json)保留成功、访问边界、超时和连接失败，SHA-256 为 `e0c65c96c79da9ef91133ecd23ff744d022a36b91f91d80688671b1a6ceba254`。
 
 - 成功读取该工作目录、`evidence`、`sprint2`、`evidence/s2-s3`、`evidence/s2-s3/short-batch-1`、`evidence/sprint12-final-d039-20261123`、`evidence/continuation-root-4deb` 和 `compiler-reconcile-r1` 的一级名称。没有在这些列出的成员中发现原 Hook archive。
 - `evidence` 内限定两层的 `*/*1154*` 没有文件；`*/*hook*` 命中普通 Git hooks / 格式修复记录。`*/*archive*` 的相关命中经读回为 11 月 23 日八个 Sprint 2 证据目录的原字节格式恢复提案，没有宣称原 13,091-member Hook 源码归档。`sprint2/internal` 的两层 `1154` 命中已公开的 dated record，不是新的原件。

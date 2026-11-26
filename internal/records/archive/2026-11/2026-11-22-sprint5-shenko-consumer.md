@@ -6,7 +6,7 @@ Date: 2026-11-22. Agent: ChatGPT, acting on the current user's Sprint 5 request 
 
 The public application source is [cyjin-yl/shenko at `f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42`](https://github.com/cyjin-yl/shenko/tree/f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42). Its original reviewed Proto UI pin is `f29738eb6a804ccfc58510cc5a5bd1692690716e`, with upstream lock SHA-256 `e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8`. An isolated candidate changed the pin explicitly to the publicly available Sprint 5 commit `457eb4ed08bae27c4db12b87a9238e3c1b074ca8` and its actual lock digest `506e325a918331c1a90273876aeee280c08bb25ef74ba54a93b7a48f33fb3863`. The original pin was saved before the change. The producer's exact-pin, clean-source, package-version and provenance checks were retained.
 
-The two application-owned prototypes are `transport-badge.proto.ts` and `message-bubble.proto.ts`. Their generated React components are imported by the real `src/ui-kit.tsx` / `src/im.tsx` application, including ordinary React children. Button, Textarea, Scroll Area, Collapsible, Drawer, Toggle Group, Input, Separator and Toggle remain React Adapter consumers. The [consumer inventory](../compiler/application-consumers.md) keeps these distinct.
+The two application-owned prototypes are `transport-badge.proto.ts` and `message-bubble.proto.ts`. Their generated React components are imported by the real `src/ui-kit.tsx` / `src/im.tsx` application, including ordinary React children. Button, Textarea, Scroll Area, Collapsible, Drawer, Toggle Group, Input, Separator and Toggle remain React Adapter consumers. The [consumer inventory](../../../compiler/application-consumers.md) keeps these distinct.
 
 ## Executed first candidate
 

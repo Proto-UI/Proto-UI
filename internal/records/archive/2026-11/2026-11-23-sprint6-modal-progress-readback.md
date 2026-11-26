@@ -61,7 +61,7 @@
 
 ## 原始证据
 
-- [Manifest](./evidence/2026-11-23-sprint6-modal-progress-readback/manifest.json)
-- [完整原始验证档案](./evidence/2026-11-23-sprint6-modal-progress-readback/validation.tar.gz)
+- [Manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint6-modal-progress-readback/manifest.json)
+- [完整原始验证档案](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint6-modal-progress-readback/validation.tar.gz)
 
 Manifest 列明每份归档文件的 SHA-256、实际报告计数及源码绑定。截图只辅助观察对应视口，动画时间来自原始 trace 与断言。

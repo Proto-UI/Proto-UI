@@ -39,7 +39,7 @@ These selected Calendar/Date Picker results do not cover every original unavaila
 
 ## Durable receipts and exact retention scope
 
-The [manifest](./evidence/2026-11-24-sprint1-native-followup/manifest.json) binds source identities, step counts and original artifact IDs. The complete original Sprint 1 artifact has 1,345 members, 23,965,352 bytes and SHA-256 `2a4ff79729755411164b9e1e99c1a68d32dea3efd88b704909bfc37de27f942a`. The complete projection artifact has 361 members, 8,136,029 bytes and SHA-256 `89643fb7e0772fc79318ca948cfad55f7fce9478408329ce9a96116b8444561c`.
+The [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-native-followup/manifest.json) binds source identities, step counts and original artifact IDs. The complete original Sprint 1 artifact has 1,345 members, 23,965,352 bytes and SHA-256 `2a4ff79729755411164b9e1e99c1a68d32dea3efd88b704909bfc37de27f942a`. The complete projection artifact has 361 members, 8,136,029 bytes and SHA-256 `89643fb7e0772fc79318ca948cfad55f7fce9478408329ce9a96116b8444561c`.
 
 The checked-in carriers are explicit selections: all Sprint 1 JSON/log/text/HTML evidence plus failure/disposal screenshots, and the complete projection capability report with the original terminal job log. Each full original ZIP has a member-by-member name/size/hash index. Every retained member was compared to that original index, and both retained ZIPs passed CRC checks. Omitted screenshots are still identified in the full index and the original GitHub artifact; the smaller carrier is not mislabeled a complete image archive.
 

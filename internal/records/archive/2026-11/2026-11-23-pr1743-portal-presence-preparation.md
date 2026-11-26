@@ -29,10 +29,10 @@ The existing TODO is repeated native adoption back to the original Document duri
 
 Independent narrow review found a P2 in v2: a preparation check before `environment()` also blocked reduced/unknown preference, hidden and lost-channel fallback. The final same-fixture red/green pair confirms v3 closes that finding. The reviewer applied the immutable patch in memory, checked all six file hashes and verified the complete `settle()` body remains byte-identical. There is no remaining blocking source finding within that narrow review. It does not establish final-head platform approval or native acceptance.
 
-Only `APPLICATION` and `OWNER` executable evidence mappings are added to the existing draft [T-FEEDBACK-PRESENCE-PRESENTATION-0001](../../spec/tests/T-FEEDBACK-PRESENCE-PRESENTATION-0001.yaml). Normative criteria and lifecycle remain unchanged.
+Only `APPLICATION` and `OWNER` executable evidence mappings are added to the existing draft [T-FEEDBACK-PRESENCE-PRESENTATION-0001](../../../../spec/tests/T-FEEDBACK-PRESENCE-PRESENTATION-0001.yaml). Normative criteria and lifecycle remain unchanged.
 
 ## Preserved evidence and remaining verification
 
-The [complete raw archive](evidence/2026-11-23-pr1743-portal-presence-preparation/raw.tar.gz) is **351,373 bytes**, SHA-256 `838619108e996fe7dfc083e56bd151331c1b4557bbde49b0114262eeb7f00965`. Its 100 members retain the original native ZIP/frames, all red and green logs, failed resource attempts, source snapshots, routing receipts and the independent review packet. The embedded review packet is 19,548 bytes, SHA-256 `9a69626489040aebaaf25d2bec2908960ceb0061a9d35f4eb40b063353bd88b0`.
+The [complete raw archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-pr1743-portal-presence-preparation/raw.tar.gz) is **351,373 bytes**, SHA-256 `838619108e996fe7dfc083e56bd151331c1b4557bbde49b0114262eeb7f00965`. Its 100 members retain the original native ZIP/frames, all red and green logs, failed resource attempts, source snapshots, routing receipts and the independent review packet. The embedded review packet is 19,548 bytes, SHA-256 `9a69626489040aebaaf25d2bec2908960ceb0061a9d35f4eb40b063353bd88b0`.
 
 The original seven native cases, affected Portal/Image consumers, full current-source type/catalog checks and strict canonical budgets remain required on the final integrated candidate. Earlier exact48 passes and these focused source tests are not relabeled as that final acceptance.

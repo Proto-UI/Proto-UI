@@ -22,7 +22,7 @@ The starter has no substitute Save Button. Its real browser-local storage and ex
 
 `blocked.packet.json` is the only actual checked-in study packet: no artifact, no controls, no runs. The expected unrun guard outcome is blocked/no measurements; this record does not claim it executed. Synthetic fixtures may exercise successful and unsuccessful bookkeeping branches, but they are never product observations. The reducer leaves `originalCriteriaComplete: false`, preserves abandoned/failed sessions, and separates controls, prior knowledge, different dependency locks and exceeded windows from the fixed primary baseline. Artifact admission JSON verifies content relationships only; Main must independently authenticate execution, rights, artifact review and actual participant observations.
 
-The complete Main-only serial before/after, compilation/unsupported, independent install/build/closure, production-preview/native, participant recording/reduction and visual procedure is [the study README](../../scripts/analysis/invisible-consumption/README.md). Its commands are planned and unrun. New browser files are standalone evidence producers, not a registered `.browser.test.ts` suite or a change to shared CI composition.
+The complete Main-only serial before/after, compilation/unsupported, independent install/build/closure, production-preview/native, participant recording/reduction and visual procedure is [the study README](../../../../scripts/analysis/invisible-consumption/README.md). Its commands are planned and unrun. New browser files are standalone evidence producers, not a registered `.browser.test.ts` suite or a change to shared CI composition.
 
 ## Every original completion condition remains preserved
 

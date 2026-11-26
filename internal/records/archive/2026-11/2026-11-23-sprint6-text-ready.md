@@ -38,4 +38,4 @@
 
 ## 原始档案
 
-[证据清单](./evidence/2026-11-23-sprint6-text-ready/manifest.json) 和 [原始档案](./evidence/2026-11-23-sprint6-text-ready/validation.tar.gz) 保存历史完整 176/176、本轮实际 Text 152 与 1200s 不完整记录、此前 20 项原回归失败和 174/176 失败、tracked 输入清单及证明、整个 E9 Select/Text artifact、三个原生工作流状态和日志、Bootstrap manifests、原 commit/bundle 与格式保全证明。所有旧失败及可选 preset 取消均维持原样。
+[证据清单](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint6-text-ready/manifest.json) 和 [原始档案](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint6-text-ready/validation.tar.gz) 保存历史完整 176/176、本轮实际 Text 152 与 1200s 不完整记录、此前 20 项原回归失败和 174/176 失败、tracked 输入清单及证明、整个 E9 Select/Text artifact、三个原生工作流状态和日志、Bootstrap manifests、原 commit/bundle 与格式保全证明。所有旧失败及可选 preset 取消均维持原样。

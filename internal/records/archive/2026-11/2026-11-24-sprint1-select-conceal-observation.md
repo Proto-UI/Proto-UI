@@ -4,7 +4,7 @@ This non-normative record reconciles the three actual Select assertion failures 
 
 ## Existing meaning and the incorrect observation
 
-[C-HOST-VIEW-ATTACHMENT-0001-B](../../spec/contracts/C-HOST-VIEW-ATTACHMENT-0001.yaml) says that `data-pui-view-detached` is present exactly when the instance's view intent is not present. The contract remains **draft**, with the existing `0.3.0-alpha.0` revision. [T-HOST-VIEW-ATTACHMENT-0001-CASE-INTENT-EXACTNESS](../../spec/tests/T-HOST-VIEW-ATTACHMENT-0001.yaml) maps that distinction to executable tests. This change neither activates that entity nor changes its meaning.
+[C-HOST-VIEW-ATTACHMENT-0001-B](../../../../spec/contracts/C-HOST-VIEW-ATTACHMENT-0001.yaml) says that `data-pui-view-detached` is present exactly when the instance's view intent is not present. The contract remains **draft**, with the existing `0.3.0-alpha.0` revision. [T-HOST-VIEW-ATTACHMENT-0001-CASE-INTENT-EXACTNESS](../../../../spec/tests/T-HOST-VIEW-ATTACHMENT-0001.yaml) maps that distinction to executable tests. This change neither activates that entity nor changes its meaning.
 
 The adapter projects not-present intent immediately, then separately waits for the existing two rendering opportunities before detaching the mounted view epoch and returning the portaled Content to its author parent. The three Select assertions instead expected the intent marker to remain absent after the first frame. That conflated the marker's declared meaning with physical retirement. The [2026-11-23 Portal assertion correction](2026-11-23-portal-conceal-assertion-correction.md) already documented the same distinction for Dialog and preserved its original red evidence.
 
@@ -43,7 +43,7 @@ The unchanged Portal suite additionally retains its existing two-frame, cancella
 
 ## Source and evidence carrier
 
-[Evidence manifest](evidence/2026-11-24-sprint1-select-conceal-observation/manifest.json) and [raw evidence archive](evidence/2026-11-24-sprint1-select-conceal-observation/raw-evidence.zip) preserve the source-bound results. The ZIP is 341,397 bytes, SHA-256 `e99a3a2c7d802525bb776ff2adf1d3fbf9a6b7be1d45a2b12b3fe9bbcccb5894`; all 46 entries pass CRC and every payload size and SHA-256 was read back and verified.
+[Evidence manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-select-conceal-observation/manifest.json) and [raw evidence archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-select-conceal-observation/raw-evidence.zip) preserve the source-bound results. The ZIP is 341,397 bytes, SHA-256 `e99a3a2c7d802525bb776ff2adf1d3fbf9a6b7be1d45a2b12b3fe9bbcccb5894`; all 46 entries pass CRC and every payload size and SHA-256 was read back and verified.
 
 The official full S1 archive is separately retained with its original 21,119,611 bytes and SHA-256 `c60ceb72c2eb96328a687f0f3426d0977441ead390ef2a0051f523a3e8bdcdb4`; this carrier includes its focused-unit subset, not unrelated screenshots or artifacts. Candidate source snapshots name shared checkout `333f2b19cc7bbe52deab3999f7beef34f6845304` plus the dirty source files actually exercised. They are not a clean-head CI result.
 

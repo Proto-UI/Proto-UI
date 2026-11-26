@@ -2,7 +2,7 @@
 
 ## Source and boundary
 
-This increment follows the Sprint 5 integration candidate `1709cd31b1d44775cd9e441e8f217e37a40a526c`, containing the earlier request-owner implementation and its [independent review corrections](2026-11-22-sprint5-request-owner-review-fixes.md). It addresses the concrete retirement/replacement boundary in `C-LIFECYCLE-OWNER-INITIALIZATION-0001-D/E`, tracked by #896. It does not change either lifecycle definition from draft or admit any canonical SSR profile. The four public SSR profiles continue to reject with `PUI4001`.
+This increment follows the Sprint 5 integration candidate `1709cd31b1d44775cd9e441e8f217e37a40a526c`, containing the earlier request-owner implementation and its [independent review corrections](../../2026-11-22-sprint5-request-owner-review-fixes.md). It addresses the concrete retirement/replacement boundary in `C-LIFECYCLE-OWNER-INITIALIZATION-0001-D/E`, tracked by #896. It does not change either lifecycle definition from draft or admit any canonical SSR profile. The four public SSR profiles continue to reject with `PUI4001`.
 
 The original #895/#896 decision and acceptance conditions remain authoritative. The earlier 117-case and later 193-case receipts are historical evidence for their tested boundaries. They did not cover cleanup-triggered browser reconnection.
 

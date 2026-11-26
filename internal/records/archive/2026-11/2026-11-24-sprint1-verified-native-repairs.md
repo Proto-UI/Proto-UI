@@ -1,6 +1,6 @@
 # Sprint 1 native follow-up — 2026-11-24
 
-This development checkpoint continues PR #1745 from `f419483e78403817fbe5aa6146caec30ab90352a`. It preserves the concurrent main integration, Calendar repair, Vue compiler repair, host-capability criterion identity repair and CLI helper work. The fourteen independently reviewed source files are bound by byte hash in the [manifest](evidence/2026-11-24-sprint1-verified-native-repairs/manifest.json). No issue, umbrella criterion, Draft status or acceptance gate is closed by this record.
+This development checkpoint continues PR #1745 from `f419483e78403817fbe5aa6146caec30ab90352a`. It preserves the concurrent main integration, Calendar repair, Vue compiler repair, host-capability criterion identity repair and CLI helper work. The fourteen independently reviewed source files are bound by byte hash in the [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-verified-native-repairs/manifest.json). No issue, umbrella criterion, Draft status or acceptance gate is closed by this record.
 
 ## Search ownership and failure recovery
 
@@ -26,7 +26,7 @@ The browser compiler registry retains the existing reviewed closure and explicit
 
 ## Executed evidence and limitations
 
-The [raw archive](evidence/2026-11-24-sprint1-verified-native-repairs/raw-evidence.zip) retains original outputs, failed attempts, source bindings, native captures and command receipts. Overlapping selections are not added together.
+The [raw archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-verified-native-repairs/raw-evidence.zip) retains original outputs, failed attempts, source bindings, native captures and command receipts. Overlapping selections are not added together.
 
 | Selection | Actual result |
 | --- | --- |

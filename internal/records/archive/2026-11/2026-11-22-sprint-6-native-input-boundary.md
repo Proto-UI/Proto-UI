@@ -26,7 +26,7 @@
 
 固定官方实现核对：[Chromium EmulationHandler](https://github.com/chromium/chromium/blob/157.0.8103.78/content/browser/devtools/protocol/emulation_handler.cc) 的同参数缓存和未启用 metrics 时 clear 的 no-op，以及 [PageHandler](https://github.com/chromium/chromium/blob/157.0.8103.78/content/browser/devtools/protocol/page_handler.cc) 的截图恢复路径，与上述原生观察一致。监听对象自身的 `MediaQueryList.matches` getter 会更新其比较值，所以诊断只读取新建、无 listener 的 query；真正注册对象通过原生 change event 取值，避免观察干预。
 
-原始 [artifact 14758902459](https://github.com/Proto-UI/Proto-UI/actions/runs/45033871906/artifacts/14758902459) 的 ZIP 为 **190374 bytes**，SHA256 `4b0b2cccf342d3c2030cc43d8673b96fba6ed96da36e8f177376fbca71b67f52`。完整协议日志为 **1145549 bytes**，SHA256 `6541924cb64f6c13ef0a1954d7fa65bbff74b8ebe19fe43b44c233c820fa9e2f`。原 ZIP 同步保存在 [native-dpr-diagnostic.zip](evidence/2026-11-22-sprint-6/native-dpr-diagnostic.zip)，保留五个原件和三张原 PNG；未生成或修改图片。Actions 原保留期 30 天。
+原始 [artifact 14758902459](https://github.com/Proto-UI/Proto-UI/actions/runs/45033871906/artifacts/14758902459) 的 ZIP 为 **190374 bytes**，SHA256 `4b0b2cccf342d3c2030cc43d8673b96fba6ed96da36e8f177376fbca71b67f52`。完整协议日志为 **1145549 bytes**，SHA256 `6541924cb64f6c13ef0a1954d7fa65bbff74b8ebe19fe43b44c233c820fa9e2f`。原 ZIP 同步保存在 [native-dpr-diagnostic.zip](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint-6/native-dpr-diagnostic.zip)，保留五个原件和三张原 PNG；未生成或修改图片。Actions 原保留期 30 天。
 
 ## 修复的责任层与验证边界
 

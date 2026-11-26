@@ -4,7 +4,7 @@
 
 [PR #1491](https://github.com/Proto-UI/Proto-UI/pull/1491) 在 `a23bf1b24f07742ef8852cda474eff958a4dc845` 修复了初始数据记录后续新增 callable 的公开生命周期投影。[PR #1490](https://github.com/Proto-UI/Proto-UI/pull/1490) 的 `0b8b403179759250664587a4a0e990a5354e02e4` 则保留 ExposeState 实际签发的取消函数在 owner 终止后的清理能力。两者修改同一个 Expose reader，单独的测试结果不能证明共同使用时仍能正确清理并保留普通方法的终态限制。
 
-本次在固定父提交 `e329c21ef07a5e7d05b093250ee5ae2be80a3eed` 上，依次应用冻结的终态取消补丁和 #1491 已发布的 Expose reader／契约测试两文件补丁，形成单独验证树。React 的五项 returned-callable integration 测试与父提交、#1491 均逐字节一致，直接复用原测试。源码来源、补丁摘要、全部命令、输入摘要及本地工程复核保存在[机器记录](evidence/2026-11-17-exposes-composition-review.json)。
+本次在固定父提交 `e329c21ef07a5e7d05b093250ee5ae2be80a3eed` 上，依次应用冻结的终态取消补丁和 #1491 已发布的 Expose reader／契约测试两文件补丁，形成单独验证树。React 的五项 returned-callable integration 测试与父提交、#1491 均逐字节一致，直接复用原测试。源码来源、补丁摘要、全部命令、输入摘要及本地工程复核保存在[机器记录](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-17-exposes-composition-review.json)。
 
 这是既有 draft 方向的组合检查，涉及 `M-EXPOSE-0001-G/H`、`C-EXPOSE-0006-C/D/E`、`C-EXPOSE-0008-B/C/D/E`、`C-CONTEXT-0003-A`、`P-SHADCN-INPUT-SHELL-BINDING-LIFETIME` 与 `M-EXPOSE-STATE-0001-C/D/E`。本记录不改变这些定义、生命周期或公开兼容性承诺。
 

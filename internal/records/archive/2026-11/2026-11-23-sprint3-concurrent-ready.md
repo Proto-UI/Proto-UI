@@ -25,7 +25,7 @@ The new actual asset case reached the compiler build, then the unchanged input g
 
 Earlier **81/81** control executions and the actual serialized probe's old `__name` failure followed by eight passing allowed/blocked combinations retain their own source trees and raw evidence. The independent review of the added asset test is static source review, not a new test execution or platform approval.
 
-The [manifest](evidence/2026-11-23-sprint3-concurrent-ready/manifest.json) binds both parents, resolution blobs, complete raw archive and each observed limit.
+The [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint3-concurrent-ready/manifest.json) binds both parents, resolution blobs, complete raw archive and each observed limit.
 
 ## Readiness and remaining acceptance
 

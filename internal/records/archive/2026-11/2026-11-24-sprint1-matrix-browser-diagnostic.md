@@ -65,7 +65,7 @@ An independent agent read the final helper, including separate sessions, setup t
 
 ## Source-bound carrier and next reading
 
-[Manifest](evidence/2026-11-24-sprint1-matrix-browser-diagnostic/manifest.json) and [raw evidence](evidence/2026-11-24-sprint1-matrix-browser-diagnostic/raw-evidence.zip) contain the complete original 333f artifact, extracted phase readback, old/new helper sources, actual reports/logs, replay config, exact commands, dependency-source hashes and independent review scope. The archive is **146,117 bytes**, SHA-256 `498143c25d6f3ade469ed3081a82b1bfc0359a4575ae0bdf39579e360f629f96`; all 37 entries passed CRC and every payload size/hash was read back and verified.
+[Manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-matrix-browser-diagnostic/manifest.json) and [raw evidence](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-matrix-browser-diagnostic/raw-evidence.zip) contain the complete original 333f artifact, extracted phase readback, old/new helper sources, actual reports/logs, replay config, exact commands, dependency-source hashes and independent review scope. The archive is **146,117 bytes**, SHA-256 `498143c25d6f3ade469ed3081a82b1bfc0359a4575ae0bdf39579e360f629f96`; all 37 entries passed CRC and every payload size/hash was read back and verified.
 
 The helper source hash is `c395360bed75a4603a7db75cbd1b8512e8d7cc9b72c02d3b64f9c40fc5439148`. The snapshot names its shared checkout plus the exact dirty files used, not a clean-head native pass.
 

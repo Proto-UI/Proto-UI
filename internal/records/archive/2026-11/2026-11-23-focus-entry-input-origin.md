@@ -16,7 +16,7 @@ Window retains its resize listener; media-query objects retain their change list
 
 ## Executed evidence
 
-The [manifest](evidence/2026-11-23-focus-entry-input-origin/manifest.json) binds the source preimage, candidate, exact final controls, commands and raw results. Its archive includes the failing attempts and diagnosis, not only the final passes.
+The [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-focus-entry-input-origin/manifest.json) binds the source preimage, candidate, exact final controls, commands and raw results. Its archive includes the failing attempts and diagnosis, not only the final passes.
 
 | Evidence | Result and boundary |
 | --- | --- |

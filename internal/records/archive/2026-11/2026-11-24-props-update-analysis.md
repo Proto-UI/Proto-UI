@@ -48,7 +48,7 @@ corepack pnpm@10.32.1 exec vitest run packages/compiler/test/props-update-analys
 
 The first attempt was 16 passed / 3 failed. Those new test fixtures used unsupported raw `click` events; their diagnostics correctly required an admitted semantic event. Replacing that fixture input with `press.commit` fixed the test setup. The initial raw log and JSON remain archived; those failures are not labelled product regressions. The earlier fixture source was not snapshotted. Existing ES2024 target warnings remain in the raw logs.
 
-The archive is [2026-11-24-props-update-analysis-evidence](./2026-11-24-props-update-analysis-evidence/receipt.json). Its receipt includes the exact command, environment, reports, log digests, and seven implementation/documentation file hashes captured after the run. These are post-run slice hashes on a shared integration checkout based at `81c103bd462b73910f7279122fab5f282d172d56`; they are not a before/after whole-tree attestation or a final committed-head gate.
+The archive is [2026-11-24-props-update-analysis-evidence](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/2026-11-24-props-update-analysis-evidence/receipt.json). Its receipt includes the exact command, environment, reports, log digests, and seven implementation/documentation file hashes captured after the run. These are post-run slice hashes on a shared integration checkout based at `81c103bd462b73910f7279122fab5f282d172d56`; they are not a before/after whole-tree attestation or a final committed-head gate.
 
 ## Retained evidence and remaining acceptance
 

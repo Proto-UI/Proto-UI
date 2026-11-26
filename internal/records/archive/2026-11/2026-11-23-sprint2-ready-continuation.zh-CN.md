@@ -30,7 +30,7 @@ Brutalist fallback Sidebar 的 group summary 与 leaf link 原先共同被网站
 
 全部 staged whitespace 检查首先报告主干原始 `bundle-verify.stdout.log` 第 4 行尾空格；已核 index blob 与 `b715b8a6` 的原 blob、工作树字节完全相同。保留该原始 stdout 及首次失败，只排除此一冻结原件后，其余全部 staged 路径检查 exit 0。正常 commit hook 保留。
 
-完整原件以 gzip 保存，解压字节和包文件 SHA-256 在 [source-binding.json](evidence/2026-11-23-sprint2-readiness/source-binding.json)；初次失败与后续复跑分别保存。
+完整原件以 gzip 保存，解压字节和包文件 SHA-256 在 [source-binding.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint2-readiness/source-binding.json)；初次失败与后续复跑分别保存。
 
 TextControl 合并的实际 diff 另由 fresh-context compiler Agent 只读审查；其回报没有阻塞发现，明确检查了 text epoch／lease、重入 reset、retirement 清理、受控 candidate 与完整 snapshot。该本地源审不是 GitHub 平台 APPROVE，也不替代后续 native 验收。
 

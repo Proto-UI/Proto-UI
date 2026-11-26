@@ -1,6 +1,6 @@
 # Sprint 5: concurrent callable and native integration
 
-This normal merge joins `cde582a260a8a3d646fe4dbd38ac22bb1f71d273` and public PR #1738 head `2df421b1fc55cc0649be6675c0ee46a69ad9316f`. Both contribution histories, original controls and failure records remain. The exact source and raw evidence are indexed in [the manifest](evidence/2026-11-24-sprint5-concurrent-merge/manifest.json).
+This normal merge joins `cde582a260a8a3d646fe4dbd38ac22bb1f71d273` and public PR #1738 head `2df421b1fc55cc0649be6675c0ee46a69ad9316f`. Both contribution histories, original controls and failure records remain. The exact source and raw evidence are indexed in [the manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint5-concurrent-merge/manifest.json).
 
 ## Semantic conflict resolution
 

@@ -30,15 +30,15 @@
 | 同 epoch 物理目标替换 | 真实 Runtime + WC commit / Effects / owned-token applier 重绑到新的 HTMLElement，重用既有 template，epoch/render/Runtime commit 计数不变，后续主题只写新目标。这不等于逐一认证所有 Adapter 的任意内部 target replacement。 |
 | Transition | 四框架在 180ms leave fallback 已排队后切换主题及 reduced-motion，旧计时仍完成；后续 reduce enter 使用零时长 fallback，before/after 事件与 presence 保持。 |
 
-原始结果：[WC](./evidence/2026-09-15-color-scheme/wc.json)、[React](./evidence/2026-09-15-color-scheme/react.json)、[Vue 3](./evidence/2026-09-15-color-scheme/vue.json)、[Vue 2](./evidence/2026-09-15-color-scheme/vue2.json)。同目录的 `*-initial-dark.json` 保留初始 frame 序列。资源计数包装原生注册/释放操作，不改 preference、回调或投射结果；归零断言发生在还原包装之前。
+原始结果：[WC](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-15-color-scheme/wc.json)、[React](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-15-color-scheme/react.json)、[Vue 3](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-15-color-scheme/vue.json)、[Vue 2](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-15-color-scheme/vue2.json)。同目录的 `*-initial-dark.json` 保留初始 frame 序列。资源计数包装原生注册/释放操作，不改 preference、回调或投射结果；归零断言发生在还原包装之前。
 
-已逐张查看本次生成的 17 张截图，保留四运行时的明暗配对，以及 WC 的选中控件、portal 和物理替换截图。例如：[React light](./evidence/2026-09-15-color-scheme/react-light.png)、[React dark](./evidence/2026-09-15-color-scheme/react-dark.png)、[选中控件](./evidence/2026-09-15-color-scheme/wc-checked-dark.png)、[portal](./evidence/2026-09-15-color-scheme/wc-portal.png)、[物理替换](./evidence/2026-09-15-color-scheme/wc-surface-replacement.png)。其余截图可由同一测试重新生成。
+已逐张查看本次生成的 17 张截图，保留四运行时的明暗配对，以及 WC 的选中控件、portal 和物理替换截图。例如：[React light](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-15-color-scheme/react-light.png)、[React dark](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-15-color-scheme/react-dark.png)、[选中控件](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-15-color-scheme/wc-checked-dark.png)、[portal](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-15-color-scheme/wc-portal.png)、[物理替换](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-15-color-scheme/wc-surface-replacement.png)。其余截图可由同一测试重新生成。
 
 ## 保留的范围反例与既有缺口
 
 四框架均保留了 reader/selector 的反例：root light 下，局部 dark marker 可使默认 Textarea 出现 input tint，但默认 reader 仍为 light；constant-dark custom reader 不会使无 dark marker 的 Textarea 自动取得该配方；局部 light 也不建立截断 root dark 的 nearest-theme 语义。这些是兼容边界证据，不是新增支持。
 
-视觉检查还暴露了既有 React / Text Control 默认值投射差异：逻辑 value 已接纳 `defaultValue`，但 React 后续 `updateTextarea` 将未声明的原生 defaultValue 写为空，初始化 DOM value 随之为空。当前与公开基线、StrictMode 开/关、默认 source / 显式默认 getter 的八组实际浏览器对照都相同；新 source 未引入它。[对照摘要与基线 blob](./evidence/2026-09-15-color-scheme/react-textarea-baseline.json)保留了该结论的范围。
+视觉检查还暴露了既有 React / Text Control 默认值投射差异：逻辑 value 已接纳 `defaultValue`，但 React 后续 `updateTextarea` 将未声明的原生 defaultValue 写为空，初始化 DOM value 随之为空。当前与公开基线、StrictMode 开/关、默认 source / 显式默认 getter 的八组实际浏览器对照都相同；新 source 未引入它。[对照摘要与基线 blob](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-15-color-scheme/react-textarea-baseline.json)保留了该结论的范围。
 
 主夹具保留 uncontrolled 配置并记录初始差异，再通过真实编辑器输入草稿、blur 后验证主题变化。诊断的 48 次 native/logical 草稿对照与主矩阵均保留输入。本次没有将这个初始化问题记为修复，也不据此宣称完成全部 Text Control / IME 验收。
 

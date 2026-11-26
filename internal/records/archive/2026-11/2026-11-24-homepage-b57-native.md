@@ -1,6 +1,6 @@
 # Native Homepage and inert-oracle evidence on b57
 
-This record preserves new native observations on clean `b57e7af30b97a087ae0c3ec9fa75e10c7ca268d8`. The complete source binding, command receipts, images, original failures, and cleanup records are retained in [evidence/2026-11-24-homepage-b57-native](evidence/2026-11-24-homepage-b57-native/receipt.json). This is follow-up evidence for the 0.3 release repair; it is not a full release, all-host, all-family, or assistive-technology acceptance receipt.
+This record preserves new native observations on clean `b57e7af30b97a087ae0c3ec9fa75e10c7ca268d8`. The complete source binding, command receipts, images, original failures, and cleanup records are retained in [evidence/2026-11-24-homepage-b57-native](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-homepage-b57-native/receipt.json). This is follow-up evidence for the 0.3 release repair; it is not a full release, all-host, all-family, or assistive-technology acceptance receipt.
 
 ## Source and execution
 
