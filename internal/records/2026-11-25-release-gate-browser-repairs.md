@@ -1,40 +1,23 @@
+---
+kind: audit
+status: archived
+date: 2026-11-25
+archived: 2026-11-26
+source:
+  revision: 1c4a23455175ec65d3b41a630cfa9797d74a721d
+  path: internal/records/2026-11-25-release-gate-browser-repairs.md
+  sha256: 9216827ae1121bb44e44206f10f5120701035636cfffc445fc5939d9846e6c9e
+---
+
 # Reviewed browser gate repairs for the 0.3 candidate
 
-## Scope and receipts
+Archived on 2026-11-26. The [complete historical record](https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/2026-11-25-release-gate-browser-repairs.md) preserves the original observations and their evidence boundaries.
 
-The original failure inventory comes from [run 45513860306](https://github.com/Proto-UI/Proto-UI/actions/runs/45513860306) at `47ae41c671c64091ae87d717f3fa61d02c13f355`. Focused reproduction used an isolated source checkout at `5f0844907895a4ae0db506fe6a5d0bf162318329`, with the stated candidate patches, one Astro server, and sandboxed system Chromium on doesvm. These are dirty-candidate native browser observations. They do not replace the final integrated, clean-head Actions gate or promote any draft lifecycle status.
+## Evidence
 
-`evidence/2026-11-25-release-gate-browser-repairs/verified-runs.json` retains the raw report paths and SHA-256 digests, all executed case names, outcomes, durations and the original passive-atom negative controls. Filtered cases in focused diagnostic commands are explicitly counted separately; the complete passive matrix and Bootstrap Select/Text matrix have no filtered cases.
+- [Original receipts and supporting files](https://github.com/Proto-UI/Proto-UI/tree/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-browser-repairs).
+- [Archive source index](2026-11-26-retained-record-archive-index.json).
 
-## Repairs with completed native verification
+## Scope & Limits
 
-| Subject | Cause and repair | Executed result |
-| --- | --- | --- |
-| Docs narrow reflow and header Select | The Shadcn Button style-profile demo used an implicit grid column whose minimum content width exceeded the 320px page at 200% root text. An explicit `grid-cols-1` permits the existing content to shrink. Repeated compact header Select opening also exposed an item-alignment conflict with wrapped labels; the existing compact Docs consumer now requests its existing `popper` mode. Authored positions and desktop family defaults remain intact. | Four narrow scenarios, each exercising all four runtime choices, pass the original 1px page bound, repeated opening, focus and native hit checks. Two desktop Header cases pass. Existing control/lifecycle unit suites pass 35/35. |
-| Bootstrap Select and Text | Public examples now split hero, disabled-item, RTL, long-list and text-scale subjects. The test binds those actual authored examples. Three flex wrappers also needed `min-w-0 max-w-full` so a 12rem Trigger at doubled text size could shrink inside the preview. The coordinated Vue2 adapter repair restores retained descendant readiness after Portal reconnection. | 12/12: four runtimes × two Select themes and four Text journeys. The hero still selects Banana, closes, resets to Apple, then reopens with all six options and native Apple entry focus. RTL, long timezone labels, popup bounds, page overflow, keyboard behavior and native text selection remain checked. |
-| Home runtime | Family selection becomes ready asynchronously; the test now observes the actual committed global/home owner before measuring Bootstrap geometry. Native editor selection uses the real nonempty authored value instead of an obsolete length of 31. | Eight targeted cases pass. The one cold editor case retains all interaction assertions and has an explicit 15s budget, justified by its isolated 12.334s execution. Other case budgets are unchanged. |
-| Runtime preview surface | The public Brutalist Select hero now offers fruits. The old `Ink` target no longer exists. | The original 390px React journey passes after selecting the real `Banana` option, retaining the same Trigger connection, generation identity, committed label and popup closure checks. |
-| Website markup source prerequisite | The fixed 33-member reference changed in two reviewed files. The prior reference and original failed CI log are archived; the browser hook and all runtime/response/Copy assertions remain unchanged. | Existing discriminator suite 67/67 and original browser suite 17/17. Details remain in `2026-11-25-browser-gate-source-renewal.md`; source admission remains unverified. |
-
-## Passive Text and Surface: separate timeout and owner diagnosis
-
-The old passive-atom matrix expected four atoms per ordinary hero, five for each Shadcn hero, ten for Bootstrap Surface and five for Liquid Surface. Current public examples have different explicit compositions. The reviewed expectations are Text counts 4/10/5/5/4 and Surface counts 4/6/5/8/4 for Base/Shadcn/Brutalist/Bootstrap/Liquid respectively; Shadcn includes its existing passive style-scope carrier.
-
-On the same candidate server, the unchanged English Base Text and Surface controls passed. The unchanged Shadcn Text and Surface cases each exhausted the original 20-second readiness budget while waiting for their obsolete count. This reproduces a cause of accumulated delays in the 80-case suite independently of the markup source-hook failure. Renewing the markup reference alone did not repair that long-running suite.
-
-After count/content rebinding, the full WC diagnostic exposed a second test-observation error: the recorder listened on `document` while capturing only the first previewer's shell. Independent public examples can mount first and emit bubbling `runtime:changed`/`previewer:mounted` events. Those peer events cannot establish the first hero's readiness. The recorder now selects the same root by `event.target` before taking that root's snapshot. It retains every event from the target owner and still requires exactly one active shell whose runtime agrees with the published event. No event is selected by whether its observed result passes.
-
-The current public hero Text hierarchy, underline, native rendered fonts and document typography remain checked. Surface tests assert the real named panel, action, navbar, pressed and focus paint examples. Every atom must remain passive, with no role or sequential input ownership and a real nonzero rendered box, except the explicitly governed Shadcn scope carrier. Page errors remain rejected.
-
-The historical Bootstrap public hero contained four Button-profile combinations across default/navbar and rest/focus. That exact browser fixture is no longer authored. The current public hero demonstrates Navbar and Button paint separately; the browser test claims those current native samples. The unchanged `packages/prototypes/bootstrap-2-3-2/test/navbar-surface.test.ts` independently checks public-props isolation and actual document, Shadow and split-target CSS lowering, and passed 3/3. That unit/CSS evidence is not represented as native execution of the removed four-combination fixture.
-
-The corrected WC diagnostic passed **20/20**. The complete original matrix subsequently passed **80/80**, with no filtered cases, unchanged 20-second readiness and 90-second case budgets, and no removed native ownership or paint assertions.
-
-## Completed overlay and code-owner follow-ups
-
-- **Bootstrap Accordion, 4/4 runtime cases:** the Content retains its label while its governed 350ms leave transition still owns the native view. The test now waits for actual physical withdrawal before asserting the original absent IDREF. The keep-mounted branch waits for the real hidden endpoint. The four original runtime cases pass; label identity and physical/retained lifetime checks remain distinct.
-- **Dialog, 4/4 original cases:** the current public title is “Edit profile.” The consumer uses the supported neutral `surface` Button variant and existing `wrap` capability to fit doubled text in its actual width. Original focus, available-space and overflow checks remain. The two consumer source checks also pass.
-- **Select first paint, 3/3:** the current timezone example supplies the real preselected JST item. The test retains its original 12 registration / 17 root facts, never-open label, native keyboard entry and React Home/End checks against this authored subject. The source harness's two stale `Ink` strings now refer to the same `Banana` used by the already-verified Runtime preview journey; all 111 harness cases pass.
-- **Code surface grammar, 3/3 affected cases:** the no-JavaScript source link is scoped to the real WC source tabs. The native file-tree getter is sampled from the upgraded visible ScrollArea viewport. The original 1280px failure happened before that first CDP read returned: the negative phase trace records context-close start at sequence 16, followed by the same original read returning `projection: composed` at sequence 17. That late value does not turn the failed run green. The repaired test awaits one getter snapshot and immediately asserts its value, retaining the original 90-second case budget, native command budgets, both 1280/390px geometry matrices, file/directory changes, native scrolling and 1px bounds. The complete affected set, including the no-JavaScript case, passes. Negative and candidate phase traces and raw report digests are archived alongside the ledger.
-
-These targeted results continue to describe the isolated dirty candidate. Final integrated clean-head Actions evidence is a separate gate.
+This page is a navigation pointer. The archived record retains its original results and pending checks at the cited revision; it is not a current-source acceptance report.

@@ -1,19 +1,23 @@
+---
+kind: audit
+status: archived
+date: 2026-11-25
+archived: 2026-11-26
+source:
+  revision: 1c4a23455175ec65d3b41a630cfa9797d74a721d
+  path: internal/records/evidence/2026-11-25-release-gate-clean-native/README.md
+  sha256: f034600f031ae7d3ffc48082890240ca0b919502c165839e6739ddc8a9e12be2
+---
+
 # Clean 124e Tooltip and Select follow-up
 
-The executed commit was `124e329cfc3cd710c1f1d267d640f1b97ef2f4c9`, tree `c2de370edb9b98a5482556ee433017fbd6bbd258`. The checkout was clean before and after execution. Node was 24.22.3 and pnpm was 10.32.1. Installation used the frozen lockfile; the actual CLI build and documentation style generator ran before the server started.
-
-The unmodified `contrast-tooltip-warm-handoff.browser.test.ts` passed **20/20**. The retained 300 ms handoff budget and negative controls were not changed.
-
-The original `audit-brutalist-contrast.mts` Select matrix passed **8/8** runtime and theme cases, with **96/96** PNG/fact pairs and target predicates, no missing planned targets, and no unresolved cases. This is the selected Select audit, not a whole-family accessibility conformance result.
-
-## Preserved failed invocation
-
-The first combined attempt ran the Tooltip Vitest suite while the audit server was alive. Vite's temporary `vitest.config.ts.timestamp-*.mjs` file correctly invalidated the source watcher. Tooltip finished successfully, but the subsequent Select audit returned HTTP 409 before capturing any frames. Its report, logs, and exit code remain under `124e329/` in the archive.
-
-The successful Select attempt started a fresh, clean audit-only server after Vitest had exited. It did not bypass, filter, or reset the source watcher. Its original source-bound report and exit codes are under `124e329-select-only/`.
+Archived on 2026-11-26. The [complete historical record](https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-clean-native/README.md) preserves the original observations and their evidence boundaries.
 
 ## Evidence
 
-`native-receipts.tar.gz` contains the original reports, process logs, source readbacks, generated-style provenance, and a SHA-256 manifest for all 640 raw files. Its SHA-256 is `e963de22f59ecb8dfd32599a1f5f0627a706ebb40ddc22d974b698e391e6125a`. The 96 PNGs and per-frame detailed fingerprints remain in the manifest's recorded raw directory on the execution device. The archive includes the full successful report; it does not claim to contain those image files.
+- [Original receipts and supporting files](https://github.com/Proto-UI/Proto-UI/tree/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-clean-native).
+- [Archive source index](../../2026-11-26-retained-record-archive-index.json).
 
-These are original native local runs on an exact clean commit. They are not GitHub Actions receipts or the two retained scheduled release cycles.
+## Scope & Limits
+
+This page is a navigation pointer. The archived record retains its original results and pending checks at the cited revision; it is not a current-source acceptance report.
