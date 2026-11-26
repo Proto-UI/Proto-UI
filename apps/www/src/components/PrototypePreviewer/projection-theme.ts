@@ -179,8 +179,42 @@ export function resolveProjectionThemeSurfaceStyle(
 export function applyProjectionThemeSurfaceStyle(
   element: ProjectionThemeSurface,
   theme: ProjectionThemeSurfaceStyle,
-  mode: 'replace' | 'preserve-inline' = 'replace'
+  mode: 'replace' | 'replace-batch' | 'preserve-inline' = 'replace'
 ): void {
+  if (mode === 'replace-batch') {
+    const nextProperties = new Set(Object.keys(theme));
+    const removals = new Set<string>();
+    for (const property of appliedThemeProperties.get(element) ?? []) {
+      if (!nextProperties.has(property)) removals.add(property);
+    }
+    for (const [property, stamp] of preservedThemeStamps.get(element)?.properties ?? []) {
+      if (retainsThemeStamp(element, property, stamp)) removals.add(property);
+    }
+    const writes = Object.entries(theme).filter(
+      ([property, value]) =>
+        removals.has(property) ||
+        element.style.getPropertyValue(property) !== value ||
+        element.style.getPropertyPriority(property)
+    );
+    let nextStyle: string | undefined;
+    if (removals.size || writes.length) {
+      // Parse with this document's CSSOM so unrelated declarations, priorities
+      // and shorthand semantics survive. The draft never joins the document:
+      // a connected text surface receives the complete palette in one write.
+      const draft = element.ownerDocument.createElement('span').style;
+      draft.cssText = element.style.cssText;
+      for (const property of removals) draft.removeProperty(property);
+      for (const [property, value] of writes) draft.setProperty(property, value);
+      if (draft.cssText !== element.style.cssText) nextStyle = draft.cssText;
+    }
+    // A native style-attribute callback may synchronously clear or replace this
+    // palette. Publish its lease first and never overwrite a newer lease after
+    // the live write returns.
+    preservedThemeStamps.delete(element);
+    appliedThemeProperties.set(element, nextProperties);
+    if (nextStyle !== undefined) element.style.cssText = nextStyle;
+    return;
+  }
   if (mode === 'preserve-inline') {
     if (appliedThemeProperties.has(element)) clearProjectionThemeSurfaceStyle(element);
     let state = preservedThemeStamps.get(element);
