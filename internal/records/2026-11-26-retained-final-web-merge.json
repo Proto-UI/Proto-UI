@@ -1,0 +1,114 @@
+{
+  "kind": "retained-source-integration",
+  "date": "2026-11-26",
+  "carrierPr": 1908,
+  "previousIntegratedHead": "7c585d67e2c7337d0f35aba740e6f3dbbe9b6cba",
+  "finalWebMain": "ea3bc53b7fdb8a13668ae24f602fda818700c0e6",
+  "finalWebMainTree": "01ba5cdefc7bce726134b8d0ac0b612075f4c30e",
+  "sourcePreservation": "Keep both complete parent histories, including the original carrier and all nine reviewed website pull requests.",
+  "conflicts": [
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.callback-consumers.test.ts",
+      "beforeSha256": "d1c3e218b072deff00e9ab10f91307912e449a36c337e21f8864b3b692d7711f",
+      "afterSha256": "2de4704477bf23fe699e37ee0a1d78ea3ea32131affc01827663c3f5c94c42ac",
+      "reason": "Keep original carrier once-only owner/reset checks plus actual rendered value assertions; final-main partial callback checks are subsumed without dropping the existing lifetime expectations."
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.expose-events.test.ts",
+      "beforeSha256": "c25da704d56dbfb6a18075fa30e4e1ed7255ef66fc0ac3b48abec510a43e3efb",
+      "afterSha256": "0731df1d4f9c9ce8080de1d6a11490209940a2f60d3778e0ca41b6f94dca495c",
+      "reason": "Keep carrier strengthened exact-owner, one-command, stable-node, native-viewport or source-inventory assertions while accepting non-conflicting final-main fixes. No deadline or runtime assertion is relaxed."
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+      "beforeSha256": "80475899549f2cd6552f6a0c8b25ca27ec964c4cb74e031aae463387272240e2",
+      "afterSha256": "ae6d289defe4d9cd85c04869245289cb300aecb5b9408d4a07e8709d639f0d7d",
+      "reason": "Keep carrier strengthened exact-owner, one-command, stable-node, native-viewport or source-inventory assertions while accepting non-conflicting final-main fixes. No deadline or runtime assertion is relaxed."
+    },
+    {
+      "path": "apps/www/src/content/docs/accordion-demo-layout.test.ts",
+      "beforeSha256": "bb81317bd3a47b1942f03265cdc47baa3a2d2a65866e72dbb7b7643c046fb96f",
+      "afterSha256": "993e86998aeac1bcde58d1169cd139ac496d4c327087a45ddd33cadfd1fe935c",
+      "reason": "Use the reviewed final-main current Accordion prototype hierarchy or normative anchored 3px Hover Card category respectively."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts",
+      "beforeSha256": "d3af38247ae39a39af6b8467a573cf4e203831c7de7ebe0f044f608a4f7b1910",
+      "afterSha256": "4210acc21edb1497fb58fca8d8dad6474cc761385708f6d600e2321310e48cd2",
+      "reason": "Keep carrier strengthened exact-owner, one-command, stable-node, native-viewport or source-inventory assertions while accepting non-conflicting final-main fixes. No deadline or runtime assertion is relaxed."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-async-region.test.ts",
+      "beforeSha256": "011126398307ed130ba20940c16d4f3542071bdd6a7180e5f7acf2a1e20977b8",
+      "afterSha256": "eaf95bcca259d959ff3801ac45aabfd7a5fcf567f64b80f6ba98b9f669c7e9ec",
+      "reason": "Keep the stronger coherent carrier oracle including current asynchronous busy completion/inspect action, exact visible accessible naming and width, or existing wrap/clearance recipe; focused source cases are rerun."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-controls.test.ts",
+      "beforeSha256": "b1efefff825911d546402c6ba081c418b5d0ac20cfb7cab2aca4997e6c30210b",
+      "afterSha256": "d577a6cc6d668ab9d06b16e498813f211cce9113f340197baa7aff36b952deab",
+      "reason": "Keep the stronger coherent carrier oracle including current asynchronous busy completion/inspect action, exact visible accessible naming and width, or existing wrap/clearance recipe; focused source cases are rerun."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.test.ts",
+      "beforeSha256": "bfa82d1129abda62a289c762d358d041266b19bd3f880bf9bd2fef3b6bb457a7",
+      "afterSha256": "6c05c16f43dc55498826df22178ef3ca94d5408501231039a454fdd89112f9c6",
+      "reason": "Keep the stronger coherent carrier oracle including current asynchronous busy completion/inspect action, exact visible accessible naming and width, or existing wrap/clearance recipe; focused source cases are rerun."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts",
+      "beforeSha256": "5c0fef6b7cf6719a40230778fd0a3ad69a34118691dd64ab339461c72a794b97",
+      "afterSha256": "c112df4e907fac7b33a25ba20200672e6848b8c76508fe77356e04a092845fa1",
+      "reason": "Keep carrier strengthened exact-owner, one-command, stable-node, native-viewport or source-inventory assertions while accepting non-conflicting final-main fixes. No deadline or runtime assertion is relaxed."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.test.ts",
+      "beforeSha256": "2de41697ee82d7c3948a72682ee446ca5ab4a0b2236c2a26169bef9d483aefb3",
+      "afterSha256": "e0fba5b829a42663e3325831b82e4d6885838444f775bc9e8144dd59b12923a3",
+      "reason": "Keep carrier strengthened exact-owner, one-command, stable-node, native-viewport or source-inventory assertions while accepting non-conflicting final-main fixes. No deadline or runtime assertion is relaxed."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/finf-neo-popover-title-route.test.ts",
+      "beforeSha256": "1067f3f5a646815d7073ce0b9ff4c677a5976866af75feaf152cff02b408f3c4",
+      "afterSha256": "b6e37820406992b7d78c408ddba513439daf824e03d0fe53a907f6e724145101",
+      "reason": "Keep carrier strengthened exact-owner, one-command, stable-node, native-viewport or source-inventory assertions while accepting non-conflicting final-main fixes. No deadline or runtime assertion is relaxed."
+    },
+    {
+      "path": "apps/www/test/release-docs-reading.browser.test.ts",
+      "beforeSha256": "f4b7cd151dc83be20f991a79b015728c55d8b4969a893c14481c034c7f5a0473",
+      "afterSha256": "b7765ad7a6ad71543441a23a0284de3d62648b58291f26f0ad423d37e411a020",
+      "reason": "Keep carrier strengthened exact-owner, one-command, stable-node, native-viewport or source-inventory assertions while accepting non-conflicting final-main fixes. No deadline or runtime assertion is relaxed."
+    },
+    {
+      "path": "spec/prototypes/P-BRUTALIST-HOVER-CARD-CONTENT.yaml",
+      "beforeSha256": "2c6c140a70a70a3cf7d6aa2ee77b98a2ffbffabddfbd765686dc7c0f3e31714a",
+      "afterSha256": "b838b370c8bbc83d7d294a1fc357a2430e994cb7df4d4472e80e9ecf1dbc208f",
+      "reason": "Use the reviewed final-main current Accordion prototype hierarchy or normative anchored 3px Hover Card category respectively."
+    }
+  ],
+  "drawerRestoration": {
+    "source": "packages/prototypes/liquid-glass/src/drawer/handle.proto.ts",
+    "restoredExactFrom": "28958b402bfb116c135377fe01e23a94ea7b2a7b",
+    "tests": "packages/prototypes/shadcn/test/drawer-handle-presentation.test.ts",
+    "passed": 9,
+    "reason": "Preserve the existing Liquid bottom flow recipe and non-bottom shared edge presentation, with no additional behavior owner or Shadcn dimension leak."
+  },
+  "focusedWebValidation": {
+    "files": 9,
+    "passed": 148,
+    "failed": 0,
+    "browserEvidence": false
+  },
+  "retainedPriorValidation": {
+    "conflictCases": 203,
+    "diagramAndBudgetPolicyCases": 46,
+    "numberFieldScopedTypes": "passed",
+    "cliBuild": "passed",
+    "coverageMatrices": "passed before final web-only/source-binding refresh"
+  },
+  "validationDebt": [
+    "Whole-workspace TypeScript exceeded local process memory; coordinator owns exact-head hosted validation.",
+    "Matrix sixty-second and Search one-thousand-millisecond acceptance remain governed by real native browser runs."
+  ],
+  "agentAssistance": "ChatGPT under explicit current-user direction. No GitHub write, public approval, native check pass or optical acceptance is asserted by this record."
+}
