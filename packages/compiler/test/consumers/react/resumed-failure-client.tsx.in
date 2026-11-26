@@ -15,6 +15,7 @@ function snapshot() {
 }
 
 const failures: { reason: string; source: ActionSource; published: ReturnType<typeof snapshot> }[] = [];
+const starts: { id: string; published: ReturnType<typeof snapshot> }[] = [];
 window.addEventListener('error', event => {
   if (event.error instanceof ActionFailure) {
     failures.push({ reason: event.error.reason, source: event.error.source, published: snapshot() });
@@ -30,10 +31,11 @@ const trace = {
   },
   publish(expected: string) { provider.publish(expected); },
   begin(id: string, path: string) {
-    enqueue(id, path, true);
+    enqueue(id, path, true, { onStart: () => starts.push({ id, published: snapshot() }) });
     return reader.current!.begin(id).status;
   },
   snapshot,
+  starts: () => starts,
   failures: () => failures,
   history: loadHistory,
 };

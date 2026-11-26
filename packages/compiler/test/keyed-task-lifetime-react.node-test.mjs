@@ -514,47 +514,51 @@ test('direct IR preserves an original parameter first read after two awaits and 
   assert.deepEqual(errors, []);
 });
 
+const failureSource = { file: 'packages/compiler/test/fixtures/backend-programs.ts', start: 0, end: 0 };
+
+async function expectFailureView(page, stage, accepted, expected) {
+  await page.waitForFunction(stage => document.querySelector('#app span')?.innerText === stage, stage);
+  await page.locator('#app span').waitFor({ state: 'visible' });
+  const snapshot = await page.evaluate(() => window.failureTrace.snapshot());
+  assert.deepEqual(snapshot, { stage, accepted, expected });
+  return snapshot;
+}
+
+async function submitFailureRead(page, id, resource) {
+  const status = await page.evaluate(([id, path]) => window.failureTrace.begin(id, path), [id, resource.path]);
+  assert.equal(status, 'committed');
+}
+
 test('a failed task resumption keeps the previous commit and the same reader can accept a later document', async t => {
   const { server, page, errors, evidence } = await openConsumer(t, resumedFailure, 'resumed-failure-client.tsx', 'resumed-failure-ir.json');
   const original = 'Obsolete amber record';
   const replacement = 'Apricot replacement';
-  const source = { file: 'packages/compiler/test/fixtures/backend-programs.ts', start: 0, end: 0 };
   const old = server.resource('A', original);
   const fresh = server.resource('A', replacement);
-  const span = page.locator('#app span');
-  async function expectView(stage, accepted, expected) {
-    await page.waitForFunction(stage => document.querySelector('#app span')?.innerText === stage, stage);
-    await span.waitFor({ state: 'visible' });
-    const snapshot = await page.evaluate(() => window.failureTrace.snapshot());
-    assert.deepEqual(snapshot, { stage, accepted, expected });
-    return snapshot;
-  }
-  async function begin(resource) {
-    assert.equal(await page.evaluate(path => window.failureTrace.begin('A', path), resource.path), 'committed');
-    assert.equal(await resource.requested(), 'A');
-  }
 
   await page.evaluate(value => window.failureTrace.mount(value), original);
-  const views = [await expectView('idle', 0, original)];
-  await begin(old);
+  const views = [await expectFailureView(page, 'idle', 0, original)];
+  await submitFailureRead(page, 'A', old);
+  assert.equal(await old.requested(), 'A');
   const checking = 'checking@' + original;
-  views.push(await expectView(checking, 0, original));
+  views.push(await expectFailureView(page, checking, 0, original));
   await page.evaluate(value => window.failureTrace.publish(value), replacement);
-  views.push(await expectView(checking, 0, replacement));
+  views.push(await expectFailureView(page, checking, 0, replacement));
   const reported = page.waitForEvent('pageerror');
   old.release();
   const error = await reported;
   assert.equal(error.name, 'ActionFailure');
-  assert.equal(error.message, `${source.file}:0-0: document-changed`);
-  const afterFailure = await expectView(checking, 0, replacement);
+  assert.equal(error.message, `${failureSource.file}:0-0: document-changed`);
+  const afterFailure = await expectFailureView(page, checking, 0, replacement);
   views.push(afterFailure);
   const failures = await page.evaluate(() => window.failureTrace.failures());
-  assert.deepEqual(failures, [{ reason: 'document-changed', source, published: afterFailure }]);
+  assert.deepEqual(failures, [{ reason: 'document-changed', source: failureSource, published: afterFailure }]);
 
-  await begin(fresh);
-  views.push(await expectView('checking@' + replacement, 0, replacement));
+  await submitFailureRead(page, 'A', fresh);
+  assert.equal(await fresh.requested(), 'A');
+  views.push(await expectFailureView(page, 'checking@' + replacement, 0, replacement));
   fresh.release();
-  views.push(await expectView(replacement, 1, replacement));
+  views.push(await expectFailureView(page, replacement, 1, replacement));
   const network = await page.evaluate(() => window.failureTrace.history());
   assert.deepEqual(network.unexpected, []);
   assert.deepEqual(network.requests.map(r => [r.path, r.state, r.value, r.aborted]), [
@@ -562,4 +566,53 @@ test('a failed task resumption keeps the previous commit and the same reader can
   ]);
   assert.deepEqual(errors, [error.message]);
   if (evidence) await writeFile(path.join(evidence, 'resumed-failure-react-native.json'), JSON.stringify({ views, failures, network, errors }));
+});
+
+test('a serial read queued before a resumed failure starts with the current Context and commits once', async t => {
+  const { server, page, errors, evidence } = await openConsumer(t, resumedFailure, 'resumed-failure-client.tsx', 'resumed-failure-ir.json');
+  const original = 'Obsolete amber record';
+  const replacement = 'Blue retained file';
+  const old = server.resource('A', original);
+  const queued = server.resource('B', replacement);
+
+  await page.evaluate(value => window.failureTrace.mount(value), original);
+  await submitFailureRead(page, 'A', old);
+  assert.equal(await old.requested(), 'A');
+  await submitFailureRead(page, 'B', queued);
+  const submitted = await expectFailureView(page, 'checking@' + original, 0, original);
+  await page.evaluate(value => window.failureTrace.publish(value), replacement);
+  const beforeRelease = await expectFailureView(page, submitted.stage, 0, replacement);
+  const pending = await page.evaluate(() => window.failureTrace.history());
+  assert.deepEqual(pending, {
+    unexpected: [], requests: [{ key: 'A', path: old.path, state: 'pending', value: null, aborted: false, reason: null }],
+  });
+  assert.equal(queued.requests, 0);
+
+  const resumed = Promise.all([page.waitForEvent('pageerror'), queued.requested()]);
+  old.release();
+  const [error, key] = await resumed;
+  assert.equal(key, 'B');
+  assert.equal(error.name, 'ActionFailure');
+  assert.equal(error.message, `${failureSource.file}:0-0: document-changed`);
+  const waiting = await expectFailureView(page, 'checking@' + replacement, 0, replacement);
+  const starts = await page.evaluate(() => window.failureTrace.starts());
+  assert.deepEqual(starts, [{ id: 'A', published: submitted }, { id: 'B', published: waiting }]);
+  const failures = await page.evaluate(() => window.failureTrace.failures());
+  assert.deepEqual(failures.map(({ reason, source }) => ({ reason, source })), [{ reason: 'document-changed', source: failureSource }]);
+  const atError = failures[0].published;
+  assert.deepEqual([atError.accepted, atError.expected], [0, replacement]);
+  assert.ok([beforeRelease.stage, waiting.stage].includes(atError.stage));
+
+  queued.release();
+  const completed = await expectFailureView(page, replacement, 1, replacement);
+  const network = await page.evaluate(() => window.failureTrace.history());
+  assert.deepEqual(network.unexpected, []);
+  assert.deepEqual(network.requests.map(r => [r.key, r.path, r.state, r.value, r.aborted]), [
+    ['A', old.path, 'returned', original, false], ['B', queued.path, 'returned', replacement, false],
+  ]);
+  assert.deepEqual([old.requests, queued.requests], [1, 1]);
+  assert.deepEqual(errors, [error.message]);
+  if (evidence) await writeFile(path.join(evidence, 'queued-resumed-failure-react-native.json'), JSON.stringify({
+    submitted, beforeRelease, pending, waiting, starts, failures, completed, network, errors,
+  }));
 });
