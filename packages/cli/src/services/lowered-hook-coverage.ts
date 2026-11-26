@@ -347,8 +347,15 @@ export function scanRuleStateReadInventory(
   // A namespace or dynamic import can pass a helper without spelling its
   // function binding. Keep those declarations pending until that value flow is
   // modeled; one known direct caller must not erase an opaque caller.
+  const trackedHelpers = [...functions.values()];
   for (const source of sources) {
-    for (const [key, helper] of functions) {
+    const references = sourceSummary.resolveFunctionImportReferences?.(source, trackedHelpers);
+    if (references) {
+      for (const helper of trackedHelpers)
+        for (const node of references.get(helper) ?? []) markUnclosed(source, node, helper);
+      continue;
+    }
+    for (const helper of trackedHelpers) {
       if (sourceSummary.hasDynamicImportOfFunction(source, helper))
         markUnclosed(source, source, helper);
       for (const statement of source.statements) {

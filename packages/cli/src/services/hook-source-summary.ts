@@ -136,6 +136,16 @@ export type HookSourceSummaryContext = {
     specifier: string,
     helper: ts.FunctionLikeDeclaration
   ): boolean;
+  /**
+   * Observe a source's opaque imports for the supplied helpers in one bounded
+   * synchronous identity query. A null result keeps a caller's scalar override
+   * authoritative; the caller must use the existing scalar methods instead.
+   * Targets and physical identity are never retained across these queries.
+   */
+  resolveFunctionImportReferences?(
+    source: ts.SourceFile,
+    helpers: readonly ts.FunctionLikeDeclaration[]
+  ): ReadonlyMap<ts.FunctionLikeDeclaration, readonly ts.Node[]> | null;
   resolveStableSourceBinding(
     node: ts.Identifier
   ): ts.VariableDeclaration | ts.ParameterDeclaration | null;
@@ -7410,6 +7420,45 @@ function createHookSourceSummaryContextInternal(
     proveSourceProducerLifetimes: (source) => createProducerLifetimeGuard(source).proveSource(),
     hasDynamicImportOfFunction,
     isSourceFunctionExportedBy,
+    resolveFunctionImportReferences(source, helpers) {
+      // Supplied contexts may replace either public scalar method. Preserve
+      // that behavior instead of bypassing the caller's implementation.
+      if (
+        this.hasDynamicImportOfFunction !== hasDynamicImportOfFunction ||
+        this.isSourceFunctionExportedBy !== isSourceFunctionExportedBy
+      )
+        return null;
+      return moduleContext.withSynchronousIdentityQuery(() => {
+        const references = new Map<ts.FunctionLikeDeclaration, readonly ts.Node[]>();
+        if (!helpers.length) return references;
+        const dynamicTargets = dynamicImportTargets(source);
+        const namespaces: Array<{ statement: ts.ImportDeclaration; target: Module }> = [];
+        for (const statement of source.statements) {
+          if (
+            !ts.isImportDeclaration(statement) ||
+            statement.importClause?.isTypeOnly ||
+            !ts.isStringLiteralLike(statement.moduleSpecifier) ||
+            !statement.importClause?.namedBindings ||
+            !ts.isNamespaceImport(statement.importClause.namedBindings)
+          )
+            continue;
+          const target = moduleContext.resolveModule(
+            source.fileName,
+            statement.moduleSpecifier.text
+          );
+          if (target) namespaces.push({ statement, target });
+        }
+        for (const helper of helpers) {
+          const nodes: ts.Node[] = [];
+          if (dynamicTargets.some((target) => moduleExportsFunction(target, helper)))
+            nodes.push(source);
+          for (const { statement, target } of namespaces)
+            if (moduleExportsFunction(target, helper)) nodes.push(statement);
+          references.set(helper, nodes);
+        }
+        return references;
+      });
+    },
     dynamicImportVariableInitializers,
     resolveStableSourceBinding: (node) => {
       const binding = moduleContext.resolveReference(node, moduleForSource(node.getSourceFile()));
