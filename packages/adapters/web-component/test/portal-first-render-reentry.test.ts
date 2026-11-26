@@ -117,7 +117,7 @@ describe('WC portal first rendering across mounted diagnostic reentry', () => {
     await expect(unmounted).rejects.toBe(false);
   });
 
-  it.each(['diagnostic', 'readiness', 'scheduler'] as const)(
+  it.each(['diagnostic', 'readiness', 'scheduler', 'inline-scheduler'] as const)(
     'rejects the held mount and releases its first portal projection on %s failure',
     async (failure) => {
       const fixture = presenceFixture(failure, false);
@@ -137,6 +137,10 @@ describe('WC portal first rendering across mounted diagnostic reentry', () => {
           if (runtimeScheduleDepth) {
             submissions();
             if (failure === 'scheduler') throw undefined;
+            if (failure === 'inline-scheduler') {
+              task();
+              throw false;
+            }
           }
           queueMicrotask(task);
         },
@@ -153,11 +157,13 @@ describe('WC portal first rendering across mounted diagnostic reentry', () => {
         failure === 'readiness' ? subscribeFocusTargetOwnerReady(host, observer) : undefined;
       try {
         fixture.presence.setIntent('enter');
-        await expect(pending).rejects.toBeUndefined();
-        expect(observer).toHaveBeenCalledTimes(failure === 'scheduler' ? 0 : 1);
-        expect(submissions).toHaveBeenCalledTimes(failure === 'scheduler' ? 1 : 0);
-        expect(fixture.mounted).not.toHaveBeenCalled();
-        if (failure !== 'scheduler') expect(isFocusTargetOwnerReady(host)).toBe(false);
+        const inline = failure === 'inline-scheduler';
+        const submitted = inline || failure === 'scheduler';
+        await expect(pending).rejects.toBe(inline ? false : undefined);
+        expect(observer).toHaveBeenCalledTimes(submitted ? 0 : 1);
+        expect(submissions).toHaveBeenCalledTimes(submitted ? 1 : 0);
+        expect(fixture.mounted).toHaveBeenCalledTimes(inline ? 1 : 0);
+        if (!submitted) expect(isFocusTargetOwnerReady(host)).toBe(false);
         // No intervening unmount can mask a stranded first-projection acquisition.
         expect(host.parentElement).toBe(origin);
         portal.mount(host);

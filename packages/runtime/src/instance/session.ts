@@ -385,10 +385,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
     };
 
     const finishMount = () => {
-      if (isStale('mounted')) {
-        resolveMount();
-        return;
-      }
+      if (isStale('mounted')) return;
 
       emit({ type: 'mount.mounted', epoch });
       callbackScope.run(run, () => {
@@ -396,7 +393,6 @@ export function createRuntimeSession<P extends PropsBaseType>(
       });
       dirty = false;
       clearPending();
-      resolveMount();
     };
 
     try {
@@ -416,6 +412,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
             return;
           }
           let scheduleReturned = false;
+          let finishedInline = false;
           handingOff = true;
           try {
             // Presence may finish after mount() returns. Phase observers and scheduler
@@ -430,6 +427,8 @@ export function createRuntimeSession<P extends PropsBaseType>(
             host.schedule(() => {
               try {
                 finishMount();
+                if (scheduleReturned) resolveMount();
+                else finishedInline = true;
               } catch (error) {
                 clearPending();
                 if (!scheduleReturned) throw error;
@@ -437,7 +436,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
               }
             });
             scheduleReturned = true;
-            if (isStale()) resolveMount();
+            if (finishedInline || isStale()) resolveMount();
           } catch (error) {
             clearPending();
             if (!mountReturned) throw error;
