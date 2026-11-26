@@ -12,6 +12,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import type { Browser, Page, Locator } from 'playwright-core';
+import { HOMEPAGE_GALLERY_IDS } from '../src/components/Homepage/homepage-layout-evidence';
 import { launchBrowser, startServer, stopServer } from '../src/content/docs/zh-cn/browser-harness';
 import {
   DOCUMENTATION_VARIANTS,
@@ -180,7 +181,7 @@ const surfaceSelectors = [
   HOME,
   ...(revisionKind === 'candidate'
     ? [
-        `${HOME} .home-settings__title`,
+        `${HOME} [data-gallery-demo="preferences"] .home-gallery__title`,
         `${HOME} [data-demo-ref="settings-view-trigger"]`,
         `${HOME} .home-settings__fields`,
         `${HOME} .home-settings__actions`,
@@ -499,14 +500,7 @@ async function exerciseWorkspaceSettings(
   const liveResult = await page
     .locator(`${HOME} [data-gallery-demo]`)
     .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-gallery-demo')));
-  assert.deepEqual(
-    [...liveResult].sort(),
-    [
-      'controls', 'hover', 'workspace-command', 'workspace-help', 'preferences',
-      'workspace-progress', 'workspace-analytics', 'editor', 'overlays', 'choices',
-    ].sort(),
-    'Each intended task occurs once, independently of responsive visual ordering'
-  );
+  assert.deepEqual(liveResult, HOMEPAGE_GALLERY_IDS, 'Gallery cards in authored order');
   activeProbeStage = 'workspace-settings-saved-capture';
   await capture('saved');
   activeProbeStage = 'workspace-settings-restore';
@@ -1035,7 +1029,10 @@ try {
                   ),
                 };
               });
-              assert.ok(facts.name && facts.text?.trim(), `${control} has a name and selected value`);
+              assert.ok(
+                facts.name && facts.text?.trim(),
+                `${control} has a name and selected value`
+              );
               globalControls.push({ control, ...facts });
             }
             evidence.globalControls = globalControls;
@@ -1161,6 +1158,20 @@ try {
               await menu.evaluate((element) => document.activeElement === element),
               'Closing settings must restore focus to the real menu control'
             );
+            if (viewport.name === 'mobile') {
+              activeProbeStage = 'gallery-hero-entry';
+              await page
+                .locator(
+                  '.homepage-hero [data-projection-generation-state="active"] a[href="#home-demo-previewer"]'
+                )
+                .press('Enter');
+              await page.waitForFunction((home) => {
+                const stage = document.querySelector<HTMLElement>(
+                  `${home} [data-home-gallery-stage]`
+                );
+                return location.hash === '#home-demo-previewer' && stage?.inert === false;
+              }, HOME);
+            }
           }
           for (const [index, runtime] of HOMEPAGE_POINTER_RUNTIME_SEQUENCE.entries()) {
             await chooseRuntime(page, runtime, false);

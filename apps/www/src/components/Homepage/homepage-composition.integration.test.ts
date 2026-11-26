@@ -47,12 +47,12 @@ function fill(input: HTMLInputElement, text: string) {
     new InputEvent('input', { bubbles: true, data: text, inputType: 'insertText' })
   );
 }
-async function mount(family: Family) {
+async function mount(family: Family, locale: 'en' | 'zh-cn' = 'en') {
   const errors: string[] = [];
   const onError = (event: ErrorEvent) => errors.push(event.message);
   window.addEventListener('error', onError);
   stopErrorWatch = () => window.removeEventListener('error', onError);
-  const content = createHomepageShowcase(family, 'wc', 'en', () => true);
+  const content = createHomepageShowcase(family, 'wc', locale, () => true);
   await loadPrototypes([...content.recipe.prototypeIds]);
   const setup = content.demo.setup!;
   const writes = vi.fn<DemoSetupContext['api']['setProps']>();
@@ -101,9 +101,50 @@ async function mount(family: Family) {
   return { host, ref, errors, writes, verifyPlan, stopSetup: () => cleanup?.() };
 }
 
+it.each([
+  {
+    locale: 'en',
+    preview: 'Target runtime: vue · CLI command: npm run demo',
+    missingTarget: 'Target runtime: (required) · CLI command: npm run demo',
+    missingCommand: 'Target runtime: vue · CLI command: (required)',
+  },
+  {
+    locale: 'zh-cn',
+    preview: '目标框架：vue · 初始化命令：npm run demo',
+    missingTarget: '目标框架：（必填） · 初始化命令：npm run demo',
+    missingCommand: '目标框架：vue · 初始化命令：（必填）',
+  },
+] as const)(
+  'previews the current Quick setup inputs in $locale',
+  async (copy) => {
+    const view = await mount('shadcn', copy.locale);
+    const target = view.ref('gallery-protocol-target').querySelector<HTMLInputElement>('input')!;
+    const command = view.ref('gallery-protocol-cmd').querySelector<HTMLInputElement>('input')!;
+    const button = view.ref('gallery-protocol-preview');
+    const status = view.ref('gallery-protocol-status');
+    expect(status.getAttribute('role')).toBe('status');
+
+    fill(target, 'vue');
+    fill(command, 'npm run demo');
+    button.click();
+    await expect.poll(() => status.textContent).toBe(copy.preview);
+
+    fill(target, ' ');
+    button.click();
+    await expect.poll(() => status.textContent).toBe(copy.missingTarget);
+
+    fill(target, 'vue');
+    fill(command, '');
+    button.click();
+    await expect.poll(() => status.textContent).toBe(copy.missingCommand);
+    expect(view.errors).toEqual([]);
+  },
+  20_000
+);
+
 for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
   describe(`${family} homepage scenes real WC integration`, () => {
-    it('mounts twelve real cards, decorative icons, a labelled sample chart and attribution', async () => {
+    it('mounts sixteen real cards, decorative icons, a labelled sample chart and attribution', async () => {
       const view = await mount(family);
       await settle();
       const cards = [...view.host.querySelectorAll<HTMLElement>('[data-gallery-demo]')];

@@ -7,6 +7,7 @@ import { transformSync } from 'esbuild';
 import ts from 'typescript';
 import { parse } from 'yaml';
 import { Window } from 'happy-dom';
+import { HOMEPAGE_GALLERY_IDS } from '../src/components/Homepage/homepage-layout-evidence';
 import {
   HOMEPAGE_BASELINE,
   HOMEPAGE_KEYBOARD_TRANSITION,
@@ -585,15 +586,21 @@ test('actual candidate task driver saves edits, restores a dirty draft, then sav
         return callback(
           [
             'controls',
-            'hover',
-            'workspace-command',
-            'workspace-help',
-            'preferences',
-            'workspace-progress',
-            'workspace-analytics',
+            'shortcuts',
             'editor',
+            'milestones',
+            'workspace-analytics',
+            'workspace-command',
+            'spark',
+            'ecosystem',
+            'preferences',
+            'workspace-help',
             'overlays',
+            'protocol',
+            'workspace-progress',
+            'hover',
             'choices',
+            'throughput',
           ].map((id) => {
             const el = previewWindow.document.createElement('div');
             el.setAttribute('data-gallery-demo', id);
@@ -703,6 +710,7 @@ test('actual candidate task driver saves edits, restores a dirty draft, then sav
     const probeContext = {
       document: previewWindow.document,
       HOME: home,
+      HOMEPAGE_GALLERY_IDS,
       assert,
       activeProbeStage: null as string | null,
       async waitForWorkspaceSettings(_page: unknown, expected: object) {
@@ -957,48 +965,40 @@ test('density observer rejects missing cards and incorrect physical multicol spa
     loader: 'ts',
     target: 'es2022',
   }).code;
-  const observe = runInNewContext(`${code}\ngallerySpacingIssues`);
-  const ids = [
-    'controls',
-    'hover',
-    'workspace-command',
-    'workspace-help',
-    'preferences',
-    'workspace-progress',
-    'workspace-analytics',
-    'editor',
-    'overlays',
-    'choices',
-  ];
+  const observe = runInNewContext(`${code}\ngallerySpacingIssues`, { HOMEPAGE_GALLERY_IDS });
+  const ids = HOMEPAGE_GALLERY_IDS;
   const facts = {
-    columnGap: '32px',
+    columnGap: '20px',
+    physicalScale: 1,
     cards: ids.map((id, i) => ({
       id,
-      x: Math.floor(i / 3) * 332,
-      right: Math.floor(i / 3) * 332 + 300,
-      y: (i % 3) * 124,
-      bottom: (i % 3) * 124 + 100,
+      x: Math.floor(i / 4) * 320,
+      right: Math.floor(i / 4) * 320 + 300,
+      y: (i % 4) * 124,
+      bottom: (i % 4) * 124 + 100,
       rowGap: 24,
     })),
   };
-  assert.equal(observe(facts, 32).length, 0);
+  assert.equal(observe(facts, 20).length, 0);
   assert.equal(
-    observe({ ...facts, cards: [...facts.cards].reverse() }, 32).length,
+    observe({ ...facts, cards: [...facts.cards].reverse() }, 20).length,
     0,
     'Membership and physical spacing do not depend on stale DOM ordering'
   );
   const narrow = {
-    columnGap: '24px',
+    columnGap: '16px',
+    physicalScale: 0.25,
     cards: ids.map((id, i) => ({
       id,
-      x: 0,
-      right: 280,
-      y: i * 120,
-      bottom: i * 120 + 100,
-      rowGap: 20,
+      x: Math.floor(i / 4) * 74,
+      right: Math.floor(i / 4) * 74 + 70,
+      y: (i % 4) * 29,
+      bottom: (i % 4) * 29 + 25,
+      rowGap: 16,
     })),
   };
-  assert.equal(observe(narrow, 24).length, 0);
+  assert.equal(observe(narrow, 16).length, 0);
+  assert.ok(observe({ ...narrow, physicalScale: 1 }, 16).includes('horizontal card spacing'));
   for (const mutate of [
     (value: typeof facts) => {
       value.cards.pop();
@@ -1007,7 +1007,7 @@ test('density observer rejects missing cards and incorrect physical multicol spa
       value.cards[8]!.id = value.cards[0]!.id;
     },
     (value: typeof facts) => {
-      value.columnGap = 'normal 32px';
+      value.columnGap = 'normal 20px';
     },
     (value: typeof facts) => {
       value.cards[1]!.y += 10;
@@ -1016,7 +1016,7 @@ test('density observer rejects missing cards and incorrect physical multicol spa
       value.cards[0]!.rowGap = 14;
     },
     (value: typeof facts) => {
-      for (const card of value.cards.slice(3, 6)) {
+      for (const card of value.cards.slice(4, 8)) {
         card.x += 10;
         card.right += 10;
       }
@@ -1027,7 +1027,7 @@ test('density observer rejects missing cards and incorrect physical multicol spa
   ]) {
     const broken = structuredClone(facts);
     mutate(broken);
-    assert.ok(observe(broken, 32).length > 0);
+    assert.ok(observe(broken, 20).length > 0);
   }
 });
 

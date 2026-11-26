@@ -874,7 +874,7 @@ export function createHomepageGalleryParts(
     );
   const milestones = card(
     zh ? '演进里程碑' : 'Release milestones',
-    zh ? '追踪 0.3 原型与适配层进度。' : 'Track 0.3 prototype and adapter milestones.',
+    zh ? '以下数量和百分比均为示例。' : 'The counts and percentages are examples.',
     [
       milestoneTile(
         zh ? '运行时适配' : 'RUNTIME ADAPTERS',
@@ -882,7 +882,7 @@ export function createHomepageGalleryParts(
         84,
         zh ? '84% 已覆盖' : '84% covered',
         'WC · React · Vue',
-        zh ? '运行时适配覆盖率' : 'Runtime adapter coverage'
+        zh ? '运行时适配覆盖率示例' : 'Runtime adapter coverage example'
       ),
       milestoneTile(
         zh ? '设计体系投影' : 'DESIGN PROJECTIONS',
@@ -890,7 +890,7 @@ export function createHomepageGalleryParts(
         68,
         zh ? '68% 已就绪' : '68% ready',
         'Shadcn · Brutalist',
-        zh ? '设计体系投影就绪度' : 'Design projection readiness'
+        zh ? '设计体系投影就绪度示例' : 'Design projection readiness example'
       ),
     ],
     'milestones',
@@ -946,9 +946,11 @@ export function createHomepageGalleryParts(
   );
 
   // Column 3 Bottom: Quick setup form snippet (balanced bottom horizon)
+  const initialTarget = 'react / vue / web-components';
+  const initialCommand = 'npx @proto.ui/cli@latest init';
   const protocol = card(
     zh ? '快速接入' : 'Quick setup',
-    zh ? '通过 CLI 在任意前端项目中初始化原型。' : 'Initialize prototypes in any frontend project.',
+    zh ? '预览目标框架和初始化命令。' : 'Preview the target runtime and CLI command.',
     [
       box('home-settings__field', [
         box('home-settings__label', [zh ? '目标框架' : 'Target runtime']),
@@ -956,7 +958,7 @@ export function createHomepageGalleryParts(
           `${family}-input-root`,
           [],
           {
-            defaultValue: 'react / vue / web-components',
+            defaultValue: initialTarget,
             ariaLabel: zh ? '目标框架示例' : 'Target runtime example',
           },
           'gallery-protocol-target',
@@ -970,7 +972,7 @@ export function createHomepageGalleryParts(
           `${family}-input-root`,
           [],
           {
-            defaultValue: 'npx @proto.ui/cli@latest init',
+            defaultValue: initialCommand,
             ariaLabel: zh ? '初始化命令示例' : 'CLI command example',
           },
           'gallery-protocol-cmd',
@@ -981,10 +983,7 @@ export function createHomepageGalleryParts(
       button(zh ? '预览生成清单' : 'Preview setup', 'gallery-protocol-preview', 'primary', false, {
         fullWidth: true,
       }),
-      status(
-        zh ? '零额外运行时框架依赖' : 'Zero secondary framework runtime',
-        'gallery-protocol-status'
-      ),
+      status(zh ? '命令仅作展示。' : 'Command preview only.', 'gallery-protocol-status'),
     ],
     'protocol',
     { density: 'compact', emphasis: 'quiet' }
@@ -1054,6 +1053,8 @@ export function createHomepageGalleryParts(
       ];
     },
     setup(context: DemoSetupContext) {
+      let target = initialTarget;
+      let command = initialCommand;
       let alive = true,
         editorText = sample,
         copies = 0,
@@ -1273,12 +1274,23 @@ export function createHomepageGalleryParts(
           zh ? `已应用 ${selected.size} 项选择` : `Applied ${selected.size} selections`
         )
       );
-      bind('gallery-protocol-preview', 'click', () =>
+      bind('gallery-protocol-target', 'valueChange', ({ value }) => {
+        if (typeof value === 'string') target = value;
+      });
+      bind('gallery-protocol-cmd', 'valueChange', ({ value }) => {
+        if (typeof value === 'string') command = value;
+      });
+      bind('gallery-protocol-preview', 'click', () => {
+        const required = zh ? '（必填）' : '(required)';
+        const previewTarget = target.trim() ? target : required;
+        const previewCommand = command.trim() ? command : required;
         feedback(
           'gallery-protocol-status',
-          zh ? '已就绪：1 个原型配置 + 样式投影' : 'Ready: 1 prototype config + style projection'
-        )
-      );
+          zh
+            ? `目标框架：${previewTarget} · 初始化命令：${previewCommand}`
+            : `Target runtime: ${previewTarget} · CLI command: ${previewCommand}`
+        );
+      });
       return () => {
         if (!alive) return;
         alive = false;

@@ -1,5 +1,6 @@
 // @vitest-environment node
 
+import { HOMEPAGE_GALLERY_IDS } from '../../../components/Homepage/homepage-layout-evidence';
 import { revealHeaderPreferences } from './site-header-browser';
 import {
   measureLabelTextDrag,
@@ -182,6 +183,7 @@ async function createHomeGalleryObservation(
       const card = stage.querySelector<HTMLElement>(
         '[data-gallery-demo="controls"] [data-projection-prototype="shadcn-card-root"]'
       )!;
+      const cards = [...stage.querySelectorAll<HTMLElement>('[data-gallery-demo]')];
       const home = stage.closest<HTMLElement>('[data-home-showcase]')!;
       return {
         viewportWidth: innerWidth,
@@ -199,7 +201,8 @@ async function createHomeGalleryObservation(
             (column) => column.getBoundingClientRect().left
           )
         ).size,
-        cardCount: stage.querySelectorAll('[data-gallery-demo]').length,
+        cardCount: cards.length,
+        cardIds: cards.map((card) => card.dataset.galleryDemo),
         noOverflow:
           bounds.left >= -1 &&
           bounds.right <= innerWidth + 1 &&
@@ -261,7 +264,7 @@ async function createHomeGalleryObservation(
     expect(facts).toMatchObject({
       inert: true,
       columnCount: 5,
-      cardCount: 12,
+      cardCount: HOMEPAGE_GALLERY_IDS.length,
       noOverflow: true,
       fitsGallery: true,
       fadePointerEvents: 'none',
@@ -269,10 +272,11 @@ async function createHomeGalleryObservation(
       sourceOutsideStage: true,
       sourceOutsideViewport: true,
     });
+    expect(facts.cardIds).toEqual(HOMEPAGE_GALLERY_IDS);
     expect(facts.liveRoots).toBeGreaterThan(0);
     expect(facts.fade).toContain('linear-gradient');
     expect(facts.fadeHeight).toBeCloseTo(
-      Math.min(8 * facts.rootFontSize, facts.fadeViewportHeight * 0.28),
+      Math.min(18 * facts.rootFontSize, facts.fadeViewportHeight * 0.28),
       1
     );
     expect(facts.fadeColorMeasurementError).toBeNull();
@@ -936,17 +940,6 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         expect(await home.textContent()).not.toMatch(
           /打开交互演示|关闭交互演示|查看桌面缩略图|Open interactive demos|Show desktop overview/
         );
-        expect(initial).toMatchObject({
-          inert: true,
-          columnCount: 5,
-          cardCount: 12,
-          noOverflow: true,
-          fitsGallery: true,
-          fadePointerEvents: 'none',
-          fadeVisible: true,
-          sourceOutsideStage: true,
-        });
-        expect(initial.fade).toContain('linear-gradient');
         expectCompactPreview(initial);
         // Playwright 1.58's role selector does not implement inert ancestry.
         // The native AX tree and actual focus behavior establish this boundary.
@@ -975,9 +968,12 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         await page.setViewportSize({ width: 1440, height: 900 });
         const desktop = await capture('desktop-after-entry');
         expect(desktop.inert).toBe(false);
-        expect(desktop.fade).toBe(initial.fade);
+        expect(desktop.fadeColorMeasurementError).toBeNull();
+        expect(desktop.fadeFirstStopRgba).toEqual(desktop.bodyBackgroundRgba);
+        expect(desktop.fadePointerEvents).toBe('none');
+        expect(desktop.fadeVisible).toBe(false);
         expect(desktop.fadeHeight).toBeCloseTo(
-          Math.min(8 * desktop.rootFontSize, desktop.fadeViewportHeight * 0.28),
+          Math.min(18 * desktop.rootFontSize, desktop.fadeViewportHeight * 0.28),
           1
         );
         await page.setViewportSize({ width: 390, height: 900 });

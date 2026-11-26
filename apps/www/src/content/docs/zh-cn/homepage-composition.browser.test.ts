@@ -731,7 +731,9 @@ describe.sequential(
             expect(await page.locator(`${HOME} [data-home-demo-nojs] [aria-live]`).count()).toBe(0);
             if (family === 'shadcn') {
               await stage('hero-responsive-typography');
-              const note = page.locator(`${ACTIVE} textarea`).first();
+              const note = page
+                .locator(ACTIVE)
+                .getByRole('textbox', { name: 'Additional note', exact: true });
               const originalNote = await note.elementHandle();
               const originalHeading = await page.locator('.homepage-hero h1').elementHandle();
               await note.fill('Preserved across Hero viewport changes');
@@ -803,15 +805,14 @@ describe.sequential(
               }
               await note.fill('');
               await page.setViewportSize({ width: 1400, height: 1000 });
-              await stage('select-rhea');
+              await stage('select-luma');
               const trigger = page.locator(
                 `${ACTIVE} [data-demo-ref="settings-view-trigger"][role="combobox"]`
               );
-              const editor = page.locator(`${ACTIVE} textarea`).first();
-              const originalEditor = await editor.elementHandle();
+              const originalEditor = await note.elementHandle();
               const sameEditor = () =>
-                editor.evaluate((current, original) => current === original, originalEditor);
-              await editor.fill('Retain this note across Select choices');
+                note.evaluate((current, original) => current === original, originalEditor);
+              await note.fill('Retain this note across Select choices');
               await trigger.press('ArrowDown');
               await attribute(trigger, 'aria-expanded', 'true');
               const portalId = await trigger.getAttribute('aria-controls');
@@ -895,18 +896,18 @@ describe.sequential(
                     { timeout: 1500, interval: 25 }
                   )
                   .toEqual({
-                    trigger: { radius: '18px', height: 32, fontSize: '14px', gap: '6px' },
+                    trigger: { radius: '22px', height: 36, fontSize: '14px', gap: '6px' },
                     backgroundMatches: true,
                     validTheme: true,
                     popup: {
-                      radius: '18px',
+                      radius: '22px',
                       isolation: 'isolate',
                       leafCount: 1,
                       filter: 'blur(40px) saturate(1.5)',
-                      leafRadius: '18px',
+                      leafRadius: '22px',
                       leafAriaHidden: 'true',
-                      padding: '4px',
-                      itemRadius: '14px',
+                      padding: '6px',
+                      itemRadius: '18px',
                       escaped: true,
                     },
                   });
@@ -917,7 +918,7 @@ describe.sequential(
                 .popup.background;
               expect(background).not.toBe('transparent');
               expect(background).not.toBe('rgba(0, 0, 0, 0)');
-              await capture('select-rhea-open');
+              await capture('select-luma-open');
               await expectEntryFocus('Email');
               await page.keyboard.press('End');
               await page.keyboard.press('Enter');
@@ -925,7 +926,7 @@ describe.sequential(
               await expect.poll(() => trigger.textContent()).toBe('In-app');
               await hasFocus(trigger);
               await expect
-                .poll(() => editor.inputValue())
+                .poll(() => note.inputValue())
                 .toBe('Retain this note across Select choices');
               expect(await sameEditor()).toBe(true);
               await trigger.press('ArrowDown');
@@ -938,9 +939,9 @@ describe.sequential(
               await hasFocus(trigger);
               expect(await sameEditor()).toBe(true);
               await expect
-                .poll(() => editor.inputValue())
+                .poll(() => note.inputValue())
                 .toBe('Retain this note across Select choices');
-              await editor.fill('');
+              await note.fill('');
               await originalEditor!.dispose();
               record.selectJourney = [
                 'Email',

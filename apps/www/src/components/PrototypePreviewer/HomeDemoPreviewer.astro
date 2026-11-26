@@ -311,9 +311,8 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     columns: 18rem;
     column-gap: var(--homepage-gallery-column-gap);
   }
-  /* The page decoration is not a scrolling mask or a pointer/focus boundary.
-     Its unscaled viewport keeps the same fade on desktop and the live mobile
-     overview. Attribution and focused controls remain outside its paint. */
+  /* Bring the bottom edge to the page background inside the card gutter.
+     Above the gutter, live labels and controls need to remain readable. */
   .home-demo-previewer :global(.home-gallery__viewport)::after {
     content: '';
     position: absolute;
@@ -321,6 +320,14 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     height: min(18rem, 28%);
     z-index: 1;
     pointer-events: none;
+    background-image: linear-gradient(
+      to top,
+      var(--color-background),
+      color-mix(in srgb, var(--color-background) 12%, transparent) var(--homepage-gallery-row-gap),
+      transparent
+    );
+  }
+  .home-demo-previewer[data-home-gallery-compact='true'] :global(.home-gallery__viewport)::after {
     background-image: linear-gradient(
       to top,
       var(--color-background),

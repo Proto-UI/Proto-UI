@@ -11,6 +11,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import type { Browser, Page } from 'playwright-core';
+import { HOMEPAGE_GALLERY_IDS } from '../src/components/Homepage/homepage-layout-evidence';
 import { launchBrowser, startServer, stopServer } from '../src/content/docs/zh-cn/browser-harness';
 
 const { values } = parseArgs({
@@ -51,6 +52,19 @@ const generatedNames = [
   'proto-ui-shadow-style.generated.js',
   'proto-ui-shadow-style.generated.d.ts',
 ];
+// Reading order of the workflow's immutable before image.
+const baselineGalleryIds = [
+  'controls',
+  'workspace-command',
+  'workspace-analytics',
+  'workspace-progress',
+  'preferences',
+  'workspace-help',
+  'editor',
+  'hover',
+  'overlays',
+  'choices',
+];
 const plan = ['zh-cn', 'en'].flatMap((locale) =>
   [390, 1440].flatMap((width) =>
     (['light', 'dark'] as const).map((theme) => ({
@@ -72,6 +86,7 @@ const report = {
     files: await Promise.all(
       [
         'apps/www/scripts/capture-homepage-preview-fit.ts',
+        'apps/www/src/components/Homepage/homepage-layout-evidence.ts',
         'apps/www/src/content/docs/zh-cn/browser-harness.ts',
         'scripts/test/server-readiness.mjs',
       ].map((file) => fileBinding(probeRoot, file))
@@ -256,14 +271,6 @@ function candidateFailures(
   const check = (condition: boolean, message: string) => {
     if (!condition) failures.push(message);
   };
-  check(
-    facts.cardCount === 10 && new Set(facts.cards.map((card) => card.id)).size === 10,
-    'Exactly ten distinct real gallery cards must remain mounted'
-  );
-  check(
-    facts.cards.every((card) => card.connected && card.visible && card.livePrototypeRoots > 0),
-    'Each visible card must contain live public Prototype roots'
-  );
   check(facts.toggles.length === 0, 'The extra layout toggle must be absent, not only hidden');
   check(facts.documentWidth <= facts.viewport.width + 1, 'The page must not overflow horizontally');
   check(
@@ -290,14 +297,14 @@ function candidateFailures(
     'The initial non-interactive gradient must actually be visible'
   );
   const expectedHeight = Math.min(
-    8 * facts.rootFontSize,
+    18 * facts.rootFontSize,
     facts.fade.ownerGeometry.rect.height * 0.28
   );
   check(
     Number.isFinite(expectedHeight) &&
       expectedHeight > 0 &&
       Math.abs(fadeBox.physicalHeight - expectedHeight) <= 1,
-    'The real pseudo-element must use the unscaled 8rem/28% screen-height rule'
+    'The real pseudo-element must use the unscaled 18rem/28% screen-height rule'
   );
   check(
     facts.compact === facts.viewport.width < 768 && facts.stageInert === facts.compact,
@@ -410,6 +417,16 @@ try {
           fadeBox.physicalHeight / Number.parseFloat(facts.fade.computedHeight),
       };
       const failures: string[] = kind === 'candidate' ? candidateFailures(facts, fadeBox) : [];
+      const expectedCards = kind === 'baseline' ? baselineGalleryIds : HOMEPAGE_GALLERY_IDS;
+      if (
+        facts.cards.length !== expectedCards.length ||
+        facts.cards.some((card, index) => card.id !== expectedCards[index])
+      )
+        failures.push('The mounted gallery must contain every authored card once in reading order');
+      if (
+        !facts.cards.every((card) => card.connected && card.visible && card.livePrototypeRoots > 0)
+      )
+        failures.push('Each visible card must contain live public Prototype roots');
       failures.push(...(entry.pageErrors as string[]).map((error) => `Page error: ${error}`));
       entry.validationFailures = failures;
       assert.deepEqual(failures, [], item.id);

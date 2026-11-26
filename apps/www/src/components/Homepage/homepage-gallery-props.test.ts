@@ -20,6 +20,66 @@ const BUTTON_VARIANT_OPTIONS: Readonly<Record<ProjectionFamilyId, readonly strin
   'liquid-glass': ['regular', 'prominent'],
 };
 
+// Identify passive copy by its authored role within each card. For mutable copy the
+// ref distinguishes the intended owner even when two fields have the same role.
+const CARD_TEXT_OWNERS: Record<string, Record<string, number>> = {
+  controls: { '[data-demo-ref="gallery-controls-feedback"][role="status"]': 1 },
+  shortcuts: { '.home-gallery__shortcut-title': 4 },
+  editor: {
+    '.home-gallery__title': 1,
+    '.home-gallery__caption': 1,
+    '[data-demo-ref="editor-preview"]': 1,
+  },
+  milestones: {
+    '.home-gallery__title': 1,
+    '.home-gallery__caption': 3,
+    '.home-gallery__eyebrow': 4,
+    '.home-gallery__submetric': 2,
+  },
+  spark: {
+    '.home-gallery__title': 1,
+    '[data-demo-ref="gallery-spark-metric"]': 1,
+    '[data-demo-ref="gallery-spark-badge"]': 1,
+  },
+  ecosystem: {
+    '.home-gallery__title': 1,
+    '.home-gallery__caption': 5,
+    '.home-gallery__stat-value': 4,
+  },
+  preferences: {
+    '.home-gallery__title': 1,
+    '.home-gallery__caption': 1,
+    '.home-settings__label': 3,
+    '[data-demo-ref="settings-count"]': 1,
+    '[data-demo-ref="settings-feedback"][role="status"]': 1,
+  },
+  overlays: {
+    '.home-gallery__title': 1,
+    '.home-gallery__caption': 1,
+    '[data-demo-ref="gallery-dialog-feedback"][role="status"]': 1,
+  },
+  protocol: {
+    '.home-gallery__title': 1,
+    '.home-gallery__caption': 1,
+    '.home-settings__label': 2,
+    '[data-demo-ref="gallery-protocol-status"][role="status"]': 1,
+  },
+  hover: { '.home-gallery__title': 2, '.home-gallery__caption': 1, '.home-gallery__copy': 1 },
+  choices: {
+    '.home-gallery__title': 1,
+    '.home-gallery__caption': 1,
+    '.home-gallery__choice-desc': 3,
+    '[data-demo-ref="choice-feedback"][role="status"]': 1,
+  },
+  throughput: {
+    '.home-gallery__title': 1,
+    '.home-gallery__caption': 1,
+    '.home-gallery__chart-label': 8,
+    '.home-gallery__eyebrow': 2,
+    '.home-gallery__stat-value': 2,
+  },
+};
+
 let rendered: Awaited<ReturnType<typeof renderDemo>> | undefined;
 afterEach(async () => {
   await rendered?.destroy();
@@ -85,9 +145,17 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     };
     await settle();
     verify();
-    const assertTextOwners = (owners: Element[]) => {
+    const assertTextOwners = () => {
       // Direct WC rendering retains authored boxes inside detached content hosts.
-      expect(new Set(owners).size).toBe(owners.length);
+      const owners = [...host.querySelectorAll('[data-home-text]')];
+      for (const [id, roles] of Object.entries(CARD_TEXT_OWNERS)) {
+        const cardOwners = owners.filter((owner) => owner.closest(`[data-gallery-demo="${id}"]`));
+        for (const [selector, count] of Object.entries(roles)) {
+          const matches = cardOwners.filter((owner) => owner.matches(selector));
+          expect(matches, `${id} ${selector}`).toHaveLength(count);
+        }
+        expect(cardOwners, id).toHaveLength(Object.values(roles).reduce((sum, n) => sum + n, 0));
+      }
       for (const [id, title] of Object.entries({
         milestones: 'Release milestones',
         ecosystem: 'Adapter parity',
@@ -95,7 +163,8 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
         throughput: 'Component matrix',
       })) {
         const cardOwners = owners.filter((owner) => owner.closest(`[data-gallery-demo="${id}"]`));
-        expect(cardOwners.map((owner) => owner.textContent?.trim())).toContain(title);
+        const heading = cardOwners.find((owner) => owner.matches('[role="heading"]'));
+        expect(heading?.textContent?.trim(), id).toBe(title);
       }
       const scenes = {
         'workspace-command': [
@@ -138,7 +207,18 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       };
       for (const [id, texts] of Object.entries(scenes)) {
         const actual = owners.filter((owner) => owner.closest(`[data-gallery-demo="${id}"]`));
-        expect(actual.map((owner) => owner.textContent?.trim())).toEqual(texts);
+        expect(
+          actual.map((owner) => owner.textContent?.trim()),
+          id
+        ).toEqual(texts);
+      }
+      for (const owner of owners) {
+        const roots = owner.querySelectorAll('[data-pui-root]');
+        expect(roots).toHaveLength(1);
+        const text = roots[0]!;
+        expect(text.localName).toBe(`wc-${family}-text-root`);
+        expect(text.getAttribute('data-pui-style')).toContain('font-');
+        expect(text.querySelectorAll('[data-home-text-slot]')).toHaveLength(1);
       }
     };
     const shortcutTile = host.querySelector('[data-gallery-demo="shortcuts"]')!;
@@ -159,19 +239,17 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     await settle();
     expect(cardsShortcut.getAttribute('aria-pressed')).toBe('true');
     expect(ref('shortcut-prototypes-buttons').getAttribute('aria-pressed')).toBe('false');
-    const textOwners = Array.from(host.querySelectorAll('[data-home-text]'));
-    assertTextOwners(textOwners);
-    const withoutMilestoneTitle = textOwners.filter(
-      (owner) => owner.textContent?.trim() !== 'Release milestones'
-    );
-    expect(() => assertTextOwners(withoutMilestoneTitle)).toThrow();
-    expect(() => assertTextOwners([...textOwners, textOwners[0]!])).toThrow();
-    expect(() => assertTextOwners([textOwners[0]!, ...textOwners.slice(0, -1)])).toThrow();
-    for (const owner of host.querySelectorAll('[data-home-text]')) {
-      const text = owner.querySelector('[data-pui-root]')!;
-      expect(text).not.toBeNull();
-      expect(text.getAttribute('data-pui-style')).toContain('font-');
-      expect(owner.querySelectorAll('[data-pui-root]')).toHaveLength(1);
+    assertTextOwners();
+    // Remove the existing feedback owner from Controls while keeping its Text and the
+    // gallery-wide inventory intact. The observer must identify the missing Controls role.
+    const feedback = ref('gallery-controls-feedback');
+    const parent = feedback.parentElement!;
+    const next = feedback.nextSibling;
+    ref('choice-feedback').after(feedback);
+    try {
+      expect(assertTextOwners).toThrow(/gallery-controls-feedback/);
+    } finally {
+      parent.insertBefore(feedback, next);
     }
     // Four formerly passive Text slots are now real Label prototypes. Keep
     // their own identity and exact one-control naming edges in the inventory.
@@ -203,7 +281,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     };
     verifyLabels();
     // Bounded observer negative controls: a missing or cross-wired relation
-    // must not become a pass merely because the total owner count is 28.
+    // must be detected even when every Label is still present.
     const labelledControl = ref('gallery-checkbox');
     const originalRelation = labelledControl.getAttribute('aria-labelledby')!;
     labelledControl.removeAttribute('aria-labelledby');
