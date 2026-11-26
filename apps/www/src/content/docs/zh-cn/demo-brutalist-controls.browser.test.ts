@@ -1301,11 +1301,12 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
             const name = (animation as CSSAnimation).animationName;
             if (animation.playState !== 'running' || !['pui-enter', 'pui-exit'].includes(name))
               continue;
+            const duration = animation.effect?.getTiming().duration ?? '';
             samples.push({
               runtime,
               ref: element.getAttribute('data-demo-ref'),
               animation: name,
-              duration: animation.effect?.getTiming().duration ?? '',
+              duration: typeof duration === 'number' ? duration : String(duration),
               opacity: Number(css.opacity),
               transform: css.transform,
             });

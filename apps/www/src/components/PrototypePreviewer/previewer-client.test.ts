@@ -315,7 +315,7 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
     const watch = vi
       .spyOn(projectionTheme, 'watchProjectionThemeSurfaceStyle')
       .mockImplementation((_family, scope, callback) => {
-        const index = roots.indexOf(scope as HTMLElement);
+        const index = roots.findIndex((root) => root === scope);
         order.push(`read ${index}`);
         callback({ '--pui-background': (scope as HTMLElement).dataset.themeSample! });
         const stop = vi.fn();
