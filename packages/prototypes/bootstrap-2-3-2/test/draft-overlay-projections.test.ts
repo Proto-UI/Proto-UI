@@ -382,6 +382,10 @@ describe('prototypes/bootstrap-2-3-2: hover-card projection', () => {
 
     trigger.dispatchEvent(new Event('pointerenter'));
     await advance(699);
+    const ink = (trigger.getAttribute('data-pui-style') ?? '').split(/\s+/);
+    expect(ink).toContain('text-foreground');
+    expect(ink).toContain('underline');
+    expect(ink).not.toContain('text-[#005580]');
     expect(stateValue<boolean>(root, 'open')).toBe(false);
     await advance(1);
     expect(stateValue<boolean>(root, 'open')).toBe(true);

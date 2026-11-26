@@ -71,12 +71,17 @@ describe('Bootstrap readable page adaptation', () => {
     for (const [path, darkToken] of [
       ['accordion/trigger.proto.ts', "tw('text-ring')"],
       ['collapsible/trigger.proto.ts', "tw('text-foreground underline')"],
-      ['hover-card/trigger.proto.ts', "tw('text-foreground underline')"],
     ] as const) {
       const source = readFileSync(`packages/prototypes/bootstrap-2-3-2/src/${path}`, 'utf8');
       expect(source).toContain("meta('colorScheme').eq('dark')");
       expect(source).toContain(darkToken);
     }
+    const hoverCard = readFileSync(
+      'packages/prototypes/bootstrap-2-3-2/src/hover-card/trigger.proto.ts',
+      'utf8'
+    );
+    expect(hoverCard).toContain("tw('text-foreground underline')");
+    expect(hoverCard).not.toContain("tw('text-[#005580] underline')");
     expect(contrast(THEME.dark['muted-foreground'], THEME.dark.background)).toBeGreaterThanOrEqual(
       4.5
     );
