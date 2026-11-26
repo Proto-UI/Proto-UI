@@ -7,6 +7,7 @@ import {
   getWebComponentPortalProjectionForOrigin,
   isWebComponentPortalTargetOwnedBy,
 } from './portal-mount';
+import { isWebComponentNativeFocusCandidate } from './native-focus-candidate';
 
 export function deepestActiveElement(doc: Document): Element | null {
   let active = doc.activeElement;
@@ -62,6 +63,13 @@ function isPrunedByExternalAncestor(el: Element): boolean {
   }
   // A retained or staging view can sit below an inert ancestor. Find that
   // boundary before reading style and forcing a layout of the inner tree.
+  // A positive native box-tree check also proves that no flat-tree ancestor
+  // has display:none or content-visibility:hidden. Keep the read fresh for
+  // every sample and use the owning realm's method, not a component member.
+  // A negative result is not a pruning decision: display:contents can still
+  // provide eligible descendants, so it retains the original style fallback.
+  const checkVisibility = el.ownerDocument.defaultView?.Element.prototype.checkVisibility;
+  if (typeof checkVisibility === 'function' && checkVisibility.call(el)) return false;
   return ancestors.some((parent) => {
     const style = getOwnedComputedStyle(parent);
     return style?.display === 'none' || style?.contentVisibility === 'hidden';
@@ -362,10 +370,60 @@ export function sampleWebComponentScopeTargets(
   };
 }
 
+export function hasPotentialScopeDescendant(container: HTMLElement): boolean {
+  // Entry projection only needs existence. A text/decorative-only composed
+  // region has no possible descendant stop, regardless of its current CSS.
+  // Prove that negative fact before asking the browser to update its box tree.
+  // Any potential target still takes the complete fresh eligibility sampler.
+  // This helper only invokes the Adapter's own closed DOM predicate.
+  const visited = new Set<Node>();
+  const mayContainTarget = (node: Node): boolean => {
+    if (visited.has(node)) return false;
+    visited.add(node);
+    if (!isElementNode(node)) {
+      const projection = getWebComponentPortalProjectionForOrigin(node);
+      return !!projection && mayContainTarget(projection);
+    }
+    if (node !== container) {
+      if (isHtmlElement(node)) {
+        if (
+          node.tabIndex >= 0 ||
+          (!node.hasAttribute('tabindex') &&
+            (isWebComponentNativeFocusCandidate(node) || isEditingHost(node)))
+        )
+          return true;
+      } else if (
+        node.hasAttribute('tabindex') ||
+        (node.namespaceURI === 'http://www.w3.org/2000/svg' &&
+          node.localName === 'a' &&
+          (node.hasAttribute('href') ||
+            node.hasAttributeNS('http://www.w3.org/1999/xlink', 'href')))
+      )
+        return true;
+    }
+    const children = isHtmlTag(node, 'slot')
+      ? logicalSlotNodes(node)
+      : node.shadowRoot
+        ? node.shadowRoot.childNodes
+        : node.childNodes;
+    for (const child of children) if (mayContainTarget(child)) return true;
+    return false;
+  };
+  return mayContainTarget(container);
+}
+
 export function hasWebComponentScopeDescendant(
   container: HTMLElement,
   isNativelyFocusable: (target: HTMLElement) => boolean
 ): boolean {
+  // A supplied predicate may have effects or depend on call order. Only the
+  // exact Adapter-owned implementation admits this DOM-only negative proof;
+  // wrappers, bound functions and all other callbacks keep the original path.
+  if (
+    isNativelyFocusable === isWebComponentNativeFocusCandidate &&
+    !hasPotentialScopeDescendant(container)
+  )
+    return false;
   return sampleWebComponentScopeTargets(
     container,
     isNativelyFocusable,

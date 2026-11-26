@@ -8,7 +8,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Locator } from 'playwright-core';
 import {
   RUNTIMES,
-  choosePreviewRuntime,
+  selectRuntime,
   launchBrowser,
   openRoute,
   startServer,
@@ -18,48 +18,29 @@ import {
 const SELECT_RUNTIMES = RUNTIMES;
 
 const SELECT_ROUTE = '/en/ui-libraries/brutalist/components/select/';
-const SELECT_DEMO_SELECTOR = '[data-demo-id="demo-brutalist-select-input"]';
 
-/** The controlled timezone demo preselects `jst`, whose authored label is `Japan Standard Time (JST)`. */
+// The public controlled example still starts with a real selected value before
+// its popup has ever opened. The hero now demonstrates an empty placeholder.
+const SELECT_DEMO_ID = 'demo-brutalist-select-input';
 const AUTHORED_LABEL = 'Japan Standard Time (JST)';
 const FIRST_LABEL = 'Eastern Standard Time (EST)';
 const LAST_LABEL = 'New Zealand Standard Time (NZST)';
-
-/** Twelve authored timezone options. */
 const REGISTERED_ITEM_COUNT = 12;
 
-/** Root, trigger, value, closed content, twelve authored items, and the Reset button. */
+/** Root, trigger, value, closed content, twelve authored Items and Reset Button. */
 const MOUNTED_ROOT_COUNT = 17;
 
 /**
- * The shared `selectRuntime` waits on an exact prototype-root count, which is
- * one of the things this file measures, so readiness here waits only for the
- * trigger. Reusing the shared helper would turn every assertion below into a
- * timeout that says nothing about the label.
+ * Observe the real committed runtime and its one Trigger. The authored demo's
+ * full Prototype and collection counts remain assertions below, not readiness
+ * conditions that could turn a missing label into an unexplained timeout.
  */
 async function showRuntime(
   page: Page,
   previewer: Locator,
   runtime: (typeof RUNTIMES)[number]
 ): Promise<void> {
-  await choosePreviewRuntime(page, previewer, runtime);
-  await page.waitForFunction(
-    ({ selected, selector }) => {
-      const root = document.querySelector<HTMLElement>(selector);
-      const host = root?.querySelector<HTMLElement>('.host');
-      const activeTab = root?.querySelector<HTMLElement>(
-        `[data-runtime-tabs-mount] [data-runtime-tabs-root] [data-runtime-tab=${JSON.stringify(selected)}][role="tab"][aria-selected="true"]`
-      );
-      if (!host || !activeTab) {
-        return false;
-      }
-      return Array.from(host.querySelectorAll('*')).some(
-        (element) => element.getAttribute('role') === 'combobox'
-      );
-    },
-    { selected: runtime, selector: SELECT_DEMO_SELECTOR },
-    { timeout: 20_000 }
-  );
+  await selectRuntime(page, previewer, runtime, '[role="combobox"]', 1);
   await page.waitForTimeout(300);
 }
 
@@ -83,6 +64,7 @@ async function retainObservation(page: Page, runtime: string, stage: string, obs
         runtime,
         stage,
         route: SELECT_ROUTE,
+        demoId: SELECT_DEMO_ID,
         browser: browser.version(),
         observed,
         outcome: 'observation-only; the corresponding Vitest result records assertion acceptance',
@@ -103,9 +85,9 @@ type ClosedSelect = {
   everOpened: boolean;
 };
 
-async function readClosedSelect(page: Page): Promise<ClosedSelect> {
-  return page.evaluate((selector) => {
-    const host = document.querySelector(`${selector} .host`);
+async function readClosedSelect(previewer: Locator): Promise<ClosedSelect> {
+  return previewer.evaluate((root) => {
+    const host = root.querySelector('[data-projection-content]') ?? root.querySelector('.host');
     if (!host) throw new Error('The Select demo must render projected content.');
     const boundaries = host.querySelectorAll(
       '.pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"]'
@@ -137,7 +119,7 @@ async function readClosedSelect(page: Page): Promise<ClosedSelect> {
       detachedHosts: content.querySelectorAll('[data-pui-view-detached]').length,
       everOpened: !!content.querySelector('[data-open]'),
     };
-  }, SELECT_DEMO_SELECTOR);
+  });
 }
 
 beforeAll(async () => {
@@ -156,13 +138,13 @@ describe.sequential('Select first paint with the popup never opened', () => {
       width: 1440,
       height: 900,
     });
-    const previewer = page.locator(SELECT_DEMO_SELECTOR);
+    const previewer = page.locator(`[data-demo-id="${SELECT_DEMO_ID}"]`);
 
     try {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of SELECT_RUNTIMES) {
         await showRuntime(page, previewer, runtime);
-        const closed = await readClosedSelect(page);
+        const closed = await readClosedSelect(previewer);
         await retainObservation(page, runtime, 'never-opened-label', closed);
 
         // Nothing in this case may open the popup; the defect it guards only
@@ -186,18 +168,18 @@ describe.sequential('Select first paint with the popup never opened', () => {
       width: 1440,
       height: 900,
     });
-    const previewer = page.locator(SELECT_DEMO_SELECTOR);
+    const previewer = page.locator(`[data-demo-id="${SELECT_DEMO_ID}"]`);
 
     try {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of SELECT_RUNTIMES) {
         await showRuntime(page, previewer, runtime);
-        const closed = await readClosedSelect(page);
+        const closed = await readClosedSelect(previewer);
         await retainObservation(page, runtime, 'closed-mounted-content', closed);
 
         expect(closed.detachedHosts, `${runtime}/detached`).toBeGreaterThan(0);
-        // Authored options must register while closed so first-paint label
-        // resolution comes from live collection entries, not a cache.
+        // Every authored option registers while the view remains closed; the
+        // first rendered label must agree with that real collection.
         expect(closed.registeredItems, `${runtime}/registered`).toBe(REGISTERED_ITEM_COUNT);
         expect(closed.mountedRoots, `${runtime}/mounted-roots`).toBe(MOUNTED_ROOT_COUNT);
       }
@@ -213,7 +195,7 @@ describe.sequential('React Select retained native entry focus', () => {
       width: 1440,
       height: 900,
     });
-    const previewer = page.locator(SELECT_DEMO_SELECTOR);
+    const previewer = page.locator(`[data-demo-id="${SELECT_DEMO_ID}"]`);
 
     try {
       await previewer.scrollIntoViewIfNeeded();
@@ -241,10 +223,12 @@ describe.sequential('React Select retained native entry focus', () => {
           observedFocused: true,
         });
       await retainObservation(page, 'react', 'selected-entry', {
-        selected: await readFocus(selected),
-        first: await readFocus(first),
-        last: await readFocus(last),
-        ariaSelected: {
+        focus: {
+          selected: await readFocus(selected),
+          first: await readFocus(first),
+          last: await readFocus(last),
+        },
+        selected: {
           selected: await selected.getAttribute('aria-selected'),
           first: await first.getAttribute('aria-selected'),
           last: await last.getAttribute('aria-selected'),
@@ -260,10 +244,12 @@ describe.sequential('React Select retained native entry focus', () => {
           observedFocused: true,
         });
       await retainObservation(page, 'react', 'native-End', {
-        selected: await readFocus(selected),
-        first: await readFocus(first),
-        last: await readFocus(last),
-        ariaSelected: {
+        focus: {
+          selected: await readFocus(selected),
+          first: await readFocus(first),
+          last: await readFocus(last),
+        },
+        selected: {
           selected: await selected.getAttribute('aria-selected'),
           first: await first.getAttribute('aria-selected'),
           last: await last.getAttribute('aria-selected'),
@@ -278,10 +264,12 @@ describe.sequential('React Select retained native entry focus', () => {
           observedFocused: true,
         });
       await retainObservation(page, 'react', 'native-Home', {
-        selected: await readFocus(selected),
-        first: await readFocus(first),
-        last: await readFocus(last),
-        ariaSelected: {
+        focus: {
+          selected: await readFocus(selected),
+          first: await readFocus(first),
+          last: await readFocus(last),
+        },
+        selected: {
           selected: await selected.getAttribute('aria-selected'),
           first: await first.getAttribute('aria-selected'),
           last: await last.getAttribute('aria-selected'),

@@ -24,7 +24,7 @@ const BROWSER_COMPILER_OWNER = Object.freeze({
 
 export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
   'packages/compiler/src/core-value-types.ts': Object.freeze({
-    sourceSha256: 'f94e6acaea151b7046c57ec4a537202ef903f79264df1e437d749cb502ab8b8d',
+    sourceSha256: '94d2e70c10ab0b4f10536682ea2c42e971419a597ba0ea5034e90011382b65e4',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/control-label']),
   }),
@@ -44,7 +44,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['../../core/src/spec/feedback/tokens']),
   }),
   'packages/compiler/src/native-async.ts': Object.freeze({
-    sourceSha256: '0b9c33c233a6fc648befeaad36ab7b7fdfe56804cd3261055ef3b0da1997c211',
+    sourceSha256: '3aacca4fef0ba3c6e3eff973c2fe29e46e704014f1d81bf674302719343a11bf',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/shader-presentation']),
   }),
@@ -69,7 +69,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['../../core/src/spec/feedback/semantic-merge']),
   }),
   'packages/compiler/src/rule-declarations.ts': Object.freeze({
-    sourceSha256: 'e6841f7531d59aff8ff4082907f98f49e82c533750254188c27eda9b97a574ab',
+    sourceSha256: 'aab4b30c7f13f53d06d01a7d6b9c3d0ac0dfbf74d3d67a1d975fb944f0499a25',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze([
       '../../core/src/handles',
@@ -155,7 +155,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['./handles', './internal', './spec', './state']),
   }),
   'packages/core/src/spec/feedback/application-role.ts': Object.freeze({
-    sourceSha256: '038d2b3b8ceb22078101be158eb06720c1658e76d0e636ddc3be1b705146d7d0',
+    sourceSha256: '0f0900c247310fd34d0d59028a2ac00f09e4ddf235e299a69378c23c1258d0d2',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['./placeholder']),
   }),
@@ -175,7 +175,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['./application-role', './semantic-merge', './style', './tokens']),
   }),
   'packages/core/src/spec/feedback/semantic-merge.ts': Object.freeze({
-    sourceSha256: '85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58',
+    sourceSha256: '591004dd057dd4b8dcf3d6a6b10879c933b0de746f894d74ad4a9bdb2559f94d',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['./placeholder']),
   }),

@@ -22,7 +22,7 @@ Tooltip displays brief supplementary text when a user hovers or focuses a trigge
 
 ## Installation
 
-Install the CLI, Shadcn prototypes and target adapter from the same workspace revision. In the initialized application, use the locally installed CLI.
+Install `@proto.ui/cli`, `@proto.ui/prototypes-shadcn`, and your host adapter (`@proto.ui/adapter-web-component`, `@proto.ui/adapter-react`, `@proto.ui/adapter-vue`, or `@proto.ui/adapter-vue2`; Vue 2 requires Vue `>=2.6.0 <2.7`) from the same source revision. For a local source checkout, use the repository's [pack-only flow](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) and [clean consumer installation](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs). In the initialized application, use the locally installed CLI.
 
 <InstallCommandCard command="npm exec -- proto-ui add wc shadcn-tooltip" manager="npm" />
 

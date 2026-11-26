@@ -19,9 +19,11 @@ export function installViewVisibilityRule(doc: Document): void {
 
   // The reveal guard suppresses transitions from the unpublished host style.
   // An explicitly bound Presence or a fresh portal can keep authored keyframes.
+  // Retained Proto children share the Presence reveal's first-paint barrier;
+  // their ordinary transitions resume when that existing guard is removed.
   styleEl.textContent = `${styleEl.textContent ?? ''}
 :where([${PUI_VIEW_PENDING_ATTR}]) { visibility: hidden !important; }
-:where([${PUI_VIEW_PENDING_ATTR}], [${PUI_VIEW_REVEALING_ATTR}]) { transition: none !important; }
+:where([${PUI_VIEW_PENDING_ATTR}], [${PUI_VIEW_REVEALING_ATTR}]), :where([${PUI_VIEW_REVEALING_ATTR}="presence"]) :where([data-pui-root]) { transition: none !important; }
 :where([${PUI_VIEW_PENDING_ATTR}], [${PUI_VIEW_REVEALING_ATTR}]:not([${PUI_VIEW_REVEALING_ATTR}="presence"], [${PUI_VIEW_REVEALING_ATTR}="portal"])) { animation: none !important; }
 :where([${PUI_VIEW_DETACHED_ATTR}]) { display: none !important; }
 `;

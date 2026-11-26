@@ -43,8 +43,8 @@ export function liquidHoverDemo(
     attrs: { 'data-liquid-hover-slot': '' },
     children: [part === 'submit' ? 'Submit' : part === 'reset' ? 'Reset' : `Glass ${part}`],
   };
-  // Layout is application-owned and transparent. The inset keeps the material's
-  // expanded idle carrier away from the Accordion Item's actual painted border.
+  // Application padding belongs outside Heading's exact-target reservation.
+  // The family reservation owns its current material footprint and border clearance.
   const inset = (children: DemoChild[]): DemoNode => ({
     kind: 'box',
     className: 'liquid-hover-inset',
@@ -67,8 +67,10 @@ export function liquidHoverDemo(
       },
       [
         atom('accordion-item', 'item', { value: 'item' }, [
-          atom('accordion-heading', 'heading', { level: 3 }, [
-            inset([atom('accordion-trigger', 'subject', {}, [slot])]),
+          inset([
+            atom('accordion-heading', 'heading', { level: 3 }, [
+              atom('accordion-trigger', 'subject', {}, [slot]),
+            ]),
           ]),
           atom('accordion-content', 'content', {}, ['Owned accordion content']),
         ]),

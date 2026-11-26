@@ -17,6 +17,7 @@ const files = {
   binding: 'packages/modules/overlay/src/target-alignment-binding.ts',
   geometry: 'packages/modules/positioning/src/geometry/target-alignment.ts',
   host: 'packages/modules/positioning/src/web/target-alignment-host.ts',
+  rootSpace: 'packages/modules/positioning/src/web/root-space-observer.ts',
   sizing: 'packages/modules/positioning/src/web/border-box-size-lease.ts',
   style: 'packages/modules/positioning/src/web/owned-style-lease.ts',
 } as const;
@@ -40,6 +41,7 @@ const paths = new Map([
   ['../caps', './declarations-v1'],
   ['./owned-style-lease', './owned-style-lease-v1'],
   ['./border-box-size-lease', './border-box-size-lease-v1'],
+  ['./root-space-observer', '../host-web/root-space-observer-v1'],
   ['../geometry/target-alignment', './geometry-v1'],
 ]);
 function selected(file: string, names: readonly string[]) {

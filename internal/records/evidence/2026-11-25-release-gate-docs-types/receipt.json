@@ -1,0 +1,91 @@
+{
+  "kind": "Complete official docs check with bounded test-only type corrections",
+  "base": "4d288166d2d5e42ad6d9b7a34e8a8d03bbc94c0c",
+  "node": "v24.22.3",
+  "command": "NODE_OPTIONS=--max-old-space-size=4096 corepack pnpm@10.32.1 --filter apps-www check",
+  "scope": "Unmodified package check command: official CLI build/init extraction, website full style generation, and Astro diagnostics across 2270 files.",
+  "files": [
+    {
+      "file": "apps/www/src/components/PrototypePreviewer/select-draft-projections.integration.test.ts",
+      "sha256": "cf1354189b216578db9611bed7eb3e7921163c765c5482e92aee8c3a664f8d7e"
+    },
+    {
+      "file": "apps/www/src/components/PrototypePreviewer/select-input-recipes.test.ts",
+      "sha256": "c120933f8d0600369c96d508eaaaf362db6ef60e37e39bf7eadcdf8c65457548"
+    },
+    {
+      "file": "apps/www/src/content/docs/drawer-auto-demo.test.ts",
+      "sha256": "2737b51fed7f720d14b54bc16527073129734b80beee15740afe7e4c0a022259"
+    }
+  ],
+  "before": {
+    "exitCode": 1,
+    "files": 2270,
+    "errors": 4,
+    "warnings": 0,
+    "hints": 36,
+    "log": "docs-before.log.gz"
+  },
+  "after": {
+    "exitCode": 0,
+    "files": 2270,
+    "errors": 0,
+    "warnings": 0,
+    "hints": 36,
+    "log": "docs-after.log.gz"
+  },
+  "changes": [
+    {
+      "file": "apps/www/src/components/PrototypePreviewer/select-draft-projections.integration.test.ts",
+      "diagnostic": "TS18046",
+      "reason": "The dynamically loaded demo is not a typed function source for Parameters<T>. Use the existing DemoSetupContext API for the observer wrapper; retain the original authored setup call and API observation.",
+      "authority": "apps/www/src/components/PrototypePreviewer/demo-types.ts: DemoSetupContext / DemoSpec.setup"
+    },
+    {
+      "file": "apps/www/src/components/PrototypePreviewer/select-input-recipes.test.ts",
+      "diagnostic": "TS2367 (two occurrences)",
+      "reason": "After the non-Base family branch returns, only Base remains. The existing expression always selected selectViewport; remove the unreachable Brutalist comparison without changing the observed element or assertions.",
+      "authority": "The preceding family !== base branch returns after its complete Shadcn/Brutalist scenario."
+    },
+    {
+      "file": "apps/www/src/content/docs/drawer-auto-demo.test.ts",
+      "diagnostic": "TS2322",
+      "reason": "An explicitly typed predicate must return boolean. An absent child list is an empty list, preserving the prior falsey find outcome; keep all structural assertions.",
+      "authority": "apps/www/src/components/PrototypePreviewer/demo-types.ts: optional DemoNode.children"
+    }
+  ],
+  "regression": {
+    "command": "node node_modules/vitest/vitest.mjs run apps/www/src/components/PrototypePreviewer/select-draft-projections.integration.test.ts apps/www/src/components/PrototypePreviewer/select-input-recipes.test.ts apps/www/src/content/docs/drawer-auto-demo.test.ts --reporter=json --outputFile=/tmp/cb5d-docs-types-original-suites.json",
+    "exitCode": 0,
+    "total": 40,
+    "passed": 40,
+    "failed": 0,
+    "skipped": 0,
+    "report": "original-suites.json.gz",
+    "log": "original-suites.log.gz",
+    "perFile": [
+      {
+        "file": "apps/www/src/components/PrototypePreviewer/select-draft-projections.integration.test.ts",
+        "passed": 10
+      },
+      {
+        "file": "apps/www/src/components/PrototypePreviewer/select-input-recipes.test.ts",
+        "passed": 12
+      },
+      {
+        "file": "apps/www/src/content/docs/drawer-auto-demo.test.ts",
+        "passed": 18
+      }
+    ]
+  },
+  "preserved": [
+    "All original test cases, public runtime consumers, assertions, waits, and deadlines",
+    "All docs checked by the existing Astro configuration",
+    "No production API, compiler admission, generated source recipe, or type-check configuration changed"
+  ],
+  "limits": [
+    "Local execution uses the 4096 MB heap envelope already present in other CI workflows; the CI default heap policy was not changed.",
+    "This is a completed local docs gate, not a claim that the final integrated GitHub CI workflow is green.",
+    "Independent CLI source-coverage and native browser gates retain their own receipts and unresolved work."
+  ]
+}

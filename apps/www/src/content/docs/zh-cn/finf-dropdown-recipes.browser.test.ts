@@ -278,6 +278,7 @@ for (const { recipe, profile } of dropdownEvidenceRecipes)
           const ref = (name: string) => menu.locator(`[data-demo-ref="${name}"]`);
           if (recipe === 'destructive') {
             const items = menu.getByRole('menuitem');
+            expect(await items.count()).toBe(4);
             expect(await items.allTextContents()).toEqual(['Edit', 'Share', 'Archive', 'Delete']);
             expect(await menu.locator('[role="menuitem"][aria-disabled="true"]').count()).toBe(0);
             const item = ref('delete');
@@ -318,14 +319,38 @@ for (const { recipe, profile } of dropdownEvidenceRecipes)
             await page.keyboard.press('Escape');
             await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
             await expect.poll(() => hasFocus(trigger)).toBe(true);
-            stage = 'activate-delete';
+            stage = 'disabled-keyboard';
+            if (!fixture) throw new Error('Destructive evidence requires its New York fixture.');
+            // The current public recipe has one Delete Item. Keep the disabled
+            // owner check by updating that same Item, then restore it below.
+            await fixture.evaluate((view) => view.setDeleteDisabled(true));
+            await fixture.evaluate((view) => view.observeSelects());
             menu = await openMenu(page, trigger);
             await expect.poll(() => hasFocus(ref('edit'))).toBe(true);
-            await fixture!.evaluate((view) => view.observeSelects());
             await page.keyboard.press('End');
+            const disabled = ref('delete');
+            await expect.poll(() => hasFocus(disabled)).toBe(true);
+            expect(await observeDropdownItem(disabled, percent)).toMatchObject({
+              disabled: 'true',
+              opacity: '0.5',
+              pointerEvents: 'none',
+            });
+            for (const key of ['Enter', 'Space']) {
+              await page.keyboard.press(key);
+              expect(await fixture.evaluate((view) => view.selections)).toEqual([]);
+              expect(await hasFocus(disabled)).toBe(true);
+              expect(await trigger.getAttribute('aria-expanded')).toBe('true');
+            }
+            await capture('disabled', await palette(disabled, percent), menu);
+            stage = 'activate';
+            await fixture.evaluate((view) => view.setDeleteDisabled(false));
+            await expect.poll(() => disabled.getAttribute('aria-disabled')).toBe('false');
+            await page.keyboard.press('ArrowUp');
+            await expect.poll(() => hasFocus(ref('archive'))).toBe(true);
+            await page.keyboard.press('ArrowDown');
             await expect.poll(() => hasFocus(ref('delete'))).toBe(true);
             await page.keyboard.press('Enter');
-            expect(await fixture!.evaluate((view) => view.selections)).toEqual([
+            expect(await fixture.evaluate((view) => view.selections)).toEqual([
               { value: 'delete', reason: 'keyboard' },
             ]);
           } else if (recipe === 'basic') {

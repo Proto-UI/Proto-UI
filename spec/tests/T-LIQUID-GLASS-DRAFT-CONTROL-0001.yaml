@@ -23,6 +23,13 @@ cases:
       - P-LIQUID-GLASS-TEXTAREA-FIELD-COMPOSITION
       - P-LIQUID-GLASS-SWITCH-FIELD-COMPOSITION
     expectation: field-composition-policy
+  - id: T-LIQUID-GLASS-DRAFT-CONTROL-0001-CASE-CHECKBOX-PAINT
+    title: Standalone Checkbox neutral, checked, mixed and disabled paint in both modes with preserved focus and activation
+    covers:
+      - P-LIQUID-GLASS-CHECKBOX-VISUAL
+      - P-LIQUID-GLASS-CHECKBOX-REFERENCE-COLOR
+      - P-LIQUID-GLASS-CHECKBOX-INDICATOR-VISUAL
+    expectation: checkbox-appearance-and-interaction
 implementations:
   - id: liquid-draft-control-projections
     kind: module-test
@@ -46,6 +53,18 @@ implementations:
       - P-LIQUID-GLASS-FIELD
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+  - id: liquid-checkbox-website-reference-paint
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-liquid-glass-state-controls.browser.test.ts
+    required: true
+    consumesCases:
+      - T-LIQUID-GLASS-DRAFT-CONTROL-0001-CASE-CHECKBOX-PAINT
+    exercises:
+      - P-LIQUID-GLASS-CHECKBOX
+      - P-LIQUID-GLASS-CHECKBOX-INDICATOR
+    notes:
+      - Compares provider-free browser paint and geometry with the adopted reference criteria in each Web runtime.
 
 exercises:
   prototypes:

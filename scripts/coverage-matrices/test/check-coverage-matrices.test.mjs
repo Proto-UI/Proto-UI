@@ -17702,7 +17702,12 @@ for (const extension of ['html', 'astro', 'md', 'mdx', 'vue', 'svelte', 'tsx']) 
     });
 }
 
-for (const helper of ['browser-harness', 'site-search-evidence']) {
+for (const helper of [
+  'browser-harness',
+  'site-search-evidence',
+  'site-search-browser',
+  'site-search-close-focus-evidence',
+]) {
   test(`main test helper boundary: ${helper} is excluded only while unreachable`, () => {
     const root = createRoot();
     writeValidMatrices(root);
@@ -19119,6 +19124,8 @@ for (const scenario of [
 for (const [source, allowed] of [
   ['UiLibraryGallery.astro', '../../../../packages/prototypes/brutalist/src/theme'],
   ['library-card-client.ts', '@proto.ui/adapter-web-component'],
+  ['library-liquid-card-client.ts', '@proto.ui/adapter-web-component'],
+  ['library-style-seed.ts', '@proto.ui/adapter-web-component'],
   ['library-card-prototypes.ts', '@proto.ui/prototypes-brutalist/card'],
   ['library-card-prototypes.ts', '@proto.ui/prototypes-shadcn/card'],
 ]) {
@@ -19156,6 +19163,21 @@ for (const [source, allowed] of [
     );
   });
 }
+
+test('library style seed rejects the retired core type import', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const relative = 'apps/www/src/components/library-style-seed.ts';
+  const file = path.join(root, relative);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+  assert.doesNotMatch(reviewed, /from\s+['"]@proto\.ui\/core['"]/u);
+  fs.writeFileSync(file, reviewed + "\nimport type { Prototype } from '@proto.ui/core';\n");
+  assert.ok(
+    validationMessage(root).includes(`raw Proto UI import \`@proto.ui/core\` in \`${relative}\``),
+    'the former core import is not an additional admitted edge'
+  );
+});
 
 for (const [relative, allowed] of [
   [
@@ -19808,6 +19830,7 @@ for (const scenario of ['exact', 'changed-source', 'foreign-owner', 'unlisted-im
 
 for (const reviewed of [
   'packages/core/src/internal.ts',
+  'packages/core/src/spec/feedback/application-role.ts',
   'packages/core/src/handles.ts',
   'packages/core/src/material-paint-reservation.ts',
   'packages/core/src/presence-presentation.ts',
@@ -20019,3 +20042,45 @@ for (const variant of [
     }
   });
 }
+
+test('Brutalist Dialog type import remains exact, content-bound and owner-bound', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const relative = 'apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.demo.ts';
+  const copy = 'apps/www/src/content/docs/zh-cn/copied-brutalist-dialog.demo.ts';
+  const target = path.join(root, relative);
+  const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+  const specifier = '@proto.ui/prototypes-brutalist/button';
+  const raw = (file, imported = specifier) => `raw Proto UI import \`${imported}\` in \`${file}\``;
+  const typeImport = `import type { BrutalistButtonProps } from '${specifier}';`;
+  assert.ok(reviewed.includes(typeImport), 'The reviewed Button edge remains type-only.');
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, reviewed);
+  fs.writeFileSync(path.join(root, copy), reviewed);
+  const exact = validationMessage(root);
+  assert.ok(!exact.includes(raw(relative)), exact);
+  assert.ok(exact.includes(raw(copy)), exact);
+
+  for (const [scenario, content, rejected] of [
+    ['body drift', `${reviewed}\n// Unreviewed importer bytes.\n`, specifier],
+    [
+      'runtime value import',
+      reviewed.replace(typeImport, `import { BrutalistButtonProps } from '${specifier}';`),
+      specifier,
+    ],
+    [
+      'adjacent prototype edge',
+      `${reviewed}\nimport '@proto.ui/prototypes-brutalist/input';\n`,
+      '@proto.ui/prototypes-brutalist/input',
+    ],
+    [
+      'adjacent Adapter edge',
+      `${reviewed}\nimport '@proto.ui/adapter-react';\n`,
+      '@proto.ui/adapter-react',
+    ],
+  ]) {
+    fs.writeFileSync(target, content);
+    const message = validationMessage(root);
+    assert.ok(message.includes(raw(relative, rejected)), `${scenario}: ${message}`);
+  }
+});

@@ -22,6 +22,8 @@ Adapter-owned caller relocation captures focus before staging caller nodes. Its 
 
 Descendant-first focus entry projects the region's self fallback from current descendant eligibility. For sibling-position conditions such as `:first-child` and `:nth-child(2n+1)` on a relational selector subject, the current source retains shallow child-list watches on direct parents in its bounded external chain. These dependencies survive an initially nonmatching subject or a selector list that cannot use scoped negated-subject observation. Prepending, removing or reinserting a hidden preceding sibling can then refresh the fallback without a resize.
 
+While the region or a composed ancestor is natively inert, entry observation follows the ancestry and defers descendant and CSS dependency discovery. Removing the inert barrier or moving the chain resamples the fallback and rebuilds its dependencies from the current DOM and stylesheets. The dormant interval releases the descendant, resize, motion, radio and late-upgrade watches.
+
 Owned portal projections also contribute their actual position parents at registered same-document destinations. Dependency discovery reads stylesheets in each projection's containing open ShadowRoot, so destination selector attributes can refresh descendant eligibility while logical ownership stays at the origin.
 
 Native `CustomStateSet.add`, `delete` and `clear` join the existing shared window invalidation subscription while entry observation is active. Membership changes coalesce into an entry refresh; native return values, argument conversion and exceptions are retained. Repeated adds, missing deletes and empty clears do not request a refresh. The last subscriber releases the method hooks using the existing ownership checks.

@@ -479,25 +479,25 @@ describe.sequential('current-source release documentation reading', () => {
               name: locale === 'en' ? 'View code' : '展开代码',
               exact: true,
             });
+            const viewport = shell.locator('[data-code-scroll-ready] [data-code-scroll-viewport]');
+            await viewport.waitFor({ state: 'visible' });
             await toggle.waitFor({ state: 'visible' });
             await toggle.focus();
             await page.keyboard.press('Enter');
             await expect.poll(() => shell.getAttribute('data-code-expanded')).toBe('true');
             expect(await toggle.isVisible()).toBe(false);
-            expect(
-              await shell
-                .locator('pre')
-                .evaluate(
-                  (element) =>
-                    (element.closest('[data-code-scroll-ready] [data-code-scroll-viewport]') ??
-                      element) === document.activeElement
-                )
-            ).toBe(true);
+            // The enhanced native viewport owns scrolling and focus; the PRE
+            // remains the static fallback and must not add a second Tab stop.
+            await expect
+              .poll(() => viewport.evaluate((element) => element === document.activeElement))
+              .toBe(true);
+            expect(await shell.locator('pre').getAttribute('tabindex')).toBeNull();
             facts.expansion = await shell.evaluate((root) => ({
               mask: getComputedStyle(root.querySelector('[data-code-content]')!).maskImage,
               focused:
-                (root.querySelector('[data-code-scroll-ready] [data-code-scroll-viewport]') ??
-                  root.querySelector('pre')) === document.activeElement,
+                root.querySelector('[data-code-scroll-ready] [data-code-scroll-viewport]') ===
+                document.activeElement,
+              focusOwner: 'native-code-scroll-viewport',
               label: root.querySelector('[data-code-toggle]')?.getAttribute('aria-label'),
             }));
             await shell.scrollIntoViewIfNeeded();

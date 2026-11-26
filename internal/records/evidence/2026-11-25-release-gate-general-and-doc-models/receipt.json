@@ -1,0 +1,80 @@
+{
+  "scope": "CI45537881490 remaining general consumer fixtures and governance anatomy/provenance models. Not native browser or full integrated CI acceptance.",
+  "sourceHead": "224c5cdf69a9faa973dd663bae2c6f5caa4fe9a8",
+  "files": {
+    "packages/compiler/test/scroll-reveal-consumers.test.ts": "6da8da8cdfcba86d86424a7bf18afd3095572083b57f4f8d32b0c216b28d61d1",
+    "packages/prototypes/shadcn/test/select-style-popup.test.ts": "b808673f3b58b5f7e648de0698f1f332b6bf1917848a80637831ae69bace7ee9",
+    "apps/www/src/content/docs/accordion-demo-layout.test.ts": "7c6184661eb17bc643f11a07f550843ec447a0ac81c3de8e3765800d54917308",
+    "apps/www/scripts/contrast-anatomy.test.mjs": "b1e1ca6877ea4631082eb2e041365db0d9ab35ba9e4c885559e121618a8c9f87",
+    "apps/www/scripts/fixtures/contrast-anatomy-30e-tooltip-sources.json": "ab893024afc3b28b2acda5bf5f54d1787a3c8a2089e3bd697b34afdebcd835b3",
+    "scripts/docs/test/brutalist-provenance.test.mjs": "c628d2d4e4a19f34af893cb23e9a141eebc593bd5e1df8c8b59670412d970045"
+  },
+  "originalOfficialFailures": {
+    "general": {
+      "job": 138949341437,
+      "scrollNestedOffset": "expected23 received0 with outer70 correct",
+      "shadcnSelect": "dark ring10 expected, light ring5 observed",
+      "accordion": 6
+    },
+    "governance": {
+      "job": 138949341424,
+      "currentCheckboxAndTabsRefs": 6,
+      "cardDefaultOptionalDivider": 2
+    }
+  },
+  "results": {
+    "general": {
+      "cases": 43,
+      "passed": 43,
+      "failed": 0,
+      "notes": "Original two core fixtures also passed31/31 in focused local before check; official failures were not claimed to reproduce deterministically. Existing mount-settlement helper now runs before nested offset injection. HappyDOM own MutationObserver tasks are drained before adapter fake-clock advancement; exact assertions/deadlines retained."
+    },
+    "contrastAnatomy": {
+      "cases": 103,
+      "passed": 103,
+      "failed": 0,
+      "notes": "Current public Checkbox refs and Tabs account/password are rebound. New Tooltip hero exposed historical30e replay/current-source mismatch; freeze exact two immutable Git objects at the recorded source commit and use them for both positive and all mutation-negative replays. Historical observations and image/facts digests unchanged."
+    },
+    "cardProvenance": {
+      "cases": 8,
+      "passed": 8,
+      "failed": 0,
+      "notes": "P-BRUTALIST-CARD-HEADER/FOOTER says without mandatory section borders; optional divider defaultsfalse. AST guard requires every border style call to be under a Rule requiring divider=true, rejects unconditional borders and any/or guards, keeps black outerframe and public documentation claims."
+    }
+  },
+  "remaining": [
+    "Whitepaper generator5 failures retain a separate bounded visual repair.",
+    "CLI tracing inventory owned by release_gate_audit.",
+    "Complete official CI must rerun after integration."
+  ],
+  "artifacts": {
+    "official-governance-failures.log.gz": {
+      "sha256": "162154c10fe3ab8183ece171fac1c213eba09d1400bf873fad938042810e96dd",
+      "bytes": 1983
+    },
+    "card-provenance-fixed.log.gz": {
+      "sha256": "37a57cc5a8dcdb3c2c8b10ce9f6f3aec5cf671b8451c7ba88958bfa9acb721c3",
+      "bytes": 437
+    },
+    "contrast-historical-source-fixed.log.gz": {
+      "sha256": "7db38d451127cf83b1d5e7cd0259f1b70b10136581f54d66fab173b3801ed8bd",
+      "bytes": 2114
+    },
+    "contrast-current-source-drift-before.log.gz": {
+      "sha256": "bb6a45abb61f2571c7fb5466adbefcb9fe88a0177227d47bca1f9ce7545a1de7",
+      "bytes": 3104
+    },
+    "general-host-task-fixes.log.gz": {
+      "sha256": "cb0945f74feb0ae676e9992fa6f8702ed6ea284cda674f49c60bb65cadf6d1d0",
+      "bytes": 39708
+    },
+    "general-host-task-fixes.json.gz": {
+      "sha256": "a0d77be702967d594aaf2e021d4b45cbb62cc0103466f2a10a4f3ea70bba5b6b",
+      "bytes": 2082
+    },
+    "general-originals-local.json.gz": {
+      "sha256": "10c493622ce8c9f88eff87968a0b450f42eb60898ce81cd3817a07b51c19488c",
+      "bytes": 1508
+    }
+  }
+}

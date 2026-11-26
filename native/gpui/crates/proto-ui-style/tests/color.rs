@@ -248,6 +248,7 @@ fn rejects_invalid_border_color_components_and_counts() {
 fn parses_every_colour_a_theme_can_produce() {
     let mut checked = 0usize;
     let mut inherited_text_diagnostics = 0usize;
+    let mut inherited_border_diagnostics = 0usize;
     let mut custom_properties_checked = std::collections::BTreeSet::new();
     let mut unresolved = 0usize;
 
@@ -267,12 +268,21 @@ fn parses_every_colour_a_theme_can_produce() {
                     match theme.substitute(raw) {
                         Substitution::Resolved(value) => {
                             // CSS inheritance is an instruction requiring the parent
-                            // text style, not a theme color literal. Keep this exact
-                            // declared omission diagnostic; all other colors must parse.
+                            // style, not a theme color literal. Keep these exact
+                            // authored inheritance diagnostics; all other colors must parse.
                             if token == "text-inherit" && property == "color" {
                                 assert_eq!(value, "inherit");
                                 assert!(matches!(parse(&value), Err(ColorError::Unsupported(_))));
                                 inherited_text_diagnostics += 1;
+                                continue;
+                            }
+                            if token == "border-inherit" && property == "border-color" {
+                                assert_eq!(value, "inherit");
+                                assert_eq!(
+                                    parse_border_colors(&value),
+                                    Err(ColorError::Unsupported("inherit".into()))
+                                );
+                                inherited_border_diagnostics += 1;
                                 continue;
                             }
                             let validated = if property == "border-color" {
@@ -304,6 +314,7 @@ fn parses_every_colour_a_theme_can_produce() {
     // Guards against the loop silently finding nothing, which would make the
     // whole test vacuous.
     assert!(inherited_text_diagnostics > 0);
+    assert!(inherited_border_diagnostics > 0);
     assert!(checked > 200, "only checked {checked} colours");
     assert!(unresolved > 0, "the cross-language case disappeared");
     assert_eq!(

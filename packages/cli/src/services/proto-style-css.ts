@@ -619,6 +619,7 @@ const staticUtilities: Record<string, string[]> = {
   'border-l-2': ['border-left-width: 2px;', 'border-left-style: solid;'],
   'border-ink': ['border-color: var(--pui-foreground);'],
   'border-current': ['border-color: currentColor;'],
+  'border-inherit': ['border-color: inherit;'],
   'border-t-transparent': ['border-top-color: transparent;'],
   'border-b-transparent': ['border-bottom-color: transparent;'],
   'rounded-t-[0.25rem]': ['border-top-left-radius: 0.25rem;', 'border-top-right-radius: 0.25rem;'],
@@ -1295,7 +1296,18 @@ function sortUtilityOverrides(rules: CssRule[]): void {
     if (/^leading-/.test(utility)) return 2;
     return 0;
   };
-  rules.sort((a, b) => overridePriority(a) - overridePriority(b));
+  // Dark context deliberately has zero specificity. Its declarations must
+  // follow unconditioned utilities, before the more specific state recipes.
+  // Keep shorthand/longhand priority and existing ties within each group.
+  const conditionPriority = (rule: CssRule): number => {
+    const variants = splitVariants(rule.token).slice(0, -1);
+    if (variants.length === 0) return 0;
+    return variants.length === 1 && variants[0] === 'dark' ? 1 : 2;
+  };
+  rules.sort(
+    (a, b) =>
+      conditionPriority(a) - conditionPriority(b) || overridePriority(a) - overridePriority(b)
+  );
 }
 
 function renderProtoStyleTokenCssForTarget(tokens: string[], target: ProtoStyleCssTarget): string {

@@ -2257,8 +2257,17 @@ for (const runtime of runtimes) {
       const readers = pipeline('field');
       const page = pipelinePage(mounted.root);
       const observe = () => readers.anatomyObservation(page, item(runtime, 'field'), 'validation');
+      const recipe =
+        productionDemos[
+          '../src/content/' + authoredSources.field.recipePath.slice('apps/www/src/content/'.length)
+        ];
+      const errorInstance = compileContrastAnatomy(
+        recipe,
+        PROJECTION_FAMILY_MANIFESTS.brutalist.families.field
+      ).instances.find((entry: any) => entry.ref === 'usernameError');
+      expect(errorInstance).toBeDefined();
       const requiredError = (result: any) =>
-        result.expectations.find((entry: any) => entry.path === 'root.children.0.children.0.children.3');
+        result.expectations.find((entry: any) => entry.path === errorInstance!.path);
       expect(requiredError(await observe()).required).toBe(false);
       mounted.root.querySelector<HTMLElement>('[data-demo-ref="validate"]')!.click();
       await vi.waitFor(
@@ -2361,9 +2370,7 @@ for (const runtime of runtimes) {
       const target = readers.primary(page.locator('[data-previewer-id]'), 'radio-group');
       expect(target, 'The original runner omitted the radio-group primary branch.').not.toBeNull();
       const selected = await target.evaluate((element: HTMLElement) => element);
-      expect(selected).toBe(
-        mounted.retained.querySelector('[data-demo-ref="hero-comfortable"]')
-      );
+      expect(selected).toBe(mounted.retained.querySelector('[data-demo-ref="hero-comfortable"]'));
       expect(selected).not.toBe(mounted.retained.querySelector('[role="radio"]'));
       expect(selected.getAttribute('role')).toBe('radio');
       expect(selected.getAttribute('aria-checked')).toBe('true');
@@ -2978,7 +2985,7 @@ for (const runtime of runtimes) {
 }
 
 for (const runtime of runtimes) {
-  it(`dropdown pointer identity/${runtime}: binds both real authored variants and their own Shortcuts`, async () => {
+  it(`dropdown pointer identity/${runtime}: binds all real authored variants and their own Shortcuts`, async () => {
     const mounted = await preview(runtime, 'dropdown-menu');
     const restore = controlledMeasurementInputs();
     try {
@@ -3002,6 +3009,7 @@ for (const runtime of runtimes) {
       });
       expect(rows.map((row: any) => [row.ref, row.value, row.pair])).toEqual([
         ['profileAction', 'profile', 'main'],
+        ['logoutAction', 'logout', 'main'],
         ['deleteAction', 'delete', 'destructive'],
       ]);
       for (const row of rows) {
@@ -3030,12 +3038,17 @@ for (const runtime of runtimes) {
         for (const child of node?.children ?? []) visit(child);
       };
       visit(source.root);
+      expect(items.find((node) => node.ref === 'logoutAction')).toMatchObject({
+        ref: 'logoutAction',
+        props: { value: 'logout', textValue: 'Log out' },
+        children: ['Log out', { prototypeId: 'brutalist-dropdown-shortcut', children: ['⇧⌘Q'] }],
+      });
+      expect(items.find((node) => node.props.value === 'logout').props.variant).toBeUndefined();
       expect(items.at(-1)).toMatchObject({
         ref: 'deleteAction',
         props: { value: 'delete', textValue: 'Delete', variant: 'destructive' },
         children: ['Delete'],
       });
-      expect(items.find((node) => node.props.value === 'logout').props.variant).toBeUndefined();
       expect(items.filter((node) => node.props.variant === 'destructive')).toHaveLength(1);
       const anatomy = await readers.anatomyObservation(
         page,

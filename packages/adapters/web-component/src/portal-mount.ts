@@ -42,6 +42,18 @@ export function beginWebComponentPortalViewAcquisition(el: HTMLElement): () => v
   };
 }
 
+const reconcileViewColorScheme = new WeakMap<Element, () => void>();
+/** Register only a current WC default-reader view; this is not a document notification. */
+export function registerWebComponentPortalColorScheme(
+  el: HTMLElement,
+  reconcile: () => void
+): () => void {
+  reconcileViewColorScheme.set(el, reconcile);
+  return () => {
+    if (reconcileViewColorScheme.get(el) === reconcile) reconcileViewColorScheme.delete(el);
+  };
+}
+
 const refreshProjections = new WeakMap<HTMLElement, () => void>();
 export function refreshWebComponentPortalProjection(el: HTMLElement): void {
   refreshProjections.get(el)?.();
@@ -248,7 +260,19 @@ export function createWebComponentPortalMount() {
           cancelLayout = scheduleAfterWebLayout(el, finish, queueMicrotask);
         // First measurement needs the published box. A retained surface uses
         // the two-layout barrier above; a fresh one is revealed after the move.
-        return firstRender ? finish : undefined;
+        if (!firstRender) return;
+        return () => {
+          // A parent's mounted callback can change the document theme after its
+          // children mounted. Reconcile existing reader leases before the first
+          // style is published. Keep this callback bound to this exact reveal:
+          // a reader may synchronously replace or retire the projection.
+          for (const target of [el, ...el.querySelectorAll('*')]) {
+            if (!isCurrent() || cancelReveal !== cancel) return;
+            if (target === el || el.contains(target)) reconcileViewColorScheme.get(target)?.();
+          }
+          if (!isCurrent() || cancelReveal !== cancel) return;
+          finish();
+        };
       };
       let unbindAdoption: (() => void) | null = null;
       let observer: MutationObserver | null = null;

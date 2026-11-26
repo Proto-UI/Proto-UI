@@ -125,6 +125,7 @@ import {
   adoptWebComponentPortalProjections,
   isWebComponentPortaled,
   beginWebComponentPortalViewAcquisition,
+  registerWebComponentPortalColorScheme,
 } from './portal-mount';
 import { createRebindableColorSchemeSource } from './color-scheme-source';
 import { createRebindableWebKeyedMetaSources } from './keyed-meta-sources';
@@ -526,13 +527,19 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       let runFocusCallbackScope: ((fn: () => void) => void) | null = null;
       const scopedExposesReader = createScopedExposesReader(() => runFocusCallbackScope);
       let releaseCurrentView: (() => void) | null = null;
+      let releasePortalColorScheme: (() => void) | null = null;
       let ownerResourcesReleased = false;
+      const isOwnerActive = () => !ownerResourcesReleased && !this._terminalDisposing;
       const releaseOwnerResources = () => {
         if (ownerResourcesReleased) return;
         ownerResourcesReleased = true;
         this._documentChangeListeners.clear();
         this._pendingPresentationDocument = null;
         completeCleanup([
+          () => {
+            releasePortalColorScheme?.();
+            releasePortalColorScheme = null;
+          },
           () => {
             const cleanup = releaseCurrentView;
             releaseCurrentView = null;
@@ -636,6 +643,17 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               ownerSplitResources.environment.subscribe(listener),
           }
         : this._defaultColorSchemeSource;
+      if (!shadow && this._defaultColorSchemeSource) {
+        releasePortalColorScheme = registerWebComponentPortalColorScheme(thisEl, () => {
+          if (
+            isOwnerActive() &&
+            this._instanceToken === instanceToken &&
+            owner.hasView &&
+            thisEl.isConnected
+          )
+            this._defaultColorSchemeSource?.reconcileForView();
+        });
+      }
       this._hostDisplay = installDefaultHostDisplay(thisEl, {
         displayOwner: split ? 'presentation' : 'fallback',
       });
@@ -673,7 +691,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         fn();
       };
       const setExposes = (record: Record<string, unknown>) => {
-        if (ownerResourcesReleased || this._terminalDisposing) return;
+        if (!isOwnerActive()) return;
         this._exposes = record;
       };
 
@@ -709,8 +727,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         const gate = currentEventGate;
         schedule(() => {
           if (
-            ownerResourcesReleased ||
-            this._terminalDisposing ||
+            !isOwnerActive() ||
             this._instanceToken !== instanceToken ||
             currentEventGate !== gate ||
             !thisEl.isConnected ||
@@ -805,11 +822,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           eventGate: {
             enable: () => {
               mountNativeLink();
-              if (
-                !ownerResourcesReleased &&
-                !this._terminalDisposing &&
-                !thisEl.hasAttribute(PUI_VIEW_DETACHED_ATTR)
-              )
+              if (isOwnerActive() && !thisEl.hasAttribute(PUI_VIEW_DETACHED_ATTR))
                 currentEventGate?.enable();
             },
             disable: () => currentEventGate?.disable(),
@@ -885,7 +898,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         });
 
       const attachView = (initial = false) => {
-        if (ownerResourcesReleased || this._terminalDisposing) return;
+        if (!isOwnerActive()) return;
         if (owner.hasView) {
           setViewDetached(false);
           return;
@@ -987,8 +1000,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                       !!session &&
                       owner.session === session &&
                       !disposed &&
-                      !ownerResourcesReleased &&
-                      !this._terminalDisposing &&
+                      isOwnerActive() &&
                       this._instanceToken === instanceToken,
                   });
                 },
@@ -1094,8 +1106,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             {
               isReady: () =>
                 !disposed &&
-                !ownerResourcesReleased &&
-                !this._terminalDisposing &&
+                isOwnerActive() &&
                 this._instanceToken === instanceToken &&
                 currentEventGate === eventGate &&
                 focusIngressReady &&
@@ -1264,8 +1275,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               runInCallbackScope,
               isViewReady: () =>
                 !disposed &&
-                !ownerResourcesReleased &&
-                !this._terminalDisposing &&
+                isOwnerActive() &&
                 thisEl.isConnected &&
                 !thisEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
               isEntryAcquisitionReady: (target) => {
@@ -1273,7 +1283,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 releaseRequestedTargetReady = undefined;
                 if (isFocusTargetOwnerReady(target)) return true;
                 releaseRequestedTargetReady = subscribeFocusTargetOwnerReady(target, () => {
-                  if (disposed || ownerResourcesReleased || this._terminalDisposing) return;
+                  if (disposed || !isOwnerActive()) return;
                   releaseRequestedTargetReady?.();
                   releaseRequestedTargetReady = undefined;
                   this[NOTIFY_FOCUS_TARGET_READY]();
@@ -1318,13 +1328,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 scheduleAfterWebLayout(
                   this,
                   () => {
-                    if (
-                      disposed ||
-                      ownerResourcesReleased ||
-                      this._terminalDisposing ||
-                      generation !== focusRetryGeneration
-                    )
-                      return;
+                    if (disposed || !isOwnerActive() || generation !== focusRetryGeneration) return;
                     this._focusTargetRetryScheduled = false;
                     this[NOTIFY_FOCUS_TARGET_READY]();
                   },
@@ -1336,8 +1340,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             disposeView,
             isViewAdmitted: () =>
               !disposed &&
-              !ownerResourcesReleased &&
-              !this._terminalDisposing &&
+              isOwnerActive() &&
               (thisEl.isConnected || isWebComponentOwnedRelocating(thisEl)) &&
               !thisEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
             createSession: createHostSession,
@@ -1371,39 +1374,24 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       let initializingOwner = true;
       let initialPresent = true;
       const reconcileIntent = (snapshot: { present: boolean }) => {
-        if (ownerResourcesReleased || this._terminalDisposing) return;
+        if (!isOwnerActive()) return;
         if (initializingOwner) {
           initialPresent = snapshot.present;
           return;
         }
         const requestVersion = ++latestIntentVersion;
         const wasConcealing = this._portalConceal.cancel();
-        if (
-          ownerResourcesReleased ||
-          this._terminalDisposing ||
-          requestVersion !== latestIntentVersion
-        )
-          return;
+        if (!isOwnerActive() || requestVersion !== latestIntentVersion) return;
         if (!snapshot.present) {
           currentEventGate?.disable();
           // The shared marker immediately projects not-present intent. The
           // existing barrier only delays physical retirement.
           setViewDetached(true);
-          if (
-            ownerResourcesReleased ||
-            this._terminalDisposing ||
-            requestVersion !== latestIntentVersion
-          )
-            return;
+          if (!isOwnerActive() || requestVersion !== latestIntentVersion) return;
           // Keep the owned conceal lease and its cleanup/reentry protection
           // while the existing rendering barrier retains the portal projection.
           if (isWebComponentPortaled(thisEl)) this._portalConceal.conceal();
-          if (
-            ownerResourcesReleased ||
-            this._terminalDisposing ||
-            requestVersion !== latestIntentVersion
-          )
-            return;
+          if (!isOwnerActive() || requestVersion !== latestIntentVersion) return;
         }
         if (
           snapshot.present &&
@@ -1420,8 +1408,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           reconciliation = reconciliation
             .then(async () => {
               if (
-                ownerResourcesReleased ||
-                this._terminalDisposing ||
+                !isOwnerActive() ||
                 requestVersion !== latestIntentVersion ||
                 !thisEl.isConnected ||
                 this._controller !== hostSession.controller
@@ -1434,8 +1421,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 const conceal = this._portalConceal.wait();
                 if (conceal) await conceal;
                 if (
-                  ownerResourcesReleased ||
-                  this._terminalDisposing ||
+                  !isOwnerActive() ||
                   requestVersion !== latestIntentVersion ||
                   !thisEl.isConnected ||
                   this._controller !== hostSession.controller

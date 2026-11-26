@@ -175,9 +175,10 @@ describe('native link facts through actual renderer props', () => {
       expect(host.querySelectorAll('a')).toHaveLength(1);
       const surface = link.querySelector('[data-pui-root]')!;
       const tokens = (surface.getAttribute('data-pui-style') ?? '').split(/\s+/);
-      // Explicit community Luma uses the named Button profile corner,
+      // Explicit community Luma uses the named Button profile corner (upstream 3d98900),
       // not the ordinary Surface / old New York rounded-lg appearance.
       expect(tokens).toContain('rounded-[var(--pui-radius-4xl)]');
+      expect(tokens).not.toContain('rounded-[var(--pui-radius-2xl)]');
       expect(tokens).not.toContain('rounded-base');
       expect(tokens).not.toContain('translate-y-1');
       expect(tokens).not.toContain('translate-x-1');

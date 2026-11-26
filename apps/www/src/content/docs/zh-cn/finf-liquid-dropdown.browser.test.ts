@@ -176,10 +176,9 @@ for (const runtime of RUNTIMES)
         const previewer = page.locator('[data-demo-id="demo-liquid-glass-dropdown-menu"]');
         await previewer.scrollIntoViewIfNeeded();
         stage = 'runtime-selection';
-        await selectRuntime(page, previewer, runtime, '[aria-haspopup="menu"]', 2);
+        await selectRuntime(page, previewer, runtime, '[aria-haspopup="menu"]', 1);
         await applyColorScheme(page, scheme);
-        const trigger = previewer.getByRole('button', { name: 'Open menu', exact: true });
-        const disabled = previewer.getByRole('button', { name: 'Disabled menu', exact: true });
+        const trigger = previewer.getByRole('button', { name: 'Open', exact: true });
         const capture = async (state: string, target = trigger) => {
           stage = `capture:${state}`;
           observations.push({
@@ -227,6 +226,18 @@ for (const runtime of RUNTIMES)
         contentObservation = await observeContent(page);
         await page.keyboard.press('Escape');
         await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
+        // The current public page keeps the disabled Trigger in its separate
+        // opaque example. Select and prove this demo's actual runtime as well.
+        stage = 'disabled-runtime-selection';
+        const disabledPreviewer = page.locator(
+          '[data-demo-id="demo-liquid-glass-dropdown-menu-opaque"]'
+        );
+        await disabledPreviewer.scrollIntoViewIfNeeded();
+        await selectRuntime(page, disabledPreviewer, runtime, '[aria-haspopup="menu"]', 2);
+        const disabled = disabledPreviewer.getByRole('button', {
+          name: 'Unavailable',
+          exact: true,
+        });
         stage = 'disabled';
         expect((await observe(disabled)).disabled).toBe('true');
         const disabledBox = await disabled.boundingBox();

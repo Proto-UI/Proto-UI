@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-25",
+  "reviewer": "root agent, independent of release_gate_audit implementation",
+  "base": "32efed90c60fa16ca12bc626dff23e133c5cfeb3",
+  "scope": "Bounded source review of prototype runtime repair group; not platform approval or final clean-commit CI acceptance",
+  "files": [
+    {
+      "path": "packages/prototypes/bootstrap-2-3-2/src/carousel/carousel.proto.ts",
+      "sha256": "5f1f2ffc8540fa6bbca0ecdbe384ff4eb365e2f1f940ee7573272fa5c2240e2d"
+    },
+    {
+      "path": "packages/prototypes/bootstrap-2-3-2/src/dialog/footer.proto.ts",
+      "sha256": "459426de33a03b54107ccd1ed59d6aaa4ebf9c583a1c0f38b2361a5f0ea477a3"
+    },
+    {
+      "path": "packages/prototypes/bootstrap-2-3-2/src/number-field/decrement.proto.ts",
+      "sha256": "f408d0886e67b1fc3c47e897229dc1e8910645a4d8a614f791ee18f12696bade"
+    },
+    {
+      "path": "packages/prototypes/bootstrap-2-3-2/src/number-field/increment.proto.ts",
+      "sha256": "dc360b2c0caa8ae47d984592b100392b11ab12303e84cffff8cff16a38ec02fe"
+    },
+    {
+      "path": "packages/prototypes/bootstrap-2-3-2/src/number-field/step-visual.ts",
+      "sha256": "daddc028f0f8d23c7703773aa77a350b583f5e2ffbf69931219c5b188e0825da"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/carousel/carousel.proto.ts",
+      "sha256": "b6c507bce1ab3e6041637f08c01876cdd2f34099dad8c040572a23e1932c1828"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/drawer/close.proto.ts",
+      "sha256": "d648e2890a569cc67eeae50b7e17c3e235c78700c6d12f1af78d0aad62bb4b0d"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/drawer/trigger.proto.ts",
+      "sha256": "cfb855626ae991b1c2fa044e460d0f64cc1c8e69294b03602ae152cfa33a30ff"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/number-field/decrement.proto.ts",
+      "sha256": "92a26ea2c46ce87864e31e9441bcc16d4998e347fa7ef408c8cc83137fe58671"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/number-field/increment.proto.ts",
+      "sha256": "4e4252d32e7f7041c4203b4ca813c83fd74d5fb9932d8a97b9f694bc626e645c"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/number-field/step-visual.ts",
+      "sha256": "75e6eb4cbd0257b734d5cc9418604672b1403151a0e13f728b7d37326c00c592"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/src/carousel/carousel.proto.ts",
+      "sha256": "339523f5e4bcffe43b7354e709bd65b4b74aa9d77dea908f6f4d04d48dbd4fc8"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/src/drawer/content.proto.ts",
+      "sha256": "339cf46ba349af4c149341f77c3c7f46686548ad1e8d76eeacf970818f46af12"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/src/number-field/decrement.proto.ts",
+      "sha256": "c96b74c8d7fa4582386aabf530193d2a2879a1cfced5d8f50a20aee6f4978c64"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/src/number-field/increment.proto.ts",
+      "sha256": "609e3cd176dbcdfd84ed1d7bf511925e6e2160447b6620195486887ddb2d7381"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/src/number-field/step-visual.ts",
+      "sha256": "eef74e4c0b4b879bee36ae5ab12e3bed72592940c03309f3f3f61602c4d9aa97"
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/carousel/visual.ts",
+      "sha256": "084225a765a65c0d136093558d5f72d396b20340203598d493ed2ab3fcf70408"
+    }
+  ],
+  "findings": [],
+  "checks": [
+    "Number Field pointer paint uses private state and existing Rule; no second activation/focus/value owner; disabled/cancel/leave/unmount clear state. Existing six before/after cases retain one proposal and controlled owner checks.",
+    "Carousel context is required and reads/subscriptions now consistently use its required API.",
+    "Liquid Drawer keeps existing material owner and supported zero-duration Base phase policy; no claim for unsupported combined motion/material.",
+    "Brutalist Drawer bounded command density contract does not supersede flat depth. Restored source retains disabled/focus/one Base hook.",
+    "Bootstrap modal Footer no longer paints fixed white inset in dark palette; semantic contrast checks retained."
+  ],
+  "evidence": "internal/records/2026-11-25-release-gate-prototype-runtime-repairs.json",
+  "limitations": [
+    "643-case report is the recorded dirty integrated source run, not the final commit or public browser acceptance.",
+    "Native window and final clean browser CI are separate gates."
+  ]
+}

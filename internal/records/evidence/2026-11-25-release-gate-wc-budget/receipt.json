@@ -1,0 +1,211 @@
+{
+  "kind": "Bounded WC implementation size repair; diagnostic candidate evidence, not a clean integrated GitHub run or review approval",
+  "baseline": {
+    "head": "4d288166d2d5e42ad6d9b7a34e8a8d03bbc94c0c",
+    "officialRun": 45537881490,
+    "officialWcGzipBytes": 218309,
+    "unchangedWcBudget": 218100
+  },
+  "candidate": {
+    "isolatedBase": "4d288166d2d5e42ad6d9b7a34e8a8d03bbc94c0c",
+    "appliedSharedHead": "224c5cdf69a9faa973dd663bae2c6f5caa4fe9a8",
+    "files": {
+      "packages/adapters/web-component/src/adapt.ts": "0f50397f1ae5a6d83067a9b1a85c9fb1e8bd16788f92d698069b68cf1f1b9e0e",
+      "packages/adapters/web-component/src/shadow-style-artifact.ts": "f318869491eaf1610d5da832fee0f38f54b52ff5a3f36270cb46a65c5bf944c3",
+      "packages/adapters/web-component/test/shadow-style-artifact.test.ts": "87739f4799289f3f60dde2ef9d5557ee102975f38759652b41d3f006223d9edc",
+      "packages/adapters/web-component/test/shadow-split-effects.test.ts": "f348713f9844f61c87af3917b6f62942ab66e4ac707590df64ff749a471355ad"
+    }
+  },
+  "decisions": [
+    "Private lifetime predicate reads current ownerResourcesReleased and terminalDisposing on every call; all other owner, view, epoch, token and connectivity checks remain.",
+    "Lexical CSS passes preserve quoted and escaped fragments and selector nesting. Only a separately captured comment closer removes a comment. The independent /*/ counterexample rejected v1 and has eleven explicit regression cases in v2.",
+    "Original cache tests still assert exact full-CSS scan counts of one or two. Their observer follows the new full-input callback replace pass instead of the removed indexOf implementation detail.",
+    "No budget, measurement, public API, capability allowlist, CSS admission boundary, portal timing, custom Meta getter or source-level appearance changed."
+  ],
+  "validation": {
+    "budgets": {
+      "command": "node scripts/analysis/package-budgets.mjs --json",
+      "exitCode": 0,
+      "withinBudgets": true,
+      "environment": {
+        "node": "v24.22.3",
+        "zlib": "1.3.2.1-motley-285e94b",
+        "esbuild": "0.25.12",
+        "platform": "linux",
+        "arch": "x64"
+      },
+      "entries": [
+        {
+          "name": "lucide/icons/x",
+          "beforeGzipBytes": 1796,
+          "afterGzipBytes": 1796,
+          "minifiedSha256": "f7fa573b04db4ac0e3c64776cc485623622ab14b2f6c75b4fad47141d7f540f9",
+          "unchangedArtifact": true
+        },
+        {
+          "name": "lucide root",
+          "beforeGzipBytes": 635846,
+          "afterGzipBytes": 635846,
+          "minifiedSha256": "dfe25b297b6499626de01289b35b82a9a9837a1285f683dbaed78d2e5e2275bd",
+          "unchangedArtifact": true
+        },
+        {
+          "name": "core root",
+          "beforeGzipBytes": 13012,
+          "afterGzipBytes": 13012,
+          "minifiedSha256": "44dff9136b34689189a41e5f4db032e718872da590d4044beb13890473042049",
+          "unchangedArtifact": true
+        },
+        {
+          "name": "runtime root",
+          "beforeGzipBytes": 107077,
+          "afterGzipBytes": 107077,
+          "minifiedSha256": "74d3d42442e2e440b7d96d4794d94f8f5420c77b12a9079518af840e9252f570",
+          "unchangedArtifact": true
+        },
+        {
+          "name": "adapter-react root",
+          "beforeGzipBytes": 181755,
+          "afterGzipBytes": 181755,
+          "minifiedSha256": "eae7b6ffc887e015894b0a177743320ee1e3e6b196745597b7dfc77dae441725",
+          "unchangedArtifact": true
+        },
+        {
+          "name": "adapter-vue root",
+          "beforeGzipBytes": 180592,
+          "afterGzipBytes": 180592,
+          "minifiedSha256": "39ee4df4c0380e4e1b05442c2c73f2f59df1d23f52adfa046f6c80b8dca29bd9",
+          "unchangedArtifact": true
+        },
+        {
+          "name": "adapter-web-component root",
+          "beforeGzipBytes": 218309,
+          "afterGzipBytes": 218091,
+          "minifiedSha256": "5ae9a43739b51f247334fe03cb1915e6cad70a3a028d6a11c8425ece12ac85da",
+          "unchangedArtifact": false
+        },
+        {
+          "name": "prototypes-base/button",
+          "beforeGzipBytes": 4311,
+          "afterGzipBytes": 4311,
+          "minifiedSha256": "6dff8377eae2cf21e3a000370423392feb1c2eaad1f98daa7bed92e470b002f2",
+          "unchangedArtifact": true
+        },
+        {
+          "name": "prototypes-shadcn/button",
+          "beforeGzipBytes": 7153,
+          "afterGzipBytes": 7153,
+          "minifiedSha256": "77d5d1f6b2a141eebe45e424179922cdb7ba1fc58d2bad268290d3cc16b99fba",
+          "unchangedArtifact": true
+        }
+      ],
+      "wcHeadroomGzipBytes": 9,
+      "provenance": "Actual complete original strict script on dirty isolated candidate; eight other entry artifacts exactly equal baseline. Clean integrated gate still required."
+    },
+    "wcTests": {
+      "command": "node node_modules/vitest/vitest.mjs run packages/adapters/web-component/test --exclude **/*.browser.test.ts --reporter=json",
+      "total": 1519,
+      "passed": 1519,
+      "failed": 0,
+      "pending": 0,
+      "exitCode": 0,
+      "coverage": "All original 1508 cases plus eleven overlapping/unclosed-comment cases; includes unchanged cache capacity/bytes and current-owner rejection cases."
+    },
+    "types": {
+      "command": "NODE_OPTIONS=--max-old-space-size=4096 corepack pnpm@10.32.1 -s check:types:workspace",
+      "preparation": [
+        "corepack pnpm@10.32.1 --filter @proto.ui/cli build",
+        "corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style"
+      ],
+      "exitCode": 0,
+      "environment": "Isolated doesvm candidate, frozen lockfile install; all four source hashes match applied candidate. Initial unprepared checkout reported two missing generated Shadow companion imports; prepared full check passed. Earlier local 4GB attempt was OS-killed 137, not a pass."
+    },
+    "differential": {
+      "kind": "Independent pure-function differential check against pre-change source; not a substitute for public contract tests",
+      "seed": "35adbeef",
+      "inputs": 386058,
+      "comparisons": 1158174,
+      "failures": [],
+      "stressTimes": [
+        {
+          "label": "unclosed-comment",
+          "length": 1000000,
+          "combinedMs": 215.94876699999986
+        },
+        {
+          "label": "closed-comment",
+          "length": 1000004,
+          "combinedMs": 74.74669700000004
+        },
+        {
+          "label": "unclosed-quote",
+          "length": 1000001,
+          "combinedMs": 147.3675149999999
+        },
+        {
+          "label": "closed-quote",
+          "length": 1000002,
+          "combinedMs": 108.61583800000017
+        },
+        {
+          "label": "escaped-quote",
+          "length": 600001,
+          "combinedMs": 230.9154470000003
+        },
+        {
+          "label": "backslashes",
+          "length": 1000000,
+          "combinedMs": 467.39215699999977
+        },
+        {
+          "label": "hex-escapes",
+          "length": 800000,
+          "combinedMs": 171.979327
+        }
+      ]
+    },
+    "nativeBrowser": "No new native-browser result is claimed by this budget-only receipt. Prior retained color/Image proofs have their own source binding."
+  },
+  "limits": [
+    "Only nine gzip bytes remain. Any later core or adapter change must rerun the same budget.",
+    "Historical v1 random checks missed /*/ and are not acceptance evidence; v2 includes the concrete independently found counterexample."
+  ],
+  "artifacts": {
+    "budgets-after-v2.json.gz": {
+      "sha256": "88a8b0e171bff99790df24df6615c4f6954adc6183eeb95f1f22618f0b478bea",
+      "bytes": 315388
+    },
+    "budgets-before.json.gz": {
+      "sha256": "4327f89eaea16683b925af23d35a4b8b104f973a327888b8a638b65d2486eee1",
+      "bytes": 315405
+    },
+    "candidate-v2.patch": {
+      "sha256": "4eefe2f37b4ce13d1e4cc1c57c6603e0e504afbaf532afdd083918bd0ebb289c",
+      "bytes": 18361
+    },
+    "css-differential-v2.json.gz": {
+      "sha256": "0bea05a8bcbdf04535ae7ec374b8e0e0bb2257df03c82bfb6a708ffd0fc1db41",
+      "bytes": 378
+    },
+    "local-types-resource-kill.log.gz": {
+      "sha256": "70858aec68412e3655b05b5c8290c3550bf58095772ecc22ffeeb592cb6b6c67",
+      "bytes": 27
+    },
+    "rejected-v1-overlapping-comment.json.gz": {
+      "sha256": "b35c47e63acc04b43669444332317c203b19eac38deb32bc328d4aedd1ade123",
+      "bytes": 142
+    },
+    "types-prepared.json": {
+      "sha256": "af4c88aa46bea675f92dd9dad721335fa3f710e8894b04a8e7a4b22d8753277b",
+      "bytes": 1624
+    },
+    "wc-original-and-regression-tests.json.gz": {
+      "sha256": "bef47eb98cdf8dace95fa6eb242b27a05be36f6189d641e21cefe3c8d59123c4",
+      "bytes": 62993
+    },
+    "wc-original-and-regression-tests.log.gz": {
+      "sha256": "d7248b53ff7e7cd8c48b54b07a6cd77fe18f175f181939fa28eb3b301093a306",
+      "bytes": 44230
+    }
+  }
+}

@@ -68,6 +68,7 @@ import type {
 import { PropsBaseType } from '@proto.ui/types';
 
 import { createDefaultMetaGetter } from './platform/meta';
+import { registerPortalViewReadiness } from './platform/portal-readiness';
 import type {
   ProtoVue2Component,
   Vue2AdapterInstance,
@@ -827,6 +828,18 @@ function initSession<Props extends PropsBaseType>(
     },
     { deferPublication: true }
   );
+  const releasePortalReadiness = registerPortalViewReadiness(rootEl, () => {
+    if (
+      !viewDisposed &&
+      !state.terminalDisposed &&
+      state.hostActive &&
+      state.viewGeneration === physicalGeneration &&
+      state.boundRoot === rootEl &&
+      state.eventGate === eventGate &&
+      getRootElement(vm) === rootEl
+    )
+      notifyFocusTargetReady(vm);
+  });
   const disposeView = () => {
     if (viewDisposed) return;
     viewDisposed = true;
@@ -838,6 +851,7 @@ function initSession<Props extends PropsBaseType>(
       state.decorationView = undefined;
     }
     const releases = [
+      releasePortalReadiness,
       () => {
         if (ownedVisualStyle !== null && rootEl.getAttribute('data-pui-style') === ownedVisualStyle)
           rootEl.removeAttribute('data-pui-style');

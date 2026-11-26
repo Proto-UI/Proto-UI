@@ -58,6 +58,8 @@ export default definePrototype<LiquidGlassFormActionProps, FormActionExposes>({
       source: { kind: 'in-app-backdrop' },
       fallback: { fill: 'style', foreground: 'style' },
     });
+    // Keep one complete Base-owned candidate. The Host applies live motion
+    // preferences while retaining its neutral contact carrier and static tint.
     for (const variant of ['regular', 'prominent', 'destructive'] as const) {
       const tint = variant === 'regular' ? {} : { tint: 'style-fill' as const };
       for (const pressed of [false, true]) {
@@ -69,8 +71,7 @@ export default definePrototype<LiquidGlassFormActionProps, FormActionExposes>({
               w.state(state.disabled).eq(false),
               w.state(state.pressed).eq(pressed),
               w.not(w.meta('preference.reducedTransparency').eq('reduce')),
-              w.not(w.meta('preference.increasedContrast').eq('more')),
-              w.not(w.meta('preference.reducedMotion').eq('reduce'))
+              w.not(w.meta('preference.increasedContrast').eq('more'))
             ),
           intent: (i) =>
             i.feedback.material.use({
@@ -85,23 +86,6 @@ export default definePrototype<LiquidGlassFormActionProps, FormActionExposes>({
             }),
         });
       }
-      def.rule({
-        when: (w) =>
-          w.all(
-            w.prop('variant').eq(variant),
-            w.prop('material').eq('auto'),
-            w.state(state.disabled).eq(false),
-            w.not(w.meta('preference.reducedTransparency').eq('reduce')),
-            w.not(w.meta('preference.increasedContrast').eq('more')),
-            w.meta('preference.reducedMotion').eq('reduce')
-          ),
-        intent: (i) =>
-          i.feedback.material.use({
-            intent: 'liquid-glass',
-            variant: 'regular',
-            ...tint,
-          }),
-      });
     }
     def.rule({
       when: (w) => w.all(w.state(state.pressed).eq(true), w.state(state.disabled).eq(false)),

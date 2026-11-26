@@ -63,6 +63,7 @@ export const PRESENTATION_RECEIPT_TYPE = readonlyRecord({
         { kind: 'literal', value: 'translate' },
         { kind: 'literal', value: 'opacity' },
         // Receipts retain the shared channel type independently of target admission.
+        { kind: 'literal', value: 'top' },
         { kind: 'literal', value: 'blockSize' },
       ],
     },

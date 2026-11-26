@@ -758,7 +758,7 @@ it('bounds the fresh static pair separately while preserving the original causal
     "entry.outcome = 'diagnostic-incomplete'",
     "entry.outcome = 'diagnostic-observed'",
     'pair.productAcceptance = true',
-    '}, 24_000);',
+    '}, 60_000);',
   ];
   const compact = (input: string) => input.replace(/\s+/g, '');
   const check = (input: string) => {

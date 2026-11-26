@@ -51,6 +51,16 @@ Browser source profiles also admit keyed `props.watchRaw` and all-key raw/resolv
 - **Web leases**: Browser source profiles acquire only reached native document sources while mounted (shared per document/key, `unknown` on missing/ambiguous facts), lease before style reconciliation, and release on detach/dispose.
 - **Lifting & handles**: Pure captured ternaries inside `when` or style `intent` callbacks lift to setup conditionals (every branch is validated). Rule operands may reference checked `StyleHandle` parameters/fields evaluated once at declaration installation.
 
+### Captured Set membership in Rule declarations
+
+A declaration-time conditional inside a Rule callback can use the existing native `Set.has` intrinsic for captured membership tests.
+
+- The receiver has a checked, non-nullable Set type. Receiver and search are pure captured expressions; neither operand comes from callback parameters or local declarations.
+- Lowering retains the actual membership call and checks both branches through ordinary Rule declaration admission.
+- Same-named ordinary methods, collection writes, optional calls, spreads and effectful operand calls remain outside this lifting boundary.
+
+This combines Set semantics with captured choices. General helper-purity analysis and new Rule observers remain separate work; authored source stays unexecuted.
+
 ## Loops, destructuring, collections, and Context aggregates
 
 | Construct | Admitted behavior | Rejected / bounded |

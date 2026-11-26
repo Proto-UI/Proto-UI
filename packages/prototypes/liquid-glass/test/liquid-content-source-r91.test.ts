@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Prototype } from '@proto.ui/core';
+import * as adapterBase from '@proto.ui/adapter-base';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
-import type { VisualFeedbackFrame } from '@proto.ui/module-feedback';
+import type { ResidentMotionFrame, VisualFeedbackFrame } from '@proto.ui/module-feedback';
 import * as scrollArea from '../src/scroll-area';
 import * as table from '../src/data-table';
 import * as tree from '../src/tree';
@@ -370,29 +371,154 @@ describe('Liquid content: data and collection ownership survives neutral paint',
     const viewport = make(carousel.carouselViewport);
     const first = make(carousel.carouselSlide, { index: 0 });
     const second = make(carousel.carouselSlide, { index: 1 });
+    const previous = make(carousel.carouselPrevious);
     const next = make(carousel.carouselNext);
     first.textContent = 'First scene';
     second.textContent = 'Second scene';
+    previous.textContent = 'Previous';
     next.textContent = 'Next';
     viewport.append(first, second);
-    root.append(viewport, next);
+    root.append(viewport, previous, next);
     const requests: unknown[] = [];
     root.addEventListener('indexChange', (event) => requests.push((event as CustomEvent).detail));
     document.body.append(root);
     await flush();
+
+    const navigationCandidate = {
+      intent: 'liquid-glass',
+      variant: 'regular',
+      deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+    };
+    const expectNavigation = (
+      element: Subject,
+      disabled: boolean,
+      material: 'auto' | 'opaque' = 'auto'
+    ) => {
+      expect(element.getExposes().disabled.get()).toBe(disabled);
+      // Controls retain their declared slot when an endpoint, disabled owner or
+      // explicit opaque prop withdraws the candidate. Only slide content is neutral.
+      expect(latest(element).material).toEqual({
+        slot: {
+          version: 2,
+          shape: { kind: 'rounded-rect', geometry: 'style' },
+          source: { kind: 'in-app-backdrop' },
+          fallback: { fill: 'style', foreground: 'style' },
+        },
+        candidates: !disabled && material === 'auto' ? [navigationCandidate] : [],
+      });
+      const tokens = latest(element).style.tokens;
+      expect(tokens).toEqual(
+        expect.arrayContaining(
+          disabled
+            ? ['bg-muted', 'text-muted-foreground']
+            : ['bg-secondary', 'text-secondary-foreground']
+        )
+      );
+      for (const token of disabled
+        ? ['bg-secondary', 'text-secondary-foreground']
+        : ['bg-muted', 'text-muted-foreground'])
+        expect(tokens).not.toContain(token);
+    };
+    const expectOwner = (index: 0 | 1) => {
+      expect(root.getExposes().index.get()).toBe(index);
+      expect(root.getExposes().slideCount.get()).toBe(2);
+      expect(first.getExposes().current.get()).toBe(index === 0);
+      expect(second.getExposes().current.get()).toBe(index === 1);
+      expect(first.getExposes().hidden.get()).toBe(index !== 0);
+      expect(second.getExposes().hidden.get()).toBe(index !== 1);
+      expect(first.parentElement).toBe(viewport);
+      expect(second.parentElement).toBe(viewport);
+      expect(first.textContent).toBe('First scene');
+      expect(second.textContent).toBe('Second scene');
+      expectNeutral(root, viewport, first, second);
+    };
+    expectOwner(0);
+    expectNavigation(previous, true);
+    expectNavigation(next, false);
+    expect(latest(first).style.tokens).toContain('px-2');
+    expect(latest(first).style.tokens).not.toContain('py-2');
+    expect(latest(previous).style.tokens).toContain('left-3');
+    expect(latest(next).style.tokens).toContain('right-3');
+    click(previous);
+    await flush();
+    expect(requests).toEqual([]);
     click(next);
     await flush();
     expect(requests).toEqual([{ index: 1 }]);
-    expect(root.getExposes().index.get()).toBe(0);
-    expect(second.getExposes().hidden.get()).toBe(true);
+    expectOwner(0);
+    expectNavigation(previous, true);
+    expectNavigation(next, false);
+
+    setElementProps(root, { index: 1, orientation: 'vertical', direction: 'rtl' });
+    await flush();
+    expectOwner(1);
+    expectNavigation(previous, false);
+    expectNavigation(next, true);
+    expect(latest(first).style.tokens).toContain('py-2');
+    expect(latest(first).style.tokens).not.toContain('px-2');
+    expect(latest(previous).style.tokens).toContain('top-3');
+    expect(latest(previous).style.tokens).not.toContain('left-3');
+    expect(latest(next).style.tokens).toContain('bottom-3');
+    expect(latest(next).style.tokens).not.toContain('right-3');
+    click(next);
+    await flush();
+    expect(requests).toEqual([{ index: 1 }]);
+
+    setElementProps(root, { index: 1, direction: 'rtl' });
+    await flush();
+    expectOwner(1);
+    expect(latest(first).style.tokens).toContain('px-2');
+    expect(latest(first).style.tokens).not.toContain('py-2');
+    expect(latest(previous).style.tokens).toContain('right-3');
+    expect(latest(previous).style.tokens).not.toContain('top-3');
+    expect(latest(next).style.tokens).toContain('left-3');
+    expect(latest(next).style.tokens).not.toContain('bottom-3');
+    click(previous);
+    await flush();
+    expect(requests).toEqual([{ index: 1 }, { index: 0 }]);
+    expectOwner(1);
+    expectNavigation(previous, false);
+    expectNavigation(next, true);
+
+    setElementProps(root, { index: 0, direction: 'rtl' });
+    await flush();
+    expectOwner(0);
+    expectNavigation(previous, true);
+    expectNavigation(next, false);
+    setElementProps(root, { index: 0, direction: 'rtl', disabled: true });
+    await flush();
+    expectNavigation(previous, true);
+    expectNavigation(next, true);
+    click(previous);
+    click(next);
+    await flush();
+    expect(requests).toEqual([{ index: 1 }, { index: 0 }]);
+    expectOwner(0);
+
+    setElementProps(root, { index: 0, direction: 'rtl' });
+    await flush();
+    expectNavigation(next, false);
+    setElementProps(next, { material: 'opaque' });
+    await flush();
+    expectNavigation(next, false, 'opaque');
+    click(next);
+    await flush();
+    expect(requests).toEqual([{ index: 1 }, { index: 0 }, { index: 1 }]);
+    expectOwner(0);
+    setElementProps(next, {});
+    await flush();
+    expectNavigation(next, false);
+
     setElementProps(root, { index: 1 });
     await flush();
-    expect(first.getExposes().hidden.get()).toBe(true);
-    expect(second.getExposes().hidden.get()).toBe(false);
-    expect(second.textContent).toBe('Second scene');
-    expectNeutral(root, viewport, first, second);
-    expect(latest(next).material.slot?.version).toBe(2);
-    expect(latest(next).material.candidates).toEqual([]);
+    expectOwner(1);
+    expectNavigation(previous, false);
+    expectNavigation(next, true);
+    expect(latest(previous).style.tokens).toContain('left-3');
+    expect(latest(previous).style.tokens).not.toContain('right-3');
+    expect(latest(next).style.tokens).toContain('right-3');
+    expect(latest(next).style.tokens).not.toContain('left-3');
+    expect(requests).toEqual([{ index: 1 }, { index: 0 }, { index: 1 }]);
   });
 
   it('retains the complete Virtual List collection and rejects stale bounded work after owner changes', async () => {
@@ -526,6 +652,22 @@ describe('Liquid content: data and collection ownership survives neutral paint',
 
 describe('Liquid content: passive facts, date rendering and ordinary editors', () => {
   it('keeps Progress indeterminate withdrawal distinct from Meter critical status', async () => {
+    const motionFrames = new WeakMap<HTMLElement, ResidentMotionFrame[]>();
+    const createMotionSink = adapterBase.createWebResidentMotionSink;
+    vi.spyOn(adapterBase, 'createWebResidentMotionSink').mockImplementation(
+      (host, effects, options) => {
+        const sink = createMotionSink(host, effects, options);
+        const records: ResidentMotionFrame[] = [];
+        motionFrames.set(host, records);
+        return {
+          ...sink,
+          commit(frame) {
+            records.push(frame);
+            sink.commit(frame);
+          },
+        };
+      }
+    );
     const progressRoot = make(progress.progressRoot);
     const progressTrack = make(progress.progressTrack);
     const progressIndicator = make(progress.progressIndicator);
@@ -552,6 +694,7 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     expect(progressIndicator.getExposes().indeterminate.get()).toBe(true);
     expect(progressIndicator.getExposes().percentage.get()).toBe(0);
     expect(progressIndicator.getAttribute('aria-hidden')).toBe('true');
+    expect(motionFrames.get(progressIndicator)?.at(-1)?.style.tokens).toContain('w-1/3');
     expect(meterRoot.getAttribute('role')).toBe('meter');
     expect(meterIndicator.getExposes().status.get()).toBe('critical');
     setElementProps(progressRoot, { value: 50, valueText: 'Half complete' });
@@ -563,8 +706,24 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     expect(progressIndicator.getExposes().percentage.get()).toBe(50);
     expect(progressIndicator.style.getPropertyValue('--pui-percentage')).toBe('50');
     expect(meterIndicator.getExposes().status.get()).toBe('optimal');
-    // ProgressIndicator uses the resident motion channel rather than the visual sink.
-    expect(frames.get(progressIndicator)).toBeUndefined();
+    // Resident motion has one projection owner and rejects combined material.
+    // Observe its actual pass-through sink, not a fabricated visual-material frame.
+    const indicatorFrame = motionFrames.get(progressIndicator)?.at(-1);
+    expect(indicatorFrame?.declarations).toEqual([
+      { properties: ['width'], durationMs: 300, easing: [0.4, 0, 0.2, 1] },
+    ]);
+    expect(indicatorFrame?.style.tokens).toContain('w-[calc(var(--pui-percentage)*1%)]');
+    expect(indicatorFrame?.style.tokens).not.toContain('w-1/3');
+    expect(frames.get(progressIndicator) ?? []).toEqual([]);
+    setElementProps(progressRoot, {});
+    await flush();
+    expect(progressRoot.hasAttribute('aria-valuenow')).toBe(false);
+    expect(progressIndicator.getExposes().indeterminate.get()).toBe(true);
+    expect(motionFrames.get(progressIndicator)?.at(-1)?.style.tokens).toContain('w-1/3');
+    expect(motionFrames.get(progressIndicator)?.at(-1)?.style.tokens).not.toContain(
+      'w-[calc(var(--pui-percentage)*1%)]'
+    );
+    expect(frames.get(progressIndicator) ?? []).toEqual([]);
     expectNeutral(progressRoot, progressValue, meterRoot, meterIndicator, meterValue);
     expect(latest(progressTrack).material.candidates).toEqual([
       { intent: 'liquid-glass', variant: 'regular' },
@@ -667,8 +826,8 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     document.body.append(root);
     await flush();
     expect(all.getAttribute('aria-checked')).toBe('mixed');
-    expect(all.querySelector('svg path')?.getAttribute('d')).toBe('M5 12h14');
-    expect(a.querySelector('svg path')?.getAttribute('d')).toBe('m20 6-11 11-5-5');
+    expect(all.querySelector('svg path')?.getAttribute('d')).toBe('M6 8h4');
+    expect(a.querySelector('svg path')?.getAttribute('d')).toBe('M4.5 8 7 11 11.5 5');
     expect(b.querySelector('svg path')).toBeNull();
     const proposals: unknown[] = [];
     root.addEventListener('valueChange', (event) => proposals.push((event as CustomEvent).detail));
@@ -679,7 +838,7 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     setElementProps(root, { value: ['a', 'b'] });
     await flush();
     expect(all.getAttribute('aria-checked')).toBe('true');
-    expect(b.querySelector('svg path')?.getAttribute('d')).toBe('m20 6-11 11-5-5');
+    expect(b.querySelector('svg path')?.getAttribute('d')).toBe('M4.5 8 7 11 11.5 5');
     expect(b.textContent).toBe('Messages');
     expectNeutral(root, all, a, b);
   });
@@ -817,6 +976,17 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
       expect.arrayContaining(['bg-muted', 'text-muted-foreground'])
     );
     expect(latest(control).style.tokens.some((token) => token.startsWith('opacity-'))).toBe(false);
+    setElementProps(root, {});
+    await flush();
+    expect(control.querySelector('input')).toBe(editor);
+    expect(editor.disabled).toBe(false);
+    expect(latest(control).material.candidates).toEqual([{ intent: 'liquid-glass' }]);
+    expect(latest(control).style.tokens).toEqual(
+      expect.arrayContaining(['bg-background', 'text-foreground'])
+    );
+    expect(latest(control).style.tokens).not.toContain('bg-muted');
+    expect(latest(control).style.tokens).not.toContain('text-muted-foreground');
+    expect(latest(control).style.tokens.some((token) => token.startsWith('opacity-'))).toBe(false);
     expectNeutral(root, label);
   });
 
@@ -938,6 +1108,9 @@ describe('Liquid scalar Slider: transient material never owns value or capture',
       await flush();
       expect(thumb.getExposes().pressed.get()).toBe(true);
       expect(latest(thumb).material.candidates).toEqual([]);
+      expect(latest(thumb).style.tokens).toEqual(
+        expect.arrayContaining(['bg-secondary', 'text-secondary-foreground'])
+      );
       setElementProps(thumb, {});
       await flush();
       expect(latest(thumb).material.candidates).toEqual(candidate);
@@ -949,6 +1122,9 @@ describe('Liquid scalar Slider: transient material never owns value or capture',
       await flush();
       expect(thumb.getExposes().pressed.get()).toBe(false);
       expect(latest(thumb).material.candidates).toEqual([]);
+      expect(latest(thumb).style.tokens).toEqual(
+        expect.arrayContaining(['bg-secondary', 'text-secondary-foreground'])
+      );
       setElementProps(root, { value: 25 });
       await flush();
       thumb.dispatchEvent(pointer('pointerdown', { pointerId: 8 }));

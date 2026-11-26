@@ -94,7 +94,13 @@ describe('Header keeps actual Select lifetime inside its visible owner', () => {
 
   it('preserves the public Rhea default through a complete compact-to-desktop reparent', async () => {
     const { header, trigger, query } = fixture('shadcn', false);
+    const content = header.querySelector<SiteSelectRoot>('wc-shadcn-select-content')!;
+    const placement = vi.spyOn(content, 'setProps');
     await settle();
+    expect(placement).toHaveBeenLastCalledWith({
+      position: undefined,
+      surfaceStyle: { maxHeight: 'none' },
+    });
     expect(trigger.getAttribute('data-pui-style')).toContain('border-transparent');
     expect(trigger.getAttribute('data-pui-style')).toContain('bg-input/50');
     const desktop = trigger.getAttribute('data-pui-style');
@@ -103,11 +109,19 @@ describe('Header keeps actual Select lifetime inside its visible owner', () => {
     await settle();
     expect(trigger.closest('[data-site-header-panel]')).not.toBeNull();
     expect(trigger.getAttribute('data-pui-style')).toBe(desktop);
+    expect(placement).toHaveBeenLastCalledWith({
+      position: 'popper',
+      surfaceStyle: { maxHeight: 'none' },
+    });
     Object.defineProperty(query, 'matches', { configurable: true, value: false });
     query.dispatchEvent(new Event('change'));
     await settle();
     expect(trigger.closest('[data-site-header-panel]')).toBeNull();
     expect(header.querySelectorAll('[data-site-header-preferences]')).toHaveLength(1);
     expect(trigger.getAttribute('data-pui-style')).toBe(desktop);
+    expect(placement).toHaveBeenLastCalledWith({
+      position: undefined,
+      surfaceStyle: { maxHeight: 'none' },
+    });
   });
 });

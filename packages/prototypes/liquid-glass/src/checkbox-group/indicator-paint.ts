@@ -10,10 +10,10 @@ import type {
   CheckboxGroupItemProps,
   CheckboxGroupItemExposes,
 } from '@proto.ui/prototypes-base/checkbox-group';
+import { renderCheckboxGlyph } from '../checkbox/indicator-paint';
 import { COMMAND_FOCUS } from '../interactive-surface';
-// Passive glyph grammar aligned with ../checkbox/root.proto.ts; the standalone
-// Liquid Checkbox is a separate owner and is not composed for this Group's paint.
-// No interaction/context/focus owner; checked and mixed remain solely the Group's state.
+
+// The Group owns these row state reads and its box paint.
 export function checkboxGroupGlyph(
   def: DefHandle<CheckboxGroupItemProps, CheckboxGroupItemExposes>,
   state: {
@@ -43,15 +43,12 @@ export function checkboxGroupGlyph(
   def.lifecycle.onUnmounted(cancel);
   def.lifecycle.onBeforeDispose(cancel);
   return (r: RendererHandle<any>) => {
-    const path = state.indeterminate.get()
-      ? 'M5 12h14'
-      : state.checked.get()
-        ? 'm20 6-11 11-5-5'
-        : null;
+    const mixed = state.indeterminate.get();
+    const checked = state.checked.get();
     const isDisabled = state.disabled.get();
     const fillTokens = isDisabled
       ? 'border-border bg-muted text-muted-foreground shadow-none'
-      : path
+      : checked || mixed
         ? 'border-primary bg-primary text-primary-foreground'
         : 'border-border bg-background text-foreground';
     const boxStyle = tw(
@@ -59,23 +56,6 @@ export function checkboxGroupGlyph(
       fillTokens,
       state.focusVisible.get() ? COMMAND_FOCUS : ''
     );
-    return r.el(
-      'span',
-      { style: boxStyle },
-      r.svg.root(
-        {
-          viewBox: '0 0 24 24',
-          width: 14,
-          height: 14,
-          'aria-hidden': 'true',
-          fill: 'none',
-          stroke: 'currentColor',
-          strokeWidth: 2.25,
-          strokeLinecap: 'round',
-          strokeLinejoin: 'round',
-        },
-        path ? r.svg.path({ d: path }) : null
-      )
-    );
+    return r.el('span', { style: boxStyle }, renderCheckboxGlyph(r, checked, mixed));
   };
 }

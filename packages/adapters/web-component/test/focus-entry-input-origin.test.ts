@@ -78,11 +78,29 @@ function visibleWhen(button: HTMLElement, visible: () => boolean) {
   });
 }
 
+function controlledCandidate(target: HTMLElement) {
+  const button = document.createElement('button');
+  target.append(button);
+  let visible = false;
+  const reads = visibleWhen(button, () => visible);
+  return {
+    reads,
+    setVisible(value: boolean) {
+      visible = value;
+    },
+  };
+}
+
 describe('WC entry native input origin', () => {
   it.each(['input', 'change'] as const)(
     'does not sample unrelated entries for a native editor %s',
     async (type) => {
       const entries = Array.from({ length: 8 }, () => entry());
+      for (const { target } of entries) {
+        const button = document.createElement('button');
+        button.style.visibility = 'hidden';
+        target.append(button);
+      }
       const editor = document.createElement('textarea');
       document.body.append(editor);
       await settle();
@@ -93,6 +111,7 @@ describe('WC entry native input origin', () => {
       expect(
         entries.map(({ target }) => reads.mock.calls.filter(([node]) => node === target).length)
       ).toEqual(Array(entries.length).fill(0));
+      expect(entries.every(({ target }) => target.tabIndex === 0)).toBe(true);
     }
   );
 
@@ -106,6 +125,9 @@ describe('WC entry native input origin', () => {
     document.body.append(style);
     const fixture = entry();
     fixture.ancestor.className = 'entry-local';
+    const button = document.createElement('button');
+    button.style.visibility = 'hidden';
+    fixture.target.append(button);
     const outside = document.createElement('textarea');
     document.body.append(outside);
     await settle();
@@ -114,6 +136,7 @@ describe('WC entry native input origin', () => {
     inputEvent(outside, 'input');
 
     expect(reads.mock.calls.some(([node]) => node === fixture.target)).toBe(false);
+    expect(fixture.target.tabIndex).toBe(0);
   });
 
   it.each(['input', 'change'] as const)(
@@ -175,13 +198,20 @@ describe('WC entry native input origin', () => {
     // Happy DOM does not project assignedSlot; supply only that host fact.
     Object.defineProperty(fixture.target, 'assignedSlot', { configurable: true, value: slot });
     document.body.append(carrier);
+    const candidate = controlledCandidate(fixture.target);
     fixture.configure(true);
     await settle();
-    const reads = vi.spyOn(window, 'getComputedStyle');
+    expect(fixture.target.tabIndex).toBe(0);
+    candidate.reads.mockClear();
 
+    candidate.setVisible(true);
     inputEvent(wrapper, 'input');
 
-    expect(reads.mock.calls.some(([node]) => node === fixture.target)).toBe(true);
+    expect(candidate.reads.mock.calls.some(([node]) => node === fixture.target)).toBe(true);
+    expect(fixture.target.hasAttribute('tabindex')).toBe(false);
+    candidate.setVisible(false);
+    inputEvent(wrapper, 'input');
+    expect(fixture.target.tabIndex).toBe(0);
   });
 
   it.each([
@@ -286,12 +316,19 @@ describe('WC entry native input origin', () => {
     const fixture = entry();
     const outside = document.createElement('input');
     document.body.append(outside);
+    const candidate = controlledCandidate(fixture.target);
     await settle();
-    const reads = vi.spyOn(window, 'getComputedStyle');
+    expect(fixture.target.tabIndex).toBe(0);
+    candidate.reads.mockClear();
 
+    candidate.setVisible(true);
     inputEvent(outside, 'input');
 
-    expect(reads.mock.calls.some(([node]) => node === fixture.target)).toBe(true);
+    expect(candidate.reads.mock.calls.some(([node]) => node === fixture.target)).toBe(true);
+    expect(fixture.target.hasAttribute('tabindex')).toBe(false);
+    candidate.setVisible(false);
+    inputEvent(outside, 'input');
+    expect(fixture.target.tabIndex).toBe(0);
   });
 
   it('updates constructed stylesheet input dependencies after CSSOM changes', async () => {
@@ -307,38 +344,58 @@ describe('WC entry native input origin', () => {
     });
     const outside = document.createElement('input');
     document.body.append(outside);
+    const candidate = controlledCandidate(fixture.target);
     await settle();
-    const reads = vi.spyOn(window, 'getComputedStyle');
+    expect(fixture.target.tabIndex).toBe(0);
+    const reads = candidate.reads;
+    reads.mockClear();
     const sampled = () => reads.mock.calls.some(([node]) => node === fixture.target);
 
+    candidate.setVisible(true);
     inputEvent(outside, 'input');
     expect(sampled()).toBe(false);
+    expect(fixture.target.tabIndex).toBe(0);
 
+    candidate.setVisible(false);
     sheet.replaceSync('body:has(input:checked) { visibility: hidden; }');
     await settle();
     reads.mockClear();
+    candidate.setVisible(true);
     inputEvent(outside, 'input');
     expect(sampled()).toBe(true);
+    expect(fixture.target.hasAttribute('tabindex')).toBe(false);
+    candidate.setVisible(false);
+    inputEvent(outside, 'input');
+    expect(fixture.target.tabIndex).toBe(0);
 
     // Happy DOM deleteRule leaves an undefined array slot, which correctly
     // remains an opaque dependency. replaceSync supplies a real empty graph.
     sheet.replaceSync('');
     await settle();
     reads.mockClear();
+    candidate.setVisible(true);
     inputEvent(outside, 'input');
     expect(sampled()).toBe(false);
+    expect(fixture.target.tabIndex).toBe(0);
   });
 
   it.each(['input', 'change'] as const)('preserves synthetic %s notifications', async (type) => {
     const fixture = entry();
     const outside = document.createElement('input');
     document.body.append(outside);
+    const candidate = controlledCandidate(fixture.target);
     await settle();
-    const reads = vi.spyOn(window, 'getComputedStyle');
+    expect(fixture.target.tabIndex).toBe(0);
+    candidate.reads.mockClear();
 
+    candidate.setVisible(true);
     inputEvent(outside, type, false);
 
-    expect(reads.mock.calls.some(([node]) => node === fixture.target)).toBe(true);
+    expect(candidate.reads.mock.calls.some(([node]) => node === fixture.target)).toBe(true);
+    expect(fixture.target.hasAttribute('tabindex')).toBe(false);
+    candidate.setVisible(false);
+    inputEvent(outside, type, false);
+    expect(fixture.target.tabIndex).toBe(0);
   });
 });
 
@@ -378,12 +435,16 @@ describe('WC entry native input with native-part stylesheet rules', () => {
       document.body.append(style, outside);
       expect((style.sheet!.cssRules[0] as CSSStyleRule).selectorText).toBe(selector);
       const fixture = entry();
+      const button = document.createElement('button');
+      button.style.visibility = 'hidden';
+      fixture.target.append(button);
       await settle();
       const reads = vi.spyOn(window, 'getComputedStyle');
 
       inputEvent(outside, type);
 
       expect(reads.mock.calls.some(([node]) => node === fixture.target)).toBe(false);
+      expect(fixture.target.tabIndex).toBe(0);
     }
   );
 
@@ -403,11 +464,18 @@ describe('WC entry native input with native-part stylesheet rules', () => {
     document.body.append(style, outside);
     expect((style.sheet!.cssRules[0] as CSSStyleRule).selectorText).toBe(selector);
     const fixture = entry();
+    const candidate = controlledCandidate(fixture.target);
     await settle();
-    const reads = vi.spyOn(window, 'getComputedStyle');
+    expect(fixture.target.tabIndex).toBe(0);
+    candidate.reads.mockClear();
 
+    candidate.setVisible(true);
     inputEvent(outside, 'input');
 
-    expect(reads.mock.calls.some(([node]) => node === fixture.target)).toBe(true);
+    expect(candidate.reads.mock.calls.some(([node]) => node === fixture.target)).toBe(true);
+    expect(fixture.target.hasAttribute('tabindex')).toBe(false);
+    candidate.setVisible(false);
+    inputEvent(outside, 'input');
+    expect(fixture.target.tabIndex).toBe(0);
   });
 });

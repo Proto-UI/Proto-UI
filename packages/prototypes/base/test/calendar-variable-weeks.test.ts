@@ -151,7 +151,8 @@ it('applies Shadcn focus-visible ring independently of selected while keeping po
   expect(day.getExposes().focused.get()).toBe(true);
   expect(day.getExposes().focusVisible.get()).toBe(false);
   expect(day.getExposes().selected.get()).toBe(false);
-  expect(day.getAttribute('data-pui-style')).not.toContain('ring-3');
+  const tokens = () => (day.getAttribute('data-pui-style') ?? '').split(/\s+/);
+  expect(tokens()).not.toContain('ring-3');
   spy.mockRestore();
   day.blur();
   await flush();
@@ -160,11 +161,13 @@ it('applies Shadcn focus-visible ring independently of selected while keeping po
   await flush();
   expect(day.getExposes().focused.get()).toBe(true);
   expect(day.getExposes().focusVisible.get()).toBe(true);
-  expect(day.getAttribute('data-pui-style')).toContain('ring-3');
+  expect(day.getExposes().selected.get()).toBe(false);
+  expect(tokens()).toEqual(expect.arrayContaining(['ring-3', 'ring-ring/50', 'border-ring']));
   day.click();
   await flush();
   expect(day.getExposes().selected.get()).toBe(true);
   expect(day.getExposes().focused.get()).toBe(true);
+  expect(tokens()).toContain('ring-3');
   expect(day.getAttribute('data-pui-style')).toContain(
     'data-[selected]:not-[data-range-middle]:not-[data-range-pending]:bg-primary'
   );

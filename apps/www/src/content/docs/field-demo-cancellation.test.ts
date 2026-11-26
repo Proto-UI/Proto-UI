@@ -78,7 +78,7 @@ async function mount(family: string) {
     input.dispatchEvent(new Event(type, { bubbles: true, composed: true }));
     await flush();
   };
-  const reset = async () => {
+  const cancel = async () => {
     const button = ref('reset');
     button.dispatchEvent(
       new PointerEvent('pointerdown', { bubbles: true, composed: true, pointerId: 1, button: 0 })
@@ -91,41 +91,41 @@ async function mount(family: string) {
     );
     await flush();
   };
-  return { ref, root, requests, edit, reset };
+  return { ref, root, requests, edit, cancel };
 }
 describe.each(['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])(
-  'Field %s demo validation reset (synthetic WC)',
+  'Field %s demo reset and cancellation consumer (synthetic WC)',
   (family) => {
-    it('retires a pending reply after delivered pointer activation and permits a fresh request', async () => {
+    it('retires a pending reply after the current Reset validation action and permits a fresh request', async () => {
       const f = await mount(family);
       await f.edit('taken');
       expect(f.root.pending.get()).toBe(true);
       const old = f.requests.at(-1);
       expect(old).toEqual(expect.stringMatching(/.+/));
-      await f.reset();
-      expect(f.ref('handleStatus').textContent).toContain('Handle ready');
+      await f.cancel();
+      expect(f.ref('handleStatus').textContent).toBe('Handle ready');
       expect(f.root.pending.get()).toBe(false);
       expect(f.root.resolveValidation(old, { invalid: true })).toBe(false);
       await vi.advanceTimersByTimeAsync(650);
-      expect(f.ref('handleStatus').textContent).toContain('Handle ready');
+      expect(f.ref('handleStatus').textContent).toBe('Handle ready');
       expect(f.root.invalid.get()).toBe(false);
       await f.edit('newer');
       await vi.advanceTimersByTimeAsync(500);
-      expect(f.ref('handleStatus').textContent).toContain('Handle available');
+      expect(f.ref('handleStatus').textContent).toBe('Handle available');
       expect(f.root.invalid.get()).toBe(false);
     });
-    it('accepts an explicit newer change after reset while the retired request stays ignored', async () => {
+    it('accepts an explicit newer change after cancellation while the canceled request stays retired', async () => {
       const f = await mount(family);
       await f.edit('taken');
-      const retired = f.requests.at(-1);
-      expect(retired).toEqual(expect.stringMatching(/.+/));
-      await f.reset();
+      const canceled = f.requests.at(-1);
+      expect(canceled).toEqual(expect.stringMatching(/.+/));
+      await f.cancel();
       await f.edit('taken', 'change');
       expect(f.requests.at(-1)).toEqual(expect.stringMatching(/.+/));
-      expect(f.requests.at(-1)).not.toBe(retired);
-      expect(f.root.resolveValidation(retired, { invalid: false })).toBe(false);
+      expect(f.requests.at(-1)).not.toBe(canceled);
+      expect(f.root.resolveValidation(canceled, { invalid: false })).toBe(false);
       await vi.advanceTimersByTimeAsync(500);
-      expect(f.ref('handleStatus').textContent).toContain('Handle unavailable');
+      expect(f.ref('handleStatus').textContent).toBe('Handle unavailable');
       expect(f.root.invalid.get()).toBe(true);
     });
     it('does not reset validation when only pointerdown arrives without a committed command', async () => {
@@ -141,27 +141,35 @@ describe.each(['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']
       );
       await flush();
       await vi.advanceTimersByTimeAsync(650);
-      expect(f.ref('handleStatus').textContent).toContain('Handle unavailable');
+      expect(f.ref('handleStatus').textContent).toBe('Handle unavailable');
       expect(f.root.invalid.get()).toBe(true);
     });
-    it('clears established validity and restores ready status after an already completed invalid check', async () => {
+    it('keeps explicit public cancellation distinct from resetting established validity', async () => {
       const f = await mount(family);
       await f.edit('taken');
       await vi.advanceTimersByTimeAsync(500);
-      expect(f.ref('handleStatus').textContent).toContain('Handle unavailable');
+      expect(f.ref('handleStatus').textContent).toBe('Handle unavailable');
       expect(f.root.invalid.get()).toBe(true);
-      await f.reset();
-      expect(f.ref('handleStatus').textContent).toContain('Handle ready');
+      // The current public demo offers Reset validation. The independent
+      // Field cancellation API still preserves an already established result.
+      f.root.cancelValidation();
+      await flush();
+      expect(f.ref('handleStatus').textContent).toBe('Handle unavailable');
+      expect(f.root.invalid.get()).toBe(true);
+      await f.cancel();
+      expect(f.ref('handleStatus').textContent).toBe('Handle ready');
       expect(f.root.invalid.get()).toBe(false);
     });
-    it('keeps mounted error feedback before form actions and preserves editor associations', async () => {
+    it('keeps the current shared Reset command and preserves editor/error associations', async () => {
       const f = await mount(family);
       await f.edit('taken');
       await vi.advanceTimersByTimeAsync(500);
-      const reset = f.ref('reset');
+      const cancel = f.ref('reset');
       const error = f.ref('handleError');
       const input = f.ref('handleControl').querySelector('input')!;
-      expect(error.compareDocumentPosition(reset) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(cancel.closest('[data-demo-ref="handleRoot"]')).toBeNull();
+      expect(cancel.textContent).toBe('Reset validation');
+      expect(error.compareDocumentPosition(cancel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
       expect(input.getAttribute('aria-labelledby')).toBe(f.ref('handleLabel').id);
       expect(input.getAttribute('aria-describedby')).toBe(f.ref('handleDescription').id);
       expect(input.getAttribute('aria-errormessage')).toBe(error.id);
@@ -170,10 +178,10 @@ describe.each(['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']
       await f.edit('taken', 'change');
       expect(f.root.pending.get()).toBe(true);
       expect(input.getAttribute('aria-errormessage')).toBeNull();
-      expect(f.ref('reset')).toBe(reset);
-      await f.reset();
+      expect(f.ref('reset')).toBe(cancel);
+      await f.cancel();
       await vi.advanceTimersByTimeAsync(650);
-      expect(f.ref('handleStatus').textContent).toContain('Handle ready');
+      expect(f.ref('handleStatus').textContent).toBe('Handle ready');
       expect(f.root.invalid.get()).toBe(false);
     });
   }

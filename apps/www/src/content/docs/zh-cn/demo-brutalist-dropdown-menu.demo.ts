@@ -162,6 +162,7 @@ export default {
           {
             kind: 'proto',
             prototypeId: 'brutalist-dropdown-item',
+            ref: 'logoutAction',
             props: {
               value: 'logout',
               textValue: 'Log out',

@@ -403,6 +403,7 @@ async function capture(
           (name) => [name, css.getPropertyValue(name).trim()]
         )
       ),
+      themeRing: css.getPropertyValue('--pui-ring').trim(),
       outline: { style: css.outlineStyle, width: css.outlineWidth, color: css.outlineColor },
       activeElement: document.activeElement === el,
       beforeContent: getComputedStyle(el, '::before').content,
@@ -616,6 +617,51 @@ async function keyboardFocus(page: Page, runtime: string, part: string) {
   await page.mouse.move(0, 0);
   await entry(page, runtime, part).focus();
   await page.keyboard.press('Tab');
+}
+
+type BlockedPaintFrame = {
+  focusVisible: boolean;
+  ring: Record<string, string>;
+  shadow: string;
+  opacity: string;
+  background: string;
+  foreground: string;
+};
+async function recordBlockedPaint(target: Locator, runtime: string) {
+  return target.evaluateHandle((element, runtime) => {
+    const frames: BlockedPaintFrame[] = [];
+    let pending = 0;
+    const read = () => {
+      const css = getComputedStyle(element);
+      frames.push({
+        focusVisible: (window as any).liquidHoverFixture.state(
+          runtime,
+          'accordion-blocked',
+          'focusVisible'
+        ),
+        ring: Object.fromEntries(
+          [
+            '--pui-ring-width',
+            '--pui-ring-inset',
+            '--pui-ring-color',
+            '--pui-ring-offset-width',
+          ].map((name) => [name, css.getPropertyValue(name).trim()])
+        ),
+        shadow: css.boxShadow,
+        opacity: css.opacity,
+        background: css.backgroundColor,
+        foreground: css.color,
+      });
+      pending = requestAnimationFrame(read);
+    };
+    read();
+    return {
+      stop() {
+        cancelAnimationFrame(pending);
+        return frames;
+      },
+    };
+  }, runtime);
 }
 
 // Continue independent parts after a failure, retaining each part's partial
@@ -1104,12 +1150,13 @@ describe.sequential('Liquid command static hover and existing self-contact nativ
                     const reduced = await sample('reduced-motion', { quality: 'self-optical' });
                     expect(reduced.facts.motion).toBe('static');
                     if (part === 'submit' || part === 'reset') {
-                      // Reduced-motion Form candidates omit deformation and paint on the host.
+                      // The complete Base-owned candidate retains its neutral carrier;
+                      // the Host suppresses elastic motion while keeping static material.
                       expect(reduced.facts.phase).toBe('rest');
-                      expect(reduced.facts.receipt.contact).toBeNull();
-                      expect(reduced.facts.receipt.contactSession).toBeNull();
-                      expect(reduced.facts.carrier.marker).toBeNull();
-                      opticalPaint(reduced.facts);
+                      expect(reduced.facts.receipt.contact).toBe('rest');
+                      expect(reduced.facts.receipt.contactSession).toMatch(/^\d+$/);
+                      expect(reduced.facts.carrier.marker).toBe('contact-v1');
+                      optical(reduced);
                     } else {
                       expect(reduced.facts.receipt.contact).toBe('rest');
                     }
@@ -1122,27 +1169,79 @@ describe.sequential('Liquid command static hover and existing self-contact nativ
                   fallback(blocked);
                   expect(blocked.states.collapseBlocked).toBe(true);
                   expect(blocked.states.disabled).toBe(false);
-                  await target.hover();
-                  const hover = await sample('collapse-blocked-hover');
-                  fallback(hover);
-                  expect(hover.raw.ring['--pui-ring-width']).not.toBe('1px');
-                  expect(isUnpaintedBootstrapBoxShadow(hover.facts.shadow)).toBe(true);
-                  const blockedBox = await target.boundingBox();
-                  if (!blockedBox) throw new Error('No collapse-blocked native box');
-                  // aria-disabled intentionally blocks Playwright locator.click(); use
-                  // native mouse input to test Base policy without force or DOM.click.
-                  await page.mouse.click(
-                    blockedBox.x + blockedBox.width / 2,
-                    blockedBox.y + blockedBox.height / 2
-                  );
-                  const pressed = await sample('collapse-blocked-click');
-                  expect(pressed.raw.attributes['aria-disabled']).toBe('true');
-                  expect(pressed.requests).toEqual([]);
-                  expect(pressed.raw.attributes['aria-expanded']).toBe('true');
-                  await keyboardFocus(page, runtime, 'accordion-blocked');
-                  const focused = await sample('collapse-blocked-focus');
-                  expect(focused.states.focusVisible).toBe(true);
-                  expect(focused.raw.ring['--pui-ring-width']).toBe('2px');
+                  // C-LIQUID-GLASS-COMMAND-INTERACTION-0001 preserves same-state
+                  // expansion paint. Its persistent inset ring is not hover elevation.
+                  const audit = await recordBlockedPaint(target, runtime);
+                  let frames: BlockedPaintFrame[] = [];
+                  try {
+                    await target.hover();
+                    const hover = await sample('collapse-blocked-hover');
+                    fallback(hover);
+                    expect(hover.raw.ring).toEqual(blocked.raw.ring);
+                    expect(hover.facts.shadow).toBe(blocked.facts.shadow);
+                    sameGeometry(blocked, hover);
+                    const blockedBox = await target.boundingBox();
+                    if (!blockedBox) throw new Error('No collapse-blocked native box');
+                    // aria-disabled blocks locator.click(); native down/up still
+                    // observes Base focus and refusal without force or DOM.click.
+                    await page.mouse.move(
+                      blockedBox.x + blockedBox.width / 2,
+                      blockedBox.y + blockedBox.height / 2
+                    );
+                    await page.mouse.down();
+                    try {
+                      const down = await sample('collapse-blocked-down');
+                      fallback(down);
+                      expect(down.raw.ring).toEqual(blocked.raw.ring);
+                      expect(down.facts.shadow).toBe(blocked.facts.shadow);
+                      sameGeometry(blocked, down);
+                    } finally {
+                      await page.mouse.up();
+                    }
+                    const pressed = await sample('collapse-blocked-click');
+                    fallback(pressed);
+                    expect(pressed.raw.attributes['aria-disabled']).toBe('true');
+                    expect(pressed.requests).toEqual([]);
+                    expect(pressed.raw.attributes['aria-expanded']).toBe('true');
+                    expect(pressed.raw.ring).toEqual(blocked.raw.ring);
+                    await keyboardFocus(page, runtime, 'accordion-blocked');
+                    const focused = await sample('collapse-blocked-focus');
+                    expect(focused.states.focusVisible).toBe(true);
+                    expect(focused.raw.ring['--pui-ring-width']).toBe('2px');
+                    expect(focused.raw.ring['--pui-ring-color']).toBe(focused.raw.themeRing);
+                    expect(focused.raw.ring['--pui-ring-inset']).toBe('');
+                    await target.hover();
+                    const focusHover = await sample('collapse-blocked-focus-hover');
+                    expect(focusHover.raw.ring).toEqual(focused.raw.ring);
+                    await entry(page, runtime, 'accordion-blocked').focus();
+                    const blurred = await sample('collapse-blocked-blur');
+                    expect(blurred.states.focusVisible).toBe(false);
+                    expect(blurred.raw.ring).toEqual(blocked.raw.ring);
+                    sameGeometry(blocked, blurred);
+                  } finally {
+                    frames = await audit.evaluate((value) => value.stop());
+                    await audit.dispose();
+                    results.push({
+                      runtime,
+                      theme,
+                      part: 'accordion-blocked',
+                      paintFrames: frames,
+                    });
+                  }
+                  expect(frames.length).toBeGreaterThan(0);
+                  for (const frame of frames) {
+                    expect(frame.opacity).toBe('1');
+                    expect(frame.background).toBe(frames[0].background);
+                    expect(frame.foreground).toBe(frames[0].foreground);
+                    if (frame.focusVisible) {
+                      expect(frame.ring['--pui-ring-width']).toBe('2px');
+                      expect(frame.ring['--pui-ring-color']).toBe(blocked.raw.themeRing);
+                      expect(frame.ring['--pui-ring-inset']).toBe('');
+                    } else {
+                      expect(frame.ring).toEqual(blocked.raw.ring);
+                      expect(frame.shadow).toBe(blocked.facts.shadow);
+                    }
+                  }
                 });
                 for (const part of [...LIQUID_HOVER_NEGATIVES, 'accordion-tight'])
                   await run(part, async (sample, target) => {

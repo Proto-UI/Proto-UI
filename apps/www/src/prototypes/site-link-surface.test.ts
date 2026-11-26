@@ -49,7 +49,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// The accepted website target remains 44px, not upstream Luma's size-8.
+// The accepted website target remains 44px, with the selected Luma action appearance.
 // Paint/focus/press literals follow the public passive Luma contract; no
 // Button, synthetic activation, or page-specific paint is installed here.
 for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
@@ -134,7 +134,7 @@ for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
   });
 }
 
-it('ordinary public Shadcn Surface omission still has no Rhea action feedback', async () => {
+it('ordinary public Shadcn Surface omission still has no action profile feedback', async () => {
   const surface = new Constructors.shadcn();
   document.body.append(surface);
   for (const active of [false, true, false]) {

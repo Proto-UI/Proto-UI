@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Field contract companion</title>
+    <style>
+      :root {
+        font-size: 16px;
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        font-family: system-ui, sans-serif;
+        color: var(--pui-foreground);
+        background: var(--pui-background);
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      .host {
+        width: 100%;
+        min-width: 0;
+      }
+      .fixture-fields {
+        display: grid;
+        width: 100%;
+        max-width: 40rem;
+        min-width: 0;
+        gap: 1.25rem;
+      }
+      .fixture-commands {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .fixture-base-field-root {
+        display: grid;
+        min-width: 0;
+        gap: 0.5rem;
+      }
+      .fixture-base-field-control {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        border: 1px solid;
+        border-radius: 4px;
+        padding: 0.5rem 0.75rem;
+      }
+      .fixture-base-field-label,
+      .fixture-base-field-description,
+      .fixture-base-field-error,
+      .fixture-base-field-validity {
+        display: block;
+        overflow-wrap: break-word;
+      }
+      .fixture-base-button {
+        border: 1px solid;
+        border-radius: 4px;
+        padding: 0.5rem 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <article data-previewer-id="field-contract-companion" data-field-companion>
+      <div class="host"></div>
+    </article>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>

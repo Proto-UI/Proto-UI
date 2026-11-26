@@ -931,6 +931,26 @@ mod accessibility_flags_tests {
     use super::*;
 
     #[test]
+    fn required_true_false_and_absence_preserve_node_fact_ownership() {
+        for required in [None, Some(true), Some(false)] {
+            for previous in [false, true] {
+                let element = AccessibilityFlags {
+                    element: div().id("checkbox").role(accesskit::Role::CheckBox),
+                    disabled: false,
+                    read_only: None,
+                    required,
+                };
+                let mut node = accesskit::Node::new(accesskit::Role::CheckBox);
+                if previous {
+                    node.set_required();
+                }
+                element.write_a11y_info(&mut node);
+                assert_eq!(node.is_required(), required.unwrap_or(previous));
+            }
+        }
+    }
+
+    #[test]
     fn current_readonly_fact_reaches_the_native_node_without_losing_its_other_semantics() {
         for read_only in [None, Some(true), Some(false)] {
             for disabled in [false, true] {
@@ -1095,6 +1115,33 @@ mod a11y_state_tests {
             focus: None,
             a11y: Some(projection.expect("a projection")),
             children: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn rendered_required_fact_reaches_the_accesskit_node_without_changing_activation() {
+        for required in [false, true] {
+            let surface = surface(json!({
+                "semanticObjectId": "checkbox",
+                "role": "checkbox",
+                "states": { "required": required, "checked": false, "disabled": false },
+                "actions": { "activate": { "event": "click" } },
+                "relations": {},
+            }));
+            let bridge = Rc::new(RefCell::new(InputBridge::new()));
+            let mut rendered = render_surface(&surface, &bridge);
+            let element = rendered
+                .downcast_mut::<AccessibilityFlags>()
+                .expect("required alone reaches the production accessibility wrapper");
+            let mut node = accesskit::Node::new(accesskit::Role::CheckBox);
+            if !required {
+                node.set_required();
+            }
+            Element::write_a11y_info(element, &mut node);
+            assert_eq!(node.is_required(), required);
+            assert!(!node.is_disabled());
+            assert_eq!(node.toggled(), Some(accesskit::Toggled::False));
+            assert!(node.supports_action(accesskit::Action::Click));
         }
     }
 

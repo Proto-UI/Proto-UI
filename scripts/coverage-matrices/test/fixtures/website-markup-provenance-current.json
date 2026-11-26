@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "0b436b388882d73b916ede97c73a1bf304dcf6f6",
-  "scope": "Direct source inventory for the sampled website routes. The Chinese Button install card now uses the stable 0.2.0 CLI and names its supported hosts. This is the only changed body among the 33 direct inputs. The preceding inventory is archived in website-markup-provenance-a8636eb.json. Served content and transitive dependencies require separate evidence.",
+  "revision": "0ee5c606be88dc39f3782067d53c9d40eac45319",
+  "scope": "Direct source inventory for the sampled website routes. Four reviewed lifecycle members changed: batched initial theme watching, shared Previewer bootstrap observation, removal-only cleanup notifications, and document preparation leases. The 33 source identities, sampled highlighted/raw-code/Copy owners and unverified admission remain unchanged. All 33 fixed source hashes match this committed source revision and its working files. The preceding reference is byte-preserved in website-markup-provenance-5f08449.json. Browser execution, served content and transitive dependencies require separate evidence.",
   "sourceAdmission": "unverified",
   "sources": [
     {
@@ -23,7 +23,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
-      "sha256": "90e29929723d05768bf7c21688b8303737097807ca4f66ec1e75fbb198455a8c"
+      "sha256": "f7ff3708827d6c832882a3db9579a8bd5d1709018b25e6b8bf1111f4950dcebc"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
@@ -31,7 +31,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
-      "sha256": "96cf7ed08aad2aec25fc1d9a5ed5b543e48ffc22d35da172fac24b61a23fbe25"
+      "sha256": "f8a053d9f8800d6ed158fd4ac8cbec1fae433775811ce93569eb019544ce8750"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-panel-client.ts",
@@ -79,7 +79,7 @@
     },
     {
       "path": "apps/www/astro.config.mjs",
-      "sha256": "2d9b2f28c7435754064aaa15e15a18ff0823f46a4081b11e1e89f302b8725177"
+      "sha256": "36a90352d9b22089abfde1318c29cd9e920dda2e79f088f259eec9c2de10be70"
     },
     {
       "path": "apps/www/package.json",
@@ -95,7 +95,7 @@
     },
     {
       "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/dialog.mdx",
-      "sha256": "7d41623f7a7b14674c6e9442980cddddbc251c931a3facd109614c838541270e"
+      "sha256": "202a03164a8a4599d686b502c87f474b381bf453f0ee7ef47b9807da7c81bc0a"
     },
     {
       "path": "apps/www/src/utils/conversionUtils.ts",
@@ -107,11 +107,11 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-removal.ts",
-      "sha256": "468d3b8fe0563caffd66bbde02caf933bec6b81bcf088847e88b5df7907a5f19"
+      "sha256": "547aa146738b442dfc17c25c01db979ae4711ea9ff226c76dbc56857f32f3a89"
     },
     {
       "path": "apps/www/src/components/docs-header-preparation.ts",
-      "sha256": "545b76fa19b9633d52915c20c8e5ddb7e340dc9a73e43b88b6c790d0a42aa244"
+      "sha256": "a9ec13d22f86a8979b3f9964cb6b8b65ab6022df922e4b21c59a728b473c8c58"
     },
     {
       "path": "apps/www/src/content/docs/demo_components/button/button-usage.ts",

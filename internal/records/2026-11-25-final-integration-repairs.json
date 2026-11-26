@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "kind": "final-integration-repair-source-review",
+  "reviewedRemote": "28958b402bfb116c135377fe01e23a94ea7b2a7b",
+  "priorOwnedIntegration": "659dcfdcb8a5fa6e445d23d5334e40e99f52d1d9",
+  "branch": "fix/ready-integration-repairs-cb096",
+  "reasonForIsolatedBranch": "The original integration branch has concurrent writers. This branch preserves their reviewed history and freezes these additional repairs for source-specific verification.",
+  "repairScopes": [
+    "A separately proven State sibling is not a token. Preserve the requested own literal string leaf proof and all mutation/escape refusals.",
+    "Preserve remote WC wiring and single-registration dormant observers with ordered identity-guarded restoration and the original CSSOM actions.",
+    "Release previously registered previewers moved into open or closed shadow roots on later document host removal, without rescanning ordinary light-DOM roots.",
+    "Combine real Header settings disclosure/Escape/focus checks with native Hero entry into the mobile full gallery; preserve all original 64 homepage assertions and budgets.",
+    "Retain the exact remote native Label centering, per-target Matrix fixture, Search-priority leases and disabled Liquid elevation withdrawal.",
+    "Regenerate the one disabled transition-none family token through the original generator.",
+    "Resolve two independently inserted NumberField registrations to the remote single registration; original assertBrowserInventory succeeds."
+  ],
+  "localBoundedControls": {
+    "previewerShadow": {
+      "original": 18,
+      "added": 5,
+      "passed": 23,
+      "negative": {
+        "passed": 21,
+        "failed": 2
+      },
+      "environment": "Actual complete modules and Happy DOM; not final native acceptance"
+    },
+    "labelViewport": {
+      "actualChromium": "156.0.8078.108",
+      "bottom": {
+        "accepted": 0,
+        "rejected": 3
+      },
+      "center": {
+        "accepted": 3,
+        "rejected": 0
+      },
+      "scope": "Diagnostic on 62fee plus pending73 merge; exact original helper/harness, not final 84-case acceptance"
+    },
+    "homepageAssertionReview": {
+      "original": 64,
+      "retained": 64,
+      "added": 1,
+      "originalActionTimeoutMs": 15000
+    }
+  },
+  "sourceBindings": [
+    {
+      "path": "apps/www/scripts/capture-documentation-evidence.ts",
+      "sha256": "36994e3775673326d91ba7b2d0458f0920d7291dbaef1faab4e0fc8efd1b8e46"
+    },
+    {
+      "path": "apps/www/scripts/capture-homepage-evidence.ts",
+      "sha256": "eb918e1e0a104545b42eb66ce2de57c2a9c8e0260b7374c460eee42aeefdf2bb"
+    },
+    {
+      "path": "apps/www/scripts/homepage-evidence-contract.test.ts",
+      "sha256": "7b923ff79bde868c0c0dd51d43901bd506cb3a5d3ac63b808def551e16d185b9"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.test.ts",
+      "sha256": "533008efe018f3e7fef5c403d5d8b1046061ca85c3295d9aecdbcd5ea3a8a4f5"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
+      "sha256": "d665ac5a6043619031f43b241da54bfc131cce5cf3f036214d679e42258f8a6b"
+    },
+    {
+      "path": "internal/records/2026-11-25-cli-wc-retained-gate-followups.json",
+      "sha256": "2f35858dbfe8103e3ac7da6d8f5fbd88e3d6909a1c3491805239e1e77fbf8660"
+    },
+    {
+      "path": "internal/records/2026-11-25-header-toast-source-bindings.json",
+      "sha256": "8c8d09dcc44b15bf207a65ef003606d0a07de1fee9274d44464c91f57adaf403"
+    },
+    {
+      "path": "internal/records/2026-11-25-previewer-shadow-removal-source-bindings.json",
+      "sha256": "b55df935a948fcfb704a4ef34a0df0b658a72ae88d5efe91a7bf238c2832877c"
+    },
+    {
+      "path": "internal/website/self-hosting-coverage-matrix.md",
+      "sha256": "e8a5e7077c585be9d1ca757c31b23dfc48ce10570ed520869b37c4cbb2268e07"
+    },
+    {
+      "path": "packages/adapters/web-component/src/runtime/modules.ts",
+      "sha256": "72fd949855174530272ab29a4920969cabbcc949e1e1a8616cfeace843f21ec7"
+    },
+    {
+      "path": "packages/adapters/web-component/test/focus-entry-refresh-coalescing.test.ts",
+      "sha256": "8fca8a41f1519e42393b96fab3556a9dc71a889b098e6487f794fbb06f21f917"
+    },
+    {
+      "path": "packages/cli/src/generated/draft-family-style-tokens.ts",
+      "sha256": "bf0d2980cba5a37890612d0f04b1363e91ac332d641fef7c6ba617ff046d217f"
+    },
+    {
+      "path": "packages/cli/src/services/lowered-hook-coverage.ts",
+      "sha256": "8601c35595a748399acc89b62cc5fef181cb40e8402b708900c8d38dd1905e46"
+    },
+    {
+      "path": "packages/cli/test/lowered-token-selected-leaf.test.ts",
+      "sha256": "e3904e5f1699ac4c5dbf006693e0eda5ca8b1faf11cf2dcff9f329c32370a2f0"
+    }
+  ],
+  "acceptance": {
+    "status": "The combined committed candidate still requires original frozen-source validation.",
+    "originalPackageCeilingsChanged": false,
+    "originalCLIInventoryOracleChanged": false,
+    "originalBrowserCaseOrSuiteBudgetsChanged": false,
+    "originalProductionPublicationBudgetMs": 1000,
+    "deferredCompilerIssuesClosed": false,
+    "priorFailuresRetained": true,
+    "fullCLIUnresolvedInventoryRepaired": false
+  },
+  "priorObservedFailures": {
+    "source": "56221ad7221ae454ddda36cb9724001dcbf5525e",
+    "cli": {
+      "passed": 821,
+      "failed": 2,
+      "total": 823,
+      "unresolvedReads": 3266
+    },
+    "strictPackage": {
+      "passed": 8,
+      "total": 9,
+      "wcGzipBytes": 218283,
+      "wcCeilingBytes": 218100
+    },
+    "isolatedSearch": {
+      "outerSeconds": 600,
+      "exitCode": 124,
+      "complete84CaseFooter": false
+    },
+    "productionSearchVuePublicationMs": {
+      "shadcn": 1776,
+      "brutalist": 1207
+    },
+    "homepageCapture": {
+      "passed": 4,
+      "failed": 16,
+      "total": 20
+    },
+    "matrix": {
+      "hookBudgetMs": 150000,
+      "caseExecutionReached": false
+    }
+  }
+}

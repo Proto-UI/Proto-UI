@@ -703,7 +703,7 @@ async function numberField(runtime, family, prefix) {
   };
 }
 
-async function calendarRangePaint(family, component = 'calendar') {
+async function calendarRangePaint(family, component) {
   await settlePaint();
   const paint = await page.evaluate(
     ({ family, component }) => {
@@ -734,16 +734,17 @@ async function calendarRangePaint(family, component = 'calendar') {
         if (!probe.style.backgroundColor) throw new Error(`Invalid theme expression: ${color}`);
         return getComputedStyle(probe).backgroundColor;
       };
-      const middleExpr =
+      // Calendar and Date Picker preserve their own family presentation recipes.
+      // The shared selection contract requires segment distinction, not identical
+      // pigment between these two independently authored consumers.
+      const middleFill =
         family === 'brutalist'
-          ? component === 'calendar'
-            ? 'color-mix(in oklab, var(--pui-main) 25%, transparent)'
-            : 'color-mix(in oklab, var(--pui-main) 20%, transparent)'
+          ? `color-mix(in oklab, var(--pui-main) ${component === 'calendar' ? 25 : 20}%, transparent)`
           : family === 'liquid-glass'
             ? component === 'calendar'
               ? 'color-mix(in oklab, var(--pui-primary) 15%, transparent)'
               : 'var(--pui-muted)'
-            : 'var(--pui-accent)';
+            : `var(--pui-${family === 'shadcn' || family === 'bootstrap-2-3-2' ? 'accent' : 'secondary'})`;
       const middleInk =
         family === 'shadcn' || family === 'bootstrap-2-3-2'
           ? 'accent-foreground'
@@ -755,7 +756,7 @@ async function calendarRangePaint(family, component = 'calendar') {
         endpointInk: resolve(
           `var(--pui-${family === 'brutalist' ? 'main-foreground' : 'primary-foreground'})`
         ),
-        middle: resolve(middleExpr),
+        middle: resolve(middleFill),
         middleInk: resolve(`var(--pui-${middleInk})`),
         transparent: resolve('transparent'),
       };

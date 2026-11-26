@@ -74,7 +74,7 @@ for (const [family, demo] of Object.entries({
   brutalist: brutalistDemo,
 }))
   for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const)
-    it(`${family}/${runtime} public Select composes the scroll viewport and owner refusal`, async () => {
+    it(`${family}/${runtime} public Select preserves its current recipe and controlled owner refusal`, async () => {
       const host = document.createElement('div');
       document.body.append(host);
       let api!: DemoRuntimeApi;
@@ -96,122 +96,108 @@ for (const [family, demo] of Object.entries({
         if (!cleaned) await view.destroy();
       });
       const x = (name: string) => api.getExposes(name) as any;
-      if (family === 'base') {
-        await vi.waitFor(() => expect(x('select').value.get()).toBe('alpha'));
-        expect(x('select').getCollectionCount()).toBe(18);
-        expect(x('item3').disabled.get()).toBe(true);
-        api.call('select', 'openDropdown', 'recipe');
-        await vi.waitFor(() => expect(refs.selectViewport).toBeDefined());
-        const viewport = refs.selectViewport;
-        expect(viewport.style.maxHeight).toBe('180px');
-        expect(viewport.style.overflowY).toBe('auto');
-        refs.toggleRefusal.click();
-        await flush();
-        expect(refs.selectPolicy.textContent).toContain('controlled-refusal');
-        expect(
-          api.call('select', 'requestValue', {
-            value: 'beta',
-            textValue: 'beta',
-            reason: 'programmatic',
-          })
-        ).toBe(true);
-        await flush();
-        expect(x('select').value.get()).toBe('alpha');
-        expect(refs.selectRequests.textContent).toContain('requested=beta');
-        refs.toggleRefusal.click();
-        await flush();
-        expect(
-          api.call('select', 'requestValue', {
-            value: 'gamma',
-            textValue: 'gamma',
-            reason: 'programmatic',
-          })
-        ).toBe(true);
-        await flush();
-        expect(x('select').value.get()).toBe('gamma');
-        expect(x('item2').selected.get()).toBe(true);
-        expect(refs.selectPolicy.textContent).toContain('owner=uncontrolled value=gamma');
-        const content = refs.selectContent;
-        await view.destroy();
-        cleaned = true;
-        await flush();
-        expect(host.childElementCount).toBe(0);
-        expect(content.isConnected).toBe(false);
-        return;
-      }
-
-      if (family === 'shadcn') {
-        await vi.waitFor(() => expect(x('controlledSelect').value.get()).toBe('system'));
-        expect(x('controlledSelect').getCollectionCount()).toBe(4);
-        expect(refs.selectedTheme.textContent).toContain('Selected: System');
+      if (family !== 'base') {
+        const rootRef = family === 'shadcn' ? 'controlledSelect' : 'timezoneSelect';
+        const resetRef = family === 'shadcn' ? 'resetTheme' : 'resetTimezone';
+        const initial = family === 'shadcn' ? 'system' : 'jst';
+        const next = family === 'shadcn' ? 'dark' : 'pst';
+        const nextText = family === 'shadcn' ? 'Dark' : 'Pacific Standard Time (PST)';
+        const count = family === 'shadcn' ? 4 : 12;
+        await vi.waitFor(() => expect(x(rootRef).value.get()).toBe(initial));
+        expect(x(rootRef).getCollectionCount()).toBe(count);
         const trigger = host.querySelector<HTMLElement>('[role="combobox"]')!;
-        await vi.waitFor(() => expect(trigger.textContent?.trim()).toBe('System'));
-        trigger.click();
-        const content = await vi.waitFor(() => {
-          const listbox = document.getElementById(trigger.getAttribute('aria-controls')!);
-          expect(listbox).not.toBeNull();
-          return listbox!;
+        if (family === 'shadcn') {
+          expect(refs.selectedTheme.textContent).toBe('Selected: System');
+          await vi.waitFor(() => expect(trigger.textContent?.trim()).toBe('System'));
+          trigger.click();
+        } else {
+          api.call(rootRef, 'openDropdown', 'recipe');
+        }
+        let content!: HTMLElement;
+        await vi.waitFor(() => {
+          content = document.getElementById(trigger.getAttribute('aria-controls')!)!;
+          expect(content?.getAttribute('role')).toBe('listbox');
+          expect(content.querySelectorAll('[role="option"]')).toHaveLength(count);
         });
-        const option = (label: string) => {
-          const listbox = document.getElementById(trigger.getAttribute('aria-controls')!);
-          return Array.from(listbox?.querySelectorAll<HTMLElement>('[role="option"]') ?? []).find(
-            (item) => item.textContent?.trim() === label
+        if (family === 'brutalist') {
+          expect(content.style.maxHeight).toBe('200px');
+          expect(content.style.overflowY).toBe('auto');
+          expect(
+            api.call(rootRef, 'requestValue', {
+              value: 'est',
+              textValue: 'Eastern Standard Time (EST)',
+              reason: 'programmatic',
+            })
+          ).toBe(true);
+          await vi.waitFor(() => expect(x(rootRef).value.get()).toBe('est'));
+          refs[resetRef].click();
+          await vi.waitFor(() => expect(x(rootRef).value.get()).toBe(initial));
+        } else {
+          const unavailable = [...content.querySelectorAll('[role="option"]')].filter(
+            (item) => item.getAttribute('aria-disabled') === 'true'
           );
-        };
-        const disabled = await vi.waitFor(() => {
-          const item = option('High Contrast (Coming soon)');
-          expect(item?.getAttribute('aria-disabled')).toBe('true');
-          return item!;
-        });
-        disabled.click();
-        await flush();
-        expect(x('controlledSelect').value.get()).toBe('system');
-        expect(refs.selectedTheme.textContent).toContain('Selected: System');
-        expect(trigger.textContent?.trim()).toBe('System');
-        expect(trigger.getAttribute('aria-expanded')).toBe('true');
-        for (const activateDark of [
-          () => option('Dark')!.click(),
-          () =>
-            expect(
-              api.call('controlledSelect', 'requestValue', {
-                value: 'dark',
-                textValue: 'Dark',
-                reason: 'programmatic',
-              })
-            ).toBe(true),
-        ]) {
-          activateDark();
+          expect(unavailable).toHaveLength(1);
+          expect(unavailable[0].textContent).toBe('High Contrast (Coming soon)');
+          (unavailable[0] as HTMLElement).click();
+          await flush();
+          expect(x(rootRef).value.get()).toBe(initial);
+          expect(refs.selectedTheme.textContent).toBe('Selected: System');
+          expect(trigger.textContent?.trim()).toBe('System');
+          expect(trigger.getAttribute('aria-expanded')).toBe('true');
+          const dark = [...content.querySelectorAll<HTMLElement>('[role="option"]')].find(
+            (item) => item.textContent?.trim() === 'Dark'
+          )!;
+          dark.click();
           await vi.waitFor(() => {
-            expect(x('controlledSelect').value.get()).toBe('dark');
+            expect(x(rootRef).value.get()).toBe(next);
             expect(trigger.textContent?.trim()).toBe('Dark');
-            expect(refs.selectedTheme.textContent).toContain('Selected: Dark');
+            expect(refs.selectedTheme.textContent).toBe('Selected: Dark');
           });
-          refs.resetTheme.click();
+          refs[resetRef].click();
           await vi.waitFor(() => {
-            expect(x('controlledSelect').value.get()).toBe('system');
+            expect(x(rootRef).value.get()).toBe(initial);
             expect(trigger.textContent?.trim()).toBe('System');
-            expect(refs.selectedTheme.textContent).toContain('Selected: System');
+            expect(refs.selectedTheme.textContent).toBe('Selected: System');
           });
         }
-        const refusedThemes: string[] = [];
-        api.setProps('controlledSelect', {
-          value: 'system',
-          onValueChange: (event: { value: string }) => {
-            refusedThemes.push(event.value);
-          },
-        });
+        // The actual public owner now accepts changes and exposes Reset. Keep
+        // refusal coverage by supplying an ordinary controlled-owner callback.
+        expect(
+          api.call(rootRef, 'requestValue', {
+            value: next,
+            textValue: nextText,
+            reason: 'programmatic',
+          })
+        ).toBe(true);
+        await vi.waitFor(() => expect(x(rootRef).value.get()).toBe(next));
+        if (family === 'shadcn') {
+          expect(refs.selectedTheme.textContent).toBe('Selected: Dark');
+          expect(trigger.textContent?.trim()).toBe('Dark');
+        }
+        refs[resetRef].click();
+        await vi.waitFor(() => expect(x(rootRef).value.get()).toBe(initial));
+        if (family === 'shadcn') {
+          expect(refs.selectedTheme.textContent).toBe('Selected: System');
+          expect(trigger.textContent?.trim()).toBe('System');
+        }
+        const requests = vi.fn();
+        api.setProps(rootRef, { onValueChange: requests });
         await flush();
         expect(
-          api.call('controlledSelect', 'requestValue', {
-            value: 'light',
-            textValue: 'Light',
+          api.call(rootRef, 'requestValue', {
+            value: next,
+            textValue: nextText,
             reason: 'programmatic',
           })
         ).toBe(true);
         await flush();
-        expect(refusedThemes).toEqual(['light']);
-        expect(x('controlledSelect').value.get()).toBe('system');
-        expect(trigger.textContent?.trim()).toBe('System');
+        expect(requests).toHaveBeenCalledOnce();
+        expect(requests.mock.calls[0][0]).toMatchObject({ value: next, reason: 'programmatic' });
+        expect(x(rootRef).value.get()).toBe(initial);
+        api.setProps(rootRef, { value: next });
+        await vi.waitFor(() => expect(x(rootRef).value.get()).toBe(next));
+        expect(requests).toHaveBeenCalledOnce();
+        expect(trigger.textContent).toContain(nextText);
         await view.destroy();
         cleaned = true;
         await flush();
@@ -219,46 +205,44 @@ for (const [family, demo] of Object.entries({
         expect(content.isConnected).toBe(false);
         return;
       }
-
-      await vi.waitFor(() => expect(x('timezoneSelect').value.get()).toBe('jst'));
-      expect(x('timezoneSelect').getCollectionCount()).toBe(12);
-      api.call('timezoneSelect', 'openDropdown', 'recipe');
+      await vi.waitFor(() => expect(x('select').value.get()).toBe('alpha'));
+      expect(x('select').getCollectionCount()).toBe(18);
+      expect(x('item3').disabled.get()).toBe(true);
+      api.call('select', 'openDropdown', 'recipe');
+      await vi.waitFor(() => expect(refs.selectViewport).toBeDefined());
+      const viewport = refs.selectViewport;
+      expect(viewport.style.maxHeight).toBe('180px');
+      expect(viewport.style.overflowY).toBe('auto');
+      refs.toggleRefusal.click();
       await flush();
-      const content = document.body.querySelector<HTMLElement>('[role="listbox"]');
-      expect(content).not.toBeNull();
-      expect(content!.style.maxHeight).toBe('200px');
-      expect(content!.style.overflowY).toBe('auto');
+      expect(refs.selectPolicy.textContent).toContain('controlled-refusal');
       expect(
-        api.call('timezoneSelect', 'requestValue', {
-          value: 'est',
-          textValue: 'Eastern Standard Time (EST)',
-          reason: 'programmatic',
-        })
-      ).toBe(true);
-      await vi.waitFor(() => expect(x('timezoneSelect').value.get()).toBe('est'));
-      refs.resetTimezone.click();
-      await vi.waitFor(() => expect(x('timezoneSelect').value.get()).toBe('jst'));
-      const refusedZones: string[] = [];
-      api.setProps('timezoneSelect', {
-        value: 'jst',
-        onValueChange: (event: { value: string }) => {
-          refusedZones.push(event.value);
-        },
-      });
-      await flush();
-      expect(
-        api.call('timezoneSelect', 'requestValue', {
-          value: 'pst',
-          textValue: 'Pacific Standard Time (PST)',
+        api.call('select', 'requestValue', {
+          value: 'beta',
+          textValue: 'beta',
           reason: 'programmatic',
         })
       ).toBe(true);
       await flush();
-      expect(refusedZones).toEqual(['pst']);
-      expect(x('timezoneSelect').value.get()).toBe('jst');
+      expect(x('select').value.get()).toBe('alpha');
+      expect(refs.selectRequests.textContent).toContain('requested=beta');
+      refs.toggleRefusal.click();
+      await flush();
+      expect(
+        api.call('select', 'requestValue', {
+          value: 'gamma',
+          textValue: 'gamma',
+          reason: 'programmatic',
+        })
+      ).toBe(true);
+      await flush();
+      expect(x('select').value.get()).toBe('gamma');
+      expect(x('item2').selected.get()).toBe(true);
+      expect(refs.selectPolicy.textContent).toContain('owner=uncontrolled value=gamma');
+      const content = refs.selectContent;
       await view.destroy();
       cleaned = true;
       await flush();
       expect(host.childElementCount).toBe(0);
-      expect(content!.isConnected).toBe(false);
+      expect(content.isConnected).toBe(false);
     });

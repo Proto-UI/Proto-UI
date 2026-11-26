@@ -1,0 +1,41 @@
+{
+  "baseCommit": "5c79265311db7d8f3b7ff5b32c5442c99876b207",
+  "path": "apps/www/src/components/PrototypePreviewer/toast-registration.test.ts",
+  "sha256": "4791cae2e74377ff772dda6c74ea3c538fd83b3a6e5c594331c8ce8f7751f8a7",
+  "diagnosis": "Deterministic stale exact default-demo atom set, not timeout or resources. PR1835 changed default Shadcn demo to three-item stack using Action/timer and removed only optional Close from that example.",
+  "authority": [
+    {
+      "path": "packages/prototypes/base/src/toast/shared.ts",
+      "fact": "TOAST_FAMILY close cardinality min0 max1."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-shadcn-toast.demo.ts",
+      "fact": "Three STACK_ITEMS use Undo Action and 5000ms timer; no Close part."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-persistent.demo.ts",
+      "fact": "Persistent public example still uses shadcn-toast-close."
+    },
+    {
+      "url": "https://github.com/Proto-UI/Proto-UI/commit/5f0844907895a4ae0db506fe6a5d0bf162318329",
+      "fact": "PR1835 exact diff introduced stack and removed optional Close from default example."
+    }
+  ],
+  "repair": "Keep exact authored default-demo atom equality; exclude only shadcn-toast-close from that default set. Independently load and verify every published TOAST_ROLE including Close, plus authored style-scope. No default demo/runtime production change.",
+  "before": {
+    "focused": "/tmp/cb5d-toast-registration-current.json",
+    "passed": 19,
+    "failed": 1,
+    "failureDurationMs": 21.798810999999887,
+    "fullGeneral": "/home/ezra/proto-ui-gate-candidate-cb5d-control/runtime.json",
+    "fullFailureDurationMs": 18.4635770000001
+  },
+  "after": {
+    "path": "/tmp/cb5d-toast-registration-fixed.json",
+    "sha256": "80a08274fee861685dbf76981970ff30b00f008264662364a844164fee50838c",
+    "total": 20,
+    "passed": 20,
+    "failed": 0
+  },
+  "preserved": "Original complete20 cases, all5 families, both locales, runtime selector, sidebar and all published loader assertions; 30000ms unchanged."
+}

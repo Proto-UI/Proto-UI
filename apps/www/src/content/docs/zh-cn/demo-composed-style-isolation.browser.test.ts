@@ -15,12 +15,52 @@ import {
   startServer,
   stopServer,
 } from './browser-harness';
-import { SHADCN_SWITCH_DEMO_CASES } from './switch-demo-fixture';
 
 /** Source-aligned Brutalist has a flat Thumb; Root alone owns the focus ring. */
 const BRUTALIST_SWITCH_ROUTE = '/en/ui-libraries/brutalist/components/switch/';
 /** The ordinary documentation consumer explicitly selects the Rhea shared scope. */
 const SHADCN_SWITCH_ROUTE = '/en/ui-libraries/shadcn/switch/';
+// The public hero, size comparison and disabled comparison now own separate
+// examples. Retain both sizes in both checked states and the disabled boundary.
+const PUBLIC_SWITCH_CASES = [
+  { demo: 'demo-shadcn-switch-sizes', name: 'Small', size: 'sm', checked: false, disabled: false },
+  {
+    demo: 'demo-shadcn-switch-sizes',
+    name: 'Small',
+    size: 'sm',
+    checked: true,
+    disabled: false,
+    selectWithPointer: true,
+  },
+  {
+    demo: 'demo-shadcn-switch',
+    name: 'Airplane Mode',
+    size: 'default',
+    checked: false,
+    disabled: false,
+  },
+  {
+    demo: 'demo-shadcn-switch-sizes',
+    name: 'Default',
+    size: 'default',
+    checked: true,
+    disabled: false,
+  },
+  {
+    demo: 'demo-shadcn-switch-disabled',
+    name: 'Disabled (off)',
+    size: 'default',
+    checked: false,
+    disabled: true,
+  },
+  {
+    demo: 'demo-shadcn-switch-disabled',
+    name: 'Disabled (on)',
+    size: 'default',
+    checked: true,
+    disabled: true,
+  },
+] as const;
 /** P-SHADCN-SWITCH-RHEA-SURFACE; source units, not rendered measurements. */
 const RHEA_SWITCH_REM_GEOMETRY = {
   default: { width: 2, height: 1.25, thumb: 1 },
@@ -215,25 +255,36 @@ describe.sequential('composed style isolation browser regressions', () => {
     });
     try {
       await page.goto(`${baseUrl}${SHADCN_SWITCH_ROUTE}`, { waitUntil: 'networkidle' });
-      const previewer = page.locator('[data-demo-id="demo-shadcn-switch-sizes"]');
+      const previewer = page.locator('[data-demo-id="demo-shadcn-switch"]');
       await previewer.waitFor({ state: 'visible' });
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
         current = undefined;
         phase = `select-runtime:${runtime}`;
-        await selectRuntime(
-          page,
-          previewer,
-          runtime,
-          '[role="switch"]',
-          SHADCN_SWITCH_DEMO_CASES.length
-        );
+        for (const [demo, count] of [
+          ['demo-shadcn-switch', 1],
+          ['demo-shadcn-switch-sizes', 2],
+          ['demo-shadcn-switch-disabled', 2],
+        ] as const)
+          await selectRuntime(
+            page,
+            page.locator(`[data-demo-id="${demo}"]`),
+            runtime,
+            '[role="switch"]',
+            count
+          );
         await applyColorScheme(page, 'light');
-        // Verify all five named examples, including both newly added small states.
-        for (const variant of SHADCN_SWITCH_DEMO_CASES) {
+        for (const variant of PUBLIC_SWITCH_CASES) {
           phase = `geometry:${runtime}/${variant.size}/${variant.name}`;
-          const target = previewer.getByRole('switch', { name: variant.name, exact: true });
+          const target = page
+            .locator(`[data-demo-id="${variant.demo}"] .host`)
+            .getByRole('switch', { name: variant.name, exact: true });
           expect(await target.count(), `${runtime}/${variant.name}/unique`).toBe(1);
+          if ('selectWithPointer' in variant) {
+            expect(await target.getAttribute('aria-checked')).toBe('false');
+            await target.click();
+            await expect.poll(() => target.getAttribute('aria-checked')).toBe('true');
+          }
           expect(await target.getAttribute('aria-checked')).toBe(String(variant.checked));
           expect(await target.getAttribute('aria-disabled')).toBe(String(variant.disabled));
           const geometry = await target.evaluate((element) => {
@@ -268,9 +319,13 @@ describe.sequential('composed style isolation browser regressions', () => {
           );
         }
         // Exercise both sizes in both checked states without changing disabled examples.
-        for (const variant of SHADCN_SWITCH_DEMO_CASES.filter((entry) => !entry.disabled)) {
+        for (const variant of PUBLIC_SWITCH_CASES.filter(
+          (entry) => !entry.disabled && !entry.checked
+        )) {
           phase = `pressed:${runtime}/${variant.size}/${variant.name}`;
-          const root = previewer.getByRole('switch', { name: variant.name, exact: true });
+          const root = page
+            .locator(`[data-demo-id="${variant.demo}"] .host`)
+            .getByRole('switch', { name: variant.name, exact: true });
           for (const checked of [false, true]) {
             current = {
               runtime,
@@ -300,6 +355,7 @@ describe.sequential('composed style isolation browser regressions', () => {
               resting.thumb,
               `${runtime}/${variant.size}/${checked}/resting-thumb`
             ).toBeCloseTo(1, 3);
+            await root.scrollIntoViewIfNeeded();
             const box = await root.boundingBox();
             if (!box) throw new Error('The Switch Root must be laid out.');
             current.phase = 'pointer-down';
@@ -414,6 +470,7 @@ describe.sequential('composed style isolation browser regressions', () => {
                 sourcePin: '3d98900e9b73c45f035f8109e9d41ba6a51685e7',
                 sourcePath: 'apps/v4/registry/styles/style-rhea.css',
                 sourceBlob: '94bbca2a7f78845e7cfbcff68fb8f535e3848a98',
+                publicDemos: [...new Set(PUBLIC_SWITCH_CASES.map((variant) => variant.demo))],
                 phase,
                 failure,
                 records,

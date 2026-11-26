@@ -1,0 +1,487 @@
+{
+  "baseRevision": "5f0844907895a4ae0db506fe6a5d0bf162318329",
+  "worktree": "/home/ezra/proto-ui-browser-gate-cb5d",
+  "checkoutState": "isolated dirty candidate; not official clean-head CI",
+  "candidateFiles": [
+    {
+      "path": "packages/prototypes/brutalist/src/tooltip/content.proto.ts",
+      "sha256": "44b27153212302c3abb0496b32c340d855cd0e696770171538d00ba467c5ee3e"
+    },
+    {
+      "path": "packages/prototypes/brutalist/test/tooltip.test.ts",
+      "sha256": "56f40c8d0d7658198c3129c957aed455932d8f4cc1e271749eb3231c7cc56f27"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts",
+      "sha256": "15b4b0f2e9f98befcbc027e82af7dd28632eb4ded4956f1b8337c6019c07afb8"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-tooltip.demo.ts",
+      "sha256": "49f3acc295c41e6acb3b9b074b4df43faabf9f921b714fc7b32e7553255e4bf1"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/tooltip/demo-brutalist-tooltip-disabled.demo.ts",
+      "sha256": "038cb49eeea56f333202caa2b5903f3eae88c269876bbf9da2b2cd3d1f84ec4c"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/tooltip/demo-brutalist-tooltip-shortcut.demo.ts",
+      "sha256": "be7463e83e1522ba5fbc416171c0ed246a9b71b82663b5bf3172b3b02767b688"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/tooltip/demo-brutalist-tooltip-sides.demo.ts",
+      "sha256": "d5e26176555d0a7f9e296bd885bb8a10ea0f786f092c534bc41a284492457ac5"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/components/tooltip.mdx",
+      "sha256": "7eb7035896261739e9849f4c2636055d9c9561b47e851272544aedc61eae1b1a"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/tooltip.mdx",
+      "sha256": "c5cacbb8fb937d0b59d614a089293d6004b3b2754c4d0688e00be1cd54d0a50b"
+    }
+  ],
+  "runs": [
+    {
+      "label": "controls-current-baseline",
+      "archive": "controls-current-baseline.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/controls-current-baseline.json",
+      "rawSha256": "7acbde43017db579d380af287581d766ab209f6788e846dc2e0f6f27dbb4fc1d",
+      "passed": 0,
+      "failed": 6,
+      "filtered": 4,
+      "cases": [
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions gives every Switch a non-empty accessible name in all runtimes",
+          "status": "failed",
+          "title": "gives every Switch a non-empty accessible name in all runtimes",
+          "duration": 5210.6937259999995,
+          "failureMessages": [
+            "AssertionError: wc: expected [ 'Airplane Mode', …(2) ] to deeply equal [ 'Email alerts', …(2) ]\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:807:32\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions keeps the Tabs Root bounds stable across selection in all runtimes",
+          "status": "failed",
+          "title": "keeps the Tabs Root bounds stable across selection in all runtimes",
+          "duration": 35172.390528,
+          "failureMessages": [
+            "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-previewer-id]').first().getByRole('tab', { name: 'Details' })\n\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:835:23\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions keeps Dropdown placement fixed while Trigger hover and press transforms change",
+          "status": "failed",
+          "title": "keeps Dropdown placement fixed while Trigger hover and press transforms change",
+          "duration": 24533.809932000004,
+          "failureMessages": [
+            "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at selectRuntime (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:231:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:865:9\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions composes the transparent Tooltip Group across all four Web hosts",
+          "status": "failed",
+          "title": "composes the transparent Tooltip Group across all four Web hosts",
+          "duration": 38433.053008999996,
+          "failureMessages": [
+            "locator.hover: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-previewer-id]').first().locator('[data-projection-content] .pui-runtime-preview-surface[data-demo-ref=\"__website_runtime_preview_surface__\"] [data-pui-root]').filter({ hasText: 'Hover or focus for details' }).last()\n\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:1024:28\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions keeps Textarea demo controls and logs readable in both themes and all runtimes",
+          "status": "failed",
+          "title": "keeps Textarea demo controls and logs readable in both themes and all runtimes",
+          "duration": 25022.76264100001,
+          "failureMessages": [
+            "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at selectRuntime (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:231:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:1393:9\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions contains the Textarea demo at 320px without document overflow",
+          "status": "failed",
+          "title": "contains the Textarea demo at 320px without document overflow",
+          "duration": 24947.68897399999,
+          "failureMessages": [
+            "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at selectRuntime (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:231:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:1476:9\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)"
+          ],
+          "meta": {}
+        }
+      ]
+    },
+    {
+      "label": "controls-current-core-color",
+      "archive": "controls-current-core-color.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/controls-current-core-color.json",
+      "rawSha256": "8b69cb9f7dd545b450f61bb4b70c71e67ea521e55822d97b0b359748ca76e5c8",
+      "passed": 0,
+      "failed": 3,
+      "filtered": 7,
+      "cases": [
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions composes the transparent Tooltip Group across all four Web hosts",
+          "status": "failed",
+          "title": "composes the transparent Tooltip Group across all four Web hosts",
+          "duration": 9964.556773,
+          "failureMessages": [
+            "AssertionError: wc/light: expected '10px' to be '5px' // Object.is equality\n    at expectTooltipPaint (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:1060:41)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:1133:28\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions keeps Textarea controls, labels and errors readable in both themes and all runtimes",
+          "status": "failed",
+          "title": "keeps Textarea controls, labels and errors readable in both themes and all runtimes",
+          "duration": 9015.837596000001,
+          "failureMessages": [
+            "AssertionError: demo-brutalist-textarea-invalid/error/native association: expected [] to have a length of 1 but got +0\n    at Proxy.<anonymous> (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1339:22)\n    at Proxy.<anonymous> (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at textareaSurfaceSelectors (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:102:61)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:1496:28\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions contains the Textarea demo at 320px without document overflow",
+          "status": "failed",
+          "title": "contains the Textarea demo at 320px without document overflow",
+          "duration": 5297.321930000002,
+          "failureMessages": [
+            "AssertionError: demo-brutalist-textarea-invalid/error/native association: expected [] to have a length of 1 but got +0\n    at Proxy.<anonymous> (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1339:22)\n    at Proxy.<anonymous> (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at textareaSurfaceSelectors (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:102:61)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:1573:28\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+          ],
+          "meta": {}
+        }
+      ]
+    },
+    {
+      "label": "controls-associations-and-tooltip-timeline",
+      "archive": "controls-associations-and-tooltip-timeline.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/controls-associations-and-tooltip-timeline.json",
+      "rawSha256": "c6daa37d9315f7c17690b954c312c485d02c855eb9af134394edd735f292ef28",
+      "passed": 2,
+      "failed": 1,
+      "filtered": 7,
+      "cases": [
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions composes the transparent Tooltip Group across all four Web hosts",
+          "status": "failed",
+          "title": "composes the transparent Tooltip Group across all four Web hosts",
+          "duration": 10358.364005999998,
+          "failureMessages": [
+            "AssertionError: wc/light: expected '5.73763px' to be '5px' // Object.is equality\n    at expectTooltipPaint (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:1089:41)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:1162:28\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions keeps Textarea controls, labels and errors readable in both themes and all runtimes",
+          "status": "passed",
+          "title": "keeps Textarea controls, labels and errors readable in both themes and all runtimes",
+          "duration": 34872.92252,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions contains the Textarea demo at 320px without document overflow",
+          "status": "passed",
+          "title": "contains the Textarea demo at 320px without document overflow",
+          "duration": 11591.421618,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ]
+    },
+    {
+      "label": "tooltip-owned-theme",
+      "archive": "tooltip-owned-theme.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/tooltip-owned-theme.json",
+      "rawSha256": "653d9ab9390bfa2cd1f278ebc8dbd239297d08d955002fc413340b7f20ee69af",
+      "passed": 0,
+      "failed": 1,
+      "filtered": 9,
+      "cases": [
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions composes the transparent Tooltip Group across all four Web hosts",
+          "status": "failed",
+          "title": "composes the transparent Tooltip Group across all four Web hosts",
+          "duration": 10574.604078,
+          "failureMessages": [
+            "AssertionError: wc/dark-repaint: expected 'rgb(245, 245, 245)' to be 'rgb(0, 0, 0)' // Object.is equality\n    at expectTooltipPaint (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:1122:40)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:1203:27\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+          ],
+          "meta": {}
+        }
+      ]
+    },
+    {
+      "label": "controls-current-contract",
+      "archive": "controls-current-contract.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/controls-current-contract.json",
+      "rawSha256": "301d226b3c6bcf0f117346aa473dd14ecb156c9368b0c99b258ce8dc781b96f3",
+      "passed": 5,
+      "failed": 2,
+      "filtered": 4,
+      "cases": [
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions gives every Switch a non-empty accessible name in all runtimes",
+          "status": "passed",
+          "title": "gives every Switch a non-empty accessible name in all runtimes",
+          "duration": 11737.429108,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions keeps the Tabs Root bounds stable across selection in all runtimes",
+          "status": "passed",
+          "title": "keeps the Tabs Root bounds stable across selection in all runtimes",
+          "duration": 12791.408862,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions keeps Dropdown placement fixed while Trigger hover and press transforms change",
+          "status": "passed",
+          "title": "keeps Dropdown placement fixed while Trigger hover and press transforms change",
+          "duration": 12791.558072,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions composes the transparent Tooltip Group across all four Web hosts",
+          "status": "failed",
+          "title": "composes the transparent Tooltip Group across all four Web hosts",
+          "duration": 15347.452138,
+          "failureMessages": [
+            "AssertionError: react/dark-repaint: expected 'rgb(130, 130, 130)' to be 'rgb(38, 38, 38)' // Object.is equality\n    at expectTooltipPaint (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:1120:44)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:1203:27\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions keeps every public Tooltip example in its own theme on first visible paint",
+          "status": "failed",
+          "title": "keeps every public Tooltip example in its own theme on first visible paint",
+          "duration": 7779.965507000001,
+          "failureMessages": [
+            "Error: Matcher did not succeed in 1000ms\n    at Proxy.<anonymous> (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/vi.DgezovHB.js:66:37)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts:1334:56\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions keeps Textarea controls, labels and errors readable in both themes and all runtimes",
+          "status": "passed",
+          "title": "keeps Textarea controls, labels and errors readable in both themes and all runtimes",
+          "duration": 40204.98503400001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions contains the Textarea demo at 320px without document overflow",
+          "status": "passed",
+          "title": "contains the Textarea demo at 320px without document overflow",
+          "duration": 12266.64022700001,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ]
+    },
+    {
+      "label": "tooltip-explicit-keyframes",
+      "archive": "tooltip-explicit-keyframes.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/tooltip-explicit-keyframes.json",
+      "rawSha256": "a16570e48428481515887578f6fec2afd0aeee19df0bc74fbb78ddb82bc648d0",
+      "passed": 2,
+      "failed": 0,
+      "filtered": 9,
+      "cases": [
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions composes the transparent Tooltip Group across all four Web hosts",
+          "status": "passed",
+          "title": "composes the transparent Tooltip Group across all four Web hosts",
+          "duration": 28136.682916000005,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions keeps every public Tooltip example in its own theme on first visible paint",
+          "status": "passed",
+          "title": "keeps every public Tooltip example in its own theme on first visible paint",
+          "duration": 61793.993617,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ]
+    },
+    {
+      "label": "controls-final-affected",
+      "archive": "controls-final-affected.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/controls-final-affected.json",
+      "rawSha256": "df487f97c722d17b7481024352e86119a43da93b251287ba15e4016312964dfb",
+      "passed": 7,
+      "failed": 0,
+      "filtered": 4,
+      "cases": [
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions gives every Switch a non-empty accessible name in all runtimes",
+          "status": "passed",
+          "title": "gives every Switch a non-empty accessible name in all runtimes",
+          "duration": 10324.332975,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions keeps the Tabs Root bounds stable across selection in all runtimes",
+          "status": "passed",
+          "title": "keeps the Tabs Root bounds stable across selection in all runtimes",
+          "duration": 10687.943388,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions keeps Dropdown placement fixed while Trigger hover and press transforms change",
+          "status": "passed",
+          "title": "keeps Dropdown placement fixed while Trigger hover and press transforms change",
+          "duration": 12383.679086,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions composes the transparent Tooltip Group across all four Web hosts",
+          "status": "passed",
+          "title": "composes the transparent Tooltip Group across all four Web hosts",
+          "duration": 27082.585548999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions keeps every public Tooltip example in its own theme on first visible paint",
+          "status": "passed",
+          "title": "keeps every public Tooltip example in its own theme on first visible paint",
+          "duration": 61483.35731399998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions contains Scroll Area and its scrollbar at 320px without document overflow",
+          "status": "skipped",
+          "title": "contains Scroll Area and its scrollbar at 320px without document overflow",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions projects one native WC Textarea focus target and its Brutalist ring by modality",
+          "status": "skipped",
+          "title": "projects one native WC Textarea focus target and its Brutalist ring by modality",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions keeps Textarea controls, labels and errors readable in both themes and all runtimes",
+          "status": "passed",
+          "title": "keeps Textarea controls, labels and errors readable in both themes and all runtimes",
+          "duration": 35184.21225099999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions contains the Textarea demo at 320px without document overflow",
+          "status": "passed",
+          "title": "contains the Textarea demo at 320px without document overflow",
+          "duration": 11247.966723999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions rings the focused Scroll Area inside its own box, in both themes and all runtimes",
+          "status": "skipped",
+          "title": "rings the focused Scroll Area inside its own box, in both themes and all runtimes",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Brutalist control documentation browser regressions"],
+          "fullName": "Brutalist control documentation browser regressions repaints theme-following Button fills on a host theme change in all runtimes",
+          "status": "skipped",
+          "title": "repaints theme-following Button fills on a host theme change in all runtimes",
+          "failureMessages": [],
+          "meta": {}
+        }
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "archive": "tooltip-border-negative-unit.json.gz",
+      "rawPath": "/tmp/cb5d-browser-control/tooltip-border-negative-unit.json",
+      "rawSha256": "dd72993121611054af8f4d3eb633480376d0992d605877f7b4d16859c55ba1a8"
+    },
+    {
+      "archive": "tooltip-border-candidate-unit.json.gz",
+      "rawPath": "/tmp/cb5d-browser-control/tooltip-border-candidate-unit.json",
+      "rawSha256": "07d7f867b371b3993ab936af1d368b6245a9f403e1445daa16fe88da38bc8beb"
+    },
+    {
+      "archive": "tooltip-final-unit.json.gz",
+      "rawPath": "/tmp/cb5d-browser-control/tooltip-final-unit.json",
+      "rawSha256": "8db8154bf75ccf03c2128bdda637da5a235e3505b6c080bbee79f571ffccd2c6"
+    },
+    {
+      "archive": "tooltip-theme-history.json.gz",
+      "rawPath": "/tmp/cb5d-browser-control/tooltip-theme-history.json",
+      "rawSha256": "d2bdb5332bc2b41d9e5dc8db19f350fa52167ef719d8c16f490468c959f110b8"
+    },
+    {
+      "archive": "tooltip-public-docs.log.gz",
+      "rawPath": "/tmp/cb5d-browser-control/tooltip-public-docs.log",
+      "rawSha256": "61fc0bd3947e40d1cd9c27129cc0020f24f4d804de441d0539c6387e9fdb104c"
+    },
+    {
+      "archive": "theme-transition-negative.log.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/controls-associations-and-tooltip-timeline.log",
+      "rawSha256": "0a4fbe2a05ddc887d8bbe60f69d7b680f7bbbb96a2234841639d3d46b829d906"
+    },
+    {
+      "archive": "public-example-motion.json.gz",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-eighteenth-5f084490/tooltip/public-example-motion.json",
+      "rawSha256": "773e2caa562c12cfb86d4dbe9e31a6bf7d274d04d1b8ab65924f72e05b10343c"
+    }
+  ],
+  "finalStyleClosure": {
+    "archive": "tooltip-final-style-closure.log.gz",
+    "rawSha256": "cb86a222d19fd49efcd9333ff93813affc4c98c4bf58358e4305cc1bdccdaaa2",
+    "result": "Brutalist preset token and theme manifests are current (737 tokens)."
+  },
+  "finalNativeMotion": {
+    "remotePath": "/home/ezra/proto-ui-browser-gate-cb5d-control/evidence-nineteenth-5f084490/tooltip/public-example-motion.json",
+    "sha256": "fbc8ba870dec218b0a4fbe387cadab4d21e8eb650cac618588ebffa265cc39b7"
+  }
+}

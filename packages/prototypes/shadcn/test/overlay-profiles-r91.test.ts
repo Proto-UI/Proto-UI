@@ -394,8 +394,11 @@ describe('source-bound overlay style owners', () => {
     setElementProps(scope, { styleProfile: 'new-york-v4' });
     await flush();
     expect(tokens(content)).toContain('text-balance');
-    expect(tokens(content)).toContain('bg-primary');
-    expect(tokens(content)).toContain('text-primary-foreground');
+    expect(tokens(content)).toEqual(
+      expect.arrayContaining(['max-w-80', 'gap-1.5', 'bg-primary', 'text-primary-foreground'])
+    );
+    expect(tokens(content)).not.toContain('bg-foreground');
+    expect(tokens(content)).not.toContain('text-background');
     expect(root.getExposes().open).toBe(open);
     expect(open.get()).toBe(true);
     expect(content.getAttribute('role')).toBe('tooltip');

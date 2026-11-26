@@ -1,0 +1,86 @@
+{
+  "kind": "local-ci-source-reconciliation",
+  "date": "2026-11-26",
+  "previousSourceRevision": "d10d0e72b305bf9228f3e92ee1677cab19120d77",
+  "reviewedSourceRevision": "0327eac24b4a07beb4ec3dbe71ade765a07c5aed",
+  "scope": "Exact source fingerprints and test-only root classification for the existing Website consumer wall.",
+  "sources": [
+    {
+      "path": "apps/www/src/components/Homepage/homepage-runtime-client.ts",
+      "previousSha256": "04ab0568d223ab7cc0fea4caf3056f9a3488c76f2a5ef082b724ab10fae8a2bd",
+      "sha256": "8950741f89aac7159d06a9184a1114b2a90c3e5cd6c65472e66970fe4a82f518",
+      "review": "Recognize the native announcement pill so its passive inner Surface does not introduce another minimum line box."
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-theme.ts",
+      "previousSha256": "8f944d960b3f435b5af9a48ca38ca1856003536755f8ef1d2357de93f538fe0d",
+      "sha256": "eef363417f1fd7e01e3c4460be4a71fc8563a174d8eb5192182d0c154bd77f8e",
+      "review": "Add the internal replace-batch publication mode, retaining authored declarations, priorities, shorthand behavior and reentrant ownership."
+    },
+    {
+      "path": "apps/www/src/components/site-typography.ts",
+      "previousSha256": "9da41374b7379af51514477115d210076eb54fea9555c300be33bd1b61ba4b74",
+      "sha256": "efa045ac360cb01c468b2153315f36d9ecfa4af550f706cb3fb06c64a31c559b",
+      "review": "Use the reviewed atomic theme publication mode for existing typography owners."
+    },
+    {
+      "path": "packages/modules/feedback/src/motion/projector.ts",
+      "previousSha256": "2408989649ea882ad3ff9ba735e88839798312eaaf66e6ed96d5d36459702359",
+      "sha256": "7625cd105c0a63f49becab3662c8f7ac3c09cbbe0f1c8b38ed35b3f26d586b1d",
+      "review": "Preserve pending percent-width basis observation and complete palette state before synchronous observation cleanup can reenter."
+    }
+  ],
+  "importBoundary": {
+    "source": "packages/modules/feedback/src/motion/projector.ts",
+    "specifiers": [
+      "./color",
+      "./sampler",
+      "./sink",
+      "./targets",
+      "@proto.ui/core",
+      "@proto.ui/core/internal"
+    ],
+    "change": "Source bytes renewed after the bounded motion repair; the six allowed import strings and existing build-time owner remain unchanged."
+  },
+  "testOnlyRoots": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/site-search-browser.ts",
+      "role": "Shared Vitest/Playwright acquisition, cleanup and observation for the original activation, layout and menu browser suites.",
+      "importers": [
+        "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts"
+      ]
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/site-search-close-focus-evidence.ts",
+      "role": "Test-owned trusted Close-click and current-opener focus observation; it never focuses controls or changes projection/readiness state.",
+      "importers": [
+        "apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/site-search-close-focus-evidence.test.ts"
+      ]
+    }
+  ],
+  "productionReachability": "The existing traversal still restores either helper and its complete dependency closure when reached from any production seed. Each new exact path has the same unreachable/reached negative control as the two historical test helpers.",
+  "localEvidence": [
+    {
+      "command": "corepack pnpm@10.32.1 exec vitest run apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+      "revision": "0ee5c606be88dc39f3782067d53c9d40eac45319",
+      "result": "17 passed; generated style prerequisite supplied; original test assertions and budgets retained."
+    },
+    {
+      "scope": "Atomic theme publication",
+      "result": "12 new unit cases passed in the complete 195-case theme selection; 14 actual Chromium controls passed, including cascade and reentrant ownership."
+    },
+    {
+      "scope": "Pending percent-width basis",
+      "result": "113 unit cases passed in the combined source validation; 14 candidate native browser paths passed, retaining original adoption, cleanup and callback boundaries."
+    }
+  ],
+  "limits": [
+    "This is a local source review for metadata reconciliation, not platform approval or release admission.",
+    "No Website row, lifecycle status, owner, denominator or runtime acceptance state changes.",
+    "The exact latest commit still requires canonical CI and the original production browser gates.",
+    "The full coverage-matrix failure before this repair is preserved; focused controls do not replace the full gate."
+  ]
+}

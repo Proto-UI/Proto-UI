@@ -2,9 +2,24 @@ import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
 
 const SIDES = [
   { side: 'top', label: 'Top', title: 'Top Drawer', description: 'Slides down from the top edge.' },
-  { side: 'right', label: 'Right', title: 'Right Drawer', description: 'Slides in from the right edge.' },
-  { side: 'bottom', label: 'Bottom', title: 'Bottom Drawer', description: 'Slides up from the bottom edge.' },
-  { side: 'left', label: 'Left', title: 'Left Drawer', description: 'Slides in from the left edge.' },
+  {
+    side: 'right',
+    label: 'Right',
+    title: 'Right Drawer',
+    description: 'Slides in from the right edge.',
+  },
+  {
+    side: 'bottom',
+    label: 'Bottom',
+    title: 'Bottom Drawer',
+    description: 'Slides up from the bottom edge.',
+  },
+  {
+    side: 'left',
+    label: 'Left',
+    title: 'Left Drawer',
+    description: 'Slides in from the left edge.',
+  },
 ] as const;
 
 export default {
@@ -29,6 +44,7 @@ export default {
         {
           kind: 'proto' as const,
           prototypeId: 'brutalist-drawer-content',
+          ref: `${item.side}-content`,
           previewTheme: 'portal',
           props: { side: item.side },
           children: [

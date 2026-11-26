@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "status": "focused-candidate-validation; integrated Actions pending",
+  "baseCommit": "fbe8f5d9dd573d869430f69301e0b5aa8214e54e",
+  "group": {
+    "id": "browser-inventory-registration-and-planning",
+    "files": [
+      {
+        "path": "scripts/test/runtime-test-plan.mjs",
+        "sha256": "0f03eefd0471049e4501c9845f9271e5d65a9240d466ab629f636f0cbe048137"
+      }
+    ],
+    "scope": "Register complete new Thumb browser suite; reserve Field current public+companion run cost honestly.",
+    "evidence": {
+      "path": "/tmp/cb5d-field-thumb-runtime-inventory.log",
+      "passed": 149,
+      "failed": 0,
+      "shards": 18,
+      "thumbPlanningSeconds": 120,
+      "fieldPlanningSeconds": 300,
+      "highestShardEstimateSeconds": 712
+    },
+    "limits": [
+      "Field reserve is an explicit local planning estimate from 280.9s, not fabricated historical official run evidence.",
+      "No suite omitted or skipped; unchanged 18-shard count and capacity assertions."
+    ]
+  },
+  "verification": {
+    "specAuthoring": "/tmp/cb5d-thumb-spec-authoring-final.log",
+    "specGraph": {
+      "path": "/tmp/cb5d-thumb-spec-graph.json",
+      "passed": 5,
+      "failed": 0
+    },
+    "proportionalTypes": {
+      "path": "/tmp/cb5d-thumb-field-types.json",
+      "ownedFiles": 12,
+      "ownedErrors": 0,
+      "transitiveDiagnostics": 97,
+      "claim": "Only owned-file zero errors; not full application/workspace typecheck."
+    },
+    "catalogTracking": "New files must be committed by parent before catalog-integrity Git-tracking check can truthfully pass."
+  }
+}

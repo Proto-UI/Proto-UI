@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { copySourceBindingIssues } from './copy-command-evidence';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { Browser, Page } from 'playwright-core';
+import type { Browser, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   RUNTIMES,
@@ -19,15 +19,39 @@ import {
 
 const TEXTAREA_ROUTE = '/en/ui-libraries/shadcn/textarea/';
 const CHECKBOX_ROUTE = '/en/ui-libraries/shadcn/checkbox/';
-const TEXTAREA_DEMO = '[data-demo-id="demo-shadcn-textarea"]';
-const CHECKBOX_DEMO = '[data-demo-id="demo-shadcn-checkbox"]';
 
-/** The hero demo order: unchecked, checked with description, disabled, and checked card. */
+// The current public hero owns a local Runtime toolbar. Checkbox mixed state
+// lives in its separate controlled example; all five semantic cases remain.
+async function selectPublicControlRuntime(
+  page: Page,
+  previewer: Locator,
+  runtime: (typeof RUNTIMES)[number],
+  readySelector: string,
+  expectedCount: number
+): Promise<void> {
+  expect(await previewer.getAttribute('data-projection-toolbar')).toBe('true');
+  await selectRuntime(page, previewer, runtime, readySelector, expectedCount);
+  if (readySelector === '[role="checkbox"]') {
+    const controlled = page.locator('[data-demo-id="demo-shadcn-checkbox-controlled"]');
+    await selectRuntime(page, controlled, runtime, '[role="checkbox"]', 1);
+  }
+}
+
+/** Semantic order: hero unchecked/checked, controlled mixed, hero disabled/card. */
+function checkboxLocators(page: Page): Locator[] {
+  const hero = page.locator('[data-demo-id="demo-shadcn-checkbox"] .host [role="checkbox"]');
+  const mixed = page.locator(
+    '[data-demo-id="demo-shadcn-checkbox-controlled"] .host [role="checkbox"]'
+  );
+  return [hero.nth(0), hero.nth(1), mixed, hero.nth(2), hero.nth(3)];
+}
+
 const UNCHECKED = 0;
 const CHECKED = 1;
-const DISABLED = 2;
-const CARD_CHECKED = 3;
-const CHECKBOX_COUNT = 4;
+const MIXED = 2;
+const DISABLED = 3;
+const FOCUS_TARGET = 4;
+const CHECKBOX_COUNT = 5;
 
 /** The demo selects Rhea: these two properties, 200ms, and the generated easing. */
 const TRANSITION_PROPERTY = 'color, box-shadow';
@@ -47,18 +71,25 @@ type BoxPaint = {
  * the colour is resolved through a canvas rather than compared as a string.
  */
 async function boxPaints(page: Page): Promise<BoxPaint[]> {
-  return page.evaluate((selector) => {
+  return page.evaluate(() => {
     const canvas = document.createElement('canvas');
     canvas.width = 1;
     canvas.height = 1;
     const context = canvas.getContext('2d', { willReadFrequently: true });
     if (!context) throw new Error('Canvas 2D context is required to resolve painted colours.');
 
-    const boxes = [...document.querySelectorAll(`${selector} [role="checkbox"]`)];
+    const hero = [
+      ...document.querySelectorAll('[data-demo-id="demo-shadcn-checkbox"] .host [role="checkbox"]'),
+    ];
+    const mixed = document.querySelector(
+      '[data-demo-id="demo-shadcn-checkbox-controlled"] .host [role="checkbox"]'
+    );
+    const boxes = [hero[0], hero[1], mixed, hero[2], hero[3]];
+    if (boxes.some((box) => !box)) throw new Error('Public Checkbox examples are incomplete.');
     return boxes.map((box) => {
       context.clearRect(0, 0, 1, 1);
       context.fillStyle = 'rgba(0,0,0,0)';
-      context.fillStyle = getComputedStyle(box).backgroundColor;
+      context.fillStyle = getComputedStyle(box!).backgroundColor;
       context.fillRect(0, 0, 1, 1);
       const [r, g, b, a] = context.getImageData(0, 0, 1, 1).data;
 
@@ -67,13 +98,13 @@ async function boxPaints(page: Page): Promise<BoxPaint[]> {
         alpha: a / 255,
         // The Root is the only node the projection may put in tab order.
         rootFocusable: (box as HTMLElement).tabIndex >= 0,
-        focusableInside: [...box.querySelectorAll('*')].filter(
+        focusableInside: [...box!.querySelectorAll('*')].filter(
           (node) => (node as HTMLElement).tabIndex >= 0
         ).length,
-        glyphs: box.querySelectorAll('svg').length,
+        glyphs: box!.querySelectorAll('svg').length,
       };
     });
-  }, CHECKBOX_DEMO);
+  });
 }
 
 /**
@@ -84,11 +115,22 @@ async function boxPaints(page: Page): Promise<BoxPaint[]> {
  */
 async function waitForGlyphs(page: Page): Promise<void> {
   await page.waitForFunction(
-    ({ selector, expected }) =>
-      [...document.querySelectorAll(`${selector} [role="checkbox"]`)]
-        .map((box) => box.querySelectorAll('svg').length)
-        .join(',') === expected,
-    { selector: CHECKBOX_DEMO, expected: '0,1,0,1' },
+    () => {
+      const hero = [
+        ...document.querySelectorAll(
+          '[data-demo-id="demo-shadcn-checkbox"] .host [role="checkbox"]'
+        ),
+      ];
+      const mixed = document.querySelector(
+        '[data-demo-id="demo-shadcn-checkbox-controlled"] .host [role="checkbox"]'
+      );
+      const boxes = [hero[0], hero[1], mixed, hero[2], hero[3]];
+      return (
+        boxes.every(Boolean) &&
+        boxes.map((box) => box!.querySelectorAll('svg').length).join(',') === '0,1,1,0,1'
+      );
+    },
+    undefined,
     { timeout: 10_000 }
   );
 }
@@ -109,8 +151,10 @@ type EditorStyle = {
 
 async function waitForStableEditorProjection(page: Page): Promise<void> {
   await page.waitForFunction(
-    (selector) => {
-      const editor = document.querySelector<HTMLElement>(`${selector} textarea`);
+    () => {
+      const editor = document.querySelector<HTMLElement>(
+        '[data-demo-id="demo-shadcn-textarea"] .host textarea'
+      );
       if (
         !editor ||
         editor.hasAttribute('data-pui-view-pending') ||
@@ -121,14 +165,14 @@ async function waitForStableEditorProjection(page: Page): Promise<void> {
       const tokens = editor.getAttribute('data-pui-style')?.split(/\s+/) ?? [];
       return tokens.includes('transition-[color,box-shadow]') && tokens.includes('duration-200');
     },
-    TEXTAREA_DEMO,
+    undefined,
     { timeout: 20_000 }
   );
 }
 
 async function editorStyle(page: Page): Promise<EditorStyle> {
-  return page.evaluate((selector) => {
-    const editor = document.querySelector(`${selector} textarea`);
+  return page.evaluate(() => {
+    const editor = document.querySelector('[data-demo-id="demo-shadcn-textarea"] .host textarea');
     if (!editor) throw new Error('The shadcn Textarea demo must render a host-owned editor.');
     const style = getComputedStyle(editor);
 
@@ -152,12 +196,14 @@ async function editorStyle(page: Page): Promise<EditorStyle> {
       focusVisibleProjected: editor.hasAttribute('data-focus-visible'),
       nativeFocusVisible: editor.matches(':focus-visible'),
     };
-  }, TEXTAREA_DEMO);
+  });
 }
 
 async function focusEditorWithRealTab(page: Page): Promise<void> {
-  const prepared = await page.evaluate((selector) => {
-    const editor = document.querySelector<HTMLTextAreaElement>(`${selector} textarea`);
+  const prepared = await page.evaluate(() => {
+    const editor = document.querySelector<HTMLTextAreaElement>(
+      '[data-demo-id="demo-shadcn-textarea"] .host textarea'
+    );
     if (!editor) return false;
     const candidates = Array.from(
       document.querySelectorAll<HTMLElement>('a[href],button,input,select,textarea,[tabindex]')
@@ -174,13 +220,13 @@ async function focusEditorWithRealTab(page: Page): Promise<void> {
     if (index <= 0) return false;
     candidates[index - 1]!.focus();
     return document.activeElement === candidates[index - 1];
-  }, TEXTAREA_DEMO);
+  });
   if (!prepared) throw new Error('Unable to prepare the real Tab predecessor for the Textarea.');
   await page.keyboard.press('Tab');
-  const active = await page.evaluate((selector) => {
-    const editor = document.querySelector(`${selector} textarea`);
+  const active = await page.evaluate(() => {
+    const editor = document.querySelector('[data-demo-id="demo-shadcn-textarea"] .host textarea');
     return document.activeElement === editor;
-  }, TEXTAREA_DEMO);
+  });
   if (!active) throw new Error('Real Tab traversal did not reach the Shadcn Textarea editor.');
 }
 
@@ -363,7 +409,7 @@ describe.sequential('shadcn control documentation browser regressions', () => {
     try {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
-        await selectRuntime(page, previewer, runtime, 'textarea', 1);
+        await selectPublicControlRuntime(page, previewer, runtime, 'textarea', 1);
         const mountScope = await previewer.evaluate((root) => ({
           previewerRoots: root.querySelectorAll('[data-pui-root]').length,
           demoRoots:
@@ -372,8 +418,13 @@ describe.sequential('shadcn control documentation browser regressions', () => {
                 '.pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"]'
               )
               ?.querySelectorAll('[data-pui-root]').length ?? 0,
+          runtimeControlRoots:
+            root
+              .querySelector('[data-projection-control="runtime"]')
+              ?.querySelectorAll('[data-pui-root]').length ?? 0,
         }));
         expect(mountScope.previewerRoots).toBeGreaterThan(mountScope.demoRoots);
+        expect(mountScope.runtimeControlRoots).toBeGreaterThan(0);
         await waitForStableEditorProjection(page);
         await applyColorScheme(page, 'light');
         await page.waitForFunction(
@@ -382,11 +433,13 @@ describe.sequential('shadcn control documentation browser regressions', () => {
           { timeout: 10_000 }
         );
         await page.waitForFunction(
-          (selector) => {
-            const editor = document.querySelector(`${selector} textarea`);
+          () => {
+            const editor = document.querySelector(
+              '[data-demo-id="demo-shadcn-textarea"] .host textarea'
+            );
             return editor && getComputedStyle(editor).transitionProperty !== 'none';
           },
-          TEXTAREA_DEMO,
+          undefined,
           { timeout: 10_000 }
         );
 
@@ -411,7 +464,7 @@ describe.sequential('shadcn control documentation browser regressions', () => {
     try {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
-        await selectRuntime(page, previewer, runtime, 'textarea', 1);
+        await selectPublicControlRuntime(page, previewer, runtime, 'textarea', 1);
         await waitForStableEditorProjection(page);
         await applyColorScheme(page, 'light');
 
@@ -482,7 +535,7 @@ describe.sequential('shadcn control documentation browser regressions', () => {
     try {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
-        await selectRuntime(page, previewer, runtime, 'textarea', 1);
+        await selectPublicControlRuntime(page, previewer, runtime, 'textarea', 1);
         await waitForStableEditorProjection(page);
 
         // The background is outside the transition set, so each read is the
@@ -520,14 +573,15 @@ describe.sequential('shadcn control documentation browser regressions', () => {
     try {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
-        await selectRuntime(page, previewer, runtime, '[role="checkbox"]', CHECKBOX_COUNT);
+        await selectPublicControlRuntime(page, previewer, runtime, '[role="checkbox"]', 4);
 
         await applyColorScheme(page, 'light');
         const light = await boxPaints(page);
         // The Rhea resting box keeps the upstream translucent input fill.
         expect(light[UNCHECKED].alpha, `${runtime}/light-resting`).toBeCloseTo(0.9, 2);
         expect(light[CHECKED].alpha, `${runtime}/light-checked`).toBeGreaterThan(0);
-        expect(light[CARD_CHECKED].background, `${runtime}/light-card-checked`).toBe(
+        expect(light[MIXED].background, `${runtime}/light-mixed`).toBe(light[CHECKED].background);
+        expect(light[FOCUS_TARGET].background, `${runtime}/light-card-checked`).toBe(
           light[CHECKED].background
         );
 
@@ -540,10 +594,12 @@ describe.sequential('shadcn control documentation browser regressions', () => {
         expect(dark[CHECKED].background, `${runtime}/dark-checked`).not.toBe(
           dark[UNCHECKED].background
         );
-        expect(dark[CARD_CHECKED].background, `${runtime}/dark-card-checked`).toBe(
+        expect(dark[MIXED].background, `${runtime}/dark-mixed`).toBe(dark[CHECKED].background);
+        expect(dark[MIXED].alpha, `${runtime}/dark-mixed-alpha`).toBe(dark[CHECKED].alpha);
+        expect(dark[FOCUS_TARGET].background, `${runtime}/dark-card-checked`).toBe(
           dark[CHECKED].background
         );
-        expect(dark[CARD_CHECKED].alpha, `${runtime}/dark-card-checked-alpha`).toBe(
+        expect(dark[FOCUS_TARGET].alpha, `${runtime}/dark-card-checked-alpha`).toBe(
           dark[CHECKED].alpha
         );
 
@@ -580,7 +636,7 @@ describe.sequential('shadcn control documentation browser regressions', () => {
     try {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
-        await selectRuntime(page, previewer, runtime, '[role="checkbox"]', CHECKBOX_COUNT);
+        await selectPublicControlRuntime(page, previewer, runtime, '[role="checkbox"]', 4);
         await waitForGlyphs(page);
 
         const paints = await boxPaints(page);
@@ -589,27 +645,28 @@ describe.sequential('shadcn control documentation browser regressions', () => {
           // The Indicator is presentational, so it must never join tab order.
           expect(paint.focusableInside, `${runtime}/inside-${index}`).toBe(0);
         }
-        for (const index of [UNCHECKED, CHECKED, CARD_CHECKED]) {
+        for (const index of [UNCHECKED, CHECKED, MIXED, FOCUS_TARGET]) {
           expect(paints[index].rootFocusable, `${runtime}/root-focusable-${index}`).toBe(true);
         }
         // Base takes a disabled checkbox out of tab order, and the projection
         // must not hand it back.
         expect(paints[DISABLED].rootFocusable, `${runtime}/disabled-focusable`).toBe(false);
         expect(paints[CHECKED].glyphs, `${runtime}/checked-glyph`).toBe(1);
-        expect(paints[CARD_CHECKED].glyphs, `${runtime}/card-checked-glyph`).toBe(1);
+        expect(paints[MIXED].glyphs, `${runtime}/mixed-glyph`).toBe(1);
         expect(paints[UNCHECKED].glyphs, `${runtime}/unchecked-glyph`).toBe(0);
+        expect(paints[FOCUS_TARGET].glyphs, `${runtime}/card-checked-glyph`).toBe(1);
         expect(paints[DISABLED].glyphs, `${runtime}/disabled-glyph`).toBe(0);
 
         // The glyph hides its own root, so the checkbox is the only node the
         // accessibility tree reports for each instance.
-        const boxes = previewer.getByRole('checkbox');
+        const boxes = checkboxLocators(page);
         for (let index = 0; index < CHECKBOX_COUNT; index += 1) {
-          const snapshot = await boxes.nth(index).ariaSnapshot();
+          const snapshot = await boxes[index]!.ariaSnapshot();
           expect(snapshot.match(/^\s*- /gm) ?? [], `${runtime}/aria-${index}`).toHaveLength(1);
           expect(snapshot, `${runtime}/aria-role-${index}`).toContain('checkbox');
         }
-        const controls = previewer.locator('[role="checkbox"]');
-        const first = controls.nth(UNCHECKED);
+        const controls = checkboxLocators(page);
+        const first = controls[0]!;
         const labelId = await first.getAttribute('aria-labelledby');
         expect(labelId?.trim().split(/\s+/)).toHaveLength(1);
         const label = page.locator(`[id="${labelId}"]`);
@@ -618,10 +675,14 @@ describe.sequential('shadcn control documentation browser regressions', () => {
         expect(await label.evaluate((el) => getComputedStyle(el).userSelect)).toBe('none');
         await label.click();
         await expect.poll(() => first.getAttribute('aria-checked')).toBe('true');
-        expect(await controls.nth(CHECKED).getAttribute('aria-checked')).toBe('true');
+        expect(await controls[1]!.getAttribute('aria-checked')).toBe('true');
         await label.click();
         await expect.poll(() => first.getAttribute('aria-checked')).toBe('false');
-        const disabled = controls.nth(DISABLED);
+        const mixed = controls[2]!;
+        const mixedLabel = await mixed.getAttribute('aria-labelledby');
+        await page.locator(`[id="${mixedLabel}"]`).click();
+        await expect.poll(() => mixed.getAttribute('aria-checked')).toBe('true');
+        const disabled = controls[3]!;
         expect(await disabled.getAttribute('aria-checked')).toBe('false');
         expect(await disabled.getAttribute('aria-disabled')).toBe('true');
         await page.locator(`[id="${await disabled.getAttribute('aria-labelledby')}"]`).click();
@@ -640,7 +701,13 @@ describe.sequential('shadcn control documentation browser regressions', () => {
       await writeFile(
         path.join(evidence, `${commit}.json`),
         JSON.stringify(
-          { commit, route: CHECKBOX_ROUTE, runtimes: RUNTIMES, browser: browser.version() },
+          {
+            commit,
+            route: CHECKBOX_ROUTE,
+            publicDemos: ['demo-shadcn-checkbox', 'demo-shadcn-checkbox-controlled'],
+            runtimes: RUNTIMES,
+            browser: browser.version(),
+          },
           null,
           2
         )
