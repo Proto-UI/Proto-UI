@@ -205,6 +205,42 @@ describe('runtime mount ticket terminal consistency', () => {
     await session.dispose();
   });
 
+  it('settles a cancelled replacement mount before its obsolete commit signal fires', async () => {
+    const signals: CommitSignal[] = [];
+    const mounted = vi.fn();
+    let session!: ReturnType<typeof createRuntimeSession>;
+    let replacementSettled = false;
+    const host: RuntimeHost<any> = {
+      prototypeName: 'mount-cancel-nested-replacement',
+      getRawProps: () => ({}),
+      commit(_children, signal) {
+        if (signal) signals.push(signal);
+      },
+      schedule: (task) => queueMicrotask(task),
+      onLifecycleEvent(event) {
+        if (event.type === 'mount.commit.done' && event.epoch === 1) {
+          void session.unmount();
+          void session.mount().then(() => {
+            replacementSettled = true;
+          });
+          void session.unmount();
+        }
+      },
+    };
+
+    session = createRuntimeSession(createBasicProto(host.prototypeName, mounted), host);
+    const firstMount = session.mount();
+    signals[0]!.done();
+    await firstMount;
+    expect(replacementSettled).toBe(true);
+    expect(session.mountPhase).toBe('detached');
+    expect(mounted).not.toHaveBeenCalled();
+    signals[1]!.done();
+    expect(session.mountPhase).toBe('detached');
+    expect(mounted).not.toHaveBeenCalled();
+    await session.dispose();
+  });
+
   it('does not deadlock future updates if an async update CommitSignal.done observer throws', async () => {
     const pendingSignals: CommitSignal[] = [];
     const boom = new Error('update commit.done failed');

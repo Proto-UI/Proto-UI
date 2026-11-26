@@ -87,7 +87,6 @@ export function createRuntimeSession<P extends PropsBaseType>(
   let children: TemplateChildren = [];
   let updateState: { inFlight: boolean; queued: boolean };
   let mountPending: { observe: () => Promise<void>; invalidate: () => void } | undefined;
-  let mountHandoff = 0;
   let unmountPending: Promise<void> | undefined;
   let unmountVersion = 0;
   let unmountWaitingForPresence = false;
@@ -217,7 +216,8 @@ export function createRuntimeSession<P extends PropsBaseType>(
     epoch: number,
     updateRevision: number,
     onCommitted: () => void,
-    onDoneError?: (error: unknown) => void
+    onDoneError?: (error: unknown) => void,
+    mountTicket?: { handoffDepth: number }
   ) => {
     propsPort.syncFromHost();
     children = inst.renderOnce();
@@ -240,7 +240,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
       done() {
         if (commitDone) return;
         commitDone = true;
-        if (kind === 'mount') mountHandoff++;
+        if (mountTicket) mountTicket.handoffDepth++;
         try {
           if (isActive()) {
             emit(
@@ -258,7 +258,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
           if (onDoneError) onDoneError(error);
           else throw error;
         } finally {
-          if (kind === 'mount') mountHandoff--;
+          if (mountTicket) mountTicket.handoffDepth--;
         }
       },
     });
@@ -383,6 +383,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
     });
     let promiseObserved = false;
     const pending = {
+      handoffDepth: 0,
       observe() {
         promiseObserved = true;
         return promise;
@@ -390,7 +391,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
       invalidate() {
         // A reentrant unmount releases the slot immediately. Let an active
         // notification/submission report its own outcome before settling it.
-        if (!mountHandoff) resolveMount();
+        if (pending.handoffDepth === 0) resolveMount();
       },
     };
     mountPending = pending;
@@ -430,7 +431,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
       clearPending();
     };
 
-    mountHandoff++;
+    pending.handoffDepth++;
     try {
       setMountPhase('mounting', epoch);
       if (!isStale('mounting')) {
@@ -453,7 +454,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
               }
               let scheduleReturned = false;
               let finishedInline = false;
-              mountHandoff++;
+              pending.handoffDepth++;
               try {
                 // Presence may finish after mount() returns. Phase observers and scheduler
                 // submission then both report their failures through this epoch's promise.
@@ -482,7 +483,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
                 if (!mountReturned) throw error;
                 rejectMount(error);
               } finally {
-                mountHandoff--;
+                pending.handoffDepth--;
               }
             };
             if (presence) presence.then(scheduleFinish, scheduleFinish);
@@ -491,7 +492,8 @@ export function createRuntimeSession<P extends PropsBaseType>(
           (error) => {
             if (!mountReturned) throw error;
             failMount(error);
-          }
+          },
+          pending
         );
       }
       if (isStale()) {
@@ -501,7 +503,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
     } catch (error) {
       failMount(error);
     } finally {
-      mountHandoff--;
+      pending.handoffDepth--;
     }
 
     mountReturned = true;
