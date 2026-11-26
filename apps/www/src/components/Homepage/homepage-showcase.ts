@@ -506,7 +506,13 @@ export function createHomepageShowcase(
             kind: 'box',
             className: 'home-gallery__stage',
             attrs: { 'data-home-gallery-stage': '' },
-            children: gallery.columns(form, gallery.analytics),
+            children: [
+              {
+                kind: 'box',
+                className: 'home-gallery__flow',
+                children: gallery.columns(form, gallery.analytics),
+              },
+            ],
           },
         ],
       },

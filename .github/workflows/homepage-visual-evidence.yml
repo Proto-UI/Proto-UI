@@ -637,8 +637,17 @@ jobs:
           set -euo pipefail
           node --import tsx --test apps/www/scripts/homepage-evidence-contract.test.ts \
             2>&1 | tee "$PREVIEW_FIT_EVIDENCE_DIR/gallery-contract.log"
-      - name: Exercise gallery composition, typography, icons, layout and runtime ownership
+      - name: Generate the candidate styles consumed by the gallery suites
+        id: candidate-styles
         if: ${{ !cancelled() && steps.ready.outcome == 'success' }}
+        working-directory: candidate
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 --filter apps-www run generate:proto-ui-style \
+            2>&1 | tee "$PREVIEW_FIT_EVIDENCE_DIR/candidate-styles.log"
+      - name: Exercise gallery composition, typography, icons, layout and runtime ownership
+        if: ${{ !cancelled() && steps.candidate-styles.outcome == 'success' }}
         working-directory: candidate
         timeout-minutes: 5
         run: |

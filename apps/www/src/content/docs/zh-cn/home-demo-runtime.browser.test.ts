@@ -1,6 +1,10 @@
 // @vitest-environment node
 
-import { HOMEPAGE_GALLERY_IDS } from '../../../components/Homepage/homepage-layout-evidence';
+import {
+  groupPaintedCards,
+  HOMEPAGE_GALLERY_IDS,
+  WIDE_GALLERY_COLUMNS,
+} from '../../../components/Homepage/homepage-layout-evidence';
 import { revealHeaderPreferences } from './site-header-browser';
 import {
   measureLabelTextDrag,
@@ -90,13 +94,30 @@ async function chooseRuntime(page: Page, root: Locator, runtime: string) {
   await waitForHomeRuntime(page, runtime);
 }
 
+async function selectByDragging(page: Page, target: Locator) {
+  await target.scrollIntoViewIfNeeded();
+  const box = await target.boundingBox();
+  if (!box) throw new Error('Selection target has no visible bounds');
+  // Reset on the target so selecting a modal description keeps its dialog open.
+  await page.mouse.click(box.x + 2, box.y + box.height / 2);
+  await page.mouse.down();
+  try {
+    await page.mouse.move(box.x + box.width - 2, box.y + box.height / 2, { steps: 12 });
+  } finally {
+    await page.mouse.up();
+  }
+  return page.evaluate(() => window.getSelection()?.toString() ?? '');
+}
+
 async function createHomeGalleryObservation(
   page: Page,
   evidenceLabel: string,
   initialColorScheme: 'light' | 'dark'
 ) {
   const home = page.locator(HOME_SELECTOR);
-  const stage = home.locator('[data-home-gallery-stage]');
+  const stage = home.locator(
+    '[data-home-demo-host] [data-projection-generation-state="active"] [data-projection-scope] [data-home-gallery-stage]'
+  );
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   const sample = () =>
@@ -184,23 +205,47 @@ async function createHomeGalleryObservation(
         '[data-gallery-demo="controls"] [data-projection-prototype="shadcn-card-root"]'
       )!;
       const cards = [...stage.querySelectorAll<HTMLElement>('[data-gallery-demo]')];
+      const scope = stage.closest<HTMLElement>('[data-projection-scope]')!;
+      const adapters = stage.querySelectorAll<HTMLElement>(
+        '[data-demo-ref="shortcut-group-adapters"] [aria-pressed]'
+      );
       const home = stage.closest<HTMLElement>('[data-home-showcase]')!;
       return {
         viewportWidth: innerWidth,
         theme: document.documentElement.dataset.theme,
         runtime: home.dataset.runnerRuntime,
         generation: home.dataset.projectionGeneration,
+        scopeGeneration: scope.dataset.projectionGeneration,
+        scopeRuntime: scope.dataset.projectionRuntime,
+        adapterItems: Array.from(adapters, (item) => ({
+          ref: item.dataset.demoRef,
+          pressed: item.getAttribute('aria-pressed'),
+          background: getComputedStyle(item).backgroundColor,
+          visible:
+            item.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }) &&
+            item.getBoundingClientRect().width > 0 &&
+            item.getBoundingClientRect().height > 0,
+        })),
         liveRoots: stage.querySelectorAll('[data-pui-root]').length,
         cardPaint: {
           background: getComputedStyle(card).backgroundColor,
           color: getComputedStyle(card).color,
         },
         inert: stage.inert,
-        columnCount: new Set(
-          [...stage.querySelectorAll('.home-gallery__column')].map(
-            (column) => column.getBoundingClientRect().left
-          )
-        ).size,
+        stageRect: {
+          left: bounds.left,
+          right: bounds.right,
+          top: bounds.top,
+          bottom: bounds.bottom,
+        },
+        paintedCards: cards.map((item) => {
+          const { left, right, top, bottom, width, height } = item.getBoundingClientRect();
+          return {
+            id: item.dataset.galleryDemo,
+            fragments: item.getClientRects().length,
+            rect: { left, right, top, bottom, width, height },
+          };
+        }),
         cardCount: cards.length,
         cardIds: cards.map((card) => card.dataset.galleryDemo),
         noOverflow:
@@ -264,7 +309,6 @@ async function createHomeGalleryObservation(
   const expectCompactPreview = (facts: Awaited<ReturnType<typeof sample>>) => {
     expect(facts).toMatchObject({
       inert: true,
-      columnCount: 5,
       cardCount: HOMEPAGE_GALLERY_IDS.length,
       noOverflow: true,
       fitsGallery: true,
@@ -274,6 +318,18 @@ async function createHomeGalleryObservation(
       sourceOutsideViewport: true,
     });
     expect(facts.cardIds).toEqual(HOMEPAGE_GALLERY_IDS);
+    expect(
+      groupPaintedCards(facts.paintedCards).map((column) => column.map((item) => item.id))
+    ).toEqual(WIDE_GALLERY_COLUMNS);
+    for (const { id, rect, fragments } of facts.paintedCards) {
+      expect(fragments, id).toBe(1);
+      expect(rect.width, id).toBeGreaterThan(0);
+      expect(rect.height, id).toBeGreaterThan(0);
+      expect(rect.left, id).toBeGreaterThanOrEqual(facts.stageRect.left - 1);
+      expect(rect.right, id).toBeLessThanOrEqual(facts.stageRect.right + 1);
+      expect(rect.top, id).toBeGreaterThanOrEqual(facts.stageRect.top - 1);
+      expect(rect.bottom, id).toBeLessThanOrEqual(facts.stageRect.bottom + 1);
+    }
     expect(facts.liveRoots).toBeGreaterThan(0);
     expect(facts.fade).toContain('linear-gradient');
     expect(facts.fadeHeight).toBeCloseTo(
@@ -426,6 +482,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         for (const [key, label] of items) {
           const row = owner.getByRole('button', { name: label, exact: true });
           expect(await row.getAttribute('data-demo-ref')).toBe(`shortcut-${group}-${key}`);
+          expect(await row.evaluate((item) => getComputedStyle(item).userSelect)).toBe('none');
           await row.scrollIntoViewIfNeeded();
           const glyph = await row.locator('svg').boundingBox();
           const text = await row.locator('.home-gallery__shortcut-text').boundingBox();
@@ -445,6 +502,19 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
           ).toBe('');
         }
       }
+
+      const editorCard = stage.locator('[data-gallery-demo="editor"]');
+      const heading = editorCard.getByRole('heading', { name: '文本编辑', exact: true });
+      expect(await selectByDragging(page, heading)).toContain('文本编辑');
+      const textarea = editorCard.getByRole('textbox', { name: '编辑示例文本', exact: true });
+      await textarea.fill('Selectable');
+      await textarea.press('ControlOrMeta+A');
+      expect(
+        await textarea.evaluate((element) => {
+          const input = element as HTMLTextAreaElement;
+          return input.value.slice(input.selectionStart, input.selectionEnd);
+        })
+      ).toBe('Selectable');
 
       await chooseProjectionControl(page, home, 'family', 'brutalist');
       const editor = stage.locator('[data-gallery-demo="editor"]');
@@ -612,20 +682,6 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
       (process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR
         ? path.join(process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, 'content-selection')
         : undefined);
-    const selectByDragging = async (target: Locator) => {
-      await target.scrollIntoViewIfNeeded();
-      const box = await target.boundingBox();
-      expect(box).not.toBeNull();
-      if (!box) throw new Error('Selection target has no visible bounds');
-      // Reset through the target itself. Clicking the document corner would
-      // dismiss a modal before its description could be selected.
-      await page.mouse.click(box.x + 2, box.y + box.height / 2);
-      await page.mouse.move(box.x + 2, box.y + box.height / 2);
-      await page.mouse.down();
-      await page.mouse.move(box.x + box.width - 2, box.y + box.height / 2, { steps: 12 });
-      await page.mouse.up();
-      return page.evaluate(() => window.getSelection()?.toString() ?? '');
-    };
     try {
       if (evidenceDirectory) await mkdir(evidenceDirectory, { recursive: true });
       await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
@@ -636,7 +692,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         const action = editorCard.getByRole('button', { name: '斜体', exact: true });
         await action.waitFor({ state: 'visible' });
         expect(await action.evaluate((el) => getComputedStyle(el).userSelect)).toBe('none');
-        expect(await selectByDragging(action)).not.toContain('斜体');
+        expect(await selectByDragging(page, action)).not.toContain('斜体');
         if (evidenceDirectory) {
           await editorCard.screenshot({
             path: path.join(evidenceDirectory, `selection-${runtime}-action.png`),
@@ -650,7 +706,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
           .toBe(activeBefore === 'true' ? 'false' : 'true');
 
         const title = editorCard.getByRole('heading', { name: '文本编辑', exact: true });
-        expect(await selectByDragging(title)).toContain('文本编辑');
+        expect(await selectByDragging(page, title)).toContain('文本编辑');
         if (evidenceDirectory) {
           await editorCard.screenshot({
             path: path.join(evidenceDirectory, `selection-${runtime}-content.png`),
@@ -740,7 +796,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         };
         await waitForEnteredDialog();
         const description = dialog.getByText('这是一个可操作的对话框示例。', { exact: true });
-        expect(await selectByDragging(description)).toContain('可操作的对话框');
+        expect(await selectByDragging(page, description)).toContain('可操作的对话框');
         await waitForEnteredDialog();
         expect(await page.evaluate(() => window.getSelection()?.toString() ?? '')).toContain(
           '可操作的对话框'
@@ -1259,19 +1315,46 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         );
         if ((await menu.getAttribute('aria-expanded')) === 'true') await menu.click();
       };
-      const beforeRuntime = afterTheme.generation;
+      const expectMountedAdapter = (facts: typeof afterTheme, runtime: string) => {
+        expect(facts.runtime).toBe(runtime);
+        expect(facts.scopeRuntime).toBe(runtime);
+        expect(facts.generation).toMatch(/^[1-9]\d*$/);
+        expect(facts.scopeGeneration).toBe(facts.generation);
+        expect(facts.adapterItems).toHaveLength(4);
+        const selected = facts.adapterItems.filter((item) => item.pressed === 'true');
+        expect(selected.map((item) => item.ref)).toEqual([`shortcut-adapters-${runtime}`]);
+        expect(selected[0]!.visible).toBe(true);
+        for (const item of facts.adapterItems.filter((item) => item.pressed !== 'true')) {
+          expect(item.pressed).toBe('false');
+          expect(item.background).not.toBe(selected[0]!.background);
+        }
+      };
+      expectMountedAdapter(afterTheme, 'wc');
       await chooseRuntime(page, home, 'react');
       await closeHeaderMenu();
       const afterRuntime = await capture('react');
       expectCompactPreview(afterRuntime);
-      expect(afterRuntime.runtime).toBe('react');
-      expect(afterRuntime.generation).not.toBe(beforeRuntime);
+      expectMountedAdapter(afterRuntime, 'react');
       await chooseRuntime(page, home, 'wc');
       await closeHeaderMenu();
       const returnedRuntime = await capture('wc-return');
       expectCompactPreview(returnedRuntime);
-      expect(returnedRuntime.runtime).toBe('wc');
-      expect(returnedRuntime.generation).not.toBe(afterRuntime.generation);
+      expectMountedAdapter(returnedRuntime, 'wc');
+      expect(
+        new Set([afterTheme.generation, afterRuntime.generation, returnedRuntime.generation]).size
+      ).toBe(3);
+      await page.getByRole('link', { name: '试试 Demo', exact: true }).click();
+      const adapterGroup = home
+        .locator('[data-projection-generation-state="active"] [data-home-gallery-stage]')
+        .getByRole('group', { name: '多端适配', exact: true });
+      await adapterGroup.getByRole('button', { name: 'Vue 3', exact: true }).click();
+      await expect
+        .poll(() =>
+          adapterGroup
+            .getByRole('button', { pressed: true })
+            .evaluateAll((items) => items.map((item) => item.getAttribute('data-demo-ref')))
+        )
+        .toEqual(['shortcut-adapters-vue']);
       expect(errors).toEqual([]);
     } finally {
       await context.close();

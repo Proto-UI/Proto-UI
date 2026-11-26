@@ -1105,11 +1105,19 @@ export function createHomepageGalleryParts(
     card,
     analytics: composition.analytics,
     columns(form: DemoNode, analyticsCard: DemoNode = composition.analytics): DemoNode[] {
+      // Each column starts with the run that stays together in both compositions.
+      // Its following siblings can flow independently without moving live controls.
       return [
-        box('home-gallery__column', [controls, shortcuts, milestones]),
-        box('home-gallery__column', [analyticsCard, composition.command, ecosystem]),
+        box('home-gallery__column', [controls, shortcuts]),
+        milestones,
+        box('home-gallery__column', [analyticsCard]),
+        composition.command,
+        ecosystem,
         box('home-gallery__column', [form, composition.progress, protocol]),
-        box('home-gallery__column', [hover, editor, composition.help, highlights]),
+        box('home-gallery__column', [hover]),
+        editor,
+        composition.help,
+        highlights,
         box('home-gallery__column', [overlays, spark, choices, throughput]),
       ];
     },

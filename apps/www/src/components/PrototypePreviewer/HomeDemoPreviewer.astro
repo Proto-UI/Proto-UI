@@ -355,6 +355,7 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   }
   /* Keep the authored reading/tab order while allowing cards, not fixed
      groups, to fill responsive columns. No component paint is owned here. */
+  .home-demo-previewer :global(.home-gallery__flow),
   .home-demo-previewer :global(.home-gallery__column) {
     display: contents;
   }
@@ -550,9 +551,6 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     gap: 0.75rem;
     min-width: 0;
   }
-  .home-demo-previewer :global(.home-gallery__shortcuts-grid [role='button']) {
-    user-select: none;
-  }
   .home-demo-previewer :global(.home-gallery__shortcut-text) {
     min-width: 0;
     overflow: hidden;
@@ -566,17 +564,52 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     gap: 0.5rem;
     min-width: 0;
   }
-  /* Explicit five-column composition on large displays. Narrow layouts retain
-     the same authored reading order and flow cards instead of empty tracks. */
+  /* Four 18rem tracks and three 1.25rem gutters. The single-track grid flows
+     through the columns. Only three runs change position, and native reading
+     flow takes keyboard and accessibility traversal through those same runs. */
+  @media (48rem <= width < 96rem) {
+    @supports (reading-flow: grid-rows) {
+      .home-demo-previewer :global(.home-gallery__viewport) {
+        container: gallery / inline-size;
+      }
+      @container gallery (min-width: 75.75rem) {
+        .home-demo-previewer :global(.home-gallery__flow) {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          reading-flow: grid-rows;
+        }
+        .home-demo-previewer :global(.home-gallery__column) {
+          display: flow-root;
+          break-inside: avoid;
+        }
+        .home-demo-previewer :global([data-gallery-demo='workspace-help']) {
+          grid-area: 3 / 1;
+        }
+        .home-demo-previewer :global([data-gallery-demo='milestones']) {
+          grid-area: 4 / 1;
+          break-before: column;
+        }
+        .home-demo-previewer :global([data-gallery-demo='highlights']) {
+          grid-area: 7 / 1;
+        }
+        .home-demo-previewer
+          :global(.home-gallery__column:has(> [data-gallery-demo='preferences'])),
+        .home-demo-previewer :global([data-gallery-demo='editor']) {
+          break-before: column;
+        }
+      }
+    }
+  }
+  /* Each wide column starts at its authored group, regardless of wrapping. */
   @media (min-width: 96rem) {
     .home-demo-previewer :global(.home-gallery__stage) {
-      display: grid;
-      grid-template-columns: repeat(var(--homepage-gallery-wide-columns), minmax(0, 1fr));
-      align-items: start;
+      columns: var(--homepage-gallery-wide-columns);
     }
     .home-demo-previewer :global(.home-gallery__column) {
       display: block;
-      min-width: 0;
+    }
+    .home-demo-previewer :global(.home-gallery__column:not(:first-child)) {
+      break-before: column;
     }
   }
   .home-demo-previewer :global(.home-gallery__attribution) {
@@ -667,15 +700,16 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
       /* The same five desktop columns, not five stacks of miniature controls
          in the tab order. CSS zoom also scales layout height, unlike transform. */
       --homepage-gallery-mini-width: 90rem;
-      display: grid;
       width: var(--homepage-gallery-mini-width);
-      grid-template-columns: repeat(var(--homepage-gallery-wide-columns), minmax(0, 1fr));
-      align-items: start;
+      columns: var(--homepage-gallery-wide-columns);
       zoom: var(--homepage-gallery-scale, 1);
     }
     .home-demo-previewer[data-home-gallery-compact='true'] :global(.home-gallery__column) {
       display: block;
-      min-width: 0;
+    }
+    .home-demo-previewer[data-home-gallery-compact='true']
+      :global(.home-gallery__column:not(:first-child)) {
+      break-before: column;
     }
   }
   @media (max-width: 639px) {

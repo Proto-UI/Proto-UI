@@ -36,6 +36,12 @@ function fixture(
   return {
     containerCount: 1,
     viewportWidth,
+    wideMedia: viewportWidth >= 1536,
+    enhancedMedia: viewportWidth >= 768 && viewportWidth < 1536,
+    queryContainerWidth: width,
+    readingFlowSupported: true,
+    flowDisplay: 'contents',
+    flowReadingFlow: 'normal',
     rootFontSize: 16,
     columnGap: gap,
     container: rect(0, 0, width, 500),
@@ -55,13 +61,62 @@ function fixture(
 }
 describe('homepage evidence observers', () => {
   it('accepts five real columns at 2K+, four desktop columns and one mobile column', () => {
+    const desktop = fixture(1320, 1440, [4, 4, 4, 5]);
+    desktop.flowDisplay = 'grid';
+    desktop.flowReadingFlow = 'grid-rows';
+    const positions = desktop.cards.map((card) => ({ rect: card.rect, fragments: card.fragments }));
+    const paintedOrder = [0, 1, 3, 11, 2, 4, 5, 12, 6, 7, 8, 9, 10, 13, 14, 15, 16];
+    paintedOrder.forEach((sourceIndex, index) =>
+      Object.assign(desktop.cards[sourceIndex]!, positions[index])
+    );
     for (const scene of [
       fixture(1856, 2048, [3, 3, 3, 4, 4]),
       fixture(1856, 2560, [3, 3, 3, 4, 4]),
-      fixture(1320, 1440, 4),
+      desktop,
       fixture(288, 320, 1, 16),
     ])
       expect(galleryFlowEvidence(scene).issues).toEqual([]);
+  });
+  it('requires grid reading flow only when the viewport, container and feature queries apply', () => {
+    const scene = fixture(1320, 1440, [4, 4, 4, 5]);
+    scene.readingFlowSupported = false;
+    scene.flowReadingFlow = '';
+    expect(galleryFlowEvidence(scene).issues).toEqual([]);
+    scene.readingFlowSupported = true;
+    expect(galleryFlowEvidence(scene).issues).toContain(
+      'eligible gallery lacks enhanced grid reading flow'
+    );
+    scene.enhancedMedia = false;
+    expect(galleryFlowEvidence(scene).issues).toEqual([]);
+    const narrower = fixture(1200, 1440, 3);
+    expect(galleryFlowEvidence(narrower).issues).toEqual([]);
+  });
+  it('uses wide media even with an enlarged document root', () => {
+    const scene = fixture(1840, 1920, [3, 3, 3, 4, 4], 40);
+    scene.rootFontSize = 32;
+    expect(galleryFlowEvidence(scene).issues).toEqual([]);
+  });
+  it('detects a common translation inside the viewport but outside the centered gallery', () => {
+    const scene = fixture(1320, 1440, 4);
+    scene.readingFlowSupported = false;
+    scene.container = rect(60, 0, 1320, 500);
+    for (const card of scene.cards) {
+      card.rect.left += 60;
+      card.rect.right += 60;
+      card.fragments = [{ ...card.rect }];
+    }
+    expect(galleryFlowEvidence(scene).issues).toEqual([]);
+    for (const card of scene.cards) {
+      card.rect.left += 20;
+      card.rect.right += 20;
+      card.fragments = [{ ...card.rect }];
+    }
+    expect(galleryFlowEvidence(scene).issues).toContain(
+      'outer gallery columns differ from gallery content edges'
+    );
+    expect(galleryFlowEvidence(scene).issues).toContain(
+      'throughput: gallery card or fragment outside gallery content'
+    );
   });
   it('rejects wrong order, split cards, overlapping cards and absent columns', () => {
     const scene = fixture(1856, 2048, [3, 3, 3, 4, 4]);

@@ -350,6 +350,26 @@ async function plan(page: Page, value: number) {
     .toBe(`Plan progress: ${value}%`);
 }
 
+// Record card crossings from native keyboard navigation. Roving controls and other
+// stops within one card contribute a single visit. A trapped cycle fails the bound.
+async function galleryTabWalk(page: Page, key: 'Tab' | 'Shift+Tab') {
+  const stage = page.locator(`${ACTIVE} [data-home-gallery-stage]`);
+  const limit = (await stage.locator('*').count()) + 2;
+  const visits: string[] = [];
+  if (key === 'Shift+Tab') await page.keyboard.press(key);
+  for (let step = 0; step < limit; step++) {
+    const card = await stage.evaluate((root) => {
+      const focused = document.activeElement;
+      if (!focused || !root.contains(focused)) return null;
+      return focused.closest<HTMLElement>('[data-gallery-demo]')?.dataset.galleryDemo ?? '(stage)';
+    });
+    if (card === null) return visits;
+    if (card !== visits.at(-1)) visits.push(card);
+    await page.keyboard.press(key);
+  }
+  throw new Error(`Gallery focus did not exit after ${limit} ${key} presses`);
+}
+
 // Passive geometry observer: never repairs overflow or rewrites scene behavior.
 async function layoutFacts(page: Page) {
   const facts = await page.evaluate((active) => {
@@ -379,12 +399,31 @@ async function layoutFacts(page: Page) {
     const galleries = [
       ...document.querySelectorAll<HTMLElement>(`${active} [data-home-gallery-stage]`),
     ];
+    const stage = galleries[0];
+    const viewport = stage?.closest('.home-gallery__viewport');
+    const flow = stage?.querySelector(':scope > .home-gallery__flow');
+    const style = flow && getComputedStyle(flow);
+    const contentBounds = (node: HTMLElement) => {
+      const box = node.getBoundingClientRect();
+      const css = getComputedStyle(node);
+      const left = box.left + parseFloat(css.borderLeftWidth) + parseFloat(css.paddingLeft);
+      const top = box.top + parseFloat(css.borderTopWidth) + parseFloat(css.paddingTop);
+      const right = box.right - parseFloat(css.borderRightWidth) - parseFloat(css.paddingRight);
+      const bottom = box.bottom - parseFloat(css.borderBottomWidth) - parseFloat(css.paddingBottom);
+      return { left, top, right, bottom, width: right - left, height: bottom - top };
+    };
     const gallery: GalleryFlowFacts = {
+      wideMedia: matchMedia('(min-width: 96rem)').matches,
+      enhancedMedia: matchMedia('(48rem <= width < 96rem)').matches,
+      queryContainerWidth: viewport ? parseFloat(getComputedStyle(viewport).width) : NaN,
+      readingFlowSupported: CSS.supports('reading-flow', 'grid-rows'),
+      flowDisplay: style?.display ?? '',
+      flowReadingFlow: style?.getPropertyValue('reading-flow').trim() ?? '',
       containerCount: galleries.length,
       viewportWidth: innerWidth,
       rootFontSize: parseFloat(getComputedStyle(document.documentElement).fontSize),
       columnGap: galleries[0] ? parseFloat(getComputedStyle(galleries[0]).columnGap) : NaN,
-      container: galleries[0] ? rect(galleries[0].getBoundingClientRect()) : null,
+      container: stage ? contentBounds(stage) : null,
       cards: [...document.querySelectorAll<HTMLElement>(`${active} [data-gallery-demo]`)].map(
         (card) => ({
           id: card.getAttribute('data-gallery-demo'),
@@ -1281,6 +1320,107 @@ describe.sequential(
             // Longest answer and all results remain visible during every layout sample.
             await help.getByRole('button', { name: questions[2], exact: true }).press('Enter');
             await input.fill('');
+            if (runtime === 'wc' && family === 'shadcn') {
+              await stage('focused-gallery-resize');
+              const options = [
+                'Outline an idea',
+                'Build a prototype',
+                'Review the details',
+                'Publish online (unavailable)',
+              ];
+              const answer = help.getByRole('region');
+              const assertExpanded = async () => {
+                await expect
+                  .poll(() => command.getByRole('option').allTextContents())
+                  .toEqual(options);
+                for (const name of options)
+                  expect(await command.getByRole('option', { name, exact: true }).isVisible()).toBe(
+                    true
+                  );
+                expect(await answer.isVisible()).toBe(true);
+                expect((await answer.textContent())?.trim()).toBe(
+                  'This is an interactive example on the current page. Nothing is uploaded, published or saved to an account. Reloading restores the defaults.'
+                );
+                await attribute(
+                  help.getByRole('button', { name: questions[2], exact: true }),
+                  'aria-expanded',
+                  'true'
+                );
+              };
+              await assertExpanded();
+              const note = page.locator(`${ACTIVE} [data-gallery-demo="preferences"] textarea`);
+              const first = page
+                .locator(`${ACTIVE} [data-gallery-demo="controls"]`)
+                .getByRole('button', { name: 'Button', exact: true });
+              const original = await note.inputValue();
+              const draft = 'Draft kept across gallery layouts';
+              await note.fill(draft);
+              const owner = await note.elementHandle();
+              if (!owner) throw new Error('Missing focused preferences editor');
+              const generation = await page
+                .locator(HOME)
+                .getAttribute('data-projection-generation');
+              expect(generation).toBeTruthy();
+              const steps: unknown[] = [];
+              record.focusedGalleryResize = steps;
+              try {
+                for (const width of [1920, 1440]) {
+                  await page.setViewportSize({ width, height: 1000 });
+                  await settled(page);
+                  await assertExpanded();
+                  const facts = await layoutFacts(page);
+                  const { gallery } = facts;
+                  const flow = galleryFlowEvidence(gallery);
+                  const retained = await owner.evaluate((node) => ({
+                    focused: node === document.activeElement,
+                    connected: node.isConnected,
+                    draft: (node as HTMLTextAreaElement).value,
+                    generation:
+                      node.closest<HTMLElement>('[data-home-showcase]')?.dataset
+                        .projectionGeneration,
+                  }));
+                  const step = {
+                    width,
+                    retained,
+                    columns: flow.columns,
+                    domOrder: gallery.cards.map((card) => card.id),
+                    expanded: {
+                      facts,
+                      bottomSpread: flow.bottomSpread,
+                      expectedGap: flow.expectedGap,
+                    },
+                    forward: [] as string[],
+                    reverse: [] as string[],
+                  };
+                  steps.push(step);
+                  expect(retained).toEqual({ focused: true, connected: true, draft, generation });
+                  expect(flow.issues).toEqual([]);
+                  expect(captureSelectionIssues(facts.selection, runtime, family)).toEqual([]);
+                  expect(facts.issues).toEqual([]);
+                  const enhanced = gallery.enhancedMedia && gallery.readingFlowSupported;
+                  if (width === 1920 || enhanced)
+                    expect(flow.columns).toHaveLength(width === 1920 ? 5 : 4);
+                  // Milestones, ecosystem, highlights and throughput contain only passive content.
+                  const passive = ['milestones', 'ecosystem', 'highlights', 'throughput'];
+                  const expected = (
+                    enhanced
+                      ? flow.columns.flatMap((column) => column.ids)
+                      : gallery.cards.map((card) => card.id)
+                  ).filter((id): id is string => id !== null && !passive.includes(id));
+                  await first.focus();
+                  await hasFocus(first);
+                  step.forward = await galleryTabWalk(page, 'Tab');
+                  expect(step.forward).toEqual(expected);
+                  step.reverse = await galleryTabWalk(page, 'Shift+Tab');
+                  expect(step.reverse).toEqual([...expected].reverse());
+                  await note.focus();
+                }
+                await note.fill(original);
+              } finally {
+                await owner.dispose();
+                await save();
+              }
+            }
             for (const layout of LAYOUTS) {
               await stage(`layout-${layout.name}`);
               await page.setViewportSize({ width: layout.width, height: 1000 });
