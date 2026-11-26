@@ -143,8 +143,8 @@ test('a stale theme fixture fails the check', () => {
 });
 
 // Source palettes and the common renderer own this finite key contract, including
-// all seven derived radius variants. Family-only navbar and destructive-foreground
-// keys stay explicit so omissions and unknown entries are both rejected.
+// all seven derived radius variants. Family-only navbar, destructive-foreground
+// and secondary-background keys stay explicit so omissions and unknown entries reject.
 const sharedDraftVariables = [
   'accent',
   'accent-foreground',
@@ -183,6 +183,7 @@ const requiredDraftVariables = {
     ...sharedDraftVariables,
     '--pui-destructive',
     '--pui-destructive-foreground',
+    '--pui-secondary-background',
   ].sort(),
 };
 function assertDraftPaletteKeys(keys, family, label = family) {
