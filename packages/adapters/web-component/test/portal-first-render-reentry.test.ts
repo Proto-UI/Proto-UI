@@ -3,7 +3,10 @@ import { defineAsHook, type Prototype } from '@proto.ui/core';
 import { getActiveAsHookContext } from '@proto.ui/core/internal';
 import type { PresenceFacade, PresenceHandle } from '@proto.ui/module-presence';
 import { AdaptToWebComponent } from '../src';
-import { isFocusTargetOwnerReady } from '../src/platform/instance-tree';
+import {
+  isFocusTargetOwnerReady,
+  subscribeFocusTargetOwnerReady,
+} from '../src/platform/instance-tree';
 import * as sessions from '../src/runtime/session';
 import { createWebComponentPortalMount } from '../src/portal-mount';
 
@@ -58,6 +61,170 @@ describe('WC portal first rendering across mounted diagnostic reentry', () => {
     document.body.replaceChildren();
     vi.restoreAllMocks();
   });
+
+  function presenceFixture(name: string, initiallyPresent: boolean) {
+    let presence: PresenceHandle;
+    const mounted = vi.fn();
+    const capturePresence = defineAsHook({
+      name: `portal-presence-${name}`,
+      setup() {
+        const { facades } = getActiveAsHookContext('portal handoff presence fixture');
+        presence = (facades.presence as PresenceFacade).createHandle({ mode: 'immediate' });
+        if (initiallyPresent) presence.setIntent('enter');
+      },
+    });
+    const proto: Prototype = {
+      name: `portal-handoff-${name}`,
+      setup(def) {
+        capturePresence();
+        def.lifecycle.onMounted(mounted);
+        return (renderer) => renderer.slot();
+      },
+    };
+    return {
+      proto,
+      mounted,
+      get presence() {
+        return presence;
+      },
+    };
+  }
+
+  it('withdraws current readiness inside throwing unmount diagnostics while Presence holds teardown', async () => {
+    const fixture = presenceFixture('withdraw', true);
+    const observed: boolean[] = [];
+    const Owner = AdaptToWebComponent(fixture.proto, {
+      shadow: false,
+      diagnostics: {
+        onLifecycleEvent(event) {
+          if (event.type === 'mount.phase' && event.phase === 'unmounting') {
+            observed.push(isFocusTargetOwnerReady(host!));
+            throw false;
+          }
+        },
+      },
+    });
+    host = new Owner();
+    document.body.append(host);
+    await captured!.mount();
+    expect(fixture.mounted).toHaveBeenCalledOnce();
+    expect(isFocusTargetOwnerReady(host)).toBe(true);
+    const unmounted = captured!.unmount();
+    expect(observed).toEqual([false]);
+    expect(fixture.presence.getPhase()).toBe('present');
+    expect(isFocusTargetOwnerReady(host)).toBe(false);
+    fixture.presence.setIntent('leave');
+    await expect(unmounted).rejects.toBe(false);
+  });
+
+  it.each(['diagnostic', 'readiness', 'scheduler'] as const)(
+    'rejects the held mount and releases its first portal projection on %s failure',
+    async (failure) => {
+      const fixture = presenceFixture(failure, false);
+      const submissions = vi.fn();
+      const observer = vi.fn(() => {
+        throw undefined;
+      });
+      const Owner = AdaptToWebComponent(fixture.proto, {
+        shadow: false,
+        diagnostics: {
+          onLifecycleEvent(event) {
+            if (failure === 'diagnostic' && event.type === 'mount.phase' && event.phase === 'mounted')
+              observer();
+          },
+        },
+        schedule(task) {
+          if (runtimeScheduleDepth) {
+            submissions();
+            if (failure === 'scheduler') throw undefined;
+          }
+          queueMicrotask(task);
+        },
+      });
+      host = new Owner();
+      const origin = document.createElement('section');
+      origin.append(host);
+      document.body.append(origin);
+      const pending = captured!.mount();
+      expect(fixture.presence.getPhase()).toBe('absent');
+      expect(isFocusTargetOwnerReady(host)).toBe(false);
+      expect(submissions).not.toHaveBeenCalled();
+      const unsubscribe =
+        failure === 'readiness' ? subscribeFocusTargetOwnerReady(host, observer) : undefined;
+      try {
+        fixture.presence.setIntent('enter');
+        await expect(pending).rejects.toBeUndefined();
+        expect(observer).toHaveBeenCalledTimes(failure === 'scheduler' ? 0 : 1);
+        expect(submissions).toHaveBeenCalledTimes(failure === 'scheduler' ? 1 : 0);
+        expect(fixture.mounted).not.toHaveBeenCalled();
+        if (failure !== 'scheduler') expect(isFocusTargetOwnerReady(host)).toBe(false);
+        // No intervening unmount can mask a stranded first-projection acquisition.
+        expect(host.parentElement).toBe(origin);
+        portal.mount(host);
+        expect(host.parentElement).toBe(document.body);
+        for (let frame = 0; frame < 2; frame++) {
+          expect(host.getAttribute('data-pui-view-revealing')).toBe('portal');
+          expect(frames.size).toBeGreaterThan(0);
+          const callbacks = [...frames.values()];
+          frames.clear();
+          callbacks.forEach((callback) => callback(0));
+        }
+        expect(host.hasAttribute('data-pui-view-revealing')).toBe(false);
+      } finally {
+        unsubscribe?.();
+      }
+    }
+  );
+
+  it.each(['diagnostic', 'scheduler'] as const)(
+    'keeps a nested replacement ready and rejects only the failing %s handoff',
+    async (failure) => {
+      const fixture = presenceFixture(`replace-${failure}`, false);
+      fixture.mounted.mockImplementation(() => portal.mount(host!));
+      let replacing = false;
+      let replacement: Promise<void> | undefined;
+      const scheduled: Array<() => void> = [];
+      const replaceAndThrow = () => {
+        replacing = true;
+        fixture.presence.setIntent('leave');
+        void captured!.unmount();
+        fixture.presence.setIntent('enter');
+        replacement = captured!.mount();
+        throw null;
+      };
+      const Owner = AdaptToWebComponent(fixture.proto, {
+        shadow: false,
+        diagnostics: {
+          onLifecycleEvent(event) {
+            if (failure === 'diagnostic' && event.type === 'mount.phase' &&
+                event.phase === 'mounted' && event.epoch === 1) replaceAndThrow();
+          },
+        },
+        schedule(task) {
+          if (!runtimeScheduleDepth) return queueMicrotask(task);
+          if (failure === 'scheduler' && !replacing) replaceAndThrow();
+          scheduled.push(task);
+        },
+      });
+      host = new Owner();
+      const origin = document.createElement('section');
+      origin.append(host);
+      document.body.append(origin);
+      const first = captured!.mount();
+      fixture.presence.setIntent('enter');
+      await expect(first).rejects.toBeNull();
+      expect(replacement).toBeDefined();
+      expect(isFocusTargetOwnerReady(host)).toBe(true);
+      expect(fixture.mounted).not.toHaveBeenCalled();
+      expect(scheduled).toHaveLength(1);
+      scheduled.shift()!();
+      await replacement;
+      expect(fixture.mounted).toHaveBeenCalledOnce();
+      expect(host.parentElement).toBe(document.body);
+      expect(host.hasAttribute('data-pui-view-revealing')).toBe(false);
+      expect(frames.size).toBe(0);
+    }
+  );
 
   it.each(['presence', 'scheduled', 'queued-before-replacement'] as const)(
     'only the replacement mounted callback runs and projects its first render (%s)',
