@@ -22,6 +22,7 @@ type Zone = keyof typeof zones;
 let active: Zone = 'original';
 let props: KeyedTaskOwnerProps = {};
 let hidden = false;
+let ownerKey = 0;
 const seen: Element[] = [];
 
 function Witness({ zone }: { zone: Zone }) {
@@ -37,7 +38,7 @@ function render(): void {
       <div id="logical-provider" data-zone={active}>
         <ITEM_ZONE.Provider value={zones[active]}>
           {createPortal(
-            <Activity mode={hidden ? 'hidden' : 'visible'}><KeyedTaskOwner {...props} /></Activity>,
+            <Activity mode={hidden ? 'hidden' : 'visible'}><KeyedTaskOwner key={ownerKey} {...props} /></Activity>,
             target
           )}
         </ITEM_ZONE.Provider>
@@ -68,10 +69,24 @@ function snapshot() {
   };
 }
 
+function sample() { return { view: snapshot(), network: loadHistory() }; }
+let replacement: { value: string; before: ReturnType<typeof sample>; after: ReturnType<typeof sample> } | null = null;
+
 const trace = {
   enqueue,
   history: loadHistory,
   mount: render,
+  replaceParentAfterReturn(id: string, path: string) {
+    enqueue(id, path, false, value => {
+      const before = sample();
+      ownerKey++;
+      active = 'replacement';
+      render();
+      replacement = { value, before, after: sample() };
+    });
+  },
+  replacement: () => replacement,
+  retainedText(id: number) { return seen[id].textContent; },
   order(first: string, second: string) { props = { first, second }; render(); },
   replaceZone() { active = 'replacement'; render(); },
   publish(zone: Zone, value: string) { zones[zone].publish(value); },

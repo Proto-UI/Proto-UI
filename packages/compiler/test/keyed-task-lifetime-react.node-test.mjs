@@ -320,3 +320,78 @@ test('authored serial and parallel tasks read Context on entry and resumption an
   assert.deepEqual(errors, []);
   if (evidence) await writeFile(path.join(evidence, 'task-policies-react-native.json'), JSON.stringify({ views, issued, retired, network, errors }));
 });
+
+test('replacing the whole keyed parent retires a returned response and a pending sibling before either can publish', async t => {
+  const { server, page, errors, evidence } = await openConsumer(t, authoredKeyedTaskSource, 'keyed-task-client.tsx', 'keyed-parent-source.json');
+  const oldA = server.resource('A', 'Obsolete amber record');
+  const oldB = server.resource('B', 'Blue retained file');
+  const freshA = server.resource('A', 'Apricot replacement');
+  const freshB = server.resource('B', 'Fresh blue file');
+  const left = ['A:left/left/pending', 'B:left/left/pending'];
+  const right = ['A:right/right/pending', 'B:right/right/pending'];
+  const aReady = 'A:right/right/Apricot replacement@right>right';
+  const bReady = 'B:right/right/Fresh blue file@right>right';
+
+  await page.evaluate(path => window.keyedLifetime.replaceParentAfterReturn('A', path), oldA.path);
+  await enqueue(page, 'B', oldB, false);
+  await page.evaluate(() => window.keyedLifetime.mount());
+  assert.deepEqual(await Promise.all([oldA.requested(), oldB.requested()]), ['A', 'B']);
+  const initial = await expectRows(page, left);
+  const oldNodes = nodes(initial);
+  await page.evaluate(() => window.keyedLifetime.detach());
+  const detached = await expectRows(page, left, { connected: false, visible: false });
+  assert.equal(detached.owner, initial.owner);
+  assert.deepEqual(nodes(detached), oldNodes);
+  const pending = await history(page);
+  expectPending(pending, oldA);
+  expectPending(pending, oldB);
+  await page.evaluate(() => {
+    window.keyedLifetime.publish('replacement', 'right');
+    window.keyedLifetime.attachOnRight();
+  });
+  await page.waitForFunction(() => window.keyedLifetime.snapshot().replacementZone === 'right');
+  assert.deepEqual(nodes(await expectRows(page, left)), oldNodes);
+  await enqueue(page, 'A', freshA);
+  await enqueue(page, 'B', freshB);
+  oldA.release();
+  assert.deepEqual(await Promise.all([freshA.requested(), freshB.requested()]), ['A', 'B']);
+  const replacement = await page.evaluate(() => window.keyedLifetime.replacement());
+  assert.equal(replacement.value, 'Obsolete amber record');
+  const { before, after } = replacement;
+  assert.equal(before.view.owner, initial.owner);
+  assert.deepEqual(nodes(before.view), oldNodes);
+  assert.deepEqual(before.view.rows.map(row => row.text), left);
+  assert.equal(before.view.activeZone, 'original');
+  assert.equal(after.view.activeZone, 'replacement');
+  assert.notEqual(after.view.owner, initial.owner);
+  assert.deepEqual(after.view.rows.map(row => row.text), right);
+  const freshNodes = nodes(after.view);
+  assert.equal(new Set([...oldNodes, ...freshNodes]).size, 4);
+  for (const [sample, aborted] of [[before, false], [after, true]]) {
+    const reason = aborted ? { status: 'owner-ended' } : null;
+    for (const [resource, state, value] of [[oldA, 'returned', 'Obsolete amber record'], [oldB, 'pending', null]]) {
+      const request = sample.network.requests.find(row => row.path === resource.path);
+      assert.deepEqual([request.state, request.value, request.aborted, request.reason], [state, value, aborted, reason]);
+    }
+  }
+
+  freshA.release();
+  assert.deepEqual(nodes(await expectRows(page, [aReady, right[1]])), freshNodes);
+  oldB.release();
+  await afterDelivery(page, oldB, 'returned');
+  const afterLateB = await expectRows(page, [aReady, right[1]]);
+  assert.deepEqual(nodes(afterLateB), freshNodes);
+  const afterLateRequests = await history(page);
+  assert.deepEqual(afterLateRequests.get(oldB.path), { key: 'B', path: oldB.path, state: 'returned', value: 'Blue retained file', aborted: true, reason: { status: 'owner-ended' } });
+  expectPending(afterLateRequests, freshB);
+  freshB.release();
+  const completed = await expectRows(page, [aReady, bReady]);
+  assert.deepEqual(nodes(completed), freshNodes);
+  const retained = await page.evaluate(ids => ids.map(id => ({ ...window.keyedLifetime.location(id), text: window.keyedLifetime.retainedText(id) })), oldNodes);
+  assert.deepEqual(retained, left.map(text => ({ connected: false, inTarget: false, text })));
+  const network = await history(page);
+  assert.equal(network.size, 4);
+  assert.ok([oldA, oldB, freshA, freshB].every(resource => resource.requests === 1));
+  assert.deepEqual(errors, []);
+  if (evidence) await writeFile(path.join(evidence, 'keyed-parent-react-native.json'), JSON.stringify({ initial, detached, replacement, afterLateB, completed, retained, requests: [...network.values()], errors }));
+});
