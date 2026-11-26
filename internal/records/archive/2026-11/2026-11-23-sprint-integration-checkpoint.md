@@ -12,7 +12,7 @@ The complete Switch admission inventory remains strict. The temporary narrowed i
 
 ## Fresh verification on the merged source
 
-The complete executed source was clean `9802e00c4c1705cdf5c32eb48eeb1e395f5d1e9e`, tree `cc98705d33705af9b1a5a3d260781005da61c538`. Head, tree and worktree status were identical before and after the runs. The [manifest](evidence/2026-11-23-sprint-integration-checkpoint/manifest.json) binds all complete raw logs, the Vitest report, original command arrays and terminal receipt.
+The complete executed source was clean `9802e00c4c1705cdf5c32eb48eeb1e395f5d1e9e`, tree `cc98705d33705af9b1a5a3d260781005da61c538`. Head, tree and worktree status were identical before and after the runs. The [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint-integration-checkpoint/manifest.json) binds all complete raw logs, the Vitest report, original command arrays and terminal receipt.
 
 | Original checks executed                                    | Passed | Failed | Skipped |
 | ----------------------------------------------------------- | -----: | -----: | ------: |
@@ -28,7 +28,7 @@ The only failed case is the complete Switch inventory described above. Original 
 
 The standard pre-commit formatter changed twelve incoming files during the merge: ten historical evidence files and two maintained scripts. The actual merge commit and its post-hook tree remain in history. Follow-up `9802e00c` restored all ten evidence files byte-for-byte from incoming main and added exact-path formatting exclusions for those immutable observations. Every restored file was independently compared with `b715b8a6`; no hash, observation, author statement or previous result was rewritten.
 
-The two maintained scripts remain subject to formatting. A separate agent reviewed their before/after diffs and parsed both versions with TypeScript 5.9.3: their normalized structural AST hashes match. The source-byte hashes changed and are recorded as such; older producer/source bindings still identify the original bytes. The real history/cache and protocol checks above were then executed. The [formatting receipt](evidence/2026-11-23-sprint-integration-checkpoint/formatter-preservation.json) and [independent source review](evidence/2026-11-23-sprint-integration-checkpoint/independent-formatting-review.json) preserve this distinction.
+The two maintained scripts remain subject to formatting. A separate agent reviewed their before/after diffs and parsed both versions with TypeScript 5.9.3: their normalized structural AST hashes match. The source-byte hashes changed and are recorded as such; older producer/source bindings still identify the original bytes. The real history/cache and protocol checks above were then executed. The [formatting receipt](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint-integration-checkpoint/formatter-preservation.json) and [independent source review](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint-integration-checkpoint/independent-formatting-review.json) preserve this distinction.
 
 ## Continuing work and source boundaries
 

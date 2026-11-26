@@ -10,7 +10,7 @@ Scroll Web 检查点已经发布为 `d80a09cd8f208274d10cb1c83354168c726eafda`�
 
 ## 精确恢复范围
 
-依据本会话已保留的当前用户本人贡献与 DCO 机械记录授权，按[单提交补签政策](../governance/contribution-provenance.md)记录原作者对其自己这一个确切公开提交的 certification：
+依据本会话已保留的当前用户本人贡献与 DCO 机械记录授权，按[单提交补签政策](../../../governance/contribution-provenance.md)记录原作者对其自己这一个确切公开提交的 certification：
 
 ```text
 I, cyjin.yl <chenyejin2004@foxmail.com>, hereby add my Signed-off-by to this commit: d80a09cd8f208274d10cb1c83354168c726eafda

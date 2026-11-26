@@ -61,7 +61,7 @@ All commands used one Cargo build worker, a private target directory and a priva
 
 The focused 17 and 2 are also present in the 263 workspace passes and must not be added again. The six Checkbox T0 cases are distinct from the default workspace passes. The default command's 45 ignored cases remain recorded as ignored in that receipt. Six were subsequently run explicitly; the other 39 Node-peer T0 cases were not executed in this bounded local repair. No macOS accessibility feature or physical AT acceptance is claimed.
 
-The actual commands, timestamps, platform/compiler versions, full output, source hashes and per-binary workspace counts are in the [evidence manifest](evidence/2026-11-23-gpui-adapter-readonly-projection/manifest.json).
+The actual commands, timestamps, platform/compiler versions, full output, source hashes and per-binary workspace counts are in the [evidence manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-gpui-adapter-readonly-projection/manifest.json).
 
 ## Preserved non-product failures
 

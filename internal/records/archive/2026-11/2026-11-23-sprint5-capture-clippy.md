@@ -12,7 +12,7 @@ The related `C-CONTROL-LABEL-0001` and `T-CONTROL-LABEL-0001` definitions remain
 
 ## Executed evidence
 
-The [validation report](evidence/2026-11-23-sprint5-capture-clippy/validation.json) binds the two source hashes, original CI failure, actual commands, environment, durations and raw logs.
+The [validation report](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint5-capture-clippy/validation.json) binds the two source hashes, original CI failure, actual commands, environment, durations and raw logs.
 
 | Observation | Result |
 | --- | --- |

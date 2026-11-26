@@ -6,7 +6,7 @@
 
 本记录更新以下记录中的“待人工验收”状态，保留原记录作为当时交付事实，不回写历史：
 
-- [S5 批准目标](./2026-09-14-shadow-s5-approved-goal.zh-CN.md)
+- [S5 批准目标](../../2026-09-14-shadow-s5-approved-goal.zh-CN.md)
 - [S5 交付与人工验收入口](./2026-09-14-shadow-s5-delivery-and-manual-acceptance.zh-CN.md)
 - [S5 公共 Web 事件路由性能修复](./2026-09-14-shadow-s5-event-routing-performance.zh-CN.md)
 

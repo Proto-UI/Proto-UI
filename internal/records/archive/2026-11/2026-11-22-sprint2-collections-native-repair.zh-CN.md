@@ -4,7 +4,7 @@
 
 ## 原始来源与失败
 
-[Run 45029016292](https://github.com/Proto-UI/Proto-UI/actions/runs/45029016292) 在 clean head `f8e7d12ebe64343b8caec71a7f23a6b9761b6ef7` 上执行。完整原始文件及 artifact `14757716300` 的下载与摘要校验由整合记录 [首轮原生回归修复](2026-11-22-sprint2-native-repair.zh-CN.md) 和 [artifact manifest](evidence/2026-11-22-sprint2-native-round1/artifact-manifest.json) 保留。本路直接读取完整 `collections/report.json`、`form-select/report.json` 和各自运行日志后归并：
+[Run 45029016292](https://github.com/Proto-UI/Proto-UI/actions/runs/45029016292) 在 clean head `f8e7d12ebe64343b8caec71a7f23a6b9761b6ef7` 上执行。完整原始文件及 artifact `14757716300` 的下载与摘要校验由整合记录 [首轮原生回归修复](2026-11-22-sprint2-native-repair.zh-CN.md) 和 [artifact manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-native-round1/artifact-manifest.json) 保留。本路直接读取完整 `collections/report.json`、`form-select/report.json` 和各自运行日志后归并：
 
 | 对象 | 首轮结果 | 观测与责任层 |
 | --- | --- | --- |
@@ -31,7 +31,7 @@
 
 `HC-FOCUS-TARGET-0001-B` 与 `C-AS-FOCUSABLE-0001` 区分顺序导航、程序化焦点和禁用目标。非原生且不可程序化聚焦的元素可以移除 `tabindex`。runner 保留隐藏几何断言，并改为同时验证 DOM `tabIndex=-1`、实际 `.focus()` 拒绝和真实 Tab 跨过隐藏节点。Tree 还验证公开 `focusSelf` 拒绝、展开后的键盘聚焦恢复；DataTable 验证显示恢复后 Header 可聚焦。它们不是仅把属性读取换成 DOM property。
 
-CSS helper 把既有 Form 的真实站点 Tailwind 编译和字体嵌入提取为共用实现，集合入口列出实际的 9 个公开 recipe 与共享源。静态回执见 [consumer-css.json](evidence/2026-11-22-sprint2-collections-native-repair/consumer-css.json)：原 Form CSS 的字节摘要不变，新集合 CSS 包含实际视口高度、overflow 和可见行布局候选。该静态步骤未运行浏览器。新 runner 在原 `committed` / 有界窗口断言之外，还要求实际 `clientHeight>0`、`scrollHeight>clientHeight`、可滚动 overflow，以及可信 wheel 后 `scrollTop` 确实增加。
+CSS helper 把既有 Form 的真实站点 Tailwind 编译和字体嵌入提取为共用实现，集合入口列出实际的 9 个公开 recipe 与共享源。静态回执见 [consumer-css.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-collections-native-repair/consumer-css.json)：原 Form CSS 的字节摘要不变，新集合 CSS 包含实际视口高度、overflow 和可见行布局候选。该静态步骤未运行浏览器。新 runner 在原 `committed` / 有界窗口断言之外，还要求实际 `clientHeight>0`、`scrollHeight>clientHeight`、可滚动 overflow，以及可信 wheel 后 `scrollTop` 确实增加。
 
 ### Form：结果回执与新请求各自保留
 
@@ -49,7 +49,7 @@ CSS helper 把既有 Form 的真实站点 Tailwind 编译和字体嵌入提取�
 
 ## 定向运行与来源边界
 
-原始日志以无损 gzip 保存，压缩文件及解压字节 SHA-256 都在 [evidence-index.json](evidence/2026-11-22-sprint2-collections-native-repair/evidence-index.json)。
+原始日志以无损 gzip 保存，压缩文件及解压字节 SHA-256 都在 [evidence-index.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-collections-native-repair/evidence-index.json)。
 
 | 原始日志 | 真实终态 | 解释 |
 | --- | --- | --- |
@@ -72,4 +72,4 @@ CSS helper 把既有 Form 的真实站点 Tailwind 编译和字体嵌入提取�
 
 整合 head `9f7c4d500b3defa2fc0a7d614c0418335f54431b` 的 workspace types 揭示本修复新增的 2 个 `TS2345`：`setupDataTableCell` 错把 Base Cell/Header 隐藏状态的 `watch/run Props` 与 Shadcn 投影的 `styleProfile` Props 绑定为同一泛型。修复增加独立 `StateOwnerProps`，保持 `ObservedStateHandle<boolean, StateOwnerProps>` 的完整观察类型；未用 `any`、类型强转、弱化 watch 或增加未声明依赖。
 
-只包含实际 Shadcn `data-table.proto.ts` 及其真实依赖的 strict TypeScript 定向检查已 **exit 0、零诊断**。原整合 2 错、实际命令/配置及最终 3 份相关源码摘要在 [类型反馈回执](evidence/2026-11-22-sprint2-collections-native-repair/data-table-owner-types.json)；完整 workspace types 和原生矩阵仍由最终整合执行，不以此小检查代替。
+只包含实际 Shadcn `data-table.proto.ts` 及其真实依赖的 strict TypeScript 定向检查已 **exit 0、零诊断**。原整合 2 错、实际命令/配置及最终 3 份相关源码摘要在 [类型反馈回执](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-collections-native-repair/data-table-owner-types.json)；完整 workspace types 和原生矩阵仍由最终整合执行，不以此小检查代替。

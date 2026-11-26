@@ -20,4 +20,4 @@ IMAGE_PREVIEW_WHEEL_DIAGNOSTICS=1 enables at most 96 passive wheel/scroll observ
 
 The complete original 32-case followup runner is pending on the new clean commit with passive diagnostics off. Its fixed 3300 s suite budget, source checks, 12 last-observed JSON/PNG pairs, matrix evidence, and two video requirements remain unchanged. A single-case pass is not full Image acceptance. The local font package is recorded separately and is not represented as the hosted Ubuntu font environment.
 
-Evidence: [manifest](evidence/2026-11-24-sprint3-image-reading-wheel-closeout/manifest.json) and [original red, preparation failure, and green evidence](evidence/2026-11-24-sprint3-image-reading-wheel-closeout/execution.tar.gz).
+Evidence: [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint3-image-reading-wheel-closeout/manifest.json) and [original red, preparation failure, and green evidence](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint3-image-reading-wheel-closeout/execution.tar.gz).

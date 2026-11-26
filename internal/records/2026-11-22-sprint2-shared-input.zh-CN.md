@@ -16,12 +16,12 @@
 
 完整入口：
 
-- [source-identity.json](evidence/2026-11-22-sprint2-input/source-identity.json)：18 个提交、父提交、tree、签署信息，以及 188 个修改文件的 Git blob、字节数和 SHA-256。
-- [receipt-index.json](evidence/2026-11-22-sprint2-input/receipt-index.json)：101 份原执行输出的摘要、失败分类、源码绑定限制、对应修复提交；所有原字节以确定性 gzip 保留。
-- [evidence-files.json](evidence/2026-11-22-sprint2-input/evidence-files.json)：压缩前后双 hash 与原文件位置。原工作目录中的 intake 回执没有删除或改写。
-- [native-status.json](evidence/2026-11-22-sprint2-input/native-status.json)：亲自持有的材料与根执行者观察转述分开，列出未运行的当前矩阵。
-- [strict-observations.json](evidence/2026-11-22-sprint2-input/strict-observations.json)：严格类型执行的原会话观察、空 stdout 的限制和 SIGKILL 中断。
-- [review-index.json](evidence/2026-11-22-sprint2-input/review-index.json)：五条独立复审发现及其回读；完整独立报告原字节在 `review/`。
+- [source-identity.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-input/source-identity.json)：18 个提交、父提交、tree、签署信息，以及 188 个修改文件的 Git blob、字节数和 SHA-256。
+- [receipt-index.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-input/receipt-index.json)：101 份原执行输出的摘要、失败分类、源码绑定限制、对应修复提交；所有原字节以确定性 gzip 保留。
+- [evidence-files.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-input/evidence-files.json)：压缩前后双 hash 与原文件位置。原工作目录中的 intake 回执没有删除或改写。
+- [native-status.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-input/native-status.json)：亲自持有的材料与根执行者观察转述分开，列出未运行的当前矩阵。
+- [strict-observations.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-input/strict-observations.json)：严格类型执行的原会话观察、空 stdout 的限制和 SIGKILL 中断。
+- [review-index.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-input/review-index.json)：五条独立复审发现及其回读；完整独立报告原字节在 `review/`。
 
 `source/changed-files.tar.gz` 保存该实现提交中所有修改文件；`source/commits.mbox.gz` 保存完整的 18 提交补丁与 sign-off，`source/base-to-candidate.patch.gz` 保存基线到该提交的完整二进制安全 diff。它们使原分支的源码在整合时发生 cherry-pick 后仍可审查。
 

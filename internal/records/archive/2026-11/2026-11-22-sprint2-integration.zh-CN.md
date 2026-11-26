@@ -8,10 +8,10 @@
 
 各路完整记录和原始回执：
 
-- [共享输入与 Form/Field/Select](2026-11-22-sprint2-shared-input.zh-CN.md)：TextControl selection/caret、AxisInput/Slider、OTP、Field choices 及对应公开配方。
-- [树、集合、几何](2026-11-22-sprint2-collections.md)：Tree RTL/Item 关系、Data Table recipes、Virtual List owner、Resizable/Carousel/Calendar/DatePicker。
-- [编译器、固定版本消费与 CLI](2026-11-22-sprint2-compiler-consumers.zh-CN.md)：独立 authored source × target × actual consumer 清单，以及原失败、支持/unsupported 分母和成本。
-- [交叉独立评审](2026-11-22-sprint2-collections-review.zh-CN.md)：网站、输入、编译器、CLI、队列和 Field 反例复验。
+- [共享输入与 Form/Field/Select](../../2026-11-22-sprint2-shared-input.zh-CN.md)：TextControl selection/caret、AxisInput/Slider、OTP、Field choices 及对应公开配方。
+- [树、集合、几何](../../2026-11-22-sprint2-collections.md)：Tree RTL/Item 关系、Data Table recipes、Virtual List owner、Resizable/Carousel/Calendar/DatePicker。
+- [编译器、固定版本消费与 CLI](../../2026-11-22-sprint2-compiler-consumers.zh-CN.md)：独立 authored source × target × actual consumer 清单，以及原失败、支持/unsupported 分母和成本。
+- [交叉独立评审](../../2026-11-22-sprint2-collections-review.zh-CN.md)：网站、输入、编译器、CLI、队列和 Field 反例复验。
 - [DatePicker 独立评审](2026-11-22-sprint2-datepicker-independent-review.zh-CN.md)：保留原 001/002 失败、每次候选源码和后续追加结果。
 
 真实 Harness 消费者为 `cyjin-yl/shenko@f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42`；其他实际消费者包括 `OpenGreendam/verdant@91a775546ebd21a87d76d76568195a6513437719`。Shenko 的两条自有 compiled source 消费路径和九家族 Adapter 消费必须分开计数。Verdant 的真实 producer 检查不替代缺少 Cargo 的桌面运行。本批没有把 Tree/Table 等演示夹具改称这两个应用的真实使用；Harness session/follow-tail、Inspector 和两领域应用证明仍随 S7 原条件推进。
@@ -71,4 +71,4 @@ PR 已实际发布到 `c13d4d9` 的回执来自 [run 45023717671](https://github
 
 本记录建立时最终托管队列尚未执行，本身不宣告 PR Ready。最终接受应追加实际发布 head、每套终态、artifact 摘要、独立复核、Issue 子条件回填和 GitHub Ready 回读；不会用本记录替代它们。
 
-原件索引：[receipt-index.json](evidence/2026-11-22-sprint2-integration/receipt-index.json)。日志按确定性 gzip 保留，索引同时记录原文与压缩字节 SHA-256，当前相关源文件也按 `dbcdecb` 快照保全。
+原件索引：[receipt-index.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-integration/receipt-index.json)。日志按确定性 gzip 保留，索引同时记录原文与压缩字节 SHA-256，当前相关源文件也按 `dbcdecb` 快照保全。

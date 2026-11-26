@@ -63,4 +63,4 @@ Apple 17:08 的平面洋红画面是教学对照，不作为目标。Apple 视�
 
 ## 保全的原始机器记录
 
-[完整 results](evidence/2026-11-22-sprint-6/visible-refraction-results.json.gz)、[sequence index](evidence/2026-11-22-sprint-6/visible-refraction-sequence-index.json.gz)、[artifact manifest](evidence/2026-11-22-sprint-6/visible-refraction-artifact-manifest.json.gz) 保存实际下载 JSON 的原始字节（gzip）。图片仍在上列 Actions artifact，不能从文件名推断通过。
+[完整 results](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint-6/visible-refraction-results.json.gz)、[sequence index](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint-6/visible-refraction-sequence-index.json.gz)、[artifact manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint-6/visible-refraction-artifact-manifest.json.gz) 保存实际下载 JSON 的原始字节（gzip）。图片仍在上列 Actions artifact，不能从文件名推断通过。

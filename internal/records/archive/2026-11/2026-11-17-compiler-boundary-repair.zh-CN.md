@@ -4,7 +4,7 @@
 
 **最终源码的完整 11 文件 affected 组实际执行 105/105 通过，0 failed、0 pending；另一组公开边界消费者 52/52 通过；九个入口的完整传递 TypeScript Program 为 0 诊断。** 独立本地审查先后发现两条 Expose 修复中的 P2，两条均保留真实红例并在最终源码复审关闭。正式 GitHub review、当前新 head 的平台检查、整合与 release acceptance 仍是后续条件。
 
-完整原始日志、Vitest JSON、类型文件清单、独立探针、各轮文件指纹及可恢复代码补丁，保存在 [机器证据](evidence/2026-11-17-compiler-boundary-repair.json) 的带 hash ZIP 附件中。恢复先核对 ZIP，再核对逐成员 SHA-256；历史失败没有被绿色结果覆盖。
+完整原始日志、Vitest JSON、类型文件清单、独立探针、各轮文件指纹及可恢复代码补丁，保存在 [机器证据](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-17-compiler-boundary-repair.json) 的带 hash ZIP 附件中。恢复先核对 ZIP，再核对逐成员 SHA-256；历史失败没有被绿色结果覆盖。
 
 ## 为什么修复这三处
 

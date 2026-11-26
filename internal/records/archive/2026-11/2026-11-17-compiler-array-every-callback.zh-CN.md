@@ -2,7 +2,7 @@
 
 ## 问题与责任层
 
-本记录回应 [PR #1479 的 callback 实参审查](https://github.com/Proto-UI/Proto-UI/pull/1479#discussion_r4586811122)。复现基线是 `385d7c706c9e4c35280878efbb6e42d63d7df786`；未提交候选的具体身份由同行的 [机器证据](evidence/2026-11-17-compiler-array-every-callback.json) 中源码、夹具和命令的摘要共同确定。
+本记录回应 [PR #1479 的 callback 实参审查](https://github.com/Proto-UI/Proto-UI/pull/1479#discussion_r4586811122)。复现基线是 `385d7c706c9e4c35280878efbb6e42d63d7df786`；未提交候选的具体身份由同行的 [机器证据](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-17-compiler-array-every-callback.json) 中源码、夹具和命令的摘要共同确定。
 
 ECMAScript 的 [`Array.prototype.every`](https://tc39.es/ecma262/2025/multipage/indexed-collections.html#sec-array.prototype.every) 向 callback 传入当前值、数值索引与正在遍历的数组。Compiler 的既有原生执行路径已经如此调用，但源码上下文、`intrinsicResult` 的校验和 callable flow 只描述了第一个实参。由此产生四种可观察的不一致：合法的第二、第三参数被拒绝；不匹配的可选参数类型漏过校验；根据索引或数组可达的交互能力被漏裁；实际已经提供的索引仍被分析成缺省，误认为需要执行默认表达式。
 

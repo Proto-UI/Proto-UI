@@ -142,7 +142,7 @@ The exact temporary TypeScript configuration is retained with the evidence. It i
 
 ## Retained evidence and remaining work
 
-[Evidence summary](evidence/2026-11-24-drawer-analysis-bound/summary.json) binds every archive/log to a SHA-256 digest. The five `.tar.gz` archives retain each original inventory plan, full report, source closure, request, completed rows, stdout/stderr and process outcome. The missing resource/row receipts in timed-out attempts remain missing; no successful receipt is synthesized for them. Compressed test logs preserve both the known baseline failure and candidate failure.
+[Evidence summary](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-drawer-analysis-bound/summary.json) binds every archive/log to a SHA-256 digest. The five `.tar.gz` archives retain each original inventory plan, full report, source closure, request, completed rows, stdout/stderr and process outcome. The missing resource/row receipts in timed-out attempts remain missing; no successful receipt is synthesized for them. Compressed test logs preserve both the known baseline failure and candidate failure.
 
 Agent evidence disposition: complete for the reproduced local worker timeout, bounded refusal, stack-overflow control and named focused tests; partial for wider compiler acceptance. This is internal analysis work, so executable receipts and the source-bound walkthrough are the applicable evidence; no UI capture or uploaded image is claimed. Independent review and any external publication are separate work.
 

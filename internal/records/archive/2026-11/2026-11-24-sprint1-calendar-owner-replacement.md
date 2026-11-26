@@ -4,7 +4,7 @@ This non-normative record preserves a reproduced Calendar defect, its bounded re
 
 ## Reproduced defect and repair
 
-[C-CALENDAR-SELECTION-0001](../../spec/contracts/C-CALENDAR-SELECTION-0001.yaml) remains draft at `0.3.0-alpha.2`. Its MODES and CONTROLLED criteria give the supplied mode-specific prop authority over accepted selection; PICKER requires partial/rejected selection to stay open and correlates accepted completion with the still-current opening session.
+[C-CALENDAR-SELECTION-0001](../../../../spec/contracts/C-CALENDAR-SELECTION-0001.yaml) remains draft at `0.3.0-alpha.2`. Its MODES and CONTROLLED criteria give the supplied mode-specific prop authority over accepted selection; PICKER requires partial/rejected selection to stay open and correlates accepted completion with the still-current opening session.
 
 Calendar's Props synchronization read one snapshot, then wrote its public `value`, `month`, `disabled` and `direction` states. A synchronous public State subscriber could replace Props during one of those writes. The nested synchronization accepted the new multiple/range selection or policy, but the interrupted outer synchronization continued with its old snapshot. In particular, it combined a live `isProvided('values'/'range')` result with the old snapshot's missing field, overwriting the newly accepted selection with `[]` or `{}`. Month and disabled subscribers similarly exposed stale policy/direction writes. Date Picker inherits this Calendar implementation, so its visible day facts and canonical value display were also affected.
 
@@ -55,6 +55,6 @@ This selects 40 native journeys, not all of #1098. The runner's normal website/s
 
 ## Evidence carrier
 
-[Manifest](evidence/2026-11-24-sprint1-calendar-owner-replacement/manifest.json) and [raw archive](evidence/2026-11-24-sprint1-calendar-owner-replacement/raw-evidence.zip) contain the original Issue body, source snapshots, exact execution reports, original-source replay config and entry-point sources. The archive is 223,878 bytes, SHA-256 `fc1b8f14974fe24ea528b8311ed2aca6ec980ef5bd4e92194a4a223d28a63c53`; all 43 entries passed CRC and every payload size/hash was read back and verified.
+[Manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-calendar-owner-replacement/manifest.json) and [raw archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-calendar-owner-replacement/raw-evidence.zip) contain the original Issue body, source snapshots, exact execution reports, original-source replay config and entry-point sources. The archive is 223,878 bytes, SHA-256 `fc1b8f14974fe24ea528b8311ed2aca6ec980ef5bd4e92194a4a223d28a63c53`; all 43 entries passed CRC and every payload size/hash was read back and verified.
 
 The repaired Calendar source SHA-256 is `a98be1f4ad13b91c69045d7de8c72e876399768d312356fea72cc71aa886cfe3`. Metadata records the shared checkout plus the dirty file snapshots actually tested. These are bounded local source-bound receipts, not a clean-head mainline, complete Sprint 1 or native-browser green result.

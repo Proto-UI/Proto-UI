@@ -44,8 +44,8 @@ The two partial runs are not combined into 6/6. No third same-input retry is aut
 
 ## Archive and review boundary
 
-[The manifest](evidence/2026-11-23-sprint6-current-main-reentry/manifest.json) binds raw/stored hashes, source hashes, all execution logs, both native reports, both complete native artifact sets and the actual scripts. Raw evidence is compressed losslessly; it is not reformatted. The two root peer receipts remain unchanged and are local source reviews, not GitHub APPROVED dispositions.
+[The manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint6-current-main-reentry/manifest.json) binds raw/stored hashes, source hashes, all execution logs, both native reports, both complete native artifact sets and the actual scripts. Raw evidence is compressed losslessly; it is not reformatted. The two root peer receipts remain unchanged and are local source reviews, not GitHub APPROVED dispositions.
 
 Draft-family generation, CLI build, website token generation, public/workspace types and original-deadline graph/schema were not executed on this checkpoint; they remain work for the final combined source. The old graph/schema failures and old type passes remain attributed to their original source. The original strict hosted Bootstrap/public workflow still owns final combination and browser acceptance. Physical refresh-rate/input-to-photon, assistive technology, non-Web and umbrella release acceptance are outside these local receipts.
 
-![Second run: actual entered Dialog before the later screenshot-sampling timeout](evidence/2026-11-23-sprint6-current-main-reentry/native-recheck/dialog-entered.png)
+![Second run: actual entered Dialog before the later screenshot-sampling timeout](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint6-current-main-reentry/native-recheck/dialog-entered.png)

@@ -25,4 +25,4 @@ All four commands used Node 24.22.3, pnpm 10.32.1, Vitest 2.1.9 and one worker. 
 
 Independent source review by the compiler workstream agreed that inventory presence alone does not establish an invalid scanner proof and that this fixture supplies no basis to change collector behavior. This is source review, not a GitHub approval or an execution attestation for the unrun whole-tree gate.
 
-Evidence: [`evidence/2026-11-23-imported-row-proof-reconciliation/manifest.json`](evidence/2026-11-23-imported-row-proof-reconciliation/manifest.json) and its byte-verified `receipts.tar.gz`.
+Evidence: [`evidence/2026-11-23-imported-row-proof-reconciliation/manifest.json`](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-imported-row-proof-reconciliation/manifest.json) and its byte-verified `receipts.tar.gz`.

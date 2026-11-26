@@ -35,4 +35,4 @@ The final candidate file has SHA-256 `61aee02e02a3e3ab6314712b52eda443b890d43300
 
 Rerun the unchanged 26-case browser inventory on the actual published head. If admission still fails, collect the existing phase stream and actual page errors to distinguish pending scheduling, focus fallback and a real initialization exception. The new wait will still fail when the requested Tree does not appear. All candidate native and screenshot evidence remains pending.
 
-[Structured observations, original diagnostic failure and selected rerun](evidence/2026-11-17-code-example-tree-readiness.json)
+[Structured observations, original diagnostic failure and selected rerun](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-17-code-example-tree-readiness.json)

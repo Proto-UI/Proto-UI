@@ -2,7 +2,7 @@
 
 This supplements [the original Sprint 1 execution record](2026-11-22-sprint-1-reliable-regression.md). It preserves each run's actual source and negative result. It does not change the seven commitments, the original Search **1000 ms** oracle, the five-pair A/B minimum, or the release recovery rules. [PR #1711](https://github.com/Proto-UI/Proto-UI/pull/1711) remains the integration vehicle.
 
-The [follow-up receipt manifest](evidence/2026-11-22-sprint1-followup/manifest.json) preserves reports, inventories and selected original evidence as losslessly compressed bytes, with original and compressed SHA-256 digests. The tar archives include their own per-member inventories. Embedded local paths identify the acquisition environment; public run and artifact URLs identify the external records. A hash inventory is not a claim that every raw artifact entry is copied into this repository.
+The [follow-up receipt manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint1-followup/manifest.json) preserves reports, inventories and selected original evidence as losslessly compressed bytes, with original and compressed SHA-256 digests. The tar archives include their own per-member inventories. Embedded local paths identify the acquisition environment; public run and artifact URLs identify the external records. A hash inventory is not a claim that every raw artifact entry is copied into this repository.
 
 ## Clean integration source `2810f01`
 

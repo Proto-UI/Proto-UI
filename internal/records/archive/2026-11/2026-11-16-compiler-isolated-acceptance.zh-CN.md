@@ -4,7 +4,7 @@
 
 **原十个浏览器文件在同一个干净源码版本上 97/97 通过；真实 Dart 的原六项加新增一项在两行修复后 7/7 通过；最终组合 `bfd383c468943e6145afb717b35d26dd7e23ebca` 的完整 `check:types` 和官方 packed React consumer 均退出 0。** Linux GPUI 的真实远端消费者 27/27 通过，macOS 仍是 runner 分配前取消、零执行。另一次完整网站 CI 暴露的独立失败也保留，不能将整体剩余工作缩写为只有 macOS 权限问题。
 
-完整机器记录、原始收据与可恢复压缩附件见 [2026-11-16-compiler-isolated-acceptance.json](evidence/2026-11-16-compiler-isolated-acceptance.json)。
+完整机器记录、原始收据与可恢复压缩附件见 [2026-11-16-compiler-isolated-acceptance.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-16-compiler-isolated-acceptance.json)。
 
 ## 执行结果与准确源码
 
@@ -44,9 +44,9 @@
 
 本轮生成 397 张真实 PNG，完整路径、大小和 SHA-256 清单保留。下面两张实际目检的原图同时保留在工程记录与恢复附件中，其余 395 张原图仍在执行目录，仅以索引引用，不声称已经作为文件上传。
 
-![ControlLabel 的可见名称与焦点轮廓](evidence/2026-11-16-compiler-isolated-acceptance/control-label-react-activated.png)
+![ControlLabel 的可见名称与焦点轮廓](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-16-compiler-isolated-acceptance/control-label-react-activated.png)
 
-![普通 Focus scope 打开后的内部焦点目标](evidence/2026-11-16-compiler-isolated-acceptance/focus-ordinary-opened.png)
+![普通 Focus scope 打开后的内部焦点目标](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-16-compiler-isolated-acceptance/focus-ordinary-opened.png)
 
 这两张图分别支持可见名称/焦点轮廓与普通 scope 内外控件的观察；它们不扩大为所有主题、设备或辅助技术验收。Focus 原夹具的 `compiledPopoverConformance: false` 与 `cleanHeadAcceptance: false` 继续保留；通用 Light DOM Focus 消费者不能替代正式 Popover 或其他宿主验收。
 

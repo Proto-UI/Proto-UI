@@ -14,7 +14,7 @@ Authoritative retained inputs:
 - `internal/records/2026-11-22-sprint-7-history-sources/index.json` and its four metadata parts; concatenated compressed source SHA-256 `ac608aa6460b81ede93e8116cbdf112bc0d34e242a476726d8ced474938b3eaf`.
 - Original issue enumeration and fetched comments are retained in this record's receipt archive.
 
-The [401-row inventory](evidence/2026-11-24-sprint1-historical-owner-audit/original-401-risk-inventory.json.gz) preserves every original number, title, scope, head/base/merge identity, full changed-file list, local-object availability, original review-class unknown, this-pass disposition, and remaining source-specific review prompts. Path-derived groups are **nonexclusive**: 59 Runtime/Adapter owner PRs, 84 Compiler/CLI, 143 website control/projection, 93 prototype component, 96 CI/release/harness, and 176 documentation/demo PRs overlap. These numbers describe routing, not findings or completed audits.
+The [401-row inventory](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-historical-owner-audit/original-401-risk-inventory.json.gz) preserves every original number, title, scope, head/base/merge identity, full changed-file list, local-object availability, original review-class unknown, this-pass disposition, and remaining source-specific review prompts. Path-derived groups are **nonexclusive**: 59 Runtime/Adapter owner PRs, 84 Compiler/CLI, 143 website control/projection, 93 prototype component, 96 CI/release/harness, and 176 documentation/demo PRs overlap. These numbers describe routing, not findings or completed audits.
 
 ## Source reviews actually performed
 
@@ -61,9 +61,9 @@ node node_modules/vitest/vitest.mjs run \
 
 Final result: **79/79, 0 failed, 0 skipped**: 8 original AdapterHost cases, 32 new real reentry/error cases, 14 Runtime transition cases and 25 Runtime resource cases. The new file uses Node with actual Promise microtasks; the existing tests retain their own declared environment. This is not Chromium, native framework scheduling, accessibility, physical-input, performance or complete Sprint 1 acceptance.
 
-The [manifest](evidence/2026-11-24-sprint1-historical-owner-audit/manifest.json) binds the reviewed working-tree bytes, checkout HEAD and every archive member. Root's integration work could change other files concurrently; no assertion of an unchanged whole workspace is made. The two red source/test snapshots and both green stages are retained separately. The first red fixture was recovered exactly and checked against its pre-execution SHA-256 before archiving; later assertion improvements are not relabeled as the earlier fixture.
+The [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-historical-owner-audit/manifest.json) binds the reviewed working-tree bytes, checkout HEAD and every archive member. Root's integration work could change other files concurrently; no assertion of an unchanged whole workspace is made. The two red source/test snapshots and both green stages are retained separately. The first red fixture was recovered exactly and checked against its pre-execution SHA-256 before archiving; later assertion improvements are not relabeled as the earlier fixture.
 
-- [Receipt archive](evidence/2026-11-24-sprint1-historical-owner-audit/receipts.zip): 244,689 bytes, 44 members, SHA-256 `dac857b69c2ea19c7e14544a2af6879b0c4164a48a607c7c0603e1b0ae20d95d`.
+- [Receipt archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-historical-owner-audit/receipts.zip): 244,689 bytes, 44 members, SHA-256 `dac857b69c2ea19c7e14544a2af6879b0c4164a48a607c7c0603e1b0ae20d95d`.
 - Compressed 401-row inventory: 820,006 bytes, SHA-256 `1fec7f70c7d04d1b7f464a92d87bf687f7bc06273973b03acc6838534e1d59f3`.
 - Every ZIP CRC and manifest SHA-256 was read back; decompression retains exactly 401 unique rows.
 

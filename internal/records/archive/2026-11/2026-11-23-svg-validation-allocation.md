@@ -28,7 +28,7 @@ The earlier shared-field-only and shared-tag candidates, their complete reports,
 
 ## Evidence
 
-[svg-validation-evidence.tar.gz](evidence/2026-11-23-svg-validation-allocation/svg-validation-evidence.tar.gz) contains 93 individually verified payload files plus its manifest. It is 2323750 bytes, SHA-256 cb9e011de9f9b86707fd66b5396b64ba1f4db621b9b35a3a1fad563150a64c47.
+[svg-validation-evidence.tar.gz](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-svg-validation-allocation/svg-validation-evidence.tar.gz) contains 93 individually verified payload files plus its manifest. It is 2323750 bytes, SHA-256 cb9e011de9f9b86707fd66b5396b64ba1f4db621b9b35a3a1fad563150a64c47.
 
 Final source SHA-256:
 

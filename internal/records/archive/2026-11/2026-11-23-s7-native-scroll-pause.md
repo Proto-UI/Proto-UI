@@ -16,7 +16,7 @@ The generated ordinary-consumer Cargo graph also lacked its new local `proto-ui-
 
 ## Executed results
 
-The candidate is bound to parent `0ffe83b72a80c10d542c0291bc63b03b3a04901b` and the two changed source-file SHA-256 values in [manifest.json](evidence/2026-11-23-s7-native-scroll-pause/manifest.json). Node 24.22.3, pnpm 10.32.1, Rust 1.98.1 and pinned GPUI `62e5991dd0f0c8a3af8d5e7e9c4652490d468db8` were used.
+The candidate is bound to parent `0ffe83b72a80c10d542c0291bc63b03b3a04901b` and the two changed source-file SHA-256 values in [manifest.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-s7-native-scroll-pause/manifest.json). Node 24.22.3, pnpm 10.32.1, Rust 1.98.1 and pinned GPUI `62e5991dd0f0c8a3af8d5e7e9c4652490d468db8` were used.
 
 | Check | Actual terminal result |
 | --- | --- |

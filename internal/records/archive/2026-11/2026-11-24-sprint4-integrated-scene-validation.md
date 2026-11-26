@@ -2,14 +2,14 @@
 
 ## 固定源码和实际结果
 
-本记录对应整合提交 `9fff88cf23d4e55375979bc5c68c033e3deaed38`，tree `8f284229ff76e51ec109af2fd8f4d9694a739a35`。该提交把作者的 `27b5429b46fdc31ae94d1f6a1bd37fb1c6a8323c` 接到已整合当前 main 的 Sprint 4 分支。实现范围和未支持目标见 [owned-scene 交付记录](./2026-11-24-sprint4-owned-scene-shader.md)。
+本记录对应整合提交 `9fff88cf23d4e55375979bc5c68c033e3deaed38`，tree `8f284229ff76e51ec109af2fd8f4d9694a739a35`。该提交把作者的 `27b5429b46fdc31ae94d1f6a1bd37fb1c6a8323c` 接到已整合当前 main 的 Sprint 4 分支。实现范围和未支持目标见 [owned-scene 交付记录](../../2026-11-24-sprint4-owned-scene-shader.md)。
 
-- [x] **整合提交的 17 份定向测试文件、245 条断言全部通过，零失败、零 pending。** 实际运行时间为 2026-11-23 20:34:05–20:34:39 UTC。测试选择与清单逐份核对相同，使用 Node 24、pnpm 10.32.1、单 worker 和 1536 MiB 堆上限。命令、原始 JSON、完整日志均保存在 [原件清单](./evidence/2026-11-24-sprint4-integrated-scene/manifest.json) 中。日志里的 esbuild ES2024 警告仍保留；本结果没有冒充严格 TypeScript 或浏览器验证。
+- [x] **整合提交的 17 份定向测试文件、245 条断言全部通过，零失败、零 pending。** 实际运行时间为 2026-11-23 20:34:05–20:34:39 UTC。测试选择与清单逐份核对相同，使用 Node 24、pnpm 10.32.1、单 worker 和 1536 MiB 堆上限。命令、原始 JSON、完整日志均保存在 [原件清单](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint4-integrated-scene/manifest.json) 中。日志里的 esbuild ES2024 警告仍保留；本结果没有冒充严格 TypeScript 或浏览器验证。
 - [x] **独立 scene 审查的 48 个控制符合各自预期。** 其中导出名称负例的成功结果是预期拒绝，不是把非法输出编译成功。审查实际运行在作者提交 `27b5429b`；13 份关键源码与整合提交逐字节相同。原审查的执行 SHA 没有改写为本次整合 SHA。
 - [x] **旧 owned-pixels 的有限兼容性审查完成。** 非法输入后的恢复、旧帧诊断、device/cleanup 轨迹、生成模板来源和三种 reached-kernel 闭包均保留原件。所审 11 份源码与 lockfile 在作者和整合提交中逐字节相同。诊断数组顺序变化保留为非阻断观察，未添加不存在的排序契约。
-- [x] **整合源码的真实浏览器 37/37 功能旅程全部执行并通过。** [Actions 45262028723](https://github.com/Proto-UI/Proto-UI/actions/runs/45262028723) 对三份 fixture 各执行四目标构建，原件见 [148 文件清单](./evidence/2026-11-24-sprint4-browser-first-pass/manifest.json)。旧浏览器 0/28、0/37 的未执行结果仍保留，未被改写。
+- [x] **整合源码的真实浏览器 37/37 功能旅程全部执行并通过。** [Actions 45262028723](https://github.com/Proto-UI/Proto-UI/actions/runs/45262028723) 对三份 fixture 各执行四目标构建，原件见 [148 文件清单](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint4-browser-first-pass/manifest.json)。旧浏览器 0/28、0/37 的未执行结果仍保留，未被改写。
 - [ ] **scene 绘制中、换源后的画面仍需补足独立视觉回读。** 首次成功的八张 scene 图实际拍于 dispose 后，只显示清理后的页面；不能据此接受绘制效果。未配置源的 fallback 图显示保留的可读控件。后继只补原旅程的中间截图，不改断言或分母。
-- [ ] **严格 canonical 包预算仍未通过。** [候选 Actions 45262013762](https://github.com/Proto-UI/Proto-UI/actions/runs/45262013762) 为实际 clean/exact-source 6/9；baseline 9/9。工具链、压缩与 external 参数相同，三项超出为 React 149、Vue 136、WC 103 字节； [事实与原件](./evidence/2026-11-24-sprint4-canonical-cost/report.json)尚未决定新上限。
+- [ ] **严格 canonical 包预算仍未通过。** [候选 Actions 45262013762](https://github.com/Proto-UI/Proto-UI/actions/runs/45262013762) 为实际 clean/exact-source 6/9；baseline 9/9。工具链、压缩与 external 参数相同，三项超出为 React 149、Vue 136、WC 103 字节； [事实与原件](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint4-canonical-cost/report.json)尚未决定新上限。
 - [ ] **正式独立 GitHub review、合并与原 Sprint 4 总体接受仍分别处理。**
 
 ### 首轮归档缺口
@@ -32,8 +32,8 @@
 
 ## 可重放原件
 
-- [scene 审查说明](./evidence/2026-11-24-sprint4-scene-independent-review/review-notes.md)、 [复现说明](./evidence/2026-11-24-sprint4-scene-independent-review/REPRODUCE.md)、 [稳定结果](./evidence/2026-11-24-sprint4-scene-independent-review/stable-review-result.json)、 [整合源码对照](./evidence/2026-11-24-sprint4-scene-independent-review/integration-source-equivalence.json)。原件包 `originals.tar.gz` 的 SHA-256 为 `46ae21f18a4d7508ff6e68c61c95ebb9c376906049f04f8aa040c07469e9103e`。
-- [旧 pixels 有限审查](./evidence/2026-11-24-sprint4-owned-pixels-review/record.json)及其 [逐文件清单](./evidence/2026-11-24-sprint4-owned-pixels-review/manifest.json)。原件包 `owned-pixels-review-27b5429.tar.gz` 的 SHA-256 为 `7fb2a6c24b87105160bdc8c41944226627e67f02a12533cafe97bdb86cc1c8ed`。
+- [scene 审查说明](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint4-scene-independent-review/review-notes.md)、 [复现说明](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint4-scene-independent-review/REPRODUCE.md)、 [稳定结果](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint4-scene-independent-review/stable-review-result.json)、 [整合源码对照](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint4-scene-independent-review/integration-source-equivalence.json)。原件包 `originals.tar.gz` 的 SHA-256 为 `46ae21f18a4d7508ff6e68c61c95ebb9c376906049f04f8aa040c07469e9103e`。
+- [旧 pixels 有限审查](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint4-owned-pixels-review/record.json)及其 [逐文件清单](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint4-owned-pixels-review/manifest.json)。原件包 `owned-pixels-review-27b5429.tar.gz` 的 SHA-256 为 `7fb2a6c24b87105160bdc8c41944226627e67f02a12533cafe97bdb86cc1c8ed`。
 
 原始记录中的机器路径用于忠实保留执行来源；解包后的相对文件名和 manifest 用于回读。目录中的未压缩说明及 JSON 是便于审阅的格式化投影；逐字节原件保存在归档中，原始 SHA 清单对应归档成员。格式化投影没有改写原件的来源或执行 SHA。未将任何审查署名解释为 GitHub APPROVE，也未代理原 IR10 作者签署 DCO。
 

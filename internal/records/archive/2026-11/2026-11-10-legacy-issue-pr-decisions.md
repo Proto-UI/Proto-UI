@@ -18,7 +18,7 @@
 | #1091 body，第 8 行 | `issue.1091.002`；body SHA-256 `2eeccd625582b4d1ce99d01929b3403d657b2ec6d781c0628183fcc3f1470a3a` | 父源原 checkbox 未勾选 |
 | PR #887 body，第 170 行 | `相邻中断会话：完整剩余工作 / 后续设计语言工作`；body SHA-256 `796af070cd5b007c84311d91e632b2486f3013b88bc5debab6c5bcd2d04933bf` | 原文字样是 ``历史状态 `pending` ``，仍未勾选 |
 
-前两个 key 来自已入库的 [冻结 release source ledger](../governance/release-0.3-source-ledger.json)。PR #887 的行号和内容哈希是本次采集的定位信息；更早 adjacent-session task ID 尚未恢复，不能把新定位伪装成历史 task ID。采集时 #1147 / #1091 的 body 哈希与冻结源相同；后续评论新增的决策不能通过改写旧 body 消除。
+前两个 key 来自已入库的 [冻结 release source ledger](../../../governance/release-0.3-source-ledger.json)。PR #887 的行号和内容哈希是本次采集的定位信息；更早 adjacent-session task ID 尚未恢复，不能把新定位伪装成历史 task ID。采集时 #1147 / #1091 的 body 哈希与冻结源相同；后续评论新增的决策不能通过改写旧 body 消除。
 
 #1139 的源恢复另找到了较晚 main-session migration 快照：session `01a0cc26-1013-72dd-b00d-4429c2af2b17`、event `5788e9e7`、时间 `2026-10-14T05:47:23.344Z`、phase `113 / Adjacent interrupted session intake`、task index `1`。该处同名任务的状态是 **blocked**，其 blocker 逐字保留：
 
@@ -53,7 +53,7 @@ Current user moves development TODOs to #872 followups and a future new PR. Pres
 
 采集时 #1147、#1091、#890、#1323 均为 OPEN；PR #887 为 MERGED，head `8941fab0c6da7a0cbb7875c51c031a58ea67eb3a`，merge commit `a0dc3792b78ab593f6466a53876ea1d91fe32004`。GitHub assignee 为空不撤销本次 owner 分工或历史 claim。
 
-[原始 Finf source debt](2026-10-14-finf-followup-source-debt.json) 的全部原文、compound 条件、历史 dispositions 与 metadata 保持原文件字节：
+[原始 Finf source debt](../../2026-10-14-finf-followup-source-debt.json) 的全部原文、compound 条件、历史 dispositions 与 metadata 保持原文件字节：
 
 | 保留集合 | 行数 | 计数含义 |
 | --- | --- | --- |
@@ -63,7 +63,7 @@ Current user moves development TODOs to #872 followups and a future new PR. Pres
 
 合计 1084 个保留 source versions；其中携带的未勾选记录是 `955 + 26 + 16 = 997`。这些数值不是独立 bug 数、全部仓库历史分母或完成百分比。JSON 绑定整份历史源 SHA-256、各集合 pointer 与原 key 顺序摘要；不去重、不复制为第二份完整原文，也不改历史哈希。
 
-[历史 source closure](2026-10-14-finf-source-closure.json) 与 [continuation](2026-10-14-finf-followup-continuation.json) 保留原 archive refs、原 head、贡献来源、真实 dated native DCO receipts 和六个公开 carrier URL。本次只读查询再次观察到原八个 PR #846 / #869 / #872 / #878 / #879 / #884 / #885 / #886 均为 MERGED；精确平台 head、merge commit、author 和采集时间记录在 JSON。没有重做这八个 PR 的当前全部讨论或技术验收。尤其 PR #846 早期 evidence-only / never-merge 文字与较晚真实 merge 回执都保留；平台已合并事实不产生新性能结论，也不回写旧审查决定。
+[历史 source closure](../../2026-10-14-finf-source-closure.json) 与 [continuation](../../2026-10-14-finf-followup-continuation.json) 保留原 archive refs、原 head、贡献来源、真实 dated native DCO receipts 和六个公开 carrier URL。本次只读查询再次观察到原八个 PR #846 / #869 / #872 / #878 / #879 / #884 / #885 / #886 均为 MERGED；精确平台 head、merge commit、author 和采集时间记录在 JSON。没有重做这八个 PR 的当前全部讨论或技术验收。尤其 PR #846 早期 evidence-only / never-merge 文字与较晚真实 merge 回执都保留；平台已合并事实不产生新性能结论，也不回写旧审查决定。
 
 冻结 release source ledger 只含采集时的 187 个 Issue。八个原 PR、187 个 Issue、997 条未勾选记录都不能定义原文“全部旧有 Issue 与 PR”的完整人口与截止时点。这个分母尚未恢复；不能以开放 Issue 列表、样本或本记录替代全历史同步。
 

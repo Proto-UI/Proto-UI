@@ -2,9 +2,9 @@
 
 ## Direction and scope
 
-The maintainer requested that package-budget ceiling increases needed to advance accepted work no longer wait for a separate human decision. The development skill now assigns that bounded numeric choice to the Agent within an authorized task. The authoritative workflow text is [the development entrypoint](../../.agents/skills/pui-dev/SKILL.md#decide-package-budget-ceilings); this record preserves the change context, not a second rule.
+The maintainer requested that package-budget ceiling increases needed to advance accepted work no longer wait for a separate human decision. The development skill now assigns that bounded numeric choice to the Agent within an authorized task. The authoritative workflow text is [the development entrypoint](../../../../.agents/skills/pui-dev/SKILL.md#decide-package-budget-ceilings); this record preserves the change context, not a second rule.
 
-This narrows the approval dependency while retaining the evidence discipline in [#654](https://github.com/Proto-UI/Proto-UI/issues/654#issuecomment-5677625733), especially its separately reviewable transaction and growth-attribution requirements. Earlier records, including [the bounded Meta transaction](2026-10-03-bounded-meta-budget-transaction.md), remain factual history of the decisions made then. They are not rewritten as if this delegation already existed.
+This narrows the approval dependency while retaining the evidence discipline in [#654](https://github.com/Proto-UI/Proto-UI/issues/654#issuecomment-5677625733), especially its separately reviewable transaction and growth-attribution requirements. Earlier records, including [the bounded Meta transaction](../../2026-10-03-bounded-meta-budget-transaction.md), remain factual history of the decisions made then. They are not rewritten as if this delegation already existed.
 
 ## What changed
 

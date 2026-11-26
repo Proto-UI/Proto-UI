@@ -10,7 +10,7 @@ This bounded update reconciles PR #1712 with main and preserves the concurrent D
 - All eight files from concurrent commit `23122cbf` retain their exact bytes. This update does not replace its close-request Root/run identity, active-focus scope, Vue2 physical-generation cache retirement, or Navbar diagnostics.
 - The earlier `831bf10` plus `9acf433c` experiment and its failures are kept under `prior-831/`. Its results are attributed to that earlier combination.
 
-[The manifest](evidence/2026-11-23-sprint6-main-view-retirement/manifest.json) contains source hashes, actual file selections, and both compressed and original hashes for every retained raw artifact. Gzip files preserve original bytes.
+[The manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint6-main-view-retirement/manifest.json) contains source hashes, actual file selections, and both compressed and original hashes for every retained raw artifact. Gzip files preserve original bytes.
 
 ## Merge decisions and product repair
 
@@ -69,9 +69,9 @@ An independent readback verified all 25 native artifacts and their source bindin
 
 Two original native PNGs were visually inspected: the entered state contains the authored Dialog and backdrop; the terminal close state contains the underlying page with both removed from paint. The physical lifetime facts remain in the case JSON.
 
-![Real Chromium entered Dialog](evidence/2026-11-23-sprint6-main-view-retirement/native-modal/dialog-entered.png)
+![Real Chromium entered Dialog](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint6-main-view-retirement/native-modal/dialog-entered.png)
 
-![Real Chromium terminal close](evidence/2026-11-23-sprint6-main-view-retirement/native-modal/dialog-enter-close-terminal.png)
+![Real Chromium terminal close](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint6-main-view-retirement/native-modal/dialog-enter-close-terminal.png)
 
 ### Command receipts
 

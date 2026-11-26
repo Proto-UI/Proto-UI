@@ -12,17 +12,17 @@ Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-
 ## Fresh results
 
 - Canonical `check:types`: workspace TypeScript and Astro 632 files; zero errors, zero warnings, ten hints. The initial optional telemetry config-path error is retained in the receipt; disabling telemetry allowed the unchanged-source rerun.
-- Exact local source/happy-dom inventory: 915 files and 8,471 tests passed. Three existing Rule matrix TODO files contain 34 TODO tests. The normal browser inventory and six explicitly native Compiler files were excluded and are not counted as passes. The complete selected and excluded path lists are [retained here](evidence/2026-10-09-finf-main-card-nonbrowser-inventory.json).
+- Exact local source/happy-dom inventory: 915 files and 8,471 tests passed. Three existing Rule matrix TODO files contain 34 TODO tests. The normal browser inventory and six explicitly native Compiler files were excluded and are not counted as passes. The complete selected and excluded path lists are [retained here](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-10-09-finf-main-card-nonbrowser-inventory.json).
 - Actual Website/Harness source wall: both matrices passed after the final Card border correction, not reused from an earlier candidate.
 - Candidate object/source/count validation: passed. Coverage controls: 3,730 passed; the portable suite explicitly skips the separate Linux media integration.
 - Complete connector-review controls: 353 passed. Runtime runner/plan controls: 123 passed. Release controls: 97 passed. Prototype catalog, GPUI current fixture and type contracts passed.
 - Fresh public package build and manifests: 45/45. Fresh website build: 349 pages. The production bundle validator passed with a native/static shell, WC primary demonstration host and three isolated demonstration runtimes. All output was generated in this integration worktree.
 
-The environment was Node 24.19.0, pnpm 10.32.1, `NODE_OPTIONS=--max-old-space-size=3072`, the existing Corepack cache and `ASTRO_TELEMETRY_DISABLED=1`. Checks ran serially. [The machine-readable receipt](evidence/2026-10-09-finf-main-card-validation.json) retains each command's exit status, log location and log digest, package results, exact objects, original failures and independent-review boundaries.
+The environment was Node 24.19.0, pnpm 10.32.1, `NODE_OPTIONS=--max-old-space-size=3072`, the existing Corepack cache and `ASTRO_TELEMETRY_DISABLED=1`. Checks ran serially. [The machine-readable receipt](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-10-09-finf-main-card-validation.json) retains each command's exit status, log location and log digest, package results, exact objects, original failures and independent-review boundaries.
 
 ## Preserve the strict failures
 
-The [fresh Finf advisory report](evidence/2026-10-09-finf-main-card-budgets-finf.json) exits zero under the existing nine-entry development policy, but `withinBudgets` remains false. The [separate strict report](evidence/2026-10-09-finf-main-card-budgets-strict.json) truthfully exits one:
+The [fresh Finf advisory report](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-10-09-finf-main-card-budgets-finf.json) exits zero under the existing nine-entry development policy, but `withinBudgets` remains false. The [separate strict report](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-10-09-finf-main-card-budgets-strict.json) truthfully exits one:
 
 - React root: 106,445 gzip bytes against 106,000; 445-byte overage.
 - Vue root: 106,280 against 106,000; 280-byte overage.

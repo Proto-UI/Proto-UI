@@ -1,6 +1,6 @@
 # Sprint 3 actual application consumer baselines
 
-This record follows the user's clarification that **cyjin-yl/shenko** is an actual Harness application consumer and **OpenGreendam/verdant** is another actual consumer. It records executed application producers at their declared upstream pins. The [machine-readable receipt](2026-11-22-sprint3-application-consumers.json) retains source/tree identities, lock and artifact hashes, commands' log identities and the precise delivery boundaries.
+This record follows the user's clarification that **cyjin-yl/shenko** is an actual Harness application consumer and **OpenGreendam/verdant** is another actual consumer. It records executed application producers at their declared upstream pins. The [machine-readable receipt](../../2026-11-22-sprint3-application-consumers.json) retains source/tree identities, lock and artifact hashes, commands' log identities and the precise delivery boundaries.
 
 Neither application was silently repinned to the Sprint 3 branch. These results establish existing consumer baselines; adoption of a later Proto-UI candidate requires its own upstream-pin change and consumer verification. A website fixture, an application build and a complete live application journey are different evidence domains.
 

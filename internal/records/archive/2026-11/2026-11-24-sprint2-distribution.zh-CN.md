@@ -8,7 +8,7 @@
 
 基线上的真实反例先观察到第二次发布错误地返回 `ok: true`，随后才断言失败。修复后完整 CLI、artifact writer 与 watcher 三个聚焦文件为 **59/59 PASS**。原反例和成功日志都保留，不把早期失败改写成成功。
 
-消费验证源码提交为 `4ffc65f2c3d32bcd5d1bd897ab20d9c6f087fb3c`。两个全新输出目录从该干净、完整 SHA 生成相同的九份 pinned artifact 文件，逐字节、逐 SHA-256 比较均一致。Compiler artifact 实际独立执行 `npm ci --ignore-scripts`，仅安装精确 TypeScript 5.9.3；其外部 imports 为 Node built-ins 与 TypeScript。Node 24.22.3、pnpm 10.32.1、esbuild 0.25.12 及完整 source/profile/lock identity 位于[确定性回执](./evidence/2026-11-24-sprint2-distribution/receipts/pinned-determinism.json)。
+消费验证源码提交为 `4ffc65f2c3d32bcd5d1bd897ab20d9c6f087fb3c`。两个全新输出目录从该干净、完整 SHA 生成相同的九份 pinned artifact 文件，逐字节、逐 SHA-256 比较均一致。Compiler artifact 实际独立执行 `npm ci --ignore-scripts`，仅安装精确 TypeScript 5.9.3；其外部 imports 为 Node built-ins 与 TypeScript。Node 24.22.3、pnpm 10.32.1、esbuild 0.25.12 及完整 source/profile/lock identity 位于[确定性回执](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-distribution/receipts/pinned-determinism.json)。
 
 ## 目标依赖由 manifest 实际安装
 
@@ -28,13 +28,13 @@
 | `vue2-source-v1`          | `vue` 2.6.14                 | PASS               |
 | `web-component-source-v1` | 无 framework runtime package | PASS               |
 
-四条均完成 original/consumer-edited 两路普通目标构建与真实框架或 custom-element 挂载、Context、State 与显式更新、view detach/rebind、终态 dispose、失效旧 handle、引入错误后的普通 TypeScript 诊断、历史 provenance/maps 保留与新 executable maps。安装树的实际成员和 payload 哈希在 build/edit/runtime 前后相同。完整收据见[普通消费者回执](./evidence/2026-11-24-sprint2-distribution/receipts/native-consumers.json)。
+四条均完成 original/consumer-edited 两路普通目标构建与真实框架或 custom-element 挂载、Context、State 与显式更新、view detach/rebind、终态 dispose、失效旧 handle、引入错误后的普通 TypeScript 诊断、历史 provenance/maps 保留与新 executable maps。安装树的实际成员和 payload 哈希在 build/edit/runtime 前后相同。完整收据见[普通消费者回执](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-distribution/receipts/native-consumers.json)。
 
 这些是 Node / Happy DOM 运行；Vue2 JavaScript component body 沿原脚本保持 `checkJs: false`，其余目标/helper 执行既有 strict TypeScript 检查。没有把它们计为 native browser、物理输入、AT 或全库 differential。Shenko 历史报告中的 React 19.3.1 与这里实际执行的 admitted 19.2.6 分别记账；本轮未为 19.3.1 新增通过记录，也未据它改动 profile pin。
 
 ## Plain Node CLI：F11 / F13 及不覆盖边界
 
-固定 artifact 的[CLI 回执](./evidence/2026-11-24-sprint2-distribution/receipts/pinned-cli.json) 中 15 个实际命令符合各自正例或负例预期：
+固定 artifact 的[CLI 回执](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-distribution/receipts/pinned-cli.json) 中 15 个实际命令符合各自正例或负例预期：
 
 - 缺失 parent 失败且不创建祖先；调用者预建 parent 后成功。
 - 新目录 compile、只读 unchanged diff；已有 output collision 拒绝。
@@ -57,7 +57,7 @@
 | Vue2 | 三家族 compile、registry 安装、普通 build / mount 全通过 |
 | WC | 三家族 compile、registry 安装、普通 build / mount 全通过 |
 
-按原 12 个 family × target 消费分母，是 **9 个完整成功，1 个实际 compile 失败，2 个未获完整消费者执行**；不是 12/12。仅按四个脚本分组则为 3 PASS / 1 FAIL。该错误已交回当前 emitter 整合 owner，后继成功必须绑定修复后的确切来源，不能修改[本轮失败回执](./evidence/2026-11-24-sprint2-distribution/receipts/release-families-first.json)。普通 Vue3 Context 消费者本轮已成功，不足以消除完整 Shadcn 组合中的失败。
+按原 12 个 family × target 消费分母，是 **9 个完整成功，1 个实际 compile 失败，2 个未获完整消费者执行**；不是 12/12。仅按四个脚本分组则为 3 PASS / 1 FAIL。该错误已交回当前 emitter 整合 owner，后继成功必须绑定修复后的确切来源，不能修改[本轮失败回执](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-distribution/receipts/release-families-first.json)。普通 Vue3 Context 消费者本轮已成功，不足以消除完整 Shadcn 组合中的失败。
 
 ## 可重放命令与证据
 
@@ -78,7 +78,7 @@ NATIVE_CONSUMER_COMPILER=/tmp/proto-pinned-current/index.js NATIVE_CONSUMER_DEPE
 node scripts/docs/check-public-docs.mjs
 ```
 
-实际输出路径、命令参数、stdout/stderr、status/signal 和每份 consumer lock 保存在 [证据目录](./evidence/2026-11-24-sprint2-distribution/README.md)；以上 `/tmp` 路径是复现示例，实际运行目录保持在原回执中。`check-public-docs` 真实成功。所有新归档逐成员解压读回并与原始内容哈希核对；清单包含每个保留成员的 mode、bytes、SHA-256 或 symlink target。仅排除可从已保留 lock 重装的 `node_modules` 与网络缓存。
+实际输出路径、命令参数、stdout/stderr、status/signal 和每份 consumer lock 保存在 [证据目录](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-distribution/README.md)；以上 `/tmp` 路径是复现示例，实际运行目录保持在原回执中。`check-public-docs` 真实成功。所有新归档逐成员解压读回并与原始内容哈希核对；清单包含每个保留成员的 mode、bytes、SHA-256 或 symlink target。仅排除可从已保留 lock 重装的 `node_modules` 与网络缓存。
 
 生成源码、executable bytes、dependency payload、进程内单次观测及内存快照分别保留在原普通消费者 `costs.json` / `timing.json`，没有合并为 bundle 性能结论，没有宣称 production retained bundle 或 input-to-photon 接受。
 
