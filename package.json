@@ -76,6 +76,8 @@
     "check:coverage-governance-live": "node scripts/coverage-matrices/sync-github-governance-snapshot.mjs --check",
     "check:website-production-bundle": "corepack pnpm@10.32.1 -s docs:build && node scripts/coverage-matrices/check-website-production-bundle.mjs",
     "check:repository-docs": "node scripts/docs/check-repository-docs.mjs",
+    "check:internal-docs": "node scripts/docs/check-internal-docs.mjs",
+    "check:internal-docs:baseline": "node scripts/docs/check-internal-docs.mjs --write-baseline",
     "check:public-docs": "node scripts/docs/check-public-docs.mjs",
     "check:autonomous-review": "node scripts/autonomous-maintenance/check-review-packets.mjs",
     "check:autonomous-runs": "node scripts/autonomous-maintenance/check-runs.mjs",
@@ -130,6 +132,7 @@
     "test:material-composition-lint": "node --test scripts/analysis/test/material-composition-lint.test.mjs"
   },
   "lint-staged": {
-    "*.{js,mjs,cjs,ts,mts,json,css,md,mdx,astro,yaml,yml}": "prettier --write"
+    "*.{js,mjs,cjs,ts,mts,json,css,md,mdx,astro,yaml,yml}": "prettier --write",
+    "internal/**/*.{md,mdx,json}": "node scripts/docs/check-internal-docs.mjs --files"
   }
 }
