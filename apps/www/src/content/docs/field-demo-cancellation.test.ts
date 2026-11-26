@@ -67,10 +67,10 @@ async function mount(family: string) {
   cleanups.push(() => view.destroy());
   await flush();
   const ref = (name: string) => host.querySelector<HTMLElement>(`[data-demo-ref="${name}"]`)!;
-  const input = ref('asyncControl').querySelector<HTMLInputElement>('input')!;
-  const root = (ref('asyncRoot') as any).getExposes();
+  const input = ref('handleControl').querySelector<HTMLInputElement>('input')!;
+  const root = (ref('handleRoot') as any).getExposes();
   const requests: string[] = [];
-  ref('asyncRoot').addEventListener('validationRequest', (event) =>
+  ref('handleRoot').addEventListener('validationRequest', (event) =>
     requests.push((event as CustomEvent).detail.requestId)
   );
   const edit = async (value: string, type = 'input') => {
@@ -78,8 +78,8 @@ async function mount(family: string) {
     input.dispatchEvent(new Event(type, { bubbles: true, composed: true }));
     await flush();
   };
-  const cancel = async () => {
-    const button = ref('cancel');
+  const reset = async () => {
+    const button = ref('reset');
     button.dispatchEvent(
       new PointerEvent('pointerdown', { bubbles: true, composed: true, pointerId: 1, button: 0 })
     );
@@ -91,44 +91,47 @@ async function mount(family: string) {
     );
     await flush();
   };
-  return { ref, root, requests, edit, cancel };
+  return { ref, root, requests, edit, reset };
 }
 describe.each(['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])(
-  'Field %s demo cancellation consumer (synthetic WC)',
+  'Field %s demo validation reset (synthetic WC)',
   (family) => {
     it('retires a pending reply after delivered pointer activation and permits a fresh request', async () => {
       const f = await mount(family);
       await f.edit('taken');
       expect(f.root.pending.get()).toBe(true);
       const old = f.requests.at(-1);
-      await f.cancel();
-      expect(f.ref('asyncStatus').textContent).toContain('Canceled');
+      expect(old).toEqual(expect.stringMatching(/.+/));
+      await f.reset();
+      expect(f.ref('handleStatus').textContent).toContain('Handle ready');
       expect(f.root.pending.get()).toBe(false);
       expect(f.root.resolveValidation(old, { invalid: true })).toBe(false);
       await vi.advanceTimersByTimeAsync(650);
-      expect(f.ref('asyncStatus').textContent).toContain('Canceled');
+      expect(f.ref('handleStatus').textContent).toContain('Handle ready');
       expect(f.root.invalid.get()).toBe(false);
       await f.edit('newer');
       await vi.advanceTimersByTimeAsync(500);
-      expect(f.ref('asyncStatus').textContent).toContain('Available');
+      expect(f.ref('handleStatus').textContent).toContain('Handle available');
       expect(f.root.invalid.get()).toBe(false);
     });
-    it('accepts an explicit newer change after cancellation while the canceled request stays retired', async () => {
+    it('accepts an explicit newer change after reset while the retired request stays ignored', async () => {
       const f = await mount(family);
       await f.edit('taken');
-      const canceled = f.requests.at(-1);
-      await f.cancel();
+      const retired = f.requests.at(-1);
+      expect(retired).toEqual(expect.stringMatching(/.+/));
+      await f.reset();
       await f.edit('taken', 'change');
-      expect(f.requests.at(-1)).not.toBe(canceled);
-      expect(f.root.resolveValidation(canceled, { invalid: false })).toBe(false);
+      expect(f.requests.at(-1)).toEqual(expect.stringMatching(/.+/));
+      expect(f.requests.at(-1)).not.toBe(retired);
+      expect(f.root.resolveValidation(retired, { invalid: false })).toBe(false);
       await vi.advanceTimersByTimeAsync(500);
-      expect(f.ref('asyncStatus').textContent).toContain('Unavailable');
+      expect(f.ref('handleStatus').textContent).toContain('Handle unavailable');
       expect(f.root.invalid.get()).toBe(true);
     });
-    it('does not claim cancellation when only pointerdown arrives without a committed command', async () => {
+    it('does not reset validation when only pointerdown arrives without a committed command', async () => {
       const f = await mount(family);
       await f.edit('taken');
-      f.ref('cancel').dispatchEvent(
+      f.ref('reset').dispatchEvent(
         new PointerEvent('pointerdown', {
           bubbles: true,
           composed: true,
@@ -138,40 +141,39 @@ describe.each(['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']
       );
       await flush();
       await vi.advanceTimersByTimeAsync(650);
-      expect(f.ref('asyncStatus').textContent).toContain('Unavailable');
+      expect(f.ref('handleStatus').textContent).toContain('Handle unavailable');
       expect(f.root.invalid.get()).toBe(true);
     });
-    it('shows cancellation after an already completed invalid check without clearing established validity', async () => {
+    it('clears established validity and restores ready status after an already completed invalid check', async () => {
       const f = await mount(family);
       await f.edit('taken');
       await vi.advanceTimersByTimeAsync(500);
-      expect(f.ref('asyncStatus').textContent).toContain('Unavailable');
+      expect(f.ref('handleStatus').textContent).toContain('Handle unavailable');
       expect(f.root.invalid.get()).toBe(true);
-      await f.cancel();
-      expect(f.ref('asyncStatus').textContent).toContain('Canceled');
-      expect(f.root.invalid.get()).toBe(true);
+      await f.reset();
+      expect(f.ref('handleStatus').textContent).toContain('Handle ready');
+      expect(f.root.invalid.get()).toBe(false);
     });
-    it('keeps the actual command before mounted error feedback and preserves editor associations', async () => {
+    it('keeps mounted error feedback before form actions and preserves editor associations', async () => {
       const f = await mount(family);
       await f.edit('taken');
       await vi.advanceTimersByTimeAsync(500);
-      const cancel = f.ref('cancel');
-      const error = f.ref('asyncError');
-      const input = f.ref('asyncControl').querySelector('input')!;
-      expect(cancel.closest('[data-demo-ref="asyncRoot"]')).toBe(f.ref('asyncRoot'));
-      expect(cancel.compareDocumentPosition(error) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-      expect(input.getAttribute('aria-labelledby')).toBe(f.ref('asyncLabel').id);
-      expect(input.getAttribute('aria-describedby')).toBe(f.ref('asyncDescription').id);
+      const reset = f.ref('reset');
+      const error = f.ref('handleError');
+      const input = f.ref('handleControl').querySelector('input')!;
+      expect(error.compareDocumentPosition(reset) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(input.getAttribute('aria-labelledby')).toBe(f.ref('handleLabel').id);
+      expect(input.getAttribute('aria-describedby')).toBe(f.ref('handleDescription').id);
       expect(input.getAttribute('aria-errormessage')).toBe(error.id);
       expect(error.getAttribute('role')).not.toBe('alert');
       expect(error.getAttribute('aria-live')).toBeNull();
       await f.edit('taken', 'change');
       expect(f.root.pending.get()).toBe(true);
       expect(input.getAttribute('aria-errormessage')).toBeNull();
-      expect(f.ref('cancel')).toBe(cancel);
-      await f.cancel();
+      expect(f.ref('reset')).toBe(reset);
+      await f.reset();
       await vi.advanceTimersByTimeAsync(650);
-      expect(f.ref('asyncStatus').textContent).toContain('Canceled');
+      expect(f.ref('handleStatus').textContent).toContain('Handle ready');
       expect(f.root.invalid.get()).toBe(false);
     });
   }

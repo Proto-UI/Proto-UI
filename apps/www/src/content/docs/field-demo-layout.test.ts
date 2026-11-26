@@ -13,80 +13,103 @@ const children = (node: DemoNode): DemoNode[] =>
     ? (node.children ?? []).filter((child): child is DemoNode => typeof child !== 'string')
     : [];
 const ref = (node: DemoNode) => ('ref' in node ? node.ref : undefined);
-function stableActionOrder(root: DemoNode) {
-  const top = children(root);
-  const field = top.find((node) => ref(node) === 'asyncRoot');
+function stableFeedbackOrder(root: DemoNode) {
+  const form = children(root)[0];
+  if (!form) return false;
+  const top = children(form);
+  const field = top.find((node) => ref(node) === 'handleRoot');
   if (!field) return false;
   const refs = children(field).map(ref);
-  const cancel = refs.indexOf('cancel');
+  const errorIndex = refs.indexOf('handleError');
+  const statusIndex = top.findIndex((node) => ref(node) === 'handleStatus');
+  const actionsIndex = top.findIndex((node) => {
+    const [save, reset] = children(node).map(ref);
+    return save === 'validate' && reset === 'reset';
+  });
   return (
-    cancel > refs.indexOf('asyncDescription') &&
-    cancel < refs.indexOf('asyncError') &&
-    cancel < refs.indexOf('asyncValidity') &&
-    top.findIndex((node) => ref(node) === 'asyncStatus') > top.indexOf(field)
+    refs.indexOf('handleControl') > refs.indexOf('handleLabel') &&
+    refs.indexOf('handleDescription') > refs.indexOf('handleControl') &&
+    errorIndex > refs.indexOf('handleDescription') &&
+    statusIndex > top.indexOf(field) &&
+    actionsIndex > statusIndex
   );
 }
 
 describe.each(families)(
   'Field %s demo feedback/action flow (source and compiled CSS)',
   (family) => {
-    it('places the command after its editor/help and before changing feedback without reserving fixed-height rows', async () => {
+    it('places handle feedback after its editor/help and before form actions without reserving fixed-height rows', async () => {
       const root = createFieldDemo(family).root;
-      expect(stableActionOrder(root)).toBe(true);
-      const asyncRoot = children(root).find((node) => ref(node) === 'asyncRoot')!;
-      const parts = children(asyncRoot);
+      expect(stableFeedbackOrder(root)).toBe(true);
+      const top = children(children(root)[0]!);
+      const handleRoot = top.find((node) => ref(node) === 'handleRoot')!;
+      const parts = children(handleRoot);
       expect(parts.map(ref)).toEqual([
-        'asyncLabel',
-        'asyncControl',
-        'asyncDescription',
-        'cancel',
-        'asyncError',
-        'asyncValidity',
+        'handleLabel',
+        'handleControl',
+        'handleDescription',
+        'handleError',
       ]);
-      expect(parts.find((node) => ref(node) === 'asyncError')).toMatchObject({ props: {} });
-      const status = children(root).find((node) => ref(node) === 'asyncStatus');
+      expect(parts.find((node) => ref(node) === 'handleError')).toMatchObject({ props: {} });
+      const status = top.find((node) => ref(node) === 'handleStatus');
       expect(status).toMatchObject({ attrs: { 'aria-live': 'polite' } });
 
       const className =
         family === 'base'
-          ? 'className' in asyncRoot
-            ? asyncRoot.className!
+          ? 'className' in handleRoot
+            ? handleRoot.className!
             : ''
-          : readFileSync(
-              new URL(
-                `../../../../../packages/prototypes/${family}/src/field/root.proto.ts`,
-                import.meta.url
-              ),
-              'utf8'
-            ).match(/tw\('([^']+)'\)/)![1];
+          : [
+              ...readFileSync(
+                new URL(
+                  `../../../../../packages/prototypes/${family}/src/field/root.proto.ts`,
+                  import.meta.url
+                ),
+                'utf8'
+              ).matchAll(/tw\('([^']+)'\)/g),
+            ]
+              .map((match) => match[1])
+              .join(' ');
       const utilities = className.split(/\s+/);
       const theme = readFileSync(require.resolve('tailwindcss/theme.css'), 'utf8');
       const compiler = await compile(`${theme}\n@tailwind utilities;`);
       const css = compiler.build(utilities);
-      expect(css).toContain(family === 'base' ? 'display: grid' : 'flex-direction: column');
+      const expectedFlow =
+        family === 'base'
+          ? 'display: grid'
+          : family === 'bootstrap-2-3-2'
+            ? 'display: block'
+            : 'flex-direction: column';
+      expect(css).toContain(expectedFlow);
       expect(css).not.toMatch(
         /column-reverse|row-reverse|(?:^|[;{])\s*(?:height|block-size|order|position)\s*:/
       );
       expect(utilities).not.toContain('grid-flow-dense');
     });
 
-    it('rejects both the prior after-feedback placement and a same-parent error-before-command mutation', () => {
+    it('rejects both status-before-field and error-before-description mutations', () => {
       const prior = structuredClone(createFieldDemo(family).root);
-      const top = children(prior);
-      const asyncRoot = top.find((node) => ref(node) === 'asyncRoot')!;
-      if (!('children' in asyncRoot) || !('children' in prior))
+      const form = children(prior)[0]!;
+      const top = children(form);
+      const handleRoot = top.find((node) => ref(node) === 'handleRoot')!;
+      const status = top.find((node) => ref(node) === 'handleStatus')!;
+      if (!('children' in handleRoot) || !('children' in form))
         throw new Error('Expected demo containers');
-      const button =
-        children(asyncRoot).find((node) => ref(node) === 'cancel') ??
-        top.find((node) => ref(node) === 'cancel')!;
-      expect(button).toBeDefined();
-      asyncRoot.children = children(asyncRoot).filter((node) => node !== button);
-      prior.children = children(prior).filter((node) => node !== button);
-      prior.children.push(button);
-      expect(stableActionOrder(prior)).toBe(false);
-      prior.children = children(prior).filter((node) => node !== button);
-      asyncRoot.children.splice(4, 0, button);
-      expect(stableActionOrder(prior)).toBe(false);
+      expect(status).toBeDefined();
+      form.children = [status, ...top.filter((node) => node !== status)];
+      expect(stableFeedbackOrder(prior)).toBe(false);
+
+      const errorBeforeDesc = structuredClone(createFieldDemo(family).root);
+      const rootNode = children(children(errorBeforeDesc)[0]!).find(
+        (node) => ref(node) === 'handleRoot'
+      )!;
+      if (!('children' in rootNode)) throw new Error('Expected handleRoot container');
+      const handleError = children(rootNode).find((node) => ref(node) === 'handleError')!;
+      rootNode.children = [
+        handleError,
+        ...children(rootNode).filter((node) => node !== handleError),
+      ];
+      expect(stableFeedbackOrder(errorBeforeDesc)).toBe(false);
     });
   }
 );

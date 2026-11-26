@@ -18,8 +18,8 @@ const workflow = () => YAML.parse(read('.github/workflows/field-family-evidence.
 function report() {
   return {
     success: true,
-    numTotalTests: 25,
-    numPassedTests: 25,
+    numTotalTests: FIELD_CASE_TITLES.length,
+    numPassedTests: FIELD_CASE_TITLES.length,
     numFailedTests: 0,
     numPendingTests: 0,
     numTodoTests: 0,
@@ -34,7 +34,7 @@ function report() {
     ],
   };
 }
-test('accepts exactly the existing 25 native Field case identities', () =>
+test('accepts exactly the expected native Field case identities', () =>
   assertFieldReport(report()));
 for (const [name, change] of [
   ['aggregate failure', (r) => (r.success = false)],
