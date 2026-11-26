@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const out = resolve(process.argv[2] ?? 'internal/records/evidence/shadow-percentage-native-build');
+const out = resolve(process.argv[2] ?? '.tmp/shadow-percentage-native-build');
 const app = join(root, 'apps/www');
 const fixture = join(app, 'test-fixtures/shadow-percentage/consumer.ts');
 const hash = (data) => createHash('sha256').update(data).digest('hex');

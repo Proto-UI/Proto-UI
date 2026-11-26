@@ -1,9 +1,0 @@
-file:///workspace/scratch/eb30117f7b2a/sprint7-history-checkpoint/scripts/governance/history-source-bindings.mjs:16
-      throw new Error(`manual reading ${row.number}: original body hash does not match`);
-            ^
-
-Error: manual reading 2: original body hash does not match
-    at bindManualReadings (file:///workspace/scratch/eb30117f7b2a/sprint7-history-checkpoint/scripts/governance/history-source-bindings.mjs:16:13)
-    at file:///workspace/scratch/eb30117f7b2a/sprint7-history-checkpoint/scripts/governance/reconcile-history-decisions.mjs:29:16
-
-Node.js v24.22.1

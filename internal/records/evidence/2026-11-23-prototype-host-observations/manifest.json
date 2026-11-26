@@ -1,9 +1,0 @@
-{
-  "candidatePassed": 56,
-  "candidateFailed": 0,
-  "sourceStable": true,
-  "files": {
-    "original-failures.json": "34c5874e54e1e8b7e84a912bc8db77395cdd9eaf68427b04f66f7e3e1a9b135b",
-    "validation.tar.gz": "f7cda7f17cb08bcc97d8bf0e8531b4ff80127e98586ab7bdd46266b56d0c5d48"
-  }
-}
