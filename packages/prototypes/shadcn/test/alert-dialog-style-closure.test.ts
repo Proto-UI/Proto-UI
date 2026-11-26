@@ -16,7 +16,7 @@ describe('Shadcn AlertDialog complete physical style closure', () => {
       .map((name) => path.join(root, name));
     files.push(
       path.resolve('packages/prototypes/shadcn/src/dialog/style.ts'),
-      path.resolve('packages/prototypes/shadcn/src/dialog/action-paint.ts')
+      path.resolve('packages/prototypes/shadcn/src/alert-dialog/action-paint.ts')
     );
     const tokens = (await collectProtoStyleTokensFromFiles(files)) as string[];
     for (const token of [

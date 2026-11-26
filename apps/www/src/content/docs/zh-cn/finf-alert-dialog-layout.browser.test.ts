@@ -155,7 +155,7 @@ const sourcePaths = [
   'apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts',
   'apps/www/src/components/PrototypePreviewer/projection-theme.ts',
   'packages/prototypes/shadcn/src/dialog/style.ts',
-  'packages/prototypes/shadcn/src/dialog/action-paint.ts',
+  'packages/prototypes/shadcn/src/alert-dialog/action-paint.ts',
   'packages/prototypes/shadcn/src/button/paint.ts',
   'packages/prototypes/shadcn/src/alert-dialog/recipes.ts',
   'packages/prototypes/shadcn/src/alert-dialog/types.ts',
