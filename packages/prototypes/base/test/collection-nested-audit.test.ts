@@ -33,10 +33,12 @@ for (const [family, atoms] of Object.entries(families)) {
     console.log(family, JSON.stringify({ disabled: previous.getExposes().disabled.get(), style }));
     expect(style.split(/\s+/), 'required disabled family rule is not registered').toContain(
       // Bootstrap bakes the disabled opacity into its glyph recipe and registers
-      // the cursor; liquid withdraws material instead of whole-control opacity.
-      family === 'bootstrap-2-3-2' || family === 'liquid-glass'
+      // the cursor; liquid withdraws material and overrides shadow dynamically.
+      family === 'bootstrap-2-3-2'
         ? 'data-[disabled]:cursor-default'
-        : 'data-[disabled]:opacity-50'
+        : family === 'liquid-glass'
+          ? 'cursor-default'
+          : 'data-[disabled]:opacity-50'
     );
   });
 }
