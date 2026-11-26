@@ -38,7 +38,7 @@ const buttonFixtureRecipe = (family: string) => ({
 });
 
 it.each(['wc', 'react', 'vue', 'vue2'] as const)(
-  'provides a stable public Select author label and uses native profile in %s',
+  'provides a stable public Select author label and uses the Header Luma profile in %s',
   (runtimeId) => {
     const config = controls();
     const composition = createProjectionComposition({
@@ -67,8 +67,9 @@ it.each(['wc', 'react', 'vue', 'vue2'] as const)(
       throw new Error('Expected real Select parts');
     expect(trigger.props).toMatchObject({ appearance: 'default', accessibleLabel: 'Runtime' });
     expect(trigger.props).not.toHaveProperty('aria-label');
+    // Header chrome selects Luma; ordinary Shadcn demos keep their own Rhea scope.
     expect(root.props).toMatchObject({
-      styleProfile: 'rhea',
+      styleProfile: 'luma',
       value: runtimeId,
     });
     expect(root.props).not.toHaveProperty('itemSizing');
@@ -838,7 +839,7 @@ describe('Website projection composition', () => {
   });
 
   it.each(['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const)(
-    'composes the real %s Popover demo and rejects an undeclared outside-focus Button',
+    'composes the real %s Popover demo and rejects an undeclared Reset Button',
     async (projectionFamilyId) => {
       const componentFamily = PROJECTION_FAMILY_MANIFESTS[projectionFamilyId].families.popover;
       const childDemo = await loadDemo(componentFamily.recipeId);
@@ -863,7 +864,7 @@ describe('Website projection composition', () => {
             composition.demo,
             (node) => node.kind === 'proto' && node.prototypeId === buttonPrototypeId
           )
-        ).toMatchObject({ children: ['Outside focus target'] });
+        ).toMatchObject({ children: ['Reset'] });
       }
       expect(() =>
         createProjectionComposition({
