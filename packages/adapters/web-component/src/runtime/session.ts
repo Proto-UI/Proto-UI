@@ -1,5 +1,8 @@
 import type { RuntimeHost } from '@proto.ui/runtime';
-import { withWebComponentCallerDomMove, withWebComponentOwnedRelocation } from '../owned-relocation';
+import {
+  withWebComponentCallerDomMove,
+  withWebComponentOwnedRelocation,
+} from '../owned-relocation';
 import {
   createWebOwnedDecorationPortalGate,
   hasOwnedWebPresenceZeroOpacity,
@@ -29,37 +32,39 @@ type DecorationNodeRecord = {
 
 type DecorationTreeRecord = {
   nodes: DecorationNodeRecord[];
-  splitRoot?: { children: ChildNode[]; identity: string; document: Document };
+  splitRoot?: {
+    children: ChildNode[];
+    identity: readonly (string | null)[];
+    document: Document;
+  };
 };
 
-function captureSplitSurfaceIdentity(surface: HTMLElement): string {
-  return JSON.stringify(
-    ['part', 'data-pui-split-surface', 'aria-hidden', 'inert', 'hidden'].map((name) =>
-      surface.getAttribute(name)
-    )
-  );
+const SPLIT_SURFACE_ATTRIBUTES = [
+  'part',
+  'data-pui-split-surface',
+  'aria-hidden',
+  'inert',
+  'hidden',
+];
+
+function captureSplitSurfaceIdentity(surface: HTMLElement) {
+  return SPLIT_SURFACE_ATTRIBUTES.map((name) => surface.getAttribute(name));
 }
 
 // The effects owner publishes data-pui-split-surface="" while the commit that
 // snapshotted the surface is still running. That owned marker is not an
 // external blueprint edit. Any other attribute drift still rejects.
-function sameSplitSurfaceIdentity(recorded: string, surface: HTMLElement): boolean {
-  const live = captureSplitSurfaceIdentity(surface);
-  if (recorded === live) return true;
-  let recordedAttrs: unknown;
-  let liveAttrs: unknown;
-  try {
-    recordedAttrs = JSON.parse(recorded);
-    liveAttrs = JSON.parse(live);
-  } catch {
-    return false;
-  }
-  if (!Array.isArray(recordedAttrs) || !Array.isArray(liveAttrs) || recordedAttrs.length !== 5)
-    return false;
-  if (recordedAttrs[1] != null || liveAttrs[1] !== '' || !hasCurrentSplitSurfacePaint(surface))
-    return false;
-  recordedAttrs[1] = '';
-  return JSON.stringify(recordedAttrs) === JSON.stringify(liveAttrs);
+function sameSplitSurfaceIdentity(
+  recorded: readonly (string | null)[],
+  surface: HTMLElement
+): boolean {
+  return SPLIT_SURFACE_ATTRIBUTES.every((name, index) => {
+    const live = surface.getAttribute(name);
+    return (
+      recorded[index] === live ||
+      (name === 'data-pui-split-surface' && recorded[index] === null && live === '')
+    );
+  });
 }
 
 function hasCollapsedSplitTransform(
@@ -643,7 +648,9 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         } catch (rollbackError) {
           throw new AggregateError(
             [error, rollbackError],
-            error instanceof Error ? error.message : '[WC Adapter] decoration caller projection changed'
+            error instanceof Error
+              ? error.message
+              : '[WC Adapter] decoration caller projection changed'
           );
         }
       }

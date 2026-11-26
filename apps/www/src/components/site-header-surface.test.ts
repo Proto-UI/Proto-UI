@@ -446,6 +446,7 @@ it('coalesces Docs decoration requests and respects superseding preparation and 
   const removed = document.createElement('div');
   document.body.append(retained, removed);
   const first = reserveDocsHeaderPreparation(document);
+  const concurrent = reserveDocsHeaderPreparation(document);
   let latest: (() => void) | undefined;
   try {
     const run = vi.fn();
@@ -460,11 +461,16 @@ it('coalesces Docs decoration requests and respects superseding preparation and 
     await Promise.resolve();
     expect(run).not.toHaveBeenCalled();
     latest();
+    first();
+    await Promise.resolve();
+    expect(run).not.toHaveBeenCalled();
+    concurrent();
     await Promise.all([wait, gone]);
     expect(run).toHaveBeenCalledOnce();
     expect(runRemoved).not.toHaveBeenCalled();
   } finally {
     first();
+    concurrent();
     latest?.();
   }
 });

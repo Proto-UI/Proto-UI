@@ -1,6 +1,6 @@
 ---
 title: 'Bootstrap 2.3.2 Separator'
-description: 'A horizontal or vertical etched divider styled after archived Bootstrap 2.3.2 rules over Base Separator.'
+description: 'A horizontal or vertical one-pixel family-border divider over Base Separator.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -10,7 +10,7 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Bootstrap 2.3.2 Separator reproduces the archived two-edge etched rule (`#eeeeee` recessed edge paired with `#ffffff` highlight) for both horizontal and vertical dividers while Base Separator manages orientation and decorative accessibility semantics.
+Bootstrap 2.3.2 Separator uses a one-pixel divider paired with the family border palette in light and dark themes, while Base Separator manages orientation and decorative accessibility semantics. This is a simplified palette-derived extension of the archived divider grammar.
 
 ## Preview
 
@@ -38,7 +38,7 @@ import { BootstrapSeparatorRoot } from '../proto-ui/components/react';
 <BootstrapSeparatorRoot />
 ```
 
-- **Etched bevel rule**: Horizontal rules render a `1px #eeeeee` top edge and `1px #ffffff` bottom edge; vertical rules pair left/right bevel edges and stretch automatically across flex containers (`self-stretch`).
+- **Family-border rule**: Horizontal rules are `1px` high; vertical rules are `1px` wide and stretch automatically across flex containers (`self-stretch`). Both use the family border color.
 - **Decorative vs. semantic**: Decorative separators (`decorative={true}`, default) stay hidden from the accessibility tree. Pass `decorative={false}` to expose `role="separator"` and `aria-orientation`.
 - **Layout**: Separator is contentless and passive with no built-in margin; length and spacing belong to the surrounding container.
 

@@ -1,4 +1,9 @@
-import { expect, it } from 'vitest';
+import { expect, expectTypeOf, it } from 'vitest';
+import type { Prototype } from '@proto.ui/core';
+import type {
+  ProtoWebComponentProps,
+  WebComponentAdapterConstructor,
+} from '@proto.ui/adapter-web-component';
 import { withLibraryStyleSeed } from './library-style-seed';
 
 let next = 0;
@@ -22,6 +27,37 @@ function fixture(onConnect: (host: HTMLElement) => void = () => {}) {
 }
 const tokens = (host: HTMLElement) =>
   (host.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean);
+
+it('preserves typed props and exposes without emitting a physical props carrier', () => {
+  type SeedPrototype = Prototype<
+    { tone: 'quiet' | 'strong'; count?: number },
+    { readCount: () => number }
+  >;
+  class Adapter extends HTMLElement {
+    declare readonly __protoUiProps?: ProtoWebComponentProps<SeedPrototype>;
+    update() {}
+    getExposes() {
+      return { readCount: () => 2 };
+    }
+    connectedCallback() {}
+  }
+  const Enhanced = withLibraryStyleSeed<WebComponentAdapterConstructor<SeedPrototype>>(Adapter);
+  expectTypeOf(Enhanced).toEqualTypeOf<WebComponentAdapterConstructor<SeedPrototype>>();
+  expectTypeOf(Enhanced.prototype.__protoUiProps).toEqualTypeOf<
+    ProtoWebComponentProps<SeedPrototype> | undefined
+  >();
+  expectTypeOf(Enhanced.prototype.getExposes).returns.toEqualTypeOf<{
+    readCount: () => number;
+  }>();
+  expectTypeOf<
+    NonNullable<InstanceType<typeof Enhanced>['__protoUiProps']>['tone']
+  >().toEqualTypeOf<'quiet' | 'strong'>();
+  const tag = `library-seed-control-${next++}`;
+  customElements.define(tag, Enhanced);
+  const host = new Enhanced();
+  expect(host.getExposes().readCount()).toBe(2);
+  expect(Object.hasOwn(host, '__protoUiProps')).toBe(false);
+});
 
 it('retires only explicitly owned server tokens before the first live connection', () => {
   const seen: string[][] = [];

@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "kind": "ready-pr-followup-source-review",
+  "baseline": "b0a5f6ce29efb128ed52373d44c034515aeef633",
+  "scope": [
+    "Honor existing wrapValue on a consumer-owned complete option label when the family has no ItemText; keep the public Select paint, width, overflow, input and focus owners.",
+    "Skip only same-valued external attribute MutationRecords. Preserve per-record A-to-B-to-A, namespaced attributes, author callback changes, scope and lifecycle.",
+    "Inject post-render theme failure through the current watcher boundary. Preserve all eight original cleanup assertions and budgets."
+  ],
+  "localControls": {
+    "headerUnit": {
+      "original": 78,
+      "added": 9,
+      "passed": 87,
+      "failed": 0,
+      "oldProduct": {
+        "passed": 83,
+        "failed": 4
+      },
+      "sourceHead": "b0 plus exactly reviewed Header diff"
+    },
+    "wc": {
+      "original": 74,
+      "added": 5,
+      "passed": 79,
+      "failed": 0,
+      "oldProduct": {
+        "passed": 76,
+        "failed": 3
+      },
+      "redundantComputedStyleReads": {
+        "beforePerNoop": 5,
+        "afterPerNoop": 0
+      },
+      "scope": "Happy DOM actual observers; not Matrix or native acceptance"
+    },
+    "postRenderCleanup": {
+      "originalTotal": 8,
+      "baseline": {
+        "passed": 4,
+        "failed": 4
+      },
+      "candidate": {
+        "passed": 8,
+        "failed": 0
+      },
+      "removeActualDestroyNegative": {
+        "passed": 0,
+        "failed": 8
+      },
+      "productionChanged": false
+    },
+    "headerNative": {
+      "source": "b0 plus exact Header product and observer diffs",
+      "candidate": {
+        "passed": 1,
+        "filtered": 21,
+        "originalCaseBudgetMs": 90000,
+        "caseMs": 73918,
+        "desktopAndCompactGeometryReached": true
+      },
+      "originalNegativeAttempt": {
+        "executed": 0,
+        "pending": 22,
+        "beforeAllTimeoutMs": 150000,
+        "acceptedNegative": false
+      },
+      "oldProductRepeat": "Pending; original failed setup retained"
+    }
+  },
+  "priorFrozenBaseline": {
+    "strictPackages": {
+      "passed": 9,
+      "total": 9,
+      "reactGzip": 181618,
+      "vueGzip": 180457,
+      "wcGzip": 217937,
+      "ceilingsChanged": false
+    },
+    "coverage": {
+      "registered": 5188,
+      "passed": 5187,
+      "failed": 0,
+      "skipped": 1,
+      "todo": 0,
+      "linuxDecoderSeparately": {
+        "passed": 15,
+        "total": 15
+      }
+    },
+    "publicBuilds": 47,
+    "packedReactConsumedPackages": 42,
+    "packedPackages": 47,
+    "workspaceTypes": "passed",
+    "cli": {
+      "passed": 822,
+      "total": 823,
+      "unresolved": 3266
+    },
+    "websiteUnit": {
+      "passed": 468,
+      "total": 476
+    },
+    "matrix": {
+      "passed": 0,
+      "total": 4
+    },
+    "productionSearch": {
+      "passed": 3,
+      "total": 4,
+      "shadcnVuePublicationMs": 1031,
+      "budgetMs": 1000
+    },
+    "isolatedSearch": {
+      "total": 84,
+      "outerSeconds": 600,
+      "exit": 124,
+      "completeFooter": false
+    },
+    "sourceSpecific": true
+  },
+  "sourceBindings": [
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-composition.ts",
+      "sha256": "1553387caf89b9bfb4b4c0dc35a8d541e53dca0d6f4effccefcdbaadc3862480"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+      "sha256": "b3dbdf6070a43e08f87487b32e8748889cabe8c55f1e773ff822d31a91f5ceea"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/header-popup-evidence.ts",
+      "sha256": "8fcf522735156ace41407b95b8b79085e045a730c02733323432ce85ba273019"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/header-popup-evidence.test.ts",
+      "sha256": "a92301820ff6988974946039b4e7e3f150ec8eecf08361f2c8a2dc6cfcb3b556"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts",
+      "sha256": "d39cf1b5ac999cdcf30c1f623bc55e01795e2e3eb5f1c033797c0c5202ef8d6e"
+    },
+    {
+      "path": "internal/website/self-hosting-coverage-matrix.md",
+      "sha256": "971388b847cb7a75280d204763e20258b6cfe430b3e513e19aafc8ac7f8bd404"
+    },
+    {
+      "path": "packages/adapters/web-component/src/runtime/modules.ts",
+      "sha256": "defab3fc457c266451b2a5dff7163104cb90c7759395820c777c69d2c1272469"
+    },
+    {
+      "path": "packages/adapters/web-component/test/focus-entry-refresh-coalescing.test.ts",
+      "sha256": "f8c2986b44ef4b8eb7cfd90ca038fa2d70fc05683511c7ee5fc6c9c787c18b84"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-client.post-render-cleanup.test.ts",
+      "sha256": "ae82a6187b7c857ed586e767234d95bf5a702d3d7097c402915cead60b3d5073"
+    }
+  ],
+  "acceptance": {
+    "newFrozenHeadPending": true,
+    "sourceReviewIsNotGithubApproval": true,
+    "originalBudgetsUnchanged": true,
+    "deferredCompilerIssuesRemainOpen": true,
+    "fullHeaderMatrixSearchAndMainAcceptancePending": true
+  }
+}

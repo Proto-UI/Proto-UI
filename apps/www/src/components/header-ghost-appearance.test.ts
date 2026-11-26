@@ -6,6 +6,7 @@ import { initSiteHeaderDisclosure, type SiteHeaderDisclosure } from './site-head
 import type { DemoSetupContext } from './PrototypePreviewer/demo-types';
 import { createRequire } from 'node:module';
 import { isNativeFocusTargetReady as isVueNativeFocusTargetReady } from '../../../../packages/adapters/vue/src/platform/instance-tree';
+import { isNativeFocusTargetReady as isReactNativeFocusTargetReady } from '../../../../packages/adapters/react/src/platform/instance-tree';
 
 // Real installed runtimes and adapters; only CDN loading is replaced in Happy DOM.
 vi.mock('./PrototypePreviewer/runtimes/react-runtime', async () => {
@@ -195,9 +196,31 @@ for (const family of ['shadcn', 'brutalist'] as const)
         expect(popup.getAttribute('data-pui-style')).not.toContain('shadow-');
       expect(popup.dataset.projectionGeneration).toBe('7');
       const option = popup.querySelector<HTMLElement>('[role="option"]')!;
-      option.focus();
-      option.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-      await vi.waitFor(() => expect(triggers[0].getAttribute('aria-expanded')).toBe('false'));
+      let optionFocused = false;
+      let escapeSent = false;
+      // A React portal's DOM can precede its committed event owner. Focusing
+      // that owner can also schedule a recommit. Keep admission, the single
+      // native Escape and its close result inside the original 1s wait.
+      await vi.waitFor(() => {
+        if (!escapeSent) {
+          if (runtime === 'react') {
+            expect(isReactNativeFocusTargetReady(popup)).toBe(true);
+            expect(isReactNativeFocusTargetReady(option)).toBe(true);
+          }
+          if (!optionFocused) {
+            option.focus();
+            optionFocused = true;
+          }
+          expect(document.activeElement).toBe(option);
+          if (runtime === 'react') {
+            expect(isReactNativeFocusTargetReady(popup)).toBe(true);
+            expect(isReactNativeFocusTargetReady(option)).toBe(true);
+          }
+          escapeSent = true;
+          option.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        }
+        expect(triggers[0].getAttribute('aria-expanded')).toBe('false');
+      });
       await vi.waitFor(() => expect(document.activeElement).toBe(triggers[0]));
       if (family === 'shadcn') {
         const ref = Object.entries(context!.refs).find(([, node]) => node === triggers[0])![0];

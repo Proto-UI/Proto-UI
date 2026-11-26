@@ -19,6 +19,10 @@ import {
   nativeImeCommitTrace,
   type NativeImeEvent,
 } from './site-search-ime-evidence';
+import {
+  installSearchCloseFocusReceipt,
+  judgeSearchCloseFocus,
+} from './site-search-close-focus-evidence';
 
 let browser: Browser;
 let baseUrl: string;
@@ -910,10 +914,45 @@ describe.sequential('Required production Search recovery with generated Pagefind
         }
 
         stage = 'close-focus';
-        await current.close.click();
-        await expect
-          .poll(() => trigger.evaluate((element) => element === document.activeElement))
-          .toBe(true);
+        const closeTrigger = await trigger.elementHandle();
+        const closeControl = await current.close.elementHandle();
+        const closePanel = await current.panel.elementHandle();
+        try {
+          if (!closeTrigger || !closeControl || !closePanel)
+            throw new Error('Missing committed Search Close/focus elements');
+          const closeFocus = await page.evaluateHandle(installSearchCloseFocusReceipt, {
+            trigger: closeTrigger,
+            close: closeControl,
+            panel: closePanel,
+            dialog: { owner: current.owner, generation: current.generation },
+          });
+          try {
+            // Keep the actual public Close click. The browser records its trusted
+            // event timestamp and the exact current opener's native focus return.
+            await current.close.click();
+            const receipt = await withTransportBound(
+              closeFocus.evaluate((observer) => observer.read()),
+              RUNTIME_RECEIPT_TIMEOUT_MS
+            );
+            const verdict = judgeSearchCloseFocus(receipt);
+            await mkdir(evidenceDirectory, { recursive: true });
+            await writeFile(
+              path.join(evidenceDirectory, `${family}-close-focus-receipt.json`),
+              JSON.stringify({ source, receipt, verdict }, null, 2)
+            );
+            expect(verdict.ok, JSON.stringify(verdict)).toBe(true);
+            // Closed state remains an independent public assertion. A focus
+            // event cannot stand in for hiding the actual committed Dialog.
+            expect(await current.panel.isVisible()).toBe(false);
+          } finally {
+            await closeFocus.evaluate((observer) => observer.dispose()).catch(() => {});
+            await closeFocus.dispose();
+          }
+        } finally {
+          await closeTrigger?.dispose();
+          await closeControl?.dispose();
+          await closePanel?.dispose();
+        }
         stage = 'reopen-focus';
         await trigger.press('Enter');
         current = await parts(page);

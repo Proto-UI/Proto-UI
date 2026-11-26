@@ -40,7 +40,15 @@ export type MotionPresentation = Readonly<{
 export type ResidentMotionHost = {
   now(): number;
   /** Immutable channel metadata from the current admitted frame, never a rejected commit. */
-  environment(requestedProperties: readonly ResidentMotionProperty[]): MotionEnvironment;
+  environment(
+    requestedProperties: readonly ResidentMotionProperty[],
+    /** Statically parsed targets only; percentages may still lack a host basis.
+     * This is a read-demand hint, never evidence of host capability or adoption. */
+    targetProperties?: readonly ResidentMotionProperty[],
+    /** The admitted finite width target needs a measured containing-block basis.
+     * A read-demand hint only; never evidence of layout capability or adoption. */
+    widthNeedsContainingBlock?: boolean
+  ): MotionEnvironment;
   subscribe(invalidate: () => void): () => void;
   requestFrame(callback: () => void): unknown;
   cancelFrame(ticket: unknown): void;
@@ -56,6 +64,11 @@ export type ResidentMotionHost = {
 export function createResidentMotionProjector(host: ResidentMotionHost): ResidentMotionSink {
   type AdmittedFrame = ResidentMotionFrame & {
     readonly requestedProperties: readonly ResidentMotionProperty[];
+    readonly targetProperties: readonly ResidentMotionProperty[];
+    readonly widthNeedsContainingBlock: boolean;
+    readonly targets: Readonly<
+      Partial<Record<ResidentMotionProperty, ReturnType<typeof extractResidentMotionTarget>>>
+    >;
   };
   let last: AdmittedFrame | null = null,
     view: number | null = null,
@@ -95,7 +108,11 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
     cancel();
     const currentGeneration = generation,
       frame = last;
-    const env = host.environment(frame.requestedProperties);
+    const env = host.environment(
+      frame.requestedProperties,
+      frame.targetProperties,
+      frame.widthNeedsContainingBlock
+    );
     if (retired || last !== frame || generation !== currentGeneration) return;
     const now = host.now();
     if (retired || last !== frame || generation !== currentGeneration) return;
@@ -132,9 +149,14 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
           samplers.set(property, sampler);
           declarationKeys.set(property, key);
         }
-        const target = env.supportedProperties.includes(property)
-          ? extractResidentMotionTarget(frame.style.tokens, property, frame.numbers)
-          : { supported: false as const, reason: 'host-property-unavailable' };
+        const parsed = frame.targets[property]!;
+        const target =
+          !parsed.supported || env.supportedProperties.includes(property)
+            ? parsed
+            : {
+                supported: false as const,
+                reason: 'host-property-unavailable',
+              };
         let value: readonly number[] | null = null;
         if (!target.supported) reasons.push(`${property}:${target.reason}`);
         else if (property === 'translate')
@@ -252,7 +274,7 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
       }
       revision = frame.revision;
       const declarations = Object.freeze(frame.declarations.map(snapshotResidentMotion));
-      last = Object.freeze({
+      const snapshot = {
         ...frame,
         style: createRootStyleEffect(readRootStyleEntries(frame.style, 'setup')),
         declarations,
@@ -273,6 +295,32 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
           )
         ),
         sourceDiagnostics: Object.freeze([...(frame.sourceDiagnostics ?? [])]),
+      };
+      // Resolve immutable semantic inputs once per admitted frame. A missing
+      // physical basis remains a valid target and still asks its host to observe.
+      const targets: Partial<
+        Record<ResidentMotionProperty, ReturnType<typeof extractResidentMotionTarget>>
+      > = {};
+      for (const property of snapshot.requestedProperties)
+        targets[property] = extractResidentMotionTarget(
+          snapshot.style.tokens,
+          property,
+          snapshot.numbers
+        );
+      const widthTarget = targets.width;
+      const widthLength = widthTarget?.supported ? (widthTarget.value as MotionLength) : null;
+      last = Object.freeze({
+        ...snapshot,
+        targets: Object.freeze(targets),
+        widthNeedsContainingBlock:
+          widthLength !== null &&
+          Number.isFinite(widthLength.px) &&
+          Number.isFinite(widthLength.rem) &&
+          Number.isFinite(widthLength.percent) &&
+          widthLength.percent !== 0,
+        targetProperties: Object.freeze(
+          snapshot.requestedProperties.filter((property) => targets[property]!.supported)
+        ),
       });
       if (!off && !subscribing) {
         subscribing = true;

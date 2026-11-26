@@ -1,5 +1,4 @@
-import type { Prototype } from '@proto.ui/core';
-import type { WebComponentAdapterConstructor } from '@proto.ui/adapter-web-component';
+import type { WebComponentAdapterElement } from '@proto.ui/adapter-web-component';
 
 const marker = 'data-library-style-seed';
 const style = 'data-pui-style';
@@ -15,9 +14,9 @@ const writeTokens = (element: HTMLElement, tokens: string[]) => {
  * Rule changes can replace it. Ordinary external tokens remain unowned here.
  * This is consumer markup bookkeeping, not general Adapter hydration.
  */
-export function withLibraryStyleSeed<T extends Prototype<any, any>>(
-  Adapter: WebComponentAdapterConstructor<T>
-): WebComponentAdapterConstructor<T> {
+export function withLibraryStyleSeed<
+  TAdapter extends new (...args: any[]) => WebComponentAdapterElement,
+>(Adapter: TAdapter): TAdapter {
   const connect: unknown = Reflect.get(Adapter.prototype, 'connectedCallback');
   if (typeof connect !== 'function') throw new Error('Library Adapter has no connection hook');
   const acquired = new WeakSet<HTMLElement>();

@@ -7,6 +7,8 @@ import { chromium, type Browser, type JSHandle, type Locator } from 'playwright-
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   installSizingMotionTrace,
+  installSizingPublicOwner,
+  type SizingMotionTrigger,
   sizingMotionIssues,
   sizingItemSizeIssues,
   type SizingMotionHandle,
@@ -26,6 +28,8 @@ let source: string;
 let sourceTree: string;
 const output = process.env.PROTO_UI_SELECT_ITEM_SIZING_EVIDENCE;
 const route = (locale: string) => `/${locale}/ui-libraries/shadcn/select/`;
+const demoId = 'demo-shadcn-select-disabled';
+const expectedItemCount = 5;
 let browser: Browser;
 let baseUrl: string;
 const environments = [
@@ -53,7 +57,7 @@ beforeAll(async () => {
   if (output) {
     await mkdir(output, { recursive: true });
     const files = [
-      'apps/www/src/content/docs/zh-cn/demo-shadcn-select.demo.ts',
+      'apps/www/src/content/docs/demo_components/select/demo-shadcn-select-disabled.demo.ts',
       'apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts',
       'apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts',
     ];
@@ -96,25 +100,18 @@ afterAll(async () => {
 }, 60_000);
 
 async function facts(trigger: Locator) {
-  return trigger.evaluate((node) => {
-    const trigger = node as HTMLElement;
+  return trigger.evaluate((node, itemCount) => {
+    const trigger = node as SizingMotionTrigger;
     const doc = trigger.ownerDocument;
-    const id = trigger.getAttribute('aria-controls');
-    const content = id ? doc.getElementById(id) : null;
-    const owner = trigger.dataset.projectionOwner;
-    if (!content || !owner || content.dataset.projectionOwner !== owner)
-      throw new Error('Controlled Content/Trigger owner mismatch');
-    const one = (id: string) => {
-      const matches = content.querySelectorAll<HTMLElement>(`[data-projection-prototype="${id}"]`);
-      if (matches.length !== 1 || matches[0].dataset.projectionOwner !== owner)
-        throw new Error(`Expected one same-owner ${id}`);
-      return matches[0];
-    };
+    const binding = trigger.__puiSizingOwner;
+    if (!binding || binding.itemCount !== itemCount)
+      throw new Error('Expected the retained public Select owner binding');
+    const { content, surface, viewport, items } = binding.read();
     const box = (element: HTMLElement) => {
       const css = getComputedStyle(element);
       const rect = element.getBoundingClientRect();
       return {
-        prototype: element.dataset.projectionPrototype,
+        prototype: element.dataset.projectionPrototype ?? element.localName,
         rect: {
           x: rect.x,
           y: rect.y,
@@ -153,17 +150,9 @@ async function facts(trigger: Locator) {
         text: element.textContent?.trim(),
       };
     };
-    const surface = one('shadcn-select-surface');
-    const viewport = one('shadcn-select-viewport');
-    const items = [...content.querySelectorAll<HTMLElement>('[role="option"]')];
-    if (
-      items.length !== 4 ||
-      items.some((item) => item.dataset.projectionOwner !== owner || !viewport.contains(item))
-    )
-      throw new Error('Expected all four current owned options inside Viewport');
     return {
       at: performance.now(),
-      runtime: trigger.dataset.projectionRuntime,
+      runtime: binding.runtime,
       expanded: trigger.getAttribute('aria-expanded'),
       trigger: box(trigger),
       content: box(content),
@@ -176,10 +165,10 @@ async function facts(trigger: Locator) {
         ? 'reduce'
         : 'no-preference',
     };
-  });
+  }, expectedItemCount);
 }
 type Facts = Awaited<ReturnType<typeof facts>>;
-function assertGeometry(
+function assertGeometryFacts(
   value: Facts,
   runtime: string,
   environment: Environment,
@@ -197,13 +186,8 @@ function assertGeometry(
   const aligned =
     selection === 'unset' ? value.items.find((item) => item.disabled === 'false') : selected[0];
   expect(aligned?.disabled, 'alignment row is enabled').toBe('false');
-  for (const edge of ['left', 'right', 'top', 'bottom'] as const)
-    expect(
-      Math.abs(aligned!.rect[edge] - value.trigger.rect[edge]),
-      `aligned row ${edge} replaces trigger`
-    ).toBeLessThanOrEqual(0.5);
-  // All four registered owned rows, including disabled siblings, share size.
-  // Only the aligned row above must replace the Trigger's position.
+  // All five registered owned rows, including disabled siblings, share size.
+  // Placement is checked separately for exact alignment and viewport collision.
   expect(
     sizingItemSizeIssues(
       value.trigger.rect,
@@ -240,6 +224,124 @@ function assertGeometry(
   expect(item.top).toBeGreaterThanOrEqual(clip.top + value.viewport.border[0] - 0.5);
   expect(item.bottom).toBeLessThanOrEqual(clip.bottom - value.viewport.border[2] + 0.5);
   expect(value.items[3].disabled).toBe('true');
+  return aligned!;
+}
+function assertGeometry(
+  value: Facts,
+  runtime: string,
+  environment: Environment,
+  selection: SizingMotionSelection
+) {
+  const aligned = assertGeometryFacts(value, runtime, environment, selection);
+  for (const edge of ['left', 'right', 'top', 'bottom'] as const)
+    expect(
+      Math.abs(aligned!.rect[edge] - value.trigger.rect[edge]),
+      `aligned row ${edge} replaces trigger`
+    ).toBeLessThanOrEqual(0.5);
+}
+async function positionClosedTrigger(trigger: Locator, placement: 'center' | 'bottom-collision') {
+  return trigger.evaluate((node, placement) => {
+    const view = node.ownerDocument.defaultView;
+    if (!view) throw new Error('Expected the current Trigger document window');
+    const read = () => {
+      const rect = node.getBoundingClientRect();
+      return {
+        rect: {
+          left: rect.left,
+          right: rect.right,
+          top: rect.top,
+          bottom: rect.bottom,
+          width: rect.width,
+          height: rect.height,
+        },
+        scroll: { x: view.scrollX, y: view.scrollY },
+      };
+    };
+    const before = read();
+    // Native document scrolling establishes this carrier's input. It does not
+    // alter the popup, its scrollTop, selection, dimensions or positioning policy.
+    node.scrollIntoView({
+      block: placement === 'center' ? 'center' : 'end',
+      inline: 'nearest',
+      behavior: 'instant',
+    });
+    if (placement === 'bottom-collision')
+      view.scrollBy({
+        top: node.getBoundingClientRect().bottom - (view.innerHeight - 2),
+        behavior: 'instant',
+      });
+    return {
+      placement,
+      method: 'native document scrolling' as const,
+      before,
+      after: read(),
+      expanded: node.getAttribute('aria-expanded'),
+      browser: { width: view.innerWidth, height: view.innerHeight },
+    };
+  }, placement);
+}
+type GeometryInput = Awaited<ReturnType<typeof positionClosedTrigger>>;
+function assertGeometryInput(input: GeometryInput) {
+  expect(input.expanded, 'fixture scroll occurs while Select is closed').toBe('false');
+  expect(input.browser).toEqual({ width: 390, height: 900 });
+  const actual =
+    input.placement === 'center'
+      ? input.after.rect.top + input.after.rect.height / 2
+      : input.after.rect.bottom;
+  const expected =
+    input.placement === 'center' ? input.browser.height / 2 : input.browser.height - 2;
+  expect(Math.abs(actual - expected), `${input.placement} measured input`).toBeLessThanOrEqual(0.5);
+}
+function assertBottomCollision(
+  value: Facts,
+  runtime: string,
+  environment: Environment,
+  input: GeometryInput
+) {
+  const aligned = assertGeometryFacts(value, runtime, environment, 'selected');
+  expect(input.placement).toBe('bottom-collision');
+  expect(aligned.text).toBe('Pineapple');
+  expect(aligned.focused).toBe(true);
+  expect(value.items.map((item) => item.selected)).toEqual([
+    'false',
+    'false',
+    'false',
+    'false',
+    'true',
+  ]);
+  for (const edge of ['left', 'right', 'top', 'bottom'] as const)
+    expect(
+      Math.abs(value.trigger.rect[edge] - input.after.rect[edge]),
+      `opening preserves the prepared Trigger ${edge}`
+    ).toBeLessThanOrEqual(0.5);
+  for (const edge of ['left', 'right'] as const)
+    expect(
+      Math.abs(aligned.rect[edge] - value.trigger.rect[edge]),
+      `collision row ${edge}`
+    ).toBeLessThanOrEqual(0.5);
+  // P-BASE-SELECT-CONTENT-CURRENT-ALIGNMENT-INTENT gives viewport collisions
+  // priority. The declared Select layout-viewport margin is 10px; this selected
+  // final row must clamp there, not be reported as replacing the Trigger.
+  const bottom = value.browser.height - 10;
+  expect(
+    value.trigger.rect.bottom - bottom,
+    'actual input requires bottom collision'
+  ).toBeGreaterThan(0.5);
+  for (const [name, box] of [
+    ['Content', value.content],
+    ['Surface', value.surface],
+    ['Viewport', value.viewport],
+    ['selected row', aligned],
+  ] as const)
+    expect(
+      Math.abs(box.rect.bottom - bottom),
+      `${name} preserves the 10px bottom gutter`
+    ).toBeLessThanOrEqual(0.5);
+  expect(
+    Math.abs(aligned.rect.top - (bottom - value.trigger.rect.height)),
+    'clamped row top'
+  ).toBeLessThanOrEqual(0.5);
+  expect(value.surface.rect.top).toBeGreaterThanOrEqual(10 - 0.5);
 }
 async function ready(previewer: Locator, runtime: (typeof RUNTIMES)[number]) {
   // A toolbar scope can publish the new selection while the previous demo is
@@ -248,7 +350,7 @@ async function ready(previewer: Locator, runtime: (typeof RUNTIMES)[number]) {
     previewer.page(),
     previewer,
     runtime,
-    '[role="combobox"][aria-label="Adapter selector"]',
+    '[role="combobox"][aria-label="Fruit selector with disabled item"]',
     1
   );
 }
@@ -263,13 +365,11 @@ interface PointerPoint {
 async function optionPoint(trigger: Locator, index: number): Promise<PointerPoint> {
   return trigger.evaluate((node, index) => {
     const doc = node.ownerDocument;
-    const content = doc.getElementById(node.getAttribute('aria-controls') ?? '');
-    const owner = (node as HTMLElement).dataset.projectionOwner;
-    if (!content || !owner || content.dataset.projectionOwner !== owner)
-      throw new Error('Pointer input requires the current controlled Content owner');
-    const option = content.querySelectorAll<HTMLElement>('[role="option"]')[index];
-    if (!option || option.dataset.projectionOwner !== owner)
-      throw new Error('Pointer option owner mismatch');
+    const binding = (node as SizingMotionTrigger).__puiSizingOwner;
+    if (!binding) throw new Error('Pointer input requires the retained public owner binding');
+    const { content, items } = binding.read();
+    const option = items[index];
+    if (!option) throw new Error('Pointer option is not registered in the current list');
     const rect = option.getBoundingClientRect();
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;
@@ -286,9 +386,9 @@ async function optionPoint(trigger: Locator, index: number): Promise<PointerPoin
       option: option.textContent?.trim() ?? '',
       pointerEvents: getComputedStyle(option).pointerEvents,
       hit: {
-        prototype: (hit as HTMLElement).dataset.projectionPrototype ?? null,
+        prototype: (hit as HTMLElement).dataset.projectionPrototype ?? hit.localName,
         role: hit.getAttribute('role'),
-        owner: (hit as HTMLElement).dataset.projectionOwner ?? null,
+        owner: binding.owns(hit as HTMLElement) ? binding.owner : null,
       },
     };
   }, index);
@@ -301,13 +401,15 @@ for (const environment of environments)
       () => {
         for (const runtime of RUNTIMES)
           it(`${runtime}: first entry, selection, reopen and narrow geometry`, async () => {
-            const { context, page, previewer } = await openRoute(browser, baseUrl, route(locale), {
+            const { context, page } = await openRoute(browser, baseUrl, route(locale), {
               width: 1180,
               height: 900,
             });
+            const previewer = page.locator(`[data-demo-id="${demoId}"]`);
             const observations: Array<{ phase: string; value: Facts }> = [];
             const motion: Array<{ phase: string; value: SizingMotionResult }> = [];
             const pointerInputs: Array<{ phase: string; value: PointerPoint }> = [];
+            const geometryInputs: Array<{ phase: string; value: GeometryInput }> = [];
             const activeMotion: { handle: JSHandle<SizingMotionHandle> | null } = { handle: null };
             const startMotion = async (trigger: Locator, selection: SizingMotionSelection) => {
               if (activeMotion.handle) throw new Error('Previous motion trace was not released');
@@ -329,10 +431,10 @@ for (const environment of environments)
                   { timeout: 1200 }
                 )
                 .toBe(true);
-              activeMotion.handle = await trigger.evaluateHandle(
-                installSizingMotionTrace,
-                selection
-              );
+              activeMotion.handle = await trigger.evaluateHandle(installSizingMotionTrace, {
+                selection,
+                itemCount: expectedItemCount,
+              });
             };
             const finishMotion = async (phase: string) => {
               if (!activeMotion.handle)
@@ -343,9 +445,10 @@ for (const environment of environments)
               motion.push({ phase, value });
               await activeMotion.handle.dispose();
               activeMotion.handle = null;
-              expect(sizingMotionIssues(value, runtime), `${phase} full motion trajectory`).toEqual(
-                []
-              );
+              expect(
+                sizingMotionIssues(value, runtime, expectedItemCount),
+                `${phase} full motion trajectory`
+              ).toEqual([]);
             };
             const name = `${locale}-${runtime}${environment.id === 'default' ? '' : `-${environment.id}`}`;
             let testFailed = false;
@@ -368,11 +471,17 @@ for (const environment of environments)
                 article.setAttribute('dir', direction);
                 return { documentBefore, articleBefore };
               }, environment.direction);
+              await previewer.scrollIntoViewIfNeeded();
               await ready(previewer, runtime);
               const trigger = previewer.getByRole('combobox', {
-                name: 'Adapter selector',
+                name: 'Fruit selector with disabled item',
                 exact: true,
               });
+              const ownerBinding = await trigger.evaluate(installSizingPublicOwner, {
+                demoId,
+                itemCount: expectedItemCount,
+              });
+              expect(ownerBinding.runtime, 'actual committed public demo controller').toBe(runtime);
               directionInput.trigger = await trigger.evaluate(
                 (node) => getComputedStyle(node).direction
               );
@@ -380,7 +489,7 @@ for (const environment of environments)
                 environment.direction
               );
               expect(await trigger.getAttribute('aria-expanded')).toBe('false');
-              expect(await trigger.innerText()).toBe('Select an adapter');
+              expect(await trigger.innerText()).toBe('Disabled item inside');
               await page.keyboard.press('Tab');
               await startMotion(trigger, 'unset');
               await trigger.press('ArrowDown');
@@ -390,7 +499,7 @@ for (const environment of environments)
                     .filter((item) => item.focused)
                     .map((item) => item.text)
                 )
-                .toEqual(['React']);
+                .toEqual(['Apple']);
               await finishMotion('first-entry');
               const first = await facts(trigger);
               observations.push({ phase: 'first-entry', value: first });
@@ -400,8 +509,9 @@ for (const environment of environments)
                 'false',
                 'false',
                 'false',
+                'false',
               ]);
-              expect(first.trigger.text).toBe('Select an adapter');
+              expect(first.trigger.text).toBe('Disabled item inside');
               if (output) await page.screenshot({ path: path.join(output, `${name}-first.png`) });
               await page.keyboard.press('End');
               await expect
@@ -410,18 +520,19 @@ for (const environment of environments)
                     .filter((item) => item.focused)
                     .map((item) => item.text)
                 )
-                .toEqual(['Web Components']);
+                .toEqual(['Pineapple']);
               const navigated = await facts(trigger);
               expect(navigated.items.map((item) => item.selected)).toEqual([
                 'false',
                 'false',
                 'false',
                 'false',
+                'false',
               ]);
-              expect(navigated.trigger.text).toBe('Select an adapter');
+              expect(navigated.trigger.text).toBe('Disabled item inside');
               await page.keyboard.press('Enter');
               await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
-              await expect.poll(() => trigger.innerText()).toContain('Web Components');
+              await expect.poll(() => trigger.innerText()).toContain('Pineapple');
               await startMotion(trigger, 'selected');
               await trigger.press('Enter');
               await expect
@@ -430,7 +541,7 @@ for (const environment of environments)
                     .filter((item) => item.focused)
                     .map((item) => item.text)
                 )
-                .toEqual(['Web Components']);
+                .toEqual(['Pineapple']);
               await finishMotion('selected-reopen');
               const reopen = await facts(trigger);
               observations.push({ phase: 'selected-reopen', value: reopen });
@@ -438,8 +549,9 @@ for (const environment of environments)
               expect(reopen.items.map((item) => item.selected)).toEqual([
                 'false',
                 'false',
-                'true',
                 'false',
+                'false',
+                'true',
               ]);
               await page.keyboard.press('Escape');
               await expect
@@ -448,7 +560,11 @@ for (const environment of environments)
                 )
                 .toBe(true);
               await page.setViewportSize({ width: 390, height: 900 });
-              await trigger.scrollIntoViewIfNeeded();
+              // Exact four-edge alignment needs a non-colliding reference. A
+              // merely visible Trigger can still lie inside the 10px gutter.
+              const narrowInput = await positionClosedTrigger(trigger, 'center');
+              geometryInputs.push({ phase: 'narrow-reopen', value: narrowInput });
+              assertGeometryInput(narrowInput);
               await startMotion(trigger, 'selected');
               await trigger.press('ArrowDown');
               await expect
@@ -457,7 +573,7 @@ for (const environment of environments)
                     .filter((item) => item.focused)
                     .map((item) => item.text)
                 )
-                .toEqual(['Web Components']);
+                .toEqual(['Pineapple']);
               await finishMotion('narrow-reopen');
               const narrow = await facts(trigger);
               observations.push({ phase: 'narrow-reopen', value: narrow });
@@ -465,6 +581,32 @@ for (const environment of environments)
               if (output) await page.screenshot({ path: path.join(output, `${name}-narrow.png`) });
               await page.keyboard.press('Escape');
               await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
+
+              // Preserve the newly observed edge case separately from exact
+              // alignment. Keep the real opening key and full motion trajectory.
+              const collisionInput = await positionClosedTrigger(trigger, 'bottom-collision');
+              geometryInputs.push({ phase: 'narrow-bottom-collision', value: collisionInput });
+              assertGeometryInput(collisionInput);
+              await startMotion(trigger, 'selected');
+              await trigger.press('ArrowDown');
+              await expect
+                .poll(async () =>
+                  (await facts(trigger)).items
+                    .filter((item) => item.focused)
+                    .map((item) => item.text)
+                )
+                .toEqual(['Pineapple']);
+              await finishMotion('narrow-bottom-collision');
+              const collision = await facts(trigger);
+              observations.push({ phase: 'narrow-bottom-collision', value: collision });
+              assertBottomCollision(collision, runtime, environment, collisionInput);
+              if (output)
+                await page.screenshot({ path: path.join(output, `${name}-bottom-collision.png`) });
+              await page.keyboard.press('Escape');
+              await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
+              const pointerInput = await positionClosedTrigger(trigger, 'center');
+              geometryInputs.push({ phase: 'disabled-probe-entry', value: pointerInput });
+              assertGeometryInput(pointerInput);
 
               // The original journey above only inspected aria-disabled. Exercise
               // the actual disabled option through trusted input, then prove the
@@ -479,7 +621,7 @@ for (const environment of environments)
                     .filter((item) => item.focused)
                     .map((item) => item.text)
                 )
-                .toEqual(['React']);
+                .toEqual(['Apple']);
               await page.keyboard.press('End');
               await expect
                 .poll(async () =>
@@ -487,7 +629,25 @@ for (const environment of environments)
                     .filter((item) => item.focused)
                     .map((item) => item.text)
                 )
-                .toEqual(['Web Components']);
+                .toEqual(['Pineapple']);
+              // The public recipe puts its disabled row before Pineapple.
+              // Exercise both directions through that gap, not only Home/End.
+              await page.keyboard.press('ArrowUp');
+              await expect
+                .poll(async () =>
+                  (await facts(trigger)).items
+                    .filter((item) => item.focused)
+                    .map((item) => item.text)
+                )
+                .toEqual(['Blueberry']);
+              await page.keyboard.press('ArrowDown');
+              await expect
+                .poll(async () =>
+                  (await facts(trigger)).items
+                    .filter((item) => item.focused)
+                    .map((item) => item.text)
+                )
+                .toEqual(['Pineapple']);
               const navigation = await facts(trigger);
               observations.push({ phase: 'disabled-keyboard-skip', value: navigation });
               assertGeometry(navigation, runtime, environment, 'selected');
@@ -510,10 +670,11 @@ for (const environment of environments)
                 expect(value.items.map((item) => item.selected)).toEqual([
                   'false',
                   'false',
-                  'true',
                   'false',
+                  'false',
+                  'true',
                 ]);
-                expect(await trigger.innerText()).toContain('Web Components');
+                expect(await trigger.innerText()).toContain('Pineapple');
                 return value;
               };
               const disabledMove = await optionPoint(trigger, 3);
@@ -536,20 +697,21 @@ for (const environment of environments)
                     .filter((item) => item.focused)
                     .map((item) => item.text)
                 )
-                .toEqual(['Vue']);
+                .toEqual(['Banana']);
               const hover = await facts(trigger);
               observations.push({ phase: 'enabled-pointer-move', value: hover });
               expect(hover.items.map((item) => item.selected)).toEqual([
                 'false',
                 'false',
-                'true',
                 'false',
+                'false',
+                'true',
               ]);
               const enabledClick = await optionPoint(trigger, 1);
               pointerInputs.push({ phase: 'enabled-pointer-click', value: enabledClick });
               await page.mouse.click(enabledClick.x, enabledClick.y);
               await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
-              await expect.poll(async () => (await trigger.innerText()).trim()).toBe('Vue');
+              await expect.poll(async () => (await trigger.innerText()).trim()).toBe('Banana');
               // Re-enter keyboard modality through actual sequential navigation
               // before installing the trace, as for the original first entry.
               await page.keyboard.press('Tab');
@@ -565,10 +727,11 @@ for (const environment of environments)
                 'true',
                 'false',
                 'false',
+                'false',
               ]);
               expect(
                 pointerReopen.items.filter((item) => item.focused).map((item) => item.text)
-              ).toEqual(['Vue']);
+              ).toEqual(['Banana']);
               if (output)
                 await page.screenshot({ path: path.join(output, `${name}-pointer-reopen.png`) });
               await page.keyboard.press('Escape');
@@ -587,7 +750,7 @@ for (const environment of environments)
                 }
                 try {
                   const trigger = previewer.getByRole('combobox', {
-                    name: 'Adapter selector',
+                    name: 'Fruit selector with disabled item',
                     exact: true,
                   });
                   observations.push({ phase: 'failure', value: await facts(trigger) });
@@ -631,6 +794,7 @@ for (const environment of environments)
                         observations,
                         motion,
                         pointerInputs,
+                        geometryInputs,
                         failure: testFailed ? String(testError) : null,
                         secondaryErrors: secondaryErrors.map(({ phase, error }) => ({
                           phase,

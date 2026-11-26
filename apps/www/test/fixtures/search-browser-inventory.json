@@ -1,0 +1,422 @@
+[
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "Search family Button commands > shadcn light 390px preserves activation, dismissal and focus",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "Search family Button commands > shadcn light 1440px preserves activation, dismissal and focus",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "Search family Button commands > shadcn dark 390px preserves activation, dismissal and focus",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "Search family Button commands > shadcn dark 1440px preserves activation, dismissal and focus",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "Search family Button commands > brutalist light 390px preserves activation, dismissal and focus",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "Search family Button commands > brutalist light 1440px preserves activation, dismissal and focus",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "Search family Button commands > brutalist dark 390px preserves activation, dismissal and focus",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "Search family Button commands > brutalist dark 1440px preserves activation, dismissal and focus",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage shadcn/wc mobile keeps the Search trigger centered through closed/open/reopen",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage shadcn/react mobile keeps the Search trigger centered through closed/open/reopen",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage shadcn/vue mobile keeps the Search trigger centered through closed/open/reopen",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage shadcn/vue2 mobile keeps the Search trigger centered through closed/open/reopen",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage brutalist/wc mobile keeps the Search trigger centered through closed/open/reopen",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage brutalist/react mobile keeps the Search trigger centered through closed/open/reopen",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage brutalist/vue mobile keeps the Search trigger centered through closed/open/reopen",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage brutalist/vue2 mobile keeps the Search trigger centered through closed/open/reopen",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage shadcn/wc desktop keeps the Search trigger centered through closed/open/reopen",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage shadcn/react desktop keeps the Search trigger centered through closed/open/reopen",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage shadcn/vue desktop keeps the Search trigger centered through closed/open/reopen",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage shadcn/vue2 desktop keeps the Search trigger centered through closed/open/reopen",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage brutalist/wc desktop keeps the Search trigger centered through closed/open/reopen",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage brutalist/react desktop keeps the Search trigger centered through closed/open/reopen",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage brutalist/vue desktop keeps the Search trigger centered through closed/open/reopen",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage brutalist/vue2 desktop keeps the Search trigger centered through closed/open/reopen",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage shadcn 1280px aligns actual Search and both selectors in every runtime",
+    "timeoutMs": 180000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage brutalist 1280px aligns actual Search and both selectors in every runtime",
+    "timeoutMs": 180000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage shadcn 1440px aligns actual Search and both selectors in every runtime",
+    "timeoutMs": 180000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage brutalist 1440px aligns actual Search and both selectors in every runtime",
+    "timeoutMs": 180000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage shadcn 2048px aligns actual Search and both selectors in every runtime",
+    "timeoutMs": 180000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage brutalist 2048px aligns actual Search and both selectors in every runtime",
+    "timeoutMs": 180000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "homepage keeps one active public Search session through runtime transitions and repeat initialization",
+    "timeoutMs": 120000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "keeps Bootstrap Homepage Search available after selecting the WIP family",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "retains Homepage Search Close focus across replacement and returns shortcut focus to the opener",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "retains Homepage Search query through a failure after replacement publication begins",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "retains Homepage Search close through a failure after replacement publication begins",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "retains Homepage Search newer focus through a failure after replacement publication begins",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+    "name": "keeps a documentation link available without JavaScript",
+    "timeoutMs": 20000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Docs shadcn 320px shows complete runtime values beside real Search",
+    "timeoutMs": 180000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Docs brutalist 320px shows complete runtime values beside real Search",
+    "timeoutMs": 180000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Docs shadcn 390px shows complete runtime values beside real Search",
+    "timeoutMs": 180000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Docs brutalist 390px shows complete runtime values beside real Search",
+    "timeoutMs": 180000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Docs shadcn 1280px shows complete runtime values beside real Search",
+    "timeoutMs": 180000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Docs brutalist 1280px shows complete runtime values beside real Search",
+    "timeoutMs": 180000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Docs shadcn 1440px shows complete runtime values beside real Search",
+    "timeoutMs": 180000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Docs brutalist 1440px shows complete runtime values beside real Search",
+    "timeoutMs": 180000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Docs shadcn 2048px shows complete runtime values beside real Search",
+    "timeoutMs": 180000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Docs brutalist 2048px shows complete runtime values beside real Search",
+    "timeoutMs": 180000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Docs shadcn 320px keeps enlarged 200% text reachable without clipping",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Docs brutalist 320px keeps enlarged 200% text reachable without clipping",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Docs shadcn 390px keeps enlarged 200% text reachable without clipping",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Docs brutalist 390px keeps enlarged 200% text reachable without clipping",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Search shadcn/wc keeps nested scrollports and dismissal reachable at 200%",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Search shadcn/react keeps nested scrollports and dismissal reachable at 200%",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Search shadcn/vue keeps nested scrollports and dismissal reachable at 200%",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Search shadcn/vue2 keeps nested scrollports and dismissal reachable at 200%",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Search brutalist/wc keeps nested scrollports and dismissal reachable at 200%",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Search brutalist/react keeps nested scrollports and dismissal reachable at 200%",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Search brutalist/vue keeps nested scrollports and dismissal reachable at 200%",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+    "name": "Search brutalist/vue2 keeps nested scrollports and dismissal reachable at 200%",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "homepage shadcn/wc mobile renders the explicit Rhea website menu anatomy",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "homepage shadcn/react mobile renders the explicit Rhea website menu anatomy",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "homepage shadcn/vue mobile renders the explicit Rhea website menu anatomy",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "homepage shadcn/vue2 mobile renders the explicit Rhea website menu anatomy",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "homepage shadcn/wc desktop renders the explicit Rhea website menu anatomy",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "homepage shadcn/react desktop renders the explicit Rhea website menu anatomy",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "homepage shadcn/vue desktop renders the explicit Rhea website menu anatomy",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "homepage shadcn/vue2 desktop renders the explicit Rhea website menu anatomy",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "docs brutalist dark 390px keeps Close focused through delayed Pagefind failure and Space dismissal",
+    "timeoutMs": 60000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "homepage shadcn/wc missing Pagefind keeps the real Retry action focused",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "homepage shadcn/react missing Pagefind keeps the real Retry action focused",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "homepage shadcn/vue missing Pagefind keeps the real Retry action focused",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "homepage shadcn/vue2 missing Pagefind keeps the real Retry action focused",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "homepage brutalist/wc missing Pagefind keeps the real Retry action focused",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "homepage brutalist/react missing Pagefind keeps the real Retry action focused",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "homepage brutalist/vue missing Pagefind keeps the real Retry action focused",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "homepage brutalist/vue2 missing Pagefind keeps the real Retry action focused",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "default public Command wc mobile retains the no-addon Rhea editor inset",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "default public Command react mobile retains the no-addon Rhea editor inset",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "default public Command vue mobile retains the no-addon Rhea editor inset",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "default public Command vue2 mobile retains the no-addon Rhea editor inset",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "default public Command wc desktop retains the no-addon Rhea editor inset",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "default public Command react desktop retains the no-addon Rhea editor inset",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "default public Command vue desktop retains the no-addon Rhea editor inset",
+    "timeoutMs": 90000
+  },
+  {
+    "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+    "name": "default public Command vue2 desktop retains the no-addon Rhea editor inset",
+    "timeoutMs": 90000
+  }
+]

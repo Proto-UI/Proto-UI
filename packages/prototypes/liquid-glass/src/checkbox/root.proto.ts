@@ -24,12 +24,11 @@ export default definePrototype<LiquidGlassCheckboxRootProps, LiquidGlassCheckbox
     if (!state) throw new Error('[liquid-glass-checkbox-root] Base Checkbox states are required.');
     const { checked, indeterminate, disabled, hovered, pressed, focusVisible } = state;
 
-    // A compact square control using concentric radius-md (6px): checked/mixed
-    // share the governed primary fill when enabled and the Indicator's
-    // currentColor mark supplies the non-color difference.
+    // Material V2 uses this Root's border box for geometry. Keep the full hit
+    // frame while the ordinary and optical surfaces share that box.
     def.feedback.style.use(
       tw(
-        'inline-flex size-5 shrink-0 items-center justify-center rounded-md border border-border bg-secondary text-secondary-foreground shadow-sm outline-none select-none cursor-pointer'
+        'inline-flex size-5 shrink-0 items-center justify-center rounded-[4px] border border-border bg-secondary-background text-foreground shadow-sm outline-none select-none cursor-pointer'
       )
     );
     def.rule({

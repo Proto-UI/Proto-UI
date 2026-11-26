@@ -1,8 +1,10 @@
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, symlink, unlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import ts from 'typescript';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import { tabsRoot, tabsList, tabsTrigger } from '@proto.ui/prototypes-shadcn/tabs';
 
 import {
   createHookSourceSummaryContext,
@@ -64,6 +66,344 @@ describe('native Props initialization before authored hook capture', () => {
     const tokens = await collect(prefix);
     expect(tokens).toContain('bg-accent');
     expect(tokens).toContain('data-[selected]:bg-accent');
+  });
+
+  it.each(['[]', 'asFacts.modules'])(
+    'retains the captured State with empty static modules %s',
+    async (modules) => {
+      const entry = path.join(directory, 'entry.proto.ts');
+      await writeFile(
+        entry,
+        sourceFor('def.props.define({}); def.props.setDefaults({});').replace(
+          "name: 'props-prefix-consumer', setup(def)",
+          `name: 'props-prefix-consumer', modules: ${modules}, setup(def)`
+        )
+      );
+      const tokens = await collectProtoStyleTokensFromFiles([entry]);
+      expect(tokens).toContain('bg-accent');
+      expect(tokens).toContain('data-[selected]:bg-accent');
+    }
+  );
+
+  it.each([
+    ['unknown module list', 'modules: unknownModules,'],
+    ['module factory', 'modules: createModules(),'],
+    ['nonempty module list', "modules: [{ id: 'custom', config: {} }],"],
+    ['module getter', 'get modules() { return []; },'],
+    ['module spread', 'modules: [...unknownModules],'],
+    ['lookalike metadata', 'modules: foreign.modules,'],
+    ['config spread', '...extra, modules: [],'],
+    ['duplicate metadata', 'modules: unknownModules, modules: [],'],
+  ])('withholds the fresh Props proof for %s', async (_label, metadata) => {
+    const entry = path.join(directory, 'entry.proto.ts');
+    await writeFile(
+      entry,
+      sourceFor('def.props.define({});').replace(
+        "name: 'props-prefix-consumer', setup(def)",
+        `name: 'props-prefix-consumer', ${metadata} setup(def)`
+      )
+    );
+    const tokens = await collectProtoStyleTokensFromFiles([entry]);
+    expect(tokens).toContain('bg-accent');
+    expect(tokens).not.toContain('data-[selected]:bg-accent');
+  });
+
+  it.each([
+    ['nonempty producer modules', "modules: [{ id: 'custom', config: {} }],"],
+    ['producer module getter', 'get modules() { return []; },'],
+    ['producer config spread', '...extra,'],
+    ['producer prototype', '__proto__: inheritedConfig,'],
+  ])('does not treat %s as an empty forwarded list', async (_label, metadata) => {
+    await writeFile(
+      path.join(directory, 'facts.ts'),
+      [
+        "import { defineAsHook } from '@proto.ui/core';",
+        "export const asFacts = defineAsHook({ name: 'props-prefix-facts',",
+        metadata,
+        "  setup(def) { def.state.bool('selected', false); } });",
+      ].join('\n')
+    );
+    const entry = path.join(directory, 'entry.proto.ts');
+    await writeFile(
+      entry,
+      sourceFor('def.props.define({});').replace(
+        "name: 'props-prefix-consumer', setup(def)",
+        "name: 'props-prefix-consumer', modules: asFacts.modules, setup(def)"
+      )
+    );
+    const tokens = await collectProtoStyleTokensFromFiles([entry]);
+    expect(tokens).toContain('bg-accent');
+    expect(tokens).not.toContain('data-[selected]:bg-accent');
+  });
+
+  it.each(['increment', 'decrement'])(
+    'retains disabled paint for the actual Liquid NumberField %s',
+    async (part) => {
+      const tokens = await collectProtoStyleTokensFromFiles([
+        path.resolve(
+          process.cwd(),
+          `packages/prototypes/liquid-glass/src/number-field/${part}.proto.ts`
+        ),
+      ]);
+      for (const token of [
+        'cursor-not-allowed',
+        'shadow-none',
+        'bg-muted',
+        'text-muted-foreground',
+      ])
+        expect(tokens).toContain(`data-[disabled]:${token}`);
+    }
+  );
+
+  it.each([
+    [
+      'inherited modules',
+      "Object.defineProperty(Object.prototype, 'modules', { configurable: true, value: [{ id: 'custom', config: {} }] });",
+      'delete Object.prototype.modules;',
+    ],
+    ['unknown initializer', 'initializeMetadata();', ''],
+    ['getter read', 'const metadata = foreign.value;', ''],
+    ['class static initialization', 'class Metadata { static value = initializeMetadata(); }', ''],
+  ])('withholds the empty snapshot proof after %s', async (_label, prefix, suffix) => {
+    await writeFile(
+      path.join(directory, 'facts.ts'),
+      [
+        "import { defineAsHook } from '@proto.ui/core';",
+        prefix,
+        "export const asFacts = defineAsHook({ name: 'props-prefix-facts',",
+        "  setup(def) { def.state.bool('selected', false); } });",
+        suffix,
+      ].join('\n')
+    );
+    const entry = path.join(directory, 'entry.proto.ts');
+    await writeFile(
+      entry,
+      sourceFor('def.props.define({});').replace(
+        "name: 'props-prefix-consumer', setup(def)",
+        "name: 'props-prefix-consumer', modules: asFacts.modules, setup(def)"
+      )
+    );
+    expect(await collectProtoStyleTokensFromFiles([entry])).not.toContain(
+      'data-[selected]:bg-accent'
+    );
+  });
+
+  it('checks creation effects in sibling runtime re-exports', async () => {
+    await writeFile(
+      path.join(directory, 'barrel.ts'),
+      "export { asFacts, asReplacement } from './facts';\nexport * from './metadata-effect';"
+    );
+    await writeFile(
+      path.join(directory, 'metadata-effect.ts'),
+      'export const metadata = mutatePrototype();'
+    );
+    const entry = path.join(directory, 'entry.proto.ts');
+    await writeFile(
+      entry,
+      sourceFor('def.props.define({});')
+        .replace("from './facts'", "from './barrel'")
+        .replace(
+          "name: 'props-prefix-consumer', setup(def)",
+          "name: 'props-prefix-consumer', modules: asFacts.modules, setup(def)"
+        )
+    );
+    expect(await collectProtoStyleTokensFromFiles([entry])).not.toContain(
+      'data-[selected]:bg-accent'
+    );
+  });
+
+  it('checks extra factory arguments before accepting a frozen snapshot', async () => {
+    await writeFile(
+      path.join(directory, 'facts.ts'),
+      [
+        "import { defineAsHook } from '@proto.ui/core';",
+        "export const asFacts = defineAsHook({ name: 'props-prefix-facts',",
+        "  setup(def) { def.state.bool('selected', false); } }, mutatePrototype());",
+      ].join('\n')
+    );
+    const entry = path.join(directory, 'entry.proto.ts');
+    await writeFile(
+      entry,
+      sourceFor('def.props.define({});').replace(
+        "name: 'props-prefix-consumer', setup(def)",
+        "name: 'props-prefix-consumer', modules: asFacts.modules, setup(def)"
+      )
+    );
+    expect(await collectProtoStyleTokensFromFiles([entry])).not.toContain(
+      'data-[selected]:bg-accent'
+    );
+  });
+
+  it('does not assume an omitted root modules property is an own empty list', async () => {
+    const entry = path.join(directory, 'entry.proto.ts');
+    await writeFile(
+      entry,
+      sourceFor('def.props.define({});').replace(
+        'export default definePrototype(',
+        "Object.defineProperty(Object.prototype, 'modules', { value: [{ id: 'custom', config: {} }] });\nexport default definePrototype("
+      )
+    );
+    expect(await collectProtoStyleTokensFromFiles([entry])).not.toContain(
+      'data-[selected]:bg-accent'
+    );
+  });
+
+  it('retains empty forwarding through closed metadata creation and source wrappers', async () => {
+    await writeFile(
+      path.join(directory, 'facts.ts'),
+      [
+        "import * as core from '@proto.ui/core';",
+        "import { createContextKey as contextKey, defineAsHook } from '@proto.ui/core';",
+        "const context = contextKey('metadata-context');",
+        "const family = core.createAnatomyFamily('metadata-family', { roles: { root: {}, child: {} },",
+        "  relations: ['child'].map(child => ({ kind: 'contains', parent: 'root', child })) });",
+        'function identity(value) { return value; }',
+        'function defer(value) { return () => value; }',
+        'const metadata = identity(Object.freeze({ context, family }));',
+        'const deferred = defer(metadata);',
+        "export const asFacts = defineAsHook({ name: 'props-prefix-facts',",
+        "  setup(def) { def.state.bool('selected', false); } });",
+      ].join('\n')
+    );
+    const entry = path.join(directory, 'entry.proto.ts');
+    await writeFile(
+      entry,
+      sourceFor('def.props.define({});').replace(
+        "name: 'props-prefix-consumer', setup(def)",
+        "name: 'props-prefix-consumer', modules: asFacts.modules, setup(def)"
+      )
+    );
+    expect(await collectProtoStyleTokensFromFiles([entry])).toContain('data-[selected]:bg-accent');
+  });
+
+  it.each([
+    ['creation effect', "Object.defineProperty(Object.prototype, 'modules', { value: [] });\n"],
+    ['nonempty snapshot', ''],
+  ])('rechecks a replaced dependency with %s before reusing fresh Props', async (label, prefix) => {
+    const entry = path.join(directory, 'entry.proto.ts');
+    const text = sourceFor('def.props.define({});').replace(
+      "name: 'props-prefix-consumer', setup(def)",
+      "name: 'props-prefix-consumer', modules: asFacts.modules, setup(def)"
+    );
+    const source = ts.createSourceFile(entry, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+    const factsPath = path.join(directory, 'facts.ts');
+    const safeFacts = await readFile(factsPath, 'utf8');
+    const changedFacts =
+      prefix +
+      (label === 'nonempty snapshot'
+        ? safeFacts.replace(
+            "name: 'props-prefix-facts',",
+            "name: 'props-prefix-facts', modules: [{ id: 'custom', config: {} }],"
+          )
+        : safeFacts);
+    let call: ts.CallExpression | undefined;
+    const visit = (node: ts.Node): void => {
+      if (
+        ts.isCallExpression(node) &&
+        ts.isIdentifier(node.expression) &&
+        node.expression.text === 'asFacts'
+      )
+        call = node;
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+    expect(call).toBeDefined();
+    const projected = await projectStandardRuntimeRootStyleTokens(source, async ({ summary }) => {
+      expect(summary.resolveCall(call!, source).value.kind).toBe('result');
+      summary.registerSource(
+        ts.createSourceFile(factsPath, changedFacts, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
+      );
+      expect(summary.resolveCall(call!, source).value.kind).toBe('unknown');
+      summary.registerSource(
+        ts.createSourceFile(factsPath, safeFacts, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
+      );
+      expect(summary.resolveCall(call!, source).value.kind).toBe('result');
+      return [];
+    });
+    expect(projected).not.toBeNull();
+  });
+
+  it.each([
+    'producer modules',
+    'named barrel',
+    'star barrel',
+    'local const alias',
+    'creation-only effect',
+  ])('rechecks a retargeted dependency with %s for the same Root source', async (kind) => {
+    const safe = path.join(directory, 'safe-dependency.ts');
+    const unsafe = path.join(directory, 'unsafe-dependency.ts');
+    const linked = path.join(directory, 'linked-dependency.ts');
+    const facts = await readFile(path.join(directory, 'facts.ts'), 'utf8');
+    const producerDependency = kind !== 'creation-only effect';
+    await writeFile(safe, producerDependency ? facts : 'export const marker = 0;');
+    await writeFile(
+      unsafe,
+      producerDependency
+        ? facts.replace(
+            "name: 'props-prefix-facts',",
+            "name: 'props-prefix-facts', modules: [{ id: 'custom', config: {} }],"
+          )
+        : "Object.defineProperty(Object.prototype, 'modules', { value: [{ id: 'custom', config: {} }], configurable: true }); export const marker = 0;"
+    );
+    await symlink(safe, linked);
+    const throughBarrel = kind === 'named barrel' || kind === 'star barrel';
+    if (throughBarrel)
+      await writeFile(
+        path.join(directory, 'barrel.ts'),
+        kind === 'named barrel'
+          ? "export { asFacts, asReplacement } from './linked-dependency';"
+          : "export * from './linked-dependency';"
+      );
+    const entry = path.join(directory, 'entry.proto.ts');
+    const text = producerDependency
+      ? sourceFor('def.props.define({});')
+          .replace(
+            "import { asFacts, asReplacement } from './facts';",
+            kind === 'local const alias'
+              ? "import { asFacts as originalAsFacts, asReplacement } from './linked-dependency'; const asFacts = originalAsFacts;"
+              : `import { asFacts, asReplacement } from '${throughBarrel ? './barrel' : './linked-dependency'}';`
+          )
+          .replace(
+            "name: 'props-prefix-consumer', setup(def)",
+            "name: 'props-prefix-consumer', modules: asFacts.modules, setup(def)"
+          )
+      : [
+          "import { definePrototype, defineAsHook } from '@proto.ui/core';",
+          "import { marker } from './linked-dependency';",
+          'const dependency = { marker };',
+          "const asFacts = defineAsHook({ name: 'local-facts', setup(def) { def.state.bool('selected', false); } });",
+          "export default definePrototype({ name: 'local-consumer', modules: asFacts.modules, setup(def) {",
+          'def.props.define({});',
+          'const { selected } = asFacts().stateHandles;',
+          '} });',
+        ].join('\n');
+    await writeFile(entry, text);
+    const source = ts.createSourceFile(entry, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+    let call: ts.CallExpression | undefined;
+    const visit = (node: ts.Node): void => {
+      if (
+        ts.isCallExpression(node) &&
+        ts.isIdentifier(node.expression) &&
+        node.expression.text === 'asFacts'
+      )
+        call = node;
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+    expect(call).toBeDefined();
+    const projected = await projectStandardRuntimeRootStyleTokens(source, async ({ summary }) => {
+      expect(summary.resolveCall(call!, source).value.kind).toBe('result');
+      await unlink(linked);
+      await symlink(unsafe, linked);
+      const changed = summary.resolveCall(call!, source).value.kind;
+      expect(await projectStandardRuntimeRootStyleTokens(source, async () => [])).toBeNull();
+      expect(changed).toBe('unknown');
+      await unlink(linked);
+      await symlink(safe, linked);
+      expect(summary.resolveCall(call!, source).value.kind).toBe('result');
+      return [];
+    });
+    expect(projected).not.toBeNull();
   });
 
   it.each([
@@ -318,10 +658,80 @@ describe('native Props initialization before authored hook capture', () => {
     const tokens = await collectProtoStyleTokensFromFiles([
       path.resolve(process.cwd(), 'packages/prototypes/shadcn/src/tabs/trigger.proto.ts'),
     ]);
-    expect(tokens).toContain('data-[selected]:bg-background');
-    expect(tokens).toContain('data-[selected]:shadow-sm');
-    expect(tokens).toContain('data-[focus-visible]:ring-3');
-    expect(tokens).toContain('data-[focus-visible]:outline-1');
+    // Appearance is mutable Props input, so these actual Rules remain in
+    // Runtime evaluation. Their resources are raw paint, not the former
+    // pure-State selector projection.
+    const paint = [
+      ['selected', 'bg-background'],
+      ['selected', 'shadow-sm'],
+      ['focus-visible', 'ring-3'],
+      ['focus-visible', 'outline-1'],
+    ] as const;
+    for (const [state, token] of paint) {
+      expect(tokens).toContain(token);
+      expect(tokens).not.toContain(`data-[${state}]:${token}`);
+    }
+
+    const Root = AdaptToWebComponent(tabsRoot, { register: false });
+    const List = AdaptToWebComponent(tabsList, { register: false });
+    const Trigger = AdaptToWebComponent(tabsTrigger, { register: false });
+    const tag = path.basename(directory).toLowerCase();
+    customElements.define(`${tag}-root`, Root);
+    customElements.define(`${tag}-list`, List);
+    customElements.define(`${tag}-trigger`, Trigger);
+    const root = new Root();
+    const list = new List();
+    const trigger = new Trigger();
+    setElementProps(root, { value: 'a', activationMode: 'manual' });
+    setElementProps(trigger, { value: 'a' });
+    trigger.textContent = 'Alpha';
+    list.append(trigger);
+    root.append(list);
+    const flush = async () => {
+      for (let index = 0; index < 6; index++) await Promise.resolve();
+    };
+    const currentTokens = () =>
+      (trigger.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean).sort();
+    let restoreMatches: (() => void) | undefined;
+    try {
+      document.body.append(root);
+      await vi.waitFor(() => expect(trigger.getExposes().selected.get()).toBe(true));
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+      const matches = vi.spyOn(trigger, 'matches').mockReturnValue(true);
+      restoreMatches = () => matches.mockRestore();
+      trigger.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+      await flush();
+      const state = trigger.getExposes();
+      expect(state.selected.get()).toBe(true);
+      expect(state.focusVisible.get()).toBe(true);
+      const before = currentTokens();
+      for (const [, token] of paint) expect(before).toContain(token);
+      for (const token of before) expect(tokens).toContain(token);
+
+      setElementProps(trigger, { value: 'a', appearance: 'underline' });
+      await flush();
+      expect(trigger.getExposes().selected).toBe(state.selected);
+      expect(trigger.getExposes().focusVisible).toBe(state.focusVisible);
+      expect(state.selected.get()).toBe(true);
+      expect(state.focusVisible.get()).toBe(true);
+      const underline = currentTokens();
+      for (const [, token] of paint) expect(underline).not.toContain(token);
+      expect(underline).toContain('bg-transparent');
+      expect(underline).toContain('outline-2');
+      for (const token of underline) expect(tokens).toContain(token);
+
+      setElementProps(trigger, { value: 'a', appearance: 'default' });
+      await flush();
+      expect(trigger.getExposes().selected).toBe(state.selected);
+      expect(trigger.getExposes().focusVisible).toBe(state.focusVisible);
+      expect(state.selected.get()).toBe(true);
+      expect(state.focusVisible.get()).toBe(true);
+      expect(currentTokens()).toEqual(before);
+    } finally {
+      restoreMatches?.();
+      root.remove();
+      await flush();
+    }
   });
 
   it('retains the actual Brutalist Toggle active paint and pressed inset rules', async () => {

@@ -1,0 +1,75 @@
+{
+  "kind": "retained-source-only-review",
+  "date": "2026-11-26",
+  "carrierPr": 1914,
+  "carrierHead": "834f4c12c316f69fea237c50c192aafb84f8622e",
+  "integrationParent": "e8e0f3389807041ff2a075f50502fb1e0a41805d",
+  "rows": [
+    {
+      "path": "apps/www/src/components/Homepage/homepage-runtime-client.ts",
+      "owners": "`www.content.typography-presentation`, `www.demo.home-demo-select`, `www.search.dialog`, `www.search.launcher`, `www.search.loading-failure`, `www.shell.adapter-select`, `www.shell.hero-actions`, `www.shell.hero-hash-scroll`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.native-link-presentation`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle`",
+      "before": "0bef3c6ef11e1527e136d93a807812dcce527eab713d99f6bcf175689bb5d3e3",
+      "actual": "7bb28f4703b19c02775660e5f890c40bcd384433e15850be5e0e81b60ad84dfc",
+      "review": "Keep currentmain pill-or-text announcement eligibility. The remaining1914 delta is a comment identifying the existing passive inner Surface; product behavior and owner stay unchanged.",
+      "currentGitBlob": "3b8f6ad6994313b4426ee68bf4aa11a2004c9564",
+      "native1914Blob": "93c3710a983ef9f2e9ff1b866f9a578c00a560a0"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-theme.ts",
+      "owners": "`www.demo.brutalist-theme-style`, `www.demo.demo-matrix`",
+      "before": "3c6a0b9111f3ec8cc6942a7469fe0d387ed64222c34c36c0c49f9f71b279e6f2",
+      "actual": "5132e72d71f6bb2ce093c2f87ff582fb9359d5636ad3cbbacaa7de257a1bac10",
+      "review": "Retain native1914 opt-in replace-batch. Parse and mutate a detached CSSOM declaration from the owning document, preserve unrelated declarations/priorities, withdraw only matching preserved stamps and publish the next lease before the one live cssText write so synchronous clear/replace cannot be overwritten.",
+      "currentGitBlob": "4d1c9f2bd5a3a89900ddfc3aa030d0bc13b46f68",
+      "native1914Blob": "2052d540e6701a7aae2cb485aed6fef1bd5629f0"
+    },
+    {
+      "path": "apps/www/src/components/site-typography-client.ts",
+      "owners": "`www.content.typography-presentation`",
+      "before": "bc20c8d2bd5afa816fa76f03fe588057000b1fb1f6d05f20e00722e9a582ef49",
+      "actual": "ecfad806298ef695834f4b046e39bc5f5c179978441ca369a43a61653eacc111",
+      "review": "Native1914 reformats the existing family selection conditional only; current Bootstrap/Shadcn/Brutalist behavior and lifecycle owner remain unchanged.",
+      "currentGitBlob": "13a038549ad4c3ff4c6dc66a1921569de26e5403",
+      "native1914Blob": "13a038549ad4c3ff4c6dc66a1921569de26e5403"
+    },
+    {
+      "path": "apps/www/src/components/site-typography.ts",
+      "owners": "`www.content.typography-presentation`",
+      "before": "9da41374b7379af51514477115d210076eb54fea9555c300be33bd1b61ba4b74",
+      "actual": "efa045ac360cb01c468b2153315f36d9ecfa4af550f706cb3fb06c64a31c559b",
+      "review": "Only existing Typography owner calls the shared opt-in replace-batch path. Native source nodes, renderer roots, activation, source revision, selection restoration and disposal authority remain unchanged.",
+      "currentGitBlob": "8f0bd38eb52ffaa7ecf14ecc02a98b1de4f8e457",
+      "native1914Blob": "8f0bd38eb52ffaa7ecf14ecc02a98b1de4f8e457"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/popover/demo-brutalist-popover-controlled.demo.ts",
+      "owners": "`www.demo.authored-controllers`",
+      "before": "8dbc0c56f0970ea39eaff090ee14143c586753f7ea1f151d9d1ffd59695e7ede",
+      "actual": "c8b4ac2e0607e525d8e5ef979b4cff6cfd1247a77a1b920fab805417ff58e87d",
+      "review": "Assign stable controlled-content ref to the already existing public Popover Content. No extra content node, controller, state owner or behavior is created.",
+      "currentGitBlob": "52fc015984e7602fa0858d9a2a16db0acfd22bac",
+      "native1914Blob": "52fc015984e7602fa0858d9a2a16db0acfd22bac"
+    }
+  ],
+  "ownerSetComparison": "The original1914 and current combined website table have exactly the same www owner-ID set. Existing1913 wrapValue and Matrix callback source bindings are retained.",
+  "secondView": "Website subagent reviewed projection-theme/site-typography actual source hashes and12 original batch controls; source PASS only.",
+  "focusedValidation": {
+    "projectionThemeBatchPassed": 12,
+    "existingProjectionThemePassed": 28,
+    "realTypographyPassed": 98,
+    "ownershipResult": "All41 ownership controls passed after synchronizing only the stale Chinese slogan literal tokens to current main Luma semibold/tight. English override, revision, original text-node and teardown assertions remain unchanged.",
+    "logSha256": "c531dac21644b76fe083d00851649439056f908ac6a50d8c20ff9453cfce3a2b",
+    "ownershipPassed": 41,
+    "ownershipLogSha256": "96e624f1aa8306742b255622c8b3d10bc84a0817a7f8fad2d0241441a632ac84"
+  },
+  "bindingUpdate": {
+    "beforeSha256": "9ee60bcbf97cdfe1fadbdaf61f6f9778164c619e8c608d5295088fe05a05c37a",
+    "afterSha256": "8242abf7967261c17d791dfe4e1c52662b7f97fd87be330d2e253531186a22eb"
+  },
+  "notEstablished": [
+    "No new owner/import allowance or row promotion",
+    "No Matrix60-second or Search1000ms performance acceptance",
+    "No native font/geometry/optical acceptance"
+  ],
+  "agentAssistance": "ChatGPT under explicit current-user direction; GitHub writes remain with coordinator."
+}

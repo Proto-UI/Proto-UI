@@ -19,6 +19,7 @@ export default {
           {
             kind: 'proto',
             prototypeId: 'brutalist-popover-content',
+            ref: 'start-content',
             previewTheme: 'portal',
             className: 'w-44',
             props: { align: 'start' },
@@ -45,6 +46,7 @@ export default {
           {
             kind: 'proto',
             prototypeId: 'brutalist-popover-content',
+            ref: 'center-content',
             previewTheme: 'portal',
             className: 'w-44',
             props: { align: 'center' },
@@ -71,6 +73,7 @@ export default {
           {
             kind: 'proto',
             prototypeId: 'brutalist-popover-content',
+            ref: 'end-content',
             previewTheme: 'portal',
             className: 'w-44',
             props: { align: 'end' },

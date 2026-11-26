@@ -80,6 +80,22 @@ describe('Homepage native focus paint ownership', () => {
             throw new Error('Expected passive Surface');
           expect(surface.prototypeId).toBe(`${family}-surface-root`);
           expect(surface.props?.focusVisible).toBe(false);
+          if (control.name === 'announcement') {
+            // Hero's resolved pill already owns padding and a 24px line box.
+            // The enhanced passive children must preserve those cold metrics.
+            expect(surface.surfaceStyle).toMatchObject({ minHeight: '0', marginBottom: '0' });
+            const text = surface.children![0];
+            if (typeof text === 'string' || text.kind !== 'proto')
+              throw new Error('Expected passive announcement Text');
+            expect(text.prototypeId).toBe(`${family}-text-root`);
+            expect(text.surfaceStyle).toMatchObject({
+              fontFamily: 'inherit',
+              fontSize: 'inherit',
+              fontWeight: 'inherit',
+              lineHeight: 'inherit',
+              letterSpacing: 'inherit',
+            });
+          }
           // Recipe preparation must not disable the fallback's native focus.
           expect(link.outerHTML).toBe(before);
           expect(link.hasAttribute('data-site-link-enhanced')).toBe(false);

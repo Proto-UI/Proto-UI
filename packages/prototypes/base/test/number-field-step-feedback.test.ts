@@ -69,6 +69,8 @@ for (const [family, hover, pressed] of recipes) {
       pointer(control, 'pointerdown');
       await flush();
       expect(tokens(control)).toContain(pressed);
+      expect(tokens(control)).not.toContain(hover);
+      if (family === 'brutalist') expect(tokens(control)).toContain('text-main-foreground');
       expect(root.getExposes().value.get()).toBe(5);
       expect(proposals).toHaveLength(0);
       pointer(control, 'pointercancel');

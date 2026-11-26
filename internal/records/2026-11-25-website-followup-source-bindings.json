@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "kind": "three-source-website-candidate-binding-review",
+  "date": "2026-11-25",
+  "sourceContext": {
+    "head": "6c257020c2c8b914d62e738e39f3989671f2b907",
+    "state": "Bootstrap/native changes committed; only the reviewed previewer-client source and regression test are pending source changes.",
+    "preimageContext": "c738a4076e3bb1f8de0267130991416c69c9d10d",
+    "matrixPreimageSha256": "1327736a0858a930e30b6e7218af1b219e359bc5f11c4c1b3c66aa4903626375",
+    "binding": "Current candidate file bytes only. The next source commit and refresh-candidate ledger are produced separately; these test hashes do not assert a clean browser acceptance revision."
+  },
+  "sourceBindings": [
+    {
+      "path": "apps/www/src/components/site-typography-client.ts",
+      "previousSha256": "779a638445611fa5dffe633ef6699902d6a3ca605ead481232522e7c7f270176",
+      "sha256": "b5cdff226ccb3d4591190a0a851d3dd49b70e3c157fbe22ee98b46e7fff021d8",
+      "owners": [
+        "www.content.typography-presentation"
+      ],
+      "review": "Both documentation family guards now accept the already implemented Bootstrap Text lane. The existing participant still owns runtime loading, native source identity, theme observation, replacement and disposal; this entry adds no prototype implementation or raw import.",
+      "authority": [
+        {
+          "path": "spec/prototypes/P-BOOTSTRAP-2-3-2-TEXT.yaml",
+          "status": "draft"
+        },
+        {
+          "path": "spec/prototypes/P-BASE-TEXT.yaml",
+          "status": "draft"
+        }
+      ],
+      "dependencies": "Import list is unchanged. Existing site-typography.ts already validates bootstrap-2-3-2 and loads bootstrap-2-3-2-text-root; the family Text prototype and palette are unchanged."
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/native-content-lease.ts",
+      "previousSha256": "7c4b4d5f910d85885270cd204d549378d8fdbb98c832f48185803576527ae238",
+      "sha256": "4fa0adf0026d10621e5e58ee7528e9e8152b805dbddf35359f1df6ff608c27e0",
+      "owners": [
+        "www.demo.preview-surface",
+        "www.shell.mobile-menu-panel",
+        "www.shell.native-link-presentation"
+      ],
+      "review": "Each physical move reads the current Selection rangeCount and skips only absent endpoint capture. Nonempty and directional selection, registered source-container ownership, shadow focus, callback focus arbitration and synchronous owner-to-owner freshness retain the existing implementation.",
+      "dependencies": "No imports are added. The per-move result is not cached across owners, callbacks, tasks or documents."
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
+      "previousSha256": "57a53bf9fcaf82a54c5e65312074aaf617c96161c4e6809b095447e56ca5a04a",
+      "sha256": "f7ff3708827d6c832882a3db9579a8bd5d1709018b25e6b8bf1111f4950dcebc",
+      "owners": [
+        "www.demo.prototype-previewer",
+        "www.demo.runtime-select"
+      ],
+      "review": "The first live watcher read replaces the separate appearance read inside the existing publication-read batch. The observer owns input changes during preparation, buffers the newest complete map until commit, and is disconnected on failed, superseded or destroyed preparation. Current-runtime, startup-shell release and mounted-event positions remain after preparation.",
+      "dependencies": "Only an existing module's ProjectionThemeSurfaceStyle type is added to the import list. Runtime theme APIs, per-scope live reads, existing family switching and renderer ownership are retained. No cross-scope or cross-delivery computed-theme cache is introduced."
+    }
+  ],
+  "matrixChange": {
+    "sourceHashRows": 3,
+    "typographyFamilyChainAdded": "P-BOOTSTRAP-2-3-2-TEXT",
+    "lifecycle": "draft",
+    "disposition": "blocked",
+    "ownersChanged": false,
+    "checkboxesChanged": false,
+    "consumerSnapshotFieldsChanged": false,
+    "pinnedMainDefinitionChanged": false,
+    "genericGateOrRawImportAllowanceChanged": false
+  },
+  "verification": {
+    "previousRepairRecord": "internal/records/2026-11-25-website-followup-repairs.json",
+    "previousRepairRecordSha256": "ef0df5b84705fcc2c7aa19abb976fbca733a2dcebc253fab40dc469d711ba2bd",
+    "bootstrap": {
+      "receipt": "bootstrap-typography/positive.report.json",
+      "sha256": "dc7b153d54499158e62a73c4fb4e5b62de354cbe9c131fe6f3d4796c7d16d04a",
+      "numTotalTests": 155,
+      "numPassedTests": 155,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTodoTests": 0
+    },
+    "bootstrapOriginalMaterializationGuard": {
+      "receipt": "bootstrap-typography/materialization.report.json",
+      "sha256": "4ff58ceaeb8d1f8145e21bd783e61e4023db346e2e60d34918fb0a015763e67a",
+      "numTotalTests": 155,
+      "numPassedTests": 150,
+      "numFailedTests": 5,
+      "numPendingTests": 0,
+      "numTodoTests": 0
+    },
+    "bootstrapOriginalCommittedGuard": {
+      "receipt": "bootstrap-typography/committed.report.json",
+      "sha256": "0b2441e308d0d088270ada48e6533ac537e424777d50ed2efc3ee4ed2c9b6d26",
+      "numTotalTests": 155,
+      "numPassedTests": 154,
+      "numFailedTests": 1,
+      "numPendingTests": 0,
+      "numTodoTests": 0
+    },
+    "nativeAndTypography": {
+      "receipt": "native-selection/combined.report.json",
+      "sha256": "d37920d68bd3d5b139da7be625335959ff10850ce910ac933f2b88e2bf2a12d7",
+      "numTotalTests": 185,
+      "numPassedTests": 185,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTodoTests": 0
+    },
+    "themeAndNativeAndSurface": {
+      "receipt": "theme-publication/positive.report.json",
+      "sha256": "45e211b70a66ad668c8c6c355ffa32c490879a5038597393956f68b46c8c9197",
+      "numTotalTests": 116,
+      "numPassedTests": 116,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTodoTests": 0
+    },
+    "themeOriginalSourceNegative": {
+      "receipt": "theme-publication/negative.report.json",
+      "sha256": "579ae6db3ce469c0cfe4bbba8db5109a7e2bae184ac2b15aecc9bd6bc183ad44",
+      "numTotalTests": 116,
+      "numPassedTests": 111,
+      "numFailedTests": 5,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "failedNames": [
+        "PrototypePreviewer adapter preference synchronization reads every startup theme watcher before publishing either owner appearance",
+        "PrototypePreviewer adapter preference synchronization owns a live theme watcher while the initial appearance is pending: commit",
+        "PrototypePreviewer adapter preference synchronization owns a live theme watcher while the initial appearance is pending: destroy",
+        "PrototypePreviewer adapter preference synchronization owns a live theme watcher while the initial appearance is pending: supersede",
+        "PrototypePreviewer adapter preference synchronization owns a live theme watcher while the initial appearance is pending: failure"
+      ]
+    },
+    "themeFiles": [
+      "apps/www/src/components/PrototypePreviewer/previewer-client.test.ts",
+      "apps/www/src/components/PrototypePreviewer/projection-theme.test.ts",
+      "apps/www/src/components/PrototypePreviewer/runtime-preview-surface.test.ts",
+      "apps/www/src/components/PrototypePreviewer/native-content-lease.test.ts"
+    ],
+    "qualification": "Complete original focused files were executed with the added regressions. Negative controls restore only the relevant original production guard/source in separate worktrees. All original assertions, browser budgets and native acceptance limits are retained."
+  },
+  "historicalMarkupReferences": {
+    "changed": false,
+    "original": {
+      "path": "scripts/coverage-matrices/test/fixtures/website-markup-provenance-source.json",
+      "recordedRevision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+      "recordedPreviewerSha256": "76f03e2f04839e26521ef603892bd1a35db4e6b73443d1a7ef233d20761ca4d7"
+    },
+    "currentReference": {
+      "path": "scripts/coverage-matrices/test/fixtures/website-markup-provenance-current.json",
+      "recordedRevision": "5f0844907895a4ae0db506fe6a5d0bf162318329",
+      "recordedPreviewerSha256": "90e29929723d05768bf7c21688b8303737097807ca4f66ec1e75fbb198455a8c",
+      "members": 33
+    },
+    "sourceAdmission": "unverified",
+    "reason": "Neither selected reference contains these three matrix preimage hashes. They describe different fixed historical inputs. This current three-source review does not rewrite their revisions, other members or original outcomes and does not claim the #834 browser source preflight passes."
+  },
+  "remainingEvidence": [
+    "Run the unchanged Matrix selected desktop journey under its original 60000ms initialization limit on the frozen candidate.",
+    "Run the original full Search and Header suites under their original 600s and 900s command limits; retain c738 timeouts as failed executions.",
+    "Rebuild production documentation from the frozen repaired source and rerun the original Header focus/control sequence; the c738 font-only production run still records Bootstrap typography errors.",
+    "Use the original refresh-candidate workflow after source freeze and rerun complete check:coverage-matrices; source hash maintenance is not semantic, lifecycle, browser, served-source or release acceptance."
+  ]
+}

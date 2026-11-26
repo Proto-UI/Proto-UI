@@ -38,26 +38,56 @@ export function createWebResidentMotionSink(
   let containingBlock: HTMLElement | null = null,
     containingBlockWidth: number | null = null,
     resize: ResizeObserver | null = null;
-  let widthRequested = false;
+  let widthRequested = false,
+    widthNeedsContainingBlock = false;
+  const widthObservations = new Set<HTMLElement>();
+  let widthObservationGeneration = 0;
+  const composedParent = (node: HTMLElement): HTMLElement | null => {
+    if (node.assignedSlot) return node.assignedSlot;
+    if (node.parentElement) return node.parentElement;
+    const root = node.getRootNode();
+    return 'host' in root ? ((root as ShadowRoot).host as HTMLElement) : null;
+  };
+  function observeWidthTargets(targets: readonly HTMLElement[]) {
+    const next = new Set(targets),
+      observer = resize,
+      observationGeneration = ++widthObservationGeneration;
+    for (const old of widthObservations) {
+      if (next.has(old)) continue;
+      widthObservations.delete(old);
+      observer?.unobserve(old);
+      if (resize !== observer || observationGeneration !== widthObservationGeneration) return;
+    }
+    for (const target of next) {
+      if (widthObservations.has(target)) continue;
+      // Publish ownership before a host call which may synchronously reenter.
+      widthObservations.add(target);
+      observer?.observe(target, { box: 'content-box' });
+      if (resize !== observer || observationGeneration !== widthObservationGeneration) return;
+    }
+  }
   /** Layout classification and content-box measurement, never a recovered width target. */
-  function widthLayout(): { supported: boolean; reason?: string } {
-    const composedParent = (node: HTMLElement): HTMLElement | null => {
-      if (node.assignedSlot) return node.assignedSlot;
-      if (node.parentElement) return node.parentElement;
-      const root = node.getRootNode();
-      return 'host' in root ? ((root as ShadowRoot).host as HTMLElement) : null;
-    };
+  function widthLayout(classify = true): {
+    supported: boolean;
+    reason?: string;
+  } {
     let parent = composedParent(el);
     // A split Shadow host and its slots may have no layout box. Walk the composed tree.
     while (parent && win?.getComputedStyle(parent).display === 'contents')
       parent = composedParent(parent);
     if (parent !== containingBlock) {
-      if (containingBlock) resize?.unobserve(containingBlock);
       containingBlock = parent;
       containingBlockWidth = null;
-      if (parent) resize?.observe(parent, { box: 'content-box' });
     }
+    // A delivery without a current-block sample must not retire and reobserve
+    // the pending ancestor chain: those new observations would trigger more
+    // deliveries, including when the real block has no initial size record.
+    if (widthNeedsContainingBlock && containingBlockWidth === null) observePendingWidthTargets();
+    else observeWidthTargets(parent ? [parent] : []);
     if (!win || !parent) return { supported: false, reason: 'containing-block-unavailable' };
+    // Even without a width sample, a style flush can change the containing
+    // block. Keep its observation current without classifying an absent sample.
+    if (!classify) return { supported: false };
     const own = win.getComputedStyle(el),
       block = win.getComputedStyle(parent);
     const horizontal = (value: string) => !value || value === 'horizontal-tb';
@@ -78,6 +108,34 @@ export function createWebResidentMotionSink(
     )
       return { supported: false, reason: 'layout-profile-unavailable' };
     return { supported: true };
+  }
+  function observePendingWidthTargets(): void {
+    // A nonzero percentage cannot produce a width until a physical basis exists.
+    // Keep the same observer live on a finite composed chain without forcing CSS
+    // layout. A real delivery must still identify and measure the actual block.
+    const candidates: HTMLElement[] = [];
+    const seen = new Set<HTMLElement>();
+    for (
+      let parent = composedParent(el);
+      parent && !seen.has(parent);
+      parent = composedParent(parent)
+    ) {
+      seen.add(parent);
+      candidates.push(parent);
+    }
+    if (containingBlock && !seen.has(containingBlock)) {
+      containingBlock = null;
+      containingBlockWidth = null;
+    }
+    observeWidthTargets(candidates);
+  }
+  function widthEnvironment(classify = true): {
+    supported: boolean;
+    reason?: string;
+  } {
+    if (!widthNeedsContainingBlock || containingBlockWidth !== null) return widthLayout(classify);
+    observePendingWidthTargets();
+    return { supported: false, reason: 'containing-block-unavailable' };
   }
   type InlineDeclaration = { value: string; priority: string };
   type Lease = {
@@ -190,19 +248,86 @@ export function createWebResidentMotionSink(
     delete lease.pending;
     return true;
   }
+  let paletteRequested = false;
+  let paletteInvalidation: (() => void) | null = null;
+  let paletteLease: {
+    invalidate: () => void;
+    off: (() => void) | null;
+  } | null = null;
+  let reconcilingPalette = false;
+  function reconcilePaletteSubscription() {
+    if (reconcilingPalette) return;
+    reconcilingPalette = true;
+    try {
+      // Source subscribe/cleanup may synchronously commit a newer frame or release
+      // this view. Reconcile its latest demand after the external call returns.
+      while (true) {
+        const invalidate = paletteInvalidation;
+        const needed = paletteRequested && invalidate !== null && paletteSource != null;
+        const old = paletteLease;
+        if (old && (!needed || old.invalidate !== invalidate)) {
+          paletteLease = null;
+          const off = old.off;
+          old.off = null;
+          off?.();
+          continue;
+        }
+        if (!needed || old) return;
+        const lease = {
+          invalidate: invalidate!,
+          off: null as (() => void) | null,
+        };
+        paletteLease = lease;
+        try {
+          lease.off = paletteSource!.subscribe(() => {
+            if (
+              paletteLease === lease &&
+              paletteRequested &&
+              paletteInvalidation === lease.invalidate
+            )
+              lease.invalidate();
+          });
+        } catch (error) {
+          if (paletteLease === lease) paletteLease = null;
+          throw error;
+        }
+      }
+    } finally {
+      reconcilingPalette = false;
+    }
+  }
   const sink = createResidentMotionProjector({
     diagnostics: options.diagnostics,
     now: () => win?.performance.now() ?? 0,
-    environment: (requestedProperties) => {
-      widthRequested = requestedProperties.includes('width');
+    environment: (
+      requestedProperties,
+      targetProperties = requestedProperties,
+      needsContainingBlock = false
+    ) => {
+      widthRequested = targetProperties.includes('width');
+      widthNeedsContainingBlock = widthRequested && needsContainingBlock;
+      // Theme authority and its diagnostics belong to the declared color channel,
+      // including frames whose target cannot be painted by resident motion.
+      const colorRequested = requestedProperties.includes('background-color');
+      paletteRequested = colorRequested;
+      reconcilePaletteSubscription();
       detectLoss();
-      const layout = widthRequested ? widthLayout() : { supported: false };
+      if (!widthRequested) observeWidthTargets(containingBlock ? [containingBlock] : []);
+      const layout = widthRequested ? widthEnvironment() : { supported: false };
       const preference = readWebPreference(doc, 'preference.reducedMotion');
-      const palette = paletteSource?.current();
-      // Root font is a host unit basis, never a recovered style target.
-      const font = win
-        ? Number.parseFloat(win.getComputedStyle(doc.documentElement).fontSize)
-        : NaN;
+      // Only the color channel consumes theme authority. Keep each admitted color
+      // frame live, without querying computed theme inputs for geometry-only frames.
+      const palette = colorRequested && paletteRequested ? paletteSource?.current() : undefined;
+      // Only length channels consume the root unit basis. Color authority stays
+      // in the palette source and never needs a separate root-font style read.
+      const pendingWidthBasis = widthNeedsContainingBlock && containingBlockWidth === null;
+      const lengthRequested = targetProperties.some(
+        (property) => property === 'translate' || (property === 'width' && !pendingWidthBasis)
+      );
+      const font =
+        win && lengthRequested
+          ? Number.parseFloat(win.getComputedStyle(doc.documentElement).fontSize)
+          : NaN;
       const hidden = webMotionAncestors(el).some((node) =>
         node.matches('[hidden],[data-pui-view-pending],[data-pui-view-detached]')
       );
@@ -229,19 +354,28 @@ export function createWebResidentMotionSink(
       };
     },
     subscribe(invalidate) {
+      paletteInvalidation = invalidate;
       const getter = (key: string) => readWebPreference(doc, key);
       const preference = createDefaultWebPreferenceSource(getter, doc)?.subscribe(
         ['preference.reducedMotion'],
         invalidate
       );
-      const offPalette = paletteSource?.subscribe(invalidate);
       // ResizeObserver borderBoxSize supplies layout-space (not transformed viewport) units.
-      resize =
+      let observerForSubscription: ResizeObserver | null = null;
+      observerForSubscription =
         typeof win?.ResizeObserver === 'function'
           ? new win.ResizeObserver((entries) => {
+              const observer = observerForSubscription;
+              if (observer === null || resize !== observer) return;
+              // Delivery is the first point at which a pending percentage can
+              // acquire a basis. Select the current block using the original
+              // layout rules; measurements of other candidates do not count.
+              if (widthNeedsContainingBlock && containingBlockWidth === null) widthLayout(false);
+              if (resize !== observer) return;
               const entry = entries.find((e) => e.target === el);
               const box = entry?.borderBoxSize?.[0];
               const vertical = win.getComputedStyle(el).writingMode.startsWith('vertical');
+              if (resize !== observer) return;
               const physicalWidth = box ? (vertical ? box.blockSize : box.inlineSize) : null;
               const physicalHeight = box ? (vertical ? box.inlineSize : box.blockSize) : null;
               if (entry) {
@@ -264,8 +398,9 @@ export function createWebResidentMotionSink(
               invalidate();
             })
           : null;
+      resize = observerForSubscription;
       resize?.observe(el, { box: 'border-box' });
-      if (containingBlock) resize?.observe(containingBlock, { box: 'content-box' });
+      for (const target of widthObservations) resize?.observe(target, { box: 'content-box' });
       const observer =
         typeof win?.MutationObserver === 'function' ? new win.MutationObserver(invalidate) : null;
       for (const node of webMotionAncestors(el))
@@ -275,10 +410,16 @@ export function createWebResidentMotionSink(
         });
       doc.addEventListener('visibilitychange', invalidate);
       return () => {
+        if (paletteInvalidation === invalidate) {
+          paletteInvalidation = null;
+          paletteRequested = false;
+        }
         preference?.();
-        offPalette?.();
-        resize?.disconnect();
+        reconcilePaletteSubscription();
+        const oldResize = resize;
         resize = null;
+        widthObservations.clear();
+        oldResize?.disconnect();
         observer?.disconnect();
         doc.removeEventListener('visibilitychange', invalidate);
         clear();
@@ -319,7 +460,9 @@ export function createWebResidentMotionSink(
       )
         accepted.push('background-color');
       if (!isCurrent()) return [];
-      const layout = widthRequested ? widthLayout() : { supported: false };
+      const layout = widthRequested
+        ? widthEnvironment(presentation.width !== undefined)
+        : { supported: false };
       if (!isCurrent()) return [];
       const sameBasis =
         measuredParent === containingBlock && measuredWidth === containingBlockWidth;

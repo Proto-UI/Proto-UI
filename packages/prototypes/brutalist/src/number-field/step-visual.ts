@@ -38,12 +38,17 @@ export function setupNumberFieldStepVisual(
     )
   );
   def.rule({
-    when: (w) => w.all(w.state(state.disabled).eq(false), w.state(hovered).eq(true)),
+    when: (w) =>
+      w.all(
+        w.state(state.disabled).eq(false),
+        w.state(hovered).eq(true),
+        w.state(pressed).eq(false)
+      ),
     intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground')),
   });
   def.rule({
     when: (w) => w.all(w.state(state.disabled).eq(false), w.state(pressed).eq(true)),
-    intent: (i) => i.feedback.style.use(tw('bg-main/80')),
+    intent: (i) => i.feedback.style.use(tw('bg-main/80 text-main-foreground')),
   });
   def.rule({
     when: (w) => w.state(state.focusVisible).eq(true),

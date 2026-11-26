@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
-import type { Browser, Page } from 'playwright-core';
+import type { Browser, Locator, Page } from 'playwright-core';
 import {
   DOCUMENTATION_VARIANTS,
   HOMEPAGE_VIEWPORTS,
@@ -25,6 +25,62 @@ type Measurement = {
   bodyWidth: number;
   fonts: Array<{ name: string; fontFamily: string }>;
 } & Record<string, unknown>;
+
+/** The immutable baseline and current authored demos keep the same user task,
+ * with separately bound native targets. No fallback target can hide a missing example. */
+async function exerciseDocumentationExample(
+  page: Page,
+  preview: Locator,
+  family: string,
+  revisionKind: 'baseline' | 'candidate'
+): Promise<Record<string, unknown>> {
+  if (family === 'base') {
+    const toggle = preview.getByRole('button', { name: 'Pin', exact: true });
+    const before = await toggle.getAttribute('aria-pressed');
+    await toggle.click();
+    await page.waitForFunction(
+      () =>
+        document
+          .querySelector('[data-previewer-id] [role="button"][aria-pressed="true"]')
+          ?.textContent?.trim() === 'Pin'
+    );
+    return {
+      action: 'Pointer click Pin',
+      before,
+      after: await toggle.getAttribute('aria-pressed'),
+    };
+  } else if (family === 'shadcn') {
+    const selector =
+      revisionKind === 'candidate'
+        ? '[data-demo-ref="hero-default"]'
+        : '[data-demo-ref="density-default"]';
+    const radio = preview.locator(selector);
+    const before = await radio.getAttribute('aria-checked');
+    await radio.click();
+    await page.waitForFunction(
+      (selector) => document.querySelector(selector)?.getAttribute('aria-checked') === 'true',
+      selector
+    );
+    return {
+      action: 'Pointer click density Default',
+      before,
+      after: await radio.getAttribute('aria-checked'),
+    };
+  } else {
+    const triggerText = revisionKind === 'candidate' ? 'Account' : 'Hover or focus for details';
+    const tooltipText =
+      revisionKind === 'candidate' ? 'View account settings' : 'Portable Base behavior';
+    const trigger = preview.getByText(triggerText, { exact: true });
+    await trigger.hover();
+    const tooltip = page.getByRole('tooltip').filter({ hasText: tooltipText });
+    await tooltip.waitFor({ state: 'visible' });
+    return {
+      action: 'Pointer hover first trigger',
+      tooltip: await tooltip.innerText(),
+      describedBy: await trigger.getAttribute('aria-describedby'),
+    };
+  }
+}
 
 /** Docs use their authored library's typography; a Brutalist monospace face is not a homepage font regression. */
 export async function captureDocumentationEvidence({
@@ -249,47 +305,12 @@ export async function captureDocumentationEvidence({
             evidence.layoutFailures = failures;
             report.failures.push(...failures.map((failure) => `${id}: ${failure}`));
           }
-          if (variant.family === 'base') {
-            const toggle = preview.getByRole('button', { name: 'Pin', exact: true });
-            const before = await toggle.getAttribute('aria-pressed');
-            await toggle.click();
-            await page.waitForFunction(
-              () =>
-                document
-                  .querySelector('[data-previewer-id] [role="button"][aria-pressed="true"]')
-                  ?.textContent?.trim() === 'Pin'
-            );
-            evidence.interaction = {
-              action: 'Pointer click Pin',
-              before,
-              after: await toggle.getAttribute('aria-pressed'),
-            };
-          } else if (variant.family === 'shadcn') {
-            const radio = preview.locator('[data-demo-ref="density-default"]');
-            const before = await radio.getAttribute('aria-checked');
-            await radio.click();
-            await page.waitForFunction(
-              () =>
-                document
-                  .querySelector('[data-demo-ref="density-default"]')
-                  ?.getAttribute('aria-checked') === 'true'
-            );
-            evidence.interaction = {
-              action: 'Pointer click density Default',
-              before,
-              after: await radio.getAttribute('aria-checked'),
-            };
-          } else {
-            const trigger = preview.getByText('Hover or focus for details', { exact: true });
-            await trigger.hover();
-            const tooltip = page.getByRole('tooltip').filter({ hasText: 'Portable Base behavior' });
-            await tooltip.waitFor({ state: 'visible' });
-            evidence.interaction = {
-              action: 'Pointer hover first trigger',
-              tooltip: await tooltip.innerText(),
-              describedBy: await trigger.getAttribute('aria-describedby'),
-            };
-          }
+          evidence.interaction = await exerciseDocumentationExample(
+            page,
+            preview,
+            variant.family,
+            revisionKind
+          );
           await screenshot('interaction-viewport');
           const themeButton = page.locator('header [data-theme-toggle]');
           const opposite = colorScheme === 'light' ? 'dark' : 'light';

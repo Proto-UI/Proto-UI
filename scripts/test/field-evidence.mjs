@@ -17,7 +17,7 @@ export const FIELD_CASE_TITLES = [
   ...FIELD_FAMILIES.map(
     (family) => `${family} default Field stacks feedback above the Save and Reset row`
   ),
-  ...FIELD_FAMILIES.map((family) => `${family} Chinese public route consumes the same six atoms`),
+  ...FIELD_FAMILIES.map((family) => `${family} Chinese public route consumes the current shared form`),
   'Brutalist contact Cancel clears validation while retaining the edited name',
   'Base Form Cancel submit retires the submission while its field reply can still land',
 ];

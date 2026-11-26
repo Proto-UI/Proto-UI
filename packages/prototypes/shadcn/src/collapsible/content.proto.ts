@@ -43,9 +43,11 @@ const collapsibleContent = definePrototype<
     });
     def.props.setDefaults({ variant: 'default' });
     // P-SHADCN-COLLAPSIBLE-CONTENT-VISUAL-SAFETY: no fixed width/height or clipped long label.
+    // duration-150 also sets transition-duration. Keep the entry fade without
+    // interpolating layout when the profile or the reader's font size changes.
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full text-foreground wrap-anywhere rounded-md border border-border bg-background p-3 text-sm animate-in fade-in-0 duration-150'
+        'min-w-0 max-w-full text-foreground wrap-anywhere rounded-md border border-border bg-background p-3 text-sm transition-none animate-in fade-in-0 duration-150'
       )
     );
     for (const [profile, tokens] of PROFILE_CONTENT_RECIPES) {

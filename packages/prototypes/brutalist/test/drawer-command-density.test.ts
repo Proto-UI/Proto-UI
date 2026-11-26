@@ -95,8 +95,8 @@ describe('Neo Brutalism Drawer command default density with bounded label wrappi
           'items-center',
           'justify-center',
           'border-2',
-          'border-black',
-          part === 'trigger' ? 'bg-primary' : 'bg-secondary-background',
+          'border-foreground',
+          'bg-background',
           'text-sm',
           'font-medium',
           'outline-none',
@@ -149,6 +149,10 @@ describe('Neo Brutalism Drawer command default density with bounded label wrappi
       };
       flat();
       target.dispatchEvent(new PointerEvent('pointerenter'));
+      await flush();
+      expect(target.getExposes().hovered.get()).toBe(true);
+      expect(target.getExposes().pressed.get()).toBe(false);
+      flat();
       target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
       await flush();
       expect(target.getExposes().hovered.get()).toBe(true);

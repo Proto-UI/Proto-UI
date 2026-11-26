@@ -187,7 +187,12 @@ describe('Liquid Collapsible shared material consumer (intent only, no paint cla
       expect(f.trigger.frames).toEqual([]);
       expect(f.trigger.feedback.materialDiagnostics?.()).toEqual(['material-host-unavailable']);
       expect(f.trigger.styles.at(-1)?.tokens).toEqual(
-        expect.arrayContaining(['bg-secondary', 'text-foreground', 'rounded-xl', 'transition-none'])
+        expect.arrayContaining([
+          'bg-secondary',
+          'text-foreground',
+          'rounded-xl',
+          'transition-shadow',
+        ])
       );
       expect(f.trigger.styles.at(-1)?.tokens).not.toContain('transition-colors');
       expect(f.trigger.styles.at(-1)?.tokens).not.toContain('transition-all');
@@ -199,6 +204,12 @@ describe('Liquid Collapsible shared material consumer (intent only, no paint cla
       expect(f.root.exposes.open.get()).toBe(false);
       expect(f.content.exposes.hidden.get()).toBe(true);
       expect(f.trigger.feedback.exportMaterialFrame?.().candidates).toEqual([candidate('rest')]);
+      f.root.set({ disabled: true });
+      expect(f.trigger.feedback.exportMaterialFrame?.().candidates).toEqual([]);
+      expect(f.trigger.styles.at(-1)?.tokens).toEqual(
+        expect.arrayContaining(['shadow-none', 'transition-none'])
+      );
+      expect(f.trigger.styles.at(-1)?.tokens).not.toContain('transition-shadow');
     } finally {
       await f.dispose();
     }

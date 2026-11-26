@@ -15,7 +15,7 @@ export const BOOTSTRAP_MOTION_SUITES = Object.freeze([
   },
   { file: 'packages/adapters/web-component/test/portal-conceal.test.ts', cases: 31 },
   { file: 'packages/modules/feedback/test/resident-width.test.ts', cases: 9 },
-  { file: 'packages/adapters/base/test/web-resident-width.test.ts', cases: 11 },
+  { file: 'packages/adapters/base/test/web-resident-width.test.ts', cases: 14 },
   { file: 'packages/adapters/base/test/web-resident-width-adoption.test.ts', cases: 13 },
   { file: 'packages/runtime/test/contract/resident-width.contract.test.ts', cases: 2 },
   { file: 'packages/prototypes/bootstrap-2-3-2/test/modal-presence.browser.test.ts', cases: 6 },

@@ -11,9 +11,10 @@ import { loadPrototypes } from './PrototypePreviewer/prototype-modules';
 import { afterAll, beforeAll, afterEach, describe, expect, it, vi } from 'vitest';
 import { siteTypographyParticipant, collectSiteTypographyTargets } from './site-typography';
 import { SHADCN_TYPOGRAPHY } from '../../../../packages/prototypes/shadcn/src/text/typography';
+import { THEME as BOOTSTRAP_THEME } from '../../../../packages/prototypes/bootstrap-2-3-2/src/theme';
 import { initDocumentationTypography } from './site-typography-client';
 import { createProjectionScopeController } from './PrototypePreviewer/projection-scope';
-import { PREFERRED_ADAPTER_EVENT } from './adapter-preference';
+import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from './adapter-preference';
 import { initHomepageRuntime } from './Homepage/homepage-runtime-client';
 import type { MaterializedProjectionCandidate } from './PrototypePreviewer/projection-materializer';
 vi.mock('./PrototypePreviewer/runtimes/react-runtime', async () => {
@@ -42,15 +43,23 @@ vi.mock('./PrototypePreviewer/projection-theme', async (original) => {
   const { SHADCN_TYPOGRAPHY } =
     await import('../../../../packages/prototypes/shadcn/src/text/typography');
   const { BRUTALIST_THEME } = await import('../../../../packages/prototypes/brutalist/src/theme');
+  const { THEME: BOOTSTRAP_THEME } =
+    await import('../../../../packages/prototypes/bootstrap-2-3-2/src/theme');
   const theme = (family: unknown) => ({
     '--pui-background': '#fff',
     '--pui-foreground': '#111',
     '--pui-font-sans':
-      family === 'shadcn' ? SHADCN_TYPOGRAPHY['font-sans'] : BRUTALIST_THEME.light['font-sans'],
+      family === 'shadcn'
+        ? SHADCN_TYPOGRAPHY['font-sans']
+        : family === 'bootstrap-2-3-2'
+          ? BOOTSTRAP_THEME.light['font-sans']
+          : BRUTALIST_THEME.light['font-sans'],
     '--pui-font-heading':
       family === 'shadcn'
         ? SHADCN_TYPOGRAPHY['font-heading']
-        : BRUTALIST_THEME.light['font-heading'],
+        : family === 'bootstrap-2-3-2'
+          ? BOOTSTRAP_THEME.light['font-heading']
+          : BRUTALIST_THEME.light['font-heading'],
   });
   return {
     ...actual,
@@ -246,6 +255,99 @@ describe('batched real typography adapters and stable native semantic owners', (
       await vi.waitFor(() => expect(body.dataset.typographyFamily).toBe('shadcn'));
       delete root.dataset.siteLibraryFamily;
       await vi.waitFor(() => expect(body.dataset.typographyFamily).toBe('brutalist'));
+    } finally {
+      history.replaceState(null, '', previous);
+    }
+  });
+  for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const)
+    it(`${runtime}: projects Bootstrap documentation through the real Text owner and restores native source`, async () => {
+      const previous = location.href;
+      history.replaceState(null, '', '/en/ui-libraries/bootstrap-2-3-2/button/');
+      const errors = vi.spyOn(console, 'error');
+      try {
+        localStorage.setItem(PREFERRED_ADAPTER_KEY, runtime);
+        const root = fixture();
+        const body = root.querySelector<HTMLElement>('#body')!;
+        const originalNodes = Array.from(body.childNodes);
+        const sourceText = body.firstChild;
+        const link = body.querySelector<HTMLAnchorElement>('a')!;
+        const clicks = vi.fn((event: Event) => event.preventDefault());
+        link.addEventListener('click', clicks);
+        const handle = initDocumentationTypography(document)!;
+        handles.push(handle);
+        await handle.ready;
+        expect(body.dataset.typographyFamily).toBe('bootstrap-2-3-2');
+        expect(body.dataset.typographyRuntime).toBe(runtime);
+        const surface = body.querySelector<HTMLElement>('[data-typography-prototype]')!;
+        expect(surface.dataset.typographyPrototype).toBe('bootstrap-2-3-2-text-root');
+        expect(surface.style.getPropertyValue('--pui-font-sans')).toBe(
+          BOOTSTRAP_THEME.light['font-sans']
+        );
+        expect(body.querySelector('[data-site-typography-slot]')!.firstChild).toBe(sourceText);
+        expect(body.querySelector('a')).toBe(link);
+        link.click();
+        expect(clicks).toHaveBeenCalledTimes(1);
+
+        const nextRuntime = runtime === 'wc' ? 'vue2' : 'wc';
+        document.dispatchEvent(
+          new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: nextRuntime } })
+        );
+        await vi.waitFor(() => expect(body.dataset.typographyRuntime).toBe(nextRuntime));
+        expect(body.dataset.typographyFamily).toBe('bootstrap-2-3-2');
+        expect(body.querySelector('a')).toBe(link);
+        const added = document.createElement('p');
+        const addedText = document.createTextNode('New native Bootstrap documentation');
+        added.append(addedText);
+        root.querySelector('[data-doc-flow]')!.append(added);
+        await vi.waitFor(() => expect(added.dataset.typographyRuntime).toBe(nextRuntime));
+        expect(added.dataset.typographyFamily).toBe('bootstrap-2-3-2');
+        expect(document.querySelectorAll('[data-site-typography-batch]')).toHaveLength(1);
+
+        await handle.destroy();
+        expect(Array.from(body.childNodes)).toEqual(originalNodes);
+        expect(added.firstChild).toBe(addedText);
+        expect(added.childNodes).toHaveLength(1);
+        expect(root.querySelector('[data-typography-owner]')).toBeNull();
+        expect(root.querySelector('[data-typography-prototype]')).toBeNull();
+        expect(document.querySelector('[data-site-typography-batch]')).toBeNull();
+        document.dispatchEvent(
+          new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: runtime } })
+        );
+        added.append(' after teardown');
+        await settle();
+        expect(root.querySelector('[data-typography-owner]')).toBeNull();
+        expect(document.querySelector('[data-site-typography-batch]')).toBeNull();
+        expect(errors).not.toHaveBeenCalled();
+      } finally {
+        history.replaceState(null, '', previous);
+      }
+    });
+  it('honors and retires an explicit Bootstrap family independently of the documentation route', async () => {
+    const previous = location.href;
+    history.replaceState(null, '', '/en/ui-libraries/brutalist/button/');
+    const errors = vi.spyOn(console, 'error');
+    try {
+      const root = fixture();
+      root.dataset.siteLibraryFamily = 'bootstrap-2-3-2';
+      const body = root.querySelector<HTMLElement>('#body')!;
+      const sourceText = body.firstChild;
+      const handle = initDocumentationTypography(document)!;
+      handles.push(handle);
+      await handle.ready;
+      expect(body.dataset.typographyFamily).toBe('bootstrap-2-3-2');
+      root.dataset.siteLibraryFamily = 'shadcn';
+      await vi.waitFor(() => expect(body.dataset.typographyFamily).toBe('shadcn'));
+      root.dataset.siteLibraryFamily = 'bootstrap-2-3-2';
+      await vi.waitFor(() => expect(body.dataset.typographyFamily).toBe('bootstrap-2-3-2'));
+      delete root.dataset.siteLibraryFamily;
+      await vi.waitFor(() => expect(body.dataset.typographyFamily).toBe('brutalist'));
+      expect(body.querySelector('[data-site-typography-slot]')!.firstChild).toBe(sourceText);
+      expect(document.querySelectorAll('[data-site-typography-batch]')).toHaveLength(1);
+      await handle.destroy();
+      expect(body.firstChild).toBe(sourceText);
+      expect(root.querySelector('[data-typography-prototype]')).toBeNull();
+      expect(document.querySelector('[data-site-typography-batch]')).toBeNull();
+      expect(errors).not.toHaveBeenCalled();
     } finally {
       history.replaceState(null, '', previous);
     }

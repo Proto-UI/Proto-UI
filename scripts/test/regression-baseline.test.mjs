@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
@@ -22,6 +22,9 @@ import {
   browserShardCosts,
   BROWSER_SUITES,
   BROWSER_SHARD_COUNT,
+  BROWSER_EXECUTION_BUDGET_SECONDS,
+  BROWSER_SETUP_RESERVE_SECONDS,
+  SEARCH_BROWSER_SUITES,
   validateBrowserCostEvidence,
 } from './runtime-test-plan.mjs';
 
@@ -32,6 +35,68 @@ const snapshot = {
   dirty: false,
   worktreeSha256: 'c'.repeat(64),
 };
+
+test('Search splitting preserves the complete retained inventory and fixed worker budgets', () => {
+  assert.deepEqual(SEARCH_BROWSER_SUITES, [
+    'apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts',
+    'apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts',
+    'apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts',
+  ]);
+  assert.equal(BROWSER_SHARD_COUNT, 19);
+  assert.equal(BROWSER_EXECUTION_BUDGET_SECONDS, 900);
+  assert.equal(BROWSER_SETUP_RESERVE_SECONDS, 180);
+  const shards = browserShards();
+  assert.equal(shards.length, 19);
+  assert.deepEqual([...shards.flat()].sort(), [...BROWSER_SUITES].sort());
+  assert.equal(new Set(shards.flat()).size, BROWSER_SUITES.length);
+  assert.ok(
+    shards.every(
+      (shard) => shard.length > 0 && shard.length <= Math.ceil(BROWSER_SUITES.length / 19)
+    )
+  );
+  assert.deepEqual(browserShards([...BROWSER_SUITES].reverse()), shards);
+  for (const suite of SEARCH_BROWSER_SUITES)
+    assert.equal(shards.flat().filter((selected) => selected === suite).length, 1);
+  assert.ok(
+    !BROWSER_SUITES.includes('apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts')
+  );
+});
+
+test('the isolated homepage workflow selects the complete retained Search replacement inventory', () => {
+  const workflow = YAML.parse(
+    readFileSync(
+      new URL('../../.github/workflows/homepage-visual-evidence.yml', import.meta.url),
+      'utf8'
+    )
+  );
+  const job = workflow.jobs['isolated-controls'];
+  const search = job.strategy.matrix.include.filter((entry) =>
+    entry.suite.startsWith('site-search-')
+  );
+  const files = search.map(
+    (entry) => `apps/www/src/content/docs/zh-cn/${entry.suite}.browser.test.ts`
+  );
+  assert.deepEqual(files, SEARCH_BROWSER_SUITES);
+  for (const file of files)
+    assert.ok(readFileSync(new URL(`../../${file}`, import.meta.url)).length);
+  assert.equal(
+    search.filter((entry) => entry.contract === 'site-search-browser-inventory').length,
+    1
+  );
+  assert.equal(job['timeout-minutes'], 15);
+  const execution = job.steps.find(
+    (step) => step.name === 'Execute the exact isolated browser suite'
+  );
+  assert.equal(execution['timeout-minutes'], 12);
+  assert.match(execution.run, /timeout --signal=TERM --kill-after=10s 600s/);
+  assert.match(execution.run, /test -f "\$FILE"/);
+});
+
+test('suite exchanges cannot make an impossible complete workload pass capacity admission', () => {
+  const impossible = browserShards(BROWSER_SUITES, 1);
+  assert.deepEqual([...impossible.flat()].sort(), [...BROWSER_SUITES].sort());
+  assert.throws(() => assertBrowserShardCapacity(impossible), /beyond 900s/);
+});
 
 test('the general receipt inventory retains the explicitly included JavaScript source suite', () => {
   const suite = 'apps/www/test/proto-ui-source.test.mjs';
@@ -101,7 +166,24 @@ test('the latest official terminal costs retain failures and exclude interrupted
   assert.equal(receipt.headSha, evidence.headSha);
   assert.equal(receipt.jobs.length, 18);
   for (const job of receipt.jobs) {
-    const compressed = readFileSync(new URL(job.logPath, directory));
+    // Original raw logs live in the published ancestor after evidence archival.
+    // Keep their exact bytes and every digest/selection/terminal assertion below.
+    let compressed;
+    try {
+      compressed = execFileSync(
+        'git',
+        [
+          'show',
+          `1c4a23455175ec65d3b41a630cfa9797d74a721d:internal/records/evidence/2026-11-25-release-gate-browser-costs/${job.logPath}`,
+        ],
+        { cwd: runtimeRoot, env: { ...process.env, GIT_NO_LAZY_FETCH: '1' } }
+      );
+    } catch (cause) {
+      throw new Error(
+        `Original browser-cost evidence requires complete Git history through 1c4a23455175ec65d3b41a630cfa9797d74a721d; unable to read ${job.logPath}.`,
+        { cause }
+      );
+    }
     const bytes = gunzipSync(compressed);
     const digest = createHash('sha256').update(bytes).digest('hex');
     assert.equal(createHash('sha256').update(compressed).digest('hex'), job.gzipSha256);
@@ -139,7 +221,7 @@ test('the latest official terminal costs retain failures and exclude interrupted
   assert.equal(missing.length, 16);
   assert.deepEqual(missing.sort(), receipt.selectedWithoutTerminal.map((row) => row.suite).sort());
   for (const suite of missing) assert.ok(!observations.includes(suite));
-  assert.equal(BROWSER_SHARD_COUNT, 18);
+  assert.equal(BROWSER_SHARD_COUNT, 19);
   assert.doesNotThrow(() => assertBrowserShardCapacity());
 });
 

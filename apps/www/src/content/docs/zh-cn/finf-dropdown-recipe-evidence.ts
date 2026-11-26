@@ -58,7 +58,6 @@ export async function mountNewYorkDropdownFixture(recipe: DropdownRecipe, runtim
   const demo = newYorkDropdownDemo(original);
   const itemRefs: string[] = [];
   const selections: unknown[] = [];
-  let api: DemoRuntimeApi;
   if (recipe === 'basic' || recipe === 'destructive') {
     // Basic has no authored refs. Attach observation handles only to the clone.
     const collectItems = (node: DemoChild) => {
@@ -70,10 +69,6 @@ export async function mountNewYorkDropdownFixture(recipe: DropdownRecipe, runtim
       node.children?.forEach(collectItems);
     };
     collectItems(demo.root);
-    demo.setup = (context) => {
-      api = context.api;
-      return original.setup?.(context);
-    };
   }
   const surface = createRuntimePreviewSurface(
     demo,
@@ -87,9 +82,20 @@ export async function mountNewYorkDropdownFixture(recipe: DropdownRecipe, runtim
   host.dataset.dropdownEvidenceFixture = recipe;
   document.body.append(host);
   let view: DemoRenderResult | undefined;
+  let runtimeApi: DemoRuntimeApi | undefined;
   try {
     await loadPrototypes([...ids]);
-    view = await renderDemo({ host, demo: surface.demo, runtime });
+    view = await renderDemo({
+      host,
+      demo: {
+        ...surface.demo,
+        setup(context) {
+          runtimeApi = context.api;
+          return surface.demo.setup?.(context);
+        },
+      },
+      runtime,
+    });
     await surface.ready;
   } catch (error) {
     try {
@@ -104,14 +110,22 @@ export async function mountNewYorkDropdownFixture(recipe: DropdownRecipe, runtim
   return {
     publicProfile: 'rhea',
     fixtureProfile: 'new-york-v4',
+    setDeleteDisabled(disabled: boolean) {
+      if (recipe !== 'destructive' || !runtimeApi)
+        throw new Error('The live destructive fixture must own its Delete prop update.');
+      // Exercise the same authored Item through the normal renderer input API.
+      runtimeApi.setProps('delete', { disabled });
+    },
     observeSelects() {
+      if (!runtimeApi) throw new Error('The live Dropdown fixture must own its observations.');
       for (const ref of itemRefs) {
-        if (!api.getExposes(ref)) throw new Error(`Missing open Dropdown item: ${ref}`);
-        api.setProps(ref, { onSelect: (payload: unknown) => selections.push(payload) });
+        if (!runtimeApi.getExposes(ref)) throw new Error(`Missing open Dropdown item: ${ref}`);
+        runtimeApi.setProps(ref, { onSelect: (payload: unknown) => selections.push(payload) });
       }
     },
     selections,
     async destroy() {
+      runtimeApi = undefined;
       try {
         await mountedView.destroy();
       } finally {

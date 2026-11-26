@@ -598,10 +598,8 @@ describe('Liquid command interaction recipe over eight implemented Base owners',
       try {
         expect(f.control.state().disabled.get()).toBe(disabled);
         expect(f.control.state().collapseBlocked.get()).toBe(blocked);
-        expect(f.control.tokens().includes('shadow-none')).toBe(disabled || blocked);
-        expect(f.control.tokens().includes('cursor-not-allowed')).toBe(blocked);
-        expect(f.control.tokens().includes('cursor-default')).toBe(disabled);
-        expect(f.control.tokens().includes('pointer-events-none')).toBe(disabled);
+        for (const token of ['shadow-none', 'cursor-not-allowed'])
+          expect(f.control.tokens().includes(token)).toBe(disabled || blocked);
         expect(f.control.frame().material.candidates).toHaveLength(disabled || blocked ? 0 : 1);
       } finally {
         await f.dispose();

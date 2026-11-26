@@ -1,4 +1,5 @@
 import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from './adapter-preference';
+import { deferUntilDocsHeaderPrepared } from './docs-header-preparation';
 import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/ids';
 import { createProjectionScopeController } from './PrototypePreviewer/projection-scope';
 import { watchProjectionThemeSurfaceStyle } from './PrototypePreviewer/projection-theme';
@@ -36,7 +37,7 @@ export function initDocumentationTypography(doc: Document = document) {
   let alive = true;
   const family = () => {
     const committed = root.dataset.siteLibraryFamily;
-    return committed === 'shadcn' || committed === 'brutalist'
+    return committed === 'shadcn' || committed === 'brutalist' || committed === 'bootstrap-2-3-2'
       ? committed
       : resolveSiteLibraryFamily(view.location.pathname);
   };
@@ -44,7 +45,11 @@ export function initDocumentationTypography(doc: Document = document) {
     initialSelection: { runtimeId: runtime, projectionFamilyId: family() },
     async materialize(request) {
       const selectedFamily = request.selection.projectionFamilyId;
-      if (selectedFamily !== 'shadcn' && selectedFamily !== 'brutalist')
+      if (
+        selectedFamily !== 'shadcn' &&
+        selectedFamily !== 'brutalist' &&
+        selectedFamily !== 'bootstrap-2-3-2'
+      )
         throw new Error('[SiteTypography] Unsupported documentation typography family.');
       const candidate = await participant.materialize(request);
       let stop: () => void;
@@ -82,23 +87,39 @@ export function initDocumentationTypography(doc: Document = document) {
             error
           );
       });
-  const reconcile = () => {
-    if (!alive) return;
+  let preferencePending = false;
+  const deferredPreparation = deferUntilDocsHeaderPrepared(root, () => {
+    if (!alive || !root.isConnected || root.ownerDocument !== doc) return;
+    const supersede = preferencePending;
+    preferencePending = false;
     const snapshot = controller.getSnapshot();
-    if (snapshot.phase === 'preparing' || snapshot.phase === 'destroyed') return;
+    if ((!supersede && snapshot.phase === 'preparing') || snapshot.phase === 'destroyed') return;
+    const selection = { runtimeId: runtime, projectionFamilyId: family() };
     if (snapshot.phase === 'idle') {
-      void observe(controller.start());
+      void observe(
+        supersede
+          ? controller.start().then(() => {
+              if (
+                alive &&
+                root.isConnected &&
+                root.ownerDocument === doc &&
+                runtime === selection.runtimeId
+              )
+                return controller.request(selection);
+            })
+          : controller.start()
+      );
       return;
     }
-    const selection = { runtimeId: runtime, projectionFamilyId: family() };
-    const sourceChanged = participant.needsRefresh();
+    const sourceChanged = snapshot.phase === 'ready' && participant.needsRefresh();
     if (
+      supersede ||
       sourceChanged ||
       snapshot.selection.runtimeId !== runtime ||
       snapshot.selection.projectionFamilyId !== selection.projectionFamilyId
     )
       void observe(controller.request(selection, { force: sourceChanged }));
-  };
+  });
   let refreshTask: number | undefined;
   const refresh = () => {
     if (!alive || refreshTask !== undefined) return;
@@ -107,20 +128,17 @@ export function initDocumentationTypography(doc: Document = document) {
     // rather than walking the whole documentation subtree for every delivery.
     refreshTask = view.setTimeout(() => {
       refreshTask = undefined;
-      reconcile();
+      void deferredPreparation.prepare();
     }, 0);
   };
   const preference = (event: Event) => {
     const next = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
     if (!alive || !isRuntimeId(next)) return;
     runtime = next;
-    // Supersede preparation as well as ready generations; the scope owns races.
-    const selection = { runtimeId: runtime, projectionFamilyId: family() };
-    void observe(
-      controller.getSnapshot().phase === 'idle'
-        ? controller.start().then(() => controller.request(selection))
-        : controller.request(selection)
-    );
+    preferencePending = true;
+    // Read the latest preference and native source inventory when critical
+    // Header/Search preparation permits this independent scope to start.
+    void deferredPreparation.prepare();
   };
   const observer = new view.MutationObserver((records) => {
     if (!root.isConnected) void handle.destroy();
@@ -163,6 +181,7 @@ export function initDocumentationTypography(doc: Document = document) {
     destroy() {
       return (destruction ??= (async () => {
         alive = false;
+        deferredPreparation.cancel();
         if (refreshTask !== undefined) {
           view.clearTimeout(refreshTask);
           refreshTask = undefined;

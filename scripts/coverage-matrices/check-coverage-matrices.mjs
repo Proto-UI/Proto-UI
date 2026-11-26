@@ -8524,6 +8524,8 @@ function websiteRawImportIsAllowed(sourcePath, specifier, guardedImport, rootDir
 const WEBSITE_TEST_HELPER_PATHS = [
   '/apps/www/src/content/docs/zh-cn/browser-harness.ts',
   '/apps/www/src/content/docs/zh-cn/site-search-evidence.ts',
+  '/apps/www/src/content/docs/zh-cn/site-search-browser.ts',
+  '/apps/www/src/content/docs/zh-cn/site-search-close-focus-evidence.ts',
 ];
 function isTestNamedSource(absolutePath) {
   if (
@@ -8639,8 +8641,8 @@ const WEBSITE_RETRY_VIRTUAL_HELPERS = [
   ],
   [
     'apps/www/scripts/accordion-activation-probe.mjs',
-    // #1928 only re-indents the three web-event-router keydown/keyup splice
-    // anchors to match the current router source; probe behavior is unchanged.
+    // Reviewed1928 aligns three existing keyboard splice indentations with main.
+    // Exact helper binding only; virtual IDs, four owners and resolver stay closed.
     '1361552ebbd4eb835eb1155261e021ae88f9d45356800be2833407c89d645642',
   ],
 ];
