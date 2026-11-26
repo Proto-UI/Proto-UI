@@ -82,8 +82,10 @@
     {
       "path": "spec/prototypes/P-BRUTALIST-HOVER-CARD-CONTENT.yaml",
       "beforeSha256": "2c6c140a70a70a3cf7d6aa2ee77b98a2ffbffabddfbd765686dc7c0f3e31714a",
-      "afterSha256": "b838b370c8bbc83d7d294a1fc357a2430e994cb7df4d4472e80e9ecf1dbc208f",
-      "reason": "Use the reviewed final-main current Accordion prototype hierarchy or normative anchored 3px Hover Card category respectively."
+      "afterSha256": "bb85b52631ad77c369c5242bc04d309c46867d686d316da8cda89987eb6b8f52",
+      "reason": "Use the reviewed final-main current Accordion prototype hierarchy or normative anchored 3px Hover Card category respectively.",
+      "preFormatAfterSha256": "b838b370c8bbc83d7d294a1fc357a2430e994cb7df4d4472e80e9ecf1dbc208f",
+      "formattingCorrection": "The normal source-commit hook inserted or moved three blank lines after this ledger was first captured. The previous hash described the pre-format bytes, not the committed source. This correction binds the actual committed bytes; YAML semantics remain equal to final main."
     }
   ],
   "drawerRestoration": {
