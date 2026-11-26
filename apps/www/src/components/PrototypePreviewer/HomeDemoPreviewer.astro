@@ -48,8 +48,8 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
       {
         ['left', 'right'].map((side) => (
           <div class:list={['home-demo-previewer__rail', `home-demo-previewer__rail--${side}`]}>
-            {[0, 1, 2].map((index) => (
-              <HomepageGhostCard tall={index === 1} />
+            {[0, 1, 2, 3].map((index) => (
+              <HomepageGhostCard tall={index === 1 || index === 3} />
             ))}
           </div>
         ))
@@ -127,12 +127,13 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   }
   .home-demo-previewer__rail {
     /* The padded mask admits outside family paint. Equal negative margins
-       retain card tracks; fade stops remain at 68%/100% of their content height. */
+       retain card tracks; fade stops dissolve the outer rails into the same
+       bottom horizon as the five live columns, clear of the attribution line. */
     mask-image: linear-gradient(
       to bottom,
       black,
-      black calc(68% - var(--homepage-gallery-paint-gutter) * 0.3),
-      transparent calc(100% - var(--homepage-gallery-paint-gutter))
+      black calc(64% - var(--homepage-gallery-paint-gutter) * 0.3),
+      transparent calc(94% - var(--homepage-gallery-paint-gutter))
     );
     box-sizing: content-box;
     padding: var(--homepage-gallery-paint-gutter);
@@ -317,13 +318,15 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     content: '';
     position: absolute;
     inset: auto 0 0;
-    height: min(8rem, 28%);
+    height: min(20rem, 28%);
     z-index: 1;
     pointer-events: none;
     background-image: linear-gradient(
       to top,
       var(--color-background),
-      color-mix(in srgb, var(--color-background) 65%, transparent) 30%,
+      var(--color-background) 16%,
+      color-mix(in srgb, var(--color-background) 86%, transparent) 42%,
+      color-mix(in srgb, var(--color-background) 44%, transparent) 72%,
       transparent
     );
   }
@@ -403,14 +406,46 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     padding-inline: 0;
     display: block;
   }
-  .home-demo-previewer :global(.home-gallery__chart) {
+  .home-demo-previewer :global(.home-gallery__chart),
+  .home-demo-previewer :global(.home-gallery__activity-chart) {
     display: block;
     color: var(--pui-foreground, currentColor);
   }
   .home-demo-previewer :global(.home-gallery__chart-bars svg),
+  .home-demo-previewer :global(.home-gallery__activity-bars svg),
   .home-demo-previewer :global(.home-gallery__spark-chart svg) {
     display: block;
     width: 100%;
+  }
+  .home-demo-previewer :global(.home-gallery__parity-row) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__highlight-row) {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__highlight-row .home-gallery__icon) {
+    margin-block-start: 0.125rem;
+  }
+  .home-demo-previewer :global(.home-gallery__parity-copy) {
+    display: grid;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__mini-bars) {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: flex-end;
+    color: var(--pui-foreground, currentColor);
+  }
+  .home-demo-previewer :global(.home-gallery__mini-bars svg) {
+    display: block;
   }
   .home-demo-previewer :global(.home-gallery__spark-kpi) {
     display: flex;
@@ -519,20 +554,10 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     gap: 0.75rem;
     min-width: 0;
   }
-  .home-demo-previewer :global(.home-gallery__shortcut-list) {
-    display: grid;
-    gap: 0.25rem;
+  .home-demo-previewer :global(.home-gallery__shortcut-text) {
     min-width: 0;
-  }
-  .home-demo-previewer :global(.home-gallery__shortcut-item) {
-    padding: 0.25rem 0.5rem;
-    min-width: 0;
-  }
-  .home-demo-previewer :global(.home-gallery__shortcut-row) {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .home-demo-previewer :global(.home-gallery__control-bar) {
     display: flex;
@@ -561,12 +586,16 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    justify-content: space-between;
-    gap: 0.5rem 1rem;
+    justify-content: center;
+    text-align: center;
+    gap: 0.25rem 0.5rem;
     min-width: 0;
-    padding-block: 2rem 0.5rem;
+    padding-block: 0.5rem 1.75rem;
     font-size: var(--sl-text-sm, 0.875rem);
     color: var(--sl-color-gray-3, inherit);
+  }
+  .home-demo-previewer :global(.home-gallery__attribution-sep) {
+    opacity: 0.55;
   }
   .home-demo-previewer :global(.home-gallery__attribution-link) {
     color: inherit;
@@ -615,7 +644,7 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   .home-demo-previewer :global(.home-gallery__choice-label),
   .home-demo-previewer :global(.home-gallery__choice-desc),
   .home-demo-previewer :global(.home-gallery__shortcut-title),
-  .home-demo-previewer :global(.home-gallery__shortcut-label),
+  .home-demo-previewer :global(.home-gallery__submetric),
   .home-demo-previewer :global(.home-gallery__chart-label),
   .home-demo-previewer :global(.home-gallery__stat-value),
   .home-demo-previewer :global(.home-gallery__eyebrow),

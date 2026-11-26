@@ -895,7 +895,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-lucide/icons/arrow-right']),
   }),
   'apps/www/src/components/Homepage/homepage-gallery-icons.ts': Object.freeze({
-    sourceSha256: '8ed70c54c924a2b9757839f48f6414a4bbfa1a5bb7bb2278f0ea6e2f711b7940',
+    sourceSha256: '29b2d2041176aaa91fd68934b9869835482a16e7beafb99937c448f6ccd66fff',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-lucide/icons/activity',
       '@proto.ui/prototypes-lucide/icons/arrow-right',

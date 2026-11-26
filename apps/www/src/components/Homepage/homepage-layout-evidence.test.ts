@@ -46,15 +46,15 @@ function fixture(
 describe('homepage evidence observers', () => {
   it('accepts five real columns at 2K+, four desktop columns and one mobile column', () => {
     for (const scene of [
-      fixture(1856, 2048, [2, 2, 2, 3, 3]),
-      fixture(1856, 2560, [2, 2, 2, 3, 3]),
-      fixture(1320, 1440, [3, 3, 3, 3]),
-      fixture(288, 320, [12], 16),
+      fixture(1856, 2048, [3, 3, 3, 4, 4]),
+      fixture(1856, 2560, [3, 3, 3, 4, 4]),
+      fixture(1320, 1440, [4, 4, 4, 5]),
+      fixture(288, 320, [17], 16),
     ])
       expect(galleryFlowEvidence(scene).issues).toEqual([]);
   });
   it('rejects wrong order, split cards, overlapping cards and absent columns', () => {
-    const scene = fixture(1856, 2048, [2, 2, 2, 3, 3]);
+    const scene = fixture(1856, 2048, [3, 3, 3, 4, 4]);
     const order = structuredClone(scene);
     order.cards.reverse();
     expect(galleryFlowEvidence(order).issues).toContain(
@@ -92,18 +92,18 @@ describe('homepage evidence observers', () => {
     expect(galleryFlowEvidence(overlap).issues).toContain(
       'controls/shortcuts: gallery cards overlap'
     );
-    expect(galleryFlowEvidence(fixture(1856, 2048, [3, 3, 3, 3])).issues).toContain(
+    expect(galleryFlowEvidence(fixture(1856, 2048, [4, 4, 4, 5])).issues).toContain(
       'painted gallery column count differs from available 18rem tracks'
     );
-    const outside = fixture(288, 320, [12], 16);
-    outside.cards[9]!.rect = rect(312, 0, 288);
-    outside.cards[9]!.fragments = [{ ...outside.cards[9]!.rect }];
+    const outside = fixture(288, 320, [17], 16);
+    outside.cards[13]!.rect = rect(312, 0, 288);
+    outside.cards[13]!.fragments = [{ ...outside.cards[13]!.rect }];
     expect(galleryFlowEvidence(outside).issues).toContain(
       'overlays: gallery card outside viewport'
     );
   });
   it('rejects extra spacing between adjacent cards while preserving reading order', () => {
-    const scene = fixture(288, 320, [12], 16);
+    const scene = fixture(288, 320, [17], 16);
     expect(galleryFlowEvidence(scene).issues).toEqual([]);
     // Move the complete suffix together: order, fragments and adjacency remain
     // valid, so only the added space between the first two cards is rejected.
@@ -113,7 +113,7 @@ describe('homepage evidence observers', () => {
       card.fragments = [{ ...card.rect }];
     }
     expect(galleryFlowEvidence(scene).issues).not.toEqual([]);
-    const columns = fixture(1856, 2048, [2, 2, 2, 3, 3]);
+    const columns = fixture(1856, 2048, [3, 3, 3, 4, 4]);
     columns.columnGap = 48;
     expect(galleryFlowEvidence(columns).issues).not.toEqual([]);
   });

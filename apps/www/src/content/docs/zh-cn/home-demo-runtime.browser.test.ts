@@ -261,7 +261,7 @@ async function createHomeGalleryObservation(
     expect(facts).toMatchObject({
       inert: true,
       columnCount: 5,
-      cardCount: 12,
+      cardCount: 17,
       noOverflow: true,
       fitsGallery: true,
       fadePointerEvents: 'none',
@@ -272,7 +272,7 @@ async function createHomeGalleryObservation(
     expect(facts.liveRoots).toBeGreaterThan(0);
     expect(facts.fade).toContain('linear-gradient');
     expect(facts.fadeHeight).toBeCloseTo(
-      Math.min(8 * facts.rootFontSize, facts.fadeViewportHeight * 0.28),
+      Math.min(20 * facts.rootFontSize, facts.fadeViewportHeight * 0.28),
       1
     );
     expect(facts.fadeColorMeasurementError).toBeNull();
@@ -939,7 +939,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         expect(initial).toMatchObject({
           inert: true,
           columnCount: 5,
-          cardCount: 12,
+          cardCount: 17,
           noOverflow: true,
           fitsGallery: true,
           fadePointerEvents: 'none',
@@ -977,7 +977,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         expect(desktop.inert).toBe(false);
         expect(desktop.fade).toBe(initial.fade);
         expect(desktop.fadeHeight).toBeCloseTo(
-          Math.min(8 * desktop.rootFontSize, desktop.fadeViewportHeight * 0.28),
+          Math.min(20 * desktop.rootFontSize, desktop.fadeViewportHeight * 0.28),
           1
         );
         await page.setViewportSize({ width: 390, height: 900 });

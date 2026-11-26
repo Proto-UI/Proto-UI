@@ -154,6 +154,8 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       'radio-group-root',
       'radio-group-item',
       'radio-group-indicator',
+      'toggle-group-root',
+      'toggle-group-item',
     ].map((suffix) => `${family}-${suffix}`);
     if (family === 'shadcn') sceneIds.push('shadcn-command-input-wrapper', 'shadcn-input-shell');
     const assertRecipe = (recipe: readonly string[]) => {
@@ -198,7 +200,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     );
     expect(JSON.stringify(composition.demo.root)).not.toContain('"data-projection-id":"button"');
   });
-  it(`${family} composes twelve task cards without a veil over live controls and with real source attribution`, () => {
+  it(`${family} composes seventeen task cards without a veil over live controls and with real source attribution`, () => {
     const content = createHomepageShowcase(family, 'wc', 'en', () => true);
     assertDemoSpec(content.demo);
     const root = content.demo.root;
@@ -232,16 +234,21 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     expect(cards.map((card) => card.id)).toEqual([
       'controls',
       'shortcuts',
+      'milestones',
       'workspace-analytics',
       'workspace-command',
+      'ecosystem',
       'preferences',
       'workspace-progress',
+      'protocol',
       'hover',
       'editor',
       'workspace-help',
+      'highlights',
       'overlays',
       'spark',
       'choices',
+      'throughput',
     ]);
     expect(new Set(cards.map((card) => card.density))).toEqual(new Set(['regular', 'compact']));
     expect(new Set(cards.map((card) => card.emphasis))).toEqual(
@@ -251,8 +258,8 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       'workspace-analytics',
       'spark',
     ]);
-    expect(icons).toHaveLength(18);
-    expect(new Set(icons).size).toBe(18);
+    expect(icons).toHaveLength(20);
+    expect(new Set(icons).size).toBe(20);
     expect(charts).toBe(1);
     expect(fades).toBe(0);
     expect(links).toEqual([

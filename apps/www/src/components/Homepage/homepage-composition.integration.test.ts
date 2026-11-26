@@ -103,24 +103,46 @@ async function mount(family: Family) {
 
 for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
   describe(`${family} homepage scenes real WC integration`, () => {
-    it('mounts twelve real cards, decorative icons, a labelled sample chart and attribution', async () => {
+    it('mounts seventeen real cards, interactive shortcuts, decorative icons, a labelled sample chart and attribution', async () => {
       const view = await mount(family);
       await settle();
       const cards = [...view.host.querySelectorAll<HTMLElement>('[data-gallery-demo]')];
       expect(cards.map((card) => card.dataset.galleryDemo)).toEqual([
         'controls',
         'shortcuts',
+        'milestones',
         'workspace-analytics',
         'workspace-command',
+        'ecosystem',
         'preferences',
         'workspace-progress',
+        'protocol',
         'hover',
         'editor',
         'workspace-help',
+        'highlights',
         'overlays',
         'spark',
         'choices',
+        'throughput',
       ]);
+      const shortcuts = cards.find((card) => card.dataset.galleryDemo === 'shortcuts')!;
+      const shortcutGroups = shortcuts.querySelectorAll<HTMLElement>(
+        `wc-${family}-toggle-group-root`
+      );
+      const shortcutItems = [
+        ...shortcuts.querySelectorAll<HTMLElement>(`wc-${family}-toggle-group-item`),
+      ];
+      expect(shortcutGroups).toHaveLength(4);
+      expect(shortcutItems).toHaveLength(16);
+      for (const item of shortcutItems) {
+        expect(item.getAttribute('data-pui-style')?.split(/\s+/)).toContain('select-none');
+      }
+      const focusShortcut = view.ref('shortcut-modules-focus');
+      expect(focusShortcut.getAttribute('aria-pressed')).toBe('false');
+      focusShortcut.click();
+      await settle();
+      expect(focusShortcut.getAttribute('aria-pressed')).toBe('true');
       const analytics = cards.find((card) => card.dataset.galleryDemo === 'workspace-analytics')!;
       expect(analytics.dataset.galleryBody).toBe('edge-media');
       expect(analytics.querySelector('.home-gallery__media')).not.toBeNull();
@@ -135,7 +157,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
         .poll(() => [...bars].map((bar) => bar.getAttribute('height')).join(','))
         .not.toBe(initialHeights.join(','));
       const icons = view.host.querySelectorAll('[data-gallery-icon] svg');
-      expect(icons).toHaveLength(18);
+      expect(icons).toHaveLength(20);
       for (const icon of icons) {
         expect(icon.getAttribute('aria-hidden')).toBe('true');
         expect(icon.closest('[data-gallery-icon]')?.getAttribute('aria-hidden')).toBe('true');

@@ -87,11 +87,11 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     verify();
     const assertTextOwners = (owners: Element[]) => {
       // Direct WC rendering retains authored boxes inside detached content hosts.
-      expect(owners).toHaveLength(76);
-      expect(new Set(owners).size).toBe(76);
+      expect(owners).toHaveLength(110);
+      expect(new Set(owners).size).toBe(110);
       expect(
         owners.filter((owner) => !owner.closest('[data-gallery-demo^="workspace-"]'))
-      ).toHaveLength(47);
+      ).toHaveLength(81);
       const scenes = {
         'workspace-command': [
           'What comes next?',

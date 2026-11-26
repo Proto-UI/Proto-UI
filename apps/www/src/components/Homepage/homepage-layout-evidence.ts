@@ -2,16 +2,21 @@
 export const HOMEPAGE_GALLERY_IDS = [
   'controls',
   'shortcuts',
+  'milestones',
   'workspace-analytics',
   'workspace-command',
+  'ecosystem',
   'preferences',
   'workspace-progress',
+  'protocol',
   'hover',
   'editor',
   'workspace-help',
+  'highlights',
   'overlays',
   'spark',
   'choices',
+  'throughput',
 ] as const;
 
 export type GalleryRect = {
