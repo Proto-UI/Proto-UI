@@ -164,13 +164,11 @@ export function galleryFlowEvidence(facts: GalleryFlowFacts) {
     facts.enhancedMedia &&
     facts.readingFlowSupported &&
     facts.queryContainerWidth >= 75.75 * facts.rootFontSize;
-  const enhancedActive = facts.flowDisplay === 'grid' && facts.flowReadingFlow === 'grid-rows';
+  const enhancedActive = facts.flowDisplay === 'flex' && facts.flowReadingFlow === 'flex-visual';
   if (enhancedExpected && !enhancedActive)
-    issues.push('eligible gallery lacks enhanced grid reading flow');
-  if (
-    !enhancedExpected &&
-    (facts.flowDisplay !== 'contents' || facts.flowReadingFlow === 'grid-rows')
-  )
+    issues.push('eligible gallery lacks its visual reading flow');
+  const ordinaryReadingFlow = facts.flowReadingFlow === '' || facts.flowReadingFlow === 'normal';
+  if (!enhancedExpected && (facts.flowDisplay !== 'contents' || !ordinaryReadingFlow))
     issues.push('ordinary gallery lacks its authored contents flow');
   if (enhancedExpected) {
     if (
@@ -208,6 +206,15 @@ export function galleryFlowEvidence(facts: GalleryFlowFacts) {
     issues.push('painted wide gallery columns differ from authored card groups');
   if (facts.container) {
     issues.push(...galleryHorizontalIssues(facts.container, facts.cards));
+    if (columns.length) {
+      const tails = columns.map((column) => column.cards.at(-1)!);
+      const paintedBottom = Math.max(...tails.map((card) => card.rect.bottom));
+      const marginBottom = Math.max(...tails.map((card) => card.rect.bottom + card.rowGap));
+      if (facts.container.bottom < paintedBottom - epsilon)
+        issues.push('gallery ends before its lowest painted card');
+      if (facts.container.bottom > marginBottom + epsilon)
+        issues.push('gallery continues below its final card margins');
+    }
     const expectedColumns =
       facts.viewportWidth <= 639
         ? 1

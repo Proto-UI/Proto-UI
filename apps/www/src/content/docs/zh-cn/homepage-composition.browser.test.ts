@@ -416,7 +416,7 @@ async function layoutFacts(page: Page) {
       wideMedia: matchMedia('(min-width: 96rem)').matches,
       enhancedMedia: matchMedia('(48rem <= width < 96rem)').matches,
       queryContainerWidth: viewport ? parseFloat(getComputedStyle(viewport).width) : NaN,
-      readingFlowSupported: CSS.supports('reading-flow', 'grid-rows'),
+      readingFlowSupported: CSS.supports('reading-flow', 'flex-visual'),
       flowDisplay: style?.display ?? '',
       flowReadingFlow: style?.getPropertyValue('reading-flow').trim() ?? '',
       containerCount: galleries.length,

@@ -44,7 +44,7 @@ function fixture(
     flowReadingFlow: 'normal',
     rootFontSize: 16,
     columnGap: gap,
-    container: rect(0, 0, width, 500),
+    container: rect(0, 0, width, Math.max(...distribution) * 120 - 20),
     cards: distribution.flatMap((count, column) =>
       Array.from({ length: count }, (_, row) => {
         const bounds = rect(column * (track + gap), row * 120, track);
@@ -62,8 +62,8 @@ function fixture(
 describe('homepage evidence observers', () => {
   it('accepts five real columns at 2K+, four desktop columns and one mobile column', () => {
     const desktop = fixture(1320, 1440, [4, 4, 4, 5]);
-    desktop.flowDisplay = 'grid';
-    desktop.flowReadingFlow = 'grid-rows';
+    desktop.flowDisplay = 'flex';
+    desktop.flowReadingFlow = 'flex-visual';
     const positions = desktop.cards.map((card) => ({ rect: card.rect, fragments: card.fragments }));
     const paintedOrder = [0, 1, 3, 11, 2, 4, 5, 12, 6, 7, 8, 9, 10, 13, 14, 15, 16];
     paintedOrder.forEach((sourceIndex, index) =>
@@ -77,14 +77,14 @@ describe('homepage evidence observers', () => {
     ])
       expect(galleryFlowEvidence(scene).issues).toEqual([]);
   });
-  it('requires grid reading flow only when the viewport, container and feature queries apply', () => {
+  it('requires visual reading order when the viewport, container and feature queries apply', () => {
     const scene = fixture(1320, 1440, [4, 4, 4, 5]);
     scene.readingFlowSupported = false;
     scene.flowReadingFlow = '';
     expect(galleryFlowEvidence(scene).issues).toEqual([]);
     scene.readingFlowSupported = true;
     expect(galleryFlowEvidence(scene).issues).toContain(
-      'eligible gallery lacks enhanced grid reading flow'
+      'eligible gallery lacks its visual reading flow'
     );
     scene.enhancedMedia = false;
     expect(galleryFlowEvidence(scene).issues).toEqual([]);
@@ -99,7 +99,7 @@ describe('homepage evidence observers', () => {
   it('detects a common translation inside the viewport but outside the centered gallery', () => {
     const scene = fixture(1320, 1440, 4);
     scene.readingFlowSupported = false;
-    scene.container = rect(60, 0, 1320, 500);
+    scene.container = rect(60, 0, 1320, scene.container!.height);
     for (const card of scene.cards) {
       card.rect.left += 60;
       card.rect.right += 60;
@@ -117,6 +117,16 @@ describe('homepage evidence observers', () => {
     expect(galleryFlowEvidence(scene).issues).toContain(
       'throughput: gallery card or fragment outside gallery content'
     );
+  });
+  it('ends the gallery at the lowest card or its trailing margin', () => {
+    const scene = fixture(1856, 2048, [3, 3, 3, 4, 4]);
+    const bottom = scene.container!.bottom;
+    const atHeight = (height: number) =>
+      galleryFlowEvidence({ ...scene, container: rect(0, 0, 1856, height) }).issues;
+    expect(atHeight(bottom)).toEqual([]);
+    expect(atHeight(bottom + 20)).toEqual([]);
+    expect(atHeight(bottom + 5122)).toEqual(['gallery continues below its final card margins']);
+    expect(atHeight(bottom - 20)).toEqual(['gallery ends before its lowest painted card']);
   });
   it('rejects wrong order, split cards, overlapping cards and absent columns', () => {
     const scene = fixture(1856, 2048, [3, 3, 3, 4, 4]);

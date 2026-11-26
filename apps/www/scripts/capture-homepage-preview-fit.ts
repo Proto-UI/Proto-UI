@@ -218,7 +218,7 @@ async function measure(page: Page) {
       rootFontSize: number(getComputedStyle(document.documentElement).fontSize),
       wideMedia: matchMedia('(min-width: 96rem)').matches,
       enhancedMedia: matchMedia('(48rem <= width < 96rem)').matches,
-      readingFlowSupported: CSS.supports('reading-flow', 'grid-rows'),
+      readingFlowSupported: CSS.supports('reading-flow', 'flex-visual'),
       flowDisplay: flowStyle?.display ?? '',
       flowReadingFlow: flowStyle?.getPropertyValue('reading-flow').trim() ?? '',
       queryContainerWidth:

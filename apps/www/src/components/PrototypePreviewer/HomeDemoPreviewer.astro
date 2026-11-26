@@ -564,34 +564,36 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     gap: 0.5rem;
     min-width: 0;
   }
-  /* Four 18rem tracks and three 1.25rem gutters. The single-track grid flows
-     through the columns. Only three runs change position, and native reading
-     flow takes keyboard and accessibility traversal through those same runs. */
+  /* The flex column breaks at the start of each reading group. Its fragmented
+     height ends at the longest painted column, including the final card margin. */
   @media (48rem <= width < 96rem) {
-    @supports (reading-flow: grid-rows) {
+    @supports (reading-flow: flex-visual) {
       .home-demo-previewer :global(.home-gallery__viewport) {
         container: gallery / inline-size;
       }
       @container gallery (min-width: 75.75rem) {
         .home-demo-previewer :global(.home-gallery__flow) {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr);
-          reading-flow: grid-rows;
+          display: flex;
+          flex-direction: column;
+          reading-flow: flex-visual;
         }
         .home-demo-previewer :global(.home-gallery__column) {
           display: flow-root;
           break-inside: avoid;
         }
+        .home-demo-previewer :global(.home-gallery__column:has(> [data-gallery-demo='controls'])),
+        .home-demo-previewer
+          :global(.home-gallery__column:has(> [data-gallery-demo='workspace-analytics'])),
         .home-demo-previewer :global([data-gallery-demo='workspace-help']) {
-          grid-area: 3 / 1;
+          order: -2;
         }
-        .home-demo-previewer :global([data-gallery-demo='milestones']) {
-          grid-area: 4 / 1;
-          break-before: column;
-        }
+        .home-demo-previewer :global([data-gallery-demo='milestones']),
+        .home-demo-previewer :global([data-gallery-demo='workspace-command']),
+        .home-demo-previewer :global([data-gallery-demo='ecosystem']),
         .home-demo-previewer :global([data-gallery-demo='highlights']) {
-          grid-area: 7 / 1;
+          order: -1;
         }
+        .home-demo-previewer :global([data-gallery-demo='milestones']),
         .home-demo-previewer
           :global(.home-gallery__column:has(> [data-gallery-demo='preferences'])),
         .home-demo-previewer :global([data-gallery-demo='editor']) {
