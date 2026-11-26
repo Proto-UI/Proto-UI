@@ -54,10 +54,10 @@ export function installDefaultHostDisplay(
     // document rule on the host wins across that boundary. Keep view visibility
     // infrastructure, but do not compete with the presentation owner's display.
     if (displayOwner === 'presentation' || hasExplicitDisplayClass(el)) {
-      el.classList.remove(HOST_DISPLAY_CLASS);
+      if (el.classList.contains(HOST_DISPLAY_CLASS)) el.classList.remove(HOST_DISPLAY_CLASS);
       return;
     }
-    el.classList.add(HOST_DISPLAY_CLASS);
+    if (!el.classList.contains(HOST_DISPLAY_CLASS)) el.classList.add(HOST_DISPLAY_CLASS);
   };
 
   sync();
@@ -65,7 +65,7 @@ export function installDefaultHostDisplay(
   return {
     sync,
     disconnect() {
-      el.classList.remove(HOST_DISPLAY_CLASS);
+      if (el.classList.contains(HOST_DISPLAY_CLASS)) el.classList.remove(HOST_DISPLAY_CLASS);
     },
   };
 }

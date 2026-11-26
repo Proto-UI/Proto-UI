@@ -62,6 +62,13 @@ function isPrunedByExternalAncestor(el: Element): boolean {
   }
   // A retained or staging view can sit below an inert ancestor. Find that
   // boundary before reading style and forcing a layout of the inner tree.
+  // A positive native box-tree check also proves that no flat-tree ancestor
+  // has display:none or content-visibility:hidden. Keep the read fresh for
+  // every sample and use the owning realm's method, not a component member.
+  // A negative result is not a pruning decision: display:contents can still
+  // provide eligible descendants, so it retains the original style fallback.
+  const checkVisibility = el.ownerDocument.defaultView?.Element.prototype.checkVisibility;
+  if (typeof checkVisibility === 'function' && checkVisibility.call(el)) return false;
   return ancestors.some((parent) => {
     const style = getOwnedComputedStyle(parent);
     return style?.display === 'none' || style?.contentVisibility === 'hidden';

@@ -901,12 +901,16 @@ function collectEntryStyleDependencies(
   const positionParents = new Set<Node>();
   const filteredPositionParents = new Map<Element | ShadowRoot, boolean>();
   const externalSubjects = [target, ...ancestors];
-  const candidates = [...externalSubjects, ...target.querySelectorAll('*')];
+  // Resolve descendants only for a selector that actually consumes them.
+  // The snapshot stays local to this synchronous, read-only dependency scan.
+  let candidates: Element[] | undefined;
+  const getCandidates = () =>
+    (candidates ??= [...externalSubjects, ...target.querySelectorAll('*')]);
   let positionalCandidates: Element[] | undefined;
   let unfilteredPositionCandidates: Element[] | undefined;
   const getPositionalCandidates = () =>
     (positionalCandidates ??= [
-      ...candidates,
+      ...getCandidates(),
       ...Array.from(observedRoots)
         .filter((root) => root !== target)
         .flatMap((root) => [
@@ -919,21 +923,23 @@ function collectEntryStyleDependencies(
     if (query) queries.add(query);
   };
   const visitRule = (rule: CSSRule) => {
+    // Native CSS rule kind is immutable for this object, including after
+    // selector/declaration edits. Read it once while visiting its live data.
+    const type = rule.type;
     // A scope's start/end selectors can change entry eligibility without an
     // attribute mutation. Read their native IDL, not a whole grouping cssText
     // whose media features and nested declarations are not selector preludes.
-    if (!inputState && ScopeRule && rule instanceof ScopeRule)
+    if (type !== 1 && !inputState && ScopeRule && rule instanceof ScopeRule)
       inputState =
         selectorMayDependOnInputState(rule.start ?? '') ||
         selectorMayDependOnInputState(rule.end ?? '');
-    if (rule.type === 3 || rule.type === 4)
-      collectMedia((rule as CSSImportRule | CSSMediaRule).media);
-    if (rule.type === 3) {
+    if (type === 3 || type === 4) collectMedia((rule as CSSImportRule | CSSMediaRule).media);
+    if (type === 3) {
       const imported = (rule as CSSImportRule).styleSheet;
       if (imported) visitSheet(imported);
       else inputState = true;
     }
-    if (rule.type === 1) {
+    if (type === 1) {
       const syntax = readEntrySelectorSyntax(rule as CSSStyleRule);
       const { selector, positional } = syntax;
       inputState ||= syntax.inputState ??= selectorMayDependOnInputState(selector);
@@ -941,7 +947,7 @@ function collectEntryStyleDependencies(
         for (const subject of collectSiblingDependencySubjects(
           selector,
           externalSubjects,
-          candidates
+          getCandidates()
         ))
           siblingSubjects.add(subject);
       // Paint and anchor offsets do not change eligibility. Grid track sizes
@@ -969,10 +975,10 @@ function collectEntryStyleDependencies(
             // sibling-position dependency still needs its direct parent.
             if (
               (!relational || scoped?.positionSubjects.length) &&
-              candidates.some((candidate) => candidate.matches(probe))
+              getCandidates().some((candidate) => candidate.matches(probe))
             ) {
               const matches = scoped
-                ? candidates.filter((candidate) => candidate.matches(scoped.subject))
+                ? getCandidates().filter((candidate) => candidate.matches(scoped.subject))
                 : [];
               if (!matches.length) relational = 1;
               else for (const candidate of matches) relationalSubjects.add(candidate);
