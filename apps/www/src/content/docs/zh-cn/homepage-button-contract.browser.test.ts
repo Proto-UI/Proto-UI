@@ -375,10 +375,11 @@ describe.sequential('Base Button selection and family-owned homepage geometry', 
           expect(normal.userSelect).toBe('none');
           expect(normal.inlineHeight).toBe('');
           expect(normal.inlineMinHeight).toBe('');
-          expect(normal.minHeight).toBe(family === 'shadcn' ? '32px' : '40px');
-          expect(normal.height).toBe(family === 'shadcn' ? 32 : 40);
+          const selectAllShortcut = process.platform === 'darwin' ? 'Meta+a' : 'Control+a';
+          expect(normal.minHeight).toBe(family === 'shadcn' ? '36px' : '40px');
+          expect(normal.height).toBe(family === 'shadcn' ? 36 : 40);
           if (family === 'shadcn') {
-            expect(normal.borderRadius).toBe('18px');
+            expect(normal.borderRadius).toBe('26px');
             expect(normal.paddingLeft).toBe('12px');
             expect(normal.paddingRight).toBe('12px');
             expect(normal.fontSize).toBe('14px');
@@ -405,7 +406,7 @@ describe.sequential('Base Button selection and family-owned homepage geometry', 
           const prose = await page.evaluate(() => getSelection()?.toString().trim() ?? '');
           record.proseSelection = prose;
           expect(prose.length).toBeGreaterThan(0);
-          await page.keyboard.press('Control+a');
+          await page.keyboard.press(selectAllShortcut);
           record.documentSelectAll = await page.evaluate(() => ({
             text: getSelection()?.toString(),
             ranges: getSelection()?.rangeCount,
@@ -417,7 +418,7 @@ describe.sequential('Base Button selection and family-owned homepage geometry', 
           const sample = '用同一份原型，组合你的界面。';
           expect(await editor.inputValue()).toBe(sample);
           await editor.fill('Selectable editing remains available');
-          await editor.press('Control+a');
+          await editor.press(selectAllShortcut);
           expect(
             await editor.evaluate((node) => {
               const input = node as HTMLTextAreaElement;
@@ -544,7 +545,7 @@ describe.sequential('Base Button selection and family-owned homepage geometry', 
             expect(prosePaint.foreground).toBe(prosePaint.expectedForeground);
             expect(prosePaint.userSelect).not.toBe('none');
             await editor.scrollIntoViewIfNeeded();
-            await editor.press('Control+a');
+            await editor.press(selectAllShortcut);
             observation.selectedEditor = await editor.evaluate((node) => {
               const input = node as HTMLTextAreaElement;
               return {
@@ -660,11 +661,11 @@ describe.sequential('Base Button selection and family-owned homepage geometry', 
           record.enlargedImmediate = await facts(reset);
           await expect
             .poll(async () => (await facts(reset)).height, { timeout: 2_000 })
-            .toBe(family === 'shadcn' ? 64 : 80);
+            .toBe(family === 'shadcn' ? 72 : 80);
           const enlarged = await facts(reset);
           record.enlarged = { ...enlarged, textScale: 200, browserZoomVerified: false };
           await capture('text200');
-          expect(enlarged.height).toBe(family === 'shadcn' ? 64 : 80);
+          expect(enlarged.height).toBe(family === 'shadcn' ? 72 : 80);
           expect(enlarged.height).toBeGreaterThan(normal.height);
           expect(enlarged.height).toBeGreaterThanOrEqual(parseFloat(enlarged.lineHeight));
           expect(enlarged.scrollWidth).toBeLessThanOrEqual(enlarged.clientWidth + 1);
