@@ -380,6 +380,8 @@ it('Brutalist opts into shared control and panel grammar without changing omitte
   const beforeTrigger = tokens(trigger),
     beforeContent = tokens(content),
     open = content.getExposes().open;
+  const expectedShadow = ['shadow-[3px_3px_0_0_var(--pui-foreground)]'];
+  expect(beforeContent.filter((token) => token.startsWith('shadow-'))).toEqual(expectedShadow);
   setElementProps(trigger, { presentation: 'navigation' });
   setElementProps(content, { presentation: 'navigation' });
   await flush();
@@ -398,6 +400,7 @@ it('Brutalist opts into shared control and panel grammar without changing omitte
       'h-[var(--proto-ui-available-height)]',
     ])
   );
+  expect(tokens(content).filter((token) => token.startsWith('shadow-'))).toEqual(expectedShadow);
   expect(tokens(content)).not.toContain('p-4');
   expect(tokens(content)).not.toContain('w-72');
   expect(content.getExposes().open).toBe(open);
