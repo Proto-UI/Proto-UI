@@ -34,9 +34,13 @@ export function setupNumberFieldStepVisual(
 
   def.feedback.style.use(
     tw(
-      'inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-2xl border border-border bg-secondary p-2 font-sans text-secondary-foreground shadow-xs select-none cursor-pointer outline-none transition-shadow'
+      'inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-2xl border border-border bg-secondary p-2 font-sans text-secondary-foreground shadow-xs select-none outline-none transition-shadow'
     )
   );
+  def.rule({
+    when: (w) => w.state(state.disabled).eq(false),
+    intent: (i) => i.feedback.style.use(tw('cursor-pointer')),
+  });
   def.feedback.material.declare({
     version: 2,
     shape: { kind: 'rounded-rect', geometry: 'style' },
