@@ -48,7 +48,7 @@ jobs:
           TOOLBAR_SETTING=$(NO_COLOR=1 corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled)
           printf '%s\n' "$TOOLBAR_SETTING"
           grep -Eq '^◉ devToolbar\.enabled is set to[[:space:]]+false[[:space:]]*$' <<< "$TOOLBAR_SETTING"
-      - name: Run all 25 native Field journeys and capture same-source comparisons
+      - name: Run all native Field journeys and capture same-source comparisons
         timeout-minutes: 20
         env:
           PROTO_UI_FIELD_SCREENSHOT_DIR: ${{ runner.temp }}/field-family/screenshots

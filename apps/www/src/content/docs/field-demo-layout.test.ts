@@ -22,9 +22,10 @@ function stableFeedbackOrder(root: DemoNode) {
   const refs = children(field).map(ref);
   const errorIndex = refs.indexOf('handleError');
   const statusIndex = top.findIndex((node) => ref(node) === 'handleStatus');
-  const actionsIndex = top.findIndex((node) =>
-    children(node).some((child) => ref(child) === 'validate')
-  );
+  const actionsIndex = top.findIndex((node) => {
+    const [save, reset] = children(node).map(ref);
+    return save === 'validate' && reset === 'reset';
+  });
   return (
     refs.indexOf('handleControl') > refs.indexOf('handleLabel') &&
     refs.indexOf('handleDescription') > refs.indexOf('handleControl') &&

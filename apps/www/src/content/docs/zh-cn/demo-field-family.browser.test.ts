@@ -109,6 +109,60 @@ beforeAll(async () => {
 afterAll(async () => {
   await Promise.all([browser?.close(), stopServer()]);
 });
+
+it.each(families)('%s default Field stacks feedback above the Save and Reset row', async (family) => {
+  const { context, page } = await openRoute(browser, baseUrl, route(family), {
+    width: 1100,
+    height: 1000,
+  });
+  try {
+    const preview = page.locator(`[data-previewer-id][data-demo-id="demo-${family}-field"]`);
+    await selectRuntime(page, preview, 'wc', fieldEditorSelector('handle'), 1);
+    const host = preview.locator('.host');
+    const handle = editor(preview, 'handle');
+    const username = editor(preview, 'username');
+    const save = host.getByRole('button', { name: 'Save changes', exact: true });
+    const reset = host.getByRole('button', { name: 'Reset validation', exact: true });
+    const status = ref(preview, 'handleStatus');
+    await handle.fill('taken');
+    await save.focus();
+    await page.keyboard.press('Enter');
+    await expect.poll(() => username.getAttribute('aria-invalid')).toBe('true');
+    await expect.poll(() => status.textContent()).toBe('Handle unavailable');
+    await expect.poll(() => handle.getAttribute('aria-invalid')).toBe('true');
+
+    const visibleBox = async (part: Locator) => {
+      const box = await part.boundingBox();
+      if (!box || box.width <= 0 || box.height <= 0) throw new Error(`Missing visible ${part}`);
+      return box;
+    };
+    const [saveBox, resetBox] = await Promise.all([visibleBox(save), visibleBox(reset)]);
+    const column = [ref(preview, 'handleLabel'), handle, ref(preview, 'handleDescription'),
+      ref(preview, 'handleError'), status];
+    let bottom = -Infinity;
+    for (const box of await Promise.all(column.map(visibleBox))) {
+      expect(box.y).toBeGreaterThanOrEqual(bottom - 1);
+      bottom = box.y + box.height;
+    }
+    expect(Math.min(saveBox.y, resetBox.y)).toBeGreaterThanOrEqual(bottom - 1);
+    expect(resetBox.x).toBeGreaterThanOrEqual(saveBox.x + saveBox.width - 1);
+    expect(Math.max(saveBox.y, resetBox.y)).toBeLessThan(
+      Math.min(saveBox.y + saveBox.height, resetBox.y + resetBox.height)
+    );
+
+    await page.keyboard.press('Tab');
+    expect(await reset.evaluate((el) => el.matches(':focus'))).toBe(true);
+    await page.keyboard.press('Space');
+    await expect.poll(() => status.textContent()).toBe('Handle ready');
+    await expect.poll(() => username.getAttribute('aria-invalid')).toBe('false');
+    await expect.poll(() => handle.getAttribute('aria-invalid')).toBe('false');
+    expect(await handle.getAttribute('aria-errormessage')).toBeNull();
+    expect(await handle.inputValue()).toBe('taken');
+  } finally {
+    await context.close();
+  }
+}, 120_000);
+
 describe('Field real browser journeys', () => {
   for (const family of families)
     for (const runtime of RUNTIMES)
